@@ -61,7 +61,7 @@ function DropdownMenuGroup({
 const BASE_ITEM_STYLES = `outline-hidden select-none relative flex cursor-default items-center 
 gap-2 rounded px-2 py-1.5 text-base text-ink-gray-6 data-[variant=destructive]:text-ink-red-3 
 data-[variant=destructive]:*:[svg]:text-ink-red-3! [&_svg:not([class*='text-'])]:text-ink-gray-6 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0 
-data-disabled:pointer-events-none data-disabled:text-ink-gray-3 data-disabled:*:[svg]:text-ink-gray-3! focus:bg-surface-gray-2 data-inset:pl-8`
+data-disabled:pointer-events-none data-disabled:text-ink-gray-3 data-disabled:*:[svg]:text-ink-gray-3! focus:bg-surface-gray-2 data-inset:ps-8`
 
 function DropdownMenuItem({
   className,
@@ -103,7 +103,7 @@ function DropdownMenuCheckboxItem({
       {...props}
     >
       {children}
-      <span className="pointer-events-none flex size-4 ml-2 px-2 items-center justify-center">
+      <span className="pointer-events-none flex size-4 ms-2 px-2 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
           <CheckIcon className="size-4" />
         </DropdownMenuPrimitive.ItemIndicator>
@@ -138,7 +138,7 @@ function DropdownMenuRadioItem({
       {...props}
     >
       {children}
-      <span className="pointer-events-none flex size-4 pl-2 items-center justify-center">
+      <span className="pointer-events-none flex size-4 ps-2 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
           <CheckIcon className="size-4" />
         </DropdownMenuPrimitive.ItemIndicator>
@@ -159,7 +159,7 @@ function DropdownMenuLabel({
       data-slot="dropdown-menu-label"
       data-inset={inset}
       className={cn(
-        "px-2 py-1.5 text-sm font-medium text-ink-gray-4 data-inset:pl-8",
+        "px-2 py-1.5 text-sm font-medium text-ink-gray-4 data-inset:ps-8",
         className
       )}
       {...props}
@@ -188,7 +188,7 @@ function DropdownMenuShortcut({
     <span
       data-slot="dropdown-menu-shortcut"
       className={cn(
-        "text-ink-gray-5 ml-auto text-xs tabular-nums",
+        "text-ink-gray-5 ms-auto text-xs tabular-nums",
         className
       )}
       {...props}
@@ -222,7 +222,7 @@ function DropdownMenuSubTrigger({
       {...props}
     >
       {children}
-      <ChevronRightIcon className="ml-auto size-4" />
+      <ChevronRightIcon className="ms-auto cn-rtl-flip size-4" />
     </DropdownMenuPrimitive.SubTrigger>
   )
 }

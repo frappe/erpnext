@@ -102,8 +102,8 @@ const Difference = () => {
 
     const isError = difference !== 0
 
-    return <StatContainer className="w-fit text-right sm:min-w-56">
-        <StatLabel className="text-right">{_("Difference")}</StatLabel>
+    return <StatContainer className="w-fit text-end sm:min-w-56">
+        <StatLabel className="text-end">{_("Difference")}</StatLabel>
         {isLoading ? <Skeleton className="w-[150px] h-9" /> : <StatValue className={isError ? 'text-ink-red-3 font-numeric' : 'font-numeric'}>
             {formatCurrency(difference,
                 bankAccount?.account_currency ?? getCompanyCurrency(bankAccount?.company ?? ''))
@@ -307,7 +307,7 @@ const ClosingBalancesList = ({ bankAccount, date }: { bankAccount: SelectedBank 
             <TableHeader>
                 <TableRow>
                     <TableHead>{_("Date")}</TableHead>
-                    <TableHead className="text-right">{_("Balance")}</TableHead>
+                    <TableHead className="text-end">{_("Balance")}</TableHead>
                     <TableHead></TableHead>
                 </TableRow>
             </TableHeader>
@@ -315,8 +315,8 @@ const ClosingBalancesList = ({ bankAccount, date }: { bankAccount: SelectedBank 
                 {data?.map((item) => (
                     <TableRow key={item.name}>
                         <TableCell>{formatDate(item.date, 'Do MMM YYYY')}</TableCell>
-                        <TableCell className="text-right">{formatCurrency(flt(item.balance, 2), bankAccount?.account_currency ?? getCompanyCurrency(bankAccount?.company ?? ''))}</TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-end">{formatCurrency(flt(item.balance, 2), bankAccount?.account_currency ?? getCompanyCurrency(bankAccount?.company ?? ''))}</TableCell>
+                        <TableCell className="text-end">
                             <Button
                                 title={_("Delete")}
                                 type='button' isIconButton variant='ghost' onClick={() => onDelete(item.name)}>

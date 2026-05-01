@@ -12,7 +12,7 @@ import { toast } from 'sonner'
 import ErrorBanner from '@/components/ui/error-banner'
 import { H4 } from '@/components/ui/typography'
 import { cn } from '@/lib/utils'
-import { ArrowRight, Banknote, Landmark, BadgeCheck, Calendar, ArrowUpRight, ArrowDownRight, CheckIcon, CheckCircle } from 'lucide-react'
+import { ArrowRight, Banknote, Landmark, BadgeCheck, Calendar, ArrowUpRight, ArrowDownRight, CheckIcon, CheckCircle, ArrowLeft } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import { Form } from '@/components/ui/form'
 import { AccountFormField, DataField, DateField, SmallTextField } from '@/components/ui/form-elements'
@@ -26,6 +26,7 @@ import { FileDropzone } from '@/components/ui/file-dropzone'
 import FileUploadBanner from '@/components/common/FileUploadBanner'
 import { BankTransaction } from '@/types/Accounts/BankTransaction'
 import { useHotkeys } from 'react-hotkeys-hook'
+import { useDirection } from '@/components/ui/direction'
 
 const TransferModal = () => {
 
@@ -291,6 +292,7 @@ const InternalTransferForm = ({ selectedBankAccount, selectedTransaction }: { se
 
     const selectedAccount = useWatch({ control: form.control, name: (selectedTransaction.deposit && selectedTransaction.deposit > 0) ? 'paid_from' : 'paid_to' })
 
+    const direction = useDirection()
 
     if (isUploading && isCompleted) {
         return <FileUploadBanner uploadProgress={uploadProgress} />
@@ -341,7 +343,7 @@ const InternalTransferForm = ({ selectedBankAccount, selectedTransaction }: { se
                         </div>
 
                         <div className='pb-2'>
-                            <ArrowRight />
+                            {direction === 'ltr' ? <ArrowRight /> : <ArrowLeft />}
                         </div>
                         <div className='flex-1'>
                             <AccountFormField
@@ -535,14 +537,14 @@ const RecommendedTransferAccount = ({ transaction, onAccountChange }: { transact
                         )}
                     </div>
                     <div className='flex gap-1'>
-                        <div className={cn('flex items-center gap-1 text-right px-0 justify-end py-1 rounded-sm',
+                        <div className={cn('flex items-center gap-1 text-end px-0 justify-end py-1 rounded-sm',
                             isWithdrawal ? 'text-ink-red-3' : 'text-ink-green-3'
                         )}>
                             {isWithdrawal ? <ArrowUpRight className="w-5 h-5 text-ink-red-3" /> : <ArrowDownRight className="w-5 h-5 text-ink-green-3" />}
                             <span className='text-sm font-semibold uppercase'>{isWithdrawal ? _('Transferred Out') : _('Received')}</span>
                         </div>
                     </div>
-                    <span className='font-semibold font-numeric text-lg text-right pe-0.5'>{formatCurrency(amount, currency)}</span>
+                    <span className='font-semibold font-numeric text-lg text-end pe-0.5'>{formatCurrency(amount, currency)}</span>
                     <div className='pt-1'>
                         <Button
                             onClick={selectTransaction}

@@ -198,7 +198,7 @@ const UnreconciledTransactions = ({ contentHeight }: { contentHeight: number }) 
             <div>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size='md' className="min-w-32 text-left">
+                        <Button variant="outline" size='md' className="min-w-32 text-start">
                             {typeFilter === 'All' ? <DollarSign className="text-ink-gray-5" /> : typeFilter === 'Debits' ? <ArrowUpRight className="text-ink-red-3" /> : <ArrowDownRight className="text-ink-green-3" />}
                             {_(typeFilter)}
                             <ChevronDown className="text-ink-gray-5" />
@@ -316,7 +316,7 @@ const UnreconciledTransactionItem = ({ transaction }: { transaction: Unreconcile
                     </div>
                     <span className="text-sm">{transaction.description}</span>
                 </div>
-                <div className="gap-1 flex flex-col items-end min-w-36 h-full text-right">
+                <div className="gap-1 flex flex-col items-end min-w-36 h-full text-end">
                     {isWithdrawal ? <ArrowUpRight className="size-5 text-ink-red-3" /> : <ArrowDownRight className="size-5 text-ink-green-3" />}
                     {amount && amount > 0 && <span className="font-semibold font-numeric text-base">{formatCurrency(amount, currency)}</span>}
                     {amount !== transaction.unallocated_amount && <span className="text-xs leading-normal text-ink-gray-5">{formatCurrency(transaction.unallocated_amount, currency)} {_("Unallocated")}</span>}
@@ -426,7 +426,7 @@ const OptionsForMultipleTransactions = ({ transactions }: { transactions: Unreco
                                     </TooltipTrigger>
                                     <TooltipContent>
                                         {_("Record a journal entry for expenses, income or split transactions")}
-                                        <KbdGroup className="ml-2">
+                                        <KbdGroup className="ms-2">
                                             <Kbd><KeyboardMetaKeyIcon /></Kbd>
                                             <Kbd>B</Kbd>
                                         </KbdGroup>
@@ -444,7 +444,7 @@ const OptionsForMultipleTransactions = ({ transactions }: { transactions: Unreco
                                     </TooltipTrigger>
                                     <TooltipContent>
                                         {_("Record a payment entry against a customer or supplier")}
-                                        <KbdGroup className="ml-2">
+                                        <KbdGroup className="ms-2">
                                             <Kbd><KeyboardMetaKeyIcon /></Kbd>
                                             <Kbd>P</Kbd>
                                         </KbdGroup>
@@ -463,7 +463,7 @@ const OptionsForMultipleTransactions = ({ transactions }: { transactions: Unreco
                                     </TooltipTrigger>
                                     <TooltipContent>
                                         {_("Record an internal transfer to another bank/credit card/cash account")}
-                                        <KbdGroup className="ml-2">
+                                        <KbdGroup className="ms-2">
                                             <Kbd><KeyboardMetaKeyIcon /></Kbd>
                                             <Kbd>I</Kbd>
                                         </KbdGroup>
@@ -501,7 +501,7 @@ const OptionsForSingleTransaction = ({ transaction, contentHeight }: { transacti
                         </TooltipTrigger>
                         <TooltipContent>
                             {_("Record a payment entry against a customer or supplier")}
-                            <KbdGroup className="ml-2">
+                            <KbdGroup className="ms-2">
                                 <Kbd><KeyboardMetaKeyIcon /></Kbd>
                                 <Kbd>P</Kbd>
                             </KbdGroup>
@@ -519,7 +519,7 @@ const OptionsForSingleTransaction = ({ transaction, contentHeight }: { transacti
                         </TooltipTrigger>
                         <TooltipContent>
                             {_("Record a journal entry for expenses, income or split transactions")}
-                            <KbdGroup className="ml-2">
+                            <KbdGroup className="ms-2">
                                 <Kbd><KeyboardMetaKeyIcon /></Kbd>
                                 <Kbd>B</Kbd>
                             </KbdGroup>
@@ -537,7 +537,7 @@ const OptionsForSingleTransaction = ({ transaction, contentHeight }: { transacti
                         </TooltipTrigger>
                         <TooltipContent>
                             {_("Record an internal transfer to another bank/credit card/cash account")}
-                            <KbdGroup className="ml-2">
+                            <KbdGroup className="ms-2">
                                 <Kbd><KeyboardMetaKeyIcon /></Kbd>
                                 <Kbd>I</Kbd>
                             </KbdGroup>
@@ -863,10 +863,8 @@ const VoucherItem = ({ voucher, index }: { voucher: LinkedPayment, index: number
                 </div>
             </div>
 
-            {isSuggested && <div className="absolute top-1.5 right-2 rtl:left-2 flex items-center gap-1 justify-center">
+            {isSuggested && <div className="absolute top-1.5 end-2 flex items-center gap-1 justify-center">
                 <Badge theme="green" variant="subtle" size='md'>{_("Suggested")}</Badge>
-                {/* {isSuggested && <span
-                    className="bg-outline-amber-4 uppercase font-medium text-white px-3 py-1 rounded-bl-md text-xs rounded-tr-sm">{_("Suggested")}</span>} */}
             </div>}
 
         </div>

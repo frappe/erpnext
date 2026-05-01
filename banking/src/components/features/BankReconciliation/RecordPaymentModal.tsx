@@ -705,9 +705,9 @@ const InvoicesSection = ({ currency }: { currency: string }) => {
                     <TableHead>{_("Reference Document")}</TableHead>
                     <TableHead>{_("Invoice No")}</TableHead>
                     <TableHead>{_("Due Date")}</TableHead>
-                    <TableHead className="text-right">{_("Grand Total")}</TableHead>
-                    <TableHead className="text-right">{_("Outstanding")}</TableHead>
-                    <TableHead className="text-right">{_("Allocated")}</TableHead>
+                    <TableHead className="text-end">{_("Grand Total")}</TableHead>
+                    <TableHead className="text-end">{_("Outstanding")}</TableHead>
+                    <TableHead className="text-end">{_("Allocated")}</TableHead>
                     <TableHead className='w-14'></TableHead>
                 </TableRow>
             </TableHeader>
@@ -735,13 +735,13 @@ const InvoicesSection = ({ currency }: { currency: string }) => {
                         <TableCell>
                             {formatDate(field.due_date)}
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-end">
                             {formatCurrency(field.total_amount, currency)}
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-end">
                             {formatCurrency(field.outstanding_amount, currency)}
                         </TableCell>
-                        <TableCell className="text-right max-w-36">
+                        <TableCell className="text-end max-w-36">
                             <CurrencyFormField
                                 name={`references.${index}.allocated_amount`}
                                 label={_("Allocated")}
@@ -861,7 +861,7 @@ const Summary = ({ currency }: { currency: string }) => {
     }, [setUnallocatedAmount, getValues, setValue])
 
     const TextComponent = ({ className, children }: { className?: string, children: React.ReactNode }) => {
-        return <span className={cn("w-32 text-right font-medium text-sm font-numeric", className)}>{children}</span>
+        return <span className={cn("w-32 text-end font-medium text-sm font-numeric", className)}>{children}</span>
     }
 
     return <div className="flex flex-col gap-2 items-end">
@@ -1061,10 +1061,10 @@ const FetchInvoicesModal = ({ onClose }: { onClose: () => void }) => {
                     <TableHead>
                         Due Date
                     </TableHead>
-                    <TableHead className="text-right">
+                    <TableHead className="text-end">
                         Grand Total
                     </TableHead>
-                    <TableHead className="text-right">
+                    <TableHead className="text-end">
                         Outstanding
                     </TableHead>
                 </TableRow>
@@ -1107,10 +1107,10 @@ const FetchInvoicesModal = ({ onClose }: { onClose: () => void }) => {
                         <TableCell>
                             {formatDate(ref.due_date)}
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-end">
                             {formatCurrency(ref.invoice_amount)}
                         </TableCell>
-                        <TableCell className="text-right font-medium">
+                        <TableCell className="text-end font-medium">
                             {formatCurrency(ref.outstanding_amount)}
                         </TableCell>
                     </TableRow>
@@ -1201,7 +1201,7 @@ const OtherChargesSection = ({ currency }: { currency: string }) => {
                     <TableHead>{_("Account")} <span className="text-ink-red-3">*</span></TableHead>
                     <TableHead>{_("Cost Center")} <span className="text-ink-red-3">*</span></TableHead>
                     <TableHead>{_("Description")}</TableHead>
-                    <TableHead className="text-right">{_("Amount")} <span className="text-ink-red-3">*</span></TableHead>
+                    <TableHead className="text-end">{_("Amount")} <span className="text-ink-red-3">*</span></TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -1259,7 +1259,7 @@ const OtherChargesSection = ({ currency }: { currency: string }) => {
                                 hideLabel
                             />
                         </TableCell>
-                        <TableCell className="text-right align-top">
+                        <TableCell className="text-end align-top">
                             <CurrencyFormField
                                 name={`deductions.${index}.amount`}
                                 label={_("Amount")}

@@ -81,7 +81,7 @@ const BankPickerItem = ({ bank, size = 'base' }: { bank: SelectedBank, size?: 'b
         {bank.logo ? <img
             src={`/assets/erpnext/images/bank-logos/${bank.logo}`}
             alt={bank.bank || bank.name || ''}
-            className={cn("max-w-24 object-left h-10 object-contain mb-1", {
+            className={cn("max-w-24 me-auto h-10 object-contain mb-1", {
                 'h-6 max-w-18 mb-2': size === 'sm',
             })}
         /> : <div className={cn("rounded-md flex items-center h-10 gap-2", {

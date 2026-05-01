@@ -131,7 +131,7 @@ const AccountsDropdown = ({ root_type, report_type, account_type, value, onChang
                             , buttonClassName)}>
                         {value || _('Select Account')}
 
-                        <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        <ChevronDownIcon className="ms-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                 </FormControl>
                     : <Button
@@ -147,7 +147,7 @@ const AccountsDropdown = ({ root_type, report_type, account_type, value, onChang
                         )}>
                         {value || _('Select Account')}
 
-                        <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        <ChevronDownIcon className="ms-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>}
             </PopoverTrigger>
             <PopoverContent className="p-0" style={{ minWidth: width }} align="start">

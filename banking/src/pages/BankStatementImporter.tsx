@@ -236,8 +236,8 @@ const StatementImportLog = () => {
                         <TableRow>
                             <TableHead>{_("Imported On")}</TableHead>
                             <TableHead>{_("Transaction Dates")}</TableHead>
-                            <TableHead className="text-right">{_("Number of Transactions")}</TableHead>
-                            <TableHead className="text-right">{_("Closing Balance")}</TableHead>
+                            <TableHead className="text-end">{_("Number of Transactions")}</TableHead>
+                            <TableHead className="text-end">{_("Closing Balance")}</TableHead>
                             <TableHead>{_("File")}</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -246,8 +246,8 @@ const StatementImportLog = () => {
                             <TableRow key={item.name}>
                                 <TableCell>{formatDate(item.creation, 'Do MMM YYYY')}</TableCell>
                                 <TableCell>{formatDate(item.start_date, 'Do MMM YYYY')} to {formatDate(item.end_date, 'Do MMM YYYY')}</TableCell>
-                                <TableCell className="text-right">{item.number_of_transactions}</TableCell>
-                                <TableCell className="text-right font-numeric">{formatCurrency(flt(item.closing_balance, 2))}</TableCell>
+                                <TableCell className="text-end">{item.number_of_transactions}</TableCell>
+                                <TableCell className="text-end font-numeric">{formatCurrency(flt(item.closing_balance, 2))}</TableCell>
                                 <TableCell><a
                                     href={item.file}
                                     target="_blank" className="underline underline-offset-4">{item.file.split('/').pop()}</a></TableCell>

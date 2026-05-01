@@ -4,18 +4,21 @@ import StatementDetails from './StatementDetails'
 import { SelectedBank } from '../../BankReconciliation/bankRecAtoms'
 import ErrorBanner from '@/components/ui/error-banner'
 import { Button } from '@/components/ui/button'
-import { ChevronLeftIcon } from 'lucide-react'
+import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import _ from '@/lib/translate'
+import { useDirection } from '@/components/ui/direction'
 
 const CSVImport = ({ bank, fileURL, onBack }: { bank: SelectedBank, fileURL: string, onBack: () => void }) => {
 
     const { data, error } = useGetStatementDetails(fileURL, bank.name)
 
+    const direction = useDirection()
+
     if (error) {
         return <div className='flex flex-col gap-4 px-4'>
             <div>
                 <Button size='sm' variant='outline' onClick={onBack}>
-                    <ChevronLeftIcon />
+                    {direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
                     {_("Back")}
                 </Button>
             </div>

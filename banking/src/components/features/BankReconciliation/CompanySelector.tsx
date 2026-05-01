@@ -76,7 +76,7 @@ const CompanySelector = ({ onChange }: { onChange?: (company: string) => void })
                                 {option}
                                 <Check
                                     className={cn(
-                                        "ml-auto",
+                                        "ms-auto",
                                         searchQuery === option ? "opacity-100" : "opacity-0"
                                     )}
                                 />

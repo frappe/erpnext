@@ -399,8 +399,8 @@ const MultipleAccountsSelection = () => {
             <TableHeader>
                 <TableRow>
                     <TableHead>{_("Account")}</TableHead>
-                    <TableHead className="text-right">{_("Debit")}</TableHead>
-                    <TableHead className="text-right">{_("Credit")}</TableHead>
+                    <TableHead className="text-end">{_("Debit")}</TableHead>
+                    <TableHead className="text-end">{_("Credit")}</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -417,7 +417,7 @@ const MultipleAccountsSelection = () => {
                 {accounts.map((account, index) => (
                     <TableRow key={index}>
                         <TableCell>{account.account}</TableCell>
-                        {index === accounts.length - 1 ? <TableCell className="text-right bg-surface-gray-1" colSpan={2}>
+                        {index === accounts.length - 1 ? <TableCell className="text-end bg-surface-gray-1" colSpan={2}>
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                     <span className="text-ink-gray-5">{_("This is auto computed to balance the journal entry.")}</span>
@@ -427,8 +427,8 @@ const MultipleAccountsSelection = () => {
                                 </TooltipContent>
                             </Tooltip>
                         </TableCell> : <>
-                            <TableCell className="font-numeric text-right"><AmountFormulaRenderer value={account.debit} /></TableCell>
-                            <TableCell className="font-numeric text-right"><AmountFormulaRenderer value={account.credit} /></TableCell>
+                            <TableCell className="font-numeric text-end"><AmountFormulaRenderer value={account.debit} /></TableCell>
+                            <TableCell className="font-numeric text-end"><AmountFormulaRenderer value={account.credit} /></TableCell>
                         </>}
                     </TableRow>
                 ))}
@@ -458,7 +458,7 @@ const AmountFormulaRenderer = ({ value }: { value?: string }) => {
 
         return <Tooltip>
             <TooltipTrigger asChild>
-                <span className={cn("font-numeric text-right tabular-nums underline underline-offset-4", isComputationValid ? "" : "text-ink-red-3")}>{value}</span>
+                <span className={cn("font-numeric text-end tabular-nums underline underline-offset-4", isComputationValid ? "" : "text-ink-red-3")}>{value}</span>
             </TooltipTrigger>
             <TooltipContent className={isComputationValid ? "" : "bg-surface-red-5"} arrowClassName={isComputationValid ? "" : "bg-surface-red-5 fill-surface-red-5"}>
                 <p className="text-sm">
@@ -470,7 +470,7 @@ const AmountFormulaRenderer = ({ value }: { value?: string }) => {
         </Tooltip>
     }
 
-    return <span className="font-numeric text-right tabular-nums">{value}</span>
+    return <span className="font-numeric text-end tabular-nums">{value}</span>
 }
 
 const ConfigureAccountsModal = ({ open, onClose }: { open: boolean, onClose: () => void }) => {
@@ -591,8 +591,8 @@ const ConfigureAccountsModalContent = () => {
                         <TableHead>{_("Account")} <span className="text-ink-red-3">*</span></TableHead>
                         {/* <TableHead>{_("Cost Center")}</TableHead> */}
                         <TableHead>{_("Remarks")}</TableHead>
-                        <TableHead className="text-right">{_("Debit")}</TableHead>
-                        <TableHead className="text-right">{_("Credit")}</TableHead>
+                        <TableHead className="text-end">{_("Debit")}</TableHead>
+                        <TableHead className="text-end">{_("Credit")}</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -610,12 +610,12 @@ const ConfigureAccountsModalContent = () => {
                         <TableCell className="align-top">
                         </TableCell>
 
-                        <TableCell className={"align-top text-right"}>
+                        <TableCell className={"align-top text-end"}>
                             <span className="text-ink-gray-5 text-sm">
                                 {transaction_type === "Withdrawal" || transaction_type === "Any" ? _("Will be auto-populated") : ""}
                             </span>
                         </TableCell>
-                        <TableCell className={"text-right align-top"}>
+                        <TableCell className={"text-end align-top"}>
                             <span className="text-ink-gray-5 text-sm">
                                 {transaction_type === "Deposit" || transaction_type === "Any" ? _("Will be auto-populated") : ""}
                             </span>
@@ -688,14 +688,14 @@ const ConfigureAccountsModalContent = () => {
                                 />
                             </TableCell>
                             <TableCell
-                                className={cn("text-right align-top", index === fields.length - 1 ? "cursor-not-allowed" : "")}
+                                className={cn("text-end align-top", index === fields.length - 1 ? "cursor-not-allowed" : "")}
                                 title={index === fields.length - 1 ? _("This is the last row. It will be auto populated based on the bank transaction.") : ""}>
                                 <DataField
                                     name={`accounts.${index}.debit`}
                                     label={_("Debit")}
                                     disabled={index === fields.length - 1}
                                     inputProps={{
-                                        className: 'text-right',
+                                        className: 'text-end',
                                         placeholder: _("0.00"),
                                         disabled: index === fields.length - 1
                                     }}
@@ -703,14 +703,14 @@ const ConfigureAccountsModalContent = () => {
                                 />
                             </TableCell>
                             <TableCell
-                                className={cn("text-right align-top", index === fields.length - 1 ? "cursor-not-allowed" : "")}
+                                className={cn("text-end align-top", index === fields.length - 1 ? "cursor-not-allowed" : "")}
                                 title={index === fields.length - 1 ? _("This is the last row. It will be auto populated based on the bank transaction.") : ""}>
                                 <DataField
                                     name={`accounts.${index}.credit`}
                                     label={_("Credit")}
                                     disabled={index === fields.length - 1}
                                     inputProps={{
-                                        className: 'text-right',
+                                        className: 'text-end',
                                         placeholder: _("0.00"),
                                         disabled: index === fields.length - 1
                                     }}

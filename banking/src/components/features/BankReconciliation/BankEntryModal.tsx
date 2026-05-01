@@ -611,8 +611,8 @@ const Entries = ({ company, isWithdrawal, currency }: { company: string, isWithd
                     <TableHead>{_("Account")}</TableHead>
                     <TableHead>{_("Cost Center")}</TableHead>
                     <TableHead>{_("Remarks")}</TableHead>
-                    <TableHead className="text-right">{_("Debit")}</TableHead>
-                    <TableHead className="text-right">{_("Credit")}</TableHead>
+                    <TableHead className="text-end">{_("Debit")}</TableHead>
+                    <TableHead className="text-end">{_("Credit")}</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -688,7 +688,7 @@ const Entries = ({ company, isWithdrawal, currency }: { company: string, isWithd
                                 hideLabel
                             />
                         </TableCell>
-                        <TableCell className={cn("text-right align-top")}>
+                        <TableCell className={cn("text-end align-top")}>
                             <CurrencyFormField
                                 name={`entries.${index}.debit`}
                                 label={_("Debit")}
@@ -705,7 +705,7 @@ const Entries = ({ company, isWithdrawal, currency }: { company: string, isWithd
                                 </Tooltip> : undefined}
                             />
                         </TableCell>
-                        <TableCell className={cn("text-right align-top")}>
+                        <TableCell className={cn("text-end align-top")}>
                             <CurrencyFormField
                                 name={`entries.${index}.credit`}
                                 style={index === 0 && isWithdrawal ? {
@@ -797,7 +797,7 @@ const Summary = ({ currency, addRow }: { currency: string, addRow: () => void })
     }, [addRow])
 
     const TextComponent = ({ className, children }: { className?: string, children: React.ReactNode }) => {
-        return <span className={cn("w-32 text-right font-medium text-sm font-numeric", className)}>{children}</span>
+        return <span className={cn("w-32 text-end font-medium text-sm font-numeric", className)}>{children}</span>
     }
 
     return <div className="flex flex-col gap-2 items-end">

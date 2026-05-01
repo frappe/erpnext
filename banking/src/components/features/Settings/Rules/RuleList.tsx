@@ -277,7 +277,7 @@ const SortableRuleItem = ({
                             <Button
                                 variant='link'
                                 size='sm'
-                                className="p-0 h-fit text-left cursor-pointer no-underline hover:underline"
+                                className="p-0 h-fit text-start cursor-pointer no-underline hover:underline"
                                 onClick={() => setSelectedRule(rule.name)}>
                                 {rule.rule_name}
                             </Button>

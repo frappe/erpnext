@@ -158,7 +158,7 @@ const BankReconciliationStatementView = () => {
                     return (
                         <button
                             type="button"
-                            className="text-ink-gray-8 hover:underline min-w-0 w-full cursor-pointer truncate text-left underline-offset-4"
+                            className="text-ink-gray-8 hover:underline min-w-0 w-full cursor-pointer truncate text-start underline-offset-4"
                             onClick={() => onCopy(ref)}
                         >
                             {ref}

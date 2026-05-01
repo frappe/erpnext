@@ -4,13 +4,14 @@ import { useMemo, useState } from 'react'
 import { AVAILABLE_TIME_PERIODS, formatDate, getDatesForTimePeriod, TimePeriod } from '@/lib/date'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { ChevronDownIcon, ChevronRight } from 'lucide-react'
+import { ChevronDownIcon, ChevronLeftIcon, ChevronRight } from 'lucide-react'
 import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { parse } from "chrono-node"
 import { Calendar } from '@/components/ui/calendar'
 import useFiscalYear from '@/hooks/useFiscalYear'
 import dayjs from 'dayjs'
 import _ from '@/lib/translate'
+import { useDirection } from '@/components/ui/direction'
 
 const BankRecDateFilter = () => {
 
@@ -127,6 +128,8 @@ const BankRecDateFilter = () => {
         }
     }, [bankRecDate.fromDate, bankRecDate.toDate])
 
+    const direction = useDirection()
+
 
 
     return <div className='flex items-center'>
@@ -149,7 +152,7 @@ const BankRecDateFilter = () => {
 
                     <CommandInput placeholder="e.g. Last 3 weeks" onValueChange={setValue} value={value} />
                     <CommandList className='max-h-fit'>
-                        <CommandEmpty className='text-left p-2 hover:bg-surface-gray-1'>
+                        <CommandEmpty className='text-start p-2 hover:bg-surface-gray-1'>
                             <EmptyState onSelect={handleTimePeriodChange} value={value} />
                         </CommandEmpty>
                         {timePeriodOptions.map((period) => (
@@ -157,8 +160,8 @@ const BankRecDateFilter = () => {
                                 <span>
                                     {period.translatedLabel ?? _(period.label)}
                                 </span>
-                                <span className='text-xs text-ink-gray-5 flex items-center gap-1 text-right whitespace-nowrap'>
-                                    {formatDate(period.fromDate, period.format)} <ChevronRight className='text-[12px] text-ink-gray-5/70' /> {formatDate(period.toDate, period.format)}
+                                <span className='text-xs text-ink-gray-5 flex items-center gap-1 text-end whitespace-nowrap'>
+                                    {formatDate(period.fromDate, period.format)} {direction === 'ltr' ? <ChevronRight className='text-[12px] text-ink-gray-5/70' /> : <ChevronLeftIcon className='text-[12px] text-ink-gray-5/70' />} {formatDate(period.toDate, period.format)}
                                 </span>
                             </CommandItem>
                         ))}

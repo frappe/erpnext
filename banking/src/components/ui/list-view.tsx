@@ -18,6 +18,7 @@ import { useDebounceCallback } from "usehooks-ts"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import { useDirection } from "./direction"
 
 /** Optional per-column layout hints for `ListView`. */
 export type ListViewColumnMeta = {
@@ -45,9 +46,9 @@ function alignClass(meta: ListViewColumnMeta | undefined) {
         case "center":
             return "justify-center text-center"
         case "right":
-            return "justify-end text-right"
+            return "justify-end text-end"
         default:
-            return "justify-start text-left"
+            return "justify-start text-start"
     }
 }
 
@@ -93,8 +94,10 @@ function ListViewCellBody<TData>({
 }) {
     const ref = React.useRef<HTMLDivElement>(null)
     const [overflowing, setOverflowing] = React.useState(false)
+    const direction = useDirection()
 
     const tooltipLabel = resolveTooltipLabel(row, meta, cell.column.columnDef)
+    const tooltipAlign = meta?.align === "right" && direction === "ltr" ? "end" : "start"
 
     const measure = React.useCallback(() => {
         const el = ref.current
@@ -138,7 +141,7 @@ function ListViewCellBody<TData>({
             <TooltipTrigger asChild>{inner}</TooltipTrigger>
             <TooltipContent
                 side="bottom"
-                align="start"
+                align={tooltipAlign}
                 className="max-w-sm text-balance wrap-break-word"
             >
                 {tooltipLabel}
@@ -295,6 +298,8 @@ function ListViewInner<TData>({
         [controlledOnColumnSizingChange, debouncedSizingCommit],
     )
 
+    const direction = useDirection()
+
     const table = useReactTable({
         data,
         columns,
@@ -303,6 +308,7 @@ function ListViewInner<TData>({
             size: 150,
         },
         columnResizeMode: "onChange",
+        columnResizeDirection: direction,
         enableColumnResizing,
         getCoreRowModel: getCoreRowModel(),
         getRowId,
@@ -376,7 +382,7 @@ function ListViewInner<TData>({
                                 <div
                                     key={header.id}
                                     className={cn(
-                                        "text-ink-gray-5 group relative flex min-w-0 items-center text-sm pr-1",
+                                        "text-ink-gray-5 group relative flex min-w-0 items-center px-1 text-sm",
                                         alignClass(meta),
                                     )}
                                     role="columnheader"
@@ -391,7 +397,7 @@ function ListViewInner<TData>({
                                             <span
                                                 aria-hidden
                                                 className={cn(
-                                                    "pointer-events-none absolute right-0 z-1 w-0.5 bg-gray-400",
+                                                    "pointer-events-none absolute ltr:right-0 rtl:left-0 z-1 w-0.5 bg-gray-400",
                                                     "opacity-0 transition-[opacity,background-color] ease-in-out duration-150",
                                                     "group-hover:opacity-100 group-hover:bg-gray-400",
                                                     header.column.getIsResizing() && "bg-outline-gray-6 opacity-100",
@@ -415,7 +421,7 @@ function ListViewInner<TData>({
                                                     header.getResizeHandler()(e)
                                                 }}
                                                 onTouchStart={header.getResizeHandler()}
-                                                className="absolute top-0 right-0 z-10 h-full w-2 max-w-[12px] cursor-col-resize touch-none select-none bg-transparent"
+                                                className="absolute top-0 ltr:right-0 rtl:left-0 z-10 h-full w-2 max-w-[12px] cursor-col-resize touch-none select-none bg-transparent"
                                             />
                                         </>
                                     ) : null}
@@ -443,7 +449,7 @@ function ListViewInner<TData>({
                                 data-index={virtualRow.index}
                                 role="row"
                                 className={cn(
-                                    "ease-in-out absolute top-0 left-0 w-full min-w-0 rounded px-2 transition-all duration-300",
+                                    "ease-in-out absolute top-0 ltr:left-0 rtl:right-0 w-full min-w-0 rounded px-2 transition-all duration-300",
                                     // virtualRow.index > 0 && "border-t border-outline-gray-1",
                                     !row.getIsSelected() && "hover:bg-surface-menu-bar",
                                     row.getIsSelected() && "bg-surface-gray-2 hover:bg-surface-gray-3",
@@ -461,7 +467,7 @@ function ListViewInner<TData>({
                                     if (onRowClick) onRowClick(row.original, e)
                                 }}
                             >
-                                {virtualRow.index > 0 && <div className="h-px bg-outline-gray-1 absolute mx-2 top-0 left-0 w-full" />}
+                                {virtualRow.index > 0 && <div className="absolute top-0 inset-s-2 inset-e-2 h-px bg-outline-gray-1" />}
                                 {row.getVisibleCells().map((cell, cellIndex) => {
                                     const meta = cell.column.columnDef.meta as ListViewColumnMeta | undefined
                                     return (

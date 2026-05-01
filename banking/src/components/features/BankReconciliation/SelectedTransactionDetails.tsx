@@ -40,7 +40,7 @@ const SelectedTransactionDetails = ({ transaction, showAccount = false, account 
                             <div className='flex flex-col'> {bank?.logo ? <img
                                 src={`/assets/erpnext/images/bank-logos/${bank.logo}`}
                                 alt={bank.bank}
-                                className="max-w-20 object-left h-10 object-contain"
+                                className="max-w-20 me-auto h-10 object-contain"
                             /> :
                                 <Landmark size={'30px'} />
                             }
@@ -52,13 +52,13 @@ const SelectedTransactionDetails = ({ transaction, showAccount = false, account 
                             </div>
                         </div>
                         <div className='flex flex-col gap-1'>
-                            <div className={cn('flex items-center gap-1 text-right px-0 justify-end py-1 rounded-sm',
+                            <div className={cn('flex items-center gap-1 text-end px-0 justify-end py-1 rounded-sm',
                                 isWithdrawal ? 'text-ink-red-3' : 'text-ink-green-3'
                             )}>
                                 {isWithdrawal ? <ArrowUpRight className="w-5 h-5 text-ink-red-3" /> : <ArrowDownRight className="w-5 h-5 text-ink-green-3" />}
                                 <span className='text-sm font-semibold uppercase'>{isWithdrawal ? _('Spent') : _('Received')}</span>
                             </div>
-                            <span className='font-semibold font-numeric text-lg text-right pe-0.5'>{formatCurrency(amount, currency)}</span>
+                            <span className='font-semibold font-numeric text-lg text-end pe-0.5'>{formatCurrency(amount, currency)}</span>
                             {transaction.unallocated_amount && transaction.unallocated_amount !== amount ? <span className='text-ink-gray-5'>{_("Unallocated")}: {formatCurrency(transaction.unallocated_amount)}</span> : null}
                         </div>
                     </div>

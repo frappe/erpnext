@@ -138,7 +138,7 @@ const BankClearanceSummaryView = () => {
                             <TooltipTrigger asChild>
                                 <button
                                     type="button"
-                                    className="text-ink-gray-8 hover:underline min-w-0 w-full cursor-pointer truncate text-left underline-offset-4"
+                                    className="text-ink-gray-8 hover:underline min-w-0 w-full cursor-pointer truncate text-start underline-offset-4"
                                     onClick={() => onCopy(ref)}
                                 >
                                     {ref}
@@ -325,7 +325,7 @@ const ForceClearVoucherForm = ({ voucher, bankAccount, companyID, onClose }: { v
                             </TableRow>
                             <TableRow>
                                 <TableHead>{_("Amount")}</TableHead>
-                                <TableCell className="text-right">{formatCurrency(voucher.amount, bankAccount?.account_currency ?? getCompanyCurrency(companyID))}</TableCell>
+                                <TableCell className="text-end">{formatCurrency(voucher.amount, bankAccount?.account_currency ?? getCompanyCurrency(companyID))}</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableHead>{_("Against Account")}</TableHead>

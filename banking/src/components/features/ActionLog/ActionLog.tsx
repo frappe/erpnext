@@ -78,8 +78,8 @@ const ActionLogDialogContent = () => {
             <div key={action.timestamp} className='flex flex-col gap-1'>
                 <ActionGroupHeader action={action} />
                 <div>
-                    <div className='ml-2 border-s border-s-outline-gray-2 py-1'>
-                        <div className='ml-5'>
+                    <div className='ms-2 border-s border-s-outline-gray-2 py-1'>
+                        <div className='ms-5'>
                             {action.items.map((item, index) => (
                                 <Row
                                     item={item}
@@ -175,7 +175,7 @@ const Row = ({ item, index, isLast, action }: { item: ActionLogItem, index: numb
                             {bank?.logo ? <img
                                 src={`/assets/erpnext/images/bank-logos/${bank?.logo}`}
                                 alt={bank?.bank || ''}
-                                className="max-w-10 object-left h-5 object-contain"
+                                className="max-w-10 me-auto h-5 object-contain"
                             /> : <LandmarkIcon className='w-4 h-4' />}
                             <span className='text-sm text-ink-gray-5'>{item.bankTransaction.bank_account}</span>
                         </div>
@@ -194,7 +194,7 @@ const Row = ({ item, index, isLast, action }: { item: ActionLogItem, index: numb
                     </div>
                 </div>
                 <div className='flex justify-end items-center gap-2'>
-                    <div className='text-right flex flex-col gap-2'>
+                    <div className='text-end flex flex-col gap-2'>
                         <a
                             href={`/desk/${slug(item.voucher.reference_doctype)}/${item.voucher.reference_name}`}
                             target='_blank'
@@ -242,16 +242,16 @@ const JournalEntryAccountsTable = ({ item, bank }: { item: ActionLogItem, bank?:
                         <TableHeader>
                             <TableRow>
                                 <TableHead>{_("Account")}</TableHead>
-                                <TableHead className='text-right'>{_("Debit")}</TableHead>
-                                <TableHead className='text-right'>{_("Credit")}</TableHead>
+                                <TableHead className='text-end'>{_("Debit")}</TableHead>
+                                <TableHead className='text-end'>{_("Credit")}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {accounts.map((account) => (
                                 <TableRow key={account.account}>
                                     <TableCell>{account.account}</TableCell>
-                                    <TableCell className='text-right font-numeric'>{formatCurrency(account.debit ?? 0, account.account_currency ?? '')}</TableCell>
-                                    <TableCell className='text-right font-numeric'>{formatCurrency(account.credit ?? 0, account.account_currency ?? '')}</TableCell>
+                                    <TableCell className='text-end font-numeric'>{formatCurrency(account.debit ?? 0, account.account_currency ?? '')}</TableCell>
+                                    <TableCell className='text-end font-numeric'>{formatCurrency(account.credit ?? 0, account.account_currency ?? '')}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -292,8 +292,8 @@ const PaymentEntryDetails = ({ item, className }: { item: ActionLogItem, classNa
                                     <TableHead>{_("Document")}</TableHead>
                                     <TableHead>{_("Invoice No")}</TableHead>
                                     <TableHead>{_("Due Date")}</TableHead>
-                                    <TableHead className='text-right'>{_("Grand Total")}</TableHead>
-                                    <TableHead className='text-right'>{_("Allocated")}</TableHead>
+                                    <TableHead className='text-end'>{_("Grand Total")}</TableHead>
+                                    <TableHead className='text-end'>{_("Allocated")}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -301,8 +301,8 @@ const PaymentEntryDetails = ({ item, className }: { item: ActionLogItem, classNa
                                     <TableCell><a href={`/desk/${slug(invoice.reference_doctype)}/${invoice.reference_name}`} target='_blank' className='underline underline-offset-4'>{invoice.reference_doctype}: {invoice.reference_name}</a></TableCell>
                                     <TableCell>{invoice.bill_no ?? "-"}</TableCell>
                                     <TableCell>{formatDate(invoice.due_date)}</TableCell>
-                                    <TableCell className='text-right font-numeric'>{formatCurrency(invoice.total_amount, currency ?? '')}</TableCell>
-                                    <TableCell className='text-right font-numeric'>{formatCurrency(invoice.allocated_amount, currency ?? '')}</TableCell>
+                                    <TableCell className='text-end font-numeric'>{formatCurrency(invoice.total_amount, currency ?? '')}</TableCell>
+                                    <TableCell className='text-end font-numeric'>{formatCurrency(invoice.allocated_amount, currency ?? '')}</TableCell>
                                 </TableRow>
                             </TableBody>
                         </Table>
@@ -340,7 +340,7 @@ const TransferDetails = ({ item, className }: { item: ActionLogItem, className?:
         {bank?.logo ? <img
             src={`/assets/erpnext/images/bank-logos/${bank.logo}`}
             alt={bank?.bank || ''}
-            className="object-left h-5 object-contain"
+            className="me-auto h-5 object-contain"
         /> : <LandmarkIcon className='w-4 h-4' />}
         <span className='text-sm'>{bank?.account}</span>
     </div>

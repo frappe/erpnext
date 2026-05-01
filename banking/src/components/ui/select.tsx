@@ -138,7 +138,7 @@ function SelectItem({
     <SelectPrimitive.Item
       data-slot="select-item"
       className={cn(
-        "outline-hidden select-none relative flex w-full cursor-default items-center gap-2 rounded py-1.5 pr-8 px-2",
+        "outline-hidden select-none relative flex w-full cursor-default items-center gap-2 rounded py-1.5 pe-8 px-2",
         "focus:bg-surface-gray-2 text-ink-gray-6 [&_svg:not([class*='text-'])]:text-ink-gray-6 text-base [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
         "data-disabled:pointer-events-none data-disabled:text-ink-gray-3",
         className
@@ -147,7 +147,7 @@ function SelectItem({
     >
       <span
         data-slot="select-item-indicator"
-        className="absolute right-2 flex size-3.5 items-center justify-center"
+        className="absolute ltr:right-2 rtl:left-2 flex size-3.5 items-center justify-center"
       >
         <SelectPrimitive.ItemIndicator>
           <CheckIcon className="size-4" />

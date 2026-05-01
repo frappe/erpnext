@@ -30,7 +30,7 @@ const tabsListVariants = cva(
       variant: {
         subtle: "bg-surface-gray-2 p-px",
         outline: "p-px border border-outline-gray-1",
-        underline: "group-data-[orientation=horizontal]/tabs:border-b border-outline-gray-1 group-data-[orientation=vertical]/tabs:border-r group-data-[orientation=horizontal]/tabs:gap-6 group-data-[orientation=vertical]/tabs:gap-2",
+        underline: "group-data-[orientation=horizontal]/tabs:border-b border-outline-gray-1 group-data-[orientation=vertical]/tabs:border-e group-data-[orientation=horizontal]/tabs:gap-6 group-data-[orientation=vertical]/tabs:gap-2",
       },
       size: {
         sm: "group-data-[orientation=horizontal]/tabs:h-7",
@@ -137,13 +137,13 @@ function TabsTrigger({
 
 
         // Variant: underline - Vertical
-        "group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:pl-0",
+        "group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:ps-0",
         // Variant: underline, size: sm
-        "group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:group-data-[size=sm]/tabs-list:py-1.5 group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:group-data-[size=sm]/tabs-list:pr-1.5",
+        "group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:group-data-[size=sm]/tabs-list:py-1.5 group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:group-data-[size=sm]/tabs-list:pe-1.5",
         // Variant: underline, size: md
-        "group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:group-data-[size=md]/tabs-list:py-2 group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:group-data-[size=md]/tabs-list:pr-2",
+        "group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:group-data-[size=md]/tabs-list:py-2 group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:group-data-[size=md]/tabs-list:pe-2",
         // Variant: underline - vertical - active - border applied
-        "group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:border-r group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:border-e-transparent group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:data-[state=active]:border-e-ink-gray-8 group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:-right-px",
+        "group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:border-e group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:border-e-transparent group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:data-[state=active]:border-e-ink-gray-8 group-data-[orientation=vertical]/tabs:group-data-[variant=underline]/tabs-list:-right-px",
 
         className
       )}

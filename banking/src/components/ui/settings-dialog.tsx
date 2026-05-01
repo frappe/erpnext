@@ -89,7 +89,7 @@ function SettingsTabs({
         <TabsPrimitive.List
             data-slot="settings-tabs"
             className={cn(
-                "flex flex-col w-56 bg-surface-menu-bar rounded-l-lg shrink-0 overflow-y-auto m-1",
+                "flex flex-col w-56 bg-surface-menu-bar rounded-s-lg shrink-0 overflow-y-auto m-1",
                 className
             )}
             {...props}
@@ -152,7 +152,7 @@ function SettingsTabItem({
                     <span
                         className={cn(
                             "flex-1 shrink-0 truncate text-sm duration-300 ease-in-out w-auto opacity-100 text-ink-gray-6",
-                            icon && "ml-2"
+                            icon && "ms-2"
                         )}
                     >
                         {label}

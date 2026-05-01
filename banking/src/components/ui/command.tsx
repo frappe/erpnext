@@ -162,7 +162,7 @@ function CommandShortcut({
     <span
       data-slot="command-shortcut"
       className={cn(
-        "text-ink-gray-5 ml-auto text-xs tracking-widest",
+        "text-ink-gray-5 ms-auto text-xs tracking-widest",
         className
       )}
       {...props}

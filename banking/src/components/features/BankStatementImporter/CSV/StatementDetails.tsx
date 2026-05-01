@@ -3,7 +3,7 @@ import { GetStatementDetailsResponse } from '../import_utils'
 import { flt, formatCurrency } from '@/lib/numbers'
 import { formatDate } from '@/lib/date'
 import { bankRecDateAtom, SelectedBank } from '../../BankReconciliation/bankRecAtoms'
-import { ChevronLeftIcon, ExternalLinkIcon, InfoIcon, Landmark, Loader2Icon } from 'lucide-react'
+import { ChevronLeftIcon, ChevronRightIcon, ExternalLinkIcon, InfoIcon, Landmark, Loader2Icon } from 'lucide-react'
 import { H2, H3, H4, Paragraph } from '@/components/ui/typography'
 import { FileTypeIcon } from '@/components/ui/file-dropzone'
 import { getFileExtension } from '@/lib/file'
@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { Progress } from '@/components/ui/progress'
 import { useSetAtom } from 'jotai'
+import { useDirection } from '@/components/ui/direction'
 
 const AMOUNT_FORMAT_LABEL_MAP = {
     "separate_columns_for_withdrawal_and_deposit": _("Separate columns for withdrawal and deposit"),
@@ -63,6 +64,8 @@ const StatementDetails = ({ data, bank, onBack }: Props) => {
 
     const setDates = useSetAtom(bankRecDateAtom)
 
+    const direction = useDirection()
+
     const onImport = () => {
 
         call({
@@ -94,7 +97,7 @@ const StatementDetails = ({ data, bank, onBack }: Props) => {
             <div className='flex flex-col gap-4'>
                 <div className='flex justify-between items-center'>
                     <Button size='sm' variant='outline' onClick={onBack}>
-                        <ChevronLeftIcon />
+                        {direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
                         {_("Back")}
                     </Button>
                     <Button onClick={onImport} disabled={loading || data.final_transactions?.length === 0} size='sm' type='button'>
@@ -130,7 +133,7 @@ const StatementDetails = ({ data, bank, onBack }: Props) => {
                                     {bank?.logo ? <img
                                         src={`/assets/erpnext/images/bank-logos/${bank.logo}`}
                                         alt={bank.bank || bank.name || ''}
-                                        className="max-w-24 object-left h-6 object-contain"
+                                        className="max-w-24 me-auto h-6 object-contain"
                                     /> : <div className="rounded-md flex items-center h-6 gap-2">
                                         <Landmark size={'24px'} />
                                         <H4 className="text-base mb-0">{bank?.bank}</H4>
@@ -214,8 +217,8 @@ const StatementDetails = ({ data, bank, onBack }: Props) => {
                                 <TableHead>{_("Date")}</TableHead>
                                 <TableHead>{_("Description")}</TableHead>
                                 <TableHead>{_("Ref.")}</TableHead>
-                                <TableHead className='text-right'>{_("Withdrawal")}</TableHead>
-                                <TableHead className='text-right'>{_("Deposit")}</TableHead>
+                                <TableHead className='text-end'>{_("Withdrawal")}</TableHead>
+                                <TableHead className='text-end'>{_("Deposit")}</TableHead>
 
                                 <TableHead></TableHead>
                             </TableRow>
@@ -226,9 +229,9 @@ const StatementDetails = ({ data, bank, onBack }: Props) => {
                                     <TableCell>{formatDate(transaction.date)}</TableCell>
                                     <TableCell>{transaction.description}</TableCell>
                                     <TableCell>{transaction.reference_number ? transaction.reference_number : "-"}</TableCell>
-                                    <TableCell className='text-right font-numeric'>{formatCurrency(transaction.withdrawal, transaction.currency)}</TableCell>
-                                    <TableCell className='text-right font-numeric'>{formatCurrency(transaction.deposit, transaction.currency)}</TableCell>
-                                    <TableCell className='text-right'>
+                                    <TableCell className='text-end font-numeric'>{formatCurrency(transaction.withdrawal, transaction.currency)}</TableCell>
+                                    <TableCell className='text-end font-numeric'>{formatCurrency(transaction.deposit, transaction.currency)}</TableCell>
+                                    <TableCell className='text-end'>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
                                                 <Button variant='link' isIconButton asChild className='text-ink-gray-5 hover:text-black p-0 h-4'>
@@ -271,8 +274,8 @@ const StatementDetails = ({ data, bank, onBack }: Props) => {
                                 <TableHead>{_("Date")}</TableHead>
                                 <TableHead>{_("Description")}</TableHead>
                                 <TableHead>{_("Ref.")}</TableHead>
-                                <TableHead className='text-right'>{_("Withdrawal")}</TableHead>
-                                <TableHead className='text-right'>{_("Deposit")}</TableHead>
+                                <TableHead className='text-end'>{_("Withdrawal")}</TableHead>
+                                <TableHead className='text-end'>{_("Deposit")}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -282,8 +285,8 @@ const StatementDetails = ({ data, bank, onBack }: Props) => {
                                     <TableCell>{formatDate(transaction.date)}</TableCell>
                                     <TableCell className='max-w-[200px] w-fit overflow-hidden text-ellipsis'>{transaction.description}</TableCell>
                                     <TableCell className='max-w-[100px] w-fit overflow-hidden text-ellipsis'>{transaction.reference}</TableCell>
-                                    <TableCell className='text-right font-numeric'>{formatCurrency(transaction.withdrawal, data.currency)}</TableCell>
-                                    <TableCell className='text-right font-numeric'>{formatCurrency(transaction.deposit, data.currency)}</TableCell>
+                                    <TableCell className='text-end font-numeric'>{formatCurrency(transaction.withdrawal, data.currency)}</TableCell>
+                                    <TableCell className='text-end font-numeric'>{formatCurrency(transaction.deposit, data.currency)}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

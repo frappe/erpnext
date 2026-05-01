@@ -375,7 +375,7 @@ const Filters = ({
         <div className="w-[25%]">
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size='md' className="min-w-32 w-full text-left justify-between">
+                    <Button variant="outline" size='md' className="min-w-32 w-full text-start justify-between">
                         <div className="flex gap-2 items-center">
                             {typeFilter === 'All' ? <DollarSign className="w-4 h-4 text-ink-gray-5" /> : typeFilter === 'Debits' ? <ArrowUpRight className="w-4 h-4 text-ink-red-3" /> : <ArrowDownRight className="w-4 h-4 text-ink-green-3" />}
                             {_(typeFilter)}
@@ -393,7 +393,7 @@ const Filters = ({
         <div className="w-[25%]">
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size='md' className="min-w-32 w-full text-left justify-between">
+                    <Button variant="outline" size='md' className="min-w-32 w-full text-start justify-between">
                         <div className="flex gap-2 items-center">
                             {status === 'All' ? <ListIcon className="w-4 h-4 text-ink-gray-5" /> :
                                 status === 'Reconciled' ? <CheckCircle2 className="w-4 h-4 text-ink-green-3" /> :

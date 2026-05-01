@@ -246,7 +246,7 @@ const LinkFieldCombobox = ({
                             {value && <a href={`/desk/${slug(doctype)}/${value}`} target="_blank" className="group-hover:block hidden">
                                 <ExternalLink className="size-4 shrink-0 opacity-50" />
                             </a>}
-                            <ChevronDownIcon className="ml-2 size-4 shrink-0" />
+                            <ChevronDownIcon className="ms-2 size-4 shrink-0" />
                         </div>
                     </Button>
                 </FormControl>
@@ -256,7 +256,7 @@ const LinkFieldCombobox = ({
                             {value && <a href={`/desk/${slug(doctype)}/${value}`} target="_blank" className="group-hover:block hidden">
                                 <ExternalLink className="size-4 shrink-0 opacity-50" />
                             </a>}
-                            <ChevronDownIcon className="ml-2 size-4 shrink-0" />
+                            <ChevronDownIcon className="ms-2 size-4 shrink-0" />
                         </div>
                     </Button>}
             </PopoverTrigger>
