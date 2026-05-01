@@ -872,7 +872,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 								},
 								() => {
 									var company_currency = me.get_company_currency();
-									me.update_item_grid_labels(company_currency);
+									me.update_item_grid_labels(
+										me.get_currency_label_options(company_currency)
+									);
 								},
 							]);
 						}
