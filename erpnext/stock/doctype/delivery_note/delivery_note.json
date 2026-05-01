@@ -1466,11 +1466,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2026-04-28 06:37:33.600775",
-=======
  "modified": "2026-05-01 02:37:31.430649",
->>>>>>> c120cc7ed1 (fix: add missing fields in set_currency_labels (#54689))
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
