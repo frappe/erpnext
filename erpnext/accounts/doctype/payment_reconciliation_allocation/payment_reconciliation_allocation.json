@@ -5,13 +5,13 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "receivable_voucher_type",
-  "receivable_voucher_no",
-  "receivable_voucher_row",
+  "to_receive_voucher_type",
+  "to_receive_voucher_no",
+  "to_receive_voucher_row",
   "column_break_3",
-  "payable_voucher_type",
-  "payable_voucher_no",
-  "payable_voucher_row",
+  "to_pay_voucher_type",
+  "to_pay_voucher_no",
+  "to_pay_voucher_row",
   "section_break_6",
   "allocated_amount",
   "unreconciled_amount",
@@ -28,42 +28,42 @@
   "exchange_rate",
   "currency",
   "accounts_section",
-  "receivable_account",
+  "to_receive_account",
   "column_break_kyjc",
-  "payable_account",
+  "to_pay_account",
   "parties_section",
-  "receivable_party_type",
-  "receivable_party",
+  "to_receive_party_type",
+  "to_receive_party",
   "parties_col_break",
-  "payable_party_type",
-  "payable_party",
+  "to_pay_party_type",
+  "to_pay_party",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break"
  ],
  "fields": [
   {
-   "fieldname": "receivable_voucher_type",
+   "fieldname": "to_receive_voucher_type",
    "fieldtype": "Link",
-   "label": "Receivable Voucher Type",
+   "label": "To Receive Voucher Type",
    "options": "DocType",
    "read_only": 1,
    "reqd": 1
   },
   {
-   "fieldname": "receivable_voucher_no",
+   "fieldname": "to_receive_voucher_no",
    "fieldtype": "Dynamic Link",
    "in_list_view": 1,
-   "label": "Receivable Voucher No",
-   "options": "receivable_voucher_type",
+   "label": "To Receive Voucher No",
+   "options": "to_receive_voucher_type",
    "read_only": 1,
    "reqd": 1
   },
   {
-   "fieldname": "receivable_voucher_row",
+   "fieldname": "to_receive_voucher_row",
    "fieldtype": "Data",
    "hidden": 1,
-   "label": "Receivable Voucher Row",
+   "label": "To Receive Voucher Row",
    "read_only": 1
   },
   {
@@ -71,27 +71,27 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "payable_voucher_type",
+   "fieldname": "to_pay_voucher_type",
    "fieldtype": "Link",
-   "label": "Payable Voucher Type",
+   "label": "To Pay Voucher Type",
    "options": "DocType",
    "read_only": 1,
    "reqd": 1
   },
   {
-   "fieldname": "payable_voucher_no",
+   "fieldname": "to_pay_voucher_no",
    "fieldtype": "Dynamic Link",
    "in_list_view": 1,
-   "label": "Payable Voucher No",
-   "options": "payable_voucher_type",
+   "label": "To Pay Voucher No",
+   "options": "to_pay_voucher_type",
    "read_only": 1,
    "reqd": 1
   },
   {
-   "fieldname": "payable_voucher_row",
+   "fieldname": "to_pay_voucher_row",
    "fieldtype": "Data",
    "hidden": 1,
-   "label": "Payable Voucher Row",
+   "label": "To Pay Voucher Row",
    "read_only": 1
   },
   {
@@ -194,16 +194,16 @@
    "label": "Accounts"
   },
   {
-   "fieldname": "receivable_account",
+   "fieldname": "to_receive_account",
    "fieldtype": "Link",
-   "label": "Receivable Account",
+   "label": "To Receive Account",
    "options": "Account",
    "read_only": 1
   },
   {
-   "fieldname": "payable_account",
+   "fieldname": "to_pay_account",
    "fieldtype": "Link",
-   "label": "Payable Account",
+   "label": "To Pay Account",
    "options": "Account",
    "read_only": 1
   },
@@ -214,17 +214,17 @@
    "label": "Parties"
   },
   {
-   "fieldname": "receivable_party_type",
+   "fieldname": "to_receive_party_type",
    "fieldtype": "Link",
-   "label": "Receivable Party Type",
+   "label": "To Receive Party Type",
    "options": "DocType",
    "read_only": 1
   },
   {
-   "fieldname": "receivable_party",
+   "fieldname": "to_receive_party",
    "fieldtype": "Dynamic Link",
-   "label": "Receivable Party",
-   "options": "receivable_party_type",
+   "label": "To Receive Party",
+   "options": "to_receive_party_type",
    "read_only": 1
   },
   {
@@ -232,17 +232,17 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "payable_party_type",
+   "fieldname": "to_pay_party_type",
    "fieldtype": "Link",
-   "label": "Payable Party Type",
+   "label": "To Pay Party Type",
    "options": "DocType",
    "read_only": 1
   },
   {
-   "fieldname": "payable_party",
+   "fieldname": "to_pay_party",
    "fieldtype": "Dynamic Link",
-   "label": "Payable Party",
-   "options": "payable_party_type",
+   "label": "To Pay Party",
+   "options": "to_pay_party_type",
    "read_only": 1
   },
   {

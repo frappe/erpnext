@@ -28,18 +28,18 @@ class PaymentReconciliationAllocation(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
-		payable_account: DF.Link | None
-		payable_party: DF.DynamicLink | None
-		payable_party_type: DF.Link | None
-		payable_voucher_no: DF.DynamicLink
-		payable_voucher_row: DF.Data | None
-		payable_voucher_type: DF.Link
-		receivable_account: DF.Link | None
-		receivable_party: DF.DynamicLink | None
-		receivable_party_type: DF.Link | None
-		receivable_voucher_no: DF.DynamicLink
-		receivable_voucher_row: DF.Data | None
-		receivable_voucher_type: DF.Link
+		to_pay_account: DF.Link | None
+		to_pay_party: DF.DynamicLink | None
+		to_pay_party_type: DF.Link | None
+		to_pay_voucher_no: DF.DynamicLink
+		to_pay_voucher_row: DF.Data | None
+		to_pay_voucher_type: DF.Link
+		to_receive_account: DF.Link | None
+		to_receive_party: DF.DynamicLink | None
+		to_receive_party_type: DF.Link | None
+		to_receive_voucher_no: DF.DynamicLink
+		to_receive_voucher_row: DF.Data | None
+		to_receive_voucher_type: DF.Link
 		unreconciled_amount: DF.Currency
 	# end: auto-generated types
 

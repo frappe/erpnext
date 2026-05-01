@@ -111,13 +111,13 @@ class PaymentReconciliation(Document):
 		min_amount: DF.Currency
 		party: DF.DynamicLink
 		party_type: DF.Link
-		payable_limit: DF.Int
-		payables: DF.Table[PaymentReconciliationEntry]
 		project: DF.Link | None
-		receivable_limit: DF.Int
 		receivable_payable_account: DF.Link | None
-		receivables: DF.Table[PaymentReconciliationEntry]
 		to_date: DF.Date | None
+		to_pay: DF.Table[PaymentReconciliationEntry]
+		to_pay_limit: DF.Int
+		to_receive: DF.Table[PaymentReconciliationEntry]
+		to_receive_limit: DF.Int
 		total_invoice_amount: DF.Currency
 		total_payment_amount: DF.Currency
 	# end: auto-generated types
