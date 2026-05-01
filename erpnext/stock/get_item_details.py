@@ -1031,6 +1031,7 @@ def insert_item_price(args):
 				currency=args.currency,
 				uom=args.stock_uom,
 				price_list=args.price_list,
+				valid_from=transaction_date,
 			)
 			item_price.insert()
 			frappe.msgprint(
@@ -1055,6 +1056,7 @@ def insert_item_price(args):
 				"currency": args.currency,
 				"price_list_rate": price_list_rate,
 				"uom": args.stock_uom,
+				"valid_from": transaction_date,
 			}
 		)
 		item_price.insert()
