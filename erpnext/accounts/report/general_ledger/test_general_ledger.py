@@ -5,6 +5,7 @@ import frappe
 from frappe import qb
 from frappe.utils import flt, today
 
+from erpnext.accounts.doctype.party_link.party_link import create_party_link
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.general_ledger.general_ledger import execute
 from erpnext.controllers.sales_and_purchase_return import make_return_doc
@@ -27,6 +28,176 @@ class TestGeneralLedger(ERPNextTestSuite):
 		]
 		for doctype in doctype_list:
 			qb.from_(qb.DocType(doctype)).delete().where(qb.DocType(doctype).company == self.company).run()
+
+	def test_cpa_includes_linked_party_entries(self):
+		"""
+		CPA support: filtering GL by a Customer should also return GL entries posted under the linked Supplier (and vice versa) via Party Link.
+		"""
+		company = self.company
+		customer = "_Test Customer"
+		supplier = "_Test Supplier"
+
+		# clean up any existing Party Link involving either party on either side
+		if pl_name := frappe.get_all(
+			"Party Link",
+			or_filters=[
+				["primary_party", "in", [customer, supplier]],
+				["secondary_party", "in", [customer, supplier]],
+			],
+			pluck="name",
+		):
+			frappe.delete_doc("Party Link", pl_name[0], ignore_permissions=True)
+
+		party_link = create_party_link(
+			primary_role="Customer",
+			primary_party=customer,
+			secondary_party=supplier,
+		)
+
+		try:
+			# GL entry via Sales Invoice (Customer side)
+			si = create_sales_invoice(customer=customer, company=company, do_not_submit=False)
+
+			# GL entry via Purchase Invoice (Supplier side)
+			from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
+			pi = make_purchase_invoice(supplier=supplier, company=company, do_not_submit=False)
+
+			# Filter by Customer only — should include both Customer and Supplier entries
+			_, data = execute(
+				frappe._dict(
+					{
+						"company": company,
+						"from_date": si.posting_date,
+						"to_date": si.posting_date,
+						"party_type": "Customer",
+						"party": [customer],
+					}
+				)
+			)
+
+			party_types_in_result = {row.party_type for row in data if row.get("party_type")}
+			self.assertIn("Customer", party_types_in_result)
+			self.assertIn("Supplier", party_types_in_result)
+
+			# Filter by Supplier only — should include both sides too
+			_, data = execute(
+				frappe._dict(
+					{
+						"company": company,
+						"from_date": pi.posting_date,
+						"to_date": pi.posting_date,
+						"party_type": "Supplier",
+						"party": [supplier],
+					}
+				)
+			)
+
+			party_types_in_result = {row.party_type for row in data if row.get("party_type")}
+			self.assertIn("Customer", party_types_in_result)
+			self.assertIn("Supplier", party_types_in_result)
+		finally:
+			frappe.delete_doc("Party Link", party_link.name, ignore_permissions=True)
+
+	def test_party_filter_without_party_link(self):
+		"""
+		When a party has no Party Link, GL filtering should only return entries for that party — no cross-party leakage.
+		"""
+		company = self.company
+		customer = "_Test Customer"
+		other_customer = "_Test Customer 1"
+
+		# Ensure no Party Link exists for these parties (either side)
+		if pl_name := frappe.get_all(
+			"Party Link",
+			or_filters=[
+				["primary_party", "in", [customer, other_customer]],
+				["secondary_party", "in", [customer, other_customer]],
+			],
+			pluck="name",
+		):
+			frappe.delete_doc("Party Link", pl_name[0], ignore_permissions=True)
+
+		# GL entry for customer
+		si = create_sales_invoice(customer=customer, company=company, do_not_submit=False)
+		# GL entry for a different customer
+		create_sales_invoice(customer=other_customer, company=company, do_not_submit=False)
+
+		_, data = execute(
+			frappe._dict(
+				{
+					"company": company,
+					"from_date": si.posting_date,
+					"to_date": si.posting_date,
+					"party_type": "Customer",
+					"party": [customer],
+				}
+			)
+		)
+
+		parties_in_result = {row.party for row in data if row.get("party")}
+		self.assertIn(customer, parties_in_result)
+		self.assertNotIn(other_customer, parties_in_result)
+
+	def test_cpa_mixed_party_list_partial_links(self):
+		"""
+		Linked counterparts are included only for parties that have a Party Link; unlinked parties return only their own GL entries.
+		"""
+		company = self.company
+		linked_customer = "_Test Customer"
+		unlinked_customer = "_Test Customer 1"
+		supplier = "_Test Supplier"
+
+		# clean up any existing Party Link touching these parties
+		if pl_name := frappe.get_all(
+			"Party Link",
+			or_filters=[
+				["primary_party", "in", [linked_customer, unlinked_customer, supplier]],
+				["secondary_party", "in", [linked_customer, unlinked_customer, supplier]],
+			],
+			pluck="name",
+		):
+			frappe.delete_doc("Party Link", pl_name[0], ignore_permissions=True)
+
+		party_link = create_party_link(
+			primary_role="Customer",
+			primary_party=linked_customer,
+			secondary_party=supplier,
+		)
+
+		try:
+			from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
+			si_linked = create_sales_invoice(customer=linked_customer, company=company, do_not_submit=False)
+			_si_unlinked = create_sales_invoice(
+				customer=unlinked_customer, company=company, do_not_submit=False
+			)
+			make_purchase_invoice(supplier=supplier, company=company, do_not_submit=False)
+
+			_, data = execute(
+				frappe._dict(
+					{
+						"company": company,
+						"from_date": si_linked.posting_date,
+						"to_date": si_linked.posting_date,
+						"party_type": "Customer",
+						"party": [linked_customer, unlinked_customer],
+					}
+				)
+			)
+
+			parties_in_result = {row.party for row in data if row.get("party")}
+			party_types_in_result = {row.party_type for row in data if row.get("party_type")}
+
+			# linked_customer's own entries are present
+			self.assertIn(linked_customer, parties_in_result)
+			# unlinked_customer's own entries are present
+			self.assertIn(unlinked_customer, parties_in_result)
+			# supplier linked to linked_customer is pulled in
+			self.assertIn(supplier, parties_in_result)
+			self.assertIn("Supplier", party_types_in_result)
+		finally:
+			frappe.delete_doc("Party Link", party_link.name, ignore_permissions=True)
 
 	def test_foreign_account_balance_after_exchange_rate_revaluation(self):
 		"""
