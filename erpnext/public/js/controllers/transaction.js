@@ -1832,8 +1832,12 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this._last_party_account_currency = this.frm.doc.party_account_currency;
 		this._last_company_currency = company_currency;
 
+		this.toggle_base_currency_fields(company_currency);
 		this.change_form_labels(company_currency);
 		this.change_grid_labels(company_currency);
+		if (this.frm.doc.currency == company_currency) {
+			this.toggle_base_currency_fields(company_currency);
+		}
 		this.frm.refresh_fields();
 	}
 
@@ -1845,7 +1849,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		};
 	}
 
-	set_currency_labels_from_options(currency_options, parentfield) {
+	set_currency_labels_from_options(currency_options, parentfield, company_currency) {
 		const doctype = parentfield ? this.frm.fields_dict[parentfield].grid.doctype : this.frm.doc.doctype;
 		const docfields = frappe.meta.get_docfields(doctype);
 
@@ -1854,16 +1858,96 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				.filter((df) => df.fieldtype === "Currency" && df.options === options)
 				.map((df) => df.fieldname);
 
+			if (this.frm.doc.currency == company_currency && currency == company_currency) {
+				this.reset_currency_labels(
+					fields.filter((field) => !field.startsWith("base_")),
+					parentfield
+				);
+				return;
+			}
+
 			this.frm.set_currency_labels(fields, currency, parentfield);
 		});
+	}
+
+	reset_currency_labels(fields, parentfield) {
+		if (!fields.length) return;
+
+		const doctype = parentfield ? this.frm.fields_dict[parentfield].grid.doctype : this.frm.doc.doctype;
+
+		fields.forEach((field) => {
+			const docfield = frappe.meta.docfield_map[doctype][field];
+			if (docfield) {
+				const label = __(docfield.label || "", null, docfield.parent)
+					.replace(/\([^\)]*\)/g, "")
+					.trim();
+
+				if (parentfield) {
+					this.frm.fields_dict[parentfield].grid.update_docfield_property(field, "label", label);
+				} else {
+					this.frm.fields_dict[field].set_label(label);
+				}
+			}
+		});
+	}
+
+	toggle_base_currency_fields(company_currency) {
+		const show = this.frm.doc.currency != company_currency;
+		this._base_currency_field_visibility = this._base_currency_field_visibility || {};
+
+		const parent_fields = { show: [], hide: [] };
+		(frappe.meta.get_docfields(this.frm.doctype, this.frm.docname) || []).forEach((df) => {
+			if (df.fieldname?.startsWith("base_")) {
+				const field_key = `${this.frm.doctype}.${df.fieldname}`;
+				const field_list = this.should_show_base_currency_field(field_key, df, show)
+					? "show"
+					: "hide";
+				parent_fields[field_list].push(df.fieldname);
+			}
+		});
+
+		if (parent_fields.show.length) this.frm.toggle_display(parent_fields.show, true);
+		if (parent_fields.hide.length) this.frm.toggle_display(parent_fields.hide, false);
+
+		Object.values(this.frm.fields_dict).forEach((field) => {
+			if (!field.grid) return;
+
+			const grid_fields = { show: [], hide: [] };
+			(field.grid.docfields || []).forEach((df) => {
+				if (df.fieldname?.startsWith("base_")) {
+					const field_key =
+						`${this.frm.doctype}.${field.grid.df.fieldname}` +
+						`.${field.grid.doctype}.${df.fieldname}`;
+					const field_list = this.should_show_base_currency_field(field_key, df, show)
+						? "show"
+						: "hide";
+					grid_fields[field_list].push(df.fieldname);
+				}
+			});
+
+			if (grid_fields.show.length) field.grid.set_column_disp(grid_fields.show, true);
+			if (grid_fields.hide.length) field.grid.set_column_disp(grid_fields.hide, false);
+		});
+	}
+
+	should_show_base_currency_field(field_key, df, show) {
+		if (!Object.prototype.hasOwnProperty.call(this._base_currency_field_visibility, field_key)) {
+			this._base_currency_field_visibility[field_key] = cint(df.hidden);
+		}
+
+		return show && !this._base_currency_field_visibility[field_key];
 	}
 
 	change_form_labels(company_currency) {
 		let me = this;
 		const currency_options = this.get_currency_label_options(company_currency);
 
-		this.set_currency_labels_from_options(currency_options);
-		this.frm.set_currency_labels(["totals_section"], this.frm.doc.currency);
+		this.set_currency_labels_from_options(currency_options, null, company_currency);
+		if (this.frm.doc.currency == company_currency) {
+			this.reset_currency_labels(["totals_section"]);
+		} else {
+			this.frm.set_currency_labels(["totals_section"], this.frm.doc.currency);
+		}
 		this.frm.set_currency_labels(["base_totals_section"], company_currency);
 
 		this.frm.set_df_property(
@@ -1942,7 +2026,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var me = this;
 		const currency_options = this.get_currency_label_options(company_currency);
 
-		this.toggle_item_grid_columns(company_currency);
+		this.toggle_item_grid_columns();
 
 		for (const child_table of [
 			"items",
@@ -1954,7 +2038,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			"sales_team",
 		]) {
 			if (this.frm.fields_dict[child_table]) {
-				this.set_currency_labels_from_options(currency_options, child_table);
+				this.set_currency_labels_from_options(currency_options, child_table, company_currency);
 			}
 		}
 
@@ -2018,17 +2102,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 	}
 
-	toggle_item_grid_columns(company_currency) {
-		const me = this;
+	toggle_item_grid_columns() {
 		// toggle columns
 		var item_grid = this.frm.fields_dict["items"].grid;
-		$.each(
-			["base_rate", "base_price_list_rate", "base_amount", "base_rate_with_margin"],
-			function (i, fname) {
-				if (frappe.meta.get_docfield(item_grid.doctype, fname))
-					item_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
-			}
-		);
 
 		var show =
 			cint(this.frm.doc.discount_amount) ||
@@ -2041,8 +2117,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		});
 
 		$.each(["base_net_rate", "base_net_amount"], function (i, fname) {
-			if (frappe.meta.get_docfield(item_grid.doctype, fname))
-				item_grid.set_column_disp(fname, show && me.frm.doc.currency != company_currency);
+			if (frappe.meta.get_docfield(item_grid.doctype, fname)) item_grid.set_column_disp(fname, show);
 		});
 	}
 
