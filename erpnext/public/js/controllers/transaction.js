@@ -1977,14 +1977,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			});
 		}
 
-		this.update_payment_schedule_grid_labels(currency_options, company_currency);
+		this.update_payment_schedule_grid_labels(company_currency);
 	}
 
 	update_item_grid_labels(currency_options) {
 		this.set_currency_labels_from_options(currency_options, "items");
 	}
 
-	update_payment_schedule_grid_labels(currency_options, company_currency) {
+	update_payment_schedule_grid_labels(company_currency) {
 		const me = this;
 		if (this.frm.doc.payment_schedule && this.frm.doc.payment_schedule.length > 0) {
 			var schedule_grid = this.frm.fields_dict["payment_schedule"].grid;
