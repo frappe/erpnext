@@ -2295,12 +2295,14 @@ class QueryPaymentLedger:
 		self.min_outstanding = None
 		self.max_outstanding = None
 		self.limit = self.voucher_no = None
+		self.exclude_zero_outstanding = False
 
 	def reset(self):
 		# clear filters
 		self.vouchers.clear()
 		self.common_filter.clear()
 		self.min_outstanding = self.max_outstanding = self.limit = None
+		self.exclude_zero_outstanding = False
 
 		# clear result
 		self.voucher_outstandings.clear()
@@ -2519,6 +2521,14 @@ class QueryPaymentLedger:
 				)
 			)
 
+		elif self.exclude_zero_outstanding:
+			self.cte_query_voucher_amount_and_outstanding = (
+				self.cte_query_voucher_amount_and_outstanding.having(
+					(qb.Field("outstanding_in_account_currency").notnull())
+					& (qb.Field("outstanding_in_account_currency") != 0)
+				)
+			)
+
 		if self.limit:
 			self.cte_query_voucher_amount_and_outstanding = (
 				self.cte_query_voucher_amount_and_outstanding.limit(self.limit)
@@ -2539,6 +2549,7 @@ class QueryPaymentLedger:
 		accounting_dimensions=None,
 		limit=None,
 		voucher_no=None,
+		exclude_zero_outstanding=False,
 	):
 		"""
 		Fetch voucher amount and outstanding amount from Payment Ledger using Database CTE
@@ -2549,6 +2560,7 @@ class QueryPaymentLedger:
 		max_outstanding - filter on maximum total  outstanding amount
 		get_invoices - only fetch vouchers(ledger entries with +ve outstanding)
 		get_payments - only fetch payments(ledger entries with -ve outstanding)
+		exclude_zero_outstanding - drop rows where outstanding settled to zero
 		"""
 
 		self.reset()
@@ -2562,6 +2574,7 @@ class QueryPaymentLedger:
 		self.get_invoices = get_invoices
 		self.limit = limit
 		self.voucher_no = voucher_no
+		self.exclude_zero_outstanding = exclude_zero_outstanding
 		self.query_for_outstanding()
 
 		return self.voucher_outstandings
