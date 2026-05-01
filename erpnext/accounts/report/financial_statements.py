@@ -3,6 +3,7 @@
 
 
 import copy
+import datetime
 import functools
 import math
 import re
@@ -21,28 +22,18 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
 from erpnext.accounts.utils import get_fiscal_year, get_zero_cutoff
 
-# ---------------------------------------------------------------------------
-# Dimension-as-column axis helpers
-#
-# When `filters.group_by_dimension` is set, the engine produces a synthetic
-# `period_list` where each entry represents a dimension value (Cost Center,
-# Project or any Accounting Dimension) instead of a date bucket. Each entry
-# carries `dim_field` and `dim_value` so downstream aggregation can branch.
-# This is the single source of truth for both period-mode and dimension-mode
-# columns; reports themselves need only swap the period_list builder.
-# ---------------------------------------------------------------------------
 
+def get_report_date_range(filters: frappe._dict) -> tuple[datetime.date | None, datetime.date | None]:
+	"""
+	Resolve `from_date`, `to_date` from filters, including validation.
+	"""
+	if filters.filter_based_on == "Fiscal Year":
+		fy_data = get_fiscal_year_data(filters.from_fiscal_year, filters.to_fiscal_year)
+		validate_fiscal_year(fy_data, filters.from_fiscal_year, filters.to_fiscal_year)
+		return getdate(fy_data.year_start_date), getdate(fy_data.year_end_date)
 
-# TODO: can use existing utility?
-# TODO: See get_period_list and check the data...
-# TODO: filters.get(FIELDNAME) -> filters.FIELDNAME
-def get_dimension_date_range(filters):
-	"""Resolve the (from_date, to_date) used as the single time bucket in dim mode."""
-	if filters.get("filter_based_on") == "Fiscal Year":
-		fy_data = get_fiscal_year_data(filters.get("from_fiscal_year"), filters.get("to_fiscal_year"))
-		return getdate(fy_data["year_start_date"]), getdate(fy_data["year_end_date"])
-
-	return getdate(filters.get("period_start_date")), getdate(filters.get("period_end_date"))
+	validate_dates(filters.period_start_date, filters.period_end_date)
+	return getdate(filters.period_start_date), getdate(filters.period_end_date)
 
 
 def get_dimensions(filters: frappe._dict) -> tuple[str | None, list]:
@@ -57,7 +48,7 @@ def get_dimensions(filters: frappe._dict) -> tuple[str | None, list]:
 		return None, []
 
 	fieldname = get_dimension_fieldname(dim_doctype)
-	from_date, to_date = get_dimension_date_range(filters)
+	from_date, to_date = get_report_date_range(filters)
 
 	gl = frappe.qb.DocType("GL Entry")
 	query = (
@@ -208,15 +199,17 @@ def get_period_list(
 	```
 	"""
 
-	if filter_based_on == "Fiscal Year":
-		fiscal_year = get_fiscal_year_data(from_fiscal_year, to_fiscal_year)
-		validate_fiscal_year(fiscal_year, from_fiscal_year, to_fiscal_year)
-		year_start_date = getdate(fiscal_year.year_start_date)
-		year_end_date = getdate(fiscal_year.year_end_date)
-	else:
-		validate_dates(period_start_date, period_end_date)
-		year_start_date = getdate(period_start_date)
-		year_end_date = getdate(period_end_date)
+	year_start_date, year_end_date = get_report_date_range(
+		frappe._dict(
+			{
+				"filter_based_on": filter_based_on,
+				"from_fiscal_year": from_fiscal_year,
+				"to_fiscal_year": to_fiscal_year,
+				"period_start_date": period_start_date,
+				"period_end_date": period_end_date,
+			}
+		)
+	)
 
 	months_to_add = {"Yearly": 12, "Half-Yearly": 6, "Quarterly": 3, "Monthly": 1}[periodicity]
 
