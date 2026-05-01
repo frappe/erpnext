@@ -175,9 +175,6 @@ class TestQuotation(FrappeTestCase):
 
 		self.assertTrue(quotation.payment_schedule)
 
-<<<<<<< HEAD
-	@change_settings(
-=======
 	def test_terms_attachments_are_copied_to_quotation(self):
 		terms = make_terms_and_conditions(copy_attachments_to_transaction=True)
 		first_attachment = make_file_attachment(
@@ -233,8 +230,7 @@ class TestQuotation(FrappeTestCase):
 
 		self.assertFalse(get_attachment_urls("Quotation", quotation.name))
 
-	@ERPNextTestSuite.change_settings(
->>>>>>> c543d15f3c (feat: copy terms attachments to transactions (#53403))
+	@change_settings(
 		"Accounts Settings",
 		{"automatically_fetch_payment_terms": 1},
 	)
