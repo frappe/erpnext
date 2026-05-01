@@ -1879,7 +1879,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			const docfield = frappe.meta.docfield_map[doctype][field];
 			if (docfield) {
 				const label = __(docfield.label || "", null, docfield.parent)
-					.replace(/\([^\)]*\)/g, "")
+					.replace(/\s*\([^\)]*\)\s*$/, "")
 					.trim();
 
 				if (parentfield) {
