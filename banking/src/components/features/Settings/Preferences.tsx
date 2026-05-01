@@ -29,7 +29,10 @@ export const Preferences = () => {
             },
             revalidate: false,
         }).then(() => {
-            toast.success(_("Preferences updated"))
+            toast.success(_("Preferences updated"), {
+                dismissible: true,
+                duration: 500,
+            })
         })
     }
 

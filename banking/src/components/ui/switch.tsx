@@ -28,7 +28,14 @@ function Switch({
         className={cn(
           "shadow-switch block pointer-events-none rounded-full ring-0 transition-transform bg-ink-white",
           "group-data-[size=sm]/switch:size-3 group-data-[size=md]/switch:size-3.5",
-          "data-[state=checked]:translate-x-[calc(100%-0px)] data-[state=unchecked]:group-data-[size=sm]/switch:translate-x-0.5 data-[state=unchecked]:group-data-[size=md]/switch:translate-x-[3px]",
+          // Unchecked: keep thumb near the start edge (mirrored by dir)
+          "ltr:data-[state=unchecked]:group-data-[size=sm]/switch:translate-x-0.5",
+          "ltr:data-[state=unchecked]:group-data-[size=md]/switch:translate-x-[3px]",
+          "rtl:data-[state=unchecked]:group-data-[size=sm]/switch:-translate-x-0.5",
+          "rtl:data-[state=unchecked]:group-data-[size=md]/switch:-translate-x-[3px]",
+          // Checked: move to opposite edge (mirrored by dir)
+          "ltr:data-[state=checked]:translate-x-[calc(100%-0px)]",
+          "rtl:data-[state=checked]:-translate-x-[calc(100%-0px)]",
         )}
       />
     </SwitchPrimitive.Root>
