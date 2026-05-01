@@ -43,7 +43,17 @@ from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
 
 
 @frappe.whitelist()
-def start_process(job_card, slab_name="", slab_template="", process_name="operator", slab_number=0, slab_batch_number="", should_start_machine=True, publish_slab_event=True):
+def start_process(
+	job_card,
+	slab_name="",
+	slab_template="",
+	process_name="operator",
+	slab_number=0,
+	slab_batch_number="",
+	should_start_machine=True,
+	publish_slab_event=True,
+	skip_stage_validation=False,
+):
 	"""Start the Job Card when mixing starts."""
 
 	jc: JobCard = frappe.get_doc("Job Card", job_card)  # pyright: ignore[reportAssignmentType]
@@ -65,6 +75,7 @@ def start_process(job_card, slab_name="", slab_template="", process_name="operat
 			next_stage=process_name.lower(),
 			job_card_number=jc.name,
 			publish_event=publish_slab_event,
+			skip_stage_validation=skip_stage_validation,
 		)
 
 	else:
@@ -212,6 +223,7 @@ def finish_process(
 	if fg_item:
 		fg_item.qty = job_card_qty
 
+	# TODO: Move this to a function whose sole responsibility is to set slab details on the stock entry.
 	if process_name == "Quality Check":
 		stock_entry_manufacture.slab_grade = slab_grade
 		stock_entry_manufacture.slab_serial_no = slab_number.split("-")[-1] if slab_number else ""
@@ -219,8 +231,8 @@ def finish_process(
 
 		for item in stock_entry_manufacture.items:
 			if item.is_finished_item:
-				item.slab_no = slab_number
-				item.to_slab_no = slab_number
+				item.slab_no = slab_number  # pyright: ignore[reportAttributeAccessIssue]
+				item.to_slab_no = slab_number  # pyright: ignore[reportAttributeAccessIssue]
 
 	stock_entry_manufacture.fg_completed_qty = job_card_qty
 	stock_entry_manufacture.save()

@@ -8,9 +8,13 @@
  "field_order": [
   "dimensions_section",
   "colour",
+  "colour_indicator",
   "slab_thickness",
+  "column_break_apce",
+  "job_card",
+  "repair_date",
   "repair_section",
-  "repair_type",
+  "repair",
   "column_break_bmec",
   "repair_reason",
   "column_break_rtvd",
@@ -19,8 +23,6 @@
   "filler_spot",
   "column_break_zrxg",
   "contamination",
-  "column_break_luli",
-  "shade",
   "paper_deep_section",
   "paper_deep_front",
   "column_break_uuha",
@@ -28,9 +30,7 @@
   "crack_section",
   "crack_front",
   "column_break_ksjd",
-  "crack_back",
-  "observations_section",
-  "table_ldtc"
+  "crack_back"
  ],
  "fields": [
   {
@@ -40,11 +40,6 @@
    "in_list_view": 1,
    "label": "Colour",
    "read_only": 1
-  },
-  {
-   "fieldname": "table_ldtc",
-   "fieldtype": "Table",
-   "options": "Slab Quality Observation"
   },
   {
    "fieldname": "dimensions_section",
@@ -76,16 +71,6 @@
    "fieldname": "contamination",
    "fieldtype": "Data",
    "label": "Contamination",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_luli",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "shade",
-   "fieldtype": "Data",
-   "label": "Shade",
    "read_only": 1
   },
   {
@@ -129,34 +114,13 @@
    "label": "Back"
   },
   {
-   "fieldname": "observations_section",
-   "fieldtype": "Section Break",
-   "label": "Observations"
-  },
-  {
    "fieldname": "repair_section",
    "fieldtype": "Section Break",
    "label": "Repair"
   },
   {
-   "fieldname": "repair_type",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Repair Type",
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_bmec",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "repair_reason",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Repair Reason",
-   "read_only": 1
   },
   {
    "fieldname": "column_break_rtvd",
@@ -165,7 +129,52 @@
   {
    "fieldname": "remarks",
    "fieldtype": "Small Text",
+   "in_list_view": 1,
    "label": "Remarks",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_apce",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "job_card",
+   "fieldtype": "Link",
+   "label": "Job Card",
+   "options": "Job Card",
+   "read_only": 1
+  },
+  {
+   "fieldname": "repair",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Repair Type",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "colour_indicator",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Colour",
+   "print_width": "1",
+   "read_only": 1,
+   "width": "1"
+  },
+  {
+   "fieldname": "repair_reason",
+   "fieldtype": "Data",
+   "label": "Repair Reason",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "repair_date",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Repair Date",
    "read_only": 1
   }
  ],
@@ -173,7 +182,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-30 13:31:30.317805",
+ "modified": "2026-05-01 23:56:58.368285",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab Repair Record",

@@ -20,7 +20,7 @@ from erpnext.manufacturing.doctype.slab_quality_report.slab_quality_report impor
 from erpnext.setup.doctype.attendance_shift.attendance_shift import AttendanceShift
 from erpnext.setup.doctype.mahi_granites_settings.mahi_granites_settings import MahiGranitesSettings
 
-STAGES_TO_SKIP_IN_AUTO_MOVE = ["Re-Pressing", "Packed", "Shipped", "Discarded", "Quality Check", "Rejected"]
+STAGES_TO_SKIP_IN_AUTO_MOVE = ["Re-Pressing", "Packed", "Shipped", "Discarded", "Quality Check", "Recovery", "Rejected"]
 
 
 @frappe.whitelist()
@@ -119,6 +119,7 @@ def move_slab_to(
 	job_card_number: str | None = None,
 	checkout_and_move=False,
 	publish_event=True,
+	skip_stage_validation=False,
 ):
 	checkout_and_move = bool(checkout_and_move)
 	# Validation: Check if the given stage is valid.
@@ -133,8 +134,9 @@ def move_slab_to(
 	next_stage = ALLOWED_STAGES[next_stage_index]
 
 	# Validation: Check the direction of transition
-	if next_stage_index < current_stage_index or (
-		next_stage_index == current_stage_index and next_stage.lower() != "Re-pressing"
+	if not skip_stage_validation and (
+		next_stage_index < current_stage_index
+		or (next_stage_index == current_stage_index and next_stage.lower() != "re-pressing")
 	):
 		frappe.throw(f"Invalid stage transition: cannot move from {slab.status} to {next_stage}")
 

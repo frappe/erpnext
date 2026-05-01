@@ -1,12 +1,16 @@
+from glob import iglob
+from typing import Literal
+
 import frappe
 from frappe.utils.data import nowdate
 
-from erpnext.manufacturing.doctype.job_card.job_card import JobCard
+from erpnext.manufacturing.doctype.job_card.job_card import JobCard, make_corrective_job_card
 from erpnext.manufacturing.doctype.production_line.production_line import get_all_child_lines
 from erpnext.manufacturing.doctype.slab.api import get_slabs_for
 from erpnext.manufacturing.doctype.slab.slab import Slab
 from erpnext.manufacturing.doctype.slab_quality_report.api import create_slab_quality_report
 from erpnext.manufacturing.doctype.slab_quality_report.slab_quality_report import SlabQualityReport
+from erpnext.manufacturing.doctype.slab_repair_record.slab_repair_record import SlabRepairRecord
 from erpnext.manufacturing.page.operator_station.operator_station import (
 	finish_process,
 	get_top_job_card_for_process,
@@ -26,8 +30,9 @@ def start_qa_process(slab_number: str):
 	job_card_name = job_card.name if job_card else ""
 	#    2. Start the job card.
 	#    3. Move the slab to quality check.
+	skip_validation = slab.status == 'Recovery'
 	start_process(
-		job_card_name, slab_name=slab.name or "", slab_template=slab.template, process_name="Quality Check"
+		job_card_name, slab_name=slab.name or "", slab_template=slab.template, process_name="Quality Check", skip_stage_validation=skip_validation
 	)
 
 	#    4. Return the job card number.
@@ -43,14 +48,25 @@ def submit_qa_report(report: str | dict, shift: str, job_card: str, slab_number:
 			report = frappe.parse_json(report)
 		slab_grade: str | None = report.get("grade")  # pyright: ignore[reportAttributeAccessIssue]
 
-		slab_qc: SlabQualityReport = frappe.new_doc("Slab Quality Report")  # pyright: ignore[reportAssignmentType]
+		report_name: str | None = report.get('name')  # pyright: ignore[reportAttributeAccessIssue]
+		if report_name:
+			existing_report: SlabQualityReport = frappe.get_doc("Slab Quality Report", report_name)  # pyright: ignore[reportAssignmentType]
+			slab_qc = existing_report
+		else:
+			slab_qc: SlabQualityReport = frappe.new_doc("Slab Quality Report")  # pyright: ignore[reportAssignmentType]
+
 		slab_qc.update(report)
 		slab_qc.shift = shift
 
 		# 1. Create the slab quality report.
 		create_slab_quality_report(slab_number, slab_qc)
+
+		if slab_qc.repair != 'None':
+			# Make repair log
+			_make_repair_logs(job_card, slab_qc)
+
 		# Then,
-		finish_qc_process(slab_number, slab_grade, job_card)
+		finish_qc_process(slab_number, slab_grade, job_card, slab_qc.repair)
 
 		frappe.db.commit()
 
@@ -59,6 +75,7 @@ def submit_qa_report(report: str | dict, shift: str, job_card: str, slab_number:
 	except Exception:
 		frappe.db.rollback()
 		raise
+
 
 @frappe.whitelist()
 def get_slab_or_jobcard_for_qa(line: str, job_card_number: str | None = None):
@@ -85,6 +102,16 @@ def get_slab_or_jobcard_for_qa(line: str, job_card_number: str | None = None):
 		slab_size = frappe.get_doc("Slab Size", slab_size_name)
 
 	return {"slab": slab, "job_card": job_card, "slab_size": slab_size}
+
+
+@frappe.whitelist()
+def get_slab_qc_report(qc_name: str):
+	qc: SlabQualityReport | None = frappe.get_doc("Slab Quality Report", qc_name) if qc_name else None  # pyright: ignore[reportAssignmentType]
+	if not qc:
+		return None
+
+	qc.repair_history.sort(key=lambda r: r.idx, reverse=True)
+	return qc.to_json()
 
 
 def _make_material_transfer_stock_entry(slab_number: str, grade: str | None, job_card: str):
@@ -170,24 +197,31 @@ def _update_item_and_status_on_slab(item_code: str, slab_number: str, is_rejecte
 
 
 @frappe.whitelist()
-def get_repair_options():
-	meta = frappe.get_meta("Slab Quality Report")
-
-	def get_options(fieldname):
-		field = meta.get_field(fieldname)
-		if field and field.options:
-			return [opt.strip() for opt in field.options.split("\n") if opt.strip()]
-		return []
-
+def get_repair_options(qc_name: str | None = None):
 	return {
-		"repair": get_options("repair"),
-		"recovery_type": get_options("recovery_type"),
-		"repolish_type": get_options("repolish_type"),
-		"recalibration_type": get_options("recalibration_type"),
+		"repair": _get_slab_qc_options("repair"),
+		"recovery_type": _get_slab_qc_options("recovery_type"),
+		"repolish_type": _get_slab_qc_options("repolish_type"),
+		"recalibration_type": _get_slab_qc_options("recalibration_type"),
+		"shade": _get_slab_qc_options("shade"),
 	}
 
 
-def finish_qc_process(slab_number: str, slab_grade: str | None, job_card: str, publish_slab_event=True):
+def _get_slab_qc_options(fieldname):
+	meta = frappe.get_meta("Slab Quality Report")
+	field = meta.get_field(fieldname)
+	if field and field.options:
+		if field.fieldtype == "Select":
+			return [opt.strip() for opt in field.options.split("\n") if opt.strip()]
+		elif field.fieldtype == "Table MultiSelect":
+			child_meta = frappe.get_meta(field.options)
+			link_field = next((f for f in child_meta.fields if f.fieldtype == "Link"), None)
+			if link_field:
+				return [d.name for d in frappe.get_all(link_field.options)]
+	return []
+
+
+def finish_qc_process(slab_number: str, slab_grade: str | None, job_card: str, repair_type: Literal['', 'None', 'Recovery', 'Repolish', 'Recalibration'], publish_slab_event=True):
 	# 2. Finish the job card and checkout the slab.
 	finish_process(job_card, "Quality Check", False, slab_number=slab_number, slab_grade=slab_grade, publish_slab_event=publish_slab_event)
 
@@ -198,21 +232,152 @@ def finish_qc_process(slab_number: str, slab_grade: str | None, job_card: str, p
 		# 4. Update the name of the stock item on the slab.
 		_update_item_and_status_on_slab(str(stock_entry.items[-1].item_code), slab_number, is_reject)
 	else:
-		_make_repack_stock_entry()
-		_make_repair_job_cards()
-		_make_repair_logs()
+		_make_repair_stock_entry(repair_type, slab_number, job_card)
+		_make_repair_job_cards(repair_type, slab_number, job_card)
 
 
-def _make_repack_stock_entry():
-	# TODO: This needs to be implmented for repolish and recalibration.
+def _make_repair_stock_entry(repair_type: Literal['', 'None', 'Recovery', 'Repolish', 'Recalibration'], slab_number: str, job_card: str):
+	# Repack the item from FG warehouse on the work order to the quality check warehouse.
+	jc_details: dict[str, str] = frappe.get_value("Job Card", job_card, ["work_order", "company", "production_item"], as_dict=True)  # pyright: ignore[reportAssignmentType]
+	company: str = jc_details.get("company")  # pyright: ignore[reportAssignmentType]
+	work_order: str = jc_details.get("work_order")  # pyright: ignore[reportAssignmentType]
+
+	if repair_type == 'Recovery':
+		_make_recovery_stock_entry(slab_number, job_card, work_order, company)
+	if repair_type == 'Repolish':
+		_make_polish_stock_entry(slab_number, job_card, work_order, company)
+	if repair_type == 'Recalibration':
+		_make_calibration_stock_entry(slab_number, job_card, work_order, company)
+
+
+def _make_recovery_stock_entry(slab_number: str, job_card: str, work_order: str, company: str):
+	production_line: str = frappe.get_value("Slab", slab_number, "line")  # pyright: ignore[reportAssignmentType]
+	# The target warehouse is the quality check warehouse since recovery doesn't have a job card or work order flow defined.
+	target_warehouse: str = frappe.get_value("Warehouse", {"mfg_process_type": "Quality Check", "company": company, "production_line": production_line}, "name")  # pyright: ignore[reportAssignmentType]
+	target_item_name: str = frappe.get_value("Work Order Item", {"parent": work_order}, "item_code")  # pyright: ignore[reportAssignmentType]
+	_make_repack_stock_entry(slab_number, job_card, work_order, company, target_warehouse, target_item_name)
+
+
+def _make_polish_stock_entry(slab_number: str, job_card: str, work_order: str, company: str):
+	# TODO: Implement this.
 	pass
 
 
-def _make_repair_job_cards():
-	# TODO: This needs to be implmented for repolish and recalibration.
+def _make_calibration_stock_entry(slab_number: str, job_card: str, work_order: str, company: str):
+	# TODO: Implement this.
 	pass
 
 
-def _make_repair_logs():
+def _make_repack_stock_entry(slab_number: str, job_card: str, work_order: str, company: str, target_warehouse: str, target_item_name: str):
+	# Repack the item from FG warehouse on the work order to the quality check warehouse.
+	slab_fg_warehouse: str = frappe.get_value("Work Order", work_order, "fg_warehouse")  # pyright: ignore[reportAssignmentType]
+
+	production_item: str =	 frappe.get_value("Job Card", job_card, "production_item")  # pyright: ignore[reportAssignmentType]
+	item_uom = frappe.get_value("Item", production_item, "stock_uom")
+	parts = []
+
+	if slab_number:
+		parts = slab_number.split("-")
+	try:
+		stock_entry: StockEntry = frappe.new_doc("Stock Entry")  # pyright: ignore[reportAssignmentType]
+		stock_entry.stock_entry_type = "Repack"
+		stock_entry.company = company
+		stock_entry.posting_date = nowdate()
+		stock_entry.slab_batch_no = parts[0] if len(parts) > 0 else None
+		stock_entry.slab_serial_no = parts[-1] if len(parts) > 1 else parts[0]
+		source_item_name = production_item
+		source_warehouse = slab_fg_warehouse
+
+		stock_entry.append(
+			"items",
+			{
+				"item_code": source_item_name,
+				"s_warehouse": source_warehouse,
+				"qty": 1,
+				"uom": item_uom,
+				"slab_no": slab_number,
+				"to_slab_no": slab_number,
+			},
+		)
+
+		stock_entry.append(
+			"items",
+			{
+				"item_code": target_item_name,
+				"t_warehouse": target_warehouse,
+				"qty": 1,
+				"uom": item_uom,
+				"slab_no": slab_number,
+				"to_slab_no": slab_number,
+			},
+		)
+
+		stock_entry.submit()
+	except Exception as e:
+		raise e
+
+
+def _make_repair_job_cards(repair_type: Literal['', 'None', 'Recovery', 'Repolish', 'Recalibration'], slab_number: str, job_card: str):
 	# TODO: This needs to be implmented for repolish and recalibration.
-	pass
+	_make_corrective_job_card_for("Quality Check", slab_number)
+	if repair_type in ['Repolish', 'Recalibration']:
+		_make_corrective_job_card_for("Polishing", slab_number)
+	if repair_type == 'Recalibration':
+		_make_corrective_job_card_for("Calibration", slab_number)
+
+
+def _make_corrective_job_card_for(station: str, slab_number: str):
+	# Get the slab history
+	slab_history = frappe.get_all(
+		"Slab History",
+		filters={"parent": slab_number},
+		fields=["job_card_number", "station"],
+		order_by="in_time ASC",
+	)
+
+	# Get the first QC job card
+	first_qc_job_card = next((item.job_card_number for item in slab_history if item.station == station), None)
+	if first_qc_job_card:
+		jc_operation: str = frappe.get_value("Job Card", first_qc_job_card, "operation")  # pyright: ignore[reportAssignmentType]
+		new_jc = make_corrective_job_card(first_qc_job_card, for_operation=jc_operation)
+		new_jc.operation = station
+		new_jc.save(ignore_permissions=True)
+
+
+def _make_repair_logs(job_card: str, slab_qc: SlabQualityReport):
+	# Create new repair log and auto-assign all the appropriate fields
+	repair_log: SlabRepairRecord = frappe.new_doc("Slab Repair Record")  # pyright: ignore[reportAssignmentType]
+	repair_log.update(slab_qc.as_dict())
+	repair_log.name = None
+	repair_log.job_card = job_card
+	repair_log.repair_date = frappe.utils.now_datetime()  # pyright: ignore[reportAttributeAccessIssue]
+	repair_log.idx = len(slab_qc.repair_history) + 1
+
+	slab_status = "Recovery"
+	if slab_qc.repair == 'Recovery':
+		repair_log.repair_reason = ", ".join([r.recovery_reason for r in slab_qc.recovery_type if r.recovery_reason])
+
+	elif slab_qc.repair == 'Repolish':
+		repair_log.repair_reason = ", ".join([r.repolish_reason for r in slab_qc.repolish_type if r.repolish_reason])
+		slab_status = "Polishing"
+
+	elif slab_qc.repair == 'Recalibration':
+		repair_log.repair_reason = ", ".join([r.recalibration_reason for r in slab_qc.recalibration_type if r.recalibration_reason])
+		slab_status = "Calibration"
+
+	# Get the list of colours in the qc's meta
+	qc_colours = _get_slab_qc_options("colour")
+
+	slab_qc.colour = next((color for color in qc_colours if color not in [r.colour for r in slab_qc.observations]), qc_colours[0]) # Set the next colour from the list as QC's colour.
+	slab_qc.repair_history.append(repair_log)
+
+	slab_qc.remarks = ''
+	slab_qc.recovery_type = []
+	slab_qc.repolish_type = []
+	slab_qc.recalibration_type = []
+	slab_qc.save()
+
+	slab: Slab = frappe.get_doc("Slab", slab_qc.slab)  # pyright: ignore[reportAssignmentType]
+	slab.reload()
+	slab.status = slab_status
+	slab.save()
