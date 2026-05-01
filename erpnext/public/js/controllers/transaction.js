@@ -870,12 +870,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 										me.apply_rule_on_other_items({ key: item });
 									}
 								},
-								() => {
-									var company_currency = me.get_company_currency();
-									me.update_item_grid_labels(
-										me.get_currency_label_options(company_currency)
-									);
-								},
 							]);
 						}
 					},
@@ -1948,11 +1942,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var me = this;
 		const currency_options = this.get_currency_label_options(company_currency);
 
-		this.update_item_grid_labels(currency_options);
-
 		this.toggle_item_grid_columns(company_currency);
 
 		for (const child_table of [
+			"items",
 			"operations",
 			"secondary_items",
 			"taxes",
@@ -1982,10 +1975,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 
 		this.update_payment_schedule_grid_labels(company_currency);
-	}
-
-	update_item_grid_labels(currency_options) {
-		this.set_currency_labels_from_options(currency_options, "items");
 	}
 
 	update_payment_schedule_grid_labels(company_currency) {
