@@ -24,12 +24,15 @@ const fetchWorkContext = async () => {
 const jobCardNumber = ref(null);
 const slabSize = ref(null);
 const selectedSlab = ref(null);
+const slabQAReport = ref(null);
 const mixerNumber = ref(null);
 const isQAStarted = ref(false);
 const hourglassRotation = ref(0);
 const hourglassIcon = ref('fa-hourglass-3');
 let hourglassInterval = null;
 const isProcessing = ref(false);
+const showRepairHistoryModal = ref(false);
+const originalRepairType = ref(null);
 
 // Visual Observation State
 const observations = ref([]);
@@ -59,6 +62,7 @@ const target_slab_thickness = computed(() => {
 
 const form = reactive({
     // Basic Details (Auto-filled)
+    name: '',
     date: '',
     shift: '',
     job_card: '',
@@ -70,8 +74,9 @@ const form = reactive({
     slab_width: null,
     slab_thickness: null,
     // Quality Measurements
-    fs: '',
-    con: '',
+    filler_spot: '',
+    contamination: '',
+    shade: '',
     // Paper Deep
     paper_deep_front: '',
     paper_deep_back: '',
@@ -81,9 +86,9 @@ const form = reactive({
     // Grading & Remarks
     bend: null,
     repair: '',
-    recovery_type: '',
-    repolish_type: '',
-    recalibration_type: '',
+    recovery_type: [],
+    repolish_type: [],
+    recalibration_type: [],
     grade: '',
     remarks: '',
 });
@@ -93,6 +98,8 @@ const repairOptions = ref([]);
 const recoveryOptions = ref([]);
 const repolishOptions = ref([]);
 const recalibrationOptions = ref([]);
+const shadeOptions = ref([]);
+const observationColour = ref('');
 
 const fetchGrades = async () => {
 	const list = await frappe.db.get_list('Slab Quality Grade', {
@@ -106,14 +113,76 @@ const fetchGrades = async () => {
 };
 
 const fetchRepairOptions = async () => {
+	if (!selectedSlab.value?.quality_assessment) {
+		return;
+	}
+
     const r = await frappe.call({
-        method: 'erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station.get_repair_options'
+		method: 'erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station.get_repair_options',
+		args: {
+			qc_report_name: selectedSlab.value.quality_assessment,
+		},
     });
+
     if (r.message && typeof r.message === 'object') {
         repairOptions.value = r.message.repair || [];
         recoveryOptions.value = r.message.recovery_type || [];
         repolishOptions.value = r.message.repolish_type || [];
         recalibrationOptions.value = r.message.recalibration_type || [];
+		shadeOptions.value = r.message.shade || [];
+    }
+};
+
+const fetchExistingQCReport = async (qc_name) => {
+    if (!qc_name) return;
+
+    const res = await frappe.call({
+        method: 'erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station.get_slab_qc_report',
+        args: {
+            qc_name: qc_name
+        }
+    });
+
+	if (res.message) {
+		slabQAReport.value = res.message;
+		observationColour.value = res.message.colour;
+		originalRepairType.value = res.message.repair;
+        const report = res.message;
+        Object.assign(form, {
+	        name: report.name,
+            date: report.date,
+            shift: report.shift,
+            job_card: report.job_card,
+            slab: report.slab,
+            slab_template: report.slab_template,
+            slab_length: report.slab_length,
+            slab_width: report.slab_width,
+            slab_thickness: report.slab_thickness,
+            filler_spot: report.filler_spot,
+            contamination: report.contamination,
+            shade: report.shade,
+            paper_deep_front: report.paper_deep_front,
+            paper_deep_back: report.paper_deep_back,
+            crack_front: report.crack_front,
+            crack_back: report.crack_back,
+            bend: report.bend,
+            repair: '', // Initialize as an empty value so that the operator can select the actual type after analysis.
+            recovery_type: (report.recovery_type || []).map(d => d.recovery_reason),
+            repolish_type: (report.repolish_type || []).map(d => d.repolish_reason),
+            recalibration_type: (report.recalibration_type || []).map(d => d.recalibration_reason),
+            grade: report.grade,
+			remarks: report.remarks,
+        });
+
+		if (report.observations && report.observations.length) {
+			observations.value = report.observations.map(obs => ({
+				name: obs.name,
+				x: obs.x,
+				y: obs.y,
+				text: obs.text,
+                colour: obs.colour,
+            }));
+        }
     }
 };
 
@@ -126,14 +195,14 @@ const get_slab_for_qa = async (job_card_number, play_ding = false) => {
         }
     });
 
-    if (res.message) {
+	if (res.message) {
         if (play_ding && res.message.slab && (!selectedSlab.value || selectedSlab.value.name !== res.message.slab.name)) {
             erpnext.utils.play_ding("new_slab");
         }
 
         jobCardNumber.value = res.message.job_card?.name || jobCardNumber.value;
         slabSize.value = res.message.slab_size;
-        mixerNumber.value = res.message.job_card?.mixer_number || null;
+        mixerNumber.value = res.message.job_card?.mixer_number || res.message.slab?.child_line;
         selectSlab(res.message.slab);
         isQAStarted.value = res.message.job_card?.status === "Work In Progress";
     }
@@ -152,6 +221,7 @@ function selectSlab(slab) {
     isQAStarted.value = false;
     // Reset and Auto-fill form
     Object.assign(form, {
+        name: '',
         date: frappe.datetime.nowdate(),
         shift: work_context.assigned_shift,
         job_card: jobCardNumber.value,
@@ -160,17 +230,18 @@ function selectSlab(slab) {
         slab_length: null,
         slab_width: null,
         slab_thickness: null,
-        fs: null,
-        con: null,
+        filler_spot: null,
+        contamination: null,
+        shade: '',
         paper_deep_front: null,
         paper_deep_back: null,
         crack_front: null,
         crack_back: null,
         bend: null,
         repair: '',
-        recovery_type: '',
-        repolish_type: '',
-        recalibration_type: '',
+        recovery_type: [],
+        repolish_type: [],
+        recalibration_type: [],
         grade: '',
         remarks: '',
     });
@@ -178,12 +249,16 @@ function selectSlab(slab) {
     // Clear observations
     observations.value = [];
     newObservation.value = null;
+
+    if (slab && slab.quality_assessment) {
+        fetchExistingQCReport(slab.quality_assessment);
+    }
 }
 
 function handleRepairChange() {
-    form.recovery_type = '';
-    form.repolish_type = '';
-    form.recalibration_type = '';
+    form.recovery_type = [];
+    form.repolish_type = [];
+    form.recalibration_type = [];
     form.grade = '';
 }
 
@@ -207,17 +282,17 @@ const confirmAndTag = async () => {
         return;
     }
 
-    if (form.repair === 'Recovery' && !form.recovery_type) {
+    if (form.repair === 'Recovery' && !form.recovery_type.length) {
         frappe.msgprint(__('Please select Recovery Type'));
         return;
     }
 
-    if (form.repair === 'Repolish' && !form.repolish_type) {
+    if (form.repair === 'Repolish' && !form.repolish_type.length) {
         frappe.msgprint(__('Please select Repolish Type'));
         return;
     }
 
-    if (form.repair === 'Recalibration' && !form.recalibration_type) {
+    if (form.repair === 'Recalibration' && !form.recalibration_type.length) {
         frappe.msgprint(__('Please select Recalibration Type'));
         return;
     }
@@ -227,14 +302,19 @@ const confirmAndTag = async () => {
         async () => {
             try {
                 isProcessing.value = true;
-                form.observations = observations.value;
+                const report_data = { ...form };
+                report_data.observations = observations.value;
+                report_data.recovery_type = form.recovery_type.map(r => ({ recovery_reason: r }));
+                report_data.repolish_type = form.repolish_type.map(r => ({ repolish_reason: r }));
+                report_data.recalibration_type = form.recalibration_type.map(r => ({ recalibration_reason: r }));
+
                 const res = await frappe.call({
                     method: 'erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station.submit_qa_report',
                     args: {
-                        report: form,
+                        report: report_data,
                         shift: work_context.assigned_shift,
                         job_card: jobCardNumber.value,
-                        slab_number: selectedSlab.value.name,
+						slab_number: selectedSlab.value.name,
                     },
                     freeze: true
                 });
@@ -422,14 +502,23 @@ const editObservation = (index) => {
 };
 
 const deleteObservation = () => {
-    if (editingObservationIndex.value !== null) {
+	if (editingObservationIndex.value !== null) {
+    	if (observations.value[editingObservationIndex.value]?.name) {
+			return;
+        }
+
         observations.value.splice(editingObservationIndex.value, 1);
     }
+
     newObservation.value = null;
     editingObservationIndex.value = null;
 };
 
 const saveObservation = () => {
+	if (editingObservationIndex.value !== null && observations.value[editingObservationIndex.value]?.name) {
+		return;
+	}
+
     if (newObservation.value && newObservation.value.text.trim()) {
         if (editingObservationIndex.value !== null) {
              observations.value[editingObservationIndex.value] = { ...newObservation.value };
@@ -467,10 +556,34 @@ onUnmounted(() => {
                             <div class="slab-template text-muted" style="font-size: 1.1rem;">
                                 {{ selectedSlab.template }}
                             </div>
-                            <span v-if="mixerNumber">Mixer: {{ mixerNumber }}</span>
+                            <span v-if="mixerNumber">Mixer: {{ mixerNumber }}</span><span class="text-danger" v-if="originalRepairType"> ({{ originalRepairType }})</span>
                         </div>
                         <div class="flex-fill"></div>
                         <div class="slab-meta-boxes d-flex">
+                            <div v-if="slabQAReport?.recovery_count > 0" class="meta-box mr-4 p-3 rounded cursor-pointer" @click="showRepairHistoryModal = true">
+                                <div class="meta-label text-danger small text-uppercase mb-2 d-flex align-items-center">
+                                    <span class="fa fa-refresh mr-2"></span>{{ __('Recoveries') }}
+                                </div>
+                                <div class="meta-value h5 mb-0 font-weight-bold text-danger">
+                                    {{ slabQAReport.recovery_count }}
+                                </div>
+                            </div>
+                            <div v-if="slabQAReport?.repolish_count > 0" class="meta-box mr-4 p-3 rounded cursor-pointer" @click="showRepairHistoryModal = true">
+                                <div class="meta-label text-danger small text-uppercase mb-2 d-flex align-items-center">
+                                    <span class="fa fa-paint-brush mr-2"></span>{{ __('Repolishes') }}
+                                </div>
+                                <div class="meta-value h5 mb-0 font-weight-bold text-danger">
+                                    {{ slabQAReport.repolish_count }}
+                                </div>
+                            </div>
+                            <div v-if="slabQAReport?.recalibration_count > 0" class="meta-box mr-4 p-3 rounded cursor-pointer" @click="showRepairHistoryModal = true">
+                                <div class="meta-label text-danger small text-uppercase mb-2 d-flex align-items-center">
+                                    <span class="fa fa-cogs mr-2"></span>{{ __('Recalibrations') }}
+                                </div>
+                                <div class="meta-value h5 mb-0 font-weight-bold text-danger">
+                                    {{ slabQAReport.recalibration_count }}
+                                </div>
+                            </div>
                             <div class="meta-box mr-4 p-3 rounded">
                                 <div class="meta-label text-muted small text-uppercase mb-2 d-flex align-items-center">
                                     <span class="fa fa-calendar-o mr-2"></span>{{ __('Production Date') }}
@@ -522,13 +635,22 @@ onUnmounted(() => {
                         <!-- Quality Measurements -->
                         <h5 class="mb-4 border-bottom pb-2">{{ __('Quality Measurements') }}</h5>
                         <div class="row mb-4">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label class="small text-muted">{{ __('Filler Spot') }}</label>
-                                <input type="text" v-model="form.fs" class="form-control">
+                                <input type="text" v-model="form.filler_spot" class="form-control">
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label class="small text-muted">{{ __('Contamination') }}</label>
-                                <input type="text" v-model="form.con" class="form-control">
+                                <input type="text" v-model="form.contamination" class="form-control">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="small text-muted">{{ __('Shade') }}</label>
+                                <select v-model="form.shade" class="form-control">
+                                    <option value="">{{ __('Select Shade') }}</option>
+                                    <option v-for="option in shadeOptions" :key="option" :value="option">
+                                        {{ __(option) }}
+                                    </option>
+                                </select>
                             </div>
                         </div>
 
@@ -620,7 +742,7 @@ onUnmounted(() => {
                                         }"
                                         :title="`${obs.text} (${obs.x}, ${obs.y})`"
                                         @click.stop="editObservation(index)">
-                                        <div class="marker-dot"></div>
+                                        <div class="marker-dot" :style="{ backgroundColor: obs.colour || observationColour }"></div>
                                     </div>
 
                                     <!-- New Observation Input -->
@@ -641,18 +763,18 @@ onUnmounted(() => {
                                             {{ newObservation.x }}, {{ newObservation.y }}
                                         </div>
                                         <input id="obs-input" type="text" v-model="newObservation.text"
-                                            class="form-control form-control-sm mb-2"
+                                            class="form-control form-control-sm mb-2" :disabled="editingObservationIndex !== null && observations[editingObservationIndex]?.name"
                                             :placeholder="__('Enter observation')"
                                             @keydown.enter="saveObservation"
                                             @keydown.esc="cancelObservation">
                                         <div class="d-flex justify-content-end">
-                                            <button v-if="editingObservationIndex !== null"
+                                            <button v-if="editingObservationIndex !== null && !observations[editingObservationIndex]?.name"
                                                 class="btn btn-xs btn-danger mr-auto"
                                                 @click="deleteObservation">
                                                 Delete
                                             </button>
                                             <button class="btn btn-xs btn-light mr-1" @click="cancelObservation">Cancel</button>
-                                            <button class="btn btn-xs btn-primary" @click="saveObservation">Save</button>
+                                            <button class="btn btn-xs btn-primary" v-if="editingObservationIndex !== null && !observations[editingObservationIndex]?.name" @click="saveObservation">Save</button>
                                         </div>
                                     </div>
 
@@ -693,30 +815,30 @@ onUnmounted(() => {
                             </div>
                             <div class="col-md-3 mb-3" v-if="form.repair === 'Recovery'">
                                 <label class="small text-muted">{{ __('Recovery Type') }}<span class="text-danger">*</span></label>
-                                <select v-model="form.recovery_type" class="form-control" :required="form.repair === 'Recovery'">
-                                    <option value="">{{ __('Select Recovery Type') }}</option>
-                                    <option v-for="option in recoveryOptions" :key="option" :value="option">
-                                        {{ __(option) }}
-                                    </option>
-                                </select>
+                                <div class="border rounded p-2" style="overflow-y: auto;">
+                                    <div v-for="option in recoveryOptions" :key="option" class="form-check small mb-1">
+                                        <input type="checkbox" :id="'recov-' + option" :value="option" v-model="form.recovery_type" class="form-check-input">
+                                        <label class="form-check-label" :for="'recov-' + option">{{ __(option) }}</label>
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-md-3 mb-3" v-if="form.repair === 'Repolish'">
                                 <label class="small text-muted">{{ __('Repolish Type') }}<span class="text-danger">*</span></label>
-                                <select v-model="form.repolish_type" class="form-control" :required="form.repair === 'Repolish'">
-                                    <option value="">{{ __('Select Repolish Type') }}</option>
-                                    <option v-for="option in repolishOptions" :key="option" :value="option">
-                                        {{ __(option) }}
-                                    </option>
-                                </select>
+                                <div class="border rounded p-2" style="overflow-y: auto;">
+                                    <div v-for="option in repolishOptions" :key="option" class="form-check small mb-1">
+                                        <input type="checkbox" :id="'repol-' + option" :value="option" v-model="form.repolish_type" class="form-check-input">
+                                        <label class="form-check-label" :for="'repol-' + option">{{ __(option) }}</label>
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-md-3 mb-3" v-if="form.repair === 'Recalibration'">
                                 <label class="small text-muted">{{ __('Recalibration Type') }}<span class="text-danger">*</span></label>
-                                <select v-model="form.recalibration_type" class="form-control" :required="form.repair === 'Recalibration'">
-                                    <option value="">{{ __('Select Recalibration Type') }}</option>
-                                    <option v-for="option in recalibrationOptions" :key="option" :value="option">
-                                        {{ __(option) }}
-                                    </option>
-                                </select>
+                                <div class="border rounded p-2" style="overflow-y: auto;">
+                                    <div v-for="option in recalibrationOptions" :key="option" class="form-check small mb-1">
+                                        <input type="checkbox" :id="'recal-' + option" :value="option" v-model="form.recalibration_type" class="form-check-input">
+                                        <label class="form-check-label" :for="'recal-' + option">{{ __(option) }}</label>
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-md-3 mb-3">
                                 <label class="small text-muted">{{ __('Remarks') }}</label>
@@ -751,6 +873,63 @@ onUnmounted(() => {
                 </div>
             </Transition>
         </div>
+
+        <!-- Fixed Repair History Toggle Button -->
+        <button v-if="selectedSlab" class="fixed-repair-btn btn btn-primary shadow" @click="showRepairHistoryModal = true">
+            <span class="fa fa-wrench mr-2"></span>
+            <span class="small font-weight-bold text-uppercase">{{ __('History') }}</span>
+        </button>
+
+        <!-- Repair History Drawer -->
+        <div class="drawer-container">
+            <Transition name="fade">
+                <div v-if="showRepairHistoryModal" class="drawer-backdrop" @click="showRepairHistoryModal = false"></div>
+            </Transition>
+            <Transition name="slide-right">
+                <div v-if="showRepairHistoryModal" class="drawer-panel p-4 shadow-lg">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="mb-0">{{ __('Repair History') }}</h4>
+                        <button class="btn btn-light btn-sm" @click="showRepairHistoryModal = false">
+                            <span class="fa fa-times"></span>
+                        </button>
+                    </div>
+                    <table class="table table-bordered table-sm small">
+                        <thead class="text-muted text-uppercase">
+                            <tr>
+                                <th style="width: 40px;"></th>
+                                <th>{{ __('Repair Type') }}</th>
+                                <th>{{ __('Reasons') }}</th>
+                                <th style="width: 170px;">{{ __('Repair Date') }}</th>
+                                <th>{{ __('Remarks') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(item, idx) in slabQAReport?.repair_history" :key="idx">
+                                <td class="text-center" style="vertical-align: middle;">
+                                    <div :style="{
+                                        width: '12px',
+                                        height: '12px',
+                                        borderRadius: '50%',
+                                        backgroundColor: item.colour,
+                                        border: '1px solid var(--border-color)',
+                                        margin: '0 auto'
+                                    }"></div>
+                                </td>
+                                <td style="vertical-align: middle;" class="font-weight-bold">{{ item.repair }}</td>
+                                <td style="vertical-align: middle;">{{ item.repair_reason }}</td>
+                                <td style="vertical-align: middle;">{{ $filters.formatDateTime(item.repair_date) }}</td>
+                                <td>{{ item.remarks }}</td>
+                            </tr>
+                            <tr v-if="!slabQAReport?.repair_history?.length">
+                                <td colspan="5" class="text-center text-muted p-4">
+                                    {{ __('No repair history available.') }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </Transition>
+        </div>
     </div>
 </template>
 
@@ -759,6 +938,61 @@ onUnmounted(() => {
     min-height: 80vh;
     background: var(--card-bg, #fff);
     color: var(--text-color);
+}
+
+.fixed-repair-btn {
+    position: fixed;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    border-radius: 8px 0 0 8px;
+    z-index: 1040;
+    padding: 12px 16px;
+    transition: all 0.2s;
+}
+
+.fixed-repair-btn:hover {
+    padding-right: 24px;
+}
+
+.drawer-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1050;
+}
+
+.drawer-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 800px;
+    height: 100%;
+    z-index: 1060;
+    overflow-y: auto;
+    background-color: var(--bg-color, #f8f9fa);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.3s;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+
+.slide-right-enter-active,
+.slide-right-leave-active {
+    transition: transform 0.3s ease;
+}
+
+.slide-right-enter-from,
+.slide-right-leave-to {
+    transform: translateX(100%);
 }
 
 .incoming-list {
@@ -805,6 +1039,10 @@ onUnmounted(() => {
     border-radius: 8px;
     background: #1e3a5f;
     flex-shrink: 0;
+}
+
+.cursor-pointer {
+    cursor: pointer;
 }
 
 .meta-box {
@@ -901,12 +1139,10 @@ onUnmounted(() => {
 .marker-dot {
     width: 12px;
     height: 12px;
-    background: #dc3545; /* Red */
     border: 2px solid white;
     border-radius: 50%;
     transform: translate(-50%, -50%);
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    /* cursor: pointer; */
 }
 
 

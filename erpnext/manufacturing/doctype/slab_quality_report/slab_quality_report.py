@@ -19,7 +19,16 @@ class SlabQualityReport(Document):
 		from erpnext.manufacturing.doctype.slab_quality_observation.slab_quality_observation import (
 			SlabQualityObservation,
 		)
+		from erpnext.manufacturing.doctype.slab_recalibration_reason_map.slab_recalibration_reason_map import (
+			SlabRecalibrationReasonMap,
+		)
+		from erpnext.manufacturing.doctype.slab_recovery_reason_map.slab_recovery_reason_map import (
+			SlabRecoveryReasonMap,
+		)
 		from erpnext.manufacturing.doctype.slab_repair_record.slab_repair_record import SlabRepairRecord
+		from erpnext.manufacturing.doctype.slab_repolish_reason_map.slab_repolish_reason_map import (
+			SlabRepolishReasonMap,
+		)
 
 		amended_from: DF.Link | None
 		bend: DF.Float
@@ -34,12 +43,12 @@ class SlabQualityReport(Document):
 		observations: DF.Table[SlabQualityObservation]
 		paper_deep_back: DF.Data | None
 		paper_deep_front: DF.Data | None
-		recalibration_type: DF.Literal["", "3cm to 2cm", "1mm"]
-		recovery_type: DF.Literal["", "Film Contamination", "Foreign Contamination", "Grit Contamination", "Pigment Contamination", "Pinhole Repair", "Cavity", "Other"]
-		remarks: DF.Text | None
+		recalibration_type: DF.TableMultiSelect[SlabRecalibrationReasonMap]
+		recovery_type: DF.TableMultiSelect[SlabRecoveryReasonMap]
+		remarks: DF.SmallText | None
 		repair: DF.Literal["", "None", "Recovery", "Repolish", "Recalibration"]
 		repair_history: DF.Table[SlabRepairRecord]
-		repolish_type: DF.Literal["", "Recovery Slab", "Head Mark", "Waves", "Edge Polish", "Dull Polish", "Other"]
+		repolish_type: DF.TableMultiSelect[SlabRepolishReasonMap]
 		shade: DF.Literal["", "Shade 1", "Shade 2", "Shade 3"]
 		shift: DF.Link
 		slab: DF.Link
@@ -48,5 +57,22 @@ class SlabQualityReport(Document):
 		slab_thickness: DF.Float
 		slab_width: DF.Float
 	# end: auto-generated types
-	pass
 
+	@property
+	def recovery_count(self):
+		return len([r for r in self.repair_history if r.repair == "Recovery"])
+
+	@property
+	def repolish_count(self):
+		return len([r for r in self.repair_history if r.repair == "Repolish"])
+
+	@property
+	def recalibration_count(self):
+		return len([r for r in self.repair_history if r.repair == "Recalibration"])
+
+	def to_json(self):
+		data = self.as_dict().copy()
+		data['recovery_count'] = self.recovery_count
+		data['repolish_count'] = self.repolish_count
+		data['recalibration_count'] = self.recalibration_count
+		return data

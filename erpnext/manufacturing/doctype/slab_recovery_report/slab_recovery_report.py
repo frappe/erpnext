@@ -12,11 +12,8 @@ class SlabRecoveryReport(Document):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
+		from erpnext.manufacturing.doctype.slab_quality_observation.slab_quality_observation import SlabQualityObservation
 		from frappe.types import DF
-
-		from erpnext.manufacturing.doctype.slab_quality_observation.slab_quality_observation import (
-			SlabQualityObservation,
-		)
 
 		amended_from: DF.Link | None
 		contamination: DF.Check

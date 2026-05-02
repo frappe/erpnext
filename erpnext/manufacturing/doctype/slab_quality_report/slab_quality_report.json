@@ -158,6 +158,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "slab_thickness",
    "fieldtype": "Float",
    "label": "Thickness",
@@ -169,6 +170,7 @@
    "label": "Quality Measurements"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "filler_spot",
    "fieldtype": "Data",
    "label": "Filler Spot"
@@ -178,6 +180,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contamination",
    "fieldtype": "Data",
    "label": "Contamination"
@@ -188,6 +191,7 @@
    "label": "Paper Deep"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "paper_deep_front",
    "fieldtype": "Data",
    "label": "Front"
@@ -197,6 +201,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "paper_deep_back",
    "fieldtype": "Data",
    "label": "Back"
@@ -207,6 +212,7 @@
    "label": "Crack"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "crack_front",
    "fieldtype": "Data",
    "label": "Front"
@@ -216,6 +222,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "crack_back",
    "fieldtype": "Data",
    "label": "Back"
@@ -231,8 +238,9 @@
    "label": "Bend (in mm)"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "remarks",
-   "fieldtype": "Text",
+   "fieldtype": "Small Text",
    "label": "Remarks"
   },
   {
@@ -240,6 +248,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "eval: doc.repair && doc.repair == 'None';",
    "fieldname": "grade",
    "fieldtype": "Link",
@@ -262,6 +271,7 @@
    "label": "Visualizer Preview"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "observations",
    "fieldtype": "Table",
    "hidden": 1,
@@ -273,25 +283,28 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "repair",
    "fieldtype": "Select",
    "label": "Slab Repair Type",
    "options": "\nNone\nRecovery\nRepolish\nRecalibration"
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "eval: doc.repair && doc.repair == 'Recovery';",
    "fieldname": "recovery_type",
-   "fieldtype": "Select",
+   "fieldtype": "Table MultiSelect",
    "label": "Recovery Type",
-   "options": "\nFilm Contamination\nForeign Contamination\nGrit Contamination\nPigment Contamination\nPinhole Repair\nCavity\nOther"
+   "options": "Slab Recovery Reason Map"
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "eval: doc.repair && doc.repair == 'Repolish';",
    "fieldname": "repolish_type",
-   "fieldtype": "Select",
+   "fieldtype": "Table MultiSelect",
    "label": "Repolish Type",
    "mandatory_depends_on": "eval: doc.repair && doc.repair == 'Repolish';",
-   "options": "\nRecovery Slab\nHead Mark\nWaves\nEdge Polish\nDull Polish\nOther"
+   "options": "Slab Repolish Reason Map"
   },
   {
    "fieldname": "column_break_yoap",
@@ -304,12 +317,13 @@
    "options": "\nShade 1\nShade 2\nShade 3"
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "eval: doc.repair && doc.repair == 'Recalibration';",
    "fieldname": "recalibration_type",
-   "fieldtype": "Select",
+   "fieldtype": "Table MultiSelect",
    "label": "Recalibration Type",
    "mandatory_depends_on": "eval: doc.repair && doc.repair == 'Recalibration';",
-   "options": "\n3cm to 2cm\n1mm"
+   "options": "Slab Recalibration Reason Map"
   },
   {
    "allow_on_submit": 1,
@@ -321,11 +335,13 @@
    "options": "#007BFF\n#33CC33\n#A020F0\n#FF8C00\n#00CED1\n#FFD700\n#E6194B\n#800000\n#008080\n#F032E6\n#808000\n#9E2A3A"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "repair_history_section",
    "fieldtype": "Section Break",
    "label": "Repair History"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "repair_history",
    "fieldtype": "Table",
    "options": "Slab Repair Record"
@@ -335,7 +351,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-30 13:22:03.232775",
+ "modified": "2026-05-01 17:28:42.243655",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab Quality Report",
@@ -363,6 +379,20 @@
    "report": 1,
    "role": "Employee",
    "share": 1
+  },
+  {
+   "amend": 1,
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Quality Inspector",
+   "select": 1,
+   "share": 1,
+   "submit": 1,
+   "write": 1
   }
  ],
  "row_format": "Dynamic",

@@ -3,6 +3,15 @@ import QualityAnalysisStation from './QualityAnalysisStation.vue';
 
 function setup_quality_analysis_station(wrapper) {
     const app = createApp(QualityAnalysisStation);
+
+    app.config.globalProperties.$filters = {
+		formatDateTime(value) {
+			if (!value) return '';
+
+	        return moment(value).format('DD/MM/YYYY hh:mm A');
+      }
+    }
+
     app.config.globalProperties.frappe = window.frappe;
     app.config.globalProperties.__ = window.__;
     app.mount(wrapper.get(0));
