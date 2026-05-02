@@ -88,14 +88,6 @@ See [Frappe Docker Documentation](https://github.com/frappe/frappe_docker) for f
 
 > For Docker basics and best practices refer to Docker's [documentation](https://docs.docker.com)
 
-#### Demo setup
-
-The fastest way to try ERPNext is to play in a pre-configured sandbox, in your browser, click the button below:
-
-<a href="https://labs.play-with-docker.com/?stack=https://raw.githubusercontent.com/frappe/frappe_docker/main/pwd.yml">
-  <img src="https://raw.githubusercontent.com/play-with-docker/stacks/master/assets/images/button.png" alt="Try in PWD"/>
-</a>
-
 ### Try on your environment
 
 > **⚠️ Disposable demo only**
