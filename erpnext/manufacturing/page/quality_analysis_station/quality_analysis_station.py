@@ -66,7 +66,7 @@ def submit_qa_report(report: str | dict, shift: str, job_card: str, slab_number:
 			_make_repair_logs(job_card, slab_qc)
 
 		# Then,
-		finish_qc_process(slab_number, slab_grade, job_card, slab_qc.repair)
+		finish_qc_process(slab_number, slab_grade, job_card, slab_qc.use_for_samples, slab_qc.repair)
 
 		frappe.db.commit()
 
@@ -114,7 +114,7 @@ def get_slab_qc_report(qc_name: str):
 	return qc.to_json()
 
 
-def _make_material_transfer_stock_entry(slab_number: str, grade: str | None, job_card: str):
+def _make_material_transfer_stock_entry(slab_number: str, grade: str | None, job_card: str, use_for_samples: int):
 	work_order = frappe.get_value("Job Card", job_card, "work_order")
 	slab_fg_warehouse: str = frappe.get_value("Work Order", work_order, "fg_warehouse")  # pyright: ignore[reportAssignmentType]
 
@@ -146,7 +146,8 @@ def _make_material_transfer_stock_entry(slab_number: str, grade: str | None, job
 
 		if grade and ("reject" in grade.lower() or "rej" in grade.lower()):
 			is_reject = True
-			target_warehouse = f"Rejected Slabs - {company_abbr}"
+			target_warehouse = "Rejected Slabs" if not use_for_samples else "Samples"
+			target_warehouse = f"{target_warehouse} - {company_abbr}"
 
 		stock_entry.append(
 			"items",
@@ -186,12 +187,13 @@ def _make_material_transfer_stock_entry(slab_number: str, grade: str | None, job
 		raise
 
 
-def _update_item_and_status_on_slab(item_code: str, slab_number: str, is_rejected: bool):
+def _update_item_and_status_on_slab(item_code: str, slab_number: str, is_rejected: bool, use_for_samples: int):
 	slab: Slab = frappe.get_doc("Slab", slab_number)  # pyright: ignore[reportAssignmentType]
 	slab.reload()
 	slab.stock_item = item_code
 	if is_rejected:
 		slab.status = "Rejected"
+		slab.is_sample = use_for_samples
 
 	slab.save(ignore_permissions=True)
 
@@ -221,16 +223,16 @@ def _get_slab_qc_options(fieldname):
 	return []
 
 
-def finish_qc_process(slab_number: str, slab_grade: str | None, job_card: str, repair_type: Literal['', 'None', 'Recovery', 'Repolish', 'Recalibration'], publish_slab_event=True):
+def finish_qc_process(slab_number: str, slab_grade: str | None, job_card: str, use_for_samples: int, repair_type: Literal['', 'None', 'Recovery', 'Repolish', 'Recalibration'], publish_slab_event=True):
 	# 2. Finish the job card and checkout the slab.
 	finish_process(job_card, "Quality Check", False, slab_number=slab_number, slab_grade=slab_grade, publish_slab_event=publish_slab_event)
 
 	if slab_grade:
 		# 3. Move the slab to specific warehouse based on grade by making a new stock entry - Material Transfer.
-		stock_entry, is_reject = _make_material_transfer_stock_entry(slab_number, slab_grade, job_card)
+		stock_entry, is_reject = _make_material_transfer_stock_entry(slab_number, slab_grade, job_card, use_for_samples)
 
 		# 4. Update the name of the stock item on the slab.
-		_update_item_and_status_on_slab(str(stock_entry.items[-1].item_code), slab_number, is_reject)
+		_update_item_and_status_on_slab(str(stock_entry.items[-1].item_code), slab_number, is_reject, use_for_samples)
 	else:
 		_make_repair_stock_entry(repair_type, slab_number, job_card)
 		_make_repair_job_cards(repair_type, slab_number, job_card)

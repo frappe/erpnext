@@ -33,6 +33,7 @@ class Slab(Document):
 		is_recovered: DF.Check
 		is_repolished: DF.Check
 		is_repressed: DF.Check
+		is_sample: DF.Check
 		line: DF.Link
 		number: DF.Int
 		packing_date: DF.Date | None

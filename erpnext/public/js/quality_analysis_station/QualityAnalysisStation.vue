@@ -90,6 +90,7 @@ const form = reactive({
     repolish_type: [],
     recalibration_type: [],
     grade: '',
+    use_for_samples: 0,
     remarks: '',
 });
 
@@ -171,6 +172,7 @@ const fetchExistingQCReport = async (qc_name) => {
             repolish_type: (report.repolish_type || []).map(d => d.repolish_reason),
             recalibration_type: (report.recalibration_type || []).map(d => d.recalibration_reason),
             grade: report.grade,
+            use_for_samples: report.use_for_samples || 0,
 			remarks: report.remarks,
         });
 
@@ -243,6 +245,7 @@ function selectSlab(slab) {
         repolish_type: [],
         recalibration_type: [],
         grade: '',
+        use_for_samples: 0,
         remarks: '',
     });
 
@@ -260,6 +263,7 @@ function handleRepairChange() {
     form.repolish_type = [];
     form.recalibration_type = [];
     form.grade = '';
+    form.use_for_samples = 0;
 }
 
 const confirmAndTag = async () => {
@@ -812,6 +816,14 @@ onUnmounted(() => {
                                         {{ g.code }}
                                     </option>
                                 </select>
+                            </div>
+                            <div class="col-md-3 mb-3 d-flex align-items-center pt-4" v-if="form.repair === 'None' && form.grade?.toLowerCase().includes('reject')">
+                                <div class="form-check">
+                                    <input type="checkbox" v-model="form.use_for_samples" :true-value="1" :false-value="0" id="use_for_samples" class="form-check-input">
+                                    <label class="form-check-label font-weight-bold" for="use_for_samples">
+                                        {{ __('Use for samples') }}
+                                    </label>
+                                </div>
                             </div>
                             <div class="col-md-3 mb-3" v-if="form.repair === 'Recovery'">
                                 <label class="small text-muted">{{ __('Recovery Type') }}<span class="text-danger">*</span></label>

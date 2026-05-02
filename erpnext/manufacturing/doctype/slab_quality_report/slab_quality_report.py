@@ -56,6 +56,7 @@ class SlabQualityReport(Document):
 		slab_template: DF.Link
 		slab_thickness: DF.Float
 		slab_width: DF.Float
+		use_for_samples: DF.Check
 	# end: auto-generated types
 
 	@property

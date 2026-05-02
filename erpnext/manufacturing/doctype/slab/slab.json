@@ -27,6 +27,7 @@
   "is_recovered",
   "is_repolished",
   "is_recalibrated",
+  "is_sample",
   "updated_template",
   "quality_section",
   "grade",
@@ -315,12 +316,20 @@
    "label": "Updated Template",
    "options": "Slab Template",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.is_sample;",
+   "fieldname": "is_sample",
+   "fieldtype": "Check",
+   "label": "Is Sample",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-30 21:44:39.343269",
+ "modified": "2026-05-02 15:56:11.415184",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab",
