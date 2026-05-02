@@ -47,7 +47,6 @@ def submit_qa_report(report: str | dict, shift: str, job_card: str, slab_number:
 
 		if isinstance(report, str):
 			report = frappe.parse_json(report)
-		slab_grade: str | None = report.get("grade")  # pyright: ignore[reportAttributeAccessIssue]
 
 		report_name: str | None = report.get('name')  # pyright: ignore[reportAttributeAccessIssue]
 		if report_name:
@@ -67,7 +66,7 @@ def submit_qa_report(report: str | dict, shift: str, job_card: str, slab_number:
 			_make_repair_logs(job_card, slab_qc)
 
 		# Then,
-		finish_qc_process(slab_number, slab_grade, job_card, slab_qc.use_for_samples, slab_qc.repair)
+		finish_qc_process(slab_number, job_card, slab_qc)
 
 		frappe.db.commit()
 
@@ -271,8 +270,12 @@ def _get_slab_qc_options(fieldname):
 	return []
 
 
-def finish_qc_process(slab_number: str, slab_grade: str | None, job_card: str, use_for_samples: int, repair_type: Literal['', 'None', 'Recovery', 'Repolish', 'Recalibration'], publish_slab_event=True):
+def finish_qc_process(slab_number: str, job_card: str, slab_qc_report: SlabQualityReport, publish_slab_event=True):
 	# 2. Finish the job card and checkout the slab.
+	slab_grade = slab_qc_report.grade
+	use_for_samples = slab_qc_report.use_for_samples
+	repair_type = slab_qc_report.repair
+
 	finish_process(job_card, "Quality Check", False, slab_number=slab_number, slab_grade=slab_grade, publish_slab_event=publish_slab_event)
 
 	if slab_grade:

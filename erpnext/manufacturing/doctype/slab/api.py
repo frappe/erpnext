@@ -438,7 +438,7 @@ def _finish_qc(slab_number: str, slab_qc: SlabQualityReport, job_card: str):
 	from erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station import finish_qc_process
 
 	# Get Slab Grade
-	finish_qc_process(slab_number, slab_qc.grade, job_card, slab_qc.use_for_samples, slab_qc.repair, publish_slab_event=False)
+	finish_qc_process(slab_number, job_card, slab_qc, publish_slab_event=False)
 
 
 def pause_or_resume_slab_operation(slab_number: str, pause: bool):
