@@ -5,6 +5,7 @@ import frappe
 from frappe.utils.data import nowdate
 
 from erpnext.manufacturing.doctype.job_card.job_card import JobCard, make_corrective_job_card
+from erpnext.manufacturing.doctype.operation.api import get_open_job_cards
 from erpnext.manufacturing.doctype.production_line.production_line import get_all_child_lines
 from erpnext.manufacturing.doctype.slab.api import get_slabs_for
 from erpnext.manufacturing.doctype.slab.slab import Slab
@@ -20,11 +21,11 @@ from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
 
 
 @frappe.whitelist()
-def start_qa_process(slab_number: str):
-	slab: Slab = frappe.get_doc("Slab", slab_number)  # pyright: ignore[reportAssignmentType]
-	#    1. Get the job card for quality analysis on the given line.
-	job_card_result = get_top_job_card_for_process("Quality Check", slab.line, True)
-	job_card: JobCard | None = job_card_result.get("top_job_card")  # pyright: ignore[reportAssignmentType]
+def start_qa_process(line: str, job_card_number: str, slab_number: str):
+	slab_and_job_card = get_slab_or_jobcard_for_qa(line, job_card_number, slab_number)
+	slab: Slab = slab_and_job_card.get("slab")  # pyright: ignore[reportAssignmentType]
+	#    1. Get the job card for quality analysis off the given line.
+	job_card: JobCard | None = slab_and_job_card.get("job_card")  # pyright: ignore[reportAssignmentType]
 	if not job_card:
 		frappe.throw("No Job Card found")
 	job_card_name = job_card.name if job_card else ""
@@ -78,23 +79,49 @@ def submit_qa_report(report: str | dict, shift: str, job_card: str, slab_number:
 
 
 @frappe.whitelist()
-def get_slab_or_jobcard_for_qa(line: str, job_card_number: str | None = None):
+def get_slab_or_jobcard_for_qa(
+	line: str,
+	job_card_number: str | None = None,
+	slab_number: str | None = None,
+	exclude_job_card: str | None = None,
+):
 	job_card: JobCard | None = None
 	if job_card_number:
 		job_card = frappe.get_doc("Job Card", job_card_number)  # pyright: ignore[reportAssignmentType]
 
 	child_lines = get_all_child_lines(line)
-	job_card_data = get_top_job_card_for_process("Quality Check", child_lines if child_lines else line, True)
-	job_card = job_card_data["top_job_card"]
+
+	job_cards = get_open_job_cards(
+		"Quality Check",
+		child_lines if child_lines else line,
+		include_wip=True,
+		include_paused=True,
+		exclude_job_cards=exclude_job_card or "",
+	)
+
+	if slab_number:
+		job_card = next((job for job in job_cards if not job.slab or job.slab == slab_number), None)
+	else:
+		job_card = job_cards[0]
 
 	slab: Slab | None = None
 	if job_card and job_card.slab:
 		slab = frappe.get_doc("Slab", job_card.slab)  # pyright: ignore[reportAssignmentType]
 
+	if not slab and slab_number:
+		slab = frappe.get_doc("Slab", slab_number)  # pyright: ignore[reportAssignmentType]
+
 	if not slab:
 		# If there are no active job cards, get the earliest finished slab
 		slabs: list[Slab] = get_slabs_for(line, next_stage="Quality Check")  # pyright: ignore[reportAssignmentType]
-		slab = slabs[0] if slabs else None
+		slab = slabs[0] if slabs and slabs[0].status != 'Recovery' else None
+		if not slab:
+			recovery_slabs = [slab for slab in slabs if slab.status == 'Recovery']
+			for recovery_slab in recovery_slabs:
+				slab_doc: Slab = frappe.get_doc("Slab", recovery_slab.name or "")  # pyright: ignore[reportAssignmentType]
+				if slab_doc.is_cur_stage_complete and slab_doc.slab_history[-1].station == 'Recovery':
+					slab = slab_doc
+					break
 
 	slab_size = None
 	if slab:
@@ -102,6 +129,26 @@ def get_slab_or_jobcard_for_qa(line: str, job_card_number: str | None = None):
 		slab_size = frappe.get_doc("Slab Size", slab_size_name)
 
 	return {"slab": slab, "job_card": job_card, "slab_size": slab_size}
+
+
+@frappe.whitelist()
+def get_slab_queue(line: str, slab_to_exclude: str):
+	slabs_for_qc = get_slabs_for(line, "Quality Check", limit=9999)
+	# slabs = [slab for slab in slabs if not slab.status != 'Recovery' or (slab.is_cur_stage_complete and slab.slab_history[-1].station == 'Recovery')]
+	slabs = []
+	for slab in slabs_for_qc:
+		if slab.name == slab_to_exclude:
+			continue
+
+		if slab.status != 'Recovery':
+			slabs.append(slab)
+			continue
+
+		slab_doc: Slab = frappe.get_doc("Slab", slab.name or "")  # pyright: ignore[reportAssignmentType]
+		if slab_doc.is_cur_stage_complete and slab_doc.slab_history[-1].station == 'Recovery':
+			slabs.append(slab_doc)
+
+	return slabs
 
 
 @frappe.whitelist()
@@ -199,13 +246,14 @@ def _update_item_and_status_on_slab(item_code: str, slab_number: str, is_rejecte
 
 
 @frappe.whitelist()
-def get_repair_options(qc_name: str | None = None):
+def get_repair_options():
 	return {
 		"repair": _get_slab_qc_options("repair"),
 		"recovery_type": _get_slab_qc_options("recovery_type"),
 		"repolish_type": _get_slab_qc_options("repolish_type"),
 		"recalibration_type": _get_slab_qc_options("recalibration_type"),
 		"shade": _get_slab_qc_options("shade"),
+		"colour": _get_slab_qc_options("colour"),
 	}
 
 

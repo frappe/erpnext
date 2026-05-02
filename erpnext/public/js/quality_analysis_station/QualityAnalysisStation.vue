@@ -32,7 +32,10 @@ const hourglassIcon = ref('fa-hourglass-3');
 let hourglassInterval = null;
 const isProcessing = ref(false);
 const showRepairHistoryModal = ref(false);
-const originalRepairType = ref(null);
+const showQueueDrawer = ref(false);
+const colourOptions = ref([]);
+const queueSlabs = ref([]);
+const originalRepairType = ref('');
 
 // Visual Observation State
 const observations = ref([]);
@@ -40,6 +43,20 @@ const newObservation = ref(null);
 const hoverCoordinates = ref({ x: 0, y: 0, visible: false });
 const slabScale = ref(1); // pixels per mm
 const visualizerRef = ref(null);
+
+const fetchQueueSlabs = async () => {
+    const res = await frappe.call({
+        method: 'erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station.get_slab_queue',
+        args: {
+            line: work_context.assigned_line,
+            slab_to_exclude: selectedSlab.value?.name
+        }
+    });
+
+	if (res.message) {
+		queueSlabs.value = res.message;
+    }
+};
 
 const productionDate = computed(() => {
     if (!selectedSlab.value?.creation) return "";
@@ -114,15 +131,8 @@ const fetchGrades = async () => {
 };
 
 const fetchRepairOptions = async () => {
-	if (!selectedSlab.value?.quality_assessment) {
-		return;
-	}
-
     const r = await frappe.call({
 		method: 'erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station.get_repair_options',
-		args: {
-			qc_report_name: selectedSlab.value.quality_assessment,
-		},
     });
 
     if (r.message && typeof r.message === 'object') {
@@ -131,11 +141,18 @@ const fetchRepairOptions = async () => {
         repolishOptions.value = r.message.repolish_type || [];
         recalibrationOptions.value = r.message.recalibration_type || [];
 		shadeOptions.value = r.message.shade || [];
+		colourOptions.value = r.message.colour || [];
+		observationColour.value = observationColour.value || r.message.colour[0] || "red";
     }
 };
 
 const fetchExistingQCReport = async (qc_name) => {
-    if (!qc_name) return;
+	if (!qc_name) {
+		slabQAReport.value = null;
+		observationColour.value = colourOptions?.value ? colourOptions.value[0] : "red";
+		originalRepairType.value = null;
+		return;
+    };
 
     const res = await frappe.call({
         method: 'erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station.get_slab_qc_report',
@@ -188,12 +205,14 @@ const fetchExistingQCReport = async (qc_name) => {
     }
 };
 
-const get_slab_for_qa = async (job_card_number, play_ding = false) => {
+const get_slab_for_qa = async (job_card_number, slab_number = null, exclude_job_card = null, play_ding = false) => {
     const res = await frappe.call({
         method: 'erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station.get_slab_or_jobcard_for_qa',
         args: {
             line: work_context.assigned_line,
-            job_card_number: job_card_number,
+			job_card_number: job_card_number,
+			slab_number: slab_number,
+			exclude_job_card: exclude_job_card,
         }
     });
 
@@ -205,13 +224,19 @@ const get_slab_for_qa = async (job_card_number, play_ding = false) => {
         jobCardNumber.value = res.message.job_card?.name || jobCardNumber.value;
         slabSize.value = res.message.slab_size;
         mixerNumber.value = res.message.job_card?.mixer_number || res.message.slab?.child_line;
-        selectSlab(res.message.slab);
+        await selectSlab(res.message.slab);
         isQAStarted.value = res.message.job_card?.status === "Work In Progress";
     }
 }
 
 
-function selectSlab(slab) {
+const selectSlabFromQueue = async (slab) => {
+	await get_slab_for_qa(null, slab?.name, jobCardNumber.value);
+	showQueueDrawer.value = false;
+};
+
+
+async function selectSlab(slab) {
     if (!slab) {
         selectedSlab.value = null;
         jobCardNumber.value = null;
@@ -253,9 +278,7 @@ function selectSlab(slab) {
     observations.value = [];
     newObservation.value = null;
 
-    if (slab && slab.quality_assessment) {
-        fetchExistingQCReport(slab.quality_assessment);
-    }
+    await fetchExistingQCReport(slab.quality_assessment);
 }
 
 function handleRepairChange() {
@@ -332,7 +355,7 @@ const confirmAndTag = async () => {
 
                     jobCardNumber.value = null;
                     selectedSlab.value = null;
-                    get_slab_for_qa(null, true);
+                    get_slab_for_qa(null, null, null, true);
                 }
             } catch (e) {
                 console.error(e);
@@ -375,6 +398,7 @@ async function loadData() {
     await get_slab_for_qa(jobCardNumber.value);
     await fetchGrades();
     await fetchRepairOptions();
+    await fetchQueueSlabs();
 }
 
 onUnmounted(() => {
@@ -396,7 +420,7 @@ frappe.realtime.on('slab_checkout', (slab) => {
     if (slab.line !== work_context.assigned_line || slab.status !== 'Polishing' || !slab.is_cur_stage_complete) return;
 
     if (!selectedSlab.value) {
-        get_slab_for_qa(null, true);
+        get_slab_for_qa(null, null, null, true);
     }
 
     // TODO: Use this if a queue is intelligently implemented on the frontend.
@@ -413,8 +437,10 @@ const startProcess = async () => {
     try {
         const res = await frappe.call({
             method: 'erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station.start_qa_process',
-            args: {
-                slab_number: selectedSlab.value.name,
+			args: {
+            	line: work_context.assigned_line,
+				slab_number: selectedSlab.value.name,
+                job_card_number: jobCardNumber.value,
             }
         });
 
@@ -546,6 +572,11 @@ onMounted(() => {
 onUnmounted(() => {
     window.removeEventListener('resize', updateScale);
 });
+
+const showQueue = async () => {
+	showQueueDrawer.value = true;
+	fetchQueueSlabs();
+};
 </script>
 
 <template>
@@ -607,14 +638,15 @@ onUnmounted(() => {
                         </div>
                     </div>
 
-
-
-                    <div v-if="!isQAStarted" class="d-flex align-items-center justify-content-center p-5 border rounded"
+                    <div v-if="!isQAStarted" class="d-flex flex-column align-items-center justify-content-center p-5 border rounded"
                         style="min-height: 400px; background: var(--card-bg);">
-                        <button class="btn btn-primary btn-lg px-5 font-weight-bold"
+                        <button class="btn btn-primary btn-lg px-5 font-weight-bold mb-4"
                             style="font-size: 1.2rem; transform: scale(1.2);" :disabled="isProcessing" @click="startProcess()">
                             <span v-if="isProcessing" class="fa fa-spinner fa-spin mr-2"></span>
                             <span v-else class="fa fa-play mr-2"></span>{{ __('Start Quality Analysis') }}
+                        </button>
+                        <button v-if="queueSlabs.length" class="btn btn-primary btn-md px-5 font-weight-bold mt-3" @click="showQueue();">
+                            <span class="fa fa-list mr-2"></span>{{ __('Show Slab Queue') }}
                         </button>
                     </div>
 
@@ -886,11 +918,56 @@ onUnmounted(() => {
             </Transition>
         </div>
 
-        <!-- Fixed Repair History Toggle Button -->
-        <button v-if="selectedSlab" class="fixed-repair-btn btn btn-primary shadow" @click="showRepairHistoryModal = true">
+        <!-- Sticky Buttons -->
+        <button v-if="queueSlabs.length && !isQAStarted" class="fixed-queue-btn btn btn-primary shadow" @click="showQueue();">
+            <span class="fa fa-list mr-2"></span>
+            <span class="small font-weight-bold text-uppercase">{{ __('Queue') }}</span>
+        </button>
+
+        <button v-if="selectedSlab && slabQAReport?.repair_history?.length" class="fixed-repair-btn btn btn-primary shadow" @click="showRepairHistoryModal = true">
             <span class="fa fa-wrench mr-2"></span>
             <span class="small font-weight-bold text-uppercase">{{ __('History') }}</span>
         </button>
+
+        <!-- Queue Drawer -->
+        <div class="drawer-container queue-drawer">
+            <Transition name="fade">
+                <div v-if="showQueueDrawer" class="drawer-backdrop" @click="showQueueDrawer = false"></div>
+            </Transition>
+            <Transition name="slide-left">
+                <div v-if="showQueueDrawer" class="drawer-panel left p-4 shadow-lg" style="background-color: var(--card-bg);">
+                    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+                        <h4 class="mb-0">{{ __('Job Queue') }}</h4>
+                        <button class="btn btn-light btn-sm" @click="showQueueDrawer = false">
+                            <span class="fa fa-times"></span>
+                        </button>
+                    </div>
+
+                    <div class="queue-list">
+                        <div v-for="slab in queueSlabs" :key="slab.name" class="card mb-3 shadow-sm border" style="background-color: var(--fg-color);">
+                            <div class="card-body p-3 pl-5 d-flex flex-column justify-content-center cursor-pointer" @click="selectSlabFromQueue(slab)">
+	                            <!-- <div class="slab-thumbnail-large mr-4"></div> -->
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="h5 font-weight-bold mb-0">{{ slab.name }}</div>
+                                    <!-- <div class="badge border text-muted" style="background-color: var(--control-bg);">{{ job.name }}</div> -->
+                                </div>
+                                <div class="text-muted small mb-3">{{ slab.template }}</div>
+
+                                <div v-if="slab.is_recovered || slab.is_repolished || slab.is_recalibrated"
+                                    class="alert alert-danger p-2 mb-0 mt-2 small font-weight-bold">
+                                    <span v-if="slab.is_recovered">{{ __('Recovered') }} </span>
+                                    <span v-if="slab.is_repolished">{{ __('Repolished') }} </span>
+                                    <span v-if="slab.is_recalibrated">{{ __('Recalibrated') }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="!queueSlabs.length" class="text-center py-5 text-muted">
+                            {{ __('No slabs in queue.') }}
+                        </div>
+                    </div>
+                </div>
+            </Transition>
+        </div>
 
         <!-- Repair History Drawer -->
         <div class="drawer-container">
@@ -963,8 +1040,20 @@ onUnmounted(() => {
     transition: all 0.2s;
 }
 
-.fixed-repair-btn:hover {
-    padding-right: 24px;
+.fixed-queue-btn {
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    border-radius: 0 8px 8px 0;
+    z-index: 1040;
+    padding: 12px 16px;
+    transition: all 0.2s;
+}
+
+.fixed-repair-btn:hover, .fixed-queue-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-50%) scale(1.05);
 }
 
 .drawer-backdrop {
@@ -984,7 +1073,13 @@ onUnmounted(() => {
     height: 100%;
     z-index: 1060;
     overflow-y: auto;
-    background-color: var(--bg-color, #f8f9fa);
+    background-color: var(--card-bg);
+}
+
+.drawer-panel.left {
+    left: 0;
+    right: auto;
+    width: 400px;
 }
 
 .fade-enter-active,
@@ -1005,6 +1100,16 @@ onUnmounted(() => {
 .slide-right-enter-from,
 .slide-right-leave-to {
     transform: translateX(100%);
+}
+
+.slide-left-enter-active,
+.slide-left-leave-active {
+    transition: transform 0.3s ease;
+}
+
+.slide-left-enter-from,
+.slide-left-leave-to {
+    transform: translateX(-100%);
 }
 
 .incoming-list {
@@ -1028,7 +1133,7 @@ onUnmounted(() => {
 }
 
 .empty-state {
-    background-color: var(--fg-color, #f8f9fa);
+	background-color: var(--fg-color, #f8f9fa);
     border: 1px solid var(--border-color) !important;
 }
 
