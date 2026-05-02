@@ -1114,9 +1114,16 @@ def insert_item_price(ctx: ItemDetailsCtx):
 				"Item Price",
 				item_code=ctx.item_code,
 				price_list_rate=price_list_rate,
+<<<<<<< HEAD
 				currency=ctx.currency,
 				uom=ctx.stock_uom,
 				price_list=ctx.price_list,
+=======
+				currency=args.currency,
+				uom=args.stock_uom,
+				price_list=args.price_list,
+				valid_from=transaction_date,
+>>>>>>> 6246a9aa6e (fix: set valid_from in created Item Price (#54696))
 			)
 			item_price.insert()
 			frappe.msgprint(
@@ -1138,7 +1145,12 @@ def insert_item_price(ctx: ItemDetailsCtx):
 				"item_code": ctx.item_code,
 				"currency": ctx.currency,
 				"price_list_rate": price_list_rate,
+<<<<<<< HEAD
 				"uom": ctx.stock_uom,
+=======
+				"uom": args.stock_uom,
+				"valid_from": transaction_date,
+>>>>>>> 6246a9aa6e (fix: set valid_from in created Item Price (#54696))
 			}
 		)
 		item_price.insert()
