@@ -1,0 +1,70 @@
+name: Propagate auto-merge label to backports
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  propagate-label:
+    runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Detect backport and original PR (metadata)
+        id: extract
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const base = pr.base.ref;
+            if (!/^version-(15|16)-hotfix$/.test(base)) {
+              core.setOutput('is_backport', 'false');
+              return;
+            }
+
+            const isMergify = pr.user && pr.user.login === 'mergify[bot]';
+            const headRef = pr.head.ref || '';
+            const match = headRef.match(/(?:^|\/)pr-(\d+)(?:-|$)/i);
+
+            if (isMergify && match) {
+              const original = Number(match[1]);
+              if (!Number.isNaN(original)) {
+                core.setOutput('original_pr', String(original));
+                core.setOutput('is_backport', 'true');
+                return;
+              }
+            }
+
+            core.setOutput('is_backport', 'false');
+
+      - name: Check original PR labels
+        if: steps.extract.outputs.is_backport == 'true'
+        id: check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = Number("${{ steps.extract.outputs.original_pr }}");
+
+            const { data } = await github.rest.issues.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber
+            });
+
+            const labels = data.labels.map(l => l.name);
+            core.setOutput("has_auto_merge", labels.includes("auto-merge backports"));
+
+      - name: Add auto-merge label to backport PR
+        if: steps.check.outputs.has_auto_merge == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              labels: ["auto-merge"]
+            });

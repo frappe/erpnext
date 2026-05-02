@@ -103,6 +103,7 @@ pull_request_rules:
       - status-success=Python Unit Tests (4)
       - status-success=linters
       - status-success=semgrep
+      - status-success=Patch Test
     actions:
       merge:
         method: squash
