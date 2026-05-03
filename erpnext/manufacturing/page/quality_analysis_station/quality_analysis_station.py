@@ -14,67 +14,9 @@ from erpnext.manufacturing.doctype.slab_quality_report.slab_quality_report impor
 from erpnext.manufacturing.doctype.slab_repair_record.slab_repair_record import SlabRepairRecord
 from erpnext.manufacturing.page.operator_station.operator_station import (
 	finish_process,
-	get_top_job_card_for_process,
 	start_process,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
-
-
-@frappe.whitelist()
-def start_qa_process(line: str, job_card_number: str, slab_number: str):
-	slab_and_job_card = get_slab_or_jobcard_for_qa(line, job_card_number, slab_number)
-	slab: Slab = slab_and_job_card.get("slab")  # pyright: ignore[reportAssignmentType]
-	#    1. Get the job card for quality analysis off the given line.
-	job_card: JobCard | None = slab_and_job_card.get("job_card")  # pyright: ignore[reportAssignmentType]
-	if not job_card:
-		frappe.throw("No Job Card found")
-	job_card_name = job_card.name if job_card else ""
-	#    2. Start the job card.
-	#    3. Move the slab to quality check.
-	skip_validation = slab.status == 'Recovery'
-	start_process(
-		job_card_name, slab_name=slab.name or "", slab_template=slab.template, process_name="Quality Check", skip_stage_validation=skip_validation
-	)
-
-	#    4. Return the job card number.
-	return job_card_name
-
-
-@frappe.whitelist()
-def submit_qa_report(report: str | dict, shift: str, job_card: str, slab_number: str):
-	try:
-		frappe.db.begin()
-
-		if isinstance(report, str):
-			report = frappe.parse_json(report)
-
-		report_name: str | None = report.get('name')  # pyright: ignore[reportAttributeAccessIssue]
-		if report_name:
-			existing_report: SlabQualityReport = frappe.get_doc("Slab Quality Report", report_name)  # pyright: ignore[reportAssignmentType]
-			slab_qc = existing_report
-		else:
-			slab_qc: SlabQualityReport = frappe.new_doc("Slab Quality Report")  # pyright: ignore[reportAssignmentType]
-
-		slab_qc.update(report)
-		slab_qc.shift = shift
-
-		# 1. Create the slab quality report.
-		create_slab_quality_report(slab_number, slab_qc)
-
-		if slab_qc.repair != 'None':
-			# Make repair log
-			_make_repair_logs(job_card, slab_qc)
-
-		# Then,
-		finish_qc_process(slab_number, job_card, slab_qc)
-
-		frappe.db.commit()
-
-		return {"slab": slab_number, "job_card": job_card}
-
-	except Exception:
-		frappe.db.rollback()
-		raise
 
 
 @frappe.whitelist()
@@ -158,6 +100,63 @@ def get_slab_qc_report(qc_name: str):
 
 	qc.repair_history.sort(key=lambda r: r.idx, reverse=True)
 	return qc.to_json()
+
+
+@frappe.whitelist()
+def start_qa_process(line: str, job_card_number: str, slab_number: str):
+	slab_and_job_card = get_slab_or_jobcard_for_qa(line, job_card_number, slab_number)
+	slab: Slab = slab_and_job_card.get("slab")  # pyright: ignore[reportAssignmentType]
+	#    1. Get the job card for quality analysis off the given line.
+	job_card: JobCard | None = slab_and_job_card.get("job_card")  # pyright: ignore[reportAssignmentType]
+	if not job_card:
+		frappe.throw("No Job Card found")
+	job_card_name = job_card.name if job_card else ""
+	#    2. Start the job card.
+	#    3. Move the slab to quality check.
+	skip_validation = slab.status == 'Recovery'
+	start_process(
+		job_card_name, slab_name=slab.name or "", slab_template=slab.template, process_name="Quality Check", skip_stage_validation=skip_validation
+	)
+
+	#    4. Return the job card number.
+	return job_card_name
+
+
+@frappe.whitelist()
+def submit_qa_report(report: str | dict, shift: str, job_card: str, slab_number: str):
+	try:
+		frappe.db.begin()
+
+		if isinstance(report, str):
+			report = frappe.parse_json(report)
+
+		report_name: str | None = report.get('name')  # pyright: ignore[reportAttributeAccessIssue]
+		if report_name:
+			existing_report: SlabQualityReport = frappe.get_doc("Slab Quality Report", report_name)  # pyright: ignore[reportAssignmentType]
+			slab_qc = existing_report
+		else:
+			slab_qc: SlabQualityReport = frappe.new_doc("Slab Quality Report")  # pyright: ignore[reportAssignmentType]
+
+		slab_qc.update(report)
+		slab_qc.shift = shift
+
+		# 1. Create the slab quality report.
+		create_slab_quality_report(slab_number, slab_qc)
+
+		if slab_qc.repair != 'None':
+			# Make repair log
+			_make_repair_logs(job_card, slab_qc)
+
+		# Then,
+		finish_qc_process(slab_number, job_card, slab_qc)
+
+		frappe.db.commit()
+
+		return {"slab": slab_number, "job_card": job_card}
+
+	except Exception:
+		frappe.db.rollback()
+		raise
 
 
 def _make_material_transfer_stock_entry(slab_number: str, grade: str | None, job_card: str, use_for_samples: int):
