@@ -20,7 +20,7 @@
   "film_contamination",
   "column_break_xatz",
   "porasity",
-  "column_break_kqgv",
+  "section_break_fmnp",
   "epoxy_applied",
   "observations_section",
   "visualizer_preview",
@@ -116,14 +116,10 @@
    "label": "Porasity"
   },
   {
-   "fieldname": "column_break_kqgv",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "0",
    "fieldname": "epoxy_applied",
    "fieldtype": "Check",
-   "label": "Epoxy Applied"
+   "label": "Is Epoxy Applied"
   },
   {
    "fieldname": "observations_section",
@@ -141,13 +137,17 @@
    "hidden": 1,
    "options": "Slab Quality Observation",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_fmnp",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-01 17:29:53.571037",
+ "modified": "2026-05-03 10:55:21.004725",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab Recovery Report",
