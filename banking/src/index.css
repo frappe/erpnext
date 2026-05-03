@@ -1105,21 +1105,3 @@ body {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-
-
-/* Custom scrollbar styles for better horizontal scrolling */
-
-.bank-picker-scrollbar::-webkit-scrollbar-track {
-  background: rgb(243 244 246);
-  border-radius: 4px;
-}
-
-.bank-picker-scrollbar::-webkit-scrollbar-thumb {
-  background: rgb(209 213 219);
-  border-radius: 4px;
-  transition: background-color 0.2s ease;
-}
-
-.bank-picker-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgb(156 163 175);
-}

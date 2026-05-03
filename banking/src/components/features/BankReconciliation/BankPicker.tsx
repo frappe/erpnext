@@ -9,8 +9,9 @@ import { getTimeago } from "@/lib/date"
 import ErrorBanner from "@/components/ui/error-banner"
 import _ from "@/lib/translate"
 import { Badge } from "@/components/ui/badge"
+import { useTheme } from "@/components/ui/theme-provider"
 
-const BankPicker = ({ className, size = 'base' }: { className?: string, size?: 'base' | 'sm' }) => {
+const BankPicker = ({ className }: { className?: string }) => {
 
     const setSelectedBank = useSetAtom(selectedBankAccountAtom)
 
@@ -28,6 +29,8 @@ const BankPicker = ({ className, size = 'base' }: { className?: string, size?: '
 
     const { banks, isLoading, error } = useGetBankAccounts(onLoadingSuccess)
 
+    const theme = useTheme()
+
     if (isLoading) {
         return null
     }
@@ -37,24 +40,24 @@ const BankPicker = ({ className, size = 'base' }: { className?: string, size?: '
     }
     return (
         <div
-            className={cn("flex gap-3 items-stretch w-full overflow-x-auto bank-picker-scrollbar pe-4",
+            className={cn("flex gap-3 items-stretch w-full overflow-x-auto pe-4",
                 banks?.length > 4 ? 'pb-2' : '', className,
             )}
             style={{
                 scrollbarWidth: 'thin',
-                scrollbarColor: 'rgb(209 213 219) rgb(243 244 246)',
+                scrollbarColor: theme.theme === 'Dark' ? 'var(--surface-gray-2) var(--surface-gray-1)' : 'rgb(209 213 219) rgb(243 244 246)',
             }}
         >
             {
                 banks?.map((bank) => (
-                    <BankPickerItem key={bank.name} bank={bank} size={size} />
+                    <BankPickerItem key={bank.name} bank={bank} />
                 ))
             }
         </div>
     )
 }
 
-const BankPickerItem = ({ bank, size = 'base' }: { bank: SelectedBank, size?: 'base' | 'sm' }) => {
+const BankPickerItem = ({ bank }: { bank: SelectedBank }) => {
 
     const [selectedBank, setSelectedBank] = useAtom(selectedBankAccountAtom)
 
@@ -67,29 +70,29 @@ const BankPickerItem = ({ bank, size = 'base' }: { bank: SelectedBank, size?: 'b
         mutate()
     }
 
+    const theme = useTheme()
+
     return <div
         role="button"
         title={`Select ${bank.account_name}`}
         onClick={onSelect}
-        className={cn('rounded-md border border-outline-gray-1 min-w-80 p-2 overflow-hidden cursor-pointer',
-            isSelected ? 'border-outline-gray-5 bg-surface-gray-1' : 'hover:bg-surface-gray-1',
-            {
-                "max-w-60 min-w-60": size === 'sm',
-            }
+        className={cn('rounded-md border border-outline-gray-1 max-w-60 min-w-60 p-2 overflow-hidden cursor-pointer',
+            isSelected ? 'border-outline-gray-5 bg-surface-gray-1' : 'hover:bg-surface-gray-1'
         )}
     >
-        {bank.logo ? <img
-            src={`/assets/erpnext/images/bank-logos/${bank.logo}`}
+
+
+
+        {bank.logo ? <div className="h-6 mb-2 flex items-center"> <img
+            src={`/assets/erpnext/images/bank-logos/${theme.theme === 'Dark' ? (bank.logoDark ?? bank.logo) : bank.logo}`}
             alt={bank.bank || bank.name || ''}
-            className={cn("max-w-24 me-auto h-10 object-contain mb-1", {
-                'h-6 max-w-18 mb-2': size === 'sm',
-            })}
-        /> : <div className={cn("rounded-md flex items-center h-10 gap-2", {
-            "h-6 mb-2": size === 'sm',
+            className={cn("h-6 max-w-22 me-auto object-contain", {
+                'dark:invert dark:brightness-0': bank.darkModeInvert
+            }, bank.logoClassName)}
+        /></div> : <div className={cn("rounded-md h-6 mb-2 flex items-center gap-2", {
         })}>
-            <Landmark size={size === 'sm' ? '16px' : '30px'} />
-            <H4 className={cn("text-base mb-0", {
-                'text-xs': size === 'sm',
+            <Landmark size={'16px'} />
+            <H4 className={cn("text-xs mb-0", {
             })}>{bank.bank}</H4>
         </div>}
 
@@ -102,7 +105,7 @@ const BankPickerItem = ({ bank, size = 'base' }: { bank: SelectedBank, size?: 'b
             </div>
 
             <span title={_("GL Account")} className={cn("text-ellipsis line-clamp-1 text-sm text-ink-gray-6")}>{bank.account}</span>
-            {bank.last_integration_date && size !== 'sm' && <span className="text-xs text-ink-gray-5">{_("Last Synced Transaction")}: {getTimeago(bank.last_integration_date)}</span>}
+            {bank.last_integration_date && <span className="text-xs text-ink-gray-5">{_("Last Synced Transaction")}: {getTimeago(bank.last_integration_date)}</span>}
         </div>
 
     </div >

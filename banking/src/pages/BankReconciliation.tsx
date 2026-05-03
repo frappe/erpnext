@@ -66,7 +66,7 @@ const BankReconciliation = () => {
                         <BankRecDateFilter />
                     </div>
                 </div>
-                <BankPicker size="sm" />
+                <BankPicker />
                 <BankBalance />
             </div>
             <Tabs defaultValue="Match and Reconcile">

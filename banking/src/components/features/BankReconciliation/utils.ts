@@ -304,7 +304,10 @@ export const useGetBankAccounts = (onSuccess?: (data?: Omit<SelectedBank, 'logo'
             const logo = BANK_LOGOS.find((logo) => logo.keywords.some((keyword) => bank.bank?.toLowerCase().includes(keyword.toLowerCase())))
             return {
                 ...bank,
-                logo: logo?.logo
+                logo: logo?.logo,
+                logoDark: logo?.logoDark,
+                darkModeInvert: logo?.darkModeInvert,
+                logoClassName: logo?.logoClassName
             }
         }) ?? []
 

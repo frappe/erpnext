@@ -96,7 +96,7 @@ const BankStatementImporter = () => {
                             {selectedCompany && <div className="flex flex-col gap-2">
                                 <Label>{_("Bank Account")}<span className="text-ink-red-3">*</span></Label>
                                 <div className="">
-                                    <BankPicker className="w-full flex-wrap" size="sm" />
+                                    <BankPicker className="w-full flex-wrap" />
                                 </div>
                             </div>
                             }

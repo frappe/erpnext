@@ -35,7 +35,7 @@ const BankBalance = () => {
     }
     return (
         <div className="flex justify-between">
-            <div className="w-[80%] flex justify-between gap-2 pe-8 border-e-border border-e">
+            <div className="w-[80%] flex flex-wrap justify-between gap-2 pe-8 border-e-border border-e">
                 <OpeningBalance />
                 <ClosingBalance />
                 <ClosingBalanceAsPerStatement />

@@ -186,7 +186,7 @@ const ThemeSwitcher = () => {
                 {_("Switch between light, dark, or system theme")}
             </p>
         </div>
-        <div className="flex gap-3 max-lg:flex-col">
+        <div className="flex gap-3">
             {themeCards.map((option) => {
                 const selected = theme === option.value
 

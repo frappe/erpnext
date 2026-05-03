@@ -63,7 +63,7 @@ function SettingsDialog({
     const contextValue = React.useMemo(() => ({ onClose }), [onClose])
 
     return (
-        <DialogContent className={cn("min-w-5xl p-0 overflow-y-hidden", contentClassName)} showCloseButton={false}>
+        <DialogContent className={cn("min-w-5xl max-lg:min-w-[98vw] p-0 overflow-y-hidden", contentClassName)} showCloseButton={false}>
             <SettingsDialogContext.Provider value={contextValue}>
                 <TabsPrimitive.Root
                     data-slot="settings-dialog"
