@@ -284,6 +284,27 @@ interface BankAccountWithCurrency extends Pick<BankAccount, 'name' | 'bank' | 'a
     account_currency?: string
 }
 
+type BankLogoEntry = (typeof BANK_LOGOS)[number]
+
+/** Prefer the longest keyword match so short tokens (e.g. "anz" in "finanzas") do not beat full bank names. */
+function findBankLogoForName(bankName: string | undefined | null): BankLogoEntry | undefined {
+    if (!bankName) return undefined
+    const haystack = bankName.toLowerCase()
+    let best: BankLogoEntry | undefined
+    let bestKeywordLen = 0
+    for (const entry of BANK_LOGOS) {
+        for (const keyword of entry.keywords) {
+            const needle = keyword.toLowerCase()
+            if (needle.length === 0) continue
+            if (haystack.includes(needle) && needle.length > bestKeywordLen) {
+                bestKeywordLen = needle.length
+                best = entry
+            }
+        }
+    }
+    return best
+}
+
 export const useGetBankAccounts = (onSuccess?: (data?: Omit<SelectedBank, 'logo'>[]) => void, filterFn?: (bank: SelectedBank) => boolean) => {
 
     const company = useCurrentCompany()
@@ -301,7 +322,7 @@ export const useGetBankAccounts = (onSuccess?: (data?: Omit<SelectedBank, 'logo'
     const banks = useMemo(() => {
         // Match the bank account to the logo
         const banksWithLogos = data?.message.map((bank) => {
-            const logo = BANK_LOGOS.find((logo) => logo.keywords.some((keyword) => bank.bank?.toLowerCase().includes(keyword.toLowerCase())))
+            const logo = findBankLogoForName(bank.bank)
             return {
                 ...bank,
                 logo: logo?.logo,

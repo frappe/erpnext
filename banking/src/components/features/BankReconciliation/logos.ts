@@ -203,8 +203,9 @@ export const BANK_LOGOS: { keywords: string[], logo: string, locale?: string[], 
     },
     {
         keywords: ['Bank of Maharashtra', 'BOM'],
-        logo: 'Bank_of_Maharashtra.svg',
-        locale: ['India']
+        logo: 'Bank_of_Maharashtra.png',
+        locale: ['India'],
+        logoClassName: 'min-w-24'
     },
     {
         keywords: ['Kotak Mahindra Bank', 'Kotak'],
@@ -229,7 +230,8 @@ export const BANK_LOGOS: { keywords: string[], logo: string, locale?: string[], 
     },
     {
         keywords: ['Federal Bank'],
-        logo: 'Federal_Bank.svg',
+        logo: 'Federal_Bank.png',
+        logoDark: 'Federal_Bank-dark.png',
         locale: ['India']
     },
     {
@@ -238,19 +240,23 @@ export const BANK_LOGOS: { keywords: string[], logo: string, locale?: string[], 
         locale: ['India']
     },
     {
-        keywords: ['RazorpayX'],
-        logo: 'RazorpayX.webp',
+        keywords: ['RazorpayX', 'Razorpay'],
+        logo: 'Razorpay.svg',
+        logoDark: 'Razorpay-dark.svg',
         locale: ['India']
     },
     {
         keywords: ['Revolut'],
         logo: 'Revolut.png',
-        locale: ['Global']
+        locale: ['Global'],
+        darkModeInvert: true
     },
     {
         keywords: ['Starling Bank'],
         logo: 'Starling_Bank.png',
-        locale: ['Global', 'UK']
+        logoDark: 'Starling_Bank-dark.png',
+        locale: ['Global', 'UK'],
+        logoClassName: 'h-10'
     },
     // Australia and New Zealand
     {
@@ -261,26 +267,31 @@ export const BANK_LOGOS: { keywords: string[], logo: string, locale?: string[], 
     {
         keywords: ["Airwallex"],
         logo: "Airwallex.png",
+        logoDark: "Airwallex-dark.png",
         locale: ['Global']
     },
     {
         keywords: ["Judo Bank"],
-        logo: "JudoBank.png",
+        logo: "Judo_Bank.svg",
+        logoDark: "Judo_Bank-dark.svg",
         locale: ['Australia', 'New Zealand']
     },
     {
         keywords: ["Alpha"], // This might conflict with Alpha Bank in Greece
-        logo: "AlphaGroupInternational.png",
+        logo: "Alpha_Bank.svg",
+        darkModeInvert: true,
+        logoClassName: 'h-4.5',
         locale: ['Australia', 'New Zealand']
     },
     {
         keywords: ["Australian Tax Office", "Australian Taxation Office"],
         logo: "Australian_Tax_Office.png",
+        darkModeInvert: true,
         locale: ['Australia']
     },
     {
         keywords: ["Westpac"],
-        logo: "Westpac.png",
+        logo: "Westpac.svg",
         locale: ['Australia']
     },
     {
@@ -290,7 +301,8 @@ export const BANK_LOGOS: { keywords: string[], logo: string, locale?: string[], 
     },
     {
         keywords: ["Macquarie Group", "Macquarie Bank"],
-        logo: "Macquarie.png",
+        logo: "Macquarie.svg",
+        darkModeInvert: true,
         locale: ['Australia']
     },
     // Nicaragua
@@ -302,12 +314,15 @@ export const BANK_LOGOS: { keywords: string[], logo: string, locale?: string[], 
     {
         keywords: ["Banco de Finanzas"],
         logo: "Banco_de_Finanzas.svg",
-        locale: ['Nicaragua']
+        locale: ['Nicaragua'],
+        logoClassName: 'h-4.5'
     },
     {
         keywords: ["Avanz"],
         logo: "Avanz.svg",
-        locale: ['Nicaragua']
+        logoDark: "Avanz-dark.svg",
+        locale: ['Nicaragua'],
+        logoClassName: 'h-7'
     },
     {
         keywords: ["Ficohsa"],
@@ -317,11 +332,13 @@ export const BANK_LOGOS: { keywords: string[], logo: string, locale?: string[], 
     {
         keywords: ["BAC", "BAC Credomatic"],
         logo: "BAC_Credomatic.svg",
-        locale: ['Nicaragua']
+        locale: ['Nicaragua'],
+        logoClassName: 'h-4.5'
     },
     {
         keywords: ["Banco Lafise"],
         logo: "Banco_Lafise.png",
+        darkModeInvert: true,
         locale: ['Nicaragua']
     },
     // German
@@ -333,7 +350,8 @@ export const BANK_LOGOS: { keywords: string[], logo: string, locale?: string[], 
     {
         keywords: ["Volksbank", "Raiffeisenbank", "VR-Bank"],
         logo: "Volksbanken_Raiffeisenbanken.svg",
-        locale: ['Germany']
+        locale: ['Germany'],
+        logoClassName: 'min-w-32'
     },
     // Kenya
     {
@@ -344,31 +362,36 @@ export const BANK_LOGOS: { keywords: string[], logo: string, locale?: string[], 
     {
         keywords: ["Equity Bank"],
         logo: "Equity_Bank.png",
-        locale: ['Kenya']
+        logoDark: "Equity_Bank-dark.png",
+        locale: ['Kenya'],
     },
     {
         keywords: ["I&M"],
-        logo: "I&M_Logo.jpg",
+        logo: "I&M.png",
         locale: ['Kenya']
     },
     {
         keywords: ["ABSA"],
         logo: "ABSA.png",
-        locale: ['Kenya']
+        locale: ['Kenya'],
+        darkModeInvert: true,
+        logoClassName: 'h-7'
     },
     {
         keywords: ["Stanbic"],
         logo: "Stanbic.png",
-        locale: ['Kenya']
+        locale: ['Kenya'],
+        logoClassName: 'h-7'
     },
     {
         keywords: ["DTB", "Diamond Trust Bank"],
-        logo: "Diamond_Trust_Bank.jpg",
+        logo: "Diamond_Trust_Bank.png",
         locale: ['Kenya']
     },
     {
         keywords: ["Prime Bank"],
         logo: "Prime_Bank.png",
-        locale: ['Kenya']
+        locale: ['Kenya'],
+        logoClassName: 'max-w-28'
     }
 ]
