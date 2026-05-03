@@ -41,7 +41,13 @@ import erpnext
 from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.stock import get_warehouse_account_map
-from erpnext.stock.utils import get_stock_value_on
+from erpnext.stock.utils import (
+	get_stock_balance,
+	get_stock_value_on,
+	is_group_warehouse,
+	validate_disabled_warehouse,
+	validate_warehouse_company,
+)
 
 if TYPE_CHECKING:
 	from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import RepostItemValuation
@@ -2730,17 +2736,33 @@ PRE_SUBMIT_DOCTYPE_CONFIG = {
 	"Sales Invoice": {
 		"check_prev_docstatus": True,
 		"check_credit_limit": True,
+		"check_stock_conditions": True,
+		"check_serial_no_availability": True,
+		"check_batch_availability": True,
+		"check_stock_availability": True,
 	},
 	"Purchase Invoice": {
 		"check_prev_docstatus": True,
+		"check_stock_conditions": True,
+		"check_serial_no_availability": True,
+		"check_batch_availability": True,
+		"check_stock_availability": True,
 	},
 	"Delivery Note": {
 		"check_prev_docstatus": True,
 		"check_credit_limit": True,
 		"check_packed_qty": True,
+		"check_stock_conditions": True,
+		"check_serial_no_availability": True,
+		"check_batch_availability": True,
+		"check_stock_availability": True,
 	},
 	"Purchase Receipt": {
 		"check_prev_docstatus": True,
+		"check_stock_conditions": True,
+		"check_serial_no_availability": True,
+		"check_batch_availability": True,
+		"check_stock_availability": True,
 	},
 	"Sales Order": {
 		"check_credit_limit": True,
@@ -2769,6 +2791,18 @@ def _run_pre_submit_checks(doc, cfg):
 
 	if cfg.get("check_packed_qty"):
 		_check_packed_qty_warn(doc)
+
+	if cfg.get("check_stock_conditions"):
+		_check_stock_conditions_warn(doc)
+
+	if cfg.get("check_serial_no_availability"):
+		_check_serial_no_availability_warn(doc)
+
+	if cfg.get("check_batch_availability"):
+		_check_batch_availability_warn(doc)
+
+	if cfg.get("check_stock_availability"):
+		_check_stock_availability_warn(doc)
 
 
 def _check_prev_docstatus(doc):
@@ -2842,3 +2876,207 @@ def _check_packed_qty_warn(doc):
 			title=_("Pre-Submit Warning: Packed Qty"),
 			indicator="orange",
 		)
+
+
+def _is_stock_document(doc):
+	"""True for any doc that creates stock ledger entries at submit time."""
+	if doc.doctype in ("Delivery Note", "Purchase Receipt"):
+		return True
+	if doc.doctype in ("Sales Invoice", "Purchase Invoice"):
+		return bool(cint(doc.get("update_stock")))
+	return False
+
+
+def _is_stock_deduction(doc):
+	"""Return True for documents that reduce warehouse stock at submit time."""
+	if doc.doctype == "Delivery Note":
+		return not doc.get("is_return")
+	if doc.doctype == "Sales Invoice":
+		return cint(doc.get("update_stock")) and not doc.get("is_return")
+	if doc.doctype == "Purchase Receipt":
+		return bool(doc.get("is_return"))
+	if doc.doctype == "Purchase Invoice":
+		return cint(doc.get("update_stock")) and bool(doc.get("is_return"))
+	return False
+
+
+def _check_stock_conditions_warn(doc):
+	if not _is_stock_document(doc):
+		return
+
+	posting_date = getdate(doc.get("posting_date") or nowdate())
+
+	settings = frappe.get_doc("Stock Settings")
+	auth_role = settings.stock_auth_role
+	if settings.stock_frozen_upto and posting_date <= getdate(settings.stock_frozen_upto):
+		if auth_role not in frappe.get_roles():
+			frappe.msgprint(
+				_("Stock transactions before {0} are frozen.").format(
+					frappe.bold(formatdate(settings.stock_frozen_upto))
+				),
+				title=_("Pre-Submit Warning: Stock Frozen"),
+				indicator="orange",
+			)
+	elif cint(settings.stock_frozen_upto_days):
+		if add_days(posting_date, cint(settings.stock_frozen_upto_days)) <= frappe.utils.today():
+			if auth_role not in frappe.get_roles():
+				frappe.msgprint(
+					_("Stock transactions older than {0} days are frozen.").format(
+						settings.stock_frozen_upto_days
+					),
+					title=_("Pre-Submit Warning: Stock Frozen"),
+					indicator="orange",
+				)
+
+	seen = set()
+	for item in doc.get("items"):
+		wh = item.get("warehouse")
+		if not wh or wh in seen:
+			continue
+		seen.add(wh)
+		try:
+			is_group_warehouse(wh)
+			validate_disabled_warehouse(wh)
+			validate_warehouse_company(wh, doc.company)
+		except frappe.ValidationError as e:
+			frappe.msgprint(
+				str(e), title=_("Pre-Submit Warning: Please choose a valid Warehouse"), indicator="orange"
+			)
+
+	if _is_stock_deduction(doc):
+		for item in doc.get("items"):
+			if not item.get("batch_no"):
+				continue
+			expiry_date = frappe.db.get_value("Batch", item.batch_no, "expiry_date")
+			if expiry_date and posting_date > getdate(expiry_date):
+				frappe.msgprint(
+					_("Batch {0} of Item {1} has expired.").format(
+						frappe.bold(item.batch_no), frappe.bold(item.item_code)
+					),
+					title=_("Pre-Submit Warning: Batch Expired"),
+					indicator="orange",
+				)
+
+
+def _check_serial_no_availability_warn(doc):
+	if not _is_stock_deduction(doc):
+		return
+
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+	for item in doc.get("items"):
+		# Modern path: serial_and_batch_bundle
+		bundle_id = item.get("serial_and_batch_bundle")
+		if bundle_id and frappe.db.exists("Serial and Batch Bundle", bundle_id):
+			bundle = frappe.get_doc("Serial and Batch Bundle", bundle_id)
+			if bundle.has_serial_no:
+				try:
+					bundle.validate_serial_no_status()
+				except frappe.ValidationError as e:
+					frappe.msgprint(str(e), title=_("Pre-Submit Warning: Serial No"), indicator="orange")
+			continue
+
+		# Legacy path: serial_no text field on item row
+		serial_no_field = item.get("serial_no")
+		if not serial_no_field or not item.get("warehouse"):
+			continue
+
+		serial_nos = get_serial_nos(serial_no_field)
+		if not serial_nos:
+			continue
+
+		invalid = frappe.get_all(
+			"Serial No",
+			filters={"name": ("in", serial_nos), "warehouse": ("!=", item.warehouse)},
+			pluck="name",
+		)
+		if invalid:
+			frappe.msgprint(
+				_("Row {0}: Serial No {1} {2} not in warehouse {3}.").format(
+					item.idx,
+					_("Nos") if len(invalid) > 1 else _("No"),
+					frappe.bold(", ".join(invalid)),
+					frappe.bold(item.warehouse),
+				),
+				title=_("Pre-Submit Warning: Serial No"),
+				indicator="orange",
+			)
+
+
+def _check_batch_availability_warn(doc):
+	if not _is_stock_deduction(doc):
+		return
+
+	from erpnext.stock.doctype.batch.batch import get_batch_qty
+
+	posting_date = doc.get("posting_date")
+	posting_time = doc.get("posting_time")
+	for item in doc.get("items"):
+		bundle_id = item.get("serial_and_batch_bundle")
+		if bundle_id and frappe.db.exists("Serial and Batch Bundle", bundle_id):
+			bundle = frappe.get_doc("Serial and Batch Bundle", bundle_id)
+			if not bundle.has_batch_no:
+				continue
+			required: dict[str, float] = {}
+			for entry in bundle.entries:
+				if entry.batch_no:
+					required[entry.batch_no] = required.get(entry.batch_no, 0.0) + flt(entry.qty)
+			for batch_no, qty_needed in required.items():
+				available = flt(
+					get_batch_qty(
+						batch_no, bundle.warehouse, posting_date=posting_date, posting_time=posting_time
+					)
+				)
+				if qty_needed > available:
+					frappe.msgprint(
+						_("Batch {0} in {1}: available {2}, required {3}.").format(
+							frappe.bold(batch_no), frappe.bold(bundle.warehouse), available, qty_needed
+						),
+						title=_("Pre-Submit Warning: Batch Qty"),
+						indicator="orange",
+					)
+			continue
+
+		batch_no = item.get("batch_no")
+		if not batch_no or not item.get("warehouse"):
+			continue
+		available = flt(
+			get_batch_qty(batch_no, item.warehouse, posting_date=posting_date, posting_time=posting_time)
+		)
+		qty_needed = flt(item.get("stock_qty") or item.qty)
+		if qty_needed > available:
+			frappe.msgprint(
+				_("Batch {0} in {1}: available {2}, required {3}.").format(
+					frappe.bold(batch_no), frappe.bold(item.warehouse), available, qty_needed
+				),
+				title=_("Pre-Submit Warning: Batch Qty"),
+				indicator="orange",
+			)
+
+
+def _check_stock_availability_warn(doc):
+	if not _is_stock_deduction(doc):
+		return
+	if frappe.db.get_single_value("Stock Settings", "allow_negative_stock"):
+		return
+
+	posting_date = doc.get("posting_date")
+	required: dict[tuple, float] = {}
+	for item in doc.get("items"):
+		if not (item.item_code and item.get("warehouse")):
+			continue
+		if item.get("serial_and_batch_bundle") or item.get("batch_no") or item.get("serial_no"):
+			continue
+		key = (item.item_code, item.warehouse)
+		required[key] = required.get(key, 0.0) + flt(item.get("stock_qty") or item.qty)
+
+	for (item_code, warehouse), qty_needed in required.items():
+		actual_qty = flt(get_stock_balance(item_code, warehouse, posting_date=posting_date))
+		if qty_needed > actual_qty:
+			frappe.msgprint(
+				_("Insufficient stock for {0} in {1}: available {2}, required {3}").format(
+					frappe.bold(item_code), frappe.bold(warehouse), actual_qty, qty_needed
+				),
+				title=_("Pre-Submit Warning: Stock"),
+				indicator="orange",
+			)
