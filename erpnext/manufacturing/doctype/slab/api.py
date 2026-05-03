@@ -216,6 +216,8 @@ def get_slabs_for(line: str, next_stage: str, limit=1, include_current_stage=Fal
 		# Special handling for Re-pressing (Pressing does NOT lead to Re-Pressing here)
 		elif next_stage == "Re-Pressing":
 			valid_previous_stages = []
+		elif next_stage == "Quality Check":
+			valid_previous_stages = ["Polishing", "Recovery"]
 		# General case: previous index in ALLOWED_STAGES
 		elif target_index > 0:
 			valid_previous_stages = [ALLOWED_STAGES[target_index - 1]]
@@ -242,6 +244,10 @@ def get_slabs_for(line: str, next_stage: str, limit=1, include_current_stage=Fal
 			"creation",
 			"modified",
 			"current_job_card",
+			"is_cur_stage_complete",
+			"is_recovered",
+			"is_repolished",
+			"is_recalibrated",
 		],
 	)
 
@@ -432,7 +438,7 @@ def _finish_qc(slab_number: str, slab_qc: SlabQualityReport, job_card: str):
 	from erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station import finish_qc_process
 
 	# Get Slab Grade
-	finish_qc_process(slab_number, slab_qc.grade, job_card, publish_slab_event=False)
+	finish_qc_process(slab_number, job_card, slab_qc, publish_slab_event=False)
 
 
 def pause_or_resume_slab_operation(slab_number: str, pause: bool):

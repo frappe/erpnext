@@ -1,5 +1,3 @@
-from erpnext.manufacturing.doctype.job_card.constants import LOW_PRIORITY
-import re
 from copy import deepcopy
 
 import frappe
@@ -7,6 +5,7 @@ from frappe import _
 from frappe.utils import flt
 
 from erpnext.manufacturing.doctype.bom.bom import BOM
+from erpnext.manufacturing.doctype.job_card.constants import LOW_PRIORITY
 from erpnext.manufacturing.doctype.job_card.job_card import JobCard
 from erpnext.manufacturing.doctype.manufacturing_process.constants import MFG_PROCESS_MAP, MIXING_PROCESS
 from erpnext.manufacturing.doctype.work_order.work_order import WorkOrder
@@ -237,6 +236,12 @@ def get_open_job_cards(
 
 	if slab_template:
 		filters["production_item"] = ["like", f"{slab_template} - %"]
+
+	if exclude_job_cards:
+		if isinstance(exclude_job_cards, list):
+			filters["name"] = ["not", "in", exclude_job_cards]
+		else:
+			filters["name"] = ["!=", exclude_job_cards]
 
 	if line:
 		if isinstance(line, list):

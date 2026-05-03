@@ -1,5 +1,8 @@
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue';
+import QueueDrawer from '../components/QueueDrawer.vue';
+import RepairHistoryDrawer from '../components/RepairHistoryDrawer.vue';
+import QualityObservationRecorder from '../components/QualityObservationRecorder.vue';
 
 const work_context = reactive({
     role: "Quality Analyst",
@@ -32,14 +35,27 @@ const hourglassIcon = ref('fa-hourglass-3');
 let hourglassInterval = null;
 const isProcessing = ref(false);
 const showRepairHistoryModal = ref(false);
-const originalRepairType = ref(null);
+const showQueueDrawer = ref(false);
+const colourOptions = ref([]);
+const queueSlabs = ref([]);
+const originalRepairType = ref('');
 
 // Visual Observation State
 const observations = ref([]);
-const newObservation = ref(null);
-const hoverCoordinates = ref({ x: 0, y: 0, visible: false });
-const slabScale = ref(1); // pixels per mm
-const visualizerRef = ref(null);
+
+const fetchQueueSlabs = async () => {
+    const res = await frappe.call({
+        method: 'erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station.get_slab_queue',
+        args: {
+            line: work_context.assigned_line,
+            slab_to_exclude: selectedSlab.value?.name
+        }
+    });
+
+	if (res.message) {
+		queueSlabs.value = res.message;
+    }
+};
 
 const productionDate = computed(() => {
     if (!selectedSlab.value?.creation) return "";
@@ -90,6 +106,7 @@ const form = reactive({
     repolish_type: [],
     recalibration_type: [],
     grade: '',
+    use_for_samples: 0,
     remarks: '',
 });
 
@@ -113,15 +130,8 @@ const fetchGrades = async () => {
 };
 
 const fetchRepairOptions = async () => {
-	if (!selectedSlab.value?.quality_assessment) {
-		return;
-	}
-
     const r = await frappe.call({
 		method: 'erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station.get_repair_options',
-		args: {
-			qc_report_name: selectedSlab.value.quality_assessment,
-		},
     });
 
     if (r.message && typeof r.message === 'object') {
@@ -130,11 +140,18 @@ const fetchRepairOptions = async () => {
         repolishOptions.value = r.message.repolish_type || [];
         recalibrationOptions.value = r.message.recalibration_type || [];
 		shadeOptions.value = r.message.shade || [];
+		colourOptions.value = r.message.colour || [];
+		observationColour.value = observationColour.value || r.message.colour[0] || "red";
     }
 };
 
 const fetchExistingQCReport = async (qc_name) => {
-    if (!qc_name) return;
+	if (!qc_name) {
+		slabQAReport.value = null;
+		observationColour.value = colourOptions?.value ? colourOptions.value[0] : "red";
+		originalRepairType.value = null;
+		return;
+    };
 
     const res = await frappe.call({
         method: 'erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station.get_slab_qc_report',
@@ -171,6 +188,7 @@ const fetchExistingQCReport = async (qc_name) => {
             repolish_type: (report.repolish_type || []).map(d => d.repolish_reason),
             recalibration_type: (report.recalibration_type || []).map(d => d.recalibration_reason),
             grade: report.grade,
+            use_for_samples: report.use_for_samples || 0,
 			remarks: report.remarks,
         });
 
@@ -186,12 +204,14 @@ const fetchExistingQCReport = async (qc_name) => {
     }
 };
 
-const get_slab_for_qa = async (job_card_number, play_ding = false) => {
+const get_slab_for_qa = async (job_card_number, slab_number = null, exclude_job_card = null, play_ding = false) => {
     const res = await frappe.call({
         method: 'erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station.get_slab_or_jobcard_for_qa',
         args: {
             line: work_context.assigned_line,
-            job_card_number: job_card_number,
+			job_card_number: job_card_number,
+			slab_number: slab_number,
+			exclude_job_card: exclude_job_card,
         }
     });
 
@@ -203,13 +223,19 @@ const get_slab_for_qa = async (job_card_number, play_ding = false) => {
         jobCardNumber.value = res.message.job_card?.name || jobCardNumber.value;
         slabSize.value = res.message.slab_size;
         mixerNumber.value = res.message.job_card?.mixer_number || res.message.slab?.child_line;
-        selectSlab(res.message.slab);
+        await selectSlab(res.message.slab);
         isQAStarted.value = res.message.job_card?.status === "Work In Progress";
     }
 }
 
 
-function selectSlab(slab) {
+const selectSlabFromQueue = async (slab) => {
+	await get_slab_for_qa(null, slab?.name, jobCardNumber.value);
+	showQueueDrawer.value = false;
+};
+
+
+async function selectSlab(slab) {
     if (!slab) {
         selectedSlab.value = null;
         jobCardNumber.value = null;
@@ -243,16 +269,14 @@ function selectSlab(slab) {
         repolish_type: [],
         recalibration_type: [],
         grade: '',
+        use_for_samples: 0,
         remarks: '',
     });
 
     // Clear observations
     observations.value = [];
-    newObservation.value = null;
 
-    if (slab && slab.quality_assessment) {
-        fetchExistingQCReport(slab.quality_assessment);
-    }
+    await fetchExistingQCReport(slab.quality_assessment);
 }
 
 function handleRepairChange() {
@@ -260,6 +284,7 @@ function handleRepairChange() {
     form.repolish_type = [];
     form.recalibration_type = [];
     form.grade = '';
+    form.use_for_samples = 0;
 }
 
 const confirmAndTag = async () => {
@@ -328,7 +353,7 @@ const confirmAndTag = async () => {
 
                     jobCardNumber.value = null;
                     selectedSlab.value = null;
-                    get_slab_for_qa(null, true);
+                    get_slab_for_qa(null, null, null, true);
                 }
             } catch (e) {
                 console.error(e);
@@ -371,6 +396,7 @@ async function loadData() {
     await get_slab_for_qa(jobCardNumber.value);
     await fetchGrades();
     await fetchRepairOptions();
+    await fetchQueueSlabs();
 }
 
 onUnmounted(() => {
@@ -392,7 +418,7 @@ frappe.realtime.on('slab_checkout', (slab) => {
     if (slab.line !== work_context.assigned_line || slab.status !== 'Polishing' || !slab.is_cur_stage_complete) return;
 
     if (!selectedSlab.value) {
-        get_slab_for_qa(null, true);
+        get_slab_for_qa(null, null, null, true);
     }
 
     // TODO: Use this if a queue is intelligently implemented on the frontend.
@@ -409,8 +435,10 @@ const startProcess = async () => {
     try {
         const res = await frappe.call({
             method: 'erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station.start_qa_process',
-            args: {
-                slab_number: selectedSlab.value.name,
+			args: {
+            	line: work_context.assigned_line,
+				slab_number: selectedSlab.value.name,
+                job_card_number: jobCardNumber.value,
             }
         });
 
@@ -423,125 +451,10 @@ const startProcess = async () => {
     }
 };
 
-// Visualizer Logic
-const getScale = () => {
-    if (!visualizerRef.value || !slabSize.value) return 1;
-    // Use getBoundingClientRect for precise sub-pixel rendering and zoom handling
-    const rect = visualizerRef.value.getBoundingClientRect();
-    return rect.width / slabSize.value.length;
+const showQueue = async () => {
+	showQueueDrawer.value = true;
+	fetchQueueSlabs();
 };
-
-const updateScale = () => {
-    if (visualizerRef.value) {
-        slabScale.value = getScale();
-    }
-};
-
-// Mouse tracking
-const handleMouseMove = (event) => {
-    if (!visualizerRef.value) return;
-    updateScale(); // Ensure scale is always current (handles zoom/resize)
-    const rect = visualizerRef.value.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-
-    // Convert to mm
-    const mmX = Math.round(x / slabScale.value);
-    const mmY = Math.round(y / slabScale.value);
-
-    // Clamp to slab dimensions
-    if (mmX >= 0 && mmX <= slabSize.value.length && mmY >= 0 && mmY <= slabSize.value.breadth) {
-        hoverCoordinates.value = { x: mmX, y: mmY, visible: true, clientX: event.clientX, clientY: event.clientY };
-    } else {
-        hoverCoordinates.value.visible = false;
-    }
-};
-
-const handleMouseLeave = () => {
-    hoverCoordinates.value.visible = false;
-};
-
-// Click to add observation
-const editingObservationIndex = ref(null);
-
-const handleSlabClick = (event) => {
-    if (!visualizerRef.value || newObservation.value) return; // Don't start new if one is open
-
-    // Clear editing state if clicking elsewhere
-    editingObservationIndex.value = null;
-
-    const rect = visualizerRef.value.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-
-    const mmX = Math.round(x / slabScale.value);
-    const mmY = Math.round(y / slabScale.value);
-
-    newObservation.value = {
-        x: mmX,
-        y: mmY,
-        text: ''
-    };
-
-    // Auto-focus input next tick
-    setTimeout(() => {
-        const input = document.getElementById('obs-input');
-        if (input) input.focus();
-    }, 100);
-};
-
-const editObservation = (index) => {
-    editingObservationIndex.value = index;
-    newObservation.value = { ...observations.value[index] };
-
-    // Auto-focus input next tick
-    setTimeout(() => {
-        const input = document.getElementById('obs-input');
-        if (input) input.focus();
-    }, 100);
-};
-
-const deleteObservation = () => {
-	if (editingObservationIndex.value !== null) {
-    	if (observations.value[editingObservationIndex.value]?.name) {
-			return;
-        }
-
-        observations.value.splice(editingObservationIndex.value, 1);
-    }
-
-    newObservation.value = null;
-    editingObservationIndex.value = null;
-};
-
-const saveObservation = () => {
-	if (editingObservationIndex.value !== null && observations.value[editingObservationIndex.value]?.name) {
-		return;
-	}
-
-    if (newObservation.value && newObservation.value.text.trim()) {
-        if (editingObservationIndex.value !== null) {
-             observations.value[editingObservationIndex.value] = { ...newObservation.value };
-        } else {
-             observations.value.push({ ...newObservation.value });
-        }
-    }
-    newObservation.value = null;
-    editingObservationIndex.value = null;
-};
-
-const cancelObservation = () => {
-    newObservation.value = null;
-    editingObservationIndex.value = null;
-};
-
-onMounted(() => {
-    window.addEventListener('resize', updateScale);
-});
-
-onUnmounted(() => {
-    window.removeEventListener('resize', updateScale);
-});
 </script>
 
 <template>
@@ -603,14 +516,15 @@ onUnmounted(() => {
                         </div>
                     </div>
 
-
-
-                    <div v-if="!isQAStarted" class="d-flex align-items-center justify-content-center p-5 border rounded"
+                    <div v-if="!isQAStarted" class="d-flex flex-column align-items-center justify-content-center p-5 border rounded"
                         style="min-height: 400px; background: var(--card-bg);">
-                        <button class="btn btn-primary btn-lg px-5 font-weight-bold"
+                        <button class="btn btn-primary btn-lg px-5 font-weight-bold mb-4"
                             style="font-size: 1.2rem; transform: scale(1.2);" :disabled="isProcessing" @click="startProcess()">
                             <span v-if="isProcessing" class="fa fa-spinner fa-spin mr-2"></span>
                             <span v-else class="fa fa-play mr-2"></span>{{ __('Start Quality Analysis') }}
+                        </button>
+                        <button v-if="queueSlabs.length" class="btn btn-primary btn-md px-5 font-weight-bold mt-3" @click="showQueue();">
+                            <span class="fa fa-list mr-2"></span>{{ __('Show Slab Queue') }}
                         </button>
                     </div>
 
@@ -685,108 +599,11 @@ onUnmounted(() => {
                         </div>
 
                         <h5 class="mb-4 border-bottom pb-2">{{ __('Observations') }}</h5>
-                        <div class="row">
-                            <div class="col-12" v-if="slabSize">
-                                <div class="visualizer-container position-relative mb-3"
-                                    ref="visualizerRef"
-                                    :style="{
-                                        width: '100%',
-                                        maxWidth: '800px',
-                                        aspectRatio: `${slabSize.length} / ${slabSize.breadth}`,
-                                        outline: '2px solid var(--text-color)',
-                                        background: 'var(--fg-color)',
-                                        cursor: 'crosshair',
-                                        margin: '0 auto'
-                                    }"
-                                    @mousemove="handleMouseMove"
-                                    @mouseleave="handleMouseLeave"
-                                    @click="handleSlabClick">
-
-                                    <!-- Crosshairs & Labels -->
-                                    <template v-if="hoverCoordinates.visible && !newObservation">
-                                        <!-- Horizontal Line -->
-                                        <div class="crosshair-h"
-                                            :style="{ top: (hoverCoordinates.y * slabScale) + 'px' }">
-                                        </div>
-
-                                        <!-- Vertical Line -->
-                                        <div class="crosshair-v"
-                                            :style="{ left: (hoverCoordinates.x * slabScale) + 'px' }">
-                                        </div>
-
-                                        <!-- X Label (Left Distance) -->
-                                        <div class="crosshair-label label-x"
-                                            :style="{
-                                                top: (hoverCoordinates.y * slabScale) + 'px',
-                                                left: (hoverCoordinates.x * slabScale) + 'px'
-                                            }">
-                                            {{ hoverCoordinates.x }} mm
-                                        </div>
-
-                                        <!-- Y Label (Top Distance) -->
-                                        <div class="crosshair-label label-y"
-                                            :style="{
-                                                top: (hoverCoordinates.y * slabScale) + 'px',
-                                                left: (hoverCoordinates.x * slabScale) + 'px'
-                                            }">
-                                            {{ hoverCoordinates.y }} mm
-                                        </div>
-                                    </template>
-
-                                    <!-- Existing Observations -->
-                                    <div v-for="(obs, index) in observations" :key="index"
-                                        class="obs-marker"
-                                        :style="{
-                                            left: (obs.x * slabScale) + 'px',
-                                            top: (obs.y * slabScale) + 'px'
-                                        }"
-                                        :title="`${obs.text} (${obs.x}, ${obs.y})`"
-                                        @click.stop="editObservation(index)">
-                                        <div class="marker-dot" :style="{ backgroundColor: obs.colour || observationColour }"></div>
-                                    </div>
-
-                                    <!-- New Observation Input -->
-                                    <div v-if="newObservation"
-                                        class="obs-input-popup p-2 shadow rounded border"
-                                        :style="{
-                                            left: (newObservation.x * slabScale) + 'px',
-                                            top: (newObservation.y * slabScale) + 'px',
-                                            position: 'absolute',
-                                            zIndex: 100,
-                                            minWidth: '200px',
-                                            background: 'var(--card-bg)',
-                                            color: 'var(--text-color)',
-                                            transform: 'translate(-10px, 10px)'
-                                        }"
-                                        @click.stop>
-                                        <div class="small text-muted mb-1">
-                                            {{ newObservation.x }}, {{ newObservation.y }}
-                                        </div>
-                                        <input id="obs-input" type="text" v-model="newObservation.text"
-                                            class="form-control form-control-sm mb-2" :disabled="editingObservationIndex !== null && observations[editingObservationIndex]?.name"
-                                            :placeholder="__('Enter observation')"
-                                            @keydown.enter="saveObservation"
-                                            @keydown.esc="cancelObservation">
-                                        <div class="d-flex justify-content-end">
-                                            <button v-if="editingObservationIndex !== null && !observations[editingObservationIndex]?.name"
-                                                class="btn btn-xs btn-danger mr-auto"
-                                                @click="deleteObservation">
-                                                Delete
-                                            </button>
-                                            <button class="btn btn-xs btn-light mr-1" @click="cancelObservation">Cancel</button>
-                                            <button class="btn btn-xs btn-primary" v-if="editingObservationIndex !== null && !observations[editingObservationIndex]?.name" @click="saveObservation">Save</button>
-                                        </div>
-                                    </div>
-
-                                </div>
-                                <div class="text-center text-muted small mt-2">
-                                    {{ __('Click anywhere on the slab to add an observation point.') }}
-                                </div>
-                            </div>
-                            <div class="col-12 text-center py-5 text-muted" v-else>
-                                {{ __('Slab dimensions not available for visualization.') }}
-                            </div>
-                        </div>
+                        <QualityObservationRecorder 
+                            v-model:observations="observations" 
+                            :slabSize="slabSize" 
+                            :observationColour="observationColour" 
+                        />
 
                         <!-- Grading & Remarks -->
                         <h5 class="mb-4 border-bottom pb-2">{{ __('Grading & Remarks') }}</h5>
@@ -812,6 +629,14 @@ onUnmounted(() => {
                                         {{ g.code }}
                                     </option>
                                 </select>
+                            </div>
+                            <div class="col-md-3 mb-3 d-flex align-items-center pt-4" v-if="form.repair === 'None' && form.grade?.toLowerCase().includes('reject')">
+                                <div class="form-check">
+                                    <input type="checkbox" v-model="form.use_for_samples" :true-value="1" :false-value="0" id="use_for_samples" class="form-check-input">
+                                    <label class="form-check-label font-weight-bold" for="use_for_samples">
+                                        {{ __('Use for samples') }}
+                                    </label>
+                                </div>
                             </div>
                             <div class="col-md-3 mb-3" v-if="form.repair === 'Recovery'">
                                 <label class="small text-muted">{{ __('Recovery Type') }}<span class="text-danger">*</span></label>
@@ -874,62 +699,20 @@ onUnmounted(() => {
             </Transition>
         </div>
 
-        <!-- Fixed Repair History Toggle Button -->
-        <button v-if="selectedSlab" class="fixed-repair-btn btn btn-primary shadow" @click="showRepairHistoryModal = true">
-            <span class="fa fa-wrench mr-2"></span>
-            <span class="small font-weight-bold text-uppercase">{{ __('History') }}</span>
-        </button>
+        <!-- Queue Drawer Component -->
+        <QueueDrawer 
+            v-model:show="showQueueDrawer" 
+            :queueSlabs="queueSlabs" 
+            :isQAStarted="isQAStarted"
+            @select="selectSlabFromQueue" 
+            @fetch-queue="fetchQueueSlabs"
+        />
 
-        <!-- Repair History Drawer -->
-        <div class="drawer-container">
-            <Transition name="fade">
-                <div v-if="showRepairHistoryModal" class="drawer-backdrop" @click="showRepairHistoryModal = false"></div>
-            </Transition>
-            <Transition name="slide-right">
-                <div v-if="showRepairHistoryModal" class="drawer-panel p-4 shadow-lg">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="mb-0">{{ __('Repair History') }}</h4>
-                        <button class="btn btn-light btn-sm" @click="showRepairHistoryModal = false">
-                            <span class="fa fa-times"></span>
-                        </button>
-                    </div>
-                    <table class="table table-bordered table-sm small">
-                        <thead class="text-muted text-uppercase">
-                            <tr>
-                                <th style="width: 40px;"></th>
-                                <th>{{ __('Repair Type') }}</th>
-                                <th>{{ __('Reasons') }}</th>
-                                <th style="width: 170px;">{{ __('Repair Date') }}</th>
-                                <th>{{ __('Remarks') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="(item, idx) in slabQAReport?.repair_history" :key="idx">
-                                <td class="text-center" style="vertical-align: middle;">
-                                    <div :style="{
-                                        width: '12px',
-                                        height: '12px',
-                                        borderRadius: '50%',
-                                        backgroundColor: item.colour,
-                                        border: '1px solid var(--border-color)',
-                                        margin: '0 auto'
-                                    }"></div>
-                                </td>
-                                <td style="vertical-align: middle;" class="font-weight-bold">{{ item.repair }}</td>
-                                <td style="vertical-align: middle;">{{ item.repair_reason }}</td>
-                                <td style="vertical-align: middle;">{{ $filters.formatDateTime(item.repair_date) }}</td>
-                                <td>{{ item.remarks }}</td>
-                            </tr>
-                            <tr v-if="!slabQAReport?.repair_history?.length">
-                                <td colspan="5" class="text-center text-muted p-4">
-                                    {{ __('No repair history available.') }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </Transition>
-        </div>
+        <!-- Repair History Drawer Component -->
+        <RepairHistoryDrawer 
+            v-model:show="showRepairHistoryModal" 
+            :slabQAReport="slabQAReport" 
+        />
     </div>
 </template>
 
@@ -938,61 +721,6 @@ onUnmounted(() => {
     min-height: 80vh;
     background: var(--card-bg, #fff);
     color: var(--text-color);
-}
-
-.fixed-repair-btn {
-    position: fixed;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    border-radius: 8px 0 0 8px;
-    z-index: 1040;
-    padding: 12px 16px;
-    transition: all 0.2s;
-}
-
-.fixed-repair-btn:hover {
-    padding-right: 24px;
-}
-
-.drawer-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1050;
-}
-
-.drawer-panel {
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: 800px;
-    height: 100%;
-    z-index: 1060;
-    overflow-y: auto;
-    background-color: var(--bg-color, #f8f9fa);
-}
-
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.3s;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-    opacity: 0;
-}
-
-.slide-right-enter-active,
-.slide-right-leave-active {
-    transition: transform 0.3s ease;
-}
-
-.slide-right-enter-from,
-.slide-right-leave-to {
-    transform: translateX(100%);
 }
 
 .incoming-list {
@@ -1016,7 +744,7 @@ onUnmounted(() => {
 }
 
 .empty-state {
-    background-color: var(--fg-color, #f8f9fa);
+	background-color: var(--fg-color, #f8f9fa);
     border: 1px solid var(--border-color) !important;
 }
 
@@ -1129,66 +857,3 @@ onUnmounted(() => {
 }
 </style>
 
-<style scoped>
-.obs-marker {
-    position: absolute;
-    width: 0;
-    height: 0;
-}
-
-.marker-dot {
-    width: 12px;
-    height: 12px;
-    border: 2px solid white;
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-
-.marker-dot:hover {
-    transform: translate(-50%, -50%) scale(1.2);
-}
-
-.crosshair-h {
-    position: absolute;
-    width: 100%;
-    height: 1px;
-    left: 0;
-    border-top: 1px dashed var(--text-color);
-    pointer-events: none;
-    z-index: 10;
-}
-
-.crosshair-v {
-    position: absolute;
-    height: 100%;
-    width: 1px;
-    top: 0;
-    border-left: 1px dashed var(--text-color);
-    pointer-events: none;
-    z-index: 10;
-}
-
-.crosshair-label {
-    position: absolute;
-    background: var(--text-color);
-    color: var(--card-bg);
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 10px;
-    pointer-events: none;
-    z-index: 11;
-    white-space: nowrap;
-}
-
-.label-x {
-    transform: translate(-100%, -50%);
-    margin-left: -30px;
-}
-
-.label-y {
-    transform: translate(-50%, -100%);
-    margin-top: -30px;
-}
-</style>
