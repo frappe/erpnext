@@ -10,6 +10,7 @@ from pypika.terms import Bracket, LiteralValue, Order
 
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.report.utils import (
+	add_party_name_column,
 	apply_common_conditions,
 	get_advance_taxes_and_charges,
 	get_journal_entries,
@@ -174,8 +175,9 @@ def get_columns(invoice_list, additional_table_columns, include_payments=False):
 			"options": "Supplier",
 			"width": 120,
 		},
-		{"label": _("Supplier Name"), "fieldname": "supplier_name", "fieldtype": "Data", "width": 120},
 	]
+
+	add_party_name_column(columns, party_type="Supplier", fieldname="supplier_name")
 
 	if additional_table_columns and not include_payments:
 		columns += additional_table_columns
