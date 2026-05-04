@@ -15,6 +15,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_dimension_with_children,
 )
 from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
+from erpnext.accounts.report.utils import show_party_name
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 from erpnext.stock.utils import get_incoming_rate
 
@@ -181,9 +182,7 @@ def get_data_when_grouped_by_invoice(columns, gross_profit_data, filters, group_
 	columns[0]["options"] = "Item"
 	columns[0]["width"] = 300
 	# removing Item Code and Item Name columns
-	supplier_master_name = frappe.db.get_single_value("Buying Settings", "supp_master_name")
-	customer_master_name = frappe.db.get_single_value("Selling Settings", "cust_master_name")
-	if supplier_master_name == "Supplier Name" and customer_master_name == "Customer Name":
+	if not show_party_name():
 		del columns[4:6]
 	else:
 		del columns[5:7]
@@ -239,12 +238,7 @@ def get_data_when_not_grouped_by_invoice(gross_profit_data, filters, group_wise_
 	group_columns = group_wise_columns.get(scrub(filters.group_by))
 
 	# removing customer_name from group columns
-	customer_master_name = frappe.db.get_single_value("Selling Settings", "cust_master_name")
-	supplier_master_name = frappe.db.get_single_value("Buying Settings", "supp_master_name")
-
-	if "customer_name" in group_columns and (
-		supplier_master_name == "Supplier Name" and customer_master_name == "Customer Name"
-	):
+	if "customer_name" in group_columns and not show_party_name():
 		group_columns = [col for col in group_columns if col != "customer_name"]
 
 	for src in gross_profit_data.grouped_data:
@@ -277,9 +271,6 @@ def get_data_when_not_grouped_by_invoice(gross_profit_data, filters, group_wise_
 
 def get_columns(group_wise_columns, filters):
 	columns = []
-
-	supplier_master_name = frappe.db.get_single_value("Buying Settings", "supp_master_name")
-	customer_master_name = frappe.db.get_single_value("Selling Settings", "cust_master_name")
 
 	column_map = frappe._dict(
 		{
@@ -456,9 +447,7 @@ def get_columns(group_wise_columns, filters):
 	)
 
 	for col in group_wise_columns.get(scrub(filters.group_by)):
-		if col == "customer_name" and (
-			supplier_master_name == "Supplier Name" and customer_master_name == "Customer Name"
-		):
+		if col == "customer_name" and not show_party_name():
 			continue
 		columns.append(column_map.get(col))
 
