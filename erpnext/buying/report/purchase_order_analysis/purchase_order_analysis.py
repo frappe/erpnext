@@ -9,6 +9,8 @@ from frappe import _
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import date_diff, flt, getdate
 
+from erpnext.accounts.report.utils import add_party_name_column, show_party_name
+
 
 def execute(filters=None):
 	if not filters:
@@ -42,6 +44,7 @@ def get_data(filters):
 	po = frappe.qb.DocType("Purchase Order")
 	po_item = frappe.qb.DocType("Purchase Order Item")
 	pi_item = frappe.qb.DocType("Purchase Invoice Item")
+	supplier = frappe.qb.DocType("Supplier")
 
 	query = (
 		frappe.qb.from_(po)
@@ -75,6 +78,13 @@ def get_data(filters):
 		.orderby(po.transaction_date)
 	)
 
+	if show_party_name():
+		query = (
+			query.left_join(supplier)
+			.on(supplier.name == po.supplier)
+			.select(supplier.supplier_name.as_("supplier_name"))
+		)
+
 	if filters.get("company"):
 		query = query.where(po.company == filters.get("company"))
 
@@ -90,9 +100,7 @@ def get_data(filters):
 	if filters.get("project"):
 		query = query.where(po_item.project == filters.get("project"))
 
-	data = query.run(as_dict=True)
-
-	return data
+	return query.run(as_dict=True)
 
 
 def update_received_amount(data):
@@ -222,6 +230,8 @@ def get_columns(filters):
 			"width": 130,
 		},
 	]
+
+	add_party_name_column(columns, party_type="Supplier", fieldname="supplier_name", index=5)
 
 	if not filters.get("group_by_po"):
 		columns.append(
