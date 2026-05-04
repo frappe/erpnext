@@ -178,7 +178,9 @@ def get_dimension_period_list(filters: frappe._dict) -> list[dict]:
 
 def is_dimension_axis(period_list: list[dict]) -> bool:
 	"""True if the provided period_list is a dimension-grouped axis."""
-	return bool(period_list) and bool(period_list[0].get("dimension_field"))
+	if not isinstance(period_list, list) or not period_list:
+		return False
+	return bool(period_list[0].get("dimension_field"))
 
 
 def get_total_period_keys(period_list: list[dict], accumulated_values: bool) -> list[str]:
