@@ -1,6 +1,7 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import frappe
 from frappe.desk.query_report import run
 
 from erpnext.selling.report.sales_partner_commission_summary.test_sales_partner_commission_summary import (
@@ -9,6 +10,11 @@ from erpnext.selling.report.sales_partner_commission_summary.test_sales_partner_
 
 
 class TestSalesPartnerTransactionSummary(SalesPartnerSummaryReportTestMixin):
+	@classmethod
+	def tearDownClass(cls):
+		frappe.db.rollback()
+		return super().tearDownClass()
+
 	def setUp(self):
 		self.filters = {
 			"company": "_Test Company",

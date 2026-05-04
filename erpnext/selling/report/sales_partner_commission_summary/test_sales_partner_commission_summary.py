@@ -46,7 +46,6 @@ class SalesPartnerSummaryReportTestMixin(FrappeTestCase):
 
 	def create_transactions(self, doctype):
 		from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import (
-			POSInvoiceTestMixin,
 			create_pos_invoice,
 		)
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -258,6 +257,11 @@ class SalesPartnerSummaryReportTestMixin(FrappeTestCase):
 
 
 class TestSalesPartnerCommissionSummary(SalesPartnerSummaryReportTestMixin):
+	@classmethod
+	def tearDownClass(cls):
+		frappe.db.rollback()
+		return super().tearDownClass()
+
 	def setUp(self):
 		self.filters = {
 			"company": "_Test Company",
