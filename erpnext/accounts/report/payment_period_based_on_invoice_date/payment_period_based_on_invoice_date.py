@@ -9,6 +9,8 @@ from frappe.query_builder.functions import Abs
 from frappe.utils import getdate
 
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
+from erpnext.accounts.report.utils import add_party_name_column
+from erpnext.accounts.report.utils import show_party_name as _show_party_name
 
 
 def execute(filters=None):
@@ -17,11 +19,13 @@ def execute(filters=None):
 
 	validate_filters(filters)
 
+	show_party_name = _show_party_name()
 	columns = get_columns(filters)
-	entries = get_entries(filters)
+	entries = get_entries(filters, show_party_name)
 	invoice_details = get_invoice_posting_date_map(filters)
 
 	data = []
+
 	for d in entries:
 		invoice = invoice_details.get(d.against_voucher_no) or frappe._dict()
 		payment_amount = d.amount
@@ -31,26 +35,31 @@ def execute(filters=None):
 		if d.against_voucher_no:
 			ReceivablePayableReport(filters).get_ageing_data(invoice.posting_date, d)
 
-		row = [
-			d.voucher_type,
-			d.voucher_no,
-			d.party_type,
-			d.party,
-			d.posting_date,
-			d.against_voucher_no,
-			invoice.posting_date,
-			invoice.due_date,
-			d.amount,
-			d.remarks,
-			d.age,
-			d.range1,
-			d.range2,
-			d.range3,
-			d.range4,
-		]
+		row = frappe._dict(
+			{
+				"payment_document": d.voucher_type,
+				"payment_entry": d.voucher_no,
+				"party_type": d.party_type,
+				"party": d.party,
+				"posting_date": d.posting_date,
+				"invoice": d.against_voucher_no,
+				"invoice_posting_date": invoice.posting_date,
+				"due_date": invoice.due_date,
+				"amount": d.amount,
+				"remarks": d.remarks,
+				"age": d.age,
+				"range1": d.range1,
+				"range2": d.range2,
+				"range3": d.range3,
+				"range4": d.range4,
+			}
+		)
+
+		if show_party_name:
+			row.party_name = d.party_name
 
 		if invoice.due_date:
-			row.append((getdate(d.posting_date) - getdate(invoice.due_date)).days or 0)
+			row.delay_in_payment = (getdate(d.posting_date) - getdate(invoice.due_date)).days or 0
 
 		data.append(row)
 
@@ -69,7 +78,7 @@ def validate_filters(filters):
 
 
 def get_columns(filters):
-	return [
+	columns = [
 		{
 			"fieldname": "payment_document",
 			"label": _("Payment Document Type"),
@@ -91,37 +100,50 @@ def get_columns(filters):
 			"options": "party_type",
 			"width": 160,
 		},
-		{"fieldname": "posting_date", "label": _("Posting Date"), "fieldtype": "Date", "width": 100},
-		{
-			"fieldname": "invoice",
-			"label": _("Invoice"),
-			"fieldtype": "Link",
-			"options": "Purchase Invoice"
-			if filters.get("payment_type") == _("Outgoing")
-			else "Sales Invoice",
-			"width": 160,
-		},
-		{
-			"fieldname": "invoice_posting_date",
-			"label": _("Invoice Posting Date"),
-			"fieldtype": "Date",
-			"width": 100,
-		},
-		{"fieldname": "due_date", "label": _("Payment Due Date"), "fieldtype": "Date", "width": 100},
-		{"fieldname": "amount", "label": _("Amount"), "fieldtype": "Currency", "width": 140},
-		{"fieldname": "remarks", "label": _("Remarks"), "fieldtype": "Data", "width": 200},
-		{"fieldname": "age", "label": _("Age"), "fieldtype": "Int", "width": 50},
-		{"fieldname": "range1", "label": _("0-30"), "fieldtype": "Currency", "width": 140},
-		{"fieldname": "range2", "label": _("30-60"), "fieldtype": "Currency", "width": 140},
-		{"fieldname": "range3", "label": _("60-90"), "fieldtype": "Currency", "width": 140},
-		{"fieldname": "range4", "label": _("90 Above"), "fieldtype": "Currency", "width": 140},
-		{
-			"fieldname": "delay_in_payment",
-			"label": _("Delay in payment (Days)"),
-			"fieldtype": "Int",
-			"width": 100,
-		},
 	]
+
+	add_party_name_column(columns, party_type=get_party_type(filters), fieldname="party_name")
+
+	columns.extend(
+		[
+			{"fieldname": "posting_date", "label": _("Posting Date"), "fieldtype": "Date", "width": 100},
+			{
+				"fieldname": "invoice",
+				"label": _("Invoice"),
+				"fieldtype": "Link",
+				"options": "Purchase Invoice"
+				if filters.get("payment_type") == _("Outgoing")
+				else "Sales Invoice",
+				"width": 160,
+			},
+			{
+				"fieldname": "invoice_posting_date",
+				"label": _("Invoice Posting Date"),
+				"fieldtype": "Date",
+				"width": 100,
+			},
+			{"fieldname": "due_date", "label": _("Payment Due Date"), "fieldtype": "Date", "width": 100},
+			{"fieldname": "amount", "label": _("Amount"), "fieldtype": "Currency", "width": 140},
+			{"fieldname": "remarks", "label": _("Remarks"), "fieldtype": "Data", "width": 200},
+			{"fieldname": "age", "label": _("Age"), "fieldtype": "Int", "width": 50},
+			{"fieldname": "range1", "label": _("0-30"), "fieldtype": "Currency", "width": 140},
+			{"fieldname": "range2", "label": _("30-60"), "fieldtype": "Currency", "width": 140},
+			{"fieldname": "range3", "label": _("60-90"), "fieldtype": "Currency", "width": 140},
+			{"fieldname": "range4", "label": _("90 Above"), "fieldtype": "Currency", "width": 140},
+			{
+				"fieldname": "delay_in_payment",
+				"label": _("Delay in payment (Days)"),
+				"fieldtype": "Int",
+				"width": 100,
+			},
+		]
+	)
+
+	return columns
+
+
+def get_party_type(filters):
+	return "Supplier" if filters.get("payment_type") == _("Outgoing") else "Customer"
 
 
 def get_conditions(filters):
@@ -151,7 +173,7 @@ def get_conditions(filters):
 	return conditions
 
 
-def get_entries(filters):
+def get_entries(filters, show_party_name=False):
 	ple = qb.DocType("Payment Ledger Entry")
 	conditions = get_conditions(filters)
 
@@ -169,6 +191,24 @@ def get_entries(filters):
 		)
 		.where(Criterion.all(conditions))
 	)
+
+	if show_party_name:
+		party_type = get_party_type(filters)
+		if party_type == "Supplier":
+			supplier = qb.DocType("Supplier")
+			query = (
+				query.left_join(supplier)
+				.on(supplier.name == ple.party)
+				.select(supplier.supplier_name.as_("party_name"))
+			)
+		else:
+			customer = qb.DocType("Customer")
+			query = (
+				query.left_join(customer)
+				.on(customer.name == ple.party)
+				.select(customer.customer_name.as_("party_name"))
+			)
+
 	res = query.run(as_dict=True)
 	return res
 
