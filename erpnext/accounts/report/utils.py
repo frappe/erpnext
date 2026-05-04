@@ -476,3 +476,25 @@ def get_party_name_map(parties_by_type=None):
 		party_map[party_type] = frappe._dict(records)
 
 	return party_map
+
+
+def enrich_with_party_names(entries):
+	"""Populate `party_name` on each entry dict/object from master if show_party_name is enabled."""
+	if not show_party_name():
+		return
+
+	parties_by_type = {}
+	for entry in entries:
+		party_type = entry.get("party_type")
+		party = entry.get("party")
+		if party_type and party:
+			parties_by_type.setdefault(party_type, set()).add(party)
+
+	party_name_map = get_party_name_map(parties_by_type)
+
+	for entry in entries:
+		party_type = entry.get("party_type")
+		party = entry.get("party")
+		if party_type and party:
+			party_name = party_name_map.get(party_type, {}).get(party)
+			entry["party_name"] = party_name

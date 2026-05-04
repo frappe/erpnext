@@ -7,6 +7,8 @@ import frappe
 from frappe import _, qb
 from frappe.query_builder import Criterion
 
+from erpnext.accounts.report.utils import add_party_name_column, enrich_with_party_names
+
 
 class PaymentLedger:
 	def __init__(self, filters=None):
@@ -160,6 +162,7 @@ class PaymentLedger:
 		self.columns.append(
 			dict(label=_("Party"), fieldname="party", fieldtype="data", options=options, width="100")
 		)
+		add_party_name_column(self.columns)
 		self.columns.append(
 			dict(
 				label=_("Voucher Type"),
@@ -229,6 +232,8 @@ class PaymentLedger:
 
 		# convert dictionary to list and add balance rows
 		self.build_data()
+
+		enrich_with_party_names(self.data)
 
 		return self.columns, self.data
 
