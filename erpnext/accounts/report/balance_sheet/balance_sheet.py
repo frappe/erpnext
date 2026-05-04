@@ -27,9 +27,6 @@ def execute(filters=None):
 
 	if filters and filters.get("group_by_dimension"):
 		period_list = get_dimension_period_list(filters)
-		# Growth view assumes ordered time periods; not meaningful across dims.
-		if filters.get("selected_view") == "Growth":
-			filters["selected_view"] = "Report"
 	else:
 		period_list = get_period_list(
 			filters.from_fiscal_year,
@@ -117,7 +114,11 @@ def execute(filters=None):
 		data.append(total_credit)
 
 	columns = get_columns(
-		filters.periodicity, period_list, filters.accumulated_values, company=filters.company
+		filters.periodicity,
+		period_list,
+		filters.accumulated_values,
+		company=filters.company,
+		selected_view=filters.get("selected_view"),
 	)
 
 	chart = get_chart_data(filters, period_list, asset, liability, equity, currency)

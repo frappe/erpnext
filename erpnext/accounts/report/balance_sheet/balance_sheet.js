@@ -13,7 +13,7 @@ frappe.query_reports[BS_REPORT_NAME]["filters"].push(
 		label: __("Group by Dimension"),
 		fieldtype: "Select",
 		options: erpnext.financial_statements.get_accounting_dimension_options(),
-		depends_on: "eval: (!doc.selected_view || doc.selected_view === 'Report') && !doc.report_template",
+		depends_on: "eval: !doc.report_template",
 	},
 	{
 		fieldname: "report_template",

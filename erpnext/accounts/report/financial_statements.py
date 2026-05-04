@@ -892,7 +892,9 @@ def get_cost_centers_with_children(cost_centers):
 	return list(set(all_cost_centers))
 
 
-def get_columns(periodicity, period_list, accumulated_values=1, company=None, cash_flow=False):
+def get_columns(
+	periodicity, period_list, accumulated_values=1, company=None, cash_flow=False, selected_view=None
+):
 	columns = [
 		{
 			"fieldname": "account" if not cash_flow else "section",
@@ -931,17 +933,27 @@ def get_columns(periodicity, period_list, accumulated_values=1, company=None, ca
 				"hidden": 1,
 			}
 		)
+	seen_dim_values = set()
 	for period in period_list:
-		columns.append(
-			{
-				"fieldname": period.key,
-				"label": period.label,
-				"fieldtype": "Currency",
-				"options": "currency",
-				"width": 150,
-			}
-		)
-	if is_dimension_axis(period_list) or (periodicity != "Yearly" and not accumulated_values):
+		dim_value = period.get("dimension_value")
+		is_first_in_dim = dim_value is not None and dim_value not in seen_dim_values
+		if is_first_in_dim:
+			seen_dim_values.add(dim_value)
+		col = {
+			"fieldname": period.key,
+			"label": period.label,
+			"fieldtype": "Currency",
+			"options": "currency",
+			"width": 150,
+		}
+		if dim_value is not None:
+			col["dimension_value"] = dim_value
+		if is_first_in_dim:
+			col["is_first_in_dim"] = True
+		columns.append(col)
+	if selected_view not in ("Growth", "Margin") and (
+		is_dimension_axis(period_list) or (periodicity != "Yearly" and not accumulated_values)
+	):
 		columns.append(
 			{
 				"fieldname": "total",
@@ -969,6 +981,10 @@ def compute_growth_view_data(data, columns):
 
 	for row_idx in range(len(data_copy)):
 		for column_idx in range(1, len(columns)):
+			# Skip cross-dimension boundary — first period of a new dim has no prior period in the same dim.
+			if columns[column_idx - 1].get("dimension_value") != columns[column_idx].get("dimension_value"):
+				continue
+
 			previous_period_key = columns[column_idx - 1].get("key")
 			current_period_key = columns[column_idx].get("key")
 			current_period_value = data_copy[row_idx].get(current_period_key)
@@ -993,9 +1009,6 @@ def compute_growth_view_data(data, columns):
 def compute_margin_view_data(data, columns, accumulated_values):
 	if not columns:
 		return
-
-	if not accumulated_values:
-		columns.append({"key": "total"})
 
 	data_copy = copy.deepcopy(data)
 

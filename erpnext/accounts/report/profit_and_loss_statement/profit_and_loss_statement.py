@@ -28,9 +28,6 @@ def execute(filters=None):
 
 	if filters and filters.get("group_by_dimension"):
 		period_list = get_dimension_period_list(filters)
-		# Growth/Margin views assume ordered time periods.
-		if filters.get("selected_view") in ("Growth", "Margin"):
-			filters["selected_view"] = "Report"
 	else:
 		period_list = get_period_list(
 			filters.from_fiscal_year,
@@ -80,7 +77,13 @@ def execute(filters=None):
 	if net_profit_loss:
 		data.append(net_profit_loss)
 
-	columns = get_columns(filters.periodicity, period_list, filters.accumulated_values, filters.company)
+	columns = get_columns(
+		filters.periodicity,
+		period_list,
+		filters.accumulated_values,
+		filters.company,
+		selected_view=filters.get("selected_view"),
+	)
 
 	currency = filters.presentation_currency or frappe.get_cached_value(
 		"Company", filters.company, "default_currency"
