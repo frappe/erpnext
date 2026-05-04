@@ -17,6 +17,7 @@ from erpnext.accounts.report.financial_statements import (
 	get_dimension_period_list,
 	get_filtered_list_for_consolidated_report,
 	get_period_list,
+	get_total_period_keys,
 )
 
 
@@ -80,7 +81,13 @@ def execute(filters=None):
 	)
 
 	provisional_profit_loss, total_credit = get_provisional_profit_loss(
-		asset, liability, equity, period_list, filters.company, currency
+		asset,
+		liability,
+		equity,
+		period_list,
+		filters.company,
+		currency,
+		accumulated_values=filters.accumulated_values,
 	)
 
 	message, opening_balance = check_opening_balance(asset, liability, equity)
@@ -126,12 +133,18 @@ def execute(filters=None):
 
 
 def get_provisional_profit_loss(
-	asset, liability, equity, period_list, company, currency=None, consolidated=False
+	asset,
+	liability,
+	equity,
+	period_list,
+	company,
+	currency=None,
+	consolidated=False,
+	accumulated_values=False,
 ):
 	provisional_profit_loss = {}
 	total_row = {}
 	if asset:
-		total = total_row_total = 0
 		currency = currency or frappe.get_cached_value("Company", company, "default_currency")
 		total_row = {
 			"account_name": "'" + _("Total (Credit)") + "'",
@@ -157,11 +170,11 @@ def get_provisional_profit_loss(
 			if provisional_profit_loss[key]:
 				has_value = True
 
-			total += flt(provisional_profit_loss[key])
-			provisional_profit_loss["total"] = total
-
-			total_row_total += flt(total_row[key])
-			total_row["total"] = total_row_total
+		total_keys = (
+			list(period_list) if consolidated else get_total_period_keys(period_list, accumulated_values)
+		)
+		provisional_profit_loss["total"] = flt(sum(provisional_profit_loss.get(k, 0.0) for k in total_keys))
+		total_row["total"] = flt(sum(total_row.get(k, 0.0) for k in total_keys))
 
 		if has_value:
 			provisional_profit_loss.update(
@@ -205,23 +218,24 @@ def get_report_summary(
 ):
 	net_asset, net_liability, net_equity, net_provisional_profit_loss = 0.0, 0.0, 0.0, 0.0
 
-	if filters.get("accumulated_values"):
-		period_list = [period_list[-1]]
-
 	# from consolidated financial statement
 	if filters.get("accumulated_in_group_company"):
 		period_list = get_filtered_list_for_consolidated_report(filters, period_list)
+		keys = [period if consolidated else period.key for period in period_list]
+	else:
+		keys = get_total_period_keys(period_list, filters.get("accumulated_values"))
 
-	for period in period_list:
-		key = period if consolidated else period.key
+	# get_data() output: [...account rows..., total_row, {}]  →  [-2] = total row, [-1] = blank separator
+	# [-1] == {} guards against missing total row (e.g. empty liability/equity data)
+	for key in keys:
 		if asset:
-			net_asset += asset[-2].get(key)
+			net_asset += flt(asset[-2].get(key))
 		if liability and liability[-1] == {}:
-			net_liability += liability[-2].get(key)
+			net_liability += flt(liability[-2].get(key))
 		if equity and equity[-1] == {}:
-			net_equity += equity[-2].get(key)
+			net_equity += flt(equity[-2].get(key))
 		if provisional_profit_loss:
-			net_provisional_profit_loss += provisional_profit_loss.get(key)
+			net_provisional_profit_loss += flt(provisional_profit_loss.get(key))
 
 	return [
 		{"value": net_asset, "label": _("Total Asset"), "datatype": "Currency", "currency": currency},

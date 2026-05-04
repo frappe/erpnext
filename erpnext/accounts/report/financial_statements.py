@@ -105,7 +105,7 @@ def get_dimension_period_list(filters: frappe._dict) -> list[dict]:
 	        "from_date_fiscal_year_start_date": "2026-04-01",
 	        "key": "center___atd_mar_2027",
 	        "label": "Center - ATD - 2026-2027",
-			"period_key": "mar_2027",
+	        "period_key": "mar_2027",
 	        "to_date": "2027-03-31",
 	        "to_date_fiscal_year": "2026-2027",
 	        "year_end_date": "2027-03-31",
@@ -118,7 +118,7 @@ def get_dimension_period_list(filters: frappe._dict) -> list[dict]:
 	        "from_date_fiscal_year_start_date": "2026-04-01",
 	        "key": "main___atd_mar_2027",
 	        "label": "Main - ATD - 2026-2027",
-			"period_key": "mar_2027",
+	        "period_key": "mar_2027",
 	        "to_date": "2027-03-31",
 	        "to_date_fiscal_year": "2026-2027",
 	        "year_end_date": "2027-03-31",
@@ -179,6 +179,29 @@ def get_dimension_period_list(filters: frappe._dict) -> list[dict]:
 def is_dimension_axis(period_list: list[dict]) -> bool:
 	"""True if the provided period_list is a dimension-grouped axis."""
 	return bool(period_list) and bool(period_list[0].get("dimension_field"))
+
+
+def get_total_period_keys(period_list: list[dict], accumulated_values: bool) -> list[str]:
+	"""Return the period keys whose values should be summed for the row-level
+	"Total" column / report-summary cards.
+
+	- dim mode + accumulated: each dimension's last period (running balance per dim)
+	- non-dim + accumulated:  only the last period (full cumulative balance)
+	- not accumulated:        all periods (sum of independent period activity)
+	"""
+	if not period_list:
+		return []
+
+	if is_dimension_axis(period_list) and accumulated_values:
+		last_per_dim: dict[str, str] = {}
+		for period in period_list:
+			last_per_dim[period.dimension_value] = period.key  # last write wins per dim
+		return list(last_per_dim.values())
+
+	if accumulated_values:
+		return [period_list[-1].key]
+
+	return [period.key for period in period_list]
 
 
 def get_period_list(
@@ -472,11 +495,11 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency, accum
 	data = []
 	year_start_date = period_list[0]["year_start_date"].strftime("%Y-%m-%d")
 	year_end_date = period_list[-1]["year_end_date"].strftime("%Y-%m-%d")
+	total_keys = get_total_period_keys(period_list, accumulated_values)
 
 	for d in accounts:
 		# add to output
 		has_value = False
-		total = 0
 		row = frappe._dict(
 			{
 				"account": _(d.name),
@@ -506,16 +529,11 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency, accum
 			if abs(row[period.key]) >= get_zero_cutoff(company_currency):
 				# ignore zero values
 				has_value = True
-				total += flt(row[period.key])
 
-		if accumulated_values:
-			# when 'accumulated_values' is enabled, periods have running balance.
-			# so, last period will have the net amount.
-			row["has_value"] = has_value
-			row["total"] = flt(d.get(period_list[-1].key, 0.0), 3)
-		else:
-			row["has_value"] = has_value
-			row["total"] = total
+		# Total column = sum of the keys returned by get_total_period_keys.
+		# Use row.get (not d.get) because sign correction is already applied to row above.
+		row["has_value"] = has_value
+		row["total"] = flt(sum(row.get(k, 0.0) for k in total_keys), 3)
 		data.append(row)
 
 	return data

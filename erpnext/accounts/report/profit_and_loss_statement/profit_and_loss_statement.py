@@ -18,6 +18,7 @@ from erpnext.accounts.report.financial_statements import (
 	get_dimension_period_list,
 	get_filtered_list_for_consolidated_report,
 	get_period_list,
+	get_total_period_keys,
 )
 
 
@@ -65,7 +66,12 @@ def execute(filters=None):
 	)
 
 	net_profit_loss = get_net_profit_loss(
-		income, expense, period_list, filters.company, filters.presentation_currency
+		income,
+		expense,
+		period_list,
+		filters.company,
+		filters.presentation_currency,
+		accumulated_values=filters.accumulated_values,
 	)
 
 	data = []
@@ -102,26 +108,18 @@ def get_report_summary(
 	# from consolidated financial statement
 	if filters.get("accumulated_in_group_company"):
 		period_list = get_filtered_list_for_consolidated_report(filters, period_list)
-
-	if filters.accumulated_values:
-		# when 'accumulated_values' is enabled, periods have running balance.
-		# so, last period will have the net amount.
-		key = period_list[-1].key
-		if income:
-			net_income = income[-2].get(key)
-		if expense:
-			net_expense = expense[-2].get(key)
-		if net_profit_loss:
-			net_profit = net_profit_loss.get(key)
+		keys = [period if consolidated else period.key for period in period_list]
 	else:
-		for period in period_list:
-			key = period if consolidated else period.key
-			if income:
-				net_income += income[-2].get(key)
-			if expense:
-				net_expense += expense[-2].get(key)
-			if net_profit_loss:
-				net_profit += net_profit_loss.get(key)
+		keys = get_total_period_keys(period_list, filters.accumulated_values)
+
+	# get_data() output: [...account rows..., total_row, {}]  →  [-2] = total row, [-1] = blank separator
+	for key in keys:
+		if income:
+			net_income += flt(income[-2].get(key))
+		if expense:
+			net_expense += flt(expense[-2].get(key))
+		if net_profit_loss:
+			net_profit += flt(net_profit_loss.get(key))
 
 	if len(period_list) == 1 and periodicity == "Yearly":
 		profit_label = _("Profit This Year")
@@ -145,8 +143,9 @@ def get_report_summary(
 	], net_profit
 
 
-def get_net_profit_loss(income, expense, period_list, company, currency=None, consolidated=False):
-	total = 0
+def get_net_profit_loss(
+	income, expense, period_list, company, currency=None, consolidated=False, accumulated_values=False
+):
 	net_profit_loss = {
 		"account_name": "'" + _("Profit for the year") + "'",
 		"account": "'" + _("Profit for the year") + "'",
@@ -166,8 +165,12 @@ def get_net_profit_loss(income, expense, period_list, company, currency=None, co
 		if net_profit_loss[key]:
 			has_value = True
 
-		total += flt(net_profit_loss[key])
-		net_profit_loss["total"] = total
+	# Total = sum of the keys returned by get_total_period_keys.
+	if consolidated:
+		total_keys = list(period_list)
+	else:
+		total_keys = get_total_period_keys(period_list, accumulated_values)
+	net_profit_loss["total"] = flt(sum(net_profit_loss.get(k, 0.0) for k in total_keys))
 
 	if has_value:
 		return net_profit_loss
