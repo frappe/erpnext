@@ -16,7 +16,7 @@ from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register i
 	get_group_by_and_display_fields,
 	get_tax_accounts,
 )
-from erpnext.accounts.report.utils import get_values_for_columns
+from erpnext.accounts.report.utils import add_party_name_column, get_values_for_columns
 
 
 def execute(filters=None):
@@ -192,14 +192,9 @@ def get_columns(additional_table_columns, filters):
 					"options": "Supplier",
 					"width": 120,
 				},
-				{
-					"label": _("Supplier Name"),
-					"fieldname": "supplier_name",
-					"fieldtype": "Data",
-					"width": 120,
-				},
 			]
 		)
+		add_party_name_column(columns, party_type="Supplier", fieldname="supplier_name")
 
 	if additional_table_columns:
 		columns += additional_table_columns

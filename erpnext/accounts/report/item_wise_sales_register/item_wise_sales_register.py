@@ -11,7 +11,7 @@ from frappe.utils.xlsxutils import handle_html
 from pypika.terms import Bracket, LiteralValue, Order
 
 from erpnext.accounts.report.sales_register.sales_register import get_mode_of_payments
-from erpnext.accounts.report.utils import get_values_for_columns
+from erpnext.accounts.report.utils import add_party_name_column, get_values_for_columns
 from erpnext.selling.report.item_wise_sales_history.item_wise_sales_history import (
 	get_customer_details,
 )
@@ -224,14 +224,9 @@ def get_columns(additional_table_columns, filters):
 					"options": "Customer",
 					"width": 120,
 				},
-				{
-					"label": _("Customer Name"),
-					"fieldname": "customer_name",
-					"fieldtype": "Data",
-					"width": 120,
-				},
 			]
 		)
+		add_party_name_column(columns, party_type="Customer", fieldname="customer_name")
 
 	if additional_table_columns:
 		columns += additional_table_columns
