@@ -112,29 +112,30 @@ See [Frappe Docker](https://github.com/frappe/frappe_docker/blob/main/docs/01-ge
 
 
 ## Development Setup
-### Manual Install
 
-The Easy Way: our install script for bench will install all dependencies (e.g. MariaDB). See https://github.com/frappe/bench for more details.
+There are two main ways to set up ERPNext for development, depending on your use case.
 
-New passwords will be created for the ERPNext "Administrator" user, the MariaDB root user, and the Frappe user (the script displays the passwords and saves them to ~/frappe_passwords.txt).
+---
 
+### Option 1: Local Development (Recommended for Contributors)
 
-### Local
+This method is recommended if you plan to contribute to ERPNext.
 
-To setup the repository locally follow the steps mentioned below:
+1. Setup bench by following the official installation guide:  
+   https://frappeframework.com/docs/user/en/installation  
 
-1. Setup bench by following the [Installation Steps](https://frappeframework.com/docs/user/en/installation) and start the server
+2. Start the development server:
    ```
    bench start
    ```
 
-2. In a separate terminal window, run the following commands:
+3. In a separate terminal window, run the following commands:
    ```
    # Create a new site
    bench new-site erpnext.localhost
    ```
 
-3. Get the ERPNext app and install it
+4. Get the ERPNext app and install it
    ```
    # Get the ERPNext app
    bench get-app https://github.com/frappe/erpnext
@@ -143,7 +144,38 @@ To setup the repository locally follow the steps mentioned below:
    bench --site erpnext.localhost install-app erpnext
    ```
 
-4. Open the URL `http://erpnext.localhost:8000/app` in your browser, you should see the app running
+5. Open the URL `http://erpnext.localhost:8000/app` in your browser, you should see the app running
+
+   
+---
+
+### Option 2: Manual Install (Advanced Users)
+
+The install script for bench can automatically install dependencies such as MariaDB.
+
+Refer to:
+https://github.com/frappe/bench
+
+New passwords will be created for:
+- ERPNext "Administrator" user  
+- MariaDB root user  
+- Frappe user  
+
+These credentials are saved in:
+
+```
+~/frappe_passwords.txt
+```
+
+> Note: This method is more suitable for users familiar with system-level configuration.
+
+---
+
+### Choosing the Right Setup
+
+- Use **Docker** → for quick evaluation  
+- Use **Local Development** → for contributing to the project  
+- Use **Manual Install** → for advanced/custom setups
 
 ## 🛠️ Troubleshooting
 
@@ -160,8 +192,9 @@ If port `8080` or `8000` is already in use:
 ### Docker containers not starting
 If containers fail to start:
 
-``bash
+```bash
 docker compose logs
+```
 
 ## Learning and Community
 
