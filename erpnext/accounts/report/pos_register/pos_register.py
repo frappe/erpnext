@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 
 from erpnext.accounts.report.sales_register.sales_register import get_mode_of_payments
+from erpnext.accounts.report.utils import add_party_name_column, get_party_name_map, show_party_name
 
 
 def execute(filters=None):
@@ -15,10 +16,18 @@ def execute(filters=None):
 	validate_filters(filters)
 
 	columns = get_columns(filters)
+	show_customer_name = show_party_name()
 
 	group_by_field = get_group_by_field(filters.get("group_by"))
 
 	pos_entries = get_pos_entries(filters, group_by_field)
+	if show_customer_name:
+		customer_name_map = get_party_name_map(
+			{"Customer": tuple({entry.customer for entry in pos_entries if entry.customer})}
+		).get("Customer", {})
+		for entry in pos_entries:
+			entry.customer_name = customer_name_map.get(entry.customer)
+
 	if group_by_field != "mode_of_payment":
 		concat_mode_of_payments(pos_entries)
 
@@ -184,48 +193,55 @@ def get_columns(filters):
 			"options": "Customer",
 			"width": 120,
 		},
-		{
-			"label": _("POS Profile"),
-			"fieldname": "pos_profile",
-			"fieldtype": "Link",
-			"options": "POS Profile",
-			"width": 160,
-		},
-		{
-			"label": _("Cashier"),
-			"fieldname": "owner",
-			"fieldtype": "Link",
-			"options": "User",
-			"width": 140,
-		},
-		{
-			"label": _("Grand Total"),
-			"fieldname": "grand_total",
-			"fieldtype": "Currency",
-			"options": "Company:company:default_currency",
-			"width": 120,
-		},
-		{
-			"label": _("Paid Amount"),
-			"fieldname": "paid_amount",
-			"fieldtype": "Currency",
-			"options": "Company:company:default_currency",
-			"width": 120,
-		},
-		{
-			"label": _("Payment Method"),
-			"fieldname": "mode_of_payment",
-			"fieldtype": "Data",
-			"width": 150,
-		},
-		{"label": _("Is Return"), "fieldname": "is_return", "fieldtype": "Data", "width": 80},
-		{
-			"label": _("Company"),
-			"fieldname": "company",
-			"fieldtype": "Link",
-			"options": "Company",
-			"width": 120,
-		},
 	]
+
+	add_party_name_column(columns, party_type="Customer", fieldname="customer_name")
+
+	columns.extend(
+		[
+			{
+				"label": _("POS Profile"),
+				"fieldname": "pos_profile",
+				"fieldtype": "Link",
+				"options": "POS Profile",
+				"width": 160,
+			},
+			{
+				"label": _("Cashier"),
+				"fieldname": "owner",
+				"fieldtype": "Link",
+				"options": "User",
+				"width": 140,
+			},
+			{
+				"label": _("Grand Total"),
+				"fieldname": "grand_total",
+				"fieldtype": "Currency",
+				"options": "Company:company:default_currency",
+				"width": 120,
+			},
+			{
+				"label": _("Paid Amount"),
+				"fieldname": "paid_amount",
+				"fieldtype": "Currency",
+				"options": "Company:company:default_currency",
+				"width": 120,
+			},
+			{
+				"label": _("Payment Method"),
+				"fieldname": "mode_of_payment",
+				"fieldtype": "Data",
+				"width": 150,
+			},
+			{"label": _("Is Return"), "fieldname": "is_return", "fieldtype": "Data", "width": 80},
+			{
+				"label": _("Company"),
+				"fieldname": "company",
+				"fieldtype": "Link",
+				"options": "Company",
+				"width": 120,
+			},
+		]
+	)
 
 	return columns
