@@ -102,32 +102,18 @@ def transfer_to_next_process(current_job_card, current_work_order, qty=None, pro
 	if not job_card_item:
 		frappe.throw(f"No Job Card Item found for {fg_item} in {open_job_card}")
 
-	se: StockEntry = frappe.new_doc("Stock Entry")  # pyright: ignore
-	se.purpose = "Material Transfer for Manufacture"
-	se.work_order = next_wo  # pyright: ignore
-	se.job_card = open_job_card  # pyright: ignore # No job card for inter-process transfer
-	se.company = wo.company
-	se.fg_completed_qty = transfer_qty
-	se.previous_job_card = current_job_card
-
-	se.append(
-		"items",
-		{
-			"item_code": fg_item,
-			"qty": transfer_qty,
-			"stock_uom": wo.stock_uom,
-			"uom": wo.stock_uom,
-			"conversion_factor": 1.0,
-			"s_warehouse": wo.fg_warehouse,
-			"t_warehouse": next_wo_doc.wip_warehouse,
-			"basic_rate": 0,
-			"job_card_item": job_card_item,
-		},
+	se = create_material_transfer_stock_entry(
+		next_wo=next_wo,
+		open_job_card=open_job_card,
+		company=wo.company,
+		fg_item=fg_item,
+		transfer_qty=transfer_qty,
+		current_job_card=current_job_card,
+		stock_uom=wo.stock_uom,
+		s_warehouse=wo.fg_warehouse,
+		t_warehouse=next_wo_doc.wip_warehouse,
+		job_card_item=job_card_item,
 	)
-
-	se.set_stock_entry_type()
-	se.set_missing_values()
-	se.submit()
 
 	job_card_item_doc = frappe.get_doc("Job Card Item", job_card_item)
 	job_card_item_doc.transferred_qty = transfer_qty
@@ -200,6 +186,7 @@ def get_open_job_cards(
 	item_code=None,
 	slab_template="",
 	limit=0,
+	exclude_job_cards="",
 ):
 	is_mixing = process == "Mixing"
 	if is_mixing:
@@ -331,3 +318,44 @@ def _set_job_card_completion_status(jc_name: str, bom_qty: float, fg_qty: float)
 		jc.priority = LOW_PRIORITY
 		jc.save(ignore_permissions=True)
 		jc.reload()
+
+
+def create_material_transfer_stock_entry(
+	next_wo: str,
+	open_job_card: str,
+	company: str,
+	fg_item: str,
+	transfer_qty: float,
+	current_job_card: str,
+	stock_uom: str,
+	s_warehouse: str,
+	t_warehouse: str,
+	job_card_item: str,
+):
+	stock_entry = frappe.new_doc("Stock Entry")  # pyright: ignore
+	stock_entry.purpose = "Material Transfer for Manufacture"
+	stock_entry.work_order = next_wo  # pyright: ignore
+	stock_entry.job_card = open_job_card  # pyright: ignore # No job card for inter-process transfer
+	stock_entry.company = company
+	stock_entry.fg_completed_qty = transfer_qty
+	stock_entry.previous_job_card = current_job_card
+
+	stock_entry.append(
+		"items",
+		{
+			"item_code": fg_item,
+			"qty": transfer_qty,
+			"stock_uom": stock_uom,
+			"uom": stock_uom,
+			"conversion_factor": 1.0,
+			"s_warehouse": s_warehouse,
+			"t_warehouse": t_warehouse,
+			"basic_rate": 0,
+			"job_card_item": job_card_item,
+		},
+	)
+	stock_entry.set_stock_entry_type()
+	stock_entry.set_missing_values()
+	stock_entry.submit()
+
+	return stock_entry

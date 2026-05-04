@@ -5,7 +5,10 @@ import frappe
 from frappe.utils.data import nowdate
 
 from erpnext.manufacturing.doctype.job_card.job_card import JobCard, make_corrective_job_card
-from erpnext.manufacturing.doctype.operation.api import get_open_job_cards
+from erpnext.manufacturing.doctype.operation.api import (
+	create_material_transfer_stock_entry,
+	get_open_job_cards,
+)
 from erpnext.manufacturing.doctype.production_line.production_line import get_all_child_lines
 from erpnext.manufacturing.doctype.slab.api import get_slabs_for
 from erpnext.manufacturing.doctype.slab.slab import Slab
@@ -306,6 +309,53 @@ def finish_qc_process(
 		_make_repair_stock_entry(repair_type, slab_number, job_card)
 		_make_repair_job_cards(repair_type, slab_number, job_card)
 
+		# Fetch job card details needed for the material transfer
+		jc_details: dict[str, str] = frappe.db.get_value(
+			"Job Card", job_card, ["work_order", "company", "production_item"], as_dict=True
+		)  # pyright: ignore[reportAssignmentType]
+		company: str = jc_details.get("company")  # pyright: ignore[reportAssignmentType]
+		work_order: str = jc_details.get("work_order")  # pyright: ignore[reportAssignmentType]
+		fg_item: str = jc_details.get("production_item")  # pyright: ignore[reportAssignmentType]
+
+		# Determine the corrective operation station to find the newly created open job card
+		next_operation = (
+			"Calibration"
+			if repair_type == "Recalibration"
+			else "Polishing"
+			if repair_type == "Repolish"
+			else "Quality Check"
+		)
+		open_job_card: str = frappe.db.get_value(
+			"Job Card",
+			{"slab": slab_number, "operation": next_operation, "status": "Open", "docstatus": 0},
+			"name",
+			order_by="creation desc",
+		)  # pyright: ignore[reportAssignmentType]
+
+		if open_job_card:
+			next_wo_doc = frappe.get_doc("Work Order", work_order)
+			s_warehouse: str = next_wo_doc.fg_warehouse  # pyright: ignore[reportAttributeAccessIssue]
+			t_warehouse: str = next_wo_doc.wip_warehouse  # pyright: ignore[reportAttributeAccessIssue]
+			stock_uom: str = frappe.db.get_value("Item", fg_item, "stock_uom")  # pyright: ignore[reportAssignmentType]
+			job_card_item: str = frappe.db.get_value(
+				"Job Card Item",
+				{"parent": open_job_card, "item_code": fg_item, "parenttype": "Job Card"},
+				"name",
+			)  # pyright: ignore[reportAssignmentType]
+
+			create_material_transfer_stock_entry(
+				next_wo=work_order,
+				open_job_card=open_job_card,
+				company=company,
+				fg_item=fg_item,
+				transfer_qty=1.0,
+				current_job_card=job_card,
+				stock_uom=stock_uom,
+				s_warehouse=s_warehouse,
+				t_warehouse=t_warehouse,
+				job_card_item=job_card_item,
+			)
+
 
 def _make_repair_stock_entry(
 	repair_type: Literal["", "None", "Recovery", "Repolish", "Recalibration"], slab_number: str, job_card: str
@@ -338,13 +388,119 @@ def _make_recovery_stock_entry(slab_number: str, job_card: str, work_order: str,
 
 
 def _make_polish_stock_entry(slab_number: str, job_card: str, work_order: str, company: str):
-	# TODO: Implement this.
-	pass
+	production_line: str = frappe.get_value("Slab", slab_number, "line")  # pyright: ignore[reportAssignmentType]
+	target_warehouse: str = frappe.get_value(
+		"Warehouse",
+		{"mfg_process_type": "Polishing", "company": company, "production_line": production_line},
+		"name",
+	)  # pyright: ignore[reportAssignmentType]
+
+	source_warehouse: str = frappe.get_value("Job Card", job_card, "wip_warehouse")  # pyright: ignore[reportAssignmentType]
+	source_item_name: str = frappe.db.get_value("Job Card Item", {"parent": job_card}, "item_code")
+	production_item: str = frappe.get_value("Job Card", job_card, "production_item")
+	target_item_name: str = frappe.db.get_value(
+		"Item", {"item_name": ("like", f"{production_item} - Calibrated%")}, "name"
+	)
+
+	item_uom = frappe.get_value("Item", source_item_name, "stock_uom")
+	parts = []
+	if slab_number:
+		parts = slab_number.split("-")
+
+	try:
+		stock_entry: StockEntry = frappe.new_doc("Stock Entry")  # pyright: ignore[reportAssignmentType]
+		stock_entry.stock_entry_type = "Repack"
+		stock_entry.company = company
+		stock_entry.work_order = work_order
+		stock_entry.posting_date = nowdate()
+		stock_entry.slab_batch_no = parts[0] if len(parts) > 0 else None
+		stock_entry.slab_serial_no = parts[-1] if len(parts) > 1 else parts[0]
+
+		stock_entry.append(
+			"items",
+			{
+				"item_code": source_item_name,
+				"s_warehouse": source_warehouse,
+				"qty": 1,
+				"uom": item_uom,
+				"slab_no": slab_number,
+				"to_slab_no": slab_number,
+			},
+		)
+
+		stock_entry.append(
+			"items",
+			{
+				"item_code": target_item_name,
+				"t_warehouse": target_warehouse,
+				"qty": 1,
+				"uom": item_uom,
+				"slab_no": slab_number,
+				"to_slab_no": slab_number,
+			},
+		)
+
+		stock_entry.submit()
+	except Exception as e:
+		raise e
 
 
 def _make_calibration_stock_entry(slab_number: str, job_card: str, work_order: str, company: str):
-	# TODO: Implement this.
-	pass
+	production_line: str = frappe.get_value("Slab", slab_number, "line")  # pyright: ignore[reportAssignmentType]
+	target_warehouse: str = frappe.get_value(
+		"Warehouse",
+		{"mfg_process_type": "Calibration", "company": company, "production_line": production_line},
+		"name",
+	)  # pyright: ignore[reportAssignmentType]
+
+	source_warehouse: str = frappe.get_value("Job Card", job_card, "wip_warehouse")  # pyright: ignore[reportAssignmentType]
+	source_item_name: str = frappe.db.get_value("Job Card Item", {"parent": job_card}, "item_code")
+	production_item: str = frappe.get_value("Job Card", job_card, "production_item")
+	target_item_name: str = frappe.db.get_value(
+		"Item", {"item_name": ("like", f"{production_item} - Trimmed%")}, "name"
+	)
+
+	item_uom = frappe.get_value("Item", source_item_name, "stock_uom")
+	parts = []
+	if slab_number:
+		parts = slab_number.split("-")
+
+	try:
+		stock_entry: StockEntry = frappe.new_doc("Stock Entry")  # pyright: ignore[reportAssignmentType]
+		stock_entry.stock_entry_type = "Repack"
+		stock_entry.company = company
+		stock_entry.work_order = work_order
+		stock_entry.posting_date = nowdate()
+		stock_entry.slab_batch_no = parts[0] if len(parts) > 0 else None
+		stock_entry.slab_serial_no = parts[-1] if len(parts) > 1 else parts[0]
+
+		stock_entry.append(
+			"items",
+			{
+				"item_code": source_item_name,
+				"s_warehouse": source_warehouse,
+				"qty": 1,
+				"uom": item_uom,
+				"slab_no": slab_number,
+				"to_slab_no": slab_number,
+			},
+		)
+
+		stock_entry.append(
+			"items",
+			{
+				"item_code": target_item_name,
+				"t_warehouse": target_warehouse,
+				"qty": 1,
+				"uom": item_uom,
+				"slab_no": slab_number,
+				"to_slab_no": slab_number,
+			},
+		)
+
+		stock_entry.submit()
+	except Exception as e:
+		raise e
 
 
 def _make_repack_stock_entry(

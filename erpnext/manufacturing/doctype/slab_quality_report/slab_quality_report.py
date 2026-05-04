@@ -14,21 +14,12 @@ class SlabQualityReport(Document):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from frappe.types import DF
-
-		from erpnext.manufacturing.doctype.slab_quality_observation.slab_quality_observation import (
-			SlabQualityObservation,
-		)
-		from erpnext.manufacturing.doctype.slab_recalibration_reason_map.slab_recalibration_reason_map import (
-			SlabRecalibrationReasonMap,
-		)
-		from erpnext.manufacturing.doctype.slab_recovery_reason_map.slab_recovery_reason_map import (
-			SlabRecoveryReasonMap,
-		)
+		from erpnext.manufacturing.doctype.slab_quality_observation.slab_quality_observation import SlabQualityObservation
+		from erpnext.manufacturing.doctype.slab_recalibration_reason_map.slab_recalibration_reason_map import SlabRecalibrationReasonMap
+		from erpnext.manufacturing.doctype.slab_recovery_reason_map.slab_recovery_reason_map import SlabRecoveryReasonMap
 		from erpnext.manufacturing.doctype.slab_repair_record.slab_repair_record import SlabRepairRecord
-		from erpnext.manufacturing.doctype.slab_repolish_reason_map.slab_repolish_reason_map import (
-			SlabRepolishReasonMap,
-		)
+		from erpnext.manufacturing.doctype.slab_repolish_reason_map.slab_repolish_reason_map import SlabRepolishReasonMap
+		from frappe.types import DF
 
 		amended_from: DF.Link | None
 		bend: DF.Float
