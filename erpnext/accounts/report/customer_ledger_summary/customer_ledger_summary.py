@@ -14,6 +14,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_with_children,
 )
+from erpnext.accounts.report.utils import add_party_name_column
 
 TREE_DOCTYPES = frozenset(
 	["Customer Group", "Territory", "Supplier Group", "Sales Partner", "Sales Person", "Cost Center"]
@@ -39,7 +40,6 @@ class PartyLedgerSummaryReport:
 		self.get_return_invoices()
 		self.get_party_adjustment_amounts()
 
-		self.party_naming_by = frappe.db.get_single_value(args.get("naming_by")[0], args.get("naming_by")[1])
 		columns = self.get_columns()
 		data = self.get_data()
 
@@ -145,15 +145,7 @@ class PartyLedgerSummaryReport:
 			}
 		]
 
-		if self.party_naming_by == "Naming Series":
-			columns.append(
-				{
-					"label": _(self.filters.party_type + " Name"),
-					"fieldtype": "Data",
-					"fieldname": "party_name",
-					"width": 150,
-				}
-			)
+		add_party_name_column(columns, party_type=self.filters.party_type)
 
 		credit_or_debit_note = "Credit Note" if self.filters.party_type == "Customer" else "Debit Note"
 
@@ -518,7 +510,6 @@ def get_children(doctype, value):
 def execute(filters=None):
 	args = {
 		"party_type": "Customer",
-		"naming_by": ["Selling Settings", "cust_master_name"],
 	}
 
 	return PartyLedgerSummaryReport(filters).run(args)
