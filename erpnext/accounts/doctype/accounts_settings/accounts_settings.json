@@ -89,6 +89,7 @@
   "use_legacy_controller_for_pcv",
   "column_break_25",
   "reports_tab",
+  "show_party_name_in_reports",
   "remarks_section",
   "general_ledger_remarks_length",
   "column_break_lvjk",
@@ -434,6 +435,13 @@
    "fieldname": "reports_tab",
    "fieldtype": "Tab Break",
    "label": "Reports"
+  },
+  {
+   "default": "0",
+   "description": "Show Party Name alongside Party Code in all reports",
+   "fieldname": "show_party_name_in_reports",
+   "fieldtype": "Check",
+   "label": "Show Party Name in Reports"
   },
   {
    "default": "0",

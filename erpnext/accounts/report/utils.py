@@ -1,7 +1,8 @@
 import frappe
+from frappe import _
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Sum
-from frappe.utils import flt, formatdate, get_datetime_str, get_table_name
+from frappe.utils import cint, flt, formatdate, get_datetime_str, get_table_name
 from pypika import Order
 
 from erpnext import get_company_currency, get_default_company
@@ -409,3 +410,69 @@ def get_opening_row(party_type, party, from_date, company):
 			& (gle.is_cancelled == 0)
 		)
 	).run(as_dict=True)
+
+
+def show_party_name():
+	return bool(cint(frappe.db.get_single_value("Accounts Settings", "show_party_name_in_reports")))
+
+
+def get_party_name_column(party_type=None, fieldname="party_name"):
+	if show_party_name():
+		label = _("Party Name")
+		if party_type:
+			label = _(f"{party_type} Name")
+
+		return {
+			"label": label,
+			"fieldname": fieldname,
+			"fieldtype": "Data",
+			"width": 150,
+		}
+
+	return {}
+
+
+def add_party_name_column(
+	columns, party_type=None, fieldname="party_name", index=None, column_overrides=None
+):
+	party_name_column = get_party_name_column(party_type, fieldname)
+	if not party_name_column:
+		return columns
+
+	if column_overrides:
+		party_name_column.update(column_overrides)
+
+	if index is None:
+		columns.append(party_name_column)
+	else:
+		columns.insert(index, party_name_column)
+
+	return columns
+
+
+def get_party_name_map(parties_by_type=None):
+	if not parties_by_type:
+		return {}
+
+	party_map = {}
+	party_doctypes = {
+		"Customer": ("Customer", "customer_name"),
+		"Supplier": ("Supplier", "supplier_name"),
+		"Employee": ("Employee", "employee_name"),
+		"Member": ("Member", "member_name"),
+	}
+
+	for party_type, (doctype, party_name_field) in party_doctypes.items():
+		party_names = tuple(set(filter(None, parties_by_type.get(party_type, ()))))
+		if not party_names:
+			continue
+
+		records = frappe.get_all(
+			doctype,
+			filters={"name": ("in", party_names)},
+			fields=["name", party_name_field],
+			as_list=True,
+		)
+		party_map[party_type] = frappe._dict(records)
+
+	return party_map
