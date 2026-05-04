@@ -5,6 +5,8 @@
 import frappe
 from frappe import _
 
+from erpnext.accounts.report.utils import add_party_name_column, show_party_name
+
 
 def execute(filters=None):
 	data = get_data(filters) or []
@@ -14,41 +16,52 @@ def execute(filters=None):
 
 
 def get_data(report_filters):
-	filters = get_report_filters(report_filters)
-	fields = get_report_fields()
-
-	return frappe.get_all("Purchase Invoice", fields=fields, filters=filters)
-
-
-def get_report_filters(report_filters):
-	filters = [
-		["Purchase Invoice", "company", "=", report_filters.get("company")],
-		["Purchase Invoice", "posting_date", "<=", report_filters.get("posting_date")],
-		["Purchase Invoice", "docstatus", "=", 1],
-		["Purchase Invoice", "per_received", "<", 100],
-		["Purchase Invoice", "update_stock", "=", 0],
-		["Purchase Invoice", "is_opening", "!=", "Yes"],
-	]
+	pi = frappe.qb.DocType("Purchase Invoice")
+	pii = frappe.qb.DocType("Purchase Invoice Item")
+	query = (
+		frappe.qb.from_(pi)
+		.inner_join(pii)
+		.on(pii.parent == pi.name)
+		.select(
+			pi.name,
+			pi.supplier,
+			pi.company,
+			pi.posting_date,
+			pi.currency,
+			pii.item_code,
+			pii.item_name,
+			pii.uom,
+			pii.qty,
+			pii.received_qty,
+			pii.rate,
+			pii.amount,
+		)
+		.where(
+			(pi.company == report_filters.get("company"))
+			& (pi.posting_date <= report_filters.get("posting_date"))
+			& (pi.docstatus == 1)
+			& (pi.per_received < 100)
+			& (pi.update_stock == 0)
+			& (pi.is_opening != "Yes")
+		)
+	)
 
 	if report_filters.get("purchase_invoice"):
-		filters.append(["Purchase Invoice", "per_received", "in", [report_filters.get("purchase_invoice")]])
+		query = query.where(pi.name == report_filters.get("purchase_invoice"))
 
-	return filters
+	if show_party_name():
+		supplier = frappe.qb.DocType("Supplier")
+		query = (
+			query.left_join(supplier)
+			.on(supplier.name == pi.supplier)
+			.select(supplier.supplier_name.as_("supplier_name"))
+		)
 
-
-def get_report_fields():
-	fields = []
-	for p_field in ["name", "supplier", "company", "posting_date", "currency"]:
-		fields.append(f"`tabPurchase Invoice`.`{p_field}`")
-
-	for c_field in ["item_code", "item_name", "uom", "qty", "received_qty", "rate", "amount"]:
-		fields.append(f"`tabPurchase Invoice Item`.`{c_field}`")
-
-	return fields
+	return query.run(as_dict=True)
 
 
 def get_columns():
-	return [
+	columns = [
 		{
 			"label": _("Purchase Invoice"),
 			"fieldname": "name",
@@ -63,18 +76,27 @@ def get_columns():
 			"options": "Supplier",
 			"width": 120,
 		},
-		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 100},
-		{
-			"label": _("Item Code"),
-			"fieldname": "item_code",
-			"fieldtype": "Link",
-			"options": "Item",
-			"width": 100,
-		},
-		{"label": _("Item Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 100},
-		{"label": _("UOM"), "fieldname": "uom", "fieldtype": "Link", "options": "UOM", "width": 100},
-		{"label": _("Invoiced Qty"), "fieldname": "qty", "fieldtype": "Float", "width": 100},
-		{"label": _("Received Qty"), "fieldname": "received_qty", "fieldtype": "Float", "width": 100},
-		{"label": _("Rate"), "fieldname": "rate", "fieldtype": "Currency", "width": 100},
-		{"label": _("Amount"), "fieldname": "amount", "fieldtype": "Currency", "width": 100},
 	]
+
+	add_party_name_column(columns, party_type="Supplier", fieldname="supplier_name")
+
+	columns.extend(
+		[
+			{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 100},
+			{
+				"label": _("Item Code"),
+				"fieldname": "item_code",
+				"fieldtype": "Link",
+				"options": "Item",
+				"width": 100,
+			},
+			{"label": _("Item Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 100},
+			{"label": _("UOM"), "fieldname": "uom", "fieldtype": "Link", "options": "UOM", "width": 100},
+			{"label": _("Invoiced Qty"), "fieldname": "qty", "fieldtype": "Float", "width": 100},
+			{"label": _("Received Qty"), "fieldname": "received_qty", "fieldtype": "Float", "width": 100},
+			{"label": _("Rate"), "fieldname": "rate", "fieldtype": "Currency", "width": 100},
+			{"label": _("Amount"), "fieldname": "amount", "fieldtype": "Currency", "width": 100},
+		]
+	)
+
+	return columns
