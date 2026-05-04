@@ -16,6 +16,8 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_dimension_with_children,
 )
 from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
+from erpnext.accounts.report.utils import add_party_name_column
+from erpnext.accounts.report.utils import show_party_name as _show_party_name
 from erpnext.accounts.utils import (
 	build_qb_match_conditions,
 	get_advance_payment_doctypes,
@@ -42,7 +44,6 @@ from erpnext.accounts.utils import (
 def execute(filters=None):
 	args = {
 		"account_type": "Receivable",
-		"naming_by": ["Selling Settings", "cust_master_name"],
 	}
 	return ReceivablePayableReport(filters).run(args)
 
@@ -75,7 +76,7 @@ class ReceivablePayableReport:
 	def run(self, args):
 		self.filters.update(args)
 		self.set_defaults()
-		self.party_naming_by = frappe.db.get_single_value(args.get("naming_by")[0], args.get("naming_by")[1])
+		self.show_party_name = _show_party_name()
 		self.get_columns()
 		self.get_data()
 		self.get_chart_data()
@@ -1129,7 +1130,7 @@ class ReceivablePayableReport:
 			fieldtype="Dynamic Link",
 			options="party_type",
 			width=180,
-			sticky=(self.party_naming_by not in ["Naming Series", "Auto Name"]),
+			sticky=(not self.show_party_name),
 		)
 		if self.account_type == "Receivable":
 			label = _("Receivable Account")
@@ -1147,18 +1148,13 @@ class ReceivablePayableReport:
 			sticky=True,
 		)
 
-		if self.party_naming_by == "Naming Series":
-			if self.account_type == "Payable":
-				label = _("Supplier Name")
-				fieldname = "supplier_name"
-			else:
-				label = _("Customer Name")
-				fieldname = "customer_name"
-			self.add_column(
-				label=label,
-				fieldname=fieldname,
-				fieldtype="Data",
-				sticky=True,
+		if self.show_party_name:
+			party_type = "Supplier" if self.account_type == "Payable" else "Customer"
+			add_party_name_column(
+				self.columns,
+				party_type=party_type,
+				fieldname=f"{party_type.lower()}_name",
+				column_overrides={"sticky": True},
 			)
 
 		if self.account_type == "Receivable":
