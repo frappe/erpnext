@@ -6,6 +6,8 @@ from frappe import _
 from frappe.utils import flt
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext.accounts.report.utils import add_party_name_column
+
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
@@ -21,7 +23,7 @@ def execute(filters=None):
 
 
 def get_columns(filters):
-	return [
+	columns = [
 		{
 			"label": _("Item Code"),
 			"fieldtype": "Link",
@@ -97,54 +99,56 @@ def get_columns(filters):
 			"options": "Supplier",
 			"width": 100,
 		},
-		{
-			"label": _("Supplier Name"),
-			"fieldtype": "Data",
-			"fieldname": "supplier_name",
-			"width": 140,
-		},
-		{
-			"label": _("Supplier Group"),
-			"fieldtype": "Link",
-			"fieldname": "supplier_group",
-			"options": "Supplier Group",
-			"width": 120,
-		},
-		{
-			"label": _("Project"),
-			"fieldtype": "Link",
-			"fieldname": "project",
-			"options": "Project",
-			"width": 100,
-		},
-		{
-			"label": _("Received Quantity"),
-			"fieldtype": "Float",
-			"fieldname": "received_qty",
-			"width": 150,
-		},
-		{
-			"label": _("Billed Amount"),
-			"fieldtype": "Currency",
-			"fieldname": "billed_amt",
-			"options": "currency",
-			"width": 120,
-		},
-		{
-			"label": _("Company"),
-			"fieldtype": "Link",
-			"fieldname": "company",
-			"options": "Company",
-			"width": 100,
-		},
-		{
-			"label": _("Currency"),
-			"fieldtype": "Link",
-			"fieldname": "currency",
-			"options": "Currency",
-			"hidden": 1,
-		},
 	]
+
+	add_party_name_column(columns, party_type="Supplier", fieldname="supplier_name")
+	columns.extend(
+		[
+			{
+				"label": _("Supplier Group"),
+				"fieldtype": "Link",
+				"fieldname": "supplier_group",
+				"options": "Supplier Group",
+				"width": 120,
+			},
+			{
+				"label": _("Project"),
+				"fieldtype": "Link",
+				"fieldname": "project",
+				"options": "Project",
+				"width": 100,
+			},
+			{
+				"label": _("Received Quantity"),
+				"fieldtype": "Float",
+				"fieldname": "received_qty",
+				"width": 150,
+			},
+			{
+				"label": _("Billed Amount"),
+				"fieldtype": "Currency",
+				"fieldname": "billed_amt",
+				"options": "currency",
+				"width": 120,
+			},
+			{
+				"label": _("Company"),
+				"fieldtype": "Link",
+				"fieldname": "company",
+				"options": "Company",
+				"width": 100,
+			},
+			{
+				"label": _("Currency"),
+				"fieldtype": "Link",
+				"fieldname": "currency",
+				"options": "Currency",
+				"hidden": 1,
+			},
+		]
+	)
+
+	return columns
 
 
 def get_data(filters):

@@ -7,6 +7,8 @@ from frappe import _
 from frappe.utils import flt
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext.accounts.report.utils import add_party_name_column
+
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
@@ -22,7 +24,7 @@ def execute(filters=None):
 
 
 def get_columns(filters):
-	return [
+	columns = [
 		{
 			"label": _("Item Code"),
 			"fieldtype": "Link",
@@ -76,56 +78,63 @@ def get_columns(filters):
 			"options": "Customer",
 			"width": 100,
 		},
-		{"label": _("Customer Name"), "fieldtype": "Data", "fieldname": "customer_name", "width": 140},
-		{
-			"label": _("Customer Group"),
-			"fieldtype": "Link",
-			"fieldname": "customer_group",
-			"options": "Customer Group",
-			"width": 120,
-		},
-		{
-			"label": _("Territory"),
-			"fieldtype": "Link",
-			"fieldname": "territory",
-			"options": "Territory",
-			"width": 100,
-		},
-		{
-			"label": _("Project"),
-			"fieldtype": "Link",
-			"fieldname": "project",
-			"options": "Project",
-			"width": 100,
-		},
-		{
-			"label": _("Delivered Quantity"),
-			"fieldtype": "Float",
-			"fieldname": "delivered_quantity",
-			"width": 150,
-		},
-		{
-			"label": _("Billed Amount"),
-			"fieldtype": "Currency",
-			"fieldname": "billed_amount",
-			"options": "currency",
-			"width": 120,
-		},
-		{
-			"label": _("Company"),
-			"fieldtype": "Link",
-			"fieldname": "company",
-			"options": "Company",
-			"width": 100,
-		},
-		{
-			"label": _("Currency"),
-			"fieldtype": "Link",
-			"fieldname": "currency",
-			"options": "Currency",
-			"hidden": 1,
-		},
 	]
+
+	add_party_name_column(columns, party_type="Customer", fieldname="customer_name")
+	columns.extend(
+		[
+			{
+				"label": _("Customer Group"),
+				"fieldtype": "Link",
+				"fieldname": "customer_group",
+				"options": "Customer Group",
+				"width": 120,
+			},
+			{
+				"label": _("Territory"),
+				"fieldtype": "Link",
+				"fieldname": "territory",
+				"options": "Territory",
+				"width": 100,
+			},
+			{
+				"label": _("Project"),
+				"fieldtype": "Link",
+				"fieldname": "project",
+				"options": "Project",
+				"width": 100,
+			},
+			{
+				"label": _("Delivered Quantity"),
+				"fieldtype": "Float",
+				"fieldname": "delivered_quantity",
+				"width": 150,
+			},
+			{
+				"label": _("Billed Amount"),
+				"fieldtype": "Currency",
+				"fieldname": "billed_amount",
+				"options": "currency",
+				"width": 120,
+			},
+			{
+				"label": _("Company"),
+				"fieldtype": "Link",
+				"fieldname": "company",
+				"options": "Company",
+				"width": 100,
+			},
+			{
+				"label": _("Currency"),
+				"fieldtype": "Link",
+				"fieldname": "currency",
+				"options": "Currency",
+				"hidden": 1,
+			},
+		]
+	)
+
+	return columns
 
 
 def get_data(filters):
