@@ -164,9 +164,10 @@ class TestCustomerLedgerSummary(ERPNextTestSuite, AccountsTestMixin):
 
 		pr.get_unreconciled_entries()
 
-		invoices = [invoice.as_dict() for invoice in pr.invoices if invoice.invoice_number == si.name]
-		payments = [payment.as_dict() for payment in pr.payments if payment.reference_name == cr_note.name]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		# Customer: SI in to_receive, CN in to_pay.
+		to_receive_subset = [r.as_dict() for r in pr.to_receive if r.voucher_no == si.name]
+		to_pay_subset = [r.as_dict() for r in pr.to_pay if r.voucher_no == cr_note.name]
+		pr.allocate_entries(to_receive=to_receive_subset, to_pay=to_pay_subset)
 		pr.reconcile()
 
 		system_generated_journal = frappe.db.get_all(

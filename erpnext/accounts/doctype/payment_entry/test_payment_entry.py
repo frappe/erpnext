@@ -1845,16 +1845,13 @@ class TestPaymentEntry(ERPNextTestSuite):
 		pr.party = "_Test Customer"
 		pr.receivable_payable_account = si.debit_to
 		pr.default_advance_account = advance_account
-		pr.payment_name = pe.name
-		pr.invoice_name = si.name
+		# `payment_name`/`invoice_name` removed — grid column-header search filters client-side.
 		pr.get_unreconciled_entries()
 
-		self.assertEqual(len(pr.invoices), 1)
-		self.assertEqual(len(pr.payments), 1)
+		self.assertEqual(len(pr.to_receive), 1)
+		self.assertEqual(len(pr.to_pay), 1)
 
-		invoices = [x.as_dict() for x in pr.get("invoices")]
-		payments = [x.as_dict() for x in pr.get("payments")]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.allocate_entries()
 		pr.allocation[0].allocated_amount = 400
 		pr.reconcile()
 
@@ -2186,12 +2183,10 @@ class TestPaymentEntry(ERPNextTestSuite):
 		pr.default_advance_account = advance_account
 		pr.get_unreconciled_entries()
 
-		self.assertEqual(len(pr.invoices), 1)
-		self.assertEqual(len(pr.payments), 1)
+		self.assertEqual(len(pr.to_receive), 1)
+		self.assertEqual(len(pr.to_pay), 1)
 
-		invoices = [x.as_dict() for x in pr.get("invoices")]
-		payments = [x.as_dict() for x in pr.get("payments")]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.allocate_entries()
 		pr.allocation[0].allocated_amount = 400
 		pr.reconcile()
 
