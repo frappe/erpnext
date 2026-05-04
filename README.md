@@ -145,6 +145,24 @@ To setup the repository locally follow the steps mentioned below:
 
 4. Open the URL `http://erpnext.localhost:8000/app` in your browser, you should see the app running
 
+## 🛠️ Troubleshooting
+
+Here are some common issues encountered during setup and how to resolve them.
+
+### Port already in use
+If port `8080` or `8000` is already in use:
+
+- Stop the conflicting service, or
+- Modify the port in your Docker or bench configuration
+
+---
+
+### Docker containers not starting
+If containers fail to start:
+
+``bash
+docker compose logs
+
 ## Learning and Community
 
 1. [Frappe School](https://school.frappe.io) - Learn Frappe Framework and ERPNext from the various courses by the maintainers or from the community.
