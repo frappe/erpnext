@@ -6,19 +6,20 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+from erpnext.accounts.report.utils import add_party_name_column
+from erpnext.accounts.report.utils import show_party_name as _show_party_name
 from erpnext.selling.doctype.customer.customer import get_credit_limit, get_customer_outstanding
 
 
 def execute(filters=None):
 	if not filters:
 		filters = {}
-	# Check if customer id is according to naming series or customer name
-	customer_naming_type = frappe.get_single_value("Selling Settings", "cust_master_name")
-	columns = get_columns(customer_naming_type)
+	columns = get_columns()
 
 	data = []
 
 	customer_list = get_details(filters)
+	show_party_name = _show_party_name()
 
 	for d in customer_list:
 		row = []
@@ -31,7 +32,7 @@ def execute(filters=None):
 
 		bal = flt(credit_limit) - flt(outstanding_amt)
 
-		if customer_naming_type == "Naming Series":
+		if show_party_name:
 			row = [
 				d.name,
 				d.customer_name,
@@ -59,7 +60,7 @@ def execute(filters=None):
 	return columns, data
 
 
-def get_columns(customer_naming_type):
+def get_columns():
 	columns = [
 		_("Customer") + ":Link/Customer:120",
 		_("Credit Limit") + ":Currency:120",
@@ -70,8 +71,7 @@ def get_columns(customer_naming_type):
 		_("Disabled") + ":Check:80",
 	]
 
-	if customer_naming_type == "Naming Series":
-		columns.insert(1, _("Customer Name") + ":Data:120")
+	add_party_name_column(columns, party_type="Customer", fieldname="customer_name", index=1)
 
 	return columns
 
