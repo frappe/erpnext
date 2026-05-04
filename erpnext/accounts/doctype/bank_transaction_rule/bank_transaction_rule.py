@@ -7,6 +7,8 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+from erpnext.accounts.doctype.bank_transaction.bank_transaction import BankTransaction
+
 
 class BankTransactionRule(Document):
 	# begin: auto-generated types
@@ -120,6 +122,54 @@ class BankTransactionRule(Document):
 		for i, rule in enumerate(rules):
 			frappe.db.set_value("Bank Transaction Rule", rule.name, "priority", i + 1)
 
+	def evaluate_rule(self, transaction: BankTransaction) -> bool:
+		"""
+		Helper function to evaluate the rule for a given transaction
+		"""
+		if self.company != transaction.company:
+			return False
+
+		# Transaction type rule
+		if self.transaction_type == "Withdrawal":
+			if transaction.withdrawal == 0.0:
+				return False
+
+		if self.transaction_type == "Deposit":
+			if transaction.deposit == 0.0:
+				return False
+
+		# Checking transaction amount limits
+		transaction_amount = transaction.withdrawal or transaction.deposit
+
+		if self.min_amount and transaction_amount < self.min_amount:
+			return False
+
+		if self.max_amount and transaction_amount > self.max_amount:
+			return False
+
+		# Checking description rules
+		for rule_desc_rule in self.description_rules:
+			desc = (transaction.description or "").lower()
+			value = (rule_desc_rule.value or "").lower()
+
+			if rule_desc_rule.check == "Contains":
+				if value in desc:
+					return True
+
+			if rule_desc_rule.check == "Starts With":
+				if desc.startswith(value):
+					return True
+
+			if rule_desc_rule.check == "Ends With":
+				if desc.endswith(value):
+					return True
+
+			if rule_desc_rule.check == "Regex":
+				if re.search(value, desc):
+					return True
+
+		return False
+
 
 def scheduler_run_rule_evaluation():
 	automatically_run_rules_on_unreconciled_transactions = frappe.db.get_single_value(
@@ -178,64 +228,15 @@ def _run_rule_evaluation(force_evaluate=False):
 
 	# Run evaluation for each transaction
 	for transaction in unreconciled_transactions:
-		evaluate_transaction(transaction, rule_docs)
+		matched_rule = None
 
+		for rule in rule_docs:
+			if rule.evaluate_rule(transaction):
+				matched_rule = rule
+				break
 
-def evaluate_transaction(transaction, rule_docs):
-	matched_rule = None
-
-	for rule in rule_docs:
-		if rule.company != transaction.company:
-			continue
-
-		# Run the rules
-
-		# Type rule - we continue searching for a rule if the transaction type does not match
-		if rule.transaction_type == "Withdrawal":
-			if transaction.withdrawal == 0.0:
-				continue
-
-		if rule.transaction_type == "Deposit":
-			if transaction.deposit == 0.0:
-				continue
-
-		amount = transaction.withdrawal or transaction.deposit
-		if rule.min_amount and amount < rule.min_amount:
-			continue
-
-		if rule.max_amount and amount > rule.max_amount:
-			continue
-
-		# Description rule
-		for rule_desc_rule in rule.description_rules:
-			desc = (transaction.description or "").lower()
-			value = (rule_desc_rule.value or "").lower()
-			# If we find a match - we can assign the rule to the transaction because type and amount matches
-			if rule_desc_rule.check == "Contains":
-				if value in desc:
-					matched_rule = rule
-					break
-
-			if rule_desc_rule.check == "Starts With":
-				if desc.startswith(value):
-					matched_rule = rule
-					break
-
-			if rule_desc_rule.check == "Ends With":
-				if desc.endswith(value):
-					matched_rule = rule
-					break
-
-			if rule_desc_rule.check == "Regex":
-				if re.search(value, desc):
-					matched_rule = rule
-					break
-
-		if matched_rule:
-			break
-
-	frappe.db.set_value(
-		"Bank Transaction",
-		transaction.name,
-		{"is_rule_evaluated": 1, "matched_transaction_rule": matched_rule.name if matched_rule else None},
-	)
+		frappe.db.set_value(
+			"Bank Transaction",
+			transaction.name,
+			{"is_rule_evaluated": 1, "matched_transaction_rule": matched_rule.name if matched_rule else None},
+		)
