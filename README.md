@@ -28,7 +28,18 @@
 
 ## ERPNext
 
+
 100% Open-Source ERP System to help you run your business.
+
+## 🚀 Quick Start (Recommended)
+
+The fastest way to try ERPNext locally is using Docker.
+
+### 1. Clone Docker setup
+
+bash
+git clone https://github.com/frappe/frappe_docker
+cd frappe_docker
 
 ### Motivation
 
