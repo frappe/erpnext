@@ -5,6 +5,8 @@
 import frappe
 from frappe import _
 
+from erpnext.accounts.report.utils import add_party_name_column, show_party_name
+
 field_map = {
 	"Contact": ["name", "first_name", "last_name", "phone", "mobile_no", "email_id", "is_primary_contact"],
 	"Address": [
@@ -53,8 +55,7 @@ def get_columns(filters):
 		"Is Primary Contact:Check",
 	]
 
-	if should_add_party_name(party_type):
-		columns.insert(2, f"{party_type} Name:Data:150")
+	add_party_name_column(columns, party_type=party_type, index=2)
 
 	return columns
 
@@ -99,7 +100,7 @@ def get_party_addresses_and_contact(party_type, party, party_group, filters):
 	party_details = get_party_details(party_type, party_list, "Address", party_details)
 	party_details = get_party_details(party_type, party_list, "Contact", party_details)
 
-	add_party_name = should_add_party_name(party_type)
+	add_party_name = show_party_name()
 
 	for party, details in party_details.items():
 		addresses = details.get("address", [])
@@ -165,16 +166,3 @@ def get_party_group(party_type):
 	}
 
 	return group[party_type]
-
-
-def should_add_party_name(party_type):
-	settings_map = {
-		"Supplier": ("Buying Settings", "supp_master_name"),
-		"Customer": ("Selling Settings", "cust_master_name"),
-	}
-
-	if party_type in settings_map:
-		doctype, fieldname = settings_map.get(party_type)
-		return frappe.db.get_single_value(doctype, fieldname) in ["Naming Series", "Auto Name"]
-
-	return False
