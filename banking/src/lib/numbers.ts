@@ -236,7 +236,7 @@ export const lstrip = (s: string, chars?: string[]) => {
     if (!chars) chars = ["\n", "\t", " "];
     // strip left
     let first_char = s.substring(0, 1);
-    while (in_list(chars, first_char)) {
+    while (chars.includes(first_char)) {
         s = s.substring(1);
         first_char = s.substring(0, 1);
     }

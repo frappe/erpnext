@@ -14,7 +14,6 @@ CLOSING_SCRIPT_TAG_PATTERN = re.compile(r"</script\>")
 
 def get_context(context):
 	csrf_token = frappe.sessions.get_csrf_token()
-	frappe.db.commit()
 
 	context = frappe._dict()
 	context.boot = get_boot()
