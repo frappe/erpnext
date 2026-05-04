@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_auto_repeat": 1,
+ "allow_bulk_edit": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2026-04-06 14:10:33.384946",
@@ -155,7 +156,6 @@
   "remarks",
   "range",
   "amended_from",
-  "is_old_subcontracting_flow",
   "other_details",
   "connections_tab"
  ],
@@ -1152,14 +1152,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
-   "fieldname": "is_old_subcontracting_flow",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Is Old Subcontracting Flow",
-   "read_only": 1
-  },
-  {
    "fieldname": "address_and_contact_tab",
    "fieldtype": "Tab Break",
    "label": "Address & Contact"
@@ -1306,7 +1298,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-06 14:11:29.630333",
+ "modified": "2026-05-04 10:19:44.638858",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

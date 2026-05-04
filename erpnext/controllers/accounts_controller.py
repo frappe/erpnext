@@ -4077,11 +4077,7 @@ def update_child_qty_rate(
 		if flt(child_item.get("qty")) != flt(d.get("qty")):
 			any_qty_changed = True
 
-		if (
-			parent.doctype in ["Sales Order", "Purchase Order"]
-			and parent.is_subcontracted
-			and not parent.get("is_old_subcontracting_flow")
-		):
+		if parent.doctype in ["Sales Order", "Purchase Order"] and parent.is_subcontracted:
 			validate_fg_item_for_subcontracting(d, new_child_flag)
 			child_item.fg_item_qty = flt(d["fg_item_qty"])
 
@@ -4216,18 +4212,12 @@ def update_child_qty_rate(
 		parent.update_receiving_percentage()
 
 		if parent.is_subcontracted:
-			if parent.is_old_subcontracting_flow:
-				if should_update_supplied_items(parent):
-					parent.update_reserved_qty_for_subcontract()
-					parent.create_raw_materials_supplied()
-				parent.save()
-			else:
-				if not parent.can_update_items():
-					frappe.throw(
-						_(
-							"Items cannot be updated as Subcontracting Order is created against the Purchase Order {0}."
-						).format(frappe.bold(parent.name))
-					)
+			if not parent.can_update_items():
+				frappe.throw(
+					_(
+						"Items cannot be updated as Subcontracting Order is created against the Purchase Order {0}."
+					).format(frappe.bold(parent.name))
+				)
 	elif parent_doctype == "Sales Order":  # Sales Order
 		if parent.is_subcontracted and not parent.can_update_items():
 			frappe.throw(

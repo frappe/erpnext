@@ -1,1 +1,0 @@
-Raw material (if any) supplied along with Purchase Order.

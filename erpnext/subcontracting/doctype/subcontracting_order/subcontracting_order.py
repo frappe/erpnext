@@ -138,9 +138,6 @@ class SubcontractingOrder(SubcontractingController):
 			if not po.is_subcontracted:
 				frappe.throw(_("Please select a valid Purchase Order that is configured for Subcontracting."))
 
-			if po.is_old_subcontracting_flow:
-				frappe.throw(_("Please select a valid Purchase Order that has Service Items."))
-
 			if po.docstatus != 1:
 				msg = f"Please submit Purchase Order {po.name} before proceeding."
 				frappe.throw(_(msg))

@@ -346,13 +346,8 @@ def validate_item_details(ctx: ItemDetailsCtx, item):
 		throw(_(msg), title=_("Template Item Selected"))
 
 	elif ctx.doctype != "Material Request":
-		if ctx.is_subcontracted:
-			if ctx.is_old_subcontracting_flow:
-				if item.is_sub_contracted_item != 1:
-					throw(_("Item {0} must be a Sub-contracted Item").format(item.name))
-			else:
-				if item.is_stock_item:
-					throw(_("Item {0} must be a Non-Stock Item").format(item.name))
+		if ctx.is_subcontracted and item.is_stock_item:
+			throw(_("Item {0} must be a Non-Stock Item").format(item.name))
 
 
 def get_basic_details(ctx: ItemDetailsCtx, item, overwrite_warehouse=True) -> ItemDetails:

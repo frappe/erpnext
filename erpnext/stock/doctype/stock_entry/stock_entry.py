@@ -128,7 +128,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 		process_loss_percentage: DF.Percent
 		process_loss_qty: DF.Float
 		project: DF.Link | None
-		purchase_order: DF.Link | None
 		purchase_receipt_no: DF.Link | None
 		purpose: DF.Literal[
 			"Material Issue",
@@ -173,16 +172,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
-		if self.purchase_order:
-			self.subcontract_data = frappe._dict(
-				{
-					"order_doctype": "Purchase Order",
-					"order_field": "purchase_order",
-					"rm_detail_field": "po_detail",
-					"order_supplied_items_field": "Purchase Order Item Supplied",
-				}
-			)
-		elif self.subcontracting_inward_order:
+		if self.subcontracting_inward_order:
 			self.subcontract_data = frappe._dict(
 				{
 					"order_doctype": "Subcontracting Inward Order",
@@ -253,7 +243,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.validate_source_stock_entry()
 		self.validate_bom()
 		self.set_process_loss_qty()
-		self.validate_purchase_order()
 		self.validate_company_in_accounting_dimension()
 
 		if self.purpose in ("Manufacture", "Repack"):
@@ -1695,19 +1684,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 			if d.bom_no and d.is_finished_item:
 				item_code = d.original_item or d.item_code
 				validate_bom_no(item_code, d.bom_no)
-
-	def validate_purchase_order(self):
-		if self.purpose == "Send to Subcontractor" and self.get("purchase_order"):
-			is_old_subcontracting_flow = frappe.db.get_value(
-				"Purchase Order", self.purchase_order, "is_old_subcontracting_flow"
-			)
-
-			if not is_old_subcontracting_flow:
-				frappe.throw(
-					_("Please select Subcontracting Order instead of Purchase Order {0}").format(
-						self.purchase_order
-					)
-				)
 
 	def validate_closed_subcontracting_order(self):
 		order = self.get("subcontracting_order") or self.get("subcontracting_inward_order")

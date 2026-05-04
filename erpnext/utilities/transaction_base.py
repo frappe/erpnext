@@ -343,7 +343,6 @@ class TransactionBase(StatusUpdater):
 					"item_tax_template": item.get("item_tax_template"),
 					"child_doctype": item.get("doctype"),
 					"child_docname": item.get("name"),
-					"is_old_subcontracting_flow": self.get("is_old_subcontracting_flow"),
 				}
 			),
 			self,
