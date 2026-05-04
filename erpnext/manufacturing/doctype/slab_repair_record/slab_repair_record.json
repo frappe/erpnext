@@ -12,7 +12,8 @@
   "slab_thickness",
   "column_break_apce",
   "job_card",
-  "repair_date",
+  "repair_req_date",
+  "repaired_date",
   "repair_section",
   "repair",
   "column_break_bmec",
@@ -30,7 +31,17 @@
   "crack_section",
   "crack_front",
   "column_break_ksjd",
-  "crack_back"
+  "crack_back",
+  "rework_section",
+  "pinholes",
+  "column_break_glsf",
+  "is_contamination",
+  "column_break_wntr",
+  "film_contamination",
+  "column_break_uyer",
+  "porasity",
+  "column_break_yvay",
+  "epoxy_applied"
  ],
  "fields": [
   {
@@ -166,23 +177,82 @@
   {
    "fieldname": "repair_reason",
    "fieldtype": "Data",
-   "label": "Repair Reason",
+   "label": "Repair Description",
    "read_only": 1
   },
   {
    "allow_on_submit": 1,
-   "fieldname": "repair_date",
+   "fieldname": "repair_req_date",
    "fieldtype": "Datetime",
    "in_list_view": 1,
-   "label": "Repair Date",
+   "label": "Repair Request Date",
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "repaired_date",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Repaired Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rework_section",
+   "fieldtype": "Section Break",
+   "label": "Re-work"
+  },
+  {
+   "default": "0",
+   "fieldname": "pinholes",
+   "fieldtype": "Check",
+   "label": "Pinholes"
+  },
+  {
+   "fieldname": "column_break_glsf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_contamination",
+   "fieldtype": "Check",
+   "label": "Contamination"
+  },
+  {
+   "fieldname": "column_break_wntr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "film_contamination",
+   "fieldtype": "Check",
+   "label": "Film Contamination"
+  },
+  {
+   "fieldname": "column_break_uyer",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "porasity",
+   "fieldtype": "Check",
+   "label": "Porasity"
+  },
+  {
+   "fieldname": "column_break_yvay",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "epoxy_applied",
+   "fieldtype": "Check",
+   "label": "Is Epoxy Applied"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-05-01 23:56:58.368285",
+ "modified": "2026-05-04 20:16:14.868567",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab Repair Record",

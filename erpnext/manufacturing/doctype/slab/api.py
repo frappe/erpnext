@@ -136,7 +136,7 @@ def move_slab_to(
 	# Validation: Check the direction of transition
 	if not skip_stage_validation and (
 		next_stage_index < current_stage_index
-		or (next_stage_index == current_stage_index and next_stage.lower() != "re-pressing")
+		or (next_stage_index == current_stage_index and next_stage.lower() != "re-pressing" and next_stage.lower() != "recovery")
 	):
 		frappe.throw(f"Invalid stage transition: cannot move from {slab.status} to {next_stage}")
 
@@ -191,11 +191,17 @@ def get_slabs_in(line: str, current_stage: str) -> list[dict]:
 			"batch_number",
 			"template",
 			"is_cur_stage_complete",
+			"child_line",
 			"creation",
 			"modified",
 			"current_job_card",
+			"is_recovered",
+			"is_repolished",
+			"is_recalibrated",
+			"quality_assessment",
 		],
 	)
+
 	return slabs
 
 
@@ -218,6 +224,8 @@ def get_slabs_for(line: str, next_stage: str, limit=1, include_current_stage=Fal
 			valid_previous_stages = []
 		elif next_stage == "Quality Check":
 			valid_previous_stages = ["Polishing", "Recovery"]
+		elif next_stage == "Recovery":
+			valid_previous_stages = ["Recovery"]
 		# General case: previous index in ALLOWED_STAGES
 		elif target_index > 0:
 			valid_previous_stages = [ALLOWED_STAGES[target_index - 1]]
@@ -243,11 +251,13 @@ def get_slabs_for(line: str, next_stage: str, limit=1, include_current_stage=Fal
 			"template",
 			"creation",
 			"modified",
+			"child_line",
 			"current_job_card",
 			"is_cur_stage_complete",
 			"is_recovered",
 			"is_repolished",
 			"is_recalibrated",
+			"quality_assessment",
 		],
 	)
 
@@ -434,8 +444,11 @@ def _finish_curing(slab_name: str):
 	finish_curing(slab_name)
 
 
+# TODO: Move this to spl_mods ASAP.
 def _finish_qc(slab_number: str, slab_qc: SlabQualityReport, job_card: str):
-	from erpnext.manufacturing.page.quality_analysis_station.quality_analysis_station import finish_qc_process
+	from spl_mods.manufacturing_enhancements.page.quality_analysis_station.quality_analysis_station import (
+		finish_qc_process,
+	)
 
 	# Get Slab Grade
 	finish_qc_process(slab_number, job_card, slab_qc, publish_slab_event=False)
