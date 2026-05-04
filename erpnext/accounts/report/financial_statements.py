@@ -190,9 +190,14 @@ def get_total_period_keys(period_list: list[dict], accumulated_values: bool) -> 
 	- dim mode + accumulated: each dimension's last period (running balance per dim)
 	- non-dim + accumulated:  only the last period (full cumulative balance)
 	- not accumulated:        all periods (sum of independent period activity)
+
+	Must be called with a list of period dicts (not a companies dict from consolidated reports).
 	"""
 	if not period_list:
 		return []
+
+	if not isinstance(period_list, list):
+		frappe.throw(title=_("Invalid Period List"), msg=_("Period list must be a list of period dicts"))
 
 	if is_dimension_axis(period_list) and accumulated_values:
 		last_per_dim: dict[str, str] = {}

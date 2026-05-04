@@ -222,6 +222,9 @@ def get_report_summary(
 	if filters.get("accumulated_in_group_company"):
 		period_list = get_filtered_list_for_consolidated_report(filters, period_list)
 		keys = [period if consolidated else period.key for period in period_list]
+	elif consolidated:
+		# period_list is a companies dict here; iterate its keys (company names)
+		keys = list(period_list)
 	else:
 		keys = get_total_period_keys(period_list, filters.get("accumulated_values"))
 
