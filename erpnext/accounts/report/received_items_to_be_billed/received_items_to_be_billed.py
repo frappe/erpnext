@@ -6,6 +6,7 @@ from frappe import _
 from pypika import Order
 
 from erpnext.accounts.report.non_billed_report import get_ordered_to_be_billed_data
+from erpnext.accounts.report.utils import add_party_name_column
 
 
 def execute(filters=None):
@@ -16,7 +17,7 @@ def execute(filters=None):
 
 
 def get_column():
-	return [
+	columns = [
 		{
 			"label": _("Purchase Receipt"),
 			"fieldname": "name",
@@ -32,52 +33,60 @@ def get_column():
 			"options": "Supplier",
 			"width": 120,
 		},
-		{"label": _("Supplier Name"), "fieldname": "supplier_name", "fieldtype": "Data", "width": 120},
-		{
-			"label": _("Item Code"),
-			"fieldname": "item_code",
-			"fieldtype": "Link",
-			"options": "Item",
-			"width": 120,
-		},
-		{
-			"label": _("Amount"),
-			"fieldname": "amount",
-			"fieldtype": "Currency",
-			"width": 100,
-			"options": "Company:company:default_currency",
-		},
-		{
-			"label": _("Billed Amount"),
-			"fieldname": "billed_amount",
-			"fieldtype": "Currency",
-			"width": 100,
-			"options": "Company:company:default_currency",
-		},
-		{
-			"label": _("Returned Amount"),
-			"fieldname": "returned_amount",
-			"fieldtype": "Currency",
-			"width": 120,
-			"options": "Company:company:default_currency",
-		},
-		{
-			"label": _("Pending Amount"),
-			"fieldname": "pending_amount",
-			"fieldtype": "Currency",
-			"width": 120,
-			"options": "Company:company:default_currency",
-		},
-		{"label": _("Item Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 120},
-		{"label": _("Description"), "fieldname": "description", "fieldtype": "Data", "width": 120},
-		{
-			"label": _("Project"),
-			"fieldname": "project",
-			"fieldtype": "Link",
-			"options": "Project",
-			"width": 120,
-		},
 	]
+
+	add_party_name_column(columns, party_type="Supplier", fieldname="supplier_name")
+
+	columns.extend(
+		[
+			{
+				"label": _("Item Code"),
+				"fieldname": "item_code",
+				"fieldtype": "Link",
+				"options": "Item",
+				"width": 120,
+			},
+			{
+				"label": _("Amount"),
+				"fieldname": "amount",
+				"fieldtype": "Currency",
+				"width": 100,
+				"options": "Company:company:default_currency",
+			},
+			{
+				"label": _("Billed Amount"),
+				"fieldname": "billed_amount",
+				"fieldtype": "Currency",
+				"width": 100,
+				"options": "Company:company:default_currency",
+			},
+			{
+				"label": _("Returned Amount"),
+				"fieldname": "returned_amount",
+				"fieldtype": "Currency",
+				"width": 120,
+				"options": "Company:company:default_currency",
+			},
+			{
+				"label": _("Pending Amount"),
+				"fieldname": "pending_amount",
+				"fieldtype": "Currency",
+				"width": 120,
+				"options": "Company:company:default_currency",
+			},
+			{"label": _("Item Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 120},
+			{"label": _("Description"), "fieldname": "description", "fieldtype": "Data", "width": 120},
+			{
+				"label": _("Project"),
+				"fieldname": "project",
+				"fieldtype": "Link",
+				"options": "Project",
+				"width": 120,
+			},
+		]
+	)
+
+	return columns
 
 
 def get_args():
