@@ -3,8 +3,8 @@ import { GetStatementDetailsResponse } from '../import_utils'
 import { flt, formatCurrency } from '@/lib/numbers'
 import { formatDate } from '@/lib/date'
 import { bankRecDateAtom, SelectedBank } from '../../BankReconciliation/bankRecAtoms'
-import { ChevronLeftIcon, ChevronRightIcon, ExternalLinkIcon, InfoIcon, Landmark, Loader2Icon } from 'lucide-react'
-import { H2, H3, H4, Paragraph } from '@/components/ui/typography'
+import { ChevronLeftIcon, ChevronRightIcon, ExternalLinkIcon, InfoIcon, Loader2Icon } from 'lucide-react'
+import { H2, H3, Paragraph } from '@/components/ui/typography'
 import { FileTypeIcon } from '@/components/ui/file-dropzone'
 import { getFileExtension } from '@/lib/file'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -19,6 +19,7 @@ import { useState } from 'react'
 import { Progress } from '@/components/ui/progress'
 import { useSetAtom } from 'jotai'
 import { useDirection } from '@/components/ui/direction'
+import BankLogo from '@/components/common/BankLogo'
 
 const AMOUNT_FORMAT_LABEL_MAP = {
     "separate_columns_for_withdrawal_and_deposit": _("Separate columns for withdrawal and deposit"),
@@ -130,14 +131,7 @@ const StatementDetails = ({ data, bank, onBack }: Props) => {
                             <TableHead>{_("Bank Account")}</TableHead>
                             <TableCell>
                                 <div className='flex items-center gap-2'>
-                                    {bank?.logo ? <img
-                                        src={`/assets/erpnext/images/bank-logos/${bank.logo}`}
-                                        alt={bank.bank || bank.name || ''}
-                                        className="max-w-24 me-auto h-6 object-contain"
-                                    /> : <div className="rounded-md flex items-center h-6 gap-2">
-                                        <Landmark size={'24px'} />
-                                        <H4 className="text-base mb-0">{bank?.bank}</H4>
-                                    </div>}
+                                    <BankLogo bank={bank} />
                                     <span className="tracking-tight text-sm font-medium">{bank?.account_name}</span>
                                     <span title="GL Account" className="text-sm">{bank?.account}</span>
                                 </div>

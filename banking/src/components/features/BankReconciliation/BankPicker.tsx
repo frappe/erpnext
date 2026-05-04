@@ -3,13 +3,12 @@ import { SelectedBank, selectedBankAccountAtom } from "./bankRecAtoms"
 import { useCallback } from "react"
 import { useGetBankAccounts, useGetUnreconciledTransactions } from "./utils"
 import { cn } from "@/lib/utils"
-import { Landmark } from "lucide-react"
-import { H4 } from "@/components/ui/typography"
 import { getTimeago } from "@/lib/date"
 import ErrorBanner from "@/components/ui/error-banner"
 import _ from "@/lib/translate"
 import { Badge } from "@/components/ui/badge"
 import { useTheme } from "@/components/ui/theme-provider"
+import BankLogo from "@/components/common/BankLogo"
 
 const BankPicker = ({ className }: { className?: string }) => {
 
@@ -70,8 +69,6 @@ const BankPickerItem = ({ bank }: { bank: SelectedBank }) => {
         mutate()
     }
 
-    const theme = useTheme()
-
     return <div
         role="button"
         title={`Select ${bank.account_name}`}
@@ -82,19 +79,7 @@ const BankPickerItem = ({ bank }: { bank: SelectedBank }) => {
     >
 
 
-
-        {bank.logo ? <div className="h-6 mb-2 flex items-center"> <img
-            src={`/assets/erpnext/images/bank-logos/${theme.theme === 'Dark' ? (bank.logoDark ?? bank.logo) : bank.logo}`}
-            alt={bank.bank || bank.name || ''}
-            className={cn("h-6 max-w-22 me-auto object-contain", {
-                'dark:invert dark:brightness-0': bank.darkModeInvert
-            }, bank.logoClassName)}
-        /></div> : <div className={cn("rounded-md h-6 mb-2 flex items-center gap-2", {
-        })}>
-            <Landmark size={'16px'} />
-            <H4 className={cn("text-xs mb-0", {
-            })}>{bank.bank}</H4>
-        </div>}
+        <BankLogo bank={bank} className="mb-2" />
 
         <div className="flex flex-col gap-1">
             <div className="flex gap-2 items-center">

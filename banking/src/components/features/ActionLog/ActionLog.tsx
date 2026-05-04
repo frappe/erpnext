@@ -26,6 +26,7 @@ import { getErrorMessage } from '@/lib/frappe'
 import ErrorBanner from '@/components/ui/error-banner'
 import SelectedTransactionDetails from '../BankReconciliation/SelectedTransactionDetails'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
+import BankLogo from '@/components/common/BankLogo'
 
 const ActionLog = () => {
 
@@ -172,11 +173,7 @@ const Row = ({ item, index, isLast, action }: { item: ActionLogItem, index: numb
                     <p className='text-p-base'>{item.bankTransaction.description}</p>
                     <div className='flex items-center gap-3'>
                         <div className='flex gap-2 items-center'>
-                            {bank?.logo ? <img
-                                src={`/assets/erpnext/images/bank-logos/${bank?.logo}`}
-                                alt={bank?.bank || ''}
-                                className="max-w-10 me-auto h-5 object-contain"
-                            /> : <LandmarkIcon className='w-4 h-4' />}
+                            <BankLogo bank={bank} className='h-4 mb-0' iconSize='16px' />
                             <span className='text-sm text-ink-gray-5'>{item.bankTransaction.bank_account}</span>
                         </div>
                         <Separator orientation='vertical' />
@@ -337,11 +334,7 @@ const TransferDetails = ({ item, className }: { item: ActionLogItem, className?:
     }, [banks, item])
 
     return <div className={cn('flex items-center gap-2 text-ink-gray-5 text-sm', className)}>
-        {bank?.logo ? <img
-            src={`/assets/erpnext/images/bank-logos/${bank.logo}`}
-            alt={bank?.bank || ''}
-            className="me-auto h-5 object-contain"
-        /> : <LandmarkIcon className='w-4 h-4' />}
+        <BankLogo bank={bank} className='h-5 mb-0' iconSize='16px' imageClassName='max-h-5' />
         <span className='text-sm'>{bank?.account}</span>
     </div>
 }

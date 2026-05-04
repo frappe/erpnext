@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { ArrowDownRight, ArrowUpRight, Calendar, Landmark } from 'lucide-react'
+import { ArrowDownRight, ArrowUpRight, Calendar } from 'lucide-react'
 import { formatCurrency } from '@/lib/numbers'
 import { formatDate } from '@/lib/date'
 import { UnreconciledTransaction, useGetBankAccounts } from './utils'
@@ -7,6 +7,7 @@ import { getCompanyCurrency } from '@/lib/company'
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import _ from '@/lib/translate'
+import BankLogo from '@/components/common/BankLogo'
 
 type Props = {
     transaction: UnreconciledTransaction,
@@ -37,13 +38,8 @@ const SelectedTransactionDetails = ({ transaction, showAccount = false, account 
                 <div className='flex flex-col gap-2'>
                     <div className='flex justify-between'>
                         <div className='flex flex-col gap-2'>
-                            <div className='flex flex-col gap-1'> {bank?.logo ? <img
-                                src={`/assets/erpnext/images/bank-logos/${bank.logo}`}
-                                alt={bank.bank}
-                                className="max-w-20 me-auto h-10 object-contain"
-                            /> :
-                                <Landmark size={'30px'} />
-                            }
+                            <div className='flex flex-col gap-1'>
+                                <BankLogo bank={bank} iconSize='30px' imageClassName='h-10 max-w-20' />
                                 <span className='font-medium text-sm'>{transaction.bank_account}</span>
                             </div>
                             <div className='flex items-center gap-1'>

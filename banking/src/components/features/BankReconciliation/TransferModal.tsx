@@ -12,7 +12,7 @@ import { toast } from 'sonner'
 import ErrorBanner from '@/components/ui/error-banner'
 import { H4 } from '@/components/ui/typography'
 import { cn } from '@/lib/utils'
-import { ArrowRight, Banknote, Landmark, BadgeCheck, Calendar, ArrowUpRight, ArrowDownRight, CheckIcon, CheckCircle, ArrowLeft } from 'lucide-react'
+import { ArrowRight, Banknote, BadgeCheck, Calendar, ArrowUpRight, ArrowDownRight, CheckIcon, CheckCircle, ArrowLeft } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import { Form } from '@/components/ui/form'
 import { AccountFormField, DataField, DateField, SmallTextField } from '@/components/ui/form-elements'
@@ -27,6 +27,7 @@ import FileUploadBanner from '@/components/common/FileUploadBanner'
 import { BankTransaction } from '@/types/Accounts/BankTransaction'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useDirection } from '@/components/ui/direction'
+import BankLogo from '@/components/common/BankLogo'
 
 const TransferModal = () => {
 
@@ -395,22 +396,14 @@ const BankOrCashPicker = ({ bankAccount, onAccountChange, selectedAccount, compa
     return <div className='grid grid-cols-4 gap-4'>
         {banks.map((bank) => (
             <div
-                className={cn('border p-2 rounded-md flex items-center gap-2 cursor-pointer outline-[0.5px] transition-all duration-200 hover:bg-surface-gray-1',
-                    selectedAccount === bank.account ? 'border-outline-gray-5 outline-outline-gray-5 bg-surface-gray-1' : 'border-outline-gray-2 outline-outline-gray-2'
+                className={cn('border p-2 rounded-md flex items-center gap-2 cursor-pointer outline-[0.5px] transition-all duration-200 hover:bg-surface-gray-1 dark:hover:bg-surface-gray-3',
+                    selectedAccount === bank.account ? 'border-outline-gray-5 outline-outline-gray-5 bg-surface-gray-1 dark:bg-surface-gray-3' : 'border-outline-gray-2 outline-outline-gray-2'
                 )}
                 role='button'
                 key={bank.account}
                 onClick={() => onAccountChange(bank.account ?? '')}
             >
-                {bank.logo ?
-                    <img
-                        src={`/assets/erpnext/images/bank-logos/${bank.logo}`}
-                        alt={bank.bank || ''}
-                        className='w-12 h-12 object-contain'
-                    /> : <div className='flex items-center justify-center h-10 w-10'>
-                        <Landmark size='24px' />
-                    </div>
-                }
+                <BankLogo bank={bank} iconSize='24px' imageClassName='w-12 h-12' />
                 <div className='flex flex-col gap-1'>
                     <span className='font-semibold text-sm'>{bank.account_name} {bank.bank_account_no && <span className='text-xs text-ink-gray-5'>({bank.bank_account_no})</span>}</span>
                     <span className='text-xs text-ink-gray-5'>{bank.account}</span>
@@ -436,8 +429,8 @@ const CashPicker = ({ company, selectedAccount, setSelectedAccount }: { company:
     const account = data?.message?.default_cash_account
 
     if (account) {
-        return <div className={cn('border p-2 rounded-md flex items-center gap-2 cursor-pointer outline-[0.5px] transition-all duration-200',
-            selectedAccount === account ? 'border-blue-500 bg-blue-50 outline-blue-500 hover:bg-blue-100/70' : 'border-gray-200 outline-gray-200 hover:bg-gray-50'
+        return <div className={cn('border p-2 rounded-md flex items-center gap-2 cursor-pointer outline-[0.5px] transition-all duration-200 hover:bg-surface-gray-1 dark:hover:bg-surface-gray-3',
+            selectedAccount === account ? 'border-outline-gray-5 outline-outline-gray-5 bg-surface-gray-1 dark:bg-surface-gray-3' : 'border-outline-gray-2 outline-outline-gray-2'
         )}
             role='button'
             onClick={() => setSelectedAccount(account ?? '')}
@@ -526,15 +519,7 @@ const RecommendedTransferAccount = ({ transaction, onAccountChange }: { transact
                 </div>
                 <div className='flex flex-col items-end justify-between gap-2 h-full w-[30%]'>
                     <div className="flex items-center gap-2">
-                        {bank?.logo ? (
-                            <img
-                                src={`/assets/erpnext/images/bank-logos/${bank.logo}`}
-                                alt={bank.bank}
-                                className="h-8 max-w-24 object-contain"
-                            />
-                        ) : (
-                            <Landmark className={cn("w-8 h-8", isSuggested ? "text-ink-green-3" : "text-purple-600")} />
-                        )}
+                        <BankLogo bank={bank} iconSize='24px' imageClassName='h-8 max-w-24' iconClassName={cn(isSuggested ? "text-ink-green-3" : "text-purple-600")} />
                     </div>
                     <div className='flex gap-1'>
                         <div className={cn('flex items-center gap-1 text-end px-0 justify-end py-1 rounded-sm',
