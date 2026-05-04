@@ -5,6 +5,8 @@ import frappe
 from frappe import _
 from frappe.query_builder.functions import IfNull
 
+from erpnext.accounts.report.utils import add_party_name_column
+
 
 class TaxWithholdingDetailsReport:
 	party_types = ("Customer", "Supplier")
@@ -194,7 +196,7 @@ class TaxWithholdingDetailsReport:
 
 	def get_columns(self):
 		party_type = self.filters.get("party_type", "Party")
-		return [
+		columns = [
 			{
 				"label": _("Tax Withholding Category"),
 				"options": "Tax Withholding Category",
@@ -204,84 +206,92 @@ class TaxWithholdingDetailsReport:
 			},
 			{"label": _("Tax Id"), "fieldname": "tax_id", "fieldtype": "Data", "width": 60},
 			{
-				"label": _(f"{party_type} Name"),
-				"fieldname": "party_name",
-				"fieldtype": "Data",
-				"width": 180,
-			},
-			{
 				"label": _(party_type),
 				"fieldname": "party",
 				"fieldtype": "Dynamic Link",
 				"options": "party_type",
 				"width": 180,
 			},
-			{
-				"label": _(f"{party_type} Type"),
-				"fieldname": "party_entity_type",
-				"fieldtype": "Data",
-				"width": 100,
-			},
-			{
-				"label": _("Supplier Invoice No"),
-				"fieldname": "supplier_invoice_no",
-				"fieldtype": "Data",
-				"width": 120,
-			},
-			{
-				"label": _("Supplier Invoice Date"),
-				"fieldname": "supplier_invoice_date",
-				"fieldtype": "Date",
-				"width": 120,
-			},
-			{"label": _("Tax Rate %"), "fieldname": "rate", "fieldtype": "Percent", "width": 60},
-			{
-				"label": _("Taxable Amount"),
-				"fieldname": "total_amount",
-				"fieldtype": "Currency",
-				"width": 120,
-			},
-			{"label": _("Tax Amount"), "fieldname": "tax_amount", "fieldtype": "Currency", "width": 120},
-			{
-				"label": _("Grand Total (Company Currency)"),
-				"fieldname": "base_total",
-				"fieldtype": "Currency",
-				"width": 150,
-			},
-			{
-				"label": _("Grand Total (Transaction Currency)"),
-				"fieldname": "grand_total",
-				"fieldtype": "Currency",
-				"width": 170,
-			},
-			{"label": _("Reference Date"), "fieldname": "taxable_date", "fieldtype": "Date", "width": 100},
-			{
-				"label": _("Transaction Type"),
-				"fieldname": "transaction_type",
-				"fieldtype": "Data",
-				"width": 130,
-			},
-			{
-				"label": _("Reference No."),
-				"fieldname": "ref_no",
-				"fieldtype": "Dynamic Link",
-				"options": "transaction_type",
-				"width": 180,
-			},
-			{
-				"label": _("Date of Transaction"),
-				"fieldname": "transaction_date",
-				"fieldtype": "Date",
-				"width": 100,
-			},
-			{
-				"label": _("Withholding Document"),
-				"fieldname": "withholding_name",
-				"fieldtype": "Dynamic Link",
-				"options": "withholding_doctype",
-				"width": 150,
-			},
 		]
+
+		add_party_name_column(columns, party_type=self.filters.get("party_type"), fieldname="party_name")
+
+		columns.extend(
+			[
+				{
+					"label": _(f"{party_type} Type"),
+					"fieldname": "party_entity_type",
+					"fieldtype": "Data",
+					"width": 100,
+				},
+				{
+					"label": _("Supplier Invoice No"),
+					"fieldname": "supplier_invoice_no",
+					"fieldtype": "Data",
+					"width": 120,
+				},
+				{
+					"label": _("Supplier Invoice Date"),
+					"fieldname": "supplier_invoice_date",
+					"fieldtype": "Date",
+					"width": 120,
+				},
+				{"label": _("Tax Rate %"), "fieldname": "rate", "fieldtype": "Percent", "width": 60},
+				{
+					"label": _("Taxable Amount"),
+					"fieldname": "total_amount",
+					"fieldtype": "Currency",
+					"width": 120,
+				},
+				{"label": _("Tax Amount"), "fieldname": "tax_amount", "fieldtype": "Currency", "width": 120},
+				{
+					"label": _("Grand Total (Company Currency)"),
+					"fieldname": "base_total",
+					"fieldtype": "Currency",
+					"width": 150,
+				},
+				{
+					"label": _("Grand Total (Transaction Currency)"),
+					"fieldname": "grand_total",
+					"fieldtype": "Currency",
+					"width": 170,
+				},
+				{
+					"label": _("Reference Date"),
+					"fieldname": "taxable_date",
+					"fieldtype": "Date",
+					"width": 100,
+				},
+				{
+					"label": _("Transaction Type"),
+					"fieldname": "transaction_type",
+					"fieldtype": "Data",
+					"width": 130,
+				},
+				{
+					"label": _("Reference No."),
+					"fieldname": "ref_no",
+					"fieldtype": "Dynamic Link",
+					"options": "transaction_type",
+					"width": 180,
+				},
+				{
+					"label": _("Date of Transaction"),
+					"fieldname": "transaction_date",
+					"fieldtype": "Date",
+					"width": 100,
+				},
+				{
+					"label": _("Withholding Document"),
+					"fieldname": "withholding_name",
+					"fieldtype": "Dynamic Link",
+					"options": "withholding_doctype",
+					"width": 150,
+				},
+			]
+		)
+
+		return columns
 
 
 execute = TaxWithholdingDetailsReport.execute

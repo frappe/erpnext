@@ -4,6 +4,7 @@ from frappe import _
 from erpnext.accounts.report.tax_withholding_details.tax_withholding_details import (
 	TaxWithholdingDetailsReport,
 )
+from erpnext.accounts.report.utils import add_party_name_column
 from erpnext.accounts.utils import get_fiscal_year
 
 
@@ -53,7 +54,7 @@ class TDSComputationSummaryReport(TaxWithholdingDetailsReport):
 
 	def get_columns(self):
 		party_type = self.filters.get("party_type", "Party")
-		return [
+		columns = [
 			{"label": _("Tax Id"), "fieldname": "tax_id", "fieldtype": "Data", "width": 90},
 			{
 				"label": _(party_type),
@@ -62,34 +63,37 @@ class TDSComputationSummaryReport(TaxWithholdingDetailsReport):
 				"options": "party_type",
 				"width": 180,
 			},
-			{
-				"label": _(f"{party_type} Name"),
-				"fieldname": "party_name",
-				"fieldtype": "Data",
-				"width": 180,
-			},
-			{
-				"label": _("Tax Withholding Category"),
-				"options": "Tax Withholding Category",
-				"fieldname": "tax_withholding_category",
-				"fieldtype": "Link",
-				"width": 180,
-			},
-			{
-				"label": _(f"{party_type} Type"),
-				"fieldname": "party_entity_type",
-				"fieldtype": "Data",
-				"width": 180,
-			},
-			{"label": _("Tax Rate %"), "fieldname": "rate", "fieldtype": "Percent", "width": 120},
-			{
-				"label": _("Total Taxable Amount"),
-				"fieldname": "total_amount",
-				"fieldtype": "Float",
-				"width": 120,
-			},
-			{"label": _("Tax Amount"), "fieldname": "tax_amount", "fieldtype": "Float", "width": 120},
 		]
+
+		add_party_name_column(columns, party_type=self.filters.get("party_type"), fieldname="party_name")
+
+		columns.extend(
+			[
+				{
+					"label": _("Tax Withholding Category"),
+					"options": "Tax Withholding Category",
+					"fieldname": "tax_withholding_category",
+					"fieldtype": "Link",
+					"width": 180,
+				},
+				{
+					"label": _(f"{party_type} Type"),
+					"fieldname": "party_entity_type",
+					"fieldtype": "Data",
+					"width": 180,
+				},
+				{"label": _("Tax Rate %"), "fieldname": "rate", "fieldtype": "Percent", "width": 120},
+				{
+					"label": _("Total Taxable Amount"),
+					"fieldname": "total_amount",
+					"fieldtype": "Float",
+					"width": 120,
+				},
+				{"label": _("Tax Amount"), "fieldname": "tax_amount", "fieldtype": "Float", "width": 120},
+			]
+		)
+
+		return columns
 
 
 execute = TDSComputationSummaryReport.execute
