@@ -4,10 +4,15 @@ from typing import Literal
 import frappe
 from frappe.utils.data import nowdate
 
-from erpnext.manufacturing.doctype.job_card.job_card import JobCard, make_corrective_job_card
+from erpnext.manufacturing.doctype.job_card.job_card import (
+	JobCard,
+	make_corrective_job_card,
+	make_stock_entry,
+)
 from erpnext.manufacturing.doctype.operation.api import (
 	create_material_transfer_stock_entry,
 	get_open_job_cards,
+	get_job_card_for_operation,
 )
 from erpnext.manufacturing.doctype.production_line.production_line import get_all_child_lines
 from erpnext.manufacturing.doctype.slab.api import get_slabs_for
@@ -286,16 +291,16 @@ def finish_qc_process(
 	use_for_samples = slab_qc_report.use_for_samples
 	repair_type = slab_qc_report.repair
 
-	finish_process(
-		job_card,
-		"Quality Check",
-		False,
-		slab_number=slab_number,
-		slab_grade=slab_grade,
-		publish_slab_event=publish_slab_event,
-	)
-
 	if slab_grade:
+		finish_process(
+			job_card,
+			"Quality Check",
+			False,
+			slab_number=slab_number,
+			slab_grade=slab_grade,
+			publish_slab_event=publish_slab_event,
+			complete_work_order=True,
+		)
 		# 3. Move the slab to specific warehouse based on grade by making a new stock entry - Material Transfer.
 		stock_entry, is_reject = _make_material_transfer_stock_entry(
 			slab_number, slab_grade, job_card, use_for_samples
@@ -306,18 +311,18 @@ def finish_qc_process(
 			str(stock_entry.items[-1].item_code), slab_number, is_reject, use_for_samples
 		)
 	else:
+		finish_process(
+			job_card,
+			"Quality Check",
+			False,
+			slab_number=slab_number,
+			slab_grade=slab_grade,
+			publish_slab_event=publish_slab_event,
+			complete_work_order=False,
+		)
 		_make_repair_stock_entry(repair_type, slab_number, job_card)
 		_make_repair_job_cards(repair_type, slab_number, job_card)
 
-		# Fetch job card details needed for the material transfer
-		jc_details: dict[str, str] = frappe.db.get_value(
-			"Job Card", job_card, ["work_order", "company", "production_item"], as_dict=True
-		)  # pyright: ignore[reportAssignmentType]
-		company: str = jc_details.get("company")  # pyright: ignore[reportAssignmentType]
-		work_order: str = jc_details.get("work_order")  # pyright: ignore[reportAssignmentType]
-		fg_item: str = jc_details.get("production_item")  # pyright: ignore[reportAssignmentType]
-
-		# Determine the corrective operation station to find the newly created open job card
 		next_operation = (
 			"Calibration"
 			if repair_type == "Recalibration"
@@ -325,36 +330,24 @@ def finish_qc_process(
 			if repair_type == "Repolish"
 			else "Quality Check"
 		)
-		open_job_card: str = frappe.db.get_value(
-			"Job Card",
-			{"slab": slab_number, "operation": next_operation, "status": "Open", "docstatus": 0},
-			"name",
-			order_by="creation desc",
-		)  # pyright: ignore[reportAssignmentType]
+		open_job_card = get_job_card_for_operation(next_operation, slab_number)
 
-		if open_job_card:
-			next_wo_doc = frappe.get_doc("Work Order", work_order)
-			s_warehouse: str = next_wo_doc.fg_warehouse  # pyright: ignore[reportAttributeAccessIssue]
-			t_warehouse: str = next_wo_doc.wip_warehouse  # pyright: ignore[reportAttributeAccessIssue]
-			stock_uom: str = frappe.db.get_value("Item", fg_item, "stock_uom")  # pyright: ignore[reportAssignmentType]
-			job_card_item: str = frappe.db.get_value(
-				"Job Card Item",
-				{"parent": open_job_card, "item_code": fg_item, "parenttype": "Job Card"},
-				"name",
-			)  # pyright: ignore[reportAssignmentType]
+		_make_self_material_transfer_stock_entry(slab_number, open_job_card)
+		_update_slab_fields(slab_number, repair_type, open_job_card)
 
-			create_material_transfer_stock_entry(
-				next_wo=work_order,
-				open_job_card=open_job_card,
-				company=company,
-				fg_item=fg_item,
-				transfer_qty=1.0,
-				current_job_card=job_card,
-				stock_uom=stock_uom,
-				s_warehouse=s_warehouse,
-				t_warehouse=t_warehouse,
-				job_card_item=job_card_item,
-			)
+
+def _update_slab_fields(slab_number: str, repair_type: str, open_job_card: str):
+	slab = frappe.get_doc("Slab", slab_number)
+	previous_operation = (
+		"Trimming"
+		if repair_type == "Recalibration"
+		else "Calibration"
+		if repair_type == "Repolish"
+		else "Polishing"
+	)
+	slab.status = previous_operation
+	slab.current_job_card = open_job_card
+	slab.save()
 
 
 def _make_repair_stock_entry(
@@ -634,3 +627,10 @@ def _make_repair_logs(job_card: str, slab_qc: SlabQualityReport):
 	slab.reload()
 	slab.status = slab_status
 	slab.save()
+
+
+def _make_self_material_transfer_stock_entry(slab_number: str, job_card: str):
+	if job_card:
+		se = make_stock_entry(job_card)
+		se.insert(ignore_permissions=True)
+		se.submit()
