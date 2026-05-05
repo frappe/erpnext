@@ -359,3 +359,15 @@ def create_material_transfer_stock_entry(
 	stock_entry.submit()
 
 	return stock_entry
+
+
+@frappe.whitelist()
+def get_job_card_for_operation(operation: str, slab_number: str = None):
+	open_job_card: str = frappe.db.get_value(
+		"Job Card",
+		{"slab": slab_number, "operation": operation, "status": "Open", "docstatus": 0},
+		"name",
+		order_by="creation desc",
+	)
+
+	return open_job_card
