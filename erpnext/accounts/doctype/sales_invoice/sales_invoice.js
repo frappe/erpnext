@@ -136,15 +136,6 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			}
 
 			if (doc.outstanding_amount > 0) {
-<<<<<<< HEAD
-				cur_frm.add_custom_button(
-					__("Payment Request"),
-					function () {
-						me.make_payment_request();
-					},
-					__("Create")
-				);
-=======
 				if (frappe.boot.user.in_create.includes("Payment Request")) {
 					this.frm.add_custom_button(
 						__("Payment Request"),
@@ -154,7 +145,6 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 						__("Create")
 					);
 				}
->>>>>>> fb7f9a81d4 (fix: hide payment and payment request buttons based on permissions in invoices and orders (#53920))
 				this.frm.add_custom_button(
 					__("Invoice Discounting"),
 					this.make_invoice_discounting.bind(this),
