@@ -21,12 +21,6 @@
 						"root_type": "Asset",
 						"account_type": "Cash"
 					},
-					"Bank Accounts": {
-						"account_number": "1102",
-						"is_group": 1,
-						"root_type": "Asset",
-						"account_type": "Bank"
-					},
 					"Petty Cash Fund": {
 						"account_number": "1200",
 						"is_group": 1,
@@ -39,6 +33,12 @@
 							"account_type": "Cash"
 						}
 					}
+				},
+				"Bank Accounts": {
+					"account_number": "1102",
+					"is_group": 1,
+					"root_type": "Asset",
+					"account_type": "Bank"
 				},
 				"Advances to Officers & Employees": {
 					"account_number": "1290",
