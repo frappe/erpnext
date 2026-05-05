@@ -773,11 +773,21 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 				}
 				// payment request
 				if (flt(doc.per_billed) < 100 + frappe.boot.sysdefaults.over_billing_allowance) {
+<<<<<<< HEAD
 					this.frm.add_custom_button(
 						__("Payment Request"),
 						() => this.make_payment_request(),
 						__("Create")
 					);
+=======
+					if (frappe.boot.user.in_create.includes("Payment Request")) {
+						this.frm.add_custom_button(
+							__("Payment Request"),
+							() => this.make_payment_request_with_schedule(),
+							__("Create")
+						);
+					}
+>>>>>>> fb7f9a81d4 (fix: hide payment and payment request buttons based on permissions in invoices and orders (#53920))
 
 					if (frappe.model.can_create("Payment Entry")) {
 						this.frm.add_custom_button(
