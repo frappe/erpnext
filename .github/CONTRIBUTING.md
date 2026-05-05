@@ -1,36 +1,70 @@
-### Introduction (for first timers)
+### Introduction (For First-Time Contributors)
 
-Thank you for your interest in raising an Issue with ERPNext. An Issue could mean a bug report or a request for a missing feature. By raising a bug report, you are contributing to the development of ERPNext and this is the first step of participating in the community. Bug reports are very helpful for developers as they quickly fix the issue before other users start facing it.
+Thank you for your interest in raising an issue with ERPNext. An issue can be either a bug report or a feature request.
 
-Feature requests are also a great way to take the product forward. New ideas can come in any user scenario and the issue list also acts a roadmap of future features.
+By reporting bugs, you contribute directly to improving ERPNext. Bug reports help developers identify and fix issues quickly before they affect more users.
 
-When you are raising an Issue, you should keep a few things in mind. Remember that the developer does not have access to your machine so you must give all the information you can while raising an Issue. If you are suggesting a feature, you should be very clear about what you want.
+Feature requests are also valuable. They help shape the future of the product by introducing new ideas and improvements based on real-world use cases.
 
-The Issue list is not the right place to ask a question or start a general discussion. If you want to do that, then the right place is the forum [https://discuss.frappe.io](https://discuss.frappe.io/c/erpnext/6).
+When raising an issue, keep in mind that developers do not have access to your environment. Therefore, provide as much relevant information as possible.
+
+If you are suggesting a feature, clearly describe what you expect and how it should behave.
+
+> ⚠️ The issue tracker is not the right place for general questions or discussions.  
+> Please use the forum instead: https://discuss.frappe.io/c/erpnext/6
+
+---
 
 ### Reply and Closing Policy
 
-If your issue is not clear or does not meet the guidelines, then it will be closed. If it is closed, please supply the requested information and re-open it.
+If your issue is unclear or does not meet the guidelines, it may be closed.
+
+If that happens, please provide the requested information and reopen the issue.
+
+---
 
 ### General Issue Guidelines
 
-1. **Search existing Issues:** Before raising an Issue, search if it has been raised before. Maybe add a 👍 or give additional help by creating a mockup if it is not already created.
-2. **Report each issue separately:** Don't club multiple, unrelated issues in one note.
-3. **Brief:** Please don't include long explanations. Use screenshots and bullet points instead of descriptive paragraphs.
+1. **Search existing issues:**  
+   Before creating a new issue, check if it already exists. You can support existing issues with a 👍 or contribute additional details or mockups.
+
+2. **Report issues separately:**  
+   Do not combine multiple unrelated issues into a single report.
+
+3. **Be concise:**  
+   Avoid long explanations. Use bullet points and screenshots where possible.
+
+---
 
 ### Bug Report Guidelines
 
-1. **Steps to Reproduce:** The bug report must have a list of steps needed to reproduce a bug. If we cannot reproduce it, then we cannot solve it.
-2. **Version Number:** Please add the version number in your report. Often a bug is fixed in the latest version.
-3. **Clear Title:** Add a clear subject to your bug report like "Unable to submit Purchase Order without Basic Rate" instead of just "Cannot Submit".
-4. **Screenshots:** Screenshots are a great way of communicating issues. Try adding annotations or using LICEcap to take a screencast in `.gif` format.
+1. **Steps to reproduce:**  
+   Clearly list the steps required to reproduce the issue. If the issue cannot be reproduced, it cannot be fixed.
+
+2. **Version number:**  
+   Include the ERPNext version. The issue may already be fixed in a newer release.
+
+3. **Clear title:**  
+   Use a descriptive title (e.g., "Unable to submit Purchase Order without Basic Rate" instead of "Cannot submit").
+
+4. **Screenshots:**  
+   Add screenshots or screen recordings (e.g., `.gif`) to illustrate the issue.
+
+---
 
 ### Feature Request Guidelines
 
-1. **Clarity:** Clearly specify how you want the feature to behave. Don't just say "I would like multiple PDF formats", instead say "Ability to add multiple print formats for customers with different languages".
-2. **Solution:** Try to identify what the feature should look like.
-3. **Mockups:** Mockups are a great way to explain your requirement.
+1. **Clarity:**  
+   Clearly describe the expected behavior. Avoid vague statements.
 
-### What if my issue is closed
+2. **Proposed solution:**  
+   Suggest how the feature should work.
 
-Don't worry, take the feedback, supply the correct information and re-open it!
+3. **Mockups:**  
+   Provide mockups or examples whenever possible.
+
+---
+
+### What if my issue is closed?
+
+Don't worry. Review the feedback, provide the required information, and reopen the issue.
