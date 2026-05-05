@@ -8,7 +8,7 @@ from frappe.utils import flt
 
 from erpnext.accounts.party import get_partywise_advanced_payment_amount
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
-from erpnext.accounts.report.utils import add_party_name_column
+from erpnext.accounts.report.utils import PARTY_NAME_FIELD, add_party_name_column
 from erpnext.accounts.report.utils import show_party_name as _show_party_name
 from erpnext.accounts.utils import get_currency_precision, get_party_types_from_account_type
 
@@ -25,8 +25,8 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 	def run(self, args):
 		self.account_type = args.get("account_type")
 		self.party_type = get_party_types_from_account_type(self.account_type)
-		current_party_type = self.party_type[0] if len(self.party_type) == 1 else None
-		self.show_party_name = _show_party_name(current_party_type)
+		self.current_party_type = self.party_type[0] if len(self.party_type) == 1 else None
+		self.show_party_name = _show_party_name(self.current_party_type)
 		self.get_columns()
 		self.get_data(args)
 		return self.columns, self.data
@@ -65,8 +65,8 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 
 			row.party = party
 			if self.show_party_name:
-				party_type = "Supplier" if self.account_type == "Payable" else "Customer"
-				fieldname = f"{party_type.lower()}_name"
+				party_type = party_dict.party_type
+				fieldname = PARTY_NAME_FIELD.get(party_type, "name")
 				row.party_name = frappe.get_cached_value(party_type, party, fieldname)
 
 			row.update(party_dict)
@@ -151,11 +151,9 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		)
 
 		if self.show_party_name:
-			party_type = "Supplier" if self.account_type == "Payable" else "Customer"
-
 			add_party_name_column(
 				self.columns,
-				party_type=party_type,
+				party_type=self.current_party_type,
 				fieldname="party_name",
 				column_overrides={"sticky": True},
 			)

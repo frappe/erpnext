@@ -457,16 +457,23 @@ def add_party_name_column(
 	return columns
 
 
+# Maps each party type to the DocType field that holds its human-readable name.
+PARTY_NAME_FIELD = {
+	"Customer": "customer_name",
+	"Supplier": "supplier_name",
+	"Employee": "employee_name",
+	"Member": "member_name",
+	"Shareholder": "title",
+}
+
+
 def get_party_name_map(parties_by_type=None):
 	if not parties_by_type:
 		return {}
 
 	party_map = {}
 	party_doctypes = {
-		"Customer": ("Customer", "customer_name"),
-		"Supplier": ("Supplier", "supplier_name"),
-		"Employee": ("Employee", "employee_name"),
-		"Member": ("Member", "member_name"),
+		party_type: (party_type, fieldname) for party_type, fieldname in PARTY_NAME_FIELD.items()
 	}
 
 	for party_type, (doctype, party_name_field) in party_doctypes.items():

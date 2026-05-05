@@ -76,8 +76,8 @@ class ReceivablePayableReport:
 	def run(self, args):
 		self.filters.update(args)
 		self.set_defaults()
-		current_party_type = self.party_type[0] if len(self.party_type) == 1 else None
-		self.show_party_name = _show_party_name(current_party_type)
+		self.current_party_type = self.party_type[0] if len(self.party_type) == 1 else None
+		self.show_party_name = _show_party_name(self.current_party_type)
 		self.get_columns()
 		self.get_data()
 		self.get_chart_data()
@@ -1150,11 +1150,12 @@ class ReceivablePayableReport:
 		)
 
 		if self.show_party_name:
-			party_type = "Supplier" if self.account_type == "Payable" else "Customer"
 			add_party_name_column(
 				self.columns,
-				party_type=party_type,
-				fieldname=f"{party_type.lower()}_name",
+				party_type=self.current_party_type,
+				fieldname=f"{self.current_party_type.lower()}_name"
+				if self.current_party_type
+				else "party_name",
 				column_overrides={"sticky": True},
 			)
 
