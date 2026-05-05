@@ -470,7 +470,7 @@ def get_party_name_map(parties_by_type=None):
 	}
 
 	for party_type, (doctype, party_name_field) in party_doctypes.items():
-		party_names = tuple(set(filter(None, parties_by_type.get(party_type, ()))))
+		party_names = tuple({p for p in parties_by_type.get(party_type, ()) if p})
 		if not party_names:
 			continue
 
