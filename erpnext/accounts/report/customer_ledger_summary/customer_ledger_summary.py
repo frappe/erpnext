@@ -345,7 +345,7 @@ class PartyLedgerSummaryReport:
 				& (gle.is_cancelled == 0)
 				& (gle.party_type == self.filters.party_type)
 				& (IfNull(gle.party, "") != "")
-				& (gle.posting_date <= self.filters.to_date)
+				& ((gle.posting_date <= self.filters.to_date) | (gle.is_opening == "Yes"))
 				& (gle.party.isin(self.parties))
 			)
 		)
