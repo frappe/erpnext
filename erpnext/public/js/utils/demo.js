@@ -5,7 +5,7 @@ $(document).on("desktop_screen", function (event, data) {
 		label: __("Delete Demo Data"),
 		icon: "trash",
 		condition: function () {
-			return frappe.boot.sysdefaults.demo_company;
+			return frappe.boot.sysdefaults.demo_company && frappe.boot.user.roles.includes("System Manager");
 		},
 		onClick: function () {
 			return erpnext.demo.clear_demo();

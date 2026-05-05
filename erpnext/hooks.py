@@ -223,7 +223,7 @@ standard_navbar_items = [
 		"item_type": "Action",
 		"action": "erpnext.demo.clear_demo();",
 		"is_standard": 1,
-		"condition": "eval: frappe.boot.sysdefaults.demo_company && frappe.boot.sysdefaults.demo_company.length > 0",
+		"condition": "eval: frappe.boot.sysdefaults.demo_company && frappe.boot.sysdefaults.demo_company.length > 0 && frappe.boot.user.roles.includes('System Manager')",
 		"icon": "trash",
 	},
 ]
