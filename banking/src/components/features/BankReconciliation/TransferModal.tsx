@@ -54,7 +54,7 @@ const TransferModalContent = () => {
 
     const selectedTransaction = useAtomValue(bankRecSelectedTransactionAtom(selectedBankAccount?.name ?? ''))
 
-    if (!selectedTransaction || !selectedBankAccount) {
+    if (!selectedTransaction || !selectedBankAccount || selectedTransaction.length === 0) {
         return <div className='p-4'>
             <span className='text-center'>No transaction selected</span>
         </div>
@@ -126,6 +126,8 @@ const BulkInternalTransferForm = ({ transactions }: { transactions: Unreconciled
 
     const company = transactions && transactions.length > 0 ? transactions[0].company : (currentCompany ?? '')
 
+    console.log("This is here", transactions)
+
     return <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className='flex flex-col gap-4'>
@@ -134,7 +136,7 @@ const BulkInternalTransferForm = ({ transactions }: { transactions: Unreconciled
 
                 <SelectedTransactionsTable />
 
-                <BankOrCashPicker company={company} bankAccount={transactions[0].bank_account ?? ''} onAccountChange={onAccountChange} selectedAccount={selectedAccount} />
+                <BankOrCashPicker company={company} bankAccount={transactions[0]?.bank_account ?? ''} onAccountChange={onAccountChange} selectedAccount={selectedAccount} />
 
                 <DialogFooter>
                     <DialogClose asChild>

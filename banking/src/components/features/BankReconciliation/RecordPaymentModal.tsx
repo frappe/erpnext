@@ -63,7 +63,7 @@ const RecordPaymentModalContent = () => {
 
     const selectedTransaction = useAtomValue(bankRecSelectedTransactionAtom(selectedBankAccount?.name ?? ''))
 
-    if (!selectedTransaction || !selectedBankAccount) {
+    if (!selectedTransaction || !selectedBankAccount || selectedTransaction.length === 0) {
         return <div className='p-4'>
             <span className='text-center'>No transaction selected</span>
         </div>
