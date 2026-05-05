@@ -2,8 +2,35 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Buying Settings", {
-	// refresh: function(frm) {
-	// }
+	refresh(frm) {
+		frm.naming_controller =
+			frm.naming_controller ||
+			new erpnext.NamingSeriesController(frm, {
+				master_naming_field: "supp_master_name",
+				master_doctype: "Supplier",
+				details_field: "naming_series_details",
+				configure_button: "configure",
+				table_field: "transaction_naming_html",
+				transactions: [
+					{ label: __("Supplier"), doctype: "Supplier" },
+					{ label: __("Material Request"), doctype: "Material Request" },
+					{ label: __("Request for Quotation"), doctype: "Request for Quotation" },
+					{ label: __("Supplier Quotation"), doctype: "Supplier Quotation" },
+					{ label: __("Purchase Order"), doctype: "Purchase Order" },
+					{ label: __("Purchase Invoice"), doctype: "Purchase Invoice" },
+					{ label: __("Purchase Receipt"), doctype: "Purchase Receipt" },
+				],
+			});
+		frm.naming_controller.refresh();
+	},
+
+	supp_master_name(frm) {
+		frm.naming_controller?.on_master_naming_change();
+	},
+
+	configure(frm) {
+		frm.naming_controller?.show_naming_series_dialog("Supplier");
+	},
 });
 
 frappe.tour["Buying Settings"] = [

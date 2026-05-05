@@ -258,9 +258,11 @@ erpnext.NamingSeriesTable = class NamingSeriesTable {
 		});
 	}
 
-	get_row_data($rows) {
-		this.transactions.forEach((t) => {
-			frappe.model.with_doctype(t.doctype, () => {
+	async get_row_data($rows) {
+		const rows = await Promise.all(
+			this.transactions.map(async (t) => {
+				await new Promise((resolve) => frappe.model.with_doctype(t.doctype, resolve));
+
 				const meta = frappe.get_meta(t.doctype);
 				const naming_df = (meta?.fields || []).find((df) => df.fieldname === "naming_series");
 				const series = (naming_df?.options || "")
@@ -268,9 +270,12 @@ erpnext.NamingSeriesTable = class NamingSeriesTable {
 					.map((s) => s.trim())
 					.filter(Boolean);
 
-				$rows.append(this.make_row(t, series));
-			});
-		});
+				return this.make_row(t, series);
+			})
+		);
+
+		$rows.empty();
+		rows.forEach(($row) => $rows.append($row));
 	}
 
 	make_row(t, series) {
@@ -308,5 +313,101 @@ erpnext.NamingSeriesTable = class NamingSeriesTable {
 				</span>`
 			)
 			.join("");
+	}
+};
+
+erpnext.NamingSeriesController = class NamingSeriesController {
+	constructor(frm, opts = {}) {
+		this.frm = frm;
+		this.opts = opts;
+	}
+
+	refresh() {
+		this.toggle_master_naming();
+		this.load_master_series();
+		this.render_table();
+	}
+
+	toggle_master_naming() {
+		const display = this.is_naming_series();
+		this.frm.set_df_property(this.opts.details_field, "hidden", !display);
+		this.frm.set_df_property(this.opts.configure_button, "hidden", !display);
+	}
+
+	is_naming_series() {
+		return this.frm.doc[this.opts.master_naming_field] === "Naming Series";
+	}
+
+	render_table() {
+		let transactions = [...this.opts.transactions];
+		if (!this.is_naming_series()) {
+			transactions = transactions.filter((t) => t.doctype !== this.opts.master_doctype);
+		}
+
+		this.frm._naming_series_table = new erpnext.NamingSeriesTable({
+			frm: this.frm,
+			fieldname: this.opts.table_field,
+			transactions: transactions,
+		});
+
+		this.frm._naming_series_table.render();
+	}
+
+	on_master_naming_change() {
+		const display = this.is_naming_series();
+		this.frm.set_df_property(this.opts.details_field, "hidden", !display);
+		this.frm.set_df_property(this.opts.configure_button, "hidden", !display);
+
+		if (display) {
+			this.load_master_series();
+		} else {
+			this.frm.doc[this.opts.details_field] = "";
+			this.frm.refresh_field(this.opts.details_field);
+		}
+		this.render_table();
+	}
+
+	load_master_series() {
+		const doctype = this.opts.master_doctype;
+		const field = this.opts.details_field;
+
+		frappe.model.with_doctype(doctype, () => {
+			const meta = frappe.get_meta(doctype);
+			const naming_df = (meta?.fields || []).find((df) => df.fieldname === "naming_series");
+			const options = naming_df?.options || "";
+			const series_list = options
+				.split("\n")
+				.map((s) => s.trim())
+				.filter(Boolean);
+
+			this.frm.doc[field] = series_list.length
+				? series_list.join("\n")
+				: __("No naming series defined");
+			this.frm.refresh_field(field);
+		});
+	}
+
+	show_naming_series_dialog(doctype) {
+		if (!this.frm._naming_dialogs) this.frm._naming_dialogs = {};
+
+		if (!this.frm._naming_dialogs[doctype]) {
+			this.frm._naming_dialogs[doctype] = new erpnext.NamingSeriesDialog({
+				doctype: doctype,
+				title: __("{0} Naming Series", [__(doctype)]),
+				on_update: ({ naming_series_options }) => {
+					if (doctype === this.opts.master_doctype && this.is_naming_series()) {
+						this.frm.doc[this.opts.details_field] = naming_series_options;
+						this.frm.refresh_field(this.opts.details_field);
+					}
+					const series = naming_series_options.split("\n").filter(Boolean);
+					this.frm
+						.get_field(this.opts.table_field)
+						.$wrapper.find(`.series-cell-${frappe.scrub(doctype)}`)
+						.html(this.frm._naming_series_table?.series_list_background(series));
+				},
+			});
+		}
+
+		this.frm._naming_dialogs[doctype].show();
 	}
 };

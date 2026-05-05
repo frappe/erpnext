@@ -6,44 +6,51 @@
  "engine": "InnoDB",
  "field_order": [
   "supplier_and_price_defaults_section",
+  "supplier_defaults_section",
   "supp_master_name",
-  "supplier_group",
-  "buying_price_list",
+  "naming_series_details",
+  "configure",
   "column_break_4",
+  "supplier_group",
+  "pricing_tab",
+  "buying_price_list",
+  "section_break_vwgg",
+  "maintain_same_rate",
+  "column_break_lwxs",
   "maintain_same_rate_action",
   "role_to_override_stop_action",
-  "section_break_xmlt",
-  "po_required",
-  "blanket_order_allowance",
-  "column_break_sbwq",
-  "pr_required",
-  "project_update_frequency",
   "transaction_settings_section",
   "column_break_fcyl",
-  "set_landed_cost_based_on_purchase_invoice_rate",
-  "allow_zero_qty_in_supplier_quotation",
-  "use_transaction_date_exchange_rate",
-  "allow_zero_qty_in_request_for_quotation",
-  "allow_negative_rates_for_items",
+  "po_required",
+  "pr_required",
+  "project_update_frequency",
   "column_break_12",
-  "maintain_same_rate",
   "allow_multiple_items",
-  "bill_for_rejected_quantity_in_purchase_invoice",
+  "allow_negative_rates_for_items",
   "set_valuation_rate_for_rejected_materials",
   "disable_last_purchase_rate",
   "show_pay_button",
+  "purchase_invoice_settings_section",
+  "bill_for_rejected_quantity_in_purchase_invoice",
+  "use_transaction_date_exchange_rate",
+  "set_landed_cost_based_on_purchase_invoice_rate",
+  "zero_quantity_line_items_section",
+  "allow_zero_qty_in_supplier_quotation",
+  "allow_zero_qty_in_request_for_quotation",
   "allow_zero_qty_in_purchase_order",
+  "blanket_order_section",
+  "blanket_order_allowance",
   "subcontract",
   "backflush_raw_materials_of_subcontract_based_on",
-  "column_break_11",
   "over_transfer_allowance",
   "validate_consumed_qty",
   "section_break_xcug",
   "auto_create_subcontracting_order",
-  "column_break_izrr",
   "auto_create_purchase_receipt",
   "request_for_quotation_tab",
-  "fixed_email"
+  "fixed_email",
+  "document_naming_tab",
+  "transaction_naming_html"
  ],
  "fields": [
   {
@@ -54,6 +61,7 @@
    "options": "Supplier Name\nNaming Series\nAuto Name"
   },
   {
+   "documentation_url": "https://docs.frappe.io/erpnext/buying-settings#2-default-supplier-group",
    "fieldname": "supplier_group",
    "fieldtype": "Link",
    "label": "Default Supplier Group",
@@ -68,26 +76,27 @@
   {
    "fieldname": "po_required",
    "fieldtype": "Select",
-   "label": "Is Purchase Order Required for Purchase Invoice & Receipt Creation?",
+   "label": "Is Purchase Order required for Purchase Invoice & Receipt creation?",
    "options": "No\nYes"
   },
   {
    "fieldname": "pr_required",
    "fieldtype": "Select",
-   "label": "Is Purchase Receipt Required for Purchase Invoice Creation?",
+   "label": "Is Purchase Receipt required for Purchase Invoice creation?",
    "options": "No\nYes"
   },
   {
    "default": "0",
+   "description": "Warn or stop if Item rate is changed in Purchase Invoice or Purchase Receipt generated from a Purchase Order.",
    "fieldname": "maintain_same_rate",
    "fieldtype": "Check",
-   "label": "Maintain Same Rate Throughout the Purchase Cycle"
+   "label": "Maintain same rate throughout the purchase  cycle"
   },
   {
    "default": "0",
    "fieldname": "allow_multiple_items",
    "fieldtype": "Check",
-   "label": "Allow Item To Be Added Multiple Times in a Transaction"
+   "label": "Allow Item to be added multiple times in a transaction"
   },
   {
    "fieldname": "subcontract",
@@ -96,9 +105,10 @@
   },
   {
    "default": "BOM",
+   "documentation_url": "https://docs.frappe.io/erpnext/buying-settings#1-backflush-raw-materials-of-subcontract-based-on",
    "fieldname": "backflush_raw_materials_of_subcontract_based_on",
    "fieldtype": "Select",
-   "label": "Backflush Raw Materials of Subcontract Based On",
+   "label": "Backflush raw materials of subcontract based on",
    "options": "BOM\nMaterial Transferred for Subcontract"
   },
   {
@@ -109,24 +119,20 @@
    "label": "Over Transfer Allowance (%)"
   },
   {
-   "fieldname": "column_break_11",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "Stop",
    "depends_on": "maintain_same_rate",
    "description": "Configure the action to stop the transaction or just warn if the same rate is not maintained.",
    "fieldname": "maintain_same_rate_action",
    "fieldtype": "Select",
-   "label": "Action If Same Rate is Not Maintained",
+   "label": "Action if same rate is not maintained",
    "mandatory_depends_on": "maintain_same_rate",
    "options": "Stop\nWarn"
   },
   {
-   "depends_on": "eval:doc.maintain_same_rate_action == 'Stop'",
+   "depends_on": "maintain_same_rate",
    "fieldname": "role_to_override_stop_action",
    "fieldtype": "Link",
-   "label": "Role Allowed to Override Stop Action",
+   "label": "Role allowed to override stop action",
    "options": "Role"
   },
   {
@@ -134,12 +140,12 @@
    "description": "If checked, Rejected Quantity will be included while making Purchase Invoice from Purchase Receipt.",
    "fieldname": "bill_for_rejected_quantity_in_purchase_invoice",
    "fieldtype": "Check",
-   "label": "Bill for Rejected Quantity in Purchase Invoice"
+   "label": "Bill for rejected quantity in Purchase Invoice"
   },
   {
    "fieldname": "supplier_and_price_defaults_section",
    "fieldtype": "Tab Break",
-   "label": "Naming Series and Price Defaults"
+   "label": "Defaults"
   },
   {
    "fieldname": "column_break_4",
@@ -156,16 +162,17 @@
   },
   {
    "default": "0",
+   "description": "Prevents the system from automatically using the rate from the last purchase transaction when creating new purchase orders or transactions.",
    "fieldname": "disable_last_purchase_rate",
    "fieldtype": "Check",
-   "label": "Disable Last Purchase Rate"
+   "label": "Disable last purchase rate"
   },
   {
    "default": "1",
    "depends_on": "eval: frappe.boot.versions && frappe.boot.versions.payments",
    "fieldname": "show_pay_button",
    "fieldtype": "Check",
-   "label": "Show Pay Button in Purchase Order Portal"
+   "label": "Show pay button in Purchase Order portal"
   },
   {
    "default": "0",
@@ -194,29 +201,24 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "column_break_izrr",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "0",
    "description": "Subcontracting Order (Draft) will be auto-created on submission of Purchase Order.",
    "fieldname": "auto_create_subcontracting_order",
    "fieldtype": "Check",
-   "label": "Auto Create Subcontracting Order"
+   "label": "Auto create Subcontracting Order"
   },
   {
    "default": "0",
    "description": "Purchase Receipt (Draft) will be auto-created on submission of Subcontracting Receipt.",
    "fieldname": "auto_create_purchase_receipt",
    "fieldtype": "Check",
-   "label": "Auto Create Purchase Receipt"
+   "label": "Auto create Purchase Receipt"
   },
   {
    "default": "Each Transaction",
-   "description": "How often should Project be updated of Total Purchase Cost ?",
    "fieldname": "project_update_frequency",
    "fieldtype": "Select",
-   "label": "Update frequency of Project",
+   "label": "How often should project be updated of Total Purchase Cost ?",
    "options": "Each Transaction\nManual"
   },
   {
@@ -241,14 +243,6 @@
    "label": "Allow Supplier Quotation with Zero Quantity"
   },
   {
-   "fieldname": "section_break_xmlt",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "column_break_sbwq",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "column_break_fcyl",
    "fieldtype": "Column Break"
   },
@@ -258,7 +252,7 @@
    "description": "If enabled, the system will generate an accounting entry for materials rejected in the Purchase Receipt.",
    "fieldname": "set_valuation_rate_for_rejected_materials",
    "fieldtype": "Check",
-   "label": "Set Valuation Rate for Rejected Materials"
+   "label": "Set valuation rate for rejected Materials"
   },
   {
    "fieldname": "request_for_quotation_tab",
@@ -279,23 +273,77 @@
    "description": "Raw materials consumed qty will be validated based on FG BOM required qty",
    "fieldname": "validate_consumed_qty",
    "fieldtype": "Check",
-   "label": "Validate Consumed Qty (as per BOM)"
+   "label": "Validate consumed quantity (as per BOM)"
   },
   {
    "default": "0",
    "fieldname": "allow_negative_rates_for_items",
    "fieldtype": "Check",
-   "label": "Allow Negative rates for Items"
+   "label": "Allow negative rates for Items"
+  },
+  {
+   "fieldname": "supplier_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Supplier Defaults"
+  },
+  {
+   "fieldname": "section_break_vwgg",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "blanket_order_section",
+   "fieldtype": "Section Break",
+   "label": "Blanket Orders"
+  },
+  {
+   "fieldname": "zero_quantity_line_items_section",
+   "fieldtype": "Section Break",
+   "label": "Zero-Quantity Line Items"
+  },
+  {
+   "fieldname": "purchase_invoice_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Purchase Invoice Settings"
+  },
+  {
+   "fieldname": "column_break_lwxs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pricing_tab",
+   "fieldtype": "Tab Break",
+   "label": "Pricing"
+  },
+  {
+   "fieldname": "document_naming_tab",
+   "fieldtype": "Tab Break",
+   "label": "Document Naming"
+  },
+  {
+   "fieldname": "configure",
+   "fieldtype": "Button",
+   "hidden": 1,
+   "label": "Configure Series"
+  },
+  {
+   "fieldname": "transaction_naming_html",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "naming_series_details",
+   "fieldtype": "Small Text",
+   "hidden": 1,
+   "is_virtual": 1,
+   "label": "Naming Series options"
   }
  ],
  "grid_page_length": 50,
- "hide_toolbar": 0,
  "icon": "fa fa-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-04-15 16:07:35.484787",
+ "modified": "2026-05-05 16:30:37.184607",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
@@ -313,7 +361,6 @@
   {
    "create": 1,
    "email": 1,
-   "export": 1,
    "print": 1,
    "read": 1,
    "role": "Purchase Manager",
