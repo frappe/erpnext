@@ -62,6 +62,11 @@ class TestOpeningInvoiceCreationTool(ERPNextTestSuite):
 			for field_idx, field in enumerate(expected_value["keys"]):
 				self.assertEqual(si.get(field, ""), expected_value[invoice_idx][field_idx])
 
+	def test_opening_invoice_requires_temporary_account_type(self):
+		doc = self.make_invoices(company="_Test Opening Invoice Company", return_doc=True)
+		doc.invoices[0].temporary_opening_account = "Sales - _TOIC"
+		self.assertRaises(frappe.ValidationError, doc.make_invoices)
+
 	def test_opening_purchase_invoice_creation(self):
 		invoices = self.make_invoices(invoice_type="Purchase", company="_Test Opening Invoice Company")
 

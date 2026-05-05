@@ -154,6 +154,10 @@ frappe.ui.form.on("Opening Invoice Creation Tool", {
 				row.temporary_opening_account = frm.doc.__onload.temporary_opening_account;
 			}
 
+			if (!row.cost_center) {
+				row.cost_center = frm.doc.cost_center;
+			}
+
 			row.party_type = frm.doc.invoice_type == "Sales" ? "Customer" : "Supplier";
 		});
 	},
