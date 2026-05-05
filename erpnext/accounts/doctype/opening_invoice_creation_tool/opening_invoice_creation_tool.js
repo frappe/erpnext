@@ -78,7 +78,10 @@ frappe.ui.form.on("Opening Invoice Creation Tool", {
 		frm.events.apply_company_query_filter(frm, "project", "invoices");
 		frm.events.apply_company_query_filter(frm, "project");
 		frm.events.apply_company_query_filter(frm, "cost_center", undefined, { is_group: 0 });
-		frm.events.apply_company_query_filter(frm, "temporary_opening_account", "invoices");
+		frm.events.apply_company_query_filter(frm, "temporary_opening_account", "invoices", {
+			account_type: "Temporary",
+			is_group: 0,
+		});
 	},
 
 	apply_company_query_filter: function (frm, field_name, child_doctype = null, filters = {}) {
