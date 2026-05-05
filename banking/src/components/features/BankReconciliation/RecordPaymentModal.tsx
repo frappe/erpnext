@@ -65,7 +65,7 @@ const RecordPaymentModalContent = () => {
 
     if (!selectedTransaction || !selectedBankAccount || selectedTransaction.length === 0) {
         return <div className='p-4'>
-            <span className='text-center'>No transaction selected</span>
+            <span className='text-center'>{_("No transaction selected")}</span>
         </div>
     }
 
