@@ -14,6 +14,8 @@
   "column_break_4",
   "customer_group",
   "territory",
+  "section_break_azsu",
+  "show_customer_name_in_reports",
   "item_price_tab",
   "item_price_settings_section",
   "selling_price_list",
@@ -71,6 +73,12 @@
    "in_list_view": 1,
    "label": "Customer Naming By",
    "options": "Customer Name\nNaming Series\nAuto Name"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_customer_name_in_reports",
+   "fieldtype": "Check",
+   "label": "Show Customer Name in Reports"
   },
   {
    "documentation_url": "https://docs.frappe.io/erpnext/selling-settings#2-default-customer-group",
@@ -404,6 +412,10 @@
   {
    "fieldname": "transaction_naming_html",
    "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "section_break_azsu",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
@@ -412,7 +424,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-04-29 11:05:48.836362",
+ "modified": "2026-05-05 13:12:09.686274",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",

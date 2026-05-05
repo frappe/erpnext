@@ -9,8 +9,7 @@ from frappe.utils import cint, flt
 
 from erpnext.accounts.report.general_ledger.general_ledger import get_accounts_with_children
 from erpnext.accounts.report.trial_balance.trial_balance import validate_filters
-from erpnext.accounts.report.utils import add_party_name_column
-from erpnext.accounts.report.utils import show_party_name as _show_party_name
+from erpnext.accounts.report.utils import add_party_name_column, show_party_name
 
 
 def execute(filters=None):
@@ -23,7 +22,7 @@ def execute(filters=None):
 
 
 def get_data(filters):
-	show_party_name = _show_party_name()
+	include_party_name = show_party_name(filters.get("party_type"))
 	if filters.get("party_type") in ("Customer", "Supplier", "Employee", "Member"):
 		party_name_field = "{}_name".format(frappe.scrub(filters.get("party_type")))
 	elif filters.get("party_type") == "Shareholder":
@@ -61,7 +60,7 @@ def get_data(filters):
 	)
 	for party in parties:
 		row = {"party": party.name}
-		if show_party_name:
+		if include_party_name:
 			row["party_name"] = party.get(party_name_field)
 
 		# opening

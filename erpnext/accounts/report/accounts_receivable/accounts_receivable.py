@@ -76,7 +76,8 @@ class ReceivablePayableReport:
 	def run(self, args):
 		self.filters.update(args)
 		self.set_defaults()
-		self.show_party_name = _show_party_name()
+		current_party_type = self.party_type[0] if len(self.party_type) == 1 else None
+		self.show_party_name = _show_party_name(current_party_type)
 		self.get_columns()
 		self.get_data()
 		self.get_chart_data()

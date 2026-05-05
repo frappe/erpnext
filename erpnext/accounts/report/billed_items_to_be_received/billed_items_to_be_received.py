@@ -49,7 +49,7 @@ def get_data(report_filters):
 	if report_filters.get("purchase_invoice"):
 		query = query.where(pi.name == report_filters.get("purchase_invoice"))
 
-	if show_party_name():
+	if show_party_name("Supplier"):
 		supplier = frappe.qb.DocType("Supplier")
 		query = (
 			query.left_join(supplier)

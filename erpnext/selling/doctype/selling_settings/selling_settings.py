@@ -58,6 +58,7 @@ class SellingSettings(Document):
 		sales_update_frequency: DF.Literal["Monthly", "Each Transaction", "Daily"]
 		selling_price_list: DF.Link | None
 		set_zero_rate_for_expired_batch: DF.Check
+		show_customer_name_in_reports: DF.Check
 		so_required: DF.Literal["No", "Yes"]
 		territory: DF.Link | None
 		use_legacy_js_reactivity: DF.Check

@@ -78,7 +78,7 @@ def get_data(filters):
 		.orderby(po.transaction_date)
 	)
 
-	if show_party_name():
+	if show_party_name("Supplier"):
 		query = (
 			query.left_join(supplier)
 			.on(supplier.name == po.supplier)

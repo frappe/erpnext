@@ -16,7 +16,7 @@ def execute(filters=None):
 	validate_filters(filters)
 
 	columns = get_columns(filters)
-	show_customer_name = show_party_name()
+	show_customer_name = show_party_name("Customer")
 
 	group_by_field = get_group_by_field(filters.get("group_by"))
 

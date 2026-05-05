@@ -19,7 +19,7 @@ def execute(filters=None):
 	data = []
 
 	customer_list = get_details(filters)
-	show_party_name = _show_party_name()
+	show_party_name = _show_party_name("Customer")
 
 	for d in customer_list:
 		row = []

@@ -83,7 +83,7 @@ def get_data(filters):
 		.orderby(soi.item_code)
 	)
 
-	if show_party_name():
+	if show_party_name("Customer"):
 		customer = qb.DocType("Customer")
 		query = (
 			query.left_join(customer)

@@ -19,7 +19,7 @@ def execute(filters=None):
 
 	validate_filters(filters)
 
-	show_party_name = _show_party_name()
+	show_party_name = _show_party_name(get_party_type(filters))
 	columns = get_columns(filters)
 	entries = get_entries(filters, show_party_name)
 	invoice_details = get_invoice_posting_date_map(filters)

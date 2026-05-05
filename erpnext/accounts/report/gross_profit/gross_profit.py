@@ -182,7 +182,7 @@ def get_data_when_grouped_by_invoice(columns, gross_profit_data, filters, group_
 	columns[0]["options"] = "Item"
 	columns[0]["width"] = 300
 	# removing Item Code and Item Name columns
-	if not show_party_name():
+	if not show_party_name("Customer"):
 		del columns[4:6]
 	else:
 		del columns[5:7]
@@ -238,7 +238,7 @@ def get_data_when_not_grouped_by_invoice(gross_profit_data, filters, group_wise_
 	group_columns = group_wise_columns.get(scrub(filters.group_by))
 
 	# removing customer_name from group columns
-	if "customer_name" in group_columns and not show_party_name():
+	if "customer_name" in group_columns and not show_party_name("Customer"):
 		group_columns = [col for col in group_columns if col != "customer_name"]
 
 	for src in gross_profit_data.grouped_data:
@@ -447,7 +447,7 @@ def get_columns(group_wise_columns, filters):
 	)
 
 	for col in group_wise_columns.get(scrub(filters.group_by)):
-		if col == "customer_name" and not show_party_name():
+		if col == "customer_name" and not show_party_name("Customer"):
 			continue
 		columns.append(column_map.get(col))
 

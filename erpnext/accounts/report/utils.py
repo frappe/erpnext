@@ -412,12 +412,19 @@ def get_opening_row(party_type, party, from_date, company):
 	).run(as_dict=True)
 
 
-def show_party_name():
-	return bool(cint(frappe.db.get_single_value("Accounts Settings", "show_party_name_in_reports")))
+def show_party_name(party_type=None):
+	if party_type == "Customer":
+		return bool(cint(frappe.db.get_single_value("Selling Settings", "show_customer_name_in_reports")))
+
+	if party_type == "Supplier":
+		return bool(cint(frappe.db.get_single_value("Buying Settings", "show_supplier_name_in_reports")))
+
+	# Employee, Member, Shareholder, or multi-party (None) — always show.
+	return True
 
 
 def get_party_name_column(party_type=None, fieldname="party_name"):
-	if show_party_name():
+	if show_party_name(party_type):
 		label = _("Party Name")
 		if party_type:
 			label = _(f"{party_type} Name")
@@ -478,23 +485,26 @@ def get_party_name_map(parties_by_type=None):
 	return party_map
 
 
-def enrich_with_party_names(entries):
+def enrich_with_party_names(entries, party_type=None):
 	"""Populate `party_name` on each entry dict/object from master if show_party_name is enabled."""
-	if not show_party_name():
+	if not show_party_name(party_type):
 		return
 
 	parties_by_type = {}
 	for entry in entries:
-		party_type = entry.get("party_type")
+		entry_party_type = entry.get("party_type")
 		party = entry.get("party")
-		if party_type and party:
-			parties_by_type.setdefault(party_type, set()).add(party)
+		if entry_party_type and party:
+			parties_by_type.setdefault(entry_party_type, set()).add(party)
+
+	if not parties_by_type:
+		return
 
 	party_name_map = get_party_name_map(parties_by_type)
 
 	for entry in entries:
-		party_type = entry.get("party_type")
+		entry_party_type = entry.get("party_type")
 		party = entry.get("party")
-		if party_type and party:
-			party_name = party_name_map.get(party_type, {}).get(party)
+		if entry_party_type and party:
+			party_name = party_name_map.get(entry_party_type, {}).get(party)
 			entry["party_name"] = party_name

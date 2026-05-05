@@ -214,7 +214,7 @@ def get_gl_entries(filters, accounting_dimensions):
 		as_dict=1,
 	)
 
-	enrich_with_party_names(gl_entries)
+	enrich_with_party_names(gl_entries, party_type=filters.get("party_type"))
 
 	if filters.get("presentation_currency"):
 		return convert_to_presentation_currency(gl_entries, currency_map, filters)

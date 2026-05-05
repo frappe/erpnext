@@ -100,7 +100,7 @@ def get_party_addresses_and_contact(party_type, party, party_group, filters):
 	party_details = get_party_details(party_type, party_list, "Address", party_details)
 	party_details = get_party_details(party_type, party_list, "Contact", party_details)
 
-	add_party_name = show_party_name()
+	add_party_name = show_party_name(party_type)
 
 	for party, details in party_details.items():
 		addresses = details.get("address", [])

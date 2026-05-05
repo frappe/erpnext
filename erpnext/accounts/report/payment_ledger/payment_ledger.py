@@ -162,7 +162,7 @@ class PaymentLedger:
 		self.columns.append(
 			dict(label=_("Party"), fieldname="party", fieldtype="data", options=options, width="100")
 		)
-		add_party_name_column(self.columns)
+		add_party_name_column(self.columns, party_type=self.filters.party_type)
 		self.columns.append(
 			dict(
 				label=_("Voucher Type"),
@@ -233,7 +233,7 @@ class PaymentLedger:
 		# convert dictionary to list and add balance rows
 		self.build_data()
 
-		enrich_with_party_names(self.data)
+		enrich_with_party_names(self.data, party_type=self.filters.party_type)
 
 		return self.columns, self.data
 
