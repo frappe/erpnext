@@ -110,6 +110,7 @@
   "sales_invoice_item",
   "material_request",
   "material_request_item",
+  "delivered_by_supplier",
   "item_weight_details",
   "weight_per_unit",
   "total_weight",
@@ -992,13 +993,22 @@
    "label": "Tax Withholding Category",
    "options": "Tax Withholding Category",
    "print_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "delivered_by_supplier",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Delivered by Supplier",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-05-04 10:48:54.535480",
+ "modified": "2026-05-06 08:08:40.782395",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
