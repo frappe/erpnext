@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-03 09:55+0000\n"
-"PO-Revision-Date: 2026-05-05 17:44\n"
+"PO-Revision-Date: 2026-05-06 17:45\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -1423,7 +1423,7 @@ msgstr "موجودی حساب در حال حاضر در بدهکاری است، 
 
 #: erpnext/accounts/dashboard_chart_source/account_balance_timeline/account_balance_timeline.py:47
 msgid "Account filter not set!"
-msgstr ""
+msgstr "فیلتر حساب تنظیم نشده است!"
 
 #. Label of the account_for_change_amount (Link) field in DocType 'POS Invoice'
 #. Label of the account_for_change_amount (Link) field in DocType 'POS Profile'
@@ -2682,7 +2682,7 @@ msgstr "افزودن سریال / شماره دسته (تعداد رد شده)"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:26
 msgid "Add Series Prefix"
-msgstr ""
+msgstr "افزودن پیشوند سری"
 
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:200
 msgid "Add Stock"
@@ -3328,7 +3328,7 @@ msgstr "پیش‌پرداخت‌های تخصیص یافته در برابر س�
 #. Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Advanced Features"
-msgstr ""
+msgstr "ویژگی‌های پیشرفته"
 
 #. Label of the advanced_filtering (Check) field in DocType 'Financial Report
 #. Row'
@@ -4360,7 +4360,7 @@ msgstr "نقش‌های اصلی مجاز عبارتند از «مشتری» و 
 
 #: erpnext/public/js/utils/naming_series_dialog.js:81
 msgid "Allowed special characters are '/' and '-'"
-msgstr ""
+msgstr "کاراکترهای ویژه مجاز عبارتند از '/' و '-'"
 
 #. Description of the 'Enable Stock Reservation' (Check) field in DocType
 #. 'Stock Settings'
@@ -6278,7 +6278,7 @@ msgstr "بستن خودکار فرصت پاسخ‌داده‌شده پس از ت
 #. Label of the auto_create_assets (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Auto create assets on purchase"
-msgstr ""
+msgstr "ایجاد خودکار دارایی‌ها هنگام خرید"
 
 #. Description of the 'Enable Automatic Party Matching' (Check) field in
 #. DocType 'Accounts Settings'
@@ -6650,7 +6650,7 @@ msgstr "ابزار مقایسه BOM"
 #. Label of the bom_conf_tab (Tab Break) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "BOM Configuration"
-msgstr ""
+msgstr "پیکربندی BOM"
 
 #. Label of the bom_created (Check) field in DocType 'BOM Creator Item'
 #: erpnext/manufacturing/doctype/bom_creator_item/bom_creator_item.json
@@ -6795,7 +6795,7 @@ msgstr "جستجوی BOM"
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgid "BOM Secondary Item"
-msgstr ""
+msgstr "آیتم ثانویه BOM"
 
 #. Label of the bom_secondary_item (Data) field in DocType 'Job Card Secondary
 #. Item'
@@ -8180,7 +8180,7 @@ msgstr "نرخ سفارش کلی"
 #. 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Blanket Orders"
-msgstr ""
+msgstr "سفارش‌های کلی"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:109
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js:260
@@ -11116,7 +11116,7 @@ msgstr "فیلد شرکت الزامی است"
 
 #: erpnext/accounts/dashboard_chart_source/account_balance_timeline/account_balance_timeline.py:45
 msgid "Company filter not set!"
-msgstr ""
+msgstr "فیلتر شرکت تنظیم نشده است!"
 
 #: erpnext/accounts/report/invalid_ledger_entries/invalid_ledger_entries.py:77
 msgid "Company is mandatory"
@@ -11388,7 +11388,7 @@ msgstr "پیکربندی اسمبلی محصول"
 #. Label of the configure (Button) field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Configure Series"
-msgstr ""
+msgstr "پیکربندی سری"
 
 #. Description of the 'Action If Same Rate is Not Maintained' (Select) field in
 #. DocType 'Buying Settings'
@@ -13636,7 +13636,7 @@ msgstr "شماره سریال فعلی"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:222
 msgid "Current Series"
-msgstr ""
+msgstr "سری فعلی"
 
 #. Label of the current_state (Select) field in DocType 'Share Balance'
 #: erpnext/accounts/doctype/share_balance/share_balance.json
@@ -14608,7 +14608,7 @@ msgstr "روز هفته"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:94
 msgid "Day of month"
-msgstr ""
+msgstr "روز ماه"
 
 #. Label of the day_to_send (Select) field in DocType 'Project'
 #: erpnext/projects/doctype/project/project.json
@@ -17110,7 +17110,7 @@ msgstr ""
 #: erpnext/public/js/utils/naming_series_dialog.js:7
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Document Naming"
-msgstr ""
+msgstr "نامگذاری سند"
 
 #: erpnext/stock/report/negative_batch_report/negative_batch_report.py:78
 msgid "Document No"
@@ -19907,7 +19907,7 @@ msgstr "سال مالی"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:100
 msgid "Fiscal Year (requires ERPNext to be installed)"
-msgstr ""
+msgstr "سال مالی (نیازمند نصب ERPNext است)"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/fiscal_year_company/fiscal_year_company.json
@@ -20319,7 +20319,7 @@ msgstr "مقدار پیش‌بینی"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/manufacturing.json
 msgid "Forecasting"
-msgstr ""
+msgstr "پیش بینی"
 
 #: erpnext/accounts/report/consolidated_trial_balance/consolidated_trial_balance.py:254
 #: erpnext/accounts/report/consolidated_trial_balance/consolidated_trial_balance.py:255
@@ -20922,7 +20922,7 @@ msgstr "GTIN"
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
 msgid "GTIN-14"
-msgstr ""
+msgstr "GTIN-14"
 
 #. Label of the gain_loss (Currency) field in DocType 'Exchange Rate
 #. Revaluation Account'
@@ -21294,7 +21294,7 @@ msgstr "دریافت سفارش‌های فروش"
 #. Receipt'
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Get Secondary Items"
-msgstr ""
+msgstr "دریافت آیتم‌های ثانویه"
 
 #. Label of the get_started_sections (Code) field in DocType 'Support Settings'
 #: erpnext/support/doctype/support_settings/support_settings.json
@@ -21673,7 +21673,7 @@ msgstr "گروه بر اساس تامین کننده"
 #. Label of the group_name (Data) field in DocType 'Tax Withholding Group'
 #: erpnext/accounts/doctype/tax_withholding_group/tax_withholding_group.json
 msgid "Group Name"
-msgstr ""
+msgstr "نام گروه"
 
 #: erpnext/setup/doctype/sales_person/sales_person_tree.js:14
 msgid "Group Node"
@@ -24254,7 +24254,7 @@ msgstr "انبار منبع و هدف نامعتبر"
 
 #: erpnext/edi/doctype/code_list/code_list_import.py:37
 msgid "Invalid Upload"
-msgstr ""
+msgstr "آپلود نامعتبر"
 
 #: erpnext/controllers/item_variant.py:151
 msgid "Invalid Value"
@@ -25425,7 +25425,7 @@ msgstr "مقادیر ویژگی آیتم"
 #. Label of the section_break_zlmj (Section Break) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Item Attributes"
-msgstr ""
+msgstr "ویژگی‌های آیتم"
 
 #. Name of a report
 #: erpnext/stock/report/item_balance/item_balance.json
@@ -26750,7 +26750,7 @@ msgstr "آیتم‌ها برای درخواست مواد اولیه"
 
 #: erpnext/selling/page/point_of_sale/pos_item_selector.js:110
 msgid "Items not found."
-msgstr ""
+msgstr "آیتم‌ها یافت نشدند."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1247
 msgid "Items rate has been updated to zero as Allow Zero Valuation Rate is checked for the following items: {0}"
@@ -30311,7 +30311,7 @@ msgstr "نام‌گذاری سری ها و پیش‌فرض‌های قیمت"
 
 #: erpnext/selling/doctype/selling_settings/selling_settings.js:38
 msgid "Naming Series for {0}"
-msgstr ""
+msgstr "نام‌گذاری سری برای {0}"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:95
 msgid "Naming Series is mandatory"
@@ -30321,11 +30321,11 @@ msgstr "سری نام‌گذاری اجباری است"
 #. Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Naming Series options"
-msgstr ""
+msgstr "گزینه‌های سری نامگذاری"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:196
 msgid "Naming Series updated"
-msgstr ""
+msgstr "سری نام‌گذاری به‌روزرسانی شد"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:938
 msgid "Naming series '{0}' for DocType '{1}' does not contain standard '.' or '{{' separator. Using fallback extraction."
@@ -31136,7 +31136,7 @@ msgstr "دیگر هیچ فرزندی در سمت راست وجود ندارد"
 
 #: erpnext/selling/doctype/selling_settings/selling_settings.js:56
 msgid "No naming series defined"
-msgstr ""
+msgstr "هیچ سری نام‌گذاری تعریف نشده است"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:608
 msgid "No of Deliveries"
@@ -31461,7 +31461,7 @@ msgstr "مجاز به ویرایش حساب ثابت {0} نیست"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:301
 msgid "Not configured"
-msgstr ""
+msgstr "پیکربندی نشده"
 
 #: erpnext/templates/form_grid/stock_entry_grid.html:26
 msgid "Not in Stock"
@@ -35903,7 +35903,7 @@ msgstr "لطفا نحوه پرداخت و جزئیات موجودی افتتاح
 
 #: erpnext/manufacturing/doctype/bom/bom.js:39
 msgid "Please add Operations first."
-msgstr ""
+msgstr "لطفا ابتدا عملیات را اضافه کنید."
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:214
 msgid "Please add Request for Quotation to the sidebar in Portal Settings."
@@ -46680,7 +46680,7 @@ msgstr "فروش دارایی"
 
 #: erpnext/assets/doctype/asset/asset.js:634
 msgid "Sell Qty"
-msgstr ""
+msgstr "مقدار فروش"
 
 #: erpnext/assets/doctype/asset/asset.js:650
 msgid "Sell quantity cannot exceed the asset quantity"
@@ -47733,7 +47733,7 @@ msgstr "زمان پاسخ را برای اولویت {0} در ردیف {1} تن�
 #. (Check) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Set Serial and Batch Bundle Naming Based on Naming Series"
-msgstr "تنظیم نامگذاری سریال و دسته‌ای باندل بر اساس سری نامگذاری"
+msgstr "تنظیم نام‌گذاری سریال و دسته‌ای باندل بر اساس سری نام‌گذاری"
 
 #. Label of the set_warehouse (Link) field in DocType 'Sales Order'
 #. Label of the set_warehouse (Link) field in DocType 'Delivery Note'
@@ -51399,7 +51399,7 @@ msgstr "تیکت‌های پشتیبانی"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:89
 msgid "Supported Variables:"
-msgstr ""
+msgstr "متغیرهای پشتیبانی‌شده:"
 
 #: erpnext/accounts/report/calculated_discount_mismatch/calculated_discount_mismatch.py:64
 msgid "Suspected Discount Amount"
@@ -55060,7 +55060,7 @@ msgstr "نام تراکنش"
 
 #: erpnext/stock/report/negative_batch_report/negative_batch_report.py:60
 msgid "Transaction Qty"
-msgstr ""
+msgstr "مقدار تراکنش"
 
 #. Label of the transaction_settings_section (Tab Break) field in DocType
 #. 'Buying Settings'
@@ -55075,7 +55075,7 @@ msgstr "تنظیمات تراکنش"
 #. Rate'
 #: erpnext/accounts/doctype/tax_withholding_rate/tax_withholding_rate.json
 msgid "Transaction Threshold"
-msgstr ""
+msgstr "آستانه تراکنش"
 
 #. Label of the transaction_type (Data) field in DocType 'Bank Transaction'
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.json
@@ -55576,7 +55576,7 @@ msgstr "جزئیات تبدیل UOM"
 #. 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "UOM Conversion Details"
-msgstr ""
+msgstr "جزئیات تبدیل واحد"
 
 #. Label of the conversion_factor (Float) field in DocType 'POS Invoice Item'
 #. Label of the conversion_factor (Float) field in DocType 'Purchase Invoice
@@ -55788,7 +55788,7 @@ msgstr "واحد"
 #. Label of the uom (Link) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Unit Of Measure"
-msgstr ""
+msgstr "واحد اندازه‌گیری"
 
 #: erpnext/controllers/accounts_controller.py:3924
 msgid "Unit Price"
@@ -56000,7 +56000,7 @@ msgstr "لغو اشتراک از این خلاصه ایمیل"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_engine.py:257
 msgid "Unsupported Feature"
-msgstr ""
+msgstr "ویژگی پشتیبانی نشده"
 
 #. Option for the 'Status' (Select) field in DocType 'Appointment'
 #: erpnext/crm/doctype/appointment/appointment.json
@@ -57208,7 +57208,7 @@ msgstr ""
 #: erpnext/stock/onboarding_step/view_stock_balance_report/view_stock_balance_report.json
 #: erpnext/stock/report/stock_ledger/stock_ledger.js:139
 msgid "View Stock Balance"
-msgstr ""
+msgstr "مشاهده تراز موجودی"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'View Stock Balance Report'
@@ -57220,7 +57220,7 @@ msgstr ""
 
 #: erpnext/stock/report/stock_balance/stock_balance.js:156
 msgid "View Stock Ledger"
-msgstr ""
+msgstr "مشاهده دفتر موجودی"
 
 #: erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.js:8
 msgid "View Type"
@@ -57324,7 +57324,7 @@ msgstr "مرجع جزئیات سند مالی"
 
 #: erpnext/accounts/report/general_ledger/general_ledger.html:160
 msgid "Voucher Details"
-msgstr ""
+msgstr "جزئیات سند مالی"
 
 #. Label of the voucher_no (Dynamic Link) field in DocType 'Advance Payment
 #. Ledger Entry'
@@ -57930,7 +57930,7 @@ msgstr "وب‌سایت:"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:95
 msgid "Week of the year"
-msgstr ""
+msgstr "هفته سال"
 
 #: erpnext/selling/report/sales_analytics/sales_analytics.py:433
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:121
@@ -58174,12 +58174,12 @@ msgstr ""
 #. Label of a chart in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "Won Opportunities"
-msgstr ""
+msgstr "فرصت‌های برنده"
 
 #. Label of a number card in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "Won Opportunity (Last 1 Month)"
-msgstr ""
+msgstr "فرصت برنده شده (۱ ماه گذشته)"
 
 #. Label of the work_done (Small Text) field in DocType 'Maintenance Visit
 #. Purpose'
@@ -58268,7 +58268,7 @@ msgstr "آیتم دستور کار"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:919
 msgid "Work Order Mismatch"
-msgstr ""
+msgstr "عدم تطابق دستور کار"
 
 #. Name of a DocType
 #: erpnext/manufacturing/doctype/work_order_operation/work_order_operation.json
@@ -58650,11 +58650,11 @@ msgstr "تاریخ شروع سال"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:92
 msgid "Year in 2 digits"
-msgstr ""
+msgstr "سال به صورت ۲ رقمی"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:91
 msgid "Year in 4 digits"
-msgstr ""
+msgstr "سال به صورت ۴ رقمی"
 
 #. Label of the year_of_passing (Int) field in DocType 'Employee Education'
 #: erpnext/setup/doctype/employee_education/employee_education.json
@@ -59046,7 +59046,7 @@ msgstr "fieldname"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:97
 msgid "fieldname on the document e.g."
-msgstr ""
+msgstr "نام فیلد در سند، مثلاً"
 
 #. Option for the 'Service Provider' (Select) field in DocType 'Currency
 #. Exchange Settings'
@@ -59300,7 +59300,7 @@ msgstr "{0} خلاصه"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:247
 msgid "{0} Naming Series"
-msgstr ""
+msgstr "{0} سری نام‌گذاری"
 
 #: erpnext/accounts/utils.py:1581
 msgid "{0} Number {1} is already used in {2} {3}"
@@ -59505,7 +59505,7 @@ msgstr "{0} اجباری است. شاید رکورد تبدیل ارز برای 
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1813
 msgid "{0} is not a CSV file."
-msgstr ""
+msgstr "{0} یک فایل CSV نیست."
 
 #: erpnext/selling/doctype/customer/customer.py:236
 msgid "{0} is not a company bank account"
@@ -59529,7 +59529,7 @@ msgstr "{0} یک مقدار معتبر برای ویژگی {1} آیتم {2} نی
 
 #: erpnext/stock/utils.py:135
 msgid "{0} is not a valid {1} fieldname."
-msgstr ""
+msgstr "{0} نام فیلد معتبر برای {1} نیست."
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:168
 msgid "{0} is not added in the table"
@@ -59881,7 +59881,7 @@ msgstr "{0}: {1} متعلق به شرکت: {2} نیست"
 
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1410
 msgid "{0}: {1} does not exist"
-msgstr ""
+msgstr "{0}: {1} وجود ندارد"
 
 #: erpnext/accounts/party.py:79
 msgid "{0}: {1} does not exists"
