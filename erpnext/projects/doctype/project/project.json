@@ -66,7 +66,13 @@
   "copied_from",
   "section_break0",
   "notes",
-  "connections_tab"
+  "connections_tab",
+  "attachments_tab",
+  "pr_link",
+  "b\u1ea3ng_c\u00e1c_t\u1ec7p_\u0111\u00ednh_k\u00e8m",
+  "google_sheet_link",
+  "sheet_tab",
+  "sheet_preview"
  ],
  "fields": [
   {
@@ -473,6 +479,41 @@
    "fieldtype": "Tab Break",
    "label": "Connections",
    "show_dashboard": 1
+  },
+  {
+   "fieldname": "attachments_tab",
+   "fieldtype": "Tab Break",
+   "label": "Attachments"
+  },
+  {
+   "bold": 1,
+   "fieldname": "pr_link",
+   "fieldtype": "Table",
+   "label": "B\u1ea3ng c\u00e1c li\u00ean k\u1ebft",
+   "options": "Project Links"
+  },
+  {
+   "bold": 1,
+   "fieldname": "b\u1ea3ng_c\u00e1c_t\u1ec7p_\u0111\u00ednh_k\u00e8m",
+   "fieldtype": "Table",
+   "label": "B\u1ea3ng c\u00e1c t\u1ec7p \u0111\u00ednh k\u00e8m",
+   "options": "Project Attachment"
+  },
+  {
+   "fieldname": "sheet_tab",
+   "fieldtype": "Tab Break",
+   "label": "Sheet"
+  },
+  {
+   "fieldname": "google_sheet_link",
+   "fieldtype": "Data",
+   "label": "Google Sheet",
+   "options": "URL"
+  },
+  {
+   "fieldname": "sheet_preview",
+   "fieldtype": "HTML",
+   "label": "Xem sheet"
   }
  ],
  "icon": "fa fa-puzzle-piece",
@@ -480,7 +521,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
- "modified": "2026-04-14 18:17:40.676750",
+ "modified": "2026-05-05 15:38:16.539924",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

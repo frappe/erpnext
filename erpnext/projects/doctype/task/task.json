@@ -212,6 +212,9 @@
   {
    "fieldname": "description",
    "fieldtype": "Text Editor",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
    "label": "Task Description",
    "oldfieldname": "description",
    "oldfieldtype": "Text Editor",
@@ -423,7 +426,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2026-04-09 19:12:27.153143",
+ "modified": "2026-05-05 16:54:58.844827",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",

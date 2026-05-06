@@ -25,13 +25,15 @@ class Project(Document):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from frappe.types import DF
-
 		from erpnext.projects.doctype.project_user.project_user import ProjectUser
+		from frappe.types import DF
+		from tantien_custom.tantien_custom.doctype.project_attachment.project_attachment import ProjectAttachment
+		from tantien_custom.tantien_custom.doctype.project_links.project_links import ProjectLinks
 
 		actual_end_date: DF.Date | None
 		actual_start_date: DF.Date | None
 		actual_time: DF.Float
+		bảng_các_tệp_đính_kèm: DF.Table[ProjectAttachment]
 		collect_progress: DF.Check
 		company: DF.Link
 		copied_from: DF.Data | None
@@ -46,6 +48,7 @@ class Project(Document):
 		first_email: DF.Time | None
 		frequency: DF.Literal["Hourly", "Twice Daily", "Daily", "Weekly"]
 		from_time: DF.Time | None
+		google_sheet_link: DF.Data | None
 		gross_margin: DF.Currency
 		holiday_list: DF.Link | None
 		is_active: DF.Literal["Yes", "No"]
@@ -55,6 +58,7 @@ class Project(Document):
 		per_gross_margin: DF.Percent
 		percent_complete: DF.Percent
 		percent_complete_method: DF.Literal["Manual", "Task Completion", "Task Progress", "Task Weight"]
+		pr_link: DF.Table[ProjectLinks]
 		priority: DF.Literal["Medium", "Low", "High"]
 		project_name: DF.Data
 		project_template: DF.Link | None
