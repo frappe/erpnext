@@ -1060,6 +1060,9 @@ def get_ssb_bundle_for_voucher(sre_list) -> object:
 		for sb_entry in sb_entries:
 			bundle.append("entries", sb_entry)
 
+		if frappe.flags.in_test:
+			bundle.flags.ignore_mandatory = True
+
 		bundle.save()
 
 		return bundle

@@ -2757,6 +2757,145 @@ class TestSalesOrder(ERPNextTestSuite):
 		so = make_sales_order(item_code=fg_item, qty=10, rate=50, warehouse=fg_warehouse, do_not_save=1)
 		self.assertRaises(frappe.ValidationError, so.save)
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "use_serial_batch_fields": 0}
+	)
+	def test_product_bundle_reservation(self):
+		pb_item = make_item("Product Bundle Item", {"is_stock_item": 0})
+		simple_item = make_item("Simple Item", {"is_stock_item": 1})
+		sb_item = make_item(
+			"Serial Batch Item",
+			{
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BAT-TSBIFRM-.#####",
+				"serial_no_series": "SN-TSBIFRM-.#####",
+			},
+		)
+		make_product_bundle(pb_item.name, [simple_item.name, sb_item.name])
+
+		warehouse = "_Test Warehouse - _TC"
+
+		make_stock_entry(
+			item_code=simple_item.name,
+			target=warehouse,
+			qty=10,
+		)
+
+		# two different stock entries on purpose to get two batches
+		make_stock_entry(
+			item_code=sb_item.name,
+			target=warehouse,
+			qty=5,
+		)
+		make_stock_entry(
+			item_code=sb_item.name,
+			target=warehouse,
+			qty=5,
+		)
+
+		so = make_sales_order(item_code=pb_item.name, do_not_submit=1)
+		so.reserve_stock = 1
+		for item in so.packed_items:
+			item.reserve_stock = 1
+		so.submit()
+
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_sre_reserved_batch_nos_details,
+			get_sre_reserved_qty_for_voucher_detail_no,
+			get_sre_reserved_serial_nos_details,
+		)
+
+		for item in so.packed_items:
+			self.assertEqual(
+				get_sre_reserved_qty_for_voucher_detail_no(item.item_code, "Sales Order", so.name, item.name),
+				item.qty,
+			)
+
+		sre_serial_nos = list(get_sre_reserved_serial_nos_details(sb_item.name, warehouse).keys())
+		sre_batch_nos = list(get_sre_reserved_batch_nos_details(sb_item.name, warehouse).keys())
+
+		dn = make_delivery_note(so.name, kwargs={"for_reserved_stock": True})
+		dn.save()
+
+		self.assertTrue(dn.packed_items[1].serial_and_batch_bundle)
+
+		from erpnext.stock.serial_batch_bundle import get_batches_from_bundle, get_serial_nos
+
+		serial_nos_in_bundle = get_serial_nos(dn.packed_items[1].serial_and_batch_bundle)
+		batches_in_bundle = list(get_batches_from_bundle(dn.packed_items[1].serial_and_batch_bundle).keys())
+
+		self.assertEqual(sre_serial_nos, serial_nos_in_bundle)
+		self.assertEqual(sre_batch_nos, batches_in_bundle)
+
+		dn.items[0].qty = 5
+		dn.save()
+		sabb_doc = frappe.get_doc("Serial and Batch Bundle", dn.packed_items[1].serial_and_batch_bundle)
+		sabb_doc.entries = sabb_doc.entries[:5]
+		sabb_doc.company = dn.company
+		sabb_doc.save()
+		dn.submit()
+
+		serial_nos = set(sre_serial_nos) - set(get_serial_nos(sabb_doc.name))
+		batch_nos = set(sre_batch_nos) - set(get_batches_from_bundle(sabb_doc.name).keys())
+
+		dn1 = make_delivery_note(so.name, kwargs={"for_reserved_stock": True})
+		dn1.save()
+
+		self.assertTrue(dn1.packed_items[1].serial_and_batch_bundle)
+
+		from erpnext.stock.serial_batch_bundle import get_batches_from_bundle, get_serial_nos
+
+		serial_nos_in_bundle = set(get_serial_nos(dn1.packed_items[1].serial_and_batch_bundle))
+		batches_in_bundle = set(get_batches_from_bundle(dn1.packed_items[1].serial_and_batch_bundle).keys())
+
+		self.assertEqual(serial_nos, serial_nos_in_bundle)
+		self.assertEqual(batch_nos, batches_in_bundle)
+
+		dn.cancel()
+
+		# test the same thing with sales invoice as well
+
+		si = make_sales_invoice(so.name)
+		si.update_stock = 1
+		si.save()
+
+		self.assertTrue(si.packed_items[1].serial_and_batch_bundle)
+
+		from erpnext.stock.serial_batch_bundle import get_batches_from_bundle, get_serial_nos
+
+		serial_nos_in_bundle = get_serial_nos(si.packed_items[1].serial_and_batch_bundle)
+		batches_in_bundle = list(get_batches_from_bundle(si.packed_items[1].serial_and_batch_bundle).keys())
+
+		self.assertEqual(sre_serial_nos, serial_nos_in_bundle)
+		self.assertEqual(sre_batch_nos, batches_in_bundle)
+
+		si.items[0].qty = 5
+		si.save()
+		sabb_doc = frappe.get_doc("Serial and Batch Bundle", si.packed_items[1].serial_and_batch_bundle)
+		sabb_doc.entries = sabb_doc.entries[:5]
+		sabb_doc.company = si.company
+		sabb_doc.save()
+		si.submit()
+
+		serial_nos = set(sre_serial_nos) - set(get_serial_nos(sabb_doc.name))
+		batch_nos = set(sre_batch_nos) - set(get_batches_from_bundle(sabb_doc.name).keys())
+
+		si1 = make_delivery_note(so.name, kwargs={"for_reserved_stock": True})
+		si1.save()
+
+		self.assertTrue(si1.packed_items[1].serial_and_batch_bundle)
+
+		from erpnext.stock.serial_batch_bundle import get_batches_from_bundle, get_serial_nos
+
+		serial_nos_in_bundle = set(get_serial_nos(si1.packed_items[1].serial_and_batch_bundle))
+		batches_in_bundle = set(get_batches_from_bundle(si1.packed_items[1].serial_and_batch_bundle).keys())
+
+		self.assertEqual(serial_nos, serial_nos_in_bundle)
+		self.assertEqual(batch_nos, batches_in_bundle)
+
 
 def compare_payment_schedules(doc, doc1, doc2):
 	for index, schedule in enumerate(doc1.get("payment_schedule")):
