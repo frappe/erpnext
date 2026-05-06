@@ -1017,11 +1017,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2026-04-07 15:40:45.687554",
-=======
  "modified": "2026-05-06 08:08:40.782395",
->>>>>>> 907a809f3f (fix: incorrect validation thrown for drop shipped PI (#54751))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
