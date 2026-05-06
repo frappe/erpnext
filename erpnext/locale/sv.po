@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-03 09:55+0000\n"
-"PO-Revision-Date: 2026-05-05 17:44\n"
+"PO-Revision-Date: 2026-05-06 17:45\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -688,7 +688,7 @@ msgstr "<div id=\"stock-levels-placeholder\"></div>"
 #. Content of the 'uom_help_html' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "<div style=\"margin-bottom:10px; color: var(--gray-500) !important;\">Define alternate units for this item. Eg: 1 Box = 12 Nos, set conversion factor as 12. (Will also apply for variants) <a href=\"https://docs.frappe.io/erpnext/uom\" target=\"_blank\">Learn more &#8594;</a></div>"
-msgstr ""
+msgstr "<div style=\"margin-bottom:10px; color: var(--gray-500) !important;\">Definiera alternativa enheter för denna artikel. Exempel: 1 Box = 12 St, ange konvertering faktor till 12. (Gäller även för varianter) <a href=\"https://docs.frappe.io/erpnext/uom\" target=\"_blank\">Läs mer &#8594;</a></div>"
 
 #. Content of the 'settings' (HTML) field in DocType 'Cheque Print Template'
 #: erpnext/accounts/doctype/cheque_print_template/cheque_print_template.json
@@ -1116,13 +1116,13 @@ msgstr "Ny bokföringsår har skapats automatiskt."
 #. DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "A quality inspection must be completed before generating a Delivery Note for this item."
-msgstr ""
+msgstr "Kvalitet kontroll måste genomföras innan följesedel för denna artikel skapas."
 
 #. Description of the 'Inspection Required before Purchase' (Check) field in
 #. DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "A quality inspection must be completed before generating a Purchase Receipt for this item."
-msgstr ""
+msgstr "Kvalitet kontroll måste genomföras innan Inköp Följesedel skapas för denna artikel."
 
 #: erpnext/accounts/doctype/sales_taxes_and_charges_template/sales_taxes_and_charges_template.py:96
 msgid "A template with tax category {0} already exists. Only one template is allowed with each tax category"
@@ -1543,25 +1543,25 @@ msgstr "Konto ej funnen"
 #. Default'
 #: erpnext/stock/doctype/item_default/item_default.json
 msgid "Account to record additional purchase expenses like freight or customs for this item"
-msgstr ""
+msgstr "Konto för att registrera extra inköpskostnader som frakt eller tull för denna artikel"
 
 #. Description of the 'Default COGS Account' (Link) field in DocType 'Item
 #. Default'
 #: erpnext/stock/doctype/item_default/item_default.json
 msgid "Account where cost of goods sold will be posted when this item is sold"
-msgstr ""
+msgstr "Konto där kostnad för sålda artiklar kommer att bokföras när denna artikel säljs"
 
 #. Description of the 'Default Income Account' (Link) field in DocType 'Item
 #. Default'
 #: erpnext/stock/doctype/item_default/item_default.json
 msgid "Account where revenue from selling this item will be credited"
-msgstr ""
+msgstr "Konto där intäkter från försäljning av denna artikel kommer att krediteras"
 
 #. Description of the 'Default Expense Account' (Link) field in DocType 'Item
 #. Default'
 #: erpnext/stock/doctype/item_default/item_default.json
 msgid "Account where the cost of this item will be debited on purchase"
-msgstr ""
+msgstr "Konto där kostnad för denna artikel debiteras vid inköp"
 
 #: erpnext/accounts/doctype/account/account.py:427
 msgid "Account with child nodes cannot be converted to ledger"
@@ -2774,7 +2774,7 @@ msgstr "Lägg till Serie/Parti Nummer (Avvisad Kvantitet)"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:26
 msgid "Add Series Prefix"
-msgstr ""
+msgstr "Lägg till Namngivning Serie Prefix"
 
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:200
 msgid "Add Stock"
@@ -4382,22 +4382,22 @@ msgstr "Tillåt att samma artikel läggs till flera gånger i transaktion"
 #. Description of the 'Allow Negative Stock' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Allow stock to go below zero for this item, even if negative stock is disabled in Stock Settings."
-msgstr ""
+msgstr "Tillåt negativt lager för denna här artikel, även om negativt lager är inaktiverat i Lager Inställningar."
 
 #. Description of the 'Allow Alternative Item' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Allow substituting this item with an alternative from the Item Alternative list when stock is unavailable."
-msgstr ""
+msgstr "Tillåt att denna artikel ersätts med ett alternativ från Artikel Alternativ lista när den inte finns i lager."
 
 #. Description of the 'Allow Purchase' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Allow this item to be used in purchase transactions."
-msgstr ""
+msgstr "Tillåt att denna artikel används i inköp transaktioner."
 
 #. Description of the 'Allow Sales' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Allow this item to be used in sales transactions."
-msgstr ""
+msgstr "Tillåt att denna artikel används i försäljning transaktioner."
 
 #. Label of the allow_to_edit_stock_uom_qty_for_purchase (Check) field in
 #. DocType 'Stock Settings'
@@ -4456,7 +4456,7 @@ msgstr "Tillåtna primära roller är 'Kund' och 'Leverantör'. Välj endast en 
 
 #: erpnext/public/js/utils/naming_series_dialog.js:81
 msgid "Allowed special characters are '/' and '-'"
-msgstr ""
+msgstr "Tillåtna specialtecken är '/' och '-'"
 
 #. Description of the 'Enable Stock Reservation' (Check) field in DocType
 #. 'Stock Settings'
@@ -6374,7 +6374,7 @@ msgstr "Automatiskt Stäng Besvarad Möjlighet efter ovan angivet antal dagar"
 #. Label of the auto_create_assets (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Auto create assets on purchase"
-msgstr ""
+msgstr "Skapa tillgångar automatiskt vid inköp"
 
 #. Description of the 'Enable Automatic Party Matching' (Check) field in
 #. DocType 'Accounts Settings'
@@ -7850,12 +7850,12 @@ msgstr "Parti är inte skapad för Artikel {} eftersom den inte har Parti Nummer
 #. 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Batch number will be auto-created in format AAAA.00001 if not specified in transactions. Leave blank to always enter batch numbers manually."
-msgstr ""
+msgstr "Partinummer skapas automatiskt i format AAAA.00001 om det inte anges i transaktioner. Lämna tomt om du alltid vill ange partinummer manuellt."
 
 #. Description of the 'Has Expiry Date' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Batch number will be created based on expiry date. Expiry dates can be set in the Batch master."
-msgstr ""
+msgstr "Partinummer skapas baserat på utgångsdatum. Utgångsdatum kan anges i Parti Inställningar."
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:384
 msgid "Batch {0} and Warehouse"
@@ -11031,7 +11031,7 @@ msgstr "Bolag Förkortning"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:101
 msgid "Company Abbreviation (requires ERPNext to be installed)"
-msgstr ""
+msgstr "Bolag Förkortning (erfordrar installerad system)"
 
 #: erpnext/public/js/setup_wizard.js:174
 msgid "Company Abbreviation cannot have more than 5 characters"
@@ -11484,7 +11484,7 @@ msgstr "Konfigurera Artikel Produktion"
 #. Label of the configure (Button) field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Configure Series"
-msgstr ""
+msgstr "Konfigurera Namngivning Serie"
 
 #. Description of the 'Action If Same Rate is Not Maintained' (Select) field in
 #. DocType 'Buying Settings'
@@ -12130,7 +12130,7 @@ msgstr "Kopierad Från"
 #. and Conditions'
 #: erpnext/setup/doctype/terms_and_conditions/terms_and_conditions.json
 msgid "Copy Attachments to Transaction"
-msgstr ""
+msgstr "Kopiera Bilagor till Transaktion"
 
 #. Label of the copy_fields_to_variant (Section Break) field in DocType 'Item
 #. Variant Settings'
@@ -12473,13 +12473,13 @@ msgstr "Säljaren Betalar Frakt"
 #. 'Item Default'
 #: erpnext/stock/doctype/item_default/item_default.json
 msgid "Cost center used for tracking purchase expenses for this item"
-msgstr ""
+msgstr "Resultat Enhet som används för att spåra inköpskostnader för denna artikel"
 
 #. Description of the 'Default Selling Cost Center' (Link) field in DocType
 #. 'Item Default'
 #: erpnext/stock/doctype/item_default/item_default.json
 msgid "Cost center used for tracking sales revenue for this item"
-msgstr ""
+msgstr "Resultat Enhet som används för att spåra försäljningsintäkter för denna artikel"
 
 #: erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py:41
 msgid "Cost of Delivered Items"
@@ -13118,13 +13118,13 @@ msgstr "Skapar Användarkonto för personal med hjälp av Föredragen, Bolag ell
 #. Description of the 'Create Grouped Asset' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Creates a single grouped asset instead of individual assets when purchased in bulk."
-msgstr ""
+msgstr "Skapar en enda grupperad tillgång istället för enskilda tillgångar när inköp är flera."
 
 #. Description of the 'Standard Selling Rate' (Currency) field in DocType
 #. 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Creates an Item Price automatically when the item is saved"
-msgstr ""
+msgstr "Skapar artikel pris automatiskt när artikel sparas"
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js:140
 msgid "Creating Accounts..."
@@ -13732,7 +13732,7 @@ msgstr "Aktuellt Serie Nummer"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:222
 msgid "Current Series"
-msgstr ""
+msgstr "Nuvarande Namngivning Serie"
 
 #. Label of the current_state (Select) field in DocType 'Share Balance'
 #: erpnext/accounts/doctype/share_balance/share_balance.json
@@ -14704,7 +14704,7 @@ msgstr "Veckodag"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:94
 msgid "Day of month"
-msgstr ""
+msgstr "Dag i månaden"
 
 #. Label of the day_to_send (Select) field in DocType 'Project'
 #: erpnext/projects/doctype/project/project.json
@@ -15474,7 +15474,7 @@ msgstr "Standard Konto uppdateras automatiskt i Kassa Faktura när detta läge �
 #. Default'
 #: erpnext/stock/doctype/item_default/item_default.json
 msgid "Default price list for buying or selling this item"
-msgstr ""
+msgstr "Standard prislista för att inköp eller försäljning av denna artikel"
 
 #. Description of a DocType
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
@@ -16558,7 +16558,7 @@ msgstr "Inaktiverad Lager {0} kan inte användas för denna transaktion."
 #. Description of the 'Disabled' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Disabled items cannot be selected in any transaction."
-msgstr ""
+msgstr "Inaktiverade artiklar kan inte väljas i någon transaktion."
 
 #: erpnext/controllers/accounts_controller.py:903
 msgid "Disabled pricing rules since this {} is an internal transfer"
@@ -17206,7 +17206,7 @@ msgstr "Antal Dokument"
 #: erpnext/public/js/utils/naming_series_dialog.js:7
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Document Naming"
-msgstr ""
+msgstr "Dokument Namngivning"
 
 #: erpnext/stock/report/negative_batch_report/negative_batch_report.py:78
 msgid "Document No"
@@ -17631,7 +17631,7 @@ msgstr "System Användare"
 #. Description of the 'Maintain Stock' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "ERPNext will make a stock ledger entry for each transaction of this item. Keep unchecked for non-stock or service items."
-msgstr ""
+msgstr "System kommer att skapa lager bokföring post för varje transaktion av denna artikel. Behåll inaktiverad för ej lager hanterade eller service artiklar."
 
 #. Option for the 'Update frequency of Project' (Select) field in DocType
 #. 'Buying Settings'
@@ -18273,29 +18273,29 @@ msgstr "Aktivera Rabatt Bokföring för Försäljning"
 #. DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Enable for drop shipping - supplier delivers directly to the customer without passing through your warehouse."
-msgstr ""
+msgstr "Aktivera direkt leverans – leverantör levererar direkt till kund utan att passera genom lager."
 
 #. Description of the 'Include Item In Manufacturing' (Check) field in DocType
 #. 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Enable for raw material items used in BOM. Uncheck for additional services like 'washing' used in manufacturing."
-msgstr ""
+msgstr "Aktivera för råmaterial artiklar som används i stycklista. Inaktivera för extra tjänster som \"washing\" som används i produktion."
 
 #. Description of the 'Is Subcontracted Item' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Enable if a vendor manufactures this item for you. You can choose to provide them raw materials using the default BOM."
-msgstr ""
+msgstr "Aktivera om leverantör tillverkar denna artikel åt dig. Du kan välja att förse dem med råmaterial med hjälp av standard stycklista."
 
 #. Description of the 'Is Fixed Asset' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Enable if this item is a company asset like machinery or furniture."
-msgstr ""
+msgstr "Aktivera om artikel är tillgång, t. ex. Maskiner eller Möbler."
 
 #. Description of the 'Is Customer Provided Item' (Check) field in DocType
 #. 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Enable if this item is provided by a customer and received via Stock Entry."
-msgstr ""
+msgstr "Aktivera om denna artikel tillhandahålls av kund och tas emot via Lager Post."
 
 #. Description of the 'Consider Rejected Warehouses' (Check) field in DocType
 #. 'Pick List'
@@ -18552,7 +18552,7 @@ msgstr "Ange Bank Garanti Nummer innan godkännande."
 #. Description of the 'Ref Code' (Data) field in DocType 'Item Customer Detail'
 #: erpnext/stock/doctype/item_customer_detail/item_customer_detail.json
 msgid "Enter the Item Code that this customer uses at their end. This will be shown in Sales Orders for the customer's reference."
-msgstr ""
+msgstr "Ange Artikel Kod som denna kund använder. Kommer att visas i försäljningsordrar som kund referens."
 
 #: erpnext/manufacturing/doctype/routing/routing.js:93
 msgid "Enter the Operation, the table will fetch the Operation details like Hourly Rate, Workstation automatically.\n\n"
@@ -19178,7 +19178,7 @@ msgstr "Kostnad Konto erfordras för Artikel {0}"
 #. Description of the 'Enable Deferred Revenue' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Expense for this item will be recognized over a period of months. Eg: prepaid insurance or annual software license"
-msgstr ""
+msgstr "Kostnad för denna artikel kommer att bokföras över period av månader. Exempel: förbetald försäkring eller årlig programvara licens"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:81
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:140
@@ -20011,7 +20011,7 @@ msgstr "Bokföringsår"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:100
 msgid "Fiscal Year (requires ERPNext to be installed)"
-msgstr ""
+msgstr "Bokföringsår (erfordrar installerad System)"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/fiscal_year_company/fiscal_year_company.json
@@ -22585,7 +22585,7 @@ msgstr "Om aktiverad,bokföring poster kommer att bokföras för Växel Belopp i
 #. Description of the 'Grant Commission' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "If enabled, sales from this item will be included in Sales Person and Sales Partner commission calculations"
-msgstr ""
+msgstr "Om aktiverad kommer försäljning från denna artikel att inkluderas i provisionsberäkningar för Försäljare och Försäljning Partner"
 
 #. Description of the 'Allow delivery of overproduced quantity' (Check) field
 #. in DocType 'Selling Settings'
@@ -23549,7 +23549,7 @@ msgstr "Intäkter & Kostnader"
 #. Description of the 'Enable Deferred Expense' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Income from this item will be recognized over a period of months instead of all at once. Eg: annual subscription paid upfront."
-msgstr ""
+msgstr "Intäkter från denna artikel kommer att bokföras över period av månader istället för direkt. T. ex.: årsabonnemang betald i förskott."
 
 #. Label of a number card in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
@@ -25532,7 +25532,7 @@ msgstr "Artikel Egenskap Värden"
 #. Label of the section_break_zlmj (Section Break) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Item Attributes"
-msgstr ""
+msgstr "Artikel Egenskaper"
 
 #. Name of a report
 #: erpnext/stock/report/item_balance/item_balance.json
@@ -26298,7 +26298,7 @@ msgstr "Artikel Pris visas flera gånger baserat på Prislista, Leverantör/Kund
 
 #: erpnext/stock/doctype/item/item.py:183
 msgid "Item Price created at rate {0}"
-msgstr ""
+msgstr "Artikelpris skapat till pris {0}"
 
 #: erpnext/stock/get_item_details.py:1124
 msgid "Item Price updated for {0} in Price List {1}"
@@ -29560,7 +29560,7 @@ msgstr "Maximum Värde"
 #: erpnext/stock/doctype/item/item.json
 #, python-format
 msgid "Maximum discount % allowed when selling this item. Eg: if set to 20%, a discount greater than 20% cannot be applied in sales transactions."
-msgstr ""
+msgstr "Högsta rabatt i % som tillåts vid försäljning av denna artikel. Exempel: om den är angiven till 20 % kan rabatt högre än 20 % inte tillämpas vid försäljningstransaktioner."
 
 #: erpnext/controllers/selling_controller.py:278
 msgid "Maximum discount for Item {0} is {1}%"
@@ -29944,12 +29944,12 @@ msgstr "Mimimum Värde"
 #. Description of the 'Minimum Order Qty' (Float) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Minimum quantity should be as per Stock UOM\n\n"
-msgstr ""
+msgstr "Lägsta kvantitet ska vara enligt Lager Enhet\n\n"
 
 #. Description of the 'Safety Stock' (Float) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Minimum stock level to maintain as a buffer. Used to calculate recommended reorder level: Reorder Level = Safety Stock + (Average Daily Consumption × Lead Time)."
-msgstr ""
+msgstr "Lägsta lagernivå att upprätthålla som buffert. Används för att beräkna rekommenderad order nivå: Order nivå = Säkerhet Lager + (Genomsnittlig Daglig Förbrukning × Ledtid)."
 
 #. Label of the minute (Text Editor) field in DocType 'Quality Meeting Minutes'
 #. Name of a UOM
@@ -30037,7 +30037,7 @@ msgstr "Betalning App Saknas"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_engine.py:249
 msgid "Missing Required Filter"
-msgstr ""
+msgstr "Saknar Erforderlig Filter"
 
 #: erpnext/assets/doctype/asset_repair/asset_repair.py:297
 msgid "Missing Serial No Bundle"
@@ -30418,7 +30418,7 @@ msgstr "Namngivning Serie & Pris Inställningar"
 
 #: erpnext/selling/doctype/selling_settings/selling_settings.js:38
 msgid "Naming Series for {0}"
-msgstr ""
+msgstr "Namngivning Serie för {0}"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:95
 msgid "Naming Series is mandatory"
@@ -30428,11 +30428,11 @@ msgstr "Namngivning Serie erfodras"
 #. Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Naming Series options"
-msgstr ""
+msgstr "Namngivning Serie alternativ"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:196
 msgid "Naming Series updated"
-msgstr ""
+msgstr "Namngivning Serie uppdaterad"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:938
 msgid "Naming series '{0}' for DocType '{1}' does not contain standard '.' or '{{' separator. Using fallback extraction."
@@ -31243,7 +31243,7 @@ msgstr "Inga fler underordnade till Höger"
 
 #: erpnext/selling/doctype/selling_settings/selling_settings.js:56
 msgid "No naming series defined"
-msgstr ""
+msgstr "Ingen namngivning serie definierad"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:608
 msgid "No of Deliveries"
@@ -31568,7 +31568,7 @@ msgstr "Ej Tillåtet redigera låst konto {0}"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:301
 msgid "Not configured"
-msgstr ""
+msgstr "Ej konfigurerad"
 
 #: erpnext/templates/form_grid/stock_entry_grid.html:26
 msgid "Not in Stock"
@@ -32379,11 +32379,11 @@ msgstr "Öppning Lager"
 
 #: erpnext/stock/doctype/item/item.py:356
 msgid "Opening Stock entry created with zero valuation rate: {0}"
-msgstr ""
+msgstr "Öppning Lager post skapad med noll grund pris: {0}"
 
 #: erpnext/stock/doctype/item/item.py:364
 msgid "Opening Stock entry created: {0}"
-msgstr ""
+msgstr "Öppning Lager post skapad: {0}"
 
 #. Label of the opening_time (Time) field in DocType 'Issue'
 #: erpnext/support/doctype/issue/issue.json
@@ -32740,7 +32740,7 @@ msgstr "Valfri. Används med Finans Rapport Mall"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:83
 msgid "Optionally, set the number of digits in the series using dot (.) followed by hashes (#). For example, '.####' means that the series will have four digits. Default is five digits."
-msgstr ""
+msgstr "Alternativt kan antal siffror anges i serie med hjälp av punkt (.) följt av hash (#). Till exempel betyder '.####' att serie kommer att ha fyra siffror. Standardvärde är fem siffror."
 
 #: erpnext/selling/report/territory_wise_sales/territory_wise_sales.py:43
 msgid "Order Amount"
@@ -35367,13 +35367,13 @@ msgstr "Procentuell Tilldelning ska vara lika med 100 %"
 #. 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Percentage by which over-billing is allowed against a Sales/Purchase Order for this item. If not set, value from Accounts Settings will be used."
-msgstr ""
+msgstr "Procentandel med vilken överfakturering är tillåten mot en Försäljning/ Inköp Order för denna artikel. Om inget anges kommer värdet från Bokföring Inställningar att användas."
 
 #. Description of the 'Over Delivery/Receipt Allowance (%)' (Float) field in
 #. DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Percentage by which over-delivery or over-receipt is allowed against a Sales/Purchase Order for this item. If not set, value from Stock Settings will be used."
-msgstr ""
+msgstr "Procentandel med vilken överleverans eller övermottagning är tillåten mot Försäljning/Inköp Order för denna artikel. Om inget anges kommer värdet från Lager Inställningar att användas."
 
 #. Description of the 'Blanket Order Allowance (%)' (Float) field in DocType
 #. 'Buying Settings'
@@ -36027,7 +36027,7 @@ msgstr "Lägg till Tillfällig Öppning Konto i Kontoplan"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:170
 msgid "Please add at least one naming series."
-msgstr ""
+msgstr "Lägg till åtminstone en Namngivning Serie."
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:661
 msgid "Please add atleast one Serial No / Batch No"
@@ -36678,7 +36678,7 @@ msgstr "Välj Leverantör för att hämta betalningar."
 
 #: erpnext/public/js/utils/naming_series_dialog.js:165
 msgid "Please select a transaction."
-msgstr ""
+msgstr "Välj transaktion."
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.py:142
 msgid "Please select a valid Purchase Order that has Service Items."
@@ -39032,7 +39032,7 @@ msgstr "Provisoriskt Resultat (Kredit)"
 #. DocType 'Item Default'
 #: erpnext/stock/doctype/item_default/item_default.json
 msgid "Provisional liability account used for service items before invoice is received"
-msgstr ""
+msgstr "Preliminärt skuld konto som används för service artiklar innan faktura mottagits"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -43440,7 +43440,7 @@ msgstr "Intäkt"
 #. Default'
 #: erpnext/stock/doctype/item_default/item_default.json
 msgid "Revenue received in advance (e.g. annual subscription) is held here and recognized gradually over time"
-msgstr ""
+msgstr "Intäkter som erhållits i förskott (t.ex. årsprenumeration) sparas här och bokförs gradvis över tid"
 
 #. Label of the reversal_of (Link) field in DocType 'Journal Entry'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
@@ -45043,7 +45043,7 @@ msgstr "Regel Beskrivning"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:54
 msgid "Rules for configuring series"
-msgstr ""
+msgstr "Regler för Namngivning Serie Konfigurering"
 
 #. Description of the 'Job Capacity' (Int) field in DocType 'Workstation'
 #: erpnext/manufacturing/doctype/workstation/workstation.json
@@ -49653,7 +49653,7 @@ msgstr "Lager Kvantitet"
 #. Label of the stock_levels_html (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Stock Levels HTML"
-msgstr ""
+msgstr "Lagernivåer HTML"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:160
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:273
@@ -50148,7 +50148,7 @@ msgstr "Lagervärde per Artikelgrupp"
 #. Default'
 #: erpnext/stock/doctype/item_default/item_default.json
 msgid "Stock account where inventory value for this item will be tracked"
-msgstr ""
+msgstr "Lager konto där lager värde för denna artikel kommer att spåras"
 
 #. Name of a report
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.json
@@ -51517,7 +51517,7 @@ msgstr "Support Ärende"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:89
 msgid "Supported Variables:"
-msgstr ""
+msgstr "Variabler som stöds:"
 
 #: erpnext/accounts/report/calculated_discount_mismatch/calculated_discount_mismatch.py:64
 msgid "Suspected Discount Amount"
@@ -53086,7 +53086,7 @@ msgstr "Procentandel man får överföra mer mot order kvantitet. Till exempel, 
 #. Description of the 'Last Purchase Rate' (Float) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "The rate at which this item was last purchased via a Purchase Invoice. Auto-updated by the system."
-msgstr ""
+msgstr "Priset som denna artikel senast köptes för via Inköp Faktura. Uppdateras automatiskt av system."
 
 #: erpnext/public/js/utils.js:967
 msgid "The reserved stock will be released when you update items. Are you certain you wish to proceed?"
@@ -53562,7 +53562,7 @@ msgstr "Detta sektion gör det möjligt för Användare att ange Huvud och Avslu
 #. Description of the 'Default Supplier' (Link) field in DocType 'Item Default'
 #: erpnext/stock/doctype/item_default/item_default.json
 msgid "This supplier will be auto-selected in new purchase transactions"
-msgstr ""
+msgstr "Denna leverantör kommer att väljas automatiskt i nya inköp transaktioner"
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.js:502
 msgid "This table is used to set details about the 'Item', 'Qty', 'Basic Rate', etc."
@@ -55045,7 +55045,7 @@ msgstr "Spåra Service Nivå Avtal"
 #. Description of the 'Has Serial No' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Track each unit with a unique serial number for warranty and return tracking. Cannot be changed after a stock transaction exists."
-msgstr ""
+msgstr "Spåra varje enhet med unikt serienummer för garanti och retur spårning. Kan inte ändras efter att lager transaktion har genomförts."
 
 #. Description of a DocType
 #: erpnext/accounts/doctype/cost_center/cost_center.json
@@ -55055,7 +55055,7 @@ msgstr "Spåra separata intäkter och kostnader för artikel vertikaler eller di
 #. Description of the 'Has Batch No' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Track this item in batches. Cannot be changed after a stock transaction exists."
-msgstr ""
+msgstr "Spåra denna artikel i partier. Kan inte ändras efter att lager transaktion har genomförts."
 
 #. Label of the tracking_status (Select) field in DocType 'Shipment'
 #: erpnext/stock/doctype/shipment/shipment.json
@@ -55697,7 +55697,7 @@ msgstr "Enhet Konvertering Detalj"
 #. 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "UOM Conversion Details"
-msgstr ""
+msgstr "Enhet Konvertering Detaljer"
 
 #. Label of the conversion_factor (Float) field in DocType 'POS Invoice Item'
 #. Label of the conversion_factor (Float) field in DocType 'Purchase Invoice
@@ -56121,7 +56121,7 @@ msgstr "Avregistrera E-post Utskick"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_engine.py:257
 msgid "Unsupported Feature"
-msgstr ""
+msgstr "Funktion stöds ej"
 
 #. Option for the 'Status' (Select) field in DocType 'Appointment'
 #: erpnext/crm/doctype/appointment/appointment.json
@@ -56587,12 +56587,12 @@ msgstr "Används för Produktion Plan"
 #. 'Item Default'
 #: erpnext/stock/doctype/item_default/item_default.json
 msgid "Used to balance the books when recording extra purchase costs like freight or customs"
-msgstr ""
+msgstr "Används för att balansera böckerna vid bokföring av extra inköp kostnader som frakt eller tull"
 
 #. Description of the 'Opening Stock' (Float) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Used to create an opening Stock Entry with the Valuation Rate when the item is saved"
-msgstr ""
+msgstr "Används för att skapa Öppning Lager Post med Grund Pris när artikel sparas"
 
 #. Description of the 'Account Category' (Link) field in DocType 'Account'
 #: erpnext/accounts/doctype/account/account.json
@@ -58051,7 +58051,7 @@ msgstr "Webbplats:"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:95
 msgid "Week of the year"
-msgstr ""
+msgstr "Årets Vecka"
 
 #: erpnext/selling/report/sales_analytics/sales_analytics.py:433
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:121
@@ -58201,7 +58201,7 @@ msgstr "När det finns flera färdiga artiklar ({0}) i en ompackning lager trans
 #. Default'
 #: erpnext/stock/doctype/item_default/item_default.json
 msgid "When you pay for something upfront (like annual insurance), the cost is held here and recognized gradually over time"
-msgstr ""
+msgstr "När något betalas i förskott (som årsförsäkring) sparas här och bokförs gradvis över tid"
 
 #: erpnext/accounts/doctype/account/account.py:380
 msgid "While creating account for Child Company {0}, parent account {1} found as a ledger account."
@@ -58771,11 +58771,11 @@ msgstr "Start Datum"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:92
 msgid "Year in 2 digits"
-msgstr ""
+msgstr "Årtal med 2 siffror"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:91
 msgid "Year in 4 digits"
-msgstr ""
+msgstr "Årtal med 4 siffror"
 
 #. Label of the year_of_passing (Int) field in DocType 'Employee Education'
 #: erpnext/setup/doctype/employee_education/employee_education.json
@@ -58824,7 +58824,7 @@ msgstr "Du kan också ange standard Kapital Arbete Pågår konto i Bolag {}"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:87
 msgid "You can also use variables in the series name by putting them between (.) dots"
-msgstr ""
+msgstr "Du kan också använda variabler i namngivning serie namn genom att placera dem mellan (.) punkter"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1016
 msgid "You can change the parent account to a Balance Sheet account or select a different account."
@@ -59167,7 +59167,7 @@ msgstr "Fält Namn "
 
 #: erpnext/public/js/utils/naming_series_dialog.js:97
 msgid "fieldname on the document e.g."
-msgstr ""
+msgstr "fältnamn i dokument, t.ex."
 
 #. Option for the 'Service Provider' (Select) field in DocType 'Currency
 #. Exchange Settings'
@@ -59421,7 +59421,7 @@ msgstr "{0} Översikt"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:247
 msgid "{0} Naming Series"
-msgstr ""
+msgstr "{0} Namngivning Serie"
 
 #: erpnext/accounts/utils.py:1581
 msgid "{0} Number {1} is already used in {2} {3}"
@@ -59650,7 +59650,7 @@ msgstr "{0} är inte ett giltigt värde för egenskap {1} för Artikel {2}."
 
 #: erpnext/stock/utils.py:135
 msgid "{0} is not a valid {1} fieldname."
-msgstr ""
+msgstr "{0} är inte giltigt {1} fältnamn."
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:168
 msgid "{0} is not added in the table"
