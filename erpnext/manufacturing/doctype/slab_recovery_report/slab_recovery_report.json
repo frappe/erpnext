@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "REC-{quality_report}-.##",
+ "autoname": "REC-.{quality_report}.-.##",
  "creation": "2026-04-30 13:26:02.527259",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -147,7 +147,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-03 10:55:21.004725",
+ "modified": "2026-05-04 18:35:29.410544",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Slab Recovery Report",
