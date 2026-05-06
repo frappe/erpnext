@@ -92,18 +92,3 @@ pull_request_rules:
           {{ title }} (#{{ number }})
 
           {{ body }}
-  - name: Auto merge backports (safe)
-    conditions:
-      - label=auto-merge
-      - base~=^version-(15|16)-hotfix$
-      - -conflict
-      - status-success=Python Unit Tests (1)
-      - status-success=Python Unit Tests (2)
-      - status-success=Python Unit Tests (3)
-      - status-success=Python Unit Tests (4)
-      - status-success=linters
-      - status-success=semgrep
-      - status-success=Patch Test
-    actions:
-      merge:
-        method: squash
