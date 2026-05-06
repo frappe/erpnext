@@ -4,23 +4,39 @@ import { ArrowDownRightIcon, ArrowUpRightIcon, BanknoteIcon, CalendarIcon, Dolla
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import _ from "@/lib/translate"
 import { GetStatementDetailsResponse } from "../import_utils"
+import { useMemo } from "react"
+import { BankStatementImportLogColumnMap } from "@/types/Accounts/BankStatementImportLogColumnMap"
 
 
 const CSVRawDataPreview = ({ data }: { data: GetStatementDetailsResponse }) => {
 
-    const validColumns = Object.values(data.column_mapping)
+    const column_mapping: Record<StandardColumnTypes, number> = useMemo(() => {
+
+        const col_map: Record<string, number> = {}
+
+        data.doc.column_mapping?.forEach(col => {
+            if (col.maps_to && col.maps_to !== "Do not import") {
+                col_map[col.maps_to] = col.index;
+            }
+        })
+
+        return col_map
+
+    }, [data])
+
+    const validColumns = Object.values(column_mapping)
 
     // Reverse the column mapping to get a map of column index to variable name
-    const columnIndexMap: Record<number, StandardColumnTypes> = Object.fromEntries(Object.entries(data.column_mapping).map(([variable, columnIndex]) => [columnIndex, variable as StandardColumnTypes]))
+    const columnIndexMap: Record<number, StandardColumnTypes> = Object.fromEntries(Object.entries(column_mapping).map(([variable, columnIndex]) => [columnIndex, variable as StandardColumnTypes]))
 
     // Loop over the contents of the CSV file and show a preview - highlight the header row and the transaction rows
     return (
         <Table containerClassName="rounded-none">
             <TableBody>
-                {data.data.map((row, index) => {
+                {data.raw_data.map((row, index) => {
 
-                    const isHeaderRow = index === data.header_index;
-                    const isTransactionRow = index >= data.transaction_starting_index && index <= data.transaction_ending_index;
+                    const isHeaderRow = index === data.doc.detected_header_index;
+                    const isTransactionRow = index >= (data.doc.detected_transaction_starting_index ?? 0) && index <= (data.doc.detected_transaction_ending_index ?? 0);
 
                     return <TableRow key={index}
                         title={isHeaderRow ? "Header Row" : ""}
@@ -86,7 +102,7 @@ const CSVRawDataPreview = ({ data }: { data: GetStatementDetailsResponse }) => {
     )
 }
 
-type StandardColumnTypes = 'Amount' | 'Date' | 'Description' | 'Reference' | 'Transaction Type' | 'Balance' | 'Withdrawal' | 'Deposit';
+type StandardColumnTypes = BankStatementImportLogColumnMap['maps_to'];
 
 const ColumnHeaderIcon = ({ columnType }: { columnType?: StandardColumnTypes }) => {
     if (!columnType) {

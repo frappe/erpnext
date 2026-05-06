@@ -1,31 +1,9 @@
+import { BankStatementImportLog } from "@/types/Accounts/BankStatementImportLog"
 import { useFrappeGetCall } from "frappe-react-sdk"
 
 
 export interface GetStatementDetailsResponse {
-    file_name: string,
-    file_path: string,
-    data: Array<Array<string>>,
-    header_index: number,
-    header_row: Array<string>,
-    column_mapping: Record<string, number>,
-    transaction_starting_index: number,
-    transaction_ending_index: number,
-    transaction_rows: Array<{
-        date_format: string,
-        date?: string,
-        amount?: number,
-        withdrawal?: number,
-        deposit?: number,
-        balance?: number,
-        reference?: string,
-        description?: string,
-        transaction_type?: string,
-    }>,
-    date_format: string,
-    amount_format: string,
-    statement_start_date: string,
-    statement_end_date: string,
-    closing_balance: number,
+    doc: BankStatementImportLog,
     conflicting_transactions: Array<{
         name: string,
         date: string,
@@ -41,15 +19,22 @@ export interface GetStatementDetailsResponse {
         deposit: number,
         description: string,
         reference: string,
-        transaction_type: string,
+        transaction_type?: string,
+        debit_credit?: string,
+        included_fee?: number,
+        excluded_fee?: number,
+        party_name?: string,
+        party_account_number?: string,
+        party_iban?: string,
     }>,
+    date_format: string,
+    raw_data: Array<Array<string>>,
     currency: string,
 }
 
-export const useGetStatementDetails = (fileURL: string, bankAccount: string) => {
-    return useFrappeGetCall<{ message: GetStatementDetailsResponse }>("mint.apis.statement_import.get_statement_details", {
-        file_url: fileURL,
-        bank_account: bankAccount,
+export const useGetStatementDetails = (id: string) => {
+    return useFrappeGetCall<{ message: GetStatementDetailsResponse }>("erpnext.accounts.doctype.bank_statement_import_log.bank_statement_import_log.get_statement_details", {
+        statement_import_id: id,
     }, undefined, {
         revalidateOnFocus: false
     })

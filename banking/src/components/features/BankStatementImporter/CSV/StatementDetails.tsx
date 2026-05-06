@@ -2,7 +2,7 @@ import _ from '@/lib/translate'
 import { GetStatementDetailsResponse } from '../import_utils'
 import { flt, formatCurrency } from '@/lib/numbers'
 import { formatDate } from '@/lib/date'
-import { bankRecDateAtom, SelectedBank } from '../../BankReconciliation/bankRecAtoms'
+import { bankRecDateAtom } from '../../BankReconciliation/bankRecAtoms'
 import { ChevronLeftIcon, ChevronRightIcon, ExternalLinkIcon, InfoIcon, Loader2Icon } from 'lucide-react'
 import { H2, H3, Paragraph } from '@/components/ui/typography'
 import { FileTypeIcon } from '@/components/ui/file-dropzone'
@@ -14,20 +14,14 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useFrappeEventListener, useFrappePostCall } from 'frappe-react-sdk'
 import { toast } from 'sonner'
 import ErrorBanner from '@/components/ui/error-banner'
-import { useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useMemo, useState } from 'react'
 import { Progress } from '@/components/ui/progress'
 import { useSetAtom } from 'jotai'
 import { useDirection } from '@/components/ui/direction'
 import BankLogo from '@/components/common/BankLogo'
-
-const AMOUNT_FORMAT_LABEL_MAP = {
-    "separate_columns_for_withdrawal_and_deposit": _("Separate columns for withdrawal and deposit"),
-    "dr_cr_in_amount": _('Amount column has "CR"/"DR" values'),
-    "positive_negative_in_amount": _("Amount column has positive/negative values"),
-    "cr_dr_in_transaction_type": _('Transaction type column has "CR"/"DR" values'),
-    "deposit_withdrawal_in_transaction_type": _('Transaction type column has "Deposit"/"Withdrawal" values'),
-}
+import { useGetBankAccounts } from '../../BankReconciliation/utils'
+import { BankStatementImportLog } from '@/types/Accounts/BankStatementImportLog'
 
 const parseDateFormat = (dateFormat: string) => {
 
@@ -52,14 +46,12 @@ const parseDateFormat = (dateFormat: string) => {
 
 type Props = {
     data: GetStatementDetailsResponse,
-    bank: SelectedBank | null,
-    onBack: () => void
 }
 
-const StatementDetails = ({ data, bank, onBack }: Props) => {
+const StatementDetails = ({ data }: Props) => {
     const dateFormat = parseDateFormat(data.date_format)
 
-    const { call, loading, error } = useFrappePostCall<{ message: { success: boolean, start_date: string, end_date: string } }>('mint.apis.statement_import.import_statement')
+    const { call, loading, error } = useFrappePostCall<{ docs: BankStatementImportLog[] }>('run_doc_method')
 
     const navigate = useNavigate()
 
@@ -70,13 +62,14 @@ const StatementDetails = ({ data, bank, onBack }: Props) => {
     const onImport = () => {
 
         call({
-            file_url: data.file_path,
-            bank_account: bank?.name,
+            docs: data.doc,
+            method: 'insert_transactions'
         }).then((response) => {
-            if (response.message.start_date && response.message.end_date) {
+            const doc = response.docs ? response.docs[0] : undefined
+            if (doc && doc.start_date && doc.end_date) {
                 setDates({
-                    fromDate: response.message.start_date,
-                    toDate: response.message.end_date,
+                    fromDate: doc.start_date,
+                    toDate: doc.end_date,
                 })
             }
             toast.success(_("Bank statement imported."))
@@ -93,13 +86,25 @@ const StatementDetails = ({ data, bank, onBack }: Props) => {
         setProgress(event.progress)
     })
 
+    const file_name = data.doc.file.split("/").pop() ?? ""
+
+    const { banks } = useGetBankAccounts()
+
+    const bank = useMemo(() => {
+
+        return banks?.find((bank) => bank.name === data.doc.bank_account)
+
+    }, [data.doc.bank_account, banks])
+
     return (
         <div className='flex flex-col gap-4'>
             <div className='flex flex-col gap-4'>
                 <div className='flex justify-between items-center'>
-                    <Button size='sm' variant='outline' onClick={onBack}>
-                        {direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-                        {_("Back")}
+                    <Button size='sm' variant='outline' asChild>
+                        <Link to="/statement-importer">
+                            {direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+                            {_("Back")}
+                        </Link>
                     </Button>
                     <Button onClick={onImport} disabled={loading || data.final_transactions?.length === 0} size='sm' type='button'>
                         {loading ? <Loader2Icon className='size-4 animate-spin' /> : null}
@@ -141,22 +146,22 @@ const StatementDetails = ({ data, bank, onBack }: Props) => {
                             <TableHead>{_("Statement File")}</TableHead>
                             <TableCell>
                                 <div className='flex items-center gap-2'>
-                                    <FileTypeIcon fileType={getFileExtension(data.file_name)} size='md' showBackground={false} />
-                                    {data.file_name}
+                                    <FileTypeIcon fileType={getFileExtension(file_name)} size='md' showBackground={false} />
+                                    {file_name}
                                 </div>
                             </TableCell>
                         </TableRow>
                         <TableRow>
                             <TableHead>{_("Transaction Dates")}</TableHead>
-                            <TableCell>{_("{0} to {1}", [formatDate(data.statement_start_date, "Do MMMM YYYY"), formatDate(data.statement_end_date, "Do MMMM YYYY")])}</TableCell>
+                            <TableCell>{_("{0} to {1}", [formatDate(data.doc.start_date, "Do MMMM YYYY"), formatDate(data.doc.end_date, "Do MMMM YYYY")])}</TableCell>
                         </TableRow>
                         <TableRow>
                             <TableHead>{_("Number of Transactions")}</TableHead>
-                            <TableCell>{data.transaction_rows.length}</TableCell>
+                            <TableCell>{data.doc.number_of_transactions}</TableCell>
                         </TableRow>
                         <TableRow>
-                            <TableHead>{_("Closing Balance as of {}", [formatDate(data.statement_end_date, "Do MMMM YYYY")])}</TableHead>
-                            <TableCell className='font-numeric'>{formatCurrency(flt(data.closing_balance, 2))}</TableCell>
+                            <TableHead>{_("Closing Balance as of {}", [formatDate(data.doc.end_date, "Do MMMM YYYY")])}</TableHead>
+                            <TableCell className='font-numeric'>{formatCurrency(flt(data.doc.closing_balance, 2))}</TableCell>
                         </TableRow>
                         <TableRow>
                             <TableHead>
@@ -169,7 +174,7 @@ const StatementDetails = ({ data, bank, onBack }: Props) => {
                                     </Tooltip>
                                 </div>
                             </TableHead>
-                            <TableCell>{AMOUNT_FORMAT_LABEL_MAP[data.amount_format as keyof typeof AMOUNT_FORMAT_LABEL_MAP]}</TableCell>
+                            <TableCell>{data.doc.detected_amount_format}</TableCell>
                         </TableRow>
                         <TableRow>
                             <TableHead>

@@ -7,6 +7,8 @@ import { TooltipProvider } from './components/ui/tooltip'
 import BankStatementImporter from '@/pages/BankStatementImporter'
 import { LucideProvider } from 'lucide-react'
 import { ThemeProvider } from './components/ui/theme-provider'
+import ViewBankStatementImportLog from './pages/ViewBankStatementImportLog'
+import BankStatementImporterContainer from './pages/BankStatementImporterContainer'
 
 function App() {
 	useEffect(() => {
@@ -44,7 +46,10 @@ function App() {
 
 								<Routes>
 									<Route index element={<BankReconciliation />} />
-									<Route path="/statement-importer" element={<BankStatementImporter />} />
+									<Route path="/statement-importer" element={<BankStatementImporterContainer />}>
+										<Route index element={<BankStatementImporter />} />
+										<Route path=":id" element={<ViewBankStatementImportLog />} />
+									</Route>
 									<Route path="*" element={<Navigate to="/" />} />
 								</Routes>
 							</BrowserRouter>

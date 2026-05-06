@@ -1,8 +1,6 @@
 import BankPicker from "@/components/features/BankReconciliation/BankPicker"
 import { selectedBankAccountAtom } from "@/components/features/BankReconciliation/bankRecAtoms"
 import CompanySelector from "@/components/features/BankReconciliation/CompanySelector"
-import CSVImport from "@/components/features/BankStatementImporter/CSV/CSVImport"
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
@@ -17,11 +15,11 @@ import { flt, formatCurrency } from "@/lib/numbers"
 import _ from "@/lib/translate"
 import { cn } from "@/lib/utils"
 import { BankStatementImportLog } from "@/types/Accounts/BankStatementImportLog"
-import { useFrappeFileUpload, useFrappeGetDocList } from "frappe-react-sdk"
+import { useFrappeCreateDoc, useFrappeFileUpload, useFrappeGetDocList } from "frappe-react-sdk"
 import { useAtom, useAtomValue } from "jotai"
-import { HomeIcon, ListIcon, Loader2Icon } from "lucide-react"
+import { ListIcon, Loader2Icon } from "lucide-react"
 import { useState } from "react"
-import { Link } from "react-router"
+import { useNavigate } from "react-router"
 
 
 const BankStatementImporter = () => {
@@ -32,122 +30,101 @@ const BankStatementImporter = () => {
 
     const [files, setFiles] = useState<File[]>([])
 
-    const [currentStep, setCurrentStep] = useState<"upload" | "import">("upload")
-    const [uploadedFileURL, setUploadedFileURL] = useState<string | null>(null)
-
     const { upload, error, loading } = useFrappeFileUpload()
+
+    const navigate = useNavigate()
+    const { createDoc, loading: createLoading, error: createError } = useFrappeCreateDoc<BankStatementImportLog>()
 
     const onUpload = () => {
 
-        if (uploadedFileURL) {
-            setCurrentStep("import")
+        if (!selectedBankAccount) {
             return
         }
 
+        const id = `new-bank-statement-import-log-${Date.now()}`
+
         upload(files[0], {
             isPrivate: true,
+            doctype: "Bank Statement Import Log",
+            docname: id,
+            fieldname: 'file'
         }).then((file) => {
-            setUploadedFileURL(file.file_url)
-            setCurrentStep("import")
+            return createDoc("Bank Statement Import Log",
+                // @ts-expect-error - not filling everything else
+                {
+                    name: id,
+                    file: file.file_url,
+                    bank_account: selectedBankAccount.name
+                })
+        }).then((doc) => {
+            navigate(`/statement-importer/${doc.name}`)
         })
     }
 
     return (
-        <div className="flex flex-col pt-1.5">
-            <div className="flex gap-2 items-baseline p-4">
-                <Breadcrumb>
-                    <BreadcrumbList>
-                        <BreadcrumbItem>
-                            <a href="/desk" className="text-ink-gray-7">
-                                <HomeIcon size={16} />
-                            </a>
-                        </BreadcrumbItem>
-                        <BreadcrumbSeparator />
-                        <BreadcrumbItem>
-                            <BreadcrumbLink asChild>
-                                <Link to="/">
-                                    {_("Banking")}
-                                </Link>
-                            </BreadcrumbLink>
-                        </BreadcrumbItem>
-                        <BreadcrumbSeparator />
-                        <BreadcrumbItem>
-                            <BreadcrumbPage>{_("Import Bank Statement")}</BreadcrumbPage>
-                        </BreadcrumbItem>
-                    </BreadcrumbList>
-                </Breadcrumb>
-            </div>
-
-            {uploadedFileURL && selectedBankAccount && currentStep === 'import' ? <CSVImport
-                bank={selectedBankAccount}
-                onBack={() => setCurrentStep("upload")}
-                fileURL={uploadedFileURL} /> :
-
-                <div className="flex px-4">
-                    <div className="w-[52%]">
-                        {error && <ErrorBanner error={error} />}
-                        <div className="py-2 flex flex-col gap-6">
-                            <div className="flex flex-col gap-2">
-                                <Label>{_("Company")}<span className="text-ink-red-3">*</span></Label>
-                                <div className="min-w-56 w-fit flex flex-col">
-                                    <CompanySelector />
-                                </div>
-                            </div>
-                            {selectedCompany && <div className="flex flex-col gap-2">
-                                <Label>{_("Bank Account")}<span className="text-ink-red-3">*</span></Label>
-                                <div className="">
-                                    <BankPicker className="w-full flex-wrap" />
-                                </div>
-                            </div>
-                            }
-                            {selectedBankAccount && <div className="flex flex-col gap-4 pe-4">
-                                <div className="flex justify-between">
-                                    <div className="flex flex-col gap-2">
-                                        <Label>{_("Bank Statement")}<span className="text-ink-red-3">*</span></Label>
-                                        <p
-                                            data-slot="form-description"
-                                            className={cn("text-ink-gray-5 text-xs")}
-                                        >
-                                            {_("Upload your bank statement file to start the import process. We support CSV, and XLSX files.")}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <StatementInstructions />
-                                    </div>
-                                </div>
-
-                                <FileDropzone
-                                    setFiles={setFiles}
-                                    onUpdate={() => setUploadedFileURL(null)}
-                                    files={files}
-                                    className="p-8"
-                                    accept={{
-                                        'text/csv': ['.csv'],
-                                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
-                                        'application/vnd.ms-excel': ['.xls'],
-                                        // 'application/xml': ['.xml'],
-                                    }}
-                                    multiple={false}
-                                />
-                            </div>}
-                            <div className="flex justify-end px-4">
-                                <Button
-                                    onClick={onUpload}
-                                    size='md'
-                                    disabled={files.length === 0 || loading || !selectedBankAccount || !selectedCompany}>
-                                    {loading ? <Loader2Icon className="size-4 animate-spin" /> : null}
-                                    {loading ? _("Uploading...") : _("Upload")}
-                                </Button>
-                            </div>
+        <div className="flex px-4">
+            <div className="w-[52%]">
+                {error && <ErrorBanner error={error} />}
+                {createError && <ErrorBanner error={error} />}
+                <div className="py-2 flex flex-col gap-6">
+                    <div className="flex flex-col gap-2">
+                        <Label>{_("Company")}<span className="text-ink-red-3">*</span></Label>
+                        <div className="min-w-56 w-fit flex flex-col">
+                            <CompanySelector />
                         </div>
                     </div>
-                    <div className="w-[48%] border-s border-outline-gray-2 ps-4">
-                        {selectedBankAccount && <StatementImportLog />}
+                    {selectedCompany && <div className="flex flex-col gap-2">
+                        <Label>{_("Bank Account")}<span className="text-ink-red-3">*</span></Label>
+                        <div className="">
+                            <BankPicker className="w-full flex-wrap" />
+                        </div>
                     </div>
+                    }
+                    {selectedBankAccount && <div className="flex flex-col gap-4 pe-4">
+                        <div className="flex justify-between">
+                            <div className="flex flex-col gap-2">
+                                <Label>{_("Bank Statement")}<span className="text-ink-red-3">*</span></Label>
+                                <p
+                                    data-slot="form-description"
+                                    className={cn("text-ink-gray-5 text-xs")}
+                                >
+                                    {_("Upload your bank statement file to start the import process. We support CSV, and XLSX files.")}
+                                </p>
+                            </div>
+                            <div>
+                                <StatementInstructions />
+                            </div>
+                        </div>
 
+                        <FileDropzone
+                            setFiles={setFiles}
+                            files={files}
+                            className="p-8"
+                            accept={{
+                                'text/csv': ['.csv'],
+                                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+                                'application/vnd.ms-excel': ['.xls'],
+                                // 'application/xml': ['.xml'],
+                            }}
+                            multiple={false}
+                        />
+                    </div>}
+                    <div className="flex justify-end px-4">
+                        <Button
+                            onClick={onUpload}
+                            size='md'
+                            disabled={files.length === 0 || loading || createLoading || !selectedBankAccount || !selectedCompany}>
+                            {loading || createLoading ? <Loader2Icon className="size-4 animate-spin" /> : null}
+                            {loading || createLoading ? _("Uploading...") : _("Upload")}
+                        </Button>
+                    </div>
                 </div>
-            }
-        </div >
+            </div>
+            <div className="w-[48%] border-s border-outline-gray-2 ps-4">
+                {selectedBankAccount && <StatementImportLog />}
+            </div>
+
+        </div>
     )
 }
 
@@ -212,7 +189,7 @@ const StatementImportLog = () => {
     const bankAccount = useAtomValue(selectedBankAccountAtom)
 
     const { data, error } = useFrappeGetDocList<BankStatementImportLog>("Bank Statement Import Log", {
-        fields: ["name", "file", "number_of_transactions", "start_date", "end_date", "closing_balance", "creation"],
+        fields: ["name", "file", "status", "number_of_transactions", "start_date", "end_date", "closing_balance", "creation"],
         filters: [["bank_account", "=", bankAccount?.name ?? ""]],
         orderBy: {
             field: "creation",
@@ -222,6 +199,12 @@ const StatementImportLog = () => {
     }, bankAccount ? undefined : null, {
         revalidateOnFocus: false
     })
+
+    const navigate = useNavigate()
+
+    const onViewDetails = (name: string) => {
+        navigate(`/statement-importer/${name}`)
+    }
 
     return (
         <div className="flex flex-col gap-4">
@@ -243,7 +226,7 @@ const StatementImportLog = () => {
                     </TableHeader>
                     <TableBody>
                         {data?.map((item) => (
-                            <TableRow key={item.name}>
+                            <TableRow key={item.name} onClick={() => onViewDetails(item.name)} className="cursor-pointer hover:bg-surface-gray-2">
                                 <TableCell>{formatDate(item.creation, 'Do MMM YYYY')}</TableCell>
                                 <TableCell>{formatDate(item.start_date, 'Do MMM YYYY')} to {formatDate(item.end_date, 'Do MMM YYYY')}</TableCell>
                                 <TableCell className="text-end">{item.number_of_transactions}</TableCell>
