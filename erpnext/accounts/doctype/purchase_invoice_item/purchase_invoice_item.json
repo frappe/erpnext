@@ -978,18 +978,7 @@
    "fieldname": "distributed_discount_amount",
    "fieldtype": "Currency",
    "label": "Distributed Discount Amount",
-<<<<<<< HEAD
    "options": "currency"
-=======
-   "options": "currency",
-   "print_hide": 1
-  },
-  {
-   "fieldname": "tax_withholding_category",
-   "fieldtype": "Link",
-   "label": "Tax Withholding Category",
-   "options": "Tax Withholding Category",
-   "print_hide": 1
   },
   {
    "default": "0",
@@ -999,17 +988,12 @@
    "label": "Delivered by Supplier",
    "print_hide": 1,
    "read_only": 1
->>>>>>> 907a809f3f (fix: incorrect validation thrown for drop shipped PI (#54751))
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2026-04-07 15:41:45.687554",
-=======
  "modified": "2026-05-06 08:08:40.782395",
->>>>>>> 907a809f3f (fix: incorrect validation thrown for drop shipped PI (#54751))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
