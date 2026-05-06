@@ -20,6 +20,7 @@ from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_due_date
 from erpnext.controllers.accounts_controller import _get_taxes_and_charges, merge_taxes
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.controllers.selling_controller import SellingController
+from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -313,9 +314,6 @@ class DeliveryNote(SellingController):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_with_previous_doc()
 		self.set_serial_and_batch_bundle_from_pick_list()
-
-		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-
 		make_packing_list(self)
 		self.update_current_stock()
 
