@@ -901,8 +901,31 @@ class SellingController(StockController):
 
 		so_field = "sales_order" if self.doctype == "Sales Invoice" else "against_sales_order"
 
+		items = []
+		for item in self.items:
+			packed_items = [
+				packed_item
+				for packed_item in self.packed_items
+				if packed_item.parent_detail_docname == item.name
+			]
+			if not packed_items:
+				items.append(item)
+			else:
+				for d in packed_items:
+					d.set(so_field, item.get(so_field))
+					d.so_detail = frappe.get_value(
+						"Packed Item",
+						{
+							"parent_detail_docname": item.so_detail,
+							"parent_item": item.item_code,
+							"item_code": d.item_code,
+							"warehouse": d.warehouse,
+						},
+					)
+					items.append(d)
+
 		if self._action == "submit":
-			for item in self.get("items"):
+			for item in items:
 				# Skip if `Sales Order` or `Sales Order Item` reference is not set.
 				if not item.get(so_field) or not item.so_detail:
 					continue
@@ -927,7 +950,7 @@ class SellingController(StockController):
 				if not sre_list:
 					continue
 
-				qty_to_deliver = item.stock_qty
+				qty_to_deliver = item.get("stock_qty") or item.qty
 				for sre in sre_list:
 					if qty_to_deliver <= 0:
 						break
@@ -974,7 +997,7 @@ class SellingController(StockController):
 					qty_to_deliver -= qty_can_be_deliver
 
 		if self._action == "cancel":
-			for item in self.get("items"):
+			for item in items:
 				# Skip if `Sales Order` or `Sales Order Item` reference is not set.
 				if not item.get(so_field) or not item.so_detail:
 					continue
@@ -996,7 +1019,7 @@ class SellingController(StockController):
 				if not sre_list:
 					continue
 
-				qty_to_undelivered = item.stock_qty
+				qty_to_undelivered = item.get("stock_qty") or item.qty
 				for sre in sre_list:
 					if qty_to_undelivered <= 0:
 						break

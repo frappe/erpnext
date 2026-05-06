@@ -402,7 +402,7 @@ class SubcontractingOrder(SubcontractingController):
 
 				reservation_items.append(data)
 
-			sre = StockReservation(self, items=reservation_items, notify=True)
+			sre = StockReservation(self, items=reservation_items)
 			if is_transfer:
 				sre.transfer_reservation_entries_to(
 					self.production_plan, from_doctype="Production Plan", to_doctype="Subcontracting Order"

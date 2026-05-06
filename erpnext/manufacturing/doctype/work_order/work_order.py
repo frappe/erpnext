@@ -2126,7 +2126,7 @@ def make_stock_reservation_entries(
 	if items and isinstance(items, str):
 		items = parse_json(items)
 
-	sre = StockReservation(doc, items=items, notify=notify)
+	sre = StockReservation(doc, items=items)
 	if doc.docstatus == 2 or doc.status == "Closed":
 		sre.cancel_stock_reservation_entries()
 	elif doc.docstatus == 1:
