@@ -25,15 +25,15 @@ erpnext.buying = {
 					};
 				});
 
-				const project_filters = {
+				const get_project_filters = () => ({
 					query: "erpnext.controllers.queries.get_project_name",
 					filters: {
-						company: doc.company,
+						company: this.frm.doc.company,
 					},
-				};
+				});
 
-				this.frm.set_query("project", (_) => project_filters);
-				this.frm.set_query("project", "items", (_, __, ___) => project_filters);
+				this.frm.set_query("project", get_project_filters);
+				this.frm.set_query("project", "items", get_project_filters);
 
 				if (
 					this.frm.doc.__islocal &&
@@ -178,9 +178,14 @@ erpnext.buying = {
 					callback: (r) => {
 						if (!r.message) return;
 
-						this.frm.set_value("billing_address", r.message.primary_address || "");
+						if (!this.frm.doc.billing_address) {
+							this.frm.set_value("billing_address", r.message.primary_address || "");
+						}
 
-						if (frappe.meta.has_field(this.frm.doc.doctype, "shipping_address")) {
+						if (
+							frappe.meta.has_field(this.frm.doc.doctype, "shipping_address") &&
+							!this.frm.doc.shipping_address
+						) {
 							this.frm.set_value("shipping_address", r.message.shipping_address || "");
 						}
 					},
