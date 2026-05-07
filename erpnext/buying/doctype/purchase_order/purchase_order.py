@@ -744,6 +744,192 @@ def close_or_unclose_purchase_orders(names: str, status: str):
 	frappe.local.message_log = []
 
 
+def set_missing_values(source, target):
+	target.run_method("set_missing_values")
+	target.run_method("calculate_taxes_and_totals")
+	target.run_method("set_use_serial_batch_fields")
+
+
+@frappe.whitelist()
+def make_purchase_receipt(
+	source_name: str, target_doc: str | Document | None = None, args: str | dict | None = None
+):
+	if args is None:
+		args = {}
+	if isinstance(args, str):
+		args = json.loads(args)
+
+	has_unit_price_items = frappe.db.get_value("Purchase Order", source_name, "has_unit_price_items")
+
+	def is_unit_price_row(source):
+		return has_unit_price_items and source.qty == 0
+
+	def update_item(obj, target, source_parent):
+		target.qty = flt(obj.qty) if is_unit_price_row(obj) else flt(obj.qty) - flt(obj.received_qty)
+		target.stock_qty = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)
+		target.amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate)
+		target.base_amount = (
+			(flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate) * flt(source_parent.conversion_rate)
+		)
+
+	def select_item(d):
+		filtered_items = args.get("filtered_children", [])
+		child_filter = d.name in filtered_items if filtered_items else True
+		return child_filter
+
+	doc = get_mapped_doc(
+		"Purchase Order",
+		source_name,
+		{
+			"Purchase Order": {
+				"doctype": "Purchase Receipt",
+				"field_map": {"supplier_warehouse": "supplier_warehouse"},
+				"validation": {
+					"docstatus": ["=", 1],
+				},
+			},
+			"Purchase Order Item": {
+				"doctype": "Purchase Receipt Item",
+				"field_map": {
+					"name": "purchase_order_item",
+					"parent": "purchase_order",
+					"bom": "bom",
+					"material_request": "material_request",
+					"material_request_item": "material_request_item",
+					"sales_order": "sales_order",
+					"sales_order_item": "sales_order_item",
+					"wip_composite_asset": "wip_composite_asset",
+				},
+				"postprocess": update_item,
+				"condition": lambda doc: (
+					True if is_unit_price_row(doc) else abs(doc.received_qty) < abs(doc.qty)
+				)
+				and doc.delivered_by_supplier != 1
+				and select_item(doc),
+			},
+			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
+		},
+		target_doc,
+		set_missing_values,
+	)
+
+	return doc
+
+
+@frappe.whitelist()
+def make_purchase_invoice(
+	source_name: str, target_doc: str | Document | None = None, args: str | dict | None = None
+):
+	return get_mapped_purchase_invoice(source_name, target_doc, args=args)
+
+
+@frappe.whitelist()
+def make_purchase_invoice_from_portal(purchase_order_name: str):
+	doc = get_mapped_purchase_invoice(purchase_order_name, ignore_permissions=True)
+	if frappe.session.user not in frappe.get_all("Portal User", {"parent": doc.supplier}, pluck="user"):
+		frappe.throw(_("Not Permitted"), frappe.PermissionError)
+	doc.save()
+	if not frappe.in_test:
+		frappe.db.commit()
+	frappe.response["type"] = "redirect"
+	frappe.response.location = "/purchase-invoices/" + doc.name
+
+
+def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions=False, args=None):
+	if args is None:
+		args = {}
+	if isinstance(args, str):
+		args = json.loads(args)
+
+	def postprocess(source, target):
+		target.flags.ignore_permissions = ignore_permissions
+		set_missing_values(source, target)
+
+		# Get the advance paid Journal Entries in Purchase Invoice Advance
+		advance, allocated = frappe.db.get_value(
+			"Buying Settings", None, ["auto_allocate_advance_payment", "fetch_only_allocated_advance_payment"]
+		)
+		target.allocate_advances_automatically = advance
+		target.only_include_allocated_payments = allocated
+		if target.get("allocate_advances_automatically"):
+			target.set_advances()
+
+		target.set_payment_schedule()
+		target.credit_to = get_party_account("Supplier", source.supplier, source.company)
+
+	def get_billed_qty(po_item_name):
+		from frappe.query_builder.functions import Sum
+
+		table = frappe.qb.DocType("Purchase Invoice Item")
+		query = (
+			frappe.qb.from_(table)
+			.select(Sum(table.qty).as_("qty"))
+			.where((table.docstatus == 1) & (table.po_detail == po_item_name))
+		)
+		return query.run(pluck="qty")[0] or 0
+
+	def update_item(obj, target, source_parent):
+		billed_qty = flt(get_billed_qty(obj.name))
+		target.qty = flt(obj.qty) - billed_qty
+
+		item = get_item_defaults(target.item_code, source_parent.company)
+		item_group = get_item_group_defaults(target.item_code, source_parent.company)
+		target.cost_center = (
+			obj.cost_center
+			or frappe.db.get_value("Project", obj.project, "cost_center")
+			or item.get("buying_cost_center")
+			or item_group.get("buying_cost_center")
+		)
+
+	def select_item(d):
+		filtered_items = args.get("filtered_children", [])
+		child_filter = d.name in filtered_items if filtered_items else True
+		return child_filter
+
+	fields = {
+		"Purchase Order": {
+			"doctype": "Purchase Invoice",
+			"field_map": {
+				"party_account_currency": "party_account_currency",
+				"supplier_warehouse": "supplier_warehouse",
+			},
+			"field_no_map": ["payment_terms_template"],
+			"validation": {
+				"docstatus": ["=", 1],
+			},
+		},
+		"Purchase Order Item": {
+			"doctype": "Purchase Invoice Item",
+			"field_map": {
+				"name": "po_detail",
+				"parent": "purchase_order",
+				"material_request": "material_request",
+				"material_request_item": "material_request_item",
+				"wip_composite_asset": "wip_composite_asset",
+			},
+			"postprocess": update_item,
+			"condition": lambda doc: (
+				doc.base_amount == 0
+				or abs(doc.billed_amt) < abs(doc.amount)
+				or doc.qty > flt(get_billed_qty(doc.name))
+			)
+			and select_item(doc),
+		},
+		"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
+	}
+
+	doc = get_mapped_doc(
+		"Purchase Order",
+		source_name,
+		fields,
+		target_doc,
+		postprocess,
+		ignore_permissions=ignore_permissions,
+	)
+
+	return doc
+
+
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
 
