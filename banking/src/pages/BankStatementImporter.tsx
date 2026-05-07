@@ -1,6 +1,7 @@
 import BankPicker from "@/components/features/BankReconciliation/BankPicker"
 import { selectedBankAccountAtom } from "@/components/features/BankReconciliation/bankRecAtoms"
 import CompanySelector from "@/components/features/BankReconciliation/CompanySelector"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
@@ -218,6 +219,7 @@ const StatementImportLog = () => {
                     <TableHeader>
                         <TableRow>
                             <TableHead>{_("Imported On")}</TableHead>
+                            <TableHead>{_("Status")}</TableHead>
                             <TableHead>{_("Transaction Dates")}</TableHead>
                             <TableHead className="text-end">{_("Number of Transactions")}</TableHead>
                             <TableHead className="text-end">{_("Closing Balance")}</TableHead>
@@ -228,6 +230,7 @@ const StatementImportLog = () => {
                         {data?.map((item) => (
                             <TableRow key={item.name} onClick={() => onViewDetails(item.name)} className="cursor-pointer hover:bg-surface-gray-2">
                                 <TableCell>{formatDate(item.creation, 'Do MMM YYYY')}</TableCell>
+                                <TableCell><Badge theme={item.status === "Completed" ? "green" : "gray"}>{item.status}</Badge></TableCell>
                                 <TableCell>{formatDate(item.start_date, 'Do MMM YYYY')} to {formatDate(item.end_date, 'Do MMM YYYY')}</TableCell>
                                 <TableCell className="text-end">{item.number_of_transactions}</TableCell>
                                 <TableCell className="text-end font-numeric">{formatCurrency(flt(item.closing_balance, 2))}</TableCell>

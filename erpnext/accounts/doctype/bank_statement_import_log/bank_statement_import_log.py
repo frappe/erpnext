@@ -62,17 +62,17 @@ class BankStatementImportLog(Document):
 	def validate(self):
 		if not frappe.has_permission("Bank Transaction", "write"):
 			frappe.throw(
-				_("You do not have permission to import bank transactions"), title="Permission Denied"
+				_("You do not have permission to import bank transactions"), title=_("Permission Denied")
 			)
 		if not frappe.has_permission("Bank Transaction", "create"):
 			frappe.throw(
-				_("You do not have permission to import bank transactions"), title="Permission Denied"
+				_("You do not have permission to import bank transactions"), title=_("Permission Denied")
 			)
 
 		if not frappe.has_permission("Bank Transaction", "submit"):
 			frappe.throw(
 				_("You do not have permission to import and submit bank transactions"),
-				title="Permission Denied",
+				title=_("Permission Denied"),
 			)
 
 		is_company_account, disabled = frappe.get_value(
@@ -81,11 +81,13 @@ class BankStatementImportLog(Document):
 		if not is_company_account:
 			frappe.throw(
 				_("The bank account is not a company account. Please select a company account"),
-				title="Invalid Bank Account",
+				title=_("Invalid Bank Account"),
 			)
 
 		if disabled:
-			frappe.throw(_("The bank account is disabled. Please enable it"), title="Disabled Bank Account")
+			frappe.throw(
+				_("The bank account is disabled. Please enable it"), title=_("Disabled Bank Account")
+			)
 
 	def before_insert(self):
 		data = self.get_data()
@@ -123,7 +125,7 @@ class BankStatementImportLog(Document):
 
 		if extension.lower() not in (".csv", ".xlsx", ".xls"):
 			frappe.throw(
-				_("Import template should be of type .csv, .xlsx or .xls"), title="Invalid File Type"
+				_("Import template should be of type .csv, .xlsx or .xls"), title=_("Invalid File Type")
 			)
 
 		if extension.lower() == ".csv":
@@ -459,17 +461,22 @@ class BankStatementImportLog(Document):
 
 	@frappe.whitelist(methods=["POST"])
 	def insert_transactions(self):
+		if self.status == "Completed":
+			return
+
 		company, account, is_company_account, disabled = frappe.get_value(
 			"Bank Account", self.bank_account, ["company", "account", "is_company_account", "disabled"]
 		)
 		if not is_company_account:
 			frappe.throw(
 				_("The bank account is not a company account. Please select a company account"),
-				title="Invalid Bank Account",
+				title=_("Invalid Bank Account"),
 			)
 
 		if disabled:
-			frappe.throw(_("The bank account is disabled. Please enable it"), title="Disabled Bank Account")
+			frappe.throw(
+				_("The bank account is disabled. Please enable it"), title=_("Disabled Bank Account")
+			)
 
 		currency = frappe.get_value("Account", account, "account_currency")
 
@@ -504,7 +511,8 @@ class BankStatementImportLog(Document):
 				{
 					"progress": round(progress / total_transactions * 100),
 				},
-				user=frappe.session.user,
+				doctype="Bank Statement Import Log",
+				docname=self.name,
 			)
 
 		frappe.publish_realtime(
@@ -513,7 +521,8 @@ class BankStatementImportLog(Document):
 				"progress": 100,
 				"total": total_transactions,
 			},
-			user=frappe.session.user,
+			doctype="Bank Statement Import Log",
+			docname=self.name,
 		)
 
 		if self.closing_balance and self.closing_balance > 0 and self.end_date:

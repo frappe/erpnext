@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { useDirection } from '@/components/ui/direction'
 import ErrorBanner from '@/components/ui/error-banner'
 import _ from '@/lib/translate'
+import { useFrappeDocumentEventListener } from 'frappe-react-sdk'
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { Link, useParams } from 'react-router'
 
@@ -12,6 +13,9 @@ const ViewBankStatementImportLog = () => {
     const { id } = useParams<{ id: string }>()
 
     const { data, isLoading, error } = useGetStatementDetails(id ?? "")
+
+    useFrappeDocumentEventListener("Bank Statement Import Log", id ?? "", () => {
+    })
 
     const direction = useDirection()
 

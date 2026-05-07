@@ -3,7 +3,7 @@ import { GetStatementDetailsResponse } from '../import_utils'
 import { flt, formatCurrency } from '@/lib/numbers'
 import { formatDate } from '@/lib/date'
 import { bankRecDateAtom } from '../../BankReconciliation/bankRecAtoms'
-import { ChevronLeftIcon, ChevronRightIcon, ExternalLinkIcon, InfoIcon, Loader2Icon } from 'lucide-react'
+import { AlertCircleIcon, ChevronLeftIcon, ChevronRightIcon, ExternalLinkIcon, InfoIcon, Loader2Icon } from 'lucide-react'
 import { H2, H3, Paragraph } from '@/components/ui/typography'
 import { FileTypeIcon } from '@/components/ui/file-dropzone'
 import { getFileExtension } from '@/lib/file'
@@ -22,6 +22,9 @@ import { useDirection } from '@/components/ui/direction'
 import BankLogo from '@/components/common/BankLogo'
 import { useGetBankAccounts } from '../../BankReconciliation/utils'
 import { BankStatementImportLog } from '@/types/Accounts/BankStatementImportLog'
+import { Badge } from '@/components/ui/badge'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 
 const parseDateFormat = (dateFormat: string) => {
 
@@ -106,14 +109,16 @@ const StatementDetails = ({ data }: Props) => {
                             {_("Back")}
                         </Link>
                     </Button>
-                    <Button onClick={onImport} disabled={loading || data.final_transactions?.length === 0} size='sm' type='button'>
-                        {loading ? <Loader2Icon className='size-4 animate-spin' /> : null}
-                        {loading ? _("Importing...") : _("Import {0} transactions", [data.final_transactions?.length?.toString() || "0"])}</Button>
+                    {data.doc.status === 'Completed' ? <Badge theme='green'>{_("Completed")}</Badge> :
+                        <Button onClick={onImport} disabled={loading || data.final_transactions?.length === 0} size='sm' type='button'>
+                            {loading ? <Loader2Icon className='size-4 animate-spin' /> : null}
+                            {loading ? _("Importing...") : _("Import {0} transactions", [data.final_transactions?.length?.toString() || "0"])}</Button>
+                    }
                 </div>
                 <div className='flex items-start gap-4'>
                     <div className='flex flex-col gap-1'>
                         <H2 className='text-lg border-0 p-0'>{_("Statement Details")}</H2>
-                        <Paragraph className='text-sm'><span>
+                        <Paragraph className='text-p-sm'><span>
                             {_("We've auto-detected the details of the statement file.")}
                         </span><br />
                             <span>
@@ -197,104 +202,142 @@ const StatementDetails = ({ data }: Props) => {
                 </Table>
             </div>
 
-            {data.conflicting_transactions.length > 0 && <Separator />}
+            {data.doc.status === "Not Started" ? <>
 
-            {data.conflicting_transactions.length > 0 ? <div className='flex flex-col gap-4'>
-                <div className='flex flex-col gap-1'>
-                    <H3 className='text-base border-0 p-0'>{_("Conflicting Transactions")}</H3>
-                    {data.conflicting_transactions.length === 1 ? (
-                        <Paragraph className='text-sm'>{_("We've found 1 existing transaction in the system that conflicts with the transactions in the statement file. Are you sure you want to proceed with the import?")}</Paragraph>
-                    ) : (
-                        <Paragraph className='text-sm'>{_("We've found {0} existing transactions in the system that conflict with the transactions in the statement file. Are you sure you want to proceed with the import?", [data.conflicting_transactions.length.toString()])}</Paragraph>
-                    )}
-                </div>
-                <div className='max-h-[400px] overflow-scroll pb-2'>
-                    <Table>
-                        <TableCaption>{_("Existing transactions in the system belonging to the same bank account and date range")}</TableCaption>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>{_("Date")}</TableHead>
-                                <TableHead>{_("Description")}</TableHead>
-                                <TableHead>{_("Ref.")}</TableHead>
-                                <TableHead className='text-end'>{_("Withdrawal")}</TableHead>
-                                <TableHead className='text-end'>{_("Deposit")}</TableHead>
+                <ConflictingTransactions transactions={data.conflicting_transactions} />
 
-                                <TableHead></TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {data.conflicting_transactions.map((transaction) => (
-                                <TableRow key={transaction.name}>
-                                    <TableCell>{formatDate(transaction.date)}</TableCell>
-                                    <TableCell>{transaction.description}</TableCell>
-                                    <TableCell>{transaction.reference_number ? transaction.reference_number : "-"}</TableCell>
-                                    <TableCell className='text-end font-numeric'>{formatCurrency(transaction.withdrawal, transaction.currency)}</TableCell>
-                                    <TableCell className='text-end font-numeric'>{formatCurrency(transaction.deposit, transaction.currency)}</TableCell>
-                                    <TableCell className='text-end'>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <Button variant='link' isIconButton asChild className='text-ink-gray-5 hover:text-black p-0 h-4'>
-                                                    <a href={`/desk/bank-transaction/${transaction.name}`} target='_blank' rel='noopener noreferrer'>
-                                                        <ExternalLinkIcon />
-                                                    </a>
-                                                </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                                {_("Open {0} in a new tab", [transaction.name])}
-                                            </TooltipContent>
-                                        </Tooltip>
+                <Separator />
 
-                                    </TableCell>
+                <div className='flex flex-col gap-4'>
+                    <div className='flex flex-col gap-1'>
+                        <H3 className='text-base border-0 p-0'>{_("Preview Transactions")}</H3>
+                        {data.final_transactions?.length === 1 ? (
+                            <Paragraph className='text-p-sm'>{_("We've found 1 transaction in the statement file that will be imported into the system. Please review the details below and click the 'Import' button to proceed.")}</Paragraph>
+                        ) : (
+                            <Paragraph className='text-p-sm'>{_("{0} transactions will be imported into the system. Please review the details below and click the 'Import' button to proceed.", [data.final_transactions?.length?.toString() || "0"])}</Paragraph>
+                        )}
+                    </div>
+                    <div className='max-h-[400px] overflow-scroll pb-2'>
+                        <Table>
+                            <TableCaption>{_("Transactions to be imported into the system")}</TableCaption>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className='w-8'>#</TableHead>
+                                    <TableHead>{_("Date")}</TableHead>
+                                    <TableHead>{_("Description")}</TableHead>
+                                    <TableHead>{_("Ref.")}</TableHead>
+                                    <TableHead className='text-end'>{_("Withdrawal")}</TableHead>
+                                    <TableHead className='text-end'>{_("Deposit")}</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {data.final_transactions?.map((transaction, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell className='w-8'>{index + 1}</TableCell>
+                                        <TableCell>{formatDate(transaction.date)}</TableCell>
+                                        <TableCell className='max-w-[200px] w-fit overflow-hidden text-ellipsis'>{transaction.description}</TableCell>
+                                        <TableCell className='max-w-[100px] w-fit overflow-hidden text-ellipsis'>{transaction.reference}</TableCell>
+                                        <TableCell className='text-end font-numeric'>{formatCurrency(transaction.withdrawal, data.currency)}</TableCell>
+                                        <TableCell className='text-end font-numeric'>{formatCurrency(transaction.deposit, data.currency)}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
                 </div>
-
-            </div> : null}
-
-            <Separator />
-
-            <div className='flex flex-col gap-4'>
-                <div className='flex flex-col gap-1'>
-                    <H3 className='text-base border-0 p-0'>{_("Preview Transactions")}</H3>
-                    {data.final_transactions?.length === 1 ? (
-                        <Paragraph className='text-sm'>{_("We've found 1 transaction in the statement file that will be imported into the system. Please review the details below and click the 'Import' button to proceed.")}</Paragraph>
-                    ) : (
-                        <Paragraph className='text-sm'>{_("{0} transactions will be imported into the system. Please review the details below and click the 'Import' button to proceed.", [data.final_transactions?.length?.toString() || "0"])}</Paragraph>
-                    )}
-                </div>
-                <div className='max-h-[400px] overflow-scroll pb-2'>
-                    <Table>
-                        <TableCaption>{_("Transactions to be imported into the system")}</TableCaption>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className='w-8'>#</TableHead>
-                                <TableHead>{_("Date")}</TableHead>
-                                <TableHead>{_("Description")}</TableHead>
-                                <TableHead>{_("Ref.")}</TableHead>
-                                <TableHead className='text-end'>{_("Withdrawal")}</TableHead>
-                                <TableHead className='text-end'>{_("Deposit")}</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {data.final_transactions?.map((transaction, index) => (
-                                <TableRow key={index}>
-                                    <TableCell className='w-8'>{index + 1}</TableCell>
-                                    <TableCell>{formatDate(transaction.date)}</TableCell>
-                                    <TableCell className='max-w-[200px] w-fit overflow-hidden text-ellipsis'>{transaction.description}</TableCell>
-                                    <TableCell className='max-w-[100px] w-fit overflow-hidden text-ellipsis'>{transaction.reference}</TableCell>
-                                    <TableCell className='text-end font-numeric'>{formatCurrency(transaction.withdrawal, data.currency)}</TableCell>
-                                    <TableCell className='text-end font-numeric'>{formatCurrency(transaction.deposit, data.currency)}</TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </div>
-            </div>
+            </> : null}
         </div>
 
     )
+}
+
+const ConflictingTransactions = ({ transactions }: { transactions: GetStatementDetailsResponse["conflicting_transactions"] }) => {
+
+    if (transactions.length === 0) {
+        return null
+    }
+
+    return <>
+        <Alert theme="red">
+            <AlertCircleIcon />
+            <AlertTitle>{_("Conflicting Transactions")}</AlertTitle>
+            <AlertDescription>
+                {transactions.length === 1 ? _("We've found 1 existing transaction in the system that conflicts with the transactions in the statement file. Are you sure you want to proceed with the import?")
+                    : _("We've found {0} existing transactions in the system that conflict with the transactions in the statement file. Are you sure you want to proceed with the import?", [transactions.length.toString()])}
+
+                <div className='py-2'>
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button
+                                size='sm'
+                                type='button'
+                                theme='red'
+                                variant='solid'>
+                                <span>{transactions.length > 1 ? _("View transactions") : _("View transaction")}</span>
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className='min-w-7xl'>
+                            <DialogHeader>
+                                <DialogTitle>{_("Conflicting Transactions")}</DialogTitle>
+                                <DialogDescription>
+                                    {transactions.length === 1 ? _("We've found 1 existing transaction in the system that conflicts with the transactions in the statement file. Are you sure you want to proceed with the import?")
+                                        : _("We've found {0} existing transactions in the system that conflict with the transactions in the statement file. Are you sure you want to proceed with the import?", [transactions.length.toString()])}
+                                </DialogDescription>
+                            </DialogHeader>
+
+                            <div className='max-h-[400px] overflow-scroll pb-2'>
+                                <Table>
+                                    <TableCaption>{_("Existing transactions in the system belonging to the same bank account and date range")}</TableCaption>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>{_("Date")}</TableHead>
+                                            <TableHead>{_("Description")}</TableHead>
+                                            <TableHead>{_("Ref.")}</TableHead>
+                                            <TableHead className='text-end'>{_("Withdrawal")}</TableHead>
+                                            <TableHead className='text-end'>{_("Deposit")}</TableHead>
+                                            <TableHead></TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {transactions.map((transaction) => (
+                                            <TableRow key={transaction.name}>
+                                                <TableCell>{formatDate(transaction.date)}</TableCell>
+                                                <TableCell title={transaction.description} className='max-w-[200px] w-fit overflow-hidden text-ellipsis'>{transaction.description}</TableCell>
+                                                <TableCell title={transaction.reference_number} className='max-w-[100px] w-fit overflow-hidden text-ellipsis'>{transaction.reference_number ? transaction.reference_number : "-"}</TableCell>
+                                                <TableCell className='text-end font-numeric'>{formatCurrency(transaction.withdrawal, transaction.currency)}</TableCell>
+                                                <TableCell className='text-end font-numeric'>{formatCurrency(transaction.deposit, transaction.currency)}</TableCell>
+                                                <TableCell className='text-end'>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button variant='link' isIconButton asChild className='text-ink-gray-5 hover:text-black p-0 h-4'>
+                                                                <a href={`/desk/bank-transaction/${transaction.name}`} target='_blank' rel='noopener noreferrer'>
+                                                                    <ExternalLinkIcon />
+                                                                </a>
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            {_("Open {0} in a new tab", [transaction.name])}
+                                                        </TooltipContent>
+                                                    </Tooltip>
+
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                            <DialogFooter>
+                                <DialogClose asChild>
+                                    <Button variant={'outline'} size='md' type='button'>{_("Close")}</Button>
+                                </DialogClose>
+                            </DialogFooter>
+                        </DialogContent>
+
+                    </Dialog>
+                </div>
+            </AlertDescription>
+        </Alert>
+    </>
 }
 
 export default StatementDetails
