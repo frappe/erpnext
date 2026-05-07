@@ -41,10 +41,23 @@ frappe.ui.form.on("POS Settings", {
 		frm.trigger("get_invoice_fields");
 		frm.trigger("add_search_options");
 	},
-
+	invoice_type: function (frm, doctype, name) {
+		const invoice_type = frm.doc.invoice_type || "POS Invoice";
+		frappe.model.with_doctype(invoice_type, () => {
+			const allowed = new Set(
+				(frappe.get_doc("DocType", invoice_type).fields || []).map((d) => d.fieldname)
+			);
+			frm.doc.invoice_fields = (frm.doc.invoice_fields || []).filter((row) =>
+				allowed.has(row.fieldname)
+			);
+			frm.refresh_field("invoice_fields");
+			frm.trigger("get_invoice_fields");
+		});
+	},
 	get_invoice_fields: function (frm) {
-		frappe.model.with_doctype("POS Invoice", () => {
-			var fields = $.map(frappe.get_doc("DocType", "POS Invoice").fields, function (d) {
+		var invoice_type = frm.doc.invoice_type ? frm.doc.invoice_type : "POS Invoice";
+		frappe.model.with_doctype(invoice_type, () => {
+			var fields = $.map(frappe.get_doc("DocType", invoice_type).fields, function (d) {
 				if (
 					frappe.model.no_value_type.indexOf(d.fieldtype) === -1 ||
 					["Button"].includes(d.fieldtype)
@@ -101,10 +114,15 @@ frappe.ui.form.on("POS Search Fields", {
 frappe.ui.form.on("POS Field", {
 	fieldname: function (frm, doctype, name) {
 		var doc = frappe.get_doc(doctype, name);
-		var df = $.map(frappe.get_doc("DocType", "POS Invoice").fields, function (d) {
-			return doc.fieldname == d.fieldname ? d : null;
-		})[0];
-
+		var df = $.map(
+			frappe.get_doc("DocType", frm.doc.invoice_type ? frm.doc.invoice_type : "POS Invoice").fields,
+			function (d) {
+				return doc.fieldname == d.fieldname ? d : null;
+			}
+		)[0];
+		if (!df) {
+			return;
+		}
 		doc.label = df.label;
 		doc.reqd = df.reqd;
 		doc.options = df.options;
