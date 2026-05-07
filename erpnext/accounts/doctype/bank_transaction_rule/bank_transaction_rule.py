@@ -95,9 +95,16 @@ class BankTransactionRule(Document):
 				except re.error:
 					frappe.throw(_("Invalid regex pattern."))
 
-		account_company = frappe.db.get_value("Account", self.account, "company")
-		if account_company != self.company:
-			frappe.throw(_("Account company does not match with the rule company."))
+		if self.bank_entry_type == "Single Account":
+			account_company = frappe.get_cached_value("Account", self.account, "company")
+			if account_company != self.company:
+				frappe.throw(_("Account company does not match with the rule company."))
+
+		if self.bank_entry_type == "Multiple Accounts":
+			for account in self.accounts:
+				account_company = frappe.get_cached_value("Account", account.account, "company")
+				if account_company != self.company:
+					frappe.throw(_("Account company does not match with the rule company."))
 
 	def on_trash(self):
 		"""
