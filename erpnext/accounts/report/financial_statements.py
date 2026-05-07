@@ -36,9 +36,9 @@ def get_report_date_range(filters: frappe._dict) -> tuple[datetime.date, datetim
 	return getdate(filters.period_start_date), getdate(filters.period_end_date)
 
 
-def get_dimensions(filters: frappe._dict) -> tuple[str | None, list]:
+def get_dimension_values(filters: frappe._dict) -> tuple[str | None, list]:
 	"""
-	Return (fieldname, [dimensions]) for the chosen grouping dimension.
+	Return (fieldname, [dimension_values]) for the chosen grouping dimension.
 
 	NOTE: Disabled dimensions values are not filtered out!
 	"""
@@ -111,7 +111,7 @@ def get_dimension_period_list(filters: frappe._dict) -> list[dict]:
 	]
 	```
 	"""
-	fieldname, dimensions = get_dimensions(filters)
+	fieldname, dimensions = get_dimension_values(filters)
 	if not fieldname or not dimensions:
 		return []
 
