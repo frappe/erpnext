@@ -282,6 +282,16 @@ def get_conditions(filters):
 
 	if filters.get("party"):
 		conditions.append(build_common_party_condition(filters))
+		if filters.get("_is_common_party"):
+			cpa_jvs = frappe.get_all(
+				"Journal Entry",
+				filters={"company": filters.get("company"), "docstatus": 1, "is_system_generated": 1},
+				pluck="name",
+			)
+			if cpa_jvs:
+				filters["voucher_no_not_in"] = (filters.get("voucher_no_not_in") or []) + cpa_jvs
+				if "voucher_no not in %(voucher_no_not_in)s" not in conditions:
+					conditions.append("voucher_no not in %(voucher_no_not_in)s")
 	elif filters.get("party_type"):
 		conditions.append("party_type=%(party_type)s")
 
@@ -375,7 +385,10 @@ def get_linked_parties(party_list: list, party_type: str) -> dict:
 
 
 def build_common_party_condition(filters):
-	parties_by_type = get_linked_parties(list(filters.get("party")), filters.get("party_type"))
+	parties_by_type = get_linked_parties(filters.get("party"), filters.get("party_type"))
+
+	if len(parties_by_type) > 1:
+		filters["_is_common_party"] = True
 
 	parts = []
 	for ptype, p_list in parties_by_type.items():

@@ -6,7 +6,9 @@ from frappe import qb
 from frappe.utils import flt, today
 
 from erpnext.accounts.doctype.party_link.party_link import create_party_link
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.accounts.party import get_party_account
 from erpnext.accounts.report.general_ledger.general_ledger import execute
 from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.tests.utils import ERPNextTestSuite
@@ -29,6 +31,39 @@ class TestGeneralLedger(ERPNextTestSuite):
 		for doctype in doctype_list:
 			qb.from_(qb.DocType(doctype)).delete().where(qb.DocType(doctype).company == self.company).run()
 
+	def _make_setoff_jv(self, company, customer, supplier, amount, posting_date):
+		"""Explicitly create a CPA set-off Journal Entry with is_system_generated=1."""
+		customer_account = get_party_account("Customer", customer, company)
+		supplier_account = get_party_account("Supplier", supplier, company)
+
+		jv = frappe.new_doc("Journal Entry")
+		jv.voucher_type = "Journal Entry"
+		jv.posting_date = posting_date
+		jv.company = company
+		jv.is_system_generated = 1
+		jv.remark = "Test CPA set-off JV"
+		jv.append(
+			"accounts",
+			{
+				"account": customer_account,
+				"party_type": "Customer",
+				"party": customer,
+				"credit_in_account_currency": amount,
+			},
+		)
+		jv.append(
+			"accounts",
+			{
+				"account": supplier_account,
+				"party_type": "Supplier",
+				"party": supplier,
+				"debit_in_account_currency": amount,
+			},
+		)
+		jv.save()
+		jv.submit()
+		return jv
+
 	def test_cpa_includes_linked_party_entries(self):
 		"""
 		CPA support: filtering GL by a Customer should also return GL entries posted under the linked Supplier (and vice versa) via Party Link.
@@ -45,6 +80,7 @@ class TestGeneralLedger(ERPNextTestSuite):
 				["secondary_party", "in", [customer, supplier]],
 			],
 			pluck="name",
+			limit=1,
 		):
 			frappe.delete_doc("Party Link", pl_name[0], ignore_permissions=True)
 
@@ -59,9 +95,12 @@ class TestGeneralLedger(ERPNextTestSuite):
 			si = create_sales_invoice(customer=customer, company=company, do_not_submit=False)
 
 			# GL entry via Purchase Invoice (Supplier side)
-			from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+			pi = make_purchase_invoice(supplier=supplier, company=company)
 
-			pi = make_purchase_invoice(supplier=supplier, company=company, do_not_submit=False)
+			# Explicitly create a CPA set-off JV so the exclusion test is not relying on auto-creation
+			setoff_jv = self._make_setoff_jv(
+				company, customer, supplier, si.outstanding_amount, si.posting_date
+			)
 
 			# Filter by Customer only — should include both Customer and Supplier entries
 			_, data = execute(
@@ -79,6 +118,9 @@ class TestGeneralLedger(ERPNextTestSuite):
 			party_types_in_result = {row.party_type for row in data if row.get("party_type")}
 			self.assertIn("Customer", party_types_in_result)
 			self.assertIn("Supplier", party_types_in_result)
+			# The explicitly created set-off JV must not appear in GL results
+			voucher_nos = {row.voucher_no for row in data if row.get("voucher_no")}
+			self.assertNotIn(setoff_jv.name, voucher_nos, "CPA set-off JV should be excluded from GL results")
 
 			# Filter by Supplier only — should include both sides too
 			_, data = execute(
@@ -96,6 +138,8 @@ class TestGeneralLedger(ERPNextTestSuite):
 			party_types_in_result = {row.party_type for row in data if row.get("party_type")}
 			self.assertIn("Customer", party_types_in_result)
 			self.assertIn("Supplier", party_types_in_result)
+			voucher_nos = {row.voucher_no for row in data if row.get("voucher_no")}
+			self.assertNotIn(setoff_jv.name, voucher_nos, "CPA set-off JV should be excluded from GL results")
 		finally:
 			frappe.delete_doc("Party Link", party_link.name, ignore_permissions=True)
 
@@ -115,6 +159,7 @@ class TestGeneralLedger(ERPNextTestSuite):
 				["secondary_party", "in", [customer, other_customer]],
 			],
 			pluck="name",
+			limit=1,
 		):
 			frappe.delete_doc("Party Link", pl_name[0], ignore_permissions=True)
 
@@ -156,6 +201,7 @@ class TestGeneralLedger(ERPNextTestSuite):
 				["secondary_party", "in", [linked_customer, unlinked_customer, supplier]],
 			],
 			pluck="name",
+			limit=1,
 		):
 			frappe.delete_doc("Party Link", pl_name[0], ignore_permissions=True)
 
@@ -166,13 +212,16 @@ class TestGeneralLedger(ERPNextTestSuite):
 		)
 
 		try:
-			from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-
 			si_linked = create_sales_invoice(customer=linked_customer, company=company, do_not_submit=False)
 			_si_unlinked = create_sales_invoice(
 				customer=unlinked_customer, company=company, do_not_submit=False
 			)
 			make_purchase_invoice(supplier=supplier, company=company, do_not_submit=False)
+
+			# Explicitly create a CPA set-off JV so the exclusion test is not relying on auto-creation
+			setoff_jv = self._make_setoff_jv(
+				company, linked_customer, supplier, si_linked.outstanding_amount, si_linked.posting_date
+			)
 
 			_, data = execute(
 				frappe._dict(
@@ -196,6 +245,9 @@ class TestGeneralLedger(ERPNextTestSuite):
 			# supplier linked to linked_customer is pulled in
 			self.assertIn(supplier, parties_in_result)
 			self.assertIn("Supplier", party_types_in_result)
+			# The explicitly created set-off JV must not appear in GL results
+			voucher_nos = {row.voucher_no for row in data if row.get("voucher_no")}
+			self.assertNotIn(setoff_jv.name, voucher_nos, "CPA set-off JV should be excluded from GL results")
 		finally:
 			frappe.delete_doc("Party Link", party_link.name, ignore_permissions=True)
 
