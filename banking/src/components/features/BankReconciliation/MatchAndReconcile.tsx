@@ -643,7 +643,7 @@ const RuleAction = ({ transaction }: { transaction: UnreconciledTransaction }) =
             <CardHeader className="pb-0">
                 <CardTitle className="flex justify-between items-center gap-3">
                     <div className="flex items-center gap-3">
-                        <div className={`p-2.5 rounded-lg ${styles.bg} ${styles.text}`}>
+                        <div className={`px-2.5 rounded-lg ${styles.bg} ${styles.text}`}>
                             {getActionIcon()}
                         </div>
                         <div className="flex flex-col gap-0.5">
@@ -662,7 +662,7 @@ const RuleAction = ({ transaction }: { transaction: UnreconciledTransaction }) =
                 </CardTitle>
             </CardHeader>
             <CardContent className="pt-0 space-y-3">
-                <div className="flex items-center justify-between p-2.5 bg-surface-white rounded-lg border border-outline-gray-1">
+                <div className="flex items-center justify-between p-2 bg-surface-white rounded-lg border border-outline-gray-1">
                     <div className="flex items-center gap-2">
                         <BadgeCheck className="w-4 h-4 text-ink-green-3" />
                         <span className="text-sm font-medium text-ink-gray-8">{_("Recommended Action")}</span>
