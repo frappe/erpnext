@@ -365,11 +365,13 @@ erpnext.financial_statements = {
 
 	get_accounting_dimension_options: function () {
 		const options = ["", "Cost Center", "Project"];
-		frappe.db.get_list("Accounting Dimension", { fields: ["document_type"] }).then((res) => {
-			res.forEach((dimension) => {
-				options.push(dimension.document_type);
+		frappe.db
+			.get_list("Accounting Dimension", { fields: ["document_type"], filters: { disabled: 0 } })
+			.then((res) => {
+				res.forEach((dimension) => {
+					options.push(dimension.document_type);
+				});
 			});
-		});
 		return options;
 	},
 };
