@@ -34,7 +34,7 @@ if (import.meta.env.DEV) {
   frappe.model.sync(frappe.boot.docs);
   createRoot(document.getElementById('root') as HTMLElement).render(
     <StrictMode>
-      <DirectionProvider dir={window.frappe?.layout_direction ?? 'ltr'}>
+      <DirectionProvider dir={window.frappe?.boot?.layout_direction ?? 'ltr'}>
         <App />
       </DirectionProvider>
     </StrictMode>,

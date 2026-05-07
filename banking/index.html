@@ -30,7 +30,19 @@
 
     frappe.boot = JSON.parse({{ boot }});
     frappe.boot.layout_direction = "{{ layout_direction }}";
-    frappe._messages = frappe.boot["__messages"];
+
+    frappe._translations_loaded = fetch(
+      `/api/method/frappe.translate.get_boot_translations?v=${frappe.boot.translations_version}&lang=${frappe.boot.lang}`,
+      {
+        credentials: "same-origin",
+        headers: {
+          "X-Frappe-CSRF-Token": frappe.csrf_token,
+          "Accept": "application/json"
+        }
+      }
+    ).then(r => r.json()).then(data => {
+      frappe._messages = data.message || {};
+    }).catch(() => { });
   </script>
   <script type="module" src="/src/main.tsx"></script>
 </body>
