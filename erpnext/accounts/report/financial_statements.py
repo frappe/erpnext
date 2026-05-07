@@ -39,53 +39,38 @@ def get_report_date_range(filters: frappe._dict) -> tuple[datetime.date, datetim
 def get_dimensions(filters: frappe._dict) -> tuple[str | None, list]:
 	"""
 	Return (fieldname, [dimensions]) for the chosen grouping dimension.
+
+	NOTE: Disabled dimensions values are not filtered out!
 	"""
 	if not filters.group_by_dimension:
 		return None, []
 
-	# GL entry fieldname for the dimension
-	fieldname = get_dimension_fieldname(filters.group_by_dimension)
-	_, to_date = get_report_date_range(filters)
+	dim_doctype = filters.group_by_dimension
+	fieldname = get_dimension_fieldname(dim_doctype)
 
-	# NOTE: Ignoring from_date because dimensions should be included even if they have no activity in the period.
-	gl = frappe.qb.DocType("GL Entry")
-	query = (
-		frappe.qb.from_(gl)
-		.select(gl[fieldname])
-		.distinct()
-		.where(gl.company == filters.company)
-		.where(gl.is_cancelled == 0)
-		.where(gl.posting_date <= to_date)
-		.where(gl[fieldname].isnotnull())
-		.where(gl[fieldname] != "")
-		.orderby(gl[fieldname])
-	)
+	meta = frappe.get_meta(dim_doctype)
+	is_tree = bool(meta.is_tree)
 
-	if filters.cost_center:
-		ccs = get_cost_centers_with_children(filters.cost_center)
-		query = query.where(gl.cost_center.isin(ccs))
+	dim = frappe.qb.DocType(dim_doctype)
+	query = frappe.qb.from_(dim).select(dim.name)
 
-	if filters.project:
-		projects = filters.project
-		if not isinstance(projects, list):
-			projects = frappe.parse_json(projects)
+	if is_tree and meta.has_field("is_group"):
+		query = query.where(dim.is_group == 0)
 
-		query = query.where(gl.project.isin(projects))
+	if meta.has_field("company"):
+		query = query.where(dim.company == filters.company)
 
-	for dimension in get_accounting_dimensions(as_list=False):
-		value = filters.get(dimension.fieldname)
-		if not value:
-			continue
+	# Self-filter: narrow to values the user picked for this same dimension.
+	if selected := filters.get(fieldname):
+		if isinstance(selected, str):
+			selected = frappe.parse_json(selected)
+		if is_tree:
+			selected = get_dimension_with_children(dim_doctype, selected)
+		query = query.where(dim.name.isin(selected))
 
-		if isinstance(value, str):
-			value = frappe.parse_json(value)
+	# order by name
+	query = query.orderby(dim.name)
 
-		if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-			value = get_dimension_with_children(dimension.document_type, value)
-
-		query = query.where(gl[dimension.fieldname].isin(value))
-
-	# return list of dimensions for the fieldname(eg: cost_center -> ["CC1", "CC2", ...])
 	return fieldname, query.run(pluck=True)
 
 
