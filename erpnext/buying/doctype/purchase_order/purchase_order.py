@@ -293,15 +293,16 @@ class PurchaseOrder(BuyingController):
 		self.party_account_currency = get_party_account_currency("Supplier", self.supplier, self.company)
 
 	def validate_minimum_order_qty(self):
+		"""Check if total ordered quantities meet the Item's minimum order requirement."""
 		if not self.get("items"):
 			return
 		items = list(set(d.item_code for d in self.get("items")))
 
 		itemwise_min_order_qty = frappe._dict(
-			frappe.db.sql(
-				"""select name, min_order_qty
-			from tabItem where name in ({})""".format(", ".join(["%s"] * len(items))),
-				items,
+			frappe.get_all("Item",
+				fields=["name", "min_order_qty"], 
+				filters={"name": ["in", items]}, 
+				as_list=True
 			)
 		)
 
