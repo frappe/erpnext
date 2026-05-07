@@ -21,7 +21,7 @@ from erpnext.accounts.report.financial_statements import (
 	get_dimension_period_list,
 	get_filtered_list_for_consolidated_report,
 	get_period_list,
-	is_dimension_axis,
+	is_dimension_grouped,
 	set_gl_entries_by_account,
 )
 from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import (
@@ -48,7 +48,7 @@ def execute(filters=None):
 		)
 
 	if not period_list:
-		return [], [], None, None, None
+		return
 
 	cash_flow_sections = get_cash_flow_accounts()
 
@@ -74,7 +74,13 @@ def execute(filters=None):
 		ignore_accumulated_values_for_fy=True,
 	)
 
-	net_profit_loss = get_net_profit_loss(income, expense, period_list, filters.company)
+	net_profit_loss = get_net_profit_loss(
+		income,
+		expense,
+		period_list,
+		filters.company,
+		accumulated_values=bool(filters.accumulated_values),
+	)
 
 	data = []
 	summary_data = {}
@@ -143,13 +149,15 @@ def execute(filters=None):
 		data, data, _("Net Change in Cash"), period_list, company_currency, summary_data, filters
 	)
 
-	if filters.show_opening_and_closing_balance and not is_dimension_axis(period_list):
+	if filters.show_opening_and_closing_balance and not is_dimension_grouped(period_list):
 		show_opening_and_closing_balance(data, period_list, company_currency, net_change_in_cash, filters)
 	elif filters.show_opening_and_closing_balance:
+		filters.show_opening_and_closing_balance = False
+
 		frappe.msgprint(
-			_("Opening & Closing balance is not shown when grouping by dimension."),
 			indicator="orange",
-			alert=True,
+			title=_("Not Supported"),
+			msg=_("Opening and Closing balance is not supported for dimension grouped cash flow statement"),
 		)
 
 	columns = get_columns(

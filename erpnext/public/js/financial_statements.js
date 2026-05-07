@@ -30,7 +30,7 @@ erpnext.financial_statements = {
 		const view = get_filter_value("selected_view");
 		// First period of each dim has no prior in Growth → show raw currency, not %.
 		// Margin always shows % for all period columns (income row = 100%).
-		if (view === "Growth" && column.is_first_in_dim) return false;
+		if (view === "Growth" && column.is_first_in_dimension) return false;
 		return (view === "Growth" && column.colIndex >= 3) || (view === "Margin" && column.colIndex >= 2);
 	},
 

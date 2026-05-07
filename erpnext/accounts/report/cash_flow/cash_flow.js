@@ -49,6 +49,7 @@ frappe.query_reports[CF_REPORT_NAME]["filters"].push(
 		fieldname: "show_opening_and_closing_balance",
 		label: __("Show Opening and Closing Balance"),
 		fieldtype: "Check",
+		depends_on: "eval:!doc.group_by_dimension",
 	}
 );
 

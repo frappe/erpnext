@@ -16,8 +16,8 @@ from erpnext.accounts.report.financial_statements import (
 	get_data,
 	get_dimension_period_list,
 	get_filtered_list_for_consolidated_report,
+	get_period_keys_for_total,
 	get_period_list,
-	get_total_period_keys,
 )
 
 
@@ -39,7 +39,7 @@ def execute(filters=None):
 		)
 
 	if not period_list:
-		return [], [], None, None, None, None
+		return
 
 	filters.period_start_date = period_list[0]["year_start_date"]
 
@@ -171,9 +171,7 @@ def get_provisional_profit_loss(
 			if provisional_profit_loss[key]:
 				has_value = True
 
-		total_keys = (
-			list(period_list) if consolidated else get_total_period_keys(period_list, accumulated_values)
-		)
+		total_keys = get_period_keys_for_total(period_list, accumulated_values, consolidated)
 		provisional_profit_loss["total"] = flt(sum(provisional_profit_loss.get(k, 0.0) for k in total_keys))
 		total_row["total"] = flt(sum(total_row.get(k, 0.0) for k in total_keys))
 
@@ -223,11 +221,8 @@ def get_report_summary(
 	if filters.get("accumulated_in_group_company"):
 		period_list = get_filtered_list_for_consolidated_report(filters, period_list)
 		keys = [period if consolidated else period.key for period in period_list]
-	elif consolidated:
-		# period_list is a companies dict here; iterate its keys (company names)
-		keys = list(period_list)
 	else:
-		keys = get_total_period_keys(period_list, filters.get("accumulated_values"))
+		keys = get_period_keys_for_total(period_list, filters.accumulated_values, consolidated)
 
 	# get_data() output: [...account rows..., total_row, {}]  →  [-2] = total row, [-1] = blank separator
 	# [-1] == {} guards against missing total row (e.g. empty liability/equity data)
