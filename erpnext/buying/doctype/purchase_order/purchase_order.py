@@ -299,10 +299,7 @@ class PurchaseOrder(BuyingController):
 		items = list(set(d.item_code for d in self.get("items")))
 
 		itemwise_min_order_qty = frappe._dict(
-			frappe.get_all("Item",
-				fields=["name", "min_order_qty"], 
-				filters={"name": ["in", items]}, 
-				as_list=True
+			frappe.get_all("Item",fields=["name", "min_order_qty"], filters={"name": ["in", items]}, as_list=True
 			)
 		)
 
