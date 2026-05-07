@@ -105,9 +105,9 @@ def get_dimension_period_list(filters: frappe._dict) -> list[dict]:
 	        "key": "center___atd_mar_2027",
 	        "label": "Center - ATD - 2026-2027",
 	        "period": "mar_2027",
-	        "to_date": " datetime.date(2027, 3, 31),
+	        "to_date": datetime.date(2027, 3, 31),
 	        "to_date_fiscal_year": "2026-2027",
-	        "year_end_date": " datetime.date(2027, 3, 31),
+	        "year_end_date": datetime.date(2027, 3, 31),
 	        "year_start_date": datetime.date(2026, 4, 1),
 	    },
 	    {
@@ -118,9 +118,9 @@ def get_dimension_period_list(filters: frappe._dict) -> list[dict]:
 	        "key": "main___atd_mar_2027",
 	        "label": "Main - ATD - 2026-2027",
 	        "period": "mar_2027",
-	        "to_date": " datetime.date(2027, 3, 31),
+	        "to_date": datetime.date(2027, 3, 31),
 	        "to_date_fiscal_year": "2026-2027",
-	        "year_end_date": " datetime.date(2027, 3, 31),
+	        "year_end_date": datetime.date(2027, 3, 31),
 	        "year_start_date": datetime.date(2026, 4, 1),
 	    },
 	]
@@ -198,7 +198,7 @@ def get_period_keys_for_total(
 	- Accumulated:  only the last period
 	- Not accumulated: all periods (sum of independent period activity)
 	- Consolidated: list of period keys is the same as the period_list
-	    - In case of consolidated reports
+	        - In case of consolidated reports
 	"""
 	if not period_list:
 		return []
