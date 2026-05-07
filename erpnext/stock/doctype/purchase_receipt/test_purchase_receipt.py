@@ -5790,6 +5790,71 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertAlmostEqual(srbnb_credit, pi_base_net_amount, places=2)
 
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"auto_allocate_advance_payment": 1, "fetch_only_allocated_advance_payment": 0}
+	)
+	def test_auto_allocate_advance_payment_from_purchase_order(self):
+		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		po = create_purchase_order(rate=1000)
+
+		pe1 = get_payment_entry("Purchase Order", po.name)
+		pe1.paid_amount = 500
+		pe1.received_amount = 500
+		pe1.references[0].allocated_amount = 500
+		pe1.insert().submit()
+
+		pe2 = get_payment_entry("Purchase Order", po.name)
+		pe2.paid_amount = 100
+		pe2.received_amount = 100
+		pe2.references = []
+		pe2.insert().submit()
+
+		pr = make_purchase_receipt(po.name)
+		pr.insert().submit()
+
+		pi = make_purchase_invoice(pr.name)
+
+		references = [d.reference_name for d in pi.advances]
+
+		self.assertIn(pe1.name, references)
+		self.assertIn(pe2.name, references)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"auto_allocate_advance_payment": 1, "fetch_only_allocated_advance_payment": 1}
+	)
+	def test_auto_allocate_fetches_only_allocated_advances(self):
+		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		po = create_purchase_order(rate=1000)
+
+		pe1 = get_payment_entry("Purchase Order", po.name)
+		pe1.paid_amount = 500
+		pe1.received_amount = 500
+		pe1.references[0].allocated_amount = 500
+		pe1.insert().submit()
+
+		pe2 = get_payment_entry("Purchase Order", po.name)
+		pe2.paid_amount = 100
+		pe2.received_amount = 100
+		pe2.references = []
+		pe2.insert().submit()
+
+		pr = make_purchase_receipt(po.name)
+		pr.insert().submit()
+
+		pi = make_purchase_invoice(pr.name)
+
+		references = [d.reference_name for d in pi.advances]
+
+		self.assertIn(pe1.name, references)
+		self.assertNotIn(pe2.name, references)
+
+
 def create_asset_category_for_pr_test():
 	category_name = "Test Asset Category for PR"
 
