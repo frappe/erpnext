@@ -1026,7 +1026,7 @@ def compute_growth_view_data(data, columns):
 			data[row_idx][current_period_key] = growth_percent
 
 
-def compute_margin_view_data(data, columns, accumulated_values):
+def compute_margin_view_data(data, columns):
 	if not columns:
 		return
 
