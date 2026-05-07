@@ -15,12 +15,11 @@ from erpnext.accounts.doctype.financial_report_template.financial_report_engine 
 	get_xlsx_styles,  #! DO NOT REMOVE - hook for styling
 )
 from erpnext.accounts.report.financial_statements import (
+	build_period_list,
 	get_columns,
 	get_cost_centers_with_children,
 	get_data,
-	get_dimension_period_list,
 	get_filtered_list_for_consolidated_report,
-	get_period_list,
 	is_dimension_grouped,
 	set_gl_entries_by_account,
 )
@@ -34,18 +33,7 @@ def execute(filters=None):
 	if filters and filters.report_template:
 		return FinancialReportEngine().execute(filters)
 
-	if filters and filters.get("group_by_dimension"):
-		period_list = get_dimension_period_list(filters)
-	else:
-		period_list = get_period_list(
-			filters.from_fiscal_year,
-			filters.to_fiscal_year,
-			filters.period_start_date,
-			filters.period_end_date,
-			filters.filter_based_on,
-			filters.periodicity,
-			company=filters.company,
-		)
+	period_list = build_period_list(filters)
 
 	if not period_list:
 		return

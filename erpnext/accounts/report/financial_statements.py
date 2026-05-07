@@ -175,6 +175,27 @@ def get_dimension_period_list(filters: frappe._dict) -> list[dict]:
 	return period_list
 
 
+def build_period_list(filters: frappe._dict) -> list[dict]:
+	"""
+	Build the report `period_list` from filters.
+
+	- If `group_by_dimension` is set, returns a dimension * period cross-product via `get_dimension_period_list`.
+	- Otherwise, returns plain time buckets via `get_period_list`.
+	"""
+	if filters and filters.get("group_by_dimension"):
+		return get_dimension_period_list(filters)
+
+	return get_period_list(
+		filters.from_fiscal_year,
+		filters.to_fiscal_year,
+		filters.period_start_date,
+		filters.period_end_date,
+		filters.filter_based_on,
+		filters.periodicity,
+		company=filters.company,
+	)
+
+
 def is_dimension_grouped(period_list: list[dict]) -> bool:
 	"""
 	Return True if period_list contains dimension-grouped periods.
