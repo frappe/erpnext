@@ -10,6 +10,7 @@ from frappe.query_builder import DocType
 from frappe.query_builder.functions import Sum
 from frappe.utils import cstr, flt
 from pypika import Order
+from pypika.terms import Bracket, LiteralValue
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
@@ -237,7 +238,11 @@ def get_account_type_based_gl_data(company, filters=None):
 		.where(gl.voucher_type != "Period Closing Voucher")
 		.where(
 			gl.account.isin(
-				frappe.qb.from_(acc).select(acc.name).where(acc.account_type == filters.account_type)
+				frappe.qb.from_(acc)
+				.select(acc.name)
+				.where(acc.is_group == 0)
+				.where(acc.company == company)
+				.where(acc.account_type == filters.account_type)
 			)
 		)
 	)
@@ -277,6 +282,12 @@ def get_account_type_based_gl_data(company, filters=None):
 			if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
 				values = get_dimension_with_children(dimension.document_type, values)
 			query = query.where(gl[dimension.fieldname].isin(values))
+
+	# apply permission filters
+	from frappe.desk.reportview import build_match_conditions
+
+	if match_conditions := build_match_conditions("GL Entry"):
+		query = query.where(Bracket(LiteralValue(match_conditions)))
 
 	result = query.run()
 	return flt(result[0][0]) if result and result[0][0] else 0
