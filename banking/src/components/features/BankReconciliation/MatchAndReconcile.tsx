@@ -636,6 +636,15 @@ const RuleAction = ({ transaction }: { transaction: UnreconciledTransaction }) =
         }
     }
 
+    useHotkeys('meta+r', () => {
+        // 
+        handleActionClick()
+    }, {
+        enabled: true,
+        enableOnFormTags: false,
+        preventDefault: true
+    })
+
     const styles = getActionStyles()
 
     return (

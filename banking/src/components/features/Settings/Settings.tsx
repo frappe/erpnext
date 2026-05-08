@@ -10,10 +10,11 @@ import {
 } from '@/components/ui/settings-dialog'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import _ from '@/lib/translate'
-import { LandmarkIcon, ListIcon, SettingsIcon, SlidersVerticalIcon, ZapIcon } from 'lucide-react'
+import { KeyboardIcon, LandmarkIcon, ListIcon, SettingsIcon, SlidersVerticalIcon, ZapIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Preferences } from './Preferences'
 import MatchingRules from './MatchingRules'
+import KeyboardShortcuts from './KeyboardShortcuts'
 
 const Settings = () => {
 
@@ -59,6 +60,11 @@ const Settings = () => {
                             label={_("Masters")}
                             value="masters"
                         />
+                        <SettingsTabItem
+                            icon={<KeyboardIcon />}
+                            label={_("Keyboard Shortcuts")}
+                            value="keyboard-shortcuts"
+                        />
                     </SettingsTabGroup>
                 </SettingsTabs>
 
@@ -71,9 +77,12 @@ const Settings = () => {
                     </SettingsPanel>
                     <SettingsPanel value="bank-accounts" />
                     <SettingsPanel value="masters" />
+                    <SettingsPanel value="keyboard-shortcuts">
+                        <KeyboardShortcuts />
+                    </SettingsPanel>
                 </SettingsPanels>
             </SettingsDialog>
-        </Dialog>
+        </Dialog >
     )
 }
 
