@@ -524,9 +524,11 @@ class PickList(TransactionBase):
 		picked_items_details = self.get_picked_items_details(items)
 		self.item_location_map = frappe._dict()
 
-		from_warehouses = [self.parent_warehouse] if self.parent_warehouse else []
+		from_warehouses = []
+		if self.parent_warehouse:
+			from_warehouses = [self.parent_warehouse]
 
-		if self.work_order:
+		elif self.work_order:
 			root_warehouse = frappe.db.get_value(
 				"Warehouse", {"company": self.company, "parent_warehouse": ["IS", "NOT SET"], "is_group": 1}
 			)
