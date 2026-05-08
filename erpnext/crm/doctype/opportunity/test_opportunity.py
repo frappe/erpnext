@@ -91,6 +91,15 @@ class TestOpportunity(ERPNextTestSuite):
 		create_communication(opp_doc.doctype, opp_doc.name, opp_doc.contact_email)
 		create_communication(opp_doc.doctype, opp_doc.name, opp_doc.contact_email)
 
+	def test_get_notification_email(self):
+		admin_email = frappe.db.get_value("User", "Administrator", "email")
+		opp = frappe.new_doc("Opportunity")
+		opp.opportunity_owner = "Administrator"
+		self.assertEqual(opp.get_notification_email(), admin_email)
+
+		opp.opportunity_owner = None
+		self.assertIsNone(opp.get_notification_email())
+
 
 def make_opportunity_from_lead(company):
 	new_lead_email_id = f"new{random_string(5)}@example.com"

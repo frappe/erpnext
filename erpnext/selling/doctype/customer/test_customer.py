@@ -350,6 +350,15 @@ class TestCustomer(ERPNextTestSuite):
 		self.assertEqual(middle, "Michael")
 		self.assertEqual(last, "Doe")
 
+	def test_get_notification_email(self):
+		admin_email = frappe.db.get_value("User", "Administrator", "email")
+		customer = frappe.new_doc("Customer")
+		customer.account_manager = "Administrator"
+		self.assertEqual(customer.get_notification_email(), admin_email)
+
+		customer.account_manager = None
+		self.assertIsNone(customer.get_notification_email())
+
 
 def get_customer_dict(customer_name):
 	return {
