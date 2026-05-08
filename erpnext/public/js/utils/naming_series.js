@@ -319,58 +319,17 @@ erpnext.NamingSeriesTable = class NamingSeriesTable {
 erpnext.NamingSeriesController = class NamingSeriesController {
 	constructor(frm, opts = {}) {
 		this.frm = frm;
-		this.opts = opts;
 	}
-
-	refresh() {
-		this.toggle_master_naming();
-		this.load_master_series();
-		this.render_table();
-	}
-
-	toggle_master_naming() {
-		const display = this.is_naming_series();
-		this.frm.set_df_property(this.opts.details_field, "hidden", !display);
-		this.frm.set_df_property(this.opts.configure_button, "hidden", !display);
-	}
-
-	is_naming_series() {
-		return this.frm.doc[this.opts.master_naming_field] === "Naming Series";
-	}
-
-	render_table() {
-		let transactions = [...this.opts.transactions];
-		if (!this.is_naming_series()) {
-			transactions = transactions.filter((t) => t.doctype !== this.opts.master_doctype);
-		}
-
+	render_table(fieldname, transactions = []) {
 		this.frm._naming_series_table = new erpnext.NamingSeriesTable({
 			frm: this.frm,
-			fieldname: this.opts.table_field,
+			fieldname: fieldname,
 			transactions: transactions,
 		});
-
 		this.frm._naming_series_table.render();
 	}
 
-	on_master_naming_change() {
-		const display = this.is_naming_series();
-		this.frm.set_df_property(this.opts.details_field, "hidden", !display);
-		this.frm.set_df_property(this.opts.configure_button, "hidden", !display);
-
-		if (display) {
-			this.load_master_series();
-		} else {
-			this.frm.doc[this.opts.details_field] = "";
-			this.frm.refresh_field(this.opts.details_field);
-		}
-		this.render_table();
-	}
-
-	load_master_series() {
-		const doctype = this.opts.master_doctype;
-		const field = this.opts.details_field;
-
+	load_master_series(doctype, field) {
 		frappe.model.with_doctype(doctype, () => {
 			const meta = frappe.get_meta(doctype);
 			const naming_df = (meta?.fields || []).find((df) => df.fieldname === "naming_series");
