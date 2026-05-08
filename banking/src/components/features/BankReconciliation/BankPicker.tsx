@@ -28,7 +28,7 @@ const BankPicker = ({ className }: { className?: string }) => {
 
     const { banks, isLoading, error } = useGetBankAccounts(onLoadingSuccess)
 
-    const theme = useTheme()
+    const { themeValue } = useTheme()
 
     if (isLoading) {
         return null
@@ -44,7 +44,7 @@ const BankPicker = ({ className }: { className?: string }) => {
             )}
             style={{
                 scrollbarWidth: 'thin',
-                scrollbarColor: theme.theme === 'Dark' ? 'var(--surface-gray-2) var(--surface-gray-1)' : 'rgb(209 213 219) rgb(243 244 246)',
+                scrollbarColor: themeValue === 'Dark' ? 'var(--surface-gray-2) var(--surface-gray-1)' : 'rgb(209 213 219) rgb(243 244 246)',
             }}
         >
             {
