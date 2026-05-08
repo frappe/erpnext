@@ -1975,9 +1975,10 @@ class PaymentEntry(AccountsController):
 		# allocate amount based on `paid_amount` is changed or not
 		if not paid_amount_change:
 			for ref in self.references:
+				row_outstanding = ref.payment_term_outstanding if ref.payment_term else ref.outstanding_amount
 				allocated_positive_outstanding, allocated_negative_outstanding = _allocation_to_unset_pr_row(
 					ref,
-					ref.outstanding_amount,
+					row_outstanding,
 					allocated_positive_outstanding,
 					allocated_negative_outstanding,
 				)
@@ -2525,9 +2526,7 @@ def get_split_invoice_rows(invoice: dict, payment_term_template: str, exc_rates:
 					"voucher_type": invoice.voucher_type,
 					"posting_date": invoice.posting_date,
 					"invoice_amount": flt(invoice.invoice_amount),
-					"outstanding_amount": payment_term_outstanding
-					if payment_term_outstanding
-					else invoice.outstanding_amount,
+					"outstanding_amount": invoice.outstanding_amount,
 					"payment_term_outstanding": payment_term_outstanding,
 					"payment_amount": payment_term.payment_amount,
 					"payment_term": payment_term.payment_term,
