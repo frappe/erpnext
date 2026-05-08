@@ -68,6 +68,11 @@ def get_dimension_values(filters: frappe._dict) -> tuple[str | None, list]:
 			selected = get_dimension_with_children(dim_doctype, selected)
 		query = query.where(dim.name.isin(selected))
 
+	from frappe.desk.reportview import build_match_conditions
+
+	if match_conditions := build_match_conditions(dim_doctype):
+		query = query.where(Bracket(LiteralValue(match_conditions)))
+
 	# order by name
 	query = query.orderby(dim.name)
 
