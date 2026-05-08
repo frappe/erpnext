@@ -68,6 +68,7 @@ from erpnext.stock.doctype.item.item import get_uom_conv_factor
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 from erpnext.stock.get_item_details import (
 	_get_item_tax_template,
+	_get_item_tax_template_from_item_group,
 	get_conversion_factor,
 	get_item_details,
 	get_item_tax_map,
@@ -3647,6 +3648,10 @@ def set_child_tax_template_and_map(item, child_item, parent_doc):
 	}
 
 	child_item.item_tax_template = _get_item_tax_template(args, item.taxes)
+
+	if not child_item.get("item_tax_template"):
+		child_item.item_tax_template = _get_item_tax_template_from_item_group(args, item.item_group)
+
 	if child_item.get("item_tax_template"):
 		child_item.item_tax_rate = get_item_tax_map(
 			parent_doc.get("company"), child_item.item_tax_template, as_json=True
