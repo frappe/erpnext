@@ -40,6 +40,7 @@ class BankStatementImportLog(Document):
 			"Amount column has positive/negative values",
 			'Transaction type column has "CR"/"DR" values',
 			'Transaction type column has "Deposit"/"Withdrawal" values',
+			'Transaction type column has "C"/"D" values',
 		]
 		detected_date_format: DF.Data | None
 		detected_header_index: DF.Int
@@ -50,6 +51,10 @@ class BankStatementImportLog(Document):
 		number_of_transactions: DF.Int
 		start_date: DF.Date | None
 		status: DF.Literal["Not Started", "Completed"]
+		total_credit_transactions: DF.Int
+		total_credits: DF.Currency
+		total_debit_transactions: DF.Int
+		total_debits: DF.Currency
 	# end: auto-generated types
 
 	def before_validate(self):
@@ -111,6 +116,35 @@ class BankStatementImportLog(Document):
 		self.detected_date_format = date_format
 
 		self.set_closing_balance(transaction_rows)
+
+		self.set_total_debits_and_credits(transaction_rows=transaction_rows)
+
+	def set_total_debits_and_credits(self, transaction_rows: list):
+		"""
+		Given the transaction rows, try to set the total debits and credits
+		"""
+
+		total_debits = 0
+		total_credits = 0
+		debit_transactions = 0
+		credit_transactions = 0
+
+		final_transactions = self.get_final_transactions(transaction_rows=transaction_rows)
+
+		for transaction in final_transactions:
+			withdrawal = transaction.get("withdrawal", 0) or 0
+			deposit = transaction.get("deposit", 0) or 0
+			if withdrawal > 0:
+				total_debits += withdrawal
+				debit_transactions += 1
+			if deposit > 0:
+				total_credits += deposit
+				credit_transactions += 1
+
+		self.total_debits = total_debits
+		self.total_credits = total_credits
+		self.total_debit_transactions = debit_transactions
+		self.total_credit_transactions = credit_transactions
 
 	def get_data(self):
 		"""
@@ -190,12 +224,20 @@ class BankStatementImportLog(Document):
 
 		standard_variables = {
 			"Date": ["date", "transaction date"],
+			"Debit/Credit": [
+				"transaction type",
+				"cr/dr",
+				"dr/cr",
+				"debit/credit",
+				"credit/debit",
+				"debit / credit",
+				"credit / debit",
+			],
 			"Withdrawal": ["withdrawal", "debit"],
 			"Deposit": ["deposit", "credit"],
 			"Amount": ["amount"],
 			"Description": ["description", "particulars", "remarks", "narration", "detail", "reference"],
 			"Reference": ["reference", "ref", "tran id", "transaction id", "cheque", "check", "id", "chq"],
-			"Debit/Credit": ["transaction type", "cr/dr", "dr/cr", "debit/credit", "credit/debit"],
 			"Balance": ["balance"],
 		}
 
@@ -225,7 +267,7 @@ class BankStatementImportLog(Document):
 
 			for standard_variable, names in standard_variables.items():
 				if any(name in cell.lower().replace(".", "") for name in names):
-					if not column_mapping.get(standard_variable, None):
+					if column_mapping.get(standard_variable, None) is None:
 						column["maps_to"] = standard_variable
 
 						column_mapping[standard_variable] = idx
@@ -381,15 +423,10 @@ class BankStatementImportLog(Document):
 		self.end_date = getdate(statement_end_date)
 		self.closing_balance = get_float_amount(closing_balance)
 
-	def get_final_transactions(self):
+	def get_final_transactions(self, transaction_rows: list):
 		"""
 		Given the parameters detected in the statement (including overrides) try to get the final transactions
 		"""
-
-		raw_data = self.get_data()
-		transactions, transaction_starting_index, transaction_ending_index = self.get_transaction_rows(
-			raw_data
-		)
 
 		date_format = self.detected_date_format
 		amount_format = self.detected_amount_format
@@ -429,6 +466,14 @@ class BankStatementImportLog(Document):
 				else:
 					return abs(amount), 0
 
+			if amount_format == 'Transaction type column has "C"/"D" values':
+				transaction_type = transaction_row.get("debit_credit")
+				amount = get_float_amount(transaction_row.get("amount", "0"))
+				if transaction_type.lower().strip() == "c":
+					return 0, abs(amount)
+				else:
+					return abs(amount), 0
+
 			if amount_format == 'Transaction type column has "Deposit"/"Withdrawal" values':
 				transaction_type = transaction_row.get("debit_credit")
 				amount = get_float_amount(transaction_row.get("amount", "0"))
@@ -439,7 +484,7 @@ class BankStatementImportLog(Document):
 
 			return 0, 0
 
-		for transaction in transactions:
+		for transaction in transaction_rows:
 			date = transaction.get("date")
 
 			if isinstance(date, datetime):
@@ -457,7 +502,7 @@ class BankStatementImportLog(Document):
 				}
 			)
 
-		return final_transactions, raw_data
+		return final_transactions
 
 	@frappe.whitelist(methods=["POST"])
 	def insert_transactions(self):
@@ -482,7 +527,12 @@ class BankStatementImportLog(Document):
 
 		progress = 0
 
-		final_transactions, raw_data = self.get_final_transactions()
+		raw_data = self.get_data()
+		transaction_rows, transaction_starting_index, transaction_ending_index = self.get_transaction_rows(
+			raw_data
+		)
+
+		final_transactions = self.get_final_transactions(transaction_rows=transaction_rows)
 
 		total_transactions = len(final_transactions)
 
@@ -578,6 +628,7 @@ def get_file_properties(transactions: list):
 		"Amount column has positive/negative values": 0,
 		'Transaction type column has "CR"/"DR" values': 0,
 		'Transaction type column has "Deposit"/"Withdrawal" values': 0,
+		'Transaction type column has "C"/"D" values': 0,
 	}
 
 	for transaction in transactions:
@@ -607,11 +658,15 @@ def get_file_properties(transactions: list):
 				or "dr" in transaction.get("debit_credit", "").lower()
 			):
 				amount_format_frequency['Transaction type column has "CR"/"DR" values'] += 1
-			if (
+			elif (
 				"deposit" in transaction.get("debit_credit", "").lower()
 				or "withdrawal" in transaction.get("debit_credit", "").lower()
 			):
 				amount_format_frequency['Transaction type column has "Deposit"/"Withdrawal" values'] += 1
+			elif (transaction.get("debit_credit", "").lower().strip() == "c") or (
+				transaction.get("debit_credit", "").lower().strip() == "d"
+			):
+				amount_format_frequency['Transaction type column has "C"/"D" values'] += 1
 
 		# Else assume that the amount is expressed as positive/negative value
 		else:
@@ -638,6 +693,9 @@ def get_statement_details(statement_import_id: str):
 		"%y": "YY",
 		"%b": "MMM",
 		"%B": "MMMM",
+		"%H": "HH",
+		"%M": "mm",
+		"%S": "ss",
 	}
 	formatted_date_format = doc.detected_date_format
 
@@ -646,7 +704,13 @@ def get_statement_details(statement_import_id: str):
 
 	conflicting_transactions = check_for_conflicts(doc.bank_account, doc.start_date, doc.end_date)
 
-	final_transactions, raw_data = doc.get_final_transactions()
+	raw_data = doc.get_data()
+
+	transaction_rows, transaction_starting_index, transaction_ending_index = doc.get_transaction_rows(
+		raw_data
+	)
+
+	final_transactions = doc.get_final_transactions(transaction_rows=transaction_rows)
 
 	return {
 		"doc": doc,

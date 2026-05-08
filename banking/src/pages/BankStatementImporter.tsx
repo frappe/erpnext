@@ -66,7 +66,7 @@ const BankStatementImporter = () => {
         <div className="flex px-4">
             <div className="w-[52%]">
                 {error && <ErrorBanner error={error} />}
-                {createError && <ErrorBanner error={error} />}
+                {createError && <ErrorBanner error={createError} />}
                 <div className="py-2 flex flex-col gap-6">
                     <div className="flex flex-col gap-2">
                         <Label>{_("Company")}<span className="text-ink-red-3">*</span></Label>

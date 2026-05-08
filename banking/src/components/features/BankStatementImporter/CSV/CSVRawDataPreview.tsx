@@ -1,6 +1,6 @@
 import { Table, TableBody, TableCell, TableHead, TableRow } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
-import { ArrowDownRightIcon, ArrowUpRightIcon, BanknoteIcon, CalendarIcon, DollarSignIcon, FileTextIcon, ListIcon, ReceiptIcon } from "lucide-react"
+import { ArrowDownRightIcon, ArrowUpDownIcon, ArrowUpRightIcon, BanknoteIcon, CalendarIcon, DollarSignIcon, FileTextIcon, ListIcon, ReceiptIcon } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import _ from "@/lib/translate"
 import { GetStatementDetailsResponse } from "../import_utils"
@@ -43,7 +43,7 @@ const CSVRawDataPreview = ({ data }: { data: GetStatementDetailsResponse }) => {
                         className={cn({
                             // "bg-yellow-100": isHeaderRow,
                             // "hover:bg-yellow-100": isHeaderRow,
-                            "bg-green-50 hover:bg-green-50": isTransactionRow,
+                            "bg-green-50 hover:bg-green-50 dark:bg-green-700 dark:hover:bg-green-700": isTransactionRow,
                             "text-ink-gray-5/70": !isTransactionRow && !isHeaderRow,
                         })}>
                         {isHeaderRow ? <TableHead className="bg-yellow-100 hover:bg-yellow-100 dark:bg-yellow-400 text-center font-semibold text-ink-gray-8">
@@ -139,6 +139,10 @@ const ColumnHeaderIcon = ({ columnType }: { columnType?: StandardColumnTypes }) 
 
     if (columnType === 'Transaction Type') {
         return <ListIcon className="w-4 h-4" />
+    }
+
+    if (columnType === 'Debit/Credit') {
+        return <ArrowUpDownIcon className="w-4 h-4" />
     }
 
     return null

@@ -1,6 +1,6 @@
 import { BankStatementImportLogColumnMap } from './BankStatementImportLogColumnMap'
 
-export interface BankStatementImportLog {
+export interface BankStatementImportLog{
 	name: string
 	creation: string
 	modified: string
@@ -27,10 +27,18 @@ export interface BankStatementImportLog {
 	end_date?: string
 	/**	Closing Balance : Currency	*/
 	closing_balance?: number
+	/**	Total Debits : Currency	*/
+	total_debits?: number
+	/**	Total Credits : Currency	*/
+	total_credits?: number
+	/**	Total Debit Transactions : Int	*/
+	total_debit_transactions?: number
+	/**	Total Credit Transactions : Int	*/
+	total_credit_transactions?: number
 	/**	Detected Date Format : Data	*/
 	detected_date_format?: string
 	/**	Detected Amount Format : Select	*/
-	detected_amount_format?: "Separate columns for withdrawal and deposit" | 'Amount column has "CR"/"DR" values' | 'Amount column has positive/negative values' | 'Transaction type column has "CR"/"DR" values' | 'Transaction type column has "Deposit"/"Withdrawal" values'
+	detected_amount_format?: "Separate columns for withdrawal and deposit" | "Amount column has "CR"/"DR" values" | "Amount column has positive/negative values" | "Transaction type column has "CR"/"DR" values" | "Transaction type column has "Deposit"/"Withdrawal" values" | "Transaction type column has "C"/"D" values"
 	/**	Detected Header Index : Int	*/
 	detected_header_index?: number
 	/**	Detected Transaction Starting Index : Int	*/

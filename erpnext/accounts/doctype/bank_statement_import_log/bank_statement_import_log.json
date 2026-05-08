@@ -15,6 +15,12 @@
   "start_date",
   "end_date",
   "closing_balance",
+  "section_break_xomd",
+  "total_debits",
+  "total_credits",
+  "column_break_mydu",
+  "total_debit_transactions",
+  "total_credit_transactions",
   "statement_format_section",
   "detected_date_format",
   "detected_amount_format",
@@ -91,7 +97,7 @@
    "fieldname": "detected_amount_format",
    "fieldtype": "Select",
    "label": "Detected Amount Format",
-   "options": "Separate columns for withdrawal and deposit\nAmount column has \"CR\"/\"DR\" values\nAmount column has positive/negative values\nTransaction type column has \"CR\"/\"DR\" values\nTransaction type column has \"Deposit\"/\"Withdrawal\" values",
+   "options": "Separate columns for withdrawal and deposit\nAmount column has \"CR\"/\"DR\" values\nAmount column has positive/negative values\nTransaction type column has \"CR\"/\"DR\" values\nTransaction type column has \"Deposit\"/\"Withdrawal\" values\nTransaction type column has \"C\"/\"D\" values",
    "read_only": 1
   },
   {
@@ -136,12 +142,48 @@
    "label": "Currency",
    "options": "Currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_xomd",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "total_debits",
+   "fieldtype": "Currency",
+   "label": "Total Debits",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_credits",
+   "fieldtype": "Currency",
+   "label": "Total Credits",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_mydu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_debit_transactions",
+   "fieldtype": "Int",
+   "label": "Total Debit Transactions",
+   "non_negative": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_credit_transactions",
+   "fieldtype": "Int",
+   "label": "Total Credit Transactions",
+   "non_negative": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-05-06 18:50:39.742426",
+ "modified": "2026-05-08 17:55:25.615942",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Statement Import Log",

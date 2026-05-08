@@ -165,8 +165,16 @@ const StatementDetails = ({ data }: Props) => {
                             <TableCell>{data.doc.number_of_transactions}</TableCell>
                         </TableRow>
                         <TableRow>
+                            <TableHead>{_("Total Debits")}</TableHead>
+                            <TableCell><span className='font-numeric'>{formatCurrency(flt(data.doc.total_debits, 2), data.currency)}</span> <span className='text-ink-gray-5 font-sans'>({data.doc.total_debit_transactions} {data.doc.total_debit_transactions === 1 ? _("transaction") : _("transactions")})</span></TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableHead>{_("Total Credits")}</TableHead>
+                            <TableCell><span className='font-numeric'>{formatCurrency(flt(data.doc.total_credits, 2), data.currency)}</span> <span className='text-ink-gray-5 font-sans'>({data.doc.total_credit_transactions} {data.doc.total_credit_transactions === 1 ? _("transaction") : _("transactions")})</span></TableCell>
+                        </TableRow>
+                        <TableRow>
                             <TableHead>{_("Closing Balance as of {}", [formatDate(data.doc.end_date, "Do MMMM YYYY")])}</TableHead>
-                            <TableCell className='font-numeric'>{formatCurrency(flt(data.doc.closing_balance, 2))}</TableCell>
+                            <TableCell className='font-numeric'>{formatCurrency(flt(data.doc.closing_balance, 2), data.currency)}</TableCell>
                         </TableRow>
                         <TableRow>
                             <TableHead>

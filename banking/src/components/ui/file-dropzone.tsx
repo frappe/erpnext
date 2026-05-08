@@ -238,7 +238,7 @@ export const FileTypeIcon = ({
             case 'xls':
             case 'xlsx':
             case 'csv':
-                return 'text-green-700'
+                return 'text-green-700 dark:text-green-500'
             case 'ppt':
             case 'pptx':
                 return 'text-[#ED6C47]'
