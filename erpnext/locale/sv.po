@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-03 09:55+0000\n"
-"PO-Revision-Date: 2026-05-06 17:45\n"
+"PO-Revision-Date: 2026-05-08 18:02\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -4904,7 +4904,7 @@ msgstr "Artikel grupp är ett sätt att klassificera artiklar baserat på typer.
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:558
 msgid "An error has been appeared while reposting item valuation via {0}"
-msgstr "Fel har uppstått vid omregistrering av artikel värdering via {0}"
+msgstr "Fel har uppstått vid ombokning av artikel värdering via {0}"
 
 #: erpnext/public/js/controllers/buying.js:382
 #: erpnext/public/js/utils/sales_common.js:489
@@ -9249,7 +9249,7 @@ msgstr "Kan inte annullera eftersom godkänd Lager Post {0} finns redan"
 
 #: erpnext/stock/stock_ledger.py:177
 msgid "Cannot cancel the transaction. Reposting of item valuation on submission is not completed yet."
-msgstr "Kan inte annullera transaktion. Omregistrering av artikel värdering vid godkännande är inte klar ännu."
+msgstr "Kan inte annullera transaktion. Ombokning av artikel värdering vid godkännande är inte klar ännu."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:592
 msgid "Cannot cancel this Manufacturing Stock Entry as quantity of Finished Good produced cannot be less than quantity delivered in the linked Subcontracting Inward Order."
@@ -12100,7 +12100,7 @@ msgstr "Konvertera till Grupp"
 
 #: erpnext/stock/doctype/stock_reposting_settings/stock_reposting_settings.js:10
 msgid "Convert to Item Based Reposting"
-msgstr "Konvertera till Artikel Baserad Omregistrering"
+msgstr "Konvertera till Artikel Baserad Ombokning"
 
 #: erpnext/stock/doctype/warehouse/warehouse.js:52
 msgctxt "Warehouse"
@@ -12925,11 +12925,11 @@ msgstr "Skapa Mottagare Lista"
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.js:44
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.js:92
 msgid "Create Reposting Entries"
-msgstr "Skapa Omregistrering Poster"
+msgstr "Skapa Ombokning Poster"
 
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.js:58
 msgid "Create Reposting Entry"
-msgstr "Skapa Omregistrering Post"
+msgstr "Skapa Ombokning Post"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Sales Invoice'
@@ -15057,7 +15057,7 @@ msgstr "Standard Förskött Intäkt Konto"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Default Ageing Range"
-msgstr "Standard Ålder Intervall"
+msgstr "Standard Åldring Intervall"
 
 #. Label of the default_bom (Link) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -18194,7 +18194,7 @@ msgstr "Aktivera Lojalitet Poäng Program"
 #. Reposting Settings'
 #: erpnext/stock/doctype/stock_reposting_settings/stock_reposting_settings.json
 msgid "Enable Parallel Reposting"
-msgstr "Aktivera Parallell Omregistrering"
+msgstr "Aktivera Parallell Ombokning"
 
 #. Label of the enable_perpetual_inventory (Check) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -18211,7 +18211,7 @@ msgstr "Aktivera Provisoriskt Bokföring för ej Lager Artiklar"
 #. 'Stock Reposting Settings'
 #: erpnext/stock/doctype/stock_reposting_settings/stock_reposting_settings.json
 msgid "Enable Separate Reposting for GL"
-msgstr "Aktivera Separat Omregistrering för Bokföring Register"
+msgstr "Aktivera Separat Ombokning för Bokföring Register"
 
 #: erpnext/stock/report/stock_ledger/stock_ledger.js:122
 msgid "Enable Serial / Batch Bundle"
@@ -18669,7 +18669,7 @@ msgstr "Fel uppstod när uppskjuten bokföring för {0} bearbetades"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:554
 msgid "Error while reposting item valuation"
-msgstr "Fel uppstod vid omregistrering av artikel värdering"
+msgstr "Fel uppstod vid ombokning av artikel värdering"
 
 #: erpnext/assets/doctype/asset_depreciation_schedule/deppreciation_schedule_controller.py:175
 msgid "Error: This asset already has {0} depreciation periods booked.\n"
@@ -21011,7 +21011,7 @@ msgstr "Bokföring Register Bearbetning Status"
 #. Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "GL reposting index"
-msgstr "Bokföring Register Omregistrering Index"
+msgstr "Bokföring Register Ombokning Index"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
@@ -26497,7 +26497,7 @@ msgstr "Artikel Varianter uppdaterade"
 
 #: erpnext/stock/doctype/stock_reposting_settings/stock_reposting_settings.py:86
 msgid "Item Warehouse based reposting has been enabled."
-msgstr "Artikel Lager baserad omregistrering är aktiverad."
+msgstr "Artikel Lager baserad ombokning är aktiverad."
 
 #. Name of a DocType
 #: erpnext/stock/doctype/item_website_specification/item_website_specification.json
@@ -26634,7 +26634,7 @@ msgstr "Grund Pris räknas om med hänsyn till landad kostnad verifikat belopp"
 
 #: erpnext/stock/utils.py:543
 msgid "Item valuation reposting in progress. Report might show incorrect item valuation."
-msgstr "Artikel värdering omregistrering pågår. Rapport kan visa felaktig artikelvärde."
+msgstr "Artikel värdering ombokning pågår. Rapport kan visa felaktig artikelvärde."
 
 #: erpnext/stock/doctype/item/item.py:1026
 msgid "Item variant {0} exists with same attributes"
@@ -27825,7 +27825,7 @@ msgstr "Gräns Överskriden"
 #. Reposting Settings'
 #: erpnext/stock/doctype/stock_reposting_settings/stock_reposting_settings.json
 msgid "Limit timeslot for Stock Reposting"
-msgstr "Begränsa tid för Lager Omregistrering"
+msgstr "Begränsa tid för Lager Ombokning"
 
 #. Description of the 'Short Name' (Data) field in DocType 'Manufacturer'
 #: erpnext/stock/doctype/manufacturer/manufacturer.json
@@ -31270,7 +31270,7 @@ msgstr "Antal Interaktioner"
 #. Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "No of Items to Repost"
-msgstr "Antal Artiklar att Återbokföra"
+msgstr "Antal Artiklar att Omboka"
 
 #. Label of the no_of_months_exp (Int) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -31286,7 +31286,7 @@ msgstr "Antal Månader"
 #. Reposting Settings'
 #: erpnext/stock/doctype/stock_reposting_settings/stock_reposting_settings.json
 msgid "No of Parallel Reposting (Per Item)"
-msgstr "Antal Parallell Bokföring (Per Artikel)"
+msgstr "Antal Parallell Ombokning (Per Artikel)"
 
 #. Label of the no_of_shares (Int) field in DocType 'Share Balance'
 #. Label of the no_of_shares (Int) field in DocType 'Share Transfer'
@@ -31691,7 +31691,7 @@ msgstr "Avisera Annan"
 #. Reposting Settings'
 #: erpnext/stock/doctype/stock_reposting_settings/stock_reposting_settings.json
 msgid "Notify Reposting Error to Role"
-msgstr "Avisera Omregistrering fel till Roll"
+msgstr "Avisera Ombokning fel till Roll"
 
 #. Label of the notify_supplier (Check) field in DocType 'Supplier Scorecard'
 #. Label of the notify_supplier (Check) field in DocType 'Supplier Scorecard
@@ -36093,7 +36093,7 @@ msgstr "Välj 'Aktivera Serie och Parti Nummer för Artikel' i {0} för att skap
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:562
 msgid "Please check the error message and take necessary actions to fix the error and then restart the reposting again."
-msgstr "Kontrollera felmeddelande och vidta nödvändiga åtgärder för att åtgärda fel och starta sedan omregistrering igen."
+msgstr "Kontrollera felmeddelande och vidta nödvändiga åtgärder för att åtgärda fel och starta sedan ombokning igen."
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_connector.py:64
 msgid "Please check your Plaid client ID and secret values"
@@ -36670,7 +36670,7 @@ msgstr "Välj intervall för leverans schema"
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.js:135
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.js:73
 msgid "Please select a row to create a Reposting Entry"
-msgstr "Välj rad att skapa Omregistrering Post"
+msgstr "Välj rad att skapa Ombokning Post"
 
 #: erpnext/accounts/report/purchase_register/purchase_register.py:35
 msgid "Please select a supplier for fetching payments."
@@ -36751,12 +36751,12 @@ msgstr "Välj Artiklar att reservera"
 
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.js:75
 msgid "Please select only one row to create a Reposting Entry"
-msgstr "Vänligen välj endast en rad för att skapa Omregistrering Post"
+msgstr "Vänligen välj endast en rad för att skapa Ombokning Post"
 
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.js:59
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.js:107
 msgid "Please select rows to create Reposting Entries"
-msgstr "Välj rader för att skapa Omregistrering Poster"
+msgstr "Välj rader för att skapa Ombokning Poster"
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:98
 msgid "Please select the Company"
@@ -42444,7 +42444,7 @@ msgstr "Ombokning Framsteg"
 #. Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Reposting Reference"
-msgstr "Omregistrering Referens"
+msgstr "Ombokning Referens"
 
 #. Label of the vouchers_based_on_item_and_warehouse_section (Section Break)
 #. field in DocType 'Repost Item Valuation'
@@ -42471,11 +42471,11 @@ msgstr "Ombokning för Verifikat Slutfört {0}%"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:109
 msgid "Reposting has been started in the background."
-msgstr "Ombokning startad i bakgrunden."
+msgstr "Ombokning startad i bakgrund."
 
 #: erpnext/accounts/doctype/repost_payment_ledger/repost_payment_ledger.js:49
 msgid "Reposting in the background."
-msgstr "Omregistrering i bakgrund."
+msgstr "Ombokning i bakgrund."
 
 #. Label of the represents_company (Link) field in DocType 'Purchase Invoice'
 #. Label of the represents_company (Link) field in DocType 'Sales Invoice'
