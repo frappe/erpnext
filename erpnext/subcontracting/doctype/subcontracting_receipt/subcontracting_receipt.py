@@ -12,7 +12,6 @@ from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
 
 import erpnext
 from erpnext.accounts.utils import get_account_currency
-from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -216,9 +215,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.create_raw_materials_supplied_or_received()
 
 	def validate_closed_subcontracting_order(self):
-		for item in self.items:
-			if item.subcontracting_order:
-				check_on_hold_or_closed_status("Subcontracting Order", item.subcontracting_order)
+		self.check_for_on_hold_or_closed_status("Subcontracting Order", "subcontracting_order")
 
 	def update_job_card(self):
 		for row in self.get("items"):

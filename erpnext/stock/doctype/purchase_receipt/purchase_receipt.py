@@ -16,7 +16,6 @@ from pypika import functions as fn
 import erpnext
 from erpnext.accounts.utils import get_account_currency
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
-from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.accounts_controller import merge_taxes
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_transaction
@@ -265,7 +264,7 @@ class PurchaseReceipt(BuyingController):
 		self.validate_cwip_accounts()
 		self.validate_provisional_expense_account()
 
-		self.check_on_hold_or_closed_status()
+		self.check_for_on_hold_or_closed_status("Purchase Order", "purchase_order")
 
 		if getdate(self.posting_date) > getdate(nowdate()):
 			throw(_("Posting Date cannot be future date"))
@@ -373,14 +372,6 @@ class PurchaseReceipt(BuyingController):
 		po_qty, po_warehouse = frappe.db.get_value("Purchase Order Item", po_detail, ["qty", "warehouse"])
 		return po_qty, po_warehouse
 
-	# Check for Closed status
-	def check_on_hold_or_closed_status(self):
-		check_list = []
-		for d in self.get("items"):
-			if d.meta.get_field("purchase_order") and d.purchase_order and d.purchase_order not in check_list:
-				check_list.append(d.purchase_order)
-				check_on_hold_or_closed_status("Purchase Order", d.purchase_order)
-
 	# on submit
 	def on_submit(self):
 		super().on_submit()
@@ -456,7 +447,7 @@ class PurchaseReceipt(BuyingController):
 	def on_cancel(self):
 		super().on_cancel()
 
-		self.check_on_hold_or_closed_status()
+		self.check_for_on_hold_or_closed_status("Purchase Order", "purchase_order")
 		# Check if Purchase Invoice has been submitted against current Purchase Order
 		submitted = frappe.db.sql(
 			"""select t1.name
