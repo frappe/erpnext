@@ -330,9 +330,9 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 					}
 				}
 
-				if (is_drop_ship && doc.status != "Delivered") {
+				if (is_drop_ship && !["Completed", "Delivered"].includes(doc.status)) {
 					this.frm.add_custom_button(
-						__("Delivered"),
+						__("Deliver (Dropship)"),
 						this.delivered_by_supplier.bind(this),
 						__("Status")
 					);
@@ -350,7 +350,12 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 			}
 			if (doc.status != "Closed") {
 				if (doc.status != "On Hold") {
-					if (flt(doc.per_received) < 100 && allow_receipt) {
+					if (
+						doc.items
+							.filter((item) => !item.delivered_by_supplier)
+							.some((item) => item.received_qty < item.qty) &&
+						allow_receipt
+					) {
 						this.frm.add_custom_button(
 							__("Purchase Receipt"),
 							() => {
@@ -694,7 +699,143 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 	}
 
 	delivered_by_supplier() {
-		this.frm.cscript.update_status("Deliver", "Delivered");
+		const data = this.frm.doc.items
+			.filter((item) => item.delivered_by_supplier == 1)
+			.map((item) => {
+				return {
+					__checked: item.qty > item.received_qty,
+					name: item.name,
+					item_code: item.item_code,
+					item_name: item.item_name,
+					qty: item.qty,
+					uom: item.uom,
+					delivered_qty: item.received_qty || 0,
+					qty_change: item.qty - item.received_qty,
+				};
+			});
+		const dialog = new frappe.ui.Dialog({
+			title: __("Set Dropship Items Delivered Quantity"),
+			size: "extra-large",
+			fields: [
+				{
+					fieldname: "items",
+					fieldtype: "Table",
+					data: data,
+					cannot_add_rows: true,
+					cannot_delete_rows: true,
+					fields: [
+						{
+							fieldname: "name",
+							fieldtype: "Data",
+							read_only: true,
+							hidden: 1,
+						},
+						{
+							fieldname: "item_code",
+							fieldtype: "Link",
+							options: "Item",
+							label: __("Item Code"),
+							in_list_view: 1,
+							read_only: true,
+						},
+						{
+							fieldname: "item_name",
+							fieldtype: "Data",
+							label: __("Item Name"),
+							in_list_view: 1,
+							read_only: true,
+						},
+						{
+							fieldname: "qty",
+							fieldtype: "Float",
+							label: __("Quantity"),
+							in_list_view: 1,
+							read_only: true,
+						},
+						{
+							fieldname: "uom",
+							fieldtype: "Data",
+							label: __("UOM"),
+							in_list_view: 1,
+							read_only: true,
+						},
+						{
+							fieldname: "delivered_qty",
+							fieldtype: "Float",
+							label: __("Delivered Qty"),
+							read_only: true,
+							in_list_view: 1,
+						},
+						{
+							fieldname: "qty_change",
+							fieldtype: "Float",
+							label: __("Qty Change"),
+							in_list_view: 1,
+							reqd: 1,
+						},
+					],
+				},
+			],
+			primary_action: (values) => {
+				const data = values.items.filter((item) => item.__checked);
+				if (!data.length) {
+					frappe.throw(__("Please select at least one item to update delivered quantity."));
+				}
+
+				data.forEach((item) => {
+					if (!item.qty_change) {
+						frappe.throw(
+							__(
+								"Item {0} has no changes in delivered quantity. Please unselect the row if you do not wish to update its quantity.",
+								[item.item_code.bold()]
+							)
+						);
+					}
+					if (item.qty_change < 0 && Math.abs(item.qty_change) > item.delivered_qty) {
+						frappe.throw(
+							__("Delivered Qty cannot be reduced by more than {0} for item {1}", [
+								item.delivered_qty,
+								item.item_code.bold(),
+							])
+						);
+					}
+					if (item.qty_change > 0 && item.delivered_qty + item.qty_change > item.qty) {
+						frappe.throw(
+							__("Delivered Qty cannot be increased by more than {0} for item {1}", [
+								item.qty - item.delivered_qty,
+								item.item_code.bold(),
+							])
+						);
+					}
+				});
+
+				data.forEach((item) => {
+					frappe.model.set_value(
+						"Purchase Order Item",
+						item.name,
+						"received_qty",
+						item.delivered_qty + item.qty_change
+					);
+				});
+
+				const frm = this.frm;
+				frm.dirty();
+				frm.save("Update", () => {
+					frappe.call({
+						doc: frm.doc,
+						method: "update_receiving_percentage",
+						callback: function (r) {
+							if (!r.exc) {
+								dialog.hide();
+								frappe.toast(__("Quantities updated successfully."));
+								frm.reload_doc();
+							}
+						},
+					});
+				});
+			},
+		});
+		dialog.show();
 	}
 
 	items_on_form_rendered() {
