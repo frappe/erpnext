@@ -581,12 +581,6 @@ class PurchaseOrder(BuyingController):
 	def is_against_pp(self):
 		return any(d.production_plan for d in self.items if d.production_plan)
 
-<<<<<<< HEAD
-	def set_received_qty_for_drop_ship_items(self):
-		for item in self.items:
-			if item.delivered_by_supplier == 1:
-				item.received_qty = item.qty
-
 	def update_reserved_qty_for_subcontract(self):
 		if self.is_old_subcontracting_flow:
 			for d in self.supplied_items:
@@ -594,9 +588,7 @@ class PurchaseOrder(BuyingController):
 					stock_bin = get_bin(d.rm_item_code, d.reserve_warehouse)
 					stock_bin.update_reserved_qty_for_sub_contracting(subcontract_doctype="Purchase Order")
 
-=======
 	@frappe.whitelist()
->>>>>>> db74360396 (feat: partial delivery in dropshipping (#54787))
 	def update_receiving_percentage(self):
 		total_qty, received_qty = 0.0, 0.0
 		for item in self.items:
