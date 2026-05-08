@@ -10,5 +10,11 @@ frappe.ui.form.on("Bank Transaction Rule", {
 				},
 			};
 		});
+
+		frm.set_intro(
+			__(
+				"Go to the <a href='/banking' target='_blank' style='text-decoration: underline;'>Banking module</a> to setup this rule."
+			)
+		);
 	},
 });
