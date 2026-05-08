@@ -137,7 +137,7 @@ const ReconcileProgress = () => {
             <Progress
                 value={progress}
                 max={100}
-                size="lg"
+                size="md"
                 label="Progress"
                 hint
                 hintText={`${reconciledCount} / ${totalCount} ${_("reconciled")}`} />
