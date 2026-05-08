@@ -4,7 +4,7 @@ import { KeyboardMetaKeyIcon } from '@/components/ui/keyboard-keys'
 import { SettingsPanelDescription, SettingsPanelTitle, SettingsPanelHeader, SettingsPanelContent } from '@/components/ui/settings-dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import _ from '@/lib/translate'
-import { ArrowRightLeftIcon, HistoryIcon, LandmarkIcon, ReceiptIcon, SaveIcon, ZapIcon } from 'lucide-react'
+import { ArrowRightLeftIcon, HistoryIcon, LandmarkIcon, ReceiptIcon, SaveIcon, SettingsIcon, ZapIcon } from 'lucide-react'
 
 const Shortcuts = [
     {
@@ -52,7 +52,15 @@ const Shortcuts = [
         action: {
             icon: <HistoryIcon />,
             label: _("Reconciliation History"),
-            description: _("View all reconciliation actions taken in this session and undo them if needed")
+            description: _("View all reconciliation actions taken in this session")
+        }
+    },
+    {
+        shortcut: <KbdGroup><Kbd><KeyboardMetaKeyIcon /></Kbd><Kbd>⇧</Kbd><Kbd>G</Kbd></KbdGroup>,
+        action: {
+            icon: <SettingsIcon />,
+            label: _("Settings"),
+            description: _("Open the settings dialog")
         }
     }
 ]
@@ -92,7 +100,7 @@ const KeyboardShortcuts = () => {
                                         </Badge>
                                     </TableCell>
                                     <TableCell>
-                                        <p className='text-p-sm text-ink-gray-6'>{shortcut.action.description}</p>
+                                        <p className='text-p-sm text-ink-gray-6 text-wrap'>{shortcut.action.description}</p>
                                     </TableCell>
                                 </TableRow>
                             ))}

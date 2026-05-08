@@ -15,10 +15,19 @@ import { useState } from 'react'
 import { Preferences } from './Preferences'
 import MatchingRules from './MatchingRules'
 import KeyboardShortcuts from './KeyboardShortcuts'
+import { useHotkeys } from 'react-hotkeys-hook'
 
 const Settings = () => {
 
     const [isOpen, setIsOpen] = useState(false)
+
+    useHotkeys('shift+meta+g', () => {
+        setIsOpen(x => !x)
+    }, {
+        enabled: true,
+        preventDefault: true,
+        enableOnFormTags: false
+    })
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
