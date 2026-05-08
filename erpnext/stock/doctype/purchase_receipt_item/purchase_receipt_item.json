@@ -106,9 +106,6 @@
   "rejected_serial_no",
   "column_break_tolu",
   "batch_no",
-  "subcontract_bom_section",
-  "include_exploded_items",
-  "bom",
   "item_weight_details",
   "weight_per_unit",
   "total_weight",
@@ -636,26 +633,6 @@
    "print_hide": 1
   },
   {
-   "depends_on": "eval:parent.is_old_subcontracting_flow",
-   "fieldname": "bom",
-   "fieldtype": "Link",
-   "label": "BOM",
-   "no_copy": 1,
-   "options": "BOM",
-   "print_hide": 1,
-   "read_only": 1,
-   "read_only_depends_on": "eval:!parent.is_old_subcontracting_flow"
-  },
-  {
-   "default": "0",
-   "depends_on": "eval:parent.is_subcontracted",
-   "fieldname": "include_exploded_items",
-   "fieldtype": "Check",
-   "label": "Include Exploded Items",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "billed_amt",
    "fieldtype": "Currency",
    "label": "Billed Amt",
@@ -1016,12 +993,6 @@
    "search_index": 1
   },
   {
-   "depends_on": "eval:parent.is_old_subcontracting_flow",
-   "fieldname": "subcontract_bom_section",
-   "fieldtype": "Section Break",
-   "label": "Subcontract BOM"
-  },
-  {
    "fieldname": "serial_no",
    "fieldtype": "Text",
    "label": "Serial No",
@@ -1149,7 +1120,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-29 16:01:34.154697",
+ "modified": "2026-05-04 10:52:43.188507",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

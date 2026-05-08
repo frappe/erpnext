@@ -11,6 +11,7 @@ from frappe.query_builder.functions import Count
 from frappe.utils import cint, date_diff, flt, get_datetime
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.valuation import round_off_if_near_zero
 
 Filters = frappe._dict
 
@@ -117,10 +118,14 @@ def get_range_age(filters: Filters, fifo_queue: list, to_date: str, item_dict: d
 				i *= 2
 				range_values[i] = flt(range_values[i] + qty, precision)
 				range_values[i + 1] = flt(range_values[i + 1] + stock_value, precision)
+				if range_values[i] == 0.0 and round_off_if_near_zero(range_values[i + 1], 2) == 0:
+					range_values[i + 1] = 0.0
 				break
 		else:
 			range_values[-2] = flt(range_values[-2] + qty, precision)
 			range_values[-1] = flt(range_values[-1] + stock_value, precision)
+			if range_values[-2] == 0.0 and round_off_if_near_zero(range_values[-1], 2) == 0:
+				range_values[-1] = 0.0
 
 	return range_values
 

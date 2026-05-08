@@ -3,7 +3,8 @@
 
 import json
 import re
-from unittest.mock import patch
+import sys
+from unittest.mock import MagicMock, patch
 
 import frappe
 from frappe.utils import add_days, nowdate
@@ -974,3 +975,1012 @@ class TestPaymentRequest(ERPNextTestSuite):
 				return_doc=True,
 				schedules=schedules,
 			)
+
+
+class TestPaymentRequestV2Gateway(ERPNextTestSuite):
+	"""Tests for PaymentController v2 gateway integration."""
+
+	def setUp(self):
+		"""Set up payment gateway fixtures for flow tests."""
+		for payment_gateway in payment_gateways:
+			if not frappe.db.get_value("Payment Gateway", payment_gateway["gateway"], "name"):
+				frappe.get_doc(payment_gateway).insert(ignore_permissions=True)
+		for method in payment_method:
+			if not frappe.db.get_value(
+				"Payment Gateway Account",
+				{"payment_gateway": method["payment_gateway"], "currency": method["currency"]},
+				"name",
+			):
+				frappe.get_doc(method).insert(ignore_permissions=True)
+
+	def _mock_payments_modules(self, is_v2_gateway_return_value):
+		"""Helper to mock both payments and payments.utils modules.
+
+		Python requires the parent module to be in sys.modules before importing
+		a child module. This helper ensures both are mocked properly.
+		"""
+		mock_payments = MagicMock()
+		mock_utils = MagicMock()
+		mock_utils.is_v2_gateway = MagicMock(return_value=is_v2_gateway_return_value)
+		mock_payments.utils = mock_utils
+		return {"payments": mock_payments, "payments.utils": mock_utils}, mock_utils
+
+	def test_is_v2_gateway_returns_false_for_none(self):
+		"""_is_v2_gateway returns False for None input."""
+		from erpnext.accounts.doctype.payment_request.payment_request import _is_v2_gateway
+
+		# Mock returns True, but is_v2_gateway(None) in payments.utils returns False
+		modules, mock_utils = self._mock_payments_modules(False)
+
+		with patch.dict(sys.modules, modules):
+			result = _is_v2_gateway(None)
+			self.assertFalse(result)
+			mock_utils.is_v2_gateway.assert_called_once_with(None)
+
+	def test_is_v2_gateway_returns_false_for_empty_string(self):
+		"""_is_v2_gateway returns False for empty string input."""
+		from erpnext.accounts.doctype.payment_request.payment_request import _is_v2_gateway
+
+		modules, mock_utils = self._mock_payments_modules(False)
+
+		with patch.dict(sys.modules, modules):
+			result = _is_v2_gateway("")
+			self.assertFalse(result)
+			mock_utils.is_v2_gateway.assert_called_once_with("")
+
+	def test_is_v2_gateway_returns_false_for_nonexistent_gateway(self):
+		"""_is_v2_gateway returns False for nonexistent gateway."""
+		from erpnext.accounts.doctype.payment_request.payment_request import _is_v2_gateway
+
+		modules, mock_utils = self._mock_payments_modules(False)
+
+		with patch.dict(sys.modules, modules):
+			result = _is_v2_gateway("NonExistentGateway12345")
+			self.assertFalse(result)
+			mock_utils.is_v2_gateway.assert_called_once_with("NonExistentGateway12345")
+
+	def test_is_v2_gateway_delegates_to_payments_util(self):
+		"""_is_v2_gateway delegates to payments.utils.is_v2_gateway."""
+		from erpnext.accounts.doctype.payment_request.payment_request import _is_v2_gateway
+
+		modules, mock_utils = self._mock_payments_modules(True)
+
+		with patch.dict(sys.modules, modules):
+			result = _is_v2_gateway("_Test Gateway")
+			self.assertTrue(result)
+			mock_utils.is_v2_gateway.assert_called_once_with("_Test Gateway")
+
+	def test_is_v2_gateway_returns_false_when_payments_util_returns_false(self):
+		"""_is_v2_gateway returns False when payments.utils.is_v2_gateway returns False."""
+		from erpnext.accounts.doctype.payment_request.payment_request import _is_v2_gateway
+
+		modules, _ = self._mock_payments_modules(False)
+
+		with patch.dict(sys.modules, modules):
+			result = _is_v2_gateway("_Test Gateway")
+			self.assertFalse(result)
+
+	def test_is_v2_gateway_catches_unexpected_exceptions(self):
+		"""_is_v2_gateway catches unexpected exceptions and returns False."""
+		from erpnext.accounts.doctype.payment_request.payment_request import _is_v2_gateway
+
+		mock_payments = MagicMock()
+		mock_utils = MagicMock()
+		mock_utils.is_v2_gateway = MagicMock(side_effect=RuntimeError("Unexpected error"))
+		mock_payments.utils = mock_utils
+		modules = {"payments": mock_payments, "payments.utils": mock_utils}
+
+		with patch.dict(sys.modules, modules):
+			# Should not raise, should return False
+			result = _is_v2_gateway("_Test Gateway")
+			self.assertFalse(result)
+
+	def test_get_tx_data_returns_required_fields(self):
+		"""get_tx_data returns all fields required by TxData."""
+		so = make_sales_order(currency="INR")
+
+		# Use make_payment_request to properly populate all mandatory fields
+		pr = make_payment_request(
+			dt="Sales Order",
+			dn=so.name,
+			recipient_id="test@example.com",
+			mute_email=True,
+			submit_doc=False,
+			return_doc=True,
+		)
+
+		tx_data = pr.get_tx_data()
+
+		# Verify all required TxData fields are present
+		self.assertIn("amount", tx_data)
+		self.assertIn("currency", tx_data)
+		self.assertIn("reference_doctype", tx_data)
+		self.assertIn("reference_docname", tx_data)
+		self.assertIn("payer_contact", tx_data)
+		self.assertIn("payer_address", tx_data)
+		self.assertIn("loyalty_points", tx_data)
+		self.assertIn("discount_amount", tx_data)
+
+		# Verify values - amount should come from get_request_amount()
+		self.assertEqual(tx_data.amount, pr.get_request_amount())
+		self.assertEqual(tx_data.currency, "INR")
+		self.assertEqual(tx_data.reference_doctype, "Payment Request")
+		self.assertEqual(tx_data.reference_docname, pr.name)
+
+	def test_get_tx_data_uses_request_amount_not_grand_total(self):
+		"""get_tx_data should use get_request_amount() to support partial payments."""
+		so = make_sales_order(currency="INR", qty=1, rate=1000)
+
+		# Use make_payment_request to properly populate all mandatory fields
+		pr = make_payment_request(
+			dt="Sales Order",
+			dn=so.name,
+			recipient_id="test@example.com",
+			mute_email=True,
+			submit_doc=False,
+			return_doc=True,
+		)
+
+		# Mock get_request_amount to return a partial amount
+		with patch.object(pr, "get_request_amount", return_value=500.0):
+			tx_data = pr.get_tx_data()
+			# Amount should be the partial request amount, not grand_total
+			self.assertEqual(tx_data.amount, 500.0)
+			self.assertNotEqual(tx_data.amount, pr.grand_total)
+
+	def test_get_party_contact_and_address_returns_whitelisted_fields_only(self):
+		"""_get_party_contact_and_address should only return payment-relevant fields."""
+		# Create a customer with contact and address to ensure assertions run
+		customer = frappe.get_doc("Customer", "_Test Customer")
+
+		# Create or get test contact
+		contact_name = f"_Test Contact for {customer.name}"
+		if not frappe.db.exists("Contact", contact_name):
+			test_contact = frappe.get_doc(
+				{
+					"doctype": "Contact",
+					"first_name": "Test",
+					"last_name": "Contact",
+					"email_id": "test.contact@example.com",
+					"phone": "+1234567890",
+				}
+			)
+			test_contact.insert(ignore_permissions=True)
+			contact_name = test_contact.name
+
+		# Create or get test address
+		address_name = f"_Test Address for {customer.name}"
+		if not frappe.db.exists("Address", {"address_title": address_name}):
+			test_address = frappe.get_doc(
+				{
+					"doctype": "Address",
+					"address_title": address_name,
+					"address_type": "Billing",
+					"address_line1": "123 Test Street",
+					"city": "Test City",
+					"country": "United States",
+				}
+			)
+			test_address.insert(ignore_permissions=True)
+			address_name = test_address.name
+
+		# Link contact and address to customer
+		customer.customer_primary_contact = contact_name
+		customer.customer_primary_address = address_name
+		customer.save(ignore_permissions=True)
+
+		pr = frappe.new_doc("Payment Request")
+		pr.party_type = "Customer"
+		pr.party = customer.name
+
+		contact, address = pr._get_party_contact_and_address()
+
+		# Assertions should always run now that we've ensured contact/address exist
+		self.assertTrue(contact, "Contact should be returned")
+		allowed_contact_fields = {"first_name", "last_name", "email_id", "email", "phone"}
+		self.assertTrue(set(contact.keys()).issubset(allowed_contact_fields))
+		# Verify internal/sensitive fields are NOT present
+		self.assertNotIn("owner", contact)
+		self.assertNotIn("creation", contact)
+		self.assertNotIn("modified", contact)
+		self.assertNotIn("doctype", contact)
+
+		self.assertTrue(address, "Address should be returned")
+		allowed_address_fields = {"address_line1", "address_line2", "city", "state", "pincode", "country"}
+		self.assertTrue(set(address.keys()).issubset(allowed_address_fields))
+		# Verify internal/sensitive fields are NOT present
+		self.assertNotIn("owner", address)
+		self.assertNotIn("creation", address)
+		self.assertNotIn("modified", address)
+		self.assertNotIn("doctype", address)
+
+	def test_get_party_contact_and_address_handles_missing_party(self):
+		"""_get_party_contact_and_address returns empty dicts for missing party."""
+		pr = frappe.new_doc("Payment Request")
+		pr.party_type = None
+		pr.party = None
+
+		contact, address = pr._get_party_contact_and_address()
+
+		self.assertEqual(contact, {})
+		self.assertEqual(address, {})
+
+	def test_get_party_contact_and_address_handles_deleted_party(self):
+		"""_get_party_contact_and_address handles deleted party gracefully."""
+		pr = frappe.new_doc("Payment Request")
+		pr.party_type = "Customer"
+		pr.party = "NonExistentCustomer12345"
+
+		contact, address = pr._get_party_contact_and_address()
+
+		self.assertEqual(contact, {})
+		self.assertEqual(address, {})
+
+	def test_v2_gateway_uses_process_v2_gateway(self):
+		"""v2 gateways should use _process_v2_gateway flow, not legacy flow."""
+		so = make_sales_order(currency="INR")
+
+		with patch(
+			"erpnext.accounts.doctype.payment_request.payment_request._is_v2_gateway",
+			return_value=True,
+		):
+			with patch(
+				"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest._process_v2_gateway"
+			) as mock_process_v2:
+				with patch(
+					"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.set_payment_request_url"
+				) as mock_set_url:
+					with patch(
+						"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.send_email"
+					):
+						make_payment_request(
+							dt="Sales Order",
+							dn=so.name,
+							recipient_id="test@example.com",
+							payment_gateway_account="_Test Gateway - INR - _TC",
+							mute_email=True,
+							submit_doc=True,
+							return_doc=True,
+						)
+
+						# v2 flow should be called
+						mock_process_v2.assert_called_once()
+						# Legacy flow should NOT be called
+						mock_set_url.assert_not_called()
+
+	def test_v1_gateway_uses_legacy_flow(self):
+		"""v1 gateways should use set_payment_request_url flow, not v2 flow."""
+		so = make_sales_order(currency="INR")
+
+		with patch(
+			"erpnext.accounts.doctype.payment_request.payment_request._is_v2_gateway",
+			return_value=False,
+		):
+			with patch(
+				"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.set_payment_request_url"
+			) as mock_set_url:
+				with patch(
+					"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest._process_v2_gateway"
+				) as mock_process_v2:
+					with patch(
+						"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.get_payment_url",
+						return_value=PAYMENT_URL,
+					):
+						with patch(
+							"erpnext.accounts.doctype.payment_request.payment_request._get_payment_gateway_controller"
+						):
+							with patch(
+								"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.send_email"
+							):
+								make_payment_request(
+									dt="Sales Order",
+									dn=so.name,
+									recipient_id="test@example.com",
+									payment_gateway_account="_Test Gateway - INR - _TC",
+									mute_email=True,
+									submit_doc=True,
+									return_doc=True,
+								)
+
+								# Legacy flow should be called
+								mock_set_url.assert_called_once()
+								# v2 flow should NOT be called
+								mock_process_v2.assert_not_called()
+
+	# ============================================================================
+	# Codecov Gap Tests
+	# ============================================================================
+
+	def test_is_v2_gateway_returns_false_when_payments_not_installed(self):
+		"""_is_v2_gateway returns False when payments app raises ValidationError."""
+		from erpnext.accounts.doctype.payment_request.payment_request import _is_v2_gateway
+
+		# Simulate payments app not installed (ValidationError from import guard)
+		with patch(
+			"erpnext.accounts.doctype.payment_request.payment_request.payment_app_import_guard",
+			side_effect=frappe.ValidationError("Payments app not installed"),
+		):
+			result = _is_v2_gateway("_Test Gateway")
+			self.assertFalse(result)
+
+	def test_process_v2_gateway_handles_initiate_failure(self):
+		"""_process_v2_gateway shows user-friendly error on initiate failure."""
+		so = make_sales_order(currency="INR")
+
+		pr = make_payment_request(
+			dt="Sales Order",
+			dn=so.name,
+			recipient_id="test@example.com",
+			payment_gateway_account="_Test Gateway - INR - _TC",
+			mute_email=True,
+			submit_doc=False,
+			return_doc=True,
+		)
+		# Ensure payment_gateway is set (make_payment_request may not populate it)
+		pr.payment_gateway = "_Test Gateway"
+
+		# Mock PaymentController to raise an exception
+		mock_controller = MagicMock()
+		mock_controller.initiate = MagicMock(side_effect=Exception("Gateway connection failed"))
+
+		with patch("erpnext.accounts.doctype.payment_request.payment_request.payment_app_import_guard"):
+			with patch.dict(
+				sys.modules,
+				{
+					"payments": MagicMock(),
+					"payments.controllers": MagicMock(PaymentController=mock_controller),
+				},
+			):
+				with self.assertRaises(frappe.ValidationError) as context:
+					pr._process_v2_gateway()
+
+				self.assertIn("Failed to initiate payment", str(context.exception))
+				self.assertIn("_Test Gateway", str(context.exception))
+
+	def test_process_v2_gateway_handles_none_psl(self):
+		"""_process_v2_gateway throws when PaymentController returns None PSL."""
+		so = make_sales_order(currency="INR")
+
+		pr = make_payment_request(
+			dt="Sales Order",
+			dn=so.name,
+			recipient_id="test@example.com",
+			payment_gateway_account="_Test Gateway - INR - _TC",
+			mute_email=True,
+			submit_doc=False,
+			return_doc=True,
+		)
+
+		# Mock PaymentController.initiate to return (controller, None)
+		mock_controller_class = MagicMock()
+		mock_controller_class.initiate = MagicMock(return_value=(MagicMock(), None))
+
+		with patch("erpnext.accounts.doctype.payment_request.payment_request.payment_app_import_guard"):
+			with patch.dict(
+				sys.modules,
+				{
+					"payments": MagicMock(),
+					"payments.controllers": MagicMock(PaymentController=mock_controller_class),
+				},
+			):
+				with self.assertRaises(frappe.ValidationError) as context:
+					pr._process_v2_gateway()
+
+				self.assertIn("failed to create a payment session", str(context.exception))
+
+	def test_process_v2_gateway_sets_payment_session_log(self):
+		"""_process_v2_gateway sets payment_session_log field when it exists."""
+		so = make_sales_order(currency="INR")
+
+		pr = make_payment_request(
+			dt="Sales Order",
+			dn=so.name,
+			recipient_id="test@example.com",
+			payment_gateway_account="_Test Gateway - INR - _TC",
+			mute_email=True,
+			submit_doc=False,
+			return_doc=True,
+		)
+
+		# Add payment_session_log attribute to simulate custom field
+		pr.payment_session_log = None
+
+		mock_controller_class = MagicMock()
+		mock_controller_class.initiate = MagicMock(return_value=(MagicMock(), "PSL-00001"))
+		mock_controller_class.get_payment_url = MagicMock(return_value="https://pay.example.com/xyz")
+
+		with patch("erpnext.accounts.doctype.payment_request.payment_request.payment_app_import_guard"):
+			with patch.dict(
+				sys.modules,
+				{
+					"payments": MagicMock(),
+					"payments.controllers": MagicMock(PaymentController=mock_controller_class),
+				},
+			):
+				pr._process_v2_gateway()
+
+				self.assertEqual(pr.payment_session_log, "PSL-00001")
+				self.assertEqual(pr.payment_url, "https://pay.example.com/xyz")
+
+	def test_get_party_contact_and_address_supplier(self):
+		"""_get_party_contact_and_address works for Supplier party type."""
+		# Get or create test supplier
+		supplier_name = "_Test Supplier"
+		if not frappe.db.exists("Supplier", supplier_name):
+			frappe.get_doc(
+				{
+					"doctype": "Supplier",
+					"supplier_name": supplier_name,
+					"supplier_group": "All Supplier Groups",
+				}
+			).insert(ignore_permissions=True)
+
+		supplier = frappe.get_doc("Supplier", supplier_name)
+		original_contact = supplier.supplier_primary_contact
+		original_address = supplier.supplier_primary_address
+
+		# Create test contact for supplier (always recreate to ensure known state)
+		contact_name = "_Test PR Supplier Contact"
+		if frappe.db.exists("Contact", contact_name):
+			frappe.delete_doc("Contact", contact_name, force=True)
+
+		test_contact = frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": "SupplierTest",
+				"last_name": "Contact",
+				# Email and phone are set via child tables in Frappe
+				"email_ids": [{"email_id": "supplier.test@example.com", "is_primary": 1}],
+				"phone_nos": [{"phone": "+9876543210", "is_primary_phone": 1}],
+			}
+		)
+		test_contact.insert(ignore_permissions=True)
+
+		# Create test address for supplier (always recreate to ensure known state)
+		address_title = "_Test PR Supplier Address"
+		existing_address = frappe.db.get_value("Address", {"address_title": address_title}, "name")
+		if existing_address:
+			frappe.delete_doc("Address", existing_address, force=True)
+
+		test_address = frappe.get_doc(
+			{
+				"doctype": "Address",
+				"address_title": address_title,
+				"address_type": "Billing",
+				"address_line1": "456 Supplier Street",
+				"city": "Supplier City",
+				"country": "United States",
+			}
+		)
+		test_address.insert(ignore_permissions=True)
+
+		try:
+			# Link contact and address to supplier
+			supplier.db_set("supplier_primary_contact", test_contact.name, update_modified=False)
+			supplier.db_set("supplier_primary_address", test_address.name, update_modified=False)
+
+			pr = frappe.new_doc("Payment Request")
+			pr.party_type = "Supplier"
+			pr.party = supplier.name
+
+			contact, address = pr._get_party_contact_and_address()
+
+			self.assertTrue(contact, "Contact should be returned for Supplier")
+			self.assertEqual(contact.get("first_name"), "SupplierTest")
+			self.assertEqual(contact.get("email_id"), "supplier.test@example.com")
+
+			self.assertTrue(address, "Address should be returned for Supplier")
+			self.assertEqual(address.get("address_line1"), "456 Supplier Street")
+			self.assertEqual(address.get("city"), "Supplier City")
+		finally:
+			# Restore original values
+			supplier.db_set("supplier_primary_contact", original_contact, update_modified=False)
+			supplier.db_set("supplier_primary_address", original_address, update_modified=False)
+			frappe.delete_doc("Contact", test_contact.name, force=True)
+			frappe.delete_doc("Address", test_address.name, force=True)
+
+	def test_get_party_contact_and_address_unsupported_party_type(self):
+		"""_get_party_contact_and_address returns empty dicts for unsupported party types."""
+		pr = frappe.new_doc("Payment Request")
+		pr.party_type = "Lead"  # Not in field_map (only Customer/Supplier supported)
+		pr.party = "some-lead-name"
+
+		# Mock the party lookup to avoid DoesNotExistError for Lead
+		with patch.object(frappe, "get_doc", return_value=MagicMock()):
+			contact, address = pr._get_party_contact_and_address()
+
+		self.assertEqual(contact, {})
+		self.assertEqual(address, {})
+
+	def test_get_party_contact_and_address_deleted_contact(self):
+		"""_get_party_contact_and_address handles deleted contact gracefully."""
+		customer = frappe.get_doc("Customer", "_Test Customer")
+
+		# Set a nonexistent contact name
+		original_contact = customer.customer_primary_contact
+		customer.db_set("customer_primary_contact", "NonExistentContact12345", update_modified=False)
+
+		try:
+			pr = frappe.new_doc("Payment Request")
+			pr.party_type = "Customer"
+			pr.party = customer.name
+
+			contact, _address = pr._get_party_contact_and_address()
+
+			# Should return empty dict for contact, not raise
+			self.assertEqual(contact, {})
+		finally:
+			# Restore original contact
+			customer.db_set("customer_primary_contact", original_contact, update_modified=False)
+
+	def test_get_party_contact_and_address_deleted_address(self):
+		"""_get_party_contact_and_address handles deleted address gracefully."""
+		customer = frappe.get_doc("Customer", "_Test Customer")
+
+		# Set a nonexistent address name
+		original_address = customer.customer_primary_address
+		customer.db_set("customer_primary_address", "NonExistentAddress12345", update_modified=False)
+
+		try:
+			pr = frappe.new_doc("Payment Request")
+			pr.party_type = "Customer"
+			pr.party = customer.name
+
+			_contact, address = pr._get_party_contact_and_address()
+
+			# Should return empty dict for address, not raise
+			self.assertEqual(address, {})
+		finally:
+			# Restore original address
+			customer.db_set("customer_primary_address", original_address, update_modified=False)
+
+	# ============================================================================
+	# before_submit Flow Gap Tests
+	# ============================================================================
+
+	def test_v2_gateway_sends_email_when_not_muted(self):
+		"""v2 gateways should send email when mute_email is False."""
+		so = make_sales_order(currency="INR")
+
+		with patch(
+			"erpnext.accounts.doctype.payment_request.payment_request._is_v2_gateway",
+			return_value=True,
+		):
+			with patch(
+				"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest._process_v2_gateway"
+			):
+				with patch(
+					"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.send_email"
+				) as mock_send_email:
+					with patch(
+						"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.make_communication_entry"
+					) as mock_make_comm:
+						make_payment_request(
+							dt="Sales Order",
+							dn=so.name,
+							recipient_id="test@example.com",
+							payment_gateway_account="_Test Gateway - INR - _TC",
+							mute_email=False,  # Email should be sent
+							submit_doc=True,
+							return_doc=True,
+						)
+
+						mock_send_email.assert_called_once()
+						mock_make_comm.assert_called_once()
+
+	def test_v1_phone_payment_skips_email(self):
+		"""Phone payment channel should skip email sending entirely."""
+		so = make_sales_order(currency="INR")
+
+		with patch(
+			"erpnext.accounts.doctype.payment_request.payment_request._is_v2_gateway",
+			return_value=False,
+		):
+			with patch(
+				"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.request_phone_payment"
+			) as mock_phone:
+				with patch(
+					"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.send_email"
+				) as mock_send_email:
+					with patch(
+						"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.make_communication_entry"
+					) as mock_make_comm:
+						pr = make_payment_request(
+							dt="Sales Order",
+							dn=so.name,
+							recipient_id="test@example.com",
+							payment_gateway_account="_Test Gateway - INR - _TC",
+							mute_email=False,
+							submit_doc=False,
+							return_doc=True,
+						)
+						pr.payment_channel = "Phone"
+						pr.submit()
+
+						# Phone payment should be called
+						mock_phone.assert_called_once()
+						# Email should NOT be sent for phone payments
+						mock_send_email.assert_not_called()
+						mock_make_comm.assert_not_called()
+
+	def test_no_payment_gateway_skips_payment_processing(self):
+		"""Payment request without gateway should skip all payment processing."""
+		so = make_sales_order(currency="INR")
+
+		with patch("erpnext.accounts.doctype.payment_request.payment_request._is_v2_gateway") as mock_is_v2:
+			with patch(
+				"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest._process_v2_gateway"
+			) as mock_v2:
+				with patch(
+					"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.set_payment_request_url"
+				) as mock_v1:
+					pr = make_payment_request(
+						dt="Sales Order",
+						dn=so.name,
+						recipient_id="test@example.com",
+						mute_email=True,
+						submit_doc=False,
+						return_doc=True,
+					)
+					# Clear the payment gateway
+					pr.payment_gateway = None
+					pr.payment_gateway_account = None
+					pr.submit()
+
+					# Neither v1 nor v2 flow should be called
+					mock_is_v2.assert_not_called()
+					mock_v2.assert_not_called()
+					mock_v1.assert_not_called()
+
+	def test_outward_payment_request_skips_gateway_processing(self):
+		"""Outward payment requests should not trigger v1/v2 gateway flows."""
+		po = create_purchase_order()
+
+		with patch("erpnext.accounts.doctype.payment_request.payment_request._is_v2_gateway") as mock_is_v2:
+			with patch(
+				"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest._process_v2_gateway"
+			) as mock_v2:
+				with patch(
+					"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.set_payment_request_url"
+				) as mock_v1:
+					pr = make_payment_request(
+						dt="Purchase Order",
+						dn=po.name,
+						recipient_id="test@example.com",
+						mute_email=True,
+						submit_doc=True,
+						return_doc=True,
+					)
+
+					# Outward requests should not call gateway processing
+					mock_is_v2.assert_not_called()
+					mock_v2.assert_not_called()
+					mock_v1.assert_not_called()
+					self.assertEqual(pr.payment_request_type, "Outward")
+					self.assertEqual(pr.status, "Initiated")
+
+	def test_flags_mute_email_suppresses_communication(self):
+		"""flags.mute_email should suppress email even when mute_email field is False."""
+		so = make_sales_order(currency="INR")
+
+		with patch(
+			"erpnext.accounts.doctype.payment_request.payment_request._is_v2_gateway",
+			return_value=True,
+		):
+			with patch(
+				"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest._process_v2_gateway"
+			):
+				with patch(
+					"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.send_email"
+				) as mock_send_email:
+					pr = make_payment_request(
+						dt="Sales Order",
+						dn=so.name,
+						recipient_id="test@example.com",
+						payment_gateway_account="_Test Gateway - INR - _TC",
+						mute_email=False,  # Field says don't mute
+						submit_doc=False,
+						return_doc=True,
+					)
+					pr.flags.mute_email = True  # But flag says mute
+					pr.submit()
+
+					# Email should NOT be sent because of flags.mute_email
+					mock_send_email.assert_not_called()
+
+	# ============================================================================
+	# _get_party_contact_and_address Edge Case Tests
+	# ============================================================================
+
+	def test_contact_uses_mobile_no_fallback(self):
+		"""Contact with mobile_no but no phone should use mobile_no as fallback."""
+		customer = frappe.get_doc("Customer", "_Test Customer")
+
+		# Create contact with only mobile_no (via phone_nos child table)
+		contact_name = "_Test Contact Mobile Only"
+		if frappe.db.exists("Contact", contact_name):
+			frappe.delete_doc("Contact", contact_name, force=True)
+
+		test_contact = frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": "Mobile",
+				"last_name": "Only",
+				"email_id": "mobile.only@example.com",
+				# Phone numbers in Frappe are set via the phone_nos child table
+				# is_primary_mobile_no sets the mobile_no field, is_primary_phone sets phone
+				"phone_nos": [{"phone": "+1999888777", "is_primary_mobile_no": 1}],
+			}
+		)
+		test_contact.insert(ignore_permissions=True)
+
+		original_contact = customer.customer_primary_contact
+		customer.db_set("customer_primary_contact", test_contact.name, update_modified=False)
+
+		try:
+			pr = frappe.new_doc("Payment Request")
+			pr.party_type = "Customer"
+			pr.party = customer.name
+
+			contact, _ = pr._get_party_contact_and_address()
+
+			# Should fall back to mobile_no since phone is empty
+			self.assertEqual(contact.get("phone"), "+1999888777")
+		finally:
+			customer.db_set("customer_primary_contact", original_contact, update_modified=False)
+			frappe.delete_doc("Contact", test_contact.name, force=True)
+
+	def test_contact_with_no_email_returns_empty_string(self):
+		"""Contact without email_id should return empty string, not None."""
+		customer = frappe.get_doc("Customer", "_Test Customer")
+
+		# Create contact without email
+		contact_name = "_Test Contact No Email"
+		if frappe.db.exists("Contact", contact_name):
+			frappe.delete_doc("Contact", contact_name, force=True)
+
+		test_contact = frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": "No",
+				"last_name": "Email",
+				"email_id": "",  # No email
+				"phone": "+1234567890",
+			}
+		)
+		test_contact.insert(ignore_permissions=True)
+
+		original_contact = customer.customer_primary_contact
+		customer.db_set("customer_primary_contact", test_contact.name, update_modified=False)
+
+		try:
+			pr = frappe.new_doc("Payment Request")
+			pr.party_type = "Customer"
+			pr.party = customer.name
+
+			contact, _ = pr._get_party_contact_and_address()
+
+			# Should be empty string, not None
+			self.assertEqual(contact.get("email_id"), "")
+			self.assertEqual(contact.get("email"), "")
+			self.assertIsNotNone(contact.get("email_id"))
+		finally:
+			customer.db_set("customer_primary_contact", original_contact, update_modified=False)
+			frappe.delete_doc("Contact", test_contact.name, force=True)
+
+	def test_address_with_missing_optional_fields(self):
+		"""Address missing optional fields should return empty strings."""
+		customer = frappe.get_doc("Customer", "_Test Customer")
+
+		# Create minimal address
+		address_title = "_Test Minimal Address"
+		existing = frappe.db.get_value("Address", {"address_title": address_title}, "name")
+		if existing:
+			frappe.delete_doc("Address", existing, force=True)
+
+		test_address = frappe.get_doc(
+			{
+				"doctype": "Address",
+				"address_title": address_title,
+				"address_type": "Billing",
+				"address_line1": "123 Main St",
+				# No address_line2, state, pincode
+				"city": "Test City",
+				"country": "United States",
+			}
+		)
+		test_address.insert(ignore_permissions=True)
+
+		original_address = customer.customer_primary_address
+		customer.db_set("customer_primary_address", test_address.name, update_modified=False)
+
+		try:
+			pr = frappe.new_doc("Payment Request")
+			pr.party_type = "Customer"
+			pr.party = customer.name
+
+			_, address = pr._get_party_contact_and_address()
+
+			# Optional fields should be empty strings, not None
+			self.assertEqual(address.get("address_line2"), "")
+			self.assertEqual(address.get("state"), "")
+			self.assertEqual(address.get("pincode"), "")
+			# Required fields should have values
+			self.assertEqual(address.get("address_line1"), "123 Main St")
+			self.assertEqual(address.get("city"), "Test City")
+		finally:
+			customer.db_set("customer_primary_address", original_address, update_modified=False)
+			frappe.delete_doc("Address", test_address.name, force=True)
+
+	def test_customer_without_primary_contact(self):
+		"""Customer without primary_contact set should return empty contact dict."""
+		customer = frappe.get_doc("Customer", "_Test Customer")
+
+		original_contact = customer.customer_primary_contact
+		customer.db_set("customer_primary_contact", None, update_modified=False)
+
+		try:
+			pr = frappe.new_doc("Payment Request")
+			pr.party_type = "Customer"
+			pr.party = customer.name
+
+			contact, _ = pr._get_party_contact_and_address()
+
+			self.assertEqual(contact, {})
+		finally:
+			customer.db_set("customer_primary_contact", original_contact, update_modified=False)
+
+	def test_customer_without_primary_address(self):
+		"""Customer without primary_address set should return empty address dict."""
+		customer = frappe.get_doc("Customer", "_Test Customer")
+
+		original_address = customer.customer_primary_address
+		customer.db_set("customer_primary_address", None, update_modified=False)
+
+		try:
+			pr = frappe.new_doc("Payment Request")
+			pr.party_type = "Customer"
+			pr.party = customer.name
+
+			_, address = pr._get_party_contact_and_address()
+
+			self.assertEqual(address, {})
+		finally:
+			customer.db_set("customer_primary_address", original_address, update_modified=False)
+
+	# ============================================================================
+	# get_tx_data Edge Case Tests
+	# ============================================================================
+
+	def test_get_tx_data_multi_currency(self):
+		"""get_tx_data handles multi-currency payment requests correctly."""
+		# Create USD sales order
+		so = make_sales_order(currency="USD", qty=1, rate=100)
+
+		pr = make_payment_request(
+			dt="Sales Order",
+			dn=so.name,
+			recipient_id="test@example.com",
+			payment_gateway_account="_Test Gateway - USD - _TC",
+			mute_email=True,
+			submit_doc=False,
+			return_doc=True,
+		)
+
+		tx_data = pr.get_tx_data()
+
+		self.assertEqual(tx_data.currency, "USD")
+		self.assertGreater(tx_data.amount, 0)
+
+	def test_get_tx_data_without_party(self):
+		"""get_tx_data returns empty contact/address when party is not set."""
+		so = make_sales_order(currency="INR")
+
+		pr = make_payment_request(
+			dt="Sales Order",
+			dn=so.name,
+			recipient_id="test@example.com",
+			mute_email=True,
+			submit_doc=False,
+			return_doc=True,
+		)
+		# Clear party info
+		pr.party_type = None
+		pr.party = None
+
+		tx_data = pr.get_tx_data()
+
+		self.assertEqual(tx_data.payer_contact, {})
+		self.assertEqual(tx_data.payer_address, {})
+
+	def test_get_tx_data_loyalty_and_discount_are_none(self):
+		"""get_tx_data sets loyalty_points and discount_amount to None."""
+		so = make_sales_order(currency="INR")
+
+		pr = make_payment_request(
+			dt="Sales Order",
+			dn=so.name,
+			recipient_id="test@example.com",
+			mute_email=True,
+			submit_doc=False,
+			return_doc=True,
+		)
+
+		tx_data = pr.get_tx_data()
+
+		# These are explicitly set to None as per current implementation
+		self.assertIsNone(tx_data.loyalty_points)
+		self.assertIsNone(tx_data.discount_amount)
+
+	# ============================================================================
+	# _process_v2_gateway Success Path Tests
+	# ============================================================================
+
+	def test_process_v2_gateway_sets_payment_url(self):
+		"""_process_v2_gateway sets payment_url from PaymentController."""
+		so = make_sales_order(currency="INR")
+
+		pr = make_payment_request(
+			dt="Sales Order",
+			dn=so.name,
+			recipient_id="test@example.com",
+			payment_gateway_account="_Test Gateway - INR - _TC",
+			mute_email=True,
+			submit_doc=False,
+			return_doc=True,
+		)
+
+		expected_url = "https://gateway.example.com/pay/session123"
+		mock_controller_class = MagicMock()
+		mock_controller_class.initiate = MagicMock(return_value=(MagicMock(), "PSL-00001"))
+		mock_controller_class.get_payment_url = MagicMock(return_value=expected_url)
+
+		with patch("erpnext.accounts.doctype.payment_request.payment_request.payment_app_import_guard"):
+			with patch.dict(
+				sys.modules,
+				{
+					"payments": MagicMock(),
+					"payments.controllers": MagicMock(PaymentController=mock_controller_class),
+				},
+			):
+				pr._process_v2_gateway()
+
+				self.assertEqual(pr.payment_url, expected_url)
+				mock_controller_class.get_payment_url.assert_called_once_with("PSL-00001")
+
+	def test_process_v2_gateway_logs_error_on_failure(self):
+		"""_process_v2_gateway logs error with frappe.log_error on initiate failure."""
+		so = make_sales_order(currency="INR")
+
+		pr = make_payment_request(
+			dt="Sales Order",
+			dn=so.name,
+			recipient_id="test@example.com",
+			payment_gateway_account="_Test Gateway - INR - _TC",
+			mute_email=True,
+			submit_doc=False,
+			return_doc=True,
+		)
+		# Ensure payment_gateway is set (make_payment_request may not populate it)
+		pr.payment_gateway = "_Test Gateway"
+
+		mock_controller_class = MagicMock()
+		mock_controller_class.initiate = MagicMock(side_effect=Exception("API timeout"))
+
+		with patch("erpnext.accounts.doctype.payment_request.payment_request.payment_app_import_guard"):
+			with patch.dict(
+				sys.modules,
+				{
+					"payments": MagicMock(),
+					"payments.controllers": MagicMock(PaymentController=mock_controller_class),
+				},
+			):
+				with patch("frappe.log_error") as mock_log_error:
+					with self.assertRaises(frappe.ValidationError):
+						pr._process_v2_gateway()
+
+					# Verify error was logged
+					mock_log_error.assert_called_once()
+					call_kwargs = mock_log_error.call_args
+					self.assertIn("Payment Initialization Failed", str(call_kwargs))
+					self.assertIn("_Test Gateway", str(call_kwargs))

@@ -1200,16 +1200,6 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			return erpnext.queries.item({ is_stock_item: 1 });
 		};
 
-		this.frm.set_query("purchase_order", function () {
-			return {
-				filters: {
-					docstatus: 1,
-					is_old_subcontracting_flow: 1,
-					company: me.frm.doc.company,
-				},
-			};
-		});
-
 		this.frm.set_query("subcontracting_order", function () {
 			return {
 				filters: {

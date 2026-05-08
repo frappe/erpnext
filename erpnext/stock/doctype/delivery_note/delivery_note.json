@@ -1266,6 +1266,7 @@
    "fieldname": "amount_eligible_for_commission",
    "fieldtype": "Currency",
    "label": "Amount Eligible for Commission",
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -1470,7 +1471,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-30 12:19:56.889644",
+ "modified": "2026-05-01 02:37:31.430649",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

@@ -664,6 +664,7 @@
    "fieldname": "total_billing_amount",
    "fieldtype": "Currency",
    "label": "Total Billing Amount",
+   "options": "currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1531,6 +1532,7 @@
    "fieldname": "amount_eligible_for_commission",
    "fieldtype": "Currency",
    "label": "Amount Eligible for Commission",
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -1639,7 +1641,7 @@
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-30 12:15:57.253316",
+ "modified": "2026-05-01 02:37:30.580568",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",

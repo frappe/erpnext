@@ -115,7 +115,12 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			}
 		}
 
-		if (doc.docstatus == 1 && doc.outstanding_amount != 0 && !doc.on_hold) {
+		if (
+			doc.docstatus == 1 &&
+			doc.outstanding_amount != 0 &&
+			!doc.on_hold &&
+			frappe.model.can_create("Payment Entry")
+		) {
 			this.frm.add_custom_button(__("Payment"), () => this.make_payment_entry(), __("Create"));
 			this.frm.page.set_inner_btn_group_as_primary(__("Create"));
 		}
@@ -130,7 +135,13 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			}
 		}
 
-		if (doc.docstatus == 1 && doc.outstanding_amount > 0 && !cint(doc.is_return) && !doc.on_hold) {
+		if (
+			doc.docstatus == 1 &&
+			doc.outstanding_amount > 0 &&
+			!cint(doc.is_return) &&
+			!doc.on_hold &&
+			frappe.boot.user.in_create.includes("Payment Request")
+		) {
 			this.frm.add_custom_button(
 				__("Payment Request"),
 				function () {
@@ -680,10 +691,6 @@ frappe.ui.form.on("Purchase Invoice", {
 	},
 
 	is_subcontracted: function (frm) {
-		if (frm.doc.is_old_subcontracting_flow) {
-			erpnext.buying.get_default_bom(frm);
-		}
-
 		frm.toggle_reqd("supplier_warehouse", frm.doc.is_subcontracted);
 	},
 

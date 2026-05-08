@@ -21,6 +21,7 @@
   "enable_common_party_accounting",
   "allow_multi_currency_invoices_against_single_party_account",
   "confirm_before_resetting_posting_date",
+  "preview_mode",
   "analytics_section",
   "enable_accounting_dimensions",
   "column_break_vtnr",
@@ -733,6 +734,13 @@
    "fieldtype": "Table",
    "label": "Allowed Doctypes",
    "options": "Repost Allowed Types"
+  },
+  {
+   "default": "0",
+   "description": "Runs a preview check on save before submission without making any actual changes.",
+   "fieldname": "preview_mode",
+   "fieldtype": "Check",
+   "label": "Preview Mode"
   }
  ],
  "grid_page_length": 50,
@@ -741,7 +749,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-04-13 15:30:28.729627",
+ "modified": "2026-04-22 01:38:42.418238",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

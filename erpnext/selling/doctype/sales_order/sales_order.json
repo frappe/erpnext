@@ -847,6 +847,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Loyalty Amount",
+   "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1480,6 +1481,7 @@
    "fieldname": "amount_eligible_for_commission",
    "fieldtype": "Currency",
    "label": "Amount Eligible for Commission",
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -1763,7 +1765,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-30 12:19:27.522646",
+ "modified": "2026-05-01 02:37:30.937916",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

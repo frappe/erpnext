@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:39",
@@ -206,7 +207,6 @@
   "sender",
   "column_break_147",
   "inter_company_invoice_reference",
-  "is_old_subcontracting_flow",
   "remarks",
   "connections_tab"
  ],
@@ -1457,14 +1457,6 @@
    "options": "Subscription"
   },
   {
-   "default": "0",
-   "fieldname": "is_old_subcontracting_flow",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Is Old Subcontracting Flow",
-   "read_only": 1
-  },
-  {
    "fieldname": "payments_tab",
    "fieldtype": "Tab Break",
    "label": "Payments"
@@ -1703,7 +1695,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-30 12:16:40.157755",
+ "modified": "2026-05-04 10:10:11.717131",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

@@ -595,8 +595,14 @@ class StockReservationEntry(Document):
 
 		voucher_delivered_qty = 0
 		if self.voucher_type == "Sales Order":
+			voucher_detail_no = self.voucher_detail_no
+			if not frappe.db.exists("Sales Order Item", self.voucher_detail_no):
+				voucher_detail_no = frappe.get_value(
+					"Packed Item", self.voucher_detail_no, "parent_detail_docname"
+				)
+
 			delivered_qty, conversion_factor = frappe.db.get_value(
-				"Sales Order Item", self.voucher_detail_no, ["delivered_qty", "conversion_factor"]
+				"Sales Order Item", voucher_detail_no, ["delivered_qty", "conversion_factor"]
 			)
 			voucher_delivered_qty = flt(delivered_qty) * flt(conversion_factor)
 
@@ -1015,7 +1021,7 @@ def get_sre_details_for_voucher(voucher_type: str, voucher_no: str) -> list[dict
 	).run(as_dict=True)
 
 
-def get_serial_batch_entries_for_voucher(sre_name: str) -> list[dict]:
+def get_serial_batch_entries_for_voucher(sre_names: list[str]) -> list[dict]:
 	"""Returns a list of `Serial and Batch Entries` for the provided voucher."""
 
 	sre = frappe.qb.DocType("Stock Reservation Entry")
@@ -1030,16 +1036,16 @@ def get_serial_batch_entries_for_voucher(sre_name: str) -> list[dict]:
 			sb_entry.batch_no,
 			(sb_entry.qty - sb_entry.delivered_qty).as_("qty"),
 		)
-		.where((sre.docstatus == 1) & (sre.name == sre_name) & (sre.delivered_qty < sre.reserved_qty))
+		.where((sre.docstatus == 1) & (sre.name.isin(sre_names)) & (sre.delivered_qty < sre.reserved_qty))
 		.where(sb_entry.qty > sb_entry.delivered_qty)
 		.orderby(sb_entry.creation)
 	).run(as_dict=True)
 
 
-def get_ssb_bundle_for_voucher(sre: dict) -> object:
+def get_ssb_bundle_for_voucher(sre_list) -> object:
 	"""Returns a new `Serial and Batch Bundle` against the provided SRE."""
 
-	sb_entries = get_serial_batch_entries_for_voucher(sre["name"])
+	sb_entries = get_serial_batch_entries_for_voucher([sre.name for sre in sre_list])
 
 	if sb_entries:
 		bundle = frappe.new_doc("Serial and Batch Bundle")
@@ -1049,14 +1055,17 @@ def get_ssb_bundle_for_voucher(sre: dict) -> object:
 		bundle.posting_time = nowtime()
 
 		for field in ("item_code", "warehouse", "has_serial_no", "has_batch_no"):
-			setattr(bundle, field, sre[field])
+			setattr(bundle, field, sre_list[0][field])
 
 		for sb_entry in sb_entries:
 			bundle.append("entries", sb_entry)
 
+		if frappe.flags.in_test:
+			bundle.flags.ignore_mandatory = True
+
 		bundle.save()
 
-		return bundle.name
+		return bundle
 
 
 def has_reserved_stock(voucher_type: str, voucher_no: str, voucher_detail_no: str | None = None) -> bool:
@@ -1071,7 +1080,7 @@ def has_reserved_stock(voucher_type: str, voucher_no: str, voucher_detail_no: st
 
 
 class StockReservation:
-	def __init__(self, doc, items=None, kwargs=None, notify=True):
+	def __init__(self, doc, items=None, kwargs=None):
 		if isinstance(doc, str):
 			doc = parse_json(doc)
 			doc = frappe.get_doc("Work Order", doc.get("name"))
@@ -1575,7 +1584,7 @@ def create_stock_reservation_entries_for_so_items(
 	items_details: list[dict] | None = None,
 	from_voucher_type: Literal["Pick List", "Purchase Receipt"] = None,
 	notify=True,
-) -> None:
+):
 	"""Creates Stock Reservation Entries for Sales Order Items."""
 
 	from erpnext.selling.doctype.sales_order.sales_order import get_unreserved_qty
@@ -1775,6 +1784,8 @@ def create_stock_reservation_entries_for_so_items(
 
 	if sre_count and notify:
 		frappe.msgprint(_("Stock Reservation Entries Created"), alert=True, indicator="green")
+
+	return sre_count
 
 
 def cancel_stock_reservation_entries(

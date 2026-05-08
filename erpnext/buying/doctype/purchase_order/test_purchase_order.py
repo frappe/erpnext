@@ -1593,11 +1593,6 @@ def create_purchase_order(**args):
 		po.set_missing_values()
 		po.insert()
 		if not args.do_not_submit:
-			if po.is_subcontracted:
-				supp_items = po.get("supplied_items")
-				for d in supp_items:
-					if not d.reserve_warehouse:
-						d.reserve_warehouse = args.warehouse or "_Test Warehouse - _TC"
 			po.submit()
 
 	return po

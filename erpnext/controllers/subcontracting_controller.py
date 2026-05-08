@@ -26,17 +26,7 @@ from erpnext.stock.utils import get_incoming_rate
 class SubcontractingController(StockController):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
-		if self.get("is_old_subcontracting_flow"):
-			self.subcontract_data = frappe._dict(
-				{
-					"order_doctype": "Purchase Order",
-					"order_field": "purchase_order",
-					"rm_detail_field": "po_detail",
-					"receipt_supplied_items_field": "Purchase Receipt Item Supplied",
-					"order_supplied_items_field": "Purchase Order Item Supplied",
-				}
-			)
-		elif self.doctype == "Subcontracting Inward Order":
+		if self.doctype == "Subcontracting Inward Order":
 			self.subcontract_data = frappe._dict(
 				{
 					"order_doctype": "Subcontracting Inward Order",
@@ -541,11 +531,7 @@ class SubcontractingController(StockController):
 			self.__set_alternative_item_details(row)
 
 		self.__transferred_items = copy.deepcopy(self.available_materials)
-		if self.get("is_old_subcontracting_flow"):
-			for doctype in ["Purchase Receipt", "Purchase Invoice"]:
-				self.__update_consumed_materials(doctype)
-		else:
-			self.__update_consumed_materials("Subcontracting Receipt")
+		self.__update_consumed_materials("Subcontracting Receipt")
 
 	def __remove_changed_rows(self):
 		if not self.__changed_name:
@@ -1136,24 +1122,17 @@ class SubcontractingController(StockController):
 
 	def set_consumed_qty_in_subcontract_order(self):
 		# Update consumed qty back in the subcontract order
-		if self.doctype in ["Subcontracting Order", "Subcontracting Receipt"] or self.get(
-			"is_old_subcontracting_flow"
-		):
+		if self.doctype in ["Subcontracting Order", "Subcontracting Receipt"]:
 			self.__get_subcontract_orders()
 			itemwise_consumed_qty = defaultdict(float)
-			if self.get("is_old_subcontracting_flow"):
-				doctypes = ["Purchase Receipt", "Purchase Invoice"]
-			else:
-				doctypes = ["Subcontracting Receipt"]
 
-			for doctype in doctypes:
-				consumed_items, receipt_items = self.__update_consumed_materials(
-					doctype, return_consumed_items=True
-				)
+			consumed_items, receipt_items = self.__update_consumed_materials(
+				"Subcontracting Receipt", return_consumed_items=True
+			)
 
-				for row in consumed_items:
-					key = (row.rm_item_code, row.main_item_code, receipt_items.get(row.reference_name))
-					itemwise_consumed_qty[key] += row.consumed_qty
+			for row in consumed_items:
+				key = (row.rm_item_code, row.main_item_code, receipt_items.get(row.reference_name))
+				itemwise_consumed_qty[key] += row.consumed_qty
 
 			self.__update_consumed_qty_in_subcontract_order(itemwise_consumed_qty)
 
@@ -1236,32 +1215,10 @@ class SubcontractingController(StockController):
 			via_landed_cost_voucher=via_landed_cost_voucher,
 		)
 
-	def get_supplied_items_cost(self, item_row_id, reset_outgoing_rate=True):
+	def get_supplied_items_cost(self, item_row_id):
 		supplied_items_cost = 0.0
 		for item in self.get("supplied_items"):
 			if item.reference_name == item_row_id:
-				if (
-					self.get("is_old_subcontracting_flow")
-					and reset_outgoing_rate
-					and frappe.get_cached_value("Item", item.rm_item_code, "is_stock_item")
-				):
-					rate = get_incoming_rate(
-						{
-							"item_code": item.rm_item_code,
-							"warehouse": self.supplier_warehouse,
-							"posting_date": self.posting_date,
-							"posting_time": self.posting_time,
-							"qty": -1 * item.consumed_qty,
-							"voucher_detail_no": item.name,
-							"serial_and_batch_bundle": item.get("serial_and_batch_bundle"),
-							"serial_no": item.get("serial_no"),
-							"batch_no": item.get("batch_no"),
-						}
-					)
-
-					if rate > 0:
-						item.rate = rate
-
 				item.amount = flt(flt(item.consumed_qty) * flt(item.rate), item.precision("amount"))
 				supplied_items_cost += item.amount
 

@@ -88,7 +88,6 @@ class PurchaseReceipt(BuyingController):
 		instructions: DF.SmallText | None
 		inter_company_reference: DF.Link | None
 		is_internal_supplier: DF.Check
-		is_old_subcontracting_flow: DF.Check
 		is_return: DF.Check
 		is_subcontracted: DF.Check
 		item_wise_tax_details: DF.Table[ItemWiseTaxDetail]
@@ -149,6 +148,7 @@ class PurchaseReceipt(BuyingController):
 		taxes_and_charges_deducted: DF.Currency
 		tc_name: DF.Link | None
 		terms: DF.TextEditor | None
+		title: DF.Data | None
 		total: DF.Currency
 		total_net_weight: DF.Float
 		total_qty: DF.Float
@@ -724,6 +724,9 @@ class PurchaseReceipt(BuyingController):
 					self.get_company_default("default_expense_account", ignore_validation=True)
 					or stock_asset_rbnb
 				)
+
+				if self.is_return and item.expense_account:
+					loss_account = item.expense_account
 
 				cost_center = item.cost_center or frappe.get_cached_value(
 					"Company", self.company, "cost_center"

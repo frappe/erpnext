@@ -2724,3 +2724,119 @@ def build_qb_match_conditions(doctype, user=None) -> list:
 
 def is_immutable_ledger_enabled():
 	return frappe.get_single_value("Accounts Settings", "enable_immutable_ledger")
+
+
+PRE_SUBMIT_DOCTYPE_CONFIG = {
+	"Sales Invoice": {
+		"check_prev_docstatus": True,
+		"check_credit_limit": True,
+	},
+	"Purchase Invoice": {
+		"check_prev_docstatus": True,
+	},
+	"Delivery Note": {
+		"check_prev_docstatus": True,
+		"check_credit_limit": True,
+		"check_packed_qty": True,
+	},
+	"Purchase Receipt": {
+		"check_prev_docstatus": True,
+	},
+	"Sales Order": {
+		"check_credit_limit": True,
+	},
+}
+
+
+def pre_submit_validation(doc, method=None):
+	cfg = PRE_SUBMIT_DOCTYPE_CONFIG.get(doc.doctype)
+	if (
+		doc.docstatus != 0
+		or not frappe.get_cached_value("Accounts Settings", None, "preview_mode")
+		or not cfg
+		or not doc.company
+	):
+		return
+	_run_pre_submit_checks(doc, cfg)
+
+
+def _run_pre_submit_checks(doc, cfg):
+	if cfg.get("check_prev_docstatus"):
+		_check_prev_docstatus(doc)
+
+	if cfg.get("check_credit_limit"):
+		_check_credit_limit_warn(doc)
+
+	if cfg.get("check_packed_qty"):
+		_check_packed_qty_warn(doc)
+
+
+def _check_prev_docstatus(doc):
+	try:
+		if hasattr(doc, "check_prev_docstatus"):
+			doc.check_prev_docstatus()
+	except Exception as e:
+		frappe.msgprint(str(e), title=_("Pre-Submit Warning"), indicator="orange")
+
+
+def _check_credit_limit_warn(doc):
+	if doc.get("is_return") or not doc.get("customer"):
+		return
+
+	from erpnext.selling.doctype.customer.customer import check_credit_limit
+
+	try:
+		bypass = cint(
+			frappe.db.get_value(
+				"Customer Credit Limit",
+				filters={"parent": doc.customer, "parenttype": "Customer", "company": doc.company},
+				fieldname="bypass_credit_limit_check",
+			)
+			or 0
+		)
+
+		if doc.doctype == "Sales Invoice":
+			validate_against_credit_limit = bypass or any(
+				not (d.sales_order or d.delivery_note) for d in doc.get("items")
+			)
+			if validate_against_credit_limit:
+				check_credit_limit(doc.customer, doc.company, bypass, extra_amount=flt(doc.base_grand_total))
+
+		elif doc.doctype == "Sales Order":
+			if not bypass:
+				check_credit_limit(doc.customer, doc.company, extra_amount=flt(doc.base_grand_total))
+
+		elif doc.doctype == "Delivery Note":
+			if doc.per_billed == 100:
+				return
+
+			if bypass:
+				doc.check_credit_limit()
+			else:
+				unlinked = [
+					d for d in doc.get("items") if not (d.against_sales_order or d.against_sales_invoice)
+				]
+				if unlinked and flt(doc.base_net_total):
+					unlinked_net = sum(flt(d.base_amount) for d in unlinked)
+					extra_amount = (unlinked_net / flt(doc.base_net_total)) * flt(doc.base_grand_total)
+					if extra_amount:
+						check_credit_limit(doc.customer, doc.company, False, extra_amount=extra_amount)
+
+	except frappe.ValidationError as e:
+		frappe.msgprint(
+			_("Credit limit warning — submission may be blocked: {0}").format(str(e)),
+			title=_("Pre-Submit Warning: Credit Limit"),
+			indicator="orange",
+		)
+
+
+def _check_packed_qty_warn(doc):
+	try:
+		if hasattr(doc, "validate_packed_qty"):
+			doc.validate_packed_qty()
+	except frappe.ValidationError as e:
+		frappe.msgprint(
+			str(e),
+			title=_("Pre-Submit Warning: Packed Qty"),
+			indicator="orange",
+		)
