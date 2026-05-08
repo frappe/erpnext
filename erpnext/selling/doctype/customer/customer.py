@@ -442,6 +442,13 @@ class Customer(TransactionBase):
 				)
 			)
 
+	def get_notification_email(self):
+		"""Hook to return the target email address for notifications."""
+		if self.account_manager:
+			return frappe.db.get_value("User", self.account_manager, "email")
+
+		return None
+
 
 @frappe.whitelist()
 def make_quotation(source_name: str, target_doc: str | Document | None = None):
