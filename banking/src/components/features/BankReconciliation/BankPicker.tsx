@@ -9,6 +9,10 @@ import _ from "@/lib/translate"
 import { Badge } from "@/components/ui/badge"
 import { useTheme } from "@/components/ui/theme-provider"
 import BankLogo from "@/components/common/BankLogo"
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
+import { LandmarkIcon } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { useCurrentCompany } from "@/hooks/useCurrentCompany"
 
 const BankPicker = ({ className }: { className?: string }) => {
 
@@ -26,6 +30,8 @@ const BankPicker = ({ className }: { className?: string }) => {
         }
     }, [setSelectedBank])
 
+    const selectedCompany = useCurrentCompany()
+
     const { banks, isLoading, error } = useGetBankAccounts(onLoadingSuccess)
 
     const { themeValue } = useTheme()
@@ -36,6 +42,25 @@ const BankPicker = ({ className }: { className?: string }) => {
 
     if (error) {
         return <ErrorBanner error={error} />
+    }
+
+    if (banks?.length === 0) {
+        return <Empty>
+            <EmptyMedia>
+                <LandmarkIcon />
+            </EmptyMedia>
+            <EmptyHeader>
+                <EmptyTitle>{_("No bank accounts found")}</EmptyTitle>
+                <EmptyDescription>{_("You have not added any bank accounts to your company.")}</EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+                <Button asChild>
+                    <a href={`/desk/bank-account?company=${encodeURIComponent(selectedCompany)}&is_company_account=1`}>
+                        {_("Configure Bank Accounts")}
+                    </a>
+                </Button>
+            </EmptyContent>
+        </Empty>
     }
     return (
         <div

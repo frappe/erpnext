@@ -19,6 +19,8 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbS
 import { Badge } from "@/components/ui/badge"
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { Button } from "@/components/ui/button"
+import { useAtomValue } from "jotai"
+import { selectedBankAccountAtom } from "@/components/features/BankReconciliation/bankRecAtoms"
 
 
 const BankReconciliation = () => {
@@ -72,31 +74,7 @@ const BankReconciliation = () => {
                     <BankPicker />
                     <BankBalance />
                 </div>
-                <Tabs defaultValue="Match and Reconcile">
-                    <TabsList>
-                        <TabsTrigger value="Match and Reconcile"><ShuffleIcon /> {_("Match and Reconcile")}</TabsTrigger>
-                        <TabsTrigger value="Bank Reconciliation Statement"><ScrollTextIcon /> {_("Bank Reconciliation Statement")}</TabsTrigger>
-                        <TabsTrigger value="Bank Transactions"><ListIcon />{_("Bank Transactions")}</TabsTrigger>
-                        <TabsTrigger value="Bank Clearance Summary"><CheckCircleIcon />{_("Bank Clearance Summary")}</TabsTrigger>
-                        <TabsTrigger value="Incorrectly Cleared Entries"><AlertTriangleIcon /> {_("Incorrectly Cleared Entries")}</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="Match and Reconcile">
-                        <MatchAndReconcile contentHeight={remainingHeightAfterTabs} />
-                    </TabsContent>
-                    <TabsContent value="Bank Reconciliation Statement">
-                        <BankReconciliationStatement />
-                    </TabsContent>
-                    <TabsContent value="Bank Transactions">
-                        <BankTransactions />
-                    </TabsContent>
-                    <TabsContent value="Bank Clearance Summary">
-                        <BankClearanceSummary />
-                    </TabsContent>
-                    <TabsContent value="Incorrectly Cleared Entries">
-                        <IncorrectlyClearedEntries />
-                    </TabsContent>
-                </Tabs>
-
+                <BankRecTabs remainingHeightAfterTabs={remainingHeightAfterTabs} />
                 <BankTransactionUnreconcileModal />
             </div>
             <div className="md:hidden flex h-screen items-center justify-between">
@@ -124,6 +102,39 @@ const BankReconciliation = () => {
             </div>
         </div>
     )
+}
+
+const BankRecTabs = ({ remainingHeightAfterTabs }: { remainingHeightAfterTabs: number }) => {
+    const selectedBankAccount = useAtomValue(selectedBankAccountAtom)
+
+    if (!selectedBankAccount) {
+        return null
+    }
+
+    return <Tabs defaultValue="Match and Reconcile">
+        <TabsList>
+            <TabsTrigger value="Match and Reconcile"><ShuffleIcon /> {_("Match and Reconcile")}</TabsTrigger>
+            <TabsTrigger value="Bank Reconciliation Statement"><ScrollTextIcon /> {_("Bank Reconciliation Statement")}</TabsTrigger>
+            <TabsTrigger value="Bank Transactions"><ListIcon />{_("Bank Transactions")}</TabsTrigger>
+            <TabsTrigger value="Bank Clearance Summary"><CheckCircleIcon />{_("Bank Clearance Summary")}</TabsTrigger>
+            <TabsTrigger value="Incorrectly Cleared Entries"><AlertTriangleIcon /> {_("Incorrectly Cleared Entries")}</TabsTrigger>
+        </TabsList>
+        <TabsContent value="Match and Reconcile">
+            <MatchAndReconcile contentHeight={remainingHeightAfterTabs} />
+        </TabsContent>
+        <TabsContent value="Bank Reconciliation Statement">
+            <BankReconciliationStatement />
+        </TabsContent>
+        <TabsContent value="Bank Transactions">
+            <BankTransactions />
+        </TabsContent>
+        <TabsContent value="Bank Clearance Summary">
+            <BankClearanceSummary />
+        </TabsContent>
+        <TabsContent value="Incorrectly Cleared Entries">
+            <IncorrectlyClearedEntries />
+        </TabsContent>
+    </Tabs>
 }
 
 export default BankReconciliation
