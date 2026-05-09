@@ -252,7 +252,7 @@ const BankEntryForm = ({ selectedTransaction }: { selectedTransaction: Unreconci
                             let value = 0;
 
                             try {
-                                value = eval(script);
+                                value = window.eval(script);
                             } catch (error: unknown) {
                                 console.error(error);
                                 value = 0;

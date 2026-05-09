@@ -449,7 +449,7 @@ const AmountFormulaRenderer = ({ value }: { value?: string }) => {
         let calculatedValue = "";
 
         try {
-            calculatedValue = eval(`const transaction_amount = 200; ${value}`);
+            calculatedValue = window.eval(`const transaction_amount = 200; ${value}`);
         } catch (error: unknown) {
             console.error(error);
             calculatedValue = "Error";
