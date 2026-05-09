@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-03 09:55+0000\n"
-"PO-Revision-Date: 2026-05-06 17:45\n"
+"PO-Revision-Date: 2026-05-09 18:17\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Croatian\n"
 "MIME-Version: 1.0\n"
@@ -102,11 +102,11 @@ msgstr " Sažetak"
 
 #: erpnext/stock/doctype/item/item.py:278
 msgid "\"Customer Provided Item\" cannot be Purchase Item also"
-msgstr "\"Artikal koji osigurava Klijent\" ne može biti Artikal Nabave"
+msgstr "\"Klijent Dostavljeni Artikal\" ne može biti Nabavni Artikal"
 
 #: erpnext/stock/doctype/item/item.py:280
 msgid "\"Customer Provided Item\" cannot have Valuation Rate"
-msgstr "\"Artikal koju daje Klijent\" ne može imati Stopu Vrednovanja"
+msgstr "\"Klijent Dostavljen Artikal\" ne može imati Stopu Vrednovanja"
 
 #: erpnext/stock/doctype/item/item.py:383
 msgid "\"Is Fixed Asset\" cannot be unchecked, as Asset record exists against the item"
@@ -1116,7 +1116,7 @@ msgstr "Kontrola Kvaliteta mora biti izvršena prije izdavanja Dostavnice za ova
 #. DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "A quality inspection must be completed before generating a Purchase Receipt for this item."
-msgstr "Kontrola Kvaliteta mora biti izvršena prije izdavanja računa nabave za ovaj artikal."
+msgstr "Kontrola Kvaliteta mora biti izvršena prije izdavanja Nabavnog Računa za ovaj artikal."
 
 #: erpnext/accounts/doctype/sales_taxes_and_charges_template/sales_taxes_and_charges_template.py:96
 msgid "A template with tax category {0} already exists. Only one template is allowed with each tax category"
@@ -4187,7 +4187,7 @@ msgstr "Dopusti kreiranje Fakture Nabave bez Naloga Nabave"
 #. (Check) field in DocType 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "Allow Purchase Invoice Creation Without Purchase Receipt"
-msgstr "Dopusti kreiranje Fakture Nabave bez Naloga Nabave"
+msgstr "Dopusti kreiranje Fakture Nabave bez Računa Nabave"
 
 #. Label of the allow_zero_qty_in_purchase_order (Check) field in DocType
 #. 'Buying Settings'
@@ -6233,7 +6233,7 @@ msgstr "Automatsko Kreiranje Revalorizacije Deviznog Kursa"
 #. Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Auto Create Purchase Receipt"
-msgstr "Automatsko Kreiranje Nabavnog Naloga"
+msgstr "Automatsko Kreiranje Nabavnog Računa"
 
 #. Label of the auto_create_serial_and_batch_bundle_for_outward (Check) field
 #. in DocType 'Stock Settings'
@@ -14372,13 +14372,13 @@ msgstr "Primarni Kontakt Klijenta"
 #: erpnext/stock/doctype/item/item.json
 #: erpnext/stock/doctype/material_request/material_request.json
 msgid "Customer Provided"
-msgstr "Od Klijenta"
+msgstr "Klijent Dostavljen Artikal"
 
 #. Label of the customer_provided_item_cost (Currency) field in DocType 'Stock
 #. Entry Detail'
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgid "Customer Provided Item Cost"
-msgstr "Klijent Dostavljen Artikal Koštanje"
+msgstr "Trošak Klijent Dostavljenog Artikala "
 
 #: erpnext/setup/doctype/company/company.py:486
 msgid "Customer Service"
@@ -22640,7 +22640,7 @@ msgstr "Ako je omogućeno, sustav će korisnicima omogućiti uređivanje sirovin
 #. in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "If enabled, the system will generate an accounting entry for materials rejected in the Purchase Receipt."
-msgstr "Ako je omogućeno, sustav će generirati knjigovodstveni unos za odbijene materijale u Nabavnoj Potvrdi."
+msgstr "Ako je omogućeno, sustav će generirati knjigovodstveni unos za odbijene materijale u Računu Nabave."
 
 #. Description of the 'Enable Item-wise Inventory Account' (Check) field in
 #. DocType 'Company'
@@ -22810,7 +22810,7 @@ msgstr "Ako je ova opcija konfigurirana kao 'Da', sustav će vas spriječiti da 
 
 #: erpnext/buying/doctype/buying_settings/buying_settings.js:34
 msgid "If this option is configured 'Yes', ERPNext will prevent you from creating a Purchase Invoice without creating a Purchase Receipt first. This configuration can be overridden for a particular supplier by enabling the 'Allow Purchase Invoice Creation Without Purchase Receipt' checkbox in the Supplier master."
-msgstr "Ako je ova opcija konfigurirana kao 'Da', sustav će vas spriječiti da kreirate Fakturu Nabave bez prethodnog kreiranja Naloga Nabave. Ova konfiguracija se može poništiti za određenog dobavljača tako što će se omogućiti 'Dozvoli kreiranje Fakture Nabave bez Naloga Nabave' u Postavkama Dobavljača."
+msgstr "Ako je ova opcija konfigurirana kao 'Da', sustav će vas spriječiti da kreirate Fakturu Nabave bez prethodnog kreiranja Računa Nabave. Ova konfiguracija se može poništiti za određenog dobavljača tako što će se omogućiti 'Dozvoli kreiranje Fakture Nabave bez Računa Nabave' u Postavkama Dobavljača."
 
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.js:10
 msgid "If ticked, multiple materials can be used for a single Work Order. This is useful if one or more time consuming products are being manufactured."
@@ -23635,7 +23635,7 @@ msgstr "Netačan Tip Plaćanja"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:116
 msgid "Incorrect Reference Document (Purchase Receipt Item)"
-msgstr "Netačan Referentni Dokument (Artikal Nabavnog Naloga)"
+msgstr "Netačan Referentni Dokument (Artikal Računa Nabave)"
 
 #. Name of a report
 #: erpnext/stock/report/incorrect_serial_no_valuation/incorrect_serial_no_valuation.json
@@ -24820,7 +24820,7 @@ msgstr "Kumulativno"
 #: erpnext/stock/doctype/item/item.json
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_received_item/subcontracting_inward_order_received_item.json
 msgid "Is Customer Provided Item"
-msgstr "Artikal koju daje Klijent"
+msgstr "Je Klijent Dostavljen Artikal"
 
 #. Label of the is_default (Check) field in DocType 'Bank Account'
 #: erpnext/accounts/doctype/bank_account/bank_account.json
@@ -27338,7 +27338,7 @@ msgstr "Obračunati Trošak Artikla"
 #. Name of a DocType
 #: erpnext/stock/doctype/landed_cost_purchase_receipt/landed_cost_purchase_receipt.json
 msgid "Landed Cost Purchase Receipt"
-msgstr "Obračunati Trošak Kupovnog Računa"
+msgstr "Obračunati Trošak Računa Nabave"
 
 #. Name of a report
 #: erpnext/stock/report/landed_cost_report/landed_cost_report.json
@@ -28657,7 +28657,7 @@ msgstr "Obavezan Nalog Nabave"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:657
 msgid "Mandatory Purchase Receipt"
-msgstr "Obavezan je Nabavni Račun"
+msgstr "Obavezan je Račun Nabave"
 
 #. Label of the conditional_mandatory_section (Section Break) field in DocType
 #. 'Inventory Dimension'
@@ -33133,7 +33133,7 @@ msgstr "Dozvola za prekomjerno Fakturisanje (%)"
 
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:1356
 msgid "Over Billing Allowance exceeded for Purchase Receipt Item {0} ({1}) by {2}%"
-msgstr "Prekoračenje dopuštenog iznosa za stavku računa premašeno je za {0} ({1}) za {2}%"
+msgstr "Prekoračenje dopuštenog iznosa za artikal računa premašeno je za {0} ({1}) za {2}%"
 
 #. Label of the over_delivery_receipt_allowance (Float) field in DocType 'Item'
 #. Label of the over_delivery_receipt_allowance (Float) field in DocType 'Stock
@@ -39486,7 +39486,7 @@ msgstr "Račun  Nabave (nacrt) će se automatski kreirati pri podnošenju Podugo
 #. Label of the pr_detail (Data) field in DocType 'Purchase Invoice Item'
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgid "Purchase Receipt Detail"
-msgstr "Detalji Nabavnog Računa"
+msgstr "Detalji Računa Nabave"
 
 #. Label of the purchase_receipt_item (Data) field in DocType 'Asset'
 #. Label of the purchase_receipt_item (Data) field in DocType 'Asset
@@ -39501,12 +39501,12 @@ msgstr "Detalji Nabavnog Računa"
 #: erpnext/stock/doctype/landed_cost_item/landed_cost_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Purchase Receipt Item"
-msgstr "Artikal Nabavnog Računa"
+msgstr "Artikal Računa Nabave"
 
 #. Name of a DocType
 #: erpnext/buying/doctype/purchase_receipt_item_supplied/purchase_receipt_item_supplied.json
 msgid "Purchase Receipt Item Supplied"
-msgstr "Dostavljeni Artikal Nabavnog Naloga"
+msgstr "Dostavljeni Artikal Računa Nabave"
 
 #. Label of the purchase_receipt_no (Link) field in DocType 'Stock Entry'
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
@@ -39515,11 +39515,11 @@ msgstr "Broj Nabavnog Računa"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:653
 msgid "Purchase Receipt Required"
-msgstr "Nabavni Nalog je Obavezan"
+msgstr "Nabavni Račun je Obavezan"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:648
 msgid "Purchase Receipt Required for item {}"
-msgstr "Nalog Nabave je obavezan za artikal {}"
+msgstr "Račun Nabave je obavezan za artikal {}"
 
 #. Label of a Link in the Buying Workspace
 #. Name of a report
@@ -44021,17 +44021,17 @@ msgstr "Red #{0}: Kumulativni prag ne može biti manji od praga pojedinačne tra
 
 #: erpnext/controllers/subcontracting_inward_controller.py:90
 msgid "Row #{0}: Customer Provided Item {1} against Subcontracting Inward Order Item {2} ({3}) cannot be added multiple times."
-msgstr "Red #{0}: Klijent Dostavljeni Artikal {1} naspram Artikla Internog Podizvođačkog Naloga {2} ({3}) ne može se dodati više puta."
+msgstr "Red #{0}: Klijent Dostavljen Artikal {1} naspram Artikla Internog Podizvođačkog Naloga {2} ({3}) ne može se dodati više puta."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:178
 #: erpnext/controllers/subcontracting_inward_controller.py:304
 #: erpnext/controllers/subcontracting_inward_controller.py:352
 msgid "Row #{0}: Customer Provided Item {1} cannot be added multiple times in the Subcontracting Inward process."
-msgstr "Red #{0}: Klijent Dostavljeni Artikal {1} ne može se dodati više puta u Podizvođačkom procesu."
+msgstr "Red #{0}: Klijent Dostavljen Artikal {1} ne može se dodati više puta u Podizvođačkom procesu."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:356
 msgid "Row #{0}: Customer Provided Item {1} cannot be added multiple times."
-msgstr "Red #{0}: Klijent Dostavljeni Artikal {1} ne može se dodati više puta."
+msgstr "Red #{0}: Klijent Dostavljen Artikal {1} ne može se dodati više puta."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:381
 msgid "Row #{0}: Customer Provided Item {1} does not exist in the Required Items table linked to the Subcontracting Inward Order."
@@ -44039,7 +44039,7 @@ msgstr "Red #{0}: Klijent Dostavljeni Artikal {1} ne postoji u tabeli Obaveznih 
 
 #: erpnext/controllers/subcontracting_inward_controller.py:288
 msgid "Row #{0}: Customer Provided Item {1} exceeds quantity available through Subcontracting Inward Order"
-msgstr "Red #{0}: Artikal koji je obezbijedio Klijent {1} premašuje količinu dostupnu putem Podizvođačkog Naloga"
+msgstr "Red #{0}: Klijent Dostavljen Artikal {1} premašuje količinu dostupnu putem Podizvođačkog Naloga"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:369
 msgid "Row #{0}: Customer Provided Item {1} has insufficient quantity in the Subcontracting Inward Order. Available quantity is {2}."
@@ -44047,12 +44047,12 @@ msgstr "Red #{0}: Klijent Dostavljeni Artikal {1} nema dovoljnu količinu u Inte
 
 #: erpnext/controllers/subcontracting_inward_controller.py:315
 msgid "Row #{0}: Customer Provided Item {1} is not a part of Subcontracting Inward Order {2}"
-msgstr "Red #{0}: Artikal koju je obezbijedio Klijent {1} nije u Podizvođačkom Nalogu {2}"
+msgstr "Red #{0}: Klijent Dostavljeni Artikal {1} nije u Podizvođačkom Nalogu {2}"
 
 #: erpnext/controllers/subcontracting_inward_controller.py:220
 #: erpnext/controllers/subcontracting_inward_controller.py:363
 msgid "Row #{0}: Customer Provided Item {1} is not a part of Work Order {2}"
-msgstr "Red #{0}: Klijent Dostavljeni Artikal {1} nije u Radnom Nalogu {2}"
+msgstr "Red #{0}: Klijent Dostavljen Artikal {1} nije u Radnom Nalogu {2}"
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:61
 msgid "Row #{0}: Dates overlapping with other row in group {1}"
@@ -44160,7 +44160,7 @@ msgstr "Red #{0}: Artikal {1} u skladištu {2}: Dostupno {3}, Potrebno {4}."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:65
 msgid "Row #{0}: Item {1} is not a Customer Provided Item."
-msgstr "Red #{0}: Artikal {1} nije Klijent Dostavljeni Artikal."
+msgstr "Red #{0}: Artikal {1} nije Klijent Dostavljen Artikal."
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:765
 msgid "Row #{0}: Item {1} is not a Serialized/Batched Item. It cannot have a Serial No/Batch No against it."
@@ -50172,7 +50172,7 @@ msgstr "Zalihe se ne mogu ažurirati jer Faktura sadrži artikal direktne dostav
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:735
 msgid "Stock cannot be updated for Purchase Invoice {0} because a Purchase Receipt {1} has already been created for this transaction. Please disable the 'Update Stock' checkbox in the Purchase Invoice and save the invoice."
-msgstr "Zalihe se ne mogu ažurirati za Fakturu Nabave {0} jer je za ovu transakciju već kreiran Nalog Nabave {1}. Deaktiviraj 'Ažuriraj Zalihe' u Fakturi Nabave i spremi."
+msgstr "Zalihe se ne mogu ažurirati za Fakturu Nabave {0} jer je za ovu transakciju već kreiran Račun Nabave {1}. Deaktiviraj 'Ažuriraj Zalihe' u Fakturi Nabave i spremi."
 
 #: erpnext/stock/doctype/warehouse/warehouse.py:125
 msgid "Stock entries exist with the old account. Changing the account may lead to a mismatch between the warehouse closing balance and the account closing balance. The overall closing balance will still match, but not for the specific account."
@@ -54280,7 +54280,7 @@ msgstr "Ukupan Iznos u Riječima"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:264
 msgid "Total Applicable Charges in Purchase Receipt Items table must be same as Total Taxes and Charges"
-msgstr "Ukupni Primjenjive Naknade u tabeli Artikla Kupovnog Naloga moraju biti isti kao i Ukupni PDV i Naknade"
+msgstr "Ukupni Primjenjive Naknade u tabeli Artikla Računa Nabave moraju biti isti kao i Ukupni PDV i Naknade"
 
 #: erpnext/accounts/report/balance_sheet/balance_sheet.py:217
 msgid "Total Asset"
@@ -56646,7 +56646,7 @@ msgstr "Korisnik {} je onemogućen. Odaberi važećeg Korisnika/Blagajnika"
 #. field in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Users can enable the checkbox If they want to adjust the incoming rate (set using purchase receipt) based on the purchase invoice rate."
-msgstr "Korisnici mogu omogućiti potvrdni okvir Ako žele prilagoditi ulaznu cijenu (podešenu pomoću računa Nabave) na osnovu cijene fakture nabave."
+msgstr "Korisnici mogu omogućiti potvrdni okvir Ako žele prilagoditi nabavnu cijenu (podešenu pomoću računa nabave) na osnovu cijene fakture nabave."
 
 #. Description of the 'Track Semi Finished Goods' (Check) field in DocType
 #. 'BOM'
@@ -56951,7 +56951,7 @@ msgstr "Vrednovanje i Ukupno"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:1008
 msgid "Valuation rate for customer provided items has been set to zero."
-msgstr "Stopa Vrednovanja za Artikle koje je dostavio Klijent postavljena je na nulu."
+msgstr "Stopa Vrednovanja za Klijent Dostavljene Artikle postavljena je na nulu."
 
 #. Description of the 'Sales Incoming Rate' (Currency) field in DocType
 #. 'Purchase Invoice Item'
