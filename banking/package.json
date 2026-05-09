@@ -24,7 +24,7 @@
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.20",
-    "frappe-react-sdk": "^1.14.0",
+    "frappe-react-sdk": "^1.15.0",
     "fuse.js": "^7.3.0",
     "jotai": "^2.20.0",
     "jotai-family": "^1.0.1",
