@@ -129,6 +129,7 @@ class PaymentRequest(Document):
 			self.status = "Draft"
 		self.validate_reference_document()
 		self.validate_payment_flows()
+		self.validate_payment_account()
 		self.validate_against_payment_reference()
 		self.validate_payment_request_amount()
 		self.validate_currency()
@@ -137,6 +138,25 @@ class PaymentRequest(Document):
 	def validate_payment_flows(self):
 		if self.bank_account and self.payment_gateway:
 			frappe.throw(_("Select either Bank Account or Payment Gateway."))
+
+	def validate_payment_account(self):
+		if not self.get("payment_gateway") or not self.get("payment_account"):
+			return
+
+		if not frappe.db.exists(
+			"Payment Gateway Account",
+			{
+				"parent": self.payment_gateway,
+				"parenttype": "Payment Gateway",
+				"company": self.company,
+				"payment_account": self.payment_account,
+			},
+		):
+			frappe.throw(
+				_("Payment Account {0} is not configured under Payment Gateway {1} for company {2}").format(
+					self.payment_account, self.payment_gateway, self.company
+				)
+			)
 
 	def validate_against_payment_reference(self):
 		if not self.payment_reference:
@@ -195,9 +215,7 @@ class PaymentRequest(Document):
 			return
 
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
-		if self.payment_account and ref_doc.currency != frappe.get_cached_value(
-			"Account", self.payment_account, "account_currency"
-		):
+		if ref_doc.currency != frappe.get_cached_value("Account", self.payment_account, "account_currency"):
 			frappe.throw(_("Transaction currency must be same as Payment Account currency"))
 
 	def validate_subscription_details(self):
