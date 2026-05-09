@@ -97,12 +97,15 @@ class BankStatementImportLog(Document):
 	def before_insert(self):
 		data = self.get_data()
 
-		self.set_header_row_index(data)
+		self.set_file_properties(data)
 
-		self.set_column_mapping(data)
+	def set_file_properties(self, raw_data: list[list]):
+		self.set_header_row_index(raw_data)
+
+		self.set_column_mapping(raw_data)
 
 		transaction_rows, transaction_starting_index, transaction_ending_index = self.get_transaction_rows(
-			data
+			raw_data
 		)
 
 		self.detected_transaction_starting_index = transaction_starting_index
