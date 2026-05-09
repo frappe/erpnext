@@ -85,6 +85,11 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 			frm.trigger("make_reconciliation_tool");
 		});
 		frm.change_custom_button_type(__("Get Unreconciled Entries"), null, "primary");
+
+		frm.set_intro(
+			__("Try the {0} for a better experience.", ["<a href='/banking'>new Banking module</a>"]),
+			"info"
+		);
 	},
 
 	bank_account: function (frm) {
