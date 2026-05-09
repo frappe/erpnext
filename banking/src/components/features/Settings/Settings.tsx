@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/settings-dialog'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import _ from '@/lib/translate'
-import { KeyboardIcon, LandmarkIcon, ListIcon, SettingsIcon, SlidersVerticalIcon, ZapIcon } from 'lucide-react'
+import { KeyboardIcon, SettingsIcon, SlidersVerticalIcon, ZapIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Preferences } from './Preferences'
 import MatchingRules from './MatchingRules'
@@ -45,7 +45,7 @@ const Settings = () => {
             </Tooltip>
             <SettingsDialog defaultValue="preferences" onClose={() => setIsOpen(false)}>
                 <SettingsTabs>
-                    <SettingsTabGroup header={_("Configuration")}>
+                    <SettingsTabGroup header={_("Settings")}>
                         <SettingsTabItem
                             icon={<SlidersVerticalIcon />}
                             label={_("Preferences")}
@@ -56,10 +56,7 @@ const Settings = () => {
                             label={_("Matching Rules")}
                             value="rules"
                         />
-                    </SettingsTabGroup>
-
-                    <SettingsTabGroup header={_("Setup")}>
-                        <SettingsTabItem
+                        {/* <SettingsTabItem
                             icon={<LandmarkIcon />}
                             label={_("Bank Accounts")}
                             value="bank-accounts"
@@ -68,7 +65,7 @@ const Settings = () => {
                             icon={<ListIcon />}
                             label={_("Masters")}
                             value="masters"
-                        />
+                        /> */}
                         <SettingsTabItem
                             icon={<KeyboardIcon />}
                             label={_("Keyboard Shortcuts")}
