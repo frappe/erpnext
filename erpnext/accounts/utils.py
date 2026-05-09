@@ -1519,13 +1519,20 @@ def create_payment_gateway_account(gateway, payment_channel="Email", company=Non
 		bank_account = create_bank_account({"company_name": company, "bank_account": _(gateway)})
 
 	if not bank_account:
-		frappe.msgprint(_("Payment Gateway Account not created, please create one manually."))
+		frappe.msgprint(
+			_("Payment Gateway Account not created, please create one under a Payment Gateway manually.")
+		)
 		return
 
 	# if payment gateway account exists, return
 	if frappe.db.exists(
 		"Payment Gateway Account",
-		{"payment_gateway": gateway, "currency": bank_account.account_currency},
+		{
+			"parent": gateway,
+			"parenttype": "Payment Gateway",
+			"company": company,
+			"payment_account": bank_account.name,
+		},
 	):
 		return
 
@@ -1533,8 +1540,10 @@ def create_payment_gateway_account(gateway, payment_channel="Email", company=Non
 		frappe.get_doc(
 			{
 				"doctype": "Payment Gateway Account",
+				"parent": gateway,
+				"parenttype": "Payment Gateway",
+				"parentfield": "payment_gateway_account",
 				"is_default": 1,
-				"payment_gateway": gateway,
 				"payment_account": bank_account.name,
 				"currency": bank_account.account_currency,
 				"payment_channel": payment_channel,
