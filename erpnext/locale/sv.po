@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-03 09:55+0000\n"
-"PO-Revision-Date: 2026-05-08 18:02\n"
+"PO-Revision-Date: 2026-05-09 18:16\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -18295,7 +18295,7 @@ msgstr "Aktivera om artikel är tillgång, t. ex. Maskiner eller Möbler."
 #. 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Enable if this item is provided by a customer and received via Stock Entry."
-msgstr "Aktivera om denna artikel tillhandahålls av kund och tas emot via Lager Post."
+msgstr "Aktivera om denna artikel är Kund Försedd och tas emot via Lager Post."
 
 #. Description of the 'Consider Rejected Warehouses' (Check) field in DocType
 #. 'Pick List'
@@ -56957,7 +56957,7 @@ msgstr "Grund Pris och Totalt"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:1008
 msgid "Valuation rate for customer provided items has been set to zero."
-msgstr "Grund Pris för Kund Försedda Artiklar sattes till noll."
+msgstr "Grund Pris för Kund Försedda Artiklar angavs till noll."
 
 #. Description of the 'Sales Incoming Rate' (Currency) field in DocType
 #. 'Purchase Invoice Item'
