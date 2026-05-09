@@ -613,18 +613,24 @@ def update_accounting_dimensions(round_off_gle):
 
 		for dimension in dimensions:
 			round_off_gle[dimension] = dimension_values.get(dimension)
-	else:
-		report_type = frappe.get_cached_value("Account", round_off_gle.account, "report_type")
-		for dimension in get_checks_for_pl_and_bs_accounts():
-			if (
-				round_off_gle.company == dimension.company
-				and (
-					(report_type == "Profit and Loss" and dimension.mandatory_for_pl)
-					or (report_type == "Balance Sheet" and dimension.mandatory_for_bs)
-				)
-				and dimension.default_dimension
-			):
-				round_off_gle[dimension.fieldname] = dimension.default_dimension
+
+	# Fall back to the per-company default dimension for any mandatory dimension
+	# that is still unset. This handles the common case where the parent voucher
+	# has the dimension field but its value is None (e.g. line-level dimensions
+	# rather than header-level), which would otherwise trip the mandatory-dimension
+	# validator on the round-off GL entry.
+	report_type = frappe.get_cached_value("Account", round_off_gle.account, "report_type")
+	for dimension in get_checks_for_pl_and_bs_accounts():
+		if (
+			round_off_gle.company == dimension.company
+			and (
+				(report_type == "Profit and Loss" and dimension.mandatory_for_pl)
+				or (report_type == "Balance Sheet" and dimension.mandatory_for_bs)
+			)
+			and dimension.default_dimension
+			and not round_off_gle.get(dimension.fieldname)
+		):
+			round_off_gle[dimension.fieldname] = dimension.default_dimension
 
 
 def get_round_off_account_and_cost_center(company, voucher_type, voucher_no, use_company_default=False):

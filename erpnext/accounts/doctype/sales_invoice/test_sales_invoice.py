@@ -2346,6 +2346,177 @@ class TestSalesInvoice(FrappeTestCase):
 
 		disable_dimension()
 
+	def test_round_off_gle_falls_back_to_default_for_mandatory_pl_dimension(self):
+		"""
+		Round-off GL entry should inherit the per-company default_dimension when
+		the parent voucher exposes a mandatory_for_pl accounting dimension field
+		but its value is None. Previously the parent's None was copied verbatim,
+		causing the validate_dimensions_for_pl_and_bs validator to reject the
+		round-off GLE on submit.
+		"""
+		from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
+			create_dimension,
+			disable_dimension,
+		)
+
+		create_dimension()
+		frappe.db.set_value("Company", "_Test Company", "round_off_account", "Round Off - _TC")
+
+		# Mark Location as mandatory for P&L (Round Off account is P&L). Persist
+		# the prior values so we can restore them at the end.
+		location = frappe.get_doc("Accounting Dimension", "Location")
+		original = [
+			(d.company, d.mandatory_for_pl, d.mandatory_for_bs, d.default_dimension)
+			for d in location.dimension_defaults
+		]
+		for d in location.dimension_defaults:
+			if d.company == "_Test Company":
+				d.mandatory_for_pl = 1
+				d.mandatory_for_bs = 0
+				d.default_dimension = "Block 1"
+		location.save()
+
+		try:
+			# Build an SI that produces a round-off GLE (cents drift via inclusive tax).
+			# Crucially, leave si.location unset so the parent has the field but value is None.
+			si = create_sales_invoice(do_not_save=True)
+			si.items = []
+			for d in [(1122, 2), (1122.01, 1), (1122.01, 1)]:
+				si.append(
+					"items",
+					{
+						"item_code": "_Test Item",
+						"gst_hsn_code": "999800",
+						"warehouse": "_Test Warehouse - _TC",
+						"qty": d[1],
+						"rate": d[0],
+						"income_account": "Sales - _TC",
+						"cost_center": "_Test Cost Center - _TC",
+						"location": "Block 1",
+					},
+				)
+			for tax_account in ["_Test Account VAT - _TC", "_Test Account Service Tax - _TC"]:
+				si.append(
+					"taxes",
+					{
+						"charge_type": "On Net Total",
+						"account_head": tax_account,
+						"description": tax_account,
+						"rate": 6,
+						"cost_center": "_Test Cost Center - _TC",
+						"included_in_print_rate": 1,
+					},
+				)
+
+			# Ensure header-level dimension is None (the bug condition).
+			si.location = None
+			si.save()
+			self.assertIsNone(si.location)
+
+			# Submit must succeed; pre-fix this raised:
+			#   "Accounting Dimension Location is required for 'Profit and Loss' account Round Off - _TC"
+			si.submit()
+
+			round_off_gle = frappe.db.get_value(
+				"GL Entry",
+				{"voucher_type": "Sales Invoice", "voucher_no": si.name, "account": "Round Off - _TC"},
+				["location"],
+				as_dict=1,
+			)
+			self.assertIsNotNone(round_off_gle, "Round Off GL entry should exist for this invoice")
+			self.assertEqual(round_off_gle.location, "Block 1")
+		finally:
+			# Restore original mandatory flags / defaults
+			location = frappe.get_doc("Accounting Dimension", "Location")
+			for d, prior in zip(location.dimension_defaults, original, strict=False):
+				d.mandatory_for_pl = prior[1]
+				d.mandatory_for_bs = prior[2]
+				d.default_dimension = prior[3]
+			location.save()
+			disable_dimension()
+
+	def test_round_off_gle_preserves_parent_value_for_mandatory_dimension(self):
+		"""
+		When the parent voucher carries a non-None value for a mandatory_for_pl
+		dimension, the round-off GLE should keep that value rather than be
+		overwritten by the per-company default fallback.
+		"""
+		from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
+			create_dimension,
+			disable_dimension,
+		)
+
+		create_dimension()
+		frappe.db.set_value("Company", "_Test Company", "round_off_account", "Round Off - _TC")
+
+		# Point the per-company default at a location that DIFFERS from the
+		# value we set on the parent. If the parent's value is preserved as
+		# expected, the round-off GLE will hold "Block 1" (parent value), not
+		# "Field 1" (the default).
+		location = frappe.get_doc("Accounting Dimension", "Location")
+		original = [
+			(d.company, d.mandatory_for_pl, d.mandatory_for_bs, d.default_dimension)
+			for d in location.dimension_defaults
+		]
+		for d in location.dimension_defaults:
+			if d.company == "_Test Company":
+				d.mandatory_for_pl = 1
+				d.mandatory_for_bs = 0
+				d.default_dimension = "Field 1"
+		location.save()
+
+		try:
+			si = create_sales_invoice(do_not_save=True)
+			si.items = []
+			for d in [(1122, 2), (1122.01, 1), (1122.01, 1)]:
+				si.append(
+					"items",
+					{
+						"item_code": "_Test Item",
+						"gst_hsn_code": "999800",
+						"warehouse": "_Test Warehouse - _TC",
+						"qty": d[1],
+						"rate": d[0],
+						"income_account": "Sales - _TC",
+						"cost_center": "_Test Cost Center - _TC",
+						"location": "Block 1",
+					},
+				)
+			for tax_account in ["_Test Account VAT - _TC", "_Test Account Service Tax - _TC"]:
+				si.append(
+					"taxes",
+					{
+						"charge_type": "On Net Total",
+						"account_head": tax_account,
+						"description": tax_account,
+						"rate": 6,
+						"cost_center": "_Test Cost Center - _TC",
+						"included_in_print_rate": 1,
+					},
+				)
+
+			# Header carries an explicit non-default value; fallback must NOT overwrite it.
+			si.location = "Block 1"
+			si.save()
+			si.submit()
+
+			round_off_gle = frappe.db.get_value(
+				"GL Entry",
+				{"voucher_type": "Sales Invoice", "voucher_no": si.name, "account": "Round Off - _TC"},
+				["location"],
+				as_dict=1,
+			)
+			self.assertIsNotNone(round_off_gle, "Round Off GL entry should exist for this invoice")
+			self.assertEqual(round_off_gle.location, "Block 1")
+		finally:
+			location = frappe.get_doc("Accounting Dimension", "Location")
+			for d, prior in zip(location.dimension_defaults, original, strict=False):
+				d.mandatory_for_pl = prior[1]
+				d.mandatory_for_bs = prior[2]
+				d.default_dimension = prior[3]
+			location.save()
+			disable_dimension()
+
 	def test_sales_invoice_with_shipping_rule(self):
 		from erpnext.accounts.doctype.shipping_rule.test_shipping_rule import create_shipping_rule
 
