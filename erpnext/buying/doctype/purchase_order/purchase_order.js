@@ -777,61 +777,26 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 				},
 			],
 			primary_action: (values) => {
-				const data = values.items.filter((item) => item.__checked);
-				if (!data.length) {
-					frappe.throw(__("Please select at least one item to update delivered quantity."));
-				}
-
-				data.forEach((item) => {
-					if (!item.qty_change) {
-						frappe.throw(
-							__(
-								"Item {0} has no changes in delivered quantity. Please unselect the row if you do not wish to update its quantity.",
-								[item.item_code.bold()]
-							)
-						);
-					}
-					if (item.qty_change < 0 && Math.abs(item.qty_change) > item.delivered_qty) {
-						frappe.throw(
-							__("Delivered Qty cannot be reduced by more than {0} for item {1}", [
-								item.delivered_qty,
-								item.item_code.bold(),
-							])
-						);
-					}
-					if (item.qty_change > 0 && item.delivered_qty + item.qty_change > item.qty) {
-						frappe.throw(
-							__("Delivered Qty cannot be increased by more than {0} for item {1}", [
-								item.qty - item.delivered_qty,
-								item.item_code.bold(),
-							])
-						);
-					}
-				});
-
-				data.forEach((item) => {
-					frappe.model.set_value(
-						"Purchase Order Item",
-						item.name,
-						"received_qty",
-						item.delivered_qty + item.qty_change
-					);
-				});
-
 				const frm = this.frm;
-				frm.dirty();
-				frm.save("Update", () => {
-					frappe.call({
-						doc: frm.doc,
-						method: "update_receiving_percentage",
-						callback: function (r) {
-							if (!r.exc) {
-								dialog.hide();
-								frappe.toast(__("Quantities updated successfully."));
-								frm.reload_doc();
-							}
-						},
-					});
+				frappe.call({
+					doc: frm.doc,
+					method: "update_dropship_received_qty",
+					args: {
+						data: values.items
+							.filter((item) => item.__checked)
+							.map((item) => ({
+								name: item.name,
+								current_qty: item.delivered_qty,
+								qty_change: item.qty_change,
+							})),
+					},
+					callback: function (r) {
+						if (!r.exc) {
+							frm.reload_doc();
+							frappe.toast(__("Quantities updated successfully."));
+							dialog.hide();
+						}
+					},
 				});
 			},
 		});
