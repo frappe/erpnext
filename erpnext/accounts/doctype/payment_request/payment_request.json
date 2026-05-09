@@ -44,8 +44,6 @@
   "cost_center",
   "dimension_col_break",
   "project",
-  "payment_details_section",
-  "payment_account",
   "recipient_details",
   "print_format",
   "email_to",
@@ -68,6 +66,7 @@
    "fieldtype": "Select",
    "label": "Payment Request Type",
    "options": "Outward\nInward",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -106,13 +105,15 @@
    "fieldname": "party_type",
    "fieldtype": "Link",
    "label": "Party Type",
-   "options": "DocType"
+   "options": "DocType",
+   "read_only": 1
   },
   {
    "fieldname": "party",
    "fieldtype": "Dynamic Link",
    "label": "Party",
-   "options": "party_type"
+   "options": "party_type",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_4",
@@ -187,7 +188,7 @@
    "options": "Subscription Plan Detail"
   },
   {
-   "collapsible": 1,
+   "depends_on": "eval: !doc.payment_gateway",
    "fieldname": "bank_account_details",
    "fieldtype": "Section Break",
    "label": "Bank Account Details"
@@ -403,27 +404,18 @@
    "fieldtype": "Column Break"
   },
   {
+   "collapsible": 1,
    "depends_on": "eval: !doc.payment_channel ? doc.payment_request_type == \"Inward\" : doc.payment_channel == \"Email\"",
    "fieldname": "recipient_details",
    "fieldtype": "Section Break",
    "label": "Recipient Details"
   },
   {
+   "collapsible": 1,
    "depends_on": "eval: !doc.payment_channel ? doc.payment_request_type == \"Inward\" : doc.payment_channel == \"Email\"",
    "fieldname": "message_details",
    "fieldtype": "Section Break",
    "label": "Message Details"
-  },
-  {
-   "fieldname": "payment_details_section",
-   "fieldtype": "Section Break",
-   "label": "Payment Details"
-  },
-  {
-   "fieldname": "payment_account",
-   "fieldtype": "Link",
-   "label": "Payment Account",
-   "options": "Account"
   }
  ],
  "grid_page_length": 50,
@@ -431,7 +423,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-29 20:28:38.207170",
+ "modified": "2026-05-06 01:25:11.783984",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Request",
