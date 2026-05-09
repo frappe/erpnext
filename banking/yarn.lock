@@ -1508,7 +1508,7 @@ attr-accept@^2.2.4:
   resolved "https://registry.yarnpkg.com/attr-accept/-/attr-accept-2.2.5.tgz#d7061d958e6d4f97bf8665c68b75851a0713ab5e"
   integrity sha512-0bDNnY/u6pPwHDMoF0FieU354oBi0a8rD9FcsLwzcGWbc8KS8KPIi7y+s13OlVY+gMWc/9xEMUgNE6Qm8ZllYQ==
 
-axios@^1.12.2:
+axios@^1.16.0:
   version "1.16.0"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.16.0.tgz#f8e5dd931cef2a5f8c32216d5784eda2f8750eb7"
   integrity sha512-6hp5CwvTPlN2A31g5dxnwAX0orzM7pmCRDLnZSX772mv8WDqICwFjowHuPs04Mc8deIld1+ejhtaMn5vp6b+1w==
@@ -2040,21 +2040,21 @@ form-data@^4.0.5:
     hasown "^2.0.2"
     mime-types "^2.1.12"
 
-frappe-js-sdk@^1.12.0:
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/frappe-js-sdk/-/frappe-js-sdk-1.12.0.tgz#2abc265d309144c600d0948b7785ef19617fe20f"
-  integrity sha512-5I0PBqeqhd5WYdTfN6qS/OvzM7TBXt1JRT6S+L5/TgKZFQy55hQH6oJVURyNQ+/qFeNSf2LjKwV1v5Huhwg+Rw==
+frappe-js-sdk@^1.13.0:
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/frappe-js-sdk/-/frappe-js-sdk-1.13.0.tgz#eaea81e361d7c77f38aa5ea502f668197c9ea4c5"
+  integrity sha512-+5JiRHfN3qTkZ37g+FtuSZMxEQ+wIJLTLMoIR1pBYGw4R7KO7Ed4zz8jE8ad0c4xwHQFelZ+ByPe7sej52eWOQ==
   dependencies:
-    axios "^1.12.2"
+    axios "^1.16.0"
 
-frappe-react-sdk@^1.14.0:
-  version "1.14.0"
-  resolved "https://registry.yarnpkg.com/frappe-react-sdk/-/frappe-react-sdk-1.14.0.tgz#05a97ded6558f56d0c473e55f531cfaff7d6d161"
-  integrity sha512-tadSW+r558C91I62Umo838XkDJV/iilwXfusU9sn8uuxdBRt0n64VJH22rB7lWw3H/fgHXmnIjmhQEqHVe13Hw==
+frappe-react-sdk@^1.15.0:
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/frappe-react-sdk/-/frappe-react-sdk-1.15.0.tgz#0fd2e5daf7c2a40a6acc6536c2a110ae14aef161"
+  integrity sha512-JYFo3olbknsHOsKknHcu4sRJikf8S9xUg+qdM79fOgEUepUmuYnG8pFs/1fPCdNrnYyVXj908AoQ1GT6GP6Viw==
   dependencies:
-    frappe-js-sdk "^1.12.0"
+    frappe-js-sdk "^1.13.0"
     socket.io-client "4.7.1"
-    swr "^2.3.6"
+    swr "^2.4.1"
 
 fsevents@~2.3.3:
   version "2.3.3"
@@ -3522,10 +3522,10 @@ supports-color@^7.1.0:
   dependencies:
     has-flag "^4.0.0"
 
-swr@^2.3.6:
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/swr/-/swr-2.4.0.tgz#cd11e368cb13597f61ee3334428aa20b5e81f36e"
-  integrity sha512-sUlC20T8EOt1pHmDiqueUWMmRRX03W7w5YxovWX7VR2KHEPCTMly85x05vpkP5i6Bu4h44ePSMD9Tc+G2MItFw==
+swr@^2.4.1:
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/swr/-/swr-2.4.1.tgz#c9e48abff6bf4b04846342e2f1f6be108a078cf6"
+  integrity sha512-2CC6CiKQtEwaEeNiqWTAw9PGykW8SR5zZX8MZk6TeAvEAnVS7Visz8WzphqgtQ8v2xz/4Q5K+j+SeMaKXeeQIA==
   dependencies:
     dequal "^2.0.3"
     use-sync-external-store "^1.6.0"
