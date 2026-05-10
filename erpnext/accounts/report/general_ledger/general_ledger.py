@@ -417,7 +417,13 @@ def get_data_with_opening_closing(filters, account_details, accounting_dimension
 	# Opening for filtered account
 	add_total_to_data(totals, "opening")
 
-	if filters.get("categorize_by") != "Categorize by Voucher (Consolidated)":
+	if not filters.get("categorize_by"):
+		all_entries = []
+		for acc_dict in gle_map.values():
+			all_entries.extend(acc_dict.entries)
+		data += all_entries
+
+	elif filters.get("categorize_by") != "Categorize by Voucher (Consolidated)":
 		set_opening_closing = (not filters.get("categorize_by") and not filters.get("voucher_no")) or (
 			filters.get("categorize_by") and filters.get("categorize_by") != "Categorize by Voucher"
 		)
@@ -483,7 +489,6 @@ def initialize_gle_map(gl_entries, filters):
 				totals=get_totals_dict(),
 				entries=[],
 			)
-
 	return gle_map
 
 
