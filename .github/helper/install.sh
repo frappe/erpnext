@@ -325,7 +325,7 @@ fi
 
 cd ~/frappe-bench || exit
 
-run_ci_step "Get payments app" bench get-app payments --branch develop
+run_ci_step "Get payments app" bench get-app "https://github.com/Shllokkk/payments" --branch "payment-gateway-fix"
 
 # Opt-in: skip building erpnext's frontend assets. Server tests don't need them, but PDF
 # tests (print formats) do — they pass only if the PDF renderer ignores missing assets.
