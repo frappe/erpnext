@@ -3461,6 +3461,7 @@ def make_purchase_invoice(**args):
 			"use_serial_batch_fields": args.get("use_serial_batch_fields") or 0,
 			"batch_no": args.get("batch_no") if args.get("use_serial_batch_fields") else "",
 			"serial_no": args.get("serial_no") if args.get("use_serial_batch_fields") else "",
+			"delivered_by_supplier": 0,
 		},
 	)
 
