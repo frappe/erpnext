@@ -565,6 +565,13 @@ class PurchaseOrder(BuyingController):
 					_("Item with name {0} not found in the Purchase Order").format(frappe.bold(d.get("name")))
 				)
 
+			if not item.delivered_by_supplier:
+				frappe.throw(
+					_(
+						"Item {0} is not a drop ship item. Only drop ship items can have Delivered Qty updated."
+					).format(frappe.bold(item.item_code))
+				)
+
 			if not item.has_permlevel_access_to("received_qty", permission_type="write"):
 				frappe.throw(
 					_("You don't have permission to update Received Qty DocField for item {0}").format(
