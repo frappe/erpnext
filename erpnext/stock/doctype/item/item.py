@@ -223,6 +223,7 @@ class Item(Document):
 		self.validate_warehouse_for_reorder()
 		self.update_bom_item_desc()
 
+		self.validate_variant()
 		self.validate_has_variants()
 		self.validate_attributes_in_variants()
 		self.validate_stock_exists_for_template_item()
@@ -859,6 +860,43 @@ class Item(Document):
 						timeout=600,
 						enqueue_after_commit=True,
 					)
+
+	def validate_variant(self):
+		if self.variant_of:
+			has_variants, based_on = frappe.get_value(
+				"Item", self.variant_of, ["has_variants", "variant_based_on"]
+			)
+			if not has_variants:
+				frappe.throw(_("Item {0} is not a template item.").format(frappe.bold(self.variant_of)))
+
+			if based_on == "Item Attribute":
+				for d in self.attributes:
+					if not frappe.db.exists(
+						"Item Variant Attribute", {"attribute": d.attribute, "parent": self.variant_of}
+					):
+						frappe.throw(
+							_("Attribute {0} is not valid for the selected template.").format(
+								frappe.bold(d.attribute)
+							)
+						)
+
+					numeric_values, disabled = frappe.get_value(
+						"Item Variant Attribute",
+						{"attribute": d.attribute, "parent": self.variant_of},
+						["numeric_values", "disabled"],
+					)
+
+					if disabled:
+						frappe.throw(_("Attribute {0} is disabled.").format(frappe.bold(d.attribute)))
+
+					if not numeric_values and not frappe.db.exists(
+						"Item Attribute Value", {"parent": d.attribute, "attribute_value": d.attribute_value}
+					):
+						frappe.throw(
+							_("Attribute Value {0} is not valid for the selected attribute {1}.").format(
+								frappe.bold(d.attribute_value), frappe.bold(d.attribute)
+							)
+						)
 
 	def validate_has_variants(self):
 		if self.is_new():
