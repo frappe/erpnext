@@ -96,9 +96,12 @@ function get_filters() {
 				if (!frappe.query_report.filters) return;
 
 				let budget_against = frappe.query_report.get_filter_value("budget_against");
+				let company = frappe.query_report.get_filter_value("company");
 				if (!budget_against) return;
+				// Branch does not have company field
+				const filters = budget_against !== "Branch" && company ? { company: company } : {};
 
-				return frappe.db.get_link_options(budget_against, txt);
+				return frappe.db.get_link_options(budget_against, txt, filters);
 			},
 		},
 		{
