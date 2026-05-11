@@ -324,6 +324,10 @@ class WorkOrder(Document):
 	def calculate_operating_cost(self):
 		self.planned_operating_cost, self.actual_operating_cost = 0.0, 0.0
 		for d in self.get("operations"):
+			if not d.hour_rate:
+				if d.workstation:
+					d.hour_rate = get_hour_rate(d.workstation)
+
 			d.planned_operating_cost = flt(
 				flt(d.hour_rate) * (flt(d.time_in_mins) / 60.0), d.precision("planned_operating_cost")
 			)
@@ -1895,3 +1899,8 @@ def make_stock_return_entry(work_order):
 	stock_entry.set_stock_entry_type()
 
 	return stock_entry
+
+
+@frappe.request_cache
+def get_hour_rate(workstation):
+	return frappe.get_cached_value("Workstation", workstation, "hour_rate") or 0.0
