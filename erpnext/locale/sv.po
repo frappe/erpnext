@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-10 10:00+0000\n"
-"PO-Revision-Date: 2026-05-10 18:21\n"
+"PO-Revision-Date: 2026-05-11 18:40\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -29923,7 +29923,7 @@ msgstr "Stäm av"
 
 #: banking/src/pages/BankReconciliation.tsx:116
 msgid "Match and Reconcile"
-msgstr "Matcha och Avstämma"
+msgstr "Jämför och Avstäm"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:62
 msgid "Match or Create"
@@ -48097,7 +48097,7 @@ msgstr "Välj Bolag"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:342
 msgid "Select a transaction to match and reconcile with vouchers"
-msgstr "Välj transaktion att matcha och stämma av med verifikationer"
+msgstr "Välj transaktion att jämföra och stämma av med verifikationer"
 
 #: banking/src/components/features/BankReconciliation/BankEntryModal.tsx:607
 #: banking/src/components/features/BankReconciliation/RecordPaymentModal.tsx:702
