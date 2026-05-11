@@ -20,7 +20,12 @@ const BankPicker = ({ className }: { className?: string }) => {
 
     const onLoadingSuccess = useCallback((data?: SelectedBank[]) => {
         // If the bank is already selected, then don't set it again
-        if (selectedBank) return
+        if (selectedBank) {
+            // Check if selected bank is in the data
+            if (data?.some((bank: SelectedBank) => bank.name === selectedBank.name)) {
+                return
+            }
+        }
         if (!data) return
         if (data.length === 1) {
             setSelectedBank(data[0])
