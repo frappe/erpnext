@@ -21,7 +21,7 @@ import { useDebounceValue } from "usehooks-ts"
 import type { ColumnDef } from "@tanstack/react-table"
 import { useCallback, useMemo, useState } from "react"
 import { Link } from "react-router"
-import { Empty, EmptyTitle, EmptyHeader, EmptyMedia, EmptyDescription } from "@/components/ui/empty"
+import { Empty, EmptyTitle, EmptyHeader, EmptyMedia, EmptyDescription, EmptyContent } from "@/components/ui/empty"
 import { InputGroup, InputGroupAddon } from "@/components/ui/input-group"
 
 const BankTransactions = () => {
@@ -262,7 +262,7 @@ const BankTransactionListView = () => {
 
         {error && <ErrorBanner error={error} />}
 
-        {data && data.message.length > 0 && <Filters
+        <Filters
             onSearchChange={onSearchChange}
             search={search}
             results={filteredResults}
@@ -272,28 +272,31 @@ const BankTransactionListView = () => {
             typeFilter={typeFilter}
             status={status}
             setStatus={setStatus}
-        />}
+        />
 
-        {data && data.message.length > 0 ? (
-            <ListView
-                data={filteredResults}
-                columns={transactionColumns}
-                getRowId={(row) => row.name}
-                maxHeight="calc(100vh - 200px)"
-                scrollAreaClassName="min-h-[calc(100vh-200px)]"
-                emptyState={<Empty>
-                    <EmptyMedia>
-                        <ListIcon />
-                    </EmptyMedia>
-                    <EmptyHeader>
-                        <EmptyTitle>{_("No bank transactions found")}</EmptyTitle>
-                        <EmptyDescription>{_("There are no transactions in the system for the selected bank account and dates that match the filters.")}</EmptyDescription>
-                    </EmptyHeader>
-                </Empty>}
-            />
-        ) : null}
-
-
+        <ListView
+            data={filteredResults}
+            columns={transactionColumns}
+            getRowId={(row) => row.name}
+            maxHeight="calc(100vh - 200px)"
+            scrollAreaClassName="min-h-[calc(100vh-200px)]"
+            emptyState={<Empty>
+                <EmptyMedia>
+                    <ListIcon />
+                </EmptyMedia>
+                <EmptyHeader>
+                    <EmptyTitle>{_("No bank transactions found")}</EmptyTitle>
+                    <EmptyDescription>{_("There are no transactions in the system for the selected bank account and dates that match the filters.")}</EmptyDescription>
+                </EmptyHeader>
+                {data && data.message.length === 0 ? <EmptyContent>
+                    <Button type='button' asChild variant='outline'>
+                        <Link to="/statement-importer">
+                            {_("Import Bank Statement")}
+                        </Link>
+                    </Button>
+                </EmptyContent> : null}
+            </Empty>}
+        />
     </div>
 }
 
