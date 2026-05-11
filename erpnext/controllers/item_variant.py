@@ -162,36 +162,23 @@ def validate_item_attribute_value(attributes_list, attribute, attribute_value, i
 
 
 def get_attribute_values(item):
-	"""Fetch and cache allowed attribute values from template for validation."""
 	if not frappe.flags.attribute_values:
-		frappe.flags.attribute_values = {}
-		frappe.flags.numeric_values = {}
+		attribute_values = {}
+		numeric_values = {}
+		for t in frappe.get_all("Item Attribute Value", fields=["parent", "attribute_value"]):
+			attribute_values.setdefault(t.parent.lower(), []).append(t.attribute_value)
 
-	if not item.variant_of:
-		return frappe.flags.attribute_values, {}
-
-	template_doc = frappe.get_cached_doc("Item", item.variant_of)
-	attributes = [d.attribute for d in template_doc.attributes]
-
-	missing_attributes = [a for a in attributes if a.lower() not in frappe.flags.attribute_values]
-
-	if missing_attributes:
 		for t in frappe.get_all(
-			"Item Attribute Value",
-			fields=["parent", "attribute_value"],
-			filters={"parent": ("in", missing_attributes)},
+			"Item Variant Attribute",
+			fields=["attribute", "from_range", "to_range", "increment"],
+			filters={"numeric_values": 1, "parent": item.variant_of},
 		):
-			frappe.flags.attribute_values.setdefault(t.parent.lower(), []).append(t.attribute_value)
+			numeric_values[t.attribute.lower()] = t
 
-		for a in missing_attributes:
-			frappe.flags.attribute_values.setdefault(a.lower(), [])
+		frappe.flags.attribute_values = attribute_values
+		frappe.flags.numeric_values = numeric_values
 
-	numeric_values = {}
-	for attr_row in template_doc.attributes:
-		if attr_row.numeric_values:
-			numeric_values[attr_row.attribute.lower()] = attr_row
-
-	return frappe.flags.attribute_values, numeric_values
+	return frappe.flags.attribute_values, frappe.flags.numeric_values
 
 
 def find_variant(template, args, variant_item_code=None):

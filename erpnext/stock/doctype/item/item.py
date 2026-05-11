@@ -215,6 +215,7 @@ class Item(Document):
 		self.validate_warehouse_for_reorder()
 		self.update_bom_item_desc()
 
+		self.validate_variant()
 		self.validate_has_variants()
 		self.validate_attributes_in_variants()
 		self.validate_stock_exists_for_template_item()
@@ -815,6 +816,27 @@ class Item(Document):
 						enqueue_after_commit=True,
 					)
 
+	def validate_variant(self):
+		if not self.variant_of:
+			return
+
+		if not frappe.get_cached_value("Item", self.variant_of, "has_variants"):
+			frappe.throw(_("Item {0} is not a template item.").format(frappe.bold(self.variant_of)))
+
+		template_attributes = {d.attribute for d in frappe.get_cached_doc("Item", self.variant_of).attributes}
+
+		for d in self.attributes:
+			if d.attribute not in template_attributes:
+				frappe.throw(
+					_("Attribute {0} is not valid for the selected template.").format(
+						frappe.bold(d.attribute)
+					)
+				)
+
+		args = {d.attribute: d.attribute_value for d in self.attributes if cstr(d.attribute_value).strip()}
+		if args:
+			validate_item_variant_attributes(self, args)
+
 	def validate_has_variants(self):
 		if self.is_new():
 			return
@@ -970,24 +992,23 @@ class Item(Document):
 		if frappe.flags.ignore_variant_validation:
 			return
 
-		if self.variant_of and (not self.variant_based_on or self.variant_based_on == "Item Attribute"):
-			val = frappe.get_cached_value("Item", self.variant_of, "variant_based_on")
-			if val:
-				self.variant_based_on = val
+		if not self.variant_based_on and self.variant_of:
+			self.variant_based_on = frappe.get_cached_value("Item", self.variant_of, "variant_based_on")
 
 		if not self.variant_of or self.variant_based_on != "Item Attribute":
 			return
 
 		template_doc = frappe.get_cached_doc("Item", self.variant_of)
-		if template_doc.variant_of:
-			frappe.throw(
-				_("Item {0} is a variant and cannot be used as a template").format(
-					frappe.bold(self.variant_of)
-				)
-			)
 
 		if not template_doc.has_variants:
-			frappe.throw(_("Item {0} is not a template").format(frappe.bold(self.variant_of)))
+			if template_doc.variant_of:
+				frappe.throw(
+					_("Item {0} is a variant and cannot be used as a template").format(
+						frappe.bold(self.variant_of)
+					)
+				)
+			else:
+				frappe.throw(_("Item {0} is not a template").format(frappe.bold(self.variant_of)))
 
 		# remove attributes with no attribute_value set
 		self.attributes = [d for d in self.attributes if cstr(d.attribute_value).strip()]
@@ -1011,12 +1032,13 @@ class Item(Document):
 				title=_("Invalid Attributes"),
 			)
 
-		variant = get_variant(self.variant_of, args, self.name)
-		if variant:
-			frappe.throw(
-				_("Item variant {0} exists with same attributes").format(variant),
-				ItemVariantExistsError,
-			)
+		if self.is_new():
+			variant = get_variant(self.variant_of, args, self.name)
+			if variant:
+				frappe.throw(
+					_("Item variant {0} exists with same attributes").format(variant),
+					ItemVariantExistsError,
+				)
 
 		validate_item_variant_attributes(self, args)
 
