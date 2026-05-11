@@ -181,20 +181,15 @@ def daterange(start_date, end_date):
 
 
 def refresh_scorecards():
-	scorecards = frappe.db.sql(
-		"""
-		SELECT
-			sc.name
-		FROM
-			`tabSupplier Scorecard` sc""",
-		{},
-		as_dict=1,
-	)
-	for sc in scorecards:
+	"""
+	Refresh the scorecards
+	"""
+	scorecards = frappe.get_list("Supplier Scorecard", fields=["name"], pluck="name", limit_page_length=0)
+	for sc_name in scorecards:
 		# Check to see if any new scorecard periods are created
-		if make_all_scorecards(sc.name) > 0:
+		if make_all_scorecards(sc_name) > 0:
 			# Save the scorecard to update the score and standings
-			frappe.get_doc("Supplier Scorecard", sc.name).save()
+			frappe.get_doc("Supplier Scorecard", sc_name).save()
 
 
 @frappe.whitelist()
