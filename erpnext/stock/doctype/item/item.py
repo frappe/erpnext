@@ -1544,3 +1544,39 @@ def get_child_warehouses(warehouse):
 	from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 
 	return get_child_warehouses(warehouse)
+
+
+@frappe.whitelist()
+def get_item_prices(item_code: str):
+	"""Fetch valid item prices for the item prices tab."""
+	today = getdate()
+
+	ItemPrice = frappe.qb.DocType("Item Price")
+
+	prices = (
+		frappe.qb.from_(ItemPrice)
+		.select(
+			ItemPrice.name,
+			ItemPrice.price_list,
+			ItemPrice.price_list_rate,
+			ItemPrice.currency,
+			ItemPrice.uom,
+			ItemPrice.customer,
+			ItemPrice.supplier,
+			ItemPrice.buying,
+			ItemPrice.selling,
+			ItemPrice.valid_upto,
+		)
+		.where(ItemPrice.item_code == item_code)
+		.where(ItemPrice.docstatus != 2)
+		.where((ItemPrice.valid_upto.isnull()) | (ItemPrice.valid_upto >= today))
+		.orderby(ItemPrice.price_list)
+		.limit(21)
+		.run(as_dict=True)
+	)
+
+	has_more = len(prices) > 10
+	return {
+		"prices": prices[:10],
+		"has_more": has_more,
+	}

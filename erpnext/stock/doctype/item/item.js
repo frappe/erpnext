@@ -262,6 +262,8 @@ frappe.ui.form.on("Item", {
 			erpnext.item.make_dashboard(frm);
 		}
 
+		erpnext.item.render_item_prices(frm);
+
 		frm.add_custom_button(__("Duplicate"), function () {
 			var new_item = frappe.model.copy_doc(frm.doc);
 			// Duplicate item could have different name, causing "copy paste" error.
@@ -663,6 +665,43 @@ $.extend(erpnext.item, {
 				erpnext.item.item_dashboard.refresh();
 			});
 		}
+	},
+
+	render_item_prices: function (frm) {
+		if (frm.doc.__islocal) return;
+
+		const container = frm.fields_dict["prices_html"].$wrapper;
+		container.html(
+			`<div class="text-muted text-center" style="padding: 20px;">${__("Loading...")}</div>`
+		);
+
+		frappe.call({
+			method: "erpnext.stock.doctype.item.item.get_item_prices",
+			args: { item_code: frm.doc.name },
+			callback: function (r) {
+				if (!r.message) return;
+
+				const { prices, has_more } = r.message;
+
+				const html = frappe.render_template("item_prices", {
+					prices,
+					has_more,
+					item_code: frm.doc.name,
+					stock_uom: frm.doc.stock_uom,
+				});
+
+				container.html(html);
+
+				container.find(".add-price-btn").on("click", () => {
+					frappe.new_doc("Item Price", { item_code: frm.doc.name });
+				});
+
+				container.find(".price-row").on("click", function (e) {
+					if ($(e.target).is("a")) return;
+					frappe.set_route("Form", "Item Price", $(this).data("name"));
+				});
+			},
+		});
 	},
 
 	edit_prices_button: function (frm) {
