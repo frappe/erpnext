@@ -3,16 +3,18 @@
 
 
 import json
+import re
 from collections import OrderedDict, defaultdict
 
 import frappe
 from frappe import qb, scrub
 from frappe.desk.reportview import get_filters_cond, get_match_cond
 from frappe.permissions import has_permission
-from frappe.query_builder import Criterion, CustomFunction
-from frappe.query_builder.functions import Concat, Locate, Sum
+from frappe.query_builder import Case, Criterion, DocType, Field
+from frappe.query_builder.functions import Concat, CustomFunction, IfNull, Length, Locate, Substring, Sum
 from frappe.utils import nowdate, today, unique
 from pypika import Order
+from pypika.terms import LiteralValue
 
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
@@ -186,37 +188,14 @@ def item_query(
 	filters: dict | str | None = None,
 	as_dict: bool = False,
 ):
+	"""
+	Fetch items for link fields
+	"""
 	doctype = "Item"
 	conditions = []
 
 	if isinstance(filters, str):
 		filters = json.loads(filters)
-
-	# Get searchfields from meta and use in Item Link field query
-	meta = frappe.get_meta(doctype, cached=True)
-	searchfields = meta.get_search_fields()
-
-	columns = ""
-	extra_searchfields = [field for field in searchfields if field not in ["name", "description"]]
-
-	if extra_searchfields:
-		columns += ", " + ", ".join(extra_searchfields)
-
-	if "description" in searchfields:
-		columns += """, if(length(tabItem.description) > 40, \
-			concat(substr(tabItem.description, 1, 40), "..."), description) as description"""
-
-	searchfields = searchfields + [
-		field
-		for field in [
-			searchfield or "name",
-			"item_code",
-			"item_group",
-			"item_name",
-		]
-		if field not in searchfields
-	]
-	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
 
 	if filters and isinstance(filters, dict):
 		if filters.get("customer") or filters.get("supplier"):
@@ -250,43 +229,112 @@ def item_query(
 			filters.pop("customer", None)
 			filters.pop("supplier", None)
 
-	description_cond = ""
-	if frappe.db.estimate_count(doctype) < 50000:
-		# scan description only if items are less than 50000
-		description_cond = "or tabItem.description LIKE %(txt)s"
+	item = DocType("Item")
 
-	return frappe.db.sql(
-		"""select
-			tabItem.name {columns}
-		from tabItem
-		where tabItem.docstatus < 2
-			and tabItem.disabled=0
-			and tabItem.has_variants=0
-			and (tabItem.end_of_life > %(today)s or ifnull(tabItem.end_of_life, '0000-00-00')='0000-00-00')
-			and ({scond} or tabItem.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
-				{description_cond})
-			{fcond} {mcond}
-		order by
-			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
-			if(locate(%(_txt)s, item_name), locate(%(_txt)s, item_name), 99999),
-			idx desc,
-			name, item_name
-		limit %(start)s, %(page_len)s """.format(
-			columns=columns,
-			scond=searchfields,
-			fcond=get_filters_cond(doctype, filters, conditions).replace("%", "%%"),
-			mcond=get_match_cond(doctype).replace("%", "%%"),
-			description_cond=description_cond,
-		),
-		{
-			"today": nowdate(),
-			"txt": "%%%s%%" % txt,
-			"_txt": txt.replace("%", ""),
-			"start": start,
-			"page_len": page_len,
-		},
-		as_dict=as_dict,
+	# Condition for the date
+	date_condition = (item.end_of_life > nowdate()) | (item.end_of_life.isnull())
+
+	# Condition for the searchfields
+	meta = frappe.get_meta("Item", cached=True)
+	searchfields = meta.get_search_fields()
+	query_select = [item.name]
+
+	extra_searchfields = [field for field in searchfields if field not in ["name", "description"]]
+
+	for field in extra_searchfields:
+		query_select.append(item[field])
+
+	if "description" in searchfields:
+		description_col = (
+			Case()
+			.when(Length(item.description) > 40, Concat(Substring(item.description, 1, 40), "..."))
+			.else_(item.description)
+		).as_("description")
+
+		query_select.append(description_col)
+
+	fields_to_process = list(
+		set(
+			searchfields
+			+ [
+				field
+				for field in [
+					searchfield or "name",
+					"item_code",
+					"item_group",
+					"item_name",
+				]
+				if field not in searchfields
+			]
+		)
 	)
+	db_fields = [f.fieldname for f in meta.fields] + ["name"]
+	search_str = f"%{txt}%"
+	search_conditions = []
+	for fieldname in fields_to_process:
+		if fieldname in db_fields:
+			search_conditions.append(item[fieldname].like(search_str))
+
+	barcode_tbl = DocType("Item Barcode")
+	barcode_subquery = (
+		frappe.qb.from_(barcode_tbl).select(barcode_tbl.parent).where(barcode_tbl.barcode.like(search_str))
+	)
+	search_conditions.append(item.name.isin(barcode_subquery))
+
+	# Condition for the description
+	if frappe.db.estimate_count("Item") < 50000 and "description" not in fields_to_process:
+		search_conditions.append(item.description.like(search_str))
+
+	# Condition for the match and filters
+	filter_sql = get_filters_cond(doctype, filters, conditions).replace("%", "%%")
+	match_sql = get_match_cond(doctype).replace("%", "%%")
+	extra_conditions = []
+
+	for res in [filter_sql, match_sql]:
+		if res:
+			raw_sql = res[0] if isinstance(res, tuple) else res
+
+			if isinstance(raw_sql, str):
+				clean_sql = raw_sql.strip()
+				if not clean_sql:
+					continue
+
+				clean_sql = re.sub(r"^and\s+", "", clean_sql, count=1, flags=re.IGNORECASE)
+				extra_conditions.append(LiteralValue(clean_sql))
+
+	# Building the query
+	query = (
+		frappe.qb.from_(item)
+		.select(*query_select)
+		.where(item.docstatus < 2)
+		.where(item.disabled == 0)
+		.where(item.has_variants == 0)
+		.where(date_condition)
+		.where(Criterion.any(search_conditions))
+	)
+
+	for cond in extra_conditions:
+		query = query.where(cond)
+
+	# Order by
+	txt_no_percent = txt.replace("%", "")
+	query = (
+		query.orderby(
+			Case().when(item.name.like(f"%{txt_no_percent}%"), Locate(txt_no_percent, item.name)).else_(99999)
+		)
+		.orderby(
+			Case()
+			.when(item.item_name.like(f"%{txt_no_percent}%"), Locate(txt_no_percent, item.item_name))
+			.else_(99999)
+		)
+		.orderby(item.idx, order=Order.desc)
+		.orderby(item.name)
+		.orderby(item.item_name)
+	)
+
+	query = query.limit(page_len).offset(start)
+
+	return query.run(as_dict=as_dict)
 
 
 @frappe.whitelist()
