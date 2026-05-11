@@ -1,4 +1,4 @@
-import { useAtom, useSetAtom } from "jotai"
+import { useAtom } from "jotai"
 import { SelectedBank, selectedBankAccountAtom } from "./bankRecAtoms"
 import { useCallback } from "react"
 import { useGetBankAccounts, useGetUnreconciledTransactions } from "./utils"
@@ -16,9 +16,11 @@ import { useCurrentCompany } from "@/hooks/useCurrentCompany"
 
 const BankPicker = ({ className }: { className?: string }) => {
 
-    const setSelectedBank = useSetAtom(selectedBankAccountAtom)
+    const [selectedBank, setSelectedBank] = useAtom(selectedBankAccountAtom)
 
     const onLoadingSuccess = useCallback((data?: SelectedBank[]) => {
+        // If the bank is already selected, then don't set it again
+        if (selectedBank) return
         if (!data) return
         if (data.length === 1) {
             setSelectedBank(data[0])
@@ -26,9 +28,12 @@ const BankPicker = ({ className }: { className?: string }) => {
             const defaultBank = data.find((bank: SelectedBank) => bank.is_default)
             if (defaultBank) {
                 setSelectedBank(defaultBank)
+            } else {
+                // Select the first available bank account
+                setSelectedBank(data[0])
             }
         }
-    }, [setSelectedBank])
+    }, [setSelectedBank, selectedBank])
 
     const selectedCompany = useCurrentCompany()
 

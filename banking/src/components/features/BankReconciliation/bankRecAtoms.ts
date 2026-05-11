@@ -15,7 +15,9 @@ export interface SelectedBank extends Pick<BankAccount, 'name' | 'bank' | 'is_cr
     logoClassName?: string,
     account_currency?: string
 }
-export const selectedBankAccountAtom = atom<SelectedBank | null>(null)
+export const selectedBankAccountAtom = atomWithStorage<SelectedBank | null>('bank-rec-selected-bank', null, undefined, {
+    getOnInit: true
+})
 
 export const bankRecDateAtom = atomWithStorage<{ fromDate: string, toDate: string }>("bank-rec-date", {
     fromDate: getDatesForTimePeriod('This Month').fromDate,
