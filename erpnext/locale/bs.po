@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-10 10:00+0000\n"
-"PO-Revision-Date: 2026-05-10 18:21\n"
+"PO-Revision-Date: 2026-05-11 18:40\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -493,7 +493,7 @@ msgstr "1 sat"
 
 #: banking/src/components/features/ActionLog/ActionLog.tsx:280
 msgid "1 invoice"
-msgstr ""
+msgstr "1 faktura"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Lead'
 #. Option for the 'No of Employees' (Select) field in DocType 'Opportunity'
@@ -1236,11 +1236,11 @@ msgstr "Akademski korisnik"
 
 #: banking/src/components/features/Settings/KeyboardShortcuts.tsx:38
 msgid "Accept Matching Rule"
-msgstr ""
+msgstr "Prihvati Pravilo Usklađivanja"
 
 #: banking/src/components/features/Settings/KeyboardShortcuts.tsx:39
 msgid "Accept the rule for the selected transaction"
-msgstr ""
+msgstr "Prihvati pravilo za odabranu transakciju"
 
 #. Label of the acceptance_formula (Code) field in DocType 'Item Quality
 #. Inspection Parameter'
@@ -1294,7 +1294,7 @@ msgstr "Prihvaćeno Skladište"
 
 #: banking/src/components/features/BankReconciliation/TransferModal.tsx:510
 msgid "Accepting the suggestion will reconcile both transactions."
-msgstr ""
+msgstr "Prihvatanje prijedloga će uskladiti obje transakcije."
 
 #. Label of the access_key (Data) field in DocType 'Currency Exchange Settings'
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
@@ -1526,7 +1526,7 @@ msgstr "Stanje na računu je već u Debitu, nije vam dozvoljeno da postavite 'St
 #: erpnext/accounts/doctype/bank_transaction_rule/bank_transaction_rule.py:101
 #: erpnext/accounts/doctype/bank_transaction_rule/bank_transaction_rule.py:107
 msgid "Account company does not match with the rule company."
-msgstr ""
+msgstr "Poduzeće računa nije usklađeno sa poduzećem pravila."
 
 #: erpnext/accounts/dashboard_chart_source/account_balance_timeline/account_balance_timeline.py:47
 msgid "Account filter not set!"
@@ -1556,7 +1556,7 @@ msgstr "Račun je obavezan za unos uplate"
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:315
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:659
 msgid "Account is required"
-msgstr ""
+msgstr "Račun je obavezan"
 
 #: erpnext/assets/doctype/asset/asset.py:906
 msgid "Account not Found"
@@ -1637,7 +1637,7 @@ msgstr "Račun {0} ne postoji"
 
 #: erpnext/accounts/doctype/mode_of_payment/mode_of_payment.py:48
 msgid "Account {0} does not match with Company {1} in Mode of Account: {2}"
-msgstr "Račun {0} se ne podudara sa {1} u Kontnom Planu: {2}"
+msgstr "Račun {0} nije usklađen sa {1} u Kontnom Planu: {2}"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:138
 msgid "Account {0} doesn't belong to Company {1}"
@@ -2759,7 +2759,7 @@ msgstr "Dodaj red"
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:227
 #: banking/src/components/features/Settings/MatchingRules.tsx:30
 msgid "Add Rule"
-msgstr ""
+msgstr "Dodaj Pravilo"
 
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.js:82
 msgid "Add Safety Stock"
@@ -2842,19 +2842,19 @@ msgstr "Dodaj Bilješku"
 
 #: banking/src/components/features/BankReconciliation/RecordPaymentModal.tsx:902
 msgid "Add a charge to the payment entry with the difference amount"
-msgstr ""
+msgstr "Dodajte naplatu u unos plaćanja s iznosom razlike"
 
 #: banking/src/components/features/BankReconciliation/RecordPaymentModal.tsx:886
 msgid "Add a charge to the payment entry with the unallocated amount"
-msgstr ""
+msgstr "Dodajte naplatu u unos plaćanja s nedodjeljnim iznosom"
 
 #: banking/src/components/features/BankReconciliation/BankEntryModal.tsx:821
 msgid "Add a row with the difference amount"
-msgstr ""
+msgstr "Dodaj red sa iznosom razlike"
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:579
 msgid "Add all accounts that you want to split the transaction into."
-msgstr ""
+msgstr "Dodaj sve račune na koje želite podijeliti transakciju."
 
 #: erpnext/www/book_appointment/index.html:42
 msgid "Add details"
@@ -4891,17 +4891,17 @@ msgstr "Iznos na Slici"
 #. Statement Import Log'
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.json
 msgid "Amount column has \"CR\"/\"DR\" values"
-msgstr ""
+msgstr "Kolona iznosa ima \"CR\"/\"DR\" vrijednosti"
 
 #. Option for the 'Detected Amount Format' (Select) field in DocType 'Bank
 #. Statement Import Log'
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.json
 msgid "Amount column has positive/negative values"
-msgstr ""
+msgstr "Kolona Iznos ima pozitivne/negativne vrijednosti"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:836
 msgid "Amount does not match the selected transaction"
-msgstr ""
+msgstr "Iznos nije usklađen s odabranom transakcijom"
 
 #. Label of the amount_in_account_currency (Currency) field in DocType 'Payment
 #. Ledger Entry'
@@ -4931,7 +4931,7 @@ msgstr "Iznos u {0}"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:836
 msgid "Amount matches the selected transaction"
-msgstr ""
+msgstr "Iznos nije usklađen s odabranom transakcijom"
 
 #: erpnext/buying/report/purchase_order_analysis/purchase_order_analysis.py:189
 #: erpnext/selling/report/sales_order_analysis/sales_order_analysis.py:209
@@ -5067,11 +5067,11 @@ msgstr "Postoji još jedan Prodavač {0} sa istim Id"
 #. Transaction Rule'
 #: erpnext/accounts/doctype/bank_transaction_rule/bank_transaction_rule.json
 msgid "Any"
-msgstr ""
+msgstr "Bilo koji"
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:49
 msgid "Any debit transaction with the keyword 'Bank Fee'."
-msgstr ""
+msgstr "Bilo koja debitna transakcija s ključnom riječi 'Bankarska Naknada'."
 
 #: erpnext/stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:37
 msgid "Any one of following filters required: warehouse, Item Code, Item Group"
@@ -5219,15 +5219,15 @@ msgstr "Primjenjuje se na"
 
 #: banking/src/components/features/Settings/Rules/RuleList.tsx:284
 msgid "Applies to deposits"
-msgstr ""
+msgstr "Primjenjuje se na uplate"
 
 #: banking/src/components/features/Settings/Rules/RuleList.tsx:284
 msgid "Applies to withdrawals"
-msgstr ""
+msgstr "Primjenjuje se na isplate"
 
 #: banking/src/components/features/Settings/Rules/RuleList.tsx:284
 msgid "Applies to withdrawals and deposits"
-msgstr ""
+msgstr "Primjenjuje se na isplate i uplate"
 
 #. Label of the apply_discount_on (Select) field in DocType 'POS Invoice'
 #. Label of the apply_discount_on (Select) field in DocType 'Purchase Invoice'
@@ -5440,7 +5440,7 @@ msgstr "Odobravajući Korisnik ne može biti isti kao korisnik na koji je pravil
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Approximately match the description/party name against parties"
-msgstr "Približno podudaranje opisu/nazivu stranke aspram stranki"
+msgstr "Približno usklađivanje opisu/nazivu stranke naspram stranki"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -5449,7 +5449,7 @@ msgstr "Are"
 
 #: banking/src/components/features/ActionLog/ActionLog.tsx:423
 msgid "Are you sure you want to cancel this {} {}?"
-msgstr ""
+msgstr "Jeste li sigurni da želite otkazati ovo {} {}?"
 
 #: erpnext/public/js/utils/demo.js:17
 msgid "Are you sure you want to clear all demo data?"
@@ -5473,11 +5473,11 @@ msgstr "Jeste li sigurni da želite revidirati ovaj budžet? Trenutni budžet ć
 
 #: banking/src/components/features/ActionLog/ActionLog.tsx:423
 msgid "Are you sure you want to unmatch the voucher from this transaction?"
-msgstr ""
+msgstr "Jeste li sigurni da želite poništiti povezivanje verifikata s ovom transakcijom?"
 
 #: banking/src/components/features/BankReconciliation/BankTransactionUnreconcileModal.tsx:32
 msgid "Are you sure you want to unreconcile this transaction?"
-msgstr ""
+msgstr "Jeste li sigurni da želite poništiti usklađivanje ove transakcije?"
 
 #. Label of the area (Float) field in DocType 'Location'
 #. Name of a UOM
@@ -6570,7 +6570,7 @@ msgstr "Automatski knjiži unos obračunskog stanja"
 #: banking/src/components/features/Settings/Preferences.tsx:84
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Automatically run rules on unreconciled transactions"
-msgstr ""
+msgstr "Automatski pokreni pravila za neusklađene transakcije"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:7
 msgid "Automotive"
@@ -7300,7 +7300,7 @@ msgstr "Stanje mora biti"
 #: banking/src/components/features/BankReconciliation/BankBalance.tsx:305
 msgctxt "Do MMM YYYY"
 msgid "Balances as per bank statement before {0}"
-msgstr ""
+msgstr "Stanje prema bankovnom izvodu prije {0}"
 
 #. Option for the 'Account Type' (Select) field in DocType 'Account'
 #. Name of a DocType
@@ -7382,7 +7382,7 @@ msgstr "Bankovni Račun"
 #. Name of a DocType
 #: erpnext/accounts/doctype/bank_account_balance/bank_account_balance.json
 msgid "Bank Account Balance"
-msgstr ""
+msgstr "Stanje Bankovnog Računa"
 
 #. Label of the bank_account_details (Section Break) field in DocType 'Payment
 #. Order Reference'
@@ -7426,7 +7426,7 @@ msgstr "Tip Bankovnog Računa"
 
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.py:439
 msgid "Bank Account {} in Bank Transaction {} is not matching with Bank Account {}"
-msgstr "Bankovni račun {} u bankovnoj transakciji {} se ne podudara s bankovnim računom {}"
+msgstr "Bankovni račun {} u bankovnoj transakciji {} nije usklađen s bankovnim računom {}"
 
 #: banking/src/components/features/Settings/Settings.tsx:61
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:15
@@ -7454,7 +7454,7 @@ msgstr "Račun za Bankarske Naknade"
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:34
 msgid "Bank Charges, Salary, etc."
-msgstr ""
+msgstr "Bankovne Provizije, Plata, itd."
 
 #. Name of a DocType
 #. Label of a Link in the Invoicing Workspace
@@ -7496,7 +7496,7 @@ msgstr "Bankovni Nacrt"
 
 #: banking/src/components/features/BankReconciliation/BankEntryModal.tsx:116
 msgid "Bank Entries Created"
-msgstr ""
+msgstr "Bankovni Unosi Stvoreni"
 
 #. Option for the 'Classify As' (Select) field in DocType 'Bank Transaction
 #. Rule'
@@ -7518,17 +7518,17 @@ msgstr "Bankovni Unos"
 
 #: banking/src/components/features/BankReconciliation/BankEntryModal.tsx:338
 msgid "Bank Entry Created"
-msgstr ""
+msgstr "Bankovni Unos Stvoren"
 
 #. Label of the bank_entry_type (Select) field in DocType 'Bank Transaction
 #. Rule'
 #: erpnext/accounts/doctype/bank_transaction_rule/bank_transaction_rule.json
 msgid "Bank Entry Type"
-msgstr ""
+msgstr "Tip Bankovnog Unosa"
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:212
 msgid "Bank Fee, Salary, etc."
-msgstr ""
+msgstr "Bankarska Provizija, Plata, itd."
 
 #. Name of a DocType
 #. Label of a Workspace Sidebar Item
@@ -7585,11 +7585,11 @@ msgstr "Bankovni Alat Usaglašavanja"
 
 #: banking/src/pages/BankStatementImporter.tsx:87
 msgid "Bank Statement"
-msgstr ""
+msgstr "Bankovni Izvod"
 
 #: banking/src/components/features/BankReconciliation/BankReconciliationStatement.tsx:290
 msgid "Bank Statement Balance as per General Ledger"
-msgstr ""
+msgstr "Stanje Bankovnog Izvoda prema Knjigovodstvenom Registru"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/bank_statement_import/bank_statement_import.json
@@ -7599,12 +7599,12 @@ msgstr "Uvoz Bankovnog Izvoda"
 #. Name of a DocType
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.json
 msgid "Bank Statement Import Log"
-msgstr ""
+msgstr "Zapisnik Uvoza Bankovnih Izvoda"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/bank_statement_import_log_column_map/bank_statement_import_log_column_map.json
 msgid "Bank Statement Import Log Column Map"
-msgstr ""
+msgstr "Mapa Kolone Zapisnika Uvoza Bankovnih Izvoda"
 
 #: erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py:44
 msgid "Bank Statement balance as per General Ledger"
@@ -7635,17 +7635,17 @@ msgstr "Bankovne Transakcije Plaćanja"
 #. Name of a DocType
 #: erpnext/accounts/doctype/bank_transaction_rule/bank_transaction_rule.json
 msgid "Bank Transaction Rule"
-msgstr ""
+msgstr "Pravilo Bankovnih Transakcija"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/bank_transaction_rule_accounts/bank_transaction_rule_accounts.json
 msgid "Bank Transaction Rule Accounts"
-msgstr ""
+msgstr "Računi Pravila Bankovnih Transakcija"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/bank_transaction_rule_description_conditions/bank_transaction_rule_description_conditions.json
 msgid "Bank Transaction Rule Description Conditions"
-msgstr ""
+msgstr "Pravilo Bankovne Transakcije Opis Uslova"
 
 #: erpnext/public/js/bank_reconciliation_tool/dialog_manager.js:508
 msgid "Bank Transaction {0} Matched"
@@ -7669,7 +7669,7 @@ msgstr "Bankovna Transakcija {0} ažurirana"
 
 #: banking/src/pages/BankReconciliation.tsx:118
 msgid "Bank Transactions"
-msgstr ""
+msgstr "Bankovne Transakcije"
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:584
 msgid "Bank account cannot be named as {0}"
@@ -7677,11 +7677,11 @@ msgstr "Bankovni račun se ne može imenovati kao {0}"
 
 #: banking/src/components/features/BankReconciliation/BankEntryModal.tsx:721
 msgid "Bank account credit for withdrawal"
-msgstr ""
+msgstr "Bankovni račun kredit za isplatu"
 
 #: banking/src/components/features/BankReconciliation/BankEntryModal.tsx:704
 msgid "Bank account debit for deposit"
-msgstr ""
+msgstr "Bankovnog računa zaduženja za uplate"
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.py:146
 msgid "Bank account {0} already exists and could not be created again"
@@ -7693,7 +7693,7 @@ msgstr "Bankovni računi dodani"
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:78
 msgid "Bank statement imported."
-msgstr ""
+msgstr "Bankovni Izvod uvezen."
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.py:311
 msgid "Bank transaction creation error"
@@ -7858,7 +7858,7 @@ msgstr "Na osnovu Vrijednosti"
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:427
 msgid "Based on the above entries, the balance amount (debit or credit) will be set for the last row to balance the journal entry."
-msgstr ""
+msgstr "Na osnovu gore navedenih unosa, iznos salda (debit ili kredit) bit će postavljen za posljednji red kako bi se nalog knjiženja uravnotežio."
 
 #: erpnext/setup/doctype/holiday_list/holiday_list.js:60
 msgid "Based on your HR Policy, select your leave allocation period's end date"
@@ -8148,15 +8148,15 @@ msgstr "Planovi Pretplate u nastavku imaju različite valute u odnosu na standar
 
 #: banking/src/components/features/BankReconciliation/BankClearanceSummary.tsx:211
 msgid "Below is a list of all accounting entries posted against the bank account {0} between {1} and {2}."
-msgstr ""
+msgstr "Ispod je lista svih knjigovodstvenih unosa knjiženih na bankovni račun {0} između {1} i {2}."
 
 #: banking/src/components/features/BankReconciliation/BankTransactionList.tsx:251
 msgid "Below is a list of all bank transactions imported in the system for the bank account {0} between {1} and {2}."
-msgstr ""
+msgstr "Ispod je lista svih bankovnih transakcija uvezenih u sistem za bankovni račun {0} između {1} i {2}."
 
 #: banking/src/components/features/BankReconciliation/BankReconciliationStatement.tsx:197
 msgid "Below is a list of all entries posted against the bank account {0} which have not been cleared till {1}."
-msgstr ""
+msgstr "Ispod je kista svih unosa knjiženih na bankovnom računu {0} koje do {1} nisu poravnate."
 
 #. Label of the bill_date (Date) field in DocType 'Journal Entry'
 #. Label of the bill_date (Date) field in DocType 'Subcontracting Receipt'
@@ -8900,11 +8900,11 @@ msgstr "Zgrade"
 
 #: banking/src/components/features/ActionLog/ActionLog.tsx:132
 msgid "Bulk Bank Entry"
-msgstr ""
+msgstr "Masovni Bankovni Unos"
 
 #: banking/src/components/features/ActionLog/ActionLog.tsx:120
 msgid "Bulk Payment"
-msgstr ""
+msgstr "Masovna Uplata"
 
 #: erpnext/utilities/doctype/rename_tool/rename_tool.js:71
 msgid "Bulk Rename Jobs"
@@ -8922,7 +8922,7 @@ msgstr "Zapisnik Detalja Masovnih Transakcija"
 
 #: banking/src/components/features/ActionLog/ActionLog.tsx:126
 msgid "Bulk Transfer"
-msgstr ""
+msgstr "Masovni Prijenos"
 
 #. Label of the packed_items (Table) field in DocType 'Quotation'
 #. Label of the bundle_items_section (Section Break) field in DocType
@@ -9186,7 +9186,7 @@ msgstr "Izračunati Iznos"
 
 #: banking/src/components/features/BankReconciliation/BankReconciliationStatement.tsx:308
 msgid "Calculated Bank Statement Balance"
-msgstr ""
+msgstr "Izračunato stanje Bankovnog Izvoda"
 
 #: erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py:57
 msgid "Calculated Bank Statement balance"
@@ -10085,7 +10085,7 @@ msgstr "Detalji Certifikata"
 #. Certificate'
 #: erpnext/regional/doctype/lower_deduction_certificate/lower_deduction_certificate.json
 msgid "Certificate Limit"
-msgstr "Limit Certifikata"
+msgstr "Ograničenje Certifikata"
 
 #. Label of the certificate_no (Data) field in DocType 'Lower Deduction
 #. Certificate'
@@ -10316,7 +10316,7 @@ msgstr "Kasa Nalog /Podnesi Nalog /Novi Nalog"
 
 #: banking/src/components/features/BankReconciliation/BankReconciliationStatement.tsx:300
 msgid "Checks and Deposits incorrectly cleared"
-msgstr ""
+msgstr "Čekovi i Uplate pogrešno proknjiženi"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:12
 msgid "Chemical"
@@ -10373,7 +10373,7 @@ msgstr "Referentni Broj"
 #: banking/src/components/features/BankReconciliation/BankClearanceSummary.tsx:132
 #: banking/src/components/features/BankReconciliation/BankClearanceSummary.tsx:323
 msgid "Cheque/Reference Number"
-msgstr ""
+msgstr "Broj čeka/referentni broj"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:134
 msgid "Cheques Required"
@@ -10468,7 +10468,7 @@ msgstr "Klasifikacija Klijenata po Regionima"
 #. Label of the classify_as (Select) field in DocType 'Bank Transaction Rule'
 #: erpnext/accounts/doctype/bank_transaction_rule/bank_transaction_rule.json
 msgid "Classify As"
-msgstr ""
+msgstr "Klasificiraj kao"
 
 #. Label of the more_information (Text Editor) field in DocType 'Bank
 #. Guarantee'
@@ -10531,7 +10531,7 @@ msgstr "Datum odobrenja promijenjen je sa {0} na {1} putem alata za bankovno odo
 
 #: banking/src/components/features/BankReconciliation/BankClearanceSummary.tsx:292
 msgid "Clearance date updated"
-msgstr ""
+msgstr "Datum odobrenja ažuriran"
 
 #: banking/src/components/features/BankReconciliation/BankClearanceSummary.tsx:184
 #: banking/src/components/features/BankReconciliation/IncorrectlyClearedEntries.tsx:82
@@ -10576,11 +10576,11 @@ msgstr "Kliknite da dodate e-poštu / telefon"
 
 #: banking/src/components/features/BankReconciliation/RecordPaymentModal.tsx:813
 msgid "Click to pay in full."
-msgstr ""
+msgstr "Kliknite da platite u cijelosti."
 
 #: banking/src/components/features/BankReconciliation/BankBalance.tsx:183
 msgid "Click to set the closing balance as per statement"
-msgstr ""
+msgstr "Kliknite da biste postavili završno stanje prema izvodu"
 
 #. Label of the close_issue_after_days (Int) field in DocType 'Support
 #. Settings'
@@ -10677,7 +10677,7 @@ msgstr "Stanje pri Zatvaranju"
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:176
 msgctxt "Do MMMM YYYY"
 msgid "Closing Balance as of {}"
-msgstr ""
+msgstr "Završno stanje na dan {}"
 
 #: erpnext/public/js/bank_reconciliation_tool/number_card.js:18
 msgid "Closing Balance as per Bank Statement"
@@ -10689,11 +10689,11 @@ msgstr "Završno Stanje prema Sistemu"
 
 #: banking/src/components/features/BankReconciliation/BankBalance.tsx:171
 msgid "Closing Balance as per statement"
-msgstr ""
+msgstr "Završno stanje prema izvodu"
 
 #: banking/src/components/features/BankReconciliation/BankBalance.tsx:68
 msgid "Closing Balance as per system"
-msgstr ""
+msgstr "Završno stanje prema sistemu"
 
 #. Label of the closing_date (Date) field in DocType 'Account Closing Balance'
 #. Label of the closing_date (Date) field in DocType 'Task'
@@ -10716,24 +10716,24 @@ msgstr "Zatvaranje [Otvaranje + Ukupno] "
 
 #: banking/src/components/features/BankReconciliation/BankBalance.tsx:75
 msgid "Closing balance as per system"
-msgstr ""
+msgstr "Završno stanje prema sistemu"
 
 #: banking/src/components/features/BankReconciliation/BankBalance.tsx:294
 msgid "Closing balance deleted."
-msgstr ""
+msgstr "Završno stanje izbrisano."
 
 #: banking/src/components/features/BankReconciliation/BankBalance.tsx:238
 msgid "Closing balance is required."
-msgstr ""
+msgstr "Završno stanje je obavezno."
 
 #: banking/src/components/features/BankReconciliation/BankBalance.tsx:257
 msgctxt "Do MMM YYYY"
 msgid "Closing balance on bank statement as of {0}"
-msgstr ""
+msgstr "Završno stanje na bankovnom izvodu od {0}"
 
 #: banking/src/components/features/BankReconciliation/BankBalance.tsx:232
 msgid "Closing balance set."
-msgstr ""
+msgstr "Završno stanje postavljeno."
 
 #. Option for the 'Type' (Select) field in DocType 'BOM Secondary Item'
 #. Option for the 'Type' (Select) field in DocType 'Job Card Secondary Item'
@@ -10805,7 +10805,7 @@ msgstr "Boja"
 #. Log'
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.json
 msgid "Column Mapping"
-msgstr ""
+msgstr "Mapiranje Kolona"
 
 #. Label of the file_field (Data) field in DocType 'Bank Transaction Mapping'
 #: erpnext/accounts/doctype/bank_transaction_mapping/bank_transaction_mapping.json
@@ -11554,7 +11554,7 @@ msgstr "Filteri poduzeća i računa nisu postavljeni!"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2580
 msgid "Company currencies of both the companies should match for Inter Company Transactions."
-msgstr "Valute oba poduzeća treba da se podudaraju za transakcije između poduzeća."
+msgstr "Valute oba poduzeća treba da budu usklađeni za transakcije između poduzeća."
 
 #: erpnext/stock/doctype/material_request/material_request.js:380
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:834
@@ -11579,7 +11579,7 @@ msgstr "Poduzeće je obavezno za generisanje fakture. Postavi standard poduzeće
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:85
 msgid "Company is required"
-msgstr ""
+msgstr "Poduzeće je obavezno"
 
 #. Description of the 'Company Field' (Data) field in DocType 'Transaction
 #. Deletion Record To Delete'
@@ -11645,7 +11645,7 @@ msgstr "Poduzeće {} još ne postoji. Postavljanje poreza je prekinuto."
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:576
 msgid "Company {} does not match with POS Profile Company {}"
-msgstr "Poduzeće {} se ne podudara s Kasa Profilom {}"
+msgstr "Poduzeće {} nije usklađeno s Kasa Profilom {}"
 
 #. Name of a DocType
 #. Label of the competitor (Link) field in DocType 'Competitor Detail'
@@ -11680,7 +11680,7 @@ msgstr "Završi Posao"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:857
 msgid "Complete Match"
-msgstr ""
+msgstr "Potpuno Usklađivanje"
 
 #: erpnext/selling/page/point_of_sale/pos_payment.js:44
 msgid "Complete Order"
@@ -11834,15 +11834,15 @@ msgstr "Uslovi će se primijeniti na sve odabrane artikle zajedno. "
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:395
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:413
 msgid "Configure Accounts"
-msgstr ""
+msgstr "Konfiguriraj Račune"
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:578
 msgid "Configure Accounts for Bank Entry"
-msgstr ""
+msgstr "Konfiguriši Račune za bankovni unos"
 
 #: banking/src/components/features/BankReconciliation/BankPicker.tsx:59
 msgid "Configure Bank Accounts"
-msgstr ""
+msgstr "Konfiguriši Bankovne Račune"
 
 #. Label of an action in the Onboarding Step 'Review Chart of Accounts'
 #: erpnext/accounts/onboarding_step/chart_of_accounts/chart_of_accounts.json
@@ -11861,15 +11861,15 @@ msgstr "Konfiguriši Seriju Imenovanja"
 #: banking/src/components/features/BankReconciliation/MatchFilters.tsx:21
 #: banking/src/components/features/BankReconciliation/MatchFilters.tsx:27
 msgid "Configure match filters for vouchers"
-msgstr ""
+msgstr "Konfigurišite filtere Usklađivanja Verifikata"
 
 #: banking/src/components/features/Settings/Rules/RuleList.tsx:202
 msgid "Configure rules to save time when reconciling transactions."
-msgstr ""
+msgstr "Konfiguriši pravila kako biste uštedjeli vrijeme prilikom usklađivanja transakcija."
 
 #: banking/src/components/features/Settings/Preferences.tsx:44
 msgid "Configure settings for the banking module"
-msgstr ""
+msgstr "Konfiguriši postavke za bankarski modul"
 
 #. Description of the 'Action If Same Rate is Not Maintained' (Select) field in
 #. DocType 'Buying Settings'
@@ -11895,7 +11895,7 @@ msgstr "Datum Potvrde"
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:271
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:289
 msgid "Conflicting Transactions"
-msgstr ""
+msgstr "Kontradiktorne Transakcije"
 
 #. Label of the connection_tab (Tab Break) field in DocType 'Asset Repair'
 #: erpnext/assets/doctype/asset_repair/asset_repair.json
@@ -12281,7 +12281,7 @@ msgstr "Kontakt: "
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:200
 #: erpnext/accounts/doctype/bank_transaction_rule_description_conditions/bank_transaction_rule_description_conditions.json
 msgid "Contains"
-msgstr ""
+msgstr "Sadrži"
 
 #. Option for the 'Entry Type' (Select) field in DocType 'Journal Entry'
 #. Option for the 'Journal Entry Type' (Select) field in DocType 'Journal Entry
@@ -12817,7 +12817,7 @@ msgstr "Centar Troškova je dio dodjele Centra Troškova, stoga se ne može konv
 
 #: banking/src/components/features/BankReconciliation/RecordPaymentModal.tsx:1243
 msgid "Cost Center is required"
-msgstr ""
+msgstr "Centar Troškova je obavezan"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1437
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:914
@@ -13093,7 +13093,7 @@ msgstr "Kreiraj Lokaciju Imovine"
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:277
 msgid "Create Bank Entry against"
-msgstr ""
+msgstr "Kreiraj bankovni unos za"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Bill of Materials'
@@ -13238,7 +13238,7 @@ msgstr "Kreiraj novi trag"
 
 #: banking/src/components/common/LinkFieldCombobox.tsx:284
 msgid "Create New {0}"
-msgstr ""
+msgstr "Kreiraj novo {0}"
 
 #. Label of an action in the Onboarding Step 'Create Operations'
 #: erpnext/manufacturing/onboarding_step/create_operations/create_operations.json
@@ -13482,15 +13482,15 @@ msgstr "Kreiraj Radnu Stanicu"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:629
 msgid "Create a journal entry for expenses, income or split transactions"
-msgstr ""
+msgstr "Napravite nalog knjiženja za troškove, prihode ili podijeljene transakcije"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:635
 msgid "Create a new entry based on the rule"
-msgstr ""
+msgstr "Kreiraj novi unos na osnovu pravila"
 
 #: banking/src/components/features/BankReconciliation/Rules/CreateNewRule.tsx:71
 msgid "Create a new rule to automatically classify transactions."
-msgstr ""
+msgstr "Kreirajte novo pravilo za automatsku klasifikaciju transakcija."
 
 #: erpnext/stock/doctype/item/item.js:825
 #: erpnext/stock/doctype/item/item.js:977
@@ -13866,7 +13866,7 @@ msgstr "Kreditno Ograničenje je dostignuto za Klijenta {0}"
 
 #: erpnext/accounts/utils.py:2827
 msgid "Credit limit warning — submission may be blocked: {0}"
-msgstr ""
+msgstr "Upozorenje o kreditnom ograničenju — slanje zahtjeva može biti blokirano: {0}"
 
 #: erpnext/accounts/report/financial_ratios/financial_ratios.py:213
 msgid "Creditor Turnover Ratio"
@@ -13880,7 +13880,7 @@ msgstr "Povjerioci"
 #: banking/src/components/features/BankReconciliation/BankTransactionList.tsx:389
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:210
 msgid "Credits"
-msgstr ""
+msgstr "Krediti"
 
 #. Label of the criteria (Table) field in DocType 'Supplier Scorecard Period'
 #: erpnext/buying/doctype/supplier_scorecard_period/supplier_scorecard_period.json
@@ -15388,12 +15388,12 @@ msgstr "Debit-Kredit je neusklađeno"
 #. Log Column Map'
 #: erpnext/accounts/doctype/bank_statement_import_log_column_map/bank_statement_import_log_column_map.json
 msgid "Debit/Credit"
-msgstr ""
+msgstr "Debit/Kredit"
 
 #: banking/src/components/features/BankReconciliation/BankTransactionList.tsx:388
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:209
 msgid "Debits"
-msgstr ""
+msgstr "Debiti"
 
 #: erpnext/accounts/report/financial_ratios/financial_ratios.py:170
 msgid "Debt Equity Ratio"
@@ -16138,11 +16138,11 @@ msgstr "Izbrisani dokumenti"
 
 #: banking/src/components/features/BankReconciliation/BankBalance.tsx:293
 msgid "Deleting closing balance..."
-msgstr ""
+msgstr "Brisanje završnog stanja..."
 
 #: banking/src/components/features/Settings/Rules/RuleList.tsx:148
 msgid "Deleting rule..."
-msgstr ""
+msgstr "Brisanje pravila..."
 
 #: erpnext/edi/doctype/code_list/code_list.js:28
 msgid "Deleting {0} and all associated Common Code documents..."
@@ -16173,7 +16173,7 @@ msgstr "Opcije Razdjelnika"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.js:335
 msgid "Deliver (Dropship)"
-msgstr ""
+msgstr "Dostava (Dropship)"
 
 #. Label of the deliver_secondary_items (Check) field in DocType 'Selling
 #. Settings'
@@ -16262,11 +16262,11 @@ msgstr "Isporučena količina (u Jedinici Zaliha)"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.js:806
 msgid "Delivered Qty cannot be increased by more than {0} for item {1}"
-msgstr ""
+msgstr "Dostavna količina se ne može povećati za više od {0} za artikal {1}"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.js:798
 msgid "Delivered Qty cannot be reduced by more than {0} for item {1}"
-msgstr ""
+msgstr "Dostavna količina ne može se smanjiti za više od {0} za artikal {1}"
 
 #: erpnext/selling/report/item_wise_sales_history/item_wise_sales_history.py:102
 msgid "Delivered Quantity"
@@ -16276,7 +16276,7 @@ msgstr "Dostavljena Količina"
 #. Invoice Item'
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgid "Delivered by Supplier"
-msgstr ""
+msgstr "Dostavlja Dobavljač"
 
 #. Label of the delivered_by_supplier (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -16761,7 +16761,7 @@ msgstr "Amortizacija eliminirana storniranjem"
 #. Rule'
 #: erpnext/accounts/doctype/bank_transaction_rule/bank_transaction_rule.json
 msgid "Description Rules"
-msgstr ""
+msgstr "Pravila Opisa"
 
 #. Label of the description_of_content (Small Text) field in DocType 'Shipment'
 #: erpnext/stock/doctype/shipment/shipment.json
@@ -16791,32 +16791,32 @@ msgstr "Detaljan Razlog"
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:182
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.json
 msgid "Detected Amount Format"
-msgstr ""
+msgstr "Detektovani Format Iznosa"
 
 #. Label of the detected_date_format (Data) field in DocType 'Bank Statement
 #. Import Log'
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:195
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.json
 msgid "Detected Date Format"
-msgstr ""
+msgstr "Detektovani Format Datuma"
 
 #. Label of the detected_header_index (Int) field in DocType 'Bank Statement
 #. Import Log'
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.json
 msgid "Detected Header Index"
-msgstr ""
+msgstr "Detektovani Indeks Zaglavlja"
 
 #. Label of the detected_transaction_ending_index (Int) field in DocType 'Bank
 #. Statement Import Log'
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.json
 msgid "Detected Transaction Ending Index"
-msgstr ""
+msgstr "Detektovani Indeks Završetka Transakcije"
 
 #. Label of the detected_transaction_starting_index (Int) field in DocType
 #. 'Bank Statement Import Log'
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.json
 msgid "Detected Transaction Starting Index"
-msgstr ""
+msgstr "Detektovani Indeks Početka Transakcije"
 
 #. Label of the determine_address_tax_category_from (Select) field in DocType
 #. 'Accounts Settings'
@@ -17100,7 +17100,7 @@ msgstr "Odabran je onemogućen Račun"
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.py:94
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.py:526
 msgid "Disabled Bank Account"
-msgstr ""
+msgstr "Onemogućeni Bankovni Račun"
 
 #: erpnext/stock/utils.py:434
 msgid "Disabled Warehouse {0} cannot be used for this transaction."
@@ -17672,7 +17672,7 @@ msgstr "Ne Koristi Šaržno Vrijednovanje"
 #. Log Column Map'
 #: erpnext/accounts/doctype/bank_statement_import_log_column_map/bank_statement_import_log_column_map.json
 msgid "Do not import"
-msgstr ""
+msgstr "Ne uvozi"
 
 #. Description of the 'Hide Currency Symbol' (Select) field in DocType 'Global
 #. Defaults'
@@ -17886,7 +17886,7 @@ msgstr "Duguje/Potražuje"
 
 #: banking/src/components/features/Settings/Rules/RuleList.tsx:268
 msgid "Drag to reorder"
-msgstr ""
+msgstr "Povucite za promjenu redoslijeda"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -17957,11 +17957,11 @@ msgstr "Drop Ship"
 
 #: banking/src/components/ui/file-dropzone.tsx:36
 msgid "Drop a file here, or click to select a file"
-msgstr ""
+msgstr "Ispustite datoteku ovdje ili kliknite da biste odabrali datoteku"
 
 #: banking/src/components/ui/file-dropzone.tsx:36
 msgid "Drop some files here, or click to select files"
-msgstr ""
+msgstr "Iispustite neke datoteke ovdje ili kliknite da biste odabrali datoteke"
 
 #. Description of the 'Drop Procedures' (Button) field in DocType 'Accounts
 #. Settings'
@@ -18290,7 +18290,7 @@ msgstr "Uredi Unose PDV Odbitka"
 
 #: banking/src/components/features/BankReconciliation/Rules/EditRule.tsx:51
 msgid "Edit this rule"
-msgstr ""
+msgstr "Uredi ovo pravilo"
 
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:777
 msgid "Editing {0} is not allowed as per POS Profile settings"
@@ -18737,7 +18737,7 @@ msgstr "Omogući Evropski Pristup"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Fuzzy Matching"
-msgstr "Omogući nejasno podudaranje"
+msgstr "Omogući Približno Usklađivanje"
 
 #. Label of the enable_health_monitor (Check) field in DocType 'Ledger Health
 #. Monitor'
@@ -18826,7 +18826,7 @@ msgstr "Omogući YouTube praćenje"
 
 #: banking/src/components/features/Settings/Preferences.tsx:104
 msgid "Enable automatic party matching"
-msgstr ""
+msgstr "Omogući automatsko usklađivanje stranki"
 
 #. Description of the 'Enable Accounting Dimensions' (Check) field in DocType
 #. 'Accounts Settings'
@@ -18882,7 +18882,7 @@ msgstr "Omogući ako korisnici žele da uzmu u obzir odbijene materijale za slan
 
 #: banking/src/components/features/Settings/Preferences.tsx:125
 msgid "Enable party name/description fuzzy matching"
-msgstr ""
+msgstr "Omogući približno usklađivanje imena/opisa stranke"
 
 #. Description of the 'Has Priority' (Check) field in DocType 'Pricing Rule'
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
@@ -19039,11 +19039,11 @@ msgstr "Kraj trenutnog perioda pretplate"
 #. Description Conditions'
 #: erpnext/accounts/doctype/bank_transaction_rule_description_conditions/bank_transaction_rule_description_conditions.json
 msgid "Ends With"
-msgstr ""
+msgstr "Završava sa"
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:202
 msgid "Ends with"
-msgstr ""
+msgstr "Završava se"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:21
 msgid "Energy"
@@ -19157,7 +19157,7 @@ msgstr "Unesi Operaciju, tabela će automatski preuzeti detalje Operacije kao š
 #: banking/src/components/features/BankReconciliation/BankBalance.tsx:250
 msgctxt "Do MMM YYYY"
 msgid "Enter the closing balance you see in your bank statement for {0} as of the {1}"
-msgstr ""
+msgstr "Unesite završno stanje koje vidite na bankovnom izvodu za {0} zaključno sa {1}"
 
 #: erpnext/accounts/doctype/bank_guarantee/bank_guarantee.py:53
 msgid "Enter the name of the Beneficiary before submitting."
@@ -19200,7 +19200,7 @@ msgstr "Entitet"
 
 #: banking/src/components/features/BankReconciliation/IncorrectlyClearedEntries.tsx:190
 msgid "Entries below have a posting date after {0} but the clearance date is before {1}."
-msgstr ""
+msgstr "Unosi ispod imaju datum knjiženja nakon {0}, ali datum odobravanja je prije {1}."
 
 #. Label of the voucher_type (Select) field in DocType 'Journal Entry'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
@@ -19260,11 +19260,11 @@ msgstr "Greška pri preuzimanju detalja za {0}: {1}"
 
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.py:320
 msgid "Error in party matching for Bank Transaction {0}"
-msgstr "Greška u podudaranju stranaka za Bankovnu Transakciju {0}"
+msgstr "Greška u usklađivanja stranki za Bankovnu Transakciju {0}"
 
 #: banking/src/components/features/BankReconciliation/BankEntryModal.tsx:373
 msgid "Error uploading attachments"
-msgstr ""
+msgstr "Greška pri otpremanju priloga"
 
 #: erpnext/assets/doctype/asset/depreciation.py:323
 msgid "Error while posting depreciation entries"
@@ -19350,7 +19350,7 @@ msgstr "Primjer: ABCD.#####. Ako je serija postavljena, a broj šarže nije post
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:468
 msgid "Example: If the transaction amount is 200, then this will be calculated as {} = {}"
-msgstr ""
+msgstr "Primjer: Ako je iznos transakcije 200, onda će se ovo izračunati kao {} = {}"
 
 #: erpnext/stock/stock_ledger.py:2334
 msgid "Example: Serial No {0} reserved in {1}."
@@ -19585,7 +19585,7 @@ msgstr "Postojeći Klijent"
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:298
 msgid "Existing transactions in the system belonging to the same bank account and date range"
-msgstr ""
+msgstr "Postojeće transakcije u sistemu koje pripadaju istom bankovnom računu i istom vremenskom periodu"
 
 #. Label of the exit (Tab Break) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -19983,11 +19983,11 @@ msgstr "Nije uspjelo kreiranje demo podataka"
 
 #: banking/src/components/features/BankReconciliation/BankBalance.tsx:295
 msgid "Failed to delete closing balance."
-msgstr ""
+msgstr "Brisanje završnog stanja nije uspjelo."
 
 #: banking/src/components/features/Settings/Rules/RuleList.tsx:150
 msgid "Failed to delete rule."
-msgstr ""
+msgstr "Brisanje pravila nije uspjelo."
 
 #: erpnext/setup/demo.py:77
 msgid "Failed to erase demo data, please delete the demo company manually."
@@ -19995,7 +19995,7 @@ msgstr "Brisanje demo podataka nije uspjelo, izbrišite demo poduzeće ručno."
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:286
 msgid "Failed to initiate payment with {0}. Please try again or contact support."
-msgstr ""
+msgstr "Nije uspjelo pokrenuti plaćanje putem {0}. Molimo pokušajte ponovo ili kontaktirajte podršku."
 
 #: erpnext/setup/setup_wizard/setup_wizard.py:16
 #: erpnext/setup/setup_wizard/setup_wizard.py:17
@@ -20012,7 +20012,7 @@ msgstr "Neuspješan unos amortizacije"
 
 #: banking/src/components/features/Settings/Rules/RuleList.tsx:58
 msgid "Failed to run rules evaluation"
-msgstr ""
+msgstr "Nije uspjelo pokrenuti evaluaciju pravila"
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:126
 msgid "Failed to send email for campaign {0} to {1}"
@@ -20037,11 +20037,11 @@ msgstr "Neuspješno postavljanje standard postavki za zemlju {0}. Kontaktiraj po
 
 #: banking/src/components/features/Settings/Rules/RuleList.tsx:116
 msgid "Failed to update auto classify transactions settings"
-msgstr ""
+msgstr "Nije uspjelo ažuriranje postavki automatske klasifikacije transakcija"
 
 #: banking/src/components/features/Settings/Rules/RuleList.tsx:177
 msgid "Failed to update rule priorities"
-msgstr ""
+msgstr "Ažuriranje prioriteta pravila nije uspjelo"
 
 #. Label of the failure_date (Datetime) field in DocType 'Asset Repair'
 #: erpnext/assets/doctype/asset_repair/asset_repair.json
@@ -20235,7 +20235,7 @@ msgstr "Filtriraj po Referentnom Datumu"
 #: banking/src/components/features/BankReconciliation/BankTransactionList.tsx:348
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:163
 msgid "Filter by amount"
-msgstr ""
+msgstr "Filtriraj po iznosu"
 
 #: erpnext/selling/page/point_of_sale/pos_past_order_list.js:70
 msgid "Filter by invoice status"
@@ -20960,11 +20960,11 @@ msgstr "Za npr. 2012, 2012-13"
 
 #: banking/src/components/features/Settings/Preferences.tsx:154
 msgid "For example, if set to 4, the system will try to find matching transactions in other banks 4 days before and after the transaction date. This is because transactions can clear on different days on different bank accounts."
-msgstr ""
+msgstr "Na primjer, ako je postavljeno na 4, sistem će pokušati pronaći odgovarajuće transakcije u drugim bankama 4 dana prije i poslije datuma transakcije. To je zato što se transakcije mogu obračunati na različite dane na različitim bankovnim računima."
 
 #: banking/src/components/features/Settings/Preferences.tsx:60
 msgid "For example, if set to 4, the system will try to find matching transfer transactions in other banks 4 days before and after the transaction date. This is because transactions can clear on different days on different bank accounts."
-msgstr ""
+msgstr "Na primjer, ako je postavljeno na 4, sistem će pokušati pronaći odgovarajuće transakcije transfera u drugim bankama 4 dana prije i poslije datuma transakcije. To je zato što se transakcije mogu obračunati na različite dane na različitim bankovnim računima."
 
 #. Description of the 'Collection Factor (=1 LP)' (Currency) field in DocType
 #. 'Loyalty Program Collection'
@@ -21059,19 +21059,19 @@ msgstr "Za {0}, količina je obavezna za unos povrata"
 
 #: banking/src/components/features/BankReconciliation/BankClearanceSummary.tsx:258
 msgid "Force Clear"
-msgstr ""
+msgstr "Prisilno brisanje"
 
 #: banking/src/components/features/BankReconciliation/BankClearanceSummary.tsx:304
 msgid "Force Clear Voucher"
-msgstr ""
+msgstr "Prisilno Briši Verifikat"
 
 #: banking/src/components/features/Settings/Rules/RuleList.tsx:85
 msgid "Force evaluate all"
-msgstr ""
+msgstr "Prisilno procijeni sve"
 
 #: banking/src/components/features/Settings/Rules/RuleList.tsx:83
 msgid "Force re-evaluate all unreconciled transactions, even if they were previously evaluated"
-msgstr ""
+msgstr "Prisilite na ponovnu procjenu svih neriješenih transakcija, čak i ako su prethodno bile procijenjene"
 
 #: erpnext/accounts/doctype/subscription/subscription.js:42
 msgid "Force-Fetch Subscription Updates"
@@ -21665,7 +21665,7 @@ msgstr "KNJIGOVODSTVENI REGISTAR"
 #: banking/src/components/features/BankReconciliation/BankPicker.tsx:117
 #: banking/src/components/features/BankReconciliation/SelectedTransactionDetails.tsx:64
 msgid "GL Account"
-msgstr ""
+msgstr "Knjigovodstveni Račun"
 
 #: erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py:172
 #: erpnext/accounts/report/general_and_payment_ledger_comparison/general_and_payment_ledger_comparison.py:250
@@ -21810,7 +21810,7 @@ msgstr "Poređenje Knjigovodstvenog Registra i Registra Plaćanja"
 #. 'Ledger Health'
 #: erpnext/accounts/doctype/ledger_health/ledger_health.json
 msgid "General and Payment Ledger mismatch"
-msgstr "Nepodudaranje Knjigovodstvenog Registra i Registra Plaćanja"
+msgstr "Neusklađenost Knjigovodstvenog Registra i Registra Plaćanja"
 
 #. Label of the generate_demand (Button) field in DocType 'Sales Forecast'
 #: erpnext/manufacturing/doctype/sales_forecast/sales_forecast.json
@@ -22116,7 +22116,7 @@ msgstr "Preuzmi Neusaglašene Unose"
 
 #: banking/src/components/features/Settings/KeyboardShortcuts.tsx:73
 msgid "Get around the system quickly with keyboard shortcuts"
-msgstr ""
+msgstr "Brzo se snalazite u sistemu pomoću prečica na tastaturi"
 
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.js:71
 msgid "Get stops from"
@@ -22155,15 +22155,15 @@ msgstr "Idi Nazad"
 
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.js:7
 msgid "Go to <a href='/banking/statement-importer' target='_blank' style='text-decoration: underline;'>Bank Statement Importer</a> in the Banking module to use this importer."
-msgstr ""
+msgstr "Idite na <a href='/banking/statement-importer' target='_blank' style='text-decoration: underline;'>Uvoznik Bankovnih Izvoda</a> u modulu za bankarstvo da biste koristili ovaj uvoznik."
 
 #: banking/src/pages/BankReconciliation.tsx:96
 msgid "Go to Desktop"
-msgstr ""
+msgstr "Idite na radnu površinu"
 
 #: erpnext/accounts/doctype/bank_transaction_rule/bank_transaction_rule.js:15
 msgid "Go to the <a href='/banking' target='_blank' style='text-decoration: underline;'>Banking module</a> to setup this rule."
-msgstr ""
+msgstr "Idite na <a href='/banking' target='_blank' style='text-decoration: underline;'>Bankarski modul</a> da biste postavili ovo pravilo."
 
 #. Label of a Card Break in the Quality Workspace
 #: erpnext/quality_management/workspace/quality/quality.json
@@ -22748,7 +22748,7 @@ msgstr "Direktor Marketinga i Prodaje"
 #. Column Map'
 #: erpnext/accounts/doctype/bank_statement_import_log_column_map/bank_statement_import_log_column_map.json
 msgid "Header Text"
-msgstr ""
+msgstr "Tekst Zaglavlja"
 
 #. Description of a DocType
 #: erpnext/accounts/doctype/account/account.json
@@ -23161,7 +23161,7 @@ msgstr "Ako je Prihod ili Rashod"
 
 #: banking/src/components/features/Settings/Preferences.tsx:127
 msgid "If a party cannot be matched by account number or IBAN, the system will try fuzzy matching using the party name and transaction description."
-msgstr ""
+msgstr "Ako se stranka ne može uskladiti po broju računa ili IBAN-u, sistem će pokušati približno usklađivanje koristeći ime stranke i opis transakcije."
 
 #: erpnext/manufacturing/doctype/operation/operation.js:32
 msgid "If an operation is divided into sub operations, they can be added here."
@@ -23186,7 +23186,7 @@ msgstr "Ako je označeno, Zalihe će biti rezervisane na <b>Podnesi</b>"
 #. Description of the 'Is Credit Card' (Check) field in DocType 'Bank Account'
 #: erpnext/accounts/doctype/bank_account/bank_account.json
 msgid "If checked, journal entries made using bank reconciliation will be of type \"Credit Card Entry\""
-msgstr ""
+msgstr "Ako je označeno, nalozi knjiženja napravljeni korištenjem bankovnog usklađivanja bit će tipa \"Unos Kreditne Kartice\""
 
 #. Description of the 'Scan Mode' (Check) field in DocType 'Pick List'
 #: erpnext/stock/doctype/pick_list/pick_list.json
@@ -23296,7 +23296,7 @@ msgstr "Ako je omogućeno, unosi registra će biti knjiženi za iznos promjene u
 #. (Check) field in DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "If enabled, rule matching algorithm will run every hour"
-msgstr ""
+msgstr "Ako je omogućeno, algoritam za usklađivanje pravila će se pokretati svaki sat"
 
 #. Description of the 'Grant Commission' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -23451,7 +23451,7 @@ msgstr "Ako je cijena nula, artikal će se tretirati kao \"Besplatni Artikal\""
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:258
 msgid "If rule matches, then:"
-msgstr ""
+msgstr "Ako je pravilo usklađeno, onda:"
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.js:51
 msgid "If selected Pricing Rule is made for 'Rate', it will overwrite Price List. Pricing Rule rate is the final rate, so no further discount should be applied. Hence, in transactions like Sales Order, Purchase Order etc, it will be fetched in 'Rate' field, rather than 'Price List Rate' field."
@@ -23592,7 +23592,7 @@ msgstr "Ako {0} {1} vrijednuje artikal {2}, šema {3} će se primijeniti na arti
 
 #: banking/src/components/features/BankReconciliation/BankBalance.tsx:81
 msgid "If your bank statement shows a different closing balance, it is because all transactions have not reconciled yet."
-msgstr ""
+msgstr "Ako vaš bankovni izvod pokazuje drugačije završno stanje, to je zato što još nisu sve transakcije usklađene."
 
 #. Option for the 'Action if Annual Budget Exceeded on MR' (Select) field in
 #. DocType 'Budget'
@@ -23761,7 +23761,7 @@ msgstr "Partner Implementacije"
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:251
 #: banking/src/pages/BankStatementImporterContainer.tsx:27
 msgid "Import Bank Statement"
-msgstr ""
+msgstr "Uvezi Bankovni Izvod"
 
 #. Description of a DocType
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.json
@@ -23827,15 +23827,15 @@ msgstr "Masovni Uvoz"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:223
 msgid "Import your bank statement to get started."
-msgstr ""
+msgstr "Uvezite bankovni izvod da biste započeli."
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:115
 msgid "Import {0} transactions"
-msgstr ""
+msgstr "Uvoz {0} transakcija"
 
 #: banking/src/pages/BankStatementImporter.tsx:221
 msgid "Imported On"
-msgstr ""
+msgstr "Uvezeno"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:192
 msgid "Imported {0} DocTypes"
@@ -23851,11 +23851,11 @@ msgstr "Uvoz Zajedničkih Kodova u toku"
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:132
 msgid "Importing {0} transactions"
-msgstr ""
+msgstr "Uvozi se {0} transakcija"
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:115
 msgid "Importing..."
-msgstr ""
+msgstr "Uvoz..."
 
 #. Option for the 'Manufacturing Type' (Select) field in DocType 'Production
 #. Plan Sub Assembly Item'
@@ -24028,7 +24028,7 @@ msgstr "U slučaju višeslojnog programa, klijenti će biti automatski raspoređ
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:753
 #, python-format
 msgid "In this case, the amount will be calculated as 25% of the transaction amount. If the transaction amount is 200, then this will be calculated as 200 * 0.25 = 50."
-msgstr ""
+msgstr "U ovom slučaju, iznos će biti izračunat kao 25% iznosa transakcije. Ako je iznos transakcije 200, onda će se to izračunati kao 200 * 0,25 = 50."
 
 #: erpnext/stock/doctype/item/item.js:1191
 msgid "In this section, you can define Company-wide transaction-related defaults for this Item. Eg. Default Warehouse, Default Price List, Supplier, etc."
@@ -24429,11 +24429,11 @@ msgstr "Pronađen je netačan broj Unosa u Knjigovodstveni Registar. Možda ste 
 
 #: banking/src/pages/BankReconciliation.tsx:120
 msgid "Incorrectly Cleared Entries"
-msgstr ""
+msgstr "Pogrešno raščišćeni unosi"
 
 #: banking/src/components/features/BankReconciliation/IncorrectlyClearedEntries.tsx:202
 msgid "Incorrectly cleared entries as per the report."
-msgstr ""
+msgstr "Pogrešno raščišćeni unosi prema izvještaju."
 
 #. Label of the incoterm (Link) field in DocType 'Purchase Invoice'
 #. Label of the incoterm (Link) field in DocType 'Sales Invoice'
@@ -24959,7 +24959,7 @@ msgstr "Nevažeći Datum Automatskog Ponavljanja"
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.py:89
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.py:521
 msgid "Invalid Bank Account"
-msgstr ""
+msgstr "Nevažeći bankovni račun"
 
 #: erpnext/stock/doctype/quick_stock_balance/quick_stock_balance.py:40
 msgid "Invalid Barcode. There is no Item attached to this barcode."
@@ -25017,7 +25017,7 @@ msgstr "Nevažeći Dokument Tip"
 
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.py:165
 msgid "Invalid File Type"
-msgstr ""
+msgstr "Nevažeći tip datoteke"
 
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.py:327
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.py:332
@@ -25175,7 +25175,7 @@ msgstr "Nevažeća referenca {0} {1}"
 
 #: erpnext/accounts/doctype/bank_transaction_rule/bank_transaction_rule.py:96
 msgid "Invalid regex pattern."
-msgstr ""
+msgstr "Nevažeći obrazac regularnog izraza."
 
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.py:99
 msgid "Invalid result key. Response:"
@@ -25323,7 +25323,7 @@ msgstr "Ograničenje Fakture"
 #: banking/src/components/features/ActionLog/ActionLog.tsx:290
 #: banking/src/components/features/BankReconciliation/RecordPaymentModal.tsx:706
 msgid "Invoice No"
-msgstr ""
+msgstr "Broj Fakture"
 
 #. Label of the invoice_number (Data) field in DocType 'Opening Invoice
 #. Creation Tool Item'
@@ -25591,7 +25591,7 @@ msgstr "Popravna Operacija"
 #. Label of the is_credit_card (Check) field in DocType 'Bank Account'
 #: erpnext/accounts/doctype/bank_account/bank_account.json
 msgid "Is Credit Card"
-msgstr ""
+msgstr "Je Kreditna Kartica"
 
 #. Label of the is_cumulative (Check) field in DocType 'Pricing Rule'
 #. Label of the is_cumulative (Check) field in DocType 'Promotional Scheme'
@@ -25800,7 +25800,7 @@ msgstr "Je Upakovan"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:402
 msgid "Is Packed Item"
-msgstr ""
+msgstr "Je Upakirani Artikal"
 
 #. Label of the is_paid (Check) field in DocType 'Purchase Invoice'
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
@@ -25899,7 +25899,7 @@ msgstr "Povrat (Debit Faktura)"
 #. Label of the is_rule_evaluated (Check) field in DocType 'Bank Transaction'
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.json
 msgid "Is Rule Evaluated"
-msgstr ""
+msgstr "Je Pravilo Ocijenjeno"
 
 #. Label of the so_required (Select) field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
@@ -26124,11 +26124,11 @@ msgstr "Potreban je za preuzimanje Detalja Artikla."
 
 #: banking/src/components/features/BankReconciliation/BankBalance.tsx:79
 msgid "It takes into account all the transactions that have been posted and subtracts the transactions that have not cleared yet."
-msgstr ""
+msgstr "Uzimaju se u obzir sve transakcije koje su knjižene i oduzimaju se transakcije koje još nisu poravnate."
 
 #: banking/src/components/features/BankReconciliation/IncorrectlyClearedEntries.tsx:219
 msgid "It's all good!"
-msgstr ""
+msgstr "Sve je u redu!"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:217
 msgid "It's not possible to distribute charges equally when total amount is zero, please set 'Distribute Charges Based On' as 'Quantity'"
@@ -27354,7 +27354,7 @@ msgstr "PDV Detalji po Artiklu"
 
 #: erpnext/controllers/taxes_and_totals.py:573
 msgid "Item Wise Tax Details do not match with Taxes and Charges at the following rows:"
-msgstr "PDV Detalji po Artiklu ne podudaraju se s PDV i Naknadama u sljedećim redovima:"
+msgstr "PDV Detalji po Artiklu nisu usklađeni se s PDV i Naknadama u sljedećim redovima:"
 
 #. Label of the section_break_rrrx (Section Break) field in DocType 'Sales
 #. Forecast'
@@ -27472,7 +27472,7 @@ msgstr "Artikal {0} nema serijski broj. Samo serijski artikli mogu imati dostavu
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.js:790
 msgid "Item {0} has no changes in delivered quantity. Please unselect the row if you do not wish to update its quantity."
-msgstr ""
+msgstr "Artikal {0} nema promjena u isporučenoj količini. Molimo vas da poništite odabir reda ako ne želite ažurirati njegovu količinu."
 
 #: erpnext/stock/doctype/item/item.py:1205
 msgid "Item {0} has reached its end of life on {1}"
@@ -27936,12 +27936,12 @@ msgstr "Račun Naloga Knjiženja"
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "Journal Entry Template"
-msgstr "Šablon Naloga Knjiženja"
+msgstr "Račiuni Šablona Naloga Knjiženja"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/journal_entry_template_account/journal_entry_template_account.json
 msgid "Journal Entry Template Account"
-msgstr "Račun Šablona Naloga Knjiženja"
+msgstr "Račun Šablona Unosa Naloga Knjiženja"
 
 #. Label of the voucher_type (Select) field in DocType 'Journal Entry Template'
 #: erpnext/accounts/doctype/journal_entry_template/journal_entry_template.json
@@ -27963,11 +27963,11 @@ msgstr "Tip Naloga Knjiženja treba postaviti kao Unos Amortizacije za amortizac
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:728
 msgid "Journal Entry {0} does not have account {1} or already matched against other voucher"
-msgstr "Naloga Knjiženja {0} nema račun {1} ili se podudara naspram drugog verifikata"
+msgstr "Nalog Knjiženja {0} nema račun {1} ili nije usklađen naspram drugog verifikata"
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:394
 msgid "Journal Template Accounts"
-msgstr ""
+msgstr "Račun Šablona Unosa Naloga Knjiženja"
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.js:97
 msgid "Journal entries have been created"
@@ -28209,7 +28209,7 @@ msgstr "Poslednji Datum Završetka"
 
 #: banking/src/components/features/BankReconciliation/BankRecDateFilter.tsx:81
 msgid "Last Fiscal Year"
-msgstr ""
+msgstr "Prošla Fiskalna Godina"
 
 #: erpnext/accounts/doctype/account/account.py:660
 msgid "Last GL Entry update was done {}. This operation is not allowed while system is actively being used. Please wait for 5 minutes before retrying."
@@ -28283,7 +28283,7 @@ msgstr "Zadnja transakcija zaliha za artikal {0} u skladištu {1} je bila {2}."
 
 #: banking/src/components/features/BankReconciliation/BankPicker.tsx:118
 msgid "Last Synced Transaction"
-msgstr ""
+msgstr "Posljednja Sinhronizirana Transakcija"
 
 #: erpnext/setup/doctype/vehicle/vehicle.py:46
 msgid "Last carbon check date cannot be a future date"
@@ -29772,7 +29772,7 @@ msgstr "Mapiranje {0} u toku..."
 #: banking/src/pages/BankStatementImporter.tsx:147
 #: erpnext/accounts/doctype/bank_statement_import_log_column_map/bank_statement_import_log_column_map.json
 msgid "Maps To"
-msgstr ""
+msgstr "Mapiraj na"
 
 #. Label of the margin (Section Break) field in DocType 'Pricing Rule'
 #. Label of the margin (Section Break) field in DocType 'Project'
@@ -29914,41 +29914,41 @@ msgstr "Postavke"
 
 #: banking/src/components/features/ActionLog/ActionLog.tsx:346
 msgid "Match"
-msgstr ""
+msgstr "Usklađivanje"
 
 #: banking/src/pages/BankReconciliation.tsx:116
 msgid "Match and Reconcile"
-msgstr ""
+msgstr "Uporedi i Uskladi"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:62
 msgid "Match or Create"
-msgstr ""
+msgstr "Uskladi ili Stvori"
 
 #. Label of the transfer_match_days (Int) field in DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Match transfers within 'N' days"
-msgstr ""
+msgstr "Usklađivanje prijenosa unutar 'N' dana"
 
 #. Option for the 'Reconciliation Type' (Select) field in DocType 'Bank
 #. Transaction Payments'
 #: banking/src/components/features/ActionLog/ActionLog.tsx:117
 #: erpnext/accounts/doctype/bank_transaction_payments/bank_transaction_payments.json
 msgid "Matched"
-msgstr ""
+msgstr "Usklađeno"
 
 #. Label of the matched_transaction_rule (Link) field in DocType 'Bank
 #. Transaction'
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.json
 msgid "Matched Transaction Rule"
-msgstr ""
+msgstr "Pravilo Usklađene Transakcije"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:314
 msgid "Matched by rule"
-msgstr ""
+msgstr "Usklađeno po pravilu"
 
 #: banking/src/components/features/Settings/Settings.tsx:56
 msgid "Matching Rules"
-msgstr ""
+msgstr "Pravila Usklađivanja"
 
 #: erpnext/projects/doctype/project/project_dashboard.py:14
 msgid "Material"
@@ -30363,7 +30363,7 @@ msgstr "Maksimalno: {0}"
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:63
 msgid "Maximum Amount"
-msgstr ""
+msgstr "Maksimalni Iznos"
 
 #. Label of the maximum_invoice_amount (Currency) field in DocType 'Payment
 #. Reconciliation'
@@ -30747,11 +30747,11 @@ msgstr "Min. Vrijednost: {0}, Maks. Vrijednost: {1}, u stopama od: {2}"
 
 #: erpnext/accounts/doctype/bank_transaction_rule/bank_transaction_rule.py:62
 msgid "Min amount cannot be greater than max amount."
-msgstr ""
+msgstr "Minimalni iznos ne može biti veći od maksimalnog iznosa."
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:58
 msgid "Minimum Amount"
-msgstr ""
+msgstr "Minimalni Iznos"
 
 #. Label of the minimum_invoice_amount (Currency) field in DocType 'Payment
 #. Reconciliation'
@@ -31169,11 +31169,11 @@ msgstr "Konstruktor Višeslojne Sastavnice"
 #. Rule'
 #: erpnext/accounts/doctype/bank_transaction_rule/bank_transaction_rule.json
 msgid "Multiple Accounts"
-msgstr ""
+msgstr "Više Računa"
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:283
 msgid "Multiple Accounts (Journal Template)"
-msgstr ""
+msgstr "Više Računa (Šablon Naloga Knjiženja)"
 
 #: erpnext/selling/doctype/customer/customer.py:440
 msgid "Multiple Loyalty Programs found for Customer {}. Please select manually."
@@ -31806,7 +31806,7 @@ msgstr "Nove Ponude"
 
 #: banking/src/components/features/BankReconciliation/Rules/CreateNewRule.tsx:68
 msgid "New Rule"
-msgstr ""
+msgstr "Novo Pravilo"
 
 #. Label of the sales_invoice (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -31954,7 +31954,7 @@ msgstr "Nema Artikala sa Spiskom Materijala."
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:857
 msgid "No Match"
-msgstr ""
+msgstr "Nije Usklađeno"
 
 #: erpnext/accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.js:15
 msgid "No Matching Bank Transactions Found"
@@ -32040,11 +32040,11 @@ msgstr "Nema knjigovodstvenih unosa za sljedeća skladišta"
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:412
 msgid "No accounts configured"
-msgstr ""
+msgstr "Nema konfiguriranih računa"
 
 #: banking/src/components/common/AccountsDropdown.tsx:157
 msgid "No accounts found."
-msgstr ""
+msgstr "Nije pronađen nijedan račun."
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:802
 msgid "No active BOM found for item {0}. Delivery by Serial No cannot be ensured"
@@ -32060,15 +32060,15 @@ msgstr "Nema raspoložive količine za rezervaciju artikla {0} u skladištu {1}"
 
 #: banking/src/components/features/BankReconciliation/BankPicker.tsx:53
 msgid "No bank accounts found"
-msgstr ""
+msgstr "Nisu pronađeni bankovni računi"
 
 #: banking/src/pages/BankStatementImporter.tsx:249
 msgid "No bank statements imported yet"
-msgstr ""
+msgstr "Još nema uvezenih bankovnih izvoda"
 
 #: banking/src/components/features/BankReconciliation/BankTransactionList.tsx:289
 msgid "No bank transactions found"
-msgstr ""
+msgstr "Nisu pronađene bankovne transakcije"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:497
 msgid "No billing email found for customer: {0}"
@@ -32076,7 +32076,7 @@ msgstr "Nije pronađena e-pošta fakture za: {0}"
 
 #: banking/src/components/features/BankReconciliation/CompanySelector.tsx:66
 msgid "No company found."
-msgstr ""
+msgstr "Nije pronađeno nijedno poduzeće."
 
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.py:449
 msgid "No contacts with email IDs found."
@@ -32109,11 +32109,11 @@ msgstr "Personal nije zakazao poziv"
 #: banking/src/components/features/BankReconciliation/BankClearanceSummary.tsx:235
 #: banking/src/components/features/BankReconciliation/BankReconciliationStatement.tsx:225
 msgid "No entries found"
-msgstr ""
+msgstr "Nije pronađen nijedan unos"
 
 #: banking/src/components/features/BankReconciliation/BankReconciliationStatement.tsx:214
 msgid "No entries with a payment document in this list."
-msgstr ""
+msgstr "Nema unosa sa dokumentom o plaćanju na ovoj listi."
 
 #: erpnext/edi/doctype/code_list/code_list_import.py:73
 msgid "No file uploaded or URL provided."
@@ -32121,7 +32121,7 @@ msgstr "Nije otpremljena datoteka niti naveden URL."
 
 #: banking/src/components/features/ActionLog/ActionLog.tsx:280
 msgid "No invoice linked"
-msgstr ""
+msgstr "Nije povezana faktura"
 
 #: erpnext/controllers/subcontracting_controller.py:1350
 msgid "No item available for transfer."
@@ -32146,7 +32146,7 @@ msgstr "Nema artikala u korpi"
 
 #: erpnext/accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.py:1043
 msgid "No matches occurred via auto reconciliation"
-msgstr "Nije došlo do podudaranja putem automatskog usaglašavanja"
+msgstr "Nije došlo do usaglašavanja putem automatskog usaglašavanja"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:1040
 msgid "No material request created"
@@ -32290,7 +32290,7 @@ msgstr "Nisu pronađeni primaoci za kampanju {0}"
 
 #: banking/src/components/features/ActionLog/ActionLog.tsx:103
 msgid "No reconciliation actions found"
-msgstr ""
+msgstr "Nisu pronađene akcije usklađivanja"
 
 #: erpnext/accounts/report/purchase_register/purchase_register.py:45
 #: erpnext/accounts/report/sales_register/sales_register.py:46
@@ -32321,7 +32321,7 @@ msgstr "Nisu pronađeni rezultati."
 #: banking/src/components/features/BankReconciliation/BankClearanceSummary.tsx:225
 #: banking/src/components/features/BankReconciliation/IncorrectlyClearedEntries.tsx:208
 msgid "No rows to display."
-msgstr ""
+msgstr "Nema redova za prikaz."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:152
 msgid "No rows with zero document count found"
@@ -32329,7 +32329,7 @@ msgstr "Nisu pronađeni redovi s nultim brojem dokumenata"
 
 #: banking/src/components/features/Settings/Rules/RuleList.tsx:201
 msgid "No rules setup yet"
-msgstr ""
+msgstr "Još nisu postavljena pravila"
 
 #: erpnext/stock/doctype/batch/batch.js:77
 msgid "No stock available for this batch."
@@ -32349,15 +32349,15 @@ msgstr "Nikakve transakcije Zalihama se ne mogu kreirati ili mijenjati prije ovo
 #: banking/src/components/features/BankReconciliation/RecordPaymentModal.tsx:68
 #: banking/src/components/features/BankReconciliation/TransferModal.tsx:59
 msgid "No transaction selected"
-msgstr ""
+msgstr "Nije odabrana nijedna transakcija"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:222
 msgid "No transactions found for the given filters."
-msgstr ""
+msgstr "Nisu pronađene transakcije za date filtere."
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:222
 msgid "No unreconciled transactions found"
-msgstr ""
+msgstr "Nisu pronađene neusklađene transakcije"
 
 #: erpnext/templates/includes/macros.html:291
 #: erpnext/templates/includes/macros.html:324
@@ -32366,7 +32366,7 @@ msgstr "Bez Vrijednosti"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:756
 msgid "No vouchers found for this transaction"
-msgstr ""
+msgstr "Nisu pronađeni verifikati za ovu transakciju"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2574
 msgid "No {0} found for Inter Company Transactions."
@@ -32459,7 +32459,7 @@ msgstr "Nije Fakturisano"
 
 #: banking/src/components/features/BankReconciliation/BankClearanceSummary.tsx:190
 msgid "Not Cleared"
-msgstr ""
+msgstr "Nije očišćeno"
 
 #. Option for the 'Delivery Status' (Select) field in DocType 'Sales Order'
 #. Option for the 'Delivery Status' (Select) field in DocType 'Pick List'
@@ -32476,7 +32476,7 @@ msgstr "Nije Pokrenuto"
 
 #: banking/src/components/features/BankReconciliation/BankTransactionList.tsx:125
 msgid "Not Reconciled"
-msgstr ""
+msgstr "Nije usklađeno"
 
 #. Option for the 'Advance Payment Status' (Select) field in DocType 'Sales
 #. Order'
@@ -32711,7 +32711,7 @@ msgstr "Broj Naloga"
 #: banking/src/pages/BankStatementImporter.tsx:224
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.json
 msgid "Number of Transactions"
-msgstr ""
+msgstr "Broj transakcija"
 
 #. Label of the demand_number (Int) field in DocType 'Sales Forecast'
 #: erpnext/manufacturing/doctype/sales_forecast/sales_forecast.json
@@ -32739,12 +32739,12 @@ msgstr "Broj dana u kojima pretplatnik mora platiti fakture generirane ovom pret
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Number of days to consider for matching transfers across bank accounts"
-msgstr ""
+msgstr "Broj dana koje treba uzeti u obzir za usklađivanje transfera između bankovnih računa"
 
 #: banking/src/components/features/Settings/Preferences.tsx:58
 #: banking/src/components/features/Settings/Preferences.tsx:148
 msgid "Number of days to match transfers"
-msgstr ""
+msgstr "Broj dana za usklađivanje prijenosa"
 
 #. Description of the 'Billing Interval Count' (Int) field in DocType
 #. 'Subscription Plan'
@@ -33048,7 +33048,7 @@ msgstr "U transakciji su dozvoljeni samo podređeni članovi"
 
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.py:350
 msgid "Only one of Deposit or Withdrawal should be non-zero when applying an Excluded Fee."
-msgstr "Samo jedan od pologa ili isplate ne treba biti nula prilikom primjene isključene naknade."
+msgstr "Samo jedan od Uplate ili Isplate ne treba biti nula prilikom primjene Isključene Naknade."
 
 #: erpnext/manufacturing/doctype/bom/bom.py:331
 msgid "Only one operation can have 'Is Final Finished Good' checked when 'Track Semi Finished Goods' is enabled."
@@ -33200,11 +33200,11 @@ msgstr "Otvorite novu kartu"
 
 #: banking/src/components/features/Settings/KeyboardShortcuts.tsx:63
 msgid "Open the settings dialog"
-msgstr ""
+msgstr "Otvorite dijalog postavki"
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:327
 msgid "Open {0} in a new tab"
-msgstr ""
+msgstr "Otvori {0} u novoj kartici"
 
 #: erpnext/accounts/report/general_ledger/general_ledger.py:395
 #: erpnext/public/js/stock_analytics.js:97
@@ -34096,7 +34096,7 @@ msgstr "Nepodmireni Iznos"
 
 #: banking/src/components/features/BankReconciliation/BankReconciliationStatement.tsx:295
 msgid "Outstanding Checks and Deposits to clear"
-msgstr ""
+msgstr "Neizvršeni čekovi i uplate na naplatu"
 
 #: erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py:48
 msgid "Outstanding Cheques and Deposits to clear"
@@ -34782,11 +34782,11 @@ msgstr "Uplaćeni iznos ne može biti veći od ukupnog negativnog nepodmirenog i
 
 #: banking/src/components/features/BankReconciliation/TransferModal.tsx:340
 msgid "Paid From"
-msgstr ""
+msgstr "Plaćeno iz"
 
 #: banking/src/components/features/BankReconciliation/RecordPaymentModal.tsx:643
 msgid "Paid From (GL Account)"
-msgstr ""
+msgstr "Plaćeno iz (Knjigovodstveni Račun)"
 
 #. Label of the paid_from_account_type (Data) field in DocType 'Payment Entry'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
@@ -34795,11 +34795,11 @@ msgstr "Plaćeno sa Tipa Računa"
 
 #: banking/src/components/features/BankReconciliation/TransferModal.tsx:354
 msgid "Paid To"
-msgstr ""
+msgstr "Plaćeno u"
 
 #: banking/src/components/features/BankReconciliation/RecordPaymentModal.tsx:631
 msgid "Paid To (GL Account)"
-msgstr ""
+msgstr "Plaćeno u (Knjigovodstveni Račun)"
 
 #. Label of the paid_to_account_type (Data) field in DocType 'Payment Entry'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
@@ -34813,7 +34813,7 @@ msgstr "Uplaćeni iznos + iznos otpisa ne može biti veći od ukupnog iznosa"
 
 #: banking/src/components/features/BankReconciliation/RecordPaymentModal.tsx:427
 msgid "Paid to"
-msgstr ""
+msgstr "Plaćeno u"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -35021,7 +35021,7 @@ msgstr "Pogreška Raščlanjivanja"
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:857
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:888
 msgid "Partial Match"
-msgstr ""
+msgstr "Djelomično Usklađivanje"
 
 #. Option for the 'Status' (Select) field in DocType 'Subcontracting Order'
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
@@ -35293,7 +35293,7 @@ msgstr "Valuta Računa Stranke"
 #. Log Column Map'
 #: erpnext/accounts/doctype/bank_statement_import_log_column_map/bank_statement_import_log_column_map.json
 msgid "Party Account No."
-msgstr ""
+msgstr "Broj računa Stranke."
 
 #. Label of the bank_party_account_number (Data) field in DocType 'Bank
 #. Transaction'
@@ -35328,7 +35328,7 @@ msgstr "Puno ime stranke"
 #. Log Column Map'
 #: erpnext/accounts/doctype/bank_statement_import_log_column_map/bank_statement_import_log_column_map.json
 msgid "Party IBAN"
-msgstr ""
+msgstr "IBAN Stranke"
 
 #. Label of the bank_party_iban (Data) field in DocType 'Bank Transaction'
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.json
@@ -35384,7 +35384,7 @@ msgstr "Ime Stranke"
 #. Log Column Map'
 #: erpnext/accounts/doctype/bank_statement_import_log_column_map/bank_statement_import_log_column_map.json
 msgid "Party Name/Account Holder"
-msgstr ""
+msgstr "Ime Stranke/Vlasnik Računa"
 
 #. Label of the bank_party_name (Data) field in DocType 'Bank Transaction'
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.json
@@ -35500,7 +35500,7 @@ msgstr "Korisnik Stranke"
 
 #: erpnext/accounts/doctype/bank_transaction_rule/bank_transaction_rule.py:72
 msgid "Party account is required to create a payment entry."
-msgstr ""
+msgstr "Račun Stranke je obavezan za kreiranje unosa plaćanja."
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:475
 msgid "Party can only be one of {0}"
@@ -35513,15 +35513,15 @@ msgstr "Stranka je obavezna"
 #: banking/src/components/features/BankReconciliation/RecordPaymentModal.tsx:208
 #: banking/src/components/features/BankReconciliation/RecordPaymentModal.tsx:218
 msgid "Party is required"
-msgstr ""
+msgstr "Stranka je Obavezna"
 
 #: erpnext/accounts/doctype/bank_transaction_rule/bank_transaction_rule.py:69
 msgid "Party is required create a payment entry."
-msgstr ""
+msgstr "Stranka je obavezna za kreiranje unosa plaćanja."
 
 #: erpnext/accounts/doctype/bank_transaction_rule/bank_transaction_rule.py:66
 msgid "Party type is required to create a payment entry."
-msgstr ""
+msgstr "Tip Stranke je obavezan za kreiranje unosa plaćanja."
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -35770,7 +35770,7 @@ msgstr "Nalog Plaćanja"
 
 #: banking/src/components/features/BankReconciliation/RecordPaymentModal.tsx:361
 msgid "Payment Entry Created"
-msgstr ""
+msgstr "Unos Plaćanja Kreiran"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/payment_entry_deduction/payment_entry_deduction.json
@@ -35843,7 +35843,7 @@ msgstr "Detalji Platnog Prolaza"
 #: erpnext/accounts/doctype/payment_request/payment_request.py:289
 #: erpnext/accounts/doctype/payment_request/payment_request.py:294
 msgid "Payment Initialization Failed"
-msgstr ""
+msgstr "Pokretanje plaćanja nije uspjelo"
 
 #. Name of a report
 #: erpnext/accounts/report/payment_ledger/payment_ledger.json
@@ -35992,7 +35992,7 @@ msgstr "Postavke Usaglašavanje Plaćanja"
 
 #: banking/src/components/features/BankReconciliation/RecordPaymentModal.tsx:136
 msgid "Payment Recorded"
-msgstr ""
+msgstr "Uplata zabilježena"
 
 #. Label of the payment_reference (Data) field in DocType 'Payment Order
 #. Reference'
@@ -36239,7 +36239,7 @@ msgstr "Iznos plaćanja ne može biti manji ili jednak 0"
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:293
 msgid "Payment gateway {0} failed to create a payment session"
-msgstr ""
+msgstr "Platni portal {0} nije uspio kreirati sesiju plaćanja"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:176
 msgid "Payment methods are mandatory. Please add at least one payment method."
@@ -36687,7 +36687,7 @@ msgstr "Stalna Adresa Je"
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.py:74
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.py:80
 msgid "Permission Denied"
-msgstr ""
+msgstr "Dozvola odbijena"
 
 #: erpnext/stock/report/incorrect_stock_value_report/incorrect_stock_value_report.py:19
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:18
@@ -37153,7 +37153,7 @@ msgstr "Dodaj Račun za Privremeno Otvaranje u Kontni Plan"
 
 #: erpnext/accounts/doctype/bank_transaction_rule/bank_transaction_rule.py:77
 msgid "Please add an account for the Bank Entry rule."
-msgstr ""
+msgstr "Dodaj račun za pravilo bankovnog unosa."
 
 #: erpnext/public/js/utils/naming_series_dialog.js:170
 msgid "Please add at least one naming series."
@@ -37248,7 +37248,7 @@ msgstr "Klikni na 'Generiraj Raspored' da generišeš raspored"
 
 #: erpnext/accounts/doctype/bank_transaction_rule/bank_transaction_rule.py:80
 msgid "Please configure accounts for the Bank Entry rule."
-msgstr ""
+msgstr "Konfiguriraj račune za pravilo bankovnog unosa."
 
 #: erpnext/selling/doctype/customer/customer.py:642
 msgid "Please contact any of the following users to extend the credit limits for {0}: {1}"
@@ -37584,7 +37584,7 @@ msgstr "Osvježi ili poništi Plaid vezu od Banke {}."
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:125
 msgid "Please review the details below and click the 'Import' button to proceed."
-msgstr ""
+msgstr "Molimo pregledajte detalje u nastavku i kliknite na dugme 'Uvezi' da biste nastavili."
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:43
 msgid "Please review the {0} configuration and complete any required financial setup activities."
@@ -37767,15 +37767,15 @@ msgstr "Odaberi Radni Nalog."
 
 #: banking/src/components/features/BankReconciliation/BankClearanceSummary.tsx:35
 msgid "Please select a bank account to view the bank clearance summary."
-msgstr ""
+msgstr "Molimo odaberite bankovni račun da biste vidjeli sažetak bankovnih poravnanja."
 
 #: banking/src/components/features/BankReconciliation/BankReconciliationStatement.tsx:28
 msgid "Please select a bank account to view the bank reconciliation statement."
-msgstr ""
+msgstr "Molimo odaberite bankovni račun za pregled izvoda o usklađivanju bankovnog računa."
 
 #: banking/src/components/features/BankReconciliation/BankTransactionList.tsx:32
 msgid "Please select a bank and set the date range"
-msgstr ""
+msgstr "Molimo odaberite banku i postavite raspon datuma"
 
 #: erpnext/selling/report/sales_partner_commission_summary/sales_partner_commission_summary.py:53
 msgid "Please select a company."
@@ -37840,7 +37840,7 @@ msgstr "Odaberi barem jedan filter: Šifra Artikla, Šarža ili Serijski Broj."
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.js:782
 msgid "Please select at least one item to update delivered quantity."
-msgstr ""
+msgstr "Molimo odaberite barem jedan artikal za ažuriranje isporučene količine."
 
 #: erpnext/stock/report/incorrect_serial_and_batch_bundle/incorrect_serial_and_batch_bundle.js:33
 msgid "Please select at least one row to fix"
@@ -37873,11 +37873,11 @@ msgstr "Odaberi Datum"
 
 #: banking/src/components/features/BankReconciliation/BankClearanceSummary.tsx:39
 msgid "Please select dates to view the bank clearance summary."
-msgstr ""
+msgstr "Molimo odaberite datume za pregled sažetka bankovnog poravnanja."
 
 #: banking/src/components/features/BankReconciliation/BankReconciliationStatement.tsx:32
 msgid "Please select dates to view the bank reconciliation statement."
-msgstr ""
+msgstr "Molimo odaberite datume za pregled izvoda o usklađivanju bankovnog računa."
 
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:30
 msgid "Please select either the Item or Warehouse or Warehouse Type filter to generate the report."
@@ -38565,7 +38565,7 @@ msgstr "Datum i vrijeme knjiženja su obavezni"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:841
 msgid "Posting date does not match the selected transaction"
-msgstr ""
+msgstr "Datum knjiženja ne odgovara odabranoj transakciji"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:99
 msgid "Posting date is required"
@@ -38573,7 +38573,7 @@ msgstr "Datum registracije je obavezan"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:841
 msgid "Posting date matches the selected transaction"
-msgstr ""
+msgstr "Datum knjiženja odgovara odabranoj transakciji"
 
 #: erpnext/controllers/sales_and_purchase_return.py:66
 msgid "Posting timestamp must be after {0}"
@@ -38638,15 +38638,15 @@ msgstr "Pretprodaja"
 
 #: erpnext/accounts/utils.py:2779
 msgid "Pre-Submit Warning"
-msgstr ""
+msgstr "Upozorenje prije podnošenja"
 
 #: erpnext/accounts/utils.py:2828
 msgid "Pre-Submit Warning: Credit Limit"
-msgstr ""
+msgstr "Upozorenje prije podnošenja: Kreditno Ograničenje"
 
 #: erpnext/accounts/utils.py:2840
 msgid "Pre-Submit Warning: Packed Qty"
-msgstr ""
+msgstr "Upozorenje prije podnošenja: Pakirana Količina"
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:307
 msgid "Preference"
@@ -38659,7 +38659,7 @@ msgstr "Postavke"
 
 #: banking/src/components/features/Settings/Preferences.tsx:33
 msgid "Preferences updated"
-msgstr ""
+msgstr "Postavke su ažurirane"
 
 #. Label of the prefered_contact_email (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -38752,7 +38752,7 @@ msgstr "Pregledaj Obavezne Materijale"
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:221
 msgid "Preview Transactions"
-msgstr ""
+msgstr "Pregled Transakcija"
 
 #: erpnext/accounts/report/balance_sheet/balance_sheet.py:182
 #: erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.py:142
@@ -38761,7 +38761,7 @@ msgstr "Prethodna Finansijska Godina nije zatvorena"
 
 #: banking/src/pages/BankStatementImporter.tsx:212
 msgid "Previous Imports"
-msgstr ""
+msgstr "Prethodni uvozi"
 
 #: erpnext/stock/report/negative_batch_report/negative_batch_report.py:54
 msgid "Previous Qty"
@@ -40897,19 +40897,19 @@ msgstr "Pravilo Odlaganja već postoji za Artikal {0} u Skladištu {1}."
 
 #: banking/src/components/features/BankReconciliation/BankRecDateFilter.tsx:41
 msgid "Q1"
-msgstr ""
+msgstr "K1"
 
 #: banking/src/components/features/BankReconciliation/BankRecDateFilter.tsx:49
 msgid "Q2"
-msgstr ""
+msgstr "K2"
 
 #: banking/src/components/features/BankReconciliation/BankRecDateFilter.tsx:57
 msgid "Q3"
-msgstr ""
+msgstr "K3"
 
 #: banking/src/components/features/BankReconciliation/BankRecDateFilter.tsx:65
 msgid "Q4"
-msgstr ""
+msgstr "K4"
 
 #. Label of the free_qty (Float) field in DocType 'Pricing Rule'
 #. Label of the free_qty (Float) field in DocType 'Promotional Scheme Product
@@ -41532,7 +41532,7 @@ msgstr "Cilj Revizije Kvaliteta"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.js:830
 msgid "Quantities updated successfully."
-msgstr ""
+msgstr "Količine su uspješno ažurirane."
 
 #. Label of the qty (Data) field in DocType 'Opening Invoice Creation Tool
 #. Item'
@@ -42739,7 +42739,7 @@ msgstr "Primljeno i Prihvaćeno"
 
 #: banking/src/components/features/BankReconciliation/RecordPaymentModal.tsx:427
 msgid "Received from"
-msgstr ""
+msgstr "Primljeno od"
 
 #. Label of the receiver_list (Code) field in DocType 'SMS Center'
 #: erpnext/selling/doctype/sms_center/sms_center.json
@@ -42774,7 +42774,7 @@ msgstr "Poruka Primaoca i Detalji Plaćanja"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:677
 msgid "Recommended Action"
-msgstr ""
+msgstr "Preporučena Radnja"
 
 #. Label of the section_break_1 (Section Break) field in DocType 'Bank
 #. Reconciliation Tool'
@@ -42857,7 +42857,7 @@ msgstr "Zapisnik Grešaka Usaglašavanja"
 #: banking/src/components/features/ActionLog/ActionLog.tsx:59
 #: banking/src/components/features/Settings/KeyboardShortcuts.tsx:54
 msgid "Reconciliation History"
-msgstr ""
+msgstr "Historija Usklađivanja"
 
 #: erpnext/accounts/doctype/process_payment_reconciliation/process_payment_reconciliation_dashboard.py:9
 msgid "Reconciliation Logs"
@@ -42889,37 +42889,37 @@ msgstr "Usaglašavanje Stupa na Snagu"
 #: banking/src/components/features/BankReconciliation/BankTransactionUnreconcileModal.tsx:84
 #: erpnext/accounts/doctype/bank_transaction_payments/bank_transaction_payments.json
 msgid "Reconciliation Type"
-msgstr ""
+msgstr "Tip Usklađivanja"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:871
 msgid "Reconciling"
-msgstr ""
+msgstr "Usklađivanje"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:442
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:499
 #: banking/src/components/features/BankReconciliation/RecordPaymentModal.tsx:48
 #: banking/src/components/features/Settings/KeyboardShortcuts.tsx:22
 msgid "Record Payment"
-msgstr ""
+msgstr "Zabilježi Plaćanje"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:422
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:515
 #: banking/src/components/features/Settings/KeyboardShortcuts.tsx:15
 msgid "Record a bank journal entry for expenses, income or split transactions"
-msgstr ""
+msgstr "Zabilježi bankovni nalog knjiženja za troškove, prihode ili podijeljene transakcije"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:428
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:521
 msgid "Record a journal entry for expenses, income or split transactions"
-msgstr ""
+msgstr "Zabilježi nalog knjiženja za troškove, prihode ili podijeljene transakcije"
 
 #: banking/src/components/features/BankReconciliation/BankEntryModal.tsx:42
 msgid "Record a journal entry for expenses, income or split transactions."
-msgstr ""
+msgstr "Zabilježi nalog knjiženja za troškove, prihode ili podijeljene transakcije."
 
 #: banking/src/components/features/Settings/KeyboardShortcuts.tsx:23
 msgid "Record a payment against a customer or supplier"
-msgstr ""
+msgstr "Zabilježite plaćanje prema klijentu ili dobavljaču"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:440
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:446
@@ -42928,11 +42928,11 @@ msgstr ""
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:631
 #: banking/src/components/features/BankReconciliation/RecordPaymentModal.tsx:50
 msgid "Record a payment entry against a customer or supplier"
-msgstr ""
+msgstr "Zabilježite unos plaćanja za klijenta ili dobavljača"
 
 #: banking/src/components/features/Settings/KeyboardShortcuts.tsx:31
 msgid "Record a transfer between two bank accounts"
-msgstr ""
+msgstr "Zabilježite prijenos između dva bankovna računa"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:459
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:465
@@ -42940,11 +42940,11 @@ msgstr ""
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:539
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:633
 msgid "Record an internal transfer to another bank/credit card/cash account"
-msgstr ""
+msgstr "Zabilježite interni prijenos na drugi bankovni račun/račun kreditne kartice/gotovinski račun"
 
 #: banking/src/components/features/BankReconciliation/TransferModal.tsx:42
 msgid "Record an internal transfer to another bank/credit card/cash account."
-msgstr ""
+msgstr "Zabilježite interni prijenos na drugi bankovni račun/račun kreditne kartice/gotovinski račun."
 
 #. Label of the recording_html (HTML) field in DocType 'Call Log'
 #: erpnext/telephony/doctype/call_log/call_log.json
@@ -43039,7 +43039,7 @@ msgstr "Datum Otkupa"
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:310
 #: banking/src/components/features/BankReconciliation/SelectedTransactionDetails.tsx:63
 msgid "Ref"
-msgstr ""
+msgstr "Referenca"
 
 #. Label of the ref_code (Data) field in DocType 'Item Customer Detail'
 #: erpnext/stock/doctype/item_customer_detail/item_customer_detail.json
@@ -43053,7 +43053,7 @@ msgstr "Referentni Datum"
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:236
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:303
 msgid "Ref."
-msgstr ""
+msgstr "Referenca."
 
 #: banking/src/components/features/BankReconciliation/BankReconciliationStatement.tsx:155
 #: banking/src/components/features/BankReconciliation/BankTransactionList.tsx:82
@@ -43070,7 +43070,7 @@ msgstr "Referentni Datum za popust pri ranijem plaćanju"
 
 #: banking/src/components/features/BankReconciliation/BankEntryModal.tsx:422
 msgid "Reference Date is required"
-msgstr ""
+msgstr "Referentni datum je obavezan"
 
 #. Label of the reference_detail_no (Data) field in DocType 'Journal Entry
 #. Account'
@@ -43162,15 +43162,15 @@ msgstr "Referentni Red #"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:846
 msgid "Reference date does not match the selected transaction"
-msgstr ""
+msgstr "Referentni datum nije usklađen s odabranom transakcijom"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:846
 msgid "Reference date matches the selected transaction"
-msgstr ""
+msgstr "Referentni datum odgovara odabranoj transakciji"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:860
 msgid "Reference does not match the selected transaction"
-msgstr ""
+msgstr "Referenca nije usklađena s odabranom transakcijom"
 
 #. Label of the reference_for_reservation (Data) field in DocType 'Serial and
 #. Batch Entry'
@@ -43180,15 +43180,15 @@ msgstr "Referenca za Rezervaciju"
 
 #: banking/src/components/features/BankReconciliation/BankEntryModal.tsx:428
 msgid "Reference is required"
-msgstr ""
+msgstr "Referenca je obavezna"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:860
 msgid "Reference matches the selected transaction"
-msgstr ""
+msgstr "Referenca odgovara odabranoj transakciji"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:860
 msgid "Reference matches the selected transaction partially"
-msgstr ""
+msgstr "Referenca je djelomično usklađena s odabranom transakcijom"
 
 #. Description of the 'Invoice Number' (Data) field in DocType 'Opening Invoice
 #. Creation Tool Item'
@@ -43267,7 +43267,7 @@ msgstr "Regeneriraj Zatvaranje Unosa Zaliha"
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:203
 #: erpnext/accounts/doctype/bank_transaction_rule_description_conditions/bank_transaction_rule_description_conditions.json
 msgid "Regex"
-msgstr ""
+msgstr "Regex"
 
 #. Label of a Card Break in the Buying Workspace
 #: erpnext/buying/workspace/buying/buying.json
@@ -43535,7 +43535,7 @@ msgstr "Poslovi preimenovanja za {0} nisu stavljeni u red."
 
 #: erpnext/accounts/doctype/account/account.py:550
 msgid "Renaming it is only allowed via parent company {0}, to avoid mismatch."
-msgstr "Preimenovanje je dozvoljeno samo preko nadređenog poduzeća {0}, kako bi se izbjegla nepodudaranje."
+msgstr "Preimenovanje je dozvoljeno samo preko nadređenog poduzeća {0}, kako bi se izbjegla neusklađenost."
 
 #: erpnext/manufacturing/doctype/workstation/test_workstation.py:78
 #: erpnext/manufacturing/doctype/workstation/test_workstation.py:89
@@ -44312,7 +44312,7 @@ msgstr "Rezervacija Zaliha..."
 
 #: banking/src/components/features/BankReconciliation/IncorrectlyClearedEntries.tsx:172
 msgid "Reset Clearing Date"
-msgstr ""
+msgstr "Resetiraj datum raščišćenja"
 
 #. Label of the reset_company_default_values_status (Select) field in DocType
 #. 'Transaction Deletion Record'
@@ -45527,7 +45527,7 @@ msgstr "Red #{0}: Artikla {1} se ne slaže. Promjena koda artikla nije dozvoljen
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:765
 msgid "Row #{0}: Journal Entry {1} does not have account {2} or already matched against another voucher"
-msgstr "Red #{0}: Nalog Knjiženja {1} nema račun {2} ili se već podudara naspram drugog verifikata"
+msgstr "Red #{0}: Nalog Knjiženja {1} nema račun {2} ili je već usjklađen naspram drugog verifikata"
 
 #: erpnext/assets/doctype/asset_category/asset_category.py:149
 msgid "Row #{0}: Missing <b>{1}</b> for company <b>{2}</b>."
@@ -45820,7 +45820,7 @@ msgstr "Red #{0}: Ukupan broj amortizacija mora biti veći od nule"
 
 #: erpnext/controllers/stock_controller.py:105
 msgid "Row #{0}: Warehouse {1} does not match with the warehouse {2} in Serial and Batch Bundle {3}."
-msgstr "Red #{0}: Skladište {1} se ne podudara sa skladištem {2} u serijskom i šaržnom paketu {3}."
+msgstr "Red #{0}: Skladište {1} nije usklađen sa skladištem {2} u serijskom i šaržnom paketu {3}."
 
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.py:94
 msgid "Row #{0}: Withholding Amount {1} does not match calculated amount {2}."
@@ -46157,7 +46157,7 @@ msgstr "Red {0}: Otpremnica je već kreirana za artikal {1}."
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:824
 msgid "Row {0}: Party / Account does not match with {1} / {2} in {3} {4}"
-msgstr "Red {0}: Strana/ Račun se ne podudara sa {1} / {2} u {3} {4}"
+msgstr "Red {0}: Strana/ Račun nije usklađen sa {1} / {2} u {3} {4}"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:602
 msgid "Row {0}: Party Type and Party is required for Receivable / Payable account {1}"
@@ -46306,7 +46306,7 @@ msgstr "Red {0}: {1} {2} ne može biti isto kao {3} (Račun Stranke) {4}"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:838
 msgid "Row {0}: {1} {2} does not match with {3}"
-msgstr "Red {0}: {1} {2} se ne podudara sa {3}"
+msgstr "Red {0}: {1} {2} nije usklađen sa {3}"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:136
 msgid "Row {0}: {1} {2} is linked to company {3}. Please select a document belonging to company {4}."
@@ -46386,35 +46386,35 @@ msgstr "Naziv pravila"
 
 #: banking/src/components/features/BankReconciliation/Rules/CreateNewRule.tsx:41
 msgid "Rule created successfully"
-msgstr ""
+msgstr "Pravilo je uspješno kreirano"
 
 #: banking/src/components/features/Settings/Rules/RuleList.tsx:149
 msgid "Rule deleted."
-msgstr ""
+msgstr "Pravilo je izbrisano."
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:661
 msgid "Rule matched based on transaction description and other criteria."
-msgstr ""
+msgstr "Pravilo jeusklađeno na osnovu opisa transakcije i drugih kriterija."
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:39
 msgid "Rule name is required"
-msgstr ""
+msgstr "Naziv pravila je obavezan"
 
 #: banking/src/components/features/Settings/Rules/RuleList.tsx:174
 msgid "Rule priorities updated"
-msgstr ""
+msgstr "Prioriteti pravila ažurirani"
 
 #: banking/src/components/features/BankReconciliation/Rules/EditRule.tsx:30
 msgid "Rule updated."
-msgstr ""
+msgstr "Pravilo je ažurirano."
 
 #: banking/src/components/features/Settings/Rules/RuleList.tsx:56
 msgid "Rules evaluation completed"
-msgstr ""
+msgstr "Procjena pravila završena"
 
 #: banking/src/components/features/Settings/Rules/RuleList.tsx:56
 msgid "Rules evaluation started"
-msgstr ""
+msgstr "Procjena pravila je započeta"
 
 #: erpnext/public/js/utils/naming_series_dialog.js:54
 msgid "Rules for configuring series"
@@ -46422,15 +46422,15 @@ msgstr "Pravila za konfiguriranje Serija Imenovanja"
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:189
 msgid "Rules to match against the transaction description"
-msgstr ""
+msgstr "Pravila za podudaranje s opisom transakcije"
 
 #: banking/src/components/features/Settings/Rules/RuleList.tsx:75
 msgid "Run Rules"
-msgstr ""
+msgstr "Pravila Pokretanja"
 
 #: banking/src/components/features/Settings/Rules/RuleList.tsx:81
 msgid "Run on new transactions"
-msgstr ""
+msgstr "Pokreni na novim transakcijama"
 
 #. Description of the 'Job Capacity' (Int) field in DocType 'Workstation'
 #: erpnext/manufacturing/doctype/workstation/workstation.json
@@ -46439,11 +46439,11 @@ msgstr "Pokreni paralelne radne kartice na radnom mjestu"
 
 #: banking/src/components/features/Settings/Rules/RuleList.tsx:125
 msgid "Run rules automatically"
-msgstr ""
+msgstr "Pokrenite pravila automatski"
 
 #: banking/src/components/features/Settings/Rules/RuleList.tsx:79
 msgid "Run rules on unreconciled transactions that haven't been evaluated yet"
-msgstr ""
+msgstr "Pokreni pravila za neusklađene transakcije koje još nisu ocijenjene"
 
 #. Option for the 'Status' (Select) field in DocType 'Process Payment
 #. Reconciliation'
@@ -46471,7 +46471,7 @@ msgstr "Izvršavanje..."
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Runs a preview check on save before submission without making any actual changes."
-msgstr ""
+msgstr "Pokreće provjeru pregleda prilikom spremanja prije podnošenja bez ikakvih stvarnih promjena."
 
 #: erpnext/selling/report/pending_so_items_for_purchase_request/pending_so_items_for_purchase_request.py:28
 msgid "S.O. No."
@@ -47420,7 +47420,7 @@ msgstr "Isti Artikal"
 
 #: banking/src/components/features/Settings/Preferences.tsx:69
 msgid "Same day"
-msgstr ""
+msgstr "Isti dan"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:604
 msgid "Same item and warehouse combination already entered."
@@ -47477,7 +47477,7 @@ msgstr "Spremi promjene i Učitaj Novu Fakturu"
 
 #: banking/src/components/features/Settings/KeyboardShortcuts.tsx:47
 msgid "Save the currently opened form"
-msgstr ""
+msgstr "Sačuvaj trenutno otvoreni obrazac"
 
 #: erpnext/templates/includes/order/order_taxes.html:34
 #: erpnext/templates/includes/order/order_taxes.html:85
@@ -47595,11 +47595,11 @@ msgstr "Zapisi Planiranog Vremena"
 
 #: banking/src/components/features/Settings/Rules/RuleList.tsx:115
 msgid "Scheduled job disabled. Transactions will not be auto classified."
-msgstr ""
+msgstr "Zakazani posao je onemogućen. Transakcije neće biti automatski klasificirane."
 
 #: banking/src/components/features/Settings/Rules/RuleList.tsx:115
 msgid "Scheduled job enabled. Transactions will be auto classified."
-msgstr ""
+msgstr "Zakazani posao je omogućen. Transakcije će biti automatski klasificirane."
 
 #: erpnext/accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.py:188
 msgid "Scheduler is Inactive. Can't trigger job now."
@@ -47732,7 +47732,7 @@ msgstr "Naziv Parametra Pretrage"
 
 #: banking/src/components/common/AccountsDropdown.tsx:155
 msgid "Search account..."
-msgstr ""
+msgstr "Pretraži račun..."
 
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:323
 msgid "Search by customer name, phone, email."
@@ -47748,12 +47748,12 @@ msgstr "Pretražuj po kodu artikla, serijskom broju ili barkodu"
 
 #: banking/src/components/features/BankReconciliation/CompanySelector.tsx:64
 msgid "Search company..."
-msgstr ""
+msgstr "Pretraži poduzeće..."
 
 #: banking/src/components/features/BankReconciliation/BankTransactionList.tsx:335
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:146
 msgid "Search transactions"
-msgstr ""
+msgstr "Pretražite transakcije"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -47834,7 +47834,7 @@ msgstr "Vrijednosni Papiri & Burze Roba"
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:31
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:44
 msgid "Securities and Deposits"
-msgstr "Vrijednosti i Depoziti"
+msgstr "Vrijednosti i Uplate"
 
 #: erpnext/templates/pages/help.html:29
 msgid "See All Articles"
@@ -47847,7 +47847,7 @@ msgstr "Pogledaj Sve Otvorene Karte"
 #: banking/src/components/common/AccountsDropdown.tsx:132
 #: banking/src/components/common/AccountsDropdown.tsx:148
 msgid "Select Account"
-msgstr ""
+msgstr "Odaberite račun"
 
 #: erpnext/accounts/report/profitability_analysis/profitability_analysis.py:23
 msgid "Select Accounting Dimension."
@@ -48047,7 +48047,7 @@ msgstr "Odaberi Prikaz"
 
 #: erpnext/public/js/bank_reconciliation_tool/dialog_manager.js:251
 msgid "Select Vouchers to Match"
-msgstr "Odaber Verifikate za Podudaranje"
+msgstr "Odaberi Verifikate za Usklađivanje"
 
 #: erpnext/public/js/stock_analytics.js:72
 msgid "Select Warehouse..."
@@ -48083,7 +48083,7 @@ msgstr "Odaberi Dobavljača"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:49
 msgid "Select a bank account to reconcile"
-msgstr ""
+msgstr "Odaberite bankovni račun za usklađivanje"
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.js:161
 msgid "Select a company"
@@ -48091,14 +48091,14 @@ msgstr "Odaberi Poduzeće"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:342
 msgid "Select a transaction to match and reconcile with vouchers"
-msgstr ""
+msgstr "Odaberite transakciju za usklađivanje i poravnanje s računima"
 
 #: banking/src/components/features/BankReconciliation/BankEntryModal.tsx:607
 #: banking/src/components/features/BankReconciliation/RecordPaymentModal.tsx:702
 #: banking/src/components/features/BankReconciliation/RecordPaymentModal.tsx:1198
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:588
 msgid "Select all"
-msgstr ""
+msgstr "Odaberi sve"
 
 #: erpnext/stock/doctype/item/item.js:1153
 msgid "Select an Item Group."
@@ -48132,7 +48132,7 @@ msgstr "Odaberite Naziv Poduzeća."
 
 #: banking/src/components/ui/form-elements.tsx:159
 msgid "Select date"
-msgstr ""
+msgstr "Odaberi datum"
 
 #: erpnext/controllers/accounts_controller.py:2995
 msgid "Select finance book for the item {0} at row {1}"
@@ -48144,14 +48144,14 @@ msgstr "Odaberi Grupu Artikla"
 
 #: banking/src/components/features/Settings/Preferences.tsx:66
 msgid "Select number of days"
-msgstr ""
+msgstr "Odaberi broj dana"
 
 #: banking/src/components/features/BankReconciliation/BankEntryModal.tsx:626
 #: banking/src/components/features/BankReconciliation/RecordPaymentModal.tsx:722
 #: banking/src/components/features/BankReconciliation/RecordPaymentModal.tsx:1215
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:632
 msgid "Select row {0}"
-msgstr ""
+msgstr "Odaberi red {0}"
 
 #: erpnext/manufacturing/doctype/bom/bom.js:473
 msgid "Select template item"
@@ -48423,7 +48423,7 @@ msgstr "Pošalji sa Prilogom"
 #. Statement Import Log'
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.json
 msgid "Separate columns for withdrawal and deposit"
-msgstr ""
+msgstr "Odvojene kolone za isplatu i uplatu"
 
 #. Label of the sequence_id (Int) field in DocType 'BOM Operation'
 #. Label of the sequence_id (Int) field in DocType 'Work Order Operation'
@@ -49232,7 +49232,7 @@ msgstr "Postavi Dostavno Skladište"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.js:717
 msgid "Set Dropship Items Delivered Quantity"
-msgstr ""
+msgstr "Postavi dostavljenu količinu Dropship artikala"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.js:418
 #: erpnext/manufacturing/doctype/job_card/job_card.js:487
@@ -49406,7 +49406,7 @@ msgstr "Postavljeno prema Šablonu PDV-a za Artikal"
 
 #: banking/src/components/features/BankReconciliation/BankBalance.tsx:248
 msgid "Set closing balance as per bank statement"
-msgstr ""
+msgstr "Postavite završno stanje prema bankovnom izvodu"
 
 #: erpnext/setup/doctype/company/company.py:546
 msgid "Set default inventory account for perpetual inventory"
@@ -49451,7 +49451,7 @@ msgstr "Postavi Planirani Datum Početka (procijenjeni datum na koji želite da 
 #: banking/src/components/features/BankReconciliation/BankClearanceSummary.tsx:261
 #: banking/src/components/features/BankReconciliation/BankClearanceSummary.tsx:306
 msgid "Set the clearance date for this voucher without reconciling with a bank transaction."
-msgstr ""
+msgstr "Postavite datum poravnanja za ovaj verifikat bez usklađivanja s bankovnom transakcijom."
 
 #. Description of the 'Manual Inspection' (Check) field in DocType 'Quality
 #. Inspection Reading'
@@ -49471,7 +49471,7 @@ msgstr "Postavite ovu vrijednost na 0 da biste onemogućili funkciju."
 
 #: banking/src/components/features/Settings/MatchingRules.tsx:37
 msgid "Set up rules to automatically classify transactions. Drag and drop rules to reorder their priority."
-msgstr ""
+msgstr "Postavite pravila za automatsku klasifikaciju transakcija. Povucite i ispustite pravila kako biste promijenili njihov prioritet."
 
 #: erpnext/assets/doctype/asset/asset.py:901
 msgid "Set {0} in asset category {1} for company {2}"
@@ -49953,7 +49953,7 @@ msgstr "Količinski Nedostatak"
 
 #: banking/src/components/features/Settings/KeyboardShortcuts.tsx:85
 msgid "Shortcut"
-msgstr ""
+msgstr "Prečica"
 
 #: erpnext/buying/report/purchase_analytics/purchase_analytics.js:70
 #: erpnext/selling/report/sales_analytics/sales_analytics.js:103
@@ -50068,7 +50068,7 @@ msgstr "Prikaži Neto Vrijednosti na Računu Stranke"
 
 #: banking/src/components/features/BankReconciliation/MatchFilters.tsx:32
 msgid "Show Only Exact Amount"
-msgstr ""
+msgstr "Prikaži samo tačan iznos"
 
 #: erpnext/templates/pages/projects.js:63
 msgid "Show Open"
@@ -50303,7 +50303,7 @@ msgstr "Jedan"
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:282
 #: erpnext/accounts/doctype/bank_transaction_rule/bank_transaction_rule.json
 msgid "Single Account"
-msgstr ""
+msgstr "Jedan račun"
 
 #. Option for the 'Loyalty Program Type' (Select) field in DocType 'Loyalty
 #. Program'
@@ -50588,7 +50588,7 @@ msgstr "Potrošnja za Račun {0} ({1}) između {2} i {3} je već premašila novi
 #: banking/src/components/features/ActionLog/ActionLog.tsx:186
 #: banking/src/components/features/BankReconciliation/SelectedTransactionDetails.tsx:55
 msgid "Spent"
-msgstr ""
+msgstr "Potrošeno"
 
 #: erpnext/assets/doctype/asset/asset.js:690
 #: erpnext/stock/doctype/batch/batch.js:104
@@ -50632,7 +50632,7 @@ msgstr "Količina podijeljene imovine mora biti manja od količine imovine"
 
 #: banking/src/components/features/ActionLog/ActionLog.tsx:235
 msgid "Split across {} accounts"
-msgstr ""
+msgstr "Raspodijeli na {} račune"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:2458
 msgid "Splitting {0} {1} into {2} rows as per Payment Terms"
@@ -50849,29 +50849,29 @@ msgstr "Početni položaj od gornje ivice"
 #. Description Conditions'
 #: erpnext/accounts/doctype/bank_transaction_rule_description_conditions/bank_transaction_rule_description_conditions.json
 msgid "Starts With"
-msgstr ""
+msgstr "Počinje sa"
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:201
 msgid "Starts with"
-msgstr ""
+msgstr "Počinje sa"
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:120
 msgid "Statement Details"
-msgstr ""
+msgstr "Detalji Izvoda"
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:151
 msgid "Statement File"
-msgstr ""
+msgstr "Datoteka Izvoda"
 
 #. Label of the statement_format_section (Section Break) field in DocType 'Bank
 #. Statement Import Log'
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.json
 msgid "Statement Format"
-msgstr ""
+msgstr "Format Izvoda"
 
 #: banking/src/pages/BankStatementImporter.tsx:139
 msgid "Statement Import Instructions"
-msgstr ""
+msgstr "Upute za uvoz izvoda"
 
 #: erpnext/accounts/report/general_ledger/general_ledger.html:124
 msgid "Statement Of Accounts"
@@ -51725,7 +51725,7 @@ msgstr "Zalihe se ne mogu ažurirati za Nabavnu Fakturu {0} jer je za ovu transa
 
 #: erpnext/stock/doctype/warehouse/warehouse.py:125
 msgid "Stock entries exist with the old account. Changing the account may lead to a mismatch between the warehouse closing balance and the account closing balance. The overall closing balance will still match, but not for the specific account."
-msgstr "Unosi zaliha postoje na starom računu. Promjena računa može dovesti do neusklađenosti između završnog stanja skladišta i završnog stanja računa. Ukupno završno stanje će se i dalje podudarati, ali ne za određeni račun."
+msgstr "Unosi zaliha postoje na starom računu. Promjena računa može dovesti do neusklađenosti između završnog stanja skladišta i završnog stanja računa. Ukupno završno stanje će i dalje biti usklađeno, ali ne za određeni račun."
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1140
 msgid "Stock has been unreserved for work order {0}."
@@ -52415,15 +52415,15 @@ msgstr "Uspješno ažurirano {0} zapisa."
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:263
 msgid "Suggest creating a"
-msgstr ""
+msgstr "Predložite kreiranje"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:876
 msgid "Suggested"
-msgstr ""
+msgstr "Predloženo"
 
 #: banking/src/components/features/BankReconciliation/TransferModal.tsx:506
 msgid "Suggested Transfer to {0}"
-msgstr ""
+msgstr "Predloženi prijenos na {0}"
 
 #. Option for the 'Request Type' (Select) field in DocType 'Lead'
 #: erpnext/crm/doctype/lead/lead.json
@@ -54350,7 +54350,7 @@ msgstr "Dolument Tip {0} mora imati Status polje za konfiguraciju Ugovora Standa
 
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.py:345
 msgid "The Excluded Fee is bigger than the Deposit it is deducted from."
-msgstr "Isključena naknada je veća od pologa od kojeg se odbija."
+msgstr "Isključena naknada je veća od Uplate od kojeg se odbija."
 
 #: erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py:177
 msgid "The GL Entries and closing balances will be processed in the background, it can take a few minutes."
@@ -54412,7 +54412,7 @@ msgstr "Dodijeljeni iznos je veći od nepodmirenog iznosa Zahtjeva Plaćanja {0}
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:185
 msgid "The amount format detected in the statement file. This is used to parse the deposit and withdrawal values from each row."
-msgstr ""
+msgstr "Format iznosa otkriven u datoteci izvoda. Koristi se za analizu vrijednosti uplate i isplate iz svakog reda."
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:219
 msgid "The amount of {0} set in this payment request is different from the calculated amount of all payment plans: {1}. Make sure this is correct before submitting the document."
@@ -54421,12 +54421,12 @@ msgstr "Iznos {0} postavljen u ovom zahtjevu plaćanja razlikuje se od izračuna
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.py:94
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.py:526
 msgid "The bank account is disabled. Please enable it"
-msgstr ""
+msgstr "Bankovni račun je onemogućen. Molimo omogućite ga"
 
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.py:88
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.py:520
 msgid "The bank account is not a company account. Please select a company account"
-msgstr ""
+msgstr "Bankovni račun nije račun poduzeća. Molimo odaberite račun poduzeća"
 
 #: erpnext/controllers/stock_controller.py:1317
 msgid "The batch {0} is already reserved in {1} {2}. So, cannot proceed with the {3} {4}, which is created against the {5} {6}."
@@ -54450,11 +54450,11 @@ msgstr "Trenutni Unos Otvaranje Kase je zastario. Zatvori ga i kreiraj novi."
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:199
 msgid "The date format detected in the statement file. This is used to parse the date values."
-msgstr ""
+msgstr "Format datuma otkriven u datoteci izvoda. Koristi se za parsiranje vrijednosti datuma."
 
 #: banking/src/pages/BankStatementImporter.tsx:155
 msgid "The date of the transaction"
-msgstr ""
+msgstr "Datum transakcije"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1229
 msgid "The default BOM for that item will be fetched by the system. You can also change the BOM."
@@ -54462,7 +54462,7 @@ msgstr "Sistem će preuzeti standard Sastavnicu za Artikal. Također možete pro
 
 #: banking/src/pages/BankStatementImporter.tsx:170
 msgid "The description of the transaction"
-msgstr ""
+msgstr "Opis transakcije"
 
 #: erpnext/crm/doctype/appointment_booking_settings/appointment_booking_settings.py:67
 msgid "The difference between from time and To Time must be a multiple of Appointment"
@@ -54470,7 +54470,7 @@ msgstr "Razlika između odvremena i do vremena mora biti višestruki broj Termin
 
 #: banking/src/components/common/FileUploadBanner.tsx:11
 msgid "The document has been created and reconciled. Uploading attachments..."
-msgstr ""
+msgstr "Dokument je kreiran i usklađen. Otpremanje priloga..."
 
 #: erpnext/accounts/doctype/share_transfer/share_transfer.py:177
 #: erpnext/accounts/doctype/share_transfer/share_transfer.py:185
@@ -54499,7 +54499,7 @@ msgstr "Polja Od Dioničara i Za Dioničara ne mogu biti prazna"
 
 #: banking/src/pages/BankStatementImporter.tsx:142
 msgid "The file should contain the following columns with a distinct header row. You can upload most bank statements as is without changing the columns."
-msgstr ""
+msgstr "Datoteka treba da sadrži sljedeće kolone sa zasebnim redom zaglavlja. Većinu bankovnih izvoda možete otpremiti onakve kakve jesu, bez mijenjanja kolona."
 
 #. Description of the 'Item to Manufacture' (Link) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
@@ -54512,7 +54512,7 @@ msgstr "Fiskalna godina je automatski kreirana u onemogućenom stanju kako bi se
 
 #: erpnext/accounts/doctype/share_transfer/share_transfer.py:240
 msgid "The folio numbers are not matching"
-msgstr "Brojevi Folija se ne podudaraju"
+msgstr "Brojevi Folija nisu usklađeni"
 
 #: erpnext/stock/doctype/putaway_rule/putaway_rule.py:307
 msgid "The following Items, having Putaway Rules, could not be accomodated:"
@@ -54577,7 +54577,7 @@ msgstr "Praznik {0} nije između Od Datuma i Do Datuma"
 
 #: banking/src/components/features/BankReconciliation/RecordPaymentModal.tsx:811
 msgid "The invoice is not fully allocated as there is a difference of {0}."
-msgstr ""
+msgstr "Faktura nije u potpunosti dodijeljena jer postoji razlika od {0}."
 
 #: erpnext/controllers/buying_controller.py:1213
 msgid "The item {item} is not marked as {type_of} item. You can enable it as {type_of} item from its Item master."
@@ -54601,7 +54601,7 @@ msgstr "Radna Kartica {0} je u {1} stanju i ne možete je ponovo pokrenuti."
 
 #: erpnext/accounts/doctype/bank_transaction_rule/bank_transaction_rule.py:87
 msgid "The last account row must not have any debit or credit amounts set."
-msgstr ""
+msgstr "Posljednji red računa ne smije imati postavljene iznose debita ili kredita."
 
 #: erpnext/public/js/utils/barcode_scanner.js:533
 msgid "The last scanned warehouse has been cleared and won't be set in the subsequently scanned items"
@@ -54627,7 +54627,7 @@ msgstr "Broj dionica i brojevi dionica nisu usklađeni"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:927
 msgid "The opening balance might not match your bank statement. Would you like to reconcile them?"
-msgstr ""
+msgstr "Početno stanje se možda nije usklađeno s vašim bankovnim izvodom. Želite li ih uskladiti?"
 
 #: erpnext/manufacturing/doctype/operation/operation.py:43
 msgid "The operation {0} can not add multiple times"
@@ -54684,7 +54684,7 @@ msgstr "Cijena po kojoj je ovaj artikal posljednji put nabavljen putem fakture. 
 
 #: banking/src/pages/BankStatementImporter.tsx:175
 msgid "The reference number of the transaction"
-msgstr ""
+msgstr "Referentni broj transakcije"
 
 #: erpnext/public/js/utils.js:958
 msgid "The reserved stock will be released when you update items. Are you certain you wish to proceed?"
@@ -54753,11 +54753,11 @@ msgstr "Sinhronizacija je počela u pozadini, provjerite listu {0} za nove zapis
 
 #: banking/src/components/features/BankReconciliation/TransferModal.tsx:509
 msgid "The system found a mirror transaction ({0}) in another account with the same amount and date."
-msgstr ""
+msgstr "Sistem je pronašao istovjetnu transakciju ({0}) na drugom računu sa istim iznosom i datumom."
 
 #: banking/src/components/features/Settings/Preferences.tsx:106
 msgid "The system will attempt to automatically match a party to a bank transaction based on account number or IBAN."
-msgstr ""
+msgstr "Sistem će pokušati automatski uskladiti stranku s bankovnom transakcijom na osnovu broja računa ili IBAN-a."
 
 #. Description of the 'Invoice Type Created via POS Screen' (Select) field in
 #. DocType 'POS Settings'
@@ -54831,7 +54831,7 @@ msgstr "Skladište u koje će vaši artikli biti prebačeni kada započnete proi
 
 #: banking/src/pages/BankStatementImporter.tsx:165
 msgid "The withdrawal or deposit amounts - only required if there's no amount column."
-msgstr ""
+msgstr "Iznosi isplate ili uplate - potrebni su samo ako nema kolone za iznos."
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:893
 msgid "The {0} ({1}) must be equal to {2} ({3})"
@@ -54880,7 +54880,7 @@ msgstr "Nema neuspjelih transakcija"
 #: banking/src/components/features/BankReconciliation/BankClearanceSummary.tsx:236
 #: banking/src/components/features/BankReconciliation/BankReconciliationStatement.tsx:226
 msgid "There are no accounting entries in the system for the selected account and dates."
-msgstr ""
+msgstr "U sistemu nema knjigovodstvenih unosa za odabrani račun i datume."
 
 #: erpnext/setup/demo.py:130
 msgid "There are no active Fiscal Years for which Demo Data can be generated."
@@ -54888,7 +54888,7 @@ msgstr "Ne postoje aktivne Fiskalne Godine za koje se mogu generirati Demo Podac
 
 #: banking/src/components/features/BankReconciliation/IncorrectlyClearedEntries.tsx:220
 msgid "There are no entries in the system where the clearance date is before the posting date."
-msgstr ""
+msgstr "U sistemu nema unosa kod kojih je datum odobravanja prije datuma knjiženja."
 
 #: erpnext/www/book_appointment/index.js:95
 msgid "There are no slots available on this date"
@@ -54896,7 +54896,7 @@ msgstr "Za ovaj datum nema slobodnih termina"
 
 #: banking/src/components/features/BankReconciliation/BankTransactionList.tsx:290
 msgid "There are no transactions in the system for the selected bank account and dates that match the filters."
-msgstr ""
+msgstr "U sistemu nema transakcija za odabrani bankovni račun i datume koji odgovaraju filterima."
 
 #: erpnext/stock/doctype/item/item.js:1177
 msgid "There are two options to maintain valuation of stock. FIFO (first in - first out) and Moving Average. To understand this topic in detail please visit <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>Item Valuation, FIFO and Moving Average.</a>"
@@ -54904,7 +54904,7 @@ msgstr "Postoje dvije opcije za održavanje vrijednosti artikal. FIFO (prvi uša
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:922
 msgid "There are {0} unreconciled transactions before {1}."
-msgstr ""
+msgstr "Prije {1} postoji {0} neusklađenih transakcija."
 
 #: erpnext/stock/report/item_variant_details/item_variant_details.py:25
 msgid "There aren't any item variants for the selected item"
@@ -54936,7 +54936,7 @@ msgstr "Nije pronađena Šarža naspram {0}: {1}"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:924
 msgid "There is one unreconciled transaction before {0}."
-msgstr ""
+msgstr "Postoji jedna neusklađena transakcija prije {0}."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1759
 msgid "There must be atleast 1 Finished Good in this Stock Entry"
@@ -54956,12 +54956,12 @@ msgstr "Došlo je do greške prilikom ažuriranja Bankovnog Računa {} prilikom 
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:81
 msgid "There was an error while importing the bank statement."
-msgstr ""
+msgstr "Došlo je do greške prilikom uvoza bankovnog izvoda."
 
 #: banking/src/components/features/ActionLog/ActionLog.tsx:395
 #: banking/src/components/features/BankReconciliation/IncorrectlyClearedEntries.tsx:88
 msgid "There was an error while performing the action."
-msgstr ""
+msgstr "Došlo je do greške prilikom izvršavanja radnje."
 
 #: erpnext/accounts/doctype/bank/bank.js:112
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.js:119
@@ -54980,7 +54980,7 @@ msgstr "Račun ima stanje '0' u Osnovnoj Valuti ili u Valuti Računa"
 
 #: banking/src/components/features/BankReconciliation/BankRecDateFilter.tsx:73
 msgid "This Fiscal Year"
-msgstr ""
+msgstr "Ove Fiskalne Godine"
 
 #: erpnext/stock/doctype/item/item.js:194
 msgid "This Item is a Template and cannot be used in transactions.<br>All fields present in the 'Copy Fields to Variant' table in Item Variant Settings will be copied to its variant items."
@@ -55026,7 +55026,7 @@ msgstr "Ova kategorija imovine je označena kao neamortizujuća. Onemogući obra
 
 #: banking/src/pages/BankStatementImporter.tsx:160
 msgid "This can contain \"CR\"/\"DR\" values or positive/negative values. You could also have a separate column for CR/DR."
-msgstr ""
+msgstr "Ovo može sadržavati \"CR\"/\"DR\" vrijednosti ili pozitivne/negativne vrijednosti. Također možete imati zasebnu kolonu za CR/DR."
 
 #: erpnext/buying/doctype/supplier_scorecard/supplier_scorecard_dashboard.py:7
 msgid "This covers all scorecards tied to this Setup"
@@ -55056,7 +55056,7 @@ msgstr "Ovo je Šablon Sastavnica i koristit će se za izradu Radnog Naloga za {
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:466
 msgid "This is a formula based value."
-msgstr ""
+msgstr "Ovo je vrijednost zasnovana na formuli."
 
 #. Description of the 'Target Warehouse' (Link) field in DocType 'Work Order'
 #: erpnext/manufacturing/doctype/work_order/work_order.json
@@ -55113,7 +55113,7 @@ msgstr "Ovo je Matični Distrikt i ne može se uređivati."
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:424
 msgid "This is auto computed to balance the journal entry."
-msgstr ""
+msgstr "Ovo se automatski izračunava radi uravnoteženja naloga knjiženja."
 
 #: erpnext/stock/doctype/item/item_dashboard.py:7
 msgid "This is based on stock movement. See {0} for details"
@@ -55145,30 +55145,30 @@ msgstr "Ovo se odnosi na artikle sirovina koje će se koristiti za izradu gotovo
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:466
 msgid "This is not a valid formula. Check the variable used in the formula."
-msgstr ""
+msgstr "Ovo nije važeća formula. Provjerite varijablu korištenu u formuli."
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:198
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:266
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:279
 msgid "This is required"
-msgstr ""
+msgstr "Ovo je obavezno"
 
 #: banking/src/components/features/BankReconciliation/BankEntryModal.tsx:620
 msgid "This is the bank account entry. You cannot edit it."
-msgstr ""
+msgstr "Ovo je unos bankovnog računa. Ne možete ga uređivati."
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:693
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:708
 msgid "This is the last row. It will be auto populated based on the bank transaction."
-msgstr ""
+msgstr "Ovo je posljednji red. Bit će automatski popunjen na osnovu bankovne transakcije."
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:600
 msgid "This is the row for the bank account. It will be auto populated based on the bank transaction."
-msgstr ""
+msgstr "Ovo je red za bankovni račun. Bit će automatski popunjen na osnovu bankovne transakcije."
 
 #: banking/src/components/features/BankReconciliation/BankBalance.tsx:77
 msgid "This is what the system expects the closing balance to be in your bank statement."
-msgstr ""
+msgstr "Ovo je ono što sistem očekuje kao završno stanje na vašem bankovnom izvodu."
 
 #: erpnext/selling/doctype/party_specific_item/party_specific_item.py:35
 msgid "This item filter has already been applied for the {0}"
@@ -55194,7 +55194,7 @@ msgstr "Ova opcija se može označiti za uređivanje polja 'Datum Knjiženja' i 
 
 #: banking/src/components/features/BankReconciliation/IncorrectlyClearedEntries.tsx:185
 msgid "This report shows all entries in the system where the <strong>clearance date is before the posting date</strong> which is incorrect."
-msgstr ""
+msgstr "Ovaj izvještaj prikazuje sve unose u sistemu gdje je <strong>datum odobravanja prije datuma knjiženja</strong>, što je netačno."
 
 #: erpnext/assets/doctype/asset_value_adjustment/asset_value_adjustment.py:212
 msgid "This schedule was created when Asset {0} was adjusted through Asset Value Adjustment {1}."
@@ -55246,7 +55246,7 @@ msgstr "Ovaj raspored je kreiran kad su Smjene Imovine {0} prilagođene kroz Dod
 
 #: banking/src/pages/BankReconciliation.tsx:90
 msgid "This screen is not supported on mobile devices."
-msgstr ""
+msgstr "Ovaj prikaz nije podržan na mobilnim uređajima."
 
 #. Description of the 'Dunning Letter' (Section Break) field in DocType
 #. 'Dunning Type'
@@ -55270,7 +55270,7 @@ msgstr "Ovaj alat vam pomaže da ažurirate ili popravite količinu i vrijednova
 
 #: banking/src/components/features/BankReconciliation/BankTransactionUnreconcileModal.tsx:78
 msgid "This transaction has been reconciled with the following document(s):"
-msgstr ""
+msgstr "Ova transakcija je usklađena sa sljedećim dokumentom/dokumentima:"
 
 #. Description of the 'Default Common Code' (Link) field in DocType 'Code List'
 #: erpnext/edi/doctype/code_list/code_list.json
@@ -55279,7 +55279,7 @@ msgstr "Ova vrijednost će se koristiti kada se ne pronađe odgovarajući Zajedn
 
 #: banking/src/components/features/Settings/Preferences.tsx:86
 msgid "This will automatically run transaction matching rules on unreconciled transactions every hour."
-msgstr ""
+msgstr "Ovo će automatski pokretati pravila za usklađivanje transakcija na neusklađenim transakcijama svakog sata."
 
 #. Description of the 'Abbreviation' (Data) field in DocType 'Item Attribute
 #. Value'
@@ -55289,11 +55289,11 @@ msgstr "Ovo će biti dodato kodu artikla varijante. Na primjer, ako je vaša skr
 
 #: banking/src/components/features/BankReconciliation/TransferModal.tsx:371
 msgid "This will be auto-populated if not set."
-msgstr ""
+msgstr "Ovo će biti automatski popunjeno ako nije postavljeno."
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:264
 msgid "This will just suggest creating a new entry, and will not automatically create it."
-msgstr ""
+msgstr "Ovo će samo predložiti kreiranje novog unosa, a neće ga automatski kreirati."
 
 #. Description of the 'Create User Permission' (Check) field in DocType
 #. 'Employee'
@@ -55813,7 +55813,7 @@ msgstr "Da poništite ovo, omogući '{0}' u kompaniji {1}"
 
 #: banking/src/components/features/Settings/KeyboardShortcuts.tsx:80
 msgid "To select more than one transaction at a time, press and hold the shift key."
-msgstr ""
+msgstr "Da biste odabrali više transakcija istovremeno, pritisnite i držite tipku Shift."
 
 #: erpnext/controllers/item_variant.py:157
 msgid "To still proceed with editing this Attribute Value, enable {0} in Item Variant Settings."
@@ -56146,7 +56146,7 @@ msgstr "Ukupan Kredit"
 #. Statement Import Log'
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.json
 msgid "Total Credit Transactions"
-msgstr ""
+msgstr "Ukupno Kreditnih Transakcija"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:344
 msgid "Total Credit/ Debit Amount should be same as linked Journal Entry"
@@ -56157,7 +56157,7 @@ msgstr "Ukupni iznos Kredita/Debita trebao bi biti isti kao povezani Nalog Knji�
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:172
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.json
 msgid "Total Credits"
-msgstr ""
+msgstr "Ukupno Kredita"
 
 #. Label of the total_debit (Currency) field in DocType 'Journal Entry'
 #: banking/src/components/features/BankReconciliation/BankEntryModal.tsx:805
@@ -56169,7 +56169,7 @@ msgstr "Ukupan Debit"
 #. Import Log'
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.json
 msgid "Total Debit Transactions"
-msgstr ""
+msgstr "Ukupno Debitnih Transakcija"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:938
 msgid "Total Debit must be equal to Total Credit. The difference is {0}"
@@ -56180,7 +56180,7 @@ msgstr "Ukupan Debit mora biti jednak Ukupnom Kreditu. Razlika je {0}"
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:168
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.json
 msgid "Total Debits"
-msgstr ""
+msgstr "Ukupni Dugovi"
 
 #: erpnext/stock/report/delivery_note_trends/delivery_note_trends.py:51
 msgid "Total Delivered Amount"
@@ -56864,7 +56864,7 @@ msgstr "Datum Transakcije"
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:160
 #: banking/src/pages/BankStatementImporter.tsx:223
 msgid "Transaction Dates"
-msgstr ""
+msgstr "Datumi Transakcija"
 
 #: erpnext/setup/doctype/company/company.py:1093
 msgid "Transaction Deletion Document {0} has been triggered for company {1}"
@@ -56928,7 +56928,7 @@ msgstr "Informacije Transakcije"
 
 #: banking/src/components/features/Settings/MatchingRules.tsx:34
 msgid "Transaction Matching Rules"
-msgstr ""
+msgstr "Pravila Usklađivanja Transakcija"
 
 #: erpnext/accounts/report/calculated_discount_mismatch/calculated_discount_mismatch.py:45
 msgid "Transaction Name"
@@ -56969,11 +56969,11 @@ msgstr "Tip Transakcije"
 
 #: banking/src/components/features/BankReconciliation/BankTransactionUnreconcileModal.tsx:62
 msgid "Transaction Unreconciled"
-msgstr ""
+msgstr "Neusklađena Transakcija"
 
 #: banking/src/components/features/Settings/KeyboardShortcuts.tsx:78
 msgid "Transaction actions work when one or more unreconciled transactions are selected."
-msgstr ""
+msgstr "Radnje transakcija funkcioniraju kada je odabrana jedna ili više neusklađenih transakcija."
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:197
 msgid "Transaction currency must be same as Payment Gateway currency"
@@ -57011,19 +57011,19 @@ msgstr "Referentni broj transakcije {0} datiran {1}"
 #. Statement Import Log'
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.json
 msgid "Transaction type column has \"C\"/\"D\" values"
-msgstr ""
+msgstr "Kolona tipa transakcije ima \"C\"/\"D\" vrijednosti"
 
 #. Option for the 'Detected Amount Format' (Select) field in DocType 'Bank
 #. Statement Import Log'
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.json
 msgid "Transaction type column has \"CR\"/\"DR\" values"
-msgstr ""
+msgstr "Kolona tipa transakcije ima \"CR\"/\"DR\" vrijednosti"
 
 #. Option for the 'Detected Amount Format' (Select) field in DocType 'Bank
 #. Statement Import Log'
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.json
 msgid "Transaction type column has \"Deposit\"/\"Withdrawal\" values"
-msgstr ""
+msgstr "Kolona tipa transakcije ima \"Uplata\"/\"Isplata\" vrijednosti"
 
 #. Group in Bank Account's connections
 #: erpnext/accounts/doctype/bank_account/bank_account.json
@@ -57048,7 +57048,7 @@ msgstr "Transakcije naspram Poduzeća već postoje! Kontni Plan se može uvesti 
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:230
 msgid "Transactions to be imported into the system"
-msgstr ""
+msgstr "Transakcije koje će biti uvezene u sistem"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1158
 msgid "Transactions using Sales Invoice in POS are disabled."
@@ -57082,7 +57082,7 @@ msgstr "Prijenos"
 
 #: banking/src/components/features/ActionLog/ActionLog.tsx:446
 msgid "Transfer Account"
-msgstr ""
+msgstr "Račun Prijenosa"
 
 #: erpnext/assets/doctype/asset/asset.js:155
 msgid "Transfer Asset"
@@ -57117,7 +57117,7 @@ msgstr "Prijenos Materijala za Skladište {0}"
 #: banking/src/components/features/BankReconciliation/TransferModal.tsx:109
 #: banking/src/components/features/BankReconciliation/TransferModal.tsx:228
 msgid "Transfer Recorded"
-msgstr ""
+msgstr "Prijenos Zabilježen"
 
 #. Label of the transfer_status (Select) field in DocType 'Material Request'
 #: erpnext/stock/doctype/material_request/material_request.json
@@ -57143,7 +57143,7 @@ msgstr "Preneseno"
 
 #: banking/src/components/features/BankReconciliation/TransferModal.tsx:531
 msgid "Transferred Out"
-msgstr ""
+msgstr "Preneseno"
 
 #. Label of the transferred_qty (Float) field in DocType 'Job Card Item'
 #. Label of the transferred_qty (Float) field in DocType 'Work Order Item'
@@ -57170,11 +57170,11 @@ msgstr "Prenesene Sirovine"
 
 #: banking/src/components/features/BankReconciliation/TransferModal.tsx:331
 msgid "Transferred from"
-msgstr ""
+msgstr "Preneseno iz"
 
 #: banking/src/components/features/BankReconciliation/TransferModal.tsx:331
 msgid "Transferred to"
-msgstr ""
+msgstr "Preneseno u"
 
 #. Label of the transit_section (Section Break) field in DocType 'Warehouse'
 #: erpnext/stock/doctype/warehouse/warehouse.json
@@ -57312,11 +57312,11 @@ msgstr "Skraćuje kolonu 'Napomene' radi postavljanja dužine znakova"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:223
 msgid "Try adjusting your search or filter criteria."
-msgstr ""
+msgstr "Pokušajte prilagoditi kriterije pretrage ili filtriranja."
 
 #: erpnext/accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.js:90
 msgid "Try the {0} for a better experience."
-msgstr ""
+msgstr "Pokušajte {0} za bolje iskustvo."
 
 #: erpnext/accounts/report/financial_ratios/financial_ratios.js:55
 #: erpnext/accounts/report/financial_ratios/financial_ratios.py:198
@@ -57363,7 +57363,7 @@ msgstr "Tip Transakcije"
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:194
 msgid "Type of check"
-msgstr ""
+msgstr "Tip čeka"
 
 #. Description of the 'Select DocType' (Link) field in DocType 'Rename Tool'
 #: erpnext/utilities/doctype/rename_tool/rename_tool.json
@@ -57670,7 +57670,7 @@ msgstr "Nije moguće pronaći varijablu:"
 #: banking/src/components/features/BankReconciliation/RecordPaymentModal.tsx:878
 #: banking/src/components/features/BankReconciliation/SelectedTransactionDetails.tsx:58
 msgid "Unallocated"
-msgstr ""
+msgstr "Nedodijeljeno"
 
 #. Label of the unallocated_amount (Currency) field in DocType 'Bank
 #. Transaction'
@@ -57738,11 +57738,11 @@ msgstr "U tabeli radnog vremena možete dodati vrijeme početka i završetka za 
 
 #: banking/src/components/features/BankReconciliation/BankTransactionUnreconcileModal.tsx:30
 msgid "Undo Transaction Reconciliation"
-msgstr ""
+msgstr "Poništi usklađivanje transakcija"
 
 #: banking/src/components/features/ActionLog/ActionLog.tsx:422
 msgid "Undo {}?"
-msgstr ""
+msgstr "Poništi {}?"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:937
 msgid "Unexpected Naming Series Pattern"
@@ -57811,11 +57811,11 @@ msgstr "Nepovezano"
 
 #: banking/src/components/features/ActionLog/ActionLog.tsx:422
 msgid "Unmatch Transaction?"
-msgstr ""
+msgstr "Poništiti Transakciju?"
 
 #: banking/src/components/features/ActionLog/ActionLog.tsx:366
 msgid "Unmatched"
-msgstr ""
+msgstr "Neusklađeno"
 
 #. Option for the 'Status' (Select) field in DocType 'POS Invoice'
 #. Option for the 'Status' (Select) field in DocType 'Purchase Invoice'
@@ -57879,7 +57879,7 @@ msgstr "Nerealizovani Račun Rezultata za transfere unutar poduzeća"
 
 #: banking/src/components/features/BankReconciliation/BankTransactionUnreconcileModal.tsx:119
 msgid "Unreconcile"
-msgstr ""
+msgstr "Poništi Usklađivanje"
 
 #. Name of a DocType
 #. Label of a Workspace Sidebar Item
@@ -57924,7 +57924,7 @@ msgstr "Neusaglašeni Unosi"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:57
 msgid "Unreconciled Transactions"
-msgstr ""
+msgstr "Neusklađene Transakcije"
 
 #: erpnext/public/js/utils/unreconcile.js:175
 msgid "Unreconciled successfully"
@@ -58264,7 +58264,7 @@ msgstr "Učitaj XML Fakture"
 
 #: banking/src/pages/BankStatementImporter.tsx:92
 msgid "Upload your bank statement file to start the import process. We support CSV, and XLSX files."
-msgstr ""
+msgstr "Otpremite datoteku bankovnog izvoda da biste započeli proces uvoza. Podržavamo CSV i XLSX datoteke."
 
 #: banking/src/pages/BankStatementImporter.tsx:119
 msgid "Uploading..."
@@ -58431,7 +58431,7 @@ msgstr "Koristi Serijske Brojeve / Šaržna Polja"
 
 #: banking/src/components/features/BankReconciliation/TransferModal.tsx:543
 msgid "Use Suggestion"
-msgstr ""
+msgstr "Koristi Prijedlog"
 
 #. Label of the use_transaction_date_exchange_rate (Check) field in DocType
 #. 'Purchase Invoice'
@@ -59178,7 +59178,7 @@ msgstr "Prikaži Žurnale Rezultata Deviznog Kursa"
 
 #: banking/src/pages/BankStatementImporter.tsx:135
 msgid "View Instructions"
-msgstr ""
+msgstr "Pogledaj Upute"
 
 #: erpnext/crm/doctype/campaign/campaign.js:15
 msgid "View Leads"
@@ -59257,11 +59257,11 @@ msgstr "Pregled Sažetka Izvještaja Radnog Naloga"
 
 #: banking/src/components/features/Settings/KeyboardShortcuts.tsx:55
 msgid "View all reconciliation actions taken in this session"
-msgstr ""
+msgstr "Prikaži sve radnje usklađivanja poduzete u ovoj sesiji"
 
 #: banking/src/components/features/ActionLog/ActionLog.tsx:60
 msgid "View all reconciliation actions taken in this session."
-msgstr ""
+msgstr "Prikaži sve radnje usklađivanja poduzete u ovoj sesiji."
 
 #. Label of the view_attachments (Check) field in DocType 'Project User'
 #: erpnext/projects/doctype/project_user/project_user.json
@@ -59274,19 +59274,19 @@ msgstr "Pogledaj zapisnik poziva"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:937
 msgid "View older transaction"
-msgstr ""
+msgstr "Prikaži stariju transakciju"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:937
 msgid "View older transactions"
-msgstr ""
+msgstr "Prikaži starije transakcije"
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:284
 msgid "View transaction"
-msgstr ""
+msgstr "Prikaži transakciju"
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:284
 msgid "View transactions"
-msgstr ""
+msgstr "Prikaži transakcije"
 
 #. Option for the 'Provider' (Select) field in DocType 'Video'
 #: erpnext/utilities/doctype/video/video.json
@@ -59343,7 +59343,7 @@ msgstr "Verifikat #"
 #. Transaction Payments'
 #: erpnext/accounts/doctype/bank_transaction_payments/bank_transaction_payments.json
 msgid "Voucher Created"
-msgstr ""
+msgstr "Verifikat kreiran"
 
 #. Label of the voucher_detail_no (Data) field in DocType 'GL Entry'
 #. Label of the voucher_detail_no (Data) field in DocType 'Payment Ledger
@@ -59945,7 +59945,7 @@ msgstr "Vidimo da je {0} napravljen protiv {1}. Ako želite da se ažuriraju nei
 
 #: banking/src/pages/BankStatementImporter.tsx:140
 msgid "We support uploading CSV, XLSX and XLS files. Please make sure the file contains the correct columns."
-msgstr ""
+msgstr "Podržavamo otpremanje CSV, XLSX i XLS datoteka. Molimo vas da provjerite da li datoteka sadrži ispravne kolone."
 
 #: erpnext/www/support/index.html:7
 msgid "We're here to help!"
@@ -59953,21 +59953,21 @@ msgstr "Tu smo da pomognemo!"
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:122
 msgid "We've auto-detected the details of the statement file."
-msgstr ""
+msgstr "Automatski smo detektovali detalje datoteke izvoda."
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:273
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:291
 msgid "We've found 1 existing transaction in the system that conflicts with the transactions in the statement file. Are you sure you want to proceed with the import?"
-msgstr ""
+msgstr "Pronašli smo jednu postojeću transakciju u sistemu koja je u sukobu s transakcijama u datoteci izvoda. Jeste li sigurni da želite nastaviti s uvozom?"
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:223
 msgid "We've found 1 transaction in the statement file that will be imported into the system. Please review the details below and click the 'Import' button to proceed."
-msgstr ""
+msgstr "Pronašli smo jednu transakciju u datoteci izvoda koja će biti uvožena u sistem. Molimo pregledajte detalje u nastavku i kliknite na dugme 'Uvozi' da biste nastavili."
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:274
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:292
 msgid "We've found {0} existing transactions in the system that conflict with the transactions in the statement file. Are you sure you want to proceed with the import?"
-msgstr ""
+msgstr "Pronašli smo {0} postojećih transakcija u sistemu koje su u sukobu s transakcijama u datoteci izvoda. Jeste li sigurni da želite nastaviti s uvozom?"
 
 #. Name of a DocType
 #: erpnext/portal/doctype/website_attribute/website_attribute.json
@@ -60208,7 +60208,7 @@ msgstr "Također će se primjenjivati za varijante osim ako se ne poništi"
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:616
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:621
 msgid "Will be auto-populated"
-msgstr ""
+msgstr "Bit će automatski popunjeno"
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:259
 msgid "Wire Transfer"
@@ -60265,23 +60265,23 @@ msgstr "Tip Dokumenta Odbitka"
 
 #: banking/src/components/features/Settings/Preferences.tsx:70
 msgid "Within 1 day"
-msgstr ""
+msgstr "U roku od 1 dana"
 
 #: banking/src/components/features/Settings/Preferences.tsx:71
 msgid "Within 2 days"
-msgstr ""
+msgstr "U roku od 2 dana"
 
 #: banking/src/components/features/Settings/Preferences.tsx:72
 msgid "Within 3 days"
-msgstr ""
+msgstr "U roku od 3 dana"
 
 #: banking/src/components/features/Settings/Preferences.tsx:73
 msgid "Within 4 days"
-msgstr ""
+msgstr "U roku od 4 dana"
 
 #: banking/src/components/features/Settings/Preferences.tsx:74
 msgid "Within 5 days"
-msgstr ""
+msgstr "U roku od 5 dana"
 
 #. Label of a chart in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
@@ -60807,7 +60807,7 @@ msgstr "Možete dodati originalnu fakturu {} ručno da nastavite."
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:743
 msgid "You can also add credit or debit values to pre-fill - these support both static values (like 200) or formulas (like transaction_amount * 0.25)."
-msgstr ""
+msgstr "Također možete dodati kreditne ili debitne vrijednosti za prethodno popunjavanje - one podržavaju i statičke vrijednosti (kao što je 200) ili formule (kao što je iznos_transaction * 0,25)."
 
 #: erpnext/templates/emails/confirm_appointment.html:10
 msgid "You can also copy-paste this link in your browser"
@@ -60852,7 +60852,7 @@ msgstr "Možete iskoristiti do {0}."
 
 #: banking/src/components/features/BankReconciliation/IncorrectlyClearedEntries.tsx:193
 msgid "You can reset the clearing dates of these entries here."
-msgstr ""
+msgstr "Datume brisanja ovih unosa možete resetovati ovdje."
 
 #: erpnext/manufacturing/doctype/workstation/workstation.js:59
 msgid "You can set it as a machine name or operation type. For example, stiching machine 12"
@@ -60860,7 +60860,7 @@ msgstr "Možete ga postaviti kao naziv mašine ili tip operacije. Na primjer, ma
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:742
 msgid "You can set up the rule to split the transaction across multiple accounts."
-msgstr ""
+msgstr "Možete postaviti pravilo za podjelu transakcije na više računa."
 
 #: erpnext/controllers/accounts_controller.py:214
 msgid "You can use {0} to reconcile against {1} later."
@@ -60944,12 +60944,12 @@ msgstr "Nemate dozvolu za uređivanje ovog dokumenta"
 
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.py:79
 msgid "You do not have permission to import and submit bank transactions"
-msgstr ""
+msgstr "Nemate dozvolu za uvoz i podnošenje bankovnih transakcija"
 
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.py:70
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.py:74
 msgid "You do not have permission to import bank transactions"
-msgstr ""
+msgstr "Nemate dozvolu za uvoz bankovnih transakcija"
 
 #: erpnext/controllers/accounts_controller.py:4005
 msgid "You do not have permissions to {} items in a {}."
@@ -61001,11 +61001,11 @@ msgstr "Unijeli ste duplikat Dostavnice u red"
 
 #: banking/src/components/features/BankReconciliation/BankPicker.tsx:54
 msgid "You have not added any bank accounts to your company."
-msgstr ""
+msgstr "Niste dodali nijedan bankovni račun poduzeća."
 
 #: banking/src/components/features/ActionLog/ActionLog.tsx:104
 msgid "You have not performed any reconciliations in this session yet."
-msgstr ""
+msgstr "Još niste izvršili nijedno usklađivanje u ovoj sesiji."
 
 #: erpnext/stock/doctype/item/item.py:1142
 msgid "You have to enable auto re-order in Stock Settings to maintain re-order levels."
@@ -61173,7 +61173,7 @@ msgstr "npr. \"Ljetni Praznici 2019 Ponuda 20\""
 #: banking/src/components/features/BankReconciliation/RecordPaymentModal.tsx:1256
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:685
 msgid "e.g. Bank Charges"
-msgstr ""
+msgstr "npr. Bankovne Naknade"
 
 #. Description of the 'Shipping Rule Label' (Data) field in DocType 'Shipping
 #. Rule'
@@ -61393,7 +61393,7 @@ msgstr "transakcija"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:404
 msgid "transaction selected"
-msgstr ""
+msgstr "transakcija odabrana"
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:169
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:173
@@ -61402,7 +61402,7 @@ msgstr "transakcije"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:404
 msgid "transactions selected"
-msgstr ""
+msgstr "odabrane transakcije"
 
 #. Description of the 'Coupon Code' (Data) field in DocType 'Coupon Code'
 #: erpnext/accounts/doctype/coupon_code/coupon_code.json
@@ -61779,7 +61779,7 @@ msgstr "{0} do {1}"
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:225
 msgid "{0} transactions will be imported into the system. Please review the details below and click the 'Import' button to proceed."
-msgstr ""
+msgstr "{0} transakcija će biti uvezeno u sistem. Molimo Vas da pregledate detalje ispod i kliknete na dugme 'Uvezi' da biste nastavili."
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:726
 msgid "{0} units are reserved for Item {1} in Warehouse {2}, please un-reserve the same to {3} the Stock Reconciliation."
