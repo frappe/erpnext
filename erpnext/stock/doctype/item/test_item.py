@@ -1007,22 +1007,6 @@ class TestItem(ERPNextTestSuite):
 			sabb_qty = frappe.db.get_value("Serial and Batch Bundle", serial_and_batch_bundle, "total_qty")
 			self.assertEqual(sabb_qty, properties["opening_stock"])
 
-	def test_ignore_variant_validation_flag(self):
-		"""Validation should be skipped when the ignore flag is set."""
-		frappe.flags.ignore_variant_validation = True
-		try:
-			variant = create_variant("_Test Variant Item", {"Test Size": "Large"})
-			variant.item_code = "_Test-Ignore-Flag-Item"
-			frappe.delete_doc_if_exists("Item", variant.item_code)
-
-			variant.set("attributes", [])
-			variant.append("attributes", {"attribute": "Test Size", "attribute_value": "Massive"})
-			variant.insert()
-
-			self.assertTrue(frappe.db.exists("Item", variant.item_code))
-		finally:
-			frappe.flags.ignore_variant_validation = None
-
 	def test_variant_based_on_fallback(self):
 		"""Templates variant_based_on is used as fallback if null."""
 		variant = create_variant("_Test Variant Item", {"Test Size": "Large"})

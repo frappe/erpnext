@@ -817,6 +817,9 @@ class Item(Document):
 					)
 
 	def validate_variant(self):
+		"""
+		Validates if the variant is valid according to selected template
+		"""
 		if not self.variant_of:
 			return
 
