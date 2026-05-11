@@ -1588,7 +1588,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		make_item(  # template item
 			"Test-WO-Tshirt",
 			{
-				"has_variant": 1,
+				"has_variants": 1,
 				"variant_based_on": "Item Attribute",
 				"attributes": [{"attribute": "Test Colour"}],
 			},
