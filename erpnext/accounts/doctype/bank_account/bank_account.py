@@ -12,7 +12,6 @@ from frappe.contacts.address_and_contact import (
 )
 from frappe.model.document import Document
 from frappe.utils import comma_and, get_link_to_form
-from pypika import Order
 
 
 class BankAccount(Document):
@@ -139,38 +138,35 @@ def get_list(company: str, show_disabled: bool = False):
 	@return: A list of bank accounts
 	"""
 
-	frappe.has_permission("Bank Account", ptype="read", throw=True)
+	filters = {"is_company_account": 1, "company": company}
+	if not show_disabled:
+		filters["disabled"] = 0
 
-	bank_account = frappe.qb.DocType("Bank Account")
-	account = frappe.qb.DocType("Account")
-
-	query = (
-		frappe.qb.from_(bank_account)
-		.join(account)
-		.on(bank_account.account == account.name)
-		.select(
-			bank_account.name,
-			account.account_currency,
-			bank_account.account,
-			bank_account.company,
-			bank_account.account_name,
-			bank_account.is_default,
-			bank_account.bank,
-			bank_account.account_type,
-			bank_account.account_subtype,
-			bank_account.bank_account_no,
-			bank_account.last_integration_date,
-			bank_account.is_credit_card,
-		)
-		.where(bank_account.is_company_account == 1)
-		.where(bank_account.company == company)
-		.orderby(bank_account.is_default, order=Order.desc)
+	bank_accounts = frappe.get_list(
+		"Bank Account",
+		filters=filters,
+		order_by="is_default desc",
+		fields=[
+			"name",
+			"account",
+			"company",
+			"account_name",
+			"is_default",
+			"bank",
+			"account_type",
+			"account_subtype",
+			"bank_account_no",
+			"last_integration_date",
+			"is_credit_card",
+		],
 	)
 
-	if not show_disabled:
-		query = query.where(bank_account.disabled == 0)
+	for bank_account in bank_accounts:
+		bank_account.account_currency = frappe.get_cached_value(
+			"Account", bank_account.account, "account_currency"
+		)
 
-	return query.run(as_dict=True)
+	return bank_accounts
 
 
 @frappe.whitelist(methods=["GET"])
