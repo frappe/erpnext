@@ -55,17 +55,10 @@ class SupplierScorecardCriteria(Document):
 
 @frappe.whitelist()
 def get_criteria_list():
-	criteria = frappe.db.sql(
-		"""
-		SELECT
-			scs.name
-		FROM
-			`tabSupplier Scorecard Criteria` scs""",
-		{},
-		as_dict=1,
-	)
-
-	return criteria
+	"""
+	Get the list of criteria
+	"""
+	return frappe.get_list("Supplier Scorecard Criteria", fields=["name"])
 
 
 def get_variables(criteria_name):
