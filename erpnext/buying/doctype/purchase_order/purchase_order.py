@@ -9,7 +9,7 @@ from frappe import _, msgprint
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import cint, cstr, flt, get_link_to_form
+from frappe.utils import cint, cstr, flt, get_datetime, get_link_to_form
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	unlink_inter_company_doc,
@@ -406,10 +406,11 @@ class PurchaseOrder(BuyingController):
 			update_bin_qty(item_code, warehouse, {"ordered_qty": get_ordered_qty(item_code, warehouse)})
 
 	def check_modified_date(self):
-		mod_db = frappe.db.sql("select modified from `tabPurchase Order` where name = %s", self.name)
-		date_diff = frappe.db.sql(f"select '{mod_db[0][0]}' - '{cstr(self.modified)}' ")
-
-		if date_diff and date_diff[0][0]:
+		"""
+		Check if the Purchase Order was modified since it was last loaded.
+		"""
+		mod_db = frappe.db.get_value("Purchase Order", self.name, "modified")
+		if mod_db and get_datetime(mod_db) != get_datetime(self.modified):
 			msgprint(
 				_("{0} {1} has been modified. Please refresh.").format(self.doctype, self.name),
 				raise_exception=True,
