@@ -393,5 +393,18 @@ export const BANK_LOGOS: { keywords: string[], logo: string, locale?: string[], 
         logo: "Prime_Bank.png",
         locale: ['Kenya'],
         logoClassName: 'max-w-28'
+    },
+    {
+        keywords: ["Stripe"],
+        logo: "Stripe.svg",
+        locale: ['Global'],
+        logoClassName: 'h-6',
+        darkModeInvert: true,
+    },
+    {
+        keywords: ["PayPal"],
+        logo: "PayPal.png",
+        locale: ['Global'],
+        logoClassName: 'h-6',
     }
 ]
