@@ -298,7 +298,7 @@ const UnreconciledTransactionItem = ({ transaction }: { transaction: Unreconcile
             tabIndex={0}
             onClick={handleSelectTransaction}>
             <div className="flex justify-between items-start w-full">
-                <div className="space-y-1">
+                <div className="space-y-1 overflow-hidden whitespace-pre-wrap">
                     <div className="flex items-center gap-1">
                         <span className="font-medium text-sm">{formatDate(transaction.date)}</span>
                         {transaction.transaction_type &&
@@ -314,7 +314,7 @@ const UnreconciledTransactionItem = ({ transaction }: { transaction: Unreconcile
                             title={_("Matched by rule")}>
                             <ZapIcon className="w-4 h-4" /> {transaction.matched_transaction_rule}</Badge>}
                     </div>
-                    <span className="text-sm">{transaction.description}</span>
+                    <span className="text-sm wrap-anywhere" title={transaction.description}>{transaction.description}</span>
                 </div>
                 <div className="gap-1 flex flex-col items-end min-w-36 h-full text-end">
                     {isWithdrawal ? <ArrowUpRight className="size-5 text-ink-red-3" /> : <ArrowDownRight className="size-5 text-ink-green-3" />}
