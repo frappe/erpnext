@@ -214,7 +214,6 @@ class StockEntry(StockController):
 		self.set_transfer_qty()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "transfer_qty")
-		self.validate_warehouse()
 		self.validate_warehouse_of_sabb()
 		self.validate_work_order()
 		self.validate_source_stock_entry()
@@ -227,6 +226,7 @@ class StockEntry(StockController):
 			self.mark_finished_and_scrap_items()
 			self.validate_finished_goods()
 
+		self.validate_warehouse()
 		self.validate_with_material_request()
 		self.validate_batch()
 		self.validate_inspection()
@@ -775,6 +775,7 @@ class StockEntry(StockController):
 					frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
 
 			if self.purpose == "Manufacture":
+<<<<<<< HEAD
 				if has_bom:
 					if d.is_finished_item or d.is_scrap_item:
 						d.s_warehouse = None
@@ -784,6 +785,16 @@ class StockEntry(StockController):
 						d.t_warehouse = None
 						if not d.s_warehouse:
 							frappe.throw(_("Source warehouse is mandatory for row {0}").format(d.idx))
+=======
+				if d.is_finished_item or d.type or d.is_legacy_scrap_item:
+					d.s_warehouse = None
+					if not d.t_warehouse:
+						frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
+				else:
+					d.t_warehouse = None
+					if not d.s_warehouse:
+						frappe.throw(_("Source warehouse is mandatory for row {0}").format(d.idx))
+>>>>>>> b5527cf328 (fix: raw material should not have target warehouse in manufacture entry (#54849))
 
 			if self.purpose == "Disassemble":
 				if has_bom:
