@@ -1858,23 +1858,55 @@ class GrowthViewTransformer:
 			if row_data.get("is_blank_line"):
 				continue
 
-			transformed_values = {}
-			for i in range(len(self.period_list)):
-				current_period = self.period_list[i]["key"]
+			if row_data.get("segment_values"):
+				self._transform_segmented_row(row_data)
+			else:
+				self._transform_single_row(row_data)
 
-				current_value = row_data[current_period]
-				previous_value = row_data[self.period_list[i - 1]["key"]] if i != 0 else 0
+	def _transform_single_row(self, row_data: dict) -> None:
+		transformed_values = {}
+		for i, period in enumerate(self.period_list):
+			current_period = period["key"]
+			current_value = row_data.get(current_period)
+
+			if not isinstance(current_value, int | float):
+				continue
+
+			if i == 0:
+				transformed_values[current_period] = current_value
+			else:
+				previous_period = self.period_list[i - 1]["key"]
+				previous_value = row_data.get(previous_period) or 0
+				transformed_values[current_period] = self._calculate_growth(previous_value, current_value)
+
+		row_data.update(transformed_values)
+
+	def _transform_segmented_row(self, row_data: dict) -> None:
+		for seg_id, seg_data in row_data.get("segment_values", {}).items():
+			if seg_data.get("is_blank_line"):
+				continue
+
+			transformed = {}
+			for i, period in enumerate(self.period_list):
+				current_period = period["key"]
+				current_value = seg_data.get(current_period)
+
+				if not isinstance(current_value, int | float):
+					continue
 
 				if i == 0:
-					transformed_values[current_period] = current_value
+					transformed[current_period] = current_value
 				else:
-					growth_percent = self._calculate_growth(previous_value, current_value)
-					transformed_values[current_period] = growth_percent
+					previous_period = self.period_list[i - 1]["key"]
+					previous_value = seg_data.get(previous_period) or 0
+					transformed[current_period] = self._calculate_growth(previous_value, current_value)
 
-			row_data.update(transformed_values)
+				row_data[f"{seg_id}_{current_period}"] = transformed[current_period]
+
+			seg_data.update(transformed)
 
 	def _calculate_growth(self, previous_value: float, current_value: float) -> float | None:
-		if current_value is None:
+		if current_value is None or current_value == "":
 			return None
 
 		if previous_value == 0 and current_value > 0:
