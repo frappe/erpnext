@@ -22,18 +22,6 @@ const parseHeading = (message?: ParsedErrorMessage) => {
     return message?.title
 }
 
-const wrapLooseListItemsWithUl = (html: string): string => {
-    // Regex matches consecutive <li>...</li> blocks not wrapped in <ul> or <ol>
-    // It wraps them in a <ul> if not already wrapped.
-    return html.replace(/(?:^|[^>])((<li[\s\S]*?<\/li>)+)(?![\s\S]*?<\/ul>)(?![\s\S]*?<\/ol>)/g, (match, p1) => {
-        // Check if the match already has <ul> or <ol> wrapping (simple check)
-        if (/^<ul>/.test(p1) || /^<ol>/.test(p1)) {
-            return match // Already wrapped, keep as is
-        }
-        return match.replace(p1, `<ul>${p1}</ul>`)
-    })
-}
-
 const ErrorBanner = ({ error, overrideHeading, ...props }: ErrorBannerProps) => {
 
 
@@ -53,8 +41,7 @@ const ErrorBanner = ({ error, overrideHeading, ...props }: ErrorBannerProps) => 
             <AlertTitle>{overrideHeading ?? parseHeading(messages[0])}</AlertTitle>
             <AlertDescription>
                 {messages.map((m, i) => {
-                    const safeMessage = wrapLooseListItemsWithUl(m.message)
-                    return <MarkdownRenderer content={safeMessage} key={i} />
+                    return <MarkdownRenderer content={m.message} key={i} />
                 })}
             </AlertDescription>
         </Alert>
