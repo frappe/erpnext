@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-10 10:00+0000\n"
-"PO-Revision-Date: 2026-05-11 18:40\n"
+"PO-Revision-Date: 2026-05-12 19:34\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Croatian\n"
 "MIME-Version: 1.0\n"
@@ -1236,7 +1236,7 @@ msgstr "Akademski korisnik"
 
 #: banking/src/components/features/Settings/KeyboardShortcuts.tsx:38
 msgid "Accept Matching Rule"
-msgstr "Prihvati Pravilo Podudaranja"
+msgstr "Prihvati Pravilo Usklađivanja"
 
 #: banking/src/components/features/Settings/KeyboardShortcuts.tsx:39
 msgid "Accept the rule for the selected transaction"
@@ -1637,7 +1637,7 @@ msgstr "Račun {0} ne postoji"
 
 #: erpnext/accounts/doctype/mode_of_payment/mode_of_payment.py:48
 msgid "Account {0} does not match with Company {1} in Mode of Account: {2}"
-msgstr "Račun {0} se ne podudara sa tvrtkom {1} u Kontnom Planu: {2}"
+msgstr "Račun {0} nije usklađen sa {1} u Kontnom Planu: {2}"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:138
 msgid "Account {0} doesn't belong to Company {1}"
@@ -5440,7 +5440,7 @@ msgstr "Odobravajući Korisnik ne može biti isti kao korisnik na koji je pravil
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Approximately match the description/party name against parties"
-msgstr "Približno podudaranje opisu/nazivu stranke aspram stranki"
+msgstr "Otprilike uskladite opis/naziv stranke s strankama"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -11554,7 +11554,7 @@ msgstr "Filtri tvrtke i računa nisu postavljeni!"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2580
 msgid "Company currencies of both the companies should match for Inter Company Transactions."
-msgstr "Valute obje tvrtke treba da se podudaraju sa transakcijama između tvrtki."
+msgstr "Valute obje tvrtke trebaju biti usklađne sa transakcijama između tvrtki."
 
 #: erpnext/stock/doctype/material_request/material_request.js:380
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:834
@@ -11645,7 +11645,7 @@ msgstr "Tvrtka {} još ne postoji. Postavljanje poreza je prekinuto."
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:576
 msgid "Company {} does not match with POS Profile Company {}"
-msgstr "Tvrtka {} se ne podudara s Kasa Profilom Tvrtke {}"
+msgstr "Tvrtka {} nije usklađena s Kasa Profilom Tvrtke {}"
 
 #. Name of a DocType
 #. Label of the competitor (Link) field in DocType 'Competitor Detail'
@@ -11680,7 +11680,7 @@ msgstr "Završi Posao"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:857
 msgid "Complete Match"
-msgstr "Potpuno Podudaranje"
+msgstr "Potpuno Usklađivanje"
 
 #: erpnext/selling/page/point_of_sale/pos_payment.js:44
 msgid "Complete Order"
@@ -11861,7 +11861,7 @@ msgstr "Konfiguriraj Seriju Imenovanja"
 #: banking/src/components/features/BankReconciliation/MatchFilters.tsx:21
 #: banking/src/components/features/BankReconciliation/MatchFilters.tsx:27
 msgid "Configure match filters for vouchers"
-msgstr "Konfigurirajte filtere podudaranja za vaučere"
+msgstr "Konfigurirajte filtere usklađivanja za vaučere"
 
 #: banking/src/components/features/Settings/Rules/RuleList.tsx:202
 msgid "Configure rules to save time when reconciling transactions."
@@ -18737,7 +18737,7 @@ msgstr "Omogući Evropski Pristup"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Fuzzy Matching"
-msgstr "Omogući nejasno podudaranje"
+msgstr "Omogući Približno Usklađivanje"
 
 #. Label of the enable_health_monitor (Check) field in DocType 'Ledger Health
 #. Monitor'
@@ -18826,7 +18826,7 @@ msgstr "Omogući YouTube praćenje"
 
 #: banking/src/components/features/Settings/Preferences.tsx:104
 msgid "Enable automatic party matching"
-msgstr "Omogući automatsko podudaranje stranki"
+msgstr "Omogući automatsko usklađivanje stranki"
 
 #. Description of the 'Enable Accounting Dimensions' (Check) field in DocType
 #. 'Accounts Settings'
@@ -18882,7 +18882,7 @@ msgstr "Omogući ako korisnici žele da uzmu u obzir odbijene materijale za slan
 
 #: banking/src/components/features/Settings/Preferences.tsx:125
 msgid "Enable party name/description fuzzy matching"
-msgstr "Omogućite približno podudaranje imena/opisa stranke"
+msgstr "Omogući približno usklađivanje imena/opisa stranke"
 
 #. Description of the 'Has Priority' (Check) field in DocType 'Pricing Rule'
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
@@ -19260,7 +19260,7 @@ msgstr "Pogreška pri preuzimanju detalja za {0}: {1}"
 
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.py:320
 msgid "Error in party matching for Bank Transaction {0}"
-msgstr "Greška u podudaranju stranaka za Bankovnu Transakciju {0}"
+msgstr "Pogreška u usklađibvanju stranaka za bankovnu transakciju {0}"
 
 #: banking/src/components/features/BankReconciliation/BankEntryModal.tsx:373
 msgid "Error uploading attachments"
@@ -23161,7 +23161,7 @@ msgstr "Ako je Prihod ili Rashod"
 
 #: banking/src/components/features/Settings/Preferences.tsx:127
 msgid "If a party cannot be matched by account number or IBAN, the system will try fuzzy matching using the party name and transaction description."
-msgstr "Ako se stranka ne može uskladiti prema broju računa ili IBAN-u, sustav će pokušati priblišno podudaranje koristeći ime stranke i opis transakcije."
+msgstr "Ako se stranka ne može uskladiti prema broju računa ili IBAN-u, sustav će pokušati priblišno usklađivanje koristeći ime stranke i opis transakcije."
 
 #: erpnext/manufacturing/doctype/operation/operation.js:32
 msgid "If an operation is divided into sub operations, they can be added here."
@@ -23296,7 +23296,7 @@ msgstr "Ako je omogućeno, unosi registra će biti knjiženi za iznos promjene u
 #. (Check) field in DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "If enabled, rule matching algorithm will run every hour"
-msgstr "Ako je omogućen, algoritam za podudaranje pravila će se pokretati svakog sata"
+msgstr "Ako je omogućen, algoritam za isklađivanje pravila će se pokretati svakog sata"
 
 #. Description of the 'Grant Commission' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -23451,7 +23451,7 @@ msgstr "Ako je cijena nula, artikal će se tretirati kao \"Besplatni Artikal\""
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:258
 msgid "If rule matches, then:"
-msgstr "Ako se pravilo podudara, onda:"
+msgstr "Ako je pravilo usklađeno, onda:"
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.js:51
 msgid "If selected Pricing Rule is made for 'Rate', it will overwrite Price List. Pricing Rule rate is the final rate, so no further discount should be applied. Hence, in transactions like Sales Order, Purchase Order etc, it will be fetched in 'Rate' field, rather than 'Price List Rate' field."
@@ -27354,7 +27354,7 @@ msgstr "PDV Detalji po Stavki"
 
 #: erpnext/controllers/taxes_and_totals.py:573
 msgid "Item Wise Tax Details do not match with Taxes and Charges at the following rows:"
-msgstr "PDV Detalji po Stavki ne podudaraju se s PDV i Naknadama u sljedećim redovima:"
+msgstr "PDV Detalji po Artiklu nisu uskađeni se s PDV i Naknadama u sljedećim redovima:"
 
 #. Label of the section_break_rrrx (Section Break) field in DocType 'Sales
 #. Forecast'
@@ -27963,7 +27963,7 @@ msgstr "Tip Naloga Knjiženja treba postaviti kao Unos Amortizacije za amortizac
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:728
 msgid "Journal Entry {0} does not have account {1} or already matched against other voucher"
-msgstr "Naloga Knjiženja {0} nema račun {1} ili se podudara naspram drugog verifikata"
+msgstr "Naloga Knjiženja {0} nema račun {1} ili nije usklađen naspram drugog verifikata"
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:394
 msgid "Journal Template Accounts"
@@ -29914,7 +29914,7 @@ msgstr "Postavke"
 
 #: banking/src/components/features/ActionLog/ActionLog.tsx:346
 msgid "Match"
-msgstr "Podudaranje"
+msgstr "Usklađivanje"
 
 #: banking/src/pages/BankReconciliation.tsx:116
 msgid "Match and Reconcile"
@@ -32146,7 +32146,7 @@ msgstr "Nema artikala u korpi"
 
 #: erpnext/accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.py:1043
 msgid "No matches occurred via auto reconciliation"
-msgstr "Nije došlo do podudaranja putem automatskog usaglašavanja"
+msgstr "Nije došlo do usklađivanja putem automatskog usklađivanja"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:1040
 msgid "No material request created"
@@ -35021,7 +35021,7 @@ msgstr "Pogreška Raščlanjivanja"
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:857
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:888
 msgid "Partial Match"
-msgstr "Djelomično podudaranje"
+msgstr "Djelomično Usklađivanje"
 
 #. Option for the 'Status' (Select) field in DocType 'Subcontracting Order'
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
@@ -43535,7 +43535,7 @@ msgstr "Poslovi preimenovanja za tip dokumenta {0} nisu stavljeni u red čekanja
 
 #: erpnext/accounts/doctype/account/account.py:550
 msgid "Renaming it is only allowed via parent company {0}, to avoid mismatch."
-msgstr "Preimenovanje je dozvoljeno samo preko nadređene tvrtke {0}, kako bi se izbjegla nepodudaranje."
+msgstr "Preimenovanje je dozvoljeno samo preko nadređene tvrtke {0}, kako bi se izbjegla neusklađenost."
 
 #: erpnext/manufacturing/doctype/workstation/test_workstation.py:78
 #: erpnext/manufacturing/doctype/workstation/test_workstation.py:89
@@ -45527,7 +45527,7 @@ msgstr "Red #{0}: Artikla {1} se ne slaže. Promjena koda artikla nije dozvoljen
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:765
 msgid "Row #{0}: Journal Entry {1} does not have account {2} or already matched against another voucher"
-msgstr "Red #{0}: Nalog Knjiženja {1} nema račun {2} ili se već podudara naspram drugog verifikata"
+msgstr "Red #{0}: Nalog Knjiženja {1} nema račun {2} ili je već usklađen naspram drugog voučera"
 
 #: erpnext/assets/doctype/asset_category/asset_category.py:149
 msgid "Row #{0}: Missing <b>{1}</b> for company <b>{2}</b>."
@@ -46157,7 +46157,7 @@ msgstr "Red {0}: Otpremnica je već kreirana za artikal {1}."
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:824
 msgid "Row {0}: Party / Account does not match with {1} / {2} in {3} {4}"
-msgstr "Red {0}: Strana/ Račun se ne podudara sa {1} / {2} u {3} {4}"
+msgstr "Red {0}: Stranka/ Račun nije usklađen sa {1} / {2} u {3} {4}"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:602
 msgid "Row {0}: Party Type and Party is required for Receivable / Payable account {1}"
@@ -46306,7 +46306,7 @@ msgstr "Red {0}: {1} {2} ne može biti isto kao {3} (Račun Stranke) {4}"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:838
 msgid "Row {0}: {1} {2} does not match with {3}"
-msgstr "Red {0}: {1} {2} se ne podudara sa {3}"
+msgstr "Red {0}: {1} {2} nije usklađen sa {3}"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:136
 msgid "Row {0}: {1} {2} is linked to company {3}. Please select a document belonging to company {4}."
@@ -48047,7 +48047,7 @@ msgstr "Odaberi Prikaz"
 
 #: erpnext/public/js/bank_reconciliation_tool/dialog_manager.js:251
 msgid "Select Vouchers to Match"
-msgstr "Odaber Verifikate za Podudaranje"
+msgstr "Odaberi Voučere za Usklađivanje"
 
 #: erpnext/public/js/stock_analytics.js:72
 msgid "Select Warehouse..."
@@ -51725,7 +51725,7 @@ msgstr "Zalihe se ne mogu ažurirati za Fakturu Nabave {0} jer je za ovu transak
 
 #: erpnext/stock/doctype/warehouse/warehouse.py:125
 msgid "Stock entries exist with the old account. Changing the account may lead to a mismatch between the warehouse closing balance and the account closing balance. The overall closing balance will still match, but not for the specific account."
-msgstr "Unosi zaliha postoje na starom računu. Promjena računa može dovesti do neusklađenosti između završnog stanja skladišta i završnog stanja računa. Ukupno završno stanje će se i dalje podudarati, ali ne za određeni račun."
+msgstr "Unosi zaliha postoje na starom računu. Promjena računa može dovesti do neusklađenosti između završnog stanja skladišta i završnog stanja računa. Ukupno završno stanje će biti usklađeno, ali ne za određeni račun."
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1140
 msgid "Stock has been unreserved for work order {0}."
@@ -54342,7 +54342,7 @@ msgstr "Kampanja '{0}' već postoji za {1} '{2}'"
 
 #: erpnext/manufacturing/doctype/master_production_schedule/master_production_schedule.py:71
 msgid "The Company {0} of Sales Forecast {1} does not match with the Company {2} of Master Production Schedule {3}."
-msgstr "Prognoza prodaje tvrtke {0} {1} ne podudara se s tvrtkom {2} glavnog proizvodnog rasporeda {3}."
+msgstr "Prognoza prodaje tvrtke {0} {1} nije usklađena se s tvrtkom {2} glavnog proizvodnog rasporeda {3}."
 
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.py:206
 msgid "The Document Type {0} must have a Status field to configure Service Level Agreement"
@@ -54512,7 +54512,7 @@ msgstr "Fiskalna godina je automatski kreirana u onemogućenom stanju kako bi se
 
 #: erpnext/accounts/doctype/share_transfer/share_transfer.py:240
 msgid "The folio numbers are not matching"
-msgstr "Brojevi Folija se ne podudaraju"
+msgstr "Brojevi Folija nisu usklađeni"
 
 #: erpnext/stock/doctype/putaway_rule/putaway_rule.py:307
 msgid "The following Items, having Putaway Rules, could not be accomodated:"
