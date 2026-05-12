@@ -5,6 +5,7 @@ import frappe
 from frappe.utils.data import today
 
 from erpnext.accounts.report.balance_sheet.balance_sheet import execute
+from erpnext.accounts.report.financial_statements import build_period_list, is_dimension_grouped
 from erpnext.tests.utils import ERPNextTestSuite
 
 COMPANY = "_Test Company 6"
@@ -105,6 +106,71 @@ class TestBalanceSheet(ERPNextTestSuite):
 
 		self.assertIn("'Provisional Profit / Loss (Credit)'", name_and_total)
 		self.assertEqual(name_and_total["'Provisional Profit / Loss (Credit)'"], 100)
+
+	def test_group_by_dimension(self):
+		create_account("BS Dim Test Bank", f"Bank Accounts - {COMPANY_SHORT_NAME}", COMPANY)
+
+		cc1 = frappe.db.get_value("Cost Center", {"company": COMPANY, "is_group": 0}, "name")
+		parent_cc = frappe.db.get_value("Cost Center", {"company": COMPANY, "is_group": 1}, "name")
+
+		cc2 = frappe.new_doc("Cost Center")
+		cc2.cost_center_name = "BS Test CC 2"
+		cc2.parent_cost_center = parent_cc
+		cc2.company = COMPANY
+		cc2.insert()
+
+		make_journal_entry(
+			[
+				dict(
+					account_name="BS Dim Test Bank",
+					debit_in_account_currency=300,
+					credit_in_account_currency=0,
+					cost_center=cc1,
+				),
+				dict(
+					account_name="Capital Stock",
+					debit_in_account_currency=0,
+					credit_in_account_currency=300,
+					cost_center=cc1,
+				),
+			]
+		)
+		make_journal_entry(
+			[
+				dict(
+					account_name="BS Dim Test Bank",
+					debit_in_account_currency=500,
+					credit_in_account_currency=0,
+					cost_center=cc2.name,
+				),
+				dict(
+					account_name="Capital Stock",
+					debit_in_account_currency=0,
+					credit_in_account_currency=500,
+					cost_center=cc2.name,
+				),
+			]
+		)
+
+		filters = frappe._dict(
+			company=COMPANY,
+			period_start_date=today(),
+			period_end_date=today(),
+			periodicity="Yearly",
+			filter_based_on="Date Range",
+			accumulated_values=True,
+			group_by_dimension="Cost Center",
+		)
+		self.assertTrue(is_dimension_grouped(build_period_list(filters)))
+
+		columns, data, *_ = execute(filters)
+
+		dim_cols = [c for c in columns if c.get("dimension_value")]
+		self.assertTrue(len(dim_cols) > 0)
+
+		name_and_total = {r["account_name"]: r["total"] for r in data if "total" in r and "account_name" in r}
+		self.assertIn("BS Dim Test Bank", name_and_total)
+		self.assertEqual(name_and_total["BS Dim Test Bank"], 800)
 
 
 def make_journal_entry(rows):

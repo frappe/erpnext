@@ -6,7 +6,11 @@ from frappe.desk.query_report import export_query
 from frappe.utils import add_days, getdate, today
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.accounts.report.financial_statements import get_period_list
+from erpnext.accounts.report.financial_statements import (
+	build_period_list,
+	get_period_list,
+	is_dimension_grouped,
+)
 from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import execute
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.tests.utils import ERPNextTestSuite
@@ -57,6 +61,49 @@ class TestProfitAndLossStatement(ERPNextTestSuite, AccountsTestMixin):
 			periodicity="Monthly",
 			accumulated_values=False,
 		)
+
+	def _create_cost_center(self, name):
+		parent = frappe.db.get_value("Cost Center", self.cost_center, "parent_cost_center")
+		cc = frappe.new_doc("Cost Center")
+		cc.cost_center_name = name
+		cc.parent_cost_center = parent
+		cc.company = self.company
+		cc.insert()
+		return cc.name
+
+	def test_group_by_dimension(self):
+		second_cc = self._create_cost_center("P&L Test CC 2")
+
+		# 100 to default cost center, 200 to second cost center
+		self.create_sales_invoice(rate=100)
+		si2 = create_sales_invoice(
+			item=self.item,
+			company=self.company,
+			customer=self.customer,
+			debit_to=self.debit_to,
+			posting_date=today(),
+			parent_cost_center=second_cc,
+			cost_center=second_cc,
+			rate=200,
+			price_list_rate=200,
+			qty=1,
+		)
+		si2.submit()
+
+		filters = self.get_report_filters()
+		filters.group_by_dimension = "Cost Center"
+
+		self.assertTrue(is_dimension_grouped(build_period_list(filters)))
+
+		columns, data, *_ = execute(filters)
+
+		dim_cols = [c for c in columns if c.get("dimension_value")]
+		self.assertTrue(len(dim_cols) > 0)
+
+		income_row = next((r for r in data if r.get("account") == self.income_account), None)
+		self.assertIsNotNone(income_row)
+		# non-accumulated: total = sum of all dimension-period values
+		self.assertEqual(income_row["total"], 300.0)
 
 	def test_profit_and_loss_output_and_summary(self):
 		self.create_sales_invoice(qty=1, rate=150)
