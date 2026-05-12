@@ -761,7 +761,6 @@ frappe.ui.form.on("Production Plan", {
 					hidden: 1,
 				}
 			];
-			debugger;
 			let d = frappe.prompt(
 				fields,
 				(values) => {
