@@ -775,18 +775,7 @@ class StockEntry(StockController):
 					frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
 
 			if self.purpose == "Manufacture":
-<<<<<<< HEAD
-				if has_bom:
-					if d.is_finished_item or d.is_scrap_item:
-						d.s_warehouse = None
-						if not d.t_warehouse:
-							frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
-					else:
-						d.t_warehouse = None
-						if not d.s_warehouse:
-							frappe.throw(_("Source warehouse is mandatory for row {0}").format(d.idx))
-=======
-				if d.is_finished_item or d.type or d.is_legacy_scrap_item:
+				if d.is_finished_item or d.is_scrap_item:
 					d.s_warehouse = None
 					if not d.t_warehouse:
 						frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
@@ -794,7 +783,6 @@ class StockEntry(StockController):
 					d.t_warehouse = None
 					if not d.s_warehouse:
 						frappe.throw(_("Source warehouse is mandatory for row {0}").format(d.idx))
->>>>>>> b5527cf328 (fix: raw material should not have target warehouse in manufacture entry (#54849))
 
 			if self.purpose == "Disassemble":
 				if has_bom:
