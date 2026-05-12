@@ -595,31 +595,29 @@ def get_sq_total_items(scorecard):
 
 def get_rfq_response_days(scorecard):
 	"""Gets the total number of days it has taken a supplier to respond to rfqs in the period"""
-	supplier = frappe.get_doc("Supplier", scorecard.supplier)
-	total_sq_days = frappe.db.sql(
-		"""
-			SELECT
-				SUM(DATEDIFF(sq.transaction_date, rfq.transaction_date))
-			FROM
-				`tabRequest for Quotation Item` rfq_item,
-				`tabSupplier Quotation Item` sq_item,
-				`tabSupplier Quotation` sq,
-				`tabRequest for Quotation Supplier` rfq_sup,
-				`tabRequest for Quotation` rfq
-			WHERE
-				rfq_sup.supplier = %(supplier)s
-				AND rfq.transaction_date BETWEEN %(start_date)s AND %(end_date)s
-				AND sq_item.request_for_quotation_item = rfq_item.name
-				AND sq_item.docstatus = 1
-				AND sq.supplier = %(supplier)s
-				AND sq_item.parent = sq.name
-				AND rfq_item.docstatus = 1
-				AND rfq_item.parent = rfq.name
-				AND rfq_sup.parent = rfq.name""",
-		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
-		as_dict=0,
-	)[0][0]
-	if not total_sq_days:
-		total_sq_days = 0
+	rfq = frappe.qb.DocType("Request for Quotation")
+	rfq_item = frappe.qb.DocType("Request for Quotation Item")
+	rfq_sup = frappe.qb.DocType("Request for Quotation Supplier")
+	sq = frappe.qb.DocType("Supplier Quotation")
+	sq_item = frappe.qb.DocType("Supplier Quotation Item")
 
-	return total_sq_days
+	query = (
+		frappe.qb.from_(rfq)
+		.join(rfq_item)
+		.on(rfq_item.parent == rfq.name)
+		.join(rfq_sup)
+		.on(rfq_sup.parent == rfq.name)
+		.join(sq_item)
+		.on(sq_item.request_for_quotation_item == rfq_item.name)
+		.join(sq)
+		.on(sq_item.parent == sq.name)
+		.select(frappe.qb.fn.Sum(frappe.qb.fn.Datediff(sq.transaction_date, rfq.transaction_date)))
+		.where(rfq_sup.supplier == scorecard.supplier)
+		.where(sq.supplier == scorecard.supplier)
+		.where(rfq.transaction_date[scorecard.start_date : scorecard.end_date])
+		.where(rfq_item.docstatus == 1)
+		.where(sq_item.docstatus == 1)
+	)
+
+	result = query.run()
+	return frappe.utils.cint(result[0][0]) if result else 0
