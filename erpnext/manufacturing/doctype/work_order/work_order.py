@@ -643,7 +643,43 @@ class WorkOrder(Document):
 		"""Update **Manufactured Qty** and **Material Transferred for Qty** in Work Order
 		based on Stock Entry"""
 
+
 		if self.track_semi_finished_goods:
+			produced_qty = frappe.db.sql(
+				"""
+				SELECT IFNULL(SUM(sed.transfer_qty), 0)
+				FROM `tabStock Entry Detail` sed
+				INNER JOIN `tabStock Entry` se
+					ON se.name = sed.parent
+				WHERE
+					se.work_order = %s
+					AND se.docstatus = 1
+					AND se.purpose = 'Manufacture'
+					AND sed.is_finished_item = 1
+					AND sed.item_code = %s
+				""",
+				(self.name, self.production_item),
+			)[0][0]
+
+			self.db_set("produced_qty", flt(produced_qty))
+			self.db_set("status", self.get_status())
+
+			if self.production_plan:
+				if self.production_plan_item:
+					frappe.db.set_value(
+						"Production Plan Item",
+						self.production_plan_item,
+						{
+							"produced_qty": flt(self.produced_qty),
+							"pending_qty": max(flt(self.qty) - flt(self.produced_qty), 0),
+						},
+					)
+
+				if self.production_plan_sub_assembly_item:
+					self.set_produced_qty_for_sub_assembly_item()
+
+				self.update_production_plan_status()
+
 			return
 
 		allowance_percentage = flt(
