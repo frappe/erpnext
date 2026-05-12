@@ -17,6 +17,7 @@
   "column_break0",
   "supplier_group",
   "country",
+  "linked_customer",
   "is_transporter",
   "image",
   "defaults_section",
@@ -100,6 +101,14 @@
    "oldfieldname": "supplier_name",
    "oldfieldtype": "Data",
    "reqd": 1
+  },
+  {
+   "fieldname": "linked_customer",
+   "fieldtype": "Link",
+   "label": "Linked Customer",
+   "no_copy": 1,
+   "options": "Customer",
+   "read_only": 1
   },
   {
    "fieldname": "country",
@@ -517,7 +526,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-03-09 17:15:25.465759",
+ "modified": "2026-05-11 17:20:14.382941",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

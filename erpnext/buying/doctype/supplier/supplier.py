@@ -13,6 +13,7 @@ from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_
 
 from erpnext.accounts.party import (
 	get_dashboard_info,
+	load_party_link,
 	validate_party_accounts,
 	validate_party_currency_before_merging,
 )
@@ -56,6 +57,7 @@ class Supplier(TransactionBase):
 		is_internal_supplier: DF.Check
 		is_transporter: DF.Check
 		language: DF.Link | None
+		linked_customer: DF.Link | None
 		mobile_no: DF.ReadOnly | None
 		naming_series: DF.Literal["SUP-.YYYY.-"]
 		on_hold: DF.Check
@@ -85,6 +87,8 @@ class Supplier(TransactionBase):
 		"""Load address and contacts in `__onload`"""
 		load_address_and_contact(self)
 		self.load_dashboard_info()
+		if not self.is_new():
+			load_party_link(self)
 
 	def before_save(self):
 		if not self.on_hold:

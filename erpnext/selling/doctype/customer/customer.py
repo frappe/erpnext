@@ -21,6 +21,7 @@ from frappe.utils.user import get_users_with_role
 
 from erpnext.accounts.party import (
 	get_dashboard_info,
+	load_party_link,
 	validate_party_accounts,
 	validate_party_currency_before_merging,
 )
@@ -76,6 +77,7 @@ class Customer(TransactionBase):
 		language: DF.Link | None
 		last_name: DF.ReadOnly | None
 		lead_name: DF.Link | None
+		linked_supplier: DF.Link | None
 		loyalty_program: DF.Link | None
 		loyalty_program_tier: DF.Data | None
 		market_segment: DF.Link | None
@@ -102,6 +104,8 @@ class Customer(TransactionBase):
 		"""Load address and contacts in `__onload`"""
 		load_address_and_contact(self)
 		self.load_dashboard_info()
+		if not self.is_new():
+			load_party_link(self)
 
 	def load_dashboard_info(self):
 		info = get_dashboard_info(self.doctype, self.name, self.loyalty_program)

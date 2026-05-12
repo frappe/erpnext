@@ -829,6 +829,22 @@ def validate_account_party_type(self):
 			)
 
 
+def load_party_link(doc) -> None:
+	from erpnext.accounts.doctype.party_link.party_link import _find_party_link
+
+	party_type = doc.doctype
+	link = _find_party_link(party_type, doc.name)
+	if not link:
+		return
+
+	if link.primary_party == doc.name:
+		peer = {"role": link.secondary_role, "name": link.secondary_party}
+	else:
+		peer = {"role": link.primary_role, "name": link.primary_party}
+
+	doc.set_onload("party_link", peer)
+
+
 def get_dashboard_info(party_type, party, loyalty_program=None):
 	current_fiscal_year = get_fiscal_year(nowdate(), as_dict=True)
 

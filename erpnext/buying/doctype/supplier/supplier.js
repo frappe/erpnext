@@ -117,18 +117,53 @@ frappe.ui.form.on("Supplier", {
 				__("View")
 			);
 
+			const party_link = frm.doc.__onload?.party_link;
+
 			if (
 				cint(frappe.defaults.get_default("enable_common_party_accounting")) &&
 				frappe.model.can_create("Party Link")
 			) {
-				frm.add_custom_button(
-					__("Link with Customer"),
-					function () {
-						frm.trigger("show_party_link_dialog");
-					},
-					__("Actions")
-				);
+				if (!party_link) {
+					frm.add_custom_button(
+						__("Link with Customer"),
+						function () {
+							frm.trigger("show_party_link_dialog");
+						},
+						__("Actions")
+					);
+				} else {
+					if (frappe.model.can_delete("Party Link")) {
+						frm.add_custom_button(
+							__("Remove Link with Customer"),
+							function () {
+								frappe.confirm(
+									__(
+										"Are you sure you want to unlink {0} and {1}? This will stop Common Party Accounting between them.",
+										[
+											frappe.utils.get_form_link("Supplier", frm.doc.name, true),
+											frappe.utils.get_form_link("Customer", party_link.name, true),
+										]
+									),
+									function () {
+										frappe.call({
+											method: "erpnext.accounts.doctype.party_link.party_link.remove_party_link",
+											args: { party_type: "Supplier", party: frm.doc.name },
+											freeze: true,
+											callback: function () {
+												frm.reload_doc();
+											},
+										});
+									}
+								);
+							},
+							__("Actions")
+						);
+					}
+				}
 			}
+
+			frm.doc.linked_customer = party_link ? party_link.name : null;
+			frm.refresh_field("linked_customer");
 
 			// indicators
 			erpnext.utils.set_party_dashboard_indicators(frm);
@@ -185,6 +220,7 @@ frappe.ui.form.on("Supplier", {
 					options: "Customer",
 					fieldname: "customer",
 					reqd: 1,
+					only_select: 1,
 				},
 			],
 			primary_action: function ({ customer }) {
@@ -202,6 +238,7 @@ frappe.ui.form.on("Supplier", {
 							message: __("Successfully linked to Customer"),
 							alert: true,
 						});
+						frm.reload_doc();
 					},
 					error: function () {
 						dialog.hide();
@@ -213,8 +250,64 @@ frappe.ui.form.on("Supplier", {
 					},
 				});
 			},
-			primary_action_label: __("Create Link"),
+			primary_action_label: __("Link"),
 		});
+
+		if (frappe.model.can_create("Customer")) {
+			dialog.set_secondary_action(function () {
+				frappe.model.with_doctype("Customer", function () {
+					const customer_type_options = frappe.meta.get_field("Customer", "customer_type").options;
+
+					const create_dialog = new frappe.ui.Dialog({
+						title: __("Create New Customer"),
+						fields: [
+							{
+								fieldname: "customer_name",
+								fieldtype: "Data",
+								label: __("Customer Name"),
+								reqd: 1,
+							},
+							{
+								fieldname: "customer_type",
+								fieldtype: "Select",
+								label: __("Customer Type"),
+								options: customer_type_options,
+								default: "Company",
+								reqd: 1,
+							},
+							{
+								fieldname: "customer_group",
+								fieldtype: "Link",
+								label: __("Customer Group"),
+								options: "Customer Group",
+							},
+						],
+						primary_action_label: __("Create & Link"),
+						primary_action: function (values) {
+							frappe.call({
+								method: "erpnext.accounts.doctype.party_link.party_link.create_and_link_party",
+								args: {
+									primary_role: "Supplier",
+									primary_party: frm.doc.name,
+									new_party_name: values.customer_name,
+									new_party_type: values.customer_type,
+									new_party_group: values.customer_group,
+								},
+								freeze: true,
+								callback: function () {
+									create_dialog.hide();
+									dialog.hide();
+									frm.reload_doc();
+								},
+							});
+						},
+					});
+					create_dialog.show();
+				});
+			});
+			dialog.set_secondary_action_label(__("Create new Customer"));
+		}
+
 		dialog.show();
 	},
 	make_pricing_rule: function (frm) {
