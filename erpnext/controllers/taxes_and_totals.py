@@ -1167,7 +1167,8 @@ class calculate_taxes_and_totals:
 				item.margin_rate_or_amount = flt(
 					item.rate - item.price_list_rate, item.precision("margin_rate_or_amount")
 				)
-				item.rate_with_margin = item.rate
+				rate_with_margin = flt(item.rate)
+				base_rate_with_margin = flt(rate_with_margin) * flt(self.doc.conversion_rate)
 
 			elif item.margin_type and item.margin_rate_or_amount:
 				margin_value = (
