@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "autoname": "naming_series:",
  "creation": "2026-03-31 21:06:16.282931",
  "doctype": "DocType",
@@ -155,6 +156,7 @@
    "fieldname": "wip_warehouse",
    "fieldtype": "Link",
    "label": "WIP Warehouse",
+   "link_filters": "[[\"Warehouse\",\"disabled\",\"=\",0],[\"Warehouse\",\"is_group\",\"=\",0]]",
    "mandatory_depends_on": "eval:!doc.finished_good || doc.skip_material_transfer === 0 || (doc.skip_material_transfer && doc.backflush_from_wip_warehouse)",
    "options": "Warehouse"
   },
@@ -506,6 +508,7 @@
    "fieldname": "target_warehouse",
    "fieldtype": "Link",
    "label": "Target Warehouse",
+   "link_filters": "[[\"Warehouse\",\"disabled\",\"=\",0],[\"Warehouse\",\"is_group\",\"=\",0]]",
    "mandatory_depends_on": "eval:doc.track_semi_finished_goods",
    "options": "Warehouse"
   },
@@ -518,6 +521,7 @@
    "fieldname": "source_warehouse",
    "fieldtype": "Link",
    "label": "Source Warehouse",
+   "link_filters": "[[\"Warehouse\",\"disabled\",\"=\",0],[\"Warehouse\",\"is_group\",\"=\",0]]",
    "options": "Warehouse"
   },
   {
@@ -627,7 +631,7 @@
  "grid_page_length": 50,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-31 21:06:48.987740",
+ "modified": "2026-05-12 12:17:17.750857",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",

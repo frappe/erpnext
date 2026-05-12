@@ -3875,7 +3875,7 @@ def get_work_order_details(work_order: str, company: str):
 	}
 
 
-def get_consumed_operating_cost(wo_name, bom_no):
+def get_consumed_operating_cost(wo_name, bom_no, operation_id):
 	table = frappe.qb.DocType("Stock Entry")
 	child_table = frappe.qb.DocType("Landed Cost Taxes and Charges")
 	query = (
@@ -3889,6 +3889,9 @@ def get_consumed_operating_cost(wo_name, bom_no):
 			& (table.purpose == "Manufacture")
 			& (table.bom_no == bom_no)
 			& (child_table.has_operating_cost == 1)
+			& (
+				(child_table.operation_id == operation_id) | (child_table.operation_id.isnull())
+			)  # the isnull part is to ensure backward compatibility
 		)
 	)
 	cost = query.run(pluck="consumed_cost")
@@ -3915,7 +3918,9 @@ def get_operating_cost_per_unit(work_order=None, bom_no=None):
 				if not (remaining_qty := flt(d.completed_qty - work_order.produced_qty)):
 					continue
 				operating_cost_per_unit += (
-					flt(d.actual_operating_cost - get_consumed_operating_cost(work_order.name, bom_no))
+					flt(
+						d.actual_operating_cost - get_consumed_operating_cost(work_order.name, bom_no, d.name)
+					)
 					/ remaining_qty
 				)
 			elif work_order.qty:

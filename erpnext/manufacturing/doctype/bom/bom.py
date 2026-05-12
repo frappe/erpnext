@@ -1647,11 +1647,11 @@ def add_non_stock_items_cost(stock_entry, work_order, expense_account, job_card=
 		)
 
 
-def add_operating_cost_component_wise(
-	stock_entry, work_order=None, consumed_operating_cost=None, op_expense_account=None, job_card=None
-):
+def add_operating_cost_component_wise(stock_entry, work_order=None, op_expense_account=None, job_card=None):
 	if not work_order:
 		return False
+
+	from erpnext.stock.doctype.stock_entry.stock_entry import get_consumed_operating_cost
 
 	cost_added = False
 	for row in work_order.operations:
@@ -1670,6 +1670,7 @@ def add_operating_cost_component_wise(
 			},
 		)
 
+		consumed_operating_cost = get_consumed_operating_cost(work_order.name, stock_entry.bom_no, row.name)
 		for wc in workstation_cost:
 			expense_account = (
 				get_component_account(wc.operating_component, stock_entry.company) or op_expense_account
@@ -1691,6 +1692,7 @@ def add_operating_cost_component_wise(
 						),
 						"amount": per_unit_cost * flt(stock_entry.fg_completed_qty),
 						"has_operating_cost": 1,
+						"operation_id": row.name,
 					},
 				)
 
@@ -1708,7 +1710,6 @@ def get_component_account(parent, company):
 
 def add_operations_cost(stock_entry, work_order=None, expense_account=None, job_card=None):
 	from erpnext.stock.doctype.stock_entry.stock_entry import (
-		get_consumed_operating_cost,
 		get_operating_cost_per_unit,
 	)
 
@@ -1718,7 +1719,6 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None, job_
 		cost_added = add_operating_cost_component_wise(
 			stock_entry,
 			work_order,
-			get_consumed_operating_cost(work_order.name, stock_entry.bom_no),
 			expense_account,
 			job_card=job_card,
 		)
