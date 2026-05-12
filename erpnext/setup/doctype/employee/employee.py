@@ -310,7 +310,12 @@ def is_holiday(employee, date=None, raise_exception=True, only_non_weekly=False,
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def deactivate_sales_person(status=None, employee=None):
+=======
+def deactivate_sales_person(status: str, employee: str):
+	frappe.has_permission("Employee", doc=employee, ptype="write", throw=True)
+>>>>>>> 9134db9cd3 (fix: added permission validation for `deactivate_sales_person` (#54884))
 	if status == "Left":
 		sales_person = frappe.db.get_value("Sales Person", {"Employee": employee})
 		if sales_person:
