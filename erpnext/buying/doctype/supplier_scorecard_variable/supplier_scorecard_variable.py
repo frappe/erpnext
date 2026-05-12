@@ -232,28 +232,21 @@ def get_late_shipments(scorecard):
 
 def get_total_received(scorecard):
 	"""Gets the total number of received shipments in the period (based on Purchase Receipts)"""
-	supplier = frappe.get_doc("Supplier", scorecard.supplier)
+	pr = frappe.qb.DocType("Purchase Receipt")
+	pr_item = frappe.qb.DocType("Purchase Receipt Item")
 
-	# Look up all PO Items with delivery dates between our dates
-	data = frappe.db.sql(
-		"""
-			SELECT
-				COUNT(pr_item.base_amount)
-			FROM
-				`tabPurchase Receipt Item` pr_item,
-				`tabPurchase Receipt` pr
-			WHERE
-				pr.supplier = %(supplier)s
-				AND pr.posting_date BETWEEN %(start_date)s AND %(end_date)s
-				AND pr_item.docstatus = 1
-				AND pr_item.parent = pr.name""",
-		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
-		as_dict=0,
-	)[0][0]
+	query = (
+		frappe.qb.from_(pr)
+		.join(pr_item)
+		.on(pr_item.parent == pr.name)
+		.select(frappe.qb.fn.Count(pr_item.base_amount))
+		.where(pr.supplier == scorecard.supplier)
+		.where(pr.posting_date[scorecard.start_date : scorecard.end_date])
+		.where(pr_item.docstatus == 1)
+	)
 
-	if not data:
-		data = 0
-	return data
+	result = query.run()
+	return result[0][0] if result and result[0][0] else 0
 
 
 def get_total_received_amount(scorecard):
