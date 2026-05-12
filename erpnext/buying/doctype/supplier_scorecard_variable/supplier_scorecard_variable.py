@@ -414,28 +414,21 @@ def get_total_accepted_items(scorecard):
 
 def get_total_shipments(scorecard):
 	"""Gets the total number of ordered shipments to arrive in the period (based on Purchase Receipts)"""
-	supplier = frappe.get_doc("Supplier", scorecard.supplier)
+	po = frappe.qb.DocType("Purchase Order")
+	po_item = frappe.qb.DocType("Purchase Order Item")
 
-	# Look up all PO Items with delivery dates between our dates
-	data = frappe.db.sql(
-		"""
-			SELECT
-				COUNT(po_item.base_amount)
-			FROM
-				`tabPurchase Order Item` po_item,
-				`tabPurchase Order` po
-			WHERE
-				po.supplier = %(supplier)s
-				AND po_item.schedule_date BETWEEN %(start_date)s AND %(end_date)s
-				AND po_item.docstatus = 1
-				AND po_item.parent = po.name""",
-		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
-		as_dict=0,
-	)[0][0]
+	query = (
+		frappe.qb.from_(po)
+		.join(po_item)
+		.on(po_item.parent == po.name)
+		.select(frappe.qb.fn.Count(po_item.base_amount))
+		.where(po.supplier == scorecard.supplier)
+		.where(po_item.schedule_date[scorecard.start_date : scorecard.end_date])
+		.where(po_item.docstatus == 1)
+	)
 
-	if not data:
-		data = 0
-	return data
+	result = query.run()
+	return frappe.utils.cint(result[0][0]) if result else 0
 
 
 def get_ordered_qty(scorecard):
