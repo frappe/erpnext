@@ -1,0 +1,36 @@
+{% load rest_framework %}
+
+<!-- Modal -->
+<div class="modal fade auth-modal auth-token" id="auth_token_modal" tabindex="-1" role="dialog" aria-labelledby="token authentication modal">
+<div class="modal-dialog modal-md" role="document">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title"><i class="fa fa-key"></i> Token Authentication</h3>
+    </div>
+
+    <form class="form-horizontal authentication-token-form">
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="prefix" class="col-sm-2 control-label">Scheme:</label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control" id="scheme" placeholder="Bearer" aria-describedby="schemeHelpBlock" required>
+          <span id="schemeHelpBlock" class="help-block">Either a registered authentication scheme such as <code>Bearer</code>, or a custom schema such as <code>Token</code> or <code>JWT</code>.</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="token" class="col-sm-2 control-label">Token:</label>
+        <div class="col-sm-10">
+          <input type="text" class="form-control" id="token" placeholder="XXXX-XXXX-XXXX-XXXX" aria-describedby="helpBlock" required>
+          <span id="tokenHelpBlock" class="help-block">A valid API token.</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      <button type="submit" class="btn btn-primary">Use Token Authentication</button>
+    </div>
+    </form>
+
+  </div>
+</div>
+</div>

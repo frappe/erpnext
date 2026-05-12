@@ -1,0 +1,102 @@
+{% load rest_framework %}
+<div class="row coredocs-link">
+
+<div class="col-md-6 docs-content">
+    <button
+        class="btn btn-sm btn-success"
+        style="float: right; margin-top: 20px"
+        data-toggle="modal"
+        data-target="#{{ section_key }}_{{ link_key|slugify }}_modal">
+        <i class="fa fa-exchange"></i> Interact
+    </button>
+
+    <h3 id="{{ section_key }}-{{ link_key|slugify }}" class="coredocs-link-title">{{ link.title|default:link_key }} <a href="#{{ section_key }}-{{ link_key|slugify }}"><i class="fa fa-link" aria-hidden="true"></i>
+</a></h3>
+
+    <div class="meta">
+        <span class="label label-primary">{{ link.action|upper }}</span>
+        <code>{{ link.url }}</code>
+    </div>
+
+    <p>{% render_markdown link.description %}</p>
+
+{% if link.fields|with_location:'path' %}
+    <h4>Path Parameters</h4>
+    <p>The following parameters should be included in the URL path.</p>
+    <table class="parameters table table-bordered table-striped">
+        <thead>
+            <tr><th>Parameter</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+            {% for field in link.fields|with_location:'path' %}
+            <tr><td class="parameter-name"><code>{{ field.name }}</code>{% if field.required %} <span class="label label-warning">required</span>{% endif %}</td><td>{% if field.schema.description %}{{ field.schema.description|safe }}{% endif %}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+{% if link.fields|with_location:'query' %}
+    <h4>Query Parameters</h4>
+    <p>The following parameters should be included as part of a URL query string.</p>
+    <table class="parameters table table-bordered table-striped">
+        <thead>
+            <tr><th>Parameter</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+            {% for field in link.fields|with_location:'query' %}
+            <tr><td class="parameter-name"><code>{{ field.name }}</code>{% if field.required %} <span class="label label-warning">required</span>{% endif %}</td><td>{% if field.schema.description %}{{ field.schema.description|safe }}{% endif %}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+{% if link.fields|with_location:'header' %}
+    <h4>Header Parameters</h4>
+    <p>The following parameters should be included as HTTP headers.</p>
+    <table class="parameters table table-bordered table-striped">
+        <thead>
+            <tr><th>Parameter</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+            {% for field in link.fields|with_location:'header' %}
+            <tr><td class="parameter-name"><code>{{ field.name }}</code>{% if field.required %} <span class="label label-warning">required</span>{% endif %}</td><td>{% if field.schema.description %}{{ field.schema.description|safe }}{% endif %}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+{% if link.fields|with_location:'body' %}
+    <h4>Request Body</h4>
+    <p>The request body should be <code>"{{ link.encoding }}"</code> encoded, and should contain a single item.</p>
+    <table class="parameters table table-bordered table-striped">
+        <thead>
+            <tr><th>Parameter</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+            {% for field in link.fields|with_location:'body' %}
+            <tr><td class="parameter-name"><code>{{ field.name }}</code>{% if field.required %} <span class="label label-warning">required</span>{% endif %}</td><td>{% if field.schema.description %}{{ field.schema.description|safe }}{% endif %}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% elif link.fields|with_location:'form' %}
+    <h4>Request Body</h4>
+    <p>The request body should be a <code>"{{ link.encoding }}"</code> encoded object, containing the following&nbsp;items.</p>
+    <table class="parameters table table-bordered table-striped">
+        <thead>
+            <tr><th>Parameter</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+            {% for field in link.fields|with_location:'form' %}
+            <tr><td class="parameter-name"><code>{{ field.name }}</code>{% if field.required %} <span class="label label-warning">required</span>{% endif %}</td><td>{% if field.schema.description %}{{ field.schema.description|safe }}{% endif %}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+
+</div>
+
+    <div class="col-md-6 code-samples">
+        {% for html in lang_htmls %}
+            {% include html %}
+        {% endfor %}
+    </div>
+</div>
+
+{% include "rest_framework/docs/interact.html" with link=link %}

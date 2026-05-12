@@ -1,0 +1,311 @@
+{% load static %}
+{% load i18n %}
+{% load rest_framework %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    {% block head %}
+
+      {% block meta %}
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NONE,NOARCHIVE" />
+      {% endblock %}
+
+      <title>{% block title %}{% if name %}{{ name }} – {% endif %}Django REST framework{% endblock %}</title>
+
+      {% block style %}
+        {% block bootstrap_theme %}
+          <link rel="stylesheet" type="text/css" href="{% static "rest_framework/css/bootstrap.min.css" %}"/>
+          <link rel="stylesheet" type="text/css" href="{% static "rest_framework/css/bootstrap-tweaks.css" %}"/>
+        {% endblock %}
+
+        <link rel="stylesheet" type="text/css" href="{% static "rest_framework/css/prettify.css" %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static "rest_framework/css/default.css" %}"/>
+        {% if code_style %}<style>{{ code_style }}</style>{% endif %}
+      {% endblock %}
+
+    {% endblock %}
+  </head>
+
+  {% block body %}
+  <body class="{% block bodyclass %}{% endblock %}">
+
+    <div class="wrapper">
+      {% block navbar %}
+        <div class="navbar navbar-static-top {% block bootstrap_navbar_variant %}navbar-inverse{% endblock %}"
+             role="navigation" aria-label="{% trans "navbar" %}">
+          <div class="container">
+            <span>
+              {% block branding %}
+                <a class='navbar-brand' rel="nofollow" href='https://www.django-rest-framework.org/'>
+                    Django REST framework
+                </a>
+              {% endblock %}
+            </span>
+            <ul class="nav navbar-nav pull-right">
+              {% block userlinks %}
+                {% if user.is_authenticated %}
+                  {% optional_logout request user %}
+                {% else %}
+                  {% optional_login request %}
+                {% endif %}
+              {% endblock %}
+            </ul>
+          </div>
+        </div>
+      {% endblock %}
+
+      <div class="container">
+        {% block breadcrumbs %}
+          <ul class="breadcrumb">
+            {% for breadcrumb_name, breadcrumb_url in breadcrumblist %}
+              {% if forloop.last %}
+                <li class="active"><a href="{{ breadcrumb_url }}">{{ breadcrumb_name }}</a></li>
+              {% else %}
+                <li><a href="{{ breadcrumb_url }}">{{ breadcrumb_name }}</a></li>
+              {% endif %}
+            {% empty %}
+              {% block breadcrumbs_empty %}&nbsp;{% endblock breadcrumbs_empty %}
+            {% endfor %}
+          </ul>
+        {% endblock %}
+
+        <!-- Content -->
+        <div id="content" role="main" aria-label="{% trans "content" %}">
+          {% block content %}
+
+          <div class="region"  aria-label="{% trans "request form" %}">
+          {% block request_forms %}
+
+          {% if 'GET' in allowed_methods %}
+            <form id="get-form" class="pull-right">
+              <fieldset>
+                {% if api_settings.URL_FORMAT_OVERRIDE %}
+                  <div class="btn-group format-selection">
+                    <a class="btn btn-primary js-tooltip" href="{{ request.get_full_path }}" rel="nofollow" title="Make a GET request on the {{ name }} resource">GET</a>
+
+                    <button class="btn btn-primary dropdown-toggle js-tooltip" data-toggle="dropdown" title="Specify a format for the GET request">
+                      <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                      {% for format in available_formats %}
+                        <li>
+                          <a class="js-tooltip format-option" href="{% add_query_param request api_settings.URL_FORMAT_OVERRIDE format %}" rel="nofollow" title="Make a GET request on the {{ name }} resource with the format set to `{{ format }}`">{{ format }}</a>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  </div>
+                {% else %}
+                  <a class="btn btn-primary js-tooltip" href="{{ request.get_full_path }}" rel="nofollow" title="Make a GET request on the {{ name }} resource">GET</a>
+                {% endif %}
+              </fieldset>
+            </form>
+          {% endif %}
+
+          {% if options_form %}
+            <form class="button-form" action="{{ request.get_full_path }}" data-method="OPTIONS">
+              <button class="btn btn-primary js-tooltip" title="Make an OPTIONS request on the {{ name }} resource">OPTIONS</button>
+            </form>
+          {% endif %}
+
+          {% if delete_form %}
+            <button class="btn btn-danger button-form js-tooltip" title="Make a DELETE request on the {{ name }} resource" data-toggle="modal" data-target="#deleteModal">DELETE</button>
+
+            <!-- Delete Modal -->
+            <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-body">
+                    <h4 class="text-center">Are you sure you want to delete this {{ name }}?</h4>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <form class="button-form" action="{{ request.get_full_path }}" data-method="DELETE">
+                      <button class="btn btn-danger">Delete</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+
+          {% if extra_actions %}
+            <div class="dropdown" style="float: right; margin-right: 10px">
+              <button class="btn btn-default" id="extra-actions-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                {% trans "Extra Actions" %}
+                <span class="caret"></span>
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="extra-actions-menu">
+                {% for action_name, url in extra_actions|items %}
+                <li><a href="{{ url }}">{{ action_name }}</a></li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+
+          {% if filter_form %}
+            <button style="float: right; margin-right: 10px" data-toggle="modal" data-target="#filtersModal" class="btn btn-default">
+              <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+              {% trans "Filters" %}
+            </button>
+          {% endif %}
+
+          {% endblock request_forms %}
+          </div>
+
+            <div class="content-main" role="main"  aria-label="{% trans "main content" %}">
+              <div class="page-header">
+                <h1>{{ name }}</h1>
+              </div>
+              <div style="float:left">
+                {% block description %}
+                  {{ description }}
+                {% endblock %}
+              </div>
+
+              {% if paginator %}
+                <nav style="float: right">
+                  {% get_pagination_html paginator %}
+                </nav>
+              {% endif %}
+
+              <div class="request-info" style="clear: both" aria-label="{% trans "request info" %}">
+                <pre class="prettyprint"><b>{{ request.method }}</b> {{ request.get_full_path }}</pre>
+              </div>
+
+              <div class="response-info" aria-label="{% trans "response info" %}">
+                <pre class="prettyprint"><span class="meta nocode"><b>HTTP {{ response.status_code }} {{ response.status_text }}</b>{% for key, val in response_headers|items %}
+<b>{{ key }}:</b> <span class="lit">{{ val|break_long_headers|urlize }}</span>{% endfor %}
+
+</span>{{ content|urlize }}</pre>
+              </div>
+            </div>
+
+            {% if display_edit_forms %}
+              {% if post_form or raw_data_post_form %}
+                <div {% if post_form %}class="tabbable"{% endif %}>
+                  {% if post_form %}
+                    <ul class="nav nav-tabs form-switcher">
+                      <li>
+                        <a name='html-tab' href="#post-object-form" data-toggle="tab">HTML form</a>
+                      </li>
+                      <li>
+                        <a name='raw-tab' href="#post-generic-content-form" data-toggle="tab">Raw data</a>
+                      </li>
+                    </ul>
+                  {% endif %}
+
+                  <div class="well tab-content">
+                    {% if post_form %}
+                      <div class="tab-pane" id="post-object-form">
+                        {% with form=post_form %}
+                          <form action="{{ request.get_full_path }}" method="POST" enctype="multipart/form-data" class="form-horizontal" novalidate>
+                            <fieldset>
+                              {% csrf_token %}
+                              {{ post_form }}
+                              <div class="form-actions">
+                                <button class="btn btn-primary js-tooltip" title="Make a POST request on the {{ name }} resource">POST</button>
+                              </div>
+                            </fieldset>
+                          </form>
+                        {% endwith %}
+                      </div>
+                    {% endif %}
+
+                    <div {% if post_form %}class="tab-pane"{% endif %} id="post-generic-content-form">
+                      {% with form=raw_data_post_form %}
+                        <form action="{{ request.get_full_path }}" method="POST" class="form-horizontal">
+                          <fieldset>
+                            {% include "rest_framework/raw_data_form.html" %}
+                            <div class="form-actions">
+                              <button class="btn btn-primary js-tooltip" title="Make a POST request on the {{ name }} resource">POST</button>
+                            </div>
+                          </fieldset>
+                        </form>
+                      {% endwith %}
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+
+              {% if put_form or raw_data_put_form or raw_data_patch_form %}
+                <div {% if put_form %}class="tabbable"{% endif %}>
+                  {% if put_form %}
+                    <ul class="nav nav-tabs form-switcher">
+                      <li>
+                        <a name='html-tab' href="#put-object-form" data-toggle="tab">HTML form</a>
+                      </li>
+                      <li>
+                        <a  name='raw-tab' href="#put-generic-content-form" data-toggle="tab">Raw data</a>
+                      </li>
+                    </ul>
+                  {% endif %}
+
+                  <div class="well tab-content">
+                    {% if put_form %}
+                      <div class="tab-pane" id="put-object-form">
+                        <form action="{{ request.get_full_path }}" data-method="PUT" enctype="multipart/form-data" class="form-horizontal" novalidate>
+                          <fieldset>
+                            {{ put_form }}
+                            <div class="form-actions">
+                              <button class="btn btn-primary js-tooltip" title="Make a PUT request on the {{ name }} resource">PUT</button>
+                            </div>
+                          </fieldset>
+                        </form>
+                      </div>
+                    {% endif %}
+
+                    <div {% if put_form %}class="tab-pane"{% endif %} id="put-generic-content-form">
+                      {% with form=raw_data_put_or_patch_form %}
+                        <form action="{{ request.get_full_path }}" data-method="PUT" class="form-horizontal">
+                          <fieldset>
+                            {% include "rest_framework/raw_data_form.html" %}
+                            <div class="form-actions">
+                              {% if raw_data_put_form %}
+                                <button class="btn btn-primary js-tooltip" title="Make a PUT request on the {{ name }} resource">PUT</button>
+                              {% endif %}
+                              {% if raw_data_patch_form %}
+                              <button data-method="PATCH" class="btn btn-primary js-tooltip" title="Make a PATCH request on the {{ name }} resource">PATCH</button>
+                                {% endif %}
+                            </div>
+                          </fieldset>
+                        </form>
+                      {% endwith %}
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% endif %}
+          {% endblock content %}
+        </div><!-- /.content -->
+      </div><!-- /.container -->
+    </div><!-- ./wrapper -->
+
+    {% if filter_form %}
+      {{ filter_form }}
+    {% endif %}
+
+    {% block script %}
+      <script>
+        window.drf = {
+          csrfHeaderName: "{{ csrf_header_name|default:'X-CSRFToken' }}",
+          csrfToken: "{% if request %}{{ csrf_token }}{% endif %}"
+        };
+      </script>
+      <script src="{% static "rest_framework/js/jquery-3.5.1.min.js" %}"></script>
+      <script src="{% static "rest_framework/js/ajax-form.js" %}"></script>
+      <script src="{% static "rest_framework/js/csrf.js" %}"></script>
+      <script src="{% static "rest_framework/js/bootstrap.min.js" %}"></script>
+      <script src="{% static "rest_framework/js/prettify-min.js" %}"></script>
+      <script src="{% static "rest_framework/js/default.js" %}"></script>
+      <script>
+        $(document).ready(function() {
+          $('form').ajaxForm();
+        });
+      </script>
+    {% endblock %}
+
+  </body>
+  {% endblock %}
+</html>

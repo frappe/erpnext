@@ -1,0 +1,15 @@
+Django==4.2.0
+djangorestframework==3.14.0
+django-cors-headers==4.0.0
+python-decouple==3.8
+psycopg2-binary==2.9.6
+gunicorn==20.1.0
+celery==5.2.7
+redis==4.5.5
+django-filter==23.1
+pydantic==1.10.8
+PyPDF2==3.0.1
+openpyxl==3.1.5
+requests==2.31.0
+python-dateutil==2.8.2
+pytz==2023.3

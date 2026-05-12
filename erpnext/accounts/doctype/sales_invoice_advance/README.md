@@ -1,1 +1,0 @@
-Details of advances paid by Customers against Sales Invoice.

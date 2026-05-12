@@ -1,0 +1,26 @@
+{% load rest_framework %}
+<table class="table table-striped">
+  <thead>
+    <tr>{% for column in columns%}<th>{{ column|capfirst }}</th>{% endfor %}<th class="col-xs-1"></th></tr>
+  </thead>
+  <tbody>
+    {% for row in results %}
+      <tr>
+        {% for key, value in row|items %}
+          {% if key in columns %}
+            <td {{ value|add_nested_class }} >
+              {{ value|format_value }}
+            </td>
+          {% endif %}
+        {% endfor %}
+        <td>
+          {% if row.url %}
+          <a href="{{ row.url }}"><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a>
+          {% else %}
+          <span class="glyphicon glyphicon-chevron-right text-muted" aria-hidden="true"></span>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

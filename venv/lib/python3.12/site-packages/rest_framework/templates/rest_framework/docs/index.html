@@ -1,0 +1,57 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	    <title>{{ document.title }}</title>
+
+        <link href="{% static 'rest_framework/css/bootstrap.min.css' %}" rel="stylesheet">
+        <link href="{% static 'rest_framework/css/bootstrap-theme.min.css' %}" rel="stylesheet">
+        <link href="{% static 'rest_framework/css/font-awesome-4.0.3.css' %}" rel="stylesheet">
+        <link href="{% static 'rest_framework/docs/css/base.css' %}" rel="stylesheet">
+        <link href="{% static 'rest_framework/docs/css/jquery.json-view.min.css' %}" rel="stylesheet">
+
+        <link href="{% static 'rest_framework/docs/img/favicon.ico' %}" rel="shortcut icon">
+
+        {% if code_style %}<style>{{ code_style }}</style>{% endif %}
+        <script src="{% static 'rest_framework/js/coreapi-0.1.1.js' %}"></script>
+        <script src="{% url 'api-docs:schema-js' %}"></script>
+
+    </head>
+
+    <body data-spy="scroll" data-target="#sidebar-nav" data-offset="50">
+
+        {% include "rest_framework/docs/sidebar.html" %}
+
+        <div class="container" id="main">
+            <div class="row">
+                <div class="col-md-12 main-container">
+                    {% include "rest_framework/docs/document.html" %}
+                </div>
+            </div>
+        </div>
+
+        {% include "rest_framework/docs/auth/token.html" %}
+        {% include "rest_framework/docs/auth/basic.html" %}
+        {% include "rest_framework/docs/auth/session.html" %}
+
+        <script src="{% static 'rest_framework/js/jquery-3.5.1.min.js' %}"></script>
+        <script src="{% static 'rest_framework/js/bootstrap.min.js' %}"></script>
+        <script src="{% static 'rest_framework/docs/js/jquery.json-view.min.js' %}"></script>
+        <script src="{% static 'rest_framework/docs/js/api.js' %}"></script>
+        <script>
+            {% if user.is_authenticated %}
+                window.auth = {
+                    'type': 'session',
+                };
+                $('#selected-authentication').text('session');
+                $('#auth-control').children().removeClass('active');
+                $('#auth-control').find("[data-auth='session']").closest('li').addClass('active');
+            {% endif %}
+	    $('pre.highlight').filter('[data-language="{{ langs | first }}"]').removeClass('hide');
+        </script>
+    </body>
+</html>

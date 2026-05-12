@@ -1,0 +1,11 @@
+{% load rest_framework %}
+{{ form.non_field_errors }}
+{% for field in form %}
+  <div class="form-group">
+    {{ field.label_tag|add_class:"col-sm-2 control-label" }}
+    <div class="col-sm-10">
+      {{ field|add_class:"form-control" }}
+      <span class="help-block">{{ field.help_text|safe }}</span>
+    </div>
+  </div>
+{% endfor %}

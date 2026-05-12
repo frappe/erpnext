@@ -1,1 +1,0 @@
-Confirmed order received from Customer (either against a PO or a payment). All fulfilment details (shipments, billing) are tracked against the Sales Order.

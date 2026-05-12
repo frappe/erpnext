@@ -1,0 +1,11 @@
+{% load rest_framework %}
+<table class="table table-striped">
+  <tbody>
+    {% for k, v in value|items %}
+      <tr>
+        <th>{{ k|format_value }}</th>
+        <td>{{ v|format_value }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

@@ -1,0 +1,6 @@
+{% load rest_framework %}
+<pre class="highlight shell hide" data-language="shell"><code>{% code bash %}# Load the schema document
+$ coreapi get {{ document.url }}{% if schema_format %} --format {{ schema_format }}{% endif %}
+
+# Interact with the API endpoint
+$ coreapi action {% if section_key %}{{ section_key }} {% endif %}{{ link_key|cut:"> " }}{% for field in link.fields %} -p {{ field.name }}=...{% endfor %}{% endcode %}</code></pre>

@@ -1,0 +1,44 @@
+{% load rest_framework %}
+<div class="sidebar">
+    <h3 class="brand"><a href="#">{{ document.title }}</a></h3>
+
+    <i class="fa fa-bars fa-2x toggle-btn" data-toggle="collapse" data-target="#menu-content"></i>
+    <div class="menu-list">
+        <ul id="menu-content" class="menu-content collapse out">
+            {% if document|data %}
+            {% for section_key, section in document|data|items %}
+            <li data-toggle="collapse" data-target="#{{ section_key }}-dropdown" class="collapsed">
+                <a><i class="fa fa-dot-circle-o fa-lg"></i> {% if section_key %}{{ section_key }}{% else %}API Endpoints{% endif %} <span class="arrow"></span></a>
+                <ul class="sub-menu {% if section_key %}collapse{% endif %}" id="{{ section_key }}-dropdown">
+                {% for link_key, link in section|schema_links|items %}
+                    <li><a href="#{{ section_key }}-{{ link_key|slugify }}">{{ link.title|default:link_key }}</a></li>
+                {% endfor %}
+                </ul>
+            </li>
+            {% endfor %}
+            {% endif %}
+        </ul>
+
+        <ul class="menu-list menu-list-bottom">
+            <li data-toggle="collapse" data-target="#auth-control" class="collapsed">
+                <a><i class="fa fa-user fa-lg"></i> Authentication</a> <span id="selected-authentication">{% if user.is_authenticated %}session{% else %}none{% endif %}</span>
+            </li>
+            <ul class="sub-menu collapse out" id="auth-control">
+                <li {% if not user.is_authenticated %}class="active"{% endif %}><a data-auth="none" href="#">none</a></li>
+                <li><a data-auth="token" data-toggle="modal" data-target="#auth_token_modal" href="#">token</a></li>
+                <li><a data-auth="basic" data-toggle="modal" data-target="#auth_basic_modal" href="#">basic</a></li>
+                <li {% if user.is_authenticated %}class="active"{% endif %}><a data-auth="session" data-toggle="modal" data-target="#auth_session_modal" href="#">session</a></li>
+            </ul>
+
+            <li data-toggle="collapse" data-target="#language-control" class="collapsed">
+                <a><i class="fa fa-code fa-lg"></i> Source Code</a> <span id="selected-language">{{ langs | first }}</span>
+            </li>
+            <ul class="sub-menu collapse out" id="language-control">
+            {% for lang in langs %}
+                <li{% if loop.first %} class="active"{% endif %}><a href="#" data-language="{{ lang }}">{{ lang }}</a></li>
+	    {% endfor %}
+            </ul>
+        </ul>
+
+    </div>
+</div>

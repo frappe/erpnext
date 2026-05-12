@@ -1,1 +1,0 @@
-Tax details for all Purchase Transactions.

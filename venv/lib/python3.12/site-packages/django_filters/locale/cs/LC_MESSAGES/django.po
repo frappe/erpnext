@@ -1,0 +1,190 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: django-filter\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-02-10 11:07+0000\n"
+"PO-Revision-Date: 2016-09-29 11:47+0300\n"
+"Last-Translator: Eugena Mikhaylikova <eugena.mihailikova@gmail.com>\n"
+"Language-Team: TextTempearture\n"
+"Language: cs\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n "
+"<= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
+"X-Generator: Poedit 1.8.9\n"
+
+#: conf.py:16
+msgid "date"
+msgstr "datum"
+
+#: conf.py:17
+msgid "year"
+msgstr "rok"
+
+#: conf.py:18
+msgid "month"
+msgstr "měsíc"
+
+#: conf.py:19
+msgid "day"
+msgstr "den"
+
+#: conf.py:20
+msgid "week day"
+msgstr "den v týdnu"
+
+#: conf.py:21
+msgid "hour"
+msgstr "hodinu"
+
+#: conf.py:22
+msgid "minute"
+msgstr "minutu"
+
+#: conf.py:23
+msgid "second"
+msgstr "vteřina"
+
+#: conf.py:27 conf.py:28
+msgid "contains"
+msgstr "obsahuje"
+
+#: conf.py:29
+msgid "is in"
+msgstr "v"
+
+#: conf.py:30
+msgid "is greater than"
+msgstr "více než"
+
+#: conf.py:31
+msgid "is greater than or equal to"
+msgstr "větší nebo roven"
+
+#: conf.py:32
+msgid "is less than"
+msgstr "méně než"
+
+#: conf.py:33
+msgid "is less than or equal to"
+msgstr "menší nebo rovné"
+
+#: conf.py:34 conf.py:35
+msgid "starts with"
+msgstr "začíná"
+
+#: conf.py:36 conf.py:37
+msgid "ends with"
+msgstr "končí"
+
+#: conf.py:38
+msgid "is in range"
+msgstr "v rozsahu"
+
+#: conf.py:39
+msgid "is null"
+msgstr ""
+
+#: conf.py:40 conf.py:41
+msgid "matches regex"
+msgstr "odpovídá normálnímu výrazu"
+
+#: conf.py:42 conf.py:49
+msgid "search"
+msgstr "vyhledávání"
+
+#: conf.py:44
+msgid "is contained by"
+msgstr "je obsažen v"
+
+#: conf.py:45
+msgid "overlaps"
+msgstr "překrývají"
+
+#: conf.py:46
+msgid "has key"
+msgstr "má klíč"
+
+#: conf.py:47
+msgid "has keys"
+msgstr "má klíče"
+
+#: conf.py:48
+msgid "has any keys"
+msgstr "má nějaké klíče"
+
+#: fields.py:94
+msgid "Select a lookup."
+msgstr ""
+
+#: fields.py:198
+msgid "Range query expects two values."
+msgstr "Rozsah dotazu očekává dvě hodnoty."
+
+#: filters.py:437
+msgid "Today"
+msgstr "Dnes"
+
+#: filters.py:438
+msgid "Yesterday"
+msgstr "Včera"
+
+#: filters.py:439
+msgid "Past 7 days"
+msgstr "Posledních 7 dní"
+
+#: filters.py:440
+msgid "This month"
+msgstr "Tento měsíc"
+
+#: filters.py:441
+msgid "This year"
+msgstr "Tento rok"
+
+#: filters.py:543
+msgid "Multiple values may be separated by commas."
+msgstr "Více hodnot lze oddělit čárkami."
+
+#: filters.py:721
+#, python-format
+msgid "%s (descending)"
+msgstr "%s (sestupně)"
+
+#: filters.py:737
+msgid "Ordering"
+msgstr "Řád z"
+
+#: rest_framework/filterset.py:33
+#: templates/django_filters/rest_framework/form.html:5
+msgid "Submit"
+msgstr "Odeslat"
+
+#: templates/django_filters/rest_framework/crispy_form.html:4
+#: templates/django_filters/rest_framework/form.html:2
+msgid "Field filters"
+msgstr "Filtry na polích"
+
+#: utils.py:308
+msgid "exclude"
+msgstr "s výjimkou"
+
+#: widgets.py:58
+msgid "All"
+msgstr "Všechno"
+
+#: widgets.py:162
+msgid "Unknown"
+msgstr "Není nastaveno"
+
+#: widgets.py:162
+msgid "Yes"
+msgstr "Ano"
+
+#: widgets.py:162
+msgid "No"
+msgstr "Ne"
+
+#~ msgid "Any date"
+#~ msgstr "Jakékoliv datum"

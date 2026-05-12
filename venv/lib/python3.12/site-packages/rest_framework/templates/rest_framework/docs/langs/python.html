@@ -1,0 +1,13 @@
+{% load rest_framework %}
+<pre class="highlight python hide" data-language="python"><code>{% code python %}import coreapi
+
+# Initialize a client & load the schema document
+client = coreapi.Client()
+schema = client.get("{{ document.url }}"{% if schema_format %}, format="{{ schema_format }}"{% endif %})
+
+# Interact with the API endpoint
+action = [{% if section_key %}"{{ section_key }}", {% endif %}"{{ link_key }}"]
+{% if link.fields %}params = {
+{% for field in link.fields %}    "{{ field.name }}": ...{% if not loop.last %},{% endif %}
+{% endfor %}}
+{% endif %}result = client.action(schema, action{% if link.fields %}, params=params{% endif %}){% endcode %}</code></pre>

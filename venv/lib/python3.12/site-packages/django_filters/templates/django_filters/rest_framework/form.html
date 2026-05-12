@@ -1,0 +1,6 @@
+{% load i18n %}
+<h2>{% trans "Field filters" %}</h2>
+<form class="form" action="" method="get">
+    {{ filter.form.as_p }}
+    <button type="submit" class="btn btn-primary">{% trans "Submit" %}</button>
+</form>

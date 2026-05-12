@@ -1,0 +1,199 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: django_filters 0.0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-02-10 11:07+0000\n"
+"PO-Revision-Date: 2023-02-12 14:36+0000\n"
+"Last-Translator: Quadric <quadmachine@wp.pl>\n"
+"Language-Team: Polish <https://hosted.weblate.org/projects/django-filter/"
+"django-filter/pl/>\n"
+"Language: pl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && ("
+"n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && "
+"n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
+"X-Generator: Weblate 4.16-dev\n"
+
+#: conf.py:16
+msgid "date"
+msgstr "data"
+
+#: conf.py:17
+msgid "year"
+msgstr "rok"
+
+#: conf.py:18
+msgid "month"
+msgstr "miesiąc"
+
+#: conf.py:19
+msgid "day"
+msgstr "dzień"
+
+#: conf.py:20
+msgid "week day"
+msgstr "dzień tygodnia"
+
+#: conf.py:21
+msgid "hour"
+msgstr "godzina"
+
+#: conf.py:22
+msgid "minute"
+msgstr "minuta"
+
+#: conf.py:23
+msgid "second"
+msgstr "sekunda"
+
+#: conf.py:27 conf.py:28
+msgid "contains"
+msgstr "zawiera"
+
+#: conf.py:29
+msgid "is in"
+msgstr "zawiera się w"
+
+#: conf.py:30
+msgid "is greater than"
+msgstr "powyżej"
+
+#: conf.py:31
+msgid "is greater than or equal to"
+msgstr "powyżej lub równe"
+
+#: conf.py:32
+msgid "is less than"
+msgstr "poniżej"
+
+#: conf.py:33
+msgid "is less than or equal to"
+msgstr "poniżej lub równe"
+
+#: conf.py:34 conf.py:35
+msgid "starts with"
+msgstr "zaczyna się od"
+
+#: conf.py:36 conf.py:37
+msgid "ends with"
+msgstr "kończy się na"
+
+#: conf.py:38
+msgid "is in range"
+msgstr "zawiera się w zakresie"
+
+#: conf.py:39
+msgid "is null"
+msgstr ""
+
+#: conf.py:40 conf.py:41
+msgid "matches regex"
+msgstr "pasuje do wyrażenia regularnego"
+
+#: conf.py:42 conf.py:49
+msgid "search"
+msgstr "szukaj"
+
+#: conf.py:44
+msgid "is contained by"
+msgstr "zawiera się w"
+
+#: conf.py:45
+msgid "overlaps"
+msgstr ""
+
+#: conf.py:46
+msgid "has key"
+msgstr ""
+
+#: conf.py:47
+msgid "has keys"
+msgstr ""
+
+#: conf.py:48
+msgid "has any keys"
+msgstr ""
+
+#: fields.py:94
+msgid "Select a lookup."
+msgstr ""
+
+#: fields.py:198
+msgid "Range query expects two values."
+msgstr ""
+
+#: filters.py:437
+msgid "Today"
+msgstr "Dziś"
+
+#: filters.py:438
+msgid "Yesterday"
+msgstr "Wczoraj"
+
+#: filters.py:439
+msgid "Past 7 days"
+msgstr "Ostatnie 7 dni"
+
+#: filters.py:440
+msgid "This month"
+msgstr "Ten miesiąc"
+
+#: filters.py:441
+msgid "This year"
+msgstr "Ten rok"
+
+#: filters.py:543
+msgid "Multiple values may be separated by commas."
+msgstr "Wiele wartości można rozdzielić przecinkami."
+
+#: filters.py:721
+#, python-format
+msgid "%s (descending)"
+msgstr "%s (malejąco)"
+
+#: filters.py:737
+msgid "Ordering"
+msgstr "Sortowanie"
+
+#: rest_framework/filterset.py:33
+#: templates/django_filters/rest_framework/form.html:5
+msgid "Submit"
+msgstr "Wyślij"
+
+#: templates/django_filters/rest_framework/crispy_form.html:4
+#: templates/django_filters/rest_framework/form.html:2
+msgid "Field filters"
+msgstr "Filtry pola"
+
+#: utils.py:308
+msgid "exclude"
+msgstr ""
+
+#: widgets.py:58
+msgid "All"
+msgstr "Wszystko"
+
+#: widgets.py:162
+msgid "Unknown"
+msgstr ""
+
+#: widgets.py:162
+msgid "Yes"
+msgstr "Tak"
+
+#: widgets.py:162
+msgid "No"
+msgstr "Nie"
+
+#~ msgid "Any date"
+#~ msgstr "Dowolna data"
+
+#~ msgid "This is an exclusion filter"
+#~ msgstr "Jest to filtr wykluczający"

@@ -1,0 +1,267 @@
+{% load static %}
+{% load i18n %}
+{% load rest_framework %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    {% block head %}
+
+      {% block meta %}
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NONE,NOARCHIVE" />
+      {% endblock %}
+
+      <title>{% block title %}Django REST framework{% endblock %}</title>
+
+      {% block style %}
+        {% block bootstrap_theme %}
+          <link rel="stylesheet" type="text/css" href="{% static "rest_framework/css/bootstrap.min.css" %}"/>
+          <link rel="stylesheet" type="text/css" href="{% static "rest_framework/css/bootstrap-tweaks.css" %}"/>
+        {% endblock %}
+        <link rel="stylesheet" type="text/css" href="{% static "rest_framework/css/prettify.css" %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static "rest_framework/css/default.css" %}"/>
+      {% endblock %}
+
+    {% endblock %}
+  </head>
+
+  {% block body %}
+    <body class="{% block bodyclass %}{% endblock %}">
+      <div class="wrapper">
+          {% block navbar %}
+            <div class="navbar navbar-static-top {% block bootstrap_navbar_variant %}navbar-inverse{% endblock %}">
+              <div class="container">
+                <span>
+                  {% block branding %}
+                    <a class='navbar-brand' rel="nofollow" href='https://www.django-rest-framework.org/'>
+                      Django REST framework
+                    </a>
+                  {% endblock %}
+                </span>
+                <ul class="nav navbar-nav pull-right">
+                  {% block userlinks %}
+                    {% if user.is_authenticated %}
+                      {% optional_logout request user %}
+                    {% else %}
+                      {% optional_login request %}
+                    {% endif %}
+                  {% endblock %}
+                </ul>
+              </div>
+            </div>
+          {% endblock %}
+
+          <div class="container">
+            {% block breadcrumbs %}
+              <ul class="breadcrumb">
+                {% for breadcrumb_name, breadcrumb_url in breadcrumblist %}
+                  {% if forloop.last %}
+                    <li class="active"><a href="{{ breadcrumb_url }}">{{ breadcrumb_name }}</a></li>
+                  {% else %}
+                    <li><a href="{{ breadcrumb_url }}">{{ breadcrumb_name }}</a></li>
+                  {% endif %}
+                {% endfor %}
+              </ul>
+            {% endblock %}
+
+          <!-- Content -->
+          <div id="content">
+            {% if 'GET' in allowed_methods %}
+              <form id="get-form" class="pull-right">
+                <fieldset>
+                  <div class="btn-group format-selection">
+                    <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                      Format <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                      {% for format in available_formats %}
+                        <li>
+                          <a class="format-option"
+                              href='{% add_query_param request api_settings.URL_FORMAT_OVERRIDE format %}'
+                               rel="nofollow">
+                              {{ format }}
+                          </a>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  </div>
+                </fieldset>
+              </form>
+            {% endif %}
+
+            {% if post_form %}
+              <button type="button" class="button-form btn btn-primary" data-toggle="modal" data-target="#createModal">
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Create
+              </button>
+            {% endif %}
+
+            {% if put_form %}
+              <button type="button" class="button-form btn btn-primary" data-toggle="modal" data-target="#editModal">
+                <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> Edit
+              </button>
+            {% endif %}
+
+            {% if delete_form %}
+              <form class="button-form" action="{{ request.get_full_path }}" data-method="DELETE">
+                <button class="btn btn-danger">
+                  <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Delete
+                </button>
+              </form>
+            {% endif %}
+
+            {% if extra_actions %}
+              <div class="dropdown" style="float: right; margin-right: 10px">
+                <button class="btn btn-default" id="extra-actions-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                  {% trans "Extra Actions" %}
+                  <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="extra-actions-menu">
+                  {% for action_name, url in extra_actions|items %}
+                  <li><a href="{{ url }}">{{ action_name }}</a></li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+
+            {% if filter_form %}
+              <button style="float: right; margin-right: 10px" data-toggle="modal" data-target="#filtersModal" class="btn btn-default">
+                <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+                {% trans "Filters" %}
+              </button>
+            {% endif %}
+
+            <div class="content-main">
+              <div class="page-header">
+                <h1>{{ name }}</h1>
+              </div>
+
+              <div style="float:left">
+                {% block description %}
+                  {{ description }}
+                {% endblock %}
+              </div>
+
+              {% if paginator %}
+                <nav style="float: right">
+                  {% get_pagination_html paginator %}
+                </nav>
+              {% endif %}
+
+              <div class="request-info" style="clear: both" >
+                {% if style == 'list' %}
+                  {% include "rest_framework/admin/list.html" %}
+                {% else %}
+                  {% include "rest_framework/admin/detail.html" %}
+                {% endif %}
+              </div>
+
+              {% if paginator %}
+                <nav style="float: right">
+                  {% get_pagination_html paginator %}
+                </nav>
+              {% endif %}
+            </div>
+          </div>
+          <!-- END Content -->
+        </div><!-- /.container -->
+      </div><!-- ./wrapper -->
+
+      <!-- Create Modal -->
+      <div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="myModalLabel">Create</h4>
+            </div>
+            <form action="{{ request.get_full_path }}" method="POST" enctype="multipart/form-data" class="form-horizontal" novalidate>
+              <div class="modal-body">
+                <fieldset>
+                  {% csrf_token %}
+                  {{ post_form }}
+                </fieldset>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Save</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit Modal -->
+      <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="myModalLabel">Edit</h4>
+            </div>
+            <form action="{{ request.get_full_path }}" data-method="PUT" enctype="multipart/form-data" class="form-horizontal" novalidate>
+              <div class="modal-body">
+                <fieldset>
+                  {{ put_form }}
+                </fieldset>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Save</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      {% if error_form %}
+        <!-- Errors Modal -->
+        <div class="modal" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">{{ error_title }}</h4>
+              </div>
+              <form action="{{ request.get_full_path }}" data-method="{{ request.method }}" enctype="multipart/form-data" class="form-horizontal" novalidate>
+                <div class="modal-body">
+                  <fieldset>
+                    {{ error_form }}
+                  </fieldset>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                  <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      {% if filter_form %}
+        {{ filter_form }}
+      {% endif %}
+
+      {% block script %}
+        <script>
+          window.drf = {
+            csrfHeaderName: "{{ csrf_header_name|default:'X-CSRFToken' }}",
+            csrfToken: "{{ csrf_token }}"
+          };
+        </script>
+        <script src="{% static "rest_framework/js/jquery-3.5.1.min.js" %}"></script>
+        <script src="{% static "rest_framework/js/ajax-form.js" %}"></script>
+        <script src="{% static "rest_framework/js/csrf.js" %}"></script>
+        <script src="{% static "rest_framework/js/bootstrap.min.js" %}"></script>
+        <script src="{% static "rest_framework/js/prettify-min.js" %}"></script>
+        <script src="{% static "rest_framework/js/default.js" %}"></script>
+        <script>
+          $(document).ready(function() {
+            $('form').ajaxForm();
+          });
+        </script>
+      {% endblock %}
+    </body>
+  {% endblock %}
+</html>

@@ -1,1 +1,0 @@
-Bill of Materials (BOM) is a list of operations and Items required to manufacture a particular product (Item).

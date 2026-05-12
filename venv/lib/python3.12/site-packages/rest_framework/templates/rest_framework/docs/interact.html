@@ -1,0 +1,51 @@
+{% load rest_framework %}
+
+<!-- Modal -->
+<div class="modal fade api-modal" id="{{ section_key }}_{{ link_key|slugify }}_modal" tabindex="-1" role="dialog" aria-labelledby="api explorer modal">
+<div class="modal-dialog modal-lg" role="document">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="toggle-view hide">
+        <div class="btn-group" role="group">
+          <button type="button" data-display-toggle="data" class="btn btn-sm btn-info">Data</button>
+          <button type="button" data-display-toggle="raw" class="btn btn-sm">Raw</button>
+        </div>
+      </div>
+
+      <h3 class="modal-title"><i class="fa fa-exchange"></i> {{ link.title|default:link_key }}</h3>
+
+    </div>
+
+    <form data-key='["{{ section_key }}", "{{ link_key }}"]' class="api-interaction">
+    <div class="modal-body">
+      <div class="row">
+        <div class="col-lg-6 request">
+          {% form_for_link link %}
+        </div>
+
+        <hr class="hidden-lg hidden-xl" />
+
+        <div class="col-lg-6 response" id="response">
+          <div class="request-awaiting">Awaiting request</div>
+
+          <div class="meta hide">
+            <span class="label label-primary request-method"></span>
+            <code class="request-url"></code>
+            <label class="label label-lg response-status-code pull-right"></label>
+          </div>
+
+          <pre class="well response-data hide"></pre>
+          <pre class="well response-raw hide"><div class="response-raw-request"></div><div class="response-raw-response"></div></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      <button type="submit" class="btn btn-primary">Send Request</button>
+    </div>
+    </form>
+
+  </div>
+</div>
+</div>

@@ -1,1 +1,0 @@
-Item detail of parent Packing Slip.

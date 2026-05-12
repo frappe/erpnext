@@ -1,1 +1,0 @@
-Table containing details of Items checked during Maintenance Visit.

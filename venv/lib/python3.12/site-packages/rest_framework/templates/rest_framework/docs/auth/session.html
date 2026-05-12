@@ -1,0 +1,35 @@
+{% load rest_framework %}
+
+<!-- Modal -->
+<div class="modal fade auth-modal auth-session" id="auth_session_modal" tabindex="-1" role="dialog" aria-labelledby="session authentication modal">
+<div class="modal-dialog modal-md" role="document">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title"><i class="fa fa-key"></i> Session Authentication</h3>
+    </div>
+
+    <form class="form-horizontal authentication-session-form">
+    <div class="modal-body">
+
+        {% if user.is_authenticated %}
+          <h4 class="text-center">You are logged in as {{ user.get_username }}.</h4>
+        {% else %}
+
+          <div class="text-center">
+            <h4 class="text-center">You need to {% optional_docs_login request %} to enable Session Authentication.</h4>
+          </div>
+        {% endif %}
+
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      {% if user.is_authenticated %}
+        <button type="submit" class="btn btn-primary">Use Session Authentication</button>
+      {% endif %}
+    </div>
+    </form>
+
+  </div>
+</div>
+</div>

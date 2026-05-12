@@ -1,0 +1,17 @@
+<div class="form-group {% if field.errors %}has-error{% endif %}">
+  {% if field.label %}
+    <label {% if style.hide_label %}class="sr-only"{% endif %}>{{ field.label }}</label>
+  {% endif %}
+
+  <input name="{{ field.name }}" {% if style.input_type != "file" %}class="form-control"{% endif %} type="{{ style.input_type }}" {% if style.placeholder %}placeholder="{{ style.placeholder }}"{% endif %} {% if field.value is not None %}value="{{ field.value }}"{% endif %} {% if style.autofocus and style.input_type != "hidden" %}autofocus{% endif %}>
+
+  {% if field.errors %}
+    {% for error in field.errors %}
+      <span class="help-block">{{ error }}</span>
+    {% endfor %}
+  {% endif %}
+
+  {% if field.help_text %}
+    <span class="help-block">{{ field.help_text|safe }}</span>
+  {% endif %}
+</div>

@@ -1,0 +1,15 @@
+{% load rest_framework %}
+
+<fieldset>
+  {% if field.label %}
+    <legend {% if style.hide_label %}class="sr-only"{% endif %}>
+      {{ field.label }}
+    </legend>
+  {% endif %}
+
+  {% for nested_field in field %}
+    {% if not nested_field.read_only %}
+      {% render_field nested_field style=style %}
+    {% endif %}
+  {% endfor %}
+</fieldset>

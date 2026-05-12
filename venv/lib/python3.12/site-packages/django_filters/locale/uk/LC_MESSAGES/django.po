@@ -1,0 +1,192 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: django-filter\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-02-10 11:07+0000\n"
+"PO-Revision-Date: 2016-09-29 11:47+0300\n"
+"Last-Translator: Eugena Mikhaylikova <eugena.mihailikova@gmail.com>\n"
+"Language-Team: TextTempearture\n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != "
+"11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % "
+"100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || "
+"(n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
+"X-Generator: Poedit 1.8.9\n"
+
+#: conf.py:16
+msgid "date"
+msgstr "дата"
+
+#: conf.py:17
+msgid "year"
+msgstr "рік"
+
+#: conf.py:18
+msgid "month"
+msgstr "місяць"
+
+#: conf.py:19
+msgid "day"
+msgstr "день"
+
+#: conf.py:20
+msgid "week day"
+msgstr "день тижня"
+
+#: conf.py:21
+msgid "hour"
+msgstr "година"
+
+#: conf.py:22
+msgid "minute"
+msgstr "хвилина"
+
+#: conf.py:23
+msgid "second"
+msgstr "секунда"
+
+#: conf.py:27 conf.py:28
+msgid "contains"
+msgstr "містить"
+
+#: conf.py:29
+msgid "is in"
+msgstr "в"
+
+#: conf.py:30
+msgid "is greater than"
+msgstr "більше ніж"
+
+#: conf.py:31
+msgid "is greater than or equal to"
+msgstr "більше або дорівнює"
+
+#: conf.py:32
+msgid "is less than"
+msgstr "менше ніж"
+
+#: conf.py:33
+msgid "is less than or equal to"
+msgstr "менше або дорівнює"
+
+#: conf.py:34 conf.py:35
+msgid "starts with"
+msgstr "починається"
+
+#: conf.py:36 conf.py:37
+msgid "ends with"
+msgstr "закінчується"
+
+#: conf.py:38
+msgid "is in range"
+msgstr "в діапазоні"
+
+#: conf.py:39
+msgid "is null"
+msgstr ""
+
+#: conf.py:40 conf.py:41
+msgid "matches regex"
+msgstr "відповідає регулярному виразу"
+
+#: conf.py:42 conf.py:49
+msgid "search"
+msgstr "пошук"
+
+#: conf.py:44
+msgid "is contained by"
+msgstr "міститься в"
+
+#: conf.py:45
+msgid "overlaps"
+msgstr "перекривається"
+
+#: conf.py:46
+msgid "has key"
+msgstr "має ключ"
+
+#: conf.py:47
+msgid "has keys"
+msgstr "має ключі"
+
+#: conf.py:48
+msgid "has any keys"
+msgstr "має будь-які ключі"
+
+#: fields.py:94
+msgid "Select a lookup."
+msgstr ""
+
+#: fields.py:198
+msgid "Range query expects two values."
+msgstr "Запит діапазону очікує два значення."
+
+#: filters.py:437
+msgid "Today"
+msgstr "Сьогодні"
+
+#: filters.py:438
+msgid "Yesterday"
+msgstr "Вчора"
+
+#: filters.py:439
+msgid "Past 7 days"
+msgstr "Минулі 7 днів"
+
+#: filters.py:440
+msgid "This month"
+msgstr "За цей місяць"
+
+#: filters.py:441
+msgid "This year"
+msgstr "В цьому році"
+
+#: filters.py:543
+msgid "Multiple values may be separated by commas."
+msgstr "Кілька значень можуть бути розділені комами."
+
+#: filters.py:721
+#, python-format
+msgid "%s (descending)"
+msgstr "%s (по спадаючій)"
+
+#: filters.py:737
+msgid "Ordering"
+msgstr "Порядок"
+
+#: rest_framework/filterset.py:33
+#: templates/django_filters/rest_framework/form.html:5
+msgid "Submit"
+msgstr "Відправити"
+
+#: templates/django_filters/rest_framework/crispy_form.html:4
+#: templates/django_filters/rest_framework/form.html:2
+msgid "Field filters"
+msgstr "Фільтри по полях"
+
+#: utils.py:308
+msgid "exclude"
+msgstr "виключаючи"
+
+#: widgets.py:58
+msgid "All"
+msgstr "Усе"
+
+#: widgets.py:162
+msgid "Unknown"
+msgstr "Не задано"
+
+#: widgets.py:162
+msgid "Yes"
+msgstr "Так"
+
+#: widgets.py:162
+msgid "No"
+msgstr "Немає"
+
+#~ msgid "Any date"
+#~ msgstr "Будь-яка дата"

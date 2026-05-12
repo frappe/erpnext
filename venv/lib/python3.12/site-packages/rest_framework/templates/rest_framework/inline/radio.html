@@ -1,0 +1,29 @@
+{% load i18n %}
+{% load rest_framework %}
+{% trans "None" as none_choice %}
+
+<div class="form-group {% if field.errors %}has-error{% endif %}">
+  {% if field.label %}
+    <label class="sr-only">
+      {{ field.label }}
+    </label>
+  {% endif %}
+
+  {% if field.allow_null or field.allow_blank %}
+    <div class="radio">
+      <label>
+        <input type="radio" name="{{ field.name }}" value="" {% if not field.value %}checked{% endif %}>
+        {{ none_choice }}
+      </label>
+    </div>
+  {% endif %}
+
+  {% for key, text in field.choices|items %}
+    <div class="radio">
+      <label>
+        <input type="radio" name="{{ field.name }}" value="{{ key }}" {% if key|as_string == field.value|as_string %}checked{% endif %}>
+        {{ text }}
+      </label>
+    </div>
+  {% endfor %}
+</div>

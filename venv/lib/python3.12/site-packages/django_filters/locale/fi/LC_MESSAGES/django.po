@@ -1,0 +1,191 @@
+# Django Filter translation.
+# Copyright (C) 2013
+# This file is distributed under the same license as the django_filter package.
+# Carlos Goce, 2017.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-02-10 17:45+0200\n"
+"PO-Revision-Date: 2023-02-12 14:36+0000\n"
+"Last-Translator: Janne Tervo <janne.tervo@iki.fi>\n"
+"Language-Team: Finnish <https://hosted.weblate.org/projects/django-filter/"
+"django-filter/fi/>\n"
+"Language: fi\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 4.16-dev\n"
+
+#: conf.py:16
+msgid "date"
+msgstr "päivämäärä"
+
+#: conf.py:17
+msgid "year"
+msgstr "vuosi"
+
+#: conf.py:18
+msgid "month"
+msgstr "kuukausi"
+
+#: conf.py:19
+msgid "day"
+msgstr "päivä"
+
+#: conf.py:20
+msgid "week day"
+msgstr "viikonpäivä"
+
+#: conf.py:21
+msgid "hour"
+msgstr "tunti"
+
+#: conf.py:22
+msgid "minute"
+msgstr "minuutti"
+
+#: conf.py:23
+msgid "second"
+msgstr "sekunti"
+
+#: conf.py:27 conf.py:28
+msgid "contains"
+msgstr "sisältää"
+
+#: conf.py:29
+msgid "is in"
+msgstr "löytyy"
+
+#: conf.py:30
+msgid "is greater than"
+msgstr "suurempi kuin"
+
+#: conf.py:31
+msgid "is greater than or equal to"
+msgstr "suurempi tai yhtäsuuri kuin"
+
+#: conf.py:32
+msgid "is less than"
+msgstr "pienempi kuin"
+
+#: conf.py:33
+msgid "is less than or equal to"
+msgstr "pienempi tai yhtäsuuri kuin"
+
+#: conf.py:34 conf.py:35
+msgid "starts with"
+msgstr "alkaa"
+
+#: conf.py:36 conf.py:37
+msgid "ends with"
+msgstr "päättyy"
+
+#: conf.py:38
+msgid "is in range"
+msgstr "on välillä"
+
+#: conf.py:39
+msgid "is null"
+msgstr "on null"
+
+#: conf.py:40 conf.py:41
+msgid "matches regex"
+msgstr "täsmää säännölliseen lausekkeeseen"
+
+#: conf.py:42 conf.py:49
+msgid "search"
+msgstr "hae"
+
+#: conf.py:44
+msgid "is contained by"
+msgstr "sisältyy kokonaan"
+
+#: conf.py:45
+msgid "overlaps"
+msgstr "on päällekkäinen"
+
+#: conf.py:46
+msgid "has key"
+msgstr "sisältää avaimen"
+
+#: conf.py:47
+msgid "has keys"
+msgstr "sisältää avaimet"
+
+#: conf.py:48
+msgid "has any keys"
+msgstr "sisältää minkä tahansa avaimista"
+
+#: fields.py:94
+msgid "Select a lookup."
+msgstr "Hakuehto vaaditaan."
+
+#: fields.py:198
+msgid "Range query expects two values."
+msgstr "Välin hakuun tarvitaan kaksi arvoa."
+
+#: filters.py:437
+msgid "Today"
+msgstr "Tänään"
+
+#: filters.py:438
+msgid "Yesterday"
+msgstr "Eilen"
+
+#: filters.py:439
+msgid "Past 7 days"
+msgstr "Edelliset 7 päivää"
+
+#: filters.py:440
+msgid "This month"
+msgstr "Tässä kuussa"
+
+#: filters.py:441
+msgid "This year"
+msgstr "Tänä vuonna"
+
+#: filters.py:543
+msgid "Multiple values may be separated by commas."
+msgstr "Voit syöttää useita arvoja pilkulla erotettuna."
+
+#: filters.py:721
+#, python-format
+msgid "%s (descending)"
+msgstr "%s (laskeva)"
+
+#: filters.py:737
+msgid "Ordering"
+msgstr "Järjestä"
+
+#: rest_framework/filterset.py:33
+#: templates/django_filters/rest_framework/form.html:5
+msgid "Submit"
+msgstr "Lähetä"
+
+#: templates/django_filters/rest_framework/crispy_form.html:4
+#: templates/django_filters/rest_framework/form.html:2
+msgid "Field filters"
+msgstr "Kenttävalinnat"
+
+#: utils.py:312
+msgid "exclude"
+msgstr "poissulje"
+
+#: widgets.py:58
+msgid "All"
+msgstr "Kaikki"
+
+#: widgets.py:162
+msgid "Unknown"
+msgstr "Tuntematon"
+
+#: widgets.py:162
+msgid "Yes"
+msgstr "Kyllä"
+
+#: widgets.py:162
+msgid "No"
+msgstr "Ei"

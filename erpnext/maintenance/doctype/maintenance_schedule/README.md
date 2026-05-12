@@ -1,1 +1,0 @@
-Schedule generator for planned maintenance for service contract or internal maintenance.

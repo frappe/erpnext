@@ -1,1 +1,0 @@
-Company against which all transactions are made. This is not the Customer or Supplier, this is the company that is the host of the system. Multiple companies can be created as host companies with each user having a different right.

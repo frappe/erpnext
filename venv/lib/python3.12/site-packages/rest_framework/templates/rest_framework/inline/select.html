@@ -1,0 +1,24 @@
+{% load rest_framework %}
+
+<div class="form-group {% if field.errors %}has-error{% endif %}">
+  {% if field.label %}
+    <label class="sr-only">
+      {{ field.label }}
+    </label>
+  {% endif %}
+
+  <select class="form-control" name="{{ field.name }}">
+    {% if field.allow_null or field.allow_blank %}
+      <option value="" {% if not field.value %}selected{% endif %}>--------</option>
+    {% endif %}
+    {% for select in field.iter_options %}
+        {% if select.start_option_group %}
+          <optgroup label="{{ select.label }}">
+        {% elif select.end_option_group %}
+          </optgroup>
+        {% else %}
+          <option value="{{ select.value }}" {% if select.value|as_string == field.value|as_string %}selected{% endif %} {% if select.disabled %}disabled{% endif %}>{{ select.display_text }}</option>
+        {% endif %}
+    {% endfor %}
+  </select>
+</div>

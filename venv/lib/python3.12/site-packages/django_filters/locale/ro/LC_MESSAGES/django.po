@@ -1,0 +1,192 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-02-10 14:47+0000\n"
+"PO-Revision-Date: 2023-02-10 16:28+0000\n"
+"Last-Translator: Dan Braghis <dan@zerolab.org>\n"
+"Language-Team: Romanian <https://hosted.weblate.org/projects/django-filter/"
+"django-filter/ro/>\n"
+"Language: ro\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
+"20)) ? 1 : 2;\n"
+"X-Generator: Weblate 4.16-dev\n"
+
+#: conf.py:16
+msgid "date"
+msgstr "dată"
+
+#: conf.py:17
+msgid "year"
+msgstr "an"
+
+#: conf.py:18
+msgid "month"
+msgstr "lună"
+
+#: conf.py:19
+msgid "day"
+msgstr "zi"
+
+#: conf.py:20
+msgid "week day"
+msgstr "zi a săptămânii"
+
+#: conf.py:21
+msgid "hour"
+msgstr "oră"
+
+#: conf.py:22
+msgid "minute"
+msgstr "minută"
+
+#: conf.py:23
+msgid "second"
+msgstr "secundă"
+
+#: conf.py:27 conf.py:28
+msgid "contains"
+msgstr "conține"
+
+#: conf.py:29
+msgid "is in"
+msgstr "este în"
+
+#: conf.py:30
+msgid "is greater than"
+msgstr "este mai mare decât"
+
+#: conf.py:31
+msgid "is greater than or equal to"
+msgstr "este mai mare sau egal cu"
+
+#: conf.py:32
+msgid "is less than"
+msgstr "este mai mic decât"
+
+#: conf.py:33
+msgid "is less than or equal to"
+msgstr "este mai mic sau egal cu"
+
+#: conf.py:34 conf.py:35
+msgid "starts with"
+msgstr "începe cu"
+
+#: conf.py:36 conf.py:37
+msgid "ends with"
+msgstr "se termină cu"
+
+#: conf.py:38
+msgid "is in range"
+msgstr "este în intervalul"
+
+#: conf.py:39
+msgid "is null"
+msgstr "este nul"
+
+#: conf.py:40 conf.py:41
+msgid "matches regex"
+msgstr "se potrivește cu expresia regex"
+
+#: conf.py:42 conf.py:49
+msgid "search"
+msgstr "căutare"
+
+#: conf.py:44
+msgid "is contained by"
+msgstr "cuprins de"
+
+#: conf.py:45
+msgid "overlaps"
+msgstr "se suprapune"
+
+#: conf.py:46
+msgid "has key"
+msgstr "are cheia"
+
+#: conf.py:47
+msgid "has keys"
+msgstr "are cheile"
+
+#: conf.py:48
+msgid "has any keys"
+msgstr "are orice cheie"
+
+#: fields.py:94
+msgid "Select a lookup."
+msgstr "Selectați o căutare."
+
+#: fields.py:198
+msgid "Range query expects two values."
+msgstr "Interogarea de interval așteaptă două valori."
+
+#: filters.py:437
+msgid "Today"
+msgstr "Astăzi"
+
+#: filters.py:438
+msgid "Yesterday"
+msgstr "Ieri"
+
+#: filters.py:439
+msgid "Past 7 days"
+msgstr "Ultimele 7 zile"
+
+#: filters.py:440
+msgid "This month"
+msgstr "Luna aceasta"
+
+#: filters.py:441
+msgid "This year"
+msgstr "Anul acesta"
+
+#: filters.py:543
+msgid "Multiple values may be separated by commas."
+msgstr "Valorile multiple pot fi separate prin virgule."
+
+#: filters.py:721
+#, python-format
+msgid "%s (descending)"
+msgstr "%s (descescător)"
+
+#: filters.py:737
+msgid "Ordering"
+msgstr "Rânduire"
+
+#: rest_framework/filterset.py:33
+#: templates/django_filters/rest_framework/form.html:5
+msgid "Submit"
+msgstr "Trimite"
+
+#: templates/django_filters/rest_framework/crispy_form.html:4
+#: templates/django_filters/rest_framework/form.html:2
+msgid "Field filters"
+msgstr "Filtre de câmp"
+
+#: utils.py:312
+msgid "exclude"
+msgstr "exclude"
+
+#: widgets.py:58
+msgid "All"
+msgstr "Toate"
+
+#: widgets.py:162
+msgid "Unknown"
+msgstr "Necunoscut"
+
+#: widgets.py:162
+msgid "Yes"
+msgstr "Da"
+
+#: widgets.py:162
+msgid "No"
+msgstr "Nu"

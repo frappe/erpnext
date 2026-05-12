@@ -1,0 +1,37 @@
+{% load rest_framework %}
+
+<div class="form-group {% if field.errors %}has-error{% endif %}">
+  {% if field.label %}
+    <label {% if style.hide_label %}class="sr-only"{% endif %}>{{ field.label }}</label>
+  {% endif %}
+
+  {% if style.inline %}
+    <div>
+      {% for key, text in field.choices|items %}
+        <label class="checkbox-inline">
+          <input type="checkbox" name="{{ field.name }}" value="{{ key }}" {% if key|as_string in field.value|as_list_of_strings %}checked{% endif %}>
+            {{ text }}
+        </label>
+      {% endfor %}
+    </div>
+  {% else %}
+    {% for key, text in field.choices|items %}
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" name="{{ field.name }}" value="{{ key }}" {% if key|as_string in field.value|as_list_of_strings %}checked{% endif %}>
+          {{ text }}
+        </label>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  {% if field.errors %}
+    {% for error in field.errors %}
+      <span class="help-block">{{ error }}</span>
+    {% endfor %}
+  {% endif %}
+
+  {% if field.help_text %}
+    <span class="help-block">{{ field.help_text|safe }}</span>
+  {% endif %}
+</div>

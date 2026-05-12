@@ -1,0 +1,192 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# FULL NAME <EMAIL@ADDRESS>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-02-10 11:07+0000\n"
+"PO-Revision-Date: 2020-03-24 00:48+0100\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
+"&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+"X-Generator: Gtranslator 2.91.7\n"
+
+#: conf.py:16
+msgid "date"
+msgstr "تاريخ"
+
+#: conf.py:17
+msgid "year"
+msgstr "سنة"
+
+#: conf.py:18
+msgid "month"
+msgstr "شهر"
+
+#: conf.py:19
+msgid "day"
+msgstr "يوم"
+
+#: conf.py:20
+msgid "week day"
+msgstr "يوم الأسبوع"
+
+#: conf.py:21
+msgid "hour"
+msgstr "ساعة"
+
+#: conf.py:22
+msgid "minute"
+msgstr "دقيقة"
+
+#: conf.py:23
+msgid "second"
+msgstr "ثانية"
+
+#: conf.py:27 conf.py:28
+msgid "contains"
+msgstr "يحتوي على"
+
+#: conf.py:29
+msgid "is in"
+msgstr "في داخل"
+
+#: conf.py:30
+msgid "is greater than"
+msgstr "أكبر من"
+
+#: conf.py:31
+msgid "is greater than or equal to"
+msgstr "أكبر من أو يساوي"
+
+#: conf.py:32
+msgid "is less than"
+msgstr "أصغر من"
+
+#: conf.py:33
+msgid "is less than or equal to"
+msgstr "أصغر من أو يساوي"
+
+#: conf.py:34 conf.py:35
+msgid "starts with"
+msgstr "يبدأ ب"
+
+#: conf.py:36 conf.py:37
+msgid "ends with"
+msgstr "ينتهي ب"
+
+#: conf.py:38
+msgid "is in range"
+msgstr "في النطاق"
+
+#: conf.py:39
+msgid "is null"
+msgstr ""
+
+#: conf.py:40 conf.py:41
+msgid "matches regex"
+msgstr "يطابق التعبير العادي"
+
+#: conf.py:42 conf.py:49
+msgid "search"
+msgstr "بحث"
+
+#: conf.py:44
+msgid "is contained by"
+msgstr "موجود في"
+
+#: conf.py:45
+msgid "overlaps"
+msgstr "يتداخل"
+
+#: conf.py:46
+msgid "has key"
+msgstr "لديه مفتاح"
+
+#: conf.py:47
+msgid "has keys"
+msgstr "لديه مفاتيح"
+
+#: conf.py:48
+msgid "has any keys"
+msgstr "لديه أي مفاتيح"
+
+#: fields.py:94
+msgid "Select a lookup."
+msgstr "حدد بحث"
+
+#: fields.py:198
+msgid "Range query expects two values."
+msgstr "إستعلام النطاق يتوقع قيمتين"
+
+#: filters.py:437
+msgid "Today"
+msgstr "اليوم"
+
+#: filters.py:438
+msgid "Yesterday"
+msgstr "أمس"
+
+#: filters.py:439
+msgid "Past 7 days"
+msgstr "الأيام السبعة الماضية"
+
+#: filters.py:440
+msgid "This month"
+msgstr "هذا الشهر"
+
+#: filters.py:441
+msgid "This year"
+msgstr "هذه السنة"
+
+#: filters.py:543
+msgid "Multiple values may be separated by commas."
+msgstr "يمكن فصل القيم المتعددة بفواصل."
+
+#: filters.py:721
+#, python-format
+msgid "%s (descending)"
+msgstr "%s (تنازلي)"
+
+#: filters.py:737
+msgid "Ordering"
+msgstr "الترتيب"
+
+#: rest_framework/filterset.py:33
+#: templates/django_filters/rest_framework/form.html:5
+msgid "Submit"
+msgstr "إرسال"
+
+#: templates/django_filters/rest_framework/crispy_form.html:4
+#: templates/django_filters/rest_framework/form.html:2
+msgid "Field filters"
+msgstr "مرشحات الحقل"
+
+#: utils.py:308
+msgid "exclude"
+msgstr "استبعاد"
+
+#: widgets.py:58
+msgid "All"
+msgstr "كل"
+
+#: widgets.py:162
+msgid "Unknown"
+msgstr "مجهول"
+
+#: widgets.py:162
+msgid "Yes"
+msgstr "نعم"
+
+#: widgets.py:162
+msgid "No"
+msgstr "لا"

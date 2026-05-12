@@ -1,0 +1,15 @@
+{% load rest_framework %}
+<pre class="highlight javascript hide" data-language="javascript"><code>{% code javascript %}var coreapi = window.coreapi  // Loaded by `coreapi.js`
+var schema = window.schema    // Loaded by `schema.js`
+
+// Initialize a client
+var client = new coreapi.Client()
+
+// Interact with the API endpoint
+var action = [{% if section_key %}"{{ section_key }}", {% endif %}"{{ link_key }}"]
+{% if link.fields %}var params = {
+{% for field in link.fields %}    {{ field.name }}: ...{% if not loop.last %},{% endif %}
+{% endfor %}}
+{% endif %}client.action(schema, action{% if link.fields %}, params{% endif %}).then(function(result) {
+    // Return value is in 'result'
+}){% endcode %}</code></pre>

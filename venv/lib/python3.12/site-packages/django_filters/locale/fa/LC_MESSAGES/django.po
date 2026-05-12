@@ -1,0 +1,190 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-02-10 11:07+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: conf.py:16
+msgid "date"
+msgstr "تاریخ"
+
+#: conf.py:17
+msgid "year"
+msgstr "سال"
+
+#: conf.py:18
+msgid "month"
+msgstr "ماه"
+
+#: conf.py:19
+msgid "day"
+msgstr "روز"
+
+#: conf.py:20
+msgid "week day"
+msgstr "روز هفته"
+
+#: conf.py:21
+msgid "hour"
+msgstr "ساعت"
+
+#: conf.py:22
+msgid "minute"
+msgstr "دقیقه"
+
+#: conf.py:23
+msgid "second"
+msgstr "ثانیه"
+
+#: conf.py:27 conf.py:28
+msgid "contains"
+msgstr "شامل"
+
+#: conf.py:29
+msgid "is in"
+msgstr "هست در"
+
+#: conf.py:30
+msgid "is greater than"
+msgstr "بزرگتر است از"
+
+#: conf.py:31
+msgid "is greater than or equal to"
+msgstr "بزرگتر یا مساوی است"
+
+#: conf.py:32
+msgid "is less than"
+msgstr "کوچکتر است از"
+
+#: conf.py:33
+msgid "is less than or equal to"
+msgstr "کوچکتر یا مساوی است"
+
+#: conf.py:34 conf.py:35
+msgid "starts with"
+msgstr "شروع می شود با"
+
+#: conf.py:36 conf.py:37
+msgid "ends with"
+msgstr "به پایان می رسد با"
+
+#: conf.py:38
+msgid "is in range"
+msgstr "در محدوده"
+
+#: conf.py:39
+msgid "is null"
+msgstr "خالی است"
+
+#: conf.py:40 conf.py:41
+msgid "matches regex"
+msgstr "با ریجکس منطبق است"
+
+#: conf.py:42 conf.py:49
+msgid "search"
+msgstr "جستجو"
+
+#: conf.py:44
+msgid "is contained by"
+msgstr "وجود دارد در"
+
+#: conf.py:45
+msgid "overlaps"
+msgstr "تداخل دارد"
+
+#: conf.py:46
+msgid "has key"
+msgstr "حاوی کلید است"
+
+#: conf.py:47
+msgid "has keys"
+msgstr "حاوی کلیدها است"
+
+#: conf.py:48
+msgid "has any keys"
+msgstr "حاوی هر کلیدی است"
+
+#: fields.py:94
+msgid "Select a lookup."
+msgstr "یک لوک آپ را انتخاب کنید."
+
+#: fields.py:198
+msgid "Range query expects two values."
+msgstr "محدوده کوئری دو مقدار را انتظار دارد."
+
+#: filters.py:437
+msgid "Today"
+msgstr "امروز"
+
+#: filters.py:438
+msgid "Yesterday"
+msgstr "دیروز"
+
+#: filters.py:439
+msgid "Past 7 days"
+msgstr "۷ روز گذشته"
+
+#: filters.py:440
+msgid "This month"
+msgstr "این ماه"
+
+#: filters.py:441
+msgid "This year"
+msgstr "امسال"
+
+#: filters.py:543
+msgid "Multiple values may be separated by commas."
+msgstr "ممکن است چندین مقدار با کاما از هم جدا شوند."
+
+#: filters.py:721
+#, python-format
+msgid "%s (descending)"
+msgstr "%s (نزولی)"
+
+#: filters.py:737
+msgid "Ordering"
+msgstr "مرتب سازی"
+
+#: rest_framework/filterset.py:33
+#: templates/django_filters/rest_framework/form.html:5
+msgid "Submit"
+msgstr "ارسال"
+
+#: templates/django_filters/rest_framework/crispy_form.html:4
+#: templates/django_filters/rest_framework/form.html:2
+msgid "Field filters"
+msgstr "فیلترهای فیلد"
+
+#: utils.py:308
+msgid "exclude"
+msgstr "به غیر از"
+
+#: widgets.py:58
+msgid "All"
+msgstr "همه"
+
+#: widgets.py:162
+msgid "Unknown"
+msgstr "ناشناس"
+
+#: widgets.py:162
+msgid "Yes"
+msgstr "بله"
+
+#: widgets.py:162
+msgid "No"
+msgstr "خیر"

@@ -1,0 +1,71 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	    <title>Error Rendering Schema</title>
+	</head>
+    <body>
+
+
+
+<h1>Error</h1>
+
+<pre>
+{{ data }}
+</pre>
+
+
+{% if debug is True %}
+<hr />
+<h2>Additional Information</h2>
+<p>Note: You are seeing this message because <code>DEBUG==True</code>.</p>
+
+<p>Seeing this page is <em>usually</em> a configuration error: are your
+<code>DEFAULT_AUTHENTICATION_CLASSES</code> or <code>DEFAULT_PERMISSION_CLASSES</code>
+being applied unexpectedly?</p>
+
+<p>Your response status code is: <code>{{ response.status_code }}</code></p>
+
+<h3>401 Unauthorised.</h3>
+<ul>
+    <li>Do you have SessionAuthentication enabled?</li>
+    <li>Are you logged in?</li>
+</ul>
+
+
+<h3>403 Forbidden.</h3>
+<ul>
+    <li>Do you have sufficient permissions to access this view?</li>
+    <li>Is you schema non-empty? (An empty schema will lead to a permission denied error being raised.)</li>
+</ul>
+
+
+<p>Most commonly the intended solution is to disable authentication and permissions
+when including the docs urls:</p>
+
+<pre>
+   path('docs/', include_docs_urls(title='Your API',
+                                    authentication_classes=[],
+                                    permission_classes=[])),
+</pre>
+
+
+<h2>Overriding this template</h2>
+
+<p>If you wish access to your docs to be authenticated you may override this template
+at <code>rest_framework/docs/error.html</code>.</p>
+
+<p>The available context is: <code>data</code> the error dict above, <code>request</code>,
+<code>response</code> and the <code>debug</code> flag.</p>
+
+{% endif %}
+
+
+
+        <script src="{% static 'rest_framework/js/jquery-3.5.1.min.js' %}"></script>
+    </body>
+</html>

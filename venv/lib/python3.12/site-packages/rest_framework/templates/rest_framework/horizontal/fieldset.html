@@ -1,0 +1,16 @@
+{% load rest_framework %}
+<fieldset>
+  {% if field.label %}
+    <div class="form-group" style="border-bottom: 1px solid #e5e5e5">
+      <legend class="control-label col-sm-2 {% if style.hide_label %}sr-only{% endif %}" style="border-bottom: 0">
+        {{ field.label }}
+      </legend>
+    </div>
+  {% endif %}
+
+  {% for nested_field in field %}
+    {% if not nested_field.read_only %}
+      {% render_field nested_field style=style %}
+    {% endif %}
+  {% endfor %}
+</fieldset>

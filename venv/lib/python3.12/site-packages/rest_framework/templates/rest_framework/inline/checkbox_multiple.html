@@ -1,0 +1,16 @@
+{% load rest_framework %}
+
+<div class="form-group {% if field.errors %}has-error{% endif %}">
+  {% if field.label %}
+    <label class="sr-only">{{ field.label }}</label>
+  {% endif %}
+
+  {% for key, text in field.choices|items %}
+    <div class="checkbox">
+      <label>
+        <input type="checkbox" name="{{ field.name }}" value="{{ key }}" {% if key|as_string in field.value|as_list_of_strings %}checked{% endif %}>
+        {{ text }}
+      </label>
+    </div>
+  {% endfor %}
+</div>

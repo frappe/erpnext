@@ -1,1 +1,0 @@
-Bin represents a unique Item-Warehouse combination. Sum of all transactions, planned, ordered, reserved quantities for that Item Warehouse is maintained in Bin.

@@ -1,1 +1,0 @@
-Conversion factor to convert non-standard Unit of Measure (UoM) to standard UoM.

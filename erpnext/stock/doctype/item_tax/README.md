@@ -1,1 +1,0 @@
-Tax rate for this Item against the specified Account.

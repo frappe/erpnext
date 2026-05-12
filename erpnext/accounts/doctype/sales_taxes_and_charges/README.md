@@ -1,1 +1,0 @@
-Tax details for all sales transactions.
