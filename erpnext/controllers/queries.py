@@ -232,7 +232,13 @@ def item_query(
 	item = DocType("Item")
 
 	# Condition for the date
-	date_condition = (item.end_of_life > nowdate()) | (item.end_of_life.isnull())
+	eol = item.end_of_life
+	date_conditions = [eol > nowdate(), eol.isnull()]
+	#  Add the condition if the db can evaluate it
+	if frappe.db.db_type not in ["postgres"]:
+		date_conditions.append(eol == "0000-00-00")
+
+	date_condition = Criterion.any(date_conditions)
 
 	# Condition for the searchfields
 	meta = frappe.get_meta("Item", cached=True)
@@ -254,7 +260,7 @@ def item_query(
 		query_select.append(description_col)
 
 	fields_to_process = list(
-		set(
+		dict.fromkeys(
 			searchfields
 			+ [
 				field
@@ -286,8 +292,8 @@ def item_query(
 		search_conditions.append(item.description.like(search_str))
 
 	# Condition for the match and filters
-	filter_sql = get_filters_cond(doctype, filters, conditions).replace("%", "%%")
-	match_sql = get_match_cond(doctype).replace("%", "%%")
+	filter_sql = get_filters_cond(doctype, filters, conditions)
+	match_sql = get_match_cond(doctype)
 	extra_conditions = []
 
 	for res in [filter_sql, match_sql]:
@@ -320,11 +326,11 @@ def item_query(
 	txt_no_percent = txt.replace("%", "")
 	query = (
 		query.orderby(
-			Case().when(item.name.like(f"%{txt_no_percent}%"), Locate(txt_no_percent, item.name)).else_(99999)
+			Case().when(Locate(txt_no_percent, item.name) > 0, Locate(txt_no_percent, item.name)).else_(99999)
 		)
 		.orderby(
 			Case()
-			.when(item.item_name.like(f"%{txt_no_percent}%"), Locate(txt_no_percent, item.item_name))
+			.when(Locate(txt_no_percent, item.item_name) > 0, Locate(txt_no_percent, item.item_name))
 			.else_(99999)
 		)
 		.orderby(item.idx, order=Order.desc)
