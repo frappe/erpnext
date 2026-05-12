@@ -474,30 +474,24 @@ def get_invoiced_qty(scorecard):
 
 def get_rfq_total_number(scorecard):
 	"""Gets the total number of RFQs sent to supplier"""
-	supplier = frappe.get_doc("Supplier", scorecard.supplier)
+	rfq = frappe.qb.DocType("Request for Quotation")
+	rfq_item = frappe.qb.DocType("Request for Quotation Item")
+	rfq_sup = frappe.qb.DocType("Request for Quotation Supplier")
 
-	# Look up all PO Items with delivery dates between our dates
-	data = frappe.db.sql(
-		"""
-			SELECT
-				COUNT(rfq.name) as total_rfqs
-			FROM
-				`tabRequest for Quotation Item` rfq_item,
-				`tabRequest for Quotation Supplier` rfq_sup,
-				`tabRequest for Quotation` rfq
-			WHERE
-				rfq_sup.supplier = %(supplier)s
-				AND rfq.transaction_date BETWEEN %(start_date)s AND %(end_date)s
-				AND rfq_item.docstatus = 1
-				AND rfq_item.parent = rfq.name
-				AND rfq_sup.parent = rfq.name""",
-		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
-		as_dict=0,
-	)[0][0]
+	query = (
+		frappe.qb.from_(rfq)
+		.join(rfq_item)
+		.on(rfq_item.parent == rfq.name)
+		.join(rfq_sup)
+		.on(rfq_sup.parent == rfq.name)
+		.select(frappe.qb.fn.Count(rfq.name))
+		.where(rfq_sup.supplier == scorecard.supplier)
+		.where(rfq.transaction_date[scorecard.start_date : scorecard.end_date])
+		.where(rfq_item.docstatus == 1)
+	)
 
-	if not data:
-		data = 0
-	return data
+	result = query.run()
+	return frappe.utils.cint(result[0][0]) if result else 0
 
 
 def get_rfq_total_items(scorecard):
