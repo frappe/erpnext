@@ -3326,7 +3326,14 @@ def get_stock_ledgers_batches(kwargs):
 			stock_ledger_entry.batch_no,
 			batch_table.expiry_date,
 		)
-		.where((stock_ledger_entry.is_cancelled == 0) & (stock_ledger_entry.batch_no.isnotnull()))
+		.where(
+			(stock_ledger_entry.is_cancelled == 0)
+			& (stock_ledger_entry.batch_no.isnotnull())
+			& (
+				(stock_ledger_entry.serial_and_batch_bundle.isnull())
+				| (stock_ledger_entry.serial_and_batch_bundle == "")
+			)
+		)
 		.groupby(stock_ledger_entry.batch_no, stock_ledger_entry.warehouse)
 	)
 
