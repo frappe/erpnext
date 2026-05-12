@@ -1,425 +1,425 @@
 {
- "actions": [],
- "allow_rename": 1,
- "autoname": "format:QC-{slab}-{slab_template}",
- "creation": "2026-01-07 13:48:53.635243",
- "doctype": "DocType",
- "engine": "InnoDB",
- "field_order": [
-  "basic_details_section",
-  "amended_from",
-  "date",
-  "column_break_ml2b",
-  "shift",
-  "column_break_xwqk",
-  "job_card",
-  "colour",
-  "slab_details_section",
-  "slab",
-  "column_break_dxoj",
-  "slab_template",
-  "column_break_uqmr",
-  "slab_dimensions_section",
-  "slab_length",
-  "column_break_jlbb",
-  "slab_width",
-  "column_break_cggy",
-  "slab_thickness",
-  "quality_measurements_section",
-  "filler_spot",
-  "column_break_2uin",
-  "contamination",
-  "column_break_yoap",
-  "shade",
-  "paper_deep_section",
-  "paper_deep_front",
-  "column_break_0ycf",
-  "paper_deep_back",
-  "crack_section",
-  "crack_front",
-  "column_break_6mxw",
-  "crack_back",
-  "section_break_ueen",
-  "bend",
-  "column_break_hmsq",
-  "repair",
-  "grade",
-  "use_for_samples",
-  "column_break_0tsh",
-  "recovery_type",
-  "repolish_type",
-  "recalibration_type",
-  "section_break_8ixs",
-  "remarks",
-  "section_break_jbcr",
-  "visualizer_preview",
-  "observations",
-  "repair_history_section",
-  "repair_history"
- ],
- "fields": [
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Slab Quality Report",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
-   "fieldname": "basic_details_section",
-   "fieldtype": "Section Break",
-   "label": "Basic Details"
-  },
-  {
-   "fieldname": "date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Date",
-   "reqd": 1
-  },
-  {
-   "fieldname": "column_break_ml2b",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "shift",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Shift",
-   "options": "Attendance Shift",
-   "reqd": 1
-  },
-  {
-   "fieldname": "column_break_xwqk",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "job_card",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Job Card",
-   "options": "Job Card",
-   "reqd": 1
-  },
-  {
-   "fieldname": "slab_details_section",
-   "fieldtype": "Section Break",
-   "label": "Slab Details"
-  },
-  {
-   "fieldname": "slab",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Slab",
-   "options": "Slab",
-   "reqd": 1
-  },
-  {
-   "fieldname": "column_break_dxoj",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "slab_template",
-   "fieldtype": "Link",
-   "label": "Slab Template",
-   "options": "Slab Template",
-   "reqd": 1
-  },
-  {
-   "fieldname": "column_break_uqmr",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "slab_dimensions_section",
-   "fieldtype": "Section Break",
-   "label": "Slab Dimensions"
-  },
-  {
-   "fieldname": "slab_length",
-   "fieldtype": "Float",
-   "label": "Length",
-   "reqd": 1
-  },
-  {
-   "fieldname": "column_break_jlbb",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "slab_width",
-   "fieldtype": "Float",
-   "label": "Width",
-   "reqd": 1
-  },
-  {
-   "fieldname": "column_break_cggy",
-   "fieldtype": "Column Break"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "slab_thickness",
-   "fieldtype": "Float",
-   "label": "Thickness",
-   "reqd": 1
-  },
-  {
-   "fieldname": "quality_measurements_section",
-   "fieldtype": "Section Break",
-   "label": "Quality Measurements"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "filler_spot",
-   "fieldtype": "Data",
-   "label": "Filler Spot"
-  },
-  {
-   "fieldname": "column_break_2uin",
-   "fieldtype": "Column Break"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "contamination",
-   "fieldtype": "Data",
-   "label": "Contamination"
-  },
-  {
-   "fieldname": "paper_deep_section",
-   "fieldtype": "Section Break",
-   "label": "Paper Deep"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "paper_deep_front",
-   "fieldtype": "Data",
-   "label": "Front"
-  },
-  {
-   "fieldname": "column_break_0ycf",
-   "fieldtype": "Column Break"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "paper_deep_back",
-   "fieldtype": "Data",
-   "label": "Back"
-  },
-  {
-   "fieldname": "crack_section",
-   "fieldtype": "Section Break",
-   "label": "Crack"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "crack_front",
-   "fieldtype": "Data",
-   "label": "Front"
-  },
-  {
-   "fieldname": "column_break_6mxw",
-   "fieldtype": "Column Break"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "crack_back",
-   "fieldtype": "Data",
-   "label": "Back"
-  },
-  {
-   "fieldname": "section_break_ueen",
-   "fieldtype": "Section Break",
-   "label": "Grading & Remarks"
-  },
-  {
-   "fieldname": "bend",
-   "fieldtype": "Float",
-   "label": "Bend (in mm)"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "remarks",
-   "fieldtype": "Small Text",
-   "label": "Remarks"
-  },
-  {
-   "fieldname": "column_break_0tsh",
-   "fieldtype": "Column Break"
-  },
-  {
-   "allow_on_submit": 1,
-   "depends_on": "eval: doc.repair && doc.repair == 'None';",
-   "fieldname": "grade",
-   "fieldtype": "Link",
-   "label": "Grade",
-   "mandatory_depends_on": "eval: doc.repair && doc.repair == 'None';",
-   "options": "Slab Quality Grade"
-  },
-  {
-   "fieldname": "section_break_8ixs",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "section_break_jbcr",
-   "fieldtype": "Section Break",
-   "label": "Observations"
-  },
-  {
-   "fieldname": "visualizer_preview",
-   "fieldtype": "HTML",
-   "label": "Visualizer Preview"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "observations",
-   "fieldtype": "Table",
-   "hidden": 1,
-   "label": "Observations",
-   "options": "Slab Quality Observation"
-  },
-  {
-   "fieldname": "column_break_hmsq",
-   "fieldtype": "Column Break"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "repair",
-   "fieldtype": "Select",
-   "label": "Slab Repair Type",
-   "options": "\nNone\nRecovery\nRepolish\nRecalibration"
-  },
-  {
-   "allow_on_submit": 1,
-   "depends_on": "eval: doc.repair && doc.repair == 'Recovery';",
-   "fieldname": "recovery_type",
-   "fieldtype": "Table MultiSelect",
-   "label": "Recovery Type",
-   "options": "Slab Recovery Reason Map"
-  },
-  {
-   "allow_on_submit": 1,
-   "depends_on": "eval: doc.repair && doc.repair == 'Repolish';",
-   "fieldname": "repolish_type",
-   "fieldtype": "Table MultiSelect",
-   "label": "Repolish Type",
-   "mandatory_depends_on": "eval: doc.repair && doc.repair == 'Repolish';",
-   "options": "Slab Repolish Reason Map"
-  },
-  {
-   "fieldname": "column_break_yoap",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "shade",
-   "fieldtype": "Select",
-   "label": "Shade",
-   "options": "\nShade 1\nShade 2\nShade 3"
-  },
-  {
-   "allow_on_submit": 1,
-   "depends_on": "eval: doc.repair && doc.repair == 'Recalibration';",
-   "fieldname": "recalibration_type",
-   "fieldtype": "Table MultiSelect",
-   "label": "Recalibration Type",
-   "mandatory_depends_on": "eval: doc.repair && doc.repair == 'Recalibration';",
-   "options": "Slab Recalibration Reason Map"
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "#007BFF",
-   "fieldname": "colour",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Colour",
-   "options": "#007BFF\n#33CC33\n#A020F0\n#FF8C00\n#00CED1\n#FFD700\n#E6194B\n#800000\n#008080\n#F032E6\n#808000\n#9E2A3A"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "repair_history_section",
-   "fieldtype": "Section Break",
-   "label": "Repair History"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "repair_history",
-   "fieldtype": "Table",
-   "options": "Slab Repair Record"
-  },
-  {
-   "default": "0",
-   "depends_on": "eval: doc.grade && doc.grade.toLowerCase().inlcudes('reject');",
-   "fieldname": "use_for_samples",
-   "fieldtype": "Check",
-   "label": "Use for samples"
-  }
- ],
- "grid_page_length": 50,
- "index_web_pages_for_search": 1,
- "is_submittable": 1,
- "links": [],
- "modified": "2026-05-03 22:48:51.305305",
- "modified_by": "Administrator",
- "module": "Manufacturing",
- "name": "Slab Quality Report",
- "naming_rule": "Expression (old style)",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "submit": 1,
-   "write": 1
-  },
-  {
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Employee",
-   "share": 1
-  },
-  {
-   "amend": 1,
-   "create": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Quality Inspector",
-   "select": 1,
-   "share": 1,
-   "submit": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Quality Manager",
-   "select": 1,
-   "share": 1,
-   "submit": 1,
-   "write": 1
-  }
- ],
- "row_format": "Dynamic",
- "rows_threshold_for_grid_search": 20,
- "sort_field": "modified",
- "sort_order": "DESC",
- "states": []
+    "actions": [],
+    "allow_rename": 1,
+    "autoname": "format:QC-{slab}-{slab_template}",
+    "creation": "2026-01-07 13:48:53.635243",
+    "doctype": "DocType",
+    "engine": "InnoDB",
+    "field_order": [
+        "basic_details_section",
+        "amended_from",
+        "date",
+        "column_break_ml2b",
+        "shift",
+        "column_break_xwqk",
+        "job_card",
+        "colour",
+        "slab_details_section",
+        "slab",
+        "column_break_dxoj",
+        "slab_template",
+        "column_break_uqmr",
+        "slab_dimensions_section",
+        "slab_length",
+        "column_break_jlbb",
+        "slab_width",
+        "column_break_cggy",
+        "slab_thickness",
+        "quality_measurements_section",
+        "filler_spot",
+        "column_break_2uin",
+        "contamination",
+        "column_break_yoap",
+        "shade",
+        "paper_deep_section",
+        "paper_deep_front",
+        "column_break_0ycf",
+        "paper_deep_back",
+        "crack_section",
+        "crack_front",
+        "column_break_6mxw",
+        "crack_back",
+        "section_break_ueen",
+        "bend",
+        "column_break_hmsq",
+        "repair",
+        "grade",
+        "use_for_samples",
+        "column_break_0tsh",
+        "recovery_type",
+        "repolish_type",
+        "recalibration_type",
+        "section_break_8ixs",
+        "remarks",
+        "section_break_jbcr",
+        "visualizer_preview",
+        "observations",
+        "repair_history_section",
+        "repair_history"
+    ],
+    "fields": [
+        {
+            "fieldname": "amended_from",
+            "fieldtype": "Link",
+            "hidden": 1,
+            "label": "Amended From",
+            "no_copy": 1,
+            "options": "Slab Quality Report",
+            "print_hide": 1,
+            "read_only": 1,
+            "search_index": 1
+        },
+        {
+            "fieldname": "basic_details_section",
+            "fieldtype": "Section Break",
+            "label": "Basic Details"
+        },
+        {
+            "fieldname": "date",
+            "fieldtype": "Date",
+            "in_list_view": 1,
+            "label": "Date",
+            "reqd": 1
+        },
+        {
+            "fieldname": "column_break_ml2b",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "shift",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Shift",
+            "options": "Attendance Shift",
+            "reqd": 1
+        },
+        {
+            "fieldname": "column_break_xwqk",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "job_card",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Job Card",
+            "options": "Job Card",
+            "reqd": 1
+        },
+        {
+            "fieldname": "slab_details_section",
+            "fieldtype": "Section Break",
+            "label": "Slab Details"
+        },
+        {
+            "fieldname": "slab",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Slab",
+            "options": "Slab",
+            "reqd": 1
+        },
+        {
+            "fieldname": "column_break_dxoj",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "slab_template",
+            "fieldtype": "Link",
+            "label": "Slab Template",
+            "options": "Slab Template",
+            "reqd": 1
+        },
+        {
+            "fieldname": "column_break_uqmr",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "slab_dimensions_section",
+            "fieldtype": "Section Break",
+            "label": "Slab Dimensions"
+        },
+        {
+            "fieldname": "slab_length",
+            "fieldtype": "Float",
+            "label": "Length",
+            "reqd": 1
+        },
+        {
+            "fieldname": "column_break_jlbb",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "slab_width",
+            "fieldtype": "Float",
+            "label": "Width",
+            "reqd": 1
+        },
+        {
+            "fieldname": "column_break_cggy",
+            "fieldtype": "Column Break"
+        },
+        {
+            "allow_on_submit": 1,
+            "fieldname": "slab_thickness",
+            "fieldtype": "Float",
+            "label": "Thickness",
+            "reqd": 1
+        },
+        {
+            "fieldname": "quality_measurements_section",
+            "fieldtype": "Section Break",
+            "label": "Quality Measurements"
+        },
+        {
+            "allow_on_submit": 1,
+            "fieldname": "filler_spot",
+            "fieldtype": "Data",
+            "label": "Filler Spot"
+        },
+        {
+            "fieldname": "column_break_2uin",
+            "fieldtype": "Column Break"
+        },
+        {
+            "allow_on_submit": 1,
+            "fieldname": "contamination",
+            "fieldtype": "Data",
+            "label": "Contamination"
+        },
+        {
+            "fieldname": "paper_deep_section",
+            "fieldtype": "Section Break",
+            "label": "Paper Deep"
+        },
+        {
+            "allow_on_submit": 1,
+            "fieldname": "paper_deep_front",
+            "fieldtype": "Data",
+            "label": "Front"
+        },
+        {
+            "fieldname": "column_break_0ycf",
+            "fieldtype": "Column Break"
+        },
+        {
+            "allow_on_submit": 1,
+            "fieldname": "paper_deep_back",
+            "fieldtype": "Data",
+            "label": "Back"
+        },
+        {
+            "fieldname": "crack_section",
+            "fieldtype": "Section Break",
+            "label": "Crack"
+        },
+        {
+            "allow_on_submit": 1,
+            "fieldname": "crack_front",
+            "fieldtype": "Data",
+            "label": "Front"
+        },
+        {
+            "fieldname": "column_break_6mxw",
+            "fieldtype": "Column Break"
+        },
+        {
+            "allow_on_submit": 1,
+            "fieldname": "crack_back",
+            "fieldtype": "Data",
+            "label": "Back"
+        },
+        {
+            "fieldname": "section_break_ueen",
+            "fieldtype": "Section Break",
+            "label": "Grading & Remarks"
+        },
+        {
+            "fieldname": "bend",
+            "fieldtype": "Float",
+            "label": "Bend (in mm)"
+        },
+        {
+            "allow_on_submit": 1,
+            "fieldname": "remarks",
+            "fieldtype": "Small Text",
+            "label": "Remarks"
+        },
+        {
+            "fieldname": "column_break_0tsh",
+            "fieldtype": "Column Break"
+        },
+        {
+            "allow_on_submit": 1,
+            "depends_on": "eval: doc.repair && doc.repair == 'None';",
+            "fieldname": "grade",
+            "fieldtype": "Link",
+            "label": "Grade",
+            "mandatory_depends_on": "eval: doc.repair && doc.repair == 'None';",
+            "options": "Slab Quality Grade"
+        },
+        {
+            "fieldname": "section_break_8ixs",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "section_break_jbcr",
+            "fieldtype": "Section Break",
+            "label": "Observations"
+        },
+        {
+            "fieldname": "visualizer_preview",
+            "fieldtype": "HTML",
+            "label": "Visualizer Preview"
+        },
+        {
+            "allow_on_submit": 1,
+            "fieldname": "observations",
+            "fieldtype": "Table",
+            "hidden": 1,
+            "label": "Observations",
+            "options": "Slab Quality Observation"
+        },
+        {
+            "fieldname": "column_break_hmsq",
+            "fieldtype": "Column Break"
+        },
+        {
+            "allow_on_submit": 1,
+            "fieldname": "repair",
+            "fieldtype": "Select",
+            "label": "Slab Repair Type",
+            "options": "\nNone\nRecovery\nRepolish\nRecalibration"
+        },
+        {
+            "allow_on_submit": 1,
+            "depends_on": "eval: doc.repair && doc.repair == 'Recovery';",
+            "fieldname": "recovery_type",
+            "fieldtype": "Table MultiSelect",
+            "label": "Recovery Type",
+            "options": "Slab Recovery Reason Map"
+        },
+        {
+            "allow_on_submit": 1,
+            "depends_on": "eval: doc.repair && doc.repair == 'Repolish';",
+            "fieldname": "repolish_type",
+            "fieldtype": "Table MultiSelect",
+            "label": "Repolish Type",
+            "mandatory_depends_on": "eval: doc.repair && doc.repair == 'Repolish';",
+            "options": "Slab Repolish Reason Map"
+        },
+        {
+            "fieldname": "column_break_yoap",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "shade",
+            "fieldtype": "Select",
+            "label": "Shade",
+            "options": "\nShade 1\nShade 2\nShade 3"
+        },
+        {
+            "allow_on_submit": 1,
+            "depends_on": "eval: doc.repair && doc.repair == 'Recalibration';",
+            "fieldname": "recalibration_type",
+            "fieldtype": "Table MultiSelect",
+            "label": "Recalibration Type",
+            "mandatory_depends_on": "eval: doc.repair && doc.repair == 'Recalibration';",
+            "options": "Slab Recalibration Reason Map"
+        },
+        {
+            "allow_on_submit": 1,
+            "default": "#007BFF",
+            "fieldname": "colour",
+            "fieldtype": "Select",
+            "hidden": 1,
+            "label": "Colour",
+            "options": "#007BFF\n#33CC33\n#A020F0\n#FF8C00\n#00CED1\n#FFD700\n#E6194B\n#800000\n#008080\n#F032E6\n#808000\n#9E2A3A"
+        },
+        {
+            "allow_on_submit": 1,
+            "fieldname": "repair_history_section",
+            "fieldtype": "Section Break",
+            "label": "Repair History"
+        },
+        {
+            "allow_on_submit": 1,
+            "fieldname": "repair_history",
+            "fieldtype": "Table",
+            "options": "Slab Repair Record"
+        },
+        {
+            "default": "0",
+            "depends_on": "eval: doc.grade && doc.grade.toLowerCase() === 'rej'",
+            "fieldname": "use_for_samples",
+            "fieldtype": "Check",
+            "label": "Use for samples"
+        }
+    ],
+    "grid_page_length": 50,
+    "index_web_pages_for_search": 1,
+    "is_submittable": 1,
+    "links": [],
+    "modified": "2026-05-03 22:48:51.305305",
+    "modified_by": "Administrator",
+    "module": "Manufacturing",
+    "name": "Slab Quality Report",
+    "naming_rule": "Expression (old style)",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "submit": 1,
+            "write": 1
+        },
+        {
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "Employee",
+            "share": 1
+        },
+        {
+            "amend": 1,
+            "create": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "Quality Inspector",
+            "select": 1,
+            "share": 1,
+            "submit": 1,
+            "write": 1
+        },
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "Quality Manager",
+            "select": 1,
+            "share": 1,
+            "submit": 1,
+            "write": 1
+        }
+    ],
+    "row_format": "Dynamic",
+    "rows_threshold_for_grid_search": 20,
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": []
 }

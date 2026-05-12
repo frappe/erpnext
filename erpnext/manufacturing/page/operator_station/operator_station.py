@@ -216,46 +216,41 @@ def finish_process(
 	jc.reload()
 
 	work_order = jc.work_order
-	wo_status = None
-	stock_entry_name = None
+	wo: WorkOrder = frappe.get_doc("Work Order", work_order)  # pyright: ignore[reportAssignmentType]
+	wo.material_transferred_for_manufacturing = job_card_qty
+	wo.flags.ignore_validate_update_after_submit = True
+	wo.save()
+	wo.reload()
 
-	if complete_work_order:
-		wo: WorkOrder = frappe.get_doc("Work Order", work_order)  # pyright: ignore[reportAssignmentType]
-		wo.material_transferred_for_manufacturing = job_card_qty
-		wo.flags.ignore_validate_update_after_submit = True
-		wo.save()
-		wo.reload()
+	se_doc = wo_make_stock_entry(work_order, "Manufacture", qty=job_card_qty)
+	if isinstance(se_doc, dict):
+		stock_entry_manufacture: StockEntry = frappe.get_doc(se_doc)  # pyright: ignore[reportAssignmentType]
+	else:
+		stock_entry_manufacture = se_doc
 
-		se_doc = wo_make_stock_entry(work_order, "Manufacture", qty=job_card_qty)
-		if isinstance(se_doc, dict):
-			stock_entry_manufacture: StockEntry = frappe.get_doc(se_doc)  # pyright: ignore[reportAssignmentType]
-		else:
-			stock_entry_manufacture = se_doc
+	fg_item = next((item for item in stock_entry_manufacture.items if item.is_finished_item), None)
+	if fg_item:
+		fg_item.qty = job_card_qty
 
-		fg_item = next((item for item in stock_entry_manufacture.items if item.is_finished_item), None)
-		if fg_item:
-			fg_item.qty = job_card_qty
+	# TODO: Move this to a function whose sole responsibility is to set slab details on the stock entry.
+	if process_name == "Quality Check":
+		stock_entry_manufacture.slab_grade = slab_grade
+		stock_entry_manufacture.slab_serial_no = slab_number.split("-")[-1] if slab_number else ""
+		stock_entry_manufacture.slab_batch_no = slab_number.split("-")[0] if slab_number else ""
 
-		# TODO: Move this to a function whose sole responsibility is to set slab details on the stock entry.
-		if process_name == "Quality Check":
-			stock_entry_manufacture.slab_grade = slab_grade
-			stock_entry_manufacture.slab_serial_no = slab_number.split("-")[-1] if slab_number else ""
-			stock_entry_manufacture.slab_batch_no = slab_number.split("-")[0] if slab_number else ""
+		for item in stock_entry_manufacture.items:
+			if item.is_finished_item:
+				item.slab_no = slab_number  # pyright: ignore[reportAttributeAccessIssue]
+				item.to_slab_no = slab_number  # pyright: ignore[reportAttributeAccessIssue]
+				item.slab_quality_grade = slab_grade
+				item.to_slab_grade = slab_grade
 
-			for item in stock_entry_manufacture.items:
-				if item.is_finished_item:
-					item.slab_no = slab_number  # pyright: ignore[reportAttributeAccessIssue]
-					item.to_slab_no = slab_number  # pyright: ignore[reportAttributeAccessIssue]
-					item.slab_quality_grade = slab_grade
-					item.to_slab_grade = slab_grade
-
-		stock_entry_manufacture.fg_completed_qty = job_card_qty
-		stock_entry_manufacture.save()
-		stock_entry_manufacture.submit()
-		wo.update_work_order_qty()
-		wo.reload()
-		wo_status = wo.get_status()
-		stock_entry_name = stock_entry_manufacture.name
+	stock_entry_manufacture.fg_completed_qty = job_card_qty
+	stock_entry_manufacture.save()
+	stock_entry_manufacture.submit()
+	wo.update_work_order_qty()
+	wo.reload()
+	wo_status = wo.get_status()
 
 	if jc.slab:
 		checkout_slab(jc.slab, publish_event=publish_slab_event)
@@ -271,10 +266,9 @@ def finish_process(
 		"work_order_status": wo_status,
 		"work_order": work_order,
 		"job_card_qty": job_card_qty,
-		"stock_entry": stock_entry_name,
-		"message": f"SE {stock_entry_name} ({job_card_qty} qty). WO: {wo_status}"
-		if stock_entry_name
-		else f"Job Card completed. WO: {work_order}",
+		"total_qty": wo.qty,
+		"stock_entry": stock_entry_manufacture.name,
+		"message": f"SE {stock_entry_manufacture.name} ({job_card_qty} qty). WO: {wo_status}",
 	}
 
 
