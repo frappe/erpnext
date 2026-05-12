@@ -1,7 +1,6 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Concat_ws, Date
@@ -22,6 +21,10 @@ def get_columns():
 			"width": 150,
 		},
 		{"label": _("Lead Name"), "fieldname": "lead_name", "fieldtype": "Data", "width": 120},
+
+		# ✅ ADDED FIELD
+		{"label": _("Designation"), "fieldname": "designation", "fieldtype": "Data", "width": 120},
+
 		{"fieldname": "status", "label": _("Status"), "fieldtype": "Data", "width": 100},
 		{
 			"fieldname": "lead_owner",
@@ -84,6 +87,10 @@ def get_data(filters):
 		.select(
 			lead.name,
 			lead.lead_name,
+
+			# ✅ ADDED FIELD
+			lead.designation,
+
 			lead.status,
 			lead.lead_owner,
 			lead.territory,
