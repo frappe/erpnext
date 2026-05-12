@@ -305,7 +305,7 @@
    "label": "Additional Info"
   },
   {
-   "depends_on": "eval:doc.status == \"Closed\" || doc.status == \"Pending Review\"",
+   "depends_on": "eval:doc.status == \"Completed\" || doc.status == \"Pending Review\"",
    "fieldname": "review_date",
    "fieldtype": "Date",
    "label": "Review Date",
@@ -313,7 +313,7 @@
    "oldfieldtype": "Date"
   },
   {
-   "depends_on": "eval:doc.status == \"Closed\"",
+   "depends_on": "eval:doc.status == \"Completed\"",
    "fieldname": "closing_date",
    "fieldtype": "Date",
    "label": "Closing Date",
