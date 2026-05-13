@@ -4539,7 +4539,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		self.assertEqual(srbnb_cost, 1500)
 
-	def test_valuation_rate_for_rejected_materials_without_accepted_materials(self):
+	def test_valuation_rate_for_rejected_materials_withoout_accepted_materials(self):
 		item = make_item("Test Item with Rej Material Valuation WO Accepted", {"is_stock_item": 1})
 		company = "_Test Company with perpetual inventory"
 
@@ -5106,6 +5106,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 			self.assertEqual(row.warehouse, "_Test Warehouse 1 - _TC")
 			self.assertEqual(row.incoming_rate, 100)
 
+<<<<<<< HEAD
 	def test_bill_for_rejected_quantity_in_purchase_invoice(self):
 		item_code = make_item("Test Rejected Qty", {"is_stock_item": 1}).name
 
@@ -5133,6 +5134,8 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(pr.total_qty, 12)
 		self.assertEqual(pr.total, 120)
 
+=======
+>>>>>>> cf5e8ce878 (Revert "fix: debit credit not equal in purchase transactions for mult… (#54906))
 	def test_different_exchange_rate_in_pr_and_pi(self):
 		from erpnext.accounts.doctype.account.test_account import create_account
 
