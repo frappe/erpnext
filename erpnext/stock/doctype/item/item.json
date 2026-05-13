@@ -648,7 +648,7 @@
   },
   {
    "default": "0",
-   "description": "Enable for drop shipping - supplier delivers directly to the customer without passing through your warehouse.",
+   "description": "If checked, this item is treated as drop-shipped by default in Sales Orders, Sales Invoices and Purchase Orders. The flag can be overridden on each transaction line.",
    "fieldname": "delivered_by_supplier",
    "fieldtype": "Check",
    "label": "Delivered by Supplier (Drop Ship)",
@@ -1077,7 +1077,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2026-04-28 17:31:47.613279",
+ "modified": "2026-05-14 02:09:33.455292",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

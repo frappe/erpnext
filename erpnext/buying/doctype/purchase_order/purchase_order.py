@@ -657,12 +657,16 @@ class PurchaseOrder(BuyingController):
 		if not self.is_against_so():
 			return
 		for item in removed_items:
+			sales_order_item = item.get("sales_order_item")
+			if not sales_order_item:
+				continue
+
 			prev_ordered_qty = flt(
-				frappe.get_cached_value("Sales Order Item", item.get("sales_order_item"), "ordered_qty")
+				frappe.get_cached_value("Sales Order Item", sales_order_item, "ordered_qty")
 			)
 
 			frappe.db.set_value(
-				"Sales Order Item", item.get("sales_order_item"), "ordered_qty", prev_ordered_qty - item.qty
+				"Sales Order Item", sales_order_item, "ordered_qty", prev_ordered_qty - item.qty
 			)
 
 	def auto_create_subcontracting_order(self):

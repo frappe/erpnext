@@ -493,9 +493,7 @@ def get_basic_details(ctx: ItemDetailsCtx, item, overwrite_warehouse=True) -> It
 			"discount_percentage": 0.0,
 			"discount_amount": flt(ctx.discount_amount) or 0.0,
 			"update_stock": ctx.update_stock if ctx.doctype in ["Sales Invoice", "Purchase Invoice"] else 0,
-			"delivered_by_supplier": item.delivered_by_supplier
-			if ctx.doctype in ["Sales Order", "Sales Invoice"]
-			else 0,
+			"delivered_by_supplier": item.delivered_by_supplier,
 			"is_fixed_asset": item.is_fixed_asset,
 			"last_purchase_rate": item.last_purchase_rate if ctx.doctype in ["Purchase Order"] else 0,
 			"transaction_date": ctx.transaction_date,

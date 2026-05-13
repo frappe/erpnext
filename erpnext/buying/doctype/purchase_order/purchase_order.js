@@ -245,6 +245,13 @@ frappe.ui.form.on("Purchase Order Item", {
 			}
 		}
 	},
+
+	delivered_by_supplier: function (frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		if (row.delivered_by_supplier && row.warehouse) {
+			frappe.model.set_value(cdt, cdn, "warehouse", null);
+		}
+	},
 });
 
 erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
