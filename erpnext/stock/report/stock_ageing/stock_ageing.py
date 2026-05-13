@@ -7,7 +7,7 @@ from operator import itemgetter
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Count
+from frappe.query_builder.functions import Abs, Count
 from frappe.utils import cint, date_diff, flt, get_datetime
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -47,6 +47,9 @@ def format_report_data(filters: Filters, item_details: dict, to_date: str) -> li
 
 		if not fifo_queue:
 			continue
+
+		if details.has_batch_no:
+			fifo_queue = [batch[1:] for batch in fifo_queue]
 
 		average_age = get_average_age(fifo_queue, to_date)
 		earliest_age = date_diff(to_date, fifo_queue[0][1])
@@ -239,7 +242,8 @@ class FIFOSlots:
 	def __init__(self, filters: dict | None = None, sle: list | None = None):
 		self.item_details = {}
 		self.transferred_item_details = {}
-		self.serial_no_batch_purchase_details = {}
+		self.serial_no_details = {}
+		self.batch_no_details = {}
 		self.filters = filters
 		self.sle = sle
 
@@ -258,8 +262,10 @@ class FIFOSlots:
 		stock_ledger_entries = self.sle
 
 		bundle_wise_serial_nos = frappe._dict({})
+		bundle_wise_batch_nos = frappe._dict({})
 		if stock_ledger_entries is None:
 			bundle_wise_serial_nos = self.__get_bundle_wise_serial_nos()
+			bundle_wise_batch_nos = self.__get_bundle_wise_batch_nos()
 
 		# prepare single sle voucher detail lookup
 		self.prepare_stock_reco_voucher_wise_count()
@@ -291,17 +297,31 @@ class FIFOSlots:
 					d.actual_qty = flt(d.qty_after_transaction) - flt(prev_balance_qty)
 
 				serial_nos = get_serial_nos(d.serial_no) if d.serial_no else []
-				if d.serial_and_batch_bundle and d.has_serial_no:
-					if bundle_wise_serial_nos:
-						serial_nos = bundle_wise_serial_nos.get(d.serial_and_batch_bundle) or []
-					else:
-						serial_nos = sorted(get_serial_nos_from_bundle(d.serial_and_batch_bundle)) or []
+				batch_nos = (
+					[[d.batch_no.upper(), d.actual_qty, d.stock_value_difference]] if d.batch_no else []
+				)
+				if d.serial_and_batch_bundle:
+					if d.has_serial_no:
+						if bundle_wise_serial_nos:
+							serial_nos = bundle_wise_serial_nos.get(d.serial_and_batch_bundle) or []
+						else:
+							serial_nos = sorted(get_serial_nos_from_bundle(d.serial_and_batch_bundle)) or []
+					elif d.has_batch_no:
+						if bundle_wise_batch_nos:
+							batch_nos = bundle_wise_batch_nos.get(d.serial_and_batch_bundle) or []
+						else:
+							batch_nos = (
+								self.__get_bundle_wise_batch_nos(d.serial_and_batch_bundle).get(
+									d.serial_and_batch_bundle
+								)
+								or []
+							)
 
 				serial_nos = self.uppercase_serial_nos(serial_nos)
 				if d.actual_qty > 0:
-					self.__compute_incoming_stock(d, fifo_queue, transferred_item_key, serial_nos)
+					self.__compute_incoming_stock(d, fifo_queue, transferred_item_key, serial_nos, batch_nos)
 				else:
-					self.__compute_outgoing_stock(d, fifo_queue, transferred_item_key, serial_nos)
+					self.__compute_outgoing_stock(d, fifo_queue, transferred_item_key, serial_nos, batch_nos)
 
 				self.__update_balances(d, key)
 
@@ -338,7 +358,9 @@ class FIFOSlots:
 
 		return key, fifo_queue, transferred_item_key
 
-	def __compute_incoming_stock(self, row: dict, fifo_queue: list, transfer_key: tuple, serial_nos: list):
+	def __compute_incoming_stock(
+		self, row: dict, fifo_queue: list, transfer_key: tuple, serial_nos: list, batch_nos: list
+	):
 		"Update FIFO Queue on inward stock."
 
 		transfer_data = self.transferred_item_details.get(transfer_key)
@@ -348,32 +370,59 @@ class FIFOSlots:
 			# consume transfer data and add stock to fifo queue
 			self.__adjust_incoming_transfer_qty(transfer_data, fifo_queue, row)
 		else:
-			if not serial_nos and not row.get("has_serial_no"):
-				if fifo_queue and flt(fifo_queue[0][0]) <= 0:
-					# neutralize 0/negative stock by adding positive stock
-					fifo_queue[0][0] += flt(row.actual_qty)
-					fifo_queue[0][1] = row.posting_date
-					fifo_queue[0][2] += flt(row.stock_value_difference)
-				else:
-					fifo_queue.append(
-						[flt(row.actual_qty), row.posting_date, flt(row.stock_value_difference)]
-					)
+			if serial_nos and row.get("has_serial_no"):
+				valuation = row.stock_value_difference / row.actual_qty
+				for serial_no in serial_nos:
+					if self.serial_no_details.get(serial_no):
+						fifo_queue.append([serial_no, self.serial_no_details.get(serial_no), valuation])
+					else:
+						self.serial_no_details.setdefault(serial_no, row.posting_date)
+						fifo_queue.append([serial_no, row.posting_date, valuation])
 				return
 
-			valuation = row.stock_value_difference / row.actual_qty
-			for serial_no in serial_nos:
-				if self.serial_no_batch_purchase_details.get(serial_no):
-					fifo_queue.append(
-						[serial_no, self.serial_no_batch_purchase_details.get(serial_no), valuation]
-					)
-				else:
-					self.serial_no_batch_purchase_details.setdefault(serial_no, row.posting_date)
-					fifo_queue.append([serial_no, row.posting_date, valuation])
+			if batch_nos and row.get("has_batch_no"):
+				for batch_no, qty, stock_value_difference in batch_nos:
+					if self.batch_no_details.get(batch_no):
+						fifo_queue.append([batch_no, qty, row.posting_date, stock_value_difference])
+					else:
+						self.batch_no_details.setdefault(batch_no, row.posting_date)
+						fifo_queue.append([batch_no, qty, row.posting_date, stock_value_difference])
+				return
 
-	def __compute_outgoing_stock(self, row: dict, fifo_queue: list, transfer_key: tuple, serial_nos: list):
+			if fifo_queue and flt(fifo_queue[0][0]) <= 0:
+				# neutralize 0/negative stock by adding positive stock
+				fifo_queue[0][0] += flt(row.actual_qty)
+				fifo_queue[0][1] = row.posting_date
+				fifo_queue[0][2] += flt(row.stock_value_difference)
+			else:
+				fifo_queue.append([flt(row.actual_qty), row.posting_date, flt(row.stock_value_difference)])
+
+	def __compute_outgoing_stock(
+		self, row: dict, fifo_queue: list, transfer_key: tuple, serial_nos: list, batch_nos: list
+	):
 		"Update FIFO Queue on outward stock."
 		if serial_nos:
 			fifo_queue[:] = [serial_no for serial_no in fifo_queue if serial_no[0] not in serial_nos]
+			return
+
+		if batch_nos:
+			for batch_no, qty, stock_value_difference in batch_nos:
+				items_to_remove = []
+				for slot in fifo_queue:
+					if slot[0] == batch_no:
+						if flt(slot[1]) <= qty:
+							qty -= flt(slot[1])
+							stock_value_difference -= flt(slot[3])
+							items_to_remove.append(slot)
+						else:
+							slot[1] = flt(slot[1]) - qty
+							slot[3] = flt(slot[3]) - stock_value_difference
+							qty = 0
+							stock_value_difference = 0
+							break
+
+				for item in items_to_remove:
+					fifo_queue.remove(item)
 			return
 
 		qty_to_pop = abs(row.actual_qty)
@@ -445,6 +494,7 @@ class FIFOSlots:
 			self.item_details[key]["total_qty"] += row.actual_qty
 
 		self.item_details[key]["has_serial_no"] = row.has_serial_no
+		self.item_details[key]["has_batch_no"] = row.has_batch_no
 		self.item_details[key]["details"].valuation_rate = row.valuation_rate
 
 	def __aggregate_details_by_item(self, wh_wise_data: dict) -> dict:
@@ -468,6 +518,7 @@ class FIFOSlots:
 			item_row["qty_after_transaction"] += flt(row["qty_after_transaction"])
 			item_row["total_qty"] += flt(row["total_qty"])
 			item_row["has_serial_no"] = row["has_serial_no"]
+			item_row["has_batch_no"] = row["has_batch_no"]
 
 		return item_aggregated_data
 
@@ -486,6 +537,7 @@ class FIFOSlots:
 				item.brand,
 				item.description,
 				item.stock_uom,
+				item.has_batch_no,
 				item.has_serial_no,
 				item.valuation_method,
 				sle.actual_qty,
@@ -556,6 +608,47 @@ class FIFOSlots:
 
 		return bundle_wise_serial_nos
 
+	def __get_bundle_wise_batch_nos(self, sabb_name=None) -> dict:
+		bundle = frappe.qb.DocType("Serial and Batch Bundle")
+		entry = frappe.qb.DocType("Serial and Batch Entry")
+
+		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
+		query = (
+			frappe.qb.from_(bundle)
+			.join(entry)
+			.on(bundle.name == entry.parent)
+			.select(
+				bundle.name,
+				entry.batch_no,
+				Abs(entry.qty).as_("qty"),
+				Abs(entry.stock_value_difference).as_("stock_value_difference"),
+			)
+			.where(
+				(bundle.docstatus == 1)
+				& (entry.batch_no.isnotnull())
+				& (bundle.company == self.filters.get("company"))
+				& (bundle.posting_datetime <= to_date)
+			)
+		)
+
+		for field in ["item_code"]:
+			if self.filters.get(field):
+				query = query.where(bundle[field] == self.filters.get(field))
+
+		if self.filters.get("warehouse"):
+			query = self.__get_warehouse_conditions(bundle, query)
+
+		if sabb_name:
+			query = query.where(bundle.name == sabb_name)
+
+		bundle_wise_batch_nos = frappe._dict({})
+		for bundle_name, batch_no, qty, stock_value_difference in query.run():
+			bundle_wise_batch_nos.setdefault(bundle_name, []).append(
+				[batch_no.upper(), qty, stock_value_difference]
+			)
+
+		return bundle_wise_batch_nos
+
 	def __get_item_query(self) -> str:
 		item_table = frappe.qb.DocType("Item")
 
@@ -567,6 +660,7 @@ class FIFOSlots:
 			"brand",
 			"item_group",
 			"has_serial_no",
+			"has_batch_no",
 			"valuation_method",
 		)
 
