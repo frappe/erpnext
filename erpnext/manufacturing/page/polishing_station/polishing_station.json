@@ -4,7 +4,7 @@
  "docstatus": 0,
  "doctype": "Page",
  "idx": 0,
- "modified": "2026-04-01 16:18:28.792042",
+ "modified": "2026-05-13 11:13:46.355770",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "polishing-station",
@@ -15,7 +15,7 @@
    "role": "Administrator"
   },
   {
-   "role": "Employee"
+   "role": "Polisher"
   }
  ],
  "script": null,
