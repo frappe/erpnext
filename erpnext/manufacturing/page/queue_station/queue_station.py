@@ -108,7 +108,7 @@ def _get_next_corrective_job_card(job_card: str, process_name: str):
 			next_wo = frappe.db.get_value("Job Card", slab_history.job_card_number, "work_order")
 			if next_wo:
 				corrective_job_card = frappe.db.get_value(
-					"Job Card", {"work_order": next_wo, "is_corrective_job_card": 1}
+					"Job Card", {"work_order": next_wo, "is_corrective_job_card": 1, "status": "Open"}
 				)
 				if corrective_job_card:
 					return corrective_job_card
