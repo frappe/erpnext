@@ -207,6 +207,7 @@ erpnext.NamingSeriesTable = class NamingSeriesTable {
 		this.frm = opts.frm;
 		this.transactions = opts.transactions || [];
 		this.$wrapper = opts.frm.get_field(opts.fieldname).$wrapper;
+		this.theme_observer = null;
 	}
 	render() {
 		this.$wrapper.html(`
@@ -231,6 +232,21 @@ erpnext.NamingSeriesTable = class NamingSeriesTable {
 		const $rows = this.$wrapper.find(".naming-series-table-rows");
 		this.map_configure_button($rows);
 		this.get_row_data($rows);
+
+		if (this.theme_observer) {
+			this.theme_observer.disconnect();
+		}
+
+		const observer = new MutationObserver(() => {
+			const badge_class = this.get_current_badge_class();
+
+			this.$wrapper.find(".badge").removeClass("badge-light badge-dark").addClass(badge_class);
+		});
+
+		observer.observe(document.documentElement, {
+			attributes: true,
+			attributeFilter: ["data-theme"],
+		});
 	}
 
 	map_configure_button($rows) {
@@ -301,13 +317,20 @@ erpnext.NamingSeriesTable = class NamingSeriesTable {
     `);
 	}
 
+	get_current_badge_class() {
+		return document.documentElement.getAttribute("data-theme") === "dark" ? "badge-dark" : "badge-light";
+	}
+
 	series_list_background(series_list) {
 		if (!series_list.length) {
 			return `<span class="text-muted">${__("Not configured")}</span>`;
 		}
+
+		const badge_class = this.get_current_badge_class();
+
 		return series_list
 			.map(
-				(s) => `<span class="badge badge-light"
+				(s) => `<span class="badge ${badge_class}"
 					style="margin: 2px; font-family: monospace; font-weight: normal;">
 					${frappe.utils.escape_html(s)}
 				</span>`
@@ -316,10 +339,21 @@ erpnext.NamingSeriesTable = class NamingSeriesTable {
 	}
 };
 
+/**
+ * @param {Object} frm - Frappe form instance.
+ */
 erpnext.NamingSeriesController = class NamingSeriesController {
-	constructor(frm, opts = {}) {
+	constructor(frm) {
 		this.frm = frm;
 	}
+
+	/**
+	 * Renders the naming series table in the given field.
+	 *
+	 * @param {string} fieldname - Fieldname where the table should be rendered.
+	 * @param {Array<{doctype: string, label: string}>} [transactions=[]] - Transactions to display.
+	 * @returns {void}
+	 */
 	render_table(fieldname, transactions = []) {
 		this.frm._naming_series_table = new erpnext.NamingSeriesTable({
 			frm: this.frm,
@@ -329,6 +363,13 @@ erpnext.NamingSeriesController = class NamingSeriesController {
 		this.frm._naming_series_table.render();
 	}
 
+	/**
+	 * Loads naming series from the given master doctype into a field.
+	 *
+	 * @param {string} doctype - Master doctype name.
+	 * @param {string} field - Fieldname where series should be shown.
+	 * @returns {void}
+	 */
 	load_master_series(doctype, field) {
 		frappe.model.with_doctype(doctype, () => {
 			const meta = frappe.get_meta(doctype);
@@ -346,7 +387,14 @@ erpnext.NamingSeriesController = class NamingSeriesController {
 		});
 	}
 
-	show_naming_series_dialog(doctype) {
+	/**
+	 * Opens the naming series dialog for a doctype.
+	 *
+	 * @param {string} doctype - Transaction doctype.
+	 * @param {Function} [on_update] - Called after series are updated.
+	 * @returns {void}
+	 */
+	show_naming_series_dialog(doctype, on_update) {
 		if (!this.frm._naming_dialogs) this.frm._naming_dialogs = {};
 
 		if (!this.frm._naming_dialogs[doctype]) {
@@ -354,15 +402,12 @@ erpnext.NamingSeriesController = class NamingSeriesController {
 				doctype: doctype,
 				title: __("{0} Naming Series", [__(doctype)]),
 				on_update: ({ naming_series_options }) => {
-					if (doctype === this.opts.master_doctype && this.is_naming_series()) {
-						this.frm.doc[this.opts.details_field] = naming_series_options;
-						this.frm.refresh_field(this.opts.details_field);
-					}
 					const series = naming_series_options.split("\n").filter(Boolean);
 					this.frm
 						.get_field(this.opts.table_field)
 						.$wrapper.find(`.series-cell-${frappe.scrub(doctype)}`)
 						.html(this.frm._naming_series_table?.series_list_background(series));
+					on_update?.({ doctype, naming_series_options });
 				},
 			});
 		}
