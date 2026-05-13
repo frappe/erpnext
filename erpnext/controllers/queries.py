@@ -11,7 +11,7 @@ from frappe import qb, scrub
 from frappe.desk.reportview import get_filters_cond, get_match_cond
 from frappe.permissions import has_permission
 from frappe.query_builder import Case, Criterion, DocType, Field
-from frappe.query_builder.functions import Concat, CustomFunction, IfNull, Length, Locate, Substring, Sum
+from frappe.query_builder.functions import Concat, CustomFunction, Length, Locate, Substring, Sum
 from frappe.utils import nowdate, today, unique
 from pypika import Order
 from pypika.terms import LiteralValue
@@ -192,7 +192,6 @@ def item_query(
 	Fetch items for link fields
 	"""
 	doctype = "Item"
-	conditions = []
 
 	if isinstance(filters, str):
 		filters = json.loads(filters)
@@ -229,7 +228,7 @@ def item_query(
 			filters.pop("customer", None)
 			filters.pop("supplier", None)
 
-	item = DocType("Item")
+	item = DocType(doctype)
 
 	# Condition for the date
 	eol = item.end_of_life
@@ -285,47 +284,24 @@ def item_query(
 	barcode_subquery = (
 		frappe.qb.from_(barcode_tbl).select(barcode_tbl.parent).where(barcode_tbl.barcode.like(search_str))
 	)
-	search_conditions.append(item.name.isin(barcode_subquery))
+	search_conditions.append(item.item_code.isin(barcode_subquery))
 
 	# Condition for the description
 	if frappe.db.estimate_count("Item") < 50000 and "description" not in fields_to_process:
 		search_conditions.append(item.description.like(search_str))
 
-	# Condition for the match and filters
-	filter_sql = get_filters_cond(doctype, filters, conditions)
-	match_sql = get_match_cond(doctype)
-	extra_conditions = []
-
-	for res in [filter_sql, match_sql]:
-		if res:
-			raw_sql = res[0] if isinstance(res, tuple) else res
-
-			if isinstance(raw_sql, str):
-				clean_sql = raw_sql.strip()
-				if not clean_sql:
-					continue
-
-				clean_sql = re.sub(r"^and\s+", "", clean_sql, count=1, flags=re.IGNORECASE)
-				extra_conditions.append(LiteralValue(clean_sql))
+	txt_no_percent = txt.replace("%", "")
 
 	# Building the query
 	query = (
-		frappe.qb.from_(item)
+		frappe.get_query(doctype, filters=filters, ignore_permissions=False)
 		.select(*query_select)
 		.where(item.docstatus < 2)
 		.where(item.disabled == 0)
 		.where(item.has_variants == 0)
 		.where(date_condition)
 		.where(Criterion.any(search_conditions))
-	)
-
-	for cond in extra_conditions:
-		query = query.where(cond)
-
-	# Order by
-	txt_no_percent = txt.replace("%", "")
-	query = (
-		query.orderby(
+		.orderby(
 			Case().when(Locate(txt_no_percent, item.name) > 0, Locate(txt_no_percent, item.name)).else_(99999)
 		)
 		.orderby(
@@ -336,9 +312,9 @@ def item_query(
 		.orderby(item.idx, order=Order.desc)
 		.orderby(item.name)
 		.orderby(item.item_name)
+		.limit(page_len)
+		.offset(start)
 	)
-
-	query = query.limit(page_len).offset(start)
 
 	return query.run(as_dict=as_dict)
 
