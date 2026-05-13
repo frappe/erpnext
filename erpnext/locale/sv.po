@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-10 10:00+0000\n"
-"PO-Revision-Date: 2026-05-11 18:40\n"
+"PO-Revision-Date: 2026-05-13 19:29\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -32210,7 +32210,7 @@ msgstr "Antal Månader"
 #. Reposting Settings'
 #: erpnext/stock/doctype/stock_reposting_settings/stock_reposting_settings.json
 msgid "No of Parallel Reposting (Per Item)"
-msgstr "Antal Parallell Ombokning (Per Artikel)"
+msgstr "Antal Parallella Ombokningar (Per Artikel)"
 
 #. Label of the no_of_shares (Int) field in DocType 'Share Balance'
 #. Label of the no_of_shares (Int) field in DocType 'Share Transfer'
