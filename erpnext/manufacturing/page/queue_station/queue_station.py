@@ -98,19 +98,16 @@ def _get_next_corrective_job_card(job_card: str, process_name: str):
 		return None
 
 	slab_no = frappe.db.get_value("Job Card", job_card, "slab")
-	for slab_history in frappe.get_all(
-		"Slab History",
-		filters={"parent": slab_no},
-		fields=["name", "station", "job_card_number"],
-		order_by="creation desc",
-	):
-		if slab_history.station == next_process:
-			next_wo = frappe.db.get_value("Job Card", slab_history.job_card_number, "work_order")
-			if next_wo:
-				corrective_job_card = frappe.db.get_value(
-					"Job Card", {"work_order": next_wo, "is_corrective_job_card": 1, "status": "Open"}
-				)
-				if corrective_job_card:
-					return corrective_job_card
-	else:
+	slab: Slab = frappe.get_doc("Slab", slab_no)
+	history_item = next((item for item in slab.slab_history if item.station == next_process), None)
+	if not history_item:
 		return None
+
+	next_wo = frappe.db.get_value("Job Card", history_item.job_card_number, "work_order")
+	if next_wo:
+		corrective_job_card = frappe.db.get_value(
+			"Job Card",
+			{"work_order": next_wo, "is_corrective_job_card": 1, "status": "Open", "slab": slab_no},
+		)
+
+		return corrective_job_card
