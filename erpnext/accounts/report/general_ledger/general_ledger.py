@@ -285,7 +285,12 @@ def get_conditions(filters):
 		if filters.get("_is_common_party"):
 			cpa_jvs = frappe.get_all(
 				"Journal Entry",
-				filters={"company": filters.get("company"), "docstatus": 1, "is_system_generated": 1},
+				filters={
+					"company": filters.get("company"),
+					"docstatus": 1,
+					"is_system_generated": 1,
+					"voucher_type": "Journal Entry",
+				},
 				pluck="name",
 			)
 			if cpa_jvs:
