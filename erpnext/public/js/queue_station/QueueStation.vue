@@ -57,7 +57,7 @@ const loadData = async (play_ding = false) => {
         const res = await frappe.call({
             method: 'erpnext.manufacturing.page.queue_station.queue_station.get_queue_data',
             args: {
-				line: work_context.assigned_line || '1',
+                line: work_context.assigned_line || '1',
                 station_name: current_station_title,
             }
         });
@@ -110,7 +110,7 @@ const startProcess = async (slab) => {
                     method: 'erpnext.manufacturing.page.queue_station.queue_station.start_queue_process',
                     args: {
                         slab_number: slab.name,
-						line: work_context.assigned_line,
+                        line: work_context.assigned_line,
                         station_name: current_station_title,
                     }
                 });
@@ -136,7 +136,7 @@ const finishProcess = async (job) => {
             isProcessing.value = true;
             try {
                 const res = await frappe.call({
-                    method: 'erpnext.manufacturing.page.operator_station.operator_station.finish_process',
+                    method: 'erpnext.manufacturing.page.queue_station.queue_station.finish_queue_process',
                     args: {
                         job_card: job.name,
                         process_name: current_station_title,
@@ -224,7 +224,8 @@ frappe.realtime.on('slab_checkout', (slab) => {
     <div class="queue-station-container p-4">
         <div class="d-flex w-100">
             <!-- Sidebar -->
-            <div v-if="incomingSlabs.length > 1" class="queue-sidebar border-right flex-shrink-0 p-3 mr-4" style="width: 300px; max-height: calc(100vh - 100px); overflow-y: auto;">
+            <div v-if="incomingSlabs.length > 1" class="queue-sidebar border-right flex-shrink-0 p-3 mr-4"
+                style="width: 300px; max-height: calc(100vh - 100px); overflow-y: auto;">
                 <h5 class="mb-3 font-weight-bold text-center border-bottom pb-2">
                     {{ __('Incoming Slabs') }}
                 </h5>
@@ -255,7 +256,8 @@ frappe.realtime.on('slab_checkout', (slab) => {
                     <div class="col-12">
                         <h4 class="mb-4 text-muted font-weight-bold">{{ __('Incoming Slab') }}</h4>
                         <Transition name="pop-switch" mode="out-in">
-                            <div v-if="!currentIncomingSlab" key="empty" class="empty-state p-2 text-center border rounded">
+                            <div v-if="!currentIncomingSlab" key="empty"
+                                class="empty-state p-2 text-center border rounded">
                                 <div class="mb-2 text-muted" style="opacity: 0.5;">
                                     <i class="fa fa-inbox" style="font-size: 3rem;"></i>
                                 </div>
@@ -276,7 +278,8 @@ frappe.realtime.on('slab_checkout', (slab) => {
                                     <!-- <button class="btn btn-outline-secondary btn-sm mr-2 px-3" @click="skipSlab">
                                         <i class="fa fa-step-forward mr-1"></i> {{ __('Skip') }}
                                     </button> -->
-                                    <button class="btn btn-primary btn-sm px-4" :disabled="isProcessing" @click="startProcess(currentIncomingSlab)">
+                                    <button class="btn btn-primary btn-sm px-4" :disabled="isProcessing"
+                                        @click="startProcess(currentIncomingSlab)">
                                         <i v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></i>
                                         <i v-else class="fa fa-play mr-1"></i> {{ __('Accept & Start') }}
                                     </button>
@@ -300,7 +303,8 @@ frappe.realtime.on('slab_checkout', (slab) => {
                         </div>
 
                         <TransitionGroup v-else name="list" tag="div" class="card-columns">
-                            <div v-for="(job, index) in slabQueue" :key="job.name" class="card mb-3 shadow-sm queue-card">
+                            <div v-for="(job, index) in slabQueue" :key="job.name"
+                                class="card mb-3 shadow-sm queue-card">
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between mb-2">
                                         <h5 class="card-title font-weight-bold mb-0">{{ job.slab }}</h5>
@@ -314,8 +318,7 @@ frappe.realtime.on('slab_checkout', (slab) => {
                                             <i class="fa fa-clock-o mr-1"></i> {{ formatDuration(job.elapsed) }}
                                         </div>
                                         <button v-if="index === 0" class="btn btn-success btn-sm px-3"
-                                            :disabled="isProcessing"
-                                            @click="finishProcess(job)">
+                                            :disabled="isProcessing" @click="finishProcess(job)">
                                             <i v-if="isProcessing" class="fa fa-spinner fa-spin mr-1"></i>
                                             <i v-else class="fa fa-check mr-1"></i> {{ __('Unload Slab') }}
                                         </button>

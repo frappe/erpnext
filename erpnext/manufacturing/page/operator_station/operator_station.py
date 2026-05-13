@@ -181,7 +181,6 @@ def finish_process(
 	slab_number=None,
 	slab_grade=None,
 	publish_slab_event=True,
-	complete_work_order=True,
 ):
 	"""Complete the Job Card when mixing is finished."""
 
@@ -393,8 +392,8 @@ def get_next_work_item(process, line="", include_wip=True):
 	job_card = job_card_data["top_job_card"]
 	available_job_cards_count = job_card_data["available_job_cards_count"]
 
-	is_wip = job_card and job_card.status == "Work In Progress"
-	slab = frappe.get_doc("Slab", job_card.slab) if is_wip and job_card.slab else None
+	# is_wip = job_card and job_card.status == "Work In Progress"
+	slab = frappe.get_doc("Slab", job_card.slab) if job_card and job_card.slab else None
 
 	slabs_for_process = get_slabs_for(
 		line, process, limit=1000

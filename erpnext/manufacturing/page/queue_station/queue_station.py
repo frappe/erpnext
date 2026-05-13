@@ -1,8 +1,13 @@
+from erpnext.manufacturing.doctype.manufacturing_process.constants import MFG_PROCESS_MAP
+from erpnext.manufacturing.doctype.slab.slab import ALLOWED_STAGES
+from erpnext.manufacturing.doctype.work_order import work_order
+from erpnext.manufacturing.page.operator_station.operator_station import finish_process
 from typing import cast
 
 import frappe
+from copy import deepcopy
 
-from erpnext.manufacturing.doctype.job_card.job_card import JobCard
+from erpnext.manufacturing.doctype.job_card.job_card import JobCard, make_stock_entry
 from erpnext.manufacturing.doctype.operation.api import get_open_job_cards
 from erpnext.manufacturing.doctype.production_line.production_line import get_all_child_lines
 from erpnext.manufacturing.doctype.slab.api import get_slabs_for
@@ -70,3 +75,42 @@ def start_queue_process(slab_number: str, line: str, station_name: str):
 
 	#    4. Return the job card number.
 	return job_card_name
+
+
+@frappe.whitelist()
+def finish_queue_process(job_card: str, process_name: str, transfer_materials: bool):
+	is_corrective_jc = frappe.db.get_value("Job Card", job_card, "is_corrective_job_card")
+	if not is_corrective_jc:
+		finish_process(job_card, process_name, transfer_materials=transfer_materials)
+	else:
+		finish_process(job_card, process_name, transfer_materials=False)
+		next_job_card_name = _get_next_corrective_job_card(job_card, process_name)
+		if next_job_card_name:
+			se = make_stock_entry(next_job_card_name)
+			se.submit()
+
+
+def _get_next_corrective_job_card(job_card: str, process_name: str):
+	process_mapping = deepcopy(MFG_PROCESS_MAP)
+	next_process = process_mapping.get(process_name)
+
+	if not next_process:
+		return None
+
+	slab_no = frappe.db.get_value("Job Card", job_card, "slab")
+	for slab_history in frappe.get_all(
+		"Slab History",
+		filters={"parent": slab_no},
+		fields=["name", "station", "job_card_number"],
+		order_by="creation desc",
+	):
+		if slab_history.station == next_process:
+			next_wo = frappe.db.get_value("Job Card", slab_history.job_card_number, "work_order")
+			if next_wo:
+				corrective_job_card = frappe.db.get_value(
+					"Job Card", {"work_order": next_wo, "is_corrective_job_card": 1}
+				)
+				if corrective_job_card:
+					return corrective_job_card
+	else:
+		return None
