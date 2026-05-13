@@ -852,7 +852,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				else:
 					frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
 
-			if self.purpose == "Manufacture":
+			if self.purpose in ["Manufacture", "Repack"]:
 				if d.is_finished_item or d.type or d.is_legacy_scrap_item:
 					d.s_warehouse = None
 					if not d.t_warehouse:
