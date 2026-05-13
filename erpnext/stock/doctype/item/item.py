@@ -1549,6 +1549,8 @@ def get_child_warehouses(warehouse):
 @frappe.whitelist()
 def get_item_prices(item_code: str):
 	"""Fetch valid item prices for the item prices tab."""
+	if not frappe.has_permission("Item Price", "read"):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
 	today = getdate()
 
 	ItemPrice = frappe.qb.DocType("Item Price")

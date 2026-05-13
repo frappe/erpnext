@@ -706,14 +706,6 @@ $.extend(erpnext.item, {
 
 	edit_prices_button: function (frm) {
 		frm.add_custom_button(
-			__("Add / Edit Prices"),
-			function () {
-				frappe.set_route("List", "Item Price", { item_code: frm.doc.name });
-			},
-			__("Actions")
-		);
-
-		frm.add_custom_button(
 			__("Make Lead Time"),
 			function () {
 				frm.make_new("Item Lead Time", {
