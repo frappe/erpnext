@@ -1481,14 +1481,16 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		customer_shipping.append("links", {"link_doctype": "Customer", "link_name": "_Test Customer"})
 		customer_shipping.save()
 
-		po = create_purchase_order(item=item.item_code, qty=1, warehouse=None, do_not_save=True)
+		po = create_purchase_order(item=item.item_code, qty=1, do_not_save=True)
 		# In the UI, `get_item_details` propagates the master flag to the row when
 		# the item is added; here we simulate that step explicitly.
 		po.items[0].delivered_by_supplier = 1
+		po.items[0].warehouse = ""
 		po.shipping_address = customer_shipping.name
 		po.save()
 
 		self.assertEqual(po.items[0].delivered_by_supplier, 1)
+		self.assertFalse(po.items[0].warehouse)
 		self.assertEqual(po.shipping_address, customer_shipping.name)
 
 	def test_drop_ship_flag_overridable_per_po_line(self):
