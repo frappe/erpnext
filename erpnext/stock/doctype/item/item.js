@@ -669,16 +669,20 @@ $.extend(erpnext.item, {
 
 	render_item_prices: function (frm) {
 		if (frm.doc.__islocal) return;
-
+		const requested_item = frm.doc.name;
 		const container = frm.fields_dict["prices_html"].$wrapper;
+
 		container.html(
 			`<div class="text-muted text-center" style="padding: 20px;">${__("Loading...")}</div>`
 		);
 
 		frappe.call({
 			method: "erpnext.stock.doctype.item.item.get_item_prices",
-			args: { item_code: frm.doc.name },
+			args: { item_code: requested_item },
+
 			callback: function (r) {
+				if (requested_item !== frm.doc.name) return;
+
 				if (!r.message) return;
 
 				const { prices, has_more } = r.message;
@@ -686,34 +690,25 @@ $.extend(erpnext.item, {
 				const html = frappe.render_template("item_prices", {
 					prices,
 					has_more,
-					item_code: frm.doc.name,
+					item_code: requested_item,
 					stock_uom: frm.doc.stock_uom,
 				});
 
 				container.html(html);
 
 				container.find(".add-price-btn").on("click", () => {
-					frappe.new_doc("Item Price", { item_code: frm.doc.name });
+					frappe.new_doc("Item Price", {
+						item_code: requested_item,
+					});
 				});
 
 				container.find(".price-row").on("click", function (e) {
 					if ($(e.target).is("a")) return;
+
 					frappe.set_route("Form", "Item Price", $(this).data("name"));
 				});
 			},
 		});
-	},
-
-	edit_prices_button: function (frm) {
-		frm.add_custom_button(
-			__("Make Lead Time"),
-			function () {
-				frm.make_new("Item Lead Time", {
-					item_code: frm.doc.name,
-				});
-			},
-			__("Actions")
-		);
 	},
 
 	weight_to_validate: function (frm) {
