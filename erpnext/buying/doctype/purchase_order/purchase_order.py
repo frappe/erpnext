@@ -664,9 +664,14 @@ class PurchaseOrder(BuyingController):
 			prev_ordered_qty = flt(
 				frappe.get_cached_value("Sales Order Item", sales_order_item, "ordered_qty")
 			)
+			# `Sales Order Item.ordered_qty` is tracked in stock UOM (see status_updater);
+			# use the row's stock_qty so PO UOMs that differ from stock UOM decrement correctly.
+			qty_in_stock_uom = flt(item.get("stock_qty")) or flt(item.qty) * flt(
+				item.get("conversion_factor") or 1
+			)
 
 			frappe.db.set_value(
-				"Sales Order Item", sales_order_item, "ordered_qty", prev_ordered_qty - item.qty
+				"Sales Order Item", sales_order_item, "ordered_qty", prev_ordered_qty - qty_in_stock_uom
 			)
 
 	def auto_create_subcontracting_order(self):
