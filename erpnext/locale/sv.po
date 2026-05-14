@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-10 10:00+0000\n"
-"PO-Revision-Date: 2026-05-13 19:29\n"
+"PO-Revision-Date: 2026-05-14 19:43\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -1523,7 +1523,7 @@ msgstr "Konto Saldo"
 
 #: erpnext/accounts/doctype/account/account.py:328
 msgid "Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'"
-msgstr "Konto Saldo är redan i Kredit, Ej Tillåtet att ange \"Balans måste vara\" som \"Debet\""
+msgstr "Konto Saldo är redan i Kredit, Ej Tillåtet att ange \"Saldo Måste Vara\" som \"Debet\""
 
 #: erpnext/accounts/doctype/account/account.py:322
 msgid "Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'"
@@ -1799,7 +1799,7 @@ msgstr "Bokföring Dimension"
 #: erpnext/accounts/doctype/gl_entry/gl_entry.py:213
 #: erpnext/accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:150
 msgid "Accounting Dimension <b>{0}</b> is required for 'Balance Sheet' account {1}."
-msgstr "Bokföring Dimension <b>{0}</b> erfordras för 'Balans Rapport' konto {1}."
+msgstr "Bokföring Dimension <b>{0}</b> erfordras för 'Saldo Rapport' konto {1}."
 
 #: erpnext/accounts/doctype/gl_entry/gl_entry.py:200
 #: erpnext/accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:138
@@ -6569,7 +6569,7 @@ msgstr "Automatiskt Behandla Uppskjutna Bokföring Poster"
 #. DocType 'Accounting Dimension Detail'
 #: erpnext/accounts/doctype/accounting_dimension_detail/accounting_dimension_detail.json
 msgid "Automatically post balancing accounting entry"
-msgstr "Automatiskt skapa balans bokföring post"
+msgstr "Automatiskt skapa saldo bokföring post"
 
 #. Label of the automatically_run_rules_on_unreconciled_transactions (Check)
 #. field in DocType 'Accounts Settings'
@@ -10160,7 +10160,7 @@ msgstr "Ändring av Kund Grupp för vald Kund är inte tillåtet."
 
 #: erpnext/stock/doctype/item/item.js:16
 msgid "Changing the valuation method to Moving Average will affect new transactions. If backdated entries are added, earlier FIFO-based entries will be reposted, which may change closing balances."
-msgstr "Om värdering sätt ändras till MA kommer det att påverka nya transaktioner. Om retroaktiva poster läggs till kommer tidigare FIFO baserade poster att bokas om, vilket kan ändra utgående balanser."
+msgstr "Om värdering sätt ändras till MA kommer det att påverka nya transaktioner. Om retroaktiva poster läggs till kommer tidigare FIFO baserade poster att bokas om, vilket kan ändra utgående saldo."
 
 #. Option for the 'Lead Type' (Select) field in DocType 'Lead'
 #: erpnext/crm/doctype/lead/lead.json
@@ -17835,7 +17835,7 @@ msgstr "Dörrar"
 #: erpnext/assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.json
 #: erpnext/assets/doctype/asset_finance_book/asset_finance_book.json
 msgid "Double Declining Balance"
-msgstr "Dubbel Avtagande Balans"
+msgstr "Dubbel Avtagande Saldo"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:247
 msgid "Download CSV Template"
