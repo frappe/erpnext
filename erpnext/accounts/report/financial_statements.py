@@ -737,6 +737,9 @@ def compute_growth_view_data(data, columns):
 	data_copy = copy.deepcopy(data)
 
 	for row_idx in range(len(data_copy)):
+		if not data_copy[row_idx]:
+			continue
+
 		for column_idx in range(1, len(columns)):
 			previous_period_key = columns[column_idx - 1].get("key")
 			current_period_key = columns[column_idx].get("key")
