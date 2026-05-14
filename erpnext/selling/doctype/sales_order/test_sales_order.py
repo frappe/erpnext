@@ -1224,9 +1224,14 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(abs(flt(reserved_qty)), 0)
 
 		# test per_delivered status
-		update_status("Delivered", po.name)
+		self.assertEqual(po.status, "To Receive and Bill")
+		self.assertEqual(so.status, "To Deliver and Bill")
+		po.update_dropship_received_qty([{"name": po.items[0].name, "qty_change": 2}])
 		self.assertEqual(flt(frappe.db.get_value("Sales Order", so.name, "per_delivered"), 2), 100.00)
 		po.load_from_db()
+		so.reload()
+		self.assertEqual(po.status, "To Bill")
+		self.assertEqual(so.status, "To Bill")
 
 		# test after closing so
 		so.db_set("status", "Closed")
