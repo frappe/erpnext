@@ -205,7 +205,7 @@ class StockController(AccountsController):
 
 	def get_item_wise_inventory_account_map(self):
 		inventory_account_map = frappe._dict()
-		for table in ["items", "packed_items", "supplied_items"]:
+		for table in ["items", "packed_items", "supplied_items", "stock_items"]:
 			if not self.get(table):
 				continue
 
