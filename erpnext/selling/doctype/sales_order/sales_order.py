@@ -686,18 +686,12 @@ class SalesOrder(SellingController):
 
 		for item in self.items:
 			if item.delivered_by_supplier:
-				item_delivered_qty = frappe.db.sql(
-					"""select sum(qty)
-					from `tabPurchase Order Item` poi, `tabPurchase Order` po
-					where poi.sales_order_item = %s
-						and poi.item_code = %s
-						and poi.parent = po.name
-						and po.docstatus = 1
-						and po.status = 'Delivered'""",
-					(item.name, item.item_code),
-				)
-
-				item_delivered_qty = item_delivered_qty[0][0] if item_delivered_qty else 0
+				item_delivered_qty = frappe.get_all(
+					"Purchase Order Item",
+					{"sales_order_item": item.name, "docstatus": 1},
+					[{"SUM": "received_qty", "AS": "received_qty"}],
+					pluck="received_qty",
+				)[0]
 				item.db_set("delivered_qty", flt(item_delivered_qty), update_modified=False)
 
 			delivered_qty += min(item.delivered_qty, item.qty)
