@@ -39,6 +39,7 @@ def after_install():
 	set_default_print_formats()
 	create_letter_head()
 	toggle_hidden_fields()
+	create_helpdesk_fields()
 	frappe.db.commit()
 
 
@@ -408,3 +409,11 @@ DEFAULT_ROLE_PROFILES = {
 		"Purchase Manager",
 	],
 }
+
+
+def create_helpdesk_fields():
+	if "helpdesk" not in frappe.get_installed_apps():
+		return
+	from helpdesk.helpdesk.integrations.erpnext.customer import create_helpdesk_fields_in_customer
+
+	create_helpdesk_fields_in_customer()
