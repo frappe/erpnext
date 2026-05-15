@@ -800,11 +800,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
-<<<<<<< HEAD
- "modified": "2025-05-15 18:01:04.013025",
-=======
  "modified": "2026-05-15 13:31:01.166010",
->>>>>>> 69642860ee (fix(payment_entry): `paid_amount` and `received_amount` calculation depending upon `account_currency`)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
