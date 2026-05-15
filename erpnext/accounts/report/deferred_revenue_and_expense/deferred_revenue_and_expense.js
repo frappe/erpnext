@@ -24,6 +24,39 @@ function set_filter_visibility_for_period_mode() {
 	frappe.query_report.toggle_filter_display("period_end_date", filter_based_on === "Fiscal Year");
 }
 
+function set_filter_values_silently(values) {
+	const report = frappe.query_report;
+	report._no_refresh = true;
+	Object.keys(values).forEach((fieldname) => {
+		const filter = report.get_filter(fieldname);
+		if (filter) {
+			filter.set_value(values[fieldname]);
+		}
+	});
+	report._no_refresh = false;
+}
+
+function debounce_report_refresh(report, delay = 50) {
+	if (report._refresh_debounced) {
+		return;
+	}
+
+	const original_refresh = report.refresh.bind(report);
+	let refresh_timeout;
+
+	report.refresh = function (have_filters_changed) {
+		if (report._no_refresh) {
+			return;
+		}
+		clearTimeout(refresh_timeout);
+		refresh_timeout = setTimeout(() => {
+			update_last_fiscal_year_range();
+			original_refresh(have_filters_changed);
+		}, delay);
+	};
+	report._refresh_debounced = true;
+}
+
 function populate_dates_from_fiscal_years(from_fy, to_fy) {
 	const default_fy = erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), false, false);
 	from_fy = from_fy || last_fiscal_year_range.from || default_fy;
@@ -45,21 +78,10 @@ function populate_dates_from_fiscal_years(from_fy, to_fy) {
 				}
 
 				if (Object.keys(updates).length) {
-					frappe.query_report.set_filter_value(updates);
+					set_filter_values_silently(updates);
 				}
 			});
 		});
-}
-
-function sync_missing_period_date() {
-	const start = frappe.query_report.get_filter_value("period_start_date");
-	const end = frappe.query_report.get_filter_value("period_end_date");
-
-	if (start && end) {
-		return Promise.resolve();
-	}
-
-	return populate_dates_from_fiscal_years();
 }
 
 function get_filters() {
@@ -81,14 +103,11 @@ function get_filters() {
 			reqd: 1,
 			on_change: function () {
 				const filter_based_on = frappe.query_report.get_filter_value("filter_based_on");
+				set_filter_visibility_for_period_mode();
 
 				if (filter_based_on === "Date Range") {
-					populate_dates_from_fiscal_years().then(() => {
-						set_filter_visibility_for_period_mode();
-						frappe.query_report.refresh();
-					});
+					populate_dates_from_fiscal_years().then(() => frappe.query_report.refresh());
 				} else {
-					set_filter_visibility_for_period_mode();
 					frappe.query_report.refresh();
 				}
 			},
@@ -98,18 +117,14 @@ function get_filters() {
 			label: __("Start Date"),
 			fieldtype: "Date",
 			depends_on: "eval:doc.filter_based_on == 'Date Range'",
-			on_change: () => {
-				sync_missing_period_date().then(() => frappe.query_report.refresh());
-			},
+			mandatory_depends_on: "eval:doc.filter_based_on == 'Date Range'",
 		},
 		{
 			fieldname: "period_end_date",
 			label: __("End Date"),
 			fieldtype: "Date",
 			depends_on: "eval:doc.filter_based_on == 'Date Range'",
-			on_change: () => {
-				sync_missing_period_date().then(() => frappe.query_report.refresh());
-			},
+			mandatory_depends_on: "eval:doc.filter_based_on == 'Date Range'",
 		},
 		{
 			fieldname: "from_fiscal_year",
@@ -118,23 +133,6 @@ function get_filters() {
 			options: "Fiscal Year",
 			depends_on: "eval:doc.filter_based_on == 'Fiscal Year'",
 			mandatory_depends_on: "eval:doc.filter_based_on == 'Fiscal Year'",
-			on_change: () => {
-				update_last_fiscal_year_range();
-				frappe.model.with_doc(
-					"Fiscal Year",
-					frappe.query_report.get_filter_value("from_fiscal_year"),
-					function () {
-						let year_start_date = frappe.model.get_value(
-							"Fiscal Year",
-							frappe.query_report.get_filter_value("from_fiscal_year"),
-							"year_start_date"
-						);
-						frappe.query_report.set_filter_value({
-							period_start_date: year_start_date,
-						});
-					}
-				);
-			},
 		},
 		{
 			fieldname: "to_fiscal_year",
@@ -143,23 +141,6 @@ function get_filters() {
 			options: "Fiscal Year",
 			depends_on: "eval:doc.filter_based_on == 'Fiscal Year'",
 			mandatory_depends_on: "eval:doc.filter_based_on == 'Fiscal Year'",
-			on_change: () => {
-				update_last_fiscal_year_range();
-				frappe.model.with_doc(
-					"Fiscal Year",
-					frappe.query_report.get_filter_value("to_fiscal_year"),
-					function () {
-						let year_end_date = frappe.model.get_value(
-							"Fiscal Year",
-							frappe.query_report.get_filter_value("to_fiscal_year"),
-							"year_end_date"
-						);
-						frappe.query_report.set_filter_value({
-							period_end_date: year_end_date,
-						});
-					}
-				);
-			},
 		},
 		{
 			fieldname: "periodicity",
@@ -214,6 +195,7 @@ frappe.query_reports["Deferred Revenue and Expense"] = {
 		return default_formatter(value, row, column, data);
 	},
 	onload: function (report) {
+		debounce_report_refresh(report);
 		update_last_fiscal_year_range();
 		set_filter_visibility_for_period_mode();
 
