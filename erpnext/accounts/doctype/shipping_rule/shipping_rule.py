@@ -36,18 +36,17 @@ class ShippingRule(Document):
 		from erpnext.accounts.doctype.shipping_rule_condition.shipping_rule_condition import (
 			ShippingRuleCondition,
 		)
-		from erpnext.accounts.doctype.shipping_rule_country.shipping_rule_country import (
-			ShippingRuleCountry,
-		)
+		from erpnext.accounts.doctype.shipping_rule_country.shipping_rule_country import ShippingRuleCountry
 
 		account: DF.Link
 		calculate_based_on: DF.Literal["Fixed", "Net Total", "Net Weight"]
 		company: DF.Link
 		conditions: DF.Table[ShippingRuleCondition]
-		cost_center: DF.Link
+		cost_center: DF.Link | None
 		countries: DF.Table[ShippingRuleCountry]
 		disabled: DF.Check
 		label: DF.Data
+		project: DF.Link | None
 		shipping_amount: DF.Currency
 		shipping_rule_type: DF.Literal["Selling", "Buying"]
 	# end: auto-generated types
