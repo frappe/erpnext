@@ -280,7 +280,10 @@ def get_conditions(filters):
 	if filters.get("categorize_by") == "Categorize by Party" and not filters.get("party_type"):
 		conditions.append("party_type in ('Customer', 'Supplier')")
 
-	if filters.get("party"):
+	if filters.get("party") and filters.get("account"):
+		conditions.append("party_type=%(party_type)s")
+		conditions.append("party in %(party)s")
+	elif filters.get("party"):
 		conditions.append(build_common_party_condition(filters))
 		if filters.get("_is_common_party"):
 			cpa_jvs = frappe.get_all(
