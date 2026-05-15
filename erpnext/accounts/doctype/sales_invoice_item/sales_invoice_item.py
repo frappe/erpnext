@@ -35,7 +35,7 @@ class SalesInvoiceItem(Document):
 		brand: DF.Data | None
 		company_total_stock: DF.Float
 		conversion_factor: DF.Float
-		cost_center: DF.Link
+		cost_center: DF.Link | None
 		customer_item_code: DF.Data | None
 		deferred_revenue_account: DF.Link | None
 		delivered_by_supplier: DF.Check
@@ -104,6 +104,8 @@ class SalesInvoiceItem(Document):
 	# end: auto-generated types
 
 	def validate_cost_center(self, company: str):
+		if not self.cost_center:
+			return
 		cost_center_company = frappe.get_cached_value("Cost Center", self.cost_center, "company")
 		if cost_center_company != company:
 			frappe.throw(

@@ -83,7 +83,6 @@ class GLEntry(Document):
 	def validate(self):
 		self.flags.ignore_submit_comment = True
 		self.validate_and_set_fiscal_year()
-		self.pl_must_have_cost_center()
 
 		if not self.flags.from_repost and self.voucher_type != "Period Closing Voucher":
 			self.check_mandatory()
@@ -167,23 +166,6 @@ class GLEntry(Document):
 					self.voucher_type, self.voucher_no, self.account
 				)
 			)
-
-	def pl_must_have_cost_center(self):
-		"""Validate that profit and loss type account GL entries have a cost center."""
-
-		if self.cost_center or self.voucher_type == "Period Closing Voucher":
-			return
-
-		if frappe.get_cached_value("Account", self.account, "report_type") == "Profit and Loss":
-			msg = _("{0} {1}: Cost Center is required for 'Profit and Loss' account {2}.").format(
-				self.voucher_type, self.voucher_no, self.account
-			)
-			msg += " "
-			msg += _(
-				"Please set the cost center field in {0} or setup a default Cost Center for the Company."
-			).format(self.voucher_type)
-
-			frappe.throw(msg, title=_("Missing Cost Center"))
 
 	def validate_dimensions_for_pl_and_bs(self):
 		account_type = frappe.get_cached_value("Account", self.account, "report_type")

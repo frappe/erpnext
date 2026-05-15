@@ -473,7 +473,7 @@ def get_basic_details(ctx: ItemDetailsCtx, item, overwrite_warehouse=True) -> It
 			"provisional_expense_account": get_provisional_account(
 				ctx, item_defaults, item_group_defaults, brand_defaults
 			),
-			"cost_center": get_default_cost_center(ctx, item_defaults, item_group_defaults, brand_defaults),
+			"cost_center": None,
 			"has_serial_no": item.has_serial_no,
 			"has_batch_no": item.has_batch_no,
 			"batch_no": ctx.batch_no,
@@ -543,7 +543,6 @@ def get_basic_details(ctx: ItemDetailsCtx, item, overwrite_warehouse=True) -> It
 	for d in [
 		["Account", "income_account", "default_income_account"],
 		["Account", "expense_account", "default_expense_account"],
-		["Cost Center", "cost_center", "cost_center"],
 		["Warehouse", "warehouse", ""],
 	]:
 		if not out[d[1]]:

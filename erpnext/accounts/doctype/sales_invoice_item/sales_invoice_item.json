@@ -498,7 +498,6 @@
    "options": "Cost Center",
    "print_hide": 1,
    "print_width": "120px",
-   "reqd": 1,
    "width": "120px"
   },
   {
@@ -855,8 +854,8 @@
    "fieldtype": "Currency",
    "label": "Rate of Stock UOM",
    "no_copy": 1,
-   "print_hide": 1,
    "options": "currency",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -1016,7 +1015,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-24 14:37:16.853941",
+ "modified": "2026-05-15 12:38:51.579794",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

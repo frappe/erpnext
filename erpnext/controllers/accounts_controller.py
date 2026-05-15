@@ -1106,14 +1106,6 @@ class AccountsController(TransactionBase):
 						if not item.get("tax_withholding_category") and ret.get("tax_withholding_category"):
 							item.set("tax_withholding_category", ret.get("tax_withholding_category"))
 
-					# Double check for cost center
-					# Items add via promotional scheme may not have cost center set
-					if hasattr(item, "cost_center") and not item.get("cost_center"):
-						item.set(
-							"cost_center",
-							self.get("cost_center") or erpnext.get_default_cost_center(self.company),
-						)
-
 					if ret.get("pricing_rules"):
 						self.apply_pricing_rule_on_items(item, ret)
 						self.set_pricing_rule_details(item, ret)
