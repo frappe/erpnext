@@ -365,6 +365,15 @@ frappe.ui.form.on("Customer", {
 									dialog.hide();
 									frm.reload_doc();
 								},
+								error: function () {
+									frappe.msgprint({
+										message: __(
+											"Creating and linking Supplier failed. Please try again."
+										),
+										title: __("Linking Failed"),
+										indicator: "red",
+									});
+								},
 							});
 						},
 					});
