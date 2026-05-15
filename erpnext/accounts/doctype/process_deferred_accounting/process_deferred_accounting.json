@@ -76,11 +76,17 @@
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2024-03-27 13:10:18.458661",
+ "links": [
+  {
+   "link_doctype": "Journal Entry",
+   "link_fieldname": "process_deferred_accounting"
+  }
+ ],
+ "modified": "2026-05-15 18:06:33.637435",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Deferred Accounting",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
@@ -125,6 +131,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
