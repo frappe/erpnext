@@ -195,11 +195,8 @@ frappe.ui.form.on("Customer", {
 
 			const party_link = frm.doc.__onload?.party_link;
 
-			if (
-				cint(frappe.defaults.get_default("enable_common_party_accounting")) &&
-				frappe.model.can_create("Party Link")
-			) {
-				if (!party_link) {
+			if (cint(frappe.defaults.get_default("enable_common_party_accounting"))) {
+				if (!party_link && frappe.model.can_create("Party Link")) {
 					frm.add_custom_button(
 						__("Link with Supplier"),
 						function () {
@@ -207,34 +204,32 @@ frappe.ui.form.on("Customer", {
 						},
 						__("Actions")
 					);
-				} else {
-					if (frappe.model.can_delete("Party Link")) {
-						frm.add_custom_button(
-							__("Remove Link with Supplier"),
-							function () {
-								frappe.confirm(
-									__(
-										"Are you sure you want to unlink {0} and {1}? This will stop Common Party Accounting between them.",
-										[
-											frappe.utils.get_form_link("Customer", frm.doc.name, true),
-											frappe.utils.get_form_link("Supplier", party_link.name, true),
-										]
-									),
-									function () {
-										frappe.call({
-											method: "erpnext.accounts.doctype.party_link.party_link.remove_party_link",
-											args: { party_type: "Customer", party: frm.doc.name },
-											freeze: true,
-											callback: function () {
-												frm.reload_doc();
-											},
-										});
-									}
-								);
-							},
-							__("Actions")
-						);
-					}
+				} else if (party_link && frappe.model.can_delete("Party Link")) {
+					frm.add_custom_button(
+						__("Remove Link with Supplier"),
+						function () {
+							frappe.confirm(
+								__(
+									"Are you sure you want to unlink {0} and {1}? This will stop Common Party Accounting between them.",
+									[
+										frappe.utils.get_form_link("Customer", frm.doc.name, true),
+										frappe.utils.get_form_link("Supplier", party_link.name, true),
+									]
+								),
+								function () {
+									frappe.call({
+										method: "erpnext.accounts.doctype.party_link.party_link.remove_party_link",
+										args: { party_type: "Customer", party: frm.doc.name },
+										freeze: true,
+										callback: function () {
+											frm.reload_doc();
+										},
+									});
+								}
+							);
+						},
+						__("Actions")
+					);
 				}
 			}
 
