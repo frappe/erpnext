@@ -6,6 +6,7 @@ from frappe import _, qb
 from frappe.query_builder import Column, functions
 from frappe.utils import add_days, date_diff, flt, get_first_day, get_last_day, getdate, rounded
 
+from erpnext import get_company_currency
 from erpnext.accounts.report.financial_statements import get_period_list
 from erpnext.accounts.utils import get_fiscal_year
 
@@ -469,6 +470,11 @@ class Deferred_Revenue_and_Expense_Report:
 			chart["data"]["datasets"].append(
 				{"name": _("Expected"), "chartType": "line", "values": [x.total for x in self.period_total]}
 			)
+
+		company_currency = get_company_currency(self.filters.company)
+		chart["fieldtype"] = "Currency"
+		chart["options"] = "currency"
+		chart["currency"] = company_currency
 
 		return chart
 
