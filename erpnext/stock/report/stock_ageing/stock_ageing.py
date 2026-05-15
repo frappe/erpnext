@@ -56,10 +56,6 @@ def format_report_data(filters: Filters, item_details: dict, to_date: str) -> li
 		latest_age = date_diff(to_date, fifo_queue[-1][1])
 		range_values = get_range_age(filters, fifo_queue, to_date, item_dict)
 
-		check_and_replace_valuations_if_moving_average(
-			range_values, details.valuation_method, details.valuation_rate, filters.get("company")
-		)
-
 		row = [details.name, details.item_name, details.description, details.item_group, details.brand]
 
 		if filters.get("show_warehouse_wise_stock"):
@@ -79,17 +75,6 @@ def format_report_data(filters: Filters, item_details: dict, to_date: str) -> li
 		data.append(row)
 
 	return data
-
-
-def check_and_replace_valuations_if_moving_average(
-	range_values, item_valuation_method, valuation_rate, company
-):
-	if item_valuation_method == "Moving Average" or (
-		not item_valuation_method
-		and frappe.get_cached_value("Company", company, "valuation_method") == "Moving Average"
-	):
-		for i in range(0, len(range_values), 2):
-			range_values[i + 1] = range_values[i] * valuation_rate
 
 
 def get_average_age(fifo_queue: list, to_date: str) -> float:
@@ -539,7 +524,6 @@ class FIFOSlots:
 				item.stock_uom,
 				item.has_batch_no,
 				item.has_serial_no,
-				item.valuation_method,
 				sle.actual_qty,
 				sle.stock_value_difference,
 				sle.valuation_rate,
@@ -661,7 +645,6 @@ class FIFOSlots:
 			"item_group",
 			"has_serial_no",
 			"has_batch_no",
-			"valuation_method",
 		)
 
 		if self.filters.get("item_code"):
