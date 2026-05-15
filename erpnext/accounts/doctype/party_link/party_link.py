@@ -172,6 +172,8 @@ def create_and_link_party(
 	if not frappe.db.exists(primary_role, primary_party):
 		frappe.throw(_("{} {} does not exist").format(primary_role, frappe.bold(primary_party)))
 
+	frappe.has_permission(primary_role, "write", doc=primary_party, throw=True)
+
 	secondary_role = "Customer" if primary_role == "Supplier" else "Supplier"
 	role_lower = secondary_role.lower()
 
