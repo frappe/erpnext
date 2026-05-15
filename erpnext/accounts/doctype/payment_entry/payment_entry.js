@@ -710,31 +710,12 @@ frappe.ui.form.on("Payment Entry", {
 		if (!frm.doc.paid_from_account_currency || !frm.doc.company) return;
 		let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
 
-		if (frm.doc.paid_from_account_currency == company_currency) {
-			frm.set_value("source_exchange_rate", 1);
-		} else if (frm.doc.paid_from) {
-			if (["Internal Transfer", "Pay"].includes(frm.doc.payment_type)) {
-				let company_currency = frappe.get_doc(":Company", frm.doc.company)?.default_currency;
-				frappe.call({
-					method: "erpnext.setup.utils.get_exchange_rate",
-					args: {
-						from_currency: frm.doc.paid_from_account_currency,
-						to_currency: company_currency,
-						transaction_date: frm.doc.posting_date,
-					},
-					callback: function (r, rt) {
-						frm.set_value("source_exchange_rate", r.message);
-					},
-				});
-			} else {
-				frm.events.set_current_exchange_rate(
-					frm,
-					"source_exchange_rate",
-					frm.doc.paid_from_account_currency,
-					company_currency
-				);
-			}
-		}
+		frm.events.set_current_exchange_rate(
+			frm,
+			"source_exchange_rate",
+			frm.doc.paid_from_account_currency,
+			company_currency
+		);
 	},
 
 	paid_to_account_currency: function (frm) {
@@ -766,49 +747,24 @@ frappe.ui.form.on("Payment Entry", {
 
 	posting_date: function (frm) {
 		frm.events.paid_from_account_currency(frm);
+		frm.events.paid_to_account_currency(frm);
 	},
 
 	source_exchange_rate: function (frm) {
-		let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
-		if (frm.doc.paid_amount) {
-			frm.set_value("base_paid_amount", flt(frm.doc.paid_amount) * flt(frm.doc.source_exchange_rate));
-			// target exchange rate should always be same as source if both account currencies is same
-			if (frm.doc.paid_from_account_currency == frm.doc.paid_to_account_currency) {
-				frm.set_value("target_exchange_rate", frm.doc.source_exchange_rate);
-				frm.set_value("base_received_amount", frm.doc.base_paid_amount);
-			} else if (company_currency == frm.doc.paid_to_account_currency) {
-				frm.set_value("received_amount", frm.doc.base_paid_amount);
-				frm.set_value("base_received_amount", frm.doc.base_paid_amount);
-			}
-
-			// set_unallocated_amount is called by below method,
-			// no need trigger separately
-			frm.events.set_total_allocated_amount(frm);
-		}
-
-		// Make read only if Accounts Settings doesn't allow stale rates
-		frm.set_df_property("source_exchange_rate", "read_only", erpnext.stale_rate_allowed() ? 0 : 1);
-	},
-
-	target_exchange_rate: function (frm) {
 		frm.set_paid_amount_based_on_received_amount = true;
 		let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
 
-		if (frm.doc.received_amount) {
-			frm.set_value(
-				"base_received_amount",
-				flt(frm.doc.received_amount) * flt(frm.doc.target_exchange_rate)
-			);
+		if (frm.doc.base_received_amount && frm.doc.source_exchange_rate) {
+			frm.set_value("base_paid_amount", frm.doc.base_received_amount);
 
-			if (
-				!frm.doc.source_exchange_rate &&
-				frm.doc.paid_from_account_currency == frm.doc.paid_to_account_currency
-			) {
-				frm.set_value("source_exchange_rate", frm.doc.target_exchange_rate);
-				frm.set_value("base_paid_amount", frm.doc.base_received_amount);
-			} else if (company_currency == frm.doc.paid_from_account_currency) {
-				frm.set_value("paid_amount", frm.doc.base_received_amount);
-				frm.set_value("base_paid_amount", frm.doc.base_received_amount);
+			// target exchange rate should always be same as source if both account currencies is same
+			if (frm.doc.paid_from_account_currency == frm.doc.paid_to_account_currency) {
+				frm.set_value("target_exchange_rate", frm.doc.source_exchange_rate);
+			} else {
+				frm.set_value(
+					"paid_amount",
+					flt(frm.doc.base_paid_amount) / flt(frm.doc.source_exchange_rate)
+				);
 			}
 
 			// set_unallocated_amount is called by below method,
@@ -816,6 +772,32 @@ frappe.ui.form.on("Payment Entry", {
 			frm.events.set_total_allocated_amount(frm);
 		}
 		frm.set_paid_amount_based_on_received_amount = false;
+
+		// Make read only if Accounts Settings doesn't allow stale rates
+		frm.set_df_property("source_exchange_rate", "read_only", erpnext.stale_rate_allowed() ? 0 : 1);
+	},
+
+	target_exchange_rate: function (frm) {
+		let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
+
+		if (frm.doc.base_paid_amount && frm.doc.target_exchange_rate) {
+			frm.set_value("base_received_amount", frm.doc.base_paid_amount);
+			if (
+				!frm.doc.source_exchange_rate &&
+				frm.doc.paid_from_account_currency == frm.doc.paid_to_account_currency
+			) {
+				frm.set_value("source_exchange_rate", frm.doc.target_exchange_rate);
+			} else {
+				frm.set_value(
+					"received_amount",
+					flt(frm.doc.base_received_amount) / flt(frm.doc.target_exchange_rate)
+				);
+			}
+
+			// set_unallocated_amount is called by below method,
+			// no need trigger separately
+			frm.events.set_total_allocated_amount(frm);
+		}
 
 		// Make read only if Accounts Settings doesn't allow stale rates
 		frm.set_df_property("target_exchange_rate", "read_only", erpnext.stale_rate_allowed() ? 0 : 1);
