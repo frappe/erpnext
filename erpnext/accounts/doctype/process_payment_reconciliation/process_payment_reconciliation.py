@@ -23,7 +23,7 @@ class ProcessPaymentReconciliation(Document):
 		bank_cash_account: DF.Link | None
 		company: DF.Link
 		cost_center: DF.Link | None
-		default_advance_account: DF.Link
+		default_advance_account: DF.Link | None
 		error_log: DF.LongText | None
 		from_invoice_date: DF.Date | None
 		from_payment_date: DF.Date | None
