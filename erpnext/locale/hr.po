@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-10 10:00+0000\n"
-"PO-Revision-Date: 2026-05-14 19:43\n"
+"PO-Revision-Date: 2026-05-16 19:44\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Croatian\n"
 "MIME-Version: 1.0\n"
@@ -7463,18 +7463,18 @@ msgstr "Bankovne Naknade, Plaća itd."
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 #: erpnext/workspace_sidebar/banking.json
 msgid "Bank Clearance"
-msgstr "Bankarsko Odobrenje"
+msgstr "Bankovno Odobrenje"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/bank_clearance_detail/bank_clearance_detail.json
 msgid "Bank Clearance Detail"
-msgstr "Detalji Bankarskog Odobrenja"
+msgstr "Detalji Bankovnog Odobrenja"
 
 #. Name of a report
 #: banking/src/pages/BankReconciliation.tsx:119
 #: erpnext/accounts/report/bank_clearance_summary/bank_clearance_summary.json
 msgid "Bank Clearance Summary"
-msgstr "Sažetak Bankarskog Odobrenja"
+msgstr "Sažetak Bankovnog Odobrenja"
 
 #. Label of the credit_balance (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -49643,7 +49643,7 @@ msgstr "Registar Dionica"
 #: erpnext/desktop_icon/share_management.json
 #: erpnext/workspace_sidebar/share_management.json
 msgid "Share Management"
-msgstr "Upravljanje Dionicama"
+msgstr "Dionice"
 
 #. Name of a DocType
 #. Label of a Link in the Invoicing Workspace
