@@ -392,25 +392,6 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 					["items.t_warehouse", "is", "not set"],
 				]
 			)
-		elif filters.get("inspection_type") != "In Process":
-			my_filters.extend(
-				[
-					"and",
-					[
-						"items.item_code",
-						"in",
-						frappe.get_list(
-							"Item",
-							filters={
-								"inspection_required_before_purchase"
-								if filters.get("inspection_type") == "Incoming"
-								else "inspection_required_before_delivery": 1
-							},
-							pluck="name",
-						),
-					],
-				]
-			)
 
 		return frappe.get_query(
 			reference_doctype,
