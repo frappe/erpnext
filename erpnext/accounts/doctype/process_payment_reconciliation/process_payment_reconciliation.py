@@ -218,10 +218,7 @@ def trigger_reconciliation_for_queued_docs():
 		fields = ["company", "party_type", "party", "receivable_payable_account", "default_advance_account"]
 
 		def get_filters_as_tuple(fields, doc):
-			filters = ()
-			for x in fields:
-				filters += tuple(doc.get(x))
-			return filters
+			return tuple(doc.get(x) or "" for x in fields)
 
 		for x in all_queued:
 			doc = frappe.get_doc("Process Payment Reconciliation", x)
