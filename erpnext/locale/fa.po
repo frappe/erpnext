@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-10 10:00+0000\n"
-"PO-Revision-Date: 2026-05-12 19:33\n"
+"PO-Revision-Date: 2026-05-16 19:44\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -488,7 +488,7 @@ msgstr "1 ساعت"
 
 #: banking/src/components/features/ActionLog/ActionLog.tsx:280
 msgid "1 invoice"
-msgstr ""
+msgstr "۱ فاکتور"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Lead'
 #. Option for the 'No of Employees' (Select) field in DocType 'Opportunity'
@@ -1022,7 +1022,7 @@ msgstr "یک قرار جدید برای شما با {0} ایجاد شده است
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:3
 msgid "A new fiscal year has been automatically created."
-msgstr ""
+msgstr "سال مالی جدید به طور خودکار ایجاد شده است."
 
 #. Description of the 'Inspection Required before Delivery' (Check) field in
 #. DocType 'Item'
@@ -6146,7 +6146,7 @@ msgstr "در ردیف {0}: تنظیم شماره ردیف والد برای آی
 
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.py:226
 msgid "Atleast one raw material for Finished Good Item {0} should be customer provided."
-msgstr ""
+msgstr "حداقل یک ماده اولیه برای آیتم کالای تمام شده {0} باید توسط مشتری تهیه شود."
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -13056,7 +13056,7 @@ msgstr "ایجاد دارایی موجود"
 #. Label of an action in the Onboarding Step 'Create Finished Goods'
 #: erpnext/manufacturing/onboarding_step/create_finished_goods/create_finished_goods.json
 msgid "Create Finished Good"
-msgstr ""
+msgstr "ایجاد کالای تمام شده"
 
 #. Title of an Onboarding Step
 #: erpnext/manufacturing/onboarding_step/create_finished_goods/create_finished_goods.json
@@ -20174,7 +20174,7 @@ msgstr "BOM نهایی"
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.json
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 msgid "Final Product"
-msgstr "محصول نهایی"
+msgstr "کالای تمام شده"
 
 #. Label of the finance_book (Link) field in DocType 'Account Closing Balance'
 #. Name of a DocType
@@ -20398,7 +20398,7 @@ msgstr "مقدار کالای تمام شده "
 #. field in DocType 'Work Order'
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 msgid "Finished Good Serial / Batch"
-msgstr ""
+msgstr "سریال / دسته کالای تمام شده"
 
 #. Label of the finished_good_uom (Link) field in DocType 'Subcontracting BOM'
 #: erpnext/subcontracting/doctype/subcontracting_bom/subcontracting_bom.json
@@ -26473,7 +26473,7 @@ msgstr "کد آیتم"
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.js:61
 msgid "Item Code (Final Product)"
-msgstr "کد آیتم (محصول نهایی)"
+msgstr "کد آیتم (کالای تمام شده)"
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.js:92
 msgid "Item Code > Item Group > Brand"
@@ -45337,7 +45337,7 @@ msgstr "ردیف #{0}: کالای تمام شده باید {1} باشد"
 
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:585
 msgid "Row #{0}: Finished Good reference is mandatory for Secondary Item {1}."
-msgstr ""
+msgstr "ردیف #{0}: مرجع کالای تمام شده برای آیتم ثانویه {1} الزامی است."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:170
 #: erpnext/controllers/subcontracting_inward_controller.py:294
@@ -54946,7 +54946,7 @@ msgstr ""
 #. Description of the 'Target Warehouse' (Link) field in DocType 'Work Order'
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 msgid "This is a location where final product stored."
-msgstr "این مکانی است که محصول نهایی در آن ذخیره می‌شود."
+msgstr "این مکانی است که کالای تمام شده در آن ذخیره می‌شود."
 
 #. Description of the 'Work-in-Progress Warehouse' (Link) field in DocType
 #. 'Work Order'
