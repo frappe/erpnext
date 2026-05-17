@@ -198,15 +198,27 @@ def item_query(
 
 	if filters and isinstance(filters, dict):
 		if filters.get("customer") or filters.get("supplier"):
+			party_type = "Customer" if filters.get("customer") else "Supplier"
 			party = filters.get("customer") or filters.get("supplier")
+			group = "Customer Group" if filters.get("customer") else "Supplier Group"
 			item_rules_list = frappe.get_all(
 				"Party Specific Item",
 				filters={
 					"party": ["!=", party],
-					"party_type": "Customer" if filters.get("customer") else "Supplier",
+					"party_type": party_type,
 				},
 				fields=["restrict_based_on", "based_on_value"],
 			)
+
+			party_group_rules_list = frappe.get_all(
+				"Party Specific Item",
+				filters={"party_type": group},
+				fields=["party as party_group", "restrict_based_on", "based_on_value"],
+			)
+			current_party_group = frappe.get_value(party_type, party, frappe.scrub(group))
+			for rule in party_group_rules_list:
+				if current_party_group != rule.party_group:
+					item_rules_list.append(rule)
 
 			filters_dict = {}
 			for rule in item_rules_list:
