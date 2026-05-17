@@ -643,7 +643,7 @@
   --ink-white: var(--white);
   --ink-gray-1: var(--gray-200);
   --ink-gray-2: var(--gray-300);
-  --ink-gray-3: var(--gray-400);
+  --ink-gray-3: var(--gray-600);
   --ink-gray-4: var(--gray-500);
   --ink-gray-5: var(--gray-600);
   --ink-gray-6: var(--gray-700);
@@ -770,7 +770,7 @@
   --outline-gray-modals: var(--gray-200);
 
   /** Focus Box Shadows **/
-  --focus-shadow-gray: 0px 0px 0px 2px rgba(201, 201, 201, 0.9);
+  --focus-shadow-gray: 0px 0px 0px 2px rgba(124, 124, 124, 0.9);
   --focus-shadow-blue: 0px 0px 0px 2px rgba(101, 185, 252, 0.9);
   --focus-shadow-green: 0px 0px 0px 2px rgba(94, 210, 156, 0.9);
   --focus-shadow-red: 0px 0px 0px 2px rgba(250, 156, 157, 0.9);
