@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-10 10:00+0000\n"
-"PO-Revision-Date: 2026-05-14 19:43\n"
+"PO-Revision-Date: 2026-05-17 19:45\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -23247,7 +23247,7 @@ msgstr "Om aktiverat kommer systemet inte att tillämpa prisregel på följesede
 #. Description of the 'Pick Manually' (Check) field in DocType 'Pick List'
 #: erpnext/stock/doctype/pick_list/pick_list.json
 msgid "If enabled then system won't override the picked qty / batches / serial numbers / warehouse."
-msgstr "Om aktiverad kommer system inte att åsidosätta plockat kvantitet / parti / serienummer / lager."
+msgstr "Om aktiverad kommer system inte att åsidosätta plockad kvantitet / parti / serienummer / lager."
 
 #. Description of the 'Send Document Print' (Check) field in DocType 'Request
 #. for Quotation'
