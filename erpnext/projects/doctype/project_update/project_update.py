@@ -4,7 +4,7 @@
 
 import frappe
 from frappe.model.document import Document
-from frappe.utils import add_days, today
+from frappe.utils import add_days, nowdate
 
 
 class ProjectUpdate(Document):
@@ -36,7 +36,7 @@ def daily_reminder():
 	frappe.only_for("Projects Manager")
 
 	# Same for every project this run, so check once instead of once per project.
-	holiday_today = frappe.db.exists("Holiday", {"holiday_date": today()})
+	holiday_today = frappe.db.exists("Holiday", {"holiday_date": nowdate()})
 
 	projects = frappe.get_all(
 		"Project",
@@ -63,7 +63,7 @@ def daily_reminder():
 		# both engines); report the columns that actually exist.
 		update = frappe.get_all(
 			"Project Update",
-			filters={"project": project_id, "date": add_days(today(), -1)},
+			filters={"project": project_id, "date": add_days(nowdate(), -1)},
 			fields=["name", "date", "time"],
 			as_list=True,
 		)

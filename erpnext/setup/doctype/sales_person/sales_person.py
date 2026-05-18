@@ -7,9 +7,8 @@ from itertools import chain
 
 import frappe
 from frappe import _
-from frappe.query_builder import Interval
-from frappe.query_builder.functions import Count, CurDate, UnixTimestamp
-from frappe.utils import flt
+from frappe.query_builder.functions import Count, UnixTimestamp
+from frappe.utils import add_years, flt, nowdate
 from frappe.utils.data import get_url_to_list
 from frappe.utils.nestedset import NestedSet, get_root_of
 
@@ -139,7 +138,7 @@ def get_timeline_data(doctype: str, name: str) -> dict[int, int]:
 			.on(transaction.name == sales_team.parent)
 			.select(UnixTimestamp(transaction[date_field]), Count("*"))
 			.where(sales_team.sales_person == name)
-			.where(transaction[date_field] > CurDate() - Interval(years=1))
+			.where(transaction[date_field] > add_years(nowdate(), -1))
 			.groupby(transaction[date_field])
 			.run()
 		)

@@ -5,9 +5,19 @@ import frappe
 from email_reply_parser import EmailReplyParser
 from frappe import _, qb
 from frappe.model.document import Document
-from frappe.query_builder import Case, Interval
-from frappe.query_builder.functions import Count, CurDate, Date, Locate, Lower, Sum, UnixTimestamp
-from frappe.utils import add_days, flt, get_datetime, get_link_to_form, get_time, nowtime, today
+from frappe.query_builder import Case
+from frappe.query_builder.functions import Count, Date, Locate, Lower, Sum, UnixTimestamp
+from frappe.utils import (
+	add_days,
+	add_years,
+	flt,
+	get_datetime,
+	get_link_to_form,
+	get_time,
+	nowdate,
+	nowtime,
+	today,
+)
 from frappe.utils.user import is_website_user
 from pypika import Order
 
@@ -446,7 +456,7 @@ def get_timeline_data(doctype: str, name: str) -> dict[int, int]:
 		frappe.qb.from_(timesheet_detail)
 		.select(UnixTimestamp(Date(timesheet_detail.from_time)), Count("*"))
 		.where(timesheet_detail.project == name)
-		.where(timesheet_detail.from_time > CurDate() - Interval(years=1))
+		.where(timesheet_detail.from_time > add_years(nowdate(), -1))
 		.where(timesheet_detail.docstatus < 2)
 		.groupby(Date(timesheet_detail.from_time))
 		.run()

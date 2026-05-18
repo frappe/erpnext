@@ -5,8 +5,8 @@
 import frappe
 from frappe import _
 from frappe.query_builder import Case
-from frappe.query_builder.functions import Count, CurDate, DateDiff, Max, Sum
-from frappe.utils import cint
+from frappe.query_builder.functions import Count, DateDiff, Max, Sum
+from frappe.utils import cint, nowdate
 
 
 def execute(filters=None):
@@ -52,9 +52,9 @@ def get_sales_details(doctype):
 		date_col = sales_doctype.posting_date
 
 	last_order_date = Max(date_col)
-	# DateDiff is cross-database (DATEDIFF on MariaDB, date subtraction on postgres); CurDate()
-	# renders the bare CURRENT_DATE keyword. Yields the integer number of days.
-	days_since_last_order = DateDiff(CurDate(), last_order_date)
+	# Use the application's today (nowdate, System Settings timezone) rather than the database
+	# server's CURRENT_DATE, which may differ when the DB session timezone does not match.
+	days_since_last_order = DateDiff(nowdate(), last_order_date)
 
 	return (
 		frappe.qb.from_(customer)

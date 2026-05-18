@@ -4,8 +4,8 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import CurDate, DateDiff
-from frappe.utils import cint
+from frappe.query_builder.functions import DateDiff
+from frappe.utils import cint, nowdate
 
 
 def execute(filters=None):
@@ -104,9 +104,9 @@ def get_sales_details(filters):
 
 	date_col = parent.transaction_date if filters["based_on"] == "Sales Order" else parent.posting_date
 
-	# DateDiff is cross-database (DATEDIFF on MariaDB, date subtraction on postgres); CurDate()
-	# renders the bare CURRENT_DATE keyword. Yields the integer number of days.
-	days_since_last_order = DateDiff(CurDate(), date_col)
+	# Use the application's today (nowdate, System Settings timezone) rather than the database
+	# server's CURRENT_DATE, which may differ when the DB session timezone does not match.
+	days_since_last_order = DateDiff(nowdate(), date_col)
 
 	sales_data = (
 		frappe.qb.from_(parent)
