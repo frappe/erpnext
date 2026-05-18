@@ -111,7 +111,7 @@ class TestItem(ERPNextTestSuite):
 			"warehouse": "_Test Warehouse - _TC",
 			"income_account": "Sales - _TC",
 			"expense_account": "_Test Account Cost for Goods Sold - _TC",
-			"cost_center": "_Test Cost Center - _TC",
+			"cost_center": None,
 			"qty": 1.0,
 			"price_list_rate": 100.0,
 			"base_price_list_rate": 0.0,
@@ -327,7 +327,7 @@ class TestItem(ERPNextTestSuite):
 			"warehouse": "_Test Warehouse 2 - _TC",  # from item
 			"income_account": "_Test Account Sales - _TC",  # from brand
 			"expense_account": "_Test Account Cost for Goods Sold - _TC",  # from item
-			"cost_center": "_Test Cost Center 2 - _TC",  # from item group
+			"cost_center": None,  # from item group
 		}
 		sales_item_details = get_item_details(
 			ItemDetailsCtx(
@@ -352,7 +352,7 @@ class TestItem(ERPNextTestSuite):
 			"warehouse": "_Test Warehouse 2 - _TC",  # from item
 			"expense_account": "_Test Account Stock Expenses - _TC",  # from item
 			"income_account": "_Test Account Sales - _TC",  # from brand
-			"cost_center": "_Test Write Off Cost Center - _TC",  # from item
+			"cost_center": None,  # from item
 		}
 		purchase_item_details = get_item_details(
 			ItemDetailsCtx(

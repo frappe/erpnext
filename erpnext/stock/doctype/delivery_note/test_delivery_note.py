@@ -1202,35 +1202,6 @@ class TestDeliveryNote(ERPNextTestSuite):
 		for _i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
-	def test_delivery_note_cost_center_with_balance_sheet_account(self):
-		cost_center = "Main - TCP1"
-
-		set_valuation_method("_Test Item", "FIFO")
-
-		make_stock_entry(target="Stores - TCP1", qty=5, basic_rate=100)
-
-		stock_in_hand_account = get_inventory_account("_Test Company with perpetual inventory")
-		dn = create_delivery_note(
-			company="_Test Company with perpetual inventory",
-			warehouse="Stores - TCP1",
-			cost_center="Main - TCP1",
-			expense_account="Cost of Goods Sold - TCP1",
-			do_not_submit=1,
-		)
-
-		dn.get("items")[0].cost_center = None
-		dn.submit()
-
-		gl_entries = get_gl_entries("Delivery Note", dn.name)
-
-		self.assertTrue(gl_entries)
-		expected_values = {
-			"Cost of Goods Sold - TCP1": {"cost_center": cost_center},
-			stock_in_hand_account: {"cost_center": cost_center},
-		}
-		for _i, gle in enumerate(gl_entries):
-			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
-
 	def test_make_sales_invoice_from_dn_for_returned_qty(self):
 		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice

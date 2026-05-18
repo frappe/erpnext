@@ -3341,6 +3341,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 
 		po = create_purchase_order(qty=10, rate=100, do_not_save=1)
+		po.items[0].cost_center = test_cc
 		po.taxes = []
 		po.append(
 			"taxes",
@@ -3490,6 +3491,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 
 		po = create_purchase_order(qty=10, rate=100, do_not_save=1)
+		po.items[0].cost_center = test_cc
 		po.taxes = []
 		po.append(
 			"taxes",
