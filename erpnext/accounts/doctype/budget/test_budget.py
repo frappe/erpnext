@@ -157,7 +157,7 @@ class TestBudget(ERPNextTestSuite):
 		po = create_purchase_order(
 			transaction_date=nowdate(), qty=1, rate=accumulated_limit + 1, do_not_submit=True
 		)
-
+		po.items[0].cost_center = "_Test Cost Center - _TC"
 		po.set_missing_values()
 
 		self.assertRaises(BudgetError, po.submit)
@@ -420,6 +420,7 @@ class TestBudget(ERPNextTestSuite):
 		po = create_purchase_order(
 			transaction_date=nowdate(), qty=1, rate=accumulated_limit + 1, do_not_submit=True
 		)
+		po.items[0].cost_center = "_Test Cost Center - _TC"
 		po.set_missing_values()
 
 		self.assertRaises(BudgetError, po.submit)
