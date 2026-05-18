@@ -88,7 +88,7 @@ def get_all_customers(date_range, company, field, limit=None):
 
 
 @frappe.whitelist()
-def get_all_items(date_range, company, field, limit=None):
+def get_all_items(date_range: str, company: str, field: str, limit: int | None = None):
 	if field in ("available_stock_qty", "available_stock_value"):
 		select_field = "sum(actual_qty)" if field == "available_stock_qty" else "sum(stock_value)"
 		results = frappe.db.get_all(
@@ -103,21 +103,21 @@ def get_all_items(date_range, company, field, limit=None):
 	else:
 		if field == "total_sales_amount":
 			select_field = "base_net_amount"
-			select_doctype = "Sales Order"
+			select_doctype = "Sales Invoice"
 		elif field == "total_purchase_amount":
 			select_field = "base_net_amount"
-			select_doctype = "Purchase Order"
+			select_doctype = "Purchase Invoice"
 		elif field == "total_qty_sold":
 			select_field = "stock_qty"
-			select_doctype = "Sales Order"
+			select_doctype = "Sales Invoice"
 		elif field == "total_qty_purchased":
 			select_field = "stock_qty"
-			select_doctype = "Purchase Order"
+			select_doctype = "Purchase Invoice"
 
 		filters = [["docstatus", "=", "1"], ["company", "=", company]]
 		from_date, to_date = parse_date_range(date_range)
 		if from_date and to_date:
-			filters.append(["transaction_date", "between", [from_date, to_date]])
+			filters.append(["posting_date", "between", [from_date, to_date]])
 
 		child_doctype = f"{select_doctype} Item"
 		return frappe.get_list(
