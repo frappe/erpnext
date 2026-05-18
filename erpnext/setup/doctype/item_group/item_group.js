@@ -101,3 +101,103 @@ frappe.ui.form.on("Item Group", {
 
 	page_name: frappe.utils.warn_page_name_change,
 });
+
+frappe.ui.form.on("Item Default", {
+	form_render: function (frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		if (!row || !row.company) return;
+
+		setTimeout(() => {
+			const $grid_row = frm.fields_dict["item_group_defaults"].grid.wrapper.find(
+				`.grid-row[data-name="${cdn}"]`
+			);
+			$grid_row
+				.find(".column-label")
+				.first()
+				.text(row.company ? `${__("From Company")} - ${row.company}` : __("From Company"));
+
+			$grid_row
+				.find(".column-label")
+				.eq(1)
+				.text(`${__("Item Group Override")}`);
+		}, 50);
+
+		const $grid_row = frm.fields_dict["item_group_defaults"].grid.wrapper.find(
+			`.grid-row[data-name="${cdn}"]`
+		);
+
+		if ($grid_row.length && !$grid_row.find(".item-defaults-desc").length) {
+			$grid_row.find(".grid-form-body").prepend(`
+				<div class="item-defaults-desc" style="
+					padding: 10px 12px;
+					margin: 0 0 12px 0;
+					border-radius: var(--border-radius-sm);
+					background: var(--gray-50);
+					font-size: inherit;
+					color: var(--text-light);
+					line-height: 1.5;
+				">
+					${__(
+						"Defaults inherited from the company level appear on the left. Use the right column to override them for this item group, all items in the group will inherit whatever you set here."
+					)}
+				</div>
+			`);
+		}
+
+		populate_item_group_company_defaults(frm, cdt, cdn, row);
+	},
+
+	company: function (frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		if (!row || !row.company) return;
+
+		setTimeout(() => {
+			const $grid_row = frm.fields_dict["item_group_defaults"].grid.wrapper.find(
+				`.grid-row[data-name="${cdn}"]`
+			);
+			$grid_row
+				.find(".column-label")
+				.first()
+				.text(row.company ? `${__("From Company")} - ${row.company}` : __("From Company"));
+		}, 50);
+
+		populate_item_group_company_defaults(frm, cdt, cdn, row);
+	},
+});
+
+const COMPANY_DEFAULTS_TO_VF = {
+	default_warehouse: "vf_default_warehouse",
+	default_inventory_account: "vf_default_inventory_account",
+	buying_cost_center: "vf_buying_cost_center",
+	selling_cost_center: "vf_selling_cost_center",
+	expense_account: "vf_expense_account",
+	income_account: "vf_income_account",
+	default_provisional_account: "vf_default_provisional_account",
+	purchase_expense_account: "vf_purchase_expense_account",
+	default_cogs_account: "vf_default_cogs_account",
+	deferred_expense_account: "vf_deferred_expense_account",
+	deferred_revenue_account: "vf_deferred_revenue_account",
+	default_price_list: "vf_default_price_list",
+	default_discount_account: "vf_default_discount_account",
+	default_supplier: "vf_default_supplier",
+	purchase_expense_contra_account: "vf_purchase_expense_contra_account",
+};
+
+function populate_item_group_company_defaults(frm, cdt, cdn, row) {
+	frappe.model.set_value(cdt, cdn, "vf_company", row.company);
+
+	frappe.call({
+		method: "erpnext.setup.doctype.item_group.item_group.get_company_resolved_defaults",
+		args: { company: row.company },
+		freeze: false,
+		callback: function (r) {
+			if (!r.message) return;
+			const defaults = r.message;
+
+			Object.entries(COMPANY_DEFAULTS_TO_VF).forEach(([key, vf_field]) => {
+				const val = defaults[key] || __("Not configured");
+				frappe.model.set_value(cdt, cdn, vf_field, val);
+			});
+		},
+	});
+}

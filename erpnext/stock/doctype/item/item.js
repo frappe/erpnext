@@ -6,6 +6,25 @@ frappe.provide("erpnext.item");
 const SALES_DOCTYPES = ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"];
 const PURCHASE_DOCTYPES = ["Purchase Order", "Purchase Receipt", "Purchase Invoice"];
 
+const virtual_field_map = {
+	company: "vf_company",
+	default_warehouse: "vf_default_warehouse",
+	default_price_list: "vf_default_price_list",
+	default_discount_account: "vf_default_discount_account",
+	default_inventory_account: "vf_default_inventory_account",
+	buying_cost_center: "vf_buying_cost_center",
+	default_supplier: "vf_default_supplier",
+	expense_account: "vf_expense_account",
+	default_provisional_account: "vf_default_provisional_account",
+	purchase_expense_account: "vf_purchase_expense_account",
+	purchase_expense_contra_account: "vf_purchase_expense_contra_account",
+	selling_cost_center: "vf_selling_cost_center",
+	income_account: "vf_income_account",
+	default_cogs_account: "vf_default_cogs_account",
+	deferred_expense_account: "vf_deferred_expense_account",
+	deferred_revenue_account: "vf_deferred_revenue_account",
+};
+
 frappe.ui.form.on("Item", {
 	valuation_method(frm) {
 		if (!frm.is_new() && frm.doc.valuation_method === "Moving Average") {
@@ -345,6 +364,59 @@ frappe.ui.form.on("Item", {
 	},
 });
 
+frappe.ui.form.on("Item Default", {
+	form_render: function (frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		if (!row || !row.company) return;
+
+		setTimeout(() => {
+			const $grid_row = frm.fields_dict["item_defaults"].grid.wrapper.find(
+				`.grid-row[data-name="${cdn}"]`
+			);
+			$grid_row
+				.find(".column-label")
+				.first()
+				.text(
+					frm.doc.item_group
+						? `${__("From Item Group")} - ${frm.doc.item_group}`
+						: __("From Item Group")
+				);
+		}, 50);
+
+		const $grid_row = frm.fields_dict["item_defaults"].grid.wrapper.find(`.grid-row[data-name="${cdn}"]`);
+
+		if ($grid_row.length && !$grid_row.find(".item-defaults-desc").length) {
+			let description = "";
+
+			description = __(
+				"Defaults inherited from the item group appear on the left. Use the right column to override them for this specific item. Leave a field empty to keep the group default."
+			);
+
+			$grid_row.find(".grid-form-body").prepend(`
+				<div class="item-defaults-desc" style="
+					padding: 10px 12px;
+					margin: 0 0 12px 0;
+					border-radius: var(--border-radius-sm);
+					background: var(--gray-50);
+					font-size: inherit;
+					color: var(--text-light);
+					line-height: 1.5;
+				">
+					${description}
+				</div>
+			`);
+		}
+
+		erpnext.item.populate_virtual_fields(frm, cdt, cdn, row);
+	},
+
+	company: function (frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		if (!row || !row.company) return;
+		erpnext.item.populate_virtual_fields(frm, cdt, cdn, row);
+	},
+});
+
 frappe.ui.form.on("Item Reorder", {
 	reorder_levels_add: function (frm, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
@@ -448,6 +520,31 @@ function render_serial_batch_banner(wrapper) {
 }
 
 $.extend(erpnext.item, {
+	populate_virtual_fields: function (frm, cdt, cdn, row) {
+		if (!frm.doc.item_group || !row.company) return;
+
+		frappe.call({
+			method: "frappe.client.get",
+			args: { doctype: "Item Group", name: frm.doc.item_group },
+			freeze: false,
+			callback: function (r) {
+				if (!r.message) return;
+
+				const group_defaults =
+					(r.message.item_group_defaults || []).find((d) => d.company === row.company) || {};
+
+				Object.entries(virtual_field_map).forEach(([real_field, vf_field]) => {
+					frappe.model.set_value(
+						cdt,
+						cdn,
+						vf_field,
+						group_defaults[real_field] || __("Not configured")
+					);
+				});
+			},
+		});
+	},
+
 	setup_queries: function (frm) {
 		frm.fields_dict["item_defaults"].grid.get_field("expense_account").get_query = function (
 			doc,
