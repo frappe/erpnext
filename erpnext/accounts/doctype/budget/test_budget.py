@@ -19,10 +19,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 class TestBudget(ERPNextTestSuite):
 	def setUp(self):
 		frappe.db.set_single_value("Accounts Settings", "use_legacy_budget_controller", False)
-		self.company = "_Test Company"
-		self.fiscal_year = frappe.db.get_value("Fiscal Year", {}, "name")
-		self.account = "_Test Account Cost for Goods Sold - _TC"
-		self.cost_center = "_Test Cost Center - _TC"
 
 	def test_monthly_budget_crossed_ignore(self):
 		set_total_expense_zero(nowdate(), "cost_center")
