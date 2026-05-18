@@ -21,7 +21,7 @@ frappe.query_reports["General Ledger"] = {
 			fieldname: "from_date",
 			label: __("From Date"),
 			fieldtype: "Date",
-			default: frappe.datetime.add_months(frappe.datetime.get_today(), -1),
+			default: frappe.datetime.get_today(),
 			reqd: 1,
 			width: "60px",
 		},
@@ -235,3 +235,19 @@ frappe.query_reports["General Ledger"] = {
 };
 
 erpnext.utils.add_dimensions("General Ledger", 15);
+
+frappe.query_reports["General Ledger"].onload = function(report) {
+	frappe.call({
+		method: "erpnext.accounts.utils.get_fiscal_year",
+		args: {
+			date: frappe.datetime.get_today(),
+			company: report.get_filter_value("company")
+		},
+		callback: function(r) {
+			if (r.message) {
+				report.set_filter_value("from_date", r.message[1]);
+				report.set_filter_value("to_date", frappe.datetime.get_today());
+			}
+		}
+	});
+};
