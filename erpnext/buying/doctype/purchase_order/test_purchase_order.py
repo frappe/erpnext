@@ -386,9 +386,9 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		else:
 			# update valid from
 			frappe.db.sql(
-				"""UPDATE `tabItem Tax` set valid_from = CURRENT_DATE
+				"""UPDATE `tabItem Tax` set valid_from = %(today)s
 				where parent = %(item)s and item_tax_template = %(tax)s""",
-				{"item": item, "tax": tax_template},
+				{"item": item, "tax": tax_template, "today": nowdate()},
 			)
 
 		po = create_purchase_order(item_code=item, qty=1, do_not_save=1)

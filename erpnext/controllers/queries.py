@@ -839,13 +839,13 @@ def get_doctype_wise_filters(filters):
 def get_batch_numbers(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	query = """select batch_id from `tabBatch`
 			where disabled = 0
-			and (expiry_date >= CURRENT_DATE or expiry_date IS NULL)
+			and (expiry_date >= %(today)s or expiry_date IS NULL)
 			and name like {txt}""".format(txt=frappe.db.escape(f"%{txt}%"))
 
 	if filters and filters.get("item"):
 		query += " and item = {item}".format(item=frappe.db.escape(filters.get("item")))
 
-	return frappe.db.sql(query, filters)
+	return frappe.db.sql(query, {"today": nowdate()})
 
 
 @frappe.whitelist()

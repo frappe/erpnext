@@ -4,6 +4,7 @@
 
 import frappe
 from frappe.model.document import Document
+from frappe.utils import add_days, nowdate
 
 
 class ProjectUpdate(Document):
@@ -47,14 +48,14 @@ def daily_reminder():
 		for drafts in draft:
 			number_of_drafts = drafts[0]
 		update = frappe.db.sql(
-			"""SELECT name,date,time,progress,progress_details FROM `tabProject Update` WHERE `tabProject Update`.project = %s AND date = DATE_ADD(CURRENT_DATE, INTERVAL -1 DAY);""",
-			project_name,
+			"""SELECT name,date,time,progress,progress_details FROM `tabProject Update` WHERE `tabProject Update`.project = %s AND date = %s;""",
+			(project_name, add_days(nowdate(), -1)),
 		)
 		email_sending(project_name, frequency, date_start, date_end, progress, number_of_drafts, update)
 
 
 def email_sending(project_name, frequency, date_start, date_end, progress, number_of_drafts, update):
-	holiday = frappe.db.sql("""SELECT holiday_date FROM `tabHoliday` where holiday_date = CURRENT_DATE;""")
+	holiday = frappe.db.sql("""SELECT holiday_date FROM `tabHoliday` where holiday_date = %s;""", nowdate())
 	msg = (
 		"<p>Project Name: "
 		+ project_name
