@@ -4221,7 +4221,8 @@
 	"Japan": {
 		"Japan Tax 10%": {
 			"account_name": "CT 10%",
-			"tax_rate": 10.00
+			"tax_rate": 10.00,
+			"default": 1
 		},
 		"Japan Tax 8%": {
 			"account_name": "CT 8%",
