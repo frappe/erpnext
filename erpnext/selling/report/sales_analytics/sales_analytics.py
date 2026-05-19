@@ -98,6 +98,53 @@ class Analytics:
 
 		self.filters["company"] = company_list
 
+	def get_user_permission_filters(self):
+		filters = {}
+
+		for doctype, fieldname in [("Territory", "territory"), ("Customer Group", "customer_group")]:
+			permitted = self.get_permitted_values(doctype)
+			if permitted is not None:
+				filters[fieldname] = ["in", permitted]
+
+		permitted_customers = self.get_permitted_values("Customer")
+		if permitted_customers is not None:
+			field = (
+				"party_name"
+				if self.filters.doc_type == "Quotation"
+				else "party"
+				if self.filters.doc_type == "Payment Entry"
+				else "customer"
+			)
+			filters[field] = ["in", permitted_customers]
+
+		permitted_suppliers = self.get_permitted_values("Supplier")
+		if permitted_suppliers is not None:
+			field = "party" if self.filters.doc_type == "Payment Entry" else "supplier"
+			filters[field] = ["in", permitted_suppliers]
+
+		return filters
+
+	def get_permitted_values(self, doctype):
+		from frappe.permissions import get_user_permissions
+
+		user_perms = get_user_permissions(frappe.session.user)
+		raw = user_perms.get(doctype, [])
+		if not raw:
+			return None
+
+		permitted = {p["doc"] for p in raw}
+
+		tree_doctypes = {"Territory", "Customer Group", "Item Group", "Supplier Group"}
+		if doctype in tree_doctypes:
+			for doc in list(permitted):
+				lft, rgt = frappe.db.get_value(doctype, doc, ["lft", "rgt"]) or (None, None)
+				if lft and rgt:
+					permitted.update(
+						frappe.get_all(doctype, filters={"lft": [">", lft], "rgt": ["<", rgt]}, pluck="name")
+					)
+
+		return list(permitted)
+
 	def run(self):
 		self.update_company_list_for_parent_company()
 		self.get_columns()
@@ -250,6 +297,8 @@ class Analytics:
 		if self.filters.doc_type in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
 			filters.update({"is_opening": "No"})
 
+		filters.update(self.get_user_permission_filters())
+
 		self.entries = frappe.get_all(
 			self.filters.doc_type, fields=[entity, entity_name, value_field, self.date_field], filters=filters
 		)
@@ -267,7 +316,7 @@ class Analytics:
 		doctype = DocType(self.filters.doc_type)
 		doctype_item = DocType(f"{self.filters.doc_type} Item")
 
-		self.entries = (
+		query = (
 			frappe.qb.from_(doctype_item)
 			.join(doctype)
 			.on(doctype.name == doctype_item.parent)
@@ -283,7 +332,12 @@ class Analytics:
 				& (doctype.company.isin(self.filters.company))
 				& (doctype[self.date_field].between(self.filters.from_date, self.filters.to_date))
 			)
-		).run(as_dict=True)
+		)
+
+		for field, values in self.get_user_permission_filters().items():
+			query = query.where(doctype[field].isin(values[1]))
+
+		self.entries = query.run(as_dict=True)
 
 		self.entity_names = {}
 		for d in self.entries:
@@ -312,6 +366,8 @@ class Analytics:
 		if self.filters.doc_type in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
 			filters.update({"is_opening": "No"})
 
+		filters.update(self.get_user_permission_filters())
+
 		self.entries = frappe.get_all(
 			self.filters.doc_type,
 			fields=[entity_field, value_field, self.date_field],
@@ -328,7 +384,7 @@ class Analytics:
 		doctype = DocType(self.filters.doc_type)
 		doctype_item = DocType(f"{self.filters.doc_type} Item")
 
-		self.entries = (
+		query = (
 			frappe.qb.from_(doctype_item)
 			.join(doctype)
 			.on(doctype.name == doctype_item.parent)
@@ -342,7 +398,12 @@ class Analytics:
 				& (doctype.company.isin(self.filters.company))
 				& (doctype[self.date_field].between(self.filters.from_date, self.filters.to_date))
 			)
-		).run(as_dict=True)
+		)
+
+		for field, values in self.get_user_permission_filters().items():
+			query = query.where(doctype[field].isin(values[1]))
+
+		self.entries = query.run(as_dict=True)
 
 		self.get_groups()
 
@@ -366,6 +427,8 @@ class Analytics:
 
 		if self.filters.doc_type in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
 			filters.update({"is_opening": "No"})
+
+		filters.update(self.get_user_permission_filters())
 
 		self.entries = frappe.get_all(
 			self.filters.doc_type, fields=[entity, value_field, self.date_field], filters=filters
