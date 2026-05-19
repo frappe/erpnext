@@ -43,6 +43,7 @@ class AccountingDimension(Document):
 	def validate(self):
 		self.validate_doctype()
 		validate_column_name(self.fieldname)
+		self.validate_fieldname_conflict()
 		self.validate_dimension_defaults()
 
 	def validate_doctype(self):
@@ -73,6 +74,27 @@ class AccountingDimension(Document):
 			message = _("Cannot change Reference Document Type.")
 			message += _("Please create a new Accounting Dimension if required.")
 			frappe.throw(message)
+
+	def validate_fieldname_conflict(self):
+		conflicting_doctypes = []
+		for doctype in get_doctypes_with_dimensions():
+			meta = frappe.get_meta(doctype, cached=False)
+			if any(f.fieldname == self.fieldname for f in meta.get("fields")):
+				conflicting_doctypes.append(doctype)
+
+		if conflicting_doctypes:
+			frappe.msgprint(
+				_(
+					"Fieldname {0} already exists in the following doctypes: {1}. "
+					"A separate dimension field will not be added to these doctypes. "
+					"GL Entries will use the value of the existing field as the dimension value."
+				).format(
+					frappe.bold(self.fieldname),
+					", ".join(frappe.bold(d) for d in conflicting_doctypes),
+				),
+				title=_("Fieldname Conflict"),
+				indicator="orange",
+			)
 
 	def validate_dimension_defaults(self):
 		companies = []
