@@ -667,7 +667,7 @@ erpnext.PointOfSale.Payment = class {
 		if (docstatus === 0)
 			this.$payment_modes.append(
 				`<div class="w-full pr-2">
-					<div class="add-mode-of-payment w-half text-grey mb-4 no-select pointer">+ Add Payment Method</div>
+					<div class="add-mode-of-payment w-half text-grey-700 mb-4 no-select pointer">
 				</div>`
 			);
 	}
