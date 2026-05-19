@@ -488,6 +488,10 @@ class StockReconciliation(StockController):
 		"""Remove items if qty or rate is not changed"""
 		self.difference_amount = 0.0
 
+		remove_unchanged = frappe.db.get_single_value(
+			"Stock Settings", "remove_unchanged_stock_reconciliation_entries"
+		)
+
 		def _changed(item):
 			if item.current_serial_and_batch_bundle:
 				bundle_data = frappe.get_all(
@@ -535,6 +539,7 @@ class StockReconciliation(StockController):
 				(item.qty is None or item.qty == item_dict.get("qty"))
 				and (valuation_rate is None or valuation_rate == rate)
 				and (not item.serial_no or (item.serial_no == item_dict.get("serial_nos")))
+				and remove_unchanged
 			):
 				return False
 			else:
@@ -806,11 +811,23 @@ class StockReconciliation(StockController):
 
 			self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
 		elif self.docstatus == 1:
-			frappe.throw(
-				_(
-					"No stock ledger entries were created. Please set the quantity or valuation rate for the items properly and try again."
-				)
+			remove_unchanged = frappe.db.get_single_value(
+				"Stock Settings", "remove_unchanged_stock_reconciliation_entries"
 			)
+			if not remove_unchanged:
+				frappe.throw(
+					_(
+						"Cannot submit Stock Reconciliation: no items have any change in quantity or value, "
+						"so no stock ledger entries would be created."
+					)
+				)
+			else:
+				frappe.throw(
+					_(
+						"No stock ledger entries were created. Please set the quantity or valuation rate "
+						"for the items properly and try again."
+					)
+				)
 
 	def make_adjustment_entry(self, row, sl_entries):
 		from erpnext.stock.stock_ledger import get_stock_value_difference

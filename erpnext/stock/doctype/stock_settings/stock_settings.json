@@ -25,6 +25,8 @@
   "allow_to_edit_stock_uom_qty_for_purchase",
   "section_break_ylhd",
   "allow_uom_with_conversion_rate_defined_in_item",
+  "column_break_udpi",
+  "remove_unchanged_stock_reconciliation_entries",
   "stock_validations_tab",
   "section_break_9",
   "over_delivery_receipt_allowance",
@@ -532,6 +534,17 @@
    "fieldname": "enable_serial_and_batch_no_for_item",
    "fieldtype": "Check",
    "label": "Activate Serial / Batch No for Item"
+  },
+  {
+   "fieldname": "column_break_udpi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "description": "If enabled, Stock Reconciliation item rows with no changes in quantity from the current stock will be removed on save.",
+   "fieldname": "remove_unchanged_stock_reconciliation_entries",
+   "fieldtype": "Check",
+   "label": "Remove Unchanged Stock Reconciliation Entries"
   }
  ],
  "icon": "icon-cog",
@@ -539,7 +552,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-04-14 13:51:49.545114",
+ "modified": "2026-05-19 16:29:58.147812",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

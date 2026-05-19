@@ -54,6 +54,7 @@ class StockSettings(Document):
 		over_delivery_receipt_allowance: DF.Float
 		over_picking_allowance: DF.Percent
 		pick_serial_and_batch_based_on: DF.Literal["FIFO", "LIFO", "Expiry"]
+		remove_unchanged_stock_reconciliation_entries: DF.Check
 		reorder_email_notify: DF.Check
 		role_allowed_to_create_edit_back_dated_transactions: DF.Link | None
 		role_allowed_to_over_deliver_receive: DF.Link | None

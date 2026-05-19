@@ -1841,6 +1841,59 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 
 		self.assertEqual(frappe.get_value("Serial No", serial_no, "status"), "Delivered")
 
+	def test_unchanged_rows_kept_when_setting_disabled(self):
+		item_code = self.make_item().name
+
+		create_stock_reconciliation(item_code=item_code, qty=10, rate=100)
+
+		frappe.db.set_single_value(
+			"Stock Settings",
+			"remove_unchanged_stock_reconciliation_entries",
+			0,
+		)
+
+		sr2 = create_stock_reconciliation(item_code=item_code, qty=10, rate=100, do_not_submit=True)
+
+		# If the setting is disabled, we expect the stock reconciliation to still have the entry.
+		self.assertEqual(len(sr2.items), 1)
+
+	def test_unchanged_rows_removed_when_setting_enabled(self):
+		item_code = self.make_item().name
+
+		create_stock_reconciliation(item_code=item_code, qty=10, rate=100)
+
+		frappe.db.set_single_value(
+			"Stock Settings",
+			"remove_unchanged_stock_reconciliation_entries",
+			1,
+		)
+
+		# If the setting is enabled, we expect the stock reconciliation to end up empty
+		# because all entries have unchanged values.
+		self.assertRaises(
+			EmptyStockReconciliationItemsError,
+			create_stock_reconciliation,
+			item_code=item_code,
+			qty=10,
+			rate=100,
+		)
+
+	def test_unchanged_only_reco_cannot_be_submitted(self):
+		item_code = self.make_item().name
+
+		create_stock_reconciliation(item_code=item_code, qty=10, rate=100)
+
+		frappe.db.set_single_value(
+			"Stock Settings",
+			"remove_unchanged_stock_reconciliation_entries",
+			0,
+		)
+
+		sr = create_stock_reconciliation(item_code=item_code, qty=10, rate=100, do_not_submit=True)
+
+		# Submitting with unchanged rows only is not supported and should throw a descriptive error.
+		self.assertRaises(frappe.ValidationError, sr.submit)
+
 
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)
