@@ -8,7 +8,7 @@
 		<div class="workstation-image {{row.workstation_off}}" onclick="location.href='{{ frappe.utils.get_form_link('Workstation', row.name)}}'">
 			<div class="workstation-image-container flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
 				{% if(row.status_image) { %}
-					<img class="workstation-image-cls" src="{{row.status_image}}">
+					<img class="workstation-image-cls" src="{{row.status_image}}" alt="Workstation status image">
 				{% } else { %}
 					<div class="workstation-image-cls workstation-abbr" style="margin:6px; height:82px">{{frappe.get_abbr(row.name, 2)}}</div>
 				{% } %}
