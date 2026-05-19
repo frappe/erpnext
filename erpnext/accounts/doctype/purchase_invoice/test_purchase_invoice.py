@@ -2962,6 +2962,52 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		pr = make_purchase_receipt_from_pi(pi.name)
 		self.assertFalse(pr.items)
 
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"enable_common_party_accounting": True})
+	def test_purchase_invoice_return_common_party_je_has_no_negative_amounts(self):
+		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
+			make_customer,
+		)
+		from erpnext.accounts.doctype.party_link.party_link import create_party_link
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		customer = make_customer(customer="_Test Common Party Return PI")
+		supplier = create_supplier(supplier_name="_Test Common Party Return PI").name
+		# Supplier must be secondary so get_common_party_link finds it via the PI's party_type
+		party_link = create_party_link("Customer", customer, supplier)
+
+		pi = make_purchase_invoice(supplier=supplier, parent_cost_center="_Test Cost Center - _TC")
+
+		return_pi = make_return_doc(pi.doctype, pi.name)
+		return_pi.submit()
+
+		# JE for the return should credit the supplier (secondary/reconciliation) account
+		# and debit the customer (primary) account — all positive amounts
+		jv_accounts = frappe.get_all(
+			"Journal Entry Account",
+			filters={"reference_type": return_pi.doctype, "reference_name": return_pi.name, "docstatus": 1},
+			fields=["debit_in_account_currency", "credit_in_account_currency", "account"],
+		)
+
+		self.assertTrue(jv_accounts, "Expected a Journal Entry for the return invoice")
+		for row in jv_accounts:
+			self.assertGreaterEqual(
+				row.debit_in_account_currency,
+				0,
+				f"Negative debit on account {row.account}",
+			)
+			self.assertGreaterEqual(
+				row.credit_in_account_currency,
+				0,
+				f"Negative credit on account {row.account}",
+			)
+
+		# Supplier (secondary) account must be credited, not debited
+		supplier_row = next(r for r in jv_accounts if r.account == pi.credit_to)
+		self.assertGreater(supplier_row.credit_in_account_currency, 0)
+		self.assertEqual(supplier_row.debit_in_account_currency, 0)
+
+		party_link.delete()
+
 
 def set_advance_flag(company, flag, default_account):
 	frappe.db.set_value(
