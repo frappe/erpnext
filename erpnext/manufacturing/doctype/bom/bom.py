@@ -1692,11 +1692,8 @@ def add_operating_cost_component_wise(stock_entry, work_order=None, op_expense_a
 			)
 
 			remaining_qty = row.completed_qty - consumed_op_cost.get("consumed_qty", 0)
-			per_unit_cost = flt(actual_cp_operating_cost) / (remaining_qty or 1)
-			operating_cost = flt(
-				per_unit_cost * stock_entry.fg_completed_qty,
-				frappe.get_precision("Landed Cost Taxes and Charges", "amount"),
-			)
+			per_unit_cost = actual_cp_operating_cost / (remaining_qty or 1)
+			operating_cost = per_unit_cost * stock_entry.fg_completed_qty
 
 			if actual_cp_operating_cost:
 				stock_entry.append(
@@ -1706,9 +1703,10 @@ def add_operating_cost_component_wise(stock_entry, work_order=None, op_expense_a
 						"description": _("{0} Operating Cost for operation {1}").format(
 							wc.operating_component, row.operation
 						),
-						"amount": operating_cost
-						if operating_cost <= actual_cp_operating_cost
-						else actual_cp_operating_cost,
+						"amount": flt(
+							min(operating_cost, actual_cp_operating_cost),
+							frappe.get_precision("Landed Cost Taxes and Charges", "amount"),
+						),
 						"has_operating_cost": 1,
 						"operation_id": row.name,
 						"operating_component": wc.operating_component,
@@ -1750,7 +1748,7 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None, job_
 					"expense_account": expense_account,
 					"description": _("Operating Cost as per Work Order / BOM"),
 					"amount": flt(
-						remaining_operating_cost,
+						remaining_operating_cost * stock_entry.fg_completed_qty,
 						frappe.get_precision("Landed Cost Taxes and Charges", "amount"),
 					),
 					"has_operating_cost": 1,

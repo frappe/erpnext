@@ -3893,9 +3893,7 @@ def get_consumed_operating_cost(wo_name, bom_no, operation_id):
 			& (table.purpose == "Manufacture")
 			& (table.bom_no == bom_no)
 			& (child_table.has_operating_cost == 1)
-			& (
-				(child_table.operation_id == operation_id) | (child_table.operation_id.isnull())
-			)  # the isnull part is to ensure backward compatibility
+			& (child_table.operation_id == operation_id)
 		)
 		.groupby(child_table.operation_id, child_table.operating_component)
 	)
