@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-17 10:04+0000\n"
-"PO-Revision-Date: 2026-05-18 20:21\n"
+"PO-Revision-Date: 2026-05-19 20:28\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -2285,7 +2285,7 @@ msgstr ""
 #. Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Action if same rate is not maintained"
-msgstr ""
+msgstr "اقدام در صورت عدم حفظ نرخ یکسان"
 
 #. Label of the maintain_same_rate_action (Select) field in DocType 'Selling
 #. Settings'
@@ -4082,7 +4082,7 @@ msgstr "اجازه افزودن یک آیتم چندین بار در یک ترا
 #. Label of the allow_multiple_items (Check) field in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Allow Item to be added multiple times in a transaction"
-msgstr ""
+msgstr "اجازه دهید آیتم چندین بار در یک تراکنش اضافه شود"
 
 #. Label of the allow_lead_duplication_based_on_emails (Check) field in DocType
 #. 'CRM Settings'
@@ -6194,7 +6194,7 @@ msgstr "مقدار ویژگی"
 
 #: erpnext/stock/doctype/item/item.py:896
 msgid "Attribute Value {0} is not valid for the selected attribute {1}."
-msgstr ""
+msgstr "مقدار ویژگی {0} برای ویژگی انتخاب شده {1} معتبر نیست."
 
 #: erpnext/stock/doctype/item/item.py:1042
 msgid "Attribute table is mandatory"
@@ -6206,11 +6206,11 @@ msgstr "مقدار مشخصه: {0} باید فقط یک بار ظاهر شود"
 
 #: erpnext/stock/doctype/item/item.py:890
 msgid "Attribute {0} is disabled."
-msgstr ""
+msgstr "ویژگی {0} غیرفعال است."
 
 #: erpnext/stock/doctype/item/item.py:878
 msgid "Attribute {0} is not valid for the selected template."
-msgstr ""
+msgstr "ویژگی {0} برای الگوی انتخاب شده معتبر نیست."
 
 #: erpnext/stock/doctype/item/item.py:1046
 msgid "Attribute {0} selected multiple times in Attributes Table"
@@ -6404,13 +6404,13 @@ msgstr "بستن خودکار فرصت پاسخ‌داده‌شده پس از ت
 #. Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Auto create Purchase Receipt"
-msgstr ""
+msgstr "ایجاد خودکار رسید خرید"
 
 #. Label of the auto_create_subcontracting_order (Check) field in DocType
 #. 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Auto create Subcontracting Order"
-msgstr ""
+msgstr "ایجاد خودکار سفارش پیمانکاری فرعی"
 
 #. Label of the auto_create_assets (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -16959,7 +16959,7 @@ msgstr "غیر فعال کردن به حروف"
 
 #: erpnext/accounts/report/general_ledger/general_ledger.js:182
 msgid "Disable Opening Balance Calculation"
-msgstr ""
+msgstr "غیرفعال کردن محاسبه تراز اولیه"
 
 #. Label of the disable_rounded_total (Check) field in DocType 'POS Profile'
 #. Label of the disable_rounded_total (Check) field in DocType 'Purchase
@@ -17004,7 +17004,7 @@ msgstr ""
 #. Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Disable last purchase rate"
-msgstr ""
+msgstr "غیرفعال کردن آخرین نرخ خرید"
 
 #. Description of the 'Disabled' (Check) field in DocType 'Financial Report
 #. Template'
@@ -29052,7 +29052,7 @@ msgstr ""
 #. Label of the maintain_same_rate (Check) field in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Maintain same rate throughout the purchase  cycle"
-msgstr ""
+msgstr "حفظ نرخ یکسان در طول چرخه خرید"
 
 #. Group in Asset's connections
 #. Label of a Card Break in the Assets Workspace
@@ -59736,7 +59736,7 @@ msgstr ""
 #. (Check) field in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Warn or stop if Item rate is changed in Purchase Invoice or Purchase Receipt generated from a Purchase Order."
-msgstr ""
+msgstr "در صورت تغییر نرخ آیتم در فاکتور خرید یا رسید خرید تولیدشده از سفارش خرید، هشدار دهید یا متوقف کنید."
 
 #: erpnext/projects/doctype/timesheet_detail/timesheet_detail.py:134
 msgid "Warning - Row {0}: Billing Hours are more than Actual Hours"
@@ -59862,7 +59862,7 @@ msgstr ""
 
 #: banking/src/pages/BankStatementImporter.tsx:140
 msgid "We support uploading CSV, XLSX and XLS files. Please make sure the file contains the correct columns."
-msgstr ""
+msgstr "ما از آپلود فایل‌های CSV، XLSX و XLS پشتیبانی می‌کنیم. لطفاً مطمئن شوید که فایل حاوی ستون‌های صحیح است."
 
 #: erpnext/www/support/index.html:7
 msgid "We're here to help!"
