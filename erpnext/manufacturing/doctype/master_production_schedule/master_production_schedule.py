@@ -289,7 +289,7 @@ class MasterProductionSchedule(Document):
 		return item_wise_data
 
 	def add_mps_data(self, data):
-		data = frappe._dict(sorted(data.items(), key=lambda x: x[0][1]))
+		data = frappe._dict(sorted(data.items(), key=lambda x: x[0][1] or ""))
 
 		for key in data:
 			row = data[key]

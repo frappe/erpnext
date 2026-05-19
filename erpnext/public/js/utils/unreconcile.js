@@ -140,8 +140,7 @@ erpnext.accounts.unreconcile_payment = {
 											selected_allocations
 										);
 									erpnext.accounts.unreconcile_payment.create_unreconcile_docs(
-										selection_map,
-										frm
+										selection_map
 									);
 									d.hide();
 								} else {
@@ -157,22 +156,11 @@ erpnext.accounts.unreconcile_payment = {
 		}
 	},
 
-	create_unreconcile_docs(selection_map, frm) {
+	create_unreconcile_docs(selection_map) {
 		frappe.call({
 			method: "erpnext.accounts.doctype.unreconcile_payment.unreconcile_payment.create_unreconcile_doc_for_selection",
 			args: {
 				selections: selection_map,
-			},
-			callback: function (r) {
-				if (r.exc) {
-					return;
-				}
-
-				if (frm && !frm.is_new()) {
-					frm.reload_doc();
-				}
-
-				frappe.show_alert({ message: __("Unreconciled successfully"), indicator: "green" });
 			},
 		});
 	},

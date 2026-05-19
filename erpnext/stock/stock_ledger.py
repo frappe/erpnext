@@ -2433,7 +2433,9 @@ def get_stock_value_difference(
 	)
 
 	if voucher_detail_no:
-		query = query.where(table.voucher_detail_no != voucher_detail_no)
+		query = query.where(
+			(table.voucher_detail_no != voucher_detail_no) | (table.voucher_detail_no.isnull())
+		)
 
 	elif voucher_no:
 		query = query.where(table.voucher_no != voucher_no)

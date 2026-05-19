@@ -2899,7 +2899,9 @@ class AccountsController(TransactionBase):
 		advance_entry.party_type = primary_party_type
 		advance_entry.party = primary_party
 		advance_entry.cost_center = self.cost_center or erpnext.get_default_cost_center(self.company)
-		advance_entry.is_advance = "Yes"
+		# For returns the direction is reversed, so this entry cannot be an advance
+		# (JE validation: Supplier advance must be debit, Customer advance must be credit)
+		advance_entry.is_advance = "No" if self.is_return else "Yes"
 
 		# Update dimensions
 		dimensions_dict = frappe._dict()
@@ -2931,35 +2933,26 @@ class AccountsController(TransactionBase):
 				)
 			)
 
-			# Convert outstanding amount from secondary to primary account currency, if needed
+			outstanding_amount = abs(self.outstanding_amount)
+			os_in_default_currency = outstanding_amount * exc_rate_secondary_to_default
+			os_in_primary_currency = outstanding_amount * exc_rate_secondary_to_primary
 
-			os_in_default_currency = self.outstanding_amount * exc_rate_secondary_to_default
-			os_in_primary_currency = self.outstanding_amount * exc_rate_secondary_to_primary
+			# SI normal and PI return → reconciliation is credit; SI return and PI normal → debit
+			reconciliation_is_credit = (self.doctype == "Sales Invoice") != bool(self.is_return)
+			_set_je_amounts(
+				reconcilation_entry, outstanding_amount, os_in_default_currency, reconciliation_is_credit
+			)
+			_set_je_amounts(
+				advance_entry, os_in_primary_currency, os_in_default_currency, not reconciliation_is_credit
+			)
 
-			if self.doctype == "Sales Invoice":
-				# Calculate credit and debit values for reconciliation and advance entries
-				reconcilation_entry.credit_in_account_currency = self.outstanding_amount
-				reconcilation_entry.credit = os_in_default_currency
-
-				advance_entry.debit_in_account_currency = os_in_primary_currency
-				advance_entry.debit = os_in_default_currency
-			else:
-				advance_entry.credit_in_account_currency = os_in_primary_currency
-				advance_entry.credit = os_in_default_currency
-
-				reconcilation_entry.debit_in_account_currency = self.outstanding_amount
-				reconcilation_entry.debit = os_in_default_currency
-
-			# Set exchange rates for entries
 			reconcilation_entry.exchange_rate = exc_rate_secondary_to_default
 			advance_entry.exchange_rate = exc_rate_primary_to_default
 		else:
-			if self.doctype == "Sales Invoice":
-				reconcilation_entry.credit_in_account_currency = self.outstanding_amount
-				advance_entry.debit_in_account_currency = self.outstanding_amount
-			else:
-				advance_entry.credit_in_account_currency = self.outstanding_amount
-				reconcilation_entry.debit_in_account_currency = self.outstanding_amount
+			outstanding_amount = abs(self.outstanding_amount)
+			reconciliation_is_credit = (self.doctype == "Sales Invoice") != bool(self.is_return)
+			_set_je_amounts(reconcilation_entry, outstanding_amount, is_credit=reconciliation_is_credit)
+			_set_je_amounts(advance_entry, outstanding_amount, is_credit=not reconciliation_is_credit)
 
 		jv.multi_currency = multi_currency
 		jv.append("accounts", reconcilation_entry)
@@ -3697,6 +3690,17 @@ def set_child_tax_template_and_map(item, child_item, parent_doc):
 		tax_template=child_item.item_tax_template,
 		as_json=True,
 	)
+
+
+def _set_je_amounts(entry, amount, default_amount=None, is_credit=True):
+	if is_credit:
+		entry.credit_in_account_currency = amount
+		if default_amount is not None:
+			entry.credit = default_amount
+	else:
+		entry.debit_in_account_currency = amount
+		if default_amount is not None:
+			entry.debit = default_amount
 
 
 def add_taxes_from_tax_template(child_item, parent_doc, db_insert=True):

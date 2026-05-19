@@ -1087,7 +1087,6 @@ def create_transaction_deletion_request(company: str):
 	tdr.reload()
 
 	tdr.submit()
-	tdr.start_deletion_tasks()
 
 	frappe.msgprint(
 		_("Transaction Deletion Document {0} has been triggered for company {1}").format(

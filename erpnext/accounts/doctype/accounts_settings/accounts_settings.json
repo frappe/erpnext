@@ -97,7 +97,6 @@
   "receivable_payable_fetch_method",
   "default_ageing_range",
   "column_break_ntmi",
-  "drop_ar_procedures",
   "legacy_section",
   "ignore_is_opening_check_for_reporting",
   "tab_break_dpet",
@@ -526,7 +525,7 @@
    "fieldname": "receivable_payable_fetch_method",
    "fieldtype": "Select",
    "label": "Data Fetch Method",
-   "options": "Buffered Cursor\nUnBuffered Cursor\nRaw SQL"
+   "options": "Buffered Cursor\nUnBuffered Cursor"
   },
   {
    "fieldname": "accounts_receivable_payable_tuning_section",
@@ -594,13 +593,6 @@
   {
    "fieldname": "column_break_ntmi",
    "fieldtype": "Column Break"
-  },
-  {
-   "depends_on": "eval:doc.receivable_payable_fetch_method == \"Raw SQL\"",
-   "description": "Drops existing SQL Procedures and Function setup by Accounts Receivable report",
-   "fieldname": "drop_ar_procedures",
-   "fieldtype": "Button",
-   "label": "Drop Procedures"
   },
   {
    "default": "0",
@@ -749,7 +741,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-04-22 01:38:42.418238",
+ "modified": "2026-05-18 12:16:33.679345",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

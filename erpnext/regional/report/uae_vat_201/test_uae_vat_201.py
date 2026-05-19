@@ -4,6 +4,7 @@ import erpnext
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.regional.report.uae_vat_201.uae_vat_201 import (
+	execute,
 	get_exempt_total,
 	get_standard_rated_expenses_tax,
 	get_standard_rated_expenses_total,
@@ -29,6 +30,13 @@ class TestUaeVat201(ERPNextTestSuite):
 		make_item("_Test UAE VAT Item", properties={"is_zero_rated": 0, "is_exempt": 0})
 		make_item("_Test UAE VAT Zero Rated Item", properties={"is_zero_rated": 1, "is_exempt": 0})
 		make_item("_Test UAE VAT Exempt Item", properties={"is_zero_rated": 0, "is_exempt": 1})
+
+	def test_validate_company_region(self):
+		self.assertRaises(
+			frappe.exceptions.ValidationError,
+			execute,
+			{"company": "_Test Company"},
+		)
 
 	def test_uae_vat_201_report(self):
 		make_sales_invoices()

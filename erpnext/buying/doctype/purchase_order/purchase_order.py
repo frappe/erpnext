@@ -469,7 +469,6 @@ class PurchaseOrder(BuyingController):
 			self.update_status_updater_if_from_pp()
 
 		if self.has_drop_ship_item():
-			self.update_delivered_qty_in_sales_order()
 			self.set_received_qty_to_zero_for_drop_ship_items()
 			self.update_receiving_percentage()
 
@@ -600,9 +599,17 @@ class PurchaseOrder(BuyingController):
 					)
 				)
 
-			item.received_qty += d.get("qty_change")
+			qty_change = item.received_qty + d.get("qty_change")
+			item.db_set("received_qty", qty_change, update_modified=True)
+			self.add_comment(
+				"Label",
+				_("updated delivered quantity for item {0} to {1}").format(
+					frappe.bold(item.item_code), frappe.bold(qty_change)
+				),
+			)
 		self.update_receiving_percentage()
-		self.save()
+		self.set_status(update=True)
+		self.update_delivered_qty_in_sales_order()
 
 	def is_against_so(self):
 		return any(d.sales_order for d in self.items if d.sales_order)
