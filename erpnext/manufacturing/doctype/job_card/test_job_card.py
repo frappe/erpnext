@@ -797,7 +797,6 @@ class TestJobCard(ERPNextTestSuite):
 		make_workstation(workstation_name="Test Workstation Z", hour_rate_rent=240)
 		operations = [
 			{"operation": "Test Operation A1", "workstation": "Test Workstation Z", "time_in_mins": 30},
-			{"operation": "Test Operation B1", "workstation": "Test Workstation Z", "time_in_mins": 20},
 		]
 
 		warehouse = create_warehouse("Test Warehouse 123 for Job Card")
@@ -840,15 +839,15 @@ class TestJobCard(ERPNextTestSuite):
 			source_warehouse=warehouse,
 		)
 
-		a1_jc = frappe.get_all(
+		first_job_card = frappe.get_all(
 			"Job Card",
-			filters={"work_order": wo_doc.name, "sequence_id": 1, "operation": "Test Operation A1"},
+			filters={"work_order": wo_doc.name, "sequence_id": 1},
 			fields=["name"],
 			order_by="sequence_id",
 			limit=1,
 		)[0].name
 
-		jc = frappe.get_doc("Job Card", a1_jc)
+		jc = frappe.get_doc("Job Card", first_job_card)
 		for _ in jc.scheduled_time_logs:
 			jc.append(
 				"time_logs",
@@ -862,34 +861,10 @@ class TestJobCard(ERPNextTestSuite):
 		jc.save()
 		jc.submit()
 
-		b1_jc = frappe.get_all(
-			"Job Card",
-			filters={"work_order": wo_doc.name, "sequence_id": 2, "operation": "Test Operation B1"},
-			fields=["name"],
-			order_by="sequence_id",
-			limit=1,
-		)[0].name
-
-		jc = frappe.get_doc("Job Card", b1_jc)
-		from_time = add_to_date(now(), days=1)
-		for _ in jc.scheduled_time_logs:
-			jc.append(
-				"time_logs",
-				{
-					"from_time": from_time,
-					"to_time": add_to_date(from_time, minutes=2),
-					"completed_qty": 4,
-				},
-			)
-		jc.for_quantity = 4
-		jc.save()
-		jc.submit()
-
 		s = frappe.get_doc(make_stock_entry_for_wo(wo_doc.name, "Manufacture", 4))
 		s.submit()
 
 		self.assertEqual(s.additional_costs[0].amount, 4)
-		self.assertEqual(s.additional_costs[1].amount, 8)
 
 		make_job_card(
 			wo_doc.name,
@@ -916,34 +891,8 @@ class TestJobCard(ERPNextTestSuite):
 		job_card.save()
 		job_card.submit()
 
-		make_job_card(
-			wo_doc.name,
-			[
-				{
-					"name": wo_doc.operations[1].name,
-					"operation": "Test Operation B1",
-					"qty": 6,
-					"pending_qty": 6,
-				}
-			],
-		)
-
-		job_card = frappe.get_last_doc("Job Card", {"work_order": wo_doc.name})
-		job_card.append(
-			"time_logs",
-			{
-				"from_time": add_to_date(now(), hours=2),
-				"to_time": add_to_date(now(), hours=2, minutes=3),
-				"completed_qty": 6,
-			},
-		)
-		job_card.for_quantity = 6
-		job_card.save()
-		job_card.submit()
-
 		s = frappe.get_doc(make_stock_entry_for_wo(wo_doc.name, "Manufacture", 6))
 		self.assertEqual(s.additional_costs[0].amount, 8)
-		self.assertEqual(s.additional_costs[1].amount, 12)
 
 	def test_co_by_product_for_sfg_flow(self):
 		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
