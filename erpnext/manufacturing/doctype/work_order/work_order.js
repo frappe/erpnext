@@ -329,7 +329,7 @@ frappe.ui.form.on("Work Order", {
 					{
 						fieldtype: "Data",
 						fieldname: "name",
-						label: __("Operation Id"),
+						label: __("Operation ID"),
 					},
 					{
 						fieldtype: "Float",
