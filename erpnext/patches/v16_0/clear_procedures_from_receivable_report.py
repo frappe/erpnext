@@ -2,10 +2,11 @@ import frappe
 
 
 def execute():
-	if frappe.db.get_single_value("Accounts Settings", "receivable_payable_fetch_method") == "Raw SQL":
-		frappe.db.set_single_value(
-			"Accounts Settings", "receivable_payable_fetch_method", "UnBuffered Cursor"
-		)
+	frappe.db.set_single_value("Accounts Settings", "receivable_payable_fetch_method", "UnBuffered Cursor")
+	# if frappe.db.get_single_value("Accounts Settings", "receivable_payable_fetch_method") == "Raw SQL":
+	# 	frappe.db.set_single_value(
+	# 		"Accounts Settings", "receivable_payable_fetch_method", "UnBuffered Cursor"
+	# 	)
 
 	frappe.db.sql("drop function if exists ar_genkey")
 	frappe.db.sql("drop procedure if exists ar_init_tmp_table")
