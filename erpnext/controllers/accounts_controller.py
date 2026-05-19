@@ -4169,6 +4169,12 @@ def update_child_qty_rate(
 
 		validate_quantity_and_rate(child_item, d)
 
+		if d.get("__islocal"):
+			child_item.weight_per_unit = frappe.db.get_value(
+				"Item", d.get("item_code"), "weight_per_unit"
+			) or 0
+			child_item.total_weight = d.get("qty", 0) * child_item.weight_per_unit
+
 		if flt(child_item.get("qty")) != flt(d.get("qty")):
 			any_qty_changed = True
 
