@@ -2932,34 +2932,57 @@ class AccountsController(TransactionBase):
 			)
 
 			# Convert outstanding amount from secondary to primary account currency, if needed
-
-			os_in_default_currency = self.outstanding_amount * exc_rate_secondary_to_default
-			os_in_primary_currency = self.outstanding_amount * exc_rate_secondary_to_primary
+			outstanding_amount = abs(self.outstanding_amount)
+			os_in_default_currency = outstanding_amount * exc_rate_secondary_to_default
+			os_in_primary_currency = outstanding_amount * exc_rate_secondary_to_primary
 
 			if self.doctype == "Sales Invoice":
-				# Calculate credit and debit values for reconciliation and advance entries
-				reconcilation_entry.credit_in_account_currency = self.outstanding_amount
-				reconcilation_entry.credit = os_in_default_currency
+				if not self.is_return:
+					# Calculate credit and debit values for reconciliation and advance entries
+					reconcilation_entry.credit_in_account_currency = outstanding_amount
+					reconcilation_entry.credit = os_in_default_currency
 
-				advance_entry.debit_in_account_currency = os_in_primary_currency
-				advance_entry.debit = os_in_default_currency
+					advance_entry.debit_in_account_currency = os_in_primary_currency
+					advance_entry.debit = os_in_default_currency
+				else:
+					reconcilation_entry.debit_in_account_currency = outstanding_amount
+					reconcilation_entry.debit = os_in_default_currency
+
+					advance_entry.credit_in_account_currency = os_in_primary_currency
+					advance_entry.credit = os_in_default_currency
 			else:
-				advance_entry.credit_in_account_currency = os_in_primary_currency
-				advance_entry.credit = os_in_default_currency
+				if not self.is_return:
+					advance_entry.credit_in_account_currency = os_in_primary_currency
+					advance_entry.credit = os_in_default_currency
 
-				reconcilation_entry.debit_in_account_currency = self.outstanding_amount
-				reconcilation_entry.debit = os_in_default_currency
+					reconcilation_entry.debit_in_account_currency = outstanding_amount
+					reconcilation_entry.debit = os_in_default_currency
+				else:
+					advance_entry.debit_in_account_currency = os_in_primary_currency
+					advance_entry.debit = os_in_default_currency
+
+					reconcilation_entry.credit_in_account_currency = outstanding_amount
+					reconcilation_entry.credit = os_in_default_currency
 
 			# Set exchange rates for entries
 			reconcilation_entry.exchange_rate = exc_rate_secondary_to_default
 			advance_entry.exchange_rate = exc_rate_primary_to_default
 		else:
+			outstanding_amount = abs(self.outstanding_amount)
 			if self.doctype == "Sales Invoice":
-				reconcilation_entry.credit_in_account_currency = self.outstanding_amount
-				advance_entry.debit_in_account_currency = self.outstanding_amount
+				if not self.is_return:
+					reconcilation_entry.credit_in_account_currency = outstanding_amount
+					advance_entry.debit_in_account_currency = outstanding_amount
+				else:
+					reconcilation_entry.debit_in_account_currency = outstanding_amount
+					advance_entry.credit_in_account_currency = outstanding_amount
 			else:
-				advance_entry.credit_in_account_currency = self.outstanding_amount
-				reconcilation_entry.debit_in_account_currency = self.outstanding_amount
+				if not self.is_return:
+					advance_entry.credit_in_account_currency = outstanding_amount
+					reconcilation_entry.debit_in_account_currency = outstanding_amount
+				else:
+					advance_entry.debit_in_account_currency = outstanding_amount
+					reconcilation_entry.credit_in_account_currency = outstanding_amount
 
 		jv.multi_currency = multi_currency
 		jv.append("accounts", reconcilation_entry)
