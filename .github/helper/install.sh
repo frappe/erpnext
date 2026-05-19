@@ -11,8 +11,10 @@ sudo apt install libcups2-dev redis-server mariadb-client libmariadb-dev
 pip install frappe-bench
 
 githubbranch=${GITHUB_BASE_REF:-${GITHUB_REF##*/}}
-frappeuser=${FRAPPE_USER:-"frappe"}
-frappecommitish=${FRAPPE_BRANCH:-$githubbranch}
+# frappeuser=${FRAPPE_USER:-"frappe"}
+frappeuser="ruthra-kumar"
+# frappecommitish=${FRAPPE_BRANCH:-$githubbranch}
+frappecommitish="debugging_implicit_commit"
 
 mkdir frappe
 pushd frappe
@@ -20,7 +22,11 @@ git init
 git remote add origin "https://github.com/${frappeuser}/frappe"
 git fetch origin "${frappecommitish}" --depth 1
 git checkout FETCH_HEAD
+echo "branch after installing frappe"
+git remote
+git branch
 popd
+
 
 bench init --skip-assets --frappe-path ~/frappe --python "$(which python)" frappe-bench
 

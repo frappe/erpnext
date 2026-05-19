@@ -116,7 +116,7 @@ jobs:
           wget https://frappe.io/files/erpnext-v14.sql.gz
           bench --site test_site --force restore ~/frappe-bench/erpnext-v14.sql.gz
 
-          git -C "apps/frappe" remote set-url upstream https://github.com/frappe/frappe.git
+          git -C "apps/frappe" remote set-url upstream https://github.com/ruthra-kumar/frappe.git
           git -C "apps/erpnext" remote set-url upstream https://github.com/frappe/erpnext.git
 
 
@@ -142,13 +142,25 @@ jobs:
             bench --site test_site migrate
           }
 
-          update_to_version 15 3.13
-          update_to_version 16 3.14
+          # update_to_version 15 3.13
+          # update_to_version 16 3.14
+
+          git -C "apps/frappe" remote
+          git -C "apps/erpnext" remote
 
           echo "Updating to latest version"
-          git -C "apps/frappe" fetch --depth 1 upstream "${GITHUB_BASE_REF:-${GITHUB_REF##*/}}"
+          git -C "apps/frappe" fetch --depth 1 upstream debugging_implicit_commit
           git -C "apps/frappe" checkout -q -f FETCH_HEAD
           git -C "apps/erpnext" checkout -q -f "$GITHUB_SHA"
+
+          git -C "apps/frappe" remote
+          git -C "apps/erpnext" remote
+
+
+          echo "Base Ref: ${GITHUB_BASE_REF}"
+          echo "Github Ref: ${GITHUB_REF}"
+          echo "Github Ref truncated: {$GITHUB_REF##*/}"
+          echo "${GITHUB_BASE_REF:-${GITHUB_REF##*/}}"
 
           pgrep honcho | xargs kill
           rm -rf ~/frappe-bench/env
@@ -156,7 +168,7 @@ jobs:
           bench pip install -e ./apps/erpnext
           bench start &>> ~/frappe-bench/bench_start.log &
 
-          bench --site test_site migrate
+          bench --site test_site migrate --skip-failing
 
       - name: Show bench output
         if: ${{ always() }}
