@@ -20,6 +20,7 @@ from erpnext.buying.doctype.purchase_order.purchase_order import (
 )
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
 from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
+from erpnext.stock.doctype.item.item import make_item_price
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 from erpnext.stock.doctype.material_request.test_material_request import make_material_request
@@ -1435,6 +1436,60 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 		pi2 = make_pi_from_po(po.name)
 		self.assertEqual(len(pi2.items), 2)
+
+	def test_supplier_item_price_with_uom_conversion(self):
+		for uom in ["Stk.", "100 Stk."]:
+			if not frappe.db.exists("UOM", uom):
+				frappe.get_doc(
+					{
+						"doctype": "UOM",
+						"uom_name": uom,
+					}
+				).insert()
+		supplier_name = "_Test Supplier"
+
+		item_properties = {
+			"stock_uom": "Stk.",
+			"is_stock_item": 1,
+		}
+		item_uoms = [
+			{
+				"uom": "Stk.",
+				"conversion_factor": 1,
+			},
+			{
+				"uom": "100 Stk.",
+				"conversion_factor": 100,
+			},
+		]
+		item = make_item("_Test Item UOM Price", item_properties, item_uoms).name
+
+		make_item_price(item, "Standard Buying", 1)
+		item_price = frappe.get_doc("Item Price", {"item_code": item, "price_list": "Standard Buying"})
+		item_price.supplier = supplier_name
+		item_price.uom = "Stk."
+		item_price.save()
+
+		po = create_purchase_order(
+			do_not_save=1,
+			company="_Test Company",
+			supplier=supplier_name,
+			rm_items=[
+				{
+					"item_code": "_Test Item UOM Price",
+					"warehouse": "_Test Warehouse - _TC",
+					"qty": 1,
+					"uom": "100 Stk.",
+					"schedule_date": add_days(nowdate(), 1),
+				}
+			],
+		)
+
+		po.set_missing_values()
+		po.run_method("calculate_taxes_and_totals")
+		row = po.items[0]
+		self.assertEqual(row.conversion_factor, 100)
+		self.assertEqual(row.rate, 100)
 
 
 def create_po_for_sc_testing():
