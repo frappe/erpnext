@@ -348,6 +348,23 @@ class FIFOSlots:
 	):
 		"Update FIFO Queue on inward stock."
 
+		def set_fifo_queue_for_serial_items():
+			valuation = row.stock_value_difference / row.actual_qty
+			for serial_no in serial_nos:
+				if self.serial_no_details.get(serial_no):
+					fifo_queue.append([serial_no, self.serial_no_details.get(serial_no), valuation])
+				else:
+					self.serial_no_details.setdefault(serial_no, row.posting_date)
+					fifo_queue.append([serial_no, row.posting_date, valuation])
+
+		def set_fifo_queue_for_batch_items():
+			for batch_no, qty, stock_value_difference in batch_nos:
+				if self.batch_no_details.get(batch_no):
+					fifo_queue.append([batch_no, qty, row.posting_date, stock_value_difference])
+				else:
+					self.batch_no_details.setdefault(batch_no, row.posting_date)
+					fifo_queue.append([batch_no, qty, row.posting_date, stock_value_difference])
+
 		transfer_data = self.transferred_item_details.get(transfer_key)
 		if transfer_data:
 			# inward/outward from same voucher, item & warehouse
@@ -356,25 +373,10 @@ class FIFOSlots:
 			self.__adjust_incoming_transfer_qty(transfer_data, fifo_queue, row)
 		else:
 			if serial_nos and row.get("has_serial_no"):
-				valuation = row.stock_value_difference / row.actual_qty
-				for serial_no in serial_nos:
-					if self.serial_no_details.get(serial_no):
-						fifo_queue.append([serial_no, self.serial_no_details.get(serial_no), valuation])
-					else:
-						self.serial_no_details.setdefault(serial_no, row.posting_date)
-						fifo_queue.append([serial_no, row.posting_date, valuation])
-				return
-
-			if batch_nos and row.get("has_batch_no"):
-				for batch_no, qty, stock_value_difference in batch_nos:
-					if self.batch_no_details.get(batch_no):
-						fifo_queue.append([batch_no, qty, row.posting_date, stock_value_difference])
-					else:
-						self.batch_no_details.setdefault(batch_no, row.posting_date)
-						fifo_queue.append([batch_no, qty, row.posting_date, stock_value_difference])
-				return
-
-			if fifo_queue and flt(fifo_queue[0][0]) <= 0:
+				set_fifo_queue_for_serial_items()
+			elif batch_nos and row.get("has_batch_no"):
+				set_fifo_queue_for_batch_items()
+			elif fifo_queue and flt(fifo_queue[0][0]) <= 0:
 				# neutralize 0/negative stock by adding positive stock
 				fifo_queue[0][0] += flt(row.actual_qty)
 				fifo_queue[0][1] = row.posting_date
@@ -388,9 +390,7 @@ class FIFOSlots:
 		"Update FIFO Queue on outward stock."
 		if serial_nos:
 			fifo_queue[:] = [serial_no for serial_no in fifo_queue if serial_no[0] not in serial_nos]
-			return
-
-		if batch_nos:
+		elif batch_nos:
 			for batch_no, qty, stock_value_difference in batch_nos:
 				items_to_remove = []
 				for slot in fifo_queue:
@@ -408,35 +408,34 @@ class FIFOSlots:
 
 				for item in items_to_remove:
 					fifo_queue.remove(item)
-			return
+		else:
+			qty_to_pop = abs(row.actual_qty)
+			stock_value = abs(row.stock_value_difference)
 
-		qty_to_pop = abs(row.actual_qty)
-		stock_value = abs(row.stock_value_difference)
-
-		while qty_to_pop:
-			slot = fifo_queue[0] if fifo_queue else [0, None, 0]
-			if 0 < flt(slot[0]) <= qty_to_pop:
-				# qty to pop >= slot qty
-				# if +ve and not enough or exactly same balance in current slot, consume whole slot
-				qty_to_pop -= flt(slot[0])
-				stock_value -= flt(slot[2])
-				self.transferred_item_details[transfer_key].append(fifo_queue.pop(0))
-			elif not fifo_queue:
-				# negative stock, no balance but qty yet to consume
-				fifo_queue.append([-(qty_to_pop), row.posting_date, -(stock_value)])
-				self.transferred_item_details[transfer_key].append(
-					[qty_to_pop, row.posting_date, stock_value]
-				)
-				qty_to_pop = 0
-				stock_value = 0
-			else:
-				# qty to pop < slot qty, ample balance
-				# consume actual_qty from first slot
-				slot[0] = flt(slot[0]) - qty_to_pop
-				slot[2] = flt(slot[2]) - stock_value
-				self.transferred_item_details[transfer_key].append([qty_to_pop, slot[1], stock_value])
-				qty_to_pop = 0
-				stock_value = 0
+			while qty_to_pop:
+				slot = fifo_queue[0] if fifo_queue else [0, None, 0]
+				if 0 < flt(slot[0]) <= qty_to_pop:
+					# qty to pop >= slot qty
+					# if +ve and not enough or exactly same balance in current slot, consume whole slot
+					qty_to_pop -= flt(slot[0])
+					stock_value -= flt(slot[2])
+					self.transferred_item_details[transfer_key].append(fifo_queue.pop(0))
+				elif not fifo_queue:
+					# negative stock, no balance but qty yet to consume
+					fifo_queue.append([-(qty_to_pop), row.posting_date, -(stock_value)])
+					self.transferred_item_details[transfer_key].append(
+						[qty_to_pop, row.posting_date, stock_value]
+					)
+					qty_to_pop = 0
+					stock_value = 0
+				else:
+					# qty to pop < slot qty, ample balance
+					# consume actual_qty from first slot
+					slot[0] = flt(slot[0]) - qty_to_pop
+					slot[2] = flt(slot[2]) - stock_value
+					self.transferred_item_details[transfer_key].append([qty_to_pop, slot[1], stock_value])
+					qty_to_pop = 0
+					stock_value = 0
 
 	def __adjust_incoming_transfer_qty(self, transfer_data: dict, fifo_queue: list, row: dict):
 		"Add previously removed stock back to FIFO Queue."
