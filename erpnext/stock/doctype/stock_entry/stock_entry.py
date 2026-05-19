@@ -10,7 +10,7 @@ from frappe import _, bold
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import DocType
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Max, Sum
 from frappe.utils import (
 	cint,
 	comma_or,
@@ -3882,7 +3882,11 @@ def get_consumed_operating_cost(wo_name, bom_no, operation_id):
 		frappe.qb.from_(child_table)
 		.join(table)
 		.on(child_table.parent == table.name)
-		.select(Sum(child_table.amount).as_("consumed_cost"))
+		.select(
+			Sum(child_table.amount).as_("consumed_cost"),
+			Sum(child_table.qty).as_("consumed_qty"),
+			child_table.operating_component,
+		)
 		.where(
 			(table.docstatus == 1)
 			& (table.work_order == wo_name)
@@ -3893,13 +3897,13 @@ def get_consumed_operating_cost(wo_name, bom_no, operation_id):
 				(child_table.operation_id == operation_id) | (child_table.operation_id.isnull())
 			)  # the isnull part is to ensure backward compatibility
 		)
+		.groupby(child_table.operation_id, child_table.operating_component)
 	)
-	cost = query.run(pluck="consumed_cost")
-	return cost[0] if cost and cost[0] else 0
+	return query.run(as_dict=True)
 
 
-def get_operating_cost_per_unit(work_order=None, bom_no=None):
-	operating_cost_per_unit = 0
+def get_remaining_operating_cost(work_order=None, bom_no=None):
+	remaining_operating_cost = 0
 	if work_order:
 		if (
 			bom_no
@@ -3914,25 +3918,23 @@ def get_operating_cost_per_unit(work_order=None, bom_no=None):
 			bom_no = work_order.bom_no
 
 		for d in work_order.get("operations"):
+			consumed_op_cost = get_consumed_operating_cost(work_order.name, bom_no, d.name) or []
+			cost = 0
+			for row in consumed_op_cost:
+				cost += flt(row.consumed_cost)
+
 			if flt(d.completed_qty):
-				if not (remaining_qty := flt(d.completed_qty - work_order.produced_qty)):
-					continue
-				operating_cost_per_unit += (
-					flt(
-						d.actual_operating_cost - get_consumed_operating_cost(work_order.name, bom_no, d.name)
-					)
-					/ remaining_qty
-				)
+				remaining_operating_cost += flt(d.actual_operating_cost - cost)
 			elif work_order.qty:
-				operating_cost_per_unit += flt(d.planned_operating_cost) / flt(work_order.qty)
+				remaining_operating_cost += flt(d.planned_operating_cost)
 
 	# Get operating cost from BOM if not found in work_order.
-	if not operating_cost_per_unit and bom_no:
+	if not remaining_operating_cost and bom_no:
 		bom = frappe.db.get_value("BOM", bom_no, ["operating_cost", "quantity"], as_dict=1)
 		if bom.quantity:
-			operating_cost_per_unit = flt(bom.operating_cost) / flt(bom.quantity)
+			remaining_operating_cost = flt(bom.operating_cost)
 
-	return operating_cost_per_unit
+	return remaining_operating_cost
 
 
 def get_used_alternative_items(

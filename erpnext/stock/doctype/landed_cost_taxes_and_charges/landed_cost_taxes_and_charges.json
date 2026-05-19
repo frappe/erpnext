@@ -15,7 +15,9 @@
   "base_amount",
   "has_corrective_cost",
   "has_operating_cost",
-  "operation_id"
+  "operation_id",
+  "qty",
+  "operating_component"
  ],
  "fields": [
   {
@@ -88,13 +90,31 @@
    "label": "Operation ID",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Qty",
+   "no_copy": 1,
+   "non_negative": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "operating_component",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Operating Component",
+   "no_copy": 1,
+   "not_nullable": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-05-12 14:05:16.688526",
+ "modified": "2026-05-18 22:56:13.540055",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Taxes and Charges",
