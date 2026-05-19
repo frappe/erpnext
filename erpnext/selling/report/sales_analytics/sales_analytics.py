@@ -100,27 +100,50 @@ class Analytics:
 
 	def get_user_permission_filters(self):
 		filters = {}
+		doc_type = self.filters.doc_type
 
-		for doctype, fieldname in [("Territory", "territory"), ("Customer Group", "customer_group")]:
-			permitted = self.get_permitted_values(doctype)
+		doc_permission_field_map = {
+			"Quotation": {
+				"Territory": "territory",
+				"Customer Group": "customer_group",
+				"Customer": "party_name",
+			},
+			"Sales Order": {
+				"Territory": "territory",
+				"Customer Group": "customer_group",
+				"Customer": "customer",
+			},
+			"Delivery Note": {
+				"Territory": "territory",
+				"Customer Group": "customer_group",
+				"Customer": "customer",
+			},
+			"Sales Invoice": {
+				"Territory": "territory",
+				"Customer Group": "customer_group",
+				"Customer": "customer",
+			},
+			"Purchase Invoice": {
+				"Supplier": "supplier",
+			},
+		}
+
+		for permission_doctype, fieldname in doc_permission_field_map.get(doc_type, {}).items():
+			permitted = self.get_permitted_values(permission_doctype)
 			if permitted is not None:
 				filters[fieldname] = ["in", permitted]
 
-		permitted_customers = self.get_permitted_values("Customer")
-		if permitted_customers is not None:
-			field = (
-				"party_name"
-				if self.filters.doc_type == "Quotation"
-				else "party"
-				if self.filters.doc_type == "Payment Entry"
-				else "customer"
-			)
-			filters[field] = ["in", permitted_customers]
-
-		permitted_suppliers = self.get_permitted_values("Supplier")
-		if permitted_suppliers is not None:
-			field = "party" if self.filters.doc_type == "Payment Entry" else "supplier"
-			filters[field] = ["in", permitted_suppliers]
+		if doc_type == "Payment Entry":
+			if self.filters.tree_type == "Supplier":
+				permitted_suppliers = self.get_permitted_values("Supplier")
+				if permitted_suppliers is not None:
+					filters["party_type"] = "Supplier"
+					filters["party"] = ["in", permitted_suppliers]
+			else:
+				permitted_customers = self.get_permitted_values("Customer")
+				if permitted_customers is not None:
+					filters["party_type"] = "Customer"
+					filters["party"] = ["in", permitted_customers]
 
 		return filters
 
