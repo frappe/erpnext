@@ -1841,32 +1841,22 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 
 		self.assertEqual(frappe.get_value("Serial No", serial_no, "status"), "Delivered")
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"remove_unchanged_stock_reconciliation_entries": 0})
 	def test_unchanged_rows_kept_when_setting_disabled(self):
 		item_code = self.make_item().name
 
 		create_stock_reconciliation(item_code=item_code, qty=10, rate=100)
 
-		frappe.db.set_single_value(
-			"Stock Settings",
-			"remove_unchanged_stock_reconciliation_entries",
-			0,
-		)
-
-		sr2 = create_stock_reconciliation(item_code=item_code, qty=10, rate=100, do_not_submit=True)
+		sr = create_stock_reconciliation(item_code=item_code, qty=10, rate=100, do_not_submit=True)
 
 		# If the setting is disabled, we expect the stock reconciliation to still have the entry.
-		self.assertEqual(len(sr2.items), 1)
+		self.assertEqual(len(sr.items), 1)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"remove_unchanged_stock_reconciliation_entries": 1})
 	def test_unchanged_rows_removed_when_setting_enabled(self):
 		item_code = self.make_item().name
 
 		create_stock_reconciliation(item_code=item_code, qty=10, rate=100)
-
-		frappe.db.set_single_value(
-			"Stock Settings",
-			"remove_unchanged_stock_reconciliation_entries",
-			1,
-		)
 
 		# If the setting is enabled, we expect the stock reconciliation to end up empty
 		# because all entries have unchanged values.
@@ -1878,16 +1868,11 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			rate=100,
 		)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"remove_unchanged_stock_reconciliation_entries": 0})
 	def test_unchanged_only_reco_cannot_be_submitted(self):
 		item_code = self.make_item().name
 
 		create_stock_reconciliation(item_code=item_code, qty=10, rate=100)
-
-		frappe.db.set_single_value(
-			"Stock Settings",
-			"remove_unchanged_stock_reconciliation_entries",
-			0,
-		)
 
 		sr = create_stock_reconciliation(item_code=item_code, qty=10, rate=100, do_not_submit=True)
 

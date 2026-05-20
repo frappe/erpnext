@@ -541,7 +541,7 @@
   },
   {
    "default": "1",
-   "description": "If enabled, Stock Reconciliation item rows with no changes in quantity from the current stock will be removed on save.",
+   "description": "If enabled, Stock Reconciliation item rows with no changes in quantity or valuation rate from current stock will be removed on save.",
    "fieldname": "remove_unchanged_stock_reconciliation_entries",
    "fieldtype": "Check",
    "label": "Remove Unchanged Stock Reconciliation Entries"
