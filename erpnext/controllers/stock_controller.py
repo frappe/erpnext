@@ -1299,6 +1299,10 @@ class StockController(AccountsController):
 					):
 						continue
 
+					item_warehouse = item.get("warehouse") or item.get("s_warehouse")
+					if item_warehouse and row.warehouse and row.warehouse != item_warehouse:
+						continue
+
 					if row.voucher_no == value:
 						continue
 
@@ -1343,7 +1347,12 @@ class StockController(AccountsController):
 				doctype.item_code,
 				doctype.warehouse,
 			)
-			.where((doctype.docstatus == 1) & (child_doc.batch_no.isin(batches)))
+			.where(
+				(doctype.docstatus == 1)
+				& (doctype.delivered_qty < doctype.reserved_qty)
+				& (child_doc.batch_no.isin(batches))
+				& (child_doc.delivered_qty < child_doc.qty)
+			)
 		).run(as_dict=True)
 
 	def make_gl_entries_on_cancel(self, from_repost=False):
