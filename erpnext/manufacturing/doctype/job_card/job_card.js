@@ -77,6 +77,30 @@ frappe.ui.form.on("Job Card", {
 		});
 	},
 
+	pending_qty(frm) {
+		if (frm.doc.total_completed_qty <= 0.0) {
+			frm.doc.pending_qty = 0.0;
+			refresh_field("pending_qty");
+			frappe.throw(__("Please complete the job first before entering Pending Quantity"));
+		}
+
+		if (frm.doc.pending_qty < 0) {
+			frappe.throw(__("Pending Quantity cannot be less than 0"));
+		}
+
+		let remaining_qty = flt(frm.doc.for_quantity) - flt(frm.doc.total_completed_qty);
+
+		if (remaining_qty < frm.doc.pending_qty) {
+			frm.doc.pending_qty = 0.0;
+			refresh_field("pending_qty");
+			frappe.throw(__("Pending Quantity cannot be greater than {0}", [remaining_qty]));
+		}
+
+		let process_loss_qty = flt(remaining_qty) - flt(frm.doc.pending_qty);
+		frm.doc.process_loss_qty = process_loss_qty >= 0 ? process_loss_qty : 0;
+		refresh_field("process_loss_qty");
+	},
+
 	set_company_filters(frm, fieldname) {
 		frm.set_query(fieldname, () => {
 			return {
@@ -150,6 +174,10 @@ frappe.ui.form.on("Job Card", {
 			return;
 		}
 
+		if (frm.doc.docstatus > 0) {
+			frm.set_df_property("pending_qty", "read_only", 1);
+		}
+
 		let has_stock_entry = frm.doc.__onload && frm.doc.__onload.has_stock_entry ? true : false;
 
 		frm.toggle_enable("for_quantity", !has_stock_entry);
@@ -212,12 +240,14 @@ frappe.ui.form.on("Job Card", {
 				!has_items?.length)
 		) {
 			let last_row = {};
-			if (frm.doc.sub_operations?.length && frm.doc.time_logs?.length) {
+			if ((frm.doc.sub_operations?.length || frm.doc.pending_qty > 0) && frm.doc.time_logs?.length) {
 				last_row = get_last_row(frm.doc.time_logs);
 			}
 
 			if (
-				(!frm.doc.time_logs?.length || (frm.doc.sub_operations?.length && last_row?.to_time)) &&
+				(!frm.doc.time_logs?.length ||
+					(flt(frm.doc.pending_qty) > 0.0 && last_row?.to_time) ||
+					(frm.doc.sub_operations?.length && last_row?.to_time)) &&
 				!frm.doc.is_paused
 			) {
 				frm.add_custom_button(__("Start Job"), () => {
@@ -306,13 +336,18 @@ frappe.ui.form.on("Job Card", {
 	},
 
 	complete_job_card(frm) {
+		let pending_qty = frm.doc.for_quantity - frm.doc.total_completed_qty;
+		if (frm.doc.pending_qty > 0) {
+			pending_qty = frm.doc.pending_qty;
+		}
+
 		let fields = [
 			{
 				fieldtype: "Float",
 				label: __("Qty to Manufacture"),
 				fieldname: "for_quantity",
 				reqd: 1,
-				default: frm.doc.for_quantity,
+				default: pending_qty,
 				change() {
 					let doc = frm.job_completion_dialog;
 
@@ -325,12 +360,29 @@ frappe.ui.form.on("Job Card", {
 				label: __("Completed Quantity"),
 				fieldname: "completed_qty",
 				reqd: 1,
-				default: frm.doc.for_quantity - frm.doc.total_completed_qty,
+				default: pending_qty,
 				change() {
 					let doc = frm.job_completion_dialog;
 
-					let process_loss_qty = doc.get_value("for_quantity") - doc.get_value("completed_qty");
-					if (process_loss_qty > 0 && process_loss_qty != doc.get_value("process_loss_qty")) {
+					let pending_qty = doc.get_value("for_quantity") - doc.get_value("completed_qty");
+					if (pending_qty > 0 && pending_qty != doc.get_value("pending_qty")) {
+						doc.set_value("pending_qty", pending_qty);
+					}
+				},
+			},
+			{
+				fieldtype: "Float",
+				label: __("Pending Quantity"),
+				fieldname: "pending_qty",
+				default: 0.0,
+				change() {
+					let doc = frm.job_completion_dialog;
+
+					let process_loss_qty =
+						doc.get_value("for_quantity") -
+						doc.get_value("completed_qty") -
+						doc.get_value("pending_qty");
+					if (process_loss_qty >= 0 && process_loss_qty != doc.get_value("process_loss_qty")) {
 						doc.set_value("process_loss_qty", process_loss_qty);
 					}
 				},
@@ -342,8 +394,13 @@ frappe.ui.form.on("Job Card", {
 				onchange() {
 					let doc = frm.job_completion_dialog;
 
-					let completed_qty = doc.get_value("for_quantity") - doc.get_value("process_loss_qty");
-					doc.set_value("completed_qty", completed_qty);
+					let pending_qty =
+						doc.get_value("for_quantity") -
+						doc.get_value("completed_qty") -
+						doc.get_value("process_loss_qty");
+					if (pending_qty >= 0 && pending_qty != doc.get_value("pending_qty")) {
+						doc.set_value("pending_qty", pending_qty);
+					}
 				},
 			},
 			{
@@ -399,6 +456,8 @@ frappe.ui.form.on("Job Card", {
 					args: {
 						qty: data.completed_qty,
 						for_quantity: data.for_quantity,
+						pending_qty: data.pending_qty,
+						process_loss_qty: data.process_loss_qty,
 						end_time: data.end_time,
 						sub_operation: data.sub_operation,
 					},
