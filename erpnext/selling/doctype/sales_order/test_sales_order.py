@@ -572,6 +572,12 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(so.get("items")[-1].qty, 7)
 		self.assertEqual(so.get("items")[-1].amount, 1400)
 
+		new_item = so.get("items")[-1]
+		bin_actual_qty = get_bin_details(
+			new_item.item_code, new_item.warehouse, so.company, include_child_warehouses=True
+		).get("actual_qty", 0)
+		self.assertEqual(flt(new_item.actual_qty), flt(bin_actual_qty))
+
 		# reserved qty should increase after adding row
 		self.assertEqual(get_reserved_qty("_Test Item 2"), reserved_qty_for_second_item + 7)
 
