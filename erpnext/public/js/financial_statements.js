@@ -15,7 +15,7 @@ erpnext.financial_statements = {
 	},
 
 	formatter: function (value, row, column, data, default_formatter, filter) {
-		if (erpnext.financial_statements._is_separator_row(data)) return "";
+		if (erpnext.financial_statements.is_blank_row(data)) return "";
 
 		const report_params = [value, row, column, data, default_formatter, filter];
 		// Growth/Margin
@@ -27,8 +27,15 @@ erpnext.financial_statements = {
 		else return erpnext.financial_statements._format_standard_report(...report_params);
 	},
 
-	_is_separator_row: function (data) {
-		return data && !data.account && !data.account_name && !data.section_name;
+	is_blank_row: function (data) {
+		return (
+			data &&
+			!data.account &&
+			!data.accounts &&
+			!data.child_accounts &&
+			!data.account_name &&
+			!data.section_name
+		);
 	},
 
 	_is_special_view: function (column, data) {
