@@ -570,7 +570,6 @@
 			"account_number": "5000",
 			"is_group": 1,
 			"root_type": "Expense",
-
 			"Cost of Goods Sold": {
 				"account_number": "5001",
 				"is_group": 1,
