@@ -1798,6 +1798,7 @@ def make_work_orders(items, sales_order, company, project=None):
 	return [p.name for p in out]
 
 
+@frappe.whitelist()
 def make_production_plan(source_name, target_doc=None):
 	sales_order = frappe.get_doc("Sales Order", source_name)
 
