@@ -434,3 +434,4 @@ erpnext.patches.v16_0.add_portal_redirects
 erpnext.patches.v16_0.update_order_qty_and_requested_qty_based_on_mr_and_po
 erpnext.patches.v16_0.depends_on_inv_dimensions
 erpnext.patches.v16_0.clear_procedures_from_receivable_report
+erpnext.patches.v16_0.migrate_address_contact_custom_fields
