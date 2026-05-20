@@ -3739,7 +3739,7 @@ def set_order_defaults(parent_doctype, parent_doctype_name, child_doctype, child
 	child_item = frappe.new_doc(child_doctype, parent_doc=p_doc, parentfield=child_docname)
 	item = frappe.get_doc("Item", trans_item.get("item_code"))
 
-	for field in ("item_code", "item_name", "description", "item_group"):
+	for field in ("item_code", "item_name", "description", "item_group", "weight_per_unit", "weight_uom"):
 		child_item.update({field: item.get(field)})
 
 	date_fieldname = "delivery_date" if child_doctype == "Sales Order Item" else "schedule_date"
@@ -3981,7 +3981,7 @@ def update_child_item_uom_and_weight(child_item, new_data) -> None:
 			flt(new_data.get("conversion_factor"), conv_fac_precision) or conversion_factor
 		)
 
-	if child_item.get("total_weight") and child_item.get("weight_per_unit"):
+	if child_item.get("weight_per_unit"):
 		child_item.total_weight = flt(
 			child_item.weight_per_unit * child_item.qty * child_item.conversion_factor,
 			child_item.precision("total_weight"),
@@ -4081,24 +4081,6 @@ def update_child_qty_rate(
 
 				if flt(new_data.get("qty")) < qty_to_check:
 					frappe.throw(_("Cannot reduce quantity than ordered or purchased quantity"))
-
-	def should_update_supplied_items(doc) -> bool:
-		"""Subcontracted PO can allow following changes *after submit*:
-
-		1. Change rate of subcontracting - regardless of other changes.
-		2. Change qty and/or add new items and/or remove items
-		        Exception: Transfer/Consumption is already made, qty change not allowed.
-		"""
-
-		supplied_items_processed = any(
-			item.supplied_qty or item.consumed_qty or item.returned_qty for item in doc.supplied_items
-		)
-
-		update_supplied_items = any_qty_changed or items_added_or_removed or any_conversion_factor_changed
-		if update_supplied_items and supplied_items_processed:
-			frappe.throw(_("Item qty can not be updated as raw materials are already processed."))
-
-		return update_supplied_items
 
 	def validate_fg_item_for_subcontracting(new_data, is_new):
 		if is_new:
