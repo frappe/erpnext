@@ -72,6 +72,7 @@ from erpnext.stock.get_item_details import (
 	ItemDetailsCtx,
 	_get_item_tax_template,
 	_get_item_tax_template_from_item_group,
+	get_bin_details,
 	get_conversion_factor,
 	get_item_details,
 	get_item_tax_map,
@@ -3753,7 +3754,28 @@ def set_order_defaults(parent_doctype, parent_doctype_name, child_doctype, child
 
 	set_child_tax_template_and_map(item, child_item, p_doc)
 	add_taxes_from_tax_template(child_item, p_doc)
+	set_bin_details_on_child_item(child_item, item, p_doc.company)
 	return child_item
+
+
+def set_bin_details_on_child_item(child_item, item, company):
+	if not item.is_stock_item or not child_item.warehouse:
+		return
+
+	child_meta = child_item.meta
+	if not child_meta.has_field("actual_qty"):
+		return
+
+	bin_details = get_bin_details(
+		child_item.item_code,
+		child_item.warehouse,
+		company,
+		include_child_warehouses=True,
+	)
+	child_item.actual_qty = flt(bin_details.get("actual_qty"))
+
+	if child_meta.has_field("projected_qty"):
+		child_item.projected_qty = flt(bin_details.get("projected_qty"))
 
 
 def validate_child_on_delete(row, parent, ordered_item=None):
