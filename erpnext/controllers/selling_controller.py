@@ -579,6 +579,7 @@ class SellingController(StockController):
 					or (
 						get_valuation_method(d.item_code, self.company) == "Moving Average"
 						and self.get("is_return")
+						and not is_standalone
 					)
 				):
 					d.incoming_rate = get_incoming_rate(
