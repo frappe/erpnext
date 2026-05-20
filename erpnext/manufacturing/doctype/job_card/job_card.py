@@ -1453,6 +1453,15 @@ class JobCard(Document):
 		if isinstance(kwargs, dict):
 			kwargs = frappe._dict(kwargs)
 
+		if flt(kwargs.pending_qty) and flt(kwargs.pending_qty) < 0:
+			frappe.throw(_("Pending quantity cannot be negative."))
+
+		if flt(kwargs.process_loss_qty) and flt(kwargs.process_loss_qty) < 0:
+			frappe.throw(_("Process loss quantity cannot be negative."))
+
+		if flt(kwargs.pending_qty) and flt(kwargs.pending_qty) > self.for_quantity:
+			frappe.throw(_("Pending quantity cannot be greater than the for quantity."))
+
 		self.pending_qty = flt(kwargs.pending_qty)
 		self.process_loss_qty = flt(kwargs.process_loss_qty)
 

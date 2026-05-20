@@ -134,7 +134,16 @@ frappe.ui.form.on("Job Card", {
 		const { doc } = frm;
 		const has_items = doc.items && doc.items.length;
 
+<<<<<<< HEAD
 >>>>>>> 0a215b0717 (refactor: job_card.js code for better readability)
+=======
+		// Clear any running timer tick from a previous render.
+		if (frm._jcd_timer_interval) {
+			clearInterval(frm._jcd_timer_interval);
+			frm._jcd_timer_interval = null;
+		}
+
+>>>>>>> 1be92f6d05 (refactor: better timer and complete button)
 		frm.trigger("make_fields_read_only");
 
 		if (!frm.is_new() && doc.__onload?.work_order_closed) {
@@ -309,103 +318,10 @@ frappe.ui.form.on("Job Card", {
 		}
 	},
 
-	// Renders the correct action button (Start / Resume / Pause + Complete) based on job state.
+	// Renders the dashboard widget (info + timer + action buttons) into job_card_dashboard wrapper.
 	// Returns true if the job timer is actively running, so the caller can skip the stock entry button.
 	setup_job_action_buttons(frm, has_items) {
-		const { doc } = frm;
-
-		const has_remaining_qty = doc.for_quantity + doc.process_loss_qty > doc.total_completed_qty;
-		const materials_ready =
-			doc.skip_material_transfer ||
-			doc.transferred_qty >= doc.for_quantity + doc.process_loss_qty ||
-			!doc.finished_good ||
-			!has_items?.length;
-
-		if (!has_remaining_qty || !materials_ready) return false;
-
-		let last_row = {};
-		const has_sub_ops_or_pending_qty = doc.sub_operations?.length || doc.pending_qty > 0;
-		if (has_sub_ops_or_pending_qty && doc.time_logs?.length) {
-			last_row = get_last_row(doc.time_logs);
-		}
-
-		const no_time_logs_yet = !doc.time_logs?.length;
-		const pending_qty_cycle_done = flt(doc.pending_qty) > 0.0 && last_row?.to_time;
-		const sub_operation_cycle_done = doc.sub_operations?.length && last_row?.to_time;
-		const should_show_start =
-			(no_time_logs_yet || pending_qty_cycle_done || sub_operation_cycle_done) && !doc.is_paused;
-
-		if (should_show_start) {
-			frm.events.add_start_job_button(frm);
-			return false;
-		}
-
-		if (doc.is_paused) {
-			frm.add_custom_button(__("Resume Job"), () => {
-				frm.call({
-					method: "resume_job",
-					doc: frm.doc,
-					args: { start_time: frappe.datetime.now_datetime() },
-					callback() {
-						frm.reload_doc();
-					},
-				});
-			});
-			return false;
-		}
-
-		// Job is actively running — show Pause and Complete buttons.
-		const manufactured_qty = doc.manufactured_qty || doc.total_completed_qty;
-		const qty_yet_to_manufacture = doc.for_quantity - (manufactured_qty + doc.process_loss_qty);
-
-		if (qty_yet_to_manufacture > 0) {
-			if (!doc.is_paused) {
-				frm.add_custom_button(__("Pause Job"), () => {
-					frm.call({
-						method: "pause_job",
-						doc: frm.doc,
-						args: { end_time: frappe.datetime.now_datetime() },
-						callback() {
-							frm.reload_doc();
-						},
-					});
-				});
-			}
-
-			frm.add_custom_button(__("Complete Job"), () => {
-				frm.trigger("complete_job_card");
-			});
-
-			frm.trigger("make_dashboard");
-			return true;
-		}
-
-		frm.trigger("make_dashboard");
-		return false;
-	},
-
-	add_start_job_button(frm) {
-		frm.add_custom_button(__("Start Job"), () => {
-			const from_time = frappe.datetime.now_datetime();
-			const has_no_employee = (frm.doc.employee && !frm.doc.employee.length) || !frm.doc.employee;
-
-			if (has_no_employee) {
-				frappe.prompt(
-					{
-						fieldtype: "Table MultiSelect",
-						label: __("Select Employees"),
-						options: "Job Card Time Log",
-						fieldname: "employees",
-						reqd: 1,
-						filters: { status: "Active" },
-					},
-					(d) => frm.events.start_timer(frm, from_time, d.employees),
-					__("Assign Job to Employee")
-				);
-			} else {
-				frm.events.start_timer(frm, from_time, frm.doc.employee);
-			}
-		});
+		return frm.events.make_dashboard(frm, has_items);
 	},
 
 	complete_job_card(frm) {
@@ -555,7 +471,6 @@ frappe.ui.form.on("Job Card", {
 			args: { start_time, employees },
 			callback() {
 				frm.reload_doc();
-				frm.trigger("make_dashboard");
 			},
 		});
 	},
@@ -737,60 +652,210 @@ frappe.ui.form.on("Job Card", {
 		}
 	},
 
-	make_dashboard(frm) {
-		if (frm.doc.__islocal) return;
+	make_dashboard(frm, has_items) {
+		if (frm.doc.__islocal) return false;
 
 		frm.dashboard.refresh();
 
-		const timer_html = `
-			<div class="stopwatch" style="font-weight:bold;margin:0px 13px 0px 2px;
-				color:#545454;font-size:18px;display:inline-block;vertical-align:text-bottom;">
-				<span class="hours">00</span>
-				<span class="colon">:</span>
-				<span class="minutes">00</span>
-				<span class="colon">:</span>
-				<span class="seconds">00</span>
-			</div>`;
-
-		let section;
-		if (frappe.utils.is_xs()) {
-			frm.dashboard.add_comment(timer_html, "white", true);
-			section = frm.layout.wrapper.find(".form-message-container");
-		} else {
-			section = frm.toolbar.page.add_inner_message(timer_html);
+		// Clear any previously running timer tick before re-rendering.
+		if (frm._jcd_timer_interval) {
+			clearInterval(frm._jcd_timer_interval);
+			frm._jcd_timer_interval = null;
 		}
 
+		const wrapper = $(frm.fields_dict["job_card_dashboard"].wrapper);
+		wrapper.empty();
+
+		const { doc } = frm;
+		const { time_logs, status } = doc;
+
+		// ── Determine which action buttons to show ────────────────────────
+		const has_remaining_qty = doc.for_quantity + doc.process_loss_qty > doc.total_completed_qty;
+		const materials_ready =
+			doc.skip_material_transfer ||
+			doc.transferred_qty >= doc.for_quantity + doc.process_loss_qty ||
+			!doc.finished_good ||
+			!has_items?.length;
+
+		let last_row = {};
+		const has_sub_ops_or_pending_qty = doc.sub_operations?.length || doc.pending_qty > 0;
+		if (has_sub_ops_or_pending_qty && time_logs?.length) {
+			last_row = get_last_row(time_logs);
+		}
+
+		const no_time_logs_yet = !time_logs?.length;
+		const pending_qty_cycle_done = flt(doc.pending_qty) > 0.0 && last_row?.to_time;
+		const sub_operation_cycle_done = doc.sub_operations?.length && last_row?.to_time;
+		const should_show_start =
+			(no_time_logs_yet || pending_qty_cycle_done || sub_operation_cycle_done) && !doc.is_paused;
+
+		const last_log_complete = time_logs?.length && time_logs[time_logs.length - 1].to_time;
+		const is_on_hold = status === "On Hold";
+		const is_actively_running = !!(
+			time_logs?.length &&
+			!last_log_complete &&
+			!is_on_hold &&
+			!doc.is_paused
+		);
+
+		let show_start = false,
+			show_pause = false,
+			show_resume = false,
+			show_complete = false,
+			is_timer_running = false;
+
+		if (has_remaining_qty && materials_ready) {
+			const manufactured_qty = doc.manufactured_qty || doc.total_completed_qty;
+			const qty_yet_to_manufacture = doc.for_quantity - (manufactured_qty + doc.process_loss_qty);
+
+			if (should_show_start) {
+				show_start = true;
+			} else if (doc.is_paused) {
+				show_resume = true;
+			} else if (qty_yet_to_manufacture > 0) {
+				show_pause = true;
+				show_complete = true;
+				is_timer_running = true;
+			}
+		}
+
+		// ── Timer color reflects job state ────────────────────────────────
+		const [timer_color, timer_bg, timer_border] = [
+			"var(--gray-600,#6b7280)",
+			"var(--gray-100,#f3f4f6)",
+			"var(--gray-300,#d1d5db)",
+		];
+
+		// ── Action button HTML ────────────────────────────────────────────
+		const btn = (cls, icon_path, label, icon_color) => `
+			<button class="btn btn-sm ${cls}" style="display:inline-flex;align-items:center;gap:5px;font-weight:600;padding:6px 14px;">
+				${frappe.utils.icon(icon_path, "sm", "", "", "", "", icon_color)}
+				${label}
+			</button>`;
+
+		const icons = {
+			play: { d: '<polygon points="5 3 19 12 5 21 5 3"/>', fill: "currentColor", stroke: "none" },
+			pause: {
+				d: '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>',
+				fill: "currentColor",
+				stroke: "none",
+			},
+			check: { d: '<polyline points="20 6 9 17 4 12"/>', sw: 3 },
+		};
+
+		const buttons_html = [
+			show_start && btn("btn-default jcd-btn-start", "play", __("Start Job")),
+			show_resume && btn("btn-default jcd-btn-resume", "play", __("Resume Job")),
+			show_pause && btn("btn-default jcd-btn-pause", "pause", __("Pause Job")),
+			show_complete && btn("btn-success jcd-btn-complete", "check", __("Complete Job"), "white"),
+		]
+			.filter(Boolean)
+			.join("");
+
+		// ── Render widget ─────────────────────────────────────────────────
+		wrapper.append(`
+			<div class="job-card-dashboard-widget"
+				style="border:1px solid var(--border-color);border-radius:var(--border-radius-lg,8px);
+					background:var(--card-bg,#fff);padding:16px 20px;margin-bottom:16px;">
+				<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+					<div>
+						<div style="font-size:10px;color:var(--text-muted);font-weight:600;
+							text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px;">
+							${__("Elapsed Time")}
+						</div>
+						<div style="display:flex;align-items:center;gap:8px;">
+							${frappe.utils.icon("clock-4", "md", "", "", "", "", timer_color)}
+							<span class="jcd-stopwatch"
+								style="font-family:var(--monospace-font,'Courier New',monospace);
+								font-size:28px;font-weight:700;letter-spacing:2px;color:${timer_color};">
+								00:00:00
+							</span>
+						</div>
+					</div>
+					<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+						${buttons_html}
+					</div>
+				</div>
+			</div>`);
+
+		// ── Wire up button click handlers ─────────────────────────────────
+		if (show_start) {
+			wrapper.find(".jcd-btn-start").on("click", () => {
+				const from_time = frappe.datetime.now_datetime();
+				const has_no_employee = !frm.doc.employee || !frm.doc.employee.length;
+
+				if (has_no_employee) {
+					frappe.prompt(
+						{
+							fieldtype: "Table MultiSelect",
+							label: __("Select Employees"),
+							options: "Job Card Time Log",
+							fieldname: "employees",
+							reqd: 1,
+							filters: { status: "Active" },
+						},
+						(d) => frm.events.start_timer(frm, from_time, d.employees),
+						__("Assign Job to Employee")
+					);
+				} else {
+					frm.events.start_timer(frm, from_time, frm.doc.employee);
+				}
+			});
+		}
+
+		if (show_resume) {
+			wrapper.find(".jcd-btn-resume").on("click", () => {
+				frm.call({
+					method: "resume_job",
+					doc: frm.doc,
+					args: { start_time: frappe.datetime.now_datetime() },
+					callback() {
+						frm.reload_doc();
+					},
+				});
+			});
+		}
+
+		if (show_pause) {
+			wrapper.find(".jcd-btn-pause").on("click", () => {
+				frm.call({
+					method: "pause_job",
+					doc: frm.doc,
+					args: { end_time: frappe.datetime.now_datetime() },
+					callback() {
+						frm.reload_doc();
+					},
+				});
+			});
+		}
+
+		if (show_complete) {
+			wrapper.find(".jcd-btn-complete").on("click", () => {
+				frm.trigger("complete_job_card");
+			});
+		}
+
+		// ── Timer tick ────────────────────────────────────────────────────
+		const timer_el = wrapper.find(".jcd-stopwatch");
 		const pad = (n) => String(n).padStart(2, "0");
-
-		const update_stopwatch = (increment) => {
-			const hours = Math.floor(increment / 3600);
-			const minutes = Math.floor((increment - hours * 3600) / 60);
-			const seconds = Math.floor(flt(increment - hours * 3600 - minutes * 60, 2));
-
-			section.find(".hours").text(pad(hours));
-			section.find(".minutes").text(pad(minutes));
-			section.find(".seconds").text(pad(seconds));
+		const update_stopwatch = (secs) => {
+			const h = Math.floor(secs / 3600);
+			const m = Math.floor((secs % 3600) / 60);
+			const s = Math.floor(secs % 60);
+			timer_el.text(`${pad(h)}:${pad(m)}:${pad(s)}`);
 		};
 
 		let current_increment = frm.events.get_current_time(frm);
+		update_stopwatch(current_increment);
 
-		const start_timer = () => {
-			setInterval(() => {
+		if (is_actively_running) {
+			frm._jcd_timer_interval = setInterval(() => {
 				current_increment += 1;
 				update_stopwatch(current_increment);
 			}, 1000);
-		};
-
-		const { time_logs, status } = frm.doc;
-		const last_log_complete = time_logs?.length && time_logs[cint(time_logs.length) - 1].to_time;
-
-		if (last_log_complete) {
-			update_stopwatch(current_increment);
-		} else if (status == "On Hold") {
-			update_stopwatch(current_increment);
-		} else {
-			start_timer();
 		}
+
+		return is_timer_running;
 	},
 
 	get_current_time(frm) {
@@ -812,7 +877,11 @@ frappe.ui.form.on("Job Card", {
 	},
 
 	hide_timer(frm) {
-		frm.toolbar.page.inner_toolbar.find(".stopwatch").remove();
+		if (frm._jcd_timer_interval) {
+			clearInterval(frm._jcd_timer_interval);
+			frm._jcd_timer_interval = null;
+		}
+		$(frm.fields_dict["job_card_dashboard"].wrapper).empty();
 	},
 
 	for_quantity(frm) {
@@ -840,10 +909,6 @@ frappe.ui.form.on("Job Card", {
 			frm: frm,
 			run_link_triggers: true,
 		});
-	},
-
-	timer(frm) {
-		return `<button> Start </button>`;
 	},
 
 	set_total_completed_qty(frm) {

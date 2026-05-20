@@ -7,20 +7,26 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "section_break_smqo",
+  "job_card_dashboard",
+  "section_break_fsba",
+  "work_order",
+  "column_break_uqjq",
+  "production_item",
+  "column_break_qrpg",
+  "for_quantity",
+  "column_break_yecz",
+  "bom_no",
+  "section_break_oisd",
   "company",
   "naming_series",
-  "production_item",
-  "employee",
   "column_break_4",
   "posting_date",
-  "work_order",
-  "bom_no",
   "semi_finished_good__finished_good_section",
   "finished_good",
   "column_break_mcnb",
   "semi_fg_bom",
   "section_break_folk",
-  "for_quantity",
   "pending_qty",
   "column_break_cyjw",
   "process_loss_qty",
@@ -39,6 +45,7 @@
   "workstation_type",
   "workstation",
   "target_warehouse",
+  "employee",
   "section_break_8",
   "items",
   "quality_inspection_section",
@@ -654,12 +661,41 @@
   {
    "fieldname": "column_break_lgte",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "job_card_dashboard",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "section_break_oisd",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_uqjq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_qrpg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_yecz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_smqo",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "section_break_fsba",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-20 14:05:46.205365",
+ "modified": "2026-05-21 18:37:05.688342",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",
