@@ -5,11 +5,23 @@
 import frappe
 from frappe import _
 
+from erpnext import get_region
+
 
 def execute(filters=None):
+	validate_company_region(filters)
 	columns = get_columns()
 	data, emirates, amounts_by_emirate = get_data(filters)
 	return columns, data
+
+
+def validate_company_region(filters):
+	if filters.get("company") and get_region(filters.get("company")) != "United Arab Emirates":
+		frappe.throw(
+			_(
+				"The company {0} is not in United Arab Emirates. UAE VAT 201 report is only available for companies in United Arab Emirates."
+			).format(frappe.bold(filters.get("company")))
+		)
 
 
 def get_columns():

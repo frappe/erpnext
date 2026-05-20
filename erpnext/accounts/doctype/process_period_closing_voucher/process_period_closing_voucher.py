@@ -72,8 +72,8 @@ class ProcessPeriodClosingVoucher(Document):
 		pcv = frappe.get_doc("Period Closing Voucher", self.parent_pcv)
 		if pcv.is_first_period_closing_voucher():
 			gl = qb.DocType("GL Entry")
-			min = qb.from_(gl).select(Min(gl.posting_date)).where(gl.company.eq(pcv.company)).run()[0][0]
-			max = qb.from_(gl).select(Max(gl.posting_date)).where(gl.company.eq(pcv.company)).run()[0][0]
+			min = qb.from_(gl).select(Min(gl.posting_date)).run()[0][0]
+			max = qb.from_(gl).select(Max(gl.posting_date)).run()[0][0]
 
 			dates = self.get_dates(get_datetime(min), get_datetime(max))
 			for x in dates:
@@ -93,12 +93,16 @@ class ProcessPeriodClosingVoucher(Document):
 def start_pcv_processing(docname: str):
 	if frappe.db.get_value("Process Period Closing Voucher", docname, "status") in ["Queued", "Running"]:
 		frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Running")
-		if normal_balances := frappe.db.get_all(
-			"Process Period Closing Voucher Detail",
-			filters={"parent": docname, "status": "Queued"},
-			fields=["processing_date", "report_type", "parentfield"],
-			order_by="parentfield, idx, processing_date",
-			limit=4,
+
+		ppcvd = qb.DocType("Process Period Closing Voucher Detail")
+		if normal_balances := (
+			qb.from_(ppcvd)
+			.select(ppcvd.processing_date, ppcvd.report_type, ppcvd.parentfield)
+			.where(ppcvd.parent.eq(docname) & ppcvd.status.eq("Queued"))
+			.orderby(ppcvd.parentfield, ppcvd.idx, ppcvd.processing_date)
+			.limit(4)
+			.for_update(skip_locked=True)
+			.run(as_dict=True)
 		):
 			if not is_scheduler_inactive():
 				for x in normal_balances:
@@ -238,12 +242,15 @@ def get_gle_for_closing_account(pcv, dimension_balance, dimensions):
 
 @frappe.whitelist()
 def schedule_next_date(docname: str):
-	if to_process := frappe.db.get_all(
-		"Process Period Closing Voucher Detail",
-		filters={"parent": docname, "status": "Queued"},
-		fields=["processing_date", "report_type", "parentfield"],
-		order_by="parentfield, idx, processing_date",
-		limit=1,
+	ppcvd = qb.DocType("Process Period Closing Voucher Detail")
+	if to_process := (
+		qb.from_(ppcvd)
+		.select(ppcvd.processing_date, ppcvd.report_type, ppcvd.parentfield)
+		.where(ppcvd.parent.eq(docname) & ppcvd.status.eq("Queued"))
+		.orderby(ppcvd.parentfield, ppcvd.idx, ppcvd.processing_date)
+		.limit(1)
+		.for_update(skip_locked=True)
+		.run(as_dict=True)
 	):
 		if not is_scheduler_inactive():
 			frappe.db.set_value(

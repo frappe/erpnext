@@ -396,7 +396,6 @@ def create_and_submit_transaction_deletion_doc(company):
 
 	tdr.process_in_single_transaction = True
 	tdr.submit()
-	tdr.start_deletion_tasks()
 	return tdr
 
 

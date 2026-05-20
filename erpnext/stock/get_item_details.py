@@ -493,9 +493,7 @@ def get_basic_details(ctx: ItemDetailsCtx, item, overwrite_warehouse=True) -> It
 			"discount_percentage": 0.0,
 			"discount_amount": flt(ctx.discount_amount) or 0.0,
 			"update_stock": ctx.update_stock if ctx.doctype in ["Sales Invoice", "Purchase Invoice"] else 0,
-			"delivered_by_supplier": item.delivered_by_supplier
-			if ctx.doctype in ["Sales Order", "Sales Invoice"]
-			else 0,
+			"delivered_by_supplier": item.delivered_by_supplier,
 			"is_fixed_asset": item.is_fixed_asset,
 			"last_purchase_rate": item.last_purchase_rate if ctx.doctype in ["Purchase Order"] else 0,
 			"transaction_date": ctx.transaction_date,
@@ -1202,9 +1200,15 @@ def get_item_price(
 
 	if not ignore_party:
 		if pctx.customer:
-			query = query.where(ip.customer == pctx.customer)
+			query = query.where(
+				(ip.customer == pctx.customer)
+				| ((IfNull(ip.customer, "") == "") & (IfNull(ip.supplier, "") == ""))
+			).orderby(IfNull(ip.customer, ""), order=frappe.qb.desc)
 		elif pctx.supplier:
-			query = query.where(ip.supplier == pctx.supplier)
+			query = query.where(
+				(ip.supplier == pctx.supplier)
+				| ((IfNull(ip.customer, "") == "") & (IfNull(ip.supplier, "") == ""))
+			).orderby(IfNull(ip.supplier, ""), order=frappe.qb.desc)
 		else:
 			query = query.where((IfNull(ip.customer, "") == "") & (IfNull(ip.supplier, "") == ""))
 
@@ -1262,9 +1266,6 @@ def get_price_list_rate_for(ctx: ItemDetailsCtx, item_code: str):
 		if desired_qty and check_packing_list(price_list_rate[0].name, desired_qty, item_code):
 			item_price_data = price_list_rate
 	else:
-		for field in ["customer", "supplier"]:
-			del pctx[field]
-
 		general_price_list_rate = get_item_price(pctx, item_code, ignore_party=ctx.get("ignore_party"))
 
 		if not general_price_list_rate and ctx.get("uom") != ctx.get("stock_uom"):

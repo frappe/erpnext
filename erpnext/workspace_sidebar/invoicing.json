@@ -80,14 +80,13 @@
   {
    "child": 1,
    "collapsible": 1,
-   "filters": "[[\"Sales Invoice\",\"is_return\",\"=\",1]]",
    "icon": "",
    "indent": 0,
    "keep_closed": 0,
    "label": "Credit Note",
    "link_to": "Sales Invoice",
    "link_type": "DocType",
-   "route_options": "",
+   "route_options": "{\"is_return\": 1}",
    "show_arrow": 0,
    "type": "Link"
   },
@@ -139,12 +138,12 @@
   {
    "child": 1,
    "collapsible": 1,
-   "filters": "[[\"Purchase Invoice\",\"is_return\",\"=\",1]]",
    "indent": 0,
    "keep_closed": 0,
    "label": "Debit Note",
    "link_to": "Purchase Invoice",
    "link_type": "DocType",
+   "route_options": "{\"is_return\": 1}",
    "show_arrow": 0,
    "type": "Link"
   },

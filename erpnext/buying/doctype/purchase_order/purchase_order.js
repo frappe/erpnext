@@ -333,7 +333,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 				if (is_drop_ship && !["Completed", "Delivered"].includes(doc.status)) {
 					this.frm.add_custom_button(
 						__("Deliver (Dropship)"),
-						this.delivered_by_supplier.bind(this),
+						this.update_dropship_delivered_qty.bind(this),
 						__("Status")
 					);
 
@@ -698,7 +698,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 		this.frm.cscript.update_status("Close", "Closed");
 	}
 
-	delivered_by_supplier() {
+	update_dropship_delivered_qty() {
 		const data = this.frm.doc.items
 			.filter((item) => item.delivered_by_supplier == 1)
 			.map((item) => {

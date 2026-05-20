@@ -1436,6 +1436,88 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		pi2 = make_pi_from_po(po.name)
 		self.assertEqual(len(pi2.items), 2)
 
+	def test_get_item_details_propagates_drop_ship_flag_to_po(self):
+		"""`get_item_details` should propagate the Item master's
+		`delivered_by_supplier` flag to Purchase Orders, not only to Sales
+		Orders/Invoices, so that POs can be created as drop-ship directly
+		(via the standard item lookup the form uses) without going through
+		the Sales Order → Purchase Order mapping pipeline.
+		"""
+		from erpnext.stock.get_item_details import ItemDetailsCtx, get_item_details
+
+		item = make_item("_Test Drop Ship From Master", {"is_stock_item": 1, "delivered_by_supplier": 1})
+
+		ctx = ItemDetailsCtx(
+			{
+				"item_code": item.item_code,
+				"doctype": "Purchase Order",
+				"company": "_Test Company",
+				"supplier": "_Test Supplier",
+				"transaction_date": nowdate(),
+				"currency": "INR",
+				"conversion_rate": 1.0,
+				"buying_price_list": "Standard Buying",
+				"price_list_currency": "INR",
+				"plc_conversion_rate": 1.0,
+				"qty": 1,
+			}
+		)
+
+		details = get_item_details(ctx, frappe.new_doc("Purchase Order"))
+		self.assertEqual(details.get("delivered_by_supplier"), 1)
+
+	def test_drop_ship_po_allows_non_company_shipping_address_without_so(self):
+		"""A PO with a drop-ship item should save with a non-company shipping
+		address even when there is no linked Sales Order.
+		Regression test for https://github.com/frappe/erpnext/issues/51629.
+		"""
+		from erpnext.crm.doctype.prospect.test_prospect import make_address
+
+		item = make_item("_Test Drop Ship Direct PO", {"is_stock_item": 1, "delivered_by_supplier": 1})
+
+		customer_shipping = make_address(
+			address_title="Drop Ship Direct PO", address_type="Shipping", address_line1="1"
+		)
+		customer_shipping.append("links", {"link_doctype": "Customer", "link_name": "_Test Customer"})
+		customer_shipping.save()
+
+		po = create_purchase_order(item=item.item_code, qty=1, do_not_save=True)
+		# In the UI, `get_item_details` propagates the master flag to the row when
+		# the item is added; here we simulate that step explicitly.
+		po.items[0].delivered_by_supplier = 1
+		po.items[0].warehouse = ""
+		po.shipping_address = customer_shipping.name
+		po.save()
+
+		self.assertEqual(po.items[0].delivered_by_supplier, 1)
+		self.assertFalse(po.items[0].warehouse)
+		self.assertEqual(po.shipping_address, customer_shipping.name)
+
+	def test_drop_ship_flag_overridable_per_po_line(self):
+		"""The drop-ship default from the Item master should be overridable
+		on individual PO lines (e.g. ordering a normally drop-shipped item
+		into the own warehouse for samples or stock).
+		"""
+		item = make_item("_Test Drop Ship Override", {"is_stock_item": 1, "delivered_by_supplier": 1})
+
+		po = create_purchase_order(item=item.item_code, qty=1, do_not_save=True)
+		po.items[0].delivered_by_supplier = 0
+		po.save()
+
+		self.assertEqual(po.items[0].delivered_by_supplier, 0)
+		self.assertEqual(po.items[0].warehouse, "_Test Warehouse - _TC")
+
+	def test_remove_unlinked_item_from_mixed_po_does_not_crash(self):
+		"""In a PO that mixes SO-linked and freely-added items, removing an
+		item that has no `sales_order_item` via Update Items must not crash
+		on the missing reference.
+		"""
+		po = create_purchase_order(do_not_submit=True)
+		# Force the SO codepath without needing a real linked Sales Order:
+		po.items[0].sales_order = "DUMMY-SO"
+
+		po.update_ordered_qty_in_so_for_removed_items([frappe._dict({"sales_order_item": None, "qty": 1})])
+
 
 def create_po_for_sc_testing():
 	from erpnext.controllers.tests.test_subcontracting_controller import (
