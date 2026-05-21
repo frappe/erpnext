@@ -378,25 +378,29 @@ class RequestforQuotation(BuyingController):
 		return [d.name for d in get_attachments(self.doctype, self.name)]
 
 	def update_rfq_supplier_status(self, sup_name=None):
+		from frappe.query_builder.functions import Count
+
+		SQ = frappe.qb.DocType("Supplier Quotation")
+		SQ_Item = frappe.qb.DocType("Supplier Quotation Item")
+
 		for supplier in self.suppliers:
 			if sup_name is None or supplier.supplier == sup_name:
 				quote_status = _("Received")
 				for item in self.items:
-					sqi_count = frappe.db.sql(
-						"""
-						SELECT
-							COUNT(sqi.name) as count
-						FROM
-							`tabSupplier Quotation Item` as sqi,
-							`tabSupplier Quotation` as sq
-						WHERE sq.supplier = %(supplier)s
-							AND sqi.docstatus = 1
-							AND sqi.request_for_quotation_item = %(rqi)s
-							AND sqi.parent = sq.name""",
-						{"supplier": supplier.supplier, "rqi": item.name},
-						as_dict=1,
-					)[0]
-					if (sqi_count.count) == 0:
+					query = (
+						frappe.qb.from_(SQ_Item)
+						.join(SQ)
+						.on(SQ_Item.parent == SQ.name)
+						.select(Count(SQ_Item.name).as_("count"))
+						.where(SQ.supplier == supplier.supplier)
+						.where(SQ_Item.docstatus == 1)
+						.where(SQ_Item.request_for_quotation_item == item.name)
+					)
+
+					result = query.run(as_dict=True)
+					sqi_count = result[0] if result else frappe._dict(count=0)
+
+					if sqi_count.count == 0:
 						quote_status = _("Pending")
 				supplier.quote_status = quote_status
 
