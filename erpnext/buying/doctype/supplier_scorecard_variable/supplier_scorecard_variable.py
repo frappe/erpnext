@@ -58,25 +58,24 @@ def get_total_workdays(scorecard):
 
 def get_item_workdays(scorecard):
 	"""Gets the number of days in this period"""
-	supplier = frappe.get_doc("Supplier", scorecard.supplier)
-	total_item_days = frappe.db.sql(
-		"""
-			SELECT
-				SUM(DATEDIFF( %(end_date)s, po_item.schedule_date) * (po_item.qty))
-			FROM
-				`tabPurchase Order Item` po_item,
-				`tabPurchase Order` po
-			WHERE
-				po.supplier = %(supplier)s
-				AND po_item.received_qty < po_item.qty
-				AND po_item.schedule_date BETWEEN %(start_date)s AND %(end_date)s
-				AND po_item.parent = po.name""",
-		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
-		as_dict=0,
-	)[0][0]
 
-	if not total_item_days:
-		total_item_days = 0
+	from frappe.query_builder.functions import Sum
+
+	PO = frappe.qb.DocType("Purchase Order")
+	PO_Item = frappe.qb.DocType("Purchase Order Item")
+
+	query = (
+		frappe.qb.from_(PO_Item)
+		.join(PO)
+		.on(PO_Item.parent == PO.name)
+		.select(Sum(frappe.qb.fn.DATEDIFF(scorecard.end_date, PO_Item.schedule_date) * (PO_Item.qty)))
+		.where(PO.supplier == scorecard.supplier)
+		.where(PO_Item.received_qty < PO_Item.qty)
+		.where(PO_Item.schedule_date[scorecard.start_date : scorecard.end_date])  # Équivalent du BETWEEN
+	)
+
+	result = query.run(as_list=True)
+	total_item_days = result[0][0] if result and result[0][0] is not None else 0
 	return total_item_days
 
 
