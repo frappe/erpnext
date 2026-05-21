@@ -24,11 +24,7 @@ def after_install():
 
 	set_single_defaults()
 	create_print_setting_custom_fields()
-<<<<<<< HEAD
-=======
-	create_marketing_campaign_custom_fields()
 	create_address_and_contact_custom_fields()
->>>>>>> 6c6fa722af (chore: migrate Address/Contact custom fields from JSON fixtures to install (#55084))
 	create_custom_company_links()
 	add_all_roles_to("Administrator")
 	create_default_success_action()
@@ -137,24 +133,6 @@ def create_print_setting_custom_fields():
 	)
 
 
-<<<<<<< HEAD
-=======
-def create_marketing_campaign_custom_fields():
-	create_custom_fields(
-		{
-			"UTM Campaign": [
-				{
-					"label": _("Messaging CRM Campaign"),
-					"fieldname": "crm_campaign",
-					"fieldtype": "Link",
-					"options": "Campaign",
-					"insert_after": "campaign_description",
-				},
-			]
-		}
-	)
-
-
 def create_address_and_contact_custom_fields():
 	create_custom_fields(
 		{
@@ -186,14 +164,6 @@ def create_address_and_contact_custom_fields():
 	)
 
 
-def create_default_success_action():
-	for success_action in get_default_success_action():
-		if not frappe.db.exists("Success Action", success_action.get("ref_doctype")):
-			doc = frappe.get_doc(success_action)
-			doc.insert(ignore_permissions=True)
-
-
->>>>>>> 6c6fa722af (chore: migrate Address/Contact custom fields from JSON fixtures to install (#55084))
 def create_custom_company_links():
 	"""Add link fields to Company in Email Account and Communication.
 
