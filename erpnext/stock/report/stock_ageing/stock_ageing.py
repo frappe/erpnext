@@ -49,7 +49,7 @@ def format_report_data(filters: Filters, item_details: dict, to_date: str) -> li
 			continue
 
 		if details.has_batch_no:
-			fifo_queue = [batch[2:] for batch in fifo_queue]
+			fifo_queue = [slot[2:] if len(slot) == 5 else slot for slot in fifo_queue]
 
 		average_age = get_average_age(fifo_queue, to_date)
 		earliest_age = date_diff(to_date, fifo_queue[0][1])
@@ -229,6 +229,7 @@ class FIFOSlots:
 		self.transferred_item_details = {}
 		self.serial_no_details = {}
 		self.batch_no_details = {}
+		self.batchwise_valuation_by_batch = {}
 		self.filters = filters
 		self.sle = sle
 
@@ -286,7 +287,7 @@ class FIFOSlots:
 					[
 						[
 							d.batch_no.upper(),
-							frappe.get_value("Batch", d.batch_no, "use_batchwise_valuation"),
+							self.__get_batchwise_valuation(d.batch_no),
 							abs(d.actual_qty),
 							abs(d.stock_value_difference),
 						]
@@ -340,6 +341,14 @@ class FIFOSlots:
 		"Convert serial nos to uppercase for uniformity."
 		return [sn.upper() for sn in serial_nos]
 
+	def __get_batchwise_valuation(self, batch_no: str):
+		if batch_no not in self.batchwise_valuation_by_batch:
+			self.batchwise_valuation_by_batch[batch_no] = frappe.db.get_value(
+				"Batch", batch_no, "use_batchwise_valuation"
+			)
+
+		return self.batchwise_valuation_by_batch[batch_no]
+
 	def __init_key_stores(self, row: dict) -> tuple:
 		"Initialise keys and FIFO Queue."
 
@@ -368,6 +377,13 @@ class FIFOSlots:
 
 		def set_fifo_queue_for_batch_items():
 			for batch_no, use_batchwise_valuation, qty, stock_value_difference in batch_nos:
+				qty, stock_value_difference = neutralize_negative_batch_stock(
+					batch_no, use_batchwise_valuation, qty, stock_value_difference
+				)
+
+				if not qty:
+					continue
+
 				if self.batch_no_details.get(batch_no):
 					fifo_queue.append(
 						[
@@ -384,12 +400,50 @@ class FIFOSlots:
 						[batch_no, use_batchwise_valuation, qty, row.posting_date, stock_value_difference]
 					)
 
+		def neutralize_negative_batch_stock(batch_no, use_batchwise_valuation, qty, stock_value_difference):
+			qty = flt(qty)
+			stock_value_difference = flt(stock_value_difference)
+
+			if not qty:
+				return qty, stock_value_difference
+
+			for slot in list(fifo_queue):
+				if (
+					len(slot) != 5
+					or slot[0] != batch_no
+					or slot[1] != use_batchwise_valuation
+					or flt(slot[2]) >= 0
+				):
+					continue
+
+				qty_to_adjust = min(qty, abs(flt(slot[2])))
+				value_to_adjust = (
+					stock_value_difference
+					if qty_to_adjust == qty
+					else flt(stock_value_difference * (qty_to_adjust / qty))
+				)
+
+				slot[2] = flt(slot[2]) + qty_to_adjust
+				slot[3] = row.posting_date
+				slot[4] = flt(slot[4]) + value_to_adjust
+
+				qty = flt(qty - qty_to_adjust)
+				stock_value_difference = flt(stock_value_difference - value_to_adjust)
+
+				if not flt(slot[2]) and not flt(slot[4]):
+					fifo_queue.remove(slot)
+
+				if not qty:
+					break
+
+			return qty, stock_value_difference
+
 		transfer_data = self.transferred_item_details.get(transfer_key)
 		if transfer_data:
 			# inward/outward from same voucher, item & warehouse
 			# eg: Repack with same item, Stock reco for batch item
 			# consume transfer data and add stock to fifo queue
-			self.__adjust_incoming_transfer_qty(transfer_data, fifo_queue, row)
+			self.__adjust_incoming_transfer_qty(transfer_data, fifo_queue, row, batch_nos)
 		else:
 			if serial_nos and row.get("has_serial_no"):
 				set_fifo_queue_for_serial_items()
@@ -416,6 +470,9 @@ class FIFOSlots:
 				for slot in fifo_queue:
 					slot_batch_no, slot_use_batchwise_valuation, slot_qty, _, slot_stock_value = slot
 
+					if flt(slot_qty) <= 0:
+						continue
+
 					# Batchwise valuation: consume only from same batch
 					if use_batchwise_valuation:
 						if slot_batch_no != batch_no:
@@ -428,17 +485,37 @@ class FIFOSlots:
 					if flt(slot_qty) <= qty:
 						qty -= flt(slot_qty)
 						stock_value_difference -= flt(slot_stock_value)
+						self.transferred_item_details[transfer_key].append(
+							[flt(slot_qty), slot[3], flt(slot_stock_value)]
+						)
 						items_to_remove.append(slot)
 					else:
 						slot[2] = flt(slot_qty) - qty
 						# preserve ledger valuation (moving average / SLE value), not slot proportional value
 						slot[4] = flt(slot_stock_value) - stock_value_difference
+						self.transferred_item_details[transfer_key].append(
+							[qty, slot[3], stock_value_difference]
+						)
 						qty = 0
 						stock_value_difference = 0
 						break
 
 				for item in items_to_remove:
 					fifo_queue.remove(item)
+
+				if qty:
+					fifo_queue.append(
+						[
+							batch_no,
+							use_batchwise_valuation,
+							-(qty),
+							row.posting_date,
+							-(stock_value_difference),
+						]
+					)
+					self.transferred_item_details[transfer_key].append(
+						[qty, row.posting_date, stock_value_difference]
+					)
 		else:
 			qty_to_pop = abs(row.actual_qty)
 			stock_value = abs(row.stock_value_difference)
@@ -468,36 +545,102 @@ class FIFOSlots:
 					qty_to_pop = 0
 					stock_value = 0
 
-	def __adjust_incoming_transfer_qty(self, transfer_data: dict, fifo_queue: list, row: dict):
+	def __adjust_incoming_transfer_qty(
+		self, transfer_data: dict, fifo_queue: list, row: dict, batch_nos: list | None = None
+	):
 		"Add previously removed stock back to FIFO Queue."
 		transfer_qty_to_pop = flt(row.actual_qty)
 		stock_value = flt(row.stock_value_difference)
+		batch_nos = [list(batch_no) for batch_no in batch_nos or []]
+
+		def is_batch_slot(slot):
+			return len(slot) == 5
+
+		def get_incoming_slots(qty, posting_date, value):
+			if not batch_nos:
+				return [[qty, posting_date, value]]
+
+			incoming_slots = []
+			remaining_qty = flt(qty)
+			remaining_value = flt(value)
+
+			while remaining_qty and batch_nos:
+				batch_no, use_batchwise_valuation, batch_qty, _ = batch_nos[0]
+				batch_qty = flt(batch_qty)
+				slot_qty = min(batch_qty, remaining_qty)
+				slot_value = (
+					remaining_value
+					if slot_qty == remaining_qty
+					else flt(remaining_value * (slot_qty / remaining_qty))
+				)
+
+				incoming_slots.append([batch_no, use_batchwise_valuation, slot_qty, posting_date, slot_value])
+
+				batch_nos[0][2] = flt(batch_qty - slot_qty)
+				if not batch_nos[0][2]:
+					batch_nos.pop(0)
+
+				remaining_qty = flt(remaining_qty - slot_qty)
+				remaining_value = flt(remaining_value - slot_value)
+
+			if remaining_qty:
+				incoming_slots.append([remaining_qty, posting_date, remaining_value])
+
+			return incoming_slots
 
 		def add_to_fifo_queue(slot):
-			if fifo_queue and flt(fifo_queue[0][0]) <= 0:
-				# neutralize 0/negative stock by adding positive stock
+			matching_negative_batch_slot = next(
+				(
+					existing_slot
+					for existing_slot in fifo_queue
+					if is_batch_slot(existing_slot)
+					and is_batch_slot(slot)
+					and flt(existing_slot[2]) <= 0
+					and existing_slot[0] == slot[0]
+					and existing_slot[1] == slot[1]
+				),
+				None,
+			)
+
+			if (
+				fifo_queue
+				and not is_batch_slot(fifo_queue[0])
+				and not is_batch_slot(slot)
+				and flt(fifo_queue[0][0]) <= 0
+			):
 				fifo_queue[0][0] += flt(slot[0])
 				fifo_queue[0][1] = slot[1]
 				fifo_queue[0][2] += flt(slot[2])
+			elif matching_negative_batch_slot:
+				matching_negative_batch_slot[2] += flt(slot[2])
+				matching_negative_batch_slot[3] = slot[3]
+				matching_negative_batch_slot[4] += flt(slot[4])
 			else:
 				fifo_queue.append(slot)
 
 		while transfer_qty_to_pop:
-			if transfer_data and 0 < transfer_data[0][0] <= transfer_qty_to_pop:
+			if transfer_data and 0 < flt(transfer_data[0][0]) <= transfer_qty_to_pop:
 				# bucket qty is not enough, consume whole
-				transfer_qty_to_pop -= transfer_data[0][0]
-				stock_value -= transfer_data[0][2]
-				add_to_fifo_queue(transfer_data.pop(0))
+				transfer_qty = flt(transfer_data[0][0])
+				transfer_date = transfer_data[0][1]
+				transfer_value = flt(transfer_data[0][2])
+				transfer_qty_to_pop -= transfer_qty
+				stock_value -= transfer_value
+				for slot in get_incoming_slots(transfer_qty, transfer_date, transfer_value):
+					add_to_fifo_queue(slot)
+				transfer_data.pop(0)
 			elif not transfer_data:
 				# transfer bucket is empty, extra incoming qty
-				add_to_fifo_queue([transfer_qty_to_pop, row.posting_date, stock_value])
+				for slot in get_incoming_slots(transfer_qty_to_pop, row.posting_date, stock_value):
+					add_to_fifo_queue(slot)
 				transfer_qty_to_pop = 0
 				stock_value = 0
 			else:
 				# ample bucket qty to consume
 				transfer_data[0][0] -= transfer_qty_to_pop
 				transfer_data[0][2] -= stock_value
-				add_to_fifo_queue([transfer_qty_to_pop, transfer_data[0][1], stock_value])
+				for slot in get_incoming_slots(transfer_qty_to_pop, transfer_data[0][1], stock_value):
+					add_to_fifo_queue(slot)
 				transfer_qty_to_pop = 0
 				stock_value = 0
 
