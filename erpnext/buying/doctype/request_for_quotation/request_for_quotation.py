@@ -575,26 +575,28 @@ def get_pdf(
 def get_item_from_material_requests_based_on_supplier(
 	source_name: str, target_doc: str | Document | None = None
 ):
-	mr_items_list = frappe.db.sql(
-		"""
-		SELECT
-			mr.name, mr_item.item_code
-		FROM
-			`tabItem` as item,
-			`tabItem Supplier` as item_supp,
-			`tabMaterial Request Item` as mr_item,
-			`tabMaterial Request`  as mr
-		WHERE item_supp.supplier = %(supplier)s
-			AND item.name = item_supp.parent
-			AND mr_item.parent = mr.name
-			AND mr_item.item_code = item.name
-			AND mr.status != "Stopped"
-			AND mr.material_request_type = "Purchase"
-			AND mr.docstatus = 1
-			AND mr.per_ordered < 99.99""",
-		{"supplier": source_name},
-		as_dict=1,
+	Item = frappe.qb.DocType("Item")
+	Item_Supp = frappe.qb.DocType("Item Supplier")
+	MR = frappe.qb.DocType("Material Request")
+	MR_Item = frappe.qb.DocType("Material Request Item")
+
+	query = (
+		frappe.qb.from_(MR_Item)
+		.join(MR)
+		.on(MR_Item.parent == MR.name)
+		.join(Item)
+		.on(MR_Item.item_code == Item.name)
+		.join(Item_Supp)
+		.on(Item.name == Item_Supp.parent)
+		.select(MR.name, MR_Item.item_code)
+		.where(Item_Supp.supplier == source_name)
+		.where(MR.status != "Stopped")
+		.where(MR.material_request_type == "Purchase")
+		.where(MR.docstatus == 1)
+		.where(MR.per_ordered < 99.99)
 	)
+
+	mr_items_list = query.run(as_dict=True)
 
 	material_requests = {}
 	for d in mr_items_list:
