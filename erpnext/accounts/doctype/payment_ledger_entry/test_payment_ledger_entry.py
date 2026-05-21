@@ -92,6 +92,7 @@ class TestPaymentLedgerEntry(ERPNextTestSuite):
 			posting_date = nowdate()
 
 		sinv = create_sales_invoice(
+			posting_date=posting_date,
 			qty=qty,
 			rate=rate,
 			company=self.company,
