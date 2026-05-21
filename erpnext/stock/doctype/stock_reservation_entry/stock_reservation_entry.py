@@ -1717,7 +1717,7 @@ def create_stock_reservation_entries_for_so_items(
 			if not from_voucher_type and (
 				not item.get("qty_to_reserve") or qty_to_be_reserved < flt(item.get("qty_to_reserve"))
 			):
-				msg = _("Row #{0}: Only {1} available to reserve for the Item {2}").format(
+				msg = _("Row #{0}: Partial reservation completed. Only {1} could be reserved for Item {2}.").format(
 					item.idx,
 					frappe.bold(str(qty_to_be_reserved / item.conversion_factor) + " " + item.uom),
 					frappe.bold(item.item_code),
