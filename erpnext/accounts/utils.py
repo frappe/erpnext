@@ -2012,7 +2012,7 @@ def get_payment_ledger_entries(gl_entries, cancel=0):
 
 		# companies
 		account = qb.DocType("Account")
-		companies = list(set([x.company for x in gl_entries]))
+		companies = list({x.company for x in gl_entries})
 
 		# receivable/payable account
 		accounts_with_types = (
@@ -2021,19 +2021,18 @@ def get_payment_ledger_entries(gl_entries, cancel=0):
 			.where(account.account_type.isin(["Receivable", "Payable"]) & (account.company.isin(companies)))
 			.run(as_dict=True)
 		)
-		receivable_or_payable_accounts = [y.name for y in accounts_with_types]
+		account_type_by_account = {entry.name: entry.account_type for entry in accounts_with_types}
+		receivable_or_payable_accounts = set(account_type_by_account)
 
-		def get_account_type(account):
-			for entry in accounts_with_types:
-				if entry.name == account:
-					return entry.account_type
+		dimensions_and_defaults = get_dimensions()
+		dimensions = dimensions_and_defaults[0] if dimensions_and_defaults else []
 
 		dr_or_cr = 0
 		account_type = None
 
 		for gle in gl_entries:
 			if gle.account in receivable_or_payable_accounts:
-				account_type = get_account_type(gle.account)
+				account_type = account_type_by_account.get(gle.account)
 				if account_type == "Receivable":
 					dr_or_cr = gle.debit - gle.credit
 					dr_or_cr_account_currency = gle.debit_in_account_currency - gle.credit_in_account_currency
@@ -2074,10 +2073,8 @@ def get_payment_ledger_entries(gl_entries, cancel=0):
 					remarks=gle.remarks,
 				)
 
-				dimensions_and_defaults = get_dimensions()
-				if dimensions_and_defaults:
-					for dimension in dimensions_and_defaults[0]:
-						ple[dimension.fieldname] = gle.get(dimension.fieldname)
+				for dimension in dimensions:
+					ple[dimension.fieldname] = gle.get(dimension.fieldname)
 
 				if gle.advance_voucher_no:
 					# create advance entry
@@ -2208,6 +2205,9 @@ def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, pa
 
 def delink_original_entry(pl_entry, partial_cancel=False):
 	if not pl_entry:
+		return
+
+	if pl_entry.doctype == "Payment Ledger Entry" and is_immutable_ledger_enabled():
 		return
 
 	if pl_entry.doctype == "Advance Payment Ledger Entry":
