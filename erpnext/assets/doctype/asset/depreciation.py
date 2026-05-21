@@ -419,6 +419,7 @@ def get_comma_separated_links(names, doctype):
 
 @frappe.whitelist()
 def scrap_asset(asset_name, scrap_date=None):
+	frappe.has_permission("Asset", "write", asset_name, throw=True)
 	asset = frappe.get_doc("Asset", asset_name)
 
 	if asset.docstatus != 1:
@@ -496,6 +497,7 @@ def validate_scrap_date(scrap_date, today_date, purchase_date, calculate_depreci
 
 @frappe.whitelist()
 def restore_asset(asset_name):
+	frappe.has_permission("Asset", "write", asset_name, throw=True)
 	asset = frappe.get_doc("Asset", asset_name)
 
 	reverse_depreciation_entry_made_after_disposal(asset, asset.disposal_date)
