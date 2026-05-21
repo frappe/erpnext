@@ -193,35 +193,33 @@ def get_total_days_late(scorecard):
 
 
 def get_on_time_shipments(scorecard):
-	"""Gets the number of late shipments (counting each item) in the period (based on Purchase Receipts vs POs)"""
+	"""Gets the number of on time shipments (counting each item) in the period (based on Purchase Receipts vs POs)"""
 
-	supplier = frappe.get_doc("Supplier", scorecard.supplier)
+	from frappe.query_builder.functions import Count
 
-	# Look up all PO Items with delivery dates between our dates
-	total_items_delivered_on_time = frappe.db.sql(
-		"""
-			SELECT
-				COUNT(pr_item.qty)
-			FROM
-				`tabPurchase Order Item` po_item,
-				`tabPurchase Receipt Item` pr_item,
-				`tabPurchase Order` po,
-				`tabPurchase Receipt` pr
-			WHERE
-				po.supplier = %(supplier)s
-				AND po_item.schedule_date BETWEEN %(start_date)s AND %(end_date)s
-				AND po_item.schedule_date <= pr.posting_date
-				AND po_item.qty = pr_item.qty
-				AND pr_item.docstatus = 1
-				AND pr_item.purchase_order_item = po_item.name
-				AND po_item.parent = po.name
-				AND pr_item.parent = pr.name""",
-		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
-		as_dict=0,
-	)[0][0]
+	PO = frappe.qb.DocType("Purchase Order")
+	PO_Item = frappe.qb.DocType("Purchase Order Item")
+	PR = frappe.qb.DocType("Purchase Receipt")
+	PR_Item = frappe.qb.DocType("Purchase Receipt Item")
 
-	if not total_items_delivered_on_time:
-		total_items_delivered_on_time = 0
+	query = (
+		frappe.qb.from_(PR_Item)
+		.join(PR)
+		.on(PR_Item.parent == PR.name)
+		.join(PO_Item)
+		.on(PR_Item.purchase_order_item == PO_Item.name)
+		.join(PO)
+		.on(PO_Item.parent == PO.name)
+		.select(Count(PR_Item.qty))
+		.where(PO.supplier == scorecard.supplier)
+		.where(PO_Item.schedule_date[scorecard.start_date : scorecard.end_date])
+		.where(PO_Item.schedule_date >= PR.posting_date)
+		.where(PO_Item.qty == PR_Item.qty)
+		.where(PR_Item.docstatus == 1)
+	)
+
+	result = query.run(as_list=True)
+	total_items_delivered_on_time = result[0][0] if result and result[0][0] is not None else 0
 	return total_items_delivered_on_time
 
 
