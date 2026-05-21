@@ -359,7 +359,12 @@ def get_message_for_depr_entry_posting_error(asset_links, error_log_links):
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def scrap_asset(asset_name, scrap_date=None):
+=======
+def scrap_asset(asset_name: str, scrap_date: DateTimeLikeObject | None = None):
+	frappe.has_permission("Asset", "write", asset_name, throw=True)
+>>>>>>> 21bb8fe979 (fix: asset scrap flow related changes)
 	asset = frappe.get_doc("Asset", asset_name)
 	scrap_date = getdate(scrap_date) or getdate(today())
 	asset.db_set("disposal_date", scrap_date)
@@ -448,7 +453,12 @@ def create_journal_entry_for_scrap(asset, scrap_date):
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def restore_asset(asset_name):
+=======
+def restore_asset(asset_name: str):
+	frappe.has_permission("Asset", "write", asset_name, throw=True)
+>>>>>>> 21bb8fe979 (fix: asset scrap flow related changes)
 	asset = frappe.get_doc("Asset", asset_name)
 	reverse_depreciation_entry_made_on_disposal(asset)
 	reset_depreciation_schedule(asset, get_note_for_restore(asset))
