@@ -523,6 +523,91 @@ def validate_budget_records(params, budget_records, expense_amount):
 				)
 
 
+def get_expense_breakup(params, currency, budget_against):
+	msg = "<hr> {} - <ul>".format(_("Total Expenses booked through"))
+
+	common_filters = frappe._dict(
+		{
+			params.budget_against_field: budget_against,
+			"account": params.account,
+			"company": params.company,
+		}
+	)
+
+	from_date = frappe.get_cached_value("Fiscal Year", params.from_fiscal_year, "year_start_date")
+	to_date = frappe.get_cached_value("Fiscal Year", params.to_fiscal_year, "year_end_date")
+
+	gl_filters = common_filters.copy()
+	gl_filters.update({"from_date": from_date, "to_date": to_date, "is_cancelled": 0})
+
+	msg += (
+		"<li>"
+		+ frappe.utils.get_link_to_report(
+			"General Ledger",
+			label=_("Actual Expenses"),
+			filters=gl_filters,
+		)
+		+ " - "
+		+ frappe.bold(fmt_money(params.actual_expense, currency=currency))
+		+ "</li>"
+	)
+
+	mr_filters = common_filters.copy()
+	mr_filters.update(
+		{
+			"status": [["!=", "Stopped"]],
+			"docstatus": 1,
+			"material_request_type": "Purchase",
+			"schedule_date": [["between", [from_date, to_date]]],
+			"per_ordered": [["<", 100]],
+		}
+	)
+	if params.get("item_code"):
+		mr_filters["item_code"] = params.item_code
+
+	msg += (
+		"<li>"
+		+ frappe.utils.get_link_to_report(
+			"Material Request",
+			label=_("Material Requests"),
+			report_type="Report Builder",
+			doctype="Material Request",
+			filters=mr_filters,
+		)
+		+ " - "
+		+ frappe.bold(fmt_money(params.requested_amount, currency=currency))
+		+ "</li>"
+	)
+
+	po_filters = common_filters.copy()
+	po_filters.update(
+		{
+			"status": [["!=", "Closed"]],
+			"docstatus": 1,
+			"transaction_date": [["between", [from_date, to_date]]],
+			"per_billed": [["<", 100]],
+		}
+	)
+	if params.get("item_code"):
+		po_filters["item_code"] = params.item_code
+
+	msg += (
+		"<li>"
+		+ frappe.utils.get_link_to_report(
+			"Purchase Order",
+			label=_("Unbilled Orders"),
+			report_type="Report Builder",
+			doctype="Purchase Order",
+			filters=po_filters,
+		)
+		+ " - "
+		+ frappe.bold(fmt_money(params.ordered_amount, currency=currency))
+		+ "</li></ul>"
+	)
+
+	return msg
+
+
 def compare_expense_with_budget(params, budget_amount, action_for, action, budget_against, amount=0):
 	params.actual_expense, params.requested_amount, params.ordered_amount = get_actual_expense(params), 0, 0
 	if not amount:
@@ -536,6 +621,16 @@ def compare_expense_with_budget(params, budget_amount, action_for, action, budge
 
 		elif params.get("doctype") == "Purchase Order" and params.for_purchase_order:
 			amount = params.ordered_amount
+
+	else:
+		# Account-head-wise PO path:
+		# `amount` = current PO's aggregated line total
+		# `ordered_amount` = other existing unbilled POs for same account (exclude current doc)
+		if params.get("doctype") == "Purchase Order" and params.for_purchase_order:
+			other_po_amount = get_ordered_amount(params, exclude_doc=params.get("name"))
+			# Store total ordered (other POs + current PO) so breakup shows correct figure
+			params.ordered_amount = other_po_amount + amount
+			amount = other_po_amount + amount
 
 	total_expense = params.actual_expense + amount
 
@@ -570,93 +665,6 @@ def compare_expense_with_budget(params, budget_amount, action_for, action, budge
 			frappe.msgprint(msg, indicator="orange", title=_("Budget Exceeded"))
 
 
-def get_expense_breakup(params, currency, budget_against):
-	msg = "<hr> {} - <ul>".format(_("Total Expenses booked through"))
-
-	common_filters = frappe._dict(
-		{
-			params.budget_against_field: budget_against,
-			"account": params.account,
-			"company": params.company,
-		}
-	)
-
-	from_date = frappe.get_cached_value("Fiscal Year", params.from_fiscal_year, "year_start_date")
-	to_date = frappe.get_cached_value("Fiscal Year", params.to_fiscal_year, "year_end_date")
-	gl_filters = common_filters.copy()
-	gl_filters.update(
-		{
-			"from_date": from_date,
-			"to_date": to_date,
-			"is_cancelled": 0,
-		}
-	)
-
-	msg += (
-		"<li>"
-		+ frappe.utils.get_link_to_report(
-			"General Ledger",
-			label=_("Actual Expenses"),
-			filters=gl_filters,
-		)
-		+ " - "
-		+ frappe.bold(fmt_money(params.actual_expense, currency=currency))
-		+ "</li>"
-	)
-	mr_filters = common_filters.copy()
-	mr_filters.update(
-		{
-			"status": [["!=", "Stopped"]],
-			"docstatus": 1,
-			"material_request_type": "Purchase",
-			"schedule_date": [["between", [from_date, to_date]]],
-			"item_code": params.item_code,
-			"per_ordered": [["<", 100]],
-		}
-	)
-
-	msg += (
-		"<li>"
-		+ frappe.utils.get_link_to_report(
-			"Material Request",
-			label=_("Material Requests"),
-			report_type="Report Builder",
-			doctype="Material Request",
-			filters=mr_filters,
-		)
-		+ " - "
-		+ frappe.bold(fmt_money(params.requested_amount, currency=currency))
-		+ "</li>"
-	)
-
-	po_filters = common_filters.copy()
-	po_filters.update(
-		{
-			"status": [["!=", "Closed"]],
-			"docstatus": 1,
-			"transaction_date": [["between", [from_date, to_date]]],
-			"item_code": params.item_code,
-			"per_billed": [["<", 100]],
-		}
-	)
-
-	msg += (
-		"<li>"
-		+ frappe.utils.get_link_to_report(
-			"Purchase Order",
-			label=_("Unbilled Orders"),
-			report_type="Report Builder",
-			doctype="Purchase Order",
-			filters=po_filters,
-		)
-		+ " - "
-		+ frappe.bold(fmt_money(params.ordered_amount, currency=currency))
-		+ "</li></ul>"
-	)
-
-	return msg
-
-
 def get_actions(params, budget):
 	yearly_action = budget.action_if_annual_budget_exceeded
 	monthly_action = budget.action_if_accumulated_monthly_budget_exceeded
@@ -673,33 +681,61 @@ def get_actions(params, budget):
 
 
 def get_requested_amount(params):
-	item_code = params.get("item_code")
 	condition = get_other_condition(params, "Material Request")
 
-	data = frappe.db.sql(
-		""" select ifnull((sum(child.stock_qty - child.ordered_qty) * rate), 0) as amount
-		from `tabMaterial Request Item` child, `tabMaterial Request` parent where parent.name = child.parent and
-		child.item_code = %s and parent.docstatus = 1 and child.stock_qty > child.ordered_qty and {} and
-		parent.material_request_type = 'Purchase' and parent.status != 'Stopped'""".format(condition),
-		item_code,
-		as_list=1,
-	)
+	if params.get("item_code"):
+		data = frappe.db.sql(
+			f""" select ifnull((sum(child.stock_qty - child.ordered_qty) * rate), 0) as amount
+			from `tabMaterial Request Item` child, `tabMaterial Request` parent
+			where parent.name = child.parent and
+			child.item_code = %s and parent.docstatus = 1 and child.stock_qty > child.ordered_qty
+			and {condition} and parent.material_request_type = 'Purchase'
+			and parent.status != 'Stopped'""",
+			params.get("item_code"),
+			as_list=1,
+		)
+	else:
+		# Account-head-wise query
+		data = frappe.db.sql(
+			f""" select ifnull((sum(child.stock_qty - child.ordered_qty) * child.rate), 0) as amount
+			from `tabMaterial Request Item` child, `tabMaterial Request` parent
+			where parent.name = child.parent and parent.docstatus = 1
+			and child.stock_qty > child.ordered_qty
+			and {condition} and parent.material_request_type = 'Purchase'
+			and parent.status != 'Stopped'""",
+			as_list=1,
+		)
 
 	return data[0][0] if data else 0
 
 
-def get_ordered_amount(params):
-	item_code = params.get("item_code")
+def get_ordered_amount(params, exclude_doc=None):
 	condition = get_other_condition(params, "Purchase Order")
 
-	data = frappe.db.sql(
-		f""" select ifnull(sum(child.amount - child.billed_amt), 0) as amount
-		from `tabPurchase Order Item` child, `tabPurchase Order` parent where
-		parent.name = child.parent and child.item_code = %s and parent.docstatus = 1 and child.amount > child.billed_amt
-		and parent.status != 'Closed' and {condition}""",
-		item_code,
-		as_list=1,
-	)
+	# Exclude the current document to avoid double-counting during on_submit
+	exclude_condition = ""
+	if exclude_doc:
+		exclude_condition = f" and parent.name != {frappe.db.escape(exclude_doc)}"
+
+	if params.get("item_code"):
+		data = frappe.db.sql(
+			f""" select ifnull(sum(child.amount - child.billed_amt), 0) as amount
+			from `tabPurchase Order Item` child, `tabPurchase Order` parent where
+			parent.name = child.parent and child.item_code = %s and parent.docstatus = 1
+			and child.amount > child.billed_amt
+			and parent.status != 'Closed' {exclude_condition} and {condition}""",
+			params.get("item_code"),
+			as_list=1,
+		)
+	else:
+		data = frappe.db.sql(
+			f""" select ifnull(sum(child.amount - child.billed_amt), 0) as amount
+			from `tabPurchase Order Item` child, `tabPurchase Order` parent where
+			parent.name = child.parent and parent.docstatus = 1
+			and child.amount > child.billed_amt
+			and parent.status != 'Closed' {exclude_condition} and {condition}""",
+			as_list=1,
+		)
 
 	return data[0][0] if data else 0
 

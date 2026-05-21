@@ -928,21 +928,54 @@ class BuyingController(SubcontractingController):
 			val.validate()
 		else:
 			if self.docstatus == 1:
-				for data in self.get("items"):
-					args = data.as_dict()
-					args.update(
-						{
-							"doctype": self.doctype,
-							"company": self.company,
-							"posting_date": (
-								self.schedule_date
-								if self.doctype == "Material Request"
-								else self.transaction_date
-							),
-						}
-					)
+				if self.doctype == "Purchase Order":
+					from collections import defaultdict
 
-					validate_expense_against_budget(args)
+					posting_date = self.transaction_date
+					account_wise_amounts = defaultdict(float)
+					account_wise_args = {}
+
+					for data in self.get("items"):
+						expense_account = data.expense_account
+						cost_center = data.cost_center
+						if not expense_account:
+							continue
+
+						key = (expense_account, cost_center)
+						account_wise_amounts[key] += flt(data.amount)
+
+						if key not in account_wise_args:
+							# Build a clean args dict — no item_code, no row-specific fields
+							account_wise_args[key] = frappe._dict(
+								{
+									"doctype": self.doctype,
+									"company": self.company,
+									"posting_date": posting_date,
+									"expense_account": expense_account,
+									"account": expense_account,
+									"cost_center": cost_center,
+									"name": self.name,  # used to exclude current doc in get_ordered_amount
+								}
+							)
+
+					for key, total_amount in account_wise_amounts.items():
+						validate_expense_against_budget(account_wise_args[key], expense_amount=total_amount)
+
+				else:
+					for data in self.get("items"):
+						args = data.as_dict()
+						args.update(
+							{
+								"doctype": self.doctype,
+								"company": self.company,
+								"posting_date": (
+									self.schedule_date
+									if self.doctype == "Material Request"
+									else self.transaction_date
+								),
+							}
+						)
+						validate_expense_against_budget(args)
 
 	def process_fixed_asset(self):
 		if self.doctype == "Purchase Invoice" and not self.update_stock:
