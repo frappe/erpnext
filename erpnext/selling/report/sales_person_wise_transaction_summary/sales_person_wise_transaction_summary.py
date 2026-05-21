@@ -5,6 +5,7 @@
 import frappe
 from frappe import _, msgprint, qb
 from frappe.query_builder import Criterion
+from frappe.query_builder.utils import DocType
 
 from erpnext import get_company_currency
 
@@ -146,95 +147,112 @@ def get_columns(filters):
 
 
 def get_entries(filters):
-	date_field = filters["doc_type"] == "Sales Order" and "transaction_date" or "posting_date"
-	if filters["doc_type"] == "Sales Order":
-		qty_field = "delivered_qty"
-	else:
-		qty_field = "qty"
-	conditions, values = get_conditions(filters, date_field)
+	doc_type = filters["doc_type"]
+	date_field = "transaction_date" if doc_type == "Sales Order" else "posting_date"
+	qty_field = "delivered_qty" if doc_type == "Sales Order" else "qty"
 
-	entries = frappe.db.sql(
-		"""
-		SELECT
-			dt.name, dt.customer, dt.territory, dt.{} as posting_date, dt_item.item_code,
-			st.sales_person, st.allocated_percentage, dt_item.warehouse,
-		CASE
-			WHEN dt.status = "Closed" THEN dt_item.{} * dt_item.conversion_factor
-			ELSE dt_item.stock_qty
-		END as stock_qty,
-		CASE
-			WHEN dt.status = "Closed" THEN (dt_item.base_net_rate * dt_item.{} * dt_item.conversion_factor)
-			ELSE dt_item.base_net_amount
-		END as base_net_amount,
-		CASE
-			WHEN dt.status = "Closed" THEN ((dt_item.base_net_rate * dt_item.{} * dt_item.conversion_factor) * st.allocated_percentage/100)
-			ELSE dt_item.base_net_amount * st.allocated_percentage/100
-		END as contribution_amt
-		FROM
-			`tab{}` dt, `tab{} Item` dt_item, `tabSales Team` st
-		WHERE
-			st.parent = dt.name and dt.name = dt_item.parent and st.parenttype = {}
-			and dt.docstatus = 1 {} order by st.sales_person, dt.name desc
-		""".format(
-			date_field,
-			qty_field,
-			qty_field,
-			qty_field,
-			filters["doc_type"],
-			filters["doc_type"],
-			"%s",
-			conditions,
-		),
-		tuple([filters["doc_type"], *values]),
-		as_dict=1,
+	doctype = DocType(doc_type)
+	item_doctype = DocType(doc_type + " Item")
+	sales_team = DocType("Sales Team")
+
+	stock_qty = (
+		frappe.qb.terms.Case()
+		.when(doctype.status == "Closed", item_doctype[qty_field] * item_doctype.conversion_factor)
+		.else_(item_doctype.stock_qty)
 	)
 
-	return entries
+	base_net_amount = (
+		frappe.qb.terms.Case()
+		.when(
+			doctype.status == "Closed",
+			item_doctype[qty_field] * item_doctype.base_net_rate * item_doctype.conversion_factor,
+		)
+		.else_(item_doctype.base_net_amount)
+	)
 
+	contribution_amt = (
+		frappe.qb.terms.Case()
+		.when(
+			doctype.status == "Closed",
+			(item_doctype[qty_field] * item_doctype.base_net_rate * item_doctype.conversion_factor)
+			* sales_team.allocated_percentage
+			/ 100,
+		)
+		.else_(item_doctype.base_net_amount * sales_team.allocated_percentage / 100)
+	)
 
-def get_conditions(filters, date_field):
-	conditions = [""]
-	values = []
+	qb_filters = {"docstatus": 1}
 
 	for field in ["company", "customer", "territory"]:
 		if filters.get(field):
-			conditions.append(f"dt.{field}=%s")
-			values.append(filters[field])
-
-	if filters.get("sales_person"):
-		lft, rgt = frappe.get_value("Sales Person", filters.get("sales_person"), ["lft", "rgt"])
-		conditions.append(
-			f"exists(select name from `tabSales Person` where lft >= {lft} and rgt <= {rgt} and name=st.sales_person)"
-		)
+			qb_filters[field] = filters[field]
 
 	if filters.get("from_date"):
-		conditions.append(f"dt.{date_field}>=%s")
-		values.append(filters["from_date"])
+		qb_filters[date_field] = [">=", filters["from_date"]]
 
 	if filters.get("to_date"):
-		conditions.append(f"dt.{date_field}<=%s")
-		values.append(filters["to_date"])
+		if filters.get("from_date"):
+			qb_filters[date_field] = ["between", [filters["from_date"], filters["to_date"]]]
+		else:
+			qb_filters[date_field] = ["<=", filters["to_date"]]
+
+	query = frappe.qb.get_query(
+		doc_type,
+		filters=qb_filters,
+		fields=[
+			doctype.name,
+			doctype.customer,
+			doctype.territory,
+			doctype[date_field].as_("posting_date"),
+		],
+		ignore_permissions=False,
+	)
+
+	query = (
+		query.join(item_doctype)
+		.on(doctype.name == item_doctype.parent)
+		.join(sales_team)
+		.on((doctype.name == sales_team.parent) & (sales_team.parenttype == doc_type))
+		.select(
+			item_doctype.item_code,
+			item_doctype.warehouse,
+			sales_team.sales_person,
+			sales_team.allocated_percentage,
+			stock_qty.as_("stock_qty"),
+			base_net_amount.as_("base_net_amount"),
+			contribution_amt.as_("contribution_amt"),
+		)
+		.orderby(sales_team.sales_person)
+		.orderby(doctype.name, order=frappe.qb.desc)
+	)
+
+	if filters.get("sales_person"):
+		sp = DocType("Sales Person")
+		lft, rgt = frappe.get_value("Sales Person", filters["sales_person"], ["lft", "rgt"])
+		sp_subquery = frappe.qb.from_(sp).select(sp.name).where((sp.lft >= lft) & (sp.rgt <= rgt))
+		query = query.where(sales_team.sales_person.isin(sp_subquery))
 
 	items = get_items(filters)
 	if items:
-		conditions.append("dt_item.item_code in (%s)" % ", ".join(["%s"] * len(items)))
-		values += items
+		query = query.where(item_doctype.item_code.isin(items))
 	else:
 		# return empty result, if no items are fetched after filtering on 'item group' and 'brand'
-		conditions.append("dt_item.item_code = Null")
+		query = query.where(item_doctype.item_code == "##NOMATCH##")
 
-	return " and ".join(conditions), values
+	return query.run(as_dict=True)
 
 
 def get_items(filters):
-	item = qb.DocType("Item")
+	item = DocType("Item")
 
 	item_query_conditions = []
 	if filters.get("item_group"):
-		# Handle 'Parent' nodes as well.
-		item_group = qb.DocType("Item Group")
+		item_group = DocType("Item Group")
 		lft, rgt = frappe.db.get_all(
-			"Item Group", filters={"name": filters.get("item_group")}, fields=["lft", "rgt"], as_list=True
+			"Item Group",
+			filters={"name": filters.get("item_group")},
+			fields=["lft", "rgt"],
+			as_list=True,
 		)[0]
 		item_group_query = (
 			qb.from_(item_group)
@@ -242,16 +260,17 @@ def get_items(filters):
 			.where((item_group.lft >= lft) & (item_group.rgt <= rgt))
 		)
 		item_query_conditions.append(item.item_group.isin(item_group_query))
+
 	if filters.get("brand"):
 		item_query_conditions.append(item.brand == filters.get("brand"))
 
 	items = qb.from_(item).select(item.name).where(Criterion.all(item_query_conditions)).run()
-	return items
+	return [r[0] for r in items]
 
 
 def get_item_details():
 	item_details = {}
-	for d in frappe.db.sql("""SELECT `name`, `item_group`, `brand` FROM `tabItem`""", as_dict=1):
+	for d in frappe.db.get_all("Item", fields=["name", "item_group", "brand"]):
 		item_details.setdefault(d.name, d)
 
 	return item_details
