@@ -31,7 +31,7 @@ def execute(filters: Filters = None) -> tuple:
 
 def format_report_data(filters: Filters, item_details: dict, to_date: str) -> list[dict]:
 	"Returns ordered, formatted data with ranges."
-	_func = itemgetter(1)
+	_func = itemgetter(-2)
 	data = []
 
 	precision = cint(frappe.db.get_single_value("System Settings", "float_precision", cache=True))
@@ -49,7 +49,7 @@ def format_report_data(filters: Filters, item_details: dict, to_date: str) -> li
 			continue
 
 		if details.has_batch_no:
-			fifo_queue = [batch[1:] for batch in fifo_queue]
+			fifo_queue = [batch[2:] for batch in fifo_queue]
 
 		average_age = get_average_age(fifo_queue, to_date)
 		earliest_age = date_diff(to_date, fifo_queue[0][1])
@@ -283,7 +283,16 @@ class FIFOSlots:
 
 				serial_nos = get_serial_nos(d.serial_no) if d.serial_no else []
 				batch_nos = (
-					[[d.batch_no.upper(), d.actual_qty, d.stock_value_difference]] if d.batch_no else []
+					[
+						[
+							d.batch_no.upper(),
+							frappe.get_value("Batch", d.batch_no, "use_batchwise_valuation"),
+							abs(d.actual_qty),
+							abs(d.stock_value_difference),
+						]
+					]
+					if d.batch_no
+					else []
 				)
 				if d.serial_and_batch_bundle:
 					if d.has_serial_no:
@@ -358,12 +367,22 @@ class FIFOSlots:
 					fifo_queue.append([serial_no, row.posting_date, valuation])
 
 		def set_fifo_queue_for_batch_items():
-			for batch_no, qty, stock_value_difference in batch_nos:
+			for batch_no, use_batchwise_valuation, qty, stock_value_difference in batch_nos:
 				if self.batch_no_details.get(batch_no):
-					fifo_queue.append([batch_no, qty, row.posting_date, stock_value_difference])
+					fifo_queue.append(
+						[
+							batch_no,
+							use_batchwise_valuation,
+							qty,
+							self.batch_no_details.get(batch_no),
+							stock_value_difference,
+						]
+					)
 				else:
 					self.batch_no_details.setdefault(batch_no, row.posting_date)
-					fifo_queue.append([batch_no, qty, row.posting_date, stock_value_difference])
+					fifo_queue.append(
+						[batch_no, use_batchwise_valuation, qty, row.posting_date, stock_value_difference]
+					)
 
 		transfer_data = self.transferred_item_details.get(transfer_key)
 		if transfer_data:
@@ -391,20 +410,32 @@ class FIFOSlots:
 		if serial_nos:
 			fifo_queue[:] = [serial_no for serial_no in fifo_queue if serial_no[0] not in serial_nos]
 		elif batch_nos:
-			for batch_no, qty, stock_value_difference in batch_nos:
+			for batch_no, use_batchwise_valuation, qty, stock_value_difference in batch_nos:
 				items_to_remove = []
+
 				for slot in fifo_queue:
-					if slot[0] == batch_no:
-						if flt(slot[1]) <= qty:
-							qty -= flt(slot[1])
-							stock_value_difference -= flt(slot[3])
-							items_to_remove.append(slot)
-						else:
-							slot[1] = flt(slot[1]) - qty
-							slot[3] = flt(slot[3]) - stock_value_difference
-							qty = 0
-							stock_value_difference = 0
-							break
+					slot_batch_no, slot_use_batchwise_valuation, slot_qty, _, slot_stock_value = slot
+
+					# Batchwise valuation: consume only from same batch
+					if use_batchwise_valuation:
+						if slot_batch_no != batch_no:
+							continue
+					# Non-batchwise valuation: consume from any non-batchwise batch
+					else:
+						if slot_use_batchwise_valuation:
+							continue
+
+					if flt(slot_qty) <= qty:
+						qty -= flt(slot_qty)
+						stock_value_difference -= flt(slot_stock_value)
+						items_to_remove.append(slot)
+					else:
+						slot[2] = flt(slot_qty) - qty
+						# preserve ledger valuation (moving average / SLE value), not slot proportional value
+						slot[4] = flt(slot_stock_value) - stock_value_difference
+						qty = 0
+						stock_value_difference = 0
+						break
 
 				for item in items_to_remove:
 					fifo_queue.remove(item)
@@ -594,15 +625,19 @@ class FIFOSlots:
 	def __get_bundle_wise_batch_nos(self, sabb_name=None) -> dict:
 		bundle = frappe.qb.DocType("Serial and Batch Bundle")
 		entry = frappe.qb.DocType("Serial and Batch Entry")
+		batch = frappe.qb.DocType("Batch")
 
 		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
 		query = (
 			frappe.qb.from_(bundle)
 			.join(entry)
 			.on(bundle.name == entry.parent)
+			.join(batch)
+			.on(entry.batch_no == batch.name)
 			.select(
 				bundle.name,
 				entry.batch_no,
+				batch.use_batchwise_valuation,
 				Abs(entry.qty).as_("qty"),
 				Abs(entry.stock_value_difference).as_("stock_value_difference"),
 			)
@@ -625,9 +660,9 @@ class FIFOSlots:
 			query = query.where(bundle.name == sabb_name)
 
 		bundle_wise_batch_nos = frappe._dict({})
-		for bundle_name, batch_no, qty, stock_value_difference in query.run():
+		for bundle_name, batch_no, use_batchwise_valuation, qty, stock_value_difference in query.run():
 			bundle_wise_batch_nos.setdefault(bundle_name, []).append(
-				[batch_no.upper(), qty, stock_value_difference]
+				[batch_no.upper(), use_batchwise_valuation, qty, stock_value_difference]
 			)
 
 		return bundle_wise_batch_nos
