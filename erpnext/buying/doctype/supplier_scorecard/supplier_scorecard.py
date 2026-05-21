@@ -89,19 +89,11 @@ class SupplierScorecard(Document):
 			throw(_("Criteria weights must add up to 100%"))
 
 	def calculate_total_score(self):
-		scorecards = frappe.db.sql(
-			"""
-			SELECT
-				scp.name
-			FROM
-				`tabSupplier Scorecard Period` scp
-			WHERE
-				scp.scorecard = %(sc)s
-				AND scp.docstatus = 1
-			ORDER BY
-				scp.end_date DESC""",
-			{"sc": self.name},
-			as_dict=1,
+		scorecards = frappe.get_all(
+			"Supplier Scorecard Period",
+			fields=["name"],
+			filters={"scorecard": self.name, "docstatus": 1},
+			order_by="end_date desc",
 		)
 
 		period = 0
