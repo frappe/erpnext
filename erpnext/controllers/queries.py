@@ -3,7 +3,6 @@
 
 
 import json
-import re
 from collections import OrderedDict, defaultdict
 
 import frappe
@@ -242,7 +241,7 @@ def item_query(
 	# Condition for the searchfields
 	meta = frappe.get_meta("Item", cached=True)
 	searchfields = meta.get_search_fields()
-	query_select = [item.name]
+	query_select = []
 
 	extra_searchfields = [field for field in searchfields if field not in ["name", "description"]]
 
@@ -298,7 +297,6 @@ def item_query(
 		.select(*query_select)
 		.where(item.docstatus < 2)
 		.where(item.disabled == 0)
-		.where(item.has_variants == 0)
 		.where(date_condition)
 		.where(Criterion.any(search_conditions))
 		.orderby(
