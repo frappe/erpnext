@@ -25,6 +25,7 @@ def after_install():
 	setup_repost_defaults()
 	create_print_setting_custom_fields()
 	create_marketing_campaign_custom_fields()
+	create_address_and_contact_custom_fields()
 	create_custom_company_links()
 	add_all_roles_to("Administrator")
 	create_default_success_action()
@@ -141,6 +142,37 @@ def create_marketing_campaign_custom_fields():
 					"insert_after": "campaign_description",
 				},
 			]
+		}
+	)
+
+
+def create_address_and_contact_custom_fields():
+	create_custom_fields(
+		{
+			"Address": [
+				{
+					"label": _("Tax Category"),
+					"fieldname": "tax_category",
+					"fieldtype": "Link",
+					"options": "Tax Category",
+					"insert_after": "fax",
+				},
+				{
+					"label": _("Is Your Company Address"),
+					"fieldname": "is_your_company_address",
+					"fieldtype": "Check",
+					"default": "0",
+					"insert_after": "linked_with",
+				},
+			],
+			"Contact": [
+				{
+					"label": _("Is Billing Contact"),
+					"fieldname": "is_billing_contact",
+					"fieldtype": "Check",
+					"insert_after": "is_primary_contact",
+				},
+			],
 		}
 	)
 
