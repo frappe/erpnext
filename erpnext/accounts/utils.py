@@ -2012,7 +2012,7 @@ def get_payment_ledger_entries(gl_entries, cancel=0):
 
 		# companies
 		account = qb.DocType("Account")
-		companies = list({x.company for x in gl_entries})
+		companies = list(set([x.company for x in gl_entries]))
 
 		# receivable/payable account
 		accounts_with_types = (
@@ -2021,18 +2021,19 @@ def get_payment_ledger_entries(gl_entries, cancel=0):
 			.where(account.account_type.isin(["Receivable", "Payable"]) & (account.company.isin(companies)))
 			.run(as_dict=True)
 		)
-		account_type_by_account = {entry.name: entry.account_type for entry in accounts_with_types}
-		receivable_or_payable_accounts = set(account_type_by_account)
+		receivable_or_payable_accounts = [y.name for y in accounts_with_types]
 
-		dimensions_and_defaults = get_dimensions()
-		dimensions = dimensions_and_defaults[0] if dimensions_and_defaults else []
+		def get_account_type(account):
+			for entry in accounts_with_types:
+				if entry.name == account:
+					return entry.account_type
 
 		dr_or_cr = 0
 		account_type = None
 
 		for gle in gl_entries:
 			if gle.account in receivable_or_payable_accounts:
-				account_type = account_type_by_account.get(gle.account)
+				account_type = get_account_type(gle.account)
 				if account_type == "Receivable":
 					dr_or_cr = gle.debit - gle.credit
 					dr_or_cr_account_currency = gle.debit_in_account_currency - gle.credit_in_account_currency
@@ -2073,8 +2074,10 @@ def get_payment_ledger_entries(gl_entries, cancel=0):
 					remarks=gle.remarks,
 				)
 
-				for dimension in dimensions:
-					ple[dimension.fieldname] = gle.get(dimension.fieldname)
+				dimensions_and_defaults = get_dimensions()
+				if dimensions_and_defaults:
+					for dimension in dimensions_and_defaults[0]:
+						ple[dimension.fieldname] = gle.get(dimension.fieldname)
 
 				if gle.advance_voucher_no:
 					# create advance entry
