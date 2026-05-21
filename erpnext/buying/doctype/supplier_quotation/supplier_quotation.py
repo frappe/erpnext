@@ -342,14 +342,12 @@ def make_quotation(source_name: str, target_doc: str | Document | None = None):
 
 
 def set_expired_status():
-	frappe.db.sql(
-		"""
-		UPDATE
-			`tabSupplier Quotation` SET `status` = 'Expired'
-		WHERE
-			`status` not in ('Cancelled', 'Stopped') AND `valid_till` < %s
-		""",
-		(nowdate()),
+	frappe.db.set_value(
+		"Supplier Quotation",
+		filters={"status": ["not in", ["Cancelled", "Stopped"]], "valid_till": ["<", nowdate()]},
+		fieldname="status",
+		value="Expired",
+		update_modified=True,
 	)
 
 
