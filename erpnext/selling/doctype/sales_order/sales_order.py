@@ -337,20 +337,24 @@ class SalesOrder(SellingController):
 					)
 
 		if self.po_no and self.customer and not self.skip_delivery_note:
-			so = frappe.db.sql(
-				"select name from `tabSales Order` \
-				where ifnull(po_no, '') = %s and name != %s and docstatus < 2\
-				and customer = %s",
-				(self.po_no, self.name, self.customer),
+			so = frappe.db.get_value(
+				"Sales Order",
+				filters={
+					"po_no": self.po_no,
+					"name": ["!=", self.name],
+					"docstatus": ["<", 2],
+					"customer": self.customer,
+				},
+				fieldname="name",
 			)
-			if so and so[0][0]:
+			if so:
 				if cint(
 					frappe.get_single_value("Selling Settings", "allow_against_multiple_purchase_orders")
 				):
 					frappe.msgprint(
 						_(
 							"Warning: Sales Order {0} already exists against Customer's Purchase Order {1}"
-						).format(frappe.bold(so[0][0]), frappe.bold(self.po_no)),
+						).format(frappe.bold(so), frappe.bold(self.po_no)),
 						alert=True,
 					)
 				else:
@@ -358,7 +362,7 @@ class SalesOrder(SellingController):
 						_(
 							"Sales Order {0} already exists against Customer's Purchase Order {1}. To allow multiple Sales Orders, Enable {2} in {3}"
 						).format(
-							frappe.bold(so[0][0]),
+							frappe.bold(so),
 							frappe.bold(self.po_no),
 							frappe.bold(
 								_("'Allow Multiple Sales Orders Against a Customer's Purchase Order'")
