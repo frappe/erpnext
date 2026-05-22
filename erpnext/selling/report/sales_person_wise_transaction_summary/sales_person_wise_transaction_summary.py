@@ -250,8 +250,5 @@ def get_items(filters):
 
 
 def get_item_details():
-	item_details = {}
-	for d in frappe.db.sql("""SELECT `name`, `item_group`, `brand` FROM `tabItem`""", as_dict=1):
-		item_details.setdefault(d.name, d)
-
-	return item_details
+	items = frappe.get_all("Item", fields=["name", "item_group", "brand"])
+	return {d.name: d for d in items}
