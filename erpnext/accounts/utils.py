@@ -40,7 +40,7 @@ import erpnext
 from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.stock import get_warehouse_account_map
-from erpnext.stock.utils import get_stock_value_on
+from erpnext.stock.utils import get_combine_datetime, get_stock_value_on
 
 if TYPE_CHECKING:
 	from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import RepostItemValuation
@@ -1752,31 +1752,31 @@ def sort_stock_vouchers_by_posting_date(
 
 
 def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, for_items=None, company=None):
-	values = []
-	condition = ""
+	posting_datetime = get_combine_datetime(posting_date, posting_time)
+
+	SLE = DocType("Stock Ledger Entry")
+
+	query = (
+		frappe.qb.from_(SLE)
+		.select(SLE.voucher_type, SLE.voucher_no)
+		.distinct()
+		.where(SLE.posting_datetime >= posting_datetime)
+		.where(SLE.is_cancelled == 0)
+		.orderby(SLE.posting_datetime)
+		.orderby(SLE.creation)
+		.for_update()
+	)
+
 	if for_items:
-		condition += " and item_code in ({})".format(", ".join(["%s"] * len(for_items)))
-		values += for_items
+		query = query.where(SLE.item_code.isin(for_items))
 
 	if for_warehouses:
-		condition += " and warehouse in ({})".format(", ".join(["%s"] * len(for_warehouses)))
-		values += for_warehouses
+		query = query.where(SLE.warehouse.isin(for_warehouses))
 
 	if company:
-		condition += " and company = %s"
-		values.append(company)
+		query = query.where(SLE.company == company)
 
-	future_stock_vouchers = frappe.db.sql(
-		f"""select distinct sle.voucher_type, sle.voucher_no
-		from `tabStock Ledger Entry` sle
-		where
-			timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s)
-			and is_cancelled = 0
-			{condition}
-		order by timestamp(sle.posting_date, sle.posting_time) asc, creation asc for update""",
-		tuple([posting_date, posting_time, *values]),
-		as_dict=True,
-	)
+	future_stock_vouchers = query.run(as_dict=True)
 
 	return [(d.voucher_type, d.voucher_no) for d in future_stock_vouchers]
 
