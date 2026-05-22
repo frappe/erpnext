@@ -221,6 +221,10 @@
 						"account_number": "1702",
 						"account_type": "Stock Received But Not Billed"
 					},
+					"Warenausgangs-Verrechnungskonto": {
+						"account_number": "1703",
+						"account_type": "Stock Delivered But Not Billed"
+					},
 					"Verbindlichkeiten aus Lohn und Gehalt": {
 						"account_number": "1740",
 						"account_type": "Payable"

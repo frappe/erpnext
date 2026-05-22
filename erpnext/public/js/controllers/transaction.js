@@ -2260,6 +2260,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			for (const [key, value] of Object.entries(child)) {
 				if (!["doctype", "name"].includes(key)) {
 					if (key === "price_list_rate") {
+						const doc = frappe.get_doc(child.doctype, child.name);
+						if (doc) doc.price_list_rate = value; // silent update so rate trigger uses correct value
 						frappe.model.set_value(child.doctype, child.name, "rate", value);
 					}
 

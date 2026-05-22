@@ -17,12 +17,15 @@
   "is_group",
   "default_holiday_list",
   "cb0",
-  "default_letter_head",
   "tax_id",
   "domain",
   "date_of_establishment",
   "parent_company",
   "reporting_currency",
+  "section_break_soma",
+  "default_letter_head",
+  "column_break_zqmp",
+  "default_letter_head_report",
   "company_info",
   "company_logo",
   "date_of_incorporation",
@@ -127,6 +130,8 @@
   "column_break_32",
   "stock_adjustment_account",
   "stock_received_but_not_billed",
+  "stock_delivered_but_not_billed",
+  "disable_sdbnb_in_sr",
   "default_provisional_account",
   "default_in_transit_warehouse",
   "manufacturing_section",
@@ -253,7 +258,7 @@
   {
    "fieldname": "default_letter_head",
    "fieldtype": "Link",
-   "label": "Default Letter Head",
+   "label": "Default Letter Head (DocType)",
    "options": "Letter Head"
   },
   {
@@ -962,6 +967,35 @@
   {
    "fieldname": "accounts_closing_section",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "default_letter_head_report",
+   "fieldtype": "Link",
+   "label": "Default Letter Head (Report)",
+   "options": "Letter Head"
+  },
+  {
+   "fieldname": "section_break_soma",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_zqmp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "disable_sdbnb_in_sr",
+   "fieldtype": "Check",
+   "label": "Disable Stock Delivered But Not Billed in Sales Return",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "stock_delivered_but_not_billed",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Stock Delivered But Not Billed",
+   "no_copy": 1,
+   "options": "Account"
   }
  ],
  "grid_page_length": 50,
@@ -970,7 +1004,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2026-04-17 17:11:46.586135",
+ "modified": "2026-05-14 16:50:34.132345",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

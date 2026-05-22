@@ -493,6 +493,11 @@ def repost_gl_entries(doc):
 	repost_affected_transaction = get_affected_transactions(doc)
 
 	transactions = directly_dependent_transactions + list(repost_affected_transaction)
+
+	# handle stock delivered but not billed ledger entries
+	if frappe.get_cached_value("Company", doc.company, "stock_delivered_but_not_billed"):
+		_update_post_delivery_billed_vouchers(transactions)
+
 	enable_separate_reposting_for_gl = frappe.db.get_single_value(
 		"Stock Reposting Settings", "enable_separate_reposting_for_gl"
 	)
@@ -546,6 +551,44 @@ def _get_directly_dependent_vouchers(doc):
 		company=doc.company,
 	)
 	return affected_vouchers
+
+
+def _update_post_delivery_billed_vouchers(transactions: list) -> None:
+	"""
+	Fetch the delivery notes from dependant transactions,
+	and repost the Sales Invoice vouchers created post delivery note.
+	To match the Stock Delivered But Not Billed ledger entries.
+	"""
+	dn_vouchers = set()
+
+	for voucher_type, voucher_no in transactions:
+		if voucher_type == "Delivery Note":
+			dn_vouchers.add(voucher_no)
+
+	if not dn_vouchers:
+		return
+
+	sii = DocType("Sales Invoice Item")
+	si = DocType("Sales Invoice")
+	dni = DocType("Delivery Note Item")
+
+	query = (
+		frappe.qb.from_(sii)
+		.inner_join(si)
+		.on(si.name == sii.parent)
+		.left_join(dni)
+		.on(dni.name == sii.dn_detail)
+		.select(sii.parenttype, sii.parent)
+		.where((sii.delivery_note.isin(dn_vouchers) | dni.parent.isin(dn_vouchers)) & (si.docstatus == 1))
+		.groupby(sii.parenttype, sii.parent)
+	)
+
+	result = query.run(as_dict=True)
+
+	si_vouchers = {(d.parenttype, d.parent) for d in result}
+	existing = set(transactions)
+
+	transactions.extend(list(si_vouchers - existing))
 
 
 def notify_error_to_stock_managers(doc, traceback):

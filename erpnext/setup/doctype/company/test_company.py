@@ -79,6 +79,7 @@ class TestCompany(ERPNextTestSuite):
 						"Receivable",
 						"Stock Adjustment",
 						"Stock Received But Not Billed",
+						"Stock Delivered But Not Billed",
 						"Bank",
 						"Cash",
 						"Stock",

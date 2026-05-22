@@ -1586,6 +1586,12 @@ class SalesInvoice(SellingController):
 		self.make_internal_transfer_gl_entries(gl_entries)
 
 		self.make_item_gl_entries(gl_entries)
+
+		disable_sdbnb_in_sr = frappe.get_cached_value("Company", self.company, "disable_sdbnb_in_sr")
+
+		if not (self.is_return and disable_sdbnb_in_sr):
+			self.stock_delivered_but_not_billed_gl_entries(gl_entries)
+
 		self.make_precision_loss_gl_entry(gl_entries)
 		self.make_discount_gl_entries(gl_entries)
 
@@ -1602,6 +1608,81 @@ class SalesInvoice(SellingController):
 
 		self.set_transaction_currency_and_rate_in_gl_map(gl_entries)
 		return gl_entries
+
+	def stock_delivered_but_not_billed_gl_entries(self, gl_entries):
+		if self.update_stock or not cint(erpnext.is_perpetual_inventory_enabled(self.company)):
+			return
+
+		for item in self.get("items"):
+			if not item.delivery_note and not item.dn_detail:
+				continue
+
+			if not frappe.get_cached_value("Item", item.item_code, "is_stock_item"):
+				continue
+
+			dn_expense_account = frappe.get_cached_value(
+				"Delivery Note Item", item.dn_detail, "expense_account"
+			)
+			if (
+				not dn_expense_account
+				or frappe.get_cached_value("Account", dn_expense_account, "account_type")
+				!= "Stock Delivered But Not Billed"
+				or not item.expense_account
+				or dn_expense_account == item.expense_account
+			):
+				continue
+
+			delivery_note = item.delivery_note or frappe.get_cached_value(
+				"Delivery Note Item", item.dn_detail, "parent"
+			)
+			if not delivery_note:
+				continue
+
+			item_g = frappe.get_cached_value(
+				"Stock Ledger Entry",
+				{
+					"voucher_no": delivery_note,
+					"voucher_detail_no": item.dn_detail,
+					"item_code": item.item_code,
+					"is_cancelled": 0,
+				},
+				["stock_value_difference", "actual_qty"],
+				as_dict=True,
+			)
+
+			if not item_g or not flt(item_g.actual_qty):
+				continue
+			valuation_rate = flt(item_g.stock_value_difference) / flt(item_g.actual_qty)
+			valuation_amount = valuation_rate * item.stock_qty
+			dn_account_currency = get_account_currency(dn_expense_account)
+			item_account_currency = get_account_currency(item.expense_account)
+
+			gl_entries.append(
+				self.get_gl_dict(
+					{
+						"account": dn_expense_account,
+						"against": item.expense_account,
+						"credit": flt(valuation_amount),
+						"credit_in_account_currency": flt(valuation_amount),
+						"cost_center": item.cost_center,
+					},
+					dn_account_currency,
+					item=item,
+				)
+			)
+			gl_entries.append(
+				self.get_gl_dict(
+					{
+						"account": item.expense_account,
+						"against": dn_expense_account,
+						"debit": flt(valuation_amount),
+						"debit_in_account_currency": flt(valuation_amount),
+						"cost_center": item.cost_center,
+					},
+					item_account_currency,
+					item=item,
+				)
+			)
 
 	def make_customer_gl_entry(self, gl_entries):
 		# Checked both rounding_adjustment and rounded_total

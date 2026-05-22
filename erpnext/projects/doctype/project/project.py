@@ -91,14 +91,14 @@ class Project(Document):
 
 	def validate(self):
 		if not self.is_new():
-			self.copy_from_template()  # nosemgrep
+			self.copy_from_template()
 		self.send_welcome_email()
 		self.update_costing()
 		self.update_percent_complete()
 		self.validate_from_to_dates("expected_start_date", "expected_end_date")
 		self.validate_from_to_dates("actual_start_date", "actual_end_date")
 
-	def copy_from_template(self):  # nosemgrep
+	def copy_from_template(self, trigger=None):
 		"""
 		Copy tasks from template
 		"""
@@ -107,11 +107,15 @@ class Project(Document):
 			if not self.expected_start_date:
 				# project starts today
 				self.expected_start_date = today()
+				if trigger == "after_insert":
+					self.db_set("expected_start_date", self.expected_start_date)
 
 			template = frappe.get_doc("Project Template", self.project_template)
 
 			if not self.project_type:
 				self.project_type = template.project_type
+				if trigger == "after_insert":
+					self.db_set("project_type", self.project_type)
 
 			# create tasks from template
 			project_tasks = []
@@ -164,6 +168,40 @@ class Project(Document):
 			self.check_depends_on_value(template_task, project_task, project_tasks)
 			self.check_for_parent_tasks(template_task, project_task, project_tasks)
 
+	def set_consumed_material_cost(self):
+		parent_doc = frappe.qb.DocType("Stock Entry")
+		child_doc = frappe.qb.DocType("Stock Entry Detail")
+		lcv_doc = frappe.qb.DocType("Landed Cost Taxes and Charges")
+
+		amount = (
+			qb.from_(child_doc)
+			.select(Sum(child_doc.amount))
+			.where(
+				(child_doc.project == self.name)
+				& (child_doc.docstatus == 1)
+				& ((child_doc.t_warehouse.isnull()) | (child_doc.t_warehouse == ""))
+			)
+		).run(as_list=1)
+
+		amount = flt(amount[0][0]) if amount else 0
+
+		additional_costs = (
+			qb.from_(parent_doc)
+			.join(lcv_doc)
+			.on(parent_doc.name == lcv_doc.parent)
+			.select(Sum(lcv_doc.base_amount))
+			.where(
+				(parent_doc.project == self.name)
+				& (parent_doc.docstatus == 1)
+				& (parent_doc.purpose == "Manufacture")
+			)
+		).run(as_list=1)
+
+		additional_cost_amt = flt(additional_costs[0][0]) if additional_costs else 0
+
+		amount += additional_cost_amt
+		self.total_consumed_material_cost = amount
+
 	def check_depends_on_value(self, template_task, project_task, project_tasks):
 		if template_task.get("depends_on") and not project_task.get("depends_on"):
 			project_template_map = {pt.template_task: pt for pt in project_tasks}
@@ -201,7 +239,7 @@ class Project(Document):
 		self.db_update()
 
 	def after_insert(self):
-		self.copy_from_template()  # nosemgrep
+		self.copy_from_template("after_insert")
 		if self.sales_order:
 			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name)
 

@@ -875,15 +875,6 @@ class update_entries_after:
 			self.get_dynamic_incoming_outgoing_rate(sle)
 
 		if (
-			sle.voucher_type == "Stock Reconciliation"
-			and (sle.serial_and_batch_bundle)
-			and sle.voucher_detail_no
-			and not self.args.get("sle_id")
-			and sle.is_cancelled == 0
-		):
-			self.reset_actual_qty_for_stock_reco(sle)
-
-		if (
 			sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"]
 			and sle.voucher_detail_no
 			and sle.actual_qty < 0
@@ -1058,30 +1049,6 @@ class update_entries_after:
 			allow_zero_rate = self.check_if_allow_zero_valuation_rate(sle.voucher_type, sle.voucher_detail_no)
 			if not allow_zero_rate:
 				self.wh_data.valuation_rate = self.get_fallback_rate(sle)
-
-	def reset_actual_qty_for_stock_reco(self, sle):
-		doc = frappe.get_doc("Stock Reconciliation", sle.voucher_no)
-
-		if sle.actual_qty < 0:
-			doc.reload()
-
-			sle.actual_qty = (
-				flt(frappe.db.get_value("Stock Reconciliation Item", sle.voucher_detail_no, "current_qty"))
-				* -1
-			)
-
-			if abs(sle.actual_qty) == 0.0:
-				sle.is_cancelled = 1
-
-				if sle.serial_and_batch_bundle:
-					for row in doc.items:
-						if row.name == sle.voucher_detail_no:
-							row.db_set("current_serial_and_batch_bundle", "")
-
-					sabb_doc = frappe.get_doc("Serial and Batch Bundle", sle.serial_and_batch_bundle)
-					sabb_doc.voucher_detail_no = None
-					sabb_doc.voucher_no = None
-					sabb_doc.cancel()
 
 	def calculate_valuation_for_serial_batch_bundle(self, sle):
 		if not frappe.db.exists("Serial and Batch Bundle", sle.serial_and_batch_bundle):

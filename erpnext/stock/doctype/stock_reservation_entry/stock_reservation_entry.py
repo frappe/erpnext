@@ -1898,3 +1898,32 @@ def update_serial_batch_delivered_qty(row, name, is_cancelled=False):
 			)
 
 		query.run()
+
+
+def get_reserved_materials(voucher_no):
+	doctype = frappe.qb.DocType("Stock Reservation Entry")
+	serial_batch_doc = frappe.qb.DocType("Serial and Batch Entry")
+
+	query = (
+		frappe.qb.from_(doctype)
+		.inner_join(serial_batch_doc)
+		.on(doctype.name == serial_batch_doc.parent)
+		.select(
+			serial_batch_doc.serial_no,
+			serial_batch_doc.batch_no,
+			serial_batch_doc.qty,
+			doctype.item_code,
+			doctype.warehouse,
+			doctype.name,
+			doctype.transferred_qty,
+			doctype.consumed_qty,
+		)
+		.where(
+			(doctype.docstatus == 1)
+			& (doctype.voucher_no == voucher_no)
+			& (serial_batch_doc.delivered_qty < serial_batch_doc.qty)
+		)
+		.orderby(serial_batch_doc.idx)
+	)
+
+	return query.run(as_dict=True)
