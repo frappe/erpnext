@@ -381,14 +381,14 @@ class SalesOrder(SellingController):
 
 	def product_bundle_has_stock_item(self, product_bundle):
 		"""Returns true if product bundle has stock item"""
-		ret = len(
-			frappe.db.sql(
-				"""select i.name from tabItem i, `tabProduct Bundle Item` pbi
-			where pbi.parent = %s and pbi.item_code = i.name and i.is_stock_item = 1""",
-				product_bundle,
-			)
+		bundle_items = frappe.get_all(
+			"Product Bundle Item", filters={"parent": product_bundle}, pluck="item_code"
 		)
-		return ret
+
+		if not bundle_items:
+			return False
+
+		return frappe.db.exists("Item", {"name": ["in", bundle_items], "is_stock_item": 1}) is not None
 
 	def validate_sales_mntc_quotation(self):
 		for d in self.get("items"):
