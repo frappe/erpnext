@@ -133,17 +133,13 @@ def get_quotations(opportunities):
 	if not opportunities:
 		return []
 
-	opportunity_names = [o.name for o in opportunities]
+	opportunity_names = [o.get("name") for o in opportunities]
 
-	return frappe.db.sql(
-		"""
-		SELECT `name`,`base_grand_total`, `opportunity`
-		FROM `tabQuotation`
-		WHERE docstatus=1 AND opportunity in ({})
-	""".format(", ".join(["%s"] * len(opportunity_names))),
-		tuple(opportunity_names),
-		as_dict=1,
-	)  # nosec
+	return frappe.get_all(
+		"Quotation",
+		fields=["name", "base_grand_total", "opportunity"],
+		filters={"docstatus": 1, "opportunity": ["in", opportunity_names]},
+	)
 
 
 def get_sales_orders(quotations):
