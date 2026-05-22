@@ -368,16 +368,22 @@ class SalesOrder(SellingController):
 					)
 
 	def validate_for_items(self):
-		for d in self.get("items"):
-			# used for production plan
-			d.transaction_date = self.transaction_date
+		item_warehouse_pairs = [
+			(d.item_code, d.warehouse) for d in self.get("items") if d.item_code and d.warehouse
+		]
 
-			tot_avail_qty = frappe.db.sql(
-				"select projected_qty from `tabBin` \
-				where item_code = %s and warehouse = %s",
-				(d.item_code, d.warehouse),
+		bin_data = {}
+		if item_warehouse_pairs:
+			bins = frappe.get_all(
+				"Bin",
+				fields=["item_code", "warehouse", "projected_qty"],
+				filters={"item_code": ["in", [p[0] for p in item_warehouse_pairs]]},
 			)
-			d.projected_qty = tot_avail_qty and flt(tot_avail_qty[0][0]) or 0
+			bin_data = {(b.item_code, b.warehouse): flt(b.projected_qty) for b in bins}
+
+		for d in self.get("items"):
+			d.transaction_date = self.transaction_date
+			d.projected_qty = bin_data.get((d.item_code, d.warehouse), 0.0)
 
 	def product_bundle_has_stock_item(self, product_bundle):
 		"""Returns true if product bundle has stock item"""
