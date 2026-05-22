@@ -1596,11 +1596,8 @@ def make_sales_invoice(
 
 @frappe.whitelist()
 def make_maintenance_schedule(source_name: str, target_doc: str | Document | None = None):
-	maint_schedule = frappe.db.sql(
-		"""select t1.name
-		from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2
-		where t2.parent=t1.name and t2.sales_order=%s and t1.docstatus=1""",
-		source_name,
+	maint_schedule = frappe.db.exists(
+		"Maintenance Schedule Item", {"sales_order": source_name, "docstatus": 1}
 	)
 
 	if not maint_schedule:
