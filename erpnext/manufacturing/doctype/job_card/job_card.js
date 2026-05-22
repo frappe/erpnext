@@ -124,26 +124,16 @@ frappe.ui.form.on("Job Card", {
 		});
 	},
 
-<<<<<<< HEAD
-	refresh: function (frm) {
-		frm.trigger("setup_stock_entry");
-
-		let has_items = frm.doc.items && frm.doc.items.length;
-=======
 	refresh(frm) {
 		const { doc } = frm;
 		const has_items = doc.items && doc.items.length;
 
-<<<<<<< HEAD
->>>>>>> 0a215b0717 (refactor: job_card.js code for better readability)
-=======
 		// Clear any running timer tick from a previous render.
 		if (frm._jcd_timer_interval) {
 			clearInterval(frm._jcd_timer_interval);
 			frm._jcd_timer_interval = null;
 		}
 
->>>>>>> 1be92f6d05 (refactor: better timer and complete button)
 		frm.trigger("make_fields_read_only");
 
 		if (!frm.is_new() && doc.__onload?.work_order_closed) {
@@ -184,90 +174,11 @@ frappe.ui.form.on("Job Card", {
 
 		frm.trigger("toggle_operation_number");
 
-<<<<<<< HEAD
-		if (
-			frm.doc.for_quantity + frm.doc.process_loss_qty > frm.doc.total_completed_qty &&
-			(frm.doc.skip_material_transfer ||
-				frm.doc.transferred_qty >= frm.doc.for_quantity + frm.doc.process_loss_qty ||
-				!frm.doc.finished_good ||
-				!has_items?.length)
-		) {
-			let last_row = {};
-			if ((frm.doc.sub_operations?.length || frm.doc.pending_qty > 0) && frm.doc.time_logs?.length) {
-				last_row = get_last_row(frm.doc.time_logs);
-			}
-
-			if (
-				(!frm.doc.time_logs?.length ||
-					(flt(frm.doc.pending_qty) > 0.0 && last_row?.to_time) ||
-					(frm.doc.sub_operations?.length && last_row?.to_time)) &&
-				!frm.doc.is_paused
-			) {
-				frm.add_custom_button(__("Start Job"), () => {
-					let from_time = frappe.datetime.now_datetime();
-					if ((frm.doc.employee && !frm.doc.employee.length) || !frm.doc.employee) {
-						frappe.prompt(
-							{
-								fieldtype: "Table MultiSelect",
-								label: __("Select Employees"),
-								options: "Job Card Time Log",
-								fieldname: "employees",
-								reqd: 1,
-								filters: {
-									status: "Active",
-								},
-							},
-							(d) => {
-								frm.events.start_timer(frm, from_time, d.employees);
-							},
-							__("Assign Job to Employee")
-						);
-					} else {
-						frm.events.start_timer(frm, from_time, frm.doc.employee);
-					}
-				});
-			} else if (frm.doc.is_paused) {
-				frm.add_custom_button(__("Resume Job"), () => {
-					frm.call({
-						method: "resume_job",
-						doc: frm.doc,
-						args: {
-							start_time: frappe.datetime.now_datetime(),
-						},
-						callback() {
-							frm.reload_doc();
-						},
-					});
-				});
-			} else {
-				let manufactured_qty = frm.doc.manufactured_qty || frm.doc.total_completed_qty;
-				if (frm.doc.for_quantity - (manufactured_qty + frm.doc.process_loss_qty) > 0) {
-					if (!frm.doc.is_paused) {
-						frm.add_custom_button(__("Pause Job"), () => {
-							frm.call({
-								method: "pause_job",
-								doc: frm.doc,
-								args: {
-									end_time: frappe.datetime.now_datetime(),
-								},
-								callback() {
-									frm.reload_doc();
-								},
-							});
-						});
-					}
-
-					frm.add_custom_button(__("Complete Job"), () => {
-						frm.trigger("complete_job_card");
-					});
-				}
-
-				frm.trigger("make_dashboard");
-			}
-		}
-=======
 		const is_timer_running = frm.events.setup_job_action_buttons(frm, has_items);
->>>>>>> 0a215b0717 (refactor: job_card.js code for better readability)
+
+		if (!is_timer_running) {
+			frm.trigger("setup_stock_entry");
+		}
 
 		frm.trigger("setup_quality_inspection");
 
