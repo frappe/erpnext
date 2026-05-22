@@ -167,17 +167,21 @@ def get_sales_invoice(sales_orders):
 	if not sales_orders:
 		return []
 
-	so_names = [so.name for so in sales_orders]
+	so_names = [so.get("name") for so in sales_orders]
 
-	return frappe.db.sql(
-		"""
-	SELECT si.name, si.base_grand_total, sii.sales_order
-	FROM `tabSales Invoice` si, `tabSales Invoice Item` sii
-	WHERE si.docstatus=1 AND si.name = sii.parent AND sii.sales_order in ({})
-	""".format(", ".join(["%s"] * len(so_names))),
-		tuple(so_names),
-		as_dict=1,
-	)  # nosec
+	SalesInvoice = frappe.qb.DocType("Sales Invoice")
+	SalesInvoiceItem = frappe.qb.DocType("Sales Invoice Item")
+
+	query = (
+		frappe.qb.from_(SalesInvoice)
+		.join(SalesInvoiceItem)
+		.on(SalesInvoice.name == SalesInvoiceItem.parent)
+		.select(SalesInvoice.name, SalesInvoice.base_grand_total, SalesInvoiceItem.sales_order)
+		.where(SalesInvoice.docstatus == 1)
+		.where(SalesInvoiceItem.sales_order.isin(so_names))
+	)
+
+	return query.run(as_dict=True)
 
 
 def _get_total(doclist, amount_field="base_grand_total"):
