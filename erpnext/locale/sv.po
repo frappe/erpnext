@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-17 10:04+0000\n"
-"PO-Revision-Date: 2026-05-21 21:16\n"
+"PO-Revision-Date: 2026-05-22 21:18\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -17705,7 +17705,7 @@ msgstr "Visa inte någon valuta symbol t.ex. $."
 #. Settings'
 #: erpnext/stock/doctype/item_variant_settings/item_variant_settings.json
 msgid "Do not update variants on save"
-msgstr "Uppdatera inte varianter vid spara"
+msgstr "Uppdatera inte Varianter vid Spara"
 
 #: erpnext/assets/doctype/asset/asset.js:955
 msgid "Do you really want to restore this scrapped asset?"
@@ -20217,7 +20217,7 @@ msgstr "Fält i Bank Transaktion"
 #. 'Item Variant Settings'
 #: erpnext/stock/doctype/item_variant_settings/item_variant_settings.json
 msgid "Fields will be copied over only at time of creation."
-msgstr "Fält kopieras över endast vid skapande tid."
+msgstr "Fält kopieras över endast när variant skapas."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1068
 msgid "File does not belong to this Transaction Deletion Record"
@@ -35583,7 +35583,7 @@ msgstr "ID Handling Detaljer"
 #. Label of the passport_number (Data) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Passport Number"
-msgstr "ID Handling Nummer"
+msgstr "Pass Nummer"
 
 #: erpnext/accounts/doctype/subscription/subscription_list.js:10
 msgid "Past Due Date"
