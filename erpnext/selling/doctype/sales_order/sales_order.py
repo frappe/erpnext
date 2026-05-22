@@ -580,13 +580,12 @@ class SalesOrder(SellingController):
 			check_credit_limit(self.customer, self.company)
 
 	def check_nextdoc_docstatus(self):
-		linked_invoices = frappe.db.sql_list(
-			"""select distinct t1.name
-			from `tabSales Invoice` t1,`tabSales Invoice Item` t2
-			where t1.name = t2.parent and t2.sales_order = %s and t1.docstatus = 0""",
-			self.name,
+		linked_invoices = frappe.get_all(
+			"Sales Invoice Item",
+			filters={"sales_order": self.name, "docstatus": 0},
+			pluck="parent",
+			distinct=True,
 		)
-
 		if linked_invoices:
 			linked_invoices = [get_link_to_form("Sales Invoice", si) for si in linked_invoices]
 			frappe.throw(
