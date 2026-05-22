@@ -150,17 +150,21 @@ def get_sales_orders(quotations):
 	if not quotations:
 		return []
 
-	quotation_names = [q.name for q in quotations]
+	quotation_names = [q.get("name") for q in quotations]
 
-	return frappe.db.sql(
-		"""
-	SELECT so.`name`, so.`base_grand_total`, soi.prevdoc_docname as quotation
-	FROM `tabSales Order` so, `tabSales Order Item` soi
-	WHERE so.docstatus=1 AND so.name = soi.parent AND soi.prevdoc_docname in ({})
-	""".format(", ".join(["%s"] * len(quotation_names))),
-		tuple(quotation_names),
-		as_dict=1,
-	)  # nosec
+	SalesOrder = frappe.qb.DocType("Sales Order")
+	SalesOrderItem = frappe.qb.DocType("Sales Order Item")
+
+	query = (
+		frappe.qb.from_(SalesOrder)
+		.join(SalesOrderItem)
+		.on(SalesOrder.name == SalesOrderItem.parent)
+		.select(SalesOrder.name, SalesOrder.base_grand_total, SalesOrderItem.prevdoc_docname.as_("quotation"))
+		.where(SalesOrder.docstatus == 1)
+		.where(SalesOrderItem.prevdoc_docname.isin(quotation_names))
+	)
+
+	return query.run(as_dict=True)
 
 
 def get_sales_invoice(sales_orders):
