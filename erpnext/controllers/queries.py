@@ -297,6 +297,7 @@ def item_query(
 		.select(*query_select)
 		.where(item.docstatus < 2)
 		.where(item.disabled == 0)
+		.where(item.has_variants == 0)
 		.where(date_condition)
 		.where(Criterion.any(search_conditions))
 		.orderby(
