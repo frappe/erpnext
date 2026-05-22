@@ -888,9 +888,12 @@ class Item(Document):
 
 					if disabled:
 						frappe.throw(_("Attribute {0} is disabled.").format(frappe.bold(d.attribute)))
-
-					if not numeric_values and not frappe.db.exists(
-						"Item Attribute Value", {"parent": d.attribute, "attribute_value": d.attribute_value}
+					if (
+						not numeric_values
+						and d.attribute_value
+						and not frappe.db.get_list(
+							"Item Attribute Value", {"parent": d.attribute}, pluck="attribute_value"
+						)
 					):
 						frappe.throw(
 							_("Attribute Value {0} is not valid for the selected attribute {1}.").format(
