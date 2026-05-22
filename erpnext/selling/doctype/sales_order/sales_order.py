@@ -428,12 +428,10 @@ class SalesOrder(SellingController):
 
 	def validate_proj_cust(self):
 		if self.project and self.customer_name:
-			res = frappe.db.sql(
-				"""select name from `tabProject` where name = %s
-				and (customer = %s or ifnull(customer,'')='')""",
-				(self.project, self.customer),
+			project_has_valid_customer = frappe.db.exists(
+				"Project", {"name": self.project, "customer": ["in", [self.customer, "", None]]}
 			)
-			if not res:
+			if not project_has_valid_customer:
 				frappe.throw(
 					_("Customer {0} does not belong to project {1}").format(self.customer, self.project)
 				)
