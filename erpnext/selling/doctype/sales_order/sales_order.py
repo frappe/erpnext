@@ -391,16 +391,20 @@ class SalesOrder(SellingController):
 		return ret
 
 	def validate_sales_mntc_quotation(self):
+		quotation_names = [d.prevdoc_docname for d in self.get("items") if d.prevdoc_docname]
+
+		if not quotation_names:
+			return
+
+		valid_quotations = frappe.get_all(
+			"Quotation",
+			filters={"name": ["in", quotation_names], "order_type": self.order_type},
+			pluck="name",
+		)
+
 		for d in self.get("items"):
-			if d.prevdoc_docname:
-				res = frappe.db.sql(
-					"select name from `tabQuotation` where name=%s and order_type = %s",
-					(d.prevdoc_docname, self.order_type),
-				)
-				if not res:
-					frappe.msgprint(
-						_("Quotation {0} not of type {1}").format(d.prevdoc_docname, self.order_type)
-					)
+			if d.prevdoc_docname and d.prevdoc_docname not in valid_quotations:
+				frappe.msgprint(_("Quotation {0} not of type {1}").format(d.prevdoc_docname, self.order_type))
 
 	def validate_delivery_date(self):
 		if self.order_type == "Sales" and not self.skip_delivery_note:
