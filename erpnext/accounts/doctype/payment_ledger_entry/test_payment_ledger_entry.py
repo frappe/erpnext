@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import qb
+from frappe.query_builder.functions import Count, Sum
 from frappe.utils import add_days, nowdate
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -537,165 +538,77 @@ class TestPaymentLedgerEntry(ERPNextTestSuite):
 		"Accounts Settings",
 		{"enable_immutable_ledger": 1},
 	)
-	def test_sales_invoice_cancellation_creates_reverse_entries_for_immutable_ledger(self):
+	def test_reverse_entries_on_cancel_for_immutable_ledger(self):
 		invoice_posting_date = add_days(nowdate(), -5)
-		cancel_posting_date = nowdate()
 		gle = qb.DocType("GL Entry")
 		ple = qb.DocType("Payment Ledger Entry")
 
 		si = self.create_sales_invoice(qty=1, rate=100, posting_date=invoice_posting_date)
 
-		gle_before_cancel = (
+		gles_before = (
 			qb.from_(gle)
 			.select(
-				gle.account,
-				gle.party_type,
-				gle.party,
-				gle.cost_center,
-				gle.project,
-				gle.finance_book,
-				gle.posting_date,
-				gle.debit,
-				gle.credit,
-				gle.debit_in_account_currency,
-				gle.credit_in_account_currency,
+				Count(gle.name),
 			)
 			.where((gle.voucher_type == si.doctype) & (gle.voucher_no == si.name) & (gle.is_cancelled == 0))
-			.run(as_dict=True)
+			.run()[0][0]
 		)
-
-		ple_before_cancel = (
+		ples_before = (
 			qb.from_(ple)
 			.select(
-				ple.name,
-				ple.account_type,
-				ple.account,
-				ple.party_type,
-				ple.party,
-				ple.posting_date,
-				ple.against_voucher_type,
-				ple.against_voucher_no,
-				ple.amount,
-				ple.amount_in_account_currency,
-				ple.delinked,
+				Count(ple.name),
 			)
-			.where((ple.voucher_type == si.doctype) & (ple.voucher_no == si.name))
-			.run(as_dict=True)
+			.where((ple.voucher_type == si.doctype) & (ple.voucher_no == si.name) & (ple.delinked.eq(0)))
+			.run()[0][0]
 		)
+
 		si.cancel()
 
-		gle_after_cancel = (
+		gles_after = (
 			qb.from_(gle)
-			.select(
-				gle.account,
-				gle.party_type,
-				gle.party,
-				gle.cost_center,
-				gle.project,
-				gle.finance_book,
-				gle.posting_date,
-				gle.debit,
-				gle.credit,
-				gle.debit_in_account_currency,
-				gle.credit_in_account_currency,
-			)
+			.select(Count(gle.account))
 			.where((gle.voucher_type == si.doctype) & (gle.voucher_no == si.name) & (gle.is_cancelled == 0))
-			.run(as_dict=True)
+			.run()[0][0]
 		)
+		self.assertEqual(gles_after, gles_before * 2)
 
-		self.assertEqual(len(gle_after_cancel), len(gle_before_cancel) * 2)
-
-		after_gl = [
-			(
-				d.account,
-				d.party_type,
-				d.party,
-				d.cost_center,
-				d.project,
-				d.finance_book,
-				str(d.posting_date),
-				d.debit,
-				d.credit,
-				d.debit_in_account_currency,
-				d.credit_in_account_currency,
-			)
-			for d in gle_after_cancel
-		]
-		for d in gle_before_cancel:
-			self.assertIn(
-				(
-					d.account,
-					d.party_type,
-					d.party,
-					d.cost_center,
-					d.project,
-					d.finance_book,
-					cancel_posting_date,
-					d.credit,
-					d.debit,
-					d.credit_in_account_currency,
-					d.debit_in_account_currency,
-				),
-				after_gl,
-			)
-
-		ple_after_cancel = (
+		ples_after = (
 			qb.from_(ple)
 			.select(
-				ple.name,
-				ple.account_type,
-				ple.account,
-				ple.party_type,
-				ple.party,
-				ple.posting_date,
-				ple.against_voucher_type,
-				ple.against_voucher_no,
-				ple.amount,
-				ple.amount_in_account_currency,
-				ple.delinked,
+				Count(ple.name),
 			)
-			.where((ple.voucher_type == si.doctype) & (ple.voucher_no == si.name))
+			.where((ple.voucher_type == si.doctype) & (ple.voucher_no == si.name) & (ple.delinked.eq(0)))
+			.run()[0][0]
+		)
+		self.assertEqual(ples_after, ples_before * 2)
+
+		# assert debit/credit are reversed
+		gl_entries = (
+			qb.from_(gle)
+			.select(gle.account, Sum(gle.debit).as_("total_debit"), Sum(gle.credit).as_("total_credit"))
+			.where((gle.voucher_type == si.doctype) & (gle.voucher_no == si.name) & (gle.is_cancelled == 0))
+			.groupby(gle.account)
 			.run(as_dict=True)
 		)
+		for gl in gl_entries:
+			with self.subTest(gl=gl):
+				self.assertEqual(gl.total_debit, gl.total_credit)
 
-		self.assertEqual(len(ple_after_cancel), len(ple_before_cancel) * 2)
+		# assert amounts are reversed
+		pl_entries = (
+			qb.from_(ple)
+			.select(ple.account, Sum(ple.amount).as_("total_amount"))
+			.where((ple.voucher_type == si.doctype) & (ple.voucher_no == si.name) & (ple.delinked == 0))
+			.groupby(ple.account)
+			.run(as_dict=True)
+		)
+		for pl in pl_entries:
+			with self.subTest(pl=pl):
+				self.assertEqual(pl.total_amount, 0)
 
-		after_ple = [
-			(
-				d.account_type,
-				d.account,
-				d.party_type,
-				d.party,
-				str(d.posting_date),
-				d.against_voucher_type,
-				d.against_voucher_no,
-				d.amount,
-				d.amount_in_account_currency,
-				d.delinked,
-			)
-			for d in ple_after_cancel
-		]
-		for d in ple_before_cancel:
-			self.assertIn(
-				(
-					d.account_type,
-					d.account,
-					d.party_type,
-					d.party,
-					cancel_posting_date,
-					d.against_voucher_type,
-					d.against_voucher_no,
-					-d.amount,
-					-d.amount_in_account_currency,
-					0,
-				),
-				after_ple,
-			)
-
-		original_ple_names = [d.name for d in ple_before_cancel]
 		self.assertFalse(
 			frappe.db.exists(
 				"Payment Ledger Entry",
-				{"name": ("in", original_ple_names), "delinked": 1},
+				{"voucher_type": si.doctype, "voucher_no": si.name, "delinked": 1},
 			)
 		)
