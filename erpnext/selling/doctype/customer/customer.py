@@ -15,7 +15,8 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
 from frappe.model.utils.rename_doc import update_linked_doctypes
-from frappe.query_builder import Field, functions
+from frappe.query_builder import CustomFunction, Field, functions
+from frappe.query_builder.functions import Cast, Coalesce, Max, Substring
 from frappe.utils import cint, cstr, flt, get_formatted_email, today
 from frappe.utils.user import get_users_with_role
 
@@ -120,36 +121,25 @@ class Customer(TransactionBase):
 		self.customer_name = self.customer_name.strip()
 		if frappe.db.get_value("Customer", self.customer_name) and not frappe.flags.in_import:
 			name_prefix = f"{self.customer_name} - %"
+			Customer = frappe.qb.DocType("Customer")
 
 			if frappe.db.db_type == "postgres":
 				# Postgres: extract trailing digits (e.g. "Customer - 3") and cast to int.
 				# NOTE: PostgreSQL is strict about types; MySQL's UNSIGNED cast does not exist.
-				count = frappe.db.sql(
-					"""
-					SELECT COALESCE(
-						MAX(CAST(SUBSTRING(name FROM '\\d+$') AS INTEGER)),
-						0
-					)
-					FROM tabCustomer
-					WHERE name LIKE %(name_prefix)s
-					""",
-					{"name_prefix": name_prefix},
-					as_list=1,
-				)[0][0]
+				extracted_part = Substring(Customer.name, r"\d+$")
+				casted_part = Cast(extracted_part, "INTEGER")
 			else:
 				# MariaDB/MySQL: keep existing behavior.
-				count = frappe.db.sql(
-					"""
-					SELECT COALESCE(
-						MAX(CAST(SUBSTRING_INDEX(name, ' ', -1) AS UNSIGNED)),
-						0
-					)
-					FROM tabCustomer
-					WHERE name LIKE %(name_prefix)s
-					""",
-					{"name_prefix": name_prefix},
-					as_list=1,
-				)[0][0]
+				SubstringIndex = CustomFunction("SUBSTRING_INDEX", ["str", "delim", "count"])
+				extracted_part = SubstringIndex(Customer.name, " ", -1)
+				casted_part = Cast(extracted_part, "UNSIGNED")
+
+			query = (
+				frappe.qb.from_(Customer)
+				.select(Coalesce(Max(casted_part), 0))
+				.where(Customer.name.like(name_prefix))
+			)
+			count = query.run()[0][0]
 			count = cint(count) + 1
 
 			new_customer_name = f"{self.customer_name} - {cstr(count)}"
