@@ -1655,32 +1655,39 @@ def get_events(start: str, end: str, filters: str | dict | None = None):
 	:param end: End date-time.
 	:param filters: Filters (JSON).
 	"""
-	from frappe.desk.calendar import get_event_conditions
 
-	conditions = get_event_conditions("Sales Order", filters)
+	SalesOrder = frappe.qb.DocType("Sales Order")
+	SalesOrderItem = frappe.qb.DocType("Sales Order Item")
 
-	data = frappe.db.sql(
-		f"""
-		select
-			distinct `tabSales Order`.name, `tabSales Order`.customer_name, `tabSales Order`.status,
-			`tabSales Order`.delivery_status, `tabSales Order`.billing_status,
-			`tabSales Order Item`.delivery_date
-		from
-			`tabSales Order`, `tabSales Order Item`
-		where `tabSales Order`.name = `tabSales Order Item`.parent
-			and `tabSales Order`.skip_delivery_note = 0
-			and (ifnull(`tabSales Order Item`.delivery_date, '0000-00-00')!= '0000-00-00') \
-			and (`tabSales Order Item`.delivery_date between %(start)s and %(end)s)
-			and `tabSales Order`.docstatus < 2
-			{conditions}
-		""",
-		{"start": start, "end": end},
-		as_dict=True,
-		update={
-			"allDay": 0,
-			"convertToUserTz": 0,
-		},
+	query = (
+		frappe.get_query("Sales Order", filters=filters, ignore_permissions=False)
+		.join(SalesOrderItem)
+		.on(SalesOrder.name == SalesOrderItem.parent)
+		.select(
+			SalesOrder.name,
+			SalesOrder.customer_name,
+			SalesOrder.status,
+			SalesOrder.delivery_status,
+			SalesOrder.billing_status,
+			SalesOrderItem.delivery_date,
+		)
+		.distinct()
+		.where(SalesOrder.skip_delivery_note == 0)
+		.where(SalesOrder.docstatus < 2)
+		.where(SalesOrderItem.delivery_date.between(start, end))
+		.where(SalesOrderItem.delivery_date.isnotnull())
 	)
+
+	data = query.run(as_dict=True)
+
+	for row in data:
+		row.update(
+			{
+				"allDay": 0,
+				"convertToUserTz": 0,
+			}
+		)
+
 	return data
 
 
