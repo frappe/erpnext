@@ -1919,7 +1919,7 @@
   {
    "default": "0",
    "depends_on": "eval: !doc.is_return",
-   "description": "Issue a debit note with 0 qty against an existing Sales Invoice",
+   "description": "Issue a debit note against an existing Sales Invoice to adjust the rate. The quantity will be retained from the original invoice.",
    "fieldname": "is_debit_note",
    "fieldtype": "Check",
    "label": "Is Rate Adjustment Entry (Debit Note)"
@@ -2357,7 +2357,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2026-05-01 02:37:29.742764",
+ "modified": "2026-05-21 17:31:11.190958",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "creation": "2025-04-09 12:12:19.824560",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -10,6 +11,7 @@
   "status",
   "completed_qty",
   "process_loss_qty",
+  "pending_qty",
   "column_break_4",
   "bom",
   "workstation_type",
@@ -301,13 +303,20 @@
    "fieldname": "quality_inspection_required",
    "fieldtype": "Check",
    "label": "Quality Inspection Required"
+  },
+  {
+   "fieldname": "pending_qty",
+   "fieldtype": "Float",
+   "label": "Pending Qty",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-03-30 17:20:08.874381",
+ "modified": "2026-05-20 13:01:21.827200",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order Operation",

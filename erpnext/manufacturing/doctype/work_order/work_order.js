@@ -12,21 +12,10 @@ frappe.ui.form.on("Work Order", {
 		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
 
 		// Set query for warehouses
-		frm.set_query("wip_warehouse", function () {
-			return {
-				filters: {
-					company: frm.doc.company,
-				},
-			};
-		});
-
-		frm.set_query("source_warehouse", function () {
-			return {
-				filters: {
-					company: frm.doc.company,
-				},
-			};
-		});
+		frm.events.set_company_filters(frm, "wip_warehouse");
+		frm.events.set_company_filters(frm, "source_warehouse");
+		frm.events.set_company_filters(frm, "fg_warehouse");
+		frm.events.set_company_filters(frm, "scrap_warehouse");
 
 		frm.set_query("source_warehouse", "required_items", function () {
 			return {
@@ -40,24 +29,6 @@ frappe.ui.form.on("Work Order", {
 			return {
 				filters: {
 					status: ["not in", ["Closed", "On Hold"]],
-				},
-			};
-		});
-
-		frm.set_query("fg_warehouse", function () {
-			return {
-				filters: {
-					company: frm.doc.company,
-					is_group: 0,
-				},
-			};
-		});
-
-		frm.set_query("scrap_warehouse", function () {
-			return {
-				filters: {
-					company: frm.doc.company,
-					is_group: 0,
 				},
 			};
 		});
@@ -115,6 +86,16 @@ frappe.ui.form.on("Work Order", {
 		// formatter for work order operation
 		frm.set_indicator_formatter("operation", function (doc) {
 			return frm.doc.qty == doc.completed_qty ? "green" : "orange";
+		});
+	},
+
+	set_company_filters(frm, fieldname) {
+		frm.set_query(fieldname, () => {
+			return {
+				filters: {
+					company: frm.doc.company,
+				},
+			};
 		});
 	},
 
@@ -348,7 +329,7 @@ frappe.ui.form.on("Work Order", {
 					{
 						fieldtype: "Data",
 						fieldname: "name",
-						label: __("Operation Id"),
+						label: __("Operation ID"),
 					},
 					{
 						fieldtype: "Float",
@@ -425,6 +406,7 @@ frappe.ui.form.on("Work Order", {
 
 				if (pending_qty) {
 					dialog.fields_dict.operations.df.data.push({
+						__checked: 1,
 						name: data.name,
 						operation: data.operation,
 						workstation: data.workstation,

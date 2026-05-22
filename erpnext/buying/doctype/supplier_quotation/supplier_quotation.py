@@ -170,6 +170,8 @@ class SupplierQuotation(BuyingController):
 			frappe.throw(_("Valid till Date cannot be before Transaction Date"))
 
 	def update_rfq_supplier_status(self, include_me):
+		from frappe.query_builder.functions import Count
+
 		rfq_list = set([])
 		for item in self.items:
 			if item.request_for_quotation:
@@ -194,22 +196,25 @@ class SupplierQuotation(BuyingController):
 				)
 
 			quote_status = _("Received")
+
+			SQ = frappe.qb.DocType("Supplier Quotation")
+			SQ_Item = frappe.qb.DocType("Supplier Quotation Item")
+
 			for item in doc.items:
-				sqi_count = frappe.db.sql(
-					"""
-					SELECT
-						COUNT(sqi.name) as count
-					FROM
-						`tabSupplier Quotation Item` as sqi,
-						`tabSupplier Quotation` as sq
-					WHERE sq.supplier = %(supplier)s
-						AND sqi.docstatus = 1
-						AND sq.name != %(me)s
-						AND sqi.request_for_quotation_item = %(rqi)s
-						AND sqi.parent = sq.name""",
-					{"supplier": self.supplier, "rqi": item.name, "me": self.name},
-					as_dict=1,
-				)[0]
+				query = (
+					frappe.qb.from_(SQ_Item)
+					.join(SQ)
+					.on(SQ_Item.parent == SQ.name)
+					.select(Count(SQ_Item.name).as_("count"))
+					.where(SQ.supplier == self.supplier)
+					.where(SQ_Item.docstatus == 1)
+					.where(SQ.name != self.name)
+					.where(SQ_Item.request_for_quotation_item == item.name)
+				)
+
+				result = query.run(as_dict=True)
+				sqi_count = result[0] if result else frappe._dict(count=0)
+
 				self_count = (
 					sum(my_item.request_for_quotation_item == item.name for my_item in self.items)
 					if include_me
@@ -342,14 +347,12 @@ def make_quotation(source_name: str, target_doc: str | Document | None = None):
 
 
 def set_expired_status():
-	frappe.db.sql(
-		"""
-		UPDATE
-			`tabSupplier Quotation` SET `status` = 'Expired'
-		WHERE
-			`status` not in ('Cancelled', 'Stopped') AND `valid_till` < %s
-		""",
-		(nowdate()),
+	frappe.db.set_value(
+		"Supplier Quotation",
+		filters={"status": ["not in", ["Cancelled", "Stopped"]], "valid_till": ["<", nowdate()]},
+		fieldname="status",
+		value="Expired",
+		update_modified=True,
 	)
 
 

@@ -289,6 +289,7 @@ class DeliveryNote(SellingController):
 		self.validate_posting_time()
 		super().validate()
 		self.validate_references()
+		self.validate_expense_account()
 		self.set_status()
 		self.so_required()
 		self.validate_proj_cust()
@@ -460,6 +461,46 @@ class DeliveryNote(SellingController):
 				if bin_qty:
 					d.actual_qty = flt(bin_qty.actual_qty)
 					d.projected_qty = flt(bin_qty.projected_qty)
+
+	def validate_expense_account(self):
+		company_values = frappe.get_cached_value(
+			"Company",
+			self.company,
+			[
+				"stock_delivered_but_not_billed",
+				"disable_sdbnb_in_sr",
+				"default_expense_account",
+			],
+			as_dict=True,
+		)
+
+		sdbnb_account = company_values.stock_delivered_but_not_billed
+		disable_sdbnb_in_sr = company_values.disable_sdbnb_in_sr
+		default_expense_account = company_values.default_expense_account
+
+		for item in self.items:
+			if item.get("against_sales_invoice"):
+				if sdbnb_account and item.expense_account == sdbnb_account:
+					frappe.throw(
+						_(
+							"Row #{0}: Stock Delivered But Not Billed account cannot be used for items linked to a Sales Invoice"
+						).format(item.idx)
+					)
+			else:
+				is_stock_item = frappe.get_cached_value("Item", item.item_code, "is_stock_item")
+				# Only stock items
+				if is_stock_item and not item.get("is_fixed_asset") and not item.get("is_subcontracted"):
+					# Sales Return handling
+					if self.is_return and disable_sdbnb_in_sr:
+						if default_expense_account and (
+							not item.expense_account or item.expense_account == sdbnb_account
+						):
+							item.expense_account = default_expense_account
+
+					elif sdbnb_account:
+						item.expense_account = sdbnb_account
+			if not item.expense_account and default_expense_account:
+				item.expense_account = default_expense_account
 
 	def on_submit(self):
 		self.validate_packed_qty()

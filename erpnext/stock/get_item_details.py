@@ -436,6 +436,27 @@ def get_basic_details(ctx: ItemDetailsCtx, item, overwrite_warehouse=True) -> It
 				fieldname="fixed_asset_account", item=ctx.item_code, company=ctx.company
 			)
 
+	company_values = frappe.get_cached_value(
+		"Company",
+		ctx.company,
+		[
+			"stock_delivered_but_not_billed",
+			"disable_sdbnb_in_sr",
+		],
+		as_dict=True,
+	)
+
+	if (
+		ctx.doctype == "Delivery Note"
+		and ctx.is_stock_item
+		and company_values
+		and company_values.stock_delivered_but_not_billed
+		and not ctx.get("is_fixed_asset")
+		and not ctx.get("is_subcontracted")
+	):
+		if not (ctx.get("is_return") and company_values.disable_sdbnb_in_sr):
+			expense_account = company_values.stock_delivered_but_not_billed
+
 	# Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
 	if not ctx.uom:
 		if ctx.doctype in sales_doctypes:

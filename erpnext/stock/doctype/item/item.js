@@ -287,13 +287,6 @@ frappe.ui.form.on("Item", {
 		});
 		frm.set_df_property("is_fixed_asset", "read_only", frm.doc.__onload?.asset_exists ? 1 : 0);
 		frm.toggle_reqd("customer", frm.doc.is_customer_provided_item ? 1 : 0);
-		frm.set_query("item_group", () => {
-			return {
-				filters: {
-					is_group: 0,
-				},
-			};
-		});
 	},
 
 	validate: function (frm) {
@@ -545,12 +538,6 @@ $.extend(erpnext.item, {
 					["Account", "account_type", "in", "Tax, Chargeable, Income Account, Expense Account"],
 					["Account", "docstatus", "!=", 2],
 				],
-			};
-		};
-
-		frm.fields_dict["item_group"].get_query = function (doc, cdt, cdn) {
-			return {
-				filters: [["Item Group", "docstatus", "!=", 2]],
 			};
 		};
 

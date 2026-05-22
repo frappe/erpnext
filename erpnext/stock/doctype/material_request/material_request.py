@@ -768,7 +768,6 @@ def make_stock_entry(source_name: str, target_doc: str | Document | None = None)
 		target.set_actual_qty()
 		target.calculate_rate_and_amount(raise_error_if_no_rate=False)
 		target.stock_entry_type = target.purpose
-		target.set_job_card_data()
 
 		if source.job_card:
 			job_card_details = frappe.get_all(

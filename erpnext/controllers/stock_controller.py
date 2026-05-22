@@ -940,6 +940,7 @@ class StockController(AccountsController):
 					"Stock Reconciliation",
 					"Stock Entry",
 					"Subcontracting Receipt",
+					"Delivery Note",
 				)
 				and not is_expense_account
 			):

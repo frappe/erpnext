@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2025-04-09 12:09:40.634472",
@@ -266,6 +267,7 @@
    "fieldname": "wip_warehouse",
    "fieldtype": "Link",
    "label": "Work-in-Progress Warehouse",
+   "link_filters": "[[\"Warehouse\",\"disabled\",\"=\",0],[\"Warehouse\",\"is_group\",\"=\",0]]",
    "mandatory_depends_on": "eval:(!doc.skip_transfer || doc.from_wip_warehouse) && !doc.track_semi_finished_goods",
    "options": "Warehouse"
   },
@@ -274,6 +276,7 @@
    "fieldname": "fg_warehouse",
    "fieldtype": "Link",
    "label": "Target Warehouse",
+   "link_filters": "[[\"Warehouse\",\"disabled\",\"=\",0],[\"Warehouse\",\"is_group\",\"=\",0]]",
    "options": "Warehouse",
    "read_only_depends_on": "subcontracting_inward_order"
   },
@@ -286,6 +289,7 @@
    "fieldname": "scrap_warehouse",
    "fieldtype": "Link",
    "label": "Scrap Warehouse",
+   "link_filters": "[[\"Warehouse\",\"disabled\",\"=\",0],[\"Warehouse\",\"is_group\",\"=\",0]]",
    "options": "Warehouse"
   },
   {
@@ -513,6 +517,7 @@
    "fieldname": "source_warehouse",
    "fieldtype": "Link",
    "label": "Source Warehouse",
+   "link_filters": "[[\"Warehouse\",\"disabled\",\"=\",0],[\"Warehouse\",\"is_group\",\"=\",0]]",
    "options": "Warehouse",
    "read_only_depends_on": "eval:doc.subcontracting_inward_order"
   },
@@ -706,7 +711,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-17 13:42:12.374055",
+ "modified": "2026-05-19 12:20:38.102403",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",

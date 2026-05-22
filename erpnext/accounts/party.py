@@ -762,7 +762,7 @@ def set_taxes(
 		args.update({"tax_type": "Purchase"})
 
 	if use_for_shopping_cart:
-		args.update({"use_for_shopping_cart": use_for_shopping_cart})
+		args.update({"use_for_shopping_cart": cint(use_for_shopping_cart)})
 
 	return get_tax_template(posting_date, args)
 

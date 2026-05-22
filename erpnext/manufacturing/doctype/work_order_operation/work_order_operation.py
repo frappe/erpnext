@@ -32,6 +32,7 @@ class WorkOrderOperation(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+		pending_qty: DF.Float
 		planned_end_time: DF.Datetime | None
 		planned_operating_cost: DF.Currency
 		planned_start_time: DF.Datetime | None

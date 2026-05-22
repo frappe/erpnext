@@ -46,6 +46,7 @@
   "target_address_display",
   "sb0",
   "scan_barcode",
+  "column_break_menu",
   "last_scanned_warehouse",
   "items_section",
   "items",
@@ -369,6 +370,7 @@
   {
    "fieldname": "sb0",
    "fieldtype": "Section Break",
+   "hide_border": 1,
    "options": "Simple"
   },
   {
@@ -646,7 +648,7 @@
    "depends_on": "eval:in_list([\"Material Issue\", \"Manufacture\", \"Repack\", \"Send to Subcontractor\", \"Material Transfer for Manufacture\", \"Material Consumption for Manufacture\", \"Disassemble\"], doc.purpose)",
    "fieldname": "bom_info_section",
    "fieldtype": "Section Break",
-   "label": "BOM Info"
+   "label": "Bill of Materials"
   },
   {
    "collapsible": 1,
@@ -695,8 +697,7 @@
   },
   {
    "fieldname": "items_section",
-   "fieldtype": "Section Break",
-   "label": "Items"
+   "fieldtype": "Section Break"
   },
   {
    "depends_on": "eval:doc.asset_repair",
@@ -761,6 +762,10 @@
    "fieldtype": "Link",
    "label": "Cost Center",
    "options": "Cost Center"
+  },
+  {
+   "fieldname": "column_break_menu",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
@@ -769,7 +774,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-04 19:03:23.426082",
+ "modified": "2026-04-21 13:31:48.817309",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
