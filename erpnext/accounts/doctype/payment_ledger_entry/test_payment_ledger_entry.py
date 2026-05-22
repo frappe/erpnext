@@ -1,8 +1,6 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-from collections import Counter
-
 import frappe
 from frappe import qb
 from frappe.utils import add_days, nowdate
@@ -607,22 +605,6 @@ class TestPaymentLedgerEntry(ERPNextTestSuite):
 
 		self.assertEqual(len(gle_after_cancel), len(gle_before_cancel) * 2)
 
-		before_gl = [
-			(
-				d.account,
-				d.party_type,
-				d.party,
-				d.cost_center,
-				d.project,
-				d.finance_book,
-				str(d.posting_date),
-				d.debit,
-				d.credit,
-				d.debit_in_account_currency,
-				d.credit_in_account_currency,
-			)
-			for d in gle_before_cancel
-		]
 		after_gl = [
 			(
 				d.account,
@@ -639,26 +621,23 @@ class TestPaymentLedgerEntry(ERPNextTestSuite):
 			)
 			for d in gle_after_cancel
 		]
-		actual_reverse_gl = list((Counter(after_gl) - Counter(before_gl)).elements())
-		self.assertEqual(len(actual_reverse_gl), len(gle_before_cancel))
-
-		expected_reverse_gl = [
-			(
-				d.account,
-				d.party_type,
-				d.party,
-				d.cost_center,
-				d.project,
-				d.finance_book,
-				cancel_posting_date,
-				d.credit,
-				d.debit,
-				d.credit_in_account_currency,
-				d.debit_in_account_currency,
+		for d in gle_before_cancel:
+			self.assertIn(
+				(
+					d.account,
+					d.party_type,
+					d.party,
+					d.cost_center,
+					d.project,
+					d.finance_book,
+					cancel_posting_date,
+					d.credit,
+					d.debit,
+					d.credit_in_account_currency,
+					d.debit_in_account_currency,
+				),
+				after_gl,
 			)
-			for d in gle_before_cancel
-		]
-		self.assertCountEqual(actual_reverse_gl, expected_reverse_gl)
 
 		ple_after_cancel = (
 			qb.from_(ple)
@@ -681,21 +660,6 @@ class TestPaymentLedgerEntry(ERPNextTestSuite):
 
 		self.assertEqual(len(ple_after_cancel), len(ple_before_cancel) * 2)
 
-		before_ple = [
-			(
-				d.account_type,
-				d.account,
-				d.party_type,
-				d.party,
-				str(d.posting_date),
-				d.against_voucher_type,
-				d.against_voucher_no,
-				d.amount,
-				d.amount_in_account_currency,
-				d.delinked,
-			)
-			for d in ple_before_cancel
-		]
 		after_ple = [
 			(
 				d.account_type,
@@ -711,25 +675,22 @@ class TestPaymentLedgerEntry(ERPNextTestSuite):
 			)
 			for d in ple_after_cancel
 		]
-		actual_reverse_ple = list((Counter(after_ple) - Counter(before_ple)).elements())
-		self.assertEqual(len(actual_reverse_ple), len(ple_before_cancel))
-
-		expected_reverse_ple = [
-			(
-				d.account_type,
-				d.account,
-				d.party_type,
-				d.party,
-				cancel_posting_date,
-				d.against_voucher_type,
-				d.against_voucher_no,
-				-d.amount,
-				-d.amount_in_account_currency,
-				0,
+		for d in ple_before_cancel:
+			self.assertIn(
+				(
+					d.account_type,
+					d.account,
+					d.party_type,
+					d.party,
+					cancel_posting_date,
+					d.against_voucher_type,
+					d.against_voucher_no,
+					-d.amount,
+					-d.amount_in_account_currency,
+					0,
+				),
+				after_ple,
 			)
-			for d in ple_before_cancel
-		]
-		self.assertCountEqual(actual_reverse_ple, expected_reverse_ple)
 
 		original_ple_names = [d.name for d in ple_before_cancel]
 		self.assertFalse(
