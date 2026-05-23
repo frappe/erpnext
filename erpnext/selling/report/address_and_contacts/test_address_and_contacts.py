@@ -13,25 +13,26 @@ class TestAddressAndContacts(ERPNextTestSuite):
 		self.contact = create_test_contact(self.customer.name)
 
 	def tearDown(self):
-		frappe.delete_doc("Contact", self.contact.name, force=True)
-		frappe.delete_doc("Customer", self.customer.name, force=True)
+		try:
+			frappe.delete_doc("Contact", self.contact.name, force=True)
+			frappe.delete_doc("Customer", self.customer.name, force=True)
+		finally:
+			super().tearDown()
 
 	def test_address_and_contacts_returns_data(self):
 		"""Test that the report returns data for a valid party type."""
 		filters = frappe._dict(party_type="Customer")
 
-		columns, data = execute(filters)
+		_, data = execute(filters)
 
-		self.assertTrue(len(columns) > 0, "Report should return columns")
 		self.assertTrue(len(data) > 0, "Report should return at least one row")
 
 	def test_address_and_contacts_columns_include_designation(self):
 		"""Test that the designation column is present in the report output."""
 		filters = frappe._dict(party_type="Customer")
 
-		columns, data = execute(filters)
+		columns, _ = execute(filters)
 
-		# Columns can be dicts or strings — normalize to check
 		col_labels = []
 		for col in columns:
 			if isinstance(col, dict):
@@ -51,8 +52,9 @@ class TestAddressAndContacts(ERPNextTestSuite):
 			party_name=self.customer.name,
 		)
 
-		columns, data = execute(filters)
+		_, data = execute(filters)
 
+		self.assertTrue(len(data) > 0, "Should return at least one row for party filter")
 		for row in data:
 			self.assertEqual(
 				row[0],
@@ -64,7 +66,7 @@ class TestAddressAndContacts(ERPNextTestSuite):
 		"""Test that an empty party_type returns no data gracefully."""
 		filters = frappe._dict(party_type=None)
 
-		columns, data = execute(filters)
+		_, data = execute(filters)
 
 		self.assertEqual(data, [], "Empty party_type should return empty data")
 
@@ -75,12 +77,12 @@ class TestAddressAndContacts(ERPNextTestSuite):
 			party_name=self.customer.name,
 		)
 
-		columns, data = execute(filters)
+		_, data = execute(filters)
 
-		# Find designation value across all rows
+		self.assertTrue(len(data) > 0, "Should return at least one row")
 		designations = []
 		for row in data:
-			if isinstance(row, (list, tuple)) and len(row) > 0:
+			if isinstance(row, (list, tuple)):
 				designations.extend([str(cell) for cell in row])
 
 		self.assertTrue(

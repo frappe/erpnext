@@ -14,7 +14,10 @@ class TestLeadDetails(ERPNextTestSuite):
 		self.lead = create_test_lead(self.company)
 
 	def tearDown(self):
-		frappe.delete_doc("Lead", self.lead.name, force=True)
+		try:
+			frappe.delete_doc("Lead", self.lead.name, force=True)
+		finally:
+			super().tearDown()
 
 	def test_lead_details_returns_data(self):
 		"""Test that the report returns data for a valid company and date range."""
@@ -24,9 +27,8 @@ class TestLeadDetails(ERPNextTestSuite):
 			to_date=add_days(getdate(), 1),
 		)
 
-		columns, data = execute(filters)
+		_, data = execute(filters)
 
-		self.assertTrue(len(columns) > 0, "Report should return columns")
 		self.assertTrue(len(data) > 0, "Report should return at least one row")
 
 	def test_lead_details_columns_include_designation(self):
@@ -37,7 +39,7 @@ class TestLeadDetails(ERPNextTestSuite):
 			to_date=add_days(getdate(), 1),
 		)
 
-		columns, data = execute(filters)
+		columns, _ = execute(filters)
 
 		fieldnames = [
 			col.get("fieldname") if isinstance(col, dict) else col
@@ -58,8 +60,9 @@ class TestLeadDetails(ERPNextTestSuite):
 			status="Open",
 		)
 
-		columns, data = execute(filters)
+		_, data = execute(filters)
 
+		self.assertTrue(len(data) > 0, "Should return at least one row for status filter")
 		for row in data:
 			self.assertEqual(
 				row.get("status"),
@@ -75,9 +78,8 @@ class TestLeadDetails(ERPNextTestSuite):
 			to_date=add_days(getdate(), -29),
 		)
 
-		columns, data = execute(filters)
+		_, data = execute(filters)
 
-		# Lead was just created, so it should NOT appear in this old date range
 		lead_names = [row.get("name") for row in data]
 		self.assertNotIn(
 			self.lead.name,
