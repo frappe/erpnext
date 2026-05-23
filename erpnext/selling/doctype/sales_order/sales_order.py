@@ -852,9 +852,13 @@ class SalesOrder(SellingController):
 
 		packed_items = []
 		if items_details:
-			for idx, item in enumerate(items_details):
+			for item in items_details:
 				if not frappe.db.exists("Sales Order Item", item.get("sales_order_item")):
-					packed_items.append(items_details.pop(idx))
+					item["qty"] = item.pop("qty_to_reserve")
+					packed_items.append(item)
+
+			for item in packed_items:
+				items_details.remove(item)
 
 		sre_count = 0
 		if items_details != []:
@@ -865,7 +869,13 @@ class SalesOrder(SellingController):
 				notify=notify,
 			)
 
-		if items := packed_items or [item for item in self.packed_items if item.reserve_stock]:
+		items = []
+		if packed_items:
+			items = packed_items
+		elif not items_details:
+			items = [item for item in self.packed_items if item.reserve_stock]
+
+		if items:
 			from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
 
 			stock_reservation = StockReservation(doc=self, items=items)
