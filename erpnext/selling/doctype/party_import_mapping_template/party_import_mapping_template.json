@@ -1,0 +1,77 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-05-23 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "template_name",
+  "party_type",
+  "mappings"
+ ],
+ "fields": [
+  {
+   "fieldname": "template_name",
+   "fieldtype": "Data",
+   "label": "Template Name",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "party_type",
+   "fieldtype": "Select",
+   "label": "Party Type",
+   "options": "Customer\nSupplier",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "mappings",
+   "fieldtype": "Long Text",
+   "label": "Mappings (JSON)",
+   "reqd": 1,
+   "description": "JSON object mapping source column name to target field name"
+  }
+ ],
+ "links": [],
+ "modified": "2026-05-23 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Party Import Mapping Template",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "Sales Master Manager",
+   "write": 1,
+   "if_owner": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "Purchase Master Manager",
+   "write": 1,
+   "if_owner": 1
+  }
+ ],
+ "sort_field": "template_name",
+ "sort_order": "ASC",
+ "track_changes": 0
+}

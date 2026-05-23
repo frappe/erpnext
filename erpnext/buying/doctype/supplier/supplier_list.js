@@ -5,4 +5,11 @@ frappe.listview_settings["Supplier"] = {
 			return [__("On Hold"), "red"];
 		}
 	},
+
+	onload(listview) {
+		listview.page.add_menu_item(__("Import Suppliers"), () => {
+			window.localStorage.setItem("party_import_prefill", "Supplier");
+			frappe.set_route("party-import-wizard");
+		});
+	},
 };

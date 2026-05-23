@@ -1,0 +1,246 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "format:PI-{YYYY}-{####}",
+ "creation": "2026-05-21 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "party_type",
+  "source_format",
+  "status",
+  "column_break_header",
+  "import_file",
+  "started_at",
+  "completed_at",
+  "section_break_mapping",
+  "column_mappings",
+  "section_break_deps",
+  "dependency_resolutions",
+  "row_overrides",
+  "section_break_policy",
+  "conflict_policy",
+  "section_break_counts",
+  "total_rows",
+  "imported_rows",
+  "created_rows",
+  "column_break_counts",
+  "updated_rows",
+  "skipped_rows",
+  "error_rows",
+  "section_break_logs",
+  "error_log",
+  "created_masters"
+ ],
+ "fields": [
+  {
+   "fieldname": "party_type",
+   "fieldtype": "Select",
+   "label": "Party Type",
+   "options": "Customer\nSupplier",
+   "reqd": 1,
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "source_format",
+   "fieldtype": "Select",
+   "label": "Source Format",
+   "options": "Generic\nTally\nQuickBooks\nZoho\nHubSpot\nSalesforce",
+   "default": "Generic",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nMapping\nResolving\nReviewing\nImporting\nCompleted\nFailed\nCancelled",
+   "default": "Draft",
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "column_break_header",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "import_file",
+   "fieldtype": "Attach",
+   "label": "Import File",
+   "read_only": 1
+  },
+  {
+   "fieldname": "started_at",
+   "fieldtype": "Datetime",
+   "label": "Started At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "completed_at",
+   "fieldtype": "Datetime",
+   "label": "Completed At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_mapping",
+   "fieldtype": "Section Break",
+   "label": "Column Mapping",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "column_mappings",
+   "fieldtype": "Long Text",
+   "label": "Column Mappings (JSON)",
+   "description": "JSON mapping of source column -> target field",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_deps",
+   "fieldtype": "Section Break",
+   "label": "Dependency Resolutions",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "row_overrides",
+   "fieldtype": "Long Text",
+   "label": "Row Overrides",
+   "read_only": 1
+  },
+  {
+   "fieldname": "dependency_resolutions",
+   "fieldtype": "Long Text",
+   "label": "Dependency Resolutions (JSON)",
+   "description": "JSON of per-doctype, per-value action: use/create/map/skip",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_policy",
+   "fieldtype": "Section Break",
+   "label": "Conflict Policy"
+  },
+  {
+   "fieldname": "conflict_policy",
+   "fieldtype": "Select",
+   "label": "On Existing Party",
+   "options": "Skip\nUpdate Empty Fields Only\nUpdate All Fields",
+   "default": "Skip",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_counts",
+   "fieldtype": "Section Break",
+   "label": "Counts"
+  },
+  {
+   "fieldname": "total_rows",
+   "fieldtype": "Int",
+   "label": "Total Rows",
+   "read_only": 1
+  },
+  {
+   "fieldname": "imported_rows",
+   "fieldtype": "Int",
+   "label": "Imported Rows",
+   "read_only": 1
+  },
+  {
+   "fieldname": "created_rows",
+   "fieldtype": "Int",
+   "label": "Created",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_counts",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "updated_rows",
+   "fieldtype": "Int",
+   "label": "Updated",
+   "read_only": 1
+  },
+  {
+   "fieldname": "skipped_rows",
+   "fieldtype": "Int",
+   "label": "Skipped",
+   "read_only": 1
+  },
+  {
+   "fieldname": "error_rows",
+   "fieldtype": "Int",
+   "label": "Errors",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_logs",
+   "fieldtype": "Section Break",
+   "label": "Logs",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "error_log",
+   "fieldtype": "Long Text",
+   "label": "Error Log (JSON)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "created_masters",
+   "fieldtype": "Long Text",
+   "label": "Created Masters (JSON)",
+   "read_only": 1,
+   "description": "Master records created during this import (for traceability)"
+  }
+ ],
+ "links": [],
+ "modified": "2026-05-21 11:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Party Import Log",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Master Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase Master Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "track_changes": 1,
+ "track_seen": 0,
+ "states": []
+}
