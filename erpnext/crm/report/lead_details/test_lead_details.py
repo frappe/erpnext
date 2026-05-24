@@ -13,12 +13,6 @@ class TestLeadDetails(ERPNextTestSuite):
 		self.company = "_Test Company"
 		self.lead = create_test_lead(self.company)
 
-	def tearDown(self):
-		try:
-			frappe.delete_doc("Lead", self.lead.name, force=True)
-		finally:
-			super().tearDown()
-
 	def test_lead_details_returns_data(self):
 		"""Test that the report returns data for a valid company and date range."""
 		filters = frappe._dict(
@@ -66,12 +60,14 @@ class TestLeadDetails(ERPNextTestSuite):
 
 
 def create_test_lead(company):
-	lead = frappe.get_doc({
-		"doctype": "Lead",
-		"lead_name": "_Test Lead Designation",
-		"email_id": "test_designation_lead@example.com",
-		"status": "Open",
-		"company": company,
-	})
+	lead = frappe.get_doc(
+		{
+			"doctype": "Lead",
+			"lead_name": "_Test Lead Designation",
+			"email_id": "test_designation_lead@example.com",
+			"status": "Open",
+			"company": company,
+		}
+	)
 	lead.insert(ignore_permissions=True)
 	return lead

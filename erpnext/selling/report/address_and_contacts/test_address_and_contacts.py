@@ -12,13 +12,6 @@ class TestAddressAndContacts(ERPNextTestSuite):
 		self.customer = create_test_customer()
 		self.contact = create_test_contact(self.customer.name)
 
-	def tearDown(self):
-		try:
-			frappe.delete_doc("Contact", self.contact.name, force=True)
-			frappe.delete_doc("Customer", self.customer.name, force=True)
-		finally:
-			super().tearDown()
-
 	def test_address_and_contacts_returns_data(self):
 		"""Test that the report returns data for a valid party type."""
 		filters = frappe._dict(party_type="Customer")
@@ -29,8 +22,14 @@ class TestAddressAndContacts(ERPNextTestSuite):
 		"""Test that the designation column is present in the report output."""
 		filters = frappe._dict(party_type="Customer")
 		columns, _ = execute(filters)
-		col_labels = [col.get("label", "").lower() if isinstance(col, dict) else str(col).lower() for col in columns]
-		self.assertTrue(any("designation" in label for label in col_labels), "Designation column should be present")
+		col_labels = [
+			col.get("label", "").lower() if isinstance(col, dict) else str(col).lower()
+			for col in columns
+		]
+		self.assertTrue(
+			any("designation" in label for label in col_labels),
+			"Designation column should be present",
+		)
 
 	def test_address_and_contacts_filter_by_party(self):
 		"""Test that filtering by specific party returns only that party data."""
@@ -51,29 +50,36 @@ class TestAddressAndContacts(ERPNextTestSuite):
 		filters = frappe._dict(party_type="Customer", party_name=self.customer.name)
 		_, data = execute(filters)
 		self.assertTrue(len(data) > 0, "Should return at least one row")
-		designations = [str(cell) for row in data if isinstance(row, (list, tuple)) for cell in row]
-		self.assertTrue(any("_Test Designation" in d for d in designations), "Designation should appear in data")
+		designations = [str(cell) for row in data if isinstance(row, list | tuple) for cell in row]
+		self.assertTrue(
+			any("_Test Designation" in d for d in designations),
+			"Designation should appear in data",
+		)
 
 
 def create_test_customer():
-	customer = frappe.get_doc({
-		"doctype": "Customer",
-		"customer_name": "_Test Customer Designation Report",
-		"customer_type": "Individual",
-		"customer_group": "All Customer Groups",
-		"territory": "All Territories",
-	})
+	customer = frappe.get_doc(
+		{
+			"doctype": "Customer",
+			"customer_name": "_Test Customer Designation Report",
+			"customer_type": "Individual",
+			"customer_group": "All Customer Groups",
+			"territory": "All Territories",
+		}
+	)
 	customer.insert(ignore_permissions=True)
 	return customer
 
 
 def create_test_contact(customer_name):
-	contact = frappe.get_doc({
-		"doctype": "Contact",
-		"first_name": "_Test",
-		"last_name": "Contact Designation",
-		"designation": "_Test Designation",
-		"links": [{"link_doctype": "Customer", "link_name": customer_name}],
-	})
+	contact = frappe.get_doc(
+		{
+			"doctype": "Contact",
+			"first_name": "_Test",
+			"last_name": "Contact Designation",
+			"designation": "_Test Designation",
+			"links": [{"link_doctype": "Customer", "link_name": customer_name}],
+		}
+	)
 	contact.insert(ignore_permissions=True)
 	return contact
