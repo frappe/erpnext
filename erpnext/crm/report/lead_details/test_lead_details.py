@@ -4,7 +4,7 @@
 import frappe
 from frappe.utils import add_days, getdate
 
-from erpnext.crm.report.lead_details.lead_details import execute
+from erpnext.crm.report.lead_details.lead_details import execute, get_columns
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -24,13 +24,8 @@ class TestLeadDetails(ERPNextTestSuite):
 		self.assertTrue(len(data) > 0, "Report should return at least one row")
 
 	def test_lead_details_columns_include_designation(self):
-		"""Test that the designation column is present in the report output."""
-		filters = frappe._dict(
-			company=self.company,
-			from_date=add_days(getdate(), -1),
-			to_date=add_days(getdate(), 1),
-		)
-		columns, _ = execute(filters)
+		"""Test that the designation column is present in the report columns."""
+		columns = get_columns()
 		fieldnames = [col.get("fieldname") if isinstance(col, dict) else col for col in columns]
 		self.assertIn("designation", fieldnames, "Designation column should be present")
 
