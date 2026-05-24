@@ -720,6 +720,7 @@ class TestJobCard(ERPNextTestSuite):
 			)
 
 		jc.time_logs[0].completed_qty = 8
+		jc.pending_qty = 0.0
 		jc.save()
 		jc.submit()
 

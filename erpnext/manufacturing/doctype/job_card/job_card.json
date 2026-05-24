@@ -7,25 +7,34 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "section_break_smqo",
+  "job_card_dashboard",
+  "section_break_fsba",
+  "work_order",
+  "column_break_uqjq",
+  "production_item",
+  "column_break_qrpg",
+  "for_quantity",
+  "column_break_yecz",
+  "bom_no",
+  "section_break_oisd",
   "company",
   "naming_series",
-  "work_order",
-  "employee",
   "column_break_4",
   "posting_date",
-  "project",
-  "bom_no",
-  "is_subcontracted",
   "semi_finished_good__finished_good_section",
   "finished_good",
-  "production_item",
-  "semi_fg_bom",
-  "total_completed_qty",
   "column_break_mcnb",
-  "for_quantity",
-  "transferred_qty",
-  "manufactured_qty",
+  "semi_fg_bom",
+  "section_break_folk",
+  "pending_qty",
+  "column_break_cyjw",
   "process_loss_qty",
+  "total_completed_qty",
+  "section_break_wpjf",
+  "transferred_qty",
+  "column_break_lgte",
+  "manufactured_qty",
   "production_section",
   "operation",
   "source_warehouse",
@@ -36,6 +45,7 @@
   "workstation_type",
   "workstation",
   "target_warehouse",
+  "employee",
   "section_break_8",
   "items",
   "quality_inspection_section",
@@ -72,8 +82,10 @@
   "item_name",
   "requested_qty",
   "is_paused",
+  "is_subcontracted",
   "track_semi_finished_goods",
   "column_break_20",
+  "project",
   "remarks",
   "section_break_dfoc",
   "status",
@@ -626,12 +638,64 @@
    "fieldname": "secondary_items_section",
    "fieldtype": "Tab Break",
    "label": "Secondary Items"
+  },
+  {
+   "fieldname": "section_break_folk",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "column_break_cyjw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "pending_qty",
+   "fieldtype": "Float",
+   "label": "Pending Qty"
+  },
+  {
+   "fieldname": "section_break_wpjf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_lgte",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "job_card_dashboard",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "section_break_oisd",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_uqjq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_qrpg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_yecz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_smqo",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "section_break_fsba",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-12 12:17:17.750857",
+ "modified": "2026-05-21 18:37:05.688342",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",
