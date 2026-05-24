@@ -767,7 +767,6 @@ class FIFOSlots:
 		entry = frappe.qb.DocType("Serial and Batch Entry")
 		batch = frappe.qb.DocType("Batch")
 
-		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
 		query = (
 			frappe.qb.from_(bundle)
 			.join(entry)
@@ -785,7 +784,7 @@ class FIFOSlots:
 				(bundle.docstatus == 1)
 				& (entry.batch_no.isnotnull())
 				& (bundle.company == self.filters.get("company"))
-				& (bundle.posting_datetime <= to_date)
+				& (bundle.posting_date <= self.filters.get("to_date"))
 			)
 		)
 
