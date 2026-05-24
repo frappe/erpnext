@@ -843,12 +843,50 @@ class SalesOrder(SellingController):
 			create_stock_reservation_entries_for_so_items as create_stock_reservation_entries,
 		)
 
+<<<<<<< HEAD
 		create_stock_reservation_entries(
 			sales_order=self,
 			items_details=items_details,
 			from_voucher_type=from_voucher_type,
 			notify=notify,
 		)
+=======
+		packed_items = []
+		if items_details:
+			for item in items_details:
+				if not frappe.db.exists("Sales Order Item", item.get("sales_order_item")):
+					item["qty"] = item.pop("qty_to_reserve")
+					packed_items.append(item)
+
+			for item in packed_items:
+				items_details.remove(item)
+
+		sre_count = 0
+		if items_details != []:
+			sre_count = create_stock_reservation_entries(
+				sales_order=self,
+				items_details=items_details,
+				from_voucher_type=from_voucher_type,
+				notify=notify,
+			)
+
+		items = []
+		if packed_items:
+			items = packed_items
+		elif not items_details:
+			items = [item for item in self.packed_items if item.reserve_stock]
+
+		if items:
+			from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
+
+			stock_reservation = StockReservation(doc=self, items=items)
+			stock_reservation.table_name = "packed_items"
+			stock_reservation.qty_field = "qty"
+			is_sre_created = stock_reservation.make_stock_reservation_entries()
+
+			if notify and is_sre_created and not sre_count:
+				frappe.msgprint(_("Stock Reservation Entries Created"), alert=True, indicator="green")
+>>>>>>> 268910467a (fix: not able to reserve product bundle through dialog (#55194))
 
 	@frappe.whitelist()
 	def cancel_stock_reservation_entries(self, sre_list=None, notify=True) -> None:
