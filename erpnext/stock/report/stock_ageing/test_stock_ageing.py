@@ -893,6 +893,33 @@ class TestStockAgeing(ERPNextTestSuite):
 
 		self.assertEqual(report_data[0][7:15], [8.0, 80.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 
+	def test_serial_transfer_replay_preserves_serial_slots(self):
+		fifo_slots = FIFOSlots(self.filters, [])
+		transfer_key = ("001", "Serial Item", "WH 1")
+		fifo_slots.transferred_item_details[transfer_key] = [[2, "2021-12-01", 20]]
+
+		row = frappe._dict(
+			name="Serial Item",
+			actual_qty=2,
+			stock_value_difference=20,
+			posting_date="2021-12-05",
+			has_serial_no=True,
+		)
+		fifo_queue = []
+
+		fifo_slots._compute_incoming_stock(row, fifo_queue, transfer_key, ["SN-A", "SN-B"], [])
+
+		self.assertEqual(fifo_queue, [["SN-A", "2021-12-01", 10.0], ["SN-B", "2021-12-01", 10.0]])
+		self.assertFalse(fifo_slots.transferred_item_details[transfer_key])
+
+	def test_batch_transfer_replay_removes_zeroed_negative_slot(self):
+		fifo_slots = FIFOSlots(self.filters, [])
+		fifo_queue = [["SA-ZERO-BATCH", 1, -4, "2021-12-01", -40]]
+
+		fifo_slots._add_transfer_slot_to_fifo_queue(fifo_queue, ["SA-ZERO-BATCH", 1, 4, "2021-12-02", 40])
+
+		self.assertEqual(fifo_queue, [])
+
 	def test_batchwise_valuation(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 
