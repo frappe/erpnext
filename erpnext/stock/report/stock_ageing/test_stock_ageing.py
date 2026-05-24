@@ -4,7 +4,11 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots, format_report_data
+from erpnext.stock.report.stock_ageing.stock_ageing import (
+	FIFOSlots,
+	format_report_data,
+	get_average_age,
+)
 
 
 class TestStockAgeing(FrappeTestCase):
@@ -892,6 +896,11 @@ class TestStockAgeing(FrappeTestCase):
 		report_data = format_report_data(self.filters, item_details, self.filters["to_date"])
 
 		self.assertEqual(report_data[0][7:15], [8.0, 80.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+
+	def test_average_age_accepts_batchwise_valuation_slots(self):
+		fifo_queue = [["SA-BATCH-SLOT", 1, 5.0, "2021-12-01", 50.0]]
+
+		self.assertEqual(get_average_age(fifo_queue, self.filters["to_date"]), 9.0)
 
 	def test_batchwise_valuation(self):
 		from erpnext.stock.doctype.item.test_item import make_item

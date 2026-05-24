@@ -48,8 +48,7 @@ def format_report_data(filters: Filters, item_details: dict, to_date: str) -> li
 		if not fifo_queue:
 			continue
 
-		if details.has_batch_no:
-			fifo_queue = [slot[2:] if len(slot) == 5 else slot for slot in fifo_queue]
+		fifo_queue = normalize_fifo_queue(fifo_queue)
 
 		average_age = get_average_age(fifo_queue, to_date)
 		earliest_age = date_diff(to_date, fifo_queue[0][1])
@@ -77,9 +76,14 @@ def format_report_data(filters: Filters, item_details: dict, to_date: str) -> li
 	return data
 
 
+def normalize_fifo_queue(fifo_queue: list) -> list:
+	"""Convert batch valuation slots to the standard [qty, posting_date, value] shape."""
+	return [slot[2:] if len(slot) == 5 else slot for slot in fifo_queue]
+
+
 def get_average_age(fifo_queue: list, to_date: str) -> float:
 	batch_age = age_qty = total_qty = 0.0
-	for batch in fifo_queue:
+	for batch in normalize_fifo_queue(fifo_queue):
 		batch_age = date_diff(to_date, batch[1])
 
 		if isinstance(batch[0], int | float):
@@ -244,10 +248,11 @@ class FIFOSlots:
 		from erpnext.stock.serial_batch_bundle import get_serial_nos_from_bundle
 
 		stock_ledger_entries = self.sle
+		use_prefetched_bundle_data = stock_ledger_entries is None
 
 		bundle_wise_serial_nos = frappe._dict({})
 		bundle_wise_batch_nos = frappe._dict({})
-		if stock_ledger_entries is None:
+		if use_prefetched_bundle_data:
 			bundle_wise_serial_nos = self.__get_bundle_wise_serial_nos()
 			bundle_wise_batch_nos = self.__get_bundle_wise_batch_nos()
 
@@ -295,19 +300,16 @@ class FIFOSlots:
 				)
 				if d.serial_and_batch_bundle:
 					if d.has_serial_no:
-						if bundle_wise_serial_nos:
+						if use_prefetched_bundle_data:
 							serial_nos = bundle_wise_serial_nos.get(d.serial_and_batch_bundle) or []
 						else:
 							serial_nos = sorted(get_serial_nos_from_bundle(d.serial_and_batch_bundle)) or []
 					elif d.has_batch_no:
-						if bundle_wise_batch_nos:
+						if use_prefetched_bundle_data:
 							batch_nos = bundle_wise_batch_nos.get(d.serial_and_batch_bundle) or []
 						else:
-							batch_nos = (
-								self.__get_bundle_wise_batch_nos(d.serial_and_batch_bundle).get(
-									d.serial_and_batch_bundle
-								)
-								or []
+							batch_nos = self.__get_bundle_wise_batch_nos(d.serial_and_batch_bundle).get(
+								d.serial_and_batch_bundle, []
 							)
 
 				serial_nos = self.uppercase_serial_nos(serial_nos)
@@ -735,29 +737,36 @@ class FIFOSlots:
 	def __get_bundle_wise_serial_nos(self) -> dict:
 		bundle = frappe.qb.DocType("Serial and Batch Bundle")
 		entry = frappe.qb.DocType("Serial and Batch Entry")
+		sle = frappe.qb.DocType("Stock Ledger Entry")
 
 		query = (
 			frappe.qb.from_(bundle)
 			.join(entry)
 			.on(bundle.name == entry.parent)
 			.select(bundle.name, entry.serial_no)
+			.where((bundle.docstatus == 1) & (entry.serial_no.isnotnull()))
+		)
+
+		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
+		query = (
+			query.join(sle)
+			.on(sle.serial_and_batch_bundle == bundle.name)
 			.where(
-				(bundle.docstatus == 1)
-				& (entry.serial_no.isnotnull())
-				& (bundle.company == self.filters.get("company"))
-				& (bundle.posting_date <= self.filters.get("to_date"))
+				(sle.company == self.filters.get("company"))
+				& (sle.posting_datetime <= to_date)
+				& (sle.is_cancelled != 1)
 			)
 		)
 
 		for field in ["item_code"]:
 			if self.filters.get(field):
-				query = query.where(bundle[field] == self.filters.get(field))
+				query = query.where(sle[field] == self.filters.get(field))
 
 		if self.filters.get("warehouse"):
-			query = self.__get_warehouse_conditions(bundle, query)
+			query = self.__get_warehouse_conditions(sle, query)
 
 		bundle_wise_serial_nos = frappe._dict({})
-		for bundle_name, serial_no in query.run():
+		for bundle_name, serial_no in query.distinct().run():
 			bundle_wise_serial_nos.setdefault(bundle_name, []).append(serial_no)
 
 		return bundle_wise_serial_nos
@@ -766,6 +775,7 @@ class FIFOSlots:
 		bundle = frappe.qb.DocType("Serial and Batch Bundle")
 		entry = frappe.qb.DocType("Serial and Batch Entry")
 		batch = frappe.qb.DocType("Batch")
+		sle = frappe.qb.DocType("Stock Ledger Entry")
 
 		query = (
 			frappe.qb.from_(bundle)
@@ -780,26 +790,38 @@ class FIFOSlots:
 				Abs(entry.qty).as_("qty"),
 				Abs(entry.stock_value_difference).as_("stock_value_difference"),
 			)
-			.where(
-				(bundle.docstatus == 1)
-				& (entry.batch_no.isnotnull())
-				& (bundle.company == self.filters.get("company"))
-				& (bundle.posting_date <= self.filters.get("to_date"))
-			)
+			.where((bundle.docstatus == 1) & (entry.batch_no.isnotnull()))
 		)
-
-		for field in ["item_code"]:
-			if self.filters.get(field):
-				query = query.where(bundle[field] == self.filters.get(field))
-
-		if self.filters.get("warehouse"):
-			query = self.__get_warehouse_conditions(bundle, query)
 
 		if sabb_name:
 			query = query.where(bundle.name == sabb_name)
+		else:
+			to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
+			query = (
+				query.join(sle)
+				.on(sle.serial_and_batch_bundle == bundle.name)
+				.where(
+					(sle.company == self.filters.get("company"))
+					& (sle.posting_datetime <= to_date)
+					& (sle.is_cancelled != 1)
+				)
+			)
+
+			for field in ["item_code"]:
+				if self.filters.get(field):
+					query = query.where(sle[field] == self.filters.get(field))
+
+			if self.filters.get("warehouse"):
+				query = self.__get_warehouse_conditions(sle, query)
 
 		bundle_wise_batch_nos = frappe._dict({})
-		for bundle_name, batch_no, use_batchwise_valuation, qty, stock_value_difference in query.run():
+		for (
+			bundle_name,
+			batch_no,
+			use_batchwise_valuation,
+			qty,
+			stock_value_difference,
+		) in query.distinct().run():
 			bundle_wise_batch_nos.setdefault(bundle_name, []).append(
 				[batch_no.upper(), use_batchwise_valuation, qty, stock_value_difference]
 			)
