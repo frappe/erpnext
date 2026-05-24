@@ -22,10 +22,7 @@ class TestAddressAndContacts(ERPNextTestSuite):
 		"""Test that the designation column is present in the report columns."""
 		filters = frappe._dict(party_type="Customer")
 		columns = get_columns(filters)
-		has_designation = any(
-			"designation" in (c.get("label", "") if isinstance(c, dict) else c).lower()
-			for c in columns
-		)
+		has_designation = any("designation" in (c.get("label", "") if isinstance(c, dict) else c).lower() for c in columns)
 		self.assertTrue(has_designation, "Designation column should be present")
 
 	def test_address_and_contacts_filter_by_party(self):
