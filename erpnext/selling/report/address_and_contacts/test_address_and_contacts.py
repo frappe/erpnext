@@ -66,3 +66,4 @@ def create_test_contact(customer_name):
 	)
 	contact.insert(ignore_permissions=True)
 	return contact
+
