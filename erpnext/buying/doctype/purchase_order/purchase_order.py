@@ -19,6 +19,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 from erpnext.accounts.party import get_party_account, get_party_account_currency
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
+from erpnext.controllers.status_updater import get_allowance_for
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
 	validate_against_blanket_order,
 )
@@ -183,6 +184,7 @@ class PurchaseOrder(BuyingController):
 
 	def onload(self):
 		self.set_onload("can_update_items", self.can_update_items())
+		self.set_onload("has_pending_receivable_qty", self.has_pending_receivable_qty())
 
 	def before_validate(self):
 		self.set_has_unit_price_items()
@@ -656,6 +658,19 @@ class PurchaseOrder(BuyingController):
 
 		return result
 
+	def has_pending_receivable_qty(self) -> bool:
+		"""Return True if any non-drop-ship item can still be received,
+		considering the configured over_delivery_receipt_allowance.
+		"""
+		for item in self.get("items", []):
+			if item.delivered_by_supplier:
+				continue
+			tolerance = flt(get_allowance_for(item.item_code, qty_or_amount="qty")[0])
+			max_receivable_qty = flt(item.qty) * (100 + tolerance) / 100
+			if abs(flt(item.received_qty)) < abs(max_receivable_qty):
+				return True
+		return False
+
 	def update_ordered_qty_in_so_for_removed_items(self, removed_items):
 		"""
 		Updates ordered_qty in linked SO when item rows are removed using Update Items
@@ -757,13 +772,25 @@ def make_purchase_receipt(
 	def is_unit_price_row(source):
 		return has_unit_price_items and source.qty == 0
 
+	def get_max_receivable_qty(source):
+		tolerance = flt(get_allowance_for(source.item_code, qty_or_amount="qty")[0])
+		return flt(source.qty) * (100 + tolerance) / 100
+
 	def update_item(obj, target, source_parent):
-		target.qty = flt(obj.qty) if is_unit_price_row(obj) else flt(obj.qty) - flt(obj.received_qty)
-		target.stock_qty = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)
-		target.amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate)
-		target.base_amount = (
-			(flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate) * flt(source_parent.conversion_rate)
-		)
+		received_qty = flt(obj.received_qty)
+		qty = flt(obj.qty)
+		pending_qty = qty - received_qty
+
+		if is_unit_price_row(obj):
+			target.qty = qty
+		elif pending_qty > 0:
+			target.qty = pending_qty
+		else:
+			target.qty = max(get_max_receivable_qty(obj) - received_qty, 0)
+
+		target.stock_qty = target.qty * flt(obj.conversion_factor)
+		target.amount = target.qty * flt(obj.rate)
+		target.base_amount = target.qty * flt(obj.rate) * flt(source_parent.conversion_rate)
 
 	def select_item(d):
 		filtered_items = args.get("filtered_children", [])
@@ -795,7 +822,9 @@ def make_purchase_receipt(
 				},
 				"postprocess": update_item,
 				"condition": lambda doc: (
-					True if is_unit_price_row(doc) else abs(doc.received_qty) < abs(doc.qty)
+					True
+					if is_unit_price_row(doc)
+					else abs(doc.received_qty) < abs(get_max_receivable_qty(doc))
 				)
 				and doc.delivered_by_supplier != 1
 				and select_item(doc),
