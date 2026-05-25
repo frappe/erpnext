@@ -1,0 +1,109 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-03-19 12:03:52.783962",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "row_index",
+  "party_code",
+  "party_name",
+  "status",
+  "column_break_1",
+  "party_created",
+  "address_created",
+  "contact_created",
+  "docname",
+  "section_break_message",
+  "message"
+ ],
+ "fields": [
+  {
+   "fieldname": "row_index",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Row",
+   "read_only": 1
+  },
+  {
+   "fieldname": "party_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Party Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "party_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Party Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Success\nSkipped\nError",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "party_created",
+   "fieldtype": "Check",
+   "label": "Party Created",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "address_created",
+   "fieldtype": "Check",
+   "label": "Address Created",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "contact_created",
+   "fieldtype": "Check",
+   "label": "Contact Created",
+   "read_only": 1
+  },
+  {
+   "fieldname": "docname",
+   "fieldtype": "Data",
+   "label": "Created Doc",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_message",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "message",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Message",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-03-19 12:12:30.528775",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Party Import Log",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,285 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-03-19 11:10:13.990296",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "party_type",
+  "download_template",
+  "import_file",
+  "column_break_1",
+  "naming_series",
+  "status",
+  "section_break_auto_create",
+  "column_break_cdbq",
+  "default_customer_group",
+  "default_customer_type",
+  "default_supplier_group",
+  "default_supplier_type",
+  "default_territory",
+  "default_address_type",
+  "auto_create_missing_masters_column",
+  "create_customer_group",
+  "create_supplier_group",
+  "create_territory",
+  "section_break_results",
+  "total_records",
+  "success_count",
+  "column_break_results",
+  "failed_count",
+  "skipped_count",
+  "section_break_log",
+  "import_log_html",
+  "import_log"
+ ],
+ "fields": [
+  {
+   "fieldname": "party_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Party Type",
+   "options": "\nCustomer\nSupplier",
+   "reqd": 1
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Draft\nPending\nPartial Success\nSuccess\nError",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "PIT-.YYYY.-"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "import_file",
+   "fieldtype": "Attach",
+   "label": "Import File"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal && doc.import_file",
+   "fieldname": "section_break_auto_create",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.party_type == \"Customer\"",
+   "fieldname": "create_customer_group",
+   "fieldtype": "Check",
+   "label": "Create Customer Group if Missing"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.party_type == \"Supplier\"",
+   "fieldname": "create_supplier_group",
+   "fieldtype": "Check",
+   "label": "Create Supplier Group if Missing"
+  },
+  {
+   "default": "0",
+   "fieldname": "create_territory",
+   "fieldtype": "Check",
+   "label": "Create Territory if Missing"
+  },
+  {
+   "depends_on": "eval: doc.party_type == \"Customer\"",
+   "description": "Used when the Customer Group column is blank in the file",
+   "fieldname": "default_customer_group",
+   "fieldtype": "Link",
+   "label": "Default Customer Group",
+   "options": "Customer Group"
+  },
+  {
+   "depends_on": "eval:doc.party_type == \"Supplier\"",
+   "description": "Used when the Supplier Group column is blank in the file",
+   "fieldname": "default_supplier_group",
+   "fieldtype": "Link",
+   "label": "Default Supplier Group",
+   "options": "Supplier Group"
+  },
+  {
+   "description": "Used when the Territory column is blank in the file",
+   "fieldname": "default_territory",
+   "fieldtype": "Link",
+   "label": "Default Territory",
+   "options": "Territory"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal && doc.import_file",
+   "fieldname": "section_break_results",
+   "fieldtype": "Section Break",
+   "label": "Results"
+  },
+  {
+   "fieldname": "total_records",
+   "fieldtype": "Int",
+   "label": "Total Records",
+   "read_only": 1
+  },
+  {
+   "fieldname": "success_count",
+   "fieldtype": "Int",
+   "label": "Success",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_results",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "failed_count",
+   "fieldtype": "Int",
+   "label": "Failed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "skipped_count",
+   "fieldtype": "Int",
+   "label": "Skipped",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:!doc.__islocal && doc.import_file",
+   "fieldname": "section_break_log",
+   "fieldtype": "Section Break",
+   "label": "Import Log"
+  },
+  {
+   "fieldname": "import_log",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Import Log",
+   "options": "Party Import Log",
+   "read_only": 1
+  },
+  {
+   "fieldname": "import_log_html",
+   "fieldtype": "HTML",
+   "label": "Import Log Summary"
+  },
+  {
+   "depends_on": "eval:doc.party_type",
+   "fieldname": "download_template",
+   "fieldtype": "Button",
+   "label": "Download Template"
+  },
+  {
+   "default": "Billing",
+   "description": "Used when address_type column is blank in the file",
+   "fieldname": "default_address_type",
+   "fieldtype": "Select",
+   "label": "Default Address Type",
+   "options": "Billing\nShipping\nOffice\nPersonal\nPlant\nPostal\nShop\nSubsidiary\nWarehouse\nCurrent\nPermanent\nOther"
+  },
+  {
+   "fieldname": "column_break_cdbq",
+   "fieldtype": "Column Break",
+   "label": "Defaults"
+  },
+  {
+   "fieldname": "auto_create_missing_masters_column",
+   "fieldtype": "Column Break",
+   "label": "Auto Create Missing Masters"
+  },
+  {
+   "default": "Company",
+   "depends_on": "eval: doc.party_type == \"Customer\"",
+   "description": "Used when the Customer Type column is blank in the file",
+   "fieldname": "default_customer_type",
+   "fieldtype": "Select",
+   "label": "Default Customer Type",
+   "options": "Company\nIndividual\nPartnership"
+  },
+  {
+   "default": "Company",
+   "depends_on": "eval: doc.party_type == \"Supplier\"",
+   "description": "Used when the Supplier Type column is blank in the file",
+   "fieldname": "default_supplier_type",
+   "fieldtype": "Select",
+   "label": "Default Supplier Type",
+   "options": "Company\nIndividual\nPartnership"
+  }
+ ],
+ "links": [],
+ "modified": "2026-05-23 14:13:37.471919",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Party Import",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [
+  {
+   "color": "Gray",
+   "title": "Draft"
+  },
+  {
+   "color": "Yellow",
+   "title": "Pending"
+  },
+  {
+   "color": "Green",
+   "title": "Success"
+  },
+  {
+   "color": "Orange",
+   "title": "Partial Success"
+  },
+  {
+   "color": "Red",
+   "title": "Error"
+  }
+ ],
+ "track_changes": 1
+}
