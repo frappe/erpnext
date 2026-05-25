@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-24 10:11+0000\n"
-"PO-Revision-Date: 2026-05-24 21:22\n"
+"PO-Revision-Date: 2026-05-25 21:27\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -6692,7 +6692,7 @@ msgstr "Tillgänglig Kvantitet"
 #. Name of a report
 #: erpnext/stock/report/available_serial_no/available_serial_no.json
 msgid "Available Serial No"
-msgstr "Tillgänglig Serienummer"
+msgstr "Tillgängliga Serienummer"
 
 #: erpnext/selling/report/customer_wise_item_price/customer_wise_item_price.py:38
 msgid "Available Stock"
@@ -28521,12 +28521,12 @@ msgstr "Register Status Övervakning Bolag"
 #. Name of a DocType
 #: erpnext/accounts/doctype/ledger_merge/ledger_merge.json
 msgid "Ledger Merge"
-msgstr "Bokgöring Register Sammanslagning"
+msgstr "Bokföring Register Sammanslagning"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/ledger_merge_accounts/ledger_merge_accounts.json
 msgid "Ledger Merge Accounts"
-msgstr "Register Sammanslagning Konton"
+msgstr "Bokföring Register Sammanslagning Konton"
 
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:146
 msgid "Ledger Type"
