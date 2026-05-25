@@ -1893,10 +1893,14 @@ def get_xlsx_styles(metadata: XLSXMetadata) -> dict | None:
 	"""
 	Generate XLSX styles for financial report templates.
 
-	NOTE: Currently only custom report generated with "Report Template" filter will have styles applied.
+	- Report Template filter: full custom styling (bold/italic/indent/colors per row config).
+	- Selected View "Growth" / "Margin": per-cell red/green coloring on Percent columns so
+	  the export matches the on-screen formatter in `public/js/financial_statements.js`.
+	- Otherwise: fall back to Frappe's default XLSX styles.
 	"""
-	# skip styling
 	if not metadata.filters.get("report_template"):
+		if metadata.filters.get("selected_view") in ("Growth", "Margin"):
+			return _get_growth_margin_xlsx_styles(metadata)
 		return
 
 	builder = XLSXStyleBuilder(metadata, default_styling=False)
@@ -2001,5 +2005,44 @@ def get_xlsx_styles(metadata: XLSXMetadata) -> dict | None:
 				style_cell(row_idx, col_idx, styles["warning"])
 			elif color := formatting.get("color"):
 				style_cell(row_idx, col_idx, get_color_style(color))
+
+	return builder.result
+
+
+def _get_growth_margin_xlsx_styles(metadata: XLSXMetadata) -> dict:
+	"""Apply red/green per-cell font colors for Percent columns in Growth/Margin views.
+
+	Mirrors `_format_special_view` in `public/js/financial_statements.js`:
+	negative values render as text-danger (red), non-negative as text-success (green).
+	"""
+	builder = XLSXStyleBuilder(metadata)
+
+	danger_style = builder.register_style({"font_color": "#dc3545"})  # text-danger
+	success_style = builder.register_style({"font_color": "#28a745"})  # text-success
+
+	percent_columns = [
+		(col_idx, col.get("fieldname"))
+		for col_idx, col in metadata.column_map.items()
+		if col.get("fieldtype") == "Percent" and col.get("fieldname")
+	]
+	if not percent_columns:
+		return builder.result
+
+	last_row_index = builder.last_row_index
+	skip_last_row = metadata.has_total_row
+	style_cell = builder.style_cell
+
+	for row_idx, row in metadata.row_map.items():
+		if skip_last_row and row_idx == last_row_index:
+			continue
+		if row.get("is_blank_line"):
+			continue
+
+		for col_idx, fieldname in percent_columns:
+			cell_value = row.get(fieldname)
+			if cell_value in (None, ""):
+				continue
+
+			style_cell(row_idx, col_idx, danger_style if flt(cell_value) < 0 else success_style)
 
 	return builder.result

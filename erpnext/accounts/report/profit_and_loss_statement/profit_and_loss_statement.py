@@ -17,6 +17,7 @@ from erpnext.accounts.report.financial_statements import (
 	get_data,
 	get_filtered_list_for_consolidated_report,
 	get_period_list,
+	set_view_specific_column_formatting,
 )
 
 
@@ -80,6 +81,10 @@ def execute(filters=None):
 
 	if filters.get("selected_view") == "Margin":
 		compute_margin_view_data(data, period_list, filters.accumulated_values)
+
+	set_view_specific_column_formatting(
+		columns, period_list, filters.get("selected_view"), filters.accumulated_values
+	)
 
 	return columns, data, None, chart, report_summary, primitive_summary
 

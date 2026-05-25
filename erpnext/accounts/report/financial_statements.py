@@ -759,6 +759,31 @@ def compute_growth_view_data(data, columns):
 			data[row_idx][current_period_key] = growth_percent
 
 
+def set_view_specific_column_formatting(columns, period_list, selected_view, accumulated_values):
+	"""Convert period column fieldtype from Currency to Percent for Growth/Margin view xlsx export.
+
+	Mirrors the on-screen formatter in financial_statements.js: cells that show as percentages
+	in the UI must export as percentages, not as currency.
+	"""
+	if selected_view not in ("Growth", "Margin"):
+		return
+
+	percent_keys = {p.key for p in period_list}
+
+	# Growth view leaves the first period column untouched (no previous period to compare against)
+	if selected_view == "Growth":
+		percent_keys.discard(period_list[0].key)
+
+	# Margin view rewrites the total column too when periods are not accumulated
+	if selected_view == "Margin" and not accumulated_values:
+		percent_keys.add("total")
+
+	for col in columns:
+		if col.get("fieldname") in percent_keys:
+			col["fieldtype"] = "Percent"
+			col.pop("options", None)
+
+
 def compute_margin_view_data(data, columns, accumulated_values):
 	if not columns:
 		return
