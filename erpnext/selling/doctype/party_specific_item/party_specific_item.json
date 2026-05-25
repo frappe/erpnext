@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "allow_import": 1,
  "creation": "2021-08-27 19:28:07.559978",
  "doctype": "DocType",
@@ -18,7 +19,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Party Type",
-   "options": "Customer\nSupplier",
+   "options": "Customer\nCustomer Group\nSupplier\nSupplier Group",
    "reqd": 1
   },
   {
@@ -52,7 +53,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-27 13:10:08.752476",
+ "modified": "2026-05-17 11:46:17.634855",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Party Specific Item",
@@ -71,6 +72,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
