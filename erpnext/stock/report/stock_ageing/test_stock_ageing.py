@@ -897,12 +897,11 @@ class TestStockAgeing(FrappeTestCase):
 
 		self.assertEqual(report_data[0][7:15], [8.0, 80.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 
-<<<<<<< HEAD
 	def test_average_age_accepts_batchwise_valuation_slots(self):
 		fifo_queue = [["SA-BATCH-SLOT", 1, 5.0, "2021-12-01", 50.0]]
 
 		self.assertEqual(get_average_age(fifo_queue, self.filters["to_date"]), 9.0)
-=======
+
 	def test_serial_transfer_replay_preserves_serial_slots(self):
 		fifo_slots = FIFOSlots(self.filters, [])
 		transfer_key = ("001", "Serial Item", "WH 1")
@@ -929,7 +928,6 @@ class TestStockAgeing(FrappeTestCase):
 		fifo_slots._add_transfer_slot_to_fifo_queue(fifo_queue, ["SA-ZERO-BATCH", 1, 4, "2021-12-02", 40])
 
 		self.assertEqual(fifo_queue, [])
->>>>>>> 2a01a37d5d (refactor: stock ageing report (#55231))
 
 	def test_batchwise_valuation(self):
 		from erpnext.stock.doctype.item.test_item import make_item

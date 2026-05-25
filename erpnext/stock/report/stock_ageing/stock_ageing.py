@@ -67,56 +67,22 @@ def format_report_data(filters: Filters, item_details: dict, to_date: str) -> li
 		if not fifo_queue:
 			continue
 
-<<<<<<< HEAD
-		fifo_queue = normalize_fifo_queue(fifo_queue)
-
-		average_age = get_average_age(fifo_queue, to_date)
-		earliest_age = date_diff(to_date, fifo_queue[0][1])
-		latest_age = date_diff(to_date, fifo_queue[-1][1])
-		range_values = get_range_age(filters, fifo_queue, to_date, item_dict)
-
-		row = [details.name, details.item_name, details.description, details.item_group, details.brand]
-
-		if filters.get("show_warehouse_wise_stock"):
-			row.append(details.warehouse)
-
-		row.extend(
-			[
-				flt(item_dict.get("total_qty"), precision),
-				average_age,
-				*range_values,
-				earliest_age,
-				latest_age,
-				details.stock_uom,
-			]
-		)
-
-		data.append(row)
-=======
 		data.append(get_report_row(filters, item_dict, fifo_queue, to_date, precision))
->>>>>>> 2a01a37d5d (refactor: stock ageing report (#55231))
 
 	return data
 
 
-<<<<<<< HEAD
 def normalize_fifo_queue(fifo_queue: list) -> list:
 	"""Convert batch valuation slots to the standard [qty, posting_date, value] shape."""
-	return [slot[2:] if len(slot) == 5 else slot for slot in fifo_queue]
+	return [get_batch_report_slot(slot) if is_batch_slot(slot) else slot for slot in fifo_queue]
 
 
-def get_average_age(fifo_queue: list, to_date: str) -> float:
-	batch_age = age_qty = total_qty = 0.0
-	for batch in normalize_fifo_queue(fifo_queue):
-		batch_age = date_diff(to_date, batch[1])
-=======
 def get_report_fifo_queue(fifo_queue: list, has_batch_no: bool) -> list:
 	get_posting_date = itemgetter(FIFO_POSTING_DATE_INDEX)
 	fifo_queue = sorted([slot for slot in fifo_queue if get_posting_date(slot)], key=get_posting_date)
->>>>>>> 2a01a37d5d (refactor: stock ageing report (#55231))
 
 	if has_batch_no:
-		return [get_batch_report_slot(slot) for slot in fifo_queue]
+		return normalize_fifo_queue(fifo_queue)
 
 	return fifo_queue
 
@@ -152,7 +118,7 @@ def get_report_row(filters: Filters, item_dict: dict, fifo_queue: list, to_date:
 
 def get_average_age(fifo_queue: list, to_date: str) -> float:
 	age_qty = total_qty = 0.0
-	for slot in fifo_queue:
+	for slot in normalize_fifo_queue(fifo_queue):
 		qty = get_slot_qty(slot)
 		age_qty += date_diff(to_date, slot[FIFO_DATE_INDEX]) * qty
 		total_qty += qty
@@ -334,17 +300,7 @@ class FIFOSlots:
 		}
 		"""
 		stock_ledger_entries = self.sle
-<<<<<<< HEAD
-		use_prefetched_bundle_data = stock_ledger_entries is None
-
-		bundle_wise_serial_nos = frappe._dict({})
-		bundle_wise_batch_nos = frappe._dict({})
-		if use_prefetched_bundle_data:
-			bundle_wise_serial_nos = self.__get_bundle_wise_serial_nos()
-			bundle_wise_batch_nos = self.__get_bundle_wise_batch_nos()
-=======
 		bundle_wise_serial_nos, bundle_wise_batch_nos = self._get_bundle_wise_details(stock_ledger_entries)
->>>>>>> 2a01a37d5d (refactor: stock ageing report (#55231))
 
 		# prepare single sle voucher detail lookup
 		self.prepare_stock_reco_voucher_wise_count()
@@ -353,75 +309,8 @@ class FIFOSlots:
 			if stock_ledger_entries is None:
 				stock_ledger_entries = self._get_stock_ledger_entries()
 
-<<<<<<< HEAD
-			for d in stock_ledger_entries:
-				key, fifo_queue, transferred_item_key = self.__init_key_stores(d)
-				prev_balance_qty = self.item_details[key].get("qty_after_transaction", 0)
-
-				if d.voucher_type == "Stock Reconciliation" and (
-					not d.batch_no or d.serial_no or d.serial_and_batch_bundle
-				):
-					if d.voucher_detail_no in self.stock_reco_voucher_wise_count:
-						# for legacy recon with single sle has qty_after_transaction and stock_value_difference without outward entry
-						# for exisitng handle emptying the existing queue and details.
-						d.stock_value_difference = flt(d.qty_after_transaction * d.valuation_rate)
-						d.actual_qty = d.qty_after_transaction
-						self.item_details[key]["qty_after_transaction"] = 0
-						self.item_details[key]["total_qty"] = 0
-						fifo_queue.clear()
-					else:
-						d.actual_qty = flt(d.qty_after_transaction) - flt(prev_balance_qty)
-
-				elif d.voucher_type == "Stock Reconciliation":
-					# get difference in qty shift as actual qty
-					d.actual_qty = flt(d.qty_after_transaction) - flt(prev_balance_qty)
-
-				serial_nos = get_serial_nos(d.serial_no) if d.serial_no else []
-				batch_nos = (
-					[
-						[
-							d.batch_no.upper(),
-							self.__get_batchwise_valuation(d.batch_no),
-							abs(d.actual_qty),
-							abs(d.stock_value_difference),
-						]
-					]
-					if d.batch_no
-					else []
-				)
-				if d.serial_and_batch_bundle:
-					if d.has_serial_no:
-						if use_prefetched_bundle_data:
-							serial_nos = bundle_wise_serial_nos.get(d.serial_and_batch_bundle) or []
-						else:
-							serial_nos = sorted(get_serial_nos_from_bundle(d.serial_and_batch_bundle)) or []
-					elif d.has_batch_no:
-						if use_prefetched_bundle_data:
-							batch_nos = bundle_wise_batch_nos.get(d.serial_and_batch_bundle) or []
-						else:
-							batch_nos = self.__get_bundle_wise_batch_nos(d.serial_and_batch_bundle).get(
-								d.serial_and_batch_bundle, []
-							)
-
-				serial_nos = self.uppercase_serial_nos(serial_nos)
-				if d.actual_qty > 0:
-					self.__compute_incoming_stock(d, fifo_queue, transferred_item_key, serial_nos, batch_nos)
-				else:
-					self.__compute_outgoing_stock(d, fifo_queue, transferred_item_key, serial_nos, batch_nos)
-
-				self.__update_balances(d, key)
-
-				# handle serial nos misconsumption
-				if d.has_serial_no:
-					qty_after = cint(self.item_details[key]["qty_after_transaction"])
-					if qty_after <= 0:
-						fifo_queue.clear()
-					elif len(fifo_queue) > qty_after:
-						fifo_queue[:] = fifo_queue[:qty_after]
-=======
 			for row in stock_ledger_entries:
 				self._process_stock_ledger_entry(row, bundle_wise_serial_nos, bundle_wise_batch_nos)
->>>>>>> 2a01a37d5d (refactor: stock ageing report (#55231))
 
 			# Note that stock_ledger_entries is an iterator, you can not reuse it like a list
 			del stock_ledger_entries
@@ -1052,11 +941,7 @@ class FIFOSlots:
 				query = query.where(sle[field] == self.filters.get(field))
 
 		if self.filters.get("warehouse"):
-<<<<<<< HEAD
-			query = self.__get_warehouse_conditions(sle, query)
-=======
-			query = self._get_warehouse_conditions(bundle, query)
->>>>>>> 2a01a37d5d (refactor: stock ageing report (#55231))
+			query = self._get_warehouse_conditions(sle, query)
 
 		bundle_wise_serial_nos = frappe._dict({})
 		for bundle_name, serial_no in query.distinct().run():
@@ -1086,16 +971,6 @@ class FIFOSlots:
 			.where((bundle.docstatus == 1) & (entry.batch_no.isnotnull()))
 		)
 
-<<<<<<< HEAD
-=======
-		for field in ["item_code"]:
-			if self.filters.get(field):
-				query = query.where(bundle[field] == self.filters.get(field))
-
-		if self.filters.get("warehouse"):
-			query = self._get_warehouse_conditions(bundle, query)
-
->>>>>>> 2a01a37d5d (refactor: stock ageing report (#55231))
 		if sabb_name:
 			query = query.where(bundle.name == sabb_name)
 		else:
@@ -1115,7 +990,7 @@ class FIFOSlots:
 					query = query.where(sle[field] == self.filters.get(field))
 
 			if self.filters.get("warehouse"):
-				query = self.__get_warehouse_conditions(sle, query)
+				query = self._get_warehouse_conditions(sle, query)
 
 		bundle_wise_batch_nos = frappe._dict({})
 		for (
