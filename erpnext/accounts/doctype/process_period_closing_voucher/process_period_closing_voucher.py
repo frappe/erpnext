@@ -137,9 +137,10 @@ def pause_pcv_processing(docname: str):
 	ppcv = qb.DocType("Process Period Closing Voucher")
 	qb.update(ppcv).set(ppcv.status, "Paused").where(ppcv.name.eq(docname)).run()
 
+	# If a date is stuck in 'Running' state, this will allow it to procced.
 	if queued_dates := frappe.db.get_all(
 		"Process Period Closing Voucher Detail",
-		filters={"parent": docname, "status": "Queued"},
+		filters={"parent": docname, "status": ["in", ["Queued", "Running"]]},
 		pluck="name",
 	):
 		ppcvd = qb.DocType("Process Period Closing Voucher Detail")
@@ -173,6 +174,9 @@ def resume_pcv_processing(docname: str):
 		ppcvd = qb.DocType("Process Period Closing Voucher Detail")
 		qb.update(ppcvd).set(ppcvd.status, "Queued").where(ppcvd.name.isin(paused_dates)).run()
 		start_pcv_processing(docname)
+	else:
+		# If a parent doc is stuck in 'Running' state, will allow it to proceed.
+		schedule_next_date(docname)
 
 
 def update_default_dimensions(dimension_fields, gl_entry, dimension_values):
