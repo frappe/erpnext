@@ -9,16 +9,6 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "section_break_xt4m",
-  "voucher_type",
-  "voucher_no",
-  "voucher_detail_no",
-  "column_break_grdt",
-  "voucher_qty",
-  "available_qty",
-  "column_break_o6ex",
-  "reserved_qty",
-  "delivered_qty",
   "item_information_section",
   "item_code",
   "warehouse",
@@ -26,21 +16,25 @@
   "stock_uom",
   "has_serial_no",
   "has_batch_no",
+  "production_section",
+  "delivered_qty",
+  "reserved_qty",
+  "column_break_qdwj",
+  "transferred_qty",
+  "consumed_qty",
+  "section_break_xt4m",
+  "voucher_type",
+  "voucher_no",
+  "voucher_detail_no",
   "column_break_7dxj",
   "from_voucher_type",
   "from_voucher_no",
   "from_voucher_detail_no",
-  "production_section",
-  "transferred_qty",
-  "column_break_qdwj",
-  "consumed_qty",
   "serial_and_batch_reservation_section",
-  "reservation_based_on",
   "sb_entries",
   "section_break_3vb3",
   "company",
   "column_break_jbyr",
-  "project",
   "status",
   "amended_from"
  ],
@@ -130,15 +124,6 @@
    "width": "150px"
   },
   {
-   "fieldname": "project",
-   "fieldtype": "Link",
-   "label": "Project",
-   "no_copy": 1,
-   "options": "Project",
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
    "fieldname": "company",
    "fieldtype": "Link",
    "in_filter": 1,
@@ -172,7 +157,7 @@
    "fieldtype": "Select",
    "label": "Status",
    "no_copy": 1,
-   "options": "Draft\nPartially Reserved\nReserved\nPartially Delivered\nPartially Used\nDelivered\nCancelled\nClosed",
+   "options": "Draft\nReserved\nPartially Delivered\nPartially Used\nDelivered\nCancelled\nClosed",
    "read_only": 1
   },
   {
@@ -191,25 +176,8 @@
    "no_copy": 1,
    "options": "Stock Reservation Entry",
    "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "available_qty",
-   "fieldtype": "Float",
-   "label": "Available Qty to Reserve",
-   "no_copy": 1,
-   "non_negative": 1,
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "voucher_qty",
-   "fieldtype": "Float",
-   "label": "Voucher Qty",
-   "no_copy": 1,
-   "non_negative": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "column_break_elik",
@@ -219,10 +187,6 @@
    "fieldname": "section_break_xt4m",
    "fieldtype": "Section Break",
    "label": "Transaction Information"
-  },
-  {
-   "fieldname": "column_break_o6ex",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "section_break_3vb3",
@@ -265,21 +229,7 @@
    "label": "Serial and Batch Reservation"
   },
   {
-   "default": "Qty",
-   "depends_on": "eval: parent.has_serial_no || parent.has_batch_no",
-   "fieldname": "reservation_based_on",
-   "fieldtype": "Select",
-   "label": "Reservation Based On",
-   "no_copy": 1,
-   "options": "Qty\nSerial and Batch",
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_7dxj",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_grdt",
    "fieldtype": "Column Break"
   },
   {
@@ -342,7 +292,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-05 11:46:28.992976",
+ "modified": "2026-05-25 15:46:15.184383",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",
