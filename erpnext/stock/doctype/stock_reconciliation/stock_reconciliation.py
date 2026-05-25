@@ -885,7 +885,7 @@ class StockReconciliation(StockController):
 				"company": self.company,
 				"stock_uom": frappe.db.get_value("Item", row.item_code, "stock_uom"),
 				"is_cancelled": 1 if self.docstatus == 2 else 0,
-				"valuation_rate": flt(row.valuation_rate, row.precision("valuation_rate")),
+				"valuation_rate": flt(row.valuation_rate),
 			}
 		)
 
