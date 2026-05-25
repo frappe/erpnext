@@ -1814,6 +1814,62 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 		toggle_provisional_accounting_setting()
 
+	def test_no_provisional_reversal_on_return_against_purchase_receipt(self):
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_debit_note
+
+		setup_provisional_accounting()
+		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 0)
+
+		pr = make_purchase_receipt(
+			item_code="_Test Non Stock Item", rate=1000, qty=5, posting_date=add_days(nowdate(), -2)
+		)
+
+		pi = create_purchase_invoice_from_receipt(pr.name)
+		pi.set_posting_time = 1
+		pi.posting_date = add_days(pr.posting_date, 1)
+		pi.items[0].expense_account = "Cost of Goods Sold - _TC"
+		pi.save()
+		pi.submit()
+
+		return_pi = make_debit_note(pi.name)
+		return_pi.set_posting_time = 1
+		return_pi.posting_date = add_days(pi.posting_date, 1)
+		return_pi.save()
+		return_pi.submit()
+
+		self.assertTrue(return_pi.is_return)
+		self.assertEqual(return_pi.items[0].qty, -5)
+		self.assertEqual(return_pi.items[0].purchase_receipt, pr.name)
+
+		expected_gle_for_purchase_receipt = [
+			["_Test Account Cost for Goods Sold - _TC", 5000, 0, pr.posting_date],
+			["Provision Account - _TC", 0, 5000, pr.posting_date],
+			["_Test Account Cost for Goods Sold - _TC", 0, 5000, pi.posting_date],
+			["Provision Account - _TC", 5000, 0, pi.posting_date],
+		]
+		check_gl_entries(
+			self, pr.name, expected_gle_for_purchase_receipt, pr.posting_date, voucher_type="Purchase Receipt"
+		)
+
+		pr_gl_count = frappe.db.count(
+			"GL Entry",
+			{"voucher_type": "Purchase Receipt", "voucher_no": pr.name, "is_cancelled": 0},
+		)
+		self.assertEqual(pr_gl_count, 4)
+
+		extra_reversal_on_return = frappe.db.count(
+			"GL Entry",
+			{
+				"voucher_type": "Purchase Receipt",
+				"voucher_no": pr.name,
+				"posting_date": return_pi.posting_date,
+				"is_cancelled": 0,
+			},
+		)
+		self.assertEqual(extra_reversal_on_return, 0)
+
+		toggle_provisional_accounting_setting()
+
 	def test_provisional_accounting_entry_multi_currency(self):
 		setup_provisional_accounting()
 

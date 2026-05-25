@@ -1140,7 +1140,7 @@ class PurchaseInvoice(BuyingController):
 					account_currency = get_account_currency(expense_account)
 					amount, base_amount = self.get_amount_and_base_amount(item, None)
 
-					if provisional_accounting_for_non_stock_items:
+					if provisional_accounting_for_non_stock_items and not self.is_return:
 						self.make_provisional_gl_entry(gl_entries, item)
 
 					if not self.is_internal_transfer():
