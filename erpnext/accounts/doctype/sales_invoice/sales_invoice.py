@@ -6,7 +6,7 @@ import frappe
 import frappe.utils
 from frappe import _, msgprint, throw
 from frappe.contacts.doctype.address.address import get_address_display
-from frappe.model.document import Document
+el.docfrom frappe.modument import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.query_builder import Case
@@ -272,22 +272,30 @@ class SalesInvoice(SellingController):
 		]
 
 	def set_indicator(self):
-		"""Set indicator for portal"""
-		if self.outstanding_amount < 0:
-			self.indicator_title = _("Credit Note Issued")
-			self.indicator_color = "gray"
-		elif self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()):
-			self.indicator_color = "orange"
-			self.indicator_title = _("Unpaid")
-		elif self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()):
+	"""Set indicator for portal"""
+	if self.outstanding_amount < 0:
+		self.indicator_title = _("Credit Note Issued")
+		self.indicator_color = "gray"
+	elif self.outstanding_amount > 0 and self.outstanding_amount < self.grand_total:
+		# Check if overdue
+		if getdate(self.due_date) < getdate(nowdate()):
 			self.indicator_color = "red"
-			self.indicator_title = _("Overdue")
-		elif cint(self.is_return) == 1:
-			self.indicator_title = _("Return")
-			self.indicator_color = "gray"
+			self.indicator_title = _("Partly Paid (Overdue)")
 		else:
-			self.indicator_color = "green"
-			self.indicator_title = _("Paid")
+			self.indicator_color = "blue"
+			self.indicator_title = _("Partly Paid")
+	elif self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()):
+		self.indicator_color = "orange"
+		self.indicator_title = _("Unpaid")
+	elif self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()):
+		self.indicator_color = "red"
+		self.indicator_title = _("Overdue")
+	elif cint(self.is_return) == 1:
+		self.indicator_title = _("Return")
+		self.indicator_color = "gray"
+	else:
+		self.indicator_color = "green"
+		self.indicator_title = _("Paid")
 
 	def onload(self):
 		super().onload()
