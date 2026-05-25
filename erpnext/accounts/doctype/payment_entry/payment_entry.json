@@ -394,7 +394,7 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "deductions",
+   "collapsible_depends_on": "eval:((doc.base_paid_amount !== doc.base_received_amount) || doc.deductions)",
    "depends_on": "eval:(doc.paid_amount && doc.received_amount)",
    "fieldname": "deductions_or_loss_section",
    "fieldtype": "Section Break",
@@ -795,7 +795,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2026-05-15 13:31:01.166010",
+ "modified": "2026-05-25 23:32:40.633792",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
