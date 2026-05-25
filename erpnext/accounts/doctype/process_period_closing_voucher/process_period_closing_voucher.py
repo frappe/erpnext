@@ -288,7 +288,14 @@ def schedule_next_date(docname: str):
 		)
 		# Ensure both normal and opening balances are processed for all dates
 		if total_no_of_dates == completed:
-			summarize_and_post_ledger_entries(docname)
+			frappe.enqueue(
+				method="erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.summarize_and_post_ledger_entries",
+				queue="long",
+				timeout="3600",
+				is_async=True,
+				enqueue_after_commit=True,
+				docname=docname,
+			)
 
 
 def make_dict_json_compliant(dimension_wise_balance) -> dict:
