@@ -544,7 +544,7 @@ def get_batches_from_stock_ledger_entries(searchfields, txt, filters, start=0, p
 		if filters.get("posting_date") and filters.get("posting_time"):
 			query = query.where(
 				stock_ledger_entry.posting_datetime
-				<= get_combine_datetime(filters.posting_date, filters.posting_time)
+				<= get_combine_datetime(filters.get("posting_date"), filters.get("posting_time"))
 			)
 
 	if not filters.get("include_expired_batches"):
@@ -604,7 +604,7 @@ def get_batches_from_serial_and_batch_bundle(searchfields, txt, filters, start=0
 		if filters.get("posting_date") and filters.get("posting_time"):
 			bundle_query = bundle_query.where(
 				stock_ledger_entry.posting_datetime
-				<= get_combine_datetime(filters.posting_date, filters.posting_time)
+				<= get_combine_datetime(filters.get("posting_date"), filters.get("posting_time"))
 			)
 
 	if not filters.get("include_expired_batches"):
