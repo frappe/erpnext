@@ -375,7 +375,7 @@ def get_columns(filters):
 				"convertible": "rate",
 			},
 			{
-				"label": _("Valuation Rate"),
+				"label": _("Outgoing Rate"),
 				"fieldname": "in_out_rate",
 				"fieldtype": filters.valuation_field_type,
 				"width": 140,
