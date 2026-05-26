@@ -952,14 +952,16 @@ def _get_default_wdv_or_dd_depr_amount(
 		if has_wdv_or_dd_non_yearly_pro_rata:
 			if schedule_idx == 0:
 				return flt(depreciable_value) * (flt(fb_row.rate_of_depreciation) / 100)
-			elif is_fiscal_year_start:
-				return (
-					flt(yearly_opening_wdv)
-					* flt(fb_row.frequency_of_depreciation)
-					* (flt(fb_row.rate_of_depreciation) / 1200)
-				)
-			else:
-				return prev_depreciation_amount
+			# All subsequent periods use the current fiscal year's opening WDV scaled
+			# to the period frequency. The caller resets yearly_opening_wdv at every
+			# fiscal year boundary, so this single expression correctly handles both
+			# the remaining months of the first fiscal year (after the prorated row 0)
+			# and every subsequent fiscal year start/continuation.
+			return (
+				flt(yearly_opening_wdv)
+				* flt(fb_row.frequency_of_depreciation)
+				* (flt(fb_row.rate_of_depreciation) / 1200)
+			)
 		else:
 			if is_fiscal_year_start:
 				return (
