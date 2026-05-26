@@ -140,7 +140,11 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Asset",
+<<<<<<< HEAD
    "link_filters": "[[\"Asset\",\"status\",\"not in\",[\"Work In Progress\",\"Capitalized\",\"Fully Depreciated\",\"Sold\",\"Scrapped\",\"Cancelled\",null]]]",
+=======
+   "link_filters": "[[\"Asset\",\"status\",\"not in\",[\"Work In Progress\",\"Capitalized\",\"Sold\",\"Scrapped\",\"Cancelled\"]]]",
+>>>>>>> c7774a95e5 (fix(asset): allow asset repair creation for fully depreciated assets)
    "options": "Asset",
    "reqd": 1
   },
@@ -250,8 +254,18 @@
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
+<<<<<<< HEAD
  "links": [],
  "modified": "2026-01-06 15:48:13.862505",
+=======
+ "links": [
+  {
+   "link_doctype": "Stock Entry",
+   "link_fieldname": "asset_repair"
+  }
+ ],
+ "modified": "2026-06-20 15:43:54.943335",
+>>>>>>> c7774a95e5 (fix(asset): allow asset repair creation for fully depreciated assets)
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",

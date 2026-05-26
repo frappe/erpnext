@@ -94,6 +94,35 @@ frappe.ui.form.on("Asset", {
 
 		if (frm.doc.docstatus == 1) {
 			if (["Submitted", "Partially Depreciated", "Fully Depreciated"].includes(frm.doc.status)) {
+<<<<<<< HEAD
+=======
+				if (frm.doc.maintenance_required && !frm.doc.maintenance_schedule) {
+					frm.add_custom_button(
+						__("Maintain Asset"),
+						function () {
+							frm.trigger("create_asset_maintenance");
+						},
+						__("Actions")
+					);
+				}
+				if (frm.doc.status === "Fully Depreciated") {
+					frm.add_custom_button(
+						__("Asset Repair"),
+						function () {
+							frm.trigger("create_asset_repair");
+						},
+						__("Actions")
+					);
+				}
+				frm.add_custom_button(
+					__("Split Asset"),
+					function () {
+						frm.trigger("split_asset");
+					},
+					__("Actions")
+				);
+
+>>>>>>> c7774a95e5 (fix(asset): allow asset repair creation for fully depreciated assets)
 				frm.add_custom_button(
 					__("Transfer Asset"),
 					function () {
