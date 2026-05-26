@@ -74,17 +74,15 @@ def _get_variables(criteria):
 	for _dummy1, match in enumerate(mylist):
 		for _dummy2 in range(0, len(match.groups())):
 			param_name = match.group(1)
-			try:
-				variables = frappe.get_all(
-					"Supplier Scorecard Variable",
-					fields=["variable_label", "description", "param_name", "path"],
-					filters={"param_name": param_name},
-					limit=1,
-				)
-				if not variables:
-					frappe.throw(_("Unable to find variable: {0}").format(param_name), InvalidFormulaVariable)
-				my_variables.append(variables[0])
-			except IndexError:
+
+			variables = frappe.get_all(
+				"Supplier Scorecard Variable",
+				fields=["variable_label", "description", "param_name", "path"],
+				filters={"param_name": param_name},
+				limit=1,
+			)
+			if not variables:
 				frappe.throw(_("Unable to find variable: {0}").format(param_name), InvalidFormulaVariable)
+			my_variables.append(variables[0])
 
 	return my_variables
