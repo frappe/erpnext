@@ -120,22 +120,20 @@ def validate_returned_items(doc):
 	items_returned = False
 	for d in doc.get("items"):
 		key = d.item_code
-		raise_exception = False
 		if doc.doctype in ["Purchase Receipt", "Purchase Invoice", "Sales Invoice", "POS Invoice"]:
 			field = frappe.scrub(doc.doctype) + "_item"
 			if d.get(field):
 				key = (d.item_code, d.get(field))
-				raise_exception = True
 		elif doc.doctype == "Delivery Note":
-			key = (d.item_code, d.get("dn_detail"))
+			if d.get("dn_detail"):
+				key = (d.item_code, d.get("dn_detail"))
 
 		if d.item_code and (flt(d.qty) <= 0 or flt(d.get("received_qty")) <= 0):
 			if key not in valid_items:
-				frappe.msgprint(
+				frappe.throw(
 					_("Row # {0}: Returned Item {1} does not exist in {2} {3}").format(
 						d.idx, d.item_code, doc.doctype, doc.return_against
 					),
-					raise_exception=raise_exception,
 				)
 			else:
 				ref = valid_items.get(key, frappe._dict())
