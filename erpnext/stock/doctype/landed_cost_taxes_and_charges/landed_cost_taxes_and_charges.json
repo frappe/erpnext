@@ -13,15 +13,10 @@
   "col_break3",
   "amount",
   "base_amount",
-<<<<<<< HEAD
-  "has_corrective_cost"
-=======
   "has_corrective_cost",
   "has_operating_cost",
   "operation_id",
-  "qty",
-  "operating_component"
->>>>>>> 2f35660142 (fix: consumed operation cost calculation (#54858))
+  "qty"
  ],
  "fields": [
   {
@@ -79,8 +74,6 @@
    "fieldtype": "Check",
    "label": "Has Corrective Cost",
    "read_only": 1
-<<<<<<< HEAD
-=======
   },
   {
    "default": "0",
@@ -105,25 +98,12 @@
    "no_copy": 1,
    "non_negative": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "operating_component",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Operating Component",
-   "no_copy": 1,
-   "read_only": 1
->>>>>>> 2f35660142 (fix: consumed operation cost calculation (#54858))
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2025-01-20 12:22:03.455762",
-=======
  "modified": "2026-05-19 12:21:07.953801",
->>>>>>> 2f35660142 (fix: consumed operation cost calculation (#54858))
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Taxes and Charges",
