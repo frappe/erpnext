@@ -969,9 +969,6 @@ class SalesInvoice(SellingController):
 			if selling_price_list:
 				self.set("selling_price_list", selling_price_list)
 
-			if not for_validate:
-				self.update_stock = cint(pos.get("update_stock"))
-
 			# set pos values in items
 			for item in self.get("items"):
 				if item.get("item_code"):
@@ -981,6 +978,10 @@ class SalesInvoice(SellingController):
 					for fname, val in profile_details.items():
 						if (not for_validate) or (for_validate and not item.get(fname)):
 							item.set(fname, val)
+
+			if not for_validate:
+				dn_flag = any(d.get("dn_detail") for d in self.get("items"))
+				self.update_stock = 0 if dn_flag else cint(pos.get("update_stock"))
 
 			# fetch terms
 			if self.tc_name and not self.terms:
