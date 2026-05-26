@@ -5,6 +5,7 @@
 import unittest
 
 import frappe
+from frappe.tests.utils import change_settings
 from frappe.utils import today
 
 from erpnext.accounts.doctype.finance_book.test_finance_book import create_finance_book
@@ -12,7 +13,6 @@ from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journ
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.general_ledger import make_reverse_gl_entries
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.tests.utils import change_settings
 
 
 class TestPeriodClosingVoucher(unittest.TestCase):
