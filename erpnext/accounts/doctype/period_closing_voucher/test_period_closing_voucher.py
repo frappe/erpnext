@@ -358,6 +358,9 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		{"enable_immutable_ledger": 1},
 	)
 	def test_immutable_ledger_reverse_entry_uses_passed_posting_date_after_pcv(self):
+		frappe.db.sql("delete from `tabGL Entry` where company='Test PCV Company'")
+		frappe.db.sql("delete from `tabPeriod Closing Voucher` where company='Test PCV Company'")
+
 		company = create_company()
 		cost_center = create_cost_center("Test Cost Center 1")
 
