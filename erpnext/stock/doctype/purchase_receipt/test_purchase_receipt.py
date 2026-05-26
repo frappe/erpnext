@@ -5170,6 +5170,301 @@ class TestPurchaseReceipt(FrappeTestCase):
 			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", original_value
 		)
 
+<<<<<<< HEAD
+=======
+	def test_purchase_receipt_gl_entries_for_asset_item(self):
+		from erpnext.assets.doctype.asset.test_asset import create_fixed_asset_item
+
+		# Create a Company without Stock Accounts Linked.
+		company = frappe.get_doc(
+			{
+				"doctype": "Company",
+				"company_name": "Asset Company",
+				"country": "India",
+				"default_currency": "INR",
+			}
+		).insert()
+
+		stock_accounts = (
+			company.default_inventory_account,
+			company.stock_adjustment_account,
+			company.stock_received_but_not_billed,
+		)
+
+		company.update(
+			{"stock_in_hand_account": "", "stock_adjustment_account": "", "stock_received_but_not_billed": ""}
+		).save()
+
+		for account in stock_accounts:
+			frappe.db.delete("Account", account)
+
+		asset_category = create_asset_category_for_pr_test()
+		asset_item = create_fixed_asset_item(
+			item_code="Test Fixed Asset Item for PR GL Test", asset_category=asset_category.name
+		)
+		arnb_account = frappe.db.get_value("Company", company.name, "asset_received_but_not_billed")
+
+		# Purchase Receipt should be able to create even without any stock accounts linked to company
+		pr = make_purchase_receipt(
+			item_code=asset_item.name, warehouse="Stores - AC", qty=1, rate=10000, company=company.name
+		)
+
+		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
+
+		self.assertTrue(gl_entries)
+		gl_accounts = [d.account for d in gl_entries]
+
+		# The fixed asset account set on the item row must be debited
+		asset_expense_account = pr.items[0].expense_account
+		self.assertIn(asset_expense_account, gl_accounts)
+
+		# Asset Received But Not Billed must be credited
+		self.assertIn(arnb_account, gl_accounts)
+
+		# No Stock-type account should appear — the inventory account map is not
+		# needed and must not be consulted for an asset-only receipt
+		for entry in gl_entries:
+			account_type = frappe.db.get_value("Account", entry.account, "account_type")
+			self.assertNotEqual(account_type, "Stock")
+
+		pr.cancel()
+
+	def test_purchase_receipt_gl_entries_with_mixed_asset_and_stock_items(self):
+		from erpnext.assets.doctype.asset.test_asset import create_fixed_asset_item
+
+		company = frappe.get_doc(
+			{
+				"doctype": "Company",
+				"company_name": "Asset Company",
+				"country": "India",
+				"default_currency": "INR",
+			}
+		).insert()
+
+		asset_category = create_asset_category_for_pr_test()
+		asset_item = create_fixed_asset_item(
+			item_code="Test Fixed Asset Item for PR GL Test", asset_category=asset_category.name
+		)
+		arnb_account = frappe.db.get_value("Company", company.name, "asset_received_but_not_billed")
+
+		pr = make_purchase_receipt(
+			item_code=asset_item.name,
+			qty=1,
+			rate=10000,
+			warehouse="Stores - AC",
+			do_not_save=True,
+			company=company.name,
+		)
+		pr.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"warehouse": "Stores - AC",
+				"qty": 5,
+				"received_qty": 5,
+				"rejected_qty": 0,
+				"rate": 50,
+				"uom": "_Test UOM",
+				"stock_uom": "_Test UOM",
+				"conversion_factor": 1.0,
+				"cost_center": frappe.get_cached_value("Company", pr.company, "cost_center"),
+			},
+		)
+		pr.insert()
+		pr.submit()
+
+		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
+		self.assertTrue(gl_entries)
+
+		gl_accounts = [d.account for d in gl_entries]
+		self.assertIn(arnb_account, gl_accounts)
+
+		# The fixed asset account set on the item row must be debited
+		asset_expense_account = pr.items[0].expense_account
+		self.assertIn(asset_expense_account, gl_accounts)
+
+		# Asset Received But Not Billed must be credited
+		self.assertIn(asset_category.accounts[0].fixed_asset_account, gl_accounts)
+
+		# Stock Accounts should be used for Stock Items
+		self.assertIn(company.stock_received_but_not_billed, gl_accounts)
+		self.assertIn(company.default_inventory_account, gl_accounts)
+		pr.cancel()
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"set_landed_cost_based_on_purchase_invoice_rate": 1, "maintain_same_rate": 0}
+	)
+	def test_srbnb_with_inclusive_tax_and_rate_change_in_pi(self):
+		"""
+		When 'Set Landed Cost Based on PI Rate' is enabled and PI has an inclusive tax:
+		  - PR: qty=2, rate=1000 INR → base_net_amount=2000
+		  - PI: rate changed to 2000, 5% tax included in basic rate
+		      → PI base_net_amount = 2 * 2000 / 1.05 ≈ 3809.52
+
+		The system must use PI's base_net_amount (not amount=4000) so that
+		SRBNB credit on PR = 3809.52, not 4000.
+		"""
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+		cost_center = "Main - TCP1"
+
+		item_code = make_item(
+			"Test Item for SRBNB Inclusive Tax Rate Change",
+			{"is_stock_item": 1},
+		).name
+
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			qty=2,
+			rate=1000,
+			company=company,
+			warehouse=warehouse,
+			cost_center=cost_center,
+		)
+
+		pi = make_purchase_invoice(pr.name)
+		pi.items[0].rate = 2000
+		pi.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account VAT - TCP1",
+				"category": "Total",
+				"add_deduct_tax": "Add",
+				"included_in_print_rate": 1,
+				"rate": 5,
+				"description": "Test Inclusive Tax",
+				"cost_center": cost_center,
+			},
+		)
+		pi.save()
+		pi.submit()
+
+		pr.reload()
+
+		# PI base_net_amount = qty * (rate / (1 + tax_rate/100)) = 2 * (2000 / 1.05)
+		pi_base_net_amount = flt(2 * 2000 / 1.05, 2)
+		pr_base_net_amount = flt(pr.items[0].amount, 2)  # 2 * 1000 = 2000
+		expected_diff = flt(pi_base_net_amount - pr_base_net_amount, 2)
+
+		self.assertAlmostEqual(pr.items[0].amount_difference_with_purchase_invoice, expected_diff, places=2)
+
+		# Total SRBNB credit = PR base_net_amount + amount_difference = PI base_net_amount
+		srbnb_account = "Stock Received But Not Billed - TCP1"
+		gl_entries = get_gl_entries("Purchase Receipt", pr.name, skip_cancelled=True)
+		srbnb_credit = sum(flt(row.credit) for row in gl_entries if row.account == srbnb_account)
+		self.assertAlmostEqual(srbnb_credit, pi_base_net_amount, places=2)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"set_landed_cost_based_on_purchase_invoice_rate": 1, "maintain_same_rate": 0}
+	)
+	def test_srbnb_with_inclusive_tax_and_exchange_rate_change_in_pi(self):
+		"""
+		When 'Set Landed Cost Based on PI Rate' is enabled, PI has an inclusive tax, and only
+		the exchange rate changes on the PI (rate stays the same):
+		  - PR: qty=2, rate=100 USD, conversion_rate=70 → base_net_amount=14000 INR
+		  - PI: same rate=100 USD, conversion_rate changed to 90, 5% tax included in basic rate
+		      → PI base_net_amount = 2 * (100 / 1.05) * 90 ≈ 17142.86 INR
+
+		The system must use PI's base_net_amount (not amount = 2*100*90 = 18000) so that
+		SRBNB credit on PR = 17142.86, not 18000.
+		"""
+		from erpnext.accounts.doctype.account.test_account import create_account
+
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+		cost_center = "Main - TCP1"
+
+		party_account = create_account(
+			account_name="USD Payable For SRBNB Exchange Rate Test",
+			parent_account="Accounts Payable - TCP1",
+			account_type="Payable",
+			company=company,
+			account_currency="USD",
+		)
+
+		supplier = create_supplier(
+			supplier_name="_Test USD Supplier for SRBNB Exchange Rate",
+			default_currency="USD",
+			party_account=party_account,
+		).name
+
+		item_code = make_item(
+			"Test Item for SRBNB Inclusive Tax Exchange Rate Change",
+			{"is_stock_item": 1},
+		).name
+
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			qty=2,
+			rate=100,
+			currency="USD",
+			conversion_rate=70,
+			company=company,
+			warehouse=warehouse,
+			supplier=supplier,
+		)
+
+		pi = make_purchase_invoice(pr.name)
+		pi.conversion_rate = 90
+		pi.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account VAT - TCP1",
+				"category": "Total",
+				"add_deduct_tax": "Add",
+				"included_in_print_rate": 1,
+				"rate": 5,
+				"description": "Test Inclusive Tax",
+				"cost_center": cost_center,
+			},
+		)
+		pi.save()
+		pi.submit()
+
+		pr.reload()
+
+		# PI base_net_amount = qty * (rate / (1 + tax_rate/100)) * new_conversion_rate
+		#                    = 2 * (100 / 1.05) * 90 ≈ 17142.86 INR
+		# PR base_net_amount = qty * rate * pr_conversion_rate = 2 * 100 * 70 = 14000 INR
+		tax_amount_pr = (200 - flt(200 / 1.05, 2)) * 90
+
+		pi_base_net_amount = flt(2 * 100 * 90) - flt(tax_amount_pr)
+		pr_base_net_amount = flt(2 * 100 * 70)
+		expected_diff = flt(pi_base_net_amount - pr_base_net_amount)
+
+		self.assertAlmostEqual(pr.items[0].amount_difference_with_purchase_invoice, expected_diff, places=2)
+
+		# Total SRBNB credit = PR base_net_amount + amount_difference = PI base_net_amount
+		srbnb_account = "Stock Received But Not Billed - TCP1"
+		gl_entries = get_gl_entries("Purchase Receipt", pr.name, skip_cancelled=True)
+		srbnb_credit = sum(flt(row.credit) for row in gl_entries if row.account == srbnb_account)
+		self.assertAlmostEqual(srbnb_credit, pi_base_net_amount, places=2)
+
+
+def create_asset_category_for_pr_test():
+	category_name = "Test Asset Category for PR"
+
+	asset_category = frappe.get_doc(
+		{
+			"doctype": "Asset Category",
+			"asset_category_name": category_name,
+			"enable_cwip_accounting": 0,
+			"depreciation_method": "Straight Line",
+			"total_number_of_depreciations": 12,
+			"frequency_of_depreciation": 1,
+			"accounts": [
+				{
+					"company_name": "Asset Company",
+					"fixed_asset_account": "Electronic Equipment - AC",
+				}
+			],
+		}
+	).insert()
+	return asset_category
+
+>>>>>>> 048ddfc265 (fix: inclusive tax amount not considered while setting LCV from purchase invoice)
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
