@@ -39,7 +39,7 @@ frappe.ui.form.on("Employee", {
 				filters: {
 					company: frm.doc.company,
 				},
-			}; 
+			};
 		});
 	},
 
