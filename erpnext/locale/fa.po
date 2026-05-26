@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-24 10:11+0000\n"
-"PO-Revision-Date: 2026-05-24 21:22\n"
+"PO-Revision-Date: 2026-05-26 21:28\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -46314,23 +46314,23 @@ msgstr ""
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:39
 msgid "Rule name is required"
-msgstr ""
+msgstr "نام قانون الزامی است"
 
 #: banking/src/components/features/Settings/Rules/RuleList.tsx:174
 msgid "Rule priorities updated"
-msgstr ""
+msgstr "اولویت‌های قوانین به‌روزرسانی شد"
 
 #: banking/src/components/features/BankReconciliation/Rules/EditRule.tsx:30
 msgid "Rule updated."
-msgstr ""
+msgstr "قانون به‌روزرسانی شد."
 
 #: banking/src/components/features/Settings/Rules/RuleList.tsx:56
 msgid "Rules evaluation completed"
-msgstr ""
+msgstr "ارزیابی قوانین تکمیل شد"
 
 #: banking/src/components/features/Settings/Rules/RuleList.tsx:56
 msgid "Rules evaluation started"
-msgstr ""
+msgstr "ارزیابی قوانین آغاز شد"
 
 #: erpnext/public/js/utils/naming_series.js:54
 msgid "Rules for configuring series"
@@ -47646,7 +47646,7 @@ msgstr "عبارت جستجو نام Param"
 
 #: banking/src/components/common/AccountsDropdown.tsx:155
 msgid "Search account..."
-msgstr ""
+msgstr "جستجوی حساب..."
 
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:323
 msgid "Search by customer name, phone, email."
@@ -47662,12 +47662,12 @@ msgstr "جستجو بر اساس کد آیتم، شماره سریال یا با
 
 #: banking/src/components/features/BankReconciliation/CompanySelector.tsx:64
 msgid "Search company..."
-msgstr ""
+msgstr "جستجوی شرکت..."
 
 #: banking/src/components/features/BankReconciliation/BankTransactionList.tsx:338
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:146
 msgid "Search transactions"
-msgstr ""
+msgstr "جستجوی تراکنش‌ها"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -47761,7 +47761,7 @@ msgstr "مشاهده همه تیکت‌های باز"
 #: banking/src/components/common/AccountsDropdown.tsx:132
 #: banking/src/components/common/AccountsDropdown.tsx:148
 msgid "Select Account"
-msgstr ""
+msgstr "انتخاب حساب"
 
 #: erpnext/accounts/report/profitability_analysis/profitability_analysis.py:23
 msgid "Select Accounting Dimension."
@@ -47997,7 +47997,7 @@ msgstr "یک تامین کننده انتخاب کنید"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:49
 msgid "Select a bank account to reconcile"
-msgstr ""
+msgstr "حساب بانکی را برای تطبیق انتخاب کنید"
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.js:161
 msgid "Select a company"
@@ -48065,7 +48065,7 @@ msgstr ""
 #: banking/src/components/features/BankReconciliation/RecordPaymentModal.tsx:1215
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:632
 msgid "Select row {0}"
-msgstr ""
+msgstr "انتخاب سطر {0}"
 
 #: erpnext/manufacturing/doctype/bom/bom.js:473
 msgid "Select template item"
@@ -49871,7 +49871,7 @@ msgstr "تعداد کمبود"
 
 #: banking/src/components/features/Settings/KeyboardShortcuts.tsx:85
 msgid "Shortcut"
-msgstr ""
+msgstr "میانبر"
 
 #: erpnext/buying/report/purchase_analytics/purchase_analytics.js:70
 #: erpnext/selling/report/sales_analytics/sales_analytics.js:103
@@ -50769,19 +50769,19 @@ msgstr "موقعیت شروع از لبه بالا"
 #. Description Conditions'
 #: erpnext/accounts/doctype/bank_transaction_rule_description_conditions/bank_transaction_rule_description_conditions.json
 msgid "Starts With"
-msgstr ""
+msgstr "شروع می شود با"
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:201
 msgid "Starts with"
-msgstr ""
+msgstr "شروع می‌شود با"
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:120
 msgid "Statement Details"
-msgstr ""
+msgstr "جزئیات صورت‌حساب"
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:151
 msgid "Statement File"
-msgstr ""
+msgstr "فایل صورت‌حساب"
 
 #. Label of the statement_format_section (Section Break) field in DocType 'Bank
 #. Statement Import Log'
@@ -54374,7 +54374,7 @@ msgstr ""
 
 #: banking/src/pages/BankStatementImporter.tsx:155
 msgid "The date of the transaction"
-msgstr ""
+msgstr "تاریخ تراکنش"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1211
 msgid "The default BOM for that item will be fetched by the system. You can also change the BOM."
@@ -54382,7 +54382,7 @@ msgstr "BOM پیش‌فرض برای آن مورد توسط سیستم واکش�
 
 #: banking/src/pages/BankStatementImporter.tsx:170
 msgid "The description of the transaction"
-msgstr ""
+msgstr "توضیحات تراکنش"
 
 #: erpnext/crm/doctype/appointment_booking_settings/appointment_booking_settings.py:67
 msgid "The difference between from time and To Time must be a multiple of Appointment"
@@ -54855,7 +54855,7 @@ msgstr "هیچ دسته ای در برابر {0} یافت نشد: {1}"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:924
 msgid "There is one unreconciled transaction before {0}."
-msgstr ""
+msgstr "یک تراکنش تطبیق‌نشده قبل از {0} وجود دارد."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:871
 msgid "There must be atleast 1 Finished Good in this Stock Entry"
@@ -54875,12 +54875,12 @@ msgstr "هنگام به‌روزرسانی حساب بانکی {} هنگام پ�
 
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:81
 msgid "There was an error while importing the bank statement."
-msgstr ""
+msgstr "هنگام درون‌بُرد صورت‌حساب بانکی خطایی رخ داد."
 
 #: banking/src/components/features/ActionLog/ActionLog.tsx:395
 #: banking/src/components/features/BankReconciliation/IncorrectlyClearedEntries.tsx:88
 msgid "There was an error while performing the action."
-msgstr ""
+msgstr "هنگام انجام اقدام خطایی رخ داد."
 
 #: erpnext/accounts/doctype/bank/bank.js:112
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.js:119
@@ -54899,7 +54899,7 @@ msgstr "این حساب دارای موجودی '0' به ارز پایه یا ا
 
 #: banking/src/components/features/BankReconciliation/BankRecDateFilter.tsx:73
 msgid "This Fiscal Year"
-msgstr ""
+msgstr "این سال مالی"
 
 #: erpnext/stock/doctype/item/item.js:194
 msgid "This Item is a Template and cannot be used in transactions.<br>All fields present in the 'Copy Fields to Variant' table in Item Variant Settings will be copied to its variant items."
