@@ -1069,11 +1069,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
-<<<<<<< HEAD
- "modified": "2026-04-28 17:31:47.613279",
-=======
  "modified": "2026-05-26 10:18:46.862670",
->>>>>>> a128d851c5 (refactor: remove unused customer field in Item DocType (#55277))
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
