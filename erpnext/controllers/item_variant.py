@@ -209,13 +209,9 @@ def create_variant(item, args, use_template_image=False):
 	variant_attributes = []
 
 	for d in template.attributes:
-<<<<<<< HEAD
-		variant_attributes.append({"attribute": d.attribute, "attribute_value": args.get(d.attribute)})
-=======
 		attribute_value = args.get(_(d.attribute)) or args.get(d.attribute)
 		if attribute_value:
 			variant_attributes.append({"attribute": d.attribute, "attribute_value": attribute_value})
->>>>>>> 090c25d848 (feat: allow creation of any number of variants in multiple item variant creation dialog)
 
 	variant.set("attributes", variant_attributes)
 	copy_attributes_to_variant(template, variant)
