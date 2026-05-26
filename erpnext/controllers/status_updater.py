@@ -240,10 +240,10 @@ class StatusUpdater(Document):
 
 			# get unique transactions to update
 			for d in self.get_all_children():
-				if hasattr(d, "qty") and d.qty < 0 and not self.get("is_return"):
+				if hasattr(d, "qty") and flt(d.qty) < 0 and not self.get("is_return"):
 					frappe.throw(_("For an item {0}, quantity must be positive number").format(d.item_code))
 
-				if hasattr(d, "qty") and d.qty > 0 and self.get("is_return"):
+				if hasattr(d, "qty") and flt(d.qty) > 0 and self.get("is_return"):
 					frappe.throw(_("For an item {0}, quantity must be negative number").format(d.item_code))
 
 				if not frappe.db.get_single_value("Selling Settings", "allow_negative_rates_for_items"):

@@ -3370,6 +3370,33 @@ def get_work_order_details(work_order, company):
 	}
 
 
+def get_consumed_operating_cost(work_order, bom_no, operation_id=None):
+	table = frappe.qb.DocType("Stock Entry")
+	child_table = frappe.qb.DocType("Landed Cost Taxes and Charges")
+	query = (
+		frappe.qb.from_(child_table)
+		.join(table)
+		.on(child_table.parent == table.name)
+		.select(
+			Sum(child_table.amount).as_("consumed_cost"),
+			Sum(child_table.qty).as_("consumed_qty"),
+		)
+		.where(
+			(table.docstatus == 1)
+			& (table.work_order == work_order)
+			& (table.purpose == "Manufacture")
+			& (table.bom_no == bom_no)
+			& (child_table.has_operating_cost == 1)
+		)
+	)
+
+	if operation_id:
+		query = query.where(child_table.operation_id == operation_id)
+
+	data = query.run(as_dict=True)
+	return data[0] if data else frappe._dict()
+
+
 def get_operating_cost_per_unit(work_order=None, bom_no=None):
 	operating_cost_per_unit = 0
 	if work_order:
