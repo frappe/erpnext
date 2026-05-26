@@ -1293,11 +1293,16 @@ def get_open_payment_requests_query(
 	)
 
 	return [
-		(
-			pr.name,
-			_("<strong>Grand Total:</strong> {0}").format(pr.grand_total),
-			_("<strong>Outstanding Amount:</strong> {0}").format(pr.outstanding_amount),
-		)
+		{
+			"value": pr.name,
+			"description": ", ".join(
+				[
+					_("<strong>Grand Total:</strong> {0}").format(pr.grand_total),
+					_("<strong>Outstanding Amount:</strong> {0}").format(pr.outstanding_amount),
+				]
+			),
+			"description_html": True,
+		}
 		for pr in open_payment_requests
 	]
 
