@@ -868,7 +868,7 @@ def warehouse_query(doctype: str, txt: str, searchfield: str, start: int, page_l
 
 
 def get_doctype_wise_filters(filters):
-	# Helper function to seperate filters doctype_wise
+	# Helper function to separate filters doctype-wise
 	filter_dict = defaultdict(list)
 	for row in filters:
 		filter_dict[row[0]].append(row)

@@ -525,10 +525,10 @@ def make_gl_entries(
 			make_gl_entries(gl_entries, cancel=(doc.docstatus == 2), merge_entries=True)
 			if not frappe.in_test:
 				frappe.db.commit()
-		except Exception as e:
+		except Exception:
 			if frappe.in_test:
 				doc.log_error(f"Error while processing deferred accounting for Invoice {doc.name}")
-				raise e
+				raise
 			else:
 				frappe.db.rollback()
 				doc.log_error(f"Error while processing deferred accounting for Invoice {doc.name}")

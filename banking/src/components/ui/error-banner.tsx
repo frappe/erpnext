@@ -24,12 +24,6 @@ const parseHeading = (message?: ParsedErrorMessage) => {
 const ErrorBanner = ({ error, overrideHeading, ...props }: ErrorBannerProps) => {
 
 
-    //exc_type: "ValidationError" or "PermissionError" etc
-    // exc: With entire traceback - useful for reporting maybe
-    // httpStatus and httpStatusText - not needed
-    // _server_messages: Array of messages - useful for showing to user
-    // console.log(JSON.parse(error?._server_messages!))
-
     const messages = useMemo(() => {
         return getErrorMessages(error)
     }, [error])

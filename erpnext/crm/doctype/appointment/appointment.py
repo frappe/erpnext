@@ -116,7 +116,7 @@ class Appointment(Document):
 		self.create_lead_and_link()
 		# Remove unverified status
 		self.status = "Open"
-		# Create calender event
+		# Create calendar event
 		self.auto_assign()
 		self.create_calendar_event()
 		self.save(ignore_permissions=True)

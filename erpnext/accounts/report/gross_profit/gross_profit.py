@@ -1108,7 +1108,7 @@ class GrossProfitGenerator:
 				)  # descendant rows will have indent: 1.0 or greater
 			)
 
-			# if item is a bundle, add it's components as seperate rows
+			# if item is a bundle, add its components as separate rows
 			if bundled_items := product_bundles.get(row.parent, {}).get(row.item_code):
 				for x in bundled_items:
 					bundle_item = self.get_bundle_item_row(row, x)

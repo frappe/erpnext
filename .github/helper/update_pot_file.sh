@@ -29,7 +29,7 @@ isodate=$(date -u +"%Y-%m-%d")
 branch_name="pot_${BASE_BRANCH}_${isodate}"
 git checkout -b "${branch_name}"
 
-echo "Commiting changes..."
+echo "Committing changes..."
 git add erpnext/locale/main.pot
 git commit -m "chore: update POT file"
 

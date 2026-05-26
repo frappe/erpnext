@@ -82,7 +82,7 @@ class PlaidConnector:
 				)
 				transactions.extend(response["transactions"])
 			return transactions
-		except ItemError as e:
-			raise e
+		except ItemError:
+			raise
 		except Exception:
 			frappe.log_error("Plaid: Transactions sync error")

@@ -184,9 +184,9 @@ def execute():
 							print(f"{percent}% ({processed}) records processed")
 							last_update_percent = percent
 
-					except Exception as err:
+					except Exception:
 						print("Migration Failed. Clear `tabPayment Ledger Entry` table before re-running")
-						raise err
+						raise
 				else:
 					break
 			print(f"{processed} records have been successfully migrated")
