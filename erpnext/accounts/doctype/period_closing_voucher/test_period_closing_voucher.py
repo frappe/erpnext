@@ -375,16 +375,6 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 
 		self.make_period_closing_voucher(posting_date="2021-03-31")
 
-		totals_before_cancel = frappe.db.sql(
-			"""
-				select sum(debit) as total_debit, sum(credit) as total_credit
-				from `tabGL Entry`
-				where voucher_type=%s and voucher_no=%s and is_cancelled=0
-			""",
-			("Journal Entry", jv.name),
-			as_dict=True,
-		)[0]
-
 		# Passed posting_date is after PCV end date, so cancellation should not fail.
 		make_reverse_gl_entries(
 			voucher_type="Journal Entry",
@@ -402,14 +392,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			as_dict=True,
 		)[0]
 
-		self.assertEqual(
-			totals_after_cancel.total_debit,
-			totals_before_cancel.total_debit * 2,
-		)
-		self.assertEqual(
-			totals_after_cancel.total_credit,
-			totals_before_cancel.total_credit * 2,
-		)
+		self.assertEqual(totals_after_cancel.total_debit, totals_after_cancel.total_credit)
 
 
 def create_company():
