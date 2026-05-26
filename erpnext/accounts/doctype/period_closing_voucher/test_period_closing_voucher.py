@@ -352,7 +352,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 
 		return pcv
 
-	@ERPNextTestSuite.change_settings(
+	@change_settings(
 		"Accounts Settings",
 		{"enable_immutable_ledger": 1},
 	)
