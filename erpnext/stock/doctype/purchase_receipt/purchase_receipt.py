@@ -1374,7 +1374,7 @@ def get_billed_qty_amount_against_purchase_receipt(pr_doc):
 		.on(parent_table.name == table.parent)
 		.select(
 			table.pr_detail,
-			fn.Sum(table.amount * parent_table.conversion_rate).as_("amount"),
+			fn.Sum(table.base_net_amount).as_("amount"),
 			fn.Sum(table.qty).as_("qty"),
 		)
 		.where((table.pr_detail.isin(pr_names)) & (table.docstatus == 1))
@@ -1420,7 +1420,7 @@ def get_billed_qty_amount_against_purchase_order(pr_doc):
 			.select(
 				table.po_detail,
 				fn.Sum(table.qty).as_("qty"),
-				fn.Sum(table.amount * parent_table.conversion_rate).as_("amount"),
+				fn.Sum(table.base_net_amount).as_("amount"),
 			)
 			.where((table.po_detail.isin(po_names)) & (table.docstatus == 1) & (table.pr_detail.isnull()))
 			.groupby(table.po_detail)
