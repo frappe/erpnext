@@ -772,11 +772,10 @@ $.extend(erpnext.item, {
 						default: 0,
 						onchange: function () {
 							let selected_attributes = get_selected_attributes();
-							let lengths = [];
-							Object.keys(selected_attributes).map((key) => {
-								lengths.push(selected_attributes[key].length);
+							let lengths = Object.keys(selected_attributes).map((key) => {
+								return selected_attributes[key].length;
 							});
-							if (lengths.includes(0)) {
+							if (!lengths.length) {
 								me.multiple_variant_dialog.get_primary_btn().html(__("Create Variants"));
 								me.multiple_variant_dialog.disable_primary_action();
 							} else {
@@ -813,7 +812,7 @@ $.extend(erpnext.item, {
 						fieldtype: "HTML",
 						fieldname: "help",
 						options: `<label class="control-label">
-							${__("Select at least one value from each of the attributes.")}
+							${__("Select at least one attribute value.")}
 						</label>`,
 					},
 				]
@@ -875,6 +874,9 @@ $.extend(erpnext.item, {
 						selected_attributes[attribute_name].push($(opt).attr("data-fieldname"));
 					}
 				});
+				if (!selected_attributes[attribute_name].length) {
+					delete selected_attributes[attribute_name];
+				}
 			});
 
 			return selected_attributes;
