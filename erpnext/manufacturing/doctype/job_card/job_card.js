@@ -655,10 +655,10 @@ frappe.ui.form.on("Job Card", {
 		};
 
 		const buttons_html = [
-			show_start && btn("btn-default jcd-btn-start", "play", __("Start Job")),
-			show_resume && btn("btn-default jcd-btn-resume", "play", __("Resume Job")),
+			show_start && btn("btn-primary jcd-btn-start", "play", __("Start Job")),
+			show_resume && btn("btn-primary jcd-btn-resume", "play", __("Resume Job")),
 			show_pause && btn("btn-default jcd-btn-pause", "pause", __("Pause Job")),
-			show_complete && btn("btn-success jcd-btn-complete", "check", __("Complete Job"), "white"),
+			show_complete && btn("btn-primary jcd-btn-complete", "check", __("Complete Job"), "white"),
 		]
 			.filter(Boolean)
 			.join("");
@@ -764,6 +764,14 @@ frappe.ui.form.on("Job Card", {
 				current_increment += 1;
 				update_stopwatch(current_increment);
 			}, 1000);
+		}
+
+		// Demote Submit to btn-default when an action button is already primary.
+		const has_action_button = show_start || show_resume || show_complete;
+		if (frm.page.btn_primary) {
+			frm.page.btn_primary
+				.toggleClass("btn-primary", !has_action_button)
+				.toggleClass("btn-default", has_action_button);
 		}
 
 		return is_timer_running;
