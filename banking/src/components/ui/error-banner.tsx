@@ -3,7 +3,6 @@ import { FrappeError } from 'frappe-react-sdk'
 import { Alert, AlertDescription, AlertProps, AlertTitle } from '@/components/ui/alert'
 import { AlertCircle } from 'lucide-react'
 import MarkdownRenderer from '@/components/ui/markdown'
-import _ from '@/lib/translate'
 import { useMemo } from 'react'
 
 type ErrorBannerProps = AlertProps & {

@@ -1,7 +1,7 @@
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { bankRecAmountFilter, bankRecDateAtom, bankRecRecordJournalEntryModalAtom, bankRecRecordPaymentModalAtom, bankRecSelectedTransactionAtom, bankRecTransactionTypeFilter, bankRecTransferModalAtom, selectedBankAccountAtom } from "./bankRecAtoms"
 import { H4 } from "@/components/ui/typography"
-import { useMemo, useRef } from "react"
+import { useCallback, useMemo, useRef } from "react"
 import { getCompanyCurrency } from "@/lib/company"
 import ErrorBanner from "@/components/ui/error-banner"
 import { Separator } from "@/components/ui/separator"
@@ -559,6 +559,28 @@ const RuleAction = ({ transaction }: { transaction: UnreconciledTransaction }) =
     const setRecordPaymentModalOpen = useSetAtom(bankRecRecordPaymentModalAtom)
     const setRecordJournalEntryModalOpen = useSetAtom(bankRecRecordJournalEntryModalAtom)
 
+    const handleActionClick = useCallback(() => {
+        if (!rule) return
+
+        switch (rule.classify_as) {
+            case "Bank Entry":
+                setRecordJournalEntryModalOpen(true)
+                break
+            case "Payment Entry":
+                setRecordPaymentModalOpen(true)
+                break
+            case "Transfer":
+                setTransferModalOpen(true)
+                break
+        }
+    }, [rule, setRecordJournalEntryModalOpen, setRecordPaymentModalOpen, setTransferModalOpen])
+
+    useHotkeys('meta+r', handleActionClick, {
+        enabled: Boolean(rule),
+        enableOnFormTags: false,
+        preventDefault: true
+    })
+
     if (!rule) {
         return null
     }
@@ -609,20 +631,6 @@ const RuleAction = ({ transaction }: { transaction: UnreconciledTransaction }) =
         }
     }
 
-    const handleActionClick = () => {
-        switch (rule.classify_as) {
-            case "Bank Entry":
-                setRecordJournalEntryModalOpen(true)
-                break
-            case "Payment Entry":
-                setRecordPaymentModalOpen(true)
-                break
-            case "Transfer":
-                setTransferModalOpen(true)
-                break
-        }
-    }
-
     const getActionDescription = () => {
         switch (rule.classify_as) {
             case "Bank Entry":
@@ -635,15 +643,6 @@ const RuleAction = ({ transaction }: { transaction: UnreconciledTransaction }) =
                 return _("Create a new entry based on the rule")
         }
     }
-
-    useHotkeys('meta+r', () => {
-        // 
-        handleActionClick()
-    }, {
-        enabled: true,
-        enableOnFormTags: false,
-        preventDefault: true
-    })
 
     const styles = getActionStyles()
 

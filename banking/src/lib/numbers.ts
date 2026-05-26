@@ -1,4 +1,3 @@
-import { in_list } from "./checks";
 import { getCurrencyNumberFormat, getCurrencyProperty, getCurrencySymbol } from "./currency";
 import { getSystemDefault } from "./frappe";
 import _ from "@/lib/translate";

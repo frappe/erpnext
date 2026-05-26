@@ -1,6 +1,5 @@
 import CSVRawDataPreview from './CSVRawDataPreview'
 import StatementDetails from './StatementDetails'
-import _ from '@/lib/translate'
 import { GetStatementDetailsResponse } from '../import_utils'
 
 const CSVImport = ({ data }: { data: { message: GetStatementDetailsResponse } }) => {

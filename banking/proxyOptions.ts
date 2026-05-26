@@ -1,4 +1,8 @@
-const common_site_config = require('../../../sites/common_site_config.json');
+import { readFileSync } from 'node:fs';
+
+const common_site_config = JSON.parse(
+	readFileSync(new URL('../../../sites/common_site_config.json', import.meta.url), 'utf8')
+) as { webserver_port: string | number };
 const { webserver_port } = common_site_config;
 
 export default {
