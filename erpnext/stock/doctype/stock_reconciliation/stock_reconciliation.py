@@ -567,15 +567,18 @@ class StockReconciliation(StockController):
 
 	def calculate_difference_amount(self, item, item_dict):
 		qty_precision = item.precision("qty")
-		val_precision = item.precision("valuation_rate")
+		amount_precision = item.precision("amount")
 
 		new_qty = flt(item.qty, qty_precision)
-		new_valuation_rate = flt(item.valuation_rate or item_dict.get("rate"), val_precision)
+		new_valuation_rate = flt(item.valuation_rate or item_dict.get("rate"))
 
 		current_qty = flt(item_dict.get("qty"), qty_precision)
-		current_valuation_rate = flt(item_dict.get("rate"), val_precision)
+		current_valuation_rate = flt(item_dict.get("rate"))
 
-		self.difference_amount += (new_qty * new_valuation_rate) - (current_qty * current_valuation_rate)
+		new_amount = flt(new_qty * new_valuation_rate, amount_precision)
+		current_amount = flt(current_qty * current_valuation_rate, amount_precision)
+
+		self.difference_amount += new_amount - current_amount
 
 	def validate_data(self):
 		def _get_msg(row_num, msg):
@@ -875,7 +878,7 @@ class StockReconciliation(StockController):
 				"company": self.company,
 				"stock_uom": frappe.db.get_value("Item", row.item_code, "stock_uom"),
 				"is_cancelled": 1 if self.docstatus == 2 else 0,
-				"valuation_rate": flt(row.valuation_rate, row.precision("valuation_rate")),
+				"valuation_rate": flt(row.valuation_rate),
 			}
 		)
 
