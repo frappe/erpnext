@@ -567,18 +567,15 @@ class StockReconciliation(StockController):
 
 	def calculate_difference_amount(self, item, item_dict):
 		qty_precision = item.precision("qty")
-		amount_precision = item.precision("amount")
+		val_precision = item.precision("valuation_rate")
 
 		new_qty = flt(item.qty, qty_precision)
-		new_valuation_rate = flt(item.valuation_rate or item_dict.get("rate"))
+		new_valuation_rate = flt(item.valuation_rate or item_dict.get("rate"), val_precision)
 
 		current_qty = flt(item_dict.get("qty"), qty_precision)
-		current_valuation_rate = flt(item_dict.get("rate"))
+		current_valuation_rate = flt(item_dict.get("rate"), val_precision)
 
-		new_amount = flt(new_qty * new_valuation_rate, amount_precision)
-		current_amount = flt(current_qty * current_valuation_rate, amount_precision)
-
-		self.difference_amount += new_amount - current_amount
+		self.difference_amount += (new_qty * new_valuation_rate) - (current_qty * current_valuation_rate)
 
 	def validate_data(self):
 		def _get_msg(row_num, msg):
@@ -888,7 +885,7 @@ class StockReconciliation(StockController):
 				"company": self.company,
 				"stock_uom": frappe.db.get_value("Item", row.item_code, "stock_uom"),
 				"is_cancelled": 1 if self.docstatus == 2 else 0,
-				"valuation_rate": flt(row.valuation_rate),
+				"valuation_rate": flt(row.valuation_rate, row.precision("valuation_rate")),
 			}
 		)
 
@@ -1047,6 +1044,84 @@ class StockReconciliation(StockController):
 			self.queue_action("cancel", timeout=2000)
 		else:
 			self._cancel()
+
+	def recalculate_current_qty(self, voucher_detail_no, sle_creation, add_new_sle=False):
+		for row in self.items:
+			if voucher_detail_no != row.name:
+				continue
+
+			if row.current_qty < 0:
+				return
+
+			val_rate = 0.0
+			current_qty = 0.0
+			if row.current_serial_and_batch_bundle:
+				current_qty = self.get_current_qty_for_serial_or_batch(row, sle_creation)
+			elif row.serial_no:
+				item_dict = get_stock_balance_for(
+					row.item_code,
+					row.warehouse,
+					self.posting_date,
+					self.posting_time,
+					row=row,
+					company=self.company,
+				)
+
+				current_qty = item_dict.get("qty")
+				row.current_serial_no = item_dict.get("serial_nos")
+				row.current_valuation_rate = item_dict.get("rate")
+				val_rate = item_dict.get("rate")
+			elif row.batch_no:
+				current_qty = get_batch_qty_for_stock_reco(
+					row.item_code,
+					row.warehouse,
+					row.batch_no,
+					self.posting_date,
+					self.posting_time,
+					self.name,
+					sle_creation,
+				)
+
+			precesion = row.precision("current_qty")
+			if flt(current_qty, precesion) != flt(row.current_qty, precesion):
+				if not row.serial_no:
+					val_rate = get_incoming_rate(
+						frappe._dict(
+							{
+								"item_code": row.item_code,
+								"warehouse": row.warehouse,
+								"qty": current_qty * -1,
+								"serial_and_batch_bundle": row.current_serial_and_batch_bundle,
+								"batch_no": row.batch_no,
+								"voucher_type": self.doctype,
+								"voucher_no": self.name,
+								"company": self.company,
+								"posting_date": self.posting_date,
+								"posting_time": self.posting_time,
+							}
+						)
+					)
+
+				row.current_valuation_rate = val_rate
+				row.current_qty = current_qty
+				row.db_set(
+					{
+						"current_qty": row.current_qty,
+						"current_valuation_rate": row.current_valuation_rate,
+						"current_amount": flt(row.current_qty * row.current_valuation_rate),
+					}
+				)
+
+			if add_new_sle and not frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_detail_no": row.name, "actual_qty": ("<", 0), "is_cancelled": 0},
+				"name",
+			):
+				if not row.current_serial_and_batch_bundle:
+					self.set_current_serial_and_batch_bundle(voucher_detail_no, save=True)
+					row.reload()
+
+				self.add_missing_stock_ledger_entry(row, voucher_detail_no, sle_creation)
 
 	def add_missing_stock_ledger_entry(self, row, voucher_detail_no, sle_creation):
 		if row.current_qty == 0:

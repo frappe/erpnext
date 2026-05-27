@@ -320,8 +320,9 @@ def clean_all_descriptions():
 
 @frappe.whitelist()
 def get_enable_stock_uom_editing():
-	return frappe.get_single_value(
+	return frappe.get_cached_value(
 		"Stock Settings",
+		None,
 		["allow_to_edit_stock_uom_qty_for_sales", "allow_to_edit_stock_uom_qty_for_purchase"],
 		as_dict=1,
 	)

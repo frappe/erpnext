@@ -551,9 +551,7 @@ frappe.ui.form.on("Asset", {
 	asset_type: function (frm) {
 		if (frm.doc.docstatus == 0) {
 			if (frm.doc.asset_type == "Composite Asset") {
-				if (!frm.doc.net_purchase_amount) {
-					frm.set_value("net_purchase_amount", 0);
-				}
+				frm.set_value("net_purchase_amount", 0);
 			} else {
 				frm.set_df_property("net_purchase_amount", "read_only", 0);
 			}

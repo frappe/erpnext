@@ -651,24 +651,19 @@ class SubcontractingInwardController:
 				).update_manufacturing_qty_fields()
 		elif self.purpose in ["Subcontracting Delivery", "Subcontracting Return"]:
 			fieldname = "delivered_qty" if self.purpose == "Subcontracting Delivery" else "returned_qty"
-			qty_map = defaultdict(lambda: defaultdict(float))
 			for item in self.items:
 				doctype = (
 					"Subcontracting Inward Order Item"
 					if not item.type and not item.is_legacy_scrap_item
 					else "Subcontracting Inward Order Secondary Item"
 				)
-				qty_map[doctype][item.scio_detail] += (
-					item.transfer_qty if self._action == "submit" else -item.transfer_qty
+				frappe.db.set_value(
+					doctype,
+					item.scio_detail,
+					fieldname,
+					frappe.get_value(doctype, item.scio_detail, fieldname)
+					+ (item.transfer_qty if self._action == "submit" else -item.transfer_qty),
 				)
-
-			for doctype, item_qty_map in qty_map.items():
-				table = frappe.qb.DocType(doctype)
-				field = table[fieldname]
-				doc_updates = {
-					scio_detail: {fieldname: field + qty} for scio_detail, qty in item_qty_map.items()
-				}
-				frappe.db.bulk_update(doctype, doc_updates, chunk_size=len(doc_updates))
 
 	def update_inward_order_received_items(self):
 		if self.subcontracting_inward_order:
@@ -684,18 +679,14 @@ class SubcontractingInwardController:
 						else -item.transfer_qty
 						for item in self.items
 					}
+					case_expr = Case()
 					table = frappe.qb.DocType("Subcontracting Inward Order Received Item")
-					doc_updates = {
-						scio_rm_name: {"returned_qty": table.returned_qty + qty}
-						for scio_rm_name, qty in scio_rm_names.items()
-					}
-					if doc_updates:
-						frappe.db.bulk_update(
-							"Subcontracting Inward Order Received Item",
-							doc_updates,
-							chunk_size=len(doc_updates),
-							update_modified=False,
-						)
+					for scio_rm_name, qty in scio_rm_names.items():
+						case_expr = case_expr.when(table.name == scio_rm_name, table.returned_qty + qty)
+
+					frappe.qb.update(table).set(table.returned_qty, case_expr).where(
+						(table.name.isin(list(scio_rm_names.keys()))) & (table.docstatus == 1)
+					).run()
 
 	def update_inward_order_received_items_for_raw_materials_receipt(self):
 		data = frappe._dict()
@@ -746,7 +737,9 @@ class SubcontractingInwardController:
 				fields=["rate", "name", "required_qty", "received_qty"],
 			)
 
-			doc_updates = {}
+			deleted_docs = []
+			table = frappe.qb.DocType("Subcontracting Inward Order Received Item")
+			case_expr_qty, case_expr_rate = Case(), Case()
 			for d in result:
 				current_qty = flt(data[d.name].transfer_qty) * (1 if self._action == "submit" else -1)
 				current_rate = flt(data[d.name].rate)
@@ -761,17 +754,16 @@ class SubcontractingInwardController:
 				)
 
 				if not d.required_qty and not d.received_qty:
+					deleted_docs.append(d.name)
 					frappe.delete_doc("Subcontracting Inward Order Received Item", d.name)
 				else:
-					doc_updates[d.name] = {"received_qty": d.received_qty, "rate": d.rate}
+					case_expr_qty = case_expr_qty.when(table.name == d.name, d.received_qty)
+					case_expr_rate = case_expr_rate.when(table.name == d.name, d.rate)
 
-			if doc_updates:
-				frappe.db.bulk_update(
-					"Subcontracting Inward Order Received Item",
-					doc_updates,
-					chunk_size=len(doc_updates),
-					update_modified=False,
-				)
+			if final_list := list(set(data.keys()) - set(deleted_docs)):
+				frappe.qb.update(table).set(table.received_qty, case_expr_qty).set(
+					table.rate, case_expr_rate
+				).where((table.name.isin(final_list)) & (table.docstatus == 1)).run()
 
 	def update_inward_order_received_items_for_manufacture(self):
 		customer_warehouse = frappe.get_cached_value(
@@ -823,8 +815,8 @@ class SubcontractingInwardController:
 		)
 
 		if data := data.run(as_dict=True):
-			used_item_wh = []
-			doc_updates = {}
+			deleted_docs, used_item_wh = [], []
+			case_expr = Case()
 			for d in data:
 				if not d.warehouse:
 					d.warehouse = next(
@@ -836,17 +828,15 @@ class SubcontractingInwardController:
 
 				qty = d.consumed_qty + item_code_wh[(d.rm_item_code, d.warehouse)]
 				if qty or d.is_customer_provided_item or not d.is_additional_item:
-					doc_updates[d.name] = {"consumed_qty": qty}
+					case_expr = case_expr.when((table.name == d.name), qty)
 				else:
+					deleted_docs.append(d.name)
 					frappe.delete_doc("Subcontracting Inward Order Received Item", d.name)
 
-			if doc_updates:
-				frappe.db.bulk_update(
-					"Subcontracting Inward Order Received Item",
-					doc_updates,
-					chunk_size=len(doc_updates),
-					update_modified=False,
-				)
+			if final_list := list(set([d.name for d in data]) - set(deleted_docs)):
+				frappe.qb.update(table).set(table.consumed_qty, case_expr).where(
+					(table.name.isin(final_list)) & (table.docstatus == 1)
+				).run()
 
 			main_item_code = next(fg for fg in self.items if fg.is_finished_item).item_code
 			for extra_item in [
@@ -918,25 +908,27 @@ class SubcontractingInwardController:
 							for d in result
 						}
 					)
-					doc_updates = {}
+					deleted_docs = []
+					case_expr = Case()
+					table = frappe.qb.DocType("Subcontracting Inward Order Secondary Item")
 					for key, value in secondary_items_dict.items():
 						if (
 							self._action == "cancel"
 							and value.produced_qty - abs(secondary_items.get(key)) == 0
 						):
+							deleted_docs.append(value.name)
 							frappe.delete_doc("Subcontracting Inward Order Secondary Item", value.name)
 						else:
-							doc_updates[value.name] = {
-								"produced_qty": value.produced_qty + secondary_items.get(key)
-							}
+							case_expr = case_expr.when(
+								table.name == value.name, value.produced_qty + secondary_items.get(key)
+							)
 
-					if doc_updates:
-						frappe.db.bulk_update(
-							"Subcontracting Inward Order Secondary Item",
-							doc_updates,
-							chunk_size=len(doc_updates),
-							update_modified=False,
-						)
+					if final_list := list(
+						set([v.name for v in secondary_items_dict.values()]) - set(deleted_docs)
+					):
+						frappe.qb.update(table).set(table.produced_qty, case_expr).where(
+							(table.name.isin(final_list)) & (table.docstatus == 1)
+						).run()
 
 				fg_item_code = next(fg for fg in self.items if fg.is_finished_item).item_code
 				for secondary_item in [

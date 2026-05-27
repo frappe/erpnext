@@ -1315,7 +1315,6 @@ def get_exploded_items(item_details, company, bom_no, include_non_stock_items, p
 			item_uom.conversion_factor,
 			item.safety_stock,
 			bom.item.as_("main_bom_item"),
-			bom.name.as_("main_bom"),
 		)
 		.where(
 			(bei.docstatus < 2)
@@ -1385,7 +1384,6 @@ def get_subitems(
 			item.purchase_uom,
 			item_uom.conversion_factor,
 			bom.item.as_("main_bom_item"),
-			bom.name.as_("main_bom"),
 			bom_item.is_phantom_item,
 		)
 		.where(

@@ -209,9 +209,7 @@ def create_variant(item, args, use_template_image=False):
 	variant_attributes = []
 
 	for d in template.attributes:
-		attribute_value = args.get(_(d.attribute)) or args.get(d.attribute)
-		if attribute_value:
-			variant_attributes.append({"attribute": d.attribute, "attribute_value": attribute_value})
+		variant_attributes.append({"attribute": d.attribute, "attribute_value": args.get(_(d.attribute))})
 
 	variant.set("attributes", variant_attributes)
 	copy_attributes_to_variant(template, variant)
@@ -230,12 +228,6 @@ def enqueue_multiple_variant_creation(item, args, use_template_image=False):
 	# There can be innumerable attribute combinations, enqueue
 	if isinstance(args, str):
 		variants = json.loads(args)
-	else:
-		variants = args
-	variants = {key: values for key, values in variants.items() if values}
-	if not variants:
-		frappe.throw(_("Please select at least one attribute value"))
-
 	total_variants = 1
 	for key in variants:
 		total_variants *= len(variants[key])
@@ -259,7 +251,6 @@ def create_multiple_variants(item, args, use_template_image=False):
 	count = 0
 	if isinstance(args, str):
 		args = json.loads(args)
-	args = {key: values for key, values in args.items() if values}
 
 	template_item = frappe.get_doc("Item", item)
 	args_set = generate_keyed_value_combinations(args)
@@ -294,9 +285,6 @@ def generate_keyed_value_combinations(args):
 
 	"""
 	# Return empty list if empty
-	if not args:
-		return []
-	args = {key: values for key, values in args.items() if values}
 	if not args:
 		return []
 

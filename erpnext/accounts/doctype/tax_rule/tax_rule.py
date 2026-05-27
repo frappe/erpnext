@@ -14,7 +14,6 @@ from frappe.utils import cstr
 from frappe.utils.nestedset import get_root_of
 
 from erpnext.setup.doctype.customer_group.customer_group import get_parent_customer_groups
-from erpnext.setup.doctype.supplier_group.supplier_group import get_parent_supplier_groups
 
 
 class IncorrectCustomerGroup(frappe.ValidationError):
@@ -177,44 +176,38 @@ def get_party_details(party, party_type, args=None):
 def get_tax_template(posting_date, args):
 	"""Get matching tax rule"""
 	args = frappe._dict(args)
-
-	TaxRule = DocType("Tax Rule")
-	query = frappe.qb.from_(TaxRule).select("*")
+	conditions = []
 
 	if posting_date:
-		query = query.where(
-			(TaxRule.from_date.isnull() | (TaxRule.from_date <= posting_date))
-			& (TaxRule.to_date.isnull() | (TaxRule.to_date >= posting_date))
+		conditions.append(
+			f"""(from_date is null or from_date <= '{posting_date}')
+			and (to_date is null or to_date >= '{posting_date}')"""
 		)
 	else:
-		query = query.where(TaxRule.from_date.isnull() & TaxRule.to_date.isnull())
+		conditions.append("(from_date is null) and (to_date is null)")
 
-	def get_group_ancestors(doctype, get_parents, value):
-		if not value:
-			value = get_root_of(doctype)
-		return [""] + [d.name for d in get_parents(value)]
-
-	group_fields = {
-		"customer_group": ("Customer Group", get_parent_customer_groups),
-		"supplier_group": ("Supplier Group", get_parent_supplier_groups),
-	}
-
-	args.setdefault("tax_category", "")
+	conditions.append(
+		"ifnull(tax_category, '') = {}".format(frappe.db.escape(cstr(args.get("tax_category")), False))
+	)
+	if "tax_category" in args.keys():
+		del args["tax_category"]
 
 	for key, value in args.items():
 		if key == "use_for_shopping_cart":
-			query = query.where(TaxRule.use_for_shopping_cart == value)
-		elif key == "tax_category":
-			query = query.where(IfNull(TaxRule.tax_category, "") == (value or ""))
-		elif key in group_fields:
-			doctype, get_parents = group_fields[key]
-			query = query.where(
-				IfNull(TaxRule[key], "").isin(get_group_ancestors(doctype, get_parents, value))
-			)
+			conditions.append(f"use_for_shopping_cart = {1 if value else 0}")
+		elif key == "customer_group":
+			if not value:
+				value = get_root_of("Customer Group")
+			customer_group_condition = get_customer_group_condition(value)
+			conditions.append(f"ifnull({key}, '') in ('', {customer_group_condition})")
 		else:
-			query = query.where(IfNull(TaxRule[key], "").isin(["", value or ""]))
+			conditions.append(f"ifnull({key}, '') in ('', {frappe.db.escape(cstr(value))})")
 
-	tax_rule = query.run(as_dict=True)
+	tax_rule = frappe.db.sql(
+		"""select * from `tabTax Rule`
+		where {}""".format(" and ".join(conditions)),
+		as_dict=True,
+	)
 
 	if not tax_rule:
 		return None
@@ -243,3 +236,11 @@ def get_tax_template(posting_date, args):
 		return None
 
 	return tax_template
+
+
+def get_customer_group_condition(customer_group):
+	condition = ""
+	customer_groups = ["%s" % (frappe.db.escape(d.name)) for d in get_parent_customer_groups(customer_group)]
+	if customer_groups:
+		condition = ",".join(["%s"] * len(customer_groups)) % (tuple(customer_groups))
+	return condition
