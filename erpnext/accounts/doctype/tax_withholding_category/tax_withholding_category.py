@@ -48,7 +48,7 @@ class TaxWithholdingCategory(Document):
 		for d in self.get("rates"):
 			if getdate(d.from_date) >= getdate(d.to_date):
 				frappe.throw(_("Row #{0}: From Date cannot be before To Date").format(d.idx))
-			group_rates[d.tax_withholding_group].append(d)
+			group_rates[d.tax_withholding_group or ""].append(d)
 
 		# Validate overlapping dates within each group
 		for group, rates in group_rates.items():
@@ -92,10 +92,9 @@ class TaxWithholdingCategory(Document):
 
 	def get_applicable_tax_row(self, posting_date, tax_withholding_group):
 		for row in self.rates:
-			if (
-				getdate(row.from_date) <= getdate(posting_date) <= getdate(row.to_date)
-				and row.tax_withholding_group == tax_withholding_group
-			):
+			if getdate(row.from_date) <= getdate(posting_date) <= getdate(row.to_date) and (
+				row.tax_withholding_group or ""
+			) == (tax_withholding_group or ""):
 				return row
 
 		frappe.throw(_("No Tax Withholding data found for the current posting date."))
