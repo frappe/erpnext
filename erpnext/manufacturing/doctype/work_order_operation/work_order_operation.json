@@ -196,10 +196,11 @@
    "read_only": 1
   },
   {
+   "default": "1",
    "fieldname": "batch_size",
    "fieldtype": "Float",
    "label": "Batch Size",
-   "read_only": 1
+   "non_negative": 1
   },
   {
    "fieldname": "sequence_id",
@@ -316,7 +317,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-05-20 13:01:21.827200",
+ "modified": "2026-05-25 17:15:12.038470",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order Operation",
