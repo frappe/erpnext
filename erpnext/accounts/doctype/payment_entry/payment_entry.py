@@ -292,6 +292,30 @@ class PaymentEntry(AccountsController):
 			alert=True,
 		)
 
+	def before_cancel(self):
+		from erpnext.accounts.doctype.bank_transaction.bank_transaction import (
+			get_reconciled_bank_transactions,
+		)
+
+		linked_bank_transactions = get_reconciled_bank_transactions(self.doctype, self.name)
+
+		active_bank_transactions = []
+		if linked_bank_transactions:
+			active_bank_transactions = frappe.get_all(
+				"Bank Transaction",
+				filters={"name": ("in", linked_bank_transactions), "docstatus": 1},
+				pluck="name",
+			)
+		if active_bank_transactions:
+			frappe.throw(
+				_(
+					"Payment Entry {0} is reconciled with Bank Transaction(s): {1}. Please unreconcile it before cancelling."
+				).format(
+					frappe.bold(self.name),
+					", ".join(frappe.bold(bt) for bt in active_bank_transactions),
+				)
+			)
+
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
 			"GL Entry",
