@@ -15,7 +15,11 @@ from frappe.utils.nestedset import get_descendants_of
 import erpnext
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
-from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots, get_average_age
+from erpnext.stock.report.stock_ageing.stock_ageing import (
+	FIFOSlots,
+	get_average_age,
+	normalize_fifo_queue,
+)
 from erpnext.stock.utils import add_additional_uom_columns
 
 
@@ -123,6 +127,7 @@ class StockBalanceReport:
 				stock_ageing_data = {"average_age": 0, "earliest_age": 0, "latest_age": 0}
 				if opening_fifo_queue:
 					fifo_queue = sorted(filter(_func, opening_fifo_queue), key=_func)
+					fifo_queue = normalize_fifo_queue(fifo_queue)
 					if not fifo_queue:
 						continue
 

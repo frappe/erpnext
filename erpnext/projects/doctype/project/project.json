@@ -176,6 +176,7 @@
    "fieldtype": "Link",
    "in_global_search": 1,
    "label": "Customer",
+   "no_copy": 1,
    "oldfieldname": "customer",
    "oldfieldtype": "Link",
    "options": "Customer",
@@ -190,6 +191,7 @@
    "fieldname": "sales_order",
    "fieldtype": "Link",
    "label": "Sales Order",
+   "no_copy": 1,
    "options": "Sales Order"
   },
   {
@@ -462,7 +464,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
- "modified": "2025-08-21 17:57:58.314809",
+ "modified": "2026-05-22 16:45:50.762759",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

@@ -1174,13 +1174,21 @@ class StockEntry(StockController):
 		)
 
 	def get_basic_rate_for_repacked_items(self, finished_item_qty, outgoing_items_cost):
-		finished_items = [d.item_code for d in self.get("items") if d.is_finished_item]
+		finished_items = [
+			d.item_code for d in self.get("items") if d.is_finished_item and not d.set_basic_rate_manually
+		]
 		if len(finished_items) == 1:
 			return flt(outgoing_items_cost / finished_item_qty)
 		else:
 			unique_finished_items = set(finished_items)
-			if len(unique_finished_items) == 1:
-				total_fg_qty = sum([flt(d.transfer_qty) for d in self.items if d.is_finished_item])
+			if unique_finished_items:
+				total_fg_qty = sum(
+					[
+						flt(d.transfer_qty)
+						for d in self.items
+						if d.is_finished_item and not d.set_basic_rate_manually
+					]
+				)
 				return flt(outgoing_items_cost / total_fg_qty)
 
 	def get_basic_rate_for_manufactured_item(self, finished_item_qty, outgoing_items_cost=0) -> float:
@@ -3360,6 +3368,33 @@ def get_work_order_details(work_order, company):
 		"fg_warehouse": work_order.fg_warehouse,
 		"fg_completed_qty": pending_qty_to_produce,
 	}
+
+
+def get_consumed_operating_cost(work_order, bom_no, operation_id=None):
+	table = frappe.qb.DocType("Stock Entry")
+	child_table = frappe.qb.DocType("Landed Cost Taxes and Charges")
+	query = (
+		frappe.qb.from_(child_table)
+		.join(table)
+		.on(child_table.parent == table.name)
+		.select(
+			Sum(child_table.amount).as_("consumed_cost"),
+			Sum(child_table.qty).as_("consumed_qty"),
+		)
+		.where(
+			(table.docstatus == 1)
+			& (table.work_order == work_order)
+			& (table.purpose == "Manufacture")
+			& (table.bom_no == bom_no)
+			& (child_table.has_operating_cost == 1)
+		)
+	)
+
+	if operation_id:
+		query = query.where(child_table.operation_id == operation_id)
+
+	data = query.run(as_dict=True)
+	return data[0] if data else frappe._dict()
 
 
 def get_operating_cost_per_unit(work_order=None, bom_no=None):
