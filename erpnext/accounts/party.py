@@ -49,6 +49,25 @@ SALES_TRANSACTION_TYPES = {
 }
 TRANSACTION_TYPES = PURCHASE_TRANSACTION_TYPES | SALES_TRANSACTION_TYPES
 
+# Party-derived fields that must NOT be auto-copied by `get_mapped_doc` when the
+# source and target documents belong to different parties (e.g. Sales Order →
+# Purchase Order or inter-company Sales Invoice → Purchase Invoice).
+CROSS_PARTY_FIELD_NO_MAP = [
+	"tax_category",
+	"tax_id",
+	"tax_withholding_category",
+	"taxes_and_charges",
+	"address_display",
+	"contact_display",
+	"contact_mobile",
+	"contact_email",
+	"contact_person",
+	"shipping_address",
+	"dispatch_address",
+	"payment_terms_template",
+	"language",
+]
+
 
 class DuplicatePartyAccountError(frappe.ValidationError):
 	pass
