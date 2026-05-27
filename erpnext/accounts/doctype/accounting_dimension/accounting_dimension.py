@@ -266,7 +266,6 @@ def get_dimension_with_children(doctype, dimensions):
 	all_dimensions = []
 
 	for dimension in dimensions:
-		# TODO: can be optimized by fetching lft and rgt for all dimensions in one query and then filtering in python
 		lft, rgt = frappe.db.get_value(doctype, dimension, ["lft", "rgt"])
 		children = frappe.get_all(doctype, filters={"lft": [">=", lft], "rgt": ["<=", rgt]}, order_by="lft")
 		all_dimensions += [c.name for c in children]
@@ -340,12 +339,9 @@ def create_accounting_dimensions_for_doctype(doctype):
 
 def get_dimension_fieldname(dim_doctype: str) -> str:
 	"""
-	Return the GL Entry fieldname for a given dimension DocType.
-
-	- For "Cost Center" and "Project", return the scrubbed DocType as fieldname.
+	Return the `GL Entry` fieldname for a given dimension.
 	"""
 	if dim_doctype in ("Cost Center", "Project"):
 		return frappe.scrub(dim_doctype)
 
-	fieldname = frappe.db.get_value("Accounting Dimension", {"document_type": dim_doctype}, "fieldname")
-	return fieldname or frappe.scrub(dim_doctype)
+	return frappe.db.get_value("Accounting Dimension", {"document_type": dim_doctype}, "fieldname")
