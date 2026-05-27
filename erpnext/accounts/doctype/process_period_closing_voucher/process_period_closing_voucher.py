@@ -137,9 +137,10 @@ def pause_pcv_processing(docname: str):
 	ppcv = qb.DocType("Process Period Closing Voucher")
 	qb.update(ppcv).set(ppcv.status, "Paused").where(ppcv.name.eq(docname)).run()
 
+	# If a date is stuck in 'Running' state, this will allow it to procced.
 	if queued_dates := frappe.db.get_all(
 		"Process Period Closing Voucher Detail",
-		filters={"parent": docname, "status": "Queued"},
+		filters={"parent": docname, "status": ["in", ["Queued", "Running"]]},
 		pluck="name",
 	):
 		ppcvd = qb.DocType("Process Period Closing Voucher Detail")
@@ -173,6 +174,9 @@ def resume_pcv_processing(docname: str):
 		ppcvd = qb.DocType("Process Period Closing Voucher Detail")
 		qb.update(ppcvd).set(ppcvd.status, "Queued").where(ppcvd.name.isin(paused_dates)).run()
 		start_pcv_processing(docname)
+	else:
+		# If a parent doc is stuck in 'Running' state, will allow it to proceed.
+		schedule_next_date(docname)
 
 
 def update_default_dimensions(dimension_fields, gl_entry, dimension_values):
@@ -288,7 +292,21 @@ def schedule_next_date(docname: str):
 		)
 		# Ensure both normal and opening balances are processed for all dates
 		if total_no_of_dates == completed:
-			summarize_and_post_ledger_entries(docname)
+			from erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation import (
+				is_job_running,
+			)
+
+			job_name = f"summarize_{docname}"
+			if not is_job_running(job_name):
+				frappe.enqueue(
+					method="erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.summarize_and_post_ledger_entries",
+					queue="long",
+					timeout="3600",
+					is_async=True,
+					job_name=job_name,
+					enqueue_after_commit=True,
+					docname=docname,
+				)
 
 
 def make_dict_json_compliant(dimension_wise_balance) -> dict:

@@ -3,7 +3,8 @@
 
 import frappe
 from frappe import qb
-from frappe.utils import nowdate
+from frappe.query_builder.functions import Count, Sum
+from frappe.utils import add_days, nowdate
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
@@ -90,6 +91,7 @@ class TestPaymentLedgerEntry(ERPNextTestSuite):
 			posting_date = nowdate()
 
 		sinv = create_sales_invoice(
+			posting_date=posting_date,
 			qty=qty,
 			rate=rate,
 			company=self.company,
@@ -531,3 +533,82 @@ class TestPaymentLedgerEntry(ERPNextTestSuite):
 		# with references removed, deletion should be possible
 		so.delete()
 		self.assertRaises(frappe.DoesNotExistError, frappe.get_doc, so.doctype, so.name)
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"enable_immutable_ledger": 1},
+	)
+	def test_reverse_entries_on_cancel_for_immutable_ledger(self):
+		invoice_posting_date = add_days(nowdate(), -5)
+		gle = qb.DocType("GL Entry")
+		ple = qb.DocType("Payment Ledger Entry")
+
+		si = self.create_sales_invoice(qty=1, rate=100, posting_date=invoice_posting_date)
+
+		gles_before = (
+			qb.from_(gle)
+			.select(
+				Count(gle.name),
+			)
+			.where((gle.voucher_type == si.doctype) & (gle.voucher_no == si.name) & (gle.is_cancelled == 0))
+			.run()[0][0]
+		)
+		ples_before = (
+			qb.from_(ple)
+			.select(
+				Count(ple.name),
+			)
+			.where((ple.voucher_type == si.doctype) & (ple.voucher_no == si.name) & (ple.delinked.eq(0)))
+			.run()[0][0]
+		)
+
+		si.cancel()
+
+		gles_after = (
+			qb.from_(gle)
+			.select(Count(gle.account))
+			.where((gle.voucher_type == si.doctype) & (gle.voucher_no == si.name) & (gle.is_cancelled == 0))
+			.run()[0][0]
+		)
+		self.assertEqual(gles_after, gles_before * 2)
+
+		ples_after = (
+			qb.from_(ple)
+			.select(
+				Count(ple.name),
+			)
+			.where((ple.voucher_type == si.doctype) & (ple.voucher_no == si.name) & (ple.delinked.eq(0)))
+			.run()[0][0]
+		)
+		self.assertEqual(ples_after, ples_before * 2)
+
+		# assert debit/credit are reversed
+		gl_entries = (
+			qb.from_(gle)
+			.select(gle.account, Sum(gle.debit).as_("total_debit"), Sum(gle.credit).as_("total_credit"))
+			.where((gle.voucher_type == si.doctype) & (gle.voucher_no == si.name) & (gle.is_cancelled == 0))
+			.groupby(gle.account)
+			.run(as_dict=True)
+		)
+		for gl in gl_entries:
+			with self.subTest(gl=gl):
+				self.assertEqual(gl.total_debit, gl.total_credit)
+
+		# assert amounts are reversed
+		pl_entries = (
+			qb.from_(ple)
+			.select(ple.account, Sum(ple.amount).as_("total_amount"))
+			.where((ple.voucher_type == si.doctype) & (ple.voucher_no == si.name) & (ple.delinked == 0))
+			.groupby(ple.account)
+			.run(as_dict=True)
+		)
+		for pl in pl_entries:
+			with self.subTest(pl=pl):
+				self.assertEqual(pl.total_amount, 0)
+
+		self.assertFalse(
+			frappe.db.exists(
+				"Payment Ledger Entry",
+				{"voucher_type": si.doctype, "voucher_no": si.name, "delinked": 1},
+			)
+		)

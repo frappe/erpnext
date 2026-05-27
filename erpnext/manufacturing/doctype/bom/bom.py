@@ -1638,11 +1638,11 @@ def add_non_stock_items_cost(stock_entry, work_order, expense_account, job_card=
 		)
 
 
-def add_operating_cost_component_wise(
-	stock_entry, work_order=None, consumed_operating_cost=None, op_expense_account=None, job_card=None
-):
+def add_operating_cost_component_wise(stock_entry, work_order=None, op_expense_account=None, job_card=None):
 	if not work_order:
 		return False
+
+	from erpnext.stock.doctype.stock_entry.stock_entry import get_consumed_operating_cost
 
 	cost_added = False
 	for row in work_order.operations:
@@ -1661,18 +1661,32 @@ def add_operating_cost_component_wise(
 			},
 		)
 
+		consumed_operating_cost = (
+			get_consumed_operating_cost(work_order.name, stock_entry.bom_no, row.name) or []
+		)
 		for wc in workstation_cost:
 			expense_account = (
 				get_component_account(wc.operating_component, stock_entry.company) or op_expense_account
 			)
+			consumed_op_cost = next(
+				(
+					cost
+					for cost in consumed_operating_cost
+					if cost.get("operating_component") == wc.operating_component
+				),
+				{},
+			)
 			actual_cp_operating_cost = flt(
-				flt(wc.operating_cost) * flt(flt(row.actual_operation_time) / 60.0) - consumed_operating_cost,
+				flt(wc.operating_cost) * flt(flt(row.actual_operation_time) / 60.0)
+				- flt(consumed_op_cost.get("consumed_cost")),
 				row.precision("actual_operating_cost"),
 			)
 
-			per_unit_cost = flt(actual_cp_operating_cost) / flt(row.completed_qty - work_order.produced_qty)
+			remaining_qty = row.completed_qty - consumed_op_cost.get("consumed_qty", 0)
+			per_unit_cost = actual_cp_operating_cost / (remaining_qty or 1)
+			operating_cost = per_unit_cost * stock_entry.fg_completed_qty
 
-			if per_unit_cost:
+			if actual_cp_operating_cost:
 				stock_entry.append(
 					"additional_costs",
 					{
@@ -1680,8 +1694,14 @@ def add_operating_cost_component_wise(
 						"description": _("{0} Operating Cost for operation {1}").format(
 							wc.operating_component, row.operation
 						),
-						"amount": per_unit_cost * flt(stock_entry.fg_completed_qty),
+						"amount": flt(
+							min(operating_cost, actual_cp_operating_cost),
+							frappe.get_precision("Landed Cost Taxes and Charges", "amount"),
+						),
 						"has_operating_cost": 1,
+						"operation_id": row.name,
+						"operating_component": wc.operating_component,
+						"qty": min(remaining_qty, stock_entry.fg_completed_qty),
 					},
 				)
 
@@ -1699,17 +1719,15 @@ def get_component_account(parent, company):
 
 def add_operations_cost(stock_entry, work_order=None, expense_account=None, job_card=None):
 	from erpnext.stock.doctype.stock_entry.stock_entry import (
-		get_consumed_operating_cost,
-		get_operating_cost_per_unit,
+		get_remaining_operating_cost,
 	)
 
-	operating_cost_per_unit = get_operating_cost_per_unit(work_order, stock_entry.bom_no)
+	remaining_operating_cost = get_remaining_operating_cost(work_order, stock_entry.bom_no)
 
-	if operating_cost_per_unit:
+	if remaining_operating_cost:
 		cost_added = add_operating_cost_component_wise(
 			stock_entry,
 			work_order,
-			get_consumed_operating_cost(work_order.name, stock_entry.bom_no),
 			expense_account,
 			job_card=job_card,
 		)
@@ -1720,7 +1738,10 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None, job_
 				{
 					"expense_account": expense_account,
 					"description": _("Operating Cost as per Work Order / BOM"),
-					"amount": operating_cost_per_unit * flt(stock_entry.fg_completed_qty),
+					"amount": flt(
+						remaining_operating_cost * stock_entry.fg_completed_qty,
+						frappe.get_precision("Landed Cost Taxes and Charges", "amount"),
+					),
 					"has_operating_cost": 1,
 				},
 			)
