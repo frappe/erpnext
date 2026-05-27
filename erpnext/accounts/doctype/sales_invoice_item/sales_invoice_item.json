@@ -947,7 +947,8 @@
    "fieldtype": "Currency",
    "label": "Distributed Discount Amount",
    "options": "currency",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "available_quantity_section",
