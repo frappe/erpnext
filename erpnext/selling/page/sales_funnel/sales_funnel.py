@@ -102,6 +102,7 @@ def get_opp_by(by_field, from_date, to_date, company):
 				},
 			)
 			for x in opportunities
+			if x.get(by_field)
 		]
 
 		summary = {}
