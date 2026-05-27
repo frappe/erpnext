@@ -3638,12 +3638,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 			args = {
 				"source_dt": "Stock Entry Detail",
 				"target_field": "transferred_qty",
-				"target_ref_field": "qty",
+				"target_ref_field": "transfer_qty",
 				"target_dt": "Stock Entry Detail",
 				"join_field": "ste_detail",
 				"target_parent_dt": "Stock Entry",
 				"target_parent_field": "per_transferred",
-				"source_field": "qty",
+				"source_field": "transfer_qty",
 				"percent_join_field": "against_stock_entry",
 			}
 
