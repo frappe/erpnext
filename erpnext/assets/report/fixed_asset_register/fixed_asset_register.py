@@ -426,12 +426,16 @@ def get_purchase_invoice_supplier_map():
 
 def get_columns(filters):
 	if filters.get("group_by") in ["Asset Category", "Location"]:
+		group_by = filters.get("group_by")
+		group_by_label = {"Asset Category": _("Asset Category"), "Location": _("Location")}.get(
+			group_by, group_by
+		)
 		return [
 			{
-				"label": _("{}").format(filters.get("group_by")),
+				"label": group_by_label,
 				"fieldtype": "Link",
-				"fieldname": frappe.scrub(filters.get("group_by")),
-				"options": filters.get("group_by"),
+				"fieldname": frappe.scrub(group_by),
+				"options": group_by,
 				"width": 216,
 			},
 			{

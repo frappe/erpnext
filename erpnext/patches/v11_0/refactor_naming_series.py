@@ -105,13 +105,13 @@ def get_series():
 			continue
 		if not frappe.get_meta(doctype).has_field("naming_series"):
 			continue
-		series_to_preserve = list(filter(None, get_series_to_preserve(doctype)))
+		series_to_preserve = [series for series in get_series_to_preserve(doctype) if series]
 		default_series = get_default_series(doctype)
 
 		if not series_to_preserve:
 			continue
 		existing_series = (frappe.get_meta(doctype).get_field("naming_series").options or "").split("\n")
-		existing_series = list(filter(None, [d.strip() for d in existing_series]))
+		existing_series = [series.strip() for series in existing_series if series.strip()]
 
 		# set naming series property setter
 		series_to_preserve = list(set(series_to_preserve + existing_series))

@@ -46,9 +46,9 @@ def search_by_term(search_term, warehouse, price_list):
 	}
 
 	if barcode:
-		barcode_info = next(filter(lambda x: x.barcode == barcode, item_doc.get("barcodes", [])), None)
+		barcode_info = next((row for row in item_doc.get("barcodes", []) if row.barcode == barcode), None)
 		if barcode_info and barcode_info.uom:
-			uom = next(filter(lambda x: x.uom == barcode_info.uom, item_doc.uoms), {})
+			uom = next((row for row in item_doc.uoms if row.uom == barcode_info.uom), {})
 			item.update(
 				{
 					"uom": barcode_info.uom,

@@ -243,7 +243,7 @@ class Deferred_Invoice:
 			inv_total[x.key] = x.total
 			inv_total.indent = 0
 		ret_data.append(inv_total)
-		list(map(lambda item: ret_data.append(item.report_data()), self.items))
+		ret_data.extend(item.report_data() for item in self.items)
 		return ret_data
 
 

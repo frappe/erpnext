@@ -426,7 +426,7 @@ frappe.ui.form.on("Shipment", {
 	remove_email_row: function (frm, table, fieldname) {
 		$.each(frm.doc[table] || [], function (i, detail) {
 			if (detail.email === fieldname) {
-				cur_frm.get_field(table).grid.grid_rows[i].remove();
+				frm.get_field(table).grid.grid_rows[i].remove();
 			}
 		});
 	},

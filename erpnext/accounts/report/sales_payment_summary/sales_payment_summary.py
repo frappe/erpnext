@@ -177,21 +177,21 @@ def get_sales_invoice_data(filters):
 def get_mode_of_payments(filters):
 	mode_of_payments = {}
 	invoice_list = get_invoices(filters)
-	invoice_list_names = ",".join("'" + invoice["name"] + "'" for invoice in invoice_list)
+	invoice_list_names = tuple(invoice["name"] for invoice in invoice_list)
 	if invoice_list:
 		inv_mop = frappe.db.sql(
-			f"""select a.owner,a.posting_date, ifnull(b.mode_of_payment, '') as mode_of_payment
+			"""select a.owner,a.posting_date, ifnull(b.mode_of_payment, '') as mode_of_payment
 			from `tabSales Invoice` a, `tabSales Invoice Payment` b
 			where a.name = b.parent
 			and a.docstatus = 1
-			and a.name in ({invoice_list_names})
+			and a.name in %(invoice_list_names)s
 			union
 			select a.owner,a.posting_date, ifnull(b.mode_of_payment, '') as mode_of_payment
 			from `tabSales Invoice` a, `tabPayment Entry` b,`tabPayment Entry Reference` c
 			where a.name = c.reference_name
 			and b.name = c.parent
 			and b.docstatus = 1
-			and a.name in ({invoice_list_names})
+			and a.name in %(invoice_list_names)s
 			union
 			select a.owner, a.posting_date,
 			ifnull(a.voucher_type,'') as mode_of_payment
@@ -199,8 +199,9 @@ def get_mode_of_payments(filters):
 			where a.name = b.parent
 			and a.docstatus = 1
 			and b.reference_type = 'Sales Invoice'
-			and b.reference_name in ({invoice_list_names})
+			and b.reference_name in %(invoice_list_names)s
 			""",
+			{"invoice_list_names": invoice_list_names},
 			as_dict=1,
 		)
 		for d in inv_mop:
@@ -222,10 +223,10 @@ def get_invoices(filters):
 def get_mode_of_payment_details(filters):
 	mode_of_payment_details = {}
 	invoice_list = get_invoices(filters)
-	invoice_list_names = ",".join("'" + invoice["name"] + "'" for invoice in invoice_list)
+	invoice_list_names = tuple(invoice["name"] for invoice in invoice_list)
 	if invoice_list:
 		inv_mop_detail = frappe.db.sql(
-			f"""
+			"""
 			select t.owner,
 			       t.posting_date,
 				   t.mode_of_payment,
@@ -236,7 +237,7 @@ def get_mode_of_payment_details(filters):
 				from `tabSales Invoice` a, `tabSales Invoice Payment` b
 				where a.name = b.parent
 				and a.docstatus = 1
-				and a.name in ({invoice_list_names})
+				and a.name in %(invoice_list_names)s
 				group by a.owner, a.posting_date, mode_of_payment
 				union
 				select a.owner,a.posting_date,
@@ -245,7 +246,7 @@ def get_mode_of_payment_details(filters):
 				where a.name = c.reference_name
 				and b.name = c.parent
 				and b.docstatus = 1
-				and a.name in ({invoice_list_names})
+				and a.name in %(invoice_list_names)s
 				group by a.owner, a.posting_date, mode_of_payment
 				union
 				select a.owner, a.posting_date,
@@ -254,23 +255,25 @@ def get_mode_of_payment_details(filters):
 				where a.name = b.parent
 				and a.docstatus = 1
 				and b.reference_type = 'Sales Invoice'
-				and b.reference_name in ({invoice_list_names})
+				and b.reference_name in %(invoice_list_names)s
 				group by a.owner, a.posting_date, mode_of_payment
 			) t
 			group by t.owner, t.posting_date, t.mode_of_payment
 			""",
+			{"invoice_list_names": invoice_list_names},
 			as_dict=1,
 		)
 
 		inv_change_amount = frappe.db.sql(
-			f"""select a.owner, a.posting_date,
+			"""select a.owner, a.posting_date,
 			ifnull(b.mode_of_payment, '') as mode_of_payment, sum(a.base_change_amount) as change_amount
 			from `tabSales Invoice` a, `tabSales Invoice Payment` b
 			where a.name = b.parent
-			and a.name in ({invoice_list_names})
+			and a.name in %(invoice_list_names)s
 			and b.type = 'Cash'
 			and a.base_change_amount > 0
 			group by a.owner, a.posting_date, mode_of_payment""",
+			{"invoice_list_names": invoice_list_names},
 			as_dict=1,
 		)
 

@@ -285,8 +285,8 @@ class JournalEntry(AccountsController):
 		if self.flags.get("ignore_reposting_on_reconciliation"):
 			return
 
-		self.needs_repost = self.check_if_fields_updated(fields_to_check=[], child_tables={"accounts": []})
-		if self.needs_repost:
+		needs_repost = self.check_if_fields_updated(fields_to_check=[], child_tables={"accounts": []})
+		if needs_repost:
 			self.validate_for_repost()
 			self.repost_accounting_entries()
 

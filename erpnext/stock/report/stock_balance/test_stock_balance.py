@@ -34,7 +34,7 @@ class TestStockBalance(ERPNextTestSuite):
 			self.assertEqual(v, actual[k], msg=f"{expected=}\n{actual=}")
 
 	def generate_stock_ledger(self, item_code: str, movements):
-		for movement in map(_dict, movements):
+		for movement in [_dict(movement) for movement in movements]:
 			if "to_warehouse" not in movement:
 				movement.to_warehouse = "_Test Warehouse - _TC"
 			make_stock_entry(item_code=item_code, **movement)

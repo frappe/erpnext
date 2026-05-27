@@ -57,7 +57,7 @@ class ModeofPayment(Document):
 				WHERE sip.parenttype = 'POS Profile' and sip.mode_of_payment = %s""",
 				(self.name),
 			)
-			pos_profiles = list(map(lambda x: x[0], pos_profiles))
+			pos_profiles = [x[0] for x in pos_profiles]
 
 			if pos_profiles:
 				message = _(

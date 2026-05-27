@@ -77,6 +77,7 @@ def start_merge(docname):
 				frappe.publish_realtime(
 					"ledger_merge_progress",
 					{"ledger_merge": ledger_merge.name, "current": successful_merges, "total": total},
+					user=frappe.session.user,
 				)
 			except Exception:
 				if not frappe.in_test:
@@ -90,4 +91,6 @@ def start_merge(docname):
 				else:
 					ledger_merge.db_set("status", "Error")
 
-	frappe.publish_realtime("ledger_merge_refresh", {"ledger_merge": ledger_merge.name})
+	frappe.publish_realtime(
+		"ledger_merge_refresh", {"ledger_merge": ledger_merge.name}, user=frappe.session.user
+	)

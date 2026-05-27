@@ -1007,9 +1007,7 @@ class JobCard(Document):
 				"Kindly cancel the Manufacturing Entries first against the work order {0}."
 			).format(frappe.bold(get_link_to_form("Work Order", self.work_order)))
 
-			frappe.throw(
-				_("{0} {1}").format(first_part_msg, second_part_msg), JobCardCancelError, title=_("Error")
-			)
+			frappe.throw(f"{first_part_msg} {second_part_msg}", JobCardCancelError, title=_("Error"))
 
 	def update_work_order_data(self, for_quantity, process_loss_qty, pending_qty, time_in_mins, wo):
 		workstation_hour_rate = frappe.get_value("Workstation", self.workstation, "hour_rate")
@@ -1340,10 +1338,16 @@ class JobCard(Document):
 			frappe.throw(_("You can't make any changes to Job Card since Work Order is closed."))
 
 	def set_employees(self):
-		self.employee = []
+		employees = []
+		seen = set()
 		for item in self.time_logs:
-			if not any(d.employee == item.employee for d in self.employee):
-				self.append("employee", {"employee": item.employee, "completed_qty": 0.0})
+			if item.employee not in seen:
+				employees.append({"employee": item.employee, "completed_qty": 0.0})
+				seen.add(item.employee)
+
+		self.set("employee", [])
+		for employee in employees:
+			self.append("employee", employee)
 
 	def is_work_order_closed(self):
 		if self.work_order:

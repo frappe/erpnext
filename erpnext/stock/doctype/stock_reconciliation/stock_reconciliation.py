@@ -555,7 +555,7 @@ class StockReconciliation(StockController):
 				self.calculate_difference_amount(item, item_dict)
 				return True
 
-		items = list(filter(lambda d: _changed(d), self.items))
+		items = [item for item in self.items if _changed(item)]
 
 		if not items:
 			frappe.throw(

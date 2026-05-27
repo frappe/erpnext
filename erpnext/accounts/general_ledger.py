@@ -312,17 +312,17 @@ def merge_similar_entries(gl_map, precision=None):
 		)
 
 	# filter zero debit and credit entries
-	merged_gl_map = filter(
-		lambda x: flt(x.debit, precision) != 0
-		or flt(x.credit, precision) != 0
+	merged_gl_map = [
+		entry
+		for entry in merged_gl_map
+		if flt(entry.debit, precision) != 0
+		or flt(entry.credit, precision) != 0
 		or (
-			x.voucher_type == "Journal Entry"
-			and frappe.get_cached_value("Journal Entry", x.voucher_no, "voucher_type")
+			entry.voucher_type == "Journal Entry"
+			and frappe.get_cached_value("Journal Entry", entry.voucher_no, "voucher_type")
 			== "Exchange Gain Or Loss"
-		),
-		merged_gl_map,
-	)
-	merged_gl_map = list(merged_gl_map)
+		)
+	]
 
 	return merged_gl_map
 

@@ -1013,9 +1013,9 @@ class BuyingController(SubcontractingController):
 								)
 							)
 						else:
-							assets_link = list(
-								map(lambda d: frappe.utils.get_link_to_form("Asset", d), created_assets)
-							)
+							assets_link = [
+								frappe.utils.get_link_to_form("Asset", asset) for asset in created_assets
+							]
 							assets_link = frappe.bold(",".join(assets_link))
 
 							if len(created_assets) == 1:

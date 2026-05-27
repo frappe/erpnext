@@ -146,7 +146,7 @@ class Employee(NestedSet):
 
 	def set_employee_name(self):
 		self.employee_name = " ".join(
-			filter(lambda x: x, [self.first_name, self.middle_name, self.last_name])
+			name for name in [self.first_name, self.middle_name, self.last_name] if name
 		)
 
 	def validate_user_details(self):

@@ -322,7 +322,7 @@ def filter_pricing_rules(args, pricing_rules, doc=None):
 				p.variant_of = None
 
 	if len(pricing_rules) > 1:
-		filtered_rules = list(filter(lambda x: x.currency == args.get("currency"), pricing_rules))
+		filtered_rules = [rule for rule in pricing_rules if rule.currency == args.get("currency")]
 		if filtered_rules:
 			pricing_rules = filtered_rules
 
@@ -330,7 +330,7 @@ def filter_pricing_rules(args, pricing_rules, doc=None):
 	if pricing_rules:
 		max_priority = max(cint(p.priority) for p in pricing_rules)
 		if max_priority:
-			pricing_rules = list(filter(lambda x: cint(x.priority) == max_priority, pricing_rules))
+			pricing_rules = [rule for rule in pricing_rules if cint(rule.priority) == max_priority]
 
 	if pricing_rules and not isinstance(pricing_rules, list):
 		pricing_rules = list(pricing_rules)
@@ -338,9 +338,9 @@ def filter_pricing_rules(args, pricing_rules, doc=None):
 	if len(pricing_rules) > 1:
 		rate_or_discount = list(set(d.rate_or_discount for d in pricing_rules))
 		if len(rate_or_discount) == 1 and rate_or_discount[0] == "Discount Percentage":
-			pricing_rules = (
-				list(filter(lambda x: x.for_price_list == args.price_list, pricing_rules)) or pricing_rules
-			)
+			pricing_rules = [
+				rule for rule in pricing_rules if rule.for_price_list == args.price_list
+			] or pricing_rules
 
 	if len(pricing_rules) > 1 and not args.for_shopping_cart:
 		frappe.throw(
@@ -439,9 +439,7 @@ def apply_internal_priority(pricing_rules, field_set, args):
 	filtered_rules = []
 	for field in field_set:
 		if args.get(field):
-			# filter function always returns a filter object even if empty
-			# list conversion is necessary to check for an empty result
-			filtered_rules = list(filter(lambda x: x.get(field) == args.get(field), pricing_rules))
+			filtered_rules = [rule for rule in pricing_rules if rule.get(field) == args.get(field)]
 			if filtered_rules:
 				break
 

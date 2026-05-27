@@ -1011,16 +1011,14 @@ def start_auto_reconcile(
 		if not linked_payments:
 			continue
 
-		vouchers = list(
-			map(
-				lambda entry: {
-					"payment_doctype": entry.get("doctype"),
-					"payment_name": entry.get("name"),
-					"amount": entry.get("paid_amount"),
-				},
-				linked_payments,
-			)
-		)
+		vouchers = [
+			{
+				"payment_doctype": entry.get("doctype"),
+				"payment_name": entry.get("name"),
+				"amount": entry.get("paid_amount"),
+			}
+			for entry in linked_payments
+		]
 
 		updated_transaction = reconcile_vouchers(transaction.name, json.dumps(vouchers))
 

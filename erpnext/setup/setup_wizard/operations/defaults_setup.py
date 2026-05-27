@@ -88,7 +88,9 @@ def create_employee_for_self(args):
 	emp = frappe.get_doc(
 		{
 			"doctype": "Employee",
-			"employee_name": " ".join(filter(None, [args.get("first_name"), args.get("last_name")])),
+			"employee_name": " ".join(
+				name for name in [args.get("first_name"), args.get("last_name")] if name
+			),
 			"user_id": frappe.session.user,
 			"status": "Active",
 			"company": args.get("company_name"),

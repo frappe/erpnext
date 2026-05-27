@@ -281,7 +281,9 @@ def start_import(data_import, bank_account, import_file_path, google_sheets_url,
 	finally:
 		frappe.flags.in_import = False
 
-	frappe.publish_realtime("data_import_refresh", {"data_import": data_import.name})
+	frappe.publish_realtime(
+		"data_import_refresh", {"data_import": data_import.name}, user=frappe.session.user
+	)
 
 
 def update_mapping_db(bank, template_options):

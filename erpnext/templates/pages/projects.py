@@ -57,11 +57,11 @@ def get_tasks(project, start=0, search=None, item_status=None):
 	task_nest = []
 	for task in tasks:
 		if task.is_group:
-			child_tasks = list(filter(lambda x: x.parent_task == task.name, tasks))
+			child_tasks = [row for row in tasks if row.parent_task == task.name]
 			if len(child_tasks):
 				task.children = child_tasks
 		task_nest.append(task)
-	return list(filter(lambda x: not x.parent_task, tasks))
+	return [task for task in tasks if not task.parent_task]
 
 
 @frappe.whitelist()

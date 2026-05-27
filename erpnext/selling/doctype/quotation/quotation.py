@@ -218,7 +218,7 @@ class Quotation(SellingController):
 
 			return True
 
-		return list(filter(can_map, self.get("items")))
+		return [row for row in self.get("items") if can_map(row)]
 
 	def is_fully_ordered(self):
 		return self.get_ordered_status() == "Ordered"
@@ -302,7 +302,7 @@ class Quotation(SellingController):
 
 	def on_cancel(self):
 		if self.lost_reasons:
-			self.lost_reasons = []
+			self.set("lost_reasons", [])
 		super().on_cancel()
 
 		# update enquiry status

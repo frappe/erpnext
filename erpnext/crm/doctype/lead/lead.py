@@ -134,7 +134,11 @@ class Lead(SellingController, CRMNote):
 	def set_full_name(self):
 		if self.first_name:
 			self.lead_name = " ".join(
-				filter(None, [self.salutation, self.first_name, self.middle_name, self.last_name])
+				[
+					name
+					for name in [self.salutation, self.first_name, self.middle_name, self.last_name]
+					if name
+				]
 			)
 
 	def set_lead_name(self):
@@ -471,7 +475,7 @@ def get_lead_details(
 		{
 			"territory": lead.territory,
 			"customer_name": lead.company_name or lead.lead_name,
-			"contact_display": " ".join(filter(None, [lead.lead_name])),
+			"contact_display": lead.lead_name or "",
 			"contact_email": lead.email_id,
 			"contact_mobile": lead.mobile_no,
 			"contact_phone": lead.phone,

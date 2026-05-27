@@ -863,7 +863,9 @@ class TestStockEntry(ERPNextTestSuite):
 		for d in stock_entry.get("items"):
 			if d.item_code != "_Test FG Item 2":
 				rm_cost += flt(d.amount)
-		fg_cost = next(filter(lambda x: x.item_code == "_Test FG Item 2", stock_entry.get("items"))).amount
+		fg_cost = next(
+			item for item in stock_entry.get("items") if item.item_code == "_Test FG Item 2"
+		).amount
 		self.assertEqual(fg_cost, flt(rm_cost + bom_operation_cost + work_order.additional_operating_cost, 2))
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"material_consumption": 1})
@@ -907,8 +909,10 @@ class TestStockEntry(ERPNextTestSuite):
 		for d in s.get("items"):
 			if d.s_warehouse:
 				rm_cost += d.amount
-		fg_cost = next(filter(lambda x: x.item_code == "_Test FG Item", s.get("items"))).amount
-		secondary_item_cost = next(filter(lambda x: x.type or x.is_legacy_scrap_item, s.get("items"))).amount
+		fg_cost = next(item for item in s.get("items") if item.item_code == "_Test FG Item").amount
+		secondary_item_cost = next(
+			item for item in s.get("items") if item.type or item.is_legacy_scrap_item
+		).amount
 
 		self.assertEqual(fg_cost, flt(rm_cost - secondary_item_cost, 2))
 
@@ -923,7 +927,7 @@ class TestStockEntry(ERPNextTestSuite):
 				rm_cost += d.amount
 		self.assertEqual(rm_cost, 0)
 		expected_fg_cost = s.get_basic_rate_for_manufactured_item(1)
-		fg_cost = next(filter(lambda x: x.item_code == "_Test FG Item", s.get("items"))).amount
+		fg_cost = next(item for item in s.get("items") if item.item_code == "_Test FG Item").amount
 		self.assertEqual(flt(fg_cost, 2), flt(expected_fg_cost, 2))
 
 	def test_variant_work_order(self):

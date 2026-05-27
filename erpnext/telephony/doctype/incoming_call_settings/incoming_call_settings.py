@@ -63,7 +63,9 @@ class IncomingCallSettings(Document):
 			]
 
 			# convert time in timeslot into an integer represents number of seconds
-			timeslots = sorted(map(lambda seq: tuple(map(self.time_to_seconds, seq)), timeslots))
+			timeslots = sorted(
+				tuple(self.time_to_seconds(value) for value in timeslot) for timeslot in timeslots
+			)
 			if len(timeslots) < 2:
 				continue
 

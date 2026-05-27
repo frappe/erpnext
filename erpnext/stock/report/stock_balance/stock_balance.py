@@ -307,7 +307,7 @@ class StockBalanceReport:
 				stock_ageing_data = {"average_age": 0, "earliest_age": 0, "latest_age": 0}
 
 				if opening_fifo_queue:
-					fifo_queue = sorted(filter(_func, opening_fifo_queue), key=_func)
+					fifo_queue = sorted((entry for entry in opening_fifo_queue if _func(entry)), key=_func)
 					if not fifo_queue:
 						continue
 

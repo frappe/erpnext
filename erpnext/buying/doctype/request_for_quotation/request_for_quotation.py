@@ -225,7 +225,7 @@ class RequestforQuotation(BuyingController):
 	@frappe.whitelist()
 	def get_supplier_email_preview(self, supplier: str):
 		"""Returns formatted email preview as string."""
-		rfq_suppliers = list(filter(lambda row: row.supplier == supplier, self.suppliers))
+		rfq_suppliers = [row for row in self.suppliers if row.supplier == supplier]
 		rfq_supplier = rfq_suppliers[0]
 
 		self.validate_email_id(rfq_supplier)

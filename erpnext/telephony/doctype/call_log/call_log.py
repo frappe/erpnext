@@ -121,8 +121,13 @@ class CallLog(Document):
 
 	def update_received_by(self):
 		if employees := get_employees_with_number(self.get("to")):
-			self.call_received_by = employees[0].get("name")
-			self.employee_user_id = employees[0].get("user_id")
+			values = {
+				"call_received_by": employees[0].get("name"),
+				"employee_user_id": employees[0].get("user_id"),
+			}
+			self.update(values)
+			if not self.is_new():
+				self.db_set(values)
 
 
 @frappe.whitelist()

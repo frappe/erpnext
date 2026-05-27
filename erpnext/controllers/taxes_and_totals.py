@@ -41,7 +41,7 @@ class calculate_taxes_and_totals:
 
 	def filter_rows(self):
 		"""Exclude rows, that do not fulfill the filter criteria, from totals computation."""
-		items = list(filter(lambda item: not item.get("is_alternative"), self.doc.get("items")))
+		items = [item for item in self.doc.get("items") if not item.get("is_alternative")]
 		return items
 
 	def calculate(self, ignore_tax_template_validation=False):

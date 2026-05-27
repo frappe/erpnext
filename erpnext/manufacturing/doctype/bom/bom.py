@@ -245,11 +245,11 @@ class BOM(WebsiteGenerator):
 	def get_next_version_index(existing_boms: list[str]) -> int:
 		# split by "/" and "-"
 		delimiters = ["/", "-"]
-		pattern = "|".join(map(re.escape, delimiters))
+		pattern = "|".join(re.escape(delimiter) for delimiter in delimiters)
 		bom_parts = [re.split(pattern, bom_name) for bom_name in existing_boms]
 
 		# filter out BOMs that do not follow the following formats: BOM/ITEM/001, BOM-ITEM-001
-		valid_bom_parts = list(filter(lambda x: len(x) > 1 and x[-1], bom_parts))
+		valid_bom_parts = [part for part in bom_parts if len(part) > 1 and part[-1]]
 
 		# extract the current index from the BOM parts
 		if valid_bom_parts:

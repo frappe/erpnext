@@ -224,7 +224,7 @@ def sales_invoice_validate(doc):
 
 	if not doc.company_address:
 		frappe.throw(
-			_("Please set an Address on the Company '%s'" % doc.company),
+			_("Please set an Address on the Company '{0}'").format(doc.company),
 			title=_("E-Invoicing Information Missing"),
 		)
 	else:
@@ -254,7 +254,7 @@ def sales_invoice_validate(doc):
 		doc.customer_fiscal_code = customer.fiscal_code
 		if not doc.customer_fiscal_code:
 			frappe.throw(
-				_("Please set Fiscal Code for the customer '%s'" % doc.customer),
+				_("Please set Fiscal Code for the customer '{0}'").format(doc.customer),
 				title=_("E-Invoicing Information Missing"),
 			)
 	else:
@@ -262,14 +262,14 @@ def sales_invoice_validate(doc):
 			doc.customer_fiscal_code = customer.fiscal_code
 			if not doc.customer_fiscal_code:
 				frappe.throw(
-					_("Please set Fiscal Code for the public administration '%s'" % doc.customer),
+					_("Please set Fiscal Code for the public administration '{0}'").format(doc.customer),
 					title=_("E-Invoicing Information Missing"),
 				)
 		else:
 			doc.tax_id = customer.tax_id
 			if not doc.tax_id:
 				frappe.throw(
-					_("Please set Tax ID for the customer '%s'" % doc.customer),
+					_("Please set Tax ID for the customer '{0}'").format(doc.customer),
 					title=_("E-Invoicing Information Missing"),
 				)
 

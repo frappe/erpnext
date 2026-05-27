@@ -115,8 +115,8 @@ def get_party_addresses_and_contact(party_type, party, party_group, filters):
 			result.extend(add_blank_columns_for("Address"))
 			data.append(result)
 		else:
-			addresses = list(map(list, addresses))
-			contacts = list(map(list, contacts))
+			addresses = [list(address) for address in addresses]
+			contacts = [list(contact) for contact in contacts]
 
 			max_length = max(len(addresses), len(contacts))
 			for idx in range(0, max_length):

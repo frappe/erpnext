@@ -65,7 +65,7 @@ def execute(filters=None):
 				child_row["bundle_qty"] = child_row["actual_qty"] // child_row["minimum_qty"]
 				child_rows.append(child_row)
 
-			min_bundle_qty = min(map(lambda d: d["bundle_qty"], child_rows))
+			min_bundle_qty = min(child_row["bundle_qty"] for child_row in child_rows)
 			parent_row["bundle_qty"] = min_bundle_qty
 
 			data.append(parent_row)
