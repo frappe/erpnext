@@ -265,6 +265,9 @@ class StatusUpdater(Document):
 		self.item_allowance = {}
 		self.global_qty_allowance = None
 		self.global_amount_allowance = None
+		negative_rate_settings_fetched = False
+		selling_negative_rate_allowed = None
+		buying_negative_rate_allowed = None
 
 		for args in self.status_updater:
 			if "target_ref_field" not in args or args.get("validate_qty") is False:
@@ -272,12 +275,14 @@ class StatusUpdater(Document):
 				continue
 
 			items_to_validate = []
-			selling_negative_rate_allowed = frappe.get_single_value(
-				"Selling Settings", "allow_negative_rates_for_items"
-			)
-			buying_negative_rate_allowed = frappe.get_single_value(
-				"Buying Settings", "allow_negative_rates_for_items"
-			)
+			if not negative_rate_settings_fetched:
+				selling_negative_rate_allowed = frappe.get_single_value(
+					"Selling Settings", "allow_negative_rates_for_items"
+				)
+				buying_negative_rate_allowed = frappe.get_single_value(
+					"Buying Settings", "allow_negative_rates_for_items"
+				)
+				negative_rate_settings_fetched = True
 
 			# get unique transactions to update
 			for d in self.get_all_children():

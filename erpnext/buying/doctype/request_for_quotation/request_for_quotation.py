@@ -125,18 +125,45 @@ class RequestforQuotation(BuyingController):
 			frappe.throw(_("Same supplier has been entered multiple times"))
 
 	def validate_supplier_list(self):
+		supplier_names = {d.supplier for d in self.suppliers if d.supplier}
+		supplier_rfq_settings = (
+			{
+				supplier.name: supplier
+				for supplier in frappe.get_all(
+					"Supplier",
+					filters={"name": ("in", list(supplier_names))},
+					fields=["name", "prevent_rfqs", "warn_rfqs"],
+				)
+			}
+			if supplier_names
+			else {}
+		)
+		supplier_scorecard_standing = (
+			frappe._dict(
+				frappe.get_all(
+					"Supplier Scorecard",
+					filters={"name": ("in", list(supplier_names))},
+					fields=["name", "status"],
+					as_list=True,
+				)
+			)
+			if supplier_names
+			else frappe._dict()
+		)
+
 		for d in self.suppliers:
-			prevent_rfqs = frappe.db.get_value("Supplier", d.supplier, "prevent_rfqs")
-			if prevent_rfqs:
-				standing = frappe.db.get_value("Supplier Scorecard", d.supplier, "status")
+			rfq_settings = supplier_rfq_settings.get(d.supplier)
+			if not rfq_settings:
+				continue
+
+			standing = supplier_scorecard_standing.get(d.supplier)
+			if rfq_settings.prevent_rfqs:
 				frappe.throw(
 					_("RFQs are not allowed for {0} due to a scorecard standing of {1}").format(
 						d.supplier, standing
 					)
 				)
-			warn_rfqs = frappe.db.get_value("Supplier", d.supplier, "warn_rfqs")
-			if warn_rfqs:
-				standing = frappe.db.get_value("Supplier Scorecard", d.supplier, "status")
+			if rfq_settings.warn_rfqs:
 				frappe.msgprint(
 					_(
 						"{0} currently has a {1} Supplier Scorecard standing, and RFQs to this supplier should be issued with caution."
@@ -146,9 +173,27 @@ class RequestforQuotation(BuyingController):
 				)
 
 	def update_email_id(self):
+		contact_names = {
+			rfq_supplier.contact
+			for rfq_supplier in self.suppliers
+			if not rfq_supplier.email_id and rfq_supplier.contact
+		}
+		contact_email_map = (
+			frappe._dict(
+				frappe.get_all(
+					"Contact",
+					filters={"name": ("in", list(contact_names))},
+					fields=["name", "email_id"],
+					as_list=True,
+				)
+			)
+			if contact_names
+			else frappe._dict()
+		)
+
 		for rfq_supplier in self.suppliers:
 			if not rfq_supplier.email_id:
-				rfq_supplier.email_id = frappe.db.get_value("Contact", rfq_supplier.contact, "email_id")
+				rfq_supplier.email_id = contact_email_map.get(rfq_supplier.contact)
 
 	def validate_email_id(self, args):
 		if not args.email_id:
@@ -217,10 +262,18 @@ class RequestforQuotation(BuyingController):
 
 	def update_supplier_part_no(self, supplier):
 		self.vendor = supplier
+		item_codes = {item.item_code for item in self.items if item.item_code}
+		supplier_part_no_map = {}
+		if item_codes:
+			for row in frappe.get_all(
+				"Item Supplier",
+				filters={"parent": ("in", list(item_codes)), "supplier": supplier},
+				fields=["parent", "supplier_part_no"],
+			):
+				supplier_part_no_map.setdefault(row.parent, row.supplier_part_no)
+
 		for item in self.items:
-			item.supplier_part_no = frappe.db.get_value(
-				"Item Supplier", {"parent": item.item_code, "supplier": supplier}, "supplier_part_no"
-			)
+			item.supplier_part_no = supplier_part_no_map.get(item.item_code)
 
 	def update_supplier_contact(self, rfq_supplier, link):
 		"""Create a new user for the supplier if not set in contact"""

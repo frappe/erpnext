@@ -476,31 +476,46 @@ def create_user(employee: str, email: str | None = None, create_user_permission:
 def get_all_employee_emails(company):
 	"""Returns list of employee emails either based on user_id or company_email"""
 	employee_list = frappe.get_all(
-		"Employee", fields=["name", "employee_name"], filters={"status": "Active", "company": company}
+		"Employee",
+		fields=["name", "employee_name", "user_id", "company_email", "personal_email"],
+		filters={"status": "Active", "company": company},
 	)
-	employee_emails = []
-	for employee in employee_list:
-		if not employee:
-			continue
-		user, company_email, personal_email = frappe.db.get_value(
-			"Employee", employee, ["user_id", "company_email", "personal_email"]
-		)
-		email = user or company_email or personal_email
-		if email:
-			employee_emails.append(email)
-	return employee_emails
+	return _get_employee_emails_from_records(employee_list)
 
 
 def get_employee_emails(employee_list):
 	"""Returns list of employee emails either based on user_id or company_email"""
+	employee_names = []
+	for employee in employee_list:
+		if not employee:
+			continue
+
+		employee_name = (
+			employee.get("name") if isinstance(employee, dict) else getattr(employee, "name", employee)
+		)
+		if employee_name:
+			employee_names.append(employee_name)
+
+	if not employee_names:
+		return []
+
+	employee_details = {
+		employee.name: employee
+		for employee in frappe.get_all(
+			"Employee",
+			filters={"name": ("in", employee_names)},
+			fields=["name", "user_id", "company_email", "personal_email"],
+		)
+	}
+	return _get_employee_emails_from_records(employee_details.get(employee) for employee in employee_names)
+
+
+def _get_employee_emails_from_records(employee_list):
 	employee_emails = []
 	for employee in employee_list:
 		if not employee:
 			continue
-		user, company_email, personal_email = frappe.db.get_value(
-			"Employee", employee, ["user_id", "company_email", "personal_email"]
-		)
-		email = user or company_email or personal_email
+		email = employee.user_id or employee.company_email or employee.personal_email
 		if email:
 			employee_emails.append(email)
 	return employee_emails

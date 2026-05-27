@@ -125,7 +125,27 @@ class PickList(TransactionBase):
 	def validate_stock_qty(self):
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
 
-		for row in self.get("locations"):
+		locations = self.get("locations") or []
+		item_warehouse_pairs = {
+			(row.item_code, row.warehouse)
+			for row in locations
+			if row.picked_qty and not row.batch_no and row.item_code and row.warehouse
+		}
+		bin_qty_map = {}
+		if item_warehouse_pairs:
+			bin_qty_map = {
+				(row.item_code, row.warehouse): row.actual_qty
+				for row in frappe.get_all(
+					"Bin",
+					filters={
+						"item_code": ("in", [d[0] for d in item_warehouse_pairs]),
+						"warehouse": ("in", [d[1] for d in item_warehouse_pairs]),
+					},
+					fields=["item_code", "warehouse", "actual_qty"],
+				)
+			}
+
+		for row in locations:
 			if not row.picked_qty:
 				continue
 
@@ -149,13 +169,7 @@ class PickList(TransactionBase):
 
 				continue
 
-			bin_qty = flt(
-				frappe.db.get_value(
-					"Bin",
-					{"item_code": row.item_code, "warehouse": row.warehouse},
-					"actual_qty",
-				)
-			)
+			bin_qty = flt(bin_qty_map.get((row.item_code, row.warehouse)))
 
 			if row.picked_qty > bin_qty:
 				frappe.throw(
@@ -166,6 +180,20 @@ class PickList(TransactionBase):
 				)
 
 	def validate_warehouses(self):
+		warehouses = {location.warehouse for location in self.locations if location.warehouse}
+		warehouse_company_map = (
+			frappe._dict(
+				frappe.get_all(
+					"Warehouse",
+					filters={"name": ("in", list(warehouses))},
+					fields=["name", "company"],
+					as_list=True,
+				)
+			)
+			if warehouses
+			else frappe._dict()
+		)
+
 		for location in self.locations:
 			if not location.warehouse:
 				frappe.throw(
@@ -174,7 +202,7 @@ class PickList(TransactionBase):
 					exc=MissingWarehouseValidationError,
 				)
 
-			company = frappe.get_cached_value("Warehouse", location.warehouse, "company")
+			company = warehouse_company_map.get(location.warehouse)
 
 			if company != self.company:
 				frappe.throw(
@@ -227,11 +255,22 @@ class PickList(TransactionBase):
 
 	def validate_sales_order_percentage(self):
 		# set percentage picked in SO
+		sales_orders = {location.sales_order for location in self.get("locations") if location.sales_order}
+		per_picked_map = (
+			frappe._dict(
+				frappe.get_all(
+					"Sales Order",
+					filters={"name": ("in", list(sales_orders))},
+					fields=["name", "per_picked"],
+					as_list=True,
+				)
+			)
+			if sales_orders
+			else frappe._dict()
+		)
+
 		for location in self.get("locations"):
-			if (
-				location.sales_order
-				and frappe.db.get_value("Sales Order", location.sales_order, "per_picked", cache=True) == 100
-			):
+			if location.sales_order and per_picked_map.get(location.sales_order) == 100:
 				frappe.throw(
 					_("Row #{}: item {} has been picked already.").format(location.idx, location.item_code)
 				)

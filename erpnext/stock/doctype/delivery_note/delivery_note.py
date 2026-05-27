@@ -446,18 +446,31 @@ class DeliveryNote(SellingController):
 
 	def update_current_stock(self):
 		if self.get("_action") and self._action != "update_after_submit":
-			for d in self.get("items"):
-				d.actual_qty = frappe.db.get_value(
-					"Bin", {"item_code": d.item_code, "warehouse": d.warehouse}, "actual_qty"
-				)
+			items = self.get("items") or []
+			packed_items = self.get("packed_items") or []
+			item_warehouse_pairs = {
+				(d.item_code, d.warehouse) for d in [*items, *packed_items] if d.item_code and d.warehouse
+			}
+			bin_qty_map = {}
+			if item_warehouse_pairs:
+				bin_qty_map = {
+					(row.item_code, row.warehouse): row
+					for row in frappe.get_all(
+						"Bin",
+						filters={
+							"item_code": ("in", [d[0] for d in item_warehouse_pairs]),
+							"warehouse": ("in", [d[1] for d in item_warehouse_pairs]),
+						},
+						fields=["item_code", "warehouse", "actual_qty", "projected_qty"],
+					)
+				}
 
-			for d in self.get("packed_items"):
-				bin_qty = frappe.db.get_value(
-					"Bin",
-					{"item_code": d.item_code, "warehouse": d.warehouse},
-					["actual_qty", "projected_qty"],
-					as_dict=True,
-				)
+			for d in items:
+				bin_qty = bin_qty_map.get((d.item_code, d.warehouse))
+				d.actual_qty = bin_qty.actual_qty if bin_qty else None
+
+			for d in packed_items:
+				bin_qty = bin_qty_map.get((d.item_code, d.warehouse))
 				if bin_qty:
 					d.actual_qty = flt(bin_qty.actual_qty)
 					d.projected_qty = flt(bin_qty.projected_qty)

@@ -400,11 +400,23 @@ class Project(Document):
 			_("You have been invited to collaborate on the project {0}.").format(url)
 		)
 
+		users_to_notify = [user.user for user in self.users if user.welcome_email_sent == 0 and user.user]
+		user_info_by_name = frappe._dict()
+		if users_to_notify:
+			user_info_by_name = frappe._dict(
+				(user.name, user)
+				for user in frappe.get_all(
+					"User",
+					filters={"name": ("in", users_to_notify)},
+					fields=["name", "enabled", "email"],
+				)
+			)
+
 		for user in self.users:
 			# process only users who haven't received the welcome email yet
 			if user.welcome_email_sent == 0:
 				# fetch canonical User data (enabled status + latest email)
-				user_info = frappe.db.get_value("User", user.user, ["enabled", "email"], as_dict=True)
+				user_info = user_info_by_name.get(user.user)
 				# send email only if user is enabled and has a valid email
 				if user_info and user_info.enabled and user_info.email:
 					frappe.sendmail(

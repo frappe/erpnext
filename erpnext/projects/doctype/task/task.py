@@ -141,8 +141,20 @@ class Task(NestedSet):
 		if self.status == "Template" and not self.is_template:
 			self.status = "Open"
 		if self.status != self.get_db_value("status") and self.status == "Completed":
+			dependency_tasks = [d.task for d in self.depends_on if d.task]
+			dependency_statuses = frappe._dict()
+			if dependency_tasks:
+				dependency_statuses = frappe._dict(
+					frappe.get_all(
+						"Task",
+						filters={"name": ("in", dependency_tasks)},
+						fields=["name", "status"],
+						as_list=True,
+					)
+				)
+
 			for d in self.depends_on:
-				if frappe.db.get_value("Task", d.task, "status") not in ("Completed", "Cancelled"):
+				if dependency_statuses.get(d.task) not in ("Completed", "Cancelled"):
 					frappe.throw(
 						_(
 							"Cannot complete task {0} as its dependant task {1} are not completed / cancelled."
@@ -174,8 +186,20 @@ class Task(NestedSet):
 
 	def validate_depends_on_tasks(self):
 		if self.depends_on:
+			dependency_tasks = [task.task for task in self.depends_on if task.task]
+			dependency_template_statuses = frappe._dict()
+			if dependency_tasks:
+				dependency_template_statuses = frappe._dict(
+					frappe.get_all(
+						"Task",
+						filters={"name": ("in", dependency_tasks)},
+						fields=["name", "is_template"],
+						as_list=True,
+					)
+				)
+
 			for task in self.depends_on:
-				if not frappe.db.get_value("Task", task.task, "is_template"):
+				if not dependency_template_statuses.get(task.task):
 					frappe.throw(
 						_("Dependent Task {0} is not a Template Task").format(
 							get_link_to_form("Task", task.task)

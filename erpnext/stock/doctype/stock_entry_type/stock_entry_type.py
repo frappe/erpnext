@@ -119,17 +119,19 @@ class ManufactureEntry:
 					backflush_based_on = based_on
 
 			available_serial_batches = frappe._dict({})
+			skip_material_transfer = False
 			if backflush_based_on != "BOM":
 				available_serial_batches = self.get_transferred_serial_batches()
+				skip_material_transfer = frappe.db.get_value(
+					"Job Card", self.job_card, "skip_material_transfer"
+				)
 
 			for item_code, _dict in item_dict.items():
 				_dict.s_warehouse = self.source_wh.get(item_code) or self.wip_warehouse
 				_dict.t_warehouse = ""
 				_dict.item_code = item_code
 
-				if backflush_based_on != "BOM" and not frappe.db.get_value(
-					"Job Card", self.job_card, "skip_material_transfer"
-				):
+				if backflush_based_on != "BOM" and not skip_material_transfer:
 					calculated_qty = flt(_dict.transferred_qty) - flt(_dict.consumed_qty)
 					if calculated_qty < 0:
 						frappe.throw(
@@ -290,17 +292,63 @@ class ManufactureEntry:
 			else:
 				item_dict[key] = item
 
+		account_names = {
+			item.get("expense_account") for item in item_dict.values() if item.get("expense_account")
+		}
+		cost_centers = {item.get("cost_center") for item in item_dict.values() if item.get("cost_center")}
+		warehouses = {
+			item.get("default_warehouse") for item in item_dict.values() if item.get("default_warehouse")
+		}
+
+		company_by_field = {
+			"expense_account": frappe._dict(
+				frappe.get_all(
+					"Account",
+					filters={"name": ("in", list(account_names))},
+					fields=["name", "company"],
+					as_list=True,
+				)
+			)
+			if account_names
+			else frappe._dict(),
+			"cost_center": frappe._dict(
+				frappe.get_all(
+					"Cost Center",
+					filters={"name": ("in", list(cost_centers))},
+					fields=["name", "company"],
+					as_list=True,
+				)
+			)
+			if cost_centers
+			else frappe._dict(),
+			"default_warehouse": frappe._dict(
+				frappe.get_all(
+					"Warehouse",
+					filters={"name": ("in", list(warehouses))},
+					fields=["name", "company"],
+					as_list=True,
+				)
+			)
+			if warehouses
+			else frappe._dict(),
+		}
+		company_defaults = {
+			"stock_adjustment_account": frappe.get_cached_value(
+				"Company", self.company, "stock_adjustment_account"
+			),
+			"cost_center": frappe.get_cached_value("Company", self.company, "cost_center"),
+		}
+
 		for item, item_details in item_dict.items():
-			for d in [
-				["Account", "expense_account", "stock_adjustment_account"],
-				["Cost Center", "cost_center", "cost_center"],
-				["Warehouse", "default_warehouse", ""],
+			for field, default_field in [
+				["expense_account", "stock_adjustment_account"],
+				["cost_center", "cost_center"],
+				["default_warehouse", ""],
 			]:
-				company_in_record = frappe.db.get_value(d[0], item_details.get(d[1]), "company")
-				if not item_details.get(d[1]) or (company_in_record and self.company != company_in_record):
-					item_dict[item][d[1]] = (
-						frappe.get_cached_value("Company", self.company, d[2]) if d[2] else None
-					)
+				value = item_details.get(field)
+				company_in_record = company_by_field[field].get(value) if value else None
+				if not value or (company_in_record and self.company != company_in_record):
+					item_dict[item][field] = company_defaults[default_field] if default_field else None
 
 		return item_dict
 

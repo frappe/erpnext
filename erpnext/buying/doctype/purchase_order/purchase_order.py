@@ -346,11 +346,27 @@ class PurchaseOrder(BuyingController):
 				item.set("fg_item_qty", 0)
 
 	def get_schedule_dates(self):
+		material_request_items = {
+			d.material_request_item
+			for d in self.get("items")
+			if d.material_request_item and not d.schedule_date
+		}
+		schedule_dates = (
+			frappe._dict(
+				frappe.get_all(
+					"Material Request Item",
+					filters={"name": ("in", list(material_request_items))},
+					fields=["name", "schedule_date"],
+					as_list=True,
+				)
+			)
+			if material_request_items
+			else frappe._dict()
+		)
+
 		for d in self.get("items"):
 			if d.material_request_item and not d.schedule_date:
-				d.schedule_date = frappe.db.get_value(
-					"Material Request Item", d.material_request_item, "schedule_date"
-				)
+				d.schedule_date = schedule_dates.get(d.material_request_item)
 
 	@frappe.whitelist()
 	def get_last_purchase_rate(self):

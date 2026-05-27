@@ -380,12 +380,27 @@ class MaterialRequest(BuyingController):
 	def update_requested_qty(self, mr_item_rows=None):
 		"""update requested qty (before ordered_qty is updated)"""
 		item_wh_list = []
+		items_to_check = [
+			d.item_code
+			for d in self.get("items")
+			if (not mr_item_rows or d.name in mr_item_rows) and d.item_code and d.warehouse
+		]
+		stock_items = set()
+		if items_to_check:
+			stock_items = set(
+				frappe.get_all(
+					"Item",
+					filters={"name": ("in", items_to_check), "is_stock_item": 1},
+					pluck="name",
+				)
+			)
+
 		for d in self.get("items"):
 			if (
 				(not mr_item_rows or d.name in mr_item_rows)
 				and [d.item_code, d.warehouse] not in item_wh_list
 				and d.warehouse
-				and frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1
+				and d.item_code in stock_items
 			):
 				item_wh_list.append([d.item_code, d.warehouse])
 
@@ -823,12 +838,36 @@ def raise_work_orders(material_request: str, company: str):
 	work_orders = []
 	default_wip_warehouse = frappe.get_cached_value("Company", company, "default_wip_warehouse")
 
+	items_to_order = [d.item_code for d in mr.items if (d.stock_qty - d.ordered_qty) > 0 and d.item_code]
+	variants_by_item = frappe._dict()
+	bom_items = set()
+	if items_to_order:
+		variants_by_item = frappe._dict(
+			frappe.get_all(
+				"Item",
+				filters={"name": ("in", items_to_order)},
+				fields=["name", "variant_of"],
+				as_list=True,
+			)
+		)
+		bom_lookup_items = set(items_to_order)
+		bom_lookup_items.update(variant for variant in variants_by_item.values() if variant)
+		bom_items = set(
+			frappe.get_all(
+				"BOM",
+				filters={
+					"item": ("in", list(bom_lookup_items)),
+					"is_default": 1,
+					"is_active": 1,
+				},
+				pluck="item",
+			)
+		)
+
 	for d in mr.items:
 		if (d.stock_qty - d.ordered_qty) > 0:
-			if frappe.db.exists("BOM", {"item": d.item_code, "is_default": 1, "is_active": 1}) or (
-				(variant_of := frappe.get_value("Item", d.item_code, "variant_of"))
-				and frappe.db.exists("BOM", {"item": variant_of, "is_default": 1, "is_active": 1})
-			):
+			variant_of = variants_by_item.get(d.item_code)
+			if d.item_code in bom_items or (variant_of and variant_of in bom_items):
 				wo_order = frappe.new_doc("Work Order")
 				wo_order.update(
 					{

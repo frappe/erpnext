@@ -673,10 +673,23 @@ class SalesOrder(SellingController):
 	def validate_supplier_after_submit(self):
 		"""Check that supplier is the same after submit if PO is already made"""
 		exc_list = []
+		item_names = {item.name for item in self.items if item.supplier}
+		supplier_by_item = (
+			frappe._dict(
+				frappe.get_all(
+					"Sales Order Item",
+					filters={"name": ("in", list(item_names))},
+					fields=["name", "supplier"],
+					as_list=True,
+				)
+			)
+			if item_names
+			else frappe._dict()
+		)
 
 		for item in self.items:
 			if item.supplier:
-				supplier = frappe.db.get_value("Sales Order Item", item.name, "supplier")
+				supplier = supplier_by_item.get(item.name)
 				if item.ordered_qty > 0.0 and item.supplier != supplier:
 					exc_list.append(
 						_("Row #{0}: Not allowed to change Supplier as Purchase Order already exists").format(
@@ -690,15 +703,25 @@ class SalesOrder(SellingController):
 	def update_delivery_status(self):
 		"""Update delivery status from Purchase Order for drop shipping"""
 		tot_qty, delivered_qty = 0.0, 0.0
+		drop_ship_item_names = [item.name for item in self.items if item.delivered_by_supplier]
+		received_qty_by_so_item = frappe._dict()
+		if drop_ship_item_names:
+			received_qty_by_so_item = frappe._dict(
+				(
+					row.sales_order_item,
+					row.received_qty,
+				)
+				for row in frappe.get_all(
+					"Purchase Order Item",
+					filters={"sales_order_item": ("in", drop_ship_item_names), "docstatus": 1},
+					fields=["sales_order_item", {"SUM": "received_qty", "AS": "received_qty"}],
+					group_by="sales_order_item",
+				)
+			)
 
 		for item in self.items:
 			if item.delivered_by_supplier:
-				item_delivered_qty = frappe.get_all(
-					"Purchase Order Item",
-					{"sales_order_item": item.name, "docstatus": 1},
-					[{"SUM": "received_qty", "AS": "received_qty"}],
-					pluck="received_qty",
-				)[0]
+				item_delivered_qty = received_qty_by_so_item.get(item.name)
 				item.db_set("delivered_qty", flt(item_delivered_qty), update_modified=False)
 
 			delivered_qty += min(item.delivered_qty, item.qty)
@@ -766,12 +789,17 @@ class SalesOrder(SellingController):
 			),
 		)
 
-		for d in self.get("items"):
-			reference_delivery_date = frappe.db.get_value(
+		reference_delivery_dates = {
+			(row.item_code, row.idx): row.delivery_date
+			for row in frappe.get_all(
 				"Sales Order Item",
-				{"parent": reference_doc.name, "item_code": d.item_code, "idx": d.idx},
-				"delivery_date",
+				filters={"parent": reference_doc.name},
+				fields=["item_code", "idx", "delivery_date"],
 			)
+		}
+
+		for d in self.get("items"):
+			reference_delivery_date = reference_delivery_dates.get((d.item_code, d.idx))
 
 			d.set(
 				"delivery_date",

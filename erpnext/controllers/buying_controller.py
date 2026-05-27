@@ -128,8 +128,7 @@ class BuyingController(SubcontractingController):
 		frappe.throw(_(msg))
 
 	def create_package_for_transfer(self) -> None:
-		"""Create serial and batch package for Sourece Warehouse in case of inter transfer."""
-
+		"""Create serial and batch package for Source Warehouse in case of inter transfer."""
 		if self.is_internal_transfer() and (
 			self.doctype == "Purchase Receipt" or (self.doctype == "Purchase Invoice" and self.update_stock)
 		):
@@ -419,6 +418,7 @@ class BuyingController(SubcontractingController):
 			last_item_idx = d.idx
 
 		tax_accounts, total_valuation_amount, total_actual_tax_amount = self.get_tax_details()
+		set_valuation_rate_for_rejected_materials = None
 
 		for i, item in enumerate(self.get("items")):
 			if item.item_code and (item.qty or item.get("rejected_qty")):
@@ -460,14 +460,14 @@ class BuyingController(SubcontractingController):
 				if item.sales_incoming_rate:  # for internal transfer
 					net_rate = item.qty * item.sales_incoming_rate
 
-				if (
-					not net_rate
-					and item.get("rejected_qty")
-					and frappe.get_single_value(
-						"Buying Settings", "set_valuation_rate_for_rejected_materials"
-					)
-				):
-					net_rate = item.rejected_qty * item.net_rate
+				if not net_rate and item.get("rejected_qty"):
+					if set_valuation_rate_for_rejected_materials is None:
+						set_valuation_rate_for_rejected_materials = frappe.get_single_value(
+							"Buying Settings", "set_valuation_rate_for_rejected_materials"
+						)
+
+					if set_valuation_rate_for_rejected_materials:
+						net_rate = item.rejected_qty * item.net_rate
 
 				qty_in_stock_uom = flt(item.qty * item.conversion_factor)
 				if not qty_in_stock_uom and item.get("rejected_qty"):
@@ -587,8 +587,22 @@ class BuyingController(SubcontractingController):
 		}
 
 		ref_doctype = ref_doctype_map.get(self.doctype)
+		ref_fieldname = frappe.scrub(ref_doctype)
+		field = "incoming_rate" if self.get("is_internal_supplier") else "rate"
+		ref_names = [d.get(ref_fieldname) for d in self.get("items") if d.get(ref_fieldname)]
+		incoming_rates = frappe._dict()
+		if ref_names:
+			incoming_rates = frappe._dict(
+				frappe.get_all(
+					ref_doctype,
+					filters={"name": ("in", ref_names)},
+					fields=["name", field],
+					as_list=True,
+				)
+			)
+
 		for d in self.get("items"):
-			if not d.get(frappe.scrub(ref_doctype)):
+			if not d.get(ref_fieldname):
 				posting_time = self.get("posting_time")
 				if not posting_time:
 					posting_time = nowtime()
@@ -612,10 +626,8 @@ class BuyingController(SubcontractingController):
 
 				d.sales_incoming_rate = flt(outgoing_rate * (d.conversion_factor or 1))
 			else:
-				field = "incoming_rate" if self.get("is_internal_supplier") else "rate"
 				d.sales_incoming_rate = flt(
-					frappe.db.get_value(ref_doctype, d.get(frappe.scrub(ref_doctype)), field)
-					* (d.conversion_factor or 1)
+					incoming_rates.get(d.get(ref_fieldname)) * (d.conversion_factor or 1)
 				)
 
 	def set_qty_as_per_stock_uom(self):
@@ -684,9 +696,21 @@ class BuyingController(SubcontractingController):
 				)
 
 	def check_for_on_hold_or_closed_status(self, ref_doctype, ref_fieldname):
+		ref_names = [d.get(ref_fieldname) for d in self.get("items") if d.get(ref_fieldname)]
+		statuses = frappe._dict()
+		if ref_names:
+			statuses = frappe._dict(
+				frappe.get_all(
+					ref_doctype,
+					filters={"name": ("in", ref_names)},
+					fields=["name", "status"],
+					as_list=True,
+				)
+			)
+
 		for d in self.get("items"):
 			if d.get(ref_fieldname):
-				status = frappe.db.get_value(ref_doctype, d.get(ref_fieldname), "status")
+				status = statuses.get(d.get(ref_fieldname))
 				if status in ("Closed", "On Hold"):
 					frappe.throw(
 						_("{ref_doctype} {ref_name} is {status}.").format(
@@ -701,6 +725,7 @@ class BuyingController(SubcontractingController):
 
 		sl_entries = []
 		stock_items = self.get_stock_items()
+		set_valuation_rate_for_rejected_materials = None
 
 		for d in self.get("items"):
 			if d.item_code not in stock_items:
@@ -813,7 +838,12 @@ class BuyingController(SubcontractingController):
 
 			if flt(d.rejected_qty) != 0:
 				valuation_rate_for_rejected_item = 0.0
-				if frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials"):
+				if set_valuation_rate_for_rejected_materials is None:
+					set_valuation_rate_for_rejected_materials = frappe.db.get_single_value(
+						"Buying Settings", "set_valuation_rate_for_rejected_materials"
+					)
+
+				if set_valuation_rate_for_rejected_materials:
 					valuation_rate_for_rejected_item = d.valuation_rate
 
 				sl_entries.append(

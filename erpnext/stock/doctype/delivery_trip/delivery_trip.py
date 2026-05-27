@@ -165,6 +165,7 @@ class DeliveryTrip(Document):
 
 		# For locks, maintain idx count while looping through route list
 		idx = 0
+		stop_delay = frappe.db.get_single_value("Delivery Settings", "stop_delay")
 		for route in route_list:
 			directions = self.get_directions(route, optimize)
 
@@ -188,7 +189,6 @@ class DeliveryTrip(Document):
 					estimated_arrival = departure_datetime + datetime.timedelta(seconds=duration)
 					delivery_stop.estimated_arrival = estimated_arrival
 
-					stop_delay = frappe.db.get_single_value("Delivery Settings", "stop_delay")
 					departure_datetime = estimated_arrival + datetime.timedelta(minutes=cint(stop_delay))
 					idx += 1
 
@@ -412,6 +412,7 @@ def notify_customers(delivery_trip: str):
 		context.update(frappe.db.get_value("Driver", delivery_trip.driver, "cell_number", as_dict=1))
 
 	email_recipients = []
+	dispatch_template = None
 
 	for stop in delivery_trip.delivery_stops:
 		contact_info = frappe.db.get_value(
@@ -429,8 +430,9 @@ def notify_customers(delivery_trip: str):
 			context.update(stop.as_dict())
 			context.update(contact_info)
 
-			dispatch_template_name = frappe.db.get_single_value("Delivery Settings", "dispatch_template")
-			dispatch_template = frappe.get_doc("Email Template", dispatch_template_name)
+			if dispatch_template is None:
+				dispatch_template_name = frappe.db.get_single_value("Delivery Settings", "dispatch_template")
+				dispatch_template = frappe.get_doc("Email Template", dispatch_template_name)
 
 			frappe.sendmail(
 				recipients=contact_info.email_id,

@@ -951,13 +951,27 @@ class ProductionPlan(Document):
 			pass
 
 	def validate_mr_subcontracted(self):
+		subcontracted_item_codes = [
+			row.item_code
+			for row in self.mr_items
+			if row.material_request_type == "Subcontracting" and row.item_code
+		]
+		subcontracted_items = set()
+		if subcontracted_item_codes:
+			subcontracted_items = set(
+				frappe.get_all(
+					"Item",
+					filters={"name": ("in", subcontracted_item_codes), "is_sub_contracted_item": 1},
+					pluck="name",
+				)
+			)
+
 		for row in self.mr_items:
-			if row.material_request_type == "Subcontracting":
-				if not frappe.db.get_value("Item", row.item_code, "is_sub_contracted_item"):
-					frappe.throw(
-						_("Item {0} is not a subcontracted item").format(row.item_code),
-						title=_("Invalid Item"),
-					)
+			if row.material_request_type == "Subcontracting" and row.item_code not in subcontracted_items:
+				frappe.throw(
+					_("Item {0} is not a subcontracted item").format(row.item_code),
+					title=_("Invalid Item"),
+				)
 
 	@frappe.whitelist()
 	def make_material_request(self):
@@ -970,6 +984,18 @@ class ProductionPlan(Document):
 		if all([item.requested_qty == item.quantity for item in self.mr_items]):
 			msgprint(_("All items are already requested"))
 			return
+
+		sales_orders = [item.sales_order for item in self.mr_items if item.sales_order]
+		projects_by_sales_order = frappe._dict()
+		if sales_orders:
+			projects_by_sales_order = frappe._dict(
+				frappe.get_all(
+					"Sales Order",
+					filters={"name": ("in", sales_orders)},
+					fields=["name", "project"],
+					as_list=True,
+				)
+			)
 
 		for item in self.mr_items:
 			if item.quantity == item.requested_qty:
@@ -1014,9 +1040,7 @@ class ProductionPlan(Document):
 					"sales_order": item.sales_order,
 					"production_plan": self.name,
 					"material_request_plan_item": item.name,
-					"project": frappe.db.get_value("Sales Order", item.sales_order, "project")
-					if item.sales_order
-					else None,
+					"project": projects_by_sales_order.get(item.sales_order) if item.sales_order else None,
 				},
 			)
 
@@ -1045,6 +1069,17 @@ class ProductionPlan(Document):
 		self.sub_assembly_items = []
 		sub_assembly_items_store = []  # temporary store to process all subassembly items
 		bin_details = frappe._dict()
+		bom_nos = [row.bom_no for row in self.po_items if row.bom_no]
+		track_semi_finished_goods_by_bom = frappe._dict()
+		if bom_nos:
+			track_semi_finished_goods_by_bom = frappe._dict(
+				frappe.get_all(
+					"BOM",
+					filters={"name": ("in", bom_nos)},
+					fields=["name", "track_semi_finished_goods"],
+					as_list=True,
+				)
+			)
 
 		track_semi_finished_goods = True
 		for row in self.po_items:
@@ -1057,7 +1092,7 @@ class ProductionPlan(Document):
 			if not row.bom_no:
 				frappe.throw(_("Row #{0}: Please select the BOM No in Assembly Items").format(row.idx))
 
-			if frappe.db.get_value("BOM", row.bom_no, "track_semi_finished_goods"):
+			if track_semi_finished_goods_by_bom.get(row.bom_no):
 				frappe.msgprint(
 					_(
 						"Row #{0}: Since 'Track Semi Finished Goods' is enabled, the BOM {1} cannot be used for Sub Assembly Items"

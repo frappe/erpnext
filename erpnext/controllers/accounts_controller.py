@@ -2154,6 +2154,15 @@ class AccountsController(TransactionBase):
 
 		role_allowed_to_overbill = frappe.get_single_value("Accounts Settings", "role_allowed_to_over_bill")
 		is_overbilling_allowed = role_allowed_to_overbill in frappe.get_roles()
+		bill_for_rejected_qty = (
+			cint(
+				frappe.db.get_single_value(
+					"Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"
+				)
+			)
+			if self.doctype == "Purchase Invoice"
+			else 0
+		)
 
 		for row in ref_wise_billed_amount.values():
 			total_billed_amt = row.billed_amt
@@ -2170,11 +2179,7 @@ class AccountsController(TransactionBase):
 			total_overbilled_amt += overbill_amt
 
 			if overbill_amt > precision_allowance and not is_overbilling_allowed:
-				if self.doctype != "Purchase Invoice" or not cint(
-					frappe.db.get_single_value(
-						"Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"
-					)
-				):
+				if self.doctype != "Purchase Invoice" or not bill_for_rejected_qty:
 					overbilled_items.append(row)
 
 		if overbilled_items:

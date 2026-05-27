@@ -82,17 +82,27 @@ class StockController(AccountsController):
 			return
 
 		doc_before_save = self.get_doc_before_save()
+		serial_and_batch_bundles = {
+			row.serial_and_batch_bundle for row in self.items if row.get("serial_and_batch_bundle")
+		}
+		sabb_details_map = (
+			{
+				sabb.name: sabb
+				for sabb in frappe.get_all(
+					"Serial and Batch Bundle",
+					filters={"name": ("in", list(serial_and_batch_bundles))},
+					fields=["name", "type_of_transaction", "warehouse", "has_serial_no"],
+				)
+			}
+			if serial_and_batch_bundles
+			else {}
+		)
 
 		for row in self.items:
 			if not row.get("serial_and_batch_bundle"):
 				continue
 
-			sabb_details = frappe.db.get_value(
-				"Serial and Batch Bundle",
-				row.serial_and_batch_bundle,
-				["type_of_transaction", "warehouse", "has_serial_no"],
-				as_dict=True,
-			)
+			sabb_details = sabb_details_map.get(row.serial_and_batch_bundle)
 			if not sabb_details:
 				continue
 
@@ -1433,6 +1443,8 @@ class StockController(AccountsController):
 		):
 			return
 
+		allow_qi_after_purchase_or_delivery = None
+
 		for row in self.get("items"):
 			qi_required = False
 			if inspection_required_fieldname and frappe.get_cached_value(
@@ -1451,10 +1463,14 @@ class StockController(AccountsController):
 					"Purchase Invoice",
 					"Sales Invoice",
 					"Delivery Note",
-				] and frappe.get_single_value(
-					"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"
-				):
-					return
+				]:
+					if allow_qi_after_purchase_or_delivery is None:
+						allow_qi_after_purchase_or_delivery = frappe.get_single_value(
+							"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"
+						)
+
+					if allow_qi_after_purchase_or_delivery:
+						return
 
 				self.validate_qi_presence(row)
 				if self.docstatus == 1:

@@ -571,6 +571,10 @@ def validate_party_accounts(doc):
 	from erpnext.controllers.accounts_controller import validate_account_head
 
 	companies = []
+	default_company = frappe.db.get_default("Company")
+	default_company_currency = (
+		frappe.get_cached_value("Company", default_company, "default_currency") if default_company else None
+	)
 
 	for account in doc.get("accounts"):
 		if account.company in companies:
@@ -582,12 +586,11 @@ def validate_party_accounts(doc):
 			companies.append(account.company)
 
 		party_account_currency = frappe.get_cached_value("Account", account.account, "account_currency")
-		if frappe.db.get_default("Company"):
-			company_default_currency = frappe.get_cached_value(
-				"Company", frappe.db.get_default("Company"), "default_currency"
-			)
-		else:
-			company_default_currency = frappe.get_cached_value("Company", account.company, "default_currency")
+		company_default_currency = (
+			default_company_currency
+			if default_company
+			else frappe.get_cached_value("Company", account.company, "default_currency")
+		)
 
 		validate_party_gle_currency(doc.doctype, doc.name, account.company, party_account_currency)
 

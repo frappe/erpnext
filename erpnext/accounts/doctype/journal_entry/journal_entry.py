@@ -591,6 +591,18 @@ class JournalEntry(AccountsController):
 		).run()
 
 	def validate_party(self):
+		party_types = [d.party_type for d in self.get("accounts") if d.party_type]
+		party_type_account_types = frappe._dict()
+		if party_types:
+			party_type_account_types = frappe._dict(
+				frappe.get_all(
+					"Party Type",
+					filters={"name": ("in", party_types)},
+					fields=["name", "account_type"],
+					as_list=True,
+				)
+			)
+
 		for d in self.get("accounts"):
 			account_type = frappe.get_cached_value("Account", d.account, "account_type")
 
@@ -605,9 +617,9 @@ class JournalEntry(AccountsController):
 					)
 				elif (
 					d.party_type
-					and frappe.db.get_value("Party Type", d.party_type, "account_type") != account_type
+					and party_type_account_types.get(d.party_type) != account_type
 					and d.party_type
-					!= "Employee"  # making an excpetion for employee since they can be both payable and receivable
+					!= "Employee"  # making an exception for employee since they can be both payable and receivable
 				):
 					frappe.throw(
 						_("Row {0}: Account {1} and Party Type {2} have different account types").format(

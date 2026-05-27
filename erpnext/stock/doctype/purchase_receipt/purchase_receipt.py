@@ -513,6 +513,9 @@ class PurchaseReceipt(BuyingController):
 		provisional_accounting_for_non_stock_items = cint(
 			frappe.db.get_value("Company", self.company, "enable_provisional_accounting_for_non_stock_items")
 		)
+		set_valuation_rate_for_rejected_materials = frappe.db.get_single_value(
+			"Buying Settings", "set_valuation_rate_for_rejected_materials"
+		)
 
 		exchange_rate_map, net_rate_map = get_purchase_document_details(self)
 
@@ -805,7 +808,7 @@ class PurchaseReceipt(BuyingController):
 					make_sub_contracting_gl_entries(d)
 					make_divisional_loss_gl_entry(d, outgoing_amount)
 			elif (d.warehouse and d.qty and d.warehouse not in warehouse_with_no_account) or (
-				not frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
+				not set_valuation_rate_for_rejected_materials
 				and d.rejected_warehouse
 				and d.rejected_warehouse not in warehouse_with_no_account
 			):
@@ -814,9 +817,7 @@ class PurchaseReceipt(BuyingController):
 			if d.is_fixed_asset and d.landed_cost_voucher_amount:
 				self.update_assets(d, d.valuation_rate)
 
-			if d.rejected_qty and frappe.db.get_single_value(
-				"Buying Settings", "set_valuation_rate_for_rejected_materials"
-			):
+			if d.rejected_qty and set_valuation_rate_for_rejected_materials:
 				stock_asset_rbnb = (
 					self.get_company_default("asset_received_but_not_billed")
 					if d.is_fixed_asset
@@ -1287,7 +1288,7 @@ def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate
 			total_amount = total_billed_amount
 
 		amount = item.amount
-		if frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"):
+		if buying_settings.bill_for_rejected_quantity_in_purchase_invoice:
 			amount += flt(item.rejected_qty * item.rate, item.precision("amount"))
 
 		if adjust_incoming_rate:

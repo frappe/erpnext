@@ -876,12 +876,37 @@ class SalesInvoice(SellingController):
 	def validate_time_sheets_are_submitted(self):
 		# Note: This validation is skipped for return invoices
 		# to allow returns to reference already-billed timesheet details
+		timesheet_details = {data.timesheet_detail for data in self.timesheets if data.timesheet_detail}
+		timesheets = {data.time_sheet for data in self.timesheets if data.time_sheet}
+		sales_invoice_by_timesheet_detail = (
+			frappe._dict(
+				frappe.get_all(
+					"Timesheet Detail",
+					filters={"name": ("in", list(timesheet_details))},
+					fields=["name", "sales_invoice"],
+					as_list=True,
+				)
+			)
+			if timesheet_details
+			else frappe._dict()
+		)
+		status_by_timesheet = (
+			frappe._dict(
+				frappe.get_all(
+					"Timesheet",
+					filters={"name": ("in", list(timesheets))},
+					fields=["name", "status"],
+					as_list=True,
+				)
+			)
+			if timesheets
+			else frappe._dict()
+		)
+
 		for data in self.timesheets:
 			# Handle invoice duplication
 			if data.time_sheet and data.timesheet_detail:
-				if sales_invoice := frappe.db.get_value(
-					"Timesheet Detail", data.timesheet_detail, "sales_invoice"
-				):
+				if sales_invoice := sales_invoice_by_timesheet_detail.get(data.timesheet_detail):
 					frappe.throw(
 						_("Row {0}: Sales Invoice {1} is already created for {2}").format(
 							data.idx, frappe.bold(sales_invoice), frappe.bold(data.time_sheet)
@@ -889,7 +914,7 @@ class SalesInvoice(SellingController):
 					)
 
 			if data.time_sheet:
-				status = frappe.db.get_value("Timesheet", data.time_sheet, "status")
+				status = status_by_timesheet.get(data.time_sheet)
 				if status not in ["Submitted", "Payslip", "Partially Billed"]:
 					frappe.throw(
 						_("Timesheet {0} cannot be invoiced in its current state").format(data.time_sheet)
@@ -1120,9 +1145,20 @@ class SalesInvoice(SellingController):
 			"Sales Order": ["so_required", "is_pos"],
 			"Delivery Note": ["dn_required", "update_stock"],
 		}
+		selling_settings = {
+			"so_required": frappe.get_single_value("Selling Settings", "so_required"),
+			"dn_required": frappe.get_single_value("Selling Settings", "dn_required"),
+		}
+		customer_settings = frappe._dict()
+		if any(value == "Yes" for value in selling_settings.values()):
+			customer_settings = (
+				frappe.get_value("Customer", self.customer, ["so_required", "dn_required"], as_dict=True)
+				or frappe._dict()
+			)
+
 		for key, value in prev_doc_field_map.items():
-			if frappe.get_single_value("Selling Settings", value[0]) == "Yes":
-				if frappe.get_value("Customer", self.customer, value[0]):
+			if selling_settings.get(value[0]) == "Yes":
+				if customer_settings.get(value[0]):
 					continue
 
 				for d in self.get("items"):
@@ -1390,17 +1426,38 @@ class SalesInvoice(SellingController):
 			item.set_income_account_for_fixed_asset(self.company)
 
 	def check_prev_docstatus(self):
+		sales_orders = {d.sales_order for d in self.get("items") if d.sales_order}
+		delivery_notes = {d.delivery_note for d in self.get("items") if d.delivery_note}
+		sales_order_status = (
+			frappe._dict(
+				frappe.get_all(
+					"Sales Order",
+					filters={"name": ("in", list(sales_orders))},
+					fields=["name", "docstatus"],
+					as_list=True,
+				)
+			)
+			if sales_orders
+			else frappe._dict()
+		)
+		delivery_note_status = (
+			frappe._dict(
+				frappe.get_all(
+					"Delivery Note",
+					filters={"name": ("in", list(delivery_notes))},
+					fields=["name", "docstatus"],
+					as_list=True,
+				)
+			)
+			if delivery_notes
+			else frappe._dict()
+		)
+
 		for d in self.get("items"):
-			if (
-				d.sales_order
-				and frappe.db.get_value("Sales Order", d.sales_order, "docstatus", cache=True) != 1
-			):
+			if d.sales_order and sales_order_status.get(d.sales_order) != 1:
 				frappe.throw(_("Sales Order {0} is not submitted").format(d.sales_order))
 
-			if (
-				d.delivery_note
-				and frappe.db.get_value("Delivery Note", d.delivery_note, "docstatus", cache=True) != 1
-			):
+			if d.delivery_note and delivery_note_status.get(d.delivery_note) != 1:
 				throw(_("Delivery Note {0} is not submitted").format(d.delivery_note))
 
 	def split_asset_based_on_sale_qty(self):

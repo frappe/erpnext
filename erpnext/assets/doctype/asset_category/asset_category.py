@@ -76,12 +76,28 @@ class AssetCategory(Document):
 			"depreciation_expense_account": {"account_type": ["Depreciation"]},
 			"capital_work_in_progress_account": {"account_type": ["Capital Work in Progress"]},
 		}
+		account_names = {
+			d.get(fieldname) for d in self.accounts for fieldname in account_type_map if d.get(fieldname)
+		}
+		account_types = (
+			frappe._dict(
+				frappe.get_all(
+					"Account",
+					filters={"name": ("in", list(account_names))},
+					fields=["name", "account_type"],
+					as_list=True,
+				)
+			)
+			if account_names
+			else frappe._dict()
+		)
+
 		for d in self.accounts:
 			for fieldname in account_type_map.keys():
 				if d.get(fieldname):
 					selected_account = d.get(fieldname)
-					key_to_match = next(iter(account_type_map.get(fieldname)))  # acount_type or root_type
-					selected_key_type = frappe.db.get_value("Account", selected_account, key_to_match)
+					key_to_match = next(iter(account_type_map.get(fieldname)))  # account_type or root_type
+					selected_key_type = account_types.get(selected_account)
 					expected_key_types = account_type_map[fieldname][key_to_match]
 
 					if selected_key_type not in expected_key_types:

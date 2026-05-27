@@ -159,15 +159,29 @@ class PackingSlip(StatusUpdater):
 		if not self.from_case_no:
 			self.from_case_no = self.get_recommended_case_no()
 
-		for item in self.items:
-			weight_per_unit, weight_uom = frappe.db.get_value(
-				"Item", item.item_code, ["weight_per_unit", "weight_uom"]
-			)
+		item_codes = {item.item_code for item in self.items if item.item_code}
+		item_weight_details = (
+			{
+				row.name: row
+				for row in frappe.get_all(
+					"Item",
+					filters={"name": ("in", list(item_codes))},
+					fields=["name", "weight_per_unit", "weight_uom"],
+				)
+			}
+			if item_codes
+			else {}
+		)
 
-			if weight_per_unit and not item.net_weight:
-				item.net_weight = weight_per_unit
-			if weight_uom and not item.weight_uom:
-				item.weight_uom = weight_uom
+		for item in self.items:
+			weight_details = item_weight_details.get(item.item_code)
+			if not weight_details:
+				continue
+
+			if weight_details.weight_per_unit and not item.net_weight:
+				item.net_weight = weight_details.weight_per_unit
+			if weight_details.weight_uom and not item.weight_uom:
+				item.weight_uom = weight_details.weight_uom
 
 	def get_recommended_case_no(self):
 		"""Returns the next case no. for a new packing slip for a delivery note"""

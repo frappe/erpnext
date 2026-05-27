@@ -315,12 +315,17 @@ class Item(Document):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 		# default warehouse, or Stores
+		default_stock_warehouse = None
+		default_stock_warehouse_fetched = False
 		for default in self.item_defaults or [
 			frappe._dict({"company": frappe.defaults.get_defaults().company})
 		]:
-			default_warehouse = default.default_warehouse or frappe.get_single_value(
-				"Stock Settings", "default_warehouse"
-			)
+			default_warehouse = default.default_warehouse
+			if not default_warehouse:
+				if not default_stock_warehouse_fetched:
+					default_stock_warehouse = frappe.get_single_value("Stock Settings", "default_warehouse")
+					default_stock_warehouse_fetched = True
+				default_warehouse = default_stock_warehouse
 			if default_warehouse:
 				warehouse_company = frappe.db.get_value("Warehouse", default_warehouse, "company")
 

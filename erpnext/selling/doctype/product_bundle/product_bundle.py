@@ -81,8 +81,21 @@ class ProductBundle(Document):
 			frappe.throw(_("Parent Item {0} must not be a Fixed Asset").format(self.new_item_code))
 
 	def validate_child_items(self):
+		item_codes = {item.item_code for item in self.items if item.item_code}
+		active_product_bundles = (
+			set(
+				frappe.get_all(
+					"Product Bundle",
+					filters={"name": ("in", list(item_codes)), "disabled": 0},
+					pluck="name",
+				)
+			)
+			if item_codes
+			else set()
+		)
+
 		for item in self.items:
-			if frappe.db.exists("Product Bundle", {"name": item.item_code, "disabled": 0}):
+			if item.item_code in active_product_bundles:
 				frappe.throw(
 					_(
 						"Row #{0}: Child Item should not be a Product Bundle. Please remove Item {1} and Save"

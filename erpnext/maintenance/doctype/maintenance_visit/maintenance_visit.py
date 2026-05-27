@@ -47,8 +47,15 @@ class MaintenanceVisit(TransactionBase):
 	# end: auto-generated types
 
 	def validate_serial_no(self):
+		serial_nos = {d.serial_no for d in self.get("purposes") if d.serial_no}
+		existing_serial_nos = (
+			set(frappe.get_all("Serial No", filters={"name": ("in", list(serial_nos))}, pluck="name"))
+			if serial_nos
+			else set()
+		)
+
 		for d in self.get("purposes"):
-			if d.serial_no and not frappe.db.exists("Serial No", d.serial_no):
+			if d.serial_no and d.serial_no not in existing_serial_nos:
 				frappe.throw(_("Serial No {0} does not exist").format(d.serial_no))
 
 	def validate_purpose_table(self):
@@ -191,7 +198,6 @@ class MaintenanceVisit(TransactionBase):
 				frappe.throw(
 					_("Cancel Material Visits {0} before cancelling this Maintenance Visit").format(check_lst)
 				)
-				raise Exception
 			else:
 				self.update_customer_issue(0)
 

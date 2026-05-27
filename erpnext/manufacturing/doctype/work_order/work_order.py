@@ -650,6 +650,7 @@ class WorkOrder(Document):
 		allowance_percentage = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
+		extra_materials_allowance_percentage = None
 
 		for purpose, fieldname in (
 			("Manufacture", "produced_qty"),
@@ -666,11 +667,14 @@ class WorkOrder(Document):
 			qty = self.get_transferred_or_manufactured_qty(purpose, fieldname)
 
 			if not allowance_percentage and purpose == "Material Transfer for Manufacture":
-				allowance_percentage = flt(
-					frappe.db.get_single_value(
-						"Manufacturing Settings", "transfer_extra_materials_percentage"
+				if extra_materials_allowance_percentage is None:
+					extra_materials_allowance_percentage = flt(
+						frappe.db.get_single_value(
+							"Manufacturing Settings", "transfer_extra_materials_percentage"
+						)
 					)
-				)
+
+				allowance_percentage = extra_materials_allowance_percentage
 
 			completed_qty = self.qty + (allowance_percentage / 100 * self.qty)
 			if qty > completed_qty:
