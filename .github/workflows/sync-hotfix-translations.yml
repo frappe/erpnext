@@ -54,6 +54,11 @@ jobs:
           # stack and must use the same Python version.
           python-version: "3.14"
 
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
       - name: Run sync script
         run: |
           bash ${GITHUB_WORKSPACE}/.github/helper/sync_hotfix_translations.sh
