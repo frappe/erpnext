@@ -719,7 +719,12 @@ def make_reverse_gl_entries(
 		check_freezing_date(gl_entries[0]["posting_date"], adv_adj)
 
 		is_opening = any(d.get("is_opening") == "Yes" for d in gl_entries)
-		validate_against_pcv(is_opening, gl_entries[0]["posting_date"], gl_entries[0]["company"])
+
+		# For reverse entries, use the posting_date parameter if provided and valid
+		# Otherwise fall back to original posting_date
+		validation_date = posting_date if posting_date else gl_entries[0]["posting_date"]
+		validate_against_pcv(is_opening, validation_date, gl_entries[0]["company"])
+
 		if partial_cancel:
 			# Partial cancel is only used by `Advance` in separate account feature.
 			# Only cancel GL entries for unlinked reference using `voucher_detail_no`
