@@ -17,7 +17,12 @@ class BOMOperation(Document):
 		base_cost_per_unit: DF.Float
 		base_hour_rate: DF.Currency
 		base_operating_cost: DF.Currency
+<<<<<<< HEAD
 		batch_size: DF.Int
+=======
+		batch_size: DF.Float
+		bom_no: DF.Link | None
+>>>>>>> 3ad67021d6 (fix(manufacturing): allow to edit batch size while creating a work order (#55058))
 		cost_per_unit: DF.Float
 		description: DF.TextEditor | None
 		fixed_time: DF.Check
