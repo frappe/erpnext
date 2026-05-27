@@ -390,7 +390,7 @@ def calculate_values(
 			prepare_opening_closing(d)
 
 
-def calculate_total_row(data, company_currency, show_group_accounts=True):
+def calculate_total_row(data, company_currency):
 	total_row = {
 		"account": "'" + _("Total") + "'",
 		"account_name": "'" + _("Total") + "'",
@@ -412,10 +412,7 @@ def calculate_total_row(data, company_currency, show_group_accounts=True):
 			total_row[field] += row[field]
 
 	for d in data:
-		if not show_group_accounts:
-			sum_value_fields(d)
-
-		elif show_group_accounts and not d.get("parent_account"):
+		if not d.get("is_group_account"):
 			sum_value_fields(d)
 
 	return total_row
@@ -465,9 +462,7 @@ def prepare_data(accounts, filters, parent_children_map, company_currency):
 	if not filters.get("show_group_accounts"):
 		data = hide_group_accounts(data)
 
-	total_row = calculate_total_row(
-		data, company_currency, show_group_accounts=filters.get("show_group_accounts")
-	)
+	total_row = calculate_total_row(data, company_currency)
 
 	data.extend([{}, total_row])
 
