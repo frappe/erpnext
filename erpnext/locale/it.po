@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-24 10:11+0000\n"
-"PO-Revision-Date: 2026-05-24 21:21\n"
+"PO-Revision-Date: 2026-05-27 21:39\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Italian\n"
 "MIME-Version: 1.0\n"
@@ -12478,13 +12478,13 @@ msgstr "Costo"
 #. Label of the cost_allocation (Currency) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Cost Allocation"
-msgstr ""
+msgstr "Ottieni allocazioni"
 
 #. Label of the cost_allocation_per (Percent) field in DocType 'BOM Secondary
 #. Item'
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 msgid "Cost Allocation %"
-msgstr ""
+msgstr "Ottieni allocazioni %"
 
 #. Label of the cost_allocation__process_loss_section (Section Break) field in
 #. DocType 'BOM'
@@ -61036,7 +61036,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1589
 msgid "as of {0}"
-msgstr ""
+msgstr "a partire da {0}"
 
 #: erpnext/www/book_appointment/index.html:43
 msgid "at"
