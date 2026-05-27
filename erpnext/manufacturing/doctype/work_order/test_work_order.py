@@ -4225,6 +4225,7 @@ class TestWorkOrder(ERPNextTestSuite):
 			"operations",
 			{
 				"operation": fg_operation.name,
+				"batch_size": fg_operation.batch_size,
 				"time_in_mins": 60,
 				"workstation": workstation.name,
 			},
@@ -4233,6 +4234,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		fg_bom.items[0].bom_no = subassembly_bom.name
 		fg_bom.save()
 		fg_bom.submit()
+		self.assertEqual(fg_bom.operations[0].batch_size, 25)
 
 		wo_order = make_wo_order_test_record(
 			item=fg_item.name,
