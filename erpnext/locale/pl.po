@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-24 10:11+0000\n"
-"PO-Revision-Date: 2026-05-24 21:21\n"
+"PO-Revision-Date: 2026-05-27 21:39\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Polish\n"
 "MIME-Version: 1.0\n"
@@ -153,7 +153,7 @@ msgstr "% Ukończony"
 #. Label of the cost_allocation_per (Percent) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "% Cost Allocation"
-msgstr ""
+msgstr "% Przydział kosztów"
 
 #. Label of the per_delivered (Percent) field in DocType 'Pick List'
 #. Label of the per_delivered (Percent) field in DocType 'Subcontracting Inward
@@ -17672,7 +17672,7 @@ msgstr ""
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:182
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:447
 msgid "DocType {0} does not exist"
-msgstr ""
+msgstr "DocType {0} nie istnieje"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:295
 msgid "DocType {0} with company field '{1}' is already in the list"
