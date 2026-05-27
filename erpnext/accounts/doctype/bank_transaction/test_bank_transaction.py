@@ -97,12 +97,14 @@ class TestBankTransaction(ERPNextTestSuite):
 			]
 		)
 		reconcile_vouchers(bank_transaction.name, vouchers)
-		payment.reload()
-		payment.cancel()
 		bank_transaction.reload()
-		self.assertEqual(bank_transaction.docstatus, DocStatus.submitted())
+		bank_transaction.remove_payment_entries()
+		bank_transaction.reload()
 		self.assertEqual(bank_transaction.unallocated_amount, 1700)
 		self.assertEqual(bank_transaction.payment_entries, [])
+		payment.reload()
+		payment.cancel()
+		self.assertEqual(bank_transaction.docstatus, DocStatus.submitted())
 
 	# Check if ERPNext can correctly filter a linked payments based on the debit/credit amount
 	def test_debit_credit_output(self):
