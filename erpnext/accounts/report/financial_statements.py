@@ -18,6 +18,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_fieldname,
 	get_dimension_with_children,
+	get_doctypes_with_dimensions,
 )
 from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
 from erpnext.accounts.utils import get_fiscal_year, get_zero_cutoff
@@ -685,12 +686,9 @@ def set_gl_entries_by_account(
 	"""Returns a dict like { "account": [gl entries], ... }"""
 	gl_entries = []
 
-	# Period Closing Vouchers have no dimension attribution, so skip them when grouping by dimension
-	group_by_dimensions = bool(filters and filters.get("group_by_dimension"))
-
 	# For balance sheet
 	ignore_closing_balances = frappe.get_single_value("Accounts Settings", "ignore_account_closing_balance")
-	if not from_date and not ignore_closing_balances and not group_by_dimensions:
+	if not from_date and not ignore_closing_balances:
 		last_period_closing_voucher = frappe.db.get_all(
 			"Period Closing Voucher",
 			filters={
@@ -756,8 +754,6 @@ def get_accounting_entries(
 	group_by_account=False,
 	ignore_reporting_currency=True,
 ):
-	group_by_dimensions = bool(filters and filters.get("group_by_dimension"))
-
 	gl_entry = frappe.qb.DocType(doctype)
 	query = (
 		frappe.qb.from_(gl_entry)
@@ -776,8 +772,8 @@ def get_accounting_entries(
 		.where(gl_entry.company == filters.company)
 	)
 
-	if group_by_dimensions and doctype == "GL Entry" and not group_by_account:
-		dimension_field = get_dimension_fieldname(filters["group_by_dimension"])
+	if filters.group_by_dimension and doctype in get_doctypes_with_dimensions() and not group_by_account:
+		dimension_field = get_dimension_fieldname(filters.group_by_dimension)
 		query = query.select(gl_entry[dimension_field])
 
 	if not ignore_reporting_currency:
