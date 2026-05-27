@@ -17,7 +17,7 @@ class BOMOperation(Document):
 		base_cost_per_unit: DF.Float
 		base_hour_rate: DF.Currency
 		base_operating_cost: DF.Currency
-		batch_size: DF.Int
+		batch_size: DF.Float
 		cost_per_unit: DF.Float
 		description: DF.TextEditor | None
 		fixed_time: DF.Check
