@@ -1033,11 +1033,7 @@ class SalesInvoice(SellingController):
 	def clear_unallocated_mode_of_payments(self):
 		self.set("payments", self.get("payments", {"amount": ["not in", [0, None, ""]]}))
 
-		frappe.db.sql(
-			"""delete from `tabSales Invoice Payment` where parent = %s
-			and amount = 0""",
-			self.name,
-		)
+		frappe.db.delete("Sales Invoice Payment", filters={"parent": self.name, "amount": 0})
 
 	def validate_with_previous_doc(self):
 		super().validate_with_previous_doc(
