@@ -51,7 +51,7 @@ class Supplier(TransactionBase):
 		disabled: DF.Check
 		email_id: DF.ReadOnly | None
 		gender: DF.Link | None
-		hold_type: DF.Literal["", "All", "Invoices", "Payments"]
+		hold_type: DF.Literal["All", "Invoices", "Payments"]
 		image: DF.AttachImage | None
 		is_frozen: DF.Check
 		is_internal_supplier: DF.Check
