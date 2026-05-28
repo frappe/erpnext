@@ -63,7 +63,11 @@ payment_method = [
 
 
 class TestPaymentRequest(ERPNextTestSuite):
-	def setUp(self):
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		# Payment gateways and accounts are master data shared by all 57 tests.
+		# Committing them once avoids re-insertion after each tearDown rollback.
 		for payment_gateway in payment_gateways:
 			if not frappe.db.get_value("Payment Gateway", payment_gateway["gateway"], "name"):
 				frappe.get_doc(payment_gateway).insert(ignore_permissions=True)
@@ -80,6 +84,10 @@ class TestPaymentRequest(ERPNextTestSuite):
 			):
 				frappe.get_doc(method).insert(ignore_permissions=True)
 
+		frappe.db.commit()  # nosemgrep
+
+	def setUp(self):
+		# Mock patches must be started per-test so addCleanup tears them down correctly.
 		send_email = patch(
 			"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.send_email",
 			return_value=None,

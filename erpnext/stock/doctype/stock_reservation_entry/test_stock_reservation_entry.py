@@ -22,10 +22,26 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestStockReservationEntry(ERPNextTestSuite):
+	@classmethod
+	def setUpClass(cls) -> None:
+		super().setUpClass()
+		cls.warehouse = "_Test Warehouse - _TC"
+		cls.sr_item = make_item(
+			"_Test Stock Reservation Item", properties={"is_stock_item": 1, "valuation_rate": 100}
+		)
+		current_qty = get_stock_balance(cls.sr_item.name, cls.warehouse)
+		if current_qty < 100:
+			create_material_receipt(
+				items={cls.sr_item.name: cls.sr_item}, warehouse=cls.warehouse, qty=100 - current_qty
+			)
+		frappe.db.commit()  # nosemgrep
+
 	def setUp(self) -> None:
-		self.warehouse = "_Test Warehouse - _TC"
-		self.sr_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100})
-		create_material_receipt(items={self.sr_item.name: self.sr_item}, warehouse=self.warehouse, qty=100)
+		self.warehouse = self.__class__.warehouse
+		self.sr_item = self.__class__.sr_item
+
+	def setup_stock_reservation_item(self) -> None:
+		self.sr_item = self.__class__.sr_item
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_validate_stock_reservation_settings(self) -> None:
@@ -57,6 +73,8 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			get_available_qty_to_reserve,
 		)
 
+		self.setup_stock_reservation_item()
+
 		# Case - 1: When `Reserved Qty` is `0`, Available Qty to Reserve = Actual Qty
 		available_qty_to_reserve = get_available_qty_to_reserve(self.sr_item.name, self.warehouse)
 		expected_available_qty_to_reserve = get_stock_balance(self.sr_item.name, self.warehouse)
@@ -77,6 +95,8 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		self.assertEqual(available_qty_to_reserve, expected_available_qty_to_reserve)
 
 	def test_update_status(self) -> None:
+		self.setup_stock_reservation_item()
+
 		sre = make_stock_reservation_entry(
 			item_code=self.sr_item.name,
 			warehouse=self.warehouse,
@@ -128,6 +148,8 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			cancel_stock_reservation_entries,
 		)
 		from erpnext.stock.stock_ledger import NegativeStockError
+
+		self.setup_stock_reservation_item()
 
 		# Step - 1: Create a `Sales Order`
 		so = make_sales_order(
@@ -183,7 +205,8 @@ class TestStockReservationEntry(ERPNextTestSuite):
 	def test_stock_reservation_against_sales_order(self) -> None:
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
-		items_details = create_items()
+		item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100})
+		items_details = {item.name: item}
 		se = create_material_receipt(items_details, self.warehouse, qty=10)
 
 		item_list = []

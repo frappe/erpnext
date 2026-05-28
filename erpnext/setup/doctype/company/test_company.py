@@ -14,6 +14,13 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestCompany(ERPNextTestSuite):
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		context = cls()
+		context.load_test_records("Company")
+		frappe.db.commit()  # nosemgrep
+
 	def test_coa_based_on_existing_company(self):
 		company = frappe.new_doc("Company")
 		company.company_name = "COA from Existing Company"
@@ -56,49 +63,50 @@ class TestCompany(ERPNextTestSuite):
 
 			self.assertTrue(templates)
 
-			for company in frappe.db.get_all("Company", {"company_name": ["in", templates]}):
+			template = templates[0]
+			company_name = f"{country} {template} COA"
+
+			for company in frappe.db.get_all("Company", {"company_name": company_name}):
 				frappe.delete_doc("Company", company.name)
 
-			for template in templates:
-				try:
-					company = frappe.new_doc("Company")
-					company.company_name = template
-					company.abbr = random_string(3)
-					company.default_currency = "USD"
-					company.create_chart_of_accounts_based_on = "Standard Template"
-					company.chart_of_accounts = template
-					company.country = country
-					company.save()
+			try:
+				company = frappe.new_doc("Company")
+				company.company_name = company_name
+				company.abbr = random_string(3)
+				company.default_currency = "USD"
+				company.create_chart_of_accounts_based_on = "Standard Template"
+				company.chart_of_accounts = template
+				company.country = country
+				company.save()
 
-					account_types = [
-						"Cost of Goods Sold",
-						"Depreciation",
-						"Expenses Included In Valuation",
-						"Fixed Asset",
-						"Payable",
-						"Receivable",
-						"Stock Adjustment",
-						"Stock Received But Not Billed",
-						"Stock Delivered But Not Billed",
-						"Bank",
-						"Cash",
-						"Stock",
-					]
+				account_types = [
+					"Cost of Goods Sold",
+					"Depreciation",
+					"Expenses Included In Valuation",
+					"Fixed Asset",
+					"Payable",
+					"Receivable",
+					"Stock Adjustment",
+					"Stock Received But Not Billed",
+					"Stock Delivered But Not Billed",
+					"Bank",
+					"Cash",
+					"Stock",
+				]
 
-					for account_type in account_types:
-						filters = {"company": template, "account_type": account_type}
-						if account_type in ["Bank", "Cash"]:
-							filters["is_group"] = 1
+				for account_type in account_types:
+					filters = {"company": company.name, "account_type": account_type}
+					if account_type in ["Bank", "Cash"]:
+						filters["is_group"] = 1
 
-						has_matching_accounts = frappe.get_all("Account", filters)
-						error_message = _("No Account matched these filters: {}").format(json.dumps(filters))
+					has_matching_accounts = frappe.get_all("Account", filters)
+					error_message = _("No Account matched these filters: {}").format(json.dumps(filters))
 
-						self.assertTrue(has_matching_accounts, msg=error_message)
-				finally:
-					frappe.delete_doc("Company", template)
+					self.assertTrue(has_matching_accounts, msg=error_message)
+			finally:
+				frappe.delete_doc("Company", company_name)
 
 	def test_basic_tree(self, records=None):
-		self.load_test_records("Company")
 		min_lft = 1
 		max_rgt = frappe.db.sql("select max(rgt) from `tabCompany`")[0][0]
 
@@ -190,8 +198,6 @@ class TestCompany(ERPNextTestSuite):
 
 	def test_demo_data(self):
 		from erpnext.setup.demo import clear_demo_data, setup_demo_data
-
-		self.load_test_records("Company")
 
 		setup_demo_data(self.globalTestRecords["Company"][0]["company_name"])
 		company_name = frappe.db.get_value("Company", {"name": ("like", "%(Demo)")})

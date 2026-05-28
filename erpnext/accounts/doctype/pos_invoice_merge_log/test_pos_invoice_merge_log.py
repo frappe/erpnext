@@ -16,19 +16,23 @@ from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import cr
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_serial_nos_from_bundle,
 )
-from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestPOSInvoiceMergeLog(ERPNextTestSuite):
-	def setUp(self):
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
 		mode_of_payment = frappe.get_doc("Mode of Payment", "Bank Draft")
+		set_default_account_for_mode_of_payment(mode_of_payment, "_Test Company", "_Test Bank - _TC")
+		frappe.db.set_single_value("Selling Settings", "validate_selling_price", 0)
+		frappe.db.commit()  # nosemgrep
+
+	def setUp(self):
 		self.test_user, self.pos_profile = init_user_and_profile()
 		self.opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
 
-		set_default_account_for_mode_of_payment(mode_of_payment, "_Test Company", "_Test Bank - _TC")
 		frappe.db.set_single_value("POS Settings", "invoice_type", "POS Invoice")
-		frappe.db.set_single_value("Selling Settings", "validate_selling_price", 0)
 
 	def make_closing_entry(self):
 		closing_entry = make_closing_entry_from_opening(self.opening_entry)
@@ -36,17 +40,17 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 		return closing_entry
 
 	def test_consolidated_invoice_creation(self):
-		pos_inv = create_pos_invoice(rate=300, do_not_submit=1)
+		pos_inv = create_pos_invoice(update_stock=0, rate=300, do_not_submit=1)
 		pos_inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 300})
 		pos_inv.save()
 		pos_inv.submit()
 
-		pos_inv2 = create_pos_invoice(rate=3200, do_not_submit=1)
+		pos_inv2 = create_pos_invoice(update_stock=0, rate=3200, do_not_submit=1)
 		pos_inv2.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3200})
 		pos_inv2.save()
 		pos_inv2.submit()
 
-		pos_inv3 = create_pos_invoice(customer="_Test Customer 2", rate=2300, do_not_submit=1)
+		pos_inv3 = create_pos_invoice(update_stock=0, customer="_Test Customer 2", rate=2300, do_not_submit=1)
 		pos_inv3.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 2300})
 		pos_inv3.save()
 		pos_inv3.submit()
@@ -62,17 +66,17 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 		self.assertFalse(pos_inv.consolidated_invoice == pos_inv3.consolidated_invoice)
 
 	def test_consolidated_credit_note_creation(self):
-		pos_inv = create_pos_invoice(rate=300, do_not_submit=1)
+		pos_inv = create_pos_invoice(update_stock=0, rate=300, do_not_submit=1)
 		pos_inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 300})
 		pos_inv.save()
 		pos_inv.submit()
 
-		pos_inv2 = create_pos_invoice(rate=3200, do_not_submit=1)
+		pos_inv2 = create_pos_invoice(update_stock=0, rate=3200, do_not_submit=1)
 		pos_inv2.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3200})
 		pos_inv2.save()
 		pos_inv2.submit()
 
-		pos_inv3 = create_pos_invoice(customer="_Test Customer 2", rate=2300, do_not_submit=1)
+		pos_inv3 = create_pos_invoice(update_stock=0, customer="_Test Customer 2", rate=2300, do_not_submit=1)
 		pos_inv3.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 2300})
 		pos_inv3.save()
 		pos_inv3.submit()
@@ -104,7 +108,7 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 		self.assertEqual(consolidated_credit_note.payments[1].amount, -200)
 
 	def test_consolidated_invoice_item_taxes(self):
-		inv = create_pos_invoice(qty=1, rate=100, do_not_save=True)
+		inv = create_pos_invoice(update_stock=0, qty=1, rate=100, do_not_save=True)
 
 		inv.append(
 			"taxes",
@@ -122,7 +126,7 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 		inv.save()
 		inv.submit()
 
-		inv2 = create_pos_invoice(qty=1, rate=100, do_not_save=True)
+		inv2 = create_pos_invoice(update_stock=0, qty=1, rate=100, do_not_save=True)
 		inv2.get("items")[0].item_code = "_Test Item 2"
 		inv2.append(
 			"taxes",
@@ -181,14 +185,7 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 		Test round off error in consolidated invoice creation if POS Invoice has inclusive tax
 		"""
 
-		make_stock_entry(
-			to_warehouse="_Test Warehouse - _TC",
-			item_code="_Test Item",
-			rate=8000,
-			qty=10,
-		)
-
-		inv = create_pos_invoice(qty=3, rate=10000, do_not_save=True)
+		inv = create_pos_invoice(update_stock=0, qty=3, rate=10000, do_not_save=True)
 		inv.append(
 			"taxes",
 			{
@@ -205,7 +202,7 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 		inv.insert()
 		inv.submit()
 
-		inv2 = create_pos_invoice(qty=3, rate=10000, do_not_save=True)
+		inv2 = create_pos_invoice(update_stock=0, qty=3, rate=10000, do_not_save=True)
 		inv2.append(
 			"taxes",
 			{
@@ -233,14 +230,7 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 		"""
 		Test the same case as above but with an Unpaid POS Invoice
 		"""
-		make_stock_entry(
-			to_warehouse="_Test Warehouse - _TC",
-			item_code="_Test Item",
-			rate=8000,
-			qty=10,
-		)
-
-		inv = create_pos_invoice(qty=6, rate=10000, do_not_save=True)
+		inv = create_pos_invoice(update_stock=0, qty=6, rate=10000, do_not_save=True)
 		inv.append(
 			"taxes",
 			{
@@ -257,7 +247,7 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 		inv.insert()
 		inv.submit()
 
-		inv2 = create_pos_invoice(qty=6, rate=10000, do_not_save=True)
+		inv2 = create_pos_invoice(update_stock=0, qty=6, rate=10000, do_not_save=True)
 		inv2.append(
 			"taxes",
 			{
@@ -274,7 +264,7 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 		inv2.insert()
 		inv2.submit()
 
-		inv3 = create_pos_invoice(qty=3, rate=600, do_not_save=True)
+		inv3 = create_pos_invoice(update_stock=0, qty=3, rate=600, do_not_save=True)
 		inv3.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 1800})
 		inv3.insert()
 		inv3.submit()
@@ -290,16 +280,9 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 		"System Settings", {"number_format": "#,###.###", "currency_precision": 3, "float_precision": 3}
 	)
 	def test_consolidation_round_off_error_3(self):
-		make_stock_entry(
-			to_warehouse="_Test Warehouse - _TC",
-			item_code="_Test Item",
-			rate=8000,
-			qty=10,
-		)
-
 		item_rates = [69, 59, 29]
 		for _i in [1, 2]:
-			inv = create_pos_invoice(is_return=1, do_not_save=1)
+			inv = create_pos_invoice(update_stock=0, is_return=1, do_not_save=1)
 			inv.items = []
 			for rate in item_rates:
 				inv.append(
@@ -343,19 +326,12 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 		"""
 		Test if the rounding adjustment is calculated correctly
 		"""
-		make_stock_entry(
-			to_warehouse="_Test Warehouse - _TC",
-			item_code="_Test Item",
-			rate=8000,
-			qty=10,
-		)
-
-		inv = create_pos_invoice(qty=1, rate=69.5, do_not_save=True)
+		inv = create_pos_invoice(update_stock=0, qty=1, rate=69.5, do_not_save=True)
 		inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 70})
 		inv.insert()
 		inv.submit()
 
-		inv2 = create_pos_invoice(qty=1, rate=59.5, do_not_save=True)
+		inv2 = create_pos_invoice(update_stock=0, qty=1, rate=59.5, do_not_save=True)
 		inv2.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 60})
 		inv2.insert()
 		inv2.submit()
@@ -428,19 +404,19 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 		create_cost_center(cost_center_name="_Test POS Cost Center 1", is_group=0)
 		create_cost_center(cost_center_name="_Test POS Cost Center 2", is_group=0)
 
-		pos_inv = create_pos_invoice(rate=300, do_not_submit=1)
+		pos_inv = create_pos_invoice(update_stock=0, rate=300, do_not_submit=1)
 		pos_inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 300})
 		pos_inv.cost_center = "_Test POS Cost Center 1 - _TC"
 		pos_inv.save()
 		pos_inv.submit()
 
-		pos_inv2 = create_pos_invoice(rate=3200, do_not_submit=1)
+		pos_inv2 = create_pos_invoice(update_stock=0, rate=3200, do_not_submit=1)
 		pos_inv2.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3200})
 		pos_inv.cost_center = "_Test POS Cost Center 2 - _TC"
 		pos_inv2.save()
 		pos_inv2.submit()
 
-		pos_inv3 = create_pos_invoice(rate=2300, do_not_submit=1)
+		pos_inv3 = create_pos_invoice(update_stock=0, rate=2300, do_not_submit=1)
 		pos_inv3.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 2300})
 		pos_inv.cost_center = "_Test POS Cost Center 2 - _TC"
 		pos_inv3.save()
@@ -465,7 +441,7 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 		"""
 		Test if the company is fetched from POS Closing Entry
 		"""
-		pos_inv = create_pos_invoice(rate=300, do_not_submit=1)
+		pos_inv = create_pos_invoice(update_stock=0, rate=300, do_not_submit=1)
 		pos_inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 300})
 		pos_inv.save()
 		pos_inv.submit()

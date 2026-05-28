@@ -51,14 +51,14 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestSalesInvoice(ERPNextTestSuite):
-	def setUp(self):
-		self.load_test_records("Journal Entry")
-		self.load_test_records("Stock Entry")
-		self.load_test_records("Sales Invoice")
-		unlink_payment_on_cancel_of_invoice()
-
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		# Internal parties, accounts, and settings are master data shared by all 120 tests.
+		# Committing them once avoids re-insertion and re-configuration after each tearDown rollback.
 		from erpnext.stock.doctype.stock_ledger_entry.test_stock_ledger_entry import create_items
 
+		unlink_payment_on_cancel_of_invoice()
 		create_items(["_Test Internal Transfer Item"], uoms=[{"uom": "Box", "conversion_factor": 10}])
 		create_internal_parties()
 		setup_accounts()
@@ -70,6 +70,11 @@ class TestSalesInvoice(ERPNextTestSuite):
 		for company in frappe.get_all("Company", pluck="name"):
 			frappe.db.set_value("Company", company, "accounts_frozen_till_date", None)
 		frappe.db.set_single_value("Selling Settings", "validate_selling_price", 0)
+		context = cls()
+		context.load_test_records("Journal Entry")
+		context.load_test_records("Stock Entry")
+		context.load_test_records("Sales Invoice")
+		frappe.db.commit()  # nosemgrep
 
 	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
@@ -114,15 +119,11 @@ class TestSalesInvoice(ERPNextTestSuite):
 		w.insert()
 
 		w2 = frappe.get_doc(w.doctype, w.name)
-
-		import time
-
-		time.sleep(1)
 		w.save()
-
-		import time
-
-		time.sleep(1)
+		# After w.save() the DB holds a newer 'modified' value than w2 cached.
+		# Backdate w2.modified to guarantee the mismatch fires independent of
+		# sub-second DB timestamp precision (avoids a 2-second sleep).
+		w2.modified = frappe.utils.add_to_date(w2.modified, seconds=-2)
 		self.assertRaises(frappe.TimestampMismatchError, w2.save)
 
 	def test_sales_invoice_change_naming_series(self):

@@ -22,10 +22,20 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class POSInvoiceTestMixin(ERPNextTestSuite):
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		context = cls()
+		cls.setup_pos_invoice_base_data(context)
+		frappe.db.commit()  # nosemgrep
+
 	def setUp(self):
+		POSInvoiceTestMixin.setup_pos_invoice_test_data(self)
+
+	def setup_pos_invoice_test_data(self, add_stock=True):
 		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
 
-		self.load_test_records("Stock Entry")
+		POSInvoiceTestMixin.setup_pos_invoice_base_data(self)
 		self.test_user, self.pos_profile = init_user_and_profile()
 
 		if frappe.session.user != "Administrator":
@@ -33,10 +43,22 @@ class POSInvoiceTestMixin(ERPNextTestSuite):
 
 		frappe.db.set_single_value("Selling Settings", "validate_selling_price", 0)
 		frappe.db.set_single_value("POS Settings", "invoice_type", "POS Invoice")
-		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item", qty=800, basic_rate=100)
+		if add_stock:
+			make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item", qty=800, basic_rate=100)
 
-		mode_of_payment = frappe.get_doc("Mode of Payment", "Bank Draft")
-		set_default_account_for_mode_of_payment(mode_of_payment, "_Test Company", "_Test Bank - _TC")
+	@staticmethod
+	def setup_pos_invoice_base_data(test_case):
+		if "Stock Entry" not in getattr(test_case, "globalTestRecords", {}):
+			test_case.load_test_records("Stock Entry")
+
+		default_account = frappe.db.get_value(
+			"Mode of Payment Account",
+			{"parent": "Bank Draft", "company": "_Test Company"},
+			"default_account",
+		)
+		if default_account != "_Test Bank - _TC":
+			mode_of_payment = frappe.get_doc("Mode of Payment", "Bank Draft")
+			set_default_account_for_mode_of_payment(mode_of_payment, "_Test Company", "_Test Bank - _TC")
 
 
 class TestPOSInvoice(POSInvoiceTestMixin):
@@ -52,15 +74,11 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		w.insert()
 
 		w2 = frappe.get_doc(w.doctype, w.name)
-
-		import time
-
-		time.sleep(1)
 		w.save()
-
-		import time
-
-		time.sleep(1)
+		# After w.save() the DB holds a newer 'modified' value than w2 cached.
+		# Backdate w2.modified to guarantee the mismatch fires independent of
+		# sub-second DB timestamp precision (avoids a 2-second sleep).
+		w2.modified = frappe.utils.add_to_date(w2.modified, seconds=-2)
 		self.assertRaises(frappe.TimestampMismatchError, w2.save)
 
 	def test_change_naming_series(self):
@@ -930,7 +948,10 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		self.assertRaises(frappe.ValidationError, pos_inv.submit)
 
 	def test_bundle_stock_availability_validation(self):
-		from erpnext.accounts.doctype.pos_invoice.pos_invoice import ProductBundleStockValidationError
+		from erpnext.accounts.doctype.pos_invoice.pos_invoice import (
+			ProductBundleStockValidationError,
+			get_product_bundle_stock_availability,
+		)
 		from erpnext.accounts.doctype.pos_invoice_merge_log.test_pos_invoice_merge_log import (
 			init_user_and_profile,
 		)
@@ -938,41 +959,38 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		from erpnext.stock.doctype.item.test_item import create_item
 
 		init_user_and_profile()
+		frappe.db.set_value("POS Profile", self.pos_profile.name, "validate_stock_on_save", 1)
+		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 0)
 
 		frappe.set_user("Administrator")
 
 		warehouse = "_Test Warehouse - _TC"
 		company = "_Test Company"
 
-		# Create stock sub-items
-		sub_item_a = "_Test Bundle SubA"
-		if not frappe.db.exists("Item", sub_item_a):
-			create_item(
-				item_code=sub_item_a,
-				is_stock_item=1,
-			)
+		suffix = frappe.generate_hash(length=8)
+		sub_item_a = f"_Test Bundle SubA {suffix}"
+		create_item(
+			item_code=sub_item_a,
+			is_stock_item=1,
+		)
 
-		sub_item_b = "_Test Bundle SubB"
-		if not frappe.db.exists("Item", sub_item_b):
-			create_item(
-				item_code=sub_item_b,
-				is_stock_item=1,
-			)
+		sub_item_b = f"_Test Bundle SubB {suffix}"
+		create_item(
+			item_code=sub_item_b,
+			is_stock_item=1,
+		)
 
 		# Add initial stock: SubA=5, SubB=2
 		make_stock_entry(item_code=sub_item_a, target=warehouse, qty=5, company=company)
 		make_stock_entry(item_code=sub_item_b, target=warehouse, qty=2, company=company)
 
 		# Create Product Bundle: Test Bundle (SubA x2 + SubB x1)
-		bundle_item = "_Test Bundle"
-		if not frappe.db.exists("Item", bundle_item):
-			create_item(
-				item_code=bundle_item,
-				is_stock_item=0,
-			)
-
-		if not frappe.db.exists("Product Bundle", bundle_item):
-			make_product_bundle(parent=bundle_item, items=[sub_item_a, sub_item_b])
+		bundle_item = f"_Test Bundle {suffix}"
+		create_item(
+			item_code=bundle_item,
+			is_stock_item=0,
+		)
+		make_product_bundle(parent=bundle_item, items=[sub_item_a, sub_item_b])
 
 		# Test Case 1: Sufficient stock (bundle qty=1: requires SubA=2 (<=5), SubB=1 (<=2)) -> No error
 		pos_inv_sufficient = create_pos_invoice(
@@ -992,6 +1010,11 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 
 		# Test Case 2: Insufficient stock (reduce SubB to 1, bundle qty=2: requires SubB=2 >1) -> Error with details
 		make_stock_entry(item_code=sub_item_b, from_warehouse=warehouse, qty=1, company=company)
+		availability, _, is_negative_stock_allowed = get_product_bundle_stock_availability(
+			bundle_item, warehouse, item_qty=2
+		)
+		self.assertFalse(is_negative_stock_allowed)
+		self.assertTrue(any(item["available"] < item["required"] for item in availability))
 
 		pos_inv_insufficient = create_pos_invoice(
 			item=bundle_item,
@@ -1002,24 +1025,26 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 			do_not_save=1,
 		)
 		pos_inv_insufficient.append("payments", {"mode_of_payment": "Cash", "amount": 200, "default": 1})
-		pos_inv_insufficient.save()
-		self.assertRaises(ProductBundleStockValidationError, pos_inv_insufficient.submit)
+		self.assertRaises(ProductBundleStockValidationError, pos_inv_insufficient.save)
 
 		frappe.set_user("test@example.com")
 
 
 def create_pos_invoice(**args):
 	args = frappe._dict(args)
-	pos_profile = None
+	pos_profile_name = args.pos_profile
 	if not args.pos_profile:
-		pos_profile = make_pos_profile()
-		pos_profile.save()
+		pos_profile_name = (
+			"_Test POS Profile"
+			if frappe.db.exists("POS Profile", "_Test POS Profile")
+			else make_pos_profile().save().name
+		)
 
 	pos_inv = frappe.new_doc("POS Invoice")
 	pos_inv.update(args)
-	pos_inv.update_stock = 1
+	pos_inv.update_stock = args.update_stock if args.get("update_stock") is not None else 1
 	pos_inv.is_pos = 1
-	pos_inv.pos_profile = args.pos_profile or pos_profile.name
+	pos_inv.pos_profile = pos_profile_name
 
 	if args.posting_date:
 		pos_inv.set_posting_time = 1

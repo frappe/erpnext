@@ -2,7 +2,6 @@
 # See license.txt
 
 import json
-import time
 from uuid import uuid4
 
 import frappe
@@ -1174,8 +1173,6 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 			posting_time="02:00:00",
 		)
 
-		time.sleep(3)
-
 		reciept2 = make_stock_entry(
 			item_code=item,
 			to_warehouse=warehouse,
@@ -1213,8 +1210,6 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 			rate=10,
 			posting_time="02:00:00",
 		)
-
-		time.sleep(3)
 
 		# backdated entry with same timestamp but different ms part
 		reciept2 = make_stock_entry(

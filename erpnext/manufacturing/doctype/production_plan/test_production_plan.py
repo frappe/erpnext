@@ -26,35 +26,46 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
 from erpnext.tests.utils import ERPNextTestSuite
 
+_PRODUCTION_PLAN_ITEMS = [
+	"Test Production Item 1",
+	"Subassembly Item 1",
+	"Raw Material Item 1",
+	"Raw Material Item 2",
+]
+
+_PRODUCTION_PLAN_BOMS = {
+	"Subassembly Item 1": ["Raw Material Item 1", "Raw Material Item 2"],
+	"Test Production Item 1": [
+		"Raw Material Item 1",
+		"Subassembly Item 1",
+		"Test Non Stock Raw Material",
+	],
+}
+
 
 class TestProductionPlan(ERPNextTestSuite):
-	def setUp(self):
-		for item in [
-			"Test Production Item 1",
-			"Subassembly Item 1",
-			"Raw Material Item 1",
-			"Raw Material Item 2",
-		]:
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		# Items and BOMs are master data shared by all 55 tests in this class.
+		# Creating them once and committing avoids re-insertion after each tearDown rollback.
+		for item in _PRODUCTION_PLAN_ITEMS:
 			create_item(item, valuation_rate=100)
+		create_item("Test Non Stock Raw Material", is_stock_item=0)
+		for item, raw_materials in _PRODUCTION_PLAN_BOMS.items():
+			if not frappe.db.get_value("BOM", {"item": item}):
+				make_bom(item=item, raw_materials=raw_materials)
+		frappe.db.commit()  # nosemgrep
 
+	def setUp(self):
+		# Cancel any submitted Stock Reconciliations that may have survived a commit
+		# in a previous test run (rare, but defensive).
+		for item in _PRODUCTION_PLAN_ITEMS:
 			sr = frappe.db.get_value(
 				"Stock Reconciliation Item", {"item_code": item, "docstatus": 1}, "parent"
 			)
 			if sr:
-				sr_doc = frappe.get_doc("Stock Reconciliation", sr)
-				sr_doc.cancel()
-
-		create_item("Test Non Stock Raw Material", is_stock_item=0)
-		for item, raw_materials in {
-			"Subassembly Item 1": ["Raw Material Item 1", "Raw Material Item 2"],
-			"Test Production Item 1": [
-				"Raw Material Item 1",
-				"Subassembly Item 1",
-				"Test Non Stock Raw Material",
-			],
-		}.items():
-			if not frappe.db.get_value("BOM", {"item": item}):
-				make_bom(item=item, raw_materials=raw_materials)
+				frappe.get_doc("Stock Reconciliation", sr).cancel()
 
 	def test_production_plan_mr_creation(self):
 		"Test if MRs are created for unavailable raw materials."

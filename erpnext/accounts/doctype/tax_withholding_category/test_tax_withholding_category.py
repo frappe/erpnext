@@ -14,10 +14,15 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestTaxWithholdingCategory(ERPNextTestSuite):
-	def setUp(self):
-		# create relevant supplier, etc
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		# Suppliers, customers, items, accounts, and TDS/TCS categories are master data
+		# shared by all 44 tests.  Committing them once avoids re-insertion after each
+		# tearDown rollback.
 		create_records()
 		create_tax_withholding_category_records()
+		frappe.db.commit()  # nosemgrep
 
 	def validate_tax_withholding_entries(self, doctype, docname, expected_entries):
 		"""Validate tax withholding entries for a document"""

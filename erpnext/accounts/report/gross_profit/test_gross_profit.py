@@ -13,13 +13,32 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestGrossProfit(ERPNextTestSuite):
-	def setUp(self):
-		self.create_company()
-		self.create_item()
-		self.create_bundle()
-		self.create_customer()
-		self.create_sales_invoice()
-		self.clear_old_entries()
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		context = cls()
+		context.create_company()
+		context.create_item()
+		context.create_bundle()
+		context.create_customer()
+		context.clear_old_entries()
+		for field in (
+			"company",
+			"cost_center",
+			"warehouse",
+			"finished_warehouse",
+			"income_account",
+			"expense_account",
+			"debit_to",
+			"creditors",
+			"item",
+			"item2",
+			"bundle",
+			"product_bundle",
+			"customer",
+		):
+			setattr(cls, field, getattr(context, field))
+		frappe.db.commit()  # nosemgrep
 
 	def create_company(self):
 		company_name = "_Test Gross Profit"

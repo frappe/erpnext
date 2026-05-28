@@ -30,9 +30,15 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestPurchaseReceipt(ERPNextTestSuite):
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		context = cls()
+		context.load_test_records("Purchase Receipt")
+		frappe.db.commit()  # nosemgrep
+
 	def setUp(self):
 		frappe.local.future_sle = {}
-		self.load_test_records("Purchase Receipt")
 
 	def test_purchase_receipt_skips_validation(self):
 		"""

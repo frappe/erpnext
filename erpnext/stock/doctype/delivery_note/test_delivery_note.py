@@ -49,9 +49,12 @@ class TestDeliveryNote(ERPNextTestSuite):
 	SDBNB_COMPANY_NAME = "_Test SDBNB Company"
 	SDBNB_COMPANY_ABBR = "_TSDBNB"
 
-	def setUp(self):
-		self.load_test_records("Stock Entry")
-		self.setup_sdbnb_company()
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		context = cls()
+		context.load_test_records("Stock Entry")
+		frappe.db.commit()  # nosemgrep
 
 	def setup_sdbnb_company(self):
 		if frappe.db.exists("Company", self.SDBNB_COMPANY_NAME):
@@ -2895,6 +2898,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	def test_sdbnb_gl_entry_on_delivery_note(self):
 		"""Test that DN GL entries use SDBNB account when configured on the company."""
+		self.setup_sdbnb_company()
+
 		item_code = make_item("SDBNB Test Item", properties={"is_stock_item": 1}).name
 		make_stock_entry(
 			item_code=item_code,
@@ -2936,6 +2941,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	def test_sdbnb_reversal_on_sales_invoice(self):
 		"""Test that SI created from DN reverses SDBNB entries (credits SDBNB, debits COGS)."""
+		self.setup_sdbnb_company()
+
 		item_code = make_item("SDBNB Reversal Test Item", properties={"is_stock_item": 1}).name
 		make_stock_entry(
 			item_code=item_code,
@@ -2988,6 +2995,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	def test_sdbnb_partial_billing(self):
 		"""Test SDBNB reversal for partial invoicing - only billed qty should be reversed."""
+		self.setup_sdbnb_company()
+
 		item_code = make_item("SDBNB Partial Bill Item", properties={"is_stock_item": 1}).name
 		make_stock_entry(
 			item_code=item_code,
@@ -3036,6 +3045,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	def test_sdbnb_disabled_for_sales_return(self):
 		"""Test that sales return DN uses default expense account when disable_sdbnb_in_sr is enabled."""
+		self.setup_sdbnb_company()
+
 		frappe.db.set_value("Company", self.sdbnb_company, "disable_sdbnb_in_sr", 1)
 
 		try:
@@ -3082,6 +3093,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	def test_sdbnb_enabled_for_sales_return(self):
 		"""Test that sales return DN uses SDBNB account when disable_sdbnb_in_sr is off."""
+		self.setup_sdbnb_company()
+
 		item_code = make_item("SDBNB Return Enable Item", properties={"is_stock_item": 1}).name
 		make_stock_entry(
 			item_code=item_code,
@@ -3119,6 +3132,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	def test_sdbnb_no_reversal_with_update_stock(self):
 		"""Test that SI with update_stock=1 (standalone, no DN link) does NOT create SDBNB GL entries."""
+		self.setup_sdbnb_company()
+
 		item_code = make_item("SDBNB Update Stock Item", properties={"is_stock_item": 1}).name
 		make_stock_entry(
 			item_code=item_code,
@@ -3150,6 +3165,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	def test_sdbnb_skip_for_dn_against_sales_invoice(self):
 		"""Test that DN items with against_sales_invoice reference skips SDBNB account assignment."""
+		self.setup_sdbnb_company()
+
 		from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 			make_delivery_note as make_dn_from_si,
 		)
@@ -3188,6 +3205,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	def test_sdbnb_non_stock_item_skipped(self):
 		"""Test that non-stock items are not assigned SDBNB account."""
+		self.setup_sdbnb_company()
+
 		non_stock_item = make_item(
 			"SDBNB Non Stock Item",
 			properties={"is_stock_item": 0},
@@ -3210,6 +3229,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	def test_sdbnb_reposting_with_fifo(self):
 		"""Test that backdated inward entry triggers reposting and updates SDBNB GL entries (FIFO)."""
+		self.setup_sdbnb_company()
+
 		item_code = make_item(
 			"SDBNB Repost FIFO Item", properties={"is_stock_item": 1, "valuation_method": "FIFO"}
 		).name
@@ -3281,6 +3302,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	def test_sdbnb_reposting_with_moving_average(self):
 		"""Test that backdated inward entry triggers reposting and updates SDBNB GL entries (Moving Average)."""
+		self.setup_sdbnb_company()
+
 		item_code = make_item(
 			"SDBNB Repost MA Item", properties={"is_stock_item": 1, "valuation_method": "Moving Average"}
 		).name

@@ -15,12 +15,32 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestPaymentLedgerEntry(ERPNextTestSuite):
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		context = cls()
+		context.ple = qb.DocType("Payment Ledger Entry")
+		context.create_company()
+		context.create_item()
+		context.create_customer()
+		context.clear_old_entries()
+		for field in (
+			"company",
+			"cost_center",
+			"warehouse",
+			"income_account",
+			"expense_account",
+			"debit_to",
+			"creditors",
+			"bank",
+			"item",
+			"customer",
+		):
+			setattr(cls, field, getattr(context, field))
+		frappe.db.commit()  # nosemgrep
+
 	def setUp(self):
 		self.ple = qb.DocType("Payment Ledger Entry")
-		self.create_company()
-		self.create_item()
-		self.create_customer()
-		self.clear_old_entries()
 
 	def create_company(self):
 		company_name = "_Test Payment Ledger"

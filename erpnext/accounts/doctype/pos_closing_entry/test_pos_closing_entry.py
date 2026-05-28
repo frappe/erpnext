@@ -21,20 +21,18 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestPOSClosingEntry(ERPNextTestSuite):
 	def setUp(self):
-		init_user_and_profile()
-		make_stock_entry(target="_Test Warehouse - _TC", qty=2, basic_rate=100)
 		frappe.db.set_single_value("POS Settings", "invoice_type", "POS Invoice")
 
 	def test_pos_closing_entry(self):
 		test_user, pos_profile = init_user_and_profile()
 		opening_entry = create_opening_entry(pos_profile, test_user.name)
 
-		pos_inv1 = create_pos_invoice(rate=3500, do_not_submit=1)
+		pos_inv1 = create_pos_invoice(rate=3500, update_stock=0, do_not_submit=1)
 		pos_inv1.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3500})
 		pos_inv1.save()
 		pos_inv1.submit()
 
-		pos_inv2 = create_pos_invoice(rate=3200, do_not_submit=1)
+		pos_inv2 = create_pos_invoice(rate=3200, update_stock=0, do_not_submit=1)
 		pos_inv2.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3200})
 		pos_inv2.save()
 		pos_inv2.submit()
@@ -62,7 +60,9 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		test_user, pos_profile = init_user_and_profile()
 		opening_entry = create_opening_entry(pos_profile, test_user.name)
 
-		pos_inv = create_pos_invoice(rate=3500, do_not_submit=1, item_name="Test Item", without_item_code=1)
+		pos_inv = create_pos_invoice(
+			rate=3500, update_stock=0, do_not_submit=1, item_name="Test Item", without_item_code=1
+		)
 		pos_inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3500})
 		pos_inv.save()
 		pos_inv.submit()
@@ -78,6 +78,8 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		Test if quantity is calculated correctly for an item in POS Closing Entry
 		"""
 		from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
+
+		make_stock_entry(target="_Test Warehouse - _TC", qty=2, basic_rate=100)
 
 		test_user, pos_profile = init_user_and_profile()
 		opening_entry = create_opening_entry(pos_profile, test_user.name)
@@ -112,12 +114,12 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		test_user, pos_profile = init_user_and_profile()
 		opening_entry = create_opening_entry(pos_profile, test_user.name)
 
-		pos_inv1 = create_pos_invoice(rate=3500, do_not_submit=1)
+		pos_inv1 = create_pos_invoice(rate=3500, update_stock=0, do_not_submit=1)
 		pos_inv1.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3500})
 		pos_inv1.save()
 		pos_inv1.submit()
 
-		pos_inv2 = create_pos_invoice(rate=3200, do_not_submit=1)
+		pos_inv2 = create_pos_invoice(rate=3200, update_stock=0, do_not_submit=1)
 		pos_inv2.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3200})
 		pos_inv2.save()
 		pos_inv2.submit()
@@ -172,7 +174,7 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		test_user = init_user_and_profile(do_not_create_pos_profile=1)
 
 		opening_entry = create_opening_entry(pos_profile, test_user.name)
-		pos_inv1 = create_pos_invoice(rate=350, do_not_submit=1, pos_profile=pos_profile.name)
+		pos_inv1 = create_pos_invoice(rate=350, update_stock=0, do_not_submit=1, pos_profile=pos_profile.name)
 		pos_inv1.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3500})
 		pos_inv1.save()
 		pos_inv1.submit()
@@ -339,7 +341,7 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 
 			pos_si1, pos_si2 = create_multiple_sales_invoices(pos_profile)
 
-			pos_inv = create_pos_invoice(rate=100, do_not_save=1)
+			pos_inv = create_pos_invoice(rate=100, update_stock=0, do_not_save=1)
 			pos_inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
 			self.assertRaises(frappe.ValidationError, pos_inv.save)
 
@@ -363,7 +365,7 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 
 			# Trying to create Sales Invoice when invoice_type is set to POS Invoice.
 			pos_si3 = create_sales_invoice(
-				qty=1, is_created_using_pos=1, pos_profile=pos_profile.name, do_not_save=1
+				qty=1, is_created_using_pos=1, pos_profile=pos_profile.name, update_stock=0, do_not_save=1
 			)
 			pos_si3.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
 			self.assertRaises(frappe.ValidationError, pos_si3.save)
@@ -403,7 +405,7 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 
 			# Trying to create Sales Invoice when invoice_type is set to POS Invoice.
 			pos_sinv = create_sales_invoice(
-				qty=1, is_created_using_pos=1, pos_profile=pos_profile.name, do_not_save=1
+				qty=1, is_created_using_pos=1, pos_profile=pos_profile.name, update_stock=0, do_not_save=1
 			)
 			pos_sinv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
 			self.assertRaises(frappe.ValidationError, pos_sinv.save)
@@ -425,7 +427,7 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 
 			pos_si1, pos_si2 = create_multiple_sales_invoices(pos_profile)
 
-			pos_inv3 = create_pos_invoice(rate=100, do_not_save=1)
+			pos_inv3 = create_pos_invoice(rate=100, update_stock=0, do_not_save=1)
 			pos_inv3.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
 			self.assertRaises(frappe.ValidationError, pos_inv3.save)
 
@@ -468,8 +470,13 @@ def init_user_and_profile(**args):
 	if args.get("do_not_create_pos_profile"):
 		return test_user
 
-	pos_profile = make_pos_profile(**args)
-	pos_profile.append("applicable_for_users", {"default": 1, "user": user})
+	if not args and frappe.db.exists("POS Profile", "_Test POS Profile"):
+		pos_profile = frappe.get_doc("POS Profile", "_Test POS Profile")
+	else:
+		pos_profile = make_pos_profile(**args)
+
+	if not any(row.user == user for row in pos_profile.applicable_for_users):
+		pos_profile.append("applicable_for_users", {"default": 1, "user": user})
 
 	pos_profile.save()
 
@@ -493,12 +500,16 @@ def get_test_item_qty(pos_profile):
 
 
 def create_multiple_sales_invoices(pos_profile):
-	pos_si1 = create_sales_invoice(qty=1, is_created_using_pos=1, pos_profile=pos_profile.name, do_not_save=1)
+	pos_si1 = create_sales_invoice(
+		qty=1, is_created_using_pos=1, pos_profile=pos_profile.name, update_stock=0, do_not_save=1
+	)
 	pos_si1.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
 	pos_si1.save()
 	pos_si1.submit()
 
-	pos_si2 = create_sales_invoice(qty=2, is_created_using_pos=1, pos_profile=pos_profile.name, do_not_save=1)
+	pos_si2 = create_sales_invoice(
+		qty=2, is_created_using_pos=1, pos_profile=pos_profile.name, update_stock=0, do_not_save=1
+	)
 	pos_si2.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 200})
 	pos_si2.save()
 	pos_si2.submit()
@@ -507,12 +518,12 @@ def create_multiple_sales_invoices(pos_profile):
 
 
 def create_multiple_pos_invoices(pos_profile):
-	pos_inv1 = create_pos_invoice(pos_profile=pos_profile.name, rate=100, do_not_save=1)
+	pos_inv1 = create_pos_invoice(pos_profile=pos_profile.name, rate=100, update_stock=0, do_not_save=1)
 	pos_inv1.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
 	pos_inv1.save()
 	pos_inv1.submit()
 
-	pos_inv2 = create_pos_invoice(pos_profile=pos_profile.name, qty=2, do_not_save=1)
+	pos_inv2 = create_pos_invoice(pos_profile=pos_profile.name, qty=2, update_stock=0, do_not_save=1)
 	pos_inv2.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 200})
 	pos_inv2.save()
 	pos_inv2.submit()

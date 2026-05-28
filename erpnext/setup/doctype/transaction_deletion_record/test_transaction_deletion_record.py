@@ -11,7 +11,6 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 	def setUp(self):
 		# Clear all deletion cache flags from previous tests
 		self._clear_all_deletion_cache_flags()
-		create_company("Dunder Mifflin Paper Co")
 
 	def _clear_all_deletion_cache_flags(self):
 		"""Clear all deletion_running_doctype:* cache keys"""
@@ -105,6 +104,7 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 	def test_validation_prevents_child_tables(self):
 		"""Test that child tables cannot be added to To Delete list"""
 		company = "Dunder Mifflin Paper Co"
+		create_company(company)
 
 		tdr = frappe.new_doc("Transaction Deletion Record")
 		tdr.company = company
@@ -117,6 +117,7 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 	def test_validation_prevents_protected_doctypes(self):
 		"""Test that protected DocTypes cannot be added to To Delete list"""
 		company = "Dunder Mifflin Paper Co"
+		create_company(company)
 
 		tdr = frappe.new_doc("Transaction Deletion Record")
 		tdr.company = company
@@ -187,6 +188,7 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 	def test_composite_key_validation(self):
 		"""Test that duplicate (doctype_name + company_field) combinations are prevented"""
 		company = "Dunder Mifflin Paper Co"
+		create_company(company)
 
 		tdr = frappe.new_doc("Transaction Deletion Record")
 		tdr.company = company
@@ -200,6 +202,7 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 	def test_same_doctype_different_company_field_allowed(self):
 		"""Test that same DocType can be added with different company_field values"""
 		company = "Dunder Mifflin Paper Co"
+		create_company(company)
 
 		tdr = frappe.new_doc("Transaction Deletion Record")
 		tdr.company = company
@@ -221,6 +224,7 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 	def test_company_field_validation(self):
 		"""Test that invalid company_field values are rejected"""
 		company = "Dunder Mifflin Paper Co"
+		create_company(company)
 
 		tdr = frappe.new_doc("Transaction Deletion Record")
 		tdr.company = company
@@ -328,6 +332,7 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 	def test_check_for_running_deletion_allows_save_when_no_flag(self):
 		"""Test that documents can be saved when no deletion is running"""
 		company = "Dunder Mifflin Paper Co"
+		create_company(company)
 
 		# Ensure no cache flag exists
 		frappe.cache.delete_value("deletion_running_doctype:Task")
@@ -350,6 +355,7 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 		company1 = "Dunder Mifflin Paper Co"
 		company2 = "Sabre Corporation"
 
+		create_company(company1)
 		create_company(company2)
 
 		# Create and submit first deletion (but don't start it)
@@ -380,14 +386,18 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 
 
 def create_company(company_name):
+	if frappe.db.exists("Company", company_name):
+		return
+
 	company = frappe.get_doc(
 		{"doctype": "Company", "company_name": company_name, "default_currency": "INR", "country": "India"}
 	)
-	company.insert(ignore_if_duplicate=True)
+	company.insert()
 
 
 def create_and_submit_transaction_deletion_doc(company):
 	"""Create and execute a transaction deletion record"""
+	create_company(company)
 	tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": company})
 	tdr.insert()
 
@@ -400,5 +410,6 @@ def create_and_submit_transaction_deletion_doc(company):
 
 
 def create_task(company):
+	create_company(company)
 	task = frappe.get_doc({"doctype": "Task", "company": company, "subject": "Delete"})
 	task.insert()
