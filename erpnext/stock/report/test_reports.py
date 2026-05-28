@@ -4,8 +4,8 @@ from erpnext.tests.utils import ERPNextTestSuite, ReportFilters, ReportName, exe
 
 DEFAULT_FILTERS = {
 	"company": "_Test Company",
-	"from_date": "2010-01-01",
-	"to_date": "2030-01-01",
+	"from_date": "2021-01-01",
+	"to_date": "2021-01-01",
 }
 
 

@@ -464,7 +464,10 @@ def init_user_and_profile(**args):
 	test_user = frappe.get_doc("User", user)
 
 	roles = ("Accounts Manager", "Accounts User", "Sales Manager", "Stock User", "Item Manager")
-	test_user.add_roles(*roles)
+	existing_roles = {role.role for role in test_user.roles}
+	missing_roles = set(roles).difference(existing_roles)
+	if missing_roles:
+		test_user.add_roles(*missing_roles)
 	frappe.set_user(user)
 
 	if args.get("do_not_create_pos_profile"):
@@ -477,8 +480,7 @@ def init_user_and_profile(**args):
 
 	if not any(row.user == user for row in pos_profile.applicable_for_users):
 		pos_profile.append("applicable_for_users", {"default": 1, "user": user})
-
-	pos_profile.save()
+		pos_profile.save()
 
 	return test_user, pos_profile
 

@@ -1,6 +1,7 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import copy
+from typing import ClassVar
 
 import frappe
 from frappe import _
@@ -62,8 +63,21 @@ class POSInvoiceTestMixin(ERPNextTestSuite):
 
 
 class TestPOSInvoice(POSInvoiceTestMixin):
+	NO_STOCK_SETUP_TESTS: ClassVar[set[str]] = {
+		"test_change_naming_series",
+		"test_discount_and_inclusive_tax",
+		"test_ignore_pricing_rule",
+		"test_tax_calculation_with_item_tax_template",
+		"test_tax_calculation_with_multiple_items",
+		"test_tax_calculation_with_multiple_items_and_discount",
+		"test_timestamp_change",
+		"test_without_payment",
+	}
+
 	def setUp(self):
-		super().setUp()
+		POSInvoiceTestMixin.setup_pos_invoice_test_data(
+			self, add_stock=self._testMethodName not in self.NO_STOCK_SETUP_TESTS
+		)
 		from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
 
 		self.opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)

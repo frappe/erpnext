@@ -2,9 +2,14 @@
 # See license.txt
 
 
+from unittest.mock import patch
+
 import frappe
 
 from erpnext.tests.utils import ERPNextTestSuite
+
+TEST_COMPANY = "_Test Company"
+TEST_COMPANY_2 = "_Test Company 1"
 
 
 class TestTransactionDeletionRecord(ERPNextTestSuite):
@@ -30,7 +35,7 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 
 	def test_doctypes_contain_company_field(self):
 		"""Test that all DocTypes in To Delete list have a valid company link field"""
-		tdr = create_and_submit_transaction_deletion_doc("Dunder Mifflin Paper Co")
+		tdr = create_and_submit_transaction_deletion_doc(TEST_COMPANY)
 		for doctype_row in tdr.doctypes_to_delete:
 			# If company_field is specified, verify it's a valid Company link field
 			if doctype_row.company_field:
@@ -52,8 +57,8 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 	def test_no_of_docs_is_correct(self):
 		"""Test that document counts are calculated correctly in To Delete list"""
 		for _ in range(5):
-			create_task("Dunder Mifflin Paper Co")
-		tdr = create_and_submit_transaction_deletion_doc("Dunder Mifflin Paper Co")
+			create_task(TEST_COMPANY)
+		tdr = create_and_submit_transaction_deletion_doc(TEST_COMPANY)
 		tdr.reload()
 
 		# Check To Delete list has correct count
@@ -67,25 +72,22 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 
 	def test_deletion_is_successful(self):
 		"""Test that deletion actually removes documents"""
-		create_task("Dunder Mifflin Paper Co")
-		create_and_submit_transaction_deletion_doc("Dunder Mifflin Paper Co")
-		tasks_containing_company = frappe.get_all("Task", filters={"company": "Dunder Mifflin Paper Co"})
+		create_task(TEST_COMPANY)
+		create_and_submit_transaction_deletion_doc(TEST_COMPANY)
+		tasks_containing_company = frappe.get_all("Task", filters={"company": TEST_COMPANY})
 		self.assertEqual(tasks_containing_company, [])
 
 	def test_company_transaction_deletion_request(self):
 		"""Test creation via company deletion request method"""
 		from erpnext.setup.doctype.company.company import create_transaction_deletion_request
 
-		# don't reuse below company for other test cases
-		company = "Deep Space Exploration"
-		create_company(company)
-
-		# below call should not raise any exceptions or throw errors
-		create_transaction_deletion_request(company)
+		with patch_minimal_to_delete_list():
+			# below call should not raise any exceptions or throw errors
+			create_transaction_deletion_request(TEST_COMPANY)
 
 	def test_generate_to_delete_list(self):
 		"""Test automatic generation of To Delete list"""
-		company = "Dunder Mifflin Paper Co"
+		company = TEST_COMPANY
 		create_task(company)
 
 		tdr = frappe.new_doc("Transaction Deletion Record")
@@ -103,8 +105,7 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 
 	def test_validation_prevents_child_tables(self):
 		"""Test that child tables cannot be added to To Delete list"""
-		company = "Dunder Mifflin Paper Co"
-		create_company(company)
+		company = TEST_COMPANY
 
 		tdr = frappe.new_doc("Transaction Deletion Record")
 		tdr.company = company
@@ -116,8 +117,7 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 
 	def test_validation_prevents_protected_doctypes(self):
 		"""Test that protected DocTypes cannot be added to To Delete list"""
-		company = "Dunder Mifflin Paper Co"
-		create_company(company)
+		company = TEST_COMPANY
 
 		tdr = frappe.new_doc("Transaction Deletion Record")
 		tdr.company = company
@@ -129,15 +129,10 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 
 	def test_csv_export_import(self):
 		"""Test CSV export and import functionality with company_field column"""
-		company = "Dunder Mifflin Paper Co"
+		company = TEST_COMPANY
 		create_task(company)
 
-		# Create and generate To Delete list
-		tdr = frappe.new_doc("Transaction Deletion Record")
-		tdr.company = company
-		tdr.insert()
-		tdr.generate_to_delete_list()
-		tdr.reload()
+		tdr = create_transaction_deletion_doc(company)
 
 		original_count = len(tdr.doctypes_to_delete)
 		self.assertGreater(original_count, 0)
@@ -168,7 +163,7 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 
 	def test_progress_tracking(self):
 		"""Test that deleted checkbox is marked when DocType deletion completes"""
-		company = "Dunder Mifflin Paper Co"
+		company = TEST_COMPANY
 		create_task(company)
 
 		tdr = create_and_submit_transaction_deletion_doc(company)
@@ -187,8 +182,7 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 
 	def test_composite_key_validation(self):
 		"""Test that duplicate (doctype_name + company_field) combinations are prevented"""
-		company = "Dunder Mifflin Paper Co"
-		create_company(company)
+		company = TEST_COMPANY
 
 		tdr = frappe.new_doc("Transaction Deletion Record")
 		tdr.company = company
@@ -201,8 +195,7 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 
 	def test_same_doctype_different_company_field_allowed(self):
 		"""Test that same DocType can be added with different company_field values"""
-		company = "Dunder Mifflin Paper Co"
-		create_company(company)
+		company = TEST_COMPANY
 
 		tdr = frappe.new_doc("Transaction Deletion Record")
 		tdr.company = company
@@ -223,8 +216,7 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 
 	def test_company_field_validation(self):
 		"""Test that invalid company_field values are rejected"""
-		company = "Dunder Mifflin Paper Co"
-		create_company(company)
+		company = TEST_COMPANY
 
 		tdr = frappe.new_doc("Transaction Deletion Record")
 		tdr.company = company
@@ -278,14 +270,10 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 
 	def test_cache_flag_management(self):
 		"""Test that cache flags can be set and cleared correctly"""
-		company = "Dunder Mifflin Paper Co"
+		company = TEST_COMPANY
 		create_task(company)
 
-		tdr = frappe.new_doc("Transaction Deletion Record")
-		tdr.company = company
-		tdr.insert()
-		tdr.generate_to_delete_list()
-		tdr.reload()
+		tdr = create_transaction_deletion_doc(company)
 
 		# Test _set_deletion_cache
 		tdr._set_deletion_cache()
@@ -307,7 +295,7 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 			check_for_running_deletion_job,
 		)
 
-		company = "Dunder Mifflin Paper Co"
+		company = TEST_COMPANY
 
 		# Manually set cache flag to simulate running deletion
 		frappe.cache.set_value("deletion_running_doctype:Task", "TDR-00001", expires_in_sec=60)
@@ -331,8 +319,7 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 
 	def test_check_for_running_deletion_allows_save_when_no_flag(self):
 		"""Test that documents can be saved when no deletion is running"""
-		company = "Dunder Mifflin Paper Co"
-		create_company(company)
+		company = TEST_COMPANY
 
 		# Ensure no cache flag exists
 		frappe.cache.delete_value("deletion_running_doctype:Task")
@@ -352,11 +339,8 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 
 	def test_only_one_deletion_allowed_globally(self):
 		"""Test that only one deletion can be submitted at a time (global enforcement)"""
-		company1 = "Dunder Mifflin Paper Co"
-		company2 = "Sabre Corporation"
-
-		create_company(company1)
-		create_company(company2)
+		company1 = TEST_COMPANY
+		company2 = TEST_COMPANY_2
 
 		# Create and submit first deletion (but don't start it)
 		tdr1 = frappe.new_doc("Transaction Deletion Record")
@@ -364,19 +348,24 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 		tdr1.insert()
 		tdr1.append("doctypes_to_delete", {"doctype_name": "Task", "company_field": "company"})
 		tdr1.save()
-		tdr1.submit()  # Status becomes "Queued"
+		from erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record import (
+			TransactionDeletionRecord,
+		)
 
 		try:
-			# Try to submit second deletion for different company
-			tdr2 = frappe.new_doc("Transaction Deletion Record")
-			tdr2.company = company2  # Different company!
-			tdr2.insert()
-			tdr2.append("doctypes_to_delete", {"doctype_name": "Lead", "company_field": "company"})
-			tdr2.save()
+			with patch.object(TransactionDeletionRecord, "start_deletion_tasks"):
+				tdr1.submit()  # Status becomes "Queued"
 
-			# Should throw error - only one deletion allowed globally
-			with self.assertRaises(frappe.ValidationError) as context:
-				tdr2.submit()
+				# Try to submit second deletion for different company
+				tdr2 = frappe.new_doc("Transaction Deletion Record")
+				tdr2.company = company2  # Different company!
+				tdr2.insert()
+				tdr2.append("doctypes_to_delete", {"doctype_name": "Lead", "company_field": "company"})
+				tdr2.save()
+
+				# Should throw error - only one deletion allowed globally
+				with self.assertRaises(frappe.ValidationError) as context:
+					tdr2.submit()
 
 			self.assertIn("already", str(context.exception).lower())
 			self.assertIn(tdr1.name, str(context.exception))
@@ -395,21 +384,47 @@ def create_company(company_name):
 	company.insert()
 
 
-def create_and_submit_transaction_deletion_doc(company):
-	"""Create and execute a transaction deletion record"""
-	create_company(company)
+def create_transaction_deletion_doc(company):
+	"""Create a transaction deletion record for Task only."""
 	tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": company})
 	tdr.insert()
+	tdr.append(
+		"doctypes_to_delete",
+		{
+			"doctype_name": "Task",
+			"company_field": "company",
+			"document_count": frappe.db.count("Task", {"company": company}),
+		},
+	)
+	tdr.save()
+	return tdr
 
-	tdr.generate_to_delete_list()
-	tdr.reload()
 
+def create_and_submit_transaction_deletion_doc(company):
+	"""Create and execute a transaction deletion record."""
+	tdr = create_transaction_deletion_doc(company)
 	tdr.process_in_single_transaction = True
 	tdr.submit()
 	return tdr
 
 
 def create_task(company):
-	create_company(company)
 	task = frappe.get_doc({"doctype": "Task", "company": company, "subject": "Delete"})
 	task.insert()
+
+
+def patch_minimal_to_delete_list():
+	from erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record import (
+		TransactionDeletionRecord,
+	)
+
+	def generate_to_delete_list(self):
+		self.doctypes_to_delete = []
+		self.append(
+			"doctypes_to_delete",
+			{"doctype_name": "Task", "company_field": "company", "document_count": 0},
+		)
+		self.save()
+		return {"count": 1}
+
+	return patch.object(TransactionDeletionRecord, "generate_to_delete_list", generate_to_delete_list)

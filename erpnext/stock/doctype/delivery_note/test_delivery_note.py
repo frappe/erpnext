@@ -1081,11 +1081,6 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 		self.assertEqual(si.get("items")[0].qty, 5)
 
-		si.reload().cancel().delete()
-		dnr2.reload().cancel().delete()
-		dnr1.reload().cancel().delete()
-		dn.reload().cancel().delete()
-
 	def test_dn_billing_status_case3(self):
 		# SO -> DN1 -> SI and SO -> SI and SO -> DN2
 		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
@@ -3391,8 +3386,6 @@ class TestDeliveryNote(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings("Selling Settings", {"validate_selling_price": 1})
 	def test_validate_selling_price(self):
 		item_code = make_item("VSP Item", properties={"is_stock_item": 1}).name
-		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=1, basic_rate=10)
-		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=1, basic_rate=1)
 
 		dn = create_delivery_note(
 			item_code=item_code,
@@ -3400,6 +3393,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 			rate=9,
 			do_not_save=True,
 		)
+		dn.items[0].incoming_rate = 10
 		self.assertRaises(frappe.ValidationError, dn.save)
 		dn.items[0].incoming_rate = 0
 		dn.items[0].stock_qty = 2
