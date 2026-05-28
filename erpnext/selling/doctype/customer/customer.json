@@ -12,9 +12,12 @@
  "field_order": [
   "basic_info",
   "naming_series",
-  "customer_type",
   "customer_name",
+<<<<<<< HEAD
   "alias",
+=======
+  "customer_type",
+>>>>>>> 059f560017 (fix: add customer type in the list view)
   "gender",
   "column_break0",
   "customer_group",
@@ -143,6 +146,7 @@
    "default": "Company",
    "fieldname": "customer_type",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Customer Type",
    "oldfieldname": "customer_type",
    "oldfieldtype": "Select",
@@ -389,7 +393,7 @@
    "description": "Internal notes about this customer. Not visible on transactions or the portal.",
    "fieldname": "customer_details",
    "fieldtype": "Text",
-   "label": "Notes",
+   "label": "Customer Details",
    "oldfieldname": "customer_details",
    "oldfieldtype": "Code"
   },
@@ -493,7 +497,6 @@
    "label": "Allow sales invoice creation without delivery note"
   },
   {
-   "depends_on": "tax_withholding_group",
    "description": "TDS/TCS is calculated at the rate defined here on every payment from this customer.",
    "fieldname": "tax_withholding_category",
    "fieldtype": "Link",
@@ -541,8 +544,11 @@
    "fieldtype": "Column Break"
   },
   {
+   "collapsible": 1,
+   "collapsible_depends_on": "loyalty_program",
    "fieldname": "loyalty_points_tab",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Loyalty Points"
   },
   {
    "fieldname": "taxation_section",
@@ -693,10 +699,14 @@
   }
  ],
 <<<<<<< HEAD
+<<<<<<< HEAD
  "modified": "2026-06-22 12:23:19.196991",
 =======
  "modified": "2026-05-27 17:07:25.099707",
 >>>>>>> 6f6e17188f (fix: customer master form cleanup)
+=======
+ "modified": "2026-05-29 02:21:41.089319",
+>>>>>>> 059f560017 (fix: add customer type in the list view)
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
