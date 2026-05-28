@@ -424,20 +424,25 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			self.assertEqual(expected_values[gle.account][1], gle.credit)
 
 	def test_subcontracting_receipt_for_service_expense_account(self):
-		service_expense_account = (
-			frappe.get_doc(
-				{
-					"doctype": "Account",
-					"account_name": "_Test Service Expense",
-					"account_type": "Expense Account",
-					"company": "_Test Company with perpetual inventory",
-					"is_group": 0,
-					"parent_account": "Indirect Expenses - TCP1",
-				}
-			)
-			.insert(ignore_if_duplicate=True)
-			.name
+		service_expense_account = frappe.db.get_value(
+			"Account",
+			{"account_name": "_Test Service Expense", "company": "_Test Company with perpetual inventory"},
 		)
+		if not service_expense_account:
+			service_expense_account = (
+				frappe.get_doc(
+					{
+						"doctype": "Account",
+						"account_name": "_Test Service Expense",
+						"account_type": "Expense Account",
+						"company": "_Test Company with perpetual inventory",
+						"is_group": 0,
+						"parent_account": "Indirect Expenses - TCP1",
+					}
+				)
+				.insert()
+				.name
+			)
 
 		service_item_doc = frappe.get_doc("Item", "Subcontracted Service Item 10")
 		service_item_doc.append(

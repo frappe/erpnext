@@ -35,20 +35,15 @@ class TestGeneralLedger(ERPNextTestSuite):
 		# create a new account with USD currency
 		account_name = "Test USD Account for Revalutation"
 		company = "_Test Company"
-		account = frappe.get_doc(
-			{
-				"account_name": account_name,
-				"is_group": 0,
-				"company": company,
-				"root_type": "Asset",
-				"report_type": "Balance Sheet",
-				"account_currency": "USD",
-				"parent_account": "Bank Accounts - _TC",
-				"account_type": "Bank",
-				"doctype": "Account",
-			}
+		account = get_or_create_account(
+			account_name=account_name,
+			company=company,
+			root_type="Asset",
+			report_type="Balance Sheet",
+			account_currency="USD",
+			parent_account="Bank Accounts - _TC",
+			account_type="Bank",
 		)
-		account.insert(ignore_if_duplicate=True)
 		# create a JV to debit 1000 USD at 75 exchange rate
 		jv = frappe.new_doc("Journal Entry")
 		jv.posting_date = today()
@@ -172,20 +167,15 @@ class TestGeneralLedger(ERPNextTestSuite):
 		# create a new account with USD currency
 		account_name = "Test Debtors USD"
 		company = "_Test Company"
-		account = frappe.get_doc(
-			{
-				"account_name": account_name,
-				"is_group": 0,
-				"company": company,
-				"root_type": "Asset",
-				"report_type": "Balance Sheet",
-				"account_currency": "USD",
-				"parent_account": "Accounts Receivable - _TC",
-				"account_type": "Receivable",
-				"doctype": "Account",
-			}
+		account = get_or_create_account(
+			account_name=account_name,
+			company=company,
+			root_type="Asset",
+			report_type="Balance Sheet",
+			account_currency="USD",
+			parent_account="Accounts Receivable - _TC",
+			account_type="Receivable",
 		)
-		account.insert(ignore_if_duplicate=True)
 		# create a JV to debit 1000 USD at 75 exchange rate
 		jv = frappe.new_doc("Journal Entry")
 		jv.posting_date = today()
@@ -332,3 +322,13 @@ class TestGeneralLedger(ERPNextTestSuite):
 		)
 		actual = set([x.voucher_no for x in data if x.voucher_no])
 		self.assertEqual(expected, actual)
+
+
+def get_or_create_account(**kwargs):
+	account = frappe.db.get_value(
+		"Account", {"account_name": kwargs["account_name"], "company": kwargs["company"]}
+	)
+	if account:
+		return frappe.get_doc("Account", account)
+
+	return frappe.get_doc({"doctype": "Account", "is_group": 0, **kwargs}).insert()

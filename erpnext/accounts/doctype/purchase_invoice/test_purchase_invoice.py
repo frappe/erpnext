@@ -2218,12 +2218,8 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		)
 		dim.save()
 
-		branch1 = frappe.new_doc("Branch")
-		branch1.branch = "Location 1"
-		branch1.insert(ignore_if_duplicate=True)
-		branch2 = frappe.new_doc("Branch")
-		branch2.branch = "Location 2"
-		branch2.insert(ignore_if_duplicate=True)
+		branch1 = create_branch("Location 1")
+		branch2 = create_branch("Location 2")
 
 		pi = make_purchase_invoice(
 			company="_Test Company",
@@ -3063,6 +3059,9 @@ def check_gl_entries(
 def create_tax_witholding_category(category_name, company, account):
 	from erpnext.accounts.utils import get_fiscal_year
 
+	if frappe.db.exists("Tax Withholding Category", category_name):
+		return frappe.get_doc("Tax Withholding Category", category_name)
+
 	fiscal_year = get_fiscal_year(date=nowdate())
 
 	return frappe.get_doc(
@@ -3081,7 +3080,17 @@ def create_tax_witholding_category(category_name, company, account):
 				}
 			],
 		}
-	).insert(ignore_if_duplicate=True)
+	).insert()
+
+
+def create_branch(branch):
+	if frappe.db.exists("Branch", branch):
+		return frappe.get_doc("Branch", branch)
+
+	doc = frappe.new_doc("Branch")
+	doc.branch = branch
+	doc.insert()
+	return doc
 
 
 def unlink_payment_on_cancel_of_invoice(enable=1):

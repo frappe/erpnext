@@ -102,7 +102,7 @@ def create_supplier_for_match(supplier_name="John Doe & Co.", iban=None, account
 	if not frappe.db.exists("Bank", "TestBank"):
 		bank = frappe.new_doc("Bank")
 		bank.bank_name = "TestBank"
-		bank.insert(ignore_if_duplicate=True)
+		bank.insert()
 
 	if not frappe.db.exists("Bank Account", supplier.name + " - " + "TestBank"):
 		bank_account = frappe.new_doc("Bank Account")

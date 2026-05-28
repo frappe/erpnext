@@ -36,7 +36,10 @@ def make_maintenance_visit():
 
 
 def make_sales_person(name):
+	if frappe.db.exists("Sales Person", name):
+		return frappe.get_doc("Sales Person", name)
+
 	sales_person = frappe.get_doc({"doctype": "Sales Person", "sales_person_name": name})
-	sales_person.insert(ignore_if_duplicate=True)
+	sales_person.insert()
 
 	return sales_person

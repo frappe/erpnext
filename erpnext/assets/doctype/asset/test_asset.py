@@ -2034,6 +2034,10 @@ def create_asset(**args):
 
 
 def create_asset_category(enable_cwip=1):
+	if frappe.db.exists("Asset Category", "Computers"):
+		frappe.db.set_value("Asset Category", "Computers", "enable_cwip_accounting", enable_cwip)
+		return frappe.get_doc("Asset Category", "Computers")
+
 	asset_category = frappe.new_doc("Asset Category")
 	asset_category.asset_category_name = "Computers"
 	asset_category.total_number_of_depreciations = 3
@@ -2059,33 +2063,32 @@ def create_asset_category(enable_cwip=1):
 		},
 	)
 
-	asset_category.insert()
+	return asset_category.insert()
 
 
 def create_fixed_asset_item(item_code=None, auto_create_assets=1, is_grouped_asset=0, asset_category=None):
+	item_code = item_code or "Macbook Pro"
+	if frappe.db.exists("Item", item_code):
+		return frappe.get_doc("Item", item_code)
+
 	meta = frappe.get_meta("Asset")
 	naming_series = meta.get_field("naming_series").options.splitlines()[0] or "ACC-ASS-.YYYY.-"
-	try:
-		item = frappe.get_doc(
-			{
-				"doctype": "Item",
-				"item_code": item_code or "Macbook Pro",
-				"item_name": "Macbook Pro",
-				"description": "Macbook Pro Retina Display",
-				"asset_category": asset_category or "Computers",
-				"item_group": "All Item Groups",
-				"stock_uom": "Nos",
-				"is_stock_item": 0,
-				"is_fixed_asset": 1,
-				"auto_create_assets": auto_create_assets,
-				"is_grouped_asset": is_grouped_asset,
-				"asset_naming_series": naming_series,
-			}
-		)
-		item.insert(ignore_if_duplicate=True)
-	except frappe.DuplicateEntryError:
-		pass
-	return item
+	return frappe.get_doc(
+		{
+			"doctype": "Item",
+			"item_code": item_code,
+			"item_name": "Macbook Pro",
+			"description": "Macbook Pro Retina Display",
+			"asset_category": asset_category or "Computers",
+			"item_group": "All Item Groups",
+			"stock_uom": "Nos",
+			"is_stock_item": 0,
+			"is_fixed_asset": 1,
+			"auto_create_assets": auto_create_assets,
+			"is_grouped_asset": is_grouped_asset,
+			"asset_naming_series": naming_series,
+		}
+	).insert()
 
 
 def set_depreciation_settings_in_company(company=None):

@@ -42,12 +42,8 @@ class TestTrialBalance(ERPNextTestSuite):
 		"""
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
-		branch1 = frappe.new_doc("Branch")
-		branch1.branch = "Location 1"
-		branch1.insert(ignore_if_duplicate=True)
-		branch2 = frappe.new_doc("Branch")
-		branch2.branch = "Location 2"
-		branch2.insert(ignore_if_duplicate=True)
+		create_branch("Location 1")
+		create_branch("Location 2")
 
 		si = create_sales_invoice(
 			company="Trial Balance Company",
@@ -66,3 +62,13 @@ class TestTrialBalance(ERPNextTestSuite):
 		)
 		total_row = execute(filters)[1][-1]
 		self.assertEqual(total_row["debit"], total_row["credit"])
+
+
+def create_branch(branch):
+	if frappe.db.exists("Branch", branch):
+		return branch
+
+	doc = frappe.new_doc("Branch")
+	doc.branch = branch
+	doc.insert()
+	return doc.name

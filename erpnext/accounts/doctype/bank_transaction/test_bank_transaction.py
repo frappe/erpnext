@@ -190,14 +190,9 @@ class TestBankTransaction(ERPNextTestSuite):
 		from lending.loan_management.doctype.loan.test_loan import create_loan_accounts
 
 		create_loan_accounts()
-		bank_account = frappe.get_doc(
-			{
-				"doctype": "Bank Account",
-				"account_name": "Payment Account",
-				"bank": "Citi Bank",
-				"account": "Payment Account - _TC",
-			}
-		).insert(ignore_if_duplicate=True)
+		bank_account = create_bank_account(
+			bank_name="Citi Bank", gl_account="Payment Account - _TC", bank_account_name="Payment Account"
+		)
 
 		bank_transaction = frappe.get_doc(
 			{
@@ -206,7 +201,7 @@ class TestBankTransaction(ERPNextTestSuite):
 				"date": "2018-10-27",
 				"deposit": 500,
 				"currency": "INR",
-				"bank_account": bank_account.name,
+				"bank_account": bank_account,
 			}
 		).submit()
 
@@ -219,29 +214,32 @@ class TestBankTransaction(ERPNextTestSuite):
 def create_bank_account(
 	bank_name="Citi Bank", gl_account="_Test Bank - _TC", bank_account_name="Checking Account"
 ):
-	try:
+	if not frappe.db.exists("Bank", bank_name):
 		frappe.get_doc(
 			{
 				"doctype": "Bank",
 				"bank_name": bank_name,
 			}
-		).insert(ignore_if_duplicate=True)
-	except frappe.DuplicateEntryError:
-		pass
+		).insert()
 
-	try:
-		bank_account = frappe.get_doc(
-			{
-				"doctype": "Bank Account",
-				"account_name": bank_account_name,
-				"bank": bank_name,
-				"account": gl_account,
-			}
-		).insert(ignore_if_duplicate=True)
-	except frappe.DuplicateEntryError:
-		pass
+	bank_account = frappe.db.get_value(
+		"Bank Account", {"account_name": bank_account_name, "bank": bank_name, "account": gl_account}
+	)
+	if not bank_account:
+		bank_account = (
+			frappe.get_doc(
+				{
+					"doctype": "Bank Account",
+					"account_name": bank_account_name,
+					"bank": bank_name,
+					"account": gl_account,
+				}
+			)
+			.insert()
+			.name
+		)
 
-	return bank_account.name
+	return bank_account
 
 
 def create_gl_account(gl_account_name="_Test Bank - _TC"):
@@ -321,7 +319,7 @@ def add_transactions(bank_account="_Test Bank - _TC"):
 
 
 def add_vouchers(gl_account="_Test Bank - _TC"):
-	try:
+	if not frappe.db.exists("Supplier", "Conrad Electronic"):
 		frappe.get_doc(
 			{
 				"doctype": "Supplier",
@@ -329,10 +327,7 @@ def add_vouchers(gl_account="_Test Bank - _TC"):
 				"supplier_type": "Company",
 				"supplier_name": "Conrad Electronic",
 			}
-		).insert(ignore_if_duplicate=True)
-
-	except frappe.DuplicateEntryError:
-		pass
+		).insert()
 
 	pi = make_purchase_invoice(supplier="Conrad Electronic", qty=1, rate=690)
 
@@ -342,7 +337,7 @@ def add_vouchers(gl_account="_Test Bank - _TC"):
 	pe.insert()
 	pe.submit()
 
-	try:
+	if not frappe.db.exists("Supplier", "Mr G"):
 		frappe.get_doc(
 			{
 				"doctype": "Supplier",
@@ -350,9 +345,7 @@ def add_vouchers(gl_account="_Test Bank - _TC"):
 				"supplier_type": "Company",
 				"supplier_name": "Mr G",
 			}
-		).insert(ignore_if_duplicate=True)
-	except frappe.DuplicateEntryError:
-		pass
+		).insert()
 
 	pi = make_purchase_invoice(supplier="Mr G", qty=1, rate=1200)
 	pe = get_payment_entry("Purchase Invoice", pi.name, bank_account=gl_account)
@@ -368,7 +361,7 @@ def add_vouchers(gl_account="_Test Bank - _TC"):
 	pe.insert()
 	pe.submit()
 
-	try:
+	if not frappe.db.exists("Supplier", "Poore Simon's"):
 		frappe.get_doc(
 			{
 				"doctype": "Supplier",
@@ -376,11 +369,9 @@ def add_vouchers(gl_account="_Test Bank - _TC"):
 				"supplier_type": "Company",
 				"supplier_name": "Poore Simon's",
 			}
-		).insert(ignore_if_duplicate=True)
-	except frappe.DuplicateEntryError:
-		pass
+		).insert()
 
-	try:
+	if not frappe.db.exists("Customer", "Poore Simon's"):
 		frappe.get_doc(
 			{
 				"doctype": "Customer",
@@ -388,9 +379,7 @@ def add_vouchers(gl_account="_Test Bank - _TC"):
 				"customer_type": "Company",
 				"customer_name": "Poore Simon's",
 			}
-		).insert(ignore_if_duplicate=True)
-	except frappe.DuplicateEntryError:
-		pass
+		).insert()
 
 	pi = make_purchase_invoice(supplier="Poore Simon's", qty=1, rate=3900, is_paid=1, do_not_save=1)
 	pi.cash_bank_account = gl_account
@@ -411,7 +400,7 @@ def add_vouchers(gl_account="_Test Bank - _TC"):
 	pe.insert()
 	pe.submit()
 
-	try:
+	if not frappe.db.exists("Customer", "Fayva"):
 		frappe.get_doc(
 			{
 				"doctype": "Customer",
@@ -419,9 +408,7 @@ def add_vouchers(gl_account="_Test Bank - _TC"):
 				"customer_type": "Company",
 				"customer_name": "Fayva",
 			}
-		).insert(ignore_if_duplicate=True)
-	except frappe.DuplicateEntryError:
-		pass
+		).insert()
 
 	mode_of_payment = frappe.get_doc({"doctype": "Mode of Payment", "name": "Wire Transfer"})
 

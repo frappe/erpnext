@@ -378,6 +378,9 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 
 
 def create_company():
+	if frappe.db.exists("Company", "Test PCV Company"):
+		return "Test PCV Company"
+
 	company = frappe.get_doc(
 		{
 			"doctype": "Company",
@@ -386,11 +389,14 @@ def create_company():
 			"default_currency": "USD",
 		}
 	)
-	company.insert(ignore_if_duplicate=True)
+	company.insert()
 	return company.name
 
 
 def create_account():
+	if frappe.db.exists("Account", "Reserve and Surplus - TPC"):
+		return "Reserve and Surplus - TPC"
+
 	account = frappe.get_doc(
 		{
 			"account_name": "Reserve and Surplus",
@@ -402,11 +408,15 @@ def create_account():
 			"parent_account": "Current Liabilities - TPC",
 			"doctype": "Account",
 		}
-	).insert(ignore_if_duplicate=True)
+	).insert()
 	return account.name
 
 
 def create_cost_center(cc_name):
+	cost_center = f"{cc_name} - TPC"
+	if frappe.db.exists("Cost Center", cost_center):
+		return cost_center
+
 	costcenter = frappe.get_doc(
 		{
 			"company": "Test PCV Company",
@@ -415,5 +425,5 @@ def create_cost_center(cc_name):
 			"parent_cost_center": "Test PCV Company - TPC",
 		}
 	)
-	costcenter.insert(ignore_if_duplicate=True)
+	costcenter.insert()
 	return costcenter.name

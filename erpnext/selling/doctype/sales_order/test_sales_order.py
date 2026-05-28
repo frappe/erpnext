@@ -2986,8 +2986,9 @@ def make_sales_order_workflow():
 		doc.save()
 		return doc
 
-	frappe.get_doc(doctype="Role", role_name="Test Junior Approver").insert(ignore_if_duplicate=True)
-	frappe.get_doc(doctype="Role", role_name="Test Approver").insert(ignore_if_duplicate=True)
+	for role in ("Test Junior Approver", "Test Approver"):
+		if not frappe.db.exists("Role", role):
+			frappe.get_doc(doctype="Role", role_name=role).insert()
 	frappe.cache().hdel("roles", frappe.session.user)
 
 	workflow = frappe.get_doc(

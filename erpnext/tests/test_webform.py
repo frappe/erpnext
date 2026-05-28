@@ -47,6 +47,9 @@ def get_data():
 
 
 def create_user(name, email):
+	if frappe.db.exists("User", email):
+		return email
+
 	frappe.get_doc(
 		{
 			"doctype": "User",
@@ -56,10 +59,14 @@ def create_user(name, email):
 			"email": email,
 			"roles": [{"doctype": "Has Role", "role": "Supplier"}],
 		}
-	).insert(ignore_if_duplicate=True)
+	).insert()
+	return email
 
 
 def create_webform():
+	if frappe.db.exists("Web Form", {"route": "so-schedule"}):
+		return
+
 	frappe.get_doc(
 		{
 			"doctype": "Web Form",
@@ -83,14 +90,17 @@ def create_webform():
 				},
 			],
 		}
-	).insert(ignore_if_duplicate=True)
+	).insert()
 
 
 def create_order_assignment(supplier, po):
+	if frappe.db.exists("Order Assignment", {"supplier": supplier, "po": po}):
+		return
+
 	frappe.get_doc(
 		{
 			"doctype": "Order Assignment",
 			"po": po,
 			"supplier": supplier,
 		}
-	).insert(ignore_if_duplicate=True)
+	).insert()

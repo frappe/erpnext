@@ -56,21 +56,20 @@ class TestVATAuditReport(ERPNextTestSuite):
 
 
 def make_company(company_name, abbr):
-	if not frappe.db.exists("Company", company_name):
-		company = frappe.get_doc(
-			{
-				"doctype": "Company",
-				"company_name": company_name,
-				"abbr": abbr,
-				"default_currency": "ZAR",
-				"country": "South Africa",
-				"create_chart_of_accounts_based_on": "Standard Template",
-			}
-		)
-		company.insert()
-	else:
-		company = frappe.get_doc("Company", company_name)
+	if frappe.db.exists("Company", company_name):
+		return frappe.get_doc("Company", company_name)
 
+	company = frappe.get_doc(
+		{
+			"doctype": "Company",
+			"company_name": company_name,
+			"abbr": abbr,
+			"default_currency": "ZAR",
+			"country": "South Africa",
+			"create_chart_of_accounts_based_on": "Standard Template",
+		}
+	)
+	company.insert()
 	company.create_default_warehouses()
 
 	if not frappe.db.get_value("Cost Center", {"is_group": 0, "company": company.name}):

@@ -315,10 +315,11 @@ class TestServiceLevelAgreement(ERPNextTestSuite):
 		applied_sla = frappe.db.get_value("Lead", lead.name, "service_level_agreement")
 		self.assertFalse(applied_sla)
 
-		source = frappe.new_doc(doctype="UTM Source")
-		source.name = "Test Source"
-		source.flags.name_set = True
-		source.insert(ignore_if_duplicate=True)
+		if not frappe.db.exists("UTM Source", "Test Source"):
+			source = frappe.new_doc(doctype="UTM Source")
+			source.name = "Test Source"
+			source.flags.name_set = True
+			source.insert()
 		lead.utm_source = "Test Source"
 		lead.save()
 		applied_sla = frappe.db.get_value("Lead", lead.name, "service_level_agreement")
@@ -457,6 +458,9 @@ def create_service_level_agreement(
 
 
 def create_customer():
+	if frappe.db.exists("Customer", "_Test Customer"):
+		return "_Test Customer"
+
 	customer = frappe.get_doc(
 		{
 			"doctype": "Customer",
@@ -466,38 +470,33 @@ def create_customer():
 			"territory": "Rest Of The World",
 		}
 	)
-	if not frappe.db.exists("Customer", "_Test Customer"):
-		customer.insert(ignore_permissions=True)
-		return customer.name
-	else:
-		return frappe.db.exists("Customer", "_Test Customer")
+	customer.insert(ignore_permissions=True)
+	return customer.name
 
 
 def create_customer_group():
-	customer_group = frappe.get_doc(
-		{"doctype": "Customer Group", "customer_group_name": "_Test SLA Customer Group"}
-	)
-
 	if not frappe.db.exists("Customer Group", {"customer_group_name": "_Test SLA Customer Group"}):
+		customer_group = frappe.get_doc(
+			{"doctype": "Customer Group", "customer_group_name": "_Test SLA Customer Group"}
+		)
 		customer_group.insert()
 		return customer_group.name
-	else:
-		return frappe.db.exists("Customer Group", {"customer_group_name": "_Test SLA Customer Group"})
+
+	return frappe.db.exists("Customer Group", {"customer_group_name": "_Test SLA Customer Group"})
 
 
 def create_territory():
-	territory = frappe.get_doc(
-		{
-			"doctype": "Territory",
-			"territory_name": "_Test SLA Territory",
-		}
-	)
-
 	if not frappe.db.exists("Territory", {"territory_name": "_Test SLA Territory"}):
+		territory = frappe.get_doc(
+			{
+				"doctype": "Territory",
+				"territory_name": "_Test SLA Territory",
+			}
+		)
 		territory.insert()
 		return territory.name
-	else:
-		return frappe.db.exists("Territory", {"territory_name": "_Test SLA Territory"})
+
+	return frappe.db.exists("Territory", {"territory_name": "_Test SLA Territory"})
 
 
 def create_service_level_agreements_for_issues():
