@@ -25,8 +25,11 @@
   "apply_putaway_rule",
   "is_return",
   "return_against",
+<<<<<<< HEAD
   "section_break_yxar",
   "title",
+=======
+>>>>>>> 34c24b86fa (fix(UX): Move title field to More Info)
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -150,6 +153,7 @@
   "instructions",
   "is_internal_supplier",
   "represents_company",
+  "title",
   "inter_company_reference",
   "column_break_131",
   "remarks",
@@ -1287,6 +1291,7 @@
   {
    "fieldname": "column_break_ugyv",
    "fieldtype": "Column Break"
+<<<<<<< HEAD
   },
   {
    "fieldname": "section_break_yxar",
@@ -1299,6 +1304,8 @@
    "label": "Title",
    "no_copy": 1,
    "print_hide": 1
+=======
+>>>>>>> 34c24b86fa (fix(UX): Move title field to More Info)
   }
  ],
  "grid_page_length": 50,
@@ -1306,7 +1313,11 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2026-04-28 06:47:12.170270",
+=======
+ "modified": "2026-05-28 12:38:05.907578",
+>>>>>>> 34c24b86fa (fix(UX): Move title field to More Info)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

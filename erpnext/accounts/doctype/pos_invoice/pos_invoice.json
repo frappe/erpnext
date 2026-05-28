@@ -26,8 +26,11 @@
   "due_date",
   "amended_from",
   "return_against",
+<<<<<<< HEAD
   "section_break_abck",
   "title",
+=======
+>>>>>>> 34c24b86fa (fix(UX): Move title field to More Info)
   "accounting_dimensions_section",
   "project",
   "dimension_col_break",
@@ -172,6 +175,7 @@
   "is_discounted",
   "col_break23",
   "status",
+  "title",
   "more_info",
   "debit_to",
   "party_account_currency",
@@ -1626,10 +1630,13 @@
    "label": "Auto Repeat"
   },
   {
+<<<<<<< HEAD
    "fieldname": "section_break_abck",
    "fieldtype": "Section Break"
   },
   {
+=======
+>>>>>>> 34c24b86fa (fix(UX): Move title field to More Info)
    "allow_on_submit": 1,
    "fieldname": "title",
    "fieldtype": "Data",
@@ -1641,7 +1648,7 @@
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-01 02:37:30.580568",
+ "modified": "2026-05-28 12:22:50.253090",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",

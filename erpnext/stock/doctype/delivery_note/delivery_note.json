@@ -22,8 +22,11 @@
   "is_return",
   "issue_credit_note",
   "return_against",
+<<<<<<< HEAD
   "section_break_zxcd",
   "title",
+=======
+>>>>>>> 34c24b86fa (fix(UX): Move title field to More Info)
   "accounting_dimensions_section",
   "cost_center",
   "column_break_18",
@@ -169,6 +172,7 @@
   "inter_company_reference",
   "customer_group",
   "territory",
+  "title",
   "column_break5",
   "excise_page",
   "instructions",
@@ -1450,10 +1454,13 @@
    "label": "Auto Repeat"
   },
   {
+<<<<<<< HEAD
    "fieldname": "section_break_zxcd",
    "fieldtype": "Section Break"
   },
   {
+=======
+>>>>>>> 34c24b86fa (fix(UX): Move title field to More Info)
    "allow_on_submit": 1,
    "fieldname": "title",
    "fieldtype": "Data",
@@ -1466,7 +1473,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-01 02:37:31.430649",
+ "modified": "2026-05-28 11:44:37.286743",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

@@ -27,8 +27,11 @@
   "update_billed_amount_in_purchase_receipt",
   "apply_tds",
   "amended_from",
+<<<<<<< HEAD
   "section_break_hzux",
   "title",
+=======
+>>>>>>> 34c24b86fa (fix(UX): Move title field to More Info)
   "supplier_invoice_details",
   "bill_no",
   "column_break_15",
@@ -201,6 +204,7 @@
   "hold_comment",
   "additional_info_section",
   "is_internal_supplier",
+  "title",
   "represents_company",
   "supplier_group",
   "sender",
@@ -1684,6 +1688,7 @@
    "fieldname": "automation_section",
    "fieldtype": "Section Break",
    "label": "Automation"
+<<<<<<< HEAD
   },
   {
    "fieldname": "section_break_hzux",
@@ -1696,6 +1701,8 @@
    "label": "Title",
    "no_copy": 1,
    "print_hide": 1
+=======
+>>>>>>> 34c24b86fa (fix(UX): Move title field to More Info)
   }
  ],
  "grid_page_length": 50,
@@ -1703,7 +1710,11 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2026-04-28 07:15:31.062404",
+=======
+ "modified": "2026-05-28 12:36:55.215363",
+>>>>>>> 34c24b86fa (fix(UX): Move title field to More Info)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
