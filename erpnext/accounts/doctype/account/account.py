@@ -449,11 +449,7 @@ class Account(NestedSet):
 		return frappe.db.get_value("GL Entry", {"account": self.name})
 
 	def check_if_child_exists(self):
-		return frappe.db.sql(
-			"""select name from `tabAccount` where parent_account = %s
-			and docstatus != 2""",
-			self.name,
-		)
+		return frappe.db.exists("Account", {"parent_account": self.name, "docstatus": ["!=", 2]})
 
 	def validate_mandatory(self):
 		if not self.root_type:
