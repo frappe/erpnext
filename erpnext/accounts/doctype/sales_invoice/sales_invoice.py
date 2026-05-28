@@ -2105,15 +2105,24 @@ class SalesInvoice(SellingController):
 	def update_billing_status_in_dn(self, update_modified=True):
 		if self.is_return and not self.update_billed_amount_in_delivery_note:
 			return
+
 		updated_delivery_notes = []
+
+		SalesInvoiceItem = frappe.qb.DocType("Sales Invoice Item")
+		from frappe.query_builder.functions import Coalesce, Sum
+
 		for d in self.get("items"):
 			if d.dn_detail:
-				billed_amt = frappe.db.sql(
-					"""select sum(amount) from `tabSales Invoice Item`
-					where dn_detail=%s and docstatus=1""",
-					d.dn_detail,
+				query = (
+					frappe.qb.from_(SalesInvoiceItem)
+					.select(Coalesce(Sum(SalesInvoiceItem.amount), 0))
+					.where(SalesInvoiceItem.dn_detail == d.dn_detail)
+					.where(SalesInvoiceItem.docstatus == 1)
 				)
-				billed_amt = billed_amt and billed_amt[0][0] or 0
+
+				res = query.run()
+				billed_amt = res[0][0] if res else 0
+
 				frappe.db.set_value(
 					"Delivery Note Item",
 					d.dn_detail,
