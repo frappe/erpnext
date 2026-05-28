@@ -3128,23 +3128,25 @@ def get_all_mode_of_payments(doc):
 
 
 def get_mode_of_payments_info(mode_of_payments, company):
-	data = frappe.db.sql(
-		"""
-		select
-			mpa.default_account, mpa.parent as mop, mp.type as type
-		from
-			`tabMode of Payment Account` mpa,`tabMode of Payment` mp
-		where
-			mpa.parent = mp.name and
-			mpa.company = %s and
-			mp.enabled = 1 and
-			mp.name in %s
-		group by
-			mp.name
-		""",
-		(company, mode_of_payments),
-		as_dict=1,
+	ModeOfPaymentAccount = frappe.qb.DocType("Mode of Payment Account")
+	ModeOfPayment = frappe.qb.DocType("Mode of Payment")
+
+	query = (
+		frappe.qb.from_(ModeOfPaymentAccount)
+		.join(ModeOfPayment)
+		.on(ModeOfPaymentAccount.parent == ModeOfPayment.name)
+		.select(
+			ModeOfPaymentAccount.default_account,
+			ModeOfPaymentAccount.parent.as_("mop"),
+			ModeOfPayment.type.as_("type"),
+		)
+		.where(ModeOfPaymentAccount.company == company)
+		.where(ModeOfPayment.enabled == 1)
+		.where(ModeOfPayment.name.isin(mode_of_payments))
+		.groupby(ModeOfPayment.name)
 	)
+
+	data = query.run(as_dict=1)
 
 	return {row.get("mop"): row for row in data}
 
