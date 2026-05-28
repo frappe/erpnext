@@ -154,6 +154,9 @@ class Task(NestedSet):
 				)
 
 			for d in self.depends_on:
+				if not d.task:
+					continue
+
 				if dependency_statuses.get(d.task) not in ("Completed", "Cancelled"):
 					frappe.throw(
 						_(
@@ -199,6 +202,9 @@ class Task(NestedSet):
 				)
 
 			for task in self.depends_on:
+				if not task.task:
+					continue
+
 				if not dependency_template_statuses.get(task.task):
 					frappe.throw(
 						_("Dependent Task {0} is not a Template Task").format(

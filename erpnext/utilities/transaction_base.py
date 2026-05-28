@@ -198,7 +198,7 @@ class TransactionBase(StatusUpdater):
 		if hasattr(self, "prev_link_mapper") and self.prev_link_mapper.get(for_doctype):
 			fieldname = self.prev_link_mapper[for_doctype]["fieldname"]
 
-			values = tuple(value for item in self.items if (value := item.as_dict()[fieldname]))
+			values = tuple(value for item in self.items if (value := item.get(fieldname)))
 
 			if values:
 				ret = {for_doctype: {"filters": [[for_doctype, "name", "in", values]]}}
