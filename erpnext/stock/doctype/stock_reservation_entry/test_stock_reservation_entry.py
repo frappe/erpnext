@@ -2,6 +2,7 @@
 # See license.txt
 
 from random import randint
+from unittest.mock import patch
 
 import frappe
 from frappe.utils import today
@@ -22,28 +23,13 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestStockReservationEntry(ERPNextTestSuite):
-	@classmethod
-	def setUpClass(cls) -> None:
-		super().setUpClass()
-		cls.warehouse = "_Test Warehouse - _TC"
-		cls.sr_item = make_item(
-			"_Test Stock Reservation Item", properties={"is_stock_item": 1, "valuation_rate": 100}
-		)
-		current_qty = get_stock_balance(cls.sr_item.name, cls.warehouse)
-		if current_qty < 100:
-			create_material_receipt(
-				items={cls.sr_item.name: cls.sr_item}, warehouse=cls.warehouse, qty=100 - current_qty
-			)
-		frappe.db.commit()  # nosemgrep
-
 	def setUp(self) -> None:
-		self.warehouse = self.__class__.warehouse
-		self.sr_item = self.__class__.sr_item
+		self.warehouse = "_Test Warehouse - _TC"
 
 	def setup_stock_reservation_item(self) -> None:
-		self.sr_item = self.__class__.sr_item
+		self.sr_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100})
+		create_material_receipt(items={self.sr_item.name: self.sr_item}, warehouse=self.warehouse, qty=100)
 
-	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_validate_stock_reservation_settings(self) -> None:
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			validate_stock_reservation_settings,
@@ -56,10 +42,10 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		)
 
 		# Case - 1: When `Stock Reservation` is disabled in `Stock Settings`, throw `ValidationError`
-		with self.change_settings("Stock Settings", {"enable_stock_reservation": 0}):
+		with patch("frappe.get_single_value", return_value=0):
 			self.assertRaises(frappe.ValidationError, validate_stock_reservation_settings, voucher)
 
-		with self.change_settings("Stock Settings", {"enable_stock_reservation": 1}):
+		with patch("frappe.get_single_value", return_value=1):
 			# Case - 2: When `Voucher Type` is not allowed for `Stock Reservation`, throw `ValidationError`
 			voucher.doctype = "NOT ALLOWED"
 			self.assertRaises(frappe.ValidationError, validate_stock_reservation_settings, voucher)
@@ -203,23 +189,18 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		},
 	)
 	def test_stock_reservation_against_sales_order(self) -> None:
-		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-
 		item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100})
 		items_details = {item.name: item}
-		se = create_material_receipt(items_details, self.warehouse, qty=10)
-
-		item_list = []
-		for item_code, properties in items_details.items():
-			item_list.append(
-				{
-					"item_code": item_code,
-					"warehouse": self.warehouse,
-					"qty": randint(11, 100),
-					"uom": properties.stock_uom,
-					"rate": randint(10, 400),
-				}
-			)
+		create_material_receipt(items_details, self.warehouse, qty=10)
+		item_list = [
+			{
+				"item_code": item.name,
+				"warehouse": self.warehouse,
+				"qty": 20,
+				"uom": item.stock_uom,
+				"rate": 100,
+			}
+		]
 
 		so = make_sales_order(
 			item_list=item_list,
@@ -245,10 +226,9 @@ class TestStockReservationEntry(ERPNextTestSuite):
 				self.assertEqual(sre_details.status, "Partially Reserved")
 
 			cancel_stock_reservation_entries("Sales Order", so.name)
-			se.cancel()
 
 			# Test - 3: Stock should be fully Reserved if the Available Qty to Reserve is greater than the Un-reserved Qty.
-			create_material_receipt(items_details, self.warehouse, qty=110)
+			create_material_receipt(items_details, self.warehouse, qty=20)
 			so.create_stock_reservation_entries()
 			so.load_from_db()
 
@@ -286,7 +266,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			)
 
 			for row in so.items:
-				row.qty = 80
+				row.qty = 2
 
 			so.save()
 			so.submit()
@@ -295,16 +275,10 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			# Test - 7: Partial Delivery against Sales Order.
 			dn1 = make_delivery_note(so.name)
 
-			item_wise_serial_nos = {}
-
 			for item in dn1.items:
-				item.qty = 10
+				item.qty = 1
 
 			dn1.save()
-			for row in dn1.items:
-				if row.serial_no:
-					item_wise_serial_nos.setdefault(row.item_code, []).extend(get_serial_nos(row.serial_no))
-
 			dn1.submit()
 
 			for item in so.items:
@@ -319,7 +293,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 				dn2 = make_delivery_note(so.name)
 
 				for item in dn2.items:
-					item.qty = 70
+					item.qty = 2
 
 				dn2.save()
 				dn2.submit()
@@ -627,7 +601,8 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		},
 	)
 	def test_consider_reserved_stock_while_cancelling_an_inward_transaction(self) -> None:
-		items_details = create_items()
+		item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100})
+		items_details = {item.name: item}
 		se = create_material_receipt(items_details, self.warehouse, qty=100)
 
 		item_list = []

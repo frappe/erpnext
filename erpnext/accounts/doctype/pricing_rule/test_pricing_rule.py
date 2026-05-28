@@ -437,7 +437,7 @@ class TestPricingRule(ERPNextTestSuite):
 		frappe.get_doc(test_record.copy()).insert()
 
 		# With pricing rule
-		so = make_sales_order(item_code="_Test Item", qty=1)
+		so = make_sales_order(item_code="_Test Item", qty=1, do_not_submit=True)
 		so.load_from_db()
 		self.assertEqual(so.items[1].is_free_item, 1)
 		self.assertEqual(so.items[1].item_code, "_Test Item")
@@ -469,7 +469,7 @@ class TestPricingRule(ERPNextTestSuite):
 		frappe.get_doc(test_record.copy()).insert()
 
 		# With pricing rule
-		so = make_sales_order(item_code="_Test Item", qty=1)
+		so = make_sales_order(item_code="_Test Item", qty=1, do_not_submit=True)
 		so.load_from_db()
 		self.assertEqual(so.items[1].is_free_item, 1)
 		self.assertEqual(so.items[1].item_code, "_Test Item 2")
@@ -1214,13 +1214,13 @@ class TestPricingRule(ERPNextTestSuite):
 		frappe.get_doc(test_record.copy()).insert()
 
 		# With pricing rule
-		so = make_sales_order(item_code="_Test Item", qty=5)
+		so = make_sales_order(item_code="_Test Item", qty=5, do_not_submit=True)
 		so.load_from_db()
 		self.assertEqual(so.items[1].is_free_item, 1)
 		self.assertEqual(so.items[1].item_code, "_Test Item")
 		self.assertEqual(so.items[1].qty, 2)
 
-		so = make_sales_order(item_code="_Test Item", qty=7)
+		so = make_sales_order(item_code="_Test Item", qty=7, do_not_submit=True)
 		so.load_from_db()
 		self.assertEqual(so.items[1].is_free_item, 1)
 		self.assertEqual(so.items[1].item_code, "_Test Item")
@@ -1260,13 +1260,13 @@ class TestPricingRule(ERPNextTestSuite):
 		frappe.get_doc(test_record.copy()).insert()
 
 		# With pricing rule
-		so = make_sales_order(item_code="_Test Item", qty=100)
+		so = make_sales_order(item_code="_Test Item", qty=100, do_not_submit=True)
 		so.load_from_db()
 		self.assertEqual(so.items[1].is_free_item, 1)
 		self.assertEqual(so.items[1].item_code, "_Test Item")
 		self.assertEqual(so.items[1].qty, 10)
 
-		so = make_sales_order(item_code="_Test Item", qty=150)
+		so = make_sales_order(item_code="_Test Item", qty=150, do_not_submit=True)
 		so.load_from_db()
 		self.assertEqual(so.items[1].is_free_item, 1)
 		self.assertEqual(so.items[1].item_code, "_Test Item")

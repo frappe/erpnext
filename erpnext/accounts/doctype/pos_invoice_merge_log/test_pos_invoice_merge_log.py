@@ -20,19 +20,14 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestPOSInvoiceMergeLog(ERPNextTestSuite):
-	@classmethod
-	def setUpClass(cls):
-		super().setUpClass()
-		mode_of_payment = frappe.get_doc("Mode of Payment", "Bank Draft")
-		set_default_account_for_mode_of_payment(mode_of_payment, "_Test Company", "_Test Bank - _TC")
-		frappe.db.set_single_value("Selling Settings", "validate_selling_price", 0)
-		frappe.db.commit()  # nosemgrep
-
 	def setUp(self):
+		mode_of_payment = frappe.get_doc("Mode of Payment", "Bank Draft")
 		self.test_user, self.pos_profile = init_user_and_profile()
 		self.opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
 
+		set_default_account_for_mode_of_payment(mode_of_payment, "_Test Company", "_Test Bank - _TC")
 		frappe.db.set_single_value("POS Settings", "invoice_type", "POS Invoice")
+		frappe.db.set_single_value("Selling Settings", "validate_selling_price", 0)
 
 	def make_closing_entry(self):
 		closing_entry = make_closing_entry_from_opening(self.opening_entry)

@@ -14,13 +14,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestCompany(ERPNextTestSuite):
-	@classmethod
-	def setUpClass(cls):
-		super().setUpClass()
-		context = cls()
-		context.load_test_records("Company")
-		frappe.db.commit()  # nosemgrep
-
 	def test_coa_based_on_existing_company(self):
 		company = frappe.new_doc("Company")
 		company.company_name = "COA from Existing Company"
@@ -107,6 +100,7 @@ class TestCompany(ERPNextTestSuite):
 				frappe.delete_doc("Company", company_name)
 
 	def test_basic_tree(self, records=None):
+		self.load_test_records("Company")
 		min_lft = 1
 		max_rgt = frappe.db.sql("select max(rgt) from `tabCompany`")[0][0]
 
@@ -199,6 +193,7 @@ class TestCompany(ERPNextTestSuite):
 	def test_demo_data(self):
 		from erpnext.setup.demo import clear_demo_data, setup_demo_data
 
+		self.load_test_records("Company")
 		setup_demo_data(self.globalTestRecords["Company"][0]["company_name"])
 		company_name = frappe.db.get_value("Company", {"name": ("like", "%(Demo)")})
 		self.assertTrue(company_name)
