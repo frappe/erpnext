@@ -993,7 +993,7 @@ class SalesInvoice(SellingController):
 		return pos
 
 	def get_company_abbr(self):
-		return frappe.db.sql("select abbr from tabCompany where name=%s", self.company)[0][0]
+		return frappe.db.get_value("Company", self.company, "abbr")
 
 	def validate_debit_to_acc(self):
 		if not self.debit_to:
