@@ -2195,28 +2195,27 @@ class SalesInvoice(SellingController):
 
 	# valdite the redemption and then delete the loyalty points earned on cancel of the invoice
 	def delete_loyalty_point_entry(self):
-		lp_entry = frappe.db.sql(
-			"select name from `tabLoyalty Point Entry` where invoice=%s", (self.name), as_dict=1
-		)
+		lp_entry = frappe.db.get_all("Loyalty Point Entry", filters={"invoice": self.name}, fields=["name"])
 
 		if not lp_entry:
 			return
-		against_lp_entry = frappe.db.sql(
-			"""select name, invoice from `tabLoyalty Point Entry`
-			where redeem_against=%s""",
-			(lp_entry[0].name),
-			as_dict=1,
+
+		against_lp_entry = frappe.db.get_all(
+			"Loyalty Point Entry",
+			filters={"redeem_against": lp_entry[0].name},
+			fields=["name", "invoice"],
 		)
+
 		if against_lp_entry:
 			invoice_list = ", ".join([d.invoice for d in against_lp_entry])
 			frappe.throw(
 				_(
-					"""{} can't be cancelled since the Loyalty Points earned has been redeemed. First cancel the {} No {}"""
+					"{} can't be cancelled since the Loyalty Points earned has been redeemed. "
+					"First cancel the {} No {}"
 				).format(self.doctype, self.doctype, invoice_list)
 			)
 		else:
-			frappe.db.sql("""delete from `tabLoyalty Point Entry` where invoice=%s""", (self.name))
-			# Set loyalty program
+			frappe.db.delete("Loyalty Point Entry", filters={"invoice": self.name})
 			self.set_loyalty_program_tier()
 
 	def set_loyalty_program_tier(self):
