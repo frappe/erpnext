@@ -2387,18 +2387,20 @@ def is_overdue(doc, total):
 def get_discounting_status(sales_invoice):
 	status = None
 
-	invoice_discounting_list = frappe.db.sql(
-		"""
-		select status
-		from `tabInvoice Discounting` id, `tabDiscounted Invoice` d
-		where
-			id.name = d.parent
-			and d.sales_invoice=%s
-			and id.docstatus=1
-			and status in ('Disbursed', 'Settled')
-	""",
-		sales_invoice,
+	InvoiceDiscounting = frappe.qb.DocType("Invoice Discounting")
+	DiscountedInvoice = frappe.qb.DocType("Discounted Invoice")
+
+	query = (
+		frappe.qb.from_(InvoiceDiscounting)
+		.join(DiscountedInvoice)
+		.on(InvoiceDiscounting.name == DiscountedInvoice.parent)
+		.select(InvoiceDiscounting.status)
+		.where(DiscountedInvoice.sales_invoice == sales_invoice)
+		.where(InvoiceDiscounting.docstatus == 1)
+		.where(InvoiceDiscounting.status.isin(["Disbursed", "Settled"]))
 	)
+
+	invoice_discounting_list = query.run()
 
 	for d in invoice_discounting_list:
 		status = d[0]
