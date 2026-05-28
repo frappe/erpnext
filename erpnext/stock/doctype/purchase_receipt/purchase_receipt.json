@@ -25,8 +25,6 @@
   "apply_putaway_rule",
   "is_return",
   "return_against",
-  "section_break_yxar",
-  "title",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -150,6 +148,7 @@
   "instructions",
   "is_internal_supplier",
   "represents_company",
+  "title",
   "inter_company_reference",
   "column_break_131",
   "remarks",
@@ -1289,10 +1288,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "section_break_yxar",
-   "fieldtype": "Section Break"
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "title",
    "fieldtype": "Data",
@@ -1306,7 +1301,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-28 06:47:12.170270",
+ "modified": "2026-05-28 12:38:05.907578",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
