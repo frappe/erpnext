@@ -892,10 +892,7 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertEqual(outstanding_amount, 0)
 
 	def test_payment_entry_against_sales_invoice_with_cost_centre(self):
-		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
-
-		cost_center = "_Test Cost Center for BS Account - _TC"
-		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
+		cost_center = "_Test Cost Center - _TC"
 
 		si = create_sales_invoice_against_cost_center(cost_center=cost_center, debit_to="Debtors - _TC")
 
@@ -929,10 +926,7 @@ class TestPaymentEntry(ERPNextTestSuite):
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
 	def test_payment_entry_against_purchase_invoice_with_cost_center(self):
-		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
-
-		cost_center = "_Test Cost Center for BS Account - _TC"
-		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
+		cost_center = "_Test Cost Center - _TC"
 
 		pi = make_purchase_invoice_against_cost_center(cost_center=cost_center, credit_to="Creditors - _TC")
 
@@ -966,11 +960,9 @@ class TestPaymentEntry(ERPNextTestSuite):
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
 	def test_payment_entry_account_and_party_balance_with_cost_center(self):
-		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		from erpnext.accounts.utils import get_balance_on
 
-		cost_center = "_Test Cost Center for BS Account - _TC"
-		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
+		cost_center = "_Test Cost Center - _TC"
 
 		si = create_sales_invoice_against_cost_center(cost_center=cost_center, debit_to="Debtors - _TC")
 
@@ -1788,12 +1780,7 @@ class TestPaymentEntry(ERPNextTestSuite):
 	def test_advance_reverse_payment_reconciliation(self):
 		company = "_Test Company"
 		customer = create_customer(frappe.generate_hash(length=10), "INR")
-		advance_account = create_account(
-			parent_account="Current Liabilities - _TC",
-			account_name="Advances Received",
-			company=company,
-			account_type="Receivable",
-		)
+		advance_account = "Advance Received - _TC"
 
 		frappe.db.set_value(
 			"Company",
@@ -1972,18 +1959,11 @@ class TestPaymentEntry(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"delete_linked_ledger_entries": 1})
 	def test_delete_linked_exchange_gain_loss_journal(self):
-		from erpnext.accounts.doctype.account.test_account import create_account
 		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
 			make_customer,
 		)
 
-		debtors = create_account(
-			account_name="Debtors USD",
-			parent_account="Accounts Receivable - _TC",
-			company="_Test Company",
-			account_currency="USD",
-			account_type="Receivable",
-		)
+		debtors = "_Test Receivable USD - _TC"
 
 		# create a customer
 		customer = make_customer(customer="_Test Party USD")

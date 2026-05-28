@@ -2,7 +2,6 @@ import frappe
 from frappe import qb
 from frappe.utils import nowdate
 
-from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.deferred_revenue_and_expense.deferred_revenue_and_expense import (
@@ -46,19 +45,8 @@ class TestDeferredRevenueAndExpense(ERPNextTestSuite, AccountsTestMixin):
 			qb.from_(pinv).delete().where(pinv.name.isin(deferred_invoices)).run()
 
 	def setup_deferred_accounts_and_items(self):
-		# created deferred expense accounts, if not found
-		self.deferred_revenue_account = create_account(
-			account_name="Deferred Revenue",
-			parent_account="Current Liabilities - " + self.company_abbr,
-			company=self.company,
-		)
-
-		# created deferred expense accounts, if not found
-		self.deferred_expense_account = create_account(
-			account_name="Deferred Expense",
-			parent_account="Current Assets - " + self.company_abbr,
-			company=self.company,
-		)
+		self.deferred_revenue_account = self.deferred_revenue
+		self.deferred_expense_account = self.deferred_expense
 
 	def setUp(self):
 		self.create_company()

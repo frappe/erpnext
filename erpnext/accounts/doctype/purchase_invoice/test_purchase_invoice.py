@@ -1132,10 +1132,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(pi_doc.outstanding_amount, 0)
 
 	def test_purchase_invoice_with_cost_center(self):
-		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
-
-		cost_center = "_Test Cost Center for BS Account - _TC"
-		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
+		cost_center = "_Test Cost Center - _TC"
 
 		pi = make_purchase_invoice_against_cost_center(cost_center=cost_center, credit_to="Creditors - _TC")
 		self.assertEqual(pi.cost_center, cost_center)
@@ -1224,9 +1221,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			self.assertEqual(expected_values[gle.account]["project"], gle.project)
 
 	def test_deferred_expense_via_journal_entry(self):
-		deferred_account = create_account(
-			account_name="Deferred Expense", parent_account="Current Assets - _TC", company="_Test Company"
-		)
+		deferred_account = "Deferred Expense - _TC"
 
 		acc_settings = frappe.get_doc("Accounts Settings", "Accounts Settings")
 		acc_settings.book_deferred_entries_via_journal_entry = 1

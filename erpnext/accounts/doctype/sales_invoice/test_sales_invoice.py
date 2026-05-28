@@ -2381,10 +2381,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(si_doc.outstanding_amount, 0)
 
 	def test_sales_invoice_with_cost_center(self):
-		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
-
-		cost_center = "_Test Cost Center for BS Account - _TC"
-		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
+		cost_center = "_Test Cost Center - _TC"
 
 		si = create_sales_invoice_against_cost_center(cost_center=cost_center, debit_to="Debtors - _TC")
 		self.assertEqual(si.cost_center, cost_center)
@@ -2479,11 +2476,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		{"book_deferred_entries_based_on": "Days", "book_deferred_entries_via_journal_entry": 0},
 	)
 	def test_deferred_revenue(self):
-		deferred_account = create_account(
-			account_name="Deferred Revenue",
-			parent_account="Current Liabilities - _TC",
-			company="_Test Company",
-		)
+		deferred_account = "Deferred Revenue - _TC"
 
 		item = create_item("_Test Item for Deferred Accounting")
 		item.enable_deferred_revenue = 1
@@ -2535,11 +2528,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		{"book_deferred_entries_based_on": "Months", "book_deferred_entries_via_journal_entry": 0},
 	)
 	def test_fixed_deferred_revenue(self):
-		deferred_account = create_account(
-			account_name="Deferred Revenue",
-			parent_account="Current Liabilities - _TC",
-			company="_Test Company",
-		)
+		deferred_account = "Deferred Revenue - _TC"
 
 		item = create_item("_Test Item for Deferred Accounting")
 		item.enable_deferred_revenue = 1
@@ -3529,11 +3518,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		},
 	)
 	def test_multi_currency_deferred_revenue_via_journal_entry(self):
-		deferred_account = create_account(
-			account_name="Deferred Revenue",
-			parent_account="Current Liabilities - _TC",
-			company="_Test Company",
-		)
+		deferred_account = "Deferred Revenue - _TC"
 
 		item = create_item("_Test Item for Deferred Accounting")
 		item.enable_deferred_expense = 1
@@ -3749,12 +3734,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 	def test_advance_entries_as_liability(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 
-		advance_account = create_account(
-			parent_account="Current Liabilities - _TC",
-			account_name="Advances Received",
-			company="_Test Company",
-			account_type="Receivable",
-		)
+		advance_account = "Advance Received - _TC"
 
 		set_advance_flag(company="_Test Company", flag=1, default_account=advance_account)
 
@@ -3789,8 +3769,8 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		# Check GL Entry against payment doctype
 		expected_gle = [
-			["Advances Received - _TC", 0.0, 1000.0, nowdate()],
-			["Advances Received - _TC", 500, 0.0, nowdate()],
+			[advance_account, 0.0, 1000.0, nowdate()],
+			[advance_account, 500, 0.0, nowdate()],
 			["Cash - _TC", 1000, 0.0, nowdate()],
 			["Debtors - _TC", 0.0, 500, nowdate()],
 		]
@@ -3834,12 +3814,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		company = "_Test Company"
 		customer = "_Test Customer"
 		debtors_acc = "Debtors - _TC"
-		advance_account = create_account(
-			parent_account="Current Liabilities - _TC",
-			account_name="Advances Received",
-			company="_Test Company",
-			account_type="Receivable",
-		)
+		advance_account = "Advance Received - _TC"
 
 		set_advance_flag(company="_Test Company", flag=1, default_account=advance_account)
 
@@ -4237,7 +4212,6 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"enable_common_party_accounting": True})
 	def test_common_party_with_foreign_currency_jv(self):
-		from erpnext.accounts.doctype.account.test_account import create_account
 		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
 			make_customer,
 		)
@@ -4245,20 +4219,8 @@ class TestSalesInvoice(ERPNextTestSuite):
 		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 		from erpnext.setup.utils import get_exchange_rate
 
-		creditors = create_account(
-			account_name="Creditors USD",
-			parent_account="Accounts Payable - _TC",
-			company="_Test Company",
-			account_currency="USD",
-			account_type="Payable",
-		)
-		debtors = create_account(
-			account_name="Debtors USD",
-			parent_account="Accounts Receivable - _TC",
-			company="_Test Company",
-			account_currency="USD",
-			account_type="Receivable",
-		)
+		creditors = "_Test Payable USD - _TC"
+		debtors = "_Test Receivable USD - _TC"
 
 		# create a customer
 		customer = make_customer(customer="_Test Common Party USD")
@@ -4319,7 +4281,6 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"enable_common_party_accounting": True})
 	def test_common_party_with_different_currency_in_debtor_and_creditor(self):
-		from erpnext.accounts.doctype.account.test_account import create_account
 		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
 			make_customer,
 		)
@@ -4327,20 +4288,8 @@ class TestSalesInvoice(ERPNextTestSuite):
 		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 		from erpnext.setup.utils import get_exchange_rate
 
-		creditors = create_account(
-			account_name="Creditors INR",
-			parent_account="Accounts Payable - _TC",
-			company="_Test Company",
-			account_currency="INR",
-			account_type="Payable",
-		)
-		debtors = create_account(
-			account_name="Debtors USD",
-			parent_account="Accounts Receivable - _TC",
-			company="_Test Company",
-			account_currency="USD",
-			account_type="Receivable",
-		)
+		creditors = "Creditors - _TC"
+		debtors = "_Test Receivable USD - _TC"
 
 		# create a customer
 		customer = make_customer(customer="_Test Common Party USD")

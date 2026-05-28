@@ -332,18 +332,26 @@ def get_inventory_account(company, warehouse=None):
 
 def create_account(**kwargs):
 	account = frappe.db.get_value(
-		"Account", filters={"account_name": kwargs.get("account_name"), "company": kwargs.get("company")}
+		"Account",
+		filters={"account_name": kwargs.get("account_name"), "company": kwargs.get("company")},
+		fieldname=["name", "is_group", "parent_account"],
+		as_dict=True,
 	)
 	if account:
-		account = frappe.get_doc("Account", account)
-		account.update(
+		is_group = kwargs.get("is_group", 0)
+		parent_account = kwargs.get("parent_account")
+		if account.is_group == is_group and account.parent_account == parent_account:
+			return account.name
+
+		doc = frappe.get_doc("Account", account.name)
+		doc.update(
 			dict(
-				is_group=kwargs.get("is_group", 0),
-				parent_account=kwargs.get("parent_account"),
+				is_group=is_group,
+				parent_account=parent_account,
 			)
 		)
-		account.save()
-		return account.name
+		doc.save()
+		return doc.name
 	else:
 		account = frappe.get_doc(
 			doctype="Account",

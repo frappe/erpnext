@@ -1198,13 +1198,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		)
 
 	def test_delivery_note_with_cost_center(self):
-		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
-
-		cost_center = "_Test Cost Center for BS Account - TCP1"
-		create_cost_center(
-			cost_center_name="_Test Cost Center for BS Account",
-			company="_Test Company with perpetual inventory",
-		)
+		cost_center = "Main - TCP1"
 
 		set_valuation_method("_Test Item", "FIFO")
 

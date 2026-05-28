@@ -3,7 +3,6 @@
 
 import frappe
 
-from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 	check_gl_entries,
 	create_sales_invoice,
@@ -17,11 +16,7 @@ class TestProcessDeferredAccounting(ERPNextTestSuite):
 		"""test creation of gl entries on submission of document"""
 		change_acc_settings(acc_frozen_till_date="2023-05-31", book_deferred_entries_based_on="Months")
 
-		deferred_account = create_account(
-			account_name="Deferred Revenue for Accounts Frozen",
-			parent_account="Current Liabilities - _TC",
-			company="_Test Company",
-		)
+		deferred_account = "Deferred Revenue - _TC"
 
 		item = create_item("_Test Item for Deferred Accounting")
 		item.enable_deferred_revenue = 1

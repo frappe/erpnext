@@ -897,13 +897,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr.cancel()
 
 	def test_purchase_receipt_cost_center(self):
-		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
-
-		cost_center = "_Test Cost Center for BS Account - TCP1"
-		create_cost_center(
-			cost_center_name="_Test Cost Center for BS Account",
-			company="_Test Company with perpetual inventory",
-		)
+		cost_center = "Main - TCP1"
 
 		if not frappe.db.exists("Location", "Test Location"):
 			frappe.get_doc({"doctype": "Location", "location_name": "Test Location"}).insert()
@@ -3629,10 +3623,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 	def test_status_mapping(self):
 		item_code = "item_for_status"
 		create_item(item_code)
-		create_item("item_for_status")
-		warehouse = create_warehouse("Stores")
-		supplier = "Test Supplier"
-		create_supplier(supplier_name=supplier)
+		warehouse = "Stores - _TC"
 		pr = make_purchase_receipt(
 			item_code=item_code,
 			warehouse=warehouse,
@@ -5426,21 +5417,13 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			self.assertEqual(row.incoming_rate, 100)
 
 	def test_different_exchange_rate_in_pr_and_pi(self):
-		from erpnext.accounts.doctype.account.test_account import create_account
-
 		original_value = frappe.db.get_single_value(
 			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate"
 		)
 
 		frappe.db.set_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 1)
 
-		party_account = create_account(
-			account_name="USD Party Account Creditors",
-			parent_account="Accounts Payable - TCP1",
-			account_type="Payable",
-			company="_Test Company with perpetual inventory",
-			account_currency="USD",
-		)
+		party_account = "_Test Payable USD - TCP1"
 
 		supplier = create_supplier(
 			supplier_name="_Test USD Supplier New 1", default_currency="USD", party_account=party_account
@@ -5479,7 +5462,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		gl_entries = get_gl_entries(pi.doctype, pi.name)
 		self.assertTrue(len(gl_entries) == 2)
 
-		accounts = ["USD Party Account Creditors - TCP1", "Stock Received But Not Billed - TCP1"]
+		accounts = [party_account, "Stock Received But Not Billed - TCP1"]
 		for row in gl_entries:
 			amount = row.credit or row.debit
 			self.assertEqual(amount, 9000.0)
@@ -5660,19 +5643,11 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		The system must use PI's base_net_amount (not amount = 2*100*90 = 18000) so that
 		SRBNB credit on PR = 17142.86, not 18000.
 		"""
-		from erpnext.accounts.doctype.account.test_account import create_account
-
 		company = "_Test Company with perpetual inventory"
 		warehouse = "Stores - TCP1"
 		cost_center = "Main - TCP1"
 
-		party_account = create_account(
-			account_name="USD Payable For SRBNB Exchange Rate Test",
-			parent_account="Accounts Payable - TCP1",
-			account_type="Payable",
-			company=company,
-			account_currency="USD",
-		)
+		party_account = "_Test Payable USD - TCP1"
 
 		supplier = create_supplier(
 			supplier_name="_Test USD Supplier for SRBNB Exchange Rate",

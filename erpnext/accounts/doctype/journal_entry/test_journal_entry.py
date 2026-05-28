@@ -312,10 +312,7 @@ class TestJournalEntry(ERPNextTestSuite):
 		self.assertEqual(jv1.inter_company_journal_entry_reference, "")
 
 	def test_jv_with_cost_centre(self):
-		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
-
-		cost_center = "_Test Cost Center for BS Account - _TC"
-		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
+		cost_center = "_Test Cost Center - _TC"
 		jv = make_journal_entry(
 			"_Test Cash - _TC", "_Test Bank - _TC", 100, cost_center=cost_center, save=False
 		)
@@ -389,11 +386,9 @@ class TestJournalEntry(ERPNextTestSuite):
 		self.check_gl_entries()
 
 	def test_jv_account_and_party_balance_with_cost_centre(self):
-		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		from erpnext.accounts.utils import get_balance_on
 
-		cost_center = "_Test Cost Center for BS Account - _TC"
-		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
+		cost_center = "_Test Cost Center - _TC"
 		jv = make_journal_entry(
 			"_Test Cash - _TC", "_Test Bank - _TC", 100, cost_center=cost_center, save=False
 		)
@@ -410,8 +405,6 @@ class TestJournalEntry(ERPNextTestSuite):
 		self.assertEqual(expected_account_balance, account_balance)
 
 	def test_repost_accounting_entries(self):
-		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
-
 		# Configure Repost Accounting Ledger for JVs
 		settings = frappe.get_doc("Accounts Settings")
 		if "Journal Entry" not in [x.document_type for x in settings.repost_allowed_types]:
@@ -450,15 +443,14 @@ class TestJournalEntry(ERPNextTestSuite):
 
 		self.check_gl_entries()
 
-		# Change cost center for bank account - _Test Cost Center for BS Account
-		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
-		jv.accounts[1].cost_center = "_Test Cost Center for BS Account - _TC"
+		# Change cost center for bank account.
+		jv.accounts[1].cost_center = "_Test Cost Center 2 - _TC"
 		# Ledger reposted implicitly upon 'Update After Submit'
 		jv.save()
 
 		# Check GL entries after reposting
 		jv.load_from_db()
-		self.expected_gle[0]["cost_center"] = "_Test Cost Center for BS Account - _TC"
+		self.expected_gle[0]["cost_center"] = "_Test Cost Center 2 - _TC"
 		self.check_gl_entries()
 
 	def check_gl_entries(self):

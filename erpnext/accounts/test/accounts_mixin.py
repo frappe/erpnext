@@ -28,15 +28,20 @@ class AccountsTestMixin:
 		else:
 			if company and default_account:
 				customer = frappe.get_doc("Customer", customer_name)
-				customer.accounts = []
-				customer.append(
-					"accounts",
-					{
-						"company": company,
-						"account": default_account,
-					},
-				)
-				customer.save()
+				if not (
+					len(customer.accounts) == 1
+					and customer.accounts[0].company == company
+					and customer.accounts[0].account == default_account
+				):
+					customer.accounts = []
+					customer.append(
+						"accounts",
+						{
+							"company": company,
+							"account": default_account,
+						},
+					)
+					customer.save()
 			self.customer = customer_name
 
 	def create_supplier(self, supplier_name="_Test Supplier", currency=None):
