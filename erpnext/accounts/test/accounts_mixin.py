@@ -90,6 +90,15 @@ class AccountsTestMixin:
 		self.cash = "Cash - " + abbr
 		self.creditors = "Creditors - " + abbr
 		self.retained_earnings = "Retained Earnings - " + abbr
+		self.deferred_revenue = "Deferred Revenue - " + abbr
+		self.deferred_expense = "Deferred Expense - " + abbr
+		self.bank = "HDFC - " + abbr
+		self.advance_received = "Advance Received - " + abbr
+		self.advance_paid = "Advance Paid - " + abbr
+
+		if company_name == "_Test Company" and abbr == "_TC":
+			self.identify_default_warehouses()
+			return
 
 		# Deferred revenue, expense and bank accounts
 		other_accounts = [
