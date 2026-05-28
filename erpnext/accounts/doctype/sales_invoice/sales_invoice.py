@@ -1363,19 +1363,28 @@ class SalesInvoice(SellingController):
 		self.total_billing_hours = timesheet_sum("billing_hours")
 
 	def get_warehouse(self):
-		user_pos_profile = frappe.db.sql(
-			"""select name, warehouse from `tabPOS Profile`
-			where ifnull(user,'') = %s and company = %s""",
-			(frappe.session["user"], self.company),
+		POSProfile = frappe.qb.DocType("POS Profile")
+
+		user_query = (
+			frappe.qb.from_(POSProfile)
+			.select(POSProfile.name, POSProfile.warehouse)
+			.where(POSProfile.company == self.company)
+			.where(
+				(POSProfile.user == frappe.session["user"])
+				| ((POSProfile.user.isnull() | (POSProfile.user == "")) & (frappe.session["user"] == ""))
+			)
 		)
+		user_pos_profile = user_query.run()
 		warehouse = user_pos_profile[0][1] if user_pos_profile else None
 
 		if not warehouse:
-			global_pos_profile = frappe.db.sql(
-				"""select name, warehouse from `tabPOS Profile`
-				where (user is null or user = '') and company = %s""",
-				self.company,
+			global_query = (
+				frappe.qb.from_(POSProfile)
+				.select(POSProfile.name, POSProfile.warehouse)
+				.where(POSProfile.company == self.company)
+				.where(POSProfile.user.isnull() | (POSProfile.user == ""))
 			)
+			global_pos_profile = global_query.run()
 
 			if global_pos_profile:
 				warehouse = global_pos_profile[0][1]
