@@ -175,16 +175,19 @@ class Account(NestedSet):
 		if cint(self.is_group):
 			db_value = self.get_doc_before_save()
 			if db_value:
+				Account = frappe.qb.DocType("Account")
+				query = frappe.qb.update(Account).where((Account.lft > self.lft) & (Account.rgt < self.rgt))
+
+				updated = False
 				if self.report_type != db_value.report_type:
-					frappe.db.sql(
-						"update `tabAccount` set report_type=%s where lft > %s and rgt < %s",
-						(self.report_type, self.lft, self.rgt),
-					)
+					query = query.set(Account.report_type, self.report_type)
+					updated = True
 				if self.root_type != db_value.root_type:
-					frappe.db.sql(
-						"update `tabAccount` set root_type=%s where lft > %s and rgt < %s",
-						(self.root_type, self.lft, self.rgt),
-					)
+					query = query.set(Account.root_type, self.root_type)
+					updated = True
+
+				if updated:
+					query.run()
 
 		if self.root_type and not self.report_type:
 			self.report_type = (
