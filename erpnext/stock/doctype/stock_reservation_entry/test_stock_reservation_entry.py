@@ -628,18 +628,13 @@ class TestStockReservationEntry(ERPNextTestSuite):
 
 
 def create_items() -> dict:
-	items_properties = [
-		# SR STOCK ITEM
-		{"is_stock_item": 1, "valuation_rate": 100},
-		# SR SERIAL ITEM
-		{
-			"is_stock_item": 1,
-			"valuation_rate": 200,
-			"has_serial_no": 1,
-			"serial_no_series": "SRSI-.#####",
-		},
+	items = {
+		"_Test Item": frappe.get_doc("Item", "_Test Item"),
+		"_Test Serialized Item With Series": frappe.get_doc("Item", "_Test Serialized Item With Series"),
+	}
+	items_properties = {
 		# SR BATCH ITEM
-		{
+		"SR Batch Item": {
 			"is_stock_item": 1,
 			"valuation_rate": 300,
 			"has_batch_no": 1,
@@ -647,7 +642,7 @@ def create_items() -> dict:
 			"batch_number_series": "SRBI-.#####.",
 		},
 		# SR SERIAL AND BATCH ITEM
-		{
+		"SR Serial and Batch Item": {
 			"is_stock_item": 1,
 			"valuation_rate": 400,
 			"has_serial_no": 1,
@@ -656,11 +651,10 @@ def create_items() -> dict:
 			"create_new_batch": 1,
 			"batch_number_series": "SRSBI-.#####.",
 		},
-	]
+	}
 
-	items = {}
-	for properties in items_properties:
-		item = make_item(properties=properties)
+	for item_code, properties in items_properties.items():
+		item = make_item(item_code, properties=properties)
 		items[item.name] = item
 
 	return items

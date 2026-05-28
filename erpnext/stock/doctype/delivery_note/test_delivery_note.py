@@ -3385,17 +3385,16 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"validate_selling_price": 1})
 	def test_validate_selling_price(self):
-		item_code = make_item("VSP Item", properties={"is_stock_item": 1}).name
-
 		dn = create_delivery_note(
-			item_code=item_code,
+			item_code="_Test Item",
 			qty=1,
-			rate=9,
+			rate=99,
 			do_not_save=True,
 		)
-		dn.items[0].incoming_rate = 10
+		dn.items[0].incoming_rate = 100
 		self.assertRaises(frappe.ValidationError, dn.save)
 		dn.items[0].incoming_rate = 0
+		dn.items[0].rate = 101
 		dn.items[0].stock_qty = 2
 		dn.save()
 

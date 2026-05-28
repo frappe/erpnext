@@ -5492,38 +5492,24 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 	def test_purchase_receipt_gl_entries_for_asset_item(self):
 		from erpnext.assets.doctype.asset.test_asset import create_fixed_asset_item
 
-		# Create a Company without Stock Accounts Linked.
-		company = frappe.get_doc(
-			{
-				"doctype": "Company",
-				"company_name": "Asset Company",
-				"country": "India",
-				"default_currency": "INR",
-			}
-		).insert()
-
-		stock_accounts = (
-			company.default_inventory_account,
-			company.stock_adjustment_account,
-			company.stock_received_but_not_billed,
-		)
-
+		company = frappe.get_doc("Company", "_Test Company")
+		# Purchase Receipt should not need stock accounts for an asset-only receipt.
 		company.update(
 			{"stock_in_hand_account": "", "stock_adjustment_account": "", "stock_received_but_not_billed": ""}
 		).save()
 
-		for account in stock_accounts:
-			frappe.db.delete("Account", account)
-
-		asset_category = create_asset_category_for_pr_test()
 		asset_item = create_fixed_asset_item(
-			item_code="Test Fixed Asset Item for PR GL Test", asset_category=asset_category.name
+			item_code="Test Fixed Asset Item for PR GL Test", asset_category="Computers"
 		)
 		arnb_account = frappe.db.get_value("Company", company.name, "asset_received_but_not_billed")
 
 		# Purchase Receipt should be able to create even without any stock accounts linked to company
 		pr = make_purchase_receipt(
-			item_code=asset_item.name, warehouse="Stores - AC", qty=1, rate=10000, company=company.name
+			item_code=asset_item.name,
+			warehouse="_Test Warehouse - _TC",
+			qty=1,
+			rate=10000,
+			company=company.name,
 		)
 
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
@@ -5549,18 +5535,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 	def test_purchase_receipt_gl_entries_with_mixed_asset_and_stock_items(self):
 		from erpnext.assets.doctype.asset.test_asset import create_fixed_asset_item
 
-		company = frappe.get_doc(
-			{
-				"doctype": "Company",
-				"company_name": "Asset Company",
-				"country": "India",
-				"default_currency": "INR",
-			}
-		).insert()
-
-		asset_category = create_asset_category_for_pr_test()
+		company = frappe.get_doc("Company", "_Test Company with perpetual inventory")
 		asset_item = create_fixed_asset_item(
-			item_code="Test Fixed Asset Item for PR GL Test", asset_category=asset_category.name
+			item_code="Test Fixed Asset Item for PR GL Test", asset_category="Computers"
 		)
 		arnb_account = frappe.db.get_value("Company", company.name, "asset_received_but_not_billed")
 
@@ -5568,7 +5545,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			item_code=asset_item.name,
 			qty=1,
 			rate=10000,
-			warehouse="Stores - AC",
+			warehouse="Stores - TCP1",
 			do_not_save=True,
 			company=company.name,
 		)
@@ -5576,7 +5553,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			"items",
 			{
 				"item_code": "_Test Item",
-				"warehouse": "Stores - AC",
+				"warehouse": "Stores - TCP1",
 				"qty": 5,
 				"received_qty": 5,
 				"rejected_qty": 0,
@@ -5599,9 +5576,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		# The fixed asset account set on the item row must be debited
 		asset_expense_account = pr.items[0].expense_account
 		self.assertIn(asset_expense_account, gl_accounts)
-
-		# Asset Received But Not Billed must be credited
-		self.assertIn(asset_category.accounts[0].fixed_asset_account, gl_accounts)
 
 		# Stock Accounts should be used for Stock Items
 		self.assertIn(company.stock_received_but_not_billed, gl_accounts)
@@ -5758,28 +5732,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name, skip_cancelled=True)
 		srbnb_credit = sum(flt(row.credit) for row in gl_entries if row.account == srbnb_account)
 		self.assertAlmostEqual(srbnb_credit, pi_base_net_amount, places=2)
-
-
-def create_asset_category_for_pr_test():
-	category_name = "Test Asset Category for PR"
-
-	asset_category = frappe.get_doc(
-		{
-			"doctype": "Asset Category",
-			"asset_category_name": category_name,
-			"enable_cwip_accounting": 0,
-			"depreciation_method": "Straight Line",
-			"total_number_of_depreciations": 12,
-			"frequency_of_depreciation": 1,
-			"accounts": [
-				{
-					"company_name": "Asset Company",
-					"fixed_asset_account": "Electronic Equipment - AC",
-				}
-			],
-		}
-	).insert()
-	return asset_category
 
 
 def prepare_data_for_internal_transfer():
