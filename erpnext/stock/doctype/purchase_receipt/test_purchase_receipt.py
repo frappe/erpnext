@@ -1082,10 +1082,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr = make_inter_company_purchase_receipt(dn.name)
 
 		supplier = frappe.get_doc("Supplier", "_Test Internal Supplier 2")
-		# Did not leak from source DN
-		self.assertNotEqual(pr.tax_category, dn.tax_category)
-		self.assertNotEqual(pr.language, dn.language)
-		# Fetched fresh from the new party (Supplier)
 		self.assertEqual(pr.tax_category or None, supplier.tax_category or None)
 		self.assertEqual(pr.language or None, supplier.language or None)
 

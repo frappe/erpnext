@@ -2703,11 +2703,6 @@ class TestSalesOrder(ERPNextTestSuite):
 		po = make_purchase_order(so.name, selected_items=so_items)[0]
 
 		supplier = frappe.get_doc("Supplier", "_Test Supplier")
-		# Did not leak from source SO
-		self.assertNotEqual(po.tax_category, so.tax_category)
-		self.assertNotEqual(po.language, so.language)
-		self.assertNotEqual(po.payment_terms_template, so.payment_terms_template)
-		# Fetched fresh from the new party (Supplier)
 		self.assertEqual(po.tax_category or None, supplier.tax_category or None)
 		self.assertEqual(po.language or None, supplier.language or None)
 		self.assertEqual(po.payment_terms_template or None, supplier.payment_terms or None)

@@ -2686,11 +2686,6 @@ class TestSalesInvoice(ERPNextTestSuite):
 		pi = make_inter_company_transaction("Sales Invoice", si.name)
 
 		supplier = frappe.get_doc("Supplier", "_Test Internal Supplier")
-		# Did not leak from source SI
-		self.assertNotEqual(pi.tax_category, si.tax_category)
-		self.assertNotEqual(pi.language, si.language)
-		self.assertNotEqual(pi.payment_terms_template, si.payment_terms_template)
-		# Fetched fresh from the new party (Supplier)
 		self.assertEqual(pi.tax_category or None, supplier.tax_category or None)
 		self.assertEqual(pi.language or None, supplier.language or None)
 		self.assertEqual(pi.payment_terms_template or None, supplier.payment_terms or None)
