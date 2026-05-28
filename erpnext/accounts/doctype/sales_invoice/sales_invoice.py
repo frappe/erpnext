@@ -3217,30 +3217,28 @@ def create_dunning(
 def check_if_return_invoice_linked_with_payment_entry(self):
 	# If a Return invoice is linked with payment entry along with other invoices,
 	# the cancellation of the Return causes allocated amount to be greater than paid
-
 	if not frappe.get_single_value("Accounts Settings", "unlink_payment_on_cancellation_of_invoice"):
 		return
 
-	payment_entries = []
 	if self.is_return and self.return_against:
 		invoice = self.return_against
 	else:
 		invoice = self.name
 
-	payment_entries = frappe.db.sql_list(
-		"""
-		SELECT
-			t1.name
-		FROM
-			`tabPayment Entry` t1, `tabPayment Entry Reference` t2
-		WHERE
-			t1.name = t2.parent
-			and t1.docstatus = 1
-			and t2.reference_name = %s
-			and t2.allocated_amount < 0
-		""",
-		invoice,
+	PaymentEntry = frappe.qb.DocType("Payment Entry")
+	PaymentEntryReference = frappe.qb.DocType("Payment Entry Reference")
+
+	query = (
+		frappe.qb.from_(PaymentEntry)
+		.join(PaymentEntryReference)
+		.on(PaymentEntry.name == PaymentEntryReference.parent)
+		.select(PaymentEntry.name)
+		.where(PaymentEntry.docstatus == 1)
+		.where(PaymentEntryReference.reference_name == invoice)
+		.where(PaymentEntryReference.allocated_amount < 0)
 	)
+
+	payment_entries = query.run(pluck=True)
 
 	links_to_pe = []
 	if payment_entries:
@@ -3248,6 +3246,7 @@ def check_if_return_invoice_linked_with_payment_entry(self):
 			payment_entry = frappe.get_doc("Payment Entry", payment)
 			if len(payment_entry.references) > 1:
 				links_to_pe.append(payment_entry.name)
+
 		if links_to_pe:
 			payment_entries_link = [
 				get_link_to_form("Payment Entry", name, label=name) for name in links_to_pe
