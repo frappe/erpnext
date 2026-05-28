@@ -26,11 +26,6 @@
   "has_unit_price_items",
   "is_subcontracted",
   "amended_from",
-<<<<<<< HEAD
-  "section_break_zstt",
-  "title",
-=======
->>>>>>> 34c24b86fa (fix(UX): Move title field to More Info)
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -1752,13 +1747,6 @@
    "read_only": 1
   },
   {
-<<<<<<< HEAD
-   "fieldname": "section_break_zstt",
-   "fieldtype": "Section Break"
-  },
-  {
-=======
->>>>>>> 34c24b86fa (fix(UX): Move title field to More Info)
    "allow_on_submit": 1,
    "fieldname": "title",
    "fieldtype": "Data",

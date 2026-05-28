@@ -23,11 +23,6 @@
   "is_subcontracted",
   "has_unit_price_items",
   "supplier_warehouse",
-<<<<<<< HEAD
-  "section_break_ahub",
-  "title",
-=======
->>>>>>> 34c24b86fa (fix(UX): Move title field to More Info)
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -1313,11 +1308,6 @@
    "fieldname": "auto_repeat_section",
    "fieldtype": "Section Break",
    "label": "Auto Repeat"
-<<<<<<< HEAD
-  },
-  {
-   "fieldname": "section_break_ahub",
-   "fieldtype": "Section Break"
   },
   {
    "allow_on_submit": 1,
@@ -1326,8 +1316,6 @@
    "label": "Title",
    "no_copy": 1,
    "print_hide": 1
-=======
->>>>>>> 34c24b86fa (fix(UX): Move title field to More Info)
   }
  ],
  "grid_page_length": 50,
@@ -1335,11 +1323,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2026-04-28 06:11:46.904768",
-=======
  "modified": "2026-05-28 12:34:19.659621",
->>>>>>> 34c24b86fa (fix(UX): Move title field to More Info)
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

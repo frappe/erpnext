@@ -33,11 +33,6 @@
   "is_created_using_pos",
   "pos_closing_entry",
   "has_subcontracted",
-<<<<<<< HEAD
-  "section_break_qllv",
-  "title",
-=======
->>>>>>> 34c24b86fa (fix(UX): Move title field to More Info)
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -2332,7 +2327,6 @@
    "label": "Automation"
   },
   {
-<<<<<<< HEAD
    "fieldname": "section_break_pxwz",
    "fieldtype": "Section Break"
   },
@@ -2349,12 +2343,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "section_break_qllv",
-   "fieldtype": "Section Break"
-  },
-  {
-=======
->>>>>>> 34c24b86fa (fix(UX): Move title field to More Info)
    "allow_on_submit": 1,
    "fieldname": "title",
    "fieldtype": "Data",

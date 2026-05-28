@@ -22,11 +22,6 @@
   "is_return",
   "issue_credit_note",
   "return_against",
-<<<<<<< HEAD
-  "section_break_zxcd",
-  "title",
-=======
->>>>>>> 34c24b86fa (fix(UX): Move title field to More Info)
   "accounting_dimensions_section",
   "cost_center",
   "column_break_18",
@@ -1454,13 +1449,6 @@
    "label": "Auto Repeat"
   },
   {
-<<<<<<< HEAD
-   "fieldname": "section_break_zxcd",
-   "fieldtype": "Section Break"
-  },
-  {
-=======
->>>>>>> 34c24b86fa (fix(UX): Move title field to More Info)
    "allow_on_submit": 1,
    "fieldname": "title",
    "fieldtype": "Data",
