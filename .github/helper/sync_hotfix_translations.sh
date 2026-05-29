@@ -77,6 +77,10 @@ while IFS= read -r file; do
   fi
 done < <(git diff --name-only erpnext/locale/ | grep '\.po$' | sort)
 
+git fetch upstream translations_hotfix 2>/dev/null || true
+if git rev-parse --verify "upstream/translations_hotfix" >/dev/null 2>&1; then
+  git merge -X ours "upstream/translations_hotfix" --no-edit
+fi
 git push -u upstream translations_hotfix
 
 echo "=== Opening PR (if not already open) ==="
