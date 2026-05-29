@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version:  frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-27 15:21+0000\n"
-"PO-Revision-Date: 2025-12-22 03:07+0000\n"
+"PO-Revision-Date: 2026-05-29 17:05+0000\n"
 "Last-Translator: hello@frappe.io\n"
 "Language: da_DK\n"
 "Language-Team: Danish\n"
@@ -603,7 +603,7 @@ msgstr "90 Over"
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1261
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1262
 msgid "<0"
-msgstr ""
+msgstr "<0"
 
 #: erpnext/assets/doctype/asset/asset.py:541
 msgid "<b>Cannot create asset.</b><br><br>You're trying to create <b>{0} asset(s)</b> from {2} {3}.<br>However, only <b>{1} item(s)</b> were purchased and <b>{4} asset(s)</b> already exist against {5}."
@@ -2579,7 +2579,7 @@ msgstr ""
 
 #: erpnext/projects/doctype/task/task_tree.js:42
 msgid "Add Multiple"
-msgstr ""
+msgstr "Tilføj Flere"
 
 #: erpnext/projects/doctype/task/task_tree.js:49
 msgid "Add Multiple Tasks"
@@ -12763,7 +12763,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Create Tasks'
 #: erpnext/projects/onboarding_step/create_tasks/create_tasks.json
 msgid "Create Task"
-msgstr ""
+msgstr "Opret Opgave"
 
 #. Title of an Onboarding Step
 #: erpnext/projects/onboarding_step/create_tasks/create_tasks.json
@@ -32547,7 +32547,7 @@ msgstr ""
 #. Label of the tab_break_dpet (Tab Break) field in DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Others"
-msgstr ""
+msgstr "Andre"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -37767,7 +37767,7 @@ msgstr ""
 #. Item'
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 msgid "Process Loss %"
-msgstr ""
+msgstr "Process Tab %"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1272
 msgid "Process Loss Percentage cannot be greater than 100"
@@ -51487,7 +51487,7 @@ msgstr "Momssats"
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:237
 #: erpnext/accounts/report/tds_computation_summary/tds_computation_summary.py:84
 msgid "Tax Rate %"
-msgstr ""
+msgstr "Momssats %"
 
 #. Label of the taxes (Table) field in DocType 'Item Tax Template'
 #: erpnext/accounts/doctype/item_tax_template/item_tax_template.json
