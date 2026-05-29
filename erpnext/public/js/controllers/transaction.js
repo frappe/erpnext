@@ -2934,6 +2934,23 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			},
 			freeze: true,
 			callback: function (r) {
+				if (r.message.length == 0) {
+					let type = inspection_type === "Incoming" ? "Purchase" : "Delivery";
+					let fieldname =
+						inspection_type === "Incoming"
+							? "Inspection Required before Purchase"
+							: "Inspection Required before Delivery";
+
+					frappe.msgprint({
+						title: __("Quality Inspection Not Configured"),
+						message: __(`Enable <b>{0}</b> on the Item master to proceed with {1} inspection.`, [
+							fieldname,
+							type,
+						]),
+					});
+					return;
+				}
+
 				r.message.forEach((item) => {
 					if (me.has_inspection_required(item)) {
 						let dialog_items = dialog.fields_dict.items;
