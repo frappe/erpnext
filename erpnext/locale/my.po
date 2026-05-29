@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version:  frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-27 15:21+0000\n"
-"PO-Revision-Date: 2026-05-29 15:11+0000\n"
+"PO-Revision-Date: 2026-05-29 17:05+0000\n"
 "Last-Translator: hello@frappe.io\n"
 "Language: my_MM\n"
 "Language-Team: Burmese\n"
@@ -150,7 +150,7 @@ msgstr "ပြီးစီးသည့် ရာခိုင်နှုန်�
 #. Label of the cost_allocation_per (Percent) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "% Cost Allocation"
-msgstr ""
+msgstr "ကုန်ကျစရိတ် ခွဲဝေမှု %"
 
 #. Label of the per_delivered (Percent) field in DocType 'Pick List'
 #. Label of the per_delivered (Percent) field in DocType 'Subcontracting Inward
@@ -1049,7 +1049,7 @@ msgstr ""
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:3
 msgid "A new fiscal year has been automatically created."
-msgstr ""
+msgstr "ဘဏ္ဍာရေးနှစ်သစ်တစ်ခုကို အလိုအလျောက် ဖန်တီးပြီးပါပြီ။"
 
 #. Description of the 'Inspection Required before Delivery' (Check) field in
 #. DocType 'Item'
@@ -1116,7 +1116,7 @@ msgstr ""
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "AP Summary"
-msgstr ""
+msgstr "ပေးရန်ရှိ စာရင်းချုပ်"
 
 #. Label of the api_details_section (Section Break) field in DocType 'Currency
 #. Exchange Settings'
@@ -1127,7 +1127,7 @@ msgstr ""
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "AR Summary"
-msgstr ""
+msgstr "ရရန်ရှိ စာရင်းချုပ်"
 
 #. Label of the awb_number (Data) field in DocType 'Shipment'
 #: erpnext/stock/doctype/shipment/shipment.json
@@ -1904,7 +1904,7 @@ msgstr ""
 #. Title of the Module Onboarding 'Accounting Onboarding'
 #: erpnext/accounts/module_onboarding/accounting_onboarding/accounting_onboarding.json
 msgid "Accounting Onboarding"
-msgstr ""
+msgstr "စာရင်းပိုင်းဆိုင်ရာ လုပ်ငန်းစဉ်များ စတင်ဆောင်ရွက်နေပါသည်။"
 
 #. Name of a DocType
 #. Label of a Link in the Invoicing Workspace
@@ -2074,7 +2074,7 @@ msgstr ""
 #: erpnext/desktop_icon/accounts_setup.json
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "Accounts Setup"
-msgstr ""
+msgstr "စာရင်းခေါင်းစဉ်များ သတ်မှတ်ခြင်း"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:1329
 msgid "Accounts table cannot be blank."
@@ -5803,7 +5803,7 @@ msgstr ""
 #. Title of the Module Onboarding 'Asset Onboarding'
 #: erpnext/assets/module_onboarding/asset_onboarding/asset_onboarding.json
 msgid "Assets Setup"
-msgstr ""
+msgstr "ပိုင်ဆိုင်မှုများ သတ်မှတ်ခြင်း"
 
 #: erpnext/controllers/buying_controller.py:1059
 msgid "Assets not created for {item_code}. You will have to create asset manually."
@@ -6177,7 +6177,7 @@ msgstr ""
 
 #: erpnext/setup/doctype/employee/employee.py:170
 msgid "Auto User Creation Error"
-msgstr ""
+msgstr "အသုံးပြုသူကို ထည့်သွင်းရာတွင် မှားယွင်းမှုဖြစ်နေပါသည်။"
 
 #. Description of the 'Close Replied Opportunity After Days' (Int) field in
 #. DocType 'CRM Settings'
@@ -6250,7 +6250,7 @@ msgstr ""
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Automatically Fetch Payment Terms from Order/Quotation"
-msgstr ""
+msgstr "အမှာစာ/ ဈေးနှုန်းအဆိုပြုလွှာမှ  ငွေပေးချေမှု သတ်မှတ်ချက်များကို အလိုအလျောက်ရယူပါ။"
 
 #. Label of the automatically_process_deferred_accounting_entry (Check) field
 #. in DocType 'Accounts Settings'
@@ -7200,7 +7200,7 @@ msgstr ""
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/banking.json
 msgid "Bank Reconciliation"
-msgstr ""
+msgstr "ဘဏ်စာရင်းညှိနှိုင်းမှု"
 
 #. Name of a report
 #. Label of a Link in the Invoicing Workspace
@@ -7360,7 +7360,7 @@ msgstr ""
 #. Label of the base_cost (Currency) field in DocType 'BOM Secondary Item'
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 msgid "Base Cost (Company Currency)"
-msgstr ""
+msgstr "အခြေခံကုန်ကျစရိတ် (လုပ်ငန်းသုံး ငွေကြေးယူနစ်)"
 
 #. Label of the base_cost_per_unit (Float) field in DocType 'BOM Operation'
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
@@ -8405,7 +8405,7 @@ msgstr ""
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/budget.json
 msgid "Budget Variance"
-msgstr ""
+msgstr "ဘတ်ဂျက်ကွာဟချက်"
 
 #. Name of a report
 #. Label of a Link in the Invoicing Workspace
@@ -8598,7 +8598,7 @@ msgstr ""
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_secondary_item/subcontracting_inward_order_secondary_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "By-Product"
-msgstr ""
+msgstr "ဘေးထွက်ပစ္စည်း"
 
 #. Label of the bypass_credit_limit_check (Check) field in DocType 'Customer
 #. Credit Limit'
@@ -8619,7 +8619,7 @@ msgstr ""
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "COA Importer"
-msgstr ""
+msgstr "စာရင်းခေါင်းစဉ်များထည့်သွင်းခြင်း"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
@@ -8903,7 +8903,7 @@ msgstr ""
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:113
 msgid "Campaign {0} not found"
-msgstr ""
+msgstr "ကမ်ပိန်း {0} ကို ရှာမတွေ့ပါ"
 
 #: erpnext/setup/doctype/authorization_control/authorization_control.py:60
 msgid "Can be approved by {0}"
@@ -10211,7 +10211,7 @@ msgstr ""
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_secondary_item/subcontracting_inward_order_secondary_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Co-Product"
-msgstr ""
+msgstr "တွဲဖက်ထုတ်ကုန်"
 
 #. Name of a DocType
 #. Label of the code_list (Link) field in DocType 'Common Code'
@@ -11026,7 +11026,7 @@ msgstr ""
 
 #: erpnext/setup/doctype/employee/employee.py:168
 msgid "Company or Personal Email is mandatory when 'Create User Automatically' is enabled"
-msgstr ""
+msgstr "'အသုံးပြုသူကို အလိုအလျောက် ထည့်သွင်းမည်' ဟုရွေးချယ်ထားသည့်အခါ  ကုမ္ပဏီအီးမေးလ် သို့မဟုတ် ကိုယ်ပိုင်အီးမေးလ် ကို မဖြစ်မနေထည့်သွင်းပေးပါ။"
 
 #. Description of the 'Registration Details' (Code) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -11259,7 +11259,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Review Chart of Accounts'
 #: erpnext/accounts/onboarding_step/chart_of_accounts/chart_of_accounts.json
 msgid "Configure Chart of Accounts"
-msgstr ""
+msgstr "စာရင်းခေါင်းစဉ်များကို  ပြင်ဆင်သတ်မှတ်ပါ။"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:56
 msgid "Configure Product Assembly"
@@ -11395,7 +11395,7 @@ msgstr ""
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Consolidated Report"
-msgstr ""
+msgstr "ပေါင်းစည်းထားသော အစီရင်ခံစာ"
 
 #. Label of the consolidated_invoice (Link) field in DocType 'POS Invoice'
 #. Label of the consolidated_invoice (Link) field in DocType 'POS Invoice Merge
@@ -11961,7 +11961,7 @@ msgstr ""
 #. Label of the cost_allocation (Currency) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Cost Allocation"
-msgstr ""
+msgstr "ကုန်ကျစရိတ်ခွဲဝေမှု"
 
 #. Label of the cost_allocation_per (Percent) field in DocType 'BOM Secondary
 #. Item'
@@ -12446,13 +12446,13 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Create Asset Item'
 #: erpnext/assets/onboarding_step/create_asset_item/create_asset_item.json
 msgid "Create Asset Item"
-msgstr ""
+msgstr "ပုံသေပိုင်ပစ္စည်း ထည့်သွင်းရန်"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Asset Location'
 #: erpnext/assets/onboarding_step/create_asset_location/create_asset_location.json
 msgid "Create Asset Location"
-msgstr ""
+msgstr "ပုံသေပိုင် ပစ္စည်း ထားမည့်နေရာ ထည့်သွင်းရန်"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Bill of Materials'
@@ -12471,7 +12471,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Create Customer'
 #: erpnext/selling/onboarding_step/create_customer/create_customer.json
 msgid "Create Customer"
-msgstr ""
+msgstr "ဝယ်သူ (ဖောက်သည်) ထည့်သွင်းရန်"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Delivery Note'
@@ -12531,7 +12531,7 @@ msgstr ""
 #: erpnext/selling/onboarding_step/create_item/create_item.json
 #: erpnext/stock/onboarding_step/create_item/create_item.json
 msgid "Create Item"
-msgstr ""
+msgstr "ကုန်ပစ္စည်း ထည့်သွင်းရန်"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:187
 msgid "Create Job Card"
@@ -12640,7 +12640,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Create Project'
 #: erpnext/projects/onboarding_step/create_project/create_project.json
 msgid "Create Project"
-msgstr ""
+msgstr "ပရောဂျက် ထည့်သွင်းရန်"
 
 #: erpnext/crm/doctype/lead/lead_list.js:8
 msgid "Create Prospect"
@@ -12650,7 +12650,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Create Purchase Invoice'
 #: erpnext/buying/onboarding_step/create_purchase_invoice/create_purchase_invoice.json
 msgid "Create Purchase Invoice"
-msgstr ""
+msgstr "အဝယ်ပြေစာ ထည့်သွင်းရန်"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Purchase Order'
@@ -12668,7 +12668,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Create Purchase Receipt'
 #: erpnext/stock/onboarding_step/create_purchase_receipt/create_purchase_receipt.json
 msgid "Create Purchase Receipt"
-msgstr ""
+msgstr "ကုန်လက်ခံလွှာ ထည့်သွင်းရန်"
 
 #: erpnext/utilities/activation.py:88
 msgid "Create Quotation"
@@ -12678,13 +12678,13 @@ msgstr ""
 #: erpnext/manufacturing/onboarding_step/create_raw_materials/create_raw_materials.json
 #: erpnext/subcontracting/onboarding_step/create_raw_materials/create_raw_materials.json
 msgid "Create Raw Material"
-msgstr ""
+msgstr "ကုန်ကြမ်း ထည့်သွင်းရန်"
 
 #. Title of an Onboarding Step
 #: erpnext/manufacturing/onboarding_step/create_raw_materials/create_raw_materials.json
 #: erpnext/subcontracting/onboarding_step/create_raw_materials/create_raw_materials.json
 msgid "Create Raw Materials"
-msgstr ""
+msgstr "ကုန်ကြမ်းများ ထည့်သွင်းရန်"
 
 #. Label of the create_receiver_list (Button) field in DocType 'SMS Center'
 #: erpnext/selling/doctype/sms_center/sms_center.json
@@ -12725,7 +12725,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Create Service Item'
 #: erpnext/subcontracting/onboarding_step/create_service_item/create_service_item.json
 msgid "Create Service Item"
-msgstr ""
+msgstr "ဝန်ဆောင်မှုပေးမည့် အရာများ ထည့်သွင်းရန်"
 
 #: erpnext/stock/dashboard/item_dashboard.js:283
 #: erpnext/stock/doctype/material_request/material_request.js:478
@@ -12757,7 +12757,7 @@ msgstr ""
 #. Title of an Onboarding Step
 #: erpnext/buying/onboarding_step/create_supplier/create_supplier.json
 msgid "Create Supplier"
-msgstr ""
+msgstr "ရောင်းသူ (ကုန်ပေးသွင်းသူ) ထည့်သွင်းရန်"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:181
 msgid "Create Supplier Quotation"
@@ -12771,7 +12771,7 @@ msgstr ""
 #. Title of an Onboarding Step
 #: erpnext/projects/onboarding_step/create_tasks/create_tasks.json
 msgid "Create Tasks"
-msgstr ""
+msgstr "လုပ်ဆောင်ချက်များ ထည့်သွင်းရန်"
 
 #: erpnext/setup/doctype/company/company.js:157
 msgid "Create Tax Template"
@@ -12788,7 +12788,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Create Transfer Entry'
 #: erpnext/stock/onboarding_step/create_transfer_entry/create_transfer_entry.json
 msgid "Create Transfer Entry"
-msgstr ""
+msgstr "ကုန်ပစ္စည်း လွှဲပြောင်းမှု မှတ်တမ်း ထည့်သွင်းရန်"
 
 #: erpnext/setup/doctype/employee/employee.js:50
 #: erpnext/setup/doctype/employee/employee.js:52
@@ -12799,7 +12799,7 @@ msgstr ""
 #. Label of the create_user_automatically (Check) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Create User Automatically"
-msgstr ""
+msgstr "အသုံးပြုသူကို အလိုအလျောက် ထည့်သွင်းခြင်း"
 
 #. Label of the create_user_permission (Check) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.js:65
@@ -12851,7 +12851,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Create Delivery Note'
 #: erpnext/selling/onboarding_step/create_delivery_note/create_delivery_note.json
 msgid "Create delivery note"
-msgstr ""
+msgstr "ကုန်ပစ္စည်း ပေးပို့လွှာ ထည့်သွင်းရန်"
 
 #. Label of the create_pr_in_draft_status (Check) field in DocType 'Accounts
 #. Settings'
@@ -12862,7 +12862,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Create Supplier'
 #: erpnext/buying/onboarding_step/create_supplier/create_supplier.json
 msgid "Create supplier"
-msgstr ""
+msgstr "ရောင်းသူ (ကုန်ပေးသွင်းသူ) ထည့်သွင်းရန်"
 
 #: erpnext/public/js/bulk_transaction_processing.js:14
 msgid "Create {0} {1} ?"
@@ -17587,11 +17587,11 @@ msgstr ""
 
 #: erpnext/setup/doctype/employee/employee.py:434
 msgid "Email is required to create a user"
-msgstr ""
+msgstr "အသုံးပြုသူ ထည့်သွင်းရန်အတွက် email လိုအပ်ပါသည်။"
 
 #: erpnext/setup/doctype/employee/employee.js:72
 msgid "Email is required to create a user."
-msgstr ""
+msgstr "အသုံးပြုသူ ထည့်သွင်းရန်အတွက် email လိုအပ်ပါသည်။"
 
 #: erpnext/stock/doctype/shipment/shipment.js:174
 msgid "Email or Phone/Mobile of the Contact are mandatory to continue."
@@ -19086,7 +19086,7 @@ msgstr ""
 #: erpnext/setup/setup_wizard/setup_wizard.py:37
 #: erpnext/setup/setup_wizard/setup_wizard.py:38
 msgid "Failed to create demo data"
-msgstr ""
+msgstr "နမူနာ အချက်အလက်များ ထည့်သွင်းခြင်း မအောင်မြင်ပါ။"
 
 #: erpnext/setup/demo.py:77
 msgid "Failed to erase demo data, please delete the demo company manually."
@@ -23310,7 +23310,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:195
 msgid "Incorrect Account"
-msgstr ""
+msgstr "စာရင်းခေါင်းစဉ် မှန်ကန်မှု မရှိပါ။"
 
 #. Name of a report
 #: erpnext/stock/report/incorrect_balance_qty_after_transaction/incorrect_balance_qty_after_transaction.json
@@ -30483,7 +30483,7 @@ msgstr ""
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:1
 msgid "New Fiscal Year - {0}"
-msgstr ""
+msgstr "ဘဏ္ဍာရေးနှစ်သစ် - {0}"
 
 #. Label of the income (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -41877,7 +41877,7 @@ msgstr ""
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Repost"
-msgstr ""
+msgstr "ပြန်လည် ပြုလုပ်မည်"
 
 #. Name of a DocType
 #. Label of a Workspace Sidebar Item
@@ -43002,7 +43002,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Review Accounts Settings'
 #: erpnext/accounts/onboarding_step/review_accounts_settings/review_accounts_settings.json
 msgid "Review Accounts Settings"
-msgstr ""
+msgstr "အကောင့်ဆက်တင်များကို ပြန်လည်သုံးသပ်ပါ။"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Review Buying Settings'
@@ -43013,7 +43013,7 @@ msgstr ""
 #. Title of an Onboarding Step
 #: erpnext/accounts/onboarding_step/chart_of_accounts/chart_of_accounts.json
 msgid "Review Chart of Accounts"
-msgstr ""
+msgstr "စာရင်းဇယားများကို ပြန်လည်သုံးသပ်ပါ။"
 
 #. Label of the review_date (Date) field in DocType 'Task'
 #: erpnext/projects/doctype/task/task.json
@@ -45412,7 +45412,7 @@ msgstr ""
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "Sales Taxes"
-msgstr ""
+msgstr "အရောင်းအခွန်များ"
 
 #. Label of the taxes (Table) field in DocType 'POS Invoice'
 #. Label of the taxes (Table) field in DocType 'Sales Invoice'
@@ -58290,7 +58290,7 @@ msgstr ""
 
 #: erpnext/controllers/accounts_controller.py:4434
 msgid "You don't have permission to create a Company Address. Please contact your System Manager."
-msgstr ""
+msgstr "ကုမ္ပဏီလိပ်စာအသစ်ဖန်တီးခွင့် မရှိပါ။ ကျေးဇူးပြု၍ Admin သို့ ဆက်သွယ်ပါ။"
 
 #: erpnext/controllers/accounts_controller.py:4414
 msgid "You don't have permission to update Company details. Please contact your System Manager."
