@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version:  frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-27 15:21+0000\n"
-"PO-Revision-Date: 2026-05-29 15:12+0000\n"
+"PO-Revision-Date: 2026-05-29 17:05+0000\n"
 "Last-Translator: hello@frappe.io\n"
 "Language: vi_VN\n"
 "Language-Team: Vietnamese\n"
@@ -150,7 +150,7 @@ msgstr "% Hoàn thành"
 #. Label of the cost_allocation_per (Percent) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "% Cost Allocation"
-msgstr ""
+msgstr "% Phân bổ chi phí"
 
 #. Label of the per_delivered (Percent) field in DocType 'Pick List'
 #. Label of the per_delivered (Percent) field in DocType 'Subcontracting Inward
@@ -603,7 +603,7 @@ msgstr "Trên 90"
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1261
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1262
 msgid "<0"
-msgstr ""
+msgstr "<0"
 
 #: erpnext/assets/doctype/asset/asset.py:541
 msgid "<b>Cannot create asset.</b><br><br>You're trying to create <b>{0} asset(s)</b> from {2} {3}.<br>However, only <b>{1} item(s)</b> were purchased and <b>{4} asset(s)</b> already exist against {5}."
@@ -677,7 +677,7 @@ msgstr "<div class=\"text-muted text-center\">{0}</div>"
 #. Content of the 'Stock Levels HTML' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "<div id=\"stock-levels-placeholder\"></div>"
-msgstr ""
+msgstr "<div id=\"stock-levels-placeholder\"></div>"
 
 #. Content of the 'uom_help_html' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -1132,7 +1132,7 @@ msgstr "Một cuộc hẹn mới đã được tạo cho bạn với {0}"
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:3
 msgid "A new fiscal year has been automatically created."
-msgstr ""
+msgstr "Một năm tài chính mới đã được tự động tạo."
 
 #. Description of the 'Inspection Required before Delivery' (Check) field in
 #. DocType 'Item'
@@ -1183,7 +1183,7 @@ msgstr "ACC-PINV-.YYYY.-"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:88
 msgid "ALL records will be deleted (entire DocType cleared)"
-msgstr ""
+msgstr "TẤT CẢ bản ghi sẽ bị xóa (toàn bộ DocType bị xóa)"
 
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:552
 msgid "AMC Expiry (Serial)"
@@ -1199,7 +1199,7 @@ msgstr "Ngày hết hạn Bảo hành"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "AP Summary"
-msgstr ""
+msgstr "Tóm tắt AP"
 
 #. Label of the api_details_section (Section Break) field in DocType 'Currency
 #. Exchange Settings'
@@ -1210,7 +1210,7 @@ msgstr "Chi tiết API"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "AR Summary"
-msgstr ""
+msgstr "Tóm tắt AR"
 
 #. Label of the awb_number (Data) field in DocType 'Shipment'
 #: erpnext/stock/doctype/shipment/shipment.json
@@ -1987,7 +1987,7 @@ msgstr "Danh mục Kế toán"
 #. Title of the Module Onboarding 'Accounting Onboarding'
 #: erpnext/accounts/module_onboarding/accounting_onboarding/accounting_onboarding.json
 msgid "Accounting Onboarding"
-msgstr ""
+msgstr "Đào tạo Kế toán"
 
 #. Name of a DocType
 #. Label of a Link in the Invoicing Workspace
@@ -2157,7 +2157,7 @@ msgstr "Cài đặt Tài khoản"
 #: erpnext/desktop_icon/accounts_setup.json
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "Accounts Setup"
-msgstr ""
+msgstr "Thiết lập Tài khoản"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:1329
 msgid "Accounts table cannot be blank."
@@ -2811,7 +2811,7 @@ msgstr "Thêm vào Quá cảnh"
 
 #: erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.py:119
 msgid "Add vouchers to generate preview."
-msgstr ""
+msgstr "Thêm chứng từ để tạo xem trước."
 
 #: erpnext/accounts/doctype/coupon_code/coupon_code.js:36
 msgid "Add/Edit Coupon Conditions"
@@ -3005,7 +3005,7 @@ msgstr "Phần trăm chiết khấu bổ sung"
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_secondary_item/subcontracting_inward_order_secondary_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Additional Finished Good"
-msgstr ""
+msgstr "Thành phẩm bổ sung"
 
 #. Label of the addtional_info (Section Break) field in DocType 'Journal Entry'
 #. Label of the additional_info_section (Section Break) field in DocType
@@ -3275,7 +3275,7 @@ msgstr "Tạm ứng đã trả"
 #. Label of the advance_paid (Currency) field in DocType 'Purchase Order'
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 msgid "Advance Paid (Company Currency)"
-msgstr ""
+msgstr "Tạm ứng đã trả (Tiền tệ Công ty)"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order_list.js:75
 #: erpnext/selling/doctype/sales_order/sales_order_list.js:122
@@ -4078,7 +4078,7 @@ msgstr "Cho phép tồn kho âm"
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Allow Negative Stock for Batch"
-msgstr ""
+msgstr "Cho phép Tồn kho Âm cho Lô"
 
 #. Label of the allow_or_restrict (Select) field in DocType 'Accounting
 #. Dimension Filter'
@@ -4827,7 +4827,7 @@ msgstr "Nhà phân tích"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Analytical Accounting"
-msgstr ""
+msgstr "Kế toán phân tích"
 
 #: erpnext/public/js/utils.js:184
 msgid "Annual Billing: {0}"
@@ -5132,7 +5132,7 @@ msgstr "Áp dụng SLA cho thời gian giải quyết"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Apply discounts and margins on products"
-msgstr ""
+msgstr "Áp dụng chiết khấu và biên lợi nhuận trên sản phẩm"
 
 #. Label of the apply_restriction_on_values (Check) field in DocType
 #. 'Accounting Dimension Filter'
@@ -5696,7 +5696,7 @@ msgstr "Trạng thái Tài sản"
 #. Label of the asset_type (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Asset Type"
-msgstr ""
+msgstr "Loại Tài sản"
 
 #. Label of the asset_value (Currency) field in DocType 'Asset Capitalization
 #. Asset Item'
@@ -5891,7 +5891,7 @@ msgstr "Tài sản"
 #. Title of the Module Onboarding 'Asset Onboarding'
 #: erpnext/assets/module_onboarding/asset_onboarding/asset_onboarding.json
 msgid "Assets Setup"
-msgstr ""
+msgstr "Thiết lập Tài sản"
 
 #: erpnext/controllers/buying_controller.py:1059
 msgid "Assets not created for {item_code}. You will have to create asset manually."
@@ -5931,7 +5931,7 @@ msgstr "Tại Dòng #{0}: Số lượng đã chọn {1} cho mặt hàng {2} lớ
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1436
 msgid "At Row {0}: In Serial and Batch Bundle {1} must have docstatus as 1 and not 0"
-msgstr ""
+msgstr "Tại Dòng {0}: Trong Bundle Serial và Batch {1} phải có docstatus là 1 và không phải 0"
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:84
 msgid "At least one account with exchange gain or loss is required"
@@ -5964,7 +5964,7 @@ msgstr "Phải chọn ít nhất một trong Bán hàng hoặc Mua hàng"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:324
 msgid "At least one raw material item must be present in the stock entry for the type {0}"
-msgstr ""
+msgstr "Phải có ít nhất một mặt hàng nguyên liệu thô trong mục nhập kho cho loại {0}"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:27
 msgid "At least one row is required for a financial report template"
@@ -6265,7 +6265,7 @@ msgstr "Lỗi Cài đặt Thuế Tự động"
 
 #: erpnext/setup/doctype/employee/employee.py:170
 msgid "Auto User Creation Error"
-msgstr ""
+msgstr "Lỗi Tạo Người dùng Tự động"
 
 #. Description of the 'Close Replied Opportunity After Days' (Int) field in
 #. DocType 'CRM Settings'
@@ -6338,7 +6338,7 @@ msgstr "Tự động tạo Lô mới"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Automatically Fetch Payment Terms from Order/Quotation"
-msgstr ""
+msgstr "Tự động tìm nạp Điều khoản Thanh toán từ Đơn hàng/Báo giá"
 
 #. Label of the automatically_process_deferred_accounting_entry (Check) field
 #. in DocType 'Accounts Settings'
@@ -6373,7 +6373,7 @@ msgstr "Có sẵn"
 #. DocType 'Bin'
 #: erpnext/stock/doctype/bin/bin.json
 msgid "Available / Future Inventory"
-msgstr ""
+msgstr "Tồn kho Có sẵn / Tương lai"
 
 #. Label of the actual_batch_qty (Float) field in DocType 'Delivery Note Item'
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
@@ -6487,7 +6487,7 @@ msgstr "Tồn kho có sẵn cho Mặt hàng đóng gói"
 #. Label of the available_for_use_date (Date) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Available for Use Date"
-msgstr ""
+msgstr "Ngày có sẵn để Sử dụng"
 
 #: erpnext/assets/doctype/asset/asset.py:382
 msgid "Available for use date is required"
@@ -6523,7 +6523,7 @@ msgstr "Giảm giá trung bình"
 #. Label of a number card in the Selling Workspace
 #: erpnext/selling/workspace/selling/selling.json
 msgid "Average Order Value"
-msgstr ""
+msgstr "Giá trị Đơn hàng Trung bình"
 
 #. Label of a number card in the Buying Workspace
 #: erpnext/buying/workspace/buying/buying.json
@@ -6800,18 +6800,18 @@ msgstr "Tìm kiếm BOM"
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgid "BOM Secondary Item"
-msgstr ""
+msgstr "Mục BOM Phụ"
 
 #. Label of the bom_secondary_item (Data) field in DocType 'Job Card Secondary
 #. Item'
 #: erpnext/manufacturing/doctype/job_card_secondary_item/job_card_secondary_item.json
 msgid "BOM Secondary Item Reference"
-msgstr ""
+msgstr "Tham chiếu Mục BOM Phụ"
 
 #. Name of a report
 #: erpnext/manufacturing/report/bom_stock_analysis/bom_stock_analysis.json
 msgid "BOM Stock Analysis"
-msgstr ""
+msgstr "Phân tích Tồn kho BOM"
 
 #. Label of the tab_2_tab (Tab Break) field in DocType 'BOM Creator'
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.json
@@ -6871,7 +6871,7 @@ msgstr "Hoạt động Website BOM"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:2458
 msgid "BOM and Finished Good Quantity is mandatory for Disassembly"
-msgstr ""
+msgstr "BOM và Số lượng Thành phẩm là bắt buộc cho Việc tháo dỡ"
 
 #. Label of the bom_and_work_order_tab (Tab Break) field in DocType
 #. 'Manufacturing Settings'
@@ -7288,7 +7288,7 @@ msgstr "Tài khoản Ngân hàng Overdraft"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/banking.json
 msgid "Bank Reconciliation"
-msgstr ""
+msgstr "Đối soát Ngân hàng"
 
 #. Name of a report
 #. Label of a Link in the Invoicing Workspace
@@ -7448,7 +7448,7 @@ msgstr "Số tiền thừa Cơ sở (Tiền tệ Công ty)"
 #. Label of the base_cost (Currency) field in DocType 'BOM Secondary Item'
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 msgid "Base Cost (Company Currency)"
-msgstr ""
+msgstr "Chi phí Cơ sở (Tiền tệ Công ty)"
 
 #. Label of the base_cost_per_unit (Float) field in DocType 'BOM Operation'
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
@@ -7469,13 +7469,13 @@ msgstr "Tỷ giá Cơ sở"
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Base Tax Withheld"
-msgstr ""
+msgstr "Thuế khấu trừ Cơ sở"
 
 #. Label of the taxable_amount (Currency) field in DocType 'Tax Withholding
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Base Taxable Amount"
-msgstr ""
+msgstr "Số tiền chịu thuế Cơ sở"
 
 #. Label of the base_total_billable_amount (Currency) field in DocType
 #. 'Timesheet'
@@ -8493,7 +8493,7 @@ msgstr "Ngày bắt đầu ngân sách"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/budget.json
 msgid "Budget Variance"
-msgstr ""
+msgstr "Chênh lệch ngân sách"
 
 #. Name of a report
 #. Label of a Link in the Invoicing Workspace
@@ -8658,7 +8658,7 @@ msgstr "Cài đặt Mua hàng"
 #. Title of the Module Onboarding 'Buying Onboarding'
 #: erpnext/buying/module_onboarding/buying_onboarding/buying_onboarding.json
 msgid "Buying Setup"
-msgstr ""
+msgstr "Thiết lập Mua hàng"
 
 #. Label of the buying_and_selling_tab (Tab Break) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -8686,7 +8686,7 @@ msgstr "Theo mặc định, Tên Nhà cung cấp được đặt theo Tên Nhà 
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_secondary_item/subcontracting_inward_order_secondary_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "By-Product"
-msgstr ""
+msgstr "Sản phẩm phụ"
 
 #. Label of the bypass_credit_limit_check (Check) field in DocType 'Customer
 #. Credit Limit'
@@ -8707,7 +8707,7 @@ msgstr "CC Đến"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "COA Importer"
-msgstr ""
+msgstr "Trình nhập COA"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
@@ -8991,7 +8991,7 @@ msgstr "Lịch Chiến dịch"
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:113
 msgid "Campaign {0} not found"
-msgstr ""
+msgstr "Chiến dịch {0} không tìm thấy"
 
 #: erpnext/setup/doctype/authorization_control/authorization_control.py:60
 msgid "Can be approved by {0}"
@@ -9106,7 +9106,7 @@ msgstr "Không thể Gửi lại Bút toán cho chứng từ trong Năm tài ch�
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:204
 msgid "Cannot add child table {0} to deletion list. Child tables are automatically deleted with their parent DocTypes."
-msgstr ""
+msgstr "Không thể thêm bảng con {0} vào danh sách xóa. Bảng con tự động bị xóa cùng DocType cha."
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:226
 msgid "Cannot amend {0} {1}, please create a new one instead."
@@ -9150,7 +9150,7 @@ msgstr "Không thể hủy Bút toán Kho Sản xuất này vì số lượng Th
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:579
 msgid "Cannot cancel this document as it is linked with the submitted Asset Value Adjustment <b>{0}</b>. Please cancel the Asset Value Adjustment to continue."
-msgstr ""
+msgstr "Không thể hủy tài liệu này vì nó được liên kết với Điều chỉnh Giá trị Tài sản đã gửi <b>{0}</b>. Vui lòng hủy Điều chỉnh Giá trị Tài sản để tiếp tục."
 
 #: erpnext/controllers/buying_controller.py:1148
 msgid "Cannot cancel this document as it is linked with the submitted asset {asset_link}. Please cancel the asset to continue."
@@ -9245,15 +9245,15 @@ msgstr "Không thể xóa mặt hàng đã được đặt"
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:197
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:783
 msgid "Cannot delete protected core DocType: {0}"
-msgstr ""
+msgstr "Không thể xóa DocType cốt lõi được bảo vệ: {0}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:213
 msgid "Cannot delete virtual DocType: {0}. Virtual DocTypes do not have database tables."
-msgstr ""
+msgstr "Không thể xóa DocType ảo: {0}. DocType ảo không có bảng cơ sở dữ liệu."
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.py:146
 msgid "Cannot disable Serial and Batch No for Item, as there are existing records for serial / batch."
-msgstr ""
+msgstr "Không thể vô hiệu hóa Serial và Số Lô cho Mặt hàng vì có các bản ghi serial / batch tồn tại."
 
 #: erpnext/setup/doctype/company/company.py:561
 msgid "Cannot disable perpetual inventory, as there are existing Stock Ledger Entries for the company {0}. Please cancel the stock transactions first and try again."
@@ -9261,7 +9261,7 @@ msgstr "Không thể vô hiệu hóa tồn kho vĩnh viễn vì có các Bút to
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.py:127
 msgid "Cannot disable {0} as it may lead to incorrect stock valuation."
-msgstr ""
+msgstr "Không thể vô hiệu hóa {0} vì có thể dẫn đến định giá tồn kho không chính xác."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:728
 msgid "Cannot disassemble more than produced quantity."
@@ -9282,7 +9282,7 @@ msgstr "Không thể đảm bảo giao hàng theo Serial No vì Mặt hàng {0} 
 
 #: erpnext/accounts/doctype/payment_request/payment_request.js:111
 msgid "Cannot fetch selected rows for submitted Payment Request"
-msgstr ""
+msgstr "Không thể tìm nạp các dòng đã chọn cho Yêu cầu Thanh toán đã gửi"
 
 #: erpnext/public/js/utils/barcode_scanner.js:62
 msgid "Cannot find Item or Warehouse with this Barcode"
@@ -9298,11 +9298,11 @@ msgstr "Không tìm thấy kho mặc định cho mặt hàng {0}. Vui lòng đ�
 
 #: erpnext/accounts/party.py:1063
 msgid "Cannot merge {0} '{1}' into '{2}' as both have existing accounting entries in different currencies for company '{3}'."
-msgstr ""
+msgstr "Không thể hợp nhất {0} '{1}' thành '{2}' vì cả hai đều có bút toán kế toán bằng các đơn vị tiền tệ khác nhau cho công ty '{3}'."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:578
 msgid "Cannot produce more Item {0} than Sales Order quantity {1} {2}"
-msgstr ""
+msgstr "Không thể sản xuất nhiều Mặt hàng {0} hơn số lượng Đơn hàng bán {1} {2}"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:1473
 msgid "Cannot produce more item for {0}"
@@ -9361,11 +9361,11 @@ msgstr "Không thể đặt nhiều Mặc định Mặt hàng cho một công ty
 
 #: erpnext/controllers/accounts_controller.py:3913
 msgid "Cannot set quantity less than delivered quantity."
-msgstr ""
+msgstr "Không thể đặt số lượng nhỏ hơn số lượng đã giao."
 
 #: erpnext/controllers/accounts_controller.py:3914
 msgid "Cannot set quantity less than received quantity."
-msgstr ""
+msgstr "Không thể đặt số lượng nhỏ hơn số lượng đã nhận."
 
 #: erpnext/stock/doctype/item_variant_settings/item_variant_settings.py:69
 msgid "Cannot set the field <b>{0}</b> for copying in variants"
@@ -9373,11 +9373,11 @@ msgstr "Không thể đặt trường <b>{0}</b> để sao chép trong các bi�
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:266
 msgid "Cannot start deletion. Another deletion {0} is already queued/running. Please wait for it to complete."
-msgstr ""
+msgstr "Không thể bắt đầu xóa. Xóa khác {0} đã được xếp hàng/chạy. Vui lòng đợi cho đến khi hoàn thành."
 
 #: erpnext/controllers/accounts_controller.py:3941
 msgid "Cannot update rate as item {0} is already ordered or purchased against this quotation"
-msgstr ""
+msgstr "Không thể cập nhật tỷ giá vì mặt hàng {0} đã được đặt hoặc mua đối với báo giá này"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1937
 msgid "Cannot {0} from {1} without any negative outstanding invoice"
@@ -9907,11 +9907,11 @@ msgstr ""
 
 #: erpnext/accounts/doctype/journal_entry_template/journal_entry_template.py:58
 msgid "Check row {0} for account {1}: Party Type is only allowed for Receivable or Payable accounts"
-msgstr ""
+msgstr "Kiểm tra dòng {0} cho tài khoản {1}: Loại Bên chỉ được phép cho tài khoản Phải thu hoặc Phải trả"
 
 #: erpnext/accounts/doctype/journal_entry_template/journal_entry_template.py:65
 msgid "Check row {0} for account {1}: Party is only allowed if Party Type is set"
-msgstr ""
+msgstr "Kiểm tra dòng {0} cho tài khoản {1}: Bên chỉ được phép nếu Loại Bên được đặt"
 
 #. Description of the 'Must be Whole Number' (Check) field in DocType 'UOM'
 #: erpnext/setup/doctype/uom/uom.json
@@ -10024,7 +10024,7 @@ msgstr "Giám đốc Công nghệ"
 #. Deletion Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Child DocTypes"
-msgstr ""
+msgstr "DocType Con"
 
 #. Label of the child_docname (Data) field in DocType 'Pricing Rule Detail'
 #: erpnext/accounts/doctype/pricing_rule_detail/pricing_rule_detail.json
@@ -10040,7 +10040,7 @@ msgstr "Tham chiếu Dòng Con"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:207
 msgid "Child Table Not Allowed"
-msgstr ""
+msgstr "Bảng Con Không được phép"
 
 #: erpnext/projects/doctype/task/task.py:314
 msgid "Child Task exists for this Task. You can not delete this Task."
@@ -10054,7 +10054,7 @@ msgstr "Nút con chỉ có thể được tạo dưới nút loại 'Nhóm'"
 #. 'Transaction Deletion Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Child tables that will also be deleted"
-msgstr ""
+msgstr "Bảng con sẽ cũng bị xóa"
 
 #: erpnext/stock/doctype/warehouse/warehouse.py:103
 msgid "Child warehouse exists for this warehouse. You can not delete this warehouse."
@@ -10088,7 +10088,7 @@ msgstr "Điều khoản và Điều kiện"
 
 #: erpnext/public/js/utils/barcode_scanner.js:493
 msgid "Clear Last Scanned Warehouse"
-msgstr ""
+msgstr "Xóa Kho đã Quét cuối"
 
 #. Label of the clear_notifications_status (Select) field in DocType
 #. 'Transaction Deletion Record'
@@ -10133,7 +10133,7 @@ msgstr "Ngày Thanh toán đã được cập nhật"
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.py:158
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.py:173
 msgid "Clearance date changed from {0} to {1} via Bank Clearance Tool"
-msgstr ""
+msgstr "Ngày thanh toán đã thay đổi từ {0} thành {1} qua Công cụ Thanh toán Ngân hàng"
 
 #: erpnext/public/js/utils/demo.js:21
 msgid "Clearing Demo Data..."
@@ -10299,7 +10299,7 @@ msgstr "Đóng [Mở đầu + Tổng] "
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_secondary_item/subcontracting_inward_order_secondary_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Co-Product"
-msgstr ""
+msgstr "Sản phẩm đồng thời"
 
 #. Name of a DocType
 #. Label of the code_list (Link) field in DocType 'Common Code'
@@ -10933,7 +10933,7 @@ msgstr "Tài khoản công ty"
 
 #: erpnext/accounts/doctype/bank_account/bank_account.py:63
 msgid "Company Account is mandatory"
-msgstr ""
+msgstr "Tài khoản Công ty là bắt buộc"
 
 #. Label of the company_address (Link) field in DocType 'Dunning'
 #. Label of the company_address_display (Text Editor) field in DocType 'POS
@@ -11045,7 +11045,7 @@ msgstr "Email công ty"
 #. Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Company Field"
-msgstr ""
+msgstr "Trường Công ty"
 
 #. Label of the company_logo (Attach Image) field in DocType 'Company'
 #: erpnext/public/js/print.js:80 erpnext/setup/doctype/company/company.json
@@ -11102,7 +11102,7 @@ msgstr "Công ty là bắt buộc để tạo hóa đơn. Vui lòng đặt công
 #. Deletion Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Company link field name used for filtering (optional - leave empty to delete all records)"
-msgstr ""
+msgstr "Tên trường liên kết công ty được sử dụng để lọc (tùy chọn - để trống để xóa tất cả bản ghi)"
 
 #: erpnext/setup/doctype/company/company.js:222
 msgid "Company name not same"
@@ -11114,7 +11114,7 @@ msgstr "Công ty của tài sản {0} và tài liệu mua {1} không khớp."
 
 #: erpnext/setup/doctype/employee/employee.py:168
 msgid "Company or Personal Email is mandatory when 'Create User Automatically' is enabled"
-msgstr ""
+msgstr "Email Công ty hoặc Cá nhân là bắt buộc khi 'Tạo Người dùng Tự động' được bật"
 
 #. Description of the 'Registration Details' (Code) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -11308,12 +11308,12 @@ msgstr ""
 #. Option for the 'Asset Type' (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Composite Asset"
-msgstr ""
+msgstr "Tài sản Tổng hợp"
 
 #. Option for the 'Asset Type' (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Composite Component"
-msgstr ""
+msgstr "Thành phần Tổng hợp"
 
 #. Label of the comprehensive_insurance (Data) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
@@ -11347,7 +11347,7 @@ msgstr "Điều kiện sẽ được áp dụng trên tất cả các mục đã
 #. Label of an action in the Onboarding Step 'Review Chart of Accounts'
 #: erpnext/accounts/onboarding_step/chart_of_accounts/chart_of_accounts.json
 msgid "Configure Chart of Accounts"
-msgstr ""
+msgstr "Cấu hình Biểu đồ Tài khoản"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:56
 msgid "Configure Product Assembly"
@@ -11384,7 +11384,7 @@ msgstr "Ngày xác nhận"
 #. Label of the connection_tab (Tab Break) field in DocType 'Asset Repair'
 #: erpnext/assets/doctype/asset_repair/asset_repair.json
 msgid "Connection"
-msgstr ""
+msgstr "Kết nối"
 
 #: erpnext/accounts/report/general_ledger/general_ledger.js:176
 msgid "Consider Accounting Dimensions"
@@ -11434,12 +11434,12 @@ msgstr "Xem xét thuế hoặc phí cho"
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 #: erpnext/accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgid "Consider for Tax Withholding"
-msgstr ""
+msgstr "Xem xét Khấu lưu Thuế"
 
 #. Label of the apply_tds (Check) field in DocType 'Journal Entry'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
 msgid "Consider for Tax Withholding "
-msgstr ""
+msgstr "Xem xét Khấu lưu Thuế "
 
 #. Label of the included_in_paid_amount (Check) field in DocType 'Advance Taxes
 #. and Charges'
@@ -11483,7 +11483,7 @@ msgstr "Báo cáo tài chính hợp nhất"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Consolidated Report"
-msgstr ""
+msgstr "Báo cáo Tổng hợp"
 
 #. Label of the consolidated_invoice (Link) field in DocType 'POS Invoice'
 #. Label of the consolidated_invoice (Link) field in DocType 'POS Invoice Merge
@@ -12049,13 +12049,13 @@ msgstr "Chi phí"
 #. Label of the cost_allocation (Currency) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Cost Allocation"
-msgstr ""
+msgstr "Phân bổ Chi phí"
 
 #. Label of the cost_allocation_per (Percent) field in DocType 'BOM Secondary
 #. Item'
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 msgid "Cost Allocation %"
-msgstr ""
+msgstr "% Phân bổ Chi phí"
 
 #. Label of the cost_allocation__process_loss_section (Section Break) field in
 #. DocType 'BOM'
@@ -12319,7 +12319,7 @@ msgstr "Chi phí Mỗi đơn vị"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:442
 msgid "Cost allocation between finished goods and secondary items should equal 100%"
-msgstr ""
+msgstr "Phân bổ chi phí giữa thành phẩm và các mục phụ phải bằng 100%"
 
 #. Title of an incoterm
 #: erpnext/setup/doctype/incoterm/incoterms.csv:8
@@ -12528,26 +12528,26 @@ msgstr "Cr"
 #. Label of an action in the Onboarding Step 'Create Asset Category'
 #: erpnext/assets/onboarding_step/create_asset_category/create_asset_category.json
 msgid "Create Asset Category"
-msgstr ""
+msgstr "Tạo Danh mục Tài sản"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Asset Item'
 #: erpnext/assets/onboarding_step/create_asset_item/create_asset_item.json
 msgid "Create Asset Item"
-msgstr ""
+msgstr "Tạo Mặt hàng Tài sản"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Asset Location'
 #: erpnext/assets/onboarding_step/create_asset_location/create_asset_location.json
 msgid "Create Asset Location"
-msgstr ""
+msgstr "Tạo Địa điểm Tài sản"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Bill of Materials'
 #: erpnext/manufacturing/onboarding_step/create_bill_of_materials/create_bill_of_materials.json
 #: erpnext/subcontracting/onboarding_step/create_bill_of_materials/create_bill_of_materials.json
 msgid "Create Bill of Materials"
-msgstr ""
+msgstr "Tạo Định mức Vật tư"
 
 #. Label of the create_chart_of_accounts_based_on (Select) field in DocType
 #. 'Company'
@@ -12559,7 +12559,7 @@ msgstr "Tạo Biểu đồ Tài khoản Dựa trên"
 #. Label of an action in the Onboarding Step 'Create Customer'
 #: erpnext/selling/onboarding_step/create_customer/create_customer.json
 msgid "Create Customer"
-msgstr ""
+msgstr "Tạo Khách hàng"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Delivery Note'
@@ -12588,17 +12588,17 @@ msgstr "Tạo hồ sơ Nhân viên."
 #. Label of an action in the Onboarding Step 'Create Existing Asset'
 #: erpnext/assets/onboarding_step/create_existing_asset/create_existing_asset.json
 msgid "Create Existing Asset"
-msgstr ""
+msgstr "Tạo Tài sản Hiện có"
 
 #. Label of an action in the Onboarding Step 'Create Finished Goods'
 #: erpnext/manufacturing/onboarding_step/create_finished_goods/create_finished_goods.json
 msgid "Create Finished Good"
-msgstr ""
+msgstr "Tạo Thành phẩm"
 
 #. Title of an Onboarding Step
 #: erpnext/manufacturing/onboarding_step/create_finished_goods/create_finished_goods.json
 msgid "Create Finished Goods"
-msgstr ""
+msgstr "Tạo Thành phẩm"
 
 #. Label of the is_grouped_asset (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -12619,7 +12619,7 @@ msgstr "Tạo Hóa đơn"
 #: erpnext/selling/onboarding_step/create_item/create_item.json
 #: erpnext/stock/onboarding_step/create_item/create_item.json
 msgid "Create Item"
-msgstr ""
+msgstr "Tạo Mặt hàng"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:187
 msgid "Create Job Card"
@@ -12686,12 +12686,12 @@ msgstr "Tạo khách hàng tiềm năng mới"
 #. Label of an action in the Onboarding Step 'Create Operations'
 #: erpnext/manufacturing/onboarding_step/create_operations/create_operations.json
 msgid "Create Operation"
-msgstr ""
+msgstr "Tạo Hoạt động"
 
 #. Title of an Onboarding Step
 #: erpnext/manufacturing/onboarding_step/create_operations/create_operations.json
 msgid "Create Operations"
-msgstr ""
+msgstr "Tạo Hoạt động"
 
 #: erpnext/crm/doctype/lead/lead.js:161
 msgid "Create Opportunity"
@@ -12714,7 +12714,7 @@ msgstr "Tạo Mục Thanh toán cho Hóa đơn POS Hợp nhất."
 
 #: erpnext/public/js/controllers/transaction.js:519
 msgid "Create Payment Request"
-msgstr ""
+msgstr "Tạo Yêu cầu Thanh toán"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:800
 msgid "Create Pick List"
@@ -12728,7 +12728,7 @@ msgstr "Tạo Định dạng In"
 #. Label of an action in the Onboarding Step 'Create Project'
 #: erpnext/projects/onboarding_step/create_project/create_project.json
 msgid "Create Project"
-msgstr ""
+msgstr "Tạo Dự án"
 
 #: erpnext/crm/doctype/lead/lead_list.js:8
 msgid "Create Prospect"
@@ -12738,7 +12738,7 @@ msgstr "Tạo Khách hàng tiềm năng"
 #. Label of an action in the Onboarding Step 'Create Purchase Invoice'
 #: erpnext/buying/onboarding_step/create_purchase_invoice/create_purchase_invoice.json
 msgid "Create Purchase Invoice"
-msgstr ""
+msgstr "Tạo Hóa đơn Mua hàng"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Purchase Order'
@@ -12756,7 +12756,7 @@ msgstr "Tạo các Đơn mua hàng"
 #. Label of an action in the Onboarding Step 'Create Purchase Receipt'
 #: erpnext/stock/onboarding_step/create_purchase_receipt/create_purchase_receipt.json
 msgid "Create Purchase Receipt"
-msgstr ""
+msgstr "Tạo Biên nhận Mua hàng"
 
 #: erpnext/utilities/activation.py:88
 msgid "Create Quotation"
@@ -12766,13 +12766,13 @@ msgstr "Tạo báo giá"
 #: erpnext/manufacturing/onboarding_step/create_raw_materials/create_raw_materials.json
 #: erpnext/subcontracting/onboarding_step/create_raw_materials/create_raw_materials.json
 msgid "Create Raw Material"
-msgstr ""
+msgstr "Tạo Nguyên liệu thô"
 
 #. Title of an Onboarding Step
 #: erpnext/manufacturing/onboarding_step/create_raw_materials/create_raw_materials.json
 #: erpnext/subcontracting/onboarding_step/create_raw_materials/create_raw_materials.json
 msgid "Create Raw Materials"
-msgstr ""
+msgstr "Tạo Nguyên liệu thô"
 
 #. Label of the create_receiver_list (Button) field in DocType 'SMS Center'
 #: erpnext/selling/doctype/sms_center/sms_center.json
@@ -12813,7 +12813,7 @@ msgstr "Tạo các Đơn hàng bán để giúp bạn lập kế hoạch công v
 #. Label of an action in the Onboarding Step 'Create Service Item'
 #: erpnext/subcontracting/onboarding_step/create_service_item/create_service_item.json
 msgid "Create Service Item"
-msgstr ""
+msgstr "Tạo Mặt hàng Dịch vụ"
 
 #: erpnext/stock/dashboard/item_dashboard.js:283
 #: erpnext/stock/doctype/material_request/material_request.js:478
@@ -12824,28 +12824,28 @@ msgstr "Tạo Mục Kho"
 #. Label of an action in the Onboarding Step 'Create Subcontracted Item'
 #: erpnext/subcontracting/onboarding_step/create_subcontracted_item/create_subcontracted_item.json
 msgid "Create Subcontracted Item"
-msgstr ""
+msgstr "Tạo Mặt hàng Ký gửi"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Subcontracting Order'
 #: erpnext/subcontracting/onboarding_step/create_subcontracting_order/create_subcontracting_order.json
 msgid "Create Subcontracting Order"
-msgstr ""
+msgstr "Tạo Đơn hàng Ký gửi"
 
 #. Title of an Onboarding Step
 #: erpnext/subcontracting/onboarding_step/create_subcontracting_po/create_subcontracting_po.json
 msgid "Create Subcontracting PO"
-msgstr ""
+msgstr "Tạo Đơn mua hàng Ký gửi"
 
 #. Label of an action in the Onboarding Step 'Create Subcontracting PO'
 #: erpnext/subcontracting/onboarding_step/create_subcontracting_po/create_subcontracting_po.json
 msgid "Create Subcontracting Purchase Order"
-msgstr ""
+msgstr "Tạo Đơn mua hàng Ký gửi"
 
 #. Title of an Onboarding Step
 #: erpnext/buying/onboarding_step/create_supplier/create_supplier.json
 msgid "Create Supplier"
-msgstr ""
+msgstr "Tạo Nhà cung cấp"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:181
 msgid "Create Supplier Quotation"
@@ -12854,12 +12854,12 @@ msgstr "Tạo Báo giá từ Nhà cung cấp"
 #. Label of an action in the Onboarding Step 'Create Tasks'
 #: erpnext/projects/onboarding_step/create_tasks/create_tasks.json
 msgid "Create Task"
-msgstr ""
+msgstr "Tạo Công việc"
 
 #. Title of an Onboarding Step
 #: erpnext/projects/onboarding_step/create_tasks/create_tasks.json
 msgid "Create Tasks"
-msgstr ""
+msgstr "Tạo các Công việc"
 
 #: erpnext/setup/doctype/company/company.js:157
 msgid "Create Tax Template"
@@ -12876,7 +12876,7 @@ msgstr "Tạo Bảng chấm công"
 #. Label of an action in the Onboarding Step 'Create Transfer Entry'
 #: erpnext/stock/onboarding_step/create_transfer_entry/create_transfer_entry.json
 msgid "Create Transfer Entry"
-msgstr ""
+msgstr "Tạo Mục Chuyển kho"
 
 #: erpnext/setup/doctype/employee/employee.js:50
 #: erpnext/setup/doctype/employee/employee.js:52
@@ -12887,7 +12887,7 @@ msgstr "Tạo người dùng"
 #. Label of the create_user_automatically (Check) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Create User Automatically"
-msgstr ""
+msgstr "Tạo Người dùng Tự động"
 
 #. Label of the create_user_permission (Check) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.js:65
@@ -12911,13 +12911,13 @@ msgstr "Tạo các biến thể"
 #. Label of an action in the Onboarding Step 'Setup Warehouse'
 #: erpnext/stock/onboarding_step/setup_warehouse/setup_warehouse.json
 msgid "Create Warehouses"
-msgstr ""
+msgstr "Tạo các Kho"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Work Order'
 #: erpnext/manufacturing/onboarding_step/create_work_order/create_work_order.json
 msgid "Create Work Order"
-msgstr ""
+msgstr "Tạo Lệnh sản xuất"
 
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:10
 msgid "Create Workstation"
@@ -12939,7 +12939,7 @@ msgstr "Tạo báo giá cho khách hàng"
 #. Label of an action in the Onboarding Step 'Create Delivery Note'
 #: erpnext/selling/onboarding_step/create_delivery_note/create_delivery_note.json
 msgid "Create delivery note"
-msgstr ""
+msgstr "Tạo phiếu giao hàng"
 
 #. Label of the create_pr_in_draft_status (Check) field in DocType 'Accounts
 #. Settings'
@@ -12950,7 +12950,7 @@ msgstr "Tạo ở Trạng thái Nháp"
 #. Label of an action in the Onboarding Step 'Create Supplier'
 #: erpnext/buying/onboarding_step/create_supplier/create_supplier.json
 msgid "Create supplier"
-msgstr ""
+msgstr "Tạo nhà cung cấp"
 
 #: erpnext/public/js/bulk_transaction_processing.js:14
 msgid "Create {0} {1} ?"
@@ -12960,7 +12960,7 @@ msgstr "Tạo {0} {1}?"
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Created By Migration"
-msgstr ""
+msgstr "Được tạo bởi Di chuyển"
 
 #: erpnext/buying/doctype/supplier_scorecard/supplier_scorecard.py:250
 msgid "Created {0} scorecards for {1} between:"
@@ -12970,7 +12970,7 @@ msgstr "Đã tạo {0} thẻ điểm cho {1} giữa:"
 #. 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Creates a User account for this employee using the Preferred, Company, or Personal email."
-msgstr ""
+msgstr "Tạo tài khoản Người dùng cho nhân viên này sử dụng Email ưu tiên, Công ty hoặc Cá nhân."
 
 #. Description of the 'Create Grouped Asset' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -13048,7 +13048,7 @@ msgstr "Đang tạo Người dùng..."
 
 #: erpnext/setup/setup_wizard/setup_wizard.py:36
 msgid "Creating demo data"
-msgstr ""
+msgstr "Đang tạo dữ liệu demo"
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:305
 msgid "Creating {} out of {} {}"
@@ -13387,7 +13387,7 @@ msgstr "Yard khối"
 #. Rate'
 #: erpnext/accounts/doctype/tax_withholding_rate/tax_withholding_rate.json
 msgid "Cumulative Threshold"
-msgstr ""
+msgstr "Ngưỡng Tích lũy"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -14091,7 +14091,7 @@ msgstr "Số LPO của khách hàng"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Customer Ledger"
-msgstr ""
+msgstr "Sổ cái Khách hàng"
 
 #. Name of a report
 #. Label of a Link in the Financial Reports Workspace
@@ -14204,7 +14204,7 @@ msgstr "Chi tiết Đơn đặt hàng của Khách hàng"
 #. Label of the customer_pos_id (Data) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Customer POS ID"
-msgstr ""
+msgstr "ID POS của Khách hàng"
 
 #. Label of the portal_users (Table) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
@@ -14826,13 +14826,13 @@ msgstr "Khấu trừ"
 #. Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Deduct Tax On Basis"
-msgstr ""
+msgstr "Khấu trừ Thuế theo Cơ sở"
 
 #. Label of the source_section (Section Break) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Deducted From"
-msgstr ""
+msgstr "Được khấu trừ từ"
 
 #. Label of the section_break_3 (Section Break) field in DocType 'Lower
 #. Deduction Certificate'
@@ -14843,7 +14843,7 @@ msgstr "Chi tiết người được khấu trừ"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/taxes.json
 msgid "Deduction Certificate"
-msgstr ""
+msgstr "Chứng chỉ Khấu trừ"
 
 #. Label of the deductions_or_loss_section (Section Break) field in DocType
 #. 'Payment Entry'
@@ -14903,7 +14903,7 @@ msgstr "Tài khoản Tạm ứng đã Nhận Mặc định"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Default Ageing Range"
-msgstr ""
+msgstr "Khoảng thời gian Quá hạn Mặc định"
 
 #. Label of the default_bom (Link) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -15414,7 +15414,7 @@ msgstr "Xác định loại dự án."
 #. Description of the 'End of Life' (Date) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Defines the date after which the item can no longer be used in transactions or manufacturing"
-msgstr ""
+msgstr "Xác định ngày sau đó mặt hàng không thể còn được sử dụng trong giao dịch hoặc sản xuất"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -15484,7 +15484,7 @@ msgstr "Xóa các bút toán đã hủy"
 #. Type: Action
 #: erpnext/hooks.py erpnext/public/js/utils/demo.js:5
 msgid "Delete Demo Data"
-msgstr ""
+msgstr "Xóa dữ liệu demo"
 
 #: erpnext/stock/doctype/inventory_dimension/inventory_dimension.js:66
 msgid "Delete Dimension"
@@ -15527,11 +15527,11 @@ msgstr "Không cho phép xóa cho quốc gia {0}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:216
 msgid "Deletion process restarted"
-msgstr ""
+msgstr "Quá trình xóa đã khởi động lại"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:97
 msgid "Deletion will start automatically after submission."
-msgstr ""
+msgstr "Quá trình xóa sẽ bắt đầu tự động sau khi gửi."
 
 #. Label of the delimiter_options (Data) field in DocType 'Bank Statement
 #. Import'
@@ -15892,7 +15892,7 @@ msgstr "Công ty demo"
 
 #: erpnext/setup/demo.py:51
 msgid "Demo Data creation failed."
-msgstr ""
+msgstr "Tạo dữ liệu demo thất bại."
 
 #: erpnext/public/js/utils/demo.js:25
 msgid "Demo data cleared"
@@ -15900,7 +15900,7 @@ msgstr "Dữ liệu demo đã xóa"
 
 #: erpnext/setup/demo.py:42
 msgid "Demo data creation failed. Check notifications for more info."
-msgstr ""
+msgstr "Tạo dữ liệu demo thất bại. Kiểm tra thông báo để biết thêm thông tin."
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:18
 msgid "Department Stores"
@@ -16312,7 +16312,7 @@ msgstr "Thu nhập trực tiếp"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:359
 msgid "Direct return is not allowed for Timesheet."
-msgstr ""
+msgstr "Không cho phép trả lại trực tiếp cho Bảng chấm công."
 
 #. Label of the disabled (Check) field in DocType 'Account'
 #. Label of the disabled (Check) field in DocType 'Accounting Dimension'
@@ -16342,7 +16342,7 @@ msgstr "Vô hiệu Lập kế hoạch Công suất"
 #. Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Disable Cumulative Threshold"
-msgstr ""
+msgstr "Vô hiệu Ngưỡng Tích lũy"
 
 #. Label of the disable_in_words (Check) field in DocType 'Global Defaults'
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
@@ -16389,7 +16389,7 @@ msgstr "Vô hiệu Bộ chọn Serial No và Batch"
 #. Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Disable Transaction Threshold"
-msgstr ""
+msgstr "Vô hiệu Ngưỡng Giao dịch"
 
 #. Label of the disable_last_purchase_rate (Check) field in DocType 'Buying
 #. Settings'
@@ -16450,7 +16450,7 @@ msgstr "Lệnh Tháo dỡ"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:2400
 msgid "Disassemble Qty cannot be less than or equal to 0."
-msgstr ""
+msgstr "Số lượng tháo rời không được nhỏ hơn hoặc bằng 0."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:445
 msgid "Disassemble Qty cannot be less than or equal to <b>0</b>."
@@ -16940,7 +16940,7 @@ msgstr "Không Sử dụng Định giá theo Batch"
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.py:128
 msgid "Do Not Use Batchwise Valuation"
-msgstr ""
+msgstr "Không Sử dụng Định giá theo Batch"
 
 #. Label of the do_not_fetch_incoming_rate_from_serial_no (Check) field in
 #. DocType 'Stock Reposting Settings'
@@ -16996,31 +16996,31 @@ msgstr ""
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:182
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:445
 msgid "DocType {0} does not exist"
-msgstr ""
+msgstr "DocType {0} không tồn tại"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:295
 msgid "DocType {0} with company field '{1}' is already in the list"
-msgstr ""
+msgstr "DocType {0} với trường công ty '{1}' đã có trong danh sách"
 
 #. Label of the doctypes_to_delete (Table) field in DocType 'Transaction
 #. Deletion Record'
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgid "DocTypes To Delete"
-msgstr ""
+msgstr "Các DocType cần Xóa"
 
 #. Description of the 'Excluded DocTypes' (Table) field in DocType 'Transaction
 #. Deletion Record'
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgid "DocTypes that will NOT be deleted."
-msgstr ""
+msgstr "Các DocType sẽ KHÔNG bị xóa."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:84
 msgid "DocTypes with a company field:"
-msgstr ""
+msgstr "Các DocType có trường công ty:"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:88
 msgid "DocTypes without a company field:"
-msgstr ""
+msgstr "Các DocType không có trường công ty:"
 
 #: erpnext/templates/pages/search_help.py:22
 msgid "Docs Search"
@@ -17030,7 +17030,7 @@ msgstr "Tìm kiếm tài liệu"
 #. Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Document Count"
-msgstr ""
+msgstr "Số lượng Tài liệu"
 
 #. Label of the document_naming_tab (Tab Break) field in DocType 'Buying
 #. Settings'
@@ -17043,7 +17043,7 @@ msgstr ""
 
 #: erpnext/stock/report/negative_batch_report/negative_batch_report.py:78
 msgid "Document No"
-msgstr ""
+msgstr "Số Tài liệu"
 
 #. Label of the document_type (Link) field in DocType 'Subscription Invoice'
 #: erpnext/accounts/doctype/subscription_invoice/subscription_invoice.json
@@ -17086,7 +17086,7 @@ msgstr "Không Bắt buộc Số lượng Mặt hàng Miễn phí"
 #: erpnext/accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 #: erpnext/accounts/doctype/sales_taxes_and_charges/sales_taxes_and_charges.json
 msgid "Don't Recompute Tax"
-msgstr ""
+msgstr "Không Tính lại Thuế"
 
 #. Label of the dont_reserve_sales_order_qty_on_sales_return (Check) field in
 #. DocType 'Selling Settings'
@@ -17292,7 +17292,7 @@ msgstr "Nhóm Khách hàng Trùng lặp"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:190
 msgid "Duplicate DocType"
-msgstr ""
+msgstr "DocType Trùng lặp"
 
 #: erpnext/setup/doctype/authorization_rule/authorization_rule.py:71
 msgid "Duplicate Entry. Please check Authorization Rule {0}"
@@ -17308,7 +17308,7 @@ msgstr "Nhóm Mặt hàng Trùng lặp"
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:102
 msgid "Duplicate Item Under Same Parent"
-msgstr ""
+msgstr "Mặt hàng Trùng lặp dưới Cùng Cha"
 
 #: erpnext/manufacturing/doctype/workstation/workstation.py:79
 #: erpnext/manufacturing/doctype/workstation_type/workstation_type.py:37
@@ -17326,7 +17326,7 @@ msgstr "Tìm thấy Hóa đơn POS trùng lặp"
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:133
 msgid "Duplicate Payment Schedule selected"
-msgstr ""
+msgstr "Đã chọn Lịch thanh toán trùng lặp"
 
 #: erpnext/projects/doctype/project/project.js:83
 msgid "Duplicate Project with Tasks"
@@ -17354,7 +17354,7 @@ msgstr "Bút toán trùng lặp cho mã mặt hàng {0} và nhà sản xuất {1
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:189
 msgid "Duplicate entry: {0}{1}"
-msgstr ""
+msgstr "Bút toán trùng lặp: {0}{1}"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:164
 msgid "Duplicate item group found in the item group table"
@@ -17415,7 +17415,7 @@ msgstr "EAN"
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
 msgid "EAN-13"
-msgstr ""
+msgstr "EAN-13"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
@@ -17435,7 +17435,7 @@ msgstr "EMU của dòng điện"
 #. Label of a Desktop Icon
 #: erpnext/desktop_icon/erpnext.json
 msgid "ERPNext"
-msgstr ""
+msgstr "ERPNext"
 
 #. Label of a Desktop Icon
 #. Name of a Workspace
@@ -17444,7 +17444,7 @@ msgstr ""
 #: erpnext/setup/workspace/erpnext_settings/erpnext_settings.json
 #: erpnext/workspace_sidebar/erpnext_settings.json
 msgid "ERPNext Settings"
-msgstr ""
+msgstr "Cài đặt ERPNext"
 
 #. Label of the user_id (Data) field in DocType 'Employee Group Table'
 #: erpnext/setup/doctype/employee_group_table/employee_group_table.json
@@ -17537,7 +17537,7 @@ msgstr "Chỉnh sửa biên nhận"
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Edit Tax Withholding Entries"
-msgstr ""
+msgstr "Sửa Bút toán Khấu lưu Thuế"
 
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:777
 msgid "Editing {0} is not allowed as per POS Profile settings"
@@ -17633,7 +17633,7 @@ msgstr "Chiến dịch email"
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:149
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:157
 msgid "Email Campaign Error"
-msgstr ""
+msgstr "Lỗi Chiến dịch Email"
 
 #. Label of the email_campaign_for (Select) field in DocType 'Email Campaign'
 #: erpnext/crm/doctype/email_campaign/email_campaign.json
@@ -17642,7 +17642,7 @@ msgstr "Chiến dịch Email Cho "
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:125
 msgid "Email Campaign Send Error"
-msgstr ""
+msgstr "Lỗi Gửi Chiến dịch Email"
 
 #. Label of the supplier_response_section (Section Break) field in DocType
 #. 'Request for Quotation'
@@ -17679,11 +17679,11 @@ msgstr "Đã gửi Email đến Nhà cung cấp {0}"
 
 #: erpnext/setup/doctype/employee/employee.py:434
 msgid "Email is required to create a user"
-msgstr ""
+msgstr "Yêu cầu Email để tạo người dùng"
 
 #: erpnext/setup/doctype/employee/employee.js:72
 msgid "Email is required to create a user."
-msgstr ""
+msgstr "Yêu cầu Email để tạo người dùng."
 
 #: erpnext/stock/doctype/shipment/shipment.js:174
 msgid "Email or Phone/Mobile of the Contact are mandatory to continue."
@@ -17869,7 +17869,7 @@ msgstr "Nhân viên không thể báo cáo cho chính mình."
 
 #: erpnext/setup/doctype/employee/employee.py:568
 msgid "Employee is required"
-msgstr ""
+msgstr "Yêu cầu Nhân viên"
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:109
 msgid "Employee is required while issuing Asset {0}"
@@ -17877,7 +17877,7 @@ msgstr "Yêu cầu Nhân viên khi phát hành Tài sản {0}"
 
 #: erpnext/setup/doctype/employee/employee.py:431
 msgid "Employee {0} already has a linked user"
-msgstr ""
+msgstr "Nhân viên {0} đã có người dùng được liên kết"
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:92
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:113
@@ -17890,7 +17890,7 @@ msgstr "Nhân viên {0} hiện đang làm việc trên máy trạm khác. Vui l�
 
 #: erpnext/setup/doctype/employee/employee.py:593
 msgid "Employee {0} not found"
-msgstr ""
+msgstr "Không tìm thấy Nhân viên {0}"
 
 #: erpnext/manufacturing/doctype/workstation/workstation.js:351
 msgid "Employees"
@@ -17902,7 +17902,7 @@ msgstr "Trống"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:755
 msgid "Empty To Delete List"
-msgstr ""
+msgstr "Danh sách Xóa Trống"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -17913,7 +17913,7 @@ msgstr "Ems(Pica)"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Accounting Dimensions"
-msgstr ""
+msgstr "Bật Chiều Kế toán"
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1721
 msgid "Enable Allow Partial Reservation in the Stock Settings to reserve partial stock."
@@ -17975,7 +17975,7 @@ msgstr "Bật Doanh thu Deferred"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Discounts and Margin"
-msgstr ""
+msgstr "Bật Giảm giá và Biên"
 
 #. Label of the enable_european_access (Check) field in DocType 'Plaid
 #. Settings'
@@ -18011,7 +18011,7 @@ msgstr "Bật Tài khoản Tồn kho theo Mặt hàng"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Loyalty Point Program"
-msgstr ""
+msgstr "Bật Chương trình Điểm Tích lũy"
 
 #. Label of the enable_parallel_reposting (Check) field in DocType 'Stock
 #. Reposting Settings'
@@ -18034,7 +18034,7 @@ msgstr "Bật Kế toán Tạm thời cho Mặt hàng Không tồn kho"
 #. 'Stock Reposting Settings'
 #: erpnext/stock/doctype/stock_reposting_settings/stock_reposting_settings.json
 msgid "Enable Separate Reposting for GL"
-msgstr ""
+msgstr "Bật Đăng lại Riêng cho GL"
 
 #: erpnext/stock/report/stock_ledger/stock_ledger.js:122
 msgid "Enable Serial / Batch Bundle"
@@ -18050,23 +18050,23 @@ msgstr "Bật Đặt trước Tồn kho"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Subscription"
-msgstr ""
+msgstr "Bật Đăng ký"
 
 #. Description of the 'Enable Subscription' (Check) field in DocType 'Accounts
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Subscription tracking in invoice"
-msgstr ""
+msgstr "Bật theo dõi Đăng ký trong hóa đơn"
 
 #. Label of the enable_utm (Check) field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Enable UTM"
-msgstr ""
+msgstr "Bật UTM"
 
 #. Description of the 'Enable UTM' (Check) field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Enable Urchin Tracking Module parameters in Quotation, Sales Order, Sales Invoice, POS Invoice, Lead,  and Delivery Note."
-msgstr ""
+msgstr "Bật tham số Mô-đun theo dõi Urchin trong Báo giá, Đơn hàng Bán, Hóa đơn Bán, Hóa đơn POS, Cơ hội và Phiếu giao hàng."
 
 #. Label of the enable_youtube_tracking (Check) field in DocType 'Video
 #. Settings'
@@ -18078,7 +18078,7 @@ msgstr "Bật theo dõi YouTube"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable cost center, projects and other custom accounting dimensions"
-msgstr ""
+msgstr "Bật trung tâm chi phí, dự án và các chiều kế toán tùy chỉnh khác"
 
 #. Label of the enable_cutoff_date_on_bulk_delivery_note_creation (Check) field
 #. in DocType 'Selling Settings'
@@ -18156,13 +18156,13 @@ msgstr "Bật để áp dụng SLA trên mỗi {0}"
 #. Description of the 'Retain Sample' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Enable to reserve a small sample from each batch for any analysis arising ahead"
-msgstr ""
+msgstr "Bật để dự trữ một mẫu nhỏ từ mỗi batch cho bất kỳ phân tích nào phát sinh"
 
 #. Label of the enable_tracking_sales_commissions (Check) field in DocType
 #. 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Enable tracking sales commissions"
-msgstr ""
+msgstr "Bật theo dõi hoa hồng bán hàng"
 
 #. Description of the 'Fetch Timesheet in Sales Invoice' (Check) field in
 #. DocType 'Projects Settings'
@@ -18479,7 +18479,7 @@ msgstr "Lỗi đánh giá công thức tiêu chí"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:267
 msgid "Error getting details for {0}: {1}"
-msgstr ""
+msgstr "Lỗi lấy chi tiết cho {0}: {1}"
 
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.py:312
 msgid "Error in party matching for Bank Transaction {0}"
@@ -18738,7 +18738,7 @@ msgstr "Số trang Thuế Tiêu thụ"
 
 #: erpnext/accounts/report/trial_balance_for_party/trial_balance_for_party.js:86
 msgid "Exclude Zero Balance Parties"
-msgstr ""
+msgstr "Loại trừ các Bên có Số dư Không"
 
 #. Label of the doctypes_to_be_ignored (Table) field in DocType 'Transaction
 #. Deletion Record'
@@ -18779,7 +18779,7 @@ msgstr "Triển lãm"
 #. Option for the 'Asset Type' (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Existing Asset"
-msgstr ""
+msgstr "Tài sản Hiện có"
 
 #. Option for the 'Create Chart Of Accounts Based On' (Select) field in DocType
 #. 'Company'
@@ -18799,7 +18799,7 @@ msgstr "Khách hàng Hiện có"
 #. Label of the exit (Tab Break) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Exit"
-msgstr ""
+msgstr "Thoát"
 
 #. Label of the held_on (Date) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -19126,7 +19126,7 @@ msgstr "Mặt hàng TP / Bán TP"
 
 #: erpnext/manufacturing/report/bom_stock_analysis/bom_stock_analysis.js:21
 msgid "FG Items to Make"
-msgstr ""
+msgstr "Các Mặt hàng TP cần Sản xuất"
 
 #. Option for the 'Default Stock Valuation Method' (Select) field in DocType
 #. 'Company'
@@ -19168,7 +19168,7 @@ msgstr "Hàng đợi FIFO/LIFO"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "FX Revaluation"
-msgstr ""
+msgstr "Đánh giá lại FX"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -19186,7 +19186,7 @@ msgstr "Không thể xác thực khóa API."
 #: erpnext/setup/setup_wizard/setup_wizard.py:37
 #: erpnext/setup/setup_wizard/setup_wizard.py:38
 msgid "Failed to create demo data"
-msgstr ""
+msgstr "Không thể tạo dữ liệu demo"
 
 #: erpnext/setup/demo.py:77
 msgid "Failed to erase demo data, please delete the demo company manually."
@@ -19207,11 +19207,11 @@ msgstr "Không thể đăng các mục khấu hao"
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:126
 msgid "Failed to send email for campaign {0} to {1}"
-msgstr ""
+msgstr "Không thể gửi email cho chiến dịch {0} đến {1}"
 
 #: erpnext/setup/setup_wizard/setup_wizard.py:26
 msgid "Failed to set defaults"
-msgstr ""
+msgstr "Không thể đặt giá trị mặc định"
 
 #: erpnext/setup/setup_wizard/setup_wizard.py:21
 #: erpnext/setup/setup_wizard/setup_wizard.py:22
@@ -19265,7 +19265,7 @@ msgstr "Phản hồi bởi"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/quality.json
 msgid "Feedback Template"
-msgstr ""
+msgstr "Mẫu phản hồi"
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
 #. Account'
@@ -19355,7 +19355,7 @@ msgstr "Đang tìm nạp..."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:224
 msgid "Field '{0}' is not a valid Company link field for DocType {1}"
-msgstr ""
+msgstr "Trường '{0}' không phải là trường liên kết công ty hợp lệ cho DocType {1}"
 
 #. Label of the field_mapping_section (Section Break) field in DocType
 #. 'Inventory Dimension'
@@ -19385,15 +19385,15 @@ msgstr "Các trường sẽ chỉ được sao chép khi tạo."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1067
 msgid "File does not belong to this Transaction Deletion Record"
-msgstr ""
+msgstr "Tệp không thuộc về Bản ghi xóa giao dịch này"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1061
 msgid "File not found"
-msgstr ""
+msgstr "Không tìm thấy tệp"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1075
 msgid "File not found on server"
-msgstr ""
+msgstr "Không tìm thấy tệp trên máy chủ"
 
 #. Label of the file_to_rename (Attach) field in DocType 'Rename Tool'
 #: erpnext/utilities/doctype/rename_tool/rename_tool.json
@@ -19854,7 +19854,7 @@ msgstr "Công ty năm tài chính"
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:5
 msgid "Fiscal Year Details"
-msgstr ""
+msgstr "Chi tiết năm tài chính"
 
 #: erpnext/accounts/doctype/fiscal_year/fiscal_year.py:53
 msgid "Fiscal Year End Date should be one year after Fiscal Year Start Date"
@@ -20171,7 +20171,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/bom/bom.py:368
 msgid "For operation {0} at row {1}, please add raw materials or set a BOM against it."
-msgstr ""
+msgstr "Đối với hoạt động {0} tại dòng {1}, vui lòng thêm nguyên vật liệu hoặc đặt BOM cho nó."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:2649
 msgid "For operation {0}: Quantity ({1}) can not be greater than pending quantity({2})"
@@ -20179,7 +20179,7 @@ msgstr "Đối với hoạt động {0}: Số lượng ({1}) không thể lớn 
 
 #: erpnext/projects/doctype/project/project.js:208
 msgid "For project - {0}, update your status"
-msgstr ""
+msgstr "Cho dự án - {0}, cập nhật trạng thái của bạn"
 
 #. Description of the 'Parent Warehouse' (Link) field in DocType 'Master
 #. Production Schedule'
@@ -20225,7 +20225,7 @@ msgstr "Để thuận tiện cho khách hàng, các mã này có thể được 
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1071
 msgid "For the item {0}, the consumed quantity should be {1} according to the BOM {2}."
-msgstr ""
+msgstr "Đối với mặt hàng {0}, số lượng tiêu thụ phải là {1} theo BOM {2}."
 
 #: erpnext/public/js/controllers/transaction.js:1404
 msgctxt "Clear payment terms template and/or payment schedule when due date is changed"
@@ -20416,7 +20416,7 @@ msgstr "Ngày Từ và Ngày Đến là bắt buộc"
 
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:29
 msgid "From Date and To Date are required"
-msgstr ""
+msgstr "Ngày Từ và Ngày Đến là bắt buộc"
 
 #: erpnext/accounts/report/tds_computation_summary/tds_computation_summary.py:30
 msgid "From Date and To Date lie in different Fiscal Year"
@@ -20431,7 +20431,7 @@ msgstr "Ngày Từ không thể lớn hơn Ngày Đến"
 
 #: erpnext/selling/report/sales_partner_commission_summary/sales_partner_commission_summary.py:60
 msgid "From Date cannot be greater than To Date."
-msgstr ""
+msgstr "Ngày Từ không thể lớn hơn Ngày Đến."
 
 #: erpnext/crm/report/sales_pipeline_analytics/sales_pipeline_analytics.py:27
 msgid "From Date is mandatory"
@@ -20728,7 +20728,7 @@ msgstr "Điều khoản và điều kiện thực hiện"
 
 #: erpnext/stock/doctype/shipment/shipment.js:275
 msgid "Full Name, Email or Phone/Mobile of the user are mandatory to continue."
-msgstr ""
+msgstr "Họ tên, Email hoặc Điện thoại/Di động của người dùng là bắt buộc để tiếp tục."
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
 #. Account'
@@ -20856,7 +20856,7 @@ msgstr "GTIN"
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
 msgid "GTIN-14"
-msgstr ""
+msgstr "GTIN-14"
 
 #. Label of the gain_loss (Currency) field in DocType 'Exchange Rate
 #. Revaluation Account'
@@ -21001,11 +21001,11 @@ msgstr "Tạo bút toán đóng kho"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:112
 msgid "Generate To Delete List"
-msgstr ""
+msgstr "Tạo danh sách xóa"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:472
 msgid "Generate To Delete list first"
-msgstr ""
+msgstr "Tạo danh sách xóa trước"
 
 #. Description of a DocType
 #: erpnext/stock/doctype/packing_slip/packing_slip.json
@@ -21227,7 +21227,7 @@ msgstr "Lấy đơn hàng bán"
 #. Receipt'
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Get Secondary Items"
-msgstr ""
+msgstr "Lấy vật phẩm thứ cấp"
 
 #. Label of the get_started_sections (Code) field in DocType 'Support Settings'
 #: erpnext/support/doctype/support_settings/support_settings.json
@@ -21272,7 +21272,7 @@ msgstr "Lấy các điểm dừng từ"
 
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:196
 msgid "Getting Secondary Items"
-msgstr ""
+msgstr "Đang lấy vật phẩm thứ cấp"
 
 #. Option for the 'Coupon Type' (Select) field in DocType 'Coupon Code'
 #: erpnext/accounts/doctype/coupon_code/coupon_code.json
@@ -21483,11 +21483,11 @@ msgstr "Tổng cộng (Tiền tệ công ty)"
 
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:252
 msgid "Grand Total (Transaction Currency)"
-msgstr ""
+msgstr "Tổng cộng (Tiền tệ giao dịch)"
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:125
 msgid "Grand Total must match sum of Payment References"
-msgstr ""
+msgstr "Tổng cộng phải khớp với tổng các tham chiếu thanh toán"
 
 #. Label of the grant_commission (Check) field in DocType 'POS Invoice Item'
 #. Label of the grant_commission (Check) field in DocType 'Sales Invoice Item'
@@ -21574,7 +21574,7 @@ msgstr "Tỷ lệ lợi nhuận gộp"
 #. Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Gross Total"
-msgstr ""
+msgstr "Tổng gộp"
 
 #. Label of the gross_weight_pkg (Float) field in DocType 'Packing Slip'
 #: erpnext/stock/doctype/packing_slip/packing_slip.json
@@ -21602,7 +21602,7 @@ msgstr "Nhóm theo nhà cung cấp"
 #. Label of the group_name (Data) field in DocType 'Tax Withholding Group'
 #: erpnext/accounts/doctype/tax_withholding_group/tax_withholding_group.json
 msgid "Group Name"
-msgstr ""
+msgstr "Tên nhóm"
 
 #: erpnext/setup/doctype/sales_person/sales_person_tree.js:14
 msgid "Group Node"
@@ -22201,7 +22201,7 @@ msgstr "IBAN"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:93
 msgid "IMPORTANT: Create a backup before proceeding!"
-msgstr ""
+msgstr "QUAN TRỌNG: Tạo bản sao lưu trước khi tiến hành!"
 
 #. Name of a report
 #: erpnext/regional/report/irs_1099/irs_1099.json
@@ -22424,13 +22424,13 @@ msgstr "Nếu được bật, hệ thống sẽ cho phép người dùng giao to
 #. field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "If enabled, system will set incoming rate as zero for stand-alone credit notes with expired batch item."
-msgstr ""
+msgstr "Nếu được bật, hệ thống sẽ đặt tỷ lệ nhập bằng không cho các ghi nợ đơn lẻ với mặt hàng lô hết hạn."
 
 #. Description of the 'Deliver secondary Items' (Check) field in DocType
 #. 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "If enabled, the Secondary Items generated against a Finished Good will also be added in the Stock Entry when delivering that Finished Good."
-msgstr ""
+msgstr "Nếu được bật, các mặt hàng phụ được tạo đối với Thành phẩm cũng sẽ được thêm vào Mục tồn kho khi giao Thành phẩm đó."
 
 #. Description of the 'Disable Rounded Total' (Check) field in DocType 'POS
 #. Profile'
@@ -22442,7 +22442,7 @@ msgstr "Nếu được bật, các hóa đơn hợp nhất sẽ có tổng làm 
 #. field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "If enabled, the item rate won't adjust to the valuation rate during internal transfers, but accounting will still use the valuation rate. This will allow the user to specify a different rate for printing or taxation purposes."
-msgstr ""
+msgstr "Nếu được bật, tỷ lệ mặt hàng sẽ không điều chỉnh theo tỷ lệ định giá trong các chuyển kho nội bộ, nhưng kế toán vẫn sẽ sử dụng tỷ lệ định giá. Điều này sẽ cho phép người dùng chỉ định một tỷ lệ khác cho mục đích in ấn hoặc tính thuế."
 
 #. Description of the 'Validate Material Transfer Warehouses' (Check) field in
 #. DocType 'Stock Settings'
@@ -22454,7 +22454,7 @@ msgstr "Nếu được bật, kho nguồn và kho đích trong Mục tồn kho c
 #. 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "If enabled, the system will allow negative stock entries for the batch. But, this may lead to incorrect valuation rates, so it is recommended to avoid using this option. The system will permit negative stock only when it is caused by backdated entries and will validate and block negative stock in all other cases."
-msgstr ""
+msgstr "Nếu được bật, hệ thống sẽ cho phép các mục tồn kho âm cho lô. Nhưng điều này có thể dẫn đến tỷ lệ định giá không chính xác, vì vậy khuyến nghị tránh sử dụng tùy chọn này. Hệ thống sẽ cho phép tồn kho âm chỉ khi nó được gây ra bởi các mục có ngày lùi và sẽ xác thực và chặn tồn kho âm trong tất cả các trường hợp khác."
 
 #. Description of the 'Allow UOM with Conversion Rate Defined in Item' (Check)
 #. field in DocType 'Stock Settings'
@@ -22687,7 +22687,7 @@ msgstr "Nếu bạn vẫn muốn tiếp tục, vui lòng bật {0}."
 #. Description of the 'Sequence ID' (Int) field in DocType 'BOM Operation'
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
 msgid "If you want to run operations in parallel, keep the same sequence ID for them."
-msgstr ""
+msgstr "Nếu bạn muốn chạy các hoạt động song song, hãy giữ cùng ID trình tự cho chúng."
 
 #: erpnext/accounts/doctype/pricing_rule/utils.py:378
 msgid "If you {0} {1} quantities of the item {2}, the scheme {3} will be applied on the item."
@@ -22812,7 +22812,7 @@ msgstr "Bỏ qua các Ghi nợ / Ghi có do hệ thống tạo"
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Ignore Tax Withholding Threshold"
-msgstr ""
+msgstr "Bỏ qua ngưỡng khấu lưu thuế"
 
 #. Label of the ignore_user_time_overlap (Check) field in DocType 'Projects
 #. Settings'
@@ -22840,7 +22840,7 @@ msgstr "Bỏ qua trường Is Opening cũ trong GL Entry cho phép thêm số d�
 
 #: erpnext/stock/doctype/item/item.py:253
 msgid "Image in the description has been removed. To disable this behavior, uncheck \"{0}\" in {1}."
-msgstr ""
+msgstr "Hình ảnh trong mô tả đã bị xóa. Để tắt hành vi này, hãy bỏ chọn \"{0}\" trong {1}."
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:135
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:229
@@ -22865,7 +22865,7 @@ msgstr "Nhập dữ liệu"
 
 #: erpnext/setup/doctype/employee/employee_list.js:16
 msgid "Import Employees"
-msgstr ""
+msgstr "Nhập nhân viên"
 
 #: erpnext/edi/doctype/code_list/code_list.js:7
 #: erpnext/edi/doctype/code_list/code_list_list.js:3
@@ -22891,7 +22891,7 @@ msgstr "Nhập thành công"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:564
 msgid "Import Summary"
-msgstr ""
+msgstr "Tóm tắt nhập"
 
 #. Label of a Link in the Buying Workspace
 #. Name of a DocType
@@ -22915,7 +22915,7 @@ msgstr "Nhập hàng loạt"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:192
 msgid "Imported {0} DocTypes"
-msgstr ""
+msgstr "Đã nhập {0} DocTypes"
 
 #: erpnext/edi/doctype/code_list/code_list_import.py:36
 msgid "Importing Code Lists from remote URLs is not allowed."
@@ -23358,7 +23358,7 @@ msgstr "Tài khoản thu nhập"
 #. 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Income and Expense"
-msgstr ""
+msgstr "Thu nhập và chi phí"
 
 #. Description of the 'Enable Deferred Expense' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -23368,7 +23368,7 @@ msgstr ""
 #. Label of a number card in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 msgid "Incoming Bills"
-msgstr ""
+msgstr "Hóa đơn đến"
 
 #. Name of a DocType
 #: erpnext/telephony/doctype/incoming_call_handling_schedule/incoming_call_handling_schedule.json
@@ -23383,7 +23383,7 @@ msgstr "Cài đặt cuộc gọi đến"
 #. Label of a number card in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 msgid "Incoming Payment"
-msgstr ""
+msgstr "Thanh toán đến"
 
 #. Label of the incoming_rate (Currency) field in DocType 'Delivery Note Item'
 #. Label of the incoming_rate (Currency) field in DocType 'Packed Item'
@@ -23416,7 +23416,7 @@ msgstr "Phát hiện cài đặt không tương thích"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:195
 msgid "Incorrect Account"
-msgstr ""
+msgstr "Tài khoản không đúng"
 
 #. Name of a report
 #: erpnext/stock/report/incorrect_balance_qty_after_transaction/incorrect_balance_qty_after_transaction.json
@@ -23433,7 +23433,7 @@ msgstr "Kiểm tra không đúng trong kho (nhóm) để đặt lại"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:143
 msgid "Incorrect Company"
-msgstr ""
+msgstr "Công ty không đúng"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1078
 msgid "Incorrect Component Quantity"
@@ -23900,7 +23900,7 @@ msgstr "Nội bộ"
 #. 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Internal Customer Accounting"
-msgstr ""
+msgstr "Kế toán khách hàng nội bộ"
 
 #: erpnext/selling/doctype/customer/customer.py:255
 msgid "Internal Customer for company {0} already exists"
@@ -23926,7 +23926,7 @@ msgstr "Tham chiếu bán hàng nội bộ bị thiếu"
 #. 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "Internal Supplier Accounting"
-msgstr ""
+msgstr "Kế toán nhà cung cấp nội bộ"
 
 #: erpnext/buying/doctype/supplier/supplier.py:181
 msgid "Internal Supplier for company {0} already exists"
@@ -23988,7 +23988,7 @@ msgstr "Tài khoản không hợp lệ"
 
 #: erpnext/accounts/report/budget_variance_report/budget_variance_report.py:418
 msgid "Invalid Accounting Dimension"
-msgstr ""
+msgstr "Chiều Kế toán không hợp lệ"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:400
 #: erpnext/accounts/doctype/payment_request/payment_request.py:1005
@@ -24017,7 +24017,7 @@ msgstr "Đơn hàng trọn gói không hợp lệ cho Khách hàng và Mặt hà
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:498
 msgid "Invalid CSV format. Expected column: doctype_name"
-msgstr ""
+msgstr "Định dạng CSV không hợp lệ. Cột mong đợi: doctype_name"
 
 #: erpnext/quality_management/doctype/quality_procedure/quality_procedure.py:72
 msgid "Invalid Child Procedure"
@@ -24025,7 +24025,7 @@ msgstr "Thủ tục con không hợp lệ"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:227
 msgid "Invalid Company Field"
-msgstr ""
+msgstr "Trường Công ty không hợp lệ"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2355
 msgid "Invalid Company for Inter Company Transaction."
@@ -24193,7 +24193,7 @@ msgstr "Biểu thức điều kiện không hợp lệ"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1056
 msgid "Invalid file URL"
-msgstr ""
+msgstr "URL tệp không hợp lệ"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:87
 msgid "Invalid filter formula. Please check the syntax."
@@ -24287,7 +24287,7 @@ msgstr "Tỷ lệ Vòng quay Hàng tồn kho"
 #. 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Inventory Valuation"
-msgstr ""
+msgstr "Định giá Hàng tồn kho"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:29
 msgid "Investment Banking"
@@ -24302,7 +24302,7 @@ msgstr "Đầu tư"
 #. Label of an action in the Onboarding Step 'Invite Users'
 #: erpnext/setup/onboarding_step/invite_users/invite_users.json
 msgid "Invite Users"
-msgstr ""
+msgstr "Mời Người dùng"
 
 #. Option for the 'Posting Date Inheritance for Exchange Gain / Loss' (Select)
 #. field in DocType 'Accounts Settings'
@@ -24504,7 +24504,7 @@ msgstr "Nhập"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/subcontracting.json
 msgid "Inward Order"
-msgstr ""
+msgstr "Đơn hàng Nhập"
 
 #. Label of the is_account_payable (Check) field in DocType 'Cheque Print
 #. Template'
@@ -24763,7 +24763,7 @@ msgstr "Là nhà cung cấp nội bộ"
 #. Label of the is_legacy (Check) field in DocType 'BOM Secondary Item'
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 msgid "Is Legacy"
-msgstr ""
+msgstr "Là Di sản"
 
 #. Label of the is_legacy_scrap_item (Check) field in DocType 'Stock Entry
 #. Detail'
@@ -24772,7 +24772,7 @@ msgstr ""
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Is Legacy Scrap Item"
-msgstr ""
+msgstr "Là Mặt hàng Phế liệu Cũ"
 
 #. Label of the is_mandatory (Check) field in DocType 'Applicable On Account'
 #: erpnext/accounts/doctype/applicable_on_account/applicable_on_account.json
@@ -26419,7 +26419,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:99
 msgid "Item {0} added multiple times under the same parent item {1} at rows {2} and {3}"
-msgstr ""
+msgstr "Mặt hàng {0} được thêm nhiều lần dưới cùng một mặt hàng cha {1} tại các dòng {2} và {3}"
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:119
 msgid "Item {0} cannot be added as a sub-assembly of itself"
@@ -26582,7 +26582,7 @@ msgstr "Sổ bán hàng theo Mặt hàng"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Item-wise sales Register"
-msgstr ""
+msgstr "Sổ bán hàng theo Mặt hàng"
 
 #: erpnext/stock/get_item_details.py:720
 msgid "Item/Item Code required to get Item Tax Template."
@@ -26616,7 +26616,7 @@ msgstr "Mặt hàng yêu cầu"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/subcontracting.json
 msgid "Items To Be Received"
-msgstr ""
+msgstr "Mặt hàng cần nhận"
 
 #. Label of a Link in the Buying Workspace
 #. Name of a report
@@ -26646,7 +26646,7 @@ msgstr "Mặt hàng cho Yêu cầu Nguyên liệu thô"
 
 #: erpnext/selling/page/point_of_sale/pos_item_selector.js:110
 msgid "Items not found."
-msgstr ""
+msgstr "Không tìm thấy mặt hàng."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1245
 msgid "Items rate has been updated to zero as Allow Zero Valuation Rate is checked for the following items: {0}"
@@ -26765,7 +26765,7 @@ msgstr "Thời gian lên lịch thẻ công việc"
 #. Name of a DocType
 #: erpnext/manufacturing/doctype/job_card_secondary_item/job_card_secondary_item.json
 msgid "Job Card Secondary Item"
-msgstr ""
+msgstr "Mặt hàng phụ thẻ công việc"
 
 #. Name of a report
 #. Label of a Link in the Manufacturing Workspace
@@ -27428,19 +27428,19 @@ msgstr "Khách hàng tiềm năng giúp bạn có công việc kinh doanh, thêm
 #. Label of an action in the Onboarding Step 'Learn Asset'
 #: erpnext/assets/onboarding_step/learn_asset/learn_asset.json
 msgid "Learn Asset"
-msgstr ""
+msgstr "Tìm hiểu Tài sản"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Learn Subcontracting'
 #: erpnext/subcontracting/onboarding_step/learn_subcontracting/learn_subcontracting.json
 msgid "Learn Subcontracting"
-msgstr ""
+msgstr "Tìm hiểu Ký gửi phụ"
 
 #. Description of the 'Enable Common Party Accounting' (Check) field in DocType
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Learn about <a href=\"https://docs.frappe.io/erpnext/user/manual/en/common_party_accounting\" rel=\"noopener noreferrer\">Common Party</a>"
-msgstr ""
+msgstr "Tìm hiểu về <a href=\"https://docs.frappe.io/erpnext/user/manual/en/common_party_accounting\" rel=\"noopener noreferrer\">Đảng chung</a>"
 
 #. Label of the leave_encashed (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -27495,7 +27495,7 @@ msgstr "Tài khoản hợp nhất sổ cái"
 
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:146
 msgid "Ledger Type"
-msgstr ""
+msgstr "Loại sổ cái"
 
 #. Label of a Card Break in the Financial Reports Workspace
 #. Label of a Workspace Sidebar Item
@@ -27507,7 +27507,7 @@ msgstr "Sổ cái"
 #. Label of the vouchers_posted (Int) field in DocType 'Repost Item Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Ledgers Posted"
-msgstr ""
+msgstr "Sổ cái đã đăng"
 
 #. Label of the left_child (Link) field in DocType 'Bisect Nodes'
 #: erpnext/accounts/doctype/bisect_nodes/bisect_nodes.json
@@ -28367,7 +28367,7 @@ msgstr "Tạo Bút toán Chuyển"
 
 #: erpnext/public/js/telephony.js:29
 msgid "Make a call"
-msgstr ""
+msgstr "Thực hiện cuộc gọi"
 
 #: erpnext/config/projects.py:34
 msgid "Make project from a template."
@@ -28399,7 +28399,7 @@ msgstr "Quản lý chi phí hoạt động"
 #. DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Manage sales partner's and sales team's commissions"
-msgstr ""
+msgstr "Quản lý hoa hồng của đối tác bán hàng và nhóm bán hàng"
 
 #: erpnext/utilities/activation.py:95
 msgid "Manage your orders"
@@ -28684,7 +28684,7 @@ msgstr "Cài đặt sản xuất"
 #. Title of the Module Onboarding 'Manufacturing Onboarding'
 #: erpnext/manufacturing/module_onboarding/manufacturing_onboarding/manufacturing_onboarding.json
 msgid "Manufacturing Setup"
-msgstr ""
+msgstr "Thiết lập sản xuất"
 
 #. Label of the manufacturing_time_in_mins (Int) field in DocType 'Item Lead
 #. Time'
@@ -28916,7 +28916,7 @@ msgstr "Xuất vật tư"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/manufacturing.json
 msgid "Material Planning"
-msgstr ""
+msgstr "Lập kế hoạch vật tư"
 
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry'
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry Type'
@@ -29055,7 +29055,7 @@ msgstr "Loại yêu cầu vật tư"
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:1119
 msgid "Material Request already created for the ordered quantity"
-msgstr ""
+msgstr "Yêu cầu vật tư đã được tạo cho số lượng đã đặt"
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:1860
 msgid "Material Request not created, as quantity for Raw Materials already available."
@@ -29190,7 +29190,7 @@ msgstr "Vật tư cho Nhà cung cấp"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/subcontracting.json
 msgid "Materials To Be Transferred"
-msgstr ""
+msgstr "Vật tư cần chuyển"
 
 #: erpnext/controllers/subcontracting_controller.py:1582
 msgid "Materials are already received against the {0} {1}"
@@ -29290,7 +29290,7 @@ msgstr "Số tiền thanh toán tối đa"
 #: erpnext/manufacturing/report/bom_stock_analysis/bom_stock_analysis.py:82
 #: erpnext/manufacturing/report/bom_stock_analysis/bom_stock_analysis.py:151
 msgid "Maximum Producible Items"
-msgstr ""
+msgstr "Các mặt hàng có thể sản xuất tối đa"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:4121
 msgid "Maximum Samples - {0} can be retained for Batch {1} and Item {2}."
@@ -29447,7 +29447,7 @@ msgstr "Tin nhắn dài hơn 160 ký tự sẽ được chia thành nhiều tin 
 
 #: erpnext/setup/install.py:138
 msgid "Messaging CRM Campaign"
-msgstr ""
+msgstr "Chiến dịch CRM nhắn tin"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -29722,7 +29722,7 @@ msgstr "Phút"
 #. Label of the section_break_19 (Section Break) field in DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Miscellaneous"
-msgstr ""
+msgstr "Khác"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:116
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:224
@@ -29781,7 +29781,7 @@ msgstr "Thiếu mặt hàng"
 
 #: erpnext/setup/doctype/employee/employee.py:568
 msgid "Missing Parameter"
-msgstr ""
+msgstr "Thiếu tham số"
 
 #: erpnext/utilities/__init__.py:53
 msgid "Missing Payments App"
@@ -29797,7 +29797,7 @@ msgstr "Thiếu gói Số serial"
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:171
 msgid "Missing Warehouse"
-msgstr ""
+msgstr "Thiếu kho"
 
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.js:156
 msgid "Missing email template for dispatch. Please set one in Delivery Settings."
@@ -30065,7 +30065,7 @@ msgstr "Nhiều biến thể"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:244
 msgid "Multiple company fields available: {0}. Please select manually."
-msgstr ""
+msgstr "Nhiều trường công ty khả dụng: {0}. Vui lòng chọn thủ công."
 
 #: erpnext/controllers/accounts_controller.py:1306
 msgid "Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year"
@@ -30168,7 +30168,7 @@ msgstr ""
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:937
 msgid "Naming series '{0}' for DocType '{1}' does not contain standard '.' or '{{' separator. Using fallback extraction."
-msgstr ""
+msgstr "Chuỗi đặt tên '{0}' cho DocType '{1}' không chứa dấu tách tiêu chuẩn '.' hoặc '{{'. Sử dụng trích xuất dự phòng."
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -30208,7 +30208,7 @@ msgstr "Phân tích nhu cầu"
 #. Name of a report
 #: erpnext/stock/report/negative_batch_report/negative_batch_report.json
 msgid "Negative Batch Report"
-msgstr ""
+msgstr "Báo cáo Lô Âm"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:628
 msgid "Negative Quantity is not allowed"
@@ -30591,7 +30591,7 @@ msgstr "Chi phí mới"
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:1
 msgid "New Fiscal Year - {0}"
-msgstr ""
+msgstr "Năm tài chính mới - {0}"
 
 #. Label of the income (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -30609,7 +30609,7 @@ msgstr "Bút toán Nhật ký mới sẽ được đăng cho số tiền chênh 
 #. Label of a number card in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "New Lead (Last 1 Month)"
-msgstr ""
+msgstr "Khách hàng tiềm năng mới (1 tháng cuối)"
 
 #: erpnext/assets/doctype/location/location_tree.js:23
 msgid "New Location"
@@ -30622,7 +30622,7 @@ msgstr "Ghi chú mới"
 #. Label of a number card in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "New Opportunity (Last 1 Month)"
-msgstr ""
+msgstr "Cơ hội mới (1 tháng cuối)"
 
 #. Label of the purchase_invoice (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -30761,7 +30761,7 @@ msgstr "Không có Phiếu giao hàng nào được chọn cho Khách hàng {}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:754
 msgid "No DocTypes in To Delete list. Please generate or import the list before submitting."
-msgstr ""
+msgstr "Không có DocType nào trong danh sách Xóa. Vui lòng tạo hoặc nhập danh sách trước khi trình."
 
 #: erpnext/public/js/utils/ledger_preview.js:64
 msgid "No Impact on Accounting Ledger"
@@ -30781,7 +30781,7 @@ msgstr "Không có Mặt hàng nào được chọn để chuyển."
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1260
 msgid "No Items with Bill of Materials to Manufacture or all items already manufactured"
-msgstr ""
+msgstr "Không có Mặt hàng nào có Định mức Nguyên vật liệu để sản xuất hoặc tất cả các mặt hàng đã sản xuất"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1413
 msgid "No Items with Bill of Materials."
@@ -30845,7 +30845,7 @@ msgstr "Không tìm thấy dữ liệu Khấu lưu thuế cho ngày đăng hiệ
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:108
 msgid "No Tax withholding account set for Company {0} in Tax Withholding Category {1}."
-msgstr ""
+msgstr "Không đặt tài khoản khấu lưu thuế cho Công ty {0} trong Danh mục Khấu lưu Thuế {1}."
 
 #: erpnext/accounts/report/gross_profit/gross_profit.py:990
 msgid "No Terms"
@@ -30907,7 +30907,7 @@ msgstr "Không tìm thấy chênh lệch cho tài khoản tồn kho {0}"
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:150
 msgid "No email found for {0} {1}"
-msgstr ""
+msgstr "Không tìm thấy email cho {0} {1}"
 
 #: erpnext/telephony/doctype/call_log/call_log.py:117
 msgid "No employee was scheduled for call popup"
@@ -30983,7 +30983,7 @@ msgstr "Số tương tác"
 #. Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "No of Items to Repost"
-msgstr ""
+msgstr "Số mặt hàng cần đăng lại"
 
 #. Label of the no_of_months_exp (Int) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -31064,7 +31064,7 @@ msgstr "Không tìm thấy Yêu cầu Vật tư đang chờ để liên kết ch
 
 #: erpnext/public/js/controllers/transaction.js:472
 msgid "No pending payment schedules available."
-msgstr ""
+msgstr "Không có lịch thanh toán đang chờ khả dụng."
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:502
 msgid "No primary email found for customer: {0}"
@@ -31080,7 +31080,7 @@ msgstr "Không tìm thấy giao dịch gần đây"
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:158
 msgid "No recipients found for campaign {0}"
-msgstr ""
+msgstr "Không tìm thấy người nhận cho chiến dịch {0}"
 
 #: erpnext/accounts/report/purchase_register/purchase_register.py:45
 #: erpnext/accounts/report/sales_register/sales_register.py:46
@@ -31106,7 +31106,7 @@ msgstr "Không có tồn kho đặt trước để hủy đặt trước."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:152
 msgid "No rows with zero document count found"
-msgstr ""
+msgstr "Không tìm thấy hàng nào có số lượng tài liệu bằng không"
 
 #: erpnext/stock/doctype/batch/batch.js:77
 msgid "No stock available for this batch."
@@ -31679,7 +31679,7 @@ msgstr "Kiểm tra máy in trên máy"
 #. Title of the Module Onboarding 'Stock Onboarding'
 #: erpnext/selling/module_onboarding/stock_onboarding/stock_onboarding.json
 msgid "Onboarding for Stock!"
-msgstr ""
+msgstr "Đào tạo về Tồn kho!"
 
 #. Description of the 'Release Date' (Date) field in DocType 'Purchase Invoice'
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
@@ -31727,7 +31727,7 @@ msgstr "Chỉ các tệp CSV và Excel có thể được sử dụng để nh�
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1070
 msgid "Only CSV files are allowed"
-msgstr ""
+msgstr "Chỉ cho phép tệp CSV"
 
 #. Label of the tax_on_excess_amount (Check) field in DocType 'Tax Withholding
 #. Category'
@@ -31779,7 +31779,7 @@ msgstr "Chỉ một trong Số tiền gửi hoặc Rút tiền nên khác không
 
 #: erpnext/manufacturing/doctype/bom/bom.py:330
 msgid "Only one operation can have 'Is Final Finished Good' checked when 'Track Semi Finished Goods' is enabled."
-msgstr ""
+msgstr "Chỉ một hoạt động có thể có 'Là Thành phẩm Cuối' được chọn khi 'Theo dõi Thành phẩm Bán thành phẩm' được bật."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1349
 msgid "Only one {0} entry can be created against the Work Order {1}"
@@ -32044,7 +32044,7 @@ msgstr "Mục Hóa đơn Mở"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "Opening Invoice Tool"
-msgstr ""
+msgstr "Công cụ Hóa đơn Mở"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1654
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1990
@@ -32741,12 +32741,12 @@ msgstr "Mục Mở POS đã lỗi thời"
 #. Label of a number card in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 msgid "Outgoing Bills"
-msgstr ""
+msgstr "Hóa đơn đi"
 
 #. Label of a number card in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 msgid "Outgoing Payment"
-msgstr ""
+msgstr "Thanh toán đi"
 
 #. Label of the outgoing_rate (Float) field in DocType 'Serial and Batch Entry'
 #. Label of the outgoing_rate (Currency) field in DocType 'Stock Ledger Entry'
@@ -32828,7 +32828,7 @@ msgstr "Đi"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/subcontracting.json
 msgid "Outward Order"
-msgstr ""
+msgstr "Đơn hàng đi"
 
 #. Label of the over_billing_allowance (Currency) field in DocType 'Accounts
 #. Settings'
@@ -32878,7 +32878,7 @@ msgstr "Cho phép vượt chuyển (%)"
 #. Option for the 'Status' (Select) field in DocType 'Tax Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Over Withheld"
-msgstr ""
+msgstr "Vượt khấu lưu"
 
 #: erpnext/controllers/status_updater.py:496
 msgid "Overbilling of {0} {1} ignored for item {2} because you have {3} role."
@@ -32980,7 +32980,7 @@ msgstr "Chủ sở hữu"
 #. Label of the asset_owner_section (Section Break) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Ownership"
-msgstr ""
+msgstr "Quyền sở hữu"
 
 #. Label of the p_l_closing_balance (JSON) field in DocType 'Process Period
 #. Closing Voucher'
@@ -33075,7 +33075,7 @@ msgstr "Đóng POS thất bại trong khi chạy trong tiến trình nền. Bạ
 #. Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "POS Configurations"
-msgstr ""
+msgstr "Cấu hình POS"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/pos_customer_group/pos_customer_group.json
@@ -33159,7 +33159,7 @@ msgstr "Hóa đơn POS sẽ được hủy hợp nhất trong tiến trình nề
 #. Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "POS Item Details"
-msgstr ""
+msgstr "Chi tiết mặt hàng POS"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/pos_item_group/pos_item_group.json
@@ -33170,7 +33170,7 @@ msgstr "Nhóm mặt hàng POS"
 #. Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "POS Item Selector"
-msgstr ""
+msgstr "Bộ chọn mặt hàng POS"
 
 #. Label of the pos_opening_entry (Link) field in DocType 'POS Closing Entry'
 #. Name of a DocType
@@ -33727,7 +33727,7 @@ msgstr "Tồn kho một phần có thể được đặt trước. Ví dụ, n�
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/delivery_note/delivery_note_list.js:24
 msgid "Partially Billed"
-msgstr ""
+msgstr "Một phần đã thanh toán"
 
 #. Option for the 'Completion Status' (Select) field in DocType 'Maintenance
 #. Schedule Detail'
@@ -33982,7 +33982,7 @@ msgstr "IBAN đối tác (Sao kê ngân hàng)"
 #. Tool Item'
 #: erpnext/accounts/doctype/opening_invoice_creation_tool_item/opening_invoice_creation_tool_item.json
 msgid "Party ID"
-msgstr ""
+msgstr "Mã đối tác"
 
 #. Label of the section_break_7 (Section Break) field in DocType 'Pricing Rule'
 #. Label of the section_break_8 (Section Break) field in DocType 'Promotional
@@ -34468,7 +34468,7 @@ msgstr "Phương thức thanh toán"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Payment Options"
-msgstr ""
+msgstr "Tùy chọn thanh toán"
 
 #. Label of the payment_order (Link) field in DocType 'Journal Entry'
 #. Label of the payment_order (Link) field in DocType 'Payment Entry'
@@ -34535,7 +34535,7 @@ msgstr "Đã nhận thanh toán"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/invoicing.json
 msgid "Payment Reconciliaition"
-msgstr ""
+msgstr "Đối soát thanh toán"
 
 #. Name of a DocType
 #. Label of the payment_reconciliation (Table) field in DocType 'POS Closing
@@ -34644,7 +34644,7 @@ msgstr "Không thể tạo yêu cầu thanh toán cho: {0}"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Payment Requests made from Sales / Purchase Invoice will be put in Draft explicitly"
-msgstr ""
+msgstr "Yêu cầu thanh toán được tạo từ hóa đơn bán / mua sẽ được đặt ở trạng thái nháp một cách tường minh"
 
 #. Label of the payment_schedule (Data) field in DocType 'Overdue Payment'
 #. Label of the payment_schedule (Link) field in DocType 'Payment Reference'
@@ -34670,11 +34670,11 @@ msgstr "Lịch thanh toán"
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:589
 msgid "Payment Schedule based Payment Requests cannot be created because a Payment Entry already exists for this document."
-msgstr ""
+msgstr "Không thể tạo yêu cầu thanh toán dựa trên lịch thanh toán vì một mục thanh toán đã tồn tại cho tài liệu này."
 
 #: erpnext/public/js/controllers/transaction.js:483
 msgid "Payment Schedules"
-msgstr ""
+msgstr "Lịch thanh toán"
 
 #. Label of the payment_term (Link) field in DocType 'Overdue Payment'
 #. Label of the payment_term (Link) field in DocType 'Payment Entry Reference'
@@ -34813,7 +34813,7 @@ msgstr "Phương thức thanh toán là bắt buộc. Vui lòng thêm ít nhất
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3033
 msgid "Payment methods refreshed. Please review before proceeding."
-msgstr ""
+msgstr "Đã làm mới phương thức thanh toán. Vui lòng xem lại trước khi tiếp tục."
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.js:466
 #: erpnext/selling/page/point_of_sale/pos_payment.js:366
@@ -35715,7 +35715,7 @@ msgstr "Vui lòng thêm Phương thức thanh toán và chi tiết số dư mở
 
 #: erpnext/manufacturing/doctype/bom/bom.js:39
 msgid "Please add Operations first."
-msgstr ""
+msgstr "Vui lòng thêm các hoạt động trước."
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:213
 msgid "Please add Request for Quotation to the sidebar in Portal Settings."
@@ -35931,7 +35931,7 @@ msgstr "Vui lòng nhập Vai trò phê duyệt hoặc Người phê duyệt"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:683
 msgid "Please enter Batch No"
-msgstr ""
+msgstr "Vui lòng nhập Số lô"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:976
 msgid "Please enter Cost Center"
@@ -35992,7 +35992,7 @@ msgstr "Vui lòng nhập Loại gốc cho tài khoản- {0}"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:685
 msgid "Please enter Serial No"
-msgstr ""
+msgstr "Vui lòng nhập Số serial"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:319
 msgid "Please enter Serial Nos"
@@ -36093,7 +36093,7 @@ msgstr "Vui lòng điền vào bảng Đơn hàng bán"
 
 #: erpnext/stock/doctype/shipment/shipment.js:277
 msgid "Please first set Full Name, Email and Phone for the user"
-msgstr ""
+msgstr "Vui lòng đặt Họ tên, Email và Điện thoại cho người dùng trước"
 
 #: erpnext/telephony/doctype/incoming_call_settings/incoming_call_settings.js:94
 msgid "Please fix overlapping time slots for {0}"
@@ -36105,11 +36105,11 @@ msgstr "Vui lòng sửa các ô thời gian chồng chéo cho {0}."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:272
 msgid "Please generate To Delete list before submitting"
-msgstr ""
+msgstr "Vui lòng tạo Danh sách cần xóa trước khi gửi"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:70
 msgid "Please generate the To Delete list before submitting"
-msgstr ""
+msgstr "Vui lòng tạo Danh sách cần xóa trước khi gửi"
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:67
 msgid "Please import accounts against parent company or enable {} in company master."
@@ -36158,7 +36158,7 @@ msgstr "Vui lòng làm mới hoặc đặt lại liên kết Plaid của Ngân h
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:43
 msgid "Please review the {0} configuration and complete any required financial setup activities."
-msgstr ""
+msgstr "Vui lòng xem lại cấu hình {0} và hoàn thành mọi hoạt động thiết lập tài chính cần thiết."
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.js:12
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.js:28
@@ -36426,7 +36426,7 @@ msgstr "Vui lòng chọn ít nhất một dòng có giá trị chênh lệch"
 
 #: erpnext/public/js/controllers/transaction.js:526
 msgid "Please select at least one schedule."
-msgstr ""
+msgstr "Vui lòng chọn ít nhất một lịch trình."
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1330
 msgid "Please select atleast one item to continue"
@@ -36497,7 +36497,7 @@ msgstr "Vui lòng chọn loại tài liệu trước"
 
 #: erpnext/selling/report/sales_partner_commission_summary/sales_partner_commission_summary.py:47
 msgid "Please select the document type first."
-msgstr ""
+msgstr "Vui lòng chọn loại tài liệu trước."
 
 #: erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py:21
 msgid "Please select the required filters"
@@ -37284,7 +37284,7 @@ msgstr "Năm tài chính trước chưa được đóng"
 
 #: erpnext/stock/report/negative_batch_report/negative_batch_report.py:54
 msgid "Previous Qty"
-msgstr ""
+msgstr "Số lượng trước"
 
 #. Label of the previous_work_experience (Section Break) field in DocType
 #. 'Employee'
@@ -37374,7 +37374,7 @@ msgstr "Bảng giá"
 #. DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Price List & Currency"
-msgstr ""
+msgstr "Bảng giá & Tiền tệ"
 
 #. Name of a DocType
 #: erpnext/stock/doctype/price_list_country/price_list_country.json
@@ -37882,7 +37882,7 @@ msgstr "Xử lý Lỗ"
 #. Item'
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 msgid "Process Loss %"
-msgstr ""
+msgstr "Mất quá trình %"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1272
 msgid "Process Loss Percentage cannot be greater than 100"
@@ -38017,7 +38017,7 @@ msgstr "Xử lý tệp XML"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:188
 msgid "Processing import..."
-msgstr ""
+msgstr "Đang xử lý nhập..."
 
 #: erpnext/buying/doctype/supplier/supplier_dashboard.py:10
 msgid "Procurement"
@@ -38193,7 +38193,7 @@ msgstr "Mặt hàng sản xuất"
 #: erpnext/manufacturing/doctype/bom/bom.json
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 msgid "Production Item Info"
-msgstr ""
+msgstr "Thông tin mặt hàng sản xuất"
 
 #. Label of the production_plan (Link) field in DocType 'Purchase Order Item'
 #. Name of a DocType
@@ -38570,7 +38570,7 @@ msgstr "Cài đặt dự án"
 #. Title of the Module Onboarding 'Projects Onboarding'
 #: erpnext/projects/module_onboarding/projects_onboarding/projects_onboarding.json
 msgid "Projects Setup"
-msgstr ""
+msgstr "Thiết lập dự án"
 
 #. Name of a role
 #: erpnext/projects/doctype/activity_cost/activity_cost.json
@@ -38690,7 +38690,7 @@ msgstr "Khách hàng tiềm năng đã tiếp cận nhưng chưa chuyển đổi
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:198
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:784
 msgid "Protected DocType"
-msgstr ""
+msgstr "DocType được bảo vệ"
 
 #. Description of the 'Company Email' (Data) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -39232,7 +39232,7 @@ msgstr "Xu hướng Biên nhận Mua hàng"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/buying.json
 msgid "Purchase Receipt Trends "
-msgstr ""
+msgstr "Xu hướng Biên nhận Mua hàng "
 
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:358
 msgid "Purchase Receipt doesn't have any Item for which Retain Sample is enabled."
@@ -39269,7 +39269,7 @@ msgstr "Mẫu Thuế Mua hàng"
 #. 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Purchase Tax Withholding Category"
-msgstr ""
+msgstr "Danh mục Khấu lưu Thuế Mua hàng"
 
 #. Label of the taxes (Table) field in DocType 'Purchase Invoice'
 #. Name of a DocType
@@ -39486,7 +39486,7 @@ msgstr "Số lượng"
 #. Item'
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Qty (As per BOM)"
-msgstr ""
+msgstr "Số lượng (Theo BOM)"
 
 #. Label of the company_total_stock (Float) field in DocType 'Sales Invoice
 #. Item'
@@ -39914,17 +39914,17 @@ msgstr "Tên mẫu kiểm tra chất lượng"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:799
 msgid "Quality Inspection is required for the item {0} before completing the job card {1}"
-msgstr ""
+msgstr "Yêu cầu kiểm tra chất lượng cho mặt hàng {0} trước khi hoàn thành thẻ công việc {1}"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:810
 #: erpnext/manufacturing/doctype/job_card/job_card.py:819
 msgid "Quality Inspection {0} is not submitted for the item: {1}"
-msgstr ""
+msgstr "Kiểm tra chất lượng {0} chưa được gửi cho mặt hàng: {1}"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:829
 #: erpnext/manufacturing/doctype/job_card/job_card.py:838
 msgid "Quality Inspection {0} is rejected for the item: {1}"
-msgstr ""
+msgstr "Kiểm tra chất lượng {0} bị từ chối cho mặt hàng: {1}"
 
 #: erpnext/public/js/controllers/transaction.js:384
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:206
@@ -40182,7 +40182,7 @@ msgstr "Số lượng không thể lớn hơn {0} cho Mặt hàng {1}"
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:564
 msgid "Quantity is mandatory for the selected items."
-msgstr ""
+msgstr "Số lượng là bắt buộc cho các mặt hàng đã chọn."
 
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:274
 msgid "Quantity is required"
@@ -40190,11 +40190,11 @@ msgstr "Số lượng là bắt buộc"
 
 #: erpnext/stock/dashboard/item_dashboard.js:285
 msgid "Quantity must be greater than zero"
-msgstr ""
+msgstr "Số lượng phải lớn hơn không"
 
 #: erpnext/stock/dashboard/item_dashboard.js:290
 msgid "Quantity must be less than or equal to {0}"
-msgstr ""
+msgstr "Số lượng phải nhỏ hơn hoặc bằng {0}"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1098
 #: erpnext/stock/doctype/pick_list/pick_list.js:209
@@ -40397,7 +40397,7 @@ msgstr "Số tiền báo giá"
 #. in DocType 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "RFQ and Purchase Order Settings"
-msgstr ""
+msgstr "Cài đặt RFQ và Đơn mua hàng"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:132
 msgid "RFQs are not allowed for {0} due to a scorecard standing of {1}"
@@ -40827,7 +40827,7 @@ msgstr "Tiêu thụ nguyên liệu"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:327
 msgid "Raw Materials Missing"
-msgstr ""
+msgstr "Nguyên liệu thô còn thiếu"
 
 #. Label of the raw_materials_received_section (Section Break) field in DocType
 #. 'Subcontracting Inward Order'
@@ -41304,7 +41304,7 @@ msgstr "Kích thước hàng đợi đối soát"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/banking.json
 msgid "Reconciliation Statement"
-msgstr ""
+msgstr "Bảng đối soát"
 
 #. Label of the reconciliation_takes_effect_on (Select) field in DocType
 #. 'Company'
@@ -41588,7 +41588,7 @@ msgstr "Khu vực"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Registers"
-msgstr ""
+msgstr "Sổ đăng ký"
 
 #. Label of the registration_details (Code) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -41787,7 +41787,7 @@ msgstr "Xóa Số dòng cha trong Bảng mặt hàng"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:140
 msgid "Remove Zero Counts"
-msgstr ""
+msgstr "Xóa các số đếm bằng không"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js:21
 msgid "Remove item if charges is not applicable to that item"
@@ -41799,7 +41799,7 @@ msgstr "Đã xóa các mặt hàng không có thay đổi về số lượng ho�
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:161
 msgid "Removed {0} rows with zero document count. Please save to persist changes."
-msgstr ""
+msgstr "Đã xóa {0} dòng với số lượng tài liệu bằng không. Vui lòng lưu để áp dụng thay đổi."
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:87
 msgid "Removing rows without exchange gain or loss"
@@ -42080,7 +42080,7 @@ msgstr "Tệp dữ liệu tái đăng"
 #. Item Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Reposting Item and Warehouse"
-msgstr ""
+msgstr "Mặt hàng và Kho tái đăng"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:131
 msgid "Reposting Progress"
@@ -42096,11 +42096,11 @@ msgstr "Tham chiếu tái đăng"
 #. field in DocType 'Repost Item Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Reposting Vouchers"
-msgstr ""
+msgstr "Các chứng từ tái đăng"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:149
 msgid "Reposting Vouchers Progress"
-msgstr ""
+msgstr "Tiến độ tái đăng chứng từ"
 
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:216
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:327
@@ -42109,11 +42109,11 @@ msgstr "Các bút toán tái đăng đã tạo: {0}"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:123
 msgid "Reposting for Item-Wh Completed {0}%"
-msgstr ""
+msgstr "Tái đăng cho Mặt hàng-Kho Hoàn thành {0}%"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:141
 msgid "Reposting for Vouchers Completed {0}%"
-msgstr ""
+msgstr "Tái đăng cho chứng từ Hoàn thành {0}%"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:109
 msgid "Reposting has been started in the background."
@@ -42482,7 +42482,7 @@ msgstr "Xung đột lô đã đặt trước"
 #. 'Bin'
 #: erpnext/stock/doctype/bin/bin.json
 msgid "Reserved Inventory"
-msgstr ""
+msgstr "Hàng tồn kho đã đặt trước"
 
 #. Label of the reserved_qty (Float) field in DocType 'Bin'
 #. Label of the reserved_qty (Float) field in DocType 'Stock Reservation Entry'
@@ -43044,7 +43044,7 @@ msgstr "Số lượng Đã trả lại theo Đơn vị Hàng tồn kho"
 
 #: erpnext/buying/report/subcontracted_raw_materials_to_be_transferred/subcontracted_raw_materials_to_be_transferred.py:44
 msgid "Returned Quantity"
-msgstr ""
+msgstr "Số lượng Đã trả lại"
 
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.py:101
 msgid "Returned exchange rate is neither integer not float."
@@ -43116,18 +43116,18 @@ msgstr "Xem xét"
 #. Label of an action in the Onboarding Step 'Review Accounts Settings'
 #: erpnext/accounts/onboarding_step/review_accounts_settings/review_accounts_settings.json
 msgid "Review Accounts Settings"
-msgstr ""
+msgstr "Xem lại Cài đặt Tài khoản"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Review Buying Settings'
 #: erpnext/buying/onboarding_step/review_buying_settings/review_buying_settings.json
 msgid "Review Buying Settings"
-msgstr ""
+msgstr "Xem lại Cài đặt Mua hàng"
 
 #. Title of an Onboarding Step
 #: erpnext/accounts/onboarding_step/chart_of_accounts/chart_of_accounts.json
 msgid "Review Chart of Accounts"
-msgstr ""
+msgstr "Xem lại Danh mục Tài khoản"
 
 #. Label of the review_date (Date) field in DocType 'Task'
 #: erpnext/projects/doctype/task/task.json
@@ -43138,25 +43138,25 @@ msgstr "Ngày đánh giá"
 #. Label of an action in the Onboarding Step 'Review Manufacturing Settings'
 #: erpnext/manufacturing/onboarding_step/review_manufacturing_settings/review_manufacturing_settings.json
 msgid "Review Manufacturing Settings"
-msgstr ""
+msgstr "Xem lại Cài đặt Sản xuất"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Review Selling Settings'
 #: erpnext/selling/onboarding_step/review_selling_settings/review_selling_settings.json
 msgid "Review Selling Settings"
-msgstr ""
+msgstr "Xem lại Cài đặt Bán hàng"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Review Stock Settings'
 #: erpnext/stock/onboarding_step/review_stock_settings/review_stock_settings.json
 msgid "Review Stock Settings"
-msgstr ""
+msgstr "Xem lại Cài đặt Hàng tồn kho"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Review System Settings'
 #: erpnext/setup/onboarding_step/review_system_settings/review_system_settings.json
 msgid "Review System Settings"
-msgstr ""
+msgstr "Xem lại Cài đặt Hệ thống"
 
 #. Label of a Card Break in the Quality Workspace
 #: erpnext/quality_management/workspace/quality/quality.json
@@ -43579,7 +43579,7 @@ msgstr "Hàng #{0}: Không thể hủy Mục Hàng tồn kho Sản xuất này v
 
 #: erpnext/controllers/subcontracting_inward_controller.py:616
 msgid "Row #{0}: Cannot cancel this Manufacturing Stock Entry as quantity of Secondary Item {1} produced cannot be less than quantity delivered."
-msgstr ""
+msgstr "Hàng #{0}: Không thể hủy Mục Hàng tồn kho Sản xuất này vì số lượng Mặt hàng Phụ {1} được sản xuất không thể ít hơn số lượng đã giao."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:483
 msgid "Row #{0}: Cannot cancel this Stock Entry as returned quantity cannot be greater than delivered quantity for Item {1} in the linked Subcontracting Inward Order"
@@ -43587,7 +43587,7 @@ msgstr "Hàng #{0}: Không thể hủy Mục Hàng tồn kho này vì số lư�
 
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.py:78
 msgid "Row #{0}: Cannot create entry with different taxable AND withholding document links."
-msgstr ""
+msgstr "Hàng #{0}: Không thể tạo mục với các liên kết tài liệu khấu trừ và khấu hao khác nhau."
 
 #: erpnext/controllers/accounts_controller.py:3792
 msgid "Row #{0}: Cannot delete item {1} which has already been billed."
@@ -43607,7 +43607,7 @@ msgstr "Hàng #{0}: Không thể xóa mặt hàng {1} có lệnh sản xuất đ
 
 #: erpnext/controllers/accounts_controller.py:3778
 msgid "Row #{0}: Cannot delete item {1} which is already ordered against this Sales Order."
-msgstr ""
+msgstr "Hàng #{0}: Không thể xóa mặt hàng {1} đã được đặt hàng theo Đơn hàng Bán này."
 
 #: erpnext/controllers/accounts_controller.py:4099
 msgid "Row #{0}: Cannot set Rate if the billed amount is greater than the amount for Item {1}."
@@ -43647,7 +43647,7 @@ msgstr "Hàng #{0}: Tâm chi phí {1} không thuộc về công ty {2}"
 
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.py:211
 msgid "Row #{0}: Could not find enough {1} entries to match. Remaining amount: {2}"
-msgstr ""
+msgstr "Hàng #{0}: Không thể tìm đủ {1} mục để khớp. Số tiền còn lại: {2}"
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:88
 msgid "Row #{0}: Cumulative threshold cannot be less than Single Transaction threshold"
@@ -43690,7 +43690,7 @@ msgstr "Hàng #{0}: Mặt hàng do khách hàng cung cấp {1} không phải là
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:61
 msgid "Row #{0}: Dates overlapping with other row in group {1}"
-msgstr ""
+msgstr "Hàng #{0}: Ngày gối đè lên hàng khác trong nhóm {1}"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.py:357
 msgid "Row #{0}: Default BOM not found for FG Item {1}"
@@ -43737,7 +43737,7 @@ msgstr "Hàng #{0}: Thành phẩm phải là {1}"
 
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:584
 msgid "Row #{0}: Finished Good reference is mandatory for Secondary Item {1}."
-msgstr ""
+msgstr "Hàng #{0}: Tham chiếu thành phẩm là bắt buộc cho Mặt hàng phụ {1}."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:170
 #: erpnext/controllers/subcontracting_inward_controller.py:294
@@ -43754,7 +43754,7 @@ msgstr "Hàng #{0}: Đối với {1}, bạn chỉ có thể chọn tài liệu t
 
 #: erpnext/assets/doctype/asset/asset.py:664
 msgid "Row #{0}: Frequency of Depreciation must be greater than zero"
-msgstr ""
+msgstr "Hàng #{0}: Tần suất khấu hao phải lớn hơn không"
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:50
 msgid "Row #{0}: From Date cannot be before To Date"
@@ -43770,7 +43770,7 @@ msgstr "Hàng #{0}: Mặt hàng đã thêm"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1644
 msgid "Row #{0}: Item {1} cannot be transferred more than {2} against {3} {4}"
-msgstr ""
+msgstr "Hàng #{0}: Mặt hàng {1} không thể chuyển nhiều hơn {2} đối với {3} {4}"
 
 #: erpnext/buying/utils.py:98
 msgid "Row #{0}: Item {1} does not exist"
@@ -43881,7 +43881,7 @@ msgstr "Hàng #{0}: Vui lòng cập nhật tài khoản doanh thu/chi phí defer
 #: erpnext/manufacturing/doctype/bom/bom.py:346
 #, python-format
 msgid "Row #{0}: Process Loss Percentage should be less than 100% for {1} Item {2}"
-msgstr ""
+msgstr "Hàng #{0}: Tỷ lệ hao hụt quy trình phải nhỏ hơn 100% cho {1} Mặt hàng {2}"
 
 #: erpnext/public/js/utils/barcode_scanner.js:425
 msgid "Row #{0}: Qty increased by {1}"
@@ -43922,7 +43922,7 @@ msgstr "Hàng #{0}: Số lượng của Mặt hàng {1} không thể nhiều hơ
 
 #: erpnext/manufacturing/doctype/bom/bom.py:339
 msgid "Row #{0}: Quantity should be greater than 0 for {1} Item {2}"
-msgstr ""
+msgstr "Hàng #{0}: Số lượng phải lớn hơn 0 cho {1} Mặt hàng {2}"
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1696
 msgid "Row #{0}: Quantity to reserve for the Item {1} should be greater than 0."
@@ -43945,7 +43945,7 @@ msgstr "Hàng #{0}: Loại tài liệu tham chiếu phải là một trong Đơn
 
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:577
 msgid "Row #{0}: Rejected Qty cannot be set for Secondary Item {1}."
-msgstr ""
+msgstr "Hàng #{0}: Số lượng từ chối không thể được đặt cho Mặt hàng phụ {1}."
 
 #: erpnext/controllers/subcontracting_controller.py:118
 msgid "Row #{0}: Rejected Warehouse is mandatory for the rejected Item {1}"
@@ -43969,7 +43969,7 @@ msgstr "Hàng #{0}: Số lượng trả lại không thể lớn hơn số lư�
 
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:572
 msgid "Row #{0}: Secondary Item Qty cannot be zero"
-msgstr ""
+msgstr "Hàng #{0}: Số lượng mặt hàng phụ không thể bằng không"
 
 #: erpnext/controllers/selling_controller.py:296
 msgid ""
@@ -43978,6 +43978,10 @@ msgid ""
 "\t\t\t\t\tyou can disable '{5}' in {6} to bypass\n"
 "\t\t\t\t\tthis validation."
 msgstr ""
+"Hàng #{0}: Tỷ giá bán cho mặt hàng {1} thấp hơn {2}.\n"
+"\t\t\t\t\tBán {3} phải ít nhất là {4}.<br><br>Ngoài ra,\n"
+"\t\t\t\t\tbạn có thể tắt '{5}' trong {6} để bỏ qua\n"
+"\t\t\t\t\txác thực này."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:286
 msgid "Row #{0}: Sequence ID must be {1} or {2} for Operation {3}."
@@ -44106,15 +44110,15 @@ msgstr "Hàng #{0}: Tổng Số Lần Khấu hao không thể nhỏ hơn hoặc 
 
 #: erpnext/assets/doctype/asset/asset.py:660
 msgid "Row #{0}: Total Number of Depreciations must be greater than zero"
-msgstr ""
+msgstr "Hàng #{0}: Tổng Số Lần Khấu hao phải lớn hơn không"
 
 #: erpnext/controllers/stock_controller.py:105
 msgid "Row #{0}: Warehouse {1} does not match with the warehouse {2} in Serial and Batch Bundle {3}."
-msgstr ""
+msgstr "Hàng #{0}: Kho {1} không khớp với kho {2} trong Gói Serial và Batch {3}."
 
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.py:94
 msgid "Row #{0}: Withholding Amount {1} does not match calculated amount {2}."
-msgstr ""
+msgstr "Hàng #{0}: Số tiền Khấu giữ {1} không khớp với số tiền đã tính {2}."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:577
 msgid "Row #{0}: Work Order exists against full or partial quantity of Item {1}"
@@ -44146,7 +44150,7 @@ msgstr "Hàng #{0}: {1} của {2} phải là {3}. Vui lòng cập nhật {1} ho�
 
 #: erpnext/controllers/accounts_controller.py:3906
 msgid "Row #{0}:Quantity for Item {1} cannot be zero."
-msgstr ""
+msgstr "Hàng #{0}:Số lượng cho Mặt hàng {1} không thể là không."
 
 #: erpnext/buying/utils.py:106
 msgid "Row #{1}: Warehouse is mandatory for stock Item {0}"
@@ -44190,7 +44194,7 @@ msgstr "Hàng #{}: Tiền tệ của {} - {} không khớp với tiền tệ cô
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:113
 msgid "Row #{}: Either Party ID or Party Name is required"
-msgstr ""
+msgstr "Hàng #{}: Yêu cầu ID Đối tác hoặc Tên Đối tác"
 
 #: erpnext/assets/doctype/asset/asset.py:421
 msgid "Row #{}: Finance Book should not be empty since you're using multiple."
@@ -44210,7 +44214,7 @@ msgstr "Hàng #{}: Hóa đơn POS {} chưa được trình"
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:123
 msgid "Row #{}: Party ID is required"
-msgstr ""
+msgstr "Hàng #{}: Yêu cầu ID Đối tác"
 
 #: erpnext/assets/doctype/asset_maintenance/asset_maintenance.py:41
 msgid "Row #{}: Please assign task to a member."
@@ -44360,7 +44364,7 @@ msgstr "Hàng {0}: Tỷ giá là bắt buộc"
 
 #: erpnext/assets/doctype/asset/asset.py:609
 msgid "Row {0}: Expected Value After Useful Life cannot be negative"
-msgstr ""
+msgstr "Hàng {0}: Giá trị dự kiến sau thời gian sử dụng không thể âm"
 
 #: erpnext/assets/doctype/asset/asset.py:612
 msgid "Row {0}: Expected Value After Useful Life must be less than Net Purchase Amount"
@@ -44368,7 +44372,7 @@ msgstr "Hàng {0}: Giá trị dự kiến sau thời gian sử dụng phải nh�
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:187
 msgid "Row {0}: Expense Account {1} is linked to company {2}. Please select an account belonging to company {3}."
-msgstr ""
+msgstr "Hàng {0}: Tài khoản chi phí {1} được liên kết với công ty {2}. Vui lòng chọn tài khoản thuộc về công ty {3}."
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:531
 msgid "Row {0}: Expense Head changed to {1} as no Purchase Receipt is created against Item {2}."
@@ -44429,7 +44433,7 @@ msgstr "Hàng {0}: Mặt hàng {1} phải là mặt hàng ký gửi."
 
 #: erpnext/controllers/subcontracting_controller.py:183
 msgid "Row {0}: Item {1} must be linked to a {2}."
-msgstr ""
+msgstr "Hàng {0}: Mặt hàng {1} phải được liên kết với {2}."
 
 #: erpnext/controllers/subcontracting_controller.py:204
 msgid "Row {0}: Item {1}'s quantity cannot be higher than the available quantity."
@@ -44437,7 +44441,7 @@ msgstr "Hàng {0}: Số lượng của mặt hàng {1} không thể cao hơn s�
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1245
 msgid "Row {0}: Operation time should be greater than 0 for operation {1}"
-msgstr ""
+msgstr "Hàng {0}: Thời gian vận hành phải lớn hơn 0 cho công việc {1}"
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.py:615
 msgid "Row {0}: Packed Qty must be equal to {1} Qty."
@@ -44525,7 +44529,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:885
 msgid "Row {0}: Sales Invoice {1} is already created for {2}"
-msgstr ""
+msgstr "Hàng {0}: Hóa đơn Bán hàng {1} đã được tạo cho {2}"
 
 #: erpnext/assets/doctype/asset_shift_allocation/asset_shift_allocation.py:58
 msgid "Row {0}: Shift cannot be changed since the depreciation has already been processed"
@@ -44569,11 +44573,11 @@ msgstr "Hàng {0}: Hệ số chuyển đổi Đơn vị là bắt buộc"
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:170
 msgid "Row {0}: Warehouse is required"
-msgstr ""
+msgstr "Hàng {0}: Yêu cầu Kho"
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:179
 msgid "Row {0}: Warehouse {1} is linked to company {2}. Please select a warehouse belonging to company {3}."
-msgstr ""
+msgstr "Hàng {0}: Kho {1} được liên kết với công ty {2}. Vui lòng chọn một kho thuộc về công ty {3}."
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1239
 #: erpnext/manufacturing/doctype/work_order/work_order.py:420
@@ -44602,7 +44606,7 @@ msgstr "Hàng {0}: {1} {2} không khớp với {3}"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:134
 msgid "Row {0}: {1} {2} is linked to company {3}. Please select a document belonging to company {4}."
-msgstr ""
+msgstr "Hàng {0}: {1} {2} được liên kết với công ty {3}. Vui lòng chọn một tài liệu thuộc về công ty {4}."
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:108
 msgid "Row {0}: {2} Item {1} does not exist in {2} {3}"
@@ -45523,12 +45527,12 @@ msgstr "Mẫu Thuế Bán hàng"
 #. Label of the sales_tax_withholding_category (Link) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Sales Tax Withholding Category"
-msgstr ""
+msgstr "Danh mục Khấu trừ Thuế Bán hàng"
 
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "Sales Taxes"
-msgstr ""
+msgstr "Thuế Bán hàng"
 
 #. Label of the taxes (Table) field in DocType 'POS Invoice'
 #. Label of the taxes (Table) field in DocType 'Sales Invoice'
@@ -45652,7 +45656,7 @@ msgstr "Số lượng Mẫu"
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:269
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:535
 msgid "Sample Retention Stock Entry"
-msgstr ""
+msgstr "Mục Hàng tồn kho Giữ Mẫu"
 
 #. Label of the sample_retention_warehouse (Link) field in DocType 'Stock
 #. Settings'
@@ -45770,7 +45774,7 @@ msgstr "Ngày lên lịch"
 
 #: erpnext/public/js/controllers/transaction.js:492
 msgid "Schedule Name"
-msgstr ""
+msgstr "Tên Lịch trình"
 
 #. Label of the scheduled_date (Date) field in DocType 'Maintenance Schedule
 #. Detail'
@@ -45886,7 +45890,7 @@ msgstr "Bảng xếp hạng"
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_secondary_item/subcontracting_inward_order_secondary_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Scrap"
-msgstr ""
+msgstr "Phế liệu"
 
 #: erpnext/assets/doctype/asset/asset.js:163
 msgid "Scrap Asset"
@@ -45949,12 +45953,12 @@ msgstr "Email thứ hai"
 #. Label of the item_code (Link) field in DocType 'Job Card Secondary Item'
 #: erpnext/manufacturing/doctype/job_card_secondary_item/job_card_secondary_item.json
 msgid "Secondary Item Code"
-msgstr ""
+msgstr "Mã Mặt hàng Phụ"
 
 #. Label of the item_name (Data) field in DocType 'Job Card Secondary Item'
 #: erpnext/manufacturing/doctype/job_card_secondary_item/job_card_secondary_item.json
 msgid "Secondary Item Name"
-msgstr ""
+msgstr "Tên Mặt hàng Phụ"
 
 #. Label of the secondary_items (Table) field in DocType 'BOM'
 #. Label of the secondary_items (Table) field in DocType 'Job Card'
@@ -45965,29 +45969,29 @@ msgstr ""
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 msgid "Secondary Items"
-msgstr ""
+msgstr "Các Mặt hàng Phụ"
 
 #. Label of the secondary_items_cost (Currency) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Secondary Items Cost"
-msgstr ""
+msgstr "Chi phí Mặt hàng Phụ"
 
 #. Label of the base_secondary_items_cost (Currency) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Secondary Items Cost (Company Currency)"
-msgstr ""
+msgstr "Chi phí Mặt hàng Phụ (Tiền tệ Công ty)"
 
 #. Label of the secondary_items_cost_per_qty (Currency) field in DocType
 #. 'Subcontracting Receipt Item'
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Secondary Items Cost Per Qty"
-msgstr ""
+msgstr "Chi phí Mặt hàng Phụ theo Số lượng"
 
 #. Label of the scrap_items_generated_section (Section Break) field in DocType
 #. 'Subcontracting Inward Order'
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 msgid "Secondary Items Generated"
-msgstr ""
+msgstr "Các Mặt hàng Phụ Đã tạo"
 
 #. Label of the secondary_party (Dynamic Link) field in DocType 'Party Link'
 #: erpnext/accounts/doctype/party_link/party_link.json
@@ -46153,7 +46157,7 @@ msgstr "Chọn Mặt hàng để Sản xuất"
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:500
 msgid "Select Items to Receive"
-msgstr ""
+msgstr "Chọn Mặt hàng để Nhận"
 
 #: erpnext/selling/doctype/sales_order/sales_order_list.js:87
 msgid "Select Items up to Delivery Date"
@@ -46172,7 +46176,7 @@ msgstr "Chọn Chương trình Khách hàng Thân thiết"
 
 #: erpnext/public/js/controllers/transaction.js:478
 msgid "Select Payment Schedule"
-msgstr ""
+msgstr "Chọn Lịch thanh toán"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:411
 msgid "Select Possible Supplier"
@@ -46411,19 +46415,19 @@ msgstr "Bán Tài sản"
 
 #: erpnext/assets/doctype/asset/asset.js:635
 msgid "Sell Qty"
-msgstr ""
+msgstr "Số lượng Bán"
 
 #: erpnext/assets/doctype/asset/asset.js:651
 msgid "Sell quantity cannot exceed the asset quantity"
-msgstr ""
+msgstr "Số lượng bán không thể vượt quá số lượng tài sản"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1410
 msgid "Sell quantity cannot exceed the asset quantity. Asset {0} has only {1} item(s)."
-msgstr ""
+msgstr "Số lượng bán không thể vượt quá số lượng tài sản. Tài sản {0} chỉ có {1} mặt hàng."
 
 #: erpnext/assets/doctype/asset/asset.js:647
 msgid "Sell quantity must be greater than zero"
-msgstr ""
+msgstr "Số lượng bán phải lớn hơn không"
 
 #. Label of the selling (Check) field in DocType 'Pricing Rule'
 #. Label of the selling (Check) field in DocType 'Promotional Scheme'
@@ -46482,7 +46486,7 @@ msgstr "Cài đặt bán hàng"
 #. Title of the Module Onboarding 'Selling Onboarding'
 #: erpnext/selling/module_onboarding/selling_onboarding/selling_onboarding.json
 msgid "Selling Setup"
-msgstr ""
+msgstr "Thiết lập Bán hàng"
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:214
 msgid "Selling must be checked, if Applicable For is selected as {0}"
@@ -46595,7 +46599,7 @@ msgstr "Cài đặt Mặt hàng Serial & Batch"
 #. Label of the section_break_jcmx (Section Break) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 msgid "Serial / Batch"
-msgstr ""
+msgstr "Serial / Batch"
 
 #. Label of the serial_and_batch_bundle (Link) field in DocType 'Stock
 #. Reconciliation Item'
@@ -46976,7 +46980,7 @@ msgstr "Số Serial và Batch"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:152
 msgid "Serial and Batch No for Item Disabled"
-msgstr ""
+msgstr "Số Serial và Batch cho Mặt hàng Bị vô hiệu hóa"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.js:53
 msgid "Serial and Batch Nos"
@@ -47406,7 +47410,7 @@ msgstr "Đặt ngày phát hành mới"
 #. field in DocType 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Set Operating Cost / Secondary Items From Sub-assemblies"
-msgstr ""
+msgstr "Đặt Chi phí Vận hành / Mặt hàng Phụ từ Tiểu lắp ráp"
 
 #. Label of the set_cost_based_on_bom_qty (Check) field in DocType 'BOM
 #. Operation'
@@ -47579,7 +47583,7 @@ msgstr "Đặt điều này nếu khách hàng là công ty của Nhà nước."
 #. Settings'
 #: erpnext/support/doctype/support_settings/support_settings.json
 msgid "Set this value to 0 to disable the feature."
-msgstr ""
+msgstr "Đặt giá trị này thành 0 để vô hiệu hóa tính năng."
 
 #. Label of the set_valuation_rate_for_rejected_materials (Check) field in
 #. DocType 'Buying Settings'
@@ -47687,39 +47691,39 @@ msgstr "Đã thanh toán"
 #. Label of an action in the Onboarding Step 'Setup Company'
 #: erpnext/setup/onboarding_step/setup_company/setup_company.json
 msgid "Setup Company"
-msgstr ""
+msgstr "Thiết lập Công ty"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Setup Email Account'
 #: erpnext/setup/onboarding_step/setup_email_account/setup_email_account.json
 msgid "Setup Email Account"
-msgstr ""
+msgstr "Thiết lập Tài khoản Email"
 
 #. Title of the Module Onboarding 'Organization Onboarding'
 #: erpnext/setup/module_onboarding/organization_onboarding/organization_onboarding.json
 msgid "Setup Organization"
-msgstr ""
+msgstr "Thiết lập Tổ chức"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Setup Role Permissions'
 #: erpnext/setup/onboarding_step/setup_role_permissions/setup_role_permissions.json
 msgid "Setup Role Permissions"
-msgstr ""
+msgstr "Thiết lập Quyền Vai trò"
 
 #. Label of an action in the Onboarding Step 'Setup Sales taxes'
 #: erpnext/accounts/onboarding_step/setup_sales_taxes/setup_sales_taxes.json
 msgid "Setup Sales Taxes"
-msgstr ""
+msgstr "Thiết lập Thuế Bán hàng"
 
 #. Title of an Onboarding Step
 #: erpnext/accounts/onboarding_step/setup_sales_taxes/setup_sales_taxes.json
 msgid "Setup Sales taxes"
-msgstr ""
+msgstr "Thiết lập thuế bán hàng"
 
 #. Title of an Onboarding Step
 #: erpnext/stock/onboarding_step/setup_warehouse/setup_warehouse.json
 msgid "Setup Warehouse"
-msgstr ""
+msgstr "Thiết lập Kho"
 
 #: erpnext/public/js/setup_wizard.js:25
 msgid "Setup your organization"
@@ -48242,7 +48246,7 @@ msgstr "Hiển thị tồn kho theo kho"
 
 #: erpnext/manufacturing/report/bom_stock_analysis/bom_stock_analysis.js:26
 msgid "Show availability of exploded items"
-msgstr ""
+msgstr "Hiển thị tình trạng sẵn có của các mặt hàng đã khai thác"
 
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.js:88
 msgid "Show in Bucket View"
@@ -48383,7 +48387,7 @@ msgstr "Since there is a process loss of {0} units for the finished good {1}, yo
 
 #: erpnext/manufacturing/doctype/bom/bom.py:323
 msgid "Since you have enabled 'Track Semi Finished Goods', at least one operation must have 'Is Final Finished Good' checked. For that set the FG / Semi FG Item as {0} against an operation."
-msgstr ""
+msgstr "Since you have enabled 'Track Semi Finished Goods', at least one operation must have 'Is Final Finished Good' checked. For that set the FG / Semi FG Item as {0} against an operation."
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:132
 msgid "Since {0} are Serial No/Batch No items, you cannot enable 'Recreate Stock Ledgers' in Repost Item Valuation."
@@ -48433,7 +48437,7 @@ msgstr "Bỏ qua chuyển nguyên vật liệu sang Kho WIP"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:563
 msgid "Skipped {0} DocType(s):<br>{1}"
-msgstr ""
+msgstr "Đã bỏ qua {0} DocType(s):<br>{1}"
 
 #. Label of the customer_skype (Data) field in DocType 'Appointment'
 #: erpnext/crm/doctype/appointment/appointment.json
@@ -48952,7 +48956,7 @@ msgstr "Minh họa trạng thái"
 #. Label of the section_break_dfoc (Section Break) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 msgid "Status and Reference"
-msgstr ""
+msgstr "Trạng thái và Tham chiếu"
 
 #: erpnext/projects/doctype/project/project.py:717
 msgid "Status must be Cancelled or Completed"
@@ -49528,7 +49532,7 @@ msgstr "Cài đặt tồn kho"
 #. Title of the Module Onboarding 'Stock Onboarding'
 #: erpnext/stock/module_onboarding/stock_onboarding/stock_onboarding.json
 msgid "Stock Setup"
-msgstr ""
+msgstr "Thiết lập tồn kho"
 
 #. Label of the stock_summary_tab (Tab Break) field in DocType 'Plant Floor'
 #. Label of the stock_summary (HTML) field in DocType 'Plant Floor'
@@ -49659,7 +49663,7 @@ msgstr "ĐVT tồn kho"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:737
 msgid "Stock Update Not Allowed"
-msgstr ""
+msgstr "Cập nhật tồn kho không được phép"
 
 #. Name of a role
 #: erpnext/accounts/doctype/fiscal_year/fiscal_year.json
@@ -49771,7 +49775,7 @@ msgstr "Tồn kho không thể được cập nhật vì hóa đơn chứa mặt
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:734
 msgid "Stock cannot be updated for Purchase Invoice {0} because a Purchase Receipt {1} has already been created for this transaction. Please disable the 'Update Stock' checkbox in the Purchase Invoice and save the invoice."
-msgstr ""
+msgstr "Tồn kho không thể được cập nhật cho Hóa đơn mua {0} vì Phiếu nhận hàng {1} đã được tạo cho giao dịch này. Vui lòng tắt hộp kiểm 'Cập nhật tồn kho' trong Hóa đơn mua và lưu hóa đơn."
 
 #: erpnext/stock/doctype/warehouse/warehouse.py:124
 msgid "Stock entries exist with the old account. Changing the account may lead to a mismatch between the warehouse closing balance and the account closing balance. The overall closing balance will still match, but not for the specific account."
@@ -50094,7 +50098,7 @@ msgstr "Mục đơn nhận hàng ký gửi đã nhận"
 #. Name of a DocType
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_secondary_item/subcontracting_inward_order_secondary_item.json
 msgid "Subcontracting Inward Order Secondary Item"
-msgstr ""
+msgstr "Mục phụ đơn nhận hàng ký gửi"
 
 #. Name of a DocType
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_service_item/subcontracting_inward_order_service_item.json
@@ -50230,7 +50234,7 @@ msgstr "Cài đặt ký gửi"
 #. Title of the Module Onboarding 'Subcontracting Onboarding'
 #: erpnext/subcontracting/module_onboarding/subcontracting_onboarding/subcontracting_onboarding.json
 msgid "Subcontracting Setup"
-msgstr ""
+msgstr "Thiết lập ký gửi"
 
 #. Label of the subdivision (Autocomplete) field in DocType 'Holiday List'
 #: erpnext/setup/doctype/holiday_list/holiday_list.json
@@ -50771,7 +50775,7 @@ msgstr "Thời gian giao hàng của nhà cung cấp (ngày)"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Supplier Ledger"
-msgstr ""
+msgstr "Sổ cái nhà cung cấp"
 
 #. Name of a report
 #. Label of a Link in the Financial Reports Workspace
@@ -51616,7 +51620,7 @@ msgstr "Thuế suất"
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:237
 #: erpnext/accounts/report/tds_computation_summary/tds_computation_summary.py:84
 msgid "Tax Rate %"
-msgstr ""
+msgstr "Thuế suất %"
 
 #. Label of the taxes (Table) field in DocType 'Item Tax Template'
 #: erpnext/accounts/doctype/item_tax_template/item_tax_template.json
@@ -51654,7 +51658,7 @@ msgstr "Cài đặt thuế"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/selling.json
 msgid "Tax Template"
-msgstr ""
+msgstr "Mẫu thuế"
 
 #: erpnext/accounts/doctype/tax_rule/tax_rule.py:86
 msgid "Tax Template is mandatory."
@@ -51730,7 +51734,7 @@ msgstr "Chi tiết khấu giữ thuế"
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Tax Withholding Entries"
-msgstr ""
+msgstr "Các mục khấu giữ thuế"
 
 #. Label of the section_tax_withholding_entry (Section Break) field in DocType
 #. 'Payment Entry'
@@ -51742,7 +51746,7 @@ msgstr ""
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Tax Withholding Entry"
-msgstr ""
+msgstr "Mục khấu giữ thuế"
 
 #. Label of the tax_withholding_group (Link) field in DocType 'Journal Entry'
 #. Label of the tax_withholding_group (Link) field in DocType 'Payment Entry'
@@ -51767,7 +51771,7 @@ msgstr ""
 #: erpnext/selling/doctype/customer/customer.json
 #: erpnext/workspace_sidebar/taxes.json
 msgid "Tax Withholding Group"
-msgstr ""
+msgstr "Nhóm khấu giữ thuế"
 
 #. Name of a DocType
 #. Label of the tax_withholding_rate (Float) field in DocType 'Tax Withholding
@@ -51803,7 +51807,7 @@ msgstr ""
 #. DocType 'Tax Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Tax withheld only for amount exceeding cumulative threshold"
-msgstr ""
+msgstr "Thuế được khấu giữ chỉ cho số tiền vượt quá ngưỡng tích lũy"
 
 #. Label of the taxable_amount (Currency) field in DocType 'Item Wise Tax
 #. Detail'
@@ -51816,18 +51820,18 @@ msgstr "Số tiền chịu thuế"
 #. Label of the taxable_date (Date) field in DocType 'Tax Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Taxable Date"
-msgstr ""
+msgstr "Ngày chịu thuế"
 
 #. Label of the taxable_name (Dynamic Link) field in DocType 'Tax Withholding
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Taxable Document Name"
-msgstr ""
+msgstr "Tên tài liệu chịu thuế"
 
 #. Label of the taxable_doctype (Link) field in DocType 'Tax Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Taxable Document Type"
-msgstr ""
+msgstr "Loại tài liệu chịu thuế"
 
 #. Label of the taxes (Table) field in DocType 'POS Closing Entry'
 #. Label of the taxes_section (Section Break) field in DocType 'POS Profile'
@@ -52475,7 +52479,7 @@ msgstr ""
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:40
 msgid "The fiscal year has been automatically created in a Disabled state to maintain consistency with the previous fiscal year's status."
-msgstr ""
+msgstr "Năm tài chính đã được tự động tạo ở trạng thái bị vô hiệu hóa để duy trì tính nhất quán với trạng thái của năm tài chính trước."
 
 #: erpnext/accounts/doctype/share_transfer/share_transfer.py:240
 msgid "The folio numbers are not matching"
@@ -52518,6 +52522,8 @@ msgid ""
 "The following payment schedule(s) already exist:\n"
 "{0}"
 msgstr ""
+"Các lịch thanh toán sau đã tồn tại:\n"
+"{0}"
 
 #: erpnext/assets/doctype/asset_repair/asset_repair.py:112
 msgid "The following rows are duplicates:"
@@ -52598,7 +52604,7 @@ msgstr "Hóa đơn gốc nên được hợp nhất trước hoặc cùng với 
 
 #: erpnext/controllers/accounts_controller.py:205
 msgid "The outstanding amount {0} in {1} is lesser than {2}. Updating the outstanding to this invoice."
-msgstr ""
+msgstr "Số tiền chưa thanh toán {0} trong {1} ít hơn {2}. Đang cập nhật số tiền chưa thanh toán cho hóa đơn này."
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:229
 msgid "The parent account {0} does not exists in the uploaded template"
@@ -52663,7 +52669,7 @@ msgstr "Mặt hàng đã chọn không thể có Lô"
 
 #: erpnext/assets/doctype/asset/asset.js:656
 msgid "The sell quantity is less than the total asset quantity. The remaining quantity will be split into a new asset. This action cannot be undone. <br><br><b>Do you want to continue?</b>"
-msgstr ""
+msgstr "Số lượng bán nhỏ hơn tổng số lượng tài sản. Số lượng còn lại sẽ được chia thành một tài sản mới. Hành động này không thể được hoàn tác. <br><br><b>Bạn có muốn tiếp tục không?</b>"
 
 #: erpnext/accounts/doctype/share_transfer/share_transfer.py:194
 msgid "The seller and the buyer cannot be the same"
@@ -52826,7 +52832,7 @@ msgstr "Không có chỗ trống vào ngày này"
 
 #: erpnext/stock/doctype/item/item.js:1161
 msgid "There are two options to maintain valuation of stock. FIFO (first in - first out) and Moving Average. To understand this topic in detail please visit <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>Item Valuation, FIFO and Moving Average.</a>"
-msgstr ""
+msgstr "Có hai tùy chọn để duy trì định giá hàng tồn kho. FIFO (nhập trước - xuất trước) và Bình quân di động. Để hiểu rõ hơn về chủ đề này, vui lòng truy cập <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>Định giá hàng tồn kho, FIFO và Bình quân di động.</a>"
 
 #: erpnext/stock/report/item_variant_details/item_variant_details.py:25
 msgid "There aren't any item variants for the selected item"
@@ -52889,7 +52895,7 @@ msgstr "Tài khoản này có số dư '0' trong Tiền tệ cơ sở hoặc Ti�
 
 #: erpnext/stock/doctype/item/item.js:194
 msgid "This Item is a Template and cannot be used in transactions.<br>All fields present in the 'Copy Fields to Variant' table in Item Variant Settings will be copied to its variant items."
-msgstr ""
+msgstr "Mặt hàng này là Mẫu và không thể được sử dụng trong giao dịch.<br>Tất cả các trường có trong bảng 'Sao chép trường sang Biến thể' trong Cài đặt Biến thể mặt hàng sẽ được sao chép sang các mặt hàng biến thể của nó."
 
 #: erpnext/stock/doctype/item/item.js:251
 msgid "This Item is a Variant of {0} (Template)."
@@ -53043,12 +53049,12 @@ msgstr "Bộ lọc mặt hàng này đã được áp dụng cho {0}"
 #. Header text in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "This module is scheduled for deprecation and will be completely removed in version 17, please use <a href=\"https://frappe.io/crm\">Frappe CRM</a> instead."
-msgstr ""
+msgstr "Mô-đun này được lên kế hoạch ngưng hoạt động và sẽ bị xóa hoàn toàn trong phiên bản 17, vui lòng sử dụng <a href=\"https://frappe.io/crm\">Frappe CRM</a> thay thế."
 
 #. Header text in the Support Workspace
 #: erpnext/support/workspace/support/support.json
 msgid "This module is scheduled for deprecation and will be completely removed in version 17, please use <a href=\"https://frappe.io/helpdesk\">Frappe Helpdesk</a> instead."
-msgstr ""
+msgstr "Mô-đun này được lên kế hoạch ngưng hoạt động và sẽ bị xóa hoàn toàn trong phiên bản 17, vui lòng sử dụng <a href=\"https://frappe.io/helpdesk\">Frappe Helpdesk</a> thay thế."
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.js:509
 msgid "This option can be checked to edit the 'Posting Date' and 'Posting Time' fields."
@@ -53147,7 +53153,7 @@ msgstr "{} này sẽ được coi là chuyển vật liệu."
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Threshold Exemption"
-msgstr ""
+msgstr "Miễn giảm theo ngưỡng"
 
 #. Label of the threshold_percentage (Percent) field in DocType 'Promotional
 #. Scheme Price Discount'
@@ -53313,7 +53319,7 @@ msgstr "Bảng chấm công cho các công việc."
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:894
 msgid "Timesheet {0} cannot be invoiced in its current state"
-msgstr ""
+msgstr "Bảng chấm công {0} không thể xuất hóa đơn ở trạng thái hiện tại"
 
 #. Label of the timesheet_sb (Section Break) field in DocType 'Projects
 #. Settings'
@@ -53393,7 +53399,7 @@ msgstr "Đến ngày giờ"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:118
 msgid "To Delete list generated with {0} DocTypes"
-msgstr ""
+msgstr "Danh sách xóa đã được tạo với {0} loại DocTypes"
 
 #. Option for the 'Sales Order Status' (Select) field in DocType 'Production
 #. Plan'
@@ -53627,7 +53633,7 @@ msgstr "Để bao gồm các mặt hàng không tồn kho trong kế hoạch yê
 #. Sub-assemblies' (Check) field in DocType 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "To include sub-assembly costs and secondary items in Finished Goods on a work order without using a job card, when the 'Use Multi-Level BOM' option is enabled."
-msgstr ""
+msgstr "Để bao gồm chi phí cụm con và các mặt hàng phụ trong Thành phẩm trên lệnh sản xuất mà không cần sử dụng thẻ công việc, khi tùy chọn 'Sử dụng Định mức đa cấp' được bật."
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:2247
 #: erpnext/controllers/accounts_controller.py:3253
@@ -53923,7 +53929,7 @@ msgstr "Tổng số lượng đã hoàn thành"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:191
 msgid "Total Completed Qty is required for Job Card {0}, please start and complete the job card before submission"
-msgstr ""
+msgstr "Tổng số lượng đã hoàn thành là bắt buộc cho Thẻ công việc {0}, vui lòng bắt đầu và hoàn thành thẻ công việc trước khi gửi"
 
 #. Label of the total_consumed_material_cost (Currency) field in DocType
 #. 'Project'
@@ -54085,7 +54091,7 @@ msgstr "Tổng chi phí đã đáp tàu (Tiền tệ công ty)"
 #. Label of the total_vouchers (Int) field in DocType 'Repost Item Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Total Ledgers"
-msgstr ""
+msgstr "Tổng sổ cái"
 
 #: erpnext/accounts/report/balance_sheet/balance_sheet.py:220
 msgid "Total Liability"
@@ -54334,7 +54340,7 @@ msgstr "Tổng thuế"
 
 #: erpnext/accounts/report/tds_computation_summary/tds_computation_summary.py:86
 msgid "Total Taxable Amount"
-msgstr ""
+msgstr "Tổng số tiền chịu thuế"
 
 #. Label of the total_taxes_and_charges (Currency) field in DocType 'Payment
 #. Entry'
@@ -54539,7 +54545,7 @@ msgstr "Tổng(SL)"
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Totals (Company Currency)"
-msgstr ""
+msgstr "Tổng cộng (Tiền tệ công ty)"
 
 #: erpnext/stock/doctype/item/item_dashboard.py:33
 msgid "Traceability"
@@ -54639,7 +54645,7 @@ msgstr "Ngày giao dịch"
 
 #: erpnext/setup/doctype/company/company.py:1090
 msgid "Transaction Deletion Document {0} has been triggered for company {1}"
-msgstr ""
+msgstr "Tài liệu xóa giao dịch {0} đã được kích hoạt cho công ty {1}"
 
 #. Name of a DocType
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
@@ -54659,15 +54665,15 @@ msgstr "Mục hồ sơ xóa giao dịch"
 #. Name of a DocType
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Transaction Deletion Record To Delete"
-msgstr ""
+msgstr "Xóa hồ sơ giao dịch"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1101
 msgid "Transaction Deletion Record {0} is already running. {1}"
-msgstr ""
+msgstr "Hồ sơ xóa giao dịch {0} đang chạy. {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1120
 msgid "Transaction Deletion Record {0} is currently deleting {1}. Cannot save documents until deletion completes."
-msgstr ""
+msgstr "Hồ sơ xóa giao dịch {0} hiện đang xóa {1}. Không thể lưu tài liệu cho đến khi xóa xong."
 
 #. Label of the transaction_details_section (Section Break) field in DocType
 #. 'GL Entry'
@@ -54703,7 +54709,7 @@ msgstr "Tên giao dịch"
 
 #: erpnext/stock/report/negative_batch_report/negative_batch_report.py:60
 msgid "Transaction Qty"
-msgstr ""
+msgstr "Số lượng giao dịch"
 
 #. Label of the transaction_settings_section (Tab Break) field in DocType
 #. 'Buying Settings'
@@ -54718,7 +54724,7 @@ msgstr "Cài đặt giao dịch"
 #. Rate'
 #: erpnext/accounts/doctype/tax_withholding_rate/tax_withholding_rate.json
 msgid "Transaction Threshold"
-msgstr ""
+msgstr "Ngưỡng giao dịch"
 
 #. Label of the transaction_type (Data) field in DocType 'Bank Transaction'
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.json
@@ -54737,19 +54743,19 @@ msgstr "Tiền tệ giao dịch: {0} không thể khác với tiền tệ Tài k
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:65
 msgid "Transaction date can't be earlier than previous movement date"
-msgstr ""
+msgstr "Ngày giao dịch không thể sớm hơn ngày chuyển trước đó"
 
 #. Description of the 'Applicable For' (Section Break) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Transaction for which tax is withheld"
-msgstr ""
+msgstr "Giao dịch mà thuế bị khấu giữ"
 
 #. Description of the 'Deducted From' (Section Break) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Transaction from which tax is withheld"
-msgstr ""
+msgstr "Giao dịch từ đó thuế bị khấu giữ"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:865
 msgid "Transaction not allowed against stopped Work Order {0}"
@@ -55303,7 +55309,7 @@ msgstr "URL chỉ có thể là một chuỗi"
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 msgid "UTM Analytics"
-msgstr ""
+msgstr "Phân tích UTM"
 
 #. Option for the 'Data Fetch Method' (Select) field in DocType 'Accounts
 #. Settings'
@@ -55322,7 +55328,7 @@ msgstr "Hủy đối soát phân bổ"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:466
 msgid "Unable to fetch DocType details. Please contact system administrator."
-msgstr ""
+msgstr "Không thể lấy chi tiết DocType. Vui lòng liên hệ quản trị hệ thống."
 
 #: erpnext/setup/utils.py:149
 msgid "Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually"
@@ -55397,13 +55403,13 @@ msgstr "Theo bảo hành"
 #. Option for the 'Status' (Select) field in DocType 'Tax Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Under Withheld"
-msgstr ""
+msgstr "Bị khấu giữ"
 
 #. Label of the under_withheld_reason (Select) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Under Withheld Reason"
-msgstr ""
+msgstr "Lý do bị khấu giữ"
 
 #: erpnext/manufacturing/doctype/workstation/workstation.js:78
 msgid "Under Working Hours table, you can add start and end times for a Workstation. For example, a Workstation may be active from 9 am to 1 pm, then 2 pm to 5 pm. You can also specify the working hours based on shifts. While scheduling a Work Order, the system will check for the availability of the Workstation based on the working hours specified."
@@ -55411,7 +55417,7 @@ msgstr "Trong bảng Giờ làm việc, bạn có thể thêm thời gian bắt 
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:936
 msgid "Unexpected Naming Series Pattern"
-msgstr ""
+msgstr "Mẫu dãy đặt tên không mong đợi"
 
 #. Option for the 'Fulfilment Status' (Select) field in DocType 'Contract'
 #: erpnext/crm/doctype/contract/contract.json
@@ -55998,7 +56004,7 @@ msgstr "Sử dụng Định mức đa cấp"
 #. DocType 'Global Defaults'
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
 msgid "Use Posting Datetime for Naming Documents"
-msgstr ""
+msgstr "Sử dụng Ngày giờ đăng để đặt tên tài liệu"
 
 #. Label of the use_serial_batch_fields (Check) field in DocType 'Stock
 #. Settings'
@@ -56148,7 +56154,7 @@ msgstr "Người dùng có thể bật hộp kiểm nếu họ muốn điều ch
 #. 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Users can make manufacture entry against Job Cards"
-msgstr ""
+msgstr "Người dùng có thể tạo mục sản xuất đối với Thẻ công việc"
 
 #. Description of the 'Role Allowed to Over Bill ' (Link) field in DocType
 #. 'Accounts Settings'
@@ -56755,7 +56761,7 @@ msgstr "Xem nhật ký cập nhật Định mức"
 #: erpnext/accounts/onboarding_step/view_balance_sheet/view_balance_sheet.json
 #: erpnext/assets/onboarding_step/view_balance_sheet/view_balance_sheet.json
 msgid "View Balance Sheet"
-msgstr ""
+msgstr "Xem Bảng cân đối kế toán"
 
 #: erpnext/public/js/setup_wizard.js:47
 msgid "View Chart of Accounts"
@@ -56795,7 +56801,7 @@ msgstr "Xem ngay"
 #. Description of a report in the Onboarding Step 'View Project Summary'
 #: erpnext/projects/onboarding_step/view_project_summary/view_project_summary.json
 msgid "View Project Summary"
-msgstr ""
+msgstr "Xem tóm tắt dự án"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'View Purchase Order Analysis'
@@ -56803,20 +56809,20 @@ msgstr ""
 #. Analysis'
 #: erpnext/buying/onboarding_step/view_purchase_order_analysis/view_purchase_order_analysis.json
 msgid "View Purchase Order Analysis"
-msgstr ""
+msgstr "Xem phân tích đơn mua hàng"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'View Sales Order Analysis'
 #. Description of a report in the Onboarding Step 'View Sales Order Analysis'
 #: erpnext/selling/onboarding_step/view_sales_order_analysis/view_sales_order_analysis.json
 msgid "View Sales Order Analysis"
-msgstr ""
+msgstr "Xem phân tích đơn đặt hàng"
 
 #. Label of an action in the Onboarding Step 'View Stock Balance Report'
 #: erpnext/stock/onboarding_step/view_stock_balance_report/view_stock_balance_report.json
 #: erpnext/stock/report/stock_ledger/stock_ledger.js:139
 msgid "View Stock Balance"
-msgstr ""
+msgstr "Xem số dư kho"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'View Stock Balance Report'
@@ -56824,11 +56830,11 @@ msgstr ""
 #: erpnext/selling/onboarding_step/view_stock_balance_report/view_stock_balance_report.json
 #: erpnext/stock/onboarding_step/view_stock_balance_report/view_stock_balance_report.json
 msgid "View Stock Balance Report"
-msgstr ""
+msgstr "Xem báo cáo số dư kho"
 
 #: erpnext/stock/report/stock_balance/stock_balance.js:156
 msgid "View Stock Ledger"
-msgstr ""
+msgstr "Xem sổ kho"
 
 #: erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.js:8
 msgid "View Type"
@@ -56837,12 +56843,12 @@ msgstr "Loại xem"
 #. Label of an action in the Onboarding Step 'View Work Order Summary Report'
 #: erpnext/manufacturing/onboarding_step/view_work_order_summary_report/view_work_order_summary_report.json
 msgid "View Work Order Summary"
-msgstr ""
+msgstr "Xem tóm tắt lệnh sản xuất"
 
 #. Title of an Onboarding Step
 #: erpnext/manufacturing/onboarding_step/view_work_order_summary_report/view_work_order_summary_report.json
 msgid "View Work Order Summary Report"
-msgstr ""
+msgstr "Xem báo cáo tóm tắt lệnh sản xuất"
 
 #. Label of the view_attachments (Check) field in DocType 'Project User'
 #: erpnext/projects/doctype/project_user/project_user.json
@@ -56860,7 +56866,7 @@ msgstr "Vimeo"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:216
 msgid "Virtual DocType"
-msgstr ""
+msgstr "DocType ảo"
 
 #: erpnext/templates/pages/help.html:46
 msgid "Visit the forums"
@@ -57222,7 +57228,7 @@ msgstr "Kho là bắt buộc"
 
 #: erpnext/manufacturing/report/bom_stock_analysis/bom_stock_analysis.py:286
 msgid "Warehouse is required to get producible FG Items"
-msgstr ""
+msgstr "Kho là bắt buộc để lấy các mặt hàng FG có thể sản xuất"
 
 #: erpnext/stock/doctype/warehouse/warehouse.py:233
 msgid "Warehouse not found against the account {0}"
@@ -57396,7 +57402,7 @@ msgstr "Cảnh báo: Đơn đặt hàng {0} đã tồn tại đối với Đơn 
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:75
 msgid "Warning: This action cannot be undone!"
-msgstr ""
+msgstr "Cảnh báo: Hành động này không thể hoàn tác!"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_validation.py:77
 msgid "Warnings"
@@ -57482,7 +57488,7 @@ msgstr "Bước sóng tính bằng Megamet"
 
 #: erpnext/controllers/accounts_controller.py:193
 msgid "We can see {0} is made against {1}. If you want {1}'s outstanding to be updated, uncheck the '{2}' checkbox."
-msgstr ""
+msgstr "Chúng tôi có thể thấy {0} được tạo đối với {1}. Nếu bạn muốn công nợ của {1} được cập nhật, hãy bỏ đánh dấu hộp kiểm '{2}'."
 
 #: erpnext/www/support/index.html:7
 msgid "We're here to help!"
@@ -57617,7 +57623,7 @@ msgstr "Bạn cần hỗ trợ gì?"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:82
 msgid "What will be deleted:"
-msgstr ""
+msgstr "Những gì sẽ bị xóa:"
 
 #. Label of the whatsapp_no (Data) field in DocType 'Lead'
 #. Label of the whatsapp (Data) field in DocType 'Opportunity'
@@ -57641,19 +57647,19 @@ msgstr "Khi chọn kho cha, hệ thống thực hiện kiểm tra Số lượng 
 #. 'Tax Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "When checked, only cumulative threshold will be applied"
-msgstr ""
+msgstr "Khi được chọn, chỉ ngưỡng tích lũy sẽ được áp dụng"
 
 #. Description of the 'Disable Cumulative Threshold' (Check) field in DocType
 #. 'Tax Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "When checked, only transaction threshold will be applied for transaction individually"
-msgstr ""
+msgstr "Khi được chọn, chỉ ngưỡng giao dịch sẽ được áp dụng cho từng giao dịch"
 
 #. Description of the 'Use Posting Datetime for Naming Documents' (Check) field
 #. in DocType 'Global Defaults'
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
 msgid "When checked, the system will use the posting datetime of the document for naming the document instead of the creation datetime of the document."
-msgstr ""
+msgstr "Khi được chọn, hệ thống sẽ sử dụng ngày giờ đăng của tài liệu để đặt tên tài liệu thay vì ngày giờ tạo của tài liệu."
 
 #: erpnext/stock/doctype/item/item.js:1168
 msgid "When creating an Item, entering a value for this field will automatically create an Item Price at the backend."
@@ -57667,7 +57673,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:304
 msgid "When there are multiple finished goods ({0}) in a Repack stock entry, the basic rate for all finished goods must be set manually. To set rate manually, enable the checkbox 'Set Basic Rate Manually' in the respective finished good row."
-msgstr ""
+msgstr "Khi có nhiều thành phẩm ({0}) trong một mục kho Đóng gói lại, đơn giá cho tất cả thành phẩm phải được đặt thủ công. Để đặt giá thủ công, hãy bật hộp kiểm 'Đặt đơn giá thủ công' trong hàng thành phẩm tương ứng."
 
 #. Description of the 'Deferred Expense Account' (Link) field in DocType 'Item
 #. Default'
@@ -57746,33 +57752,33 @@ msgstr "Rút tiền"
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Withholding Date"
-msgstr ""
+msgstr "Ngày khấu giữ"
 
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:278
 msgid "Withholding Document"
-msgstr ""
+msgstr "Tài liệu khấu giữ"
 
 #. Label of the withholding_name (Dynamic Link) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Withholding Document Name"
-msgstr ""
+msgstr "Tên tài liệu khấu giữ"
 
 #. Label of the withholding_doctype (Link) field in DocType 'Tax Withholding
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Withholding Document Type"
-msgstr ""
+msgstr "Loại tài liệu khấu giữ"
 
 #. Label of a chart in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "Won Opportunities"
-msgstr ""
+msgstr "Cơ hội đã thắng"
 
 #. Label of a number card in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "Won Opportunity (Last 1 Month)"
-msgstr ""
+msgstr "Cơ hội đã thắng (1 tháng qua)"
 
 #. Label of the work_done (Small Text) field in DocType 'Maintenance Visit
 #. Purpose'
@@ -57898,7 +57904,7 @@ msgstr "Tóm tắt đơn hàng công việc"
 #. Report'
 #: erpnext/manufacturing/onboarding_step/view_work_order_summary_report/view_work_order_summary_report.json
 msgid "Work Order Summary Report"
-msgstr ""
+msgstr "Báo cáo tóm tắt đơn hàng công việc"
 
 #: erpnext/stock/doctype/material_request/material_request.py:877
 msgid "Work Order cannot be created for following reason: <br> {0}"
@@ -58326,7 +58332,7 @@ msgstr "Bạn có thể đặt nó làm tên máy hoặc loại thao tác. Ví d
 
 #: erpnext/controllers/accounts_controller.py:214
 msgid "You can use {0} to reconcile against {1} later."
-msgstr ""
+msgstr "Bạn có thể sử dụng {0} để đối trừ với {1} sau."
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1339
 msgid "You can't make any changes to Job Card since Work Order is closed."
@@ -58374,7 +58380,7 @@ msgstr "Bạn không thể bật cả hai cài đặt '{0}' và '{1}'."
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:167
 msgid "You cannot outward following {0} as either they are Delivered, Inactive or located in a different warehouse."
-msgstr ""
+msgstr "Bạn không thể xuất ra các {0} sau vì chúng đã được giao, không hoạt động hoặc nằm ở kho khác."
 
 #: erpnext/selling/page/point_of_sale/pos_payment.js:625
 msgid "You cannot redeem more than {0}."
@@ -58402,7 +58408,7 @@ msgstr "Bạn không thể {0} tài liệu này vì một Mục đóng kỳ khá
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:580
 msgid "You do not have permission to edit this document"
-msgstr ""
+msgstr "Bạn không có quyền chỉnh sửa tài liệu này"
 
 #: erpnext/controllers/accounts_controller.py:3862
 msgid "You do not have permissions to {} items in a {}."
@@ -58571,7 +58577,7 @@ msgstr "tính theo phần trăm số lượng vật tư hoàn thành"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1589
 msgid "as of {0}"
-msgstr ""
+msgstr "tính đến {0}"
 
 #: erpnext/www/book_appointment/index.html:43
 msgid "at"
@@ -58966,7 +58972,7 @@ msgstr "{0} tài sản không thể được chuyển"
 
 #: erpnext/controllers/trends.py:66
 msgid "{0} can be either {1} or {2}."
-msgstr ""
+msgstr "{0} có thể là {1} hoặc {2}."
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:279
 msgid "{0} can not be negative"
@@ -59051,7 +59057,7 @@ msgstr "{0} trong hàng {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:452
 msgid "{0} is a child table and will be deleted automatically with its parent"
-msgstr ""
+msgstr "{0} là một bảng con và sẽ bị xóa tự động cùng với bảng gốc của nó"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:94
 msgid "{0} is a mandatory Accounting Dimension. <br>Please set a value for {0} in Accounting Dimensions section."
@@ -59094,7 +59100,7 @@ msgstr "{0} là bắt buộc. Có thể bản ghi Tỷ giá tiền tệ chưa đ
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1813
 msgid "{0} is not a CSV file."
-msgstr ""
+msgstr "{0} không phải là tệp CSV."
 
 #: erpnext/selling/doctype/customer/customer.py:235
 msgid "{0} is not a company bank account"
@@ -59110,7 +59116,7 @@ msgstr "{0} không phải là vật tư tồn kho"
 
 #: erpnext/accounts/report/budget_variance_report/budget_variance_report.py:419
 msgid "{0} is not a valid Accounting Dimension."
-msgstr ""
+msgstr "{0} không phải là Kích thước kế toán hợp lệ."
 
 #: erpnext/controllers/item_variant.py:141
 msgid "{0} is not a valid Value for Attribute {1} of Item {2}."
@@ -59146,7 +59152,7 @@ msgstr "{0} đang mở. Hãy đóng POS hoặc hủy Mục mở POS hiện có �
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:525
 msgid "{0} items disassembled"
-msgstr ""
+msgstr "{0} mục đã được tháo rời"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:489
 msgid "{0} items in progress"
@@ -59162,11 +59168,11 @@ msgstr "{0} mục đã được sản xuất"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:493
 msgid "{0} items returned"
-msgstr ""
+msgstr "{0} mục đã được trả lại"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:496
 msgid "{0} items to return"
-msgstr ""
+msgstr "{0} mục cần trả lại"
 
 #: erpnext/controllers/sales_and_purchase_return.py:218
 msgid "{0} must be negative in return document"
@@ -59202,7 +59208,7 @@ msgstr "{0} đơn vị của Mục {1} không có sẵn trong bất kỳ kho nà
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:1080
 msgid "{0} units of Item {1} is not available in any of the warehouses. Other Pick Lists exist for this item."
-msgstr ""
+msgstr "{0} đơn vị của Mục {1} không có sẵn trong bất kỳ kho nào. Các Danh sách chọn khác tồn tại cho mục này."
 
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py:145
 msgid "{0} units of {1} are required in {2} with the inventory dimension: {3} on {4} {5} for {6} to complete the transaction."
@@ -59450,19 +59456,19 @@ msgstr "{0}, hãy hoàn thành thao tác {1} trước thao tác {2}."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:523
 msgid "{0}: Child table (auto-deleted with parent)"
-msgstr ""
+msgstr "{0}: Bảng con (tự động xóa với bảng gốc)"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:518
 msgid "{0}: Not found"
-msgstr ""
+msgstr "{0}: Không tìm thấy"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:514
 msgid "{0}: Protected DocType"
-msgstr ""
+msgstr "{0}: DocType được bảo vệ"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:528
 msgid "{0}: Virtual DocType (no database table)"
-msgstr ""
+msgstr "{0}: DocType ảo (không có bảng cơ sở dữ liệu)"
 
 #: erpnext/controllers/accounts_controller.py:543
 msgid "{0}: {1} does not belong to the Company: {2}"
@@ -59470,7 +59476,7 @@ msgstr "{0}: {1} không thuộc Công ty: {2}"
 
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1323
 msgid "{0}: {1} does not exist"
-msgstr ""
+msgstr "{0}: {1} không tồn tại"
 
 #: erpnext/accounts/party.py:78
 msgid "{0}: {1} does not exists"
