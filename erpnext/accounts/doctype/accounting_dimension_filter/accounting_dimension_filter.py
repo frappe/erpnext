@@ -43,18 +43,19 @@ class AccountingDimensionFilter(Document):
 		self.validate_applicable_accounts()
 
 	def validate_applicable_accounts(self):
-		accounts = frappe.db.sql(
-			"""
-				SELECT a.applicable_on_account as account
-				FROM `tabApplicable On Account` a, `tabAccounting Dimension Filter` d
-				WHERE d.name = a.parent
-				and d.name != %s
-				and d.accounting_dimension = %s
-			""",
-			(self.name, self.accounting_dimension),
-			as_dict=1,
+		ApplicableOnAccount = frappe.qb.DocType("Applicable On Account")
+		AccountingDimensionFilter = frappe.qb.DocType("Accounting Dimension Filter")
+
+		query = (
+			frappe.qb.from_(ApplicableOnAccount)
+			.join(AccountingDimensionFilter)
+			.on(AccountingDimensionFilter.name == ApplicableOnAccount.parent)
+			.select(ApplicableOnAccount.applicable_on_account.as_("account"))
+			.where(AccountingDimensionFilter.name != self.name)
+			.where(AccountingDimensionFilter.accounting_dimension == self.accounting_dimension)
 		)
 
+		accounts = query.run(as_dict=1)
 		account_list = [d.account for d in accounts]
 
 		for account in self.get("accounts"):
