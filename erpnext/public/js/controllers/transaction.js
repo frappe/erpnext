@@ -2929,6 +2929,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			method: "erpnext.controllers.stock_controller.check_item_quality_inspection",
 			args: {
 				doctype: this.frm.doc.doctype,
+				docstatus: this.frm.doc.docstatus,
 				items: this.frm.doc.items,
 			},
 			freeze: true,
