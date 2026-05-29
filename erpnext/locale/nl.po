@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version:  frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-27 15:21+0000\n"
-"PO-Revision-Date: 2026-05-29 15:11+0000\n"
+"PO-Revision-Date: 2026-05-29 17:05+0000\n"
 "Last-Translator: hello@frappe.io\n"
 "Language: nl_NL\n"
 "Language-Team: Dutch\n"
@@ -603,7 +603,7 @@ msgstr "90 en meer"
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1261
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1262
 msgid "<0"
-msgstr ""
+msgstr "<0"
 
 #: erpnext/assets/doctype/asset/asset.py:541
 msgid "<b>Cannot create asset.</b><br><br>You're trying to create <b>{0} asset(s)</b> from {2} {3}.<br>However, only <b>{1} item(s)</b> were purchased and <b>{4} asset(s)</b> already exist against {5}."
@@ -677,7 +677,7 @@ msgstr "<div class=\"text-muted text-center\">{0}</div>"
 #. Content of the 'Stock Levels HTML' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "<div id=\"stock-levels-placeholder\"></div>"
-msgstr ""
+msgstr "<div id=\"stock-levels-placeholder\"></div>"
 
 #. Content of the 'uom_help_html' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -1249,7 +1249,7 @@ msgstr "ACC-PINV-.JJJJ.-"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:88
 msgid "ALL records will be deleted (entire DocType cleared)"
-msgstr ""
+msgstr "ALLE records worden verwijderd (het volledige documenttype wordt gewist)."
 
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:552
 msgid "AMC Expiry (Serial)"
@@ -2731,7 +2731,7 @@ msgstr "Handmatig toevoegen"
 
 #: erpnext/projects/doctype/task/task_tree.js:42
 msgid "Add Multiple"
-msgstr ""
+msgstr "Meerdere toevoegen"
 
 #: erpnext/projects/doctype/task/task_tree.js:49
 msgid "Add Multiple Tasks"
@@ -2877,7 +2877,7 @@ msgstr "Toevoegen aan Transit"
 
 #: erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.py:119
 msgid "Add vouchers to generate preview."
-msgstr ""
+msgstr "Voeg vouchers toe om een voorbeeld te genereren."
 
 #: erpnext/accounts/doctype/coupon_code/coupon_code.js:36
 msgid "Add/Edit Coupon Conditions"
@@ -3341,7 +3341,7 @@ msgstr "Vooruitbetaald"
 #. Label of the advance_paid (Currency) field in DocType 'Purchase Order'
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 msgid "Advance Paid (Company Currency)"
-msgstr ""
+msgstr "Vooruitbetaald (bedrijfsvaluta)"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order_list.js:75
 #: erpnext/selling/doctype/sales_order/sales_order_list.js:122
@@ -3833,7 +3833,7 @@ msgstr "Alle lood (open)"
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.html:115
 #: erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.html:113
 msgid "All Parties"
-msgstr ""
+msgstr "Alle partijen"
 
 #. Option for the 'Send To' (Select) field in DocType 'SMS Center'
 #: erpnext/selling/doctype/sms_center/sms_center.json
@@ -4144,7 +4144,7 @@ msgstr "Negatieve voorraad toestaan"
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Allow Negative Stock for Batch"
-msgstr ""
+msgstr "Negatieve voorraad toestaan voor de batch"
 
 #. Label of the allow_or_restrict (Select) field in DocType 'Accounting
 #. Dimension Filter'
@@ -4893,7 +4893,7 @@ msgstr "Analist"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Analytical Accounting"
-msgstr ""
+msgstr "Analytische boekhouding"
 
 #: erpnext/public/js/utils.js:184
 msgid "Annual Billing: {0}"
@@ -5198,7 +5198,7 @@ msgstr "Pas de SLA toe voor de oplostijd."
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Apply discounts and margins on products"
-msgstr ""
+msgstr "Pas kortingen en marges toe op producten."
 
 #. Label of the apply_restriction_on_values (Check) field in DocType
 #. 'Accounting Dimension Filter'
@@ -5762,7 +5762,7 @@ msgstr "Activa-status"
 #. Label of the asset_type (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Asset Type"
-msgstr ""
+msgstr "Type activa"
 
 #. Label of the asset_value (Currency) field in DocType 'Asset Capitalization
 #. Asset Item'
@@ -5997,7 +5997,7 @@ msgstr "Bij rij #{0}: De verzamelde hoeveelheid {1} voor het artikel {2} is grot
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1436
 msgid "At Row {0}: In Serial and Batch Bundle {1} must have docstatus as 1 and not 0"
-msgstr ""
+msgstr "Bij rij {0}: In seriële en batchbundel {1} moet de documentstatus 1 zijn en niet 0."
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:84
 msgid "At least one account with exchange gain or loss is required"
@@ -6030,7 +6030,7 @@ msgstr "Er moet ten minste één van de opties 'Verkopen' of 'Kopen' geselecteer
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:324
 msgid "At least one raw material item must be present in the stock entry for the type {0}"
-msgstr ""
+msgstr "Er moet ten minste één grondstofartikel aanwezig zijn in de voorraadpost voor het type {0}"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:27
 msgid "At least one row is required for a financial report template"
@@ -6439,7 +6439,7 @@ msgstr "Beschikbaar"
 #. DocType 'Bin'
 #: erpnext/stock/doctype/bin/bin.json
 msgid "Available / Future Inventory"
-msgstr ""
+msgstr "Beschikbare / Toekomstige voorraad"
 
 #. Label of the actual_batch_qty (Float) field in DocType 'Delivery Note Item'
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
@@ -6553,7 +6553,7 @@ msgstr "Beschikbaar voor Verpakking Items"
 #. Label of the available_for_use_date (Date) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Available for Use Date"
-msgstr ""
+msgstr "Beschikbaar vanaf datum"
 
 #: erpnext/assets/doctype/asset/asset.py:382
 msgid "Available for use date is required"
@@ -6589,7 +6589,7 @@ msgstr "Gemiddelde korting"
 #. Label of a number card in the Selling Workspace
 #: erpnext/selling/workspace/selling/selling.json
 msgid "Average Order Value"
-msgstr ""
+msgstr "Gemiddelde orderwaarde"
 
 #. Label of a number card in the Buying Workspace
 #: erpnext/buying/workspace/buying/buying.json
@@ -6937,7 +6937,7 @@ msgstr "BOM-websitewerking"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:2458
 msgid "BOM and Finished Good Quantity is mandatory for Disassembly"
-msgstr ""
+msgstr "De stuklijst (BOM) en de hoeveelheid eindproduct zijn verplicht voor demontage."
 
 #. Label of the bom_and_work_order_tab (Tab Break) field in DocType
 #. 'Manufacturing Settings'
@@ -7535,13 +7535,13 @@ msgstr "Basistarief"
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Base Tax Withheld"
-msgstr ""
+msgstr "Basisbelasting ingehouden"
 
 #. Label of the taxable_amount (Currency) field in DocType 'Tax Withholding
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Base Taxable Amount"
-msgstr ""
+msgstr "Basis belastbaar bedrag"
 
 #. Label of the base_total_billable_amount (Currency) field in DocType
 #. 'Timesheet'
@@ -9057,7 +9057,7 @@ msgstr "Campagneschema's"
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:113
 msgid "Campaign {0} not found"
-msgstr ""
+msgstr "Campagne {0} niet gevonden"
 
 #: erpnext/setup/doctype/authorization_control/authorization_control.py:60
 msgid "Can be approved by {0}"
@@ -9172,7 +9172,7 @@ msgstr "Het is niet mogelijk om grootboekposten voor vouchers in een afgesloten 
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:204
 msgid "Cannot add child table {0} to deletion list. Child tables are automatically deleted with their parent DocTypes."
-msgstr ""
+msgstr "Kan de onderliggende tabel {0} niet toevoegen aan de verwijderingslijst. Onderliggende tabellen worden automatisch verwijderd samen met hun bovenliggende DocTypes."
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:226
 msgid "Cannot amend {0} {1}, please create a new one instead."
@@ -9216,7 +9216,7 @@ msgstr "Deze productievoorraadboeking kan niet worden geannuleerd, omdat de gepr
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:579
 msgid "Cannot cancel this document as it is linked with the submitted Asset Value Adjustment <b>{0}</b>. Please cancel the Asset Value Adjustment to continue."
-msgstr ""
+msgstr "Dit document kan niet worden geannuleerd omdat het is gekoppeld aan de ingediende activa-waardeaanpassing <b>{0}</b>. Annuleer de activa-waardeaanpassing om verder te gaan."
 
 #: erpnext/controllers/buying_controller.py:1148
 msgid "Cannot cancel this document as it is linked with the submitted asset {asset_link}. Please cancel the asset to continue."
@@ -9311,11 +9311,11 @@ msgstr "Een besteld artikel kan niet worden verwijderd."
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:197
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:783
 msgid "Cannot delete protected core DocType: {0}"
-msgstr ""
+msgstr "Kan beveiligde kern DocType niet verwijderen: {0}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:213
 msgid "Cannot delete virtual DocType: {0}. Virtual DocTypes do not have database tables."
-msgstr ""
+msgstr "Virtueel documenttype kan niet worden verwijderd: {0}. Virtuele documenttypen hebben geen databasetabellen."
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.py:146
 msgid "Cannot disable Serial and Batch No for Item, as there are existing records for serial / batch."
@@ -9364,11 +9364,11 @@ msgstr "Er kan geen standaardmagazijn worden gevonden voor artikel {0}. Stel er 
 
 #: erpnext/accounts/party.py:1063
 msgid "Cannot merge {0} '{1}' into '{2}' as both have existing accounting entries in different currencies for company '{3}'."
-msgstr ""
+msgstr "Kan {0} '{1}' niet samenvoegen met '{2}' omdat beide bestaande boekhoudkundige posten in verschillende valuta's hebben voor bedrijf '{3}'."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:578
 msgid "Cannot produce more Item {0} than Sales Order quantity {1} {2}"
-msgstr ""
+msgstr "Kan niet meer artikelen {0} produceren dan de bestelhoeveelheid {1} {2}"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:1473
 msgid "Cannot produce more item for {0}"
@@ -9427,11 +9427,11 @@ msgstr "Kan niet meerdere item-standaardwaarden voor een bedrijf instellen."
 
 #: erpnext/controllers/accounts_controller.py:3913
 msgid "Cannot set quantity less than delivered quantity."
-msgstr ""
+msgstr "Kan hoeveelheid niet lager instellen dan geleverde hoeveelheid."
 
 #: erpnext/controllers/accounts_controller.py:3914
 msgid "Cannot set quantity less than received quantity."
-msgstr ""
+msgstr "Kan hoeveelheid niet lager instellen dan ontvangen hoeveelheid."
 
 #: erpnext/stock/doctype/item_variant_settings/item_variant_settings.py:69
 msgid "Cannot set the field <b>{0}</b> for copying in variants"
@@ -9439,7 +9439,7 @@ msgstr "Kan veld <b>{0}</b> niet instellen voor het kopiëren in varianten"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:266
 msgid "Cannot start deletion. Another deletion {0} is already queued/running. Please wait for it to complete."
-msgstr ""
+msgstr "Kan de verwijdering niet starten. Er is al een andere verwijdering {0} in de wachtrij/wordt al uitgevoerd. Wacht tot deze is voltooid."
 
 #: erpnext/controllers/accounts_controller.py:3941
 msgid "Cannot update rate as item {0} is already ordered or purchased against this quotation"
@@ -9973,11 +9973,11 @@ msgstr ""
 
 #: erpnext/accounts/doctype/journal_entry_template/journal_entry_template.py:58
 msgid "Check row {0} for account {1}: Party Type is only allowed for Receivable or Payable accounts"
-msgstr ""
+msgstr "Controleer rij {0} voor rekening {1}: Partijtype is alleen toegestaan voor debiteuren- of crediteurenrekeningen"
 
 #: erpnext/accounts/doctype/journal_entry_template/journal_entry_template.py:65
 msgid "Check row {0} for account {1}: Party is only allowed if Party Type is set"
-msgstr ""
+msgstr "Controleer rij {0} voor account {1}: Feest is alleen toegestaan als Feesttype is ingesteld"
 
 #. Description of the 'Must be Whole Number' (Check) field in DocType 'UOM'
 #: erpnext/setup/doctype/uom/uom.json
@@ -10090,7 +10090,7 @@ msgstr "Hoofd Technologie Officer"
 #. Deletion Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Child DocTypes"
-msgstr ""
+msgstr "Kind-documenttypen"
 
 #. Label of the child_docname (Data) field in DocType 'Pricing Rule Detail'
 #: erpnext/accounts/doctype/pricing_rule_detail/pricing_rule_detail.json
@@ -10106,7 +10106,7 @@ msgstr "Referentie naar onderliggende rij"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:207
 msgid "Child Table Not Allowed"
-msgstr ""
+msgstr "Kindertafel niet toegestaan"
 
 #: erpnext/projects/doctype/task/task.py:314
 msgid "Child Task exists for this Task. You can not delete this Task."
@@ -10120,7 +10120,7 @@ msgstr "Child nodes kunnen alleen worden gemaakt op grond van het type nodes &#3
 #. 'Transaction Deletion Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Child tables that will also be deleted"
-msgstr ""
+msgstr "Kindtabellen die ook verwijderd zullen worden"
 
 #: erpnext/stock/doctype/warehouse/warehouse.py:103
 msgid "Child warehouse exists for this warehouse. You can not delete this warehouse."
@@ -10199,7 +10199,7 @@ msgstr "Ontruiming Geactualiseerd"
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.py:158
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.py:173
 msgid "Clearance date changed from {0} to {1} via Bank Clearance Tool"
-msgstr ""
+msgstr "De verrekeningsdatum is gewijzigd van {0} naar {1} via de Bank Clearance Tool."
 
 #: erpnext/public/js/utils/demo.js:21
 msgid "Clearing Demo Data..."
@@ -10999,7 +10999,7 @@ msgstr "Bedrijfsrekening"
 
 #: erpnext/accounts/doctype/bank_account/bank_account.py:63
 msgid "Company Account is mandatory"
-msgstr ""
+msgstr "Een bedrijfsaccount is verplicht."
 
 #. Label of the company_address (Link) field in DocType 'Dunning'
 #. Label of the company_address_display (Text Editor) field in DocType 'POS
@@ -11111,7 +11111,7 @@ msgstr "Bedrijfs-e-mail"
 #. Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Company Field"
-msgstr ""
+msgstr "Bedrijfsveld"
 
 #. Label of the company_logo (Attach Image) field in DocType 'Company'
 #: erpnext/public/js/print.js:80 erpnext/setup/doctype/company/company.json
@@ -11168,7 +11168,7 @@ msgstr "Een bedrijf is verplicht voor het genereren van een factuur. Stel een st
 #. Deletion Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Company link field name used for filtering (optional - leave empty to delete all records)"
-msgstr ""
+msgstr "Bedrijfslinkveldnaam gebruikt voor filtering (optioneel - laat leeg om alle records te verwijderen)"
 
 #: erpnext/setup/doctype/company/company.js:222
 msgid "Company name not same"
@@ -11374,12 +11374,12 @@ msgstr ""
 #. Option for the 'Asset Type' (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Composite Asset"
-msgstr ""
+msgstr "Samengesteld actief"
 
 #. Option for the 'Asset Type' (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Composite Component"
-msgstr ""
+msgstr "Samengestelde component"
 
 #. Label of the comprehensive_insurance (Data) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
@@ -11450,7 +11450,7 @@ msgstr "Bevestigingsdatum"
 #. Label of the connection_tab (Tab Break) field in DocType 'Asset Repair'
 #: erpnext/assets/doctype/asset_repair/asset_repair.json
 msgid "Connection"
-msgstr ""
+msgstr "Verbinding"
 
 #: erpnext/accounts/report/general_ledger/general_ledger.js:176
 msgid "Consider Accounting Dimensions"
@@ -11500,12 +11500,12 @@ msgstr "Overweeg belasting of heffing voor"
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 #: erpnext/accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgid "Consider for Tax Withholding"
-msgstr ""
+msgstr "Overweeg de inhouding van belasting."
 
 #. Label of the apply_tds (Check) field in DocType 'Journal Entry'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
 msgid "Consider for Tax Withholding "
-msgstr ""
+msgstr "Overweeg de inhouding van belasting. "
 
 #. Label of the included_in_paid_amount (Check) field in DocType 'Advance Taxes
 #. and Charges'
@@ -12920,7 +12920,7 @@ msgstr "Offerte voor leveranciers maken"
 #. Label of an action in the Onboarding Step 'Create Tasks'
 #: erpnext/projects/onboarding_step/create_tasks/create_tasks.json
 msgid "Create Task"
-msgstr ""
+msgstr "Maak taak"
 
 #. Title of an Onboarding Step
 #: erpnext/projects/onboarding_step/create_tasks/create_tasks.json
@@ -13026,7 +13026,7 @@ msgstr "Maak {0} {1}?"
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Created By Migration"
-msgstr ""
+msgstr "Aangemaakt door migratie"
 
 #: erpnext/buying/doctype/supplier_scorecard/supplier_scorecard.py:250
 msgid "Created {0} scorecards for {1} between:"
@@ -13453,7 +13453,7 @@ msgstr "Kubieke meter"
 #. Rate'
 #: erpnext/accounts/doctype/tax_withholding_rate/tax_withholding_rate.json
 msgid "Cumulative Threshold"
-msgstr ""
+msgstr "Cumulatieve drempelwaarde"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -14270,7 +14270,7 @@ msgstr "Klantgegevens inkooporder"
 #. Label of the customer_pos_id (Data) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Customer POS ID"
-msgstr ""
+msgstr "Klant POS-ID"
 
 #. Label of the portal_users (Table) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
@@ -14892,13 +14892,13 @@ msgstr "Aftrekken"
 #. Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Deduct Tax On Basis"
-msgstr ""
+msgstr "Belasting inhouden op basis van"
 
 #. Label of the source_section (Section Break) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Deducted From"
-msgstr ""
+msgstr "afgetrokken van"
 
 #. Label of the section_break_3 (Section Break) field in DocType 'Lower
 #. Deduction Certificate'
@@ -14969,7 +14969,7 @@ msgstr "Standaard voorschot ontvangen rekening"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Default Ageing Range"
-msgstr ""
+msgstr "Standaard verouderingsbereik"
 
 #. Label of the default_bom (Link) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -15593,11 +15593,11 @@ msgstr "Verwijderen is niet toegestaan voor land {0}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:216
 msgid "Deletion process restarted"
-msgstr ""
+msgstr "Het verwijderingsproces is opnieuw gestart."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:97
 msgid "Deletion will start automatically after submission."
-msgstr ""
+msgstr "Het verwijderen start automatisch na indiening."
 
 #. Label of the delimiter_options (Data) field in DocType 'Bank Statement
 #. Import'
@@ -16378,7 +16378,7 @@ msgstr "Directe Inkomsten"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:359
 msgid "Direct return is not allowed for Timesheet."
-msgstr ""
+msgstr "Directe retourzending is niet toegestaan voor urenstaten."
 
 #. Label of the disabled (Check) field in DocType 'Account'
 #. Label of the disabled (Check) field in DocType 'Accounting Dimension'
@@ -16408,7 +16408,7 @@ msgstr "Capaciteitsplanning voor mensen met een beperking"
 #. Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Disable Cumulative Threshold"
-msgstr ""
+msgstr "Schakel cumulatieve drempelwaarde uit"
 
 #. Label of the disable_in_words (Check) field in DocType 'Global Defaults'
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
@@ -16455,7 +16455,7 @@ msgstr "Schakel de serienummer- en batchselector uit."
 #. Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Disable Transaction Threshold"
-msgstr ""
+msgstr "Transactiedrempel uitschakelen"
 
 #. Label of the disable_last_purchase_rate (Check) field in DocType 'Buying
 #. Settings'
@@ -16516,7 +16516,7 @@ msgstr "Demontageopdracht"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:2400
 msgid "Disassemble Qty cannot be less than or equal to 0."
-msgstr ""
+msgstr "De hoeveelheid demonteren kan niet kleiner of gelijk zijn aan 0."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:445
 msgid "Disassemble Qty cannot be less than or equal to <b>0</b>."
@@ -17062,31 +17062,31 @@ msgstr ""
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:182
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:445
 msgid "DocType {0} does not exist"
-msgstr ""
+msgstr "DocType {0} bestaat niet"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:295
 msgid "DocType {0} with company field '{1}' is already in the list"
-msgstr ""
+msgstr "DocType {0} met bedrijfsveld '{1}' staat al in de lijst"
 
 #. Label of the doctypes_to_delete (Table) field in DocType 'Transaction
 #. Deletion Record'
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgid "DocTypes To Delete"
-msgstr ""
+msgstr "Documenttypen die verwijderd moeten worden"
 
 #. Description of the 'Excluded DocTypes' (Table) field in DocType 'Transaction
 #. Deletion Record'
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgid "DocTypes that will NOT be deleted."
-msgstr ""
+msgstr "Documenttypen die NIET worden verwijderd."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:84
 msgid "DocTypes with a company field:"
-msgstr ""
+msgstr "Documenttypen met een bedrijfsveld:"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:88
 msgid "DocTypes without a company field:"
-msgstr ""
+msgstr "Documenttypen zonder bedrijfsveld:"
 
 #: erpnext/templates/pages/search_help.py:22
 msgid "Docs Search"
@@ -17096,7 +17096,7 @@ msgstr "Google Documenten zoeken"
 #. Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Document Count"
-msgstr ""
+msgstr "Aantal documenten"
 
 #. Label of the document_naming_tab (Tab Break) field in DocType 'Buying
 #. Settings'
@@ -17152,7 +17152,7 @@ msgstr "Handhaaf geen maximumaantal gratis artikelen."
 #: erpnext/accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 #: erpnext/accounts/doctype/sales_taxes_and_charges/sales_taxes_and_charges.json
 msgid "Don't Recompute Tax"
-msgstr ""
+msgstr "Belasting niet opnieuw berekenen"
 
 #. Label of the dont_reserve_sales_order_qty_on_sales_return (Check) field in
 #. DocType 'Selling Settings'
@@ -17358,7 +17358,7 @@ msgstr "Dubbele klantengroep"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:190
 msgid "Duplicate DocType"
-msgstr ""
+msgstr "Dubbel documenttype"
 
 #: erpnext/setup/doctype/authorization_rule/authorization_rule.py:71
 msgid "Duplicate Entry. Please check Authorization Rule {0}"
@@ -17374,7 +17374,7 @@ msgstr "Dubbele itemgroep"
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:102
 msgid "Duplicate Item Under Same Parent"
-msgstr ""
+msgstr "Dubbel item onder hetzelfde ouderitem"
 
 #: erpnext/manufacturing/doctype/workstation/workstation.py:79
 #: erpnext/manufacturing/doctype/workstation_type/workstation_type.py:37
@@ -17420,7 +17420,7 @@ msgstr "Dubbele invoer tegen de artikelcode {0} en fabrikant {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:189
 msgid "Duplicate entry: {0}{1}"
-msgstr ""
+msgstr "Dubbele invoer: {0}{1}"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:164
 msgid "Duplicate item group found in the item group table"
@@ -17481,7 +17481,7 @@ msgstr "EAN"
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
 msgid "EAN-13"
-msgstr ""
+msgstr "EAN-13"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
@@ -17501,7 +17501,7 @@ msgstr "EMU van de huidige"
 #. Label of a Desktop Icon
 #: erpnext/desktop_icon/erpnext.json
 msgid "ERPNext"
-msgstr ""
+msgstr "ERPNext"
 
 #. Label of a Desktop Icon
 #. Name of a Workspace
@@ -17510,7 +17510,7 @@ msgstr ""
 #: erpnext/setup/workspace/erpnext_settings/erpnext_settings.json
 #: erpnext/workspace_sidebar/erpnext_settings.json
 msgid "ERPNext Settings"
-msgstr ""
+msgstr "ERPNext-instellingen"
 
 #. Label of the user_id (Data) field in DocType 'Employee Group Table'
 #: erpnext/setup/doctype/employee_group_table/employee_group_table.json
@@ -17603,7 +17603,7 @@ msgstr "Bewerk ontvangstbewijs"
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Edit Tax Withholding Entries"
-msgstr ""
+msgstr "Belastinginhoudingsgegevens bewerken"
 
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:777
 msgid "Editing {0} is not allowed as per POS Profile settings"
@@ -17699,7 +17699,7 @@ msgstr "E-mail campagne"
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:149
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:157
 msgid "Email Campaign Error"
-msgstr ""
+msgstr "E-mailcampagnefout"
 
 #. Label of the email_campaign_for (Select) field in DocType 'Email Campaign'
 #: erpnext/crm/doctype/email_campaign/email_campaign.json
@@ -17708,7 +17708,7 @@ msgstr "E-mailcampagne voor "
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:125
 msgid "Email Campaign Send Error"
-msgstr ""
+msgstr "Fout bij het verzenden van e-mailcampagne"
 
 #. Label of the supplier_response_section (Section Break) field in DocType
 #. 'Request for Quotation'
@@ -17968,7 +17968,7 @@ msgstr "Leeg"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:755
 msgid "Empty To Delete List"
-msgstr ""
+msgstr "Leegmaken om te verwijderen. Lijst met te verwijderen objecten"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -17979,7 +17979,7 @@ msgstr "Ems(Pica)"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Accounting Dimensions"
-msgstr ""
+msgstr "Accountdimensies inschakelen"
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1721
 msgid "Enable Allow Partial Reservation in the Stock Settings to reserve partial stock."
@@ -18041,7 +18041,7 @@ msgstr "Schakel uitgestelde omzet in."
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Discounts and Margin"
-msgstr ""
+msgstr "Schakel kortingen en marges in"
 
 #. Label of the enable_european_access (Check) field in DocType 'Plaid
 #. Settings'
@@ -18077,7 +18077,7 @@ msgstr "Inventarisaccount per artikel inschakelen"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Loyalty Point Program"
-msgstr ""
+msgstr "Activeer het loyaliteitspuntenprogramma"
 
 #. Label of the enable_parallel_reposting (Check) field in DocType 'Stock
 #. Reposting Settings'
@@ -18127,12 +18127,12 @@ msgstr ""
 #. Label of the enable_utm (Check) field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Enable UTM"
-msgstr ""
+msgstr "UTM inschakelen"
 
 #. Description of the 'Enable UTM' (Check) field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Enable Urchin Tracking Module parameters in Quotation, Sales Order, Sales Invoice, POS Invoice, Lead,  and Delivery Note."
-msgstr ""
+msgstr "Schakel de parameters van de Urchin Tracking Module in voor offertes, verkooporders, verkoopfacturen, POS-facturen, leads en leveringsbonnen."
 
 #. Label of the enable_youtube_tracking (Check) field in DocType 'Video
 #. Settings'
@@ -18144,7 +18144,7 @@ msgstr "YouTube-tracking inschakelen"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable cost center, projects and other custom accounting dimensions"
-msgstr ""
+msgstr "Schakel kostenplaatsen, projecten en andere aangepaste boekhoudkundige dimensies in."
 
 #. Label of the enable_cutoff_date_on_bulk_delivery_note_creation (Check) field
 #. in DocType 'Selling Settings'
@@ -18228,7 +18228,7 @@ msgstr ""
 #. 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Enable tracking sales commissions"
-msgstr ""
+msgstr "Schakel het bijhouden van verkoopcommissies in."
 
 #. Description of the 'Fetch Timesheet in Sales Invoice' (Check) field in
 #. DocType 'Projects Settings'
@@ -18545,7 +18545,7 @@ msgstr "Fout bij het evalueren van de criteria formule"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:267
 msgid "Error getting details for {0}: {1}"
-msgstr ""
+msgstr "Fout bij het ophalen van details voor {0}: {1}"
 
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.py:312
 msgid "Error in party matching for Bank Transaction {0}"
@@ -18804,7 +18804,7 @@ msgstr "Accijnspaginanummer"
 
 #: erpnext/accounts/report/trial_balance_for_party/trial_balance_for_party.js:86
 msgid "Exclude Zero Balance Parties"
-msgstr ""
+msgstr "Partijen met een saldo van nul uitsluiten"
 
 #. Label of the doctypes_to_be_ignored (Table) field in DocType 'Transaction
 #. Deletion Record'
@@ -18845,7 +18845,7 @@ msgstr "Tentoonstelling"
 #. Option for the 'Asset Type' (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Existing Asset"
-msgstr ""
+msgstr "Bestaande activa"
 
 #. Option for the 'Create Chart Of Accounts Based On' (Select) field in DocType
 #. 'Company'
@@ -19273,7 +19273,7 @@ msgstr "Het is niet gelukt om afschrijvingsboekingen te verwerken."
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:126
 msgid "Failed to send email for campaign {0} to {1}"
-msgstr ""
+msgstr "Het verzenden van de e-mail voor campagne {0} naar {1} is mislukt."
 
 #: erpnext/setup/setup_wizard/setup_wizard.py:26
 msgid "Failed to set defaults"
@@ -19421,7 +19421,7 @@ msgstr "Bezig met ophalen..."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:224
 msgid "Field '{0}' is not a valid Company link field for DocType {1}"
-msgstr ""
+msgstr "Veld '{0}' is geen geldig bedrijfslinkveld voor documenttype {1}"
 
 #. Label of the field_mapping_section (Section Break) field in DocType
 #. 'Inventory Dimension'
@@ -19451,15 +19451,15 @@ msgstr "De velden worden pas gekopieerd op het moment van aanmaken."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1067
 msgid "File does not belong to this Transaction Deletion Record"
-msgstr ""
+msgstr "Dit bestand hoort niet bij dit transactieverwijderingsrecord."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1061
 msgid "File not found"
-msgstr ""
+msgstr "Bestand niet gevonden"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1075
 msgid "File not found on server"
-msgstr ""
+msgstr "Bestand niet gevonden op de server"
 
 #. Label of the file_to_rename (Attach) field in DocType 'Rename Tool'
 #: erpnext/utilities/doctype/rename_tool/rename_tool.json
@@ -20237,7 +20237,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/bom/bom.py:368
 msgid "For operation {0} at row {1}, please add raw materials or set a BOM against it."
-msgstr ""
+msgstr "Voor bewerking {0} op rij {1}, voeg grondstoffen toe of stel een stuklijst in."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:2649
 msgid "For operation {0}: Quantity ({1}) can not be greater than pending quantity({2})"
@@ -20291,7 +20291,7 @@ msgstr "Voor het gemak van de klant kunnen deze codes worden gebruikt in gedrukt
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1071
 msgid "For the item {0}, the consumed quantity should be {1} according to the BOM {2}."
-msgstr ""
+msgstr "Voor het artikel {0}moet de verbruikte hoeveelheid {1} zijn volgens de stuklijst {2}."
 
 #: erpnext/public/js/controllers/transaction.js:1404
 msgctxt "Clear payment terms template and/or payment schedule when due date is changed"
@@ -20482,7 +20482,7 @@ msgstr "De begindatum en einddatum zijn verplicht."
 
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:29
 msgid "From Date and To Date are required"
-msgstr ""
+msgstr "De begindatum en de einddatum zijn verplicht."
 
 #: erpnext/accounts/report/tds_computation_summary/tds_computation_summary.py:30
 msgid "From Date and To Date lie in different Fiscal Year"
@@ -20497,7 +20497,7 @@ msgstr "Vanaf de datum kan niet groter zijn dan tot nu toe"
 
 #: erpnext/selling/report/sales_partner_commission_summary/sales_partner_commission_summary.py:60
 msgid "From Date cannot be greater than To Date."
-msgstr ""
+msgstr "Vanaf de datum kan niet groter zijn dan tot nu toe."
 
 #: erpnext/crm/report/sales_pipeline_analytics/sales_pipeline_analytics.py:27
 msgid "From Date is mandatory"
@@ -20794,7 +20794,7 @@ msgstr "Voorwaarden voor de uitvoering"
 
 #: erpnext/stock/doctype/shipment/shipment.js:275
 msgid "Full Name, Email or Phone/Mobile of the user are mandatory to continue."
-msgstr ""
+msgstr "De volledige naam, het e-mailadres of het telefoonnummer/mobiele nummer van de gebruiker zijn verplicht om verder te gaan."
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
 #. Account'
@@ -20922,7 +20922,7 @@ msgstr "GTIN"
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
 msgid "GTIN-14"
-msgstr ""
+msgstr "GTIN-14"
 
 #. Label of the gain_loss (Currency) field in DocType 'Exchange Rate
 #. Revaluation Account'
@@ -21067,11 +21067,11 @@ msgstr "Genereer een boekingspost voor de afsluiting van de aandelenpositie"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:112
 msgid "Generate To Delete List"
-msgstr ""
+msgstr "Lijst genereren om te verwijderen"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:472
 msgid "Generate To Delete list first"
-msgstr ""
+msgstr "Genereer eerst de lijst met te verwijderen items."
 
 #. Description of a DocType
 #: erpnext/stock/doctype/packing_slip/packing_slip.json
@@ -21549,7 +21549,7 @@ msgstr "Totaalbedrag (valuta van het bedrijf)"
 
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:252
 msgid "Grand Total (Transaction Currency)"
-msgstr ""
+msgstr "Totaalbedrag (transactievaluta)"
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:125
 msgid "Grand Total must match sum of Payment References"
@@ -21640,7 +21640,7 @@ msgstr "Brutowinstratio"
 #. Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Gross Total"
-msgstr ""
+msgstr "Bruto totaal"
 
 #. Label of the gross_weight_pkg (Float) field in DocType 'Packing Slip'
 #: erpnext/stock/doctype/packing_slip/packing_slip.json
@@ -21668,7 +21668,7 @@ msgstr "Groeperen op leverancier"
 #. Label of the group_name (Data) field in DocType 'Tax Withholding Group'
 #: erpnext/accounts/doctype/tax_withholding_group/tax_withholding_group.json
 msgid "Group Name"
-msgstr ""
+msgstr "Groepsnaam"
 
 #: erpnext/setup/doctype/sales_person/sales_person_tree.js:14
 msgid "Group Node"
@@ -22267,7 +22267,7 @@ msgstr "IBAN"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:93
 msgid "IMPORTANT: Create a backup before proceeding!"
-msgstr ""
+msgstr "BELANGRIJK: Maak een back-up voordat u verdergaat!"
 
 #. Name of a report
 #: erpnext/regional/report/irs_1099/irs_1099.json
@@ -22492,7 +22492,7 @@ msgstr "Indien ingeschakeld, staat het systeem de gebruiker toe de volledige hoe
 #. field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "If enabled, system will set incoming rate as zero for stand-alone credit notes with expired batch item."
-msgstr ""
+msgstr "Indien ingeschakeld, stelt het systeem het inkomende tarief op nul voor losstaande creditnota's met een verlopen batchitem."
 
 #. Description of the 'Deliver secondary Items' (Check) field in DocType
 #. 'Selling Settings'
@@ -22755,7 +22755,7 @@ msgstr "Als je toch wilt doorgaan, schakel dan {0} in."
 #. Description of the 'Sequence ID' (Int) field in DocType 'BOM Operation'
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
 msgid "If you want to run operations in parallel, keep the same sequence ID for them."
-msgstr ""
+msgstr "Als u bewerkingen parallel wilt uitvoeren, gebruik dan dezelfde volg-ID voor al deze bewerkingen."
 
 #: erpnext/accounts/doctype/pricing_rule/utils.py:378
 msgid "If you {0} {1} quantities of the item {2}, the scheme {3} will be applied on the item."
@@ -22880,7 +22880,7 @@ msgstr "Negeer door het systeem gegenereerde credit-/debetnota's."
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Ignore Tax Withholding Threshold"
-msgstr ""
+msgstr "Negeer de drempel voor inhouding van belasting"
 
 #. Label of the ignore_user_time_overlap (Check) field in DocType 'Projects
 #. Settings'
@@ -22908,7 +22908,7 @@ msgstr "Negeert het verouderde veld 'Is Opening' in de grootboekboeking, waarmee
 
 #: erpnext/stock/doctype/item/item.py:253
 msgid "Image in the description has been removed. To disable this behavior, uncheck \"{0}\" in {1}."
-msgstr ""
+msgstr "De afbeelding in de beschrijving is verwijderd. Om dit gedrag uit te schakelen, vinkt u \"{0}\" uit in {1}."
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:135
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:229
@@ -22959,7 +22959,7 @@ msgstr "Import succesvol"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:564
 msgid "Import Summary"
-msgstr ""
+msgstr "Importoverzicht"
 
 #. Label of a Link in the Buying Workspace
 #. Name of a DocType
@@ -22983,7 +22983,7 @@ msgstr "Import in bulk"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:192
 msgid "Imported {0} DocTypes"
-msgstr ""
+msgstr "Geïmporteerde {0} DocTypes"
 
 #: erpnext/edi/doctype/code_list/code_list_import.py:36
 msgid "Importing Code Lists from remote URLs is not allowed."
@@ -23426,7 +23426,7 @@ msgstr "Inkomstenrekening"
 #. 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Income and Expense"
-msgstr ""
+msgstr "Inkomsten en uitgaven"
 
 #. Description of the 'Enable Deferred Expense' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -23436,7 +23436,7 @@ msgstr ""
 #. Label of a number card in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 msgid "Incoming Bills"
-msgstr ""
+msgstr "Inkomende rekeningen"
 
 #. Name of a DocType
 #: erpnext/telephony/doctype/incoming_call_handling_schedule/incoming_call_handling_schedule.json
@@ -23451,7 +23451,7 @@ msgstr "Instellingen voor inkomende oproepen"
 #. Label of a number card in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 msgid "Incoming Payment"
-msgstr ""
+msgstr "Inkomende betaling"
 
 #. Label of the incoming_rate (Currency) field in DocType 'Delivery Note Item'
 #. Label of the incoming_rate (Currency) field in DocType 'Packed Item'
@@ -23968,7 +23968,7 @@ msgstr "Intern"
 #. 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Internal Customer Accounting"
-msgstr ""
+msgstr "Interne klantboekhouding"
 
 #: erpnext/selling/doctype/customer/customer.py:255
 msgid "Internal Customer for company {0} already exists"
@@ -23994,7 +23994,7 @@ msgstr "Intern verkoopreferentie ontbreekt"
 #. 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "Internal Supplier Accounting"
-msgstr ""
+msgstr "Interne leveranciersboekhouding"
 
 #: erpnext/buying/doctype/supplier/supplier.py:181
 msgid "Internal Supplier for company {0} already exists"
@@ -24085,7 +24085,7 @@ msgstr "Ongeldige algemene bestelling voor de geselecteerde klant en artikel"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:498
 msgid "Invalid CSV format. Expected column: doctype_name"
-msgstr ""
+msgstr "Ongeldig CSV-formaat. Verwachte kolom: doctype_name"
 
 #: erpnext/quality_management/doctype/quality_procedure/quality_procedure.py:72
 msgid "Invalid Child Procedure"
@@ -24093,7 +24093,7 @@ msgstr "Ongeldige kindprocedure"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:227
 msgid "Invalid Company Field"
-msgstr ""
+msgstr "Ongeldig bedrijfsveld"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2355
 msgid "Invalid Company for Inter Company Transaction."
@@ -24261,7 +24261,7 @@ msgstr "Ongeldige voorwaarde-uitdrukking"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1056
 msgid "Invalid file URL"
-msgstr ""
+msgstr "Ongeldige bestands-URL"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:87
 msgid "Invalid filter formula. Please check the syntax."
@@ -24355,7 +24355,7 @@ msgstr "Voorraadomloopsnelheid"
 #. 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Inventory Valuation"
-msgstr ""
+msgstr "Voorraadwaardering"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:29
 msgid "Investment Banking"
@@ -26487,7 +26487,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:99
 msgid "Item {0} added multiple times under the same parent item {1} at rows {2} and {3}"
-msgstr ""
+msgstr "Item {0} is meerdere keren toegevoegd onder hetzelfde bovenliggende item {1} op rijen {2} en {3}"
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:119
 msgid "Item {0} cannot be added as a sub-assembly of itself"
@@ -26714,7 +26714,7 @@ msgstr "Artikelen voor grondstofverzoek"
 
 #: erpnext/selling/page/point_of_sale/pos_item_selector.js:110
 msgid "Items not found."
-msgstr ""
+msgstr "Artikelen niet gevonden."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1245
 msgid "Items rate has been updated to zero as Allow Zero Valuation Rate is checked for the following items: {0}"
@@ -27508,7 +27508,7 @@ msgstr ""
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Learn about <a href=\"https://docs.frappe.io/erpnext/user/manual/en/common_party_accounting\" rel=\"noopener noreferrer\">Common Party</a>"
-msgstr ""
+msgstr "Leer meer over <a href=\"https://docs.frappe.io/erpnext/user/manual/en/common_party_accounting\" rel=\"noopener noreferrer\">Common Party</a>"
 
 #. Label of the leave_encashed (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -27563,7 +27563,7 @@ msgstr "Grootboekrekeningen samenvoegen"
 
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:146
 msgid "Ledger Type"
-msgstr ""
+msgstr "Grootboektype"
 
 #. Label of a Card Break in the Financial Reports Workspace
 #. Label of a Workspace Sidebar Item
@@ -28435,7 +28435,7 @@ msgstr "Overboeking uitvoeren"
 
 #: erpnext/public/js/telephony.js:29
 msgid "Make a call"
-msgstr ""
+msgstr "Gesprek starten"
 
 #: erpnext/config/projects.py:34
 msgid "Make project from a template."
@@ -28467,7 +28467,7 @@ msgstr "Beheer de operationele kosten"
 #. DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Manage sales partner's and sales team's commissions"
-msgstr ""
+msgstr "Beheer de commissies van verkooppartners en het verkoopteam."
 
 #: erpnext/utilities/activation.py:95
 msgid "Manage your orders"
@@ -29790,7 +29790,7 @@ msgstr "Notulen"
 #. Label of the section_break_19 (Section Break) field in DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Miscellaneous"
-msgstr ""
+msgstr "Gemengd"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:116
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:224
@@ -30133,7 +30133,7 @@ msgstr "Meerdere varianten"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:244
 msgid "Multiple company fields available: {0}. Please select manually."
-msgstr ""
+msgstr "Meerdere bedrijfsvelden beschikbaar: {0}. Selecteer handmatig."
 
 #: erpnext/controllers/accounts_controller.py:1306
 msgid "Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year"
@@ -30236,7 +30236,7 @@ msgstr ""
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:937
 msgid "Naming series '{0}' for DocType '{1}' does not contain standard '.' or '{{' separator. Using fallback extraction."
-msgstr ""
+msgstr "De naamgevingsreeks '{0}' voor documenttype '{1}' bevat geen standaard scheidingsteken '.' of '{{'. Er wordt gebruikgemaakt van een alternatieve extractiemethode."
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -30677,7 +30677,7 @@ msgstr "Er wordt een nieuwe journaalpost aangemaakt voor het verschilbedrag. De 
 #. Label of a number card in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "New Lead (Last 1 Month)"
-msgstr ""
+msgstr "Nieuwe lead (afgelopen maand)"
 
 #: erpnext/assets/doctype/location/location_tree.js:23
 msgid "New Location"
@@ -30690,7 +30690,7 @@ msgstr "Nieuwe notitie"
 #. Label of a number card in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "New Opportunity (Last 1 Month)"
-msgstr ""
+msgstr "Nieuwe kans (afgelopen maand)"
 
 #. Label of the purchase_invoice (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -30829,7 +30829,7 @@ msgstr "Geen leveringsbewijs geselecteerd voor klant {}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:754
 msgid "No DocTypes in To Delete list. Please generate or import the list before submitting."
-msgstr ""
+msgstr "Er staan geen documenttypen in de lijst 'Te verwijderen'. Genereer of importeer de lijst voordat u deze indient."
 
 #: erpnext/public/js/utils/ledger_preview.js:64
 msgid "No Impact on Accounting Ledger"
@@ -30849,7 +30849,7 @@ msgstr "Geen artikelen geselecteerd voor overdracht."
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1260
 msgid "No Items with Bill of Materials to Manufacture or all items already manufactured"
-msgstr ""
+msgstr "Geen artikelen met een stuklijst voor de productie of alle artikelen zijn reeds geproduceerd."
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1413
 msgid "No Items with Bill of Materials."
@@ -30913,7 +30913,7 @@ msgstr "Er zijn geen gegevens over loonheffing gevonden voor de huidige boekings
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:108
 msgid "No Tax withholding account set for Company {0} in Tax Withholding Category {1}."
-msgstr ""
+msgstr "Er is geen belastinginhoudingsrekening ingesteld voor bedrijf {0} in belastinginhoudingscategorie {1}."
 
 #: erpnext/accounts/report/gross_profit/gross_profit.py:990
 msgid "No Terms"
@@ -30975,7 +30975,7 @@ msgstr "Geen verschil gevonden voor aandelenrekening {0}"
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:150
 msgid "No email found for {0} {1}"
-msgstr ""
+msgstr "Geen e-mailadres gevonden voor {0} {1}"
 
 #: erpnext/telephony/doctype/call_log/call_log.py:117
 msgid "No employee was scheduled for call popup"
@@ -31148,7 +31148,7 @@ msgstr "Geen recente transacties gevonden"
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:158
 msgid "No recipients found for campaign {0}"
-msgstr ""
+msgstr "Geen ontvangers gevonden voor campagne {0}"
 
 #: erpnext/accounts/report/purchase_register/purchase_register.py:45
 #: erpnext/accounts/report/sales_register/sales_register.py:46
@@ -31174,7 +31174,7 @@ msgstr "Er zijn geen gereserveerde artikelen die vrijgegeven kunnen worden."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:152
 msgid "No rows with zero document count found"
-msgstr ""
+msgstr "Geen rijen gevonden met een documentaantal van nul."
 
 #: erpnext/stock/doctype/batch/batch.js:77
 msgid "No stock available for this batch."
@@ -31795,7 +31795,7 @@ msgstr "Alleen CSV- en Excel-bestanden kunnen worden gebruikt voor het importere
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1070
 msgid "Only CSV files are allowed"
-msgstr ""
+msgstr "Alleen CSV-bestanden zijn toegestaan."
 
 #. Label of the tax_on_excess_amount (Check) field in DocType 'Tax Withholding
 #. Category'
@@ -31847,7 +31847,7 @@ msgstr "Bij het toepassen van een uitgesloten vergoeding mag slechts één van d
 
 #: erpnext/manufacturing/doctype/bom/bom.py:330
 msgid "Only one operation can have 'Is Final Finished Good' checked when 'Track Semi Finished Goods' is enabled."
-msgstr ""
+msgstr "Er kan slechts één bewerking de optie 'Is eindproduct' aangevinkt hebben wanneer 'Halffabricage bijhouden' is ingeschakeld."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1349
 msgid "Only one {0} entry can be created against the Work Order {1}"
@@ -32728,7 +32728,7 @@ msgstr "Overige instellingen"
 #. Label of the tab_break_dpet (Tab Break) field in DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Others"
-msgstr ""
+msgstr "Anderen"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -32809,12 +32809,12 @@ msgstr "Verouderde POS-openingsingang"
 #. Label of a number card in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 msgid "Outgoing Bills"
-msgstr ""
+msgstr "Uitgaande rekeningen"
 
 #. Label of a number card in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 msgid "Outgoing Payment"
-msgstr ""
+msgstr "Uitgaande betaling"
 
 #. Label of the outgoing_rate (Float) field in DocType 'Serial and Batch Entry'
 #. Label of the outgoing_rate (Currency) field in DocType 'Stock Ledger Entry'
@@ -32946,7 +32946,7 @@ msgstr "Overboekingstoeslag (%)"
 #. Option for the 'Status' (Select) field in DocType 'Tax Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Over Withheld"
-msgstr ""
+msgstr "Overig"
 
 #: erpnext/controllers/status_updater.py:496
 msgid "Overbilling of {0} {1} ignored for item {2} because you have {3} role."
@@ -33048,7 +33048,7 @@ msgstr "eigenaar"
 #. Label of the asset_owner_section (Section Break) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Ownership"
-msgstr ""
+msgstr "Eigendom"
 
 #. Label of the p_l_closing_balance (JSON) field in DocType 'Process Period
 #. Closing Voucher'
@@ -33143,7 +33143,7 @@ msgstr "Het afsluiten van het POS-systeem is mislukt tijdens de uitvoering op de
 #. Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "POS Configurations"
-msgstr ""
+msgstr "POS-configuraties"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/pos_customer_group/pos_customer_group.json
@@ -33227,7 +33227,7 @@ msgstr "POS-facturen worden niet geconsolideerd, maar worden verwerkt in een ach
 #. Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "POS Item Details"
-msgstr ""
+msgstr "POS-artikeldetails"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/pos_item_group/pos_item_group.json
@@ -33238,7 +33238,7 @@ msgstr "POS-artikelgroep"
 #. Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "POS Item Selector"
-msgstr ""
+msgstr "POS-artikelselector"
 
 #. Label of the pos_opening_entry (Link) field in DocType 'POS Closing Entry'
 #. Name of a DocType
@@ -33795,7 +33795,7 @@ msgstr "Een deel van de voorraad kan worden gereserveerd. Als u bijvoorbeeld een
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/delivery_note/delivery_note_list.js:24
 msgid "Partially Billed"
-msgstr ""
+msgstr "Gedeeltelijk gefactureerd"
 
 #. Option for the 'Completion Status' (Select) field in DocType 'Maintenance
 #. Schedule Detail'
@@ -34536,7 +34536,7 @@ msgstr "Betaling Mode"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Payment Options"
-msgstr ""
+msgstr "Betaalopties"
 
 #. Label of the payment_order (Link) field in DocType 'Journal Entry'
 #. Label of the payment_order (Link) field in DocType 'Payment Entry'
@@ -34712,7 +34712,7 @@ msgstr "Betalingsverzoeken kunnen niet worden aangemaakt voor: {0}"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Payment Requests made from Sales / Purchase Invoice will be put in Draft explicitly"
-msgstr ""
+msgstr "Betalingsverzoeken die voortvloeien uit verkoop-/inkoopfacturen worden expliciet als concept opgeslagen."
 
 #. Label of the payment_schedule (Data) field in DocType 'Overdue Payment'
 #. Label of the payment_schedule (Link) field in DocType 'Payment Reference'
@@ -35783,7 +35783,7 @@ msgstr "Voeg betalingswijze en beginsaldodetails toe."
 
 #: erpnext/manufacturing/doctype/bom/bom.js:39
 msgid "Please add Operations first."
-msgstr ""
+msgstr "Voeg eerst de bewerkingen toe."
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:213
 msgid "Please add Request for Quotation to the sidebar in Portal Settings."
@@ -35999,7 +35999,7 @@ msgstr "Vul de Goedkeurders Rol of Goedkeurende Gebruiker in"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:683
 msgid "Please enter Batch No"
-msgstr ""
+msgstr "Voer het batchnummer in."
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:976
 msgid "Please enter Cost Center"
@@ -36060,7 +36060,7 @@ msgstr "Voer het roottype voor het account in: {0}"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:685
 msgid "Please enter Serial No"
-msgstr ""
+msgstr "Voer het serienummer in."
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:319
 msgid "Please enter Serial Nos"
@@ -36161,7 +36161,7 @@ msgstr "Vul de tabel met verkooporders in"
 
 #: erpnext/stock/doctype/shipment/shipment.js:277
 msgid "Please first set Full Name, Email and Phone for the user"
-msgstr ""
+msgstr "Vul eerst de volledige naam, het e-mailadres en het telefoonnummer van de gebruiker in."
 
 #: erpnext/telephony/doctype/incoming_call_settings/incoming_call_settings.js:94
 msgid "Please fix overlapping time slots for {0}"
@@ -36173,11 +36173,11 @@ msgstr "Corrigeer de overlappende tijdvakken voor {0}."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:272
 msgid "Please generate To Delete list before submitting"
-msgstr ""
+msgstr "Maak een lijst aan die verwijderd moet worden voordat u het formulier indient."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:70
 msgid "Please generate the To Delete list before submitting"
-msgstr ""
+msgstr "Genereer de lijst met te verwijderen objecten voordat u het formulier indient."
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:67
 msgid "Please import accounts against parent company or enable {} in company master."
@@ -36565,7 +36565,7 @@ msgstr "Selecteer eerst het documenttype"
 
 #: erpnext/selling/report/sales_partner_commission_summary/sales_partner_commission_summary.py:47
 msgid "Please select the document type first."
-msgstr ""
+msgstr "Selecteer eerst het documenttype."
 
 #: erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py:21
 msgid "Please select the required filters"
@@ -37442,7 +37442,7 @@ msgstr "Prijslijst"
 #. DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Price List & Currency"
-msgstr ""
+msgstr "Prijslijst & Valuta"
 
 #. Name of a DocType
 #: erpnext/stock/doctype/price_list_country/price_list_country.json
@@ -37950,7 +37950,7 @@ msgstr "Procesverlies"
 #. Item'
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 msgid "Process Loss %"
-msgstr ""
+msgstr "Procesverlies %"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1272
 msgid "Process Loss Percentage cannot be greater than 100"
@@ -38085,7 +38085,7 @@ msgstr "XML-bestanden verwerken"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:188
 msgid "Processing import..."
-msgstr ""
+msgstr "Import wordt verwerkt..."
 
 #: erpnext/buying/doctype/supplier/supplier_dashboard.py:10
 msgid "Procurement"
@@ -38261,7 +38261,7 @@ msgstr "Productie Item"
 #: erpnext/manufacturing/doctype/bom/bom.json
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 msgid "Production Item Info"
-msgstr ""
+msgstr "Productinformatie"
 
 #. Label of the production_plan (Link) field in DocType 'Purchase Order Item'
 #. Name of a DocType
@@ -38758,7 +38758,7 @@ msgstr "Vooruitzichten betrokken maar niet omgezet"
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:198
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:784
 msgid "Protected DocType"
-msgstr ""
+msgstr "Beveiligd documenttype"
 
 #. Description of the 'Company Email' (Data) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -39300,7 +39300,7 @@ msgstr "Ontvangstbevestiging Trends"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/buying.json
 msgid "Purchase Receipt Trends "
-msgstr ""
+msgstr "Ontvangstbevestiging Trends "
 
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:358
 msgid "Purchase Receipt doesn't have any Item for which Retain Sample is enabled."
@@ -39337,7 +39337,7 @@ msgstr "Kopen Tax Template"
 #. 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Purchase Tax Withholding Category"
-msgstr ""
+msgstr "Categorie voor inhouding van aankoopbelasting"
 
 #. Label of the taxes (Table) field in DocType 'Purchase Invoice'
 #. Name of a DocType
@@ -39982,17 +39982,17 @@ msgstr "Naam van het sjabloon voor kwaliteitsinspectie"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:799
 msgid "Quality Inspection is required for the item {0} before completing the job card {1}"
-msgstr ""
+msgstr "Kwaliteitscontrole is vereist voor het artikel {0} voordat de werkkaart {1} wordt voltooid."
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:810
 #: erpnext/manufacturing/doctype/job_card/job_card.py:819
 msgid "Quality Inspection {0} is not submitted for the item: {1}"
-msgstr ""
+msgstr "Kwaliteitsinspectie {0} is niet ingediend voor het artikel: {1}"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:829
 #: erpnext/manufacturing/doctype/job_card/job_card.py:838
 msgid "Quality Inspection {0} is rejected for the item: {1}"
-msgstr ""
+msgstr "Kwaliteitsinspectie {0} is afgekeurd voor het artikel: {1}"
 
 #: erpnext/public/js/controllers/transaction.js:384
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:206
@@ -40250,7 +40250,7 @@ msgstr "De hoeveelheid mag niet groter zijn dan {0} voor item {1}"
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:564
 msgid "Quantity is mandatory for the selected items."
-msgstr ""
+msgstr "De hoeveelheid is verplicht voor de geselecteerde artikelen."
 
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:274
 msgid "Quantity is required"
@@ -40465,7 +40465,7 @@ msgstr "Opgegeven bedrag"
 #. in DocType 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "RFQ and Purchase Order Settings"
-msgstr ""
+msgstr "Instellingen voor offerteaanvraag (RFQ) en inkooporder"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:132
 msgid "RFQs are not allowed for {0} due to a scorecard standing of {1}"
@@ -40895,7 +40895,7 @@ msgstr "Verbruik van grondstoffen"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:327
 msgid "Raw Materials Missing"
-msgstr ""
+msgstr "Grondstoffen ontbreken"
 
 #. Label of the raw_materials_received_section (Section Break) field in DocType
 #. 'Subcontracting Inward Order'
@@ -41855,7 +41855,7 @@ msgstr "Verwijder het bovenliggende rijnummer in de tabel met items."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:140
 msgid "Remove Zero Counts"
-msgstr ""
+msgstr "Nulwaarden verwijderen"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js:21
 msgid "Remove item if charges is not applicable to that item"
@@ -42550,7 +42550,7 @@ msgstr "Conflict in gereserveerde batch"
 #. 'Bin'
 #: erpnext/stock/doctype/bin/bin.json
 msgid "Reserved Inventory"
-msgstr ""
+msgstr "Gereserveerde inventaris"
 
 #. Label of the reserved_qty (Float) field in DocType 'Bin'
 #. Label of the reserved_qty (Float) field in DocType 'Stock Reservation Entry'
@@ -43655,7 +43655,7 @@ msgstr "Rij #{0}: Deze voorraadboeking kan niet worden geannuleerd omdat de gere
 
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.py:78
 msgid "Row #{0}: Cannot create entry with different taxable AND withholding document links."
-msgstr ""
+msgstr "Rij #{0}: Het is niet mogelijk om een item aan te maken met verschillende links naar belastbare documenten EN documenten voor inhouding."
 
 #: erpnext/controllers/accounts_controller.py:3792
 msgid "Row #{0}: Cannot delete item {1} which has already been billed."
@@ -43675,7 +43675,7 @@ msgstr "Rij # {0}: kan item {1} niet verwijderen waaraan een werkorder is toegew
 
 #: erpnext/controllers/accounts_controller.py:3778
 msgid "Row #{0}: Cannot delete item {1} which is already ordered against this Sales Order."
-msgstr ""
+msgstr "Rij #{0}: Artikel {1} kan niet worden verwijderd, omdat het al is besteld voor deze verkooporder."
 
 #: erpnext/controllers/accounts_controller.py:4099
 msgid "Row #{0}: Cannot set Rate if the billed amount is greater than the amount for Item {1}."
@@ -43715,7 +43715,7 @@ msgstr "Rij # {0}: Kostenplaats {1} hoort niet bij bedrijf {2}"
 
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.py:211
 msgid "Row #{0}: Could not find enough {1} entries to match. Remaining amount: {2}"
-msgstr ""
+msgstr "Rij #{0}: Er konden niet genoeg {1} vermeldingen worden gevonden die overeenkomen. Resterend aantal: {2}"
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:88
 msgid "Row #{0}: Cumulative threshold cannot be less than Single Transaction threshold"
@@ -43758,7 +43758,7 @@ msgstr "Rij #{0}: Door de klant geleverd artikel {1} maakt geen deel uit van wer
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:61
 msgid "Row #{0}: Dates overlapping with other row in group {1}"
-msgstr ""
+msgstr "Rij #{0}: Datums die overlappen met een andere rij in groep {1}"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.py:357
 msgid "Row #{0}: Default BOM not found for FG Item {1}"
@@ -43822,7 +43822,7 @@ msgstr "Rij #{0}: Voor {1}kunt u het referentiedocument alleen selecteren als de
 
 #: erpnext/assets/doctype/asset/asset.py:664
 msgid "Row #{0}: Frequency of Depreciation must be greater than zero"
-msgstr ""
+msgstr "Rij #{0}: De afschrijvingsfrequentie moet groter zijn dan nul"
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:50
 msgid "Row #{0}: From Date cannot be before To Date"
@@ -43838,7 +43838,7 @@ msgstr "Rij # {0}: item toegevoegd"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1644
 msgid "Row #{0}: Item {1} cannot be transferred more than {2} against {3} {4}"
-msgstr ""
+msgstr "Rij #{0}: Item {1} kan niet meer dan {2} worden overgeplaatst naar {3} {4}"
 
 #: erpnext/buying/utils.py:98
 msgid "Row #{0}: Item {1} does not exist"
@@ -44046,6 +44046,10 @@ msgid ""
 "\t\t\t\t\tyou can disable '{5}' in {6} to bypass\n"
 "\t\t\t\t\tthis validation."
 msgstr ""
+"Rij #{0}: De verkoopprijs voor artikel {1} is lager dan die van {2}.\n"
+"\t\t\t\t\tDe verkoopprijs van {3} zou minstens {4}moeten zijn.<br><br>Als alternatief\n"
+"\t\t\t\t\tkunt u '{5}' in {6} uitschakelen om\n"
+"\t\t\t\t\tdeze validatie te omzeilen."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:286
 msgid "Row #{0}: Sequence ID must be {1} or {2} for Operation {3}."
@@ -44174,7 +44178,7 @@ msgstr "Rij #{0}: Het totale aantal afschrijvingen mag niet kleiner of gelijk zi
 
 #: erpnext/assets/doctype/asset/asset.py:660
 msgid "Row #{0}: Total Number of Depreciations must be greater than zero"
-msgstr ""
+msgstr "Rij #{0}: Het totale aantal afschrijvingen moet groter zijn dan nul"
 
 #: erpnext/controllers/stock_controller.py:105
 msgid "Row #{0}: Warehouse {1} does not match with the warehouse {2} in Serial and Batch Bundle {3}."
@@ -44182,7 +44186,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.py:94
 msgid "Row #{0}: Withholding Amount {1} does not match calculated amount {2}."
-msgstr ""
+msgstr "Rij #{0}: Inhoudingsbedrag {1} komt niet overeen met het berekende bedrag {2}."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:577
 msgid "Row #{0}: Work Order exists against full or partial quantity of Item {1}"
@@ -44428,7 +44432,7 @@ msgstr "Rij {0}: Wisselkoers is verplicht"
 
 #: erpnext/assets/doctype/asset/asset.py:609
 msgid "Row {0}: Expected Value After Useful Life cannot be negative"
-msgstr ""
+msgstr "Rij {0}: De verwachte waarde na gebruiksduur kan niet negatief zijn"
 
 #: erpnext/assets/doctype/asset/asset.py:612
 msgid "Row {0}: Expected Value After Useful Life must be less than Net Purchase Amount"
@@ -44497,7 +44501,7 @@ msgstr "Rij {0}: Artikel {1} moet een uitbested artikel zijn."
 
 #: erpnext/controllers/subcontracting_controller.py:183
 msgid "Row {0}: Item {1} must be linked to a {2}."
-msgstr ""
+msgstr "Rij {0}: Item {1} moet gekoppeld zijn aan een {2}."
 
 #: erpnext/controllers/subcontracting_controller.py:204
 msgid "Row {0}: Item {1}'s quantity cannot be higher than the available quantity."
@@ -44593,7 +44597,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:885
 msgid "Row {0}: Sales Invoice {1} is already created for {2}"
-msgstr ""
+msgstr "Rij {0}: Verkoopfactuur {1} is al aangemaakt voor {2}"
 
 #: erpnext/assets/doctype/asset_shift_allocation/asset_shift_allocation.py:58
 msgid "Row {0}: Shift cannot be changed since the depreciation has already been processed"
@@ -45591,7 +45595,7 @@ msgstr "Omzetbelastingsjabloon"
 #. Label of the sales_tax_withholding_category (Link) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Sales Tax Withholding Category"
-msgstr ""
+msgstr "Categorie voor inhouding van omzetbelasting"
 
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/accounts_setup.json
@@ -45720,7 +45724,7 @@ msgstr "Aantal monsters"
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:269
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:535
 msgid "Sample Retention Stock Entry"
-msgstr ""
+msgstr "Voorraadbeheer van monsters"
 
 #. Label of the sample_retention_warehouse (Link) field in DocType 'Stock
 #. Settings'
@@ -46221,7 +46225,7 @@ msgstr "Selecteer Items voor fabricage"
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:500
 msgid "Select Items to Receive"
-msgstr ""
+msgstr "Selecteer de artikelen die u wilt ontvangen"
 
 #: erpnext/selling/doctype/sales_order/sales_order_list.js:87
 msgid "Select Items up to Delivery Date"
@@ -46479,19 +46483,19 @@ msgstr "Verkoop activa"
 
 #: erpnext/assets/doctype/asset/asset.js:635
 msgid "Sell Qty"
-msgstr ""
+msgstr "Verkoophoeveelheid"
 
 #: erpnext/assets/doctype/asset/asset.js:651
 msgid "Sell quantity cannot exceed the asset quantity"
-msgstr ""
+msgstr "De verkoophoeveelheid mag de hoeveelheid activa niet overschrijden."
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1410
 msgid "Sell quantity cannot exceed the asset quantity. Asset {0} has only {1} item(s)."
-msgstr ""
+msgstr "De verkoophoeveelheid mag de hoeveelheid van het actief niet overschrijden. Actief {0} heeft slechts {1} item(s)."
 
 #: erpnext/assets/doctype/asset/asset.js:647
 msgid "Sell quantity must be greater than zero"
-msgstr ""
+msgstr "De verkoophoeveelheid moet groter zijn dan nul."
 
 #. Label of the selling (Check) field in DocType 'Pricing Rule'
 #. Label of the selling (Check) field in DocType 'Promotional Scheme'
@@ -46663,7 +46667,7 @@ msgstr "Instellingen voor serie- en batchitems"
 #. Label of the section_break_jcmx (Section Break) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 msgid "Serial / Batch"
-msgstr ""
+msgstr "Serienummer / Batchnummer"
 
 #. Label of the serial_and_batch_bundle (Link) field in DocType 'Stock
 #. Reconciliation Item'
@@ -48451,7 +48455,7 @@ msgstr "Omdat er een procesverlies is van {0} eenheden voor het eindproduct {1},
 
 #: erpnext/manufacturing/doctype/bom/bom.py:323
 msgid "Since you have enabled 'Track Semi Finished Goods', at least one operation must have 'Is Final Finished Good' checked. For that set the FG / Semi FG Item as {0} against an operation."
-msgstr ""
+msgstr "Aangezien u 'Halffabricage volgen' hebt ingeschakeld, moet er bij ten minste één bewerking 'Is eindproduct' zijn aangevinkt. Stel hiervoor het FG/Semi-FG-item in als {0} bij een bewerking."
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:132
 msgid "Since {0} are Serial No/Batch No items, you cannot enable 'Recreate Stock Ledgers' in Repost Item Valuation."
@@ -48501,7 +48505,7 @@ msgstr "Materiaaloverdracht naar WIP-magazijn overslaan"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:563
 msgid "Skipped {0} DocType(s):<br>{1}"
-msgstr ""
+msgstr "Overgeslagen {0} DocType(s):<br>{1}"
 
 #. Label of the customer_skype (Data) field in DocType 'Appointment'
 #: erpnext/crm/doctype/appointment/appointment.json
@@ -49020,7 +49024,7 @@ msgstr "Statusillustratie"
 #. Label of the section_break_dfoc (Section Break) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 msgid "Status and Reference"
-msgstr ""
+msgstr "Status en referentie"
 
 #: erpnext/projects/doctype/project/project.py:717
 msgid "Status must be Cancelled or Completed"
@@ -51684,7 +51688,7 @@ msgstr "Belastingtarief"
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:237
 #: erpnext/accounts/report/tds_computation_summary/tds_computation_summary.py:84
 msgid "Tax Rate %"
-msgstr ""
+msgstr "Belastingtarief %"
 
 #. Label of the taxes (Table) field in DocType 'Item Tax Template'
 #: erpnext/accounts/doctype/item_tax_template/item_tax_template.json
@@ -51798,7 +51802,7 @@ msgstr "Details over de inhouding van belasting"
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Tax Withholding Entries"
-msgstr ""
+msgstr "Inhouding van belasting"
 
 #. Label of the section_tax_withholding_entry (Section Break) field in DocType
 #. 'Payment Entry'
@@ -51810,7 +51814,7 @@ msgstr ""
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Tax Withholding Entry"
-msgstr ""
+msgstr "Invoer van ingehouden belasting"
 
 #. Label of the tax_withholding_group (Link) field in DocType 'Journal Entry'
 #. Label of the tax_withholding_group (Link) field in DocType 'Payment Entry'
@@ -51835,7 +51839,7 @@ msgstr ""
 #: erpnext/selling/doctype/customer/customer.json
 #: erpnext/workspace_sidebar/taxes.json
 msgid "Tax Withholding Group"
-msgstr ""
+msgstr "Belastinginhoudingsgroep"
 
 #. Name of a DocType
 #. Label of the tax_withholding_rate (Float) field in DocType 'Tax Withholding
@@ -51871,7 +51875,7 @@ msgstr ""
 #. DocType 'Tax Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Tax withheld only for amount exceeding cumulative threshold"
-msgstr ""
+msgstr "Belasting wordt alleen ingehouden voor bedragen die de cumulatieve drempel overschrijden."
 
 #. Label of the taxable_amount (Currency) field in DocType 'Item Wise Tax
 #. Detail'
@@ -51884,18 +51888,18 @@ msgstr "Belastbaar bedrag"
 #. Label of the taxable_date (Date) field in DocType 'Tax Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Taxable Date"
-msgstr ""
+msgstr "Belastingdatum"
 
 #. Label of the taxable_name (Dynamic Link) field in DocType 'Tax Withholding
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Taxable Document Name"
-msgstr ""
+msgstr "Naam van het belastbare document"
 
 #. Label of the taxable_doctype (Link) field in DocType 'Tax Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Taxable Document Type"
-msgstr ""
+msgstr "Belastbaar documenttype"
 
 #. Label of the taxes (Table) field in DocType 'POS Closing Entry'
 #. Label of the taxes_section (Section Break) field in DocType 'POS Profile'
@@ -52668,7 +52672,7 @@ msgstr "De originele factuur moet worden samengevoegd met of vóór de retourfac
 
 #: erpnext/controllers/accounts_controller.py:205
 msgid "The outstanding amount {0} in {1} is lesser than {2}. Updating the outstanding to this invoice."
-msgstr ""
+msgstr "Het openstaande bedrag {0} in {1} is lager dan {2}. Het openstaande bedrag van deze factuur wordt bijgewerkt."
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:229
 msgid "The parent account {0} does not exists in the uploaded template"
@@ -52733,7 +52737,7 @@ msgstr "Het geselecteerde item kan niet Batch hebben"
 
 #: erpnext/assets/doctype/asset/asset.js:656
 msgid "The sell quantity is less than the total asset quantity. The remaining quantity will be split into a new asset. This action cannot be undone. <br><br><b>Do you want to continue?</b>"
-msgstr ""
+msgstr "De verkoophoeveelheid is kleiner dan de totale hoeveelheid activa. De resterende hoeveelheid wordt verdeeld over een nieuw actief. Deze actie kan niet ongedaan worden gemaakt. <br><br><b>Wilt u doorgaan?</b>"
 
 #: erpnext/accounts/doctype/share_transfer/share_transfer.py:194
 msgid "The seller and the buyer cannot be the same"
@@ -52896,7 +52900,7 @@ msgstr "Er zijn geen plaatsen meer beschikbaar op deze datum."
 
 #: erpnext/stock/doctype/item/item.js:1161
 msgid "There are two options to maintain valuation of stock. FIFO (first in - first out) and Moving Average. To understand this topic in detail please visit <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>Item Valuation, FIFO and Moving Average.</a>"
-msgstr ""
+msgstr "Er zijn twee opties om de waardering van aandelen te handhaven: FIFO (first in - first out) en het voortschrijdend gemiddelde. Voor een gedetailleerde uitleg van dit onderwerp kunt u terecht op <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>Item Waardering, FIFO en Voortschrijdend gemiddelde.</a>"
 
 #: erpnext/stock/report/item_variant_details/item_variant_details.py:25
 msgid "There aren't any item variants for the selected item"
@@ -52959,7 +52963,7 @@ msgstr "Deze rekening heeft een saldo van '0' in zowel de basisvaluta als de rek
 
 #: erpnext/stock/doctype/item/item.js:194
 msgid "This Item is a Template and cannot be used in transactions.<br>All fields present in the 'Copy Fields to Variant' table in Item Variant Settings will be copied to its variant items."
-msgstr ""
+msgstr "Dit item is een sjabloon en kan niet in transacties worden gebruikt.<br>Alle velden in de tabel 'Velden kopiëren naar variant' in de itemvariantinstellingen worden naar de variantitems gekopieerd."
 
 #: erpnext/stock/doctype/item/item.js:251
 msgid "This Item is a Variant of {0} (Template)."
@@ -53118,7 +53122,7 @@ msgstr ""
 #. Header text in the Support Workspace
 #: erpnext/support/workspace/support/support.json
 msgid "This module is scheduled for deprecation and will be completely removed in version 17, please use <a href=\"https://frappe.io/helpdesk\">Frappe Helpdesk</a> instead."
-msgstr ""
+msgstr "Deze module zal binnenkort niet meer ondersteund worden en volledig verwijderd worden in versie 17. Gebruik in plaats daarvan <a href=\"https://frappe.io/helpdesk\">Frappe Helpdesk</a>."
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.js:509
 msgid "This option can be checked to edit the 'Posting Date' and 'Posting Time' fields."
@@ -53217,7 +53221,7 @@ msgstr "Deze accolades worden beschouwd als materiaaloverdracht."
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Threshold Exemption"
-msgstr ""
+msgstr "Drempelvrijstelling"
 
 #. Label of the threshold_percentage (Percent) field in DocType 'Promotional
 #. Scheme Price Discount'
@@ -53336,7 +53340,7 @@ msgstr "Tijd (in minuten)"
 #: erpnext/projects/doctype/project/project.json
 #: erpnext/projects/doctype/task/task.json
 msgid "Timeline"
-msgstr ""
+msgstr "Tijdlijn"
 
 #: erpnext/manufacturing/doctype/workstation/workstation_job_card.html:36
 #: erpnext/public/js/projects/timer.js:5
@@ -53383,7 +53387,7 @@ msgstr "Timesheet voor taken."
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:894
 msgid "Timesheet {0} cannot be invoiced in its current state"
-msgstr ""
+msgstr "Urenregistratie {0} kan in de huidige staat niet worden gefactureerd."
 
 #. Label of the timesheet_sb (Section Break) field in DocType 'Projects
 #. Settings'
@@ -53463,7 +53467,7 @@ msgstr "Om Datetime"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:118
 msgid "To Delete list generated with {0} DocTypes"
-msgstr ""
+msgstr "Om de lijst te verwijderen die is gegenereerd met {0} DocTypes"
 
 #. Option for the 'Sales Order Status' (Select) field in DocType 'Production
 #. Plan'
@@ -53993,7 +53997,7 @@ msgstr "Totaal voltooid aantal"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:191
 msgid "Total Completed Qty is required for Job Card {0}, please start and complete the job card before submission"
-msgstr ""
+msgstr "Het totale aantal voltooide opdrachten is vereist voor de werkbon {0}. Begin en voltooi de werkbon voordat u deze indient."
 
 #. Label of the total_consumed_material_cost (Currency) field in DocType
 #. 'Project'
@@ -54404,7 +54408,7 @@ msgstr "Totale belasting"
 
 #: erpnext/accounts/report/tds_computation_summary/tds_computation_summary.py:86
 msgid "Total Taxable Amount"
-msgstr ""
+msgstr "Totaal belastbaar bedrag"
 
 #. Label of the total_taxes_and_charges (Currency) field in DocType 'Payment
 #. Entry'
@@ -54609,7 +54613,7 @@ msgstr "Totaal (Aantal)"
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Totals (Company Currency)"
-msgstr ""
+msgstr "Totalen (bedrijfsvaluta)"
 
 #: erpnext/stock/doctype/item/item_dashboard.py:33
 msgid "Traceability"
@@ -54709,7 +54713,7 @@ msgstr "transactie datum"
 
 #: erpnext/setup/doctype/company/company.py:1090
 msgid "Transaction Deletion Document {0} has been triggered for company {1}"
-msgstr ""
+msgstr "Transactie voor verwijdering van document {0} is geactiveerd voor bedrijf {1}"
 
 #. Name of a DocType
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
@@ -54729,15 +54733,15 @@ msgstr "Transactieverwijderingsrecorditem"
 #. Name of a DocType
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Transaction Deletion Record To Delete"
-msgstr ""
+msgstr "Transactieverwijderingsrecord om te verwijderen"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1101
 msgid "Transaction Deletion Record {0} is already running. {1}"
-msgstr ""
+msgstr "Het transactieverwijderingsrecord {0} wordt al uitgevoerd. {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1120
 msgid "Transaction Deletion Record {0} is currently deleting {1}. Cannot save documents until deletion completes."
-msgstr ""
+msgstr "Transactieverwijderingsrecord {0} verwijdert momenteel {1}. Documenten kunnen niet worden opgeslagen totdat de verwijdering is voltooid."
 
 #. Label of the transaction_details_section (Section Break) field in DocType
 #. 'GL Entry'
@@ -54788,7 +54792,7 @@ msgstr "Transactie-instellingen"
 #. Rate'
 #: erpnext/accounts/doctype/tax_withholding_rate/tax_withholding_rate.json
 msgid "Transaction Threshold"
-msgstr ""
+msgstr "Transactiedrempel"
 
 #. Label of the transaction_type (Data) field in DocType 'Bank Transaction'
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.json
@@ -54807,19 +54811,19 @@ msgstr "Transactievaluta: {0} mag niet verschillen van de bankrekeningvaluta ({1
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:65
 msgid "Transaction date can't be earlier than previous movement date"
-msgstr ""
+msgstr "De transactiedatum mag niet eerder zijn dan de vorige overschrijvingsdatum."
 
 #. Description of the 'Applicable For' (Section Break) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Transaction for which tax is withheld"
-msgstr ""
+msgstr "Transactie waarvoor belasting wordt ingehouden"
 
 #. Description of the 'Deducted From' (Section Break) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Transaction from which tax is withheld"
-msgstr ""
+msgstr "Transactie waarover belasting wordt ingehouden"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:865
 msgid "Transaction not allowed against stopped Work Order {0}"
@@ -55373,7 +55377,7 @@ msgstr "URL mag alleen een tekenreeks zijn"
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 msgid "UTM Analytics"
-msgstr ""
+msgstr "UTM-analyse"
 
 #. Option for the 'Data Fetch Method' (Select) field in DocType 'Accounts
 #. Settings'
@@ -55392,7 +55396,7 @@ msgstr "Niet-afgestemde toewijzingen"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:466
 msgid "Unable to fetch DocType details. Please contact system administrator."
-msgstr ""
+msgstr "Het lukt niet om de DocType-gegevens op te halen. Neem contact op met de systeembeheerder."
 
 #: erpnext/setup/utils.py:149
 msgid "Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually"
@@ -55467,13 +55471,13 @@ msgstr "Onder garantie"
 #. Option for the 'Status' (Select) field in DocType 'Tax Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Under Withheld"
-msgstr ""
+msgstr "Onder 'Ingehouden'"
 
 #. Label of the under_withheld_reason (Select) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Under Withheld Reason"
-msgstr ""
+msgstr "Onder een niet-ondertekende reden"
 
 #: erpnext/manufacturing/doctype/workstation/workstation.js:78
 msgid "Under Working Hours table, you can add start and end times for a Workstation. For example, a Workstation may be active from 9 am to 1 pm, then 2 pm to 5 pm. You can also specify the working hours based on shifts. While scheduling a Work Order, the system will check for the availability of the Workstation based on the working hours specified."
@@ -55481,7 +55485,7 @@ msgstr "In de tabel 'Werktijden' kunt u begin- en eindtijden voor een werkstatio
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:936
 msgid "Unexpected Naming Series Pattern"
-msgstr ""
+msgstr "Onverwacht patroon voor naamgevingsreeksen"
 
 #. Option for the 'Fulfilment Status' (Select) field in DocType 'Contract'
 #: erpnext/crm/doctype/contract/contract.json
@@ -56068,7 +56072,7 @@ msgstr "Gebruik een stuklijst met meerdere niveaus."
 #. DocType 'Global Defaults'
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
 msgid "Use Posting Datetime for Naming Documents"
-msgstr ""
+msgstr "Gebruik de boekingsdatum en -tijd voor het benoemen van documenten."
 
 #. Label of the use_serial_batch_fields (Check) field in DocType 'Stock
 #. Settings'
@@ -56218,7 +56222,7 @@ msgstr "Gebruikers kunnen het selectievakje inschakelen als ze het inkomende tar
 #. 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Users can make manufacture entry against Job Cards"
-msgstr ""
+msgstr "Gebruikers kunnen productiegegevens invoeren aan de hand van werkbonnen."
 
 #. Description of the 'Role Allowed to Over Bill ' (Link) field in DocType
 #. 'Accounts Settings'
@@ -56886,7 +56890,7 @@ msgstr ""
 #: erpnext/stock/onboarding_step/view_stock_balance_report/view_stock_balance_report.json
 #: erpnext/stock/report/stock_ledger/stock_ledger.js:139
 msgid "View Stock Balance"
-msgstr ""
+msgstr "Bekijk de voorraadbalans"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'View Stock Balance Report'
@@ -56898,7 +56902,7 @@ msgstr ""
 
 #: erpnext/stock/report/stock_balance/stock_balance.js:156
 msgid "View Stock Ledger"
-msgstr ""
+msgstr "Voorraadadministratie bekijken"
 
 #: erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.js:8
 msgid "View Type"
@@ -56930,7 +56934,7 @@ msgstr "Vimeo"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:216
 msgid "Virtual DocType"
-msgstr ""
+msgstr "Virtueel documenttype"
 
 #: erpnext/templates/pages/help.html:46
 msgid "Visit the forums"
@@ -57466,7 +57470,7 @@ msgstr "Waarschuwing: Sales Order {0} bestaat al tegen Klant Bestelling {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:75
 msgid "Warning: This action cannot be undone!"
-msgstr ""
+msgstr "Waarschuwing: Deze actie kan niet ongedaan gemaakt worden!"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_validation.py:77
 msgid "Warnings"
@@ -57523,7 +57527,7 @@ msgstr "Garantieperiode (in dagen)"
 
 #: erpnext/utilities/doctype/video/video.js:7
 msgid "Watch Video"
-msgstr ""
+msgstr "Bekijk de video"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -57552,7 +57556,7 @@ msgstr "Golflengte in megameters"
 
 #: erpnext/controllers/accounts_controller.py:193
 msgid "We can see {0} is made against {1}. If you want {1}'s outstanding to be updated, uncheck the '{2}' checkbox."
-msgstr ""
+msgstr "We kunnen zien dat {0} is gemaakt ten opzichte van {1}. Als u wilt dat de openstaande waarde van {1}wordt bijgewerkt, schakelt u het selectievakje '{2}' uit."
 
 #: erpnext/www/support/index.html:7
 msgid "We're here to help!"
@@ -57687,7 +57691,7 @@ msgstr "Waarmee heb je hulp nodig?"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:82
 msgid "What will be deleted:"
-msgstr ""
+msgstr "Wat wordt verwijderd:"
 
 #. Label of the whatsapp_no (Data) field in DocType 'Lead'
 #. Label of the whatsapp (Data) field in DocType 'Opportunity'
@@ -57711,19 +57715,19 @@ msgstr "Wanneer een hoofdmagazijn is geselecteerd, voert het systeem projecthoev
 #. 'Tax Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "When checked, only cumulative threshold will be applied"
-msgstr ""
+msgstr "Indien aangevinkt, wordt alleen de cumulatieve drempelwaarde toegepast."
 
 #. Description of the 'Disable Cumulative Threshold' (Check) field in DocType
 #. 'Tax Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "When checked, only transaction threshold will be applied for transaction individually"
-msgstr ""
+msgstr "Indien aangevinkt, wordt alleen de transactiedrempel voor elke transactie afzonderlijk toegepast."
 
 #. Description of the 'Use Posting Datetime for Naming Documents' (Check) field
 #. in DocType 'Global Defaults'
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
 msgid "When checked, the system will use the posting datetime of the document for naming the document instead of the creation datetime of the document."
-msgstr ""
+msgstr "Indien aangevinkt, gebruikt het systeem de boekingsdatum en -tijd van het document voor de naamgeving in plaats van de aanmaakdatum en -tijd van het document."
 
 #: erpnext/stock/doctype/item/item.js:1168
 msgid "When creating an Item, entering a value for this field will automatically create an Item Price at the backend."
@@ -57737,7 +57741,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:304
 msgid "When there are multiple finished goods ({0}) in a Repack stock entry, the basic rate for all finished goods must be set manually. To set rate manually, enable the checkbox 'Set Basic Rate Manually' in the respective finished good row."
-msgstr ""
+msgstr "Wanneer er meerdere eindproducten ({0}) in een herverpakte voorraadpost staan, moet het basistarief voor alle eindproducten handmatig worden ingesteld. Om het tarief handmatig in te stellen, vinkt u het selectievakje 'Basistarief handmatig instellen' aan in de betreffende regel van het eindproduct."
 
 #. Description of the 'Deferred Expense Account' (Link) field in DocType 'Item
 #. Default'
@@ -57816,33 +57820,33 @@ msgstr "Opname"
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Withholding Date"
-msgstr ""
+msgstr "Inhoudingsdatum"
 
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:278
 msgid "Withholding Document"
-msgstr ""
+msgstr "Inhoudingsdocument"
 
 #. Label of the withholding_name (Dynamic Link) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Withholding Document Name"
-msgstr ""
+msgstr "Naam van het inhoudingsdocument"
 
 #. Label of the withholding_doctype (Link) field in DocType 'Tax Withholding
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Withholding Document Type"
-msgstr ""
+msgstr "Type inhoudingsdocument"
 
 #. Label of a chart in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "Won Opportunities"
-msgstr ""
+msgstr "Verdiende kansen"
 
 #. Label of a number card in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "Won Opportunity (Last 1 Month)"
-msgstr ""
+msgstr "Kans gewonnen (afgelopen maand)"
 
 #. Label of the work_done (Small Text) field in DocType 'Maintenance Visit
 #. Purpose'
@@ -58396,7 +58400,7 @@ msgstr "Je kunt het instellen als machinenaam of bewerkingstype. Bijvoorbeeld: n
 
 #: erpnext/controllers/accounts_controller.py:214
 msgid "You can use {0} to reconcile against {1} later."
-msgstr ""
+msgstr "Je kunt {0} gebruiken om later af te stemmen met {1}."
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1339
 msgid "You can't make any changes to Job Card since Work Order is closed."
@@ -58444,7 +58448,7 @@ msgstr "Je kunt niet beide instellingen '{0}' en '{1} ' inschakelen."
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:167
 msgid "You cannot outward following {0} as either they are Delivered, Inactive or located in a different warehouse."
-msgstr ""
+msgstr "Je kunt niet naar buiten gaan na {0} omdat ze ofwel geleverd, inactief of in een ander magazijn zijn opgeslagen."
 
 #: erpnext/selling/page/point_of_sale/pos_payment.js:625
 msgid "You cannot redeem more than {0}."
@@ -59121,7 +59125,7 @@ msgstr "{0} in rij {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:452
 msgid "{0} is a child table and will be deleted automatically with its parent"
-msgstr ""
+msgstr "{0} is een kindtabel en wordt automatisch verwijderd samen met de oudertabel."
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:94
 msgid "{0} is a mandatory Accounting Dimension. <br>Please set a value for {0} in Accounting Dimensions section."
@@ -59520,19 +59524,19 @@ msgstr "{0}, voltooi de bewerking {1} vóór de bewerking {2}."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:523
 msgid "{0}: Child table (auto-deleted with parent)"
-msgstr ""
+msgstr "{0}: Kindtabel (wordt automatisch verwijderd samen met de oudertabel)"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:518
 msgid "{0}: Not found"
-msgstr ""
+msgstr "{0}: Niet gevonden"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:514
 msgid "{0}: Protected DocType"
-msgstr ""
+msgstr "{0}: Beveiligd documenttype"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:528
 msgid "{0}: Virtual DocType (no database table)"
-msgstr ""
+msgstr "{0}: Virtueel documenttype (geen databasetabel)"
 
 #: erpnext/controllers/accounts_controller.py:543
 msgid "{0}: {1} does not belong to the Company: {2}"
