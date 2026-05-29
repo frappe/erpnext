@@ -1,11 +1,13 @@
 #!/bin/bash
-# Syncs Crowdin translations from develop to version-16-hotfix.
+# Syncs Crowdin translations from develop to a hotfix branch.
 # Merge logic: see merge_po_files.py.
-# Env: GH_TOKEN, PR_REVIEWER, GITHUB_WORKSPACE (all set by Actions).
+# Env: GH_TOKEN, PR_REVIEWER, GITHUB_WORKSPACE, APP_NAME, GITHUB_REPOSITORY
+#      (all set by Actions).
 
 set -e
 
-HOTFIX_BRANCH="version-16-hotfix"
+HOTFIX_BRANCH="${HOTFIX_BRANCH:?HOTFIX_BRANCH env var is required}"
+APP_NAME="${APP_NAME:?APP_NAME env var is required}"
 
 cd ~ || exit
 
@@ -13,32 +15,32 @@ echo "=== Setting up bench ==="
 pip install frappe-bench
 bench -v init frappe-bench --skip-assets --skip-redis-config-generation --python "$(which python)"
 cd ./frappe-bench || exit
-bench get-app --skip-assets erpnext "${GITHUB_WORKSPACE}"
+bench get-app --skip-assets "${APP_NAME}" "${GITHUB_WORKSPACE}"
 
-echo "=== Setting up translations_hotfix branch ==="
-cd ./apps/erpnext || exit
+echo "=== Setting up sync_translations_${HOTFIX_BRANCH} branch ==="
+cd "./apps/${APP_NAME}" || exit
 git config user.email "developers@erpnext.com"
 git config user.name "frappe-pr-bot"
-git remote set-url upstream https://github.com/frappe/erpnext.git
+git remote set-url upstream "https://github.com/${GITHUB_REPOSITORY}.git"
 gh auth setup-git
 git fetch upstream "${HOTFIX_BRANCH}"
-git fetch upstream translations_hotfix 2>/dev/null || true
 
-if git rev-parse --verify "upstream/translations_hotfix" >/dev/null 2>&1; then
-  git checkout -b translations_hotfix "upstream/translations_hotfix"
+if git ls-remote --exit-code --heads upstream sync_translations_${HOTFIX_BRANCH} >/dev/null 2>&1; then
+  git fetch upstream sync_translations_${HOTFIX_BRANCH}
+  git checkout -b sync_translations_${HOTFIX_BRANCH} "upstream/sync_translations_${HOTFIX_BRANCH}"
   git merge -X theirs "upstream/${HOTFIX_BRANCH}" --no-edit
 else
-  git checkout -b translations_hotfix "upstream/${HOTFIX_BRANCH}"
+  git checkout -b sync_translations_${HOTFIX_BRANCH} "upstream/${HOTFIX_BRANCH}"
 fi
 cd ../.. || exit
 
 echo "=== Fetching develop's .po files ==="
 mkdir -p /tmp/develop-po
 git -C "${GITHUB_WORKSPACE}" fetch origin develop
-git -C "${GITHUB_WORKSPACE}" archive origin/develop erpnext/locale/ \
+git -C "${GITHUB_WORKSPACE}" archive origin/develop "${APP_NAME}/locale/" \
   | tar -xf - -C /tmp/develop-po/
 
-po_count=$(find /tmp/develop-po/erpnext/locale -name "*.po" | wc -l)
+po_count=$(find "/tmp/develop-po/${APP_NAME}/locale" -name "*.po" | wc -l)
 if [ "${po_count}" -eq 0 ]; then
   echo "ERROR: No .po files found in develop's archive. Aborting." >&2
   exit 1
@@ -47,46 +49,50 @@ echo "Extracted ${po_count} .po file(s) from develop."
 
 echo "=== Merging and reconciling ==="
 env/bin/python "${GITHUB_WORKSPACE}/.github/helper/merge_po_files.py"
-bench update-po-files --app erpnext
+bench update-po-files --app "${APP_NAME}"
 
-cd ./apps/erpnext || exit
+cd "./apps/${APP_NAME}" || exit
 
-if git diff --quiet erpnext/locale/ && [ -z "$(git ls-files --others --exclude-standard erpnext/locale/)" ]; then
+if git diff --quiet "${APP_NAME}/locale/" && [ -z "$(git ls-files --others --exclude-standard "${APP_NAME}/locale/")" ]; then
   echo "Translations are already up to date. No PR needed."
   exit 0
 fi
 
 echo "Changed files:"
-git diff --name-only erpnext/locale/
-git ls-files --others --exclude-standard erpnext/locale/
+git diff --name-only "${APP_NAME}/locale/"
+git ls-files --others --exclude-standard "${APP_NAME}/locale/"
 
 echo "=== Committing ==="
 while IFS= read -r file; do
   git add "${file}"
   lang=$(basename "${file}" .po)
-  git commit -m "fix: add ${lang} translation to ${HOTFIX_BRANCH}"
-done < <(git ls-files --others --exclude-standard erpnext/locale/ | grep '\.po$' | sort)
+  git commit -m "chore: add ${lang} translation to ${HOTFIX_BRANCH}"
+done < <(git ls-files --others --exclude-standard "${APP_NAME}/locale/" | grep '\.po$' | sort)
 
 while IFS= read -r file; do
   git add "${file}"
   if ! git diff --staged --quiet -- "${file}"; then
     lang=$(basename "${file}" .po)
-    git commit -m "fix: sync ${lang} translation to ${HOTFIX_BRANCH}"
+    git commit -m "chore: sync ${lang} translation to ${HOTFIX_BRANCH}"
   else
     git restore --staged -- "${file}"
   fi
-done < <(git diff --name-only erpnext/locale/ | grep '\.po$' | sort)
+done < <(git diff --name-only "${APP_NAME}/locale/" | grep '\.po$' | sort)
 
-git push -u upstream translations_hotfix
+if git ls-remote --exit-code --heads upstream sync_translations_${HOTFIX_BRANCH} >/dev/null 2>&1; then
+  git fetch upstream sync_translations_${HOTFIX_BRANCH}
+  git merge -X ours "upstream/sync_translations_${HOTFIX_BRANCH}" --no-edit
+fi
+git push -u upstream sync_translations_${HOTFIX_BRANCH}
 
 echo "=== Opening PR (if not already open) ==="
 existing_pr=$(gh pr list \
   --base "${HOTFIX_BRANCH}" \
-  --head "translations_hotfix" \
+  --head "sync_translations_${HOTFIX_BRANCH}" \
   --state open \
   --json number \
   --jq 'length' \
-  -R frappe/erpnext)
+  -R "${GITHUB_REPOSITORY}")
 
 if [ "${existing_pr}" -gt 0 ]; then
   echo "PR already open — branch updated in place. No new PR needed."
@@ -95,8 +101,8 @@ fi
 
 gh pr create \
   --base "${HOTFIX_BRANCH}" \
-  --head "translations_hotfix" \
-  --title "fix: sync translations to ${HOTFIX_BRANCH}" \
+  --head "sync_translations_${HOTFIX_BRANCH}" \
+  --title "chore: sync translations to ${HOTFIX_BRANCH}" \
   --body "Automated sync of Crowdin translations from \`develop\` to \`${HOTFIX_BRANCH}\`.
 
 A 3-way merge is performed per language, then \`bench update-po-files\` reconciles each \`.po\` against hotfix's \`main.pot\`:
@@ -111,4 +117,4 @@ Generated by the \`sync-hotfix-translations\` workflow." \
   --label "translation" \
   --label "skip-release-notes" \
   --reviewer "${PR_REVIEWER}" \
-  -R frappe/erpnext
+  -R "${GITHUB_REPOSITORY}"

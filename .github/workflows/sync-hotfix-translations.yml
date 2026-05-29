@@ -1,67 +1,36 @@
-# Syncs Crowdin translations from develop into version-16-hotfix,
-# filtered to only the strings present in hotfix's main.pot.
+# Orchestrator — lives on develop only.
 #
-# Trigger: fires when version-16-hotfix's main.pot is updated — i.e., when
-# the POT update PR from generate-pot-file.yml is merged. At that point
-# hotfix's main.pot is authoritative, and this workflow fetches develop's
-# latest .po files (Crowdin translations) and merges them against it.
+# Triggers on the weekly schedule and dispatches the runner workflow on each
+# hotfix branch listed in the matrix. To add or remove a branch, edit the
+# matrix below.
 #
-# The weekly schedule acts as a safety net to pick up any Crowdin translations
-# that arrived on develop between POT update cycles.
-#
-# POT file generation remains in generate-pot-file.yml (unchanged).
-# Maintain this file on develop only; it always acts on version-16-hotfix.
+# POT-change triggers are handled by the runner on each hotfix branch
+# (run-hotfix-translation-sync.yml), since GitHub only evaluates a workflow
+# from the branch that receives the push.
 
-name: Sync translations to version-16-hotfix
+name: Sync translations to hotfix branches
 
 on:
-  push:
-    branches:
-      - version-16-hotfix
-    paths:
-      - "erpnext/locale/main.pot"  # fires exactly when the POT update PR merges
   schedule:
-    # 10:00 UTC Monday — safety net for Crowdin translations that arrived
-    # on develop since the last POT update PR merged to version-16-hotfix
+    # 10:00 UTC Monday
     - cron: "0 10 * * 1"
   workflow_dispatch:
 
-# Prevent concurrent runs. cancel-in-progress: false because a mid-flight
-# `git push` + `gh pr create` cancellation can leave an orphaned remote branch.
-concurrency:
-  group: sync-hotfix-translations
-  cancel-in-progress: false
-
 jobs:
-  sync-translations:
-    name: Sync translations to version-16-hotfix
+  trigger-runners:
+    name: Trigger sync → ${{ matrix.hotfix_branch }}
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    strategy:
+      matrix:
+        hotfix_branch:
+          - version-16-hotfix
+      fail-fast: false
 
     steps:
-      - name: Checkout version-16-hotfix
-        uses: actions/checkout@v6
-        with:
-          ref: version-16-hotfix
-          # Full history so `git fetch origin develop` inside the helper works
-          fetch-depth: 0
-
-      - name: Setup Python
-        uses: actions/setup-python@v6
-        with:
-          # Match generate-pot-file.yml — bench runs under the same frappe
-          # stack and must use the same Python version.
-          python-version: "3.14"
-
-      - name: Setup Node
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-
-      - name: Run sync script
+      - name: Dispatch runner on ${{ matrix.hotfix_branch }}
         run: |
-          bash ${GITHUB_WORKSPACE}/.github/helper/sync_hotfix_translations.sh
+          gh workflow run run-hotfix-translation-sync.yml \
+            --repo "${{ github.repository }}" \
+            --ref "${{ matrix.hotfix_branch }}"
         env:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-          PR_REVIEWER: barredterra # change to your GitHub username if you copied this file
