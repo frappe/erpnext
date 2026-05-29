@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version:  frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-27 15:21+0000\n"
-"PO-Revision-Date: 2026-05-29 15:12+0000\n"
+"PO-Revision-Date: 2026-05-29 17:05+0000\n"
 "Last-Translator: hello@frappe.io\n"
 "Language: th_TH\n"
 "Language-Team: Thai\n"
@@ -603,7 +603,7 @@ msgstr "90 ขึ้นไป"
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1261
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1262
 msgid "<0"
-msgstr ""
+msgstr "<0"
 
 #: erpnext/assets/doctype/asset/asset.py:541
 msgid "<b>Cannot create asset.</b><br><br>You're trying to create <b>{0} asset(s)</b> from {2} {3}.<br>However, only <b>{1} item(s)</b> were purchased and <b>{4} asset(s)</b> already exist against {5}."
@@ -677,7 +677,7 @@ msgstr "<div class=\"text-muted text-center\">{0}</div>การแปล: \"ก
 #. Content of the 'Stock Levels HTML' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "<div id=\"stock-levels-placeholder\"></div>"
-msgstr ""
+msgstr "<div id=\"stock-levels-placeholder\"></div>การแปล: \"การแปล\""
 
 #. Content of the 'uom_help_html' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -1249,7 +1249,7 @@ msgstr "ACC-PINV-.YYYY.-"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:88
 msgid "ALL records will be deleted (entire DocType cleared)"
-msgstr ""
+msgstr "บันทึกทั้งหมดจะถูกลบ (ประเภทเอกสารทั้งหมดถูกล้าง)"
 
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:552
 msgid "AMC Expiry (Serial)"
@@ -2731,7 +2731,7 @@ msgstr "เพิ่มด้วยตนเอง"
 
 #: erpnext/projects/doctype/task/task_tree.js:42
 msgid "Add Multiple"
-msgstr ""
+msgstr "เพิ่มหลายรายการ"
 
 #: erpnext/projects/doctype/task/task_tree.js:49
 msgid "Add Multiple Tasks"
@@ -2877,7 +2877,7 @@ msgstr "เพิ่มไปยังการเดินทางต่อ"
 
 #: erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.py:119
 msgid "Add vouchers to generate preview."
-msgstr ""
+msgstr "เพิ่มบัตรกำนัลเพื่อสร้างตัวอย่าง"
 
 #: erpnext/accounts/doctype/coupon_code/coupon_code.js:36
 msgid "Add/Edit Coupon Conditions"
@@ -3341,7 +3341,7 @@ msgstr "จ่ายเงินทดรองแล้ว"
 #. Label of the advance_paid (Currency) field in DocType 'Purchase Order'
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 msgid "Advance Paid (Company Currency)"
-msgstr ""
+msgstr "ชำระเงินล่วงหน้า (สกุลเงินของบริษัท)"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order_list.js:75
 #: erpnext/selling/doctype/sales_order/sales_order_list.js:122
@@ -3833,7 +3833,7 @@ msgstr "ผู้สนใจทั้งหมด (เปิดอยู่)"
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.html:115
 #: erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.html:113
 msgid "All Parties"
-msgstr ""
+msgstr "ทุกฝ่าย"
 
 #. Option for the 'Send To' (Select) field in DocType 'SMS Center'
 #: erpnext/selling/doctype/sms_center/sms_center.json
@@ -4144,7 +4144,7 @@ msgstr "อนุญาตสต็อกติดลบ"
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Allow Negative Stock for Batch"
-msgstr ""
+msgstr "อนุญาตให้สต็อกติดลบสำหรับชุดการผลิต"
 
 #. Label of the allow_or_restrict (Select) field in DocType 'Accounting
 #. Dimension Filter'
@@ -4893,7 +4893,7 @@ msgstr "นักวิเคราะห์"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Analytical Accounting"
-msgstr ""
+msgstr "การบัญชีเชิงวิเคราะห์"
 
 #: erpnext/public/js/utils.js:184
 msgid "Annual Billing: {0}"
@@ -5198,7 +5198,7 @@ msgstr "ใช้ SLA สำหรับเวลาในการแก้ไ�
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Apply discounts and margins on products"
-msgstr ""
+msgstr "ใช้ส่วนลดและกำไรบนสินค้า"
 
 #. Label of the apply_restriction_on_values (Check) field in DocType
 #. 'Accounting Dimension Filter'
@@ -5762,7 +5762,7 @@ msgstr "สถานะสินทรัพย์"
 #. Label of the asset_type (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Asset Type"
-msgstr ""
+msgstr "ประเภทสินทรัพย์"
 
 #. Label of the asset_value (Currency) field in DocType 'Asset Capitalization
 #. Asset Item'
@@ -5997,7 +5997,7 @@ msgstr "ที่แถว #{0}: ปริมาณที่เลือก {1} 
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1436
 msgid "At Row {0}: In Serial and Batch Bundle {1} must have docstatus as 1 and not 0"
-msgstr ""
+msgstr "ที่แถว {0}: ใน Serial และ Batch Bundle {1} ต้องมีสถานะเอกสารเป็น 1 และไม่ใช่ 0"
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:84
 msgid "At least one account with exchange gain or loss is required"
@@ -6030,7 +6030,7 @@ msgstr "ต้องเลือกการขายหรือการซื
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:324
 msgid "At least one raw material item must be present in the stock entry for the type {0}"
-msgstr ""
+msgstr "ต้องมีวัตถุดิบอย่างน้อยหนึ่งรายการในรายการสต็อกสำหรับประเภท {0}"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:27
 msgid "At least one row is required for a financial report template"
@@ -6439,7 +6439,7 @@ msgstr "มีอยู่ / ว่าง"
 #. DocType 'Bin'
 #: erpnext/stock/doctype/bin/bin.json
 msgid "Available / Future Inventory"
-msgstr ""
+msgstr "มีสินค้า / สินค้าที่จะมีในอนาคต"
 
 #. Label of the actual_batch_qty (Float) field in DocType 'Delivery Note Item'
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
@@ -6553,7 +6553,7 @@ msgstr "สต็อกที่ใช้ได้สำหรับสินค
 #. Label of the available_for_use_date (Date) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Available for Use Date"
-msgstr ""
+msgstr "วันที่พร้อมใช้งาน"
 
 #: erpnext/assets/doctype/asset/asset.py:382
 msgid "Available for use date is required"
@@ -6589,7 +6589,7 @@ msgstr "ส่วนลดเฉลี่ย"
 #. Label of a number card in the Selling Workspace
 #: erpnext/selling/workspace/selling/selling.json
 msgid "Average Order Value"
-msgstr ""
+msgstr "มูลค่าการสั่งซื้อเฉลี่ย"
 
 #. Label of a number card in the Buying Workspace
 #: erpnext/buying/workspace/buying/buying.json
@@ -6937,7 +6937,7 @@ msgstr "การดำเนินการ BOM บนเว็บไซต์"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:2458
 msgid "BOM and Finished Good Quantity is mandatory for Disassembly"
-msgstr ""
+msgstr "ปริมาณ BOM และสินค้าสำเร็จรูปเป็นข้อมูลที่จำเป็นสำหรับการถอดประกอบ"
 
 #. Label of the bom_and_work_order_tab (Tab Break) field in DocType
 #. 'Manufacturing Settings'
@@ -7535,13 +7535,13 @@ msgstr "อัตราฐาน"
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Base Tax Withheld"
-msgstr ""
+msgstr "ภาษีฐานที่ถูกหัก ณ ที่จ่าย"
 
 #. Label of the taxable_amount (Currency) field in DocType 'Tax Withholding
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Base Taxable Amount"
-msgstr ""
+msgstr "จำนวนเงินฐานที่ต้องเสียภาษี"
 
 #. Label of the base_total_billable_amount (Currency) field in DocType
 #. 'Timesheet'
@@ -9057,7 +9057,7 @@ msgstr "ตารางแคมเปญ"
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:113
 msgid "Campaign {0} not found"
-msgstr ""
+msgstr "แคมเปญ {0} ไม่พบ"
 
 #: erpnext/setup/doctype/authorization_control/authorization_control.py:60
 msgid "Can be approved by {0}"
@@ -9172,7 +9172,7 @@ msgstr "ไม่สามารถส่งรายการบัญชีแ
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:204
 msgid "Cannot add child table {0} to deletion list. Child tables are automatically deleted with their parent DocTypes."
-msgstr ""
+msgstr "ไม่สามารถเพิ่มตารางลูก {0} ไปยังรายการการลบได้ ตารางลูกจะถูกลบโดยอัตโนมัติพร้อมกับ DocTypes ที่เป็นพ่อแม่"
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:226
 msgid "Cannot amend {0} {1}, please create a new one instead."
@@ -9216,7 +9216,7 @@ msgstr "ไม่สามารถยกเลิกการบันทึก
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:579
 msgid "Cannot cancel this document as it is linked with the submitted Asset Value Adjustment <b>{0}</b>. Please cancel the Asset Value Adjustment to continue."
-msgstr ""
+msgstr "ไม่สามารถยกเลิกเอกสารนี้ได้ เนื่องจากเอกสารนี้เชื่อมโยงกับการปรับปรุงมูลค่าสินทรัพย์ที่ยื่นไว้แล้ว <b>{0}</b>กรุณายกเลิกการปรับปรุงมูลค่าสินทรัพย์เพื่อดำเนินการต่อ"
 
 #: erpnext/controllers/buying_controller.py:1148
 msgid "Cannot cancel this document as it is linked with the submitted asset {asset_link}. Please cancel the asset to continue."
@@ -9311,11 +9311,11 @@ msgstr "ไม่สามารถลบรายการที่ได้ส
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:197
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:783
 msgid "Cannot delete protected core DocType: {0}"
-msgstr ""
+msgstr "ไม่สามารถลบ DocType ที่ได้รับการป้องกันได้: {0}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:213
 msgid "Cannot delete virtual DocType: {0}. Virtual DocTypes do not have database tables."
-msgstr ""
+msgstr "ไม่สามารถลบ DocType เสมือน: {0}. DocType เสมือนไม่มีตารางฐานข้อมูล"
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.py:146
 msgid "Cannot disable Serial and Batch No for Item, as there are existing records for serial / batch."
@@ -9364,11 +9364,11 @@ msgstr "ไม่พบคลังสินค้าเริ่มต้นส
 
 #: erpnext/accounts/party.py:1063
 msgid "Cannot merge {0} '{1}' into '{2}' as both have existing accounting entries in different currencies for company '{3}'."
-msgstr ""
+msgstr "ไม่สามารถรวม {0} '{1}' เข้าเป็น '{2}' ได้ เนื่องจากทั้งสองมีรายการบัญชีที่มีอยู่แล้วในสกุลเงินที่แตกต่างกันสำหรับบริษัท '{3}'"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:578
 msgid "Cannot produce more Item {0} than Sales Order quantity {1} {2}"
-msgstr ""
+msgstr "ไม่สามารถผลิตสินค้าได้มากกว่าปริมาณคำสั่งซื้อ {0} กว่าปริมาณคำสั่งซื้อ {1} {2}"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:1473
 msgid "Cannot produce more item for {0}"
@@ -9427,11 +9427,11 @@ msgstr "ไม่สามารถตั้งค่าเริ่มต้น
 
 #: erpnext/controllers/accounts_controller.py:3913
 msgid "Cannot set quantity less than delivered quantity."
-msgstr ""
+msgstr "ไม่สามารถตั้งค่าปริมาณน้อยกว่าปริมาณที่จัดส่งแล้ว."
 
 #: erpnext/controllers/accounts_controller.py:3914
 msgid "Cannot set quantity less than received quantity."
-msgstr ""
+msgstr "ไม่สามารถตั้งค่าปริมาณน้อยกว่าปริมาณที่ได้รับแล้ว."
 
 #: erpnext/stock/doctype/item_variant_settings/item_variant_settings.py:69
 msgid "Cannot set the field <b>{0}</b> for copying in variants"
@@ -9439,7 +9439,7 @@ msgstr "ไม่สามารถตั้งค่าฟิลด์ <b>{0}</
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:266
 msgid "Cannot start deletion. Another deletion {0} is already queued/running. Please wait for it to complete."
-msgstr ""
+msgstr "ไม่สามารถเริ่มการลบได้ การลบ {0} กำลังอยู่ในคิว/กำลังดำเนินการอยู่ กรุณารอจนกว่าจะเสร็จสิ้น"
 
 #: erpnext/controllers/accounts_controller.py:3941
 msgid "Cannot update rate as item {0} is already ordered or purchased against this quotation"
@@ -9973,11 +9973,11 @@ msgstr ""
 
 #: erpnext/accounts/doctype/journal_entry_template/journal_entry_template.py:58
 msgid "Check row {0} for account {1}: Party Type is only allowed for Receivable or Payable accounts"
-msgstr ""
+msgstr "ตรวจสอบแถว {0} สำหรับบัญชี {1}: ประเภทบัญชีอนุญาตเฉพาะบัญชีลูกหนี้หรือเจ้าหนี้เท่านั้น"
 
 #: erpnext/accounts/doctype/journal_entry_template/journal_entry_template.py:65
 msgid "Check row {0} for account {1}: Party is only allowed if Party Type is set"
-msgstr ""
+msgstr "ตรวจสอบแถว {0} สำหรับบัญชี {1}: อนุญาตเฉพาะปาร์ตี้หากประเภทปาร์ตี้ถูกตั้งค่าแล้ว"
 
 #. Description of the 'Must be Whole Number' (Check) field in DocType 'UOM'
 #: erpnext/setup/doctype/uom/uom.json
@@ -10090,7 +10090,7 @@ msgstr "ประธานเจ้าหน้าที่ฝ่ายเทค
 #. Deletion Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Child DocTypes"
-msgstr ""
+msgstr "ประเภทเอกสารของเด็ก"
 
 #. Label of the child_docname (Data) field in DocType 'Pricing Rule Detail'
 #: erpnext/accounts/doctype/pricing_rule_detail/pricing_rule_detail.json
@@ -10106,7 +10106,7 @@ msgstr "การอ้างอิงแถวลูก"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:207
 msgid "Child Table Not Allowed"
-msgstr ""
+msgstr "ไม่อนุญาตให้ใช้ตารางย่อย"
 
 #: erpnext/projects/doctype/task/task.py:314
 msgid "Child Task exists for this Task. You can not delete this Task."
@@ -10120,7 +10120,7 @@ msgstr "โหนดลูกสามารถสร้างได้ภาย
 #. 'Transaction Deletion Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Child tables that will also be deleted"
-msgstr ""
+msgstr "ตารางเด็กที่จะถูกลบด้วย"
 
 #: erpnext/stock/doctype/warehouse/warehouse.py:103
 msgid "Child warehouse exists for this warehouse. You can not delete this warehouse."
@@ -10199,7 +10199,7 @@ msgstr "อัปเดตวันที่เคลียร์แล้ว"
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.py:158
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.py:173
 msgid "Clearance date changed from {0} to {1} via Bank Clearance Tool"
-msgstr ""
+msgstr "วันที่การเคลียร์เปลี่ยนจาก {0} เป็น {1} ผ่านเครื่องมือการเคลียร์ธนาคาร"
 
 #: erpnext/public/js/utils/demo.js:21
 msgid "Clearing Demo Data..."
@@ -10999,7 +10999,7 @@ msgstr "บัญชีบริษัท"
 
 #: erpnext/accounts/doctype/bank_account/bank_account.py:63
 msgid "Company Account is mandatory"
-msgstr ""
+msgstr "บัญชีบริษัทเป็นสิ่งที่จำเป็น"
 
 #. Label of the company_address (Link) field in DocType 'Dunning'
 #. Label of the company_address_display (Text Editor) field in DocType 'POS
@@ -11111,7 +11111,7 @@ msgstr "อีเมลบริษัท"
 #. Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Company Field"
-msgstr ""
+msgstr "ช่องข้อมูลบริษัท"
 
 #. Label of the company_logo (Attach Image) field in DocType 'Company'
 #: erpnext/public/js/print.js:80 erpnext/setup/doctype/company/company.json
@@ -11168,7 +11168,7 @@ msgstr "ต้องระบุบริษัทเพื่อสร้าง
 #. Deletion Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Company link field name used for filtering (optional - leave empty to delete all records)"
-msgstr ""
+msgstr "ชื่อฟิลด์ลิงก์บริษัทที่ใช้สำหรับการกรอง (ไม่บังคับ - ปล่อยว่างไว้เพื่อลบข้อมูลทั้งหมด)"
 
 #: erpnext/setup/doctype/company/company.js:222
 msgid "Company name not same"
@@ -11369,17 +11369,17 @@ msgstr "ชื่อส่วนประกอบ"
 #. Label of the items (Table) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Components"
-msgstr ""
+msgstr "ส่วนประกอบ"
 
 #. Option for the 'Asset Type' (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Composite Asset"
-msgstr ""
+msgstr "สินทรัพย์เชิงประกอบ"
 
 #. Option for the 'Asset Type' (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Composite Component"
-msgstr ""
+msgstr "ส่วนประกอบผสม"
 
 #. Label of the comprehensive_insurance (Data) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
@@ -11450,7 +11450,7 @@ msgstr "วันที่ยืนยัน"
 #. Label of the connection_tab (Tab Break) field in DocType 'Asset Repair'
 #: erpnext/assets/doctype/asset_repair/asset_repair.json
 msgid "Connection"
-msgstr ""
+msgstr "การเชื่อมต่อ"
 
 #: erpnext/accounts/report/general_ledger/general_ledger.js:176
 msgid "Consider Accounting Dimensions"
@@ -11500,12 +11500,12 @@ msgstr "พิจารณาภาษีหรือค่าธรรมเน
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 #: erpnext/accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgid "Consider for Tax Withholding"
-msgstr ""
+msgstr "พิจารณาสำหรับการหักภาษี ณ ที่จ่าย"
 
 #. Label of the apply_tds (Check) field in DocType 'Journal Entry'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
 msgid "Consider for Tax Withholding "
-msgstr ""
+msgstr "พิจารณาสำหรับการหักภาษี ณ ที่จ่าย "
 
 #. Label of the included_in_paid_amount (Check) field in DocType 'Advance Taxes
 #. and Charges'
@@ -12920,7 +12920,7 @@ msgstr "สร้างใบเสนอราคาจากซัพพลา
 #. Label of an action in the Onboarding Step 'Create Tasks'
 #: erpnext/projects/onboarding_step/create_tasks/create_tasks.json
 msgid "Create Task"
-msgstr ""
+msgstr "สร้างงาน"
 
 #. Title of an Onboarding Step
 #: erpnext/projects/onboarding_step/create_tasks/create_tasks.json
@@ -13026,7 +13026,7 @@ msgstr "สร้าง {0} {1} ?"
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Created By Migration"
-msgstr ""
+msgstr "สร้างโดยการย้ายข้อมูล"
 
 #: erpnext/buying/doctype/supplier_scorecard/supplier_scorecard.py:250
 msgid "Created {0} scorecards for {1} between:"
@@ -13453,7 +13453,7 @@ msgstr "ลูกบาศก์หลา"
 #. Rate'
 #: erpnext/accounts/doctype/tax_withholding_rate/tax_withholding_rate.json
 msgid "Cumulative Threshold"
-msgstr ""
+msgstr "เกณฑ์สะสม"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -14270,7 +14270,7 @@ msgstr "รายละเอียดใบสั่งซื้อของล
 #. Label of the customer_pos_id (Data) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Customer POS ID"
-msgstr ""
+msgstr "รหัสลูกค้า POS"
 
 #. Label of the portal_users (Table) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
@@ -14892,13 +14892,13 @@ msgstr "หัก"
 #. Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Deduct Tax On Basis"
-msgstr ""
+msgstr "หักภาษีตามฐาน"
 
 #. Label of the source_section (Section Break) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Deducted From"
-msgstr ""
+msgstr "หักจาก"
 
 #. Label of the section_break_3 (Section Break) field in DocType 'Lower
 #. Deduction Certificate'
@@ -14969,7 +14969,7 @@ msgstr "บัญชีรับล่วงหน้าเริ่มต้น
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Default Ageing Range"
-msgstr ""
+msgstr "ช่วงอายุการเสื่อมสภาพเริ่มต้น"
 
 #. Label of the default_bom (Link) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -15593,11 +15593,11 @@ msgstr "ไม่อนุญาตให้ลบสำหรับประเ
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:216
 msgid "Deletion process restarted"
-msgstr ""
+msgstr "กระบวนการลบเริ่มต้นใหม่"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:97
 msgid "Deletion will start automatically after submission."
-msgstr ""
+msgstr "การลบจะเริ่มโดยอัตโนมัติหลังจากส่งแล้ว"
 
 #. Label of the delimiter_options (Data) field in DocType 'Bank Statement
 #. Import'
@@ -16378,7 +16378,7 @@ msgstr "รายได้ทางตรง"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:359
 msgid "Direct return is not allowed for Timesheet."
-msgstr ""
+msgstr "ไม่อนุญาตให้คืนสินค้าโดยตรงสำหรับ Timesheet"
 
 #. Label of the disabled (Check) field in DocType 'Account'
 #. Label of the disabled (Check) field in DocType 'Accounting Dimension'
@@ -16408,7 +16408,7 @@ msgstr "ปิดใช้งานการวางแผนกำลังก
 #. Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Disable Cumulative Threshold"
-msgstr ""
+msgstr "ปิดใช้งานเกณฑ์สะสม"
 
 #. Label of the disable_in_words (Check) field in DocType 'Global Defaults'
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
@@ -16455,7 +16455,7 @@ msgstr "ปิดใช้งานตัวเลือกหมายเลข
 #. Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Disable Transaction Threshold"
-msgstr ""
+msgstr "ปิดการใช้งานเกณฑ์การทำธุรกรรม"
 
 #. Label of the disable_last_purchase_rate (Check) field in DocType 'Buying
 #. Settings'
@@ -16516,7 +16516,7 @@ msgstr "ใบสั่งถอดประกอบ"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:2400
 msgid "Disassemble Qty cannot be less than or equal to 0."
-msgstr ""
+msgstr "จำนวนชิ้นส่วนที่ต้องถอดประกอบไม่สามารถน้อยกว่าหรือเท่ากับ0 ได้"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:445
 msgid "Disassemble Qty cannot be less than or equal to <b>0</b>."
@@ -17062,31 +17062,31 @@ msgstr ""
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:182
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:445
 msgid "DocType {0} does not exist"
-msgstr ""
+msgstr "ประเภทเอกสาร {0} ไม่มีอยู่"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:295
 msgid "DocType {0} with company field '{1}' is already in the list"
-msgstr ""
+msgstr "ประเภทเอกสาร {0} พร้อมฟิลด์บริษัท '{1}' อยู่ในรายการแล้ว"
 
 #. Label of the doctypes_to_delete (Table) field in DocType 'Transaction
 #. Deletion Record'
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgid "DocTypes To Delete"
-msgstr ""
+msgstr "ประเภทเอกสารที่จะลบ"
 
 #. Description of the 'Excluded DocTypes' (Table) field in DocType 'Transaction
 #. Deletion Record'
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgid "DocTypes that will NOT be deleted."
-msgstr ""
+msgstr "ประเภทเอกสารที่จะไม่ถูกลบ"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:84
 msgid "DocTypes with a company field:"
-msgstr ""
+msgstr "ประเภทเอกสารที่มีฟิลด์บริษัท:"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:88
 msgid "DocTypes without a company field:"
-msgstr ""
+msgstr "ประเภทเอกสารที่ไม่มีฟิลด์บริษัท:"
 
 #: erpnext/templates/pages/search_help.py:22
 msgid "Docs Search"
@@ -17096,7 +17096,7 @@ msgstr "ค้นหาเอกสาร"
 #. Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Document Count"
-msgstr ""
+msgstr "จำนวนเอกสาร"
 
 #. Label of the document_naming_tab (Tab Break) field in DocType 'Buying
 #. Settings'
@@ -17152,7 +17152,7 @@ msgstr "อย่าบังคับปริมาณรายการฟร
 #: erpnext/accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 #: erpnext/accounts/doctype/sales_taxes_and_charges/sales_taxes_and_charges.json
 msgid "Don't Recompute Tax"
-msgstr ""
+msgstr "อย่าคำนวณภาษีใหม่"
 
 #. Label of the dont_reserve_sales_order_qty_on_sales_return (Check) field in
 #. DocType 'Selling Settings'
@@ -17358,7 +17358,7 @@ msgstr "กลุ่มลูกค้าที่ซ้ำกัน"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:190
 msgid "Duplicate DocType"
-msgstr ""
+msgstr "เอกสารซ้ำซ้อน ประเภทเอกสาร"
 
 #: erpnext/setup/doctype/authorization_rule/authorization_rule.py:71
 msgid "Duplicate Entry. Please check Authorization Rule {0}"
@@ -17374,7 +17374,7 @@ msgstr "กลุ่มสินค้าซ้ำ"
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:102
 msgid "Duplicate Item Under Same Parent"
-msgstr ""
+msgstr "รายการซ้ำภายใต้ผู้ปกครองเดียวกัน"
 
 #: erpnext/manufacturing/doctype/workstation/workstation.py:79
 #: erpnext/manufacturing/doctype/workstation_type/workstation_type.py:37
@@ -17420,7 +17420,7 @@ msgstr "รายการซ้ำกับรหัสสินค้า {0} �
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:189
 msgid "Duplicate entry: {0}{1}"
-msgstr ""
+msgstr "รายการซ้ำ: {0}{1}"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:164
 msgid "Duplicate item group found in the item group table"
@@ -17481,7 +17481,7 @@ msgstr "อีแอนด์เอ็น"
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
 msgid "EAN-13"
-msgstr ""
+msgstr "อีแอนด์เอ็น-13"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
@@ -17501,7 +17501,7 @@ msgstr "EMU ของกระแส"
 #. Label of a Desktop Icon
 #: erpnext/desktop_icon/erpnext.json
 msgid "ERPNext"
-msgstr ""
+msgstr "เออีอาร์พีเน็กซ์"
 
 #. Label of a Desktop Icon
 #. Name of a Workspace
@@ -17510,7 +17510,7 @@ msgstr ""
 #: erpnext/setup/workspace/erpnext_settings/erpnext_settings.json
 #: erpnext/workspace_sidebar/erpnext_settings.json
 msgid "ERPNext Settings"
-msgstr ""
+msgstr "การตั้งค่า ERPNext"
 
 #. Label of the user_id (Data) field in DocType 'Employee Group Table'
 #: erpnext/setup/doctype/employee_group_table/employee_group_table.json
@@ -17603,7 +17603,7 @@ msgstr "แก้ไขใบเสร็จ"
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Edit Tax Withholding Entries"
-msgstr ""
+msgstr "แก้ไขรายการหักภาษี ณ ที่จ่าย"
 
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:777
 msgid "Editing {0} is not allowed as per POS Profile settings"
@@ -17699,7 +17699,7 @@ msgstr "แคมเปญอีเมล"
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:149
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:157
 msgid "Email Campaign Error"
-msgstr ""
+msgstr "ข้อผิดพลาดในการส่งอีเมลแคมเปญ"
 
 #. Label of the email_campaign_for (Select) field in DocType 'Email Campaign'
 #: erpnext/crm/doctype/email_campaign/email_campaign.json
@@ -17708,7 +17708,7 @@ msgstr "แคมเปญอีเมลสำหรับ "
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:125
 msgid "Email Campaign Send Error"
-msgstr ""
+msgstr "เกิดข้อผิดพลาดในการส่งแคมเปญอีเมล"
 
 #. Label of the supplier_response_section (Section Break) field in DocType
 #. 'Request for Quotation'
@@ -17968,7 +17968,7 @@ msgstr "ว่างเปล่า"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:755
 msgid "Empty To Delete List"
-msgstr ""
+msgstr "ว่างเปล่า เพื่อลบบัญชี"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -17979,7 +17979,7 @@ msgstr "เอ็มส์ (Pica)"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Accounting Dimensions"
-msgstr ""
+msgstr "เปิดใช้งานมิติการบัญชี"
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1721
 msgid "Enable Allow Partial Reservation in the Stock Settings to reserve partial stock."
@@ -18041,7 +18041,7 @@ msgstr "เปิดใช้งานรายได้รอตัดบัญ
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Discounts and Margin"
-msgstr ""
+msgstr "เปิดใช้งานส่วนลดและอัตรากำไร"
 
 #. Label of the enable_european_access (Check) field in DocType 'Plaid
 #. Settings'
@@ -18077,7 +18077,7 @@ msgstr "เปิดใช้งานบัญชีสินค้าคงค
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Loyalty Point Program"
-msgstr ""
+msgstr "เปิดใช้งานโปรแกรมสะสมคะแนนสะสม"
 
 #. Label of the enable_parallel_reposting (Check) field in DocType 'Stock
 #. Reposting Settings'
@@ -18127,12 +18127,12 @@ msgstr ""
 #. Label of the enable_utm (Check) field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Enable UTM"
-msgstr ""
+msgstr "เปิดใช้งาน UTM"
 
 #. Description of the 'Enable UTM' (Check) field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Enable Urchin Tracking Module parameters in Quotation, Sales Order, Sales Invoice, POS Invoice, Lead,  and Delivery Note."
-msgstr ""
+msgstr "เปิดใช้งานพารามิเตอร์โมดูลการติดตาม Urchin ในใบเสนอราคา, ใบสั่งขาย, ใบแจ้งหนี้ขาย, ใบแจ้งหนี้ POS, ลูกค้าเป้าหมาย และใบส่งของ"
 
 #. Label of the enable_youtube_tracking (Check) field in DocType 'Video
 #. Settings'
@@ -18144,7 +18144,7 @@ msgstr "เปิดใช้งานการติดตาม YouTube"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable cost center, projects and other custom accounting dimensions"
-msgstr ""
+msgstr "เปิดใช้งานศูนย์ต้นทุน โครงการ และมิติการบัญชีที่กำหนดเองอื่น ๆ"
 
 #. Label of the enable_cutoff_date_on_bulk_delivery_note_creation (Check) field
 #. in DocType 'Selling Settings'
@@ -18228,7 +18228,7 @@ msgstr ""
 #. 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Enable tracking sales commissions"
-msgstr ""
+msgstr "เปิดใช้งานการติดตามค่าคอมมิชชั่นการขาย"
 
 #. Description of the 'Fetch Timesheet in Sales Invoice' (Check) field in
 #. DocType 'Projects Settings'
@@ -18545,7 +18545,7 @@ msgstr "ข้อผิดพลาดในการประเมินสู
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:267
 msgid "Error getting details for {0}: {1}"
-msgstr ""
+msgstr "เกิดข้อผิดพลาดในการดึงรายละเอียดสำหรับ {0}: {1}"
 
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.py:312
 msgid "Error in party matching for Bank Transaction {0}"
@@ -18804,7 +18804,7 @@ msgstr "หมายเลขหน้าภาษีสรรพสามิต
 
 #: erpnext/accounts/report/trial_balance_for_party/trial_balance_for_party.js:86
 msgid "Exclude Zero Balance Parties"
-msgstr ""
+msgstr "ยกเว้นฝ่ายที่มียอดคงเหลือเป็นศูนย์"
 
 #. Label of the doctypes_to_be_ignored (Table) field in DocType 'Transaction
 #. Deletion Record'
@@ -18845,7 +18845,7 @@ msgstr "นิทรรศการ"
 #. Option for the 'Asset Type' (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Existing Asset"
-msgstr ""
+msgstr "สินทรัพย์ที่มีอยู่"
 
 #. Option for the 'Create Chart Of Accounts Based On' (Select) field in DocType
 #. 'Company'
@@ -18865,7 +18865,7 @@ msgstr "ลูกค้าที่มีอยู่"
 #. Label of the exit (Tab Break) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Exit"
-msgstr ""
+msgstr "ออก"
 
 #. Label of the held_on (Date) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -19273,7 +19273,7 @@ msgstr "ล้มเหลวในการโพสต์รายการค
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:126
 msgid "Failed to send email for campaign {0} to {1}"
-msgstr ""
+msgstr "ไม่สามารถส่งอีเมลสำหรับแคมเปญ {0} ไปยัง {1}ได้"
 
 #: erpnext/setup/setup_wizard/setup_wizard.py:26
 msgid "Failed to set defaults"
@@ -19421,7 +19421,7 @@ msgstr "กำลังดึงข้อมูล..."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:224
 msgid "Field '{0}' is not a valid Company link field for DocType {1}"
-msgstr ""
+msgstr "ฟิลด์ '{0}' ไม่ใช่ฟิลด์ลิงก์บริษัทที่ถูกต้องสำหรับประเภทเอกสาร {1}"
 
 #. Label of the field_mapping_section (Section Break) field in DocType
 #. 'Inventory Dimension'
@@ -19451,15 +19451,15 @@ msgstr "ฟิลด์จะถูกคัดลอกเมื่อสร้
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1067
 msgid "File does not belong to this Transaction Deletion Record"
-msgstr ""
+msgstr "ไฟล์นี้ไม่เกี่ยวข้องกับบันทึกการลบธุรกรรมนี้"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1061
 msgid "File not found"
-msgstr ""
+msgstr "ไฟล์ไม่พบ"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1075
 msgid "File not found on server"
-msgstr ""
+msgstr "ไฟล์ไม่พบในเซิร์ฟเวอร์"
 
 #. Label of the file_to_rename (Attach) field in DocType 'Rename Tool'
 #: erpnext/utilities/doctype/rename_tool/rename_tool.json
@@ -20237,7 +20237,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/bom/bom.py:368
 msgid "For operation {0} at row {1}, please add raw materials or set a BOM against it."
-msgstr ""
+msgstr "สำหรับการดำเนินการ {0} ที่แถว {1}โปรดเพิ่มวัตถุดิบหรือกำหนด BOM ให้กับรายการนี้"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:2649
 msgid "For operation {0}: Quantity ({1}) can not be greater than pending quantity({2})"
@@ -20291,7 +20291,7 @@ msgstr "เพื่อความสะดวกของลูกค้า �
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1071
 msgid "For the item {0}, the consumed quantity should be {1} according to the BOM {2}."
-msgstr ""
+msgstr "สำหรับรายการ {0}ปริมาณที่ใช้ควรเป็น {1} ตาม BOM {2}"
 
 #: erpnext/public/js/controllers/transaction.js:1404
 msgctxt "Clear payment terms template and/or payment schedule when due date is changed"
@@ -20482,7 +20482,7 @@ msgstr "จากวันที่และถึงวันที่เป็
 
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:29
 msgid "From Date and To Date are required"
-msgstr ""
+msgstr "จากวันที่ ถึงวันที่ จำเป็นต้องกรอก"
 
 #: erpnext/accounts/report/tds_computation_summary/tds_computation_summary.py:30
 msgid "From Date and To Date lie in different Fiscal Year"
@@ -20794,7 +20794,7 @@ msgstr "ข้อกำหนดและเงื่อนไขการปฏ
 
 #: erpnext/stock/doctype/shipment/shipment.js:275
 msgid "Full Name, Email or Phone/Mobile of the user are mandatory to continue."
-msgstr ""
+msgstr "ชื่อ-นามสกุล, อีเมล หรือหมายเลขโทรศัพท์/มือถือของผู้ใช้เป็นข้อมูลที่จำเป็นในการดำเนินการต่อ"
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
 #. Account'
@@ -20922,7 +20922,7 @@ msgstr "GTIN"
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
 msgid "GTIN-14"
-msgstr ""
+msgstr "GTIN-14"
 
 #. Label of the gain_loss (Currency) field in DocType 'Exchange Rate
 #. Revaluation Account'
@@ -21067,11 +21067,11 @@ msgstr "สร้างรายการปิดสต็อก"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:112
 msgid "Generate To Delete List"
-msgstr ""
+msgstr "สร้างรายการเพื่อลบ"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:472
 msgid "Generate To Delete list first"
-msgstr ""
+msgstr "สร้างรายการเพื่อลบก่อน"
 
 #. Description of a DocType
 #: erpnext/stock/doctype/packing_slip/packing_slip.json
@@ -21549,7 +21549,7 @@ msgstr "ยอดรวมทั้งหมด (สกุลเงินบร�
 
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:252
 msgid "Grand Total (Transaction Currency)"
-msgstr ""
+msgstr "ยอดรวมทั้งหมด (สกุลเงินของธุรกรรม)"
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:125
 msgid "Grand Total must match sum of Payment References"
@@ -21640,7 +21640,7 @@ msgstr "อัตรากำไรขั้นต้น"
 #. Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Gross Total"
-msgstr ""
+msgstr "ยอดรวมทั้งหมด"
 
 #. Label of the gross_weight_pkg (Float) field in DocType 'Packing Slip'
 #: erpnext/stock/doctype/packing_slip/packing_slip.json
@@ -21668,7 +21668,7 @@ msgstr "จัดกลุ่มตามผู้จัดจำหน่าย
 #. Label of the group_name (Data) field in DocType 'Tax Withholding Group'
 #: erpnext/accounts/doctype/tax_withholding_group/tax_withholding_group.json
 msgid "Group Name"
-msgstr ""
+msgstr "ชื่อกลุ่ม"
 
 #: erpnext/setup/doctype/sales_person/sales_person_tree.js:14
 msgid "Group Node"
@@ -22267,7 +22267,7 @@ msgstr "IBAN"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:93
 msgid "IMPORTANT: Create a backup before proceeding!"
-msgstr ""
+msgstr "สำคัญ: สร้างสำรองข้อมูลก่อนดำเนินการต่อ!"
 
 #. Name of a report
 #: erpnext/regional/report/irs_1099/irs_1099.json
@@ -22490,7 +22490,7 @@ msgstr "หากเปิดใช้งาน ระบบจะอนุญ�
 #. field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "If enabled, system will set incoming rate as zero for stand-alone credit notes with expired batch item."
-msgstr ""
+msgstr "หากเปิดใช้งาน ระบบจะตั้งค่าอัตราขาเข้าเป็นศูนย์สำหรับใบลดหนี้แบบสแตนด์อโลนที่มีรายการชุดหมดอายุ"
 
 #. Description of the 'Deliver secondary Items' (Check) field in DocType
 #. 'Selling Settings'
@@ -22753,7 +22753,7 @@ msgstr "หากคุณยังต้องการดำเนินกา
 #. Description of the 'Sequence ID' (Int) field in DocType 'BOM Operation'
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
 msgid "If you want to run operations in parallel, keep the same sequence ID for them."
-msgstr ""
+msgstr "หากคุณต้องการดำเนินการแบบขนาน ให้คงลำดับ ID เดิมไว้สำหรับแต่ละรายการ"
 
 #: erpnext/accounts/doctype/pricing_rule/utils.py:378
 msgid "If you {0} {1} quantities of the item {2}, the scheme {3} will be applied on the item."
@@ -22878,7 +22878,7 @@ msgstr "ละเว้นใบเครดิต/เดบิตที่ส�
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Ignore Tax Withholding Threshold"
-msgstr ""
+msgstr "เพิกเฉยต่อเกณฑ์การหักภาษี ณ ที่จ่าย"
 
 #. Label of the ignore_user_time_overlap (Check) field in DocType 'Projects
 #. Settings'
@@ -22906,7 +22906,7 @@ msgstr "ละเว้นฟิลด์ Is Opening แบบเก่าที
 
 #: erpnext/stock/doctype/item/item.py:253
 msgid "Image in the description has been removed. To disable this behavior, uncheck \"{0}\" in {1}."
-msgstr ""
+msgstr "รูปภาพในคำอธิบายถูกลบออกแล้ว หากต้องการปิดการทำงานนี้ ให้ยกเลิกการเลือก \"{0}\" ใน {1}"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:135
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:229
@@ -22957,7 +22957,7 @@ msgstr "นำเข้าสำเร็จ"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:564
 msgid "Import Summary"
-msgstr ""
+msgstr "สรุปการนำเข้า"
 
 #. Label of a Link in the Buying Workspace
 #. Name of a DocType
@@ -22981,7 +22981,7 @@ msgstr "นำเข้าเป็นกลุ่ม"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:192
 msgid "Imported {0} DocTypes"
-msgstr ""
+msgstr "นำเข้า {0} ประเภทเอกสาร"
 
 #: erpnext/edi/doctype/code_list/code_list_import.py:36
 msgid "Importing Code Lists from remote URLs is not allowed."
@@ -23424,7 +23424,7 @@ msgstr "บัญชีรายได้"
 #. 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Income and Expense"
-msgstr ""
+msgstr "รายได้และค่าใช้จ่าย"
 
 #. Description of the 'Enable Deferred Expense' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -23434,7 +23434,7 @@ msgstr ""
 #. Label of a number card in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 msgid "Incoming Bills"
-msgstr ""
+msgstr "ใบแจ้งหนี้ที่เข้ามา"
 
 #. Name of a DocType
 #: erpnext/telephony/doctype/incoming_call_handling_schedule/incoming_call_handling_schedule.json
@@ -23449,7 +23449,7 @@ msgstr "การตั้งค่าสายเรียกเข้า"
 #. Label of a number card in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 msgid "Incoming Payment"
-msgstr ""
+msgstr "การชำระเงินเข้า"
 
 #. Label of the incoming_rate (Currency) field in DocType 'Delivery Note Item'
 #. Label of the incoming_rate (Currency) field in DocType 'Packed Item'
@@ -23966,7 +23966,7 @@ msgstr "ภายใน"
 #. 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Internal Customer Accounting"
-msgstr ""
+msgstr "บัญชีลูกค้าภายใน"
 
 #: erpnext/selling/doctype/customer/customer.py:255
 msgid "Internal Customer for company {0} already exists"
@@ -23992,7 +23992,7 @@ msgstr "การอ้างอิงการขายภายในหาย
 #. 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "Internal Supplier Accounting"
-msgstr ""
+msgstr "บัญชีผู้จัดหาภายใน"
 
 #: erpnext/buying/doctype/supplier/supplier.py:181
 msgid "Internal Supplier for company {0} already exists"
@@ -24083,7 +24083,7 @@ msgstr "คำสั่งซื้อแบบครอบคลุมไม่
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:498
 msgid "Invalid CSV format. Expected column: doctype_name"
-msgstr ""
+msgstr "รูปแบบ CSV ไม่ถูกต้อง คอลัมน์ที่คาดหวัง: doctype_name"
 
 #: erpnext/quality_management/doctype/quality_procedure/quality_procedure.py:72
 msgid "Invalid Child Procedure"
@@ -24091,7 +24091,7 @@ msgstr "กระบวนการย่อยไม่ถูกต้อง"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:227
 msgid "Invalid Company Field"
-msgstr ""
+msgstr "ฟิลด์บริษัทไม่ถูกต้อง"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2355
 msgid "Invalid Company for Inter Company Transaction."
@@ -24259,7 +24259,7 @@ msgstr "นิพจน์เงื่อนไขไม่ถูกต้อง
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1056
 msgid "Invalid file URL"
-msgstr ""
+msgstr "ไฟล์ URL ไม่ถูกต้อง"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:87
 msgid "Invalid filter formula. Please check the syntax."
@@ -24353,7 +24353,7 @@ msgstr "อัตราหมุนเวียนสินค้าคงคล
 #. 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Inventory Valuation"
-msgstr ""
+msgstr "การประเมินมูลค่าสินค้าคงคลัง"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:29
 msgid "Investment Banking"
@@ -26485,7 +26485,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:99
 msgid "Item {0} added multiple times under the same parent item {1} at rows {2} and {3}"
-msgstr ""
+msgstr "รายการ {0} ถูกเพิ่มหลายครั้งภายใต้รายการหลักเดียวกัน {1} ที่แถว {2} และ {3}"
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:119
 msgid "Item {0} cannot be added as a sub-assembly of itself"
@@ -26712,7 +26712,7 @@ msgstr "รายการสำหรับคำขอวัตถุดิบ
 
 #: erpnext/selling/page/point_of_sale/pos_item_selector.js:110
 msgid "Items not found."
-msgstr ""
+msgstr "ไม่พบรายการ"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1245
 msgid "Items rate has been updated to zero as Allow Zero Valuation Rate is checked for the following items: {0}"
@@ -27506,7 +27506,7 @@ msgstr ""
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Learn about <a href=\"https://docs.frappe.io/erpnext/user/manual/en/common_party_accounting\" rel=\"noopener noreferrer\">Common Party</a>"
-msgstr ""
+msgstr "เรียนรู้เกี่ยวกับ<a href=\"https://docs.frappe.io/erpnext/user/manual/en/common_party_accounting\" rel=\"noopener noreferrer\">Common Party</a>"
 
 #. Label of the leave_encashed (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -27561,7 +27561,7 @@ msgstr "การรวมบัญชีแยกประเภท"
 
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:146
 msgid "Ledger Type"
-msgstr ""
+msgstr "ประเภทบัญชีแยกประเภท"
 
 #. Label of a Card Break in the Financial Reports Workspace
 #. Label of a Workspace Sidebar Item
@@ -28433,7 +28433,7 @@ msgstr "สร้างรายการโอน"
 
 #: erpnext/public/js/telephony.js:29
 msgid "Make a call"
-msgstr ""
+msgstr "โทรออก"
 
 #: erpnext/config/projects.py:34
 msgid "Make project from a template."
@@ -28465,7 +28465,7 @@ msgstr "จัดการต้นทุนการดำเนินงาน
 #. DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Manage sales partner's and sales team's commissions"
-msgstr ""
+msgstr "จัดการค่าคอมมิชชั่นของพันธมิตรทางการขายและทีมขาย"
 
 #: erpnext/utilities/activation.py:95
 msgid "Manage your orders"
@@ -29788,7 +29788,7 @@ msgstr "นาที"
 #. Label of the section_break_19 (Section Break) field in DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Miscellaneous"
-msgstr ""
+msgstr "เบ็ดเตล็ด"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:116
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:224
@@ -30131,7 +30131,7 @@ msgstr "ตัวเลือกหลายรายการ"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:244
 msgid "Multiple company fields available: {0}. Please select manually."
-msgstr ""
+msgstr "มีหลายช่องสำหรับข้อมูลบริษัท: {0}กรุณาเลือกด้วยตนเอง"
 
 #: erpnext/controllers/accounts_controller.py:1306
 msgid "Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year"
@@ -30234,7 +30234,7 @@ msgstr ""
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:937
 msgid "Naming series '{0}' for DocType '{1}' does not contain standard '.' or '{{' separator. Using fallback extraction."
-msgstr ""
+msgstr "การตั้งชื่อซีรีส์ '{0}' สำหรับ DocType '{1}' ไม่มีตัวคั่นมาตรฐาน '.' หรือ '{{' ใช้การดึงข้อมูลแบบ fallback แทน"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -30675,7 +30675,7 @@ msgstr "จะมีการบันทึกบัญชีรายการ
 #. Label of a number card in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "New Lead (Last 1 Month)"
-msgstr ""
+msgstr "ลูกค้าใหม่ (1 เดือนที่ผ่านมา)"
 
 #: erpnext/assets/doctype/location/location_tree.js:23
 msgid "New Location"
@@ -30688,7 +30688,7 @@ msgstr "บันทึกใหม่"
 #. Label of a number card in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "New Opportunity (Last 1 Month)"
-msgstr ""
+msgstr "โอกาสใหม่ (1 เดือนที่ผ่านมา)"
 
 #. Label of the purchase_invoice (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -30827,7 +30827,7 @@ msgstr "ไม่ได้เลือกใบส่งของสำหรั
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:754
 msgid "No DocTypes in To Delete list. Please generate or import the list before submitting."
-msgstr ""
+msgstr "ไม่มี DocTypes ในรายการที่จะลบ กรุณาสร้างหรือนำเข้ารายการก่อนส่ง"
 
 #: erpnext/public/js/utils/ledger_preview.js:64
 msgid "No Impact on Accounting Ledger"
@@ -30847,7 +30847,7 @@ msgstr "ไม่ได้เลือกสินค้าสำหรับก
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1260
 msgid "No Items with Bill of Materials to Manufacture or all items already manufactured"
-msgstr ""
+msgstr "ไม่มีรายการที่มีใบรายการวัสดุสำหรับการผลิต หรือทุกรายการได้ผลิตเสร็จแล้ว"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1413
 msgid "No Items with Bill of Materials."
@@ -30911,7 +30911,7 @@ msgstr "ไม่พบข้อมูลการหักภาษี ณ ท�
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:108
 msgid "No Tax withholding account set for Company {0} in Tax Withholding Category {1}."
-msgstr ""
+msgstr "ยังไม่ได้ตั้งค่าบัญชีหักภาษี ณ ที่จ่ายสำหรับบริษัท {0} ในหมวดหมู่การหักภาษี ณ ที่จ่าย {1}"
 
 #: erpnext/accounts/report/gross_profit/gross_profit.py:990
 msgid "No Terms"
@@ -30973,7 +30973,7 @@ msgstr "ไม่พบผลต่างสำหรับบัญชีสต
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:150
 msgid "No email found for {0} {1}"
-msgstr ""
+msgstr "ไม่พบอีเมลสำหรับ {0} {1}"
 
 #: erpnext/telephony/doctype/call_log/call_log.py:117
 msgid "No employee was scheduled for call popup"
@@ -31146,7 +31146,7 @@ msgstr "ไม่พบธุรกรรมล่าสุด"
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:158
 msgid "No recipients found for campaign {0}"
-msgstr ""
+msgstr "ไม่พบผู้รับสำหรับแคมเปญ {0}"
 
 #: erpnext/accounts/report/purchase_register/purchase_register.py:45
 #: erpnext/accounts/report/sales_register/sales_register.py:46
@@ -31172,7 +31172,7 @@ msgstr "ไม่มีสต็อกที่จองไว้เพื่อ
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:152
 msgid "No rows with zero document count found"
-msgstr ""
+msgstr "ไม่พบแถวที่มีจำนวนเอกสารเป็นศูนย์"
 
 #: erpnext/stock/doctype/batch/batch.js:77
 msgid "No stock available for this batch."
@@ -31793,7 +31793,7 @@ msgstr "สามารถใช้เฉพาะไฟล์ CSV และ Exc
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1070
 msgid "Only CSV files are allowed"
-msgstr ""
+msgstr "อนุญาตเฉพาะไฟล์ CSV เท่านั้น"
 
 #. Label of the tax_on_excess_amount (Check) field in DocType 'Tax Withholding
 #. Category'
@@ -31845,7 +31845,7 @@ msgstr "เมื่อใช้ค่าธรรมเนียมยกเว
 
 #: erpnext/manufacturing/doctype/bom/bom.py:330
 msgid "Only one operation can have 'Is Final Finished Good' checked when 'Track Semi Finished Goods' is enabled."
-msgstr ""
+msgstr "สามารถเลือก 'Is Final Finished Good' ได้เพียงหนึ่งรายการเท่านั้นเมื่อเปิดใช้งาน 'ติดตามสินค้าครึ่งสำเร็จ'"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1349
 msgid "Only one {0} entry can be created against the Work Order {1}"
@@ -32726,7 +32726,7 @@ msgstr "การตั้งค่าอื่นๆ"
 #. Label of the tab_break_dpet (Tab Break) field in DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Others"
-msgstr ""
+msgstr "อื่นๆ"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -32807,12 +32807,12 @@ msgstr "รายการเปิดระบบ POS ล้าสมัย"
 #. Label of a number card in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 msgid "Outgoing Bills"
-msgstr ""
+msgstr "บิลที่ต้องชำระ"
 
 #. Label of a number card in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 msgid "Outgoing Payment"
-msgstr ""
+msgstr "การชำระเงินขาออก"
 
 #. Label of the outgoing_rate (Float) field in DocType 'Serial and Batch Entry'
 #. Label of the outgoing_rate (Currency) field in DocType 'Stock Ledger Entry'
@@ -32944,7 +32944,7 @@ msgstr "ค่าเบี้ยเลี้ยงเกินกำหนด (%
 #. Option for the 'Status' (Select) field in DocType 'Tax Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Over Withheld"
-msgstr ""
+msgstr "เกินที่ถูกหักไว้"
 
 #: erpnext/controllers/status_updater.py:496
 msgid "Overbilling of {0} {1} ignored for item {2} because you have {3} role."
@@ -33046,7 +33046,7 @@ msgstr "เจ้าของ"
 #. Label of the asset_owner_section (Section Break) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Ownership"
-msgstr ""
+msgstr "ความเป็นเจ้าของ"
 
 #. Label of the p_l_closing_balance (JSON) field in DocType 'Process Period
 #. Closing Voucher'
@@ -33141,7 +33141,7 @@ msgstr "การปิด POS ล้มเหลวขณะทำงานใ�
 #. Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "POS Configurations"
-msgstr ""
+msgstr "การกำหนดค่า POS"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/pos_customer_group/pos_customer_group.json
@@ -33225,7 +33225,7 @@ msgstr "ใบแจ้งหนี้ POS จะถูกแยกในกร�
 #. Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "POS Item Details"
-msgstr ""
+msgstr "รายละเอียดสินค้า POS"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/pos_item_group/pos_item_group.json
@@ -33236,7 +33236,7 @@ msgstr "กลุ่มรายการ POS"
 #. Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "POS Item Selector"
-msgstr ""
+msgstr "ตัวเลือกสินค้า POS"
 
 #. Label of the pos_opening_entry (Link) field in DocType 'POS Closing Entry'
 #. Name of a DocType
@@ -33793,7 +33793,7 @@ msgstr "สามารถจองสินค้าคงคลังบาง
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/delivery_note/delivery_note_list.js:24
 msgid "Partially Billed"
-msgstr ""
+msgstr "เรียกเก็บเงินบางส่วนแล้ว"
 
 #. Option for the 'Completion Status' (Select) field in DocType 'Maintenance
 #. Schedule Detail'
@@ -34534,7 +34534,7 @@ msgstr "โหมดการชำระเงิน"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Payment Options"
-msgstr ""
+msgstr "ตัวเลือกการชำระเงิน"
 
 #. Label of the payment_order (Link) field in DocType 'Journal Entry'
 #. Label of the payment_order (Link) field in DocType 'Payment Entry'
@@ -34710,7 +34710,7 @@ msgstr "ไม่สามารถสร้างคำขอการชำร
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Payment Requests made from Sales / Purchase Invoice will be put in Draft explicitly"
-msgstr ""
+msgstr "คำขอชำระเงินที่ทำจากใบแจ้งหนี้ขาย/ซื้อจะถูกจัดเก็บเป็นฉบับร่างโดยชัดเจน"
 
 #. Label of the payment_schedule (Data) field in DocType 'Overdue Payment'
 #. Label of the payment_schedule (Link) field in DocType 'Payment Reference'
@@ -35781,7 +35781,7 @@ msgstr "โปรดเพิ่มวิธีการชำระเงิน
 
 #: erpnext/manufacturing/doctype/bom/bom.js:39
 msgid "Please add Operations first."
-msgstr ""
+msgstr "กรุณาเพิ่มฝ่ายปฏิบัติการก่อน"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:213
 msgid "Please add Request for Quotation to the sidebar in Portal Settings."
@@ -35997,7 +35997,7 @@ msgstr "โปรดป้อนบทบาทการอนุมัติห
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:683
 msgid "Please enter Batch No"
-msgstr ""
+msgstr "กรุณาป้อนหมายเลขชุด"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:976
 msgid "Please enter Cost Center"
@@ -36058,7 +36058,7 @@ msgstr "กรุณากรอกหมวดหมู่สำหรับบ
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:685
 msgid "Please enter Serial No"
-msgstr ""
+msgstr "กรุณากรอกหมายเลขซีเรียล"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:319
 msgid "Please enter Serial Nos"
@@ -36159,7 +36159,7 @@ msgstr "โปรดกรอกตารางคำสั่งขาย"
 
 #: erpnext/stock/doctype/shipment/shipment.js:277
 msgid "Please first set Full Name, Email and Phone for the user"
-msgstr ""
+msgstr "กรุณาตั้งค่าชื่อเต็ม, อีเมล และโทรศัพท์สำหรับผู้ใช้ก่อน"
 
 #: erpnext/telephony/doctype/incoming_call_settings/incoming_call_settings.js:94
 msgid "Please fix overlapping time slots for {0}"
@@ -36171,11 +36171,11 @@ msgstr "โปรดแก้ไขช่วงเวลาที่ทับซ
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:272
 msgid "Please generate To Delete list before submitting"
-msgstr ""
+msgstr "กรุณาสร้างรายการที่ต้องลบ ก่อนส่ง"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:70
 msgid "Please generate the To Delete list before submitting"
-msgstr ""
+msgstr "กรุณาสร้างรายการที่ต้องลบ ก่อนส่ง"
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:67
 msgid "Please import accounts against parent company or enable {} in company master."
@@ -36563,7 +36563,7 @@ msgstr "โปรดเลือกประเภทเอกสารก่อ
 
 #: erpnext/selling/report/sales_partner_commission_summary/sales_partner_commission_summary.py:47
 msgid "Please select the document type first."
-msgstr ""
+msgstr "โปรดเลือกประเภทเอกสารก่อน."
 
 #: erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py:21
 msgid "Please select the required filters"
@@ -37440,7 +37440,7 @@ msgstr "รายการราคา"
 #. DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Price List & Currency"
-msgstr ""
+msgstr "รายการราคาและสกุลเงิน"
 
 #. Name of a DocType
 #: erpnext/stock/doctype/price_list_country/price_list_country.json
@@ -37948,7 +37948,7 @@ msgstr "การสูญเสียกระบวนการ"
 #. Item'
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 msgid "Process Loss %"
-msgstr ""
+msgstr "การสูญเสียกระบวนการ %"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1272
 msgid "Process Loss Percentage cannot be greater than 100"
@@ -38083,7 +38083,7 @@ msgstr "กำลังประมวลผลไฟล์ XML"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:188
 msgid "Processing import..."
-msgstr ""
+msgstr "กำลังประมวลผลการนำเข้า..."
 
 #: erpnext/buying/doctype/supplier/supplier_dashboard.py:10
 msgid "Procurement"
@@ -38259,7 +38259,7 @@ msgstr "รายการผลิต"
 #: erpnext/manufacturing/doctype/bom/bom.json
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 msgid "Production Item Info"
-msgstr ""
+msgstr "ข้อมูลรายการการผลิต"
 
 #. Label of the production_plan (Link) field in DocType 'Purchase Order Item'
 #. Name of a DocType
@@ -38756,7 +38756,7 @@ msgstr "โอกาสที่มีการติดต่อแต่ยั
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:198
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:784
 msgid "Protected DocType"
-msgstr ""
+msgstr "ประเภทเอกสารที่ได้รับการคุ้มครอง"
 
 #. Description of the 'Company Email' (Data) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -39298,7 +39298,7 @@ msgstr "แนวโน้มใบรับซื้อ"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/buying.json
 msgid "Purchase Receipt Trends "
-msgstr ""
+msgstr "แนวโน้มใบรับซื้อ "
 
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:358
 msgid "Purchase Receipt doesn't have any Item for which Retain Sample is enabled."
@@ -39335,7 +39335,7 @@ msgstr "แม่แบบภาษีซื้อ"
 #. 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Purchase Tax Withholding Category"
-msgstr ""
+msgstr "หมวดหมู่การหักภาษี ณ ที่จ่ายสำหรับการซื้อ"
 
 #. Label of the taxes (Table) field in DocType 'Purchase Invoice'
 #. Name of a DocType
@@ -39980,17 +39980,17 @@ msgstr "ชื่อแม่แบบการตรวจสอบคุณภ
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:799
 msgid "Quality Inspection is required for the item {0} before completing the job card {1}"
-msgstr ""
+msgstr "การตรวจสอบคุณภาพเป็นสิ่งจำเป็นสำหรับรายการ {0} ก่อนทำการกรอกบัตรงานให้เสร็จสิ้น {1}"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:810
 #: erpnext/manufacturing/doctype/job_card/job_card.py:819
 msgid "Quality Inspection {0} is not submitted for the item: {1}"
-msgstr ""
+msgstr "การตรวจสอบคุณภาพ {0} ไม่ได้ส่งสำหรับรายการ: {1}"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:829
 #: erpnext/manufacturing/doctype/job_card/job_card.py:838
 msgid "Quality Inspection {0} is rejected for the item: {1}"
-msgstr ""
+msgstr "การตรวจสอบคุณภาพ {0} ถูกปฏิเสธสำหรับรายการ: {1}"
 
 #: erpnext/public/js/controllers/transaction.js:384
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:206
@@ -40248,7 +40248,7 @@ msgstr "ปริมาณไม่สามารถมากกว่า {0} �
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:564
 msgid "Quantity is mandatory for the selected items."
-msgstr ""
+msgstr "จำนวนเป็นสิ่งจำเป็นสำหรับสินค้าที่เลือกไว้"
 
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:274
 msgid "Quantity is required"
@@ -40463,7 +40463,7 @@ msgstr "จำนวนเงินที่เสนอราคา"
 #. in DocType 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "RFQ and Purchase Order Settings"
-msgstr ""
+msgstr "การตั้งค่าคำขอเสนอราคา (RFQ) และใบสั่งซื้อ"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:132
 msgid "RFQs are not allowed for {0} due to a scorecard standing of {1}"
@@ -40893,7 +40893,7 @@ msgstr "การบริโภควัตถุดิบ"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:327
 msgid "Raw Materials Missing"
-msgstr ""
+msgstr "วัตถุดิบขาดหาย"
 
 #. Label of the raw_materials_received_section (Section Break) field in DocType
 #. 'Subcontracting Inward Order'
@@ -41853,7 +41853,7 @@ msgstr "ลบหมายเลขแถวหลักในตารางร
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:140
 msgid "Remove Zero Counts"
-msgstr ""
+msgstr "ลบจำนวนศูนย์"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js:21
 msgid "Remove item if charges is not applicable to that item"
@@ -41865,7 +41865,7 @@ msgstr "ลบรายการที่ไม่มีการเปลี่
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:161
 msgid "Removed {0} rows with zero document count. Please save to persist changes."
-msgstr ""
+msgstr "ลบ {0} แถวที่มีจำนวนเอกสารเป็นศูนย์ กรุณากดบันทึกเพื่อคงการเปลี่ยนแปลง"
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:87
 msgid "Removing rows without exchange gain or loss"
@@ -42548,7 +42548,7 @@ msgstr "ความขัดแย้งของชุดข้อมูลท
 #. 'Bin'
 #: erpnext/stock/doctype/bin/bin.json
 msgid "Reserved Inventory"
-msgstr ""
+msgstr "สินค้าคงคลังที่สงวนไว้"
 
 #. Label of the reserved_qty (Float) field in DocType 'Bin'
 #. Label of the reserved_qty (Float) field in DocType 'Stock Reservation Entry'
@@ -43653,7 +43653,7 @@ msgstr "แถว #{0}: ไม่สามารถยกเลิกการ�
 
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.py:78
 msgid "Row #{0}: Cannot create entry with different taxable AND withholding document links."
-msgstr ""
+msgstr "แถว #{0}: ไม่สามารถสร้างรายการที่มีเอกสารภาษีและเอกสารหัก ณ ที่จ่ายที่แตกต่างกันได้"
 
 #: erpnext/controllers/accounts_controller.py:3792
 msgid "Row #{0}: Cannot delete item {1} which has already been billed."
@@ -43673,7 +43673,7 @@ msgstr "แถว #{0}: ไม่สามารถลบรายการ {1} 
 
 #: erpnext/controllers/accounts_controller.py:3778
 msgid "Row #{0}: Cannot delete item {1} which is already ordered against this Sales Order."
-msgstr ""
+msgstr "แถว #{0}: ไม่สามารถลบรายการ {1} ได้ เนื่องจากได้สั่งซื้อไว้กับใบสั่งขายนี้แล้ว"
 
 #: erpnext/controllers/accounts_controller.py:4099
 msgid "Row #{0}: Cannot set Rate if the billed amount is greater than the amount for Item {1}."
@@ -43713,7 +43713,7 @@ msgstr "แถว #{0}: ศูนย์ต้นทุน {1} ไม่ได้
 
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.py:211
 msgid "Row #{0}: Could not find enough {1} entries to match. Remaining amount: {2}"
-msgstr ""
+msgstr "แถว #{0}: ไม่พบรายการ {1} เพียงพอที่จะตรงกัน จำนวนที่เหลือ: {2}"
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:88
 msgid "Row #{0}: Cumulative threshold cannot be less than Single Transaction threshold"
@@ -43756,7 +43756,7 @@ msgstr "แถว #{0}: รายการที่ลูกค้าจัด�
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:61
 msgid "Row #{0}: Dates overlapping with other row in group {1}"
-msgstr ""
+msgstr "แถว #{0}: วันที่ทับซ้อนกับแถวอื่นในกลุ่ม {1}"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.py:357
 msgid "Row #{0}: Default BOM not found for FG Item {1}"
@@ -43820,7 +43820,7 @@ msgstr "แถว #{0}: สำหรับ {1} คุณสามารถเล
 
 #: erpnext/assets/doctype/asset/asset.py:664
 msgid "Row #{0}: Frequency of Depreciation must be greater than zero"
-msgstr ""
+msgstr "แถว #{0}: ความถี่ของการคิดค่าเสื่อมราคาต้องมากกว่าศูนย์"
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:50
 msgid "Row #{0}: From Date cannot be before To Date"
@@ -43836,7 +43836,7 @@ msgstr "แถว #{0}: เพิ่มรายการแล้ว"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1644
 msgid "Row #{0}: Item {1} cannot be transferred more than {2} against {3} {4}"
-msgstr ""
+msgstr "แถว #{0}: รายการ {1} ไม่สามารถโอนได้มากกว่า {2} ต่อ {3} {4}"
 
 #: erpnext/buying/utils.py:98
 msgid "Row #{0}: Item {1} does not exist"
@@ -44044,6 +44044,10 @@ msgid ""
 "\t\t\t\t\tyou can disable '{5}' in {6} to bypass\n"
 "\t\t\t\t\tthis validation."
 msgstr ""
+"แถว #{0}: อัตราการขายสำหรับสินค้า {1} ต่ำกว่า {2}ของมัน\n"
+"\t\t\t\t\tการขาย {3} ควรอยู่ที่อย่างน้อย {4}<br><br> หรืออีกทางหนึ่ง\n"
+"\t\t\t\t\tคุณสามารถปิดใช้งาน '{5}' ใน {6} เพื่อข้ามการตรวจสอบ\n"
+"\t\t\t\t\tนี้ได้"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:286
 msgid "Row #{0}: Sequence ID must be {1} or {2} for Operation {3}."
@@ -44172,7 +44176,7 @@ msgstr "จำนวนการหักค่าเสื่อมราคา
 
 #: erpnext/assets/doctype/asset/asset.py:660
 msgid "Row #{0}: Total Number of Depreciations must be greater than zero"
-msgstr ""
+msgstr "แถว #{0}: จำนวนรวมของการคิดค่าเสื่อมราคาต้องมากกว่าศูนย์"
 
 #: erpnext/controllers/stock_controller.py:105
 msgid "Row #{0}: Warehouse {1} does not match with the warehouse {2} in Serial and Batch Bundle {3}."
@@ -44180,7 +44184,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.py:94
 msgid "Row #{0}: Withholding Amount {1} does not match calculated amount {2}."
-msgstr ""
+msgstr "แถว #{0}: จำนวนเงินที่หักไว้ {1} ไม่ตรงกับจำนวนที่คำนวณได้ {2}."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:577
 msgid "Row #{0}: Work Order exists against full or partial quantity of Item {1}"
@@ -44426,7 +44430,7 @@ msgstr "แถว {0}: อัตราแลกเปลี่ยนเป็น
 
 #: erpnext/assets/doctype/asset/asset.py:609
 msgid "Row {0}: Expected Value After Useful Life cannot be negative"
-msgstr ""
+msgstr "แถว {0}: ค่าที่คาดหวังหลังอายุการใช้งานไม่สามารถเป็นค่าลบได้"
 
 #: erpnext/assets/doctype/asset/asset.py:612
 msgid "Row {0}: Expected Value After Useful Life must be less than Net Purchase Amount"
@@ -44495,7 +44499,7 @@ msgstr "แถว {0}: รายการ {1} ต้องเป็นราย�
 
 #: erpnext/controllers/subcontracting_controller.py:183
 msgid "Row {0}: Item {1} must be linked to a {2}."
-msgstr ""
+msgstr "แถว {0}: รายการ {1} ต้องเชื่อมโยงกับ {2}"
 
 #: erpnext/controllers/subcontracting_controller.py:204
 msgid "Row {0}: Item {1}'s quantity cannot be higher than the available quantity."
@@ -44591,7 +44595,7 @@ msgstr "แถว {0}: ไม่มีปริมาณสำหรับ {4} �
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:885
 msgid "Row {0}: Sales Invoice {1} is already created for {2}"
-msgstr ""
+msgstr "แถว {0}: ใบแจ้งหนี้การขาย {1} ได้ถูกสร้างขึ้นแล้วสำหรับ {2}"
 
 #: erpnext/assets/doctype/asset_shift_allocation/asset_shift_allocation.py:58
 msgid "Row {0}: Shift cannot be changed since the depreciation has already been processed"
@@ -45589,7 +45593,7 @@ msgstr "แม่แบบภาษีการขาย"
 #. Label of the sales_tax_withholding_category (Link) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Sales Tax Withholding Category"
-msgstr ""
+msgstr "หมวดหมู่การหักภาษีขาย ณ ที่จ่าย"
 
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/accounts_setup.json
@@ -45718,7 +45722,7 @@ msgstr "ปริมาณตัวอย่าง"
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:269
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:535
 msgid "Sample Retention Stock Entry"
-msgstr ""
+msgstr "การบันทึกสต็อกตัวอย่างคงเหลือ"
 
 #. Label of the sample_retention_warehouse (Link) field in DocType 'Stock
 #. Settings'
@@ -46219,7 +46223,7 @@ msgstr "เลือกรายการที่จะผลิต"
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:500
 msgid "Select Items to Receive"
-msgstr ""
+msgstr "เลือกสินค้าที่จะรับ"
 
 #: erpnext/selling/doctype/sales_order/sales_order_list.js:87
 msgid "Select Items up to Delivery Date"
@@ -46477,19 +46481,19 @@ msgstr "ขายสินทรัพย์"
 
 #: erpnext/assets/doctype/asset/asset.js:635
 msgid "Sell Qty"
-msgstr ""
+msgstr "ขายจำนวน"
 
 #: erpnext/assets/doctype/asset/asset.js:651
 msgid "Sell quantity cannot exceed the asset quantity"
-msgstr ""
+msgstr "จำนวนการขายไม่สามารถเกินจำนวนสินทรัพย์"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1410
 msgid "Sell quantity cannot exceed the asset quantity. Asset {0} has only {1} item(s)."
-msgstr ""
+msgstr "จำนวนการขายไม่สามารถเกินจำนวนสินทรัพย์ได้ สินทรัพย์ {0} มีเพียง {1} รายการเท่านั้น"
 
 #: erpnext/assets/doctype/asset/asset.js:647
 msgid "Sell quantity must be greater than zero"
-msgstr ""
+msgstr "จำนวนขายต้องมากกว่าศูนย์"
 
 #. Label of the selling (Check) field in DocType 'Pricing Rule'
 #. Label of the selling (Check) field in DocType 'Promotional Scheme'
@@ -46661,7 +46665,7 @@ msgstr "การตั้งค่าสินค้าแบบต่อเน
 #. Label of the section_break_jcmx (Section Break) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 msgid "Serial / Batch"
-msgstr ""
+msgstr "ซีเรียล / ชุด"
 
 #. Label of the serial_and_batch_bundle (Link) field in DocType 'Stock
 #. Reconciliation Item'
@@ -48449,7 +48453,7 @@ msgstr "เนื่องจากมีการสูญเสียกระ
 
 #: erpnext/manufacturing/doctype/bom/bom.py:323
 msgid "Since you have enabled 'Track Semi Finished Goods', at least one operation must have 'Is Final Finished Good' checked. For that set the FG / Semi FG Item as {0} against an operation."
-msgstr ""
+msgstr "เนื่องจากคุณได้เปิดใช้งาน 'ติดตามสินค้าครึ่งสำเร็จรูป' แล้ว อย่างน้อยหนึ่งกระบวนการจะต้องมีการเลือก 'Is Final Finished Good' สำหรับการตั้งค่านี้ ให้ตั้งค่า FG / Semi FG Item เป็น {0} สำหรับกระบวนการนั้น"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:132
 msgid "Since {0} are Serial No/Batch No items, you cannot enable 'Recreate Stock Ledgers' in Repost Item Valuation."
@@ -48499,7 +48503,7 @@ msgstr "ข้ามการโอนวัสดุไปยังคลัง
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:563
 msgid "Skipped {0} DocType(s):<br>{1}"
-msgstr ""
+msgstr "ข้าม {0} ประเภทเอกสาร:<br>{1}"
 
 #. Label of the customer_skype (Data) field in DocType 'Appointment'
 #: erpnext/crm/doctype/appointment/appointment.json
@@ -49018,7 +49022,7 @@ msgstr "ภาพประกอบสถานะ"
 #. Label of the section_break_dfoc (Section Break) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 msgid "Status and Reference"
-msgstr ""
+msgstr "สถานะและอ้างอิง"
 
 #: erpnext/projects/doctype/project/project.py:717
 msgid "Status must be Cancelled or Completed"
@@ -51682,7 +51686,7 @@ msgstr "อัตราภาษี"
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:237
 #: erpnext/accounts/report/tds_computation_summary/tds_computation_summary.py:84
 msgid "Tax Rate %"
-msgstr ""
+msgstr "อัตราภาษี %"
 
 #. Label of the taxes (Table) field in DocType 'Item Tax Template'
 #: erpnext/accounts/doctype/item_tax_template/item_tax_template.json
@@ -51796,7 +51800,7 @@ msgstr "รายละเอียดการหักภาษี ณ ที�
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Tax Withholding Entries"
-msgstr ""
+msgstr "รายการหักภาษี ณ ที่จ่าย"
 
 #. Label of the section_tax_withholding_entry (Section Break) field in DocType
 #. 'Payment Entry'
@@ -51808,7 +51812,7 @@ msgstr ""
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Tax Withholding Entry"
-msgstr ""
+msgstr "รายการหักภาษี ณ ที่จ่าย"
 
 #. Label of the tax_withholding_group (Link) field in DocType 'Journal Entry'
 #. Label of the tax_withholding_group (Link) field in DocType 'Payment Entry'
@@ -51833,7 +51837,7 @@ msgstr ""
 #: erpnext/selling/doctype/customer/customer.json
 #: erpnext/workspace_sidebar/taxes.json
 msgid "Tax Withholding Group"
-msgstr ""
+msgstr "กลุ่มการหักภาษี ณ ที่จ่าย"
 
 #. Name of a DocType
 #. Label of the tax_withholding_rate (Float) field in DocType 'Tax Withholding
@@ -51869,7 +51873,7 @@ msgstr ""
 #. DocType 'Tax Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Tax withheld only for amount exceeding cumulative threshold"
-msgstr ""
+msgstr "หักภาษี ณ ที่จ่าย เฉพาะส่วนที่เกินกว่าเกณฑ์สะสม"
 
 #. Label of the taxable_amount (Currency) field in DocType 'Item Wise Tax
 #. Detail'
@@ -51882,18 +51886,18 @@ msgstr "จำนวนเงินที่ต้องเสียภาษี
 #. Label of the taxable_date (Date) field in DocType 'Tax Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Taxable Date"
-msgstr ""
+msgstr "วันที่ต้องเสียภาษี"
 
 #. Label of the taxable_name (Dynamic Link) field in DocType 'Tax Withholding
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Taxable Document Name"
-msgstr ""
+msgstr "ชื่อเอกสารที่ต้องเสียภาษี"
 
 #. Label of the taxable_doctype (Link) field in DocType 'Tax Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Taxable Document Type"
-msgstr ""
+msgstr "ประเภทเอกสารที่ต้องเสียภาษี"
 
 #. Label of the taxes (Table) field in DocType 'POS Closing Entry'
 #. Label of the taxes_section (Section Break) field in DocType 'POS Profile'
@@ -52664,7 +52668,7 @@ msgstr "ใบแจ้งหนี้ต้นฉบับควรถูกร
 
 #: erpnext/controllers/accounts_controller.py:205
 msgid "The outstanding amount {0} in {1} is lesser than {2}. Updating the outstanding to this invoice."
-msgstr ""
+msgstr "ยอดคงเหลือ {0} ใน {1} น้อยกว่า {2}. กำลังปรับปรุงยอดคงเหลือให้เป็นไปตามใบแจ้งหนี้ฉบับนี้"
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:229
 msgid "The parent account {0} does not exists in the uploaded template"
@@ -52729,7 +52733,7 @@ msgstr "รายการที่เลือกไม่สามารถม
 
 #: erpnext/assets/doctype/asset/asset.js:656
 msgid "The sell quantity is less than the total asset quantity. The remaining quantity will be split into a new asset. This action cannot be undone. <br><br><b>Do you want to continue?</b>"
-msgstr ""
+msgstr "ปริมาณการขายน้อยกว่าปริมาณสินทรัพย์ทั้งหมด ปริมาณที่เหลือจะถูกแบ่งเป็นสินทรัพย์ใหม่ การกระทำนี้ไม่สามารถยกเลิกได้<br><br><b>คุณต้องการดำเนินการต่อหรือไม่</b>"
 
 #: erpnext/accounts/doctype/share_transfer/share_transfer.py:194
 msgid "The seller and the buyer cannot be the same"
@@ -52892,7 +52896,7 @@ msgstr "ไม่มีช่องว่างให้บริการใน
 
 #: erpnext/stock/doctype/item/item.js:1161
 msgid "There are two options to maintain valuation of stock. FIFO (first in - first out) and Moving Average. To understand this topic in detail please visit <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>Item Valuation, FIFO and Moving Average.</a>"
-msgstr ""
+msgstr "มีสองทางเลือกในการรักษาการประเมินมูลค่าของหุ้น ได้แก่ FIFO (เข้าแรกออกก่อน) และค่าเฉลี่ยเคลื่อนที่ หากต้องการทำความเข้าใจหัวข้อนี้อย่างละเอียด โปรดไปที่<a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>การประเมินมูลค่าสินค้า, FIFO และค่าเฉลี่ยเคลื่อนที่</a>"
 
 #: erpnext/stock/report/item_variant_details/item_variant_details.py:25
 msgid "There aren't any item variants for the selected item"
@@ -52955,7 +52959,7 @@ msgstr "บัญชีนี้มียอดคงเหลือ '0' ใน�
 
 #: erpnext/stock/doctype/item/item.js:194
 msgid "This Item is a Template and cannot be used in transactions.<br>All fields present in the 'Copy Fields to Variant' table in Item Variant Settings will be copied to its variant items."
-msgstr ""
+msgstr "รายการนี้เป็นแม่แบบและไม่สามารถใช้ในธุรกรรมได้<br>ทุกฟิลด์ที่มีอยู่ในตาราง 'คัดลอกฟิลด์ไปยังตัวแปร' ในการตั้งค่าตัวแปรของรายการจะถูกคัดลอกไปยังรายการตัวแปรของมัน"
 
 #: erpnext/stock/doctype/item/item.js:251
 msgid "This Item is a Variant of {0} (Template)."
@@ -53109,12 +53113,12 @@ msgstr "ตัวกรองรายการนี้ถูกใช้แล
 #. Header text in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "This module is scheduled for deprecation and will be completely removed in version 17, please use <a href=\"https://frappe.io/crm\">Frappe CRM</a> instead."
-msgstr ""
+msgstr "โมดูลนี้ถูกกำหนดให้ยกเลิกการใช้งานและจะถูกลบออกทั้งหมดในเวอร์ชัน 17 กรุณาใช้<a href=\"https://frappe.io/crm\">Frappe CRM</a>แทน"
 
 #. Header text in the Support Workspace
 #: erpnext/support/workspace/support/support.json
 msgid "This module is scheduled for deprecation and will be completely removed in version 17, please use <a href=\"https://frappe.io/helpdesk\">Frappe Helpdesk</a> instead."
-msgstr ""
+msgstr "โมดูลนี้ถูกกำหนดให้เลิกใช้งานและจะถูกลบออกทั้งหมดในเวอร์ชัน 17 กรุณาใช้<a href=\"https://frappe.io/helpdesk\">Frappe Helpdesk</a>แทน"
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.js:509
 msgid "This option can be checked to edit the 'Posting Date' and 'Posting Time' fields."
@@ -53213,7 +53217,7 @@ msgstr "{} นี้จะถือว่าเป็นการโอนวั
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Threshold Exemption"
-msgstr ""
+msgstr "การยกเว้นตามเกณฑ์ขั้นต่ำ"
 
 #. Label of the threshold_percentage (Percent) field in DocType 'Promotional
 #. Scheme Price Discount'
@@ -53332,7 +53336,7 @@ msgstr "เวลา (เป็นนาที)"
 #: erpnext/projects/doctype/project/project.json
 #: erpnext/projects/doctype/task/task.json
 msgid "Timeline"
-msgstr ""
+msgstr "ไทม์ไลน์"
 
 #: erpnext/manufacturing/doctype/workstation/workstation_job_card.html:36
 #: erpnext/public/js/projects/timer.js:5
@@ -53379,7 +53383,7 @@ msgstr "แบบฟอร์มบันทึกเวลาทำงานส
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:894
 msgid "Timesheet {0} cannot be invoiced in its current state"
-msgstr ""
+msgstr "Timesheet {0} ไม่สามารถออกใบแจ้งหนี้ได้ในสถานะปัจจุบัน"
 
 #. Label of the timesheet_sb (Section Break) field in DocType 'Projects
 #. Settings'
@@ -53459,7 +53463,7 @@ msgstr "เป็นวันที่และเวลา"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:118
 msgid "To Delete list generated with {0} DocTypes"
-msgstr ""
+msgstr "เพื่อ ลบ รายการที่สร้างขึ้นด้วย {0} ประเภทเอกสาร"
 
 #. Option for the 'Sales Order Status' (Select) field in DocType 'Production
 #. Plan'
@@ -53989,7 +53993,7 @@ msgstr "รวมปริมาณที่เสร็จสิ้น"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:191
 msgid "Total Completed Qty is required for Job Card {0}, please start and complete the job card before submission"
-msgstr ""
+msgstr "จำเป็นต้องมีจำนวนที่เสร็จสิ้นทั้งหมดสำหรับบัตรงาน {0}กรุณาเริ่มและกรอกบัตรงานให้เสร็จสมบูรณ์ก่อนการส่ง"
 
 #. Label of the total_consumed_material_cost (Currency) field in DocType
 #. 'Project'
@@ -54400,7 +54404,7 @@ msgstr "รวมภาษี"
 
 #: erpnext/accounts/report/tds_computation_summary/tds_computation_summary.py:86
 msgid "Total Taxable Amount"
-msgstr ""
+msgstr "จำนวนเงินที่ต้องเสียภาษีทั้งหมด"
 
 #. Label of the total_taxes_and_charges (Currency) field in DocType 'Payment
 #. Entry'
@@ -54605,7 +54609,7 @@ msgstr "รวม (ปริมาณ)"
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Totals (Company Currency)"
-msgstr ""
+msgstr "ยอดรวม (สกุลเงินของบริษัท)"
 
 #: erpnext/stock/doctype/item/item_dashboard.py:33
 msgid "Traceability"
@@ -54705,7 +54709,7 @@ msgstr "วันที่ธุรกรรม"
 
 #: erpnext/setup/doctype/company/company.py:1090
 msgid "Transaction Deletion Document {0} has been triggered for company {1}"
-msgstr ""
+msgstr "เอกสารการลบธุรกรรม {0} ได้ถูกกระตุ้นสำหรับบริษัท {1}"
 
 #. Name of a DocType
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
@@ -54725,15 +54729,15 @@ msgstr "รายการบันทึกการลบธุรกรรม
 #. Name of a DocType
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Transaction Deletion Record To Delete"
-msgstr ""
+msgstr "บันทึกการลบรายการธุรกรรม เพื่อลบ"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1101
 msgid "Transaction Deletion Record {0} is already running. {1}"
-msgstr ""
+msgstr "{1}บันทึกการลบธุรกรรม {0} กำลังทำงานอยู่แล้ว"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1120
 msgid "Transaction Deletion Record {0} is currently deleting {1}. Cannot save documents until deletion completes."
-msgstr ""
+msgstr "บันทึกการลบรายการธุรกรรม {0} กำลังลบ {1}ไม่สามารถบันทึกเอกสารได้จนกว่าการลบจะเสร็จสมบูรณ์"
 
 #. Label of the transaction_details_section (Section Break) field in DocType
 #. 'GL Entry'
@@ -54784,7 +54788,7 @@ msgstr "การตั้งค่าธุรกรรม"
 #. Rate'
 #: erpnext/accounts/doctype/tax_withholding_rate/tax_withholding_rate.json
 msgid "Transaction Threshold"
-msgstr ""
+msgstr "เกณฑ์การทำธุรกรรม"
 
 #. Label of the transaction_type (Data) field in DocType 'Bank Transaction'
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.json
@@ -54803,19 +54807,19 @@ msgstr "สกุลเงินของธุรกรรม: {0} ต้อง
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:65
 msgid "Transaction date can't be earlier than previous movement date"
-msgstr ""
+msgstr "วันที่ทำรายการไม่สามารถเป็นวันที่ก่อนหน้าวันที่เคลื่อนไหวครั้งก่อนได้"
 
 #. Description of the 'Applicable For' (Section Break) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Transaction for which tax is withheld"
-msgstr ""
+msgstr "ธุรกรรมที่มีการหักภาษี ณ ที่จ่าย"
 
 #. Description of the 'Deducted From' (Section Break) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Transaction from which tax is withheld"
-msgstr ""
+msgstr "ธุรกรรมที่มีการหักภาษี ณ ที่จ่าย"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:865
 msgid "Transaction not allowed against stopped Work Order {0}"
@@ -55369,7 +55373,7 @@ msgstr "URL สามารถเป็นได้เพียงสตริ�
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 msgid "UTM Analytics"
-msgstr ""
+msgstr "UTM Analytics"
 
 #. Option for the 'Data Fetch Method' (Select) field in DocType 'Accounts
 #. Settings'
@@ -55388,7 +55392,7 @@ msgstr "ยกเลิกการกระทบยอดการจัดส
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:466
 msgid "Unable to fetch DocType details. Please contact system administrator."
-msgstr ""
+msgstr "ไม่สามารถดึงรายละเอียด DocType ได้ กรุณาติดต่อผู้ดูแลระบบ"
 
 #: erpnext/setup/utils.py:149
 msgid "Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually"
@@ -55463,13 +55467,13 @@ msgstr "อยู่ภายใต้การรับประกัน"
 #. Option for the 'Status' (Select) field in DocType 'Tax Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Under Withheld"
-msgstr ""
+msgstr "ภายใต้การหักไว้"
 
 #. Label of the under_withheld_reason (Select) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Under Withheld Reason"
-msgstr ""
+msgstr "ภายใต้เหตุผลที่ถูกระงับไว้"
 
 #: erpnext/manufacturing/doctype/workstation/workstation.js:78
 msgid "Under Working Hours table, you can add start and end times for a Workstation. For example, a Workstation may be active from 9 am to 1 pm, then 2 pm to 5 pm. You can also specify the working hours based on shifts. While scheduling a Work Order, the system will check for the availability of the Workstation based on the working hours specified."
@@ -55477,7 +55481,7 @@ msgstr "ในตารางเวลาทำงาน คุณสามา�
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:936
 msgid "Unexpected Naming Series Pattern"
-msgstr ""
+msgstr "รูปแบบการตั้งชื่อที่ไม่คาดคิด"
 
 #. Option for the 'Fulfilment Status' (Select) field in DocType 'Contract'
 #: erpnext/crm/doctype/contract/contract.json
@@ -56064,7 +56068,7 @@ msgstr "ใช้ BOM หลายระดับ"
 #. DocType 'Global Defaults'
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
 msgid "Use Posting Datetime for Naming Documents"
-msgstr ""
+msgstr "ใช้เวลาโพสต์เป็นเวลาในการตั้งชื่อเอกสาร"
 
 #. Label of the use_serial_batch_fields (Check) field in DocType 'Stock
 #. Settings'
@@ -56214,7 +56218,7 @@ msgstr "ผู้ใช้สามารถเปิดใช้งานช่
 #. 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Users can make manufacture entry against Job Cards"
-msgstr ""
+msgstr "ผู้ใช้สามารถทำการบันทึกการผลิตสำหรับบัตรงานได้"
 
 #. Description of the 'Role Allowed to Over Bill ' (Link) field in DocType
 #. 'Accounts Settings'
@@ -56882,7 +56886,7 @@ msgstr ""
 #: erpnext/stock/onboarding_step/view_stock_balance_report/view_stock_balance_report.json
 #: erpnext/stock/report/stock_ledger/stock_ledger.js:139
 msgid "View Stock Balance"
-msgstr ""
+msgstr "ดูยอดคงเหลือในสต็อก"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'View Stock Balance Report'
@@ -56894,7 +56898,7 @@ msgstr ""
 
 #: erpnext/stock/report/stock_balance/stock_balance.js:156
 msgid "View Stock Ledger"
-msgstr ""
+msgstr "ดูสมุดบัญชีแยกประเภท"
 
 #: erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.js:8
 msgid "View Type"
@@ -56926,7 +56930,7 @@ msgstr "วีเมโอ"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:216
 msgid "Virtual DocType"
-msgstr ""
+msgstr "ประเภทเอกสารเสมือน"
 
 #: erpnext/templates/pages/help.html:46
 msgid "Visit the forums"
@@ -57462,7 +57466,7 @@ msgstr "คำเตือน: คำสั่งขาย {0} มีอยู�
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:75
 msgid "Warning: This action cannot be undone!"
-msgstr ""
+msgstr "คำเตือน: การกระทำนี้ไม่สามารถย้อนกลับได้!"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_validation.py:77
 msgid "Warnings"
@@ -57519,7 +57523,7 @@ msgstr "ระยะเวลาการรับประกัน (เป็�
 
 #: erpnext/utilities/doctype/video/video.js:7
 msgid "Watch Video"
-msgstr ""
+msgstr "ดูวิดีโอ"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -57548,7 +57552,7 @@ msgstr "ความยาวคลื่น ในเมกะเมตร"
 
 #: erpnext/controllers/accounts_controller.py:193
 msgid "We can see {0} is made against {1}. If you want {1}'s outstanding to be updated, uncheck the '{2}' checkbox."
-msgstr ""
+msgstr "เราสามารถเห็นได้ว่า {0} ถูกสร้างขึ้นเพื่อ {1}หากคุณต้องการให้ยอดคงเหลือของ {1}ได้รับการอัปเดต ให้ยกเลิกการเลือกช่อง '{2}'"
 
 #: erpnext/www/support/index.html:7
 msgid "We're here to help!"
@@ -57683,7 +57687,7 @@ msgstr "คุณต้องการความช่วยเหลือเ
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:82
 msgid "What will be deleted:"
-msgstr ""
+msgstr "สิ่งที่ถูกลบ:"
 
 #. Label of the whatsapp_no (Data) field in DocType 'Lead'
 #. Label of the whatsapp (Data) field in DocType 'Opportunity'
@@ -57707,19 +57711,19 @@ msgstr "เมื่อเลือกคลังสินค้าหลัก
 #. 'Tax Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "When checked, only cumulative threshold will be applied"
-msgstr ""
+msgstr "เมื่อถูกเลือก จะใช้เฉพาะเกณฑ์สะสมเท่านั้น"
 
 #. Description of the 'Disable Cumulative Threshold' (Check) field in DocType
 #. 'Tax Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "When checked, only transaction threshold will be applied for transaction individually"
-msgstr ""
+msgstr "เมื่อถูกเลือก จะใช้เกณฑ์มูลค่าการทำธุรกรรมเป็นรายรายการเท่านั้น"
 
 #. Description of the 'Use Posting Datetime for Naming Documents' (Check) field
 #. in DocType 'Global Defaults'
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
 msgid "When checked, the system will use the posting datetime of the document for naming the document instead of the creation datetime of the document."
-msgstr ""
+msgstr "เมื่อมีการตรวจสอบ ระบบจะใช้เวลาและวันที่ของการโพสต์เอกสารในการตั้งชื่อเอกสารแทนเวลาและวันที่ของการสร้างเอกสาร"
 
 #: erpnext/stock/doctype/item/item.js:1168
 msgid "When creating an Item, entering a value for this field will automatically create an Item Price at the backend."
@@ -57733,7 +57737,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:304
 msgid "When there are multiple finished goods ({0}) in a Repack stock entry, the basic rate for all finished goods must be set manually. To set rate manually, enable the checkbox 'Set Basic Rate Manually' in the respective finished good row."
-msgstr ""
+msgstr "เมื่อมีสินค้าสำเร็จรูปหลายรายการ ({0}) ในรายการสต็อกการบรรจุใหม่ (Repack) อัตราพื้นฐานสำหรับสินค้าสำเร็จรูปทั้งหมดจะต้องถูกกำหนดด้วยตนเอง เพื่อกำหนดอัตราด้วยตนเอง ให้เปิดใช้งานช่องทำเครื่องหมาย 'กำหนดอัตราพื้นฐานด้วยตนเอง' ในแถวของสินค้าสำเร็จรูปที่เกี่ยวข้อง"
 
 #. Description of the 'Deferred Expense Account' (Link) field in DocType 'Item
 #. Default'
@@ -57812,33 +57816,33 @@ msgstr "การถอนเงิน"
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Withholding Date"
-msgstr ""
+msgstr "วันที่หัก ณ ที่จ่าย"
 
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:278
 msgid "Withholding Document"
-msgstr ""
+msgstr "เอกสารการหัก ณ ที่จ่าย"
 
 #. Label of the withholding_name (Dynamic Link) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Withholding Document Name"
-msgstr ""
+msgstr "เอกสารการหัก ณ ที่จ่าย ชื่อเอกสาร"
 
 #. Label of the withholding_doctype (Link) field in DocType 'Tax Withholding
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Withholding Document Type"
-msgstr ""
+msgstr "ประเภทเอกสารการหัก ณ ที่จ่าย"
 
 #. Label of a chart in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "Won Opportunities"
-msgstr ""
+msgstr "ชนะโอกาส"
 
 #. Label of a number card in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "Won Opportunity (Last 1 Month)"
-msgstr ""
+msgstr "ชนะโอกาส (1 เดือนที่ผ่านมา)"
 
 #. Label of the work_done (Small Text) field in DocType 'Maintenance Visit
 #. Purpose'
@@ -58392,7 +58396,7 @@ msgstr "คุณสามารถตั้งค่าเป็นชื่อ
 
 #: erpnext/controllers/accounts_controller.py:214
 msgid "You can use {0} to reconcile against {1} later."
-msgstr ""
+msgstr "คุณสามารถใช้ {0} เพื่อตรวจสอบความถูกต้องกับ {1} ในภายหลังได้"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1339
 msgid "You can't make any changes to Job Card since Work Order is closed."
@@ -58440,7 +58444,7 @@ msgstr "คุณไม่สามารถเปิดใช้งานกา
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:167
 msgid "You cannot outward following {0} as either they are Delivered, Inactive or located in a different warehouse."
-msgstr ""
+msgstr "คุณไม่สามารถติดตามสินค้าภายนอกได้จาก {0} เนื่องจากสินค้าถูกจัดส่งแล้ว อยู่ในสถานะไม่ใช้งาน หรืออยู่ในคลังสินค้าที่ต่างกัน"
 
 #: erpnext/selling/page/point_of_sale/pos_payment.js:625
 msgid "You cannot redeem more than {0}."
@@ -59117,7 +59121,7 @@ msgstr "{0} ในแถว {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:452
 msgid "{0} is a child table and will be deleted automatically with its parent"
-msgstr ""
+msgstr "{0} เป็นตารางลูกและจะถูกลบโดยอัตโนมัติพร้อมกับตารางแม่"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:94
 msgid "{0} is a mandatory Accounting Dimension. <br>Please set a value for {0} in Accounting Dimensions section."
@@ -59516,19 +59520,19 @@ msgstr "{0}, โปรดทำการดำเนินการ {1} ให�
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:523
 msgid "{0}: Child table (auto-deleted with parent)"
-msgstr ""
+msgstr "{0}: ตารางลูก (ถูกลบโดยอัตโนมัติเมื่อถูกลบจากตารางแม่)"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:518
 msgid "{0}: Not found"
-msgstr ""
+msgstr "{0}: ไม่พบ"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:514
 msgid "{0}: Protected DocType"
-msgstr ""
+msgstr "{0}: ประเภทเอกสารที่ได้รับการคุ้มครอง"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:528
 msgid "{0}: Virtual DocType (no database table)"
-msgstr ""
+msgstr "{0}: ประเภทเอกสารเสมือน (ไม่มีตารางฐานข้อมูล)"
 
 #: erpnext/controllers/accounts_controller.py:543
 msgid "{0}: {1} does not belong to the Company: {2}"
