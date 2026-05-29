@@ -7,7 +7,7 @@ Merge rules:
   b. language not yet in hotfix → copy file as-is (bench will filter to main.pot)
   c. msgid present in both      → use develop's msgstr
 """
-import shutil
+from datetime import datetime, timezone
 from pathlib import Path
 
 from babel.messages.pofile import read_po, write_po
@@ -24,7 +24,9 @@ for src in sorted(DEVELOP.glob("*.po")):
         dev = read_po(f)
 
     if not dst.exists():
-        shutil.copy(src, dst)
+        dev.revision_date = datetime.now(timezone.utc)
+        with dst.open("wb") as f:
+            write_po(f, dev)
         added += 1
         print(f"  [new]     {src.name}")
         continue
@@ -39,6 +41,7 @@ for src in sorted(DEVELOP.glob("*.po")):
             changes += 1
 
     if changes:
+        hf.revision_date = datetime.now(timezone.utc)
         with dst.open("wb") as f:
             write_po(f, hf)
         updated += 1

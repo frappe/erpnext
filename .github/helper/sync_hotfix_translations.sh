@@ -12,6 +12,23 @@ bench -v init frappe-bench --skip-assets --skip-redis-config-generation --python
 cd ./frappe-bench || exit
 bench get-app --skip-assets erpnext "${GITHUB_WORKSPACE}"
 
+echo "=== Setting up translations_hotfix branch ==="
+cd ./apps/erpnext || exit
+git config user.email "developers@erpnext.com"
+git config user.name "frappe-pr-bot"
+git remote set-url upstream https://github.com/frappe/erpnext.git
+gh auth setup-git
+git fetch upstream version-16-hotfix
+git fetch upstream translations_hotfix 2>/dev/null || true
+
+if git rev-parse --verify upstream/translations_hotfix >/dev/null 2>&1; then
+  git checkout -b translations_hotfix upstream/translations_hotfix
+  git merge -X theirs upstream/version-16-hotfix --no-edit
+else
+  git checkout -b translations_hotfix upstream/version-16-hotfix
+fi
+cd ../.. || exit
+
 echo "=== Fetching develop's .po files ==="
 mkdir -p /tmp/develop-po
 git -C "${GITHUB_WORKSPACE}" fetch origin develop
@@ -31,24 +48,33 @@ bench update-po-files --app erpnext
 
 cd ./apps/erpnext || exit
 
-git config user.email "developers@erpnext.com"
-git config user.name "frappe-pr-bot"
-git remote set-url upstream https://github.com/frappe/erpnext.git
-
-if git diff --quiet erpnext/locale/; then
+if git diff --quiet erpnext/locale/ && [ -z "$(git ls-files --others --exclude-standard erpnext/locale/)" ]; then
   echo "Translations are already up to date. No PR needed."
   exit 0
 fi
 
 echo "Changed files:"
 git diff --name-only erpnext/locale/
+git ls-files --others --exclude-standard erpnext/locale/
 
-echo "=== Committing and pushing ==="
-git checkout -B translations_hotfix
-git add erpnext/locale/
-git commit -m "fix: sync translations to version-16-hotfix"
-gh auth setup-git
-git push -u upstream translations_hotfix --force
+echo "=== Committing ==="
+while IFS= read -r file; do
+  git add "${file}"
+  lang=$(basename "${file}" .po)
+  git commit -m "fix: add ${lang} translation to version-16-hotfix"
+done < <(git ls-files --others --exclude-standard erpnext/locale/ | grep '\.po$' | sort)
+
+while IFS= read -r file; do
+  git add "${file}"
+  if ! git diff --staged --quiet -- "${file}"; then
+    lang=$(basename "${file}" .po)
+    git commit -m "fix: sync ${lang} translation to version-16-hotfix"
+  else
+    git restore --staged -- "${file}"
+  fi
+done < <(git diff --name-only erpnext/locale/ | grep '\.po$' | sort)
+
+git push -u upstream translations_hotfix
 
 echo "=== Opening PR (if not already open) ==="
 existing_pr=$(gh pr list \
