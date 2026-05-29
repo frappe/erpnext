@@ -514,6 +514,19 @@ def delete_node(**kwargs):
 
 @frappe.whitelist()
 def edit_qty(doctype, docname, qty, parent):
+	if doctype != "BOM Creator Item":
+		frappe.throw(_("Invalid doctype"), frappe.PermissionError)
+
+	if not frappe.has_permission(doctype="BOM Creator", doc=parent, ptype="write"):
+		frappe.throw(_("You do not have permission to edit this document"), frappe.PermissionError)
+
+	if not frappe.db.exists("BOM Creator Item", {"name": docname, "parent": parent}):
+		frappe.throw(_("Row does not belong to this BOM Creator"), frappe.PermissionError)
+
+	qty = flt(qty)
+	if qty <= 0:
+		frappe.throw(_("Quantity must be greater than zero"))
+
 	frappe.db.set_value(doctype, docname, "qty", qty)
 	doc = frappe.get_doc("BOM Creator", parent)
 	doc.set_rate_for_items()
