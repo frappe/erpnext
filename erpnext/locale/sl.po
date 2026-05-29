@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version:  frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-27 15:21+0000\n"
-"PO-Revision-Date: 2026-05-29 15:11+0000\n"
+"PO-Revision-Date: 2026-05-29 17:05+0000\n"
 "Last-Translator: hello@frappe.io\n"
 "Language: sl_SI\n"
 "Language-Team: Slovenian\n"
@@ -603,7 +603,7 @@ msgstr "90 Zgoraj"
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1261
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1262
 msgid "<0"
-msgstr ""
+msgstr "<0"
 
 #: erpnext/assets/doctype/asset/asset.py:541
 msgid "<b>Cannot create asset.</b><br><br>You're trying to create <b>{0} asset(s)</b> from {2} {3}.<br>However, only <b>{1} item(s)</b> were purchased and <b>{4} asset(s)</b> already exist against {5}."
@@ -677,7 +677,7 @@ msgstr "<div class=\"text-muted text-center\">{0}</div>"
 #. Content of the 'Stock Levels HTML' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "<div id=\"stock-levels-placeholder\"></div>"
-msgstr ""
+msgstr "<div id=\"stock-levels-placeholder\"></div>"
 
 #. Content of the 'uom_help_html' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -2716,7 +2716,7 @@ msgstr "Dodaj Ročno"
 
 #: erpnext/projects/doctype/task/task_tree.js:42
 msgid "Add Multiple"
-msgstr ""
+msgstr "Dodaj Več"
 
 #: erpnext/projects/doctype/task/task_tree.js:49
 msgid "Add Multiple Tasks"
@@ -3813,7 +3813,7 @@ msgstr ""
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.html:115
 #: erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.html:113
 msgid "All Parties"
-msgstr ""
+msgstr "Vse Stranke"
 
 #. Option for the 'Send To' (Select) field in DocType 'SMS Center'
 #: erpnext/selling/doctype/sms_center/sms_center.json
@@ -17457,7 +17457,7 @@ msgstr "EAN"
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
 msgid "EAN-13"
-msgstr ""
+msgstr "EAN-13"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
@@ -32684,7 +32684,7 @@ msgstr ""
 #. Label of the tab_break_dpet (Tab Break) field in DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Others"
-msgstr ""
+msgstr "Drugi"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -37904,7 +37904,7 @@ msgstr ""
 #. Item'
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 msgid "Process Loss %"
-msgstr ""
+msgstr "Izgub Procesa %"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1272
 msgid "Process Loss Percentage cannot be greater than 100"
