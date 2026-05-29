@@ -7,6 +7,7 @@ from frappe import _
 from frappe.query_builder import Order
 from frappe.query_builder.functions import Max, Min
 from frappe.utils import (
+	DateTimeLikeObject,
 	add_months,
 	cint,
 	flt,
