@@ -198,21 +198,9 @@ def add_dimension_to_budget_doctype(df, doc):
 def delete_accounting_dimension(doc):
 	doclist = get_doctypes_with_dimensions()
 
-	frappe.db.sql(
-		"""
-		DELETE FROM `tabCustom Field`
-		WHERE fieldname = {}
-		AND dt IN ({})""".format("%s", ", ".join(["%s"] * len(doclist))),  # nosec
-		tuple([doc.fieldname, *doclist]),
-	)
+	frappe.db.delete("Custom Field", filters={"fieldname": doc.fieldname, "dt": ["in", doclist]})
 
-	frappe.db.sql(
-		"""
-		DELETE FROM `tabProperty Setter`
-		WHERE field_name = {}
-		AND doc_type IN ({})""".format("%s", ", ".join(["%s"] * len(doclist))),  # nosec
-		tuple([doc.fieldname, *doclist]),
-	)
+	frappe.db.delete("Property Setter", filters={"field_name": doc.fieldname, "doc_type": ["in", doclist]})
 
 	budget_against_property = frappe.get_doc("Property Setter", "Budget-budget_against-options")
 	value_list = budget_against_property.value.split("\n")[3:]
