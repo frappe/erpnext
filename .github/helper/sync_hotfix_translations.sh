@@ -5,7 +5,7 @@
 
 set -e
 
-HOTFIX_BRANCH="version-16-hotfix"
+HOTFIX_BRANCH="${HOTFIX_BRANCH:?HOTFIX_BRANCH env var is required}"
 
 cd ~ || exit
 
