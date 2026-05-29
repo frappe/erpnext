@@ -4,6 +4,9 @@
 # Env: GH_TOKEN, PR_REVIEWER, GITHUB_WORKSPACE (all set by Actions).
 
 set -e
+
+HOTFIX_BRANCH="version-16-hotfix"
+
 cd ~ || exit
 
 echo "=== Setting up bench ==="
@@ -18,14 +21,14 @@ git config user.email "developers@erpnext.com"
 git config user.name "frappe-pr-bot"
 git remote set-url upstream https://github.com/frappe/erpnext.git
 gh auth setup-git
-git fetch upstream version-16-hotfix
+git fetch upstream "${HOTFIX_BRANCH}"
 git fetch upstream translations_hotfix 2>/dev/null || true
 
-if git rev-parse --verify upstream/translations_hotfix >/dev/null 2>&1; then
-  git checkout -b translations_hotfix upstream/translations_hotfix
-  git merge -X theirs upstream/version-16-hotfix --no-edit
+if git rev-parse --verify "upstream/translations_hotfix" >/dev/null 2>&1; then
+  git checkout -b translations_hotfix "upstream/translations_hotfix"
+  git merge -X theirs "upstream/${HOTFIX_BRANCH}" --no-edit
 else
-  git checkout -b translations_hotfix upstream/version-16-hotfix
+  git checkout -b translations_hotfix "upstream/${HOTFIX_BRANCH}"
 fi
 cd ../.. || exit
 
@@ -61,14 +64,14 @@ echo "=== Committing ==="
 while IFS= read -r file; do
   git add "${file}"
   lang=$(basename "${file}" .po)
-  git commit -m "fix: add ${lang} translation to version-16-hotfix"
+  git commit -m "fix: add ${lang} translation to ${HOTFIX_BRANCH}"
 done < <(git ls-files --others --exclude-standard erpnext/locale/ | grep '\.po$' | sort)
 
 while IFS= read -r file; do
   git add "${file}"
   if ! git diff --staged --quiet -- "${file}"; then
     lang=$(basename "${file}" .po)
-    git commit -m "fix: sync ${lang} translation to version-16-hotfix"
+    git commit -m "fix: sync ${lang} translation to ${HOTFIX_BRANCH}"
   else
     git restore --staged -- "${file}"
   fi
@@ -78,7 +81,7 @@ git push -u upstream translations_hotfix
 
 echo "=== Opening PR (if not already open) ==="
 existing_pr=$(gh pr list \
-  --base "version-16-hotfix" \
+  --base "${HOTFIX_BRANCH}" \
   --head "translations_hotfix" \
   --state open \
   --json number \
@@ -91,10 +94,10 @@ if [ "${existing_pr}" -gt 0 ]; then
 fi
 
 gh pr create \
-  --base "version-16-hotfix" \
+  --base "${HOTFIX_BRANCH}" \
   --head "translations_hotfix" \
-  --title "fix: sync translations to version-16-hotfix" \
-  --body "Automated sync of Crowdin translations from \`develop\` to \`version-16-hotfix\`.
+  --title "fix: sync translations to ${HOTFIX_BRANCH}" \
+  --body "Automated sync of Crowdin translations from \`develop\` to \`${HOTFIX_BRANCH}\`.
 
 A 3-way merge is performed per language, then \`bench update-po-files\` reconciles each \`.po\` against hotfix's \`main.pot\`:
 
