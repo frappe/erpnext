@@ -179,6 +179,21 @@ class OpeningInvoiceCreationTool(Document):
 
 	def get_invoice_dict(self, row=None):
 		def get_item_dict():
+			msg = ""
+			if not row.get("is_return"):
+				if flt(row.qty) <= 0:
+					msg = _("Row #{0}: Quantity must be a positive number")
+				elif flt(row.outstanding_amount) <= 0:
+					msg = _("Row #{0}: Outstanding Amount must be a positive number")
+			else:
+				if flt(row.qty) >= 0:
+					msg = _("Row #{0}: Quantity must be a negative number")
+				elif flt(row.outstanding_amount) >= 0:
+					msg = _("Row #{0}: Outstanding Amount must be a negative number")
+
+			if msg:
+				frappe.throw(msg.format(row.idx))
+
 			cost_center = row.get("cost_center") or frappe.get_cached_value(
 				"Company", self.company, "cost_center"
 			)
@@ -197,12 +212,13 @@ class OpeningInvoiceCreationTool(Document):
 				{
 					"uom": default_uom,
 					"rate": rate or 0.0,
-					"qty": row.qty,
+					"qty": flt(row.qty),
 					"conversion_factor": 1.0,
 					"item_name": row.item_name or "Opening Invoice Item",
 					"description": row.item_name or "Opening Invoice Item",
 					income_expense_account_field: row.temporary_opening_account,
 					"cost_center": cost_center,
+					"project": row.project,
 				}
 			)
 
@@ -220,10 +236,12 @@ class OpeningInvoiceCreationTool(Document):
 				"set_posting_time": 1,
 				"company": self.company,
 				"cost_center": self.cost_center,
+				"project": self.project,
 				"due_date": row.due_date,
 				"posting_date": row.posting_date,
 				frappe.scrub(row.party_type): row.party,
 				"is_pos": 0,
+				"is_return": row.is_return,
 				"doctype": "Sales Invoice" if self.invoice_type == "Sales" else "Purchase Invoice",
 				"update_stock": 0,  # important: https://github.com/frappe/erpnext/pull/23559
 				"invoice_number": row.invoice_number,
