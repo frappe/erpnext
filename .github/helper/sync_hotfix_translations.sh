@@ -22,15 +22,16 @@ cd "./apps/${APP_NAME}" || exit
 git config user.email "developers@erpnext.com"
 git config user.name "frappe-pr-bot"
 git remote set-url upstream "https://github.com/${GITHUB_REPOSITORY}.git"
+git config remote.upstream.fetch "+refs/heads/*:refs/remotes/upstream/*"
 gh auth setup-git
 git fetch upstream "${HOTFIX_BRANCH}"
 
-if git ls-remote --exit-code --heads upstream sync_translations_${HOTFIX_BRANCH} >/dev/null 2>&1; then
-  git fetch upstream sync_translations_${HOTFIX_BRANCH}
-  git checkout -b sync_translations_${HOTFIX_BRANCH} "upstream/sync_translations_${HOTFIX_BRANCH}"
+if git ls-remote --exit-code --heads upstream "sync_translations_${HOTFIX_BRANCH}" >/dev/null 2>&1; then
+  git fetch upstream "sync_translations_${HOTFIX_BRANCH}"
+  git checkout -b "sync_translations_${HOTFIX_BRANCH}" "upstream/sync_translations_${HOTFIX_BRANCH}"
   git merge -X theirs "upstream/${HOTFIX_BRANCH}" --no-edit
 else
-  git checkout -b sync_translations_${HOTFIX_BRANCH} "upstream/${HOTFIX_BRANCH}"
+  git checkout -b "sync_translations_${HOTFIX_BRANCH}" "upstream/${HOTFIX_BRANCH}"
 fi
 cd ../.. || exit
 
@@ -79,8 +80,8 @@ while IFS= read -r file; do
   fi
 done < <(git diff --name-only "${APP_NAME}/locale/" | grep '\.po$' | sort)
 
-if git ls-remote --exit-code --heads upstream sync_translations_${HOTFIX_BRANCH} >/dev/null 2>&1; then
-  git fetch upstream sync_translations_${HOTFIX_BRANCH}
+if git ls-remote --exit-code --heads upstream "sync_translations_${HOTFIX_BRANCH}" >/dev/null 2>&1; then
+  git fetch upstream "sync_translations_${HOTFIX_BRANCH}"
   git merge -X ours "upstream/sync_translations_${HOTFIX_BRANCH}" --no-edit
 fi
 git push -u upstream sync_translations_${HOTFIX_BRANCH}
