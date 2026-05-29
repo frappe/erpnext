@@ -63,7 +63,7 @@ jobs:
 
       - name: Run sync script
         run: |
-          bash "${GITHUB_WORKSPACE}/.github/helper/sync_hotfix_translations.sh" "${HOTFIX_BRANCH}"
+          bash "${GITHUB_WORKSPACE}/.github/helper/sync_hotfix_translations.sh"
         env:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
           PR_REVIEWER: diptanilsaha
