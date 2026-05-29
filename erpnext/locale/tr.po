@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version:  frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-27 15:21+0000\n"
-"PO-Revision-Date: 2026-05-29 17:05+0000\n"
+"PO-Revision-Date: 2026-05-29 17:37+0000\n"
 "Last-Translator: hello@frappe.io\n"
 "Language: tr_TR\n"
 "Language-Team: Turkish\n"
@@ -35357,7 +35357,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/bom/bom_item_preview.html:16
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:321
 msgid "Phantom Item"
-msgstr ""
+msgstr "Hayalet Seçenek"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:430
 msgid "Phantom Item is mandatory"
