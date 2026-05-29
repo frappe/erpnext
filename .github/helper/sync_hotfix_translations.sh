@@ -17,7 +17,7 @@ bench -v init frappe-bench --skip-assets --skip-redis-config-generation --python
 cd ./frappe-bench || exit
 bench get-app --skip-assets "${APP_NAME}" "${GITHUB_WORKSPACE}"
 
-echo "=== Setting up translations_hotfix branch ==="
+echo "=== Setting up sync_translations_${HOTFIX_BRANCH} branch ==="
 cd "./apps/${APP_NAME}" || exit
 git config user.email "developers@erpnext.com"
 git config user.name "frappe-pr-bot"
@@ -25,12 +25,12 @@ git remote set-url upstream "https://github.com/${GITHUB_REPOSITORY}.git"
 gh auth setup-git
 git fetch upstream "${HOTFIX_BRANCH}"
 
-if git ls-remote --exit-code --heads upstream translations_hotfix >/dev/null 2>&1; then
-  git fetch upstream translations_hotfix
-  git checkout -b translations_hotfix "upstream/translations_hotfix"
+if git ls-remote --exit-code --heads upstream sync_translations_${HOTFIX_BRANCH} >/dev/null 2>&1; then
+  git fetch upstream sync_translations_${HOTFIX_BRANCH}
+  git checkout -b sync_translations_${HOTFIX_BRANCH} "upstream/sync_translations_${HOTFIX_BRANCH}"
   git merge -X theirs "upstream/${HOTFIX_BRANCH}" --no-edit
 else
-  git checkout -b translations_hotfix "upstream/${HOTFIX_BRANCH}"
+  git checkout -b sync_translations_${HOTFIX_BRANCH} "upstream/${HOTFIX_BRANCH}"
 fi
 cd ../.. || exit
 
@@ -79,16 +79,16 @@ while IFS= read -r file; do
   fi
 done < <(git diff --name-only "${APP_NAME}/locale/" | grep '\.po$' | sort)
 
-if git ls-remote --exit-code --heads upstream translations_hotfix >/dev/null 2>&1; then
-  git fetch upstream translations_hotfix
-  git merge -X ours "upstream/translations_hotfix" --no-edit
+if git ls-remote --exit-code --heads upstream sync_translations_${HOTFIX_BRANCH} >/dev/null 2>&1; then
+  git fetch upstream sync_translations_${HOTFIX_BRANCH}
+  git merge -X ours "upstream/sync_translations_${HOTFIX_BRANCH}" --no-edit
 fi
-git push -u upstream translations_hotfix
+git push -u upstream sync_translations_${HOTFIX_BRANCH}
 
 echo "=== Opening PR (if not already open) ==="
 existing_pr=$(gh pr list \
   --base "${HOTFIX_BRANCH}" \
-  --head "translations_hotfix" \
+  --head "sync_translations_${HOTFIX_BRANCH}" \
   --state open \
   --json number \
   --jq 'length' \
@@ -101,7 +101,7 @@ fi
 
 gh pr create \
   --base "${HOTFIX_BRANCH}" \
-  --head "translations_hotfix" \
+  --head "sync_translations_${HOTFIX_BRANCH}" \
   --title "chore: sync translations to ${HOTFIX_BRANCH}" \
   --body "Automated sync of Crowdin translations from \`develop\` to \`${HOTFIX_BRANCH}\`.
 
