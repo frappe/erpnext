@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version:  frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-27 15:21+0000\n"
-"PO-Revision-Date: 2026-05-29 15:11+0000\n"
+"PO-Revision-Date: 2026-05-29 17:05+0000\n"
 "Last-Translator: hello@frappe.io\n"
 "Language: pt_PT\n"
 "Language-Team: Portuguese\n"
@@ -603,7 +603,7 @@ msgstr "90 Acima"
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1261
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1262
 msgid "<0"
-msgstr ""
+msgstr "<0"
 
 #: erpnext/assets/doctype/asset/asset.py:541
 msgid "<b>Cannot create asset.</b><br><br>You're trying to create <b>{0} asset(s)</b> from {2} {3}.<br>However, only <b>{1} item(s)</b> were purchased and <b>{4} asset(s)</b> already exist against {5}."
@@ -661,7 +661,7 @@ msgstr ""
 #. Content of the 'Stock Levels HTML' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "<div id=\"stock-levels-placeholder\"></div>"
-msgstr ""
+msgstr "<div id=\"stock-levels-placeholder\"></div>"
 
 #. Content of the 'uom_help_html' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -2585,7 +2585,7 @@ msgstr ""
 
 #: erpnext/projects/doctype/task/task_tree.js:42
 msgid "Add Multiple"
-msgstr ""
+msgstr "Adicionar Vários"
 
 #: erpnext/projects/doctype/task/task_tree.js:49
 msgid "Add Multiple Tasks"
@@ -3682,7 +3682,7 @@ msgstr ""
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.html:115
 #: erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.html:113
 msgid "All Parties"
-msgstr ""
+msgstr "Todas as Partes"
 
 #. Option for the 'Send To' (Select) field in DocType 'SMS Center'
 #: erpnext/selling/doctype/sms_center/sms_center.json
@@ -6438,7 +6438,7 @@ msgstr ""
 #. Label of a number card in the Selling Workspace
 #: erpnext/selling/workspace/selling/selling.json
 msgid "Average Order Value"
-msgstr ""
+msgstr "Valor Médio do Pedido"
 
 #. Label of a number card in the Buying Workspace
 #: erpnext/buying/workspace/buying/buying.json
@@ -9276,11 +9276,11 @@ msgstr ""
 
 #: erpnext/controllers/accounts_controller.py:3913
 msgid "Cannot set quantity less than delivered quantity."
-msgstr ""
+msgstr "Não é possível definir quantidade menor que a quantidade fornecida."
 
 #: erpnext/controllers/accounts_controller.py:3914
 msgid "Cannot set quantity less than received quantity."
-msgstr ""
+msgstr "Não é possível definir quantidade menor que a quantidade recebida."
 
 #: erpnext/stock/doctype/item_variant_settings/item_variant_settings.py:69
 msgid "Cannot set the field <b>{0}</b> for copying in variants"
@@ -10848,7 +10848,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/bank_account/bank_account.py:63
 msgid "Company Account is mandatory"
-msgstr ""
+msgstr "A Conta da Empresa é obrigatória"
 
 #. Label of the company_address (Link) field in DocType 'Dunning'
 #. Label of the company_address_display (Text Editor) field in DocType 'POS
@@ -10960,7 +10960,7 @@ msgstr ""
 #. Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Company Field"
-msgstr ""
+msgstr "Campo da Empresa"
 
 #. Label of the company_logo (Attach Image) field in DocType 'Company'
 #: erpnext/public/js/print.js:80 erpnext/setup/doctype/company/company.json
@@ -16907,7 +16907,7 @@ msgstr ""
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:182
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:445
 msgid "DocType {0} does not exist"
-msgstr ""
+msgstr "DocType {0} não existe"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:295
 msgid "DocType {0} with company field '{1}' is already in the list"
@@ -16941,7 +16941,7 @@ msgstr ""
 #. Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Document Count"
-msgstr ""
+msgstr "Contagem de Documentos"
 
 #. Label of the document_naming_tab (Tab Break) field in DocType 'Buying
 #. Settings'
@@ -16997,7 +16997,7 @@ msgstr ""
 #: erpnext/accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 #: erpnext/accounts/doctype/sales_taxes_and_charges/sales_taxes_and_charges.json
 msgid "Don't Recompute Tax"
-msgstr ""
+msgstr "Não Recomputar Imposto"
 
 #. Label of the dont_reserve_sales_order_qty_on_sales_return (Check) field in
 #. DocType 'Selling Settings'
@@ -17265,7 +17265,7 @@ msgstr ""
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:189
 msgid "Duplicate entry: {0}{1}"
-msgstr ""
+msgstr "Entrada duplicada: {0}{1}"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:164
 msgid "Duplicate item group found in the item group table"
@@ -17326,7 +17326,7 @@ msgstr ""
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
 msgid "EAN-13"
-msgstr ""
+msgstr "EAN-13"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
@@ -17346,7 +17346,7 @@ msgstr ""
 #. Label of a Desktop Icon
 #: erpnext/desktop_icon/erpnext.json
 msgid "ERPNext"
-msgstr ""
+msgstr "ERPNext"
 
 #. Label of a Desktop Icon
 #. Name of a Workspace
@@ -17355,7 +17355,7 @@ msgstr ""
 #: erpnext/setup/workspace/erpnext_settings/erpnext_settings.json
 #: erpnext/workspace_sidebar/erpnext_settings.json
 msgid "ERPNext Settings"
-msgstr ""
+msgstr "Definições de ERPNext"
 
 #. Label of the user_id (Data) field in DocType 'Employee Group Table'
 #: erpnext/setup/doctype/employee_group_table/employee_group_table.json
@@ -19292,11 +19292,11 @@ msgstr ""
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1061
 msgid "File not found"
-msgstr ""
+msgstr "Ficheiro não encontrado"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1075
 msgid "File not found on server"
-msgstr ""
+msgstr "Ficheiro não encontrado no servidor"
 
 #. Label of the file_to_rename (Attach) field in DocType 'Rename Tool'
 #: erpnext/utilities/doctype/rename_tool/rename_tool.json
@@ -20334,7 +20334,7 @@ msgstr ""
 
 #: erpnext/selling/report/sales_partner_commission_summary/sales_partner_commission_summary.py:60
 msgid "From Date cannot be greater than To Date."
-msgstr ""
+msgstr "A Data De não pode ser mais recente do que a Data A."
 
 #: erpnext/crm/report/sales_pipeline_analytics/sales_pipeline_analytics.py:27
 msgid "From Date is mandatory"
@@ -21505,7 +21505,7 @@ msgstr ""
 #. Label of the group_name (Data) field in DocType 'Tax Withholding Group'
 #: erpnext/accounts/doctype/tax_withholding_group/tax_withholding_group.json
 msgid "Group Name"
-msgstr ""
+msgstr "Nome do Grupo"
 
 #: erpnext/setup/doctype/sales_person/sales_person_tree.js:14
 msgid "Group Node"
@@ -22788,7 +22788,7 @@ msgstr ""
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:564
 msgid "Import Summary"
-msgstr ""
+msgstr "Resumo de Importação"
 
 #. Label of a Link in the Buying Workspace
 #. Name of a DocType
@@ -23280,7 +23280,7 @@ msgstr ""
 #. Label of a number card in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 msgid "Incoming Payment"
-msgstr ""
+msgstr "Pagamento de Entrada"
 
 #. Label of the incoming_rate (Currency) field in DocType 'Delivery Note Item'
 #. Label of the incoming_rate (Currency) field in DocType 'Packed Item'
@@ -23922,7 +23922,7 @@ msgstr ""
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:227
 msgid "Invalid Company Field"
-msgstr ""
+msgstr "Campo de Empresa Inválido"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2355
 msgid "Invalid Company for Inter Company Transaction."
@@ -24090,7 +24090,7 @@ msgstr ""
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1056
 msgid "Invalid file URL"
-msgstr ""
+msgstr "URL de ficheiro inválido"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:87
 msgid "Invalid filter formula. Please check the syntax."
@@ -26543,7 +26543,7 @@ msgstr ""
 
 #: erpnext/selling/page/point_of_sale/pos_item_selector.js:110
 msgid "Items not found."
-msgstr ""
+msgstr "Artigos não encontrados."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1245
 msgid "Items rate has been updated to zero as Allow Zero Valuation Rate is checked for the following items: {0}"
@@ -27337,7 +27337,7 @@ msgstr ""
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Learn about <a href=\"https://docs.frappe.io/erpnext/user/manual/en/common_party_accounting\" rel=\"noopener noreferrer\">Common Party</a>"
-msgstr ""
+msgstr "Saiba mais sobre <a href=\"https://docs.frappe.io/erpnext/user/manual/en/common_party_accounting\" rel=\"noopener noreferrer\">Entidade Comum</a>"
 
 #. Label of the leave_encashed (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -28262,7 +28262,7 @@ msgstr ""
 
 #: erpnext/public/js/telephony.js:29
 msgid "Make a call"
-msgstr ""
+msgstr "Fazer uma chamada"
 
 #: erpnext/config/projects.py:34
 msgid "Make project from a template."
@@ -35822,7 +35822,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:683
 msgid "Please enter Batch No"
-msgstr ""
+msgstr "Por favor, insira o N.º do Lote"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:976
 msgid "Please enter Cost Center"
@@ -35883,7 +35883,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:685
 msgid "Please enter Serial No"
-msgstr ""
+msgstr "Por favor, insira o N.º de Série"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:319
 msgid "Please enter Serial Nos"
@@ -36388,7 +36388,7 @@ msgstr ""
 
 #: erpnext/selling/report/sales_partner_commission_summary/sales_partner_commission_summary.py:47
 msgid "Please select the document type first."
-msgstr ""
+msgstr "Por favor, selecione primeiro o tipo de documento."
 
 #: erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py:21
 msgid "Please select the required filters"
@@ -37773,7 +37773,7 @@ msgstr ""
 #. Item'
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 msgid "Process Loss %"
-msgstr ""
+msgstr "Perda de Processo %"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1272
 msgid "Process Loss Percentage cannot be greater than 100"
@@ -39123,7 +39123,7 @@ msgstr ""
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/buying.json
 msgid "Purchase Receipt Trends "
-msgstr ""
+msgstr "Tendências de Recibo de Compra "
 
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:358
 msgid "Purchase Receipt doesn't have any Item for which Retain Sample is enabled."
@@ -51493,7 +51493,7 @@ msgstr ""
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:237
 #: erpnext/accounts/report/tds_computation_summary/tds_computation_summary.py:84
 msgid "Tax Rate %"
-msgstr ""
+msgstr "Taxa de imposto %"
 
 #. Label of the taxes (Table) field in DocType 'Item Tax Template'
 #: erpnext/accounts/doctype/item_tax_template/item_tax_template.json
@@ -52701,7 +52701,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/item/item.js:1161
 msgid "There are two options to maintain valuation of stock. FIFO (first in - first out) and Moving Average. To understand this topic in detail please visit <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>Item Valuation, FIFO and Moving Average.</a>"
-msgstr ""
+msgstr "Existem duas opções para manter a valorização de stock. FIFO (primeiro a entrar - primeiro a sair) e Média Móvel. Para compreender este tema em detalhe, visite <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>Valorização de Artigos, FIFO e Média Móvel.</a>"
 
 #: erpnext/stock/report/item_variant_details/item_variant_details.py:25
 msgid "There aren't any item variants for the selected item"
@@ -57271,7 +57271,7 @@ msgstr ""
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:75
 msgid "Warning: This action cannot be undone!"
-msgstr ""
+msgstr "Aviso: Esta ação não pode ser anulada!"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_validation.py:77
 msgid "Warnings"
@@ -57492,7 +57492,7 @@ msgstr ""
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:82
 msgid "What will be deleted:"
-msgstr ""
+msgstr "O que será eliminado:"
 
 #. Label of the whatsapp_no (Data) field in DocType 'Lead'
 #. Label of the whatsapp (Data) field in DocType 'Opportunity'
@@ -59329,7 +59329,7 @@ msgstr ""
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:518
 msgid "{0}: Not found"
-msgstr ""
+msgstr "{0}: Não encontrado"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:514
 msgid "{0}: Protected DocType"
