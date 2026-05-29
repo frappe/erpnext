@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version:  frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-27 15:21+0000\n"
-"PO-Revision-Date: 2026-05-29 15:11+0000\n"
+"PO-Revision-Date: 2026-05-29 17:05+0000\n"
 "Last-Translator: hello@frappe.io\n"
 "Language: de_DE\n"
 "Language-Team: German\n"
@@ -23,6 +23,12 @@ msgid ""
 "\t\t\tHowever, enabling this setting may lead to negative stock in the system.\n"
 "\t\t\tSo please ensure the stock levels are adjusted as soon as possible to maintain the correct valuation rate."
 msgstr ""
+"\n"
+"\t\t\tDie Charge {0} des Artikels {1} hat einen negativen Bestand im Lager {2}{3}.\n"
+"\t\t\tBitte fügen Sie eine Bestandsmenge von {4} hinzu, um mit dieser Buchung fortzufahren.\n"
+"\t\t\tFalls keine Korrekturbuchung möglich ist, aktivieren Sie bitte 'Negativen Bestand für Chargen zulassen' in den Lager-Einstellungen.\n"
+"\t\t\tBeachten Sie jedoch, dass diese Einstellung zu negativem Bestand im System führen kann.\n"
+"\t\t\tStellen Sie daher sicher, dass die Bestände so schnell wie möglich korrigiert werden, um den korrekten Bewertungssatz beizubehalten."
 
 #. Label of the column_break_32 (Column Break) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -150,7 +156,7 @@ msgstr "% Abgeschlossen"
 #. Label of the cost_allocation_per (Percent) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "% Cost Allocation"
-msgstr ""
+msgstr "% Kostenzuordnung"
 
 #. Label of the per_delivered (Percent) field in DocType 'Pick List'
 #. Label of the per_delivered (Percent) field in DocType 'Subcontracting Inward
@@ -603,7 +609,7 @@ msgstr "über 90"
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1261
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1262
 msgid "<0"
-msgstr ""
+msgstr "<0"
 
 #: erpnext/assets/doctype/asset/asset.py:541
 msgid "<b>Cannot create asset.</b><br><br>You're trying to create <b>{0} asset(s)</b> from {2} {3}.<br>However, only <b>{1} item(s)</b> were purchased and <b>{4} asset(s)</b> already exist against {5}."
@@ -677,7 +683,7 @@ msgstr "<div class=\"text-muted text-center\">{0}</div>"
 #. Content of the 'Stock Levels HTML' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "<div id=\"stock-levels-placeholder\"></div>"
-msgstr ""
+msgstr "<div id=\"stock-levels-placeholder\"></div>"
 
 #. Content of the 'uom_help_html' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -1198,7 +1204,7 @@ msgstr "Es wurde ein neuer Termin für Sie bei {0} erstellt"
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:3
 msgid "A new fiscal year has been automatically created."
-msgstr ""
+msgstr "Ein neues Geschäftsjahr wurde automatisch erstellt."
 
 #. Description of the 'Inspection Required before Delivery' (Check) field in
 #. DocType 'Item'
@@ -1249,7 +1255,7 @@ msgstr "ACC-PINV-.YYYY.-"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:88
 msgid "ALL records will be deleted (entire DocType cleared)"
-msgstr ""
+msgstr "ALLE Datensätze werden gelöscht (gesamter DocType geleert)"
 
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:552
 msgid "AMC Expiry (Serial)"
@@ -1265,7 +1271,7 @@ msgstr "Verfalldatum des jährlichen Wartungsvertrags"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "AP Summary"
-msgstr ""
+msgstr "Verbindlichkeiten-Übersicht"
 
 #. Label of the api_details_section (Section Break) field in DocType 'Currency
 #. Exchange Settings'
@@ -1276,7 +1282,7 @@ msgstr "API Details"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "AR Summary"
-msgstr ""
+msgstr "Forderungen-Übersicht"
 
 #. Label of the awb_number (Data) field in DocType 'Shipment'
 #: erpnext/stock/doctype/shipment/shipment.json
@@ -2053,7 +2059,7 @@ msgstr "Stammdaten Buchhaltung"
 #. Title of the Module Onboarding 'Accounting Onboarding'
 #: erpnext/accounts/module_onboarding/accounting_onboarding/accounting_onboarding.json
 msgid "Accounting Onboarding"
-msgstr ""
+msgstr "Buchhaltung Onboarding"
 
 #. Name of a DocType
 #. Label of a Link in the Invoicing Workspace
@@ -2223,7 +2229,7 @@ msgstr "Buchhaltungseinstellungen"
 #: erpnext/desktop_icon/accounts_setup.json
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "Accounts Setup"
-msgstr ""
+msgstr "Buchhaltungseinrichtung"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:1329
 msgid "Accounts table cannot be blank."
@@ -2731,7 +2737,7 @@ msgstr "Manuell hinzufügen"
 
 #: erpnext/projects/doctype/task/task_tree.js:42
 msgid "Add Multiple"
-msgstr ""
+msgstr "Mehrere hinzufügen"
 
 #: erpnext/projects/doctype/task/task_tree.js:49
 msgid "Add Multiple Tasks"
@@ -2877,7 +2883,7 @@ msgstr "Zum Transit hinzufügen"
 
 #: erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.py:119
 msgid "Add vouchers to generate preview."
-msgstr ""
+msgstr "Belege hinzufügen, um eine Vorschau zu erstellen."
 
 #: erpnext/accounts/doctype/coupon_code/coupon_code.js:36
 msgid "Add/Edit Coupon Conditions"
@@ -3071,7 +3077,7 @@ msgstr "Zusätzlicher Rabatt in Prozent"
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_secondary_item/subcontracting_inward_order_secondary_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Additional Finished Good"
-msgstr ""
+msgstr "Zusätzliches Fertigprodukt"
 
 #. Label of the addtional_info (Section Break) field in DocType 'Journal Entry'
 #. Label of the additional_info_section (Section Break) field in DocType
@@ -3341,7 +3347,7 @@ msgstr "Angezahlt"
 #. Label of the advance_paid (Currency) field in DocType 'Purchase Order'
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 msgid "Advance Paid (Company Currency)"
-msgstr ""
+msgstr "Vorauszahlung (Unternehmenswährung)"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order_list.js:75
 #: erpnext/selling/doctype/sales_order/sales_order_list.js:122
@@ -3833,7 +3839,7 @@ msgstr "Alle Interessenten (offen)"
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.html:115
 #: erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.html:113
 msgid "All Parties"
-msgstr ""
+msgstr "Alle Parteien"
 
 #. Option for the 'Send To' (Select) field in DocType 'SMS Center'
 #: erpnext/selling/doctype/sms_center/sms_center.json
@@ -4144,7 +4150,7 @@ msgstr "Negativen Lagerbestand zulassen"
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Allow Negative Stock for Batch"
-msgstr ""
+msgstr "Negativen Bestand für Chargen zulassen"
 
 #. Label of the allow_or_restrict (Select) field in DocType 'Accounting
 #. Dimension Filter'
@@ -4893,7 +4899,7 @@ msgstr "Analyst"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Analytical Accounting"
-msgstr ""
+msgstr "Analytische Buchhaltung"
 
 #: erpnext/public/js/utils.js:184
 msgid "Annual Billing: {0}"
@@ -5198,7 +5204,7 @@ msgstr "SLA für Lösungszeit anwenden"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Apply discounts and margins on products"
-msgstr ""
+msgstr "Rabatte und Margen auf Produkte anwenden"
 
 #. Label of the apply_restriction_on_values (Check) field in DocType
 #. 'Accounting Dimension Filter'
@@ -5762,7 +5768,7 @@ msgstr "Status Vermögenswert"
 #. Label of the asset_type (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Asset Type"
-msgstr ""
+msgstr "Anlagentyp"
 
 #. Label of the asset_value (Currency) field in DocType 'Asset Capitalization
 #. Asset Item'
@@ -5957,7 +5963,7 @@ msgstr "Vermögenswerte"
 #. Title of the Module Onboarding 'Asset Onboarding'
 #: erpnext/assets/module_onboarding/asset_onboarding/asset_onboarding.json
 msgid "Assets Setup"
-msgstr ""
+msgstr "Anlageneinrichtung"
 
 #: erpnext/controllers/buying_controller.py:1059
 msgid "Assets not created for {item_code}. You will have to create asset manually."
@@ -5997,7 +6003,7 @@ msgstr "In Zeile #{0}: Die kommissionierte Menge {1} für den Artikel {2} ist gr
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1436
 msgid "At Row {0}: In Serial and Batch Bundle {1} must have docstatus as 1 and not 0"
-msgstr ""
+msgstr "In Zeile {0}: Das Serien- und Chargenbündel {1} muss den Dokumentstatus 1 haben und nicht 0"
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:84
 msgid "At least one account with exchange gain or loss is required"
@@ -6030,7 +6036,7 @@ msgstr "Mindestens eine der Optionen „Verkauf“ oder „Einkauf“ muss ausge
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:324
 msgid "At least one raw material item must be present in the stock entry for the type {0}"
-msgstr ""
+msgstr "Mindestens ein Rohmaterial-Artikel muss in der Lagerbuchung für den Typ {0} vorhanden sein"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:27
 msgid "At least one row is required for a financial report template"
@@ -6331,7 +6337,7 @@ msgstr "Fehler bei automatischen Steuereinstellungen"
 
 #: erpnext/setup/doctype/employee/employee.py:170
 msgid "Auto User Creation Error"
-msgstr ""
+msgstr "Fehler bei automatischer Benutzererstellung"
 
 #. Description of the 'Close Replied Opportunity After Days' (Int) field in
 #. DocType 'CRM Settings'
@@ -6404,7 +6410,7 @@ msgstr "Automatisch neue Charge erstellen"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Automatically Fetch Payment Terms from Order/Quotation"
-msgstr ""
+msgstr "Zahlungsbedingungen automatisch aus Bestellung/Angebot übernehmen"
 
 #. Label of the automatically_process_deferred_accounting_entry (Check) field
 #. in DocType 'Accounts Settings'
@@ -6439,7 +6445,7 @@ msgstr "Verfügbar"
 #. DocType 'Bin'
 #: erpnext/stock/doctype/bin/bin.json
 msgid "Available / Future Inventory"
-msgstr ""
+msgstr "Verfügbarer / Zukünftiger Bestand"
 
 #. Label of the actual_batch_qty (Float) field in DocType 'Delivery Note Item'
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
@@ -6553,7 +6559,7 @@ msgstr "Verfügbarer Bestand für Verpackungsartikel"
 #. Label of the available_for_use_date (Date) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Available for Use Date"
-msgstr ""
+msgstr "Verfügbar ab Datum"
 
 #: erpnext/assets/doctype/asset/asset.py:382
 msgid "Available for use date is required"
@@ -6589,7 +6595,7 @@ msgstr "Durchschnittlicher Rabatt"
 #. Label of a number card in the Selling Workspace
 #: erpnext/selling/workspace/selling/selling.json
 msgid "Average Order Value"
-msgstr ""
+msgstr "Durchschnittlicher Bestellwert"
 
 #. Label of a number card in the Buying Workspace
 #: erpnext/buying/workspace/buying/buying.json
@@ -6866,18 +6872,18 @@ msgstr "Stücklisten-Suche"
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgid "BOM Secondary Item"
-msgstr ""
+msgstr "Stücklisten-Sekundärartikel"
 
 #. Label of the bom_secondary_item (Data) field in DocType 'Job Card Secondary
 #. Item'
 #: erpnext/manufacturing/doctype/job_card_secondary_item/job_card_secondary_item.json
 msgid "BOM Secondary Item Reference"
-msgstr ""
+msgstr "Stücklisten-Sekundärartikel-Referenz"
 
 #. Name of a report
 #: erpnext/manufacturing/report/bom_stock_analysis/bom_stock_analysis.json
 msgid "BOM Stock Analysis"
-msgstr ""
+msgstr "Stücklisten-Bestandsanalyse"
 
 #. Label of the tab_2_tab (Tab Break) field in DocType 'BOM Creator'
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.json
@@ -6937,7 +6943,7 @@ msgstr "Stückliste Webseite Vorgang"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:2458
 msgid "BOM and Finished Good Quantity is mandatory for Disassembly"
-msgstr ""
+msgstr "Stückliste und Menge des Fertigprodukts sind für die Demontage erforderlich"
 
 #. Label of the bom_and_work_order_tab (Tab Break) field in DocType
 #. 'Manufacturing Settings'
@@ -7354,7 +7360,7 @@ msgstr "Kontokorrentkredit-Konto"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/banking.json
 msgid "Bank Reconciliation"
-msgstr ""
+msgstr "Bankabstimmung"
 
 #. Name of a report
 #. Label of a Link in the Invoicing Workspace
@@ -7514,7 +7520,7 @@ msgstr "Base-Änderungsbetrag (Unternehmenswährung)"
 #. Label of the base_cost (Currency) field in DocType 'BOM Secondary Item'
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 msgid "Base Cost (Company Currency)"
-msgstr ""
+msgstr "Basiskosten (Unternehmenswährung)"
 
 #. Label of the base_cost_per_unit (Float) field in DocType 'BOM Operation'
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
@@ -7535,13 +7541,13 @@ msgstr "Basispreis"
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Base Tax Withheld"
-msgstr ""
+msgstr "Einbehaltene Steuer (Basiswährung)"
 
 #. Label of the taxable_amount (Currency) field in DocType 'Tax Withholding
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Base Taxable Amount"
-msgstr ""
+msgstr "Steuerpflichtiger Basisbetrag"
 
 #. Label of the base_total_billable_amount (Currency) field in DocType
 #. 'Timesheet'
@@ -8559,7 +8565,7 @@ msgstr "Budget-Startdatum"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/budget.json
 msgid "Budget Variance"
-msgstr ""
+msgstr "Budgetabweichung"
 
 #. Name of a report
 #. Label of a Link in the Invoicing Workspace
@@ -8724,7 +8730,7 @@ msgstr "Einkaufs-Einstellungen"
 #. Title of the Module Onboarding 'Buying Onboarding'
 #: erpnext/buying/module_onboarding/buying_onboarding/buying_onboarding.json
 msgid "Buying Setup"
-msgstr ""
+msgstr "Einkaufs-Einrichtung"
 
 #. Label of the buying_and_selling_tab (Tab Break) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -8752,7 +8758,7 @@ msgstr "Standardmäßig wird die ID des Lieferanten basierend auf dem eingegeben
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_secondary_item/subcontracting_inward_order_secondary_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "By-Product"
-msgstr ""
+msgstr "Nebenprodukt"
 
 #. Label of the bypass_credit_limit_check (Check) field in DocType 'Customer
 #. Credit Limit'
@@ -8773,7 +8779,7 @@ msgstr "CC An"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "COA Importer"
-msgstr ""
+msgstr "Kontenplan-Importeur"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
@@ -9057,7 +9063,7 @@ msgstr "Kampagnenpläne"
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:113
 msgid "Campaign {0} not found"
-msgstr ""
+msgstr "Kampagne {0} nicht gefunden"
 
 #: erpnext/setup/doctype/authorization_control/authorization_control.py:60
 msgid "Can be approved by {0}"
@@ -9172,7 +9178,7 @@ msgstr "Erneutes Buchen von Belegen in einem abgeschlossenem Wirtschaftsjahr ist
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:204
 msgid "Cannot add child table {0} to deletion list. Child tables are automatically deleted with their parent DocTypes."
-msgstr ""
+msgstr "Untergeordnete Tabelle {0} kann nicht zur Löschliste hinzugefügt werden. Untergeordnete Tabellen werden automatisch mit ihren übergeordneten DocTypes gelöscht."
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:226
 msgid "Cannot amend {0} {1}, please create a new one instead."
@@ -9216,7 +9222,7 @@ msgstr "Diese Fertigungslagerbuchung kann nicht storniert werden, da die Menge d
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:579
 msgid "Cannot cancel this document as it is linked with the submitted Asset Value Adjustment <b>{0}</b>. Please cancel the Asset Value Adjustment to continue."
-msgstr ""
+msgstr "Dieses Dokument kann nicht storniert werden, da es mit der gebuchten Anpassung des Vermögenswerts <b>{0}</b> verknüpft ist. Bitte stornieren Sie die Anpassung des Vermögenswerts, um fortzufahren."
 
 #: erpnext/controllers/buying_controller.py:1148
 msgid "Cannot cancel this document as it is linked with the submitted asset {asset_link}. Please cancel the asset to continue."
@@ -9311,15 +9317,15 @@ msgstr "Ein bestellter Artikel kann nicht gelöscht werden"
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:197
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:783
 msgid "Cannot delete protected core DocType: {0}"
-msgstr ""
+msgstr "Geschützter Kern-DocType kann nicht gelöscht werden: {0}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:213
 msgid "Cannot delete virtual DocType: {0}. Virtual DocTypes do not have database tables."
-msgstr ""
+msgstr "Virtueller DocType kann nicht gelöscht werden: {0}. Virtuelle DocTypes haben keine Datenbanktabellen."
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.py:146
 msgid "Cannot disable Serial and Batch No for Item, as there are existing records for serial / batch."
-msgstr ""
+msgstr "Serien- und Chargennummer für Artikel kann nicht deaktiviert werden, da bereits Datensätze für Serien-/Chargen vorhanden sind."
 
 #: erpnext/setup/doctype/company/company.py:561
 msgid "Cannot disable perpetual inventory, as there are existing Stock Ledger Entries for the company {0}. Please cancel the stock transactions first and try again."
@@ -9327,7 +9333,7 @@ msgstr "Die dauerhafte Bestandsführung kann nicht deaktiviert werden, da bereit
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.py:127
 msgid "Cannot disable {0} as it may lead to incorrect stock valuation."
-msgstr ""
+msgstr "{0} kann nicht deaktiviert werden, da dies zu einer fehlerhaften Lagerbewertung führen könnte."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:728
 msgid "Cannot disassemble more than produced quantity."
@@ -9348,7 +9354,7 @@ msgstr "Die Lieferung per Seriennummer kann nicht sichergestellt werden, da Arti
 
 #: erpnext/accounts/doctype/payment_request/payment_request.js:111
 msgid "Cannot fetch selected rows for submitted Payment Request"
-msgstr ""
+msgstr "Ausgewählte Zeilen für gebuchte Zahlungsanforderung können nicht abgerufen werden"
 
 #: erpnext/public/js/utils/barcode_scanner.js:62
 msgid "Cannot find Item or Warehouse with this Barcode"
@@ -9364,11 +9370,11 @@ msgstr "Es wurde kein Standardlager für den Artikel {0} gefunden. Bitte legen S
 
 #: erpnext/accounts/party.py:1063
 msgid "Cannot merge {0} '{1}' into '{2}' as both have existing accounting entries in different currencies for company '{3}'."
-msgstr ""
+msgstr "{0} '{1}' kann nicht mit '{2}' zusammengeführt werden, da für das Unternehmen '{3}' bereits Buchungen in unterschiedlichen Währungen vorhanden sind."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:578
 msgid "Cannot produce more Item {0} than Sales Order quantity {1} {2}"
-msgstr ""
+msgstr "Es können nicht mehr Artikel {0} als die Auftragsmenge {1} {2} produziert werden"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:1473
 msgid "Cannot produce more item for {0}"
@@ -9402,7 +9408,7 @@ msgstr "Link-Token kann nicht abgerufen werden. Prüfen Sie das Fehlerprotokoll 
 
 #: erpnext/selling/doctype/customer/customer.py:367
 msgid "Cannot select a Group type Customer Group. Please select a non-group Customer Group."
-msgstr ""
+msgstr "Eine Kundengruppe vom Typ Gruppe kann nicht ausgewählt werden. Bitte wählen Sie eine Kundengruppe ohne Gruppentyp."
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:1507
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:1685
@@ -9427,11 +9433,11 @@ msgstr "Es können nicht mehrere Artikelstandards für ein Unternehmen festgeleg
 
 #: erpnext/controllers/accounts_controller.py:3913
 msgid "Cannot set quantity less than delivered quantity."
-msgstr ""
+msgstr "Menge kann nicht kleiner als gelieferte Menge sein."
 
 #: erpnext/controllers/accounts_controller.py:3914
 msgid "Cannot set quantity less than received quantity."
-msgstr ""
+msgstr "Menge kann nicht kleiner als die empfangene Menge eingestellt werden."
 
 #: erpnext/stock/doctype/item_variant_settings/item_variant_settings.py:69
 msgid "Cannot set the field <b>{0}</b> for copying in variants"
@@ -9439,11 +9445,11 @@ msgstr "Das Feld <b>{0}</b> kann nicht zum Kopieren in Varianten festgelegt werd
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:266
 msgid "Cannot start deletion. Another deletion {0} is already queued/running. Please wait for it to complete."
-msgstr ""
+msgstr "Löschvorgang kann nicht gestartet werden. Ein weiterer Löschvorgang {0} ist bereits in der Warteschlange/wird ausgeführt. Bitte warten Sie, bis dieser abgeschlossen ist."
 
 #: erpnext/controllers/accounts_controller.py:3941
 msgid "Cannot update rate as item {0} is already ordered or purchased against this quotation"
-msgstr ""
+msgstr "Preis kann nicht aktualisiert werden, da Artikel {0} für dieses Angebot bereits bestellt oder eingekauft wurde"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1937
 msgid "Cannot {0} from {1} without any negative outstanding invoice"
@@ -9973,11 +9979,11 @@ msgstr ""
 
 #: erpnext/accounts/doctype/journal_entry_template/journal_entry_template.py:58
 msgid "Check row {0} for account {1}: Party Type is only allowed for Receivable or Payable accounts"
-msgstr ""
+msgstr "Prüfen Sie Zeile {0} für Konto {1}: Partnertyp ist nur für Forderungs- oder Verbindlichkeitskonten zulässig"
 
 #: erpnext/accounts/doctype/journal_entry_template/journal_entry_template.py:65
 msgid "Check row {0} for account {1}: Party is only allowed if Party Type is set"
-msgstr ""
+msgstr "Prüfen Sie Zeile {0} für Konto {1}: Partner ist nur zulässig, wenn der Partnertyp festgelegt ist"
 
 #. Description of the 'Must be Whole Number' (Check) field in DocType 'UOM'
 #: erpnext/setup/doctype/uom/uom.json
@@ -10090,7 +10096,7 @@ msgstr "Technischer Leiter"
 #. Deletion Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Child DocTypes"
-msgstr ""
+msgstr "Untergeordnete DocTypes"
 
 #. Label of the child_docname (Data) field in DocType 'Pricing Rule Detail'
 #: erpnext/accounts/doctype/pricing_rule_detail/pricing_rule_detail.json
@@ -10106,7 +10112,7 @@ msgstr "Zeilenreferenz"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:207
 msgid "Child Table Not Allowed"
-msgstr ""
+msgstr "Untergeordnete Tabelle nicht erlaubt"
 
 #: erpnext/projects/doctype/task/task.py:314
 msgid "Child Task exists for this Task. You can not delete this Task."
@@ -10120,7 +10126,7 @@ msgstr "Unterknoten können nur unter Gruppenknoten erstellt werden."
 #. 'Transaction Deletion Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Child tables that will also be deleted"
-msgstr ""
+msgstr "Untergeordnete Tabellen, die ebenfalls gelöscht werden"
 
 #: erpnext/stock/doctype/warehouse/warehouse.py:103
 msgid "Child warehouse exists for this warehouse. You can not delete this warehouse."
@@ -10154,7 +10160,7 @@ msgstr "Klauseln und Bedingungen"
 
 #: erpnext/public/js/utils/barcode_scanner.js:493
 msgid "Clear Last Scanned Warehouse"
-msgstr ""
+msgstr "Zuletzt gescanntes Lager löschen"
 
 #. Label of the clear_notifications_status (Select) field in DocType
 #. 'Transaction Deletion Record'
@@ -10199,7 +10205,7 @@ msgstr "Abrechnungsdatum aktualisiert"
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.py:158
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.py:173
 msgid "Clearance date changed from {0} to {1} via Bank Clearance Tool"
-msgstr ""
+msgstr "Valutadatum wurde über das Bankfreigabe-Werkzeug von {0} auf {1} geändert"
 
 #: erpnext/public/js/utils/demo.js:21
 msgid "Clearing Demo Data..."
@@ -10365,7 +10371,7 @@ msgstr "Schluss [Eröffnung + Gesamt] "
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_secondary_item/subcontracting_inward_order_secondary_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Co-Product"
-msgstr ""
+msgstr "Kuppelprodukt"
 
 #. Name of a DocType
 #. Label of the code_list (Link) field in DocType 'Common Code'
@@ -10999,7 +11005,7 @@ msgstr "Firmenkonto"
 
 #: erpnext/accounts/doctype/bank_account/bank_account.py:63
 msgid "Company Account is mandatory"
-msgstr ""
+msgstr "Unternehmenskonto ist erforderlich"
 
 #. Label of the company_address (Link) field in DocType 'Dunning'
 #. Label of the company_address_display (Text Editor) field in DocType 'POS
@@ -11111,7 +11117,7 @@ msgstr "E-Mail-Adresse des Unternehmens"
 #. Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Company Field"
-msgstr ""
+msgstr "Unternehmensfeld"
 
 #. Label of the company_logo (Attach Image) field in DocType 'Company'
 #: erpnext/public/js/print.js:80 erpnext/setup/doctype/company/company.json
@@ -11168,7 +11174,7 @@ msgstr "Für die Rechnungserstellung ist die Angabe eines Unternehmens obligator
 #. Deletion Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Company link field name used for filtering (optional - leave empty to delete all records)"
-msgstr ""
+msgstr "Name des Unternehmensverknüpfungsfeldes zur Filterung (optional – leer lassen, um alle Datensätze zu löschen)"
 
 #: erpnext/setup/doctype/company/company.js:222
 msgid "Company name not same"
@@ -11180,7 +11186,7 @@ msgstr "Das Unternehmen von Anlage {0} und Eingangsbeleg {1} stimmt nicht übere
 
 #: erpnext/setup/doctype/employee/employee.py:168
 msgid "Company or Personal Email is mandatory when 'Create User Automatically' is enabled"
-msgstr ""
+msgstr "Unternehmens- oder persönliche E-Mail ist erforderlich, wenn 'Benutzer automatisch erstellen' aktiviert ist"
 
 #. Description of the 'Registration Details' (Code) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -11369,17 +11375,17 @@ msgstr "Komponentenname"
 #. Label of the items (Table) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Components"
-msgstr ""
+msgstr "Komponenten"
 
 #. Option for the 'Asset Type' (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Composite Asset"
-msgstr ""
+msgstr "Zusammengesetzter Vermögensgegenstand"
 
 #. Option for the 'Asset Type' (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Composite Component"
-msgstr ""
+msgstr "Zusammengesetzte Komponente"
 
 #. Label of the comprehensive_insurance (Data) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
@@ -11413,7 +11419,7 @@ msgstr "Die Bedingungen werden auf alle ausgewählten Elemente zusammen angewend
 #. Label of an action in the Onboarding Step 'Review Chart of Accounts'
 #: erpnext/accounts/onboarding_step/chart_of_accounts/chart_of_accounts.json
 msgid "Configure Chart of Accounts"
-msgstr ""
+msgstr "Kontenplan konfigurieren"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:56
 msgid "Configure Product Assembly"
@@ -11450,7 +11456,7 @@ msgstr "Bestätigungsdatum"
 #. Label of the connection_tab (Tab Break) field in DocType 'Asset Repair'
 #: erpnext/assets/doctype/asset_repair/asset_repair.json
 msgid "Connection"
-msgstr ""
+msgstr "Verbindung"
 
 #: erpnext/accounts/report/general_ledger/general_ledger.js:176
 msgid "Consider Accounting Dimensions"
@@ -11500,12 +11506,12 @@ msgstr "Steuern oder Gebühren berücksichtigen für"
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 #: erpnext/accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgid "Consider for Tax Withholding"
-msgstr ""
+msgstr "Für Quellensteuer berücksichtigen"
 
 #. Label of the apply_tds (Check) field in DocType 'Journal Entry'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
 msgid "Consider for Tax Withholding "
-msgstr ""
+msgstr "Für Quellensteuer berücksichtigen "
 
 #. Label of the included_in_paid_amount (Check) field in DocType 'Advance Taxes
 #. and Charges'
@@ -11549,7 +11555,7 @@ msgstr "Konsolidierter Finanzbericht"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Consolidated Report"
-msgstr ""
+msgstr "Konsolidierter Bericht"
 
 #. Label of the consolidated_invoice (Link) field in DocType 'POS Invoice'
 #. Label of the consolidated_invoice (Link) field in DocType 'POS Invoice Merge
@@ -12115,13 +12121,13 @@ msgstr "Kosten"
 #. Label of the cost_allocation (Currency) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Cost Allocation"
-msgstr ""
+msgstr "Kostenzuordnung"
 
 #. Label of the cost_allocation_per (Percent) field in DocType 'BOM Secondary
 #. Item'
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 msgid "Cost Allocation %"
-msgstr ""
+msgstr "Kostenzuordnung %"
 
 #. Label of the cost_allocation__process_loss_section (Section Break) field in
 #. DocType 'BOM'
@@ -12385,7 +12391,7 @@ msgstr "Kosten pro Einheit"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:442
 msgid "Cost allocation between finished goods and secondary items should equal 100%"
-msgstr ""
+msgstr "Die Kostenzuordnung zwischen Fertigerzeugnissen und Sekundärartikeln sollte 100 % ergeben"
 
 #. Title of an incoterm
 #: erpnext/setup/doctype/incoterm/incoterms.csv:8
@@ -12594,26 +12600,26 @@ msgstr "H"
 #. Label of an action in the Onboarding Step 'Create Asset Category'
 #: erpnext/assets/onboarding_step/create_asset_category/create_asset_category.json
 msgid "Create Asset Category"
-msgstr ""
+msgstr "Vermögensgegenstand-Kategorie erstellen"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Asset Item'
 #: erpnext/assets/onboarding_step/create_asset_item/create_asset_item.json
 msgid "Create Asset Item"
-msgstr ""
+msgstr "Vermögensgegenstand-Artikel erstellen"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Asset Location'
 #: erpnext/assets/onboarding_step/create_asset_location/create_asset_location.json
 msgid "Create Asset Location"
-msgstr ""
+msgstr "Vermögensgegenstand-Standort erstellen"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Bill of Materials'
 #: erpnext/manufacturing/onboarding_step/create_bill_of_materials/create_bill_of_materials.json
 #: erpnext/subcontracting/onboarding_step/create_bill_of_materials/create_bill_of_materials.json
 msgid "Create Bill of Materials"
-msgstr ""
+msgstr "Stückliste erstellen"
 
 #. Label of the create_chart_of_accounts_based_on (Select) field in DocType
 #. 'Company'
@@ -12625,7 +12631,7 @@ msgstr "Kontenplan erstellen, basierend auf"
 #. Label of an action in the Onboarding Step 'Create Customer'
 #: erpnext/selling/onboarding_step/create_customer/create_customer.json
 msgid "Create Customer"
-msgstr ""
+msgstr "Kunden erstellen"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Delivery Note'
@@ -12654,17 +12660,17 @@ msgstr "Mitarbeiter-Datensätze erstellen."
 #. Label of an action in the Onboarding Step 'Create Existing Asset'
 #: erpnext/assets/onboarding_step/create_existing_asset/create_existing_asset.json
 msgid "Create Existing Asset"
-msgstr ""
+msgstr "Vorhandenen Vermögensgegenstand erstellen"
 
 #. Label of an action in the Onboarding Step 'Create Finished Goods'
 #: erpnext/manufacturing/onboarding_step/create_finished_goods/create_finished_goods.json
 msgid "Create Finished Good"
-msgstr ""
+msgstr "Fertigerzeugnis erstellen"
 
 #. Title of an Onboarding Step
 #: erpnext/manufacturing/onboarding_step/create_finished_goods/create_finished_goods.json
 msgid "Create Finished Goods"
-msgstr ""
+msgstr "Fertigerzeugnisse erstellen"
 
 #. Label of the is_grouped_asset (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -12685,7 +12691,7 @@ msgstr "Rechnungen erstellen"
 #: erpnext/selling/onboarding_step/create_item/create_item.json
 #: erpnext/stock/onboarding_step/create_item/create_item.json
 msgid "Create Item"
-msgstr ""
+msgstr "Artikel erstellen"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:187
 msgid "Create Job Card"
@@ -12752,12 +12758,12 @@ msgstr "Neuen Interessenten erstellen"
 #. Label of an action in the Onboarding Step 'Create Operations'
 #: erpnext/manufacturing/onboarding_step/create_operations/create_operations.json
 msgid "Create Operation"
-msgstr ""
+msgstr "Vorgang erstellen"
 
 #. Title of an Onboarding Step
 #: erpnext/manufacturing/onboarding_step/create_operations/create_operations.json
 msgid "Create Operations"
-msgstr ""
+msgstr "Vorgänge erstellen"
 
 #: erpnext/crm/doctype/lead/lead.js:161
 msgid "Create Opportunity"
@@ -12780,7 +12786,7 @@ msgstr "Zahlungseintrag für konsolidierte POS-Rechnungen erstellen."
 
 #: erpnext/public/js/controllers/transaction.js:519
 msgid "Create Payment Request"
-msgstr ""
+msgstr "Zahlungsanforderung erstellen"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:800
 msgid "Create Pick List"
@@ -12794,7 +12800,7 @@ msgstr "Druckformat erstellen"
 #. Label of an action in the Onboarding Step 'Create Project'
 #: erpnext/projects/onboarding_step/create_project/create_project.json
 msgid "Create Project"
-msgstr ""
+msgstr "Projekt erstellen"
 
 #: erpnext/crm/doctype/lead/lead_list.js:8
 msgid "Create Prospect"
@@ -12804,7 +12810,7 @@ msgstr "Potenziellen Kunde erstellen"
 #. Label of an action in the Onboarding Step 'Create Purchase Invoice'
 #: erpnext/buying/onboarding_step/create_purchase_invoice/create_purchase_invoice.json
 msgid "Create Purchase Invoice"
-msgstr ""
+msgstr "Eingangsrechnung erstellen"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Purchase Order'
@@ -12822,7 +12828,7 @@ msgstr "Bestellungen erstellen"
 #. Label of an action in the Onboarding Step 'Create Purchase Receipt'
 #: erpnext/stock/onboarding_step/create_purchase_receipt/create_purchase_receipt.json
 msgid "Create Purchase Receipt"
-msgstr ""
+msgstr "Eingangsbeleg erstellen"
 
 #: erpnext/utilities/activation.py:88
 msgid "Create Quotation"
@@ -12832,13 +12838,13 @@ msgstr "Angebot erstellen"
 #: erpnext/manufacturing/onboarding_step/create_raw_materials/create_raw_materials.json
 #: erpnext/subcontracting/onboarding_step/create_raw_materials/create_raw_materials.json
 msgid "Create Raw Material"
-msgstr ""
+msgstr "Rohmaterial erstellen"
 
 #. Title of an Onboarding Step
 #: erpnext/manufacturing/onboarding_step/create_raw_materials/create_raw_materials.json
 #: erpnext/subcontracting/onboarding_step/create_raw_materials/create_raw_materials.json
 msgid "Create Raw Materials"
-msgstr ""
+msgstr "Rohmaterialien erstellen"
 
 #. Label of the create_receiver_list (Button) field in DocType 'SMS Center'
 #: erpnext/selling/doctype/sms_center/sms_center.json
@@ -12879,7 +12885,7 @@ msgstr "Erstellen Sie Aufträge, um Ihre Arbeit zu planen und pünktlich zu lief
 #. Label of an action in the Onboarding Step 'Create Service Item'
 #: erpnext/subcontracting/onboarding_step/create_service_item/create_service_item.json
 msgid "Create Service Item"
-msgstr ""
+msgstr "Dienstleistungsartikel erstellen"
 
 #: erpnext/stock/dashboard/item_dashboard.js:283
 #: erpnext/stock/doctype/material_request/material_request.js:478
@@ -12890,28 +12896,28 @@ msgstr "Lagerbewegung erstellen"
 #. Label of an action in the Onboarding Step 'Create Subcontracted Item'
 #: erpnext/subcontracting/onboarding_step/create_subcontracted_item/create_subcontracted_item.json
 msgid "Create Subcontracted Item"
-msgstr ""
+msgstr "Fremdvergabe-Artikel erstellen"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Subcontracting Order'
 #: erpnext/subcontracting/onboarding_step/create_subcontracting_order/create_subcontracting_order.json
 msgid "Create Subcontracting Order"
-msgstr ""
+msgstr "Unterauftrag erstellen"
 
 #. Title of an Onboarding Step
 #: erpnext/subcontracting/onboarding_step/create_subcontracting_po/create_subcontracting_po.json
 msgid "Create Subcontracting PO"
-msgstr ""
+msgstr "Fremdvergabe-Lieferantenauftrag erstellen"
 
 #. Label of an action in the Onboarding Step 'Create Subcontracting PO'
 #: erpnext/subcontracting/onboarding_step/create_subcontracting_po/create_subcontracting_po.json
 msgid "Create Subcontracting Purchase Order"
-msgstr ""
+msgstr "Fremdvergabe-Lieferantenauftrag erstellen"
 
 #. Title of an Onboarding Step
 #: erpnext/buying/onboarding_step/create_supplier/create_supplier.json
 msgid "Create Supplier"
-msgstr ""
+msgstr "Lieferanten erstellen"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:181
 msgid "Create Supplier Quotation"
@@ -12920,12 +12926,12 @@ msgstr "Lieferantenangebot erstellen"
 #. Label of an action in the Onboarding Step 'Create Tasks'
 #: erpnext/projects/onboarding_step/create_tasks/create_tasks.json
 msgid "Create Task"
-msgstr ""
+msgstr "Aufgabe Erstellen"
 
 #. Title of an Onboarding Step
 #: erpnext/projects/onboarding_step/create_tasks/create_tasks.json
 msgid "Create Tasks"
-msgstr ""
+msgstr "Vorgänge erstellen"
 
 #: erpnext/setup/doctype/company/company.js:157
 msgid "Create Tax Template"
@@ -12942,7 +12948,7 @@ msgstr "Arbeitszeittabelle erstellen"
 #. Label of an action in the Onboarding Step 'Create Transfer Entry'
 #: erpnext/stock/onboarding_step/create_transfer_entry/create_transfer_entry.json
 msgid "Create Transfer Entry"
-msgstr ""
+msgstr "Umbuchung erstellen"
 
 #: erpnext/setup/doctype/employee/employee.js:50
 #: erpnext/setup/doctype/employee/employee.js:52
@@ -12953,7 +12959,7 @@ msgstr "Benutzer erstellen"
 #. Label of the create_user_automatically (Check) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Create User Automatically"
-msgstr ""
+msgstr "Benutzer automatisch erstellen"
 
 #. Label of the create_user_permission (Check) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.js:65
@@ -12977,13 +12983,13 @@ msgstr "Varianten erstellen"
 #. Label of an action in the Onboarding Step 'Setup Warehouse'
 #: erpnext/stock/onboarding_step/setup_warehouse/setup_warehouse.json
 msgid "Create Warehouses"
-msgstr ""
+msgstr "Lager erstellen"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Work Order'
 #: erpnext/manufacturing/onboarding_step/create_work_order/create_work_order.json
 msgid "Create Work Order"
-msgstr ""
+msgstr "Arbeitsauftrag erstellen"
 
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:10
 msgid "Create Workstation"
@@ -13005,7 +13011,7 @@ msgstr "Kunden Angebote erstellen"
 #. Label of an action in the Onboarding Step 'Create Delivery Note'
 #: erpnext/selling/onboarding_step/create_delivery_note/create_delivery_note.json
 msgid "Create delivery note"
-msgstr ""
+msgstr "Lieferschein erstellen"
 
 #. Label of the create_pr_in_draft_status (Check) field in DocType 'Accounts
 #. Settings'
@@ -13016,7 +13022,7 @@ msgstr "In Entwurfsstatus erstellen"
 #. Label of an action in the Onboarding Step 'Create Supplier'
 #: erpnext/buying/onboarding_step/create_supplier/create_supplier.json
 msgid "Create supplier"
-msgstr ""
+msgstr "Lieferanten erstellen"
 
 #: erpnext/public/js/bulk_transaction_processing.js:14
 msgid "Create {0} {1} ?"
@@ -13026,7 +13032,7 @@ msgstr "{0} {1} erstellen?"
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Created By Migration"
-msgstr ""
+msgstr "Durch Migration erstellt"
 
 #: erpnext/buying/doctype/supplier_scorecard/supplier_scorecard.py:250
 msgid "Created {0} scorecards for {1} between:"
@@ -13036,7 +13042,7 @@ msgstr "Erstellte {0} Bewertungsliste für {1} zwischen:"
 #. 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Creates a User account for this employee using the Preferred, Company, or Personal email."
-msgstr ""
+msgstr "Erstellt ein Benutzerkonto für diesen Mitarbeiter unter Verwendung der bevorzugten, Unternehmens- oder persönlichen E-Mail-Adresse."
 
 #. Description of the 'Create Grouped Asset' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -13114,7 +13120,7 @@ msgstr "Benutzer erstellen..."
 
 #: erpnext/setup/setup_wizard/setup_wizard.py:36
 msgid "Creating demo data"
-msgstr ""
+msgstr "Demodaten werden erstellt"
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:305
 msgid "Creating {} out of {} {}"
@@ -13453,7 +13459,7 @@ msgstr "Kubikyard"
 #. Rate'
 #: erpnext/accounts/doctype/tax_withholding_rate/tax_withholding_rate.json
 msgid "Cumulative Threshold"
-msgstr ""
+msgstr "Kumulierter Schwellenwert"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -14157,7 +14163,7 @@ msgstr "Kunden-LPO-Nr."
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Customer Ledger"
-msgstr ""
+msgstr "Kundenbuch"
 
 #. Name of a report
 #. Label of a Link in the Financial Reports Workspace
@@ -14270,7 +14276,7 @@ msgstr "Auftragsdetails"
 #. Label of the customer_pos_id (Data) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Customer POS ID"
-msgstr ""
+msgstr "Kunden-Kassen-ID"
 
 #. Label of the portal_users (Table) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
@@ -14892,13 +14898,13 @@ msgstr "Abziehen"
 #. Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Deduct Tax On Basis"
-msgstr ""
+msgstr "Quellensteuer auf Basis abziehen"
 
 #. Label of the source_section (Section Break) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Deducted From"
-msgstr ""
+msgstr "Abgezogen von"
 
 #. Label of the section_break_3 (Section Break) field in DocType 'Lower
 #. Deduction Certificate'
@@ -14909,7 +14915,7 @@ msgstr "Details zum Abzug"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/taxes.json
 msgid "Deduction Certificate"
-msgstr ""
+msgstr "Abzugsbescheinigung"
 
 #. Label of the deductions_or_loss_section (Section Break) field in DocType
 #. 'Payment Entry'
@@ -14969,7 +14975,7 @@ msgstr "Standardkonto für erhaltene Vorauszahlungen"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Default Ageing Range"
-msgstr ""
+msgstr "Standard-Fälligkeitsbereich"
 
 #. Label of the default_bom (Link) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -15480,7 +15486,7 @@ msgstr "Projekttyp definieren"
 #. Description of the 'End of Life' (Date) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Defines the date after which the item can no longer be used in transactions or manufacturing"
-msgstr ""
+msgstr "Definiert das Datum, nach dem der Artikel nicht mehr in Transaktionen oder der Fertigung verwendet werden kann"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -15550,7 +15556,7 @@ msgstr "Stornierte Buchungseinträge löschen"
 #. Type: Action
 #: erpnext/hooks.py erpnext/public/js/utils/demo.js:5
 msgid "Delete Demo Data"
-msgstr ""
+msgstr "Demodaten löschen"
 
 #: erpnext/stock/doctype/inventory_dimension/inventory_dimension.js:66
 msgid "Delete Dimension"
@@ -15593,11 +15599,11 @@ msgstr "Das Löschen ist für das Land {0} nicht zulässig."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:216
 msgid "Deletion process restarted"
-msgstr ""
+msgstr "Löschvorgang neu gestartet"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:97
 msgid "Deletion will start automatically after submission."
-msgstr ""
+msgstr "Der Löschvorgang startet automatisch nach dem Buchen."
 
 #. Label of the delimiter_options (Data) field in DocType 'Bank Statement
 #. Import'
@@ -15958,7 +15964,7 @@ msgstr "Demo-Unternehmen"
 
 #: erpnext/setup/demo.py:51
 msgid "Demo Data creation failed."
-msgstr ""
+msgstr "Erstellung der Demodaten fehlgeschlagen."
 
 #: erpnext/public/js/utils/demo.js:25
 msgid "Demo data cleared"
@@ -15966,7 +15972,7 @@ msgstr "Demodaten gelöscht"
 
 #: erpnext/setup/demo.py:42
 msgid "Demo data creation failed. Check notifications for more info."
-msgstr ""
+msgstr "Erstellung der Demodaten fehlgeschlagen. Benachrichtigungen für weitere Informationen prüfen."
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:18
 msgid "Department Stores"
@@ -16378,7 +16384,7 @@ msgstr "Direkte Erträge"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:359
 msgid "Direct return is not allowed for Timesheet."
-msgstr ""
+msgstr "Direkte Rückgabe ist für Zeiterfassungen nicht zulässig."
 
 #. Label of the disabled (Check) field in DocType 'Account'
 #. Label of the disabled (Check) field in DocType 'Accounting Dimension'
@@ -16408,7 +16414,7 @@ msgstr "Kapazitätsplanung deaktivieren"
 #. Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Disable Cumulative Threshold"
-msgstr ""
+msgstr "Kumulierten Schwellenwert deaktivieren"
 
 #. Label of the disable_in_words (Check) field in DocType 'Global Defaults'
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
@@ -16455,7 +16461,7 @@ msgstr "Selektor für Seriennummer und Chargen deaktivieren"
 #. Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Disable Transaction Threshold"
-msgstr ""
+msgstr "Transaktionsschwellenwert deaktivieren"
 
 #. Label of the disable_last_purchase_rate (Check) field in DocType 'Buying
 #. Settings'
@@ -16516,7 +16522,7 @@ msgstr "Demontageauftrag"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:2400
 msgid "Disassemble Qty cannot be less than or equal to 0."
-msgstr ""
+msgstr "Demontage-Menge darf nicht kleiner oder gleich 0 sein."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:445
 msgid "Disassemble Qty cannot be less than or equal to <b>0</b>."
@@ -17006,7 +17012,7 @@ msgstr "Keine chargenweise Bewertung verwenden"
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.py:128
 msgid "Do Not Use Batchwise Valuation"
-msgstr ""
+msgstr "Chargenweise Bewertung nicht verwenden"
 
 #. Label of the do_not_fetch_incoming_rate_from_serial_no (Check) field in
 #. DocType 'Stock Reposting Settings'
@@ -17062,31 +17068,31 @@ msgstr ""
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:182
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:445
 msgid "DocType {0} does not exist"
-msgstr ""
+msgstr "DocType {0} existiert nicht"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:295
 msgid "DocType {0} with company field '{1}' is already in the list"
-msgstr ""
+msgstr "DocType {0} mit Unternehmensfeld '{1}' ist bereits in der Liste"
 
 #. Label of the doctypes_to_delete (Table) field in DocType 'Transaction
 #. Deletion Record'
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgid "DocTypes To Delete"
-msgstr ""
+msgstr "Zu löschende DocTypes"
 
 #. Description of the 'Excluded DocTypes' (Table) field in DocType 'Transaction
 #. Deletion Record'
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgid "DocTypes that will NOT be deleted."
-msgstr ""
+msgstr "DocTypes, die NICHT gelöscht werden."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:84
 msgid "DocTypes with a company field:"
-msgstr ""
+msgstr "DocTypes mit einem Unternehmensfeld:"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:88
 msgid "DocTypes without a company field:"
-msgstr ""
+msgstr "DocTypes ohne Unternehmensfeld:"
 
 #: erpnext/templates/pages/search_help.py:22
 msgid "Docs Search"
@@ -17096,7 +17102,7 @@ msgstr "Google Docs-Suche"
 #. Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Document Count"
-msgstr ""
+msgstr "Dokumentenanzahl"
 
 #. Label of the document_naming_tab (Tab Break) field in DocType 'Buying
 #. Settings'
@@ -17109,7 +17115,7 @@ msgstr ""
 
 #: erpnext/stock/report/negative_batch_report/negative_batch_report.py:78
 msgid "Document No"
-msgstr ""
+msgstr "Dokumentnummer"
 
 #. Label of the document_type (Link) field in DocType 'Subscription Invoice'
 #: erpnext/accounts/doctype/subscription_invoice/subscription_invoice.json
@@ -17152,7 +17158,7 @@ msgstr "Kostenlose Artikelmenge nicht erzwingen"
 #: erpnext/accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 #: erpnext/accounts/doctype/sales_taxes_and_charges/sales_taxes_and_charges.json
 msgid "Don't Recompute Tax"
-msgstr ""
+msgstr "Steuer nicht neu berechnen"
 
 #. Label of the dont_reserve_sales_order_qty_on_sales_return (Check) field in
 #. DocType 'Selling Settings'
@@ -17358,7 +17364,7 @@ msgstr "Doppelte Kundengruppe"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:190
 msgid "Duplicate DocType"
-msgstr ""
+msgstr "Doppelter DocType"
 
 #: erpnext/setup/doctype/authorization_rule/authorization_rule.py:71
 msgid "Duplicate Entry. Please check Authorization Rule {0}"
@@ -17374,7 +17380,7 @@ msgstr "Doppelte Artikelgruppe"
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:102
 msgid "Duplicate Item Under Same Parent"
-msgstr ""
+msgstr "Doppelter Artikel unter demselben übergeordneten Element"
 
 #: erpnext/manufacturing/doctype/workstation/workstation.py:79
 #: erpnext/manufacturing/doctype/workstation_type/workstation_type.py:37
@@ -17392,7 +17398,7 @@ msgstr "Doppelte POS-Rechnungen gefunden"
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:133
 msgid "Duplicate Payment Schedule selected"
-msgstr ""
+msgstr "Doppelter Zahlungsplan ausgewählt"
 
 #: erpnext/projects/doctype/project/project.js:83
 msgid "Duplicate Project with Tasks"
@@ -17420,7 +17426,7 @@ msgstr "Doppelte Eingabe gegen Artikelcode {0} und Hersteller {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:189
 msgid "Duplicate entry: {0}{1}"
-msgstr ""
+msgstr "Doppelter Eintrag: {0}{1}"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:164
 msgid "Duplicate item group found in the item group table"
@@ -17481,7 +17487,7 @@ msgstr "EAN"
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
 msgid "EAN-13"
-msgstr ""
+msgstr "EAN-13"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
@@ -17501,7 +17507,7 @@ msgstr "Elektromagnetische Einheit der Stromstärke"
 #. Label of a Desktop Icon
 #: erpnext/desktop_icon/erpnext.json
 msgid "ERPNext"
-msgstr ""
+msgstr "ERPNext"
 
 #. Label of a Desktop Icon
 #. Name of a Workspace
@@ -17510,7 +17516,7 @@ msgstr ""
 #: erpnext/setup/workspace/erpnext_settings/erpnext_settings.json
 #: erpnext/workspace_sidebar/erpnext_settings.json
 msgid "ERPNext Settings"
-msgstr ""
+msgstr "ERPNext-Einstellungen"
 
 #. Label of the user_id (Data) field in DocType 'Employee Group Table'
 #: erpnext/setup/doctype/employee_group_table/employee_group_table.json
@@ -17603,7 +17609,7 @@ msgstr "Beleg bearbeiten"
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Edit Tax Withholding Entries"
-msgstr ""
+msgstr "Quellensteuereinträge bearbeiten"
 
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:777
 msgid "Editing {0} is not allowed as per POS Profile settings"
@@ -17699,7 +17705,7 @@ msgstr "E-Mail-Kampagne"
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:149
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:157
 msgid "Email Campaign Error"
-msgstr ""
+msgstr "Fehler bei der E-Mail-Kampagne"
 
 #. Label of the email_campaign_for (Select) field in DocType 'Email Campaign'
 #: erpnext/crm/doctype/email_campaign/email_campaign.json
@@ -17708,7 +17714,7 @@ msgstr "E-Mail-Kampagne für"
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:125
 msgid "Email Campaign Send Error"
-msgstr ""
+msgstr "Sendefehler bei der E-Mail-Kampagne"
 
 #. Label of the supplier_response_section (Section Break) field in DocType
 #. 'Request for Quotation'
@@ -17745,11 +17751,11 @@ msgstr "E-Mail an Lieferanten gesendet {0}"
 
 #: erpnext/setup/doctype/employee/employee.py:434
 msgid "Email is required to create a user"
-msgstr ""
+msgstr "E-Mail ist erforderlich, um einen Benutzer zu erstellen"
 
 #: erpnext/setup/doctype/employee/employee.js:72
 msgid "Email is required to create a user."
-msgstr ""
+msgstr "E-Mail-Adresse ist erforderlich, um einen Benutzer zu erstellen."
 
 #: erpnext/stock/doctype/shipment/shipment.js:174
 msgid "Email or Phone/Mobile of the Contact are mandatory to continue."
@@ -17935,7 +17941,7 @@ msgstr "Mitarbeiter können nicht an sich selbst Bericht erstatten"
 
 #: erpnext/setup/doctype/employee/employee.py:568
 msgid "Employee is required"
-msgstr ""
+msgstr "Mitarbeiter ist erforderlich"
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:109
 msgid "Employee is required while issuing Asset {0}"
@@ -17943,7 +17949,7 @@ msgstr "Mitarbeiter wird bei der Ausstellung des Vermögenswerts {0} benötigt"
 
 #: erpnext/setup/doctype/employee/employee.py:431
 msgid "Employee {0} already has a linked user"
-msgstr ""
+msgstr "Mitarbeiter {0} hat bereits einen verknüpften Benutzer"
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:92
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:113
@@ -17956,7 +17962,7 @@ msgstr "Der Mitarbeiter {0} arbeitet derzeit an einem anderen Arbeitsplatz. Bitt
 
 #: erpnext/setup/doctype/employee/employee.py:593
 msgid "Employee {0} not found"
-msgstr ""
+msgstr "Mitarbeiter {0} nicht gefunden"
 
 #: erpnext/manufacturing/doctype/workstation/workstation.js:351
 msgid "Employees"
@@ -17968,7 +17974,7 @@ msgstr "Leer"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:755
 msgid "Empty To Delete List"
-msgstr ""
+msgstr "Löschliste leeren"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -17979,7 +17985,7 @@ msgstr "Ems (Pica)"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Accounting Dimensions"
-msgstr ""
+msgstr "Buchhaltungsdimensionen aktivieren"
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1721
 msgid "Enable Allow Partial Reservation in the Stock Settings to reserve partial stock."
@@ -18041,7 +18047,7 @@ msgstr "Aktivieren Sie den passiven Rechnungsabgrenzungsposten"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Discounts and Margin"
-msgstr ""
+msgstr "Rabatte und Marge aktivieren"
 
 #. Label of the enable_european_access (Check) field in DocType 'Plaid
 #. Settings'
@@ -18077,7 +18083,7 @@ msgstr "Artikelbezogenes Bestandskonto aktivieren"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Loyalty Point Program"
-msgstr ""
+msgstr "Treuepunkteprogramm aktivieren"
 
 #. Label of the enable_parallel_reposting (Check) field in DocType 'Stock
 #. Reposting Settings'
@@ -18100,7 +18106,7 @@ msgstr "Vorläufige Buchhaltung für Artikel ohne Lagerhaltung aktivieren"
 #. 'Stock Reposting Settings'
 #: erpnext/stock/doctype/stock_reposting_settings/stock_reposting_settings.json
 msgid "Enable Separate Reposting for GL"
-msgstr ""
+msgstr "Separates Neubuchen für das Hauptbuch aktivieren"
 
 #: erpnext/stock/report/stock_ledger/stock_ledger.js:122
 msgid "Enable Serial / Batch Bundle"
@@ -18116,23 +18122,23 @@ msgstr "Bestandsreservierung aktivieren"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Subscription"
-msgstr ""
+msgstr "Abonnement aktivieren"
 
 #. Description of the 'Enable Subscription' (Check) field in DocType 'Accounts
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Subscription tracking in invoice"
-msgstr ""
+msgstr "Abonnement-Verfolgung in der Rechnung aktivieren"
 
 #. Label of the enable_utm (Check) field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Enable UTM"
-msgstr ""
+msgstr "UTM aktivieren"
 
 #. Description of the 'Enable UTM' (Check) field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Enable Urchin Tracking Module parameters in Quotation, Sales Order, Sales Invoice, POS Invoice, Lead,  and Delivery Note."
-msgstr ""
+msgstr "Urchin-Tracking-Modul-Parameter in Angebot, Auftrag, Ausgangsrechnung, POS-Rechnung, Interessent und Lieferschein aktivieren."
 
 #. Label of the enable_youtube_tracking (Check) field in DocType 'Video
 #. Settings'
@@ -18144,7 +18150,7 @@ msgstr "YouTube-Tracking aktivieren"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable cost center, projects and other custom accounting dimensions"
-msgstr ""
+msgstr "Kostenstelle, Projekte und andere benutzerdefinierte Buchhaltungsdimensionen aktivieren"
 
 #. Label of the enable_cutoff_date_on_bulk_delivery_note_creation (Check) field
 #. in DocType 'Selling Settings'
@@ -18222,13 +18228,13 @@ msgstr "Anwendung des SLA auf jede {0} aktivieren"
 #. Description of the 'Retain Sample' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Enable to reserve a small sample from each batch for any analysis arising ahead"
-msgstr ""
+msgstr "Aktivieren, um eine kleine Probe aus jeder Charge für künftige Analysen zu reservieren"
 
 #. Label of the enable_tracking_sales_commissions (Check) field in DocType
 #. 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Enable tracking sales commissions"
-msgstr ""
+msgstr "Verfolgung von Verkaufsprovisionen aktivieren"
 
 #. Description of the 'Fetch Timesheet in Sales Invoice' (Check) field in
 #. DocType 'Projects Settings'
@@ -18545,7 +18551,7 @@ msgstr "Fehler bei der Auswertung der Kriterienformel"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:267
 msgid "Error getting details for {0}: {1}"
-msgstr ""
+msgstr "Fehler beim Abrufen der Details für {0}: {1}"
 
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.py:312
 msgid "Error in party matching for Bank Transaction {0}"
@@ -18804,7 +18810,7 @@ msgstr "Seitenzahl entfernen"
 
 #: erpnext/accounts/report/trial_balance_for_party/trial_balance_for_party.js:86
 msgid "Exclude Zero Balance Parties"
-msgstr ""
+msgstr "Parteien mit Nullsaldo ausschließen"
 
 #. Label of the doctypes_to_be_ignored (Table) field in DocType 'Transaction
 #. Deletion Record'
@@ -18845,7 +18851,7 @@ msgstr "Ausstellung"
 #. Option for the 'Asset Type' (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Existing Asset"
-msgstr ""
+msgstr "Vorhandener Vermögensgegenstand"
 
 #. Option for the 'Create Chart Of Accounts Based On' (Select) field in DocType
 #. 'Company'
@@ -18865,7 +18871,7 @@ msgstr "Bestehender Kunde"
 #. Label of the exit (Tab Break) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Exit"
-msgstr ""
+msgstr "Austritt"
 
 #. Label of the held_on (Date) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -19192,7 +19198,7 @@ msgstr "Fertigerzeugnis/Halbfertigerzeugnis"
 
 #: erpnext/manufacturing/report/bom_stock_analysis/bom_stock_analysis.js:21
 msgid "FG Items to Make"
-msgstr ""
+msgstr "Herzustellende Fertigerzeugnisse"
 
 #. Option for the 'Default Stock Valuation Method' (Select) field in DocType
 #. 'Company'
@@ -19234,7 +19240,7 @@ msgstr "FIFO/LIFO-Warteschlange"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "FX Revaluation"
-msgstr ""
+msgstr "Fremdwährungsneubewertung"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -19252,7 +19258,7 @@ msgstr "Fehler beim Authentifizieren des API-Schlüssels."
 #: erpnext/setup/setup_wizard/setup_wizard.py:37
 #: erpnext/setup/setup_wizard/setup_wizard.py:38
 msgid "Failed to create demo data"
-msgstr ""
+msgstr "Demodaten konnten nicht erstellt werden"
 
 #: erpnext/setup/demo.py:77
 msgid "Failed to erase demo data, please delete the demo company manually."
@@ -19273,11 +19279,11 @@ msgstr "Abschreibungsbuchungen fehlgeschlagen"
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:126
 msgid "Failed to send email for campaign {0} to {1}"
-msgstr ""
+msgstr "E-Mail für Kampagne {0} an {1} konnte nicht gesendet werden"
 
 #: erpnext/setup/setup_wizard/setup_wizard.py:26
 msgid "Failed to set defaults"
-msgstr ""
+msgstr "Standardwerte konnten nicht gesetzt werden"
 
 #: erpnext/setup/setup_wizard/setup_wizard.py:21
 #: erpnext/setup/setup_wizard/setup_wizard.py:22
@@ -19331,7 +19337,7 @@ msgstr "Feedback von"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/quality.json
 msgid "Feedback Template"
-msgstr ""
+msgstr "Feedback-Vorlage"
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
 #. Account'
@@ -19365,7 +19371,7 @@ msgstr "Überfällige Zahlungen abrufen"
 #. DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Fetch Payment Schedule In Payment Request"
-msgstr ""
+msgstr "Zahlungsplan in Zahlungsaufforderung abrufen"
 
 #: erpnext/accounts/doctype/subscription/subscription.js:36
 msgid "Fetch Subscription Updates"
@@ -19421,7 +19427,7 @@ msgstr "Abrufen..."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:224
 msgid "Field '{0}' is not a valid Company link field for DocType {1}"
-msgstr ""
+msgstr "Feld '{0}' ist kein gültiges Unternehmens-Verknüpfungsfeld für den DocType {1}"
 
 #. Label of the field_mapping_section (Section Break) field in DocType
 #. 'Inventory Dimension'
@@ -19451,15 +19457,15 @@ msgstr "Felder werden nur zum Zeitpunkt der Erstellung kopiert."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1067
 msgid "File does not belong to this Transaction Deletion Record"
-msgstr ""
+msgstr "Datei gehört nicht zu diesem Transaktionslöschprotokoll"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1061
 msgid "File not found"
-msgstr ""
+msgstr "Datei nicht gefunden"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1075
 msgid "File not found on server"
-msgstr ""
+msgstr "Datei nicht auf dem Server gefunden"
 
 #. Label of the file_to_rename (Attach) field in DocType 'Rename Tool'
 #: erpnext/utilities/doctype/rename_tool/rename_tool.json
@@ -19920,7 +19926,7 @@ msgstr "Geschäftsjahr Unternehmen"
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:5
 msgid "Fiscal Year Details"
-msgstr ""
+msgstr "Geschäftsjahr-Details"
 
 #: erpnext/accounts/doctype/fiscal_year/fiscal_year.py:53
 msgid "Fiscal Year End Date should be one year after Fiscal Year Start Date"
@@ -20237,7 +20243,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/bom/bom.py:368
 msgid "For operation {0} at row {1}, please add raw materials or set a BOM against it."
-msgstr ""
+msgstr "Für den Vorgang {0} in Zeile {1} bitte Rohmaterialien hinzufügen oder eine Stückliste dafür festlegen."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:2649
 msgid "For operation {0}: Quantity ({1}) can not be greater than pending quantity({2})"
@@ -20245,7 +20251,7 @@ msgstr "Für den Vorgang {0}: Die Menge ({1}) darf nicht größer sein als die a
 
 #: erpnext/projects/doctype/project/project.js:208
 msgid "For project - {0}, update your status"
-msgstr ""
+msgstr "Für Projekt - {0}, aktualisieren Sie Ihren Status"
 
 #. Description of the 'Parent Warehouse' (Link) field in DocType 'Master
 #. Production Schedule'
@@ -20291,7 +20297,7 @@ msgstr "Zur Vereinfachung für Kunden können diese Codes in Druckformaten wie R
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1071
 msgid "For the item {0}, the consumed quantity should be {1} according to the BOM {2}."
-msgstr ""
+msgstr "Für den Artikel {0} sollte die verbrauchte Menge gemäß der Stückliste {2} gleich {1} sein."
 
 #: erpnext/public/js/controllers/transaction.js:1404
 msgctxt "Clear payment terms template and/or payment schedule when due date is changed"
@@ -20482,7 +20488,7 @@ msgstr "Von-Datum und Bis-Datum sind obligatorisch"
 
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:29
 msgid "From Date and To Date are required"
-msgstr ""
+msgstr "Von-Datum und Bis-Datum sind erforderlich"
 
 #: erpnext/accounts/report/tds_computation_summary/tds_computation_summary.py:30
 msgid "From Date and To Date lie in different Fiscal Year"
@@ -20497,7 +20503,7 @@ msgstr "Von-Datum kann später liegen als Bis-Datum"
 
 #: erpnext/selling/report/sales_partner_commission_summary/sales_partner_commission_summary.py:60
 msgid "From Date cannot be greater than To Date."
-msgstr ""
+msgstr "Das Von-Datum darf nicht nach dem Bis-Datum liegen."
 
 #: erpnext/crm/report/sales_pipeline_analytics/sales_pipeline_analytics.py:27
 msgid "From Date is mandatory"
@@ -20794,7 +20800,7 @@ msgstr "Erfüllungsbedingungen"
 
 #: erpnext/stock/doctype/shipment/shipment.js:275
 msgid "Full Name, Email or Phone/Mobile of the user are mandatory to continue."
-msgstr ""
+msgstr "Vollständiger Name, E-Mail-Adresse oder Telefon/Mobilnummer des Benutzers sind erforderlich, um fortzufahren."
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
 #. Account'
@@ -21067,11 +21073,11 @@ msgstr "Lagerabschlussbuchung generieren"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:112
 msgid "Generate To Delete List"
-msgstr ""
+msgstr "Löschliste erstellen"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:472
 msgid "Generate To Delete list first"
-msgstr ""
+msgstr "Bitte zuerst die Löschliste erstellen"
 
 #. Description of a DocType
 #: erpnext/stock/doctype/packing_slip/packing_slip.json
@@ -21293,7 +21299,7 @@ msgstr "Aufträge aufrufen"
 #. Receipt'
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Get Secondary Items"
-msgstr ""
+msgstr "Sekundärartikel abrufen"
 
 #. Label of the get_started_sections (Code) field in DocType 'Support Settings'
 #: erpnext/support/doctype/support_settings/support_settings.json
@@ -21338,7 +21344,7 @@ msgstr "Stationen abrufen von"
 
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:196
 msgid "Getting Secondary Items"
-msgstr ""
+msgstr "Sekundäre Artikel werden abgerufen"
 
 #. Option for the 'Coupon Type' (Select) field in DocType 'Coupon Code'
 #: erpnext/accounts/doctype/coupon_code/coupon_code.json
@@ -21549,11 +21555,11 @@ msgstr "Gesamtbetrag (Unternehmenswährung)"
 
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:252
 msgid "Grand Total (Transaction Currency)"
-msgstr ""
+msgstr "Gesamtsumme (Transaktionswährung)"
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:125
 msgid "Grand Total must match sum of Payment References"
-msgstr ""
+msgstr "Gesamtsumme muss der Summe der Zahlungsreferenzen entsprechen"
 
 #. Label of the grant_commission (Check) field in DocType 'POS Invoice Item'
 #. Label of the grant_commission (Check) field in DocType 'Sales Invoice Item'
@@ -21640,7 +21646,7 @@ msgstr "Bruttogewinnmarge"
 #. Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Gross Total"
-msgstr ""
+msgstr "Bruttosumme"
 
 #. Label of the gross_weight_pkg (Float) field in DocType 'Packing Slip'
 #: erpnext/stock/doctype/packing_slip/packing_slip.json
@@ -21668,7 +21674,7 @@ msgstr "Nach Lieferanten gruppieren"
 #. Label of the group_name (Data) field in DocType 'Tax Withholding Group'
 #: erpnext/accounts/doctype/tax_withholding_group/tax_withholding_group.json
 msgid "Group Name"
-msgstr ""
+msgstr "Gruppenname"
 
 #: erpnext/setup/doctype/sales_person/sales_person_tree.js:14
 msgid "Group Node"
@@ -22267,7 +22273,7 @@ msgstr "IBAN"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:93
 msgid "IMPORTANT: Create a backup before proceeding!"
-msgstr ""
+msgstr "WICHTIG: Bitte vor dem Fortfahren ein Backup erstellen!"
 
 #. Name of a report
 #: erpnext/regional/report/irs_1099/irs_1099.json
@@ -22492,13 +22498,13 @@ msgstr "Wenn aktiviert, erlaubt das System dem Benutzer, die gesamte Menge der p
 #. field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "If enabled, system will set incoming rate as zero for stand-alone credit notes with expired batch item."
-msgstr ""
+msgstr "Wenn aktiviert, setzt das System den Einstandspreis für eigenständige Gutschriften mit abgelaufenen Chargenartikeln auf Null."
 
 #. Description of the 'Deliver secondary Items' (Check) field in DocType
 #. 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "If enabled, the Secondary Items generated against a Finished Good will also be added in the Stock Entry when delivering that Finished Good."
-msgstr ""
+msgstr "Wenn aktiviert, werden die für ein Fertigprodukt erzeugten Sekundärartikel auch in die Lagerbuchung aufgenommen, wenn dieses Fertigprodukt geliefert wird."
 
 #. Description of the 'Disable Rounded Total' (Check) field in DocType 'POS
 #. Profile'
@@ -22510,7 +22516,7 @@ msgstr "Falls aktiviert, wird bei konsolidierten Rechnungen die gerundete Summe 
 #. field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "If enabled, the item rate won't adjust to the valuation rate during internal transfers, but accounting will still use the valuation rate. This will allow the user to specify a different rate for printing or taxation purposes."
-msgstr ""
+msgstr "Wenn aktiviert, wird der Artikelpreis bei internen Umbuchungen nicht an den Bewertungspreis angepasst, die Buchhaltung verwendet jedoch weiterhin den Bewertungspreis. Dies ermöglicht es dem Benutzer, einen anderen Preis für Druck- oder Steuerzwecke anzugeben."
 
 #. Description of the 'Validate Material Transfer Warehouses' (Check) field in
 #. DocType 'Stock Settings'
@@ -22522,7 +22528,7 @@ msgstr "Wenn aktiviert, müssen Quell- und Ziellager in der Materialumbuchungs-L
 #. 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "If enabled, the system will allow negative stock entries for the batch. But, this may lead to incorrect valuation rates, so it is recommended to avoid using this option. The system will permit negative stock only when it is caused by backdated entries and will validate and block negative stock in all other cases."
-msgstr ""
+msgstr "Falls aktiviert, erlaubt das System negative Lagerbestandsbuchungen für die Charge. Dies kann jedoch zu falschen Bewertungskursen führen, daher wird empfohlen, diese Option zu vermeiden. Das System erlaubt negativen Lagerbestand nur bei rückdatierten Buchungen und blockiert negativen Lagerbestand in allen anderen Fällen."
 
 #. Description of the 'Allow UOM with Conversion Rate Defined in Item' (Check)
 #. field in DocType 'Stock Settings'
@@ -22616,11 +22622,11 @@ msgstr "Wenn nicht, können Sie diesen Eintrag stornieren / buchen"
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:197
 msgid "If party does not exist, create it using the Customer Name field."
-msgstr ""
+msgstr "Wenn die Partei nicht vorhanden ist, legen Sie diese bitte über das Feld Kundenname an."
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:198
 msgid "If party does not exist, create it using the Supplier Name field."
-msgstr ""
+msgstr "Wenn die Partei nicht vorhanden ist, legen Sie diese bitte über das Feld Lieferantenname an."
 
 #. Description of the 'Free Item Rate' (Currency) field in DocType 'Pricing
 #. Rule'
@@ -22755,7 +22761,7 @@ msgstr "Wenn Sie dennoch fortfahren möchten, aktivieren Sie bitte {0}."
 #. Description of the 'Sequence ID' (Int) field in DocType 'BOM Operation'
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
 msgid "If you want to run operations in parallel, keep the same sequence ID for them."
-msgstr ""
+msgstr "Wenn Sie Arbeitsgänge parallel ausführen möchten, vergeben Sie dieselbe Sequenz-ID für diese."
 
 #: erpnext/accounts/doctype/pricing_rule/utils.py:378
 msgid "If you {0} {1} quantities of the item {2}, the scheme {3} will be applied on the item."
@@ -22880,7 +22886,7 @@ msgstr "Systemgenerierte Gut-/Lastschriften ignorieren"
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Ignore Tax Withholding Threshold"
-msgstr ""
+msgstr "Steuereinbehalt-Schwellenwert ignorieren"
 
 #. Label of the ignore_user_time_overlap (Check) field in DocType 'Projects
 #. Settings'
@@ -22908,7 +22914,7 @@ msgstr "Ignoriert das veraltete Ist-Eröffnung-Feld im Hauptbucheintrag, das das
 
 #: erpnext/stock/doctype/item/item.py:253
 msgid "Image in the description has been removed. To disable this behavior, uncheck \"{0}\" in {1}."
-msgstr ""
+msgstr "Das Bild in der Beschreibung wurde entfernt. Um dieses Verhalten zu deaktivieren, deaktivieren Sie \"{0}\" in {1}."
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:135
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:229
@@ -22933,7 +22939,7 @@ msgstr "Daten importieren"
 
 #: erpnext/setup/doctype/employee/employee_list.js:16
 msgid "Import Employees"
-msgstr ""
+msgstr "Mitarbeiter importieren"
 
 #: erpnext/edi/doctype/code_list/code_list.js:7
 #: erpnext/edi/doctype/code_list/code_list_list.js:3
@@ -22959,7 +22965,7 @@ msgstr "Import erfolgreich"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:564
 msgid "Import Summary"
-msgstr ""
+msgstr "Importzusammenfassung"
 
 #. Label of a Link in the Buying Workspace
 #. Name of a DocType
@@ -22983,7 +22989,7 @@ msgstr "Mengenimport"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:192
 msgid "Imported {0} DocTypes"
-msgstr ""
+msgstr "{0} DocTypes importiert"
 
 #: erpnext/edi/doctype/code_list/code_list_import.py:36
 msgid "Importing Code Lists from remote URLs is not allowed."
@@ -23426,7 +23432,7 @@ msgstr "Ertragskonto"
 #. 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Income and Expense"
-msgstr ""
+msgstr "Erträge und Aufwendungen"
 
 #. Description of the 'Enable Deferred Expense' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -23436,7 +23442,7 @@ msgstr ""
 #. Label of a number card in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 msgid "Incoming Bills"
-msgstr ""
+msgstr "Eingehende Rechnungen"
 
 #. Name of a DocType
 #: erpnext/telephony/doctype/incoming_call_handling_schedule/incoming_call_handling_schedule.json
@@ -23451,7 +23457,7 @@ msgstr "Einstellungen für eingehende Anrufe"
 #. Label of a number card in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 msgid "Incoming Payment"
-msgstr ""
+msgstr "Eingehende Zahlung"
 
 #. Label of the incoming_rate (Currency) field in DocType 'Delivery Note Item'
 #. Label of the incoming_rate (Currency) field in DocType 'Packed Item'
@@ -23484,7 +23490,7 @@ msgstr "Inkompatible Einstellung erkannt"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:195
 msgid "Incorrect Account"
-msgstr ""
+msgstr "Falsches Konto"
 
 #. Name of a report
 #: erpnext/stock/report/incorrect_balance_qty_after_transaction/incorrect_balance_qty_after_transaction.json
@@ -23501,7 +23507,7 @@ msgstr "Falsches Aktivieren in (Gruppen-)Lager für Nachbestellung"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:143
 msgid "Incorrect Company"
-msgstr ""
+msgstr "Falsches Unternehmen"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1078
 msgid "Incorrect Component Quantity"
@@ -23968,7 +23974,7 @@ msgstr "Intern"
 #. 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Internal Customer Accounting"
-msgstr ""
+msgstr "Interne Kundenbuchhaltung"
 
 #: erpnext/selling/doctype/customer/customer.py:255
 msgid "Internal Customer for company {0} already exists"
@@ -23994,7 +24000,7 @@ msgstr "Interne Verkaufsreferenz Fehlt"
 #. 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "Internal Supplier Accounting"
-msgstr ""
+msgstr "Interne Lieferantenbuchhaltung"
 
 #: erpnext/buying/doctype/supplier/supplier.py:181
 msgid "Internal Supplier for company {0} already exists"
@@ -24056,7 +24062,7 @@ msgstr "Ungültiger Account"
 
 #: erpnext/accounts/report/budget_variance_report/budget_variance_report.py:418
 msgid "Invalid Accounting Dimension"
-msgstr ""
+msgstr "Ungültige Buchhaltungsdimension"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:400
 #: erpnext/accounts/doctype/payment_request/payment_request.py:1005
@@ -24085,7 +24091,7 @@ msgstr "Ungültiger Rahmenauftrag für den ausgewählten Kunden und Artikel"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:498
 msgid "Invalid CSV format. Expected column: doctype_name"
-msgstr ""
+msgstr "Ungültiges CSV-Format. Erwartete Spalte: doctype_name"
 
 #: erpnext/quality_management/doctype/quality_procedure/quality_procedure.py:72
 msgid "Invalid Child Procedure"
@@ -24093,7 +24099,7 @@ msgstr "Ungültige untergeordnete Prozedur"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:227
 msgid "Invalid Company Field"
-msgstr ""
+msgstr "Ungültiges Unternehmensfeld"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2355
 msgid "Invalid Company for Inter Company Transaction."
@@ -24107,7 +24113,7 @@ msgstr "Ungültige Kostenstelle"
 
 #: erpnext/selling/doctype/customer/customer.py:368
 msgid "Invalid Customer Group"
-msgstr ""
+msgstr "Ungültige Kundengruppe"
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:419
 msgid "Invalid Delivery Date"
@@ -24261,7 +24267,7 @@ msgstr "Ungültiger Bedingungsausdruck"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1056
 msgid "Invalid file URL"
-msgstr ""
+msgstr "Ungültige Datei-URL"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:87
 msgid "Invalid filter formula. Please check the syntax."
@@ -24355,7 +24361,7 @@ msgstr "Lagerumschlag"
 #. 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Inventory Valuation"
-msgstr ""
+msgstr "Bestandsbewertung"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:29
 msgid "Investment Banking"
@@ -24572,7 +24578,7 @@ msgstr "Nach innen"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/subcontracting.json
 msgid "Inward Order"
-msgstr ""
+msgstr "Eingangsauftrag"
 
 #. Label of the is_account_payable (Check) field in DocType 'Cheque Print
 #. Template'
@@ -24831,7 +24837,7 @@ msgstr "Ist interner Lieferant"
 #. Label of the is_legacy (Check) field in DocType 'BOM Secondary Item'
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 msgid "Is Legacy"
-msgstr ""
+msgstr "Ist Legacy"
 
 #. Label of the is_legacy_scrap_item (Check) field in DocType 'Stock Entry
 #. Detail'
@@ -24840,7 +24846,7 @@ msgstr ""
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Is Legacy Scrap Item"
-msgstr ""
+msgstr "Ist veralteter Ausschussartikel"
 
 #. Label of the is_mandatory (Check) field in DocType 'Applicable On Account'
 #: erpnext/accounts/doctype/applicable_on_account/applicable_on_account.json
@@ -26487,7 +26493,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:99
 msgid "Item {0} added multiple times under the same parent item {1} at rows {2} and {3}"
-msgstr ""
+msgstr "Artikel {0} wurde mehrfach unter demselben übergeordneten Artikel {1} in Zeilen {2} und {3} hinzugefügt"
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:119
 msgid "Item {0} cannot be added as a sub-assembly of itself"
@@ -26650,7 +26656,7 @@ msgstr "Artikelbezogene Übersicht der Verkäufe"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Item-wise sales Register"
-msgstr ""
+msgstr "Artikelweises Verkaufsregister"
 
 #: erpnext/stock/get_item_details.py:720
 msgid "Item/Item Code required to get Item Tax Template."
@@ -26684,7 +26690,7 @@ msgstr "Erforderliche Artikel"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/subcontracting.json
 msgid "Items To Be Received"
-msgstr ""
+msgstr "Zu empfangende Artikel"
 
 #. Label of a Link in the Buying Workspace
 #. Name of a report
@@ -26714,7 +26720,7 @@ msgstr "Artikel für Rohstoffanforderung"
 
 #: erpnext/selling/page/point_of_sale/pos_item_selector.js:110
 msgid "Items not found."
-msgstr ""
+msgstr "Artikel nicht gefunden."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1245
 msgid "Items rate has been updated to zero as Allow Zero Valuation Rate is checked for the following items: {0}"
@@ -26833,7 +26839,7 @@ msgstr "Geplante Zeit der Jobkarte"
 #. Name of a DocType
 #: erpnext/manufacturing/doctype/job_card_secondary_item/job_card_secondary_item.json
 msgid "Job Card Secondary Item"
-msgstr ""
+msgstr "Auftragszettel-Sekundärartikel"
 
 #. Name of a report
 #. Label of a Link in the Manufacturing Workspace
@@ -27496,19 +27502,19 @@ msgstr "Interessenten helfen Ihnen bei der Geschäftsanbahnung. Fügen Sie alle 
 #. Label of an action in the Onboarding Step 'Learn Asset'
 #: erpnext/assets/onboarding_step/learn_asset/learn_asset.json
 msgid "Learn Asset"
-msgstr ""
+msgstr "Vermögensgegenstand kennenlernen"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Learn Subcontracting'
 #: erpnext/subcontracting/onboarding_step/learn_subcontracting/learn_subcontracting.json
 msgid "Learn Subcontracting"
-msgstr ""
+msgstr "Unterauftragsvergabe kennenlernen"
 
 #. Description of the 'Enable Common Party Accounting' (Check) field in DocType
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Learn about <a href=\"https://docs.frappe.io/erpnext/user/manual/en/common_party_accounting\" rel=\"noopener noreferrer\">Common Party</a>"
-msgstr ""
+msgstr "Mehr erfahren über <a href=\"https://docs.frappe.io/erpnext/user/manual/en/common_party_accounting\" rel=\"noopener noreferrer\">Gemeinsame Partei</a>"
 
 #. Label of the leave_encashed (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -27563,7 +27569,7 @@ msgstr "Hauptbuch-Kontenzusammenführung"
 
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:146
 msgid "Ledger Type"
-msgstr ""
+msgstr "Hauptbuchtyp"
 
 #. Label of a Card Break in the Financial Reports Workspace
 #. Label of a Workspace Sidebar Item
@@ -27575,7 +27581,7 @@ msgstr "Bücher"
 #. Label of the vouchers_posted (Int) field in DocType 'Repost Item Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Ledgers Posted"
-msgstr ""
+msgstr "Gebuchte Hauptbücher"
 
 #. Label of the left_child (Link) field in DocType 'Bisect Nodes'
 #: erpnext/accounts/doctype/bisect_nodes/bisect_nodes.json
@@ -28435,7 +28441,7 @@ msgstr "Transferbuchung erstellen"
 
 #: erpnext/public/js/telephony.js:29
 msgid "Make a call"
-msgstr ""
+msgstr "Einen Anruf tätigen"
 
 #: erpnext/config/projects.py:34
 msgid "Make project from a template."
@@ -28467,7 +28473,7 @@ msgstr "Arbeitsgangkosten verwalten"
 #. DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Manage sales partner's and sales team's commissions"
-msgstr ""
+msgstr "Provisionen von Vertriebspartnern und Verkaufsteams verwalten"
 
 #: erpnext/utilities/activation.py:95
 msgid "Manage your orders"
@@ -28752,7 +28758,7 @@ msgstr "Fertigungseinstellungen"
 #. Title of the Module Onboarding 'Manufacturing Onboarding'
 #: erpnext/manufacturing/module_onboarding/manufacturing_onboarding/manufacturing_onboarding.json
 msgid "Manufacturing Setup"
-msgstr ""
+msgstr "Fertigungseinrichtung"
 
 #. Label of the manufacturing_time_in_mins (Int) field in DocType 'Item Lead
 #. Time'
@@ -28984,7 +28990,7 @@ msgstr "Materialentnahme"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/manufacturing.json
 msgid "Material Planning"
-msgstr ""
+msgstr "Materialplanung"
 
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry'
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry Type'
@@ -29123,7 +29129,7 @@ msgstr "Materialanfragetyp"
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:1119
 msgid "Material Request already created for the ordered quantity"
-msgstr ""
+msgstr "Materialanfrage für die bestellte Menge wurde bereits erstellt"
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:1860
 msgid "Material Request not created, as quantity for Raw Materials already available."
@@ -29258,7 +29264,7 @@ msgstr "Material an den Lieferanten"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/subcontracting.json
 msgid "Materials To Be Transferred"
-msgstr ""
+msgstr "Zu übertragende Materialien"
 
 #: erpnext/controllers/subcontracting_controller.py:1582
 msgid "Materials are already received against the {0} {1}"
@@ -29358,7 +29364,7 @@ msgstr "Maximaler Zahlungsbetrag"
 #: erpnext/manufacturing/report/bom_stock_analysis/bom_stock_analysis.py:82
 #: erpnext/manufacturing/report/bom_stock_analysis/bom_stock_analysis.py:151
 msgid "Maximum Producible Items"
-msgstr ""
+msgstr "Maximal produzierbare Artikel"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:4121
 msgid "Maximum Samples - {0} can be retained for Batch {1} and Item {2}."
@@ -29515,7 +29521,7 @@ msgstr "Mitteilungen mit mehr als 160 Zeichen werden in mehrere Nachrichten aufg
 
 #: erpnext/setup/install.py:138
 msgid "Messaging CRM Campaign"
-msgstr ""
+msgstr "Messaging-CRM-Kampagne"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -29790,7 +29796,7 @@ msgstr "Minuten"
 #. Label of the section_break_19 (Section Break) field in DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Miscellaneous"
-msgstr ""
+msgstr "Sonstiges"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:116
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:224
@@ -29849,7 +29855,7 @@ msgstr "Fehlender Artikel"
 
 #: erpnext/setup/doctype/employee/employee.py:568
 msgid "Missing Parameter"
-msgstr ""
+msgstr "Fehlender Parameter"
 
 #: erpnext/utilities/__init__.py:53
 msgid "Missing Payments App"
@@ -29865,7 +29871,7 @@ msgstr "Fehlendes Seriennr.-Bündel"
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:171
 msgid "Missing Warehouse"
-msgstr ""
+msgstr "Fehlendes Lager"
 
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.js:156
 msgid "Missing email template for dispatch. Please set one in Delivery Settings."
@@ -30133,7 +30139,7 @@ msgstr "Mehrere Varianten"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:244
 msgid "Multiple company fields available: {0}. Please select manually."
-msgstr ""
+msgstr "Mehrere Unternehmensfelder verfügbar: {0}. Bitte manuell auswählen."
 
 #: erpnext/controllers/accounts_controller.py:1306
 msgid "Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year"
@@ -30236,7 +30242,7 @@ msgstr ""
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:937
 msgid "Naming series '{0}' for DocType '{1}' does not contain standard '.' or '{{' separator. Using fallback extraction."
-msgstr ""
+msgstr "Nummernkreis '{0}' für DocType '{1}' enthält keinen Standard-Trenner '.' oder '{{'. Verwende Fallback-Extraktion."
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -30276,7 +30282,7 @@ msgstr "Muss analysiert werden"
 #. Name of a report
 #: erpnext/stock/report/negative_batch_report/negative_batch_report.json
 msgid "Negative Batch Report"
-msgstr ""
+msgstr "Bericht über negative Chargen"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:628
 msgid "Negative Quantity is not allowed"
@@ -30659,7 +30665,7 @@ msgstr "Neue Ausgaben"
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:1
 msgid "New Fiscal Year - {0}"
-msgstr ""
+msgstr "Neues Geschäftsjahr - {0}"
 
 #. Label of the income (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -30677,7 +30683,7 @@ msgstr "Ein neuer Journaleintrag wird für den Differenzbetrag gebucht. Das Buch
 #. Label of a number card in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "New Lead (Last 1 Month)"
-msgstr ""
+msgstr "Neuer Interessent (letzter Monat)"
 
 #: erpnext/assets/doctype/location/location_tree.js:23
 msgid "New Location"
@@ -30690,7 +30696,7 @@ msgstr "Neue Notiz"
 #. Label of a number card in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "New Opportunity (Last 1 Month)"
-msgstr ""
+msgstr "Neue Chance (letzter Monat)"
 
 #. Label of the purchase_invoice (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -30829,7 +30835,7 @@ msgstr "Kein Lieferschein für den Kunden {} ausgewählt"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:754
 msgid "No DocTypes in To Delete list. Please generate or import the list before submitting."
-msgstr ""
+msgstr "Keine DocTypes in der Zu-löschenden-Liste. Bitte die Liste vor dem Buchen generieren oder importieren."
 
 #: erpnext/public/js/utils/ledger_preview.js:64
 msgid "No Impact on Accounting Ledger"
@@ -30849,7 +30855,7 @@ msgstr "Keine Artikel zur Übertragung ausgewählt."
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1260
 msgid "No Items with Bill of Materials to Manufacture or all items already manufactured"
-msgstr ""
+msgstr "Keine Artikel mit Stückliste zur Fertigung vorhanden oder alle Artikel bereits gefertigt"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1413
 msgid "No Items with Bill of Materials."
@@ -30913,7 +30919,7 @@ msgstr "Für das aktuelle Buchungsdatum wurden keine Quellensteuerdaten gefunden
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:108
 msgid "No Tax withholding account set for Company {0} in Tax Withholding Category {1}."
-msgstr ""
+msgstr "Kein Steuereinbehalt-Konto für das Unternehmen {0} in der Steuereinbehalt-Kategorie {1} hinterlegt."
 
 #: erpnext/accounts/report/gross_profit/gross_profit.py:990
 msgid "No Terms"
@@ -30975,7 +30981,7 @@ msgstr "Keine Differenz für Bestandskonto {0} gefunden"
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:150
 msgid "No email found for {0} {1}"
-msgstr ""
+msgstr "Keine E-Mail-Adresse gefunden für {0} {1}"
 
 #: erpnext/telephony/doctype/call_log/call_log.py:117
 msgid "No employee was scheduled for call popup"
@@ -31051,7 +31057,7 @@ msgstr "Anzahl der Interaktionen"
 #. Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "No of Items to Repost"
-msgstr ""
+msgstr "Anzahl der neu zu buchenden Artikel"
 
 #. Label of the no_of_months_exp (Int) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -31132,7 +31138,7 @@ msgstr "Es wurden keine ausstehenden Materialanfragen gefunden, die mit dem ange
 
 #: erpnext/public/js/controllers/transaction.js:472
 msgid "No pending payment schedules available."
-msgstr ""
+msgstr "Keine ausstehenden Zahlungspläne verfügbar."
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:502
 msgid "No primary email found for customer: {0}"
@@ -31148,7 +31154,7 @@ msgstr "Keine kürzlichen Transaktionen gefunden"
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:158
 msgid "No recipients found for campaign {0}"
-msgstr ""
+msgstr "Keine Empfänger für Kampagne {0} gefunden"
 
 #: erpnext/accounts/report/purchase_register/purchase_register.py:45
 #: erpnext/accounts/report/sales_register/sales_register.py:46
@@ -31174,7 +31180,7 @@ msgstr "Kein reservierter Bestand zum Aufheben der Reservierung."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:152
 msgid "No rows with zero document count found"
-msgstr ""
+msgstr "Keine Zeilen mit Dokumentanzahl null gefunden"
 
 #: erpnext/stock/doctype/batch/batch.js:77
 msgid "No stock available for this batch."
@@ -31747,7 +31753,7 @@ msgstr "Pressenprüfungen an der Maschine"
 #. Title of the Module Onboarding 'Stock Onboarding'
 #: erpnext/selling/module_onboarding/stock_onboarding/stock_onboarding.json
 msgid "Onboarding for Stock!"
-msgstr ""
+msgstr "Einführung in das Lagerwesen!"
 
 #. Description of the 'Release Date' (Date) field in DocType 'Purchase Invoice'
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
@@ -31795,7 +31801,7 @@ msgstr "Nur CSV- und Excel-Dateien können für den Datenimport verwendet werden
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1070
 msgid "Only CSV files are allowed"
-msgstr ""
+msgstr "Nur CSV-Dateien sind erlaubt"
 
 #. Label of the tax_on_excess_amount (Check) field in DocType 'Tax Withholding
 #. Category'
@@ -31847,7 +31853,7 @@ msgstr "Nur eines von Einzahlung oder Auszahlung darf ungleich null sein, wenn e
 
 #: erpnext/manufacturing/doctype/bom/bom.py:330
 msgid "Only one operation can have 'Is Final Finished Good' checked when 'Track Semi Finished Goods' is enabled."
-msgstr ""
+msgstr "Nur ein Arbeitsgang kann 'Ist endgültiges Fertigerzeugnis' aktiviert haben, wenn 'Halbfertigerzeugnisse verfolgen' aktiviert ist."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1349
 msgid "Only one {0} entry can be created against the Work Order {1}"
@@ -32112,7 +32118,7 @@ msgstr "Rechnungsposition öffnen"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "Opening Invoice Tool"
-msgstr ""
+msgstr "Werkzeug für offene Rechnungen"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1654
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1990
@@ -32728,7 +32734,7 @@ msgstr "Weitere Einstellungen"
 #. Label of the tab_break_dpet (Tab Break) field in DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Others"
-msgstr ""
+msgstr "Andere"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -32809,12 +32815,12 @@ msgstr "Veralteter POS-Eröffnungseintrag"
 #. Label of a number card in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 msgid "Outgoing Bills"
-msgstr ""
+msgstr "Ausgehende Rechnungen"
 
 #. Label of a number card in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 msgid "Outgoing Payment"
-msgstr ""
+msgstr "Ausgehende Zahlung"
 
 #. Label of the outgoing_rate (Float) field in DocType 'Serial and Batch Entry'
 #. Label of the outgoing_rate (Currency) field in DocType 'Stock Ledger Entry'
@@ -32896,7 +32902,7 @@ msgstr "Nach außen"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/subcontracting.json
 msgid "Outward Order"
-msgstr ""
+msgstr "Ausgangsauftrag"
 
 #. Label of the over_billing_allowance (Currency) field in DocType 'Accounts
 #. Settings'
@@ -32946,7 +32952,7 @@ msgstr "Erlaubte Mehrtransferierung (%)"
 #. Option for the 'Status' (Select) field in DocType 'Tax Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Over Withheld"
-msgstr ""
+msgstr "Zu viel einbehalten"
 
 #: erpnext/controllers/status_updater.py:496
 msgid "Overbilling of {0} {1} ignored for item {2} because you have {3} role."
@@ -33048,7 +33054,7 @@ msgstr "Besitzer"
 #. Label of the asset_owner_section (Section Break) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Ownership"
-msgstr ""
+msgstr "Eigentümerschaft"
 
 #. Label of the p_l_closing_balance (JSON) field in DocType 'Process Period
 #. Closing Voucher'
@@ -33143,7 +33149,7 @@ msgstr "POS-Abschluss ist während der Ausführung in einem Hintergrundprozess f
 #. Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "POS Configurations"
-msgstr ""
+msgstr "POS-Konfigurationen"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/pos_customer_group/pos_customer_group.json
@@ -33227,7 +33233,7 @@ msgstr "POS-Rechnungen werden in einem Hintergrundprozess gelöst"
 #. Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "POS Item Details"
-msgstr ""
+msgstr "POS-Artikeldetails"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/pos_item_group/pos_item_group.json
@@ -33238,7 +33244,7 @@ msgstr "POS Artikelgruppe"
 #. Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "POS Item Selector"
-msgstr ""
+msgstr "POS-Artikelauswahl"
 
 #. Label of the pos_opening_entry (Link) field in DocType 'POS Closing Entry'
 #. Name of a DocType
@@ -33795,7 +33801,7 @@ msgstr "Teilbestände können reserviert werden. Wenn Sie beispielsweise einen A
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/delivery_note/delivery_note_list.js:24
 msgid "Partially Billed"
-msgstr ""
+msgstr "Teilweise berechnet"
 
 #. Option for the 'Completion Status' (Select) field in DocType 'Maintenance
 #. Schedule Detail'
@@ -34050,7 +34056,7 @@ msgstr "IBAN der Partei (Kontoauszug)"
 #. Tool Item'
 #: erpnext/accounts/doctype/opening_invoice_creation_tool_item/opening_invoice_creation_tool_item.json
 msgid "Party ID"
-msgstr ""
+msgstr "Partei-ID"
 
 #. Label of the section_break_7 (Section Break) field in DocType 'Pricing Rule'
 #. Label of the section_break_8 (Section Break) field in DocType 'Promotional
@@ -34536,7 +34542,7 @@ msgstr "Zahlungsweise"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Payment Options"
-msgstr ""
+msgstr "Zahlungsoptionen"
 
 #. Label of the payment_order (Link) field in DocType 'Journal Entry'
 #. Label of the payment_order (Link) field in DocType 'Payment Entry'
@@ -34603,7 +34609,7 @@ msgstr "Zahlung erhalten"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/invoicing.json
 msgid "Payment Reconciliaition"
-msgstr ""
+msgstr "Zahlungsabgleich"
 
 #. Name of a DocType
 #. Label of the payment_reconciliation (Table) field in DocType 'POS Closing
@@ -34712,7 +34718,7 @@ msgstr "Zahlungsanforderungen können nicht erstellt werden für: {0}"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Payment Requests made from Sales / Purchase Invoice will be put in Draft explicitly"
-msgstr ""
+msgstr "Zahlungsaufforderungen aus Ausgangs-/Eingangsrechnungen werden explizit als Entwurf gespeichert"
 
 #. Label of the payment_schedule (Data) field in DocType 'Overdue Payment'
 #. Label of the payment_schedule (Link) field in DocType 'Payment Reference'
@@ -34738,11 +34744,11 @@ msgstr "Zahlungsplan"
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:589
 msgid "Payment Schedule based Payment Requests cannot be created because a Payment Entry already exists for this document."
-msgstr ""
+msgstr "Zahlungsplan-basierte Zahlungsaufforderungen können nicht erstellt werden, da bereits ein Zahlungseintrag für dieses Dokument vorhanden ist."
 
 #: erpnext/public/js/controllers/transaction.js:483
 msgid "Payment Schedules"
-msgstr ""
+msgstr "Zahlungspläne"
 
 #. Label of the payment_term (Link) field in DocType 'Overdue Payment'
 #. Label of the payment_term (Link) field in DocType 'Payment Entry Reference'
@@ -34881,7 +34887,7 @@ msgstr "Zahlungsmethoden sind obligatorisch. Bitte fügen Sie mindestens eine Za
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3033
 msgid "Payment methods refreshed. Please review before proceeding."
-msgstr ""
+msgstr "Zahlungsmethoden wurden aktualisiert. Bitte prüfen Sie diese vor dem Fortfahren."
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.js:466
 #: erpnext/selling/page/point_of_sale/pos_payment.js:366
@@ -35783,7 +35789,7 @@ msgstr "Bitte fügen Sie die Zahlungsweise und die Details zum Eröffnungssaldo 
 
 #: erpnext/manufacturing/doctype/bom/bom.js:39
 msgid "Please add Operations first."
-msgstr ""
+msgstr "Bitte fügen Sie zuerst Arbeitsgänge hinzu."
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:213
 msgid "Please add Request for Quotation to the sidebar in Portal Settings."
@@ -35999,7 +36005,7 @@ msgstr "Bitte genehmigende Rolle oder genehmigenden Nutzer eingeben"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:683
 msgid "Please enter Batch No"
-msgstr ""
+msgstr "Bitte Chargennummer eingeben"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:976
 msgid "Please enter Cost Center"
@@ -36060,7 +36066,7 @@ msgstr "Bitte geben Sie den Root-Typ für das Konto ein: {0}"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:685
 msgid "Please enter Serial No"
-msgstr ""
+msgstr "Bitte Seriennummer eingeben"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:319
 msgid "Please enter Serial Nos"
@@ -36161,7 +36167,7 @@ msgstr "Bitte füllen Sie die Tabelle Aufträge aus"
 
 #: erpnext/stock/doctype/shipment/shipment.js:277
 msgid "Please first set Full Name, Email and Phone for the user"
-msgstr ""
+msgstr "Bitte zuerst vollständigen Namen, E-Mail-Adresse und Telefonnummer für den Benutzer angeben"
 
 #: erpnext/telephony/doctype/incoming_call_settings/incoming_call_settings.js:94
 msgid "Please fix overlapping time slots for {0}"
@@ -36173,11 +36179,11 @@ msgstr "Bitte korrigieren Sie sich überschneidende Zeitfenster für {0}."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:272
 msgid "Please generate To Delete list before submitting"
-msgstr ""
+msgstr "Bitte vor dem Buchen die Löschliste erstellen"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:70
 msgid "Please generate the To Delete list before submitting"
-msgstr ""
+msgstr "Bitte die Löschliste vor dem Buchen generieren"
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:67
 msgid "Please import accounts against parent company or enable {} in company master."
@@ -36226,7 +36232,7 @@ msgstr "Bitte aktualisieren oder setzen Sie die Plaid-Verknüpfung der Bank {} z
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:43
 msgid "Please review the {0} configuration and complete any required financial setup activities."
-msgstr ""
+msgstr "Bitte überprüfen Sie die {0}-Konfiguration und führen Sie alle erforderlichen finanziellen Einrichtungsaktivitäten durch."
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.js:12
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.js:28
@@ -36494,7 +36500,7 @@ msgstr "Bitte mindestens eine Zeile mit Differenzwert auswählen"
 
 #: erpnext/public/js/controllers/transaction.js:526
 msgid "Please select at least one schedule."
-msgstr ""
+msgstr "Bitte mindestens einen Zahlungsplan auswählen."
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1330
 msgid "Please select atleast one item to continue"
@@ -36565,7 +36571,7 @@ msgstr "Bitte zuerst den Dokumententyp auswählen"
 
 #: erpnext/selling/report/sales_partner_commission_summary/sales_partner_commission_summary.py:47
 msgid "Please select the document type first."
-msgstr ""
+msgstr "Bitte zuerst den Dokumententyp auswählen."
 
 #: erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py:21
 msgid "Please select the required filters"
@@ -37352,7 +37358,7 @@ msgstr "Letztes Geschäftsjahr nicht abgeschlossen"
 
 #: erpnext/stock/report/negative_batch_report/negative_batch_report.py:54
 msgid "Previous Qty"
-msgstr ""
+msgstr "Vorherige Menge"
 
 #. Label of the previous_work_experience (Section Break) field in DocType
 #. 'Employee'
@@ -37442,7 +37448,7 @@ msgstr "Preisliste"
 #. DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Price List & Currency"
-msgstr ""
+msgstr "Preisliste & Währung"
 
 #. Name of a DocType
 #: erpnext/stock/doctype/price_list_country/price_list_country.json
@@ -37950,7 +37956,7 @@ msgstr "Prozessverlust"
 #. Item'
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 msgid "Process Loss %"
-msgstr ""
+msgstr "Prozessverlust %"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1272
 msgid "Process Loss Percentage cannot be greater than 100"
@@ -38085,7 +38091,7 @@ msgstr "XML-Dateien verarbeiten"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:188
 msgid "Processing import..."
-msgstr ""
+msgstr "Import wird verarbeitet..."
 
 #: erpnext/buying/doctype/supplier/supplier_dashboard.py:10
 msgid "Procurement"
@@ -38261,7 +38267,7 @@ msgstr "Produktions-Artikel"
 #: erpnext/manufacturing/doctype/bom/bom.json
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 msgid "Production Item Info"
-msgstr ""
+msgstr "Fertigungsartikel-Informationen"
 
 #. Label of the production_plan (Link) field in DocType 'Purchase Order Item'
 #. Name of a DocType
@@ -38638,7 +38644,7 @@ msgstr "Projekteinstellungen"
 #. Title of the Module Onboarding 'Projects Onboarding'
 #: erpnext/projects/module_onboarding/projects_onboarding/projects_onboarding.json
 msgid "Projects Setup"
-msgstr ""
+msgstr "Projekt-Einrichtung"
 
 #. Name of a role
 #: erpnext/projects/doctype/activity_cost/activity_cost.json
@@ -38758,7 +38764,7 @@ msgstr "Perspektiven engagiert, aber nicht umgewandelt"
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:198
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:784
 msgid "Protected DocType"
-msgstr ""
+msgstr "Geschützter DocType"
 
 #. Description of the 'Company Email' (Data) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -39300,7 +39306,7 @@ msgstr "Trendanalyse Eingangsbelege"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/buying.json
 msgid "Purchase Receipt Trends "
-msgstr ""
+msgstr "Trendanalyse Eingangsbelege "
 
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:358
 msgid "Purchase Receipt doesn't have any Item for which Retain Sample is enabled."
@@ -39337,7 +39343,7 @@ msgstr "Umsatzsteuer-Vorlage"
 #. 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Purchase Tax Withholding Category"
-msgstr ""
+msgstr "Steuereinbehalt-Kategorie Einkauf"
 
 #. Label of the taxes (Table) field in DocType 'Purchase Invoice'
 #. Name of a DocType
@@ -39554,7 +39560,7 @@ msgstr "Menge "
 #. Item'
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Qty (As per BOM)"
-msgstr ""
+msgstr "Menge (lt. Stückliste)"
 
 #. Label of the company_total_stock (Float) field in DocType 'Sales Invoice
 #. Item'
@@ -39982,17 +39988,17 @@ msgstr "Name der Qualitätsinspektionsvorlage"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:799
 msgid "Quality Inspection is required for the item {0} before completing the job card {1}"
-msgstr ""
+msgstr "Für Artikel {0} ist eine Qualitätsprüfung erforderlich, bevor die Jobkarte {1} abgeschlossen werden kann"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:810
 #: erpnext/manufacturing/doctype/job_card/job_card.py:819
 msgid "Quality Inspection {0} is not submitted for the item: {1}"
-msgstr ""
+msgstr "Qualitätsprüfung {0} wurde für Artikel {1} nicht gebucht"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:829
 #: erpnext/manufacturing/doctype/job_card/job_card.py:838
 msgid "Quality Inspection {0} is rejected for the item: {1}"
-msgstr ""
+msgstr "Qualitätsprüfung {0} wurde für den Artikel {1} abgelehnt"
 
 #: erpnext/public/js/controllers/transaction.js:384
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:206
@@ -40250,7 +40256,7 @@ msgstr "Die Menge kann für Artikel {1} nicht größer als {0} sein"
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:564
 msgid "Quantity is mandatory for the selected items."
-msgstr ""
+msgstr "Die Menge ist für die ausgewählten Artikel erforderlich."
 
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:274
 msgid "Quantity is required"
@@ -40258,11 +40264,11 @@ msgstr "Menge ist erforderlich"
 
 #: erpnext/stock/dashboard/item_dashboard.js:285
 msgid "Quantity must be greater than zero"
-msgstr ""
+msgstr "Menge muss größer als null sein"
 
 #: erpnext/stock/dashboard/item_dashboard.js:290
 msgid "Quantity must be less than or equal to {0}"
-msgstr ""
+msgstr "Die Menge muss kleiner oder gleich {0} sein"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1098
 #: erpnext/stock/doctype/pick_list/pick_list.js:209
@@ -40465,7 +40471,7 @@ msgstr "Angebotsbetrag"
 #. in DocType 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "RFQ and Purchase Order Settings"
-msgstr ""
+msgstr "Angebotsanfrage- und Lieferantenauftrags-Einstellungen"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:132
 msgid "RFQs are not allowed for {0} due to a scorecard standing of {1}"
@@ -40895,7 +40901,7 @@ msgstr "Rohstoffverbrauch"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:327
 msgid "Raw Materials Missing"
-msgstr ""
+msgstr "Rohmaterialien fehlen"
 
 #. Label of the raw_materials_received_section (Section Break) field in DocType
 #. 'Subcontracting Inward Order'
@@ -41372,7 +41378,7 @@ msgstr "Größe der Abstimmungswarteschlange"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/banking.json
 msgid "Reconciliation Statement"
-msgstr ""
+msgstr "Abstimmungsbericht"
 
 #. Label of the reconciliation_takes_effect_on (Select) field in DocType
 #. 'Company'
@@ -41656,7 +41662,7 @@ msgstr "Regional"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Registers"
-msgstr ""
+msgstr "Register"
 
 #. Label of the registration_details (Code) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -41855,7 +41861,7 @@ msgstr "Übergeordnete Zeilennummer in Artikeltabelle entfernen"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:140
 msgid "Remove Zero Counts"
-msgstr ""
+msgstr "Null-Einträge entfernen"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js:21
 msgid "Remove item if charges is not applicable to that item"
@@ -41867,7 +41873,7 @@ msgstr "Artikel wurden ohne Veränderung der Menge oder des Wertes entfernt."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:161
 msgid "Removed {0} rows with zero document count. Please save to persist changes."
-msgstr ""
+msgstr "{0} Zeilen mit null Dokumenten entfernt. Bitte speichern, um die Änderungen beizubehalten."
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:87
 msgid "Removing rows without exchange gain or loss"
@@ -42148,7 +42154,7 @@ msgstr "Neubuchungsdatendatei"
 #. Item Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Reposting Item and Warehouse"
-msgstr ""
+msgstr "Artikel und Lager neu buchen"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:131
 msgid "Reposting Progress"
@@ -42164,11 +42170,11 @@ msgstr "Neubuchungsreferenz"
 #. field in DocType 'Repost Item Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Reposting Vouchers"
-msgstr ""
+msgstr "Belege neu buchen"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:149
 msgid "Reposting Vouchers Progress"
-msgstr ""
+msgstr "Fortschritt der Neubuchung von Belegen"
 
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:216
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:327
@@ -42177,11 +42183,11 @@ msgstr "Neubuchungseinträge erstellt: {0}"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:123
 msgid "Reposting for Item-Wh Completed {0}%"
-msgstr ""
+msgstr "Neubuchung für Artikel-Lager abgeschlossen {0}%"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:141
 msgid "Reposting for Vouchers Completed {0}%"
-msgstr ""
+msgstr "Neubuchung für Belege abgeschlossen {0}%"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:109
 msgid "Reposting has been started in the background."
@@ -42550,7 +42556,7 @@ msgstr "Konflikt bei reservierter Charge"
 #. 'Bin'
 #: erpnext/stock/doctype/bin/bin.json
 msgid "Reserved Inventory"
-msgstr ""
+msgstr "Reservierter Bestand"
 
 #. Label of the reserved_qty (Float) field in DocType 'Bin'
 #. Label of the reserved_qty (Float) field in DocType 'Stock Reservation Entry'
@@ -43112,7 +43118,7 @@ msgstr "Zurückgegebene Menge in Lager-ME"
 
 #: erpnext/buying/report/subcontracted_raw_materials_to_be_transferred/subcontracted_raw_materials_to_be_transferred.py:44
 msgid "Returned Quantity"
-msgstr ""
+msgstr "Zurückgegebene Menge"
 
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.py:101
 msgid "Returned exchange rate is neither integer not float."
@@ -43184,18 +43190,18 @@ msgstr "Rezension"
 #. Label of an action in the Onboarding Step 'Review Accounts Settings'
 #: erpnext/accounts/onboarding_step/review_accounts_settings/review_accounts_settings.json
 msgid "Review Accounts Settings"
-msgstr ""
+msgstr "Buchhaltungseinstellungen überprüfen"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Review Buying Settings'
 #: erpnext/buying/onboarding_step/review_buying_settings/review_buying_settings.json
 msgid "Review Buying Settings"
-msgstr ""
+msgstr "Einkaufs-Einstellungen überprüfen"
 
 #. Title of an Onboarding Step
 #: erpnext/accounts/onboarding_step/chart_of_accounts/chart_of_accounts.json
 msgid "Review Chart of Accounts"
-msgstr ""
+msgstr "Prüfung des Kontenplans"
 
 #. Label of the review_date (Date) field in DocType 'Task'
 #: erpnext/projects/doctype/task/task.json
@@ -43206,25 +43212,25 @@ msgstr "Überprüfungsdatum"
 #. Label of an action in the Onboarding Step 'Review Manufacturing Settings'
 #: erpnext/manufacturing/onboarding_step/review_manufacturing_settings/review_manufacturing_settings.json
 msgid "Review Manufacturing Settings"
-msgstr ""
+msgstr "Fertigungseinstellungen überprüfen"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Review Selling Settings'
 #: erpnext/selling/onboarding_step/review_selling_settings/review_selling_settings.json
 msgid "Review Selling Settings"
-msgstr ""
+msgstr "Vertriebseinstellungen überprüfen"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Review Stock Settings'
 #: erpnext/stock/onboarding_step/review_stock_settings/review_stock_settings.json
 msgid "Review Stock Settings"
-msgstr ""
+msgstr "Lagereinstellungen überprüfen"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Review System Settings'
 #: erpnext/setup/onboarding_step/review_system_settings/review_system_settings.json
 msgid "Review System Settings"
-msgstr ""
+msgstr "Systemeinstellungen überprüfen"
 
 #. Label of a Card Break in the Quality Workspace
 #: erpnext/quality_management/workspace/quality/quality.json
@@ -43647,7 +43653,7 @@ msgstr "Zeile #{0}: Diese Fertigungslagerbuchung kann nicht storniert werden, da
 
 #: erpnext/controllers/subcontracting_inward_controller.py:616
 msgid "Row #{0}: Cannot cancel this Manufacturing Stock Entry as quantity of Secondary Item {1} produced cannot be less than quantity delivered."
-msgstr ""
+msgstr "Zeile #{0}: Diese Fertigungs-Lagerbuchung kann nicht storniert werden, da die produzierte Menge des Sekundärartikels {1} nicht kleiner als die gelieferte Menge sein darf."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:483
 msgid "Row #{0}: Cannot cancel this Stock Entry as returned quantity cannot be greater than delivered quantity for Item {1} in the linked Subcontracting Inward Order"
@@ -43655,7 +43661,7 @@ msgstr "Zeile #{0}: Diese Lagerbuchung kann nicht storniert werden, da die zurü
 
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.py:78
 msgid "Row #{0}: Cannot create entry with different taxable AND withholding document links."
-msgstr ""
+msgstr "Zeile #{0}: Eintrag mit unterschiedlichen steuerpflichtigen UND quellensteuerrelevanten Dokumentverknüpfungen kann nicht erstellt werden."
 
 #: erpnext/controllers/accounts_controller.py:3792
 msgid "Row #{0}: Cannot delete item {1} which has already been billed."
@@ -43675,7 +43681,7 @@ msgstr "Zeile {0}: Element {1}, dem ein Arbeitsauftrag zugewiesen wurde, kann ni
 
 #: erpnext/controllers/accounts_controller.py:3778
 msgid "Row #{0}: Cannot delete item {1} which is already ordered against this Sales Order."
-msgstr ""
+msgstr "Zeile #{0}: Artikel {1} kann nicht gelöscht werden, da er bereits für diesen Auftrag bestellt wurde."
 
 #: erpnext/controllers/accounts_controller.py:4099
 msgid "Row #{0}: Cannot set Rate if the billed amount is greater than the amount for Item {1}."
@@ -43715,7 +43721,7 @@ msgstr "Zeile {0}: Kostenstelle {1} gehört nicht zu Firma {2}"
 
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.py:211
 msgid "Row #{0}: Could not find enough {1} entries to match. Remaining amount: {2}"
-msgstr ""
+msgstr "Zeile #{0}: Es konnten nicht genügend {1}-Einträge zum Abgleichen gefunden werden. Verbleibender Betrag: {2}"
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:88
 msgid "Row #{0}: Cumulative threshold cannot be less than Single Transaction threshold"
@@ -43758,7 +43764,7 @@ msgstr "Zeile #{0}: Vom Kunden beigestellter Artikel {1} ist nicht Teil von Arbe
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:61
 msgid "Row #{0}: Dates overlapping with other row in group {1}"
-msgstr ""
+msgstr "Zeile #{0}: Datumsüberschneidung mit einer anderen Zeile in Gruppe {1}"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.py:357
 msgid "Row #{0}: Default BOM not found for FG Item {1}"
@@ -43805,7 +43811,7 @@ msgstr "Zeile #{0}: Fertigerzeugnis muss {1} sein"
 
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:584
 msgid "Row #{0}: Finished Good reference is mandatory for Secondary Item {1}."
-msgstr ""
+msgstr "Zeile #{0}: Die Referenz auf das Fertigerzeugnis ist für den Sekundärartikel {1} erforderlich."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:170
 #: erpnext/controllers/subcontracting_inward_controller.py:294
@@ -43822,7 +43828,7 @@ msgstr "Zeile #{0}: Für {1} können Sie den Referenzbeleg nur auswählen, wenn 
 
 #: erpnext/assets/doctype/asset/asset.py:664
 msgid "Row #{0}: Frequency of Depreciation must be greater than zero"
-msgstr ""
+msgstr "Zeile #{0}: Abschreibungshäufigkeit muss größer als null sein"
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:50
 msgid "Row #{0}: From Date cannot be before To Date"
@@ -43838,7 +43844,7 @@ msgstr "Zeile {0}: Element hinzugefügt"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1644
 msgid "Row #{0}: Item {1} cannot be transferred more than {2} against {3} {4}"
-msgstr ""
+msgstr "Zeile #{0}: Artikel {1} kann nicht mehr als {2} gegen {3} {4} übertragen werden"
 
 #: erpnext/buying/utils.py:98
 msgid "Row #{0}: Item {1} does not exist"
@@ -43949,7 +43955,7 @@ msgstr "Zeile #{0}: Bitte aktualisieren Sie das aktive/passive Rechnungsabgrenzu
 #: erpnext/manufacturing/doctype/bom/bom.py:346
 #, python-format
 msgid "Row #{0}: Process Loss Percentage should be less than 100% for {1} Item {2}"
-msgstr ""
+msgstr "Zeile #{0}: Der Prozessverlust in Prozent sollte für {1} Artikel {2} weniger als 100 % betragen"
 
 #: erpnext/public/js/utils/barcode_scanner.js:425
 msgid "Row #{0}: Qty increased by {1}"
@@ -43990,7 +43996,7 @@ msgstr "Zeile #{0}: Die Menge von Artikel {1} kann nicht mehr als {2} {3} für F
 
 #: erpnext/manufacturing/doctype/bom/bom.py:339
 msgid "Row #{0}: Quantity should be greater than 0 for {1} Item {2}"
-msgstr ""
+msgstr "Zeile #{0}: Die Menge muss für {1} Artikel {2} größer als 0 sein"
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1696
 msgid "Row #{0}: Quantity to reserve for the Item {1} should be greater than 0."
@@ -44013,7 +44019,7 @@ msgstr "Zeile #{0}: Referenzbelegtyp muss einer der folgenden sein: Auftrag, Aus
 
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:577
 msgid "Row #{0}: Rejected Qty cannot be set for Secondary Item {1}."
-msgstr ""
+msgstr "Zeile #{0}: Abgelehnte Menge kann für Sekundärartikel {1} nicht festgelegt werden."
 
 #: erpnext/controllers/subcontracting_controller.py:118
 msgid "Row #{0}: Rejected Warehouse is mandatory for the rejected Item {1}"
@@ -44037,7 +44043,7 @@ msgstr "Zeile #{0}: Die zurückgegebene Menge kann nicht größer sein als die z
 
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:572
 msgid "Row #{0}: Secondary Item Qty cannot be zero"
-msgstr ""
+msgstr "Zeile #{0}: Menge des Sekundärartikels darf nicht null sein"
 
 #: erpnext/controllers/selling_controller.py:296
 msgid ""
@@ -44046,6 +44052,10 @@ msgid ""
 "\t\t\t\t\tyou can disable '{5}' in {6} to bypass\n"
 "\t\t\t\t\tthis validation."
 msgstr ""
+"Zeile #{0}: Verkaufspreis für Artikel {1} liegt unter {2}.\n"
+"\t\t\t\t\tVerkauf {3} sollte mindestens {4} betragen.<br><br>Alternativ\n"
+"\t\t\t\t\tkönnen Sie '{5}' in {6} deaktivieren, um\n"
+"\t\t\t\t\tdiese Validierung zu umgehen."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:286
 msgid "Row #{0}: Sequence ID must be {1} or {2} for Operation {3}."
@@ -44174,15 +44184,15 @@ msgstr "Zeile #{0}: Die Gesamtzahl der Abschreibungen kann nicht kleiner oder gl
 
 #: erpnext/assets/doctype/asset/asset.py:660
 msgid "Row #{0}: Total Number of Depreciations must be greater than zero"
-msgstr ""
+msgstr "Zeile #{0}: Die Gesamtzahl der Abschreibungen muss größer als null sein"
 
 #: erpnext/controllers/stock_controller.py:105
 msgid "Row #{0}: Warehouse {1} does not match with the warehouse {2} in Serial and Batch Bundle {3}."
-msgstr ""
+msgstr "Zeile #{0}: Lager {1} stimmt nicht mit dem Lager {2} im Serien- und Chargenbündel {3} überein."
 
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.py:94
 msgid "Row #{0}: Withholding Amount {1} does not match calculated amount {2}."
-msgstr ""
+msgstr "Zeile #{0}: Einbehaltener Betrag {1} stimmt nicht mit dem berechneten Betrag {2} überein."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:577
 msgid "Row #{0}: Work Order exists against full or partial quantity of Item {1}"
@@ -44214,7 +44224,7 @@ msgstr "Zeile #{0}: {1} von {2} sollte {3} sein. Bitte aktualisieren Sie die {1}
 
 #: erpnext/controllers/accounts_controller.py:3906
 msgid "Row #{0}:Quantity for Item {1} cannot be zero."
-msgstr ""
+msgstr "Zeile #{0}: Menge für Artikel {1} darf nicht null sein."
 
 #: erpnext/buying/utils.py:106
 msgid "Row #{1}: Warehouse is mandatory for stock Item {0}"
@@ -44258,7 +44268,7 @@ msgstr "Zeile # {}: Die Währung von {} - {} stimmt nicht mit der Firmenwährung
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:113
 msgid "Row #{}: Either Party ID or Party Name is required"
-msgstr ""
+msgstr "Zeile #{}: Entweder Geschäftspartner-ID oder Geschäftspartnername ist erforderlich"
 
 #: erpnext/assets/doctype/asset/asset.py:421
 msgid "Row #{}: Finance Book should not be empty since you're using multiple."
@@ -44278,7 +44288,7 @@ msgstr "Zeile #{}: POS-Rechnung {} ist noch nicht gebucht"
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:123
 msgid "Row #{}: Party ID is required"
-msgstr ""
+msgstr "Zeile #{}: Partei-ID ist erforderlich"
 
 #: erpnext/assets/doctype/asset_maintenance/asset_maintenance.py:41
 msgid "Row #{}: Please assign task to a member."
@@ -44428,7 +44438,7 @@ msgstr "Zeile {0}: Wechselkurs ist erforderlich"
 
 #: erpnext/assets/doctype/asset/asset.py:609
 msgid "Row {0}: Expected Value After Useful Life cannot be negative"
-msgstr ""
+msgstr "Zeile {0}: Erwarteter Wert nach Nutzungsdauer darf nicht negativ sein"
 
 #: erpnext/assets/doctype/asset/asset.py:612
 msgid "Row {0}: Expected Value After Useful Life must be less than Net Purchase Amount"
@@ -44436,7 +44446,7 @@ msgstr "Zeile {0}: Erwarteter Wert nach Nutzungsdauer muss kleiner als Nettokauf
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:187
 msgid "Row {0}: Expense Account {1} is linked to company {2}. Please select an account belonging to company {3}."
-msgstr ""
+msgstr "Zeile {0}: Aufwandskonto {1} ist mit Unternehmen {2} verknüpft. Bitte ein Konto auswählen, das zum Unternehmen {3} gehört."
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:531
 msgid "Row {0}: Expense Head changed to {1} as no Purchase Receipt is created against Item {2}."
@@ -44497,7 +44507,7 @@ msgstr "Zeile {0}: Artikel {1} muss ein an Dritte vergebener Artikel sein."
 
 #: erpnext/controllers/subcontracting_controller.py:183
 msgid "Row {0}: Item {1} must be linked to a {2}."
-msgstr ""
+msgstr "Zeile {0}: Artikel {1} muss mit einem {2} verknüpft sein."
 
 #: erpnext/controllers/subcontracting_controller.py:204
 msgid "Row {0}: Item {1}'s quantity cannot be higher than the available quantity."
@@ -44505,7 +44515,7 @@ msgstr "Zeile {0}: Die Menge des Artikels {1} kann nicht höher sein als die ver
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1245
 msgid "Row {0}: Operation time should be greater than 0 for operation {1}"
-msgstr ""
+msgstr "Zeile {0}: Die Vorgangszeit für Arbeitsgang {1} muss größer als 0 sein"
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.py:615
 msgid "Row {0}: Packed Qty must be equal to {1} Qty."
@@ -44593,7 +44603,7 @@ msgstr "Zeile {0}: Menge für {4} in Lager {1} zum Buchungszeitpunkt des Eintrag
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:885
 msgid "Row {0}: Sales Invoice {1} is already created for {2}"
-msgstr ""
+msgstr "Zeile {0}: Ausgangsrechnung {1} wurde bereits für {2} erstellt"
 
 #: erpnext/assets/doctype/asset_shift_allocation/asset_shift_allocation.py:58
 msgid "Row {0}: Shift cannot be changed since the depreciation has already been processed"
@@ -44637,11 +44647,11 @@ msgstr "Zeile {0}: Umrechnungsfaktor für Maßeinheit ist zwingend erforderlich"
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:170
 msgid "Row {0}: Warehouse is required"
-msgstr ""
+msgstr "Zeile {0}: Lager ist erforderlich"
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:179
 msgid "Row {0}: Warehouse {1} is linked to company {2}. Please select a warehouse belonging to company {3}."
-msgstr ""
+msgstr "Zeile {0}: Lager {1} ist mit Unternehmen {2} verknüpft. Bitte wählen Sie ein Lager aus, das zu Unternehmen {3} gehört."
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1239
 #: erpnext/manufacturing/doctype/work_order/work_order.py:420
@@ -44670,7 +44680,7 @@ msgstr "Zeile {0}: {1} {2} stimmt nicht mit {3} überein"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:134
 msgid "Row {0}: {1} {2} is linked to company {3}. Please select a document belonging to company {4}."
-msgstr ""
+msgstr "Zeile {0}: {1} {2} ist mit dem Unternehmen {3} verknüpft. Bitte wählen Sie ein Dokument aus, das zum Unternehmen {4} gehört."
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:108
 msgid "Row {0}: {2} Item {1} does not exist in {2} {3}"
@@ -45591,12 +45601,12 @@ msgstr "Umsatzsteuer-Vorlage"
 #. Label of the sales_tax_withholding_category (Link) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Sales Tax Withholding Category"
-msgstr ""
+msgstr "Quellensteuer-Kategorie Verkauf"
 
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "Sales Taxes"
-msgstr ""
+msgstr "Verkaufssteuern"
 
 #. Label of the taxes (Table) field in DocType 'POS Invoice'
 #. Label of the taxes (Table) field in DocType 'Sales Invoice'
@@ -45720,7 +45730,7 @@ msgstr "Beispielmenge"
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:269
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:535
 msgid "Sample Retention Stock Entry"
-msgstr ""
+msgstr "Lagerbuchung für Musterrückbehalt"
 
 #. Label of the sample_retention_warehouse (Link) field in DocType 'Stock
 #. Settings'
@@ -45838,7 +45848,7 @@ msgstr "Geplantes Datum"
 
 #: erpnext/public/js/controllers/transaction.js:492
 msgid "Schedule Name"
-msgstr ""
+msgstr "Zeitplanname"
 
 #. Label of the scheduled_date (Date) field in DocType 'Maintenance Schedule
 #. Detail'
@@ -45954,7 +45964,7 @@ msgstr "Punkte zählen"
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_secondary_item/subcontracting_inward_order_secondary_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Scrap"
-msgstr ""
+msgstr "Ausschuss"
 
 #: erpnext/assets/doctype/asset/asset.js:163
 msgid "Scrap Asset"
@@ -46017,12 +46027,12 @@ msgstr "Zweite E-Mail"
 #. Label of the item_code (Link) field in DocType 'Job Card Secondary Item'
 #: erpnext/manufacturing/doctype/job_card_secondary_item/job_card_secondary_item.json
 msgid "Secondary Item Code"
-msgstr ""
+msgstr "Sekundärer Artikelcode"
 
 #. Label of the item_name (Data) field in DocType 'Job Card Secondary Item'
 #: erpnext/manufacturing/doctype/job_card_secondary_item/job_card_secondary_item.json
 msgid "Secondary Item Name"
-msgstr ""
+msgstr "Name des Sekundärartikels"
 
 #. Label of the secondary_items (Table) field in DocType 'BOM'
 #. Label of the secondary_items (Table) field in DocType 'Job Card'
@@ -46033,29 +46043,29 @@ msgstr ""
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 msgid "Secondary Items"
-msgstr ""
+msgstr "Sekundärartikel"
 
 #. Label of the secondary_items_cost (Currency) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Secondary Items Cost"
-msgstr ""
+msgstr "Kosten für Sekundärartikel"
 
 #. Label of the base_secondary_items_cost (Currency) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Secondary Items Cost (Company Currency)"
-msgstr ""
+msgstr "Kosten der Sekundärartikel (Unternehmenswährung)"
 
 #. Label of the secondary_items_cost_per_qty (Currency) field in DocType
 #. 'Subcontracting Receipt Item'
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Secondary Items Cost Per Qty"
-msgstr ""
+msgstr "Kosten der Sekundärartikel je Menge"
 
 #. Label of the scrap_items_generated_section (Section Break) field in DocType
 #. 'Subcontracting Inward Order'
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 msgid "Secondary Items Generated"
-msgstr ""
+msgstr "Sekundärartikel erzeugt"
 
 #. Label of the secondary_party (Dynamic Link) field in DocType 'Party Link'
 #: erpnext/accounts/doctype/party_link/party_link.json
@@ -46221,7 +46231,7 @@ msgstr "Wählen Sie die Elemente Herstellung"
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:500
 msgid "Select Items to Receive"
-msgstr ""
+msgstr "Artikel zum Empfangen auswählen"
 
 #: erpnext/selling/doctype/sales_order/sales_order_list.js:87
 msgid "Select Items up to Delivery Date"
@@ -46240,7 +46250,7 @@ msgstr "Wählen Sie Treueprogramm"
 
 #: erpnext/public/js/controllers/transaction.js:478
 msgid "Select Payment Schedule"
-msgstr ""
+msgstr "Zahlungsplan auswählen"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:411
 msgid "Select Possible Supplier"
@@ -46479,19 +46489,19 @@ msgstr "Vermögensgegenstand verkaufen"
 
 #: erpnext/assets/doctype/asset/asset.js:635
 msgid "Sell Qty"
-msgstr ""
+msgstr "Verkaufsmenge"
 
 #: erpnext/assets/doctype/asset/asset.js:651
 msgid "Sell quantity cannot exceed the asset quantity"
-msgstr ""
+msgstr "Die Verkaufsmenge darf die Menge des Vermögensgegenstands nicht überschreiten"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1410
 msgid "Sell quantity cannot exceed the asset quantity. Asset {0} has only {1} item(s)."
-msgstr ""
+msgstr "Verkaufsmenge darf die Vermögensgegenstand-Menge nicht überschreiten. Vermögensgegenstand {0} hat nur {1} Artikel."
 
 #: erpnext/assets/doctype/asset/asset.js:647
 msgid "Sell quantity must be greater than zero"
-msgstr ""
+msgstr "Verkaufsmenge muss größer als null sein"
 
 #. Label of the selling (Check) field in DocType 'Pricing Rule'
 #. Label of the selling (Check) field in DocType 'Promotional Scheme'
@@ -46550,7 +46560,7 @@ msgstr "Vertriebseinstellungen"
 #. Title of the Module Onboarding 'Selling Onboarding'
 #: erpnext/selling/module_onboarding/selling_onboarding/selling_onboarding.json
 msgid "Selling Setup"
-msgstr ""
+msgstr "Vertrieb einrichten"
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:214
 msgid "Selling must be checked, if Applicable For is selected as {0}"
@@ -46663,7 +46673,7 @@ msgstr "Einstellungen für Serien- und Chargenartikel"
 #. Label of the section_break_jcmx (Section Break) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 msgid "Serial / Batch"
-msgstr ""
+msgstr "Seriennummer / Charge"
 
 #. Label of the serial_and_batch_bundle (Link) field in DocType 'Stock
 #. Reconciliation Item'
@@ -47044,7 +47054,7 @@ msgstr "Seriennummer und Charge"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:152
 msgid "Serial and Batch No for Item Disabled"
-msgstr ""
+msgstr "Seriennummer und Chargennummer für Artikel deaktiviert"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.js:53
 msgid "Serial and Batch Nos"
@@ -47474,7 +47484,7 @@ msgstr "Neues Veröffentlichungsdatum festlegen"
 #. field in DocType 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Set Operating Cost / Secondary Items From Sub-assemblies"
-msgstr ""
+msgstr "Betriebskosten / Sekundärartikel aus Unterbaugruppen übernehmen"
 
 #. Label of the set_cost_based_on_bom_qty (Check) field in DocType 'BOM
 #. Operation'
@@ -47647,7 +47657,7 @@ msgstr "Stellen Sie dies ein, wenn der Kunde ein Unternehmen der öffentlichen V
 #. Settings'
 #: erpnext/support/doctype/support_settings/support_settings.json
 msgid "Set this value to 0 to disable the feature."
-msgstr ""
+msgstr "Setzen Sie diesen Wert auf 0, um die Funktion zu deaktivieren."
 
 #. Label of the set_valuation_rate_for_rejected_materials (Check) field in
 #. DocType 'Buying Settings'
@@ -47755,39 +47765,39 @@ msgstr "Erledigt"
 #. Label of an action in the Onboarding Step 'Setup Company'
 #: erpnext/setup/onboarding_step/setup_company/setup_company.json
 msgid "Setup Company"
-msgstr ""
+msgstr "Unternehmen einrichten"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Setup Email Account'
 #: erpnext/setup/onboarding_step/setup_email_account/setup_email_account.json
 msgid "Setup Email Account"
-msgstr ""
+msgstr "E-Mail-Konto einrichten"
 
 #. Title of the Module Onboarding 'Organization Onboarding'
 #: erpnext/setup/module_onboarding/organization_onboarding/organization_onboarding.json
 msgid "Setup Organization"
-msgstr ""
+msgstr "Organisation einrichten"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Setup Role Permissions'
 #: erpnext/setup/onboarding_step/setup_role_permissions/setup_role_permissions.json
 msgid "Setup Role Permissions"
-msgstr ""
+msgstr "Rollenberechtigungen einrichten"
 
 #. Label of an action in the Onboarding Step 'Setup Sales taxes'
 #: erpnext/accounts/onboarding_step/setup_sales_taxes/setup_sales_taxes.json
 msgid "Setup Sales Taxes"
-msgstr ""
+msgstr "Verkaufssteuern einrichten"
 
 #. Title of an Onboarding Step
 #: erpnext/accounts/onboarding_step/setup_sales_taxes/setup_sales_taxes.json
 msgid "Setup Sales taxes"
-msgstr ""
+msgstr "Verkaufssteuern einrichten"
 
 #. Title of an Onboarding Step
 #: erpnext/stock/onboarding_step/setup_warehouse/setup_warehouse.json
 msgid "Setup Warehouse"
-msgstr ""
+msgstr "Lager einrichten"
 
 #: erpnext/public/js/setup_wizard.js:25
 msgid "Setup your organization"
@@ -48310,7 +48320,7 @@ msgstr "Lagerbestand anzeigen"
 
 #: erpnext/manufacturing/report/bom_stock_analysis/bom_stock_analysis.js:26
 msgid "Show availability of exploded items"
-msgstr ""
+msgstr "Verfügbarkeit von aufgelösten Artikeln anzeigen"
 
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.js:88
 msgid "Show in Bucket View"
@@ -48451,7 +48461,7 @@ msgstr "Da es einen Prozessverlust von {0} Einheiten für das Fertigerzeugnis {1
 
 #: erpnext/manufacturing/doctype/bom/bom.py:323
 msgid "Since you have enabled 'Track Semi Finished Goods', at least one operation must have 'Is Final Finished Good' checked. For that set the FG / Semi FG Item as {0} against an operation."
-msgstr ""
+msgstr "Da Sie 'Halbfertigwaren verfolgen' aktiviert haben, muss mindestens ein Arbeitsgang 'Ist endgültiges Fertigerzeugnis' aktiviert haben. Legen Sie dazu den FG / Halb-FG Artikel als {0} für einen Arbeitsgang fest."
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:132
 msgid "Since {0} are Serial No/Batch No items, you cannot enable 'Recreate Stock Ledgers' in Repost Item Valuation."
@@ -48501,7 +48511,7 @@ msgstr "Überspringen Sie die Materialübertragung in das WIP-Lager"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:563
 msgid "Skipped {0} DocType(s):<br>{1}"
-msgstr ""
+msgstr "{0} DocType(s) übersprungen:<br>{1}"
 
 #. Label of the customer_skype (Data) field in DocType 'Appointment'
 #: erpnext/crm/doctype/appointment/appointment.json
@@ -49020,7 +49030,7 @@ msgstr "Statusdarstellung"
 #. Label of the section_break_dfoc (Section Break) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 msgid "Status and Reference"
-msgstr ""
+msgstr "Status und Referenz"
 
 #: erpnext/projects/doctype/project/project.py:717
 msgid "Status must be Cancelled or Completed"
@@ -49596,7 +49606,7 @@ msgstr "Lager-Einstellungen"
 #. Title of the Module Onboarding 'Stock Onboarding'
 #: erpnext/stock/module_onboarding/stock_onboarding/stock_onboarding.json
 msgid "Stock Setup"
-msgstr ""
+msgstr "Lager-Einrichtung"
 
 #. Label of the stock_summary_tab (Tab Break) field in DocType 'Plant Floor'
 #. Label of the stock_summary (HTML) field in DocType 'Plant Floor'
@@ -49727,7 +49737,7 @@ msgstr "Lagermaßeinheit"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:737
 msgid "Stock Update Not Allowed"
-msgstr ""
+msgstr "Lagerbestandsaktualisierung nicht erlaubt"
 
 #. Name of a role
 #: erpnext/accounts/doctype/fiscal_year/fiscal_year.json
@@ -49839,7 +49849,7 @@ msgstr "Der Bestand kann nicht aktualisiert werden, da die Eingangsrechnung eine
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:734
 msgid "Stock cannot be updated for Purchase Invoice {0} because a Purchase Receipt {1} has already been created for this transaction. Please disable the 'Update Stock' checkbox in the Purchase Invoice and save the invoice."
-msgstr ""
+msgstr "Der Bestand kann für Eingangsrechnung {0} nicht aktualisiert werden, da für diese Transaktion bereits ein Eingangsbeleg {1} erstellt wurde. Bitte deaktivieren Sie das Kontrollkästchen 'Bestand aktualisieren' in der Eingangsrechnung und speichern Sie die Rechnung."
 
 #: erpnext/stock/doctype/warehouse/warehouse.py:124
 msgid "Stock entries exist with the old account. Changing the account may lead to a mismatch between the warehouse closing balance and the account closing balance. The overall closing balance will still match, but not for the specific account."
@@ -50162,7 +50172,7 @@ msgstr "Fremdvergabe-Eingangsbestellung Erhaltener Artikel"
 #. Name of a DocType
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_secondary_item/subcontracting_inward_order_secondary_item.json
 msgid "Subcontracting Inward Order Secondary Item"
-msgstr ""
+msgstr "Unterauftrag Eingangsbestellung Sekundärartikel"
 
 #. Name of a DocType
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_service_item/subcontracting_inward_order_service_item.json
@@ -50298,7 +50308,7 @@ msgstr "Untervergabe-Einstellungen"
 #. Title of the Module Onboarding 'Subcontracting Onboarding'
 #: erpnext/subcontracting/module_onboarding/subcontracting_onboarding/subcontracting_onboarding.json
 msgid "Subcontracting Setup"
-msgstr ""
+msgstr "Unterauftragsvergabe einrichten"
 
 #. Label of the subdivision (Autocomplete) field in DocType 'Holiday List'
 #: erpnext/setup/doctype/holiday_list/holiday_list.json
@@ -50839,7 +50849,7 @@ msgstr "Vorlaufzeit des Lieferanten (Tage)"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Supplier Ledger"
-msgstr ""
+msgstr "Lieferanten-Hauptbuch"
 
 #. Name of a report
 #. Label of a Link in the Financial Reports Workspace
@@ -51684,7 +51694,7 @@ msgstr "Steuersatz"
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:237
 #: erpnext/accounts/report/tds_computation_summary/tds_computation_summary.py:84
 msgid "Tax Rate %"
-msgstr ""
+msgstr "Steuersatz %"
 
 #. Label of the taxes (Table) field in DocType 'Item Tax Template'
 #: erpnext/accounts/doctype/item_tax_template/item_tax_template.json
@@ -51722,7 +51732,7 @@ msgstr "Umsatzsteuer-Einstellungen"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/selling.json
 msgid "Tax Template"
-msgstr ""
+msgstr "Steuervorlage"
 
 #: erpnext/accounts/doctype/tax_rule/tax_rule.py:86
 msgid "Tax Template is mandatory."
@@ -51798,7 +51808,7 @@ msgstr "Steuereinbehalt Details"
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Tax Withholding Entries"
-msgstr ""
+msgstr "Quellensteuereinträge"
 
 #. Label of the section_tax_withholding_entry (Section Break) field in DocType
 #. 'Payment Entry'
@@ -51810,7 +51820,7 @@ msgstr ""
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Tax Withholding Entry"
-msgstr ""
+msgstr "Quellensteuer-Buchung"
 
 #. Label of the tax_withholding_group (Link) field in DocType 'Journal Entry'
 #. Label of the tax_withholding_group (Link) field in DocType 'Payment Entry'
@@ -51835,7 +51845,7 @@ msgstr ""
 #: erpnext/selling/doctype/customer/customer.json
 #: erpnext/workspace_sidebar/taxes.json
 msgid "Tax Withholding Group"
-msgstr ""
+msgstr "Quellensteuergruppe"
 
 #. Name of a DocType
 #. Label of the tax_withholding_rate (Float) field in DocType 'Tax Withholding
@@ -51871,7 +51881,7 @@ msgstr ""
 #. DocType 'Tax Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Tax withheld only for amount exceeding cumulative threshold"
-msgstr ""
+msgstr "Steuer wird nur für den Betrag einbehalten, der den kumulativen Schwellenwert überschreitet"
 
 #. Label of the taxable_amount (Currency) field in DocType 'Item Wise Tax
 #. Detail'
@@ -51884,18 +51894,18 @@ msgstr "Steuerpflichtiger Betrag"
 #. Label of the taxable_date (Date) field in DocType 'Tax Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Taxable Date"
-msgstr ""
+msgstr "Steuerpflichtiges Datum"
 
 #. Label of the taxable_name (Dynamic Link) field in DocType 'Tax Withholding
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Taxable Document Name"
-msgstr ""
+msgstr "Name des steuerpflichtigen Dokuments"
 
 #. Label of the taxable_doctype (Link) field in DocType 'Tax Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Taxable Document Type"
-msgstr ""
+msgstr "Steuerpflichtiger Dokumenttyp"
 
 #. Label of the taxes (Table) field in DocType 'POS Closing Entry'
 #. Label of the taxes_section (Section Break) field in DocType 'POS Profile'
@@ -52543,7 +52553,7 @@ msgstr ""
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:40
 msgid "The fiscal year has been automatically created in a Disabled state to maintain consistency with the previous fiscal year's status."
-msgstr ""
+msgstr "Das Geschäftsjahr wurde automatisch im deaktivierten Zustand erstellt, um die Konsistenz mit dem Status des vorherigen Geschäftsjahres zu wahren."
 
 #: erpnext/accounts/doctype/share_transfer/share_transfer.py:240
 msgid "The folio numbers are not matching"
@@ -52586,6 +52596,8 @@ msgid ""
 "The following payment schedule(s) already exist:\n"
 "{0}"
 msgstr ""
+"Der/die folgende(n) Zahlungsplan/Zahlungspläne ist/sind bereits vorhanden:\n"
+"{0}"
 
 #: erpnext/assets/doctype/asset_repair/asset_repair.py:112
 msgid "The following rows are duplicates:"
@@ -52666,7 +52678,7 @@ msgstr "Die Originalrechnung sollte vor oder zusammen mit der Erstattungsrechnun
 
 #: erpnext/controllers/accounts_controller.py:205
 msgid "The outstanding amount {0} in {1} is lesser than {2}. Updating the outstanding to this invoice."
-msgstr ""
+msgstr "Der offene Betrag {0} in {1} ist kleiner als {2}. Der offene Betrag wird auf diese Rechnung aktualisiert."
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:229
 msgid "The parent account {0} does not exists in the uploaded template"
@@ -52731,7 +52743,7 @@ msgstr "Der ausgewählte Artikel kann keine Charge haben"
 
 #: erpnext/assets/doctype/asset/asset.js:656
 msgid "The sell quantity is less than the total asset quantity. The remaining quantity will be split into a new asset. This action cannot be undone. <br><br><b>Do you want to continue?</b>"
-msgstr ""
+msgstr "Die Verkaufsmenge ist geringer als die Gesamtmenge des Vermögensgegenstands. Die verbleibende Menge wird in einen neuen Vermögensgegenstand aufgeteilt. Diese Aktion kann nicht rückgängig gemacht werden. <br><br><b>Möchten Sie fortfahren?</b>"
 
 #: erpnext/accounts/doctype/share_transfer/share_transfer.py:194
 msgid "The seller and the buyer cannot be the same"
@@ -52894,7 +52906,7 @@ msgstr "Für dieses Datum sind keine Plätze verfügbar"
 
 #: erpnext/stock/doctype/item/item.js:1161
 msgid "There are two options to maintain valuation of stock. FIFO (first in - first out) and Moving Average. To understand this topic in detail please visit <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>Item Valuation, FIFO and Moving Average.</a>"
-msgstr ""
+msgstr "Es gibt zwei Möglichkeiten, die Bewertung des Lagerbestands zu verwalten: FIFO (first in - first out) und gleitender Durchschnitt. Um dieses Thema im Detail zu verstehen, besuchen Sie bitte <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>Artikelbewertung, FIFO und gleitender Durchschnitt.</a>"
 
 #: erpnext/stock/report/item_variant_details/item_variant_details.py:25
 msgid "There aren't any item variants for the selected item"
@@ -52957,7 +52969,7 @@ msgstr "Dieses Konto weist entweder in der Basiswährung oder in der Kontowähru
 
 #: erpnext/stock/doctype/item/item.js:194
 msgid "This Item is a Template and cannot be used in transactions.<br>All fields present in the 'Copy Fields to Variant' table in Item Variant Settings will be copied to its variant items."
-msgstr ""
+msgstr "Dieser Artikel ist eine Vorlage und kann nicht in Transaktionen verwendet werden.<br>Alle Felder in der Tabelle 'Felder in Variante kopieren' in den Einstellungen zur Artikelvariante werden in die Variantenartikel kopiert."
 
 #: erpnext/stock/doctype/item/item.js:251
 msgid "This Item is a Variant of {0} (Template)."
@@ -53111,12 +53123,12 @@ msgstr "Dieser Artikelfilter wurde bereits für {0} angewendet"
 #. Header text in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "This module is scheduled for deprecation and will be completely removed in version 17, please use <a href=\"https://frappe.io/crm\">Frappe CRM</a> instead."
-msgstr ""
+msgstr "Dieses Modul ist für die Einstellung vorgesehen und wird in Version 17 vollständig entfernt. Bitte verwenden Sie stattdessen <a href=\"https://frappe.io/crm\">Frappe CRM</a>."
 
 #. Header text in the Support Workspace
 #: erpnext/support/workspace/support/support.json
 msgid "This module is scheduled for deprecation and will be completely removed in version 17, please use <a href=\"https://frappe.io/helpdesk\">Frappe Helpdesk</a> instead."
-msgstr ""
+msgstr "Dieses Modul ist zur Ablösung vorgesehen und wird in Version 17 vollständig entfernt. Bitte verwenden Sie stattdessen <a href=\"https://frappe.io/helpdesk\">Frappe Helpdesk</a>."
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.js:509
 msgid "This option can be checked to edit the 'Posting Date' and 'Posting Time' fields."
@@ -53215,7 +53227,7 @@ msgstr "Diese(r) {} wird als Materialtransfer behandelt."
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Threshold Exemption"
-msgstr ""
+msgstr "Schwellenwertbefreiung"
 
 #. Label of the threshold_percentage (Percent) field in DocType 'Promotional
 #. Scheme Price Discount'
@@ -53334,7 +53346,7 @@ msgstr "Zeit (in Min)"
 #: erpnext/projects/doctype/project/project.json
 #: erpnext/projects/doctype/task/task.json
 msgid "Timeline"
-msgstr ""
+msgstr "Zeitleiste"
 
 #: erpnext/manufacturing/doctype/workstation/workstation_job_card.html:36
 #: erpnext/public/js/projects/timer.js:5
@@ -53381,7 +53393,7 @@ msgstr "Zeitraport für Vorgänge."
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:894
 msgid "Timesheet {0} cannot be invoiced in its current state"
-msgstr ""
+msgstr "Zeiterfassung {0} kann in ihrem aktuellen Status nicht in Rechnung gestellt werden"
 
 #. Label of the timesheet_sb (Section Break) field in DocType 'Projects
 #. Settings'
@@ -53461,7 +53473,7 @@ msgstr "Bis Datum und Uhrzeit"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:118
 msgid "To Delete list generated with {0} DocTypes"
-msgstr ""
+msgstr "Löschliste mit {0} DocTypes generiert"
 
 #. Option for the 'Sales Order Status' (Select) field in DocType 'Production
 #. Plan'
@@ -53695,7 +53707,7 @@ msgstr "Um \"Artikel ohne Lagerhaltung\" in die Materialanforderungsplanung einz
 #. Sub-assemblies' (Check) field in DocType 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "To include sub-assembly costs and secondary items in Finished Goods on a work order without using a job card, when the 'Use Multi-Level BOM' option is enabled."
-msgstr ""
+msgstr "Um Unterbaugruppen-Kosten und Sekundärartikel in Fertigerzeugnissen eines Arbeitsauftrags ohne Jobkarte einzubeziehen, wenn die Option 'Mehrstufige Stückliste verwenden' aktiviert ist."
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:2247
 #: erpnext/controllers/accounts_controller.py:3253
@@ -53991,7 +54003,7 @@ msgstr "Gesamt abgeschlossene Menge"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:191
 msgid "Total Completed Qty is required for Job Card {0}, please start and complete the job card before submission"
-msgstr ""
+msgstr "Gesamte fertiggestellte Menge ist für Auftragszettel {0} erforderlich. Bitte starten und vervollständigen Sie den Auftragszettel vor der Buchung."
 
 #. Label of the total_consumed_material_cost (Currency) field in DocType
 #. 'Project'
@@ -54153,7 +54165,7 @@ msgstr "Einstandskosten gesamt (Unternehmenswährung)"
 #. Label of the total_vouchers (Int) field in DocType 'Repost Item Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Total Ledgers"
-msgstr ""
+msgstr "Gesamtanzahl Buchungen"
 
 #: erpnext/accounts/report/balance_sheet/balance_sheet.py:220
 msgid "Total Liability"
@@ -54402,7 +54414,7 @@ msgstr "Summe Steuern"
 
 #: erpnext/accounts/report/tds_computation_summary/tds_computation_summary.py:86
 msgid "Total Taxable Amount"
-msgstr ""
+msgstr "Gesamter steuerpflichtiger Betrag"
 
 #. Label of the total_taxes_and_charges (Currency) field in DocType 'Payment
 #. Entry'
@@ -54607,7 +54619,7 @@ msgstr "Summe (Anzahl)"
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Totals (Company Currency)"
-msgstr ""
+msgstr "Summen (Unternehmenswährung)"
 
 #: erpnext/stock/doctype/item/item_dashboard.py:33
 msgid "Traceability"
@@ -54707,7 +54719,7 @@ msgstr "Transaktionsdatum"
 
 #: erpnext/setup/doctype/company/company.py:1090
 msgid "Transaction Deletion Document {0} has been triggered for company {1}"
-msgstr ""
+msgstr "Transaktionslöschdokument {0} wurde für das Unternehmen {1} ausgelöst"
 
 #. Name of a DocType
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
@@ -54727,15 +54739,15 @@ msgstr "Eintrag zum Datensatz zur Transaktionslöschung"
 #. Name of a DocType
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Transaction Deletion Record To Delete"
-msgstr ""
+msgstr "Transaktionslöschprotokoll zum Löschen"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1101
 msgid "Transaction Deletion Record {0} is already running. {1}"
-msgstr ""
+msgstr "Transaktionslöschdatensatz {0} wird bereits ausgeführt. {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1120
 msgid "Transaction Deletion Record {0} is currently deleting {1}. Cannot save documents until deletion completes."
-msgstr ""
+msgstr "Transaktionslöschungsdatensatz {0} löscht derzeit {1}. Dokumente können erst gespeichert werden, wenn die Löschung abgeschlossen ist."
 
 #. Label of the transaction_details_section (Section Break) field in DocType
 #. 'GL Entry'
@@ -54771,7 +54783,7 @@ msgstr "Transaktionsname"
 
 #: erpnext/stock/report/negative_batch_report/negative_batch_report.py:60
 msgid "Transaction Qty"
-msgstr ""
+msgstr "Transaktionsmenge"
 
 #. Label of the transaction_settings_section (Tab Break) field in DocType
 #. 'Buying Settings'
@@ -54786,7 +54798,7 @@ msgstr "Transaktionseinstellungen"
 #. Rate'
 #: erpnext/accounts/doctype/tax_withholding_rate/tax_withholding_rate.json
 msgid "Transaction Threshold"
-msgstr ""
+msgstr "Transaktionsschwellenwert"
 
 #. Label of the transaction_type (Data) field in DocType 'Bank Transaction'
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.json
@@ -54805,19 +54817,19 @@ msgstr "Die Transaktionswährung: {0} darf sich nicht von der Währung des Bankk
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:65
 msgid "Transaction date can't be earlier than previous movement date"
-msgstr ""
+msgstr "Transaktionsdatum darf nicht vor dem vorherigen Bewegungsdatum liegen"
 
 #. Description of the 'Applicable For' (Section Break) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Transaction for which tax is withheld"
-msgstr ""
+msgstr "Transaktion, für die Steuer einbehalten wird"
 
 #. Description of the 'Deducted From' (Section Break) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Transaction from which tax is withheld"
-msgstr ""
+msgstr "Transaktion, von der die Steuer einbehalten wird"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:865
 msgid "Transaction not allowed against stopped Work Order {0}"
@@ -55371,7 +55383,7 @@ msgstr "URL kann nur eine Zeichenfolge sein"
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 msgid "UTM Analytics"
-msgstr ""
+msgstr "UTM-Analyse"
 
 #. Option for the 'Data Fetch Method' (Select) field in DocType 'Accounts
 #. Settings'
@@ -55390,7 +55402,7 @@ msgstr "Zuweisungen aufheben"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:466
 msgid "Unable to fetch DocType details. Please contact system administrator."
-msgstr ""
+msgstr "DocType-Details können nicht abgerufen werden. Bitte wenden Sie sich an den Systemadministrator."
 
 #: erpnext/setup/utils.py:149
 msgid "Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually"
@@ -55465,13 +55477,13 @@ msgstr "Innerhalb der Garantie"
 #. Option for the 'Status' (Select) field in DocType 'Tax Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Under Withheld"
-msgstr ""
+msgstr "Zu wenig einbehalten"
 
 #. Label of the under_withheld_reason (Select) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Under Withheld Reason"
-msgstr ""
+msgstr "Grund für unvollständigen Einbehalt"
 
 #: erpnext/manufacturing/doctype/workstation/workstation.js:78
 msgid "Under Working Hours table, you can add start and end times for a Workstation. For example, a Workstation may be active from 9 am to 1 pm, then 2 pm to 5 pm. You can also specify the working hours based on shifts. While scheduling a Work Order, the system will check for the availability of the Workstation based on the working hours specified."
@@ -55479,7 +55491,7 @@ msgstr "In der Tabelle „Arbeitszeit“ können Sie Start- und Endzeiten für e
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:936
 msgid "Unexpected Naming Series Pattern"
-msgstr ""
+msgstr "Unerwartetes Nummernkreismuster"
 
 #. Option for the 'Fulfilment Status' (Select) field in DocType 'Contract'
 #: erpnext/crm/doctype/contract/contract.json
@@ -56066,7 +56078,7 @@ msgstr "Mehrstufige Stückliste verwenden"
 #. DocType 'Global Defaults'
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
 msgid "Use Posting Datetime for Naming Documents"
-msgstr ""
+msgstr "Buchungsdatum und -uhrzeit für die Benennung von Dokumenten verwenden"
 
 #. Label of the use_serial_batch_fields (Check) field in DocType 'Stock
 #. Settings'
@@ -56216,7 +56228,7 @@ msgstr "Benutzer können das Kontrollkästchen aktivieren, wenn sie den Eingangs
 #. 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Users can make manufacture entry against Job Cards"
-msgstr ""
+msgstr "Benutzer können Fertigungsbuchungen gegen Jobkarten erstellen"
 
 #. Description of the 'Role Allowed to Over Bill ' (Link) field in DocType
 #. 'Accounts Settings'
@@ -56823,7 +56835,7 @@ msgstr "Stücklistenaktualisierungsprotokoll anzeigen"
 #: erpnext/accounts/onboarding_step/view_balance_sheet/view_balance_sheet.json
 #: erpnext/assets/onboarding_step/view_balance_sheet/view_balance_sheet.json
 msgid "View Balance Sheet"
-msgstr ""
+msgstr "Bilanz anzeigen"
 
 #: erpnext/public/js/setup_wizard.js:47
 msgid "View Chart of Accounts"
@@ -56863,7 +56875,7 @@ msgstr "Jetzt ansehen"
 #. Description of a report in the Onboarding Step 'View Project Summary'
 #: erpnext/projects/onboarding_step/view_project_summary/view_project_summary.json
 msgid "View Project Summary"
-msgstr ""
+msgstr "Projektzusammenfassung anzeigen"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'View Purchase Order Analysis'
@@ -56871,20 +56883,20 @@ msgstr ""
 #. Analysis'
 #: erpnext/buying/onboarding_step/view_purchase_order_analysis/view_purchase_order_analysis.json
 msgid "View Purchase Order Analysis"
-msgstr ""
+msgstr "Lieferauftragsanalyse anzeigen"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'View Sales Order Analysis'
 #. Description of a report in the Onboarding Step 'View Sales Order Analysis'
 #: erpnext/selling/onboarding_step/view_sales_order_analysis/view_sales_order_analysis.json
 msgid "View Sales Order Analysis"
-msgstr ""
+msgstr "Auftragsanalyse anzeigen"
 
 #. Label of an action in the Onboarding Step 'View Stock Balance Report'
 #: erpnext/stock/onboarding_step/view_stock_balance_report/view_stock_balance_report.json
 #: erpnext/stock/report/stock_ledger/stock_ledger.js:139
 msgid "View Stock Balance"
-msgstr ""
+msgstr "Lagerbestand anzeigen"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'View Stock Balance Report'
@@ -56892,11 +56904,11 @@ msgstr ""
 #: erpnext/selling/onboarding_step/view_stock_balance_report/view_stock_balance_report.json
 #: erpnext/stock/onboarding_step/view_stock_balance_report/view_stock_balance_report.json
 msgid "View Stock Balance Report"
-msgstr ""
+msgstr "Lagerbestandsbericht anzeigen"
 
 #: erpnext/stock/report/stock_balance/stock_balance.js:156
 msgid "View Stock Ledger"
-msgstr ""
+msgstr "Lagerbuch anzeigen"
 
 #: erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.js:8
 msgid "View Type"
@@ -56905,12 +56917,12 @@ msgstr "Ansichtstyp"
 #. Label of an action in the Onboarding Step 'View Work Order Summary Report'
 #: erpnext/manufacturing/onboarding_step/view_work_order_summary_report/view_work_order_summary_report.json
 msgid "View Work Order Summary"
-msgstr ""
+msgstr "Arbeitsauftragsübersicht anzeigen"
 
 #. Title of an Onboarding Step
 #: erpnext/manufacturing/onboarding_step/view_work_order_summary_report/view_work_order_summary_report.json
 msgid "View Work Order Summary Report"
-msgstr ""
+msgstr "Arbeitsauftrag-Zusammenfassungsbericht anzeigen"
 
 #. Label of the view_attachments (Check) field in DocType 'Project User'
 #: erpnext/projects/doctype/project_user/project_user.json
@@ -56928,7 +56940,7 @@ msgstr "Vimeo"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:216
 msgid "Virtual DocType"
-msgstr ""
+msgstr "Virtueller DocType"
 
 #: erpnext/templates/pages/help.html:46
 msgid "Visit the forums"
@@ -57290,7 +57302,7 @@ msgstr "Lager ist erforderlich"
 
 #: erpnext/manufacturing/report/bom_stock_analysis/bom_stock_analysis.py:286
 msgid "Warehouse is required to get producible FG Items"
-msgstr ""
+msgstr "Lager ist erforderlich, um produzierbare Fertigerzeugnisse abzurufen"
 
 #: erpnext/stock/doctype/warehouse/warehouse.py:233
 msgid "Warehouse not found against the account {0}"
@@ -57464,7 +57476,7 @@ msgstr "Warnung: Auftrag {0} zu Kunden-Bestellung bereits vorhanden {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:75
 msgid "Warning: This action cannot be undone!"
-msgstr ""
+msgstr "Warnung: Diese Aktion kann nicht rückgängig gemacht werden!"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_validation.py:77
 msgid "Warnings"
@@ -57550,7 +57562,7 @@ msgstr "Wellenlänge in Megametern"
 
 #: erpnext/controllers/accounts_controller.py:193
 msgid "We can see {0} is made against {1}. If you want {1}'s outstanding to be updated, uncheck the '{2}' checkbox."
-msgstr ""
+msgstr "Es ist erkennbar, dass {0} gegen {1} erstellt wurde. Wenn Sie den offenen Betrag von {1} aktualisieren möchten, deaktivieren Sie das Kontrollkästchen '{2}'."
 
 #: erpnext/www/support/index.html:7
 msgid "We're here to help!"
@@ -57685,7 +57697,7 @@ msgstr "Wofür benötigen Sie Hilfe?"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:82
 msgid "What will be deleted:"
-msgstr ""
+msgstr "Was wird gelöscht:"
 
 #. Label of the whatsapp_no (Data) field in DocType 'Lead'
 #. Label of the whatsapp (Data) field in DocType 'Opportunity'
@@ -57709,19 +57721,19 @@ msgstr "Wenn ein übergeordnetes Lager ausgewählt wird, führt das System Proje
 #. 'Tax Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "When checked, only cumulative threshold will be applied"
-msgstr ""
+msgstr "Falls aktiviert, wird nur der kumulative Schwellenwert angewendet"
 
 #. Description of the 'Disable Cumulative Threshold' (Check) field in DocType
 #. 'Tax Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "When checked, only transaction threshold will be applied for transaction individually"
-msgstr ""
+msgstr "Falls aktiviert, wird nur der Transaktionsschwellenwert für jede Transaktion einzeln angewendet"
 
 #. Description of the 'Use Posting Datetime for Naming Documents' (Check) field
 #. in DocType 'Global Defaults'
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
 msgid "When checked, the system will use the posting datetime of the document for naming the document instead of the creation datetime of the document."
-msgstr ""
+msgstr "Falls aktiviert, verwendet das System das Buchungsdatum des Dokuments für die Benennung des Dokuments anstelle des Erstellungsdatums."
 
 #: erpnext/stock/doctype/item/item.js:1168
 msgid "When creating an Item, entering a value for this field will automatically create an Item Price at the backend."
@@ -57735,7 +57747,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:304
 msgid "When there are multiple finished goods ({0}) in a Repack stock entry, the basic rate for all finished goods must be set manually. To set rate manually, enable the checkbox 'Set Basic Rate Manually' in the respective finished good row."
-msgstr ""
+msgstr "Wenn ein Umlagerungs-Lagerbuchung mehrere Fertigerzeugnisse ({0}) enthält, muss der Grundpreis für alle Fertigerzeugnisse manuell festgelegt werden. Um den Preis manuell festzulegen, aktivieren Sie das Kontrollkästchen 'Grundpreis manuell festlegen' in der jeweiligen Fertigerzeugnis-Zeile."
 
 #. Description of the 'Deferred Expense Account' (Link) field in DocType 'Item
 #. Default'
@@ -57814,33 +57826,33 @@ msgstr "Auszahlung"
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Withholding Date"
-msgstr ""
+msgstr "Einbehaltungsdatum"
 
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:278
 msgid "Withholding Document"
-msgstr ""
+msgstr "Einbehaltsdokument"
 
 #. Label of the withholding_name (Dynamic Link) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Withholding Document Name"
-msgstr ""
+msgstr "Name des Einbehaltsbelegs"
 
 #. Label of the withholding_doctype (Link) field in DocType 'Tax Withholding
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Withholding Document Type"
-msgstr ""
+msgstr "Einbehalt-Dokumenttyp"
 
 #. Label of a chart in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "Won Opportunities"
-msgstr ""
+msgstr "Gewonnene Chancen"
 
 #. Label of a number card in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "Won Opportunity (Last 1 Month)"
-msgstr ""
+msgstr "Gewonnene Chance (letzter Monat)"
 
 #. Label of the work_done (Small Text) field in DocType 'Maintenance Visit
 #. Purpose'
@@ -57966,7 +57978,7 @@ msgstr "Arbeitsauftragsübersicht"
 #. Report'
 #: erpnext/manufacturing/onboarding_step/view_work_order_summary_report/view_work_order_summary_report.json
 msgid "Work Order Summary Report"
-msgstr ""
+msgstr "Zusammenfassungsbericht Arbeitsaufträge"
 
 #: erpnext/stock/doctype/material_request/material_request.py:877
 msgid "Work Order cannot be created for following reason: <br> {0}"
@@ -58394,7 +58406,7 @@ msgstr "Sie können es als Maschinenname oder Vorgangstyp festlegen. Zum Beispie
 
 #: erpnext/controllers/accounts_controller.py:214
 msgid "You can use {0} to reconcile against {1} later."
-msgstr ""
+msgstr "Sie können {0} verwenden, um später mit {1} abzugleichen."
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1339
 msgid "You can't make any changes to Job Card since Work Order is closed."
@@ -58442,7 +58454,7 @@ msgstr "Sie können nicht beide Einstellungen '{0}' und '{1}' aktivieren."
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:167
 msgid "You cannot outward following {0} as either they are Delivered, Inactive or located in a different warehouse."
-msgstr ""
+msgstr "Folgende {0} können nicht ausgelagert werden, da sie entweder geliefert, inaktiv oder in einem anderen Lager befindlich sind."
 
 #: erpnext/selling/page/point_of_sale/pos_payment.js:625
 msgid "You cannot redeem more than {0}."
@@ -58470,7 +58482,7 @@ msgstr "Sie können dieses Dokument nicht {0}, da nach {2} ein weiterer Perioden
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:580
 msgid "You do not have permission to edit this document"
-msgstr ""
+msgstr "Sie haben keine Berechtigung, dieses Dokument zu bearbeiten"
 
 #: erpnext/controllers/accounts_controller.py:3862
 msgid "You do not have permissions to {} items in a {}."
@@ -58639,7 +58651,7 @@ msgstr "als Prozentsatz der fertigen Artikelmenge"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1589
 msgid "as of {0}"
-msgstr ""
+msgstr "zum {0}"
 
 #: erpnext/www/book_appointment/index.html:43
 msgid "at"
@@ -59034,7 +59046,7 @@ msgstr "{0} Anlagevermögen kann nicht übertragen werden"
 
 #: erpnext/controllers/trends.py:66
 msgid "{0} can be either {1} or {2}."
-msgstr ""
+msgstr "{0} kann entweder {1} oder {2} sein."
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:279
 msgid "{0} can not be negative"
@@ -59119,7 +59131,7 @@ msgstr "{0} in Zeile {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:452
 msgid "{0} is a child table and will be deleted automatically with its parent"
-msgstr ""
+msgstr "{0} ist eine untergeordnete Tabelle und wird automatisch mit dem übergeordneten Datensatz gelöscht"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:94
 msgid "{0} is a mandatory Accounting Dimension. <br>Please set a value for {0} in Accounting Dimensions section."
@@ -59162,7 +59174,7 @@ msgstr "{0} ist zwingend erforderlich. Möglicherweise wurde der Datensatz für 
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1813
 msgid "{0} is not a CSV file."
-msgstr ""
+msgstr "{0} ist keine CSV-Datei."
 
 #: erpnext/selling/doctype/customer/customer.py:235
 msgid "{0} is not a company bank account"
@@ -59178,7 +59190,7 @@ msgstr "{0} ist kein Lagerartikel"
 
 #: erpnext/accounts/report/budget_variance_report/budget_variance_report.py:419
 msgid "{0} is not a valid Accounting Dimension."
-msgstr ""
+msgstr "{0} ist keine gültige Buchhaltungsdimension."
 
 #: erpnext/controllers/item_variant.py:141
 msgid "{0} is not a valid Value for Attribute {1} of Item {2}."
@@ -59214,7 +59226,7 @@ msgstr "{0} ist geöffnet. Schließen Sie die Kasse oder stornieren Sie den vorh
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:525
 msgid "{0} items disassembled"
-msgstr ""
+msgstr "{0} Artikel demontiert"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:489
 msgid "{0} items in progress"
@@ -59230,11 +59242,11 @@ msgstr "{0} Elemente hergestellt"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:493
 msgid "{0} items returned"
-msgstr ""
+msgstr "{0} Artikel zurückgegeben"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:496
 msgid "{0} items to return"
-msgstr ""
+msgstr "{0} Artikel zurückzugeben"
 
 #: erpnext/controllers/sales_and_purchase_return.py:218
 msgid "{0} must be negative in return document"
@@ -59270,7 +59282,7 @@ msgstr "{0} Einheiten des Artikels {1} sind in keinem der Lager verfügbar."
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:1080
 msgid "{0} units of Item {1} is not available in any of the warehouses. Other Pick Lists exist for this item."
-msgstr ""
+msgstr "{0} Einheiten von Artikel {1} sind in keinem der Lager verfügbar. Für diesen Artikel existieren weitere Picklisten."
 
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py:145
 msgid "{0} units of {1} are required in {2} with the inventory dimension: {3} on {4} {5} for {6} to complete the transaction."
@@ -59518,19 +59530,19 @@ msgstr "{0}, schließen Sie die Operation {1} vor der Operation {2} ab."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:523
 msgid "{0}: Child table (auto-deleted with parent)"
-msgstr ""
+msgstr "{0}: Untergeordnete Tabelle (automatisch mit dem übergeordneten Datensatz gelöscht)"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:518
 msgid "{0}: Not found"
-msgstr ""
+msgstr "{0}: Nicht gefunden"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:514
 msgid "{0}: Protected DocType"
-msgstr ""
+msgstr "{0}: Geschützter DocType"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:528
 msgid "{0}: Virtual DocType (no database table)"
-msgstr ""
+msgstr "{0}: Virtueller DocType (keine Datenbanktabelle)"
 
 #: erpnext/controllers/accounts_controller.py:543
 msgid "{0}: {1} does not belong to the Company: {2}"
@@ -59538,7 +59550,7 @@ msgstr "{0}: {1} gehört nicht zum Unternehmen: {2}"
 
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1323
 msgid "{0}: {1} does not exist"
-msgstr ""
+msgstr "{0}: {1} existiert nicht"
 
 #: erpnext/accounts/party.py:78
 msgid "{0}: {1} does not exists"
