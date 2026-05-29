@@ -38,12 +38,14 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      HOTFIX_BRANCH: version-16-hotfix
 
     steps:
-      - name: Checkout version-16-hotfix
+      - name: Checkout ${{ env.HOTFIX_BRANCH }}
         uses: actions/checkout@v6
         with:
-          ref: version-16-hotfix
+          ref: ${{ env.HOTFIX_BRANCH }}
           # Full history so `git fetch origin develop` inside the helper works
           fetch-depth: 0
 
@@ -61,7 +63,7 @@ jobs:
 
       - name: Run sync script
         run: |
-          bash ${GITHUB_WORKSPACE}/.github/helper/sync_hotfix_translations.sh
+          bash "${GITHUB_WORKSPACE}/.github/helper/sync_hotfix_translations.sh" "${HOTFIX_BRANCH}"
         env:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-          PR_REVIEWER: barredterra # change to your GitHub username if you copied this file
+          PR_REVIEWER: diptanilsaha
