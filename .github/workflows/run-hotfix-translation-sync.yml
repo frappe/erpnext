@@ -9,9 +9,6 @@
 name: Run hotfix translation sync
 
 on:
-  push:
-    paths:
-      - "**/locale/main.pot"
   workflow_dispatch:
 
 # One run at a time per branch. cancel-in-progress: false to avoid leaving
