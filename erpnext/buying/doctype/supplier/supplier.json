@@ -368,19 +368,22 @@
    "fieldname": "supplier_primary_contact",
    "fieldtype": "Link",
    "label": "Supplier Primary Contact",
+   "no_copy": 1,
    "options": "Contact"
   },
   {
    "fetch_from": "supplier_primary_contact.mobile_no",
    "fieldname": "mobile_no",
    "fieldtype": "Read Only",
-   "label": "Mobile No"
+   "label": "Mobile No",
+   "no_copy": 1
   },
   {
    "fetch_from": "supplier_primary_contact.email_id",
    "fieldname": "email_id",
    "fieldtype": "Read Only",
-   "label": "Email Id"
+   "label": "Email Id",
+   "no_copy": 1
   },
   {
    "fieldname": "column_break_44",
@@ -390,6 +393,7 @@
    "fieldname": "primary_address",
    "fieldtype": "Text Editor",
    "label": "Primary Address",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -397,6 +401,7 @@
    "fieldname": "supplier_primary_address",
    "fieldtype": "Link",
    "label": "Supplier Primary Address",
+   "no_copy": 1,
    "options": "Address"
   },
   {
@@ -517,7 +522,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-03-09 17:15:25.465759",
+ "modified": "2026-05-29 16:52:59.441272",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
