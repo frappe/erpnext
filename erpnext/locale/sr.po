@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version:  frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-27 15:21+0000\n"
-"PO-Revision-Date: 2025-12-23 03:03+0000\n"
+"PO-Revision-Date: 2026-05-29 17:05+0000\n"
 "Last-Translator: hello@frappe.io\n"
 "Language: sr_SP\n"
 "Language-Team: Serbian (Cyrillic)\n"
@@ -22,6 +22,12 @@ msgid ""
 "\t\t\tHowever, enabling this setting may lead to negative stock in the system.\n"
 "\t\t\tSo please ensure the stock levels are adjusted as soon as possible to maintain the correct valuation rate."
 msgstr ""
+"\n"
+"\t\t\tШаржа {0} ставке {1} има негативно стање залиха у складишту {2}{3}.\n"
+"\t\t\tМолимо Вас да унесете количину залиха од {4} како бисте наставили са овим уносом.\n"
+"\t\t\tУколико није могуће извршити корективно књижење, омогућите опцију 'Дозволи негативно стање залиха за шаржу' у подешавањима залиха како бисте наставили.\n"
+"\t\t\tМеђутим, омогућавањем ове опције може довести до негативног стања залиха у систему.\n"
+"\t\t\tОбавезно ускладите стање залиха што је пре могуће како би стопа вредновања остала тачна."
 
 #. Label of the column_break_32 (Column Break) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -149,7 +155,7 @@ msgstr "% Завршено"
 #. Label of the cost_allocation_per (Percent) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "% Cost Allocation"
-msgstr ""
+msgstr "Расподела трошка %"
 
 #. Label of the per_delivered (Percent) field in DocType 'Pick List'
 #. Label of the per_delivered (Percent) field in DocType 'Subcontracting Inward
@@ -602,7 +608,7 @@ msgstr "Изнад 90"
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1261
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1262
 msgid "<0"
-msgstr ""
+msgstr "<0"
 
 #: erpnext/assets/doctype/asset/asset.py:541
 msgid "<b>Cannot create asset.</b><br><br>You're trying to create <b>{0} asset(s)</b> from {2} {3}.<br>However, only <b>{1} item(s)</b> were purchased and <b>{4} asset(s)</b> already exist against {5}."
@@ -676,7 +682,7 @@ msgstr "<div class=\"text-muted text-center\">{0}</div>"
 #. Content of the 'Stock Levels HTML' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "<div id=\"stock-levels-placeholder\"></div>"
-msgstr ""
+msgstr "<div id=\"stock-levels-placeholder\"></div>"
 
 #. Content of the 'uom_help_html' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -1197,7 +1203,7 @@ msgstr "Нови састанак је заказан за Вас са {0}"
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:3
 msgid "A new fiscal year has been automatically created."
-msgstr ""
+msgstr "Нова фискална година је аутоматски креирана."
 
 #. Description of the 'Inspection Required before Delivery' (Check) field in
 #. DocType 'Item'
@@ -1248,7 +1254,7 @@ msgstr "ACC-PINV-.YYYY.-"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:88
 msgid "ALL records will be deleted (entire DocType cleared)"
-msgstr ""
+msgstr "Сви записи ће бити обрисани (цео DocType ће бити очишћен)"
 
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:552
 msgid "AMC Expiry (Serial)"
@@ -1264,7 +1270,7 @@ msgstr "Датум истека годишњег уговора о одржав�
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "AP Summary"
-msgstr ""
+msgstr "Резиме обавеза"
 
 #. Label of the api_details_section (Section Break) field in DocType 'Currency
 #. Exchange Settings'
@@ -1275,7 +1281,7 @@ msgstr "API Детаљи"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "AR Summary"
-msgstr ""
+msgstr "Резиме потраживања"
 
 #. Label of the awb_number (Data) field in DocType 'Shipment'
 #: erpnext/stock/doctype/shipment/shipment.json
@@ -2052,7 +2058,7 @@ msgstr "Рачуноводствени мастер подаци"
 #. Title of the Module Onboarding 'Accounting Onboarding'
 #: erpnext/accounts/module_onboarding/accounting_onboarding/accounting_onboarding.json
 msgid "Accounting Onboarding"
-msgstr ""
+msgstr "Увод у рачуноводство"
 
 #. Name of a DocType
 #. Label of a Link in the Invoicing Workspace
@@ -2222,7 +2228,7 @@ msgstr "Подешавање рачуна"
 #: erpnext/desktop_icon/accounts_setup.json
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "Accounts Setup"
-msgstr ""
+msgstr "Подешавање рачуна"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:1329
 msgid "Accounts table cannot be blank."
@@ -2409,7 +2415,7 @@ msgstr "Извршене радње"
 #: erpnext/stock/doctype/item/item.js:407
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Activate Serial / Batch No for Item"
-msgstr ""
+msgstr "Активирај број серије / шарже за ставку"
 
 #: erpnext/selling/page/sales_funnel/sales_funnel.py:55
 msgid "Active Leads"
@@ -2730,7 +2736,7 @@ msgstr "Додај ручно"
 
 #: erpnext/projects/doctype/task/task_tree.js:42
 msgid "Add Multiple"
-msgstr ""
+msgstr "Додај вишеструко"
 
 #: erpnext/projects/doctype/task/task_tree.js:49
 msgid "Add Multiple Tasks"
@@ -2876,7 +2882,7 @@ msgstr "Додај у транзит"
 
 #: erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.py:119
 msgid "Add vouchers to generate preview."
-msgstr ""
+msgstr "Додајте документа ради генерисања прегледа."
 
 #: erpnext/accounts/doctype/coupon_code/coupon_code.js:36
 msgid "Add/Edit Coupon Conditions"
@@ -3070,7 +3076,7 @@ msgstr "Додатни проценат попуста"
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_secondary_item/subcontracting_inward_order_secondary_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Additional Finished Good"
-msgstr ""
+msgstr "Додатни готов производ"
 
 #. Label of the addtional_info (Section Break) field in DocType 'Journal Entry'
 #. Label of the additional_info_section (Section Break) field in DocType
@@ -3340,7 +3346,7 @@ msgstr "Плаћени аванс"
 #. Label of the advance_paid (Currency) field in DocType 'Purchase Order'
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 msgid "Advance Paid (Company Currency)"
-msgstr ""
+msgstr "Плаћена аконтација (валута компаније)"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order_list.js:75
 #: erpnext/selling/doctype/sales_order/sales_order_list.js:122
@@ -3462,7 +3468,7 @@ msgstr "Ваздухопловство"
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.js:20
 msgid "After save, please refresh the page to apply the changes."
-msgstr ""
+msgstr "Након чувања, освежите страницу како би се примениле измене."
 
 #. Label of the against (Text) field in DocType 'GL Entry'
 #: erpnext/accounts/doctype/gl_entry/gl_entry.json
@@ -3832,7 +3838,7 @@ msgstr "Сви потенцијални купци (отворени)"
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.html:115
 #: erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.html:113
 msgid "All Parties"
-msgstr ""
+msgstr "Све странке"
 
 #. Option for the 'Send To' (Select) field in DocType 'SMS Center'
 #: erpnext/selling/doctype/sms_center/sms_center.json
@@ -4143,7 +4149,7 @@ msgstr "Дозволи негативно стање залиха"
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Allow Negative Stock for Batch"
-msgstr ""
+msgstr "Дозволи негативно стање залиха за шаржу"
 
 #. Label of the allow_or_restrict (Select) field in DocType 'Accounting
 #. Dimension Filter'
@@ -4892,7 +4898,7 @@ msgstr "Аналитичар"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Analytical Accounting"
-msgstr ""
+msgstr "Аналитичко рачуноводство"
 
 #: erpnext/public/js/utils.js:184
 msgid "Annual Billing: {0}"
@@ -5197,7 +5203,7 @@ msgstr "Примени споразума о нивоу услуге за вре
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Apply discounts and margins on products"
-msgstr ""
+msgstr "Примени попусте и марже на производе"
 
 #. Label of the apply_restriction_on_values (Check) field in DocType
 #. 'Accounting Dimension Filter'
@@ -5761,7 +5767,7 @@ msgstr "Статус имовине"
 #. Label of the asset_type (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Asset Type"
-msgstr ""
+msgstr "Врста имовине"
 
 #. Label of the asset_value (Currency) field in DocType 'Asset Capitalization
 #. Asset Item'
@@ -5956,7 +5962,7 @@ msgstr "Имовина"
 #. Title of the Module Onboarding 'Asset Onboarding'
 #: erpnext/assets/module_onboarding/asset_onboarding/asset_onboarding.json
 msgid "Assets Setup"
-msgstr ""
+msgstr "Поставке имовине"
 
 #: erpnext/controllers/buying_controller.py:1059
 msgid "Assets not created for {item_code}. You will have to create asset manually."
@@ -5996,7 +6002,7 @@ msgstr "У реду #{0}: Одабрана количина {1} за ставк�
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1436
 msgid "At Row {0}: In Serial and Batch Bundle {1} must have docstatus as 1 and not 0"
-msgstr ""
+msgstr "У реду {0}: Пакет серије и шарже {1} мора имати docstatus 1, а не 0"
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:84
 msgid "At least one account with exchange gain or loss is required"
@@ -6029,7 +6035,7 @@ msgstr "Мора бити изабран барем један од продај
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:324
 msgid "At least one raw material item must be present in the stock entry for the type {0}"
-msgstr ""
+msgstr "Најмање једна сировина мора бити присутна у уносу залиха за врсту {0}"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:27
 msgid "At least one row is required for a financial report template"
@@ -6330,7 +6336,7 @@ msgstr "Грешка у аутоматском подешавању пореза
 
 #: erpnext/setup/doctype/employee/employee.py:170
 msgid "Auto User Creation Error"
-msgstr ""
+msgstr "Грешка приликом аутоматског креирања корисника"
 
 #. Description of the 'Close Replied Opportunity After Days' (Int) field in
 #. DocType 'CRM Settings'
@@ -6403,7 +6409,7 @@ msgstr "Аутоматски креирај нову шаржу"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Automatically Fetch Payment Terms from Order/Quotation"
-msgstr ""
+msgstr "Аутоматски преузми услове плаћања из поруџбине / понуде"
 
 #. Label of the automatically_process_deferred_accounting_entry (Check) field
 #. in DocType 'Accounts Settings'
@@ -6438,7 +6444,7 @@ msgstr "Доступно"
 #. DocType 'Bin'
 #: erpnext/stock/doctype/bin/bin.json
 msgid "Available / Future Inventory"
-msgstr ""
+msgstr "Доступан / Будући инвентар"
 
 #. Label of the actual_batch_qty (Float) field in DocType 'Delivery Note Item'
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
@@ -6552,7 +6558,7 @@ msgstr "Доступне залихе за паковање ставки"
 #. Label of the available_for_use_date (Date) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Available for Use Date"
-msgstr ""
+msgstr "Датум доступности за употребу"
 
 #: erpnext/assets/doctype/asset/asset.py:382
 msgid "Available for use date is required"
@@ -6588,7 +6594,7 @@ msgstr "Просечан попуст"
 #. Label of a number card in the Selling Workspace
 #: erpnext/selling/workspace/selling/selling.json
 msgid "Average Order Value"
-msgstr ""
+msgstr "Просечна вредност поруџбине"
 
 #. Label of a number card in the Buying Workspace
 #: erpnext/buying/workspace/buying/buying.json
@@ -6865,18 +6871,18 @@ msgstr "Саставница претрага"
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgid "BOM Secondary Item"
-msgstr ""
+msgstr "Секундарна ставка саставнице"
 
 #. Label of the bom_secondary_item (Data) field in DocType 'Job Card Secondary
 #. Item'
 #: erpnext/manufacturing/doctype/job_card_secondary_item/job_card_secondary_item.json
 msgid "BOM Secondary Item Reference"
-msgstr ""
+msgstr "Референца секундарне ставке саставнице"
 
 #. Name of a report
 #: erpnext/manufacturing/report/bom_stock_analysis/bom_stock_analysis.json
 msgid "BOM Stock Analysis"
-msgstr ""
+msgstr "Анализа залиха саставнице"
 
 #. Label of the tab_2_tab (Tab Break) field in DocType 'BOM Creator'
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.json
@@ -6936,7 +6942,7 @@ msgstr "Операција саставнице на веб-сајту"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:2458
 msgid "BOM and Finished Good Quantity is mandatory for Disassembly"
-msgstr ""
+msgstr "Саставница и количина готовог производа су обавезни за растављање"
 
 #. Label of the bom_and_work_order_tab (Tab Break) field in DocType
 #. 'Manufacturing Settings'
@@ -7353,7 +7359,7 @@ msgstr "Рачун за прекорачење"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/banking.json
 msgid "Bank Reconciliation"
-msgstr ""
+msgstr "Банкарско усклађивање"
 
 #. Name of a report
 #. Label of a Link in the Invoicing Workspace
@@ -7513,7 +7519,7 @@ msgstr "Основни износ кусура (валута компаније)
 #. Label of the base_cost (Currency) field in DocType 'BOM Secondary Item'
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 msgid "Base Cost (Company Currency)"
-msgstr ""
+msgstr "Основни трошак (валута компаније)"
 
 #. Label of the base_cost_per_unit (Float) field in DocType 'BOM Operation'
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
@@ -7534,13 +7540,13 @@ msgstr "Основна цена"
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Base Tax Withheld"
-msgstr ""
+msgstr "Основни износ пореза по одбитку"
 
 #. Label of the taxable_amount (Currency) field in DocType 'Tax Withholding
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Base Taxable Amount"
-msgstr ""
+msgstr "Основни опорезиви износ"
 
 #. Label of the base_total_billable_amount (Currency) field in DocType
 #. 'Timesheet'
@@ -8558,7 +8564,7 @@ msgstr "Датум почетка буџета"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/budget.json
 msgid "Budget Variance"
-msgstr ""
+msgstr "Одступање од буџета"
 
 #. Name of a report
 #. Label of a Link in the Invoicing Workspace
@@ -8723,7 +8729,7 @@ msgstr "Подешавање набавке"
 #. Title of the Module Onboarding 'Buying Onboarding'
 #: erpnext/buying/module_onboarding/buying_onboarding/buying_onboarding.json
 msgid "Buying Setup"
-msgstr ""
+msgstr "Поставке набавке"
 
 #. Label of the buying_and_selling_tab (Tab Break) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -8751,7 +8757,7 @@ msgstr "Подразумевано, назив добављача постављ
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_secondary_item/subcontracting_inward_order_secondary_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "By-Product"
-msgstr ""
+msgstr "Нуспроизвод"
 
 #. Label of the bypass_credit_limit_check (Check) field in DocType 'Customer
 #. Credit Limit'
@@ -8772,7 +8778,7 @@ msgstr "CC за"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "COA Importer"
-msgstr ""
+msgstr "Увоз контног оквира"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
@@ -9056,7 +9062,7 @@ msgstr "Распоред кампање"
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:113
 msgid "Campaign {0} not found"
-msgstr ""
+msgstr "Кампања {0} није пронађена"
 
 #: erpnext/setup/doctype/authorization_control/authorization_control.py:60
 msgid "Can be approved by {0}"
@@ -9171,7 +9177,7 @@ msgstr "Није могуће поново поднети унос за доку
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:204
 msgid "Cannot add child table {0} to deletion list. Child tables are automatically deleted with their parent DocTypes."
-msgstr ""
+msgstr "Није могуће додати зависну табелу {0} за листу за брисање. Зависне табеле се аутоматски бришу заједно са својим матичним DocType-овима."
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:226
 msgid "Cannot amend {0} {1}, please create a new one instead."
@@ -9215,7 +9221,7 @@ msgstr "Није могуће отказати овај унос залиха у
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:579
 msgid "Cannot cancel this document as it is linked with the submitted Asset Value Adjustment <b>{0}</b>. Please cancel the Asset Value Adjustment to continue."
-msgstr ""
+msgstr "Није могуће отказати овај документ јер је повезан са поднетом корекцијом вредности имовине <b>{0}</b>. Молимо Вас да прво откажете корекцију вредности имовине како бисте наставили."
 
 #: erpnext/controllers/buying_controller.py:1148
 msgid "Cannot cancel this document as it is linked with the submitted asset {asset_link}. Please cancel the asset to continue."
@@ -9310,15 +9316,15 @@ msgstr "Није могуће обрисати ставку која је већ
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:197
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:783
 msgid "Cannot delete protected core DocType: {0}"
-msgstr ""
+msgstr "Није могуће обрисати заштићени основни DocType: {0}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:213
 msgid "Cannot delete virtual DocType: {0}. Virtual DocTypes do not have database tables."
-msgstr ""
+msgstr "Није могуће обрисати виртуелни DocType: {0}. Виртуелни DocType немају базе података."
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.py:146
 msgid "Cannot disable Serial and Batch No for Item, as there are existing records for serial / batch."
-msgstr ""
+msgstr "Није могуће онемогућити број серије и шарже за ставку јер већ постоје записи за серију / шаржу."
 
 #: erpnext/setup/doctype/company/company.py:561
 msgid "Cannot disable perpetual inventory, as there are existing Stock Ledger Entries for the company {0}. Please cancel the stock transactions first and try again."
@@ -9326,7 +9332,7 @@ msgstr "Није могуће онемогућити стварно праћењ
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.py:127
 msgid "Cannot disable {0} as it may lead to incorrect stock valuation."
-msgstr ""
+msgstr "Није могуће онемогућити {0} јер то може довести до нетачног вредновања залиха."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:728
 msgid "Cannot disassemble more than produced quantity."
@@ -9334,7 +9340,7 @@ msgstr "Није могуће демонтирати више од произв�
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:926
 msgid "Cannot disassemble {0} qty against Stock Entry {1}. Only {2} qty available to disassemble."
-msgstr ""
+msgstr "Није могуће демонтирати количину {0} из уноса залиха {1}. Доступно је само {2} за демонтажу."
 
 #: erpnext/setup/doctype/company/company.py:223
 msgid "Cannot enable Item-wise Inventory Account, as there are existing Stock Ledger Entries for the company {0} with Warehouse-wise Inventory Account. Please cancel the stock transactions first and try again."
@@ -9347,7 +9353,7 @@ msgstr "Не може се обезбедити испорука по броју
 
 #: erpnext/accounts/doctype/payment_request/payment_request.js:111
 msgid "Cannot fetch selected rows for submitted Payment Request"
-msgstr ""
+msgstr "Није могуће преузети изабране редове за потврђен захтев за наплату"
 
 #: erpnext/public/js/utils/barcode_scanner.js:62
 msgid "Cannot find Item or Warehouse with this Barcode"
@@ -9363,11 +9369,11 @@ msgstr "Не може се пронаћи подразумевано склад�
 
 #: erpnext/accounts/party.py:1063
 msgid "Cannot merge {0} '{1}' into '{2}' as both have existing accounting entries in different currencies for company '{3}'."
-msgstr ""
+msgstr "Није могуће спојити {0} '{1}' у '{2}' јер оба имају постојеће књиговодствене уносе у различитим валутама за '{3}'."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:578
 msgid "Cannot produce more Item {0} than Sales Order quantity {1} {2}"
-msgstr ""
+msgstr "Није могуће произвести више ставке {0} него што је количина на продајној поруџбини {1} {2}"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:1473
 msgid "Cannot produce more item for {0}"
@@ -9401,7 +9407,7 @@ msgstr "Није могуће преузети токен за повезива�
 
 #: erpnext/selling/doctype/customer/customer.py:367
 msgid "Cannot select a Group type Customer Group. Please select a non-group Customer Group."
-msgstr ""
+msgstr "Није могуће изабрати врсту групе као група купаца. Молимо Вас да изаберете групу купаца која није групне врсте."
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:1507
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:1685
@@ -9426,11 +9432,11 @@ msgstr "Не може се поставити више подразумеван�
 
 #: erpnext/controllers/accounts_controller.py:3913
 msgid "Cannot set quantity less than delivered quantity."
-msgstr ""
+msgstr "Не може се поставити количина мања од испоручене количине."
 
 #: erpnext/controllers/accounts_controller.py:3914
 msgid "Cannot set quantity less than received quantity."
-msgstr ""
+msgstr "Не може се поставити количина мања од примљене количине."
 
 #: erpnext/stock/doctype/item_variant_settings/item_variant_settings.py:69
 msgid "Cannot set the field <b>{0}</b> for copying in variants"
@@ -9438,11 +9444,11 @@ msgstr "Не може се поставити поље <b>{0}</b> за копи�
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:266
 msgid "Cannot start deletion. Another deletion {0} is already queued/running. Please wait for it to complete."
-msgstr ""
+msgstr "Брисање не може да започне. Друго брисање {0} је већ у реду чекања или је у току. Молимо Вас да сачекате да се заврши."
 
 #: erpnext/controllers/accounts_controller.py:3941
 msgid "Cannot update rate as item {0} is already ordered or purchased against this quotation"
-msgstr ""
+msgstr "Није могуће ажурирати цену јер је ставка {0} већ поручена или набављена по овој понуди"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1937
 msgid "Cannot {0} from {1} without any negative outstanding invoice"
@@ -9968,15 +9974,15 @@ msgstr "Проверите да ли унос преноса материјал�
 #: erpnext/accounts/doctype/item_tax_template_detail/item_tax_template_detail.json
 #, python-format
 msgid "Check if this tax is not applicable to items (distinct from 0% rate)"
-msgstr ""
+msgstr "Проверите да ли се овај порез не примењује на ставке (различито од стопе 0%)"
 
 #: erpnext/accounts/doctype/journal_entry_template/journal_entry_template.py:58
 msgid "Check row {0} for account {1}: Party Type is only allowed for Receivable or Payable accounts"
-msgstr ""
+msgstr "Проверите ред {0} за рачун {1}: Врста странке је дозвољена само за рачуне потраживања или обавеза"
 
 #: erpnext/accounts/doctype/journal_entry_template/journal_entry_template.py:65
 msgid "Check row {0} for account {1}: Party is only allowed if Party Type is set"
-msgstr ""
+msgstr "Проверите ред {0} за рачун {1}: Странка је дозвољена само уколико је постављена врста странке"
 
 #. Description of the 'Must be Whole Number' (Check) field in DocType 'UOM'
 #: erpnext/setup/doctype/uom/uom.json
@@ -10089,7 +10095,7 @@ msgstr "Технички директор"
 #. Deletion Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Child DocTypes"
-msgstr ""
+msgstr "Зависни DocType-ови"
 
 #. Label of the child_docname (Data) field in DocType 'Pricing Rule Detail'
 #: erpnext/accounts/doctype/pricing_rule_detail/pricing_rule_detail.json
@@ -10105,7 +10111,7 @@ msgstr "Референца зависног реда"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:207
 msgid "Child Table Not Allowed"
-msgstr ""
+msgstr "Зависна табела није дозвољена"
 
 #: erpnext/projects/doctype/task/task.py:314
 msgid "Child Task exists for this Task. You can not delete this Task."
@@ -10119,7 +10125,7 @@ msgstr "Зависни чворови могу бити креирани сам�
 #. 'Transaction Deletion Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Child tables that will also be deleted"
-msgstr ""
+msgstr "Зависне табеле које ће такође бити обрисане"
 
 #: erpnext/stock/doctype/warehouse/warehouse.py:103
 msgid "Child warehouse exists for this warehouse. You can not delete this warehouse."
@@ -10153,7 +10159,7 @@ msgstr "Клаузуле и услови"
 
 #: erpnext/public/js/utils/barcode_scanner.js:493
 msgid "Clear Last Scanned Warehouse"
-msgstr ""
+msgstr "Очисти последње скенирано складиште"
 
 #. Label of the clear_notifications_status (Select) field in DocType
 #. 'Transaction Deletion Record'
@@ -10198,7 +10204,7 @@ msgstr "Датум клиринга је ажуриран"
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.py:158
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.py:173
 msgid "Clearance date changed from {0} to {1} via Bank Clearance Tool"
-msgstr ""
+msgstr "Датум клиринга је промењен са {0} на {1} путем алата за банкарски клиринг"
 
 #: erpnext/public/js/utils/demo.js:21
 msgid "Clearing Demo Data..."
@@ -10364,7 +10370,7 @@ msgstr "Затварање (Почетно + Укупно) "
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_secondary_item/subcontracting_inward_order_secondary_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Co-Product"
-msgstr ""
+msgstr "Споредни производ"
 
 #. Name of a DocType
 #. Label of the code_list (Link) field in DocType 'Common Code'
@@ -10998,7 +11004,7 @@ msgstr "Текући рачун компаније"
 
 #: erpnext/accounts/doctype/bank_account/bank_account.py:63
 msgid "Company Account is mandatory"
-msgstr ""
+msgstr "Рачун компаније је обавезан"
 
 #. Label of the company_address (Link) field in DocType 'Dunning'
 #. Label of the company_address_display (Text Editor) field in DocType 'POS
@@ -11043,7 +11049,7 @@ msgstr "Назив адресе компаније"
 
 #: erpnext/controllers/accounts_controller.py:4379
 msgid "Company Address is missing. You don't have permission to create an Address. Please contact your System Manager."
-msgstr ""
+msgstr "Адреса компаније недостаје. Немате дозволу да креирате адресу. Молимо Вас да се обратите систем менаџеру."
 
 #: erpnext/controllers/accounts_controller.py:4367
 msgid "Company Address is missing. You don't have permission to update it. Please contact your System Manager."
@@ -11110,7 +11116,7 @@ msgstr "Имејл компаније"
 #. Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Company Field"
-msgstr ""
+msgstr "Поље компаније"
 
 #. Label of the company_logo (Attach Image) field in DocType 'Company'
 #: erpnext/public/js/print.js:80 erpnext/setup/doctype/company/company.json
@@ -11167,7 +11173,7 @@ msgstr "Компанија је обавезна за генерисање фа�
 #. Deletion Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Company link field name used for filtering (optional - leave empty to delete all records)"
-msgstr ""
+msgstr "Назив поља за линк компаније који се користи за филтрирање (опционо - оставите празно да бисте обрисали све записе)"
 
 #: erpnext/setup/doctype/company/company.js:222
 msgid "Company name not same"
@@ -11179,7 +11185,7 @@ msgstr "Имовина {0} за компанију и улазни докуме�
 
 #: erpnext/setup/doctype/employee/employee.py:168
 msgid "Company or Personal Email is mandatory when 'Create User Automatically' is enabled"
-msgstr ""
+msgstr "Компанијски или лични имејл је обавезан када је омогућена опција 'Аутоматски креирај корисника'"
 
 #. Description of the 'Registration Details' (Code) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -11219,7 +11225,7 @@ msgstr "Компанија {0} је додата више пута"
 
 #: erpnext/regional/doctype/south_africa_vat_settings/south_africa_vat_settings.py:33
 msgid "Company {0} is not in South Africa."
-msgstr ""
+msgstr "Компанија {0} није у Јужној Африци."
 
 #: erpnext/setup/setup_wizard/operations/taxes_setup.py:14
 msgid "Company {} does not exist yet. Taxes setup aborted."
@@ -11368,17 +11374,17 @@ msgstr "Назив компоненте"
 #. Label of the items (Table) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Components"
-msgstr ""
+msgstr "Компоненте"
 
 #. Option for the 'Asset Type' (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Composite Asset"
-msgstr ""
+msgstr "Композитна имовина"
 
 #. Option for the 'Asset Type' (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Composite Component"
-msgstr ""
+msgstr "Композитна компонента"
 
 #. Label of the comprehensive_insurance (Data) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
@@ -11412,7 +11418,7 @@ msgstr "Услови ће бити примењени на све изабран
 #. Label of an action in the Onboarding Step 'Review Chart of Accounts'
 #: erpnext/accounts/onboarding_step/chart_of_accounts/chart_of_accounts.json
 msgid "Configure Chart of Accounts"
-msgstr ""
+msgstr "Подеси контни оквир"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:56
 msgid "Configure Product Assembly"
@@ -11449,7 +11455,7 @@ msgstr "Датум потврде"
 #. Label of the connection_tab (Tab Break) field in DocType 'Asset Repair'
 #: erpnext/assets/doctype/asset_repair/asset_repair.json
 msgid "Connection"
-msgstr ""
+msgstr "Веза"
 
 #: erpnext/accounts/report/general_ledger/general_ledger.js:176
 msgid "Consider Accounting Dimensions"
@@ -11499,12 +11505,12 @@ msgstr "Размотрите порезе или накнаду за"
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 #: erpnext/accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgid "Consider for Tax Withholding"
-msgstr ""
+msgstr "Узимати у обзир за порез по одбитку"
 
 #. Label of the apply_tds (Check) field in DocType 'Journal Entry'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
 msgid "Consider for Tax Withholding "
-msgstr ""
+msgstr "Узимати у обзир за порез по одбитку "
 
 #. Label of the included_in_paid_amount (Check) field in DocType 'Advance Taxes
 #. and Charges'
@@ -11548,7 +11554,7 @@ msgstr "Консолидовани финансијски извештај"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Consolidated Report"
-msgstr ""
+msgstr "Консолидован извештај"
 
 #. Label of the consolidated_invoice (Link) field in DocType 'POS Invoice'
 #. Label of the consolidated_invoice (Link) field in DocType 'POS Invoice Merge
@@ -12114,13 +12120,13 @@ msgstr "Трошак"
 #. Label of the cost_allocation (Currency) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Cost Allocation"
-msgstr ""
+msgstr "Расподела трошка"
 
 #. Label of the cost_allocation_per (Percent) field in DocType 'BOM Secondary
 #. Item'
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 msgid "Cost Allocation %"
-msgstr ""
+msgstr "Расподела трошка %"
 
 #. Label of the cost_allocation__process_loss_section (Section Break) field in
 #. DocType 'BOM'
@@ -12384,7 +12390,7 @@ msgstr "Трошак по јединици"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:442
 msgid "Cost allocation between finished goods and secondary items should equal 100%"
-msgstr ""
+msgstr "Расподела трошка између готових производа и секундарних ставки мора износити 100%"
 
 #. Title of an incoterm
 #: erpnext/setup/doctype/incoterm/incoterms.csv:8
@@ -12593,26 +12599,26 @@ msgstr "Потражује"
 #. Label of an action in the Onboarding Step 'Create Asset Category'
 #: erpnext/assets/onboarding_step/create_asset_category/create_asset_category.json
 msgid "Create Asset Category"
-msgstr ""
+msgstr "Креирај категорију имовине"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Asset Item'
 #: erpnext/assets/onboarding_step/create_asset_item/create_asset_item.json
 msgid "Create Asset Item"
-msgstr ""
+msgstr "Креирај ставку имовине"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Asset Location'
 #: erpnext/assets/onboarding_step/create_asset_location/create_asset_location.json
 msgid "Create Asset Location"
-msgstr ""
+msgstr "Креирај локацију имовине"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Bill of Materials'
 #: erpnext/manufacturing/onboarding_step/create_bill_of_materials/create_bill_of_materials.json
 #: erpnext/subcontracting/onboarding_step/create_bill_of_materials/create_bill_of_materials.json
 msgid "Create Bill of Materials"
-msgstr ""
+msgstr "Креирај саставницу"
 
 #. Label of the create_chart_of_accounts_based_on (Select) field in DocType
 #. 'Company'
@@ -12624,7 +12630,7 @@ msgstr "Креирај контни оквир на основу"
 #. Label of an action in the Onboarding Step 'Create Customer'
 #: erpnext/selling/onboarding_step/create_customer/create_customer.json
 msgid "Create Customer"
-msgstr ""
+msgstr "Креирај купца"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Delivery Note'
@@ -12653,17 +12659,17 @@ msgstr "Креирај записе о запосленим лицима."
 #. Label of an action in the Onboarding Step 'Create Existing Asset'
 #: erpnext/assets/onboarding_step/create_existing_asset/create_existing_asset.json
 msgid "Create Existing Asset"
-msgstr ""
+msgstr "Креирај постојећу имовину"
 
 #. Label of an action in the Onboarding Step 'Create Finished Goods'
 #: erpnext/manufacturing/onboarding_step/create_finished_goods/create_finished_goods.json
 msgid "Create Finished Good"
-msgstr ""
+msgstr "Креирај готов производ"
 
 #. Title of an Onboarding Step
 #: erpnext/manufacturing/onboarding_step/create_finished_goods/create_finished_goods.json
 msgid "Create Finished Goods"
-msgstr ""
+msgstr "Креирај готове производе"
 
 #. Label of the is_grouped_asset (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -12684,7 +12690,7 @@ msgstr "Креирај фактуру"
 #: erpnext/selling/onboarding_step/create_item/create_item.json
 #: erpnext/stock/onboarding_step/create_item/create_item.json
 msgid "Create Item"
-msgstr ""
+msgstr "Креирај ставку"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:187
 msgid "Create Job Card"
@@ -12751,12 +12757,12 @@ msgstr "Креирај новог потенцијалног клијента"
 #. Label of an action in the Onboarding Step 'Create Operations'
 #: erpnext/manufacturing/onboarding_step/create_operations/create_operations.json
 msgid "Create Operation"
-msgstr ""
+msgstr "Креирај операцију"
 
 #. Title of an Onboarding Step
 #: erpnext/manufacturing/onboarding_step/create_operations/create_operations.json
 msgid "Create Operations"
-msgstr ""
+msgstr "Креирај операције"
 
 #: erpnext/crm/doctype/lead/lead.js:161
 msgid "Create Opportunity"
@@ -12779,7 +12785,7 @@ msgstr "Креирај унос уплате за консолидоване ф�
 
 #: erpnext/public/js/controllers/transaction.js:519
 msgid "Create Payment Request"
-msgstr ""
+msgstr "Креирај захтев за наплату"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:800
 msgid "Create Pick List"
@@ -12793,7 +12799,7 @@ msgstr "Креирај формат штампе"
 #. Label of an action in the Onboarding Step 'Create Project'
 #: erpnext/projects/onboarding_step/create_project/create_project.json
 msgid "Create Project"
-msgstr ""
+msgstr "Креирај пројекат"
 
 #: erpnext/crm/doctype/lead/lead_list.js:8
 msgid "Create Prospect"
@@ -12803,7 +12809,7 @@ msgstr "Креирај потенцијалног проспекта"
 #. Label of an action in the Onboarding Step 'Create Purchase Invoice'
 #: erpnext/buying/onboarding_step/create_purchase_invoice/create_purchase_invoice.json
 msgid "Create Purchase Invoice"
-msgstr ""
+msgstr "Креирај улазну фактуру"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Purchase Order'
@@ -12821,7 +12827,7 @@ msgstr "Креирај набавне поруџбине"
 #. Label of an action in the Onboarding Step 'Create Purchase Receipt'
 #: erpnext/stock/onboarding_step/create_purchase_receipt/create_purchase_receipt.json
 msgid "Create Purchase Receipt"
-msgstr ""
+msgstr "Креирај пријемницу набавке"
 
 #: erpnext/utilities/activation.py:88
 msgid "Create Quotation"
@@ -12831,13 +12837,13 @@ msgstr "Креирај понуду"
 #: erpnext/manufacturing/onboarding_step/create_raw_materials/create_raw_materials.json
 #: erpnext/subcontracting/onboarding_step/create_raw_materials/create_raw_materials.json
 msgid "Create Raw Material"
-msgstr ""
+msgstr "Креирај сировину"
 
 #. Title of an Onboarding Step
 #: erpnext/manufacturing/onboarding_step/create_raw_materials/create_raw_materials.json
 #: erpnext/subcontracting/onboarding_step/create_raw_materials/create_raw_materials.json
 msgid "Create Raw Materials"
-msgstr ""
+msgstr "Креирај сировине"
 
 #. Label of the create_receiver_list (Button) field in DocType 'SMS Center'
 #: erpnext/selling/doctype/sms_center/sms_center.json
@@ -12878,7 +12884,7 @@ msgstr "Креирај продајну поруџбину како би тим�
 #. Label of an action in the Onboarding Step 'Create Service Item'
 #: erpnext/subcontracting/onboarding_step/create_service_item/create_service_item.json
 msgid "Create Service Item"
-msgstr ""
+msgstr "Креирај услужну ставку"
 
 #: erpnext/stock/dashboard/item_dashboard.js:283
 #: erpnext/stock/doctype/material_request/material_request.js:478
@@ -12889,28 +12895,28 @@ msgstr "Креирај унос залиха"
 #. Label of an action in the Onboarding Step 'Create Subcontracted Item'
 #: erpnext/subcontracting/onboarding_step/create_subcontracted_item/create_subcontracted_item.json
 msgid "Create Subcontracted Item"
-msgstr ""
+msgstr "Креирај подуговорену ставку"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Subcontracting Order'
 #: erpnext/subcontracting/onboarding_step/create_subcontracting_order/create_subcontracting_order.json
 msgid "Create Subcontracting Order"
-msgstr ""
+msgstr "Креирај налог подуговарања"
 
 #. Title of an Onboarding Step
 #: erpnext/subcontracting/onboarding_step/create_subcontracting_po/create_subcontracting_po.json
 msgid "Create Subcontracting PO"
-msgstr ""
+msgstr "Креирај набавну поруџбину подуговарања"
 
 #. Label of an action in the Onboarding Step 'Create Subcontracting PO'
 #: erpnext/subcontracting/onboarding_step/create_subcontracting_po/create_subcontracting_po.json
 msgid "Create Subcontracting Purchase Order"
-msgstr ""
+msgstr "Креирај набавну поруџбину подуговарања"
 
 #. Title of an Onboarding Step
 #: erpnext/buying/onboarding_step/create_supplier/create_supplier.json
 msgid "Create Supplier"
-msgstr ""
+msgstr "Креирај добављача"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:181
 msgid "Create Supplier Quotation"
@@ -12919,12 +12925,12 @@ msgstr "Креирај понуду добављача"
 #. Label of an action in the Onboarding Step 'Create Tasks'
 #: erpnext/projects/onboarding_step/create_tasks/create_tasks.json
 msgid "Create Task"
-msgstr ""
+msgstr "Креирај задатак"
 
 #. Title of an Onboarding Step
 #: erpnext/projects/onboarding_step/create_tasks/create_tasks.json
 msgid "Create Tasks"
-msgstr ""
+msgstr "Креирај задатке"
 
 #: erpnext/setup/doctype/company/company.js:157
 msgid "Create Tax Template"
@@ -12941,7 +12947,7 @@ msgstr "Креирај евиденцију времена"
 #. Label of an action in the Onboarding Step 'Create Transfer Entry'
 #: erpnext/stock/onboarding_step/create_transfer_entry/create_transfer_entry.json
 msgid "Create Transfer Entry"
-msgstr ""
+msgstr "Креирај унос преноса"
 
 #: erpnext/setup/doctype/employee/employee.js:50
 #: erpnext/setup/doctype/employee/employee.js:52
@@ -12952,7 +12958,7 @@ msgstr "Креирај корисника"
 #. Label of the create_user_automatically (Check) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Create User Automatically"
-msgstr ""
+msgstr "Аутоматски креирај корисника"
 
 #. Label of the create_user_permission (Check) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.js:65
@@ -12976,13 +12982,13 @@ msgstr "Креирај варијанте"
 #. Label of an action in the Onboarding Step 'Setup Warehouse'
 #: erpnext/stock/onboarding_step/setup_warehouse/setup_warehouse.json
 msgid "Create Warehouses"
-msgstr ""
+msgstr "Креирај складиште"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Work Order'
 #: erpnext/manufacturing/onboarding_step/create_work_order/create_work_order.json
 msgid "Create Work Order"
-msgstr ""
+msgstr "Креирај радни налог"
 
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:10
 msgid "Create Workstation"
@@ -13004,7 +13010,7 @@ msgstr "Креирај понуде за купце"
 #. Label of an action in the Onboarding Step 'Create Delivery Note'
 #: erpnext/selling/onboarding_step/create_delivery_note/create_delivery_note.json
 msgid "Create delivery note"
-msgstr ""
+msgstr "Креирај отпремницу"
 
 #. Label of the create_pr_in_draft_status (Check) field in DocType 'Accounts
 #. Settings'
@@ -13015,7 +13021,7 @@ msgstr "Креирај у статусу нацрта"
 #. Label of an action in the Onboarding Step 'Create Supplier'
 #: erpnext/buying/onboarding_step/create_supplier/create_supplier.json
 msgid "Create supplier"
-msgstr ""
+msgstr "Креирај добављача"
 
 #: erpnext/public/js/bulk_transaction_processing.js:14
 msgid "Create {0} {1} ?"
@@ -13025,7 +13031,7 @@ msgstr "Креирај {0} {1} ?"
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Created By Migration"
-msgstr ""
+msgstr "Креирано путем миграције"
 
 #: erpnext/buying/doctype/supplier_scorecard/supplier_scorecard.py:250
 msgid "Created {0} scorecards for {1} between:"
@@ -13035,7 +13041,7 @@ msgstr "Креирано {0} таблица за оцењивање за {1} и�
 #. 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Creates a User account for this employee using the Preferred, Company, or Personal email."
-msgstr ""
+msgstr "Креира кориснички налог за ово запослено лице користећи преферирани, компанијски или лични имејл."
 
 #. Description of the 'Create Grouped Asset' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -13113,7 +13119,7 @@ msgstr "Креирање корисника ..."
 
 #: erpnext/setup/setup_wizard/setup_wizard.py:36
 msgid "Creating demo data"
-msgstr ""
+msgstr "Креирање демо података"
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:305
 msgid "Creating {} out of {} {}"
@@ -13452,7 +13458,7 @@ msgstr "Кубна јарда"
 #. Rate'
 #: erpnext/accounts/doctype/tax_withholding_rate/tax_withholding_rate.json
 msgid "Cumulative Threshold"
-msgstr ""
+msgstr "Кумулативни праг"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -14156,7 +14162,7 @@ msgstr "Купац локална наруџбина бр."
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Customer Ledger"
-msgstr ""
+msgstr "Књига купаца"
 
 #. Name of a report
 #. Label of a Link in the Financial Reports Workspace
@@ -14269,7 +14275,7 @@ msgstr "Купац детаљи поруџбенице"
 #. Label of the customer_pos_id (Data) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Customer POS ID"
-msgstr ""
+msgstr "ИД купца у малопродаји"
 
 #. Label of the portal_users (Table) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
@@ -14891,13 +14897,13 @@ msgstr "Одбиј"
 #. Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Deduct Tax On Basis"
-msgstr ""
+msgstr "Основ за одбитак пореза"
 
 #. Label of the source_section (Section Break) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Deducted From"
-msgstr ""
+msgstr "Одбијено од"
 
 #. Label of the section_break_3 (Section Break) field in DocType 'Lower
 #. Deduction Certificate'
@@ -14908,7 +14914,7 @@ msgstr "Подаци о ентитету где се врши одбитак"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/taxes.json
 msgid "Deduction Certificate"
-msgstr ""
+msgstr "Потврда о одбитку"
 
 #. Label of the deductions_or_loss_section (Section Break) field in DocType
 #. 'Payment Entry'
@@ -14968,7 +14974,7 @@ msgstr "Подразумевани рачун примљених аванса"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Default Ageing Range"
-msgstr ""
+msgstr "Подразумевани опсег старости"
 
 #. Label of the default_bom (Link) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -15479,7 +15485,7 @@ msgstr "Дефиниши врсту пројекта."
 #. Description of the 'End of Life' (Date) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Defines the date after which the item can no longer be used in transactions or manufacturing"
-msgstr ""
+msgstr "Дефинише датуме након кога се ставка више не може користити у трансакцијама или производњи"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -15549,7 +15555,7 @@ msgstr "Обриши отказане књиговодствене уносе"
 #. Type: Action
 #: erpnext/hooks.py erpnext/public/js/utils/demo.js:5
 msgid "Delete Demo Data"
-msgstr ""
+msgstr "Обриши демо податке"
 
 #: erpnext/stock/doctype/inventory_dimension/inventory_dimension.js:66
 msgid "Delete Dimension"
@@ -15592,11 +15598,11 @@ msgstr "Брисање није дозвољено за државу {0}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:216
 msgid "Deletion process restarted"
-msgstr ""
+msgstr "Процес брисања је поново покренут"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:97
 msgid "Deletion will start automatically after submission."
-msgstr ""
+msgstr "Брисање ће започети аутоматски након подношења."
 
 #. Label of the delimiter_options (Data) field in DocType 'Bank Statement
 #. Import'
@@ -15957,7 +15963,7 @@ msgstr "Демо компанија"
 
 #: erpnext/setup/demo.py:51
 msgid "Demo Data creation failed."
-msgstr ""
+msgstr "Креирање демо података није успело."
 
 #: erpnext/public/js/utils/demo.js:25
 msgid "Demo data cleared"
@@ -15965,7 +15971,7 @@ msgstr "Демо подаци обрисани"
 
 #: erpnext/setup/demo.py:42
 msgid "Demo data creation failed. Check notifications for more info."
-msgstr ""
+msgstr "Креирање демо података није успело. Проверите обавештења за више информација."
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:18
 msgid "Department Stores"
@@ -16377,7 +16383,7 @@ msgstr "Директан приход"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:359
 msgid "Direct return is not allowed for Timesheet."
-msgstr ""
+msgstr "Директни поврат није дозвољен за евиденцију времена."
 
 #. Label of the disabled (Check) field in DocType 'Account'
 #. Label of the disabled (Check) field in DocType 'Accounting Dimension'
@@ -16407,7 +16413,7 @@ msgstr "Онемогући планирање капацитета"
 #. Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Disable Cumulative Threshold"
-msgstr ""
+msgstr "Онемогући кумулативни праг"
 
 #. Label of the disable_in_words (Check) field in DocType 'Global Defaults'
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
@@ -16454,7 +16460,7 @@ msgstr "Онемогући број серије и селектор шарже"
 #. Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Disable Transaction Threshold"
-msgstr ""
+msgstr "Онемогући праг по трансакцији"
 
 #. Label of the disable_last_purchase_rate (Check) field in DocType 'Buying
 #. Settings'
@@ -16515,7 +16521,7 @@ msgstr "Налог за демонтажу"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:2400
 msgid "Disassemble Qty cannot be less than or equal to 0."
-msgstr ""
+msgstr "Демонтирана количина не може бити мања или једнака 0."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:445
 msgid "Disassemble Qty cannot be less than or equal to <b>0</b>."
@@ -17005,7 +17011,7 @@ msgstr "Не користи вредновање по шаржама"
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.py:128
 msgid "Do Not Use Batchwise Valuation"
-msgstr ""
+msgstr "Не користи вредновање по шаржама"
 
 #. Label of the do_not_fetch_incoming_rate_from_serial_no (Check) field in
 #. DocType 'Stock Reposting Settings'
@@ -17061,31 +17067,31 @@ msgstr ""
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:182
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:445
 msgid "DocType {0} does not exist"
-msgstr ""
+msgstr "DocType {0} не постоји"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:295
 msgid "DocType {0} with company field '{1}' is already in the list"
-msgstr ""
+msgstr "DocType {0} са пољем компаније '{1}' се већ налази на листи"
 
 #. Label of the doctypes_to_delete (Table) field in DocType 'Transaction
 #. Deletion Record'
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgid "DocTypes To Delete"
-msgstr ""
+msgstr "DocType-ови за брисање"
 
 #. Description of the 'Excluded DocTypes' (Table) field in DocType 'Transaction
 #. Deletion Record'
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgid "DocTypes that will NOT be deleted."
-msgstr ""
+msgstr "DocType-ови који неће бити обрисани."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:84
 msgid "DocTypes with a company field:"
-msgstr ""
+msgstr "DocType-ови са пољем компаније:"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:88
 msgid "DocTypes without a company field:"
-msgstr ""
+msgstr "DocType-ови без поља компаније:"
 
 #: erpnext/templates/pages/search_help.py:22
 msgid "Docs Search"
@@ -17095,7 +17101,7 @@ msgstr "Претрага докумената"
 #. Record To Delete'
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Document Count"
-msgstr ""
+msgstr "Број докумената"
 
 #. Label of the document_naming_tab (Tab Break) field in DocType 'Buying
 #. Settings'
@@ -17108,7 +17114,7 @@ msgstr ""
 
 #: erpnext/stock/report/negative_batch_report/negative_batch_report.py:78
 msgid "Document No"
-msgstr ""
+msgstr "Број документа"
 
 #. Label of the document_type (Link) field in DocType 'Subscription Invoice'
 #: erpnext/accounts/doctype/subscription_invoice/subscription_invoice.json
@@ -17151,7 +17157,7 @@ msgstr "Не примењуј обавезну количину бесплатн
 #: erpnext/accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 #: erpnext/accounts/doctype/sales_taxes_and_charges/sales_taxes_and_charges.json
 msgid "Don't Recompute Tax"
-msgstr ""
+msgstr "Немој прерачунавати порез"
 
 #. Label of the dont_reserve_sales_order_qty_on_sales_return (Check) field in
 #. DocType 'Selling Settings'
@@ -17357,7 +17363,7 @@ msgstr "Дупликат групе купаца"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:190
 msgid "Duplicate DocType"
-msgstr ""
+msgstr "Дупликат DocType"
 
 #: erpnext/setup/doctype/authorization_rule/authorization_rule.py:71
 msgid "Duplicate Entry. Please check Authorization Rule {0}"
@@ -17373,7 +17379,7 @@ msgstr "Дупликат групе ставки"
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:102
 msgid "Duplicate Item Under Same Parent"
-msgstr ""
+msgstr "Дуплирана ставка под истим матичним елементом"
 
 #: erpnext/manufacturing/doctype/workstation/workstation.py:79
 #: erpnext/manufacturing/doctype/workstation_type/workstation_type.py:37
@@ -17391,7 +17397,7 @@ msgstr "Пронађени дупликат фискалног рачуна"
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:133
 msgid "Duplicate Payment Schedule selected"
-msgstr ""
+msgstr "Изабран је дупликат распореда плаћања"
 
 #: erpnext/projects/doctype/project/project.js:83
 msgid "Duplicate Project with Tasks"
@@ -17419,7 +17425,7 @@ msgstr "Дупли унос за шифру ставке {0} и произвођ
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:189
 msgid "Duplicate entry: {0}{1}"
-msgstr ""
+msgstr "Дупликат уноса: {0}{1}"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:164
 msgid "Duplicate item group found in the item group table"
@@ -17480,7 +17486,7 @@ msgstr "EAN"
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
 msgid "EAN-13"
-msgstr ""
+msgstr "EAN-13"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
@@ -17500,7 +17506,7 @@ msgstr "Електромагнетна јединица струје"
 #. Label of a Desktop Icon
 #: erpnext/desktop_icon/erpnext.json
 msgid "ERPNext"
-msgstr ""
+msgstr "ERPNext"
 
 #. Label of a Desktop Icon
 #. Name of a Workspace
@@ -17509,7 +17515,7 @@ msgstr ""
 #: erpnext/setup/workspace/erpnext_settings/erpnext_settings.json
 #: erpnext/workspace_sidebar/erpnext_settings.json
 msgid "ERPNext Settings"
-msgstr ""
+msgstr "ERPNext подешавања"
 
 #. Label of the user_id (Data) field in DocType 'Employee Group Table'
 #: erpnext/setup/doctype/employee_group_table/employee_group_table.json
@@ -17602,7 +17608,7 @@ msgstr "Измени потврду"
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Edit Tax Withholding Entries"
-msgstr ""
+msgstr "Уреди уносе пореза по одбитку"
 
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:777
 msgid "Editing {0} is not allowed as per POS Profile settings"
@@ -17698,7 +17704,7 @@ msgstr "Имејл кампања"
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:149
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:157
 msgid "Email Campaign Error"
-msgstr ""
+msgstr "Грешка у имејл кампањи"
 
 #. Label of the email_campaign_for (Select) field in DocType 'Email Campaign'
 #: erpnext/crm/doctype/email_campaign/email_campaign.json
@@ -17707,7 +17713,7 @@ msgstr "Имејл кампања за "
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:125
 msgid "Email Campaign Send Error"
-msgstr ""
+msgstr "Грешка при слању имејл кампање"
 
 #. Label of the supplier_response_section (Section Break) field in DocType
 #. 'Request for Quotation'
@@ -17744,11 +17750,11 @@ msgstr "Имејл послат добављачу {0}"
 
 #: erpnext/setup/doctype/employee/employee.py:434
 msgid "Email is required to create a user"
-msgstr ""
+msgstr "Имејл је обавезан за креирање корисника"
 
 #: erpnext/setup/doctype/employee/employee.js:72
 msgid "Email is required to create a user."
-msgstr ""
+msgstr "Имејл је обавезан за креирање корисника."
 
 #: erpnext/stock/doctype/shipment/shipment.js:174
 msgid "Email or Phone/Mobile of the Contact are mandatory to continue."
@@ -17934,7 +17940,7 @@ msgstr "Запослено лице не може извештавати сам�
 
 #: erpnext/setup/doctype/employee/employee.py:568
 msgid "Employee is required"
-msgstr ""
+msgstr "Запослено лице је обавезно"
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:109
 msgid "Employee is required while issuing Asset {0}"
@@ -17942,7 +17948,7 @@ msgstr "Запослено лице је обавезно при издавањ�
 
 #: erpnext/setup/doctype/employee/employee.py:431
 msgid "Employee {0} already has a linked user"
-msgstr ""
+msgstr "Запослено лице {0} већ има повезаног корисника"
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:92
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:113
@@ -17955,7 +17961,7 @@ msgstr "Запослено лице {0} тренутно ради на друг�
 
 #: erpnext/setup/doctype/employee/employee.py:593
 msgid "Employee {0} not found"
-msgstr ""
+msgstr "Запослено лице {0} није пронађено"
 
 #: erpnext/manufacturing/doctype/workstation/workstation.js:351
 msgid "Employees"
@@ -17967,7 +17973,7 @@ msgstr "Празно"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:755
 msgid "Empty To Delete List"
-msgstr ""
+msgstr "Листа за брисање је празна"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -17978,7 +17984,7 @@ msgstr "Ems (Pica)"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Accounting Dimensions"
-msgstr ""
+msgstr "Омогући рачуноводствене димензије"
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1721
 msgid "Enable Allow Partial Reservation in the Stock Settings to reserve partial stock."
@@ -18040,7 +18046,7 @@ msgstr "Омогући разграничени приход"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Discounts and Margin"
-msgstr ""
+msgstr "Омогући попусте и маржу"
 
 #. Label of the enable_european_access (Check) field in DocType 'Plaid
 #. Settings'
@@ -18076,7 +18082,7 @@ msgstr "Омогући рачун инвентара по ставкама"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Loyalty Point Program"
-msgstr ""
+msgstr "Омогући програм лојалти поена"
 
 #. Label of the enable_parallel_reposting (Check) field in DocType 'Stock
 #. Reposting Settings'
@@ -18099,11 +18105,11 @@ msgstr "Омогући привремено рачуноводствено пр�
 #. 'Stock Reposting Settings'
 #: erpnext/stock/doctype/stock_reposting_settings/stock_reposting_settings.json
 msgid "Enable Separate Reposting for GL"
-msgstr ""
+msgstr "Омогући одвојено поновно књижење за главну књигу"
 
 #: erpnext/stock/report/stock_ledger/stock_ledger.js:122
 msgid "Enable Serial / Batch Bundle"
-msgstr ""
+msgstr "Омогући пакет серије / шарже"
 
 #. Label of the enable_stock_reservation (Check) field in DocType 'Stock
 #. Settings'
@@ -18115,23 +18121,23 @@ msgstr "Омогући резервацију залиха"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Subscription"
-msgstr ""
+msgstr "Омогући претплату"
 
 #. Description of the 'Enable Subscription' (Check) field in DocType 'Accounts
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Subscription tracking in invoice"
-msgstr ""
+msgstr "Омогући праћење претплате на фактури"
 
 #. Label of the enable_utm (Check) field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Enable UTM"
-msgstr ""
+msgstr "Омогући UTM"
 
 #. Description of the 'Enable UTM' (Check) field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Enable Urchin Tracking Module parameters in Quotation, Sales Order, Sales Invoice, POS Invoice, Lead,  and Delivery Note."
-msgstr ""
+msgstr "Омогући Urchin Tracking Model параметре у понуди, продајној поруџбини, излазној фактури, фискалном рачуну, потенцијалном клијенту и отпремници."
 
 #. Label of the enable_youtube_tracking (Check) field in DocType 'Video
 #. Settings'
@@ -18143,7 +18149,7 @@ msgstr "Омогући праћење YouTube-а"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable cost center, projects and other custom accounting dimensions"
-msgstr ""
+msgstr "Омогући трошковне центре, пројекте и друге прилагођене рачуноводствене димензије"
 
 #. Label of the enable_cutoff_date_on_bulk_delivery_note_creation (Check) field
 #. in DocType 'Selling Settings'
@@ -18221,13 +18227,13 @@ msgstr "Омогући примену споразума о нивоу услу�
 #. Description of the 'Retain Sample' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Enable to reserve a small sample from each batch for any analysis arising ahead"
-msgstr ""
+msgstr "Омогућава резервисање мале количине из сваке шарже за будуће анализе"
 
 #. Label of the enable_tracking_sales_commissions (Check) field in DocType
 #. 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Enable tracking sales commissions"
-msgstr ""
+msgstr "Омогући праћење провизија од продаје"
 
 #. Description of the 'Fetch Timesheet in Sales Invoice' (Check) field in
 #. DocType 'Projects Settings'
@@ -18544,7 +18550,7 @@ msgstr "Грешка приликом евалуације формуле кри
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:267
 msgid "Error getting details for {0}: {1}"
-msgstr ""
+msgstr "Грешка при прибављању детаља за {0}: {1}"
 
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.py:312
 msgid "Error in party matching for Bank Transaction {0}"
@@ -18648,7 +18654,7 @@ msgstr "Улога за одобравање изузетака буџета"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:933
 msgid "Excess Disassembly"
-msgstr ""
+msgstr "Прекомерна демонтажа"
 
 #: erpnext/manufacturing/report/work_order_consumed_materials/work_order_consumed_materials.js:55
 msgid "Excess Materials Consumed"
@@ -18803,7 +18809,7 @@ msgstr "Број странице за акцизу"
 
 #: erpnext/accounts/report/trial_balance_for_party/trial_balance_for_party.js:86
 msgid "Exclude Zero Balance Parties"
-msgstr ""
+msgstr "Искључи странке са нултим салдом"
 
 #. Label of the doctypes_to_be_ignored (Table) field in DocType 'Transaction
 #. Deletion Record'
@@ -18844,7 +18850,7 @@ msgstr "Изложба"
 #. Option for the 'Asset Type' (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Existing Asset"
-msgstr ""
+msgstr "Постојећа имовина"
 
 #. Option for the 'Create Chart Of Accounts Based On' (Select) field in DocType
 #. 'Company'
@@ -18864,7 +18870,7 @@ msgstr "Постојећи купац"
 #. Label of the exit (Tab Break) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Exit"
-msgstr ""
+msgstr "Одлазак"
 
 #. Label of the held_on (Date) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -19191,7 +19197,7 @@ msgstr "Готов производ / Полупроизвод"
 
 #: erpnext/manufacturing/report/bom_stock_analysis/bom_stock_analysis.js:21
 msgid "FG Items to Make"
-msgstr ""
+msgstr "Готови производи за производњу"
 
 #. Option for the 'Default Stock Valuation Method' (Select) field in DocType
 #. 'Company'
@@ -19233,7 +19239,7 @@ msgstr "ФИФО/ЛИФО ред чекања"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "FX Revaluation"
-msgstr ""
+msgstr "Ревалоризација девизног курса"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -19251,7 +19257,7 @@ msgstr "Неуспешна аутентификација API кључа."
 #: erpnext/setup/setup_wizard/setup_wizard.py:37
 #: erpnext/setup/setup_wizard/setup_wizard.py:38
 msgid "Failed to create demo data"
-msgstr ""
+msgstr "Креирање демо података није успело"
 
 #: erpnext/setup/demo.py:77
 msgid "Failed to erase demo data, please delete the demo company manually."
@@ -19272,11 +19278,11 @@ msgstr "Неуспешно књижење уноса амортизације"
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:126
 msgid "Failed to send email for campaign {0} to {1}"
-msgstr ""
+msgstr "Слање имејла за кампању {0} ка {1} није успело"
 
 #: erpnext/setup/setup_wizard/setup_wizard.py:26
 msgid "Failed to set defaults"
-msgstr ""
+msgstr "Постављање подразумеваних вредности није успело"
 
 #: erpnext/setup/setup_wizard/setup_wizard.py:21
 #: erpnext/setup/setup_wizard/setup_wizard.py:22
@@ -19330,7 +19336,7 @@ msgstr "Повратна информација од"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/quality.json
 msgid "Feedback Template"
-msgstr ""
+msgstr "Шаблон за повратне информације"
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
 #. Account'
@@ -19364,7 +19370,7 @@ msgstr "Преузми неизмирене уплате"
 #. DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Fetch Payment Schedule In Payment Request"
-msgstr ""
+msgstr "Преузми распоред плаћања у захтеву за наплату"
 
 #: erpnext/accounts/doctype/subscription/subscription.js:36
 msgid "Fetch Subscription Updates"
@@ -19420,7 +19426,7 @@ msgstr "Преузимање..."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:224
 msgid "Field '{0}' is not a valid Company link field for DocType {1}"
-msgstr ""
+msgstr "Поље '{0}' није важеће поље за линк компаније за DocType {1}"
 
 #. Label of the field_mapping_section (Section Break) field in DocType
 #. 'Inventory Dimension'
@@ -19450,15 +19456,15 @@ msgstr "Поља ће бити копирана само приликом кре
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1067
 msgid "File does not belong to this Transaction Deletion Record"
-msgstr ""
+msgstr "Фајл не припада овом запису о брисању трансакције"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1061
 msgid "File not found"
-msgstr ""
+msgstr "Фајл није пронађен"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1075
 msgid "File not found on server"
-msgstr ""
+msgstr "Фајл није пронађен на серверу"
 
 #. Label of the file_to_rename (Attach) field in DocType 'Rename Tool'
 #: erpnext/utilities/doctype/rename_tool/rename_tool.json
@@ -19919,7 +19925,7 @@ msgstr "Фискална година компаније"
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:5
 msgid "Fiscal Year Details"
-msgstr ""
+msgstr "Детаљи фискалне године"
 
 #: erpnext/accounts/doctype/fiscal_year/fiscal_year.py:53
 msgid "Fiscal Year End Date should be one year after Fiscal Year Start Date"
@@ -20236,7 +20242,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/bom/bom.py:368
 msgid "For operation {0} at row {1}, please add raw materials or set a BOM against it."
-msgstr ""
+msgstr "За операцију {0} у реду {1}, молимо Вас да додате сировине или доделите саставницу."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:2649
 msgid "For operation {0}: Quantity ({1}) can not be greater than pending quantity({2})"
@@ -20244,7 +20250,7 @@ msgstr "За операцију {0}: Количина ({1}) не може бит
 
 #: erpnext/projects/doctype/project/project.js:208
 msgid "For project - {0}, update your status"
-msgstr ""
+msgstr "За пројекат - {0}, ажурирајте свој статус"
 
 #. Description of the 'Parent Warehouse' (Link) field in DocType 'Master
 #. Production Schedule'
@@ -20290,7 +20296,7 @@ msgstr "Ради погодности купаца, ове шифре могу �
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1071
 msgid "For the item {0}, the consumed quantity should be {1} according to the BOM {2}."
-msgstr ""
+msgstr "За ставку {0}, утрошена количина треба да буде {1} према саставници {2}."
 
 #: erpnext/public/js/controllers/transaction.js:1404
 msgctxt "Clear payment terms template and/or payment schedule when due date is changed"
@@ -20481,7 +20487,7 @@ msgstr "Датум почетка и датум завршетка су обав
 
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:29
 msgid "From Date and To Date are required"
-msgstr ""
+msgstr "Датум почетка и датум завршетка су обавезни"
 
 #: erpnext/accounts/report/tds_computation_summary/tds_computation_summary.py:30
 msgid "From Date and To Date lie in different Fiscal Year"
@@ -20496,7 +20502,7 @@ msgstr "Датум почетка не може бити већи од дату�
 
 #: erpnext/selling/report/sales_partner_commission_summary/sales_partner_commission_summary.py:60
 msgid "From Date cannot be greater than To Date."
-msgstr ""
+msgstr "Датум почетка не може бити већи од датума завршетка."
 
 #: erpnext/crm/report/sales_pipeline_analytics/sales_pipeline_analytics.py:27
 msgid "From Date is mandatory"
@@ -20793,7 +20799,7 @@ msgstr "Услови и одредбе испуњења"
 
 #: erpnext/stock/doctype/shipment/shipment.js:275
 msgid "Full Name, Email or Phone/Mobile of the user are mandatory to continue."
-msgstr ""
+msgstr "Пуно име и презиме, имејл или телефон/мобилни телефон корисника су обавезни за наставак."
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
 #. Account'
@@ -20921,7 +20927,7 @@ msgstr "GTIN"
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
 msgid "GTIN-14"
-msgstr ""
+msgstr "GTIN-14"
 
 #. Label of the gain_loss (Currency) field in DocType 'Exchange Rate
 #. Revaluation Account'
@@ -21066,11 +21072,11 @@ msgstr "Генериши унос затварања залиха"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:112
 msgid "Generate To Delete List"
-msgstr ""
+msgstr "Генериши листу за брисање"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:472
 msgid "Generate To Delete list first"
-msgstr ""
+msgstr "Прво генеришите листу за брисање"
 
 #. Description of a DocType
 #: erpnext/stock/doctype/packing_slip/packing_slip.json
@@ -21292,7 +21298,7 @@ msgstr "Прикажи продајне поруџбине"
 #. Receipt'
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Get Secondary Items"
-msgstr ""
+msgstr "Преузми секундарне ставке"
 
 #. Label of the get_started_sections (Code) field in DocType 'Support Settings'
 #: erpnext/support/doctype/support_settings/support_settings.json
@@ -21337,7 +21343,7 @@ msgstr "Прикажи стајалишта од"
 
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:196
 msgid "Getting Secondary Items"
-msgstr ""
+msgstr "Преузимање секундарних ставки"
 
 #. Option for the 'Coupon Type' (Select) field in DocType 'Coupon Code'
 #: erpnext/accounts/doctype/coupon_code/coupon_code.json
@@ -21548,11 +21554,11 @@ msgstr "Укупно (валута компаније)"
 
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:252
 msgid "Grand Total (Transaction Currency)"
-msgstr ""
+msgstr "Укупно (валута трансакције)"
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:125
 msgid "Grand Total must match sum of Payment References"
-msgstr ""
+msgstr "Укупан износ мора одговарати збиру референци плаћања"
 
 #. Label of the grant_commission (Check) field in DocType 'POS Invoice Item'
 #. Label of the grant_commission (Check) field in DocType 'Sales Invoice Item'
@@ -21639,7 +21645,7 @@ msgstr "Стопа пословног добитка"
 #. Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Gross Total"
-msgstr ""
+msgstr "Укупно бруто"
 
 #. Label of the gross_weight_pkg (Float) field in DocType 'Packing Slip'
 #: erpnext/stock/doctype/packing_slip/packing_slip.json
@@ -21667,7 +21673,7 @@ msgstr "Груписано по добављачу"
 #. Label of the group_name (Data) field in DocType 'Tax Withholding Group'
 #: erpnext/accounts/doctype/tax_withholding_group/tax_withholding_group.json
 msgid "Group Name"
-msgstr ""
+msgstr "Назив групе"
 
 #: erpnext/setup/doctype/sales_person/sales_person_tree.js:14
 msgid "Group Node"
@@ -22266,7 +22272,7 @@ msgstr "IBAN"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:93
 msgid "IMPORTANT: Create a backup before proceeding!"
-msgstr ""
+msgstr "ВАЖНО: Направите резервну копију пре наставка!"
 
 #. Name of a report
 #: erpnext/regional/report/irs_1099/irs_1099.json
@@ -22491,13 +22497,13 @@ msgstr "Уколико је омогућено, систем ће дозволи
 #. field in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "If enabled, system will set incoming rate as zero for stand-alone credit notes with expired batch item."
-msgstr ""
+msgstr "Уколико је омогућено, систем ће поставити јединичну улазну цену на нулу за самосталне документе о смањењу са ставком чија је шаржа истекла."
 
 #. Description of the 'Deliver secondary Items' (Check) field in DocType
 #. 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "If enabled, the Secondary Items generated against a Finished Good will also be added in the Stock Entry when delivering that Finished Good."
-msgstr ""
+msgstr "Уколико је омогућено, секундарне ставке настале уз готов производ додају се у унос залиха приликом испоруке тог готовог производа."
 
 #. Description of the 'Disable Rounded Total' (Check) field in DocType 'POS
 #. Profile'
@@ -22509,7 +22515,7 @@ msgstr "Уколико је омогућено, консолидоване фа�
 #. field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "If enabled, the item rate won't adjust to the valuation rate during internal transfers, but accounting will still use the valuation rate. This will allow the user to specify a different rate for printing or taxation purposes."
-msgstr ""
+msgstr "Уколико је омогућено, цена ставке неће се прилагодити стопи вредновања током интерних трансфера, али ће рачуноводство и даље користити стопу вредновања. Ово омогућава кориснику да наведе другачију цену за потребе штампе или опорезивања."
 
 #. Description of the 'Validate Material Transfer Warehouses' (Check) field in
 #. DocType 'Stock Settings'
@@ -22521,7 +22527,7 @@ msgstr "Уколико је омогућено, изворно и циљно с�
 #. 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "If enabled, the system will allow negative stock entries for the batch. But, this may lead to incorrect valuation rates, so it is recommended to avoid using this option. The system will permit negative stock only when it is caused by backdated entries and will validate and block negative stock in all other cases."
-msgstr ""
+msgstr "Уколико је омогућено, систем ће дозволити књижење негативног стања залиха за шаржу. То може довести до нетачне стопе вредновања, па се препоручује избегавање ове опције. Систем ће дозволити негативно стање само у случају ретроактивних књижења и блокираће негативно стање у свим осталим случајевима."
 
 #. Description of the 'Allow UOM with Conversion Rate Defined in Item' (Check)
 #. field in DocType 'Stock Settings'
@@ -22615,11 +22621,11 @@ msgstr "Уколико није, можете отказати/ поднети �
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:197
 msgid "If party does not exist, create it using the Customer Name field."
-msgstr ""
+msgstr "Уколико странка не постоји, креирајте је користећи поље назив купца."
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:198
 msgid "If party does not exist, create it using the Supplier Name field."
-msgstr ""
+msgstr "Уколико странка не постоји, креирајте је користећи поље назив добављача."
 
 #. Description of the 'Free Item Rate' (Currency) field in DocType 'Pricing
 #. Rule'
@@ -22754,7 +22760,7 @@ msgstr "Уколико и даље желите да наставите, омо�
 #. Description of the 'Sequence ID' (Int) field in DocType 'BOM Operation'
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
 msgid "If you want to run operations in parallel, keep the same sequence ID for them."
-msgstr ""
+msgstr "Уколико желите да се операције извршавају паралелно, задржите исти ИД секвенце за њих."
 
 #: erpnext/accounts/doctype/pricing_rule/utils.py:378
 msgid "If you {0} {1} quantities of the item {2}, the scheme {3} will be applied on the item."
@@ -22879,7 +22885,7 @@ msgstr "Игнориши дуговне/потражне белешке гене
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Ignore Tax Withholding Threshold"
-msgstr ""
+msgstr "Игнориши праг за порез по одбитку"
 
 #. Label of the ignore_user_time_overlap (Check) field in DocType 'Projects
 #. Settings'
@@ -22907,7 +22913,7 @@ msgstr "Игнориши поље за отварање стања у уносу
 
 #: erpnext/stock/doctype/item/item.py:253
 msgid "Image in the description has been removed. To disable this behavior, uncheck \"{0}\" in {1}."
-msgstr ""
+msgstr "Слика у опису је уклоњена. Да бисте онемогућили ово понашање, уклоните ознаку са опције \"{0}\" на {1}."
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:135
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:229
@@ -22932,7 +22938,7 @@ msgstr "Увези податке"
 
 #: erpnext/setup/doctype/employee/employee_list.js:16
 msgid "Import Employees"
-msgstr ""
+msgstr "Увоз запослених лица"
 
 #: erpnext/edi/doctype/code_list/code_list.js:7
 #: erpnext/edi/doctype/code_list/code_list_list.js:3
@@ -22958,7 +22964,7 @@ msgstr "Увоз успешан"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:564
 msgid "Import Summary"
-msgstr ""
+msgstr "Резиме увоза"
 
 #. Label of a Link in the Buying Workspace
 #. Name of a DocType
@@ -22982,11 +22988,11 @@ msgstr "Масовни увоз"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:192
 msgid "Imported {0} DocTypes"
-msgstr ""
+msgstr "Увезено {0} DocType"
 
 #: erpnext/edi/doctype/code_list/code_list_import.py:36
 msgid "Importing Code Lists from remote URLs is not allowed."
-msgstr ""
+msgstr "Увоз листа шифара са удаљених URL адреса није дозвољен."
 
 #: erpnext/edi/doctype/common_code/common_code.py:111
 msgid "Importing Common Codes"
@@ -23425,7 +23431,7 @@ msgstr "Рачун прихода"
 #. 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Income and Expense"
-msgstr ""
+msgstr "Приходи и расходи"
 
 #. Description of the 'Enable Deferred Expense' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -23435,7 +23441,7 @@ msgstr ""
 #. Label of a number card in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 msgid "Incoming Bills"
-msgstr ""
+msgstr "Улазни рачуни"
 
 #. Name of a DocType
 #: erpnext/telephony/doctype/incoming_call_handling_schedule/incoming_call_handling_schedule.json
@@ -23450,7 +23456,7 @@ msgstr "Поставке долазних позива"
 #. Label of a number card in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 msgid "Incoming Payment"
-msgstr ""
+msgstr "Улазна уплата"
 
 #. Label of the incoming_rate (Currency) field in DocType 'Delivery Note Item'
 #. Label of the incoming_rate (Currency) field in DocType 'Packed Item'
@@ -23483,7 +23489,7 @@ msgstr "Откривена некомпатибилна подешавања"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:195
 msgid "Incorrect Account"
-msgstr ""
+msgstr "Нетачан рачун"
 
 #. Name of a report
 #: erpnext/stock/report/incorrect_balance_qty_after_transaction/incorrect_balance_qty_after_transaction.json
@@ -23500,7 +23506,7 @@ msgstr "Нетачно складиште за поновно наручивањ
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:143
 msgid "Incorrect Company"
-msgstr ""
+msgstr "Нетачна компанија"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1078
 msgid "Incorrect Component Quantity"
@@ -23967,7 +23973,7 @@ msgstr "Интерни"
 #. 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Internal Customer Accounting"
-msgstr ""
+msgstr "Рачуноводство интерног купца"
 
 #: erpnext/selling/doctype/customer/customer.py:255
 msgid "Internal Customer for company {0} already exists"
@@ -23993,7 +23999,7 @@ msgstr "Недостаје референца за интерну продају
 #. 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "Internal Supplier Accounting"
-msgstr ""
+msgstr "Интерно рачуноводство добављача"
 
 #: erpnext/buying/doctype/supplier/supplier.py:181
 msgid "Internal Supplier for company {0} already exists"
@@ -24055,7 +24061,7 @@ msgstr "Неважећи рачун"
 
 #: erpnext/accounts/report/budget_variance_report/budget_variance_report.py:418
 msgid "Invalid Accounting Dimension"
-msgstr ""
+msgstr "Неважећа рачуноводствена димензија"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:400
 #: erpnext/accounts/doctype/payment_request/payment_request.py:1005
@@ -24084,7 +24090,7 @@ msgstr "Неважећа оквирна наруџбина за изабрано
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:498
 msgid "Invalid CSV format. Expected column: doctype_name"
-msgstr ""
+msgstr "Неважећи CSV формат. Очекивана колона: doctype_name"
 
 #: erpnext/quality_management/doctype/quality_procedure/quality_procedure.py:72
 msgid "Invalid Child Procedure"
@@ -24092,7 +24098,7 @@ msgstr "Неважећа зависна процедура"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:227
 msgid "Invalid Company Field"
-msgstr ""
+msgstr "Неважеће поље компаније"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2355
 msgid "Invalid Company for Inter Company Transaction."
@@ -24106,7 +24112,7 @@ msgstr "Неважећи трошковни центар"
 
 #: erpnext/selling/doctype/customer/customer.py:368
 msgid "Invalid Customer Group"
-msgstr ""
+msgstr "Неважећа група купаца"
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:419
 msgid "Invalid Delivery Date"
@@ -24239,7 +24245,7 @@ msgstr "Неважеће изворно и циљно складиште"
 
 #: erpnext/edi/doctype/code_list/code_list_import.py:37
 msgid "Invalid Upload"
-msgstr ""
+msgstr "Неважеће отпремање"
 
 #: erpnext/controllers/item_variant.py:145
 msgid "Invalid Value"
@@ -24260,7 +24266,7 @@ msgstr "Неважећи израз услова"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1056
 msgid "Invalid file URL"
-msgstr ""
+msgstr "Неважећи URL фајла"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:87
 msgid "Invalid filter formula. Please check the syntax."
@@ -24354,7 +24360,7 @@ msgstr "Коефицијент обрта залиха"
 #. 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Inventory Valuation"
-msgstr ""
+msgstr "Вредновање инвентара"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:29
 msgid "Investment Banking"
@@ -24369,7 +24375,7 @@ msgstr "Инвестиције"
 #. Label of an action in the Onboarding Step 'Invite Users'
 #: erpnext/setup/onboarding_step/invite_users/invite_users.json
 msgid "Invite Users"
-msgstr ""
+msgstr "Позовите кориснике"
 
 #. Option for the 'Posting Date Inheritance for Exchange Gain / Loss' (Select)
 #. field in DocType 'Accounts Settings'
@@ -24571,7 +24577,7 @@ msgstr "Улазно"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/subcontracting.json
 msgid "Inward Order"
-msgstr ""
+msgstr "Налог за пријем"
 
 #. Label of the is_account_payable (Check) field in DocType 'Cheque Print
 #. Template'
@@ -24830,7 +24836,7 @@ msgstr "Интерни добављач"
 #. Label of the is_legacy (Check) field in DocType 'BOM Secondary Item'
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 msgid "Is Legacy"
-msgstr ""
+msgstr "Застарело"
 
 #. Label of the is_legacy_scrap_item (Check) field in DocType 'Stock Entry
 #. Detail'
@@ -24839,7 +24845,7 @@ msgstr ""
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Is Legacy Scrap Item"
-msgstr ""
+msgstr "Застарела ставка отпада"
 
 #. Label of the is_mandatory (Check) field in DocType 'Applicable On Account'
 #: erpnext/accounts/doctype/applicable_on_account/applicable_on_account.json
@@ -26486,7 +26492,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:99
 msgid "Item {0} added multiple times under the same parent item {1} at rows {2} and {3}"
-msgstr ""
+msgstr "Ставка {0} је додата више пута под истом матичном ставком {1} у редовима {2} и {3}"
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:119
 msgid "Item {0} cannot be added as a sub-assembly of itself"
@@ -26649,7 +26655,7 @@ msgstr "Регистар продаје по ставкама"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Item-wise sales Register"
-msgstr ""
+msgstr "Књига продаје по ставкама"
 
 #: erpnext/stock/get_item_details.py:720
 msgid "Item/Item Code required to get Item Tax Template."
@@ -26683,7 +26689,7 @@ msgstr "Потребне ставке"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/subcontracting.json
 msgid "Items To Be Received"
-msgstr ""
+msgstr "Ставке за пријем"
 
 #. Label of a Link in the Buying Workspace
 #. Name of a report
@@ -26713,7 +26719,7 @@ msgstr "Ставке за захтев за набавку сировина"
 
 #: erpnext/selling/page/point_of_sale/pos_item_selector.js:110
 msgid "Items not found."
-msgstr ""
+msgstr "Ставке нису пронађене."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1245
 msgid "Items rate has been updated to zero as Allow Zero Valuation Rate is checked for the following items: {0}"
@@ -26832,7 +26838,7 @@ msgstr "Заказано време за радну картицу"
 #. Name of a DocType
 #: erpnext/manufacturing/doctype/job_card_secondary_item/job_card_secondary_item.json
 msgid "Job Card Secondary Item"
-msgstr ""
+msgstr "Секундарна ставка радне картице"
 
 #. Name of a report
 #. Label of a Link in the Manufacturing Workspace
@@ -27495,19 +27501,19 @@ msgstr "Потенцијални клијенти Вам помажу да до�
 #. Label of an action in the Onboarding Step 'Learn Asset'
 #: erpnext/assets/onboarding_step/learn_asset/learn_asset.json
 msgid "Learn Asset"
-msgstr ""
+msgstr "Сазнајте више о имовини"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Learn Subcontracting'
 #: erpnext/subcontracting/onboarding_step/learn_subcontracting/learn_subcontracting.json
 msgid "Learn Subcontracting"
-msgstr ""
+msgstr "Сазнајте више о подуговарању"
 
 #. Description of the 'Enable Common Party Accounting' (Check) field in DocType
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Learn about <a href=\"https://docs.frappe.io/erpnext/user/manual/en/common_party_accounting\" rel=\"noopener noreferrer\">Common Party</a>"
-msgstr ""
+msgstr "Сазнајте више о <a href=\"https://docs.frappe.io/erpnext/user/manual/en/common_party_accounting\" rel=\"noopener noreferrer\"> заједничкој странци </a>"
 
 #. Label of the leave_encashed (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -27562,7 +27568,7 @@ msgstr "Спајање рачуна"
 
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:146
 msgid "Ledger Type"
-msgstr ""
+msgstr "Врста главне књиге"
 
 #. Label of a Card Break in the Financial Reports Workspace
 #. Label of a Workspace Sidebar Item
@@ -27574,7 +27580,7 @@ msgstr "Пословне књиге"
 #. Label of the vouchers_posted (Int) field in DocType 'Repost Item Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Ledgers Posted"
-msgstr ""
+msgstr "Прокњижени налози"
 
 #. Label of the left_child (Link) field in DocType 'Bisect Nodes'
 #: erpnext/accounts/doctype/bisect_nodes/bisect_nodes.json
@@ -28434,7 +28440,7 @@ msgstr "Направи унос преноса"
 
 #: erpnext/public/js/telephony.js:29
 msgid "Make a call"
-msgstr ""
+msgstr "Позови"
 
 #: erpnext/config/projects.py:34
 msgid "Make project from a template."
@@ -28466,7 +28472,7 @@ msgstr "Управљај трошковима операција"
 #. DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Manage sales partner's and sales team's commissions"
-msgstr ""
+msgstr "Управљање провизијама продајних партнера и продајног тима"
 
 #: erpnext/utilities/activation.py:95
 msgid "Manage your orders"
@@ -28751,7 +28757,7 @@ msgstr "Подешавање производње"
 #. Title of the Module Onboarding 'Manufacturing Onboarding'
 #: erpnext/manufacturing/module_onboarding/manufacturing_onboarding/manufacturing_onboarding.json
 msgid "Manufacturing Setup"
-msgstr ""
+msgstr "Поставке производње"
 
 #. Label of the manufacturing_time_in_mins (Int) field in DocType 'Item Lead
 #. Time'
@@ -28983,7 +28989,7 @@ msgstr "Издавање материјала"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/manufacturing.json
 msgid "Material Planning"
-msgstr ""
+msgstr "Планирање материјала"
 
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry'
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry Type'
@@ -29122,7 +29128,7 @@ msgstr "Врста захтева за набавку"
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:1119
 msgid "Material Request already created for the ordered quantity"
-msgstr ""
+msgstr "Захтев за набавку је већ креиран за наручену количину"
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:1860
 msgid "Material Request not created, as quantity for Raw Materials already available."
@@ -29257,7 +29263,7 @@ msgstr "Материјал ка добављачу"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/subcontracting.json
 msgid "Materials To Be Transferred"
-msgstr ""
+msgstr "Материјал за пренос"
 
 #: erpnext/controllers/subcontracting_controller.py:1582
 msgid "Materials are already received against the {0} {1}"
@@ -29357,7 +29363,7 @@ msgstr "Максимални износ плаћања"
 #: erpnext/manufacturing/report/bom_stock_analysis/bom_stock_analysis.py:82
 #: erpnext/manufacturing/report/bom_stock_analysis/bom_stock_analysis.py:151
 msgid "Maximum Producible Items"
-msgstr ""
+msgstr "Максимална количина производивих ставки"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:4121
 msgid "Maximum Samples - {0} can be retained for Batch {1} and Item {2}."
@@ -29514,7 +29520,7 @@ msgstr "Поруке дуже од 160 карактера биће подеље�
 
 #: erpnext/setup/install.py:138
 msgid "Messaging CRM Campaign"
-msgstr ""
+msgstr "CRM кампања за поруке"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -29789,7 +29795,7 @@ msgstr "Минути"
 #. Label of the section_break_19 (Section Break) field in DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Miscellaneous"
-msgstr ""
+msgstr "Разно"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:116
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:224
@@ -29848,7 +29854,7 @@ msgstr "Недостајућа ставка"
 
 #: erpnext/setup/doctype/employee/employee.py:568
 msgid "Missing Parameter"
-msgstr ""
+msgstr "Недостајући параметар"
 
 #: erpnext/utilities/__init__.py:53
 msgid "Missing Payments App"
@@ -29864,7 +29870,7 @@ msgstr "Недостаје број серије пакета"
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:171
 msgid "Missing Warehouse"
-msgstr ""
+msgstr "Недостаје складиште"
 
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.js:156
 msgid "Missing email template for dispatch. Please set one in Delivery Settings."
@@ -30132,7 +30138,7 @@ msgstr "Више варијанти"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:244
 msgid "Multiple company fields available: {0}. Please select manually."
-msgstr ""
+msgstr "Доступно је више поља компаније: {0}. Молимо Вас да изаберете ручно."
 
 #: erpnext/controllers/accounts_controller.py:1306
 msgid "Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year"
@@ -30235,7 +30241,7 @@ msgstr ""
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:937
 msgid "Naming series '{0}' for DocType '{1}' does not contain standard '.' or '{{' separator. Using fallback extraction."
-msgstr ""
+msgstr "Серија именовања '{0}' за DocType '{1}' не садржи стандардни сепаратор '.' или '{{'. Користи се резервни начин екстракције."
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -30275,7 +30281,7 @@ msgstr "Анализа потребна"
 #. Name of a report
 #: erpnext/stock/report/negative_batch_report/negative_batch_report.json
 msgid "Negative Batch Report"
-msgstr ""
+msgstr "Извештај о шаржама са негативним стањем"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:628
 msgid "Negative Quantity is not allowed"
@@ -30658,7 +30664,7 @@ msgstr "Нови расходи"
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:1
 msgid "New Fiscal Year - {0}"
-msgstr ""
+msgstr "Нова фискална година - {0}"
 
 #. Label of the income (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -30676,7 +30682,7 @@ msgstr "Биће прокњижен нови налог књижења за из
 #. Label of a number card in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "New Lead (Last 1 Month)"
-msgstr ""
+msgstr "Нови потенцијални клијент (претходни месец)"
 
 #: erpnext/assets/doctype/location/location_tree.js:23
 msgid "New Location"
@@ -30689,7 +30695,7 @@ msgstr "Нова белешка"
 #. Label of a number card in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "New Opportunity (Last 1 Month)"
-msgstr ""
+msgstr "Нова прилика (претходни месец)"
 
 #. Label of the purchase_invoice (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -30828,7 +30834,7 @@ msgstr "Не постоје изабране отпремнице за купц�
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:754
 msgid "No DocTypes in To Delete list. Please generate or import the list before submitting."
-msgstr ""
+msgstr "Нема DocType-ова на листи за брисање. Молимо Вас да генеришете или увезете листу пре подношења."
 
 #: erpnext/public/js/utils/ledger_preview.js:64
 msgid "No Impact on Accounting Ledger"
@@ -30848,7 +30854,7 @@ msgstr "Нема ставки изабраних за трансфер."
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1260
 msgid "No Items with Bill of Materials to Manufacture or all items already manufactured"
-msgstr ""
+msgstr "Нема ставки са саставницом за производњу или су све ставке већ произведене"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1413
 msgid "No Items with Bill of Materials."
@@ -30912,7 +30918,7 @@ msgstr "Нема података о порезу по одбитку за тр�
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:108
 msgid "No Tax withholding account set for Company {0} in Tax Withholding Category {1}."
-msgstr ""
+msgstr "Није постављен рачун за порез по одбитку за компанију {0} у врсти пореза по одбитку {1}."
 
 #: erpnext/accounts/report/gross_profit/gross_profit.py:990
 msgid "No Terms"
@@ -30974,7 +30980,7 @@ msgstr "Није пронађена разлика за рачун залиха 
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:150
 msgid "No email found for {0} {1}"
-msgstr ""
+msgstr "Није пронађен имејл за {0} {1}"
 
 #: erpnext/telephony/doctype/call_log/call_log.py:117
 msgid "No employee was scheduled for call popup"
@@ -30982,7 +30988,7 @@ msgstr "Ниједно запослено лице није у распоред�
 
 #: erpnext/edi/doctype/code_list/code_list_import.py:73
 msgid "No file uploaded or URL provided."
-msgstr ""
+msgstr "Није отпремљен фајл нити је унет URL."
 
 #: erpnext/controllers/subcontracting_controller.py:1391
 msgid "No item available for transfer."
@@ -31050,7 +31056,7 @@ msgstr "Број интеракција"
 #. Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "No of Items to Repost"
-msgstr ""
+msgstr "Број ставки за поновно књижење"
 
 #. Label of the no_of_months_exp (Int) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -31131,7 +31137,7 @@ msgstr "Није пронађен ниједан чекајући захтев �
 
 #: erpnext/public/js/controllers/transaction.js:472
 msgid "No pending payment schedules available."
-msgstr ""
+msgstr "Нема доступних распореда плаћања на чекању."
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:502
 msgid "No primary email found for customer: {0}"
@@ -31147,7 +31153,7 @@ msgstr "Нису пронађене недавне трансакције"
 
 #: erpnext/crm/doctype/email_campaign/email_campaign.py:158
 msgid "No recipients found for campaign {0}"
-msgstr ""
+msgstr "Нису пронађени примаоци за кампању {0}"
 
 #: erpnext/accounts/report/purchase_register/purchase_register.py:45
 #: erpnext/accounts/report/sales_register/sales_register.py:46
@@ -31173,11 +31179,11 @@ msgstr "Нису пронађене резервисане залихе за п�
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:152
 msgid "No rows with zero document count found"
-msgstr ""
+msgstr "Нису пронађени редови са нултим бројем докумената"
 
 #: erpnext/stock/doctype/batch/batch.js:77
 msgid "No stock available for this batch."
-msgstr ""
+msgstr "Нема доступних залиха за ову шаржу."
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:810
 msgid "No stock ledger entries were created. Please set the quantity or valuation rate for the items properly and try again."
@@ -31251,7 +31257,7 @@ msgstr "Нема нула"
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.js:117
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:113
 msgid "Non-phantom BOM cannot be created for non-stock item {0}."
-msgstr ""
+msgstr "Није могуће креирати саставницу која није виртуелна за ставку ван залиха {0}."
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:559
 msgid "None of the items have any change in quantity or value."
@@ -31746,7 +31752,7 @@ msgstr "Провере на машини"
 #. Title of the Module Onboarding 'Stock Onboarding'
 #: erpnext/selling/module_onboarding/stock_onboarding/stock_onboarding.json
 msgid "Onboarding for Stock!"
-msgstr ""
+msgstr "Увод у залихе!"
 
 #. Description of the 'Release Date' (Date) field in DocType 'Purchase Invoice'
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
@@ -31794,7 +31800,7 @@ msgstr "Само CSV и Excel фајлови могу бити коришћен�
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1070
 msgid "Only CSV files are allowed"
-msgstr ""
+msgstr "Дозвољени су искључиво CSV фајлови"
 
 #. Label of the tax_on_excess_amount (Check) field in DocType 'Tax Withholding
 #. Category'
@@ -31846,7 +31852,7 @@ msgstr "Приликом примене искључене накнаде, са�
 
 #: erpnext/manufacturing/doctype/bom/bom.py:330
 msgid "Only one operation can have 'Is Final Finished Good' checked when 'Track Semi Finished Goods' is enabled."
-msgstr ""
+msgstr "Само једна операција може имати означено 'Финални готов производ' када је омогућено 'Праћење полупроизвода'."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1349
 msgid "Only one {0} entry can be created against the Work Order {1}"
@@ -32111,7 +32117,7 @@ msgstr "Ставка почетне фактуре"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "Opening Invoice Tool"
-msgstr ""
+msgstr "Алат за унос почетних фактура"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1654
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1990
@@ -32499,7 +32505,7 @@ msgstr "Оптимизуј руту"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1017
 msgid "Optional. Select a specific manufacture entry to reverse."
-msgstr ""
+msgstr "Опционо. Изаберите конкретан унос производње који желите да поништите."
 
 #: erpnext/accounts/doctype/account/account_tree.js:178
 msgid "Optional. Sets company's default currency, if not specified."
@@ -32727,7 +32733,7 @@ msgstr "Остала подешавања"
 #. Label of the tab_break_dpet (Tab Break) field in DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Others"
-msgstr ""
+msgstr "Остали"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -32808,12 +32814,12 @@ msgstr "Застарели унос почетног стања малопрод
 #. Label of a number card in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 msgid "Outgoing Bills"
-msgstr ""
+msgstr "Излазни рачуни"
 
 #. Label of a number card in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 msgid "Outgoing Payment"
-msgstr ""
+msgstr "Излазно плаћање"
 
 #. Label of the outgoing_rate (Float) field in DocType 'Serial and Batch Entry'
 #. Label of the outgoing_rate (Currency) field in DocType 'Stock Ledger Entry'
@@ -32895,7 +32901,7 @@ msgstr "Излазно"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/subcontracting.json
 msgid "Outward Order"
-msgstr ""
+msgstr "Налог за издавање"
 
 #. Label of the over_billing_allowance (Currency) field in DocType 'Accounts
 #. Settings'
@@ -32945,7 +32951,7 @@ msgstr "Дозвола за прекорачење преноса (%)"
 #. Option for the 'Status' (Select) field in DocType 'Tax Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Over Withheld"
-msgstr ""
+msgstr "Прекомерно обрачунат порез по одбитку"
 
 #: erpnext/controllers/status_updater.py:496
 msgid "Overbilling of {0} {1} ignored for item {2} because you have {3} role."
@@ -33047,7 +33053,7 @@ msgstr "Власник"
 #. Label of the asset_owner_section (Section Break) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
 msgid "Ownership"
-msgstr ""
+msgstr "Власништво"
 
 #. Label of the p_l_closing_balance (JSON) field in DocType 'Process Period
 #. Closing Voucher'
@@ -33142,7 +33148,7 @@ msgstr "Затварање малопродаје није успело прил
 #. Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "POS Configurations"
-msgstr ""
+msgstr "Конфигурација малопродаје"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/pos_customer_group/pos_customer_group.json
@@ -33226,7 +33232,7 @@ msgstr "Фискални рачуни ће бити деконсолидован
 #. Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "POS Item Details"
-msgstr ""
+msgstr "Детаљи малопродајне ставке"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/pos_item_group/pos_item_group.json
@@ -33237,7 +33243,7 @@ msgstr "Група ставки малопродаје"
 #. Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "POS Item Selector"
-msgstr ""
+msgstr "Селектор малопродајне ставке"
 
 #. Label of the pos_opening_entry (Link) field in DocType 'POS Closing Entry'
 #. Name of a DocType
@@ -33794,7 +33800,7 @@ msgstr "Делимичне залихе могу бити резервисане
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/delivery_note/delivery_note_list.js:24
 msgid "Partially Billed"
-msgstr ""
+msgstr "Делимично фактурисано"
 
 #. Option for the 'Completion Status' (Select) field in DocType 'Maintenance
 #. Schedule Detail'
@@ -34049,7 +34055,7 @@ msgstr "IBAN странке (Банкарски извод)"
 #. Tool Item'
 #: erpnext/accounts/doctype/opening_invoice_creation_tool_item/opening_invoice_creation_tool_item.json
 msgid "Party ID"
-msgstr ""
+msgstr "ИД странке"
 
 #. Label of the section_break_7 (Section Break) field in DocType 'Pricing Rule'
 #. Label of the section_break_8 (Section Break) field in DocType 'Promotional
@@ -34535,7 +34541,7 @@ msgstr "Начин плаћања"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Payment Options"
-msgstr ""
+msgstr "Опције плаћања"
 
 #. Label of the payment_order (Link) field in DocType 'Journal Entry'
 #. Label of the payment_order (Link) field in DocType 'Payment Entry'
@@ -34602,7 +34608,7 @@ msgstr "Плаћање примљено"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/invoicing.json
 msgid "Payment Reconciliaition"
-msgstr ""
+msgstr "Усклађивање плаћања"
 
 #. Name of a DocType
 #. Label of the payment_reconciliation (Table) field in DocType 'POS Closing
@@ -34711,7 +34717,7 @@ msgstr "Захтеви за наплату не могу бити креиран
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Payment Requests made from Sales / Purchase Invoice will be put in Draft explicitly"
-msgstr ""
+msgstr "Захтеви за плаћање креирани из излазне или улазне фактуре биће експлицитно постављени у статус нацрта"
 
 #. Label of the payment_schedule (Data) field in DocType 'Overdue Payment'
 #. Label of the payment_schedule (Link) field in DocType 'Payment Reference'
@@ -34737,11 +34743,11 @@ msgstr "Распоред плаћања"
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:589
 msgid "Payment Schedule based Payment Requests cannot be created because a Payment Entry already exists for this document."
-msgstr ""
+msgstr "Захтев за наплату на основу распореда плаћања не може бити креиран јер већ постоји налог за плаћање за овај документ."
 
 #: erpnext/public/js/controllers/transaction.js:483
 msgid "Payment Schedules"
-msgstr ""
+msgstr "Распореди плаћања"
 
 #. Label of the payment_term (Link) field in DocType 'Overdue Payment'
 #. Label of the payment_term (Link) field in DocType 'Payment Entry Reference'
@@ -34880,7 +34886,7 @@ msgstr "Методе плаћања су обавезне. Молимо Вас �
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3033
 msgid "Payment methods refreshed. Please review before proceeding."
-msgstr ""
+msgstr "Методе плаћања су освежене. Молимо Вас да их прегледате пре наставка."
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.js:466
 #: erpnext/selling/page/point_of_sale/pos_payment.js:366
@@ -35360,7 +35366,7 @@ msgstr "Бензин"
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.js:113
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:110
 msgid "Phantom BOM cannot be created for stock item {0}."
-msgstr ""
+msgstr "Није могуће креирати виртуелну саставницу за ставку на залихама {0}."
 
 #: erpnext/manufacturing/doctype/bom/bom_item_preview.html:16
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:321
@@ -35780,7 +35786,7 @@ msgstr "Молимо Вас да додате начин плаћања и де�
 
 #: erpnext/manufacturing/doctype/bom/bom.js:39
 msgid "Please add Operations first."
-msgstr ""
+msgstr "Молимо Вас да прво додате операције."
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:213
 msgid "Please add Request for Quotation to the sidebar in Portal Settings."
@@ -35858,7 +35864,7 @@ msgstr "Молимо Вас да проверите оперативне тро�
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:149
 msgid "Please check the 'Activate Serial and Batch No for Item' checkbox in the {0} to make Serial and Batch Bundle for the item."
-msgstr ""
+msgstr "Молимо Вас да означите опцију 'Активирај број серије и шарже за ставку' у документу {0} како бисте омогућили пакет серије / шарже за ту ставку."
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:569
 msgid "Please check the error message and take necessary actions to fix the error and then restart the reposting again."
@@ -35996,7 +36002,7 @@ msgstr "Молимо Вас да унесете улогу одобравања 
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:683
 msgid "Please enter Batch No"
-msgstr ""
+msgstr "Молимо Вас да унесете број шарже"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:976
 msgid "Please enter Cost Center"
@@ -36057,7 +36063,7 @@ msgstr "Молимо Вас да унесете врсту главног рач
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:685
 msgid "Please enter Serial No"
-msgstr ""
+msgstr "Молимо Вас да унесете број серије"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:319
 msgid "Please enter Serial Nos"
@@ -36158,7 +36164,7 @@ msgstr "Молимо Вас да попуните табелу продајни�
 
 #: erpnext/stock/doctype/shipment/shipment.js:277
 msgid "Please first set Full Name, Email and Phone for the user"
-msgstr ""
+msgstr "Молимо Вас да прво поставите име и презиме, имејл и телефон за корисника"
 
 #: erpnext/telephony/doctype/incoming_call_settings/incoming_call_settings.js:94
 msgid "Please fix overlapping time slots for {0}"
@@ -36170,11 +36176,11 @@ msgstr "Молимо Вас да исправите преклапајуће в�
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:272
 msgid "Please generate To Delete list before submitting"
-msgstr ""
+msgstr "Молимо Вас да генеришете листу за брисање пре подношења"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:70
 msgid "Please generate the To Delete list before submitting"
-msgstr ""
+msgstr "Молимо Вас да генеришете листу за брисање пре подношења"
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:67
 msgid "Please import accounts against parent company or enable {} in company master."
@@ -36223,7 +36229,7 @@ msgstr "Молимо Вас да освежите или ресетујете Pl
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:43
 msgid "Please review the {0} configuration and complete any required financial setup activities."
-msgstr ""
+msgstr "Погледајте конфигурацију {0} и довршите неопходна финансијска подешавања."
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.js:12
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.js:28
@@ -36491,7 +36497,7 @@ msgstr "Молимо Вас да изаберете најмање један р
 
 #: erpnext/public/js/controllers/transaction.js:526
 msgid "Please select at least one schedule."
-msgstr ""
+msgstr "Молимо Вас да изаберете барем један распоред."
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1330
 msgid "Please select atleast one item to continue"
@@ -36562,7 +36568,7 @@ msgstr "Молимо Вас да прво изаберете врсту доку
 
 #: erpnext/selling/report/sales_partner_commission_summary/sales_partner_commission_summary.py:47
 msgid "Please select the document type first."
-msgstr ""
+msgstr "Молимо Вас да прво изаберете врсту документа."
 
 #: erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py:21
 msgid "Please select the required filters"
@@ -37182,7 +37188,7 @@ msgstr "Датум и време књижења су обавезни"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:99
 msgid "Posting date is required"
-msgstr ""
+msgstr "Датум књижења је обавезан"
 
 #: erpnext/controllers/sales_and_purchase_return.py:66
 msgid "Posting timestamp must be after {0}"
@@ -37349,7 +37355,7 @@ msgstr "Претходна фискална година није затворе
 
 #: erpnext/stock/report/negative_batch_report/negative_batch_report.py:54
 msgid "Previous Qty"
-msgstr ""
+msgstr "Претходна количина"
 
 #. Label of the previous_work_experience (Section Break) field in DocType
 #. 'Employee'
@@ -37439,7 +37445,7 @@ msgstr "Ценовник"
 #. DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Price List & Currency"
-msgstr ""
+msgstr "Ценовник и валута"
 
 #. Name of a DocType
 #: erpnext/stock/doctype/price_list_country/price_list_country.json
@@ -37947,7 +37953,7 @@ msgstr "Губитак у процесу"
 #. Item'
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 msgid "Process Loss %"
-msgstr ""
+msgstr "Губитак у процесу %"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1272
 msgid "Process Loss Percentage cannot be greater than 100"
@@ -38082,7 +38088,7 @@ msgstr "Обрада XML фајлова"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:188
 msgid "Processing import..."
-msgstr ""
+msgstr "Обрада увоза..."
 
 #: erpnext/buying/doctype/supplier/supplier_dashboard.py:10
 msgid "Procurement"
@@ -38258,7 +38264,7 @@ msgstr "Ставка у производњи"
 #: erpnext/manufacturing/doctype/bom/bom.json
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 msgid "Production Item Info"
-msgstr ""
+msgstr "Информације о производној ставци"
 
 #. Label of the production_plan (Link) field in DocType 'Purchase Order Item'
 #. Name of a DocType
@@ -38635,7 +38641,7 @@ msgstr "Подешавања пројеката"
 #. Title of the Module Onboarding 'Projects Onboarding'
 #: erpnext/projects/module_onboarding/projects_onboarding/projects_onboarding.json
 msgid "Projects Setup"
-msgstr ""
+msgstr "Поставке пројеката"
 
 #. Name of a role
 #: erpnext/projects/doctype/activity_cost/activity_cost.json
@@ -38755,7 +38761,7 @@ msgstr "Потенцијални купци укључени, али нису к
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:198
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:784
 msgid "Protected DocType"
-msgstr ""
+msgstr "Заштићен DocType"
 
 #. Description of the 'Company Email' (Data) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -39297,7 +39303,7 @@ msgstr "Трендови пријемница набавке"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/buying.json
 msgid "Purchase Receipt Trends "
-msgstr ""
+msgstr "Трендови пријемница набавке "
 
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:358
 msgid "Purchase Receipt doesn't have any Item for which Retain Sample is enabled."
@@ -39334,7 +39340,7 @@ msgstr "Шаблон пореза на набавку"
 #. 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Purchase Tax Withholding Category"
-msgstr ""
+msgstr "Врста пореза по одбитку за набавку"
 
 #. Label of the taxes (Table) field in DocType 'Purchase Invoice'
 #. Name of a DocType
@@ -39551,7 +39557,7 @@ msgstr "Количина "
 #. Item'
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Qty (As per BOM)"
-msgstr ""
+msgstr "Количина (према саставници)"
 
 #. Label of the company_total_stock (Float) field in DocType 'Sales Invoice
 #. Item'
@@ -39735,7 +39741,7 @@ msgstr "Количина за испоруку"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:379
 msgid "Qty to Disassemble"
-msgstr ""
+msgstr "Количина за демонтажу"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:384
 msgid "Qty to Fetch"
@@ -39979,17 +39985,17 @@ msgstr "Назив шаблона инспекције квалитета"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:799
 msgid "Quality Inspection is required for the item {0} before completing the job card {1}"
-msgstr ""
+msgstr "Инспекција квалитета је обавезна за ставку {0} пре завршетка радне картице {1}"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:810
 #: erpnext/manufacturing/doctype/job_card/job_card.py:819
 msgid "Quality Inspection {0} is not submitted for the item: {1}"
-msgstr ""
+msgstr "Инспекција квалитета {0} није поднета за ставку: {1}"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:829
 #: erpnext/manufacturing/doctype/job_card/job_card.py:838
 msgid "Quality Inspection {0} is rejected for the item: {1}"
-msgstr ""
+msgstr "Инспекција квалитета {0} је одбијена за ставку: {1}"
 
 #: erpnext/public/js/controllers/transaction.js:384
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:206
@@ -40247,7 +40253,7 @@ msgstr "Количина не може бити већа од {0} за став�
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:564
 msgid "Quantity is mandatory for the selected items."
-msgstr ""
+msgstr "Количина је обавезна за изабране ставке."
 
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:274
 msgid "Quantity is required"
@@ -40255,11 +40261,11 @@ msgstr "Количина је обавезна"
 
 #: erpnext/stock/dashboard/item_dashboard.js:285
 msgid "Quantity must be greater than zero"
-msgstr ""
+msgstr "Количина мора бити већа од нуле"
 
 #: erpnext/stock/dashboard/item_dashboard.js:290
 msgid "Quantity must be less than or equal to {0}"
-msgstr ""
+msgstr "Количина мора бити мања или једнака {0}"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1098
 #: erpnext/stock/doctype/pick_list/pick_list.js:209
@@ -40462,7 +40468,7 @@ msgstr "Износ понуде"
 #. in DocType 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "RFQ and Purchase Order Settings"
-msgstr ""
+msgstr "Подешавање захтева за понуду и набавних поруџбина"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:132
 msgid "RFQs are not allowed for {0} due to a scorecard standing of {1}"
@@ -40892,7 +40898,7 @@ msgstr "Утрошак сировина"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:327
 msgid "Raw Materials Missing"
-msgstr ""
+msgstr "Недостају сировине"
 
 #. Label of the raw_materials_received_section (Section Break) field in DocType
 #. 'Subcontracting Inward Order'
@@ -41369,7 +41375,7 @@ msgstr "Величина реда за усклађивање"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/banking.json
 msgid "Reconciliation Statement"
-msgstr ""
+msgstr "Извештај о усклађености"
 
 #. Label of the reconciliation_takes_effect_on (Select) field in DocType
 #. 'Company'
@@ -41653,7 +41659,7 @@ msgstr "Регионални"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Registers"
-msgstr ""
+msgstr "Регистри"
 
 #. Label of the registration_details (Code) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -41852,7 +41858,7 @@ msgstr "Уклони матични ред у табели ставки"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:140
 msgid "Remove Zero Counts"
-msgstr ""
+msgstr "Уклони записе са нултим бројем"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js:21
 msgid "Remove item if charges is not applicable to that item"
@@ -41864,7 +41870,7 @@ msgstr "Уклони ставке без промене у количини ил
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:161
 msgid "Removed {0} rows with zero document count. Please save to persist changes."
-msgstr ""
+msgstr "Уклоњено {0} редова са бројем докумената нула. Молимо Вас да сачувате измене."
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:87
 msgid "Removing rows without exchange gain or loss"
@@ -42056,7 +42062,7 @@ msgstr "Одговара"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Repost"
-msgstr ""
+msgstr "Поновно књижење"
 
 #. Name of a DocType
 #. Label of a Workspace Sidebar Item
@@ -42145,7 +42151,7 @@ msgstr "Поновна обрада датотеке података"
 #. Item Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Reposting Item and Warehouse"
-msgstr ""
+msgstr "Поновно књижене ставке и складишта"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:131
 msgid "Reposting Progress"
@@ -42161,11 +42167,11 @@ msgstr "Референца поновног књижења"
 #. field in DocType 'Repost Item Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Reposting Vouchers"
-msgstr ""
+msgstr "Поновно књижење докумената"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:149
 msgid "Reposting Vouchers Progress"
-msgstr ""
+msgstr "Напредак поновног књижења докумената"
 
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:216
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:327
@@ -42174,11 +42180,11 @@ msgstr "Креиране ставке за поновну обраду: {0}"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:123
 msgid "Reposting for Item-Wh Completed {0}%"
-msgstr ""
+msgstr "Поновно књижење за ставку и складиште је завршено {0}%"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:141
 msgid "Reposting for Vouchers Completed {0}%"
-msgstr ""
+msgstr "Поновно књижење докумената је завршено {0}%"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.js:109
 msgid "Reposting has been started in the background."
@@ -42547,7 +42553,7 @@ msgstr "Конфликт резервисане шарже"
 #. 'Bin'
 #: erpnext/stock/doctype/bin/bin.json
 msgid "Reserved Inventory"
-msgstr ""
+msgstr "Резервисани инвентар"
 
 #. Label of the reserved_qty (Float) field in DocType 'Bin'
 #. Label of the reserved_qty (Float) field in DocType 'Stock Reservation Entry'
@@ -43109,7 +43115,7 @@ msgstr "Враћена количина у јединици мера залих�
 
 #: erpnext/buying/report/subcontracted_raw_materials_to_be_transferred/subcontracted_raw_materials_to_be_transferred.py:44
 msgid "Returned Quantity"
-msgstr ""
+msgstr "Враћена количина"
 
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.py:101
 msgid "Returned exchange rate is neither integer not float."
@@ -43181,18 +43187,18 @@ msgstr "Преглед"
 #. Label of an action in the Onboarding Step 'Review Accounts Settings'
 #: erpnext/accounts/onboarding_step/review_accounts_settings/review_accounts_settings.json
 msgid "Review Accounts Settings"
-msgstr ""
+msgstr "Преглед поставки рачуна"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Review Buying Settings'
 #: erpnext/buying/onboarding_step/review_buying_settings/review_buying_settings.json
 msgid "Review Buying Settings"
-msgstr ""
+msgstr "Преглед поставки набавке"
 
 #. Title of an Onboarding Step
 #: erpnext/accounts/onboarding_step/chart_of_accounts/chart_of_accounts.json
 msgid "Review Chart of Accounts"
-msgstr ""
+msgstr "Преглед контног оквира"
 
 #. Label of the review_date (Date) field in DocType 'Task'
 #: erpnext/projects/doctype/task/task.json
@@ -43203,25 +43209,25 @@ msgstr "Датум прегледа"
 #. Label of an action in the Onboarding Step 'Review Manufacturing Settings'
 #: erpnext/manufacturing/onboarding_step/review_manufacturing_settings/review_manufacturing_settings.json
 msgid "Review Manufacturing Settings"
-msgstr ""
+msgstr "Преглед поставки производње"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Review Selling Settings'
 #: erpnext/selling/onboarding_step/review_selling_settings/review_selling_settings.json
 msgid "Review Selling Settings"
-msgstr ""
+msgstr "Преглед поставки продаје"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Review Stock Settings'
 #: erpnext/stock/onboarding_step/review_stock_settings/review_stock_settings.json
 msgid "Review Stock Settings"
-msgstr ""
+msgstr "Преглед поставки залиха"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Review System Settings'
 #: erpnext/setup/onboarding_step/review_system_settings/review_system_settings.json
 msgid "Review System Settings"
-msgstr ""
+msgstr "Преглед системских поставки"
 
 #. Label of a Card Break in the Quality Workspace
 #: erpnext/quality_management/workspace/quality/quality.json
@@ -43644,7 +43650,7 @@ msgstr "Ред #{0}: Није могуће отказати овај унос з
 
 #: erpnext/controllers/subcontracting_inward_controller.py:616
 msgid "Row #{0}: Cannot cancel this Manufacturing Stock Entry as quantity of Secondary Item {1} produced cannot be less than quantity delivered."
-msgstr ""
+msgstr "Ред #{0}: Није могуће отказати овај унос залиха производње јер произведена количина секундарне ставке {1} не може бити мања од испоручене количине."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:483
 msgid "Row #{0}: Cannot cancel this Stock Entry as returned quantity cannot be greater than delivered quantity for Item {1} in the linked Subcontracting Inward Order"
@@ -43652,7 +43658,7 @@ msgstr "Ред #{0}: Није могуће отказати овај унос з
 
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.py:78
 msgid "Row #{0}: Cannot create entry with different taxable AND withholding document links."
-msgstr ""
+msgstr "Ред #{0}: Није могуће креирати унос са различитим везама опорезивог документа и документа за порез по одбитку."
 
 #: erpnext/controllers/accounts_controller.py:3792
 msgid "Row #{0}: Cannot delete item {1} which has already been billed."
@@ -43672,7 +43678,7 @@ msgstr "Ред #{0}: Не може се обрисати ставка {1} кој
 
 #: erpnext/controllers/accounts_controller.py:3778
 msgid "Row #{0}: Cannot delete item {1} which is already ordered against this Sales Order."
-msgstr ""
+msgstr "Ред #{0}: Није могуће обрисати ставку {1} јер је већ поручена у оквиру ове продајне поруџбине."
 
 #: erpnext/controllers/accounts_controller.py:4099
 msgid "Row #{0}: Cannot set Rate if the billed amount is greater than the amount for Item {1}."
@@ -43712,7 +43718,7 @@ msgstr "Ред #{0}: Трошковни центар {1} не припада к�
 
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.py:211
 msgid "Row #{0}: Could not find enough {1} entries to match. Remaining amount: {2}"
-msgstr ""
+msgstr "Ред #{0}: Није пронађен довољан број уноса {1} за усклађивање. Преостали износ: {2}"
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:88
 msgid "Row #{0}: Cumulative threshold cannot be less than Single Transaction threshold"
@@ -43755,7 +43761,7 @@ msgstr "Ред #{0}: Ставка обезбеђена од стране куп�
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:61
 msgid "Row #{0}: Dates overlapping with other row in group {1}"
-msgstr ""
+msgstr "Ред #{0}: Датуми се преклапају са другим редом у групи {1}"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.py:357
 msgid "Row #{0}: Default BOM not found for FG Item {1}"
@@ -43802,7 +43808,7 @@ msgstr "Ред #{0}: Готов производ мора бити {1}"
 
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:584
 msgid "Row #{0}: Finished Good reference is mandatory for Secondary Item {1}."
-msgstr ""
+msgstr "Ред #{0}: Референца готовог производа је обавезна за секундарну ставку {1}."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:170
 #: erpnext/controllers/subcontracting_inward_controller.py:294
@@ -43819,7 +43825,7 @@ msgstr "Ред #{0}: За {1}, можете изабрати референтн�
 
 #: erpnext/assets/doctype/asset/asset.py:664
 msgid "Row #{0}: Frequency of Depreciation must be greater than zero"
-msgstr ""
+msgstr "Ред #{0}: Учесталост амортизације мора бити већа од нуле"
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:50
 msgid "Row #{0}: From Date cannot be before To Date"
@@ -43835,7 +43841,7 @@ msgstr "Ред #{0}: Ставка је додата"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1644
 msgid "Row #{0}: Item {1} cannot be transferred more than {2} against {3} {4}"
-msgstr ""
+msgstr "Ред #{0}: Ставка {1} не може се пренети у количини већој од {2} у односу на {3} {4}"
 
 #: erpnext/buying/utils.py:98
 msgid "Row #{0}: Item {1} does not exist"
@@ -43851,7 +43857,7 @@ msgstr "Ред #{0}: Ставка {1} нема залиха у складишт�
 
 #: erpnext/controllers/stock_controller.py:153
 msgid "Row #{0}: Item {1} has zero rate but '{2}' is not enabled."
-msgstr ""
+msgstr "Ред #{0}: Ставка {1} има стопу нула, али опција '{2}' није омогућена."
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:456
 msgid "Row #{0}: Item {1} in warehouse {2}: Available {3}, Needed {4}."
@@ -43946,7 +43952,7 @@ msgstr "Ред #{0}: Молимо Вас да ажурирате рачун ра
 #: erpnext/manufacturing/doctype/bom/bom.py:346
 #, python-format
 msgid "Row #{0}: Process Loss Percentage should be less than 100% for {1} Item {2}"
-msgstr ""
+msgstr "Ред #{0}: Проценат губитка у процесу мора бити мањи од 100% за {1} ставку {2}"
 
 #: erpnext/public/js/utils/barcode_scanner.js:425
 msgid "Row #{0}: Qty increased by {1}"
@@ -43987,7 +43993,7 @@ msgstr "Ред #{0}: Количина ставке {1} не може бити в
 
 #: erpnext/manufacturing/doctype/bom/bom.py:339
 msgid "Row #{0}: Quantity should be greater than 0 for {1} Item {2}"
-msgstr ""
+msgstr "Ред #{0}: Количина мора бити већа од 0 за {1} ставку {2}"
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1696
 msgid "Row #{0}: Quantity to reserve for the Item {1} should be greater than 0."
@@ -44010,7 +44016,7 @@ msgstr "Ред #{0}: Врста референтног документа мор
 
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:577
 msgid "Row #{0}: Rejected Qty cannot be set for Secondary Item {1}."
-msgstr ""
+msgstr "Ред #{0}: Одбијена количина не може бити постављена за секундарну ставку {1}."
 
 #: erpnext/controllers/subcontracting_controller.py:118
 msgid "Row #{0}: Rejected Warehouse is mandatory for the rejected Item {1}"
@@ -44034,7 +44040,7 @@ msgstr "Ред #{0}: Враћена количина не може бити ве
 
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:572
 msgid "Row #{0}: Secondary Item Qty cannot be zero"
-msgstr ""
+msgstr "Ред #{0}: Количина секундарне ставке не може бити нула"
 
 #: erpnext/controllers/selling_controller.py:296
 msgid ""
@@ -44043,6 +44049,10 @@ msgid ""
 "\t\t\t\t\tyou can disable '{5}' in {6} to bypass\n"
 "\t\t\t\t\tthis validation."
 msgstr ""
+"Ред #{0}: Продајна цена за ставку {1} је нижа од њене {2}.\n"
+"\t\t\t\t\tПродајна {3} мора бити најмање {4}. <br><br>Алтернативно,\n"
+"\t\t\t\t\tможете онемогућити '{5}' у {6} да бисте заобишли\n"
+"\t\t\t\t\tову проверу."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:286
 msgid "Row #{0}: Sequence ID must be {1} or {2} for Operation {3}."
@@ -44171,15 +44181,15 @@ msgstr "Ред #{0}: Укупан број амортизација не мож�
 
 #: erpnext/assets/doctype/asset/asset.py:660
 msgid "Row #{0}: Total Number of Depreciations must be greater than zero"
-msgstr ""
+msgstr "Ред #{0}: Укупан број амортизација мора бити већи од нуле"
 
 #: erpnext/controllers/stock_controller.py:105
 msgid "Row #{0}: Warehouse {1} does not match with the warehouse {2} in Serial and Batch Bundle {3}."
-msgstr ""
+msgstr "Ред #{0}: Складиште {1} се не подудара са складиштем {2} у пакету серије и шарже {3}."
 
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.py:94
 msgid "Row #{0}: Withholding Amount {1} does not match calculated amount {2}."
-msgstr ""
+msgstr "Ред #{0}: Износ пореза по одбитку {1} не одговара обрачунатом износу {2}."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:577
 msgid "Row #{0}: Work Order exists against full or partial quantity of Item {1}"
@@ -44211,7 +44221,7 @@ msgstr "Ред #{0}: {1} од {2} треба да буде {3}. Молимо В�
 
 #: erpnext/controllers/accounts_controller.py:3906
 msgid "Row #{0}:Quantity for Item {1} cannot be zero."
-msgstr ""
+msgstr "Ред #{0}: Количина за ставку {1} не може бити нула."
 
 #: erpnext/buying/utils.py:106
 msgid "Row #{1}: Warehouse is mandatory for stock Item {0}"
@@ -44255,7 +44265,7 @@ msgstr "Ред #{}: Валута за {} - {} се не поклапа са ва
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:113
 msgid "Row #{}: Either Party ID or Party Name is required"
-msgstr ""
+msgstr "Ред #{}: Обавезан је или ИД странке или назив странке"
 
 #: erpnext/assets/doctype/asset/asset.py:421
 msgid "Row #{}: Finance Book should not be empty since you're using multiple."
@@ -44275,7 +44285,7 @@ msgstr "Ред #{}: Фискални рачун {} још увек није по
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:123
 msgid "Row #{}: Party ID is required"
-msgstr ""
+msgstr "Ред #{}: ИД странке ја обавезан"
 
 #: erpnext/assets/doctype/asset_maintenance/asset_maintenance.py:41
 msgid "Row #{}: Please assign task to a member."
@@ -44425,7 +44435,7 @@ msgstr "Ред {0}: Девизни курс је обавезан"
 
 #: erpnext/assets/doctype/asset/asset.py:609
 msgid "Row {0}: Expected Value After Useful Life cannot be negative"
-msgstr ""
+msgstr "Ред {0}: Очекивана вредност након корисног века не може бити негативна"
 
 #: erpnext/assets/doctype/asset/asset.py:612
 msgid "Row {0}: Expected Value After Useful Life must be less than Net Purchase Amount"
@@ -44433,7 +44443,7 @@ msgstr "Ред {0}: Очекивана вредност током корисн�
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:187
 msgid "Row {0}: Expense Account {1} is linked to company {2}. Please select an account belonging to company {3}."
-msgstr ""
+msgstr "Ред {0}: Рачун расхода {1} је повезан са компанијом {2}. Молимо Вас да изаберете рачун који припада компанији {3}."
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:531
 msgid "Row {0}: Expense Head changed to {1} as no Purchase Receipt is created against Item {2}."
@@ -44494,7 +44504,7 @@ msgstr "Ред {0}: Ставка {1} мора бити подуговорена 
 
 #: erpnext/controllers/subcontracting_controller.py:183
 msgid "Row {0}: Item {1} must be linked to a {2}."
-msgstr ""
+msgstr "Ред {0}: Ставка {1} мора бити повезана са {2}."
 
 #: erpnext/controllers/subcontracting_controller.py:204
 msgid "Row {0}: Item {1}'s quantity cannot be higher than the available quantity."
@@ -44502,7 +44512,7 @@ msgstr "Ред {0}: Количина ставке {1} не може бити в�
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1245
 msgid "Row {0}: Operation time should be greater than 0 for operation {1}"
-msgstr ""
+msgstr "Ред {0}: Време операције мора бити већ од 0 за операцију {1}"
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.py:615
 msgid "Row {0}: Packed Qty must be equal to {1} Qty."
@@ -44590,7 +44600,7 @@ msgstr "Ред {0}: Количина није доступна за {4} у ск�
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:885
 msgid "Row {0}: Sales Invoice {1} is already created for {2}"
-msgstr ""
+msgstr "Ред {0}: Излазна фактура {1} је већ креирана за {2}"
 
 #: erpnext/assets/doctype/asset_shift_allocation/asset_shift_allocation.py:58
 msgid "Row {0}: Shift cannot be changed since the depreciation has already been processed"
@@ -44634,11 +44644,11 @@ msgstr "Ред {0}: Фактор конверзије јединица мере 
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:170
 msgid "Row {0}: Warehouse is required"
-msgstr ""
+msgstr "Ред {0}: Складиште је обавезно"
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:179
 msgid "Row {0}: Warehouse {1} is linked to company {2}. Please select a warehouse belonging to company {3}."
-msgstr ""
+msgstr "Ред {0}: Складиште {1} је повезано са компанијом {2}. Молимо Вас да изаберете складиште које припада компанији {3}."
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1239
 #: erpnext/manufacturing/doctype/work_order/work_order.py:420
@@ -44667,7 +44677,7 @@ msgstr "Ред {0}: {1} {2} се не подудара са {3}"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:134
 msgid "Row {0}: {1} {2} is linked to company {3}. Please select a document belonging to company {4}."
-msgstr ""
+msgstr "Ред {0}: {1} {2} је повезан са компанијом {3}. Молимо Вас да изаберете документ који припада компанији {4}."
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:108
 msgid "Row {0}: {2} Item {1} does not exist in {2} {3}"
@@ -45292,7 +45302,7 @@ msgstr "Продајна поруџбина {0} већ постоји за на�
 #: erpnext/selling/doctype/sales_order/sales_order.py:1814
 #: erpnext/selling/doctype/sales_order/sales_order.py:1827
 msgid "Sales Order {0} is not available for production"
-msgstr ""
+msgstr "Продајна поруџбина {0} није доступна за производњу"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1397
 msgid "Sales Order {0} is not submitted"
@@ -45588,12 +45598,12 @@ msgstr "Шаблон пореза на продају"
 #. Label of the sales_tax_withholding_category (Link) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Sales Tax Withholding Category"
-msgstr ""
+msgstr "Врста пореза по одбитку за продају"
 
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "Sales Taxes"
-msgstr ""
+msgstr "Порези на продају"
 
 #. Label of the taxes (Table) field in DocType 'POS Invoice'
 #. Label of the taxes (Table) field in DocType 'Sales Invoice'
@@ -45717,7 +45727,7 @@ msgstr "Количина узорка"
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:269
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:535
 msgid "Sample Retention Stock Entry"
-msgstr ""
+msgstr "Унос залиха за задржане узорке"
 
 #. Label of the sample_retention_warehouse (Link) field in DocType 'Stock
 #. Settings'
@@ -45835,7 +45845,7 @@ msgstr "Датум распореда"
 
 #: erpnext/public/js/controllers/transaction.js:492
 msgid "Schedule Name"
-msgstr ""
+msgstr "Назив распореда"
 
 #. Label of the scheduled_date (Date) field in DocType 'Maintenance Schedule
 #. Detail'
@@ -45951,7 +45961,7 @@ msgstr "Резултати оцењивања"
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_secondary_item/subcontracting_inward_order_secondary_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Scrap"
-msgstr ""
+msgstr "Отпад"
 
 #: erpnext/assets/doctype/asset/asset.js:163
 msgid "Scrap Asset"
@@ -46014,12 +46024,12 @@ msgstr "Други имејл"
 #. Label of the item_code (Link) field in DocType 'Job Card Secondary Item'
 #: erpnext/manufacturing/doctype/job_card_secondary_item/job_card_secondary_item.json
 msgid "Secondary Item Code"
-msgstr ""
+msgstr "Шифра секундарне ставке"
 
 #. Label of the item_name (Data) field in DocType 'Job Card Secondary Item'
 #: erpnext/manufacturing/doctype/job_card_secondary_item/job_card_secondary_item.json
 msgid "Secondary Item Name"
-msgstr ""
+msgstr "Назив секундарне ставке"
 
 #. Label of the secondary_items (Table) field in DocType 'BOM'
 #. Label of the secondary_items (Table) field in DocType 'Job Card'
@@ -46030,29 +46040,29 @@ msgstr ""
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 msgid "Secondary Items"
-msgstr ""
+msgstr "Секундарне ставке"
 
 #. Label of the secondary_items_cost (Currency) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Secondary Items Cost"
-msgstr ""
+msgstr "Трошак секундарних ставки"
 
 #. Label of the base_secondary_items_cost (Currency) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Secondary Items Cost (Company Currency)"
-msgstr ""
+msgstr "Трошак секундарних ставки (валута компаније)"
 
 #. Label of the secondary_items_cost_per_qty (Currency) field in DocType
 #. 'Subcontracting Receipt Item'
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Secondary Items Cost Per Qty"
-msgstr ""
+msgstr "Трошак секундарних ставки према количини"
 
 #. Label of the scrap_items_generated_section (Section Break) field in DocType
 #. 'Subcontracting Inward Order'
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 msgid "Secondary Items Generated"
-msgstr ""
+msgstr "Генерисане секундарне ставке"
 
 #. Label of the secondary_party (Dynamic Link) field in DocType 'Party Link'
 #: erpnext/accounts/doctype/party_link/party_link.json
@@ -46218,7 +46228,7 @@ msgstr "Изаберите ставке за производњу"
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:500
 msgid "Select Items to Receive"
-msgstr ""
+msgstr "Изаберите ставке за пријем"
 
 #: erpnext/selling/doctype/sales_order/sales_order_list.js:87
 msgid "Select Items up to Delivery Date"
@@ -46237,7 +46247,7 @@ msgstr "Изаберите програм лојалности"
 
 #: erpnext/public/js/controllers/transaction.js:478
 msgid "Select Payment Schedule"
-msgstr ""
+msgstr "Изаберите распоред плаћања"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:411
 msgid "Select Possible Supplier"
@@ -46476,19 +46486,19 @@ msgstr "Продаја имовине"
 
 #: erpnext/assets/doctype/asset/asset.js:635
 msgid "Sell Qty"
-msgstr ""
+msgstr "Продајна количина"
 
 #: erpnext/assets/doctype/asset/asset.js:651
 msgid "Sell quantity cannot exceed the asset quantity"
-msgstr ""
+msgstr "Продајна количина не може премашити количину имовине"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1410
 msgid "Sell quantity cannot exceed the asset quantity. Asset {0} has only {1} item(s)."
-msgstr ""
+msgstr "Продајна количина не може премашити количину имовине. Имовина {0} има само {1} ставку."
 
 #: erpnext/assets/doctype/asset/asset.js:647
 msgid "Sell quantity must be greater than zero"
-msgstr ""
+msgstr "Продајна количина мора бити већа од нуле"
 
 #. Label of the selling (Check) field in DocType 'Pricing Rule'
 #. Label of the selling (Check) field in DocType 'Promotional Scheme'
@@ -46547,7 +46557,7 @@ msgstr "Подешавање продаје"
 #. Title of the Module Onboarding 'Selling Onboarding'
 #: erpnext/selling/module_onboarding/selling_onboarding/selling_onboarding.json
 msgid "Selling Setup"
-msgstr ""
+msgstr "Поставке продаје"
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:214
 msgid "Selling must be checked, if Applicable For is selected as {0}"
@@ -46660,7 +46670,7 @@ msgstr "Подешавање ставке серије и шарже"
 #. Label of the section_break_jcmx (Section Break) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 msgid "Serial / Batch"
-msgstr ""
+msgstr "Серија / Шаржа"
 
 #. Label of the serial_and_batch_bundle (Link) field in DocType 'Stock
 #. Reconciliation Item'
@@ -46925,7 +46935,7 @@ msgstr "Бројеви серије / Бројеви шарже"
 #. Label of the serial_nos_and_batches (Section Break) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Serial Nos / Batches"
-msgstr ""
+msgstr "Бројеви серија / шарже"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1958
 msgid "Serial Nos are created successfully"
@@ -47041,7 +47051,7 @@ msgstr "Број серије и шарже"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:152
 msgid "Serial and Batch No for Item Disabled"
-msgstr ""
+msgstr "Број серије и шарже за ставку су онемогућени"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.js:53
 msgid "Serial and Batch Nos"
@@ -47471,7 +47481,7 @@ msgstr "Постави нови датум издавања"
 #. field in DocType 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Set Operating Cost / Secondary Items From Sub-assemblies"
-msgstr ""
+msgstr "Постави оперативни трошак / секундарне ставке из подсклопова"
 
 #. Label of the set_cost_based_on_bom_qty (Check) field in DocType 'BOM
 #. Operation'
@@ -47644,7 +47654,7 @@ msgstr "Постави ово уколико је купац јавно пред
 #. Settings'
 #: erpnext/support/doctype/support_settings/support_settings.json
 msgid "Set this value to 0 to disable the feature."
-msgstr ""
+msgstr "Поставите ову вредност на 0 да бисте онемогућили функционалност."
 
 #. Label of the set_valuation_rate_for_rejected_materials (Check) field in
 #. DocType 'Buying Settings'
@@ -47752,39 +47762,39 @@ msgstr "Поравнато"
 #. Label of an action in the Onboarding Step 'Setup Company'
 #: erpnext/setup/onboarding_step/setup_company/setup_company.json
 msgid "Setup Company"
-msgstr ""
+msgstr "Поставке компаније"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Setup Email Account'
 #: erpnext/setup/onboarding_step/setup_email_account/setup_email_account.json
 msgid "Setup Email Account"
-msgstr ""
+msgstr "Поставке имејл налога"
 
 #. Title of the Module Onboarding 'Organization Onboarding'
 #: erpnext/setup/module_onboarding/organization_onboarding/organization_onboarding.json
 msgid "Setup Organization"
-msgstr ""
+msgstr "Поставке организације"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Setup Role Permissions'
 #: erpnext/setup/onboarding_step/setup_role_permissions/setup_role_permissions.json
 msgid "Setup Role Permissions"
-msgstr ""
+msgstr "Поставке дозвола за улоге"
 
 #. Label of an action in the Onboarding Step 'Setup Sales taxes'
 #: erpnext/accounts/onboarding_step/setup_sales_taxes/setup_sales_taxes.json
 msgid "Setup Sales Taxes"
-msgstr ""
+msgstr "Поставке пореза на продају"
 
 #. Title of an Onboarding Step
 #: erpnext/accounts/onboarding_step/setup_sales_taxes/setup_sales_taxes.json
 msgid "Setup Sales taxes"
-msgstr ""
+msgstr "Поставке пореза на продају"
 
 #. Title of an Onboarding Step
 #: erpnext/stock/onboarding_step/setup_warehouse/setup_warehouse.json
 msgid "Setup Warehouse"
-msgstr ""
+msgstr "Поставке складишта"
 
 #: erpnext/public/js/setup_wizard.js:25
 msgid "Setup your organization"
@@ -48307,7 +48317,7 @@ msgstr "Прикажи залихе по складиштима"
 
 #: erpnext/manufacturing/report/bom_stock_analysis/bom_stock_analysis.js:26
 msgid "Show availability of exploded items"
-msgstr ""
+msgstr "Прикажи доступност разложених ставки"
 
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.js:88
 msgid "Show in Bucket View"
@@ -48448,7 +48458,7 @@ msgstr "Пошто постоје губици у процесу од {0} јед
 
 #: erpnext/manufacturing/doctype/bom/bom.py:323
 msgid "Since you have enabled 'Track Semi Finished Goods', at least one operation must have 'Is Final Finished Good' checked. For that set the FG / Semi FG Item as {0} against an operation."
-msgstr ""
+msgstr "Пошто је омогућено 'Праћење полупроизвода', најмање једна операција мора имати означено 'Финални готов производ'. За то поставите готов производ / полупроизвод као {0} уз одговарајућу операцију."
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:132
 msgid "Since {0} are Serial No/Batch No items, you cannot enable 'Recreate Stock Ledgers' in Repost Item Valuation."
@@ -48456,7 +48466,7 @@ msgstr "Пошто су {0} ставке са бројем серије/шарж
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:112
 msgid "Since {0} has 'Update Stock' disabled, you cannot create repost item valuation against it"
-msgstr ""
+msgstr "Пошто је за {0} искључена опција 'Ажурирај залихе', није могуће креирати поновно књижење вредновања ставки"
 
 #. Option for the 'Marital Status' (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -48498,7 +48508,7 @@ msgstr "Прескочи пренос материјала за складишт
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:563
 msgid "Skipped {0} DocType(s):<br>{1}"
-msgstr ""
+msgstr "Прескочено {0} DocType-ова: <br>{1}"
 
 #. Label of the customer_skype (Data) field in DocType 'Appointment'
 #: erpnext/crm/doctype/appointment/appointment.json
@@ -48613,20 +48623,20 @@ msgstr "Локација извора"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1014
 msgid "Source Manufacture Entry"
-msgstr ""
+msgstr "Изворни унос производње"
 
 #. Label of the source_stock_entry (Link) field in DocType 'Stock Entry'
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 msgid "Source Stock Entry (Manufacture)"
-msgstr ""
+msgstr "Изворни унос залиха (производња)"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:914
 msgid "Source Stock Entry {0} belongs to Work Order {1}, not {2}. Please use a manufacture entry from the same Work Order."
-msgstr ""
+msgstr "Изворни унос залиха {0} припада радном налогу {1}, а не {2}. Молимо Вас да користите унос производње из истог радног налога."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:2380
 msgid "Source Stock Entry {0} has no finished goods quantity"
-msgstr ""
+msgstr "Изворни унос залиха {0} нема количину готових производа"
 
 #. Label of the source_type (Select) field in DocType 'Support Search Source'
 #: erpnext/support/doctype/support_search_source/support_search_source.json
@@ -49017,7 +49027,7 @@ msgstr "Илустрација статуса"
 #. Label of the section_break_dfoc (Section Break) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 msgid "Status and Reference"
-msgstr ""
+msgstr "Статус и референца"
 
 #: erpnext/projects/doctype/project/project.py:717
 msgid "Status must be Cancelled or Completed"
@@ -49593,7 +49603,7 @@ msgstr "Подешавање залиха"
 #. Title of the Module Onboarding 'Stock Onboarding'
 #: erpnext/stock/module_onboarding/stock_onboarding/stock_onboarding.json
 msgid "Stock Setup"
-msgstr ""
+msgstr "Поставке залиха"
 
 #. Label of the stock_summary_tab (Tab Break) field in DocType 'Plant Floor'
 #. Label of the stock_summary (HTML) field in DocType 'Plant Floor'
@@ -49724,7 +49734,7 @@ msgstr "Јединица мере залиха"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:737
 msgid "Stock Update Not Allowed"
-msgstr ""
+msgstr "Ажурирање залиха није дозвољено"
 
 #. Name of a role
 #: erpnext/accounts/doctype/fiscal_year/fiscal_year.json
@@ -49836,11 +49846,11 @@ msgstr "Залихе не могу бити ажуриране јер факту
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:734
 msgid "Stock cannot be updated for Purchase Invoice {0} because a Purchase Receipt {1} has already been created for this transaction. Please disable the 'Update Stock' checkbox in the Purchase Invoice and save the invoice."
-msgstr ""
+msgstr "Залихе се не могу ажурирати за улазну фактуру {0} јер је за ову трансакцију већ креирана пријемница набавке {1}. Молимо Вас да искључите опцију 'Ажурирај залихе' у улазној фактури и да сачувате фактуру."
 
 #: erpnext/stock/doctype/warehouse/warehouse.py:124
 msgid "Stock entries exist with the old account. Changing the account may lead to a mismatch between the warehouse closing balance and the account closing balance. The overall closing balance will still match, but not for the specific account."
-msgstr ""
+msgstr "Постоје уноси залиха са старим рачуном. Промена рачуна може довести до неслагања између завршног стања складишта и завршног стања на рачуну. Укупно завршно стање ће се и даље поклапати, али не и за конкретан рачун."
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1131
 msgid "Stock has been unreserved for work order {0}."
@@ -50159,7 +50169,7 @@ msgstr "Примљена ставка налога за пријем из под
 #. Name of a DocType
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_secondary_item/subcontracting_inward_order_secondary_item.json
 msgid "Subcontracting Inward Order Secondary Item"
-msgstr ""
+msgstr "Секундарна ставка налога за пријем из подуговарања"
 
 #. Name of a DocType
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_service_item/subcontracting_inward_order_service_item.json
@@ -50295,7 +50305,7 @@ msgstr "Подешавање подуговарања"
 #. Title of the Module Onboarding 'Subcontracting Onboarding'
 #: erpnext/subcontracting/module_onboarding/subcontracting_onboarding/subcontracting_onboarding.json
 msgid "Subcontracting Setup"
-msgstr ""
+msgstr "Поставке подуговарања"
 
 #. Label of the subdivision (Autocomplete) field in DocType 'Holiday List'
 #: erpnext/setup/doctype/holiday_list/holiday_list.json
@@ -50836,7 +50846,7 @@ msgstr "Време испоруке добављача (дани)"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Supplier Ledger"
-msgstr ""
+msgstr "Књига добављача"
 
 #. Name of a report
 #. Label of a Link in the Financial Reports Workspace
@@ -51679,7 +51689,7 @@ msgstr "Пореска стопа"
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:237
 #: erpnext/accounts/report/tds_computation_summary/tds_computation_summary.py:84
 msgid "Tax Rate %"
-msgstr ""
+msgstr "Пореска стопа %"
 
 #. Label of the taxes (Table) field in DocType 'Item Tax Template'
 #: erpnext/accounts/doctype/item_tax_template/item_tax_template.json
@@ -51717,7 +51727,7 @@ msgstr "Подешавање пореза"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/selling.json
 msgid "Tax Template"
-msgstr ""
+msgstr "Порески шаблон"
 
 #: erpnext/accounts/doctype/tax_rule/tax_rule.py:86
 msgid "Tax Template is mandatory."
@@ -51793,7 +51803,7 @@ msgstr "Детаљи пореза по одбитку"
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Tax Withholding Entries"
-msgstr ""
+msgstr "Уноси пореза по одбитку"
 
 #. Label of the section_tax_withholding_entry (Section Break) field in DocType
 #. 'Payment Entry'
@@ -51805,7 +51815,7 @@ msgstr ""
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Tax Withholding Entry"
-msgstr ""
+msgstr "Унос пореза по одбитку"
 
 #. Label of the tax_withholding_group (Link) field in DocType 'Journal Entry'
 #. Label of the tax_withholding_group (Link) field in DocType 'Payment Entry'
@@ -51830,7 +51840,7 @@ msgstr ""
 #: erpnext/selling/doctype/customer/customer.json
 #: erpnext/workspace_sidebar/taxes.json
 msgid "Tax Withholding Group"
-msgstr ""
+msgstr "Група пореза по одбитку"
 
 #. Name of a DocType
 #. Label of the tax_withholding_rate (Float) field in DocType 'Tax Withholding
@@ -51866,7 +51876,7 @@ msgstr ""
 #. DocType 'Tax Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Tax withheld only for amount exceeding cumulative threshold"
-msgstr ""
+msgstr "Порез по одбитку се обрачунава само на износ који прелази кумулативни праг"
 
 #. Label of the taxable_amount (Currency) field in DocType 'Item Wise Tax
 #. Detail'
@@ -51879,18 +51889,18 @@ msgstr "Опорезиви износ"
 #. Label of the taxable_date (Date) field in DocType 'Tax Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Taxable Date"
-msgstr ""
+msgstr "Датум опорезивања"
 
 #. Label of the taxable_name (Dynamic Link) field in DocType 'Tax Withholding
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Taxable Document Name"
-msgstr ""
+msgstr "Назив опорезивог документа"
 
 #. Label of the taxable_doctype (Link) field in DocType 'Tax Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Taxable Document Type"
-msgstr ""
+msgstr "Врста опорезивог документа"
 
 #. Label of the taxes (Table) field in DocType 'POS Closing Entry'
 #. Label of the taxes_section (Section Break) field in DocType 'POS Profile'
@@ -52480,7 +52490,7 @@ msgstr "Шаржа {0} је већ резервисана у {1} {2}. Дакле
 
 #: erpnext/regional/report/vat_audit_report/vat_audit_report.py:43
 msgid "The company {0} is not in South Africa. VAT Audit Report is only available for companies in South Africa."
-msgstr ""
+msgstr "Компанија {0} није у Јужној Африци. Извештај о ПДВ ревизији доступан је само за компаније у Јужној Африци."
 
 #: erpnext/regional/report/uae_vat_201/uae_vat_201.py:21
 msgid "The company {0} is not in United Arab Emirates. UAE VAT 201 report is only available for companies in United Arab Emirates."
@@ -52538,7 +52548,7 @@ msgstr ""
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:40
 msgid "The fiscal year has been automatically created in a Disabled state to maintain consistency with the previous fiscal year's status."
-msgstr ""
+msgstr "Фискална година је аутоматски креирана у онемогућеном статусу ради усклађености са статусом претходне фискалне године."
 
 #: erpnext/accounts/doctype/share_transfer/share_transfer.py:240
 msgid "The folio numbers are not matching"
@@ -52581,6 +52591,8 @@ msgid ""
 "The following payment schedule(s) already exist:\n"
 "{0}"
 msgstr ""
+"Следећи распореди плаћања већ постоје:\n"
+"{0}"
 
 #: erpnext/assets/doctype/asset_repair/asset_repair.py:112
 msgid "The following rows are duplicates:"
@@ -52661,7 +52673,7 @@ msgstr "Оригинална фактура треба бити консолид
 
 #: erpnext/controllers/accounts_controller.py:205
 msgid "The outstanding amount {0} in {1} is lesser than {2}. Updating the outstanding to this invoice."
-msgstr ""
+msgstr "Неизмирени износ {0} у {1} је мањи од {2}. Неизмирени износ се ажурира на овом рачуну."
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:229
 msgid "The parent account {0} does not exists in the uploaded template"
@@ -52726,7 +52738,7 @@ msgstr "Изабрана ставка не може имати шаржу"
 
 #: erpnext/assets/doctype/asset/asset.js:656
 msgid "The sell quantity is less than the total asset quantity. The remaining quantity will be split into a new asset. This action cannot be undone. <br><br><b>Do you want to continue?</b>"
-msgstr ""
+msgstr "Продајна количина је мања од укупне количине имовине. Преостала количина биће издвојена у нову имовину. Ова радња се не може поништити. <br><br><b> Да ли желите да наставите?</b>"
 
 #: erpnext/accounts/doctype/share_transfer/share_transfer.py:194
 msgid "The seller and the buyer cannot be the same"
@@ -52789,7 +52801,7 @@ msgstr "Укупна количина издавања / преноса {0} у �
 
 #: erpnext/edi/doctype/code_list/code_list_import.py:43
 msgid "The uploaded file could not be parsed as a genericode XML document."
-msgstr ""
+msgstr "Отпремљени фајл није могуће обрадити као XML документ са генеричким кодом."
 
 #: erpnext/accounts/doctype/bank_statement_import/bank_statement_import.py:154
 msgid "The uploaded file does not appear to be in valid MT940 format."
@@ -52889,7 +52901,7 @@ msgstr "Нема доступних термина за овај датум"
 
 #: erpnext/stock/doctype/item/item.js:1161
 msgid "There are two options to maintain valuation of stock. FIFO (first in - first out) and Moving Average. To understand this topic in detail please visit <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>Item Valuation, FIFO and Moving Average.</a>"
-msgstr ""
+msgstr "Постоје две опције за процену залиха. ФИФО (први улаз - први излаз) и просечна вредност. За детаљно разумевање погледајте документацију <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'> Вредновање, ФИФО и просечна вредност.</a>"
 
 #: erpnext/stock/report/item_variant_details/item_variant_details.py:25
 msgid "There aren't any item variants for the selected item"
@@ -52952,7 +52964,7 @@ msgstr "Овај рачун има стање '0' у основној валут
 
 #: erpnext/stock/doctype/item/item.js:194
 msgid "This Item is a Template and cannot be used in transactions.<br>All fields present in the 'Copy Fields to Variant' table in Item Variant Settings will be copied to its variant items."
-msgstr ""
+msgstr "Ова ставка је шаблон и не може се користити у трансакцијама. <br> Сва поља присутна у табели 'Копирај поље у варијанту' у подешавањима варијанти ставки биће копирана у њене варијанте."
 
 #: erpnext/stock/doctype/item/item.js:251
 msgid "This Item is a Variant of {0} (Template)."
@@ -53106,12 +53118,12 @@ msgstr "Овај филтер ставки је већ примењен за {0}
 #. Header text in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "This module is scheduled for deprecation and will be completely removed in version 17, please use <a href=\"https://frappe.io/crm\">Frappe CRM</a> instead."
-msgstr ""
+msgstr "Овај модул је планиран за повлачење и биће у потпуности уклоњен у верзији 17 уместо тога можете да користите <a href=\"https://frappe.io/crm\">Frappe CRM</a>."
 
 #. Header text in the Support Workspace
 #: erpnext/support/workspace/support/support.json
 msgid "This module is scheduled for deprecation and will be completely removed in version 17, please use <a href=\"https://frappe.io/helpdesk\">Frappe Helpdesk</a> instead."
-msgstr ""
+msgstr "Овај модул је планиран за повлачење и биће у потпуности уклоњен у верзији 17 уместо тога можете да користите <a href=\"https://frappe.io/helpdesk\">Frappe Helpdesk</a>."
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.js:509
 msgid "This option can be checked to edit the 'Posting Date' and 'Posting Time' fields."
@@ -53210,7 +53222,7 @@ msgstr "Ово {} ће се третирати као пренос матери�
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Threshold Exemption"
-msgstr ""
+msgstr "Ослобођење од прага"
 
 #. Label of the threshold_percentage (Percent) field in DocType 'Promotional
 #. Scheme Price Discount'
@@ -53329,7 +53341,7 @@ msgstr "Време (у минутима)"
 #: erpnext/projects/doctype/project/project.json
 #: erpnext/projects/doctype/task/task.json
 msgid "Timeline"
-msgstr ""
+msgstr "Временски редослед"
 
 #: erpnext/manufacturing/doctype/workstation/workstation_job_card.html:36
 #: erpnext/public/js/projects/timer.js:5
@@ -53376,7 +53388,7 @@ msgstr "Евиденција времена за задатке."
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:894
 msgid "Timesheet {0} cannot be invoiced in its current state"
-msgstr ""
+msgstr "Евиденција времена {0} не може бити фактурисана у тренутном статусу"
 
 #. Label of the timesheet_sb (Section Break) field in DocType 'Projects
 #. Settings'
@@ -53456,7 +53468,7 @@ msgstr "Датум и време завршетка"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:118
 msgid "To Delete list generated with {0} DocTypes"
-msgstr ""
+msgstr "Листа за брисање је генерисана са {0} DocType-ова"
 
 #. Option for the 'Sales Order Status' (Select) field in DocType 'Production
 #. Plan'
@@ -53690,7 +53702,7 @@ msgstr "За укључивање ставки ван залиха у плани
 #. Sub-assemblies' (Check) field in DocType 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "To include sub-assembly costs and secondary items in Finished Goods on a work order without using a job card, when the 'Use Multi-Level BOM' option is enabled."
-msgstr ""
+msgstr "Омогућава укључивање трошкова подсклопова и секундарних ставки у готове производе у радном налогу без коришћења радне картице, када је укључена опција 'Користи вишеслојну саставницу'."
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:2247
 #: erpnext/controllers/accounts_controller.py:3253
@@ -53986,7 +53998,7 @@ msgstr "Укупна завршена количина"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:191
 msgid "Total Completed Qty is required for Job Card {0}, please start and complete the job card before submission"
-msgstr ""
+msgstr "Укупна завршена количина је обавезна за радну картицу {0}, молимо Вас да започнете и завршите радну картицу пре подношења"
 
 #. Label of the total_consumed_material_cost (Currency) field in DocType
 #. 'Project'
@@ -54148,7 +54160,7 @@ msgstr "Укупни зависни трошкови набавке (валут�
 #. Label of the total_vouchers (Int) field in DocType 'Repost Item Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Total Ledgers"
-msgstr ""
+msgstr "Укупно пословних књига"
 
 #: erpnext/accounts/report/balance_sheet/balance_sheet.py:220
 msgid "Total Liability"
@@ -54397,7 +54409,7 @@ msgstr "Укупно пореза"
 
 #: erpnext/accounts/report/tds_computation_summary/tds_computation_summary.py:86
 msgid "Total Taxable Amount"
-msgstr ""
+msgstr "Укупан опорезиви износ"
 
 #. Label of the total_taxes_and_charges (Currency) field in DocType 'Payment
 #. Entry'
@@ -54602,7 +54614,7 @@ msgstr "Укупно (количина)"
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Totals (Company Currency)"
-msgstr ""
+msgstr "Укупно (валута компаније)"
 
 #: erpnext/stock/doctype/item/item_dashboard.py:33
 msgid "Traceability"
@@ -54702,7 +54714,7 @@ msgstr "Датум трансакције"
 
 #: erpnext/setup/doctype/company/company.py:1090
 msgid "Transaction Deletion Document {0} has been triggered for company {1}"
-msgstr ""
+msgstr "Документ брисања трансакција {0} је покренут за компанију {1}"
 
 #. Name of a DocType
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.json
@@ -54722,15 +54734,15 @@ msgstr "Ставка у запису о брисању трансакције"
 #. Name of a DocType
 #: erpnext/setup/doctype/transaction_deletion_record_to_delete/transaction_deletion_record_to_delete.json
 msgid "Transaction Deletion Record To Delete"
-msgstr ""
+msgstr "Запис брисања трансакција за брисање"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1101
 msgid "Transaction Deletion Record {0} is already running. {1}"
-msgstr ""
+msgstr "Запис брисања трансакција {0} је већ у току. {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:1120
 msgid "Transaction Deletion Record {0} is currently deleting {1}. Cannot save documents until deletion completes."
-msgstr ""
+msgstr "Запис брисања трансакција {0} тренутно брише {1}. Није могуће сачувати документа док се брисање не заврши."
 
 #. Label of the transaction_details_section (Section Break) field in DocType
 #. 'GL Entry'
@@ -54766,7 +54778,7 @@ msgstr "Назив трансакције"
 
 #: erpnext/stock/report/negative_batch_report/negative_batch_report.py:60
 msgid "Transaction Qty"
-msgstr ""
+msgstr "Трансакциона количина"
 
 #. Label of the transaction_settings_section (Tab Break) field in DocType
 #. 'Buying Settings'
@@ -54781,7 +54793,7 @@ msgstr "Подешавање трансакције"
 #. Rate'
 #: erpnext/accounts/doctype/tax_withholding_rate/tax_withholding_rate.json
 msgid "Transaction Threshold"
-msgstr ""
+msgstr "Праг по трансакцији"
 
 #. Label of the transaction_type (Data) field in DocType 'Bank Transaction'
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.json
@@ -54800,19 +54812,19 @@ msgstr "Валута трансакције: {0} не може бити разл
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:65
 msgid "Transaction date can't be earlier than previous movement date"
-msgstr ""
+msgstr "Датум трансакције не може бити пре датума претходног кретања"
 
 #. Description of the 'Applicable For' (Section Break) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Transaction for which tax is withheld"
-msgstr ""
+msgstr "Трансакција за коју се обрачунава порез по одбитку"
 
 #. Description of the 'Deducted From' (Section Break) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Transaction from which tax is withheld"
-msgstr ""
+msgstr "Трансакција из које се обрачунава порез по одбитку"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:865
 msgid "Transaction not allowed against stopped Work Order {0}"
@@ -55366,7 +55378,7 @@ msgstr "URL може бити само стринг"
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 msgid "UTM Analytics"
-msgstr ""
+msgstr "UTM аналитика"
 
 #. Option for the 'Data Fetch Method' (Select) field in DocType 'Accounts
 #. Settings'
@@ -55385,7 +55397,7 @@ msgstr "Поништи расподелу"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:466
 msgid "Unable to fetch DocType details. Please contact system administrator."
-msgstr ""
+msgstr "Није могуће преузети детаље DocType. Молимо Вас да контактирате систем администратора."
 
 #: erpnext/setup/utils.py:149
 msgid "Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually"
@@ -55460,13 +55472,13 @@ msgstr "Под гаранцијом"
 #. Option for the 'Status' (Select) field in DocType 'Tax Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Under Withheld"
-msgstr ""
+msgstr "Недовољно обрачунат порез по одбитку"
 
 #. Label of the under_withheld_reason (Select) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Under Withheld Reason"
-msgstr ""
+msgstr "Разлог недовољно обрачунатог пореза по одбитку"
 
 #: erpnext/manufacturing/doctype/workstation/workstation.js:78
 msgid "Under Working Hours table, you can add start and end times for a Workstation. For example, a Workstation may be active from 9 am to 1 pm, then 2 pm to 5 pm. You can also specify the working hours based on shifts. While scheduling a Work Order, the system will check for the availability of the Workstation based on the working hours specified."
@@ -55474,7 +55486,7 @@ msgstr "У табели радних сати можете додати врем
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:936
 msgid "Unexpected Naming Series Pattern"
-msgstr ""
+msgstr "Неочекивани образац серије именовања"
 
 #. Option for the 'Fulfilment Status' (Select) field in DocType 'Contract'
 #: erpnext/crm/doctype/contract/contract.json
@@ -56061,7 +56073,7 @@ msgstr "Користи вишеслојну саставницу"
 #. DocType 'Global Defaults'
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
 msgid "Use Posting Datetime for Naming Documents"
-msgstr ""
+msgstr "Користи датум и време књижења за именовање докумената"
 
 #. Label of the use_serial_batch_fields (Check) field in DocType 'Stock
 #. Settings'
@@ -56211,7 +56223,7 @@ msgstr "Корисници могу омогућити избор уколико
 #. 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Users can make manufacture entry against Job Cards"
-msgstr ""
+msgstr "Корисници могу унети производњу путем радних картица"
 
 #. Description of the 'Role Allowed to Over Bill ' (Link) field in DocType
 #. 'Accounts Settings'
@@ -56818,7 +56830,7 @@ msgstr "Приказ евиденције ажурирања саставниц�
 #: erpnext/accounts/onboarding_step/view_balance_sheet/view_balance_sheet.json
 #: erpnext/assets/onboarding_step/view_balance_sheet/view_balance_sheet.json
 msgid "View Balance Sheet"
-msgstr ""
+msgstr "Преглед биланса стања"
 
 #: erpnext/public/js/setup_wizard.js:47
 msgid "View Chart of Accounts"
@@ -56858,7 +56870,7 @@ msgstr "Прикажи сада"
 #. Description of a report in the Onboarding Step 'View Project Summary'
 #: erpnext/projects/onboarding_step/view_project_summary/view_project_summary.json
 msgid "View Project Summary"
-msgstr ""
+msgstr "Преглед резимеа пројеката"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'View Purchase Order Analysis'
@@ -56866,20 +56878,20 @@ msgstr ""
 #. Analysis'
 #: erpnext/buying/onboarding_step/view_purchase_order_analysis/view_purchase_order_analysis.json
 msgid "View Purchase Order Analysis"
-msgstr ""
+msgstr "Преглед анализе набавних поруџбина"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'View Sales Order Analysis'
 #. Description of a report in the Onboarding Step 'View Sales Order Analysis'
 #: erpnext/selling/onboarding_step/view_sales_order_analysis/view_sales_order_analysis.json
 msgid "View Sales Order Analysis"
-msgstr ""
+msgstr "Преглед анализе продајних поруџбина"
 
 #. Label of an action in the Onboarding Step 'View Stock Balance Report'
 #: erpnext/stock/onboarding_step/view_stock_balance_report/view_stock_balance_report.json
 #: erpnext/stock/report/stock_ledger/stock_ledger.js:139
 msgid "View Stock Balance"
-msgstr ""
+msgstr "Прикажи стање залиха"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'View Stock Balance Report'
@@ -56887,11 +56899,11 @@ msgstr ""
 #: erpnext/selling/onboarding_step/view_stock_balance_report/view_stock_balance_report.json
 #: erpnext/stock/onboarding_step/view_stock_balance_report/view_stock_balance_report.json
 msgid "View Stock Balance Report"
-msgstr ""
+msgstr "Преглед извештаја стања залиха"
 
 #: erpnext/stock/report/stock_balance/stock_balance.js:156
 msgid "View Stock Ledger"
-msgstr ""
+msgstr "Прикажи књигу залиха"
 
 #: erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.js:8
 msgid "View Type"
@@ -56900,12 +56912,12 @@ msgstr "Врста приказа"
 #. Label of an action in the Onboarding Step 'View Work Order Summary Report'
 #: erpnext/manufacturing/onboarding_step/view_work_order_summary_report/view_work_order_summary_report.json
 msgid "View Work Order Summary"
-msgstr ""
+msgstr "Преглед резимеа радних налога"
 
 #. Title of an Onboarding Step
 #: erpnext/manufacturing/onboarding_step/view_work_order_summary_report/view_work_order_summary_report.json
 msgid "View Work Order Summary Report"
-msgstr ""
+msgstr "Преглед извештаја резимеа радних налога"
 
 #. Label of the view_attachments (Check) field in DocType 'Project User'
 #: erpnext/projects/doctype/project_user/project_user.json
@@ -56923,7 +56935,7 @@ msgstr "Вимео"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:216
 msgid "Virtual DocType"
-msgstr ""
+msgstr "Виртуелни DocType"
 
 #: erpnext/templates/pages/help.html:46
 msgid "Visit the forums"
@@ -57285,7 +57297,7 @@ msgstr "Складиште је обавезно"
 
 #: erpnext/manufacturing/report/bom_stock_analysis/bom_stock_analysis.py:286
 msgid "Warehouse is required to get producible FG Items"
-msgstr ""
+msgstr "Складиште је обавезно за добијање производивих готових производа"
 
 #: erpnext/stock/doctype/warehouse/warehouse.py:233
 msgid "Warehouse not found against the account {0}"
@@ -57439,7 +57451,7 @@ msgstr "Упозорење!"
 
 #: erpnext/stock/doctype/warehouse/warehouse.py:122
 msgid "Warning: Account changed for warehouse"
-msgstr ""
+msgstr "Упозорење: Рачун је промењен за складиште"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:1322
 msgid "Warning: Another {0} # {1} exists against stock entry {2}"
@@ -57459,7 +57471,7 @@ msgstr "Упозорење: Продајна поруџбина {0} већ по�
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:75
 msgid "Warning: This action cannot be undone!"
-msgstr ""
+msgstr "Упозорење: Ова радња се не може опозвати!"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_validation.py:77
 msgid "Warnings"
@@ -57516,7 +57528,7 @@ msgstr "Период гаранције (у данима)"
 
 #: erpnext/utilities/doctype/video/video.js:7
 msgid "Watch Video"
-msgstr ""
+msgstr "Погледајте видео"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -57545,7 +57557,7 @@ msgstr "Таласна дужина у мегаметрима"
 
 #: erpnext/controllers/accounts_controller.py:193
 msgid "We can see {0} is made against {1}. If you want {1}'s outstanding to be updated, uncheck the '{2}' checkbox."
-msgstr ""
+msgstr "Видимо да је {0} направљен према {1}. Уколико желите да се неизмирени износ са {1} ажурира, уклоните ознаку са опције '{2}'."
 
 #: erpnext/www/support/index.html:7
 msgid "We're here to help!"
@@ -57680,7 +57692,7 @@ msgstr "У вези са чим Вам је потребна помоћ?"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:82
 msgid "What will be deleted:"
-msgstr ""
+msgstr "Шта ће бити обрисано:"
 
 #. Label of the whatsapp_no (Data) field in DocType 'Lead'
 #. Label of the whatsapp (Data) field in DocType 'Opportunity'
@@ -57704,19 +57716,19 @@ msgstr "Када је изабрано матично складиште, сис
 #. 'Tax Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "When checked, only cumulative threshold will be applied"
-msgstr ""
+msgstr "Када је означено, примењиваће се само кумулативни праг"
 
 #. Description of the 'Disable Cumulative Threshold' (Check) field in DocType
 #. 'Tax Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "When checked, only transaction threshold will be applied for transaction individually"
-msgstr ""
+msgstr "Када је означено, примењиваће се само праг по трансакцији, појединачно за сваку трансакцију"
 
 #. Description of the 'Use Posting Datetime for Naming Documents' (Check) field
 #. in DocType 'Global Defaults'
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
 msgid "When checked, the system will use the posting datetime of the document for naming the document instead of the creation datetime of the document."
-msgstr ""
+msgstr "Када је означено, систем ће користити датум и време књижења документа за његово именовање уместо датума и времена креирања."
 
 #: erpnext/stock/doctype/item/item.js:1168
 msgid "When creating an Item, entering a value for this field will automatically create an Item Price at the backend."
@@ -57730,7 +57742,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:304
 msgid "When there are multiple finished goods ({0}) in a Repack stock entry, the basic rate for all finished goods must be set manually. To set rate manually, enable the checkbox 'Set Basic Rate Manually' in the respective finished good row."
-msgstr ""
+msgstr "Када у уносу залиха за препаковање постоји више готових производа ({0}), основна цена за све готове производе мора бити постављена ручно. Да бисте ручно поставили цену, омогућите опцију 'Постави основну цену ручно' у одговарајуће реду готовог производа."
 
 #. Description of the 'Deferred Expense Account' (Link) field in DocType 'Item
 #. Default'
@@ -57809,33 +57821,33 @@ msgstr "Подизање"
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Withholding Date"
-msgstr ""
+msgstr "Датум обрачуна пореза по одбитку"
 
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:278
 msgid "Withholding Document"
-msgstr ""
+msgstr "Документ пореза по одбитку"
 
 #. Label of the withholding_name (Dynamic Link) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Withholding Document Name"
-msgstr ""
+msgstr "Назив документа пореза по одбитку"
 
 #. Label of the withholding_doctype (Link) field in DocType 'Tax Withholding
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Withholding Document Type"
-msgstr ""
+msgstr "Врста документа пореза по одбитку"
 
 #. Label of a chart in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "Won Opportunities"
-msgstr ""
+msgstr "Освојене прилике"
 
 #. Label of a number card in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "Won Opportunity (Last 1 Month)"
-msgstr ""
+msgstr "Освојена прилика (претходни месец)"
 
 #. Label of the work_done (Small Text) field in DocType 'Maintenance Visit
 #. Purpose'
@@ -57924,7 +57936,7 @@ msgstr "Ставка радног налога"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:917
 msgid "Work Order Mismatch"
-msgstr ""
+msgstr "Неусклађеност радног налога"
 
 #. Name of a DocType
 #: erpnext/manufacturing/doctype/work_order_operation/work_order_operation.json
@@ -57961,7 +57973,7 @@ msgstr "Резиме радног налога"
 #. Report'
 #: erpnext/manufacturing/onboarding_step/view_work_order_summary_report/view_work_order_summary_report.json
 msgid "Work Order Summary Report"
-msgstr ""
+msgstr "Извештај резимеа радних налога"
 
 #: erpnext/stock/doctype/material_request/material_request.py:877
 msgid "Work Order cannot be created for following reason: <br> {0}"
@@ -57986,7 +57998,7 @@ msgstr "Радни налог {0} је креиран"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:2396
 msgid "Work Order {0} has no produced qty"
-msgstr ""
+msgstr "Радни налог {0} нема произведену количину"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:954
 msgid "Work Order {0}: Job Card not found for the operation {1}"
@@ -58389,7 +58401,7 @@ msgstr "Можете то поставити као назив машине ил
 
 #: erpnext/controllers/accounts_controller.py:214
 msgid "You can use {0} to reconcile against {1} later."
-msgstr ""
+msgstr "Можете користити {0} за усклађивање са {1} касније."
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1339
 msgid "You can't make any changes to Job Card since Work Order is closed."
@@ -58437,7 +58449,7 @@ msgstr "Не можете омогућити оба подешавања '{0}' �
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:167
 msgid "You cannot outward following {0} as either they are Delivered, Inactive or located in a different warehouse."
-msgstr ""
+msgstr "Није могуће послати следеће {0} јер су или испоручени, неактивни или се налазе у другом складишту."
 
 #: erpnext/selling/page/point_of_sale/pos_payment.js:625
 msgid "You cannot redeem more than {0}."
@@ -58465,7 +58477,7 @@ msgstr "Не можете {0} овај документ јер постоји д
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:580
 msgid "You do not have permission to edit this document"
-msgstr ""
+msgstr "Немате дозволу да измените овај документ"
 
 #: erpnext/controllers/accounts_controller.py:3862
 msgid "You do not have permissions to {} items in a {}."
@@ -58481,11 +58493,11 @@ msgstr "Немате довољно поена да бисте их искори
 
 #: erpnext/controllers/accounts_controller.py:4434
 msgid "You don't have permission to create a Company Address. Please contact your System Manager."
-msgstr ""
+msgstr "Немате дозволу да креирате адресу компаније. Молимо Вас да се обратите систем менаџеру."
 
 #: erpnext/controllers/accounts_controller.py:4414
 msgid "You don't have permission to update Company details. Please contact your System Manager."
-msgstr ""
+msgstr "Немате дозволу да ажурирате податке о компанији. Молимо Вас да се обратите систем менаџеру."
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.py:599
 msgid "You don't have permission to update Received Qty DocField for item {0}"
@@ -58493,7 +58505,7 @@ msgstr ""
 
 #: erpnext/controllers/accounts_controller.py:4408
 msgid "You don't have permission to update this document. Please contact your System Manager."
-msgstr ""
+msgstr "Немате дозволу да ажурирате овај документ. Молимо Вас да се обратите систем менаџеру."
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:291
 msgid "You had {} errors while creating opening invoices. Check {} for more details"
@@ -58634,7 +58646,7 @@ msgstr "као проценат количине финалне ставке"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1589
 msgid "as of {0}"
-msgstr ""
+msgstr "на дан {0}"
 
 #: erpnext/www/book_appointment/index.html:43
 msgid "at"
@@ -59029,7 +59041,7 @@ msgstr "{0} имовина не може бити пренета"
 
 #: erpnext/controllers/trends.py:66
 msgid "{0} can be either {1} or {2}."
-msgstr ""
+msgstr "{0} може бити или {1} или {2}."
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:279
 msgid "{0} can not be negative"
@@ -59114,7 +59126,7 @@ msgstr "{0} у реду {1}"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:452
 msgid "{0} is a child table and will be deleted automatically with its parent"
-msgstr ""
+msgstr "{0} је зависна табела и биће аутоматски обрисана заједно са матичним записом"
 
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:94
 msgid "{0} is a mandatory Accounting Dimension. <br>Please set a value for {0} in Accounting Dimensions section."
@@ -59157,7 +59169,7 @@ msgstr "{0} је обавезно. Можда запис о конверзији
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1813
 msgid "{0} is not a CSV file."
-msgstr ""
+msgstr "{0} није CSV фајл."
 
 #: erpnext/selling/doctype/customer/customer.py:235
 msgid "{0} is not a company bank account"
@@ -59173,7 +59185,7 @@ msgstr "{0} није ставка на залихама"
 
 #: erpnext/accounts/report/budget_variance_report/budget_variance_report.py:419
 msgid "{0} is not a valid Accounting Dimension."
-msgstr ""
+msgstr "{0} није важећа рачуноводствена димензија."
 
 #: erpnext/controllers/item_variant.py:141
 msgid "{0} is not a valid Value for Attribute {1} of Item {2}."
@@ -59209,7 +59221,7 @@ msgstr "{0} је отворен. Затворите малопродају ил�
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:525
 msgid "{0} items disassembled"
-msgstr ""
+msgstr "{0} ставки демонтирано"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:489
 msgid "{0} items in progress"
@@ -59225,11 +59237,11 @@ msgstr "{0} ставки произведено"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:493
 msgid "{0} items returned"
-msgstr ""
+msgstr "{0} ставки враћено"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:496
 msgid "{0} items to return"
-msgstr ""
+msgstr "{0} ставки за враћање"
 
 #: erpnext/controllers/sales_and_purchase_return.py:218
 msgid "{0} must be negative in return document"
@@ -59265,7 +59277,7 @@ msgstr "{0} јединица ставке {1} није доступно ни у 
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:1080
 msgid "{0} units of Item {1} is not available in any of the warehouses. Other Pick Lists exist for this item."
-msgstr ""
+msgstr "{0} јединица ставке {1} није доступно ни у једном складишту. Постоје друге листе за одабир за ову ставку."
 
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py:145
 msgid "{0} units of {1} are required in {2} with the inventory dimension: {3} on {4} {5} for {6} to complete the transaction."
@@ -59424,7 +59436,7 @@ msgstr "{0} {1} мора бити поднето"
 
 #: erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.py:276
 msgid "{0} {1} not allowed to be reposted. You can enable it by adding it '{2}' table in {3}."
-msgstr ""
+msgstr "За {0} {1} није дозвољено поновно књижење. Можете га омогућити додавањем у табелу '{2}' у документу {3}."
 
 #: erpnext/buying/utils.py:116
 msgid "{0} {1} status is {2}"
@@ -59513,19 +59525,19 @@ msgstr "{0}, завршите операцију {1} пре операције {
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:523
 msgid "{0}: Child table (auto-deleted with parent)"
-msgstr ""
+msgstr "{0}: Зависна табела (аутоматски се брише са матичним записом)"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:518
 msgid "{0}: Not found"
-msgstr ""
+msgstr "{0}: Није пронађено"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:514
 msgid "{0}: Protected DocType"
-msgstr ""
+msgstr "{0}: Заштићени DocType"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:528
 msgid "{0}: Virtual DocType (no database table)"
-msgstr ""
+msgstr "{0}: Виртуелни DocType (нема табелу у бази података)"
 
 #: erpnext/controllers/accounts_controller.py:543
 msgid "{0}: {1} does not belong to the Company: {2}"
@@ -59533,7 +59545,7 @@ msgstr "{0}: {1} не припада компанији: {2}"
 
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1323
 msgid "{0}: {1} does not exist"
-msgstr ""
+msgstr "{0}: {1} не постоји"
 
 #: erpnext/accounts/party.py:78
 msgid "{0}: {1} does not exists"
