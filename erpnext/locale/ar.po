@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version:  frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-27 15:21+0000\n"
-"PO-Revision-Date: 2026-05-29 15:11+0000\n"
+"PO-Revision-Date: 2026-05-29 17:05+0000\n"
 "Last-Translator: hello@frappe.io\n"
 "Language: ar_SA\n"
 "Language-Team: Arabic\n"
@@ -603,7 +603,7 @@ msgstr "أكثر من 90"
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1261
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1262
 msgid "<0"
-msgstr ""
+msgstr "<0"
 
 #: erpnext/assets/doctype/asset/asset.py:541
 msgid "<b>Cannot create asset.</b><br><br>You're trying to create <b>{0} asset(s)</b> from {2} {3}.<br>However, only <b>{1} item(s)</b> were purchased and <b>{4} asset(s)</b> already exist against {5}."
@@ -661,7 +661,7 @@ msgstr ""
 #. Content of the 'Stock Levels HTML' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "<div id=\"stock-levels-placeholder\"></div>"
-msgstr ""
+msgstr "<div id=\"stock-levels-placeholder\"></div>"
 
 #. Content of the 'uom_help_html' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -2579,7 +2579,7 @@ msgstr ""
 
 #: erpnext/projects/doctype/task/task_tree.js:42
 msgid "Add Multiple"
-msgstr ""
+msgstr "إضافة متعددة"
 
 #: erpnext/projects/doctype/task/task_tree.js:49
 msgid "Add Multiple Tasks"
@@ -2725,7 +2725,7 @@ msgstr "أضف إلى Transit"
 
 #: erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.py:119
 msgid "Add vouchers to generate preview."
-msgstr ""
+msgstr "أضف القسائم لإنشاء معاينة."
 
 #: erpnext/accounts/doctype/coupon_code/coupon_code.js:36
 msgid "Add/Edit Coupon Conditions"
@@ -3676,7 +3676,7 @@ msgstr "(جميع الزبائن المحتملين (مفتوح"
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.html:115
 #: erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.html:113
 msgid "All Parties"
-msgstr ""
+msgstr "جميع الأطراف"
 
 #. Option for the 'Send To' (Select) field in DocType 'SMS Center'
 #: erpnext/selling/doctype/sms_center/sms_center.json
@@ -5840,7 +5840,7 @@ msgstr "في الصف #{0}: الكمية المختارة {1} للصنف {2} أ�
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1436
 msgid "At Row {0}: In Serial and Batch Bundle {1} must have docstatus as 1 and not 0"
-msgstr ""
+msgstr "في الصف {0}: في حزمة البيانات التسلسلية والدفعية {1} ، يجب أن تكون حالة المستند 1 وليس 0"
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:84
 msgid "At least one account with exchange gain or loss is required"
@@ -6432,7 +6432,7 @@ msgstr "متوسط الخصم"
 #. Label of a number card in the Selling Workspace
 #: erpnext/selling/workspace/selling/selling.json
 msgid "Average Order Value"
-msgstr ""
+msgstr "متوسط قيمة الطلب"
 
 #. Label of a number card in the Buying Workspace
 #: erpnext/buying/workspace/buying/buying.json
@@ -6780,7 +6780,7 @@ msgstr "عملية الموقع الالكتروني بقائمة المواد"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:2458
 msgid "BOM and Finished Good Quantity is mandatory for Disassembly"
-msgstr ""
+msgstr "يُعدّ كل من قائمة المواد وكمية المنتج النهائي شرطًا أساسيًا لعملية التفكيك."
 
 #. Label of the bom_and_work_order_tab (Tab Break) field in DocType
 #. 'Manufacturing Settings'
@@ -7378,13 +7378,13 @@ msgstr "سعر الفائدة الأساسي"
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Base Tax Withheld"
-msgstr ""
+msgstr "الضريبة الأساسية المقتطعة"
 
 #. Label of the taxable_amount (Currency) field in DocType 'Tax Withholding
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Base Taxable Amount"
-msgstr ""
+msgstr "المبلغ الأساسي الخاضع للضريبة"
 
 #. Label of the base_total_billable_amount (Currency) field in DocType
 #. 'Timesheet'
@@ -9207,7 +9207,7 @@ msgstr "تعذر العثور على مستودع افتراضي للصنف {0}.
 
 #: erpnext/accounts/party.py:1063
 msgid "Cannot merge {0} '{1}' into '{2}' as both have existing accounting entries in different currencies for company '{3}'."
-msgstr ""
+msgstr "لا يمكن دمج {0} '{1}' في '{2}' حيث أن لكليهما قيود محاسبية موجودة بعملات مختلفة للشركة '{3}'."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:578
 msgid "Cannot produce more Item {0} than Sales Order quantity {1} {2}"
@@ -9270,11 +9270,11 @@ msgstr "لا يمكن تعيين عدة عناصر افتراضية لأي شر�
 
 #: erpnext/controllers/accounts_controller.py:3913
 msgid "Cannot set quantity less than delivered quantity."
-msgstr ""
+msgstr "لا يمكن ضبط كمية أقل من الكمية المسلمة."
 
 #: erpnext/controllers/accounts_controller.py:3914
 msgid "Cannot set quantity less than received quantity."
-msgstr ""
+msgstr "لا يمكن تعيين كمية أقل من الكمية المستلمة."
 
 #: erpnext/stock/doctype/item_variant_settings/item_variant_settings.py:69
 msgid "Cannot set the field <b>{0}</b> for copying in variants"
@@ -10042,7 +10042,7 @@ msgstr "تم تحديث تاريخ التخليص\\n<br>\\nClearance Date update
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.py:158
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.py:173
 msgid "Clearance date changed from {0} to {1} via Bank Clearance Tool"
-msgstr ""
+msgstr "تم تغيير تاريخ التخليص من {0} إلى {1} عبر أداة التخليص المصرفي"
 
 #: erpnext/public/js/utils/demo.js:21
 msgid "Clearing Demo Data..."
@@ -11343,12 +11343,12 @@ msgstr "النظر في ضريبة أو رسم ل"
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 #: erpnext/accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgid "Consider for Tax Withholding"
-msgstr ""
+msgstr "ضع في اعتبارك اقتطاع الضرائب"
 
 #. Label of the apply_tds (Check) field in DocType 'Journal Entry'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
 msgid "Consider for Tax Withholding "
-msgstr ""
+msgstr "ضع في اعتبارك اقتطاع الضرائب "
 
 #. Label of the included_in_paid_amount (Check) field in DocType 'Advance Taxes
 #. and Charges'
@@ -12647,7 +12647,7 @@ msgstr "إنشاء عميل محتمل"
 #. Label of an action in the Onboarding Step 'Create Purchase Invoice'
 #: erpnext/buying/onboarding_step/create_purchase_invoice/create_purchase_invoice.json
 msgid "Create Purchase Invoice"
-msgstr ""
+msgstr "إنشاء فاتورة شراء"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Purchase Order'
@@ -12785,7 +12785,7 @@ msgstr "إنشاء الجدول الزمني"
 #. Label of an action in the Onboarding Step 'Create Transfer Entry'
 #: erpnext/stock/onboarding_step/create_transfer_entry/create_transfer_entry.json
 msgid "Create Transfer Entry"
-msgstr ""
+msgstr "إنشاء قيد تحويل"
 
 #: erpnext/setup/doctype/employee/employee.js:50
 #: erpnext/setup/doctype/employee/employee.js:52
@@ -12848,7 +12848,7 @@ msgstr "إنشاء عروض مسعرة للزبائن"
 #. Label of an action in the Onboarding Step 'Create Delivery Note'
 #: erpnext/selling/onboarding_step/create_delivery_note/create_delivery_note.json
 msgid "Create delivery note"
-msgstr ""
+msgstr "إنشاء إيصال التسليم"
 
 #. Label of the create_pr_in_draft_status (Check) field in DocType 'Accounts
 #. Settings'
@@ -12869,7 +12869,7 @@ msgstr "إنشاء {0} {1}؟"
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Created By Migration"
-msgstr ""
+msgstr "تم إنشاؤه بواسطة الهجرة"
 
 #: erpnext/buying/doctype/supplier_scorecard/supplier_scorecard.py:250
 msgid "Created {0} scorecards for {1} between:"
@@ -13292,7 +13292,7 @@ msgstr "ياردة مكعبة"
 #. Rate'
 #: erpnext/accounts/doctype/tax_withholding_rate/tax_withholding_rate.json
 msgid "Cumulative Threshold"
-msgstr ""
+msgstr "العتبة التراكمية"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -14731,13 +14731,13 @@ msgstr "خصم"
 #. Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Deduct Tax On Basis"
-msgstr ""
+msgstr "خصم الضريبة على أساس"
 
 #. Label of the source_section (Section Break) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Deducted From"
-msgstr ""
+msgstr "تم خصمها من"
 
 #. Label of the section_break_3 (Section Break) field in DocType 'Lower
 #. Deduction Certificate'
@@ -14808,7 +14808,7 @@ msgstr "الحساب الافتراضي للمقدم المستلم"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Default Ageing Range"
-msgstr ""
+msgstr "نطاق العمر الافتراضي"
 
 #. Label of the default_bom (Link) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -16217,7 +16217,7 @@ msgstr "إيراد مباشر"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:359
 msgid "Direct return is not allowed for Timesheet."
-msgstr ""
+msgstr "لا يُسمح بالإرجاع المباشر لجدول الدوام."
 
 #. Label of the disabled (Check) field in DocType 'Account'
 #. Label of the disabled (Check) field in DocType 'Accounting Dimension'
@@ -16247,7 +16247,7 @@ msgstr "تعطيل تخطيط القدرات"
 #. Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Disable Cumulative Threshold"
-msgstr ""
+msgstr "تعطيل العتبة التراكمية"
 
 #. Label of the disable_in_words (Check) field in DocType 'Global Defaults'
 #: erpnext/setup/doctype/global_defaults/global_defaults.json
@@ -16294,7 +16294,7 @@ msgstr "تعطيل رقم التسلسل ومحدد الدفعة"
 #. Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Disable Transaction Threshold"
-msgstr ""
+msgstr "تعطيل حد المعاملات"
 
 #. Label of the disable_last_purchase_rate (Check) field in DocType 'Buying
 #. Settings'
@@ -16901,7 +16901,7 @@ msgstr ""
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:182
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:445
 msgid "DocType {0} does not exist"
-msgstr ""
+msgstr "نوع المستند {0} غير موجود"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:295
 msgid "DocType {0} with company field '{1}' is already in the list"
@@ -16991,7 +16991,7 @@ msgstr "لا تفرض كمية محددة من المنتجات المجانية
 #: erpnext/accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 #: erpnext/accounts/doctype/sales_taxes_and_charges/sales_taxes_and_charges.json
 msgid "Don't Recompute Tax"
-msgstr ""
+msgstr "لا تعيد حساب الضريبة"
 
 #. Label of the dont_reserve_sales_order_qty_on_sales_return (Check) field in
 #. DocType 'Selling Settings'
@@ -17213,7 +17213,7 @@ msgstr "مجموعة العناصر المكررة"
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:102
 msgid "Duplicate Item Under Same Parent"
-msgstr ""
+msgstr "عنصر مكرر تحت نفس الأصل"
 
 #: erpnext/manufacturing/doctype/workstation/workstation.py:79
 #: erpnext/manufacturing/doctype/workstation_type/workstation_type.py:37
@@ -17320,7 +17320,7 @@ msgstr "EAN"
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
 msgid "EAN-13"
-msgstr ""
+msgstr "EAN-13"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
@@ -17349,7 +17349,7 @@ msgstr ""
 #: erpnext/setup/workspace/erpnext_settings/erpnext_settings.json
 #: erpnext/workspace_sidebar/erpnext_settings.json
 msgid "ERPNext Settings"
-msgstr ""
+msgstr "إعدادات النظام"
 
 #. Label of the user_id (Data) field in DocType 'Employee Group Table'
 #: erpnext/setup/doctype/employee_group_table/employee_group_table.json
@@ -17442,7 +17442,7 @@ msgstr "تحرير الإيصال"
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Edit Tax Withholding Entries"
-msgstr ""
+msgstr "تعديل إدخالات اقتطاع الضرائب"
 
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:777
 msgid "Editing {0} is not allowed as per POS Profile settings"
@@ -18643,7 +18643,7 @@ msgstr "رقم صفحة الضريبة"
 
 #: erpnext/accounts/report/trial_balance_for_party/trial_balance_for_party.js:86
 msgid "Exclude Zero Balance Parties"
-msgstr ""
+msgstr "استبعاد الحفلات ذات الرصيد الصفري"
 
 #. Label of the doctypes_to_be_ignored (Table) field in DocType 'Transaction
 #. Deletion Record'
@@ -18704,7 +18704,7 @@ msgstr "عميل حالي"
 #. Label of the exit (Tab Break) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Exit"
-msgstr ""
+msgstr "خروج"
 
 #. Label of the held_on (Date) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -20321,7 +20321,7 @@ msgstr "تاريخ البدء وتاريخ الانتهاء إلزامي"
 
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:29
 msgid "From Date and To Date are required"
-msgstr ""
+msgstr "تاريخ البدء وتاريخ الانتهاء مطلوبان"
 
 #: erpnext/accounts/report/tds_computation_summary/tds_computation_summary.py:30
 msgid "From Date and To Date lie in different Fiscal Year"
@@ -20761,7 +20761,7 @@ msgstr "GTIN"
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
 msgid "GTIN-14"
-msgstr ""
+msgstr "GTIN-14"
 
 #. Label of the gain_loss (Currency) field in DocType 'Exchange Rate
 #. Revaluation Account'
@@ -21479,7 +21479,7 @@ msgstr "نسبة الربح الإجمالي"
 #. Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Gross Total"
-msgstr ""
+msgstr "الإجمالي"
 
 #. Label of the gross_weight_pkg (Float) field in DocType 'Packing Slip'
 #: erpnext/stock/doctype/packing_slip/packing_slip.json
@@ -21507,7 +21507,7 @@ msgstr "المجموعة حسب المورد"
 #. Label of the group_name (Data) field in DocType 'Tax Withholding Group'
 #: erpnext/accounts/doctype/tax_withholding_group/tax_withholding_group.json
 msgid "Group Name"
-msgstr ""
+msgstr "اسم المجموعة"
 
 #: erpnext/setup/doctype/sales_person/sales_person_tree.js:14
 msgid "Group Node"
@@ -22588,7 +22588,7 @@ msgstr "إذا كنت لا تزال ترغب في المتابعة، يرجى ت
 #. Description of the 'Sequence ID' (Int) field in DocType 'BOM Operation'
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
 msgid "If you want to run operations in parallel, keep the same sequence ID for them."
-msgstr ""
+msgstr "إذا كنت ترغب في تشغيل العمليات بالتوازي، فاحتفظ بنفس معرف التسلسل لها."
 
 #: erpnext/accounts/doctype/pricing_rule/utils.py:378
 msgid "If you {0} {1} quantities of the item {2}, the scheme {3} will be applied on the item."
@@ -22713,7 +22713,7 @@ msgstr "تجاهل إشعارات الإيداع/السحب التي يُنشئ�
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Ignore Tax Withholding Threshold"
-msgstr ""
+msgstr "تجاهل الحد الأدنى لحجز الضريبة"
 
 #. Label of the ignore_user_time_overlap (Check) field in DocType 'Projects
 #. Settings'
@@ -23269,7 +23269,7 @@ msgstr ""
 #. Label of a number card in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 msgid "Incoming Bills"
-msgstr ""
+msgstr "الفواتير الواردة"
 
 #. Name of a DocType
 #: erpnext/telephony/doctype/incoming_call_handling_schedule/incoming_call_handling_schedule.json
@@ -23284,7 +23284,7 @@ msgstr "إعدادات المكالمات الواردة"
 #. Label of a number card in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 msgid "Incoming Payment"
-msgstr ""
+msgstr "دفعة واردة"
 
 #. Label of the incoming_rate (Currency) field in DocType 'Delivery Note Item'
 #. Label of the incoming_rate (Currency) field in DocType 'Packed Item'
@@ -26320,7 +26320,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:99
 msgid "Item {0} added multiple times under the same parent item {1} at rows {2} and {3}"
-msgstr ""
+msgstr "تمت إضافة العنصر {0} عدة مرات تحت نفس العنصر الأصل {1} في الصفين {2} و {3}"
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:119
 msgid "Item {0} cannot be added as a sub-assembly of itself"
@@ -26547,7 +26547,7 @@ msgstr "عناصر لطلب المواد الخام"
 
 #: erpnext/selling/page/point_of_sale/pos_item_selector.js:110
 msgid "Items not found."
-msgstr ""
+msgstr "لم يتم العثور على العناصر."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1245
 msgid "Items rate has been updated to zero as Allow Zero Valuation Rate is checked for the following items: {0}"
@@ -27396,7 +27396,7 @@ msgstr "دمج حسابات دفتر الأستاذ"
 
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:146
 msgid "Ledger Type"
-msgstr ""
+msgstr "نوع دفتر الأستاذ"
 
 #. Label of a Card Break in the Financial Reports Workspace
 #. Label of a Workspace Sidebar Item
@@ -28268,7 +28268,7 @@ msgstr "إدخال التحويل"
 
 #: erpnext/public/js/telephony.js:29
 msgid "Make a call"
-msgstr ""
+msgstr "إجراء مكالمة"
 
 #: erpnext/config/projects.py:34
 msgid "Make project from a template."
@@ -30510,7 +30510,7 @@ msgstr "سيتم تسجيل قيد يومية جديد بقيمة الفرق. و
 #. Label of a number card in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "New Lead (Last 1 Month)"
-msgstr ""
+msgstr "عميل محتمل جديد (آخر شهر واحد)"
 
 #: erpnext/assets/doctype/location/location_tree.js:23
 msgid "New Location"
@@ -30523,7 +30523,7 @@ msgstr "ملاحظة جديدة"
 #. Label of a number card in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "New Opportunity (Last 1 Month)"
-msgstr ""
+msgstr "فرصة جديدة (آخر شهر)"
 
 #. Label of the purchase_invoice (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -30746,7 +30746,7 @@ msgstr "لم يتم العثور على بيانات اقتطاع الضرائب
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:108
 msgid "No Tax withholding account set for Company {0} in Tax Withholding Category {1}."
-msgstr ""
+msgstr "لم يتم تعيين حساب اقتطاع ضريبي للشركة {0} في فئة اقتطاع الضرائب {1}."
 
 #: erpnext/accounts/report/gross_profit/gross_profit.py:990
 msgid "No Terms"
@@ -32561,7 +32561,7 @@ msgstr ""
 #. Label of the tab_break_dpet (Tab Break) field in DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Others"
-msgstr ""
+msgstr "بدلات أخرى"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -32642,12 +32642,12 @@ msgstr "إدخال بيانات فتح نقاط البيع القديمة"
 #. Label of a number card in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 msgid "Outgoing Bills"
-msgstr ""
+msgstr "الفواتير الصادرة"
 
 #. Label of a number card in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 msgid "Outgoing Payment"
-msgstr ""
+msgstr "الدفعة الصادرة"
 
 #. Label of the outgoing_rate (Float) field in DocType 'Serial and Batch Entry'
 #. Label of the outgoing_rate (Currency) field in DocType 'Stock Ledger Entry'
@@ -32779,7 +32779,7 @@ msgstr "بدل التحويل الزائد (%)"
 #. Option for the 'Status' (Select) field in DocType 'Tax Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Over Withheld"
-msgstr ""
+msgstr "مبالغ محجوزة"
 
 #: erpnext/controllers/status_updater.py:496
 msgid "Overbilling of {0} {1} ignored for item {2} because you have {3} role."
@@ -33628,7 +33628,7 @@ msgstr "يمكن حجز جزء من المخزون. على سبيل المثال
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/delivery_note/delivery_note_list.js:24
 msgid "Partially Billed"
-msgstr ""
+msgstr "فاتورة جزئية"
 
 #. Option for the 'Completion Status' (Select) field in DocType 'Maintenance
 #. Schedule Detail'
@@ -34545,7 +34545,7 @@ msgstr "لا يمكن إنشاء طلبات دفع مقابل: {0}"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Payment Requests made from Sales / Purchase Invoice will be put in Draft explicitly"
-msgstr ""
+msgstr "سيتم وضع طلبات الدفع المقدمة من فواتير المبيعات/المشتريات في حالة المسودة بشكل صريح."
 
 #. Label of the payment_schedule (Data) field in DocType 'Overdue Payment'
 #. Label of the payment_schedule (Link) field in DocType 'Payment Reference'
@@ -35616,7 +35616,7 @@ msgstr "الرجاء إضافة طريقة الدفع وتفاصيل الرصي�
 
 #: erpnext/manufacturing/doctype/bom/bom.js:39
 msgid "Please add Operations first."
-msgstr ""
+msgstr "يرجى إضافة العمليات أولاً."
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:213
 msgid "Please add Request for Quotation to the sidebar in Portal Settings."
@@ -37783,7 +37783,7 @@ msgstr "خسائر العملية"
 #. Item'
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 msgid "Process Loss %"
-msgstr ""
+msgstr "خسائر العملية %"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1272
 msgid "Process Loss Percentage cannot be greater than 100"
@@ -39133,7 +39133,7 @@ msgstr "شراء اتجاهات الإيصال"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/buying.json
 msgid "Purchase Receipt Trends "
-msgstr ""
+msgstr "شراء اتجاهات الإيصال "
 
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:358
 msgid "Purchase Receipt doesn't have any Item for which Retain Sample is enabled."
@@ -39170,7 +39170,7 @@ msgstr "قالب الضرائب على المشتريات"
 #. 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Purchase Tax Withholding Category"
-msgstr ""
+msgstr "فئة اقتطاع ضريبة الشراء"
 
 #. Label of the taxes (Table) field in DocType 'Purchase Invoice'
 #. Name of a DocType
@@ -40083,7 +40083,7 @@ msgstr "لا يمكن أن تتجاوز الكمية {0} للعنصر {1}"
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:564
 msgid "Quantity is mandatory for the selected items."
-msgstr ""
+msgstr "الكمية إلزامية بالنسبة للأصناف المختارة."
 
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:274
 msgid "Quantity is required"
@@ -43488,7 +43488,7 @@ msgstr "الصف #{0}: لا يمكن إلغاء إدخال المخزون هذا
 
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.py:78
 msgid "Row #{0}: Cannot create entry with different taxable AND withholding document links."
-msgstr ""
+msgstr "الصف #{0}: لا يمكن إنشاء إدخال بروابط مستندات مختلفة للضرائب والحجز."
 
 #: erpnext/controllers/accounts_controller.py:3792
 msgid "Row #{0}: Cannot delete item {1} which has already been billed."
@@ -43508,7 +43508,7 @@ msgstr "الصف # {0}: لا يمكن حذف العنصر {1} الذي تم تع
 
 #: erpnext/controllers/accounts_controller.py:3778
 msgid "Row #{0}: Cannot delete item {1} which is already ordered against this Sales Order."
-msgstr ""
+msgstr "الصف #{0}: لا يمكن حذف العنصر {1} الذي تم طلبه بالفعل مقابل أمر البيع هذا."
 
 #: erpnext/controllers/accounts_controller.py:4099
 msgid "Row #{0}: Cannot set Rate if the billed amount is greater than the amount for Item {1}."
@@ -43548,7 +43548,7 @@ msgstr "الصف # {0}: مركز التكلفة {1} لا ينتمي لشركة {
 
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.py:211
 msgid "Row #{0}: Could not find enough {1} entries to match. Remaining amount: {2}"
-msgstr ""
+msgstr "الصف #{0}: لم يتم العثور على عدد كافٍ من {1} من المدخلات للمطابقة. المبلغ المتبقي: {2}"
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:88
 msgid "Row #{0}: Cumulative threshold cannot be less than Single Transaction threshold"
@@ -43591,7 +43591,7 @@ msgstr "الصف #{0}: العنصر المقدم من العميل {1} ليس ج
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:61
 msgid "Row #{0}: Dates overlapping with other row in group {1}"
-msgstr ""
+msgstr "الصف #{0}: التواريخ المتداخلة مع صف آخر في المجموعة {1}"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.py:357
 msgid "Row #{0}: Default BOM not found for FG Item {1}"
@@ -43655,7 +43655,7 @@ msgstr "الصف #{0}: بالنسبة للصف {1}، يمكنك تحديد ال�
 
 #: erpnext/assets/doctype/asset/asset.py:664
 msgid "Row #{0}: Frequency of Depreciation must be greater than zero"
-msgstr ""
+msgstr "الصف #{0}: يجب أن يكون معدل الاستهلاك أكبر من الصفر"
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:50
 msgid "Row #{0}: From Date cannot be before To Date"
@@ -43671,7 +43671,7 @@ msgstr "الصف # {0}: تمت إضافة العنصر"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1644
 msgid "Row #{0}: Item {1} cannot be transferred more than {2} against {3} {4}"
-msgstr ""
+msgstr "الصف #{0}: لا يمكن نقل العنصر {1} إلى أكثر من {2} مقابل {3} {4}"
 
 #: erpnext/buying/utils.py:98
 msgid "Row #{0}: Item {1} does not exist"
@@ -44007,7 +44007,7 @@ msgstr "الصف #{0}: لا يمكن أن يكون إجمالي عدد الإه�
 
 #: erpnext/assets/doctype/asset/asset.py:660
 msgid "Row #{0}: Total Number of Depreciations must be greater than zero"
-msgstr ""
+msgstr "الصف #{0}: يجب أن يكون إجمالي عدد الاستهلاكات أكبر من الصفر"
 
 #: erpnext/controllers/stock_controller.py:105
 msgid "Row #{0}: Warehouse {1} does not match with the warehouse {2} in Serial and Batch Bundle {3}."
@@ -44015,7 +44015,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.py:94
 msgid "Row #{0}: Withholding Amount {1} does not match calculated amount {2}."
-msgstr ""
+msgstr "الصف #{0}: مبلغ الاستقطاع {1} لا يتطابق مع المبلغ المحسوب {2}."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:577
 msgid "Row #{0}: Work Order exists against full or partial quantity of Item {1}"
@@ -44261,7 +44261,7 @@ msgstr "الصف {0}: سعر صرف إلزامي"
 
 #: erpnext/assets/doctype/asset/asset.py:609
 msgid "Row {0}: Expected Value After Useful Life cannot be negative"
-msgstr ""
+msgstr "الصف {0}: لا يمكن أن تكون القيمة المتوقعة بعد العمر الإنتاجي سالبة"
 
 #: erpnext/assets/doctype/asset/asset.py:612
 msgid "Row {0}: Expected Value After Useful Life must be less than Net Purchase Amount"
@@ -44426,7 +44426,7 @@ msgstr "الصف {0}: الكمية غير متوفرة {4} في المستودع
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:885
 msgid "Row {0}: Sales Invoice {1} is already created for {2}"
-msgstr ""
+msgstr "الصف {0}: تم إنشاء فاتورة المبيعات {1} بالفعل لـ {2}"
 
 #: erpnext/assets/doctype/asset_shift_allocation/asset_shift_allocation.py:58
 msgid "Row {0}: Shift cannot be changed since the depreciation has already been processed"
@@ -45424,7 +45424,7 @@ msgstr "قالب ضريبة المبيعات"
 #. Label of the sales_tax_withholding_category (Link) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Sales Tax Withholding Category"
-msgstr ""
+msgstr "فئة اقتطاع ضريبة المبيعات"
 
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/accounts_setup.json
@@ -45553,7 +45553,7 @@ msgstr "كمية العينة"
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.js:269
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:535
 msgid "Sample Retention Stock Entry"
-msgstr ""
+msgstr "إدخال بيانات المخزون للاحتفاظ بالعينات"
 
 #. Label of the sample_retention_warehouse (Link) field in DocType 'Stock
 #. Settings'
@@ -46054,7 +46054,7 @@ msgstr "حدد العناصر لتصنيع"
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:500
 msgid "Select Items to Receive"
-msgstr ""
+msgstr "اختر العناصر التي ترغب في استلامها"
 
 #: erpnext/selling/doctype/sales_order/sales_order_list.js:87
 msgid "Select Items up to Delivery Date"
@@ -46310,19 +46310,19 @@ msgstr "بيع الأصل"
 
 #: erpnext/assets/doctype/asset/asset.js:635
 msgid "Sell Qty"
-msgstr ""
+msgstr "بيع الكمية"
 
 #: erpnext/assets/doctype/asset/asset.js:651
 msgid "Sell quantity cannot exceed the asset quantity"
-msgstr ""
+msgstr "لا يمكن أن تتجاوز كمية البيع كمية الأصل"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1410
 msgid "Sell quantity cannot exceed the asset quantity. Asset {0} has only {1} item(s)."
-msgstr ""
+msgstr "لا يمكن أن تتجاوز كمية البيع كمية الأصل. يحتوي الأصل {0} على {1} عنصر فقط."
 
 #: erpnext/assets/doctype/asset/asset.js:647
 msgid "Sell quantity must be greater than zero"
-msgstr ""
+msgstr "يجب أن تكون كمية البيع أكبر من الصفر"
 
 #. Label of the selling (Check) field in DocType 'Pricing Rule'
 #. Label of the selling (Check) field in DocType 'Promotional Scheme'
@@ -51510,7 +51510,7 @@ msgstr "معدل الضريبة"
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:237
 #: erpnext/accounts/report/tds_computation_summary/tds_computation_summary.py:84
 msgid "Tax Rate %"
-msgstr ""
+msgstr "معدل الضريبة %"
 
 #. Label of the taxes (Table) field in DocType 'Item Tax Template'
 #: erpnext/accounts/doctype/item_tax_template/item_tax_template.json
@@ -51624,7 +51624,7 @@ msgstr "تفاصيل حجب الضرائب"
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Tax Withholding Entries"
-msgstr ""
+msgstr "قيود اقتطاع الضرائب"
 
 #. Label of the section_tax_withholding_entry (Section Break) field in DocType
 #. 'Payment Entry'
@@ -51636,7 +51636,7 @@ msgstr ""
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Tax Withholding Entry"
-msgstr ""
+msgstr "قيد اقتطاع الضريبة"
 
 #. Label of the tax_withholding_group (Link) field in DocType 'Journal Entry'
 #. Label of the tax_withholding_group (Link) field in DocType 'Payment Entry'
@@ -51661,7 +51661,7 @@ msgstr ""
 #: erpnext/selling/doctype/customer/customer.json
 #: erpnext/workspace_sidebar/taxes.json
 msgid "Tax Withholding Group"
-msgstr ""
+msgstr "مجموعة حجز الضرائب"
 
 #. Name of a DocType
 #. Label of the tax_withholding_rate (Float) field in DocType 'Tax Withholding
@@ -51697,7 +51697,7 @@ msgstr ""
 #. DocType 'Tax Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Tax withheld only for amount exceeding cumulative threshold"
-msgstr ""
+msgstr "يتم اقتطاع الضريبة فقط على المبلغ الذي يتجاوز الحد التراكمي"
 
 #. Label of the taxable_amount (Currency) field in DocType 'Item Wise Tax
 #. Detail'
@@ -51710,18 +51710,18 @@ msgstr "المبلغ الخاضع للضريبة"
 #. Label of the taxable_date (Date) field in DocType 'Tax Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Taxable Date"
-msgstr ""
+msgstr "تاريخ استحقاق الضريبة"
 
 #. Label of the taxable_name (Dynamic Link) field in DocType 'Tax Withholding
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Taxable Document Name"
-msgstr ""
+msgstr "اسم المستند الخاضع للضريبة"
 
 #. Label of the taxable_doctype (Link) field in DocType 'Tax Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Taxable Document Type"
-msgstr ""
+msgstr "نوع المستند الخاضع للضريبة"
 
 #. Label of the taxes (Table) field in DocType 'POS Closing Entry'
 #. Label of the taxes_section (Section Break) field in DocType 'POS Profile'
@@ -52557,7 +52557,7 @@ msgstr "العنصر المحدد لا يمكن أن يكون دفعة"
 
 #: erpnext/assets/doctype/asset/asset.js:656
 msgid "The sell quantity is less than the total asset quantity. The remaining quantity will be split into a new asset. This action cannot be undone. <br><br><b>Do you want to continue?</b>"
-msgstr ""
+msgstr "كمية البيع أقل من إجمالي كمية الأصل. سيتم تقسيم الكمية المتبقية إلى أصل جديد. لا يمكن التراجع عن هذا الإجراء. <br><br><b>هل تريد المتابعة؟</b>"
 
 #: erpnext/accounts/doctype/share_transfer/share_transfer.py:194
 msgid "The seller and the buyer cannot be the same"
@@ -52720,7 +52720,7 @@ msgstr "لا توجد مواعيد متاحة في هذا التاريخ"
 
 #: erpnext/stock/doctype/item/item.js:1161
 msgid "There are two options to maintain valuation of stock. FIFO (first in - first out) and Moving Average. To understand this topic in detail please visit <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>Item Valuation, FIFO and Moving Average.</a>"
-msgstr ""
+msgstr "هناك خياران لتقييم المخزون: طريقة الوارد أولاً يُصرف أولاً (FIFO) وطريقة المتوسط المتحرك. لفهم هذا الموضوع بالتفصيل، يُرجى زيارة <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>تقييم الأصناف، وطريقة الوارد أولاً يُصرف أولاً، وطريقة المتوسط المتحرك.</a>"
 
 #: erpnext/stock/report/item_variant_details/item_variant_details.py:25
 msgid "There aren't any item variants for the selected item"
@@ -52783,7 +52783,7 @@ msgstr "يحتوي هذا الحساب على رصيد \"0\" سواء بالعم
 
 #: erpnext/stock/doctype/item/item.js:194
 msgid "This Item is a Template and cannot be used in transactions.<br>All fields present in the 'Copy Fields to Variant' table in Item Variant Settings will be copied to its variant items."
-msgstr ""
+msgstr "هذا العنصر عبارة عن قالب ولا يمكن استخدامه في المعاملات.<br>سيتم نسخ جميع الحقول الموجودة في جدول \"نسخ الحقول إلى المتغير\" في إعدادات متغير العنصر إلى متغيراته."
 
 #: erpnext/stock/doctype/item/item.js:251
 msgid "This Item is a Variant of {0} (Template)."
@@ -52937,12 +52937,12 @@ msgstr "تم تطبيق فلتر العنصر هذا بالفعل على {0}"
 #. Header text in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "This module is scheduled for deprecation and will be completely removed in version 17, please use <a href=\"https://frappe.io/crm\">Frappe CRM</a> instead."
-msgstr ""
+msgstr "من المقرر إيقاف هذه الوحدة وسيتم إزالتها بالكامل في الإصدار 17، يرجى استخدام <a href=\"https://frappe.io/crm\">Frappe CRM</a> بدلاً من ذلك."
 
 #. Header text in the Support Workspace
 #: erpnext/support/workspace/support/support.json
 msgid "This module is scheduled for deprecation and will be completely removed in version 17, please use <a href=\"https://frappe.io/helpdesk\">Frappe Helpdesk</a> instead."
-msgstr ""
+msgstr "من المقرر إيقاف هذه الوحدة وسيتم إزالتها بالكامل في الإصدار 17، يرجى استخدام <a href=\"https://frappe.io/helpdesk\">Frappe Helpdesk</a> بدلاً من ذلك."
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.js:509
 msgid "This option can be checked to edit the 'Posting Date' and 'Posting Time' fields."
@@ -53041,7 +53041,7 @@ msgstr "سيتم التعامل مع هذا {} على أنه نقل مواد."
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Threshold Exemption"
-msgstr ""
+msgstr "الإعفاء من الحد الأدنى"
 
 #. Label of the threshold_percentage (Percent) field in DocType 'Promotional
 #. Scheme Price Discount'
@@ -53207,7 +53207,7 @@ msgstr "الجدول الزمني للمهام."
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:894
 msgid "Timesheet {0} cannot be invoiced in its current state"
-msgstr ""
+msgstr "لا يمكن إصدار فاتورة لجدول الدوام {0} في حالته الحالية"
 
 #. Label of the timesheet_sb (Section Break) field in DocType 'Projects
 #. Settings'
@@ -54612,7 +54612,7 @@ msgstr "إعدادات المعاملات"
 #. Rate'
 #: erpnext/accounts/doctype/tax_withholding_rate/tax_withholding_rate.json
 msgid "Transaction Threshold"
-msgstr ""
+msgstr "عتبة المعاملة"
 
 #. Label of the transaction_type (Data) field in DocType 'Bank Transaction'
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.json
@@ -54637,13 +54637,13 @@ msgstr ""
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Transaction for which tax is withheld"
-msgstr ""
+msgstr "المعاملة التي يتم اقتطاع الضريبة منها"
 
 #. Description of the 'Deducted From' (Section Break) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Transaction from which tax is withheld"
-msgstr ""
+msgstr "المعاملة التي يتم اقتطاع الضريبة منها"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:865
 msgid "Transaction not allowed against stopped Work Order {0}"
@@ -55291,13 +55291,13 @@ msgstr "تحت الضمان"
 #. Option for the 'Status' (Select) field in DocType 'Tax Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Under Withheld"
-msgstr ""
+msgstr "تم حجب المبلغ"
 
 #. Label of the under_withheld_reason (Select) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Under Withheld Reason"
-msgstr ""
+msgstr "تحت سبب محجوب"
 
 #: erpnext/manufacturing/doctype/workstation/workstation.js:78
 msgid "Under Working Hours table, you can add start and end times for a Workstation. For example, a Workstation may be active from 9 am to 1 pm, then 2 pm to 5 pm. You can also specify the working hours based on shifts. While scheduling a Work Order, the system will check for the availability of the Workstation based on the working hours specified."
@@ -56710,7 +56710,7 @@ msgstr ""
 #: erpnext/stock/onboarding_step/view_stock_balance_report/view_stock_balance_report.json
 #: erpnext/stock/report/stock_ledger/stock_ledger.js:139
 msgid "View Stock Balance"
-msgstr ""
+msgstr "عرض رصيد الأسهم"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'View Stock Balance Report'
@@ -56722,7 +56722,7 @@ msgstr ""
 
 #: erpnext/stock/report/stock_balance/stock_balance.js:156
 msgid "View Stock Ledger"
-msgstr ""
+msgstr "عرض سجل المخزون"
 
 #: erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.js:8
 msgid "View Type"
@@ -57535,13 +57535,13 @@ msgstr "عند اختيار مستودع رئيسي، يقوم النظام بإ
 #. 'Tax Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "When checked, only cumulative threshold will be applied"
-msgstr ""
+msgstr "عند التحقق، سيتم تطبيق الحد التراكمي فقط"
 
 #. Description of the 'Disable Cumulative Threshold' (Check) field in DocType
 #. 'Tax Withholding Category'
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "When checked, only transaction threshold will be applied for transaction individually"
-msgstr ""
+msgstr "عند التحديد، سيتم تطبيق حد المعاملة فقط على كل معاملة على حدة."
 
 #. Description of the 'Use Posting Datetime for Naming Documents' (Check) field
 #. in DocType 'Global Defaults'
@@ -57640,33 +57640,33 @@ msgstr "انسحاب"
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Withholding Date"
-msgstr ""
+msgstr "تاريخ الحجب"
 
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.py:278
 msgid "Withholding Document"
-msgstr ""
+msgstr "وثيقة الحجز"
 
 #. Label of the withholding_name (Dynamic Link) field in DocType 'Tax
 #. Withholding Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Withholding Document Name"
-msgstr ""
+msgstr "اسم مستند الحجز"
 
 #. Label of the withholding_doctype (Link) field in DocType 'Tax Withholding
 #. Entry'
 #: erpnext/accounts/doctype/tax_withholding_entry/tax_withholding_entry.json
 msgid "Withholding Document Type"
-msgstr ""
+msgstr "نوع مستند الحجب"
 
 #. Label of a chart in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "Won Opportunities"
-msgstr ""
+msgstr "الفرص المكتسبة"
 
 #. Label of a number card in the CRM Workspace
 #: erpnext/crm/workspace/crm/crm.json
 msgid "Won Opportunity (Last 1 Month)"
-msgstr ""
+msgstr "الفرص المكتسبة (آخر شهر واحد)"
 
 #. Label of the work_done (Small Text) field in DocType 'Maintenance Visit
 #. Purpose'
@@ -58268,7 +58268,7 @@ msgstr "لا يمكنك تفعيل كل من الإعدادين '{0}' و '{1}'."
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:167
 msgid "You cannot outward following {0} as either they are Delivered, Inactive or located in a different warehouse."
-msgstr ""
+msgstr "لا يمكنك المتابعة الخارجية {0} لأنها إما تم تسليمها أو غير نشطة أو موجودة في مستودع مختلف."
 
 #: erpnext/selling/page/point_of_sale/pos_payment.js:625
 msgid "You cannot redeem more than {0}."
