@@ -88,7 +88,6 @@ class PurchaseReceipt(BuyingController):
 		instructions: DF.SmallText | None
 		inter_company_reference: DF.Link | None
 		is_internal_supplier: DF.Check
-		is_old_subcontracting_flow: DF.Check
 		is_return: DF.Check
 		is_subcontracted: DF.Check
 		item_wise_tax_details: DF.Table[ItemWiseTaxDetail]
@@ -149,6 +148,7 @@ class PurchaseReceipt(BuyingController):
 		taxes_and_charges_deducted: DF.Currency
 		tc_name: DF.Link | None
 		terms: DF.TextEditor | None
+		title: DF.Data | None
 		total: DF.Currency
 		total_net_weight: DF.Float
 		total_qty: DF.Float
@@ -562,7 +562,7 @@ class PurchaseReceipt(BuyingController):
 				else flt(item.net_amount, item.precision("net_amount"))
 			)
 
-			outgoing_amount = item.qty * item.base_net_rate
+			outgoing_amount = item.base_net_amount
 			if self.is_internal_transfer() and item.valuation_rate:
 				outgoing_amount = abs(get_stock_value_difference(self.name, item.name, item.from_warehouse))
 				credit_amount = outgoing_amount
@@ -717,6 +717,9 @@ class PurchaseReceipt(BuyingController):
 					self.get_company_default("default_expense_account", ignore_validation=True)
 					or stock_asset_rbnb
 				)
+
+				if self.is_return and item.expense_account:
+					loss_account = item.expense_account
 
 				cost_center = item.cost_center or frappe.get_cached_value(
 					"Company", self.company, "cost_center"
@@ -1372,7 +1375,7 @@ def get_billed_qty_amount_against_purchase_receipt(pr_doc):
 		.on(parent_table.name == table.parent)
 		.select(
 			table.pr_detail,
-			fn.Sum(table.amount * parent_table.conversion_rate).as_("amount"),
+			fn.Sum(table.base_net_amount).as_("amount"),
 			fn.Sum(table.qty).as_("qty"),
 		)
 		.where((table.pr_detail.isin(pr_names)) & (table.docstatus == 1))
@@ -1418,7 +1421,7 @@ def get_billed_qty_amount_against_purchase_order(pr_doc):
 			.select(
 				table.po_detail,
 				fn.Sum(table.qty).as_("qty"),
-				fn.Sum(table.amount * parent_table.conversion_rate).as_("amount"),
+				fn.Sum(table.base_net_amount).as_("amount"),
 			)
 			.where((table.po_detail.isin(po_names)) & (table.docstatus == 1) & (table.pr_detail.isnull()))
 			.groupby(table.po_detail)

@@ -73,6 +73,7 @@ frappe.ui.form.on("Item", {
 			},
 		};
 	},
+
 	onload: function (frm) {
 		erpnext.item.setup_queries(frm);
 		if (frm.doc.variant_of) {
@@ -126,6 +127,21 @@ frappe.ui.form.on("Item", {
 
 	refresh: function (frm) {
 		frm.trigger("toggle_has_serial_batch_fields");
+
+		if (frappe.defaults.get_default("item_naming_by") != "Naming Series" || frm.doc.variant_of) {
+			frm.toggle_display("naming_series", false);
+		} else {
+			erpnext.toggle_naming_series();
+		}
+
+		frm.toggle_display(["standard_rate"], frappe.model.can_create("Item Price"));
+
+		if (frm.is_new()) {
+			frm.toggle_display("disabled", false);
+			return;
+		}
+
+		frm.toggle_display("disabled", true);
 
 		if (frm.doc.is_stock_item) {
 			frm.add_custom_button(
@@ -229,8 +245,6 @@ frappe.ui.form.on("Item", {
 					__("Create")
 				);
 			}
-
-			// frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 		if (frm.doc.variant_of) {
 			frm.set_intro(
@@ -239,12 +253,6 @@ frappe.ui.form.on("Item", {
 				]),
 				true
 			);
-		}
-
-		if (frappe.defaults.get_default("item_naming_by") != "Naming Series" || frm.doc.variant_of) {
-			frm.toggle_display("naming_series", false);
-		} else {
-			erpnext.toggle_naming_series();
 		}
 
 		erpnext.item.edit_prices_button(frm);
@@ -278,16 +286,6 @@ frappe.ui.form.on("Item", {
 			frm.set_df_property(fieldname, "read_only", stock_exists);
 		});
 		frm.set_df_property("is_fixed_asset", "read_only", frm.doc.__onload?.asset_exists ? 1 : 0);
-		frm.toggle_reqd("customer", frm.doc.is_customer_provided_item ? 1 : 0);
-		frm.set_query("item_group", () => {
-			return {
-				filters: {
-					is_group: 0,
-				},
-			};
-		});
-
-		frm.toggle_display(["standard_rate"], frappe.model.can_create("Item Price"));
 	},
 
 	validate: function (frm) {
@@ -296,10 +294,6 @@ frappe.ui.form.on("Item", {
 
 	image: function () {
 		refresh_field("image_view");
-	},
-
-	is_customer_provided_item: function (frm) {
-		frm.toggle_reqd("customer", frm.doc.is_customer_provided_item ? 1 : 0);
 	},
 
 	is_fixed_asset: function (frm) {
@@ -542,12 +536,6 @@ $.extend(erpnext.item, {
 			};
 		};
 
-		frm.fields_dict["item_group"].get_query = function (doc, cdt, cdn) {
-			return {
-				filters: [["Item Group", "docstatus", "!=", 2]],
-			};
-		};
-
 		frm.fields_dict["item_defaults"].grid.get_field("deferred_revenue_account").get_query = function (
 			doc,
 			cdt,
@@ -661,10 +649,10 @@ $.extend(erpnext.item, {
 	make_dashboard: function (frm) {
 		if (frm.doc.__islocal) return;
 
-		// Show Stock Levels only if is_stock_item
 		if (frm.doc.is_stock_item) {
 			frappe.require("item-dashboard.bundle.js", function () {
-				const section = frm.dashboard.add_section("", __("Stock Levels"));
+				const section = frm.fields_dict["stock_levels_html"].$wrapper;
+
 				erpnext.item.item_dashboard = new erpnext.stock.ItemDashboard({
 					parent: section,
 					item_code: frm.doc.name,
@@ -784,11 +772,10 @@ $.extend(erpnext.item, {
 						default: 0,
 						onchange: function () {
 							let selected_attributes = get_selected_attributes();
-							let lengths = [];
-							Object.keys(selected_attributes).map((key) => {
-								lengths.push(selected_attributes[key].length);
+							let lengths = Object.keys(selected_attributes).map((key) => {
+								return selected_attributes[key].length;
 							});
-							if (lengths.includes(0)) {
+							if (!lengths.length) {
 								me.multiple_variant_dialog.get_primary_btn().html(__("Create Variants"));
 								me.multiple_variant_dialog.disable_primary_action();
 							} else {
@@ -825,7 +812,7 @@ $.extend(erpnext.item, {
 						fieldtype: "HTML",
 						fieldname: "help",
 						options: `<label class="control-label">
-							${__("Select at least one value from each of the attributes.")}
+							${__("Select at least one attribute value.")}
 						</label>`,
 					},
 				]
@@ -887,6 +874,9 @@ $.extend(erpnext.item, {
 						selected_attributes[attribute_name].push($(opt).attr("data-fieldname"));
 					}
 				});
+				if (!selected_attributes[attribute_name].length) {
+					delete selected_attributes[attribute_name];
+				}
 			});
 
 			return selected_attributes;

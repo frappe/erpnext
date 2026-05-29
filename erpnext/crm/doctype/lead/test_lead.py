@@ -148,6 +148,15 @@ class TestLead(ERPNextTestSuite):
 		self.assertEqual(event.event_participants[1].reference_doctype, "Prospect")
 		self.assertEqual(event.event_participants[1].reference_docname, prospect)
 
+	def test_get_notification_email(self):
+		admin_email = frappe.db.get_value("User", "Administrator", "email")
+		lead = frappe.new_doc("Lead")
+		lead.lead_owner = "Administrator"
+		self.assertEqual(lead.get_notification_email(), admin_email)
+
+		lead.lead_owner = None
+		self.assertIsNone(lead.get_notification_email())
+
 
 def create_event(subject, starts_on, reference_type, reference_name):
 	event = frappe.new_doc("Event")

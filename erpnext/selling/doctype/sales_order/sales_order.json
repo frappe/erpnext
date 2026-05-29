@@ -26,8 +26,6 @@
   "has_unit_price_items",
   "is_subcontracted",
   "amended_from",
-  "section_break_umok",
-  "title",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -176,6 +174,7 @@
   "po_no",
   "po_date",
   "represents_company",
+  "title",
   "column_break_yvzv",
   "inter_company_order_reference",
   "party_account_currency",
@@ -847,6 +846,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Loyalty Amount",
+   "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1480,6 +1480,7 @@
    "fieldname": "amount_eligible_for_commission",
    "fieldtype": "Currency",
    "label": "Amount Eligible for Commission",
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -1746,10 +1747,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "section_break_umok",
-   "fieldtype": "Section Break"
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "title",
    "fieldtype": "Data",
@@ -1763,7 +1760,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-30 12:19:27.522646",
+ "modified": "2026-05-28 11:41:11.823034",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

@@ -175,6 +175,8 @@ class InventoryDimension(Document):
 				mandatory_depends_on = "eval:doc.s_warehouse"
 			elif doctype == "Subcontracting Receipt Supplied Item":
 				mandatory_depends_on = "eval:doc.reference_name"
+			elif doctype == "Packed Item":
+				mandatory_depends_on = "eval:doc.parent_detail_docname && ['Delivery Note', 'Sales Invoice', 'POS Invoice'].includes(parent.doctype)"
 
 		dimension_fields = [
 			dict(
@@ -195,7 +197,8 @@ class InventoryDimension(Document):
 				reqd=1
 				if self.reqd
 				and not self.mandatory_depends_on
-				and doctype not in ["Stock Entry Detail", "Subcontracting Receipt Supplied Item"]
+				and doctype
+				not in ["Stock Entry Detail", "Subcontracting Receipt Supplied Item", "Packed Item"]
 				else 0,
 				mandatory_depends_on=mandatory_depends_on,
 			),

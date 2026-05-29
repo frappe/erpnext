@@ -1,0 +1,211 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "hash",
+ "creation": "2026-04-11 20:57:11.214959",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "bank_account",
+  "file",
+  "status",
+  "currency",
+  "column_break_zhdv",
+  "number_of_transactions",
+  "start_date",
+  "end_date",
+  "closing_balance",
+  "section_break_xomd",
+  "total_debits",
+  "total_credits",
+  "column_break_mydu",
+  "total_debit_transactions",
+  "total_credit_transactions",
+  "statement_format_section",
+  "detected_date_format",
+  "detected_amount_format",
+  "detected_header_index",
+  "detected_transaction_starting_index",
+  "detected_transaction_ending_index",
+  "section_break_yulq",
+  "column_mapping"
+ ],
+ "fields": [
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Bank Account",
+   "link_filters": "[[\"Bank Account\",\"is_company_account\",\"=\",1]]",
+   "options": "Bank Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "number_of_transactions",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Number of Transactions",
+   "non_negative": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "closing_balance",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Closing Balance",
+   "non_negative": 1,
+   "options": "currency"
+  },
+  {
+   "fieldname": "column_break_zhdv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Start Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "End Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "file",
+   "fieldtype": "Attach",
+   "label": "File",
+   "reqd": 1
+  },
+  {
+   "fieldname": "statement_format_section",
+   "fieldtype": "Section Break",
+   "label": "Statement Format"
+  },
+  {
+   "fieldname": "detected_date_format",
+   "fieldtype": "Data",
+   "label": "Detected Date Format",
+   "read_only": 1
+  },
+  {
+   "fieldname": "detected_amount_format",
+   "fieldtype": "Select",
+   "label": "Detected Amount Format",
+   "options": "Separate columns for withdrawal and deposit\nAmount column has \"CR\"/\"DR\" values\nAmount column has positive/negative values\nTransaction type column has \"CR\"/\"DR\" values\nTransaction type column has \"Deposit\"/\"Withdrawal\" values\nTransaction type column has \"C\"/\"D\" values",
+   "read_only": 1
+  },
+  {
+   "fieldname": "detected_header_index",
+   "fieldtype": "Int",
+   "label": "Detected Header Index",
+   "read_only": 1
+  },
+  {
+   "fieldname": "detected_transaction_starting_index",
+   "fieldtype": "Int",
+   "label": "Detected Transaction Starting Index",
+   "read_only": 1
+  },
+  {
+   "fieldname": "detected_transaction_ending_index",
+   "fieldtype": "Int",
+   "label": "Detected Transaction Ending Index",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_yulq",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_mapping",
+   "fieldtype": "Table",
+   "label": "Column Mapping",
+   "options": "Bank Statement Import Log Column Map"
+  },
+  {
+   "default": "Not Started",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Not Started\nCompleted",
+   "read_only": 1
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_xomd",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "total_debits",
+   "fieldtype": "Currency",
+   "label": "Total Debits",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_credits",
+   "fieldtype": "Currency",
+   "label": "Total Credits",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_mydu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_debit_transactions",
+   "fieldtype": "Int",
+   "label": "Total Debit Transactions",
+   "non_negative": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_credit_transactions",
+   "fieldtype": "Int",
+   "label": "Total Credit Transactions",
+   "non_negative": 1,
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-05-08 17:55:25.615942",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Bank Statement Import Log",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

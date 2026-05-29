@@ -363,6 +363,13 @@ class Opportunity(TransactionBase, CRMNote):
 				if not d.get(key):
 					d.set(key, item.get(key))
 
+	def get_notification_email(self):
+		"""Hook to return the target email address for notifications."""
+		if self.opportunity_owner:
+			return frappe.db.get_value("User", self.opportunity_owner, "email")
+
+		return None
+
 
 @frappe.whitelist()
 def get_item_details(item_code: str):

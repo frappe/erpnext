@@ -167,18 +167,19 @@ class WorkOrder(Document):
 				self.set_onload("backflush_raw_materials_based_on", based_on)
 
 	def show_create_job_card_button(self):
-		operation_details = frappe._dict(
-			frappe.get_all(
-				"Job Card",
-				fields=["operation", {"SUM": "for_quantity"}],
-				filters={"docstatus": ("<", 2), "work_order": self.name},
-				as_list=1,
-				group_by="operation_id",
-			)
+		jc_doctype = frappe.qb.DocType("Job Card")
+		query = (
+			frappe.qb.from_(jc_doctype)
+			.select(jc_doctype.operation_id, Sum(jc_doctype.for_quantity - IfNull(jc_doctype.pending_qty, 0)))
+			.where((jc_doctype.docstatus < 2) & (jc_doctype.work_order == self.name))
+			.groupby(jc_doctype.operation_id)
 		)
 
+		operation_details = query.run(as_list=1)
+		operation_details = frappe._dict(operation_details)
+
 		for d in self.operations:
-			job_card_qty = self.qty - flt(operation_details.get(d.operation))
+			job_card_qty = self.qty - flt(operation_details.get(d.name))
 			if job_card_qty > 0:
 				return True
 
@@ -201,7 +202,7 @@ class WorkOrder(Document):
 		self.calculate_operating_cost()
 		self.validate_qty()
 		self.validate_transfer_against()
-		self.validate_operation_time()
+		self.validate_operations()
 		self.status = self.get_status()
 		self.validate_workstation_type()
 		self.reset_use_multi_level_bom()
@@ -1498,8 +1499,11 @@ class WorkOrder(Document):
 				title=_("Missing value"),
 			)
 
-	def validate_operation_time(self):
+	def validate_operations(self):
 		for d in self.operations:
+			if not d.batch_size or d.batch_size <= 0:
+				d.batch_size = 1
+
 			if d.time_in_mins <= 0:
 				frappe.throw(_("Operation Time must be greater than 0 for Operation {0}").format(d.operation))
 
@@ -2087,8 +2091,9 @@ class WorkOrder(Document):
 
 		additional_items = frappe._dict()
 		for row in stock_entry.items:
-			if row.item_code not in required_items:
-				additional_items.setdefault(row.item_code, []).append(row)
+			item_code = row.original_item if row.original_item else row.item_code
+			if item_code not in required_items:
+				additional_items.setdefault(item_code, []).append(row)
 
 		self.flags.ignore_validate_update_after_submit = True
 
@@ -2126,7 +2131,7 @@ def make_stock_reservation_entries(
 	if items and isinstance(items, str):
 		items = parse_json(items)
 
-	sre = StockReservation(doc, items=items, notify=notify)
+	sre = StockReservation(doc, items=items)
 	if doc.docstatus == 2 or doc.status == "Closed":
 		sre.cancel_stock_reservation_entries()
 	elif doc.docstatus == 1:
@@ -2453,10 +2458,6 @@ def make_stock_entry(
 	stock_entry.set_stock_entry_type()
 	stock_entry.is_additional_transfer_entry = is_additional_transfer_entry
 	stock_entry.get_items()
-	stock_entry.set_secondary_items_from_job_card()
-
-	if purpose != "Disassemble":
-		stock_entry.set_serial_no_batch_for_finished_good()
 
 	return stock_entry.as_dict()
 
@@ -2817,11 +2818,9 @@ def get_reserved_qty_for_production(
 
 @frappe.whitelist()
 def make_stock_return_entry(work_order: str):
-	from erpnext.stock.doctype.stock_entry.stock_entry import get_available_materials
-
-	non_consumed_items = get_available_materials(work_order)
-	if not non_consumed_items:
-		return
+	from erpnext.stock.doctype.stock_entry.stock_entry_handler.manufacturing import (
+		ManufactureStockEntry,
+	)
 
 	wo_doc = frappe.get_cached_doc("Work Order", work_order)
 
@@ -2831,9 +2830,11 @@ def make_stock_return_entry(work_order: str):
 	stock_entry.work_order = work_order
 	stock_entry.purpose = "Material Transfer for Manufacture"
 	stock_entry.bom_no = wo_doc.bom_no
-	stock_entry.add_transfered_raw_materials_in_items()
 	stock_entry.set_stock_entry_type()
 
+	ste_cls = ManufactureStockEntry(stock_entry)
+	ste_cls.add_raw_materials_based_on_transfer()
+	ste_cls.return_available_materials_in_source_wh()
 	return stock_entry
 
 

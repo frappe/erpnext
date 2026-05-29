@@ -33,8 +33,11 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	get_sre_details_for_voucher,
 	get_sre_reserved_qty_details_for_voucher,
+	get_ssb_bundle_for_voucher,
 	has_reserved_stock,
 )
 from erpnext.stock.get_item_details import (
@@ -218,7 +221,7 @@ class SalesOrder(SellingController):
 			return
 
 		if frappe.get_single_value("Stock Settings", "enable_stock_reservation"):
-			if self.has_unreserved_stock():
+			if self.has_unreserved_stock() or self.has_unreserved_stock("packed_items"):
 				self.set_onload("has_unreserved_stock", True)
 
 		if has_reserved_stock(self.doctype, self.name):
@@ -258,8 +261,6 @@ class SalesOrder(SellingController):
 			from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
 
 			validate_coupon_code(self.coupon_code)
-
-		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 
 		make_packing_list(self)
 
@@ -336,20 +337,24 @@ class SalesOrder(SellingController):
 					)
 
 		if self.po_no and self.customer and not self.skip_delivery_note:
-			so = frappe.db.sql(
-				"select name from `tabSales Order` \
-				where ifnull(po_no, '') = %s and name != %s and docstatus < 2\
-				and customer = %s",
-				(self.po_no, self.name, self.customer),
+			so = frappe.db.get_value(
+				"Sales Order",
+				filters={
+					"po_no": self.po_no,
+					"name": ["!=", self.name],
+					"docstatus": ["<", 2],
+					"customer": self.customer,
+				},
+				fieldname="name",
 			)
-			if so and so[0][0]:
+			if so:
 				if cint(
 					frappe.get_single_value("Selling Settings", "allow_against_multiple_purchase_orders")
 				):
 					frappe.msgprint(
 						_(
 							"Warning: Sales Order {0} already exists against Customer's Purchase Order {1}"
-						).format(frappe.bold(so[0][0]), frappe.bold(self.po_no)),
+						).format(frappe.bold(so), frappe.bold(self.po_no)),
 						alert=True,
 					)
 				else:
@@ -357,7 +362,7 @@ class SalesOrder(SellingController):
 						_(
 							"Sales Order {0} already exists against Customer's Purchase Order {1}. To allow multiple Sales Orders, Enable {2} in {3}"
 						).format(
-							frappe.bold(so[0][0]),
+							frappe.bold(so),
 							frappe.bold(self.po_no),
 							frappe.bold(
 								_("'Allow Multiple Sales Orders Against a Customer's Purchase Order'")
@@ -367,39 +372,49 @@ class SalesOrder(SellingController):
 					)
 
 	def validate_for_items(self):
-		for d in self.get("items"):
-			# used for production plan
-			d.transaction_date = self.transaction_date
+		item_warehouse_pairs = [
+			(d.item_code, d.warehouse) for d in self.get("items") if d.item_code and d.warehouse
+		]
 
-			tot_avail_qty = frappe.db.sql(
-				"select projected_qty from `tabBin` \
-				where item_code = %s and warehouse = %s",
-				(d.item_code, d.warehouse),
+		bin_data = {}
+		if item_warehouse_pairs:
+			bins = frappe.get_all(
+				"Bin",
+				fields=["item_code", "warehouse", "projected_qty"],
+				filters={"item_code": ["in", [p[0] for p in item_warehouse_pairs]]},
 			)
-			d.projected_qty = tot_avail_qty and flt(tot_avail_qty[0][0]) or 0
+			bin_data = {(b.item_code, b.warehouse): flt(b.projected_qty) for b in bins}
+
+		for d in self.get("items"):
+			d.transaction_date = self.transaction_date
+			d.projected_qty = bin_data.get((d.item_code, d.warehouse), 0.0)
 
 	def product_bundle_has_stock_item(self, product_bundle):
 		"""Returns true if product bundle has stock item"""
-		ret = len(
-			frappe.db.sql(
-				"""select i.name from tabItem i, `tabProduct Bundle Item` pbi
-			where pbi.parent = %s and pbi.item_code = i.name and i.is_stock_item = 1""",
-				product_bundle,
-			)
+		bundle_items = frappe.get_all(
+			"Product Bundle Item", filters={"parent": product_bundle}, pluck="item_code"
 		)
-		return ret
+
+		if not bundle_items:
+			return False
+
+		return frappe.db.exists("Item", {"name": ["in", bundle_items], "is_stock_item": 1}) is not None
 
 	def validate_sales_mntc_quotation(self):
+		quotation_names = [d.prevdoc_docname for d in self.get("items") if d.prevdoc_docname]
+
+		if not quotation_names:
+			return
+
+		valid_quotations = frappe.get_all(
+			"Quotation",
+			filters={"name": ["in", quotation_names], "order_type": self.order_type},
+			pluck="name",
+		)
+
 		for d in self.get("items"):
-			if d.prevdoc_docname:
-				res = frappe.db.sql(
-					"select name from `tabQuotation` where name=%s and order_type = %s",
-					(d.prevdoc_docname, self.order_type),
-				)
-				if not res:
-					frappe.msgprint(
-						_("Quotation {0} not of type {1}").format(d.prevdoc_docname, self.order_type)
-					)
+			if d.prevdoc_docname and d.prevdoc_docname not in valid_quotations:
+				frappe.msgprint(_("Quotation {0} not of type {1}").format(d.prevdoc_docname, self.order_type))
 
 	def validate_delivery_date(self):
 		if self.order_type == "Sales" and not self.skip_delivery_note:
@@ -427,12 +442,10 @@ class SalesOrder(SellingController):
 
 	def validate_proj_cust(self):
 		if self.project and self.customer_name:
-			res = frappe.db.sql(
-				"""select name from `tabProject` where name = %s
-				and (customer = %s or ifnull(customer,'')='')""",
-				(self.project, self.customer),
+			project_has_valid_customer = frappe.db.exists(
+				"Project", {"name": self.project, "customer": ["in", [self.customer, "", None]]}
 			)
-			if not res:
+			if not project_has_valid_customer:
 				frappe.throw(
 					_("Customer {0} does not belong to project {1}").format(self.customer, self.project)
 				)
@@ -453,7 +466,7 @@ class SalesOrder(SellingController):
 				and not cint(d.delivered_by_supplier)
 			):
 				frappe.throw(
-					_("Delivery warehouse required for stock item {0}").format(d.item_code), WarehouseRequired
+					_("Source warehouse required for stock item {0}").format(d.item_code), WarehouseRequired
 				)
 
 	def validate_with_previous_doc(self):
@@ -473,12 +486,9 @@ class SalesOrder(SellingController):
 			self.validate_rate_with_reference_doc([["Quotation", "prevdoc_docname", "quotation_item"]])
 
 	def update_enquiry_status(self, prevdoc, flag):
-		enq = frappe.db.sql(
-			"select t2.prevdoc_docname from `tabQuotation` t1, `tabQuotation Item` t2 where t2.parent = t1.name and t1.name=%s",
-			prevdoc,
-		)
-		if enq:
-			frappe.db.sql("update `tabOpportunity` set status = %s where name=%s", (flag, enq[0][0]))
+		opportunity_name = frappe.db.get_value("Quotation Item", {"parent": prevdoc}, "prevdoc_docname")
+		if opportunity_name:
+			frappe.db.set_value("Opportunity", opportunity_name, "status", flag)
 
 	def update_prevdoc_status(self, flag=None):
 		for quotation in set(d.prevdoc_docname for d in self.get("items")):
@@ -579,13 +589,12 @@ class SalesOrder(SellingController):
 			check_credit_limit(self.customer, self.company)
 
 	def check_nextdoc_docstatus(self):
-		linked_invoices = frappe.db.sql_list(
-			"""select distinct t1.name
-			from `tabSales Invoice` t1,`tabSales Invoice Item` t2
-			where t1.name = t2.parent and t2.sales_order = %s and t1.docstatus = 0""",
-			self.name,
+		linked_invoices = frappe.get_all(
+			"Sales Invoice Item",
+			filters={"sales_order": self.name, "docstatus": 0},
+			pluck="parent",
+			distinct=True,
 		)
-
 		if linked_invoices:
 			linked_invoices = [get_link_to_form("Sales Invoice", si) for si in linked_invoices]
 			frappe.throw(
@@ -596,8 +605,7 @@ class SalesOrder(SellingController):
 
 	def check_modified_date(self):
 		mod_db = frappe.db.get_value("Sales Order", self.name, "modified")
-		date_diff = frappe.db.sql(f"select TIMEDIFF('{mod_db}', '{cstr(self.modified)}')")
-		if date_diff and date_diff[0][0]:
+		if mod_db and cstr(mod_db) != cstr(self.modified):
 			frappe.throw(_("{0} {1} has been modified. Please refresh.").format(self.doctype, self.name))
 
 	def update_status(self, status):
@@ -611,6 +619,7 @@ class SalesOrder(SellingController):
 		self.update_subcontracting_order_status()
 		self.notify_update()
 		clear_doctype_notifications(self)
+		self.update_blanket_order()
 
 	def update_subcontracting_order_status(self):
 		from erpnext.subcontracting.doctype.subcontracting_inward_order.subcontracting_inward_order import (
@@ -684,18 +693,12 @@ class SalesOrder(SellingController):
 
 		for item in self.items:
 			if item.delivered_by_supplier:
-				item_delivered_qty = frappe.db.sql(
-					"""select sum(qty)
-					from `tabPurchase Order Item` poi, `tabPurchase Order` po
-					where poi.sales_order_item = %s
-						and poi.item_code = %s
-						and poi.parent = po.name
-						and po.docstatus = 1
-						and po.status = 'Delivered'""",
-					(item.name, item.item_code),
-				)
-
-				item_delivered_qty = item_delivered_qty[0][0] if item_delivered_qty else 0
+				item_delivered_qty = frappe.get_all(
+					"Purchase Order Item",
+					{"sales_order_item": item.name, "docstatus": 1},
+					[{"SUM": "received_qty", "AS": "received_qty"}],
+					pluck="received_qty",
+				)[0]
 				item.db_set("delivered_qty", flt(item_delivered_qty), update_modified=False)
 
 			delivered_qty += min(item.delivered_qty, item.qty)
@@ -821,20 +824,22 @@ class SalesOrder(SellingController):
 			if item.reserve_stock and (not enable_stock_reservation or not cint(item.is_stock_item)):
 				item.reserve_stock = 0
 
-	def has_unreserved_stock(self) -> bool:
+	@frappe.whitelist()
+	def has_unreserved_stock(self, table_name: str = "items") -> bool:
 		"""Returns True if there is any unreserved item in the Sales Order."""
 
 		reserved_qty_details = get_sre_reserved_qty_details_for_voucher("Sales Order", self.name)
 
-		for item in self.get("items"):
+		data = {}
+		for item in self.get(table_name):
 			if not item.get("reserve_stock"):
 				continue
 
 			unreserved_qty = get_unreserved_qty(item, reserved_qty_details)
 			if unreserved_qty > 0:
-				return True
+				data[item.name] = unreserved_qty
 
-		return False
+		return data
 
 	@frappe.whitelist()
 	def create_stock_reservation_entries(
@@ -849,12 +854,41 @@ class SalesOrder(SellingController):
 			create_stock_reservation_entries_for_so_items as create_stock_reservation_entries,
 		)
 
-		create_stock_reservation_entries(
-			sales_order=self,
-			items_details=items_details,
-			from_voucher_type=from_voucher_type,
-			notify=notify,
-		)
+		packed_items = []
+		if items_details:
+			for item in items_details:
+				if not frappe.db.exists("Sales Order Item", item.get("sales_order_item")):
+					item["qty"] = item.pop("qty_to_reserve")
+					packed_items.append(item)
+
+			for item in packed_items:
+				items_details.remove(item)
+
+		sre_count = 0
+		if items_details != []:
+			sre_count = create_stock_reservation_entries(
+				sales_order=self,
+				items_details=items_details,
+				from_voucher_type=from_voucher_type,
+				notify=notify,
+			)
+
+		items = []
+		if packed_items:
+			items = packed_items
+		elif not items_details:
+			items = [item for item in self.packed_items if item.reserve_stock]
+
+		if items:
+			from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
+
+			stock_reservation = StockReservation(doc=self, items=items)
+			stock_reservation.table_name = "packed_items"
+			stock_reservation.qty_field = "qty"
+			is_sre_created = stock_reservation.make_stock_reservation_entries()
+
+			if notify and is_sre_created and not sre_count:
+				frappe.msgprint(_("Stock Reservation Entries Created"), alert=True, indicator="green")
 
 	@frappe.whitelist()
 	def cancel_stock_reservation_entries(self, sre_list: list | None = None, notify: bool = True) -> None:
@@ -957,7 +991,23 @@ def get_unreserved_qty(item: object, reserved_qty_details: dict) -> float:
 	"""Returns the unreserved quantity for the Sales Order Item."""
 
 	existing_reserved_qty = reserved_qty_details.get(item.name, 0)
-	return item.stock_qty - flt(item.delivered_qty) * item.get("conversion_factor", 1) - existing_reserved_qty
+	if item.get("delivered_qty") is not None:
+		return (
+			item.stock_qty
+			- flt(item.delivered_qty) * item.get("conversion_factor", 1)
+			- existing_reserved_qty
+		)
+	else:
+		stock_qty, delivered_qty, conversion_factor = frappe.get_value(
+			"Sales Order Item",
+			item.parent_detail_docname,
+			["stock_qty", "delivered_qty", "conversion_factor"],
+		)
+		bundle_conversion_factor = (
+			item.qty / stock_qty
+		)  # ratio of packed item qty to main item qty in product bundle
+		delivered_qty = delivered_qty * conversion_factor * bundle_conversion_factor
+		return item.qty - delivered_qty - existing_reserved_qty
 
 
 def get_list_context(context=None):
@@ -1152,15 +1202,58 @@ def make_project(source_name: str, target_doc: str | Document | None = None):
 	return doc
 
 
+def set_serial_batch_for_bundle_reservation(source, target, use_serial_batch_fields, packed_sre):
+	for item in source.packed_items:
+		target_item = next(
+			(
+				d
+				for d in target.packed_items
+				if (d.parent_item, d.item_code, d.warehouse)
+				== (item.parent_item, item.item_code, item.warehouse)
+			),
+			None,
+		)
+		if target_item and (sre := [sre for sre in packed_sre if sre.voucher_detail_no == item.name]):
+			if sre[0].reservation_based_on == "Serial and Batch":
+				qty = 0
+				serial_nos = []
+				batch_nos = []
+				if use_serial_batch_fields:
+					target_item.use_serial_batch_fields = 1
+					for item in sre:
+						qty += item.reserved_qty
+						if item.has_serial_no:
+							serial_nos.extend(
+								frappe.get_all(
+									"Serial and Batch Entry",
+									filters={"parent": item.name},
+									pluck="serial_no",
+								)
+							)
+						if item.has_batch_no:
+							batch_nos.extend(
+								frappe.get_all(
+									"Serial and Batch Entry",
+									filters={"parent": item.name},
+									pluck="batch_no",
+								)
+							)
+
+					if len(batch_nos) == 1:
+						target_item.batch_no = batch_nos[0] if batch_nos else None
+					if serial_nos and len(batch_nos) < 2:
+						target_item.serial_no = "\n".join(serial_nos)
+
+				if not use_serial_batch_fields or len(batch_nos) > 1:
+					target_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher(sre).name
+
+
 @frappe.whitelist()
 def make_delivery_note(
 	source_name: str, target_doc: str | Document | None = None, kwargs: dict | None = None
 ):
-	from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 	from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-		get_sre_details_for_voucher,
 		get_sre_reserved_qty_details_for_voucher,
-		get_ssb_bundle_for_voucher,
 	)
 
 	if not kwargs:
@@ -1183,6 +1276,7 @@ def make_delivery_note(
 
 	# 0 qty is accepted, as the qty is uncertain for some items
 	has_unit_price_items = frappe.db.get_value("Sales Order", source_name, "has_unit_price_items")
+	use_serial_batch_fields = frappe.get_single_value("Stock Settings", "use_serial_batch_fields")
 
 	def is_unit_price_row(source):
 		return has_unit_price_items and source.qty == 0
@@ -1267,6 +1361,7 @@ def make_delivery_note(
 	so = frappe.get_doc("Sales Order", source_name)
 	target_doc = get_mapped_doc("Sales Order", so.name, mapper, target_doc)
 
+	packed_sre = []
 	if not kwargs.skip_item_mapping and kwargs.for_reserved_stock:
 		sre_list = get_sre_details_for_voucher("Sales Order", source_name)
 
@@ -1278,6 +1373,10 @@ def make_delivery_note(
 			so_items = {d.name: d for d in so.items if d.stock_reserved_qty}
 
 			for sre in sre_list:
+				if not so_items.get(sre.voucher_detail_no):
+					packed_sre.append(sre)
+					continue
+
 				if not condition(so_items[sre.voucher_detail_no]):
 					continue
 
@@ -1301,14 +1400,12 @@ def make_delivery_note(
 				dn_item.qty = flt(sre.reserved_qty) / flt(dn_item.get("conversion_factor", 1))
 				dn_item.warehouse = sre.warehouse
 
-				use_serial_batch_fields = frappe.get_single_value("Stock Settings", "use_serial_batch_fields")
-
 				if (
 					not use_serial_batch_fields
 					and sre.reservation_based_on == "Serial and Batch"
 					and (sre.has_serial_no or sre.has_batch_no)
 				):
-					dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher(sre)
+					dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher([sre]).name
 
 				target_doc.append("items", dn_item)
 			else:
@@ -1322,7 +1419,9 @@ def make_delivery_note(
 		return
 
 	# Should be called after mapping items.
+	target_doc.packed_items = []
 	set_missing_values(so, target_doc)
+	set_serial_batch_for_bundle_reservation(so, target_doc, use_serial_batch_fields, packed_sre)
 
 	return target_doc
 
@@ -1350,6 +1449,14 @@ def make_sales_invoice(
 		# Get the advance paid Journal Entries in Sales Invoice Advance
 		if target.get("allocate_advances_automatically"):
 			target.set_advances()
+
+		make_packing_list(target)
+		set_serial_batch_for_bundle_reservation(
+			source,
+			target,
+			frappe.get_single_value("Stock Settings", "use_serial_batch_fields"),
+			get_sre_details_for_voucher("Sales Order", source_name),
+		)
 
 	def set_missing_values(source, target):
 		target.flags.ignore_permissions = True
@@ -1506,11 +1613,8 @@ def make_sales_invoice(
 
 @frappe.whitelist()
 def make_maintenance_schedule(source_name: str, target_doc: str | Document | None = None):
-	maint_schedule = frappe.db.sql(
-		"""select t1.name
-		from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2
-		where t2.parent=t1.name and t2.sales_order=%s and t1.docstatus=1""",
-		source_name,
+	maint_schedule = frappe.db.exists(
+		"Maintenance Schedule Item", {"sales_order": source_name, "docstatus": 1}
 	)
 
 	if not maint_schedule:
@@ -1532,15 +1636,20 @@ def make_maintenance_schedule(source_name: str, target_doc: str | Document | Non
 
 @frappe.whitelist()
 def make_maintenance_visit(source_name: str, target_doc: str | Document | None = None):
-	visit = frappe.db.sql(
-		"""select t1.name
-		from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2
-		where t2.parent=t1.name and t2.prevdoc_docname=%s
-		and t1.docstatus=1 and t1.completion_status='Fully Completed'""",
-		source_name,
+	MaintenanceVisit = frappe.qb.DocType("Maintenance Visit")
+	MaintenanceVisitPurpose = frappe.qb.DocType("Maintenance Visit Purpose")
+
+	query = (
+		frappe.qb.from_(MaintenanceVisit)
+		.join(MaintenanceVisitPurpose)
+		.on(MaintenanceVisitPurpose.parent == MaintenanceVisit.name)
+		.select(MaintenanceVisit.name)
+		.where(MaintenanceVisitPurpose.prevdoc_docname == source_name)
+		.where(MaintenanceVisit.docstatus == 1)
+		.where(MaintenanceVisit.completion_status == "Fully Completed")
 	)
 
-	if not visit:
+	if not query.run():
 		doclist = get_mapped_doc(
 			"Sales Order",
 			source_name,
@@ -1565,32 +1674,39 @@ def get_events(start: str, end: str, filters: str | dict | None = None):
 	:param end: End date-time.
 	:param filters: Filters (JSON).
 	"""
-	from frappe.desk.calendar import get_event_conditions
 
-	conditions = get_event_conditions("Sales Order", filters)
+	SalesOrder = frappe.qb.DocType("Sales Order")
+	SalesOrderItem = frappe.qb.DocType("Sales Order Item")
 
-	data = frappe.db.sql(
-		f"""
-		select
-			distinct `tabSales Order`.name, `tabSales Order`.customer_name, `tabSales Order`.status,
-			`tabSales Order`.delivery_status, `tabSales Order`.billing_status,
-			`tabSales Order Item`.delivery_date
-		from
-			`tabSales Order`, `tabSales Order Item`
-		where `tabSales Order`.name = `tabSales Order Item`.parent
-			and `tabSales Order`.skip_delivery_note = 0
-			and (ifnull(`tabSales Order Item`.delivery_date, '0000-00-00')!= '0000-00-00') \
-			and (`tabSales Order Item`.delivery_date between %(start)s and %(end)s)
-			and `tabSales Order`.docstatus < 2
-			{conditions}
-		""",
-		{"start": start, "end": end},
-		as_dict=True,
-		update={
-			"allDay": 0,
-			"convertToUserTz": 0,
-		},
+	query = (
+		frappe.get_query("Sales Order", filters=filters, ignore_permissions=False)
+		.join(SalesOrderItem)
+		.on(SalesOrder.name == SalesOrderItem.parent)
+		.select(
+			SalesOrder.name,
+			SalesOrder.customer_name,
+			SalesOrder.status,
+			SalesOrder.delivery_status,
+			SalesOrder.billing_status,
+			SalesOrderItem.delivery_date,
+		)
+		.distinct()
+		.where(SalesOrder.skip_delivery_note == 0)
+		.where(SalesOrder.docstatus < 2)
+		.where(SalesOrderItem.delivery_date.between(start, end))
+		.where(SalesOrderItem.delivery_date.isnotnull())
 	)
+
+	data = query.run(as_dict=True)
+
+	for row in data:
+		row.update(
+			{
+				"allDay": 0,
+				"convertToUserTz": 0,
+			}
+		)
+
 	return data
 
 
@@ -1639,7 +1755,7 @@ def make_purchase_order(
 		if default_payment_terms:
 			target.payment_terms_template = default_payment_terms
 
-		if any(item.delivered_by_supplier == 1 for item in source.items):
+		if any(item.delivered_by_supplier for item in target.items):
 			if source.shipping_address_name:
 				target.shipping_address = source.shipping_address_name
 				target.shipping_address_display = source.shipping_address

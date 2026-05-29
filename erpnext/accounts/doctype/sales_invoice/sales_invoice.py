@@ -969,9 +969,6 @@ class SalesInvoice(SellingController):
 			if selling_price_list:
 				self.set("selling_price_list", selling_price_list)
 
-			if not for_validate:
-				self.update_stock = cint(pos.get("update_stock"))
-
 			# set pos values in items
 			for item in self.get("items"):
 				if item.get("item_code"):
@@ -981,6 +978,10 @@ class SalesInvoice(SellingController):
 					for fname, val in profile_details.items():
 						if (not for_validate) or (for_validate and not item.get(fname)):
 							item.set(fname, val)
+
+			if not for_validate:
+				dn_flag = any(d.get("dn_detail") for d in self.get("items"))
+				self.update_stock = 0 if dn_flag else cint(pos.get("update_stock"))
 
 			# fetch terms
 			if self.tc_name and not self.terms:
@@ -1586,6 +1587,12 @@ class SalesInvoice(SellingController):
 		self.make_internal_transfer_gl_entries(gl_entries)
 
 		self.make_item_gl_entries(gl_entries)
+
+		disable_sdbnb_in_sr = frappe.get_cached_value("Company", self.company, "disable_sdbnb_in_sr")
+
+		if not (self.is_return and disable_sdbnb_in_sr):
+			self.stock_delivered_but_not_billed_gl_entries(gl_entries)
+
 		self.make_precision_loss_gl_entry(gl_entries)
 		self.make_discount_gl_entries(gl_entries)
 
@@ -1602,6 +1609,81 @@ class SalesInvoice(SellingController):
 
 		self.set_transaction_currency_and_rate_in_gl_map(gl_entries)
 		return gl_entries
+
+	def stock_delivered_but_not_billed_gl_entries(self, gl_entries):
+		if self.update_stock or not cint(erpnext.is_perpetual_inventory_enabled(self.company)):
+			return
+
+		for item in self.get("items"):
+			if not item.delivery_note and not item.dn_detail:
+				continue
+
+			if not frappe.get_cached_value("Item", item.item_code, "is_stock_item"):
+				continue
+
+			dn_expense_account = frappe.get_cached_value(
+				"Delivery Note Item", item.dn_detail, "expense_account"
+			)
+			if (
+				not dn_expense_account
+				or frappe.get_cached_value("Account", dn_expense_account, "account_type")
+				!= "Stock Delivered But Not Billed"
+				or not item.expense_account
+				or dn_expense_account == item.expense_account
+			):
+				continue
+
+			delivery_note = item.delivery_note or frappe.get_cached_value(
+				"Delivery Note Item", item.dn_detail, "parent"
+			)
+			if not delivery_note:
+				continue
+
+			item_g = frappe.get_cached_value(
+				"Stock Ledger Entry",
+				{
+					"voucher_no": delivery_note,
+					"voucher_detail_no": item.dn_detail,
+					"item_code": item.item_code,
+					"is_cancelled": 0,
+				},
+				["stock_value_difference", "actual_qty"],
+				as_dict=True,
+			)
+
+			if not item_g or not flt(item_g.actual_qty):
+				continue
+			valuation_rate = flt(item_g.stock_value_difference) / flt(item_g.actual_qty)
+			valuation_amount = valuation_rate * item.stock_qty
+			dn_account_currency = get_account_currency(dn_expense_account)
+			item_account_currency = get_account_currency(item.expense_account)
+
+			gl_entries.append(
+				self.get_gl_dict(
+					{
+						"account": dn_expense_account,
+						"against": item.expense_account,
+						"credit": flt(valuation_amount),
+						"credit_in_account_currency": flt(valuation_amount),
+						"cost_center": item.cost_center,
+					},
+					dn_account_currency,
+					item=item,
+				)
+			)
+			gl_entries.append(
+				self.get_gl_dict(
+					{
+						"account": item.expense_account,
+						"against": dn_expense_account,
+						"debit": flt(valuation_amount),
+						"debit_in_account_currency": flt(valuation_amount),
+						"cost_center": item.cost_center,
+					},
+					item_account_currency,
+					item=item,
+				)
+			)
 
 	def make_customer_gl_entry(self, gl_entries):
 		# Checked both rounding_adjustment and rounded_total
@@ -2306,18 +2388,20 @@ def is_overdue(doc, total):
 def get_discounting_status(sales_invoice):
 	status = None
 
-	invoice_discounting_list = frappe.db.sql(
-		"""
-		select status
-		from `tabInvoice Discounting` id, `tabDiscounted Invoice` d
-		where
-			id.name = d.parent
-			and d.sales_invoice=%s
-			and id.docstatus=1
-			and status in ('Disbursed', 'Settled')
-	""",
-		sales_invoice,
+	InvoiceDiscounting = frappe.qb.DocType("Invoice Discounting")
+	DiscountedInvoice = frappe.qb.DocType("Discounted Invoice")
+
+	query = (
+		frappe.qb.from_(InvoiceDiscounting)
+		.join(DiscountedInvoice)
+		.on(InvoiceDiscounting.name == DiscountedInvoice.parent)
+		.select(InvoiceDiscounting.status)
+		.where(DiscountedInvoice.sales_invoice == sales_invoice)
+		.where(InvoiceDiscounting.docstatus == 1)
+		.where(InvoiceDiscounting.status.isin(["Disbursed", "Settled"]))
 	)
+
+	invoice_discounting_list = query.run()
 
 	for d in invoice_discounting_list:
 		status = d[0]
@@ -3136,30 +3220,28 @@ def create_dunning(
 def check_if_return_invoice_linked_with_payment_entry(self):
 	# If a Return invoice is linked with payment entry along with other invoices,
 	# the cancellation of the Return causes allocated amount to be greater than paid
-
 	if not frappe.get_single_value("Accounts Settings", "unlink_payment_on_cancellation_of_invoice"):
 		return
 
-	payment_entries = []
 	if self.is_return and self.return_against:
 		invoice = self.return_against
 	else:
 		invoice = self.name
 
-	payment_entries = frappe.db.sql_list(
-		"""
-		SELECT
-			t1.name
-		FROM
-			`tabPayment Entry` t1, `tabPayment Entry Reference` t2
-		WHERE
-			t1.name = t2.parent
-			and t1.docstatus = 1
-			and t2.reference_name = %s
-			and t2.allocated_amount < 0
-		""",
-		invoice,
+	PaymentEntry = frappe.qb.DocType("Payment Entry")
+	PaymentEntryReference = frappe.qb.DocType("Payment Entry Reference")
+
+	query = (
+		frappe.qb.from_(PaymentEntry)
+		.join(PaymentEntryReference)
+		.on(PaymentEntry.name == PaymentEntryReference.parent)
+		.select(PaymentEntry.name)
+		.where(PaymentEntry.docstatus == 1)
+		.where(PaymentEntryReference.reference_name == invoice)
+		.where(PaymentEntryReference.allocated_amount < 0)
 	)
+
+	payment_entries = query.run(pluck=True)
 
 	links_to_pe = []
 	if payment_entries:
@@ -3167,6 +3249,7 @@ def check_if_return_invoice_linked_with_payment_entry(self):
 			payment_entry = frappe.get_doc("Payment Entry", payment)
 			if len(payment_entry.references) > 1:
 				links_to_pe.append(payment_entry.name)
+
 		if links_to_pe:
 			payment_entries_link = [
 				get_link_to_form("Payment Entry", name, label=name) for name in links_to_pe

@@ -70,6 +70,10 @@ frappe.ui.form.on("Journal Entry", {
 	},
 
 	refresh: function (frm) {
+		if (frm.doc.reversal_of && (frm.is_new() || frm.doc.docstatus == 0)) {
+			frm.set_read_only();
+		}
+
 		erpnext.toggle_naming_series();
 
 		if (frm.doc.docstatus > 0) {

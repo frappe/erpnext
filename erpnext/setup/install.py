@@ -25,6 +25,7 @@ def after_install():
 	setup_repost_defaults()
 	create_print_setting_custom_fields()
 	create_marketing_campaign_custom_fields()
+	create_address_and_contact_custom_fields()
 	create_custom_company_links()
 	add_all_roles_to("Administrator")
 	create_default_success_action()
@@ -38,6 +39,7 @@ def after_install():
 	update_pegged_currencies()
 	set_default_print_formats()
 	create_letter_head()
+	toggle_hidden_fields()
 	frappe.db.commit()
 
 
@@ -140,6 +142,37 @@ def create_marketing_campaign_custom_fields():
 					"insert_after": "campaign_description",
 				},
 			]
+		}
+	)
+
+
+def create_address_and_contact_custom_fields():
+	create_custom_fields(
+		{
+			"Address": [
+				{
+					"label": _("Tax Category"),
+					"fieldname": "tax_category",
+					"fieldtype": "Link",
+					"options": "Tax Category",
+					"insert_after": "fax",
+				},
+				{
+					"label": _("Is Your Company Address"),
+					"fieldname": "is_your_company_address",
+					"fieldtype": "Check",
+					"default": "0",
+					"insert_after": "linked_with",
+				},
+			],
+			"Contact": [
+				{
+					"label": _("Is Billing Contact"),
+					"fieldname": "is_billing_contact",
+					"fieldtype": "Check",
+					"insert_after": "is_primary_contact",
+				},
+			],
 		}
 	)
 
@@ -363,6 +396,21 @@ def create_letter_head():
 				}
 			)
 			doc.insert(ignore_permissions=True)
+
+
+def toggle_hidden_fields():
+	from erpnext.accounts.doctype.accounts_settings.accounts_settings import (
+		toggle_accounting_dimension_sections,
+		toggle_loyalty_point_program_section,
+		toggle_sales_discount_section,
+		toggle_subscription_sections,
+	)
+
+	acc_settings = frappe.get_doc("Accounts Settings")
+	toggle_accounting_dimension_sections(not acc_settings.enable_accounting_dimensions)
+	toggle_sales_discount_section(not acc_settings.enable_discounts_and_margin)
+	toggle_subscription_sections(not acc_settings.enable_subscription)
+	toggle_loyalty_point_program_section(not acc_settings.enable_loyalty_point_program)
 
 
 DEFAULT_ROLE_PROFILES = {

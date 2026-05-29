@@ -129,7 +129,6 @@ class PurchaseInvoice(BuyingController):
 		incoterm: DF.Link | None
 		inter_company_invoice_reference: DF.Link | None
 		is_internal_supplier: DF.Check
-		is_old_subcontracting_flow: DF.Check
 		is_opening: DF.Literal["No", "Yes"]
 		is_paid: DF.Check
 		is_return: DF.Check
@@ -777,9 +776,6 @@ class PurchaseInvoice(BuyingController):
 			self.make_bundle_for_sales_purchase_return()
 			self.make_bundle_using_old_serial_batch_fields()
 			self.update_stock_ledger()
-
-			if self.is_old_subcontracting_flow:
-				self.set_consumed_qty_in_subcontract_order()
 
 		# this sequence because outstanding may get -negative
 		self.make_gl_entries()
@@ -1705,9 +1701,6 @@ class PurchaseInvoice(BuyingController):
 		if self.update_stock == 1:
 			self.update_stock_ledger()
 			self.delete_auto_created_batches()
-
-			if self.is_old_subcontracting_flow:
-				self.set_consumed_qty_in_subcontract_order()
 
 		self.make_gl_entries_on_cancel()
 

@@ -381,9 +381,9 @@ class ProductionPlan(Document):
 		items = items_query.run(as_dict=True)
 
 		for item in items:
-			item.pending_qty = (
-				flt(item.qty) - max(item.work_order_qty, item.delivered_qty, 0)
-			) * item.conversion_factor
+			item.pending_qty = flt(item.qty) - max(
+				item.work_order_qty, flt(item.delivered_qty) * item.conversion_factor, 0
+			)
 
 		pi = frappe.qb.DocType("Packed Item")
 
@@ -1314,6 +1314,7 @@ def get_exploded_items(item_details, company, bom_no, include_non_stock_items, p
 			item_uom.conversion_factor,
 			item.safety_stock,
 			bom.item.as_("main_bom_item"),
+			bom.name.as_("main_bom"),
 		)
 		.where(
 			(bei.docstatus < 2)
@@ -1383,6 +1384,7 @@ def get_subitems(
 			item.purchase_uom,
 			item_uom.conversion_factor,
 			bom.item.as_("main_bom_item"),
+			bom.name.as_("main_bom"),
 			bom_item.is_phantom_item,
 		)
 		.where(
@@ -2252,7 +2254,7 @@ def make_stock_reservation_entries(
 		if table_name and table_name != child_table_name:
 			continue
 
-		sre = StockReservation(doc, items=items, kwargs=mapper[child_table_name], notify=notify)
+		sre = StockReservation(doc, items=items, kwargs=mapper[child_table_name])
 		if doc.docstatus == 1:
 			sre_created = sre.make_stock_reservation_entries()
 			if sre_created:

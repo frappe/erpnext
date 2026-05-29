@@ -1387,6 +1387,7 @@
 									"root_type": "Liability",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -1405,6 +1406,7 @@
 									"root_type": "Liability",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -1423,6 +1425,7 @@
 									"root_type": "Liability",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -1441,6 +1444,7 @@
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -1459,6 +1463,7 @@
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -1477,6 +1482,7 @@
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -1499,6 +1505,7 @@
 									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -1517,6 +1524,7 @@
 									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -1535,6 +1543,7 @@
 									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -1553,6 +1562,7 @@
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -1571,6 +1581,7 @@
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -1589,6 +1600,7 @@
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -1620,6 +1632,7 @@
 									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -1629,6 +1642,7 @@
 									"root_type": "Liability",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -1638,6 +1652,7 @@
 									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -1647,6 +1662,7 @@
 									"root_type": "Liability",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -1656,6 +1672,7 @@
 									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -1665,6 +1682,7 @@
 									"root_type": "Liability",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -1674,6 +1692,7 @@
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -1683,6 +1702,7 @@
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -1692,6 +1712,7 @@
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -1701,6 +1722,7 @@
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -1710,6 +1732,7 @@
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -1719,6 +1742,7 @@
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -1727,6 +1751,7 @@
 									"account_number": "1433",
 									"root_type": "Asset"
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							}
 						]
@@ -2150,6 +2175,7 @@
 									"root_type": "Liability",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -2168,6 +2194,7 @@
 									"root_type": "Liability",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -2186,6 +2213,7 @@
 									"root_type": "Liability",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -2204,6 +2232,7 @@
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -2222,6 +2251,7 @@
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -2240,6 +2270,7 @@
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -2262,6 +2293,7 @@
 									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -2280,6 +2312,7 @@
 									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -2298,6 +2331,7 @@
 									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -2316,6 +2350,7 @@
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -2334,6 +2369,7 @@
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -2352,6 +2388,7 @@
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -2383,6 +2420,7 @@
 									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -2392,6 +2430,7 @@
 									"root_type": "Liability",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -2401,6 +2440,7 @@
 									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -2410,6 +2450,7 @@
 									"root_type": "Liability",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -2419,6 +2460,7 @@
 									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -2428,6 +2470,7 @@
 									"root_type": "Liability",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -2437,6 +2480,7 @@
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -2446,6 +2490,7 @@
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -2455,6 +2500,7 @@
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -2464,6 +2510,7 @@
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -2473,6 +2520,7 @@
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -2482,6 +2530,7 @@
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -2490,6 +2539,7 @@
 									"account_number": "1588",
 									"root_type": "Asset"
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							}
 						]
@@ -2913,6 +2963,7 @@
 									"root_type": "Liability",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -2931,6 +2982,7 @@
 									"root_type": "Liability",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -2949,6 +3001,7 @@
 									"root_type": "Liability",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -2967,6 +3020,7 @@
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -2985,6 +3039,7 @@
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3003,6 +3058,7 @@
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3025,6 +3081,7 @@
 									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3043,6 +3100,7 @@
 									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3061,7 +3119,8 @@
 									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
-								"tax_rate": 19.00
+								"not_applicable": 1,
+								"tax_rate": 0.00
 							},
 							{
 								"tax_type": {
@@ -3079,6 +3138,7 @@
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3097,6 +3157,7 @@
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3115,6 +3176,7 @@
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3146,6 +3208,7 @@
 									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3155,6 +3218,7 @@
 									"root_type": "Liability",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3164,6 +3228,7 @@
 									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3173,6 +3238,7 @@
 									"root_type": "Liability",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3182,6 +3248,7 @@
 									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3191,6 +3258,7 @@
 									"root_type": "Liability",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3200,6 +3268,7 @@
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3209,6 +3278,7 @@
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3218,6 +3288,7 @@
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3227,6 +3298,7 @@
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3236,6 +3308,7 @@
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3245,6 +3318,7 @@
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3253,6 +3327,7 @@
 									"account_number": "1550",
 									"root_type": "Asset"
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							}
 						]
@@ -3645,6 +3720,7 @@
 									"root_type": "Liability",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3661,6 +3737,7 @@
 									"root_type": "Liability",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3677,6 +3754,7 @@
 									"root_type": "Liability",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3693,6 +3771,7 @@
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3709,6 +3788,7 @@
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3725,6 +3805,7 @@
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3745,6 +3826,7 @@
 									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3761,6 +3843,7 @@
 									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3777,6 +3860,7 @@
 									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3793,6 +3877,7 @@
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3809,6 +3894,7 @@
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3825,6 +3911,7 @@
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3853,6 +3940,7 @@
 									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3861,6 +3949,7 @@
 									"root_type": "Liability",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3869,6 +3958,7 @@
 									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3877,6 +3967,7 @@
 									"root_type": "Liability",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3885,6 +3976,7 @@
 									"root_type": "Liability",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3893,6 +3985,7 @@
 									"root_type": "Liability",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3901,6 +3994,7 @@
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3909,6 +4003,7 @@
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3917,6 +4012,7 @@
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3925,6 +4021,7 @@
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3933,6 +4030,7 @@
 									"root_type": "Asset",
 									"tax_rate": 19.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3941,6 +4039,7 @@
 									"root_type": "Asset",
 									"tax_rate": 7.00
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							},
 							{
@@ -3948,6 +4047,7 @@
 									"account_name": "Entstandene Einfuhrumsatzsteuer",
 									"root_type": "Asset"
 								},
+								"not_applicable": 1,
 								"tax_rate": 0.00
 							}
 						]

@@ -22,8 +22,6 @@
   "company",
   "has_unit_price_items",
   "amended_from",
-  "section_break_cojf",
-  "title",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -137,6 +135,7 @@
   "status",
   "customer_group",
   "territory",
+  "title",
   "column_break_108",
   "opportunity",
   "enq_det",
@@ -1134,10 +1133,6 @@
    "label": "Auto Repeat"
   },
   {
-   "fieldname": "section_break_cojf",
-   "fieldtype": "Section Break"
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "title",
    "fieldtype": "Data",
@@ -1150,7 +1145,7 @@
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-30 12:19:04.589592",
+ "modified": "2026-05-28 11:38:05.090149",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

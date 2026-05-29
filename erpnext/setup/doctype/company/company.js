@@ -69,6 +69,22 @@ frappe.ui.form.on("Company", {
 				},
 			};
 		});
+
+		frm.set_query("default_letter_head", function () {
+			return {
+				filters: {
+					letter_head_for: "DocType",
+				},
+			};
+		});
+
+		frm.set_query("default_letter_head_report", function () {
+			return {
+				filters: {
+					letter_head_for: "Report",
+				},
+			};
+		});
 	},
 
 	company_name: function (frm) {
@@ -319,6 +335,10 @@ erpnext.company.setup_queries = function (frm) {
 				[
 					"stock_received_but_not_billed",
 					{ root_type: "Liability", account_type: "Stock Received But Not Billed" },
+				],
+				[
+					"stock_delivered_but_not_billed",
+					{ root_type: "Liability", account_type: "Stock Delivered But Not Billed" },
 				],
 				[
 					"service_received_but_not_billed",

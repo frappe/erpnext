@@ -75,13 +75,11 @@ class CustomerGroup(NestedSet):
 
 def get_parent_customer_groups(customer_group):
 	lft, rgt = frappe.db.get_value("Customer Group", customer_group, ["lft", "rgt"])
-
-	return frappe.db.sql(
-		"""select name from `tabCustomer Group`
-		where lft <= %s and rgt >= %s
-		order by lft asc""",
-		(lft, rgt),
-		as_dict=True,
+	return frappe.get_all(
+		"Customer Group",
+		filters=[["lft", "<=", lft], ["rgt", ">=", rgt]],
+		fields=["name"],
+		order_by="lft asc",
 	)
 
 

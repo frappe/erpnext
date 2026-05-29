@@ -38,16 +38,6 @@ frappe.ui.form.on("Accounts Settings", {
 	add_taxes_from_item_tax_template(frm) {
 		toggle_tax_settings(frm, "add_taxes_from_item_tax_template");
 	},
-
-	drop_ar_procedures: function (frm) {
-		frm.call({
-			doc: frm.doc,
-			method: "drop_ar_sql_procedures",
-			callback: function (r) {
-				frappe.show_alert(__("Procedures dropped"), 5);
-			},
-		});
-	},
 });
 
 function toggle_tax_settings(frm, field_name) {

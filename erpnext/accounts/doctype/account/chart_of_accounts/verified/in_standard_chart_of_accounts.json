@@ -223,6 +223,10 @@
                     "Stock Received But Not Billed": {
                         "account_type": "Stock Received But Not Billed",
                         "account_category": "Trade Payables"
+                    },
+                    "Stock Delivered But Not Billed": {
+                        "account_type": "Stock Delivered But Not Billed",
+                        "account_category": "Trade Payables"
                     }
                 },
                 "Duties and Taxes": {

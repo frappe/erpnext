@@ -10,7 +10,7 @@
 
 [![Learn on Frappe School](https://img.shields.io/badge/Frappe%20School-Learn%20ERPNext-blue?style=flat-square)](https://frappe.school)<br><br>
 [![CI](https://github.com/frappe/erpnext/actions/workflows/server-tests-mariadb.yml/badge.svg?event=schedule)](https://github.com/frappe/erpnext/actions/workflows/server-tests-mariadb.yml)
-[![docker pulls](https://img.shields.io/docker/pulls/frappe/erpnext-worker.svg)](https://hub.docker.com/r/frappe/erpnext-worker)
+[![docker pulls](https://img.shields.io/docker/pulls/frappe/erpnext.svg)](https://hub.docker.com/r/frappe/erpnext)
 
 </div>
 
@@ -87,14 +87,6 @@ See [Frappe Docker Documentation](https://github.com/frappe/frappe_docker) for f
 - [git](https://docs.github.com/en/get-started/getting-started-with-git/set-up-git)
 
 > For Docker basics and best practices refer to Docker's [documentation](https://docs.docker.com)
-
-#### Demo setup
-
-The fastest way to try ERPNext is to play in a pre-configured sandbox, in your browser, click the button below:
-
-<a href="https://labs.play-with-docker.com/?stack=https://raw.githubusercontent.com/frappe/frappe_docker/main/pwd.yml">
-  <img src="https://raw.githubusercontent.com/play-with-docker/stacks/master/assets/images/button.png" alt="Try in PWD"/>
-</a>
 
 ### Try on your environment
 
