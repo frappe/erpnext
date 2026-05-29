@@ -783,7 +783,7 @@ def get_allowance_for(
 	if qty_or_amount == "qty" and not qty_allowance:
 		if global_qty_allowance is None:
 			global_qty_allowance = flt(
-				frappe.get_cached_value(global_qty_allowance_doctype, None, global_qty_allowance_field)
+				frappe.get_single_value(global_qty_allowance_doctype, global_qty_allowance_field)
 			)
 		qty_allowance = global_qty_allowance
 	elif qty_or_amount == "amount" and not over_billing_allowance:
