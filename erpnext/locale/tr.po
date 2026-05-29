@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
-"POT-Creation-Date: 2026-05-24 10:11+0000\n"
-"PO-Revision-Date: 2026-05-27 21:40\n"
+"POT-Creation-Date: 2026-05-27 15:21+0000\n"
+"PO-Revision-Date: 2026-05-29 21:49\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -95,15 +95,15 @@ msgstr " Alt Montaj"
 msgid " Summary"
 msgstr " Özet"
 
-#: erpnext/stock/doctype/item/item.py:279
+#: erpnext/stock/doctype/item/item.py:278
 msgid "\"Customer Provided Item\" cannot be Purchase Item also"
 msgstr "\"Müşterinin Tedarik Ettiği Ürün\" aynı zamanda Satın Alma Ürünü olamaz."
 
-#: erpnext/stock/doctype/item/item.py:281
+#: erpnext/stock/doctype/item/item.py:280
 msgid "\"Customer Provided Item\" cannot have Valuation Rate"
 msgstr "\"Müşterinin Tedarik Ettiği Ürün\" Değerleme Oranına sahip olamaz."
 
-#: erpnext/stock/doctype/item/item.py:384
+#: erpnext/stock/doctype/item/item.py:383
 msgid "\"Is Fixed Asset\" cannot be unchecked, as Asset record exists against the item"
 msgstr "Varlık kaydı yapıldığından, 'Sabit Varlık' seçimi kaldırılamaz."
 
@@ -272,7 +272,7 @@ msgstr "Satış Siparişine karşılık teslim edilen malzemelerin yüzdesi"
 msgid "'Account' in the Accounting section of Customer {0}"
 msgstr "{0} isimli Müşterinin Muhasebe bölümündeki ‘Hesap’"
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:364
+#: erpnext/selling/doctype/sales_order/sales_order.py:368
 msgid "'Allow Multiple Sales Orders Against a Customer's Purchase Order'"
 msgstr "'Müşterinin Satın Alma Siparişine Karşı Çoklu Satış Siparişlerine İzin Ver'"
 
@@ -302,7 +302,7 @@ msgstr "'Başlangıç Tarihi' alanı zorunlu"
 msgid "'From Date' must be after 'To Date'"
 msgstr "Başlangıç Tarihi Bitiş Tarihinden önce olmalıdır"
 
-#: erpnext/stock/doctype/item/item.py:467
+#: erpnext/stock/doctype/item/item.py:466
 msgid "'Has Serial No' can not be 'Yes' for non-stock item"
 msgstr "Stokta olmayan ürünün 'Seri No' değeri 'Evet' olamaz."
 
@@ -971,11 +971,11 @@ msgstr "<span class=\"h4\"><b>Kısayollar\n"
 msgid "<span class=\"h4\"><b>Your Shortcuts</b></span>"
 msgstr "<span class=\"h4\"><b>Kısayollar</b></span>"
 
-#: erpnext/accounts/doctype/payment_request/payment_request.py:1298
+#: erpnext/accounts/doctype/payment_request/payment_request.py:1300
 msgid "<strong>Grand Total:</strong> {0}"
 msgstr "<strong>Genel Toplam:</strong> {0}"
 
-#: erpnext/accounts/doctype/payment_request/payment_request.py:1299
+#: erpnext/accounts/doctype/payment_request/payment_request.py:1301
 msgid "<strong>Outstanding Amount:</strong> {0}"
 msgstr "<strong>Ödenmemiş Tutar:</strong> {0}"
 
@@ -1429,7 +1429,7 @@ msgstr "Ana Hesap"
 msgid "Account Manager"
 msgstr "Muhasebe Müdürü"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1009
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1010
 #: erpnext/controllers/accounts_controller.py:2397
 msgid "Account Missing"
 msgstr "Hesap Eksik"
@@ -1981,8 +1981,8 @@ msgstr "Muhasebe Girişleri"
 msgid "Accounting Entry for Asset"
 msgstr "Varlık İçin Muhasebe Girişi"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1148
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1168
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1156
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1176
 msgid "Accounting Entry for LCV in Stock Entry {0}"
 msgstr ""
 
@@ -2006,8 +2006,8 @@ msgstr "Hizmet için Muhasebe Girişi"
 #: erpnext/controllers/stock_controller.py:733
 #: erpnext/controllers/stock_controller.py:750
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:941
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1100
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1114
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1108
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1122
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:778
 msgid "Accounting Entry for Stock"
 msgstr "Stok İçin Muhasebe Girişi"
@@ -2395,7 +2395,7 @@ msgstr "Gerçekleştirilen İşlemler"
 
 #. Label of the enable_serial_and_batch_no_for_item (Check) field in DocType
 #. 'Stock Settings'
-#: erpnext/stock/doctype/item/item.js:412
+#: erpnext/stock/doctype/item/item.js:407
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Activate Serial / Batch No for Item"
 msgstr ""
@@ -2641,7 +2641,7 @@ msgstr "Toplam Saat (Zaman Çizgelgesi)"
 msgid "Actual qty in stock"
 msgstr "Güncel Stok Miktarı"
 
-#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1527
+#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1529
 #: erpnext/public/js/controllers/accounts.js:197
 msgid "Actual type tax cannot be included in Item rate in row {0}"
 msgstr "Gerçek tip vergi satırda Ürün fiyatına dahil edilemez {0}"
@@ -2650,7 +2650,7 @@ msgstr "Gerçek tip vergi satırda Ürün fiyatına dahil edilemez {0}"
 msgid "Ad-hoc Qty"
 msgstr ""
 
-#: erpnext/stock/doctype/item/item.js:675
+#: erpnext/stock/doctype/item/item.js:670
 #: erpnext/stock/doctype/price_list/price_list.js:8
 msgid "Add / Edit Prices"
 msgstr "Fiyat Ekle / Düzenle"
@@ -3531,7 +3531,7 @@ msgstr "Hesap"
 msgid "Against Blanket Order"
 msgstr "Genel Siparişe Karşılık"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1102
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1103
 msgid "Against Customer Order {0}"
 msgstr "Müşteri Siparişi {0} Karşılığında"
 
@@ -3677,7 +3677,7 @@ msgstr "Gün"
 msgid "Age (Days)"
 msgstr "Geçen Gün"
 
-#: erpnext/stock/report/stock_ageing/stock_ageing.py:216
+#: erpnext/stock/report/stock_ageing/stock_ageing.py:261
 msgid "Age ({0})"
 msgstr "Yaş ({0})"
 
@@ -3955,11 +3955,11 @@ msgstr "Bu İş Emri için tüm öğeler zaten aktarıldı."
 msgid "All items in this document already have a linked Quality Inspection."
 msgstr "Bu belgedeki tüm Ürünlerin zaten bağlantılı bir Kalite Kontrolü var."
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1238
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1239
 msgid "All items must be linked to a Sales Order or Subcontracting Inward Order for this Sales Invoice."
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1249
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1250
 msgid "All linked Sales Orders must be subcontracted."
 msgstr ""
 
@@ -3996,7 +3996,7 @@ msgstr "Ayrılan"
 msgid "Allocate Advances Automatically (FIFO)"
 msgstr "Avansları Otomatik Olarak Tahsis Et (FIFO)"
 
-#: erpnext/accounts/doctype/payment_entry/payment_entry.js:917
+#: erpnext/accounts/doctype/payment_entry/payment_entry.js:919
 msgid "Allocate Payment Amount"
 msgstr "Ayrılan Ödeme Tutarı"
 
@@ -4006,7 +4006,7 @@ msgstr "Ayrılan Ödeme Tutarı"
 msgid "Allocate Payment Based On Payment Terms"
 msgstr "Ödeme Koşullarına Göre Ödeme Tahsis Edin"
 
-#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1717
+#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1719
 msgid "Allocate Payment Request"
 msgstr "Ödeme Talebini Tahsis Et"
 
@@ -4036,7 +4036,7 @@ msgstr "Ayrılan"
 #. Payment Entries'
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.json
 #: erpnext/accounts/doctype/bank_transaction_payments/bank_transaction_payments.json
-#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1708
+#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1710
 #: erpnext/accounts/doctype/payment_reconciliation_allocation/payment_reconciliation_allocation.json
 #: erpnext/accounts/doctype/process_payment_reconciliation_log_allocations/process_payment_reconciliation_log_allocations.json
 #: erpnext/accounts/doctype/purchase_invoice_advance/purchase_invoice_advance.json
@@ -5517,7 +5517,7 @@ msgstr "{0} alanı etkinleştirildiğinden, {1} alanı zorunludur."
 msgid "As the field {0} is enabled, the value of the field {1} should be more than 1."
 msgstr "{0} alanı etkinleştirildiğinden, {1} alanının değeri 1'den fazla olmalıdır."
 
-#: erpnext/stock/doctype/item/item.py:1106
+#: erpnext/stock/doctype/item/item.py:1110
 msgid "As there are existing submitted transactions against item {0}, you can not change the value of {1}."
 msgstr "{0} Ürününe karşı mevcut gönderilmiş işlemler olduğundan, {1} değerini değiştiremezsiniz."
 
@@ -5667,7 +5667,7 @@ msgstr "Varlık Kategorisi Hesabı"
 msgid "Asset Category Name"
 msgstr "Varlık Kategorisi Adı"
 
-#: erpnext/stock/doctype/item/item.py:376
+#: erpnext/stock/doctype/item/item.py:375
 msgid "Asset Category is mandatory for Fixed Asset item"
 msgstr "Duran Varlık için Varlık Kategorisi zorunludur"
 
@@ -5945,7 +5945,7 @@ msgstr "Varlık iptal edildi"
 msgid "Asset cannot be cancelled, as it is already {0}"
 msgstr "Varlık iptal edilemez, çünkü zaten {0} durumda"
 
-#: erpnext/assets/doctype/asset/depreciation.py:397
+#: erpnext/assets/doctype/asset/depreciation.py:398
 msgid "Asset cannot be scrapped before the last depreciation entry."
 msgstr "Varlık, son amortisman girişinden önce hurdaya çıkarılamaz."
 
@@ -5977,7 +5977,7 @@ msgstr "Varlık, {0} nedeniyle onarımda ve şuan devre dışı."
 msgid "Asset received at Location {0} and issued to Employee {1}"
 msgstr "Varlık {0} Konumunda alındı ve {1} Çalışanına verildi"
 
-#: erpnext/assets/doctype/asset/depreciation.py:458
+#: erpnext/assets/doctype/asset/depreciation.py:460
 msgid "Asset restored"
 msgstr "Varlık geri yüklendi"
 
@@ -5985,20 +5985,20 @@ msgstr "Varlık geri yüklendi"
 msgid "Asset restored after Asset Capitalization {0} was cancelled"
 msgstr "Varlık Sermayelendirmesi {0} iptal edildikten sonra varlık geri yüklendi"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1521
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1522
 msgid "Asset returned"
 msgstr "Varlık iade edildi"
 
-#: erpnext/assets/doctype/asset/depreciation.py:445
+#: erpnext/assets/doctype/asset/depreciation.py:446
 msgid "Asset scrapped"
 msgstr "Varlık hurdaya çıkarıldı"
 
-#: erpnext/assets/doctype/asset/depreciation.py:447
+#: erpnext/assets/doctype/asset/depreciation.py:448
 msgid "Asset scrapped via Journal Entry {0}"
 msgstr "Varlık, Yevmiye Kaydı {0} ile hurdaya ayrıldı"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1521
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1524
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1522
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1525
 msgid "Asset sold"
 msgstr "Satılan Varlık"
 
@@ -6018,7 +6018,7 @@ msgstr "Varlık, Varlığa bölündükten sonra güncellendi {0}"
 msgid "Asset updated due to Asset Repair {0} {1}."
 msgstr ""
 
-#: erpnext/assets/doctype/asset/depreciation.py:379
+#: erpnext/assets/doctype/asset/depreciation.py:380
 msgid "Asset {0} cannot be scrapped, as it is already {1}"
 msgstr "Varlık {0} hurdaya ayrılamaz, çünkü zaten {1} durumda"
 
@@ -6059,7 +6059,7 @@ msgstr ""
 msgid "Asset {0} is not submitted. Please submit the asset before proceeding."
 msgstr ""
 
-#: erpnext/assets/doctype/asset/depreciation.py:377
+#: erpnext/assets/doctype/asset/depreciation.py:378
 msgid "Asset {0} must be submitted"
 msgstr "Varlık {0} kaydedilmelidir"
 
@@ -6270,11 +6270,11 @@ msgstr "Özellik İsmi"
 msgid "Attribute Value"
 msgstr "Özellik Değeri"
 
-#: erpnext/stock/doctype/item/item.py:896
+#: erpnext/stock/doctype/item/item.py:900
 msgid "Attribute Value {0} is not valid for the selected attribute {1}."
 msgstr ""
 
-#: erpnext/stock/doctype/item/item.py:1042
+#: erpnext/stock/doctype/item/item.py:1046
 msgid "Attribute table is mandatory"
 msgstr "Özellik tablosu zorunludur"
 
@@ -6282,19 +6282,19 @@ msgstr "Özellik tablosu zorunludur"
 msgid "Attribute value: {0} must appear only once"
 msgstr "Özellik değeri: {0} yalnızca bir kez görünmelidir"
 
-#: erpnext/stock/doctype/item/item.py:890
+#: erpnext/stock/doctype/item/item.py:889
 msgid "Attribute {0} is disabled."
 msgstr ""
 
-#: erpnext/stock/doctype/item/item.py:878
+#: erpnext/stock/doctype/item/item.py:877
 msgid "Attribute {0} is not valid for the selected template."
 msgstr ""
 
-#: erpnext/stock/doctype/item/item.py:1046
+#: erpnext/stock/doctype/item/item.py:1050
 msgid "Attribute {0} selected multiple times in Attributes Table"
 msgstr "Özellik {0}, Özellikler Tablosunda birden çok kez seçilmiş"
 
-#: erpnext/stock/doctype/item/item.py:974
+#: erpnext/stock/doctype/item/item.py:978
 msgid "Attributes"
 msgstr "Özellikler"
 
@@ -6618,7 +6618,7 @@ msgstr "Kullanıma Hazır Tarihi"
 #: erpnext/public/js/utils.js:647
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/pick_list_item/pick_list_item.json
-#: erpnext/stock/report/stock_ageing/stock_ageing.py:165
+#: erpnext/stock/report/stock_ageing/stock_ageing.py:210
 msgid "Available Qty"
 msgstr "Mevcut Miktar"
 
@@ -6715,8 +6715,8 @@ msgstr "{0} Kullanılabilir"
 msgid "Available-for-use Date should be after purchase date"
 msgstr "Kullanıma hazır tarihi satın alma tarihinden sonra olmalıdır"
 
-#: erpnext/stock/report/stock_ageing/stock_ageing.py:166
-#: erpnext/stock/report/stock_ageing/stock_ageing.py:200
+#: erpnext/stock/report/stock_ageing/stock_ageing.py:211
+#: erpnext/stock/report/stock_ageing/stock_ageing.py:245
 #: erpnext/stock/report/stock_balance/stock_balance.py:594
 msgid "Average Age"
 msgstr "Ortalama Yaş"
@@ -7713,11 +7713,11 @@ msgstr "Banka İşlemleri"
 msgid "Barcode Type"
 msgstr "Barkod Türü"
 
-#: erpnext/stock/doctype/item/item.py:544
+#: erpnext/stock/doctype/item/item.py:543
 msgid "Barcode {0} already used in Item {1}"
 msgstr "{0} barkodu zaten {1} ürününde kullanılmış"
 
-#: erpnext/stock/doctype/item/item.py:559
+#: erpnext/stock/doctype/item/item.py:558
 msgid "Barcode {0} is not a valid {1} code"
 msgstr "Barkod {0}, geçerli bir {1} kodu değil"
 
@@ -8038,7 +8038,7 @@ msgstr ""
 msgid "Batch Quantity"
 msgstr "Parti Miktarı"
 
-#. Label of the batch_size (Int) field in DocType 'BOM Operation'
+#. Label of the batch_size (Float) field in DocType 'BOM Operation'
 #. Label of the batch_size (Int) field in DocType 'Operation'
 #. Label of the batch_size (Float) field in DocType 'Work Order'
 #. Label of the batch_size (Float) field in DocType 'Work Order Operation'
@@ -8622,7 +8622,7 @@ msgstr "Rezerve"
 msgid "Booked Fixed Asset"
 msgstr "Ayrılmış Sabit Varlık"
 
-#: erpnext/accounts/general_ledger.py:830
+#: erpnext/accounts/general_ledger.py:835
 msgid "Books have been closed till the period ending on {0}"
 msgstr "Defterler {0} adresinde sona eren döneme kadar kapatılmıştır."
 
@@ -9356,7 +9356,7 @@ msgstr ""
 msgid "Can be approved by {0}"
 msgstr "{0} tarafından onaylanabilir"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2581
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2584
 msgid "Can not close Work Order. Since {0} Job Cards are in Work In Progress state."
 msgstr "{0} İş Kartı Devam Ediyor durumunda olduğu için İş Emri kapatılamıyor."
 
@@ -9389,7 +9389,7 @@ msgstr "Belgelerle gruplandırılmışsa, Belge No ile filtreleme yapılamaz."
 msgid "Can only make payment against unbilled {0}"
 msgstr "Sadece faturalandırılmamış ödemeler yapılabilir {0}"
 
-#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1499
+#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1501
 #: erpnext/controllers/accounts_controller.py:3190
 #: erpnext/public/js/controllers/accounts.js:103
 msgid "Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total'"
@@ -9445,9 +9445,9 @@ msgstr ""
 msgid "Cannot Create Return"
 msgstr "İade Oluşturulamıyor"
 
-#: erpnext/stock/doctype/item/item.py:699
-#: erpnext/stock/doctype/item/item.py:712
-#: erpnext/stock/doctype/item/item.py:726
+#: erpnext/stock/doctype/item/item.py:698
+#: erpnext/stock/doctype/item/item.py:711
+#: erpnext/stock/doctype/item/item.py:725
 msgid "Cannot Merge"
 msgstr "Birleştirilemez"
 
@@ -9475,7 +9475,7 @@ msgstr "{0} {1} değiştirilemiyor, lütfen bunu düzenlemek yerine yeni bir tan
 msgid "Cannot apply TDS against multiple parties in one entry"
 msgstr "Bir girişte birden fazla tarafa karşı Stopaj Vergisi uygulanamaz"
 
-#: erpnext/stock/doctype/item/item.py:379
+#: erpnext/stock/doctype/item/item.py:378
 msgid "Cannot be a fixed asset item as Stock Ledger is created."
 msgstr "Stok Defterine girişi olan bir kalem Sabit Varlık olarak ayarlanamaz."
 
@@ -9519,7 +9519,7 @@ msgstr ""
 msgid "Cannot cancel transaction for Completed Work Order."
 msgstr "Tamamlanan İş Emri için işlem iptal edilemez."
 
-#: erpnext/stock/doctype/item/item.py:994
+#: erpnext/stock/doctype/item/item.py:998
 msgid "Cannot change Attributes after stock transaction. Make a new Item and transfer stock to the new Item"
 msgstr "Stok işlemi sonrasında Özellikler değiştirilemez. Yeni bir Ürün oluşturun ve stoğu yeni Ürüne aktarmayı deneyin."
 
@@ -9531,7 +9531,7 @@ msgstr "Referans Belge Türü değiştirilemiyor."
 msgid "Cannot change Service Stop Date for item in row {0}"
 msgstr "{0} satırındaki öğe için Hizmet Durdurma Tarihi değiştirilemiyor"
 
-#: erpnext/stock/doctype/item/item.py:985
+#: erpnext/stock/doctype/item/item.py:989
 msgid "Cannot change Variant properties after stock transaction. You will have to make a new Item to do this."
 msgstr "Stok işlemi sonrasında Varyant özellikleri değiştirilemez. Bunu yapmak için yeni bir Ürün oluşturmanız gerekecektir."
 
@@ -9563,7 +9563,7 @@ msgstr "Hesap Türü seçili olduğundan Gruba dönüştürülemiyor."
 msgid "Cannot create Stock Reservation Entries for future dated Purchase Receipts."
 msgstr "İleri tarihli Alış İrsaliyeleri için Stok Rezervasyon Girişleri oluşturulamıyor."
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:2045
+#: erpnext/selling/doctype/sales_order/sales_order.py:2049
 #: erpnext/stock/doctype/pick_list/pick_list.py:257
 msgid "Cannot create a pick list for Sales Order {0} because it has reserved stock. Please unreserve the stock in order to create a pick list."
 msgstr "Rezerve stok olduğundan {0} Satış Siparişi için bir Çekme Listesi oluşturulamıyor. Çekme Listesi oluşturmak için lütfen stok rezervini kaldırın."
@@ -9589,7 +9589,7 @@ msgstr "Kayıp olarak belirtilemez, çünkü Fiyat Teklifi verilmiş."
 msgid "Cannot deduct when category is for 'Valuation' or 'Valuation and Total'"
 msgstr "'Değerleme' veya 'Değerleme ve Toplam' kategorisi için çıkarma işlemi yapılamaz."
 
-#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1814
+#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1816
 msgid "Cannot delete Exchange Gain/Loss row"
 msgstr "Kur Farkı Satırı Silinemiyor"
 
@@ -9634,8 +9634,8 @@ msgstr ""
 msgid "Cannot enable Item-wise Inventory Account, as there are existing Stock Ledger Entries for the company {0} with Warehouse-wise Inventory Account. Please cancel the stock transactions first and try again."
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:786
-#: erpnext/selling/doctype/sales_order/sales_order.py:809
+#: erpnext/selling/doctype/sales_order/sales_order.py:790
+#: erpnext/selling/doctype/sales_order/sales_order.py:813
 msgid "Cannot ensure delivery by Serial No as Item {0} is added with and without Ensure Delivery by Serial No."
 msgstr "{0} Ürünü Seri No ile \"Teslimatı Sağla ile ve Seri No ile Teslimatı Sağla\" olmadan eklendiğinden, Seri No ile teslimat sağlanamaz."
 
@@ -9679,7 +9679,7 @@ msgstr "Negatif bakiye karşılığında müşteriden teslim alınamıyor"
 msgid "Cannot reduce quantity than ordered or purchased quantity"
 msgstr ""
 
-#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1512
+#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1514
 #: erpnext/controllers/accounts_controller.py:3205
 #: erpnext/public/js/controllers/accounts.js:120
 msgid "Cannot refer row number greater than or equal to current row number for this Charge type"
@@ -9697,8 +9697,8 @@ msgstr "Güncelleme için bağlantı token'ı alınamıyor. Daha fazla bilgi iç
 msgid "Cannot select a Group type Customer Group. Please select a non-group Customer Group."
 msgstr ""
 
-#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1505
-#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1683
+#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1507
+#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1685
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1827
 #: erpnext/controllers/accounts_controller.py:3195
 #: erpnext/public/js/controllers/accounts.js:112
@@ -9714,7 +9714,7 @@ msgstr "Satış Siparişi verildiği için Kayıp olarak ayarlanamaz."
 msgid "Cannot set authorization on basis of Discount for {0}"
 msgstr "{0} için İndirim bazında yetkilendirme ayarlanamıyor"
 
-#: erpnext/stock/doctype/item/item.py:790
+#: erpnext/stock/doctype/item/item.py:789
 msgid "Cannot set multiple Item Defaults for a company."
 msgstr "Bir şirket için birden fazla Ürün Varsayılanı belirlenemez."
 
@@ -10118,7 +10118,7 @@ msgstr "Yayın Tarihi Değiştir"
 msgid "Change in Stock Value"
 msgstr "Stok Değerindeki Değişim"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1028
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1029
 msgid "Change the account type to Receivable or select a different account."
 msgstr "Hesap türünü Alacak olarak değiştirin veya farklı bir hesap seçin."
 
@@ -10136,7 +10136,7 @@ msgstr "'{}' zaten mevcut olduğundan müşteri adı '{}' olarak değiştirildi.
 msgid "Changes in {0}"
 msgstr "{0} adresindeki değişiklikler"
 
-#: erpnext/stock/doctype/item/item.js:378
+#: erpnext/stock/doctype/item/item.js:373
 msgid "Changing Customer Group for the selected Customer is not allowed."
 msgstr "Seçilen Müşteri için Müşteri Grubunu değiştirmeye izin verilmiyor."
 
@@ -10600,11 +10600,11 @@ msgstr "Kapalı Belge"
 msgid "Closed Documents"
 msgstr "Kapalı Belgeler"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2504
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2507
 msgid "Closed Work Order can not be stopped or Re-opened"
 msgstr "Kapatılan İş Emri durdurulamaz veya Yeniden Açılamaz"
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:547
+#: erpnext/selling/doctype/sales_order/sales_order.py:551
 msgid "Closed order cannot be cancelled. Unclose to cancel."
 msgstr "Kapalı sipariş iptal edilemez. İptal etmek için önce açın."
 
@@ -11540,7 +11540,7 @@ msgstr "Şirket ve Kaydetme Tarihi zorunludur"
 msgid "Company and account filters not set!"
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2661
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2662
 msgid "Company currencies of both the companies should match for Inter Company Transactions."
 msgstr "Şirketler Arası İşlemler için her iki şirketin para birimlerinin eşleşmesi gerekir."
 
@@ -12096,7 +12096,7 @@ msgstr ""
 msgid "Consumed Qty"
 msgstr "Tüketilen Miktar"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1767
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1770
 msgid "Consumed Qty cannot be greater than Reserved Qty for item {0}"
 msgstr "Tüketilen Miktar, {0} öğesi için Ayrılmış Miktardan büyük olamaz"
 
@@ -12439,7 +12439,7 @@ msgstr "Dönüşüm Faktörü"
 msgid "Conversion Rate"
 msgstr "Dönüşüm Oranı"
 
-#: erpnext/stock/doctype/item/item.py:462
+#: erpnext/stock/doctype/item/item.py:461
 msgid "Conversion factor for default Unit of Measure must be 1 in row {0}"
 msgstr "Varsayılan Ölçü Birimi için dönüşüm faktörü {0} satırında 1 olmalıdır"
 
@@ -13438,12 +13438,12 @@ msgstr "Kullanıcı İzni Oluştur"
 msgid "Create Users"
 msgstr "Kullanıcıları Oluştur"
 
-#: erpnext/stock/doctype/item/item.js:971
+#: erpnext/stock/doctype/item/item.js:968
 msgid "Create Variant"
 msgstr "Varyasyon Oluştur"
 
-#: erpnext/stock/doctype/item/item.js:785
-#: erpnext/stock/doctype/item/item.js:829
+#: erpnext/stock/doctype/item/item.js:779
+#: erpnext/stock/doctype/item/item.js:823
 msgid "Create Variants"
 msgstr "Varyantları Oluştur"
 
@@ -13474,8 +13474,8 @@ msgstr ""
 msgid "Create a new rule to automatically classify transactions."
 msgstr ""
 
-#: erpnext/stock/doctype/item/item.js:812
-#: erpnext/stock/doctype/item/item.js:964
+#: erpnext/stock/doctype/item/item.js:806
+#: erpnext/stock/doctype/item/item.js:961
 msgid "Create a variant with the template image."
 msgstr "Şablon görselini kullanarak bir varyant oluşturun."
 
@@ -14281,7 +14281,6 @@ msgstr "Özel Ayırıcılar"
 #. Label of a shortcut in the Home Workspace
 #. Label of the customer (Link) field in DocType 'Delivery Note'
 #. Label of the customer (Link) field in DocType 'Delivery Stop'
-#. Label of the customer (Link) field in DocType 'Item'
 #. Label of the customer (Link) field in DocType 'Item Price'
 #. Label of the customer (Link) field in DocType 'Material Request'
 #. Label of the customer (Link) field in DocType 'Pick List'
@@ -14388,7 +14387,6 @@ msgstr "Özel Ayırıcılar"
 #: erpnext/stock/doctype/delivery_note/delivery_note.js:495
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/delivery_stop/delivery_stop.json
-#: erpnext/stock/doctype/item/item.json
 #: erpnext/stock/doctype/item_price/item_price.json
 #: erpnext/stock/doctype/material_request/material_request.json
 #: erpnext/stock/doctype/pick_list/pick_list.json
@@ -14575,6 +14573,7 @@ msgstr "Müşteri Görüşleri"
 #. Label of the customer_group (Link) field in DocType 'Maintenance Visit'
 #. Label of the customer_group (Link) field in DocType 'Customer'
 #. Label of the customer_group (Link) field in DocType 'Installation Note'
+#. Option for the 'Party Type' (Select) field in DocType 'Party Specific Item'
 #. Label of the customer_group (Link) field in DocType 'Quotation'
 #. Label of the customer_group (Link) field in DocType 'Sales Order'
 #. Label of a Link in the Selling Workspace
@@ -14614,6 +14613,7 @@ msgstr "Müşteri Görüşleri"
 #: erpnext/public/js/sales_trends_filters.js:26
 #: erpnext/selling/doctype/customer/customer.json
 #: erpnext/selling/doctype/installation_note/installation_note.json
+#: erpnext/selling/doctype/party_specific_item/party_specific_item.json
 #: erpnext/selling/doctype/quotation/quotation.json
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #: erpnext/selling/report/inactive_customers/inactive_customers.py:77
@@ -14872,8 +14872,8 @@ msgstr "Müşteri veya Ürün"
 msgid "Customer required for 'Customerwise Discount'"
 msgstr "'Müşteri Bazlı İndirim' için müşteri seçilmesi gereklidir"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1142
-#: erpnext/selling/doctype/sales_order/sales_order.py:446
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1143
+#: erpnext/selling/doctype/sales_order/sales_order.py:450
 #: erpnext/stock/doctype/delivery_note/delivery_note.py:437
 msgid "Customer {0} does not belong to project {1}"
 msgstr "Müşteri {0} {1} projesine ait değil"
@@ -15331,13 +15331,13 @@ msgstr "İade Faturası, ‘Karşı Fatura’ belirtilmiş olsa bile kendi açı
 #. Label of the debit_to (Link) field in DocType 'Sales Invoice'
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1013
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1024
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1014
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1025
 #: erpnext/controllers/accounts_controller.py:2377
 msgid "Debit To"
 msgstr "Borçlandırma"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1009
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1010
 msgid "Debit To is required"
 msgstr "Borçlandırılacak Hesap gerekli"
 
@@ -15514,11 +15514,11 @@ msgstr ""
 msgid "Default BOM"
 msgstr "Varsayılan Ürün Ağacı"
 
-#: erpnext/stock/doctype/item/item.py:505
+#: erpnext/stock/doctype/item/item.py:504
 msgid "Default BOM ({0}) must be active for this item or its template"
 msgstr "Bu ürün veya şablonu için varsayılan Ürün Ağacı ({0}) aktif olmalıdır"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2270
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2273
 msgid "Default BOM for {0} not found"
 msgstr "{0} İçin Ürün Ağacı Bulunamadı"
 
@@ -15526,7 +15526,7 @@ msgstr "{0} İçin Ürün Ağacı Bulunamadı"
 msgid "Default BOM not found for FG Item {0}"
 msgstr "{0} Ürünü için Varsayılan Ürün Ağacı bulunamadı"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2267
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2270
 msgid "Default BOM not found for Item {0} and Project {1}"
 msgstr "{0} Ürünü ve {1} Projesi için varsayılan Ürün Ağacı bulunamadı"
 
@@ -15881,15 +15881,15 @@ msgstr "Varsayılan Bölge"
 msgid "Default Unit of Measure"
 msgstr "Varsayılan Ölçü Birimi"
 
-#: erpnext/stock/doctype/item/item.py:1389
+#: erpnext/stock/doctype/item/item.py:1393
 msgid "Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You need to either cancel the linked documents or create a new Item."
 msgstr "{0} Ürünü için Varsayılan Ölçü Birimi doğrudan değiştirilemez çünkü zaten başka bir Ölçü Birimi ile bazı işlemler yaptınız. Ya bağlantılı belgeleri iptal etmeniz ya da yeni bir Ürün oluşturmanız gerekir."
 
-#: erpnext/stock/doctype/item/item.py:1372
+#: erpnext/stock/doctype/item/item.py:1376
 msgid "Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You will need to create a new Item to use a different Default UOM."
 msgstr "Ürün {0} için Varsayılan Ölçü Birimi doğrudan değiştirilemez çünkü başka bir ölçü birimiyle işlem yapılmıştır. Farklı bir Varsayılan Ölçü Birimi kullanmak için yeni bir Ürün oluşturmanız gerekecek."
 
-#: erpnext/stock/doctype/item/item.py:1020
+#: erpnext/stock/doctype/item/item.py:1024
 msgid "Default Unit of Measure for Variant '{0}' must be same as in Template '{1}'"
 msgstr "Değişiklik için varsayılan ölçü birimi '{0}' şablondaki ile aynı olmalıdır '{1}'"
 
@@ -16397,7 +16397,7 @@ msgstr "İrsaliyesi Kesilmiş Paketlenmiş Ürün"
 msgid "Delivery Note Trends"
 msgstr "İrsaliye Trendleri"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1403
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1404
 msgid "Delivery Note {0} is not submitted"
 msgstr "Satış İrsaliyesi {0} kaydedilmedi"
 
@@ -16866,7 +16866,7 @@ msgstr "Kalemler Tablosundaki Fark Hesabı"
 msgid "Difference Account must be a Asset/Liability type account (Temporary Opening), since this Stock Entry is an Opening Entry"
 msgstr "Bu Stok Mutabakatı bir Hesap Açılış Kaydı olduğundan farklı hesabının aktif ya da pasif bir hesap tipi olması gerekmektedir"
 
-#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:991
+#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:994
 msgid "Difference Account must be a Asset/Liability type account, since this Stock Reconciliation is an Opening Entry"
 msgstr "Fark Hesabı, bu Stok Mutabakatı bir Açılış Girişi olduğundan Varlık/Yükümlülük türü bir hesap olmalıdır"
 
@@ -17512,7 +17512,7 @@ msgstr ""
 msgid "Disposal Date"
 msgstr "Bertaraf Tarihi"
 
-#: erpnext/assets/doctype/asset/depreciation.py:836
+#: erpnext/assets/doctype/asset/depreciation.py:838
 msgid "Disposal date {0} cannot be before {1} date {2} of the asset."
 msgstr "Elden çıkarma tarihi {0} varlığın {1} tarihinden {2} önce olamaz."
 
@@ -18209,7 +18209,7 @@ msgstr ""
 msgid "Each Transaction"
 msgstr "Her Bir İşlemde"
 
-#: erpnext/stock/report/stock_ageing/stock_ageing.py:172
+#: erpnext/stock/report/stock_ageing/stock_ageing.py:217
 msgid "Earliest"
 msgstr "En erken"
 
@@ -18682,7 +18682,7 @@ msgstr "Randevu Zamanlamayı Etkinleştirme"
 msgid "Enable Auto Email"
 msgstr "Otomatik E-postayı Etkinleştir"
 
-#: erpnext/stock/doctype/item/item.py:1181
+#: erpnext/stock/doctype/item/item.py:1185
 msgid "Enable Auto Re-Order"
 msgstr "Otomatik Yeniden Siparişi Etkinleştir"
 
@@ -19102,7 +19102,7 @@ msgstr "Bu Tatil Listesi için bir ad girin."
 msgid "Enter amount to be redeemed."
 msgstr "Kullanılacak tutarı giriniz."
 
-#: erpnext/stock/doctype/item/item.js:1133
+#: erpnext/stock/doctype/item/item.js:1130
 msgid "Enter an Item Code, the name will be auto-filled the same as Item Code on clicking inside the Item Name field."
 msgstr "Bir Ürün Kodu girin, Ürün Adı alanına tıklandığında ad, Ürün Kodu ile aynı şekilde otomatik olarak doldurulacaktır."
 
@@ -19158,7 +19158,7 @@ msgstr "Göndermeden önce Yararlanıcının adını giriniz."
 msgid "Enter the name of the bank or lending institution before submitting."
 msgstr "Göndermeden önce bankanın veya kredi veren kurumun adını girin."
 
-#: erpnext/stock/doctype/item/item.js:1159
+#: erpnext/stock/doctype/item/item.js:1156
 msgid "Enter the opening stock units."
 msgstr "Açılış stok birimlerini girin."
 
@@ -19277,7 +19277,7 @@ msgstr "Hata: Bu varlık için zaten {0} amortisman dönemi ayrılmıştır.\n"
 "\t\t\t\t\tAmortisman başlangıç tarihi, `kullanıma hazır` tarihinden en az {1} dönem sonra olmalıdır.\n"
 "\t\t\t\t\tLütfen tarihleri buna göre düzeltin."
 
-#: erpnext/accounts/doctype/payment_entry/payment_entry.js:969
+#: erpnext/accounts/doctype/payment_entry/payment_entry.js:971
 msgid "Error: {0} is mandatory field"
 msgstr "Hata: {0} zorunlu bir alandır"
 
@@ -19323,7 +19323,7 @@ msgstr "Fabrika Teslim "
 msgid "Example URL"
 msgstr "Örnek URL"
 
-#: erpnext/stock/doctype/item/item.py:1112
+#: erpnext/stock/doctype/item/item.py:1116
 msgid "Example of a linked document: {0}"
 msgstr "Bağlantılı bir döküman örneği: {0}"
 
@@ -19628,7 +19628,7 @@ msgstr "Beklenen Kapanış Tarihi"
 msgid "Expected Delivery Date"
 msgstr "Beklenen Teslim Tarihi"
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:429
+#: erpnext/selling/doctype/sales_order/sales_order.py:433
 msgid "Expected Delivery Date should be after Sales Order Date"
 msgstr "Beklenen Teslimat Tarihi Satış Siparişi Tarihinden sonra olmalıdır"
 
@@ -20561,7 +20561,7 @@ msgstr "Ürün Kabul Deposu"
 msgid "Finished Goods based Operating Cost"
 msgstr "Bitmiş Ürün Operasyon Maliyeti"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:862
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:870
 msgid "Finished Item {0} does not match with Work Order {1}"
 msgstr "Bitmiş Ürün {0} İş Emri {1} ile eşleşmiyor"
 
@@ -20720,7 +20720,7 @@ msgstr "Sabit Varlık Hesabı"
 msgid "Fixed Asset Defaults"
 msgstr "Sabit Varlık Varsayılanları"
 
-#: erpnext/stock/doctype/item/item.py:373
+#: erpnext/stock/doctype/item/item.py:372
 msgid "Fixed Asset Item must be a non-stock item."
 msgstr "Sabit Varlık Kalemi stok dışı bir kalem olmalıdır."
 
@@ -20813,7 +20813,7 @@ msgstr "Takvim Aylarını Takip Edin"
 msgid "Following Material Requests have been raised automatically based on Item's re-order level"
 msgstr "Aşağıdaki Malzeme Talepleri, Ürünün yeniden sipariş seviyesine göre otomatik olarak oluşturulmuştur."
 
-#: erpnext/selling/doctype/customer/customer.py:833
+#: erpnext/selling/doctype/customer/customer.py:845
 msgid "Following fields are mandatory to create address:"
 msgstr "Adres oluşturmak için aşağıdaki alanların doldurulması zorunludur:"
 
@@ -20991,7 +20991,7 @@ msgstr ""
 msgid "For operation {0} at row {1}, please add raw materials or set a BOM against it."
 msgstr ""
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2651
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2654
 msgid "For operation {0}: Quantity ({1}) can not be greater than pending quantity({2})"
 msgstr "{0} Operasyonu için: Miktar ({1}) bekleyen ({2}) miktarıdan büyük olamaz"
 
@@ -21008,7 +21008,7 @@ msgstr ""
 msgid "For projected and forecast quantities, the system will consider all child warehouses under the selected parent warehouse."
 msgstr ""
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:894
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:902
 msgid "For quantity {0} should not be greater than allowed quantity {1}"
 msgstr "{0} Miktarı izin verilen {1} miktarından büyük olmamalıdır"
 
@@ -21017,7 +21017,7 @@ msgstr "{0} Miktarı izin verilen {1} miktarından büyük olmamalıdır"
 msgid "For reference"
 msgstr "Referans İçin"
 
-#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1534
+#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1536
 #: erpnext/public/js/controllers/accounts.js:204
 msgid "For row {0} in {1}. To include {2} in Item rate, rows {3} must also be included"
 msgstr "Satır {0} için {1} belgesi. Ürün fiyatına {2} masrafı dahil etmek için, satır {3} de dahil edilmelidir."
@@ -21645,7 +21645,7 @@ msgstr "Yaklaşan Ödeme Referansı"
 msgid "Future Payments"
 msgstr "Yaklaşan Ödemeler"
 
-#: erpnext/assets/doctype/asset/depreciation.py:386
+#: erpnext/assets/doctype/asset/depreciation.py:387
 msgid "Future date is not allowed"
 msgstr "Gelecek tarihe izin verilmiyor"
 
@@ -22185,7 +22185,7 @@ msgstr "Taşıma Halindeki Ürünler"
 msgid "Goods Transferred"
 msgstr "Transfer Edilen Mallar"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1379
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1387
 msgid "Goods are already received against the outward entry {0}"
 msgstr "{0} numaralı çıkış kaydına karşılık mallar zaten alınmış"
 
@@ -22368,7 +22368,7 @@ msgstr ""
 msgid "Grant Commission"
 msgstr "Komisyona İzin Ver"
 
-#: erpnext/accounts/doctype/payment_entry/payment_entry.js:888
+#: erpnext/accounts/doctype/payment_entry/payment_entry.js:890
 msgid "Greater Than Amount"
 msgstr "Tutardan Büyük"
 
@@ -23559,7 +23559,7 @@ msgstr "Sadakat Puanları için sınırsız son kullanma tarihi varsa, Son Kulla
 msgid "If yes, then this warehouse will be used to store rejected materials"
 msgstr "Reddedilen malzemeleri depolamak için kullanılacak"
 
-#: erpnext/stock/doctype/item/item.js:1145
+#: erpnext/stock/doctype/item/item.js:1142
 msgid "If you are maintaining stock of this Item in your Inventory, ERPNext will make a stock ledger entry for each transaction of this item."
 msgstr "Bu Ürünün stokunu Envanterinizde tutuyorsanız, ERPNext bu ürünün her işlemi için bir stok defteri girişi yapacaktır."
 
@@ -23744,7 +23744,7 @@ msgstr "İş İstasyonu Zaman Çakışmasını Yoksay"
 msgid "Ignores legacy Is Opening field in GL Entry that allows adding opening balance post the system is in use while generating reports"
 msgstr "Raporlar oluşturulurken sistemin kullanımda olduğu açılış bakiyesi sonrası eklemeye izin veren Defter Girişindeki eski Açılış mı alanını yok sayar"
 
-#: erpnext/stock/doctype/item/item.py:267
+#: erpnext/stock/doctype/item/item.py:266
 msgid "Image in the description has been removed. To disable this behavior, uncheck \"{0}\" in {1}."
 msgstr ""
 
@@ -24031,7 +24031,7 @@ msgstr "Çok kademeli bir program durumunda, müşteriler harcamalarına göre i
 msgid "In this case, the amount will be calculated as 25% of the transaction amount. If the transaction amount is 200, then this will be calculated as 200 * 0.25 = 50."
 msgstr ""
 
-#: erpnext/stock/doctype/item/item.js:1178
+#: erpnext/stock/doctype/item/item.js:1175
 msgid "In this section, you can define Company-wide transaction-related defaults for this Item. Eg. Default Warehouse, Default Price List, Supplier, etc."
 msgstr "Bu bölümde, bu ürün için Şirket Genelinde yapılacak işlemlerle ilgili varsayılanları tanımlayabilirsiniz. Örneğin; Varsayılan Depo, Varsayılan Fiyat Listesi, Tedarikçi vb."
 
@@ -24366,7 +24366,7 @@ msgstr "İşlem Sonrası Yanlış Bakiye Miktarı"
 msgid "Incorrect Batch Consumed"
 msgstr "Yanlış Parti Tüketildi"
 
-#: erpnext/stock/doctype/item/item.py:601
+#: erpnext/stock/doctype/item/item.py:600
 msgid "Incorrect Check in (group) Warehouse for Reorder"
 msgstr "Yeniden Sipariş İçin Depoda Yanlış Giriş (grup)"
 
@@ -24926,8 +24926,8 @@ msgstr "Aralık 1 ila 59 Dakika arasında olmalıdır"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:377
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:385
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1019
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1029
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1020
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1030
 #: erpnext/assets/doctype/asset_category/asset_category.py:69
 #: erpnext/assets/doctype/asset_category/asset_category.py:97
 #: erpnext/controllers/accounts_controller.py:3219
@@ -24981,7 +24981,7 @@ msgstr "Geçersiz Alt Prosedür"
 msgid "Invalid Company Field"
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2436
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2437
 msgid "Invalid Company for Inter Company Transaction."
 msgstr "Şirketler Arası İşlem için Geçersiz Şirket."
 
@@ -24995,7 +24995,7 @@ msgstr "Geçersiz Maliyet Merkezi"
 msgid "Invalid Customer Group"
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:431
+#: erpnext/selling/doctype/sales_order/sales_order.py:435
 msgid "Invalid Delivery Date"
 msgstr "Geçersiz Teslimat Tarihi"
 
@@ -25033,7 +25033,7 @@ msgstr "Geçersiz Gruplama Ölçütü"
 msgid "Invalid Item"
 msgstr "Geçersiz Öğe"
 
-#: erpnext/stock/doctype/item/item.py:1527
+#: erpnext/stock/doctype/item/item.py:1531
 msgid "Invalid Item Defaults"
 msgstr "Geçersiz Ürün Varsayılanları"
 
@@ -25047,7 +25047,7 @@ msgid "Invalid Net Purchase Amount"
 msgstr ""
 
 #: erpnext/accounts/doctype/pos_closing_entry/pos_closing_entry.py:79
-#: erpnext/accounts/general_ledger.py:822
+#: erpnext/accounts/general_ledger.py:827
 msgid "Invalid Opening Entry"
 msgstr "Geçersiz Açılış Girişi"
 
@@ -25119,7 +25119,7 @@ msgstr "Geçersiz Program"
 msgid "Invalid Selling Price"
 msgstr "Geçersiz Satış Fiyatı"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:937
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:945
 msgid "Invalid Serial and Batch Bundle"
 msgstr "Geçersiz Seri ve Parti"
 
@@ -25161,7 +25161,7 @@ msgstr ""
 msgid "Invalid lost reason {0}, please create a new lost reason"
 msgstr "Geçersiz kayıp nedeni {0}, lütfen yeni bir kayıp nedeni oluşturun"
 
-#: erpnext/stock/doctype/item/item.py:477
+#: erpnext/stock/doctype/item/item.py:476
 msgid "Invalid naming series (. missing) for {0}"
 msgstr "{0} için geçersiz adlandırma serisi (. eksik)"
 
@@ -25187,8 +25187,8 @@ msgstr ""
 
 #: erpnext/accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:109
 #: erpnext/accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:119
-#: erpnext/accounts/general_ledger.py:865
-#: erpnext/accounts/general_ledger.py:875
+#: erpnext/accounts/general_ledger.py:870
+#: erpnext/accounts/general_ledger.py:880
 msgid "Invalid value {0} for {1} against account {2}"
 msgstr "{2} hesabına karşı {1} için geçersiz değer {0}"
 
@@ -25196,7 +25196,7 @@ msgstr "{2} hesabına karşı {1} için geçersiz değer {0}"
 msgid "Invalid {0}"
 msgstr "Geçersiz {0}"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2434
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2435
 msgid "Invalid {0} for Inter Company Transaction."
 msgstr "Şirketler Arası İşlem için geçersiz {0}."
 
@@ -25432,7 +25432,7 @@ msgstr "Faturalanan Miktar"
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.json
 #: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.json
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2485
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2486
 #: erpnext/buying/doctype/supplier/supplier.json
 #: erpnext/selling/report/payment_terms_status_for_sales_order/payment_terms_status_for_sales_order.py:62
 msgid "Invoices"
@@ -26107,7 +26107,7 @@ msgstr "Sorunlar"
 msgid "Issuing Date"
 msgstr "Veriliş Tarihi"
 
-#: erpnext/stock/doctype/item/item.py:658
+#: erpnext/stock/doctype/item/item.py:657
 msgid "It can take upto few hours for accurate stock values to be visible after merging items."
 msgstr "Ürünlerin birleştirilmesinden sonra doğru stok değerlerinin görünür hale gelmesi birkaç saat sürebilir."
 
@@ -26545,7 +26545,7 @@ msgstr "Ürün Sepeti"
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.js:8
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:433
 #: erpnext/stock/report/serial_no_ledger/serial_no_ledger.js:7
-#: erpnext/stock/report/stock_ageing/stock_ageing.py:126
+#: erpnext/stock/report/stock_ageing/stock_ageing.py:171
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.py:104
 #: erpnext/stock/report/stock_qty_vs_batch_qty/stock_qty_vs_batch_qty.py:25
 #: erpnext/stock/report/stock_qty_vs_serial_no_count/stock_qty_vs_serial_no_count.py:26
@@ -26744,7 +26744,7 @@ msgstr "Ürün Detayları"
 #: erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py:55
 #: erpnext/stock/report/product_bundle_balance/product_bundle_balance.js:37
 #: erpnext/stock/report/product_bundle_balance/product_bundle_balance.py:99
-#: erpnext/stock/report/stock_ageing/stock_ageing.py:136
+#: erpnext/stock/report/stock_ageing/stock_ageing.py:181
 #: erpnext/stock/report/stock_analytics/stock_analytics.js:8
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:52
 #: erpnext/stock/report/stock_balance/stock_balance.js:32
@@ -27007,7 +27007,7 @@ msgstr "Üretici Firma"
 #: erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py:54
 #: erpnext/stock/report/serial_and_batch_summary/serial_and_batch_summary.py:133
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:440
-#: erpnext/stock/report/stock_ageing/stock_ageing.py:133
+#: erpnext/stock/report/stock_ageing/stock_ageing.py:178
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:45
 #: erpnext/stock/report/stock_balance/stock_balance.py:480
 #: erpnext/stock/report/stock_ledger/stock_ledger.py:292
@@ -27075,7 +27075,7 @@ msgstr ""
 msgid "Item Price appears multiple times based on Price List, Supplier/Customer, Currency, Item, Batch, UOM, Qty, and Dates."
 msgstr "Ürün Fiyatı, Fiyat Listesi, Tedarikçi/Müşteri, Para Birimi, Ürün, Parti, Birim, Miktar ve Tarihlere göre birden fazla kez görünür."
 
-#: erpnext/stock/doctype/item/item.py:183
+#: erpnext/stock/doctype/item/item.py:182
 msgid "Item Price created at rate {0}"
 msgstr ""
 
@@ -27266,11 +27266,11 @@ msgstr "Ürün Varyant Detayları"
 msgid "Item Variant Settings"
 msgstr "Ürün Varyant Ayarları"
 
-#: erpnext/stock/doctype/item/item.js:994
+#: erpnext/stock/doctype/item/item.js:991
 msgid "Item Variant {0} already exists with same attributes"
 msgstr "Öğe Varyantı {0} aynı niteliklerle zaten mevcut"
 
-#: erpnext/stock/doctype/item/item.py:853
+#: erpnext/stock/doctype/item/item.py:852
 msgid "Item Variants updated"
 msgstr "Ürün Varyantları Güncellendi"
 
@@ -27375,7 +27375,7 @@ msgstr "Ürün ve Garanti Detayları"
 msgid "Item for row {0} does not match Material Request"
 msgstr "{0} satırındaki Kalem Malzeme Talebi ile eşleşmiyor"
 
-#: erpnext/stock/doctype/item/item.py:907
+#: erpnext/stock/doctype/item/item.py:911
 msgid "Item has variants."
 msgstr "Ürünün varyantları mevcut."
 
@@ -27420,7 +27420,7 @@ msgstr "Ürün değerleme oranı, indirilmiş maliyet kuponu tutarı dikkate al�
 msgid "Item valuation reposting in progress. Report might show incorrect item valuation."
 msgstr "Ürün değerlemesi yeniden yapılıyor. Rapor geçici olarak yanlış değerleme gösterebilir."
 
-#: erpnext/stock/doctype/item/item.py:1064
+#: erpnext/stock/doctype/item/item.py:1068
 msgid "Item variant {0} exists with same attributes"
 msgstr "Öğe Varyantı {0} aynı niteliklerle zaten mevcut"
 
@@ -27441,7 +27441,7 @@ msgid "Item {0} cannot be ordered more than {1} against Blanket Order {2}."
 msgstr "Ürün {0}, Toplu Sipariş {2} kapsamında {1} miktarından daha fazla sipariş edilemez."
 
 #: erpnext/assets/doctype/asset/asset.py:344
-#: erpnext/stock/doctype/item/item.py:704
+#: erpnext/stock/doctype/item/item.py:703
 msgid "Item {0} does not exist"
 msgstr "{0} ürünü mevcut değil"
 
@@ -27465,7 +27465,7 @@ msgstr "Ürün {0} zaten iade edilmiş"
 msgid "Item {0} has been disabled"
 msgstr "Ürün {0} Devre dışı bırakılmış"
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:793
+#: erpnext/selling/doctype/sales_order/sales_order.py:797
 msgid "Item {0} has no Serial No. Only serialized items can have delivery based on Serial No"
 msgstr "{0} Ürününe ait Seri Numarası yoktur. Yalnızca serileştirilmiş Ürünler Seri Numarasına göre teslimat yapılabilir"
 
@@ -27473,7 +27473,7 @@ msgstr "{0} Ürününe ait Seri Numarası yoktur. Yalnızca serileştirilmiş Ü
 msgid "Item {0} has no changes in delivered quantity. Please unselect the row if you do not wish to update its quantity."
 msgstr ""
 
-#: erpnext/stock/doctype/item/item.py:1243
+#: erpnext/stock/doctype/item/item.py:1247
 msgid "Item {0} has reached its end of life on {1}"
 msgstr "Ürün {0} {1} tarihinde kullanım süresinin sonuna gelmiştir."
 
@@ -27485,11 +27485,11 @@ msgstr "{0} Stok Kalemi olmadığından, ürün yok sayılır"
 msgid "Item {0} is already reserved/delivered against Sales Order {1}."
 msgstr "Ürün {0} zaten {1} Satış Siparişi karşılığında rezerve edilmiş/teslim edilmiştir."
 
-#: erpnext/stock/doctype/item/item.py:1263
+#: erpnext/stock/doctype/item/item.py:1267
 msgid "Item {0} is cancelled"
 msgstr "Ürün {0} iptal edildi"
 
-#: erpnext/stock/doctype/item/item.py:1247
+#: erpnext/stock/doctype/item/item.py:1251
 msgid "Item {0} is disabled"
 msgstr "{0} ürünü devre dışı bırakıldı"
 
@@ -27501,7 +27501,7 @@ msgstr ""
 msgid "Item {0} is not a serialized Item"
 msgstr "Ürün {0} bir serileştirilmiş Ürün değildir"
 
-#: erpnext/stock/doctype/item/item.py:1255
+#: erpnext/stock/doctype/item/item.py:1259
 msgid "Item {0} is not a stock Item"
 msgstr "Ürün {0} bir stok ürünü değildir"
 
@@ -27509,11 +27509,11 @@ msgstr "Ürün {0} bir stok ürünü değildir"
 msgid "Item {0} is not a subcontracted item"
 msgstr "{0} Ürünü Alt Yüklenici Kalemi olmalıdır"
 
-#: erpnext/stock/doctype/item/item.py:870
+#: erpnext/stock/doctype/item/item.py:869
 msgid "Item {0} is not a template item."
 msgstr ""
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1302
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1310
 msgid "Item {0} is not active or end of life has been reached"
 msgstr "Ürün {0} aktif değil veya kullanım süresinin sonuna gelindi"
 
@@ -27545,7 +27545,7 @@ msgstr "{0} ürünü {1} adetten daha az sipariş edilemez. Bu ayar ürün sayfa
 msgid "Item {0}: {1} qty produced. "
 msgstr "{0} Ürünü {1} adet üretildi. "
 
-#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:1384
+#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:1387
 msgid "Item {} does not exist."
 msgstr "{0} Ürünü mevcut değil."
 
@@ -27870,7 +27870,7 @@ msgstr "Yetkili Kişi Adı"
 msgid "Job Worker Warehouse"
 msgstr "Alt Yüklenici Deposu"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2706
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2709
 msgid "Job card {0} created"
 msgstr "İş Kartı {0} oluşturuldu"
 
@@ -28300,7 +28300,7 @@ msgstr "Son karbon kontrol tarihi gelecekteki bir tarih olamaz"
 msgid "Last transacted"
 msgstr "Son İşlem"
 
-#: erpnext/stock/report/stock_ageing/stock_ageing.py:173
+#: erpnext/stock/report/stock_ageing/stock_ageing.py:218
 msgid "Latest"
 msgstr "Son"
 
@@ -28567,7 +28567,7 @@ msgstr "Defter"
 msgid "Length (cm)"
 msgstr "Uzunluk (cm)"
 
-#: erpnext/accounts/doctype/payment_entry/payment_entry.js:893
+#: erpnext/accounts/doctype/payment_entry/payment_entry.js:895
 msgid "Less Than Amount"
 msgstr "Tutardan Az"
 
@@ -28708,7 +28708,7 @@ msgstr "Bağlı Faturalar"
 msgid "Linked Location"
 msgstr "Bağlantılı Konum"
 
-#: erpnext/stock/doctype/item/item.py:1116
+#: erpnext/stock/doctype/item/item.py:1120
 msgid "Linked with submitted documents"
 msgstr "Gönderilen belgelerle bağlantılı"
 
@@ -29338,7 +29338,7 @@ msgstr "Amortisman kaydı yap"
 msgid "Make Difference Entry"
 msgstr "Farklı Giriş Ekle"
 
-#: erpnext/stock/doctype/item/item.js:683
+#: erpnext/stock/doctype/item/item.js:678
 msgid "Make Lead Time"
 msgstr ""
 
@@ -29397,11 +29397,11 @@ msgstr "Arama yap"
 msgid "Make project from a template."
 msgstr "Bir şablondan proje oluşturun."
 
-#: erpnext/stock/doctype/item/item.js:791
+#: erpnext/stock/doctype/item/item.js:785
 msgid "Make {0} Variant"
 msgstr "{0} Varyantı Oluştur"
 
-#: erpnext/stock/doctype/item/item.js:793
+#: erpnext/stock/doctype/item/item.js:787
 msgid "Make {0} Variants"
 msgstr "{0} Varyantları Oluştur"
 
@@ -29445,7 +29445,7 @@ msgstr "Genel Müdür"
 msgid "Mandatory Accounting Dimension"
 msgstr "Zorunlu Muhasebe Boyutu"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1962
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1963
 msgid "Mandatory Field"
 msgstr "Zorunlu Alan"
 
@@ -29544,8 +29544,8 @@ msgstr "Manuel giriş oluşturulamaz! Hesap ayarlarında ertelenmiş muhasebe i�
 #: erpnext/stock/doctype/material_request_item/material_request_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:696
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:713
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:704
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:721
 #: erpnext/stock/doctype/stock_entry_type/stock_entry_type.json
 #: erpnext/subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
@@ -29966,7 +29966,7 @@ msgstr "Malzeme Tüketimi"
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry Type'
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:114
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:697
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:705
 #: erpnext/stock/doctype/stock_entry_type/stock_entry_type.json
 msgid "Material Consumption for Manufacture"
 msgstr "Üretim İçin Malzeme Tüketimi"
@@ -30144,11 +30144,11 @@ msgstr "Malzeme Talebi Planı Ürünü"
 msgid "Material Request Type"
 msgstr "Malzeme Talep Türü"
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:1171
+#: erpnext/selling/doctype/sales_order/sales_order.py:1175
 msgid "Material Request already created for the ordered quantity"
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:1991
+#: erpnext/selling/doctype/sales_order/sales_order.py:1995
 msgid "Material Request not created, as quantity for Raw Materials already available."
 msgstr "Hammaddeler için miktar zaten mevcut olduğundan Malzeme Talebi oluşturulmadı."
 
@@ -30746,7 +30746,7 @@ msgstr "Minimum Miktar Maksimum Miktardan Fazla olamaz"
 msgid "Min Qty should be greater than Recurse Over Qty"
 msgstr "Minimum Miktar, Yeniden İşlenecek Miktardan büyük olmalıdır."
 
-#: erpnext/stock/doctype/item/item.js:945
+#: erpnext/stock/doctype/item/item.js:942
 msgid "Min Value: {0}, Max Value: {1}, in Increments of: {2}"
 msgstr ""
 
@@ -30844,15 +30844,15 @@ msgstr "Çeşitli Giderler"
 msgid "Mismatch"
 msgstr "Uyuşmazlık"
 
-#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:1385
+#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:1388
 msgid "Missing"
 msgstr "Eksik"
 
 #: erpnext/accounts/doctype/pos_opening_entry/pos_opening_entry.py:97
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:201
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:594
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2502
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3110
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2503
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3111
 #: erpnext/assets/doctype/asset_category/asset_category.py:126
 msgid "Missing Account"
 msgstr "Eksik Hesap"
@@ -30882,7 +30882,7 @@ msgstr ""
 msgid "Missing Finance Book"
 msgstr "Kayıp Finans Kitabı"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:872
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:880
 msgid "Missing Finished Good"
 msgstr "Eksik Bitmiş Ürün"
 
@@ -31180,7 +31180,7 @@ msgstr ""
 msgid "Multiple Loyalty Programs found for Customer {}. Please select manually."
 msgstr "Müşteri {} için birden fazla Sadakat Programı bulundu. Lütfen manuel olarak seçin."
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1193
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1194
 msgid "Multiple POS Opening Entry"
 msgstr ""
 
@@ -31206,7 +31206,7 @@ msgstr ""
 msgid "Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year"
 msgstr "{0} tarihi için birden fazla mali yıl var. Lütfen Mali Yıl'da şirketi ayarlayın"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:879
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:887
 msgid "Multiple items cannot be marked as finished item"
 msgstr "Birden fazla ürün bitmiş ürün olarak işaretlenemez"
 
@@ -31346,7 +31346,7 @@ msgstr "İhtiyaç Analizi"
 msgid "Negative Batch Report"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:628
+#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:631
 msgid "Negative Quantity is not allowed"
 msgstr "Negatif Miktara izin verilmez"
 
@@ -31355,7 +31355,7 @@ msgstr "Negatif Miktara izin verilmez"
 msgid "Negative Stock Error"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:633
+#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:636
 msgid "Negative Valuation Rate is not allowed"
 msgstr "Negatif Değerleme Oranına izin verilmez"
 
@@ -31905,7 +31905,7 @@ msgstr "Aksiyon Yok"
 msgid "No Answer"
 msgstr "Cevap Yok"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2607
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2608
 msgid "No Customer found for Inter Company Transactions which represents company {0}"
 msgstr "Şirketi temsil eden Şirketler Arası İşlemler için Müşteri bulunamadı {0}"
 
@@ -31969,7 +31969,7 @@ msgstr "POS Profili bulunamadı. Lütfen önce Yeni bir POS Profili oluşturun"
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:1597
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:1657
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:1678
-#: erpnext/stock/doctype/item/item.py:1488
+#: erpnext/stock/doctype/item/item.py:1492
 msgid "No Permission"
 msgstr "İzin yok"
 
@@ -31998,15 +31998,15 @@ msgstr "Şu Anda Stok Mevcut Değil"
 msgid "No Summary"
 msgstr "Özet Yok"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2591
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2592
 msgid "No Supplier found for Inter Company Transactions which represents company {0}"
 msgstr "{0} şirketini temsil eden Şirketler Arası İşlemler için Tedarikçi bulunamadı"
 
-#: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:101
+#: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:100
 msgid "No Tax Withholding data found for the current posting date."
 msgstr "Geçerli kayıt tarihi için Vergi Stopajı verisi bulunamadı."
 
-#: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:109
+#: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:108
 msgid "No Tax withholding account set for Company {0} in Tax Withholding Category {1}."
 msgstr ""
 
@@ -32040,7 +32040,7 @@ msgstr ""
 msgid "No accounts found."
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:799
+#: erpnext/selling/doctype/sales_order/sales_order.py:803
 msgid "No active BOM found for item {0}. Delivery by Serial No cannot be ensured"
 msgstr "{0} ürünü için aktif bir Ürün Ağacı bulunamadı. Seri No'ya göre teslimat sağlanamaz"
 
@@ -32234,7 +32234,7 @@ msgstr ""
 msgid "No open Material Requests found for the given criteria."
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1187
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1188
 msgid "No open POS Opening Entry found for POS Profile {0}."
 msgstr ""
 
@@ -32329,7 +32329,7 @@ msgstr ""
 msgid "No stock available for this batch."
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:810
+#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:813
 msgid "No stock ledger entries were created. Please set the quantity or valuation rate for the items properly and try again."
 msgstr ""
 
@@ -32362,7 +32362,7 @@ msgstr "Veri Yok"
 msgid "No vouchers found for this transaction"
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2655
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2656
 msgid "No {0} found for Inter Company Transactions."
 msgstr "Şirketler Arası İşlemler için {0} bulunamadı."
 
@@ -32571,7 +32571,7 @@ msgstr "Not: 'Nakit veya Banka Hesabı' belirtilmediği için Ödeme Girişi olu
 msgid "Note: This Cost Center is a Group. Cannot make accounting entries against groups."
 msgstr "Not: Bu Maliyet Merkezi bir Gruptur. Gruplara karşı muhasebe girişleri yapılamaz."
 
-#: erpnext/stock/doctype/item/item.py:695
+#: erpnext/stock/doctype/item/item.py:694
 msgid "Note: To merge the items, create a separate Stock Reconciliation for the old item {0}"
 msgstr "Kalemleri birleştirmek istiyorsanız, eski kalem {0} için ayrı bir Stok Mutabakatı oluşturun"
 
@@ -33048,7 +33048,7 @@ msgstr ""
 msgid "Only one operation can have 'Is Final Finished Good' checked when 'Track Semi Finished Goods' is enabled."
 msgstr ""
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:712
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:720
 msgid "Only one {0} entry can be created against the Work Order {1}"
 msgstr "İş Emri {1} için yalnızca bir {0} girişi oluşturulabilir"
 
@@ -33290,7 +33290,7 @@ msgstr "Açılış Tarihi"
 msgid "Opening Entry"
 msgstr "Açılış Fişi"
 
-#: erpnext/accounts/general_ledger.py:821
+#: erpnext/accounts/general_ledger.py:826
 msgid "Opening Entry can not be created after Period Closing Voucher is created."
 msgstr "Dönem Kapanış Fişi oluşturulduktan sonra Açılış Fişi oluşturulamaz."
 
@@ -33323,7 +33323,7 @@ msgid "Opening Invoice Tool"
 msgstr ""
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1651
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2071
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2072
 msgid "Opening Invoice has rounding adjustment of {0}.<br><br> '{1}' account is required to post these values. Please set it in Company: {2}.<br><br> Or, '{3}' can be enabled to not post any rounding adjustment."
 msgstr "Açılış Faturası {0} yuvarlama ayarına sahiptir.<br><br> '{1}' hesabının bu değerleri göndermesi gerekir. Lütfen Şirket'te bu hesabı ayarlayın: {2}.<br><br> Veya, herhangi bir yuvarlama ayarı göndermemek için '{3}' seçeneğini aktifleştirin."
 
@@ -33359,16 +33359,16 @@ msgstr "Açılış Satış Faturaları oluşturuldu."
 
 #. Label of the opening_stock (Float) field in DocType 'Item'
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Reconciliation'
-#: erpnext/stock/doctype/item/item.json erpnext/stock/doctype/item/item.py:352
+#: erpnext/stock/doctype/item/item.json erpnext/stock/doctype/item/item.py:351
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.json
 msgid "Opening Stock"
 msgstr "Açılış Stoku"
 
-#: erpnext/stock/doctype/item/item.py:357
+#: erpnext/stock/doctype/item/item.py:356
 msgid "Opening Stock entry created with zero valuation rate: {0}"
 msgstr ""
 
-#: erpnext/stock/doctype/item/item.py:365
+#: erpnext/stock/doctype/item/item.py:364
 msgid "Opening Stock entry created: {0}"
 msgstr ""
 
@@ -33386,7 +33386,7 @@ msgstr "Açılış Değeri"
 msgid "Opening and Closing"
 msgstr "Açılış ve Kapanış"
 
-#: erpnext/stock/doctype/item/item.py:199
+#: erpnext/stock/doctype/item/item.py:198
 msgid "Opening stock creation has been queued and will be created in the background. Please check the stock entry after some time."
 msgstr ""
 
@@ -33502,7 +33502,7 @@ msgstr "Operasyon Satır Numarası"
 msgid "Operation Time"
 msgstr "Operasyon Süresi"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1505
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1508
 msgid "Operation Time must be greater than 0 for Operation {0}"
 msgstr "{0} Operasyonu için İşlem Süresi 0'dan büyük olmalıdır"
 
@@ -33862,7 +33862,7 @@ msgstr "Sipariş Miktarı"
 
 #: erpnext/buying/doctype/supplier/supplier_dashboard.py:11
 #: erpnext/selling/doctype/customer/customer_dashboard.py:20
-#: erpnext/selling/doctype/sales_order/sales_order.py:1018
+#: erpnext/selling/doctype/sales_order/sales_order.py:1022
 #: erpnext/setup/doctype/company/company_dashboard.py:23
 msgid "Orders"
 msgstr "Siparişler"
@@ -34016,7 +34016,7 @@ msgstr "Garanti Dışı"
 msgid "Out of stock"
 msgstr "Stokta yok"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1200
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1201
 #: erpnext/selling/page/point_of_sale/pos_controller.js:208
 msgid "Outdated POS Opening Entry"
 msgstr ""
@@ -34070,7 +34070,7 @@ msgstr ""
 #: erpnext/accounts/doctype/cashier_closing/cashier_closing.json
 #: erpnext/accounts/doctype/discounted_invoice/discounted_invoice.json
 #: erpnext/accounts/doctype/opening_invoice_creation_tool_item/opening_invoice_creation_tool_item.json
-#: erpnext/accounts/doctype/payment_entry/payment_entry.js:885
+#: erpnext/accounts/doctype/payment_entry/payment_entry.js:887
 #: erpnext/accounts/doctype/payment_reconciliation_invoice/payment_reconciliation_invoice.json
 #: erpnext/accounts/doctype/payment_request/payment_request.json
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.js:300
@@ -34474,7 +34474,7 @@ msgstr ""
 msgid "POS Opening Entry"
 msgstr "POS Açılış Kaydı"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1201
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1202
 msgid "POS Opening Entry - {0} is outdated. Please close the POS and create a new POS Opening Entry."
 msgstr ""
 
@@ -34495,7 +34495,7 @@ msgstr "POS Açılış Girişi Detayı"
 msgid "POS Opening Entry Exists"
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1186
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1187
 msgid "POS Opening Entry Missing"
 msgstr ""
 
@@ -34531,7 +34531,7 @@ msgstr "POS Ödeme Yöntemi"
 msgid "POS Profile"
 msgstr "POS Profili"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1194
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1195
 msgid "POS Profile - {0} has multiple open POS Opening Entries. Please close or cancel the existing entries before proceeding."
 msgstr ""
 
@@ -34549,11 +34549,11 @@ msgstr "POS Profil Kullanıcısı"
 msgid "POS Profile doesn't match {}"
 msgstr "POS Profili {} ile eşleşmiyor"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1154
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1155
 msgid "POS Profile is mandatory to mark this invoice as POS Transaction."
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1383
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1384
 msgid "POS Profile required to make POS Entry"
 msgstr "POS Girişi yapmak için POS Profili gereklidir"
 
@@ -34803,7 +34803,7 @@ msgid "Paid To Account Type"
 msgstr "Ödenen Yapılacak Hesap Türü"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:327
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1150
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1151
 msgid "Paid amount + Write Off Amount can not be greater than Grand Total"
 msgstr "Ödenen Tutar + Kapatılan Tutar, Genel Toplamdan büyük olamaz."
 
@@ -35024,7 +35024,7 @@ msgstr ""
 msgid "Partial Material Transferred"
 msgstr "Kısmi Malzeme Transferi"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1173
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1174
 msgid "Partial Payment in POS Transactions are not allowed."
 msgstr ""
 
@@ -36015,7 +36015,7 @@ msgstr "Ödeme Referansları"
 #. Name of a DocType
 #. Label of a Workspace Sidebar Item
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
-#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1708
+#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1710
 #: erpnext/accounts/doctype/payment_entry_reference/payment_entry_reference.json
 #: erpnext/accounts/doctype/payment_order/payment_order.js:19
 #: erpnext/accounts/doctype/payment_order/payment_order.json
@@ -36236,7 +36236,7 @@ msgstr ""
 msgid "Payment methods are mandatory. Please add at least one payment method."
 msgstr "Ödeme yöntemleri zorunludur. Lütfen en az bir ödeme yöntemi ekleyin."
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3114
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3115
 msgid "Payment methods refreshed. Please review before proceeding."
 msgstr ""
 
@@ -36533,7 +36533,7 @@ msgstr "Algı Analizi"
 msgid "Period Based On"
 msgstr "Döneme Göre"
 
-#: erpnext/accounts/general_ledger.py:833
+#: erpnext/accounts/general_ledger.py:838
 msgid "Period Closed"
 msgstr "Dönem Kapalı"
 
@@ -37134,7 +37134,7 @@ msgstr "Lütfen Önceliği Belirleyin"
 msgid "Please Set Supplier Group in Buying Settings."
 msgstr "Lütfen Satın Alma Ayarlarında Tedarikçi Grubunu Ayarlayın."
 
-#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1879
+#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1881
 msgid "Please Specify Account"
 msgstr "Lütfen Hesap Belirtin"
 
@@ -37198,7 +37198,7 @@ msgstr "Lütfen miktarı ayarlayın veya devam etmek için {0} öğesini düzenl
 msgid "Please attach CSV file"
 msgstr "Lütfen CSV dosyasını ekleyin"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3255
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3256
 msgid "Please cancel and amend the Payment Entry"
 msgstr "Lütfen Ödeme Girişini iptal edin ve düzeltin"
 
@@ -37301,11 +37301,11 @@ msgstr "Lütfen satın alma işlemini dahili satış veya teslimat belgesinin ke
 msgid "Please create purchase receipt or purchase invoice for the item {0}"
 msgstr "Lütfen {0} ürünü için alış irsaliyesi veya alış faturası alın"
 
-#: erpnext/stock/doctype/item/item.py:723
+#: erpnext/stock/doctype/item/item.py:722
 msgid "Please delete Product Bundle {0}, before merging {1} into {2}"
 msgstr "Lütfen {1} adresini {2} adresiyle birleştirmeden önce {0} Ürün Paketini silin"
 
-#: erpnext/assets/doctype/asset/depreciation.py:560
+#: erpnext/assets/doctype/asset/depreciation.py:562
 msgid "Please disable workflow temporarily for Journal Entry {0}"
 msgstr ""
 
@@ -37313,7 +37313,7 @@ msgstr ""
 msgid "Please do not book expense of multiple assets against one single Asset."
 msgstr "Lütfen birden fazla varlığın giderini tek bir Varlığa karşı muhasebeleştirmeyin."
 
-#: erpnext/controllers/item_variant.py:241
+#: erpnext/controllers/item_variant.py:249
 msgid "Please do not create more than 500 items at a time"
 msgstr "Lütfen bir kerede 500'den fazla öğe oluşturmayın"
 
@@ -37349,11 +37349,11 @@ msgstr "Lütfen {0} hesabının bir Bilanço hesabı olduğundan emin olun. Ana 
 msgid "Please ensure that the {0} account {1} is a Payable account. You can change the account type to Payable or select a different account."
 msgstr "Lütfen {0} hesabının {1} bir Borç hesabı olduğundan emin olun. Hesap türünü Ödenecek olarak değiştirebilir veya farklı bir hesap seçebilirsiniz."
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1013
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1014
 msgid "Please ensure {} account is a Balance Sheet account."
 msgstr "Lütfen {} hesabının bir Bilanço Hesabı olduğundan emin olun."
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1023
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1024
 msgid "Please ensure {} account {} is a Receivable account."
 msgstr "Lütfen {} hesabının {} bir Alacak hesabı olduğundan emin olun."
 
@@ -37362,7 +37362,7 @@ msgid "Please enter <b>Difference Account</b> or set default <b>Stock Adjustment
 msgstr "Lütfen <b>Fark Hesabı</b> girin veya şirket için varsayılan <b>Stok Ayarlama Hesabı</b> olarak ayarlayın {0}"
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:556
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1285
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1286
 msgid "Please enter Account for Change Amount"
 msgstr "Değişim Miktarı Hesabı girin"
 
@@ -37370,15 +37370,15 @@ msgstr "Değişim Miktarı Hesabı girin"
 msgid "Please enter Approving Role or Approving User"
 msgstr "Lütfen Onaylayan Rolü veya Onaylayan Kullanıcıyı girin"
 
-#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:683
+#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:686
 msgid "Please enter Batch No"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:976
+#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:979
 msgid "Please enter Cost Center"
 msgstr "Lütfen maliyet merkezini girin"
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:435
+#: erpnext/selling/doctype/sales_order/sales_order.py:439
 msgid "Please enter Delivery Date"
 msgstr "Lütfen Teslimat Tarihini giriniz"
 
@@ -37386,7 +37386,7 @@ msgstr "Lütfen Teslimat Tarihini giriniz"
 msgid "Please enter Employee Id of this sales person"
 msgstr "Lütfen bu satış elemanının Personel Kimliğini girin"
 
-#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:985
+#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:988
 msgid "Please enter Expense Account"
 msgstr "Lütfen Gider Hesabını girin"
 
@@ -37431,7 +37431,7 @@ msgstr "Lütfen Referans tarihini giriniz"
 msgid "Please enter Root Type for account- {0}"
 msgstr "Lütfen hesap için Kök Türünü girin- {0}"
 
-#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:685
+#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:688
 msgid "Please enter Serial No"
 msgstr ""
 
@@ -37448,7 +37448,7 @@ msgid "Please enter Warehouse and Date"
 msgstr "Lütfen Depo ve Tarihi giriniz"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:660
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1281
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1282
 msgid "Please enter Write Off Account"
 msgstr "Lütfen Şüpheli Alacak Hesabını Girin"
 
@@ -37568,7 +37568,7 @@ msgstr "Lütfen kullandığınız dosyanın başlığında 'Ana Hesap' sütununu
 msgid "Please make sure you really want to delete all the transactions for this company. Your master data will remain as it is. This action cannot be undone."
 msgstr "Lütfen bu şirket için tüm işlemleri gerçekten silmek istediğinizden emin olun. Ana verileriniz olduğu gibi kalacaktır. Bu eylem geri alınamaz."
 
-#: erpnext/stock/doctype/item/item.js:696
+#: erpnext/stock/doctype/item/item.js:691
 msgid "Please mention 'Weight UOM' along with Weight."
 msgstr "Lütfen Ağırlık ile birlikte 'Ağırlık Ölçü Birimini de belirtin."
 
@@ -37627,7 +37627,7 @@ msgstr "Şablonu indirmek için lütfen <b>Şablon Türünü</b> seçin"
 msgid "Please select Apply Discount On"
 msgstr "Lütfen indirim uygula seçeneğini belirleyin"
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:1906
+#: erpnext/selling/doctype/sales_order/sales_order.py:1910
 msgid "Please select BOM against item {0}"
 msgstr "Lütfen {0} Ürününe karşı Ürün Ağacını Seçin"
 
@@ -37643,7 +37643,7 @@ msgstr "Lütfen Banka Hesabını Seçin"
 msgid "Please select Category first"
 msgstr "Lütfen önce Kategoriyi seçin"
 
-#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1490
+#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1492
 #: erpnext/public/js/controllers/accounts.js:94
 #: erpnext/public/js/controllers/accounts.js:145
 msgid "Please select Charge Type first"
@@ -37715,11 +37715,11 @@ msgstr "Lütfen önce Gönderi Tarihini seçin"
 msgid "Please select Price List"
 msgstr "Lütfen Fiyat Listesini Seçin"
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:1908
+#: erpnext/selling/doctype/sales_order/sales_order.py:1912
 msgid "Please select Qty against item {0}"
 msgstr "Lütfen {0} ürünü için miktar seçin"
 
-#: erpnext/stock/doctype/item/item.py:389
+#: erpnext/stock/doctype/item/item.py:388
 msgid "Please select Sample Retention Warehouse in Stock Settings first"
 msgstr "Lütfen önce Stok Ayarlarında Numune Saklama Deposunu seçin"
 
@@ -37849,6 +37849,10 @@ msgstr "Lütfen {1} Fiyat Teklifi {0} için bir değer seçin"
 msgid "Please select an item code before setting the warehouse."
 msgstr "Depoyu ayarlamadan önce lütfen bir ürün kodu seçin."
 
+#: erpnext/controllers/item_variant.py:243
+msgid "Please select at least one attribute value"
+msgstr ""
+
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:43
 msgid "Please select at least one filter: Item Code, Batch, or Serial No."
 msgstr ""
@@ -37931,7 +37935,7 @@ msgstr "Lütfen Şirketi seçiniz"
 msgid "Please select the Multiple Tier Program type for more than one collection rules."
 msgstr "Birden fazla tahsilat kuralı için lütfen Çok Katmanlı Program türünü seçin."
 
-#: erpnext/stock/doctype/item/item.js:364
+#: erpnext/stock/doctype/item/item.js:359
 msgid "Please select the Warehouse first"
 msgstr ""
 
@@ -37960,7 +37964,7 @@ msgstr "Lütfen geçerli belge türünü seçin."
 msgid "Please select weekly off day"
 msgstr "Haftalık izin süresini seçin"
 
-#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1208
+#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1210
 #: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:618
 msgid "Please select {0} first"
 msgstr "Lütfen Önce {0} Seçin"
@@ -37969,11 +37973,11 @@ msgstr "Lütfen Önce {0} Seçin"
 msgid "Please set 'Apply Additional Discount On'"
 msgstr "Lütfen 'Ek İndirim Uygula' seçeneğini ayarlayın"
 
-#: erpnext/assets/doctype/asset/depreciation.py:787
+#: erpnext/assets/doctype/asset/depreciation.py:789
 msgid "Please set 'Asset Depreciation Cost Center' in Company {0}"
 msgstr "Lütfen {0} Şirketinde 'Varlık Amortisman Masraf Merkezi' ayarlayın"
 
-#: erpnext/assets/doctype/asset/depreciation.py:785
+#: erpnext/assets/doctype/asset/depreciation.py:787
 msgid "Please set 'Gain/Loss Account on Asset Disposal' in Company {0}"
 msgstr "Şirket {0} için ‘Varlık Elden Çıkarma Kar/Zarar Hesabı’nı ayarlayın"
 
@@ -37985,7 +37989,7 @@ msgstr "Lütfen Şirket: {1} için '{0}' değerini ayarlayın"
 msgid "Please set Account"
 msgstr "Lütfen Hesabı Ayarlayın"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1962
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1963
 msgid "Please set Account for Change Amount"
 msgstr "Lütfen Tutar Değişikliği için Hesap ayarlayın"
 
@@ -38015,7 +38019,7 @@ msgstr "Lütfen Şirketi ayarlayın"
 msgid "Please set Customer Address to determine if the transaction is an export."
 msgstr ""
 
-#: erpnext/assets/doctype/asset/depreciation.py:749
+#: erpnext/assets/doctype/asset/depreciation.py:751
 msgid "Please set Depreciation related Accounts in Asset Category {0} or Company {1}"
 msgstr "Lütfen Değer Kaybı ile ilgili Hesapları, Varlık Kategorisi {0} veya Firma {1} içinde belirleyin"
 
@@ -38033,7 +38037,7 @@ msgstr "Lütfen müşteri için Mali Kodu ayarlayın '%s'"
 msgid "Please set Fiscal Code for the public administration '%s'"
 msgstr "Lütfen kamu idaresi için Mali Kodu belirleyin '%s'"
 
-#: erpnext/assets/doctype/asset/depreciation.py:735
+#: erpnext/assets/doctype/asset/depreciation.py:737
 msgid "Please set Fixed Asset Account in Asset Category {0}"
 msgstr ""
 
@@ -38116,19 +38120,19 @@ msgstr "Lütfen Vergiler ve Ücretler Tablosunda en az bir satır ayarlayın"
 msgid "Please set both the Tax ID and Fiscal Code on Company {0}"
 msgstr "Lütfen {0} Şirketi için hem Vergi Kimlik Numarasını hem de Muhasebe Kodunu ayarlayın"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2499
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2500
 msgid "Please set default Cash or Bank account in Mode of Payment {0}"
 msgstr "Lütfen Ödeme Şeklinde varsayılan Nakit veya Banka hesabını ayarlayın {0}"
 
 #: erpnext/accounts/doctype/pos_opening_entry/pos_opening_entry.py:94
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:198
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3107
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3108
 msgid "Please set default Cash or Bank account in Mode of Payment {}"
 msgstr "Lütfen Ödeme Şeklinde varsayılan Nakit veya Banka hesabını ayarlayın {}"
 
 #: erpnext/accounts/doctype/pos_opening_entry/pos_opening_entry.py:96
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:200
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3109
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3110
 msgid "Please set default Cash or Bank account in Mode of Payments {}"
 msgstr "Lütfen Ödeme Şeklinde varsayılan Nakit veya Banka hesabını ayarlayın {}"
 
@@ -38263,7 +38267,7 @@ msgstr "Lütfen önce bir {0} belirtin."
 msgid "Please specify at least one attribute in the Attributes table"
 msgstr "Lütfen Özellikler tablosunda en az bir özelliği belirtin"
 
-#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:623
+#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:626
 msgid "Please specify either Quantity or Valuation Rate or both"
 msgstr "Miktar veya Birim Fiyatı ya da her ikisini de belirtiniz"
 
@@ -38434,7 +38438,7 @@ msgstr "Yayınlama Tarihi"
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
 #: erpnext/accounts/doctype/loyalty_point_entry/loyalty_point_entry.json
 #: erpnext/accounts/doctype/opening_invoice_creation_tool_item/opening_invoice_creation_tool_item.json
-#: erpnext/accounts/doctype/payment_entry/payment_entry.js:872
+#: erpnext/accounts/doctype/payment_entry/payment_entry.js:874
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
 #: erpnext/accounts/doctype/payment_ledger_entry/payment_ledger_entry.json
 #: erpnext/accounts/doctype/payment_order/payment_order.json
@@ -41769,7 +41773,7 @@ msgstr "Miktar 0'dan büyük olmalıdır"
 msgid "Quantity to Manufacture"
 msgstr "Üretilecek Miktar"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2644
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2647
 msgid "Quantity to Manufacture can not be zero for the operation {0}"
 msgstr "{0} işlemi için Üretim Miktarı sıfır olamaz"
 
@@ -41915,11 +41919,11 @@ msgstr "Teklif Edilen"
 msgid "Quotation Trends"
 msgstr "Teklif Analizi"
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:494
+#: erpnext/selling/doctype/sales_order/sales_order.py:498
 msgid "Quotation {0} is cancelled"
 msgstr "Teklif {0} iptal edildi"
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:413
+#: erpnext/selling/doctype/sales_order/sales_order.py:417
 msgid "Quotation {0} not of type {1}"
 msgstr "Teklif {0} {1} türü değil"
 
@@ -44683,7 +44687,7 @@ msgstr "Reddedilen Depodan İade Miktarı"
 msgid "Return Raw Material to Customer"
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1524
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1525
 msgid "Return invoice of asset cancelled"
 msgstr ""
 
@@ -45219,16 +45223,16 @@ msgid "Row #1: Sequence ID must be 1 for Operation {0}."
 msgstr ""
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:565
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2154
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2155
 msgid "Row #{0} (Payment Table): Amount must be negative"
 msgstr "Satır #{0} (Ödeme Tablosu): Tutar negatif olmalıdır"
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:563
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2149
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2150
 msgid "Row #{0} (Payment Table): Amount must be positive"
 msgstr "Satır #{0} (Ödeme Tablosu): Tutar pozitif olmalıdır"
 
-#: erpnext/stock/doctype/item/item.py:582
+#: erpnext/stock/doctype/item/item.py:581
 msgid "Row #{0}: A reorder entry already exists for warehouse {1} with reorder type {2}."
 msgstr "Satır #{0}: {1} deposu için {2} yeniden sipariş türüyle zaten yeniden bir sipariş girişi mevcut."
 
@@ -45517,7 +45521,7 @@ msgstr ""
 msgid "Row #{0}: Item {1} is not a Customer Provided Item."
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:766
+#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:769
 msgid "Row #{0}: Item {1} is not a Serialized/Batched Item. It cannot have a Serial No/Batch No against it."
 msgstr "Satır #{0}: Ürün {1}, Serili/Partili bir ürün değil. Seri No/Parti No’su atanamaz."
 
@@ -45558,7 +45562,7 @@ msgstr ""
 msgid "Row #{0}: Next Depreciation Date cannot be before Purchase Date"
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:678
+#: erpnext/selling/doctype/sales_order/sales_order.py:682
 msgid "Row #{0}: Not allowed to change Supplier as Purchase Order already exists"
 msgstr "Satır #{0}: Satın Alma Emri zaten mevcut olduğundan Tedarikçiyi değiştirmenize izin verilmiyor"
 
@@ -45591,7 +45595,7 @@ msgstr ""
 msgid "Row #{0}: Please select the Sub Assembly Warehouse"
 msgstr "Satır #{0}: Lütfen Alt Montaj Deposunu seçin"
 
-#: erpnext/stock/doctype/item/item.py:589
+#: erpnext/stock/doctype/item/item.py:588
 msgid "Row #{0}: Please set reorder quantity"
 msgstr "Satır #{0}: Lütfen yeniden sipariş miktarını ayarlayın"
 
@@ -45656,11 +45660,11 @@ msgstr "Satır #{0}: {1} Kalemi için rezerve edilecek miktar 0'dan büyük olma
 msgid "Row #{0}: Rate must be same as {1}: {2} ({3} / {4})"
 msgstr "Satır #{0}: {1} işlemindeki fiyat ile aynı olmalıdır: {2} ({3} / {4})"
 
-#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1240
+#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1242
 msgid "Row #{0}: Reference Document Type must be one of Purchase Order, Purchase Invoice or Journal Entry"
 msgstr "Satır #{0}: Referans Belge Türü Satın Alma Emri, Satın Alma Faturası veya Defter Girişi'nden biri olmalıdır"
 
-#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1226
+#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1228
 msgid "Row #{0}: Reference Document Type must be one of Sales Order, Sales Invoice, Journal Entry or Dunning"
 msgstr "Satır #{0}: Referans Belge Türü, Satış Siparişi, Satış Faturası, Yevmiye Kaydı veya Takip Uyarısı’ndan biri olmalıdır"
 
@@ -45731,7 +45735,7 @@ msgstr "Satır #{0}: Hizmet Başlangıç Tarihi, Hizmet Bitiş Tarihinden büyü
 msgid "Row #{0}: Service Start and End Date is required for deferred accounting"
 msgstr "Satır #{0}: Ertelenmiş muhasebe için Hizmet Başlangıç ve Bitiş Tarihi gereklidir"
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:502
+#: erpnext/selling/doctype/sales_order/sales_order.py:506
 msgid "Row #{0}: Set Supplier for item {1}"
 msgstr "Satır #{0}: {1} kalemi için Tedarikçiyi Ayarla"
 
@@ -45804,7 +45808,7 @@ msgstr "Satır #{0}: {3} Deposunda, {2} Partisi için {1} ürününe ayrılacak 
 msgid "Row #{0}: Stock not available to reserve for the Item {1} in Warehouse {2}."
 msgstr "Satır #{0}: {2} Deposundaki {1} Ürünü için rezerve edilecek stok mevcut değil."
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1267
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1268
 msgid "Row #{0}: Stock quantity {1} ({2}) for item {3} cannot exceed {4}"
 msgstr ""
 
@@ -45816,7 +45820,7 @@ msgstr ""
 msgid "Row #{0}: The batch {1} has already expired."
 msgstr "Satır #{0}: {1} grubu zaten sona erdi."
 
-#: erpnext/stock/doctype/item/item.py:598
+#: erpnext/stock/doctype/item/item.py:597
 msgid "Row #{0}: The warehouse {1} is not a child warehouse of a group warehouse {2}"
 msgstr "Satır #{0}: {1} deposu, {2} grup deposunun alt deposu değildir."
 
@@ -45969,7 +45973,7 @@ msgstr "Satır #{}: {}"
 msgid "Row #{}: {} {} does not exist."
 msgstr "Satır #{}: {} {} mevcut değil."
 
-#: erpnext/stock/doctype/item/item.py:1520
+#: erpnext/stock/doctype/item/item.py:1524
 msgid "Row #{}: {} {} doesn't belong to Company {}. Please select valid {}."
 msgstr "Satır #{}: {} {}, {} Şirketine ait değil. Lütfen geçerli {} seçin."
 
@@ -46017,7 +46021,7 @@ msgstr "Satır {0}: Tahsis edilen tutar {1}, fatura kalan tutarı {2}’den az v
 msgid "Row {0}: Allocated amount {1} must be less than or equal to remaining payment amount {2}"
 msgstr "Satır {0}: Tahsis edilen tutar {1}, kalan ödeme tutarı {2} değerinden az veya ona eşit olmalıdır."
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:691
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:699
 msgid "Row {0}: As {1} is enabled, raw materials cannot be added to {2} entry. Use {3} entry to consume raw materials."
 msgstr "Satır {0}: {1} etkin olduğu için, ham maddeler {2} girişine eklenemez. Ham maddeleri tüketmek için {3} girişini kullanın."
 
@@ -46817,7 +46821,7 @@ msgstr ""
 msgid "Sales Invoice {0} has already been submitted"
 msgstr "Satış Faturası {0} zaten kaydedildi"
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:597
+#: erpnext/selling/doctype/sales_order/sales_order.py:601
 msgid "Sales Invoice {0} must be deleted before cancelling this Sales Order"
 msgstr "Bu Satış Siparişini iptal etmeden önce Satış Faturası {0} iptal edilmeli veya silinmelidir"
 
@@ -47015,16 +47019,16 @@ msgstr "Satış Trendleri"
 msgid "Sales Order required for Item {0}"
 msgstr "Ürün için Satış Siparişi gerekli {0}"
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:358
+#: erpnext/selling/doctype/sales_order/sales_order.py:362
 msgid "Sales Order {0} already exists against Customer's Purchase Order {1}. To allow multiple Sales Orders, Enable {2} in {3}"
 msgstr "Satış Siparişi {0} Müşterinin Satın Alma Siparişi {1} ile zaten mevcut. Birden fazla Satış Siparişine izin vermek için {2} adresini {3} adresinde etkinleştirin"
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:1943
-#: erpnext/selling/doctype/sales_order/sales_order.py:1956
+#: erpnext/selling/doctype/sales_order/sales_order.py:1947
+#: erpnext/selling/doctype/sales_order/sales_order.py:1960
 msgid "Sales Order {0} is not available for production"
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1397
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1398
 msgid "Sales Order {0} is not submitted"
 msgstr "Satış Siparişi {0} kaydedilmedi"
 
@@ -47431,7 +47435,7 @@ msgstr "Aynı Ürün"
 msgid "Same day"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:605
+#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:608
 msgid "Same item and warehouse combination already entered."
 msgstr "Aynı Ürün ve Depo kombinasyonu zaten girilmiş."
 
@@ -47712,7 +47716,7 @@ msgstr "Varlığı Hurdaya Ayır"
 msgid "Scrap Warehouse"
 msgstr "Hurda Deposu"
 
-#: erpnext/assets/doctype/asset/depreciation.py:388
+#: erpnext/assets/doctype/asset/depreciation.py:389
 msgid "Scrap date cannot be before purchase date"
 msgstr "Hurdaya çıkarma tarihi satın alma tarihinden önce olamaz"
 
@@ -47870,7 +47874,7 @@ msgstr "Alternatif Ürün Seçin"
 msgid "Select Alternative Items for Sales Order"
 msgstr "Satış Siparişi için Alternatif Ürünleri Seçin"
 
-#: erpnext/stock/doctype/item/item.js:807
+#: erpnext/stock/doctype/item/item.js:801
 msgid "Select Attribute Values"
 msgstr "Özellik Değerlerini Seç"
 
@@ -48109,7 +48113,7 @@ msgstr ""
 msgid "Select all"
 msgstr ""
 
-#: erpnext/stock/doctype/item/item.js:1140
+#: erpnext/stock/doctype/item/item.js:1137
 msgid "Select an Item Group."
 msgstr "Bir Ürün Grubu seçin."
 
@@ -48125,9 +48129,9 @@ msgstr "Özet verileri yüklemek için bir fatura seçin"
 msgid "Select an item from each set to be used in the Sales Order."
 msgstr "Satış Siparişinde kullanılmak üzere her setten bir ürün seçin."
 
-#: erpnext/stock/doctype/item/item.js:821
-msgid "Select at least one value from each of the attributes."
-msgstr "Tüm özelliklerden en az bir değer seçin."
+#: erpnext/stock/doctype/item/item.js:815
+msgid "Select at least one attribute value."
+msgstr ""
 
 #: erpnext/public/js/utils/party.js:379
 msgid "Select company first"
@@ -48228,7 +48232,7 @@ msgstr "Müşteriyi bu alanlar ile aranabilir hale getirmek için seçin."
 msgid "Selected POS Opening Entry should be open."
 msgstr "Seçilen POS Açılış Girişi açık olmalıdır."
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2650
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2651
 msgid "Selected Price List should have buying and selling fields checked."
 msgstr "Seçilen Fiyat Listesi alım satım merkezlerine sahip olmalıdır."
 
@@ -48278,7 +48282,7 @@ msgstr ""
 msgid "Sell quantity cannot exceed the asset quantity"
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1410
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1411
 msgid "Sell quantity cannot exceed the asset quantity. Asset {0} has only {1} item(s)."
 msgstr ""
 
@@ -48600,7 +48604,7 @@ msgstr "Seri No Aralığı"
 msgid "Serial No Reserved"
 msgstr "Seri No Ayrılmış"
 
-#: erpnext/stock/doctype/item/item.py:495
+#: erpnext/stock/doctype/item/item.py:494
 msgid "Serial No Series Overlap"
 msgstr ""
 
@@ -50564,7 +50568,7 @@ msgstr "Fon Kaynakları (Borçlar)"
 msgid "Source or Target Warehouse is required for item {0}"
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:465
+#: erpnext/selling/doctype/sales_order/sales_order.py:469
 msgid "Source warehouse required for stock item {0}"
 msgstr ""
 
@@ -50729,7 +50733,7 @@ msgstr "Standart Oranlı Giderler"
 
 #: erpnext/setup/setup_wizard/operations/defaults_setup.py:70
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:493
-#: erpnext/stock/doctype/item/item.py:289 erpnext/tests/utils.py:283
+#: erpnext/stock/doctype/item/item.py:288 erpnext/tests/utils.py:283
 #: erpnext/tests/utils.py:2518
 msgid "Standard Selling"
 msgstr "Standart Satış"
@@ -51340,7 +51344,7 @@ msgstr "Faturalanmamış Alınan Stok"
 #. Label of a Link in the Stock Workspace
 #. Label of a Workspace Sidebar Item
 #: erpnext/setup/workspace/home/home.json
-#: erpnext/stock/doctype/item/item.py:686
+#: erpnext/stock/doctype/item/item.py:685
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.json
 #: erpnext/stock/workspace/stock/stock.json
 #: erpnext/workspace_sidebar/stock.json
@@ -51352,7 +51356,7 @@ msgstr "Stok Sayımı"
 msgid "Stock Reconciliation Item"
 msgstr "Stok Sayımı Kalemi"
 
-#: erpnext/stock/doctype/item/item.py:686
+#: erpnext/stock/doctype/item/item.py:685
 msgid "Stock Reconciliations"
 msgstr "Stok Sayımı"
 
@@ -51390,7 +51394,7 @@ msgstr "Stok Yeniden Gönderim Ayarları"
 #: erpnext/stock/doctype/pick_list/pick_list.js:170
 #: erpnext/stock/doctype/pick_list/pick_list.js:175
 #: erpnext/stock/doctype/stock_entry/stock_entry_dashboard.py:12
-#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:743
+#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:746
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:680
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1246
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1653
@@ -51417,8 +51421,8 @@ msgstr "Stok Rezervasyon Girişleri İptal Edildi"
 
 #: erpnext/controllers/subcontracting_inward_controller.py:1029
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:2261
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2150
-#: erpnext/selling/doctype/sales_order/sales_order.py:887
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2153
+#: erpnext/selling/doctype/sales_order/sales_order.py:891
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1786
 msgid "Stock Reservation Entries Created"
 msgstr "Stok Rezervasyon Girişleri Oluşturuldu"
@@ -51486,7 +51490,7 @@ msgstr "Stok Rezerv Miktarı (Stok Ölçü Birimi)"
 #: erpnext/selling/doctype/selling_settings/selling_settings.py:115
 #: erpnext/setup/doctype/company/company.json
 #: erpnext/setup/workspace/erpnext_settings/erpnext_settings.json
-#: erpnext/stock/doctype/item/item.js:413
+#: erpnext/stock/doctype/item/item.js:408
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:681
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 #: erpnext/stock/workspace/stock/stock.json
@@ -51734,11 +51738,11 @@ msgstr "{0} Grup Deposunda Stok Rezerve edilemez."
 msgid "Stock cannot be reserved in the group warehouse {0}."
 msgstr "{0} Grup Deposunda Stok Rezerve edilemez."
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1225
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1226
 msgid "Stock cannot be updated against the following Delivery Notes: {0}"
 msgstr "Aşağıdaki İrsaliyelere göre stok güncellenemez: {0}"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1294
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1295
 msgid "Stock cannot be updated because the invoice contains a drop shipping item. Please disable 'Update Stock' or remove the drop shipping item."
 msgstr "Stok güncellenemiyor çünkü faturada drop shipping ürünü var. Lütfen 'Stok Güncelle'yi devre dışı bırakın veya drop shipping ürününü kaldırın."
 
@@ -51800,7 +51804,7 @@ msgstr "Durdurulan İş Emri iptal edilemez, iptal etmek için önce durdurmayı
 #: erpnext/setup/doctype/company/company.py:387
 #: erpnext/setup/setup_wizard/operations/defaults_setup.py:33
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:537
-#: erpnext/stock/doctype/item/item.py:330 erpnext/tests/utils.py:248
+#: erpnext/stock/doctype/item/item.py:329 erpnext/tests/utils.py:248
 msgid "Stores"
 msgstr "Mağazalar"
 
@@ -52384,7 +52388,7 @@ msgstr "Başarıyla Uzlaştırıldı"
 msgid "Successfully Set Supplier"
 msgstr "Tedarikçi Başarıyla Ayarlandı"
 
-#: erpnext/stock/doctype/item/item.py:408
+#: erpnext/stock/doctype/item/item.py:407
 msgid "Successfully changed Stock UOM, please redefine conversion factors for new UOM."
 msgstr "Stok Ölçü Birimi başarıyla değiştirildi, lütfen yeni Ölçü Birimi için dönüşüm faktörlerini yeniden tanımlayın."
 
@@ -52666,6 +52670,7 @@ msgstr "Tedarikçi Detayları"
 #. Label of a Link in the Buying Workspace
 #. Label of the supplier_group (Link) field in DocType 'Import Supplier
 #. Invoice'
+#. Option for the 'Party Type' (Select) field in DocType 'Party Specific Item'
 #. Name of a DocType
 #. Label of a Workspace Sidebar Item
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
@@ -52690,6 +52695,7 @@ msgstr "Tedarikçi Detayları"
 #: erpnext/regional/doctype/import_supplier_invoice/import_supplier_invoice.json
 #: erpnext/regional/report/irs_1099/irs_1099.js:26
 #: erpnext/regional/report/irs_1099/irs_1099.py:70
+#: erpnext/selling/doctype/party_specific_item/party_specific_item.json
 #: erpnext/setup/doctype/supplier_group/supplier_group.json
 #: erpnext/workspace_sidebar/buying.json
 msgid "Supplier Group"
@@ -53964,7 +53970,7 @@ msgstr "Çıkarılan Vergiler"
 msgid "Taxes and Charges Deducted (Company Currency)"
 msgstr "Düşülen Vergi ve Harçlar (Şirket Para Biriminde)"
 
-#: erpnext/stock/doctype/item/item.py:421
+#: erpnext/stock/doctype/item/item.py:420
 msgid "Taxes row #{0}: {1} cannot be smaller than {2}"
 msgstr "Vergi Satırı #{0}: {1} değeri {2} değerinden küçük olamaz"
 
@@ -54389,7 +54395,7 @@ msgstr "{0} satırındaki Ödeme Süresi muhtemelen bir tekrardır."
 msgid "The Pick List having Stock Reservation Entries cannot be updated. If you need to make changes, we recommend canceling the existing Stock Reservation Entries before updating the Pick List."
 msgstr "Stok Rezervasyon Girişleri olan Seçim Listesi güncellenemez. Değişiklik yapmanız gerekiyorsa, Seçim Listesini güncellemeden önce mevcut Stok Rezervasyon Girişlerini iptal etmenizi öneririz."
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1428
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1436
 #: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:119
 msgid "The Process Loss Qty has reset as per job cards Process Loss Qty"
 msgstr "Proses Kaybı Miktarı, iş kartlarındaki Proses Kaybı Miktarına göre sıfırlandı."
@@ -54406,7 +54412,7 @@ msgstr "Satır #{0}: {1} Seri Numarası, {2} deposunda mevcut değil."
 msgid "The Serial No {0} is reserved against the {1} {2} and cannot be used for any other transaction."
 msgstr "Seri No {0} , {1} {2} için ayrılmıştır ve başka bir işlem için kullanılamaz."
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:934
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:942
 msgid "The Serial and Batch Bundle {0} is not valid for this transaction. The 'Type of Transaction' should be 'Outward' instead of 'Inward' in Serial and Batch Bundle {0}"
 msgstr "Seri ve Parti Paketi {0}, bu işlem için geçerli değil. Seri ve Parti Paketi {0} içinde ‘İşlem Türü’ ‘Giriş’ yerine ‘Çıkış’ olmalıdır."
 
@@ -54552,7 +54558,7 @@ msgstr ""
 msgid "The following cancelled repost entries exist for <b>{0}</b>:<br><br>{1}<br><br>Kindly delete these entries before continuing."
 msgstr ""
 
-#: erpnext/stock/doctype/item/item.py:961
+#: erpnext/stock/doctype/item/item.py:965
 msgid "The following deleted attributes exist in Variants but not in the Template. You can either delete the Variants or keep the attribute(s) in template."
 msgstr "Aşağıdaki silinmiş nitelikler Varyantlarda mevcuttur ancak Şablonda mevcut değildir. Varyantları silebilir veya nitelikleri şablonda tutabilirsiniz."
 
@@ -54600,7 +54606,7 @@ msgstr ""
 msgid "The item {item} is not marked as {type_of} item. You can enable it as {type_of} item from its Item master."
 msgstr ""
 
-#: erpnext/stock/doctype/item/item.py:688
+#: erpnext/stock/doctype/item/item.py:687
 msgid "The items {0} and {1} are present in the following {2} :"
 msgstr "Ürünler {0} ve {1}, aşağıdaki {2} içinde bulunmaktadır:"
 
@@ -54760,7 +54766,7 @@ msgstr "{0} ile paylaşımlar mevcut değil"
 msgid "The stock for the item {0} in the {1} warehouse was negative on the {2}. You should create a positive entry {3} before the date {4} and time {5} to post the correct valuation rate. For more details, please read the <a href='https://docs.erpnext.com/docs/user/manual/en/stock-adjustment-cogs-with-negative-stock'>documentation<a>."
 msgstr "{1} deposundaki {0} ürünü için stok, {2} tarihinde negatife düştü. Bu durumu düzeltmek için {4} tarihi ve {5} saatinden önce {3} işlemiyle pozitif bir stok girişi oluşturmalısınız. Aksi takdirde, sistem doğru değerleme oranını hesaplayamaz."
 
-#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:737
+#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:740
 msgid "The stock has been reserved for the following Items and Warehouses, un-reserve the same to {0} the Stock Reconciliation: <br /><br /> {1}"
 msgstr "Stok aşağıdaki Ürünler ve Depolar için rezerve edilmiştir, Stok Sayımı {0} için rezerve edilmeyen hale getirin: <br /><br /> {1}"
 
@@ -54782,11 +54788,11 @@ msgstr ""
 msgid "The system will create a Sales Invoice or a POS Invoice from the POS interface based on this setting. For high-volume transactions, it is recommended to use POS Invoice."
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:1032
+#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:1035
 msgid "The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Reconciliation and revert to the Draft stage"
 msgstr "Görev arka plan işi olarak sıraya alındı. Arka planda işlemede herhangi bir sorun olması durumunda, sistem bu Stok Sayımı hata hakkında bir yorum ekleyecek ve Taslak aşamasına geri dönecektir."
 
-#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:1043
+#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:1046
 msgid "The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Reconciliation and revert to the Submitted stage"
 msgstr "Görev arka plan işi olarak kuyruğa alındı. Arka planda işlem yapılmasında herhangi bir sorun olması durumunda sistem bu Stok Sayımı hata hakkında yorum ekleyecek ve Gönderildi aşamasına geri dönecektir."
 
@@ -54858,7 +54864,7 @@ msgstr "{0} ({1}) ile {2} ({3}) eşit olmalıdır"
 msgid "The {0} contains Unit Price Items."
 msgstr ""
 
-#: erpnext/stock/doctype/item/item.py:492
+#: erpnext/stock/doctype/item/item.py:491
 msgid "The {0} prefix '{1}' already exists. Please change the Serial No Series, otherwise you will get a Duplicate Entry error."
 msgstr ""
 
@@ -54915,7 +54921,7 @@ msgstr "Bu tarihte boş yer bulunmamaktadır"
 msgid "There are no transactions in the system for the selected bank account and dates that match the filters."
 msgstr ""
 
-#: erpnext/stock/doctype/item/item.js:1164
+#: erpnext/stock/doctype/item/item.js:1161
 msgid "There are two options to maintain valuation of stock. FIFO (first in - first out) and Moving Average. To understand this topic in detail please visit <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>Item Valuation, FIFO and Moving Average.</a>"
 msgstr "Stok değerlemesini sürdürmek için iki seçenek vardır. FIFO (ilk giren ilk çıkar) ve Hareketli Ortalama. Bu konuyu ayrıntılı olarak anlamak için lütfen <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>Öğe Değerleme, FIFO ve Hareketli Ortalama</a> bölümünü ziyaret edin."
 
@@ -54955,7 +54961,7 @@ msgstr "{0} için grup bulunamadı: {1}"
 msgid "There is one unreconciled transaction before {0}."
 msgstr ""
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:871
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:879
 msgid "There must be atleast 1 Finished Good in this Stock Entry"
 msgstr "Bu Stok Girişinde en az 1 Bitmiş Ürün bulunmalıdır"
 
@@ -55015,7 +55021,7 @@ msgstr "Bu Ayın Özeti"
 msgid "This Purchase Order has been fully subcontracted."
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:2209
+#: erpnext/selling/doctype/sales_order/sales_order.py:2213
 msgid "This Sales Order has been fully subcontracted."
 msgstr ""
 
@@ -55156,7 +55162,7 @@ msgstr "Bu işlem, Satın Alma Faturası oluşturulduktan sonra Satın Alma İrs
 msgid "This is enabled by default. If you want to plan materials for sub-assemblies of the Item you're manufacturing leave this enabled. If you plan and manufacture the sub-assemblies separately, you can disable this checkbox."
 msgstr "Bu varsayılan olarak aktiftir. Ürettiğiniz Ürünün alt montajları için malzemeler planlamak istiyorsanız bunu aktif bırakın. Alt montajları ayrı ayrı planlıyor ve üretiyorsanız, bu onay kutusunu devre dışı bırakabilirsiniz."
 
-#: erpnext/stock/doctype/item/item.js:1152
+#: erpnext/stock/doctype/item/item.js:1149
 msgid "This is for raw material Items that'll be used to create finished goods. If the Item is an additional service like 'washing' that'll be used in the BOM, keep this unchecked."
 msgstr "Bu, bitmiş ürünlerin üretiminde kullanılacak ham madde ürünleri içindir. Eğer ürün, Ürün Ağacında kullanılacak bir ek hizmet (örneğin, ‘boyama’) ise, bu seçeneği işaretli bırakmayın."
 
@@ -55225,7 +55231,7 @@ msgstr "Bu plan, Varlık {0}, Varlık Sermayeleştirme {1} işlemiyle tüketildi
 msgid "This schedule was created when Asset {0} was repaired through Asset Repair {1}."
 msgstr "Bu plan, Varlık {0} için Varlık Onarımı {1} ile onarıldığı zaman oluşturuldu."
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1501
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1502
 msgid "This schedule was created when Asset {0} was restored due to Sales Invoice {1} cancellation."
 msgstr ""
 
@@ -55233,15 +55239,15 @@ msgstr ""
 msgid "This schedule was created when Asset {0} was restored on Asset Capitalization {1}'s cancellation."
 msgstr "Bu çizelge, Varlık Kapitalizasyonu {1}'un iptali üzerine Varlık {0} geri yüklendiğinde oluşturulmuştur."
 
-#: erpnext/assets/doctype/asset/depreciation.py:462
+#: erpnext/assets/doctype/asset/depreciation.py:464
 msgid "This schedule was created when Asset {0} was restored."
 msgstr "Bu program, Varlık {0} geri yüklendiğinde oluşturulmuştur."
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1497
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1498
 msgid "This schedule was created when Asset {0} was returned through Sales Invoice {1}."
 msgstr "Bu çizelge, Varlık {0} 'ın Satış Faturası {1} aracılığıyla iade edilmesiyle oluşturuldu."
 
-#: erpnext/assets/doctype/asset/depreciation.py:421
+#: erpnext/assets/doctype/asset/depreciation.py:422
 msgid "This schedule was created when Asset {0} was scrapped."
 msgstr "Bu program, Varlık {0} hurdaya çıkarıldığında oluşturuldu."
 
@@ -55249,7 +55255,7 @@ msgstr "Bu program, Varlık {0} hurdaya çıkarıldığında oluşturuldu."
 msgid "This schedule was created when Asset {0} was {1} into new Asset {2}."
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1473
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1474
 msgid "This schedule was created when Asset {0} was {1} through Sales Invoice {2}."
 msgstr ""
 
@@ -55816,7 +55822,7 @@ msgstr ""
 msgid "To include tax in row {0} in Item rate, taxes in rows {1} must also be included"
 msgstr "{0} nolu satırdaki verginin ürün fiyatına dahil edilebilmesi için, {1} satırındaki vergiler de dahil edilmelidir"
 
-#: erpnext/stock/doctype/item/item.py:710
+#: erpnext/stock/doctype/item/item.py:709
 msgid "To merge, following properties must be same for both items"
 msgstr "Birleştirmek için, aşağıdaki özellikler her iki öğe için de aynı olmalıdır"
 
@@ -55849,7 +55855,7 @@ msgstr "Satın alma irsaliyesi olmadan faturayı göndermek için {0} değerini 
 msgid "To use a different finance book, please uncheck 'Include Default FB Assets'"
 msgstr "Farklı bir finans defteri kullanmak için lütfen 'Varsayılan FD Varlıklarını Dahil Et' seçeneğinin işaretini kaldırın"
 
-#: erpnext/accounts/doctype/financial_report_template/financial_report_engine.py:748
+#: erpnext/accounts/doctype/financial_report_template/financial_report_engine.py:749
 #: erpnext/accounts/report/financial_statements.py:621
 #: erpnext/accounts/report/general_ledger/general_ledger.py:318
 #: erpnext/accounts/report/trial_balance/trial_balance.py:310
@@ -55999,7 +56005,7 @@ msgstr "Toplam Tahsisler"
 #: banking/src/components/features/BankReconciliation/RecordPaymentModal.tsx:869
 #: erpnext/accounts/doctype/invoice_discounting/invoice_discounting.json
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
-#: erpnext/selling/page/sales_funnel/sales_funnel.py:167
+#: erpnext/selling/page/sales_funnel/sales_funnel.py:168
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 #: erpnext/stock/report/item_wise_consumption/item_wise_consumption.py:66
@@ -56425,7 +56431,7 @@ msgstr "Toplam Ödeme Talebi tutarı {0} tutarından büyük olamaz"
 msgid "Total Payments"
 msgstr "Toplam Ödemeler"
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:727
+#: erpnext/selling/doctype/sales_order/sales_order.py:731
 msgid "Total Picked Quantity {0} is more than ordered qty {1}. You can set the Over Picking Allowance in Stock Settings."
 msgstr "Toplam Toplanan Miktar {0} sipariş edilen {1} miktardan fazladır. Fazla Toplama Ödeneğini Stok Ayarlarında ayarlayabilirsiniz."
 
@@ -57068,7 +57074,7 @@ msgstr "Şirkete karşı işlemler zaten mevcut! Hesap Planı yalnızca hiçbir 
 msgid "Transactions to be imported into the system"
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1158
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1159
 msgid "Transactions using Sales Invoice in POS are disabled."
 msgstr ""
 
@@ -57529,7 +57535,7 @@ msgstr "BAE KDV Ayarları"
 #: erpnext/stock/report/item_prices/item_prices.py:55
 #: erpnext/stock/report/item_wise_consumption/item_wise_consumption.py:60
 #: erpnext/stock/report/product_bundle_balance/product_bundle_balance.py:93
-#: erpnext/stock/report/stock_ageing/stock_ageing.py:174
+#: erpnext/stock/report/stock_ageing/stock_ageing.py:219
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:59
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.py:136
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_service_item/subcontracting_inward_order_service_item.json
@@ -57603,7 +57609,7 @@ msgstr "Ölçü Birimi Dönüşüm faktörü {0} satırında gereklidir"
 msgid "UOM Name"
 msgstr "Ölçü Birimi Adı"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1711
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1719
 msgid "UOM conversion factor required for UOM: {0} in Item: {1}"
 msgstr "Ürünü içinde: {1} ölçü birimi için: {0} dönüştürme faktörü gereklidir"
 
@@ -57679,9 +57685,9 @@ msgstr "{0} ile başlayan puan bulunamadı. 0 ile 100 arasında değişen sabit 
 msgid "Unable to find the time slot in the next {0} days for the operation {1}. Please increase the 'Capacity Planning For (Days)' in the {2}."
 msgstr "Önümüzdeki {0} gün içinde {1} operasyonu için zaman aralığı bulunamıyor. Lütfen {2} sayfasındaki 'Kapasite Planlama' alanının değerini artırın."
 
-#: erpnext/buying/doctype/supplier_scorecard_criteria/supplier_scorecard_criteria.py:91
-msgid "Unable to find variable:"
-msgstr "Değişken bulunamadı:"
+#: erpnext/buying/doctype/supplier_scorecard_criteria/supplier_scorecard_criteria.py:85
+msgid "Unable to find variable: {0}"
+msgstr ""
 
 #: banking/src/components/features/BankReconciliation/BankTransactionList.tsx:102
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:322
@@ -57798,7 +57804,7 @@ msgstr "Ölçü Birimi"
 msgid "Unit of Measure (UOM)"
 msgstr "Ölçü Birimi"
 
-#: erpnext/stock/doctype/item/item.py:453
+#: erpnext/stock/doctype/item/item.py:452
 msgid "Unit of Measure {0} has been entered more than once in Conversion Factor Table"
 msgstr "Ölçü Birimi {0} Dönüşüm Faktörü Tablosuna birden fazla girildi"
 
@@ -57988,7 +57994,7 @@ msgstr "planlanmamış"
 msgid "Unsecured Loans"
 msgstr "Teminatsız Krediler"
 
-#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1712
+#: erpnext/accounts/doctype/payment_entry/payment_entry.js:1714
 msgid "Unset Matched Payment Request"
 msgstr "Eşleşen Ödeme Talebini Ayarla"
 
@@ -58243,7 +58249,7 @@ msgstr ""
 msgid "Updating Costing and Billing fields against this Project..."
 msgstr ""
 
-#: erpnext/stock/doctype/item/item.py:1504
+#: erpnext/stock/doctype/item/item.py:1508
 msgid "Updating Variants..."
 msgstr "Varyantlar Güncelleniyor..."
 
@@ -58836,11 +58842,11 @@ msgstr "Değerleme Fiyatı Eksik"
 msgid "Valuation Rate for the Item {0}, is required to do accounting entries for {1} {2}."
 msgstr "Ürün {0} için Değerleme Oranı, {1} {2} muhasebe kayıtlarını yapmak için gereklidir."
 
-#: erpnext/stock/doctype/item/item.py:314
+#: erpnext/stock/doctype/item/item.py:313
 msgid "Valuation Rate is mandatory if Opening Stock entered"
 msgstr "Açılış Stoku girilirse Değerleme Oranı zorunludur"
 
-#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:789
+#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:792
 msgid "Valuation Rate required for Item {0} at row {1}"
 msgstr "{1} nolu satırdaki {0} Ürünü için Değerleme Oranı gereklidir"
 
@@ -58850,7 +58856,7 @@ msgstr "{1} nolu satırdaki {0} Ürünü için Değerleme Oranı gereklidir"
 msgid "Valuation and Total"
 msgstr "Değerleme ve Toplam"
 
-#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:1009
+#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:1012
 msgid "Valuation rate for customer provided items has been set to zero."
 msgstr "Müşteri tarafından sağlanan ürünler için değerleme oranı sıfır olarak ayarlandı."
 
@@ -58876,7 +58882,7 @@ msgstr "Değerleme türü ücretleri Dahil olarak işaretlenemez"
 msgid "Value (G - D)"
 msgstr "Değer (G - D)"
 
-#: erpnext/stock/report/stock_ageing/stock_ageing.py:217
+#: erpnext/stock/report/stock_ageing/stock_ageing.py:262
 msgid "Value ({0})"
 msgstr "Değer ({0})"
 
@@ -59000,7 +59006,7 @@ msgstr "Varyans ({})"
 msgid "Variant"
 msgstr "Varyant"
 
-#: erpnext/stock/doctype/item/item.py:976
+#: erpnext/stock/doctype/item/item.py:980
 msgid "Variant Attribute Error"
 msgstr "Varyant Özelliği Hatası"
 
@@ -59019,7 +59025,7 @@ msgstr "Varyant Ürün Ağacı"
 msgid "Variant Based On"
 msgstr "Varyant Referansı"
 
-#: erpnext/stock/doctype/item/item.py:1004
+#: erpnext/stock/doctype/item/item.py:1008
 msgid "Variant Based On cannot be changed"
 msgstr "Varyant Tabanlı değiştirilemez"
 
@@ -59037,7 +59043,7 @@ msgstr "Varyant Alanı"
 msgid "Variant Item"
 msgstr "Varyant Ürün"
 
-#: erpnext/stock/doctype/item/item.py:974
+#: erpnext/stock/doctype/item/item.py:978
 msgid "Variant Items"
 msgstr "Varyant Ürünler"
 
@@ -59048,7 +59054,7 @@ msgstr "Varyant Ürünler"
 msgid "Variant Of"
 msgstr "Varyantı"
 
-#: erpnext/stock/doctype/item/item.js:844
+#: erpnext/stock/doctype/item/item.js:838
 msgid "Variant creation has been queued."
 msgstr "Varyant oluşturma işlemi sıraya alındı."
 
@@ -59695,7 +59701,7 @@ msgstr ""
 msgid "Warehouse not found against the account {0}"
 msgstr "Hesap {0} karşılığında depo bulunamadı."
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1215
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1216
 #: erpnext/stock/doctype/delivery_note/delivery_note.py:445
 msgid "Warehouse required for stock Item {0}"
 msgstr "Stok Ürünü {0} için depo gereklidir"
@@ -59862,7 +59868,7 @@ msgstr "Uyarı: Talep Edilen Malzeme Miktarı Minimum Sipariş Miktarından Az"
 msgid "Warning: Quantity exceeds maximum producible quantity based on quantity of raw materials received through the Subcontracting Inward Order {0}."
 msgstr ""
 
-#: erpnext/selling/doctype/sales_order/sales_order.py:351
+#: erpnext/selling/doctype/sales_order/sales_order.py:355
 msgid "Warning: Sales Order {0} already exists against Customer's Purchase Order {1}"
 msgstr "Uyarı: Müşterinin Satın Alma Siparişi {1} için Satış Siparişi {0} zaten mevcut."
 
@@ -60151,7 +60157,7 @@ msgstr ""
 msgid "When checked, the system will use the posting datetime of the document for naming the document instead of the creation datetime of the document."
 msgstr ""
 
-#: erpnext/stock/doctype/item/item.js:1171
+#: erpnext/stock/doctype/item/item.js:1168
 msgid "When creating an Item, entering a value for this field will automatically create an Item Price at the backend."
 msgstr "Bir Ürün oluştururken bu alana bir değer girilmesi, arka planda otomatik olarak bir Ürün Fiyatı oluşturacaktır."
 
@@ -60440,8 +60446,8 @@ msgstr "Aşağıdaki nedenden dolayı İş Emri oluşturulamıyor: <br> {0}"
 msgid "Work Order cannot be raised against a Item Template"
 msgstr "İş Emri bir Ürün Şablonuna karşı oluşturulamaz"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2508
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2588
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2511
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2591
 msgid "Work Order has been {0}"
 msgstr "İş Emri {0}"
 
@@ -60802,7 +60808,7 @@ msgstr "Kod listesi için veri aktarıyorsunuz:"
 msgid "You are not allowed to update as per the conditions set in {} Workflow."
 msgstr "{} İş Akışında belirlenen koşullara göre güncelleme yapmanıza izin verilmiyor."
 
-#: erpnext/accounts/general_ledger.py:812
+#: erpnext/accounts/general_ledger.py:817
 msgid "You are not authorized to add or update entries before {0}"
 msgstr "{0} tarihinden önce giriş ekleme veya güncelleme yetkiniz yok"
 
@@ -60838,7 +60844,7 @@ msgstr "Ayrıca, Şirket içinde genel Sermaye Devam Eden İşler hesabını da 
 msgid "You can also use variables in the series name by putting them between (.) dots"
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1016
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1017
 msgid "You can change the parent account to a Balance Sheet account or select a different account."
 msgstr "Ana hesabı Bilanço hesabına dönüştürebilir veya farklı bir hesap seçebilirsiniz."
 
@@ -60907,7 +60913,7 @@ msgstr "Kapatılan Hesap Dönemi  {1} içinde bir {0} oluşturamazsınız"
 msgid "You cannot create or cancel any accounting entries with in the closed Accounting Period {0}"
 msgstr "Kapalı Hesap Döneminde herhangi bir muhasebe girişi oluşturamaz veya iptal edemezsiniz {0}"
 
-#: erpnext/accounts/general_ledger.py:832
+#: erpnext/accounts/general_ledger.py:837
 msgid "You cannot create/amend any accounting entries till this date."
 msgstr "Bu tarihe kadar herhangi bir muhasebe kaydı oluşturamaz/değiştiremezsiniz."
 
@@ -61028,7 +61034,7 @@ msgstr ""
 msgid "You have not performed any reconciliations in this session yet."
 msgstr ""
 
-#: erpnext/stock/doctype/item/item.py:1180
+#: erpnext/stock/doctype/item/item.py:1184
 msgid "You have to enable auto re-order in Stock Settings to maintain re-order levels."
 msgstr "Yeniden sipariş seviyelerini korumak için Stok Ayarlarında otomatik yeniden siparişi etkinleştirmeniz gerekir."
 
@@ -61162,7 +61168,7 @@ msgid "cannot be greater than 100"
 msgstr "100'den büyük olamaz"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:334
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1104
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1105
 msgid "dated {0}"
 msgstr "{0} tarihli"
 
@@ -61344,7 +61350,7 @@ msgstr "alındı:"
 msgid "reconciled"
 msgstr "mutabık"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1475
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1476
 msgid "returned"
 msgstr "i̇ade Edildi"
 
@@ -61379,7 +61385,7 @@ msgstr "rgt"
 msgid "sandbox"
 msgstr "sandbox"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1475
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1476
 msgid "sold"
 msgstr "satıldı"
 
@@ -61406,7 +61412,7 @@ msgstr "Başlık"
 msgid "to"
 msgstr "giden"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3257
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3258
 msgid "to unallocate the amount of this Return Invoice before cancelling it."
 msgstr "bu İade Faturası tutarını iptal etmeden önce tahsisini kaldırmak için."
 
@@ -61516,7 +61522,7 @@ msgstr "{0} Operasyonlar: {1}"
 msgid "{0} Request for {1}"
 msgstr "{1} için {0} Talebi"
 
-#: erpnext/stock/doctype/item/item.py:392
+#: erpnext/stock/doctype/item/item.py:391
 msgid "{0} Retain Sample is based on batch, please check Has Batch No to retain sample of item"
 msgstr "{0} Numune Saklama partiye dayalıdır, lütfen Ürünün numunesini saklamak için Parti Numarası Var seçeneğini işaretleyin"
 
@@ -61629,7 +61635,7 @@ msgid "{0} entered twice in Item Tax"
 msgstr "{0} iki kere ürün vergisi girildi"
 
 #: erpnext/setup/doctype/item_group/item_group.py:47
-#: erpnext/stock/doctype/item/item.py:523
+#: erpnext/stock/doctype/item/item.py:522
 msgid "{0} entered twice {1} in Item Taxes"
 msgstr "{1} Ürün Vergilerinde iki kez {0} olarak girildi"
 
@@ -61684,12 +61690,12 @@ msgstr "{0} engellendi, bu işleme devam edilemiyor"
 msgid "{0} is in Draft. Submit it before creating the Asset."
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1130
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1131
 msgid "{0} is mandatory for Item {1}"
 msgstr "{0} {1} Ürünü için zorunludur"
 
 #: erpnext/accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:100
-#: erpnext/accounts/general_ledger.py:856
+#: erpnext/accounts/general_ledger.py:861
 msgid "{0} is mandatory for account {1}"
 msgstr "{0} {1} hesabı için zorunludur"
 
@@ -61781,7 +61787,7 @@ msgstr ""
 msgid "{0} must be negative in return document"
 msgstr "{0} iade faturasında negatif değer olmalıdır"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2447
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2448
 msgid "{0} not allowed to transact with {1}. Please change the Company or add the Company in the 'Allowed To Transact With'-Section in the Customer record."
 msgstr "{0} {1} ile işlem yapmaya izin verilmiyor. Lütfen Şirketi değiştirin veya Müşteri kaydındaki 'İşlem Yapmaya İzin Verilenler' bölümüne Şirketi ekleyin."
 
@@ -61810,7 +61816,7 @@ msgstr "{0} ile {1}"
 msgid "{0} transactions will be imported into the system. Please review the details below and click the 'Import' button to proceed."
 msgstr ""
 
-#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:727
+#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:730
 msgid "{0} units are reserved for Item {1} in Warehouse {2}, please un-reserve the same to {3} the Stock Reconciliation."
 msgstr "{0} birim {1} Ürünü için {2} Deposunda rezerve edilmiştir, lütfen Stok Doğrulamasını {3} yapabilmek için stok rezevini kaldırın."
 
@@ -61847,7 +61853,7 @@ msgstr "{0} kadar {1}"
 msgid "{0} valid serial nos for Item {1}"
 msgstr "{0}, {1} Ürünü için geçerli bir seri numarası"
 
-#: erpnext/stock/doctype/item/item.js:849
+#: erpnext/stock/doctype/item/item.js:843
 msgid "{0} variants created."
 msgstr "{0} varyantları oluşturuldu."
 
@@ -61902,7 +61908,7 @@ msgid "{0} {1} has already been partly paid. Please use the 'Get Outstanding Inv
 msgstr "{0} {1} zaten kısmen ödenmiştir. Ödenmemiş en son tutarları almak için lütfen 'Ödenmemiş Faturayı Al' veya 'Ödenmemiş Siparişleri Al' düğmesini kullanın."
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.py:413
-#: erpnext/selling/doctype/sales_order/sales_order.py:605
+#: erpnext/selling/doctype/sales_order/sales_order.py:609
 #: erpnext/stock/doctype/material_request/material_request.py:257
 msgid "{0} {1} has been modified. Please refresh."
 msgstr "{0}, {1} düzenledi. Lütfen sayfayı yenileyin."
@@ -62098,7 +62104,7 @@ msgstr "{0}: {1} mevcut değil"
 msgid "{0}: {1} is a group account."
 msgstr ""
 
-#: erpnext/accounts/doctype/payment_entry/payment_entry.js:975
+#: erpnext/accounts/doctype/payment_entry/payment_entry.js:977
 msgid "{0}: {1} must be less than {2}"
 msgstr "{0}: {1} {2} değerinden küçük olmalıdır"
 
@@ -62122,7 +62128,7 @@ msgstr ""
 msgid "{}"
 msgstr "{}"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2213
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2214
 msgid "{} can't be cancelled since the Loyalty Points earned has been redeemed. First cancel the {} No {}"
 msgstr "Kazanılan Sadakat Puanları kullanıldığından {} iptal edilemez. Önce {} No {}'yu iptal edin"
 
