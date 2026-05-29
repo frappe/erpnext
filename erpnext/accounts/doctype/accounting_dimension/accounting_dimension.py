@@ -261,12 +261,26 @@ def get_accounting_dimensions(as_list=True):
 
 
 def get_checks_for_pl_and_bs_accounts():
-	return frappe.db.sql(
-		"""SELECT p.label, p.disabled, p.fieldname, c.default_dimension, c.company, c.mandatory_for_pl, c.mandatory_for_bs
-			FROM `tabAccounting Dimension`p ,`tabAccounting Dimension Detail` c
-			WHERE p.name = c.parent AND p.disabled = 0""",
-		as_dict=1,
+	AccountingDimension = frappe.qb.DocType("Accounting Dimension")
+	AccountingDimensionDetail = frappe.qb.DocType("Accounting Dimension Detail")
+
+	query = (
+		frappe.qb.from_(AccountingDimension)
+		.join(AccountingDimensionDetail)
+		.on(AccountingDimension.name == AccountingDimensionDetail.parent)
+		.select(
+			AccountingDimension.label,
+			AccountingDimension.disabled,
+			AccountingDimension.fieldname,
+			AccountingDimensionDetail.default_dimension,
+			AccountingDimensionDetail.company,
+			AccountingDimensionDetail.mandatory_for_pl,
+			AccountingDimensionDetail.mandatory_for_bs,
+		)
+		.where(AccountingDimension.disabled == 0)
 	)
+
+	return query.run(as_dict=1)
 
 
 def get_dimension_with_children(doctype, dimensions):
