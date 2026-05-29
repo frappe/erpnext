@@ -176,14 +176,9 @@ erpnext.buying = {
 					callback: (r) => {
 						if (!r.message) return;
 
-						if (!this.frm.doc.billing_address) {
-							this.frm.set_value("billing_address", r.message.primary_address || "");
-						}
+						this.frm.set_value("billing_address", r.message.primary_address || "");
 
-						if (
-							frappe.meta.has_field(this.frm.doc.doctype, "shipping_address") &&
-							!this.frm.doc.shipping_address
-						) {
+						if (frappe.meta.has_field(this.frm.doc.doctype, "shipping_address")) {
 							this.frm.set_value("shipping_address", r.message.shipping_address || "");
 						}
 					},
