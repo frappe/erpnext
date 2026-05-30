@@ -1,13 +1,74 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+import ipaddress
+import socket
+import urllib.parse
+
 import frappe
+import requests
 from frappe import _
 from frappe.utils import add_days, flt, get_datetime_str, nowdate
 from frappe.utils.data import DateTimeLikeObject
 from frappe.utils.nestedset import get_root_of
 
 from erpnext import get_default_company
+
+
+def _is_disallowed_ip(ip_str: str) -> bool:
+	addr = ipaddress.ip_address(ip_str)
+	return (
+		addr.is_private
+		or addr.is_loopback
+		or addr.is_link_local
+		or addr.is_reserved
+		or addr.is_multicast
+		or addr.is_unspecified
+	)
+
+
+def validate_exchange_endpoint(url: str) -> None:
+	"""Reject URLs that would allow server-side requests to private/internal addresses."""
+	parsed = urllib.parse.urlparse(url)
+
+	if parsed.scheme not in ("http", "https"):
+		frappe.throw(_("Exchange rate endpoint must use http or https."), exc=frappe.ValidationError)
+
+	host = parsed.hostname
+	if not host:
+		frappe.throw(_("Exchange rate endpoint has no valid hostname."), exc=frappe.ValidationError)
+
+	try:
+		if _is_disallowed_ip(host):
+			frappe.throw(
+				_("Exchange rate endpoint must not point to a private or reserved address."),
+				exc=frappe.ValidationError,
+			)
+	except ValueError:
+		pass  # hostname, not a bare IP — continue to DNS resolution
+
+	port = parsed.port or (443 if parsed.scheme == "https" else 80)
+
+	try:
+		results = socket.getaddrinfo(host, port, proto=socket.IPPROTO_TCP)
+	except socket.gaierror as e:
+		frappe.throw(
+			_("Could not resolve exchange rate endpoint hostname: {0}").format(str(e)),
+			exc=frappe.ValidationError,
+		)
+
+	for _family, _type, _proto, _canonname, sockaddr in results:
+		if _is_disallowed_ip(sockaddr[0]):
+			frappe.throw(
+				_("Exchange rate endpoint resolves to a private or reserved address and cannot be used."),
+				exc=frappe.ValidationError,
+			)
+
+
+def safe_ces_request(url: str, params: dict, validate: bool = False):
+	if validate:
+		validate_exchange_endpoint(url)
+	return requests.get(url, params=params, timeout=30)
 
 
 def get_pegged_currencies():
@@ -116,8 +177,6 @@ def get_exchange_rate(
 		value = cache.get(key)
 
 		if not value:
-			import requests
-
 			settings = frappe.get_cached_doc("Currency Exchange Settings")
 			req_params = {
 				"transaction_date": transaction_date,
@@ -131,7 +190,11 @@ def get_exchange_rate(
 			params = {}
 			for row in settings.req_params:
 				params[row.key] = format_ces_api(row.value, req_params)
-			response = requests.get(format_ces_api(settings.api_endpoint, req_params), params=params)
+			response = safe_ces_request(
+				format_ces_api(settings.api_endpoint, req_params),
+				params,
+				validate=settings.service_provider == "Custom",
+			)
 			# expire in 6 hours
 			response.raise_for_status()
 			value = response.json()
@@ -148,6 +211,8 @@ def get_exchange_rate(
 			value /= flt(pegged_currencies[from_currency]["ratio"])
 
 		return flt(value)
+	except frappe.ValidationError:
+		raise
 	except Exception:
 		frappe.log_error("Unable to fetch exchange rate")
 		frappe.msgprint(

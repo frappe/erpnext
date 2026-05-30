@@ -2,10 +2,11 @@
 # For license information, please see license.txt
 
 import frappe
-import requests
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import nowdate
+
+from erpnext.setup.utils import safe_ces_request
 
 
 class CurrencyExchangeSettings(Document):
@@ -80,8 +81,10 @@ class CurrencyExchangeSettings(Document):
 		api_url = self.api_endpoint.format(transaction_date=nowdate(), to_currency="INR", from_currency="USD")
 
 		try:
-			response = requests.get(api_url, params=params)
-		except requests.exceptions.RequestException as e:
+			response = safe_ces_request(api_url, params, validate=self.service_provider == "Custom")
+		except frappe.ValidationError:
+			raise
+		except Exception as e:
 			frappe.throw("Error: " + str(e))
 
 		response.raise_for_status()
