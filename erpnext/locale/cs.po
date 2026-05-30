@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-27 15:21+0000\n"
-"PO-Revision-Date: 2026-05-29 21:48\n"
+"PO-Revision-Date: 2026-05-30 22:06\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Czech\n"
 "MIME-Version: 1.0\n"
@@ -3043,7 +3043,7 @@ msgstr ""
 #: erpnext/quality_management/doctype/quality_review/quality_review.json
 #: erpnext/selling/page/point_of_sale/pos_payment.js:59
 msgid "Additional Information"
-msgstr ""
+msgstr "Dodatečné informace"
 
 #: erpnext/selling/page/point_of_sale/pos_payment.js:85
 msgid "Additional Information updated successfully."
@@ -3651,7 +3651,7 @@ msgstr ""
 #. Booking Settings'
 #: erpnext/crm/doctype/appointment_booking_settings/appointment_booking_settings.json
 msgid "Agents"
-msgstr ""
+msgstr "Agenti"
 
 #. Description of a DocType
 #: erpnext/selling/doctype/product_bundle/product_bundle.json
@@ -5221,7 +5221,7 @@ msgstr ""
 #. Level Agreement'
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.json
 msgid "Apply SLA for Resolution Time"
-msgstr ""
+msgstr "Použít SLA pro dobu vyřešení"
 
 #. Description of the 'Enable Discounts and Margin' (Check) field in DocType
 #. 'Accounts Settings'
@@ -6023,7 +6023,7 @@ msgstr ""
 #. Agreement'
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.json
 msgid "Assignment Conditions"
-msgstr ""
+msgstr "Podmínky přiřazení"
 
 #: erpnext/setup/setup_wizard/data/designation.txt:5
 msgid "Associate"
@@ -6647,7 +6647,7 @@ msgstr ""
 #. Label of the avg_response_time (Duration) field in DocType 'Issue'
 #: erpnext/support/doctype/issue/issue.json
 msgid "Average Response Time"
-msgstr ""
+msgstr "Průměrná doba odezvy"
 
 #. Description of the 'Lead Time in days' (Int) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -7745,11 +7745,11 @@ msgstr ""
 
 #: erpnext/setup/doctype/holiday_list/holiday_list.js:60
 msgid "Based on your HR Policy, select your leave allocation period's end date"
-msgstr ""
+msgstr "Podle vaší HR politiky vyberte datum konce období přidělení dovolené"
 
 #: erpnext/setup/doctype/holiday_list/holiday_list.js:55
 msgid "Based on your HR Policy, select your leave allocation period's start date"
-msgstr ""
+msgstr "Podle vaší HR politiky vyberte datum začátku období přidělení dovolené"
 
 #. Label of the basic_amount (Currency) field in DocType 'Stock Entry Detail'
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
@@ -8357,7 +8357,7 @@ msgstr ""
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:285
 msgid "Black"
-msgstr ""
+msgstr "Černá"
 
 #. Option for the 'Data Source' (Select) field in DocType 'Financial Report
 #. Row'
@@ -8844,7 +8844,7 @@ msgstr ""
 #. Option for the 'Status' (Select) field in DocType 'Call Log'
 #: erpnext/telephony/doctype/call_log/call_log.json
 msgid "Busy"
-msgstr ""
+msgstr "Obsazeno"
 
 #: erpnext/stock/doctype/batch/batch_dashboard.py:8
 #: erpnext/stock/doctype/item/item_dashboard.py:22
@@ -9148,7 +9148,7 @@ msgstr ""
 #. Label of the call_received_by (Link) field in DocType 'Call Log'
 #: erpnext/telephony/doctype/call_log/call_log.json
 msgid "Call Received By"
-msgstr ""
+msgstr "Hovor přijal"
 
 #. Label of the call_receiving_device (Select) field in DocType 'Voice Call
 #. Settings'
@@ -12066,7 +12066,7 @@ msgstr ""
 #: erpnext/stock/doctype/manufacturer/manufacturer.json
 #: erpnext/stock/doctype/warehouse/warehouse.json
 msgid "Contact HTML"
-msgstr ""
+msgstr "Kontakt HTML"
 
 #. Label of the contact_info_tab (Section Break) field in DocType 'Lead'
 #. Label of the contact_info (Section Break) field in DocType 'Maintenance
@@ -13108,7 +13108,7 @@ msgstr ""
 
 #: erpnext/public/js/call_popup/call_popup.js:122
 msgid "Create New Contact"
-msgstr ""
+msgstr "Vytvořit nový kontakt"
 
 #: erpnext/public/js/call_popup/call_popup.js:128
 msgid "Create New Customer"
@@ -14312,7 +14312,7 @@ msgstr ""
 #: erpnext/workspace_sidebar/selling.json
 #: erpnext/workspace_sidebar/subscription.json
 msgid "Customer"
-msgstr ""
+msgstr "Zákazník"
 
 #. Label of the customer (Link) field in DocType 'Customer Item'
 #: erpnext/accounts/doctype/customer_item/customer_item.json
@@ -14633,7 +14633,7 @@ msgstr ""
 #: erpnext/support/doctype/issue/issue.json
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Customer Name"
-msgstr ""
+msgstr "Název zákazníka"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:22
 msgid "Customer Name: "
@@ -15076,7 +15076,7 @@ msgstr ""
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Days"
-msgstr ""
+msgstr "Dny"
 
 #: erpnext/accounts/report/inactive_sales_items/inactive_sales_items.py:51
 #: erpnext/selling/report/inactive_customers/inactive_customers.js:8
@@ -21689,7 +21689,7 @@ msgstr ""
 #. Label of the gs (Section Break) field in DocType 'Item Group'
 #: erpnext/setup/doctype/item_group/item_group.json
 msgid "General Settings"
-msgstr ""
+msgstr "Obecná nastavení"
 
 #. Name of a report
 #: erpnext/accounts/report/general_and_payment_ledger_comparison/general_and_payment_ledger_comparison.json
@@ -22726,7 +22726,7 @@ msgstr ""
 
 #: erpnext/setup/doctype/holiday_list/holiday_list.js:77
 msgid "Here, your weekly offs are pre-populated based on the previous selections. You can add more rows to also add public and national holidays individually."
-msgstr ""
+msgstr "Zde jsou vaše pravidelné volné dny předvyplněny podle předchozích voleb. Můžete přidat další řádky a doplnit i jednotlivé státní a národní svátky."
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -22802,7 +22802,7 @@ msgstr ""
 #: erpnext/buying/doctype/purchase_order/purchase_order.js:314
 #: erpnext/selling/doctype/sales_order/sales_order.js:1033
 msgid "Hold"
-msgstr ""
+msgstr "Pozastavit"
 
 #. Label of the sb_14 (Section Break) field in DocType 'Purchase Invoice'
 #. Label of the on_hold (Check) field in DocType 'Purchase Invoice'
@@ -24467,7 +24467,7 @@ msgstr ""
 #: erpnext/accounts/doctype/payment_request/payment_request.json
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 msgid "Initiated"
-msgstr ""
+msgstr "Zahájeno"
 
 #. Label of the inspected_by (Link) field in DocType 'Quality Inspection'
 #: erpnext/manufacturing/report/quality_inspection_summary/quality_inspection_summary.js:33
@@ -28553,7 +28553,7 @@ msgstr ""
 #. Search Source'
 #: erpnext/support/doctype/support_search_source/support_search_source.json
 msgid "Link Options"
-msgstr ""
+msgstr "Možnosti propojení"
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.js:15
 msgid "Link a new bank account"
@@ -30371,7 +30371,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/account/account.js:169
 msgid "Merge"
-msgstr ""
+msgstr "Sloučit"
 
 #: erpnext/accounts/doctype/account/account.js:55
 msgid "Merge Account"
@@ -31794,7 +31794,7 @@ msgstr ""
 #. Option for the 'Status' (Select) field in DocType 'Call Log'
 #: erpnext/telephony/doctype/call_log/call_log.json
 msgid "No Answer"
-msgstr ""
+msgstr "Žádná odpověď"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2608
 msgid "No Customer found for Inter Company Transactions which represents company {0}"
@@ -32374,7 +32374,7 @@ msgstr ""
 #: erpnext/support/report/issue_summary/issue_summary.py:206
 #: erpnext/support/report/issue_summary/issue_summary.py:287
 msgid "Not Specified"
-msgstr ""
+msgstr "Neurčeno"
 
 #. Option for the 'Status' (Select) field in DocType 'Bank Statement Import
 #. Log'
@@ -32759,7 +32759,7 @@ msgstr ""
 #. Label of the on_hold_since (Datetime) field in DocType 'Issue'
 #: erpnext/support/doctype/issue/issue.json
 msgid "On Hold Since"
-msgstr ""
+msgstr "Pozastaveno od"
 
 #. Option for the 'Type' (Select) field in DocType 'Purchase Taxes and Charges'
 #. Option for the 'Type' (Select) field in DocType 'Sales Taxes and Charges'
@@ -33170,7 +33170,7 @@ msgstr ""
 #. Label of the opening_date (Date) field in DocType 'Issue'
 #: erpnext/support/doctype/issue/issue.json
 msgid "Opening Date"
-msgstr ""
+msgstr "Datum otevření"
 
 #. Option for the 'Entry Type' (Select) field in DocType 'Journal Entry'
 #. Option for the 'Journal Entry Type' (Select) field in DocType 'Journal Entry
@@ -33265,7 +33265,7 @@ msgstr ""
 #. Label of the opening_time (Time) field in DocType 'Issue'
 #: erpnext/support/doctype/issue/issue.json
 msgid "Opening Time"
-msgstr ""
+msgstr "Čas otevření"
 
 #: erpnext/stock/report/stock_balance/stock_balance.py:543
 msgid "Opening Value"
@@ -34156,7 +34156,7 @@ msgstr ""
 #: erpnext/accounts/report/sales_register/sales_register.py:236
 #: erpnext/crm/report/lead_details/lead_details.py:45
 msgid "Owner"
-msgstr ""
+msgstr "Vlastník"
 
 #. Label of the asset_owner_section (Section Break) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
@@ -35470,7 +35470,7 @@ msgstr ""
 #: erpnext/accounts/doctype/process_period_closing_voucher/process_period_closing_voucher.json
 #: erpnext/accounts/doctype/process_period_closing_voucher_detail/process_period_closing_voucher_detail.json
 msgid "Paused"
-msgstr ""
+msgstr "Pozastaveno"
 
 #. Option for the 'Payment Type' (Select) field in DocType 'Payment Entry'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
@@ -37852,7 +37852,7 @@ msgstr ""
 
 #: erpnext/setup/doctype/holiday_list/holiday_list.py:52
 msgid "Please select weekly off day"
-msgstr ""
+msgstr "Vyberte prosím týdenní den volna"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:1210
 #: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:618
@@ -38230,7 +38230,7 @@ msgstr ""
 #: erpnext/support/doctype/support_search_source/support_search_source.json
 #: erpnext/support/doctype/support_settings/support_settings.json
 msgid "Post Description Key"
-msgstr ""
+msgstr "Klíč popisu účtování"
 
 #. Option for the 'Level' (Select) field in DocType 'Employee Education'
 #: erpnext/setup/doctype/employee_education/employee_education.json
@@ -38246,21 +38246,21 @@ msgstr ""
 #. Source'
 #: erpnext/support/doctype/support_search_source/support_search_source.json
 msgid "Post Route Key List"
-msgstr ""
+msgstr "Seznam klíčů tras pošty"
 
 #. Label of the post_route (Data) field in DocType 'Support Search Source'
 #. Label of the post_route_string (Data) field in DocType 'Support Settings'
 #: erpnext/support/doctype/support_search_source/support_search_source.json
 #: erpnext/support/doctype/support_settings/support_settings.json
 msgid "Post Route String"
-msgstr ""
+msgstr "Řetězec poštovní trasy"
 
 #. Label of the post_title_key (Data) field in DocType 'Support Search Source'
 #. Label of the post_title_key (Data) field in DocType 'Support Settings'
 #: erpnext/support/doctype/support_search_source/support_search_source.json
 #: erpnext/support/doctype/support_settings/support_settings.json
 msgid "Post Title Key"
-msgstr ""
+msgstr "Klíč názvu účtování"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:126
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:206
@@ -39240,7 +39240,7 @@ msgstr ""
 
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.py:109
 msgid "Priority {0} has been repeated."
-msgstr ""
+msgstr "Priorita {0} se opakuje."
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:38
 msgid "Private Equity"
@@ -41698,7 +41698,7 @@ msgstr ""
 #. Label of the query_route (Data) field in DocType 'Support Search Source'
 #: erpnext/support/doctype/support_search_source/support_search_source.json
 msgid "Query Route String"
-msgstr ""
+msgstr "Řetězec trasy dotazu"
 
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.py:192
 msgid "Queue Size should be between 5 and 100"
@@ -43137,7 +43137,7 @@ msgstr ""
 #: erpnext/selling/doctype/customer/customer.json
 #: erpnext/subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 msgid "References"
-msgstr ""
+msgstr "Reference"
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.py:404
 msgid "References to Sales Invoices are Incomplete"
@@ -44265,19 +44265,19 @@ msgstr ""
 #: erpnext/quality_management/doctype/quality_action_resolution/quality_action_resolution.json
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Resolution"
-msgstr ""
+msgstr "Vyřešení"
 
 #. Label of the sla_resolution_by (Datetime) field in DocType 'Issue'
 #: erpnext/support/doctype/issue/issue.json
 msgid "Resolution By"
-msgstr ""
+msgstr "Vyřešit do"
 
 #. Label of the sla_resolution_date (Datetime) field in DocType 'Issue'
 #. Label of the resolution_date (Datetime) field in DocType 'Warranty Claim'
 #: erpnext/support/doctype/issue/issue.json
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Resolution Date"
-msgstr ""
+msgstr "Datum vyřešení"
 
 #. Label of the section_break_19 (Section Break) field in DocType 'Issue'
 #. Label of the resolution_details (Text Editor) field in DocType 'Issue'
@@ -44285,13 +44285,13 @@ msgstr ""
 #: erpnext/support/doctype/issue/issue.json
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Resolution Details"
-msgstr ""
+msgstr "Detaily vyřešení"
 
 #. Option for the 'Service Level Agreement Status' (Select) field in DocType
 #. 'Issue'
 #: erpnext/support/doctype/issue/issue.json
 msgid "Resolution Due"
-msgstr ""
+msgstr "Termín vyřešení"
 
 #. Label of the resolution_time (Duration) field in DocType 'Issue'
 #. Label of the resolution_time (Duration) field in DocType 'Service Level
@@ -44299,7 +44299,7 @@ msgstr ""
 #: erpnext/support/doctype/issue/issue.json
 #: erpnext/support/doctype/service_level_priority/service_level_priority.json
 msgid "Resolution Time"
-msgstr ""
+msgstr "Doba vyřešení"
 
 #. Label of the resolutions (Table) field in DocType 'Quality Action'
 #: erpnext/quality_management/doctype/quality_action/quality_action.json
@@ -44321,7 +44321,7 @@ msgstr ""
 #: erpnext/support/report/issue_summary/issue_summary.js:45
 #: erpnext/support/report/issue_summary/issue_summary.py:378
 msgid "Resolved"
-msgstr ""
+msgstr "Vyřešeno"
 
 #. Label of the resolved_by (Link) field in DocType 'Warranty Claim'
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
@@ -44347,23 +44347,23 @@ msgstr ""
 #. Search Source'
 #: erpnext/support/doctype/support_search_source/support_search_source.json
 msgid "Response Options"
-msgstr ""
+msgstr "Možnosti odpovědi"
 
 #. Label of the response_result_key_path (Data) field in DocType 'Support
 #. Search Source'
 #: erpnext/support/doctype/support_search_source/support_search_source.json
 msgid "Response Result Key Path"
-msgstr ""
+msgstr "Cesta klíče výsledku odpovědi"
 
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.py:99
 msgid "Response Time for {0} priority in row {1} can't be greater than Resolution Time."
-msgstr ""
+msgstr "Doba odpovědi pro prioritu {0} na řádku {1} nemůže být delší než doba vyřešení."
 
 #. Label of the response_and_resolution_time_section (Section Break) field in
 #. DocType 'Service Level Agreement'
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.json
 msgid "Response and Resolution"
-msgstr ""
+msgstr "Odpověď a vyřešení"
 
 #. Label of the responsible (Link) field in DocType 'Quality Action Resolution'
 #: erpnext/quality_management/doctype/quality_action_resolution/quality_action_resolution.json
@@ -44419,19 +44419,19 @@ msgstr ""
 #. Source'
 #: erpnext/support/doctype/support_search_source/support_search_source.json
 msgid "Result Preview Field"
-msgstr ""
+msgstr "Pole náhledu výsledku"
 
 #. Label of the result_route_field (Data) field in DocType 'Support Search
 #. Source'
 #: erpnext/support/doctype/support_search_source/support_search_source.json
 msgid "Result Route Field"
-msgstr ""
+msgstr "Pole trasy výsledku"
 
 #. Label of the result_title_field (Data) field in DocType 'Support Search
 #. Source'
 #: erpnext/support/doctype/support_search_source/support_search_source.json
 msgid "Result Title Field"
-msgstr ""
+msgstr "Pole názvu výsledku"
 
 #: erpnext/accounts/doctype/process_period_closing_voucher/process_period_closing_voucher.js:43
 #: erpnext/buying/doctype/purchase_order/purchase_order.js:320
@@ -47629,7 +47629,7 @@ msgstr ""
 #. Source'
 #: erpnext/support/doctype/support_search_source/support_search_source.json
 msgid "Search Term Param Name"
-msgstr ""
+msgstr "Název parametru vyhledávacího výrazu"
 
 #: banking/src/components/common/AccountsDropdown.tsx:155
 msgid "Search account..."
@@ -47972,7 +47972,7 @@ msgstr ""
 
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.py:115
 msgid "Select a Default Priority."
-msgstr ""
+msgstr "Vyberte výchozí prioritu."
 
 #: erpnext/selling/page/point_of_sale/pos_payment.js:146
 msgid "Select a Payment Method."
@@ -48107,7 +48107,7 @@ msgstr ""
 
 #: erpnext/setup/doctype/holiday_list/holiday_list.js:65
 msgid "Select your weekly off day"
-msgstr ""
+msgstr "Vyberte svůj týdenní den volna"
 
 #. Description of the 'Primary Address and Contact' (Section Break) field in
 #. DocType 'Customer'
@@ -49041,7 +49041,7 @@ msgstr ""
 #. Label of the service_level (Data) field in DocType 'Service Level Agreement'
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.json
 msgid "Service Level Name"
-msgstr ""
+msgstr "Název úrovně služby"
 
 #. Name of a DocType
 #: erpnext/support/doctype/service_level_priority/service_level_priority.json
@@ -49220,7 +49220,7 @@ msgstr ""
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.py:82
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.py:90
 msgid "Set Response Time for Priority {0} in row {1}."
-msgstr ""
+msgstr "Nastavte dobu odpovědi pro prioritu {0} na řádku {1}."
 
 #. Label of the set_serial_and_batch_bundle_naming_based_on_naming_series
 #. (Check) field in DocType 'Stock Settings'
@@ -50314,7 +50314,7 @@ msgstr ""
 #. Label of the source_doctype (Link) field in DocType 'Support Search Source'
 #: erpnext/support/doctype/support_search_source/support_search_source.json
 msgid "Source DocType"
-msgstr ""
+msgstr "Zdrojový typ dokumentu"
 
 #. Label of the source_document_section (Section Break) field in DocType
 #. 'Serial No'
@@ -50375,7 +50375,7 @@ msgstr ""
 #. Label of the source_type (Select) field in DocType 'Support Search Source'
 #: erpnext/support/doctype/support_search_source/support_search_source.json
 msgid "Source Type"
-msgstr ""
+msgstr "Zdrojový typ"
 
 #. Label of the set_warehouse (Link) field in DocType 'POS Invoice'
 #. Label of the set_warehouse (Link) field in DocType 'Sales Invoice'
@@ -50791,7 +50791,7 @@ msgstr ""
 #. Agreement'
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.json
 msgid "Status Details"
-msgstr ""
+msgstr "Detaily stavu"
 
 #. Label of the illustration_section (Section Break) field in DocType
 #. 'Workstation'
@@ -52931,12 +52931,12 @@ msgstr ""
 #: erpnext/support/workspace/support/support.json
 #: erpnext/workspace_sidebar/support.json
 msgid "Support"
-msgstr ""
+msgstr "Podpora"
 
 #. Name of a report
 #: erpnext/support/report/support_hour_distribution/support_hour_distribution.json
 msgid "Support Hour Distribution"
-msgstr ""
+msgstr "Rozložení hodin podpory"
 
 #. Label of the portal_sb (Section Break) field in DocType 'Support Settings'
 #: erpnext/support/doctype/support_settings/support_settings.json
@@ -52961,7 +52961,7 @@ msgstr ""
 #: erpnext/support/doctype/issue/issue.json
 #: erpnext/support/doctype/issue_type/issue_type.json
 msgid "Support Team"
-msgstr ""
+msgstr "Tým podpory"
 
 #: erpnext/crm/report/lead_conversion_time/lead_conversion_time.py:68
 msgid "Support Tickets"
@@ -53862,7 +53862,7 @@ msgstr ""
 #. Maintenance Team'
 #: erpnext/assets/doctype/asset_maintenance_team/asset_maintenance_team.json
 msgid "Team"
-msgstr ""
+msgstr "Tým"
 
 #. Label of the team_member (Link) field in DocType 'Maintenance Team Member'
 #: erpnext/assets/doctype/maintenance_team_member/maintenance_team_member.json
@@ -53917,7 +53917,7 @@ msgstr ""
 #: erpnext/accounts/doctype/payment_terms_template/payment_terms_template.json
 #: erpnext/quality_management/doctype/quality_feedback_template/quality_feedback_template.json
 msgid "Template Name"
-msgstr ""
+msgstr "Název šablony"
 
 #. Label of the template_task (Data) field in DocType 'Task'
 #: erpnext/projects/doctype/task/task.json
@@ -54480,7 +54480,7 @@ msgstr ""
 
 #: erpnext/setup/doctype/holiday_list/holiday_list.py:126
 msgid "The holiday on {0} is not between From Date and To Date"
-msgstr ""
+msgstr "Svátek dne {0} není mezi datem od a datem do"
 
 #: banking/src/components/features/BankReconciliation/RecordPaymentModal.tsx:811
 msgid "The invoice is not fully allocated as there is a difference of {0}."
@@ -55431,7 +55431,7 @@ msgstr ""
 #: erpnext/controllers/accounts_controller.py:627
 #: erpnext/setup/doctype/holiday_list/holiday_list.py:121
 msgid "To Date cannot be before From Date"
-msgstr ""
+msgstr "Datum do nemůže být před datem od"
 
 #: erpnext/buying/report/purchase_order_analysis/purchase_order_analysis.py:38
 #: erpnext/buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.py:34
@@ -56141,7 +56141,7 @@ msgstr ""
 #. Label of the total_hold_time (Duration) field in DocType 'Issue'
 #: erpnext/support/doctype/issue/issue.json
 msgid "Total Hold Time"
-msgstr ""
+msgstr "Celková doba podržení"
 
 #. Label of the total_holidays (Int) field in DocType 'Holiday List'
 #: erpnext/setup/doctype/holiday_list/holiday_list.json
@@ -58403,7 +58403,7 @@ msgstr ""
 #. Label of the user_resolution_time (Duration) field in DocType 'Issue'
 #: erpnext/support/doctype/issue/issue.json
 msgid "User Resolution Time"
-msgstr ""
+msgstr "Doba vyřešení uživatelem"
 
 #: erpnext/accounts/doctype/pricing_rule/utils.py:595
 msgid "User has not applied rule on the invoice {0}"
@@ -58516,7 +58516,7 @@ msgstr ""
 #: erpnext/stock/doctype/item_tax/item_tax.json
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.json
 msgid "Valid From"
-msgstr ""
+msgstr "Platné od"
 
 #: erpnext/regional/doctype/lower_deduction_certificate/lower_deduction_certificate.py:45
 msgid "Valid From date not in Fiscal Year {0}"
@@ -59022,7 +59022,7 @@ msgstr ""
 #: erpnext/support/doctype/issue/issue.json
 #: erpnext/support/web_form/issues/issues.json
 msgid "Via Customer Portal"
-msgstr ""
+msgstr "Přes zákaznický portál"
 
 #. Label of the via_landed_cost_voucher (Check) field in DocType 'Repost Item
 #. Valuation'
@@ -60392,7 +60392,7 @@ msgstr ""
 
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.py:137
 msgid "Workday {0} has been repeated."
-msgstr ""
+msgstr "Pracovní den {0} byl zopakován."
 
 #. Option for the 'Status' (Select) field in DocType 'Task'
 #. Option in a Select field in the tasks Web Form
