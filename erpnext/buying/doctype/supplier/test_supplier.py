@@ -118,12 +118,12 @@ class TestSupplier(ERPNextTestSuite):
 		self.assertEqual(supplier.country, "Greece")
 
 	def test_party_details_tax_category(self):
-		from erpnext.accounts.party import get_party_details
+		from erpnext.accounts.party import _get_party_details
 
 		frappe.delete_doc_if_exists("Address", "_Test Address With Tax Category-Billing")
 
 		# Tax Category without Address
-		details = get_party_details("_Test Supplier With Tax Category", party_type="Supplier")
+		details = _get_party_details("_Test Supplier With Tax Category", party_type="Supplier")
 		self.assertEqual(details.tax_category, "_Test Tax Category 1")
 
 		address = frappe.get_doc(
@@ -138,7 +138,7 @@ class TestSupplier(ERPNextTestSuite):
 		).insert()
 
 		# Tax Category with Address
-		details = get_party_details("_Test Supplier With Tax Category", party_type="Supplier")
+		details = _get_party_details("_Test Supplier With Tax Category", party_type="Supplier")
 		self.assertEqual(details.tax_category, "_Test Tax Category 2")
 
 		# Rollback
