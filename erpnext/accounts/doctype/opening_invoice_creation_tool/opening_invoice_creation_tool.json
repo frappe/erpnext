@@ -1,6 +1,6 @@
 {
+ "actions": [],
  "allow_copy": 1,
- "beta": 1,
  "creation": "2017-08-29 02:22:54.947711",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -64,10 +64,10 @@
    "options": "Cost Center"
   },
   {
-    "fieldname": "project",
-    "fieldtype": "Link",
-    "label": "Project",
-    "options": "Project"
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
   },
   {
    "collapsible": 1,
@@ -82,7 +82,8 @@
  ],
  "hide_toolbar": 1,
  "issingle": 1,
- "modified": "2022-01-04 15:25:06.053187",
+ "links": [],
+ "modified": "2026-05-30 20:43:36.282738",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Opening Invoice Creation Tool",
@@ -99,7 +100,9 @@
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

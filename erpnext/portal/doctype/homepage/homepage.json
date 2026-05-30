@@ -1,6 +1,5 @@
 {
  "actions": [],
- "beta": 1,
  "creation": "2016-04-22 05:27:52.109319",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -87,7 +86,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2022-12-19 21:10:29.127277",
+ "modified": "2026-05-30 20:51:04.415019",
  "modified_by": "Administrator",
  "module": "Portal",
  "name": "Homepage",
@@ -114,6 +113,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
