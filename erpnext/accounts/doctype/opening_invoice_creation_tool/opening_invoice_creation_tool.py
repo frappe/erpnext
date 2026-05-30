@@ -31,6 +31,7 @@ class OpeningInvoiceCreationTool(Document):
 		create_missing_party: DF.Check
 		invoice_type: DF.Literal["Sales", "Purchase"]
 		invoices: DF.Table[OpeningInvoiceCreationToolItem]
+		project: DF.Link | None
 	# end: auto-generated types
 
 	def onload(self):
