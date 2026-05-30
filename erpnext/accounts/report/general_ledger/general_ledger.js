@@ -64,7 +64,7 @@ frappe.query_reports["General Ledger"] = {
 			fieldname: "party_type",
 			label: __("Party Type"),
 			fieldtype: "Autocomplete",
-			options: Object.keys(frappe.boot.party_account_types),
+			options: ["", ...Object.keys(frappe.boot.party_account_types)],
 			on_change: function () {
 				frappe.query_report.set_filter_value("party", []);
 			},
