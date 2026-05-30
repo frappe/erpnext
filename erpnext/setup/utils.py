@@ -45,7 +45,7 @@ def validate_exchange_endpoint(url: str) -> None:
 				exc=frappe.ValidationError,
 			)
 	except ValueError:
-		pass  # hostname, not a bare IP — continue to DNS resolution
+		pass  # hostname, not a bare IP so continue to DNS resolution
 
 	port = parsed.port or (443 if parsed.scheme == "https" else 80)
 
