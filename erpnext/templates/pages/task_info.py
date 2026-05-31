@@ -5,6 +5,7 @@ def get_context(context):
 	context.no_cache = 1
 
 	task = frappe.get_doc("Task", frappe.form_dict.task)
+	task.check_permission()
 
 	context.comments = frappe.get_all(
 		"Communication",
