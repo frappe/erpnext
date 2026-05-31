@@ -419,14 +419,10 @@ def get_past_order_list(search_term, status, limit=20):
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
 def set_customer_info(fieldname, customer, value=""):
-=======
-def set_customer_info(fieldname: str, customer: str, value: str = ""):
 	customer_doc = frappe.get_doc("Customer", customer)
 	customer_doc.check_permission("write")
 
->>>>>>> 45d9af9430 (fix(pos): preserve contacts and enforce permissions in set_customer_info (#55463))
 	if fieldname == "loyalty_program":
 		customer_doc.loyalty_program = value
 	else:
