@@ -1971,6 +1971,7 @@ def make_stock_entry(source_name: str, target_doc: str | Document | None = None)
 def change_release_date(name: str, release_date: str | None = None):
 	if frappe.db.exists("Purchase Invoice", name):
 		pi = frappe.get_lazy_doc("Purchase Invoice", name)
+		pi.check_permission("submit")
 		pi.db_set("release_date", release_date)
 
 
@@ -1978,6 +1979,7 @@ def change_release_date(name: str, release_date: str | None = None):
 def unblock_invoice(name: str):
 	if frappe.db.exists("Purchase Invoice", name):
 		pi = frappe.get_lazy_doc("Purchase Invoice", name)
+		pi.check_permission("submit")
 		pi.unblock_invoice()
 
 
@@ -1985,6 +1987,7 @@ def unblock_invoice(name: str):
 def block_invoice(name: str, release_date: str, hold_comment: str | None = None):
 	if frappe.db.exists("Purchase Invoice", name):
 		pi = frappe.get_lazy_doc("Purchase Invoice", name)
+		pi.check_permission("submit")
 		pi.block_invoice(hold_comment, release_date)
 
 
