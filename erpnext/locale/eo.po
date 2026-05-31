@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
-"POT-Creation-Date: 2026-05-27 15:21+0000\n"
-"PO-Revision-Date: 2026-05-29 21:50\n"
+"POT-Creation-Date: 2026-05-31 10:18+0000\n"
+"PO-Revision-Date: 2026-05-31 22:15\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Esperanto\n"
 "MIME-Version: 1.0\n"
@@ -314,9 +314,9 @@ msgstr "crwdns151814:0{0}crwdne151814:0"
 msgid "'Inspection Required before Purchase' has disabled for the item {0}, no need to create the QI"
 msgstr "crwdns151816:0{0}crwdne151816:0"
 
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:683
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:724
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:829
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:684
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:725
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:830
 msgid "'Opening'"
 msgstr "crwdns62492:0crwdne62492:0"
 
@@ -1207,7 +1207,7 @@ msgstr "crwdns62788:0{0}crwdne62788:0"
 msgid "According to CEFACT/ICG/2010/IC013 or CEFACT/ICG/2010/IC010"
 msgstr "crwdns132236:0crwdne132236:0"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:784
+#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:786
 msgid "According to the BOM {0}, the Item '{1}' is missing in the stock entry."
 msgstr "crwdns152084:0{0}crwdnd152084:0{1}crwdne152084:0"
 
@@ -1344,7 +1344,7 @@ msgstr "crwdns62894:0crwdne62894:0"
 msgid "Account Name"
 msgstr "crwdns132254:0crwdne132254:0"
 
-#: erpnext/accounts/doctype/account/account.py:374
+#: erpnext/accounts/doctype/account/account.py:377
 msgid "Account Not Found"
 msgstr "crwdns62904:0crwdne62904:0"
 
@@ -1357,7 +1357,7 @@ msgstr "crwdns62904:0crwdne62904:0"
 msgid "Account Number"
 msgstr "crwdns62906:0crwdne62906:0"
 
-#: erpnext/accounts/doctype/account/account.py:360
+#: erpnext/accounts/doctype/account/account.py:363
 msgid "Account Number {0} already used in account {1}"
 msgstr "crwdns62910:0{0}crwdnd62910:0{1}crwdne62910:0"
 
@@ -1396,7 +1396,7 @@ msgstr "crwdns132262:0crwdne132262:0"
 #. Label of the account_type (Select) field in DocType 'Payment Ledger Entry'
 #. Label of the account_type (Select) field in DocType 'Party Type'
 #: erpnext/accounts/doctype/account/account.json
-#: erpnext/accounts/doctype/account/account.py:207
+#: erpnext/accounts/doctype/account/account.py:210
 #: erpnext/accounts/doctype/account/account_tree.js:154
 #: erpnext/accounts/doctype/bank_account/bank_account.json
 #: erpnext/accounts/doctype/bank_account_type/bank_account_type.json
@@ -1412,11 +1412,11 @@ msgstr "crwdns62924:0crwdne62924:0"
 msgid "Account Value"
 msgstr "crwdns62938:0crwdne62938:0"
 
-#: erpnext/accounts/doctype/account/account.py:329
+#: erpnext/accounts/doctype/account/account.py:332
 msgid "Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'"
 msgstr "crwdns62940:0crwdne62940:0"
 
-#: erpnext/accounts/doctype/account/account.py:323
+#: erpnext/accounts/doctype/account/account.py:326
 msgid "Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'"
 msgstr "crwdns62942:0crwdne62942:0"
 
@@ -1483,24 +1483,24 @@ msgstr "crwdns200714:0crwdne200714:0"
 msgid "Account where the cost of this item will be debited on purchase"
 msgstr "crwdns200716:0crwdne200716:0"
 
-#: erpnext/accounts/doctype/account/account.py:428
+#: erpnext/accounts/doctype/account/account.py:431
 msgid "Account with child nodes cannot be converted to ledger"
 msgstr "crwdns62956:0crwdne62956:0"
 
-#: erpnext/accounts/doctype/account/account.py:280
+#: erpnext/accounts/doctype/account/account.py:283
 msgid "Account with child nodes cannot be set as ledger"
 msgstr "crwdns62958:0crwdne62958:0"
 
-#: erpnext/accounts/doctype/account/account.py:439
+#: erpnext/accounts/doctype/account/account.py:442
 msgid "Account with existing transaction can not be converted to group."
 msgstr "crwdns62960:0crwdne62960:0"
 
-#: erpnext/accounts/doctype/account/account.py:468
+#: erpnext/accounts/doctype/account/account.py:467
 msgid "Account with existing transaction can not be deleted"
 msgstr "crwdns62962:0crwdne62962:0"
 
-#: erpnext/accounts/doctype/account/account.py:274
-#: erpnext/accounts/doctype/account/account.py:430
+#: erpnext/accounts/doctype/account/account.py:277
+#: erpnext/accounts/doctype/account/account.py:433
 msgid "Account with existing transaction cannot be converted to ledger"
 msgstr "crwdns62964:0crwdne62964:0"
 
@@ -1508,11 +1508,11 @@ msgstr "crwdns62964:0crwdne62964:0"
 msgid "Account {0} added multiple times"
 msgstr "crwdns62966:0{0}crwdne62966:0"
 
-#: erpnext/accounts/doctype/account/account.py:292
+#: erpnext/accounts/doctype/account/account.py:295
 msgid "Account {0} cannot be converted to Group as it is already set as {1} for {2}."
 msgstr "crwdns160592:0{0}crwdnd160592:0{1}crwdnd160592:0{2}crwdne160592:0"
 
-#: erpnext/accounts/doctype/account/account.py:289
+#: erpnext/accounts/doctype/account/account.py:292
 msgid "Account {0} cannot be disabled as it is already set as {1} for {2}."
 msgstr "crwdns160594:0{0}crwdnd160594:0{1}crwdnd160594:0{2}crwdne160594:0"
 
@@ -1524,7 +1524,7 @@ msgstr "crwdns161250:0{0}crwdnd161250:0{1}crwdne161250:0"
 msgid "Account {0} does not belong to company: {1}"
 msgstr "crwdns62968:0{0}crwdnd62968:0{1}crwdne62968:0"
 
-#: erpnext/accounts/doctype/account/account.py:590
+#: erpnext/accounts/doctype/account/account.py:599
 msgid "Account {0} does not exist"
 msgstr "crwdns62972:0{0}crwdne62972:0"
 
@@ -1540,11 +1540,11 @@ msgstr "crwdns62978:0{0}crwdnd62978:0{1}crwdnd62978:0{2}crwdne62978:0"
 msgid "Account {0} doesn't belong to Company {1}"
 msgstr "crwdns155910:0{0}crwdnd155910:0{1}crwdne155910:0"
 
-#: erpnext/accounts/doctype/account/account.py:547
+#: erpnext/accounts/doctype/account/account.py:556
 msgid "Account {0} exists in parent company {1}."
 msgstr "crwdns62980:0{0}crwdnd62980:0{1}crwdne62980:0"
 
-#: erpnext/accounts/doctype/account/account.py:412
+#: erpnext/accounts/doctype/account/account.py:415
 msgid "Account {0} is added in the child company {1}"
 msgstr "crwdns62984:0{0}crwdnd62984:0{1}crwdne62984:0"
 
@@ -1967,7 +1967,6 @@ msgstr "crwdns161988:0crwdne161988:0"
 #. Category'
 #. Label of the accounts (Table) field in DocType 'Asset Category'
 #. Label of the accounts (Table) field in DocType 'Supplier'
-#. Label of the accounts (Table) field in DocType 'Customer'
 #. Label of the accounts_tab (Tab Break) field in DocType 'Company'
 #. Label of the accounts (Table) field in DocType 'Customer Group'
 #. Label of the accounts (Section Break) field in DocType 'Email Digest'
@@ -1980,7 +1979,6 @@ msgstr "crwdns161988:0crwdne161988:0"
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 #: erpnext/assets/doctype/asset_category/asset_category.json
 #: erpnext/buying/doctype/supplier/supplier.json
-#: erpnext/selling/doctype/customer/customer.json
 #: erpnext/setup/doctype/company/company.json
 #: erpnext/setup/doctype/company/company.py:448
 #: erpnext/setup/doctype/customer_group/customer_group.json
@@ -3076,11 +3074,6 @@ msgid "Additional Transferred Qty {0}\n"
 "\t\t\t\t\tin Manufacturing Settings."
 msgstr "crwdns160056:0{0}crwdnd160056:0{1}crwdne160056:0"
 
-#. Description of the 'Customer Details' (Text) field in DocType 'Customer'
-#: erpnext/selling/doctype/customer/customer.json
-msgid "Additional information regarding the customer."
-msgstr "crwdns132402:0crwdne132402:0"
-
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:660
 msgid "Additional {0} {1} of item {2} required as per BOM to complete this transaction"
 msgstr "crwdns161476:0{0}crwdnd161476:0{1}crwdnd161476:0{2}crwdne161476:0"
@@ -3427,7 +3420,7 @@ msgstr "crwdns63874:0crwdne63874:0"
 msgid "Against Blanket Order"
 msgstr "crwdns132442:0crwdne132442:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1103
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1099
 msgid "Against Customer Order {0}"
 msgstr "crwdns148754:0{0}crwdne148754:0"
 
@@ -3831,6 +3824,11 @@ msgstr "crwdns132500:0crwdne132500:0"
 msgid "All communications including and above this shall be moved into the new Issue"
 msgstr "crwdns64036:0crwdne64036:0"
 
+#. Description of the 'Billing Currency' (Link) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "All invoices and orders for this customer will be created in this currency."
+msgstr "crwdns201945:0crwdne201945:0"
+
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:971
 msgid "All items are already requested"
 msgstr "crwdns152148:0crwdne152148:0"
@@ -3843,7 +3841,7 @@ msgstr "crwdns64038:0crwdne64038:0"
 msgid "All items have already been received"
 msgstr "crwdns112194:0crwdne112194:0"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry_handler/material_transfer.py:138
+#: erpnext/stock/doctype/stock_entry/stock_entry_handler/material_transfer.py:221
 msgid "All items have already been transferred for this Work Order."
 msgstr "crwdns64040:0crwdne64040:0"
 
@@ -3851,11 +3849,11 @@ msgstr "crwdns64040:0crwdne64040:0"
 msgid "All items in this document already have a linked Quality Inspection."
 msgstr "crwdns64042:0crwdne64042:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1239
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1243
 msgid "All items must be linked to a Sales Order or Subcontracting Inward Order for this Sales Invoice."
 msgstr "crwdns160274:0crwdne160274:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1250
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1254
 msgid "All linked Sales Orders must be subcontracted."
 msgstr "crwdns160276:0crwdne160276:0"
 
@@ -3989,7 +3987,7 @@ msgstr "crwdns64100:0crwdne64100:0"
 
 #. Label of the allow_account_creation_against_child_company (Check) field in
 #. DocType 'Company'
-#: erpnext/accounts/doctype/account/account.py:545
+#: erpnext/accounts/doctype/account/account.py:554
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:68
 #: erpnext/setup/doctype/company/company.json
 msgid "Allow Account Creation Against Child Company"
@@ -4176,16 +4174,6 @@ msgstr "crwdns64170:0crwdne64170:0"
 msgid "Allow Sales"
 msgstr "crwdns132558:0crwdne132558:0"
 
-#. Label of the dn_required (Check) field in DocType 'Customer'
-#: erpnext/selling/doctype/customer/customer.json
-msgid "Allow Sales Invoice Creation Without Delivery Note"
-msgstr "crwdns132560:0crwdne132560:0"
-
-#. Label of the so_required (Check) field in DocType 'Customer'
-#: erpnext/selling/doctype/customer/customer.json
-msgid "Allow Sales Invoice Creation Without Sales Order"
-msgstr "crwdns132562:0crwdne132562:0"
-
 #. Label of the allow_sales_order_creation_for_expired_quotation (Check) field
 #. in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
@@ -4311,6 +4299,16 @@ msgstr "crwdns200506:0crwdne200506:0"
 msgid "Allow negative rates for Items"
 msgstr "crwdns200508:0crwdne200508:0"
 
+#. Label of the dn_required (Check) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Allow sales invoice creation without delivery note"
+msgstr "crwdns201947:0crwdne201947:0"
+
+#. Label of the so_required (Check) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Allow sales invoice creation without sales order"
+msgstr "crwdns201949:0crwdne201949:0"
+
 #. Description of the 'Zero-Quantity Line Items' (Section Break) field in
 #. DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
@@ -4387,10 +4385,8 @@ msgstr "crwdns132592:0crwdne132592:0"
 
 #. Name of a DocType
 #. Label of the companies (Table) field in DocType 'Supplier'
-#. Label of the companies (Table) field in DocType 'Customer'
 #: erpnext/accounts/doctype/allowed_to_transact_with/allowed_to_transact_with.json
 #: erpnext/buying/doctype/supplier/supplier.json
-#: erpnext/selling/doctype/customer/customer.json
 msgid "Allowed To Transact With"
 msgstr "crwdns64224:0crwdne64224:0"
 
@@ -4401,6 +4397,11 @@ msgstr "crwdns64230:0crwdne64230:0"
 #: erpnext/public/js/utils/naming_series.js:81
 msgid "Allowed special characters are '/' and '-'"
 msgstr "crwdns200728:0crwdne200728:0"
+
+#. Label of the companies (Table) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Allowed to transact with"
+msgstr "crwdns201951:0crwdne201951:0"
 
 #. Description of the 'Enable Stock Reservation' (Check) field in DocType
 #. 'Stock Settings'
@@ -4873,7 +4874,7 @@ msgstr "crwdns111618:0crwdne111618:0"
 msgid "An error has been appeared while reposting item valuation via {0}"
 msgstr "crwdns64584:0{0}crwdne64584:0"
 
-#: erpnext/public/js/controllers/buying.js:383
+#: erpnext/public/js/controllers/buying.js:378
 #: erpnext/public/js/utils/sales_common.js:489
 msgid "An error occurred during the update process"
 msgstr "crwdns64590:0crwdne64590:0"
@@ -5881,7 +5882,7 @@ msgstr "crwdns65030:0crwdne65030:0"
 msgid "Asset restored after Asset Capitalization {0} was cancelled"
 msgstr "crwdns65032:0{0}crwdne65032:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1522
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1535
 msgid "Asset returned"
 msgstr "crwdns65034:0crwdne65034:0"
 
@@ -5893,8 +5894,8 @@ msgstr "crwdns65036:0crwdne65036:0"
 msgid "Asset scrapped via Journal Entry {0}"
 msgstr "crwdns65038:0{0}crwdne65038:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1522
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1525
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1535
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1538
 msgid "Asset sold"
 msgstr "crwdns65040:0crwdne65040:0"
 
@@ -6402,7 +6403,7 @@ msgstr "crwdns132802:0crwdne132802:0"
 msgid "Auto re-order"
 msgstr "crwdns132804:0crwdne132804:0"
 
-#: erpnext/public/js/controllers/buying.js:378
+#: erpnext/public/js/controllers/buying.js:373
 #: erpnext/public/js/utils/sales_common.js:484
 msgid "Auto repeat document updated"
 msgstr "crwdns65254:0crwdne65254:0"
@@ -6636,7 +6637,9 @@ msgstr "crwdns164146:0crwdne164146:0"
 msgid "Average Order Values"
 msgstr "crwdns163924:0crwdne163924:0"
 
+#. Label of the valuation_rate (Currency) field in DocType 'Stock Ledger Entry'
 #: erpnext/accounts/report/share_balance/share_balance.py:60
+#: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.json
 msgid "Average Rate"
 msgstr "crwdns65332:0crwdne65332:0"
 
@@ -6660,7 +6663,7 @@ msgid "Avg Rate"
 msgstr "crwdns132848:0crwdne132848:0"
 
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:154
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:367
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:368
 msgid "Avg Rate (Balance Stock)"
 msgstr "crwdns65342:0crwdne65342:0"
 
@@ -7098,7 +7101,7 @@ msgstr "crwdns132886:0crwdne132886:0"
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:126
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:84
 #: erpnext/stock/report/stock_balance/stock_balance.py:520
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:330
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:331
 msgid "Balance Qty"
 msgstr "crwdns65526:0crwdne65526:0"
 
@@ -7163,7 +7166,7 @@ msgstr "crwdns161054:0crwdne161054:0"
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:174
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:86
 #: erpnext/stock/report/stock_balance/stock_balance.py:528
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:387
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:388
 msgid "Balance Value"
 msgstr "crwdns65544:0crwdne65544:0"
 
@@ -7770,7 +7773,7 @@ msgstr "crwdns132958:0crwdne132958:0"
 #: erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py:34
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:80
 #: erpnext/stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:158
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:417
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:418
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:171
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:80
 #: erpnext/stock/report/stock_qty_vs_batch_qty/stock_qty_vs_batch_qty.js:19
@@ -8422,6 +8425,16 @@ msgstr "crwdns66058:0crwdne66058:0"
 msgid "Block Supplier"
 msgstr "crwdns133030:0crwdne133030:0"
 
+#. Description of the 'Is Frozen' (Check) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Blocks all further accounting entries on this customer's account. Only users with the frozen-entries role can override.\n"
+msgstr "crwdns201953:0crwdne201953:0"
+
+#. Description of the 'Disabled' (Check) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Blocks this customer from being used on any new transaction."
+msgstr "crwdns201955:0crwdne201955:0"
+
 #. Label of the blog_subscriber (Check) field in DocType 'Lead'
 #: erpnext/crm/doctype/lead/lead.json
 msgid "Blog Subscriber"
@@ -8939,15 +8952,15 @@ msgstr "crwdns66266:0crwdne66266:0"
 msgid "By-Product"
 msgstr "crwdns198308:0crwdne198308:0"
 
-#. Label of the bypass_credit_limit_check (Check) field in DocType 'Customer
-#. Credit Limit'
-#: erpnext/selling/doctype/customer_credit_limit/customer_credit_limit.json
-msgid "Bypass Credit Limit Check at Sales Order"
-msgstr "crwdns133086:0crwdne133086:0"
-
 #: erpnext/selling/report/customer_credit_balance/customer_credit_balance.py:68
 msgid "Bypass credit check at Sales Order"
 msgstr "crwdns66272:0crwdne66272:0"
+
+#. Label of the bypass_credit_limit_check (Check) field in DocType 'Customer
+#. Credit Limit'
+#: erpnext/selling/doctype/customer_credit_limit/customer_credit_limit.json
+msgid "Bypass credit limit check at sales order"
+msgstr "crwdns201957:0crwdne201957:0"
 
 #. Label of the cc_to (Table MultiSelect) field in DocType 'Process Statement
 #. Of Accounts'
@@ -9447,11 +9460,11 @@ msgstr "crwdns66562:0crwdne66562:0"
 msgid "Cannot convert Task to non-group because the following child Tasks exist: {0}."
 msgstr "crwdns66564:0{0}crwdne66564:0"
 
-#: erpnext/accounts/doctype/account/account.py:441
+#: erpnext/accounts/doctype/account/account.py:444
 msgid "Cannot convert to Group because Account Type is selected."
 msgstr "crwdns66566:0crwdne66566:0"
 
-#: erpnext/accounts/doctype/account/account.py:277
+#: erpnext/accounts/doctype/account/account.py:280
 msgid "Cannot covert to Group because Account Type is selected."
 msgstr "crwdns66568:0crwdne66568:0"
 
@@ -9909,7 +9922,7 @@ msgstr "crwdns133166:0crwdne133166:0"
 msgid "Category-wise Asset Value"
 msgstr "crwdns66722:0crwdne66722:0"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:288
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:291
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:144
 msgid "Caution"
 msgstr "crwdns66724:0crwdne66724:0"
@@ -10354,6 +10367,11 @@ msgstr "crwdns111652:0crwdne111652:0"
 msgid "Classify As"
 msgstr "crwdns200973:0crwdne200973:0"
 
+#. Description of the 'Market Segment' (Link) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Classify the type of market this customer belongs to, used for sales analysis and targeting."
+msgstr "crwdns201959:0crwdne201959:0"
+
 #. Label of the more_information (Text Editor) field in DocType 'Bank
 #. Guarantee'
 #: erpnext/accounts/doctype/bank_guarantee/bank_guarantee.json
@@ -10756,6 +10774,12 @@ msgstr "crwdns133284:0crwdne133284:0"
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:177
 msgid "Commission on Sales"
 msgstr "crwdns67072:0crwdne67072:0"
+
+#. Description of the 'Sales Partner' (Section Break) field in DocType
+#. 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Commission paid to the Sales Partner on transactions with this customer."
+msgstr "crwdns201961:0crwdne201961:0"
 
 #. Name of a DocType
 #. Label of the common_code (Data) field in DocType 'Common Code'
@@ -11240,7 +11264,7 @@ msgstr "crwdns133292:0crwdne133292:0"
 #: erpnext/stock/report/stock_balance/stock_balance.js:8
 #: erpnext/stock/report/stock_balance/stock_balance.py:583
 #: erpnext/stock/report/stock_ledger/stock_ledger.js:8
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:440
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:441
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.js:18
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.js:8
 #: erpnext/stock/report/stock_qty_vs_serial_no_count/stock_qty_vs_serial_no_count.js:8
@@ -11339,8 +11363,10 @@ msgstr "crwdns160284:0crwdne160284:0"
 
 #. Label of the bank_account (Link) field in DocType 'Payment Entry'
 #. Label of the company_bank_account (Link) field in DocType 'Payment Order'
+#. Label of the default_bank_account (Link) field in DocType 'Customer'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
 #: erpnext/accounts/doctype/payment_order/payment_order.json
+#: erpnext/selling/doctype/customer/customer.json
 msgid "Company Bank Account"
 msgstr "crwdns133302:0crwdne133302:0"
 
@@ -11436,7 +11462,7 @@ msgstr "crwdns67420:0crwdne67420:0"
 msgid "Company and account filters not set!"
 msgstr "crwdns199142:0crwdne199142:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2662
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2686
 msgid "Company currencies of both the companies should match for Inter Company Transactions."
 msgstr "crwdns67422:0crwdne67422:0"
 
@@ -11510,7 +11536,7 @@ msgstr "crwdns133328:0crwdne133328:0"
 msgid "Company {0} added multiple times"
 msgstr "crwdns154238:0{0}crwdne154238:0"
 
-#: erpnext/accounts/doctype/account/account.py:510
+#: erpnext/accounts/doctype/account/account.py:519
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.py:1308
 msgid "Company {0} does not exist"
 msgstr "crwdns67444:0{0}crwdne67444:0"
@@ -12274,6 +12300,11 @@ msgstr "crwdns133450:0crwdne133450:0"
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Controls how raw materials are consumed during the ‘Manufacture’ stock entry."
 msgstr "crwdns200524:0crwdne200524:0"
+
+#. Description of the 'Tax Category' (Link) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Controls which tax template is auto-applied when this customer is selected on a transaction."
+msgstr "crwdns201963:0crwdne201963:0"
 
 #. Label of the conversion_factor (Float) field in DocType 'Loyalty Program'
 #. Label of the conversion_factor (Float) field in DocType 'Purchase Receipt
@@ -13084,7 +13115,7 @@ msgid "Create Ledger Entries for Change Amount"
 msgstr "crwdns133506:0crwdne133506:0"
 
 #: erpnext/buying/doctype/supplier/supplier.js:216
-#: erpnext/selling/doctype/customer/customer.js:287
+#: erpnext/selling/doctype/customer/customer.js:289
 msgid "Create Link"
 msgstr "crwdns68334:0crwdne68334:0"
 
@@ -13645,12 +13676,6 @@ msgstr "crwdns68544:0crwdne68544:0"
 msgid "Credit Limit Settings"
 msgstr "crwdns133530:0crwdne133530:0"
 
-#. Label of the credit_limit_section (Section Break) field in DocType
-#. 'Customer'
-#: erpnext/selling/doctype/customer/customer.json
-msgid "Credit Limit and Payment Terms"
-msgstr "crwdns133532:0crwdne133532:0"
-
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:50
 msgid "Credit Limit:"
 msgstr "crwdns148604:0crwdne148604:0"
@@ -13919,7 +13944,7 @@ msgstr "crwdns68688:0crwdne68688:0"
 msgid "Currency and Price List"
 msgstr "crwdns133558:0crwdne133558:0"
 
-#: erpnext/accounts/doctype/account/account.py:347
+#: erpnext/accounts/doctype/account/account.py:350
 msgid "Currency can not be changed after making entries using some other currency"
 msgstr "crwdns68708:0crwdne68708:0"
 
@@ -14079,6 +14104,11 @@ msgstr "crwdns68766:0crwdne68766:0"
 #: erpnext/stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
 msgid "Current Valuation Rate"
 msgstr "crwdns133594:0crwdne133594:0"
+
+#. Description of the 'Loyalty Program Tier' (Data) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Current tier based on accumulated points. Updated automatically on each invoice."
+msgstr "crwdns201965:0crwdne201965:0"
 
 #: erpnext/selling/report/sales_analytics/sales_analytics.js:90
 msgid "Curves"
@@ -14766,7 +14796,7 @@ msgstr "crwdns133654:0crwdne133654:0"
 msgid "Customer required for 'Customerwise Discount'"
 msgstr "crwdns69084:0crwdne69084:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1143
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1147
 #: erpnext/selling/doctype/sales_order/sales_order.py:450
 #: erpnext/stock/doctype/delivery_note/delivery_note.py:437
 msgid "Customer {0} does not belong to project {1}"
@@ -15359,8 +15389,7 @@ msgstr "crwdns133750:0crwdne133750:0"
 
 #. Label of the default_accounts_section (Section Break) field in DocType
 #. 'Supplier'
-#. Label of the default_receivable_accounts (Section Break) field in DocType
-#. 'Customer'
+#. Label of the accounts (Table) field in DocType 'Customer'
 #. Label of the default_settings (Section Break) field in DocType 'Company'
 #. Label of the default_receivable_account (Section Break) field in DocType
 #. 'Customer Group'
@@ -15473,9 +15502,7 @@ msgid "Default Company"
 msgstr "crwdns133774:0crwdne133774:0"
 
 #. Label of the default_bank_account (Link) field in DocType 'Supplier'
-#. Label of the default_bank_account (Link) field in DocType 'Customer'
 #: erpnext/buying/doctype/supplier/supplier.json
-#: erpnext/selling/doctype/customer/customer.json
 msgid "Default Company Bank Account"
 msgstr "crwdns133776:0crwdne133776:0"
 
@@ -15636,23 +15663,19 @@ msgid "Default Payment Request Message"
 msgstr "crwdns133828:0crwdne133828:0"
 
 #. Label of the payment_terms (Link) field in DocType 'Supplier'
-#. Label of the payment_terms (Link) field in DocType 'Customer'
 #. Label of the payment_terms (Link) field in DocType 'Company'
 #. Label of the payment_terms (Link) field in DocType 'Customer Group'
 #. Label of the payment_terms (Link) field in DocType 'Supplier Group'
 #: erpnext/buying/doctype/supplier/supplier.json
-#: erpnext/selling/doctype/customer/customer.json
 #: erpnext/setup/doctype/company/company.json
 #: erpnext/setup/doctype/customer_group/customer_group.json
 #: erpnext/setup/doctype/supplier_group/supplier_group.json
 msgid "Default Payment Terms Template"
 msgstr "crwdns133830:0crwdne133830:0"
 
-#. Label of the default_price_list (Link) field in DocType 'Customer'
 #. Label of the selling_price_list (Link) field in DocType 'Selling Settings'
 #. Label of the default_price_list (Link) field in DocType 'Customer Group'
 #. Label of the default_price_list (Link) field in DocType 'Item Default'
-#: erpnext/selling/doctype/customer/customer.json
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 #: erpnext/setup/doctype/customer_group/customer_group.json
 #: erpnext/stock/doctype/item_default/item_default.json
@@ -15926,6 +15949,12 @@ msgstr "crwdns69652:0crwdne69652:0"
 msgid "Defines the date after which the item can no longer be used in transactions or manufacturing"
 msgstr "crwdns199550:0crwdne199550:0"
 
+#. Description of the 'Payment Terms Template' (Link) field in DocType
+#. 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Defines when payment is due (e.g. Net 30, 50% advance). Applied automatically on invoices for this customer."
+msgstr "crwdns201967:0crwdne201967:0"
+
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Dekagram/Litre"
@@ -16146,11 +16175,11 @@ msgstr "crwdns69706:0crwdne69706:0"
 msgid "Delivered Qty (in Stock UOM)"
 msgstr "crwdns155462:0crwdne155462:0"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:596
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:599
 msgid "Delivered Qty cannot be increased by more than {0} for item {1}"
 msgstr "crwdns201049:0{0}crwdnd201049:0{1}crwdne201049:0"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:589
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:592
 msgid "Delivered Qty cannot be reduced by more than {0} for item {1}"
 msgstr "crwdns201051:0{0}crwdnd201051:0{1}crwdne201051:0"
 
@@ -16291,7 +16320,7 @@ msgstr "crwdns133926:0crwdne133926:0"
 msgid "Delivery Note Trends"
 msgstr "crwdns69774:0crwdne69774:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1404
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1417
 msgid "Delivery Note {0} is not submitted"
 msgstr "crwdns69776:0{0}crwdne69776:0"
 
@@ -20030,6 +20059,11 @@ msgstr "crwdns134356:0crwdne134356:0"
 msgid "Fetch exploded BOM (including sub-assemblies)"
 msgstr "crwdns71686:0crwdne71686:0"
 
+#. Description of the 'Price List' (Link) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Fetched automatically on sales orders and invoices for this customer."
+msgstr "crwdns201969:0crwdne201969:0"
+
 #: erpnext/selling/page/point_of_sale/pos_item_details.js:457
 msgid "Fetched only {0} available serial numbers."
 msgstr "crwdns154185:0{0}crwdne154185:0"
@@ -20592,6 +20626,7 @@ msgstr "crwdns134436:0crwdne134436:0"
 #. Option for the 'Account Type' (Select) field in DocType 'Account'
 #: erpnext/accounts/doctype/account/account.json
 #: erpnext/accounts/report/account_balance/account_balance.js:52
+#: erpnext/stock/doctype/item/item_list.js:20
 msgid "Fixed Asset"
 msgstr "crwdns71904:0crwdne71904:0"
 
@@ -20825,11 +20860,11 @@ msgstr "crwdns71972:0crwdne71972:0"
 msgid "For Work Order"
 msgstr "crwdns71978:0crwdne71978:0"
 
-#: erpnext/controllers/status_updater.py:288
+#: erpnext/controllers/status_updater.py:290
 msgid "For an item {0}, quantity must be negative number"
 msgstr "crwdns71980:0{0}crwdne71980:0"
 
-#: erpnext/controllers/status_updater.py:285
+#: erpnext/controllers/status_updater.py:287
 msgid "For an item {0}, quantity must be positive number"
 msgstr "crwdns71982:0{0}crwdne71982:0"
 
@@ -20867,7 +20902,7 @@ msgstr "crwdns134476:0crwdne134476:0"
 msgid "For item <b>{0}</b>, only <b>{1}</b> asset have been created or linked to <b>{2}</b>. Please create or link <b>{3}</b> more asset with the respective document."
 msgstr "crwdns154774:0{0}crwdnd154774:0{1}crwdnd154774:0{2}crwdnd154774:0{3}crwdne154774:0"
 
-#: erpnext/controllers/status_updater.py:298
+#: erpnext/controllers/status_updater.py:300
 msgid "For item {0}, rate must be a positive number. To Allow negative rates, enable {1} in {2}"
 msgstr "crwdns71992:0{0}crwdnd71992:0{1}crwdnd71992:0{2}crwdne71992:0"
 
@@ -20931,7 +20966,7 @@ msgstr "crwdns72006:0{0}crwdne72006:0"
 msgid "For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes"
 msgstr "crwdns111744:0crwdne111744:0"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:773
+#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:775
 msgid "For the item {0}, the consumed quantity should be {1} according to the BOM {2}."
 msgstr "crwdns195002:0{0}crwdnd195002:0{1}crwdnd195002:0{2}crwdne195002:0"
 
@@ -21795,7 +21830,7 @@ msgstr "crwdns155468:0crwdne155468:0"
 msgid "Get Current Stock"
 msgstr "crwdns134622:0crwdne134622:0"
 
-#: erpnext/selling/doctype/customer/customer.js:189
+#: erpnext/selling/doctype/customer/customer.js:190
 msgid "Get Customer Group Details"
 msgstr "crwdns72390:0crwdne72390:0"
 
@@ -21853,7 +21888,7 @@ msgstr "crwdns134628:0crwdne134628:0"
 #: erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.js:119
 #: erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.js:142
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
-#: erpnext/public/js/controllers/buying.js:330
+#: erpnext/public/js/controllers/buying.js:325
 #: erpnext/selling/doctype/quotation/quotation.js:182
 #: erpnext/selling/doctype/sales_order/sales_order.js:201
 #: erpnext/selling/doctype/sales_order/sales_order.js:1254
@@ -21892,7 +21927,7 @@ msgstr "crwdns72414:0crwdne72414:0"
 msgid "Get Items from Material Requests against this Supplier"
 msgstr "crwdns72416:0crwdne72416:0"
 
-#: erpnext/public/js/controllers/buying.js:607
+#: erpnext/public/js/controllers/buying.js:602
 msgid "Get Items from Product Bundle"
 msgstr "crwdns72420:0crwdne72420:0"
 
@@ -23345,6 +23380,11 @@ msgstr "crwdns201141:0crwdne201141:0"
 msgid "If selected Pricing Rule is made for 'Rate', it will overwrite Price List. Pricing Rule rate is the final rate, so no further discount should be applied. Hence, in transactions like Sales Order, Purchase Order etc, it will be fetched in 'Rate' field, rather than 'Price List Rate' field."
 msgstr "crwdns157468:0crwdne157468:0"
 
+#. Description of the 'Default Accounts' (Table) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "If set, accounting entries for this customer will post to these accounts instead of the company default."
+msgstr "crwdns201971:0crwdne201971:0"
+
 #. Description of the 'Fixed Outgoing Email Account' (Link) field in DocType
 #. 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
@@ -23795,7 +23835,7 @@ msgstr "crwdns73228:0crwdne73228:0"
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:112
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:82
 #: erpnext/stock/report/stock_balance/stock_balance.py:550
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:316
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:317
 msgid "In Qty"
 msgstr "crwdns73250:0crwdne73250:0"
 
@@ -24222,7 +24262,7 @@ msgstr "crwdns164206:0crwdne164206:0"
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.json
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:146
 #: erpnext/stock/report/serial_and_batch_summary/serial_and_batch_summary.py:169
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:359
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:360
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:193
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:96
 msgid "Incoming Rate"
@@ -24262,7 +24302,7 @@ msgstr "crwdns127834:0crwdne127834:0"
 msgid "Incorrect Company"
 msgstr "crwdns197190:0crwdne197190:0"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:780
+#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:782
 msgid "Incorrect Component Quantity"
 msgstr "crwdns148794:0crwdne148794:0"
 
@@ -24798,6 +24838,11 @@ msgstr "crwdns73694:0crwdne73694:0"
 msgid "Internal Work History"
 msgstr "crwdns135024:0crwdne135024:0"
 
+#. Description of the 'Customer Details' (Text) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Internal notes about this customer. Not visible on transactions or the portal."
+msgstr "crwdns201973:0crwdne201973:0"
+
 #: erpnext/controllers/stock_controller.py:1568
 msgid "Internal transfers can only be done in company's default currency"
 msgstr "crwdns73698:0crwdne73698:0"
@@ -24869,7 +24914,7 @@ msgstr "crwdns73722:0crwdne73722:0"
 msgid "Invalid Company Field"
 msgstr "crwdns195022:0crwdne195022:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2437
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2461
 msgid "Invalid Company for Inter Company Transaction."
 msgstr "crwdns73724:0crwdne73724:0"
 
@@ -24943,11 +24988,11 @@ msgstr "crwdns73746:0crwdne73746:0"
 msgid "Invalid POS Invoices"
 msgstr "crwdns73748:0crwdne73748:0"
 
-#: erpnext/accounts/doctype/account/account.py:388
+#: erpnext/accounts/doctype/account/account.py:391
 msgid "Invalid Parent Account"
 msgstr "crwdns73750:0crwdne73750:0"
 
-#: erpnext/public/js/controllers/buying.js:429
+#: erpnext/public/js/controllers/buying.js:424
 msgid "Invalid Part Number"
 msgstr "crwdns73752:0crwdne73752:0"
 
@@ -25084,7 +25129,7 @@ msgstr "crwdns73788:0{0}crwdnd73788:0{1}crwdnd73788:0{2}crwdne73788:0"
 msgid "Invalid {0}"
 msgstr "crwdns73790:0{0}crwdne73790:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2435
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2459
 msgid "Invalid {0} for Inter Company Transaction."
 msgstr "crwdns73792:0{0}crwdne73792:0"
 
@@ -25320,7 +25365,7 @@ msgstr "crwdns73872:0crwdne73872:0"
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.json
 #: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.json
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2486
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2510
 #: erpnext/buying/doctype/supplier/supplier.json
 #: erpnext/selling/report/payment_terms_status_for_sales_order/payment_terms_status_for_sales_order.py:62
 msgid "Invoices"
@@ -26123,7 +26168,7 @@ msgstr "crwdns161132:0crwdne161132:0"
 #: erpnext/stock/report/stock_analytics/stock_analytics.js:15
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:43
 #: erpnext/stock/report/stock_balance/stock_balance.py:473
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:286
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:287
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.js:27
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:51
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.js:28
@@ -26638,7 +26683,7 @@ msgstr "crwdns111788:0crwdne111788:0"
 #: erpnext/stock/report/stock_balance/stock_balance.js:32
 #: erpnext/stock/report/stock_balance/stock_balance.py:482
 #: erpnext/stock/report/stock_ledger/stock_ledger.js:71
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:344
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:345
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.js:39
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.py:114
 #: erpnext/stock/report/warehouse_wise_item_balance_age_and_value/warehouse_wise_item_balance_age_and_value.js:33
@@ -26898,7 +26943,7 @@ msgstr "crwdns74534:0crwdne74534:0"
 #: erpnext/stock/report/stock_ageing/stock_ageing.py:178
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:45
 #: erpnext/stock/report/stock_balance/stock_balance.py:480
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:292
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:293
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.py:111
 #: erpnext/stock/report/stock_qty_vs_batch_qty/stock_qty_vs_batch_qty.py:31
 #: erpnext/stock/report/stock_qty_vs_serial_no_count/stock_qty_vs_serial_no_count.py:32
@@ -27259,7 +27304,7 @@ msgstr "crwdns135226:0crwdne135226:0"
 msgid "Item and Warranty Details"
 msgstr "crwdns135228:0crwdne135228:0"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry_handler/material_transfer.py:297
+#: erpnext/stock/doctype/stock_entry/stock_entry_handler/material_transfer.py:380
 msgid "Item for row {0} does not match Material Request"
 msgstr "crwdns74796:0{0}crwdne74796:0"
 
@@ -27312,7 +27357,7 @@ msgstr "crwdns74814:0crwdne74814:0"
 msgid "Item variant {0} exists with same attributes"
 msgstr "crwdns74816:0{0}crwdne74816:0"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:563
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:566
 msgid "Item with name {0} not found in the Purchase Order"
 msgstr "crwdns201779:0{0}crwdne201779:0"
 
@@ -27357,7 +27402,7 @@ msgstr "crwdns74830:0{0}crwdne74830:0"
 msgid "Item {0} has no Serial No. Only serialized items can have delivery based on Serial No"
 msgstr "crwdns104602:0{0}crwdne104602:0"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:582
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:585
 msgid "Item {0} has no changes in delivered quantity. Please unselect the row if you do not wish to update its quantity."
 msgstr "crwdns201181:0{0}crwdne201181:0"
 
@@ -27381,7 +27426,7 @@ msgstr "crwdns74840:0{0}crwdne74840:0"
 msgid "Item {0} is disabled"
 msgstr "crwdns74842:0{0}crwdne74842:0"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:568
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:571
 msgid "Item {0} is not a drop ship item. Only drop ship items can have Delivered Qty updated."
 msgstr "crwdns201781:0{0}crwdne201781:0"
 
@@ -27425,7 +27470,7 @@ msgstr "crwdns74858:0{0}crwdnd74858:0{1}crwdnd74858:0{2}crwdne74858:0"
 msgid "Item {0} not found."
 msgstr "crwdns74860:0{0}crwdne74860:0"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:314
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:317
 msgid "Item {0}: Ordered qty {1} cannot be less than minimum order qty {2} (defined in Item)."
 msgstr "crwdns74862:0{0}crwdnd74862:0{1}crwdnd74862:0{2}crwdne74862:0"
 
@@ -28106,7 +28151,7 @@ msgstr "crwdns135278:0crwdne135278:0"
 msgid "Last Fiscal Year"
 msgstr "crwdns201185:0crwdne201185:0"
 
-#: erpnext/accounts/doctype/account/account.py:661
+#: erpnext/accounts/doctype/account/account.py:670
 msgid "Last GL Entry update was done {}. This operation is not allowed while system is actively being used. Please wait for 5 minutes before retrying."
 msgstr "crwdns152585:0crwdne152585:0"
 
@@ -28513,7 +28558,7 @@ msgstr "crwdns135330:0crwdne135330:0"
 msgid "License Plate"
 msgstr "crwdns135332:0crwdne135332:0"
 
-#: erpnext/controllers/status_updater.py:489
+#: erpnext/controllers/status_updater.py:499
 msgid "Limit Crossed"
 msgstr "crwdns75404:0crwdne75404:0"
 
@@ -28574,7 +28619,7 @@ msgstr "crwdns75424:0crwdne75424:0"
 msgid "Link with Customer"
 msgstr "crwdns75426:0crwdne75426:0"
 
-#: erpnext/selling/doctype/customer/customer.js:201
+#: erpnext/selling/doctype/customer/customer.js:203
 msgid "Link with Supplier"
 msgstr "crwdns75428:0crwdne75428:0"
 
@@ -28600,7 +28645,7 @@ msgid "Linked with submitted documents"
 msgstr "crwdns75436:0crwdne75436:0"
 
 #: erpnext/buying/doctype/supplier/supplier.js:210
-#: erpnext/selling/doctype/customer/customer.js:281
+#: erpnext/selling/doctype/customer/customer.js:283
 msgid "Linking Failed"
 msgstr "crwdns75438:0crwdne75438:0"
 
@@ -28608,7 +28653,7 @@ msgstr "crwdns75438:0crwdne75438:0"
 msgid "Linking to Customer Failed. Please try again."
 msgstr "crwdns75440:0crwdne75440:0"
 
-#: erpnext/selling/doctype/customer/customer.js:280
+#: erpnext/selling/doctype/customer/customer.js:282
 msgid "Linking to Supplier Failed. Please try again."
 msgstr "crwdns75442:0crwdne75442:0"
 
@@ -28913,6 +28958,11 @@ msgstr "crwdns135384:0crwdne135384:0"
 #: erpnext/accounts/doctype/loyalty_program/loyalty_program.json
 msgid "Loyalty Program Type"
 msgstr "crwdns135386:0crwdne135386:0"
+
+#. Description of the 'Loyalty Program' (Link) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Loyalty scheme this customer earns points under. Auto-assigned if a matching program exists."
+msgstr "crwdns201975:0crwdne201975:0"
 
 #. Label of the mps (Link) field in DocType 'Purchase Order'
 #. Label of the mps (Link) field in DocType 'Work Order'
@@ -29332,7 +29382,7 @@ msgstr "crwdns143466:0crwdne143466:0"
 msgid "Mandatory Accounting Dimension"
 msgstr "crwdns75798:0crwdne75798:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1963
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1976
 msgid "Mandatory Field"
 msgstr "crwdns75802:0crwdne75802:0"
 
@@ -29511,7 +29561,7 @@ msgstr "crwdns75872:0crwdne75872:0"
 msgid "Manufacturer Part Number"
 msgstr "crwdns75892:0crwdne75892:0"
 
-#: erpnext/public/js/controllers/buying.js:426
+#: erpnext/public/js/controllers/buying.js:421
 msgid "Manufacturer Part Number <b>{0}</b> is invalid"
 msgstr "crwdns75910:0{0}crwdne75910:0"
 
@@ -29746,6 +29796,12 @@ msgstr "crwdns135472:0crwdne135472:0"
 #: erpnext/public/js/templates/crm_activities.html:123
 msgid "Mark As Closed"
 msgstr "crwdns111810:0crwdne111810:0"
+
+#. Description of the 'Is Internal Customer' (Check) field in DocType
+#. 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Mark if this customer represents an internal company. Enables inter-company transactions."
+msgstr "crwdns201977:0crwdne201977:0"
 
 #. Label of the market_segment (Link) field in DocType 'Lead'
 #. Name of a DocType
@@ -30279,11 +30335,11 @@ msgstr "crwdns135524:0crwdne135524:0"
 msgid "Maximum Producible Items"
 msgstr "crwdns199582:0crwdne199582:0"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:1049
+#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:1051
 msgid "Maximum Samples - {0} can be retained for Batch {1} and Item {2}."
 msgstr "crwdns76212:0{0}crwdnd76212:0{1}crwdnd76212:0{2}crwdne76212:0"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:1038
+#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:1040
 msgid "Maximum Samples - {0} have already been retained for Batch {1} and Item {2} in Batch {3}."
 msgstr "crwdns76214:0{0}crwdnd76214:0{1}crwdnd76214:0{2}crwdnd76214:0{3}crwdne76214:0"
 
@@ -30348,11 +30404,6 @@ msgstr "crwdns112466:0crwdne112466:0"
 msgid "Mention Valuation Rate in the Item master."
 msgstr "crwdns76238:0crwdne76238:0"
 
-#. Description of the 'Accounts' (Table) field in DocType 'Customer'
-#: erpnext/selling/doctype/customer/customer.json
-msgid "Mention if non-standard Receivable account"
-msgstr "crwdns135532:0crwdne135532:0"
-
 #. Description of the 'Accounts' (Table) field in DocType 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "Mention if non-standard payable account"
@@ -30402,7 +30453,7 @@ msgstr "crwdns76260:0crwdne76260:0"
 msgid "Merged"
 msgstr "crwdns135544:0crwdne135544:0"
 
-#: erpnext/accounts/doctype/account/account.py:604
+#: erpnext/accounts/doctype/account/account.py:613
 msgid "Merging is only possible if following properties are same in both records. Is Group, Root Type, Company and Account Currency"
 msgstr "crwdns76266:0crwdne76266:0"
 
@@ -30738,8 +30789,8 @@ msgstr "crwdns76350:0crwdne76350:0"
 #: erpnext/accounts/doctype/pos_opening_entry/pos_opening_entry.py:97
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:201
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:594
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2503
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3111
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2527
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3135
 #: erpnext/assets/doctype/asset_category/asset_category.py:126
 msgid "Missing Account"
 msgstr "crwdns76352:0crwdne76352:0"
@@ -30777,7 +30828,7 @@ msgstr "crwdns76360:0crwdne76360:0"
 msgid "Missing Formula"
 msgstr "crwdns76362:0crwdne76362:0"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:787
+#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:789
 msgid "Missing Item"
 msgstr "crwdns152088:0crwdne152088:0"
 
@@ -31067,7 +31118,7 @@ msgstr "crwdns201215:0crwdne201215:0"
 msgid "Multiple Loyalty Programs found for Customer {}. Please select manually."
 msgstr "crwdns76630:0crwdne76630:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1194
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1198
 msgid "Multiple POS Opening Entry"
 msgstr "crwdns155640:0crwdne155640:0"
 
@@ -31792,7 +31843,7 @@ msgstr "crwdns77022:0crwdne77022:0"
 msgid "No Answer"
 msgstr "crwdns135692:0crwdne135692:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2608
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2632
 msgid "No Customer found for Inter Company Transactions which represents company {0}"
 msgstr "crwdns77026:0{0}crwdne77026:0"
 
@@ -31885,7 +31936,7 @@ msgstr "crwdns77054:0crwdne77054:0"
 msgid "No Summary"
 msgstr "crwdns111830:0crwdne111830:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2592
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2616
 msgid "No Supplier found for Inter Company Transactions which represents company {0}"
 msgstr "crwdns77056:0{0}crwdne77056:0"
 
@@ -32121,7 +32172,7 @@ msgstr "crwdns159884:0crwdne159884:0"
 msgid "No open Material Requests found for the given criteria."
 msgstr "crwdns159886:0crwdne159886:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1188
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1192
 msgid "No open POS Opening Entry found for POS Profile {0}."
 msgstr "crwdns154504:0{0}crwdne154504:0"
 
@@ -32145,7 +32196,7 @@ msgstr "crwdns77128:0crwdne77128:0"
 msgid "No outstanding {0} found for the {1} {2} which qualify the filters you have specified."
 msgstr "crwdns77130:0{0}crwdnd77130:0{1}crwdnd77130:0{2}crwdne77130:0"
 
-#: erpnext/public/js/controllers/buying.js:536
+#: erpnext/public/js/controllers/buying.js:531
 msgid "No pending Material Requests found to link for the given items."
 msgstr "crwdns77132:0crwdne77132:0"
 
@@ -32249,7 +32300,7 @@ msgstr "crwdns77150:0crwdne77150:0"
 msgid "No vouchers found for this transaction"
 msgstr "crwdns201253:0crwdne201253:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2656
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2680
 msgid "No {0} found for Inter Company Transactions."
 msgstr "crwdns77154:0{0}crwdne77154:0"
 
@@ -32640,6 +32691,11 @@ msgstr "crwdns77326:0crwdne77326:0"
 #: erpnext/accounts/doctype/cost_center/cost_center_tree.js:39
 msgid "Number of new Cost Center, it will be included in the cost center name as a prefix"
 msgstr "crwdns77328:0crwdne77328:0"
+
+#. Description of the 'Supplier Numbers' (Table) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Numbers this customer uses to identify your company in their own system."
+msgstr "crwdns201979:0crwdne201979:0"
 
 #. Label of the numeric (Check) field in DocType 'Item Quality Inspection
 #. Parameter'
@@ -33209,7 +33265,7 @@ msgid "Opening Invoice Tool"
 msgstr "crwdns195874:0crwdne195874:0"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1651
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2072
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2085
 msgid "Opening Invoice has rounding adjustment of {0}.<br><br> '{1}' account is required to post these values. Please set it in Company: {2}.<br><br> Or, '{3}' can be enabled to not post any rounding adjustment."
 msgstr "crwdns148804:0{0}crwdnd148804:0{1}crwdnd148804:0{2}crwdnd148804:0{3}crwdne148804:0"
 
@@ -33864,7 +33920,7 @@ msgstr "crwdns112546:0crwdne112546:0"
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:119
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:83
 #: erpnext/stock/report/stock_balance/stock_balance.py:558
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:323
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:324
 msgid "Out Qty"
 msgstr "crwdns77862:0crwdne77862:0"
 
@@ -33902,7 +33958,7 @@ msgstr "crwdns135906:0crwdne135906:0"
 msgid "Out of stock"
 msgstr "crwdns77880:0crwdne77880:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1201
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1205
 #: erpnext/selling/page/point_of_sale/pos_controller.js:208
 msgid "Outdated POS Opening Entry"
 msgstr "crwdns155642:0crwdne155642:0"
@@ -33921,6 +33977,7 @@ msgstr "crwdns164228:0crwdne164228:0"
 #. Label of the outgoing_rate (Currency) field in DocType 'Stock Ledger Entry'
 #: erpnext/stock/doctype/serial_and_batch_entry/serial_and_batch_entry.json
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.json
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:378
 msgid "Outgoing Rate"
 msgstr "crwdns135908:0crwdne135908:0"
 
@@ -34026,6 +34083,11 @@ msgstr "crwdns154918:0{0}crwdnd154918:0{1}crwdnd154918:0{2}crwdne154918:0"
 msgid "Over Delivery/Receipt Allowance (%)"
 msgstr "crwdns135916:0crwdne135916:0"
 
+#. Label of the over_order_allowance (Float) field in DocType 'Buying Settings'
+#: erpnext/buying/doctype/buying_settings/buying_settings.json
+msgid "Over Order Allowance (%)"
+msgstr "crwdns201981:0crwdne201981:0"
+
 #. Label of the over_picking_allowance (Percent) field in DocType 'Stock
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
@@ -34036,7 +34098,7 @@ msgstr "crwdns142960:0crwdne142960:0"
 msgid "Over Receipt"
 msgstr "crwdns77934:0crwdne77934:0"
 
-#: erpnext/controllers/status_updater.py:494
+#: erpnext/controllers/status_updater.py:504
 msgid "Over Receipt/Delivery of {0} {1} ignored for item {2} because you have {3} role."
 msgstr "crwdns77936:0{0}crwdnd77936:0{1}crwdnd77936:0{2}crwdnd77936:0{3}crwdne77936:0"
 
@@ -34056,7 +34118,7 @@ msgstr "crwdns135920:0crwdne135920:0"
 msgid "Over Withheld"
 msgstr "crwdns164230:0crwdne164230:0"
 
-#: erpnext/controllers/status_updater.py:496
+#: erpnext/controllers/status_updater.py:506
 msgid "Overbilling of {0} {1} ignored for item {2} because you have {3} role."
 msgstr "crwdns77942:0{0}crwdnd77942:0{1}crwdnd77942:0{2}crwdnd77942:0{3}crwdne77942:0"
 
@@ -34360,7 +34422,7 @@ msgstr "crwdns195182:0crwdne195182:0"
 msgid "POS Opening Entry"
 msgstr "crwdns78062:0crwdne78062:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1202
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1206
 msgid "POS Opening Entry - {0} is outdated. Please close the POS and create a new POS Opening Entry."
 msgstr "crwdns155644:0{0}crwdne155644:0"
 
@@ -34381,7 +34443,7 @@ msgstr "crwdns78070:0crwdne78070:0"
 msgid "POS Opening Entry Exists"
 msgstr "crwdns155650:0crwdne155650:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1187
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1191
 msgid "POS Opening Entry Missing"
 msgstr "crwdns154506:0crwdne154506:0"
 
@@ -34417,7 +34479,7 @@ msgstr "crwdns78072:0crwdne78072:0"
 msgid "POS Profile"
 msgstr "crwdns78074:0crwdne78074:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1195
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1199
 msgid "POS Profile - {0} has multiple open POS Opening Entries. Please close or cancel the existing entries before proceeding."
 msgstr "crwdns155656:0{0}crwdne155656:0"
 
@@ -34435,11 +34497,11 @@ msgstr "crwdns78084:0crwdne78084:0"
 msgid "POS Profile doesn't match {}"
 msgstr "crwdns143488:0crwdne143488:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1155
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1159
 msgid "POS Profile is mandatory to mark this invoice as POS Transaction."
 msgstr "crwdns154652:0crwdne154652:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1384
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1397
 msgid "POS Profile required to make POS Entry"
 msgstr "crwdns78088:0crwdne78088:0"
 
@@ -34689,7 +34751,7 @@ msgid "Paid To Account Type"
 msgstr "crwdns135980:0crwdne135980:0"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:327
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1151
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1155
 msgid "Paid amount + Write Off Amount can not be greater than Grand Total"
 msgstr "crwdns78248:0crwdne78248:0"
 
@@ -34910,7 +34972,7 @@ msgstr "crwdns201281:0crwdne201281:0"
 msgid "Partial Material Transferred"
 msgstr "crwdns136036:0crwdne136036:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1174
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1178
 msgid "Partial Payment in POS Transactions are not allowed."
 msgstr "crwdns154654:0crwdne154654:0"
 
@@ -36051,6 +36113,7 @@ msgstr "crwdns78794:0crwdne78794:0"
 #. Invoice'
 #. Label of the payment_terms_template (Link) field in DocType 'Sales Invoice'
 #. Label of the payment_terms_template (Link) field in DocType 'Purchase Order'
+#. Label of the payment_terms (Link) field in DocType 'Customer'
 #. Label of the payment_terms_template (Link) field in DocType 'Quotation'
 #. Label of the payment_terms_template (Link) field in DocType 'Sales Order'
 #: erpnext/accounts/doctype/payment_terms_template/payment_terms_template.json
@@ -36065,6 +36128,7 @@ msgstr "crwdns78794:0crwdne78794:0"
 #: erpnext/accounts/report/customer_ledger_summary/customer_ledger_summary.js:62
 #: erpnext/accounts/report/supplier_ledger_summary/supplier_ledger_summary.js:61
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
+#: erpnext/selling/doctype/customer/customer.json
 #: erpnext/selling/doctype/quotation/quotation.json
 #: erpnext/selling/doctype/sales_order/sales_order.json
 msgid "Payment Terms Template"
@@ -36122,7 +36186,7 @@ msgstr "crwdns201305:0{0}crwdne201305:0"
 msgid "Payment methods are mandatory. Please add at least one payment method."
 msgstr "crwdns78828:0crwdne78828:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3115
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3139
 msgid "Payment methods refreshed. Please review before proceeding."
 msgstr "crwdns199158:0crwdne199158:0"
 
@@ -37068,7 +37132,7 @@ msgstr "crwdns79198:0crwdne79198:0"
 msgid "Please add the account to root level Company - {0}"
 msgstr "crwdns79200:0{0}crwdne79200:0"
 
-#: erpnext/accounts/doctype/account/account.py:234
+#: erpnext/accounts/doctype/account/account.py:237
 msgid "Please add the account to root level Company - {}"
 msgstr "crwdns79202:0crwdne79202:0"
 
@@ -37084,7 +37148,7 @@ msgstr "crwdns79206:0{0}crwdne79206:0"
 msgid "Please attach CSV file"
 msgstr "crwdns79208:0crwdne79208:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3256
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3286
 msgid "Please cancel and amend the Payment Entry"
 msgstr "crwdns79210:0crwdne79210:0"
 
@@ -37163,7 +37227,7 @@ msgstr "crwdns79238:0crwdne79238:0"
 msgid "Please contact your administrator to extend the credit limits for {0}."
 msgstr "crwdns79240:0{0}crwdne79240:0"
 
-#: erpnext/accounts/doctype/account/account.py:385
+#: erpnext/accounts/doctype/account/account.py:388
 msgid "Please convert the parent account in corresponding child company to a group account."
 msgstr "crwdns79242:0crwdne79242:0"
 
@@ -37248,7 +37312,7 @@ msgid "Please enter <b>Difference Account</b> or set default <b>Stock Adjustment
 msgstr "crwdns79278:0{0}crwdne79278:0"
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:556
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1286
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1290
 msgid "Please enter Account for Change Amount"
 msgstr "crwdns79280:0crwdne79280:0"
 
@@ -37334,7 +37398,7 @@ msgid "Please enter Warehouse and Date"
 msgstr "crwdns79320:0crwdne79320:0"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:660
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1282
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1286
 msgid "Please enter Write Off Account"
 msgstr "crwdns79324:0crwdne79324:0"
 
@@ -37743,7 +37807,7 @@ msgstr "crwdns201925:0crwdne201925:0"
 msgid "Please select at least one filter: Item Code, Batch, or Serial No."
 msgstr "crwdns157478:0crwdne157478:0"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:556
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:559
 msgid "Please select at least one item to update delivered quantity."
 msgstr "crwdns201321:0crwdne201321:0"
 
@@ -37875,7 +37939,7 @@ msgstr "crwdns148820:0{0}crwdnd148820:0{1}crwdne148820:0"
 msgid "Please set Account"
 msgstr "crwdns79518:0crwdne79518:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1963
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1976
 msgid "Please set Account for Change Amount"
 msgstr "crwdns111902:0crwdne111902:0"
 
@@ -38006,19 +38070,19 @@ msgstr "crwdns79566:0crwdne79566:0"
 msgid "Please set both the Tax ID and Fiscal Code on Company {0}"
 msgstr "crwdns154248:0{0}crwdne154248:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2500
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2524
 msgid "Please set default Cash or Bank account in Mode of Payment {0}"
 msgstr "crwdns79568:0{0}crwdne79568:0"
 
 #: erpnext/accounts/doctype/pos_opening_entry/pos_opening_entry.py:94
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:198
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3108
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3132
 msgid "Please set default Cash or Bank account in Mode of Payment {}"
 msgstr "crwdns79570:0crwdne79570:0"
 
 #: erpnext/accounts/doctype/pos_opening_entry/pos_opening_entry.py:96
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:200
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3110
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3134
 msgid "Please set default Cash or Bank account in Mode of Payments {}"
 msgstr "crwdns79572:0crwdne79572:0"
 
@@ -38549,6 +38613,11 @@ msgstr "crwdns201335:0crwdne201335:0"
 msgid "Pre-Submit Warning: Packed Qty"
 msgstr "crwdns201337:0crwdne201337:0"
 
+#. Description of the 'Company Bank Account' (Link) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Pre-filled on payment entries for this customer. Must be a company account."
+msgstr "crwdns201983:0crwdne201983:0"
+
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:307
 msgid "Preference"
 msgstr "crwdns79784:0crwdne79784:0"
@@ -38721,6 +38790,7 @@ msgstr "crwdns136306:0crwdne136306:0"
 #. Option for the 'Rate Of Materials Based On' (Select) field in DocType 'BOM
 #. Creator'
 #. Label of the buying_price_list (Link) field in DocType 'BOM Creator'
+#. Label of the default_price_list (Link) field in DocType 'Customer'
 #. Label of the selling_price_list (Link) field in DocType 'Quotation'
 #. Label of the selling_price_list (Link) field in DocType 'Sales Order'
 #. Label of a Link in the Selling Workspace
@@ -38744,6 +38814,7 @@ msgstr "crwdns136306:0crwdne136306:0"
 #: erpnext/buying/workspace/buying/buying.json
 #: erpnext/manufacturing/doctype/bom/bom.json
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.json
+#: erpnext/selling/doctype/customer/customer.json
 #: erpnext/selling/doctype/quotation/quotation.json
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #: erpnext/selling/report/customer_wise_item_price/customer_wise_item_price.py:44
@@ -39504,8 +39575,8 @@ msgstr "crwdns136382:0crwdne136382:0"
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 #: erpnext/buying/doctype/purchase_order_item/purchase_order_item.json
 #: erpnext/buying/workspace/buying/buying.json
-#: erpnext/public/js/controllers/buying.js:326
-#: erpnext/public/js/controllers/buying.js:611
+#: erpnext/public/js/controllers/buying.js:321
+#: erpnext/public/js/controllers/buying.js:606
 #: erpnext/selling/doctype/product_bundle/product_bundle.json
 #: erpnext/selling/workspace/selling/selling.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
@@ -40194,6 +40265,7 @@ msgstr "crwdns143508:0crwdne143508:0"
 #: erpnext/projects/doctype/project/project_dashboard.py:16
 #: erpnext/setup/doctype/company/company.py:466 erpnext/setup/install.py:436
 #: erpnext/stock/doctype/item/item.json
+#: erpnext/stock/doctype/item/item_list.js:30
 #: erpnext/stock/doctype/item_lead_time/item_lead_time.json
 #: erpnext/stock/doctype/item_reorder/item_reorder.json
 #: erpnext/stock/doctype/material_request/material_request.json
@@ -40516,7 +40588,7 @@ msgstr "crwdns159924:0{0}crwdne159924:0"
 msgid "Purchase Order {0} is not submitted"
 msgstr "crwdns80886:0{0}crwdne80886:0"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:930
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:933
 msgid "Purchase Orders"
 msgstr "crwdns80888:0crwdne80888:0"
 
@@ -40531,7 +40603,7 @@ msgstr "crwdns163964:0crwdne163964:0"
 msgid "Purchase Orders Items Overdue"
 msgstr "crwdns136434:0crwdne136434:0"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:276
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:279
 msgid "Purchase Orders are not allowed for {0} due to a scorecard standing of {1}."
 msgstr "crwdns80892:0{0}crwdnd80892:0{1}crwdne80892:0"
 
@@ -40778,6 +40850,7 @@ msgstr "crwdns81004:0crwdne81004:0"
 #. Label of the purpose (Select) field in DocType 'Stock Reconciliation'
 #: erpnext/assets/doctype/asset_movement/asset_movement.json
 #: erpnext/manufacturing/doctype/master_production_schedule/master_production_schedule.js:163
+#: erpnext/stock/doctype/item/item_list.js:40
 #: erpnext/stock/doctype/material_request/material_request.json
 #: erpnext/stock/doctype/pick_list/pick_list.json
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:459
@@ -41504,7 +41577,7 @@ msgstr "crwdns201355:0crwdne201355:0"
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:194
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:218
 #: erpnext/manufacturing/doctype/production_plan_sub_assembly_item/production_plan_sub_assembly_item.json
-#: erpnext/public/js/controllers/buying.js:618
+#: erpnext/public/js/controllers/buying.js:613
 #: erpnext/public/js/stock_analytics.js:50
 #: erpnext/public/js/utils/serial_no_batch_selector.js:500
 #: erpnext/selling/doctype/quotation_item/quotation_item.json
@@ -41686,7 +41759,7 @@ msgstr "crwdns112592:0crwdne112592:0"
 msgid "Quart Liquid (US)"
 msgstr "crwdns112594:0crwdne112594:0"
 
-#: erpnext/selling/report/sales_analytics/sales_analytics.py:437
+#: erpnext/selling/report/sales_analytics/sales_analytics.py:461
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:125
 msgid "Quarter {0} {1}"
 msgstr "crwdns81420:0{0}crwdnd81420:0{1}crwdne81420:0"
@@ -43423,7 +43496,7 @@ msgstr "crwdns136754:0crwdne136754:0"
 msgid "Rename Log"
 msgstr "crwdns136756:0crwdne136756:0"
 
-#: erpnext/accounts/doctype/account/account.py:559
+#: erpnext/accounts/doctype/account/account.py:568
 msgid "Rename Not Allowed"
 msgstr "crwdns82346:0crwdne82346:0"
 
@@ -43440,7 +43513,7 @@ msgstr "crwdns154658:0{0}crwdne154658:0"
 msgid "Rename jobs for doctype {0} have not been enqueued."
 msgstr "crwdns154660:0{0}crwdne154660:0"
 
-#: erpnext/accounts/doctype/account/account.py:551
+#: erpnext/accounts/doctype/account/account.py:560
 msgid "Renaming it is only allowed via parent company {0}, to avoid mismatch."
 msgstr "crwdns82350:0{0}crwdne82350:0"
 
@@ -43559,7 +43632,7 @@ msgstr "crwdns161174:0crwdne161174:0"
 msgid "Report Template"
 msgstr "crwdns161176:0crwdne161176:0"
 
-#: erpnext/accounts/doctype/account/account.py:463
+#: erpnext/accounts/doctype/account/account.py:462
 msgid "Report Type is mandatory"
 msgstr "crwdns82414:0crwdne82414:0"
 
@@ -44573,7 +44646,7 @@ msgstr "crwdns82812:0crwdne82812:0"
 msgid "Return Raw Material to Customer"
 msgstr "crwdns160340:0crwdne160340:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1525
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1538
 msgid "Return invoice of asset cancelled"
 msgstr "crwdns154944:0crwdne154944:0"
 
@@ -44900,11 +44973,11 @@ msgstr "crwdns82910:0crwdne82910:0"
 msgid "Root Type for {0} must be one of the Asset, Liability, Income, Expense and Equity"
 msgstr "crwdns82916:0{0}crwdne82916:0"
 
-#: erpnext/accounts/doctype/account/account.py:460
+#: erpnext/accounts/doctype/account/account.py:459
 msgid "Root Type is mandatory"
 msgstr "crwdns82918:0crwdne82918:0"
 
-#: erpnext/accounts/doctype/account/account.py:216
+#: erpnext/accounts/doctype/account/account.py:219
 msgid "Root cannot be edited."
 msgstr "crwdns82920:0crwdne82920:0"
 
@@ -45109,12 +45182,12 @@ msgid "Row #1: Sequence ID must be 1 for Operation {0}."
 msgstr "crwdns156066:0{0}crwdne156066:0"
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:565
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2155
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2177
 msgid "Row #{0} (Payment Table): Amount must be negative"
 msgstr "crwdns83042:0#{0}crwdne83042:0"
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:563
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2150
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2172
 msgid "Row #{0} (Payment Table): Amount must be positive"
 msgstr "crwdns83044:0#{0}crwdne83044:0"
 
@@ -45303,7 +45376,7 @@ msgstr "crwdns160464:0#{0}crwdnd160464:0{1}crwdnd160464:0{2}crwdne160464:0"
 msgid "Row #{0}: Dates overlapping with other row in group {1}"
 msgstr "crwdns164248:0#{0}crwdnd164248:0{1}crwdne164248:0"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:337
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:340
 msgid "Row #{0}: Default BOM not found for FG Item {1}"
 msgstr "crwdns83110:0#{0}crwdnd83110:0{1}crwdne83110:0"
 
@@ -45327,17 +45400,17 @@ msgstr "crwdns83116:0#{0}crwdnd83116:0{1}crwdnd83116:0{2}crwdne83116:0"
 msgid "Row #{0}: Expense account {1} is not valid for Purchase Invoice {2}. Only expense accounts from non-stock items are allowed."
 msgstr "crwdns163866:0#{0}crwdnd163866:0{1}crwdnd163866:0{2}crwdne163866:0"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:342
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:345
 #: erpnext/selling/doctype/sales_order/sales_order.py:307
 msgid "Row #{0}: Finished Good Item Qty can not be zero"
 msgstr "crwdns83118:0#{0}crwdne83118:0"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:324
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:327
 #: erpnext/selling/doctype/sales_order/sales_order.py:287
 msgid "Row #{0}: Finished Good Item is not specified for service item {1}"
 msgstr "crwdns83120:0#{0}crwdnd83120:0{1}crwdne83120:0"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:331
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:334
 #: erpnext/selling/doctype/sales_order/sales_order.py:294
 msgid "Row #{0}: Finished Good Item {1} must be a sub-contracted item"
 msgstr "crwdns83122:0#{0}crwdnd83122:0{1}crwdne83122:0"
@@ -45694,7 +45767,7 @@ msgstr "crwdns83224:0#{0}crwdnd83224:0{1}crwdnd83224:0{2}crwdnd83224:0{3}crwdne8
 msgid "Row #{0}: Stock not available to reserve for the Item {1} in Warehouse {2}."
 msgstr "crwdns83226:0#{0}crwdnd83226:0{1}crwdnd83226:0{2}crwdne83226:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1268
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1272
 msgid "Row #{0}: Stock quantity {1} ({2}) for item {3} cannot exceed {4}"
 msgstr "crwdns160378:0#{0}crwdnd160378:0{1}crwdnd160378:0{2}crwdnd160378:0{3}crwdnd160378:0{4}crwdne160378:0"
 
@@ -45742,7 +45815,7 @@ msgstr "crwdns83234:0#{0}crwdnd83234:0{1}crwdne83234:0"
 msgid "Row #{0}: You must select an Asset for Item {1}."
 msgstr "crwdns83236:0#{0}crwdnd83236:0{1}crwdne83236:0"
 
-#: erpnext/public/js/controllers/buying.js:266
+#: erpnext/public/js/controllers/buying.js:261
 msgid "Row #{0}: {1} can not be negative for item {2}"
 msgstr "crwdns83240:0#{0}crwdnd83240:0{1}crwdnd83240:0{2}crwdne83240:0"
 
@@ -46166,7 +46239,7 @@ msgstr "crwdns149102:0{0}crwdnd149102:0{3}crwdnd149102:0{1}crwdnd149102:0{2}crwd
 msgid "Row {0}: To set {1} periodicity, difference between from and to date must be greater than or equal to {2}"
 msgstr "crwdns83416:0{0}crwdnd83416:0{1}crwdnd83416:0{2}crwdne83416:0"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry_handler/material_transfer.py:348
+#: erpnext/stock/doctype/stock_entry/stock_entry_handler/material_transfer.py:99
 msgid "Row {0}: Transferred quantity cannot be greater than the requested quantity."
 msgstr "crwdns163972:0{0}crwdne163972:0"
 
@@ -46505,9 +46578,14 @@ msgstr "crwdns136980:0crwdne136980:0"
 #: erpnext/setup/install.py:431
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:297
 #: erpnext/stock/doctype/item/item.json
+#: erpnext/stock/doctype/item/item_list.js:29
 #: erpnext/stock/doctype/pick_list/pick_list_dashboard.py:16
 msgid "Sales"
 msgstr "crwdns83534:0crwdne83534:0"
+
+#: erpnext/stock/doctype/item/item_list.js:28
+msgid "Sales & Purchase"
+msgstr "crwdns201985:0crwdne201985:0"
 
 #: erpnext/setup/doctype/company/company.py:653
 msgid "Sales Account"
@@ -46914,7 +46992,7 @@ msgstr "crwdns83694:0{0}crwdnd83694:0{1}crwdnd83694:0{2}crwdnd83694:0{3}crwdne83
 msgid "Sales Order {0} is not available for production"
 msgstr "crwdns200212:0{0}crwdne200212:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1398
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1411
 msgid "Sales Order {0} is not submitted"
 msgstr "crwdns83696:0{0}crwdne83696:0"
 
@@ -46967,6 +47045,7 @@ msgstr "crwdns137000:0crwdne137000:0"
 #. Scheme'
 #. Label of the sales_partner (Link) field in DocType 'Sales Invoice'
 #. Label of the default_sales_partner (Link) field in DocType 'Customer'
+#. Label of the sales_team_section (Section Break) field in DocType 'Customer'
 #. Label of the sales_partner (Link) field in DocType 'Sales Order'
 #. Label of the sales_partner (Link) field in DocType 'SMS Center'
 #. Label of a Link in the Selling Workspace
@@ -47358,7 +47437,7 @@ msgstr "crwdns137022:0crwdne137022:0"
 msgid "Sample Size"
 msgstr "crwdns83884:0crwdne83884:0"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:1021
+#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:1023
 msgid "Sample quantity {0} cannot be more than received quantity {1}"
 msgstr "crwdns83888:0{0}crwdnd83888:0{1}crwdne83888:0"
 
@@ -47974,7 +48053,7 @@ msgstr "crwdns84172:0crwdne84172:0"
 msgid "Select a Payment Method."
 msgstr "crwdns155794:0crwdne155794:0"
 
-#: erpnext/selling/doctype/customer/customer.js:251
+#: erpnext/selling/doctype/customer/customer.js:253
 msgid "Select a Supplier"
 msgstr "crwdns84174:0crwdne84174:0"
 
@@ -48088,6 +48167,12 @@ msgstr "crwdns148834:0crwdne148834:0"
 msgid "Select the date and your timezone"
 msgstr "crwdns84210:0crwdne84210:0"
 
+#. Description of the 'Tax Withholding Group' (Link) field in DocType
+#. 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Select the group first to filter the applicable withholding categories below."
+msgstr "crwdns201987:0crwdne201987:0"
+
 #: erpnext/manufacturing/doctype/bom/bom.js:1004
 msgid "Select the raw materials (Items) required to manufacture the Item"
 msgstr "crwdns84212:0crwdne84212:0"
@@ -48115,7 +48200,7 @@ msgstr "crwdns137100:0crwdne137100:0"
 msgid "Selected POS Opening Entry should be open."
 msgstr "crwdns84222:0crwdne84222:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2651
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2675
 msgid "Selected Price List should have buying and selling fields checked."
 msgstr "crwdns84224:0crwdne84224:0"
 
@@ -48165,7 +48250,7 @@ msgstr "crwdns164268:0crwdne164268:0"
 msgid "Sell quantity cannot exceed the asset quantity"
 msgstr "crwdns164270:0crwdne164270:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1411
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1424
 msgid "Sell quantity cannot exceed the asset quantity. Asset {0} has only {1} item(s)."
 msgstr "crwdns164272:0{0}crwdnd164272:0{1}crwdne164272:0"
 
@@ -48442,7 +48527,7 @@ msgstr "crwdns84330:0crwdne84330:0"
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:450
 #: erpnext/stock/report/serial_no_ledger/serial_no_ledger.js:38
 #: erpnext/stock/report/serial_no_ledger/serial_no_ledger.py:61
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:425
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:426
 #: erpnext/stock/workspace/stock/stock.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_supplied_item/subcontracting_receipt_supplied_item.json
@@ -48697,7 +48782,7 @@ msgstr "crwdns137154:0crwdne137154:0"
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:188
 #: erpnext/stock/report/incorrect_serial_and_batch_bundle/incorrect_serial_and_batch_bundle.py:31
 #: erpnext/stock/report/serial_and_batch_summary/serial_and_batch_summary.py:82
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:409
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:410
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:177
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 #: erpnext/workspace_sidebar/stock.json
@@ -49111,7 +49196,7 @@ msgstr "crwdns137206:0crwdne137206:0"
 
 #. Label of the set_basic_rate_manually (Check) field in DocType 'Stock Entry
 #. Detail'
-#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:706
+#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:708
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgid "Set Basic Rate Manually"
 msgstr "crwdns137208:0crwdne137208:0"
@@ -50536,6 +50621,11 @@ msgstr "crwdns154974:0crwdne154974:0"
 msgid "Split across {} accounts"
 msgstr "crwdns201487:0crwdne201487:0"
 
+#. Description of the 'Sales Team' (Table) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Split commission credit across multiple sales persons."
+msgstr "crwdns201989:0crwdne201989:0"
+
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:2458
 msgid "Splitting {0} {1} into {2} rows as per Payment Terms"
 msgstr "crwdns85260:0{0}crwdnd85260:0{1}crwdnd85260:0{2}crwdne85260:0"
@@ -50830,6 +50920,7 @@ msgstr "crwdns137432:0crwdne137432:0"
 #: erpnext/manufacturing/doctype/bom/bom_dashboard.py:14
 #: erpnext/setup/doctype/incoterm/incoterm.json
 #: erpnext/setup/workspace/home/home.json
+#: erpnext/stock/doctype/item/item_list.js:21
 #: erpnext/stock/doctype/material_request/material_request_dashboard.py:17
 #: erpnext/stock/workspace/stock/stock.json
 #: erpnext/workspace_sidebar/stock.json
@@ -51486,7 +51577,7 @@ msgstr "crwdns137458:0crwdne137458:0"
 #: erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py:35
 #: erpnext/stock/report/reserved_stock/reserved_stock.py:110
 #: erpnext/stock/report/stock_balance/stock_balance.py:513
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:294
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:295
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_item/subcontracting_inward_order_item.json
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_received_item/subcontracting_inward_order_received_item.json
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_secondary_item/subcontracting_inward_order_secondary_item.json
@@ -51619,11 +51710,11 @@ msgstr "crwdns85782:0{0}crwdne85782:0"
 msgid "Stock cannot be reserved in the group warehouse {0}."
 msgstr "crwdns85784:0{0}crwdne85784:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1226
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1230
 msgid "Stock cannot be updated against the following Delivery Notes: {0}"
 msgstr "crwdns112036:0{0}crwdne112036:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1295
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1299
 msgid "Stock cannot be updated because the invoice contains a drop shipping item. Please disable 'Update Stock' or remove the drop shipping item."
 msgstr "crwdns112038:0crwdne112038:0"
 
@@ -52005,7 +52096,7 @@ msgstr "crwdns85894:0crwdne85894:0"
 msgid "Subcontracting Order Supplied Item"
 msgstr "crwdns85896:0crwdne85896:0"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:973
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:976
 msgid "Subcontracting Order {0} created."
 msgstr "crwdns85898:0{0}crwdne85898:0"
 
@@ -52094,7 +52185,7 @@ msgstr "crwdns197270:0crwdne197270:0"
 msgid "Subdivision"
 msgstr "crwdns137496:0crwdne137496:0"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:969
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:972
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:1122
 msgid "Submit Action Failed"
 msgstr "crwdns85940:0crwdne85940:0"
@@ -52293,7 +52384,7 @@ msgstr "crwdns86074:0{0}crwdne86074:0"
 msgid "Successfully linked to Customer"
 msgstr "crwdns86076:0crwdne86076:0"
 
-#: erpnext/selling/doctype/customer/customer.js:273
+#: erpnext/selling/doctype/customer/customer.js:275
 msgid "Successfully linked to Supplier"
 msgstr "crwdns86078:0crwdne86078:0"
 
@@ -52453,7 +52544,7 @@ msgstr "crwdns86128:0crwdne86128:0"
 #: erpnext/public/js/purchase_trends_filters.js:63
 #: erpnext/regional/doctype/lower_deduction_certificate/lower_deduction_certificate.json
 #: erpnext/regional/report/irs_1099/irs_1099.py:77
-#: erpnext/selling/doctype/customer/customer.js:255
+#: erpnext/selling/doctype/customer/customer.js:257
 #: erpnext/selling/doctype/party_specific_item/party_specific_item.json
 #: erpnext/selling/doctype/sales_order/sales_order.js:187
 #: erpnext/selling/doctype/sales_order/sales_order.js:1741
@@ -52696,8 +52787,6 @@ msgid "Supplier Number At Customer"
 msgstr "crwdns154978:0crwdne154978:0"
 
 #. Label of the supplier_numbers (Table) field in DocType 'Customer'
-#. Label of the supplier_numbers_section (Section Break) field in DocType
-#. 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Supplier Numbers"
 msgstr "crwdns154980:0crwdne154980:0"
@@ -52884,11 +52973,6 @@ msgstr "crwdns137574:0crwdne137574:0"
 msgid "Supplier is required for all selected Items"
 msgstr "crwdns161496:0crwdne161496:0"
 
-#. Description of the 'Supplier Numbers' (Table) field in DocType 'Customer'
-#: erpnext/selling/doctype/customer/customer.json
-msgid "Supplier numbers assigned by the customer"
-msgstr "crwdns154982:0crwdne154982:0"
-
 #. Description of a DocType
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "Supplier of Goods or Services."
@@ -52999,7 +53083,7 @@ msgstr "crwdns86424:0crwdne86424:0"
 msgid "Synchronize all accounts every hour"
 msgstr "crwdns137586:0crwdne137586:0"
 
-#: erpnext/accounts/doctype/account/account.py:664
+#: erpnext/accounts/doctype/account/account.py:673
 msgid "System In Use"
 msgstr "crwdns152593:0crwdne152593:0"
 
@@ -53053,6 +53137,12 @@ msgstr "crwdns151582:0crwdne151582:0"
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:292
 msgid "TDS Payable"
 msgstr "crwdns86446:0crwdne86446:0"
+
+#. Description of the 'Tax Withholding Category' (Link) field in DocType
+#. 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "TDS/TCS is calculated at the rate defined here on every payment from this customer."
+msgstr "crwdns201991:0crwdne201991:0"
 
 #. Description of a DocType
 #: erpnext/stock/doctype/item_website_specification/item_website_specification.json
@@ -54556,6 +54646,12 @@ msgstr "crwdns87144:0{0}crwdne87144:0"
 msgid "The payment gateway account in plan {0} is different from the payment gateway account in this payment request"
 msgstr "crwdns87146:0{0}crwdne87146:0"
 
+#. Description of the 'Over Order Allowance (%)' (Float) field in DocType
+#. 'Buying Settings'
+#: erpnext/buying/doctype/buying_settings/buying_settings.json
+msgid "The percentage by which you are allowed to order more on a Purchase Order than the quantity requested on the originating Material Request. For example, if the Material Request has 100 units and the allowance is 10%, you can order up to 110 units"
+msgstr "crwdns201993:0crwdne201993:0"
+
 #. Description of the 'Over Billing Allowance (%)' (Currency) field in DocType
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
@@ -54597,7 +54693,7 @@ msgstr "crwdns87154:0crwdne87154:0"
 msgid "The reserved stock will be released. Are you certain you wish to proceed?"
 msgstr "crwdns87156:0crwdne87156:0"
 
-#: erpnext/accounts/doctype/account/account.py:219
+#: erpnext/accounts/doctype/account/account.py:222
 msgid "The root account {0} must be a group"
 msgstr "crwdns87158:0{0}crwdne87158:0"
 
@@ -54772,7 +54868,7 @@ msgstr "crwdns87212:0crwdne87212:0"
 msgid "There are inconsistencies between the rate, no of shares and the amount calculated"
 msgstr "crwdns87214:0crwdne87214:0"
 
-#: erpnext/accounts/doctype/account/account.py:204
+#: erpnext/accounts/doctype/account/account.py:207
 msgid "There are ledger entries against this account. Changing {0} to non-{1} in live system will cause incorrect output in 'Accounts {2}' report"
 msgstr "crwdns112056:0{0}crwdnd112056:0{1}crwdnd112056:0{2}crwdne112056:0"
 
@@ -54897,7 +54993,7 @@ msgstr "crwdns87260:0{0}crwdne87260:0"
 msgid "This Month's Summary"
 msgstr "crwdns87262:0crwdne87262:0"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:982
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:985
 msgid "This Purchase Order has been fully subcontracted."
 msgstr "crwdns160416:0crwdne160416:0"
 
@@ -54935,7 +55031,7 @@ msgstr "crwdns201555:0crwdne201555:0"
 msgid "This covers all scorecards tied to this Setup"
 msgstr "crwdns87274:0crwdne87274:0"
 
-#: erpnext/controllers/status_updater.py:478
+#: erpnext/controllers/status_updater.py:488
 msgid "This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?"
 msgstr "crwdns87276:0{0}crwdnd87276:0{1}crwdnd87276:0{4}crwdnd87276:0{3}crwdnd87276:0{2}crwdne87276:0"
 
@@ -55111,7 +55207,7 @@ msgstr "crwdns87332:0{0}crwdnd87332:0{1}crwdne87332:0"
 msgid "This schedule was created when Asset {0} was repaired through Asset Repair {1}."
 msgstr "crwdns87334:0{0}crwdnd87334:0{1}crwdne87334:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1502
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1515
 msgid "This schedule was created when Asset {0} was restored due to Sales Invoice {1} cancellation."
 msgstr "crwdns154988:0{0}crwdnd154988:0{1}crwdne154988:0"
 
@@ -55123,7 +55219,7 @@ msgstr "crwdns87336:0{0}crwdnd87336:0{1}crwdne87336:0"
 msgid "This schedule was created when Asset {0} was restored."
 msgstr "crwdns87338:0{0}crwdne87338:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1498
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1511
 msgid "This schedule was created when Asset {0} was returned through Sales Invoice {1}."
 msgstr "crwdns87340:0{0}crwdnd87340:0{1}crwdne87340:0"
 
@@ -55135,7 +55231,7 @@ msgstr "crwdns87342:0{0}crwdne87342:0"
 msgid "This schedule was created when Asset {0} was {1} into new Asset {2}."
 msgstr "crwdns154990:0{0}crwdnd154990:0{1}crwdnd154990:0{2}crwdne154990:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1474
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1487
 msgid "This schedule was created when Asset {0} was {1} through Sales Invoice {2}."
 msgstr "crwdns154992:0{0}crwdnd154992:0{1}crwdnd154992:0{2}crwdne154992:0"
 
@@ -55651,11 +55747,15 @@ msgstr "crwdns87702:0crwdne87702:0"
 msgid "To add subcontracted Item's raw materials if include exploded items is disabled."
 msgstr "crwdns87704:0crwdne87704:0"
 
-#: erpnext/controllers/status_updater.py:471
+#: erpnext/controllers/status_updater.py:481
 msgid "To allow over billing, update \"Over Billing Allowance\" in Accounts Settings or the Item."
 msgstr "crwdns87706:0crwdne87706:0"
 
-#: erpnext/controllers/status_updater.py:467
+#: erpnext/controllers/status_updater.py:475
+msgid "To allow over ordering, update \"Over Order Allowance\" in Buying Settings."
+msgstr "crwdns201995:0crwdne201995:0"
+
+#: erpnext/controllers/status_updater.py:477
 msgid "To allow over receipt / delivery, update \"Over Receipt/Delivery Allowance\" in Stock Settings or the Item."
 msgstr "crwdns87708:0crwdne87708:0"
 
@@ -55710,7 +55810,7 @@ msgstr "crwdns87726:0crwdne87726:0"
 msgid "To not apply Pricing Rule in a particular transaction, all applicable Pricing Rules should be disabled."
 msgstr "crwdns157498:0crwdne157498:0"
 
-#: erpnext/accounts/doctype/account/account.py:555
+#: erpnext/accounts/doctype/account/account.py:564
 msgid "To overrule this, enable '{0}' in company {1}"
 msgstr "crwdns87728:0{0}crwdnd87728:0{1}crwdne87728:0"
 
@@ -56950,11 +57050,16 @@ msgstr "crwdns137974:0crwdne137974:0"
 msgid "Transactions against the Company already exist! Chart of Accounts can only be imported for a Company with no transactions."
 msgstr "crwdns88266:0crwdne88266:0"
 
+#. Description of the 'Credit Limit' (Table) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Transactions are blocked or warned when outstanding balance exceeds this amount."
+msgstr "crwdns201997:0crwdne201997:0"
+
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:230
 msgid "Transactions to be imported into the system"
 msgstr "crwdns201611:0crwdne201611:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1159
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1163
 msgid "Transactions using Sales Invoice in POS are disabled."
 msgstr "crwdns154686:0crwdne154686:0"
 
@@ -57400,6 +57505,7 @@ msgstr "crwdns88430:0crwdne88430:0"
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/delivery_stop/delivery_stop.json
 #: erpnext/stock/doctype/item/item.json
+#: erpnext/stock/doctype/item/item_list.js:41
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
 #: erpnext/stock/doctype/item_price/item_price.json
 #: erpnext/stock/doctype/material_request_item/material_request_item.json
@@ -58441,6 +58547,11 @@ msgstr "crwdns138156:0crwdne138156:0"
 msgid "Users can make manufacture entry against Job Cards"
 msgstr "crwdns195800:0crwdne195800:0"
 
+#. Description of the 'Portal Users' (Tab Break) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Users listed here can log into the customer portal to view their orders, invoices, and deliveries."
+msgstr "crwdns201999:0crwdne201999:0"
+
 #. Description of the 'Role Allowed to Over Bill ' (Link) field in DocType
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
@@ -58683,7 +58794,6 @@ msgstr "crwdns88988:0crwdne88988:0"
 #. Label of the valuation_rate (Currency) field in DocType 'Stock Closing
 #. Balance'
 #. Label of the valuation_rate (Currency) field in DocType 'Stock Entry Detail'
-#. Label of the valuation_rate (Currency) field in DocType 'Stock Ledger Entry'
 #. Label of the valuation_rate (Currency) field in DocType 'Stock
 #. Reconciliation Item'
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
@@ -58699,14 +58809,12 @@ msgstr "crwdns88988:0crwdne88988:0"
 #: erpnext/stock/doctype/serial_and_batch_entry/serial_and_batch_entry.json
 #: erpnext/stock/doctype/stock_closing_balance/stock_closing_balance.json
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
-#: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.json
 #: erpnext/stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:164
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:85
 #: erpnext/stock/report/item_prices/item_prices.py:57
 #: erpnext/stock/report/serial_no_ledger/serial_no_ledger.py:68
 #: erpnext/stock/report/stock_balance/stock_balance.py:566
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:377
 msgid "Valuation Rate"
 msgstr "crwdns88992:0crwdne88992:0"
 
@@ -58881,7 +58989,7 @@ msgid "Variance ({})"
 msgstr "crwdns89086:0crwdne89086:0"
 
 #: erpnext/stock/doctype/item/item.js:241
-#: erpnext/stock/doctype/item/item_list.js:22
+#: erpnext/stock/doctype/item/item_list.js:59
 #: erpnext/stock/report/item_variant_details/item_variant_details.py:74
 msgid "Variant"
 msgstr "crwdns89088:0crwdne89088:0"
@@ -59228,7 +59336,7 @@ msgstr "crwdns89190:0crwdne89190:0"
 #: erpnext/stock/report/available_serial_no/available_serial_no.js:56
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:196
 #: erpnext/stock/report/stock_ledger/stock_ledger.js:97
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:402
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:403
 msgid "Voucher #"
 msgstr "crwdns89192:0crwdne89192:0"
 
@@ -59401,7 +59509,7 @@ msgstr "crwdns89230:0crwdne89230:0"
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:486
 #: erpnext/stock/report/serial_no_ledger/serial_no_ledger.py:28
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:152
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:400
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:401
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:159
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:68
 msgid "Voucher Type"
@@ -59581,7 +59689,7 @@ msgstr "crwdns199610:0crwdne199610:0"
 msgid "Warehouse not found against the account {0}"
 msgstr "crwdns89402:0{0}crwdne89402:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1216
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1220
 #: erpnext/stock/doctype/delivery_note/delivery_note.py:445
 msgid "Warehouse required for stock Item {0}"
 msgstr "crwdns89406:0{0}crwdne89406:0"
@@ -59907,7 +60015,7 @@ msgstr "crwdns160424:0crwdne160424:0"
 msgid "Week of the year"
 msgstr "crwdns200846:0crwdne200846:0"
 
-#: erpnext/selling/report/sales_analytics/sales_analytics.py:433
+#: erpnext/selling/report/sales_analytics/sales_analytics.py:457
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:121
 msgid "Week {0} {1}"
 msgstr "crwdns89556:0{0}crwdnd89556:0{1}crwdne89556:0"
@@ -60047,7 +60155,7 @@ msgstr "crwdns89646:0crwdne89646:0"
 msgid "When enabled, it adds a cutoff date filter to Delivery Notes created in bulk from Sales Orders. This allows you to process orders only with a transaction date up to the specified cutoff date, which is useful for period-end processing and batch fulfillment."
 msgstr "crwdns200596:0crwdne200596:0"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:703
+#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:705
 msgid "When there are multiple finished goods ({0}) in a Repack stock entry, the basic rate for all finished goods must be set manually. To set rate manually, enable the checkbox 'Set Basic Rate Manually' in the respective finished good row."
 msgstr "crwdns195094:0{0}crwdne195094:0"
 
@@ -60057,11 +60165,11 @@ msgstr "crwdns195094:0{0}crwdne195094:0"
 msgid "When you pay for something upfront (like annual insurance), the cost is held here and recognized gradually over time"
 msgstr "crwdns200848:0crwdne200848:0"
 
-#: erpnext/accounts/doctype/account/account.py:381
+#: erpnext/accounts/doctype/account/account.py:384
 msgid "While creating account for Child Company {0}, parent account {1} found as a ledger account."
 msgstr "crwdns89648:0{0}crwdnd89648:0{1}crwdne89648:0"
 
-#: erpnext/accounts/doctype/account/account.py:371
+#: erpnext/accounts/doctype/account/account.py:374
 msgid "While creating account for Child Company {0}, parent account {1} not found. Please create the parent account in corresponding COA"
 msgstr "crwdns89650:0{0}crwdnd89650:0{1}crwdne89650:0"
 
@@ -60696,7 +60804,7 @@ msgstr "crwdns89928:0{0}crwdne89928:0"
 msgid "You are not authorized to make/edit Stock Transactions for Item {0} under warehouse {1} before this time."
 msgstr "crwdns89930:0{0}crwdnd89930:0{1}crwdne89930:0"
 
-#: erpnext/accounts/doctype/account/account.py:313
+#: erpnext/accounts/doctype/account/account.py:316
 msgid "You are not authorized to set Frozen value"
 msgstr "crwdns89932:0crwdne89932:0"
 
@@ -60874,7 +60982,7 @@ msgstr "crwdns200222:0crwdne200222:0"
 msgid "You don't have permission to update Company details. Please contact your System Manager."
 msgstr "crwdns200224:0crwdne200224:0"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:575
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:578
 msgid "You don't have permission to update Received Qty DocField for item {0}"
 msgstr "crwdns201801:0{0}crwdne201801:0"
 
@@ -61003,7 +61111,7 @@ msgstr "crwdns138392:0crwdne138392:0"
 msgid "[Important] [ERPNext] Auto Reorder Errors"
 msgstr "crwdns90044:0crwdne90044:0"
 
-#: erpnext/controllers/status_updater.py:302
+#: erpnext/controllers/status_updater.py:304
 msgid "`Allow Negative rates for Items`"
 msgstr "crwdns90046:0crwdne90046:0"
 
@@ -61048,7 +61156,7 @@ msgid "cannot be greater than 100"
 msgstr "crwdns112162:0crwdne112162:0"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:334
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1105
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1101
 msgid "dated {0}"
 msgstr "crwdns148846:0{0}crwdne148846:0"
 
@@ -61230,7 +61338,7 @@ msgstr "crwdns90144:0crwdne90144:0"
 msgid "reconciled"
 msgstr "crwdns201709:0crwdne201709:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1476
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1489
 msgid "returned"
 msgstr "crwdns155012:0crwdne155012:0"
 
@@ -61265,7 +61373,7 @@ msgstr "crwdns138422:0crwdne138422:0"
 msgid "sandbox"
 msgstr "crwdns138424:0crwdne138424:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1476
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1489
 msgid "sold"
 msgstr "crwdns155014:0crwdne155014:0"
 
@@ -61273,8 +61381,8 @@ msgstr "crwdns155014:0crwdne155014:0"
 msgid "subscription is already cancelled."
 msgstr "crwdns90172:0crwdne90172:0"
 
-#: erpnext/controllers/status_updater.py:481
-#: erpnext/controllers/status_updater.py:500
+#: erpnext/controllers/status_updater.py:491
+#: erpnext/controllers/status_updater.py:510
 msgid "target_ref_field"
 msgstr "crwdns90174:0crwdne90174:0"
 
@@ -61292,7 +61400,7 @@ msgstr "crwdns138428:0crwdne138428:0"
 msgid "to"
 msgstr "crwdns90180:0crwdne90180:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3258
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3288
 msgid "to unallocate the amount of this Return Invoice before cancelling it."
 msgstr "crwdns90182:0crwdne90182:0"
 
@@ -61319,7 +61427,7 @@ msgstr "crwdns201717:0crwdne201717:0"
 msgid "unique e.g. SAVE20  To be used to get discount"
 msgstr "crwdns138430:0crwdne138430:0"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:605
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:608
 msgid "updated delivered quantity for item {0} to {1}"
 msgstr "crwdns201803:0{0}crwdnd201803:0{1}crwdne201803:0"
 
@@ -61494,7 +61602,7 @@ msgstr "crwdns162030:0{0}crwdne162030:0"
 msgid "{0} currency must be same as company's default currency. Please select another account."
 msgstr "crwdns90252:0{0}crwdne90252:0"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:285
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:288
 msgid "{0} currently has a {1} Supplier Scorecard standing, and Purchase Orders to this supplier should be issued with caution."
 msgstr "crwdns90254:0{0}crwdnd90254:0{1}crwdne90254:0"
 
@@ -61570,7 +61678,7 @@ msgstr "crwdns90274:0{0}crwdne90274:0"
 msgid "{0} is in Draft. Submit it before creating the Asset."
 msgstr "crwdns162036:0{0}crwdne162036:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1131
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1127
 msgid "{0} is mandatory for Item {1}"
 msgstr "crwdns90278:0{0}crwdnd90278:0{1}crwdne90278:0"
 
@@ -61667,7 +61775,7 @@ msgstr "crwdns198382:0{0}crwdne198382:0"
 msgid "{0} must be negative in return document"
 msgstr "crwdns90308:0{0}crwdne90308:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2448
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2472
 msgid "{0} not allowed to transact with {1}. Please change the Company or add the Company in the 'Allowed To Transact With'-Section in the Customer record."
 msgstr "crwdns112674:0{0}crwdnd112674:0{1}crwdne112674:0"
 
@@ -61787,7 +61895,7 @@ msgstr "crwdns90352:0{0}crwdnd90352:0{1}crwdne90352:0"
 msgid "{0} {1} has already been partly paid. Please use the 'Get Outstanding Invoice' or the 'Get Outstanding Orders' button to get the latest outstanding amounts."
 msgstr "crwdns90354:0{0}crwdnd90354:0{1}crwdne90354:0"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:413
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:416
 #: erpnext/selling/doctype/sales_order/sales_order.py:609
 #: erpnext/stock/doctype/material_request/material_request.py:257
 msgid "{0} {1} has been modified. Please refresh."
@@ -62008,7 +62116,7 @@ msgstr "crwdns154284:0{ref_doctype}crwdnd154284:0{ref_name}crwdnd154284:0{status
 msgid "{}"
 msgstr "crwdns90446:0crwdne90446:0"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2214
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2236
 msgid "{} can't be cancelled since the Loyalty Points earned has been redeemed. First cancel the {} No {}"
 msgstr "crwdns90450:0crwdne90450:0"
 
