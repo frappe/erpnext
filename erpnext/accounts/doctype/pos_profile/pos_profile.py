@@ -209,15 +209,14 @@ class POSProfile(Document):
 	def set_defaults(self, include_current_pos=True):
 		frappe.defaults.clear_default("is_pos")
 
-		if not include_current_pos:
-			condition = " where pfu.name != '%s' and pfu.default = 1 " % self.name.replace("'", "'")
-		else:
-			condition = " where pfu.default = 1 "
+		pfu = frappe.qb.DocType("POS Profile User")
 
-		pos_view_users = frappe.db.sql_list(
-			f"""select pfu.user
-			from `tabPOS Profile User` as pfu {condition}"""
-		)
+		query = frappe.qb.from_(pfu).select(pfu.user).where(pfu.default == 1)
+
+		if not include_current_pos:
+			query = query.where(pfu.name != self.name)
+
+		pos_view_users = query.run(as_list=1, pluck=True)
 
 		for user in pos_view_users:
 			if user:
