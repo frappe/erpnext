@@ -104,8 +104,14 @@ frappe.ui.form.on("Item Group", {
 
 frappe.ui.form.on("Item Default", {
 	form_render: function (frm, cdt, cdn) {
+		if (!frm.fields_dict["item_group_defaults"]) return;
+
 		const row = locals[cdt][cdn];
-		if (!row || !row.company) return;
+		if (!row || !row.company) {
+			Object.values(COMPANY_DEFAULTS_TO_VF).forEach((vf) => frappe.model.set_value(cdt, cdn, vf, ""));
+			frappe.model.set_value(cdt, cdn, "vf_company", "");
+			return;
+		}
 
 		setTimeout(() => {
 			const $grid_row = frm.fields_dict["item_group_defaults"].grid.wrapper.find(
@@ -148,8 +154,14 @@ frappe.ui.form.on("Item Default", {
 	},
 
 	company: function (frm, cdt, cdn) {
+		if (!frm.fields_dict["item_group_defaults"]) return;
+
 		const row = locals[cdt][cdn];
-		if (!row || !row.company) return;
+		if (!row || !row.company) {
+			Object.values(COMPANY_DEFAULTS_TO_VF).forEach((vf) => frappe.model.set_value(cdt, cdn, vf, ""));
+			frappe.model.set_value(cdt, cdn, "vf_company", "");
+			return;
+		}
 
 		setTimeout(() => {
 			const $grid_row = frm.fields_dict["item_group_defaults"].grid.wrapper.find(
@@ -186,12 +198,18 @@ const COMPANY_DEFAULTS_TO_VF = {
 function populate_item_group_company_defaults(frm, cdt, cdn, row) {
 	frappe.model.set_value(cdt, cdn, "vf_company", row.company);
 
+	const company = row.company;
+
 	frappe.call({
 		method: "erpnext.setup.doctype.item_group.item_group.get_company_resolved_defaults",
 		args: { company: row.company },
 		freeze: false,
 		callback: function (r) {
 			if (!r.message) return;
+
+			const current_row = locals[cdt][cdn];
+			if (!current_row || current_row.company !== company) return;
+
 			const defaults = r.message;
 
 			Object.entries(COMPANY_DEFAULTS_TO_VF).forEach(([key, vf_field]) => {

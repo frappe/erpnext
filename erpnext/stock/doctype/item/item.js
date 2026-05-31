@@ -7,7 +7,6 @@ const SALES_DOCTYPES = ["Quotation", "Sales Order", "Delivery Note", "Sales Invo
 const PURCHASE_DOCTYPES = ["Purchase Order", "Purchase Receipt", "Purchase Invoice"];
 
 const virtual_field_map = {
-	company: "vf_company",
 	default_warehouse: "vf_default_warehouse",
 	default_price_list: "vf_default_price_list",
 	default_discount_account: "vf_default_discount_account",
@@ -366,8 +365,14 @@ frappe.ui.form.on("Item", {
 
 frappe.ui.form.on("Item Default", {
 	form_render: function (frm, cdt, cdn) {
+		if (!frm.fields_dict["item_defaults"]) return;
+
 		const row = locals[cdt][cdn];
-		if (!row || !row.company) return;
+		if (!row || !row.company) {
+			Object.values(virtual_field_map).forEach((vf) => frappe.model.set_value(cdt, cdn, vf, ""));
+			frappe.model.set_value(cdt, cdn, "vf_company", "");
+			return;
+		}
 
 		setTimeout(() => {
 			const $grid_row = frm.fields_dict["item_defaults"].grid.wrapper.find(
@@ -411,8 +416,13 @@ frappe.ui.form.on("Item Default", {
 	},
 
 	company: function (frm, cdt, cdn) {
+		if (!frm.fields_dict["item_defaults"]) return;
+
 		const row = locals[cdt][cdn];
-		if (!row || !row.company) return;
+		if (!row || !row.company) {
+			Object.values(virtual_field_map).forEach((vf) => frappe.model.set_value(cdt, cdn, vf, ""));
+			return;
+		}
 		erpnext.item.populate_virtual_fields(frm, cdt, cdn, row);
 	},
 });
@@ -521,7 +531,16 @@ function render_serial_batch_banner(wrapper) {
 
 $.extend(erpnext.item, {
 	populate_virtual_fields: function (frm, cdt, cdn, row) {
-		if (!frm.doc.item_group || !row.company) return;
+		if (!frm.doc.item_group || !row.company) {
+			Object.values(virtual_field_map).forEach((vf) => frappe.model.set_value(cdt, cdn, vf, ""));
+			frappe.model.set_value(cdt, cdn, "vf_company", "");
+			return;
+		}
+
+		frappe.model.set_value(cdt, cdn, "vf_company", row.company);
+
+		const company = row.company;
+		const item_group = frm.doc.item_group;
 
 		frappe.call({
 			method: "frappe.client.get",
@@ -529,6 +548,10 @@ $.extend(erpnext.item, {
 			freeze: false,
 			callback: function (r) {
 				if (!r.message) return;
+
+				const current_row = locals[cdt][cdn];
+				if (!current_row || current_row.company !== company || frm.doc.item_group !== item_group)
+					return;
 
 				const group_defaults =
 					(r.message.item_group_defaults || []).find((d) => d.company === row.company) || {};

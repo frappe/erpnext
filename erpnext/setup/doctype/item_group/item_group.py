@@ -108,14 +108,10 @@ def get_company_resolved_defaults(company: str) -> dict:
 		return {}
 
 	company_doc = frappe.get_cached_doc("Company", company)
-	stock_settings = frappe.get_cached_doc("Stock Settings")
-
-	def first(*values):
-		"""Return first non-empty value from the chain"""
-		return next((v for v in values if v), "")
+	default_warehouse = frappe.db.get_single_value("Stock Settings", "default_warehouse")
 
 	return {
-		"default_warehouse": stock_settings.get("default_warehouse"),
+		"default_warehouse": default_warehouse,
 		"default_inventory_account": company_doc.get("default_inventory_account"),
 		"buying_cost_center": company_doc.get("cost_center"),
 		"selling_cost_center": company_doc.get("cost_center"),
