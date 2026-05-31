@@ -105,9 +105,7 @@ def get_data(filters) -> list[list]:
 	if not filters.get("show_group_accounts"):
 		data = hide_group_accounts(data)
 
-	total_row = calculate_total_row(
-		data, reporting_currency, show_group_accounts=filters.get("show_group_accounts")
-	)
+	total_row = calculate_total_row(data, reporting_currency)
 
 	calculate_foreign_currency_translation_reserve(total_row, data, filters=filters)
 
