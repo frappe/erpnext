@@ -218,11 +218,17 @@ def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20, ord
 @frappe.whitelist()
 def set_multiple_status(names, status):
 	for name in json.loads(names):
-		frappe.db.set_value("Issue", name, "status", status)
+		set_status(name, status)
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def set_status(name, status):
+=======
+def set_status(name: str, status: str):
+	frappe.has_permission("Issue", "write", name, throw=True)
+
+>>>>>>> 876f403500 (fix(issue): check permission before issue status modification (#55458))
 	frappe.db.set_value("Issue", name, "status", status)
 
 
