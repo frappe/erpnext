@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
-"POT-Creation-Date: 2026-05-27 15:21+0000\n"
-"PO-Revision-Date: 2026-05-30 22:06\n"
+"POT-Creation-Date: 2026-05-31 10:18+0000\n"
+"PO-Revision-Date: 2026-05-31 22:15\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Korean\n"
 "MIME-Version: 1.0\n"
@@ -314,9 +314,9 @@ msgstr ""
 msgid "'Inspection Required before Purchase' has disabled for the item {0}, no need to create the QI"
 msgstr ""
 
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:683
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:724
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:829
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:684
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:725
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:830
 msgid "'Opening'"
 msgstr "'열기'"
 
@@ -1234,7 +1234,7 @@ msgstr ""
 msgid "According to CEFACT/ICG/2010/IC013 or CEFACT/ICG/2010/IC010"
 msgstr "CEFACT/ICG/2010/IC013 또는 CEFACT/ICG/2010/IC010에 따르면"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:784
+#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:786
 msgid "According to the BOM {0}, the Item '{1}' is missing in the stock entry."
 msgstr "BOM {0}에 따르면 재고 항목에 품목 '{1}'이 누락되었습니다."
 
@@ -1371,7 +1371,7 @@ msgstr "계정이 없습니다"
 msgid "Account Name"
 msgstr "계정 이름"
 
-#: erpnext/accounts/doctype/account/account.py:374
+#: erpnext/accounts/doctype/account/account.py:377
 msgid "Account Not Found"
 msgstr "계정을 찾을 수 없습니다"
 
@@ -1384,7 +1384,7 @@ msgstr "계정을 찾을 수 없습니다"
 msgid "Account Number"
 msgstr "계좌번호"
 
-#: erpnext/accounts/doctype/account/account.py:360
+#: erpnext/accounts/doctype/account/account.py:363
 msgid "Account Number {0} already used in account {1}"
 msgstr ""
 
@@ -1423,7 +1423,7 @@ msgstr "계정 하위 유형"
 #. Label of the account_type (Select) field in DocType 'Payment Ledger Entry'
 #. Label of the account_type (Select) field in DocType 'Party Type'
 #: erpnext/accounts/doctype/account/account.json
-#: erpnext/accounts/doctype/account/account.py:207
+#: erpnext/accounts/doctype/account/account.py:210
 #: erpnext/accounts/doctype/account/account_tree.js:154
 #: erpnext/accounts/doctype/bank_account/bank_account.json
 #: erpnext/accounts/doctype/bank_account_type/bank_account_type.json
@@ -1439,11 +1439,11 @@ msgstr "계정 유형"
 msgid "Account Value"
 msgstr "계정 가치"
 
-#: erpnext/accounts/doctype/account/account.py:329
+#: erpnext/accounts/doctype/account/account.py:332
 msgid "Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'"
 msgstr ""
 
-#: erpnext/accounts/doctype/account/account.py:323
+#: erpnext/accounts/doctype/account/account.py:326
 msgid "Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'"
 msgstr ""
 
@@ -1510,24 +1510,24 @@ msgstr ""
 msgid "Account where the cost of this item will be debited on purchase"
 msgstr ""
 
-#: erpnext/accounts/doctype/account/account.py:428
+#: erpnext/accounts/doctype/account/account.py:431
 msgid "Account with child nodes cannot be converted to ledger"
 msgstr ""
 
-#: erpnext/accounts/doctype/account/account.py:280
+#: erpnext/accounts/doctype/account/account.py:283
 msgid "Account with child nodes cannot be set as ledger"
 msgstr ""
 
-#: erpnext/accounts/doctype/account/account.py:439
+#: erpnext/accounts/doctype/account/account.py:442
 msgid "Account with existing transaction can not be converted to group."
 msgstr "기존 거래 내역이 있는 계정은 그룹으로 전환할 수 없습니다."
 
-#: erpnext/accounts/doctype/account/account.py:468
+#: erpnext/accounts/doctype/account/account.py:467
 msgid "Account with existing transaction can not be deleted"
 msgstr ""
 
-#: erpnext/accounts/doctype/account/account.py:274
-#: erpnext/accounts/doctype/account/account.py:430
+#: erpnext/accounts/doctype/account/account.py:277
+#: erpnext/accounts/doctype/account/account.py:433
 msgid "Account with existing transaction cannot be converted to ledger"
 msgstr ""
 
@@ -1535,11 +1535,11 @@ msgstr ""
 msgid "Account {0} added multiple times"
 msgstr ""
 
-#: erpnext/accounts/doctype/account/account.py:292
+#: erpnext/accounts/doctype/account/account.py:295
 msgid "Account {0} cannot be converted to Group as it is already set as {1} for {2}."
 msgstr ""
 
-#: erpnext/accounts/doctype/account/account.py:289
+#: erpnext/accounts/doctype/account/account.py:292
 msgid "Account {0} cannot be disabled as it is already set as {1} for {2}."
 msgstr ""
 
@@ -1551,7 +1551,7 @@ msgstr ""
 msgid "Account {0} does not belong to company: {1}"
 msgstr ""
 
-#: erpnext/accounts/doctype/account/account.py:590
+#: erpnext/accounts/doctype/account/account.py:599
 msgid "Account {0} does not exist"
 msgstr ""
 
@@ -1567,11 +1567,11 @@ msgstr ""
 msgid "Account {0} doesn't belong to Company {1}"
 msgstr ""
 
-#: erpnext/accounts/doctype/account/account.py:547
+#: erpnext/accounts/doctype/account/account.py:556
 msgid "Account {0} exists in parent company {1}."
 msgstr ""
 
-#: erpnext/accounts/doctype/account/account.py:412
+#: erpnext/accounts/doctype/account/account.py:415
 msgid "Account {0} is added in the child company {1}"
 msgstr ""
 
@@ -1994,7 +1994,6 @@ msgstr ""
 #. Category'
 #. Label of the accounts (Table) field in DocType 'Asset Category'
 #. Label of the accounts (Table) field in DocType 'Supplier'
-#. Label of the accounts (Table) field in DocType 'Customer'
 #. Label of the accounts_tab (Tab Break) field in DocType 'Company'
 #. Label of the accounts (Table) field in DocType 'Customer Group'
 #. Label of the accounts (Section Break) field in DocType 'Email Digest'
@@ -2007,7 +2006,6 @@ msgstr ""
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 #: erpnext/assets/doctype/asset_category/asset_category.json
 #: erpnext/buying/doctype/supplier/supplier.json
-#: erpnext/selling/doctype/customer/customer.json
 #: erpnext/setup/doctype/company/company.json
 #: erpnext/setup/doctype/company/company.py:448
 #: erpnext/setup/doctype/customer_group/customer_group.json
@@ -3103,11 +3101,6 @@ msgid "Additional Transferred Qty {0}\n"
 "\t\t\t\t\tin Manufacturing Settings."
 msgstr ""
 
-#. Description of the 'Customer Details' (Text) field in DocType 'Customer'
-#: erpnext/selling/doctype/customer/customer.json
-msgid "Additional information regarding the customer."
-msgstr "고객에 관한 추가 정보입니다."
-
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:660
 msgid "Additional {0} {1} of item {2} required as per BOM to complete this transaction"
 msgstr ""
@@ -3454,7 +3447,7 @@ msgstr "계좌에 대해"
 msgid "Against Blanket Order"
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1103
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1099
 msgid "Against Customer Order {0}"
 msgstr "고객 주문에 대해 {0}"
 
@@ -3858,6 +3851,11 @@ msgstr ""
 msgid "All communications including and above this shall be moved into the new Issue"
 msgstr ""
 
+#. Description of the 'Billing Currency' (Link) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "All invoices and orders for this customer will be created in this currency."
+msgstr ""
+
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:971
 msgid "All items are already requested"
 msgstr ""
@@ -3870,7 +3868,7 @@ msgstr ""
 msgid "All items have already been received"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_entry/stock_entry_handler/material_transfer.py:138
+#: erpnext/stock/doctype/stock_entry/stock_entry_handler/material_transfer.py:221
 msgid "All items have already been transferred for this Work Order."
 msgstr ""
 
@@ -3878,11 +3876,11 @@ msgstr ""
 msgid "All items in this document already have a linked Quality Inspection."
 msgstr "이 문서에 있는 모든 항목에는 이미 품질 검사 링크가 연결되어 있습니다."
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1239
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1243
 msgid "All items must be linked to a Sales Order or Subcontracting Inward Order for this Sales Invoice."
 msgstr "모든 품목은 이 판매 송장에 대한 판매 주문 또는 하도급 입고 주문과 연결되어 있어야 합니다."
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1250
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1254
 msgid "All linked Sales Orders must be subcontracted."
 msgstr ""
 
@@ -4016,7 +4014,7 @@ msgstr "할당 수량"
 
 #. Label of the allow_account_creation_against_child_company (Check) field in
 #. DocType 'Company'
-#: erpnext/accounts/doctype/account/account.py:545
+#: erpnext/accounts/doctype/account/account.py:554
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:68
 #: erpnext/setup/doctype/company/company.json
 msgid "Allow Account Creation Against Child Company"
@@ -4203,16 +4201,6 @@ msgstr ""
 msgid "Allow Sales"
 msgstr "판매 허용"
 
-#. Label of the dn_required (Check) field in DocType 'Customer'
-#: erpnext/selling/doctype/customer/customer.json
-msgid "Allow Sales Invoice Creation Without Delivery Note"
-msgstr ""
-
-#. Label of the so_required (Check) field in DocType 'Customer'
-#: erpnext/selling/doctype/customer/customer.json
-msgid "Allow Sales Invoice Creation Without Sales Order"
-msgstr ""
-
 #. Label of the allow_sales_order_creation_for_expired_quotation (Check) field
 #. in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
@@ -4338,6 +4326,16 @@ msgstr ""
 msgid "Allow negative rates for Items"
 msgstr ""
 
+#. Label of the dn_required (Check) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Allow sales invoice creation without delivery note"
+msgstr ""
+
+#. Label of the so_required (Check) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Allow sales invoice creation without sales order"
+msgstr ""
+
 #. Description of the 'Zero-Quantity Line Items' (Section Break) field in
 #. DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
@@ -4414,10 +4412,8 @@ msgstr "허용 품목"
 
 #. Name of a DocType
 #. Label of the companies (Table) field in DocType 'Supplier'
-#. Label of the companies (Table) field in DocType 'Customer'
 #: erpnext/accounts/doctype/allowed_to_transact_with/allowed_to_transact_with.json
 #: erpnext/buying/doctype/supplier/supplier.json
-#: erpnext/selling/doctype/customer/customer.json
 msgid "Allowed To Transact With"
 msgstr "거래 허용 대상"
 
@@ -4427,6 +4423,11 @@ msgstr ""
 
 #: erpnext/public/js/utils/naming_series.js:81
 msgid "Allowed special characters are '/' and '-'"
+msgstr ""
+
+#. Label of the companies (Table) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Allowed to transact with"
 msgstr ""
 
 #. Description of the 'Enable Stock Reservation' (Check) field in DocType
@@ -4900,7 +4901,7 @@ msgstr "품목 그룹은 품목의 종류에 따라 분류하는 방법입니다
 msgid "An error has been appeared while reposting item valuation via {0}"
 msgstr ""
 
-#: erpnext/public/js/controllers/buying.js:383
+#: erpnext/public/js/controllers/buying.js:378
 #: erpnext/public/js/utils/sales_common.js:489
 msgid "An error occurred during the update process"
 msgstr ""
@@ -5908,7 +5909,7 @@ msgstr "자산 복원됨"
 msgid "Asset restored after Asset Capitalization {0} was cancelled"
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1522
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1535
 msgid "Asset returned"
 msgstr ""
 
@@ -5920,8 +5921,8 @@ msgstr "자산 폐기됨"
 msgid "Asset scrapped via Journal Entry {0}"
 msgstr "자산이 회계 전표를 통해 폐기되었습니다 {0}"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1522
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1525
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1535
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1538
 msgid "Asset sold"
 msgstr "자산 매각"
 
@@ -6429,7 +6430,7 @@ msgstr ""
 msgid "Auto re-order"
 msgstr ""
 
-#: erpnext/public/js/controllers/buying.js:378
+#: erpnext/public/js/controllers/buying.js:373
 #: erpnext/public/js/utils/sales_common.js:484
 msgid "Auto repeat document updated"
 msgstr ""
@@ -6663,7 +6664,9 @@ msgstr "평균 주문 금액"
 msgid "Average Order Values"
 msgstr "평균 주문 금액"
 
+#. Label of the valuation_rate (Currency) field in DocType 'Stock Ledger Entry'
 #: erpnext/accounts/report/share_balance/share_balance.py:60
+#: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.json
 msgid "Average Rate"
 msgstr "평균 요금"
 
@@ -6687,7 +6690,7 @@ msgid "Avg Rate"
 msgstr "평균 비율"
 
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:154
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:367
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:368
 msgid "Avg Rate (Balance Stock)"
 msgstr ""
 
@@ -7125,7 +7128,7 @@ msgstr "기준 통화 잔액"
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:126
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:84
 #: erpnext/stock/report/stock_balance/stock_balance.py:520
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:330
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:331
 msgid "Balance Qty"
 msgstr "잔량 수량"
 
@@ -7190,7 +7193,7 @@ msgstr "잔액 유형"
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:174
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:86
 #: erpnext/stock/report/stock_balance/stock_balance.py:528
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:387
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:388
 msgid "Balance Value"
 msgstr "잔액"
 
@@ -7797,7 +7800,7 @@ msgstr ""
 #: erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py:34
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:80
 #: erpnext/stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:158
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:417
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:418
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:171
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:80
 #: erpnext/stock/report/stock_qty_vs_batch_qty/stock_qty_vs_batch_qty.js:19
@@ -8449,6 +8452,16 @@ msgstr ""
 msgid "Block Supplier"
 msgstr ""
 
+#. Description of the 'Is Frozen' (Check) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Blocks all further accounting entries on this customer's account. Only users with the frozen-entries role can override.\n"
+msgstr ""
+
+#. Description of the 'Disabled' (Check) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Blocks this customer from being used on any new transaction."
+msgstr ""
+
 #. Label of the blog_subscriber (Check) field in DocType 'Lead'
 #: erpnext/crm/doctype/lead/lead.json
 msgid "Blog Subscriber"
@@ -8966,15 +8979,15 @@ msgstr ""
 msgid "By-Product"
 msgstr "부산물"
 
-#. Label of the bypass_credit_limit_check (Check) field in DocType 'Customer
-#. Credit Limit'
-#: erpnext/selling/doctype/customer_credit_limit/customer_credit_limit.json
-msgid "Bypass Credit Limit Check at Sales Order"
-msgstr ""
-
 #: erpnext/selling/report/customer_credit_balance/customer_credit_balance.py:68
 msgid "Bypass credit check at Sales Order"
 msgstr "판매 주문 시 신용 조회 절차 생략"
+
+#. Label of the bypass_credit_limit_check (Check) field in DocType 'Customer
+#. Credit Limit'
+#: erpnext/selling/doctype/customer_credit_limit/customer_credit_limit.json
+msgid "Bypass credit limit check at sales order"
+msgstr ""
 
 #. Label of the cc_to (Table MultiSelect) field in DocType 'Process Statement
 #. Of Accounts'
@@ -9474,11 +9487,11 @@ msgstr ""
 msgid "Cannot convert Task to non-group because the following child Tasks exist: {0}."
 msgstr "{0} 하위 작업이 존재하므로 작업을 그룹이 아닌 작업으로 변환할 수 없습니다."
 
-#: erpnext/accounts/doctype/account/account.py:441
+#: erpnext/accounts/doctype/account/account.py:444
 msgid "Cannot convert to Group because Account Type is selected."
 msgstr "계정 유형이 선택되어 있으므로 그룹으로 변환할 수 없습니다."
 
-#: erpnext/accounts/doctype/account/account.py:277
+#: erpnext/accounts/doctype/account/account.py:280
 msgid "Cannot covert to Group because Account Type is selected."
 msgstr "계정 유형이 선택되어 있으므로 그룹으로 변환할 수 없습니다."
 
@@ -9936,7 +9949,7 @@ msgstr "카테고리 세부 정보"
 msgid "Category-wise Asset Value"
 msgstr ""
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:288
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:291
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:144
 msgid "Caution"
 msgstr "주의"
@@ -10381,6 +10394,11 @@ msgstr ""
 msgid "Classify As"
 msgstr "다음과 같이 분류하세요"
 
+#. Description of the 'Market Segment' (Link) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Classify the type of market this customer belongs to, used for sales analysis and targeting."
+msgstr ""
+
 #. Label of the more_information (Text Editor) field in DocType 'Bank
 #. Guarantee'
 #: erpnext/accounts/doctype/bank_guarantee/bank_guarantee.json
@@ -10783,6 +10801,12 @@ msgstr ""
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:177
 msgid "Commission on Sales"
 msgstr "판매 수수료"
+
+#. Description of the 'Sales Partner' (Section Break) field in DocType
+#. 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Commission paid to the Sales Partner on transactions with this customer."
+msgstr ""
 
 #. Name of a DocType
 #. Label of the common_code (Data) field in DocType 'Common Code'
@@ -11267,7 +11291,7 @@ msgstr "회사들"
 #: erpnext/stock/report/stock_balance/stock_balance.js:8
 #: erpnext/stock/report/stock_balance/stock_balance.py:583
 #: erpnext/stock/report/stock_ledger/stock_ledger.js:8
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:440
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:441
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.js:18
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.js:8
 #: erpnext/stock/report/stock_qty_vs_serial_no_count/stock_qty_vs_serial_no_count.js:8
@@ -11366,8 +11390,10 @@ msgstr "회사 주소가 누락되었습니다. 귀하에게는 회사 주소를
 
 #. Label of the bank_account (Link) field in DocType 'Payment Entry'
 #. Label of the company_bank_account (Link) field in DocType 'Payment Order'
+#. Label of the default_bank_account (Link) field in DocType 'Customer'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
 #: erpnext/accounts/doctype/payment_order/payment_order.json
+#: erpnext/selling/doctype/customer/customer.json
 msgid "Company Bank Account"
 msgstr "회사 은행 계좌"
 
@@ -11463,7 +11489,7 @@ msgstr ""
 msgid "Company and account filters not set!"
 msgstr "회사 및 계정 필터가 설정되지 않았습니다!"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2662
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2686
 msgid "Company currencies of both the companies should match for Inter Company Transactions."
 msgstr ""
 
@@ -11537,7 +11563,7 @@ msgstr ""
 msgid "Company {0} added multiple times"
 msgstr ""
 
-#: erpnext/accounts/doctype/account/account.py:510
+#: erpnext/accounts/doctype/account/account.py:519
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.py:1308
 msgid "Company {0} does not exist"
 msgstr ""
@@ -12301,6 +12327,11 @@ msgstr "과거 주식 거래 내역을 관리하세요"
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Controls how raw materials are consumed during the ‘Manufacture’ stock entry."
 msgstr "'제조' 재고 입력 시 원자재 소비 방식을 제어합니다."
+
+#. Description of the 'Tax Category' (Link) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Controls which tax template is auto-applied when this customer is selected on a transaction."
+msgstr ""
 
 #. Label of the conversion_factor (Float) field in DocType 'Loyalty Program'
 #. Label of the conversion_factor (Float) field in DocType 'Purchase Receipt
@@ -13111,7 +13142,7 @@ msgid "Create Ledger Entries for Change Amount"
 msgstr ""
 
 #: erpnext/buying/doctype/supplier/supplier.js:216
-#: erpnext/selling/doctype/customer/customer.js:287
+#: erpnext/selling/doctype/customer/customer.js:289
 msgid "Create Link"
 msgstr "링크 생성"
 
@@ -13674,12 +13705,6 @@ msgstr "신용 한도 초과"
 msgid "Credit Limit Settings"
 msgstr "신용 한도 설정"
 
-#. Label of the credit_limit_section (Section Break) field in DocType
-#. 'Customer'
-#: erpnext/selling/doctype/customer/customer.json
-msgid "Credit Limit and Payment Terms"
-msgstr "신용 한도 및 지불 조건"
-
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:50
 msgid "Credit Limit:"
 msgstr "신용 한도:"
@@ -13948,7 +13973,7 @@ msgstr "환전은 구매 또는 판매 모두에 적용되어야 합니다."
 msgid "Currency and Price List"
 msgstr "통화 및 가격표"
 
-#: erpnext/accounts/doctype/account/account.py:347
+#: erpnext/accounts/doctype/account/account.py:350
 msgid "Currency can not be changed after making entries using some other currency"
 msgstr ""
 
@@ -14107,6 +14132,11 @@ msgstr "현재 재고"
 #. Reconciliation Item'
 #: erpnext/stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
 msgid "Current Valuation Rate"
+msgstr ""
+
+#. Description of the 'Loyalty Program Tier' (Data) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Current tier based on accumulated points. Updated automatically on each invoice."
 msgstr ""
 
 #: erpnext/selling/report/sales_analytics/sales_analytics.js:90
@@ -14795,7 +14825,7 @@ msgstr "고객 또는 품목"
 msgid "Customer required for 'Customerwise Discount'"
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1143
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1147
 #: erpnext/selling/doctype/sales_order/sales_order.py:450
 #: erpnext/stock/doctype/delivery_note/delivery_note.py:437
 msgid "Customer {0} does not belong to project {1}"
@@ -15388,8 +15418,7 @@ msgstr "기본 계정"
 
 #. Label of the default_accounts_section (Section Break) field in DocType
 #. 'Supplier'
-#. Label of the default_receivable_accounts (Section Break) field in DocType
-#. 'Customer'
+#. Label of the accounts (Table) field in DocType 'Customer'
 #. Label of the default_settings (Section Break) field in DocType 'Company'
 #. Label of the default_receivable_account (Section Break) field in DocType
 #. 'Customer Group'
@@ -15502,9 +15531,7 @@ msgid "Default Company"
 msgstr "기본 회사"
 
 #. Label of the default_bank_account (Link) field in DocType 'Supplier'
-#. Label of the default_bank_account (Link) field in DocType 'Customer'
 #: erpnext/buying/doctype/supplier/supplier.json
-#: erpnext/selling/doctype/customer/customer.json
 msgid "Default Company Bank Account"
 msgstr "기본 회사 은행 계좌"
 
@@ -15665,23 +15692,19 @@ msgid "Default Payment Request Message"
 msgstr "기본 결제 요청 메시지"
 
 #. Label of the payment_terms (Link) field in DocType 'Supplier'
-#. Label of the payment_terms (Link) field in DocType 'Customer'
 #. Label of the payment_terms (Link) field in DocType 'Company'
 #. Label of the payment_terms (Link) field in DocType 'Customer Group'
 #. Label of the payment_terms (Link) field in DocType 'Supplier Group'
 #: erpnext/buying/doctype/supplier/supplier.json
-#: erpnext/selling/doctype/customer/customer.json
 #: erpnext/setup/doctype/company/company.json
 #: erpnext/setup/doctype/customer_group/customer_group.json
 #: erpnext/setup/doctype/supplier_group/supplier_group.json
 msgid "Default Payment Terms Template"
 msgstr ""
 
-#. Label of the default_price_list (Link) field in DocType 'Customer'
 #. Label of the selling_price_list (Link) field in DocType 'Selling Settings'
 #. Label of the default_price_list (Link) field in DocType 'Customer Group'
 #. Label of the default_price_list (Link) field in DocType 'Item Default'
-#: erpnext/selling/doctype/customer/customer.json
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 #: erpnext/setup/doctype/customer_group/customer_group.json
 #: erpnext/stock/doctype/item_default/item_default.json
@@ -15955,6 +15978,12 @@ msgstr "프로젝트 유형을 정의하세요."
 msgid "Defines the date after which the item can no longer be used in transactions or manufacturing"
 msgstr ""
 
+#. Description of the 'Payment Terms Template' (Link) field in DocType
+#. 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Defines when payment is due (e.g. Net 30, 50% advance). Applied automatically on invoices for this customer."
+msgstr ""
+
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Dekagram/Litre"
@@ -16175,11 +16204,11 @@ msgstr "납품 수량"
 msgid "Delivered Qty (in Stock UOM)"
 msgstr "납품 수량 (재고 단위)"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:596
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:599
 msgid "Delivered Qty cannot be increased by more than {0} for item {1}"
 msgstr ""
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:589
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:592
 msgid "Delivered Qty cannot be reduced by more than {0} for item {1}"
 msgstr ""
 
@@ -16320,7 +16349,7 @@ msgstr "배송 전표 포장된 품목"
 msgid "Delivery Note Trends"
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1404
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1417
 msgid "Delivery Note {0} is not submitted"
 msgstr ""
 
@@ -20060,6 +20089,11 @@ msgstr ""
 msgid "Fetch exploded BOM (including sub-assemblies)"
 msgstr ""
 
+#. Description of the 'Price List' (Link) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Fetched automatically on sales orders and invoices for this customer."
+msgstr ""
+
 #: erpnext/selling/page/point_of_sale/pos_item_details.js:457
 msgid "Fetched only {0} available serial numbers."
 msgstr ""
@@ -20622,6 +20656,7 @@ msgstr "결정된"
 #. Option for the 'Account Type' (Select) field in DocType 'Account'
 #: erpnext/accounts/doctype/account/account.json
 #: erpnext/accounts/report/account_balance/account_balance.js:52
+#: erpnext/stock/doctype/item/item_list.js:20
 msgid "Fixed Asset"
 msgstr "고정 자산"
 
@@ -20855,11 +20890,11 @@ msgstr ""
 msgid "For Work Order"
 msgstr ""
 
-#: erpnext/controllers/status_updater.py:288
+#: erpnext/controllers/status_updater.py:290
 msgid "For an item {0}, quantity must be negative number"
 msgstr ""
 
-#: erpnext/controllers/status_updater.py:285
+#: erpnext/controllers/status_updater.py:287
 msgid "For an item {0}, quantity must be positive number"
 msgstr ""
 
@@ -20897,7 +20932,7 @@ msgstr ""
 msgid "For item <b>{0}</b>, only <b>{1}</b> asset have been created or linked to <b>{2}</b>. Please create or link <b>{3}</b> more asset with the respective document."
 msgstr "항목 <b>{0}</b>에 대해서는 <b>{1}</b> 자산만 생성되었거나 <b>{2}</b>에 연결되었습니다. 해당 문서에 <b>{3}</b> 자산을 추가로 생성하거나 연결해 주십시오."
 
-#: erpnext/controllers/status_updater.py:298
+#: erpnext/controllers/status_updater.py:300
 msgid "For item {0}, rate must be a positive number. To Allow negative rates, enable {1} in {2}"
 msgstr ""
 
@@ -20961,7 +20996,7 @@ msgstr ""
 msgid "For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:773
+#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:775
 msgid "For the item {0}, the consumed quantity should be {1} according to the BOM {2}."
 msgstr ""
 
@@ -21825,7 +21860,7 @@ msgstr "균형을 맞추세요"
 msgid "Get Current Stock"
 msgstr "현재 재고 확인"
 
-#: erpnext/selling/doctype/customer/customer.js:189
+#: erpnext/selling/doctype/customer/customer.js:190
 msgid "Get Customer Group Details"
 msgstr "고객 그룹 세부 정보 가져오기"
 
@@ -21883,7 +21918,7 @@ msgstr "아이템 위치 가져오기"
 #: erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.js:119
 #: erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.js:142
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
-#: erpnext/public/js/controllers/buying.js:330
+#: erpnext/public/js/controllers/buying.js:325
 #: erpnext/selling/doctype/quotation/quotation.js:182
 #: erpnext/selling/doctype/sales_order/sales_order.js:201
 #: erpnext/selling/doctype/sales_order/sales_order.js:1254
@@ -21922,7 +21957,7 @@ msgstr "BOM에서 품목 가져오기"
 msgid "Get Items from Material Requests against this Supplier"
 msgstr ""
 
-#: erpnext/public/js/controllers/buying.js:607
+#: erpnext/public/js/controllers/buying.js:602
 msgid "Get Items from Product Bundle"
 msgstr "제품 묶음에서 상품을 받으세요"
 
@@ -23376,6 +23411,11 @@ msgstr ""
 msgid "If selected Pricing Rule is made for 'Rate', it will overwrite Price List. Pricing Rule rate is the final rate, so no further discount should be applied. Hence, in transactions like Sales Order, Purchase Order etc, it will be fetched in 'Rate' field, rather than 'Price List Rate' field."
 msgstr ""
 
+#. Description of the 'Default Accounts' (Table) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "If set, accounting entries for this customer will post to these accounts instead of the company default."
+msgstr ""
+
 #. Description of the 'Fixed Outgoing Email Account' (Link) field in DocType
 #. 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
@@ -23826,7 +23866,7 @@ msgstr "제작 중"
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:112
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:82
 #: erpnext/stock/report/stock_balance/stock_balance.py:550
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:316
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:317
 msgid "In Qty"
 msgstr "수량"
 
@@ -24253,7 +24293,7 @@ msgstr ""
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.json
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:146
 #: erpnext/stock/report/serial_and_batch_summary/serial_and_batch_summary.py:169
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:359
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:360
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:193
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:96
 msgid "Incoming Rate"
@@ -24293,7 +24333,7 @@ msgstr ""
 msgid "Incorrect Company"
 msgstr "잘못된 회사"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:780
+#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:782
 msgid "Incorrect Component Quantity"
 msgstr ""
 
@@ -24829,6 +24869,11 @@ msgstr "내부 이동"
 msgid "Internal Work History"
 msgstr "내부 업무 이력"
 
+#. Description of the 'Customer Details' (Text) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Internal notes about this customer. Not visible on transactions or the portal."
+msgstr ""
+
 #: erpnext/controllers/stock_controller.py:1568
 msgid "Internal transfers can only be done in company's default currency"
 msgstr ""
@@ -24900,7 +24945,7 @@ msgstr ""
 msgid "Invalid Company Field"
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2437
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2461
 msgid "Invalid Company for Inter Company Transaction."
 msgstr "회사 간 거래에 적합하지 않은 회사입니다."
 
@@ -24974,11 +25019,11 @@ msgstr "잘못된 시작 입력"
 msgid "Invalid POS Invoices"
 msgstr "유효하지 않은 POS 송장"
 
-#: erpnext/accounts/doctype/account/account.py:388
+#: erpnext/accounts/doctype/account/account.py:391
 msgid "Invalid Parent Account"
 msgstr "잘못된 부모 계정입니다"
 
-#: erpnext/public/js/controllers/buying.js:429
+#: erpnext/public/js/controllers/buying.js:424
 msgid "Invalid Part Number"
 msgstr "잘못된 부품 번호"
 
@@ -25115,7 +25160,7 @@ msgstr ""
 msgid "Invalid {0}"
 msgstr "잘못된 {0}"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2435
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2459
 msgid "Invalid {0} for Inter Company Transaction."
 msgstr "회사 간 거래에 대해 유효하지 않은 {0} 입니다."
 
@@ -25351,7 +25396,7 @@ msgstr "청구 수량"
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.json
 #: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.json
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2486
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2510
 #: erpnext/buying/doctype/supplier/supplier.json
 #: erpnext/selling/report/payment_terms_status_for_sales_order/payment_terms_status_for_sales_order.py:62
 msgid "Invoices"
@@ -26154,7 +26199,7 @@ msgstr ""
 #: erpnext/stock/report/stock_analytics/stock_analytics.js:15
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:43
 #: erpnext/stock/report/stock_balance/stock_balance.py:473
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:286
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:287
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.js:27
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:51
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.js:28
@@ -26669,7 +26714,7 @@ msgstr ""
 #: erpnext/stock/report/stock_balance/stock_balance.js:32
 #: erpnext/stock/report/stock_balance/stock_balance.py:482
 #: erpnext/stock/report/stock_ledger/stock_ledger.js:71
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:344
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:345
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.js:39
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.py:114
 #: erpnext/stock/report/warehouse_wise_item_balance_age_and_value/warehouse_wise_item_balance_age_and_value.js:33
@@ -26929,7 +26974,7 @@ msgstr "품목 제조업체"
 #: erpnext/stock/report/stock_ageing/stock_ageing.py:178
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:45
 #: erpnext/stock/report/stock_balance/stock_balance.py:480
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:292
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:293
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.py:111
 #: erpnext/stock/report/stock_qty_vs_batch_qty/stock_qty_vs_batch_qty.py:31
 #: erpnext/stock/report/stock_qty_vs_serial_no_count/stock_qty_vs_serial_no_count.py:32
@@ -27290,7 +27335,7 @@ msgstr "품목 및 창고"
 msgid "Item and Warranty Details"
 msgstr "제품 및 보증 정보"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry_handler/material_transfer.py:297
+#: erpnext/stock/doctype/stock_entry/stock_entry_handler/material_transfer.py:380
 msgid "Item for row {0} does not match Material Request"
 msgstr ""
 
@@ -27343,7 +27388,7 @@ msgstr ""
 msgid "Item variant {0} exists with same attributes"
 msgstr ""
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:563
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:566
 msgid "Item with name {0} not found in the Purchase Order"
 msgstr ""
 
@@ -27388,7 +27433,7 @@ msgstr ""
 msgid "Item {0} has no Serial No. Only serialized items can have delivery based on Serial No"
 msgstr ""
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:582
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:585
 msgid "Item {0} has no changes in delivered quantity. Please unselect the row if you do not wish to update its quantity."
 msgstr "품목 {0} 의 배송 수량에 변동이 없습니다. 수량 업데이트를 원하지 않으시면 해당 행의 선택을 해제해 주세요."
 
@@ -27412,7 +27457,7 @@ msgstr ""
 msgid "Item {0} is disabled"
 msgstr ""
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:568
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:571
 msgid "Item {0} is not a drop ship item. Only drop ship items can have Delivered Qty updated."
 msgstr ""
 
@@ -27456,7 +27501,7 @@ msgstr ""
 msgid "Item {0} not found."
 msgstr ""
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:314
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:317
 msgid "Item {0}: Ordered qty {1} cannot be less than minimum order qty {2} (defined in Item)."
 msgstr "품목 {0}: 주문 수량 {1} 은 최소 주문 수량 {2} (품목에 정의됨)보다 적을 수 없습니다."
 
@@ -28137,7 +28182,7 @@ msgstr "최종 완료일"
 msgid "Last Fiscal Year"
 msgstr "지난 회계연도"
 
-#: erpnext/accounts/doctype/account/account.py:661
+#: erpnext/accounts/doctype/account/account.py:670
 msgid "Last GL Entry update was done {}. This operation is not allowed while system is actively being used. Please wait for 5 minutes before retrying."
 msgstr "마지막 GL 항목 업데이트는 {} 시간에 완료되었습니다. 시스템이 활성화된 상태에서는 이 작업을 수행할 수 없습니다. 5분 후에 다시 시도해 주십시오."
 
@@ -28544,7 +28589,7 @@ msgstr "라이선스 번호"
 msgid "License Plate"
 msgstr "번호판"
 
-#: erpnext/controllers/status_updater.py:489
+#: erpnext/controllers/status_updater.py:499
 msgid "Limit Crossed"
 msgstr "한계를 넘어섰습니다"
 
@@ -28605,7 +28650,7 @@ msgstr "자재 요청 링크"
 msgid "Link with Customer"
 msgstr "고객과 소통하기"
 
-#: erpnext/selling/doctype/customer/customer.js:201
+#: erpnext/selling/doctype/customer/customer.js:203
 msgid "Link with Supplier"
 msgstr ""
 
@@ -28631,7 +28676,7 @@ msgid "Linked with submitted documents"
 msgstr "제출된 문서와 연결됨"
 
 #: erpnext/buying/doctype/supplier/supplier.js:210
-#: erpnext/selling/doctype/customer/customer.js:281
+#: erpnext/selling/doctype/customer/customer.js:283
 msgid "Linking Failed"
 msgstr "연결 실패"
 
@@ -28639,7 +28684,7 @@ msgstr "연결 실패"
 msgid "Linking to Customer Failed. Please try again."
 msgstr "고객 연결에 실패했습니다. 다시 시도해 주세요."
 
-#: erpnext/selling/doctype/customer/customer.js:280
+#: erpnext/selling/doctype/customer/customer.js:282
 msgid "Linking to Supplier Failed. Please try again."
 msgstr ""
 
@@ -28944,6 +28989,11 @@ msgstr "로열티 프로그램 등급"
 #: erpnext/accounts/doctype/loyalty_program/loyalty_program.json
 msgid "Loyalty Program Type"
 msgstr "로열티 프로그램 유형"
+
+#. Description of the 'Loyalty Program' (Link) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Loyalty scheme this customer earns points under. Auto-assigned if a matching program exists."
+msgstr ""
 
 #. Label of the mps (Link) field in DocType 'Purchase Order'
 #. Label of the mps (Link) field in DocType 'Work Order'
@@ -29363,7 +29413,7 @@ msgstr ""
 msgid "Mandatory Accounting Dimension"
 msgstr "필수 회계 차원"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1963
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1976
 msgid "Mandatory Field"
 msgstr "필수 입력 항목"
 
@@ -29542,7 +29592,7 @@ msgstr "제조업체"
 msgid "Manufacturer Part Number"
 msgstr "제조사 부품 번호"
 
-#: erpnext/public/js/controllers/buying.js:426
+#: erpnext/public/js/controllers/buying.js:421
 msgid "Manufacturer Part Number <b>{0}</b> is invalid"
 msgstr ""
 
@@ -29777,6 +29827,12 @@ msgstr "혼인 여부"
 #: erpnext/public/js/templates/crm_activities.html:123
 msgid "Mark As Closed"
 msgstr "종료됨으로 표시"
+
+#. Description of the 'Is Internal Customer' (Check) field in DocType
+#. 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Mark if this customer represents an internal company. Enables inter-company transactions."
+msgstr ""
 
 #. Label of the market_segment (Link) field in DocType 'Lead'
 #. Name of a DocType
@@ -30310,11 +30366,11 @@ msgstr "최대 지불 금액"
 msgid "Maximum Producible Items"
 msgstr "최대 생산 가능 품목 수"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:1049
+#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:1051
 msgid "Maximum Samples - {0} can be retained for Batch {1} and Item {2}."
 msgstr ""
 
-#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:1038
+#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:1040
 msgid "Maximum Samples - {0} have already been retained for Batch {1} and Item {2} in Batch {3}."
 msgstr "배치 {1} 및 배치 {3}의 항목 {2} 에 대해 최대 샘플 수 - {0} 가 이미 보관되었습니다."
 
@@ -30379,11 +30435,6 @@ msgstr "메가와트"
 msgid "Mention Valuation Rate in the Item master."
 msgstr ""
 
-#. Description of the 'Accounts' (Table) field in DocType 'Customer'
-#: erpnext/selling/doctype/customer/customer.json
-msgid "Mention if non-standard Receivable account"
-msgstr ""
-
 #. Description of the 'Accounts' (Table) field in DocType 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "Mention if non-standard payable account"
@@ -30433,7 +30484,7 @@ msgstr "기존 계정과 병합"
 msgid "Merged"
 msgstr "병합됨"
 
-#: erpnext/accounts/doctype/account/account.py:604
+#: erpnext/accounts/doctype/account/account.py:613
 msgid "Merging is only possible if following properties are same in both records. Is Group, Root Type, Company and Account Currency"
 msgstr "병합은 다음 속성이 두 레코드에서 동일한 경우에만 가능합니다. 그룹, 루트 유형, 회사 및 계정 통화"
 
@@ -30769,8 +30820,8 @@ msgstr "없어진"
 #: erpnext/accounts/doctype/pos_opening_entry/pos_opening_entry.py:97
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:201
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:594
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2503
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3111
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2527
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3135
 #: erpnext/assets/doctype/asset_category/asset_category.py:126
 msgid "Missing Account"
 msgstr "계정 누락"
@@ -30808,7 +30859,7 @@ msgstr "누락됨 완료됨 좋음"
 msgid "Missing Formula"
 msgstr "누락된 공식"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:787
+#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:789
 msgid "Missing Item"
 msgstr "누락된 품목"
 
@@ -31098,7 +31149,7 @@ msgstr ""
 msgid "Multiple Loyalty Programs found for Customer {}. Please select manually."
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1194
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1198
 msgid "Multiple POS Opening Entry"
 msgstr "다중 POS 개폐 항목"
 
@@ -31823,7 +31874,7 @@ msgstr "조치 없음"
 msgid "No Answer"
 msgstr "답변 없음"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2608
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2632
 msgid "No Customer found for Inter Company Transactions which represents company {0}"
 msgstr ""
 
@@ -31916,7 +31967,7 @@ msgstr ""
 msgid "No Summary"
 msgstr "요약 없음"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2592
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2616
 msgid "No Supplier found for Inter Company Transactions which represents company {0}"
 msgstr ""
 
@@ -32152,7 +32203,7 @@ msgstr ""
 msgid "No open Material Requests found for the given criteria."
 msgstr "제시된 기준에 맞는 공개 자재 요청이 없습니다."
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1188
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1192
 msgid "No open POS Opening Entry found for POS Profile {0}."
 msgstr "POS 프로필 {0}에 대한 열린 POS 개시 항목을 찾을 수 없습니다."
 
@@ -32176,7 +32227,7 @@ msgstr ""
 msgid "No outstanding {0} found for the {1} {2} which qualify the filters you have specified."
 msgstr "지정한 필터 조건을 만족하는 {0} 이 {1} {2} 에 대해 발견되지 않았습니다."
 
-#: erpnext/public/js/controllers/buying.js:536
+#: erpnext/public/js/controllers/buying.js:531
 msgid "No pending Material Requests found to link for the given items."
 msgstr "해당 품목과 연결할 수 있는 보류 중인 자재 요청이 없습니다."
 
@@ -32280,7 +32331,7 @@ msgstr "값이 없습니다"
 msgid "No vouchers found for this transaction"
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2656
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2680
 msgid "No {0} found for Inter Company Transactions."
 msgstr ""
 
@@ -32670,6 +32721,11 @@ msgstr ""
 
 #: erpnext/accounts/doctype/cost_center/cost_center_tree.js:39
 msgid "Number of new Cost Center, it will be included in the cost center name as a prefix"
+msgstr ""
+
+#. Description of the 'Supplier Numbers' (Table) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Numbers this customer uses to identify your company in their own system."
 msgstr ""
 
 #. Label of the numeric (Check) field in DocType 'Item Quality Inspection
@@ -33240,7 +33296,7 @@ msgid "Opening Invoice Tool"
 msgstr "송장 열기 도구"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:1651
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2072
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2085
 msgid "Opening Invoice has rounding adjustment of {0}.<br><br> '{1}' account is required to post these values. Please set it in Company: {2}.<br><br> Or, '{3}' can be enabled to not post any rounding adjustment."
 msgstr ""
 
@@ -33895,7 +33951,7 @@ msgstr "온스/갤런(미국)"
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:119
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:83
 #: erpnext/stock/report/stock_balance/stock_balance.py:558
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:323
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:324
 msgid "Out Qty"
 msgstr "수량"
 
@@ -33933,7 +33989,7 @@ msgstr ""
 msgid "Out of stock"
 msgstr "품절"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1201
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1205
 #: erpnext/selling/page/point_of_sale/pos_controller.js:208
 msgid "Outdated POS Opening Entry"
 msgstr "구식 POS 개시 입력"
@@ -33952,6 +34008,7 @@ msgstr "지출 결제"
 #. Label of the outgoing_rate (Currency) field in DocType 'Stock Ledger Entry'
 #: erpnext/stock/doctype/serial_and_batch_entry/serial_and_batch_entry.json
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.json
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:378
 msgid "Outgoing Rate"
 msgstr ""
 
@@ -34057,6 +34114,11 @@ msgstr ""
 msgid "Over Delivery/Receipt Allowance (%)"
 msgstr "초과 배송/수령 허용치(%)"
 
+#. Label of the over_order_allowance (Float) field in DocType 'Buying Settings'
+#: erpnext/buying/doctype/buying_settings/buying_settings.json
+msgid "Over Order Allowance (%)"
+msgstr ""
+
 #. Label of the over_picking_allowance (Percent) field in DocType 'Stock
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
@@ -34067,7 +34129,7 @@ msgstr "초과 채취 허용량"
 msgid "Over Receipt"
 msgstr "영수증 초과"
 
-#: erpnext/controllers/status_updater.py:494
+#: erpnext/controllers/status_updater.py:504
 msgid "Over Receipt/Delivery of {0} {1} ignored for item {2} because you have {3} role."
 msgstr "{0} {1} 의 수령/배송 초과는 항목 {2} 에 대해 무시되었습니다. 왜냐하면 귀하에게 {3} 역할이 있기 때문입니다."
 
@@ -34087,7 +34149,7 @@ msgstr "초과 이체 허용 비율(%)"
 msgid "Over Withheld"
 msgstr "보류됨"
 
-#: erpnext/controllers/status_updater.py:496
+#: erpnext/controllers/status_updater.py:506
 msgid "Overbilling of {0} {1} ignored for item {2} because you have {3} role."
 msgstr ""
 
@@ -34391,7 +34453,7 @@ msgstr "POS 품목 선택기"
 msgid "POS Opening Entry"
 msgstr "POS 개시 입력"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1202
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1206
 msgid "POS Opening Entry - {0} is outdated. Please close the POS and create a new POS Opening Entry."
 msgstr ""
 
@@ -34412,7 +34474,7 @@ msgstr ""
 msgid "POS Opening Entry Exists"
 msgstr "POS 개시 입력이 존재합니다"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1187
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1191
 msgid "POS Opening Entry Missing"
 msgstr "POS 개시 입력 누락"
 
@@ -34448,7 +34510,7 @@ msgstr "POS 결제 방식"
 msgid "POS Profile"
 msgstr "POS 프로필"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1195
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1199
 msgid "POS Profile - {0} has multiple open POS Opening Entries. Please close or cancel the existing entries before proceeding."
 msgstr "POS 프로필 - {0} 에 열려 있는 POS 개시 항목이 여러 개 있습니다. 진행하기 전에 기존 항목을 닫거나 취소하십시오."
 
@@ -34466,11 +34528,11 @@ msgstr "POS 프로필 사용자"
 msgid "POS Profile doesn't match {}"
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1155
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1159
 msgid "POS Profile is mandatory to mark this invoice as POS Transaction."
 msgstr "이 송장을 POS 거래로 표시하려면 POS 프로필이 필수입니다."
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1384
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1397
 msgid "POS Profile required to make POS Entry"
 msgstr ""
 
@@ -34720,7 +34782,7 @@ msgid "Paid To Account Type"
 msgstr "지급 계좌 유형"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:327
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1151
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1155
 msgid "Paid amount + Write Off Amount can not be greater than Grand Total"
 msgstr ""
 
@@ -34941,7 +35003,7 @@ msgstr "부분 일치"
 msgid "Partial Material Transferred"
 msgstr "부분적인 물질 이송"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1174
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1178
 msgid "Partial Payment in POS Transactions are not allowed."
 msgstr "POS 거래 시 부분 결제는 허용되지 않습니다."
 
@@ -36082,6 +36144,7 @@ msgstr "판매 주문에 대한 결제 조건 상태"
 #. Invoice'
 #. Label of the payment_terms_template (Link) field in DocType 'Sales Invoice'
 #. Label of the payment_terms_template (Link) field in DocType 'Purchase Order'
+#. Label of the payment_terms (Link) field in DocType 'Customer'
 #. Label of the payment_terms_template (Link) field in DocType 'Quotation'
 #. Label of the payment_terms_template (Link) field in DocType 'Sales Order'
 #: erpnext/accounts/doctype/payment_terms_template/payment_terms_template.json
@@ -36096,6 +36159,7 @@ msgstr "판매 주문에 대한 결제 조건 상태"
 #: erpnext/accounts/report/customer_ledger_summary/customer_ledger_summary.js:62
 #: erpnext/accounts/report/supplier_ledger_summary/supplier_ledger_summary.js:61
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
+#: erpnext/selling/doctype/customer/customer.json
 #: erpnext/selling/doctype/quotation/quotation.json
 #: erpnext/selling/doctype/sales_order/sales_order.json
 msgid "Payment Terms Template"
@@ -36153,7 +36217,7 @@ msgstr ""
 msgid "Payment methods are mandatory. Please add at least one payment method."
 msgstr "결제 수단은 필수 입력 사항입니다. 최소 한 가지 이상의 결제 수단을 추가해 주세요."
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3115
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3139
 msgid "Payment methods refreshed. Please review before proceeding."
 msgstr ""
 
@@ -37099,7 +37163,7 @@ msgstr ""
 msgid "Please add the account to root level Company - {0}"
 msgstr ""
 
-#: erpnext/accounts/doctype/account/account.py:234
+#: erpnext/accounts/doctype/account/account.py:237
 msgid "Please add the account to root level Company - {}"
 msgstr ""
 
@@ -37115,7 +37179,7 @@ msgstr ""
 msgid "Please attach CSV file"
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3256
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3286
 msgid "Please cancel and amend the Payment Entry"
 msgstr ""
 
@@ -37194,7 +37258,7 @@ msgstr "이 거래를 진행하려면 다음 사용자 중 한 명에게 연락�
 msgid "Please contact your administrator to extend the credit limits for {0}."
 msgstr "{0}의 신용 한도를 연장하려면 관리자에게 문의하십시오."
 
-#: erpnext/accounts/doctype/account/account.py:385
+#: erpnext/accounts/doctype/account/account.py:388
 msgid "Please convert the parent account in corresponding child company to a group account."
 msgstr ""
 
@@ -37279,7 +37343,7 @@ msgid "Please enter <b>Difference Account</b> or set default <b>Stock Adjustment
 msgstr ""
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:556
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1286
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1290
 msgid "Please enter Account for Change Amount"
 msgstr ""
 
@@ -37365,7 +37429,7 @@ msgid "Please enter Warehouse and Date"
 msgstr ""
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:660
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1282
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1286
 msgid "Please enter Write Off Account"
 msgstr ""
 
@@ -37774,7 +37838,7 @@ msgstr ""
 msgid "Please select at least one filter: Item Code, Batch, or Serial No."
 msgstr "품목 코드, 배치 번호 또는 일련 번호 중 하나 이상의 필터를 선택하십시오."
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:556
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:559
 msgid "Please select at least one item to update delivered quantity."
 msgstr "배송 수량을 업데이트하려면 최소 한 개 이상의 품목을 선택해 주세요."
 
@@ -37906,7 +37970,7 @@ msgstr ""
 msgid "Please set Account"
 msgstr "계정을 설정해 주세요"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1963
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1976
 msgid "Please set Account for Change Amount"
 msgstr ""
 
@@ -38037,19 +38101,19 @@ msgstr ""
 msgid "Please set both the Tax ID and Fiscal Code on Company {0}"
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2500
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2524
 msgid "Please set default Cash or Bank account in Mode of Payment {0}"
 msgstr ""
 
 #: erpnext/accounts/doctype/pos_opening_entry/pos_opening_entry.py:94
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:198
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3108
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3132
 msgid "Please set default Cash or Bank account in Mode of Payment {}"
 msgstr ""
 
 #: erpnext/accounts/doctype/pos_opening_entry/pos_opening_entry.py:96
 #: erpnext/accounts/doctype/pos_profile/pos_profile.py:200
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3110
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3134
 msgid "Please set default Cash or Bank account in Mode of Payments {}"
 msgstr ""
 
@@ -38580,6 +38644,11 @@ msgstr "제출 전 경고: 신용 한도"
 msgid "Pre-Submit Warning: Packed Qty"
 msgstr "제출 전 경고: 포장 수량"
 
+#. Description of the 'Company Bank Account' (Link) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Pre-filled on payment entries for this customer. Must be a company account."
+msgstr ""
+
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:307
 msgid "Preference"
 msgstr "선호"
@@ -38752,6 +38821,7 @@ msgstr ""
 #. Option for the 'Rate Of Materials Based On' (Select) field in DocType 'BOM
 #. Creator'
 #. Label of the buying_price_list (Link) field in DocType 'BOM Creator'
+#. Label of the default_price_list (Link) field in DocType 'Customer'
 #. Label of the selling_price_list (Link) field in DocType 'Quotation'
 #. Label of the selling_price_list (Link) field in DocType 'Sales Order'
 #. Label of a Link in the Selling Workspace
@@ -38775,6 +38845,7 @@ msgstr ""
 #: erpnext/buying/workspace/buying/buying.json
 #: erpnext/manufacturing/doctype/bom/bom.json
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.json
+#: erpnext/selling/doctype/customer/customer.json
 #: erpnext/selling/doctype/quotation/quotation.json
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #: erpnext/selling/report/customer_wise_item_price/customer_wise_item_price.py:44
@@ -39535,8 +39606,8 @@ msgstr "제품"
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 #: erpnext/buying/doctype/purchase_order_item/purchase_order_item.json
 #: erpnext/buying/workspace/buying/buying.json
-#: erpnext/public/js/controllers/buying.js:326
-#: erpnext/public/js/controllers/buying.js:611
+#: erpnext/public/js/controllers/buying.js:321
+#: erpnext/public/js/controllers/buying.js:606
 #: erpnext/selling/doctype/product_bundle/product_bundle.json
 #: erpnext/selling/workspace/selling/selling.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
@@ -40225,6 +40296,7 @@ msgstr "출판"
 #: erpnext/projects/doctype/project/project_dashboard.py:16
 #: erpnext/setup/doctype/company/company.py:466 erpnext/setup/install.py:436
 #: erpnext/stock/doctype/item/item.json
+#: erpnext/stock/doctype/item/item_list.js:30
 #: erpnext/stock/doctype/item_lead_time/item_lead_time.json
 #: erpnext/stock/doctype/item_reorder/item_reorder.json
 #: erpnext/stock/doctype/material_request/material_request.json
@@ -40547,7 +40619,7 @@ msgstr "구매 주문서 {0} 가 생성되었습니다"
 msgid "Purchase Order {0} is not submitted"
 msgstr ""
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:930
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:933
 msgid "Purchase Orders"
 msgstr "구매 주문서"
 
@@ -40562,7 +40634,7 @@ msgstr "구매 주문 건수"
 msgid "Purchase Orders Items Overdue"
 msgstr "구매 주문서 기한 초과 품목"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:276
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:279
 msgid "Purchase Orders are not allowed for {0} due to a scorecard standing of {1}."
 msgstr ""
 
@@ -40809,6 +40881,7 @@ msgstr "구매"
 #. Label of the purpose (Select) field in DocType 'Stock Reconciliation'
 #: erpnext/assets/doctype/asset_movement/asset_movement.json
 #: erpnext/manufacturing/doctype/master_production_schedule/master_production_schedule.js:163
+#: erpnext/stock/doctype/item/item_list.js:40
 #: erpnext/stock/doctype/material_request/material_request.json
 #: erpnext/stock/doctype/pick_list/pick_list.json
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:459
@@ -41535,7 +41608,7 @@ msgstr "수량 업데이트가 완료되었습니다."
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:194
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:218
 #: erpnext/manufacturing/doctype/production_plan_sub_assembly_item/production_plan_sub_assembly_item.json
-#: erpnext/public/js/controllers/buying.js:618
+#: erpnext/public/js/controllers/buying.js:613
 #: erpnext/public/js/stock_analytics.js:50
 #: erpnext/public/js/utils/serial_no_batch_selector.js:500
 #: erpnext/selling/doctype/quotation_item/quotation_item.json
@@ -41717,7 +41790,7 @@ msgstr ""
 msgid "Quart Liquid (US)"
 msgstr ""
 
-#: erpnext/selling/report/sales_analytics/sales_analytics.py:437
+#: erpnext/selling/report/sales_analytics/sales_analytics.py:461
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:125
 msgid "Quarter {0} {1}"
 msgstr "분기 {0} {1}"
@@ -43454,7 +43527,7 @@ msgstr "항목 속성의 속성 값을 변경합니다."
 msgid "Rename Log"
 msgstr "로그 이름 변경"
 
-#: erpnext/accounts/doctype/account/account.py:559
+#: erpnext/accounts/doctype/account/account.py:568
 msgid "Rename Not Allowed"
 msgstr "이름 변경은 허용되지 않습니다"
 
@@ -43471,7 +43544,7 @@ msgstr ""
 msgid "Rename jobs for doctype {0} have not been enqueued."
 msgstr ""
 
-#: erpnext/accounts/doctype/account/account.py:551
+#: erpnext/accounts/doctype/account/account.py:560
 msgid "Renaming it is only allowed via parent company {0}, to avoid mismatch."
 msgstr ""
 
@@ -43590,7 +43663,7 @@ msgstr "보고서 항목"
 msgid "Report Template"
 msgstr ""
 
-#: erpnext/accounts/doctype/account/account.py:463
+#: erpnext/accounts/doctype/account/account.py:462
 msgid "Report Type is mandatory"
 msgstr ""
 
@@ -44604,7 +44677,7 @@ msgstr ""
 msgid "Return Raw Material to Customer"
 msgstr "원자재를 고객에게 반환"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1525
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1538
 msgid "Return invoice of asset cancelled"
 msgstr "자산 반환 송장 취소됨"
 
@@ -44931,11 +45004,11 @@ msgstr "루트 유형"
 msgid "Root Type for {0} must be one of the Asset, Liability, Income, Expense and Equity"
 msgstr ""
 
-#: erpnext/accounts/doctype/account/account.py:460
+#: erpnext/accounts/doctype/account/account.py:459
 msgid "Root Type is mandatory"
 msgstr ""
 
-#: erpnext/accounts/doctype/account/account.py:216
+#: erpnext/accounts/doctype/account/account.py:219
 msgid "Root cannot be edited."
 msgstr "루트는 편집할 수 없습니다."
 
@@ -45140,12 +45213,12 @@ msgid "Row #1: Sequence ID must be 1 for Operation {0}."
 msgstr ""
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:565
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2155
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2177
 msgid "Row #{0} (Payment Table): Amount must be negative"
 msgstr ""
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:563
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2150
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2172
 msgid "Row #{0} (Payment Table): Amount must be positive"
 msgstr ""
 
@@ -45334,7 +45407,7 @@ msgstr ""
 msgid "Row #{0}: Dates overlapping with other row in group {1}"
 msgstr ""
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:337
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:340
 msgid "Row #{0}: Default BOM not found for FG Item {1}"
 msgstr ""
 
@@ -45358,17 +45431,17 @@ msgstr "행 #{0}: 항목 {1}에 대해 비용 계정이 설정되지 않았습�
 msgid "Row #{0}: Expense account {1} is not valid for Purchase Invoice {2}. Only expense accounts from non-stock items are allowed."
 msgstr "행 #{0}: 비용 계정 {1} 은 구매 송장 {2}에 유효하지 않습니다. 재고 품목이 아닌 품목에 대한 비용 계정만 허용됩니다."
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:342
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:345
 #: erpnext/selling/doctype/sales_order/sales_order.py:307
 msgid "Row #{0}: Finished Good Item Qty can not be zero"
 msgstr ""
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:324
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:327
 #: erpnext/selling/doctype/sales_order/sales_order.py:287
 msgid "Row #{0}: Finished Good Item is not specified for service item {1}"
 msgstr ""
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:331
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:334
 #: erpnext/selling/doctype/sales_order/sales_order.py:294
 msgid "Row #{0}: Finished Good Item {1} must be a sub-contracted item"
 msgstr ""
@@ -45725,7 +45798,7 @@ msgstr ""
 msgid "Row #{0}: Stock not available to reserve for the Item {1} in Warehouse {2}."
 msgstr "행 #{0}: 창고 {2}에서 품목 {1} 에 대한 예약 가능한 재고가 없습니다."
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1268
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1272
 msgid "Row #{0}: Stock quantity {1} ({2}) for item {3} cannot exceed {4}"
 msgstr ""
 
@@ -45773,7 +45846,7 @@ msgstr ""
 msgid "Row #{0}: You must select an Asset for Item {1}."
 msgstr "행 #{0}: 항목 {1}에 대한 자산을 선택해야 합니다."
 
-#: erpnext/public/js/controllers/buying.js:266
+#: erpnext/public/js/controllers/buying.js:261
 msgid "Row #{0}: {1} can not be negative for item {2}"
 msgstr ""
 
@@ -46198,7 +46271,7 @@ msgstr ""
 msgid "Row {0}: To set {1} periodicity, difference between from and to date must be greater than or equal to {2}"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_entry/stock_entry_handler/material_transfer.py:348
+#: erpnext/stock/doctype/stock_entry/stock_entry_handler/material_transfer.py:99
 msgid "Row {0}: Transferred quantity cannot be greater than the requested quantity."
 msgstr "행 {0}: 전송 수량은 요청 수량보다 클 수 없습니다."
 
@@ -46537,9 +46610,14 @@ msgstr "급여 방식"
 #: erpnext/setup/install.py:431
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:297
 #: erpnext/stock/doctype/item/item.json
+#: erpnext/stock/doctype/item/item_list.js:29
 #: erpnext/stock/doctype/pick_list/pick_list_dashboard.py:16
 msgid "Sales"
 msgstr "매상"
+
+#: erpnext/stock/doctype/item/item_list.js:28
+msgid "Sales & Purchase"
+msgstr ""
 
 #: erpnext/setup/doctype/company/company.py:653
 msgid "Sales Account"
@@ -46946,7 +47024,7 @@ msgstr ""
 msgid "Sales Order {0} is not available for production"
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1398
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1411
 msgid "Sales Order {0} is not submitted"
 msgstr ""
 
@@ -46999,6 +47077,7 @@ msgstr "판매 주문 배송"
 #. Scheme'
 #. Label of the sales_partner (Link) field in DocType 'Sales Invoice'
 #. Label of the default_sales_partner (Link) field in DocType 'Customer'
+#. Label of the sales_team_section (Section Break) field in DocType 'Customer'
 #. Label of the sales_partner (Link) field in DocType 'Sales Order'
 #. Label of the sales_partner (Link) field in DocType 'SMS Center'
 #. Label of a Link in the Selling Workspace
@@ -47390,7 +47469,7 @@ msgstr "시료 보관 창고"
 msgid "Sample Size"
 msgstr "표본 크기"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:1021
+#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:1023
 msgid "Sample quantity {0} cannot be more than received quantity {1}"
 msgstr ""
 
@@ -48006,7 +48085,7 @@ msgstr "기본 우선순위를 선택하세요."
 msgid "Select a Payment Method."
 msgstr "결제 방법을 선택하세요."
 
-#: erpnext/selling/doctype/customer/customer.js:251
+#: erpnext/selling/doctype/customer/customer.js:253
 msgid "Select a Supplier"
 msgstr ""
 
@@ -48120,6 +48199,12 @@ msgstr "날짜를 선택하세요"
 msgid "Select the date and your timezone"
 msgstr "날짜와 시간대를 선택하세요"
 
+#. Description of the 'Tax Withholding Group' (Link) field in DocType
+#. 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Select the group first to filter the applicable withholding categories below."
+msgstr ""
+
 #: erpnext/manufacturing/doctype/bom/bom.js:1004
 msgid "Select the raw materials (Items) required to manufacture the Item"
 msgstr ""
@@ -48148,7 +48233,7 @@ msgstr ""
 msgid "Selected POS Opening Entry should be open."
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2651
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2675
 msgid "Selected Price List should have buying and selling fields checked."
 msgstr ""
 
@@ -48198,7 +48283,7 @@ msgstr "판매 수량"
 msgid "Sell quantity cannot exceed the asset quantity"
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1411
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1424
 msgid "Sell quantity cannot exceed the asset quantity. Asset {0} has only {1} item(s)."
 msgstr ""
 
@@ -48475,7 +48560,7 @@ msgstr "일련번호/배치번호"
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:450
 #: erpnext/stock/report/serial_no_ledger/serial_no_ledger.js:38
 #: erpnext/stock/report/serial_no_ledger/serial_no_ledger.py:61
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:425
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:426
 #: erpnext/stock/workspace/stock/stock.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_supplied_item/subcontracting_receipt_supplied_item.json
@@ -48730,7 +48815,7 @@ msgstr ""
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:188
 #: erpnext/stock/report/incorrect_serial_and_batch_bundle/incorrect_serial_and_batch_bundle.py:31
 #: erpnext/stock/report/serial_and_batch_summary/serial_and_batch_summary.py:82
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:409
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:410
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:177
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 #: erpnext/workspace_sidebar/stock.json
@@ -49144,7 +49229,7 @@ msgstr ""
 
 #. Label of the set_basic_rate_manually (Check) field in DocType 'Stock Entry
 #. Detail'
-#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:706
+#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:708
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgid "Set Basic Rate Manually"
 msgstr ""
@@ -50571,6 +50656,11 @@ msgstr ""
 msgid "Split across {} accounts"
 msgstr ""
 
+#. Description of the 'Sales Team' (Table) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Split commission credit across multiple sales persons."
+msgstr ""
+
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:2458
 msgid "Splitting {0} {1} into {2} rows as per Payment Terms"
 msgstr ""
@@ -50865,6 +50955,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/bom/bom_dashboard.py:14
 #: erpnext/setup/doctype/incoterm/incoterm.json
 #: erpnext/setup/workspace/home/home.json
+#: erpnext/stock/doctype/item/item_list.js:21
 #: erpnext/stock/doctype/material_request/material_request_dashboard.py:17
 #: erpnext/stock/workspace/stock/stock.json
 #: erpnext/workspace_sidebar/stock.json
@@ -51521,7 +51612,7 @@ msgstr "주식 거래 설정"
 #: erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py:35
 #: erpnext/stock/report/reserved_stock/reserved_stock.py:110
 #: erpnext/stock/report/stock_balance/stock_balance.py:513
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:294
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:295
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_item/subcontracting_inward_order_item.json
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_received_item/subcontracting_inward_order_received_item.json
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_secondary_item/subcontracting_inward_order_secondary_item.json
@@ -51654,11 +51745,11 @@ msgstr "그룹 창고 {0}에서는 재고를 예약할 수 없습니다."
 msgid "Stock cannot be reserved in the group warehouse {0}."
 msgstr "그룹 창고 {0}에서는 재고를 예약할 수 없습니다."
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1226
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1230
 msgid "Stock cannot be updated against the following Delivery Notes: {0}"
 msgstr "다음 배송 전표에 대해서는 재고를 업데이트할 수 없습니다: {0}"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1295
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1299
 msgid "Stock cannot be updated because the invoice contains a drop shipping item. Please disable 'Update Stock' or remove the drop shipping item."
 msgstr ""
 
@@ -52040,7 +52131,7 @@ msgstr "하도급 주문 서비스 품목"
 msgid "Subcontracting Order Supplied Item"
 msgstr "하도급 주문 공급 품목"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:973
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:976
 msgid "Subcontracting Order {0} created."
 msgstr "하도급 주문 {0} 이 생성되었습니다."
 
@@ -52129,7 +52220,7 @@ msgstr "하청 계약 설정"
 msgid "Subdivision"
 msgstr ""
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:969
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:972
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:1122
 msgid "Submit Action Failed"
 msgstr "작업 제출 실패"
@@ -52328,7 +52419,7 @@ msgstr "{0} 레코드를 성공적으로 가져왔습니다."
 msgid "Successfully linked to Customer"
 msgstr ""
 
-#: erpnext/selling/doctype/customer/customer.js:273
+#: erpnext/selling/doctype/customer/customer.js:275
 msgid "Successfully linked to Supplier"
 msgstr ""
 
@@ -52488,7 +52579,7 @@ msgstr "공급 수량"
 #: erpnext/public/js/purchase_trends_filters.js:63
 #: erpnext/regional/doctype/lower_deduction_certificate/lower_deduction_certificate.json
 #: erpnext/regional/report/irs_1099/irs_1099.py:77
-#: erpnext/selling/doctype/customer/customer.js:255
+#: erpnext/selling/doctype/customer/customer.js:257
 #: erpnext/selling/doctype/party_specific_item/party_specific_item.json
 #: erpnext/selling/doctype/sales_order/sales_order.js:187
 #: erpnext/selling/doctype/sales_order/sales_order.js:1741
@@ -52731,8 +52822,6 @@ msgid "Supplier Number At Customer"
 msgstr ""
 
 #. Label of the supplier_numbers (Table) field in DocType 'Customer'
-#. Label of the supplier_numbers_section (Section Break) field in DocType
-#. 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Supplier Numbers"
 msgstr ""
@@ -52919,11 +53008,6 @@ msgstr ""
 msgid "Supplier is required for all selected Items"
 msgstr ""
 
-#. Description of the 'Supplier Numbers' (Table) field in DocType 'Customer'
-#: erpnext/selling/doctype/customer/customer.json
-msgid "Supplier numbers assigned by the customer"
-msgstr ""
-
 #. Description of a DocType
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "Supplier of Goods or Services."
@@ -53034,7 +53118,7 @@ msgstr "동기화가 시작되었습니다"
 msgid "Synchronize all accounts every hour"
 msgstr ""
 
-#: erpnext/accounts/doctype/account/account.py:664
+#: erpnext/accounts/doctype/account/account.py:673
 msgid "System In Use"
 msgstr "시스템 사용 중"
 
@@ -53087,6 +53171,12 @@ msgstr ""
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:292
 msgid "TDS Payable"
+msgstr ""
+
+#. Description of the 'Tax Withholding Category' (Link) field in DocType
+#. 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "TDS/TCS is calculated at the rate defined here on every payment from this customer."
 msgstr ""
 
 #. Description of a DocType
@@ -54591,6 +54681,12 @@ msgstr ""
 msgid "The payment gateway account in plan {0} is different from the payment gateway account in this payment request"
 msgstr ""
 
+#. Description of the 'Over Order Allowance (%)' (Float) field in DocType
+#. 'Buying Settings'
+#: erpnext/buying/doctype/buying_settings/buying_settings.json
+msgid "The percentage by which you are allowed to order more on a Purchase Order than the quantity requested on the originating Material Request. For example, if the Material Request has 100 units and the allowance is 10%, you can order up to 110 units"
+msgstr ""
+
 #. Description of the 'Over Billing Allowance (%)' (Currency) field in DocType
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
@@ -54632,7 +54728,7 @@ msgstr "예약된 재고는 아이템을 업데이트할 때 해제됩니다. �
 msgid "The reserved stock will be released. Are you certain you wish to proceed?"
 msgstr "예약된 재고가 풀릴 예정입니다. 계속 진행하시겠습니까?"
 
-#: erpnext/accounts/doctype/account/account.py:219
+#: erpnext/accounts/doctype/account/account.py:222
 msgid "The root account {0} must be a group"
 msgstr ""
 
@@ -54807,7 +54903,7 @@ msgstr ""
 msgid "There are inconsistencies between the rate, no of shares and the amount calculated"
 msgstr ""
 
-#: erpnext/accounts/doctype/account/account.py:204
+#: erpnext/accounts/doctype/account/account.py:207
 msgid "There are ledger entries against this account. Changing {0} to non-{1} in live system will cause incorrect output in 'Accounts {2}' report"
 msgstr ""
 
@@ -54932,7 +55028,7 @@ msgstr ""
 msgid "This Month's Summary"
 msgstr "이번 달 요약"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:982
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:985
 msgid "This Purchase Order has been fully subcontracted."
 msgstr ""
 
@@ -54970,7 +55066,7 @@ msgstr "이 열에는 \"CR\"/\"DR\" 값 또는 양수/음수 값이 포함될 �
 msgid "This covers all scorecards tied to this Setup"
 msgstr ""
 
-#: erpnext/controllers/status_updater.py:478
+#: erpnext/controllers/status_updater.py:488
 msgid "This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?"
 msgstr ""
 
@@ -55146,7 +55242,7 @@ msgstr ""
 msgid "This schedule was created when Asset {0} was repaired through Asset Repair {1}."
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1502
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1515
 msgid "This schedule was created when Asset {0} was restored due to Sales Invoice {1} cancellation."
 msgstr "이 일정은 매출 송장 {1} 취소로 인해 자산 {0} 이 복원되었을 때 생성되었습니다."
 
@@ -55158,7 +55254,7 @@ msgstr ""
 msgid "This schedule was created when Asset {0} was restored."
 msgstr "이 일정은 자산 {0} 이 복원되었을 때 생성되었습니다."
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1498
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1511
 msgid "This schedule was created when Asset {0} was returned through Sales Invoice {1}."
 msgstr ""
 
@@ -55170,7 +55266,7 @@ msgstr "이 일정은 자산 {0} 이 폐기되었을 때 생성되었습니다."
 msgid "This schedule was created when Asset {0} was {1} into new Asset {2}."
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1474
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1487
 msgid "This schedule was created when Asset {0} was {1} through Sales Invoice {2}."
 msgstr ""
 
@@ -55686,11 +55782,15 @@ msgstr ""
 msgid "To add subcontracted Item's raw materials if include exploded items is disabled."
 msgstr ""
 
-#: erpnext/controllers/status_updater.py:471
+#: erpnext/controllers/status_updater.py:481
 msgid "To allow over billing, update \"Over Billing Allowance\" in Accounts Settings or the Item."
 msgstr "과다 청구를 허용하려면 계정 설정 또는 해당 항목에서 \"과다 청구 허용량\"을 업데이트하십시오."
 
-#: erpnext/controllers/status_updater.py:467
+#: erpnext/controllers/status_updater.py:475
+msgid "To allow over ordering, update \"Over Order Allowance\" in Buying Settings."
+msgstr ""
+
+#: erpnext/controllers/status_updater.py:477
 msgid "To allow over receipt / delivery, update \"Over Receipt/Delivery Allowance\" in Stock Settings or the Item."
 msgstr ""
 
@@ -55745,7 +55845,7 @@ msgstr ""
 msgid "To not apply Pricing Rule in a particular transaction, all applicable Pricing Rules should be disabled."
 msgstr ""
 
-#: erpnext/accounts/doctype/account/account.py:555
+#: erpnext/accounts/doctype/account/account.py:564
 msgid "To overrule this, enable '{0}' in company {1}"
 msgstr ""
 
@@ -56985,11 +57085,16 @@ msgstr "거래 내역 연간 기록"
 msgid "Transactions against the Company already exist! Chart of Accounts can only be imported for a Company with no transactions."
 msgstr ""
 
+#. Description of the 'Credit Limit' (Table) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Transactions are blocked or warned when outstanding balance exceeds this amount."
+msgstr ""
+
 #: banking/src/components/features/BankStatementImporter/CSV/StatementDetails.tsx:230
 msgid "Transactions to be imported into the system"
 msgstr "시스템으로 가져올 거래 내역"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1159
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1163
 msgid "Transactions using Sales Invoice in POS are disabled."
 msgstr ""
 
@@ -57435,6 +57540,7 @@ msgstr "UAE 부가가치세 설정"
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/delivery_stop/delivery_stop.json
 #: erpnext/stock/doctype/item/item.json
+#: erpnext/stock/doctype/item/item_list.js:41
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
 #: erpnext/stock/doctype/item_price/item_price.json
 #: erpnext/stock/doctype/material_request_item/material_request_item.json
@@ -58476,6 +58582,11 @@ msgstr ""
 msgid "Users can make manufacture entry against Job Cards"
 msgstr ""
 
+#. Description of the 'Portal Users' (Tab Break) field in DocType 'Customer'
+#: erpnext/selling/doctype/customer/customer.json
+msgid "Users listed here can log into the customer portal to view their orders, invoices, and deliveries."
+msgstr ""
+
 #. Description of the 'Role Allowed to Over Bill ' (Link) field in DocType
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
@@ -58718,7 +58829,6 @@ msgstr "평가 방법"
 #. Label of the valuation_rate (Currency) field in DocType 'Stock Closing
 #. Balance'
 #. Label of the valuation_rate (Currency) field in DocType 'Stock Entry Detail'
-#. Label of the valuation_rate (Currency) field in DocType 'Stock Ledger Entry'
 #. Label of the valuation_rate (Currency) field in DocType 'Stock
 #. Reconciliation Item'
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
@@ -58734,14 +58844,12 @@ msgstr "평가 방법"
 #: erpnext/stock/doctype/serial_and_batch_entry/serial_and_batch_entry.json
 #: erpnext/stock/doctype/stock_closing_balance/stock_closing_balance.json
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
-#: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.json
 #: erpnext/stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:164
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:85
 #: erpnext/stock/report/item_prices/item_prices.py:57
 #: erpnext/stock/report/serial_no_ledger/serial_no_ledger.py:68
 #: erpnext/stock/report/stock_balance/stock_balance.py:566
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:377
 msgid "Valuation Rate"
 msgstr "평가 비율"
 
@@ -58916,7 +59024,7 @@ msgid "Variance ({})"
 msgstr "분산({})"
 
 #: erpnext/stock/doctype/item/item.js:241
-#: erpnext/stock/doctype/item/item_list.js:22
+#: erpnext/stock/doctype/item/item_list.js:59
 #: erpnext/stock/report/item_variant_details/item_variant_details.py:74
 msgid "Variant"
 msgstr "변종"
@@ -59263,7 +59371,7 @@ msgstr "보증인"
 #: erpnext/stock/report/available_serial_no/available_serial_no.js:56
 #: erpnext/stock/report/available_serial_no/available_serial_no.py:196
 #: erpnext/stock/report/stock_ledger/stock_ledger.js:97
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:402
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:403
 msgid "Voucher #"
 msgstr ""
 
@@ -59436,7 +59544,7 @@ msgstr ""
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:486
 #: erpnext/stock/report/serial_no_ledger/serial_no_ledger.py:28
 #: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:152
-#: erpnext/stock/report/stock_ledger/stock_ledger.py:400
+#: erpnext/stock/report/stock_ledger/stock_ledger.py:401
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:159
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:68
 msgid "Voucher Type"
@@ -59616,7 +59724,7 @@ msgstr ""
 msgid "Warehouse not found against the account {0}"
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1216
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1220
 #: erpnext/stock/doctype/delivery_note/delivery_note.py:445
 msgid "Warehouse required for stock Item {0}"
 msgstr ""
@@ -59942,7 +60050,7 @@ msgstr "웹사이트:"
 msgid "Week of the year"
 msgstr "연중 주차"
 
-#: erpnext/selling/report/sales_analytics/sales_analytics.py:433
+#: erpnext/selling/report/sales_analytics/sales_analytics.py:457
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:121
 msgid "Week {0} {1}"
 msgstr "주 {0} {1}"
@@ -60082,7 +60190,7 @@ msgstr ""
 msgid "When enabled, it adds a cutoff date filter to Delivery Notes created in bulk from Sales Orders. This allows you to process orders only with a transaction date up to the specified cutoff date, which is useful for period-end processing and batch fulfillment."
 msgstr ""
 
-#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:703
+#: erpnext/stock/doctype/stock_entry/stock_entry_handler/manufacturing.py:705
 msgid "When there are multiple finished goods ({0}) in a Repack stock entry, the basic rate for all finished goods must be set manually. To set rate manually, enable the checkbox 'Set Basic Rate Manually' in the respective finished good row."
 msgstr ""
 
@@ -60092,11 +60200,11 @@ msgstr ""
 msgid "When you pay for something upfront (like annual insurance), the cost is held here and recognized gradually over time"
 msgstr ""
 
-#: erpnext/accounts/doctype/account/account.py:381
+#: erpnext/accounts/doctype/account/account.py:384
 msgid "While creating account for Child Company {0}, parent account {1} found as a ledger account."
 msgstr "자식 회사 {0}에 대한 계정을 생성하는 동안 상위 계정 {1} 이 원장 계정으로 발견되었습니다."
 
-#: erpnext/accounts/doctype/account/account.py:371
+#: erpnext/accounts/doctype/account/account.py:374
 msgid "While creating account for Child Company {0}, parent account {1} not found. Please create the parent account in corresponding COA"
 msgstr ""
 
@@ -60731,7 +60839,7 @@ msgstr ""
 msgid "You are not authorized to make/edit Stock Transactions for Item {0} under warehouse {1} before this time."
 msgstr "귀하는 이 시간 이전에 창고 {1} 의 품목 {0} 에 대한 재고 거래를 생성/수정할 권한이 없습니다."
 
-#: erpnext/accounts/doctype/account/account.py:313
+#: erpnext/accounts/doctype/account/account.py:316
 msgid "You are not authorized to set Frozen value"
 msgstr ""
 
@@ -60909,7 +61017,7 @@ msgstr "회사 주소를 생성할 권한이 없습니다. 시스템 관리자�
 msgid "You don't have permission to update Company details. Please contact your System Manager."
 msgstr "귀하는 회사 정보를 업데이트할 권한이 없습니다. 시스템 관리자에게 문의하십시오."
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:575
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:578
 msgid "You don't have permission to update Received Qty DocField for item {0}"
 msgstr ""
 
@@ -61038,7 +61146,7 @@ msgstr "압축 파일"
 msgid "[Important] [ERPNext] Auto Reorder Errors"
 msgstr ""
 
-#: erpnext/controllers/status_updater.py:302
+#: erpnext/controllers/status_updater.py:304
 msgid "`Allow Negative rates for Items`"
 msgstr "'항목에 대해 음수 요금을 허용합니다'"
 
@@ -61083,7 +61191,7 @@ msgid "cannot be greater than 100"
 msgstr ""
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:334
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1105
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1101
 msgid "dated {0}"
 msgstr "날짜가 {0}"
 
@@ -61265,7 +61373,7 @@ msgstr "받은 것"
 msgid "reconciled"
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1476
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1489
 msgid "returned"
 msgstr ""
 
@@ -61300,7 +61408,7 @@ msgstr "rgt"
 msgid "sandbox"
 msgstr "모래 상자"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1476
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1489
 msgid "sold"
 msgstr "판매된"
 
@@ -61308,8 +61416,8 @@ msgstr "판매된"
 msgid "subscription is already cancelled."
 msgstr "구독이 이미 취소되었습니다."
 
-#: erpnext/controllers/status_updater.py:481
-#: erpnext/controllers/status_updater.py:500
+#: erpnext/controllers/status_updater.py:491
+#: erpnext/controllers/status_updater.py:510
 msgid "target_ref_field"
 msgstr "타겟_참조_필드"
 
@@ -61327,7 +61435,7 @@ msgstr "제목"
 msgid "to"
 msgstr "에게"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3258
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3288
 msgid "to unallocate the amount of this Return Invoice before cancelling it."
 msgstr "반품 송장을 취소하기 전에 해당 금액을 할당 해제해야 합니다."
 
@@ -61354,7 +61462,7 @@ msgstr "선택된 거래"
 msgid "unique e.g. SAVE20  To be used to get discount"
 msgstr ""
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:605
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:608
 msgid "updated delivered quantity for item {0} to {1}"
 msgstr ""
 
@@ -61529,7 +61637,7 @@ msgstr ""
 msgid "{0} currency must be same as company's default currency. Please select another account."
 msgstr "{0} 통화는 회사 기본 통화와 동일해야 합니다. 다른 계정을 선택하십시오."
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:285
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:288
 msgid "{0} currently has a {1} Supplier Scorecard standing, and Purchase Orders to this supplier should be issued with caution."
 msgstr ""
 
@@ -61605,7 +61713,7 @@ msgstr ""
 msgid "{0} is in Draft. Submit it before creating the Asset."
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1131
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1127
 msgid "{0} is mandatory for Item {1}"
 msgstr ""
 
@@ -61702,7 +61810,7 @@ msgstr "반환할 항목 {0} 개"
 msgid "{0} must be negative in return document"
 msgstr ""
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2448
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2472
 msgid "{0} not allowed to transact with {1}. Please change the Company or add the Company in the 'Allowed To Transact With'-Section in the Customer record."
 msgstr ""
 
@@ -61822,7 +61930,7 @@ msgstr "{0} {1} 는 이미 전액 지불되었습니다."
 msgid "{0} {1} has already been partly paid. Please use the 'Get Outstanding Invoice' or the 'Get Outstanding Orders' button to get the latest outstanding amounts."
 msgstr ""
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:413
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:416
 #: erpnext/selling/doctype/sales_order/sales_order.py:609
 #: erpnext/stock/doctype/material_request/material_request.py:257
 msgid "{0} {1} has been modified. Please refresh."
@@ -62043,7 +62151,7 @@ msgstr "{ref_doctype} {ref_name} 는 {status}입니다."
 msgid "{}"
 msgstr "{}"
 
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2214
+#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2236
 msgid "{} can't be cancelled since the Loyalty Points earned has been redeemed. First cancel the {} No {}"
 msgstr ""
 
