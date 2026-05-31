@@ -101,12 +101,8 @@ def get_available_slots_between(query_start_time, query_end_time, settings):
 
 
 @frappe.whitelist(allow_guest=True)
-<<<<<<< HEAD
 def create_appointment(date, time, tz, contact):
-=======
-def create_appointment(date: str, time: str, tz: str, contact: str):
 	handle_appointment_booking_disabled()
->>>>>>> a7e2daff7e (fix(book_appointment): when scheduling is disabled, block API endpoints (#55455))
 	format_string = "%Y-%m-%d %H:%M:%S"
 	scheduled_time = datetime.datetime.strptime(date + " " + time, format_string)
 	# Strip tzinfo from datetime objects since it's handled by the doctype
