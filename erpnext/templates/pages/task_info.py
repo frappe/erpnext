@@ -8,9 +8,9 @@ def get_context(context):
 	task.check_permission()
 
 	context.comments = frappe.get_all(
-		"Communication",
-		filters={"reference_name": task.name, "comment_type": "comment"},
-		fields=["subject", "sender_full_name", "communication_date"],
+		"Comment",
+		filters={"reference_doctype": "Task", "reference_name": task.name, "comment_type": "Comment"},
+		fields=["content", "comment_email", "creation"],
 	)
 
 	context.doc = task
