@@ -16,6 +16,7 @@
   "categorize_by",
   "cost_center",
   "territory",
+  "show_opening_entries",
   "ignore_exchange_rate_revaluation_journals",
   "ignore_cr_dr_notes",
   "column_break_14",
@@ -414,10 +415,17 @@
    "fieldtype": "Link",
    "label": "Print Format",
    "options": "Print Format"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:(doc.report == 'General Ledger');",
+   "fieldname": "show_opening_entries",
+   "fieldtype": "Check",
+   "label": "Show Opening Entries"
   }
  ],
  "links": [],
- "modified": "2025-10-07 12:19:20.719898",
+ "modified": "2026-06-01 15:37:07.660442",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",
