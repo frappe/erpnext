@@ -2112,7 +2112,7 @@ def repost_required_for_queue(doc: StockController) -> bool:
 
 
 @frappe.whitelist()
-def check_item_quality_inspection(doctype: str, items: str | list[dict]):
+def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str | list[dict]):
 	if isinstance(items, str):
 		items = json.loads(items)
 
