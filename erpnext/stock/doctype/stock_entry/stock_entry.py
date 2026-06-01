@@ -572,7 +572,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 			if self.bom_no:
 				d.basic_rate *= frappe.get_value("BOM", self.bom_no, "cost_allocation_per") / 100
-		elif d.type and d.bom_secondary_item:
+		elif d.secondary_item_type and d.bom_secondary_item:
 			cost_allocation_per = frappe.get_value(
 				"BOM Secondary Item", d.bom_secondary_item, "cost_allocation_per"
 			)
@@ -693,7 +693,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 	def _validate_no_raw_materials_in_manufacture_entry(self, settings):
 		for item in self.items:
-			if not item.is_finished_item and not item.type and not item.is_legacy_scrap_item:
+			if not item.is_finished_item and not item.secondary_item_type and not item.is_legacy_scrap_item:
 				label = frappe.get_meta(settings.doctype).get_label("get_rm_cost_from_consumption_entry")
 				frappe.throw(
 					_(
@@ -835,7 +835,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 					d.is_finished_item = 1
 			else:
 				d.is_finished_item = 0
-				d.type = ""
+				d.secondary_item_type = ""
 
 	def get_finished_item(self):
 		finished_item = None

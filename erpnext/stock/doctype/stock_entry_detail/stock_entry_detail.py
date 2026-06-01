@@ -83,7 +83,7 @@ class StockEntryDetail(Document):
 		t_warehouse: DF.Link | None
 		transfer_qty: DF.Float
 		transferred_qty: DF.Float
-		type: DF.Literal["", "Co-Product", "By-Product", "Scrap", "Additional Finished Good"]
+		secondary_item_type: DF.Literal["", "Co-Product", "By-Product", "Scrap", "Additional Finished Good"]
 		uom: DF.Link
 		use_serial_batch_fields: DF.Check
 		valuation_rate: DF.Currency

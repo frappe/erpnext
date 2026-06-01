@@ -25,7 +25,7 @@ class BaseManufactureStockEntry(BaseStockEntry):
 				and self.doc.from_warehouse
 				and not row.is_finished_item
 				and not row.is_legacy_scrap_item
-				and not row.type
+				and not row.secondary_item_type
 			):
 				row.s_warehouse = self.doc.from_warehouse
 				row.t_warehouse = None
@@ -33,7 +33,7 @@ class BaseManufactureStockEntry(BaseStockEntry):
 			elif (
 				not row.t_warehouse
 				and self.doc.to_warehouse
-				and (row.is_finished_item or row.is_legacy_scrap_item or row.type)
+				and (row.is_finished_item or row.is_legacy_scrap_item or row.secondary_item_type)
 			):
 				row.t_warehouse = self.doc.to_warehouse
 				row.s_warehouse = None
@@ -83,10 +83,10 @@ class BaseManufactureStockEntry(BaseStockEntry):
 		for row in secondary_items:
 			item_args = self.get_item_dict(row)
 			item_args["is_legacy_scrap_item"] = bool(row.get("is_legacy"))
-			item_args["type"] = row.type
+			item_args["secondary_item_type"] = row.secondary_item_type
 			item_args["bom_secondary_item"] = row.name
 
-			if row.type == "Scrap" and self.wo_doc and self.wo_doc.get("scrap_warehouse"):
+			if row.secondary_item_type == "Scrap" and self.wo_doc and self.wo_doc.get("scrap_warehouse"):
 				item_args["t_warehouse"] = self.wo_doc.scrap_warehouse
 			else:
 				item_args["t_warehouse"] = self.doc.to_warehouse
@@ -591,7 +591,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			row.s_warehouse = None
 			row.t_warehouse = row.warehouse or self.doc.to_warehouse
 			row.is_legacy_scrap_item = row.is_legacy
-			row.type = row.get("type")
+			row.secondary_item_type = row.get("secondary_item_type")
 
 			self.doc.append("items", row)
 
@@ -633,7 +633,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			.select(sed.item_code, sed.qty)
 			.where(
 				(se.work_order == self.doc.work_order)
-				& ((sed.type.isnotnull()) | (sed.is_legacy_scrap_item == 1))
+				& ((sed.secondary_item_type.isnotnull()) | (sed.is_legacy_scrap_item == 1))
 				& (se.docstatus == 1)
 				& (se.purpose.isin(["Repack", "Manufacture"]))
 			)
@@ -832,7 +832,7 @@ def _add_bom_table_specific_fields(query, doctype, table_name):
 			doctype.cost_allocation_per,
 			doctype.uom,
 			doctype.process_loss_per,
-			doctype.type,
+			doctype.secondary_item_type,
 			doctype.is_legacy,
 			doctype.conversion_factor,
 		)
@@ -891,7 +891,7 @@ def get_secondary_items_from_job_card(work_order, jc_name=None):
 			job_card_secondary_item.item_name,
 			job_card_secondary_item.description,
 			job_card_secondary_item.stock_uom,
-			job_card_secondary_item.type,
+			job_card_secondary_item.secondary_item_type,
 			job_card_secondary_item.bom_secondary_item,
 		)
 		.join(job_card_secondary_item)
@@ -901,7 +901,7 @@ def get_secondary_items_from_job_card(work_order, jc_name=None):
 			& (job_card.work_order == work_order)
 			& (job_card.docstatus == 1)
 		)
-		.groupby(job_card_secondary_item.item_code, job_card_secondary_item.type)
+		.groupby(job_card_secondary_item.item_code, job_card_secondary_item.secondary_item_type)
 		.orderby(job_card_secondary_item.idx)
 	)
 

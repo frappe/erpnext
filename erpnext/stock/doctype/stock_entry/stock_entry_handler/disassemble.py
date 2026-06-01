@@ -135,7 +135,7 @@ class DisassembleStockEntry(BaseStockEntry):
 			"s_warehouse": s_warehouse,
 			"t_warehouse": t_warehouse,
 			"is_finished_item": source_row.is_finished_item,
-			"type": source_row.type,
+			"secondary_item_type": source_row.secondary_item_type,
 			"is_legacy_scrap_item": source_row.is_legacy_scrap_item,
 			"bom_secondary_item": source_row.bom_secondary_item,
 			"bom_no": source_row.bom_no,
@@ -185,7 +185,7 @@ class DisassembleStockEntry(BaseStockEntry):
 				"conversion_factor",
 				"item_group",
 				"description",
-				"type",
+				"secondary_item_type",
 			]
 			for field in fields:
 				item_args[field] = row.get(field)
@@ -235,7 +235,7 @@ class DisassembleStockEntry(BaseStockEntry):
 			SED.basic_rate,
 			SED.conversion_factor,
 			SED.is_finished_item,
-			SED.type,
+			SED.secondary_item_type,
 			SED.is_legacy_scrap_item,
 			SED.bom_secondary_item,
 			SED.batch_no,

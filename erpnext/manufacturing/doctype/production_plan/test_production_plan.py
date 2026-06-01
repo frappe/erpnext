@@ -2903,7 +2903,7 @@ def make_bom(**args):
 			bom.append(
 				"secondary_items",
 				{
-					"type": "Scrap",
+					"secondary_item_type": "Scrap",
 					"item_code": item,
 					"item_name": item,
 					"uom": item_doc.stock_uom,
