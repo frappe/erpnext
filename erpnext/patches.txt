@@ -484,4 +484,4 @@ erpnext.patches.v16_0.set_not_applicable_on_german_item_tax_templates
 erpnext.patches.v16_0.clear_procedures_from_receivable_report
 erpnext.patches.v16_0.migrate_address_contact_custom_fields
 erpnext.patches.v16_0.rename_secondary_item_type_field
-erpnext.patches.v16.update_show_party_name_setting
+erpnext.patches.v15_0.update_show_party_name_setting

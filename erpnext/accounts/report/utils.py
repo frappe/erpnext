@@ -427,7 +427,7 @@ def get_party_name_column(party_type=None, fieldname="party_name"):
 	if show_party_name(party_type):
 		label = _("Party Name")
 		if party_type:
-			label = _(f"{party_type} Name")
+			label = _("{0} Name").format(_(party_type))
 
 		return {
 			"label": label,
@@ -472,17 +472,15 @@ def get_party_name_map(parties_by_type=None):
 		return {}
 
 	party_map = {}
-	party_doctypes = {
-		party_type: (party_type, fieldname) for party_type, fieldname in PARTY_NAME_FIELD.items()
-	}
 
-	for party_type, (doctype, party_name_field) in party_doctypes.items():
-		party_names = tuple({p for p in parties_by_type.get(party_type, ()) if p})
+	# The DocType holding each party's name is the party type itself (e.g. "Customer").
+	for party_type, party_name_field in PARTY_NAME_FIELD.items():
+		party_names = tuple({p for p in (parties_by_type.get(party_type) or ()) if p})
 		if not party_names:
 			continue
 
 		records = frappe.get_all(
-			doctype,
+			party_type,
 			filters={"name": ("in", party_names)},
 			fields=["name", party_name_field],
 			as_list=True,

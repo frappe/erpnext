@@ -25,7 +25,6 @@
   "po_required",
   "pr_required",
   "project_update_frequency",
-  "section_break_vxuc",
   "over_order_allowance",
   "column_break_kdcm",
   "allow_multiple_items",
@@ -71,6 +70,7 @@
    "label": "Show Supplier Name in Reports"
   },
   {
+   "documentation_url": "https://docs.frappe.io/erpnext/buying-settings#2-default-supplier-group",
    "fieldname": "supplier_group",
    "fieldtype": "Link",
    "label": "Default Supplier Group",
@@ -350,10 +350,6 @@
   {
    "fieldname": "column_break_kdcm",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break_vxuc",
-   "fieldtype": "Section Break"
   },
   {
    "fieldname": "report_settings_tab",

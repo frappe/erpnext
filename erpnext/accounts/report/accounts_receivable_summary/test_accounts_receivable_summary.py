@@ -109,7 +109,7 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual(len(rpt_output), 1)
 		self.assertDictEqual(rpt_output[0], expected_data)
 
-	@ERPNextTestSuite.change_settings("Selling Settings", {"cust_master_name": "Naming Series"})
+	@ERPNextTestSuite.change_settings("Selling Settings", {"show_customer_name_in_reports": 1})
 	def test_02_various_filters_and_output(self):
 		filters = {
 			"company": self.company,
