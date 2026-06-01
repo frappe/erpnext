@@ -79,10 +79,48 @@ erpnext.PointOfSale.ItemSelector = class {
 		});
 	}
 
+<<<<<<< HEAD
+=======
+	set_items_not_found_banner() {
+		this.$items_container.removeClass(this.item_display_class);
+		this.$items_container.addClass("items-not-found");
+		this.$items_container.html(__("Items not found."));
+	}
+
+	render_item_list_column_header() {
+		return `<div class="list-column">
+			<div class="column-name">${__("Name")}</div>
+			<div class="column-price">${__("Price")}</div>
+			<div class="column-uom">${__("UOM")}</div>
+			<div class="column-qty-available">${__("Quantity Available")}</div>
+		</div>`;
+	}
+
+>>>>>>> 24b28b4d29 (fix(pos): escape item data on pos item selector (#55503))
 	get_item_html(item) {
 		const me = this;
 		// eslint-disable-next-line no-unused-vars
-		const { item_image, serial_no, batch_no, barcode, actual_qty, uom, price_list_rate } = item;
+		function sanitize_item_data(item) {
+			return Object.fromEntries(
+				Object.entries(item).map(([key, value]) => [
+					key,
+					typeof value === "string" ? frappe.utils.escape_html(value) : value,
+				])
+			);
+		}
+		const sanitize_item = sanitize_item_data(item);
+		const {
+			item_code,
+			stock_uom,
+			item_name,
+			item_image,
+			serial_no,
+			batch_no,
+			barcode,
+			actual_qty,
+			uom,
+			price_list_rate,
+		} = sanitize_item;
 		const precision = flt(price_list_rate, 2) % 1 != 0 ? 2 : 0;
 		let indicator_color;
 		let qty_to_display = actual_qty;
@@ -107,30 +145,39 @@ erpnext.PointOfSale.ItemSelector = class {
 						<div class="flex items-center justify-center border-b-grey text-6xl text-grey-100" style="height:8rem; min-height:8rem">
 							<img
 								onerror="cur_pos.item_selector.handle_broken_image(this)"
+<<<<<<< HEAD
 								class="h-full item-img" src="${item_image}"
 								alt="${frappe.get_abbr(item.item_name)}"
+=======
+								class="item-img" src="${item_image}"
+								alt="${item_name}"
+>>>>>>> 24b28b4d29 (fix(pos): escape item data on pos item selector (#55503))
 							>
 						</div>`;
 			} else {
 				return `<div class="item-qty-pill">
 							<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
 						</div>
-						<div class="item-display abbr">${frappe.get_abbr(item.item_name)}</div>`;
+						<div class="item-display abbr">${frappe.get_abbr(item_name)}</div>`;
 			}
 		}
 
 		return `<div class="item-wrapper"
-				data-item-code="${escape(item.item_code)}" data-serial-no="${escape(serial_no)}"
-				data-batch-no="${escape(batch_no)}" data-uom="${escape(uom)}"
-				data-rate="${escape(price_list_rate || 0)}"
-				data-stock-uom="${escape(item.stock_uom)}"
-				title="${item.item_name}">
+				data-item-code="${item_code}" data-serial-no="${serial_no}"
+				data-batch-no="${batch_no}" data-uom="${uom}"
+				data-rate="${price_list_rate || 0}"
+				data-stock-uom="${stock_uom}"
+				title="${item_name}">
 
 				${get_item_image_html()}
 
 				<div class="item-detail">
 					<div class="item-name">
+<<<<<<< HEAD
 						${frappe.ellipsis(item.item_name, 18)}
+=======
+						${!me.hide_images ? frappe.ellipsis(item_name, 18) : item_name}
+>>>>>>> 24b28b4d29 (fix(pos): escape item data on pos item selector (#55503))
 					</div>
 					<div class="item-rate">${format_currency(price_list_rate, item.currency, precision) || 0} / ${uom}</div>
 				</div>
@@ -138,7 +185,7 @@ erpnext.PointOfSale.ItemSelector = class {
 	}
 
 	handle_broken_image($img) {
-		const item_abbr = $($img).attr("alt");
+		const item_abbr = frappe.utils.escape_html($($img).attr("alt"));
 		$($img).parent().replaceWith(`<div class="item-display abbr">${item_abbr}</div>`);
 	}
 
@@ -186,6 +233,19 @@ erpnext.PointOfSale.ItemSelector = class {
 		this.attach_clear_btn();
 	}
 
+<<<<<<< HEAD
+=======
+	set_item_selector_filter_label(value) {
+		const $filter_label = this.$component.find(".label");
+
+		$filter_label.html(value ? frappe.utils.escape_html(__(value)) : __("All Items"));
+	}
+
+	hide_open_link_btn() {
+		$(this.item_group_field.$wrapper.find(".btn-open")).css("display", "none");
+	}
+
+>>>>>>> 24b28b4d29 (fix(pos): escape item data on pos item selector (#55503))
 	attach_clear_btn() {
 		this.search_field.$wrapper.find(".control-input").append(
 			`<span class="link-btn" style="top: 2px;">
@@ -252,12 +312,12 @@ erpnext.PointOfSale.ItemSelector = class {
 
 		this.$component.on("click", ".item-wrapper", function () {
 			const $item = $(this);
-			const item_code = unescape($item.attr("data-item-code"));
-			let batch_no = unescape($item.attr("data-batch-no"));
-			let serial_no = unescape($item.attr("data-serial-no"));
-			let uom = unescape($item.attr("data-uom"));
-			let rate = unescape($item.attr("data-rate"));
-			let stock_uom = unescape($item.attr("data-stock-uom"));
+			const item_code = $item.attr("data-item-code");
+			let batch_no = $item.attr("data-batch-no");
+			let serial_no = $item.attr("data-serial-no");
+			let uom = $item.attr("data-uom");
+			let rate = $item.attr("data-rate");
+			let stock_uom = $item.attr("data-stock-uom");
 
 			// escape(undefined) returns "undefined" then unescape returns "undefined"
 			batch_no = batch_no === "undefined" ? undefined : batch_no;
