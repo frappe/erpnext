@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
-"POT-Creation-Date: 2026-05-27 15:21+0000\n"
+"POT-Creation-Date: 2026-05-31 10:17+0000\n"
 "PO-Revision-Date: 2026-05-29 17:05+0000\n"
 "Last-Translator: hello@frappe.io\n"
 "Language: vi_VN\n"
@@ -4806,7 +4806,7 @@ msgstr "Nhóm mặt hàng là cách để phân loại mặt hàng theo loại."
 msgid "An error has been appeared while reposting item valuation via {0}"
 msgstr "Đã xảy ra lỗi khi định giá lại mặt hàng qua {0}"
 
-#: erpnext/public/js/controllers/buying.js:387
+#: erpnext/public/js/controllers/buying.js:382
 #: erpnext/public/js/utils/sales_common.js:489
 msgid "An error occurred during the update process"
 msgstr "Đã xảy ra lỗi trong quá trình cập nhật"
@@ -5737,7 +5737,7 @@ msgstr "Tài sản đã bị hủy"
 msgid "Asset cannot be cancelled, as it is already {0}"
 msgstr "Tài sản không thể bị hủy, vì nó đã là {0}"
 
-#: erpnext/assets/doctype/asset/depreciation.py:396
+#: erpnext/assets/doctype/asset/depreciation.py:398
 msgid "Asset cannot be scrapped before the last depreciation entry."
 msgstr "Tài sản không thể thanh lý trước bút toán khấu hao cuối cùng."
 
@@ -5769,7 +5769,7 @@ msgstr "Tài sản ngừng hoạt động do Sửa chữa Tài sản {0}"
 msgid "Asset received at Location {0} and issued to Employee {1}"
 msgstr "Tài sản đã nhận tại Vị trí {0} và phát cho Nhân viên {1}"
 
-#: erpnext/assets/doctype/asset/depreciation.py:457
+#: erpnext/assets/doctype/asset/depreciation.py:460
 msgid "Asset restored"
 msgstr "Tài sản đã được khôi phục"
 
@@ -5781,11 +5781,11 @@ msgstr "Tài sản đã được khôi phục sau khi Vốn hóa Tài sản {0} 
 msgid "Asset returned"
 msgstr "Tài sản đã trả lại"
 
-#: erpnext/assets/doctype/asset/depreciation.py:444
+#: erpnext/assets/doctype/asset/depreciation.py:446
 msgid "Asset scrapped"
 msgstr "Tài sản đã thanh lý"
 
-#: erpnext/assets/doctype/asset/depreciation.py:446
+#: erpnext/assets/doctype/asset/depreciation.py:448
 msgid "Asset scrapped via Journal Entry {0}"
 msgstr "Tài sản đã thanh lý qua Bút toán {0}"
 
@@ -5810,7 +5810,7 @@ msgstr "Tài sản đã được cập nhật sau khi tách thành Tài sản {0
 msgid "Asset updated due to Asset Repair {0} {1}."
 msgstr "Tài sản đã được cập nhật do Sửa chữa Tài sản {0} {1}."
 
-#: erpnext/assets/doctype/asset/depreciation.py:378
+#: erpnext/assets/doctype/asset/depreciation.py:380
 msgid "Asset {0} cannot be scrapped, as it is already {1}"
 msgstr "Tài sản {0} không thể thanh lý, vì nó đã là {1}"
 
@@ -5851,7 +5851,7 @@ msgstr "Tài sản {0} không được đặt để tính khấu hao."
 msgid "Asset {0} is not submitted. Please submit the asset before proceeding."
 msgstr "Tài sản {0} chưa được trình. Vui lòng trình tài sản trước khi tiếp tục."
 
-#: erpnext/assets/doctype/asset/depreciation.py:376
+#: erpnext/assets/doctype/asset/depreciation.py:378
 msgid "Asset {0} must be submitted"
 msgstr "Tài sản {0} phải được trình"
 
@@ -6301,7 +6301,7 @@ msgstr "Tự động đối sánh và đặt Bên liên quan trong Giao dịch N
 msgid "Auto re-order"
 msgstr "Tự động đặt hàng lại"
 
-#: erpnext/public/js/controllers/buying.js:382
+#: erpnext/public/js/controllers/buying.js:377
 #: erpnext/public/js/utils/sales_common.js:484
 msgid "Auto repeat document updated"
 msgstr "Tài liệu tự động lặp lại đã được cập nhật"
@@ -9650,7 +9650,7 @@ msgstr "Chi tiết Danh mục"
 msgid "Category-wise Asset Value"
 msgstr "Giá trị Tài sản theo Danh mục"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:297
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:300
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:143
 msgid "Caution"
 msgstr "Cảnh báo"
@@ -15626,11 +15626,11 @@ msgstr "Số lượng đã giao"
 msgid "Delivered Qty (in Stock UOM)"
 msgstr "Số lượng đã giao (theo Đơn vị đo tồn kho)"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:620
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:623
 msgid "Delivered Qty cannot be increased by more than {0} for item {1}"
 msgstr ""
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:613
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:616
 msgid "Delivered Qty cannot be reduced by more than {0} for item {1}"
 msgstr ""
 
@@ -16024,7 +16024,7 @@ msgstr "Trạng thái Đăng Bút toán Khấu hao"
 msgid "Depreciation Entry against asset {0}"
 msgstr "Bút toán Khấu hao đối với tài sản {0}"
 
-#: erpnext/assets/doctype/asset/depreciation.py:258
+#: erpnext/assets/doctype/asset/depreciation.py:259
 msgid "Depreciation Entry against {0} worth {1}"
 msgstr "Bút toán Khấu hao đối với {0} trị giá {1}"
 
@@ -16036,7 +16036,7 @@ msgstr "Bút toán Khấu hao đối với {0} trị giá {1}"
 msgid "Depreciation Expense Account"
 msgstr "Tài khoản Chi phí Khấu hao"
 
-#: erpnext/assets/doctype/asset/depreciation.py:305
+#: erpnext/assets/doctype/asset/depreciation.py:306
 msgid "Depreciation Expense Account should be an Income or Expense Account."
 msgstr "Tài khoản Chi phí Khấu hao phải là Tài khoản Thu nhập hoặc Chi phí."
 
@@ -16802,7 +16802,7 @@ msgstr "Tên Hiển thị"
 msgid "Disposal Date"
 msgstr "Ngày xử lý"
 
-#: erpnext/assets/doctype/asset/depreciation.py:835
+#: erpnext/assets/doctype/asset/depreciation.py:838
 msgid "Disposal date {0} cannot be before {1} date {2} of the asset."
 msgstr "Ngày xử lý {0} không thể trước ngày {1} {2} của tài sản."
 
@@ -18485,7 +18485,7 @@ msgstr "Lỗi lấy chi tiết cho {0}: {1}"
 msgid "Error in party matching for Bank Transaction {0}"
 msgstr "Lỗi trong đối sánh bên cho Giao dịch Ngân hàng {0}"
 
-#: erpnext/assets/doctype/asset/depreciation.py:322
+#: erpnext/assets/doctype/asset/depreciation.py:323
 msgid "Error while posting depreciation entries"
 msgstr "Lỗi khi đăng các bút toán khấu hao"
 
@@ -19889,6 +19889,7 @@ msgstr "Cố định"
 #. Option for the 'Account Type' (Select) field in DocType 'Account'
 #: erpnext/accounts/doctype/account/account.json
 #: erpnext/accounts/report/account_balance/account_balance.js:52
+#: erpnext/stock/doctype/item/item_list.js:20
 msgid "Fixed Asset"
 msgstr "Tài sản cố định"
 
@@ -20125,11 +20126,11 @@ msgstr "Cho kho"
 msgid "For Work Order"
 msgstr "Cho lệnh sản xuất"
 
-#: erpnext/controllers/status_updater.py:288
+#: erpnext/controllers/status_updater.py:290
 msgid "For an item {0}, quantity must be negative number"
 msgstr "Đối với mặt hàng {0}, số lượng phải là số âm"
 
-#: erpnext/controllers/status_updater.py:285
+#: erpnext/controllers/status_updater.py:287
 msgid "For an item {0}, quantity must be positive number"
 msgstr "Đối với mặt hàng {0}, số lượng phải là số dương"
 
@@ -20159,7 +20160,7 @@ msgstr "Cho nhà cung cấp cá nhân"
 msgid "For item <b>{0}</b>, only <b>{1}</b> asset have been created or linked to <b>{2}</b>. Please create or link <b>{3}</b> more asset with the respective document."
 msgstr "Đối với mặt hàng <b>{0}</b>, chỉ có <b>{1}</b> tài sản đã được tạo hoặc liên kết với <b>{2}</b>. Vui lòng tạo hoặc liên kết thêm <b>{3}</b> tài sản với tài liệu tương ứng."
 
-#: erpnext/controllers/status_updater.py:298
+#: erpnext/controllers/status_updater.py:300
 msgid "For item {0}, rate must be a positive number. To Allow negative rates, enable {1} in {2}"
 msgstr "Đối với mặt hàng {0}, tỷ lệ phải là số dương. Để cho phép tỷ lệ âm, hãy bật {1} trong {2}"
 
@@ -20807,7 +20808,7 @@ msgstr "Tham chiếu thanh toán trong tương lai"
 msgid "Future Payments"
 msgstr "Thanh toán trong tương lai"
 
-#: erpnext/assets/doctype/asset/depreciation.py:385
+#: erpnext/assets/doctype/asset/depreciation.py:387
 msgid "Future date is not allowed"
 msgstr "Ngày trong tương lai không được phép"
 
@@ -21120,7 +21121,7 @@ msgstr "Nhận vị trí vật phẩm"
 #: erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.js:119
 #: erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.js:142
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
-#: erpnext/public/js/controllers/buying.js:334
+#: erpnext/public/js/controllers/buying.js:329
 #: erpnext/selling/doctype/quotation/quotation.js:182
 #: erpnext/selling/doctype/sales_order/sales_order.js:211
 #: erpnext/selling/doctype/sales_order/sales_order.js:1216
@@ -21159,7 +21160,7 @@ msgstr "Lấy vật phẩm từ BOM"
 msgid "Get Items from Material Requests against this Supplier"
 msgstr "Lấy vật phẩm từ yêu cầu vật tư đối với nhà cung cấp này"
 
-#: erpnext/public/js/controllers/buying.js:611
+#: erpnext/public/js/controllers/buying.js:606
 msgid "Get Items from Product Bundle"
 msgstr "Lấy vật phẩm từ gói sản phẩm"
 
@@ -21933,7 +21934,7 @@ msgstr "Văn bản trợ giúp"
 msgid "Helps you distribute the Budget/Target across months if you have seasonality in your business."
 msgstr "Giúp bạn phân bổ Ngân sách/Mục tiêu qua các tháng nếu bạn có tính thời vụ trong kinh doanh."
 
-#: erpnext/assets/doctype/asset/depreciation.py:352
+#: erpnext/assets/doctype/asset/depreciation.py:353
 msgid "Here are the error logs for the aforementioned failed depreciation entries: {0}"
 msgstr "Đây là nhật ký lỗi cho các bút toán khấu hao thất bại đã đề cập: {0}"
 
@@ -24101,7 +24102,7 @@ msgstr "Hóa đơn POS không hợp lệ"
 msgid "Invalid Parent Account"
 msgstr "Tài khoản cha không hợp lệ"
 
-#: erpnext/public/js/controllers/buying.js:433
+#: erpnext/public/js/controllers/buying.js:428
 msgid "Invalid Part Number"
 msgstr "Số phần không hợp lệ"
 
@@ -26413,7 +26414,7 @@ msgstr "Đang đăng lại định giá mặt hàng. Báo cáo có thể hiển 
 msgid "Item variant {0} exists with same attributes"
 msgstr "Biến thể mặt hàng {0} đã tồn tại với cùng thuộc tính"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:587
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:590
 msgid "Item with name {0} not found in the Purchase Order"
 msgstr ""
 
@@ -26458,7 +26459,7 @@ msgstr "Mặt hàng {0} đã bị vô hiệu hóa"
 msgid "Item {0} has no Serial No. Only serialized items can have delivery based on Serial No"
 msgstr "Mặt hàng {0} không có Serial No. Chỉ các mặt hàng được đánh serial mới có thể giao dựa trên Serial No"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:606
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:609
 msgid "Item {0} has no changes in delivered quantity. Please unselect the row if you do not wish to update its quantity."
 msgstr ""
 
@@ -26482,7 +26483,7 @@ msgstr "Mặt hàng {0} đã bị hủy"
 msgid "Item {0} is disabled"
 msgstr "Mặt hàng {0} bị vô hiệu hóa"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:592
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:595
 msgid "Item {0} is not a drop ship item. Only drop ship items can have Delivered Qty updated."
 msgstr ""
 
@@ -26530,7 +26531,7 @@ msgstr "Mặt hàng {0} không tìm thấy trong bảng 'Nguyên liệu thô đ�
 msgid "Item {0} not found."
 msgstr "Không tìm thấy Mặt hàng {0}."
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:324
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:327
 msgid "Item {0}: Ordered qty {1} cannot be less than minimum order qty {2} (defined in Item)."
 msgstr "Mặt hàng {0}: Số lượng đặt {1} không thể nhỏ hơn số lượng đặt tối thiểu {2} (được định nghĩa trong Mặt hàng)."
 
@@ -27605,7 +27606,7 @@ msgstr "Số giấy phép"
 msgid "License Plate"
 msgstr "Biển số xe"
 
-#: erpnext/controllers/status_updater.py:489
+#: erpnext/controllers/status_updater.py:499
 msgid "Limit Crossed"
 msgstr "Đã vượt giới hạn"
 
@@ -28592,7 +28593,7 @@ msgstr "Nhà sản xuất"
 msgid "Manufacturer Part Number"
 msgstr "Số phần của nhà sản xuất"
 
-#: erpnext/public/js/controllers/buying.js:430
+#: erpnext/public/js/controllers/buying.js:425
 msgid "Manufacturer Part Number <b>{0}</b> is invalid"
 msgstr "Số phần của nhà sản xuất <b>{0}</b> không hợp lệ"
 
@@ -31058,7 +31059,7 @@ msgstr "Không có hóa đơn chưa thanh toán yêu cầu đánh giá lại t�
 msgid "No outstanding {0} found for the {1} {2} which qualify the filters you have specified."
 msgstr "Không tìm thấy {0} chưa thanh toán cho {1} {2} phù hợp với bộ lọc bạn đã chỉ định."
 
-#: erpnext/public/js/controllers/buying.js:540
+#: erpnext/public/js/controllers/buying.js:535
 msgid "No pending Material Requests found to link for the given items."
 msgstr "Không tìm thấy Yêu cầu Vật tư đang chờ để liên kết cho các mặt hàng đã cho."
 
@@ -32850,6 +32851,11 @@ msgstr "Cho phép vượt hóa đơn đã vượt cho Mục Biên lai mua hàng 
 msgid "Over Delivery/Receipt Allowance (%)"
 msgstr "Cho phép vượt giao/nhận (%)"
 
+#. Label of the over_order_allowance (Float) field in DocType 'Buying Settings'
+#: erpnext/buying/doctype/buying_settings/buying_settings.json
+msgid "Over Order Allowance (%)"
+msgstr ""
+
 #. Label of the over_picking_allowance (Percent) field in DocType 'Stock
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
@@ -32860,7 +32866,7 @@ msgstr "Cho phép vượt chọn"
 msgid "Over Receipt"
 msgstr "Vượt nhận"
 
-#: erpnext/controllers/status_updater.py:494
+#: erpnext/controllers/status_updater.py:504
 msgid "Over Receipt/Delivery of {0} {1} ignored for item {2} because you have {3} role."
 msgstr "Vượt nhận/giao của {0} {1} bị bỏ qua cho mặt hàng {2} vì bạn có vai trò {3}."
 
@@ -32880,7 +32886,7 @@ msgstr "Cho phép vượt chuyển (%)"
 msgid "Over Withheld"
 msgstr "Vượt khấu lưu"
 
-#: erpnext/controllers/status_updater.py:496
+#: erpnext/controllers/status_updater.py:506
 msgid "Overbilling of {0} {1} ignored for item {2} because you have {3} role."
 msgstr "Vượt hóa đơn của {0} {1} bị bỏ qua cho mặt hàng {2} vì bạn có vai trò {3}."
 
@@ -35864,7 +35870,7 @@ msgstr "Vui lòng tạo biên nhận mua hàng hoặc hóa đơn mua hàng cho m
 msgid "Please delete Product Bundle {0}, before merging {1} into {2}"
 msgstr "Vui lòng xóa Bundle sản phẩm {0}, trước khi hợp nhất {1} vào {2}"
 
-#: erpnext/assets/doctype/asset/depreciation.py:559
+#: erpnext/assets/doctype/asset/depreciation.py:562
 msgid "Please disable workflow temporarily for Journal Entry {0}"
 msgstr "Vui lòng tạm thời vô hiệu hóa quy trình làm việc cho Bút toán nhật ký {0}"
 
@@ -36412,7 +36418,7 @@ msgstr ""
 msgid "Please select at least one filter: Item Code, Batch, or Serial No."
 msgstr "Vui lòng chọn ít nhất một bộ lọc: Mã mặt hàng, Lô hoặc Số serial."
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:580
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:583
 msgid "Please select at least one item to update delivered quantity."
 msgstr ""
 
@@ -36520,11 +36526,11 @@ msgstr "Vui lòng chọn {0} trước"
 msgid "Please set 'Apply Additional Discount On'"
 msgstr "Vui lòng đặt 'Áp dụng chiết khấu bổ sung trên'"
 
-#: erpnext/assets/doctype/asset/depreciation.py:786
+#: erpnext/assets/doctype/asset/depreciation.py:789
 msgid "Please set 'Asset Depreciation Cost Center' in Company {0}"
 msgstr "Vui lòng đặt 'Trung tâm chi phí khấu hao tài sản' trong Công ty {0}"
 
-#: erpnext/assets/doctype/asset/depreciation.py:784
+#: erpnext/assets/doctype/asset/depreciation.py:787
 msgid "Please set 'Gain/Loss Account on Asset Disposal' in Company {0}"
 msgstr "Vui lòng đặt 'Tài khoản Lãi/Lỗ khi thanh lý tài sản' trong Công ty {0}"
 
@@ -36566,7 +36572,7 @@ msgstr "Vui lòng đặt Công ty"
 msgid "Please set Customer Address to determine if the transaction is an export."
 msgstr "Vui lòng đặt Địa chỉ khách hàng để xác định xem giao dịch có phải là xuất khẩu không."
 
-#: erpnext/assets/doctype/asset/depreciation.py:748
+#: erpnext/assets/doctype/asset/depreciation.py:751
 msgid "Please set Depreciation related Accounts in Asset Category {0} or Company {1}"
 msgstr "Vui lòng đặt Tài khoản liên quan đến Khấu hao trong Loại tài sản {0} hoặc Công ty {1}"
 
@@ -36584,7 +36590,7 @@ msgstr "Vui lòng đặt Mã số thuế cho khách hàng '%s'"
 msgid "Please set Fiscal Code for the public administration '%s'"
 msgstr "Vui lòng đặt Mã số thuế cho hành chính công '%s'"
 
-#: erpnext/assets/doctype/asset/depreciation.py:734
+#: erpnext/assets/doctype/asset/depreciation.py:737
 msgid "Please set Fixed Asset Account in Asset Category {0}"
 msgstr "Vui lòng đặt Tài khoản tài sản cố định trong Loại tài sản {0}"
 
@@ -36787,7 +36793,7 @@ msgstr "Vui lòng đặt {0} thành {1}, cùng tài khoản được sử dụng
 msgid "Please setup and enable a group account with the Account Type - {0} for the company {1}"
 msgstr "Vui lòng thiết lập và bật tài khoản nhóm với Loại tài khoản - {0} cho công ty {1}"
 
-#: erpnext/assets/doctype/asset/depreciation.py:357
+#: erpnext/assets/doctype/asset/depreciation.py:358
 msgid "Please share this email with your support team so that they can find and fix the issue."
 msgstr "Vui lòng chia sẻ email này với nhóm hỗ trợ của bạn để họ có thể tìm và khắc phục sự cố."
 
@@ -38089,8 +38095,8 @@ msgstr "Sản phẩm"
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 #: erpnext/buying/doctype/purchase_order_item/purchase_order_item.json
 #: erpnext/buying/workspace/buying/buying.json
-#: erpnext/public/js/controllers/buying.js:330
-#: erpnext/public/js/controllers/buying.js:615
+#: erpnext/public/js/controllers/buying.js:325
+#: erpnext/public/js/controllers/buying.js:610
 #: erpnext/selling/doctype/product_bundle/product_bundle.json
 #: erpnext/selling/workspace/selling/selling.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
@@ -38777,6 +38783,7 @@ msgstr "Xuất bản"
 #: erpnext/projects/doctype/project/project_dashboard.py:16
 #: erpnext/setup/doctype/company/company.py:463 erpnext/setup/install.py:435
 #: erpnext/stock/doctype/item/item.json
+#: erpnext/stock/doctype/item/item_list.js:30
 #: erpnext/stock/doctype/item_lead_time/item_lead_time.json
 #: erpnext/stock/doctype/item_reorder/item_reorder.json
 #: erpnext/stock/doctype/material_request/material_request.json
@@ -39098,7 +39105,7 @@ msgstr "Đơn Mua hàng {0} đã được tạo"
 msgid "Purchase Order {0} is not submitted"
 msgstr "Đơn Mua hàng {0} chưa được trình"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:948
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:951
 msgid "Purchase Orders"
 msgstr "Đơn đặt hàng"
 
@@ -39113,7 +39120,7 @@ msgstr "Số lượng Đơn Mua hàng"
 msgid "Purchase Orders Items Overdue"
 msgstr "Các Mục Đơn Mua hàng Quá hạn"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:285
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:288
 msgid "Purchase Orders are not allowed for {0} due to a scorecard standing of {1}."
 msgstr "Đơn Mua hàng không được phép cho {0} do xếp hạng thẻ điểm {1}."
 
@@ -39358,6 +39365,7 @@ msgstr "Mua sắm"
 #. Label of the purpose (Select) field in DocType 'Stock Reconciliation'
 #: erpnext/assets/doctype/asset_movement/asset_movement.json
 #: erpnext/manufacturing/doctype/master_production_schedule/master_production_schedule.js:163
+#: erpnext/stock/doctype/item/item_list.js:40
 #: erpnext/stock/doctype/material_request/material_request.json
 #: erpnext/stock/doctype/pick_list/pick_list.json
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:459
@@ -40064,7 +40072,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:194
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:218
 #: erpnext/manufacturing/doctype/production_plan_sub_assembly_item/production_plan_sub_assembly_item.json
-#: erpnext/public/js/controllers/buying.js:622
+#: erpnext/public/js/controllers/buying.js:617
 #: erpnext/public/js/stock_analytics.js:50
 #: erpnext/public/js/utils/serial_no_batch_selector.js:499
 #: erpnext/selling/doctype/quotation_item/quotation_item.json
@@ -40243,7 +40251,7 @@ msgstr "Quart Khô (Mỹ)"
 msgid "Quart Liquid (US)"
 msgstr "Quart Lỏng (Mỹ)"
 
-#: erpnext/selling/report/sales_analytics/sales_analytics.py:437
+#: erpnext/selling/report/sales_analytics/sales_analytics.py:461
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:125
 msgid "Quarter {0} {1}"
 msgstr "Quý {0} {1}"
@@ -43553,7 +43561,7 @@ msgstr "Hàng #{0}: Tài sản {1} không thể được bán, nó đã là {2}"
 msgid "Row #{0}: Asset {1} is already sold"
 msgstr "Hàng #{0}: Tài sản {1} đã được bán"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:333
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:336
 msgid "Row #{0}: BOM is not specified for subcontracting item {0}"
 msgstr ""
 
@@ -43692,7 +43700,7 @@ msgstr "Hàng #{0}: Mặt hàng do khách hàng cung cấp {1} không phải là
 msgid "Row #{0}: Dates overlapping with other row in group {1}"
 msgstr "Hàng #{0}: Ngày gối đè lên hàng khác trong nhóm {1}"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:357
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:360
 msgid "Row #{0}: Default BOM not found for FG Item {1}"
 msgstr "Hàng #{0}: BOM mặc định không tìm thấy cho Mặt hàng thành phẩm {1}"
 
@@ -43716,17 +43724,17 @@ msgstr "Hàng #{0}: Tài khoản chi phí chưa được đặt cho Mặt hàng 
 msgid "Row #{0}: Expense account {1} is not valid for Purchase Invoice {2}. Only expense accounts from non-stock items are allowed."
 msgstr "Hàng #{0}: Tài khoản chi phí {1} không hợp lệ cho Hóa đơn mua hàng {2}. Chỉ tài khoản chi phí từ mặt hàng không tồn kho mới được phép."
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:362
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:365
 #: erpnext/selling/doctype/sales_order/sales_order.py:305
 msgid "Row #{0}: Finished Good Item Qty can not be zero"
 msgstr "Hàng #{0}: Số lượng mặt hàng thành phẩm không thể bằng không"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:344
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:347
 #: erpnext/selling/doctype/sales_order/sales_order.py:285
 msgid "Row #{0}: Finished Good Item is not specified for service item {1}"
 msgstr "Hàng #{0}: Mặt hàng thành phẩm chưa được chỉ định cho mặt hàng dịch vụ {1}"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:351
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:354
 #: erpnext/selling/doctype/sales_order/sales_order.py:292
 msgid "Row #{0}: Finished Good Item {1} must be a sub-contracted item"
 msgstr "Hàng #{0}: Mặt hàng thành phẩm {1} phải là mặt hàng ký gửi"
@@ -44132,7 +44140,7 @@ msgstr "Hàng #{0}: Bạn không thể sử dụng chiều hàng tồn kho '{1}'
 msgid "Row #{0}: You must select an Asset for Item {1}."
 msgstr "Hàng #{0}: Bạn phải chọn một Tài sản cho Mặt hàng {1}."
 
-#: erpnext/public/js/controllers/buying.js:270
+#: erpnext/public/js/controllers/buying.js:265
 msgid "Row #{0}: {1} can not be negative for item {2}"
 msgstr "Hàng #{0}: {1} không thể âm cho mặt hàng {2}"
 
@@ -44827,9 +44835,14 @@ msgstr "Chế độ Lương"
 #: erpnext/setup/install.py:430
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:297
 #: erpnext/stock/doctype/item/item.json
+#: erpnext/stock/doctype/item/item_list.js:29
 #: erpnext/stock/doctype/pick_list/pick_list_dashboard.py:16
 msgid "Sales"
 msgstr "Bán hàng"
+
+#: erpnext/stock/doctype/item/item_list.js:28
+msgid "Sales & Purchase"
+msgstr ""
 
 #: erpnext/setup/doctype/company/company.py:649
 msgid "Sales Account"
@@ -45901,7 +45914,7 @@ msgstr "Tài sản phế liệu"
 msgid "Scrap Warehouse"
 msgstr "Kho phế liệu"
 
-#: erpnext/assets/doctype/asset/depreciation.py:387
+#: erpnext/assets/doctype/asset/depreciation.py:389
 msgid "Scrap date cannot be before purchase date"
 msgstr "Ngày phế liệu không thể trước ngày mua"
 
@@ -48988,6 +49001,7 @@ msgstr "Thông tin pháp lý và các thông tin chung khác về Nhà cung cấ
 #: erpnext/manufacturing/doctype/bom/bom_dashboard.py:14
 #: erpnext/setup/doctype/incoterm/incoterm.json
 #: erpnext/setup/workspace/home/home.json
+#: erpnext/stock/doctype/item/item_list.js:21
 #: erpnext/stock/doctype/material_request/material_request_dashboard.py:17
 #: erpnext/stock/workspace/stock/stock.json
 #: erpnext/workspace_sidebar/stock.json
@@ -50153,7 +50167,7 @@ msgstr "Mục dịch vụ đơn hàng ký gửi"
 msgid "Subcontracting Order Supplied Item"
 msgstr "Mục cung cấp đơn hàng ký gửi"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:985
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:988
 msgid "Subcontracting Order {0} created."
 msgstr "Đơn hàng ký gửi {0} đã được tạo."
 
@@ -50241,7 +50255,7 @@ msgstr "Thiết lập ký gửi"
 msgid "Subdivision"
 msgstr "Tiểu huyện"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:981
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:984
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:1116
 msgid "Submit Action Failed"
 msgstr "Gửi hành động thất bại"
@@ -52493,7 +52507,7 @@ msgstr "Các mặt hàng sau, có Quy tắc đặt hàng, không thể được 
 msgid "The following Purchase Invoices are not submitted:"
 msgstr "Các hóa đơn mua hàng sau chưa được gửi:"
 
-#: erpnext/assets/doctype/asset/depreciation.py:347
+#: erpnext/assets/doctype/asset/depreciation.py:348
 msgid "The following assets have failed to automatically post depreciation entries: {0}"
 msgstr "Các tài sản sau đã không đăng được các mục khấu hao tự động: {0}"
 
@@ -52613,6 +52627,12 @@ msgstr "Tài khoản gốc {0} không tồn tại trong mẫu đã tải lên"
 #: erpnext/accounts/doctype/payment_request/payment_request.py:187
 msgid "The payment gateway account in plan {0} is different from the payment gateway account in this payment request"
 msgstr "Tài khoản cổng thanh toán trong kế hoạch {0} khác với tài khoản cổng thanh toán trong yêu cầu thanh toán này"
+
+#. Description of the 'Over Order Allowance (%)' (Float) field in DocType
+#. 'Buying Settings'
+#: erpnext/buying/doctype/buying_settings/buying_settings.json
+msgid "The percentage by which you are allowed to order more on a Purchase Order than the quantity requested on the originating Material Request. For example, if the Material Request has 100 units and the allowance is 10%, you can order up to 110 units"
+msgstr ""
 
 #. Description of the 'Over Billing Allowance (%)' (Currency) field in DocType
 #. 'Accounts Settings'
@@ -52905,7 +52925,7 @@ msgstr "Mặt hàng này là Biến thể của {0} (Mẫu)."
 msgid "This Month's Summary"
 msgstr "Tóm tắt Tháng này"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:994
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:997
 msgid "This Purchase Order has been fully subcontracted."
 msgstr "Đơn mua hàng này đã được giao hoàn toàn cho bên thứ ba."
 
@@ -52939,7 +52959,7 @@ msgstr "Danh mục tài sản này được đánh dấu là không khấu hao. 
 msgid "This covers all scorecards tied to this Setup"
 msgstr "Điều này bao gồm tất cả các thẻ điểm gắn với Cài đặt này"
 
-#: erpnext/controllers/status_updater.py:478
+#: erpnext/controllers/status_updater.py:488
 msgid "This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?"
 msgstr "Tài liệu này vượt quá giới hạn {0} {1} cho mặt hàng {4}. Bạn đang tạo một {3} khác đối với cùng một {2}?"
 
@@ -53080,7 +53100,7 @@ msgstr "Lịch trình này được tạo khi Tài sản {0} được khôi ph�
 msgid "This schedule was created when Asset {0} was restored on Asset Capitalization {1}'s cancellation."
 msgstr "Lịch trình này được tạo khi Tài sản {0} được khôi phục khi hủy Tích tụ tài sản {1}."
 
-#: erpnext/assets/doctype/asset/depreciation.py:461
+#: erpnext/assets/doctype/asset/depreciation.py:464
 msgid "This schedule was created when Asset {0} was restored."
 msgstr "Lịch trình này được tạo khi Tài sản {0} được khôi phục."
 
@@ -53088,7 +53108,7 @@ msgstr "Lịch trình này được tạo khi Tài sản {0} được khôi ph�
 msgid "This schedule was created when Asset {0} was returned through Sales Invoice {1}."
 msgstr "Lịch trình này được tạo khi Tài sản {0} được trả lại thông qua Hóa đơn bán hàng {1}."
 
-#: erpnext/assets/doctype/asset/depreciation.py:420
+#: erpnext/assets/doctype/asset/depreciation.py:422
 msgid "This schedule was created when Asset {0} was scrapped."
 msgstr "Lịch trình này được tạo khi Tài sản {0} bị thanh lý."
 
@@ -53589,11 +53609,15 @@ msgstr "Để thêm Các hoạt động, hãy đánh dấu hộp kiểm 'Có ho�
 msgid "To add subcontracted Item's raw materials if include exploded items is disabled."
 msgstr "Để thêm nguyên vật liệu thô của mặt hàng gia công nếu bao gồm các mục khai thác bị tắt."
 
-#: erpnext/controllers/status_updater.py:471
+#: erpnext/controllers/status_updater.py:481
 msgid "To allow over billing, update \"Over Billing Allowance\" in Accounts Settings or the Item."
 msgstr "Để cho phép thanh toán vượt quá, hãy cập nhật \"Cho phép thanh toán vượt\" trong Cài đặt tài khoản hoặc mặt hàng."
 
-#: erpnext/controllers/status_updater.py:467
+#: erpnext/controllers/status_updater.py:475
+msgid "To allow over ordering, update \"Over Order Allowance\" in Buying Settings."
+msgstr ""
+
+#: erpnext/controllers/status_updater.py:477
 msgid "To allow over receipt / delivery, update \"Over Receipt/Delivery Allowance\" in Stock Settings or the Item."
 msgstr "Để cho phép nhận/giao vượt quá, hãy cập nhật \"Cho phép nhận/giao vượt\" trong Cài đặt kho hoặc mặt hàng."
 
@@ -55188,6 +55212,7 @@ msgstr "Cài đặt UAE VAT"
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/delivery_stop/delivery_stop.json
 #: erpnext/stock/doctype/item/item.json
+#: erpnext/stock/doctype/item/item_list.js:41
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
 #: erpnext/stock/doctype/item_price/item_price.json
 #: erpnext/stock/doctype/material_request_item/material_request_item.json
@@ -56587,7 +56612,7 @@ msgid "Variance ({})"
 msgstr "Phương sai ({})"
 
 #: erpnext/stock/doctype/item/item.js:241
-#: erpnext/stock/doctype/item/item_list.js:22
+#: erpnext/stock/doctype/item/item_list.js:59
 #: erpnext/stock/report/item_variant_details/item_variant_details.py:74
 msgid "Variant"
 msgstr "Biến thể"
@@ -57533,7 +57558,7 @@ msgstr "Trang mạng:"
 msgid "Week of the year"
 msgstr ""
 
-#: erpnext/selling/report/sales_analytics/sales_analytics.py:433
+#: erpnext/selling/report/sales_analytics/sales_analytics.py:457
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:121
 msgid "Week {0} {1}"
 msgstr "Tuần {0} {1}"
@@ -58430,7 +58455,7 @@ msgstr ""
 msgid "You don't have permission to update Company details. Please contact your System Manager."
 msgstr ""
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:599
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:602
 msgid "You don't have permission to update Received Qty DocField for item {0}"
 msgstr ""
 
@@ -58551,7 +58576,7 @@ msgstr "Tệp Zip"
 msgid "[Important] [ERPNext] Auto Reorder Errors"
 msgstr "[Quan trọng] [ERPNext] Lỗi tự động sắp xếp lại"
 
-#: erpnext/controllers/status_updater.py:302
+#: erpnext/controllers/status_updater.py:304
 msgid "`Allow Negative rates for Items`"
 msgstr "`Cho phép tỷ giá âm cho vật tư`"
 
@@ -58810,8 +58835,8 @@ msgstr "đã bán"
 msgid "subscription is already cancelled."
 msgstr "đăng ký đã bị hủy."
 
-#: erpnext/controllers/status_updater.py:481
-#: erpnext/controllers/status_updater.py:500
+#: erpnext/controllers/status_updater.py:491
+#: erpnext/controllers/status_updater.py:510
 msgid "target_ref_field"
 msgstr "trường_tài_liệu_mục_tiêu"
 
@@ -58838,7 +58863,7 @@ msgstr "để hủy phân bổ số tiền của Hóa đơn trả lại này tr�
 msgid "unique e.g. SAVE20  To be used to get discount"
 msgstr "duy nhất, ví dụ: SAVE20 Được sử dụng để nhận chiết khấu"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:629
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:632
 msgid "updated delivered quantity for item {0} to {1}"
 msgstr ""
 
@@ -59005,7 +59030,7 @@ msgstr "Việc tạo {0} cho các bản ghi sau sẽ bị bỏ qua."
 msgid "{0} currency must be same as company's default currency. Please select another account."
 msgstr "{0} tiền tệ phải giống như tiền tệ mặc định của công ty. Vui lòng chọn tài khoản khác."
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:294
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:297
 msgid "{0} currently has a {1} Supplier Scorecard standing, and Purchase Orders to this supplier should be issued with caution."
 msgstr "{0} hiện có thứ hạng Thẻ điểm Nhà cung cấp {1}, và Đơn hàng mua cho nhà cung cấp này nên được phát hành cẩn thận."
 
@@ -59289,7 +59314,7 @@ msgstr "{0} {1} đã được thanh toán đầy đủ."
 msgid "{0} {1} has already been partly paid. Please use the 'Get Outstanding Invoice' or the 'Get Outstanding Orders' button to get the latest outstanding amounts."
 msgstr "{0} {1} đã được thanh toán một phần. Vui lòng sử dụng nút 'Lấy Hóa đơn chưa thanh toán' hoặc 'Lấy Đơn hàng chưa thanh toán' để lấy số tiền chưa thanh toán mới nhất."
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:434
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:437
 #: erpnext/selling/doctype/sales_order/sales_order.py:600
 #: erpnext/stock/doctype/material_request/material_request.py:255
 msgid "{0} {1} has been modified. Please refresh."
