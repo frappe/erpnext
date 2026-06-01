@@ -6,7 +6,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "type",
+  "secondary_item_type",
   "rate",
   "column_break_gres",
   "is_legacy",
@@ -35,7 +35,7 @@
  "fields": [
   {
    "depends_on": "eval:!doc.is_legacy",
-   "fieldname": "type",
+   "fieldname": "secondary_item_type",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Type",

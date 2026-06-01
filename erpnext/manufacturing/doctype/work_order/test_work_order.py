@@ -1115,7 +1115,7 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
 		for row in stock_entry.items:
-			if row.type or row.is_legacy_scrap_item:
+			if row.secondary_item_type or row.is_legacy_scrap_item:
 				self.assertEqual(row.qty, 1)
 
 		# Partial Job Card 1 with qty 10
@@ -1127,7 +1127,7 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
 		for row in stock_entry.items:
-			if row.type or row.is_legacy_scrap_item:
+			if row.secondary_item_type or row.is_legacy_scrap_item:
 				self.assertEqual(row.qty, 2)
 
 		# Partial Job Card 2 with qty 10
@@ -2501,7 +2501,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertTrue(se_doc.additional_costs)
 		secondary_items = []
 		for item in se_doc.items:
-			if item.type or item.is_legacy_scrap_item:
+			if item.secondary_item_type or item.is_legacy_scrap_item:
 				secondary_items.append(item.item_code)
 
 		self.assertEqual(
@@ -2966,7 +2966,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		# Secondary/Scrap item: should be taken from scrap warehouse in disassembly
 		scrap_row = next((i for i in stock_entry.items if i.item_code == scrap_item), None)
 		self.assertIsNotNone(scrap_row)
-		self.assertEqual(scrap_row.type, "Scrap")
+		self.assertEqual(scrap_row.secondary_item_type, "Scrap")
 		self.assertTrue(scrap_row.s_warehouse)
 		self.assertFalse(scrap_row.t_warehouse)
 		self.assertEqual(scrap_row.s_warehouse, wo.scrap_warehouse)
@@ -4882,7 +4882,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		bom.append(
 			"secondary_items",
 			{
-				"type": "Scrap",
+				"secondary_item_type": "Scrap",
 				"item_code": scrap_item,
 				"item_name": scrap_item,
 				"qty": 3,
@@ -4903,7 +4903,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(len(secondary_items), 1)
 		row = secondary_items[0]
 		self.assertEqual(row.item_code, scrap_item)
-		self.assertEqual(row.type, "Scrap")
+		self.assertEqual(row.secondary_item_type, "Scrap")
 		# data is fetched from the BOM (carries bom_qty)
 		self.assertEqual(flt(row.bom_qty), 8.0)
 		# qty = (bom_secondary_qty / bom_qty) * wo_qty = (3 / 8) * 20 = 7.5
@@ -4930,7 +4930,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		bom.append(
 			"secondary_items",
 			{
-				"type": "Scrap",
+				"secondary_item_type": "Scrap",
 				"item_code": scrap_item,
 				"item_name": scrap_item,
 				"qty": 3,
@@ -4959,7 +4959,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		manufacture_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 8))
 		manufacture_entry.submit()
 
-		generated_row = next(row for row in manufacture_entry.items if row.type == "Scrap")
+		generated_row = next(row for row in manufacture_entry.items if row.secondary_item_type == "Scrap")
 
 		wo_order.reload()
 		secondary_items = wo_order.secondary_items

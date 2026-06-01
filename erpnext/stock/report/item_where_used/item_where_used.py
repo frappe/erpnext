@@ -195,7 +195,7 @@ def get_bom_secondary_item_rows(item, company=None):
 	rows = frappe.get_all(
 		"BOM Secondary Item",
 		filters={"item_code": item, "parenttype": "BOM", "docstatus": 1},
-		fields=["parent", "idx", "type", "qty", "uom", "stock_qty", "stock_uom"],
+		fields=["parent", "idx", "secondary_item_type", "qty", "uom", "stock_qty", "stock_uom"],
 		order_by="parent asc, idx asc",
 	)
 	bom_map = get_bom_map([row.parent for row in rows], company)
@@ -219,7 +219,7 @@ def get_bom_secondary_item_rows(item, company=None):
 					company=bom.company,
 					is_default=bom.is_default,
 					is_active=bom.is_active,
-					details=row.type,
+					details=row.secondary_item_type,
 				)
 			)
 

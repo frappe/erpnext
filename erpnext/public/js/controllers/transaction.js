@@ -22,7 +22,10 @@ erpnext.stock.is_incoming_qi_purpose = (purpose) =>
 	purpose === "Manufacture" || erpnext.stock.qi_incoming_purposes.includes(purpose);
 erpnext.stock.secondary_item_purposes = ["Manufacture", "Repack", "Disassemble"];
 erpnext.stock.row_requires_quality_inspection = (purpose, row) => {
-	if (erpnext.stock.secondary_item_purposes.includes(purpose) && (row.type || row.is_legacy_scrap_item))
+	if (
+		erpnext.stock.secondary_item_purposes.includes(purpose) &&
+		(row.secondary_item_type || row.is_legacy_scrap_item)
+	)
 		return false;
 	if (purpose === "Manufacture") return !!row.is_finished_item;
 	if (erpnext.stock.qi_incoming_purposes.includes(purpose)) return !!row.t_warehouse;

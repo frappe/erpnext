@@ -297,7 +297,7 @@ class JobCard(Document):
 				"stock_qty": values.qty,
 				"item_name": values.item_name,
 				"stock_uom": values.stock_uom,
-				"type": values.type,
+				"secondary_item_type": values.secondary_item_type,
 				"bom_secondary_item": values.name,
 			}
 
@@ -1725,7 +1725,7 @@ class JobCard(Document):
 		ste.stock_entry.pro_doc = frappe.get_doc("Work Order", self.work_order)
 		ste.stock_entry.set_secondary_items_from_job_card()
 		for row in ste.stock_entry.items:
-			if (row.type or row.is_legacy_scrap_item) and not row.t_warehouse:
+			if (row.secondary_item_type or row.is_legacy_scrap_item) and not row.t_warehouse:
 				row.t_warehouse = self.target_warehouse
 
 		if auto_submit:

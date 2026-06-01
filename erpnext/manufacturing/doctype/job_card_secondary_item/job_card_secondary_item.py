@@ -22,7 +22,7 @@ class JobCardSecondaryItem(Document):
 		parenttype: DF.Data
 		stock_qty: DF.Float
 		stock_uom: DF.Link | None
-		type: DF.Literal["Co-Product", "By-Product", "Scrap", "Additional Finished Good"]
+		secondary_item_type: DF.Literal["Co-Product", "By-Product", "Scrap", "Additional Finished Good"]
 	# end: auto-generated types
 
 	pass
