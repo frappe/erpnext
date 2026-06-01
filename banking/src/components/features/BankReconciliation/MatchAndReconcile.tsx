@@ -559,11 +559,8 @@ const RuleAction = ({ transaction }: { transaction: UnreconciledTransaction }) =
     const setRecordPaymentModalOpen = useSetAtom(bankRecRecordPaymentModalAtom)
     const setRecordJournalEntryModalOpen = useSetAtom(bankRecRecordJournalEntryModalAtom)
 
-    if (!rule) {
-        return null
-    }
-
     const getActionIcon = () => {
+        if (!rule) return null
         switch (rule.classify_as) {
             case "Bank Entry":
                 return <Landmark />
@@ -577,6 +574,7 @@ const RuleAction = ({ transaction }: { transaction: UnreconciledTransaction }) =
     }
 
     const getActionStyles = () => {
+        if (!rule) return {}
         switch (rule.classify_as) {
             case "Bank Entry":
                 return {
@@ -610,6 +608,7 @@ const RuleAction = ({ transaction }: { transaction: UnreconciledTransaction }) =
     }
 
     const handleActionClick = () => {
+        if (!rule) return
         switch (rule.classify_as) {
             case "Bank Entry":
                 setRecordJournalEntryModalOpen(true)
@@ -624,6 +623,7 @@ const RuleAction = ({ transaction }: { transaction: UnreconciledTransaction }) =
     }
 
     const getActionDescription = () => {
+        if (!rule) return ""
         switch (rule.classify_as) {
             case "Bank Entry":
                 return _("Create a journal entry for expenses, income or split transactions")
@@ -636,8 +636,7 @@ const RuleAction = ({ transaction }: { transaction: UnreconciledTransaction }) =
         }
     }
 
-    useHotkeys('meta+r', () => {
-        // 
+    useHotkeys('alt+r', () => {
         handleActionClick()
     }, {
         enabled: true,
@@ -646,6 +645,10 @@ const RuleAction = ({ transaction }: { transaction: UnreconciledTransaction }) =
     })
 
     const styles = getActionStyles()
+
+    if (!rule) {
+        return null
+    }
 
     return (
         <Card className={`border ${styles.border} ${styles.bg} shadow-sm hover:shadow-md transition-all duration-200`}>
