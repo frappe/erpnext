@@ -66,13 +66,13 @@ frappe.query_reports["Supplier Quotation Comparison"] = {
 			},
 		},
 		{
-			fieldtype: "Link",
+			fieldtype: "MultiSelectList",
 			label: __("Request for Quotation"),
 			options: "Request for Quotation",
 			fieldname: "request_for_quotation",
 			default: "",
-			get_query: () => {
-				return { filters: { docstatus: ["<", 2] } };
+			get_data: function (txt) {
+				return frappe.db.get_link_options("Request for Quotation", txt, { docstatus: ["<", 2] });
 			},
 		},
 		{
