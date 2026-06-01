@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
-"POT-Creation-Date: 2026-05-27 15:21+0000\n"
+"POT-Creation-Date: 2026-05-31 10:17+0000\n"
 "PO-Revision-Date: 2026-05-29 17:37+0000\n"
 "Last-Translator: hello@frappe.io\n"
 "Language: th_TH\n"
@@ -4872,7 +4872,7 @@ msgstr "กลุ่มสินค้าคือวิธีการจำแ
 msgid "An error has been appeared while reposting item valuation via {0}"
 msgstr "เกิดข้อผิดพลาดขณะลงรายการประเมินค่าสินค้าอีกครั้งผ่าน {0}"
 
-#: erpnext/public/js/controllers/buying.js:387
+#: erpnext/public/js/controllers/buying.js:382
 #: erpnext/public/js/utils/sales_common.js:489
 msgid "An error occurred during the update process"
 msgstr "เกิดข้อผิดพลาดระหว่างกระบวนการอัปเดต"
@@ -5803,7 +5803,7 @@ msgstr "สินทรัพย์ถูกยกเลิก"
 msgid "Asset cannot be cancelled, as it is already {0}"
 msgstr "ไม่สามารถยกเลิกสินทรัพย์ได้ เนื่องจากมันอยู่ในสถานะ {0} แล้ว"
 
-#: erpnext/assets/doctype/asset/depreciation.py:396
+#: erpnext/assets/doctype/asset/depreciation.py:398
 msgid "Asset cannot be scrapped before the last depreciation entry."
 msgstr "ไม่สามารถทิ้งสินทรัพย์ได้ก่อนการบันทึกค่าเสื่อมราคาครั้งสุดท้าย"
 
@@ -5835,7 +5835,7 @@ msgstr "สินทรัพย์ไม่สามารถใช้งาน
 msgid "Asset received at Location {0} and issued to Employee {1}"
 msgstr "สินทรัพย์ได้รับที่ตำแหน่ง {0} และออกให้พนักงาน {1}"
 
-#: erpnext/assets/doctype/asset/depreciation.py:457
+#: erpnext/assets/doctype/asset/depreciation.py:460
 msgid "Asset restored"
 msgstr "สินทรัพย์ถูกกู้คืน"
 
@@ -5847,11 +5847,11 @@ msgstr "สินทรัพย์ถูกกู้คืนหลังจา
 msgid "Asset returned"
 msgstr "สินทรัพย์ถูกคืน"
 
-#: erpnext/assets/doctype/asset/depreciation.py:444
+#: erpnext/assets/doctype/asset/depreciation.py:446
 msgid "Asset scrapped"
 msgstr "สินทรัพย์ถูกทิ้ง"
 
-#: erpnext/assets/doctype/asset/depreciation.py:446
+#: erpnext/assets/doctype/asset/depreciation.py:448
 msgid "Asset scrapped via Journal Entry {0}"
 msgstr "สินทรัพย์ถูกทิ้งผ่านรายการบัญชี {0}"
 
@@ -5876,7 +5876,7 @@ msgstr "สินทรัพย์ถูกอัปเดตหลังจา
 msgid "Asset updated due to Asset Repair {0} {1}."
 msgstr "สินทรัพย์ถูกอัปเดตเนื่องจากการซ่อมแซมสินทรัพย์ {0} {1}"
 
-#: erpnext/assets/doctype/asset/depreciation.py:378
+#: erpnext/assets/doctype/asset/depreciation.py:380
 msgid "Asset {0} cannot be scrapped, as it is already {1}"
 msgstr "สินทรัพย์ {0} ไม่สามารถทิ้งได้ เนื่องจากมันอยู่ในสถานะ {1} แล้ว"
 
@@ -5917,7 +5917,7 @@ msgstr "สินทรัพย์ {0} ไม่ได้ตั้งค่า�
 msgid "Asset {0} is not submitted. Please submit the asset before proceeding."
 msgstr "สินทรัพย์ {0} ยังไม่ได้รับการส่ง กรุณาส่งสินทรัพย์ก่อนดำเนินการต่อ"
 
-#: erpnext/assets/doctype/asset/depreciation.py:376
+#: erpnext/assets/doctype/asset/depreciation.py:378
 msgid "Asset {0} must be submitted"
 msgstr "สินทรัพย์ {0} ต้องถูกส่ง"
 
@@ -6367,7 +6367,7 @@ msgstr "จับคู่และตั้งค่าคู่ค้าใน
 msgid "Auto re-order"
 msgstr "สั่งซื้อซ้ำอัตโนมัติ"
 
-#: erpnext/public/js/controllers/buying.js:382
+#: erpnext/public/js/controllers/buying.js:377
 #: erpnext/public/js/utils/sales_common.js:484
 msgid "Auto repeat document updated"
 msgstr "อัปเดตเอกสารที่ทำซ้ำอัตโนมัติแล้ว"
@@ -9716,7 +9716,7 @@ msgstr "รายละเอียดหมวดหมู่"
 msgid "Category-wise Asset Value"
 msgstr "มูลค่าสินทรัพย์ตามหมวดหมู่"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:297
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:300
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:143
 msgid "Caution"
 msgstr "คำเตือน"
@@ -15692,11 +15692,11 @@ msgstr "ปริมาณที่จัดส่งแล้ว"
 msgid "Delivered Qty (in Stock UOM)"
 msgstr "ปริมาณที่จัดส่งแล้ว (ในหน่วยสต็อก)"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:620
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:623
 msgid "Delivered Qty cannot be increased by more than {0} for item {1}"
 msgstr ""
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:613
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:616
 msgid "Delivered Qty cannot be reduced by more than {0} for item {1}"
 msgstr ""
 
@@ -16090,7 +16090,7 @@ msgstr "สถานะการลงรายการค่าเสื่อ
 msgid "Depreciation Entry against asset {0}"
 msgstr "รายการค่าเสื่อมราคาต่อสินทรัพย์ {0}"
 
-#: erpnext/assets/doctype/asset/depreciation.py:258
+#: erpnext/assets/doctype/asset/depreciation.py:259
 msgid "Depreciation Entry against {0} worth {1}"
 msgstr "รายการค่าเสื่อมราคาสำหรับ {0} มูลค่า {1}"
 
@@ -16102,7 +16102,7 @@ msgstr "รายการค่าเสื่อมราคาสำหรั
 msgid "Depreciation Expense Account"
 msgstr "บัญชีค่าใช้จ่ายค่าเสื่อมราคา"
 
-#: erpnext/assets/doctype/asset/depreciation.py:305
+#: erpnext/assets/doctype/asset/depreciation.py:306
 msgid "Depreciation Expense Account should be an Income or Expense Account."
 msgstr "บัญชีค่าใช้จ่ายค่าเสื่อมราคาควรเป็นบัญชีรายได้หรือค่าใช้จ่าย"
 
@@ -16868,7 +16868,7 @@ msgstr "ชื่อที่แสดง"
 msgid "Disposal Date"
 msgstr "วันที่จำหน่าย"
 
-#: erpnext/assets/doctype/asset/depreciation.py:835
+#: erpnext/assets/doctype/asset/depreciation.py:838
 msgid "Disposal date {0} cannot be before {1} date {2} of the asset."
 msgstr "วันที่จำหน่าย {0} ต้องไม่มาก่อนวันที่ {1} {2} ของสินทรัพย์"
 
@@ -18551,7 +18551,7 @@ msgstr "เกิดข้อผิดพลาดในการดึงรา
 msgid "Error in party matching for Bank Transaction {0}"
 msgstr "ข้อผิดพลาดในการจับคู่ฝ่ายสำหรับธุรกรรมธนาคาร {0}"
 
-#: erpnext/assets/doctype/asset/depreciation.py:322
+#: erpnext/assets/doctype/asset/depreciation.py:323
 msgid "Error while posting depreciation entries"
 msgstr "ข้อผิดพลาดขณะโพสต์รายการค่าเสื่อมราคา"
 
@@ -19955,6 +19955,7 @@ msgstr "คงที่"
 #. Option for the 'Account Type' (Select) field in DocType 'Account'
 #: erpnext/accounts/doctype/account/account.json
 #: erpnext/accounts/report/account_balance/account_balance.js:52
+#: erpnext/stock/doctype/item/item_list.js:20
 msgid "Fixed Asset"
 msgstr "สินทรัพย์ถาวร"
 
@@ -20191,11 +20192,11 @@ msgstr "สำหรับคลังสินค้า"
 msgid "For Work Order"
 msgstr "สำหรับใบสั่งงาน"
 
-#: erpnext/controllers/status_updater.py:288
+#: erpnext/controllers/status_updater.py:290
 msgid "For an item {0}, quantity must be negative number"
 msgstr "สำหรับรายการ {0}จำนวนต้องเป็นจำนวนลบ"
 
-#: erpnext/controllers/status_updater.py:285
+#: erpnext/controllers/status_updater.py:287
 msgid "For an item {0}, quantity must be positive number"
 msgstr "สำหรับรายการ {0}ปริมาณต้องเป็นจำนวนบวก"
 
@@ -20225,7 +20226,7 @@ msgstr "สำหรับผู้จัดจำหน่ายรายบุ
 msgid "For item <b>{0}</b>, only <b>{1}</b> asset have been created or linked to <b>{2}</b>. Please create or link <b>{3}</b> more asset with the respective document."
 msgstr "สำหรับรายการ <b>{0}</b> มีเพียง <b>{1}</b> สินทรัพย์ที่ถูกสร้างหรือเชื่อมโยงกับ <b>{2}</b> โปรดสร้างหรือเชื่อมโยง <b>{3}</b> สินทรัพย์เพิ่มเติมกับเอกสารที่เกี่ยวข้อง"
 
-#: erpnext/controllers/status_updater.py:298
+#: erpnext/controllers/status_updater.py:300
 msgid "For item {0}, rate must be a positive number. To Allow negative rates, enable {1} in {2}"
 msgstr "สำหรับรายการ {0} อัตราต้องเป็นตัวเลขบวก หากต้องการอนุญาตอัตราเชิงลบ ให้เปิดใช้งาน {1} ใน {2}"
 
@@ -20873,7 +20874,7 @@ msgstr "อ้างอิงการชำระเงินในอนาค
 msgid "Future Payments"
 msgstr "การชำระเงินในอนาคต"
 
-#: erpnext/assets/doctype/asset/depreciation.py:385
+#: erpnext/assets/doctype/asset/depreciation.py:387
 msgid "Future date is not allowed"
 msgstr "ไม่อนุญาตให้ใช้วันที่ในอนาคต"
 
@@ -21186,7 +21187,7 @@ msgstr "รับตำแหน่งสินค้า"
 #: erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.js:119
 #: erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.js:142
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
-#: erpnext/public/js/controllers/buying.js:334
+#: erpnext/public/js/controllers/buying.js:329
 #: erpnext/selling/doctype/quotation/quotation.js:182
 #: erpnext/selling/doctype/sales_order/sales_order.js:211
 #: erpnext/selling/doctype/sales_order/sales_order.js:1216
@@ -21225,7 +21226,7 @@ msgstr "รับสินค้าจาก BOM"
 msgid "Get Items from Material Requests against this Supplier"
 msgstr "รับสินค้าจากใบขอวัสดุสำหรับซัพพลายเออร์นี้"
 
-#: erpnext/public/js/controllers/buying.js:611
+#: erpnext/public/js/controllers/buying.js:606
 msgid "Get Items from Product Bundle"
 msgstr "รับสินค้าจากชุดสินค้า"
 
@@ -21999,7 +22000,7 @@ msgstr "ข้อความช่วยเหลือ"
 msgid "Helps you distribute the Budget/Target across months if you have seasonality in your business."
 msgstr "ช่วยให้คุณกระจายงบประมาณ/เป้าหมายในแต่ละเดือนหากธุรกิจของคุณมีฤดูกาล"
 
-#: erpnext/assets/doctype/asset/depreciation.py:352
+#: erpnext/assets/doctype/asset/depreciation.py:353
 msgid "Here are the error logs for the aforementioned failed depreciation entries: {0}"
 msgstr "นี่คือบันทึกข้อผิดพลาดสำหรับรายการค่าเสื่อมราคาที่ล้มเหลวที่กล่าวถึงข้างต้น: {0}"
 
@@ -24167,7 +24168,7 @@ msgstr "ใบแจ้งหนี้ POS ไม่ถูกต้อง"
 msgid "Invalid Parent Account"
 msgstr "บัญชีหลักไม่ถูกต้อง"
 
-#: erpnext/public/js/controllers/buying.js:433
+#: erpnext/public/js/controllers/buying.js:428
 msgid "Invalid Part Number"
 msgstr "หมายเลขชิ้นส่วนไม่ถูกต้อง"
 
@@ -26479,7 +26480,7 @@ msgstr "กำลังดำเนินการโพสต์ใหม่ก
 msgid "Item variant {0} exists with same attributes"
 msgstr "ตัวเลือกของรายการ {0} มีอยู่พร้อมแอตทริบิวต์เดียวกัน"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:587
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:590
 msgid "Item with name {0} not found in the Purchase Order"
 msgstr ""
 
@@ -26524,7 +26525,7 @@ msgstr "รายการ {0} ถูกปิดใช้งาน"
 msgid "Item {0} has no Serial No. Only serialized items can have delivery based on Serial No"
 msgstr "รายการ {0} ไม่มีหมายเลขซีเรียล เฉพาะรายการที่มีหมายเลขซีเรียลเท่านั้นที่สามารถจัดส่งตามหมายเลขซีเรียลได้"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:606
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:609
 msgid "Item {0} has no changes in delivered quantity. Please unselect the row if you do not wish to update its quantity."
 msgstr ""
 
@@ -26548,7 +26549,7 @@ msgstr "รายการ {0} ถูกยกเลิก"
 msgid "Item {0} is disabled"
 msgstr "รายการ {0} ถูกปิดใช้งาน"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:592
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:595
 msgid "Item {0} is not a drop ship item. Only drop ship items can have Delivered Qty updated."
 msgstr ""
 
@@ -26596,7 +26597,7 @@ msgstr "ไม่พบรายการ {0} ในตาราง 'วัต�
 msgid "Item {0} not found."
 msgstr "ไม่พบรายการ {0}"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:324
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:327
 msgid "Item {0}: Ordered qty {1} cannot be less than minimum order qty {2} (defined in Item)."
 msgstr "รายการ {0}: ปริมาณที่สั่งซื้อ {1} ต้องไม่น้อยกว่าปริมาณการสั่งซื้อขั้นต่ำ {2} (กำหนดในรายการ)"
 
@@ -27671,7 +27672,7 @@ msgstr "หมายเลขใบอนุญาต"
 msgid "License Plate"
 msgstr "ป้ายทะเบียน"
 
-#: erpnext/controllers/status_updater.py:489
+#: erpnext/controllers/status_updater.py:499
 msgid "Limit Crossed"
 msgstr "เกินขีดจำกัด"
 
@@ -28658,7 +28659,7 @@ msgstr "ผู้ผลิต"
 msgid "Manufacturer Part Number"
 msgstr "หมายเลขชิ้นส่วนผู้ผลิต"
 
-#: erpnext/public/js/controllers/buying.js:430
+#: erpnext/public/js/controllers/buying.js:425
 msgid "Manufacturer Part Number <b>{0}</b> is invalid"
 msgstr "หมายเลขชิ้นส่วนผู้ผลิต <b>{0}</b> ไม่ถูกต้อง"
 
@@ -31124,7 +31125,7 @@ msgstr "ไม่มีใบแจ้งหนี้ที่ค้างชำ
 msgid "No outstanding {0} found for the {1} {2} which qualify the filters you have specified."
 msgstr "ไม่พบ {0} ที่ค้างชำระสำหรับ {1} {2} ที่ตรงตามตัวกรองที่คุณระบุ"
 
-#: erpnext/public/js/controllers/buying.js:540
+#: erpnext/public/js/controllers/buying.js:535
 msgid "No pending Material Requests found to link for the given items."
 msgstr "ไม่พบคำขอวัสดุที่ค้างอยู่เพื่อเชื่อมโยงกับรายการที่ให้มา"
 
@@ -32916,6 +32917,11 @@ msgstr "ค่าเผื่อการเรียกเก็บเกิน
 msgid "Over Delivery/Receipt Allowance (%)"
 msgstr "ค่าเผื่อการส่งมอบ/การรับมอบเกิน (%)"
 
+#. Label of the over_order_allowance (Float) field in DocType 'Buying Settings'
+#: erpnext/buying/doctype/buying_settings/buying_settings.json
+msgid "Over Order Allowance (%)"
+msgstr ""
+
 #. Label of the over_picking_allowance (Percent) field in DocType 'Stock
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
@@ -32926,7 +32932,7 @@ msgstr "ค่าเผื่อการหยิบเกิน"
 msgid "Over Receipt"
 msgstr "การรับเกิน"
 
-#: erpnext/controllers/status_updater.py:494
+#: erpnext/controllers/status_updater.py:504
 msgid "Over Receipt/Delivery of {0} {1} ignored for item {2} because you have {3} role."
 msgstr "การรับ/ส่งมอบเกิน {0} {1} ถูกละเว้นสำหรับรายการ {2} เนื่องจากคุณมีบทบาท {3}"
 
@@ -32946,7 +32952,7 @@ msgstr "ค่าเบี้ยเลี้ยงเกินกำหนด (%
 msgid "Over Withheld"
 msgstr "เกินที่ถูกหักไว้"
 
-#: erpnext/controllers/status_updater.py:496
+#: erpnext/controllers/status_updater.py:506
 msgid "Overbilling of {0} {1} ignored for item {2} because you have {3} role."
 msgstr "การเรียกเก็บเงินเกิน {0} {1} ถูกละเว้นสำหรับรายการ {2} เนื่องจากคุณมีบทบาท {3}"
 
@@ -35930,7 +35936,7 @@ msgstr "โปรดสร้างใบรับซื้อหรือใบ
 msgid "Please delete Product Bundle {0}, before merging {1} into {2}"
 msgstr "โปรดลบชุดผลิตภัณฑ์ {0} ก่อนรวม {1} เข้ากับ {2}"
 
-#: erpnext/assets/doctype/asset/depreciation.py:559
+#: erpnext/assets/doctype/asset/depreciation.py:562
 msgid "Please disable workflow temporarily for Journal Entry {0}"
 msgstr "โปรดปิดใช้งานเวิร์กโฟลว์ชั่วคราวสำหรับรายการบัญชี {0}"
 
@@ -36478,7 +36484,7 @@ msgstr ""
 msgid "Please select at least one filter: Item Code, Batch, or Serial No."
 msgstr "กรุณาเลือกอย่างน้อยหนึ่งตัวกรอง: รหัสสินค้า, ชุดการผลิต, หรือหมายเลขซีเรียล"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:580
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:583
 msgid "Please select at least one item to update delivered quantity."
 msgstr ""
 
@@ -36586,11 +36592,11 @@ msgstr "โปรดเลือก {0} ก่อน"
 msgid "Please set 'Apply Additional Discount On'"
 msgstr "โปรดตั้งค่า 'ใช้ส่วนลดเพิ่มเติมใน'"
 
-#: erpnext/assets/doctype/asset/depreciation.py:786
+#: erpnext/assets/doctype/asset/depreciation.py:789
 msgid "Please set 'Asset Depreciation Cost Center' in Company {0}"
 msgstr "โปรดตั้งค่า 'ศูนย์ต้นทุนค่าเสื่อมราคาสินทรัพย์' ในบริษัท {0}"
 
-#: erpnext/assets/doctype/asset/depreciation.py:784
+#: erpnext/assets/doctype/asset/depreciation.py:787
 msgid "Please set 'Gain/Loss Account on Asset Disposal' in Company {0}"
 msgstr "โปรดตั้งค่า 'บัญชีกำไร/ขาดทุนจากการจำหน่ายสินทรัพย์' ในบริษัท {0}"
 
@@ -36632,7 +36638,7 @@ msgstr "โปรดตั้งค่าบริษัท"
 msgid "Please set Customer Address to determine if the transaction is an export."
 msgstr "กรุณาตั้งค่าที่อยู่ลูกค้าเพื่อกำหนดว่าธุรกรรมนี้เป็นการส่งออกหรือไม่"
 
-#: erpnext/assets/doctype/asset/depreciation.py:748
+#: erpnext/assets/doctype/asset/depreciation.py:751
 msgid "Please set Depreciation related Accounts in Asset Category {0} or Company {1}"
 msgstr "โปรดตั้งค่าบัญชีที่เกี่ยวข้องกับค่าเสื่อมราคาในหมวดสินทรัพย์ {0} หรือบริษัท {1}"
 
@@ -36650,7 +36656,7 @@ msgstr "กรุณาตั้งค่ารหัสภาษีสำหร
 msgid "Please set Fiscal Code for the public administration '%s'"
 msgstr "กรุณาตั้งค่ารหัสการเงินสำหรับการบริหารราชการแผ่นดิน '%s'"
 
-#: erpnext/assets/doctype/asset/depreciation.py:734
+#: erpnext/assets/doctype/asset/depreciation.py:737
 msgid "Please set Fixed Asset Account in Asset Category {0}"
 msgstr "โปรดตั้งค่าบัญชีสินทรัพย์ถาวรในหมวดสินทรัพย์ {0}"
 
@@ -36853,7 +36859,7 @@ msgstr "โปรดตั้งค่า {0} เป็น {1} ซึ่งเ�
 msgid "Please setup and enable a group account with the Account Type - {0} for the company {1}"
 msgstr "โปรดตั้งค่าและเปิดใช้งานบัญชีกลุ่มด้วยประเภทบัญชี - {0} สำหรับบริษัท {1}"
 
-#: erpnext/assets/doctype/asset/depreciation.py:357
+#: erpnext/assets/doctype/asset/depreciation.py:358
 msgid "Please share this email with your support team so that they can find and fix the issue."
 msgstr "โปรดแชร์อีเมลนี้กับทีมสนับสนุนของคุณเพื่อให้พวกเขาสามารถค้นหาและแก้ไขปัญหาได้"
 
@@ -38155,8 +38161,8 @@ msgstr "สินค้า"
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 #: erpnext/buying/doctype/purchase_order_item/purchase_order_item.json
 #: erpnext/buying/workspace/buying/buying.json
-#: erpnext/public/js/controllers/buying.js:330
-#: erpnext/public/js/controllers/buying.js:615
+#: erpnext/public/js/controllers/buying.js:325
+#: erpnext/public/js/controllers/buying.js:610
 #: erpnext/selling/doctype/product_bundle/product_bundle.json
 #: erpnext/selling/workspace/selling/selling.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
@@ -38843,6 +38849,7 @@ msgstr "การเผยแพร่"
 #: erpnext/projects/doctype/project/project_dashboard.py:16
 #: erpnext/setup/doctype/company/company.py:463 erpnext/setup/install.py:435
 #: erpnext/stock/doctype/item/item.json
+#: erpnext/stock/doctype/item/item_list.js:30
 #: erpnext/stock/doctype/item_lead_time/item_lead_time.json
 #: erpnext/stock/doctype/item_reorder/item_reorder.json
 #: erpnext/stock/doctype/material_request/material_request.json
@@ -39164,7 +39171,7 @@ msgstr "ใบสั่งซื้อสินค้า {0} สร้างข�
 msgid "Purchase Order {0} is not submitted"
 msgstr "คำสั่งซื้อ {0} ยังไม่ได้ส่ง"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:948
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:951
 msgid "Purchase Orders"
 msgstr "คำสั่งซื้อ"
 
@@ -39179,7 +39186,7 @@ msgstr "จำนวนใบสั่งซื้อ"
 msgid "Purchase Orders Items Overdue"
 msgstr "รายการคำสั่งซื้อเกินกำหนด"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:285
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:288
 msgid "Purchase Orders are not allowed for {0} due to a scorecard standing of {1}."
 msgstr "ไม่อนุญาตคำสั่งซื้อสำหรับ {0} เนื่องจากสถานะคะแนน {1}"
 
@@ -39424,6 +39431,7 @@ msgstr "กำลังซื้อ"
 #. Label of the purpose (Select) field in DocType 'Stock Reconciliation'
 #: erpnext/assets/doctype/asset_movement/asset_movement.json
 #: erpnext/manufacturing/doctype/master_production_schedule/master_production_schedule.js:163
+#: erpnext/stock/doctype/item/item_list.js:40
 #: erpnext/stock/doctype/material_request/material_request.json
 #: erpnext/stock/doctype/pick_list/pick_list.json
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:459
@@ -40130,7 +40138,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:194
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:218
 #: erpnext/manufacturing/doctype/production_plan_sub_assembly_item/production_plan_sub_assembly_item.json
-#: erpnext/public/js/controllers/buying.js:622
+#: erpnext/public/js/controllers/buying.js:617
 #: erpnext/public/js/stock_analytics.js:50
 #: erpnext/public/js/utils/serial_no_batch_selector.js:499
 #: erpnext/selling/doctype/quotation_item/quotation_item.json
@@ -40309,7 +40317,7 @@ msgstr "ควอร์ตแห้ง (สหรัฐอเมริกา)"
 msgid "Quart Liquid (US)"
 msgstr "ควอร์ตของเหลว (สหรัฐอเมริกา)"
 
-#: erpnext/selling/report/sales_analytics/sales_analytics.py:437
+#: erpnext/selling/report/sales_analytics/sales_analytics.py:461
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:125
 msgid "Quarter {0} {1}"
 msgstr "ไตรมาส {0} {1}"
@@ -43619,7 +43627,7 @@ msgstr "แถว #{0}: สินทรัพย์ {1} ไม่สามาร
 msgid "Row #{0}: Asset {1} is already sold"
 msgstr "แถว #{0}: สินทรัพย์ {1} ถูกขายไปแล้ว"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:333
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:336
 msgid "Row #{0}: BOM is not specified for subcontracting item {0}"
 msgstr "แถว #{0}: ไม่ได้ระบุ BOM สำหรับรายการจ้างช่วง {0}"
 
@@ -43758,7 +43766,7 @@ msgstr "แถว #{0}: รายการที่ลูกค้าจัด�
 msgid "Row #{0}: Dates overlapping with other row in group {1}"
 msgstr "แถว #{0}: วันที่ทับซ้อนกับแถวอื่นในกลุ่ม {1}"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:357
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:360
 msgid "Row #{0}: Default BOM not found for FG Item {1}"
 msgstr "แถว #{0}: ไม่พบ BOM เริ่มต้นสำหรับรายการ FG {1}"
 
@@ -43782,17 +43790,17 @@ msgstr "แถว #{0}: ไม่ได้ตั้งค่าบัญชี�
 msgid "Row #{0}: Expense account {1} is not valid for Purchase Invoice {2}. Only expense accounts from non-stock items are allowed."
 msgstr "แถว #{0}: บัญชีค่าใช้จ่าย {1} ไม่ถูกต้องสำหรับใบแจ้งหนี้การซื้อ {2}. อนุญาตเฉพาะบัญชีค่าใช้จ่ายจากสินค้าที่ไม่มีสต็อกเท่านั้น"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:362
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:365
 #: erpnext/selling/doctype/sales_order/sales_order.py:305
 msgid "Row #{0}: Finished Good Item Qty can not be zero"
 msgstr "แถว #{0}: ปริมาณรายการสินค้าสำเร็จรูปไม่สามารถเป็นศูนย์ได้"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:344
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:347
 #: erpnext/selling/doctype/sales_order/sales_order.py:285
 msgid "Row #{0}: Finished Good Item is not specified for service item {1}"
 msgstr "แถว #{0}: ไม่ได้ระบุรายการสินค้าสำเร็จรูปสำหรับรายการบริการ {1}"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:351
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:354
 #: erpnext/selling/doctype/sales_order/sales_order.py:292
 msgid "Row #{0}: Finished Good Item {1} must be a sub-contracted item"
 msgstr "แถว #{0}: รายการสินค้าสำเร็จรูป {1} ต้องเป็นรายการจ้างช่วง"
@@ -44198,7 +44206,7 @@ msgstr "คุณไม่สามารถใช้มิติสินค้
 msgid "Row #{0}: You must select an Asset for Item {1}."
 msgstr "คุณต้องเลือกสินทรัพย์สำหรับรายการ {1}"
 
-#: erpnext/public/js/controllers/buying.js:270
+#: erpnext/public/js/controllers/buying.js:265
 msgid "Row #{0}: {1} can not be negative for item {2}"
 msgstr "{1} ไม่สามารถเป็นค่าลบสำหรับรายการ {2}"
 
@@ -44893,9 +44901,14 @@ msgstr "โหมดเงินเดือน"
 #: erpnext/setup/install.py:430
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:297
 #: erpnext/stock/doctype/item/item.json
+#: erpnext/stock/doctype/item/item_list.js:29
 #: erpnext/stock/doctype/pick_list/pick_list_dashboard.py:16
 msgid "Sales"
 msgstr "การขายสินค้า"
+
+#: erpnext/stock/doctype/item/item_list.js:28
+msgid "Sales & Purchase"
+msgstr ""
 
 #: erpnext/setup/doctype/company/company.py:649
 msgid "Sales Account"
@@ -45967,7 +45980,7 @@ msgstr "สินทรัพย์เศษ"
 msgid "Scrap Warehouse"
 msgstr "โกดังเศษวัสดุ"
 
-#: erpnext/assets/doctype/asset/depreciation.py:387
+#: erpnext/assets/doctype/asset/depreciation.py:389
 msgid "Scrap date cannot be before purchase date"
 msgstr "วันที่ยกเลิกไม่สามารถเป็นก่อนวันที่ซื้อ"
 
@@ -49054,6 +49067,7 @@ msgstr "ข้อมูลตามกฎหมายและข้อมูล
 #: erpnext/manufacturing/doctype/bom/bom_dashboard.py:14
 #: erpnext/setup/doctype/incoterm/incoterm.json
 #: erpnext/setup/workspace/home/home.json
+#: erpnext/stock/doctype/item/item_list.js:21
 #: erpnext/stock/doctype/material_request/material_request_dashboard.py:17
 #: erpnext/stock/workspace/stock/stock.json
 #: erpnext/workspace_sidebar/stock.json
@@ -50219,7 +50233,7 @@ msgstr "รายการบริการคำสั่งจ้างช่
 msgid "Subcontracting Order Supplied Item"
 msgstr "รายการที่จัดหาสำหรับคำสั่งจ้างช่วง"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:985
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:988
 msgid "Subcontracting Order {0} created."
 msgstr "คำสั่งจ้างช่วง {0} ถูกสร้างขึ้นแล้ว"
 
@@ -50307,7 +50321,7 @@ msgstr ""
 msgid "Subdivision"
 msgstr "การแบ่งย่อย"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:981
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:984
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:1116
 msgid "Submit Action Failed"
 msgstr "การส่งล้มเหลว"
@@ -52559,7 +52573,7 @@ msgstr "รายการต่อไปนี้ที่มีข้อกำ
 msgid "The following Purchase Invoices are not submitted:"
 msgstr "ใบแจ้งหนี้การซื้อต่อไปนี้ไม่ได้ถูกส่ง:"
 
-#: erpnext/assets/doctype/asset/depreciation.py:347
+#: erpnext/assets/doctype/asset/depreciation.py:348
 msgid "The following assets have failed to automatically post depreciation entries: {0}"
 msgstr "สินทรัพย์ต่อไปนี้ล้มเหลวในการโพสต์รายการค่าเสื่อมราคาโดยอัตโนมัติ: {0}"
 
@@ -52677,6 +52691,12 @@ msgstr "บัญชีแม่ {0} ไม่มีในเทมเพลต�
 #: erpnext/accounts/doctype/payment_request/payment_request.py:187
 msgid "The payment gateway account in plan {0} is different from the payment gateway account in this payment request"
 msgstr "บัญชีเกตเวย์การชำระเงินในแผน {0} แตกต่างจากบัญชีเกตเวย์การชำระเงินในคำขอชำระเงินนี้"
+
+#. Description of the 'Over Order Allowance (%)' (Float) field in DocType
+#. 'Buying Settings'
+#: erpnext/buying/doctype/buying_settings/buying_settings.json
+msgid "The percentage by which you are allowed to order more on a Purchase Order than the quantity requested on the originating Material Request. For example, if the Material Request has 100 units and the allowance is 10%, you can order up to 110 units"
+msgstr ""
 
 #. Description of the 'Over Billing Allowance (%)' (Currency) field in DocType
 #. 'Accounts Settings'
@@ -52969,7 +52989,7 @@ msgstr "รายการนี้เป็นตัวแปรของ {0} (
 msgid "This Month's Summary"
 msgstr "สรุปเดือนนี้"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:994
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:997
 msgid "This Purchase Order has been fully subcontracted."
 msgstr "ใบสั่งซื้อใบนี้ได้ถูกมอบหมายให้ผู้รับเหมาช่วงดำเนินการทั้งหมดแล้ว"
 
@@ -53003,7 +53023,7 @@ msgstr "หมวดหมู่สินทรัพย์นี้ถูกท
 msgid "This covers all scorecards tied to this Setup"
 msgstr "ครอบคลุมการ์ดคะแนนทั้งหมดที่เชื่อมโยงกับการตั้งค่านี้"
 
-#: erpnext/controllers/status_updater.py:478
+#: erpnext/controllers/status_updater.py:488
 msgid "This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?"
 msgstr "เอกสารนี้เกินขีดจำกัด {0} {1} สำหรับรายการ {4} คุณกำลังทำ {3} อื่นกับ {2} เดียวกันหรือไม่?"
 
@@ -53144,7 +53164,7 @@ msgstr "กำหนดการนี้ถูกสร้างขึ้นเ
 msgid "This schedule was created when Asset {0} was restored on Asset Capitalization {1}'s cancellation."
 msgstr "กำหนดการนี้ถูกสร้างขึ้นเมื่อสินทรัพย์ {0} ถูกคืนค่าเนื่องจากการยกเลิกการเพิ่มทุนสินทรัพย์ {1}"
 
-#: erpnext/assets/doctype/asset/depreciation.py:461
+#: erpnext/assets/doctype/asset/depreciation.py:464
 msgid "This schedule was created when Asset {0} was restored."
 msgstr "กำหนดการนี้ถูกสร้างขึ้นเมื่อสินทรัพย์ {0} ถูกคืนค่า"
 
@@ -53152,7 +53172,7 @@ msgstr "กำหนดการนี้ถูกสร้างขึ้นเ
 msgid "This schedule was created when Asset {0} was returned through Sales Invoice {1}."
 msgstr "กำหนดการนี้ถูกสร้างขึ้นเมื่อสินทรัพย์ {0} ถูกคืนผ่านใบแจ้งหนี้ขาย {1}"
 
-#: erpnext/assets/doctype/asset/depreciation.py:420
+#: erpnext/assets/doctype/asset/depreciation.py:422
 msgid "This schedule was created when Asset {0} was scrapped."
 msgstr "กำหนดการนี้ถูกสร้างขึ้นเมื่อสินทรัพย์ {0} ถูกทิ้ง"
 
@@ -53653,11 +53673,15 @@ msgstr "เพื่อเพิ่มการดำเนินการ ใ�
 msgid "To add subcontracted Item's raw materials if include exploded items is disabled."
 msgstr "เพื่อเพิ่มวัตถุดิบของรายการที่จ้างช่วง หากไม่ได้เปิดใช้งานการรวมรายการที่ขยายแล้ว"
 
-#: erpnext/controllers/status_updater.py:471
+#: erpnext/controllers/status_updater.py:481
 msgid "To allow over billing, update \"Over Billing Allowance\" in Accounts Settings or the Item."
 msgstr "หากต้องการอนุญาตให้มีการเรียกเก็บเงินเกิน ให้อัปเดต \"วงเงินการเรียกเก็บเงินเกิน\" ในตั้งค่าบัญชีหรือสินค้า"
 
-#: erpnext/controllers/status_updater.py:467
+#: erpnext/controllers/status_updater.py:475
+msgid "To allow over ordering, update \"Over Order Allowance\" in Buying Settings."
+msgstr ""
+
+#: erpnext/controllers/status_updater.py:477
 msgid "To allow over receipt / delivery, update \"Over Receipt/Delivery Allowance\" in Stock Settings or the Item."
 msgstr "หากต้องการอนุญาตให้มีการรับ/ส่งเกิน ให้อัปเดต \"การอนุญาตให้รับ/ส่งเกิน\" ใน การตั้งค่าสต็อก หรือในรายการสินค้า"
 
@@ -55252,6 +55276,7 @@ msgstr "การตั้งค่าภาษีมูลค่าเพิ่
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/delivery_stop/delivery_stop.json
 #: erpnext/stock/doctype/item/item.json
+#: erpnext/stock/doctype/item/item_list.js:41
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
 #: erpnext/stock/doctype/item_price/item_price.json
 #: erpnext/stock/doctype/material_request_item/material_request_item.json
@@ -56651,7 +56676,7 @@ msgid "Variance ({})"
 msgstr "ความแปรปรวน ({})"
 
 #: erpnext/stock/doctype/item/item.js:241
-#: erpnext/stock/doctype/item/item_list.js:22
+#: erpnext/stock/doctype/item/item_list.js:59
 #: erpnext/stock/report/item_variant_details/item_variant_details.py:74
 msgid "Variant"
 msgstr "ตัวแปร"
@@ -57597,7 +57622,7 @@ msgstr "เว็บไซต์:"
 msgid "Week of the year"
 msgstr ""
 
-#: erpnext/selling/report/sales_analytics/sales_analytics.py:433
+#: erpnext/selling/report/sales_analytics/sales_analytics.py:457
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:121
 msgid "Week {0} {1}"
 msgstr "สัปดาห์ {0} {1}"
@@ -58494,7 +58519,7 @@ msgstr ""
 msgid "You don't have permission to update Company details. Please contact your System Manager."
 msgstr ""
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:599
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:602
 msgid "You don't have permission to update Received Qty DocField for item {0}"
 msgstr ""
 
@@ -58615,7 +58640,7 @@ msgstr "ไฟล์ซิป"
 msgid "[Important] [ERPNext] Auto Reorder Errors"
 msgstr "[สำคัญ] [ERPNext] ข้อผิดพลาดการสั่งซื้ออัตโนมัติ"
 
-#: erpnext/controllers/status_updater.py:302
+#: erpnext/controllers/status_updater.py:304
 msgid "`Allow Negative rates for Items`"
 msgstr "`อนุญาตอัตราเชิงลบสำหรับรายการ`"
 
@@ -58874,8 +58899,8 @@ msgstr "ขายแล้ว"
 msgid "subscription is already cancelled."
 msgstr "การสมัครสมาชิกถูกยกเลิกแล้ว"
 
-#: erpnext/controllers/status_updater.py:481
-#: erpnext/controllers/status_updater.py:500
+#: erpnext/controllers/status_updater.py:491
+#: erpnext/controllers/status_updater.py:510
 msgid "target_ref_field"
 msgstr "ฟิลด์อ้างอิงเป้าหมาย"
 
@@ -58902,7 +58927,7 @@ msgstr "เพื่อยกเลิกการจัดสรรจำนว
 msgid "unique e.g. SAVE20  To be used to get discount"
 msgstr "ไม่ซ้ำ เช่น SAVE20 ใช้เพื่อรับส่วนลด"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:629
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:632
 msgid "updated delivered quantity for item {0} to {1}"
 msgstr ""
 
@@ -59069,7 +59094,7 @@ msgstr "{0} การสร้างสำหรับบันทึกต่�
 msgid "{0} currency must be same as company's default currency. Please select another account."
 msgstr "สกุลเงิน {0} ต้องเหมือนกับสกุลเงินเริ่มต้นของบริษัท โปรดเลือกบัญชีอื่น"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:294
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:297
 msgid "{0} currently has a {1} Supplier Scorecard standing, and Purchase Orders to this supplier should be issued with caution."
 msgstr "{0} ปัจจุบันมีสถานะ Supplier Scorecard {1} และควรออกคำสั่งซื้อให้กับผู้จัดจำหน่ายนี้ด้วยความระมัดระวัง"
 
@@ -59353,7 +59378,7 @@ msgstr "{0} {1} ได้รับการชำระเงินเต็ม�
 msgid "{0} {1} has already been partly paid. Please use the 'Get Outstanding Invoice' or the 'Get Outstanding Orders' button to get the latest outstanding amounts."
 msgstr "{0} {1} ได้รับการชำระเงินบางส่วนแล้ว โปรดใช้ปุ่ม 'รับใบแจ้งหนี้ค้างชำระ' หรือ 'รับคำสั่งซื้อค้างชำระ' เพื่อรับยอดค้างชำระล่าสุด"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:434
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:437
 #: erpnext/selling/doctype/sales_order/sales_order.py:600
 #: erpnext/stock/doctype/material_request/material_request.py:255
 msgid "{0} {1} has been modified. Please refresh."
