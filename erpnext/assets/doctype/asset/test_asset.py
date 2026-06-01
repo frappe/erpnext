@@ -2062,7 +2062,7 @@ def create_asset_category(enable_cwip=1):
 	asset_category.insert()
 
 
-def create_fixed_asset_item(item_code=None, auto_create_assets=1, is_grouped_asset=0):
+def create_fixed_asset_item(item_code=None, auto_create_assets=1, is_grouped_asset=0, asset_category=None):
 	meta = frappe.get_meta("Asset")
 	naming_series = meta.get_field("naming_series").options.splitlines()[0] or "ACC-ASS-.YYYY.-"
 	try:
@@ -2072,7 +2072,7 @@ def create_fixed_asset_item(item_code=None, auto_create_assets=1, is_grouped_ass
 				"item_code": item_code or "Macbook Pro",
 				"item_name": "Macbook Pro",
 				"description": "Macbook Pro Retina Display",
-				"asset_category": "Computers",
+				"asset_category": asset_category or "Computers",
 				"item_group": "All Item Groups",
 				"stock_uom": "Nos",
 				"is_stock_item": 0,

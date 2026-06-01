@@ -42,6 +42,7 @@
   "letter_head",
   "more_info",
   "opportunity",
+  "title",
   "address_and_contact_tab",
   "billing_address",
   "billing_address_display",
@@ -371,6 +372,14 @@
    "fieldtype": "Text Editor",
    "label": "Shipping Address Details",
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1
   }
  ],
  "grid_page_length": 50,
@@ -378,7 +387,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-19 15:27:56.730649",
+ "modified": "2026-05-28 12:28:46.606963",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",
@@ -448,5 +457,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "company"
 }

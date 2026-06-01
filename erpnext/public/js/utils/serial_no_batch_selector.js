@@ -87,7 +87,16 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 	}
 
 	get_dialog_fields() {
-		let fields = [];
+		let fields = [
+			{
+				fieldname: "item_code",
+				read_only: 1,
+				fieldtype: "Link",
+				options: "Item",
+				label: __("Item Code"),
+				default: this.item.item_code,
+			},
+		];
 
 		fields.push({
 			fieldtype: "Link",
@@ -106,10 +115,12 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			},
 			get_query: () => {
 				return {
-					filters: {
-						is_group: 0,
-						company: this.frm.doc.company,
-					},
+					query: "erpnext.controllers.queries.warehouse_query",
+					filters: [
+						["Bin", "item_code", "=", this.item.item_code],
+						["Warehouse", "is_group", "=", 0],
+						["Warehouse", "company", "=", this.frm.doc.company],
+					],
 				};
 			},
 		});
@@ -473,6 +484,8 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 								warehouse:
 									this.item.s_warehouse || this.item.t_warehouse || this.item.warehouse,
 								is_inward: is_inward,
+								posting_date: this.frm.doc.posting_date,
+								posting_time: this.frm.doc.posting_time,
 								include_expired_batches: include_expired_batches,
 							},
 						};

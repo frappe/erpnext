@@ -182,7 +182,7 @@
 {% endif %}
 
 <!-- Purchase Order Items Overdue -->
-{% if purchase_orders_items_overdue_list %}
+{% if purchase_orders_items_overdue_map %}
 <h4 style="{{ section_head }}" class="text-center">{{ _("Purchase Order Items not received on time") }}</h4>
 <div>
     <div style="background-color: #fafbfc;">
@@ -206,43 +206,41 @@
         <hr>
     </div>
     <div>
-    {% for po in purchase_order_list %}
+    {% for po, po_items in purchase_orders_items_overdue_map.items() %}
         <div style="{{ line_item }}">
             <table style="width: 100%;">
                 <tr>
                     <th>
-                        <span style="padding: 3px 7px; margin-right: 7px; font-weight: bold;">{{ po.po }}</span>
+                        <span style="padding: 3px 7px; margin-right: 7px; font-weight: bold;">{{ po | e }}</span>
                     </th>
                 </tr>
                 <tr>
                     <td>
-                    {% for t in purchase_orders_items_overdue_list %}
-                        {% if t.parent == po.po %}
-                            <div >
-                                <table style="width: 100%;">
-                                    <tr>
-                                        <td style="padding-left: 7px;">
-                                            <a style="width: 40%; {{ link_css }}" href="{{ t.link }}">{{ _(t.item_code) }}</a>
-                                        </td>
-                                        <td style="width: 20%; text-align: right">
-                                            <span style="{{ label_css }}">
-                                                {{ t.missing_qty }}
-                                            </span>
-                                        </td>
-                                        <td style="width: 20%; text-align: right">
-                                            <span style="{{ label_css }}">
-                                                {{ t.rate }}
-                                            </span>
-                                        </td>
-                                        <td style="width: 20%; text-align: right">
-                                            <span style="{{ label_css }}">
-                                                {{ t.amount }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
-                        {% endif %}
+                    {% for row in po_items %}
+                        <div >
+                            <table style="width: 100%; table-layout: fixed;">
+                                <tr>
+                                    <td style="width: 40%; padding-left: 7px; vertical-align: top;">
+                                        <a style="{{ link_css }}" href="{{ row.link | e }}">{{ _(row.item_code) | e }}</a>
+                                    </td>
+                                    <td style="width: 20%; text-align: right; white-space: nowrap; vertical-align: top;">
+                                        <span style="{{ label_css }}">
+                                            {{ row.missing_qty | e }}
+                                        </span>
+                                    </td>
+                                    <td style="width: 20%; text-align: right; white-space: nowrap; vertical-align: top;">
+                                        <span style="{{ label_css }}">
+                                            {{ row.rate | e }}
+                                        </span>
+                                    </td>
+                                    <td style="width: 20%; text-align: right; white-space: nowrap; vertical-align: top;">
+                                        <span style="{{ label_css }}">
+                                            {{ row.amount | e }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
                     {% endfor %}
                     </td>
                 </tr>

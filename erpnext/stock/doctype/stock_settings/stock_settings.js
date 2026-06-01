@@ -15,6 +15,12 @@ frappe.ui.form.on("Stock Settings", {
 		frm.set_query("sample_retention_warehouse", filters);
 	},
 
+	enable_serial_and_batch_no_for_item(frm) {
+		if (frm.doc.enable_serial_and_batch_no_for_item) {
+			frappe.msgprint(__("After save, please refresh the page to apply the changes."));
+		}
+	},
+
 	use_serial_batch_fields(frm) {
 		if (frm.doc.use_serial_batch_fields && !frm.doc.disable_serial_no_and_batch_selector) {
 			frm.set_value("disable_serial_no_and_batch_selector", 1);

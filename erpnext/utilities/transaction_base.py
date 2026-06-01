@@ -9,7 +9,7 @@ from frappe.utils import cint, flt, get_time, now_datetime
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.controllers.status_updater import StatusUpdater
-from erpnext.stock.get_item_details import get_item_details
+from erpnext.stock.get_item_details import NOT_APPLICABLE_TAX, get_item_details
 from erpnext.stock.utils import get_incoming_rate
 
 
@@ -18,6 +18,14 @@ class UOMMustBeIntegerError(frappe.ValidationError):
 
 
 class TransactionBase(StatusUpdater):
+	def on_change(self):
+		# `on_change` also fires for `db_set()`, so only run during an actual insert/save.
+		is_real_save = self.flags.in_insert or (self.doctype, self.name) in frappe.flags.currently_saving
+		if not is_real_save:
+			return
+
+		self.copy_terms_and_conditions_attachments()
+
 	def validate_posting_time(self):
 		# set Edit Posting Date and Time to 1 while data import and restore
 		if (frappe.flags.in_import or self.flags.from_restore) and self.posting_date:
@@ -35,6 +43,56 @@ class TransactionBase(StatusUpdater):
 
 	def validate_uom_is_integer(self, uom_field, qty_fields, child_dt=None):
 		validate_uom_is_integer(self, uom_field, qty_fields, child_dt)
+
+	def copy_terms_and_conditions_attachments(self):
+		if (
+			not self.name
+			or not self.meta.has_field("tc_name")
+			or not self.tc_name
+			or not self.has_value_changed("tc_name")
+		):
+			return
+
+		copy_attachments_to_transaction = frappe.db.get_value(
+			"Terms and Conditions", self.tc_name, "copy_attachments_to_transaction"
+		)
+		if not cint(copy_attachments_to_transaction):
+			return
+
+		source_attachments = frappe.get_all(
+			"File",
+			filters={
+				"attached_to_doctype": "Terms and Conditions",
+				"attached_to_name": self.tc_name,
+			},
+			fields=["name", "file_url"],
+		)
+		if not source_attachments:
+			return
+
+		existing_file_urls = {
+			attachment.file_url
+			for attachment in frappe.get_all(
+				"File",
+				filters={
+					"attached_to_doctype": self.doctype,
+					"attached_to_name": self.name,
+				},
+				fields=["file_url"],
+			)
+			if attachment.file_url
+		}
+
+		for source_attachment in source_attachments:
+			if not source_attachment.file_url or source_attachment.file_url in existing_file_urls:
+				continue
+
+			# Reuse the existing file metadata so the same on-disk blob is shared.
+			new_attachment = frappe.get_doc("File", source_attachment.name).create_attachment_copy(
+				attached_to_doctype=self.doctype,
+				attached_to_name=self.name,
+			)
+			existing_file_urls.add(new_attachment.file_url)
 
 	def validate_with_previous_doc(self, ref):
 		self.exclude_fields = ["conversion_factor", "uom"] if self.get("is_return") else []
@@ -285,7 +343,6 @@ class TransactionBase(StatusUpdater):
 					"item_tax_template": item.get("item_tax_template"),
 					"child_doctype": item.get("doctype"),
 					"child_docname": item.get("name"),
-					"is_old_subcontracting_flow": self.get("is_old_subcontracting_flow"),
 				}
 			),
 			self,
@@ -367,6 +424,9 @@ class TransactionBase(StatusUpdater):
 		):
 			item_tax_template = frappe.json.loads(item_details.item_tax_rate)
 			for tax_head, _rate in item_tax_template.items():
+				if _rate == NOT_APPLICABLE_TAX:
+					continue
+
 				found = [x for x in self.taxes if x.account_head == tax_head]
 				if not found:
 					self.append("taxes", {"charge_type": "On Net Total", "account_head": tax_head, "rate": 0})

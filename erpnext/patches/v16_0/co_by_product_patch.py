@@ -41,7 +41,7 @@ def insert_into_bom():
 					"conversion_factor": 1,
 					"qty": item.stock_qty,
 					"is_legacy": 1,
-					"type": "Scrap",
+					"secondary_item_type": "Scrap",
 				}
 			)
 			secondary_item.insert()
@@ -49,7 +49,14 @@ def insert_into_bom():
 
 def insert_into_job_card():
 	fields = ["item_code", "item_name", "description", "stock_qty", "stock_uom"]
-	bulk_insert("Job Card", "Job Card Scrap Item", "Job Card Secondary Item", fields, ["type"], ["Scrap"])
+	bulk_insert(
+		"Job Card",
+		"Job Card Scrap Item",
+		"Job Card Secondary Item",
+		fields,
+		["secondary_item_type"],
+		["Scrap"],
+	)
 
 
 def insert_into_subcontracting_inward():
@@ -67,7 +74,7 @@ def insert_into_subcontracting_inward():
 		"Subcontracting Inward Order Scrap Item",
 		"Subcontracting Inward Order Secondary Item",
 		fields,
-		["type"],
+		["secondary_item_type"],
 		["Scrap"],
 	)
 

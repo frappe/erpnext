@@ -15,7 +15,8 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
 from frappe.model.utils.rename_doc import update_linked_doctypes
-from frappe.query_builder import Field, functions
+from frappe.query_builder import CustomFunction, Field, functions
+from frappe.query_builder.functions import Cast, Coalesce, Max, Substring
 from frappe.utils import cint, cstr, flt, get_formatted_email, today
 from frappe.utils.user import get_users_with_role
 
@@ -120,36 +121,25 @@ class Customer(TransactionBase):
 		self.customer_name = self.customer_name.strip()
 		if frappe.db.get_value("Customer", self.customer_name) and not frappe.flags.in_import:
 			name_prefix = f"{self.customer_name} - %"
+			Customer = frappe.qb.DocType("Customer")
 
 			if frappe.db.db_type == "postgres":
 				# Postgres: extract trailing digits (e.g. "Customer - 3") and cast to int.
 				# NOTE: PostgreSQL is strict about types; MySQL's UNSIGNED cast does not exist.
-				count = frappe.db.sql(
-					"""
-					SELECT COALESCE(
-						MAX(CAST(SUBSTRING(name FROM '\\d+$') AS INTEGER)),
-						0
-					)
-					FROM tabCustomer
-					WHERE name LIKE %(name_prefix)s
-					""",
-					{"name_prefix": name_prefix},
-					as_list=1,
-				)[0][0]
+				extracted_part = Substring(Customer.name, r"\d+$")
+				casted_part = Cast(extracted_part, "INTEGER")
 			else:
 				# MariaDB/MySQL: keep existing behavior.
-				count = frappe.db.sql(
-					"""
-					SELECT COALESCE(
-						MAX(CAST(SUBSTRING_INDEX(name, ' ', -1) AS UNSIGNED)),
-						0
-					)
-					FROM tabCustomer
-					WHERE name LIKE %(name_prefix)s
-					""",
-					{"name_prefix": name_prefix},
-					as_list=1,
-				)[0][0]
+				SubstringIndex = CustomFunction("SUBSTRING_INDEX", ["str", "delim", "count"])
+				extracted_part = SubstringIndex(Customer.name, " ", -1)
+				casted_part = Cast(extracted_part, "UNSIGNED")
+
+			query = (
+				frappe.qb.from_(Customer)
+				.select(Coalesce(Max(casted_part), 0))
+				.where(Customer.name.like(name_prefix))
+			)
+			count = query.run()[0][0]
 			count = cint(count) + 1
 
 			new_customer_name = f"{self.customer_name} - {cstr(count)}"
@@ -415,7 +405,7 @@ class Customer(TransactionBase):
 
 		delete_contact_and_address("Customer", self.name)
 		if self.lead_name:
-			frappe.db.sql("update `tabLead` set status='Interested' where name=%s", self.lead_name)
+			frappe.db.set_value("Lead", self.lead_name, "status", "Interested")
 
 	def before_rename(self, olddn, newdn, merge=False):
 		if merge:
@@ -441,6 +431,13 @@ class Customer(TransactionBase):
 					frappe.bold(self.customer_name)
 				)
 			)
+
+	def get_notification_email(self):
+		"""Hook to return the target email address for notifications."""
+		if self.account_manager:
+			return frappe.db.get_value("User", self.account_manager, "email")
+
+		return None
 
 
 @frappe.whitelist()
@@ -670,85 +667,97 @@ def send_emails(
 
 
 def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=False, cost_center=None):
-	# Outstanding based on GL Entries
-	cond = ""
+	from frappe.query_builder import Criterion
+	from frappe.query_builder.functions import Coalesce, IfNull, Sum
+
+	GLEntry = frappe.qb.DocType("GL Entry")
+	gle_query = (
+		frappe.qb.from_(GLEntry)
+		.select(Sum(GLEntry.debit) - Sum(GLEntry.credit))
+		.where(GLEntry.party_type == "Customer")
+		.where(GLEntry.party == customer)
+		.where(GLEntry.company == company)
+		.where(GLEntry.is_cancelled == 0)
+	)
+
 	if cost_center:
 		lft, rgt = frappe.get_cached_value("Cost Center", cost_center, ["lft", "rgt"])
+		CostCenter = frappe.qb.DocType("Cost Center")
+		cost_center_subquery = (
+			frappe.qb.from_(CostCenter)
+			.select(CostCenter.name)
+			.where(CostCenter.lft >= lft)
+			.where(CostCenter.rgt <= rgt)
+		)
+		gle_query = gle_query.where(GLEntry.cost_center.isin(cost_center_subquery))
 
-		cond = f""" and cost_center in (select name from `tabCost Center` where
-			lft >= {lft} and rgt <= {rgt})"""
+	gle_res = gle_query.run()
+	outstanding_based_on_gle = flt(gle_res[0][0]) if gle_res and gle_res[0][0] is not None else 0.0
 
-	outstanding_based_on_gle = frappe.db.sql(
-		f"""
-		select sum(debit) - sum(credit)
-		from `tabGL Entry` where party_type = 'Customer'
-		and is_cancelled = 0 and party = %s
-		and company=%s {cond}""",
-		(customer, company),
-	)
-
-	outstanding_based_on_gle = flt(outstanding_based_on_gle[0][0]) if outstanding_based_on_gle else 0
-
-	# Outstanding based on Sales Order
-	outstanding_based_on_so = 0
-
-	# if credit limit check is bypassed at sales order level,
-	# we should not consider outstanding Sales Orders, when customer credit balance report is run
+	outstanding_based_on_so = 0.0
 	if not ignore_outstanding_sales_order:
-		outstanding_based_on_so = frappe.db.sql(
-			"""
-			select sum(base_grand_total*(100 - per_billed)/100)
-			from `tabSales Order`
-			where customer=%s and docstatus = 1 and company=%s
-			and per_billed < 100 and status != 'Closed'""",
-			(customer, company),
+		SalesOrder = frappe.qb.DocType("Sales Order")
+		so_query = (
+			frappe.qb.from_(SalesOrder)
+			.select(Sum(SalesOrder.base_grand_total * (100 - SalesOrder.per_billed) / 100))
+			.where(SalesOrder.customer == customer)
+			.where(SalesOrder.company == company)
+			.where(SalesOrder.docstatus == 1)
+			.where(SalesOrder.per_billed < 100)
+			.where(SalesOrder.status != "Closed")
 		)
+		so_res = so_query.run()
+		outstanding_based_on_so = flt(so_res[0][0]) if so_res and so_res[0][0] is not None else 0.0
 
-		outstanding_based_on_so = flt(outstanding_based_on_so[0][0]) if outstanding_based_on_so else 0
+	DeliveryNote = frappe.qb.DocType("Delivery Note")
+	DeliveryNoteItem = frappe.qb.DocType("Delivery Note Item")
+	SalesInvoiceItem = frappe.qb.DocType("Sales Invoice Item")
 
-	# Outstanding based on Delivery Note, which are not created against Sales Order
-	outstanding_based_on_dn = 0
-
-	unmarked_delivery_note_items = frappe.db.sql(
-		"""select
-			dn_item.name, dn_item.amount, dn.base_net_total, dn.base_grand_total
-		from `tabDelivery Note` dn, `tabDelivery Note Item` dn_item
-		where
-			dn.name = dn_item.parent
-			and dn.customer=%s and dn.company=%s
-			and dn.docstatus = 1 and dn.status not in ('Closed', 'Stopped')
-			and ifnull(dn_item.against_sales_order, '') = ''
-			and ifnull(dn_item.against_sales_invoice, '') = ''
-		""",
-		(customer, company),
-		as_dict=True,
+	si_subquery = (
+		frappe.qb.from_(SalesInvoiceItem)
+		.select(SalesInvoiceItem.dn_detail, Sum(SalesInvoiceItem.amount).as_("billed_amount"))
+		.where(SalesInvoiceItem.docstatus == 1)
+		.groupby(SalesInvoiceItem.dn_detail)
 	)
 
-	if not unmarked_delivery_note_items:
-		return outstanding_based_on_gle + outstanding_based_on_so
-
-	si_amounts = frappe.db.sql(
-		"""
-		SELECT
-			dn_detail, sum(amount) from `tabSales Invoice Item`
-		WHERE
-			docstatus = 1
-			and dn_detail in ({})
-		GROUP BY dn_detail""".format(
-			", ".join(frappe.db.escape(dn_item.name) for dn_item in unmarked_delivery_note_items)
+	dn_query = (
+		frappe.qb.from_(DeliveryNote)
+		.join(DeliveryNoteItem)
+		.on(DeliveryNote.name == DeliveryNoteItem.parent)
+		.left_join(si_subquery)
+		.on(DeliveryNoteItem.name == si_subquery.dn_detail)
+		.select(
+			Sum(
+				(
+					(DeliveryNoteItem.amount - IfNull(si_subquery.billed_amount, 0.0))
+					/ DeliveryNote.base_net_total
+				)
+				* DeliveryNote.base_grand_total
+			)
+		)
+		.where(DeliveryNote.customer == customer)
+		.where(DeliveryNote.company == company)
+		.where(DeliveryNote.docstatus == 1)
+		.where(DeliveryNote.base_net_total > 0)
+		.where(DeliveryNote.status.notin(["Closed", "Stopped"]))
+		.where(DeliveryNoteItem.amount > IfNull(si_subquery.billed_amount, 0.0))
+		.where(
+			Criterion.any(
+				[DeliveryNoteItem.against_sales_order.isnull(), DeliveryNoteItem.against_sales_order == ""]
+			)
+		)
+		.where(
+			Criterion.any(
+				[
+					DeliveryNoteItem.against_sales_invoice.isnull(),
+					DeliveryNoteItem.against_sales_invoice == "",
+				]
+			)
 		)
 	)
 
-	si_amounts = {si_item[0]: si_item[1] for si_item in si_amounts}
-
-	for dn_item in unmarked_delivery_note_items:
-		dn_amount = flt(dn_item.amount)
-		si_amount = flt(si_amounts.get(dn_item.name))
-
-		if dn_amount > si_amount and dn_item.base_net_total:
-			outstanding_based_on_dn += (
-				(dn_amount - si_amount) / dn_item.base_net_total
-			) * dn_item.base_grand_total
+	dn_res = dn_query.run()
+	outstanding_based_on_dn = flt(dn_res[0][0]) if dn_res and dn_res[0][0] is not None else 0.0
 
 	return outstanding_based_on_gle + outstanding_based_on_so + outstanding_based_on_dn
 

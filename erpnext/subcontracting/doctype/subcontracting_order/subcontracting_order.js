@@ -55,7 +55,6 @@ frappe.ui.form.on("Subcontracting Order", {
 				filters: {
 					docstatus: 1,
 					is_subcontracted: 1,
-					is_old_subcontracting_flow: 0,
 				},
 			};
 		});

@@ -142,6 +142,7 @@ def prepare_data(accounts, filters, company_currency, dimension_list):
 		total = 0
 		row = {
 			"account": d.name,
+			"is_group": d.is_group,
 			"parent_account": d.parent_account,
 			"indent": d.indent,
 			"from_date": filters.from_date,

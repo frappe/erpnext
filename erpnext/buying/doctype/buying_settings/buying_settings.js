@@ -2,10 +2,59 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Buying Settings", {
-	// refresh: function(frm) {
-	// }
+	refresh(frm) {
+		if (!frm.naming_controller) frm.naming_controller = new erpnext.NamingSeriesController(frm);
+
+		const display = frm.doc.supp_master_name === "Naming Series";
+		frm.set_df_property("naming_series_details", "hidden", !display);
+		frm.set_df_property("configure", "hidden", !display);
+
+		if (display) {
+			frm.naming_controller.load_master_series("Supplier", "naming_series_details");
+		}
+
+		frm.naming_controller.render_table("transaction_naming_html", get_transactions(frm));
+	},
+
+	supp_master_name(frm) {
+		const display = frm.doc.supp_master_name === "Naming Series";
+		frm.set_df_property("naming_series_details", "hidden", !display);
+		frm.set_df_property("configure", "hidden", !display);
+
+		if (display) {
+			frm.naming_controller.load_master_series("Supplier", "naming_series_details");
+		} else {
+			frm.doc.naming_series_details = "";
+			frm.refresh_field("naming_series_details");
+		}
+
+		frm.naming_controller.render_table("transaction_naming_html", get_transactions(frm));
+	},
+
+	configure(frm) {
+		frm.naming_controller.show_naming_series_dialog("Supplier", ({ naming_series_options }) => {
+			frm.doc.naming_series_details = naming_series_options;
+			frm.refresh_field("naming_series_details");
+		});
+	},
 });
 
+function get_transactions(frm) {
+	const transactions = [
+		{ label: __("Supplier"), doctype: "Supplier" },
+		{ label: __("Material Request"), doctype: "Material Request" },
+		{ label: __("Request for Quotation"), doctype: "Request for Quotation" },
+		{ label: __("Purchase Order"), doctype: "Purchase Order" },
+		{ label: __("Purchase Invoice"), doctype: "Purchase Invoice" },
+		{ label: __("Purchase Receipt"), doctype: "Purchase Receipt" },
+	];
+
+	if (frm.doc.supp_master_name !== "Naming Series") {
+		return transactions.filter((t) => t.doctype !== "Supplier");
+	}
+
+	return transactions;
+}
 frappe.tour["Buying Settings"] = [
 	{
 		fieldname: "supp_master_name",

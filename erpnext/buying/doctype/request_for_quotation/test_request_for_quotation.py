@@ -263,6 +263,13 @@ def make_request_for_quotation(**args):
 
 	for data in supplier_data:
 		rfq.append("suppliers", data)
+		frappe.new_doc(
+			"Portal User",
+			user="Administrator",
+			parent=data.get("supplier"),
+			parentfield="portal_users",
+			parenttype="Supplier",
+		).insert()
 
 	rfq.append(
 		"items",

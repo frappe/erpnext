@@ -128,6 +128,44 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		frappe.db.set_value("Item", "_Test Item", "over_billing_allowance", 0)
 		frappe.db.set_single_value("Accounts Settings", "over_billing_allowance", 0)
 
+	def test_over_order_allowance_against_material_request(self) -> None:
+		"""Over Order Allowance in Buying Settings must govern PO qty vs MR qty independently
+		from Over Delivery/Receipt Allowance which governs receipt/delivery against a PO."""
+		mr = make_material_request(qty=100)
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.items[0].qty = 110  # 10% over the MR qty
+
+		# Without any allowance, submitting should raise an OverAllowanceError
+		from erpnext.controllers.status_updater import OverAllowanceError
+
+		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 0)
+		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 0)
+		self.assertRaises(OverAllowanceError, po.submit)
+
+		# Granting 10% in Over Order Allowance (Buying Settings) must allow the submit
+		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 10)
+		po.reload()
+		po.items[0].qty = 110
+		po.submit()
+		self.assertEqual(po.docstatus, 1)
+		po.cancel()
+
+		# Over Delivery/Receipt Allowance must remain independent — changing it must not
+		# affect the MR → PO validation when Over Order Allowance is 0.
+		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 0)
+		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 50)
+
+		mr2 = make_material_request(qty=100)
+		po2 = make_purchase_order(mr2.name)
+		po2.supplier = "_Test Supplier"
+		po2.items[0].qty = 110
+		self.assertRaises(OverAllowanceError, po2.submit)
+
+		# cleanup
+		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 0)
+		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 0)
+
 	def test_update_remove_child_linked_to_mr(self):
 		"""Test impact on linked PO and MR on deleting/updating row."""
 		mr = make_material_request(qty=10)
@@ -1436,6 +1474,88 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		pi2 = make_pi_from_po(po.name)
 		self.assertEqual(len(pi2.items), 2)
 
+	def test_get_item_details_propagates_drop_ship_flag_to_po(self):
+		"""`get_item_details` should propagate the Item master's
+		`delivered_by_supplier` flag to Purchase Orders, not only to Sales
+		Orders/Invoices, so that POs can be created as drop-ship directly
+		(via the standard item lookup the form uses) without going through
+		the Sales Order → Purchase Order mapping pipeline.
+		"""
+		from erpnext.stock.get_item_details import ItemDetailsCtx, get_item_details
+
+		item = make_item("_Test Drop Ship From Master", {"is_stock_item": 1, "delivered_by_supplier": 1})
+
+		ctx = ItemDetailsCtx(
+			{
+				"item_code": item.item_code,
+				"doctype": "Purchase Order",
+				"company": "_Test Company",
+				"supplier": "_Test Supplier",
+				"transaction_date": nowdate(),
+				"currency": "INR",
+				"conversion_rate": 1.0,
+				"buying_price_list": "Standard Buying",
+				"price_list_currency": "INR",
+				"plc_conversion_rate": 1.0,
+				"qty": 1,
+			}
+		)
+
+		details = get_item_details(ctx, frappe.new_doc("Purchase Order"))
+		self.assertEqual(details.get("delivered_by_supplier"), 1)
+
+	def test_drop_ship_po_allows_non_company_shipping_address_without_so(self):
+		"""A PO with a drop-ship item should save with a non-company shipping
+		address even when there is no linked Sales Order.
+		Regression test for https://github.com/frappe/erpnext/issues/51629.
+		"""
+		from erpnext.crm.doctype.prospect.test_prospect import make_address
+
+		item = make_item("_Test Drop Ship Direct PO", {"is_stock_item": 1, "delivered_by_supplier": 1})
+
+		customer_shipping = make_address(
+			address_title="Drop Ship Direct PO", address_type="Shipping", address_line1="1"
+		)
+		customer_shipping.append("links", {"link_doctype": "Customer", "link_name": "_Test Customer"})
+		customer_shipping.save()
+
+		po = create_purchase_order(item=item.item_code, qty=1, do_not_save=True)
+		# In the UI, `get_item_details` propagates the master flag to the row when
+		# the item is added; here we simulate that step explicitly.
+		po.items[0].delivered_by_supplier = 1
+		po.items[0].warehouse = ""
+		po.shipping_address = customer_shipping.name
+		po.save()
+
+		self.assertEqual(po.items[0].delivered_by_supplier, 1)
+		self.assertFalse(po.items[0].warehouse)
+		self.assertEqual(po.shipping_address, customer_shipping.name)
+
+	def test_drop_ship_flag_overridable_per_po_line(self):
+		"""The drop-ship default from the Item master should be overridable
+		on individual PO lines (e.g. ordering a normally drop-shipped item
+		into the own warehouse for samples or stock).
+		"""
+		item = make_item("_Test Drop Ship Override", {"is_stock_item": 1, "delivered_by_supplier": 1})
+
+		po = create_purchase_order(item=item.item_code, qty=1, do_not_save=True)
+		po.items[0].delivered_by_supplier = 0
+		po.save()
+
+		self.assertEqual(po.items[0].delivered_by_supplier, 0)
+		self.assertEqual(po.items[0].warehouse, "_Test Warehouse - _TC")
+
+	def test_remove_unlinked_item_from_mixed_po_does_not_crash(self):
+		"""In a PO that mixes SO-linked and freely-added items, removing an
+		item that has no `sales_order_item` via Update Items must not crash
+		on the missing reference.
+		"""
+		po = create_purchase_order(do_not_submit=True)
+		# Force the SO codepath without needing a real linked Sales Order:
+		po.items[0].sales_order = "DUMMY-SO"
+
+		po.update_ordered_qty_in_so_for_removed_items([frappe._dict({"sales_order_item": None, "qty": 1})])
+
 
 def create_po_for_sc_testing():
 	from erpnext.controllers.tests.test_subcontracting_controller import (
@@ -1593,11 +1713,6 @@ def create_purchase_order(**args):
 		po.set_missing_values()
 		po.insert()
 		if not args.do_not_submit:
-			if po.is_subcontracted:
-				supp_items = po.get("supplied_items")
-				for d in supp_items:
-					if not d.reserve_warehouse:
-						d.reserve_warehouse = args.warehouse or "_Test Warehouse - _TC"
 			po.submit()
 
 	return po

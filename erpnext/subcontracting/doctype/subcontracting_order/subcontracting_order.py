@@ -138,9 +138,6 @@ class SubcontractingOrder(SubcontractingController):
 			if not po.is_subcontracted:
 				frappe.throw(_("Please select a valid Purchase Order that is configured for Subcontracting."))
 
-			if po.is_old_subcontracting_flow:
-				frappe.throw(_("Please select a valid Purchase Order that has Service Items."))
-
 			if po.docstatus != 1:
 				msg = f"Please submit Purchase Order {po.name} before proceeding."
 				frappe.throw(_(msg))
@@ -402,7 +399,7 @@ class SubcontractingOrder(SubcontractingController):
 
 				reservation_items.append(data)
 
-			sre = StockReservation(self, items=reservation_items, notify=True)
+			sre = StockReservation(self, items=reservation_items)
 			if is_transfer:
 				sre.transfer_reservation_entries_to(
 					self.production_plan, from_doctype="Production Plan", to_doctype="Subcontracting Order"

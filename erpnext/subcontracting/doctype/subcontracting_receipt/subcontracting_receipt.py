@@ -16,6 +16,7 @@ from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.get_item_details import get_default_cost_center, get_default_expense_account
 from erpnext.stock.stock_ledger import get_valuation_rate
@@ -120,6 +121,7 @@ class SubcontractingReceipt(SubcontractingController):
 		)
 
 	def before_validate(self):
+		self.save_inventory_dimensions()
 		super().before_validate()
 		self.validate_items_qty()
 		self.set_items_bom()
@@ -160,6 +162,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		self.set_supplied_items_expense_account()
 		self.set_supplied_items_cost_center()
+		self.set_supplied_items_inventory_dimensions()
 
 	def on_submit(self):
 		self.validate_closed_subcontracting_order()
@@ -313,6 +316,22 @@ class SubcontractingReceipt(SubcontractingController):
 					self.company,
 				)
 
+	def set_supplied_items_inventory_dimensions(self):
+		if hasattr(self, "inventory_dimensions") and (inventory_dimensions := get_inventory_dimensions()):
+			for item in self.supplied_items:
+				key = (
+					item.reference_name,
+					item.rm_item_code,
+					item.main_item_code,
+					item.batch_no,
+					item.serial_no,
+				)
+
+				for dimension in inventory_dimensions:
+					dimension_values = self.inventory_dimensions.get(dimension.source_fieldname, {})
+					if key in dimension_values:
+						item.set(dimension.source_fieldname, dimension_values[key])
+
 	def set_supplied_items_expense_account(self):
 		for item in self.supplied_items:
 			if not item.expense_account:
@@ -328,6 +347,19 @@ class SubcontractingReceipt(SubcontractingController):
 					get_item_group_defaults(item.rm_item_code, self.company),
 					get_brand_defaults(item.rm_item_code, self.company),
 				)
+
+	def save_inventory_dimensions(self):
+		if inventory_dimensions := get_inventory_dimensions():
+			if not getattr(self, "inventory_dimensions", None):
+				self.inventory_dimensions = {}
+
+			for dimension in inventory_dimensions:
+				self.inventory_dimensions[dimension.source_fieldname] = {
+					(d.reference_name, d.rm_item_code, d.main_item_code, d.batch_no, d.serial_no): d.get(
+						dimension.source_fieldname
+					)
+					for d in self.supplied_items
+				}
 
 	def reset_supplied_items(self):
 		if (
@@ -388,7 +420,7 @@ class SubcontractingReceipt(SubcontractingController):
 					self.append(
 						"items",
 						{
-							"type": secondary_item.type,
+							"secondary_item_type": secondary_item.secondary_item_type,
 							"is_legacy_scrap_item": secondary_item.is_legacy,
 							"reference_name": item.name,
 							"item_code": secondary_item.item_code,
@@ -416,7 +448,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 	def remove_secondary_items(self):
 		for item in list(self.items):
-			if item.type or item.is_legacy_scrap_item:
+			if item.secondary_item_type or item.is_legacy_scrap_item:
 				self.remove(item)
 			else:
 				item.secondary_items_cost_per_qty = 0
@@ -476,7 +508,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		secondary_items_cost_map = {}
 		for item in self.get("items") or []:
-			if item.type or item.is_legacy_scrap_item:
+			if item.secondary_item_type or item.is_legacy_scrap_item:
 				qty = (
 					flt(item.qty)
 					if item.is_legacy_scrap_item
@@ -491,7 +523,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		total_qty = total_amount = 0
 		for item in self.get("items") or []:
-			if not item.type and not item.is_legacy_scrap_item:
+			if not item.secondary_item_type and not item.is_legacy_scrap_item:
 				if item.qty:
 					if item.name in rm_cost_map:
 						item.rm_supp_cost = rm_cost_map[item.name]
@@ -535,7 +567,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 	def validate_secondary_items(self):
 		for item in self.items:
-			if item.type or item.is_legacy_scrap_item:
+			if item.secondary_item_type or item.is_legacy_scrap_item:
 				if not item.qty:
 					frappe.throw(
 						_("Row #{0}: Secondary Item Qty cannot be zero").format(item.idx),
@@ -1044,7 +1076,6 @@ def make_purchase_receipt(
 				"subcontracting_receipt": source_doc.name,
 				"supplier_warehouse": source_doc.supplier_warehouse,
 				"is_subcontracted": 1,
-				"is_old_subcontracting_flow": 0,
 				"currency": frappe.get_cached_value("Company", target.company, "default_currency"),
 			}
 		)

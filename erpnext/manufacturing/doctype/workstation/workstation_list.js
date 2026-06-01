@@ -10,6 +10,6 @@ frappe.listview_settings["Workstation"] = {
 			Setup: "blue",
 		};
 
-		return [__(doc.status), color_map[doc.status], true];
+		return [__(doc.status), color_map[doc.status], "status,=," + doc.status];
 	},
 };

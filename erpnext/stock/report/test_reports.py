@@ -63,7 +63,7 @@ REPORT_FILTER_TEST_CASES: list[tuple[ReportName, ReportFilters]] = [
 	("Incorrect Stock Value Report", {"company": "_Test Company with perpetual inventory"}),
 	("Incorrect Serial No Valuation", {}),
 	("Incorrect Balance Qty After Transaction", {}),
-	("Supplier-Wise Sales Analytics", {}),
+	("Item Wise Consumption", {}),
 	("Item Prices", {"items": "Enabled Items only"}),
 	("Delayed Item Report", {"based_on": "Sales Invoice"}),
 	("Delayed Item Report", {"based_on": "Delivery Note"}),

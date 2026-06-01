@@ -118,26 +118,38 @@ def check_on_hold_or_closed_status(doctype, docname) -> None:
 
 @frappe.whitelist()
 def get_linked_material_requests(items: str):
+	"""
+	Retrieve Material Requests linked to a list of items.
+	"""
+
 	items = json.loads(items)
 	mr_list = []
+
+	mr = frappe.qb.DocType("Material Request")
+	mr_item = frappe.qb.DocType("Material Request Item")
+
 	for item in items:
-		material_request = frappe.db.sql(
-			"""SELECT distinct mr.name AS mr_name,
-				(mr_item.qty - mr_item.ordered_qty) AS qty,
-				mr_item.item_code AS item_code,
-				mr_item.name AS mr_item
-			FROM `tabMaterial Request` mr, `tabMaterial Request Item` mr_item
-			WHERE mr.name = mr_item.parent
-				AND mr_item.item_code = %(item)s
-				AND mr.material_request_type = 'Purchase'
-				AND mr.per_ordered < 99.99
-				AND mr.docstatus = 1
-				AND mr.status != 'Stopped'
-                        ORDER BY mr_item.item_code ASC""",
-			{"item": item},
-			as_dict=1,
+		query = (
+			frappe.qb.from_(mr)
+			.join(mr_item)
+			.on(mr.name == mr_item.parent)
+			.select(
+				mr.name.as_("mr_name"),
+				(mr_item.qty - mr_item.ordered_qty).as_("qty"),
+				mr_item.item_code,
+				mr_item.name.as_("mr_item"),
+			)
+			.where(mr_item.item_code == item)
+			.where(mr.material_request_type == "Purchase")
+			.where(mr.per_ordered < 99.99)
+			.where(mr.docstatus == 1)
+			.where(mr.status != "Stopped")
+			.distinct()
+			.orderby(mr_item.item_code)
 		)
-		if material_request:
-			mr_list.append(material_request)
+
+		result = query.run(as_dict=True)
+		if result:
+			mr_list.extend(result)
 
 	return mr_list

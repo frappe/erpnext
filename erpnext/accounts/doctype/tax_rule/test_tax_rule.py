@@ -61,6 +61,117 @@ class TestTaxRule(ERPNextTestSuite):
 			"_Test Sales Taxes and Charges Template - _TC",
 		)
 
+	def test_for_parent_supplier_group(self):
+		purchase_template = "_Test Purchase Taxes and Charges Template - _TC"
+		if not frappe.db.exists("Purchase Taxes and Charges Template", purchase_template):
+			frappe.get_doc(
+				{
+					"doctype": "Purchase Taxes and Charges Template",
+					"title": "_Test Purchase Taxes and Charges Template",
+					"company": "_Test Company",
+					"taxes": [
+						{
+							"account_head": "_Test Account VAT - _TC",
+							"charge_type": "On Net Total",
+							"description": "VAT",
+							"doctype": "Purchase Taxes and Charges",
+							"cost_center": "Main - _TC",
+							"rate": 6,
+						}
+					],
+				}
+			).insert()
+
+		make_tax_rule(
+			supplier_group="All Supplier Groups",
+			tax_type="Purchase",
+			purchase_tax_template=purchase_template,
+			priority=1,
+			use_for_shopping_cart=0,
+			from_date="2015-01-01",
+			save=1,
+		)
+
+		# "_Test Supplier Group" has "All Supplier Groups" as its parent — should match hierarchically
+		self.assertEqual(
+			get_tax_template(
+				"2015-01-01",
+				{
+					"supplier_group": "_Test Supplier Group",
+					"tax_type": "Purchase",
+					"use_for_shopping_cart": 0,
+				},
+			),
+			purchase_template,
+		)
+
+	def test_use_for_shopping_cart_filter(self):
+		city = "Test Cart City"
+		# higher priority ensures this rule wins when use_for_shopping_cart is not filtered
+		make_tax_rule(
+			customer="_Test Customer",
+			billing_city=city,
+			sales_tax_template="_Test Sales Taxes and Charges Template - _TC",
+			use_for_shopping_cart=0,
+			priority=2,
+			save=1,
+		)
+		make_tax_rule(
+			customer="_Test Customer",
+			billing_city=city,
+			sales_tax_template="_Test Sales Taxes and Charges Template 1 - _TC",
+			use_for_shopping_cart=1,
+			priority=1,
+			save=1,
+		)
+
+		# Cart request (use_for_shopping_cart=1) filters to cart rules only
+		self.assertEqual(
+			get_tax_template(
+				"2015-01-01",
+				{"customer": "_Test Customer", "billing_city": city, "use_for_shopping_cart": 1},
+			),
+			"_Test Sales Taxes and Charges Template 1 - _TC",
+		)
+
+		# Non-cart request omits use_for_shopping_cart — no filter is applied, both rules
+		# are candidates; non-cart rule wins by higher priority
+		self.assertEqual(
+			get_tax_template(
+				"2015-01-01",
+				{"customer": "_Test Customer", "billing_city": city},
+			),
+			"_Test Sales Taxes and Charges Template - _TC",
+		)
+
+	def test_use_for_shopping_cart_default(self):
+		city = "Test Default Cart City"
+		# use_for_shopping_cart not set — Check field defaults to 0
+		make_tax_rule(
+			customer="_Test Customer",
+			billing_city=city,
+			sales_tax_template="_Test Sales Taxes and Charges Template - _TC",
+			use_for_shopping_cart=0,  # Default is set to 1.
+			save=1,
+		)
+
+		# Non-cart request (no use_for_shopping_cart in args) matches the rule
+		self.assertEqual(
+			get_tax_template(
+				"2015-01-01",
+				{"customer": "_Test Customer", "billing_city": city},
+			),
+			"_Test Sales Taxes and Charges Template - _TC",
+		)
+
+		# Cart request (use_for_shopping_cart=1) does not match — rule has default 0
+		self.assertIsNone(
+			get_tax_template(
+				"2015-01-01",
+				{"customer": "_Test Customer", "billing_city": city, "use_for_shopping_cart": 1},
+			)
+		)
+
 	def test_conflict_with_overlapping_dates(self):
 		tax_rule1 = make_tax_rule(
 			customer="_Test Customer",

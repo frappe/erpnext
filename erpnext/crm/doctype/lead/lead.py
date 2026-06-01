@@ -314,6 +314,13 @@ class Lead(SellingController, CRMNote):
 		except frappe.DuplicateEntryError:
 			frappe.throw(_("Prospect {0} already exists").format(company_name or self.company_name))
 
+	def get_notification_email(self):
+		"""Hook to return the target email address for notifications."""
+		if self.lead_owner:
+			return frappe.db.get_value("User", self.lead_owner, "email")
+
+		return None
+
 
 @frappe.whitelist()
 def make_customer(source_name: str, target_doc: str | Document | None = None):

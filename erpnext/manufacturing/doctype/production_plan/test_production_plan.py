@@ -2876,6 +2876,9 @@ def make_bom(**args):
 		}
 	)
 
+	if args.backflush_based_on:
+		bom.backflush_based_on = args.backflush_based_on
+
 	if args.operating_cost_per_bom_quantity:
 		bom.fg_based_operating_cost = 1
 		bom.operating_cost_per_bom_quantity = args.operating_cost_per_bom_quantity
@@ -2900,7 +2903,7 @@ def make_bom(**args):
 			bom.append(
 				"secondary_items",
 				{
-					"type": "Scrap",
+					"secondary_item_type": "Scrap",
 					"item_code": item,
 					"item_name": item,
 					"uom": item_doc.stock_uom,

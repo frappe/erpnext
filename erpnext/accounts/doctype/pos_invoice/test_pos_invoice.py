@@ -34,7 +34,6 @@ class POSInvoiceTestMixin(ERPNextTestSuite):
 		frappe.db.set_single_value("Selling Settings", "validate_selling_price", 0)
 		frappe.db.set_single_value("POS Settings", "invoice_type", "POS Invoice")
 		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item", qty=800, basic_rate=100)
-		frappe.db.sql("delete from `tabTax Rule`")
 
 		mode_of_payment = frappe.get_doc("Mode of Payment", "Bank Draft")
 		set_default_account_for_mode_of_payment(mode_of_payment, "_Test Company", "_Test Bank - _TC")

@@ -240,6 +240,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
 		delivery.items[0].use_serial_batch_fields = 1
 		delivery.save()
+		delivery.submit()
 		delivery_serial_list, _ = get_serial_batch_list_from_item(delivery.items[0])
 		self.assertEqual(sorted(serial_list), sorted(delivery_serial_list))
 
@@ -327,7 +328,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 	def test_secondary_items_delivery(self):
 		new_bom = frappe.copy_doc(frappe.get_doc("BOM", "BOM-Basic FG Item-001"))
 		new_bom.secondary_items.append(
-			frappe.new_doc("BOM Secondary Item", item_code="Basic RM 2", qty=1, type="Scrap")
+			frappe.new_doc("BOM Secondary Item", item_code="Basic RM 2", qty=1, secondary_item_type="Scrap")
 		)
 		new_bom.submit()
 		sc_bom = frappe.get_doc("Subcontracting BOM", "SB-0001")

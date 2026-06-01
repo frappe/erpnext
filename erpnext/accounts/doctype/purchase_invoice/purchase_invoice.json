@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:39",
@@ -199,16 +200,24 @@
   "hold_comment",
   "additional_info_section",
   "is_internal_supplier",
+  "title",
   "represents_company",
   "supplier_group",
   "sender",
   "column_break_147",
   "inter_company_invoice_reference",
-  "is_old_subcontracting_flow",
   "remarks",
   "connections_tab"
  ],
  "fields": [
+  {
+   "allow_on_submit": 1,
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1
+  },
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
@@ -1447,14 +1456,6 @@
    "options": "Subscription"
   },
   {
-   "default": "0",
-   "fieldname": "is_old_subcontracting_flow",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Is Old Subcontracting Flow",
-   "read_only": 1
-  },
-  {
    "fieldname": "payments_tab",
    "fieldtype": "Tab Break",
    "label": "Payments"
@@ -1689,7 +1690,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-25 11:45:38.696888",
+ "modified": "2026-05-28 12:36:55.215363",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

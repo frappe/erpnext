@@ -744,11 +744,7 @@ erpnext.utils.update_child_items = function (opts) {
 					}
 				} else if (frm.doc.doctype == "Purchase Order") {
 					if (frm.doc.is_subcontracted) {
-						if (frm.doc.is_old_subcontracting_flow) {
-							filters = { is_sub_contracted_item: 1 };
-						} else {
-							filters = { is_stock_item: 0 };
-						}
+						filters = { is_stock_item: 0 };
 					} else {
 						filters = { is_purchase_item: 1 };
 					}
@@ -791,7 +787,6 @@ erpnext.utils.update_child_items = function (opts) {
 							pos_profile: cint(frm.doc.is_pos) ? frm.doc.pos_profile : "",
 							tax_category: frm.doc.tax_category,
 							child_doctype: frm.doc.doctype + " Item",
-							is_old_subcontracting_flow: frm.doc.is_old_subcontracting_flow,
 						},
 					},
 					callback: function (r) {
@@ -904,11 +899,7 @@ erpnext.utils.update_child_items = function (opts) {
 		});
 	}
 
-	if (
-		["Purchase Order", "Sales Order"].includes(frm.doc.doctype) &&
-		frm.doc.is_subcontracted &&
-		!frm.doc.is_old_subcontracting_flow
-	) {
+	if (["Purchase Order", "Sales Order"].includes(frm.doc.doctype) && frm.doc.is_subcontracted) {
 		fields.push(
 			{
 				fieldtype: "Link",

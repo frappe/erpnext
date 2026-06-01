@@ -18,7 +18,7 @@ class BOMOperation(Document):
 		base_cost_per_unit: DF.Float
 		base_hour_rate: DF.Currency
 		base_operating_cost: DF.Currency
-		batch_size: DF.Int
+		batch_size: DF.Float
 		bom_no: DF.Link | None
 		cost_per_unit: DF.Float
 		description: DF.TextEditor | None
@@ -35,6 +35,7 @@ class BOMOperation(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+		quality_inspection_required: DF.Check
 		sequence_id: DF.Int
 		set_cost_based_on_bom_qty: DF.Check
 		skip_material_transfer: DF.Check

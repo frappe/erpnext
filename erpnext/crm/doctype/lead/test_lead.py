@@ -86,9 +86,6 @@ class TestLead(ERPNextTestSuite):
 		self.assertEqual(len(address_1.get("links")), 1)
 
 	def test_prospect_creation_from_lead(self):
-		frappe.db.sql("delete from `tabLead` where lead_name='Rahul Tripathi'")
-		frappe.db.sql("delete from `tabProspect` where name='Prospect Company'")
-
 		lead = make_lead(
 			first_name="Rahul",
 			last_name="Tripathi",
@@ -108,9 +105,6 @@ class TestLead(ERPNextTestSuite):
 		self.assertEqual(event.event_participants[1].reference_docname, prospect)
 
 	def test_opportunity_from_lead(self):
-		frappe.db.sql("delete from `tabLead` where lead_name='Rahul Tripathi'")
-		frappe.db.sql("delete from `tabOpportunity` where party_name='Rahul Tripathi'")
-
 		lead = make_lead(
 			first_name="Rahul",
 			last_name="Tripathi",
@@ -138,9 +132,6 @@ class TestLead(ERPNextTestSuite):
 		)
 
 	def test_copy_events_from_lead_to_prospect(self):
-		frappe.db.sql("delete from `tabLead` where lead_name='Rahul Tripathi'")
-		frappe.db.sql("delete from `tabProspect` where name='Prospect Company'")
-
 		lead = make_lead(
 			first_name="Rahul",
 			last_name="Tripathi",
@@ -156,6 +147,15 @@ class TestLead(ERPNextTestSuite):
 		self.assertEqual(len(event.event_participants), 2)
 		self.assertEqual(event.event_participants[1].reference_doctype, "Prospect")
 		self.assertEqual(event.event_participants[1].reference_docname, prospect)
+
+	def test_get_notification_email(self):
+		admin_email = frappe.db.get_value("User", "Administrator", "email")
+		lead = frappe.new_doc("Lead")
+		lead.lead_owner = "Administrator"
+		self.assertEqual(lead.get_notification_email(), admin_email)
+
+		lead.lead_owner = None
+		self.assertIsNone(lead.get_notification_email())
 
 
 def create_event(subject, starts_on, reference_type, reference_name):

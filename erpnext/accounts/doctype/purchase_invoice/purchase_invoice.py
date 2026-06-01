@@ -129,7 +129,6 @@ class PurchaseInvoice(BuyingController):
 		incoterm: DF.Link | None
 		inter_company_invoice_reference: DF.Link | None
 		is_internal_supplier: DF.Check
-		is_old_subcontracting_flow: DF.Check
 		is_opening: DF.Literal["No", "Yes"]
 		is_paid: DF.Check
 		is_return: DF.Check
@@ -204,6 +203,7 @@ class PurchaseInvoice(BuyingController):
 		taxes_and_charges_deducted: DF.Currency
 		tc_name: DF.Link | None
 		terms: DF.TextEditor | None
+		title: DF.Data | None
 		to_date: DF.Date | None
 		total: DF.Currency
 		total_advance: DF.Currency
@@ -332,9 +332,6 @@ class PurchaseInvoice(BuyingController):
 				self.remarks = _("Against Supplier Invoice {0}").format(self.bill_no)
 				if self.bill_date:
 					self.remarks += " " + _("dated {0}").format(formatdate(self.bill_date))
-
-			else:
-				self.remarks = _("No Remarks")
 
 	def set_missing_values(self, for_validate=False):
 		if not self.credit_to:
@@ -779,9 +776,6 @@ class PurchaseInvoice(BuyingController):
 			self.make_bundle_for_sales_purchase_return()
 			self.make_bundle_using_old_serial_batch_fields()
 			self.update_stock_ledger()
-
-			if self.is_old_subcontracting_flow:
-				self.set_consumed_qty_in_subcontract_order()
 
 		# this sequence because outstanding may get -negative
 		self.make_gl_entries()
@@ -1707,9 +1701,6 @@ class PurchaseInvoice(BuyingController):
 		if self.update_stock == 1:
 			self.update_stock_ledger()
 			self.delete_auto_created_batches()
-
-			if self.is_old_subcontracting_flow:
-				self.set_consumed_qty_in_subcontract_order()
 
 		self.make_gl_entries_on_cancel()
 

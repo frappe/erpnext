@@ -142,14 +142,19 @@ class StockController(AccountsController):
 		]:
 			for item in self.get("items"):
 				if (
-					(item.get("valuation_rate") == 0 or item.get("incoming_rate") == 0)
+					(
+						item.get("valuation_rate") == 0
+						or (item.get("incoming_rate") == 0 and self.get("update_stock", 1))
+					)
 					and item.get("allow_zero_valuation_rate") == 0
 					and frappe.get_cached_value("Item", item.item_code, "is_stock_item")
 				):
 					frappe.toast(
-						_(
-							"Row #{0}: Item {1} has zero rate but 'Allow Zero Valuation Rate' is not enabled."
-						).format(item.idx, frappe.bold(item.item_code)),
+						_("Row #{0}: Item {1} has zero rate but '{2}' is not enabled.").format(
+							item.idx,
+							frappe.bold(item.item_code),
+							item.meta.get_label("allow_zero_valuation_rate"),
+						),
 						indicator="orange",
 					)
 
@@ -264,14 +269,15 @@ class StockController(AccountsController):
 		)
 
 		is_asset_pr = any(d.get("is_fixed_asset") for d in self.get("items"))
-
-		if (
+		need_inventory_map = (self.get_stock_items() or self.get("packed_items")) and (
 			cint(erpnext.is_perpetual_inventory_enabled(self.company))
-			or provisional_accounting_for_non_stock_items
-			or is_asset_pr
-		):
+		)
+
+		inventory_account_map = frappe._dict()
+		if need_inventory_map:
 			inventory_account_map = self.get_inventory_account_map()
 
+		if need_inventory_map or provisional_accounting_for_non_stock_items or is_asset_pr:
 			if self.docstatus == 1:
 				if not gl_entries:
 					gl_entries = (
@@ -934,6 +940,7 @@ class StockController(AccountsController):
 					"Stock Reconciliation",
 					"Stock Entry",
 					"Subcontracting Receipt",
+					"Delivery Note",
 				)
 				and not is_expense_account
 			):
@@ -1435,7 +1442,7 @@ class StockController(AccountsController):
 			elif self.doctype == "Stock Entry" and row.t_warehouse:
 				qi_required = True  # inward stock needs inspection
 
-			if row.get("type") or row.get("is_legacy_scrap_item"):
+			if row.get("secondary_item_type") or row.get("is_legacy_scrap_item"):
 				continue
 
 			if qi_required:  # validate row only if inspection is required on item level

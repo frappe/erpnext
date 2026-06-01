@@ -12,18 +12,23 @@
  "field_order": [
   "basic_info",
   "naming_series",
-  "customer_type",
   "customer_name",
+  "customer_type",
   "gender",
   "column_break0",
   "customer_group",
   "territory",
   "image",
-  "defaults_tab",
+  "section_break_hwkr",
   "default_currency",
   "default_bank_account",
-  "column_break_14",
+  "column_break_yvyu",
   "default_price_list",
+  "payment_terms",
+  "loyalty_points_tab",
+  "loyalty_program",
+  "column_break_54",
+  "loyalty_program_tier",
   "contact_and_address_tab",
   "address_contacts",
   "address_html",
@@ -39,28 +44,31 @@
   "email_id",
   "first_name",
   "last_name",
+  "accounting_tab",
+  "default_receivable_accounts",
+  "default_accounts_column",
+  "accounts",
+  "credit_limit_section",
+  "credit_limit_column",
+  "credit_limits",
+  "internal_customer_section",
+  "is_internal_customer",
+  "represents_company",
+  "section_break_nrvh",
+  "companies",
   "tax_tab",
   "taxation_section",
   "tax_id",
   "tax_category",
   "column_break_21",
-  "tax_withholding_category",
   "tax_withholding_group",
-  "accounting_tab",
-  "default_receivable_accounts",
-  "accounts",
-  "credit_limit_section",
-  "payment_terms",
-  "credit_limits",
-  "internal_customer_section",
-  "is_internal_customer",
-  "represents_company",
-  "column_break_70",
-  "companies",
-  "loyalty_points_tab",
-  "loyalty_program",
-  "column_break_54",
-  "loyalty_program_tier",
+  "tax_withholding_category",
+  "settings_tab",
+  "so_required",
+  "dn_required",
+  "column_break_53",
+  "disabled",
+  "is_frozen",
   "sales_team_tab",
   "account_manager",
   "sales_team",
@@ -68,12 +76,6 @@
   "default_sales_partner",
   "column_break_66",
   "default_commission_rate",
-  "settings_tab",
-  "so_required",
-  "dn_required",
-  "column_break_53",
-  "disabled",
-  "is_frozen",
   "portal_users_tab",
   "portal_users",
   "more_info_tab",
@@ -91,6 +93,7 @@
   "column_break_hdmn",
   "customer_details",
   "supplier_numbers_section",
+  "supplier_numbers_column",
   "supplier_numbers",
   "connections_tab"
  ],
@@ -132,6 +135,7 @@
    "default": "Company",
    "fieldname": "customer_type",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Customer Type",
    "oldfieldname": "customer_type",
    "oldfieldtype": "Select",
@@ -139,10 +143,12 @@
    "reqd": 1
   },
   {
+   "description": "Pre-filled on payment entries for this customer. Must be a company account.",
    "fieldname": "default_bank_account",
    "fieldtype": "Link",
-   "label": "Default Company Bank Account",
-   "options": "Bank Account"
+   "label": "Company Bank Account",
+   "options": "Bank Account",
+   "show_description_on_click": 1
   },
   {
    "fieldname": "lead_name",
@@ -203,6 +209,7 @@
    "label": "Tax ID"
   },
   {
+   "description": "Controls which tax template is auto-applied when this customer is selected on a transaction.",
    "fieldname": "tax_category",
    "fieldtype": "Link",
    "label": "Tax Category",
@@ -210,12 +217,15 @@
   },
   {
    "default": "0",
+   "description": "Blocks this customer from being used on any new transaction.",
    "fieldname": "disabled",
    "fieldtype": "Check",
-   "label": "Disabled"
+   "label": "Disabled",
+   "show_description_on_click": 1
   },
   {
    "default": "0",
+   "description": "Mark if this customer represents an internal company. Enables inter-company transactions.",
    "fieldname": "is_internal_customer",
    "fieldtype": "Check",
    "label": "Is Internal Customer"
@@ -230,31 +240,32 @@
    "unique": 1
   },
   {
-   "depends_on": "represents_company",
+   "depends_on": "eval: doc.is_internal_customer && doc.represents_company",
    "fieldname": "companies",
    "fieldtype": "Table",
-   "label": "Allowed To Transact With",
+   "label": "Allowed to transact with",
    "options": "Allowed To Transact With"
   },
   {
+   "description": "All invoices and orders for this customer will be created in this currency.",
    "fieldname": "default_currency",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "Billing Currency",
    "no_copy": 1,
-   "options": "Currency"
+   "options": "Currency",
+   "show_description_on_click": 1
   },
   {
+   "description": "Fetched automatically on sales orders and invoices for this customer.",
    "fieldname": "default_price_list",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
-   "label": "Default Price List",
-   "options": "Price List"
-  },
-  {
-   "fieldname": "column_break_14",
-   "fieldtype": "Column Break"
+   "label": "Price List",
+   "link_filters": "[[\"Price List\", \"selling\", \"=\", 1]]",
+   "options": "Price List",
+   "show_description_on_click": 1
   },
   {
    "fieldname": "language",
@@ -340,29 +351,30 @@
   },
   {
    "fieldname": "default_receivable_accounts",
-   "fieldtype": "Section Break",
-   "label": "Default Accounts"
+   "fieldtype": "Section Break"
   },
   {
-   "description": "Mention if non-standard Receivable account",
+   "description": "If set, accounting entries for this customer will post to these accounts instead of the company default.",
    "fieldname": "accounts",
    "fieldtype": "Table",
-   "label": "Accounts",
-   "options": "Party Account"
+   "label": "Default Accounts",
+   "options": "Party Account",
+   "show_description_on_click": 1
   },
   {
    "fieldname": "credit_limit_section",
-   "fieldtype": "Section Break",
-   "label": "Credit Limit and Payment Terms"
+   "fieldtype": "Section Break"
   },
   {
+   "description": "Defines when payment is due (e.g. Net 30, 50% advance). Applied automatically on invoices for this customer.",
    "fieldname": "payment_terms",
    "fieldtype": "Link",
-   "label": "Default Payment Terms Template",
-   "options": "Payment Terms Template"
+   "label": "Payment Terms Template",
+   "options": "Payment Terms Template",
+   "show_description_on_click": 1
   },
   {
-   "description": "Additional information regarding the customer.",
+   "description": "Internal notes about this customer. Not visible on transactions or the portal.",
    "fieldname": "customer_details",
    "fieldtype": "Text",
    "label": "Customer Details",
@@ -370,10 +382,12 @@
    "oldfieldtype": "Code"
   },
   {
+   "description": "Classify the type of market this customer belongs to, used for sales analysis and targeting.",
    "fieldname": "market_segment",
    "fieldtype": "Link",
    "label": "Market Segment",
-   "options": "Market Segment"
+   "options": "Market Segment",
+   "show_description_on_click": 1
   },
   {
    "fieldname": "industry",
@@ -383,11 +397,14 @@
   },
   {
    "default": "0",
+   "description": "Blocks all further accounting entries on this customer's account. Only users with the frozen-entries role can override.\n",
    "fieldname": "is_frozen",
    "fieldtype": "Check",
-   "label": "Is Frozen"
+   "label": "Is Frozen",
+   "show_description_on_click": 1
   },
   {
+   "description": "Loyalty scheme this customer earns points under. Auto-assigned if a matching program exists.",
    "fieldname": "loyalty_program",
    "fieldtype": "Link",
    "label": "Loyalty Program",
@@ -395,6 +412,7 @@
    "options": "Loyalty Program"
   },
   {
+   "description": "Current tier based on accumulated points. Updated automatically on each invoice.",
    "fieldname": "loyalty_program_tier",
    "fieldtype": "Data",
    "label": "Loyalty Program Tier",
@@ -418,12 +436,14 @@
    "oldfieldtype": "Currency"
   },
   {
-   "collapsible": 1,
    "collapsible_depends_on": "sales_team",
+   "description": "Commission paid to the Sales Partner on transactions with this customer.",
    "fieldname": "sales_team_section",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Sales Partner"
   },
   {
+   "description": "Split commission credit across multiple sales persons.",
    "fieldname": "sales_team",
    "fieldtype": "Table",
    "label": "Sales Team",
@@ -441,24 +461,27 @@
    "report_hide": 1
   },
   {
+   "description": "Transactions are blocked or warned when outstanding balance exceeds this amount.",
    "fieldname": "credit_limits",
    "fieldtype": "Table",
    "label": "Credit Limit",
-   "options": "Customer Credit Limit"
+   "options": "Customer Credit Limit",
+   "show_description_on_click": 1
   },
   {
    "default": "0",
    "fieldname": "so_required",
    "fieldtype": "Check",
-   "label": "Allow Sales Invoice Creation Without Sales Order"
+   "label": "Allow sales invoice creation without sales order"
   },
   {
    "default": "0",
    "fieldname": "dn_required",
    "fieldtype": "Check",
-   "label": "Allow Sales Invoice Creation Without Delivery Note"
+   "label": "Allow sales invoice creation without delivery note"
   },
   {
+   "description": "TDS/TCS is calculated at the rate defined here on every payment from this customer.",
    "fieldname": "tax_withholding_category",
    "fieldtype": "Link",
    "label": "Tax Withholding Category",
@@ -477,11 +500,6 @@
    "fieldname": "contact_and_address_tab",
    "fieldtype": "Tab Break",
    "label": "Address & Contact"
-  },
-  {
-   "fieldname": "defaults_tab",
-   "fieldtype": "Section Break",
-   "label": "Defaults"
   },
   {
    "fieldname": "settings_tab",
@@ -511,6 +529,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "loyalty_program",
    "fieldname": "loyalty_points_tab",
    "fieldtype": "Section Break",
    "label": "Loyalty Points"
@@ -530,21 +549,17 @@
    "label": "Tax"
   },
   {
-   "collapsible": 1,
-   "collapsible_depends_on": "is_internal_customer",
    "fieldname": "internal_customer_section",
    "fieldtype": "Section Break",
+   "hide_border": 1,
    "label": "Internal Customer Accounting"
-  },
-  {
-   "fieldname": "column_break_70",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "column_break_54",
    "fieldtype": "Column Break"
   },
   {
+   "description": "Users listed here can log into the customer portal to view their orders, invoices, and deliveries.",
    "fieldname": "portal_users_tab",
    "fieldtype": "Tab Break",
    "label": "Portal Users"
@@ -583,13 +598,14 @@
    "label": "Last Name"
   },
   {
-   "description": "Supplier numbers assigned by the customer",
+   "description": "Numbers this customer uses to identify your company in their own system.",
    "fieldname": "supplier_numbers",
    "fieldtype": "Table",
    "label": "Supplier Numbers",
    "options": "Supplier Number At Customer"
   },
   {
+   "description": "Select the group first to filter the applicable withholding categories below.",
    "fieldname": "tax_withholding_group",
    "fieldtype": "Link",
    "label": "Tax Withholding Group",
@@ -625,8 +641,32 @@
   },
   {
    "fieldname": "supplier_numbers_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_hwkr",
    "fieldtype": "Section Break",
-   "label": "Supplier Numbers"
+   "label": "Defaults"
+  },
+  {
+   "fieldname": "column_break_yvyu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_accounts_column",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "supplier_numbers_column",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_nrvh",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "credit_limit_column",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-user",
@@ -640,7 +680,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-03-09 17:15:26.040050",
+ "modified": "2026-05-29 02:21:41.089319",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

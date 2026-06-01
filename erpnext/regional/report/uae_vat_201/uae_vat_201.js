@@ -10,6 +10,13 @@ frappe.query_reports["UAE VAT 201"] = {
 			options: "Company",
 			reqd: 1,
 			default: frappe.defaults.get_user_default("Company"),
+			get_query: function () {
+				return {
+					filters: {
+						country: "United Arab Emirates",
+					},
+				};
+			},
 		},
 		{
 			fieldname: "from_date",
