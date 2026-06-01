@@ -490,11 +490,10 @@ class SubcontractingReceipt(SubcontractingController):
 					supplied_items_details[item.name][
 						supplied_item.rm_item_code
 					] += supplied_item.available_qty
-		else:
-			for item in self.get("supplied_items"):
-				item.available_qty_for_consumption = supplied_items_details.get(item.reference_name, {}).get(
-					item.rm_item_code, 0
-				)
+		for item in self.get("supplied_items"):
+			item.available_qty_for_consumption = supplied_items_details.get(item.reference_name, {}).get(
+				item.rm_item_code, 0
+			)
 
 	def calculate_items_qty_and_amount(self):
 		rm_cost_map = {}
@@ -561,9 +560,8 @@ class SubcontractingReceipt(SubcontractingController):
 
 			total_qty += flt(item.qty) + flt(item.rejected_qty)
 			total_amount += item.amount
-		else:
-			self.total_qty = total_qty
-			self.total = total_amount
+		self.total_qty = total_qty
+		self.total = total_amount
 
 	def validate_secondary_items(self):
 		for item in self.items:

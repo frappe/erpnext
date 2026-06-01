@@ -434,8 +434,7 @@ def get_reposting_data(file_path) -> dict:
 	except Exception:
 		return frappe._dict()
 
-	if data := json.loads(data.decode("utf-8")):
-		data = data
+	data = json.loads(data.decode("utf-8"))
 
 	return parse_json(data)
 
@@ -1457,8 +1456,7 @@ class update_entries_after:
 				item.amount = flt(item.qty) * flt(item.valuation_rate)
 				item.quantity_difference = item.qty - item.current_qty
 				item.amount_difference = item.amount - item.current_amount
-			else:
-				sr.difference_amount = sum([item.amount_difference for item in sr.items])
+			sr.difference_amount = sum([item.amount_difference for item in sr.items])
 			sr.db_update()
 
 			for item in sr.items:

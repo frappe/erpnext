@@ -1408,10 +1408,9 @@ def make_delivery_note(
 					dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher([sre]).name
 
 				target_doc.append("items", dn_item)
-			else:
-				# Correct rows index.
-				for idx, item in enumerate(target_doc.items):
-					item.idx = idx + 1
+			# Correct rows index.
+			for idx, item in enumerate(target_doc.items):
+				item.idx = idx + 1
 
 	if not kwargs.skip_item_mapping and frappe.flags.bulk_transaction and not target_doc.items:
 		# the (date) condition filter resulted in an unintendedly created empty DN; remove it
