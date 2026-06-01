@@ -2506,18 +2506,11 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			method: "erpnext.controllers.stock_controller.check_item_quality_inspection",
 			args: {
 				doctype: this.frm.doc.doctype,
-<<<<<<< HEAD
-				items: this.frm.doc.items
-=======
 				docstatus: this.frm.doc.docstatus,
 				items: this.frm.doc.items,
->>>>>>> c6a88ab1d2 (fix(stock): allow to create quality inspection after purchase/delivery)
 			},
 			freeze: true,
 			callback: function (r) {
-<<<<<<< HEAD
-				r.message.forEach(item => {
-=======
 				if (r.message.length == 0) {
 					let type = inspection_type === "Incoming" ? "Purchase" : "Delivery";
 					let fieldname =
@@ -2536,7 +2529,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				}
 
 				r.message.forEach((item) => {
->>>>>>> e003fe4de0 (fix(stock): add warning message to notify the user to configure the inspection)
 					if (me.has_inspection_required(item)) {
 						let dialog_items = dialog.fields_dict.items;
 						dialog_items.df.data.push({
