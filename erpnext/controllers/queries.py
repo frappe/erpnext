@@ -374,7 +374,6 @@ def get_delivery_notes_to_be_billed(
 		"Delivery Note",
 		fields=fields,
 		filters=filters,
-		ignore_permissions=False,
 	)
 
 	query = (
