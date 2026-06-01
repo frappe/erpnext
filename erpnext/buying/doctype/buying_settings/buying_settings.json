@@ -26,7 +26,6 @@
   "pr_required",
   "project_update_frequency",
   "section_break_vxuc",
-  "show_supplier_name_in_reports",
   "over_order_allowance",
   "column_break_kdcm",
   "allow_multiple_items",
@@ -53,7 +52,9 @@
   "request_for_quotation_tab",
   "fixed_email",
   "document_naming_tab",
-  "transaction_naming_html"
+  "transaction_naming_html",
+  "report_settings_tab",
+  "show_supplier_name_in_reports"
  ],
  "fields": [
   {
@@ -353,6 +354,11 @@
   {
    "fieldname": "section_break_vxuc",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "report_settings_tab",
+   "fieldtype": "Tab Break",
+   "label": "Report Settings"
   }
  ],
  "grid_page_length": 50,
@@ -361,7 +367,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-05-27 23:04:00.842393",
+ "modified": "2026-06-01 17:08:02.537007",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",

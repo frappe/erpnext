@@ -14,8 +14,6 @@
   "column_break_4",
   "customer_group",
   "territory",
-  "section_break_azsu",
-  "show_customer_name_in_reports",
   "item_price_tab",
   "item_price_settings_section",
   "selling_price_list",
@@ -63,7 +61,9 @@
   "column_break_mla9",
   "deliver_secondary_items",
   "default_naming_tab",
-  "transaction_naming_html"
+  "transaction_naming_html",
+  "report_settings_tab",
+  "show_customer_name_in_reports"
  ],
  "fields": [
   {
@@ -414,8 +414,9 @@
    "fieldtype": "HTML"
   },
   {
-   "fieldname": "section_break_azsu",
-   "fieldtype": "Section Break"
+   "fieldname": "report_settings_tab",
+   "fieldtype": "Tab Break",
+   "label": "Report Settings"
   }
  ],
  "grid_page_length": 50,
@@ -424,7 +425,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-05-05 13:12:09.686274",
+ "modified": "2026-06-01 17:08:36.898770",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",

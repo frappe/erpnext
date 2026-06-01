@@ -89,7 +89,6 @@
   "use_legacy_controller_for_pcv",
   "column_break_25",
   "reports_tab",
-  "show_party_name_in_reports",
   "remarks_section",
   "general_ledger_remarks_length",
   "column_break_lvjk",
@@ -438,13 +437,6 @@
   },
   {
    "default": "0",
-   "description": "Show Party Name alongside Party Code in all reports",
-   "fieldname": "show_party_name_in_reports",
-   "fieldtype": "Check",
-   "label": "Show Party Name in Reports"
-  },
-  {
-   "default": "0",
    "description": "Truncates 'Remarks' column to set character length",
    "fieldname": "general_ledger_remarks_length",
    "fieldtype": "Int",
@@ -749,7 +741,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-05-18 12:16:33.679345",
+ "modified": "2026-06-01 17:06:10.853326",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

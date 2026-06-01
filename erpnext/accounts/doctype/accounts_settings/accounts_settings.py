@@ -101,7 +101,6 @@ class AccountsSettings(Document):
 		round_row_wise_tax: DF.Check
 		show_balance_in_coa: DF.Check
 		show_inclusive_tax_in_print: DF.Check
-		show_party_name_in_reports: DF.Check
 		show_payment_schedule_in_print: DF.Check
 		show_taxes_as_table_in_print: DF.Check
 		stale_days: DF.Int
