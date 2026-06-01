@@ -987,6 +987,7 @@ erpnext.PointOfSale.ItemCart = class {
 						customer: current_customer,
 						value: this.value,
 					},
+					freeze: true,
 					callback: (r) => {
 						if (!r.exc) {
 							me.customer_info[this.df.fieldname] = this.value;
