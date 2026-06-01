@@ -6,12 +6,19 @@ export function useMultiFileUploadProgress() {
     const fileProgressesRef = useRef<number[]>([])
 
     const startTracking = useCallback((fileCount: number) => {
+        if (fileCount <= 0) {
+            return
+        }
         fileProgressesRef.current = new Array(fileCount).fill(0)
         setUploadProgress(0)
     }, [])
 
     const updateFileProgress = useCallback((fileIndex: number, progress: number) => {
-        if (fileIndex >= fileProgressesRef.current.length) {
+        if (fileIndex < 0 || fileIndex >= fileProgressesRef.current.length) {
+            return
+        }
+
+        if (fileProgressesRef.current.length === 0) {
             return
         }
         fileProgressesRef.current[fileIndex] = progress
