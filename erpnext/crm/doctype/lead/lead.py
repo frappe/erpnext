@@ -546,6 +546,7 @@ def get_lead_with_phone_number(number):
 @frappe.whitelist()
 def add_lead_to_prospect(lead: str, prospect: str):
 	prospect = frappe.get_doc("Prospect", prospect)
+	prospect.check_permission("write")
 	prospect.append("leads", {"lead": lead})
 	prospect.save(ignore_permissions=True)
 
