@@ -4,7 +4,7 @@
  "docstatus": 0,
  "doctype": "Number Card",
  "document_type": "Purchase Invoice",
- "dynamic_filters_json": "[[\"Purchase Invoice\",\"company\",\"=\",\"frappe.defaults.get_user_default(\\\"Company\\\")\"], [\"Purchase Invoice\",\"posting_date\",\"Between\",\"[frappe.boot.current_fiscal_year[1], frappe.boot.current_fiscal_year[2]]\"]]",
+ "dynamic_filters_json": "[[\"Purchase Invoice\", \"company\", \"=\", \"frappe.defaults.get_user_default(\\\"Company\\\")\"], [\"Purchase Invoice\", \"posting_date\", \"Between\", \"(frappe.boot.current_fiscal_year || [null, `${frappe.datetime.get_today().slice(0,4)}-01-01`, `${frappe.datetime.get_today().slice(0,4)}-12-31`]).slice(1)\"]]",
  "filters_json": "[[\"Purchase Invoice\",\"docstatus\",\"=\",\"1\"]]",
  "function": "Sum",
  "idx": 0,
