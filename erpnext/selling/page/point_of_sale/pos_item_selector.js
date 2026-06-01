@@ -196,10 +196,14 @@ erpnext.PointOfSale.ItemSelector = class {
 					${
 						!me.hide_images
 							? `<div class="item-rate">
-								${format_currency(price_list_rate, item.currency, precision) || 0} / ${uom}
+								${frappe.utils.escape_html(format_currency(price_list_rate, item.currency, precision)) || 0} / ${uom}
 							</div>`
 							: `
-							<div class="item-price">${format_currency(price_list_rate, item.currency, precision) || 0}</div>
+							<div class="item-price">${
+								frappe.utils.escape_html(
+									format_currency(price_list_rate, item.currency, precision)
+								) || 0
+							}</div>
 							<div class="item-uom">${uom}</div>
 							<div class="item-qty-available">${qty_to_display || "Non stock item"}</div>
 							`
