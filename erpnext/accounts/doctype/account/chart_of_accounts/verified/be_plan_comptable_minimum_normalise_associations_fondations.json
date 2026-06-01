@@ -586,7 +586,7 @@
                     "account_type": "Tax"
                 },
                 "Impôts et précomptes à récupérer": {
-                    "à 4127 Autres impôts et taxes belges": {
+                    "Autres impôts et taxes belges (4125 à 4127)": {
                         "account_number": "4125",
                         "account_type": "Receivable"
                     },
@@ -677,7 +677,7 @@
             },
             "Dettes fiscales, salariales et sociales": {
                 "Dettes fiscales estimées": {
-                    "à 4507 Autres impôts et taxes belges": {
+                    "Autres impôts et taxes belges (4505 à 4507)": {
                         "account_number": "4505",
                         "account_type": "Payable"
                     },
@@ -693,7 +693,7 @@
                     "account_type": "Tax"
                 },
                 "Impôts et taxes à payer": {
-                    "à 4527 Autres impôts et taxes belges": {
+                    "Autres impôts et taxes belges (4525 à 4527)": {
                         "account_number": "4525",
                         "account_type": "Payable"
                     },
@@ -851,7 +851,7 @@
                 "account_type": "Bank"
             },
             "Caisses": {
-                "à 577 Caisses-espèces": {
+                "Caisses-espèces (570 à 577)": {
                     "account_number": "570",
                     "account_type": "Cash"
                 },
