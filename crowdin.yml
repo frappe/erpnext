@@ -12,4 +12,3 @@ append_commit_message: false
 languages_mapping:
   two_letters_code:
     pt-BR: pt_BR
-    zh-TW: zh_TW
