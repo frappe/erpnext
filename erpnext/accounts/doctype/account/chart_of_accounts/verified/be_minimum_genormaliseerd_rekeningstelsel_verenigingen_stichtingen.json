@@ -1138,6 +1138,10 @@
                     "account_number": "643",
                     "account_type": "Expense Account"
                 },
+                "Diverse bedrijfskosten (644 tot 648)": {
+                    "account_number": "644",
+                    "account_type": "Expense Account"
+                },
                 "Als herstructureringskosten geactiveerde bedrijfskosten (-)": {
                     "account_number": "649",
                     "account_type": "Expense Account"
@@ -1200,6 +1204,10 @@
                         "account_type": "Expense Account"
                     },
                     "account_number": "656",
+                    "account_type": "Expense Account"
+                },
+                "Diverse financiële kosten (657 tot 658)": {
+                    "account_number": "657",
                     "account_type": "Expense Account"
                 },
                 "Als herstructureringskosten geactiveerde financiële kosten (-)": {
@@ -1268,6 +1276,10 @@
                         "account_type": "Expense Account"
                     },
                     "account_number": "663",
+                    "account_type": "Expense Account"
+                },
+                "Andere niet-recurrente bedrijfskosten (664 tot 667)": {
+                    "account_number": "664",
                     "account_type": "Expense Account"
                 },
                 "Andere niet-recurrente financiële kosten": {
@@ -1421,6 +1433,10 @@
                     "account_number": "742",
                     "account_type": "Income Account"
                 },
+                "Diverse bedrijfsopbrengsten (743 tot 749)": {
+                    "account_number": "743",
+                    "account_type": "Income Account"
+                },
                 "account_number": "74",
                 "account_type": "Income Account"
             },
@@ -1443,6 +1459,10 @@
                 },
                 "Resultaten uit de omrekening van vreemde valuta": {
                     "account_number": "755",
+                    "account_type": "Income Account"
+                },
+                "Diverse financiële opbrengsten (756 tot 759)": {
+                    "account_number": "756",
                     "account_type": "Income Account"
                 },
                 "account_number": "75",
@@ -1487,6 +1507,10 @@
                         "account_type": "Income Account"
                     },
                     "account_number": "763",
+                    "account_type": "Income Account"
+                },
+                "Andere niet-recurrente bedrijfsopbrengsten (764 tot 768)": {
+                    "account_number": "764",
                     "account_type": "Income Account"
                 },
                 "Andere niet-recurrente financiële opbrengsten": {

@@ -1138,6 +1138,10 @@
                     "account_number": "643",
                     "account_type": "Expense Account"
                 },
+                "Charges d'exploitations diverses (644 à 648)": {
+                    "account_number": "644",
+                    "account_type": "Expense Account"
+                },
                 "Charges d'exploitation portées à l'actif au titre de frais de restructuration (–)": {
                     "account_number": "649",
                     "account_type": "Expense Account"
@@ -1202,6 +1206,10 @@
                     "account_number": "656",
                     "account_type": "Expense Account"
                 },
+                "Charges financières diverses (657 à 658)": {
+                    "account_number": "657",
+                    "account_type": "Expense Account"
+                },
                 "Charges financières portées à l'actif au titre de frais de restructuration (-)": {
                     "account_number": "659",
                     "account_type": "Expense Account"
@@ -1263,11 +1271,15 @@
                         "account_number": "6630",
                         "account_type": "Expense Account"
                     },
-                    "Moins-values sur réalisations d'actifs immobilisés": {
+                    "Moins-values sur réalisation d'immobilisations financières": {
                         "account_number": "6631",
                         "account_type": "Expense Account"
                     },
                     "account_number": "663",
+                    "account_type": "Expense Account"
+                },
+                "Autres charges d'exploitation non récurrentes (664 à 667)": {
+                    "account_number": "664",
                     "account_type": "Expense Account"
                 },
                 "Autres charges financières non récurrentes": {
@@ -1421,6 +1433,10 @@
                     "account_number": "742",
                     "account_type": "Income Account"
                 },
+                "Produits d'exploitation divers (743 à 749)": {
+                    "account_number": "743",
+                    "account_type": "Income Account"
+                },
                 "account_number": "74",
                 "account_type": "Income Account"
             },
@@ -1443,6 +1459,10 @@
                 },
                 "Écarts de conversion des devises": {
                     "account_number": "755",
+                    "account_type": "Income Account"
+                },
+                "Produits financiers divers (756 à 759)": {
+                    "account_number": "756",
                     "account_type": "Income Account"
                 },
                 "account_number": "75",
@@ -1482,11 +1502,15 @@
                         "account_number": "7630",
                         "account_type": "Income Account"
                     },
-                    "Plus-values sur réalisations d'actifs immobilisés": {
+                    "Plus-values sur réalisation d'immobilisations financières": {
                         "account_number": "7631",
                         "account_type": "Income Account"
                     },
                     "account_number": "763",
+                    "account_type": "Income Account"
+                },
+                "Autres produits d'exploitation non récurrents (764 à 768)": {
+                    "account_number": "764",
                     "account_type": "Income Account"
                 },
                 "Autres produits financiers non récurrents": {
