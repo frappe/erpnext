@@ -1217,9 +1217,19 @@ class StockEntry(StockController, SubcontractingInwardController):
 				)
 				d.basic_rate = (outgoing_items_cost * (cost_allocation_per / 100)) / d.transfer_qty
 
+<<<<<<< HEAD
 			if not d.basic_rate and not d.allow_zero_valuation_rate:
 				if self.is_new():
 					raise_error_if_no_rate = False
+=======
+			if self.bom_no:
+				d.basic_rate *= frappe.get_value("BOM", self.bom_no, "cost_allocation_per") / 100
+		elif d.secondary_item_type and d.bom_secondary_item:
+			cost_allocation_per = frappe.get_value(
+				"BOM Secondary Item", d.bom_secondary_item, "cost_allocation_per"
+			)
+			d.basic_rate = (outgoing_items_cost * (cost_allocation_per / 100)) / d.transfer_qty
+>>>>>>> dbcfac839c (chore: rename type field to secondary_item_type (#55469))
 
 				d.basic_rate = get_valuation_rate(
 					d.item_code,
@@ -1372,6 +1382,75 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		return flt((outgoing_items_cost - scrap_items_cost) / finished_item_qty)
 
+<<<<<<< HEAD
+=======
+	def _get_rm_cost_for_manufacture(self, settings, finished_item_qty, outgoing_items_cost):
+		if settings.get_rm_cost_from_consumption_entry and self.work_order:
+			if frappe.db.exists(
+				"Stock Entry",
+				{
+					"docstatus": 1,
+					"work_order": self.work_order,
+					"purpose": "Material Consumption for Manufacture",
+				},
+			):
+				self._validate_no_raw_materials_in_manufacture_entry(settings)
+				self._validate_single_manufacture_entry()
+				return self._fetch_consumption_entry_cost()
+		elif not outgoing_items_cost:
+			bom_items = self.get_bom_raw_materials(finished_item_qty)
+			outgoing_items_cost = sum([flt(row.qty) * flt(row.rate) for row in bom_items.values()])
+
+		return outgoing_items_cost
+
+	def _validate_no_raw_materials_in_manufacture_entry(self, settings):
+		for item in self.items:
+			if not item.is_finished_item and not item.secondary_item_type and not item.is_legacy_scrap_item:
+				label = frappe.get_meta(settings.doctype).get_label("get_rm_cost_from_consumption_entry")
+				frappe.throw(
+					_(
+						"Row {0}: As {1} is enabled, raw materials cannot be added to {2} entry. Use {3} entry to consume raw materials."
+					).format(
+						item.idx,
+						frappe.bold(label),
+						frappe.bold(_("Manufacture")),
+						frappe.bold(_("Material Consumption for Manufacture")),
+					)
+				)
+
+	def _validate_single_manufacture_entry(self):
+		if frappe.db.exists(
+			"Stock Entry",
+			{
+				"docstatus": 1,
+				"work_order": self.work_order,
+				"purpose": "Manufacture",
+				"name": ("!=", self.name),
+			},
+		):
+			frappe.throw(
+				_("Only one {0} entry can be created against the Work Order {1}").format(
+					frappe.bold(_("Manufacture")), frappe.bold(self.work_order)
+				)
+			)
+
+	def _fetch_consumption_entry_cost(self):
+		SE = frappe.qb.DocType("Stock Entry")
+		SE_ITEM = frappe.qb.DocType("Stock Entry Detail")
+
+		return (
+			frappe.qb.from_(SE)
+			.left_join(SE_ITEM)
+			.on(SE.name == SE_ITEM.parent)
+			.select(Sum(SE_ITEM.valuation_rate * SE_ITEM.transfer_qty))
+			.where(
+				(SE.docstatus == 1)
+				& (SE.work_order == self.work_order)
+				& (SE.purpose == "Material Consumption for Manufacture")
+			)
+		).run()[0][0] or 0
+
+>>>>>>> dbcfac839c (chore: rename type field to secondary_item_type (#55469))
 	def distribute_additional_costs(self):
 		# If no incoming items, set additional costs blank
 		if not any(d.item_code for d in self.items if d.t_warehouse):
@@ -1742,7 +1821,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 					d.is_finished_item = 1
 			else:
 				d.is_finished_item = 0
-				d.type = ""
+				d.secondary_item_type = ""
 
 	def get_finished_item(self):
 		finished_item = None

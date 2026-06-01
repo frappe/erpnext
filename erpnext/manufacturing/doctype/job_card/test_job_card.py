@@ -912,7 +912,7 @@ class TestJobCard(ERPNextTestSuite):
 					"qty": 1,
 					"process_loss_per": 10,
 					"cost_allocation_per": 5,
-					"type": "Scrap",
+					"secondary_item_type": "Scrap",
 				},
 			)
 			if submit:
@@ -995,7 +995,8 @@ class TestJobCard(ERPNextTestSuite):
 			},
 		)
 		job_card.append(
-			"secondary_items", {"item_code": scrap_extra.name, "stock_qty": 5, "type": "Co-Product"}
+			"secondary_items",
+			{"item_code": scrap_extra.name, "stock_qty": 5, "secondary_item_type": "Co-Product"},
 		)
 		job_card.submit()
 
@@ -1014,7 +1015,7 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(manufacturing_entry.items[2].qty, 9)
 		self.assertEqual(flt(manufacturing_entry.items[2].basic_rate, 3), 5.556)
 		self.assertEqual(manufacturing_entry.items[3].item_code, scrap_extra.name)
-		self.assertEqual(manufacturing_entry.items[3].type, "Co-Product")
+		self.assertEqual(manufacturing_entry.items[3].secondary_item_type, "Co-Product")
 		self.assertEqual(manufacturing_entry.items[3].qty, 5)
 		self.assertEqual(manufacturing_entry.items[3].basic_rate, 0)
 
@@ -1059,7 +1060,9 @@ class TestJobCard(ERPNextTestSuite):
 			)
 
 		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
-		job_card.append("secondary_items", {"item_code": "_Test Item", "stock_qty": 2, "type": "Scrap"})
+		job_card.append(
+			"secondary_items", {"item_code": "_Test Item", "stock_qty": 2, "secondary_item_type": "Scrap"}
+		)
 		job_card.append(
 			"time_logs",
 			{
