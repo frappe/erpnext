@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
-"POT-Creation-Date: 2026-05-27 15:21+0000\n"
+"POT-Creation-Date: 2026-05-31 10:17+0000\n"
 "PO-Revision-Date: 2026-05-29 17:05+0000\n"
 "Last-Translator: hello@frappe.io\n"
 "Language: ar_SA\n"
@@ -4715,7 +4715,7 @@ msgstr "مجموعة العناصر هي طريقة لتصنيف العناصر 
 msgid "An error has been appeared while reposting item valuation via {0}"
 msgstr "حدث خطأ أثناء إعادة نشر تقييم العنصر عبر {0}"
 
-#: erpnext/public/js/controllers/buying.js:387
+#: erpnext/public/js/controllers/buying.js:382
 #: erpnext/public/js/utils/sales_common.js:489
 msgid "An error occurred during the update process"
 msgstr "حدث خطأ أثناء عملية التحديث"
@@ -5646,7 +5646,7 @@ msgstr ""
 msgid "Asset cannot be cancelled, as it is already {0}"
 msgstr "لا يمكن إلغاء الأصل، لانه بالفعل {0}"
 
-#: erpnext/assets/doctype/asset/depreciation.py:396
+#: erpnext/assets/doctype/asset/depreciation.py:398
 msgid "Asset cannot be scrapped before the last depreciation entry."
 msgstr "لا يمكن التخلص من الأصل قبل آخر قيد استهلاك."
 
@@ -5678,7 +5678,7 @@ msgstr "الأصل معطل بسبب إصلاح الأصل {0}"
 msgid "Asset received at Location {0} and issued to Employee {1}"
 msgstr "تم استلام الأصل في الموقع {0} وتم إصداره للموظف {1}"
 
-#: erpnext/assets/doctype/asset/depreciation.py:457
+#: erpnext/assets/doctype/asset/depreciation.py:460
 msgid "Asset restored"
 msgstr "تم استعادة الأصل"
 
@@ -5690,11 +5690,11 @@ msgstr "تمت استعادة الأصل بعد إلغاء رسملة الأصل
 msgid "Asset returned"
 msgstr "تم إرجاع الأصل"
 
-#: erpnext/assets/doctype/asset/depreciation.py:444
+#: erpnext/assets/doctype/asset/depreciation.py:446
 msgid "Asset scrapped"
 msgstr "الأصول الملغاة"
 
-#: erpnext/assets/doctype/asset/depreciation.py:446
+#: erpnext/assets/doctype/asset/depreciation.py:448
 msgid "Asset scrapped via Journal Entry {0}"
 msgstr "ألغت الأصول عن طريق قيد اليومية {0}\\n<br>\\n Asset scrapped via Journal Entry {0}"
 
@@ -5719,7 +5719,7 @@ msgstr "تم تحديث الأصل بعد تقسيمه إلى الأصل {0}"
 msgid "Asset updated due to Asset Repair {0} {1}."
 msgstr "تم تحديث الأصل بسبب إصلاح الأصل {0} {1}."
 
-#: erpnext/assets/doctype/asset/depreciation.py:378
+#: erpnext/assets/doctype/asset/depreciation.py:380
 msgid "Asset {0} cannot be scrapped, as it is already {1}"
 msgstr "لا يمكن إلغاء الأصل {0} ، كما هو بالفعل {1}\\n<br>\\nAsset {0} cannot be scrapped, as it is already {1}"
 
@@ -5760,7 +5760,7 @@ msgstr "لم يتم ضبط الأصل {0} لحساب الاستهلاك."
 msgid "Asset {0} is not submitted. Please submit the asset before proceeding."
 msgstr "لم يتم إرسال الأصل {0} . يرجى إرسال الأصل قبل المتابعة."
 
-#: erpnext/assets/doctype/asset/depreciation.py:376
+#: erpnext/assets/doctype/asset/depreciation.py:378
 msgid "Asset {0} must be submitted"
 msgstr "الاصل {0} يجب تقديمه"
 
@@ -6210,7 +6210,7 @@ msgstr "المطابقة التلقائية وتعيين الطرف في الم�
 msgid "Auto re-order"
 msgstr "إعادة ترتيب تلقائي"
 
-#: erpnext/public/js/controllers/buying.js:382
+#: erpnext/public/js/controllers/buying.js:377
 #: erpnext/public/js/utils/sales_common.js:484
 msgid "Auto repeat document updated"
 msgstr "تكرار تلقائي للمستندات المحدثة"
@@ -9559,7 +9559,7 @@ msgstr "تفاصيل التصنيف"
 msgid "Category-wise Asset Value"
 msgstr "قيمة الأصول حسب الفئة"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:297
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:300
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:143
 msgid "Caution"
 msgstr "الحذر"
@@ -15531,11 +15531,11 @@ msgstr "الكمية المستلمة"
 msgid "Delivered Qty (in Stock UOM)"
 msgstr "الكمية المُسلَّمة (وحدة القياس المتوفرة في المخزون)"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:620
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:623
 msgid "Delivered Qty cannot be increased by more than {0} for item {1}"
 msgstr ""
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:613
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:616
 msgid "Delivered Qty cannot be reduced by more than {0} for item {1}"
 msgstr ""
 
@@ -15929,7 +15929,7 @@ msgstr "حالة ترحيل قيد الإهلاك"
 msgid "Depreciation Entry against asset {0}"
 msgstr "قيد استهلاك الأصل {0}"
 
-#: erpnext/assets/doctype/asset/depreciation.py:258
+#: erpnext/assets/doctype/asset/depreciation.py:259
 msgid "Depreciation Entry against {0} worth {1}"
 msgstr "قيد الإهلاك مقابل {0} بقيمة {1}"
 
@@ -15941,7 +15941,7 @@ msgstr "قيد الإهلاك مقابل {0} بقيمة {1}"
 msgid "Depreciation Expense Account"
 msgstr "حساب نفقات الاهلاك"
 
-#: erpnext/assets/doctype/asset/depreciation.py:305
+#: erpnext/assets/doctype/asset/depreciation.py:306
 msgid "Depreciation Expense Account should be an Income or Expense Account."
 msgstr "يجب أن يكون حساب مصروف الاستهلاك حساب إيرادات أو حساب مصروفات."
 
@@ -16707,7 +16707,7 @@ msgstr "اسم العرض"
 msgid "Disposal Date"
 msgstr "تاريخ التخلص"
 
-#: erpnext/assets/doctype/asset/depreciation.py:835
+#: erpnext/assets/doctype/asset/depreciation.py:838
 msgid "Disposal date {0} cannot be before {1} date {2} of the asset."
 msgstr "لا يمكن أن يكون تاريخ التخلص {0} قبل تاريخ {1} {2} للأصل."
 
@@ -18390,7 +18390,7 @@ msgstr ""
 msgid "Error in party matching for Bank Transaction {0}"
 msgstr "خطأ في مطابقة الأطراف للمعاملة المصرفية {0}"
 
-#: erpnext/assets/doctype/asset/depreciation.py:322
+#: erpnext/assets/doctype/asset/depreciation.py:323
 msgid "Error while posting depreciation entries"
 msgstr "حدث خطأ أثناء ترحيل قيود الإهلاك"
 
@@ -19794,6 +19794,7 @@ msgstr "ثابت"
 #. Option for the 'Account Type' (Select) field in DocType 'Account'
 #: erpnext/accounts/doctype/account/account.json
 #: erpnext/accounts/report/account_balance/account_balance.js:52
+#: erpnext/stock/doctype/item/item_list.js:20
 msgid "Fixed Asset"
 msgstr "الأصول الثابتة"
 
@@ -20030,11 +20031,11 @@ msgstr "لمستودع"
 msgid "For Work Order"
 msgstr "لأمر العمل"
 
-#: erpnext/controllers/status_updater.py:288
+#: erpnext/controllers/status_updater.py:290
 msgid "For an item {0}, quantity must be negative number"
 msgstr "بالنسبة إلى عنصر {0} ، يجب أن تكون الكمية رقمًا سالبًا"
 
-#: erpnext/controllers/status_updater.py:285
+#: erpnext/controllers/status_updater.py:287
 msgid "For an item {0}, quantity must be positive number"
 msgstr "بالنسبة إلى عنصر {0} ، يجب أن تكون الكمية رقمًا موجبًا"
 
@@ -20064,7 +20065,7 @@ msgstr "عن مورد فردي"
 msgid "For item <b>{0}</b>, only <b>{1}</b> asset have been created or linked to <b>{2}</b>. Please create or link <b>{3}</b> more asset with the respective document."
 msgstr ""
 
-#: erpnext/controllers/status_updater.py:298
+#: erpnext/controllers/status_updater.py:300
 msgid "For item {0}, rate must be a positive number. To Allow negative rates, enable {1} in {2}"
 msgstr "بالنسبة للعنصر {0}، يجب أن يكون السعر رقمًا موجبًا. للسماح بالأسعار السالبة، فعّل {1} في {2}"
 
@@ -20712,7 +20713,7 @@ msgstr "الدفع في المستقبل المرجع"
 msgid "Future Payments"
 msgstr "المدفوعات المستقبلية"
 
-#: erpnext/assets/doctype/asset/depreciation.py:385
+#: erpnext/assets/doctype/asset/depreciation.py:387
 msgid "Future date is not allowed"
 msgstr "التاريخ المستقبلي غير مسموح به"
 
@@ -21025,7 +21026,7 @@ msgstr "الحصول على مواقع البند"
 #: erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.js:119
 #: erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.js:142
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
-#: erpnext/public/js/controllers/buying.js:334
+#: erpnext/public/js/controllers/buying.js:329
 #: erpnext/selling/doctype/quotation/quotation.js:182
 #: erpnext/selling/doctype/sales_order/sales_order.js:211
 #: erpnext/selling/doctype/sales_order/sales_order.js:1216
@@ -21064,7 +21065,7 @@ msgstr "تنزيل الاصناف من BOM"
 msgid "Get Items from Material Requests against this Supplier"
 msgstr "الحصول على عناصر من طلبات المواد ضد هذا المورد"
 
-#: erpnext/public/js/controllers/buying.js:611
+#: erpnext/public/js/controllers/buying.js:606
 msgid "Get Items from Product Bundle"
 msgstr "الحصول على أصناف من حزمة المنتج"
 
@@ -21838,7 +21839,7 @@ msgstr "نص المساعدة"
 msgid "Helps you distribute the Budget/Target across months if you have seasonality in your business."
 msgstr "يساعدك ذلك على توزيع الميزانية/الهدف على مدار الأشهر إذا كان لديك موسمية في عملك."
 
-#: erpnext/assets/doctype/asset/depreciation.py:352
+#: erpnext/assets/doctype/asset/depreciation.py:353
 msgid "Here are the error logs for the aforementioned failed depreciation entries: {0}"
 msgstr "فيما يلي سجلات الأخطاء الخاصة بإدخالات الإهلاك الفاشلة المذكورة أعلاه: {0}"
 
@@ -24002,7 +24003,7 @@ msgstr "فواتير نقاط البيع غير صالحة"
 msgid "Invalid Parent Account"
 msgstr "حساب الوالد غير صالح"
 
-#: erpnext/public/js/controllers/buying.js:433
+#: erpnext/public/js/controllers/buying.js:428
 msgid "Invalid Part Number"
 msgstr "رقم الجزء غير صالح"
 
@@ -26314,7 +26315,7 @@ msgstr "جارٍ إعادة نشر تقييم الأصناف. قد يُظهر ا
 msgid "Item variant {0} exists with same attributes"
 msgstr "متغير العنصر {0} موجود بنفس السمات\\n<br>\\nItem variant {0} exists with same attributes"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:587
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:590
 msgid "Item with name {0} not found in the Purchase Order"
 msgstr ""
 
@@ -26359,7 +26360,7 @@ msgstr "الصنف{0} تم تعطيله"
 msgid "Item {0} has no Serial No. Only serialized items can have delivery based on Serial No"
 msgstr "العنصر {0} ليس له رقم تسلسلي. يتم تسليم العناصر ذات الأرقام التسلسلية فقط بناءً على الرقم التسلسلي."
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:606
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:609
 msgid "Item {0} has no changes in delivered quantity. Please unselect the row if you do not wish to update its quantity."
 msgstr ""
 
@@ -26383,7 +26384,7 @@ msgstr "تم إلغاء العنصر {0}\\n<br>\\nItem {0} is cancelled"
 msgid "Item {0} is disabled"
 msgstr "تم تعطيل البند {0}"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:592
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:595
 msgid "Item {0} is not a drop ship item. Only drop ship items can have Delivered Qty updated."
 msgstr ""
 
@@ -26431,7 +26432,7 @@ msgstr "العنصر {0} غير موجود في جدول \"المواد الخا
 msgid "Item {0} not found."
 msgstr "العنصر {0} غير موجود."
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:324
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:327
 msgid "Item {0}: Ordered qty {1} cannot be less than minimum order qty {2} (defined in Item)."
 msgstr "البند {0} الكمية المطلوبة {1} لا يمكن أن تكون أقل من الحد الأدنى للطلب {2} (المحددة في البند)."
 
@@ -27506,7 +27507,7 @@ msgstr "رقم الرخصة"
 msgid "License Plate"
 msgstr ""
 
-#: erpnext/controllers/status_updater.py:489
+#: erpnext/controllers/status_updater.py:499
 msgid "Limit Crossed"
 msgstr "الحدود تجاوزت"
 
@@ -28493,7 +28494,7 @@ msgstr "الصانع"
 msgid "Manufacturer Part Number"
 msgstr "رقم قطعة المُصَنِّع"
 
-#: erpnext/public/js/controllers/buying.js:430
+#: erpnext/public/js/controllers/buying.js:425
 msgid "Manufacturer Part Number <b>{0}</b> is invalid"
 msgstr "رقم جزء الشركة المصنعة <b>{0}</b> غير صالح"
 
@@ -30959,7 +30960,7 @@ msgstr "لا تتطلب الفواتير المستحقة إعادة تقييم 
 msgid "No outstanding {0} found for the {1} {2} which qualify the filters you have specified."
 msgstr "لم يتم العثور على أي {0} متميز لـ {1} {2} التي تفي بالمعايير التي حددتها."
 
-#: erpnext/public/js/controllers/buying.js:540
+#: erpnext/public/js/controllers/buying.js:535
 msgid "No pending Material Requests found to link for the given items."
 msgstr "لم يتم العثور على طلبات المواد المعلقة للربط للعناصر المحددة."
 
@@ -32751,6 +32752,11 @@ msgstr "تم تجاوز حدّ السماح بالفواتير الزائدة ل
 msgid "Over Delivery/Receipt Allowance (%)"
 msgstr "بدل التسليم/الاستلام الزائد (%)"
 
+#. Label of the over_order_allowance (Float) field in DocType 'Buying Settings'
+#: erpnext/buying/doctype/buying_settings/buying_settings.json
+msgid "Over Order Allowance (%)"
+msgstr ""
+
 #. Label of the over_picking_allowance (Percent) field in DocType 'Stock
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
@@ -32761,7 +32767,7 @@ msgstr "بدل الإفراط في الانتقاء"
 msgid "Over Receipt"
 msgstr "إيصال زائد"
 
-#: erpnext/controllers/status_updater.py:494
+#: erpnext/controllers/status_updater.py:504
 msgid "Over Receipt/Delivery of {0} {1} ignored for item {2} because you have {3} role."
 msgstr "تم تجاهل استلام/تسليم {0} {1} للعنصر {2} لأن لديك الدور {3} ."
 
@@ -32781,7 +32787,7 @@ msgstr "بدل التحويل الزائد (%)"
 msgid "Over Withheld"
 msgstr "مبالغ محجوزة"
 
-#: erpnext/controllers/status_updater.py:496
+#: erpnext/controllers/status_updater.py:506
 msgid "Overbilling of {0} {1} ignored for item {2} because you have {3} role."
 msgstr "تم تجاهل الفوترة الزائدة لـ {0} {1} للعنصر {2} لأن لديك الدور {3} ."
 
@@ -35765,7 +35771,7 @@ msgstr "الرجاء إنشاء إيصال شراء أو فاتورة شراء �
 msgid "Please delete Product Bundle {0}, before merging {1} into {2}"
 msgstr "يرجى حذف حزمة المنتج {0}قبل دمج {1} في {2}"
 
-#: erpnext/assets/doctype/asset/depreciation.py:559
+#: erpnext/assets/doctype/asset/depreciation.py:562
 msgid "Please disable workflow temporarily for Journal Entry {0}"
 msgstr "يرجى تعطيل سير العمل مؤقتًا لإدخال دفتر اليومية {0}"
 
@@ -36313,7 +36319,7 @@ msgstr ""
 msgid "Please select at least one filter: Item Code, Batch, or Serial No."
 msgstr "يرجى تحديد فلتر واحد على الأقل: رمز الصنف، أو رقم الدفعة، أو الرقم التسلسلي."
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:580
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:583
 msgid "Please select at least one item to update delivered quantity."
 msgstr ""
 
@@ -36421,11 +36427,11 @@ msgstr "الرجاء تحديد {0} أولا\\n<br>\\nPlease select {0} first"
 msgid "Please set 'Apply Additional Discount On'"
 msgstr "يرجى تحديد 'تطبيق خصم إضافي على'"
 
-#: erpnext/assets/doctype/asset/depreciation.py:786
+#: erpnext/assets/doctype/asset/depreciation.py:789
 msgid "Please set 'Asset Depreciation Cost Center' in Company {0}"
 msgstr "يرجى تحديد \"مركز تكلفة اهلاك الأصول\" للشركة {0}"
 
-#: erpnext/assets/doctype/asset/depreciation.py:784
+#: erpnext/assets/doctype/asset/depreciation.py:787
 msgid "Please set 'Gain/Loss Account on Asset Disposal' in Company {0}"
 msgstr "يرجى تحديد \"احساب لربح / الخسارة عند التخلص من الأصول\" للشركة {0}"
 
@@ -36467,7 +36473,7 @@ msgstr "يرجى تعيين الشركة"
 msgid "Please set Customer Address to determine if the transaction is an export."
 msgstr "يرجى تحديد عنوان العميل لتحديد ما إذا كانت المعاملة عبارة عن تصدير."
 
-#: erpnext/assets/doctype/asset/depreciation.py:748
+#: erpnext/assets/doctype/asset/depreciation.py:751
 msgid "Please set Depreciation related Accounts in Asset Category {0} or Company {1}"
 msgstr "يرجى تحديد الحسابات المتعلقة بالاهلاك في فئة الأصول {0} أو الشركة {1}"
 
@@ -36485,7 +36491,7 @@ msgstr "يرجى تحديد الرمز الضريبي للعميل '%s'"
 msgid "Please set Fiscal Code for the public administration '%s'"
 msgstr "يرجى تحديد الرمز المالي للإدارة العامة '%s'"
 
-#: erpnext/assets/doctype/asset/depreciation.py:734
+#: erpnext/assets/doctype/asset/depreciation.py:737
 msgid "Please set Fixed Asset Account in Asset Category {0}"
 msgstr "يرجى تعيين حساب الأصول الثابتة في فئة الأصول {0}"
 
@@ -36688,7 +36694,7 @@ msgstr "يرجى تعيين {0} إلى {1}، وهو نفس الحساب الذي
 msgid "Please setup and enable a group account with the Account Type - {0} for the company {1}"
 msgstr "يرجى إعداد وتفعيل حساب مجموعة بنوع الحساب {0} للشركة {1}"
 
-#: erpnext/assets/doctype/asset/depreciation.py:357
+#: erpnext/assets/doctype/asset/depreciation.py:358
 msgid "Please share this email with your support team so that they can find and fix the issue."
 msgstr "يرجى مشاركة هذه الرسالة الإلكترونية مع فريق الدعم الخاص بك حتى يتمكنوا من إيجاد المشكلة وحلها."
 
@@ -37990,8 +37996,8 @@ msgstr "المنتج"
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 #: erpnext/buying/doctype/purchase_order_item/purchase_order_item.json
 #: erpnext/buying/workspace/buying/buying.json
-#: erpnext/public/js/controllers/buying.js:330
-#: erpnext/public/js/controllers/buying.js:615
+#: erpnext/public/js/controllers/buying.js:325
+#: erpnext/public/js/controllers/buying.js:610
 #: erpnext/selling/doctype/product_bundle/product_bundle.json
 #: erpnext/selling/workspace/selling/selling.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
@@ -38678,6 +38684,7 @@ msgstr "نشر"
 #: erpnext/projects/doctype/project/project_dashboard.py:16
 #: erpnext/setup/doctype/company/company.py:463 erpnext/setup/install.py:435
 #: erpnext/stock/doctype/item/item.json
+#: erpnext/stock/doctype/item/item_list.js:30
 #: erpnext/stock/doctype/item_lead_time/item_lead_time.json
 #: erpnext/stock/doctype/item_reorder/item_reorder.json
 #: erpnext/stock/doctype/material_request/material_request.json
@@ -38999,7 +39006,7 @@ msgstr "تم إنشاء أمر الشراء {0}"
 msgid "Purchase Order {0} is not submitted"
 msgstr "طلب الشراء {0} يجب أن يعتمد\\n<br>\\nPurchase Order {0} is not submitted"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:948
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:951
 msgid "Purchase Orders"
 msgstr "طلبات الشراء"
 
@@ -39014,7 +39021,7 @@ msgstr "عدد أوامر الشراء"
 msgid "Purchase Orders Items Overdue"
 msgstr "أوامر الشراء البنود المتأخرة"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:285
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:288
 msgid "Purchase Orders are not allowed for {0} due to a scorecard standing of {1}."
 msgstr "لا يسمح بأوامر الشراء {0} بسبب وضع بطاقة النقاط {1}."
 
@@ -39259,6 +39266,7 @@ msgstr "المشتريات"
 #. Label of the purpose (Select) field in DocType 'Stock Reconciliation'
 #: erpnext/assets/doctype/asset_movement/asset_movement.json
 #: erpnext/manufacturing/doctype/master_production_schedule/master_production_schedule.js:163
+#: erpnext/stock/doctype/item/item_list.js:40
 #: erpnext/stock/doctype/material_request/material_request.json
 #: erpnext/stock/doctype/pick_list/pick_list.json
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:459
@@ -39965,7 +39973,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:194
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:218
 #: erpnext/manufacturing/doctype/production_plan_sub_assembly_item/production_plan_sub_assembly_item.json
-#: erpnext/public/js/controllers/buying.js:622
+#: erpnext/public/js/controllers/buying.js:617
 #: erpnext/public/js/stock_analytics.js:50
 #: erpnext/public/js/utils/serial_no_batch_selector.js:499
 #: erpnext/selling/doctype/quotation_item/quotation_item.json
@@ -40144,7 +40152,7 @@ msgstr "كوارت دراي (الولايات المتحدة)"
 msgid "Quart Liquid (US)"
 msgstr "كوارت ليكويد (الولايات المتحدة)"
 
-#: erpnext/selling/report/sales_analytics/sales_analytics.py:437
+#: erpnext/selling/report/sales_analytics/sales_analytics.py:461
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:125
 msgid "Quarter {0} {1}"
 msgstr "الربع {0} {1}"
@@ -43454,7 +43462,7 @@ msgstr "الصف #{0}: الأصل {1} لا يمكن بيعه، فهو بالفع
 msgid "Row #{0}: Asset {1} is already sold"
 msgstr "الصف #{0}: الأصل {1} قد تم بيعه بالفعل"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:333
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:336
 msgid "Row #{0}: BOM is not specified for subcontracting item {0}"
 msgstr ""
 
@@ -43593,7 +43601,7 @@ msgstr "الصف #{0}: العنصر المقدم من العميل {1} ليس ج
 msgid "Row #{0}: Dates overlapping with other row in group {1}"
 msgstr "الصف #{0}: التواريخ المتداخلة مع صف آخر في المجموعة {1}"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:357
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:360
 msgid "Row #{0}: Default BOM not found for FG Item {1}"
 msgstr "الصف #{0}: لم يتم العثور على قائمة مكونات المنتج النهائية الافتراضية لعنصر المنتج النهائي {1}"
 
@@ -43617,17 +43625,17 @@ msgstr "الصف #{0}: لم يتم تعيين حساب المصروفات للع
 msgid "Row #{0}: Expense account {1} is not valid for Purchase Invoice {2}. Only expense accounts from non-stock items are allowed."
 msgstr "الصف #{0}: حساب المصروفات {1} غير صالح لفاتورة الشراء {2}. يُسمح فقط بحسابات المصروفات الخاصة بالعناصر غير المخزنة."
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:362
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:365
 #: erpnext/selling/doctype/sales_order/sales_order.py:305
 msgid "Row #{0}: Finished Good Item Qty can not be zero"
 msgstr "الصف #{0}: لا يمكن أن تكون كمية المنتج النهائي صفرًا"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:344
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:347
 #: erpnext/selling/doctype/sales_order/sales_order.py:285
 msgid "Row #{0}: Finished Good Item is not specified for service item {1}"
 msgstr "الصف #{0}: لم يتم تحديد عنصر المنتج النهائي لعنصر الخدمة {1}"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:351
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:354
 #: erpnext/selling/doctype/sales_order/sales_order.py:292
 msgid "Row #{0}: Finished Good Item {1} must be a sub-contracted item"
 msgstr "الصف #{0}: يجب أن يكون المنتج النهائي {1} منتجًا تم التعاقد عليه من الباطن"
@@ -44029,7 +44037,7 @@ msgstr "الصف #{0}: لا يمكنك استخدام بُعد المخزون '{
 msgid "Row #{0}: You must select an Asset for Item {1}."
 msgstr "الصف #{0}: يجب عليك تحديد أصل للعنصر {1}."
 
-#: erpnext/public/js/controllers/buying.js:270
+#: erpnext/public/js/controllers/buying.js:265
 msgid "Row #{0}: {1} can not be negative for item {2}"
 msgstr "الصف # {0}: {1} لا يمكن أن يكون سالبا للبند {2}"
 
@@ -44724,9 +44732,14 @@ msgstr "طريقة تحصيل الراتب"
 #: erpnext/setup/install.py:430
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:297
 #: erpnext/stock/doctype/item/item.json
+#: erpnext/stock/doctype/item/item_list.js:29
 #: erpnext/stock/doctype/pick_list/pick_list_dashboard.py:16
 msgid "Sales"
 msgstr "مبيعات"
+
+#: erpnext/stock/doctype/item/item_list.js:28
+msgid "Sales & Purchase"
+msgstr ""
 
 #: erpnext/setup/doctype/company/company.py:649
 msgid "Sales Account"
@@ -45798,7 +45811,7 @@ msgstr "أصول خردة"
 msgid "Scrap Warehouse"
 msgstr "الخردة مستودع"
 
-#: erpnext/assets/doctype/asset/depreciation.py:387
+#: erpnext/assets/doctype/asset/depreciation.py:389
 msgid "Scrap date cannot be before purchase date"
 msgstr "لا يمكن أن يكون تاريخ التلف قبل تاريخ الشراء"
 
@@ -48880,6 +48893,7 @@ msgstr "معلومات قانونية ومعلومات عامة أخرى عن ب
 #: erpnext/manufacturing/doctype/bom/bom_dashboard.py:14
 #: erpnext/setup/doctype/incoterm/incoterm.json
 #: erpnext/setup/workspace/home/home.json
+#: erpnext/stock/doctype/item/item_list.js:21
 #: erpnext/stock/doctype/material_request/material_request_dashboard.py:17
 #: erpnext/stock/workspace/stock/stock.json
 #: erpnext/workspace_sidebar/stock.json
@@ -50045,7 +50059,7 @@ msgstr "بند خدمة طلب التعاقد من الباطن"
 msgid "Subcontracting Order Supplied Item"
 msgstr "بند مورد من طلب التعاقد من الباطن"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:985
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:988
 msgid "Subcontracting Order {0} created."
 msgstr "تم إنشاء أمر التعاقد من الباطن {0} ."
 
@@ -50133,7 +50147,7 @@ msgstr ""
 msgid "Subdivision"
 msgstr "تقسيم فرعي"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:981
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:984
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:1116
 msgid "Submit Action Failed"
 msgstr "فشل إرسال الإجراء"
@@ -52383,7 +52397,7 @@ msgstr "لا يمكن استيعاب العناصر التالية، التي ت
 msgid "The following Purchase Invoices are not submitted:"
 msgstr "لم يتم تقديم فواتير الشراء التالية:"
 
-#: erpnext/assets/doctype/asset/depreciation.py:347
+#: erpnext/assets/doctype/asset/depreciation.py:348
 msgid "The following assets have failed to automatically post depreciation entries: {0}"
 msgstr "فشلت الأصول التالية في تسجيل قيود الإهلاك تلقائيًا: {0}"
 
@@ -52501,6 +52515,12 @@ msgstr "الحساب الأصل {0} غير موجود في القالب الذي
 #: erpnext/accounts/doctype/payment_request/payment_request.py:187
 msgid "The payment gateway account in plan {0} is different from the payment gateway account in this payment request"
 msgstr "يختلف حساب بوابة الدفع في الخطة {0} عن حساب بوابة الدفع في طلب الدفع هذا"
+
+#. Description of the 'Over Order Allowance (%)' (Float) field in DocType
+#. 'Buying Settings'
+#: erpnext/buying/doctype/buying_settings/buying_settings.json
+msgid "The percentage by which you are allowed to order more on a Purchase Order than the quantity requested on the originating Material Request. For example, if the Material Request has 100 units and the allowance is 10%, you can order up to 110 units"
+msgstr ""
 
 #. Description of the 'Over Billing Allowance (%)' (Currency) field in DocType
 #. 'Accounts Settings'
@@ -52793,7 +52813,7 @@ msgstr "هذا العنصر هو متغير {0} (قالب)."
 msgid "This Month's Summary"
 msgstr "ملخص هذا الشهر"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:994
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:997
 msgid "This Purchase Order has been fully subcontracted."
 msgstr "تم التعاقد من الباطن بالكامل على أمر الشراء هذا."
 
@@ -52827,7 +52847,7 @@ msgstr "تم تصنيف هذه الفئة من الأصول على أنها غي
 msgid "This covers all scorecards tied to this Setup"
 msgstr "وهذا يغطي جميع بطاقات الأداء مرتبطة بهذا الإعداد"
 
-#: erpnext/controllers/status_updater.py:478
+#: erpnext/controllers/status_updater.py:488
 msgid "This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?"
 msgstr "هذه الوثيقة هي على حد كتبها {0} {1} لمادة {4}. وجعل لكم آخر {3} ضد نفسه {2}؟"
 
@@ -52968,7 +52988,7 @@ msgstr "تم إنشاء هذا الجدول عندما تم استعادة ال�
 msgid "This schedule was created when Asset {0} was restored on Asset Capitalization {1}'s cancellation."
 msgstr "تم إنشاء هذا الجدول عندما تمت استعادة الأصل {0} عند إلغاء رسملة الأصل {1}."
 
-#: erpnext/assets/doctype/asset/depreciation.py:461
+#: erpnext/assets/doctype/asset/depreciation.py:464
 msgid "This schedule was created when Asset {0} was restored."
 msgstr "تم إنشاء هذا الجدول عند استعادة الأصل {0} ."
 
@@ -52976,7 +52996,7 @@ msgstr "تم إنشاء هذا الجدول عند استعادة الأصل {0}
 msgid "This schedule was created when Asset {0} was returned through Sales Invoice {1}."
 msgstr "تم إنشاء هذا الجدول عندما تم إرجاع الأصل {0} من خلال فاتورة المبيعات {1}."
 
-#: erpnext/assets/doctype/asset/depreciation.py:420
+#: erpnext/assets/doctype/asset/depreciation.py:422
 msgid "This schedule was created when Asset {0} was scrapped."
 msgstr "تم إنشاء هذا الجدول عندما تم إلغاء الأصل {0} ."
 
@@ -53477,11 +53497,15 @@ msgstr "لإضافة عمليات، حدد خانة الاختيار \"مع ال
 msgid "To add subcontracted Item's raw materials if include exploded items is disabled."
 msgstr "لإضافة المواد الخام للعنصر المتعاقد عليه من الباطن في حالة تعطيل خيار تضمين العناصر المفككة."
 
-#: erpnext/controllers/status_updater.py:471
+#: erpnext/controllers/status_updater.py:481
 msgid "To allow over billing, update \"Over Billing Allowance\" in Accounts Settings or the Item."
 msgstr "للسماح بزيادة الفواتير ، حدّث &quot;Over Billing Allowance&quot; في إعدادات الحسابات أو العنصر."
 
-#: erpnext/controllers/status_updater.py:467
+#: erpnext/controllers/status_updater.py:475
+msgid "To allow over ordering, update \"Over Order Allowance\" in Buying Settings."
+msgstr ""
+
+#: erpnext/controllers/status_updater.py:477
 msgid "To allow over receipt / delivery, update \"Over Receipt/Delivery Allowance\" in Stock Settings or the Item."
 msgstr "للسماح بوصول الاستلام / التسليم ، قم بتحديث &quot;الإفراط في الاستلام / بدل التسليم&quot; في إعدادات المخزون أو العنصر."
 
@@ -55076,6 +55100,7 @@ msgstr "إعدادات ضريبة القيمة المضافة في الإمار�
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/delivery_stop/delivery_stop.json
 #: erpnext/stock/doctype/item/item.json
+#: erpnext/stock/doctype/item/item_list.js:41
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
 #: erpnext/stock/doctype/item_price/item_price.json
 #: erpnext/stock/doctype/material_request_item/material_request_item.json
@@ -56475,7 +56500,7 @@ msgid "Variance ({})"
 msgstr "التباين ({})"
 
 #: erpnext/stock/doctype/item/item.js:241
-#: erpnext/stock/doctype/item/item_list.js:22
+#: erpnext/stock/doctype/item/item_list.js:59
 #: erpnext/stock/report/item_variant_details/item_variant_details.py:74
 msgid "Variant"
 msgstr "مختلف"
@@ -57421,7 +57446,7 @@ msgstr "الموقع:"
 msgid "Week of the year"
 msgstr ""
 
-#: erpnext/selling/report/sales_analytics/sales_analytics.py:433
+#: erpnext/selling/report/sales_analytics/sales_analytics.py:457
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:121
 msgid "Week {0} {1}"
 msgstr "الأسبوع {0} {1}"
@@ -58318,7 +58343,7 @@ msgstr ""
 msgid "You don't have permission to update Company details. Please contact your System Manager."
 msgstr ""
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:599
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:602
 msgid "You don't have permission to update Received Qty DocField for item {0}"
 msgstr ""
 
@@ -58439,7 +58464,7 @@ msgstr "ملف مضغوط"
 msgid "[Important] [ERPNext] Auto Reorder Errors"
 msgstr "[هام] [ERPNext] إعادة ترتيب الأخطاء تلقائيًا"
 
-#: erpnext/controllers/status_updater.py:302
+#: erpnext/controllers/status_updater.py:304
 msgid "`Allow Negative rates for Items`"
 msgstr "السماح بأسعار سلبية للعناصر"
 
@@ -58698,8 +58723,8 @@ msgstr "تم البيع"
 msgid "subscription is already cancelled."
 msgstr "تم إلغاء الاشتراك بالفعل."
 
-#: erpnext/controllers/status_updater.py:481
-#: erpnext/controllers/status_updater.py:500
+#: erpnext/controllers/status_updater.py:491
+#: erpnext/controllers/status_updater.py:510
 msgid "target_ref_field"
 msgstr "حقل مرجع الهدف"
 
@@ -58726,7 +58751,7 @@ msgstr "لإلغاء تخصيص مبلغ فاتورة الإرجاع هذه قب
 msgid "unique e.g. SAVE20  To be used to get discount"
 msgstr "فريدة مثل SAVE20 لاستخدامها للحصول على الخصم"
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:629
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:632
 msgid "updated delivered quantity for item {0} to {1}"
 msgstr ""
 
@@ -58893,7 +58918,7 @@ msgstr "سيتم تخطي إنشاء السجلات التالية {0} ."
 msgid "{0} currency must be same as company's default currency. Please select another account."
 msgstr ""
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:294
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:297
 msgid "{0} currently has a {1} Supplier Scorecard standing, and Purchase Orders to this supplier should be issued with caution."
 msgstr "{0} لديها حاليا {1} بطاقة أداء بطاقة الموردين، ويجب إصدار أوامر الشراء إلى هذا المورد بحذر."
 
@@ -59177,7 +59202,7 @@ msgstr "تم دفع المبلغ بالكامل بالفعل {0} {1} ."
 msgid "{0} {1} has already been partly paid. Please use the 'Get Outstanding Invoice' or the 'Get Outstanding Orders' button to get the latest outstanding amounts."
 msgstr "تم سداد جزء من المبلغ المستحق {0} {1} . يُرجى استخدام زر \"الحصول على الفاتورة المستحقة\" أو زر \"الحصول على الطلبات المستحقة\" للاطلاع على أحدث المبالغ المستحقة."
 
-#: erpnext/buying/doctype/purchase_order/purchase_order.py:434
+#: erpnext/buying/doctype/purchase_order/purchase_order.py:437
 #: erpnext/selling/doctype/sales_order/sales_order.py:600
 #: erpnext/stock/doctype/material_request/material_request.py:255
 msgid "{0} {1} has been modified. Please refresh."
