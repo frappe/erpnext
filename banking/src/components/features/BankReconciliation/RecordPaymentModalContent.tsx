@@ -1013,7 +1013,7 @@ const FetchInvoicesModal = ({ onClose }: { onClose: () => void }) => {
     return <div className="flex flex-col gap-4">
         {isLoading ? <TableLoader columns={6} /> : null}
         {error && <ErrorBanner error={error} />}
-        {error && <ErrorBanner error={allocateAmountToReferencesError} />}
+        {allocateAmountToReferencesError && <ErrorBanner error={allocateAmountToReferencesError} />}
         {message ? <MissingFiltersBanner text={<MarkdownRenderer content={message} />} /> : null}
 
         {data?.message && data?.message?.length > 0 ? <Table>
@@ -1229,7 +1229,7 @@ const OtherChargesSection = ({ currency }: { currency: string }) => {
                         </TableCell>
                         <TableCell className="align-top">
                             <DataField
-                                name={`entries.${index}.user_remark`}
+                                name={`deductions.${index}.description`}
                                 label={_("Remarks")}
                                 inputProps={{
                                     placeholder: _("e.g. Bank Charges"),
