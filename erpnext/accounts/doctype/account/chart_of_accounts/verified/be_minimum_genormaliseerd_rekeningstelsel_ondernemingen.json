@@ -117,96 +117,127 @@
             "root_type": "Liability",
             "Voorzieningen en uitgestelde belastingen": {
                 "Voorzieningen voor pensioenen en soortgelijke verplichtingen": {
-                    "account_number": "160"
+                    "account_number": "160",
+                    "account_type": "Liability"
                 },
                 "Voorzieningen voor belastingen": {
-                    "account_number": "161"
+                    "account_number": "161",
+                    "account_type": "Liability"
                 },
                 "Voorzieningen voor grote herstellingswerken en grote onderhoudswerken": {
-                    "account_number": "162"
+                    "account_number": "162",
+                    "account_type": "Liability"
                 },
                 "Voorzieningen voor milieuverplichtingen": {
-                    "account_number": "163"
+                    "account_number": "163",
+                    "account_type": "Liability"
                 },
                 "Uitgestelde belastingen": {
                     "Uitgestelde belastingen op kapitaalsubsidies": {
-                        "account_number": "1680"
+                        "account_number": "1680",
+                        "account_type": "Liability"
                     },
                     "Uitgestelde belastingen op gerealiseerde meerwaarden op immateriële vaste activa": {
-                        "account_number": "1681"
+                        "account_number": "1681",
+                        "account_type": "Liability"
                     },
                     "Uitgestelde belastingen op gerealiseerde meerwaarden op materiële vaste activa": {
-                        "account_number": "1682"
+                        "account_number": "1682",
+                        "account_type": "Liability"
                     },
                     "Uitgestelde belastingen op gerealiseerde meerwaarden op effecten die zijn uitgegeven door de Belgische openbare sector": {
-                        "account_number": "1687"
+                        "account_number": "1687",
+                        "account_type": "Liability"
                     },
                     "Buitenlandse uitgestelde belastingen": {
-                        "account_number": "1688"
+                        "account_number": "1688",
+                        "account_type": "Liability"
                     },
-                    "account_number": "168"
+                    "account_number": "168",
+                    "account_type": "Liability"
                 },
-                "account_number": "16"
+                "account_number": "16",
+                "account_type": "Liability"
             },
             "Schulden op meer dan één jaar": {
                 "Achtergestelde leningen": {
                     "Converteerbaar": {
-                        "account_number": "1700"
+                        "account_number": "1700",
+                        "account_type": "Liability"
                     },
                     "Niet converteerbaar": {
-                        "account_number": "1701"
+                        "account_number": "1701",
+                        "account_type": "Liability"
                     },
-                    "account_number": "170"
+                    "account_number": "170",
+                    "account_type": "Liability"
                 },
                 "Niet-achtergestelde obligatieleningen": {
                     "Converteerbaar": {
-                        "account_number": "1710"
+                        "account_number": "1710",
+                        "account_type": "Liability"
                     },
                     "Niet converteerbaar": {
-                        "account_number": "1711"
+                        "account_number": "1711",
+                        "account_type": "Liability"
                     },
-                    "account_number": "171"
+                    "account_number": "171",
+                    "account_type": "Liability"
                 },
                 "Leasingschulden en soortgelijke schulden": {
-                    "account_number": "172"
+                    "account_number": "172",
+                    "account_type": "Liability"
                 },
                 "Kredietinstellingen": {
                     "Schulden op rekening": {
-                        "account_number": "1730"
+                        "account_number": "1730",
+                        "account_type": "Liability"
                     },
                     "Promessen": {
-                        "account_number": "1731"
+                        "account_number": "1731",
+                        "account_type": "Liability"
                     },
                     "Acceptkredieten": {
-                        "account_number": "1732"
+                        "account_number": "1732",
+                        "account_type": "Liability"
                     },
-                    "account_number": "173"
+                    "account_number": "173",
+                    "account_type": "Liability"
                 },
                 "Overige leningen": {
-                    "account_number": "174"
+                    "account_number": "174",
+                    "account_type": "Liability"
                 },
                 "Handelsschulden": {
                     "Leveranciers": {
-                        "account_number": "1750"
+                        "account_number": "1750",
+                        "account_type": "Liability"
                     },
                     "Te betalen wissel": {
-                        "account_number": "1751"
+                        "account_number": "1751",
+                        "account_type": "Liability"
                     },
-                    "account_number": "175"
+                    "account_number": "175",
+                    "account_type": "Liability"
                 },
                 "Vooruitbetalingen op bestellingen": {
-                    "account_number": "176"
+                    "account_number": "176",
+                    "account_type": "Liability"
                 },
                 "Borgtochten ontvangen in contanten": {
-                    "account_number": "178"
+                    "account_number": "178",
+                    "account_type": "Liability"
                 },
                 "Overige schulden": {
-                    "account_number": "179"
+                    "account_number": "179",
+                    "account_type": "Liability"
                 },
-                "account_number": "17"
+                "account_number": "17",
+                "account_type": "Liability"
             },
             "Voorschot aan de vennoten op de verdeling van het netto-actief (-)": {
-                "account_number": "19"
+                "account_number": "19",
+                "account_type": "Liability"
             }
         },
         "KLASSE 2 : OPRICHTINGSKOSTEN, VASTE ACTIVA EN VORDERINGEN OP MEER DAN ÉÉN JAAR": {
@@ -669,25 +700,32 @@
         "KLASSE 4 : SCHULDEN OP TEN HOOGSTE ÉÉN JAAR": {
             "root_type": "Liability",
             "Schulden op meer dan één jaar die binnen het jaar vervallen (16) (zelfde onderverdeling als 17)": {
-                "account_number": "42"
+                "account_number": "42",
+                "account_type": "Current Liability"
             },
             "Financiële schulden": {
                 "Kredietinstellingen - Leningen op rekening met vaste termijn": {
-                    "account_number": "430"
+                    "account_number": "430",
+                    "account_type": "Current Liability"
                 },
                 "Kredietinstellingen - Promessen": {
-                    "account_number": "431"
+                    "account_number": "431",
+                    "account_type": "Current Liability"
                 },
                 "Kredietinstellingen - Acceptkredieten": {
-                    "account_number": "432"
+                    "account_number": "432",
+                    "account_type": "Current Liability"
                 },
                 "Kredietinstellingen - Schulden in rekening-courant": {
-                    "account_number": "433"
+                    "account_number": "433",
+                    "account_type": "Current Liability"
                 },
                 "Overige leningen": {
-                    "account_number": "439"
+                    "account_number": "439",
+                    "account_type": "Current Liability"
                 },
-                "account_number": "43"
+                "account_number": "43",
+                "account_type": "Current Liability"
             },
             "Handelsschulden": {
                 "Leveranciers": {
@@ -750,112 +788,147 @@
                 "account_type": "Payable"
             },
             "Vooruitbetalingen op bestellingen": {
-                "account_number": "46"
+                "account_number": "46",
+                "account_type": "Current Liability"
             },
             "Schulden uit de bestemming van het resultaat": {
                 "Dividenden en tantièmes over vorige boekjaren": {
-                    "account_number": "470"
+                    "account_number": "470",
+                    "account_type": "Current Liability"
                 },
                 "Dividenden over het boekjaar": {
-                    "account_number": "471"
+                    "account_number": "471",
+                    "account_type": "Current Liability"
                 },
                 "Tantièmes over het boekjaar": {
-                    "account_number": "472"
+                    "account_number": "472",
+                    "account_type": "Current Liability"
                 },
                 "Andere rechthebbenden": {
-                    "account_number": "473"
+                    "account_number": "473",
+                    "account_type": "Current Liability"
                 },
-                "account_number": "47"
+                "account_number": "47",
+                "account_type": "Current Liability"
             },
             "Diverse schulden": {
                 "Vervallen obligaties en coupons": {
-                    "account_number": "480"
+                    "account_number": "480",
+                    "account_type": "Current Liability"
                 },
                 "Borgtochten ontvangen in contanten": {
-                    "account_number": "488"
+                    "account_number": "488",
+                    "account_type": "Current Liability"
                 },
                 "Andere diverse schulden": {
-                    "account_number": "489"
+                    "account_number": "489",
+                    "account_type": "Current Liability"
                 },
-                "account_number": "48"
+                "account_number": "48",
+                "account_type": "Current Liability"
             },
             "Overlopende rekeningen": {
                 "Over te dragen kosten": {
-                    "account_number": "490"
+                    "account_number": "490",
+                    "account_type": "Current Liability"
                 },
                 "Verkregen opbrengsten": {
-                    "account_number": "491"
+                    "account_number": "491",
+                    "account_type": "Current Liability"
                 },
                 "Toe te rekenen kosten": {
-                    "account_number": "492"
+                    "account_number": "492",
+                    "account_type": "Current Liability"
                 },
                 "Over te dragen opbrengsten": {
-                    "account_number": "493"
+                    "account_number": "493",
+                    "account_type": "Current Liability"
                 },
                 "Wachtrekeningen": {
-                    "account_number": "499"
+                    "account_number": "499",
+                    "account_type": "Current Liability"
                 },
-                "account_number": "49"
+                "account_number": "49",
+                "account_type": "Current Liability"
             }
         },
         "KLASSE 5 : GELDBELEGGINGEN EN LIQUIDE MIDDELEN": {
             "root_type": "Asset",
             "Eigen aandelen": {
-                "account_number": "50"
+                "account_number": "50",
+                "account_type": "Current Asset"
             },
             "Aandelen en geldbeleggingen andere dan vastrentende beleggingen": {
                 "Aanschaffingswaarde": {
                     "Aandelen": {
-                        "account_number": "5100"
+                        "account_number": "5100",
+                        "account_type": "Current Asset"
                     },
                     "Geldbeleggingen andere dan vastrentende beleggingen": {
-                        "account_number": "5101"
+                        "account_number": "5101",
+                        "account_type": "Current Asset"
                     },
-                    "account_number": "510"
+                    "account_number": "510",
+                    "account_type": "Current Asset"
                 },
                 "Niet-opgevraagde bedragen (-)": {
                     "Aandelen": {
-                        "account_number": "5110"
+                        "account_number": "5110",
+                        "account_type": "Current Asset"
                     },
-                    "account_number": "511"
+                    "account_number": "511",
+                    "account_type": "Current Asset"
                 },
                 "Geboekte waardeverminderingen (-)": {
                     "Aandelen": {
-                        "account_number": "5190"
+                        "account_number": "5190",
+                        "account_type": "Current Asset"
                     },
                     "Geldbeleggingen andere dan vastrentende beleggingen": {
-                        "account_number": "5191"
+                        "account_number": "5191",
+                        "account_type": "Current Asset"
                     },
-                    "account_number": "519"
+                    "account_number": "519",
+                    "account_type": "Current Asset"
                 },
-                "account_number": "51"
+                "account_number": "51",
+                "account_type": "Current Asset"
             },
             "Vastrentende effecten": {
                 "Aanschaffingswaarde": {
-                    "account_number": "520"
+                    "account_number": "520",
+                    "account_type": "Current Asset"
                 },
                 "Geboekte waardeverminderingen (–)": {
-                    "account_number": "529"
+                    "account_number": "529",
+                    "account_type": "Current Asset"
                 },
-                "account_number": "52"
+                "account_number": "52",
+                "account_type": "Current Asset"
             },
             "Termijndeposito's": {
                 "Op meer dan een jaar": {
-                    "account_number": "530"
+                    "account_number": "530",
+                    "account_type": "Current Asset"
                 },
                 "Op meer dan een maand en op ten hoogste een jaar": {
-                    "account_number": "531"
+                    "account_number": "531",
+                    "account_type": "Current Asset"
                 },
                 "Op ten hoogste een maand": {
-                    "account_number": "532"
+                    "account_number": "532",
+                    "account_type": "Current Asset"
                 },
                 "Geboekte waardeverminderingen (–)": {
-                    "account_number": "539"
+                    "account_number": "539",
+                    "account_type": "Current Asset"
                 },
-                "account_number": "53"
+                "account_number": "53",
+                "account_type": "Current Asset"
             },
             "Te incasseren vervallen waarden": {
-                "account_number": "54"
+                "account_number": "54",
+                "account_type": "Current Asset"
             },
             "Kredietinstellingen": {
                 "Bank": {
@@ -874,7 +947,8 @@
                 "account_type": "Cash"
             },
             "Interne overboekingen": {
-                "account_number": "58"
+                "account_number": "58",
+                "account_type": "Temporary"
             }
         },
         "KLASSE 6 : KOSTEN": {
