@@ -2112,11 +2112,7 @@ def repost_required_for_queue(doc: StockController) -> bool:
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
-def check_item_quality_inspection(doctype, items):
-=======
-def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str | list[dict]):
->>>>>>> c6a88ab1d2 (fix(stock): allow to create quality inspection after purchase/delivery)
+def check_item_quality_inspection(doctype: str, items: str | list[dict]):
 	if isinstance(items, str):
 		items = json.loads(items)
 
