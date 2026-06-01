@@ -18,7 +18,7 @@ interface ParsedErrorMessage {
 }
 
 const parseHeading = (message?: ParsedErrorMessage) => {
-    if (message?.title === 'Message' || message?.title === 'Error') return "There was an error."
+    if (message?.title === 'Message' || message?.title === 'Error') return _("There was an error.")
     return message?.title
 }
 

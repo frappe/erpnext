@@ -83,7 +83,7 @@ const BankClearanceSummaryView = () => {
                 toast.success(_("Copied to clipboard"))
             })
         },
-        [copyToClipboard, _],
+        [copyToClipboard],
     )
 
     const accountCurrency = useMemo(
@@ -200,7 +200,7 @@ const BankClearanceSummaryView = () => {
                 },
             },
         ],
-        [_, accountCurrency, bankAccount, companyID, mutate, onCopy],
+        [accountCurrency, bankAccount, companyID, mutate, onCopy],
     )
 
     return <div className="space-y-4 py-2">

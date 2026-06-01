@@ -91,7 +91,7 @@ const IncorrectlyClearedEntriesView = () => {
                     })
                 })
         },
-        [clearClearingDate, mutate, _],
+        [clearClearingDate, mutate],
     )
 
     const accountCurrency = useMemo(
@@ -174,7 +174,7 @@ const IncorrectlyClearedEntriesView = () => {
                 ),
             },
         ],
-        [_, accountCurrency, onClearClick],
+        [accountCurrency, onClearClick],
     )
 
     return <div className="space-y-4 py-2">

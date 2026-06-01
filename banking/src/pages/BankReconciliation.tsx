@@ -1,20 +1,16 @@
 import BankBalance from "@/components/features/BankReconciliation/BankBalance"
-import BankClearanceSummary from "@/components/features/BankReconciliation/BankClearanceSummary"
 import BankPicker from "@/components/features/BankReconciliation/BankPicker"
 import BankRecDateFilter from "@/components/features/BankReconciliation/BankRecDateFilter"
-import BankReconciliationStatement from "@/components/features/BankReconciliation/BankReconciliationStatement"
-import BankTransactions from "@/components/features/BankReconciliation/BankTransactionList"
 import BankTransactionUnreconcileModal from "@/components/features/BankReconciliation/BankTransactionUnreconcileModal"
 import CompanySelector from "@/components/features/BankReconciliation/CompanySelector"
-import IncorrectlyClearedEntries from "@/components/features/BankReconciliation/IncorrectlyClearedEntries"
 import MatchAndReconcile from "@/components/features/BankReconciliation/MatchAndReconcile"
 import Settings from "@/components/features/Settings/Settings"
 import ActionLog from "@/components/features/ActionLog/ActionLog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import _ from "@/lib/translate"
-import { useLayoutEffect, useRef, useState } from "react"
-import { AlertTriangleIcon, CheckCircleIcon, HomeIcon, LandmarkIcon, ListIcon, ScrollTextIcon, ShuffleIcon } from "lucide-react"
+import { lazy, Suspense, useLayoutEffect, useRef, useState } from "react"
+import { AlertTriangleIcon, CheckCircleIcon, HomeIcon, LandmarkIcon, ListIcon, Loader2Icon, ScrollTextIcon, ShuffleIcon } from "lucide-react"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Badge } from "@/components/ui/badge"
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
@@ -22,6 +18,10 @@ import { Button } from "@/components/ui/button"
 import { useAtomValue } from "jotai"
 import { selectedBankAccountAtom } from "@/components/features/BankReconciliation/bankRecAtoms"
 
+const BankReconciliationStatement = lazy(() => import('@/components/features/BankReconciliation/BankReconciliationStatement'))
+const BankTransactions = lazy(() => import('@/components/features/BankReconciliation/BankTransactionList'))
+const BankClearanceSummary = lazy(() => import('@/components/features/BankReconciliation/BankClearanceSummary'))
+const IncorrectlyClearedEntries = lazy(() => import('@/components/features/BankReconciliation/IncorrectlyClearedEntries'))
 
 const BankReconciliation = () => {
 
@@ -35,7 +35,7 @@ const BankReconciliation = () => {
         }
     }, [])
 
-    const remainingHeightAfterTabs = window.innerHeight - headerHeight - 270
+    const remainingHeightAfterTabs = window.innerHeight - headerHeight - 220
 
     return (
         <div>
@@ -122,18 +122,24 @@ const BankRecTabs = ({ remainingHeightAfterTabs }: { remainingHeightAfterTabs: n
         <TabsContent value="Match and Reconcile">
             <MatchAndReconcile contentHeight={remainingHeightAfterTabs} />
         </TabsContent>
-        <TabsContent value="Bank Reconciliation Statement">
-            <BankReconciliationStatement />
-        </TabsContent>
-        <TabsContent value="Bank Transactions">
-            <BankTransactions />
-        </TabsContent>
-        <TabsContent value="Bank Clearance Summary">
-            <BankClearanceSummary />
-        </TabsContent>
-        <TabsContent value="Incorrectly Cleared Entries">
-            <IncorrectlyClearedEntries />
-        </TabsContent>
+        <Suspense fallback={
+            <div className="flex items-center justify-center p-16">
+                <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
+            </div>
+        }>
+            <TabsContent value="Bank Reconciliation Statement">
+                <BankReconciliationStatement />
+            </TabsContent>
+            <TabsContent value="Bank Transactions">
+                <BankTransactions />
+            </TabsContent>
+            <TabsContent value="Bank Clearance Summary">
+                <BankClearanceSummary />
+            </TabsContent>
+            <TabsContent value="Incorrectly Cleared Entries">
+                <IncorrectlyClearedEntries />
+            </TabsContent>
+        </Suspense>
     </Tabs>
 }
 
