@@ -21,7 +21,7 @@ const BankTransactionUnreconcileModalBody = () => {
 
 	const [unreconcileModal, setBankRecUnreconcileModal] = useAtom(bankRecUnreconcileModalAtom)
 
-	const { data: transaction, error } = useFrappeGetDoc<BankTransaction>('Bank Transaction', unreconcileModal)
+	const { data: transaction, error, isLoading } = useFrappeGetDoc<BankTransaction>('Bank Transaction', unreconcileModal)
 
 	const { call, loading, error: unreconcileError } = useFrappePostCall('erpnext.accounts.doctype.bank_transaction.bank_transaction.unreconcile_transaction')
 
@@ -98,7 +98,7 @@ const BankTransactionUnreconcileModalBody = () => {
 			</div>
 			<AlertDialogFooter>
 				<AlertDialogCancel disabled={loading}>{_("Cancel")}</AlertDialogCancel>
-				<AlertDialogAction onClick={onUnreconcile} theme="red" disabled={loading}>
+				<AlertDialogAction onClick={onUnreconcile} theme="red" disabled={loading || isLoading}>
 					{_("Unreconcile")}
 				</AlertDialogAction>
 			</AlertDialogFooter>

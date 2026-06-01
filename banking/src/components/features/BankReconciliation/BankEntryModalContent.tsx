@@ -14,6 +14,7 @@ import SelectedTransactionDetails from "./SelectedTransactionDetails"
 import { AccountFormField, CurrencyFormField, DataField, DateField, LinkFormField, PartyTypeFormField, SmallTextField } from "@/components/ui/form-elements"
 import { Form } from "@/components/ui/form"
 import { useCallback, useContext, useMemo, useRef, useState } from "react"
+import { useMultiFileUploadProgress } from "@/hooks/useMultiFileUploadProgress"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ArrowDownRight, ArrowUpRight, Plus, Trash2 } from "lucide-react"
@@ -286,7 +287,7 @@ const BankEntryForm = ({ selectedTransaction }: { selectedTransaction: Unreconci
     const { file: frappeFile } = useContext(FrappeContext) as FrappeConfig
 
     const [isUploading, setIsUploading] = useState(false)
-    const [uploadProgress, setUploadProgress] = useState(0)
+    const { uploadProgress, startTracking, updateFileProgress, resetProgress } = useMultiFileUploadProgress()
 
     const [files, setFiles] = useState<File[]>([])
 
@@ -329,30 +330,27 @@ const BankEntryForm = ({ selectedTransaction }: { selectedTransaction: Unreconci
 
             if (files.length > 0) {
                 setIsUploading(true)
+                startTracking(files.length)
 
-                const uploadPromises = files.map(f => {
+                const uploadPromises = files.map((f, fileIndex) => {
                     return frappeFile.uploadFile(f, {
                         isPrivate: true,
                         doctype: "Journal Entry",
                         docname: message.journal_entry.name,
                     }, (_bytesUploaded, _totalBytes, progress) => {
-
-                        setUploadProgress((currentProgress) => {
-                            //If there are multiple files, we need to add the progress to the current progress
-                            return currentProgress + ((progress?.progress ?? 0) / files.length)
-                        })
-
+                        updateFileProgress(fileIndex, progress?.progress ?? 0)
                     })
                 })
 
                 return Promise.all(uploadPromises).then(() => {
-                    setUploadProgress(0)
+                    resetProgress()
                     setIsUploading(false)
                 }).catch((error) => {
                     console.error(error)
                     toast.error(_("Error uploading attachments"), {
                         duration: 4000,
                     })
+                    resetProgress()
                     setIsUploading(false)
                 })
             } else {
@@ -534,7 +532,8 @@ const Entries = ({ company, isWithdrawal, currency }: { company: string, isWithd
     }, [fields])
 
     const onRemove = useCallback(() => {
-        remove(selectedRows)
+        // Do not remove the first row
+        remove(selectedRows.filter(index => index !== 0))
         setSelectedRows([])
     }, [remove, selectedRows])
 

@@ -22,6 +22,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { PaymentEntry } from "@/types/Accounts/PaymentEntry"
 import { H4 } from "@/components/ui/typography"
 import { usePaymentEntryCalculations } from "@/hooks/usePaymentEntryCalculations"
+import { useMultiFileUploadProgress } from "@/hooks/useMultiFileUploadProgress"
 import { MissingFiltersBanner } from "./MissingFiltersBanner"
 import { formatDate, today } from "@/lib/date"
 import { slug } from "@/lib/frappe"
@@ -85,7 +86,8 @@ const BulkPaymentEntryForm = ({ transactions }: { transactions: UnreconciledTran
             bank_transaction_names: transactions.map((transaction) => transaction.name),
             party_type: data.party_type,
             party: data.party,
-            account: data.account
+            account: data.account,
+            mode_of_payment: data.mode_of_payment
         }).then(({ message }) => {
 
             addToActionLog({
@@ -306,7 +308,7 @@ const PaymentEntryForm = ({ selectedTransaction, selectedBankAccount }: { select
     const { file: frappeFile } = useContext(FrappeContext) as FrappeConfig
 
     const [isUploading, setIsUploading] = useState(false)
-    const [uploadProgress, setUploadProgress] = useState(0)
+    const { uploadProgress, startTracking, updateFileProgress, resetProgress } = useMultiFileUploadProgress()
 
     const [files, setFiles] = useState<File[]>([])
 
@@ -351,24 +353,20 @@ const PaymentEntryForm = ({ selectedTransaction, selectedBankAccount }: { select
 
             if (files.length > 0) {
                 setIsUploading(true)
+                startTracking(files.length)
 
-                const uploadPromises = files.map(f => {
+                const uploadPromises = files.map((f, fileIndex) => {
                     return frappeFile.uploadFile(f, {
                         isPrivate: true,
                         doctype: "Payment Entry",
                         docname: message.payment_entry.name,
                     }, (_bytesUploaded, _totalBytes, progress) => {
-
-                        setUploadProgress((currentProgress) => {
-                            //If there are multiple files, we need to add the progress to the current progress
-                            return currentProgress + ((progress?.progress ?? 0) / files.length)
-                        })
-
+                        updateFileProgress(fileIndex, progress?.progress ?? 0)
                     })
                 })
 
                 return Promise.all(uploadPromises).then(() => {
-                    setUploadProgress(0)
+                    resetProgress()
                     setIsUploading(false)
                 })
             } else {
@@ -376,7 +374,7 @@ const PaymentEntryForm = ({ selectedTransaction, selectedBankAccount }: { select
             }
 
         }).then(() => {
-            setUploadProgress(0)
+            resetProgress()
             setIsUploading(false)
             onReconcile(selectedTransaction)
             onClose()

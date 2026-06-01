@@ -23,7 +23,7 @@ const Settings = () => {
 			<Tooltip>
 				<TooltipTrigger asChild>
 					<DialogTrigger asChild>
-						<Button variant={'outline'} isIconButton size='md'>
+						<Button variant={'outline'} isIconButton size='md' aria-label={_("Settings")}>
 							<SettingsIcon />
 						</Button>
 					</DialogTrigger>

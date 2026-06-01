@@ -3,7 +3,6 @@ import {
 	AlertDialogContent,
 	AlertDialogDescription,
 	AlertDialogHeader,
-	AlertDialogOverlay,
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useAtom } from "jotai"
@@ -35,7 +34,6 @@ const BankTransactionUnreconcileModal = () => {
 
 	return (
 		<AlertDialog open onOpenChange={onOpenChange}>
-			<AlertDialogOverlay />
 			<AlertDialogContent className="min-w-2xl">
 				<AlertDialogHeader>
 					<AlertDialogTitle>{_("Undo Transaction Reconciliation")}</AlertDialogTitle>

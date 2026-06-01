@@ -1,6 +1,6 @@
-import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { bankRecSelectedTransactionAtom, bankRecTransferModalAtom, bankRecUnreconcileModalAtom, SelectedBank, selectedBankAccountAtom } from './bankRecAtoms'
-import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogClose, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { DialogFooter, DialogClose } from '@/components/ui/dialog'
 import _ from '@/lib/translate'
 import { UnreconciledTransaction, useGetBankAccounts, useGetRuleForTransaction, useRefreshUnreconciledTransactions, useUpdateActionLog } from './utils'
 import { Button } from '@/components/ui/button'
@@ -18,6 +18,7 @@ import { Form } from '@/components/ui/form'
 import { AccountFormField, DataField, DateField, SmallTextField } from '@/components/ui/form-elements'
 import SelectedTransactionsTable from './SelectedTransactionsTable'
 import { useCurrentCompany } from '@/hooks/useCurrentCompany'
+import { useMultiFileUploadProgress } from '@/hooks/useMultiFileUploadProgress'
 import { formatDate } from '@/lib/date'
 import { useContext, useMemo, useState } from 'react'
 import { formatCurrency } from '@/lib/numbers'
@@ -172,7 +173,7 @@ const InternalTransferForm = ({ selectedBankAccount, selectedTransaction }: { se
     const { file: frappeFile } = useContext(FrappeContext) as FrappeConfig
 
     const [isUploading, setIsUploading] = useState(false)
-    const [uploadProgress, setUploadProgress] = useState(0)
+    const { uploadProgress, startTracking, updateFileProgress, resetProgress } = useMultiFileUploadProgress()
 
     const [files, setFiles] = useState<File[]>([])
 
@@ -217,31 +218,27 @@ const InternalTransferForm = ({ selectedBankAccount, selectedTransaction }: { se
 
             if (files.length > 0) {
                 setIsUploading(true)
+                startTracking(files.length)
 
-                const uploadPromises = files.map(f => {
+                const uploadPromises = files.map((f, fileIndex) => {
                     return frappeFile.uploadFile(f, {
                         isPrivate: true,
                         doctype: "Payment Entry",
                         docname: message.payment_entry.name,
                     }, (_bytesUploaded, _totalBytes, progress) => {
-
-                        setUploadProgress((currentProgress) => {
-                            //If there are multiple files, we need to add the progress to the current progress
-                            return currentProgress + ((progress?.progress ?? 0) / files.length)
-                        })
-
+                        updateFileProgress(fileIndex, progress?.progress ?? 0)
                     })
                 })
 
                 return Promise.all(uploadPromises).then(() => {
-                    setUploadProgress(0)
+                    resetProgress()
                     setIsUploading(false)
                 })
             } else {
                 return Promise.resolve()
             }
         }).then(() => {
-            setUploadProgress(0)
+            resetProgress()
             setIsUploading(false)
             onReconcile(selectedTransaction)
             onClose()
@@ -375,11 +372,11 @@ const BankOrCashPicker = ({ bankAccount, onAccountChange, selectedAccount, compa
 
     return <div className='grid grid-cols-4 gap-4'>
         {banks.map((bank) => (
-            <div
-                className={cn('border p-2 rounded-md flex items-center gap-2 cursor-pointer outline-[0.5px] transition-all duration-200 hover:bg-surface-gray-1 dark:hover:bg-surface-gray-3',
+            <button
+                className={cn('text-left border p-2 rounded-md flex items-center gap-2 cursor-pointer outline-[0.5px] transition-all duration-200 hover:bg-surface-gray-1 dark:hover:bg-surface-gray-3',
                     selectedAccount === bank.account ? 'border-outline-gray-5 outline-outline-gray-5 bg-surface-gray-1 dark:bg-surface-gray-3' : 'border-outline-gray-2 outline-outline-gray-2'
                 )}
-                role='button'
+                type='button'
                 key={bank.account}
                 onClick={() => onAccountChange(bank.account ?? '')}
             >
@@ -388,7 +385,7 @@ const BankOrCashPicker = ({ bankAccount, onAccountChange, selectedAccount, compa
                     <span className='font-semibold text-sm'>{bank.account_name} {bank.bank_account_no && <span className='text-xs text-ink-gray-5'>({bank.bank_account_no})</span>}</span>
                     <span className='text-xs text-ink-gray-5'>{bank.account}</span>
                 </div>
-            </div>
+            </button>
         ))}
         <CashPicker company={company ?? ''} selectedAccount={selectedAccount} setSelectedAccount={onAccountChange} />
     </div>
@@ -409,10 +406,10 @@ const CashPicker = ({ company, selectedAccount, setSelectedAccount }: { company:
     const account = data?.message?.default_cash_account
 
     if (account) {
-        return <div className={cn('border p-2 rounded-md flex items-center gap-2 cursor-pointer outline-[0.5px] transition-all duration-200 hover:bg-surface-gray-1 dark:hover:bg-surface-gray-3',
+        return <button className={cn('text-left border p-2 rounded-md flex items-center gap-2 cursor-pointer outline-[0.5px] transition-all duration-200 hover:bg-surface-gray-1 dark:hover:bg-surface-gray-3',
             selectedAccount === account ? 'border-outline-gray-5 outline-outline-gray-5 bg-surface-gray-1 dark:bg-surface-gray-3' : 'border-outline-gray-2 outline-outline-gray-2'
         )}
-            role='button'
+            type='button'
             onClick={() => setSelectedAccount(account ?? '')}
         >
             <div className='flex items-center justify-center h-10 w-10'>
@@ -422,7 +419,7 @@ const CashPicker = ({ company, selectedAccount, setSelectedAccount }: { company:
                 <span className='font-semibold text-sm'>Cash</span>
                 <span className='text-xs text-ink-gray-5'>{data?.message?.default_cash_account}</span>
             </div>
-        </div>
+        </button>
     }
 
     return null

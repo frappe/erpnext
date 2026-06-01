@@ -75,18 +75,20 @@ function VirtualizedListBody<T>({
     height,
     getItemKey,
     children,
+    estimateSize = 74,
 }: {
     items: T[]
     height: number
     getItemKey: (item: T, index: number) => string | number
     children: (item: T, index: number) => React.ReactNode
+    estimateSize?: number
 }) {
     const scrollRef = useRef<HTMLDivElement>(null)
 
     const rowVirtualizer = useVirtualizer({
         count: items.length,
         getScrollElement: () => scrollRef.current,
-        estimateSize: () => 1,
+        estimateSize: () => estimateSize,
         overscan: 8,
         getItemKey: (index) => String(getItemKey(items[index], index)),
     })
@@ -277,6 +279,7 @@ const UnreconciledTransactions = ({ contentHeight }: { contentHeight: number }) 
         <VirtualizedListBody
             items={results}
             height={listHeight}
+            estimateSize={74}
             getItemKey={(transaction) => transaction.name}
         >
             {(transaction) => <UnreconciledTransactionItem transaction={transaction} />}
@@ -816,6 +819,7 @@ const VouchersForTransaction = ({ transaction, contentHeight }: { transaction: U
         <VirtualizedListBody
             items={voucherList}
             height={listHeight}
+            estimateSize={121}
             getItemKey={(voucher) => voucher.name}
         >
             {(voucher, index) => <VoucherItem voucher={voucher} index={index} />}
