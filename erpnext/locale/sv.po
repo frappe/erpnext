@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-31 10:18+0000\n"
-"PO-Revision-Date: 2026-05-31 22:14\n"
+"PO-Revision-Date: 2026-06-01 16:23\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -18368,11 +18368,11 @@ msgstr "Förfluten Tid"
 #. Option for the 'Fuel Type' (Select) field in DocType 'Vehicle'
 #: erpnext/setup/doctype/vehicle/vehicle.json
 msgid "Electric"
-msgstr "Elektrisk"
+msgstr "El"
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:222
 msgid "Electrical"
-msgstr "Elektrisk"
+msgstr "El"
 
 #: erpnext/patches/v16_0/make_workstation_operating_components.py:47
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:314
@@ -26028,7 +26028,7 @@ msgstr "Är Mall"
 #. Label of the is_transporter (Check) field in DocType 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "Is Transporter"
-msgstr "Är Leverantör"
+msgstr "Är Transportör"
 
 #: erpnext/setup/install.py:161
 msgid "Is Your Company Address"
