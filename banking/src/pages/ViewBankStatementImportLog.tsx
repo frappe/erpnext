@@ -1,4 +1,4 @@
-import CSVImport from '@/components/features/BankStatementImporter/CSV/CSVImport'
+import { lazy } from 'react'
 import { useGetStatementDetails } from '@/components/features/BankStatementImporter/import_utils'
 import { Button } from '@/components/ui/button'
 import { useDirection } from '@/components/ui/direction'
@@ -7,6 +7,8 @@ import _ from '@/lib/translate'
 import { useFrappeDocumentEventListener } from 'frappe-react-sdk'
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { Link, useParams } from 'react-router'
+
+const CSVImport = lazy(() => import('@/components/features/BankStatementImporter/CSV/CSVImport'))
 
 const ViewBankStatementImportLog = () => {
 
