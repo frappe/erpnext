@@ -134,9 +134,9 @@ erpnext.PointOfSale.ItemSelector = class {
 					<div class="item-name">
 						${frappe.utils.escape_html(frappe.ellipsis(item.item_name, 18))}
 					</div>
-					<div class="item-rate">${frappe.utils.escape_html(
+					<div class="item-rate">${
 						format_currency(price_list_rate, item.currency, precision) || 0
-					)} / ${frappe.utils.escape_html(uom)}</div>
+					} / ${frappe.utils.escape_html(uom)}</div>
 				</div>
 			</div>`;
 	}
@@ -265,7 +265,6 @@ erpnext.PointOfSale.ItemSelector = class {
 			let rate = $item.attr("data-rate");
 			let stock_uom = $item.attr("data-stock-uom");
 
-			// escape(undefined) returns "undefined" then unescape returns "undefined"
 			batch_no = batch_no === "undefined" ? undefined : batch_no;
 			serial_no = serial_no === "undefined" ? undefined : serial_no;
 			uom = uom === "undefined" ? undefined : uom;
