@@ -106,7 +106,7 @@ class TestSupplier(ERPNextTestSuite):
 	def test_supplier_country(self):
 		# Test that country field exists in Supplier DocType
 		supplier = frappe.get_doc("Supplier", "_Test Supplier with Country")
-		self.assertTrue("country" in supplier.as_dict())
+		self.assertIn("country", supplier.as_dict())
 
 		# Test if test supplier field record is 'Greece'
 		self.assertEqual(supplier.country, "Greece")

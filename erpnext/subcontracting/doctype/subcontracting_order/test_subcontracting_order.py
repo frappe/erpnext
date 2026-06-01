@@ -640,7 +640,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 			qty=10,
 		)
 
-		self.assertTrue(mr.docstatus == 1)
+		self.assertEqual(mr.docstatus, 1)
 
 		new_requested_qty = frappe.db.get_value(
 			"Bin",
@@ -726,7 +726,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		sco.submit()
 
 		sre_list = get_sre_details_for_voucher("Subcontracting Order", sco.name)
-		self.assertTrue(len(sre_list) > 0)
+		self.assertGreater(len(sre_list), 0)
 
 		se_dict = make_rm_stock_entry(sco.name)
 		se = frappe.get_doc(se_dict)
@@ -843,9 +843,8 @@ def create_subcontracting_order(**args):
 			warehouses = []
 			for item in po.items:
 				warehouses.append(item.warehouse)
-			else:
-				for idx, val in enumerate(sco.items):
-					val.warehouse = warehouses[idx]
+			for idx, val in enumerate(sco.items):
+				val.warehouse = warehouses[idx]
 
 	warehouses = set()
 	for item in sco.items:

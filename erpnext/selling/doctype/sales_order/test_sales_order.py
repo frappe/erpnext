@@ -986,8 +986,8 @@ class TestSalesOrder(ERPNextTestSuite):
 
 		so = make_sales_order(item_code="_Test Service Product Bundle", warehouse=None)
 
-		self.assertTrue("_Test Service Product Bundle Item 1" in [d.item_code for d in so.packed_items])
-		self.assertTrue("_Test Service Product Bundle Item 2" in [d.item_code for d in so.packed_items])
+		self.assertIn("_Test Service Product Bundle Item 1", [d.item_code for d in so.packed_items])
+		self.assertIn("_Test Service Product Bundle Item 2", [d.item_code for d in so.packed_items])
 
 	def test_mix_type_product_bundle(self):
 		make_item("_Test Mix Product Bundle", {"is_stock_item": 0})
@@ -2342,8 +2342,8 @@ class TestSalesOrder(ERPNextTestSuite):
 		pick_list.save()
 		for row in pick_list.locations:
 			self.assertEqual(row.qty, 1.0)
-			self.assertFalse(row.warehouse == rejected_warehouse)
-			self.assertTrue(row.warehouse == warehouse)
+			self.assertNotEqual(row.warehouse, rejected_warehouse)
+			self.assertEqual(row.warehouse, warehouse)
 
 	def test_pick_list_for_batch(self):
 		from erpnext.stock.doctype.pick_list.pick_list import create_delivery_note
@@ -2371,16 +2371,16 @@ class TestSalesOrder(ERPNextTestSuite):
 
 		for row in pick_list.locations:
 			self.assertEqual(row.qty, 10.0)
-			self.assertTrue(row.warehouse == warehouse)
-			self.assertTrue(row.batch_no == batch_no)
+			self.assertEqual(row.warehouse, warehouse)
+			self.assertEqual(row.batch_no, batch_no)
 
 		pick_list.submit()
 
 		dn = create_delivery_note(pick_list.name)
 		for row in dn.items:
 			self.assertEqual(row.qty, 10.0)
-			self.assertTrue(row.warehouse == warehouse)
-			self.assertTrue(row.batch_no == batch_no)
+			self.assertEqual(row.warehouse, warehouse)
+			self.assertEqual(row.batch_no, batch_no)
 
 		dn.submit()
 		dn.reload()
@@ -2438,7 +2438,7 @@ class TestSalesOrder(ERPNextTestSuite):
 
 		so.items[0].rate = 90
 		so.save()
-		self.assertTrue(so.items[0].discount_amount == 27558.0)
+		self.assertEqual(so.items[0].discount_amount, 27558.0)
 		so.submit()
 
 		warehouse = create_warehouse("NW Warehouse FOR Rate", company=so.company)
@@ -2584,13 +2584,13 @@ class TestSalesOrder(ERPNextTestSuite):
 
 		self.assertEqual(len(sres), 1)
 		sre_doc = frappe.get_doc("Stock Reservation Entry", sres[0].name)
-		self.assertFalse(sre_doc.status == "Delivered")
+		self.assertNotEqual(sre_doc.status, "Delivered")
 
 		si = make_sales_invoice(so.name)
 		si.update_stock = 1
 		si.submit()
 		sre_doc.reload()
-		self.assertTrue(sre_doc.status == "Delivered")
+		self.assertEqual(sre_doc.status, "Delivered")
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_zero_qty_in_sales_order": 1})
 	def test_deliver_zero_qty_purchase_order(self):

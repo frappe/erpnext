@@ -184,7 +184,7 @@ class TestStockEntry(ERPNextTestSuite):
 			for d in mr.items:
 				items.append(d.item_code)
 
-		self.assertTrue(item_code in items)
+		self.assertIn(item_code, items)
 
 	def test_add_to_transit_entry(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
@@ -953,7 +953,7 @@ class TestStockEntry(ERPNextTestSuite):
 
 		stock_entry = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
 		stock_entry.insert()
-		self.assertTrue("_Test Variant Item-S" in [d.item_code for d in stock_entry.items])
+		self.assertIn("_Test Variant Item-S", [d.item_code for d in stock_entry.items])
 
 	def test_nagative_stock_for_batch(self):
 		item = make_item(
