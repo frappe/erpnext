@@ -9,11 +9,10 @@ import frappe
 from frappe import qb, scrub
 from frappe.desk.reportview import get_filters_cond, get_match_cond
 from frappe.permissions import has_permission
-from frappe.query_builder import Case, Criterion, DocType, Field
+from frappe.query_builder import Case, Criterion, DocType
 from frappe.query_builder.functions import Concat, CustomFunction, Length, Locate, Substring, Sum
 from frappe.utils import nowdate, today, unique
 from pypika import Order
-from pypika.terms import LiteralValue
 
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions

@@ -17,7 +17,6 @@ from frappe.utils import (
 	format_date,
 	get_datetime,
 	get_link_to_form,
-	getdate,
 	now,
 	nowdate,
 	nowtime,

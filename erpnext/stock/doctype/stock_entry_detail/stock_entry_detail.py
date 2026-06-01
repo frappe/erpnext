@@ -5,20 +5,15 @@ import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 from frappe.utils import (
-	cint,
-	cstr,
 	flt,
-	format_time,
-	formatdate,
 	get_link_to_form,
 	getdate,
-	nowdate,
 )
 
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	OpeningEntryAccountError,
 )
-from erpnext.stock.stock_ledger import NegativeStockError, get_previous_sle, is_negative_stock_allowed
+from erpnext.stock.stock_ledger import get_previous_sle
 
 
 class StockEntryDetail(Document):

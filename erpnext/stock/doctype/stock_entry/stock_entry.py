@@ -6,20 +6,15 @@ import json
 from collections import defaultdict
 
 import frappe
-from frappe import _, bold
+from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.query_builder import DocType
-from frappe.query_builder.functions import Max, Sum
+from frappe.query_builder.functions import Sum
 from frappe.utils import (
 	cint,
-	comma_or,
 	cstr,
 	flt,
-	format_time,
-	formatdate,
 	get_link_to_form,
-	getdate,
 	nowdate,
 )
 
@@ -29,27 +24,17 @@ from erpnext.accounts.utils import get_account_currency
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
 from erpnext.manufacturing.doctype.bom.bom import (
-	add_additional_cost,
 	get_op_cost_from_sub_assemblies,
-	get_secondary_items_from_sub_assemblies,
 	validate_bom_no,
 )
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
-from erpnext.stock.doctype.item.item import get_item_defaults
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.get_item_details import (
 	ItemDetailsCtx,
 	get_barcode_data,
 	get_bin_details,
 	get_conversion_factor,
 	get_default_cost_center,
-)
-from erpnext.stock.serial_batch_bundle import (
-	SerialBatchCreation,
-	get_batch_nos,
-	get_empty_batches_based_work_order,
-	get_serial_or_batch_items,
 )
 from erpnext.stock.stock_ledger import get_previous_sle, get_valuation_rate
 from erpnext.stock.utils import get_incoming_rate
