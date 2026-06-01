@@ -562,6 +562,9 @@ def process_individual_date(docname: str, date, report_type, parentfield):
 
 	if parentfield == "z_opening_balances":
 		query = query.where(gle.is_opening.eq("Yes"))
+	else:
+		# Keep balances aligned with legacy PCV logic (non-opening transactions only)
+		query = query.where(gle.is_opening.eq("No"))
 
 	query = query.groupby(gle.account)
 	for dim in dimensions:
