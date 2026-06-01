@@ -4,6 +4,8 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder import Case, CustomFunction
+from frappe.query_builder.functions import Count, Max, Sum
 from frappe.utils import cint
 
 
@@ -14,6 +16,9 @@ def execute(filters=None):
 	days_since_last_order = filters.get("days_since_last_order")
 	doctype = filters.get("doctype")
 
+	if doctype not in {"Sales Order", "Sales Invoice"}:
+		frappe.throw(_("Invalid value {0} for 'Doctype'").format(doctype))
+
 	if cint(days_since_last_order) <= 0:
 		frappe.throw(_("'Days Since Last Order' must be greater than or equal to zero"))
 
@@ -21,50 +26,66 @@ def execute(filters=None):
 	customers = get_sales_details(doctype)
 
 	data = []
-	for cust in customers:
-		if cint(cust[8]) >= cint(days_since_last_order):
-			cust.insert(7, get_last_sales_amt(cust[0], doctype))
-			data.append(cust)
+	for C in customers:
+		if cint(C[8]) >= cint(days_since_last_order):
+			C.insert(7, get_last_sales_amt(C[0], doctype))
+			data.append(C)
 	return columns, data
 
 
 def get_sales_details(doctype):
-	cond = """sum(so.base_net_total) as 'total_order_considered',
-			max(so.posting_date) as 'last_order_date',
-			DATEDIFF(CURRENT_DATE, max(so.posting_date)) as 'days_since_last_order' """
-	if doctype == "Sales Order":
-		cond = """sum(if(so.status = "Stopped",
-				so.base_net_total * so.per_delivered/100,
-				so.base_net_total)) as 'total_order_considered',
-			max(so.transaction_date) as 'last_order_date',
-			DATEDIFF(CURRENT_DATE, max(so.transaction_date)) as 'days_since_last_order'"""
+	C = frappe.qb.DocType("Customer")
+	DT = frappe.qb.DocType(doctype)
 
-	return frappe.db.sql(
-		f"""select
-			cust.name,
-			cust.customer_name,
-			cust.territory,
-			cust.customer_group,
-			count(distinct(so.name)) as 'num_of_order',
-			sum(base_net_total) as 'total_order_value', {cond}
-		from `tabCustomer` cust, `tab{doctype}` so
-		where cust.name = so.customer and so.docstatus = 1
-		group by cust.name
-		order by 'days_since_last_order' desc """,
-		as_list=1,
-	)
+	DateDiff = CustomFunction("DATEDIFF", ["d1", "d2"])
+	CurDate = CustomFunction("CURRENT_DATE", [])
+
+	if doctype == "Sales Order":
+		total_considered = Sum(
+			Case()
+			.when(DT.status == "Stopped", DT.base_net_total * DT.per_delivered / 100)
+			.else_(DT.base_net_total)
+		)
+		date_col = DT.transaction_date
+	else:
+		total_considered = Sum(DT.base_net_total)
+		date_col = DT.posting_date
+
+	last_order_date = Max(date_col)
+	days_since_last_order = DateDiff(CurDate(), last_order_date)
+
+	return (
+		frappe.qb.from_(C)
+		.inner_join(DT)
+		.on(C.name == DT.customer)
+		.select(
+			C.name,
+			C.customer_name,
+			C.territory,
+			C.customer_group,
+			Count(DT.name).distinct().as_("num_of_order"),
+			Sum(DT.base_net_total).as_("total_order_value"),
+			total_considered.as_("total_order_considered"),
+			last_order_date.as_("last_order_date"),
+			days_since_last_order.as_("days_since_last_order"),
+		)
+		.where(DT.docstatus == 1)
+		.groupby(C.name)
+		.orderby(days_since_last_order, order=frappe.qb.desc)
+	).run(as_list=True)
 
 
 def get_last_sales_amt(customer, doctype):
-	cond = "posting_date"
-	if doctype == "Sales Order":
-		cond = "transaction_date"
-	res = frappe.db.sql(
-		f"""select base_net_total from `tab{doctype}`
-		where customer = %s and docstatus = 1 order by {cond} desc
-		limit 1""",
-		customer,
-	)
+	DT = frappe.qb.DocType(doctype)
+	date_col = DT.transaction_date if doctype == "Sales Order" else DT.posting_date
+
+	res = (
+		frappe.qb.from_(DT)
+		.select(DT.base_net_total)
+		.where((DT.customer == customer) & (DT.docstatus == 1))
+		.orderby(date_col, order=frappe.qb.desc)
+		.limit(1)
+	).run()
 
 	return res and res[0][0] or 0
 
