@@ -126,8 +126,6 @@ const BulkInternalTransferForm = ({ transactions }: { transactions: Unreconciled
 
     const company = transactions && transactions.length > 0 ? transactions[0].company : (currentCompany ?? '')
 
-    console.log("This is here", transactions)
-
     return <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className='flex flex-col gap-4'>
@@ -391,7 +389,7 @@ const InternalTransferForm = ({ selectedBankAccount, selectedTransaction }: { se
 }
 
 
-const BankOrCashPicker = ({ bankAccount, onAccountChange, selectedAccount, company }: { selectedAccount: string, bankAccount: string, onAccountChange: (account: string) => void, company: string }) => {
+const BankOrCashPicker = ({ bankAccount, onAccountChange, selectedAccount, company }: { selectedAccount: string, bankAccount: string, onAccountChange: (account: string) => void, company?: string }) => {
 
     const { banks } = useGetBankAccounts(undefined, (bank) => bank.name !== bankAccount)
 
