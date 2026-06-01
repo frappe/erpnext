@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "autoname": "format:Process-PCV-{###}",
  "creation": "2025-09-25 15:44:03.534699",
  "doctype": "DocType",
@@ -7,11 +8,13 @@
  "field_order": [
   "parent_pcv",
   "status",
+  "amended_from",
+  "section_normal_balances",
   "p_l_closing_balance",
-  "normal_balances",
   "bs_closing_balance",
-  "z_opening_balances",
-  "amended_from"
+  "normal_balances",
+  "section_opening_balances",
+  "z_opening_balances"
  ],
  "fields": [
   {
@@ -64,17 +67,27 @@
    "fieldname": "bs_closing_balance",
    "fieldtype": "JSON",
    "label": "Balance Sheet Closing Balance"
+  },
+  {
+   "fieldname": "section_normal_balances",
+   "fieldtype": "Tab Break",
+   "label": "Normal Balances"
+  },
+  {
+   "fieldname": "section_opening_balances",
+   "fieldtype": "Tab Break",
+   "label": "Opening Balances"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-05 11:40:24.996403",
+ "modified": "2026-06-01 12:16:37.374412",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Period Closing Voucher",
- "naming_rule": "Expression",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
