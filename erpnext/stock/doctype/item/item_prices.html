@@ -104,9 +104,9 @@
 				</td>
 				<td>
 					{% if (p.customer) { %}
-						<a href="/app/customer/{{ p.customer }}" onclick="event.stopPropagation()">{{ p.customer }}</a>
+						<a href="/app/customer/{{ encodeURIComponent(p.customer) }}" onclick="event.stopPropagation()">{{ p.customer }}</a>
 					{% } else if (p.supplier) { %}
-						<a href="/app/supplier/{{ p.supplier }}" onclick="event.stopPropagation()">{{ p.supplier }}</a>
+						<a href="/app/supplier/{{ encodeURIComponent(p.supplier) }}" onclick="event.stopPropagation()">{{ p.supplier }}</a>
 					{% } %}
 				</td>
 				<td class="col-rate">{{ format_currency(p.price_list_rate, p.currency) }}</td>
@@ -121,7 +121,7 @@
 <div class="item-prices-footer">
 	<div>
 		{% if (has_more) { %}
-		<a href="/app/item-price?item_code={{ item_code }}" class="btn btn-xs btn-default">
+		<a href="/app/item-price?item_code={{ encodeURIComponent(item_code) }}" class="btn btn-xs btn-default">
 			{{ __("View All Prices") }}
 		</a>
 		{% } %}
