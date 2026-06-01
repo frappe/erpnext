@@ -266,20 +266,8 @@
 		},
 		"Income": {
 			"Sales": {
-				"Sales - GST 15%": {
-					"account_number": "41010",
-					"account_type": "Income Account"
-				},
-				"Sales - Zero Rated (Exports)": {
-					"account_number": "41020",
-					"account_type": "Income Account"
-				},
-				"Sales - Exempt": {
-					"account_number": "41030",
-					"account_type": "Income Account"
-				},
-				"account_number": "41000",
-				"is_group": 1
+				"account_number": "41010",
+				"account_type": "Income Account"
 			},
 			"Other Income": {
 				"Interest Income": {
