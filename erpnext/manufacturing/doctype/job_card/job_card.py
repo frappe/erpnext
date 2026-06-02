@@ -177,7 +177,7 @@ class JobCard(Document):
 			self.validate_semi_finished_goods()
 
 	def validate_semi_finished_goods(self):
-		if not self.track_semi_finished_goods:
+		if not self.track_semi_finished_goods or self.is_subcontracted:
 			return
 
 		if self.items and not self.transferred_qty and not self.skip_material_transfer:
@@ -1579,9 +1579,7 @@ def make_subcontracting_po(source_name: str, target_doc: Document | str | None =
 		"Job Card",
 		source_name,
 		{
-			"Job Card": {
-				"doctype": "Purchase Order",
-			},
+			"Job Card": {"doctype": "Purchase Order", "field_no_map": ["naming_series"]},
 		},
 		target_doc,
 		set_missing_values,
