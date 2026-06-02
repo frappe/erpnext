@@ -459,19 +459,22 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				reference_name: frm.doc.name,
 			},
 		});
+
+		if (!schedules?.length) {
+			this.make_payment_request();
+			return;
+		}
+
 		const value = await frappe.db.get_single_value(
 			"Accounts Settings",
 			"fetch_payment_schedule_in_payment_request"
 		);
 
-		if (!value || !schedules.length) {
+		if (!value) {
 			this.make_payment_request();
 			return;
 		}
-		if (!schedules || !schedules.length) {
-			frappe.msgprint(__("No pending payment schedules available."));
-			return;
-		}
+
 		schedules.forEach((schedule) => (schedule.__checked = 1));
 
 		const dialog = new frappe.ui.Dialog({
@@ -834,26 +837,24 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 								},
 								async () => {
 									// for internal customer instead of pricing rule directly apply valuation rate on item
-									const fetch_valuation_rate_for_internal_transactions =
-										await frappe.db.get_single_value(
-											"Accounts Settings",
-											"fetch_valuation_rate_for_internal_transaction"
-										);
-									if (
-										(me.frm.doc.is_internal_customer ||
-											me.frm.doc.is_internal_supplier) &&
-										fetch_valuation_rate_for_internal_transactions
-									) {
-										me.get_incoming_rate(
-											item,
-											me.frm.posting_date,
-											me.frm.posting_time,
-											me.frm.doc.doctype,
-											me.frm.doc.company
-										);
-									} else {
-										me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
+									if (me.frm.doc.is_internal_customer || me.frm.doc.is_internal_supplier) {
+										const fetch_valuation_rate_for_internal_transactions =
+											await frappe.db.get_single_value(
+												"Accounts Settings",
+												"fetch_valuation_rate_for_internal_transaction"
+											);
+										if (fetch_valuation_rate_for_internal_transactions) {
+											me.get_incoming_rate(
+												item,
+												me.frm.posting_date,
+												me.frm.posting_time,
+												me.frm.doc.doctype,
+												me.frm.doc.company
+											);
+											return;
+										}
 									}
+									me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
 								},
 								() => {
 									if (me.frm.doc.is_internal_customer || me.frm.doc.is_internal_supplier) {
