@@ -2195,7 +2195,9 @@ class SalesInvoice(SellingController):
 
 	# valdite the redemption and then delete the loyalty points earned on cancel of the invoice
 	def delete_loyalty_point_entry(self):
-		lp_entry = frappe.db.get_all("Loyalty Point Entry", filters={"invoice": self.name}, fields=["name"])
+		lp_entry = frappe.db.get_all(
+			"Loyalty Point Entry", filters={"invoice": self.name, "loyalty_points": (">", 0)}, fields=["name"]
+		)
 
 		if not lp_entry:
 			return
