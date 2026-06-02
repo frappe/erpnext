@@ -139,16 +139,16 @@ class Analytics:
 			self.get_rows()
 
 	def _get_permitted_parent_names(self):
-		return frappe.qb.get_query(
-			table=self.filters.doc_type,
+		return frappe.get_list(
+			self.filters.doc_type,
 			fields=["name"],
 			filters={
 				"docstatus": 1,
 				"company": ["in", self.filters.company],
 				self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
 			},
-			ignore_permissions=False,
-		).run(pluck="name")
+			pluck="name",
+		)
 
 	def get_sales_transactions_based_on_order_type(self):
 		if self.filters["value_quantity"] == "Value":
@@ -199,12 +199,11 @@ class Analytics:
 		if self.filters.doc_type in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
 			filters.update({"is_opening": "No"})
 
-		self.entries = frappe.qb.get_query(
-			table=self.filters.doc_type,
+		self.entries = frappe.get_list(
+			self.filters.doc_type,
 			fields=[entity, entity_name, value_field, self.date_field],
 			filters=filters,
-			ignore_permissions=False,
-		).run(as_dict=True)
+		)
 
 		self.entity_names = {}
 		for d in self.entries:
@@ -266,12 +265,11 @@ class Analytics:
 		if self.filters.doc_type in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
 			filters.update({"is_opening": "No"})
 
-		self.entries = frappe.qb.get_query(
-			table=self.filters.doc_type,
+		self.entries = frappe.get_list(
+			self.filters.doc_type,
 			fields=[entity_field, value_field, self.date_field],
 			filters=filters,
-			ignore_permissions=False,
-		).run(as_dict=True)
+		)
 		self.get_groups()
 
 	def get_sales_transactions_based_on_item_group(self):
@@ -321,12 +319,11 @@ class Analytics:
 		if self.filters.doc_type in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
 			filters.update({"is_opening": "No"})
 
-		self.entries = frappe.qb.get_query(
-			table=self.filters.doc_type,
+		self.entries = frappe.get_list(
+			self.filters.doc_type,
 			fields=[entity, value_field, self.date_field],
 			filters=filters,
-			ignore_permissions=False,
-		).run(as_dict=True)
+		)
 
 	def get_rows(self):
 		self.data = []
