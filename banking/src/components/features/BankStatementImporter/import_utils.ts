@@ -1,6 +1,63 @@
 import { BankStatementImportLog } from "@/types/Accounts/BankStatementImportLog"
-import { useFrappeGetCall } from "frappe-react-sdk"
+import { useFrappeGetCall, useFrappePostCall } from "frappe-react-sdk"
 
+export type ColumnMapsTo =
+    | "Do not import"
+    | "Date"
+    | "Withdrawal"
+    | "Deposit"
+    | "Amount"
+    | "Description"
+    | "Reference"
+    | "Transaction Type"
+    | "Debit/Credit"
+    | "Balance"
+    | "Included Fee"
+    | "Excluded Fee"
+    | "Party Name/Account Holder"
+    | "Party Account No."
+    | "Party IBAN"
+
+export const COLUMN_MAPS_TO_OPTIONS: ColumnMapsTo[] = [
+    "Do not import",
+    "Date",
+    "Description",
+    "Reference",
+    "Withdrawal",
+    "Deposit",
+    "Amount",
+    "Balance",
+    "Debit/Credit",
+    "Transaction Type",
+    "Included Fee",
+    "Excluded Fee",
+    "Party Name/Account Holder",
+    "Party Account No.",
+    "Party IBAN",
+]
+
+export interface PDFTableColumn {
+    index: number
+    header_text: string
+    variable?: string
+    maps_to: ColumnMapsTo
+}
+
+export interface PDFTable {
+    page: number
+    table_index: number
+    bbox: [number, number, number, number]
+    page_width: number
+    page_height: number
+    page_image: string | null
+    render_scale: number | null
+    rows: string[][]
+    header_index: number | null
+    column_mapping: PDFTableColumn[]
+    date_format?: string
+    amount_format?: string
+    included: boolean
+}
 
 export interface GetStatementDetailsResponse {
     doc: BankStatementImportLog,
@@ -30,6 +87,7 @@ export interface GetStatementDetailsResponse {
     date_format: string,
     raw_data: Array<Array<string>>,
     currency: string,
+    pdf_tables?: PDFTable[],
 }
 
 export const useGetStatementDetails = (id: string) => {
@@ -39,4 +97,16 @@ export const useGetStatementDetails = (id: string) => {
         revalidateOnFocus: false
     })
 
+}
+
+export const useUpdatePDFTables = () => {
+    return useFrappePostCall<{ message: GetStatementDetailsResponse }>("erpnext.accounts.doctype.bank_statement_import_log.bank_statement_import_log.update_pdf_tables")
+}
+
+export const useReextractPDFTable = () => {
+    return useFrappePostCall<{ message: GetStatementDetailsResponse }>("erpnext.accounts.doctype.bank_statement_import_log.bank_statement_import_log.reextract_pdf_table")
+}
+
+export const useSetPDFTableHeader = () => {
+    return useFrappePostCall<{ message: GetStatementDetailsResponse }>("erpnext.accounts.doctype.bank_statement_import_log.bank_statement_import_log.set_pdf_table_header")
 }
