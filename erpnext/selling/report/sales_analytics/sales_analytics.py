@@ -138,11 +138,29 @@ class Analytics:
 			self.get_sales_transactions_based_on_project()
 			self.get_rows()
 
+	def _get_permitted_parent_names(self):
+		return frappe.get_list(
+			self.filters.doc_type,
+			fields=["name"],
+			filters={
+				"docstatus": 1,
+				"company": ["in", self.filters.company],
+				self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
+			},
+			pluck="name",
+		)
+
 	def get_sales_transactions_based_on_order_type(self):
 		if self.filters["value_quantity"] == "Value":
 			value_field = "base_net_total"
 		else:
 			value_field = "total_qty"
+
+		permitted_names = self._get_permitted_parent_names()
+		if not permitted_names:
+			self.entries = []
+			self.get_teams()
+			return
 
 		doctype = DocType(self.filters.doc_type)
 
@@ -153,12 +171,7 @@ class Analytics:
 				doctype[self.date_field],
 				doctype[value_field].as_("value_field"),
 			)
-			.where(
-				(doctype.docstatus == 1)
-				& (doctype.company.isin(self.filters.company))
-				& (doctype[self.date_field].between(self.filters.from_date, self.filters.to_date))
-				& (IfNull(doctype.order_type, "") != "")
-			)
+			.where((doctype.name.isin(permitted_names)) & (IfNull(doctype.order_type, "") != ""))
 			.orderby(doctype.order_type)
 		).run(as_dict=True)
 
@@ -186,8 +199,10 @@ class Analytics:
 		if self.filters.doc_type in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
 			filters.update({"is_opening": "No"})
 
-		self.entries = frappe.get_all(
-			self.filters.doc_type, fields=[entity, entity_name, value_field, self.date_field], filters=filters
+		self.entries = frappe.get_list(
+			self.filters.doc_type,
+			fields=[entity, entity_name, value_field, self.date_field],
+			filters=filters,
 		)
 
 		self.entity_names = {}
@@ -199,6 +214,12 @@ class Analytics:
 			value_field = "base_net_amount"
 		else:
 			value_field = "stock_qty"
+
+		permitted_names = self._get_permitted_parent_names()
+		if not permitted_names:
+			self.entries = []
+			self.entity_names = {}
+			return
 
 		doctype = DocType(self.filters.doc_type)
 		doctype_item = DocType(f"{self.filters.doc_type} Item")
@@ -214,11 +235,7 @@ class Analytics:
 				doctype_item[value_field].as_("value_field"),
 				doctype[self.date_field],
 			)
-			.where(
-				(doctype_item.docstatus == 1)
-				& (doctype.company.isin(self.filters.company))
-				& (doctype[self.date_field].between(self.filters.from_date, self.filters.to_date))
-			)
+			.where((doctype_item.docstatus == 1) & (doctype.name.isin(permitted_names)))
 		).run(as_dict=True)
 
 		self.entity_names = {}
@@ -248,7 +265,7 @@ class Analytics:
 		if self.filters.doc_type in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
 			filters.update({"is_opening": "No"})
 
-		self.entries = frappe.get_all(
+		self.entries = frappe.get_list(
 			self.filters.doc_type,
 			fields=[entity_field, value_field, self.date_field],
 			filters=filters,
@@ -260,6 +277,12 @@ class Analytics:
 			value_field = "base_net_amount"
 		else:
 			value_field = "qty"
+
+		permitted_names = self._get_permitted_parent_names()
+		if not permitted_names:
+			self.entries = []
+			self.get_groups()
+			return
 
 		doctype = DocType(self.filters.doc_type)
 		doctype_item = DocType(f"{self.filters.doc_type} Item")
@@ -273,11 +296,7 @@ class Analytics:
 				doctype_item[value_field].as_("value_field"),
 				doctype[self.date_field],
 			)
-			.where(
-				(doctype_item.docstatus == 1)
-				& (doctype.company.isin(self.filters.company))
-				& (doctype[self.date_field].between(self.filters.from_date, self.filters.to_date))
-			)
+			.where((doctype_item.docstatus == 1) & (doctype.name.isin(permitted_names)))
 		).run(as_dict=True)
 
 		self.get_groups()
@@ -300,8 +319,10 @@ class Analytics:
 		if self.filters.doc_type in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
 			filters.update({"is_opening": "No"})
 
-		self.entries = frappe.get_all(
-			self.filters.doc_type, fields=[entity, value_field, self.date_field], filters=filters
+		self.entries = frappe.get_list(
+			self.filters.doc_type,
+			fields=[entity, value_field, self.date_field],
+			filters=filters,
 		)
 
 	def get_rows(self):
