@@ -3599,3 +3599,16 @@ def make_payment_order(source_name, target_doc=None):
 @erpnext.allow_regional
 def add_regional_gl_entries(gl_entries, doc):
 	return
+
+
+@frappe.whitelist()
+def get_linked_bank_transactions(payment_entry: str) -> list:
+	frappe.has_permission("Payment Entry", ptype="read", doc=payment_entry, throw=True)
+	return frappe.get_all(
+		"Bank Transaction Payments",
+		filters={
+			"payment_document": "Payment Entry",
+			"payment_entry": payment_entry,
+		},
+		pluck="parent",
+	)
