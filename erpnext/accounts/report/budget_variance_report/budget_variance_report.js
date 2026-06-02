@@ -39,6 +39,14 @@ function get_filters() {
 
 	let filters = [
 		{
+			fieldname: "company",
+			label: __("Company"),
+			fieldtype: "Link",
+			options: "Company",
+			default: frappe.defaults.get_user_default("Company"),
+			reqd: 1,
+		},
+		{
 			fieldname: "from_fiscal_year",
 			label: __("From Fiscal Year"),
 			fieldtype: "Link",
@@ -68,14 +76,6 @@ function get_filters() {
 			reqd: 1,
 		},
 		{
-			fieldname: "company",
-			label: __("Company"),
-			fieldtype: "Link",
-			options: "Company",
-			default: frappe.defaults.get_user_default("Company"),
-			reqd: 1,
-		},
-		{
 			fieldname: "budget_against",
 			label: __("Budget Against"),
 			fieldtype: "Select",
@@ -98,7 +98,7 @@ function get_filters() {
 				let budget_against = frappe.query_report.get_filter_value("budget_against");
 				let company = frappe.query_report.get_filter_value("company");
 				if (!budget_against) return;
-				// Branch does not have company field
+
 				const filters = budget_against !== "Branch" && company ? { company: company } : {};
 
 				return frappe.db.get_link_options(budget_against, txt, filters);
