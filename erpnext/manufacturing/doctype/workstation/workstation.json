@@ -8,9 +8,6 @@
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
-  "dashboard_tab",
-  "section_break_mqqv",
-  "workstation_dashboard",
   "details_tab",
   "workstation_name",
   "workstation_type",
@@ -174,12 +171,6 @@
    "label": "Total Working Hours"
   },
   {
-   "depends_on": "eval:!doc.__islocal",
-   "fieldname": "dashboard_tab",
-   "fieldtype": "Tab Break",
-   "label": "Job Cards"
-  },
-  {
    "fieldname": "details_tab",
    "fieldtype": "Tab Break",
    "label": "Details"
@@ -189,16 +180,6 @@
    "fieldtype": "Tab Break",
    "label": "Connections",
    "show_dashboard": 1
-  },
-  {
-   "fieldname": "workstation_dashboard",
-   "fieldtype": "HTML",
-   "label": "Workstation Dashboard"
-  },
-  {
-   "fieldname": "section_break_mqqv",
-   "fieldtype": "Section Break",
-   "hide_border": 1
   },
   {
    "default": "0",
