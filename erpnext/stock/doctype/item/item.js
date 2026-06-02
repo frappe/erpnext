@@ -740,16 +740,6 @@ $.extend(erpnext.item, {
 
 			if (!row.disabled) {
 				if (row.numeric_values) {
-<<<<<<< HEAD
-					fieldtype = "Float";
-					desc =
-						"Min Value: " +
-						row.from_range +
-						" , Max Value: " +
-						row.to_range +
-						", in Increments of: " +
-						row.increment;
-=======
 					const all_are_int =
 						flt(row.from_range) === cint(row.from_range) &&
 						flt(row.to_range) === cint(row.to_range) &&
@@ -762,7 +752,6 @@ $.extend(erpnext.item, {
 						frappe.format(row.to_range, df, options),
 						frappe.format(row.increment, df, options),
 					]);
->>>>>>> 016b64df6d (fix(item): format integer numeric variant attributes without decimals (#55561))
 				} else {
 					fieldtype = "Data";
 					desc = "";
