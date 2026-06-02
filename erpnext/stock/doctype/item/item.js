@@ -740,14 +740,18 @@ $.extend(erpnext.item, {
 
 			if (!row.disabled) {
 				if (row.numeric_values) {
-					fieldtype = "Float";
-					desc =
-						"Min Value: " +
-						row.from_range +
-						" , Max Value: " +
-						row.to_range +
-						", in Increments of: " +
-						row.increment;
+					const all_are_int =
+						flt(row.from_range) === cint(row.from_range) &&
+						flt(row.to_range) === cint(row.to_range) &&
+						flt(row.increment) === cint(row.increment);
+					fieldtype = all_are_int ? "Int" : "Float";
+					const df = { fieldtype };
+					const options = all_are_int ? { inline: 1 } : { always_show_decimals: true, inline: 1 };
+					desc = __("Min Value: {0}, Max Value: {1}, in Increments of: {2}", [
+						frappe.format(row.from_range, df, options),
+						frappe.format(row.to_range, df, options),
+						frappe.format(row.increment, df, options),
+					]);
 				} else {
 					fieldtype = "Data";
 					desc = "";
