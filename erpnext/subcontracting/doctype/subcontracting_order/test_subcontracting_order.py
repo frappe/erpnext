@@ -554,7 +554,12 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		scr.submit()
 
 		# Get RM from Supplier
-		ste = get_materials_from_supplier(sco.name, [d.name for d in sco.supplied_items])
+		frappe.flags.args = frappe._dict(
+			subcontract_order=sco.name,
+			rm_details=[d.name for d in sco.supplied_items],
+			order_doctype=sco.doctype,
+		)
+		ste = get_materials_from_supplier(sco.name)
 		ste.save()
 		ste.submit()
 
