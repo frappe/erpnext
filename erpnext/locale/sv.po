@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-31 10:18+0000\n"
-"PO-Revision-Date: 2026-06-01 16:23\n"
+"PO-Revision-Date: 2026-06-02 17:53\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -29992,7 +29992,7 @@ msgstr "Stäm av"
 
 #: banking/src/pages/BankReconciliation.tsx:116
 msgid "Match and Reconcile"
-msgstr "Jämför och Avstäm"
+msgstr "Jämför och Stäm av"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:62
 msgid "Match or Create"
@@ -32416,7 +32416,7 @@ msgstr "Inga transaktioner hittades för angivna filter."
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:222
 msgid "No unreconciled transactions found"
-msgstr "Inga oavstämda transaktioner hittades"
+msgstr "Inga ej avstämda transaktioner hittades"
 
 #: erpnext/templates/includes/macros.html:291
 #: erpnext/templates/includes/macros.html:324
@@ -51003,7 +51003,7 @@ msgstr "Utdrag Format"
 
 #: banking/src/pages/BankStatementImporter.tsx:139
 msgid "Statement Import Instructions"
-msgstr "Utdrag Import Instruktioner"
+msgstr "Bankutdrag Import Instruktioner"
 
 #: erpnext/accounts/report/general_ledger/general_ledger.html:124
 msgid "Statement Of Accounts"
@@ -53116,7 +53116,7 @@ msgstr "Leverantör erfordras för alla valda artiklar"
 #. Description of a DocType
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "Supplier of Goods or Services."
-msgstr "Leverantör av Varor eller Tjänster"
+msgstr "Leverantör av Artiklar eller Tjänster."
 
 #: erpnext/buying/doctype/supplier_quotation/supplier_quotation.py:190
 msgid "Supplier {0} not found in {1}"
@@ -55168,7 +55168,7 @@ msgstr "Denna tillgång kategori är angiven som ej avskrivningsbar. Inaktivera 
 
 #: banking/src/pages/BankStatementImporter.tsx:160
 msgid "This can contain \"CR\"/\"DR\" values or positive/negative values. You could also have a separate column for CR/DR."
-msgstr "Detta kan innehålla \"CR\"/\"DR\" värden eller positiva/negativa värden. Du kan också ha en separat kolumn för CR/DR."
+msgstr "Detta kan innehålla \"CR\"/\"DR\" värden eller positiva/negativa värden. Du kan också ha separat kolumn för CR/DR."
 
 #: erpnext/buying/doctype/supplier_scorecard/supplier_scorecard_dashboard.py:7
 msgid "This covers all scorecards tied to this Setup"
