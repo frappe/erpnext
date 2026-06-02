@@ -19,6 +19,8 @@ def execute(filters=None):
 	columns = get_columns(filters)
 	if filters.get("budget_against_filter"):
 		dimensions = filters.get("budget_against_filter")
+		if filters.get("budget_against") == "Cost Center":
+			dimensions = get_cost_center_with_children(dimensions)
 	else:
 		dimensions = get_budget_dimensions(filters)
 	if not dimensions:
@@ -121,6 +123,7 @@ def build_budget_map(budget_records, filters):
 def get_actual_transactions(dimension_name, filters):
 	budget_against = frappe.scrub(filters.get("budget_against"))
 	cost_center_filter = ""
+	budget_gl_dimension_join = f"and b.{budget_against} = gl.{budget_against}"
 
 	if filters.get("budget_against") == "Cost Center" and dimension_name:
 		cc_lft, cc_rgt = frappe.db.get_value("Cost Center", dimension_name, ["lft", "rgt"])
@@ -128,6 +131,7 @@ def get_actual_transactions(dimension_name, filters):
 			and lft >= "{cc_lft}"
 			and rgt <= "{cc_rgt}"
 		"""
+		budget_gl_dimension_join = ""
 
 	actual_transactions = frappe.db.sql(
 		f"""
@@ -144,7 +148,7 @@ def get_actual_transactions(dimension_name, filters):
 			where
 				b.docstatus = 1
 				and b.account=gl.account
-				and b.{budget_against} = gl.{budget_against}
+				{budget_gl_dimension_join}
 				and gl.fiscal_year between %s and %s
 				and gl.is_cancelled = 0
 				and b.{budget_against} = %s
@@ -380,6 +384,22 @@ def get_fiscal_years(filters):
 	)
 
 	return fiscal_year
+
+
+def get_cost_center_with_children(cost_centers):
+	"""Expand each cost center to include itself and all its descendants."""
+	all_cost_centers = set()
+	for cost_center in cost_centers:
+		result = frappe.db.get_value("Cost Center", cost_center, ["lft", "rgt"])
+		if not result:
+			continue
+		lft, rgt = result
+		children = frappe.db.sql_list(
+			"SELECT name FROM `tabCost Center` WHERE lft >= %s AND rgt <= %s",
+			(lft, rgt),
+		)
+		all_cost_centers.update(children)
+	return list(all_cost_centers)
 
 
 def get_budget_dimensions(filters):
