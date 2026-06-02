@@ -33,23 +33,24 @@ type Props = {
 }
 
 /**
- * A read-only-ish preview of extracted rows with the same colour coding as the CSV importer:
- * the header row is highlighted, detected transaction rows are green, and mapped columns are
- * emphasised. When `editable` is set, a row of column -> field dropdowns is shown on top.
+ * A preview of extracted rows with CSV-style colour coding: the header row is highlighted,
+ * detected transaction rows are green, and mapped columns are emphasised. When `editable`, a
+ * compact row of column -> field dropdowns sits at the top, and row numbers can be clicked to
+ * set/clear the header row.
  */
 const RawTableGrid = ({ rows, columnMapping, headerIndex, editable, disabled, onChangeMapping, onSetHeader }: Props) => {
-    const numColumns = useMemo(() => rows.reduce((max, row) => Math.max(max, row.length), 0), [rows])
+    // Tabular (XLSX) cells can be numbers/dates, not strings - coerce so .trim()/render are safe.
+    const stringRows = useMemo(
+        () => rows.map((row) => row.map((cell) => (cell == null ? '' : String(cell)))),
+        [rows],
+    )
+    const numColumns = useMemo(() => stringRows.reduce((max, row) => Math.max(max, row.length), 0), [stringRows])
 
     const validColumns = useMemo(
         () => Object.entries(columnMapping).filter(([, m]) => m && m !== 'Do not import').map(([i]) => Number(i)),
         [columnMapping],
     )
-
-    const dateColumn = useMemo(
-        () => Object.entries(columnMapping).find(([, m]) => m === 'Date')?.[0],
-        [columnMapping],
-    )
-
+    const dateColumn = useMemo(() => Object.entries(columnMapping).find(([, m]) => m === 'Date')?.[0], [columnMapping])
     const amountColumns = useMemo(
         () => Object.entries(columnMapping).filter(([, m]) => ['Amount', 'Withdrawal', 'Deposit'].includes(m)).map(([i]) => Number(i)),
         [columnMapping],
@@ -60,21 +61,20 @@ const RawTableGrid = ({ rows, columnMapping, headerIndex, editable, disabled, on
         const set = new Set<number>()
         if (dateColumn === undefined) return set
         const dateIdx = Number(dateColumn)
-        rows.forEach((row, index) => {
+        stringRows.forEach((row, index) => {
             if (index === headerIndex) return
             const dateCell = (row[dateIdx] ?? '').trim()
             if (!dateCell || !DATE_LIKE.test(dateCell)) return
-            const hasAmount = amountColumns.some((c) => (row[c] ?? '').trim() !== '')
-            if (hasAmount) set.add(index)
+            if (amountColumns.some((c) => (row[c] ?? '').trim() !== '')) set.add(index)
         })
         return set
-    }, [rows, headerIndex, dateColumn, amountColumns])
+    }, [stringRows, headerIndex, dateColumn, amountColumns])
 
     return (
         <Table containerClassName="rounded-none">
             <TableBody>
                 {editable && (
-                    <TableRow className="bg-surface-gray-1 hover:bg-surface-gray-1">
+                    <TableRow className="border-b border-outline-gray-2 bg-surface-white hover:bg-surface-white">
                         <TableHead className="w-8 p-1" />
                         {Array.from({ length: numColumns }).map((_unused, columnIndex) => (
                             <TableHead key={columnIndex} className="p-1 align-top">
@@ -83,13 +83,16 @@ const RawTableGrid = ({ rows, columnMapping, headerIndex, editable, disabled, on
                                     value={columnMapping[columnIndex] ?? 'Do not import'}
                                     onValueChange={(value) => onChangeMapping?.(columnIndex, value as ColumnMapsTo)}
                                 >
-                                    <SelectTrigger inputSize="sm">
+                                    <SelectTrigger variant="outline" inputSize="sm" className="h-7 w-full">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {COLUMN_MAPS_TO_OPTIONS.map((option) => (
                                             <SelectItem key={option} value={option}>
-                                                {_(option)}
+                                                <span className="flex items-center gap-1.5">
+                                                    <ColumnHeaderIcon columnType={option} />
+                                                    {_(option)}
+                                                </span>
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -99,7 +102,7 @@ const RawTableGrid = ({ rows, columnMapping, headerIndex, editable, disabled, on
                     </TableRow>
                 )}
 
-                {rows.map((row, index) => {
+                {stringRows.map((row, index) => {
                     const isHeaderRow = index === headerIndex
                     const isTransactionRow = transactionRows.has(index)
 
@@ -138,10 +141,31 @@ const RawTableGrid = ({ rows, columnMapping, headerIndex, editable, disabled, on
                             ) : (
                                 <TableCell className="w-8 px-1 py-0.5 text-center text-ink-gray-6">{index + 1}</TableCell>
                             )}
+
                             {Array.from({ length: numColumns }).map((_unused, cellIndex) => {
-                                const isValidColumn = validColumns.includes(cellIndex)
                                 const columnType = columnMapping[cellIndex]
+                                const isValidColumn = validColumns.includes(cellIndex)
                                 const isAmountColumn = AMOUNT_COLUMNS.includes(columnType)
+                                const cellText = row[cellIndex] ?? ''
+
+                                // Read-only header row: icon + label.
+                                if (isHeaderRow) {
+                                    return (
+                                        <TableCell key={cellIndex} className="max-w-[200px] overflow-hidden text-ellipsis py-1">
+                                            <div className="flex items-center gap-1 px-1 text-xs font-medium text-ink-gray-8">
+                                                {columnType && (
+                                                    <Tooltip>
+                                                        <TooltipTrigger>
+                                                            <ColumnHeaderIcon columnType={columnType} />
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>{_(columnType)}</TooltipContent>
+                                                    </Tooltip>
+                                                )}
+                                                {cellText}
+                                            </div>
+                                        </TableCell>
+                                    )
+                                }
 
                                 return (
                                     <TableCell
@@ -152,21 +176,12 @@ const RawTableGrid = ({ rows, columnMapping, headerIndex, editable, disabled, on
                                         })}
                                     >
                                         <div
-                                            className={cn('min-h-5 flex items-center gap-1 px-1 text-xs', {
+                                            className={cn('min-h-5 flex items-center px-1 text-xs', {
                                                 'justify-end': isAmountColumn && isValidColumn && isTransactionRow,
-                                                'font-medium text-ink-gray-8': isHeaderRow,
                                             })}
-                                            title={row[cellIndex] ?? ''}
+                                            title={cellText}
                                         >
-                                            {isHeaderRow && columnType && (
-                                                <Tooltip>
-                                                    <TooltipTrigger>
-                                                        <ColumnHeaderIcon columnType={columnType} />
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>{_(columnType)}</TooltipContent>
-                                                </Tooltip>
-                                            )}
-                                            {row[cellIndex] ?? ''}
+                                            {cellText}
                                         </div>
                                     </TableCell>
                                 )

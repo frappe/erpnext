@@ -18,6 +18,40 @@ export type ColumnMapsTo =
     | "Party Account No."
     | "Party IBAN"
 
+export type ColumnMappingEntry = {
+    index: number
+    maps_to: ColumnMapsTo | string
+    header_text?: string
+    variable?: string
+}
+
+/** Apply a column mapping change, clearing the same mapping from any other column. */
+export function applyColumnMappingChange<T extends ColumnMappingEntry>(
+    columns: T[],
+    columnIndex: number,
+    mapsTo: ColumnMapsTo,
+): T[] {
+    const previous = columns.find((c) => c.index === columnIndex)
+    const cleared =
+        mapsTo === "Do not import"
+            ? columns
+            : columns.map((c) =>
+                  c.index !== columnIndex && c.maps_to === mapsTo
+                      ? { ...c, maps_to: "Do not import" as ColumnMapsTo }
+                      : c,
+              )
+
+    return [
+        ...cleared.filter((c) => c.index !== columnIndex),
+        {
+            index: columnIndex,
+            maps_to: mapsTo,
+            header_text: previous?.header_text ?? "",
+            variable: previous?.variable ?? `column_${columnIndex}`,
+        } as T,
+    ].sort((a, b) => a.index - b.index)
+}
+
 export const COLUMN_MAPS_TO_OPTIONS: ColumnMapsTo[] = [
     "Do not import",
     "Date",
@@ -109,4 +143,12 @@ export const useReextractPDFTable = () => {
 
 export const useSetPDFTableHeader = () => {
     return useFrappePostCall<{ message: GetStatementDetailsResponse }>("erpnext.accounts.doctype.bank_statement_import_log.bank_statement_import_log.set_pdf_table_header")
+}
+
+export const useUpdateColumnMapping = () => {
+    return useFrappePostCall<{ message: GetStatementDetailsResponse }>("erpnext.accounts.doctype.bank_statement_import_log.bank_statement_import_log.update_column_mapping")
+}
+
+export const useSetHeaderIndex = () => {
+    return useFrappePostCall<{ message: GetStatementDetailsResponse }>("erpnext.accounts.doctype.bank_statement_import_log.bank_statement_import_log.set_header_index")
 }

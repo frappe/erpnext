@@ -12,6 +12,7 @@ import ErrorBanner from '@/components/ui/error-banner'
 import RawTableGrid from '../RawTableGrid'
 import BBoxOverlay from './BBoxOverlay'
 import {
+    applyColumnMappingChange,
     ColumnMapsTo,
     GetStatementDetailsResponse,
     PDFTable,
@@ -126,21 +127,10 @@ const PDFTableEditor = ({ data, mutate }: Props) => {
     }
 
     const onChangeMapping = (tableIndex: number, columnIndex: number, mapsTo: ColumnMapsTo) => {
-        updateTable(tableIndex, (table) => {
-            const previous = table.column_mapping.find((c) => c.index === columnIndex)
-            return {
-                ...table,
-                column_mapping: [
-                    ...table.column_mapping.filter((c) => c.index !== columnIndex),
-                    {
-                        index: columnIndex,
-                        header_text: previous?.header_text ?? '',
-                        variable: previous?.variable ?? `column_${columnIndex}`,
-                        maps_to: mapsTo,
-                    },
-                ].sort((a, b) => a.index - b.index),
-            }
-        })
+        updateTable(tableIndex, (table) => ({
+            ...table,
+            column_mapping: applyColumnMappingChange(table.column_mapping, columnIndex, mapsTo),
+        }))
     }
 
     const onToggleIncluded = (tableIndex: number, included: boolean) =>

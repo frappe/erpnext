@@ -114,9 +114,15 @@ class BankStatementImportLog(Document):
 
 	def set_file_properties(self, raw_data: list[list]):
 		self.set_header_row_index(raw_data)
-
 		self.set_column_mapping(raw_data)
+		self.recompute_properties(raw_data)
 
+	def recompute_properties(self, raw_data: list[list]):
+		"""
+		Recompute everything that depends on the header row and column mapping: transaction
+		row range, date/amount format, closing balance and totals. Called both during initial
+		detection and after the user overrides the mapping or header row.
+		"""
 		transaction_rows, transaction_starting_index, transaction_ending_index = self.get_transaction_rows(
 			raw_data
 		)
@@ -222,20 +228,50 @@ class BankStatementImportLog(Document):
 		Given the header row, try to map each column index to a standard variable, or set it to "Do not import"
 		"""
 
-		columns = detect_column_mapping(data[self.detected_header_index])
+		self.set_column_mapping_from_columns(detect_column_mapping(data[self.detected_header_index]))
 
+	def set_column_mapping_from_columns(self, columns: list[dict]):
+		"""Replace the column_mapping child table from a list of column dicts."""
 		self.column_mapping = []
 
 		for col in columns:
+			index = col["index"]
+			# header_text is mandatory on the child table; fall back to a readable placeholder
+			# for headerless tables (content-guessed columns) and user overrides.
 			self.append(
 				"column_mapping",
 				{
-					"header_text": col["header_text"],
-					"variable": col["variable"],
-					"maps_to": col["maps_to"],
-					"index": col["index"],
+					"header_text": col.get("header_text") or _("Column {0}").format(index + 1),
+					"variable": col.get("variable") or f"column_{index}",
+					"maps_to": col.get("maps_to", "Do not import"),
+					"index": index,
 				},
 			)
+
+	def apply_column_mapping(self, columns: list[dict]):
+		"""Persist a user-overridden column mapping and recompute the derived properties."""
+		self.set_column_mapping_from_columns(columns)
+		self.recompute_properties(self.get_data())
+
+	def apply_header_index(self, header_index: int):
+		"""
+		Set (or clear, with -1) the header row for a tabular statement.
+
+		The existing column mapping is preserved; it is only re-derived when a header row is
+		selected AND that row resolves to a meaningful mapping. Clearing the header (no header
+		row) never discards the user's mapping.
+		"""
+		raw_data = self.get_data()
+
+		if 0 <= header_index < len(raw_data):
+			self.detected_header_index = header_index
+			candidate = detect_column_mapping(raw_data[header_index])
+			if is_meaningful_mapping(candidate):
+				self.set_column_mapping_from_columns(candidate)
+		else:
+			self.detected_header_index = -1
+
+		self.recompute_properties(raw_data)
 
 	def get_transaction_rows(self, data: list[list[str]]):
 		"""
@@ -637,6 +673,11 @@ def detect_column_mapping(header_row: list) -> list[dict]:
 		columns.append(column)
 
 	return columns
+
+
+def is_meaningful_mapping(columns: list[dict]) -> bool:
+	"""True if at least one column resolves to an actual field (not "Do not import")."""
+	return any(col.get("maps_to") and col["maps_to"] != "Do not import" for col in columns)
 
 
 def guess_column_mapping_by_content(rows: list[list]) -> list[dict]:
@@ -1223,17 +1264,53 @@ def set_pdf_table_header(statement_import_id: str, page: int, table_index: int, 
 	for table in tables:
 		if table["page"] == page and table["table_index"] == table_index:
 			rows = table.get("rows", [])
+			# Preserve the existing mapping; only re-derive when the chosen header row
+			# resolves to a meaningful mapping. Clearing the header keeps the mapping.
 			if 0 <= header_index < len(rows):
 				table["header_index"] = header_index
-				table["column_mapping"] = detect_column_mapping(rows[header_index])
+				candidate = detect_column_mapping(rows[header_index])
+				if is_meaningful_mapping(candidate):
+					table["column_mapping"] = candidate
 			else:
 				table["header_index"] = None
-				table["column_mapping"] = guess_column_mapping_by_content(rows)
 
 			_finals, table["date_format"], table["amount_format"] = build_table_transactions(table)
 			break
 
 	doc.apply_pdf_tables(tables)
+
+	return get_statement_details(statement_import_id)
+
+
+@frappe.whitelist(methods=["POST"])
+def update_column_mapping(statement_import_id: str, column_mapping: list | str):
+	"""Persist a user-overridden column mapping for a tabular (CSV/XLSX) statement."""
+	doc = frappe.get_doc("Bank Statement Import Log", statement_import_id)
+
+	if doc.status == "Completed":
+		frappe.throw(_("This statement has already been imported."), title=_("Already Imported"))
+
+	if isinstance(column_mapping, str):
+		column_mapping = json.loads(column_mapping)
+
+	doc.apply_column_mapping(column_mapping)
+	doc.save()
+
+	return get_statement_details(statement_import_id)
+
+
+@frappe.whitelist(methods=["POST"])
+def set_header_index(statement_import_id: str, header_index: int):
+	"""
+	Set (or clear, with -1) the header row of a tabular statement and re-derive its mapping.
+	"""
+	doc = frappe.get_doc("Bank Statement Import Log", statement_import_id)
+
+	if doc.status == "Completed":
+		frappe.throw(_("This statement has already been imported."), title=_("Already Imported"))
+
+	doc.apply_header_index(int(header_index))
+	doc.save()
 
 	return get_statement_details(statement_import_id)
 

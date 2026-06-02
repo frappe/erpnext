@@ -15,7 +15,9 @@ from erpnext.accounts.doctype.bank_statement_import_log.bank_statement_import_lo
 	get_statement_details,
 	guess_column_mapping_by_content,
 	reextract_pdf_table,
+	set_header_index,
 	set_pdf_table_header,
+	update_column_mapping,
 	update_pdf_tables,
 )
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
@@ -366,18 +368,20 @@ class TestBankStatementImportLog(ERPNextTestSuite, AccountsTestMixin):
 		doc = self._create_pdf_import_log(html)
 		table = doc.get_pdf_tables()[0]
 		self.assertEqual(table["header_index"], 0)
+		original = {
+			c["maps_to"]: c["index"] for c in table["column_mapping"] if c["maps_to"] != "Do not import"
+		}
 
-		# Mark as headerless (-1): mapping falls back to content-based guessing.
+		# Clear the header (-1): header is removed but the mapping is preserved (not re-guessed).
 		details = set_pdf_table_header(doc.name, table["page"], table["table_index"], -1)
 		updated = details["pdf_tables"][0]
 		self.assertIsNone(updated["header_index"])
-		guessed = {
+		preserved = {
 			c["maps_to"]: c["index"] for c in updated["column_mapping"] if c["maps_to"] != "Do not import"
 		}
-		self.assertEqual(guessed.get("Date"), 0)
-		self.assertEqual(guessed.get("Amount"), 2)
+		self.assertEqual(preserved, original)
 
-		# Set row 0 back as the header: mapping is re-derived from its labels.
+		# Set row 0 back as the header: it resolves meaningfully, so mapping is re-derived.
 		details = set_pdf_table_header(doc.name, table["page"], table["table_index"], 0)
 		updated = details["pdf_tables"][0]
 		self.assertEqual(updated["header_index"], 0)
@@ -386,6 +390,79 @@ class TestBankStatementImportLog(ERPNextTestSuite, AccountsTestMixin):
 		}
 		self.assertEqual(mapped.get("Date"), 0)
 		self.assertEqual(mapped.get("Description"), 1)
+
+	# ------------------------------------------------------------------ #
+	# CSV/XLSX column mapping + header overrides
+	# ------------------------------------------------------------------ #
+
+	def _create_csv_import_log(self, csv_text: str) -> BankStatementImportLog:
+		file_doc = frappe.get_doc(
+			{
+				"doctype": "File",
+				"file_name": f"test-statement-{frappe.generate_hash(length=8)}.csv",
+				"is_private": 1,
+				"content": csv_text,
+			}
+		).insert(ignore_permissions=True)
+
+		doc = frappe.get_doc(
+			{
+				"doctype": "Bank Statement Import Log",
+				"bank_account": self.bank_account,
+				"file": file_doc.file_url,
+			}
+		)
+		return doc.insert()
+
+	def test_csv_update_column_mapping(self):
+		"""Overriding the column mapping recomputes the transaction count."""
+		csv_text = "Date,Narration,Amount\n01/04/2024,UPI PAYMENT,500.00\n03/04/2024,SALARY,20000.00\n"
+		doc = self._create_csv_import_log(csv_text)
+		self.assertEqual(doc.number_of_transactions, 2)
+
+		# Drop the amount column -> no amount -> no transactions detected.
+		mapping = [
+			{"index": c.index, "maps_to": "Do not import" if c.maps_to == "Amount" else c.maps_to}
+			for c in doc.column_mapping
+		]
+		details = update_column_mapping(doc.name, mapping)
+		doc.reload()
+		self.assertEqual(doc.number_of_transactions, 0)
+		self.assertEqual(len(details["final_transactions"]), 0)
+
+	def test_csv_set_header_index_preserves_mapping(self):
+		"""Clearing the header keeps the user's mapping; it is not re-guessed."""
+		csv_text = "Date,Narration,Amount\n01/04/2024,UPI PAYMENT,500.00\n03/04/2024,SALARY,20000.00\n"
+		doc = self._create_csv_import_log(csv_text)
+		self.assertEqual(doc.detected_header_index, 0)
+
+		# Manually map the Narration column (1) as Reference.
+		mapping = [
+			{
+				"index": c.index,
+				"maps_to": "Reference" if c.index == 1 else c.maps_to,
+				"header_text": c.header_text,
+			}
+			for c in doc.column_mapping
+		]
+		update_column_mapping(doc.name, mapping)
+		doc.reload()
+
+		# Clear the header row: the manual mapping must be preserved (column 1 stays Reference,
+		# not re-guessed to Description). The label row fails date parsing, so 2 transactions remain.
+		set_header_index(doc.name, -1)
+		doc.reload()
+		self.assertEqual(doc.detected_header_index, -1)
+		self.assertEqual(doc.number_of_transactions, 2)
+		current = {c.index: c.maps_to for c in doc.column_mapping}
+		self.assertEqual(current.get(1), "Reference")
+
+		# Restore row 0 as the header (resolves meaningfully -> re-derived from labels).
+		set_header_index(doc.name, 0)
+		doc.reload()
+		self.assertEqual(doc.detected_header_index, 0)
+		restored = {c.maps_to: c.index for c in doc.column_mapping if c.maps_to != "Do not import"}
+		self.assertEqual(restored.get("Description"), 1)
 
 
 test_hdfc_sample_statement_data = [

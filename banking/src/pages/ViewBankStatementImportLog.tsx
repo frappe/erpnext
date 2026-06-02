@@ -49,7 +49,7 @@ const ViewBankStatementImportLog = () => {
         return <PDFImport data={data} mutate={mutate} />
     }
 
-    return <CSVImport data={data} />
+    return <CSVImport data={data} mutate={mutate} />
 }
 
 export default ViewBankStatementImportLog
