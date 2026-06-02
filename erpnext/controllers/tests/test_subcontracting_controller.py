@@ -347,7 +347,12 @@ class TestSubcontractingController(ERPNextTestSuite):
 
 		sco.load_from_db()
 		self.assertEqual(sco.supplied_items[0].consumed_qty, 5)
-		doc = get_materials_from_supplier(sco.name, [d.name for d in sco.supplied_items])
+		frappe.flags.args = frappe._dict(
+			subcontract_order=sco.name,
+			rm_details=[d.name for d in sco.supplied_items],
+			order_doctype=sco.doctype,
+		)
+		doc = get_materials_from_supplier(sco.name)
 		doc.save()
 		self.assertEqual(doc.items[0].qty, 1)
 		self.assertEqual(doc.items[0].s_warehouse, "_Test Warehouse 1 - _TC")
@@ -404,7 +409,12 @@ class TestSubcontractingController(ERPNextTestSuite):
 
 		sco.load_from_db()
 		self.assertEqual(sco.supplied_items[0].consumed_qty, 5)
-		doc = get_materials_from_supplier(sco.name, [d.name for d in sco.supplied_items])
+		frappe.flags.args = frappe._dict(
+			subcontract_order=sco.name,
+			rm_details=[d.name for d in sco.supplied_items],
+			order_doctype=sco.doctype,
+		)
+		doc = get_materials_from_supplier(sco.name)
 		self.assertEqual(doc.items[0].qty, 1)
 		self.assertEqual(doc.items[0].s_warehouse, "_Test Warehouse 1 - _TC")
 		self.assertEqual(doc.items[0].t_warehouse, "_Test Warehouse - _TC")
@@ -1133,7 +1143,12 @@ class TestSubcontractingController(ERPNextTestSuite):
 
 		sco.load_from_db()
 		self.assertEqual(sco.supplied_items[0].consumed_qty, 5)
-		doc = get_materials_from_supplier(sco.name, [d.name for d in sco.supplied_items])
+		frappe.flags.args = frappe._dict(
+			subcontract_order=sco.name,
+			rm_details=[d.name for d in sco.supplied_items],
+			order_doctype=sco.doctype,
+		)
+		doc = get_materials_from_supplier(sco.name)
 		self.assertEqual(doc.items[0].qty, 1)
 		self.assertEqual(doc.items[0].s_warehouse, "_Test Warehouse 1 - _TC")
 		self.assertEqual(doc.items[0].t_warehouse, "_Test Warehouse - _TC")
