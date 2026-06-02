@@ -583,7 +583,7 @@ frappe.ui.form.on("BOM", {
 	},
 
 	routing(frm) {
-		if (frm.doc.routing) {
+		if (frm.doc.routing && frm.doc.with_operations && !frm.doc.operations) {
 			frappe.call({
 				doc: frm.doc,
 				method: "get_routing",

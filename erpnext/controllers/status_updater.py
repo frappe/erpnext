@@ -262,14 +262,16 @@ class StatusUpdater(Document):
 
 	def validate_qty(self):
 		"""Validates qty at row level"""
-		self.item_allowance = {}
-		self.global_qty_allowance = None
-		self.global_amount_allowance = None
-
 		for args in self.status_updater:
 			if "target_ref_field" not in args or args.get("validate_qty") is False:
 				# if target_ref_field is not specified or validate_qty is explicitly set to False, skip validation
 				continue
+
+			# Reset per-args so each config block uses its own allowance source without
+			# leaking cached values from a previous config block.
+			self.item_allowance = {}
+			self.global_qty_allowance = None
+			self.global_amount_allowance = None
 
 			items_to_validate = []
 			selling_negative_rate_allowed = frappe.get_single_value(
@@ -402,9 +404,12 @@ class StatusUpdater(Document):
 
 	def check_overflow_with_allowance(self, item, args):
 		"""
-		Checks if there is overflow condering a relaxation allowance
+		Checks if there is overflow considering a relaxation allowance.
 		"""
 		qty_or_amount = "qty" if "qty" in args["target_ref_field"] else "amount"
+		global_qty_allowance_field = args.get("global_allowance_field", "over_delivery_receipt_allowance")
+		global_qty_allowance_doctype = args.get("global_allowance_doctype", "Stock Settings")
+		item_qty_allowance_field = args.get("item_allowance_field", "over_delivery_receipt_allowance")
 
 		# check if overflow is within allowance
 		(
@@ -419,6 +424,9 @@ class StatusUpdater(Document):
 				self.global_qty_allowance,
 				self.global_amount_allowance,
 				qty_or_amount,
+				global_qty_allowance_field,
+				global_qty_allowance_doctype,
+				item_qty_allowance_field,
 			)
 			if args["source_dt"] != "Pick List Item"
 			else (0, {}, None, None)
@@ -463,7 +471,9 @@ class StatusUpdater(Document):
 			"Quotation Item",
 			"Packed Item",
 		]:
-			if qty_or_amount == "qty":
+			if args.get("target_dt") == "Material Request Item":
+				action_msg = _('To allow over ordering, update "Over Order Allowance" in Buying Settings.')
+			elif qty_or_amount == "qty":
 				action_msg = _(
 					'To allow over receipt / delivery, update "Over Receipt/Delivery Allowance" in Stock Settings or the Item.'
 				)
@@ -724,16 +734,28 @@ class StatusUpdater(Document):
 			ref_doc.set_status(update=True)
 
 
-@frappe.request_cache
 def get_allowance_for(
 	item_code,
 	item_allowance=None,
 	global_qty_allowance=None,
 	global_amount_allowance=None,
 	qty_or_amount="qty",
+	global_qty_allowance_field="over_delivery_receipt_allowance",
+	global_qty_allowance_doctype="Stock Settings",
+	item_qty_allowance_field="over_delivery_receipt_allowance",
 ):
 	"""
-	Returns the allowance for the item, if not set, returns global allowance
+	Returns the allowance for the item, if not set, returns global allowance.
+
+	Args:
+	        item_code: The item to get allowance for.
+	        item_allowance: Cached per-item allowances from a previous call.
+	        global_qty_allowance: Cached global qty allowance from a previous call.
+	        global_amount_allowance: Cached global amount allowance from a previous call.
+	        qty_or_amount: Whether to return qty or amount allowance.
+	        global_qty_allowance_field: The field name on the settings doctype to use for the global qty allowance.
+	        global_qty_allowance_doctype: The settings doctype to read the global qty allowance from.
+	        item_qty_allowance_field: The field name on the Item doctype to use for the item-level qty allowance override.
 	"""
 	if item_allowance is None:
 		item_allowance = {}
@@ -755,13 +777,13 @@ def get_allowance_for(
 			)
 
 	qty_allowance, over_billing_allowance = frappe.get_cached_value(
-		"Item", item_code, ["over_delivery_receipt_allowance", "over_billing_allowance"]
+		"Item", item_code, [item_qty_allowance_field, "over_billing_allowance"]
 	)
 
 	if qty_or_amount == "qty" and not qty_allowance:
 		if global_qty_allowance is None:
 			global_qty_allowance = flt(
-				frappe.get_cached_value("Stock Settings", None, "over_delivery_receipt_allowance")
+				frappe.get_single_value(global_qty_allowance_doctype, global_qty_allowance_field)
 			)
 		qty_allowance = global_qty_allowance
 	elif qty_or_amount == "amount" and not over_billing_allowance:

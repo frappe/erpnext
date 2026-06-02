@@ -27,8 +27,6 @@
   "update_billed_amount_in_purchase_receipt",
   "apply_tds",
   "amended_from",
-  "section_break_hzux",
-  "title",
   "supplier_invoice_details",
   "bill_no",
   "column_break_15",
@@ -201,6 +199,7 @@
   "hold_comment",
   "additional_info_section",
   "is_internal_supplier",
+  "title",
   "represents_company",
   "supplier_group",
   "sender",
@@ -1686,10 +1685,6 @@
    "label": "Automation"
   },
   {
-   "fieldname": "section_break_hzux",
-   "fieldtype": "Section Break"
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "title",
    "fieldtype": "Data",
@@ -1703,7 +1698,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-04-28 07:15:31.062404",
+ "modified": "2026-05-28 12:36:55.215363",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

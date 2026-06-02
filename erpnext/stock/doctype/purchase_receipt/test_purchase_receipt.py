@@ -57,13 +57,13 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 		mr.insert()
 		mr.submit()
-		frappe.db.set_value("Item", item.name, "over_delivery_receipt_allowance", 200)
+		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 200)
 		po = make_purchase_order(mr.name)
 		po.supplier = "_Test Supplier"
 		po.items[0].qty = 300
 		po.save()
 		po.submit()
-		frappe.db.set_value("Item", item.name, "over_delivery_receipt_allowance", 20)
+		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 0)
 		pr = make_purchase_receipt(qty=300, item_code=item.name, do_not_save=True)
 		pr.save()
 		pr.submit()

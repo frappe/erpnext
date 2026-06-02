@@ -947,7 +947,8 @@
    "fieldtype": "Currency",
    "label": "Distributed Discount Amount",
    "options": "currency",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "available_quantity_section",
@@ -1016,7 +1017,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-24 14:37:16.853941",
+ "modified": "2026-05-29 12:23:28.259905",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
