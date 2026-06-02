@@ -1726,6 +1726,35 @@ frappe.ui.form.on("Payment Entry", {
 			},
 		});
 	},
+
+	before_cancel: function (frm) {
+		return new Promise((resolve, reject) => {
+			frappe.call({
+				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_linked_bank_transactions",
+				args: { payment_entry: frm.doc.name },
+				callback: function (r) {
+					const linked = r.message || [];
+					if (!linked.length) {
+						resolve();
+						return;
+					}
+					const bt_links = linked
+						.map((name) => frappe.utils.get_form_link("Bank Transaction", name, true))
+						.join(", ");
+					frappe.confirm(
+						__(
+							"This Payment Entry is reconciled with {0}. Cancelling will automatically unreconcile it. Do you want to proceed?",
+							[bt_links]
+						),
+						() => resolve(),
+						() => reject(),
+						__("Yes"),
+						__("No")
+					);
+				},
+			});
+		});
+	},
 });
 
 frappe.ui.form.on("Payment Entry Reference", {
