@@ -107,39 +107,45 @@ erpnext.PointOfSale.ItemSelector = class {
 						<div class="flex items-center justify-center border-b-grey text-6xl text-grey-100" style="height:8rem; min-height:8rem">
 							<img
 								onerror="cur_pos.item_selector.handle_broken_image(this)"
-								class="h-full item-img" src="${item_image}"
-								alt="${frappe.get_abbr(item.item_name)}"
+								class="h-full item-img" src="${frappe.utils.escape_html(item_image)}"
+								alt="${frappe.utils.escape_html(frappe.get_abbr(item.item_name))}"
 							>
 						</div>`;
 			} else {
 				return `<div class="item-qty-pill">
 							<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
 						</div>
-						<div class="item-display abbr">${frappe.get_abbr(item.item_name)}</div>`;
+						<div class="item-display abbr">${frappe.utils.escape_html(frappe.get_abbr(item.item_name))}</div>`;
 			}
 		}
 
 		return `<div class="item-wrapper"
-				data-item-code="${escape(item.item_code)}" data-serial-no="${escape(serial_no)}"
-				data-batch-no="${escape(batch_no)}" data-uom="${escape(uom)}"
-				data-rate="${escape(price_list_rate || 0)}"
-				data-stock-uom="${escape(item.stock_uom)}"
-				title="${item.item_name}">
+				data-item-code="${frappe.utils.escape_html(item.item_code)}" data-serial-no="${frappe.utils.escape_html(
+			serial_no
+		)}"
+				data-batch-no="${frappe.utils.escape_html(batch_no)}" data-uom="${frappe.utils.escape_html(uom)}"
+				data-rate="${frappe.utils.escape_html(price_list_rate || 0)}"
+				data-stock-uom="${frappe.utils.escape_html(item.stock_uom)}"
+				title="${frappe.utils.escape_html(item.item_name)}">
 
 				${get_item_image_html()}
 
 				<div class="item-detail">
 					<div class="item-name">
-						${frappe.ellipsis(item.item_name, 18)}
+						${frappe.utils.escape_html(frappe.ellipsis(item.item_name, 18))}
 					</div>
-					<div class="item-rate">${format_currency(price_list_rate, item.currency, precision) || 0} / ${uom}</div>
+					<div class="item-rate">${
+						format_currency(price_list_rate, item.currency, precision) || 0
+					} / ${frappe.utils.escape_html(uom)}</div>
 				</div>
 			</div>`;
 	}
 
 	handle_broken_image($img) {
 		const item_abbr = $($img).attr("alt");
-		$($img).parent().replaceWith(`<div class="item-display abbr">${item_abbr}</div>`);
+		$($img)
+			.parent()
+			.replaceWith(`<div class="item-display abbr">${frappe.utils.escape_html(item_abbr)}</div>`);
 	}
 
 	make_search_bar() {
@@ -252,14 +258,13 @@ erpnext.PointOfSale.ItemSelector = class {
 
 		this.$component.on("click", ".item-wrapper", function () {
 			const $item = $(this);
-			const item_code = unescape($item.attr("data-item-code"));
-			let batch_no = unescape($item.attr("data-batch-no"));
-			let serial_no = unescape($item.attr("data-serial-no"));
-			let uom = unescape($item.attr("data-uom"));
-			let rate = unescape($item.attr("data-rate"));
-			let stock_uom = unescape($item.attr("data-stock-uom"));
+			const item_code = $item.attr("data-item-code");
+			let batch_no = $item.attr("data-batch-no");
+			let serial_no = $item.attr("data-serial-no");
+			let uom = $item.attr("data-uom");
+			let rate = $item.attr("data-rate");
+			let stock_uom = $item.attr("data-stock-uom");
 
-			// escape(undefined) returns "undefined" then unescape returns "undefined"
 			batch_no = batch_no === "undefined" ? undefined : batch_no;
 			serial_no = serial_no === "undefined" ? undefined : serial_no;
 			uom = uom === "undefined" ? undefined : uom;

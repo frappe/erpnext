@@ -370,10 +370,14 @@ def get_delivery_notes_to_be_billed(
 		.where((DeliveryNote.docstatus == 1) & (DeliveryNote.is_return == 0) & (DeliveryNote.per_billed > 0))
 	)
 
+	query = frappe.qb.get_query(
+		"Delivery Note",
+		fields=fields,
+		filters=filters,
+	)
+
 	query = (
-		frappe.qb.from_(DeliveryNote)
-		.select(*[DeliveryNote[f] for f in fields])
-		.where(
+		query.where(
 			(DeliveryNote.docstatus == 1)
 			& (DeliveryNote.status.notin(["Stopped", "Closed"]))
 			& (DeliveryNote[searchfield].like(f"%{txt}%"))
@@ -387,12 +391,11 @@ def get_delivery_notes_to_be_billed(
 				)
 			)
 		)
+		.orderby(DeliveryNote[searchfield], order=Order.asc)
+		.limit(page_len)
+		.offset(start)
 	)
-	if filters and isinstance(filters, dict):
-		for key, value in filters.items():
-			query = query.where(DeliveryNote[key] == value)
 
-	query = query.orderby(DeliveryNote[searchfield], order=Order.asc).limit(page_len).offset(start)
 	return query.run(as_dict=as_dict)
 
 
