@@ -361,12 +361,8 @@
    "description": "Reselect, if the chosen contact is edited after save",
    "fieldname": "supplier_primary_contact",
    "fieldtype": "Link",
-<<<<<<< HEAD
    "label": "Supplier Primary Contact",
-=======
-   "label": "Primary Contact",
    "no_copy": 1,
->>>>>>> cb84678198 (fix: duplicating a Customer/Supplier shouldn't inherit the source's primary contact and address (#55421))
    "options": "Contact"
   },
   {
@@ -380,8 +376,8 @@
    "fetch_from": "supplier_primary_contact.email_id",
    "fieldname": "email_id",
    "fieldtype": "Read Only",
-<<<<<<< HEAD
-   "label": "Email Id"
+   "label": "Email Id",
+   "no_copy": 1
   },
   {
    "fieldname": "column_break_44",
@@ -391,28 +387,15 @@
    "fieldname": "primary_address",
    "fieldtype": "Text",
    "label": "Primary Address",
-=======
-   "label": "Email ID",
-   "no_copy": 1
-  },
-  {
-   "fieldname": "primary_address",
-   "fieldtype": "Text Editor",
-   "label": "Primary Address Preview",
    "no_copy": 1,
->>>>>>> cb84678198 (fix: duplicating a Customer/Supplier shouldn't inherit the source's primary contact and address (#55421))
    "read_only": 1
   },
   {
    "description": "Reselect, if the chosen address is edited after save",
    "fieldname": "supplier_primary_address",
    "fieldtype": "Link",
-<<<<<<< HEAD
    "label": "Supplier Primary Address",
-=======
-   "label": "Primary Address",
    "no_copy": 1,
->>>>>>> cb84678198 (fix: duplicating a Customer/Supplier shouldn't inherit the source's primary contact and address (#55421))
    "options": "Address"
   },
   {
@@ -508,11 +491,7 @@
    "link_fieldname": "party"
   }
  ],
-<<<<<<< HEAD
- "modified": "2026-02-06 12:58:01.398824",
-=======
  "modified": "2026-05-29 16:52:59.441272",
->>>>>>> cb84678198 (fix: duplicating a Customer/Supplier shouldn't inherit the source's primary contact and address (#55421))
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

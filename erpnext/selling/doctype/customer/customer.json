@@ -603,83 +603,8 @@
    "fieldname": "last_name",
    "fieldtype": "Read Only",
    "hidden": 1,
-<<<<<<< HEAD
-   "label": "Last Name"
-=======
    "label": "Last Name",
    "no_copy": 1
-  },
-  {
-   "description": "Numbers this customer uses to identify your company in their own system.",
-   "fieldname": "supplier_numbers",
-   "fieldtype": "Table",
-   "label": "Supplier Numbers",
-   "options": "Supplier Number At Customer"
-  },
-  {
-   "description": "Select the group first to filter the applicable withholding categories below.",
-   "fieldname": "tax_withholding_group",
-   "fieldtype": "Link",
-   "label": "Tax Withholding Group",
-   "options": "Tax Withholding Group"
-  },
-  {
-   "fieldname": "more_info_tab",
-   "fieldtype": "Tab Break",
-   "label": "More Info"
-  },
-  {
-   "fieldname": "references_section",
-   "fieldtype": "Section Break",
-   "label": "References"
-  },
-  {
-   "fieldname": "column_break_wlbg",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break_objq",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "column_break_hdmn",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "connections_tab",
-   "fieldtype": "Tab Break",
-   "label": "Connections",
-   "show_dashboard": 1
-  },
-  {
-   "fieldname": "supplier_numbers_section",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "section_break_hwkr",
-   "fieldtype": "Section Break",
-   "label": "Defaults"
-  },
-  {
-   "fieldname": "column_break_yvyu",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "default_accounts_column",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "supplier_numbers_column",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break_nrvh",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "credit_limit_column",
-   "fieldtype": "Column Break"
->>>>>>> cb84678198 (fix: duplicating a Customer/Supplier shouldn't inherit the source's primary contact and address (#55421))
   }
  ],
  "icon": "fa fa-user",
@@ -693,11 +618,7 @@
    "link_fieldname": "party"
   }
  ],
-<<<<<<< HEAD
- "modified": "2026-01-21 17:23:42.151114",
-=======
  "modified": "2026-05-29 16:52:59.441272",
->>>>>>> cb84678198 (fix: duplicating a Customer/Supplier shouldn't inherit the source's primary contact and address (#55421))
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
