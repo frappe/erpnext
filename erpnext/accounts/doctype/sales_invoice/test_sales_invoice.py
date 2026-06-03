@@ -3319,6 +3319,52 @@ class TestSalesInvoice(ERPNextTestSuite):
 		party_link.delete()
 		frappe.db.set_single_value("Accounts Settings", "enable_common_party_accounting", 0)
 
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"enable_common_party_accounting": True})
+	def test_sales_invoice_return_common_party_je_has_no_negative_amounts(self):
+		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
+			make_customer,
+		)
+		from erpnext.accounts.doctype.party_link.party_link import create_party_link
+		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		customer = make_customer(customer="_Test Common Party Return SI")
+		supplier = create_supplier(supplier_name="_Test Common Party Return SI").name
+		party_link = create_party_link("Supplier", supplier, customer)
+
+		si = create_sales_invoice(customer=customer, parent_cost_center="_Test Cost Center - _TC")
+
+		return_si = make_return_doc(si.doctype, si.name)
+		return_si.submit()
+
+		# JE for the return should credit the supplier (primary/advance) account
+		# and debit the customer (secondary/reconciliation) account — all positive amounts
+		jv_accounts = frappe.get_all(
+			"Journal Entry Account",
+			filters={"reference_type": return_si.doctype, "reference_name": return_si.name, "docstatus": 1},
+			fields=["debit_in_account_currency", "credit_in_account_currency", "account"],
+		)
+
+		self.assertTrue(jv_accounts, "Expected a Journal Entry for the return invoice")
+		for row in jv_accounts:
+			self.assertGreaterEqual(
+				row.debit_in_account_currency,
+				0,
+				f"Negative debit on account {row.account}",
+			)
+			self.assertGreaterEqual(
+				row.credit_in_account_currency,
+				0,
+				f"Negative credit on account {row.account}",
+			)
+
+		# Customer (secondary) account must be debited, not credited
+		customer_row = next(r for r in jv_accounts if r.account == return_si.debit_to)
+		self.assertGreater(customer_row.debit_in_account_currency, 0)
+		self.assertEqual(customer_row.credit_in_account_currency, 0)
+
+		party_link.delete()
+
 	def test_payment_statuses(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 
