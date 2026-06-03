@@ -291,6 +291,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.validate_closed_subcontracting_order()
 		self.validate_subcontract_order()
 		self.validate_raw_materials_exists()
+		super().validate_subcontracting_inward()
 
 	def validate_finished_good_serial_batch_for_work_order(self):
 		if not (
