@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-31 10:18+0000\n"
-"PO-Revision-Date: 2026-05-31 22:15\n"
+"PO-Revision-Date: 2026-06-03 17:58\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Esperanto\n"
 "MIME-Version: 1.0\n"
@@ -35895,8 +35895,8 @@ msgstr "crwdns78710:0crwdne78710:0"
 
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/invoicing.json
-msgid "Payment Reconciliaition"
-msgstr "crwdns195880:0crwdne195880:0"
+msgid "Payment Reconciliation"
+msgstr "crwdns78712:0crwdne78712:0"
 
 #. Name of a DocType
 #. Label of the payment_reconciliation (Table) field in DocType 'POS Closing
@@ -35906,7 +35906,7 @@ msgstr "crwdns195880:0crwdne195880:0"
 #: erpnext/accounts/doctype/pos_closing_entry/pos_closing_entry.json
 #: erpnext/workspace_sidebar/payments.json
 msgid "Payment Reconciliation"
-msgstr "crwdns78712:0crwdne78712:0"
+msgstr "crwdns202013:0crwdne202013:0"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/payment_reconciliation_allocation/payment_reconciliation_allocation.json
