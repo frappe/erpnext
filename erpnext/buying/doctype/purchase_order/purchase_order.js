@@ -351,9 +351,10 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 			if (doc.status != "Closed") {
 				if (doc.status != "On Hold") {
 					if (
-						doc.items
+						(doc.items
 							.filter((item) => !item.delivered_by_supplier)
-							.some((item) => item.received_qty < item.qty) &&
+							.some((item) => item.received_qty < item.qty) ||
+							doc.__onload?.has_pending_receivable_qty) &&
 						allow_receipt
 					) {
 						this.frm.add_custom_button(

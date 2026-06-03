@@ -94,6 +94,9 @@ def get_data(filters):
 def get_sales_details(filters):
 	item_details_map = {}
 
+	if filters["based_on"] not in ("Sales Order", "Sales Invoice"):
+		frappe.throw(_("Invalid value {0} for 'Based On'").format(filters["based_on"]))
+
 	date_field = "s.transaction_date" if filters["based_on"] == "Sales Order" else "s.posting_date"
 
 	sales_data = frappe.db.sql(

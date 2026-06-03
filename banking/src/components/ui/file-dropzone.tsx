@@ -231,7 +231,7 @@ export const FileTypeIcon = ({
     const getTextColor = () => {
         switch (fileType.toLowerCase()) {
             case 'pdf':
-                return 'text-red-700'
+                return 'text-ink-red-3'
             case 'doc':
             case 'docx':
                 return 'text-[#1A5CBD]'

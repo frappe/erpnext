@@ -47,4 +47,6 @@ export interface BankStatementImportLog {
 	detected_transaction_ending_index?: number
 	/**	Column Mapping : Table - Bank Statement Import Log Column Map	*/
 	column_mapping?: BankStatementImportLogColumnMap[]
+	/**	PDF Tables : JSON - Per-table extraction data for PDF statements	*/
+	pdf_tables?: string
 }

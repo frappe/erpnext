@@ -13,7 +13,7 @@ from frappe.utils.data import nowtime
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
-from erpnext.accounts.party import get_party_details
+from erpnext.accounts.party import _get_party_details
 from erpnext.buying.utils import update_last_purchase_rate, validate_for_items
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
@@ -213,7 +213,7 @@ class BuyingController(SubcontractingController):
 		# set contact and address details for supplier, if they are not mentioned
 		if getattr(self, "supplier", None):
 			self.update_if_missing(
-				get_party_details(
+				_get_party_details(
 					self.supplier,
 					party_type="Supplier",
 					doctype=self.doctype,
@@ -682,19 +682,6 @@ class BuyingController(SubcontractingController):
 						item_code=frappe.bold(item_row["item_code"]),
 					)
 				)
-
-	def check_for_on_hold_or_closed_status(self, ref_doctype, ref_fieldname):
-		for d in self.get("items"):
-			if d.get(ref_fieldname):
-				status = frappe.db.get_value(ref_doctype, d.get(ref_fieldname), "status")
-				if status in ("Closed", "On Hold"):
-					frappe.throw(
-						_("{ref_doctype} {ref_name} is {status}.").format(
-							ref_doctype=frappe.bold(_(ref_doctype)),
-							ref_name=frappe.bold(d.get(ref_fieldname)),
-							status=frappe.bold(_(status)),
-						)
-					)
 
 	def update_stock_ledger(self, allow_negative_stock=False, via_landed_cost_voucher=False):
 		self.update_ordered_and_reserved_qty()

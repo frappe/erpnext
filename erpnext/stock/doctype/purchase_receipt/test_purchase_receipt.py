@@ -1051,6 +1051,40 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		pr.cancel()
 
+	def test_inter_company_purchase_receipt_does_not_inherit_party_fields(self):
+		"""
+		Party-derived fields on DN (from Customer) must not leak into the mapped PR.
+		"""
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		prepare_data_for_internal_transfer()
+
+		customer = "_Test Internal Customer 2"
+		company = "_Test Company with perpetual inventory"
+
+		dn = create_delivery_note(
+			company=company,
+			customer=customer,
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=1,
+			rate=100,
+			warehouse="Stores - TCP1",
+			target_warehouse="Work In Progress - TCP1",
+			do_not_submit=True,
+		)
+		# Stamp customer-side party fields onto the DN
+		dn.tax_category = "_Test Tax Category 2"
+		dn.language = "ar"
+		dn.submit()
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+
+		supplier = frappe.get_doc("Supplier", "_Test Internal Supplier 2")
+		self.assertEqual(pr.tax_category or None, supplier.tax_category or None)
+		self.assertEqual(pr.language or None, supplier.language or None)
+
 	def test_lcv_for_internal_transfer(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note

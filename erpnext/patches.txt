@@ -481,6 +481,7 @@ erpnext.patches.v16_0.set_root_type_in_account_categories
 erpnext.patches.v16_0.scr_inv_dimension
 erpnext.patches.v16_0.packed_item_inv_dimen
 erpnext.patches.v16_0.set_not_applicable_on_german_item_tax_templates
+erpnext.patches.v16_0.set_default_letter_head_for_doctype_and_report
 erpnext.patches.v16_0.clear_procedures_from_receivable_report
 erpnext.patches.v16_0.migrate_address_contact_custom_fields
 erpnext.patches.v16_0.rename_secondary_item_type_field

@@ -1937,6 +1937,43 @@ class StockController(AccountsController):
 
 					qty -= working_qty
 
+	def check_for_on_hold_or_closed_status(
+		self, ref_doctype: str, ref_fieldname: str, exclude_if_field: str | None = None
+	) -> None:
+		def _include(d):
+			return d.get(ref_fieldname) and not (exclude_if_field and d.get(exclude_if_field))
+
+		included = [(d, d.get(ref_fieldname)) for d in self.get("items") if _include(d)]
+		if not included:
+			return
+
+		status_map = {
+			r.name: r.status
+			for r in frappe.get_all(
+				ref_doctype,
+				filters={"name": ["in", {name for _, name in included}]},
+				fields=["name", "status"],
+			)
+		}
+
+		errors = []
+		seen = set()
+		for _d, ref_name in included:
+			if ref_name in seen:
+				continue
+			seen.add(ref_name)
+			if (status := status_map.get(ref_name)) in ("Closed", "On Hold"):
+				errors.append(
+					_("{ref_doctype} {ref_name} status is {status}.").format(
+						ref_doctype=frappe.bold(_(ref_doctype)),
+						ref_name=frappe.bold(ref_name),
+						status=frappe.bold(_(status)),
+					)
+				)
+
+		if errors:
+			frappe.throw("<br>".join(errors), frappe.InvalidStatusError)
+
 
 @frappe.whitelist()
 def show_accounting_ledger_preview(company: str, doctype: str, docname: str):

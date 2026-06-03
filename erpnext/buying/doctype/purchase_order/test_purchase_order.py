@@ -98,6 +98,60 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		po.load_from_db()
 		self.assertEqual(po.get("items")[0].received_qty, 4)
 
+	def test_make_purchase_receipt_respects_over_receipt_allowance(self):
+		"""make_purchase_receipt must include fully-received PO lines when
+		over_delivery_receipt_allowance permits further receipt.
+
+		Regression test for #55246: the mapper dropped rows once
+		received_qty >= qty, ignoring the configured tolerance.
+		"""
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+
+		# 50% tolerance — 10 ordered allows up to 15 received
+		frappe.db.set_value("Item", "_Test Item", "over_delivery_receipt_allowance", 50)
+		try:
+			po = create_purchase_order()
+			create_pr_against_po(po.name, received_qty=10)
+
+			po.load_from_db()
+			self.assertEqual(po.get("items")[0].received_qty, 10)
+
+			# onload must flag pending receivable qty so the UI keeps the
+			# "Create > Purchase Receipt" button visible even at per_received = 100
+			po.run_method("onload")
+			self.assertTrue(
+				po.get_onload("has_pending_receivable_qty"),
+				"onload should flag pending receivable qty while tolerance is available",
+			)
+
+			# Re-mapping the same PO must yield a PR with the row present
+			# and qty pre-filled to the remaining tolerance (15 - 10 = 5)
+			pr = make_purchase_receipt(po.name)
+			self.assertEqual(
+				len(pr.get("items")), 1, "Fully-received row dropped despite available tolerance"
+			)
+			self.assertEqual(pr.get("items")[0].item_code, "_Test Item")
+			self.assertEqual(pr.get("items")[0].qty, 5)
+			self.assertEqual(pr.get("items")[0].purchase_order_item, po.get("items")[0].name)
+
+			# Tolerance exhausted → row must be filtered out as before
+			create_pr_against_po(po.name, received_qty=5)
+			po.load_from_db()
+			self.assertEqual(po.get("items")[0].received_qty, 15)
+
+			po.run_method("onload")
+			self.assertFalse(
+				po.get_onload("has_pending_receivable_qty"),
+				"onload should clear pending receivable flag once tolerance is exhausted",
+			)
+
+			pr_empty = make_purchase_receipt(po.name)
+			self.assertEqual(
+				len(pr_empty.get("items")), 0, "Row should be dropped once tolerance is exhausted"
+			)
+		finally:
+			frappe.db.set_value("Item", "_Test Item", "over_delivery_receipt_allowance", 0)
+
 	def test_ordered_qty_against_pi_with_update_stock(self):
 		existing_ordered_qty = get_ordered_qty()
 		po = create_purchase_order()

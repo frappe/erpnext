@@ -14,6 +14,9 @@ def execute(filters=None):
 	days_since_last_order = filters.get("days_since_last_order")
 	doctype = filters.get("doctype")
 
+	if doctype not in ("Sales Order", "Sales Invoice"):
+		frappe.throw(_("Invalid value {0} for 'Doctype'").format(doctype))
+
 	if cint(days_since_last_order) <= 0:
 		frappe.throw(_("'Days Since Last Order' must be greater than or equal to zero"))
 
