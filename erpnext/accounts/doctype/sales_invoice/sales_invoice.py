@@ -28,7 +28,16 @@ from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger 
 )
 from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import SalesTaxWithholding
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
+<<<<<<< HEAD
 from erpnext.accounts.party import get_due_date, get_party_account, get_party_details
+=======
+from erpnext.accounts.party import (
+	CROSS_PARTY_FIELD_NO_MAP,
+	_get_party_details,
+	get_due_date,
+	get_party_account,
+)
+>>>>>>> 260cec3b86 (fix: prevent leakage of party-derived fields in cross doctype transactions (#55336))
 from erpnext.accounts.utils import (
 	get_account_currency,
 	update_voucher_outstanding,
@@ -2776,7 +2785,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 				"doctype": target_doctype,
 				"postprocess": update_details,
 				"set_target_warehouse": "set_from_warehouse",
-				"field_no_map": ["taxes_and_charges", "set_warehouse", "shipping_address", "cost_center"],
+				"field_no_map": [*CROSS_PARTY_FIELD_NO_MAP, "set_warehouse", "cost_center"],
 			},
 			doctype + " Item": item_field_map,
 		},
