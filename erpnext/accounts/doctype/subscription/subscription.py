@@ -86,6 +86,39 @@ class Subscription(Document):
 		# update start just before the subscription doc is created
 		self.update_subscription_period(self.start_date)
 
+	def after_insert(self) -> None:
+		if frappe.flags.in_import or frappe.flags.in_migrate:
+			return
+
+		if getdate(self.start_date) > getdate(nowdate()):
+			return
+
+		self.generate_invoices_till_date()
+
+	def generate_invoices_till_date(self) -> None:
+		"""
+		Catch up a freshly created subscription by billing every elapsed period
+		from the start date up to today, then advancing the status (e.g. cancelling
+		if the end date has been crossed). Stops early when no further invoice is due
+		or an outstanding invoice blocks billing (per `generate_new_invoices_past_due_date`).
+		"""
+		while getdate(self._next_invoice_trigger_date()) <= getdate(nowdate()):
+			period_start = self.current_invoice_start
+			self.process(posting_date=self._next_invoice_trigger_date())
+
+			if self.status == "Cancelled" or getdate(self.current_invoice_start) == getdate(period_start):
+				break
+
+			if not self.generate_new_invoices_past_due_date:
+				break
+
+	def _next_invoice_trigger_date(self) -> DateTimeLikeObject:
+		if self.generate_invoice_at == "Beginning of the current subscription period":
+			return self.current_invoice_start
+		if self.generate_invoice_at == "Days before the current subscription period":
+			return add_days(self.current_invoice_start, -self.number_of_days)
+		return self.current_invoice_end
+
 	def update_subscription_period(self, date: DateTimeLikeObject | None = None):
 		"""
 		Subscription period is the period to be billed. This method updates the
@@ -610,13 +643,7 @@ class Subscription(Document):
 			return False
 
 		posting = getdate(posting_date)
-
-		if self.generate_invoice_at == "Beginning of the current subscription period":
-			trigger = getdate(self.current_invoice_start)
-		elif self.generate_invoice_at == "Days before the current subscription period":
-			trigger = getdate(add_days(self.current_invoice_start, -1 * self.number_of_days))
-		else:
-			trigger = getdate(self.current_invoice_end)
+		trigger = getdate(self._next_invoice_trigger_date())
 
 		if posting < trigger:
 			return False

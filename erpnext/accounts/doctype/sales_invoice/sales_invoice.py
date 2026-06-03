@@ -22,7 +22,7 @@ from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger 
 )
 from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import SalesTaxWithholding
 from erpnext.accounts.party import get_due_date, get_party_account
-from erpnext.accounts.utils import update_voucher_outstanding
+from erpnext.accounts.utils import refresh_subscription_status, update_voucher_outstanding
 from erpnext.controllers.accounts_controller import validate_account_head
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
@@ -703,6 +703,10 @@ class SalesInvoice(SellingController):
 	# Called by POS Invoice
 	def set_pos_fields(self, for_validate=False):
 		return POSService(self).set_pos_fields(for_validate)
+
+	def refresh_subscription_status(self):
+		if self.get("subscription"):
+			refresh_subscription_status(self.subscription)
 
 	@frappe.whitelist()
 	def reset_mode_of_payments(self):
