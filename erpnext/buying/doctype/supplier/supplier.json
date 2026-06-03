@@ -396,7 +396,7 @@
    "fieldname": "email_id",
    "fieldtype": "Read Only",
    "label": "Email ID",
-   "no_copy": 1,
+   "no_copy": 1
   },
   {
    "fieldname": "primary_address",
