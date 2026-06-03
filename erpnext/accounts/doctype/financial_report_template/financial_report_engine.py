@@ -565,18 +565,19 @@ class FinancialQueryBuilder:
 			frappe.qb.from_(acb_table)
 			.select(
 				acb_table.account,
-				(acb_table.debit - acb_table.credit).as_("balance"),
+				Sum(acb_table.debit - acb_table.credit).as_("balance"),
 			)
 			.where(acb_table.company == self.company)
 			.where(acb_table.account.isin(account_names))
 			.where(acb_table.period_closing_voucher == closing_voucher)
+			.groupby(acb_table.account)
 		)
 
 		query = self._apply_standard_filters(query, acb_table, "Account Closing Balance")
 		results = self._execute_with_permissions(query, "Account Closing Balance")
 
 		for row in results:
-			closing_balances[row["account"]] = row["balance"]
+			closing_balances[row["account"]] = row["balance"] or 0.0
 
 		return closing_balances
 

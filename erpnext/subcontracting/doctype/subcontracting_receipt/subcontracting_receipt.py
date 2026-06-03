@@ -12,7 +12,6 @@ from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
 
 import erpnext
 from erpnext.accounts.utils import get_account_currency
-from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -216,9 +215,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.create_raw_materials_supplied_or_received()
 
 	def validate_closed_subcontracting_order(self):
-		for item in self.items:
-			if item.subcontracting_order:
-				check_on_hold_or_closed_status("Subcontracting Order", item.subcontracting_order)
+		self.check_for_on_hold_or_closed_status("Subcontracting Order", "subcontracting_order")
 
 	def update_job_card(self):
 		for row in self.get("items"):
@@ -420,7 +417,7 @@ class SubcontractingReceipt(SubcontractingController):
 					self.append(
 						"items",
 						{
-							"type": secondary_item.type,
+							"secondary_item_type": secondary_item.secondary_item_type,
 							"is_legacy_scrap_item": secondary_item.is_legacy,
 							"reference_name": item.name,
 							"item_code": secondary_item.item_code,
@@ -448,7 +445,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 	def remove_secondary_items(self):
 		for item in list(self.items):
-			if item.type or item.is_legacy_scrap_item:
+			if item.secondary_item_type or item.is_legacy_scrap_item:
 				self.remove(item)
 			else:
 				item.secondary_items_cost_per_qty = 0
@@ -490,11 +487,10 @@ class SubcontractingReceipt(SubcontractingController):
 					supplied_items_details[item.name][
 						supplied_item.rm_item_code
 					] += supplied_item.available_qty
-		else:
-			for item in self.get("supplied_items"):
-				item.available_qty_for_consumption = supplied_items_details.get(item.reference_name, {}).get(
-					item.rm_item_code, 0
-				)
+		for item in self.get("supplied_items"):
+			item.available_qty_for_consumption = supplied_items_details.get(item.reference_name, {}).get(
+				item.rm_item_code, 0
+			)
 
 	def calculate_items_qty_and_amount(self):
 		rm_cost_map = {}
@@ -508,7 +504,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		secondary_items_cost_map = {}
 		for item in self.get("items") or []:
-			if item.type or item.is_legacy_scrap_item:
+			if item.secondary_item_type or item.is_legacy_scrap_item:
 				qty = (
 					flt(item.qty)
 					if item.is_legacy_scrap_item
@@ -523,7 +519,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		total_qty = total_amount = 0
 		for item in self.get("items") or []:
-			if not item.type and not item.is_legacy_scrap_item:
+			if not item.secondary_item_type and not item.is_legacy_scrap_item:
 				if item.qty:
 					if item.name in rm_cost_map:
 						item.rm_supp_cost = rm_cost_map[item.name]
@@ -561,13 +557,12 @@ class SubcontractingReceipt(SubcontractingController):
 
 			total_qty += flt(item.qty) + flt(item.rejected_qty)
 			total_amount += item.amount
-		else:
-			self.total_qty = total_qty
-			self.total = total_amount
+		self.total_qty = total_qty
+		self.total = total_amount
 
 	def validate_secondary_items(self):
 		for item in self.items:
-			if item.type or item.is_legacy_scrap_item:
+			if item.secondary_item_type or item.is_legacy_scrap_item:
 				if not item.qty:
 					frappe.throw(
 						_("Row #{0}: Secondary Item Qty cannot be zero").format(item.idx),

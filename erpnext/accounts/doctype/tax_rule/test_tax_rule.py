@@ -387,7 +387,7 @@ class TestTaxRule(ERPNextTestSuite):
 		self.assertEqual(quotation.taxes_and_charges, "_Test Sales Taxes and Charges Template - _TC")
 
 		# Check if accounts heads and rate fetched are also fetched from tax template or not
-		self.assertTrue(len(quotation.taxes) > 0)
+		self.assertGreater(len(quotation.taxes), 0)
 
 
 def make_tax_rule(**args):

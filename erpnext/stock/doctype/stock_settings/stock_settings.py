@@ -8,7 +8,6 @@ import frappe
 from frappe import _
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.model.document import Document
-from frappe.utils import cint
 from frappe.utils.html_utils import clean_html
 
 from erpnext.stock.utils import check_pending_reposting

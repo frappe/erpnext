@@ -36,8 +36,8 @@ class ProcessPeriodClosingVoucher(Document):
 		parent_pcv: DF.Link
 		status: DF.Literal["Queued", "Running", "Paused", "Completed", "Cancelled"]
 		z_opening_balances: DF.Table[ProcessPeriodClosingVoucherDetail]
-
 	# end: auto-generated types
+
 	def on_discard(self):
 		self.db_set("status", "Cancelled")
 
@@ -562,6 +562,9 @@ def process_individual_date(docname: str, date, report_type, parentfield):
 
 	if parentfield == "z_opening_balances":
 		query = query.where(gle.is_opening.eq("Yes"))
+	else:
+		# Keep balances aligned with legacy PCV logic (non-opening transactions only)
+		query = query.where(gle.is_opening.eq("No"))
 
 	query = query.groupby(gle.account)
 	for dim in dimensions:

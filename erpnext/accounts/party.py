@@ -84,7 +84,6 @@ def get_party_details(
 	price_list: str | None = None,
 	currency: str | None = None,
 	doctype: str | None = None,
-	ignore_permissions: bool | None = False,
 	fetch_payment_terms_template: bool = True,
 	party_address: str | None = None,
 	company_address: str | None = None,
@@ -94,8 +93,6 @@ def get_party_details(
 ):
 	if not party:
 		return frappe._dict()
-	if not frappe.db.exists(party_type, party):
-		frappe.throw(_("{0}: {1} does not exists").format(party_type, party))
 	return _get_party_details(
 		party,
 		account,
@@ -106,7 +103,7 @@ def get_party_details(
 		price_list,
 		currency,
 		doctype,
-		ignore_permissions,
+		False,
 		fetch_payment_terms_template,
 		party_address,
 		company_address,

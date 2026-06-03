@@ -2687,7 +2687,7 @@ class AccountsController(TransactionBase):
 					payment_schedule["credit_days"] = cint(schedule.credit_days)
 					payment_schedule["credit_months"] = cint(schedule.credit_months)
 
-				if schedule.discount_validity_based_on:
+				if schedule.discount_validity_based_on and flt(schedule.discount):
 					payment_schedule["discount_date"] = get_discount_date(schedule, posting_date)
 					payment_schedule["discount_validity_based_on"] = schedule.discount_validity_based_on
 					payment_schedule["discount_validity"] = cint(schedule.discount_validity)
@@ -2729,6 +2729,8 @@ class AccountsController(TransactionBase):
 			return
 
 		for d in self.get("payment_schedule"):
+			if not flt(d.discount):
+				d.discount_date = None
 			d.validate_from_to_dates("discount_date", "due_date")
 			if self.doctype in ["Sales Order", "Quotation"] and getdate(d.due_date) < getdate(
 				self.transaction_date
@@ -3618,12 +3620,11 @@ def get_payment_term_details(
 	term_details.outstanding = term_details.payment_amount
 	term_details.base_outstanding = term_details.base_payment_amount
 
-	if bill_date:
-		term_details.due_date = get_due_date(term, bill_date)
-		term_details.discount_date = get_discount_date(term, bill_date)
-	elif posting_date:
-		term_details.due_date = get_due_date(term, posting_date)
-		term_details.discount_date = get_discount_date(term, posting_date)
+	has_discount = flt(term.get("discount"))
+	date = bill_date or posting_date
+	if date:
+		term_details.due_date = get_due_date(term, date)
+		term_details.discount_date = get_discount_date(term, date) if has_discount else None
 
 	if posting_date and getdate(term_details.due_date) < getdate(posting_date):
 		term_details.due_date = posting_date

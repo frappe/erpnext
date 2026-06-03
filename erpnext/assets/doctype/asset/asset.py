@@ -1288,8 +1288,6 @@ def make_asset_movement(
 	assets: list[dict] | str,
 	purpose: str = "Transfer",
 ):
-	import json
-
 	if isinstance(assets, str):
 		assets = json.loads(assets)
 

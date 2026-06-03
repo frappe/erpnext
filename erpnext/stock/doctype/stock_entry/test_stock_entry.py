@@ -184,7 +184,7 @@ class TestStockEntry(ERPNextTestSuite):
 			for d in mr.items:
 				items.append(d.item_code)
 
-		self.assertTrue(item_code in items)
+		self.assertIn(item_code, items)
 
 	def test_add_to_transit_entry(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
@@ -908,7 +908,9 @@ class TestStockEntry(ERPNextTestSuite):
 			if d.s_warehouse:
 				rm_cost += d.amount
 		fg_cost = next(filter(lambda x: x.item_code == "_Test FG Item", s.get("items"))).amount
-		secondary_item_cost = next(filter(lambda x: x.type or x.is_legacy_scrap_item, s.get("items"))).amount
+		secondary_item_cost = next(
+			filter(lambda x: x.secondary_item_type or x.is_legacy_scrap_item, s.get("items"))
+		).amount
 
 		self.assertEqual(fg_cost, flt(rm_cost - secondary_item_cost, 2))
 
@@ -951,7 +953,7 @@ class TestStockEntry(ERPNextTestSuite):
 
 		stock_entry = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
 		stock_entry.insert()
-		self.assertTrue("_Test Variant Item-S" in [d.item_code for d in stock_entry.items])
+		self.assertIn("_Test Variant Item-S", [d.item_code for d in stock_entry.items])
 
 	def test_nagative_stock_for_batch(self):
 		item = make_item(
@@ -1027,7 +1029,7 @@ class TestStockEntry(ERPNextTestSuite):
 					basic_rate=row.basic_rate or 100,
 				)
 
-			if row.type or row.is_legacy_scrap_item:
+			if row.secondary_item_type or row.is_legacy_scrap_item:
 				row.item_code = secondary_item
 				row.uom = frappe.db.get_value("Item", secondary_item, "stock_uom")
 				row.stock_uom = frappe.db.get_value("Item", secondary_item, "stock_uom")
@@ -1035,10 +1037,16 @@ class TestStockEntry(ERPNextTestSuite):
 		stock_entry.inspection_required = 1
 		stock_entry.save()
 
-		self.assertTrue([row.item_code for row in stock_entry.items if row.type or row.is_legacy_scrap_item])
+		self.assertTrue(
+			[
+				row.item_code
+				for row in stock_entry.items
+				if row.secondary_item_type or row.is_legacy_scrap_item
+			]
+		)
 
 		for row in stock_entry.items:
-			if not row.type and not row.is_legacy_scrap_item:
+			if not row.secondary_item_type and not row.is_legacy_scrap_item:
 				qc = frappe.get_doc(
 					{
 						"doctype": "Quality Inspection",
@@ -1058,7 +1066,7 @@ class TestStockEntry(ERPNextTestSuite):
 		stock_entry.reload()
 		stock_entry.submit()
 		for row in stock_entry.items:
-			if row.type or row.is_legacy_scrap_item:
+			if row.secondary_item_type or row.is_legacy_scrap_item:
 				self.assertFalse(row.quality_inspection)
 			else:
 				self.assertTrue(row.quality_inspection)
@@ -2877,6 +2885,88 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 		key = (rm, wip_wh)
 		if key in materials:
 			self.assertEqual(materials[key].qty, 0)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
+	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
+	def test_validate_fg_resets_invalid_serial_no_on_manufacture(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as _make_stock_entry,
+		)
+
+		fg_item = "_FG Serial No Item"
+		rm_item = "RM for serial item"
+		create_nested_bom({fg_item: {rm_item: {}}}, prefix="")
+
+		item = frappe.get_doc("Item", fg_item)
+		item.has_serial_no = 1
+		item.serial_no_series = "FSNI-.####"
+		item.save()
+
+		make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=20, basic_rate=100)
+
+		wo1 = make_wo_order_test_record(item=fg_item, qty=2, skip_transfer=True)
+		wo2 = make_wo_order_test_record(item=fg_item, qty=2, skip_transfer=True)
+		wo1_serial_nos = frappe.get_all("Serial No", filters={"work_order": wo1.name}, pluck="name")
+		wo2_serial_nos = frappe.get_all("Serial No", filters={"work_order": wo2.name}, pluck="name")
+
+		se = frappe.get_doc(_make_stock_entry(wo1.name, "Manufacture", 2))
+		for row in se.items:
+			if row.is_finished_item:
+				row.serial_no = wo2_serial_nos[0]
+				row.serial_and_batch_bundle = None
+
+		se.save()
+
+		for row in se.items:
+			if row.is_finished_item:
+				self.assertIsNone(row.serial_no)
+				self.assertTrue(row.serial_and_batch_bundle)
+				for sn in get_serial_nos_from_bundle(row.serial_and_batch_bundle):
+					self.assertIn(sn, wo1_serial_nos)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
+	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
+	def test_validate_fg_resets_invalid_batch_no_on_manufacture(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as _make_stock_entry,
+		)
+		from erpnext.stock.serial_batch_bundle import get_batches_from_bundle
+
+		fg_item = "_FG Batch No Item"
+		rm_item = "RM for Batch Item"
+		create_nested_bom({fg_item: {rm_item: {}}}, prefix="")
+
+		item = frappe.get_doc("Item", fg_item)
+		item.has_batch_no = 1
+		item.create_new_batch = 1
+		item.batch_number_series = "FBNI-.####"
+		item.save()
+
+		make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=20, basic_rate=100)
+
+		wo1 = make_wo_order_test_record(item=fg_item, qty=2, skip_transfer=True)
+		wo2 = make_wo_order_test_record(item=fg_item, qty=2, skip_transfer=True)
+		wo1_batches = frappe.get_all("Batch", filters={"reference_name": wo1.name}, pluck="name")
+		wo2_batches = frappe.get_all("Batch", filters={"reference_name": wo2.name}, pluck="name")
+
+		se = frappe.get_doc(_make_stock_entry(wo1.name, "Manufacture", 2))
+		for row in se.items:
+			if row.is_finished_item:
+				row.batch_no = wo2_batches[0]
+				row.serial_and_batch_bundle = None
+
+		se.save()
+
+		for row in se.items:
+			if row.is_finished_item:
+				self.assertIsNone(row.batch_no)
+				self.assertTrue(row.serial_and_batch_bundle)
+				for bn in list(get_batches_from_bundle(row.serial_and_batch_bundle).keys()):
+					self.assertIn(bn, wo1_batches)
 
 
 def make_serialized_item(self, **args):

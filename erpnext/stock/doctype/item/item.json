@@ -236,7 +236,7 @@
    "description": "ERPNext will make a stock ledger entry for each transaction of this item. Keep unchecked for non-stock or service items.",
    "fieldname": "is_stock_item",
    "fieldtype": "Check",
-   "in_list_view": 1,
+   "in_list_view": 0,
    "label": "Maintain Stock",
    "oldfieldname": "is_stock_item",
    "oldfieldtype": "Select",
@@ -279,7 +279,8 @@
    "fieldname": "is_fixed_asset",
    "fieldtype": "Check",
    "label": "Is Fixed Asset",
-   "read_only_depends_on": "eval:doc.is_stock_item"
+   "read_only_depends_on": "eval:doc.is_stock_item",
+   "in_list_view": 1
   },
   {
    "allow_in_quick_entry": 1,
@@ -592,7 +593,7 @@
    "oldfieldtype": "Currency"
   },
   {
-   "description": "Minimum stock level to maintain as a buffer. Used to calculate recommended reorder level: Reorder Level = Safety Stock + (Average Daily Consumption \u00d7 Lead Time).",
+   "description": "Minimum stock level to maintain as a buffer. Used to calculate recommended reorder level: Reorder Level = Safety Stock + (Average Daily Consumption × Lead Time).",
    "fieldname": "safety_stock",
    "fieldtype": "Float",
    "label": "Safety Stock",
@@ -696,7 +697,8 @@
    "fieldname": "is_sales_item",
    "fieldtype": "Check",
    "label": "Allow Sales",
-   "show_description_on_click": 1
+   "show_description_on_click": 1,
+   "in_list_view": 1
   },
   {
    "fieldname": "column_break3",
@@ -1069,7 +1071,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2026-05-26 10:18:46.862670",
+ "modified": "2026-05-27 10:18:46.862670",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

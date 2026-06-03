@@ -7,6 +7,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, flt, get_link_to_form
 
@@ -150,7 +151,7 @@ class SubcontractingController(StockController):
 					).format(item.idx, get_link_to_form("Item", item.item_code))
 				)
 
-			if not item.get("type") and not item.get("is_legacy_scrap_item"):
+			if not item.get("secondary_item_type") and not item.get("is_legacy_scrap_item"):
 				if not is_sub_contracted_item:
 					frappe.throw(
 						_("Row {0}: Item {1} must be a subcontracted item.").format(item.idx, item.item_name)
@@ -1243,10 +1244,10 @@ class SubcontractingController(StockController):
 				total_amt = sum(
 					flt(item.amount)
 					for item in self.get("items")
-					if not item.get("type") and not item.get("is_legacy_scrap_item")
+					if not item.get("secondary_item_type") and not item.get("is_legacy_scrap_item")
 				)
 				for item in self.items:
-					if not item.get("type") and not item.get("is_legacy_scrap_item"):
+					if not item.get("secondary_item_type") and not item.get("is_legacy_scrap_item"):
 						item.additional_cost_per_qty = (
 							(item.amount * self.total_additional_costs) / total_amt
 						) / item.qty
@@ -1254,15 +1255,15 @@ class SubcontractingController(StockController):
 				total_qty = sum(
 					flt(item.qty)
 					for item in self.get("items")
-					if not item.get("type") and not item.get("is_legacy_scrap_item")
+					if not item.get("secondary_item_type") and not item.get("is_legacy_scrap_item")
 				)
 				additional_cost_per_qty = self.total_additional_costs / total_qty
 				for item in self.items:
-					if not item.get("type") and not item.get("is_legacy_scrap_item"):
+					if not item.get("secondary_item_type") and not item.get("is_legacy_scrap_item"):
 						item.additional_cost_per_qty = additional_cost_per_qty
 		else:
 			for item in self.items:
-				if not item.get("type") and not item.get("is_legacy_scrap_item"):
+				if not item.get("secondary_item_type") and not item.get("is_legacy_scrap_item"):
 					item.additional_cost_per_qty = 0
 
 	@frappe.whitelist()
@@ -1529,9 +1530,13 @@ def make_return_stock_entry_for_subcontract(
 
 
 @frappe.whitelist()
-def get_materials_from_supplier(
-	subcontract_order: str, rm_details: str | list, order_doctype: str = "Subcontracting Order"
-):
+def get_materials_from_supplier(source_name: str, target_doc: Document | str | None = None):
+	args = frappe.flags.args or {}
+
+	subcontract_order = args.get("subcontract_order") or source_name
+	rm_details = args.get("rm_details")
+	order_doctype = args.get("order_doctype") or "Subcontracting Order"
+
 	if isinstance(rm_details, str):
 		rm_details = json.loads(rm_details)
 

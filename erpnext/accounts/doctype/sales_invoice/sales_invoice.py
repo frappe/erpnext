@@ -33,7 +33,7 @@ from erpnext.accounts.party import (
 	CROSS_PARTY_FIELD_NO_MAP,
 	get_due_date,
 	get_party_account,
-	get_party_details,
+	_get_party_details,
 )
 from erpnext.accounts.utils import (
 	get_account_currency,
@@ -999,7 +999,7 @@ class SalesInvoice(SellingController):
 		return pos
 
 	def get_company_abbr(self):
-		return frappe.db.sql("select abbr from tabCompany where name=%s", self.company)[0][0]
+		return frappe.db.get_value("Company", self.company, "abbr")
 
 	def validate_debit_to_acc(self):
 		if not self.debit_to:
@@ -1039,11 +1039,7 @@ class SalesInvoice(SellingController):
 	def clear_unallocated_mode_of_payments(self):
 		self.set("payments", self.get("payments", {"amount": ["not in", [0, None, ""]]}))
 
-		frappe.db.sql(
-			"""delete from `tabSales Invoice Payment` where parent = %s
-			and amount = 0""",
-			self.name,
-		)
+		frappe.db.delete("Sales Invoice Payment", filters={"parent": self.name, "amount": 0})
 
 	def validate_with_previous_doc(self):
 		super().validate_with_previous_doc(
@@ -1139,12 +1135,20 @@ class SalesInvoice(SellingController):
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
 		if self.project and self.customer:
-			res = frappe.db.sql(
-				"""select name from `tabProject`
-				where name = %s and (customer = %s or customer is null or customer = '')""",
-				(self.project, self.customer),
+			Project = frappe.qb.DocType("Project")
+
+			query = (
+				frappe.qb.from_(Project)
+				.select(Project.name)
+				.where(Project.name == self.project)
+				.where(
+					(Project.customer == self.customer)
+					| (Project.customer.isnull())
+					| (Project.customer == "")
+				)
 			)
-			if not res:
+
+			if not query.run():
 				throw(_("Customer {0} does not belong to project {1}").format(self.customer, self.project))
 
 	def validate_pos(self):
@@ -1369,19 +1373,28 @@ class SalesInvoice(SellingController):
 		self.total_billing_hours = timesheet_sum("billing_hours")
 
 	def get_warehouse(self):
-		user_pos_profile = frappe.db.sql(
-			"""select name, warehouse from `tabPOS Profile`
-			where ifnull(user,'') = %s and company = %s""",
-			(frappe.session["user"], self.company),
+		POSProfile = frappe.qb.DocType("POS Profile")
+
+		user_query = (
+			frappe.qb.from_(POSProfile)
+			.select(POSProfile.name, POSProfile.warehouse)
+			.where(POSProfile.company == self.company)
+			.where(
+				(POSProfile.user == frappe.session["user"])
+				| ((POSProfile.user.isnull() | (POSProfile.user == "")) & (frappe.session["user"] == ""))
+			)
 		)
+		user_pos_profile = user_query.run()
 		warehouse = user_pos_profile[0][1] if user_pos_profile else None
 
 		if not warehouse:
-			global_pos_profile = frappe.db.sql(
-				"""select name, warehouse from `tabPOS Profile`
-				where (user is null or user = '') and company = %s""",
-				self.company,
+			global_query = (
+				frappe.qb.from_(POSProfile)
+				.select(POSProfile.name, POSProfile.warehouse)
+				.where(POSProfile.company == self.company)
+				.where(POSProfile.user.isnull() | (POSProfile.user == ""))
 			)
+			global_pos_profile = global_query.run()
 
 			if global_pos_profile:
 				warehouse = global_pos_profile[0][1]
@@ -2111,15 +2124,24 @@ class SalesInvoice(SellingController):
 	def update_billing_status_in_dn(self, update_modified=True):
 		if self.is_return and not self.update_billed_amount_in_delivery_note:
 			return
+
 		updated_delivery_notes = []
+
+		SalesInvoiceItem = frappe.qb.DocType("Sales Invoice Item")
+		from frappe.query_builder.functions import Coalesce, Sum
+
 		for d in self.get("items"):
 			if d.dn_detail:
-				billed_amt = frappe.db.sql(
-					"""select sum(amount) from `tabSales Invoice Item`
-					where dn_detail=%s and docstatus=1""",
-					d.dn_detail,
+				query = (
+					frappe.qb.from_(SalesInvoiceItem)
+					.select(Coalesce(Sum(SalesInvoiceItem.amount), 0))
+					.where(SalesInvoiceItem.dn_detail == d.dn_detail)
+					.where(SalesInvoiceItem.docstatus == 1)
 				)
-				billed_amt = billed_amt and billed_amt[0][0] or 0
+
+				res = query.run()
+				billed_amt = res[0][0] if res else 0
+
 				frappe.db.set_value(
 					"Delivery Note Item",
 					d.dn_detail,
@@ -2201,28 +2223,29 @@ class SalesInvoice(SellingController):
 
 	# valdite the redemption and then delete the loyalty points earned on cancel of the invoice
 	def delete_loyalty_point_entry(self):
-		lp_entry = frappe.db.sql(
-			"select name from `tabLoyalty Point Entry` where invoice=%s", (self.name), as_dict=1
+		lp_entry = frappe.db.get_all(
+			"Loyalty Point Entry", filters={"invoice": self.name, "loyalty_points": (">", 0)}, fields=["name"]
 		)
 
 		if not lp_entry:
 			return
-		against_lp_entry = frappe.db.sql(
-			"""select name, invoice from `tabLoyalty Point Entry`
-			where redeem_against=%s""",
-			(lp_entry[0].name),
-			as_dict=1,
+
+		against_lp_entry = frappe.db.get_all(
+			"Loyalty Point Entry",
+			filters={"redeem_against": lp_entry[0].name},
+			fields=["name", "invoice"],
 		)
+
 		if against_lp_entry:
 			invoice_list = ", ".join([d.invoice for d in against_lp_entry])
 			frappe.throw(
 				_(
-					"""{} can't be cancelled since the Loyalty Points earned has been redeemed. First cancel the {} No {}"""
+					"{} can't be cancelled since the Loyalty Points earned has been redeemed. "
+					"First cancel the {} No {}"
 				).format(self.doctype, self.doctype, invoice_list)
 			)
 		else:
-			frappe.db.sql("""delete from `tabLoyalty Point Entry` where invoice=%s""", (self.name))
-			# Set loyalty program
+			frappe.db.delete("Loyalty Point Entry", filters={"invoice": self.name})
 			self.set_loyalty_program_tier()
 
 	def set_loyalty_program_tier(self):
@@ -2393,18 +2416,20 @@ def is_overdue(doc, total):
 def get_discounting_status(sales_invoice):
 	status = None
 
-	invoice_discounting_list = frappe.db.sql(
-		"""
-		select status
-		from `tabInvoice Discounting` id, `tabDiscounted Invoice` d
-		where
-			id.name = d.parent
-			and d.sales_invoice=%s
-			and id.docstatus=1
-			and status in ('Disbursed', 'Settled')
-	""",
-		sales_invoice,
+	InvoiceDiscounting = frappe.qb.DocType("Invoice Discounting")
+	DiscountedInvoice = frappe.qb.DocType("Discounted Invoice")
+
+	query = (
+		frappe.qb.from_(InvoiceDiscounting)
+		.join(DiscountedInvoice)
+		.on(InvoiceDiscounting.name == DiscountedInvoice.parent)
+		.select(InvoiceDiscounting.status)
+		.where(DiscountedInvoice.sales_invoice == sales_invoice)
+		.where(InvoiceDiscounting.docstatus == 1)
+		.where(InvoiceDiscounting.status.isin(["Disbursed", "Settled"]))
 	)
+
+	invoice_discounting_list = query.run()
 
 	for d in invoice_discounting_list:
 		status = d[0]
@@ -3023,7 +3048,7 @@ def update_taxes(
 	master_doctype=None,
 ):
 	# Update Party Details
-	party_details = get_party_details(
+	party_details = _get_party_details(
 		party=party,
 		party_type=party_type,
 		company=company,
@@ -3123,14 +3148,21 @@ def update_multi_mode_option(doc, pos_profile):
 
 
 def get_all_mode_of_payments(doc):
-	return frappe.db.sql(
-		"""
-		select mpa.default_account, mpa.parent, mp.type as type
-		from `tabMode of Payment Account` mpa,`tabMode of Payment` mp
-		where mpa.parent = mp.name and mpa.company = %(company)s and mp.enabled = 1""",
-		{"company": doc.company},
-		as_dict=1,
+	ModeOfPaymentAccount = frappe.qb.DocType("Mode of Payment Account")
+	ModeOfPayment = frappe.qb.DocType("Mode of Payment")
+
+	query = (
+		frappe.qb.from_(ModeOfPaymentAccount)
+		.join(ModeOfPayment)
+		.on(ModeOfPaymentAccount.parent == ModeOfPayment.name)
+		.select(
+			ModeOfPaymentAccount.default_account, ModeOfPaymentAccount.parent, ModeOfPayment.type.as_("type")
+		)
+		.where(ModeOfPaymentAccount.company == doc.company)
+		.where(ModeOfPayment.enabled == 1)
 	)
+
+	return query.run(as_dict=1)
 
 
 def get_mode_of_payments_info(mode_of_payments, company):
@@ -3156,14 +3188,22 @@ def get_mode_of_payments_info(mode_of_payments, company):
 
 
 def get_mode_of_payment_info(mode_of_payment, company):
-	return frappe.db.sql(
-		"""
-		select mpa.default_account, mpa.parent, mp.type as type
-		from `tabMode of Payment Account` mpa,`tabMode of Payment` mp
-		where mpa.parent = mp.name and mpa.company = %s and mp.enabled = 1 and mp.name = %s""",
-		(company, mode_of_payment),
-		as_dict=1,
+	ModeOfPaymentAccount = frappe.qb.DocType("Mode of Payment Account")
+	ModeOfPayment = frappe.qb.DocType("Mode of Payment")
+
+	query = (
+		frappe.qb.from_(ModeOfPayment)
+		.join(ModeOfPaymentAccount)
+		.on(ModeOfPaymentAccount.parent == ModeOfPayment.name)
+		.select(
+			ModeOfPaymentAccount.default_account, ModeOfPaymentAccount.parent, ModeOfPayment.type.as_("type")
+		)
+		.where(ModeOfPaymentAccount.company == company)
+		.where(ModeOfPayment.enabled == 1)
+		.where(ModeOfPayment.name == mode_of_payment)
 	)
+
+	return query.run(as_dict=1)
 
 
 @frappe.whitelist()
@@ -3223,30 +3263,28 @@ def create_dunning(
 def check_if_return_invoice_linked_with_payment_entry(self):
 	# If a Return invoice is linked with payment entry along with other invoices,
 	# the cancellation of the Return causes allocated amount to be greater than paid
-
 	if not frappe.get_single_value("Accounts Settings", "unlink_payment_on_cancellation_of_invoice"):
 		return
 
-	payment_entries = []
 	if self.is_return and self.return_against:
 		invoice = self.return_against
 	else:
 		invoice = self.name
 
-	payment_entries = frappe.db.sql_list(
-		"""
-		SELECT
-			t1.name
-		FROM
-			`tabPayment Entry` t1, `tabPayment Entry Reference` t2
-		WHERE
-			t1.name = t2.parent
-			and t1.docstatus = 1
-			and t2.reference_name = %s
-			and t2.allocated_amount < 0
-		""",
-		invoice,
+	PaymentEntry = frappe.qb.DocType("Payment Entry")
+	PaymentEntryReference = frappe.qb.DocType("Payment Entry Reference")
+
+	query = (
+		frappe.qb.from_(PaymentEntry)
+		.join(PaymentEntryReference)
+		.on(PaymentEntry.name == PaymentEntryReference.parent)
+		.select(PaymentEntry.name)
+		.where(PaymentEntry.docstatus == 1)
+		.where(PaymentEntryReference.reference_name == invoice)
+		.where(PaymentEntryReference.allocated_amount < 0)
 	)
+
+	payment_entries = query.run(pluck=True)
 
 	links_to_pe = []
 	if payment_entries:
@@ -3254,6 +3292,7 @@ def check_if_return_invoice_linked_with_payment_entry(self):
 			payment_entry = frappe.get_doc("Payment Entry", payment)
 			if len(payment_entry.references) > 1:
 				links_to_pe.append(payment_entry.name)
+
 		if links_to_pe:
 			payment_entries_link = [
 				get_link_to_form("Payment Entry", name, label=name) for name in links_to_pe

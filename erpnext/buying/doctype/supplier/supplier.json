@@ -11,72 +11,75 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
-  "supplier_type",
   "supplier_name",
+  "supplier_type",
   "gender",
   "column_break0",
   "supplier_group",
   "country",
-  "is_transporter",
   "image",
   "defaults_section",
   "default_currency",
   "default_bank_account",
   "column_break_10",
   "default_price_list",
-  "column_break2",
-  "supplier_details",
-  "column_break_30",
-  "website",
-  "language",
-  "customer_numbers",
+  "payment_terms",
   "contact_and_address_tab",
   "address_contacts",
   "address_html",
   "column_break1",
   "contact_html",
   "primary_address_and_contact_detail_section",
-  "column_break_44",
   "supplier_primary_address",
   "primary_address",
   "column_break_mglr",
   "supplier_primary_contact",
   "mobile_no",
   "email_id",
-  "tax_tab",
-  "tax_id",
-  "tax_category",
-  "column_break_27",
-  "tax_withholding_category",
-  "tax_withholding_group",
   "accounting_tab",
-  "payment_terms",
   "default_accounts_section",
   "accounts",
   "internal_supplier_section",
   "is_internal_supplier",
   "represents_company",
   "column_break_16",
+  "section_break_pgad",
   "companies",
+  "tax_tab",
+  "taxation_section",
+  "tax_id",
+  "tax_category",
+  "column_break_27",
+  "tax_withholding_category",
+  "tax_withholding_group",
   "settings_tab",
+  "invoice_settings_section",
+  "is_transporter",
   "allow_purchase_invoice_creation_without_purchase_order",
   "allow_purchase_invoice_creation_without_purchase_receipt",
   "column_break_54",
   "disabled",
   "is_frozen",
+  "block_supplier_section",
+  "on_hold",
+  "hold_type",
+  "release_date",
   "rfq_and_purchase_order_settings_section",
   "warn_rfqs",
   "prevent_rfqs",
   "column_break_oxjw",
   "warn_pos",
   "prevent_pos",
-  "block_supplier_section",
-  "on_hold",
-  "hold_type",
-  "column_break_59",
-  "release_date",
   "portal_users_tab",
   "portal_users",
+  "more_info_tab",
+  "column_break2",
+  "website",
+  "language",
+  "column_break_30",
+  "supplier_details",
+  "section_break_jqla",
+  "customer_numbers",
   "dashboard_tab"
  ],
  "fields": [
@@ -110,21 +113,24 @@
   {
    "fieldname": "default_bank_account",
    "fieldtype": "Link",
-   "label": "Default Company Bank Account",
+   "label": "Company Bank Account",
    "options": "Bank Account"
   },
   {
+   "description": "Supplier's tax identification number (e.g. PAN, VAT, GST)",
    "fieldname": "tax_id",
    "fieldtype": "Data",
    "label": "Tax ID"
   },
   {
+   "description": "Determines which tax rules apply to this supplier",
    "fieldname": "tax_category",
    "fieldtype": "Link",
    "label": "Tax Category",
    "options": "Tax Category"
   },
   {
+   "description": "TDS / withholding tax category applied when paying this supplier",
    "fieldname": "tax_withholding_category",
    "fieldtype": "Link",
    "label": "Tax Withholding Category",
@@ -132,15 +138,18 @@
   },
   {
    "default": "0",
+   "description": "Enable to make this supplier selectable as a transporter on Delivery Notes and Stock Entries",
    "fieldname": "is_transporter",
    "fieldtype": "Check",
    "label": "Is Transporter"
   },
   {
    "default": "0",
+   "description": "Used for inter-company transactions",
    "fieldname": "is_internal_supplier",
    "fieldtype": "Check",
-   "label": "Is Internal Supplier"
+   "label": "Is Internal Supplier",
+   "show_description_on_click": 1
   },
   {
    "depends_on": "is_internal_supplier",
@@ -192,6 +201,7 @@
   {
    "bold": 1,
    "default": "0",
+   "description": "Disabled suppliers are hidden from selection in new transactions but remain in historical records",
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
@@ -232,7 +242,7 @@
    "depends_on": "represents_company",
    "fieldname": "companies",
    "fieldtype": "Table",
-   "label": "Allowed To Transact With",
+   "label": "Allowed to transact with",
    "options": "Allowed To Transact With"
   },
   {
@@ -258,21 +268,24 @@
   {
    "fieldname": "payment_terms",
    "fieldtype": "Link",
-   "label": "Default Payment Terms Template",
+   "label": "Payment Terms Template",
    "options": "Payment Terms Template"
   },
   {
    "default": "0",
+   "description": "When enabled, transactions with this supplier will be blocked based on the Hold Type below",
    "fieldname": "on_hold",
    "fieldtype": "Check",
-   "label": "Block Supplier"
+   "label": "Block Supplier",
+   "show_description_on_click": 1
   },
   {
+   "default": "All",
    "depends_on": "eval:doc.on_hold",
    "fieldname": "hold_type",
    "fieldtype": "Select",
    "label": "Hold Type",
-   "options": "\nAll\nInvoices\nPayments"
+   "options": "All\nInvoices\nPayments"
   },
   {
    "depends_on": "eval:doc.on_hold",
@@ -307,14 +320,13 @@
    "read_only": 1
   },
   {
-   "description": "Mention if non-standard payable account",
+   "description": "Override the default payable / advance accounts on a per-company basis. Leave blank to use each company's defaults from Company settings.",
    "fieldname": "accounts",
    "fieldtype": "Table",
-   "label": "Accounts",
+   "label": "Per-Company Accounts",
    "options": "Party Account"
   },
   {
-   "collapsible": 1,
    "collapsible_depends_on": "supplier_details",
    "fieldname": "column_break2",
    "fieldtype": "Section Break",
@@ -329,7 +341,7 @@
    "oldfieldtype": "Data"
   },
   {
-   "description": "Statutory info and other general information about your Supplier",
+   "description": "General information about your Supplier",
    "fieldname": "supplier_details",
    "fieldtype": "Text",
    "label": "Supplier Details",
@@ -342,6 +354,7 @@
   },
   {
    "default": "0",
+   "description": "Frozen suppliers block ledger entries until unfrozen. Use this to temporarily lock accounting activity without disabling the supplier.",
    "fieldname": "is_frozen",
    "fieldtype": "Check",
    "label": "Is Frozen"
@@ -350,13 +363,13 @@
    "default": "0",
    "fieldname": "allow_purchase_invoice_creation_without_purchase_order",
    "fieldtype": "Check",
-   "label": "Allow Purchase Invoice Creation Without Purchase Order"
+   "label": "Allow purchase invoice creation without purchase order"
   },
   {
    "default": "0",
    "fieldname": "allow_purchase_invoice_creation_without_purchase_receipt",
    "fieldtype": "Check",
-   "label": "Allow Purchase Invoice Creation Without Purchase Receipt"
+   "label": "Allow purchase invoice creation without purchase receipt"
   },
   {
    "fieldname": "primary_address_and_contact_detail_section",
@@ -367,7 +380,7 @@
    "description": "Reselect, if the chosen contact is edited after save",
    "fieldname": "supplier_primary_contact",
    "fieldtype": "Link",
-   "label": "Supplier Primary Contact",
+   "label": "Primary Contact",
    "options": "Contact"
   },
   {
@@ -380,23 +393,19 @@
    "fetch_from": "supplier_primary_contact.email_id",
    "fieldname": "email_id",
    "fieldtype": "Read Only",
-   "label": "Email Id"
-  },
-  {
-   "fieldname": "column_break_44",
-   "fieldtype": "Column Break"
+   "label": "Email ID"
   },
   {
    "fieldname": "primary_address",
    "fieldtype": "Text Editor",
-   "label": "Primary Address",
+   "label": "Primary Address Preview",
    "read_only": 1
   },
   {
    "description": "Reselect, if the chosen address is edited after save",
    "fieldname": "supplier_primary_address",
    "fieldtype": "Link",
-   "label": "Supplier Primary Address",
+   "label": "Primary Address",
    "options": "Address"
   },
   {
@@ -431,10 +440,11 @@
    "label": "Tax"
   },
   {
-   "collapsible": 1,
+   "collapsible_depends_on": "is_internal_supplier",
    "fieldname": "internal_supplier_section",
    "fieldtype": "Section Break",
-   "label": "Internal Supplier Accounting"
+   "hide_border": 1,
+   "label": "Internal Supplier Details"
   },
   {
    "fieldname": "column_break_16",
@@ -452,10 +462,6 @@
    "fieldname": "block_supplier_section",
    "fieldtype": "Section Break",
    "label": "Block Supplier"
-  },
-  {
-   "fieldname": "column_break_59",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "default_accounts_section",
@@ -478,12 +484,14 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Account / customer numbers assigned to your companies by this supplier (for reconciliation on their statements)",
    "fieldname": "customer_numbers",
    "fieldtype": "Table",
    "label": "Customer Numbers",
    "options": "Customer Number At Supplier"
   },
   {
+   "description": "Used to pick the correct rate row inside the Tax Withholding Category for this supplier (e.g. Company vs Individual rates)",
    "fieldname": "tax_withholding_group",
    "fieldtype": "Link",
    "label": "Tax Withholding Group",
@@ -499,11 +507,34 @@
   {
    "fieldname": "rfq_and_purchase_order_settings_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "RFQ and Purchase Order Settings"
   },
   {
    "fieldname": "column_break_oxjw",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "taxation_section",
+   "fieldtype": "Section Break",
+   "label": "Tax Identification"
+  },
+  {
+   "fieldname": "invoice_settings_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "more_info_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Info"
+  },
+  {
+   "fieldname": "section_break_jqla",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_pgad",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
@@ -517,7 +548,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-03-09 17:15:25.465759",
+ "modified": "2026-05-29 13:03:41.864602",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

@@ -476,7 +476,7 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 
 		# Cumulative threshold is 10,000
 		# Threshold calculation should be only on the third invoice
-		self.assertTrue(len(pi1.taxes) > 0)
+		self.assertGreater(len(pi1.taxes), 0)
 		self.assertEqual(pi1.taxes[0].tax_amount, 1000)
 
 		self.cleanup_invoices(invoices)
@@ -998,6 +998,47 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 		self.assertEqual(abs(total), 2000, "Company rate should be 2% (2000 on 100000)")
 
 		self.cleanup_invoices(invoices)
+
+	def test_null_and_empty_tax_withholding_group_are_equivalent(self):
+		"""
+		NULL and empty-string `tax_withholding_group` must be treated as the
+		same value.
+		"""
+		category = frappe.get_doc("Tax Withholding Category", "Cumulative Threshold TDS")
+		original_row = category.rates[0]
+		original_row.tax_withholding_group = None
+
+		# Part 1: validate_dates must detect overlap between NULL-group and
+		# empty-string-group rows covering the same date range.
+		category.append(
+			"rates",
+			{
+				"from_date": original_row.from_date,
+				"to_date": original_row.to_date,
+				"tax_withholding_group": "",
+				"tax_withholding_rate": original_row.tax_withholding_rate,
+			},
+		)
+		with self.assertRaises(frappe.ValidationError):
+			category.validate_dates()
+		category.rates.pop()
+
+		# Part 2: get_applicable_tax_row must match NULL <-> "" in either direction.
+		posting_date = original_row.from_date
+
+		row = category.get_applicable_tax_row(posting_date=posting_date, tax_withholding_group="")
+		self.assertEqual(row.name, original_row.name)
+
+		row = category.get_applicable_tax_row(posting_date=posting_date, tax_withholding_group=None)
+		self.assertEqual(row.name, original_row.name)
+
+		original_row.tax_withholding_group = ""
+		row = category.get_applicable_tax_row(posting_date=posting_date, tax_withholding_group=None)
+		self.assertEqual(row.name, original_row.name)
+
+		original_row.tax_withholding_group = None
+		with self.assertRaises(frappe.ValidationError):
+			category.get_applicable_tax_row(posting_date=posting_date, tax_withholding_group="194R")
 
 	def test_tds_calculation_on_net_total(self):
 		self.setup_party_with_category("Supplier", "Test TDS Supplier4", "Cumulative Threshold TDS")
@@ -3613,7 +3654,7 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 		pi = create_purchase_invoice(supplier="Test TDS Supplier", rate=50000, do_not_save=True)
 		pi.save()
 
-		self.assertTrue(len(pi.tax_withholding_entries) > 0)
+		self.assertGreater(len(pi.tax_withholding_entries), 0)
 		pi.delete()
 
 	def test_tds_rounding_with_decimal_amounts(self):
@@ -3679,7 +3720,7 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 		self.setup_party_with_category("Supplier", "Test TDS Supplier", "Cumulative Threshold TDS")
 		pi = create_purchase_invoice(supplier="Test TDS Supplier", rate=50000)
 
-		self.assertTrue(len(pi.tax_withholding_entries) > 0)
+		self.assertGreater(len(pi.tax_withholding_entries), 0)
 		pi.override_tax_withholding_entries = 1
 
 		entry = pi.tax_withholding_entries[0]

@@ -1119,7 +1119,7 @@ class TestPaymentEntry(ERPNextTestSuite):
 		with self.assertRaises(frappe.ValidationError) as err:
 			pe.save()
 
-		self.assertTrue("is on hold" in str(err.exception).lower())
+		self.assertIn("is on hold", str(err.exception).lower())
 
 	def test_payment_entry_for_employee(self):
 		employee = make_employee("test_payment_entry@salary.com", company="_Test Company")
@@ -2035,8 +2035,8 @@ class TestPaymentEntry(ERPNextTestSuite):
 
 		# check cancellation of payment entry and journal entry
 		pe.cancel()
-		self.assertTrue(pe.docstatus == 2)
-		self.assertTrue(frappe.db.get_value("Journal Entry", {"name": jv[0]}, "docstatus") == 2)
+		self.assertEqual(pe.docstatus, 2)
+		self.assertEqual(frappe.db.get_value("Journal Entry", {"name": jv[0]}, "docstatus"), 2)
 
 		# check deletion of payment entry and journal entry
 		pe.delete()

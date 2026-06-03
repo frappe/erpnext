@@ -34,8 +34,8 @@ class TestBOM(ERPNextTestSuite):
 		items_dict = get_bom_items_as_dict(
 			bom=get_default_bom(), company="_Test Company", qty=1, fetch_exploded=0
 		)
-		self.assertTrue(self.globalTestRecords["BOM"][2]["items"][0]["item_code"] in items_dict)
-		self.assertTrue(self.globalTestRecords["BOM"][2]["items"][1]["item_code"] in items_dict)
+		self.assertIn(self.globalTestRecords["BOM"][2]["items"][0]["item_code"], items_dict)
+		self.assertIn(self.globalTestRecords["BOM"][2]["items"][1]["item_code"], items_dict)
 		self.assertEqual(len(items_dict.values()), 2)
 
 	@timeout
@@ -45,10 +45,10 @@ class TestBOM(ERPNextTestSuite):
 		items_dict = get_bom_items_as_dict(
 			bom=get_default_bom(), company="_Test Company", qty=1, fetch_exploded=1
 		)
-		self.assertTrue(self.globalTestRecords["BOM"][2]["items"][0]["item_code"] in items_dict)
-		self.assertFalse(self.globalTestRecords["BOM"][2]["items"][1]["item_code"] in items_dict)
-		self.assertTrue(self.globalTestRecords["BOM"][0]["items"][0]["item_code"] in items_dict)
-		self.assertTrue(self.globalTestRecords["BOM"][0]["items"][1]["item_code"] in items_dict)
+		self.assertIn(self.globalTestRecords["BOM"][2]["items"][0]["item_code"], items_dict)
+		self.assertNotIn(self.globalTestRecords["BOM"][2]["items"][1]["item_code"], items_dict)
+		self.assertIn(self.globalTestRecords["BOM"][0]["items"][0]["item_code"], items_dict)
+		self.assertIn(self.globalTestRecords["BOM"][0]["items"][1]["item_code"], items_dict)
 		self.assertEqual(len(items_dict.values()), 3)
 
 	@timeout
@@ -763,9 +763,9 @@ class TestBOM(ERPNextTestSuite):
 		for row in data:
 			items.append(row[0])
 
-		self.assertTrue("_Test RM Item 1 Do Not Include In Manufacture" not in items)
-		self.assertTrue("_Test RM Item 2 Fixed Asset Item" not in items)
-		self.assertTrue("_Test RM Item 3 Manufacture Item" in items)
+		self.assertNotIn("_Test RM Item 1 Do Not Include In Manufacture", items)
+		self.assertNotIn("_Test RM Item 2 Fixed Asset Item", items)
+		self.assertIn("_Test RM Item 3 Manufacture Item", items)
 
 	def test_bom_raw_materials_stock_uom(self):
 		rm_item = make_item(

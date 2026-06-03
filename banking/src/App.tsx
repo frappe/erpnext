@@ -1,14 +1,15 @@
-import { useEffect } from 'react'
+import { lazy, useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { FrappeProvider } from 'frappe-react-sdk'
 import { Toaster } from '@/components/ui/sonner'
 import BankReconciliation from '@/pages/BankReconciliation'
+import BankStatementImporterContainer from '@/pages/BankStatementImporterContainer'
 import { TooltipProvider } from './components/ui/tooltip'
-import BankStatementImporter from '@/pages/BankStatementImporter'
 import { LucideProvider } from 'lucide-react'
 import { ThemeProvider } from './components/ui/theme-provider'
-import ViewBankStatementImportLog from './pages/ViewBankStatementImportLog'
-import BankStatementImporterContainer from './pages/BankStatementImporterContainer'
+
+const BankStatementImporter = lazy(() => import('@/pages/BankStatementImporter'))
+const ViewBankStatementImportLog = lazy(() => import('@/pages/ViewBankStatementImportLog'))
 
 function App() {
 	useEffect(() => {
@@ -43,7 +44,6 @@ function App() {
 					>
 						{window.frappe?.boot?.user?.name && window.frappe?.boot?.user?.name !== 'Guest' &&
 							<BrowserRouter basename={import.meta.env.VITE_BASE_NAME ? `/${import.meta.env.VITE_BASE_NAME}` : ''}>
-
 								<Routes>
 									<Route index element={<BankReconciliation />} />
 									<Route path="/statement-importer" element={<BankStatementImporterContainer />}>

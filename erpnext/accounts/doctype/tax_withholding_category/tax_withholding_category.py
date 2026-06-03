@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
-from frappe.utils import getdate
+from frappe.utils import cstr, getdate
 
 from erpnext import allow_regional
 from erpnext.controllers.accounts_controller import validate_account_head
@@ -48,7 +48,7 @@ class TaxWithholdingCategory(Document):
 		for d in self.get("rates"):
 			if getdate(d.from_date) >= getdate(d.to_date):
 				frappe.throw(_("Row #{0}: From Date cannot be before To Date").format(d.idx))
-			group_rates[d.tax_withholding_group].append(d)
+			group_rates[cstr(d.tax_withholding_group)].append(d)
 
 		# Validate overlapping dates within each group
 		for group, rates in group_rates.items():
@@ -92,10 +92,9 @@ class TaxWithholdingCategory(Document):
 
 	def get_applicable_tax_row(self, posting_date, tax_withholding_group):
 		for row in self.rates:
-			if (
-				getdate(row.from_date) <= getdate(posting_date) <= getdate(row.to_date)
-				and row.tax_withholding_group == tax_withholding_group
-			):
+			if getdate(row.from_date) <= getdate(posting_date) <= getdate(row.to_date) and cstr(
+				row.tax_withholding_group
+			) == cstr(tax_withholding_group):
 				return row
 
 		frappe.throw(_("No Tax Withholding data found for the current posting date."))
@@ -116,7 +115,7 @@ class TaxWithholdingDetails:
 	def __init__(
 		self,
 		tax_withholding_categories: list[str],
-		tax_withholding_group: str,
+		tax_withholding_group: str | None,
 		posting_date: str,
 		party_type: str,
 		party: str,

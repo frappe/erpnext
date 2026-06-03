@@ -1,12 +1,12 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "allow_copy": 1,
  "autoname": "MAT-SLE-.YYYY.-.#####",
  "creation": "2013-01-29 19:25:42",
  "doctype": "DocType",
  "document_type": "Other",
  "engine": "InnoDB",
- "is_submittable": 1,
  "field_order": [
   "item_code",
   "warehouse",
@@ -205,7 +205,7 @@
   {
    "fieldname": "valuation_rate",
    "fieldtype": "Currency",
-   "label": "Valuation Rate",
+   "label": "Average Rate",
    "oldfieldname": "valuation_rate",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
@@ -361,12 +361,13 @@
  "idx": 1,
  "in_create": 1,
  "index_web_pages_for_search": 1,
+ "is_submittable": 1,
  "links": [],
- "modified": "2025-10-04 09:59:15.546556",
+ "modified": "2026-05-26 19:07:43.537450",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",
- "naming_rule": "Expression (old style)",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

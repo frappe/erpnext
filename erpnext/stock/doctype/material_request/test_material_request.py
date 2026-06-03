@@ -915,7 +915,7 @@ class TestMaterialRequest(ERPNextTestSuite):
 		for company, _mr_list in comapnywise_mr_list.items():
 			emails = get_email_list(company)
 
-			self.assertTrue(comapnywise_users[company] in emails)
+			self.assertIn(comapnywise_users[company], emails)
 
 		for perm in permissions:
 			perm.delete()

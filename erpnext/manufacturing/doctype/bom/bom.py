@@ -338,14 +338,14 @@ class BOM(WebsiteGenerator):
 			if not item.qty:
 				frappe.throw(
 					_("Row #{0}: Quantity should be greater than 0 for {1} Item {2}").format(
-						item.idx, item.type, get_link_to_form("Item", item.item_code)
+						item.idx, item.secondary_item_type, get_link_to_form("Item", item.item_code)
 					)
 				)
 
 			if item.process_loss_per >= 100:
 				frappe.throw(
 					_("Row #{0}: Process Loss Percentage should be less than 100% for {1} Item {2}").format(
-						item.idx, item.type, get_link_to_form("Item", item.item_code)
+						item.idx, item.secondary_item_type, get_link_to_form("Item", item.item_code)
 					)
 				)
 
@@ -1285,7 +1285,9 @@ class BOM(WebsiteGenerator):
 			frappe.throw(msg, title=_("Invalid Process Loss Configuration"))
 
 	def has_scrap_items(self):
-		return any(d.get("type") == "Scrap" or d.get("is_legacy") for d in self.get("secondary_items"))
+		return any(
+			d.get("secondary_item_type") == "Scrap" or d.get("is_legacy") for d in self.get("secondary_items")
+		)
 
 
 def get_bom_item_rate(args, bom_doc):
@@ -1453,7 +1455,7 @@ def get_bom_items_as_dict(
 		query = query.format(
 			table="BOM Secondary Item",
 			where_conditions=")",
-			select_columns=", item.description, bom_item.cost_allocation_per, bom_item.process_loss_per, bom_item.type, bom_item.name, bom_item.is_legacy",
+			select_columns=", item.description, bom_item.cost_allocation_per, bom_item.process_loss_per, bom_item.secondary_item_type, bom_item.name, bom_item.is_legacy",
 			is_stock_item=is_stock_item,
 			qty_field="stock_qty",
 			group_by_cond=group_by_cond,

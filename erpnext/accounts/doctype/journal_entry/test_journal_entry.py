@@ -89,7 +89,7 @@ class TestJournalEntry(ERPNextTestSuite):
 		)
 		payment_against_order = base_jv.get("accounts")[0].get(dr_or_cr)
 
-		self.assertTrue(flt(advance_paid[0][0]) == flt(payment_against_order))
+		self.assertEqual(flt(advance_paid[0][0]), flt(payment_against_order))
 
 	def cancel_against_voucher_testcase(self, test_voucher):
 		if test_voucher.doctype == "Journal Entry":
