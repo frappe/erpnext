@@ -23,74 +23,43 @@ from erpnext.accounts.utils import (
 	reconcile_against_document,
 )
 
+RECEIVABLE = "Receivable"
+PAYABLE = "Payable"
 
-class Classifier:
-	"""Classifies a PLE/voucher row as Receivable or Payable based on account direction.
 
-	The rule is universal across all voucher types (Sales Invoice, Purchase Invoice,
-	Payment Entry, Journal Entry) and across regular vs return/advance variants:
+def classify(account_type: str, amount: float) -> str:
+	"""Sort a PLE row into Receivable or Payable by `(account_type, sign)`.
 
-	    Receivable account + positive amount  →  Receivable  (owed to us)
-	    Receivable account + negative amount  →  Payable     (we owe back)
-	    Payable    account + positive amount  →  Payable     (we owe)
-	    Payable    account + negative amount  →  Receivable  (owed back to us)
-
-	Worked cases:
-	    Sales Invoice (regular):       Receivable account, +ve  →  Receivable
-	    Sales Invoice (return / CN):   Receivable account, -ve  →  Payable
-	    Purchase Invoice (regular):    Payable    account, +ve  →  Payable
-	    Purchase Invoice (return / DN):Payable    account, -ve  →  Receivable
-	    Payment Entry (Receive):       Receivable account, -ve  →  Payable
-	    Payment Entry (Pay):           Payable    account, -ve  →  Receivable
-	    Journal Entry Dr to party:     party account,      +ve  →  Receivable
-	    Journal Entry Cr to party:     party account,      -ve  →  Payable
-
+	Receivable account + +ve  →  Receivable      Payable account + +ve  →  Payable
+	Receivable account + -ve  →  Payable         Payable account + -ve  →  Receivable
 	"""
+	if account_type not in (RECEIVABLE, PAYABLE):
+		frappe.throw(_("Unsupported account type {0}").format(account_type))
+	if not amount:
+		frappe.throw(_("Cannot classify entry with zero amount."))
+	if (amount > 0) == (account_type == RECEIVABLE):
+		return RECEIVABLE
+	return PAYABLE
 
-	RECEIVABLE = "Receivable"
-	PAYABLE = "Payable"
 
-	@staticmethod
-	def classify(account_type: str, amount: float) -> str:
-		"""Return "Receivable" or "Payable" for an entry.
-
-		Args:
-		        account_type: Account doctype's `account_type`. Must be "Receivable" or "Payable".
-		        amount: PLE amount (signed; positive = balance in the account's natural direction).
-		"""
-		if account_type not in (Classifier.RECEIVABLE, Classifier.PAYABLE):
-			frappe.throw(_("Unsupported account type {0}").format(account_type))
-
-		if not amount:
-			frappe.throw(_("Cannot classify entry with zero amount."))
-
-		positive = amount > 0
-		if account_type == Classifier.RECEIVABLE:
-			return Classifier.RECEIVABLE if positive else Classifier.PAYABLE
-		else:  # Payable
-			return Classifier.PAYABLE if positive else Classifier.RECEIVABLE
-
-	@staticmethod
-	def is_receivable(account_type: str, amount: float) -> bool:
-		return Classifier.classify(account_type, amount) == Classifier.RECEIVABLE
-
-	@staticmethod
-	def is_payable(account_type: str, amount: float) -> bool:
-		return Classifier.classify(account_type, amount) == Classifier.PAYABLE
+def _fifo_key(r):
+	"""Sort OpenBalance rows: oldest-first, with PE-Reference rows BEFORE
+	their PE-self row (PR-E: drain bound PO/SO advances before free balance)."""
+	return (
+		r.get("posting_date") or getdate(nowdate()),
+		r.get("voucher_no") or "",
+		0 if r.get("voucher_row") else 1,
+		r.get("voucher_row") or "",
+	)
 
 
 class OpenBalanceFetcher:
 	"""
-	Two-query fetcher for all open (unallocated) party balances.
-
-	    Query 1 (PLE via QueryPaymentLedger):  SI / PI / PE / CN / DN
-	        WHERE against_voucher_type != 'Journal Entry'
-	        Returns rows of either sign.
-
-	    Query 2 (Journal Entry Account direct):  JE party rows
-	        Returns one row per unallocated JEA row, with PLE-direction signed amount.
-
-	After fetch, `_enrich_voucher_metadata` attached additional fields
+	Pipeline:
+	1. fetch PLE rows + JE rows for all party accounts
+	2. split each PE's PLE row into a free slice + one slice per PO/SO reference
+	3. enrich with is_return / is_advance / exchange_rate
+	4. filter by amount (min/max + zero-drop)
 	"""
 
 	def __init__(self, pr):
@@ -109,14 +78,13 @@ class OpenBalanceFetcher:
 		if not rows:
 			return []
 
+		rows = self._split_pe_by_references(rows)
 		self._enrich_voucher_metadata(rows)
-		return rows
+		return [r for r in rows if self._passes_amount_filter(r)]
 
 	def _get_party_accounts(self):
-		"""
-		If `receivable_payable_account` is set: just that one (single-account mode).
-		Otherwise (cross-account mode): query distinct accounts from PLE.
-		"""
+		"""Single-account when `receivable_payable_account` is set; else all
+		party accounts from PLE (split by natural / advance root_type)."""
 		accounts = set()
 		ple = qb.DocType("Payment Ledger Entry")
 		account = qb.DocType("Account")
@@ -188,19 +156,16 @@ class OpenBalanceFetcher:
 			accounting_dimensions=dimension_filter,
 			exclude_zero_outstanding=True,
 		)
-		return [self._project_ple_row(frappe._dict(r)) for r in raw if self._passes_amount_filter(r)]
+		return [self._project_ple_row(frappe._dict(r)) for r in raw]
 
 	def _project_ple_row(self, r):
-		"""Project a `QueryPaymentLedger` result row onto the OpenBalance shape."""
-		signed = flt(r.outstanding_in_account_currency)
-		r.outstanding_amount = signed  # signed; classifier reads sign, downstream uses abs
+		r.outstanding_amount = flt(r.outstanding_in_account_currency)
 		r.amount = flt(r.invoice_amount_in_account_currency)
-		r.voucher_row = None  # PLE-side rows are voucher-level, not row-level
+		r.voucher_row = None  # PLE rows are voucher-level, not row-level
 		return r
 
 	def _passes_amount_filter(self, r):
-		"""min/max amount on absolute outstanding"""
-		signed = flt(r.get("outstanding_in_account_currency") or r.get("outstanding_amount"))
+		signed = flt(r.get("outstanding_amount"))
 		if not signed:
 			return False
 
@@ -214,17 +179,87 @@ class OpenBalanceFetcher:
 
 		return True
 
+	def _split_pe_by_references(self, rows):
+		"""Split a PE's single PLE row into a free slice (voucher_row=None) plus
+		one bound slice per submitted PO/SO reference (voucher_row=PER.name).
+
+		PLE is authoritative for a PE's total open balance — it nets invoice and
+		PE↔PE / JE settlements — but it never records PO/SO references (those live
+		only in `Payment Entry Reference`), so it over-states the free balance by
+		exactly the bound amount. A bound slice's `voucher_row` lets the Allocator
+		pass it as `voucher_detail_no` to `update_reference_in_payment_entry` to
+		re-point that advance onto an invoice.
+		"""
+		pe_names = {r.voucher_no for r in rows if r.voucher_type == "Payment Entry"}
+		if not pe_names:
+			return rows
+
+		refs_by_pe: dict[str, list] = {}
+		for ref in self._fetch_po_so_references(pe_names):
+			refs_by_pe.setdefault(ref.pe_name, []).append(ref)
+
+		split_rows = []
+		for r in rows:
+			refs = refs_by_pe.get(r.voucher_no) if r.voucher_type == "Payment Entry" else None
+			if not refs:
+				split_rows.append(r)
+				continue
+
+			sign = -1 if flt(r.outstanding_amount) < 0 else 1
+
+			bound_total = sum(flt(ref.allocated_amount) for ref in refs)
+			free = frappe._dict(r.copy())
+			free.outstanding_amount = flt(r.outstanding_amount) - sign * bound_total
+			free.amount = free.outstanding_amount
+			free.reference_doctype = None
+			free.reference_name = None
+			split_rows.append(free)
+
+			for ref in refs:
+				amt = sign * flt(ref.allocated_amount)
+				slice_row = frappe._dict(r.copy())
+				slice_row.voucher_row = ref.per_name
+				slice_row.outstanding_amount = amt
+				slice_row.amount = amt
+				slice_row.reference_doctype = ref.reference_doctype
+				slice_row.reference_name = ref.reference_name
+				split_rows.append(slice_row)
+
+		return split_rows
+
+	def _fetch_po_so_references(self, pe_names):
+		"""Submitted PO/SO advance references — the one allocation PLE never records."""
+		if not pe_names:
+			return []
+		per = qb.DocType("Payment Entry Reference")
+		return (
+			qb.from_(per)
+			.select(
+				per.name.as_("per_name"),
+				per.parent.as_("pe_name"),
+				per.allocated_amount,
+				per.reference_doctype,
+				per.reference_name,
+			)
+			.where(
+				per.parent.isin(list(pe_names))
+				& (per.docstatus == 1)
+				& per.reference_doctype.isin(("Sales Order", "Purchase Order"))
+				& (per.allocated_amount > 0)
+			)
+			.run(as_dict=True)
+		)
+
 	def _query_je_outstanding(self, accounts):
 		je = qb.DocType("Journal Entry")
 		jea = qb.DocType("Journal Entry Account")
 		account_dt = qb.DocType("Account")
 
-		party_account_type = erpnext.get_party_account_type(self.party_type)
-		if party_account_type == "Receivable":
-			# positive amount = Dr balance = debit - credit
+		# Sign convention: positive = balance in account's natural direction
+		# (Dr-Cr for Receivable accounts, Cr-Dr for Payable).
+		if erpnext.get_party_account_type(self.party_type) == "Receivable":
 			signed_amount = jea.debit_in_account_currency - jea.credit_in_account_currency
 		else:
-			# positive amount = Cr balance = credit - debit
 			signed_amount = jea.credit_in_account_currency - jea.debit_in_account_currency
 
 		conditions = [
@@ -238,7 +273,7 @@ class OpenBalanceFetcher:
 				| (jea.reference_type.isnull())
 				| (jea.reference_type.isin(("Sales Order", "Purchase Order")))
 			),
-			signed_amount.ne(0),
+			signed_amount != 0,
 		]
 		if self.pr.from_date:
 			conditions.append(je.posting_date.gte(self.pr.from_date))
@@ -246,10 +281,6 @@ class OpenBalanceFetcher:
 			conditions.append(je.posting_date.lte(self.pr.to_date))
 		if self.pr.currency_filter:
 			conditions.append(jea.account_currency == self.pr.currency_filter)
-		if self.pr.min_amount:
-			conditions.append(signed_amount.abs().gte(self.pr.min_amount))
-		if self.pr.max_amount:
-			conditions.append(signed_amount.abs().lte(self.pr.max_amount))
 		for dim in self.dimensions:
 			val = self.pr.get(dim.fieldname)
 			if val and frappe.db.has_column("Journal Entry Account", dim.fieldname):
@@ -285,7 +316,47 @@ class OpenBalanceFetcher:
 		)
 
 		raw = query.run(as_dict=True)
-		return [frappe._dict(r) for r in raw]
+		rows = [frappe._dict(r) for r in raw]
+
+		# Net JEA balance against PE-side PLE allocations. A PE settling a JE
+		# doesn't touch the JEA (splitting it would drop the JE's self-ref PLE row
+		# and break aggregation); instead the PE writes `(voucher=PE, against=JE)`,
+		# which nets signed_amount to zero when fully settled.
+		if rows:
+			je_names = list({r.voucher_no for r in rows})
+			ple_dt = qb.DocType("Payment Ledger Entry")
+			from frappe.query_builder.functions import Sum
+
+			alloc_rows = (
+				qb.from_(ple_dt)
+				.select(
+					ple_dt.against_voucher_no.as_("je_name"),
+					ple_dt.account.as_("account"),
+					Sum(ple_dt.amount_in_account_currency).as_("allocated"),
+				)
+				.where(
+					(ple_dt.against_voucher_type == "Journal Entry")
+					& ple_dt.against_voucher_no.isin(je_names)
+					& (ple_dt.voucher_no != ple_dt.against_voucher_no)  # exclude JE-self
+					& (ple_dt.delinked == 0)
+					& (ple_dt.company == self.company)
+					& (ple_dt.party_type == self.party_type)
+					& (ple_dt.party == self.party)
+				)
+				.groupby(ple_dt.against_voucher_no, ple_dt.account)
+				.run(as_dict=True)
+			)
+			alloc_by_key = {(a.je_name, a.account): flt(a.allocated) for a in alloc_rows}
+
+			for r in rows:
+				alloc = alloc_by_key.get((r.voucher_no, r.account), 0)
+				if alloc:
+					r.outstanding_amount = flt(r.outstanding_amount) + alloc
+					r.amount = r.outstanding_amount
+
+			rows = [r for r in rows if flt(r.outstanding_amount) != 0]
+
+		return rows
 
 	def _enrich_voucher_metadata(self, rows):
 		"""Adds is_return, is_advance, and exchange_rate etc. to the PLE rows"""
@@ -294,7 +365,6 @@ class OpenBalanceFetcher:
 			if r.voucher_type in ("Sales Invoice", "Purchase Invoice", "Payment Entry"):
 				by_type.setdefault(r.voucher_type, set()).add(r.voucher_no)
 
-		# is_return + conversion_rate for SI/PI
 		invoice_meta: dict[tuple[str, str], tuple[int, float]] = {}
 		for vtype in ("Sales Invoice", "Purchase Invoice"):
 			if vtype in by_type:
@@ -308,8 +378,7 @@ class OpenBalanceFetcher:
 						flt(v.conversion_rate) or 1.0,
 					)
 
-		# Advance flag + per-PE exchange_rate
-		# PE Receive uses source_exchange_rate (party account currency), PE Pay uses target_exchange_rate.
+		# PE Receive uses source_exchange_rate; PE Pay uses target_exchange_rate.
 		pe_meta: dict[str, tuple[int, float]] = {}
 		if "Payment Entry" in by_type:
 			for p in frappe.db.get_all(
@@ -336,13 +405,13 @@ class OpenBalanceFetcher:
 				r.is_advance = 0
 				r.exchange_rate = exch
 			elif r.voucher_type == "Payment Entry":
-				adv, exch = pe_meta.get(r.voucher_no, (0, 1.0))
-				r.is_return = 0
-				r.is_advance = adv
-				r.exchange_rate = exch
+				if r.voucher_no in pe_meta:
+					adv, exch = pe_meta[r.voucher_no]
+					r.is_return = 0
+					r.is_advance = adv
+					r.exchange_rate = exch
 			elif r.voucher_type == "Journal Entry":
-				# JE rows already enriched in _query_je_outstanding.
-				continue
+				continue  # already enriched in _query_je_outstanding
 			else:
 				r.is_return = 0
 				r.is_advance = 0
@@ -447,30 +516,24 @@ class PaymentReconciliation(Document):
 
 	@frappe.whitelist()
 	def get_unreconciled_entries(self):
-		"""Populate `to_receive` and `to_pay` from a single PLE-based query.
-
-		Pipeline:
-		    OpenBalanceFetcher.fetch()  →  list[OpenBalance]  (one row per voucher position)
-		    Classifier.classify(...)    →  routes each row to to_receive or to_pay
-		    _apply_post_filters()       →  per-table voucher_no LIKE + row caps
-		"""
+		# Pipeline: fetch → classify (Receivable/Payable) → cap per `fetch_limit`.
 		self.set("to_receive", [])
 		self.set("to_pay", [])
 		self.check_mandatory_to_fetch()
 
 		open_balances = OpenBalanceFetcher(self).fetch()
 		self._classify_and_populate(open_balances)
-		self._apply_post_filters()
+		self._apply_fetch_limit()
 
 	def _classify_and_populate(self, open_balances):
-		open_balances.sort(key=lambda r: r.get("posting_date") or getdate(nowdate()))
+		open_balances.sort(key=_fifo_key)
 
 		for row in open_balances:
 			signed = flt(row.get("outstanding_amount"))
 			if not signed:
 				continue
-			target = Classifier.classify(row.get("account_type"), signed)
-			table = "to_receive" if target == Classifier.RECEIVABLE else "to_pay"
+			target = classify(row.get("account_type"), signed)
+			table = "to_receive" if target == RECEIVABLE else "to_pay"
 
 			self.append(
 				table,
@@ -482,7 +545,7 @@ class PaymentReconciliation(Document):
 				},
 			)
 
-	def _apply_post_filters(self):
+	def _apply_fetch_limit(self):
 		limit = self.fetch_limit
 		if limit and len(self.to_receive) > limit:
 			self.to_receive = self.to_receive[:limit]
