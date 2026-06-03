@@ -292,9 +292,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.validate_subcontract_order()
 		self.validate_raw_materials_exists()
 
-<<<<<<< HEAD
-		super().validate_subcontracting_inward()
-=======
 	def validate_finished_good_serial_batch_for_work_order(self):
 		if not (
 			self.work_order
@@ -371,7 +368,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 			self.set_serial_no_batch_for_finished_good()
 		elif self.pro_doc.has_batch_no:
 			self.set_batchwise_finished_goods(item_details, None, existing_row=row)
->>>>>>> 6d3f9d3c6f (fix(stock): add validation for work order seial nos and batch nos)
 
 	def validate_repack_entry(self):
 		if self.purpose != "Repack":
