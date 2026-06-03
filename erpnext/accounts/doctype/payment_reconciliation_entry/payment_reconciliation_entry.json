@@ -6,6 +6,8 @@
  "field_order": [
   "voucher_type",
   "voucher_no",
+  "reference_doctype",
+  "reference_name",
   "posting_date",
   "col_break1",
   "outstanding_amount",
@@ -41,6 +43,22 @@
    "in_list_view": 1,
    "label": "Voucher No",
    "options": "voucher_type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Reference Type",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Reference",
+   "options": "reference_doctype",
    "read_only": 1
   },
   {
@@ -163,7 +181,7 @@
  "is_virtual": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-05-01 15:53:01.148774",
+ "modified": "2026-06-03 14:25:40.199779",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation Entry",

@@ -30,6 +30,8 @@ class PaymentReconciliationEntry(Document):
 		party: DF.DynamicLink | None
 		party_type: DF.Link | None
 		posting_date: DF.Date | None
+		reference_doctype: DF.Link | None
+		reference_name: DF.DynamicLink | None
 		voucher_no: DF.DynamicLink | None
 		voucher_row: DF.Data | None
 		voucher_type: DF.Link | None
