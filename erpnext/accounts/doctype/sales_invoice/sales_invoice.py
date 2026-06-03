@@ -23,12 +23,16 @@ from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category 
 	get_party_tax_withholding_details,
 )
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
+<<<<<<< HEAD
 from erpnext.accounts.party import (
 	CROSS_PARTY_FIELD_NO_MAP,
 	get_due_date,
 	get_party_account,
 	get_party_details,
 )
+=======
+from erpnext.accounts.party import _get_party_details, get_due_date, get_party_account
+>>>>>>> efb8336bf8 (fix: remove ignore_permissions from get_party_details signature (#55491))
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
 	get_account_currency,
@@ -2737,7 +2741,7 @@ def update_taxes(
 	master_doctype=None,
 ):
 	# Update Party Details
-	party_details = get_party_details(
+	party_details = _get_party_details(
 		party=party,
 		party_type=party_type,
 		company=company,
