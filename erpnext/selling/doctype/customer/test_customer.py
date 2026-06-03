@@ -53,7 +53,7 @@ class TestCustomer(ERPNextTestSuite):
 		doc.delete()
 
 	def test_party_details(self):
-		from erpnext.accounts.party import get_party_details
+		from erpnext.accounts.party import _get_party_details
 
 		to_check = {
 			"selling_price_list": None,
@@ -75,7 +75,7 @@ class TestCustomer(ERPNextTestSuite):
 			"Contact", "_Test Contact for _Test Customer-_Test Customer", "is_primary_contact", 1
 		)
 
-		details = get_party_details("_Test Customer")
+		details = _get_party_details("_Test Customer")
 
 		for key, value in to_check.items():
 			val = details.get(key)
@@ -85,10 +85,10 @@ class TestCustomer(ERPNextTestSuite):
 			self.assertEqual(value, val)
 
 	def test_party_details_tax_category(self):
-		from erpnext.accounts.party import get_party_details
+		from erpnext.accounts.party import _get_party_details
 
 		# Tax Category without Address
-		details = get_party_details("_Test Customer With Tax Category")
+		details = _get_party_details("_Test Customer With Tax Category")
 		self.assertEqual(details.tax_category, "_Test Tax Category 1")
 
 		frappe.get_doc(
@@ -120,13 +120,13 @@ class TestCustomer(ERPNextTestSuite):
 		# Tax Category from Billing Address
 		settings.determine_address_tax_category_from = "Billing Address"
 		settings.save()
-		details = get_party_details("_Test Customer With Tax Category")
+		details = _get_party_details("_Test Customer With Tax Category")
 		self.assertEqual(details.tax_category, "_Test Tax Category 2")
 
 		# Tax Category from Shipping Address
 		settings.determine_address_tax_category_from = "Shipping Address"
 		settings.save()
-		details = get_party_details("_Test Customer With Tax Category")
+		details = _get_party_details("_Test Customer With Tax Category")
 		self.assertEqual(details.tax_category, "_Test Tax Category 3")
 
 		# Rollback

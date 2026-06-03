@@ -2994,7 +2994,7 @@ def update_taxes(
 	master_doctype=None,
 ):
 	# Update Party Details
-	party_details = get_party_details(
+	party_details = _get_party_details(
 		party=party,
 		party_type=party_type,
 		company=company,
