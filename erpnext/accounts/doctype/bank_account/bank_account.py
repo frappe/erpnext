@@ -41,6 +41,7 @@ class BankAccount(Document):
 		mask: DF.Data | None
 		party: DF.DynamicLink | None
 		party_type: DF.Link | None
+		statement_password: DF.Password | None
 	# end: auto-generated types
 
 	def onload(self):

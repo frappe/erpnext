@@ -24,6 +24,11 @@ dependencies = [
 
     # MT940 parser for bank statements
     "mt-940>=4.26.0",
+
+    # PDF bank statement table extraction + page rasterization.
+    # Pulls pdfminer.six (parsing), Pillow, and pypdfium2 (render backend for
+    # Page.to_image) - all pure-Python wheels, no system binaries required.
+    "pdfplumber>=0.11.0",
 ]
 
 [build-system]

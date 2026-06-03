@@ -142,9 +142,14 @@ const StatementDetails = ({ data }: Props) => {
                             <TableCell>
                                 <div className='flex items-center gap-2'>
                                     <BankLogo bank={bank} />
-                                    <span className="tracking-tight text-sm font-medium">{bank?.account_name}</span>
-                                    <span title="GL Account" className="text-sm">{bank?.account}</span>
+                                    <span className="text-sm">{bank?.account_name}</span>
                                 </div>
+                            </TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableHead>{_("Account")}</TableHead>
+                            <TableCell>
+                                <span title="GL Account" className="text-sm">{bank?.account}</span>
                             </TableCell>
                         </TableRow>
                         <TableRow>
@@ -158,7 +163,11 @@ const StatementDetails = ({ data }: Props) => {
                         </TableRow>
                         <TableRow>
                             <TableHead>{_("Transaction Dates")}</TableHead>
-                            <TableCell>{_("{0} to {1}", [formatDate(data.doc.start_date, "Do MMMM YYYY"), formatDate(data.doc.end_date, "Do MMMM YYYY")])}</TableCell>
+                            {data.doc.start_date && data.doc.end_date ? (
+                                <TableCell>{_("{0} to {1}", [formatDate(data.doc.start_date, "Do MMMM YYYY"), formatDate(data.doc.end_date, "Do MMMM YYYY")])}</TableCell>
+                            ) : (
+                                <TableCell>-</TableCell>
+                            )}
                         </TableRow>
                         <TableRow>
                             <TableHead>{_("Number of Transactions")}</TableHead>
