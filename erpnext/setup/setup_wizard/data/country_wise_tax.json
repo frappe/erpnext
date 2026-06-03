@@ -262,7 +262,15 @@
 		},
 		"Belgium VAT 12%": {
 			"account_name": "VAT 12%",
-			"tax_rate": 12
+			"tax_rate": 12.00
+		},
+		"Belgium VAT 6%": {
+			"account_name": "VAT 6%",
+			"tax_rate": 6.00
+		},
+		"Belgium VAT 0%": {
+			"account_name": "VAT 0%",
+			"tax_rate": 0.00
 		}
 	},
 
