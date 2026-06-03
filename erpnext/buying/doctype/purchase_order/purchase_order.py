@@ -16,7 +16,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	validate_inter_company_party,
 )
 from erpnext.accounts.party import get_party_account, get_party_account_currency
-from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
+from erpnext.buying.utils import validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
 	validate_against_blanket_order,
@@ -206,7 +206,7 @@ class PurchaseOrder(BuyingController):
 		self.validate_supplier()
 		self.validate_schedule_date()
 		validate_for_items(self)
-		self.check_on_hold_or_closed_status()
+		self.check_for_on_hold_or_closed_status("Material Request", "material_request")
 
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
@@ -401,18 +401,6 @@ class PurchaseOrder(BuyingController):
 							d.base_rate
 						) = d.price_list_rate = d.rate = d.last_purchase_rate = item_last_purchase_rate
 
-	# Check for Closed status
-	def check_on_hold_or_closed_status(self):
-		check_list = []
-		for d in self.get("items"):
-			if (
-				d.meta.get_field("material_request")
-				and d.material_request
-				and d.material_request not in check_list
-			):
-				check_list.append(d.material_request)
-				check_on_hold_or_closed_status("Material Request", d.material_request)
-
 	def update_ordered_qty(self, po_item_rows=None):
 		"""update requested qty (before ordered_qty is updated)"""
 		item_wh_list = []
@@ -498,7 +486,7 @@ class PurchaseOrder(BuyingController):
 			self.update_receiving_percentage()
 
 		self.update_reserved_qty_for_subcontract()
-		self.check_on_hold_or_closed_status()
+		self.check_for_on_hold_or_closed_status("Material Request", "material_request")
 
 		self.db_set("status", "Cancelled")
 

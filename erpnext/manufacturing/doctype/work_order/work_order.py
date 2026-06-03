@@ -25,6 +25,7 @@ from frappe.utils import (
 )
 from pypika import functions as fn
 
+from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.manufacturing.doctype.bom.bom import (
 	get_bom_item_rate,
 	get_bom_items_as_dict,
@@ -439,7 +440,7 @@ class WorkOrder(Document):
 				production_item = main_item_code
 
 		if self.sales_order:
-			self.check_sales_order_on_hold_or_close()
+			check_on_hold_or_closed_status("Sales Order", self.sales_order)
 
 			SalesOrder = frappe.qb.DocType("Sales Order")
 			SalesOrderItem = frappe.qb.DocType("Sales Order Item")
@@ -494,11 +495,6 @@ class WorkOrder(Document):
 					self.validate_work_order_against_so()
 			else:
 				frappe.throw(_("Sales Order {0} is not valid").format(self.sales_order))
-
-	def check_sales_order_on_hold_or_close(self):
-		status = frappe.db.get_value("Sales Order", self.sales_order, "status")
-		if status in ("Closed", "On Hold"):
-			frappe.throw(_("Sales Order {0} is {1}").format(self.sales_order, status))
 
 	def set_default_warehouse(self):
 		if not self.wip_warehouse and not self.skip_transfer:
