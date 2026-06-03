@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-31 10:18+0000\n"
-"PO-Revision-Date: 2026-05-31 22:15\n"
+"PO-Revision-Date: 2026-06-03 17:58\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Korean\n"
 "MIME-Version: 1.0\n"
@@ -35926,7 +35926,7 @@ msgstr "결제 완료"
 
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/invoicing.json
-msgid "Payment Reconciliaition"
+msgid "Payment Reconciliation"
 msgstr "지불 대조"
 
 #. Name of a DocType
