@@ -123,20 +123,21 @@ frappe.ui.form.on("Item Default", {
 			`.grid-row[data-name="${cdn}"]`
 		);
 
-		if ($grid_row.length && !$grid_row.find(".item-defaults-desc").length) {
+		if (!$grid_row.find(".item-defaults-desc").length) {
 			$grid_row.find(".grid-form-body").prepend(`
-				<div class="item-defaults-desc" style="
-					padding: 10px 12px;
-					margin: 0 0 12px 0;
-					border-radius: var(--border-radius-sm);
-					background: var(--gray-50);
-					font-size: inherit;
-					color: var(--text-light);
-					line-height: 1.5;
-				">
-					${__(
-						"Defaults inherited from the company level appear on the left. Use the right column to override them for this item group, all items in the group will inherit whatever you set here."
-					)}
+				<div class="row">
+					<div class="col-xs-12">
+						<div class="item-defaults-desc" style="
+							background: var(--control-bg);
+							border-radius: var(--border-radius-sm);
+							padding: 6px 6px 8px 14px;
+							color: var(--text-muted);
+						">
+							${__(
+								"Left column shows system-level defaults (Company / Stock Settings). Right column is where you set overrides for this item group."
+							)}
+						</div>
+					</div>
 				</div>
 			`);
 		}

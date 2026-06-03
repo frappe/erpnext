@@ -375,22 +375,22 @@ frappe.ui.form.on("Item Default", {
 
 		const $grid_row = frm.fields_dict["item_defaults"].grid.wrapper.find(`.grid-row[data-name="${cdn}"]`);
 
-		if ($grid_row.length && !$grid_row.find(".item-defaults-desc").length) {
-			const description = __(
-				"The left column shows the value this item will inherit — from Item Group if set, otherwise from Company. Fields labelled (Company) are falling back to the company default. Leave a field empty on the right to keep the inherited value."
-			);
-
+		if (!$grid_row.find(".item-defaults-desc").length) {
 			$grid_row.find(".grid-form-body").prepend(`
-				<div class="item-defaults-desc" style="
-					padding: 10px 12px;
-					margin: 0 0 12px 0;
-					border-radius: var(--border-radius-sm);
-					background: var(--gray-50);
-					font-size: inherit;
-					color: var(--text-light);
-					line-height: 1.5;
-				">
-					${description}
+				<div class="row">
+					<div class="col-xs-12">
+						<div class="item-defaults-desc" style="
+							background: var(--control-bg);
+							border-radius: var(--border-radius-sm);
+							padding: 6px 6px 8px 14px;
+							color: var(--text-muted);
+
+						">
+							${__(
+								"Left column shows inherited defaults (Item Group → Company / Stock Settings). Right column is where you set overrides for this item only."
+							)}
+						</div>
+					</div>
 				</div>
 			`);
 		}
