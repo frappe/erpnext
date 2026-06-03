@@ -2848,6 +2848,22 @@ def update_subscription_on_invoice_update(doc: "Document", method: str | None = 
 		refresh_subscription_status(doc.subscription)
 
 
+def update_subscriptions_on_payment(doc: "Document", method: str | None = None) -> None:
+	subscriptions = set()
+	for reference in doc.get("references", []):
+		if reference.reference_doctype not in ("Sales Invoice", "Purchase Invoice"):
+			continue
+		subscription = frappe.db.get_value(
+			reference.reference_doctype, reference.reference_name, "subscription"
+		)
+		if subscription:
+			subscriptions.add(subscription)
+
+	for subscription in subscriptions:
+		refresh_subscription_status(subscription)
+
+
+
 def refresh_subscription_status(name: str) -> None:
 	subscription = frappe.get_doc("Subscription", name)
 	subscription.set_subscription_status()

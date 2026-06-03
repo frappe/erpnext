@@ -768,6 +768,7 @@ class TestSubscription(ERPNextTestSuite):
 		subscription.reload()
 		self.assertEqual(subscription.status, "Active")
 
+
 	def test_first_invoice_generated_on_create_for_prepaid(self):
 		subscription = create_subscription(
 			start_date=nowdate(),
