@@ -696,9 +696,21 @@ $.extend(erpnext.item, {
 				container.html(html);
 
 				container.find(".add-price-btn").on("click", () => {
-					frappe.new_doc("Item Price", {
-						item_code: requested_item,
-					});
+					const filters = {};
+					if (frm.doc.is_sales_item && !frm.doc.is_purchase_item) {
+						filters.selling = 1;
+					} else if (frm.doc.is_purchase_item && !frm.doc.is_sales_item) {
+						filters.buying = 1;
+					}
+					frappe.new_doc(
+						"Item Price",
+						{ item_code: requested_item, uom: frm.doc.stock_uom },
+						(dialog) => {
+							if (Object.keys(filters).length) {
+								dialog.fields_dict.price_list.get_query = () => ({ filters });
+							}
+						}
+					);
 				});
 
 				container.find(".price-row").on("click", function (e) {
