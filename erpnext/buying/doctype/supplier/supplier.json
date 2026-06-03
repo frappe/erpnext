@@ -367,36 +367,57 @@
    "description": "Reselect, if the chosen contact is edited after save",
    "fieldname": "supplier_primary_contact",
    "fieldtype": "Link",
+<<<<<<< HEAD
    "label": "Supplier Primary Contact",
+=======
+   "label": "Primary Contact",
+   "no_copy": 1,
+>>>>>>> cb84678198 (fix: duplicating a Customer/Supplier shouldn't inherit the source's primary contact and address (#55421))
    "options": "Contact"
   },
   {
    "fetch_from": "supplier_primary_contact.mobile_no",
    "fieldname": "mobile_no",
    "fieldtype": "Read Only",
-   "label": "Mobile No"
+   "label": "Mobile No",
+   "no_copy": 1
   },
   {
    "fetch_from": "supplier_primary_contact.email_id",
    "fieldname": "email_id",
    "fieldtype": "Read Only",
+<<<<<<< HEAD
    "label": "Email Id"
   },
   {
    "fieldname": "column_break_44",
    "fieldtype": "Column Break"
+=======
+   "label": "Email ID",
+   "no_copy": 1
+>>>>>>> cb84678198 (fix: duplicating a Customer/Supplier shouldn't inherit the source's primary contact and address (#55421))
   },
   {
    "fieldname": "primary_address",
    "fieldtype": "Text Editor",
+<<<<<<< HEAD
    "label": "Primary Address",
+=======
+   "label": "Primary Address Preview",
+   "no_copy": 1,
+>>>>>>> cb84678198 (fix: duplicating a Customer/Supplier shouldn't inherit the source's primary contact and address (#55421))
    "read_only": 1
   },
   {
    "description": "Reselect, if the chosen address is edited after save",
    "fieldname": "supplier_primary_address",
    "fieldtype": "Link",
+<<<<<<< HEAD
    "label": "Supplier Primary Address",
+=======
+   "label": "Primary Address",
+   "no_copy": 1,
+>>>>>>> cb84678198 (fix: duplicating a Customer/Supplier shouldn't inherit the source's primary contact and address (#55421))
    "options": "Address"
   },
   {
@@ -517,7 +538,11 @@
    "link_fieldname": "party"
   }
  ],
+<<<<<<< HEAD
  "modified": "2026-03-09 17:15:25.465759",
+=======
+ "modified": "2026-05-29 16:52:59.441272",
+>>>>>>> cb84678198 (fix: duplicating a Customer/Supplier shouldn't inherit the source's primary contact and address (#55421))
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
