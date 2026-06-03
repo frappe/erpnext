@@ -48,9 +48,46 @@ def _fifo_key(r):
 	return (
 		r.get("posting_date") or getdate(nowdate()),
 		r.get("voucher_no") or "",
-		0 if r.get("voucher_row") else 1,
+		0 if r.get("reference_name") else 1,
+		r.get("reference_name") or "",
 		r.get("voucher_row") or "",
 	)
+
+
+_WRITABLE_VOUCHER_TYPES = {"Payment Entry", "Journal Entry"}
+
+
+def link_strategy(recv, pay) -> str:
+	"""`voucher_mutation` if either side is PE/JE (append PE.references or
+	split JEA); `bridge_je` if both sides are SI/PI/CN/DN (create a system JE).
+	"""
+	if recv.voucher_type in _WRITABLE_VOUCHER_TYPES or pay.voucher_type in _WRITABLE_VOUCHER_TYPES:
+		return "voucher_mutation"
+	return "bridge_je"
+
+
+def pick_voucher_side(recv, pay, party_type=None) -> str:
+	"""Return `"receive"` or `"pay"` — the side that owns the `voucher_no`
+	slot in `reconcile_against_document`. PE > JE > others.
+
+	For PE-PE pairs, voucher = the advance PE (Receive for Customer, Pay for
+	Supplier) to match legacy `add_payment_entries` behaviour. The advance side
+	classifies opposite to the party's natural direction: to_pay for Customer,
+	to_receive for Supplier. Required for `add_advance_gl_for_reference` to
+	emit the bridge GL on the side whose self-PLE row balances the bridge.
+	"""
+	pe_pair = recv.voucher_type == "Payment Entry" and pay.voucher_type == "Payment Entry"
+	if pe_pair and party_type:
+		return "pay" if party_type == "Customer" else "receive"
+	if pay.voucher_type == "Payment Entry":
+		return "pay"
+	if recv.voucher_type == "Payment Entry":
+		return "receive"
+	if pay.voucher_type == "Journal Entry":
+		return "pay"
+	if recv.voucher_type == "Journal Entry":
+		return "receive"
+	frappe.throw(_("bridge_je pair without PE/JE: {0} × {1}").format(recv.voucher_type, pay.voucher_type))
 
 
 class OpenBalanceFetcher:
@@ -418,6 +455,176 @@ class OpenBalanceFetcher:
 				r.exchange_rate = 1.0
 
 
+class Allocator:
+	"""Currency-bucketed FIFO allocator.
+
+	Walks `to_receive` oldest-first, consuming `to_pay` oldest-first within
+	each currency bucket. Never crosses currencies. Pure transformation —
+	`PaymentReconciliation.allocate_entries` clears `self.allocation` and
+	appends each emitted dict.
+	"""
+
+	def __init__(self, pr, to_receive=None, to_pay=None):
+		# `to_receive` / `to_pay` overrides let the form pass user-selected
+		# rows (the "select rows then Allocate" UX); defaults to full tables.
+		self.pr = pr
+		self.company = pr.company
+		self.party_type = pr.party_type
+		self.to_receive = to_receive if to_receive is not None else list(pr.get("to_receive") or [])
+		self.to_pay = to_pay if to_pay is not None else list(pr.get("to_pay") or [])
+		self.exchange_gain_loss_account = frappe.get_cached_value(
+			"Company", pr.company, "exchange_gain_loss_account"
+		)
+		self.exc_gain_loss_posting_date_setting = frappe.db.get_single_value(
+			"Accounts Settings", "exchange_gain_loss_posting_date", cache=True
+		)
+		self.company_currency = frappe.get_cached_value("Company", pr.company, "default_currency")
+		self.diff_precision = get_field_precision(
+			frappe.get_meta("Payment Reconciliation Allocation").get_field("difference_amount")
+		)
+
+	def allocate(self):
+		buckets_recv = self._bucket_by_currency(self.to_receive)
+		buckets_pay = self._bucket_by_currency(self.to_pay)
+
+		allocations = []
+		for currency, recv_rows in buckets_recv.items():
+			pay_rows = buckets_pay.get(currency, [])
+			if not pay_rows:
+				continue
+			# Shared `_fifo_key` ensures PE-Reference rows drain before PE-self (PR-E).
+			recv_rows = sorted(recv_rows, key=_fifo_key)
+			pay_rows = sorted(pay_rows, key=_fifo_key)
+			allocations.extend(self._walk(recv_rows, pay_rows))
+
+		return allocations
+
+	@staticmethod
+	def _bucket_by_currency(rows):
+		buckets = {}
+		for r in rows:
+			buckets.setdefault(r.currency, []).append(r)
+		return buckets
+
+	def _walk(self, receivables, payables):
+		allocations = []
+		recv_remaining = [flt(r.outstanding_amount) for r in receivables]
+		pay_remaining = [flt(p.outstanding_amount) for p in payables]
+		pay_idx = 0
+
+		for i, recv in enumerate(receivables):
+			while recv_remaining[i] > 0 and pay_idx < len(payables):
+				amt = min(recv_remaining[i], pay_remaining[pay_idx])
+				if amt > 0:
+					allocations.append(self._make_allocation(recv, payables[pay_idx], amt))
+					recv_remaining[i] -= amt
+					pay_remaining[pay_idx] -= amt
+				if pay_remaining[pay_idx] <= 0:
+					pay_idx += 1
+			if pay_idx >= len(payables):
+				break
+
+		return allocations
+
+	def _make_allocation(self, recv, pay, allocated_amount):
+		difference_amount = self._fx_difference(recv, pay, allocated_amount)
+		gain_loss_posting_date = self._gain_loss_posting_date(recv, pay)
+		is_cross_account = recv.account != pay.account
+
+		# Pick voucher side using the same rule as `ReconcileRouter` — see
+		# `pick_voucher_side`. Bridge_je pairs fall back to the party_type
+		# convention (CN on to_pay for Customer, DN on to_receive for Supplier)
+		# since neither side has a writable refs table.
+		if link_strategy(recv, pay) == "voucher_mutation":
+			side = pick_voucher_side(recv, pay, self.party_type)
+		else:
+			side = "pay" if self.party_type == "Customer" else "receive"
+		voucher_side_row = pay if side == "pay" else recv
+		against_side_row = recv if side == "pay" else pay
+
+		row = frappe._dict(
+			{
+				"to_receive_voucher_type": recv.voucher_type,
+				"to_receive_voucher_no": recv.voucher_no,
+				"to_receive_voucher_row": recv.voucher_row,
+				"to_receive_account": recv.account,
+				"to_receive_party_type": recv.party_type,
+				"to_receive_party": recv.party,
+				"to_pay_voucher_type": pay.voucher_type,
+				"to_pay_voucher_no": pay.voucher_no,
+				"to_pay_voucher_row": pay.voucher_row,
+				"to_pay_account": pay.account,
+				"to_pay_party_type": pay.party_type,
+				"to_pay_party": pay.party,
+				"allocated_amount": allocated_amount,
+				"unreconciled_amount": flt(voucher_side_row.outstanding_amount),
+				"amount": flt(voucher_side_row.amount or voucher_side_row.outstanding_amount),
+				"is_advance": 1 if (pay.is_advance or recv.is_advance) else 0,
+				"is_cross_account": 1 if is_cross_account else 0,
+				# `exchange_rate` is the AGAINST side's rate. PE-Reference uses it in
+				# `calculate_base_allocated_amount_for_reference` to compute FX gain/loss
+				# as (base_rate - ref_rate) x amt; setting it to the voucher-side rate
+				# would zero out the gain/loss and skip the FX JE.
+				"difference_amount": difference_amount,
+				"difference_account": self.exchange_gain_loss_account if difference_amount else None,
+				"gain_loss_posting_date": gain_loss_posting_date,
+				"exchange_rate": flt(against_side_row.exchange_rate) or 1.0,
+				"currency": voucher_side_row.currency,
+				# TODO: is opp of voucher side relevant here? Depends on how it's used
+				"cost_center": pay.cost_center or recv.cost_center,
+			}
+		)
+
+		# TODO: evaluate if true - why are these not fetched in the original fetcher?
+		# Should it not be updated from original entries?
+		for dim in self.pr.dimensions:
+			val = self.pr.get(dim.fieldname)
+			if val:
+				row[dim.fieldname] = val
+
+		return row
+
+	def _fx_difference(self, recv, pay, allocated_amount):
+		"""FX gain/loss when the two sides booked at different exchange rates.
+
+		Sign convention matches `Payment Entry Reference.exchange_gain_loss` so
+		`make_exchange_gain_loss_journal` produces correct JEs. Phase 3 PRE will
+		replace this with `amount x (received_rate - paid_rate)` once both rates
+		live on a single PRE row.
+		"""
+		recv_rate = flt(recv.exchange_rate) or 1.0
+		pay_rate = flt(pay.exchange_rate) or 1.0
+		if recv_rate == pay_rate:
+			return 0.0
+		if recv.currency == self.company_currency and pay.currency == self.company_currency:
+			return 0.0
+
+		amt_in_pay_rate = flt(pay_rate * flt(allocated_amount), self.diff_precision)
+		amt_in_recv_rate = flt(recv_rate * flt(allocated_amount), self.diff_precision)
+
+		# Cash-event pair (PExPE, JExE, PExJE): neither side is the "booked"
+		# asset/liability so use the Receivable-style formula for both parties.
+		invoice_doctypes = ("Sales Invoice", "Purchase Invoice")
+		if recv.voucher_type not in invoice_doctypes and pay.voucher_type not in invoice_doctypes:
+			return amt_in_pay_rate - amt_in_recv_rate
+
+		# Standard SI/PI ↔ PE: invert sign for Payable accounts (Supplier).
+		if recv.account_type == PAYABLE:
+			return amt_in_recv_rate - amt_in_pay_rate
+		return amt_in_pay_rate - amt_in_recv_rate
+
+	def _gain_loss_posting_date(self, recv, pay):
+		date = pay.posting_date
+		# TODO: should this be based on the voucher side instead?
+		if pay.is_advance:
+			return date
+		if self.exc_gain_loss_posting_date_setting == "Invoice":
+			date = recv.posting_date
+		elif self.exc_gain_loss_posting_date_setting == "Reconciliation Date":
+			date = nowdate()
+		return date
+
+
 class PaymentReconciliation(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
@@ -552,150 +759,62 @@ class PaymentReconciliation(Document):
 		if limit and len(self.to_pay) > limit:
 			self.to_pay = self.to_pay[:limit]
 
-	def get_difference_amount(self, payment_entry, invoice, allocated_amount):
-		party_account_defaults = frappe.get_cached_value(
-			"Account", self.receivable_payable_account, ["account_type", "account_currency"], as_dict=True
-		)
-		allocated_amount_precision = get_field_precision(
-			frappe.get_meta("Payment Reconciliation Allocation").get_field("allocated_amount")
-		)
-		difference_amount_precision = get_field_precision(
-			frappe.get_meta("Payment Reconciliation Allocation").get_field("difference_amount")
-		)
-		difference_amount = 0
-		if party_account_defaults.get("account_currency") != frappe.get_cached_value(
-			"Company", self.company, "default_currency"
-		):
-			if invoice.get("exchange_rate") and payment_entry.get("exchange_rate", 1) != invoice.get(
-				"exchange_rate", 1
-			):
-				allocated_amount_in_ref_rate = flt(
-					payment_entry.get("exchange_rate", 1) * flt(allocated_amount, allocated_amount_precision),
-					difference_amount_precision,
-				)
-				allocated_amount_in_inv_rate = flt(
-					invoice.get("exchange_rate", 1) * flt(allocated_amount, allocated_amount_precision),
-					difference_amount_precision,
-				)
-
-				# Added If clause to handle return Adhoc payments for account type holders ("Payable")
-				if party_account_defaults.get("account_type") in ("Payable") and invoice.get(
-					"invoice_type"
-				) in ["Payment Entry", "Journal Entry"]:
-					difference_amount = allocated_amount_in_inv_rate - allocated_amount_in_ref_rate
-				else:
-					difference_amount = allocated_amount_in_ref_rate - allocated_amount_in_inv_rate
-
-		return difference_amount
-
 	@frappe.whitelist()
 	def calculate_difference_on_allocation_change(
-		self, payment_entry: list, invoice: list, allocated_amount: float
+		self,
+		payment_entry: list | None = None,
+		invoice: list | None = None,
+		allocated_amount: float | None = None,
 	):
-		invoice_exchange_map = self.get_invoice_exchange_map(invoice, payment_entry)
-		invoice[0]["exchange_rate"] = invoice_exchange_map.get(invoice[0].get("invoice_number"))
-		if payment_entry[0].get("reference_type") in ["Sales Invoice", "Purchase Invoice"]:
-			payment_entry[0]["exchange_rate"] = invoice_exchange_map.get(
-				payment_entry[0].get("reference_name")
-			)
-
-		new_difference_amount = self.get_difference_amount(payment_entry[0], invoice[0], allocated_amount)
-		return new_difference_amount
+		"""Backward-compat API for external callers that manually edit an
+		allocation row's allocated_amount. Delegates to `Allocator._fx_difference`."""
+		if not (payment_entry and invoice):
+			return 0.0
+		pay = (
+			frappe._dict(payment_entry[0]) if isinstance(payment_entry, list) else frappe._dict(payment_entry)
+		)
+		recv = frappe._dict(invoice[0]) if isinstance(invoice, list) else frappe._dict(invoice)
+		return Allocator(self)._fx_difference(recv, pay, flt(allocated_amount))
 
 	@frappe.whitelist()
-	def allocate_entries(self, args: dict):
-		self.validate_entries()
+	def allocate_entries(
+		self,
+		args: dict | str | None = None,
+		to_receive: list | None = None,
+		to_pay: list | None = None,
+		**kwargs,
+	):
+		"""Run the Allocator. Three call shapes:
+		1. `({"to_receive": [...], "to_pay": [...]})` — Process PR background job
+		2. `(to_receive=[...], to_pay=[...])` — form's "select rows then Allocate"
+		3. `()` — Auto-Match across the full parent tables
+		"""
+		if isinstance(args, str):
+			import json as _json
 
-		exc_gain_loss_posting_date = frappe.db.get_single_value(
-			"Accounts Settings", "exchange_gain_loss_posting_date", cache=True
-		)
-		invoice_exchange_map = self.get_invoice_exchange_map(args.get("invoices"), args.get("payments"))
-		account_currency = frappe.get_cached_value(
-			"Account", self.receivable_payable_account, "account_currency"
-		)
-		allocated_amount_precision = get_field_precision(
-			frappe.get_meta("Payment Reconciliation Allocation").get_field("allocated_amount"),
-			currency=account_currency,
-		)
+			args = _json.loads(args)
+		if args is None:
+			args = {}
+		to_receive = to_receive if to_receive is not None else args.get("to_receive")
+		to_pay = to_pay if to_pay is not None else args.get("to_pay")
 
-		entries = []
-		for pay in args.get("payments"):
-			pay.update({"unreconciled_amount": pay.get("amount")})
-			for inv in args.get("invoices"):
-				if pay.get("amount") >= inv.get("outstanding_amount"):
-					res = self.get_allocated_entry(pay, inv, inv["outstanding_amount"])
-					pay["amount"] = flt(
-						flt(pay.get("amount")) - flt(inv.get("outstanding_amount")),
-						allocated_amount_precision,
-					)
-					inv["outstanding_amount"] = 0
-				else:
-					res = self.get_allocated_entry(pay, inv, pay["amount"])
-					inv["outstanding_amount"] = flt(
-						flt(inv.get("outstanding_amount")) - flt(pay.get("amount")),
-						allocated_amount_precision,
-					)
-					pay["amount"] = 0
+		if to_receive is not None:
+			to_receive = [frappe._dict(r) if isinstance(r, dict) else r for r in to_receive]
+		if to_pay is not None:
+			to_pay = [frappe._dict(r) if isinstance(r, dict) else r for r in to_pay]
 
-				inv["exchange_rate"] = invoice_exchange_map.get(inv.get("invoice_number"))
-				if pay.get("reference_type") in ["Sales Invoice", "Purchase Invoice"]:
-					pay["exchange_rate"] = invoice_exchange_map.get(pay.get("reference_name"))
+		if not (to_receive or self.get("to_receive")):
+			frappe.throw(_("No records found in the To Receive table"))
+		if not (to_pay or self.get("to_pay")):
+			frappe.throw(_("No records found in the To Pay table"))
 
-				res.difference_amount = self.get_difference_amount(pay, inv, res["allocated_amount"])
-				is_gain = (
-					res.difference_amount > 0 if self.party_type == "Customer" else res.difference_amount < 0
-				)
-				res.difference_account = get_exchange_gain_loss_account(self.company, is_gain)
-				res.exchange_rate = inv.get("exchange_rate")
-				res.update({"gain_loss_posting_date": pay.get("posting_date")})
-				if not pay.get("is_advance"):
-					if exc_gain_loss_posting_date == "Invoice":
-						res.update({"gain_loss_posting_date": inv.get("invoice_date")})
-					elif exc_gain_loss_posting_date == "Reconciliation Date":
-						res.update({"gain_loss_posting_date": nowdate()})
-
-				if pay.get("amount") == 0:
-					entries.append(res)
-					break
-				elif inv.get("outstanding_amount") == 0:
-					entries.append(res)
-					continue
-
-			else:
-				break
+		allocations = Allocator(self, to_receive=to_receive, to_pay=to_pay).allocate()
 
 		self.set("allocation", [])
-		for entry in entries:
-			if entry["allocated_amount"] != 0:
+		for entry in allocations:
+			if entry["allocated_amount"]:
 				row = self.append("allocation", {})
 				row.update(entry)
-
-	def update_dimension_values_in_allocated_entries(self, res):
-		for x in self.dimensions:
-			dimension = x.fieldname
-			if self.get(dimension):
-				res[dimension] = self.get(dimension)
-		return res
-
-	def get_allocated_entry(self, pay, inv, allocated_amount):
-		res = frappe._dict(
-			{
-				"reference_type": pay.get("reference_type"),
-				"reference_name": pay.get("reference_name"),
-				"reference_row": pay.get("reference_row"),
-				"invoice_type": inv.get("invoice_type"),
-				"invoice_number": inv.get("invoice_number"),
-				"unreconciled_amount": pay.get("unreconciled_amount"),
-				"amount": pay.get("amount"),
-				"allocated_amount": allocated_amount,
-				"difference_amount": pay.get("difference_amount"),
-				"currency": inv.get("currency"),
-				"cost_center": pay.get("cost_center"),
-			}
-		)
-
-		res = self.update_dimension_values_in_allocated_entries(res)
-		return res
 
 	def reconcile_allocations(self, skip_ref_details_update_for_pe=False):
 		adjust_allocations_for_taxes(self)
