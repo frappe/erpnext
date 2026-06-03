@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-31 10:18+0000\n"
-"PO-Revision-Date: 2026-06-02 17:53\n"
+"PO-Revision-Date: 2026-06-03 17:57\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -36023,7 +36023,7 @@ msgstr "Betalning Mottagen"
 
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/invoicing.json
-msgid "Payment Reconciliaition"
+msgid "Payment Reconciliation"
 msgstr "Betalning Avstämning"
 
 #. Name of a DocType
