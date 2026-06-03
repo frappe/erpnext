@@ -290,6 +290,7 @@ class calculate_taxes_and_totals:
 			return
 
 		for item in self.doc.items:
+			item._unrounded_net_amount = None
 			item_tax_map = self._load_item_tax_rate(item.item_tax_rate)
 			cumulated_tax_fraction = 0
 			total_inclusive_tax_amount_per_qty = 0
@@ -317,7 +318,8 @@ class calculate_taxes_and_totals:
 			):
 				amount = flt(item.amount) - total_inclusive_tax_amount_per_qty
 
-				item.net_amount = flt(amount / (1 + cumulated_tax_fraction), item.precision("net_amount"))
+				item._unrounded_net_amount = amount / (1 + cumulated_tax_fraction)
+				item.net_amount = flt(item._unrounded_net_amount, item.precision("net_amount"))
 				item.net_rate = flt(item.net_amount / item.qty, item.precision("net_rate"))
 				item.discount_percentage = flt(
 					item.discount_percentage, item.precision("discount_percentage")
@@ -480,6 +482,65 @@ class calculate_taxes_and_totals:
 
 			self._set_in_company_currency(tax, ["total"])
 
+<<<<<<< HEAD
+=======
+		self.adjust_rounding_in_item_wise_tax_details()
+
+	def adjust_rounding_in_item_wise_tax_details(self):
+		if ignore_item_wise_tax_details(self.doc):
+			return
+
+		if not self.doc.get("_item_wise_tax_details"):
+			return
+
+		invalid_rows = []
+
+		# reset temporary attributes
+		for tax in self.doc.taxes:
+			tax._total_tax_breakup = 0
+			tax._last_row_idx = None
+
+		for idx, d in enumerate(self.doc._item_wise_tax_details):
+			tax = d.get("tax")
+			if not tax or (tax.get("charge_type") == "Actual" and d.rate == 0):
+				continue
+
+			tax._total_tax_breakup += d.amount or 0
+			tax._last_row_idx = idx
+
+		# Apply rounding difference to the last row
+		for tax in self.doc.taxes:
+			last_idx = tax._last_row_idx
+			if last_idx is None:
+				continue
+
+			multiplier = -1 if tax.get("add_deduct_tax") == "Deduct" else 1
+			expected_amount = tax.base_tax_amount_after_discount_amount * multiplier
+			actual_breakup = tax._total_tax_breakup
+			diff = flt(expected_amount - actual_breakup, 5)
+
+			# TODO: fix rounding difference issues
+			# Allow up to 1 for zero-precision currencies (e.g. JPY, KRW)
+			if abs(diff) <= (1 if tax.precision("tax_amount") == 0 else 0.5):
+				detail_row = self.doc._item_wise_tax_details[last_idx]
+				detail_row["amount"] = flt(detail_row["amount"] + diff, 5)
+
+			else:
+				invalid_rows.append(f"Row {tax.idx} (Difference: {diff})")
+
+		if self.doc.flags.ignore_validate:
+			return
+
+		if invalid_rows:
+			message = (
+				_("Item Wise Tax Details do not match with Taxes and Charges at the following rows:")
+				+ "<br>"
+				+ "<br>".join(invalid_rows)
+			)
+
+			frappe.throw(_(message))
+
+>>>>>>> 36dc196a1d (fix: prevent double rounding in inclusive tax calculations (#52512))
 	def get_tax_amount_if_for_valuation_or_deduction(self, tax_amount, tax):
 		# if just for valuation, do not add the tax amount in total
 		# if tax/charges is for deduction, multiply by -1
@@ -522,7 +583,22 @@ class calculate_taxes_and_totals:
 				)
 
 		elif tax.charge_type == "On Net Total":
+<<<<<<< HEAD
 			current_tax_amount = (tax_rate / 100.0) * item.net_amount
+=======
+			if tax.account_head in item_tax_map:
+				current_net_amount = item.net_amount
+
+			# Use unrounded net for inclusive taxes to avoid double rounding
+			if (
+				cint(tax.included_in_print_rate)
+				and not self.discount_amount_applied
+				and item._unrounded_net_amount is not None
+			):
+				current_tax_amount = (tax_rate / 100.0) * item._unrounded_net_amount
+			else:
+				current_tax_amount = (tax_rate / 100.0) * item.net_amount
+>>>>>>> 36dc196a1d (fix: prevent double rounding in inclusive tax calculations (#52512))
 		elif tax.charge_type == "On Previous Row Amount":
 			current_tax_amount = (tax_rate / 100.0) * self.doc.get("taxes")[
 				cint(tax.row_id) - 1
