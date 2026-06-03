@@ -43,16 +43,6 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			};
 		});
 
-		this.frm.set_query("bank_cash_account", () => {
-			return {
-				filters: [
-					["Account", "company", "=", this.frm.doc.company],
-					["Account", "is_group", "=", 0],
-					["Account", "account_type", "in", ["Bank", "Cash"]],
-				],
-			};
-		});
-
 		this.frm.set_query("cost_center", () => {
 			return {
 				filters: {
@@ -61,7 +51,15 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 				},
 			};
 		});
-		this.frm.set_query("cost_center", "payments", () => {
+		this.frm.set_query("cost_center", "to_pay", () => {
+			return {
+				filters: {
+					company: this.frm.doc.company,
+					is_group: 0,
+				},
+			};
+		});
+		this.frm.set_query("cost_center", "to_receive", () => {
 			return {
 				filters: {
 					company: this.frm.doc.company,
@@ -82,21 +80,21 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 	refresh() {
 		this.frm.disable_save();
 
-		this.frm.set_df_property("invoices", "cannot_delete_rows", true);
-		this.frm.set_df_property("payments", "cannot_delete_rows", true);
+		this.frm.set_df_property("to_receive", "cannot_delete_rows", true);
+		this.frm.set_df_property("to_pay", "cannot_delete_rows", true);
 		this.frm.set_df_property("allocation", "cannot_delete_rows", true);
 
-		this.frm.set_df_property("invoices", "cannot_add_rows", true);
-		this.frm.set_df_property("payments", "cannot_add_rows", true);
+		this.frm.set_df_property("to_receive", "cannot_add_rows", true);
+		this.frm.set_df_property("to_pay", "cannot_add_rows", true);
 		this.frm.set_df_property("allocation", "cannot_add_rows", true);
 
-		if (this.frm.doc.receivable_payable_account) {
+		if (this.frm.doc.party) {
 			this.frm.add_custom_button(__("Get Unreconciled Entries"), () =>
 				this.frm.trigger("get_unreconciled_entries")
 			);
 			this.frm.change_custom_button_type(__("Get Unreconciled Entries"), null, "primary");
 		}
-		if (this.frm.doc.invoices.length && this.frm.doc.payments.length) {
+		if (this.frm.doc.to_receive.length && this.frm.doc.to_pay.length) {
 			this.frm.add_custom_button(__("Allocate"), () => this.frm.trigger("allocate"));
 			this.frm.change_custom_button_type(__("Allocate"), null, "primary");
 			this.frm.change_custom_button_type(__("Get Unreconciled Entries"), null, "default");
@@ -113,7 +111,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 		this.bind_totals_on_row_select();
 
 		// check for any running reconciliation jobs
-		if (this.frm.doc.receivable_payable_account) {
+		if (this.frm.doc.party) {
 			frappe.call({
 				method: "erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation.is_auto_process_enabled",
 				callback: (r) => {
@@ -126,7 +124,8 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 										company: this.frm.doc.company,
 										party_type: this.frm.doc.party_type,
 										party: this.frm.doc.party,
-										receivable_payable_account: this.frm.doc.receivable_payable_account,
+										receivable_payable_account:
+											this.frm.doc.receivable_payable_account || null,
 									},
 								},
 							})
@@ -149,6 +148,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			});
 		}
 	}
+
 	set_query_for_dimension_filters() {
 		frappe.call({
 			method: "erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation.get_queries_for_dimension_filters",
@@ -211,31 +211,22 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 		this.frm.refresh();
 	}
 
-	invoice_name() {
-		this.frm.trigger("get_unreconciled_entries");
-	}
-
-	payment_name() {
-		this.frm.trigger("get_unreconciled_entries");
-	}
-
 	clear_child_tables() {
-		this.frm.clear_table("invoices");
-		this.frm.clear_table("payments");
+		this.frm.clear_table("to_receive");
+		this.frm.clear_table("to_pay");
 		this.frm.clear_table("allocation");
 		this.frm.refresh_fields();
 		this.update_totals();
 	}
 
 	update_totals() {
-		const sum_outstanding = (rows) => rows.reduce((total, row) => total + flt(row.outstanding_amount), 0);
-		const sum_amount = (rows) => rows.reduce((total, row) => total + flt(row.amount), 0);
+		const sum_selected = (fieldname) =>
+			this.frm.fields_dict[fieldname].grid
+				.get_selected_children()
+				.reduce((total, row) => total + flt(row.outstanding_amount), 0);
 
-		const selected_invoices = this.frm.fields_dict.invoices.grid.get_selected_children();
-		const selected_payments = this.frm.fields_dict.payments.grid.get_selected_children();
-
-		const total_invoice_amount = sum_outstanding(selected_invoices);
-		const total_payment_amount = sum_amount(selected_payments);
+		const total_invoice_amount = sum_selected("to_receive");
+		const total_payment_amount = sum_selected("to_pay");
 		this.frm.set_value({
 			total_invoice_amount,
 			total_payment_amount,
@@ -244,7 +235,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 	}
 
 	bind_totals_on_row_select() {
-		["invoices", "payments"].forEach((fieldname) => {
+		["to_receive", "to_pay"].forEach((fieldname) => {
 			this.frm.fields_dict[fieldname].grid.wrapper
 				.off("click.pr_totals")
 				.on("click.pr_totals", ".grid-row-check", () => this.update_totals());
@@ -258,14 +249,14 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			method: "get_unreconciled_entries",
 			callback: () => {
 				this.update_totals();
-				if (!(this.frm.doc.payments.length || this.frm.doc.invoices.length)) {
+				if (!(this.frm.doc.to_pay.length || this.frm.doc.to_receive.length)) {
 					frappe.throw({
-						message: __("No Unreconciled Invoices and Payments found for this party and account"),
+						message: __("No Unreconciled entries found for this party"),
 					});
-				} else if (!this.frm.doc.invoices.length) {
-					frappe.throw({ message: __("No Outstanding Invoices found for this party") });
-				} else if (!this.frm.doc.payments.length) {
-					frappe.throw({ message: __("No Unreconciled Payments found for this party") });
+				} else if (!this.frm.doc.to_receive.length) {
+					frappe.throw({ message: __("No 'To Receive' entries found for this party") });
+				} else if (!this.frm.doc.to_pay.length) {
+					frappe.throw({ message: __("No 'To Pay' entries found for this party") });
 				}
 				this.frm.refresh();
 			},
@@ -273,21 +264,17 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 	}
 
 	allocate() {
-		let payments = this.frm.fields_dict.payments.grid.get_selected_children();
-		if (!payments.length) {
-			payments = this.frm.doc.payments;
-		}
-		let invoices = this.frm.fields_dict.invoices.grid.get_selected_children();
-		if (!invoices.length) {
-			invoices = this.frm.doc.invoices;
-		}
+		const to_receive_rows = this.frm.fields_dict.to_receive.grid.get_selected_children();
+		const to_pay_rows = this.frm.fields_dict.to_pay.grid.get_selected_children();
+
+		const args = {};
+		if (to_receive_rows.length) args.to_receive = to_receive_rows;
+		if (to_pay_rows.length) args.to_pay = to_pay_rows;
+
 		return this.frm.call({
 			doc: this.frm.doc,
 			method: "allocate_entries",
-			args: {
-				payments: payments,
-				invoices: invoices,
-			},
+			args: args,
 			callback: () => {
 				this.frm.refresh();
 			},
@@ -322,7 +309,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 							},
 							{
 								fieldtype: "Data",
-								fieldname: "reference_name",
+								fieldname: "to_pay_voucher_no",
 								label: __("Voucher No"),
 								in_list_view: 1,
 								read_only: 1,
@@ -394,7 +381,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 				if (d.difference_amount) {
 					dialog.fields_dict.allocation.df.data.push({
 						docname: d.name,
-						reference_name: d.reference_name,
+						to_pay_voucher_no: d.to_pay_voucher_no,
 						difference_amount: d.difference_amount,
 						difference_account: d.difference_account,
 						gain_loss_posting_date: d.gain_loss_posting_date,
