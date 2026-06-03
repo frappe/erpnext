@@ -31,9 +31,9 @@ from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 from erpnext.accounts.party import (
 	CROSS_PARTY_FIELD_NO_MAP,
+	_get_party_details,
 	get_due_date,
 	get_party_account,
-	_get_party_details,
 )
 from erpnext.accounts.utils import (
 	get_account_currency,
