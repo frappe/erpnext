@@ -33,19 +33,21 @@ frappe.listview_settings["Item"] = {
 	},
 
 	onload: function (listview) {
-		listview.columns = listview.columns.map((col) => {
-			if (!col.df) return col;
-			const renames = {
-				is_fixed_asset: __("Item Type"),
-				is_sales_item: __("Purpose"),
-				stock_uom: __("UOM"),
-			};
-			if (col.df.fieldname in renames) {
-				return { ...col, df: { ...col.df, label: renames[col.df.fieldname] } };
-			}
-			return col;
-		});
-		listview.render_header(true);
+		if (listview.view === "List") {
+			listview.columns = listview.columns.map((col) => {
+				if (!col.df) return col;
+				const renames = {
+					is_fixed_asset: __("Item Type"),
+					is_sales_item: __("Purpose"),
+					stock_uom: __("UOM"),
+				};
+				if (col.df.fieldname in renames) {
+					return { ...col, df: { ...col.df, label: renames[col.df.fieldname] } };
+				}
+				return col;
+			});
+			listview.render_header(true);
+		}
 	},
 
 	get_indicator: function (doc) {
