@@ -70,6 +70,7 @@ class SellingController(StockController):
 		self.validate_for_duplicate_items()
 		self.validate_target_warehouse()
 		self.validate_auto_repeat_subscription_dates()
+		self.validate_sample_retention_warehouse()
 		for table_field in ["items", "packed_items"]:
 			if self.get(table_field):
 				self.set_serial_and_batch_bundle(table_field)
@@ -890,6 +891,26 @@ class SellingController(StockController):
 		from erpnext.controllers.buying_controller import validate_item_type
 
 		validate_item_type(self, "is_sales_item", "sales")
+
+	def validate_sample_retention_warehouse(self):
+		if self.get("is_return"):
+			return
+
+		sample_retention_warehouse = frappe.db.get_single_value(
+			"Stock Settings", "sample_retention_warehouse"
+		)
+		if not sample_retention_warehouse:
+			return
+
+		items = self.get("items") + (self.get("packed_items"))
+		for item in items:
+			if item.get("warehouse") == sample_retention_warehouse:
+				frappe.throw(
+					_("Row {0}: Cannot sell item {1} from Sample Retention Warehouse {2}").format(
+						item.idx, frappe.bold(item.item_code), frappe.bold(sample_retention_warehouse)
+					),
+					title=_("Not Allowed"),
+				)
 
 	def update_stock_reservation_entries(self) -> None:
 		"""Updates Delivered Qty in Stock Reservation Entries."""
