@@ -12,6 +12,8 @@ from erpnext.exceptions import PartyDisabled, PartyFrozen
 from erpnext.selling.doctype.customer.customer import (
 	get_credit_limit,
 	get_customer_outstanding,
+)
+from erpnext.selling.doctype.customer.mapper import (
 	parse_full_name,
 )
 from erpnext.tests.utils import ERPNextTestSuite

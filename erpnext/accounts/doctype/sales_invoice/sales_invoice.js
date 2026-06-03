@@ -197,21 +197,21 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 
 	make_invoice_discounting() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.create_invoice_discounting",
+			method: "erpnext.accounts.doctype.sales_invoice.mapper.create_invoice_discounting",
 			frm: this.frm,
 		});
 	}
 
 	make_dunning() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.create_dunning",
+			method: "erpnext.accounts.doctype.sales_invoice.mapper.create_dunning",
 			frm: this.frm,
 		});
 	}
 
 	make_maintenance_schedule() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_maintenance_schedule",
+			method: "erpnext.accounts.doctype.sales_invoice.mapper.make_maintenance_schedule",
 			frm: this.frm,
 		});
 	}
@@ -361,7 +361,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			__("Sales Order"),
 			function () {
 				erpnext.utils.map_current_doc({
-					method: "erpnext.selling.doctype.sales_order.sales_order.make_sales_invoice",
+					method: "erpnext.selling.doctype.sales_order.mapper.make_sales_invoice",
 					source_doctype: "Sales Order",
 					target: me.frm,
 					setters: {
@@ -383,7 +383,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			__("Quotation"),
 			function () {
 				erpnext.utils.map_current_doc({
-					method: "erpnext.selling.doctype.quotation.quotation.make_sales_invoice",
+					method: "erpnext.selling.doctype.quotation.mapper.make_sales_invoice",
 					source_doctype: "Quotation",
 					target: me.frm,
 					setters: [
@@ -421,7 +421,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 					});
 				}
 				erpnext.utils.map_current_doc({
-					method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
+					method: "erpnext.stock.doctype.delivery_note.mapper.make_sales_invoice",
 					source_doctype: "Delivery Note",
 					target: me.frm,
 					date_field: "posting_date",
@@ -501,7 +501,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 	make_inter_company_invoice() {
 		let me = this;
 		frappe.model.open_mapped_doc({
-			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_inter_company_purchase_invoice",
+			method: "erpnext.accounts.doctype.sales_invoice.mapper.make_inter_company_purchase_invoice",
 			frm: me.frm,
 		});
 	}
@@ -579,7 +579,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 
 	make_sales_return() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_sales_return",
+			method: "erpnext.accounts.doctype.sales_invoice.mapper.make_sales_return",
 			frm: this.frm,
 		});
 	}
@@ -712,7 +712,7 @@ extend_cscript(cur_frm.cscript, new erpnext.accounts.SalesInvoiceController({ fr
 
 cur_frm.cscript["Make Delivery Note"] = function () {
 	frappe.model.open_mapped_doc({
-		method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_delivery_note",
+		method: "erpnext.accounts.doctype.sales_invoice.mapper.make_delivery_note",
 		frm: cur_frm,
 	});
 };

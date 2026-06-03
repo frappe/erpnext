@@ -10,9 +10,9 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_sales_orders,
 	get_warehouse_list,
 )
+from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_se_from_wo
 from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError
-from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry as make_se_from_wo
-from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
@@ -523,13 +523,13 @@ class TestProductionPlan(ERPNextTestSuite):
 		)
 
 		def make_purchase_receipt_from_po(po_doc):
-			from erpnext.buying.doctype.purchase_order.purchase_order import make_subcontracting_order
+			from erpnext.buying.doctype.purchase_order.mapper import make_subcontracting_order
 			from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
 			from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 			from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 				make_subcontracting_receipt,
 			)
-			from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
+			from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import (
 				make_purchase_receipt as scr_make_purchase_receipt,
 			)
 
@@ -2211,9 +2211,9 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual(mr_items_dict["RM Item 2"], 80)
 
 	def test_stock_reservation_against_production_plan(self):
-		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
-		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
+		from erpnext.stock.doctype.material_request.mapper import make_purchase_order
 
 		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 1)
 
@@ -2323,9 +2323,9 @@ class TestProductionPlan(ERPNextTestSuite):
 		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
 
 	def test_stock_reservation_of_serial_nos_against_production_plan(self):
-		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
-		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
+		from erpnext.stock.doctype.material_request.mapper import make_purchase_order
 
 		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 1)
 
@@ -2470,9 +2470,9 @@ class TestProductionPlan(ERPNextTestSuite):
 		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
 
 	def test_stock_reservation_of_batch_nos_against_production_plan(self):
-		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
-		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
+		from erpnext.stock.doctype.material_request.mapper import make_purchase_order
 
 		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 1)
 

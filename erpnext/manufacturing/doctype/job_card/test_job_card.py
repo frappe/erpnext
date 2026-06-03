@@ -12,10 +12,12 @@ from erpnext.manufacturing.doctype.job_card.job_card import (
 	JobCardOverTransferError,
 	OperationMismatchError,
 	OverlapError,
+)
+from erpnext.manufacturing.doctype.job_card.mapper import (
 	make_corrective_job_card,
 	make_material_request,
 )
-from erpnext.manufacturing.doctype.job_card.job_card import (
+from erpnext.manufacturing.doctype.job_card.mapper import (
 	make_stock_entry as make_stock_entry_from_jc,
 )
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
@@ -552,7 +554,7 @@ class TestJobCard(ERPNextTestSuite):
 		corrective_job_card.submit()
 		wo.reload()
 
-		from erpnext.manufacturing.doctype.work_order.work_order import (
+		from erpnext.manufacturing.doctype.work_order.mapper import (
 			make_stock_entry as make_stock_entry_for_wo,
 		)
 
@@ -623,7 +625,7 @@ class TestJobCard(ERPNextTestSuite):
 		assertStatus("Cancelled")
 
 	def test_job_card_material_request_and_bom_details(self):
-		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
+		from erpnext.stock.doctype.material_request.mapper import make_stock_entry
 
 		create_bom_with_multiple_operations()
 		work_order = make_wo_with_transfer_against_jc()
@@ -647,7 +649,7 @@ class TestJobCard(ERPNextTestSuite):
 			setup_bom,
 			setup_operations,
 		)
-		from erpnext.manufacturing.doctype.work_order.work_order import (
+		from erpnext.manufacturing.doctype.work_order.mapper import (
 			make_stock_entry as make_stock_entry_for_wo,
 		)
 		from erpnext.stock.doctype.item.test_item import make_item
@@ -788,10 +790,10 @@ class TestJobCard(ERPNextTestSuite):
 			setup_bom,
 			setup_operations,
 		)
-		from erpnext.manufacturing.doctype.work_order.work_order import make_job_card
-		from erpnext.manufacturing.doctype.work_order.work_order import (
+		from erpnext.manufacturing.doctype.work_order.mapper import (
 			make_stock_entry as make_stock_entry_for_wo,
 		)
+		from erpnext.manufacturing.doctype.work_order.work_order import make_job_card
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
@@ -1075,7 +1077,7 @@ class TestJobCard(ERPNextTestSuite):
 		job_card.save()
 		job_card.submit()
 
-		from erpnext.manufacturing.doctype.work_order.work_order import (
+		from erpnext.manufacturing.doctype.work_order.mapper import (
 			make_stock_entry as make_stock_entry_for_wo,
 		)
 
@@ -1094,10 +1096,10 @@ class TestJobCard(ERPNextTestSuite):
 			setup_bom,
 			setup_operations,
 		)
-		from erpnext.manufacturing.doctype.work_order.work_order import make_job_card
-		from erpnext.manufacturing.doctype.work_order.work_order import (
+		from erpnext.manufacturing.doctype.work_order.mapper import (
 			make_stock_entry as make_stock_entry_for_wo,
 		)
+		from erpnext.manufacturing.doctype.work_order.work_order import make_job_card
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 

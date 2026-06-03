@@ -13,7 +13,7 @@ from erpnext.stock.doctype.item.test_item import (
 	make_item_variant,
 	set_item_variant_settings,
 )
-from erpnext.stock.doctype.material_request.material_request import (
+from erpnext.stock.doctype.material_request.mapper import (
 	make_in_transit_stock_entry,
 )
 from erpnext.stock.doctype.material_request.test_material_request import (
@@ -830,7 +830,7 @@ class TestStockEntry(ERPNextTestSuite):
 		frappe.db.set_single_value("Stock Settings", "stock_frozen_upto_days", 0)
 
 	def test_work_order(self):
-		from erpnext.manufacturing.doctype.work_order.work_order import (
+		from erpnext.manufacturing.doctype.work_order.mapper import (
 			make_stock_entry as _make_stock_entry,
 		)
 
@@ -868,7 +868,7 @@ class TestStockEntry(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"material_consumption": 1})
 	def test_work_order_manufacture_with_material_consumption(self):
-		from erpnext.manufacturing.doctype.work_order.work_order import (
+		from erpnext.manufacturing.doctype.work_order.mapper import (
 			make_stock_entry as _make_stock_entry,
 		)
 
@@ -949,7 +949,7 @@ class TestStockEntry(ERPNextTestSuite):
 		work_order.insert()
 		work_order.submit()
 
-		from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry
+		from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry
 
 		stock_entry = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
 		stock_entry.insert()
@@ -992,7 +992,7 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, ste.submit)
 
 	def test_quality_check_for_secondary_item(self):
-		from erpnext.manufacturing.doctype.work_order.work_order import (
+		from erpnext.manufacturing.doctype.work_order.mapper import (
 			make_stock_entry as _make_stock_entry,
 		)
 
@@ -1441,7 +1441,7 @@ class TestStockEntry(ERPNextTestSuite):
 
 	def test_mapped_stock_entry(self):
 		"Check if rate and stock details are populated in mapped SE given warehouse."
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_stock_entry
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_stock_entry
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
 		item_code = "_TestMappedItem"
@@ -2405,7 +2405,7 @@ class TestStockEntry(ERPNextTestSuite):
 	)
 	def test_validation_as_per_bom_with_continuous_raw_material_consumption(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-		from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry as _make_stock_entry
+		from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as _make_stock_entry
 		from erpnext.manufacturing.doctype.work_order.work_order import make_work_order
 
 		fg_item = make_item("_Mobiles", properties={"is_stock_item": 1}).name
@@ -2796,7 +2796,7 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 
 	def test_get_available_materials_tracks_transferred_qty(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-		from erpnext.manufacturing.doctype.work_order.work_order import (
+		from erpnext.manufacturing.doctype.work_order.mapper import (
 			make_stock_entry as _make_stock_entry,
 		)
 		from erpnext.stock.doctype.stock_entry.stock_entry_handler.disassemble import (
@@ -2841,7 +2841,7 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 
 	def test_get_available_materials_reduces_qty_after_consumption(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-		from erpnext.manufacturing.doctype.work_order.work_order import (
+		from erpnext.manufacturing.doctype.work_order.mapper import (
 			make_stock_entry as _make_stock_entry,
 		)
 		from erpnext.stock.doctype.stock_entry.stock_entry_handler.disassemble import (
@@ -2890,10 +2890,10 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
 	def test_validate_fg_resets_invalid_serial_no_on_manufacture(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
-		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
-		from erpnext.manufacturing.doctype.work_order.work_order import (
+		from erpnext.manufacturing.doctype.work_order.mapper import (
 			make_stock_entry as _make_stock_entry,
 		)
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 
 		fg_item = "_FG Serial No Item"
 		rm_item = "RM for serial item"
@@ -2930,10 +2930,10 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
 	def test_validate_fg_resets_invalid_batch_no_on_manufacture(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
-		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
-		from erpnext.manufacturing.doctype.work_order.work_order import (
+		from erpnext.manufacturing.doctype.work_order.mapper import (
 			make_stock_entry as _make_stock_entry,
 		)
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 		from erpnext.stock.serial_batch_bundle import get_batches_from_bundle
 
 		fg_item = "_FG Batch No Item"

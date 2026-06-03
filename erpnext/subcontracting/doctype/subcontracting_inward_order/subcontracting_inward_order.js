@@ -99,7 +99,7 @@ frappe.ui.form.on("Subcontracting Inward Order", {
 
 		if (frm.doc.sales_order) {
 			erpnext.utils.map_current_doc({
-				method: "erpnext.selling.doctype.sales_order.sales_order.make_subcontracting_inward_order",
+				method: "erpnext.selling.doctype.sales_order.mapper.make_subcontracting_inward_order",
 				source_name: frm.doc.sales_order,
 				target_doc: frm,
 				freeze: true,

@@ -154,7 +154,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 				__("Opportunity"),
 				function () {
 					erpnext.utils.map_current_doc({
-						method: "erpnext.crm.doctype.opportunity.opportunity.make_quotation",
+						method: "erpnext.crm.doctype.opportunity.mapper.make_quotation",
 						source_doctype: "Opportunity",
 						target: me.frm,
 						setters: [
@@ -195,7 +195,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 			this.show_alternative_items_dialog();
 		} else {
 			frappe.model.open_mapped_doc({
-				method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
+				method: "erpnext.selling.doctype.quotation.mapper.make_sales_order",
 				frm: me.frm,
 			});
 		}
@@ -362,7 +362,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 			],
 			primary_action: function () {
 				frappe.model.open_mapped_doc({
-					method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
+					method: "erpnext.selling.doctype.quotation.mapper.make_sales_order",
 					frm: me.frm,
 					args: {
 						selected_items: dialog.fields_dict.alternative_items.grid.get_selected_children(),

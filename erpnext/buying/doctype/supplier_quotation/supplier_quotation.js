@@ -56,7 +56,7 @@ erpnext.buying.SupplierQuotationController = class SupplierQuotationController e
 				__("Material Request"),
 				function () {
 					erpnext.utils.map_current_doc({
-						method: "erpnext.stock.doctype.material_request.material_request.make_supplier_quotation",
+						method: "erpnext.stock.doctype.material_request.mapper.make_supplier_quotation",
 						source_doctype: "Material Request",
 						target: me.frm,
 						setters: {
@@ -91,7 +91,7 @@ erpnext.buying.SupplierQuotationController = class SupplierQuotationController e
 						frappe.throw({ message: __("Please select a Supplier"), title: __("Mandatory") });
 					}
 					erpnext.utils.map_current_doc({
-						method: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.make_supplier_quotation_from_rfq",
+						method: "erpnext.buying.doctype.request_for_quotation.mapper.make_supplier_quotation_from_rfq",
 						source_doctype: "Request for Quotation",
 						target: me.frm,
 						setters: {
@@ -112,13 +112,13 @@ erpnext.buying.SupplierQuotationController = class SupplierQuotationController e
 
 	make_purchase_order() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order",
+			method: "erpnext.buying.doctype.supplier_quotation.mapper.make_purchase_order",
 			frm: this.frm,
 		});
 	}
 	make_quotation() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_quotation",
+			method: "erpnext.buying.doctype.supplier_quotation.mapper.make_quotation",
 			frm: this.frm,
 		});
 	}

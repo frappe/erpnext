@@ -183,7 +183,7 @@ class Supplier(TransactionBase):
 			)
 
 	def create_primary_contact(self):
-		from erpnext.selling.doctype.customer.customer import make_contact
+		from erpnext.selling.doctype.customer.mapper import make_contact
 
 		if not self.supplier_primary_contact:
 			if self.mobile_no or self.email_id:
@@ -195,7 +195,7 @@ class Supplier(TransactionBase):
 	def create_primary_address(self):
 		from frappe.contacts.doctype.address.address import get_address_display
 
-		from erpnext.selling.doctype.customer.customer import make_address
+		from erpnext.selling.doctype.customer.mapper import make_address
 
 		if self.flags.is_new_doc and self.get("address_line1"):
 			address = make_address(self)

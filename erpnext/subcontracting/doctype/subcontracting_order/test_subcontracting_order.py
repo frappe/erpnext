@@ -7,7 +7,7 @@ from collections import defaultdict
 import frappe
 from frappe.utils import flt
 
-from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_subcontracting_order
+from erpnext.buying.doctype.purchase_order.mapper import get_mapped_subcontracting_order
 from erpnext.controllers.subcontracting_controller import (
 	get_materials_from_supplier,
 	make_rm_stock_entry,
@@ -629,7 +629,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		self.assertEqual(ordered_qty + 10, new_ordered_qty)
 
 	def test_requested_qty_for_subcontracting_order(self):
-		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
+		from erpnext.stock.doctype.material_request.mapper import make_purchase_order
 		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
 
 		requested_qty = frappe.db.get_value(

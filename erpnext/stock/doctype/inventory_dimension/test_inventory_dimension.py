@@ -364,7 +364,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 
 	def test_inter_transfer_return_against_inventory_dimension(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 
 		data = prepare_data_for_internal_transfer()
 

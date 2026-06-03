@@ -975,10 +975,11 @@ class StockReconciliation(StockController):
 		return new_sl_entries
 
 	def get_gl_entries(self, inventory_account_map=None):
-		if not self.cost_center:
-			msgprint(_("Please enter Cost Center"), raise_exception=1)
+		from erpnext.stock.doctype.stock_reconciliation.services.gl_composer import (
+			StockReconciliationGLComposer,
+		)
 
-		return super().get_gl_entries(inventory_account_map, self.expense_account, self.cost_center)
+		return StockReconciliationGLComposer(self).compose(inventory_account_map)
 
 	def validate_expense_account(self):
 		if not cint(erpnext.is_perpetual_inventory_enabled(self.company)):

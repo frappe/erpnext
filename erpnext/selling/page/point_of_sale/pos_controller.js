@@ -617,7 +617,7 @@ erpnext.PointOfSale.Controller = class {
 			method:
 				doc.doctype == "POS Invoice"
 					? "erpnext.accounts.doctype.pos_invoice.pos_invoice.make_sales_return"
-					: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_sales_return",
+					: "erpnext.accounts.doctype.sales_invoice.mapper.make_sales_return",
 			args: {
 				source_name: doc.name,
 				target_doc: this.frm.doc,

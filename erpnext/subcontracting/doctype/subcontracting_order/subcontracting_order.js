@@ -145,7 +145,7 @@ frappe.ui.form.on("Subcontracting Order", {
 
 		if (frm.doc.purchase_order) {
 			erpnext.utils.map_current_doc({
-				method: "erpnext.buying.doctype.purchase_order.purchase_order.make_subcontracting_order",
+				method: "erpnext.buying.doctype.purchase_order.mapper.make_subcontracting_order",
 				source_name: frm.doc.purchase_order,
 				target_doc: frm,
 				freeze: true,

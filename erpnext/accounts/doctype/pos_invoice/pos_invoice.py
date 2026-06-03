@@ -17,6 +17,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	get_mode_of_payment_info,
 	update_multi_mode_option,
 )
+from erpnext.accounts.doctype.sales_invoice.services.loyalty import LoyaltyService
 from erpnext.accounts.party import get_due_date, get_party_account
 from erpnext.controllers.queries import item_query as _item_query
 from erpnext.controllers.sales_and_purchase_return import get_sales_invoice_item_from_consolidated_invoice
@@ -241,13 +242,13 @@ class POSInvoice(SalesInvoice):
 	def on_submit(self):
 		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program
 		if not self.is_return and self.loyalty_program:
-			self.make_loyalty_point_entry()
+			LoyaltyService(self).make_loyalty_point_entry()
 		elif self.is_return and self.return_against and self.loyalty_program:
 			against_psi_doc = frappe.get_doc("POS Invoice", self.return_against)
-			against_psi_doc.delete_loyalty_point_entry()
-			against_psi_doc.make_loyalty_point_entry()
+			LoyaltyService(against_psi_doc).delete_loyalty_point_entry()
+			LoyaltyService(against_psi_doc).make_loyalty_point_entry()
 		if self.redeem_loyalty_points and self.loyalty_points:
-			self.apply_loyalty_points()
+			LoyaltyService(self).apply_loyalty_points()
 		self.check_phone_payments()
 		self.set_status(update=True)
 		self.make_bundle_for_sales_purchase_return()
@@ -288,11 +289,11 @@ class POSInvoice(SalesInvoice):
 		# run on cancel method of selling controller
 		super(SalesInvoice, self).on_cancel()
 		if not self.is_return and self.loyalty_program:
-			self.delete_loyalty_point_entry()
+			LoyaltyService(self).delete_loyalty_point_entry()
 		elif self.is_return and self.return_against and self.loyalty_program:
 			against_psi_doc = frappe.get_doc("POS Invoice", self.return_against)
-			against_psi_doc.delete_loyalty_point_entry()
-			against_psi_doc.make_loyalty_point_entry()
+			LoyaltyService(against_psi_doc).delete_loyalty_point_entry()
+			LoyaltyService(against_psi_doc).make_loyalty_point_entry()
 
 		self.db_set("status", "Cancelled")
 
@@ -745,7 +746,9 @@ class POSInvoice(SalesInvoice):
 
 			# fetch charges
 			if self.taxes_and_charges and not len(self.get("taxes")):
-				self.set_taxes()
+				from erpnext.accounts.services.taxes import TaxService
+
+				TaxService(self).set_taxes()
 
 		if not self.account_for_change_amount:
 			self.account_for_change_amount = frappe.get_cached_value(

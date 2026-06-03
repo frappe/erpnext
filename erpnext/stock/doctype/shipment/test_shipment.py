@@ -5,7 +5,7 @@ from datetime import date, timedelta
 
 import frappe
 
-from erpnext.stock.doctype.delivery_note.delivery_note import make_shipment
+from erpnext.stock.doctype.delivery_note.mapper import make_shipment
 from erpnext.tests.utils import ERPNextTestSuite
 
 

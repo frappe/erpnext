@@ -19,8 +19,7 @@ from erpnext.maintenance.doctype.maintenance_visit.test_maintenance_visit import
 )
 from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
-from erpnext.selling.doctype.sales_order.sales_order import (
-	WarehouseRequired,
+from erpnext.selling.doctype.sales_order.mapper import (
 	create_pick_list,
 	make_delivery_note,
 	make_material_request,
@@ -29,6 +28,9 @@ from erpnext.selling.doctype.sales_order.sales_order import (
 	make_raw_material_request,
 	make_sales_invoice,
 	make_work_orders,
+)
+from erpnext.selling.doctype.sales_order.sales_order import (
+	WarehouseRequired,
 )
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -253,7 +255,7 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(len(si1.get("items")), 0)
 
 	def test_so_billed_amount_against_return_entry(self):
-		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
 
 		so = make_sales_order(do_not_submit=True)
 		so.submit()
@@ -1902,7 +1904,7 @@ class TestSalesOrder(ERPNextTestSuite):
 
 	def test_so_back_updated_from_wo_via_mr(self):
 		"SO -> MR (Manufacture) -> WO. Test if WO Qty is updated in SO."
-		from erpnext.manufacturing.doctype.work_order.work_order import (
+		from erpnext.manufacturing.doctype.work_order.mapper import (
 			make_stock_entry as make_se_from_wo,
 		)
 		from erpnext.stock.doctype.material_request.material_request import raise_work_orders
@@ -2333,7 +2335,7 @@ class TestSalesOrder(ERPNextTestSuite):
 			self.assertEqual(row.warehouse, warehouse)
 
 	def test_pick_list_for_batch(self):
-		from erpnext.stock.doctype.pick_list.pick_list import create_delivery_note
+		from erpnext.stock.doctype.pick_list.mapper import create_delivery_note
 
 		batch_item = make_item(
 			"_Test Batch Item for Pick LIST",

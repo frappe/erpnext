@@ -34,7 +34,6 @@ frappe.ui.form.on("Pick List", {
 
 		frm.custom_make_buttons = {
 			"Delivery Note": "Delivery Note",
-			"Sales Invoice": "Sales Invoice",
 			"Stock Entry": "Stock Entry",
 		};
 
@@ -217,7 +216,7 @@ frappe.ui.form.on("Pick List", {
 						}
 						frm.clear_table("locations");
 						erpnext.utils.map_current_doc({
-							method: "erpnext.manufacturing.doctype.work_order.work_order.create_pick_list",
+							method: "erpnext.manufacturing.doctype.work_order.mapper.create_pick_list",
 							target: frm,
 							source_name: frm.doc.work_order,
 						});
@@ -229,7 +228,7 @@ frappe.ui.form.on("Pick List", {
 	},
 	material_request: (frm) => {
 		erpnext.utils.map_current_doc({
-			method: "erpnext.stock.doctype.material_request.material_request.create_pick_list",
+			method: "erpnext.stock.doctype.material_request.mapper.create_pick_list",
 			target: frm,
 			source_name: frm.doc.material_request,
 		});
@@ -238,9 +237,18 @@ frappe.ui.form.on("Pick List", {
 		frm.clear_table("locations");
 		frm.trigger("add_get_items_button");
 	},
+	create_delivery(frm, doctype) {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.stock.doctype.pick_list.mapper.create_delivery",
+			args: {
+				target: doctype,
+			},
+			frm: frm,
+		});
+	},
 	create_stock_entry: (frm) => {
 		frappe
-			.xcall("erpnext.stock.doctype.pick_list.pick_list.create_stock_entry", {
+			.xcall("erpnext.stock.doctype.pick_list.mapper.create_stock_entry", {
 				pick_list: frm.doc,
 			})
 			.then((stock_entry) => {
@@ -262,7 +270,7 @@ frappe.ui.form.on("Pick List", {
 		};
 		frm.get_items_btn = frm.add_custom_button(__("Get Items"), () => {
 			erpnext.utils.map_current_doc({
-				method: "erpnext.selling.doctype.sales_order.sales_order.create_pick_list",
+				method: "erpnext.selling.doctype.sales_order.mapper.create_pick_list",
 				source_doctype: "Sales Order",
 				target: frm,
 				setters: {
@@ -332,15 +340,6 @@ frappe.ui.form.on("Pick List", {
 			from_voucher_no: frm.doc.name,
 		};
 		frappe.set_route("query-report", "Reserved Stock");
-	},
-	create_delivery(frm, doctype) {
-		frappe.model.open_mapped_doc({
-			method: "erpnext.stock.doctype.pick_list.pick_list.create_delivery",
-			args: {
-				target: doctype,
-			},
-			frm: frm,
-		});
 	},
 });
 

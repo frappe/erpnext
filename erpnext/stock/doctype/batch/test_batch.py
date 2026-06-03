@@ -387,7 +387,7 @@ class TestBatch(ERPNextTestSuite):
 		self.assertEqual(get_batch_qty("batch a", "_Test Warehouse - _TC"), 90)
 
 	def test_ignore_reserved_qty(self):
-		from erpnext.selling.doctype.sales_order.sales_order import create_pick_list
+		from erpnext.selling.doctype.sales_order.mapper import create_pick_list
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 		batch_item_name = "Reserve Batch Item"

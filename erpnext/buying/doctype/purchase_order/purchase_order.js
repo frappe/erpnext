@@ -459,14 +459,14 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 
 	make_inter_company_order(frm) {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.buying.doctype.purchase_order.purchase_order.make_inter_company_sales_order",
+			method: "erpnext.buying.doctype.purchase_order.mapper.make_inter_company_sales_order",
 			frm: frm,
 		});
 	}
 
 	make_purchase_receipt() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
+			method: "erpnext.buying.doctype.purchase_order.mapper.make_purchase_receipt",
 			frm: this.frm,
 			freeze_message: __("Creating Purchase Receipt ..."),
 		});
@@ -474,14 +474,14 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 
 	make_purchase_invoice() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice",
+			method: "erpnext.buying.doctype.purchase_order.mapper.make_purchase_invoice",
 			frm: this.frm,
 		});
 	}
 
 	make_subcontracting_order() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.buying.doctype.purchase_order.purchase_order.make_subcontracting_order",
+			method: "erpnext.buying.doctype.purchase_order.mapper.make_subcontracting_order",
 			frm: this.frm,
 			freeze_message: __("Creating Subcontracting Order ..."),
 		});
@@ -493,7 +493,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 			__("Material Request"),
 			function () {
 				erpnext.utils.map_current_doc({
-					method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order",
+					method: "erpnext.stock.doctype.material_request.mapper.make_purchase_order",
 					source_doctype: "Material Request",
 					target: me.frm,
 					setters: {
@@ -518,7 +518,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 			__("Supplier Quotation"),
 			function () {
 				erpnext.utils.map_current_doc({
-					method: "erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order",
+					method: "erpnext.buying.doctype.supplier_quotation.mapper.make_purchase_order",
 					source_doctype: "Supplier Quotation",
 					target: me.frm,
 					setters: {

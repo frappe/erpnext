@@ -18,8 +18,6 @@ from frappe.utils.data import add_to_date
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.assets.doctype.asset.asset import (
-	make_sales_invoice,
-	split_asset,
 	update_maintenance_status,
 )
 from erpnext.assets.doctype.asset.depreciation import (
@@ -27,11 +25,15 @@ from erpnext.assets.doctype.asset.depreciation import (
 	restore_asset,
 	scrap_asset,
 )
+from erpnext.assets.doctype.asset.mapper import (
+	make_sales_invoice,
+	split_asset,
+)
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
 	get_depr_schedule,
 )
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+from erpnext.stock.doctype.purchase_receipt.mapper import (
 	make_purchase_invoice as make_invoice,
 )
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt

@@ -10,12 +10,14 @@ from frappe.utils import flt, today
 
 from erpnext.controllers.accounts_controller import InvalidQtyError
 from erpnext.stock.doctype.item.test_item import create_item
-from erpnext.stock.doctype.material_request.material_request import (
+from erpnext.stock.doctype.material_request.mapper import (
 	create_pick_list,
 	make_in_transit_stock_entry,
 	make_purchase_order,
 	make_stock_entry,
 	make_supplier_quotation,
+)
+from erpnext.stock.doctype.material_request.material_request import (
 	raise_work_orders,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry import make_stock_in_entry
@@ -980,7 +982,7 @@ class TestMaterialRequest(ERPNextTestSuite):
 		from frappe.utils import add_to_date, today
 
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
-		from erpnext.selling.doctype.sales_order.sales_order import make_material_request
+		from erpnext.selling.doctype.sales_order.mapper import make_material_request
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 		sub_item_a = "_Test Bundle ItemA"
@@ -1019,7 +1021,7 @@ class TestMaterialRequest(ERPNextTestSuite):
 		"""Test for pick list mapped doc qty from partially received Material Request Transfer"""
 		import json
 
-		from erpnext.stock.doctype.pick_list.pick_list import create_stock_entry
+		from erpnext.stock.doctype.pick_list.mapper import create_stock_entry
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 		new_item = create_item("_Test Pick List Item", is_stock_item=1)

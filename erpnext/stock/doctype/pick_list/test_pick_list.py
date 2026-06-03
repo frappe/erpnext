@@ -5,11 +5,11 @@ import frappe
 from frappe import _dict
 
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
-from erpnext.selling.doctype.sales_order.sales_order import create_pick_list
+from erpnext.selling.doctype.sales_order.mapper import create_pick_list
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.packed_item.test_packed_item import create_product_bundle
-from erpnext.stock.doctype.pick_list.pick_list import create_delivery_note, create_dn_for_pick_lists
+from erpnext.stock.doctype.pick_list.mapper import create_delivery_note, create_dn_for_pick_lists
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_batch_from_bundle,
@@ -1052,7 +1052,8 @@ class TestPickList(ERPNextTestSuite):
 
 	def test_pick_list_warehouse_for_work_order(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-		from erpnext.manufacturing.doctype.work_order.work_order import create_pick_list, make_work_order
+		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list
+		from erpnext.manufacturing.doctype.work_order.work_order import make_work_order
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 		# Create Warehouses for Work Order
@@ -1536,7 +1537,7 @@ class TestPickList(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_multiple_pick_lists_delivery_note(self):
-		from erpnext.stock.doctype.pick_list.pick_list import create_dn_for_pick_lists
+		from erpnext.stock.doctype.pick_list.mapper import create_dn_for_pick_lists
 
 		item_code = make_item().name
 		warehouse = "_Test Warehouse - _TC"
@@ -1745,7 +1746,7 @@ class TestPickList(ERPNextTestSuite):
 
 		pick_list = frappe.new_doc("Pick List")
 		map_docs(
-			"erpnext.selling.doctype.sales_order.sales_order.create_pick_list",
+			"erpnext.selling.doctype.sales_order.mapper.create_pick_list",
 			dumps([sales_order1.name, sales_order2.name, sales_order3.name]),
 			pick_list,
 		)

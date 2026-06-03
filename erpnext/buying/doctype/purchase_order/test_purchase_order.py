@@ -11,19 +11,19 @@ from frappe.utils.data import today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.party import get_due_date_from_template
-from erpnext.buying.doctype.purchase_order.purchase_order import (
+from erpnext.buying.doctype.purchase_order.mapper import (
 	make_inter_company_sales_order,
 	make_purchase_receipt,
 )
-from erpnext.buying.doctype.purchase_order.purchase_order import (
+from erpnext.buying.doctype.purchase_order.mapper import (
 	make_purchase_invoice as make_pi_from_po,
 )
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
 from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.doctype.material_request.material_request import make_purchase_order
+from erpnext.stock.doctype.material_request.mapper import make_purchase_order
 from erpnext.stock.doctype.material_request.test_material_request import make_material_request
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+from erpnext.stock.doctype.purchase_receipt.mapper import (
 	make_purchase_invoice as make_pi_from_pr,
 )
 from erpnext.tests.utils import ERPNextTestSuite
@@ -105,7 +105,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		Regression test for #55246: the mapper dropped rows once
 		received_qty >= qty, ignoring the configured tolerance.
 		"""
-		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
 
 		# 50% tolerance — 10 ordered allows up to 15 received
 		frappe.db.set_value("Item", "_Test Item", "over_delivery_receipt_allowance", 50)
@@ -611,7 +611,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(po.get("items")[0].received_qty, 5)
 
 	def test_purchase_order_invoice_receipt_workflow(self):
-		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_purchase_receipt
+		from erpnext.accounts.doctype.purchase_invoice.mapper import make_purchase_receipt
 
 		po = create_purchase_order()
 		pi = make_pi_from_po(po.name)
@@ -1050,14 +1050,14 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 	def test_internal_transfer_flow(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
-		from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
+		from erpnext.accounts.doctype.sales_invoice.mapper import (
 			make_inter_company_purchase_invoice,
 		)
-		from erpnext.selling.doctype.sales_order.sales_order import (
+		from erpnext.selling.doctype.sales_order.mapper import (
 			make_delivery_note,
 			make_sales_invoice,
 		)
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 
 		frappe.db.set_single_value("Selling Settings", "maintain_same_sales_rate", 1)
 		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 1)
@@ -1198,7 +1198,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(po.items[0].fg_item_qty, 30)
 
 	def test_new_sc_flow(self):
-		from erpnext.buying.doctype.purchase_order.purchase_order import make_subcontracting_order
+		from erpnext.buying.doctype.purchase_order.mapper import make_subcontracting_order
 
 		po = create_po_for_sc_testing()
 		sco = make_subcontracting_order(po.name)
@@ -1326,7 +1326,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Not Initiated")
 
 	def test_po_billed_amount_against_return_entry(self):
-		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_debit_note
+		from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note
 
 		# Create a Purchase Order and Fully Bill it
 		po = create_purchase_order()

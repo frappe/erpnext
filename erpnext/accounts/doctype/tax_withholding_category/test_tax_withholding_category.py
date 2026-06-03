@@ -9,7 +9,7 @@ from frappe.utils import add_days, add_months, getdate, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
+from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
 from erpnext.tests.utils import ERPNextTestSuite
 
 
