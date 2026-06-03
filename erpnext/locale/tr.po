@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-31 10:18+0000\n"
-"PO-Revision-Date: 2026-05-31 22:14\n"
+"PO-Revision-Date: 2026-06-03 17:57\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -36009,8 +36009,8 @@ msgstr "Ödeme Alındı"
 
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/invoicing.json
-msgid "Payment Reconciliaition"
-msgstr ""
+msgid "Payment Reconciliation"
+msgstr "Ödeme Mutabakatı"
 
 #. Name of a DocType
 #. Label of the payment_reconciliation (Table) field in DocType 'POS Closing
