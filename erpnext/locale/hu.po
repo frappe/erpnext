@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-31 10:18+0000\n"
-"PO-Revision-Date: 2026-05-31 22:13\n"
+"PO-Revision-Date: 2026-06-03 17:56\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Hungarian\n"
 "MIME-Version: 1.0\n"
@@ -2733,7 +2733,7 @@ msgstr ""
 #. List'
 #: erpnext/setup/doctype/holiday_list/holiday_list.json
 msgid "Add Weekly Holidays"
-msgstr ""
+msgstr "Heti ünnepek hozzáadása"
 
 #: erpnext/public/js/utils/crm_activities.js:144
 msgid "Add a Note"
@@ -10395,7 +10395,7 @@ msgstr "Értesítések Törlése"
 #. Label of the clear_table (Button) field in DocType 'Holiday List'
 #: erpnext/setup/doctype/holiday_list/holiday_list.json
 msgid "Clear Table"
-msgstr ""
+msgstr "Tábla törlése"
 
 #. Label of the clearance_date (Date) field in DocType 'Bank Clearance Detail'
 #. Label of the clearance_date (Date) field in DocType 'Bank Transaction
@@ -13107,7 +13107,7 @@ msgstr ""
 
 #: erpnext/utilities/activation.py:79
 msgid "Create Lead"
-msgstr ""
+msgstr "Érdeklődés létrehozása"
 
 #: erpnext/utilities/activation.py:77
 msgid "Create Leads"
@@ -13324,7 +13324,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Create Tasks'
 #: erpnext/projects/onboarding_step/create_tasks/create_tasks.json
 msgid "Create Task"
-msgstr ""
+msgstr "Feladat létrehozása"
 
 #. Title of an Onboarding Step
 #: erpnext/projects/onboarding_step/create_tasks/create_tasks.json
@@ -20505,7 +20505,7 @@ msgstr ""
 #. Label of the first_responded_on (Datetime) field in DocType 'Issue'
 #: erpnext/support/doctype/issue/issue.json
 msgid "First Responded On"
-msgstr ""
+msgstr "Első válasz időpontja"
 
 #. Option for the 'Service Level Agreement Status' (Select) field in DocType
 #. 'Issue'
@@ -20772,7 +20772,7 @@ msgstr "Láb/másodperc"
 
 #: erpnext/accounts/print_format/payment_receipt_voucher/payment_receipt_voucher.html:23
 msgid "For"
-msgstr ""
+msgstr "Ennek"
 
 #: erpnext/public/js/utils/sales_common.js:389
 msgid "For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table, values will be copied to 'Packing List' table."
@@ -24507,7 +24507,7 @@ msgstr ""
 #: erpnext/accounts/doctype/payment_request/payment_request.json
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 msgid "Initiated"
-msgstr ""
+msgstr "kezdeményezett"
 
 #. Label of the inspected_by (Link) field in DocType 'Quality Inspection'
 #: erpnext/manufacturing/report/quality_inspection_summary/quality_inspection_summary.js:33
@@ -28759,7 +28759,7 @@ msgstr ""
 #: erpnext/setup/doctype/sales_partner/sales_partner.json
 #: erpnext/stock/doctype/manufacturer/manufacturer.json
 msgid "Logo"
-msgstr ""
+msgstr "Logó"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:187
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:323
@@ -32911,7 +32911,7 @@ msgstr ""
 #. Order'
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 msgid "Ongoing"
-msgstr ""
+msgstr "Folyamatban lévő"
 
 #: erpnext/manufacturing/dashboard_fixtures.py:228
 msgid "Ongoing Job Cards"
@@ -33505,7 +33505,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/downtime_entry/downtime_entry.json
 #: erpnext/manufacturing/report/downtime_analysis/downtime_analysis.py:85
 msgid "Operator"
-msgstr ""
+msgstr "Operátor"
 
 #: erpnext/crm/report/campaign_efficiency/campaign_efficiency.py:21
 #: erpnext/crm/report/lead_owner_efficiency/lead_owner_efficiency.py:27
@@ -35899,7 +35899,7 @@ msgstr ""
 
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/invoicing.json
-msgid "Payment Reconciliaition"
+msgid "Payment Reconciliation"
 msgstr ""
 
 #. Name of a DocType
@@ -39320,7 +39320,7 @@ msgstr ""
 #. Label of the probability (Percent) field in DocType 'Prospect Opportunity'
 #: erpnext/crm/doctype/prospect_opportunity/prospect_opportunity.json
 msgid "Probability"
-msgstr ""
+msgstr "Valószínűség"
 
 #. Label of the probability (Percent) field in DocType 'Opportunity'
 #: erpnext/crm/doctype/opportunity/opportunity.json
@@ -53072,7 +53072,7 @@ msgstr ""
 
 #: banking/src/components/features/Settings/Preferences.tsx:186
 msgid "Switch between light, dark, or system theme"
-msgstr ""
+msgstr "Váltás világos, sötét vagy rendszertéma között"
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.js:23
 msgid "Sync Now"
