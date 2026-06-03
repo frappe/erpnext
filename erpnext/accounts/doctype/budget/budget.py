@@ -705,18 +705,20 @@ def get_ordered_amount(params):
 
 
 def get_other_condition(params, for_doc):
-	condition = f"expense_account = '{params.expense_account}'"
+	condition = f"expense_account = {frappe.db.escape(params.expense_account)}"
 	budget_against_field = params.get("budget_against_field")
 
 	if budget_against_field and params.get(budget_against_field):
-		condition += f" and child.{budget_against_field} = '{params.get(budget_against_field)}'"
+		condition += (
+			f" and child.{budget_against_field} = {frappe.db.escape(params.get(budget_against_field))}"
+		)
 
 	date_field = "schedule_date" if for_doc == "Material Request" else "transaction_date"
 
 	start_date = frappe.get_cached_value("Fiscal Year", params.from_fiscal_year, "year_start_date")
 	end_date = frappe.get_cached_value("Fiscal Year", params.to_fiscal_year, "year_end_date")
 
-	condition += f" and parent.{date_field} between '{start_date}' and '{end_date}'"
+	condition += f" and parent.{date_field} between {frappe.db.escape(str(start_date))} and {frappe.db.escape(str(end_date))}"
 
 	return condition
 

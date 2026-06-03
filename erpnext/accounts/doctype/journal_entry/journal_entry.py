@@ -1292,7 +1292,11 @@ class JournalEntry(AccountsController):
 		self.validate_total_debit_and_credit()
 
 	def get_values(self):
-		cond = f" and outstanding_amount <= {self.write_off_amount}" if flt(self.write_off_amount) > 0 else ""
+		cond = (
+			f" and outstanding_amount <= {flt(self.write_off_amount)}"
+			if flt(self.write_off_amount) > 0
+			else ""
+		)
 
 		if self.write_off_based_on == "Accounts Receivable":
 			return frappe.db.sql(
