@@ -35926,7 +35926,7 @@ msgstr "결제 완료"
 
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/invoicing.json
-msgid "Payment Reconciliaition"
+msgid "Payment Reconciliation"
 msgstr "지불 대조"
 
 #. Name of a DocType

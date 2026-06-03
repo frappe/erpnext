@@ -35895,7 +35895,7 @@ msgstr "crwdns78710:0crwdne78710:0"
 
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/invoicing.json
-msgid "Payment Reconciliaition"
+msgid "Payment Reconciliation"
 msgstr "crwdns195880:0crwdne195880:0"
 
 #. Name of a DocType

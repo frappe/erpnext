@@ -36018,7 +36018,7 @@ msgstr "Plaćanje Primljeno"
 
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/invoicing.json
-msgid "Payment Reconciliaition"
+msgid "Payment Reconciliation"
 msgstr "Usklađivanje Plaćanja"
 
 #. Name of a DocType
