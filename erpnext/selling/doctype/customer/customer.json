@@ -647,11 +647,7 @@
    "link_fieldname": "party"
   }
  ],
-<<<<<<< HEAD
- "modified": "2026-03-09 17:15:26.040050",
-=======
  "modified": "2026-05-29 16:52:59.441272",
->>>>>>> cb84678198 (fix: duplicating a Customer/Supplier shouldn't inherit the source's primary contact and address (#55421))
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
