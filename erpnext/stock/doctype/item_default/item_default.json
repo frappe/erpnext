@@ -5,15 +5,15 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "company_section",
+  "company",
   "from_section",
   "column_break_general",
-  "vf_company",
   "vf_default_warehouse",
   "vf_default_price_list",
   "vf_default_discount_account",
   "vf_default_inventory_account",
   "column_break_njfg",
-  "company",
   "default_warehouse",
   "default_price_list",
   "default_discount_account",
@@ -56,6 +56,10 @@
  ],
  "fields": [
   {
+   "fieldname": "company_section",
+   "fieldtype": "Section Break"
+  },
+  {
    "fieldname": "company",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -68,7 +72,7 @@
    "fieldname": "default_warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Default Warehouse",
+   "label": "Warehouse",
    "options": "Warehouse",
    "search_index": 1
   },
@@ -77,21 +81,21 @@
    "fieldname": "default_price_list",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Default Price List",
+   "label": "Price List",
    "options": "Price List",
    "show_description_on_click": 1
   },
   {
    "fieldname": "default_discount_account",
    "fieldtype": "Link",
-   "label": "Default Discount Account",
+   "label": "Discount Account",
    "options": "Account"
   },
   {
    "description": "Stock account where inventory value for this item will be tracked",
    "fieldname": "default_inventory_account",
    "fieldtype": "Link",
-   "label": "Default Inventory Account",
+   "label": "Inventory Account",
    "options": "Account",
    "show_description_on_click": 1
   },
@@ -106,37 +110,31 @@
   {
    "fieldname": "column_break_general",
    "fieldtype": "Column Break",
-   "label": "From"
-  },
-  {
-   "fieldname": "vf_company",
-   "fieldtype": "Read Only",
-   "is_virtual": 1,
-   "label": "Company"
+   "label": "Inherited Default"
   },
   {
    "fieldname": "vf_default_warehouse",
    "fieldtype": "Read Only",
    "is_virtual": 1,
-   "label": "Default Warehouse"
+   "label": "Warehouse"
   },
   {
    "fieldname": "vf_default_price_list",
    "fieldtype": "Read Only",
    "is_virtual": 1,
-   "label": "Default Price List"
+   "label": "Price List"
   },
   {
    "fieldname": "vf_default_discount_account",
    "fieldtype": "Read Only",
    "is_virtual": 1,
-   "label": "Default Discount Account"
+   "label": "Discount Account"
   },
   {
    "fieldname": "vf_default_inventory_account",
    "fieldtype": "Read Only",
    "is_virtual": 1,
-   "label": "Default Inventory Account"
+   "label": "Inventory Account"
   },
   {
    "fieldname": "purchase_defaults",
@@ -147,7 +145,7 @@
    "description": "Cost center used for tracking purchase expenses for this item",
    "fieldname": "buying_cost_center",
    "fieldtype": "Link",
-   "label": "Default Buying Cost Center",
+   "label": "Buying Cost Center",
    "options": "Cost Center",
    "show_description_on_click": 1
   },
@@ -155,7 +153,7 @@
    "description": "This supplier will be auto-selected in new purchase transactions",
    "fieldname": "default_supplier",
    "fieldtype": "Link",
-   "label": "Default Supplier",
+   "label": "Supplier",
    "options": "Supplier",
    "show_description_on_click": 1
   },
@@ -163,7 +161,7 @@
    "description": "Account where the cost of this item will be debited on purchase",
    "fieldname": "expense_account",
    "fieldtype": "Link",
-   "label": "Default Expense Account",
+   "label": "Expense Account",
    "options": "Account",
    "show_description_on_click": 1
   },
@@ -171,7 +169,7 @@
    "description": "Provisional liability account used for service items before invoice is received",
    "fieldname": "default_provisional_account",
    "fieldtype": "Link",
-   "label": "Default Provisional Account (Service)",
+   "label": "Provisional Account (Service)",
    "options": "Account",
    "show_description_on_click": 1
   },
@@ -199,25 +197,25 @@
    "fieldname": "vf_buying_cost_center",
    "fieldtype": "Read Only",
    "is_virtual": 1,
-   "label": "Default Buying Cost Center"
+   "label": "Buying Cost Center"
   },
   {
    "fieldname": "vf_default_supplier",
    "fieldtype": "Read Only",
    "is_virtual": 1,
-   "label": "Default Supplier"
+   "label": "Supplier"
   },
   {
    "fieldname": "vf_expense_account",
    "fieldtype": "Read Only",
    "is_virtual": 1,
-   "label": "Default Expense Account"
+   "label": "Expense Account"
   },
   {
    "fieldname": "vf_default_provisional_account",
    "fieldtype": "Read Only",
    "is_virtual": 1,
-   "label": "Default Provisional Account (Service)"
+   "label": "Provisional Account (Service)"
   },
   {
    "fieldname": "vf_purchase_expense_account",
@@ -240,7 +238,7 @@
    "description": "Cost center used for tracking sales revenue for this item",
    "fieldname": "selling_cost_center",
    "fieldtype": "Link",
-   "label": "Default Selling Cost Center",
+   "label": "Selling Cost Center",
    "options": "Cost Center",
    "show_description_on_click": 1
   },
@@ -248,7 +246,7 @@
    "description": "Account where revenue from selling this item will be credited",
    "fieldname": "income_account",
    "fieldtype": "Link",
-   "label": "Default Income Account",
+   "label": "Income Account",
    "options": "Account",
    "show_description_on_click": 1
   },
@@ -260,13 +258,13 @@
    "fieldname": "vf_selling_cost_center",
    "fieldtype": "Read Only",
    "is_virtual": 1,
-   "label": "Default Selling Cost Center"
+   "label": "Selling Cost Center"
   },
   {
    "fieldname": "vf_income_account",
    "fieldtype": "Read Only",
    "is_virtual": 1,
-   "label": "Default Income Account"
+   "label": "Income Account"
   },
   {
    "fieldname": "cost_of_good_sold_section",
@@ -277,7 +275,7 @@
    "description": "Account where cost of goods sold will be posted when this item is sold",
    "fieldname": "default_cogs_account",
    "fieldtype": "Link",
-   "label": "Default COGS Account",
+   "label": "COGS Account",
    "options": "Account",
    "show_description_on_click": 1
   },
@@ -289,7 +287,7 @@
    "fieldname": "vf_default_cogs_account",
    "fieldtype": "Read Only",
    "is_virtual": 1,
-   "label": "Default COGS Account"
+   "label": "COGS Account"
   },
   {
    "fieldname": "deferred_accounting_defaults_section",
@@ -300,7 +298,7 @@
    "depends_on": "eval: parent.enable_deferred_expense",
    "fieldname": "deferred_expense_account",
    "fieldtype": "Link",
-   "label": "Deferred Expense Account",
+   "label": "Expense Account",
    "options": "Account",
    "show_description_on_click": 1
   },
@@ -308,7 +306,7 @@
    "depends_on": "eval: parent.enable_deferred_revenue",
    "fieldname": "deferred_revenue_account",
    "fieldtype": "Link",
-   "label": "Deferred Revenue Account",
+   "label": "Revenue Account",
    "options": "Account",
    "show_description_on_click": 1
   },
@@ -358,7 +356,7 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2026-05-18 15:49:21.914437",
+ "modified": "2026-06-03 15:52:38.720333",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Default",

@@ -109,7 +109,6 @@ frappe.ui.form.on("Item Default", {
 		const row = locals[cdt][cdn];
 		if (!row || !row.company) {
 			Object.values(COMPANY_DEFAULTS_TO_VF).forEach((vf) => frappe.model.set_value(cdt, cdn, vf, ""));
-			frappe.model.set_value(cdt, cdn, "vf_company", "");
 			return;
 		}
 
@@ -117,15 +116,7 @@ frappe.ui.form.on("Item Default", {
 			const $grid_row = frm.fields_dict["item_group_defaults"].grid.wrapper.find(
 				`.grid-row[data-name="${cdn}"]`
 			);
-			$grid_row
-				.find(".column-label")
-				.first()
-				.text(row.company ? `${__("From Company")} - ${row.company}` : __("From Company"));
-
-			$grid_row
-				.find(".column-label")
-				.eq(1)
-				.text(`${__("Item Group Override")}`);
+			$grid_row.find(".column-label").eq(1).text(__("Item Group Override"));
 		}, 50);
 
 		const $grid_row = frm.fields_dict["item_group_defaults"].grid.wrapper.find(
@@ -159,19 +150,8 @@ frappe.ui.form.on("Item Default", {
 		const row = locals[cdt][cdn];
 		if (!row || !row.company) {
 			Object.values(COMPANY_DEFAULTS_TO_VF).forEach((vf) => frappe.model.set_value(cdt, cdn, vf, ""));
-			frappe.model.set_value(cdt, cdn, "vf_company", "");
 			return;
 		}
-
-		setTimeout(() => {
-			const $grid_row = frm.fields_dict["item_group_defaults"].grid.wrapper.find(
-				`.grid-row[data-name="${cdn}"]`
-			);
-			$grid_row
-				.find(".column-label")
-				.first()
-				.text(row.company ? `${__("From Company")} - ${row.company}` : __("From Company"));
-		}, 50);
 
 		populate_item_group_company_defaults(frm, cdt, cdn, row);
 	},
@@ -195,14 +175,30 @@ const COMPANY_DEFAULTS_TO_VF = {
 	purchase_expense_contra_account: "vf_purchase_expense_contra_account",
 };
 
-function populate_item_group_company_defaults(frm, cdt, cdn, row) {
-	frappe.model.set_value(cdt, cdn, "vf_company", row.company);
+const FIELD_DEFAULT_SOURCE = {
+	default_warehouse: "Stock Settings",
+	default_inventory_account: "Company",
+	buying_cost_center: "Company",
+	selling_cost_center: "Company",
+	expense_account: "Company",
+	income_account: "Company",
+	default_provisional_account: "Company",
+	purchase_expense_account: "Company",
+	default_cogs_account: "Company",
+	deferred_expense_account: "Company",
+	deferred_revenue_account: "Company",
+	default_price_list: null,
+	default_discount_account: "Company",
+	default_supplier: null,
+	purchase_expense_contra_account: "Company",
+};
 
+function populate_item_group_company_defaults(frm, cdt, cdn, row) {
 	const company = row.company;
 
 	frappe.call({
 		method: "erpnext.setup.doctype.item_group.item_group.get_company_resolved_defaults",
-		args: { company: row.company },
+		args: { company: company },
 		freeze: false,
 		callback: function (r) {
 			if (!r.message) return;
@@ -213,9 +209,30 @@ function populate_item_group_company_defaults(frm, cdt, cdn, row) {
 			const defaults = r.message;
 
 			Object.entries(COMPANY_DEFAULTS_TO_VF).forEach(([key, vf_field]) => {
-				const val = defaults[key] || __("Not configured");
-				frappe.model.set_value(cdt, cdn, vf_field, val);
+				frappe.model.set_value(cdt, cdn, vf_field, defaults[key] || "—");
 			});
+
+			setTimeout(() => update_item_group_vf_labels(frm, cdn, defaults), 50);
 		},
+	});
+}
+
+function update_item_group_vf_labels(frm, cdn, defaults) {
+	const $grid_row = frm.fields_dict["item_group_defaults"].grid.wrapper.find(
+		`.grid-row[data-name="${cdn}"]`
+	);
+	if (!$grid_row.length) return;
+
+	Object.entries(COMPANY_DEFAULTS_TO_VF).forEach(([key, vf_field]) => {
+		const $label = $grid_row.find(`[data-fieldname="${vf_field}"]`).find(".control-label, label").first();
+		if (!$label.length) return;
+
+		if (!$label.data("base-label")) {
+			$label.data("base-label", $label.text().trim());
+		}
+		const base = $label.data("base-label");
+
+		const source = FIELD_DEFAULT_SOURCE[key];
+		$label.text(source ? `${base} (${__(source)})` : base);
 	});
 }

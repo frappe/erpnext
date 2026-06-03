@@ -370,31 +370,14 @@ frappe.ui.form.on("Item Default", {
 		const row = locals[cdt][cdn];
 		if (!row || !row.company) {
 			Object.values(virtual_field_map).forEach((vf) => frappe.model.set_value(cdt, cdn, vf, ""));
-			frappe.model.set_value(cdt, cdn, "vf_company", "");
 			return;
 		}
-
-		setTimeout(() => {
-			const $grid_row = frm.fields_dict["item_defaults"].grid.wrapper.find(
-				`.grid-row[data-name="${cdn}"]`
-			);
-			$grid_row
-				.find(".column-label")
-				.first()
-				.text(
-					frm.doc.item_group
-						? `${__("From Item Group")} - ${frm.doc.item_group}`
-						: __("From Item Group")
-				);
-		}, 50);
 
 		const $grid_row = frm.fields_dict["item_defaults"].grid.wrapper.find(`.grid-row[data-name="${cdn}"]`);
 
 		if ($grid_row.length && !$grid_row.find(".item-defaults-desc").length) {
-			let description = "";
-
-			description = __(
-				"Defaults inherited from the item group appear on the left. Use the right column to override them for this specific item. Leave a field empty to keep the group default."
+			const description = __(
+				"The left column shows the value this item will inherit — from Item Group if set, otherwise from Company. Fields labelled (Company) are falling back to the company default. Leave a field empty on the right to keep the inherited value."
 			);
 
 			$grid_row.find(".grid-form-body").prepend(`
@@ -533,11 +516,8 @@ $.extend(erpnext.item, {
 	populate_virtual_fields: function (frm, cdt, cdn, row) {
 		if (!frm.doc.item_group || !row.company) {
 			Object.values(virtual_field_map).forEach((vf) => frappe.model.set_value(cdt, cdn, vf, ""));
-			frappe.model.set_value(cdt, cdn, "vf_company", "");
 			return;
 		}
-
-		frappe.model.set_value(cdt, cdn, "vf_company", row.company);
 
 		const company = row.company;
 		const item_group = frm.doc.item_group;
@@ -554,17 +534,69 @@ $.extend(erpnext.item, {
 					return;
 
 				const group_defaults =
-					(r.message.item_group_defaults || []).find((d) => d.company === row.company) || {};
+					(r.message.item_group_defaults || []).find((d) => d.company === company) || {};
 
+				// Set Item Group values immediately; collect fields that need company fallback
+				const needs_company_fallback = [];
 				Object.entries(virtual_field_map).forEach(([real_field, vf_field]) => {
-					frappe.model.set_value(
-						cdt,
-						cdn,
-						vf_field,
-						group_defaults[real_field] || __("Not configured")
-					);
+					if (group_defaults[real_field]) {
+						frappe.model.set_value(cdt, cdn, vf_field, group_defaults[real_field]);
+					} else {
+						frappe.model.set_value(cdt, cdn, vf_field, "");
+						needs_company_fallback.push(real_field);
+					}
+				});
+
+				if (!needs_company_fallback.length) {
+					setTimeout(() => erpnext.item.update_vf_labels(frm, cdn, {}), 50);
+					return;
+				}
+				frappe.call({
+					method: "erpnext.setup.doctype.item_group.item_group.get_company_resolved_defaults",
+					args: { company: company },
+					freeze: false,
+					callback: function (cr) {
+						const current_row = locals[cdt][cdn];
+						if (
+							!current_row ||
+							current_row.company !== company ||
+							frm.doc.item_group !== item_group
+						)
+							return;
+
+						const company_defaults = cr.message || {};
+						const from_company = {};
+
+						needs_company_fallback.forEach((real_field) => {
+							const val = company_defaults[real_field] || "";
+							if (val) from_company[real_field] = val;
+							frappe.model.set_value(cdt, cdn, virtual_field_map[real_field], val || "—");
+						});
+
+						setTimeout(() => erpnext.item.update_vf_labels(frm, cdn, from_company), 50);
+					},
 				});
 			},
+		});
+	},
+
+	update_vf_labels: function (frm, cdn, from_company) {
+		const $grid_row = frm.fields_dict["item_defaults"].grid.wrapper.find(`.grid-row[data-name="${cdn}"]`);
+		if (!$grid_row.length) return;
+
+		Object.entries(virtual_field_map).forEach(([real_field, vf_field]) => {
+			const $label = $grid_row
+				.find(`[data-fieldname="${vf_field}"]`)
+				.find(".control-label, label")
+				.first();
+			if (!$label.length) return;
+
+			if (!$label.data("base-label")) {
+				$label.data("base-label", $label.text().trim());
+			}
+			const base = $label.data("base-label");
+
+			$label.text(from_company[real_field] ? `${base} (Company)` : `${base} (Item Group)`);
 		});
 	},
 
