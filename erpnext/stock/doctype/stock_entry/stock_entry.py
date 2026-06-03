@@ -278,6 +278,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.calculate_rate_and_amount()
 		self.validate_putaway_capacity()
 		self.validate_component_and_quantities()
+		self.validate_finished_good_serial_batch_for_work_order()
 
 		if self.get("purpose") != "Manufacture":
 			# ignore other item wh difference and empty source/target wh
@@ -291,7 +292,86 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.validate_subcontract_order()
 		self.validate_raw_materials_exists()
 
+<<<<<<< HEAD
 		super().validate_subcontracting_inward()
+=======
+	def validate_finished_good_serial_batch_for_work_order(self):
+		if not (
+			self.work_order
+			and self.pro_doc
+			and self.pro_doc.get("track_semi_finished_goods") != 1
+			and cint(
+				frappe.db.get_single_value(
+					"Manufacturing Settings", "make_serial_no_batch_from_work_order", cache=True
+				)
+			)
+			and (self.pro_doc.has_serial_no or self.pro_doc.has_batch_no)
+		):
+			return
+
+		for row in self.items:
+			if not row.is_finished_item:
+				continue
+
+			if self.check_invalid_serial_batch_nos_for_finished_good_item(row):
+				self.reset_serial_batch_on_fg_row(row)
+				frappe.msgprint(
+					_(
+						"Row {0}: Serial/Batch has been reset to values linked with Work Order {1}"
+						" because the previously selected serial/batch does not belong to this Work Order."
+					).format(row.idx, frappe.bold(self.work_order))
+				)
+
+	def check_invalid_serial_batch_nos_for_finished_good_item(self, row) -> bool:
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		from erpnext.stock.serial_batch_bundle import get_batches_from_bundle, get_serial_nos_from_bundle
+
+		if self.pro_doc.has_serial_no:
+			serial_nos = get_serial_nos(row.serial_no) if row.serial_no else []
+			if not serial_nos and row.serial_and_batch_bundle:
+				serial_nos = get_serial_nos_from_bundle(row.serial_and_batch_bundle)
+			if serial_nos:
+				valid_serial_nos = frappe.get_all(
+					"Serial No",
+					filters={"name": ("in", serial_nos), "work_order": self.work_order},
+					pluck="name",
+				)
+				return bool(set(serial_nos) - set(valid_serial_nos))
+			else:
+				return True
+
+		if self.pro_doc.has_batch_no:
+			batch_nos = [row.batch_no] if row.batch_no else []
+			if not batch_nos and row.serial_and_batch_bundle:
+				batch_nos = list(get_batches_from_bundle(row.serial_and_batch_bundle).keys())
+			if batch_nos:
+				valid_batch_nos = frappe.get_all(
+					"Batch",
+					filters={"name": ("in", batch_nos), "reference_name": self.work_order},
+					pluck="name",
+				)
+				return bool(set(batch_nos) - set(valid_batch_nos))
+			else:
+				return True
+
+	def reset_serial_batch_on_fg_row(self, row):
+		item_details = frappe._dict(
+			{
+				"item_code": row.item_code,
+				"t_warehouse": row.t_warehouse,
+				"qty": row.qty,
+			}
+		)
+
+		row.serial_no = None
+		row.batch_no = None
+		row.serial_and_batch_bundle = None
+
+		if self.pro_doc.has_serial_no:
+			self.set_serial_no_batch_for_finished_good()
+		elif self.pro_doc.has_batch_no:
+			self.set_batchwise_finished_goods(item_details, None, existing_row=row)
+>>>>>>> 6d3f9d3c6f (fix(stock): add validation for work order seial nos and batch nos)
 
 	def validate_repack_entry(self):
 		if self.purpose != "Repack":
@@ -2915,15 +2995,16 @@ class StockEntry(StockController, SubcontractingInwardController):
 		else:
 			self.add_finished_goods(args, item)
 
-	def set_batchwise_finished_goods(self, args, item):
+	def set_batchwise_finished_goods(self, args, item, existing_row=None):
 		batches = get_empty_batches_based_work_order(self.work_order, self.pro_doc.production_item)
 
 		if not batches:
-			self.add_finished_goods(args, item)
+			if not existing_row:
+				self.add_finished_goods(args, item)
 		else:
-			self.add_batchwise_finished_good(batches, args, item)
+			self.add_batchwise_finished_good(batches, args, item, existing_row=existing_row)
 
-	def add_batchwise_finished_good(self, batches, args, item):
+	def add_batchwise_finished_good(self, batches, args, item, existing_row=None):
 		qty = flt(self.fg_completed_qty)
 		row = frappe._dict({"batches_to_be_consume": defaultdict(float)})
 
@@ -2932,7 +3013,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if not row.batches_to_be_consume:
 			return
 
-		id = create_serial_and_batch_bundle(
+		_id = create_serial_and_batch_bundle(
 			self,
 			row,
 			frappe._dict(
@@ -2942,9 +3023,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 				}
 			),
 		)
-
-		args["serial_and_batch_bundle"] = id
-		self.add_finished_goods(args, item)
+		if existing_row:
+			existing_row.serial_and_batch_bundle = _id
+			existing_row.use_serial_batch_fields = 0
+		else:
+			args["serial_and_batch_bundle"] = _id
+			args["use_serial_batch_fields"] = 0
+			self.add_finished_goods(args, item)
 
 	def add_finished_goods(self, args, item):
 		self.add_to_stock_entry_detail({item.name: args}, bom_no=self.bom_no)
