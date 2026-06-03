@@ -570,6 +570,17 @@
 			"account_number": "5000",
 			"is_group": 1,
 			"root_type": "Expense",
+			"Cost of Goods Sold": {
+				"account_number": "5001",
+				"is_group": 1,
+				"root_type": "Expense",
+				"Cost of Goods Sold": {
+					"account_number": "5010",
+					"is_group": 0,
+					"root_type": "Expense",
+					"account_type": "Cost of Goods Sold"
+				}
+			},
 			"Operating Expenses": {
 				"account_number": "5100",
 				"is_group": 1,
