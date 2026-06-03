@@ -254,6 +254,10 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		self.assertEqual(pos_return.get("payments")[1].amount, -500)
 
 	def test_pos_return_with_negative_rounding(self):
+		"""
+		Test that POS invoice returns process correctly with negative rounding adjustments,
+		ensuring the validation loop does not crash on absolute values.
+		"""
 		# 1. Create a POS Invoice that requires negative rounding 
 		# (Grand Total is 100.05, but user pays exactly 100.00)
 		pos = create_pos_invoice(qty=1, rate=100.05, do_not_save=True)
@@ -269,14 +273,15 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		
 		# Before your -abs() fix, this insert() would crash with a Validation Error
 		pos_return.insert()
+		pos_return.submit() # Added to satisfy the full document lifecycle
 
 		# 3. Assert the fix works
 		self.assertEqual(pos_return.is_return, 1)
+		self.assertEqual(pos_return.docstatus, 1) # Added to verify submitted state
 		
 		# Verify that all returned payment amounts are strictly negative or zero
 		for payment in pos_return.get("payments"):
-			self.assertLessEqual(payment.amount, 0)
-			
+			self.assertLessEqual(payment.amount, 0)			
 
 	def test_pos_return_for_serialized_item(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
