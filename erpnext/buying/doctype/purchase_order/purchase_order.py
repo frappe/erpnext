@@ -485,12 +485,8 @@ class PurchaseOrder(BuyingController):
 			self.set_received_qty_to_zero_for_drop_ship_items()
 			self.update_receiving_percentage()
 
-<<<<<<< HEAD
 		self.update_reserved_qty_for_subcontract()
-		self.check_on_hold_or_closed_status()
-=======
 		self.check_for_on_hold_or_closed_status("Material Request", "material_request")
->>>>>>> 5074597d00 (perf: batch status check for on-hold/closed documents, remove N+1 queries (#54798))
 
 		self.db_set("status", "Cancelled")
 
