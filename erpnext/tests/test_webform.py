@@ -29,12 +29,12 @@ class TestWebsite(ERPNextTestSuite):
 
 		with self.set_user("supplier1@gmail.com"):
 			# checking if data only consist of order assignment of Supplier1
-			self.assertTrue("Supplier1" in [data.supplier for data in get_data()])
+			self.assertIn("Supplier1", [data.supplier for data in get_data()])
 			self.assertFalse([data.supplier for data in get_data() if data.supplier != "Supplier1"])
 
 		with self.set_user("supplier2@gmail.com"):
 			# checking if data only consist of order assignment of Supplier2
-			self.assertTrue("Supplier2" in [data.supplier for data in get_data()])
+			self.assertIn("Supplier2", [data.supplier for data in get_data()])
 			self.assertFalse([data.supplier for data in get_data() if data.supplier != "Supplier2"])
 
 

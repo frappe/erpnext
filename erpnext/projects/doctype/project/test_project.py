@@ -152,7 +152,7 @@ class TestProject(ERPNextTestSuite):
 
 		self.assertEqual(tasks[1].subject, "Test Template Task with Dependency")
 		self.assertEqual(getdate(tasks[1].exp_end_date), calculate_end_date(project, 2, 2))
-		self.assertTrue(tasks[1].depends_on_tasks.find(tasks[0].name) >= 0)
+		self.assertGreaterEqual(tasks[1].depends_on_tasks.find(tasks[0].name), 0)
 
 		self.assertEqual(tasks[0].subject, "Test Template Task for Dependency")
 		self.assertEqual(getdate(tasks[0].exp_end_date), calculate_end_date(project, 3, 1))

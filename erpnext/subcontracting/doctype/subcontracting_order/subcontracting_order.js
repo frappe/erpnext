@@ -577,7 +577,7 @@ frappe.ui.form.on("Subcontracting Order", {
 	},
 
 	get_materials_from_supplier: function (frm) {
-		let sco_rm_details = [];
+		const sco_rm_details = [];
 
 		if (frm.doc.status != "Closed" && frm.doc.supplied_items) {
 			frm.doc.supplied_items.forEach((d) => {
@@ -591,21 +591,16 @@ frappe.ui.form.on("Subcontracting Order", {
 			frm.add_custom_button(
 				__("Return of Components"),
 				() => {
-					frm.call({
+					frappe.model.open_mapped_doc({
 						method: "erpnext.controllers.subcontracting_controller.get_materials_from_supplier",
-						freeze: true,
-						freeze_message: __("Creating Stock Entry"),
+						frm: frm,
 						args: {
 							subcontract_order: frm.doc.name,
 							rm_details: sco_rm_details,
-							order_doctype: cur_frm.doc.doctype,
+							order_doctype: frm.doc.doctype,
 						},
-						callback: function (r) {
-							if (r && r.message) {
-								const doc = frappe.model.sync(r.message);
-								frappe.set_route("Form", doc[0].doctype, doc[0].name);
-							}
-						},
+						freeze: true,
+						freeze_message: __("Creating Return of Components ..."),
 					});
 				},
 				__("Create")

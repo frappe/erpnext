@@ -29,7 +29,7 @@ from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger 
 )
 from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import SalesTaxWithholding
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
-from erpnext.accounts.party import get_due_date, get_party_account, get_party_details
+from erpnext.accounts.party import _get_party_details, get_due_date, get_party_account
 from erpnext.accounts.utils import (
 	get_account_currency,
 	update_voucher_outstanding,
@@ -3042,7 +3042,7 @@ def update_taxes(
 	master_doctype=None,
 ):
 	# Update Party Details
-	party_details = get_party_details(
+	party_details = _get_party_details(
 		party=party,
 		party_type=party_type,
 		company=company,

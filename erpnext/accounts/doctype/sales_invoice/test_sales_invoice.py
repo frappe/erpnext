@@ -881,7 +881,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		link_doctypes = [d.parent for d in link_data]
 
 		# test case for dynamic link order
-		self.assertTrue(link_doctypes.index("GL Entry") > link_doctypes.index("Journal Entry Account"))
+		self.assertGreater(link_doctypes.index("GL Entry"), link_doctypes.index("Journal Entry Account"))
 
 		jv.cancel()
 		self.assertEqual(frappe.db.get_value("Sales Invoice", w.name, "outstanding_amount"), 562.0)
@@ -3517,7 +3517,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		with self.assertRaises(frappe.ValidationError) as err:
 			si.save()
 
-		self.assertTrue("cannot overbill" in str(err.exception).lower())
+		self.assertIn("cannot overbill", str(err.exception).lower())
 		dn.cancel()
 
 	@ERPNextTestSuite.change_settings(
@@ -3630,9 +3630,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 			with self.assertRaises(frappe.ValidationError) as err:
 				si.submit()
 
-			self.assertTrue(
-				"Cannot create accounting entries against disabled accounts" in str(err.exception)
-			)
+			self.assertIn("Cannot create accounting entries against disabled accounts", str(err.exception))
 
 		finally:
 			account.disabled = 0
@@ -3727,7 +3725,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		return_si = make_return_doc(si.doctype, si.name)
 		return_si.save().submit()
 
-		self.assertTrue(return_si.docstatus == 1)
+		self.assertEqual(return_si.docstatus, 1)
 
 	def test_sales_invoice_with_payable_tax_account(self):
 		si = create_sales_invoice(do_not_submit=True)

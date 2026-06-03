@@ -2077,7 +2077,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		return_pi = make_return_doc(pi.doctype, pi.name)
 		return_pi.save().submit()
 
-		self.assertTrue(return_pi.docstatus == 1)
+		self.assertEqual(return_pi.docstatus, 1)
 
 	def test_advance_entries_as_asset(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry

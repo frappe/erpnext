@@ -100,14 +100,14 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 			repost_doc.db_update_all()
 
 		logs = frappe.get_all("Repost Item Valuation", filters={"status": "Skipped"})
-		self.assertTrue(len(logs) > 10)
+		self.assertGreater(len(logs), 10)
 
 		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import RepostItemValuation
 
 		RepostItemValuation.clear_old_logs(days=1)
 
 		logs = frappe.get_all("Repost Item Valuation", filters={"status": "Skipped"})
-		self.assertTrue(len(logs) == 0)
+		self.assertEqual(len(logs), 0)
 
 	def test_create_item_wise_repost_item_valuation_entries(self):
 		pr = make_purchase_receipt(
@@ -379,13 +379,13 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 			get_multiple_items=True,
 		)
 
-		self.assertTrue(pr.docstatus == 1)
+		self.assertEqual(pr.docstatus, 1)
 		self.assertFalse(frappe.db.exists("Repost Item Valuation", {"voucher_no": pr.name}))
 
 		pr.load_from_db()
 
 		pr.cancel()
-		self.assertTrue(pr.docstatus == 2)
+		self.assertEqual(pr.docstatus, 2)
 		self.assertTrue(frappe.db.exists("Repost Item Valuation", {"voucher_no": pr.name}))
 
 	def test_repost_item_valuation_for_closing_stock_balance(self):

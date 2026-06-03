@@ -31,7 +31,6 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_entry import test_stock_entry
-from erpnext.stock.doctype.stock_entry.stock_entry_handler.manufacturing import ManufactureStockEntry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.utils import get_bin
 from erpnext.tests.utils import ERPNextTestSuite
@@ -807,7 +806,7 @@ class TestWorkOrder(ERPNextTestSuite):
 
 				bundle_id = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
 				for bundle_row in bundle_id.get("entries"):
-					self.assertTrue(bundle_row.batch_no in batches)
+					self.assertIn(bundle_row.batch_no, batches)
 					batches.remove(bundle_row.batch_no)
 
 		ste1.submit()
@@ -821,7 +820,7 @@ class TestWorkOrder(ERPNextTestSuite):
 
 				bundle_id = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
 				for bundle_row in bundle_id.get("entries"):
-					self.assertTrue(bundle_row.batch_no in batches)
+					self.assertIn(bundle_row.batch_no, batches)
 					remaining_batches.append(bundle_row.batch_no)
 
 		self.assertEqual(sorted(remaining_batches), sorted(batches))
@@ -1096,7 +1095,7 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
 		for row in stock_entry.items:
-			if row.type or row.is_legacy_scrap_item:
+			if row.secondary_item_type or row.is_legacy_scrap_item:
 				self.assertEqual(row.qty, 1)
 
 		# Partial Job Card 1 with qty 10
@@ -1108,7 +1107,7 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
 		for row in stock_entry.items:
-			if row.type or row.is_legacy_scrap_item:
+			if row.secondary_item_type or row.is_legacy_scrap_item:
 				self.assertEqual(row.qty, 2)
 
 		# Partial Job Card 2 with qty 10
@@ -2193,7 +2192,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertTrue(se_doc.additional_costs)
 		secondary_items = []
 		for item in se_doc.items:
-			if item.type or item.is_legacy_scrap_item:
+			if item.secondary_item_type or item.is_legacy_scrap_item:
 				secondary_items.append(item.item_code)
 
 		self.assertEqual(
@@ -2658,7 +2657,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		# Secondary/Scrap item: should be taken from scrap warehouse in disassembly
 		scrap_row = next((i for i in stock_entry.items if i.item_code == scrap_item), None)
 		self.assertIsNotNone(scrap_row)
-		self.assertEqual(scrap_row.type, "Scrap")
+		self.assertEqual(scrap_row.secondary_item_type, "Scrap")
 		self.assertTrue(scrap_row.s_warehouse)
 		self.assertFalse(scrap_row.t_warehouse)
 		self.assertEqual(scrap_row.s_warehouse, wo.scrap_warehouse)
@@ -3173,12 +3172,12 @@ class TestWorkOrder(ERPNextTestSuite):
 		transfer_entry.items[0].original_item = raw_materials[0]
 		transfer_entry.submit()
 
-		self.assertTrue(transfer_entry.docstatus == 1)
+		self.assertEqual(transfer_entry.docstatus, 1)
 
 		manufacture_entry = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 10))
 		manufacture_entry.save()
-		self.assertTrue(manufacture_entry.items[0].item_code == alternate_item[0])
-		self.assertTrue(manufacture_entry.items[0].original_item == raw_materials[0])
+		self.assertEqual(manufacture_entry.items[0].item_code, alternate_item[0])
+		self.assertEqual(manufacture_entry.items[0].original_item, raw_materials[0])
 
 		manufacture_entry.submit()
 
@@ -3882,7 +3881,7 @@ class TestWorkOrder(ERPNextTestSuite):
 				self.assertEqual(sorted(serial_nos), sorted(value.serial_nos))
 
 			if value.batch_nos:
-				self.assertTrue(row.batch_no in value.batch_nos)
+				self.assertIn(row.batch_no, value.batch_nos)
 
 		_before_reserved_item = get_reserved_entries(wo.name, mt_stock_entry.items[0].t_warehouse)
 
@@ -3898,16 +3897,16 @@ class TestWorkOrder(ERPNextTestSuite):
 			if row.serial_no:
 				serial_nos = get_serial_nos_from_bundle(row.serial_and_batch_bundle)
 				for sn in serial_nos:
-					self.assertTrue(sn in value.serial_nos)
+					self.assertIn(sn, value.serial_nos)
 					value.serial_nos.remove(sn)
 
 			if row.batch_no:
-				self.assertTrue(row.batch_no in value.batch_nos)
+				self.assertIn(row.batch_no, value.batch_nos)
 				value.batch_nos[row.batch_no] -= row.qty
 				if row.serial_no:
 					sns = get_serial_nos_from_bundle(row.serial_and_batch_bundle)
 					for sn in sns:
-						self.assertTrue(sn in value.serial_batches[row.batch_no])
+						self.assertIn(sn, value.serial_batches[row.batch_no])
 						value.serial_batches[row.batch_no].remove(sn)
 
 		# Manufacture 3 qty
@@ -3925,7 +3924,7 @@ class TestWorkOrder(ERPNextTestSuite):
 				self.assertEqual(sorted(serial_nos), sorted(value.serial_nos))
 
 			if row.batch_no:
-				self.assertTrue(row.batch_no in value.batch_nos)
+				self.assertIn(row.batch_no, value.batch_nos)
 				self.assertEqual(value.batch_nos[row.batch_no], row.qty)
 				if row.serial_no:
 					sns = get_serial_nos_from_bundle(row.serial_and_batch_bundle)

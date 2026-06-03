@@ -307,7 +307,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 		returned_serial_nos1 = get_serial_nos_from_bundle(dn1.items[0].serial_and_batch_bundle)
 		for serial_no in returned_serial_nos1:
-			self.assertTrue(serial_no in serial_nos)
+			self.assertIn(serial_no, serial_nos)
 
 		dn2 = make_sales_return(dn.name)
 
@@ -318,8 +318,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 		returned_serial_nos2 = get_serial_nos_from_bundle(dn2.items[0].serial_and_batch_bundle)
 		for serial_no in returned_serial_nos2:
-			self.assertTrue(serial_no in serial_nos)
-			self.assertFalse(serial_no in returned_serial_nos1)
+			self.assertIn(serial_no, serial_nos)
+			self.assertNotIn(serial_no, returned_serial_nos1)
 
 	def test_sales_return_for_non_bundled_items_partial(self):
 		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
@@ -1557,7 +1557,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		return_dn = make_return_doc(dn.doctype, dn.name)
 		return_dn.save().submit()
 
-		self.assertTrue(return_dn.docstatus == 1)
+		self.assertEqual(return_dn.docstatus, 1)
 
 	def test_reserve_qty_on_sales_return(self):
 		frappe.db.set_single_value("Selling Settings", "dont_reserve_sales_order_qty_on_sales_return", 0)
@@ -2772,7 +2772,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 			doc = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
 			for entry in doc.entries:
 				if entry.serial_no:
-					self.assertTrue(entry.serial_no in serial_batch_map[row.item_code].serial_nos)
+					self.assertIn(entry.serial_no, serial_batch_map[row.item_code].serial_nos)
 					self.assertEqual(
 						entry.incoming_rate,
 						serial_batch_map[row.item_code].serial_no_valuation[entry.serial_no],
@@ -2782,7 +2782,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 				elif entry.batch_no:
 					serial_batch_map[row.item_code].batches[entry.batch_no] += entry.qty
-					self.assertTrue(entry.batch_no in serial_batch_map[row.item_code].batches)
+					self.assertIn(entry.batch_no, serial_batch_map[row.item_code].batches)
 					self.assertEqual(entry.qty, 2.0)
 					self.assertEqual(
 						entry.incoming_rate,
@@ -2798,7 +2798,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 			doc = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
 			for entry in doc.entries:
 				if entry.serial_no:
-					self.assertTrue(entry.serial_no in serial_batch_map[row.item_code].serial_nos)
+					self.assertIn(entry.serial_no, serial_batch_map[row.item_code].serial_nos)
 					self.assertEqual(
 						entry.incoming_rate,
 						serial_batch_map[row.item_code].serial_no_valuation[entry.serial_no],
@@ -2810,7 +2810,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 					serial_batch_map[row.item_code].batches[entry.batch_no] += entry.qty
 					self.assertEqual(serial_batch_map[row.item_code].batches[entry.batch_no], 0.0)
 
-					self.assertTrue(entry.batch_no in serial_batch_map[row.item_code].batches)
+					self.assertIn(entry.batch_no, serial_batch_map[row.item_code].batches)
 
 					self.assertEqual(entry.qty, 3.0)
 					self.assertEqual(

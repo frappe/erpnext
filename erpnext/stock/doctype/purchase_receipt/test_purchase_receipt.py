@@ -1145,7 +1145,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		new_cost = frappe.db.get_value("Serial and Batch Bundle", new_inward_sabb[0], "total_amount")
 		self.assertEqual(new_cost, original_cost + 100)
 
-		self.assertTrue(new_inward_sabb[0] == inward_sabb[0])
+		self.assertEqual(new_inward_sabb[0], inward_sabb[0])
 
 	def test_stock_transfer_from_purchase_receipt_with_valuation(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
@@ -1797,7 +1797,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		return_pi = make_return_doc(pi.doctype, pi.name)
 		return_pi.save().submit()
 
-		self.assertTrue(return_pi.docstatus == 1)
+		self.assertEqual(return_pi.docstatus, 1)
 
 	def test_disable_last_purchase_rate(self):
 		from erpnext.stock.get_item_details import ItemDetailsCtx, get_item_details
@@ -2504,7 +2504,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		sbb_doc = frappe.get_doc("Serial and Batch Bundle", pr.items[0].serial_and_batch_bundle)
 
 		for row in sbb_doc.entries:
-			self.assertTrue(row.serial_no in serial_nos)
+			self.assertIn(row.serial_no, serial_nos)
 
 		serial_nos.remove("SNU-TSFISI-000015")
 
@@ -2537,7 +2537,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		serial_no_status = frappe.db.get_value("Serial No", "SNU-TSFISI-000015", "status")
 
-		self.assertTrue(serial_no_status != "Active")
+		self.assertNotEqual(serial_no_status, "Active")
 
 		dn = create_delivery_note(
 			item_code=item_code,
@@ -2550,11 +2550,11 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(dn.items[0].qty, 4)
 		doc = frappe.get_doc("Serial and Batch Bundle", dn.items[0].serial_and_batch_bundle)
 		for row in doc.entries:
-			self.assertTrue(row.serial_no in new_serial_nos)
+			self.assertIn(row.serial_no, new_serial_nos)
 
 		for sn in new_serial_nos:
 			serial_no_status = frappe.db.get_value("Serial No", sn, "status")
-			self.assertTrue(serial_no_status != "Active")
+			self.assertNotEqual(serial_no_status, "Active")
 
 		frappe.db.set_single_value(
 			"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle", 1
@@ -2965,7 +2965,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 					serial_no_details = frappe.db.get_value(
 						"Serial No", sn, ["status", "warehouse"], as_dict=1
 					)
-					self.assertTrue(serial_no_details.status == "Active")
+					self.assertEqual(serial_no_details.status, "Active")
 					self.assertEqual(serial_no_details.warehouse, "Work In Progress - TCP1")
 
 		inter_transfer_dn_return = make_return_doc("Delivery Note", inter_transfer_dn.name)
@@ -3104,7 +3104,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 					serial_no_details = frappe.db.get_value(
 						"Serial No", sn, ["status", "warehouse"], as_dict=1
 					)
-					self.assertTrue(serial_no_details.status == "Active")
+					self.assertEqual(serial_no_details.status, "Active")
 					self.assertEqual(serial_no_details.warehouse, "Work In Progress - TCP1")
 
 		inter_transfer_dn_return = make_return_doc("Delivery Note", inter_transfer_dn.name)
@@ -4236,7 +4236,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		serial_no = get_serial_nos_from_bundle(pr.items[0].serial_and_batch_bundle)[0]
 
 		status = frappe.db.get_value("Serial No", serial_no, "status")
-		self.assertTrue(status == "Active")
+		self.assertEqual(status, "Active")
 
 		make_stock_entry(
 			item_code=item_code,
@@ -4247,7 +4247,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 
 		status = frappe.db.get_value("Serial No", serial_no, "status")
-		self.assertFalse(status == "Active")
+		self.assertNotEqual(status, "Active")
 
 		pr = make_purchase_receipt(
 			item_code=item_code, qty=1, rate=100, use_serial_batch_fields=1, do_not_submit=1
@@ -4759,8 +4759,8 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		gl_entries = get_gl_entries(pr.doctype, pr.name)
 		accounts = [d.account for d in gl_entries]
-		self.assertTrue(expense_account in accounts)
-		self.assertTrue(expense_contra_account in accounts)
+		self.assertIn(expense_account, accounts)
+		self.assertIn(expense_contra_account, accounts)
 
 		for row in gl_entries:
 			if row.account == expense_account:
@@ -4798,7 +4798,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		gl_entries = get_gl_entries(se.doctype, se.name)
 		for row in gl_entries:
-			self.assertTrue(row.account in ["Stock In Hand - TCP1", "Stock Adjustment - TCP1"])
+			self.assertIn(row.account, ["Stock In Hand - TCP1", "Stock Adjustment - TCP1"])
 
 		se.items[0].db_set("expense_account", account)
 		se.reload()
@@ -4820,7 +4820,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		gl_entries = get_gl_entries(se.doctype, se.name)
 		for row in gl_entries:
-			self.assertTrue(row.account in ["Stock In Hand - TCP1", account])
+			self.assertIn(row.account, ["Stock In Hand - TCP1", account])
 
 	def test_lcv_for_repack_entry(self):
 		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
@@ -5056,7 +5056,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		doc.db_set("use_batchwise_valuation", 0)
 		doc.reload()
 
-		self.assertTrue(doc.use_batchwise_valuation == 0)
+		self.assertEqual(doc.use_batchwise_valuation, 0)
 
 		doc = frappe.new_doc("Batch")
 		doc.update(
@@ -5066,7 +5066,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			}
 		).insert()
 
-		self.assertTrue(doc.use_batchwise_valuation == 1)
+		self.assertEqual(doc.use_batchwise_valuation, 1)
 
 		warehouse = "_Test Warehouse - _TC"
 		make_stock_entry(
@@ -5458,7 +5458,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(pr.conversion_rate, 80)
 
 		gl_entries = get_gl_entries(pr.doctype, pr.name)
-		self.assertTrue(len(gl_entries) == 2)
+		self.assertEqual(len(gl_entries), 2)
 		for row in gl_entries:
 			amount = row.credit or row.debit
 			self.assertEqual(amount, 8000.0)
@@ -5471,13 +5471,13 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pi.submit()
 
 		gl_entries = get_gl_entries(pi.doctype, pi.name)
-		self.assertTrue(len(gl_entries) == 2)
+		self.assertEqual(len(gl_entries), 2)
 
 		accounts = ["USD Party Account Creditors - TCP1", "Stock Received But Not Billed - TCP1"]
 		for row in gl_entries:
 			amount = row.credit or row.debit
 			self.assertEqual(amount, 9000.0)
-			self.assertTrue(row.account in accounts)
+			self.assertIn(row.account, accounts)
 
 		frappe.db.set_single_value(
 			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", original_value

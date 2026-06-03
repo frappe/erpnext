@@ -50,7 +50,7 @@ class Supplier(TransactionBase):
 		disabled: DF.Check
 		email_id: DF.ReadOnly | None
 		gender: DF.Link | None
-		hold_type: DF.Literal["", "All", "Invoices", "Payments"]
+		hold_type: DF.Literal["All", "Invoices", "Payments"]
 		image: DF.AttachImage | None
 		is_frozen: DF.Check
 		is_internal_supplier: DF.Check
@@ -88,7 +88,6 @@ class Supplier(TransactionBase):
 
 	def before_save(self):
 		if not self.on_hold:
-			self.hold_type = ""
 			self.release_date = ""
 		elif self.on_hold and not self.hold_type:
 			self.hold_type = "All"

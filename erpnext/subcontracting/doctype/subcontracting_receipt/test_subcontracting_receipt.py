@@ -1220,7 +1220,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr.get_secondary_items()
 
 		scr_secondary_items = set(
-			[item.item_code for item in scr.items if item.type or item.is_legacy_scrap_item]
+			[item.item_code for item in scr.items if item.secondary_item_type or item.is_legacy_scrap_item]
 		)
 		self.assertEqual(len(scr.items), 3)  # 1 FG Item + 2 Scrap Items
 		self.assertEqual(scr_secondary_items, set(secondary_items))
@@ -1311,7 +1311,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		# Step - 8: Cancel Subcontracting Receipt
 		scr.cancel()
-		self.assertTrue(scr.docstatus == 2)
+		self.assertEqual(scr.docstatus, 2)
 
 	def test_subcontract_return_from_rejected_warehouse(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse

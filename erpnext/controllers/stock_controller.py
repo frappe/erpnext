@@ -1442,7 +1442,7 @@ class StockController(AccountsController):
 			elif self.doctype == "Stock Entry" and row.t_warehouse:
 				qi_required = True  # inward stock needs inspection
 
-			if row.get("type") or row.get("is_legacy_scrap_item"):
+			if row.get("secondary_item_type") or row.get("is_legacy_scrap_item"):
 				continue
 
 			if qi_required:  # validate row only if inspection is required on item level
@@ -2113,7 +2113,7 @@ def repost_required_for_queue(doc: StockController) -> bool:
 
 
 @frappe.whitelist()
-def check_item_quality_inspection(doctype: str, items: str | list[dict]):
+def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str | list[dict]):
 	if isinstance(items, str):
 		items = json.loads(items)
 
@@ -2125,13 +2125,30 @@ def check_item_quality_inspection(doctype: str, items: str | list[dict]):
 		"Delivery Note": "inspection_required_before_delivery",
 	}
 
-	items_to_remove = []
-	for item in items:
-		if not frappe.db.get_value("Item", item.get("item_code"), inspection_fieldname_map.get(doctype)):
-			items_to_remove.append(item)
-	items = [item for item in items if item not in items_to_remove]
+	inspection_fieldname = inspection_fieldname_map.get(doctype)
+	if inspection_fieldname is None:
+		return []
 
-	return items
+	allow_after_transaction = cint(docstatus) == 1 and frappe.get_single_value(
+		"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"
+	)
+
+	if allow_after_transaction:
+		return items
+
+	item_codes = list({item.get("item_code") for item in items})
+
+	Item = frappe.qb.DocType("Item")
+	results = (
+		frappe.qb.from_(Item)
+		.select(Item.name)
+		.where((Item.name.isin(item_codes)) & (Item[inspection_fieldname] == 1))
+		.run(as_dict=True)
+	)
+
+	inspection_required_items = {row.name for row in results}
+
+	return [item for item in items if item.get("item_code") in inspection_required_items]
 
 
 @frappe.whitelist()

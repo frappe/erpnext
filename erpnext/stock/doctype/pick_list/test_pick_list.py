@@ -876,7 +876,7 @@ class TestPickList(ERPNextTestSuite):
 			)
 
 			for d in data:
-				self.assertTrue(d.batch_no in ["PICKLT-000001", "PICKLT-000002"])
+				self.assertIn(d.batch_no, ["PICKLT-000001", "PICKLT-000002"])
 				if d.batch_no == "PICKLT-000001":
 					self.assertEqual(d.qty, 5.0 * -1)
 				elif d.batch_no == "PICKLT-000002":
@@ -927,7 +927,7 @@ class TestPickList(ERPNextTestSuite):
 
 			self.assertEqual(len(data), 10)
 			for d in data:
-				self.assertTrue(d.serial_no not in picked_serial_nos)
+				self.assertNotIn(d.serial_no, picked_serial_nos)
 
 		pl1.cancel()
 		pl.cancel()
@@ -1311,7 +1311,7 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(len(new_serial_nos), 110)
 
 		for sn in serial_nos:
-			self.assertFalse(sn in new_serial_nos)
+			self.assertNotIn(sn, new_serial_nos)
 
 		pl1.submit()
 
@@ -1765,5 +1765,5 @@ class TestPickList(ERPNextTestSuite):
 			else:
 				self.assertEqual(doc.shipping_address_name, customer_shipping_address_1.name)
 				item_codes = [item.item_code for item in doc.items]
-				self.assertTrue(item1 in item_codes)
-				self.assertTrue(item2 in item_codes)
+				self.assertIn(item1, item_codes)
+				self.assertIn(item2, item_codes)

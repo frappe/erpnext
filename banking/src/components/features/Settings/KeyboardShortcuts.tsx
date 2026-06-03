@@ -4,7 +4,7 @@ import { KeyboardMetaKeyIcon } from '@/components/ui/keyboard-keys'
 import { SettingsPanelDescription, SettingsPanelTitle, SettingsPanelHeader, SettingsPanelContent } from '@/components/ui/settings-dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import _ from '@/lib/translate'
-import { ArrowRightLeftIcon, HistoryIcon, LandmarkIcon, ReceiptIcon, SaveIcon, SettingsIcon, ZapIcon } from 'lucide-react'
+import { ArrowRightLeftIcon, HistoryIcon, LandmarkIcon, OptionIcon, ReceiptIcon, SaveIcon, SettingsIcon, ZapIcon } from 'lucide-react'
 
 const Shortcuts = [
     {
@@ -32,7 +32,7 @@ const Shortcuts = [
         }
     },
     {
-        shortcut: <KbdGroup><Kbd><KeyboardMetaKeyIcon /></Kbd><Kbd>R</Kbd></KbdGroup>,
+        shortcut: <KbdGroup><Kbd><OptionIcon /></Kbd><Kbd>R</Kbd></KbdGroup>,
         action: {
             icon: <ZapIcon />,
             label: _("Accept Matching Rule"),

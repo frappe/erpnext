@@ -361,7 +361,7 @@ class CalculationFormulaValidator(Validator):
 					"sqrt": lambda x: x**0.5,
 					"pow": pow,
 					"ceil": lambda x: int(x) + (1 if x % 1 else 0),
-					"floor": lambda x: int(x),
+					"floor": int,
 				}
 			)
 

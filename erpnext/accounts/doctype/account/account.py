@@ -530,6 +530,7 @@ def update_account_number(
 ):
 	_ensure_idle_system()
 	account = frappe.get_cached_doc("Account", name)
+	account.check_permission("write")
 	if not account:
 		return
 

@@ -1469,7 +1469,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		pi1.submit()
 
 		self.assertEqual(pi1.grand_total, 10000.0)
-		self.assertTrue(len(pi1.items) == 1)
+		self.assertEqual(len(pi1.items), 1)
 
 		pi2 = make_pi_from_po(po.name)
 		self.assertEqual(len(pi2.items), 2)

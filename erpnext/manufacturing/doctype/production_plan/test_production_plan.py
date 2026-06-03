@@ -900,8 +900,9 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		missing_warehouse = expected_warehouses - warehouses
 
-		self.assertTrue(
-			len(missing_warehouse) == 0,
+		self.assertEqual(
+			len(missing_warehouse),
+			0,
 			msg=f"Following warehouses were expected {', '.join(missing_warehouse)}",
 		)
 
@@ -1392,7 +1393,7 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		validate_mr_items = [d.get("item_code") for d in items]
 		for item_code in mr_items:
-			self.assertTrue(item_code in validate_mr_items)
+			self.assertIn(item_code, validate_mr_items)
 
 	def test_reserved_qty_for_production_plan_for_material_requests(self):
 		from erpnext.stock.utils import get_or_make_bin
@@ -1510,7 +1511,7 @@ class TestProductionPlan(ERPNextTestSuite):
 		non_completed_plans = get_non_completed_production_plans()
 
 		for plan in plans:
-			self.assertTrue(plan in non_completed_plans)
+			self.assertIn(plan, non_completed_plans)
 
 	def test_reserved_qty_for_production_plan_for_material_requests_with_multi_UOM(self):
 		from erpnext.stock.utils import get_or_make_bin
@@ -1721,13 +1722,13 @@ class TestProductionPlan(ERPNextTestSuite):
 		for row in items:
 			row = frappe._dict(row)
 			if row.material_request_type == "Material Transfer":
-				self.assertTrue(row.uom == row.stock_uom)
-				self.assertTrue(row.from_warehouse in [wh1, wh2])
+				self.assertEqual(row.uom, row.stock_uom)
+				self.assertIn(row.from_warehouse, [wh1, wh2])
 				self.assertEqual(row.quantity, 2)
 
 			if row.material_request_type == "Purchase":
-				self.assertTrue(row.uom != row.stock_uom)
-				self.assertTrue(row.warehouse == mrp_warhouse)
+				self.assertNotEqual(row.uom, row.stock_uom)
+				self.assertEqual(row.warehouse, mrp_warhouse)
 				self.assertEqual(row.quantity, 12.0)
 
 	def test_mr_qty_for_complex_bom(self):
@@ -2257,12 +2258,12 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		plan.save()
 
-		self.assertTrue(len(plan.sub_assembly_items) == 3)
+		self.assertEqual(len(plan.sub_assembly_items), 3)
 		for row in plan.sub_assembly_items:
 			self.assertEqual(row.required_qty, 15.0)
 			self.assertEqual(row.qty, 10.0)
 
-		self.assertTrue(len(plan.mr_items) == 3)
+		self.assertEqual(len(plan.mr_items), 3)
 		for row in plan.mr_items:
 			self.assertEqual(row.required_bom_qty, 10.0)
 			self.assertEqual(row.quantity, 5.0)
@@ -2271,7 +2272,7 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		sre = StockReservation(plan)
 		reserved_entries = sre.get_reserved_entries("Production Plan", plan.name)
-		self.assertTrue(len(reserved_entries) == 6)
+		self.assertEqual(len(reserved_entries), 6)
 
 		for row in reserved_entries:
 			self.assertEqual(row.reserved_qty, 5.0)
@@ -2284,7 +2285,7 @@ class TestProductionPlan(ERPNextTestSuite):
 			"Material Request", filters={"production_plan": plan.name}, pluck="name"
 		)
 
-		self.assertTrue(len(material_requests) > 0)
+		self.assertGreater(len(material_requests), 0)
 		for mr_name in list(set(material_requests)):
 			po = make_purchase_order(mr_name)
 			po.supplier = "_Test Supplier"
@@ -2295,7 +2296,7 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		sre = StockReservation(plan)
 		reserved_entries = sre.get_reserved_entries("Production Plan", plan.name)
-		self.assertTrue(len(reserved_entries) == 9)
+		self.assertEqual(len(reserved_entries), 9)
 
 		work_orders = frappe.get_all("Work Order", filters={"production_plan": plan.name}, pluck="name")
 		for wo_name in list(set(work_orders)):
@@ -2318,7 +2319,7 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		sre = StockReservation(plan)
 		reserved_entries = sre.get_reserved_entries("Production Plan", plan.name)
-		self.assertTrue(len(reserved_entries) == 0)
+		self.assertEqual(len(reserved_entries), 0)
 		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
 
 	def test_stock_reservation_of_serial_nos_against_production_plan(self):
@@ -2374,12 +2375,12 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		plan.save()
 
-		self.assertTrue(len(plan.sub_assembly_items) == 3)
+		self.assertEqual(len(plan.sub_assembly_items), 3)
 		for row in plan.sub_assembly_items:
 			self.assertEqual(row.required_qty, 15.0)
 			self.assertEqual(row.qty, 10.0)
 
-		self.assertTrue(len(plan.mr_items) == 3)
+		self.assertEqual(len(plan.mr_items), 3)
 		for row in plan.mr_items:
 			self.assertEqual(row.required_bom_qty, 10.0)
 			self.assertEqual(row.quantity, 5.0)
@@ -2388,7 +2389,7 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		sre = StockReservation(plan)
 		reserved_entries = sre.get_reserved_entries("Production Plan", plan.name)
-		self.assertTrue(len(reserved_entries) == 30)
+		self.assertEqual(len(reserved_entries), 30)
 
 		for row in reserved_entries:
 			self.assertEqual(row.reserved_qty, 5.0)
@@ -2416,7 +2417,7 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		self.assertTrue(additional_serial_nos)
 
-		self.assertTrue(len(material_requests) > 0)
+		self.assertGreater(len(material_requests), 0)
 		for mr_name in list(set(material_requests)):
 			po = make_purchase_order(mr_name)
 			po.supplier = "_Test Supplier"
@@ -2427,7 +2428,7 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		sre = StockReservation(plan)
 		reserved_entries = sre.get_reserved_entries("Production Plan", plan.name)
-		self.assertTrue(len(reserved_entries) == 45)
+		self.assertEqual(len(reserved_entries), 45)
 		serial_nos_res_for_pp = frappe.get_all(
 			"Serial and Batch Entry",
 			filters={"parent": ("in", [x.name for x in reserved_entries]), "docstatus": 1},
@@ -2453,8 +2454,8 @@ class TestProductionPlan(ERPNextTestSuite):
 			)
 
 			for serial_no in serial_nos_res_for_wo:
-				self.assertTrue(serial_no in serial_nos_res_for_pp)
-				self.assertFalse(serial_no in additional_serial_nos)
+				self.assertIn(serial_no, serial_nos_res_for_pp)
+				self.assertNotIn(serial_no, additional_serial_nos)
 
 			if wo_doc.production_item == "Finished Good For SR":
 				self.assertEqual(len(reserved_entries), 15)
@@ -2465,7 +2466,7 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		sre = StockReservation(plan)
 		reserved_entries = sre.get_reserved_entries("Production Plan", plan.name)
-		self.assertTrue(len(reserved_entries) == 0)
+		self.assertEqual(len(reserved_entries), 0)
 		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
 
 	def test_stock_reservation_of_batch_nos_against_production_plan(self):
@@ -2522,12 +2523,12 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		plan.save()
 
-		self.assertTrue(len(plan.sub_assembly_items) == 3)
+		self.assertEqual(len(plan.sub_assembly_items), 3)
 		for row in plan.sub_assembly_items:
 			self.assertEqual(row.required_qty, 15.0)
 			self.assertEqual(row.qty, 10.0)
 
-		self.assertTrue(len(plan.mr_items) == 3)
+		self.assertEqual(len(plan.mr_items), 3)
 		for row in plan.mr_items:
 			self.assertEqual(row.required_bom_qty, 10.0)
 			self.assertEqual(row.quantity, 5.0)
@@ -2536,7 +2537,7 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		sre = StockReservation(plan)
 		reserved_entries = sre.get_reserved_entries("Production Plan", plan.name)
-		self.assertTrue(len(reserved_entries) == 6)
+		self.assertEqual(len(reserved_entries), 6)
 
 		for row in reserved_entries:
 			self.assertEqual(row.reserved_qty, 5.0)
@@ -2565,7 +2566,7 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		self.assertTrue(additional_batches)
 
-		self.assertTrue(len(material_requests) > 0)
+		self.assertGreater(len(material_requests), 0)
 		for mr_name in list(set(material_requests)):
 			po = make_purchase_order(mr_name)
 			po.supplier = "_Test Supplier"
@@ -2576,7 +2577,7 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		sre = StockReservation(plan)
 		reserved_entries = sre.get_reserved_entries("Production Plan", plan.name)
-		self.assertTrue(len(reserved_entries) == 9)
+		self.assertEqual(len(reserved_entries), 9)
 		batches_reserved_for_pp = frappe.get_all(
 			"Serial and Batch Entry",
 			filters={"parent": ("in", [x.name for x in reserved_entries]), "docstatus": 1},
@@ -2602,8 +2603,8 @@ class TestProductionPlan(ERPNextTestSuite):
 			)
 
 			for batch_no in batches_reserved_for_wo:
-				self.assertTrue(batch_no in batches_reserved_for_pp)
-				self.assertFalse(batch_no in additional_batches)
+				self.assertIn(batch_no, batches_reserved_for_pp)
+				self.assertNotIn(batch_no, additional_batches)
 
 			if wo_doc.production_item == "Finished Good For SR":
 				self.assertEqual(len(reserved_entries), 3)
@@ -2614,7 +2615,7 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		sre = StockReservation(plan)
 		reserved_entries = sre.get_reserved_entries("Production Plan", plan.name)
-		self.assertTrue(len(reserved_entries) == 0)
+		self.assertEqual(len(reserved_entries), 0)
 		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
 
 	def test_production_plan_for_partial_sub_assembly_items(self):
@@ -2903,7 +2904,7 @@ def make_bom(**args):
 			bom.append(
 				"secondary_items",
 				{
-					"type": "Scrap",
+					"secondary_item_type": "Scrap",
 					"item_code": item,
 					"item_name": item,
 					"uom": item_doc.stock_uom,

@@ -1895,8 +1895,6 @@ def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 
 	precision = frappe.get_precision("Material Request Plan Item", "quantity")
 	if flt(required_qty, precision) > 0:
-		required_qty = required_qty
-
 		if frappe.db.get_value("UOM", purchase_uom, "must_be_whole_number"):
 			required_qty = ceil(required_qty)
 
