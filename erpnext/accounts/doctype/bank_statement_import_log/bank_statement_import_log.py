@@ -357,7 +357,7 @@ class BankStatementImportLog(Document):
 		pages = {table["page"] for table in tables}
 		page_images = render_pdf_pages(content, password, pages)
 
-		self._pending_page_images = {page: png for page, (png, _scale) in page_images.items()}
+		self.flags._pending_page_images = {page: png for page, (png, _scale) in page_images.items()}
 		page_scales = {page: scale for page, (_png, scale) in page_images.items()}
 
 		for table in tables:
@@ -384,7 +384,7 @@ class BankStatementImportLog(Document):
 	def attach_pdf_page_images(self):
 		"""Persist the rendered page images (rendered in `prepare_pdf_tables`) as private
 		Files attached to this log, and write their URLs back into `pdf_tables`."""
-		pending = getattr(self, "_pending_page_images", None)
+		pending = getattr(self.flags, "_pending_page_images", None)
 		if not pending:
 			return
 
@@ -395,7 +395,7 @@ class BankStatementImportLog(Document):
 			table["page_image"] = page_urls.get(table["page"])
 
 		self.db_set("pdf_tables", json.dumps(tables), update_modified=False)
-		self._pending_page_images = None
+		self.flags._pending_page_images = None
 
 	def save_page_image(self, png_bytes: bytes, page_number: int) -> str:
 		"""Save a rendered page as a private File attached to this log; return its URL."""
