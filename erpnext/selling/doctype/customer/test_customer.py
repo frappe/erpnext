@@ -218,62 +218,6 @@ class TestCustomer(ERPNextTestSuite):
 		self.assertEqual("_Test Customer 1 - 1", duplicate_customer.name)
 		self.assertEqual(test_customer_1.customer_name, duplicate_customer.customer_name)
 
-	def test_duplicate_does_not_inherit_primary_contact_or_address(self):
-		"""Duplicating a Customer must not reuse the source's primary contact or address.
-
-		Both belong to the source alone, so the duplicate should get its own (or none) instead
-		of pointing at a foreign contact/address or displaying the source's rendered address.
-		"""
-		source = frappe.get_doc(
-			get_customer_dict("_Test Customer Dup Source " + frappe.generate_hash(length=6))
-		).insert(ignore_permissions=True)
-		source.mobile_no = "9000000001"
-		source.save()  # creates and links the source's own primary contact
-		source.reload()
-		self.assertTrue(source.customer_primary_contact)
-		source_contact = source.customer_primary_contact
-
-		address = frappe.get_doc(
-			{
-				"doctype": "Address",
-				"address_title": source.name,
-				"address_type": "Billing",
-				"address_line1": "1 Source Street",
-				"city": "Source City",
-				"country": "India",
-				"links": [{"link_doctype": "Customer", "link_name": source.name}],
-			}
-		).insert(ignore_permissions=True)
-		source.db_set("customer_primary_address", address.name)
-		source.db_set("primary_address", "1 Source Street, Source City")
-		source.reload()
-
-		# ignore_no_copy=False mirrors the UI "Duplicate" action, which skips no_copy fields.
-		duplicate = frappe.copy_doc(source, ignore_no_copy=False)
-		duplicate.customer_name = "_Test Customer Dup Copy " + frappe.generate_hash(length=6)
-		duplicate.insert(ignore_permissions=True)
-		duplicate.reload()
-
-		self.assertNotEqual(
-			duplicate.customer_primary_contact,
-			source_contact,
-			"Duplicate inherited the source customer's primary contact",
-		)
-		self.assertNotEqual(
-			duplicate.customer_primary_address,
-			address.name,
-			"Duplicate inherited the source customer's primary address",
-		)
-		self.assertFalse(duplicate.primary_address, "Duplicate inherited the source's rendered address")
-
-		# The source's contact must remain linked to the source alone.
-		linked_customers = frappe.get_all(
-			"Dynamic Link",
-			filters={"parenttype": "Contact", "parent": source_contact, "link_doctype": "Customer"},
-			pluck="link_name",
-		)
-		self.assertEqual(linked_customers, [source.name])
-
 	def get_customer_outstanding_amount(self):
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 

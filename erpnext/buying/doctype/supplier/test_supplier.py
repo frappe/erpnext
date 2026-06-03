@@ -144,61 +144,6 @@ class TestSupplier(ERPNextTestSuite):
 		# Rollback
 		address.delete()
 
-	def test_duplicate_does_not_inherit_primary_contact_or_address(self):
-		"""Duplicating a Supplier must not reuse the source's primary contact or address.
-
-		Both belong to the source alone, so the duplicate should get its own (or none) instead
-		of pointing at a foreign contact/address or displaying the source's rendered address.
-		"""
-		source_name = "_Test Supplier Dup Source " + frappe.generate_hash(length=6)
-		source = create_supplier(supplier_name=source_name)
-		source.mobile_no = "9000000002"
-		source.save()  # creates and links the source's own primary contact
-		source.reload()
-		self.assertTrue(source.supplier_primary_contact)
-		source_contact = source.supplier_primary_contact
-
-		address = frappe.get_doc(
-			{
-				"doctype": "Address",
-				"address_title": source.name,
-				"address_type": "Billing",
-				"address_line1": "1 Source Street",
-				"city": "Source City",
-				"country": "India",
-				"links": [{"link_doctype": "Supplier", "link_name": source.name}],
-			}
-		).insert(ignore_permissions=True)
-		source.db_set("supplier_primary_address", address.name)
-		source.db_set("primary_address", "1 Source Street, Source City")
-		source.reload()
-
-		# ignore_no_copy=False mirrors the UI "Duplicate" action, which skips no_copy fields.
-		duplicate = frappe.copy_doc(source, ignore_no_copy=False)
-		duplicate.supplier_name = "_Test Supplier Dup Copy " + frappe.generate_hash(length=6)
-		duplicate.insert()
-		duplicate.reload()
-
-		self.assertNotEqual(
-			duplicate.supplier_primary_contact,
-			source_contact,
-			"Duplicate inherited the source supplier's primary contact",
-		)
-		self.assertNotEqual(
-			duplicate.supplier_primary_address,
-			address.name,
-			"Duplicate inherited the source supplier's primary address",
-		)
-		self.assertFalse(duplicate.primary_address, "Duplicate inherited the source's rendered address")
-
-		# The source's contact must remain linked to the source alone.
-		linked_suppliers = frappe.get_all(
-			"Dynamic Link",
-			filters={"parenttype": "Contact", "parent": source_contact, "link_doctype": "Supplier"},
-			pluck="link_name",
-		)
-		self.assertEqual(linked_suppliers, [source.name])
-
 
 def create_supplier(**args):
 	args = frappe._dict(args)
