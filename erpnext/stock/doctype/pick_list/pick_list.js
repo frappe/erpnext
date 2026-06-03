@@ -34,6 +34,7 @@ frappe.ui.form.on("Pick List", {
 
 		frm.custom_make_buttons = {
 			"Delivery Note": "Delivery Note",
+			"Sales Invoice": "Sales Invoice",
 			"Stock Entry": "Stock Entry",
 		};
 
@@ -135,7 +136,12 @@ frappe.ui.form.on("Pick List", {
 				if (frm.doc.purpose === "Delivery") {
 					frm.add_custom_button(
 						__("Delivery Note"),
-						() => frm.trigger("create_delivery_note"),
+						() => frm.events.create_delivery(frm, "Delivery Note"),
+						__("Create")
+					);
+					frm.add_custom_button(
+						__("Sales Invoice"),
+						() => frm.events.create_delivery(frm, "Sales Invoice"),
 						__("Create")
 					);
 				} else {
@@ -232,12 +238,6 @@ frappe.ui.form.on("Pick List", {
 		frm.clear_table("locations");
 		frm.trigger("add_get_items_button");
 	},
-	create_delivery_note: (frm) => {
-		frappe.model.open_mapped_doc({
-			method: "erpnext.stock.doctype.pick_list.pick_list.create_delivery_note",
-			frm: frm,
-		});
-	},
 	create_stock_entry: (frm) => {
 		frappe
 			.xcall("erpnext.stock.doctype.pick_list.pick_list.create_stock_entry", {
@@ -332,6 +332,15 @@ frappe.ui.form.on("Pick List", {
 			from_voucher_no: frm.doc.name,
 		};
 		frappe.set_route("query-report", "Reserved Stock");
+	},
+	create_delivery(frm, doctype) {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.stock.doctype.pick_list.pick_list.create_delivery",
+			args: {
+				target: doctype,
+			},
+			frm: frm,
+		});
 	},
 });
 

@@ -1585,7 +1585,8 @@ def make_sales_invoice(
 					if is_unit_price_row(doc)
 					else (doc.qty and (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount)))
 				)
-				and select_item(doc),
+				and select_item(doc)
+				and not args.get("skip_item_mapping"),
 			},
 			"Sales Taxes and Charges": {
 				"doctype": "Sales Taxes and Charges",

@@ -371,6 +371,7 @@ class SalesInvoice(SellingController):
 				if row.billing_amount:
 					row.billing_amount = -abs(row.billing_amount)
 
+		self.set_serial_and_batch_bundle_from_pick_list()
 		self.update_packing_list()
 		self.set_billing_hours_and_amount()
 		self.update_timesheet_billing_for_project()
@@ -492,6 +493,7 @@ class SalesInvoice(SellingController):
 
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
+			self.update_pick_list_status()
 
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
@@ -615,6 +617,7 @@ class SalesInvoice(SellingController):
 		if self.update_stock == 1:
 			self.update_stock_reservation_entries()
 			self.repost_future_sle_and_gle()
+			self.update_pick_list_status()
 
 		self.db_set("status", "Cancelled")
 
@@ -666,26 +669,41 @@ class SalesInvoice(SellingController):
 		if not cint(self.update_stock):
 			return
 
-		self.status_updater.append(
-			{
-				"source_dt": "Sales Invoice Item",
-				"target_dt": "Sales Order Item",
-				"target_parent_dt": "Sales Order",
-				"target_parent_field": "per_delivered",
-				"target_field": "delivered_qty",
-				"target_ref_field": "qty",
-				"source_field": "qty",
-				"join_field": "so_detail",
-				"percent_join_field": "sales_order",
-				"status_field": "delivery_status",
-				"keyword": "Delivered",
-				"second_source_dt": "Delivery Note Item",
-				"second_source_field": "qty",
-				"second_join_field": "so_detail",
-				"overflow_type": "delivery",
-				"extra_cond": """ and exists(select name from `tabSales Invoice`
-				where name=`tabSales Invoice Item`.parent and update_stock = 1)""",
-			}
+		self.status_updater.extend(
+			[
+				{
+					"source_dt": "Sales Invoice Item",
+					"target_dt": "Sales Order Item",
+					"target_parent_dt": "Sales Order",
+					"target_parent_field": "per_delivered",
+					"target_field": "delivered_qty",
+					"target_ref_field": "qty",
+					"source_field": "qty",
+					"join_field": "so_detail",
+					"percent_join_field": "sales_order",
+					"status_field": "delivery_status",
+					"keyword": "Delivered",
+					"second_source_dt": "Delivery Note Item",
+					"second_source_field": "qty",
+					"second_join_field": "so_detail",
+					"overflow_type": "delivery",
+					"extra_cond": """ and exists(select name from `tabSales Invoice`
+					where name=`tabSales Invoice Item`.parent and update_stock = 1)""",
+				},
+				{
+					"source_dt": "Sales Invoice Item",
+					"target_dt": "Pick List Item",
+					"join_field": "pick_list_item",
+					"target_field": "delivered_qty",
+					"target_parent_dt": "Pick List",
+					"target_parent_field": "per_delivered",
+					"target_ref_field": "picked_qty",
+					"source_field": "stock_qty",
+					"percent_join_field": "against_pick_list",
+					"status_field": "delivery_status",
+					"keyword": "Delivered",
+				},
+			]
 		)
 
 		if not cint(self.is_return):
