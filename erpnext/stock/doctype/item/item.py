@@ -1573,11 +1573,11 @@ def get_item_prices(item_code: str):
 		.where(ItemPrice.docstatus != 2)
 		.where((ItemPrice.valid_upto.isnull()) | (ItemPrice.valid_upto >= today))
 		.orderby(ItemPrice.price_list)
-		.limit(21)
+		.limit(11)
 		.run(as_dict=True)
 	)
 
-	has_more = len(prices) > 10
+	has_more = len(prices) == 11
 	return {
 		"prices": prices[:10],
 		"has_more": has_more,

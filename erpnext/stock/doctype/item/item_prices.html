@@ -68,12 +68,10 @@
 		margin-bottom: 16px;
 	}
 </style>
-
-{% if (prices && prices.length) { %}
-
 <div style="margin-bottom: 12px;">
 	<div class="text-extra-muted" style="font-size: var(--text-sm);">{{ __("All active prices for this item across buying and selling price lists.") }}</div>
 </div>
+{% if (prices && prices.length) { %}
 
 <div style="border: 1px solid var(--border-color); border-radius: var(--border-radius-md); overflow: hidden; margin-bottom: 16px;">
 	<table class="item-price-table">
@@ -133,7 +131,7 @@
 
 {% } else { %}
 
-<div style="text-align: center; padding: 40px 20px; color: var(--text-muted); border: 1px dashed var(--border-color); border-radius: var(--border-radius-md);">
+<div style="text-align: center; padding: 40px 20px; color: var(--text-muted); border: 1px dashed var(--border-color); border-radius: var(--border-radius-md); margin-bottom: 14px;">
 	<p style="margin-bottom: 12px;">{{ __("No active item prices found.") }}</p>
 	<button class="btn btn-sm btn-default add-price-btn">{{ __("+ Add Price") }}</button>
 </div>
