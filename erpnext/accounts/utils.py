@@ -2844,8 +2844,15 @@ def _check_packed_qty_warn(doc):
 
 
 def update_subscription_on_invoice_update(doc: "Document", method: str | None = None) -> None:
-	if doc.get("subscription"):
-		refresh_subscription_status(doc.subscription)
+	if not doc.get("subscription"):
+		return
+
+	# Generation submits the invoice itself and sets status in the same flow; only
+	# react to a fresh submit when it is a credit note (return) so refunds register.
+	if method == "on_submit" and not doc.get("is_return"):
+		return
+
+	refresh_subscription_status(doc.subscription)
 
 
 def update_subscriptions_on_payment(doc: "Document", method: str | None = None) -> None:
