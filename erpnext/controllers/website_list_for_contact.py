@@ -178,6 +178,7 @@ def get_list_for_transactions(
 
 
 def rfq_transaction_list(parties_doctype, doctype, parties, limit_start, limit_page_length):
+<<<<<<< HEAD
 	data = frappe.db.sql(
 		"""select distinct parent as name, supplier from `tab{doctype}`
 			where supplier = '{supplier}' and docstatus=1  order by modified desc limit {start}, {len}""".format(
@@ -185,6 +186,18 @@ def rfq_transaction_list(parties_doctype, doctype, parties, limit_start, limit_p
 		),
 		as_dict=1,
 	)
+=======
+	party = frappe.qb.DocType(parties_doctype)
+	data = (
+		frappe.qb.from_(party)
+		.select(party.parent.as_("name"), party.supplier)
+		.distinct()
+		.where((party.supplier == party[0]) & (party.docstatus == 1))
+		.orderby(party.creation, order=frappe.qb.desc)
+		.limit(limit_page_length)
+		.offset(limit_start)
+	).run(as_dict=True)
+>>>>>>> 9cecf2e6f9 (refactor: convert rfq_transaction_list to query builder (#55497))
 
 	return post_process(doctype, data)
 
