@@ -10,7 +10,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Case
-from frappe.query_builder.functions import IfNull, Sum
+from frappe.query_builder.functions import Coalesce, IfNull, Sum
 from frappe.utils import (
 	cint,
 	date_diff,
@@ -75,6 +75,9 @@ class WorkOrder(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		from erpnext.manufacturing.doctype.work_order_additional_item.work_order_additional_item import (
+			WorkOrderAdditionalItem,
+		)
 		from erpnext.manufacturing.doctype.work_order_item.work_order_item import WorkOrderItem
 		from erpnext.manufacturing.doctype.work_order_operation.work_order_operation import WorkOrderOperation
 
@@ -105,6 +108,7 @@ class WorkOrder(Document):
 		max_producible_qty: DF.Float
 		mps: DF.Link | None
 		naming_series: DF.Literal["MFG-WO-.YYYY.-"]
+		non_stock_items: DF.Table[WorkOrderAdditionalItem]
 		operations: DF.Table[WorkOrderOperation]
 		planned_end_date: DF.Datetime | None
 		planned_operating_cost: DF.Currency
@@ -123,6 +127,7 @@ class WorkOrder(Document):
 		sales_order: DF.Link | None
 		sales_order_item: DF.Data | None
 		scrap_warehouse: DF.Link | None
+		secondary_items: DF.Table[WorkOrderAdditionalItem]
 		skip_transfer: DF.Check
 		source_warehouse: DF.Link | None
 		status: DF.Literal[
@@ -165,6 +170,68 @@ class WorkOrder(Document):
 		if self.bom_no:
 			if based_on := frappe.get_cached_value("BOM", self.bom_no, "backflush_based_on"):
 				self.set_onload("backflush_raw_materials_based_on", based_on)
+
+	@property
+	def secondary_items(self):
+		parent = frappe.qb.DocType("Stock Entry")
+		child = frappe.qb.DocType("Stock Entry Detail")
+		secondary_items_generated = (
+			frappe.qb.from_(parent)
+			.join(child)
+			.on(parent.name == child.parent)
+			.where(
+				(parent.work_order == self.name)
+				& (parent.docstatus == 1)
+				& ((child.secondary_item_type != "") | (child.is_legacy_scrap_item == 1))
+			)
+			.select(
+				child.item_code,
+				Coalesce(child.secondary_item_type, "Scrap (Legacy)").as_("secondary_item_type"),
+				child.qty,
+				child.uom,
+				child.amount,
+			)
+			.run(as_dict=True)
+		)
+		if secondary_items_generated:
+			self.set_onload("secondary_items_generated", True)
+			return secondary_items_generated
+		else:
+			secondary_items = frappe.get_query(
+				"BOM",
+				filters={"name": self.bom_no},
+				fields=[
+					"secondary_items.item_code",
+					"secondary_items.secondary_item_type",
+					"secondary_items.qty",
+					"secondary_items.uom",
+					"secondary_items.cost as amount",
+					"quantity as bom_qty",
+				],
+			).run(as_dict=True)
+			for item in secondary_items:
+				item["qty"] = (item.qty / item.bom_qty) * self.qty
+				item["amount"] *= item.qty
+			return secondary_items
+
+	@property
+	def non_stock_items(self):
+		non_stock_items = frappe.get_query(
+			"BOM",
+			filters={"name": self.bom_no, "items.is_stock_item": 0, "items.is_phantom_item": 0},
+			fields=[
+				"items.item_code",
+				"items.qty",
+				"items.uom",
+				"items.base_rate as rate",
+				"items.base_amount as amount",
+				"quantity as bom_qty",
+			],
+		).run(as_dict=True)
+		for item in non_stock_items:
+			item["qty"] = (item.qty / item.bom_qty) * self.qty
+			item["amount"] = item.rate * item["qty"]
+		return non_stock_items
 
 	def show_create_job_card_button(self):
 		jc_doctype = frappe.qb.DocType("Job Card")

@@ -30,9 +30,9 @@ class BOMSecondaryItem(Document):
 		process_loss_qty: DF.Float
 		qty: DF.Float
 		rate: DF.Currency
+		secondary_item_type: DF.Literal["", "Co-Product", "By-Product", "Scrap", "Additional Finished Good"]
 		stock_qty: DF.Float
 		stock_uom: DF.Link | None
-		secondary_item_type: DF.Literal["", "Co-Product", "By-Product", "Scrap", "Additional Finished Good"]
 		uom: DF.Link
 	# end: auto-generated types
 
