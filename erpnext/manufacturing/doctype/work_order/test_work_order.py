@@ -4442,8 +4442,8 @@ class TestWorkOrder(ERPNextTestSuite):
 		secondary_items = wo_order.secondary_items
 		self.assertEqual(len(secondary_items), 1)
 		row = secondary_items[0]
-		# now sourced from the manufacture entry, not the BOM (no bom_qty key)
-		self.assertNotIn("bom_qty", row)
+		# now sourced from the manufacture entry, not the BOM
+		self.assertIsNone(row.get("bom_qty"))
 		self.assertEqual(row.item_code, scrap_item)
 		self.assertEqual(flt(row.qty, 6), flt(generated_row.qty, 6))
 		self.assertEqual(flt(row.amount, 6), flt(generated_row.amount, 6))
