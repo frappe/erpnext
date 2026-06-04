@@ -116,6 +116,9 @@ frappe.ui.form.on("Work Order", {
 		frm.set_indicator_formatter("operation", function (doc) {
 			return frm.doc.qty == doc.completed_qty ? "green" : "orange";
 		});
+
+		frm.fields_dict["non_stock_items"].grid.set_column_disp_in_list_view("secondary_item_type", false);
+		frm.fields_dict["secondary_items"].grid.set_column_disp_in_list_view("rate", false);
 	},
 
 	onload: function (frm) {
@@ -144,6 +147,15 @@ frappe.ui.form.on("Work Order", {
 				},
 			});
 		}
+	},
+
+	onload_post_render(frm) {
+		const label = frm.doc.__onload?.secondary_items_generated
+			? __("Secondary Items (as per Manufacture Entries)")
+			: __("Secondary Items (as per BOM)");
+
+		frm.set_df_property("secondary_items", "label", label);
+		frm.fields_dict["secondary_items"].grid.wrapper?.find("> .control-label").text(label);
 	},
 
 	source_warehouse: function (frm) {
