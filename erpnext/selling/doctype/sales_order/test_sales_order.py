@@ -24,11 +24,7 @@ from erpnext.selling.doctype.sales_order.sales_order import (
 	create_pick_list,
 	make_delivery_note,
 	make_material_request,
-<<<<<<< HEAD
-=======
-	make_production_plan,
 	make_purchase_order,
->>>>>>> 260cec3b86 (fix: prevent leakage of party-derived fields in cross doctype transactions (#55336))
 	make_raw_material_request,
 	make_sales_invoice,
 	make_work_orders,
@@ -1174,12 +1170,9 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 
 	def test_drop_shipping(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
-<<<<<<< HEAD
 		from erpnext.selling.doctype.sales_order.sales_order import (
 			make_purchase_order_for_default_supplier,
 		)
-=======
->>>>>>> 260cec3b86 (fix: prevent leakage of party-derived fields in cross doctype transactions (#55336))
 		from erpnext.selling.doctype.sales_order.sales_order import update_status as so_update_status
 
 		# make items
@@ -1268,12 +1261,9 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		so.cancel()
 
 	def test_drop_shipping_partial_order(self):
-<<<<<<< HEAD
 		from erpnext.selling.doctype.sales_order.sales_order import (
 			make_purchase_order_for_default_supplier,
 		)
-=======
->>>>>>> 260cec3b86 (fix: prevent leakage of party-derived fields in cross doctype transactions (#55336))
 		from erpnext.selling.doctype.sales_order.sales_order import update_status as so_update_status
 
 		# make items
@@ -1331,13 +1321,10 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 
 	def test_drop_shipping_full_for_default_suppliers(self):
 		"""Test if multiple POs are generated in one go against different default suppliers."""
-<<<<<<< HEAD
 		from erpnext.selling.doctype.sales_order.sales_order import (
 			make_purchase_order_for_default_supplier,
 		)
 
-=======
->>>>>>> 260cec3b86 (fix: prevent leakage of party-derived fields in cross doctype transactions (#55336))
 		if not frappe.db.exists("Item", "_Test Item for Drop Shipping 1"):
 			make_item("_Test Item for Drop Shipping 1", {"is_stock_item": 1, "delivered_by_supplier": 1})
 
@@ -2429,8 +2416,6 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		self.assertRaises(frappe.ValidationError, so1.update_status, "Draft")
 
 	def test_item_tax_transfer_from_sales_to_purchase(self):
-		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order
-
 		item_tax = frappe.new_doc("Item Tax Template")
 		item_tax.title = "Test Item Tax Template"
 		item_tax.company = "_Test Company"
@@ -2531,38 +2516,6 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		self.assertFalse(so.per_billed)
 		self.assertEqual(so.status, "To Deliver and Bill")
 
-<<<<<<< HEAD
-=======
-	def test_item_tax_transfer_from_sales_to_purchase(self):
-		item_tax = frappe.new_doc("Item Tax Template")
-		item_tax.title = "Test Item Tax Template"
-		item_tax.company = "_Test Company"
-		item_tax.append("taxes", {"tax_type": "_Test Account Service Tax - _TC", "tax_rate": 2})
-		item_tax.save()
-
-		item_group = frappe.get_doc("Item Group", "_Test Item Group")
-		item_group.append("taxes", {"item_tax_template": "Test Item Tax Template - _TC"})
-		item_group.save()
-
-		so = make_sales_order(item_code="_Test Item", qty=1, do_not_submit=1)
-		so.append(
-			"taxes",
-			{
-				"account_head": "_Test Account Service Tax - _TC",
-				"charge_type": "On Net Total",
-				"description": "TDS",
-				"doctype": "Sales Taxes and Charges",
-				"rate": 2,
-			},
-		)
-		so.submit()
-
-		po = make_purchase_order(so.name, selected_items=so.items)[0]
-		po.supplier = "_Test Supplier"
-		po.items[0].rate = 100
-		po.submit()
-		self.assertEqual(po.taxes[0].tax_amount, 2)
-
 	def test_make_purchase_order_does_not_inherit_party_fields(self):
 		"""
 		Customer-derived fields must not leak from a drop-ship SO into the PO.
@@ -2590,7 +2543,6 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(po.language or None, supplier.language or None)
 		self.assertEqual(po.payment_terms_template or None, supplier.payment_terms or None)
 
->>>>>>> 260cec3b86 (fix: prevent leakage of party-derived fields in cross doctype transactions (#55336))
 	def test_pending_quantity_after_update_item_during_invoice_creation(self):
 		so = make_sales_order(qty=30, rate=100)
 
