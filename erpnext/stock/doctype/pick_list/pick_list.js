@@ -239,14 +239,10 @@ frappe.ui.form.on("Pick List", {
 	},
 	create_delivery(frm, doctype) {
 		frappe.model.open_mapped_doc({
-<<<<<<< HEAD
-			method: "erpnext.stock.doctype.pick_list.pick_list.create_delivery_note",
-=======
 			method: "erpnext.stock.doctype.pick_list.mapper.create_delivery",
 			args: {
 				target: doctype,
 			},
->>>>>>> d6a201ed4a (feat: create sales invoice from pick list (#55594))
 			frm: frm,
 		});
 	},
