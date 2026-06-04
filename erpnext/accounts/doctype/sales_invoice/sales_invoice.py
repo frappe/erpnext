@@ -377,7 +377,7 @@ class SalesInvoice(SellingController):
 		self.validate_scio_self_rm_qty()
 
 	def validate_update_stock_for_pick_list_reference(self):
-		if cint(self.update_stock):
+		if self.update_stock or self.is_return:
 			return
 
 		for row in self.items:
