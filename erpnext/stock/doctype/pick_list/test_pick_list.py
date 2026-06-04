@@ -9,7 +9,7 @@ from erpnext.selling.doctype.sales_order.sales_order import create_pick_list
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.packed_item.test_packed_item import create_product_bundle
-from erpnext.stock.doctype.pick_list.mapper import (
+from erpnext.stock.doctype.pick_list.pick_list import (
 	create_delivery,
 	create_delivery_note,
 	create_dn_for_pick_lists,

@@ -239,7 +239,7 @@ frappe.ui.form.on("Pick List", {
 	},
 	create_delivery(frm, doctype) {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.stock.doctype.pick_list.mapper.create_delivery",
+			method: "erpnext.stock.doctype.pick_list.pick_list.create_delivery",
 			args: {
 				target: doctype,
 			},
