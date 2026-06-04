@@ -1254,10 +1254,10 @@ class TestProductionPlan(FrappeTestCase):
 		plan.get_sub_assembly_items()
 
 		mr_items = []
-		main_item_by_mr_item = {}
+		expected_main_item_by_mr_item = {"ChildPart1 For MR": "SubAssembly1-1 For MR"}
 		for row in plan.sub_assembly_items:
 			mr_items.append(row.production_item)
-			main_item_by_mr_item[row.production_item] = row.parent_item_code
+			expected_main_item_by_mr_item[row.production_item] = row.parent_item_code
 			row.type_of_manufacturing = "Material Request"
 
 		plan.save()
@@ -1267,8 +1267,9 @@ class TestProductionPlan(FrappeTestCase):
 		for item_code in mr_items:
 			self.assertTrue(item_code in validate_mr_items)
 
-		for item in items:
-			self.assertEqual(item.main_item_code, main_item_by_mr_item[item.item_code])
+		main_item_by_mr_item = {item.get("item_code"): item.get("main_item_code") for item in items}
+		for item_code, main_item_code in expected_main_item_by_mr_item.items():
+			self.assertEqual(main_item_by_mr_item[item_code], main_item_code)
 
 	def test_resered_qty_for_production_plan_for_material_requests(self):
 		from erpnext.stock.utils import get_or_make_bin

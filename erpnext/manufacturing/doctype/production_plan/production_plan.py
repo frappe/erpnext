@@ -1662,6 +1662,7 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 					"stock_uom": item_master.stock_uom,
 					"conversion_factor": conversion_factor,
 					"safety_stock": item_master.safety_stock,
+					"main_bom_item": data.get("main_bom_item"),
 				}
 			)
 
