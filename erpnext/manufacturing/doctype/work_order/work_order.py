@@ -209,9 +209,10 @@ class WorkOrder(Document):
 					"quantity as bom_qty",
 				],
 			).run(as_dict=True)
+			secondary_items = [item for item in secondary_items if item.item_code]
 			for item in secondary_items:
 				item["qty"] = (item.qty / item.bom_qty) * self.qty
-				item["amount"] *= item.qty
+				item["amount"] = flt(item.amount) * item.qty
 			return secondary_items
 
 	@property
