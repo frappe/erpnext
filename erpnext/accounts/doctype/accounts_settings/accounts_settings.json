@@ -105,10 +105,6 @@
   "enable_party_matching",
   "automatically_run_rules_on_unreconciled_transactions",
   "enable_fuzzy_matching",
-<<<<<<< HEAD
-=======
-  "transfer_match_days",
->>>>>>> 8a8b89e5dd (fix(UX): Accounts settings cleanup)
   "payment_request_section",
   "create_pr_in_draft_status",
   "budget_section",
@@ -714,15 +710,6 @@
    "fieldtype": "Table",
    "label": "Allowed DocTypes",
    "options": "Repost Allowed Types"
-<<<<<<< HEAD
-=======
-  },
-  {
-   "default": "0",
-   "description": "Runs a preview check on save before submission without making any actual changes.",
-   "fieldname": "preview_mode",
-   "fieldtype": "Check",
-   "label": "Preview mode"
   },
   {
    "fieldname": "document_naming_tab",
@@ -737,7 +724,6 @@
    "description": "Changing the account in any transaction of the DocTypes listed below will trigger a repost. To prevent reposting, remove the relevant DocType from the list.",
    "fieldname": "column_break_mfor",
    "fieldtype": "Column Break"
->>>>>>> 8a8b89e5dd (fix(UX): Accounts settings cleanup)
   }
  ],
  "grid_page_length": 50,
