@@ -945,6 +945,25 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(sales_order.billing_status, "Fully Billed")
 		self.assertEqual(sales_order.status, "Completed")
 
+	def test_sales_invoice_against_pick_list_requires_update_stock(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item().name
+
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=5, basic_rate=100)
+		sales_order = make_sales_order(item_code=item, warehouse=warehouse, qty=5, rate=100)
+
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+
+		sales_invoice = create_delivery(pick_list.name, target="Sales Invoice")
+		sales_invoice.update_stock = 0
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Update Stock.*Pick List",
+			sales_invoice.save,
+		)
+
 	def test_picklist_reserved_qty_validation(self):
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 

@@ -356,6 +356,7 @@ class SalesInvoice(SellingController):
 				if row.billing_amount:
 					row.billing_amount = -abs(row.billing_amount)
 
+		self.validate_update_stock_for_pick_list_reference()
 		self.set_serial_and_batch_bundle_from_pick_list()
 		self.update_packing_list()
 		TimesheetBillingService(self).set_billing_hours_and_amount()
@@ -374,6 +375,18 @@ class SalesInvoice(SellingController):
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		self.validate_subcontracted_sales_order()
 		self.validate_scio_self_rm_qty()
+
+	def validate_update_stock_for_pick_list_reference(self):
+		if cint(self.update_stock):
+			return
+
+		for row in self.items:
+			if row.get("against_pick_list"):
+				frappe.throw(
+					_(
+						"Row {0}: Update Stock must be checked for item {1} because it is against Pick List {2}."
+					).format(row.idx, frappe.bold(row.item_code), frappe.bold(row.against_pick_list))
+				)
 
 	def validate_accounts(self):
 		self.validate_write_off_account()
