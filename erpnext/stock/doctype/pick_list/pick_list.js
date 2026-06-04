@@ -135,7 +135,12 @@ frappe.ui.form.on("Pick List", {
 				if (frm.doc.purpose === "Delivery") {
 					frm.add_custom_button(
 						__("Delivery Note"),
-						() => frm.trigger("create_delivery_note"),
+						() => frm.events.create_delivery(frm, "Delivery Note"),
+						__("Create")
+					);
+					frm.add_custom_button(
+						__("Sales Invoice"),
+						() => frm.events.create_delivery(frm, "Sales Invoice"),
 						__("Create")
 					);
 				} else {
@@ -232,9 +237,16 @@ frappe.ui.form.on("Pick List", {
 		frm.clear_table("locations");
 		frm.trigger("add_get_items_button");
 	},
-	create_delivery_note: (frm) => {
+	create_delivery(frm, doctype) {
 		frappe.model.open_mapped_doc({
+<<<<<<< HEAD
 			method: "erpnext.stock.doctype.pick_list.pick_list.create_delivery_note",
+=======
+			method: "erpnext.stock.doctype.pick_list.mapper.create_delivery",
+			args: {
+				target: doctype,
+			},
+>>>>>>> d6a201ed4a (feat: create sales invoice from pick list (#55594))
 			frm: frm,
 		});
 	},
