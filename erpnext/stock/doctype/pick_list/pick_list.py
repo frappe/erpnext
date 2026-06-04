@@ -1468,6 +1468,9 @@ def create_delivery_from_so(pick_list, sales_order_list, target, target_doc=None
 	if not target_doc:
 		return
 
+	if target == "Sales Invoice":
+		target_doc.set("items", [])
+
 	for so in sales_order_list:
 		map_pl_locations(pick_list, item_table_mapper, target_doc, so)
 
