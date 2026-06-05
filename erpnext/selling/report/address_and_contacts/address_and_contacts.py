@@ -11,13 +11,14 @@ field_map = {
 		"name",
 		"address_line1",
 		"address_line2",
+		"pincode",
 		"city",
 		"state",
-		"pincode",
 		"country",
 		"is_primary_address",
 	],
 }
+
 
 
 def execute(filters=None):
