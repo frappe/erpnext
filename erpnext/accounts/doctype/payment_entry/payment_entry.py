@@ -10,7 +10,7 @@ from frappe import ValidationError, _, qb, scrub, throw
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import Tuple
-from frappe.query_builder.functions import Count
+from frappe.query_builder.functions import Count, Max
 from frappe.utils import cint, comma_or, flt, getdate, nowdate
 from frappe.utils.data import comma_and, fmt_money, get_link_to_form
 from pypika.functions import Coalesce, Sum
@@ -1861,7 +1861,7 @@ def get_matched_payment_request_of_references(references=None):
 			PR.reference_doctype,
 			PR.reference_name,
 			PR.outstanding_amount.as_("allocated_amount"),
-			PR.name.as_("payment_request"),
+			Max(PR.name).as_("payment_request"),
 			Count("*").as_("count"),
 		)
 		.where(Tuple(PR.reference_doctype, PR.reference_name, PR.outstanding_amount).isin(refs))
@@ -2315,8 +2315,8 @@ def get_orders_to_be_billed(
 		"""
 		select
 			name as voucher_no,
-			if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) as invoice_amount,
-			(if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) - advance_paid) as outstanding_amount,
+			coalesce(nullif({rounded_total_field}, 0), {grand_total_field}) as invoice_amount,
+			(coalesce(nullif({rounded_total_field}, 0), {grand_total_field}) - advance_paid) as outstanding_amount,
 			transaction_date as posting_date
 		from
 			`tab{voucher_type}`
@@ -2324,8 +2324,8 @@ def get_orders_to_be_billed(
 			{party_type} = %s
 			and docstatus = 1
 			and company = %s
-			and status != "Closed"
-			and if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) > advance_paid
+			and status != 'Closed'
+			and coalesce(nullif({rounded_total_field}, 0), {grand_total_field}) > advance_paid
 			and abs(100 - per_billed) > 0.01
 			{condition}
 		order by
@@ -2391,8 +2391,8 @@ def get_negative_outstanding_invoices(
 	return frappe.db.sql(
 		"""
 		select
-			"{voucher_type}" as voucher_type, name as voucher_no, {account} as account,
-			if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) as invoice_amount,
+			'{voucher_type}' as voucher_type, name as voucher_no, {account} as account,
+			coalesce(nullif({rounded_total_field}, 0), {grand_total_field}) as invoice_amount,
 			outstanding_amount, posting_date,
 			due_date, conversion_rate as exchange_rate
 		from
