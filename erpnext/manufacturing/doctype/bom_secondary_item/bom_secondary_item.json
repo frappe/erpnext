@@ -6,17 +6,13 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-<<<<<<< HEAD
   "type",
-=======
->>>>>>> e2a1f6057d (feat: show non stock items and secondary items in work order (#55631))
   "rate",
   "column_break_gres",
   "is_legacy",
   "section_break_sbnk",
   "item_code",
   "item_name",
-  "secondary_item_type",
   "uom",
   "column_break_atlf",
   "qty",
@@ -222,11 +218,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
-<<<<<<< HEAD
  "modified": "2026-03-11 12:12:29.208031",
-=======
- "modified": "2026-06-03 16:10:18.474377",
->>>>>>> e2a1f6057d (feat: show non stock items and secondary items in work order (#55631))
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Secondary Item",

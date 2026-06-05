@@ -7,7 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "item_code",
-  "secondary_item_type",
+  "type",
   "qty",
   "uom",
   "column_break_lrsc",
@@ -23,7 +23,7 @@
    "options": "Item"
   },
   {
-   "fieldname": "secondary_item_type",
+   "fieldname": "type",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Type"

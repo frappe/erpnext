@@ -10,7 +10,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Case
-from frappe.query_builder.functions import Coalesce, IfNull, Sum
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import (
 	cint,
 	date_diff,
@@ -183,11 +183,11 @@ class WorkOrder(Document):
 			.where(
 				(parent.work_order == self.name)
 				& (parent.docstatus == 1)
-				& ((child.secondary_item_type != "") | (child.is_legacy_scrap_item == 1))
+				& ((child.type != "") | (child.is_legacy_scrap_item == 1))
 			)
 			.select(
 				child.item_code,
-				Coalesce(child.secondary_item_type, "Scrap (Legacy)").as_("secondary_item_type"),
+				Case().when(child.is_legacy_scrap_item == 1, "Scrap (Legacy)").else_(child.type).as_("type"),
 				child.qty,
 				child.uom,
 				child.amount,
@@ -203,7 +203,7 @@ class WorkOrder(Document):
 				filters={"name": self.bom_no},
 				fields=[
 					"secondary_items.item_code",
-					"secondary_items.secondary_item_type",
+					"secondary_items.type",
 					"secondary_items.qty",
 					"secondary_items.uom",
 					"secondary_items.cost as amount",

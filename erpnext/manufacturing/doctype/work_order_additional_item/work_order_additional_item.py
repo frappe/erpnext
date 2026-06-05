@@ -21,7 +21,7 @@ class WorkOrderAdditionalItem(Document):
 		parenttype: DF.Data
 		qty: DF.Float
 		rate: DF.Currency
-		secondary_item_type: DF.Data | None
+		type: DF.Data | None
 		uom: DF.Link | None
 	# end: auto-generated types
 
