@@ -64,6 +64,7 @@ def get_tasks(project, start=0, search=None, item_status=None):
 	return list(filter(lambda x: not x.parent_task, tasks))
 
 
+<<<<<<< HEAD
 @frappe.whitelist()
 def get_task_html(project, start=0, item_status=None):
 	return frappe.render_template(
@@ -79,6 +80,8 @@ def get_task_html(project, start=0, item_status=None):
 	)
 
 
+=======
+>>>>>>> 7c6b13a838 (chore: remove unused whitelisted method from project (#55648))
 def get_timesheets(project, start=0, search=None):
 	filters = {"project": project}
 	if search:
@@ -104,6 +107,7 @@ def get_timesheets(project, start=0, search=None):
 	return timesheets
 
 
+<<<<<<< HEAD
 @frappe.whitelist()
 def get_timesheet_html(project, start=0):
 	return frappe.render_template(
@@ -113,6 +117,8 @@ def get_timesheet_html(project, start=0):
 	)
 
 
+=======
+>>>>>>> 7c6b13a838 (chore: remove unused whitelisted method from project (#55648))
 def get_attachments(project):
 	return frappe.get_all(
 		"File",
