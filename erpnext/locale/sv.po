@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-31 10:18+0000\n"
-"PO-Revision-Date: 2026-05-31 22:14\n"
+"PO-Revision-Date: 2026-06-05 18:36\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -4302,7 +4302,7 @@ msgstr "Tillåt Försäljning Order med noll kvantitet"
 #. Label of the allow_stale (Check) field in DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Allow Stale Exchange Rates"
-msgstr "Tillåt Inaktuella Valutaväxling Kurser"
+msgstr "Tillåt Inaktuella Växelkurser"
 
 #. Label of the allow_zero_qty_in_supplier_quotation (Check) field in DocType
 #. 'Buying Settings'
@@ -6362,7 +6362,7 @@ msgstr "Auktoriserad Värde"
 #. 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Auto Create Exchange Rate Revaluation"
-msgstr "Automatiskt Skapa Valutaväxling Kurs Omvärdering"
+msgstr "Automatiskt Skapa Växelkurs Omvärdering"
 
 #. Label of the auto_create_serial_and_batch_bundle_for_outward (Check) field
 #. in DocType 'Stock Settings'
@@ -12020,7 +12020,7 @@ msgstr "Konsoliderad Kredit Faktura"
 #: erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.json
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 msgid "Consolidated Financial Statement"
-msgstr "Konsoliderad Finans Rapport"
+msgstr "Konsoliderad Bokslut Rapport"
 
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
@@ -13285,11 +13285,11 @@ msgstr "Skapa Kassa Öppning Post"
 #: erpnext/accounts/doctype/payment_request/payment_request.js:66
 #: erpnext/accounts/onboarding_step/create_payment_entry/create_payment_entry.json
 msgid "Create Payment Entry"
-msgstr "Skapa Betalning Post"
+msgstr "Skapa Kontering Post"
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:861
 msgid "Create Payment Entry for Consolidated POS Invoices."
-msgstr "Skapa Betalning Post för Konsoliderade Kassa Fakturor."
+msgstr "Skapa Kontering Post för Konsoliderade Kassa Fakturor."
 
 #: erpnext/public/js/controllers/transaction.js:519
 msgid "Create Payment Request"
@@ -14002,7 +14002,7 @@ msgstr "Cup"
 #: erpnext/setup/doctype/currency_exchange/currency_exchange.json
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "Currency Exchange"
-msgstr "Valutaväxling Kurs"
+msgstr "Valutaväxling"
 
 #. Label of the currency_exchange_section (Section Break) field in DocType
 #. 'Accounts Settings'
@@ -14065,7 +14065,7 @@ msgstr "Valuta kan inte ändras efter att poster är skapade med någon annan va
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_engine.py:258
 msgid "Currency filters are currently unsupported in Custom Financial Report."
-msgstr "Valuta filter stöds för närvarande inte i Anpassad Finans Rapport."
+msgstr "Valuta filter stöds för närvarande inte i Anpassad Bokslut Rapport."
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1604
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1672
@@ -14135,7 +14135,7 @@ msgstr "Aktuell Stycklista och ny Stycklista kan inte vara samma"
 #. Revaluation Account'
 #: erpnext/accounts/doctype/exchange_rate_revaluation_account/exchange_rate_revaluation_account.json
 msgid "Current Exchange Rate"
-msgstr "Aktuell Växel Kurs"
+msgstr "Aktuell Växelkurs"
 
 #. Label of the current_invoice_end (Date) field in DocType 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
@@ -14253,7 +14253,7 @@ msgstr "Anpassad API"
 #: erpnext/accounts/report/custom_financial_statement/custom_financial_statement.json
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Custom Financial Statement"
-msgstr "Anpassad Finans Rapport"
+msgstr "Anpassad Bokslut Rapport"
 
 #. Label of the custom_remark (Check) field in DocType 'Journal Entry'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
@@ -18368,11 +18368,11 @@ msgstr "Förfluten Tid"
 #. Option for the 'Fuel Type' (Select) field in DocType 'Vehicle'
 #: erpnext/setup/doctype/vehicle/vehicle.json
 msgid "Electric"
-msgstr "Elektrisk"
+msgstr "El"
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:222
 msgid "Electrical"
-msgstr "Elektrisk"
+msgstr "El"
 
 #: erpnext/patches/v16_0/make_workstation_operating_components.py:47
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:314
@@ -19502,7 +19502,7 @@ msgstr "Valutaväxling Resultat Belopp har bokförts genom {0}"
 #: erpnext/stock/doctype/landed_cost_taxes_and_charges/landed_cost_taxes_and_charges.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Exchange Rate"
-msgstr "Växel Kurs"
+msgstr "Växelkurs"
 
 #. Name of a DocType
 #. Option for the 'Entry Type' (Select) field in DocType 'Journal Entry'
@@ -19517,24 +19517,24 @@ msgstr "Växel Kurs"
 #: erpnext/accounts/doctype/journal_entry_template/journal_entry_template.json
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 msgid "Exchange Rate Revaluation"
-msgstr "Valutaväxling Kurs Omvärdering"
+msgstr "Växelkurs Omvärdering"
 
 #. Label of the accounts (Table) field in DocType 'Exchange Rate Revaluation'
 #. Name of a DocType
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.json
 #: erpnext/accounts/doctype/exchange_rate_revaluation_account/exchange_rate_revaluation_account.json
 msgid "Exchange Rate Revaluation Account"
-msgstr "Valutaväxling Kurs Omvärdering Konto"
+msgstr "Växelkurs Omvärdering Konto"
 
 #. Label of the exchange_rate_revaluation_settings_section (Section Break)
 #. field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Exchange Rate Revaluation Settings"
-msgstr "Valutaväxling Kurs Omvärdering Inställningar"
+msgstr "Växelkurs Omvärdering Inställningar"
 
 #: erpnext/controllers/sales_and_purchase_return.py:72
 msgid "Exchange Rate must be same as {0} {1} ({2})"
-msgstr "Valutaväxling Kurs måste vara samma som {0} {1} ({2})"
+msgstr "Växelkurs måste vara samma som {0} {1} ({2})"
 
 #. Option for the 'Entry Type' (Select) field in DocType 'Journal Entry'
 #. Option for the 'Journal Entry Type' (Select) field in DocType 'Journal Entry
@@ -20202,7 +20202,7 @@ msgstr "Hämtar Försäljning Ordrar..."
 #: erpnext/accounts/doctype/dunning/dunning.js:135
 #: erpnext/public/js/controllers/transaction.js:1593
 msgid "Fetching exchange rates ..."
-msgstr "Hämtar växel kurs ..."
+msgstr "Hämtar växelkurser ..."
 
 #: erpnext/manufacturing/page/bom_comparison_tool/bom_comparison_tool.js:74
 msgid "Fetching..."
@@ -23706,7 +23706,7 @@ msgstr "Ignorera Tom Lager"
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 #: erpnext/accounts/report/general_ledger/general_ledger.js:224
 msgid "Ignore Exchange Rate Revaluation and Gain / Loss Journals"
-msgstr "Ignorera Valutakurs omvärdering och Resultat Journaler"
+msgstr "Ignorera Växelkurs Omvärdering och Resultat Journaler"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:1470
 msgid "Ignore Existing Ordered Qty"
@@ -24171,7 +24171,7 @@ msgstr "Inkludera Standard Finans Register Tillgångar"
 #: erpnext/accounts/report/profit_and_loss_statement/profit_and_loss_statement.js:46
 #: erpnext/accounts/report/trial_balance/trial_balance.js:105
 msgid "Include Default FB Entries"
-msgstr "Visa Standard Finans Register Poster"
+msgstr "Visa Standard Bokslut Register Poster"
 
 #: erpnext/buying/report/supplier_quotation_comparison/supplier_quotation_comparison.js:90
 msgid "Include Expired"
@@ -26028,7 +26028,7 @@ msgstr "Är Mall"
 #. Label of the is_transporter (Check) field in DocType 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "Is Transporter"
-msgstr "Är Leverantör"
+msgstr "Är Transportör"
 
 #: erpnext/setup/install.py:161
 msgid "Is Your Company Address"
@@ -29992,7 +29992,7 @@ msgstr "Stäm av"
 
 #: banking/src/pages/BankReconciliation.tsx:116
 msgid "Match and Reconcile"
-msgstr "Jämför och Avstäm"
+msgstr "Jämför och Stäm av"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:62
 msgid "Match or Create"
@@ -31802,7 +31802,7 @@ msgstr "Ny Personal"
 #. Revaluation Account'
 #: erpnext/accounts/doctype/exchange_rate_revaluation_account/exchange_rate_revaluation_account.json
 msgid "New Exchange Rate"
-msgstr "Ny Växel Kurs"
+msgstr "Ny Växelkurs"
 
 #. Label of the expenses_booked (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -32317,7 +32317,7 @@ msgstr "Inga utestående fakturor hittades"
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:329
 msgid "No outstanding invoices require exchange rate revaluation"
-msgstr "Inga utestående fakturor kräver valutaväxling kurs omvärdering"
+msgstr "Inga utestående fakturor kräver växelkurs omvärdering"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:2432
 msgid "No outstanding {0} found for the {1} {2} which qualify the filters you have specified."
@@ -32416,7 +32416,7 @@ msgstr "Inga transaktioner hittades för angivna filter."
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:222
 msgid "No unreconciled transactions found"
-msgstr "Inga oavstämda transaktioner hittades"
+msgstr "Inga ej avstämda transaktioner hittades"
 
 #: erpnext/templates/includes/macros.html:291
 #: erpnext/templates/includes/macros.html:324
@@ -32630,7 +32630,7 @@ msgstr "Obs: Artikel {0} angiven flera gånger"
 
 #: erpnext/controllers/accounts_controller.py:713
 msgid "Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified"
-msgstr "Obs: Betalning post kommer inte skapas eftersom \"Kassa eller Bank Konto\" angavs inte"
+msgstr "Obs: Kontering Post kommer inte skapas eftersom \"Kassa eller Bank Konto\" angavs inte"
 
 #: erpnext/accounts/doctype/cost_center/cost_center.js:30
 msgid "Note: This Cost Center is a Group. Cannot make accounting entries against groups."
@@ -32923,7 +32923,7 @@ msgstr "Avräkning för Bokföring Dimension"
 #: erpnext/setup/doctype/supplier_group/supplier_group.json
 #: erpnext/stock/doctype/warehouse/warehouse.json
 msgid "Old Parent"
-msgstr "Tidigare Överordnad"
+msgstr "Gammal Överordnad"
 
 #. Option for the 'Reconciliation Takes Effect On' (Select) field in DocType
 #. 'Company'
@@ -33056,7 +33056,7 @@ msgstr "Auktioner på Nätet"
 #: erpnext/accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.json
 #: erpnext/setup/doctype/company/company.json
 msgid "Only 'Payment Entries' made against this advance account are supported."
-msgstr "Endast \"Betalning Poster\" som skapas mot detta förskott konto stöds."
+msgstr "Endast \"Kontering Poster\" som skapas mot detta förskott konto stöds."
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:105
 msgid "Only CSV and Excel files can be used to for importing data. Please check the file format you are trying to upload"
@@ -35572,7 +35572,7 @@ msgstr "Parti Användare"
 
 #: erpnext/accounts/doctype/bank_transaction_rule/bank_transaction_rule.py:72
 msgid "Party account is required to create a payment entry."
-msgstr "Parti konto erfordras för att skapa betalning post."
+msgstr "Parti konto erfordras för att skapa kontering post."
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:475
 msgid "Party can only be one of {0}"
@@ -35589,11 +35589,11 @@ msgstr "Parti erfodrdras"
 
 #: erpnext/accounts/doctype/bank_transaction_rule/bank_transaction_rule.py:69
 msgid "Party is required create a payment entry."
-msgstr "Parti erfordras för att skapa betalning post."
+msgstr "Parti erfordras för att skapa kontering post."
 
 #: erpnext/accounts/doctype/bank_transaction_rule/bank_transaction_rule.py:66
 msgid "Party type is required to create a payment entry."
-msgstr "Parti typ erfordras för att skapa betalning post."
+msgstr "Parti typ erfordras för att skapa kontering post."
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -35841,7 +35841,7 @@ msgstr "Kontering Post"
 
 #: banking/src/components/features/BankReconciliation/RecordPaymentModal.tsx:361
 msgid "Payment Entry Created"
-msgstr "Betalning Post Skapad"
+msgstr "Kontering Post Skapad"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/payment_entry_deduction/payment_entry_deduction.json
@@ -35864,7 +35864,7 @@ msgstr "Betalning Post har ändrats efter hämtning.Hämta igen."
 #: erpnext/accounts/doctype/payment_request/payment_request.py:175
 #: erpnext/accounts/doctype/payment_request/payment_request.py:797
 msgid "Payment Entry is already created"
-msgstr "Betalning Post är redan skapad"
+msgstr "Kontering Post är redan skapad"
 
 #: erpnext/controllers/accounts_controller.py:1618
 msgid "Payment Entry {0} is linked against Order {1}, check if it should be pulled as advance in this invoice."
@@ -39029,7 +39029,7 @@ msgstr "Prislista Standard"
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Price List Exchange Rate"
-msgstr "Prislista Växel Kurs"
+msgstr "Prislista Växelkurs"
 
 #. Label of the price_list_name (Data) field in DocType 'Price List'
 #: erpnext/stock/doctype/price_list/price_list.json
@@ -46174,7 +46174,7 @@ msgstr "Rad # {0}: Antingen Följesedel eller Packad Artikel Referens erfordras"
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:1023
 #: erpnext/controllers/taxes_and_totals.py:1373
 msgid "Row {0}: Exchange Rate is mandatory"
-msgstr "Rad # {0}: Valutaväxling Kurs erfordras"
+msgstr "Rad # {0}: Växelkurs erfordras"
 
 #: erpnext/assets/doctype/asset/asset.py:613
 msgid "Row {0}: Expected Value After Useful Life cannot be negative"
@@ -48761,7 +48761,7 @@ msgstr "Serie Nummer och Parti Väljare kan inte användas när Använd Serie Nu
 #: erpnext/stock/workspace/stock/stock.json
 #: erpnext/workspace_sidebar/stock.json
 msgid "Serial No and Batch Traceability"
-msgstr "Serienummer och Parti Spårbarhet"
+msgstr "Serie Nummer och Parti Spårbarhet"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1179
 msgid "Serial No is mandatory"
@@ -50564,7 +50564,7 @@ msgstr "Käll DocType"
 #. Label of the source_exchange_rate (Float) field in DocType 'Payment Entry'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
 msgid "Source Exchange Rate"
-msgstr "Käll Växelkurs"
+msgstr "Referens Växelkurs"
 
 #. Label of the source_fieldname (Data) field in DocType 'Inventory Dimension'
 #: erpnext/stock/doctype/inventory_dimension/inventory_dimension.json
@@ -51003,7 +51003,7 @@ msgstr "Utdrag Format"
 
 #: banking/src/pages/BankStatementImporter.tsx:139
 msgid "Statement Import Instructions"
-msgstr "Utdrag Import Instruktioner"
+msgstr "Bankutdrag Import Instruktioner"
 
 #: erpnext/accounts/report/general_ledger/general_ledger.html:124
 msgid "Statement Of Accounts"
@@ -53116,7 +53116,7 @@ msgstr "Leverantör erfordras för alla valda artiklar"
 #. Description of a DocType
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "Supplier of Goods or Services."
-msgstr "Leverantör av Varor eller Tjänster"
+msgstr "Leverantör av Artiklar eller Tjänster."
 
 #: erpnext/buying/doctype/supplier_quotation/supplier_quotation.py:190
 msgid "Supplier {0} not found in {1}"
@@ -53347,7 +53347,7 @@ msgstr "Fördelning"
 #. Label of the target_exchange_rate (Float) field in DocType 'Payment Entry'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
 msgid "Target Exchange Rate"
-msgstr "Växelkurs"
+msgstr "Siktad Växelkurs"
 
 #. Label of the target_fieldname (Data) field in DocType 'Inventory Dimension'
 #: erpnext/stock/doctype/inventory_dimension/inventory_dimension.json
@@ -55168,7 +55168,7 @@ msgstr "Denna tillgång kategori är angiven som ej avskrivningsbar. Inaktivera 
 
 #: banking/src/pages/BankStatementImporter.tsx:160
 msgid "This can contain \"CR\"/\"DR\" values or positive/negative values. You could also have a separate column for CR/DR."
-msgstr "Detta kan innehålla \"CR\"/\"DR\" värden eller positiva/negativa värden. Du kan också ha en separat kolumn för CR/DR."
+msgstr "Detta kan innehålla \"CR\"/\"DR\" värden eller positiva/negativa värden. Du kan också ha separat kolumn för CR/DR."
 
 #: erpnext/buying/doctype/supplier_scorecard/supplier_scorecard_dashboard.py:7
 msgid "This covers all scorecards tied to this Setup"
@@ -57799,12 +57799,12 @@ msgstr "Kan inte hämta DocType detaljer. Kontakta system administratör."
 
 #: erpnext/setup/utils.py:154
 msgid "Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually"
-msgstr "Kunde inte hitta valuta växelkurs för {0} till {1} för nyckel datum {2}. skapa valuta växel post manuellt"
+msgstr "Kunde inte hitta växelkurs för {0} till {1} för nyckel datum {2}. skapa valuta växel post manuellt"
 
 #: erpnext/accounts/doctype/account_closing_balance/account_closing_balance.py:165
 #: erpnext/accounts/doctype/gl_entry/gl_entry.py:312
 msgid "Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually."
-msgstr "Kunde inte hitta valuta växelkurs för {0} till {1} för nyckel datum {2}. skapa valuta växel post manuellt."
+msgstr "Kunde inte hitta växelkurs för {0} till {1} för nyckel datum {2}. Skapa Växelkurs post manuellt."
 
 #: erpnext/buying/doctype/supplier_scorecard/supplier_scorecard.py:78
 msgid "Unable to find score starting at {0}. You need to have standing scores covering 0 to 100"
