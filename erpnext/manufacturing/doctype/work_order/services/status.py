@@ -124,7 +124,11 @@ class StatusService:
 		if status in ["Closed", "Stopped"]:
 			return status
 
-		status = "In Process" if flt(self.doc.material_transferred_for_manufacturing) > 0 else "Not Started"
+		status = (
+			"In Process"
+			if flt(self.doc.material_transferred_for_manufacturing) > 0 or self.doc.skip_transfer
+			else "Not Started"
+		)
 		precision = frappe.get_precision("Work Order", "produced_qty")
 		total_qty = flt(self.doc.produced_qty, precision) + flt(self.doc.process_loss_qty, precision)
 		if flt(total_qty, precision) >= flt(self.doc.qty, precision):
