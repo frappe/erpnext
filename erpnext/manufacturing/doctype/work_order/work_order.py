@@ -406,7 +406,7 @@ class WorkOrder(Document):
 		elif self.docstatus == 1:
 			if status not in ["Closed", "Stopped"]:
 				status = "Not Started"
-				if flt(self.material_transferred_for_manufacturing) > 0:
+				if flt(self.material_transferred_for_manufacturing) > 0 or self.skip_transfer:
 					status = "In Process"
 
 				precision = frappe.get_precision("Work Order", "produced_qty")
