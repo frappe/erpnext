@@ -10,12 +10,7 @@ from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
 from frappe.query_builder.functions import CurDate, Sum
 from frappe.utils import cint, flt, get_link_to_form
-<<<<<<< HEAD
 from frappe.utils.data import add_days
-from frappe.utils.jinja import render_template
-=======
-from frappe.utils.data import DateTimeLikeObject, add_days
->>>>>>> 3a50056968 (fix: naming series issue)
 
 
 class UnableToSelectBatchError(frappe.ValidationError):
