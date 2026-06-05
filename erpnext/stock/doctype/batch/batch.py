@@ -10,8 +10,12 @@ from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
 from frappe.query_builder.functions import CurDate, Sum
 from frappe.utils import cint, flt, get_link_to_form
+<<<<<<< HEAD
 from frappe.utils.data import add_days
 from frappe.utils.jinja import render_template
+=======
+from frappe.utils.data import DateTimeLikeObject, add_days
+>>>>>>> 3a50056968 (fix: naming series issue)
 
 
 class UnableToSelectBatchError(frappe.ValidationError):
@@ -225,10 +229,8 @@ class Batch(Document):
 		:return: The string that was generated.
 		"""
 		naming_series_prefix = _get_batch_prefix()
-		# validate_template(naming_series_prefix)
-		naming_series_prefix = render_template(str(naming_series_prefix), self.__dict__)
 		key = _make_naming_series_key(naming_series_prefix)
-		name = make_autoname(key)
+		name = make_autoname(key, doc=self)
 
 		return name
 
