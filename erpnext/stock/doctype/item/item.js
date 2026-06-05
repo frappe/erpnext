@@ -255,12 +255,13 @@ frappe.ui.form.on("Item", {
 			);
 		}
 
-		erpnext.item.edit_prices_button(frm);
 		erpnext.item.toggle_attributes(frm);
 
 		if (!frm.doc.is_fixed_asset) {
 			erpnext.item.make_dashboard(frm);
 		}
+
+		erpnext.item.render_item_prices(frm);
 
 		frm.add_custom_button(__("Duplicate"), function () {
 			var new_item = frappe.model.copy_doc(frm.doc);
@@ -665,24 +666,60 @@ $.extend(erpnext.item, {
 		}
 	},
 
-	edit_prices_button: function (frm) {
-		frm.add_custom_button(
-			__("Add / Edit Prices"),
-			function () {
-				frappe.set_route("List", "Item Price", { item_code: frm.doc.name });
-			},
-			__("Actions")
+	render_item_prices: function (frm) {
+		if (frm.doc.__islocal) return;
+		const requested_item = frm.doc.name;
+		const container = frm.fields_dict["prices_html"].$wrapper;
+
+		container.html(
+			`<div class="text-muted text-center" style="padding: 20px;">${__("Loading...")}</div>`
 		);
 
-		frm.add_custom_button(
-			__("Make Lead Time"),
-			function () {
-				frm.make_new("Item Lead Time", {
-					item_code: frm.doc.name,
+		frappe.call({
+			method: "erpnext.stock.doctype.item.item.get_item_prices",
+			args: { item_code: requested_item },
+
+			callback: function (r) {
+				if (requested_item !== frm.doc.name) return;
+
+				if (!r.message) return;
+
+				const { prices, has_more } = r.message;
+
+				const html = frappe.render_template("item_prices", {
+					prices,
+					has_more,
+					item_code: requested_item,
+					stock_uom: frm.doc.stock_uom,
+				});
+
+				container.html(html);
+
+				container.find(".add-price-btn").on("click", () => {
+					const filters = {};
+					if (frm.doc.is_sales_item && !frm.doc.is_purchase_item) {
+						filters.selling = 1;
+					} else if (frm.doc.is_purchase_item && !frm.doc.is_sales_item) {
+						filters.buying = 1;
+					}
+					frappe.new_doc(
+						"Item Price",
+						{ item_code: requested_item, uom: frm.doc.stock_uom },
+						(dialog) => {
+							if (Object.keys(filters).length) {
+								dialog.fields_dict.price_list.get_query = () => ({ filters });
+							}
+						}
+					);
+				});
+
+				container.find(".price-row").on("click", function (e) {
+					if ($(e.target).is("a")) return;
+
+					frappe.set_route("Form", "Item Price", $(this).data("name"));
 				});
 			},
-			__("Actions")
-		);
+		});
 	},
 
 	weight_to_validate: function (frm) {
