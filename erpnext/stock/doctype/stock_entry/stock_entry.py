@@ -651,6 +651,7 @@ class StockEntry(StockController):
 		):
 			return
 
+<<<<<<< HEAD
 		if self.project:
 			amount = frappe.db.sql(
 				""" select ifnull(sum(sed.amount), 0)
@@ -681,6 +682,13 @@ class StockEntry(StockController):
 			project = frappe.get_doc("Project", self.project)
 			project.total_consumed_material_cost = amount
 			project.save()
+=======
+		projects = set(item.project for item in self.items if item.project)
+		for project in projects:
+			project_doc = frappe.get_doc("Project", project)
+			project_doc.set_consumed_material_cost()
+			project_doc.save(ignore_permissions=True)
+>>>>>>> 4b0b7adeee (fix: bypass project permission check when updating consumed material cost)
 
 	def validate_item(self):
 		stock_items = self.get_stock_items()
