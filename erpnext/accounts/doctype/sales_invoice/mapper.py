@@ -378,7 +378,8 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	return doclist
 
 
-def get_received_items(reference_name, doctype, reference_fieldname):
+@frappe.whitelist()
+def get_received_items(reference_name: str, doctype: str, reference_fieldname: str):
 	reference_field = "inter_company_invoice_reference"
 	if doctype == "Purchase Order":
 		reference_field = "inter_company_order_reference"

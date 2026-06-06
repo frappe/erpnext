@@ -179,12 +179,31 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 						: "Inter Company Purchase Invoice";
 
 				me.frm.add_custom_button(
-					button_label,
+					__(button_label),
 					function () {
 						me.make_inter_company_invoice();
 					},
 					__("Create")
 				);
+
+				frappe.call({
+					method: "erpnext.accounts.doctype.sales_invoice.mapper.get_received_items",
+					args: {
+						reference_name: me.frm.doc.name,
+						doctype: "Purchase Invoice",
+						reference_fieldname: "sales_invoice_item",
+					},
+					callback: function (r) {
+						if (r.exc) return;
+						const received_items = r.message || {};
+						const has_pending_qty = me.frm.doc.items.some(
+							(item) => flt(item.qty) - flt(received_items[item.name] || 0) > 0
+						);
+						if (!has_pending_qty) {
+							me.frm.remove_custom_button(__(button_label), __("Create"));
+						}
+					},
+				});
 			}
 		}
 
