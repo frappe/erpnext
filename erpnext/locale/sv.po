@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-31 10:18+0000\n"
-"PO-Revision-Date: 2026-06-05 18:36\n"
+"PO-Revision-Date: 2026-06-06 18:47\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -76,7 +76,7 @@ msgstr "Namn"
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:144
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:185
 msgid " Phantom Item"
-msgstr " Fantom Artikel"
+msgstr " Virtuell Artikel"
 
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:602
 msgid " Rate"
@@ -2741,7 +2741,7 @@ msgstr "Lägg till Order Rabatt"
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:281
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:416
 msgid "Add Phantom Item"
-msgstr "Lägg till Fantom Artikel"
+msgstr "Lägg till Virtuell Artikel"
 
 #. Label of the add_quote (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -6890,14 +6890,14 @@ msgstr "Stycklista Skapad"
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.json
 #: erpnext/workspace_sidebar/manufacturing.json
 msgid "BOM Creator"
-msgstr "Stycklista Generator"
+msgstr "Skapa Stycklista"
 
 #. Label of the bom_creator_item (Data) field in DocType 'BOM'
 #. Name of a DocType
 #: erpnext/manufacturing/doctype/bom/bom.json
 #: erpnext/manufacturing/doctype/bom_creator_item/bom_creator_item.json
 msgid "BOM Creator Item"
-msgstr "Stycklista Generator Post"
+msgstr "Stycklista Post"
 
 #. Label of the bom_detail_no (Data) field in DocType 'Purchase Receipt Item
 #. Supplied'
@@ -25876,7 +25876,7 @@ msgstr "Är Period Stängning Verifikat Post"
 #: erpnext/manufacturing/doctype/bom/bom.json
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.js:68
 msgid "Is Phantom BOM"
-msgstr "Är Fantom Stycklista"
+msgstr "Är Virtuell Stycklista"
 
 #. Label of the is_phantom (Check) field in DocType 'BOM Creator'
 #. Label of the is_phantom_item (Check) field in DocType 'BOM Creator Item'
@@ -25886,7 +25886,7 @@ msgstr "Är Fantom Stycklista"
 #: erpnext/manufacturing/doctype/bom_item/bom_item.json
 #: erpnext/manufacturing/report/bom_explorer/bom_explorer.py:68
 msgid "Is Phantom Item"
-msgstr "Är Fantom Artikel"
+msgstr "Är Virtuell Artikel"
 
 #. Label of the po_required (Select) field in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
@@ -31229,7 +31229,7 @@ msgstr "Valuta"
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.js:42
 msgid "Multi-level BOM Creator"
-msgstr "Fler Nivå Stycklista Generator"
+msgstr "Fler Nivå Stycklista"
 
 #. Option for the 'Bank Entry Type' (Select) field in DocType 'Bank Transaction
 #. Rule'
@@ -32484,7 +32484,7 @@ msgstr "Ej Nollvärde"
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.js:117
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:113
 msgid "Non-phantom BOM cannot be created for non-stock item {0}."
-msgstr "Ej Fantom Stycklista kan inte skapas för ej lagerförd artikel {0}."
+msgstr "Ej Virtuell Stycklista kan inte skapas för ej lagerförd artikel {0}."
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:562
 msgid "None of the items have any change in quantity or value."
@@ -36804,16 +36804,16 @@ msgstr "Bensin"
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.js:113
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:110
 msgid "Phantom BOM cannot be created for stock item {0}."
-msgstr "Fantom Stycklista kan inte skapas för lagerförd artikel {0}."
+msgstr "Virtuell Stycklista kan inte skapas för lager artikel {0}."
 
 #: erpnext/manufacturing/doctype/bom/bom_item_preview.html:16
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:321
 msgid "Phantom Item"
-msgstr "Fantom Artikel"
+msgstr "Virtuell Artikel"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:430
 msgid "Phantom Item is mandatory"
-msgstr "Fantom Artikel erfordras"
+msgstr "Virtuell Artikel erfordras"
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:234
 msgid "Pharmaceutical"
@@ -38305,7 +38305,7 @@ msgstr "Ange {0} för Adress {1}"
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:245
 msgid "Please set {0} in BOM Creator {1}"
-msgstr "Ange {0} i Stycklista Generator {1}"
+msgstr "Ange {0} i Stycklista {1}"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1145
 msgid "Please set {0} in Company {1} to account for Exchange Gain / Loss"
