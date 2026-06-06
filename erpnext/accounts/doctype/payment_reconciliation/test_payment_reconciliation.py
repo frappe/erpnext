@@ -2411,6 +2411,56 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		self.assertEqual(flt(pr.allocation[0].difference_amount), 5000.0)
 		pr.reconcile()
 
+	def test_cr_note_split_across_invoices_floating_point_precision(self):
+		"""Regression: when a credit note is split across multiple invoices, floating-point
+		arithmetic (150 - 8.45 - 90.72 = 50.83000000000001) must not cause reconcile() to fail.
+		"""
+		# Create invoices on different posting dates so the sort-by-date order is deterministic:
+		# 8.45 first, 90.72 second, 72.57 third.  This produces the chain:
+		#   150 - 8.45 = 141.55  →  141.55 - 90.72 = 50.83000000000001  (float imprecision)
+		# The last allocation row will therefore carry allocated_amount = 50.83000000000001.
+		si_a = self.create_sales_invoice(qty=1, rate=8.45, posting_date=add_days(nowdate(), -2))
+		si_b = self.create_sales_invoice(qty=1, rate=90.72, posting_date=add_days(nowdate(), -1))
+		si_c = self.create_sales_invoice(qty=1, rate=72.57, posting_date=nowdate())
+
+		cr_note = self.create_sales_invoice(
+			qty=-1, rate=150, posting_date=nowdate(), do_not_save=True, do_not_submit=True
+		)
+		cr_note.is_return = 1
+		cr_note = cr_note.save().submit()
+
+		pr = self.create_payment_reconciliation()
+		# Widen date range so all three invoices (oldest is -2 days) are fetched
+		pr.from_invoice_date = add_days(nowdate(), -2)
+		pr.to_invoice_date = nowdate()
+		pr.from_payment_date = nowdate()
+		pr.to_payment_date = nowdate()
+
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 3)
+		self.assertEqual(len(pr.payments), 1)
+
+		invoices = [x.as_dict() for x in pr.invoices]
+		payments = [x.as_dict() for x in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+
+		# Credit note (150) covers all of si_a (8.45) and si_b (90.72), then partially si_c
+		self.assertEqual(len(pr.allocation), 3)
+		last_row = pr.allocation[-1]
+		# Last allocated amount should be ~50.83 (possibly 50.83000000000001 due to float arithmetic)
+		self.assertAlmostEqual(flt(last_row.allocated_amount), 50.83, places=2)
+
+		# reconcile() must not raise "has been modified after you pulled it" due to float imprecision
+		pr.reconcile()
+
+		si_a.reload()
+		si_b.reload()
+		si_c.reload()
+		self.assertEqual(si_a.outstanding_amount, 0)
+		self.assertEqual(si_b.outstanding_amount, 0)
+		# si_c is only partially settled: 72.57 - 50.83 = 21.74
+		self.assertAlmostEqual(si_c.outstanding_amount, 21.74, places=2)
+
 
 def create_fiscal_year(company, year_start_date, year_end_date):
 	fy_docname = frappe.db.exists(
