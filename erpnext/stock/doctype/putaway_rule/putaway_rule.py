@@ -334,3 +334,71 @@ def get_serial_nos_to_allocate(serial_nos, to_allocate):
 		return "\n".join(allocated_serial_nos) if allocated_serial_nos else ""
 	else:
 		return ""
+
+
+def validate_putaway_capacity(doc):
+	# if over receipt is attempted while 'apply putaway rule' is disabled
+	# and if rule was applied on the transaction, validate it.
+	valid_doctype = doc.doctype in (
+		"Purchase Receipt",
+		"Stock Entry",
+		"Purchase Invoice",
+		"Stock Reconciliation",
+	)
+
+	if not frappe.get_all("Putaway Rule", limit=1):
+		return
+
+	if doc.doctype == "Purchase Invoice" and doc.get("update_stock") == 0:
+		valid_doctype = False
+
+	if valid_doctype:
+		rule_map = defaultdict(dict)
+		for item in doc.get("items"):
+			warehouse_field = "t_warehouse" if doc.doctype == "Stock Entry" else "warehouse"
+			rule = frappe.db.get_value(
+				"Putaway Rule",
+				{"item_code": item.get("item_code"), "warehouse": item.get(warehouse_field)},
+				["stock_capacity", "name", "disable"],
+				as_dict=True,
+			)
+			if rule:
+				if rule.get("disable"):
+					continue  # dont validate for disabled rule
+
+				if doc.doctype == "Stock Reconciliation":
+					stock_qty = flt(item.qty)
+				else:
+					stock_qty = (
+						flt(item.transfer_qty) if doc.doctype == "Stock Entry" else flt(item.stock_qty)
+					)
+
+				rule_name = rule.get("name")
+				if not rule_map[rule_name]:
+					rule_map[rule_name]["warehouse"] = item.get(warehouse_field)
+					rule_map[rule_name]["item"] = item.get("item_code")
+					rule_map[rule_name]["qty_put"] = 0
+					rule_map[rule_name]["capacity"] = (
+						rule.stock_capacity
+						if doc.doctype == "Stock Reconciliation"
+						else get_available_putaway_capacity(rule_name)
+					)
+				rule_map[rule_name]["qty_put"] += flt(stock_qty)
+
+		for rule, values in rule_map.items():
+			if flt(values["qty_put"]) > flt(values["capacity"]):
+				message = _prepare_over_receipt_message(rule, values)
+				frappe.throw(msg=message, title=_("Over Receipt"))
+
+
+def _prepare_over_receipt_message(rule, values):
+	message = _("{0} qty of Item {1} is being received into Warehouse {2} with capacity {3}.").format(
+		frappe.bold(values["qty_put"]),
+		frappe.bold(values["item"]),
+		frappe.bold(values["warehouse"]),
+		frappe.bold(values["capacity"]),
+	)
+	message += "<br><br>"
+	rule_link = frappe.utils.get_link_to_form("Putaway Rule", rule)
+	message += _("Please adjust the qty or edit {0} to proceed.").format(rule_link)
+	return message

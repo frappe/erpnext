@@ -1,7 +1,7 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "allow_copy": 1,
- "beta": 1,
  "creation": "2017-08-29 02:22:54.947711",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -90,7 +90,7 @@
  "hide_toolbar": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-03-31 01:47:20.360352",
+ "modified": "2026-05-30 23:18:48.691227",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Opening Invoice Creation Tool",

@@ -41,6 +41,8 @@ frappe.ui.form.on("Delivery Trip", {
 	},
 
 	refresh: function (frm) {
+		frm.ignore_doctypes_on_cancel_all = ["Delivery Note"];
+
 		if (frm.doc.docstatus == 1 && frm.doc.delivery_stops.length > 0) {
 			frm.add_custom_button(__("Notify Customers via Email"), function () {
 				frm.trigger("notify_customers");
@@ -52,7 +54,7 @@ frappe.ui.form.on("Delivery Trip", {
 				__("Delivery Note"),
 				() => {
 					erpnext.utils.map_current_doc({
-						method: "erpnext.stock.doctype.delivery_note.delivery_note.make_delivery_trip",
+						method: "erpnext.stock.doctype.delivery_note.mapper.make_delivery_trip",
 						source_doctype: "Delivery Note",
 						target: frm,
 						date_field: "posting_date",

@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
-from frappe.utils import getdate
+from frappe.utils import cstr, getdate
 
 from erpnext import allow_regional
 from erpnext.controllers.accounts_controller import validate_account_head
@@ -48,7 +48,7 @@ class TaxWithholdingCategory(Document):
 		for d in self.get("rates"):
 			if getdate(d.from_date) >= getdate(d.to_date):
 				frappe.throw(_("Row #{0}: From Date cannot be before To Date").format(d.idx))
-			group_rates[d.tax_withholding_group].append(d)
+			group_rates[cstr(d.tax_withholding_group)].append(d)
 
 		# Validate overlapping dates within each group
 		for group, rates in group_rates.items():
@@ -92,10 +92,9 @@ class TaxWithholdingCategory(Document):
 
 	def get_applicable_tax_row(self, posting_date, tax_withholding_group):
 		for row in self.rates:
-			if (
-				getdate(row.from_date) <= getdate(posting_date) <= getdate(row.to_date)
-				and row.tax_withholding_group == tax_withholding_group
-			):
+			if getdate(row.from_date) <= getdate(posting_date) <= getdate(row.to_date) and cstr(
+				row.tax_withholding_group
+			) == cstr(tax_withholding_group):
 				return row
 
 		frappe.throw(_("No Tax Withholding data found for the current posting date."))
@@ -116,7 +115,7 @@ class TaxWithholdingDetails:
 	def __init__(
 		self,
 		tax_withholding_categories: list[str],
-		tax_withholding_group: str,
+		tax_withholding_group: str | None,
 		posting_date: str,
 		party_type: str,
 		party: str,
@@ -128,6 +127,7 @@ class TaxWithholdingDetails:
 		self.party_type = party_type
 		self.party = party
 		self.company = company
+		self.tax_id = get_tax_id_for_party(self.party_type, self.party)
 
 	def get(self) -> list:
 		"""
@@ -161,6 +161,7 @@ class TaxWithholdingDetails:
 				disable_cumulative_threshold=doc.disable_cumulative_threshold,
 				disable_transaction_threshold=doc.disable_transaction_threshold,
 				taxable_amount=0,
+				tax_id=self.tax_id,
 			)
 
 			# ldc (only if valid based on posting date)
@@ -181,17 +182,13 @@ class TaxWithholdingDetails:
 		if self.party_type != "Supplier":
 			return ldc_details
 
-		# NOTE: This can be a configurable option
-		# To check if filter by tax_id is needed
-		tax_id = get_tax_id_for_party(self.party_type, self.party)
-
 		# ldc details
-		ldc_records = self.get_valid_ldc_records(tax_id)
+		ldc_records = self.get_valid_ldc_records(self.tax_id)
 		if not ldc_records:
 			return ldc_details
 
 		ldc_names = [ldc.name for ldc in ldc_records]
-		ldc_utilization_map = self.get_ldc_utilization_by_category(ldc_names, tax_id)
+		ldc_utilization_map = self.get_ldc_utilization_by_category(ldc_names, self.tax_id)
 
 		# map
 		for ldc in ldc_records:
@@ -254,4 +251,5 @@ class TaxWithholdingDetails:
 
 @allow_regional
 def get_tax_id_for_party(party_type, party):
-	return None
+	# cannot use tax_id from doc because payment and journal entry do not have tax_id field.\
+	return frappe.db.get_value(party_type, party, "tax_id")

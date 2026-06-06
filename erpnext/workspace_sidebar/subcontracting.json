@@ -71,7 +71,7 @@
    "icon": "",
    "indent": 0,
    "keep_closed": 0,
-   "label": "Subcontracting Order",
+   "label": "Subcontracting Inward Order",
    "link_to": "Subcontracting Inward Order",
    "link_type": "DocType",
    "show_arrow": 0,
@@ -230,7 +230,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-02-23 22:40:17.130101",
+ "modified": "2026-04-06 20:22:17.130321",
  "modified_by": "Administrator",
  "module": "Buying",
  "module_onboarding": "Subcontracting Onboarding",

@@ -8,7 +8,6 @@ import frappe
 from frappe import _
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.model.document import Document
-from frappe.utils import cint
 from frappe.utils.html_utils import clean_html
 
 from erpnext.stock.utils import check_pending_reposting
@@ -320,9 +319,8 @@ def clean_all_descriptions():
 
 @frappe.whitelist()
 def get_enable_stock_uom_editing():
-	return frappe.get_cached_value(
+	return frappe.get_single_value(
 		"Stock Settings",
-		None,
 		["allow_to_edit_stock_uom_qty_for_sales", "allow_to_edit_stock_uom_qty_for_purchase"],
 		as_dict=1,
 	)

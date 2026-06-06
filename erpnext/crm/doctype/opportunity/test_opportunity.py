@@ -4,9 +4,9 @@
 import frappe
 from frappe.utils import now_datetime, random_string, today
 
-from erpnext.crm.doctype.lead.lead import make_customer
+from erpnext.crm.doctype.lead.mapper import make_customer
 from erpnext.crm.doctype.lead.test_lead import make_lead
-from erpnext.crm.doctype.opportunity.opportunity import make_quotation
+from erpnext.crm.doctype.opportunity.mapper import make_quotation
 from erpnext.crm.utils import get_linked_communication_list
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -90,6 +90,15 @@ class TestOpportunity(ERPNextTestSuite):
 		opp_doc.add_comment("Comment", text="Test Comment 4")
 		create_communication(opp_doc.doctype, opp_doc.name, opp_doc.contact_email)
 		create_communication(opp_doc.doctype, opp_doc.name, opp_doc.contact_email)
+
+	def test_get_notification_email(self):
+		admin_email = frappe.db.get_value("User", "Administrator", "email")
+		opp = frappe.new_doc("Opportunity")
+		opp.opportunity_owner = "Administrator"
+		self.assertEqual(opp.get_notification_email(), admin_email)
+
+		opp.opportunity_owner = None
+		self.assertIsNone(opp.get_notification_email())
 
 
 def make_opportunity_from_lead(company):

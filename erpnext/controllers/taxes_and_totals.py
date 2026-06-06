@@ -19,7 +19,12 @@ from erpnext.controllers.accounts_controller import (
 	validate_taxes_and_charges,
 )
 from erpnext.deprecation_dumpster import deprecated
-from erpnext.stock.get_item_details import ItemDetailsCtx, _get_item_tax_template, get_item_tax_map
+from erpnext.stock.get_item_details import (
+	NOT_APPLICABLE_TAX,
+	ItemDetailsCtx,
+	_get_item_tax_template,
+	get_item_tax_map,
+)
 from erpnext.utilities.regional import temporary_flag
 
 
@@ -164,11 +169,10 @@ class calculate_taxes_and_totals:
 			return
 
 		if not self.discount_amount_applied:
-			bill_for_rejected_quantity_in_purchase_invoice = frappe.get_single_value(
-				"Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"
-			)
+			do_not_round_fields = ["valuation_rate", "incoming_rate"]
+
 			for item in self.doc.items:
-				self.doc.round_floats_in(item)
+				self.doc.round_floats_in(item, do_not_round_fields=do_not_round_fields)
 
 				if item.discount_percentage == 100:
 					item.rate = 0.0
@@ -228,13 +232,7 @@ class calculate_taxes_and_totals:
 				elif not item.qty and self.doc.get("is_debit_note"):
 					item.amount = flt(item.rate, item.precision("amount"))
 				else:
-					qty = (
-						(item.qty + item.rejected_qty)
-						if bill_for_rejected_quantity_in_purchase_invoice
-						and self.doc.doctype == "Purchase Receipt"
-						else item.qty
-					)
-					item.amount = flt(item.rate * qty, item.precision("amount"))
+					item.amount = flt(item.rate * item.qty, item.precision("amount"))
 
 				item.net_amount = item.amount
 
@@ -306,6 +304,7 @@ class calculate_taxes_and_totals:
 			return
 
 		for item in self.doc.items:
+			item._unrounded_net_amount = None
 			item_tax_map = self._load_item_tax_rate(item.item_tax_rate)
 			cumulated_tax_fraction = 0
 			total_inclusive_tax_amount_per_qty = 0
@@ -333,7 +332,8 @@ class calculate_taxes_and_totals:
 			):
 				amount = flt(item.amount) - total_inclusive_tax_amount_per_qty
 
-				item.net_amount = flt(amount / (1 + cumulated_tax_fraction), item.precision("net_amount"))
+				item._unrounded_net_amount = amount / (1 + cumulated_tax_fraction)
+				item.net_amount = flt(item._unrounded_net_amount, item.precision("net_amount"))
 				item.net_rate = flt(item.net_amount / item.qty, item.precision("net_rate"))
 				item.discount_percentage = flt(
 					item.discount_percentage, item.precision("discount_percentage")
@@ -354,6 +354,9 @@ class calculate_taxes_and_totals:
 
 		if cint(tax.included_in_print_rate):
 			tax_rate = self._get_tax_rate(tax, item_tax_map)
+
+			if tax_rate == NOT_APPLICABLE_TAX:
+				return current_tax_fraction, inclusive_tax_amount_per_qty
 
 			if tax.charge_type == "On Net Total":
 				current_tax_fraction = tax_rate / 100.0
@@ -379,25 +382,21 @@ class calculate_taxes_and_totals:
 
 	def _get_tax_rate(self, tax, item_tax_map):
 		if tax.account_head in item_tax_map:
-			return flt(item_tax_map.get(tax.account_head), self.doc.precision("rate", tax))
-		else:
-			return tax.rate
+			rate = item_tax_map[tax.account_head]
+			if rate == NOT_APPLICABLE_TAX:
+				return NOT_APPLICABLE_TAX
+			return flt(rate, self.doc.precision("rate", tax))
+
+		return tax.rate
 
 	def calculate_net_total(self):
 		self.doc.total_qty = (
 			self.doc.total
 		) = self.doc.base_total = self.doc.net_total = self.doc.base_net_total = 0.0
 
-		bill_for_rejected_quantity_in_purchase_invoice = frappe.get_single_value(
-			"Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"
-		)
 		for item in self._items:
 			self.doc.total += item.amount
-			self.doc.total_qty += (
-				(item.qty + item.rejected_qty)
-				if bill_for_rejected_quantity_in_purchase_invoice and self.doc.doctype == "Purchase Receipt"
-				else item.qty
-			)
+			self.doc.total_qty += item.qty
 			self.doc.base_total += item.base_amount
 			self.doc.net_total += item.net_amount
 			self.doc.base_net_total += item.base_net_amount
@@ -544,7 +543,9 @@ class calculate_taxes_and_totals:
 			actual_breakup = tax._total_tax_breakup
 			diff = flt(expected_amount - actual_breakup, 5)
 
-			if abs(diff) <= 0.5:
+			# TODO: fix rounding difference issues
+			# Allow up to 1 for zero-precision currencies (e.g. JPY, KRW)
+			if abs(diff) <= (1 if tax.precision("tax_amount") == 0 else 0.5):
 				detail_row = self.doc._item_wise_tax_details[last_idx]
 				detail_row["amount"] = flt(detail_row["amount"] + diff, 5)
 
@@ -591,6 +592,9 @@ class calculate_taxes_and_totals:
 		current_tax_amount = 0.0
 		current_net_amount = 0.0
 
+		if tax_rate == NOT_APPLICABLE_TAX:
+			return current_net_amount, current_tax_amount
+
 		if tax.charge_type == "Actual":
 			current_net_amount = item.net_amount
 			# distribute the tax amount proportionally to each item row
@@ -600,7 +604,16 @@ class calculate_taxes_and_totals:
 		elif tax.charge_type == "On Net Total":
 			if tax.account_head in item_tax_map:
 				current_net_amount = item.net_amount
-			current_tax_amount = (tax_rate / 100.0) * item.net_amount
+
+			# Use unrounded net for inclusive taxes to avoid double rounding
+			if (
+				cint(tax.included_in_print_rate)
+				and not self.discount_amount_applied
+				and item._unrounded_net_amount is not None
+			):
+				current_tax_amount = (tax_rate / 100.0) * item._unrounded_net_amount
+			else:
+				current_tax_amount = (tax_rate / 100.0) * item.net_amount
 		elif tax.charge_type == "On Previous Row Amount":
 			current_net_amount = self.doc.get("taxes")[cint(tax.row_id) - 1].tax_amount_for_current_item
 			current_tax_amount = (tax_rate / 100.0) * current_net_amount
@@ -781,18 +794,17 @@ class calculate_taxes_and_totals:
 		if self.doc.meta.get_field("rounded_total"):
 			if self.doc.is_rounded_total_disabled():
 				self.doc.rounded_total = 0
-				self.doc.base_rounded_total = 0
 				self.doc.rounding_adjustment = 0
-				return
 
-			self.doc.rounded_total = round_based_on_smallest_currency_fraction(
-				self.doc.grand_total, self.doc.currency, self.doc.precision("rounded_total")
-			)
+			else:
+				self.doc.rounded_total = round_based_on_smallest_currency_fraction(
+					self.doc.grand_total, self.doc.currency, self.doc.precision("rounded_total")
+				)
 
-			# rounding adjustment should always be the difference vetween grand and rounded total
-			self.doc.rounding_adjustment = flt(
-				self.doc.rounded_total - self.doc.grand_total, self.doc.precision("rounding_adjustment")
-			)
+				# rounding adjustment should always be the difference between grand and rounded total
+				self.doc.rounding_adjustment = flt(
+					self.doc.rounded_total - self.doc.grand_total, self.doc.precision("rounding_adjustment")
+				)
 
 			self._set_in_company_currency(self.doc, ["rounding_adjustment", "rounded_total"])
 
@@ -825,7 +837,8 @@ class calculate_taxes_and_totals:
 			discount_amount += total_return_discount
 
 		# validate that discount amount cannot exceed the total before discount
-		if (
+		# only during save (i.e. when `_action` is set)
+		if self.doc.get("_action") and (
 			(grand_total >= 0 and discount_amount > grand_total)
 			or (grand_total < 0 and discount_amount < grand_total)  # returns
 		):
@@ -1286,7 +1299,8 @@ def get_itemised_tax(doc, with_tax_account=False):
 		)
 
 		tax_info.tax_amount += flt(row.amount, precision)
-		tax_info.taxable_amount += flt(row.taxable_amount, precision)
+		conversion_rate = doc.conversion_rate or 1
+		tax_info.taxable_amount += flt(row.taxable_amount / conversion_rate, precision)
 
 		if with_tax_account:
 			tax_info.tax_account = tax.account_head

@@ -36,8 +36,8 @@ class TestSalesPaymentSummary(ERPNextTestSuite):
 			pe.submit()
 
 		mop = get_mode_of_payments(filters)
-		self.assertTrue("Credit Card" in next(iter(mop.values())))
-		self.assertTrue("Cash" in next(iter(mop.values())))
+		self.assertIn("Credit Card", next(iter(mop.values())))
+		self.assertIn("Cash", next(iter(mop.values())))
 
 		# Cancel all Cash payment entry and check if this mode of payment is still fetched.
 		payment_entries = frappe.get_all(
@@ -50,8 +50,8 @@ class TestSalesPaymentSummary(ERPNextTestSuite):
 			pe.cancel()
 
 		mop = get_mode_of_payments(filters)
-		self.assertTrue("Credit Card" in next(iter(mop.values())))
-		self.assertTrue("Cash" not in next(iter(mop.values())))
+		self.assertIn("Credit Card", next(iter(mop.values())))
+		self.assertNotIn("Cash", next(iter(mop.values())))
 
 	def test_get_mode_of_payments_details(self):
 		filters = get_filters()
@@ -100,7 +100,7 @@ class TestSalesPaymentSummary(ERPNextTestSuite):
 			if mopd_value[0] == "Credit Card":
 				cc_final_amount = mopd_value[1]
 
-		self.assertTrue(cc_init_amount > cc_final_amount)
+		self.assertGreater(cc_init_amount, cc_final_amount)
 
 
 def get_filters():

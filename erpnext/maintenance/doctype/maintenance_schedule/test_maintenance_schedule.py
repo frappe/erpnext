@@ -43,11 +43,11 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 		ms.submit()
 
 		all_events = get_events(ms)
-		self.assertTrue(len(all_events) > 0)
+		self.assertGreater(len(all_events), 0)
 
 		ms.cancel()
 		events_after_cancel = get_events(ms)
-		self.assertTrue(len(events_after_cancel) == 0)
+		self.assertEqual(len(events_after_cancel), 0)
 
 	def test_make_schedule(self):
 		ms = make_maintenance_schedule()

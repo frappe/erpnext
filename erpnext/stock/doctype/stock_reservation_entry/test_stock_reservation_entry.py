@@ -6,7 +6,7 @@ from random import randint
 import frappe
 from frappe.utils import today
 
-from erpnext.selling.doctype.sales_order.sales_order import create_pick_list, make_delivery_note
+from erpnext.selling.doctype.sales_order.mapper import create_pick_list, make_delivery_note
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
@@ -119,75 +119,6 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		sre.cancel()
 		sre.load_from_db()
 		self.assertEqual(sre.status, "Cancelled")
-
-	@ERPNextTestSuite.change_settings(
-		"Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1}
-	)
-	def test_update_reserved_qty_in_voucher(self) -> None:
-		# Step - 1: Create a `Sales Order`
-		so = make_sales_order(
-			item_code=self.sr_item.name,
-			warehouse=self.warehouse,
-			qty=50,
-			rate=100,
-			do_not_submit=True,
-		)
-		so.reserve_stock = 0  # Stock Reservation Entries won't be created on submit
-		so.items[0].reserve_stock = 1
-		so.save()
-		so.submit()
-
-		# Step - 2: Create a `Stock Reservation Entry[1]` for the `Sales Order Item`
-		sre1 = make_stock_reservation_entry(
-			item_code=self.sr_item.name,
-			warehouse=self.warehouse,
-			voucher_type="Sales Order",
-			voucher_no=so.name,
-			voucher_detail_no=so.items[0].name,
-			reserved_qty=30,
-		)
-
-		so.load_from_db()
-		sre1.load_from_db()
-		self.assertEqual(sre1.status, "Partially Reserved")
-		self.assertEqual(so.items[0].stock_reserved_qty, sre1.reserved_qty)
-
-		# Step - 3: Create a `Stock Reservation Entry[2]` for the `Sales Order Item`
-		sre2 = make_stock_reservation_entry(
-			item_code=self.sr_item.name,
-			warehouse=self.warehouse,
-			voucher_type="Sales Order",
-			voucher_no=so.name,
-			voucher_detail_no=so.items[0].name,
-			reserved_qty=20,
-		)
-
-		so.load_from_db()
-		sre2.load_from_db()
-		self.assertEqual(sre1.status, "Partially Reserved")
-		self.assertEqual(so.items[0].stock_reserved_qty, sre1.reserved_qty + sre2.reserved_qty)
-
-		# Step - 4: Cancel `Stock Reservation Entry[1]`
-		sre1.cancel()
-		so.load_from_db()
-		sre1.load_from_db()
-		self.assertEqual(sre1.status, "Cancelled")
-		self.assertEqual(so.items[0].stock_reserved_qty, sre2.reserved_qty)
-
-		# Step - 5: Update `Stock Reservation Entry[2]` Reserved Qty
-		sre2.reserved_qty += sre1.reserved_qty
-		sre2.save()
-		so.load_from_db()
-		sre1.load_from_db()
-		self.assertEqual(sre2.status, "Reserved")
-		self.assertEqual(so.items[0].stock_reserved_qty, sre2.reserved_qty)
-
-		# Step - 6: Cancel `Stock Reservation Entry[2]`
-		sre2.cancel()
-		so.load_from_db()
-		sre2.load_from_db()
-		self.assertEqual(sre1.status, "Cancelled")
-		self.assertEqual(so.items[0].stock_reserved_qty, 0)
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1}
@@ -594,9 +525,9 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		},
 	)
 	def test_stock_reservation_from_purchase_receipt(self) -> None:
-		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
-		from erpnext.selling.doctype.sales_order.sales_order import make_material_request
-		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
+		from erpnext.selling.doctype.sales_order.mapper import make_material_request
+		from erpnext.stock.doctype.material_request.mapper import make_purchase_order
 
 		items_details = create_items()
 		create_material_receipt(items_details, self.warehouse, qty=10)

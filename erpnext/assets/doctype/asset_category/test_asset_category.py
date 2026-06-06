@@ -72,7 +72,7 @@ class TestAssetCategory(ERPNextTestSuite):
 		)
 		with self.assertRaises(frappe.ValidationError) as err:
 			asset_category.save()
-		self.assertTrue("Cannot set multiple account rows for the same company" in str(err.exception))
+		self.assertIn("Cannot set multiple account rows for the same company", str(err.exception))
 
 	def test_depreciation_accounts_required_for_existing_depreciable_assets(self):
 		asset = create_asset(
@@ -110,9 +110,9 @@ class TestAssetCategory(ERPNextTestSuite):
 			with self.assertRaises(frappe.ValidationError) as err:
 				asset_category.save()
 
-			self.assertTrue(
-				"Since there are active depreciable assets under this category, the following accounts are required."
-				in str(err.exception)
+			self.assertIn(
+				"Since there are active depreciable assets under this category, the following accounts are required.",
+				str(err.exception),
 			)
 		finally:
 			frappe.db.set_value("Company", asset.company, company_acccount_depreciation)

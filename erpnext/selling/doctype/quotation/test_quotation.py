@@ -8,7 +8,7 @@ from frappe.tests import change_settings
 from frappe.utils import add_days, add_months, flt, getdate, nowdate
 
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
-from erpnext.selling.doctype.quotation.quotation import make_sales_order
+from erpnext.selling.doctype.quotation.mapper import make_sales_order
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -183,12 +183,67 @@ class TestQuotation(ERPNextTestSuite):
 
 		self.assertTrue(quotation.payment_schedule)
 
+	def test_terms_attachments_are_copied_to_quotation(self):
+		terms = make_terms_and_conditions(copy_attachments_to_transaction=True)
+		first_attachment = make_file_attachment(
+			"Terms and Conditions",
+			terms.name,
+			content="First terms attachment",
+		)
+
+		quotation = make_quotation(do_not_save=1)
+		quotation.tc_name = terms.name
+		quotation.insert()
+
+		self.assertEqual(get_attachment_urls("Quotation", quotation.name), {first_attachment.file_url})
+
+		second_attachment = make_file_attachment(
+			"Terms and Conditions",
+			terms.name,
+			content="Second terms attachment",
+		)
+		quotation.valid_till = add_days(getdate(quotation.valid_till), 1)
+		quotation.save()
+
+		quotation_attachments = get_attachment_urls("Quotation", quotation.name)
+		self.assertEqual(quotation_attachments, {first_attachment.file_url})
+		self.assertNotIn(second_attachment.file_url, quotation_attachments)
+
+		new_terms = make_terms_and_conditions(copy_attachments_to_transaction=True)
+		new_terms_attachment = make_file_attachment(
+			"Terms and Conditions",
+			new_terms.name,
+			content="Attachment from updated terms",
+		)
+		quotation.tc_name = new_terms.name
+		quotation.valid_till = add_days(getdate(quotation.valid_till), 1)
+		quotation.save()
+
+		self.assertEqual(
+			get_attachment_urls("Quotation", quotation.name),
+			{first_attachment.file_url, new_terms_attachment.file_url},
+		)
+
+	def test_terms_attachments_are_not_copied_when_disabled(self):
+		terms = make_terms_and_conditions(copy_attachments_to_transaction=False)
+		make_file_attachment(
+			"Terms and Conditions",
+			terms.name,
+			content="Terms attachment should stay on the template",
+		)
+
+		quotation = make_quotation(do_not_save=1)
+		quotation.tc_name = terms.name
+		quotation.insert()
+
+		self.assertFalse(get_attachment_urls("Quotation", quotation.name))
+
 	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
 		{"automatically_fetch_payment_terms": 1},
 	)
 	def test_make_sales_order_terms_copied(self):
-		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+		from erpnext.selling.doctype.quotation.mapper import make_sales_order
 
 		quotation = frappe.copy_doc(self.globalTestRecords["Quotation"][0])
 		quotation.transaction_date = nowdate()
@@ -201,7 +256,7 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertTrue(sales_order.get("payment_schedule"))
 
 	def test_do_not_add_ordered_items_in_new_sales_order(self):
-		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+		from erpnext.selling.doctype.quotation.mapper import make_sales_order
 		from erpnext.stock.doctype.item.test_item import make_item
 
 		item = make_item("_Test Item for Quotation for SO", {"is_stock_item": 1})
@@ -266,7 +321,7 @@ class TestQuotation(ERPNextTestSuite):
 		frappe.db.set_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing", 0)
 
 	def test_maintain_rate_in_sales_cycle_is_enforced(self):
-		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+		from erpnext.selling.doctype.quotation.mapper import make_sales_order
 
 		maintain_rate = frappe.db.get_single_value("Selling Settings", "maintain_same_sales_rate")
 		frappe.db.set_single_value("Selling Settings", "maintain_same_sales_rate", 1)
@@ -284,7 +339,7 @@ class TestQuotation(ERPNextTestSuite):
 		frappe.db.set_single_value("Selling Settings", "maintain_same_sales_rate", maintain_rate)
 
 	def test_make_sales_order_with_different_currency(self):
-		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+		from erpnext.selling.doctype.quotation.mapper import make_sales_order
 
 		quotation = frappe.copy_doc(self.globalTestRecords["Quotation"][0])
 		quotation.transaction_date = nowdate()
@@ -304,7 +359,7 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertNotEqual(sales_order.currency, quotation.currency)
 
 	def test_make_sales_order(self):
-		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+		from erpnext.selling.doctype.quotation.mapper import make_sales_order
 
 		quotation = frappe.copy_doc(self.globalTestRecords["Quotation"][0])
 		quotation.transaction_date = nowdate()
@@ -336,7 +391,7 @@ class TestQuotation(ERPNextTestSuite):
 		},
 	)
 	def test_make_sales_order_with_terms(self):
-		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+		from erpnext.selling.doctype.quotation.mapper import make_sales_order
 
 		quotation = frappe.copy_doc(self.globalTestRecords["Quotation"][0])
 		quotation.transaction_date = nowdate()
@@ -386,7 +441,7 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, quotation.validate)
 
 	def test_so_from_expired_quotation(self):
-		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+		from erpnext.selling.doctype.quotation.mapper import make_sales_order
 
 		frappe.db.set_single_value("Selling Settings", "allow_sales_order_creation_for_expired_quotation", 0)
 
@@ -402,8 +457,8 @@ class TestQuotation(ERPNextTestSuite):
 		make_sales_order(quotation.name)
 
 	def test_create_quotation_with_margin(self):
-		from erpnext.selling.doctype.quotation.quotation import make_sales_order
-		from erpnext.selling.doctype.sales_order.sales_order import (
+		from erpnext.selling.doctype.quotation.mapper import make_sales_order
+		from erpnext.selling.doctype.sales_order.mapper import (
 			make_delivery_note,
 			make_sales_invoice,
 		)
@@ -495,7 +550,7 @@ class TestQuotation(ERPNextTestSuite):
 
 	def test_product_bundle_mapping_on_creating_so(self):
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
-		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+		from erpnext.selling.doctype.quotation.mapper import make_sales_order
 		from erpnext.stock.doctype.item.test_item import make_item
 
 		make_item("_Test Product Bundle", {"is_stock_item": 0})
@@ -822,7 +877,7 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertEqual(quotation.items[1].amount, 240)
 
 	def test_alternative_items_sales_order_mapping_with_stock_items(self):
-		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+		from erpnext.selling.doctype.quotation.mapper import make_sales_order
 		from erpnext.stock.doctype.item.test_item import make_item
 
 		frappe.flags.args = frappe._dict()
@@ -947,7 +1002,7 @@ class TestQuotation(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_zero_qty_in_quotation": 1})
 	def test_so_from_zero_qty_quotation(self):
-		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+		from erpnext.selling.doctype.quotation.mapper import make_sales_order
 		from erpnext.stock.doctype.item.test_item import make_item
 
 		make_item("_Test Item 2", {"is_stock_item": 1})
@@ -980,7 +1035,7 @@ class TestQuotation(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_duplicate_items_in_quotation(self):
-		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+		from erpnext.selling.doctype.quotation.mapper import make_sales_order
 		from erpnext.stock.doctype.item.test_item import make_item
 
 		# item code same but description different
@@ -1083,7 +1138,7 @@ class TestQuotation(ERPNextTestSuite):
 		{"automatically_fetch_payment_terms": 1},
 	)
 	def test_make_sales_order_with_payment_terms(self):
-		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+		from erpnext.selling.doctype.quotation.mapper import make_sales_order
 
 		template = frappe.get_doc(
 			{
@@ -1145,6 +1200,42 @@ def get_quotation_dict(party_name=None, item_code=None):
 		"doctype": "Quotation",
 		"party_name": party_name,
 		"items": [{"item_code": item_code, "qty": 1, "rate": 100}],
+	}
+
+
+def make_terms_and_conditions(copy_attachments_to_transaction=False):
+	return frappe.get_doc(
+		{
+			"doctype": "Terms and Conditions",
+			"title": f"_Test Terms and Conditions {frappe.generate_hash(length=8)}",
+			"selling": 1,
+			"terms": "Test terms",
+			"copy_attachments_to_transaction": 1 if copy_attachments_to_transaction else 0,
+		}
+	).insert()
+
+
+def make_file_attachment(doctype, docname, content):
+	return frappe.get_doc(
+		{
+			"doctype": "File",
+			"file_name": f"terms-attachment-{frappe.generate_hash(length=8)}.txt",
+			"attached_to_doctype": doctype,
+			"attached_to_name": docname,
+			"content": content,
+		}
+	).insert()
+
+
+def get_attachment_urls(doctype, docname):
+	return {
+		file.file_url
+		for file in frappe.get_all(
+			"File",
+			filters={"attached_to_doctype": doctype, "attached_to_name": docname},
+			fields=["file_url"],
+		)
+		if file.file_url
 	}
 
 

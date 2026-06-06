@@ -137,8 +137,7 @@ class StockClosingEntry(Document):
 			attached_file = frappe.get_doc("File", attachment.name)
 
 			data = gzip.decompress(attached_file.get_content())
-			if data := json.loads(data.decode("utf-8")):
-				data = data
+			data = json.loads(data.decode("utf-8"))
 
 			return parse_json(data)
 

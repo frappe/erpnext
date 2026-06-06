@@ -3,7 +3,7 @@ import datetime
 import frappe
 from frappe.utils import add_days, add_months, nowdate
 
-from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.selling.report.payment_terms_status_for_sales_order.payment_terms_status_for_sales_order import (
 	execute,

@@ -402,7 +402,7 @@ class WorkstationDashboard {
 				if (r.message) {
 					me.prepare_materials_modal(r.message, job_card, (job_card) => {
 						frappe.call({
-							method: "erpnext.manufacturing.doctype.job_card.job_card.make_stock_entry",
+							method: "erpnext.manufacturing.doctype.job_card.mapper.make_stock_entry",
 							args: {
 								source_name: job_card,
 							},

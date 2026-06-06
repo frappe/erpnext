@@ -250,7 +250,7 @@ def get_item_warehouse_batch_map(filters, float_precision):
 				)
 
 		qty_dict.bal_qty = flt(qty_dict.bal_qty, float_precision) + flt(d.actual_qty, float_precision)
-		qty_dict.bal_value += flt(d.stock_value_difference, float_precision)
+		qty_dict.bal_value += flt(d.stock_value_difference)
 
 	return iwb_map
 

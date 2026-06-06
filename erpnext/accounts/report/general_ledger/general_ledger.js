@@ -178,9 +178,15 @@ frappe.query_reports["General Ledger"] = {
 			default: 1,
 		},
 		{
+			fieldname: "disable_opening_balance_calculation",
+			label: __("Disable Opening Balance Calculation"),
+			fieldtype: "Check",
+		},
+		{
 			fieldname: "show_opening_entries",
 			label: __("Show Opening Entries"),
 			fieldtype: "Check",
+			depends_on: "eval: !doc.disable_opening_balance_calculation",
 		},
 		{
 			fieldname: "include_default_book_entries",

@@ -47,11 +47,3 @@ frappe.ui.form.on("Sales Forecast", {
 		}
 	},
 });
-
-frappe.ui.form.on("Sales Forecast Item", {
-	adjust_qty(frm, cdt, cdn) {
-		let row = locals[cdt][cdn];
-		row.demand_qty = row.forecast_qty + row.adjust_qty;
-		frappe.model.set_value(cdt, cdn, "demand_qty", row.demand_qty);
-	},
-});

@@ -93,10 +93,10 @@ class SellingSettings(Document):
 
 		self.validate_fallback_to_default_price_list()
 
-		if old_doc.enable_tracking_sales_commissions != self.enable_tracking_sales_commissions:
+		if old_doc and old_doc.enable_tracking_sales_commissions != self.enable_tracking_sales_commissions:
 			toggle_tracking_sales_commissions_section(not self.enable_tracking_sales_commissions)
 
-		if old_doc.enable_utm != self.enable_utm:
+		if old_doc and old_doc.enable_utm != self.enable_utm:
 			toggle_utm_analytics_section(not self.enable_utm)
 
 	def validate_fallback_to_default_price_list(self):

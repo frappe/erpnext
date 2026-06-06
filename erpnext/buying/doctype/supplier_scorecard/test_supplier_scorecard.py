@@ -13,7 +13,6 @@ class TestSupplierScorecard(ERPNextTestSuite):
 		self.assertEqual(doc.name, valid_scorecard[0].get("supplier"))
 
 	def test_criteria_weight(self):
-		delete_test_scorecards()
 		my_doc = make_supplier_scorecard()
 		for d in my_doc.criteria:
 			d.weight = 0
@@ -31,26 +30,6 @@ def make_supplier_scorecard():
 			my_criteria = frappe.get_doc(d)
 			my_criteria.insert()
 	return my_doc
-
-
-def delete_test_scorecards():
-	my_doc = make_supplier_scorecard()
-	if frappe.db.exists("Supplier Scorecard", my_doc.name):
-		# Delete all the periods, then delete the scorecard
-		frappe.db.sql(
-			"""delete from `tabSupplier Scorecard Period` where scorecard = %(scorecard)s""",
-			{"scorecard": my_doc.name},
-		)
-		frappe.db.sql(
-			"""delete from `tabSupplier Scorecard Scoring Criteria` where parenttype = 'Supplier Scorecard Period'"""
-		)
-		frappe.db.sql(
-			"""delete from `tabSupplier Scorecard Scoring Standing` where parenttype = 'Supplier Scorecard Period'"""
-		)
-		frappe.db.sql(
-			"""delete from `tabSupplier Scorecard Scoring Variable` where parenttype = 'Supplier Scorecard Period'"""
-		)
-		frappe.delete_doc(my_doc.doctype, my_doc.name)
 
 
 valid_scorecard = [

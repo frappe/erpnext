@@ -168,6 +168,7 @@
   "inter_company_reference",
   "customer_group",
   "territory",
+  "title",
   "column_break5",
   "excise_page",
   "instructions",
@@ -1264,6 +1265,7 @@
    "fieldname": "amount_eligible_for_commission",
    "fieldtype": "Currency",
    "label": "Amount Eligible for Commission",
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -1450,13 +1452,21 @@
    "fieldname": "auto_repeat_section",
    "fieldtype": "Section Break",
    "label": "Auto Repeat"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-09 17:15:27.932956",
+ "modified": "2026-05-28 11:44:37.286743",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

@@ -1070,11 +1070,11 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 
 		se.remove(se.items[1])
 		se.save()
-		self.assertTrue(len(se.items) == 1)
+		self.assertEqual(len(se.items), 1)
 		se.submit()
 
 		bundle_doc.reload()
-		self.assertTrue(bundle_doc.docstatus == 0)
+		self.assertEqual(bundle_doc.docstatus, 0)
 		self.assertRaises(frappe.ValidationError, bundle_doc.submit)
 
 	def test_reference_voucher_on_cancel(self):

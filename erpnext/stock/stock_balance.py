@@ -97,7 +97,7 @@ def get_reserved_qty(item_code, warehouse):
 	reserved_qty = frappe.db.sql(
 		f"""
 		select
-			sum(dnpi_qty * ((so_item_qty - so_item_delivered_qty - if(dont_reserve_qty_on_return, so_item_returned_qty, 0)) / so_item_qty))
+			sum(dnpi_qty * ((so_item_qty - so_item_delivered_qty - (case when dont_reserve_qty_on_return = 1 then so_item_returned_qty else 0 end)) / so_item_qty))
 		from
 			(
 				(select
@@ -284,7 +284,7 @@ def set_stock_balance_as_per_serial_no(
 	if not posting_time:
 		posting_time = nowtime()
 
-	condition = " and item.name='%s'" % item_code.replace("'", "'") if item_code else ""
+	condition = " and item.name=%s" % frappe.db.escape(item_code, percent=False) if item_code else ""
 
 	bin = frappe.db.sql(
 		"""select bin.item_code, bin.warehouse, bin.actual_qty, item.stock_uom

@@ -10,6 +10,13 @@ frappe.query_reports["VAT Audit Report"] = {
 			options: "Company",
 			reqd: 1,
 			default: frappe.defaults.get_user_default("Company"),
+			get_query: function () {
+				return {
+					filters: {
+						country: "South Africa",
+					},
+				};
+			},
 		},
 		{
 			fieldname: "from_date",

@@ -49,6 +49,25 @@ SALES_TRANSACTION_TYPES = {
 }
 TRANSACTION_TYPES = PURCHASE_TRANSACTION_TYPES | SALES_TRANSACTION_TYPES
 
+# Party-derived fields that must NOT be auto-copied by `get_mapped_doc` when the
+# source and target documents belong to different parties (e.g. Sales Order →
+# Purchase Order or inter-company Sales Invoice → Purchase Invoice).
+CROSS_PARTY_FIELD_NO_MAP = [
+	"tax_category",
+	"tax_id",
+	"tax_withholding_category",
+	"taxes_and_charges",
+	"address_display",
+	"contact_display",
+	"contact_mobile",
+	"contact_email",
+	"contact_person",
+	"shipping_address",
+	"dispatch_address",
+	"payment_terms_template",
+	"language",
+]
+
 
 class DuplicatePartyAccountError(frappe.ValidationError):
 	pass
@@ -65,7 +84,6 @@ def get_party_details(
 	price_list: str | None = None,
 	currency: str | None = None,
 	doctype: str | None = None,
-	ignore_permissions: bool | None = False,
 	fetch_payment_terms_template: bool = True,
 	party_address: str | None = None,
 	company_address: str | None = None,
@@ -75,8 +93,6 @@ def get_party_details(
 ):
 	if not party:
 		return frappe._dict()
-	if not frappe.db.exists(party_type, party):
-		frappe.throw(_("{0}: {1} does not exists").format(party_type, party))
 	return _get_party_details(
 		party,
 		account,
@@ -87,7 +103,7 @@ def get_party_details(
 		price_list,
 		currency,
 		doctype,
-		ignore_permissions,
+		False,
 		fetch_payment_terms_template,
 		party_address,
 		company_address,
@@ -687,7 +703,7 @@ def validate_due_date_with_template(posting_date, due_date, bill_date, template_
 	if not default_due_date:
 		return
 
-	if default_due_date != posting_date and getdate(due_date) > getdate(default_due_date):
+	if getdate(default_due_date) != getdate(posting_date) and getdate(due_date) > getdate(default_due_date):
 		if frappe.get_single_value("Accounts Settings", "credit_controller") in frappe.get_roles():
 			party_type = "supplier" if doctype == "Purchase Invoice" else "customer"
 
@@ -762,7 +778,7 @@ def set_taxes(
 		args.update({"tax_type": "Purchase"})
 
 	if use_for_shopping_cart:
-		args.update({"use_for_shopping_cart": use_for_shopping_cart})
+		args.update({"use_for_shopping_cart": cint(use_for_shopping_cart)})
 
 	return get_tax_template(posting_date, args)
 

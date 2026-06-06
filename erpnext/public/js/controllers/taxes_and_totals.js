@@ -1,6 +1,8 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+const NOT_APPLICABLE_TAX = "N/A";
+
 erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	setup() {
 		this.fetch_round_off_accounts();
@@ -256,6 +258,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		if (has_inclusive_tax == false) return;
 
 		$.each(this.frm.doc.items || [], function (n, item) {
+			item._unrounded_net_amount = null;
 			var item_tax_map = me._load_item_tax_rate(item.item_tax_rate);
 			var cumulated_tax_fraction = 0.0;
 			var total_inclusive_tax_amount_per_qty = 0;
@@ -282,7 +285,8 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				(total_inclusive_tax_amount_per_qty || cumulated_tax_fraction)
 			) {
 				var amount = flt(item.amount) - total_inclusive_tax_amount_per_qty;
-				item.net_amount = flt(amount / (1 + cumulated_tax_fraction), precision("net_amount", item));
+				item._unrounded_net_amount = amount / (1 + cumulated_tax_fraction);
+				item.net_amount = flt(item._unrounded_net_amount, precision("net_amount", item));
 				item.net_rate = item.qty ? flt(item.net_amount / item.qty, precision("net_rate", item)) : 0;
 
 				me.set_in_company_currency(item, ["net_rate", "net_amount"]);
@@ -298,6 +302,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 		if (cint(tax.included_in_print_rate)) {
 			var tax_rate = this._get_tax_rate(tax, item_tax_map);
+
+			if (tax_rate === NOT_APPLICABLE_TAX) {
+				return [current_tax_fraction, inclusive_tax_amount_per_qty];
+			}
 
 			if (tax.charge_type == "On Net Total") {
 				current_tax_fraction = tax_rate / 100.0;
@@ -322,9 +330,14 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	}
 
 	_get_tax_rate(tax, item_tax_map) {
-		return Object.keys(item_tax_map).indexOf(tax.account_head) != -1
-			? flt(item_tax_map[tax.account_head], precision("rate", tax))
-			: tax.rate;
+		if (tax.account_head in item_tax_map) {
+			let rate = item_tax_map[tax.account_head];
+			if (rate === NOT_APPLICABLE_TAX) {
+				return NOT_APPLICABLE_TAX;
+			}
+			return flt(rate, precision("rate", tax));
+		}
+		return tax.rate;
 	}
 
 	calculate_net_total() {
@@ -368,6 +381,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			}
 
 			$.each(item_tax_map, function (tax, rate) {
+				if (rate === NOT_APPLICABLE_TAX) {
+					return;
+				}
+
 				let found = (me.frm.doc.taxes || []).find((d) => d.account_head === tax);
 				if (!found) {
 					let child = frappe.model.add_child(me.frm.doc, "taxes");
@@ -524,6 +541,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		var current_tax_amount = 0.0;
 		var current_net_amount = 0.0;
 
+		if (tax_rate === NOT_APPLICABLE_TAX) {
+			return [current_net_amount, current_tax_amount];
+		}
+
 		// To set row_id by default as previous row.
 		if (["On Previous Row Amount", "On Previous Row Total"].includes(tax.charge_type)) {
 			if (tax.idx === 1) {
@@ -548,7 +569,14 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			if (tax.account_head in item_tax_map) {
 				current_net_amount = item.net_amount;
 			}
-			current_tax_amount = (tax_rate / 100.0) * item.net_amount;
+			// Use unrounded net for inclusive taxes to avoid double rounding
+			var net_for_tax =
+				cint(tax.included_in_print_rate) &&
+				!this.discount_amount_applied &&
+				item._unrounded_net_amount !== null
+					? item._unrounded_net_amount
+					: item.net_amount;
+			current_tax_amount = (tax_rate / 100.0) * net_for_tax;
 		} else if (tax.charge_type == "On Previous Row Amount") {
 			current_net_amount = this.frm.doc["taxes"][cint(tax.row_id) - 1].tax_amount_for_current_item;
 			current_tax_amount =
@@ -716,23 +744,21 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			disable_rounded_total = frappe.sys_defaults.disable_rounded_total;
 		}
 
-		if (cint(disable_rounded_total)) {
-			this.frm.doc.rounded_total = 0;
-			this.frm.doc.base_rounded_total = 0;
-			this.frm.doc.rounding_adjustment = 0;
-			return;
-		}
-
 		if (frappe.meta.get_docfield(this.frm.doc.doctype, "rounded_total", this.frm.doc.name)) {
-			this.frm.doc.rounded_total = round_based_on_smallest_currency_fraction(
-				this.frm.doc.grand_total,
-				this.frm.doc.currency,
-				precision("rounded_total")
-			);
-			this.frm.doc.rounding_adjustment = flt(
-				this.frm.doc.rounded_total - this.frm.doc.grand_total,
-				precision("rounding_adjustment")
-			);
+			if (cint(disable_rounded_total)) {
+				this.frm.doc.rounded_total = 0;
+				this.frm.doc.rounding_adjustment = 0;
+			} else {
+				this.frm.doc.rounded_total = round_based_on_smallest_currency_fraction(
+					this.frm.doc.grand_total,
+					this.frm.doc.currency,
+					precision("rounded_total")
+				);
+				this.frm.doc.rounding_adjustment = flt(
+					this.frm.doc.rounded_total - this.frm.doc.grand_total,
+					precision("rounding_adjustment")
+				);
+			}
 
 			this.set_in_company_currency(this.frm.doc, ["rounding_adjustment", "rounded_total"]);
 		}

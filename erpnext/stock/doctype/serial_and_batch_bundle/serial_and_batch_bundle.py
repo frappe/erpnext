@@ -8,11 +8,10 @@ from typing import Any
 
 import frappe
 import frappe.query_builder
-import frappe.query_builder.functions
 from frappe import _, _dict, bold
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
-from frappe.query_builder.functions import Concat_ws, Locate, Sum
+from frappe.query_builder.functions import Concat_ws, Sum
 from frappe.utils import (
 	cint,
 	cstr,
@@ -148,7 +147,7 @@ class SerialandBatchBundle(Document):
 		if not frappe.db.get_single_value("Stock Settings", "enable_serial_and_batch_no_for_item"):
 			frappe.throw(
 				_(
-					"Please check the 'Enable Serial and Batch No for Item' checkbox in the {0} to make Serial and Batch Bundle for the item."
+					"Please check the 'Activate Serial and Batch No for Item' checkbox in the {0} to make Serial and Batch Bundle for the item."
 				).format(get_link_to_form("Stock Settings", "Stock Settings")),
 				title=_("Serial and Batch No for Item Disabled"),
 			)
@@ -931,6 +930,7 @@ class SerialandBatchBundle(Document):
 				parent.voucher_type,
 				parent.voucher_no,
 			)
+			.distinct()
 			.where(
 				(child.parent != self.name)
 				& (parent.item_code == self.item_code)
@@ -2268,25 +2268,6 @@ def update_serial_batch_no_ledgers(bundle, entries, child_row, parent_doc, wareh
 	return doc
 
 
-@frappe.whitelist()
-def update_serial_or_batch(bundle_id: str, serial_no: str | None = None, batch_no: str | None = None):
-	if batch_no and not serial_no:
-		if qty := frappe.db.get_value(
-			"Serial and Batch Entry", {"parent": bundle_id, "batch_no": batch_no}, "qty"
-		):
-			frappe.db.set_value(
-				"Serial and Batch Entry", {"parent": bundle_id, "batch_no": batch_no}, "qty", qty + 1
-			)
-			return
-
-	doc = frappe.get_cached_doc("Serial and Batch Bundle", bundle_id)
-	if not serial_no and not batch_no:
-		return
-
-	doc.append("entries", {"serial_no": serial_no, "batch_no": batch_no, "qty": 1})
-	doc.save(ignore_permissions=True)
-
-
 def get_serial_and_batch_ledger(**kwargs):
 	kwargs = frappe._dict(kwargs)
 
@@ -3371,21 +3352,20 @@ def get_stock_ledgers_for_serial_nos(kwargs):
 		serial_nos = [serial_nos]
 
 	if serial_nos:
+		import re
+
+		escaped_serial_nos = [re.escape(sn) for sn in serial_nos if sn]
+		regex_pattern = r"\n(" + "|".join(escaped_serial_nos) + r")\n"
+
 		query = (
 			query.left_join(serial_batch_entry)
 			.on(stock_ledger_entry.serial_and_batch_bundle == serial_batch_entry.parent)
+			.where(
+				serial_batch_entry.serial_no.isin(serial_nos)
+				| Concat_ws("", "\n", stock_ledger_entry.serial_no, "\n").regexp(regex_pattern)
+			)
 			.distinct()
 		)
-
-		bundle_match = serial_batch_entry.serial_no.isin(serial_nos)
-
-		padded_serial_no = Concat_ws("", "\n", stock_ledger_entry.serial_no, "\n")
-		direct_match = None
-		for sn in serial_nos:
-			cond = Locate(f"\n{sn}\n", padded_serial_no) > 0
-			direct_match = cond if direct_match is None else (direct_match | cond)
-
-		query = query.where(bundle_match | direct_match)
 
 	if kwargs.ignore_voucher_detail_no:
 		query = query.where(stock_ledger_entry.voucher_detail_no != kwargs.ignore_voucher_detail_no)

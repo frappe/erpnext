@@ -119,7 +119,7 @@ frappe.query_reports["Stock Ledger"] = {
 		},
 		{
 			fieldname: "segregate_serial_batch_bundle",
-			label: __("Segregate Serial / Batch Bundle"),
+			label: __("Enable Serial / Batch Bundle"),
 			fieldtype: "Check",
 			default: 0,
 		},

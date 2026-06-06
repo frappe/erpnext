@@ -70,6 +70,10 @@ frappe.ui.form.on("Journal Entry", {
 	},
 
 	refresh: function (frm) {
+		if (frm.doc.reversal_of && (frm.is_new() || frm.doc.docstatus == 0)) {
+			frm.set_read_only();
+		}
+
 		erpnext.toggle_naming_series();
 
 		if (frm.doc.docstatus > 0) {
@@ -429,15 +433,17 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 
 	accounts_add(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
-		row.exchange_rate = 1;
-		$.each(doc.accounts, function (i, d) {
-			if (d.account && d.party && d.party_type) {
-				row.account = d.account;
-				row.party = d.party;
-				row.party_type = d.party_type;
-				row.exchange_rate = d.exchange_rate;
-			}
-		});
+		if (!row.exchange_rate) row.exchange_rate = 1;
+		if (!row.account) {
+			$.each(doc.accounts, function (i, d) {
+				if (d.account && d.party && d.party_type) {
+					row.account = d.account;
+					row.party = d.party;
+					row.party_type = d.party_type;
+					row.exchange_rate = d.exchange_rate;
+				}
+			});
+		}
 
 		// set difference
 		if (doc.difference) {
@@ -648,7 +654,7 @@ $.extend(erpnext.journal_entry, {
 					reqd: 1,
 					default: frm.doc.posting_date,
 				},
-				{ fieldtype: "Small Text", fieldname: "user_remark", label: __("User Remark") },
+				{ fieldtype: "Small Text", fieldname: "remark", label: __("Remark") },
 				{
 					fieldtype: "Select",
 					fieldname: "naming_series",
@@ -665,8 +671,14 @@ $.extend(erpnext.journal_entry, {
 			var values = dialog.get_values();
 
 			frm.set_value("posting_date", values.posting_date);
-			frm.set_value("user_remark", values.user_remark);
 			frm.set_value("naming_series", values.naming_series);
+			if (values.remark) {
+				frm.set_value("custom_remark", 1);
+				frm.set_value("remark", values.remark);
+			} else {
+				frm.set_value("custom_remark", 0);
+				frm.set_value("remark", "");
+			}
 
 			// clear table is used because there might've been an error while adding child
 			// and cleanup didn't happen

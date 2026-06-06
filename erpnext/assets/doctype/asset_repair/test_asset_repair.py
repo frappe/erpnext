@@ -9,6 +9,8 @@ from frappe.utils import add_days, add_months, flt, get_first_day, nowdate, nowt
 from erpnext.assets.doctype.asset.asset import (
 	get_asset_account,
 	get_asset_value_after_depreciation,
+)
+from erpnext.assets.doctype.asset.mapper import (
 	make_sales_invoice,
 )
 from erpnext.assets.doctype.asset.test_asset import (

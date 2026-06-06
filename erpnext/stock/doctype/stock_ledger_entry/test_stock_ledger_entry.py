@@ -31,17 +31,8 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 	def setUp(self):
-		items = create_items()
+		create_items()
 		reset("Stock Entry")
-
-		# delete SLE and BINs for all items
-		frappe.db.sql(
-			"delete from `tabStock Ledger Entry` where item_code in (%s)" % (", ".join(["%s"] * len(items))),
-			items,
-		)
-		frappe.db.sql(
-			"delete from `tabBin` where item_code in (%s)" % (", ".join(["%s"] * len(items))), items
-		)
 
 	def test_item_cost_reposting(self):
 		company = "_Test Company"
@@ -1503,7 +1494,7 @@ def create_purchase_receipt_entries_for_batchwise_item_valuation_test(pr_entry_l
 
 
 def create_delivery_note_entries_for_batchwise_item_valuation_test(dn_entry_list):
-	from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+	from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
 	from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 	dns = []

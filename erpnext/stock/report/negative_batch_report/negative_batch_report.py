@@ -86,28 +86,33 @@ def get_columns() -> list[dict]:
 
 def get_data(filters) -> list[dict]:
 	batches = get_batches(filters)
-	companies = get_companies(filters)
 	batch_negative_data = []
 
 	flt_precision = frappe.db.get_default("float_precision") or 2
-	for company in companies:
+	distinct_batches = set()
+	warehouses = get_warehouses(filters)
+	for _warehouse in warehouses:
 		for batch in batches:
 			_c, data = stock_ledger_execute(
 				frappe._dict(
 					{
-						"company": company,
 						"batch_no": batch,
 						"from_date": add_to_date(today(), years=-12),
 						"to_date": today(),
-						"segregate_serial_batch_bundle": 1,
-						"warehouse": filters.get("warehouse"),
+						"warehouse": _warehouse.name,
+						"company": _warehouse.company,
 						"valuation_field_type": "Currency",
+						"segregate_serial_batch_bundle": 1,
 					}
 				)
 			)
 
 			previous_qty = 0
 			for row in data:
+				key = (row.get("warehouse"), batch)
+				if key in distinct_batches:
+					continue
+
 				if flt(row.get("qty_after_transaction"), flt_precision) < 0:
 					batch_negative_data.append(
 						{
@@ -124,9 +129,22 @@ def get_data(filters) -> list[dict]:
 						}
 					)
 
+					distinct_batches.add(key)
+
 				previous_qty = row.get("qty_after_transaction")
 
 	return batch_negative_data
+
+
+def get_warehouses(filters):
+	warehouse_filters = {"disabled": 0, "is_group": 0}
+	if filters.get("company"):
+		warehouse_filters["company"] = filters["company"]
+
+	if filters.get("warehouse"):
+		warehouse_filters["name"] = filters["warehouse"]
+
+	return frappe.get_all("Warehouse", fields=["name", "company"], filters=warehouse_filters)
 
 
 def get_batches(filters):
@@ -135,11 +153,3 @@ def get_batches(filters):
 		batch_filters["item"] = filters["item_code"]
 
 	return frappe.get_all("Batch", pluck="name", filters=batch_filters)
-
-
-def get_companies(filters):
-	company_filters = {}
-	if filters.get("company"):
-		company_filters["name"] = filters["company"]
-
-	return frappe.get_all("Company", pluck="name", filters=company_filters)

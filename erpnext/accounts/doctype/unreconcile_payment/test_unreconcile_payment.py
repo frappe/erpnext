@@ -9,7 +9,7 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
-from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.tests.utils import ERPNextTestSuite
 

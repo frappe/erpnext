@@ -65,6 +65,7 @@ class Account(NestedSet):
 			"Stock",
 			"Stock Adjustment",
 			"Stock Received But Not Billed",
+			"Stock Delivered But Not Billed",
 			"Service Received But Not Billed",
 			"Tax",
 			"Temporary",
@@ -174,16 +175,19 @@ class Account(NestedSet):
 		if cint(self.is_group):
 			db_value = self.get_doc_before_save()
 			if db_value:
+				Account = frappe.qb.DocType("Account")
+				query = frappe.qb.update(Account).where((Account.lft > self.lft) & (Account.rgt < self.rgt))
+
+				updated = False
 				if self.report_type != db_value.report_type:
-					frappe.db.sql(
-						"update `tabAccount` set report_type=%s where lft > %s and rgt < %s",
-						(self.report_type, self.lft, self.rgt),
-					)
+					query = query.set(Account.report_type, self.report_type)
+					updated = True
 				if self.root_type != db_value.root_type:
-					frappe.db.sql(
-						"update `tabAccount` set root_type=%s where lft > %s and rgt < %s",
-						(self.root_type, self.lft, self.rgt),
-					)
+					query = query.set(Account.root_type, self.root_type)
+					updated = True
+
+				if updated:
+					query.run()
 
 		if self.root_type and not self.report_type:
 			self.report_type = (
@@ -448,11 +452,7 @@ class Account(NestedSet):
 		return frappe.db.get_value("GL Entry", {"account": self.name})
 
 	def check_if_child_exists(self):
-		return frappe.db.sql(
-			"""select name from `tabAccount` where parent_account = %s
-			and docstatus != 2""",
-			self.name,
-		)
+		return frappe.db.exists("Account", {"parent_account": self.name, "docstatus": ["!=", 2]})
 
 	def validate_mandatory(self):
 		if not self.root_type:
@@ -472,13 +472,23 @@ class Account(NestedSet):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_parent_account(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
-	return frappe.db.sql(
-		"""select name from tabAccount
-		where is_group = 1 and docstatus != 2 and company = {}
-		and {} like {} order by name limit {} offset {}""".format("%s", searchfield, "%s", "%s", "%s"),
-		(filters["company"], "%%%s%%" % txt, page_len, start),
-		as_list=1,
+	Account = frappe.qb.DocType("Account")
+
+	search_field_obj = getattr(Account, searchfield)
+
+	query = (
+		frappe.qb.from_(Account)
+		.select(Account.name)
+		.where(Account.is_group == 1)
+		.where(Account.docstatus != 2)
+		.where(Account.company == filters["company"])
+		.where(search_field_obj.like(f"%{txt}%"))
+		.order_by(Account.name)
+		.limit(page_len)
+		.offset(start)
 	)
+
+	return query.run(as_list=1)
 
 
 def get_account_currency(account):
@@ -520,6 +530,7 @@ def update_account_number(
 ):
 	_ensure_idle_system()
 	account = frappe.get_cached_doc("Account", name)
+	account.check_permission("write")
 	if not account:
 		return
 
@@ -673,6 +684,7 @@ def get_company_default_account_fields():
 		"default_expense_account": "Default Expense Account",
 		"default_income_account": "Default Income Account",
 		"stock_received_but_not_billed": "Stock Received But Not Billed Account",
+		"stock_delivered_but_not_billed": "Stock Delivered But Not Billed Account",
 		"stock_adjustment_account": "Stock Adjustment Account",
 		"write_off_account": "Write Off Account",
 		"default_discount_account": "Default Payment Discount Account",

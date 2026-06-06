@@ -94,3 +94,36 @@ def get_item_group_defaults(item, company):
 			return row
 
 	return frappe._dict()
+
+
+@frappe.whitelist()
+def get_company_resolved_defaults(company: str) -> dict:
+	"""
+	Returns effective default values for a company by checking:
+	1. Company document
+	2. Stock Settings (for warehouse fallback)
+	3. Accounts Settings (for deferred account fallbacks)
+	"""
+	if not company:
+		return {}
+
+	company_doc = frappe.get_cached_doc("Company", company)
+	default_warehouse = frappe.db.get_single_value("Stock Settings", "default_warehouse")
+
+	return {
+		"default_warehouse": default_warehouse,
+		"default_inventory_account": company_doc.get("default_inventory_account"),
+		"buying_cost_center": company_doc.get("cost_center"),
+		"selling_cost_center": company_doc.get("cost_center"),
+		"expense_account": company_doc.get("default_expense_account"),
+		"income_account": company_doc.get("default_income_account"),
+		"default_provisional_account": company_doc.get("default_provisional_account"),
+		"purchase_expense_account": company_doc.get("purchase_expense_account"),
+		"default_cogs_account": company_doc.get("default_expense_account"),
+		"deferred_expense_account": company_doc.get("default_deferred_expense_account"),
+		"deferred_revenue_account": company_doc.get("default_deferred_revenue_account"),
+		"default_discount_account": company_doc.get("default_discount_account"),
+		"purchase_expense_contra_account": company_doc.get("purchase_expense_contra_account"),
+		"default_price_list": "",
+		"default_supplier": "",
+	}

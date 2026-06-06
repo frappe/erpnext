@@ -16,7 +16,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Operation",
-   "options": "Operation"
+   "options": "Operation",
+   "reqd": 1
   },
   {
    "default": "0",
@@ -40,7 +41,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-08-04 16:15:11.425349",
+ "modified": "2026-04-13 12:17:33.776504",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Sub Operation",

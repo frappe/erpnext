@@ -65,6 +65,11 @@ class StockReconciliation(StockController):
 		self.head_row = ["Item Code", "Warehouse", "Quantity", "Valuation Rate"]
 
 	def validate(self):
+		from erpnext.stock.doctype.putaway_rule.putaway_rule import validate_putaway_capacity
+		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+
+		sbb = SerialBatchBundleService(self)
+
 		self.validate_items_exist()
 		if not self.expense_account:
 			self.expense_account = frappe.get_cached_value(
@@ -75,17 +80,18 @@ class StockReconciliation(StockController):
 		self.validate_posting_time()
 		self.set_current_serial_and_batch_bundle()
 		self.set_new_serial_and_batch_bundle()
-		self.validate_duplicate_serial_and_batch_bundle("items")
+		sbb.validate_duplicate_serial_and_batch_bundle("items")
 		self.remove_items_with_no_change()
 		self.validate_data()
 		self.change_row_indexes()
 		self.validate_expense_account()
 		self.validate_customer_provided_item()
 		self.set_zero_value_for_customer_provided_items()
-		self.clean_serial_nos()
+		sbb.clean_serial_nos()
 		self.set_total_qty_and_amount()
-		self.validate_putaway_capacity()
+		validate_putaway_capacity(self)
 		self.validate_inventory_dimension()
+		self.validate_uom_is_integer("stock_uom", "qty")
 
 		if self._action == "submit":
 			self.validate_reserved_stock()
@@ -569,15 +575,18 @@ class StockReconciliation(StockController):
 
 	def calculate_difference_amount(self, item, item_dict):
 		qty_precision = item.precision("qty")
-		val_precision = item.precision("valuation_rate")
+		amount_precision = item.precision("amount")
 
 		new_qty = flt(item.qty, qty_precision)
-		new_valuation_rate = flt(item.valuation_rate or item_dict.get("rate"), val_precision)
+		new_valuation_rate = flt(item.valuation_rate or item_dict.get("rate"))
 
 		current_qty = flt(item_dict.get("qty"), qty_precision)
-		current_valuation_rate = flt(item_dict.get("rate"), val_precision)
+		current_valuation_rate = flt(item_dict.get("rate"))
 
-		self.difference_amount += (new_qty * new_valuation_rate) - (current_qty * current_valuation_rate)
+		new_amount = flt(new_qty * new_valuation_rate, amount_precision)
+		current_amount = flt(current_qty * current_valuation_rate, amount_precision)
+
+		self.difference_amount += new_amount - current_amount
 
 	def validate_data(self):
 		def _get_msg(row_num, msg):
@@ -887,7 +896,7 @@ class StockReconciliation(StockController):
 				"company": self.company,
 				"stock_uom": frappe.db.get_value("Item", row.item_code, "stock_uom"),
 				"is_cancelled": 1 if self.docstatus == 2 else 0,
-				"valuation_rate": flt(row.valuation_rate, row.precision("valuation_rate")),
+				"valuation_rate": flt(row.valuation_rate),
 			}
 		)
 
@@ -921,7 +930,9 @@ class StockReconciliation(StockController):
 			data.qty_after_transaction = 0.0
 			data.incoming_rate = flt(row.valuation_rate)
 
-		self.update_inventory_dimensions(row, data)
+		from erpnext.stock.services.stock_ledger_service import StockLedgerService
+
+		StockLedgerService(self).update_inventory_dimensions(row, data)
 
 		return data
 
@@ -971,10 +982,11 @@ class StockReconciliation(StockController):
 		return new_sl_entries
 
 	def get_gl_entries(self, inventory_account_map=None):
-		if not self.cost_center:
-			msgprint(_("Please enter Cost Center"), raise_exception=1)
+		from erpnext.stock.doctype.stock_reconciliation.services.gl_composer import (
+			StockReconciliationGLComposer,
+		)
 
-		return super().get_gl_entries(inventory_account_map, self.expense_account, self.cost_center)
+		return StockReconciliationGLComposer(self).compose(inventory_account_map)
 
 	def validate_expense_account(self):
 		if not cint(erpnext.is_perpetual_inventory_enabled(self.company)):
@@ -1046,84 +1058,6 @@ class StockReconciliation(StockController):
 			self.queue_action("cancel", timeout=2000)
 		else:
 			self._cancel()
-
-	def recalculate_current_qty(self, voucher_detail_no, sle_creation, add_new_sle=False):
-		for row in self.items:
-			if voucher_detail_no != row.name:
-				continue
-
-			if row.current_qty < 0:
-				return
-
-			val_rate = 0.0
-			current_qty = 0.0
-			if row.current_serial_and_batch_bundle:
-				current_qty = self.get_current_qty_for_serial_or_batch(row, sle_creation)
-			elif row.serial_no:
-				item_dict = get_stock_balance_for(
-					row.item_code,
-					row.warehouse,
-					self.posting_date,
-					self.posting_time,
-					row=row,
-					company=self.company,
-				)
-
-				current_qty = item_dict.get("qty")
-				row.current_serial_no = item_dict.get("serial_nos")
-				row.current_valuation_rate = item_dict.get("rate")
-				val_rate = item_dict.get("rate")
-			elif row.batch_no:
-				current_qty = get_batch_qty_for_stock_reco(
-					row.item_code,
-					row.warehouse,
-					row.batch_no,
-					self.posting_date,
-					self.posting_time,
-					self.name,
-					sle_creation,
-				)
-
-			precesion = row.precision("current_qty")
-			if flt(current_qty, precesion) != flt(row.current_qty, precesion):
-				if not row.serial_no:
-					val_rate = get_incoming_rate(
-						frappe._dict(
-							{
-								"item_code": row.item_code,
-								"warehouse": row.warehouse,
-								"qty": current_qty * -1,
-								"serial_and_batch_bundle": row.current_serial_and_batch_bundle,
-								"batch_no": row.batch_no,
-								"voucher_type": self.doctype,
-								"voucher_no": self.name,
-								"company": self.company,
-								"posting_date": self.posting_date,
-								"posting_time": self.posting_time,
-							}
-						)
-					)
-
-				row.current_valuation_rate = val_rate
-				row.current_qty = current_qty
-				row.db_set(
-					{
-						"current_qty": row.current_qty,
-						"current_valuation_rate": row.current_valuation_rate,
-						"current_amount": flt(row.current_qty * row.current_valuation_rate),
-					}
-				)
-
-			if add_new_sle and not frappe.db.get_value(
-				"Stock Ledger Entry",
-				{"voucher_detail_no": row.name, "actual_qty": ("<", 0), "is_cancelled": 0},
-				"name",
-			):
-				if not row.current_serial_and_batch_bundle:
-					self.set_current_serial_and_batch_bundle(voucher_detail_no, save=True)
-					row.reload()
-
-				self.add_missing_stock_ledger_entry(row, voucher_detail_no, sle_creation)
 
 	def add_missing_stock_ledger_entry(self, row, voucher_detail_no, sle_creation):
 		if row.current_qty == 0:

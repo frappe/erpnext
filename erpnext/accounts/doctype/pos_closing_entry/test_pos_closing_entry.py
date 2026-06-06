@@ -200,7 +200,6 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		)
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
 
-		frappe.db.sql("delete from `tabPOS Invoice`")
 		item_doc = make_item(
 			"_Test Item With Batch FOR POS Merge Test",
 			properties={
@@ -331,7 +330,7 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		"""
 		Test Sales Invoice and Return Sales Invoice creation during POS Invoice mode.
 		"""
-		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
 
 		test_user, pos_profile = init_user_and_profile()
 

@@ -24,7 +24,6 @@ from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
 	get_account_currency,
-	get_advance_payment_doctypes,
 	get_balance_on,
 	get_stock_accounts,
 	get_stock_and_account_balance,
@@ -62,6 +61,7 @@ class JournalEntry(AccountsController):
 		cheque_no: DF.Data | None
 		clearance_date: DF.Date | None
 		company: DF.Link
+		custom_remark: DF.Check
 		difference: DF.Currency
 		due_date: DF.Date | None
 		finance_book: DF.Link | None
@@ -354,8 +354,11 @@ class JournalEntry(AccountsController):
 					frappe.throw(_("Account {0} should be of type Expense").format(d.account))
 
 	def validate_stock_accounts(self):
-		if self.voucher_type == "Periodic Accounting Entry":
-			# Skip validation for periodic accounting entry
+		if (
+			not erpnext.is_perpetual_inventory_enabled(self.company)
+			or self.voucher_type == "Periodic Accounting Entry"
+		):
+			# Skip validation for periodic accounting entry and Perpetual Inventory Disabled Company.
 			return
 
 		stock_accounts = get_stock_accounts(self.company, accounts=self.accounts)
@@ -1024,8 +1027,8 @@ class JournalEntry(AccountsController):
 		if self.flags.skip_remarks_creation:
 			return
 
-		if self.user_remark:
-			r.append(_("Note: {0}").format(self.user_remark))
+		if self.get("custom_remark"):
+			return
 
 		if self.cheque_no:
 			if self.cheque_date:
@@ -1116,87 +1119,9 @@ class JournalEntry(AccountsController):
 		self.total_amount_in_words = money_in_words(amt, currency)
 
 	def build_gl_map(self):
-		gl_map = []
+		from erpnext.accounts.doctype.journal_entry.services.gl_composer import JournalEntryGLComposer
 
-		company_currency = erpnext.get_company_currency(self.company)
-		self.transaction_currency = company_currency
-		self.transaction_exchange_rate = 1
-		if self.multi_currency:
-			for row in self.get("accounts"):
-				if row.account_currency != company_currency:
-					# Journal assumes the first foreign currency as transaction currency
-					self.transaction_currency = row.account_currency
-					self.transaction_exchange_rate = row.exchange_rate
-					break
-
-		advance_doctypes = get_advance_payment_doctypes()
-
-		for d in self.get("accounts"):
-			if d.debit or d.credit or (self.voucher_type == "Exchange Gain Or Loss"):
-				r = [d.user_remark, self.remark]
-				r = [x for x in r if x]
-				remarks = "\n".join(r)
-
-				row = {
-					"account": d.account,
-					"party_type": d.party_type,
-					"due_date": self.due_date,
-					"party": d.party,
-					"against": d.against_account,
-					"debit": flt(d.debit, d.precision("debit")),
-					"credit": flt(d.credit, d.precision("credit")),
-					"account_currency": d.account_currency,
-					"debit_in_account_currency": flt(
-						d.debit_in_account_currency, d.precision("debit_in_account_currency")
-					),
-					"credit_in_account_currency": flt(
-						d.credit_in_account_currency, d.precision("credit_in_account_currency")
-					),
-					"transaction_currency": self.transaction_currency,
-					"transaction_exchange_rate": self.transaction_exchange_rate,
-					"debit_in_transaction_currency": flt(
-						d.debit_in_account_currency, d.precision("debit_in_account_currency")
-					)
-					if self.transaction_currency == d.account_currency
-					else flt(d.debit, d.precision("debit")) / self.transaction_exchange_rate,
-					"credit_in_transaction_currency": flt(
-						d.credit_in_account_currency, d.precision("credit_in_account_currency")
-					)
-					if self.transaction_currency == d.account_currency
-					else flt(d.credit, d.precision("credit")) / self.transaction_exchange_rate,
-					"against_voucher_type": d.reference_type,
-					"against_voucher": d.reference_name,
-					"remarks": remarks,
-					"voucher_detail_no": d.reference_detail_no,
-					"cost_center": d.cost_center,
-					"project": d.project,
-					"finance_book": self.finance_book,
-					"advance_voucher_type": d.advance_voucher_type,
-					"advance_voucher_no": d.advance_voucher_no,
-				}
-
-				if d.reference_type in advance_doctypes:
-					row.update(
-						{
-							"against_voucher_type": self.doctype,
-							"against_voucher": self.name,
-							"advance_voucher_type": d.reference_type,
-							"advance_voucher_no": d.reference_name,
-						}
-					)
-
-				# set flag to skip party validation
-				account_type = frappe.get_cached_value("Account", d.account, "account_type")
-				if account_type in ["Receivable", "Payable"] and self.party_not_required:
-					frappe.flags.party_not_required = True
-
-				gl_map.append(
-					self.get_gl_dict(
-						row,
-						item=d,
-					)
-				)
-		return gl_map
+		return JournalEntryGLComposer(self).compose()
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		from erpnext.accounts.general_ledger import make_gl_entries
@@ -1288,7 +1213,11 @@ class JournalEntry(AccountsController):
 		self.validate_total_debit_and_credit()
 
 	def get_values(self):
-		cond = f" and outstanding_amount <= {self.write_off_amount}" if flt(self.write_off_amount) > 0 else ""
+		cond = (
+			f" and outstanding_amount <= {flt(self.write_off_amount)}"
+			if flt(self.write_off_amount) > 0
+			else ""
+		)
 
 		if self.write_off_based_on == "Accounts Receivable":
 			return frappe.db.sql(
@@ -1550,34 +1479,41 @@ def get_payment_entry(ref_doc, args):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_against_jv(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
+def get_against_jv(
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict,
+):
 	if not frappe.db.has_column("Journal Entry", searchfield):
 		return []
 
-	return frappe.db.sql(
-		f"""
-		SELECT jv.name, jv.posting_date, jv.user_remark
-		FROM `tabJournal Entry` jv, `tabJournal Entry Account` jv_detail
-		WHERE jv_detail.parent = jv.name
-			AND jv_detail.account = %(account)s
-			AND IFNULL(jv_detail.party, '') = %(party)s
-			AND (
-				jv_detail.reference_type IS NULL
-				OR jv_detail.reference_type = ''
-			)
-			AND jv.docstatus = 1
-			AND jv.`{searchfield}` LIKE %(txt)s
-		ORDER BY jv.name DESC
-		LIMIT %(limit)s offset %(offset)s
-		""",
-		dict(
-			account=filters.get("account"),
-			party=cstr(filters.get("party")),
-			txt=f"%{txt}%",
-			offset=start,
-			limit=page_len,
-		),
+	JournalEntry = frappe.qb.DocType("Journal Entry")
+	JournalEntryAccount = frappe.qb.DocType("Journal Entry Account")
+
+	query = (
+		frappe.qb.from_(JournalEntry)
+		.join(JournalEntryAccount)
+		.on(JournalEntryAccount.parent == JournalEntry.name)
+		.select(JournalEntry.name, JournalEntry.posting_date, JournalEntry.remark)
+		.where(JournalEntryAccount.account == filters.get("account"))
+		.where(JournalEntryAccount.reference_type.isnull() | (JournalEntryAccount.reference_type == ""))
+		.where(JournalEntry.docstatus == 1)
+		.where(JournalEntry[searchfield].like(f"%{txt}%"))
+		.orderby(JournalEntry.name, order=frappe.qb.desc)
+		.limit(page_len)
+		.offset(start)
 	)
+
+	party = filters.get("party")
+	if party:
+		query = query.where(JournalEntryAccount.party == party)
+	else:
+		query = query.where(JournalEntryAccount.party.isnull() | (JournalEntryAccount.party == ""))
+
+	return query.run()
 
 
 @frappe.whitelist()

@@ -182,7 +182,7 @@ class TestCostCenterAllocation(ERPNextTestSuite):
 		self.assertTrue(gl_entries)
 
 		for gle in gl_entries:
-			self.assertTrue(gle.cost_center in expected_values)
+			self.assertIn(gle.cost_center, expected_values)
 			self.assertEqual(gle.debit, 0)
 			self.assertEqual(gle.credit, expected_values[gle.cost_center])
 

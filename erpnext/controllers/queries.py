@@ -9,14 +9,15 @@ import frappe
 from frappe import qb, scrub
 from frappe.desk.reportview import get_filters_cond, get_match_cond
 from frappe.permissions import has_permission
-from frappe.query_builder import Criterion, CustomFunction
-from frappe.query_builder.functions import Concat, Locate, Sum
+from frappe.query_builder import Case, Criterion, DocType
+from frappe.query_builder.functions import Concat, CustomFunction, Length, Locate, Substring, Sum
 from frappe.utils import nowdate, today, unique
 from pypika import Order
 
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
 from erpnext.stock.get_item_details import ItemDetailsCtx, _get_item_tax_template
+from erpnext.stock.utils import get_combine_datetime
 
 
 # searches for active employees
@@ -186,49 +187,37 @@ def item_query(
 	filters: dict | str | None = None,
 	as_dict: bool = False,
 ):
+	"""
+	Fetch items for link fields
+	"""
 	doctype = "Item"
-	conditions = []
 
 	if isinstance(filters, str):
 		filters = json.loads(filters)
 
-	# Get searchfields from meta and use in Item Link field query
-	meta = frappe.get_meta(doctype, cached=True)
-	searchfields = meta.get_search_fields()
-
-	columns = ""
-	extra_searchfields = [field for field in searchfields if field not in ["name", "description"]]
-
-	if extra_searchfields:
-		columns += ", " + ", ".join(extra_searchfields)
-
-	if "description" in searchfields:
-		columns += """, if(length(tabItem.description) > 40, \
-			concat(substr(tabItem.description, 1, 40), "..."), description) as description"""
-
-	searchfields = searchfields + [
-		field
-		for field in [
-			searchfield or "name",
-			"item_code",
-			"item_group",
-			"item_name",
-		]
-		if field not in searchfields
-	]
-	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
-
 	if filters and isinstance(filters, dict):
 		if filters.get("customer") or filters.get("supplier"):
+			party_type = "Customer" if filters.get("customer") else "Supplier"
 			party = filters.get("customer") or filters.get("supplier")
+			group = "Customer Group" if filters.get("customer") else "Supplier Group"
 			item_rules_list = frappe.get_all(
 				"Party Specific Item",
 				filters={
 					"party": ["!=", party],
-					"party_type": "Customer" if filters.get("customer") else "Supplier",
+					"party_type": party_type,
 				},
 				fields=["restrict_based_on", "based_on_value"],
 			)
+
+			party_group_rules_list = frappe.get_all(
+				"Party Specific Item",
+				filters={"party_type": group},
+				fields=["party as party_group", "restrict_based_on", "based_on_value"],
+			)
+			current_party_group = frappe.get_value(party_type, party, frappe.scrub(group))
+			for rule in party_group_rules_list:
+				if current_party_group != rule.party_group:
+					item_rules_list.append(rule)
 
 			filters_dict = {}
 			for rule in item_rules_list:
@@ -250,43 +239,95 @@ def item_query(
 			filters.pop("customer", None)
 			filters.pop("supplier", None)
 
-	description_cond = ""
-	if frappe.db.estimate_count(doctype) < 50000:
-		# scan description only if items are less than 50000
-		description_cond = "or tabItem.description LIKE %(txt)s"
+	item = DocType(doctype)
 
-	return frappe.db.sql(
-		"""select
-			tabItem.name {columns}
-		from tabItem
-		where tabItem.docstatus < 2
-			and tabItem.disabled=0
-			and tabItem.has_variants=0
-			and (tabItem.end_of_life > %(today)s or ifnull(tabItem.end_of_life, '0000-00-00')='0000-00-00')
-			and ({scond} or tabItem.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
-				{description_cond})
-			{fcond} {mcond}
-		order by
-			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
-			if(locate(%(_txt)s, item_name), locate(%(_txt)s, item_name), 99999),
-			idx desc,
-			name, item_name
-		limit %(start)s, %(page_len)s """.format(
-			columns=columns,
-			scond=searchfields,
-			fcond=get_filters_cond(doctype, filters, conditions).replace("%", "%%"),
-			mcond=get_match_cond(doctype).replace("%", "%%"),
-			description_cond=description_cond,
-		),
-		{
-			"today": nowdate(),
-			"txt": "%%%s%%" % txt,
-			"_txt": txt.replace("%", ""),
-			"start": start,
-			"page_len": page_len,
-		},
-		as_dict=as_dict,
+	# Condition for the date
+	eol = item.end_of_life
+	date_conditions = [eol > nowdate(), eol.isnull()]
+	#  Add the condition if the db can evaluate it
+	if frappe.db.db_type not in ["postgres"]:
+		date_conditions.append(eol == "0000-00-00")
+
+	date_condition = Criterion.any(date_conditions)
+
+	# Condition for the searchfields
+	meta = frappe.get_meta("Item", cached=True)
+	searchfields = meta.get_search_fields()
+	query_select = []
+
+	extra_searchfields = [field for field in searchfields if field not in ["name", "description"]]
+
+	for field in extra_searchfields:
+		query_select.append(item[field])
+
+	if "description" in searchfields:
+		description_col = (
+			Case()
+			.when(Length(item.description) > 40, Concat(Substring(item.description, 1, 40), "..."))
+			.else_(item.description)
+		).as_("description")
+
+		query_select.append(description_col)
+
+	fields_to_process = list(
+		dict.fromkeys(
+			searchfields
+			+ [
+				field
+				for field in [
+					searchfield or "name",
+					"item_code",
+					"item_group",
+					"item_name",
+				]
+				if field not in searchfields
+			]
+		)
 	)
+	db_fields = [f.fieldname for f in meta.fields] + ["name"]
+	search_str = f"%{txt}%"
+	search_conditions = []
+	for fieldname in fields_to_process:
+		if fieldname in db_fields:
+			search_conditions.append(item[fieldname].like(search_str))
+
+	barcode_tbl = DocType("Item Barcode")
+	barcode_subquery = (
+		frappe.qb.from_(barcode_tbl).select(barcode_tbl.parent).where(barcode_tbl.barcode.like(search_str))
+	)
+	search_conditions.append(item.item_code.isin(barcode_subquery))
+
+	# Condition for the description
+	if frappe.db.estimate_count("Item") < 50000 and "description" not in fields_to_process:
+		search_conditions.append(item.description.like(search_str))
+
+	txt_no_percent = txt.replace("%", "")
+
+	# Building the query
+	query = (
+		frappe.get_query(doctype, filters=filters, ignore_permissions=False)
+		.select(*query_select)
+		.where(item.docstatus < 2)
+		.where(item.disabled == 0)
+		.where(item.has_variants == 0)
+		.where(date_condition)
+		.where(Criterion.any(search_conditions))
+		.orderby(
+			Case().when(Locate(txt_no_percent, item.name) > 0, Locate(txt_no_percent, item.name)).else_(99999)
+		)
+		.orderby(
+			Case()
+			.when(Locate(txt_no_percent, item.item_name) > 0, Locate(txt_no_percent, item.item_name))
+			.else_(99999)
+		)
+		.orderby(item.idx, order=Order.desc)
+		.orderby(item.name)
+		.orderby(item.item_name)
+		.limit(page_len)
+		.offset(start)
+	)
+
+	return query.run(as_dict=as_dict)
 
 
 @frappe.whitelist()
@@ -379,39 +420,46 @@ def get_project_name(
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_delivery_notes_to_be_billed(
-	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, as_dict: bool
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, as_dict: bool = False
 ):
-	doctype = "Delivery Note"
+	DeliveryNote = frappe.qb.DocType("Delivery Note")
+
 	fields = get_fields(doctype, ["name", "customer", "posting_date"])
 
-	return frappe.db.sql(
-		"""
-		select {fields}
-		from `tabDelivery Note`
-		where `tabDelivery Note`.`{key}` like {txt} and
-			`tabDelivery Note`.docstatus = 1
-			and status not in ('Stopped', 'Closed') {fcond}
-			and (
-				(`tabDelivery Note`.is_return = 0 and `tabDelivery Note`.per_billed < 100)
-				or (`tabDelivery Note`.grand_total = 0 and `tabDelivery Note`.per_billed < 100)
-				or (
-					`tabDelivery Note`.is_return = 1
-					and return_against in (select name from `tabDelivery Note` where per_billed < 100)
+	original_dn = (
+		frappe.qb.from_(DeliveryNote)
+		.select(DeliveryNote.name)
+		.where((DeliveryNote.docstatus == 1) & (DeliveryNote.is_return == 0) & (DeliveryNote.per_billed > 0))
+	)
+
+	query = frappe.qb.get_query(
+		"Delivery Note",
+		fields=fields,
+		filters=filters,
+		ignore_permissions=False,
+	)
+
+	query = (
+		query.where(
+			(DeliveryNote.docstatus == 1)
+			& (DeliveryNote.status.notin(["Stopped", "Closed"]))
+			& (DeliveryNote[searchfield].like(f"%{txt}%"))
+			& (
+				((DeliveryNote.is_return == 0) & (DeliveryNote.per_billed < 100))
+				| ((DeliveryNote.grand_total == 0) & (DeliveryNote.per_billed < 100))
+				| (
+					(DeliveryNote.is_return == 1)
+					& (DeliveryNote.per_billed < 100)
+					& (DeliveryNote.return_against.isin(original_dn))
 				)
 			)
-			{mcond} order by `tabDelivery Note`.`{key}` asc limit {page_len} offset {start}
-	""".format(
-			fields=", ".join([f"`tabDelivery Note`.{f}" for f in fields]),
-			key=searchfield,
-			fcond=get_filters_cond(doctype, filters, []),
-			mcond=get_match_cond(doctype),
-			start=start,
-			page_len=page_len,
-			txt="%(txt)s",
-		),
-		{"txt": ("%%%s%%" % txt)},
-		as_dict=as_dict,
+		)
+		.orderby(DeliveryNote[searchfield], order=Order.asc)
+		.limit(page_len)
+		.offset(start)
 	)
+
+	return query.run(as_dict=as_dict)
 
 
 @frappe.whitelist()
@@ -495,6 +543,13 @@ def get_batches_from_stock_ledger_entries(searchfields, txt, filters, start=0, p
 		.limit(page_len)
 	)
 
+	if not filters.get("is_inward"):
+		if filters.get("posting_date") and filters.get("posting_time"):
+			query = query.where(
+				stock_ledger_entry.posting_datetime
+				<= get_combine_datetime(filters.get("posting_date"), filters.get("posting_time"))
+			)
+
 	if not filters.get("include_expired_batches"):
 		query = query.where((batch_table.expiry_date >= expiry_date) | (batch_table.expiry_date.isnull()))
 
@@ -547,6 +602,13 @@ def get_batches_from_serial_and_batch_bundle(searchfields, txt, filters, start=0
 		.offset(start)
 		.limit(page_len)
 	)
+
+	if not filters.get("is_inward"):
+		if filters.get("posting_date") and filters.get("posting_time"):
+			bundle_query = bundle_query.where(
+				stock_ledger_entry.posting_datetime
+				<= get_combine_datetime(filters.get("posting_date"), filters.get("posting_time"))
+			)
 
 	if not filters.get("include_expired_batches"):
 		bundle_query = bundle_query.where(

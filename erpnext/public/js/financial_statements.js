@@ -64,7 +64,7 @@ erpnext.financial_statements = {
 		const isPeriodColumn = periodKeys.includes(baseName);
 
 		return {
-			isAccount: baseName === erpnext.financial_statements.name_field,
+			isAccount: baseName === "account", // DO NOT USE `name_field` ! This can be overridden in some reports!
 			isPeriod: isPeriodColumn,
 			segmentIndex: valueMatch && valueMatch[1] ? parseInt(valueMatch[1]) : null,
 			fieldname: baseName,
@@ -230,7 +230,10 @@ erpnext.financial_statements = {
 
 		value = default_formatter(value, row, column, data);
 
-		if (data && !data.parent_account && !data.parent_section) {
+		if (
+			data &&
+			((!data.parent_account && !data.parent_section) || data.is_group_account || data.is_group)
+		) {
 			value = $(`<span>${value}</span>`);
 
 			var $value = $(value).css("font-weight", "bold");
@@ -295,7 +298,7 @@ erpnext.financial_statements = {
 		let fiscal_year = erpnext.utils.get_fiscal_year(frappe.datetime.get_today());
 		var filters = report.get_values();
 
-		if (!filters.period_start_date || !filters.period_end_date) {
+		if (fiscal_year && (!filters.period_start_date || !filters.period_end_date)) {
 			frappe.model.with_doc("Fiscal Year", fiscal_year, function (r) {
 				var fy = frappe.model.get_doc("Fiscal Year", fiscal_year);
 				frappe.query_report.set_filter_value({
@@ -419,16 +422,16 @@ function get_filters() {
 			label: __("Start Year"),
 			fieldtype: "Link",
 			options: "Fiscal Year",
-			reqd: 1,
 			depends_on: "eval:doc.filter_based_on == 'Fiscal Year'",
+			mandatory_depends_on: "eval:doc.filter_based_on == 'Fiscal Year'",
 		},
 		{
 			fieldname: "to_fiscal_year",
 			label: __("End Year"),
 			fieldtype: "Link",
 			options: "Fiscal Year",
-			reqd: 1,
 			depends_on: "eval:doc.filter_based_on == 'Fiscal Year'",
+			mandatory_depends_on: "eval:doc.filter_based_on == 'Fiscal Year'",
 		},
 		{
 			fieldname: "periodicity",
@@ -452,6 +455,7 @@ function get_filters() {
 			label: __("Currency"),
 			fieldtype: "Select",
 			options: erpnext.get_presentation_currency_list(),
+			depends_on: "eval: !doc.report_template",
 		},
 		{
 			fieldname: "cost_center",

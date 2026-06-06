@@ -503,6 +503,17 @@
    "collapsible": 1,
    "indent": 0,
    "keep_closed": 0,
+   "label": "Inactive Customers",
+   "link_to": "Inactive Customers",
+   "link_type": "Report",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
    "label": "Sales Invoice Trends",
    "link_to": "Sales Invoice Trends",
    "link_type": "Report",
@@ -687,7 +698,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-02-20 16:44:44.931581",
+ "modified": "2026-04-28 14:38:37.179705",
  "modified_by": "Administrator",
  "module": "Selling",
  "module_onboarding": "Selling Onboarding",

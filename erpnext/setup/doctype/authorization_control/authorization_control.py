@@ -120,7 +120,9 @@ class AuthorizationControl(TransactionBase):
 		if val == 1:
 			add_cond += " and system_user = {}".format(frappe.db.escape(session["user"]))
 		elif val == 2:
-			add_cond += " and system_role IN %s" % ("('" + "','".join(frappe.get_roles()) + "')")
+			add_cond += " and system_role IN (%s)" % ", ".join(
+				frappe.db.escape(r) for r in frappe.get_roles()
+			)
 		else:
 			add_cond += " and ifnull(system_user,'') = '' and ifnull(system_role,'') = ''"
 
@@ -206,8 +208,8 @@ class AuthorizationControl(TransactionBase):
 			and docstatus != 2
 		""".format(
 					"%s",
-					"'" + "','".join(frappe.get_roles()) + "'",
-					"'" + "','".join(final_based_on) + "'",
+					", ".join(frappe.db.escape(r) for r in frappe.get_roles()),
+					", ".join(frappe.db.escape(b) for b in final_based_on),
 					"%s",
 				),
 				(doctype_name, company),

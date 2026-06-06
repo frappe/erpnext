@@ -126,7 +126,7 @@ erpnext.maintenance.MaintenanceVisit = class MaintenanceVisit extends frappe.ui.
 						return;
 					}
 					erpnext.utils.map_current_doc({
-						method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_visit",
+						method: "erpnext.selling.doctype.sales_order.mapper.make_maintenance_visit",
 						source_doctype: "Sales Order",
 						target: me.frm,
 						setters: {

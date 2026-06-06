@@ -2,10 +2,10 @@ import frappe
 from frappe import qb
 from frappe.utils import add_days, flt, get_first_day, get_last_day, nowdate
 
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_delivery_note, make_sales_return
+from erpnext.accounts.doctype.sales_invoice.mapper import make_delivery_note, make_sales_return
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.gross_profit.gross_profit import execute
-from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
+from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -354,7 +354,7 @@ class TestGrossProfit(ERPNextTestSuite):
 			do_not_submit=False,
 		)
 
-		from erpnext.selling.doctype.sales_order.sales_order import (
+		from erpnext.selling.doctype.sales_order.mapper import (
 			make_delivery_note,
 			make_sales_invoice,
 		)
@@ -522,7 +522,7 @@ class TestGrossProfit(ERPNextTestSuite):
 			do_not_submit=False,
 		)
 
-		from erpnext.selling.doctype.sales_order.sales_order import (
+		from erpnext.selling.doctype.sales_order.mapper import (
 			make_delivery_note,
 			make_sales_invoice,
 		)
@@ -730,6 +730,31 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertEqual(total[6], 0.0)
 		self.assertEqual(total[7], 1000.0)
 		self.assertEqual(total[8], 100.0)
+
+	def test_drop_ship(self):
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
+		from erpnext.selling.doctype.sales_order.mapper import make_purchase_order, make_sales_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item("_Test Drop Ship Item", properties={"is_stock_item": 1, "delivered_by_supplier": 1})
+
+		so = make_sales_order(item=item.name, qty=10, rate=100)
+		po = make_purchase_order(so.name, selected_items=[so.items[0]])[0]
+		po.items[0].rate = 80
+		po.supplier = "_Test Supplier"
+		po.submit()
+		make_purchase_invoice(po.name).submit()
+		si = make_sales_invoice(so.name).submit()
+
+		filters = frappe._dict(
+			company=si.company, from_date=si.posting_date, to_date=si.posting_date, group_by="Invoice"
+		)
+
+		_, data = execute(filters=filters)
+		self.assertEqual(data[1].buying_amount, 800)
+		self.assertIsNone(data[1].buying_rate)
+		self.assertEqual(data[1]["gross_profit_%"], 20)
 
 
 def make_sales_person(sales_person_name="_Test Sales Person"):

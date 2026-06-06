@@ -170,6 +170,7 @@
   "is_discounted",
   "col_break23",
   "status",
+  "title",
   "more_info",
   "debit_to",
   "party_account_currency",
@@ -662,6 +663,7 @@
    "fieldname": "total_billing_amount",
    "fieldtype": "Currency",
    "label": "Total Billing Amount",
+   "options": "currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1529,6 +1531,7 @@
    "fieldname": "amount_eligible_for_commission",
    "fieldtype": "Currency",
    "label": "Amount Eligible for Commission",
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -1620,12 +1623,20 @@
    "fieldname": "auto_repeat_section",
    "fieldtype": "Section Break",
    "label": "Auto Repeat"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-02 07:32:47.667810",
+ "modified": "2026-05-28 12:22:50.253090",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",

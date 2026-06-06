@@ -12,10 +12,13 @@ no_cache = 1
 
 
 def get_context(context):
-	is_enabled = frappe.db.get_single_value("Appointment Booking Settings", "enable_scheduling")
-	if is_enabled:
-		return context
-	else:
+	handle_appointment_booking_disabled()
+
+	return context
+
+
+def handle_appointment_booking_disabled():
+	if not frappe.get_single_value("Appointment Booking Settings", "enable_scheduling"):
 		frappe.redirect_to_message(
 			_("Appointment Scheduling Disabled"),
 			_("Appointment Scheduling has been disabled for this site"),
@@ -27,9 +30,9 @@ def get_context(context):
 
 @frappe.whitelist(allow_guest=True)
 def get_appointment_settings():
-	settings = frappe.get_cached_value(
+	handle_appointment_booking_disabled()
+	settings = frappe.get_single_value(
 		"Appointment Booking Settings",
-		None,
 		["advance_booking_days", "appointment_duration", "success_redirect_url"],
 		as_dict=True,
 	)
@@ -38,12 +41,14 @@ def get_appointment_settings():
 
 @frappe.whitelist(allow_guest=True)
 def get_timezones():
+	handle_appointment_booking_disabled()
 	return zoneinfo.available_timezones()
 
 
 @frappe.whitelist(allow_guest=True)
 def get_appointment_slots(date: str, timezone: str):
 	# Convert query to local timezones
+	handle_appointment_booking_disabled()
 	format_string = "%Y-%m-%d %H:%M:%S"
 	query_start_time = datetime.datetime.strptime(date + " 00:00:00", format_string)
 	query_end_time = datetime.datetime.strptime(date + " 23:59:59", format_string)
@@ -52,7 +57,11 @@ def get_appointment_slots(date: str, timezone: str):
 	now = convert_to_guest_timezone(timezone, datetime.datetime.now())
 
 	# Database queries
-	settings = frappe.get_doc("Appointment Booking Settings")
+	settings = frappe.get_single_value(
+		"Appointment Booking Settings",
+		["holiday_list", "appointment_duration", "number_of_agents", "availability_of_slots"],
+		as_dict=True,
+	)
 	holiday_list = frappe.get_doc("Holiday List", settings.holiday_list)
 	timeslots = get_available_slots_between(query_start_time, query_end_time, settings)
 
@@ -93,6 +102,7 @@ def get_available_slots_between(query_start_time, query_end_time, settings):
 
 @frappe.whitelist(allow_guest=True)
 def create_appointment(date: str, time: str, tz: str, contact: str):
+	handle_appointment_booking_disabled()
 	format_string = "%Y-%m-%d %H:%M:%S"
 	scheduled_time = datetime.datetime.strptime(date + " " + time, format_string)
 	# Strip tzinfo from datetime objects since it's handled by the doctype

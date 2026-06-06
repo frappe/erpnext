@@ -7,6 +7,7 @@ from frappe.utils import today
 from erpnext.accounts.doctype.finance_book.test_finance_book import create_finance_book
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.accounts.general_ledger import make_reverse_gl_entries
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -17,9 +18,6 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		frappe.db.set_single_value("Accounts Settings", "use_legacy_controller_for_pcv", 1)
 
 	def test_closing_entry(self):
-		frappe.db.sql("delete from `tabGL Entry` where company='Test PCV Company'")
-		frappe.db.sql("delete from `tabPeriod Closing Voucher` where company='Test PCV Company'")
-
 		company = create_company()
 		cost_center = create_cost_center("Test Cost Center 1")
 
@@ -69,9 +67,6 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		self.assertEqual(pcv_gle, expected_gle)
 
 	def test_cost_center_wise_posting(self):
-		frappe.db.sql("delete from `tabGL Entry` where company='Test PCV Company'")
-		frappe.db.sql("delete from `tabPeriod Closing Voucher` where company='Test PCV Company'")
-
 		company = create_company()
 		surplus_account = create_account()
 
@@ -135,9 +130,6 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		)
 
 	def test_period_closing_with_finance_book_entries(self):
-		frappe.db.sql("delete from `tabGL Entry` where company='Test PCV Company'")
-		frappe.db.sql("delete from `tabPeriod Closing Voucher` where company='Test PCV Company'")
-
 		company = create_company()
 		surplus_account = create_account()
 		cost_center = create_cost_center("Test Cost Center 1")
@@ -189,9 +181,6 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		self.assertSequenceEqual(pcv_gle, expected_gle)
 
 	def test_gl_entries_restrictions(self):
-		frappe.db.sql("delete from `tabGL Entry` where company='Test PCV Company'")
-		frappe.db.sql("delete from `tabPeriod Closing Voucher` where company='Test PCV Company'")
-
 		company = create_company()
 		cost_center = create_cost_center("Test Cost Center 1")
 
@@ -212,10 +201,6 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, jv1.submit)
 
 	def test_closing_balance_with_dimensions_and_test_reposting_entry(self):
-		frappe.db.sql("delete from `tabGL Entry` where company='Test PCV Company'")
-		frappe.db.sql("delete from `tabPeriod Closing Voucher` where company='Test PCV Company'")
-		frappe.db.sql("delete from `tabAccount Closing Balance` where company='Test PCV Company'")
-
 		company = create_company()
 		cost_center1 = create_cost_center("Test Cost Center 1")
 		cost_center2 = create_cost_center("Test Cost Center 2")
@@ -348,6 +333,48 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 			pcv.submit()
 
 		return pcv
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"enable_immutable_ledger": 1},
+	)
+	def test_immutable_ledger_reverse_entry_uses_passed_posting_date_after_pcv(self):
+		company = create_company()
+		cost_center = create_cost_center("Test Cost Center 1")
+
+		jv = make_journal_entry(
+			posting_date="2021-03-15",
+			amount=400,
+			account1="Cash - TPC",
+			account2="Sales - TPC",
+			cost_center=cost_center,
+			company=company,
+			save=False,
+		)
+		jv.company = company
+		jv.save()
+		jv.submit()
+
+		self.make_period_closing_voucher(posting_date="2021-03-31")
+
+		# Passed posting_date is after PCV end date, so cancellation should not fail.
+		make_reverse_gl_entries(
+			voucher_type="Journal Entry",
+			voucher_no=jv.name,
+			posting_date="2022-01-01",
+		)
+
+		totals_after_cancel = frappe.db.sql(
+			"""
+				select sum(debit) as total_debit, sum(credit) as total_credit
+				from `tabGL Entry`
+				where voucher_type=%s and voucher_no=%s and is_cancelled=0
+			""",
+			("Journal Entry", jv.name),
+			as_dict=True,
+		)[0]
+
+		self.assertEqual(totals_after_cancel.total_debit, totals_after_cancel.total_credit)
 
 
 def create_company():
