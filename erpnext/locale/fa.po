@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-05-31 10:18+0000\n"
-"PO-Revision-Date: 2026-05-31 22:14\n"
+"PO-Revision-Date: 2026-06-07 18:44\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -34107,7 +34107,7 @@ msgstr "اضافه تحویل/دریافت مجاز (%)"
 #. Label of the over_order_allowance (Float) field in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Over Order Allowance (%)"
-msgstr ""
+msgstr "سفارش مازاد مجاز (٪)"
 
 #. Label of the over_picking_allowance (Percent) field in DocType 'Stock
 #. Settings'
@@ -35917,7 +35917,7 @@ msgstr "پرداخت دریافت شد"
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/invoicing.json
 msgid "Payment Reconciliation"
-msgstr ""
+msgstr "تطبیق پرداخت"
 
 #. Name of a DocType
 #. Label of the payment_reconciliation (Table) field in DocType 'POS Closing
@@ -37822,7 +37822,7 @@ msgstr "لطفاً قبل از تنظیم انبار یک کد آیتم را ا�
 
 #: erpnext/controllers/item_variant.py:243
 msgid "Please select at least one attribute value"
-msgstr ""
+msgstr "لطفا حداقل یک مقدار ویژگی انتخاب کنید"
 
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:43
 msgid "Please select at least one filter: Item Code, Batch, or Serial No."
@@ -46606,7 +46606,7 @@ msgstr "فروش"
 
 #: erpnext/stock/doctype/item/item_list.js:28
 msgid "Sales & Purchase"
-msgstr ""
+msgstr "فروش و خرید"
 
 #: erpnext/setup/doctype/company/company.py:653
 msgid "Sales Account"
@@ -48115,7 +48115,7 @@ msgstr "از هر مجموعه یک آیتم را برای استفاده در �
 
 #: erpnext/stock/doctype/item/item.js:815
 msgid "Select at least one attribute value."
-msgstr ""
+msgstr "حداقل یک مقدار ویژگی انتخاب کنید."
 
 #: erpnext/public/js/utils/party.js:379
 msgid "Select company first"
@@ -57695,7 +57695,7 @@ msgstr ""
 
 #: erpnext/buying/doctype/supplier_scorecard_criteria/supplier_scorecard_criteria.py:85
 msgid "Unable to find variable: {0}"
-msgstr ""
+msgstr "متغیر: {0} پیدا نشد"
 
 #: banking/src/components/features/BankReconciliation/BankTransactionList.tsx:102
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:322
