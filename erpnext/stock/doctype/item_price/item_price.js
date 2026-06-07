@@ -10,6 +10,15 @@ frappe.ui.form.on("Item Price", {
 				},
 			};
 		});
+
+		frm._price_list_filters = {};
+		frm.set_query("price_list", () => ({ filters: frm._price_list_filters }));
+	},
+
+	refresh(frm) {
+		if (frm.doc.item_code) {
+			frm.trigger("item_code");
+		}
 	},
 
 	onload(frm) {
@@ -36,5 +45,21 @@ frappe.ui.form.on("Item Price", {
 				},
 			};
 		});
+	},
+
+	item_code(frm) {
+		frm._price_list_filters = {};
+		if (frm.doc.item_code) {
+			frappe.db
+				.get_value("Item", frm.doc.item_code, ["is_sales_item", "is_purchase_item"])
+				.then((r) => {
+					if (!r.message) return;
+					if (r.message.is_sales_item && !r.message.is_purchase_item) {
+						frm._price_list_filters.selling = 1;
+					} else if (r.message.is_purchase_item && !r.message.is_sales_item) {
+						frm._price_list_filters.buying = 1;
+					}
+				});
+		}
 	},
 });

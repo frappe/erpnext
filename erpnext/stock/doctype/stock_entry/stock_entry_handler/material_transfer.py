@@ -65,6 +65,87 @@ class BaseMaterialTransferStockEntry(BaseStockEntry):
 							title=_("Invalid Source and Target Warehouse"),
 						)
 
+	def update_transferred_qty(self):
+		if not self.doc.outgoing_stock_entry:
+			return
+
+		stock_entries, child_list = self._collect_transferred_qtys()
+		if not stock_entries:
+			return
+
+		self._bulk_update_transferred_qty(stock_entries, child_list)
+		self._update_per_transferred_field()
+
+	def _get_item_transferred_qty(self, item):
+		sed = frappe.qb.DocType("Stock Entry Detail")
+		result = (
+			frappe.qb.from_(sed)
+			.select(Sum(sed.transfer_qty).as_("qty"))
+			.where(
+				(sed.against_stock_entry == item.against_stock_entry)
+				& (sed.ste_detail == item.ste_detail)
+				& (sed.docstatus == 1)
+			)
+		).run(as_dict=True)
+		return result[0].qty if result and result[0].qty else 0.0
+
+	def _validate_item_transferred_qty(self, item, transferred_qty):
+		if item.docstatus != 1:
+			return
+
+		transfer_qty = frappe.get_value("Stock Entry Detail", item.ste_detail, "transfer_qty")
+		if transferred_qty > transfer_qty:
+			frappe.throw(
+				_("Row {0}: Transferred quantity cannot be greater than the requested quantity.").format(
+					item.idx
+				)
+			)
+
+	def _collect_transferred_qtys(self):
+		stock_entries, child_list = {}, []
+		for item in self.doc.items:
+			if not (item.against_stock_entry and item.ste_detail):
+				continue
+
+			transferred_qty = self._get_item_transferred_qty(item)
+			self._validate_item_transferred_qty(item, transferred_qty)
+			child_list.append(item.ste_detail)
+			stock_entries[(item.against_stock_entry, item.ste_detail)] = transferred_qty
+		return stock_entries, child_list
+
+	def _bulk_update_transferred_qty(self, stock_entries, child_list):
+		sed = frappe.qb.DocType("Stock Entry Detail")
+		case_expr = self._build_case_expr(sed, stock_entries)
+		(
+			frappe.qb.update(sed)
+			.set(sed.transferred_qty, case_expr.else_(sed.transferred_qty))
+			.where(sed.name.isin(child_list))
+		).run()
+
+	def _build_case_expr(self, sed, stock_entries):
+		from pypika import Case
+
+		case_expr = Case()
+		for (parent, name), qty in stock_entries.items():
+			case_expr = case_expr.when((sed.parent == parent) & (sed.name == name), qty)
+		return case_expr
+
+	def _update_per_transferred_field(self):
+		self.doc._update_percent_field_in_targets(self._get_per_transferred_config(), update_modified=True)
+
+	def _get_per_transferred_config(self):
+		return {
+			"source_dt": "Stock Entry Detail",
+			"target_field": "transferred_qty",
+			"target_ref_field": "transfer_qty",
+			"target_dt": "Stock Entry Detail",
+			"join_field": "ste_detail",
+			"target_parent_dt": "Stock Entry",
+			"target_parent_field": "per_transferred",
+			"source_field": "transfer_qty",
+			"percent_join_field": "against_stock_entry",
+		}
+
 
 class MaterialTransferStockEntry(BaseMaterialTransferStockEntry):
 	def before_validate(self):
@@ -75,9 +156,11 @@ class MaterialTransferStockEntry(BaseMaterialTransferStockEntry):
 		self.validate_same_source_target_warehouse()
 
 	def on_submit(self):
+		self.update_transferred_qty()
 		self.update_subcontract_order_supplied_items()
 
 	def on_cancel(self):
+		self.update_transferred_qty()
 		self.update_subcontract_order_supplied_items()
 
 	def update_subcontract_order_supplied_items(self):
@@ -313,87 +396,6 @@ class MaterialRequestStockEntry(BaseMaterialTransferStockEntry):
 
 		if self.doc.outgoing_stock_entry:
 			self.set_material_request_transfer_status("In Transit")
-
-	def update_transferred_qty(self):
-		if not self.doc.outgoing_stock_entry:
-			return
-
-		stock_entries, child_list = self._collect_transferred_qtys()
-		if not stock_entries:
-			return
-
-		self._bulk_update_transferred_qty(stock_entries, child_list)
-		self._update_per_transferred_field()
-
-	def _get_item_transferred_qty(self, item):
-		sed = frappe.qb.DocType("Stock Entry Detail")
-		result = (
-			frappe.qb.from_(sed)
-			.select(Sum(sed.transfer_qty).as_("qty"))
-			.where(
-				(sed.against_stock_entry == item.against_stock_entry)
-				& (sed.ste_detail == item.ste_detail)
-				& (sed.docstatus == 1)
-			)
-		).run(as_dict=True)
-		return result[0].qty if result and result[0].qty else 0.0
-
-	def _validate_item_transferred_qty(self, item, transferred_qty):
-		if item.docstatus != 1:
-			return
-
-		transfer_qty = frappe.get_value("Stock Entry Detail", item.ste_detail, "transfer_qty")
-		if transferred_qty > transfer_qty:
-			frappe.throw(
-				_("Row {0}: Transferred quantity cannot be greater than the requested quantity.").format(
-					item.idx
-				)
-			)
-
-	def _collect_transferred_qtys(self):
-		stock_entries, child_list = {}, []
-		for item in self.doc.items:
-			if not (item.against_stock_entry and item.ste_detail):
-				continue
-
-			transferred_qty = self._get_item_transferred_qty(item)
-			self._validate_item_transferred_qty(item, transferred_qty)
-			child_list.append(item.ste_detail)
-			stock_entries[(item.against_stock_entry, item.ste_detail)] = transferred_qty
-		return stock_entries, child_list
-
-	def _bulk_update_transferred_qty(self, stock_entries, child_list):
-		sed = frappe.qb.DocType("Stock Entry Detail")
-		case_expr = self._build_case_expr(sed, stock_entries)
-		(
-			frappe.qb.update(sed)
-			.set(sed.transferred_qty, case_expr.else_(sed.transferred_qty))
-			.where(sed.name.isin(child_list))
-		).run()
-
-	def _build_case_expr(self, sed, stock_entries):
-		from pypika import Case
-
-		case_expr = Case()
-		for (parent, name), qty in stock_entries.items():
-			case_expr = case_expr.when((sed.parent == parent) & (sed.name == name), qty)
-		return case_expr
-
-	def _update_per_transferred_field(self):
-		self.doc._update_percent_field_in_targets(self._get_per_transferred_config(), update_modified=True)
-
-	def _get_per_transferred_config(self):
-		return {
-			"source_dt": "Stock Entry Detail",
-			"target_field": "transferred_qty",
-			"target_ref_field": "qty",
-			"target_dt": "Stock Entry Detail",
-			"join_field": "ste_detail",
-			"target_parent_dt": "Stock Entry",
-			"target_parent_field": "per_transferred",
-			"source_field": "qty",
-			"percent_join_field": "against_stock_entry",
-		}
 
 	def set_material_request_transfer_status(self, status):
 		material_requests = []

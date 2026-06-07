@@ -194,7 +194,7 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		report = execute(filters)
 
 		row = report[1]
-		self.assertTrue(len(row) == 0)
+		self.assertEqual(len(row), 0)
 
 	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
@@ -764,7 +764,7 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		report = execute(filters)[1]
 
 		# Assert that the report contains data for the specified customer groups
-		self.assertTrue(len(report) > 0)
+		self.assertGreater(len(report), 0)
 
 		for row in report:
 			# Assert that the customer group of each row is in the list of customer groups

@@ -87,6 +87,9 @@ frappe.ui.form.on("Work Order", {
 		frm.set_indicator_formatter("operation", function (doc) {
 			return frm.doc.qty == doc.completed_qty ? "green" : "orange";
 		});
+
+		frm.fields_dict["non_stock_items"].grid.set_column_disp_in_list_view("secondary_item_type", false);
+		frm.fields_dict["secondary_items"].grid.set_column_disp_in_list_view("rate", false);
 	},
 
 	set_company_filters(frm, fieldname) {
@@ -125,6 +128,15 @@ frappe.ui.form.on("Work Order", {
 				},
 			});
 		}
+	},
+
+	onload_post_render(frm) {
+		const label = frm.doc.__onload?.secondary_items_generated
+			? __("Secondary Items (as per Manufacture Entries)")
+			: __("Secondary Items (as per BOM)");
+
+		frm.set_df_property("secondary_items", "label", label);
+		frm.fields_dict["secondary_items"].grid.wrapper?.find("> .control-label").text(label);
 	},
 
 	source_warehouse: function (frm) {
@@ -289,7 +301,7 @@ frappe.ui.form.on("Work Order", {
 
 	create_stock_return_entry: function (frm) {
 		frappe.call({
-			method: "erpnext.manufacturing.doctype.work_order.work_order.make_stock_return_entry",
+			method: "erpnext.manufacturing.doctype.work_order.mapper.make_stock_return_entry",
 			args: {
 				work_order: frm.doc.name,
 			},
@@ -445,7 +457,7 @@ frappe.ui.form.on("Work Order", {
 					frappe.msgprint(__("Disassemble Qty cannot be less than or equal to <b>0</b>."));
 					return;
 				}
-				return frappe.xcall("erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry", {
+				return frappe.xcall("erpnext.manufacturing.doctype.work_order.mapper.make_stock_entry", {
 					work_order_id: frm.doc.name,
 					purpose: "Disassemble",
 					qty: data.qty,
@@ -822,7 +834,7 @@ erpnext.work_order = {
 										.show_prompt_for_qty_input(frm, purpose, qty, 1)
 										.then((data) => {
 											return frappe.xcall(
-												"erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry",
+												"erpnext.manufacturing.doctype.work_order.mapper.make_stock_entry",
 												{
 													work_order_id: frm.doc.name,
 													purpose: purpose,
@@ -1110,7 +1122,7 @@ erpnext.work_order = {
 	make_se: function (frm, purpose, qty, is_additional_transfer_entry) {
 		if (qty) {
 			frappe
-				.xcall("erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry", {
+				.xcall("erpnext.manufacturing.doctype.work_order.mapper.make_stock_entry", {
 					work_order_id: frm.doc.name,
 					purpose: purpose,
 					qty: qty,
@@ -1123,14 +1135,11 @@ erpnext.work_order = {
 		} else {
 			this.show_prompt_for_qty_input(frm, purpose)
 				.then((data) => {
-					return frappe.xcall(
-						"erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry",
-						{
-							work_order_id: frm.doc.name,
-							purpose: purpose,
-							qty: data.qty,
-						}
-					);
+					return frappe.xcall("erpnext.manufacturing.doctype.work_order.mapper.make_stock_entry", {
+						work_order_id: frm.doc.name,
+						purpose: purpose,
+						qty: data.qty,
+					});
 				})
 				.then((stock_entry) => {
 					frappe.model.sync(stock_entry);
@@ -1142,7 +1151,7 @@ erpnext.work_order = {
 	create_pick_list: function (frm, purpose = "Material Transfer for Manufacture") {
 		this.show_prompt_for_qty_input(frm, purpose)
 			.then((data) => {
-				return frappe.xcall("erpnext.manufacturing.doctype.work_order.work_order.create_pick_list", {
+				return frappe.xcall("erpnext.manufacturing.doctype.work_order.mapper.create_pick_list", {
 					source_name: frm.doc.name,
 					for_qty: data.qty,
 				});
@@ -1166,7 +1175,7 @@ erpnext.work_order = {
 		}
 
 		frappe.call({
-			method: "erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry",
+			method: "erpnext.manufacturing.doctype.work_order.mapper.make_stock_entry",
 			args: {
 				work_order_id: frm.doc.name,
 				purpose: "Material Consumption for Manufacture",

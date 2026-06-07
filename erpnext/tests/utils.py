@@ -3003,6 +3003,9 @@ class ERPNextTestSuite(unittest.TestCase):
 
 	def tearDown(self):
 		frappe.db.rollback()
+		frappe.local.request_cache.clear()
+		if hasattr(frappe.local, "future_sle"):
+			frappe.local.future_sle.clear()
 
 	def load_test_records(self, doctype):
 		if doctype not in self.globalTestRecords:

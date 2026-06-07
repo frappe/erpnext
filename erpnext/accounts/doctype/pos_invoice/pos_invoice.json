@@ -26,8 +26,6 @@
   "due_date",
   "amended_from",
   "return_against",
-  "section_break_clmv",
-  "title",
   "accounting_dimensions_section",
   "project",
   "dimension_col_break",
@@ -172,6 +170,7 @@
   "is_discounted",
   "col_break23",
   "status",
+  "title",
   "more_info",
   "debit_to",
   "party_account_currency",
@@ -1626,10 +1625,6 @@
    "label": "Auto Repeat"
   },
   {
-   "fieldname": "section_break_clmv",
-   "fieldtype": "Section Break"
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "title",
    "fieldtype": "Data",
@@ -1641,7 +1636,7 @@
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-01 02:37:30.580568",
+ "modified": "2026-05-28 12:22:50.253090",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",

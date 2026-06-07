@@ -20,8 +20,6 @@
   "quotation_number",
   "has_unit_price_items",
   "amended_from",
-  "section_break_wwao",
-  "title",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -118,6 +116,7 @@
   "more_info",
   "is_subcontracted",
   "column_break_57",
+  "title",
   "opportunity",
   "connections_tab"
  ],
@@ -940,10 +939,6 @@
    "fieldname": "auto_repeat_section",
    "fieldtype": "Section Break",
    "label": "Auto Repeat"
-  },
-  {
-   "fieldname": "section_break_wwao",
-   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
@@ -952,7 +947,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-30 12:18:35.777574",
+ "modified": "2026-05-28 12:29:37.509487",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",

@@ -4,14 +4,14 @@
 import frappe
 from frappe.utils import random_string, today
 
-from erpnext.crm.doctype.lead.lead import make_opportunity
+from erpnext.crm.doctype.lead.mapper import make_opportunity
 from erpnext.crm.utils import get_linked_prospect
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestLead(ERPNextTestSuite):
 	def test_make_customer(self):
-		from erpnext.crm.doctype.lead.lead import make_customer
+		from erpnext.crm.doctype.lead.mapper import make_customer
 
 		lead = frappe.db.get_all("Lead", {"lead_name": "_Test Lead"})[0].name
 
@@ -41,7 +41,7 @@ class TestLead(ERPNextTestSuite):
 			self.assertEqual(contact_doc.has_link(customer.doctype, customer.name), True)
 
 	def test_make_customer_from_organization(self):
-		from erpnext.crm.doctype.lead.lead import make_customer
+		from erpnext.crm.doctype.lead.mapper import make_customer
 
 		lead = frappe.db.get_all("Lead", {"lead_name": "_Test Lead 1"})[0].name
 		customer = make_customer(lead)

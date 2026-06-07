@@ -23,7 +23,7 @@ class TestMapper(ERPNextTestSuite):
 		so, item_list_3 = self.make_sales_order()
 
 		# Map source docs to target with corresponding mapper method
-		method = "erpnext.selling.doctype.quotation.quotation.make_sales_order"
+		method = "erpnext.selling.doctype.quotation.mapper.make_sales_order"
 		updated_so = mapper.map_docs(method, json.dumps([qtn1.name, qtn2.name]), so)
 
 		# Assert that all inserted items are present in updated sales order

@@ -19,7 +19,7 @@ from erpnext.selling.doctype.sales_order.test_sales_order import (
 	create_dn_against_so,
 	make_sales_order,
 )
-from erpnext.stock.doctype.delivery_note.delivery_note import (
+from erpnext.stock.doctype.delivery_note.mapper import (
 	make_delivery_trip,
 	make_sales_invoice,
 )
@@ -218,7 +218,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 			self.assertEqual(cstr(serial_no.get(field)), value)
 
 	def test_delivery_note_return_against_denormalized_serial_no(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 		frappe.flags.ignore_serial_batch_bundle_validation = True
@@ -307,7 +307,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 		returned_serial_nos1 = get_serial_nos_from_bundle(dn1.items[0].serial_and_batch_bundle)
 		for serial_no in returned_serial_nos1:
-			self.assertTrue(serial_no in serial_nos)
+			self.assertIn(serial_no, serial_nos)
 
 		dn2 = make_sales_return(dn.name)
 
@@ -318,8 +318,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 		returned_serial_nos2 = get_serial_nos_from_bundle(dn2.items[0].serial_and_batch_bundle)
 		for serial_no in returned_serial_nos2:
-			self.assertTrue(serial_no in serial_nos)
-			self.assertFalse(serial_no in returned_serial_nos1)
+			self.assertIn(serial_no, serial_nos)
+			self.assertNotIn(serial_no, returned_serial_nos1)
 
 	def test_sales_return_for_non_bundled_items_partial(self):
 		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
@@ -1012,7 +1012,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	def test_dn_billing_status_case2(self):
 		# SO -> SI and SO -> DN1, DN2
-		from erpnext.selling.doctype.sales_order.sales_order import (
+		from erpnext.selling.doctype.sales_order.mapper import (
 			make_delivery_note,
 			make_sales_invoice,
 		)
@@ -1054,7 +1054,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"delete_linked_ledger_entries": True})
 	def test_sales_invoice_qty_after_return(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 
 		item = make_item(
 			"Test Sales Invoice Qty After Return",
@@ -1085,8 +1085,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	def test_dn_billing_status_case3(self):
 		# SO -> DN1 -> SI and SO -> SI and SO -> DN2
-		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
-		from erpnext.selling.doctype.sales_order.sales_order import (
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
+		from erpnext.selling.doctype.sales_order.mapper import (
 			make_sales_invoice as make_sales_invoice_from_so,
 		)
 
@@ -1136,8 +1136,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	def test_dn_billing_status_case4(self):
 		# SO -> SI -> DN
-		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_delivery_note
-		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_delivery_note
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
 
 		so = make_sales_order(po_no="12345")
 
@@ -1160,7 +1160,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 	def test_dn_billing_status_case5(self):
 		# SO -> SI(with update stock partial invoice)
 		# SO -> DN
-		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note, make_sales_invoice
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note, make_sales_invoice
 
 		so = make_sales_order(po_no="12345")
 
@@ -1260,8 +1260,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
 	def test_make_sales_invoice_from_dn_for_returned_qty(self):
-		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice
 
 		so = make_sales_order(qty=2)
 		so.submit()
@@ -1280,7 +1280,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_make_sales_invoice_from_dn_with_returned_qty_duplicate_items(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice
 
 		dn = create_delivery_note(qty=8, do_not_submit=True)
 		dn.append(
@@ -1387,8 +1387,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 		#                 |
 		#                 |---> DN(Partial Sales Return) ---> SI(Credit Note)
 
-		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_delivery_note
-		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_delivery_note
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
 
 		so = make_sales_order(qty=10)
 		si = make_sales_invoice(so.name)
@@ -1400,7 +1400,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(dn.items[0].returned_qty, 0)
 		self.assertEqual(dn.per_billed, 100)
 
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice
 
 		dn1 = create_delivery_note(is_return=1, return_against=dn.name, qty=-3)
 		si1 = make_sales_invoice(dn1.name)
@@ -1557,7 +1557,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		return_dn = make_return_doc(dn.doctype, dn.name)
 		return_dn.save().submit()
 
-		self.assertTrue(return_dn.docstatus == 1)
+		self.assertEqual(return_dn.docstatus, 1)
 
 	def test_reserve_qty_on_sales_return(self):
 		frappe.db.set_single_value("Selling Settings", "dont_reserve_sales_order_qty_on_sales_return", 0)
@@ -1569,7 +1569,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	def reserved_qty_check(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
-		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
 		from erpnext.stock.stock_balance import get_reserved_qty
 
 		dont_reserve_qty = frappe.db.get_single_value(
@@ -1776,7 +1776,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	def test_internal_transfer_for_non_stock_item(self):
 		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
-		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
 
 		item = make_item(properties={"is_stock_item": 0}).name
 		warehouse = "_Test Warehouse - _TC"
@@ -1965,7 +1965,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(sle_data.stock_value_difference, 200.0 * -1)
 
 	def test_sales_return_batch_no_for_batched_item_in_dn(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 
 		item_code = make_item(
 			"Test Batched Item for Sales Return 11",
@@ -1994,7 +1994,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(batch_no, returned_batch_no)
 
 	def test_partial_sales_return_batch_no_for_batched_item_in_dn(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 
 		item_code = make_item(
 			"Test Partial Batched Item for Sales Return 11",
@@ -2041,7 +2041,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(sabb_qty, 2)
 
 	def test_sales_return_serial_no_for_serial_item_in_dn(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 
 		item_code = make_item(
 			"Test Serial Item for Sales Return 11",
@@ -2190,7 +2190,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 			self.assertEqual(sn.warranty_period, 100)
 
 	def test_batch_return_dn(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 
 		item_code = make_item(
 			"Test Batch Return DN Item 1",
@@ -2231,7 +2231,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(stock_value_difference, 100.0 * 5)
 
 	def test_delivery_note_return_valuation_without_use_serial_batch_field(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 
 		batch_item = make_item(
 			"_Test Delivery Note Return Valuation Batch Item",
@@ -2351,7 +2351,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_delivery_note_return_valuation_with_use_serial_batch_field(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 
 		batch_item = make_item(
 			"_Test Delivery Note Return Valuation WITH Batch Item",
@@ -2561,7 +2561,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 				self.assertTrue(row.serial_no)
 
 	def test_delivery_note_return_for_batch_item_with_different_warehouse(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 		batch_item = make_item(
@@ -2631,7 +2631,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 				self.assertEqual(d.incoming_rate, batch_no_valuation[d.batch_no])
 
 	def test_delivery_note_per_billed_after_return(self):
-		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
 
 		so = make_sales_order(qty=2)
 		dn = make_delivery_note(so.name)
@@ -2699,7 +2699,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	def test_sales_return_for_product_bundle(self):
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 		from erpnext.stock.doctype.item.test_item import make_item
 
 		rm_items = []
@@ -2772,7 +2772,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 			doc = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
 			for entry in doc.entries:
 				if entry.serial_no:
-					self.assertTrue(entry.serial_no in serial_batch_map[row.item_code].serial_nos)
+					self.assertIn(entry.serial_no, serial_batch_map[row.item_code].serial_nos)
 					self.assertEqual(
 						entry.incoming_rate,
 						serial_batch_map[row.item_code].serial_no_valuation[entry.serial_no],
@@ -2782,7 +2782,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 				elif entry.batch_no:
 					serial_batch_map[row.item_code].batches[entry.batch_no] += entry.qty
-					self.assertTrue(entry.batch_no in serial_batch_map[row.item_code].batches)
+					self.assertIn(entry.batch_no, serial_batch_map[row.item_code].batches)
 					self.assertEqual(entry.qty, 2.0)
 					self.assertEqual(
 						entry.incoming_rate,
@@ -2798,7 +2798,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 			doc = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
 			for entry in doc.entries:
 				if entry.serial_no:
-					self.assertTrue(entry.serial_no in serial_batch_map[row.item_code].serial_nos)
+					self.assertIn(entry.serial_no, serial_batch_map[row.item_code].serial_nos)
 					self.assertEqual(
 						entry.incoming_rate,
 						serial_batch_map[row.item_code].serial_no_valuation[entry.serial_no],
@@ -2810,7 +2810,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 					serial_batch_map[row.item_code].batches[entry.batch_no] += entry.qty
 					self.assertEqual(serial_batch_map[row.item_code].batches[entry.batch_no], 0.0)
 
-					self.assertTrue(entry.batch_no in serial_batch_map[row.item_code].batches)
+					self.assertIn(entry.batch_no, serial_batch_map[row.item_code].batches)
 
 					self.assertEqual(entry.qty, 3.0)
 					self.assertEqual(
@@ -3150,7 +3150,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	def test_sdbnb_skip_for_dn_against_sales_invoice(self):
 		"""Test that DN items with against_sales_invoice reference skips SDBNB account assignment."""
-		from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
+		from erpnext.accounts.doctype.sales_invoice.mapper import (
 			make_delivery_note as make_dn_from_si,
 		)
 

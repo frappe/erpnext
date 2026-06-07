@@ -368,7 +368,7 @@ frappe.ui.form.on("Job Card", {
 		if (frm.doc.docstatus === 1 && frm.doc.for_quantity > frm.doc.manufactured_qty) {
 			frm.add_custom_button(__("Make Subcontracting PO"), () => {
 				frappe.model.open_mapped_doc({
-					method: "erpnext.manufacturing.doctype.job_card.job_card.make_subcontracting_po",
+					method: "erpnext.manufacturing.doctype.job_card.mapper.make_subcontracting_po",
 					frm: frm,
 				});
 			}).addClass("btn-primary");
@@ -483,7 +483,7 @@ frappe.ui.form.on("Job Card", {
 
 	make_corrective_job_card(frm, operation, for_operation) {
 		frappe.call({
-			method: "erpnext.manufacturing.doctype.job_card.job_card.make_corrective_job_card",
+			method: "erpnext.manufacturing.doctype.job_card.mapper.make_corrective_job_card",
 			args: {
 				source_name: frm.doc.name,
 				operation: operation,
@@ -655,10 +655,10 @@ frappe.ui.form.on("Job Card", {
 		};
 
 		const buttons_html = [
-			show_start && btn("btn-default jcd-btn-start", "play", __("Start Job")),
-			show_resume && btn("btn-default jcd-btn-resume", "play", __("Resume Job")),
+			show_start && btn("btn-primary jcd-btn-start", "play", __("Start Job")),
+			show_resume && btn("btn-primary jcd-btn-resume", "play", __("Resume Job")),
 			show_pause && btn("btn-default jcd-btn-pause", "pause", __("Pause Job")),
-			show_complete && btn("btn-success jcd-btn-complete", "check", __("Complete Job"), "white"),
+			show_complete && btn("btn-primary jcd-btn-complete", "check", __("Complete Job"), "white"),
 		]
 			.filter(Boolean)
 			.join("");
@@ -766,6 +766,14 @@ frappe.ui.form.on("Job Card", {
 			}, 1000);
 		}
 
+		// Demote Submit to btn-default when an action button is already primary.
+		const has_action_button = show_start || show_resume || show_complete;
+		if (frm.page.btn_primary) {
+			frm.page.btn_primary
+				.toggleClass("btn-primary", !has_action_button)
+				.toggleClass("btn-default", has_action_button);
+		}
+
 		return is_timer_running;
 	},
 
@@ -808,7 +816,7 @@ frappe.ui.form.on("Job Card", {
 
 	make_material_request(frm) {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.manufacturing.doctype.job_card.job_card.make_material_request",
+			method: "erpnext.manufacturing.doctype.job_card.mapper.make_material_request",
 			frm: frm,
 			run_link_triggers: true,
 		});
@@ -816,7 +824,7 @@ frappe.ui.form.on("Job Card", {
 
 	make_stock_entry(frm) {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.manufacturing.doctype.job_card.job_card.make_stock_entry",
+			method: "erpnext.manufacturing.doctype.job_card.mapper.make_stock_entry",
 			frm: frm,
 			run_link_triggers: true,
 		});

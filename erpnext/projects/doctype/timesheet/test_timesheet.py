@@ -5,7 +5,7 @@ import datetime
 import frappe
 from frappe.utils import add_to_date, now_datetime, nowdate
 
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
+from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.projects.doctype.task.test_task import create_task
 from erpnext.projects.doctype.timesheet.timesheet import OverlapError, make_sales_invoice

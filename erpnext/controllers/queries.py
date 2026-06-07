@@ -9,11 +9,10 @@ import frappe
 from frappe import qb, scrub
 from frappe.desk.reportview import get_filters_cond, get_match_cond
 from frappe.permissions import has_permission
-from frappe.query_builder import Case, Criterion, DocType, Field
+from frappe.query_builder import Case, Criterion, DocType
 from frappe.query_builder.functions import Concat, CustomFunction, Length, Locate, Substring, Sum
 from frappe.utils import nowdate, today, unique
 from pypika import Order
-from pypika.terms import LiteralValue
 
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
@@ -198,15 +197,27 @@ def item_query(
 
 	if filters and isinstance(filters, dict):
 		if filters.get("customer") or filters.get("supplier"):
+			party_type = "Customer" if filters.get("customer") else "Supplier"
 			party = filters.get("customer") or filters.get("supplier")
+			group = "Customer Group" if filters.get("customer") else "Supplier Group"
 			item_rules_list = frappe.get_all(
 				"Party Specific Item",
 				filters={
 					"party": ["!=", party],
-					"party_type": "Customer" if filters.get("customer") else "Supplier",
+					"party_type": party_type,
 				},
 				fields=["restrict_based_on", "based_on_value"],
 			)
+
+			party_group_rules_list = frappe.get_all(
+				"Party Specific Item",
+				filters={"party_type": group},
+				fields=["party as party_group", "restrict_based_on", "based_on_value"],
+			)
+			current_party_group = frappe.get_value(party_type, party, frappe.scrub(group))
+			for rule in party_group_rules_list:
+				if current_party_group != rule.party_group:
+					item_rules_list.append(rule)
 
 			filters_dict = {}
 			for rule in item_rules_list:
@@ -421,10 +432,15 @@ def get_delivery_notes_to_be_billed(
 		.where((DeliveryNote.docstatus == 1) & (DeliveryNote.is_return == 0) & (DeliveryNote.per_billed > 0))
 	)
 
+	query = frappe.qb.get_query(
+		"Delivery Note",
+		fields=fields,
+		filters=filters,
+		ignore_permissions=False,
+	)
+
 	query = (
-		frappe.qb.from_(DeliveryNote)
-		.select(*[DeliveryNote[f] for f in fields])
-		.where(
+		query.where(
 			(DeliveryNote.docstatus == 1)
 			& (DeliveryNote.status.notin(["Stopped", "Closed"]))
 			& (DeliveryNote[searchfield].like(f"%{txt}%"))
@@ -438,12 +454,11 @@ def get_delivery_notes_to_be_billed(
 				)
 			)
 		)
+		.orderby(DeliveryNote[searchfield], order=Order.asc)
+		.limit(page_len)
+		.offset(start)
 	)
-	if filters and isinstance(filters, dict):
-		for key, value in filters.items():
-			query = query.where(DeliveryNote[key] == value)
 
-	query = query.orderby(DeliveryNote[searchfield], order=Order.asc).limit(page_len).offset(start)
 	return query.run(as_dict=as_dict)
 
 
@@ -532,7 +547,7 @@ def get_batches_from_stock_ledger_entries(searchfields, txt, filters, start=0, p
 		if filters.get("posting_date") and filters.get("posting_time"):
 			query = query.where(
 				stock_ledger_entry.posting_datetime
-				<= get_combine_datetime(filters.posting_date, filters.posting_time)
+				<= get_combine_datetime(filters.get("posting_date"), filters.get("posting_time"))
 			)
 
 	if not filters.get("include_expired_batches"):
@@ -592,7 +607,7 @@ def get_batches_from_serial_and_batch_bundle(searchfields, txt, filters, start=0
 		if filters.get("posting_date") and filters.get("posting_time"):
 			bundle_query = bundle_query.where(
 				stock_ledger_entry.posting_datetime
-				<= get_combine_datetime(filters.posting_date, filters.posting_time)
+				<= get_combine_datetime(filters.get("posting_date"), filters.get("posting_time"))
 			)
 
 	if not filters.get("include_expired_batches"):

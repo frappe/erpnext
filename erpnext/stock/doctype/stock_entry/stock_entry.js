@@ -384,7 +384,7 @@ frappe.ui.form.on("Stock Entry", {
 							async (data) => {
 								if (frm.doc.work_order) {
 									let stock_entry = await frappe.xcall(
-										"erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry",
+										"erpnext.manufacturing.doctype.work_order.mapper.make_stock_entry",
 										{
 											work_order_id: frm.doc.work_order,
 											purpose: "Disassemble",
@@ -424,7 +424,7 @@ frappe.ui.form.on("Stock Entry", {
 				__("Purchase Invoice"),
 				function () {
 					erpnext.utils.map_current_doc({
-						method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_stock_entry",
+						method: "erpnext.accounts.doctype.purchase_invoice.mapper.make_stock_entry",
 						source_doctype: "Purchase Invoice",
 						target: frm,
 						date_field: "posting_date",
@@ -449,7 +449,7 @@ frappe.ui.form.on("Stock Entry", {
 					];
 					const depends_on_condition = "eval:doc.material_request_type==='Customer Provided'";
 					const d = erpnext.utils.map_current_doc({
-						method: "erpnext.stock.doctype.material_request.material_request.make_stock_entry",
+						method: "erpnext.stock.doctype.material_request.mapper.make_stock_entry",
 						source_doctype: "Material Request",
 						target: frm,
 						date_field: "schedule_date",

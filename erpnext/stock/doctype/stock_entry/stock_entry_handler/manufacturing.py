@@ -7,10 +7,13 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import ceil, cint, flt, get_link_to_form
 
 from erpnext.manufacturing.doctype.bom.bom import add_additional_cost
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.serial_batch_bundle import (
 	SerialBatchCreation,
 	get_batch_nos,
+	get_batches_from_bundle,
 	get_empty_batches_based_work_order,
+	get_serial_nos_from_bundle,
 )
 
 from .base import BaseStockEntry
@@ -25,7 +28,7 @@ class BaseManufactureStockEntry(BaseStockEntry):
 				and self.doc.from_warehouse
 				and not row.is_finished_item
 				and not row.is_legacy_scrap_item
-				and not row.type
+				and not row.secondary_item_type
 			):
 				row.s_warehouse = self.doc.from_warehouse
 				row.t_warehouse = None
@@ -33,7 +36,7 @@ class BaseManufactureStockEntry(BaseStockEntry):
 			elif (
 				not row.t_warehouse
 				and self.doc.to_warehouse
-				and (row.is_finished_item or row.is_legacy_scrap_item or row.type)
+				and (row.is_finished_item or row.is_legacy_scrap_item or row.secondary_item_type)
 			):
 				row.t_warehouse = self.doc.to_warehouse
 				row.s_warehouse = None
@@ -83,13 +86,18 @@ class BaseManufactureStockEntry(BaseStockEntry):
 		for row in secondary_items:
 			item_args = self.get_item_dict(row)
 			item_args["is_legacy_scrap_item"] = bool(row.get("is_legacy"))
-			item_args["type"] = row.type
+			item_args["secondary_item_type"] = row.secondary_item_type
 			item_args["bom_secondary_item"] = row.name
 
-			if row.type == "Scrap" and self.wo_doc and self.wo_doc.get("scrap_warehouse"):
+			if row.secondary_item_type == "Scrap" and self.wo_doc and self.wo_doc.get("scrap_warehouse"):
 				item_args["t_warehouse"] = self.wo_doc.scrap_warehouse
 			else:
 				item_args["t_warehouse"] = self.doc.to_warehouse
+
+			if not item_args.get("t_warehouse"):
+				item_args["t_warehouse"] = frappe.get_cached_value(
+					"BOM", self.doc.bom_no, "default_target_warehouse"
+				)
 
 			row.qty = row.qty * self.doc.fg_completed_qty
 			if row.get("process_loss_per"):
@@ -142,7 +150,8 @@ class BaseManufactureStockEntry(BaseStockEntry):
 				"conversion_factor": 1,
 				"uom": item_details.stock_uom,
 				"qty": ceil_qty_if_uom_has_whole_number(fg_item_qty, item_details.stock_uom),
-				"t_warehouse": self.doc.to_warehouse,
+				"t_warehouse": self.doc.to_warehouse
+				or frappe.get_cached_value("BOM", self.doc.bom_no, "default_target_warehouse"),
 				"s_warehouse": None,
 				"is_finished_item": 1,
 			}
@@ -165,25 +174,30 @@ class BaseManufactureStockEntry(BaseStockEntry):
 		else:
 			self.doc.append("items", item_details)
 
-	def set_serial_nos_for_finished_good(self, item_details):
+	def set_serial_nos_for_finished_good(self, item_details, existing_row=None):
 		serial_nos = self.get_available_serial_nos_for_fg(item_details.item_code)
-		if serial_nos:
-			row = frappe._dict({"serial_nos": serial_nos[0 : cint(item_details.qty)]})
+		if not serial_nos:
+			return
 
-			_id = create_serial_and_batch_bundle(
-				self.doc,
-				row,
-				frappe._dict(
-					{
-						"item_code": item_details.item_code,
-						"warehouse": item_details.t_warehouse,
-					}
-				),
-			)
+		row = frappe._dict({"serial_nos": serial_nos[0 : cint(item_details.qty)]})
 
+		_id = create_serial_and_batch_bundle(
+			self.doc,
+			row,
+			frappe._dict(
+				{
+					"item_code": item_details.item_code,
+					"warehouse": item_details.t_warehouse,
+				}
+			),
+		)
+
+		if existing_row:
+			existing_row.serial_and_batch_bundle = _id
+			existing_row.use_serial_batch_fields = 0
+		else:
 			item_details.serial_and_batch_bundle = _id
 			item_details.use_serial_batch_fields = 0
-
 			self.doc.append("items", item_details)
 
 	def get_available_serial_nos_for_fg(self, item_code) -> list[str]:
@@ -199,22 +213,23 @@ class BaseManufactureStockEntry(BaseStockEntry):
 			order_by="creation asc",
 		)
 
-	def set_batchwise_finished_goods(self, item_details):
-		batches = get_empty_batches_based_work_order(self.doc.work_order, self.doc.pro_doc.production_item)
+	def set_batchwise_finished_goods(self, item_details, existing_row=None):
+		batches = get_empty_batches_based_work_order(self.doc.work_order, self.wo_doc.production_item)
 
 		if not batches:
-			self.doc.append("items", item_details)
+			if not existing_row:
+				self.doc.append("items", item_details)
 		else:
-			self.add_batchwise_finished_good(batches, item_details)
+			self.add_batchwise_finished_good(batches, item_details, existing_row=existing_row)
 
-	def add_batchwise_finished_good(self, batches, item_details):
+	def add_batchwise_finished_good(self, batches, item_details, existing_row=None):
 		qty = flt(self.doc.fg_completed_qty)
 		row = frappe._dict({"batches_to_be_consume": defaultdict(float)})
 		self.update_batches_to_be_consume(batches, row, qty)
 		if row.batches_to_be_consume:
-			self._link_fg_bundle_and_append(item_details, row)
+			self._link_fg_bundle_and_append(item_details, row, existing_row=existing_row)
 
-	def _link_fg_bundle_and_append(self, item_details, row):
+	def _link_fg_bundle_and_append(self, item_details, row, existing_row=None):
 		_id = create_serial_and_batch_bundle(
 			self.doc,
 			row,
@@ -222,8 +237,13 @@ class BaseManufactureStockEntry(BaseStockEntry):
 				{"item_code": self.wo_doc.production_item, "warehouse": item_details.get("t_warehouse")}
 			),
 		)
-		item_details["serial_and_batch_bundle"] = _id
-		self.doc.append("items", item_details)
+		if existing_row:
+			existing_row.serial_and_batch_bundle = _id
+			existing_row.use_serial_batch_fields = 0
+		else:
+			item_details["serial_and_batch_bundle"] = _id
+			item_details["use_serial_batch_fields"] = 0
+			self.doc.append("items", item_details)
 
 	def update_batches_to_be_consume(self, batches, row, qty):
 		qty_to_be_consumed = qty
@@ -253,6 +273,81 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		self.validate_warehouse()
 		self.validate_raw_materials_exists()
 		self.validate_component_and_quantities()
+		self.validate_finished_good_serial_batch_for_work_order()
+
+	def validate_finished_good_serial_batch_for_work_order(self):
+		if not (
+			self.doc.work_order
+			and self.wo_doc
+			and self.wo_doc.track_semi_finished_goods != 1
+			and cint(
+				frappe.db.get_single_value(
+					"Manufacturing Settings", "make_serial_no_batch_from_work_order", cache=True
+				)
+			)
+			and (self.wo_doc.has_serial_no or self.wo_doc.has_batch_no)
+		):
+			return
+
+		for row in self.doc.items:
+			if not row.is_finished_item:
+				continue
+
+			if self.check_invalid_serial_batch_nos_for_finished_good_item(row):
+				self.reset_serial_batch_on_fg_row(row)
+				frappe.msgprint(
+					_(
+						"Row {0}: Serial/Batch has been reset to values linked with Work Order {1}"
+						" because the previously selected serial/batch does not belong to this Work Order."
+					).format(row.idx, frappe.bold(self.doc.work_order))
+				)
+
+	def check_invalid_serial_batch_nos_for_finished_good_item(self, row) -> bool:
+		if self.wo_doc.has_serial_no:
+			serial_nos = get_serial_nos(row.serial_no) if row.serial_no else []
+			if not serial_nos and row.serial_and_batch_bundle:
+				serial_nos = get_serial_nos_from_bundle(row.serial_and_batch_bundle)
+			if serial_nos:
+				valid_serial_nos = frappe.get_all(
+					"Serial No",
+					filters={"name": ("in", serial_nos), "work_order": self.doc.work_order},
+					pluck="name",
+				)
+				return bool(set(serial_nos) - set(valid_serial_nos))
+			else:
+				return True
+
+		if self.wo_doc.has_batch_no:
+			batch_nos = [row.batch_no] if row.batch_no else []
+			if not batch_nos and row.serial_and_batch_bundle:
+				batch_nos = list(get_batches_from_bundle(row.serial_and_batch_bundle).keys())
+			if batch_nos:
+				valid_batch_nos = frappe.get_all(
+					"Batch",
+					filters={"name": ("in", batch_nos), "reference_name": self.doc.work_order},
+					pluck="name",
+				)
+				return bool(set(batch_nos) - set(valid_batch_nos))
+			else:
+				return True
+
+	def reset_serial_batch_on_fg_row(self, row):
+		item_details = frappe._dict(
+			{
+				"item_code": row.item_code,
+				"t_warehouse": row.t_warehouse,
+				"qty": row.qty,
+			}
+		)
+
+		row.serial_no = None
+		row.batch_no = None
+		row.serial_and_batch_bundle = None
+
+		if self.wo_doc.has_serial_no:
+			self.set_serial_nos_for_finished_good(item_details, existing_row=row)
+		elif self.wo_doc.has_batch_no:
+			self.set_batchwise_finished_goods(item_details, existing_row=row)
 
 	def set_job_card_data(self):
 		if self.doc.job_card and not self.doc.work_order:
@@ -366,8 +461,10 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 	def _resolve_rm_warehouse(self, row):
 		if self.doc.from_warehouse:
 			return self.doc.from_warehouse
-		if self.wo_doc.from_wip_warehouse:
+		if self.wo_doc and self.wo_doc.from_wip_warehouse:
 			return self.wo_doc.wip_warehouse
+		if s_warehouse := frappe.get_cached_value("BOM", self.doc.bom_no, "default_source_warehouse"):
+			return s_warehouse
 		return row.get("source_warehouse")
 
 	def get_alternative_items(self, bom_items):
@@ -422,9 +519,11 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 
 	def add_raw_materials_based_on_transfer(self):
 		self.prepare_available_materials_based_on_transfer()
-		pending_qty_to_mfg = flt(self.wo_doc.material_transferred_for_manufacturing) - flt(
-			self.wo_doc.produced_qty
-		)
+		pending_qty_to_mfg = flt(self.doc.fg_completed_qty)
+		if self.doc.work_order:
+			pending_qty_to_mfg = flt(self.wo_doc.material_transferred_for_manufacturing) - flt(
+				self.wo_doc.produced_qty
+			)
 		if pending_qty_to_mfg <= 0 and not self.doc.get("is_return"):
 			return
 		for key in self.available_materials:
@@ -589,7 +688,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			row.s_warehouse = None
 			row.t_warehouse = row.warehouse or self.doc.to_warehouse
 			row.is_legacy_scrap_item = row.is_legacy
-			row.type = row.get("type")
+			row.secondary_item_type = row.get("secondary_item_type")
 
 			self.doc.append("items", row)
 
@@ -631,7 +730,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			.select(sed.item_code, sed.qty)
 			.where(
 				(se.work_order == self.doc.work_order)
-				& ((sed.type.isnotnull()) | (sed.is_legacy_scrap_item == 1))
+				& ((sed.secondary_item_type.isnotnull()) | (sed.is_legacy_scrap_item == 1))
 				& (se.docstatus == 1)
 				& (se.purpose.isin(["Repack", "Manufacture"]))
 			)
@@ -830,7 +929,7 @@ def _add_bom_table_specific_fields(query, doctype, table_name):
 			doctype.cost_allocation_per,
 			doctype.uom,
 			doctype.process_loss_per,
-			doctype.type,
+			doctype.secondary_item_type,
 			doctype.is_legacy,
 			doctype.conversion_factor,
 		)
@@ -889,7 +988,7 @@ def get_secondary_items_from_job_card(work_order, jc_name=None):
 			job_card_secondary_item.item_name,
 			job_card_secondary_item.description,
 			job_card_secondary_item.stock_uom,
-			job_card_secondary_item.type,
+			job_card_secondary_item.secondary_item_type,
 			job_card_secondary_item.bom_secondary_item,
 		)
 		.join(job_card_secondary_item)
@@ -899,7 +998,7 @@ def get_secondary_items_from_job_card(work_order, jc_name=None):
 			& (job_card.work_order == work_order)
 			& (job_card.docstatus == 1)
 		)
-		.groupby(job_card_secondary_item.item_code, job_card_secondary_item.type)
+		.groupby(job_card_secondary_item.item_code, job_card_secondary_item.secondary_item_type)
 		.orderby(job_card_secondary_item.idx)
 	)
 

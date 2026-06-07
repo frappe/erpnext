@@ -43,7 +43,7 @@ frappe.listview_settings["Delivery Note"] = {
 						type: "POST",
 						method: "frappe.model.mapper.map_docs",
 						args: {
-							method: "erpnext.stock.doctype.delivery_note.delivery_note.make_delivery_trip",
+							method: "erpnext.stock.doctype.delivery_note.mapper.make_delivery_trip",
 							source_names: docnames,
 							target_doc: cur_frm.doc,
 						},

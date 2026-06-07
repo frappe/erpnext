@@ -3,11 +3,9 @@
 
 
 import frappe
-from frappe import qb
 from frappe.utils import add_days, add_years, flt, getdate, nowdate, today
 from frappe.utils.data import getdate as convert_to_date
 
-from erpnext import get_default_cost_center
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -15,7 +13,6 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
-from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.tests.utils import ERPNextTestSuite
 
 

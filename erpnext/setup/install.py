@@ -38,7 +38,6 @@ def after_install():
 	make_default_operations()
 	update_pegged_currencies()
 	set_default_print_formats()
-	create_letter_head()
 	toggle_hidden_fields()
 	frappe.db.commit()
 
@@ -372,30 +371,6 @@ def set_default_print_formats():
 			},
 			validate_fields_for_doctype=False,
 		)
-
-
-def create_letter_head():
-	base_path = frappe.get_app_path("erpnext", "accounts", "letterhead")
-
-	letterheads = {
-		"Company Letterhead": "company_letterhead.html",
-		"Company Letterhead - Grey": "company_letterhead_grey.html",
-	}
-
-	for name, filename in letterheads.items():
-		if not frappe.db.exists("Letter Head", name):
-			content = frappe.read_file(os.path.join(base_path, filename))
-			doc = frappe.get_doc(
-				{
-					"doctype": "Letter Head",
-					"letter_head_name": name,
-					"source": "HTML",
-					"content": content,
-					"is_default": 1 if name == "Company Letterhead - Grey" else 0,
-					"letter_head_for": "Report",
-				}
-			)
-			doc.insert(ignore_permissions=True)
 
 
 def toggle_hidden_fields():

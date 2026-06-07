@@ -4,7 +4,7 @@
 import frappe
 
 from erpnext.accounts.doctype.tax_rule.tax_rule import ConflictingTaxRule, get_tax_template
-from erpnext.crm.doctype.opportunity.opportunity import make_quotation
+from erpnext.crm.doctype.opportunity.mapper import make_quotation
 from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -387,7 +387,7 @@ class TestTaxRule(ERPNextTestSuite):
 		self.assertEqual(quotation.taxes_and_charges, "_Test Sales Taxes and Charges Template - _TC")
 
 		# Check if accounts heads and rate fetched are also fetched from tax template or not
-		self.assertTrue(len(quotation.taxes) > 0)
+		self.assertGreater(len(quotation.taxes), 0)
 
 
 def make_tax_rule(**args):

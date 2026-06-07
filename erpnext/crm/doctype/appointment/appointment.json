@@ -77,7 +77,8 @@
    "fieldname": "customer_email",
    "fieldtype": "Data",
    "label": "Email",
-   "reqd": 1
+   "reqd": 1,
+   "options": "Email"
   },
   {
    "fieldname": "linked_docs_section",
@@ -102,7 +103,7 @@
   }
  ],
  "links": [],
- "modified": "2024-03-27 13:05:59.300573",
+ "modified": "2026-06-06 13:05:59.300573",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",

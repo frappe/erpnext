@@ -3,8 +3,8 @@
 
 import frappe
 
-from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry as make_stock_entry_from_wo
-from erpnext.selling.doctype.sales_order.sales_order import make_subcontracting_inward_order
+from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_stock_entry_from_wo
+from erpnext.selling.doctype.sales_order.mapper import make_subcontracting_inward_order
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -328,7 +328,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 	def test_secondary_items_delivery(self):
 		new_bom = frappe.copy_doc(frappe.get_doc("BOM", "BOM-Basic FG Item-001"))
 		new_bom.secondary_items.append(
-			frappe.new_doc("BOM Secondary Item", item_code="Basic RM 2", qty=1, type="Scrap")
+			frappe.new_doc("BOM Secondary Item", item_code="Basic RM 2", qty=1, secondary_item_type="Scrap")
 		)
 		new_bom.submit()
 		sc_bom = frappe.get_doc("Subcontracting BOM", "SB-0001")
@@ -368,7 +368,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery()).submit()
 		scio.reload()
 
-		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
 
 		si = make_sales_invoice(so.name)
 		self.assertEqual(si.items[-1].item_code, "Self RM")

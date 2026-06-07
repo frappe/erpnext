@@ -8,7 +8,7 @@ import frappe
 from frappe.tests import change_settings
 from frappe.utils import add_days, today
 
-from erpnext.buying.doctype.supplier_quotation.supplier_quotation import make_purchase_order
+from erpnext.buying.doctype.supplier_quotation.mapper import make_purchase_order
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
 from erpnext.tests.utils import ERPNextTestSuite
 

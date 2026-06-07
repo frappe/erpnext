@@ -140,28 +140,20 @@ class SupplierScorecard(Document):
 @frappe.whitelist()
 def get_timeline_data(doctype: str, name: str):
 	# Get a list of all the associated scorecards
-	scs = frappe.get_doc(doctype, name)
+
 	out = {}
 	timeline_data = {}
-	scorecards = frappe.db.sql(
-		"""
-		SELECT
-			sc.name
-		FROM
-			`tabSupplier Scorecard Period` sc
-		WHERE
-			sc.scorecard = %(scs)s
-			AND sc.docstatus = 1""",
-		{"scs": scs.name},
-		as_dict=1,
+
+	scorecards = frappe.get_all(
+		"Supplier Scorecard Period",
+		fields=["name", "start_date", "end_date", "total_score"],
+		filters={"scorecard": name, "docstatus": 1},
+		order_by="end_date desc",
 	)
 
 	for sc in scorecards:
-		start_date, end_date, total_score = frappe.db.get_value(
-			"Supplier Scorecard Period", sc.name, ["start_date", "end_date", "total_score"]
-		)
-		for single_date in daterange(start_date, end_date):
-			timeline_data[time.mktime(single_date.timetuple())] = total_score
+		for single_date in daterange(sc.start_date, sc.end_date):
+			timeline_data[time.mktime(single_date.timetuple())] = sc.total_score
 
 	out["timeline_data"] = timeline_data
 	return out

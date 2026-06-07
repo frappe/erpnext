@@ -76,7 +76,7 @@ const BankReconciliationStatementView = () => {
                 toast.success(_("Copied to clipboard"))
             })
         },
-        [copyToClipboard, _],
+        [copyToClipboard],
     )
 
     const statementColumns = useMemo<ColumnDef<BankClearanceSummaryEntry, unknown>[]>(
@@ -181,7 +181,7 @@ const BankReconciliationStatementView = () => {
                 cell: ({ row }) => formatDate(row.original.clearance_date),
             },
         ],
-        [_, onCopy],
+        [onCopy],
     )
 
     const statementRows = useMemo(() => {

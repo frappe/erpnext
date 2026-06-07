@@ -8,8 +8,8 @@ from frappe.utils import add_days, cint, flt, getdate, nowdate, today
 import erpnext
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_purchase_invoice
-from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice as make_pi_from_po
+from erpnext.buying.doctype.purchase_order.mapper import get_mapped_purchase_invoice
+from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice as make_pi_from_po
 from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 	create_pr_against_po,
 	create_purchase_order,
@@ -20,9 +20,9 @@ from erpnext.controllers.buying_controller import QtyMismatchError
 from erpnext.exceptions import InvalidCurrency
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import create_item
-from erpnext.stock.doctype.material_request.material_request import make_purchase_order
+from erpnext.stock.doctype.material_request.mapper import make_purchase_order
 from erpnext.stock.doctype.material_request.test_material_request import make_material_request
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+from erpnext.stock.doctype.purchase_receipt.mapper import (
 	make_purchase_invoice as create_purchase_invoice_from_receipt,
 )
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
@@ -80,7 +80,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		pi.delete()
 
 	def test_update_received_qty_in_material_request(self):
-		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
 
 		"""
 		Test if the received_qty in Material Request is updated correctly when
@@ -346,7 +346,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
 	)
 	def test_purchase_invoice_with_exchange_rate_difference(self):
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
 			make_purchase_invoice as create_purchase_invoice,
 		)
 
@@ -388,7 +388,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		)
 
 	def test_purchase_invoice_with_exchange_rate_difference_for_non_stock_item(self):
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
 			make_purchase_invoice as create_purchase_invoice,
 		)
 
@@ -2077,7 +2077,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		return_pi = make_return_doc(pi.doctype, pi.name)
 		return_pi.save().submit()
 
-		self.assertTrue(return_pi.docstatus == 1)
+		self.assertEqual(return_pi.docstatus, 1)
 
 	def test_advance_entries_as_asset(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
@@ -2162,7 +2162,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			create_pr_against_po,
 			create_purchase_order,
 		)
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
 			make_purchase_invoice as make_pi_from_pr,
 		)
 
@@ -2748,10 +2748,10 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 	def test_invoice_against_returned_pr(self):
 		from erpnext.stock.doctype.item.test_item import make_item
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
 			make_purchase_invoice as make_purchase_invoice_from_pr,
 		)
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
 			make_purchase_return_against_rejected_warehouse,
 		)
 
@@ -2892,7 +2892,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(invoice.grand_total, 300)
 
 	def test_pr_pi_over_billing(self):
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
 			make_purchase_invoice as make_purchase_invoice_from_pr,
 		)
 
@@ -2940,7 +2940,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(pi.discount_amount, discount_amount)
 
 	def test_returned_item_purchase_receipt(self):
-		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
+		from erpnext.accounts.doctype.purchase_invoice.mapper import (
 			make_purchase_receipt as make_purchase_receipt_from_pi,
 		)
 

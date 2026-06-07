@@ -59,7 +59,7 @@ erpnext.selling.InstallationNote = class InstallationNote extends frappe.ui.form
 				__("From Delivery Note"),
 				function () {
 					erpnext.utils.map_current_doc({
-						method: "erpnext.stock.doctype.delivery_note.delivery_note.make_installation_note",
+						method: "erpnext.stock.doctype.delivery_note.mapper.make_installation_note",
 						source_doctype: "Delivery Note",
 						target: me.frm,
 						date_field: "posting_date",

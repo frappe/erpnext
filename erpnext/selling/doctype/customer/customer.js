@@ -13,7 +13,7 @@ frappe.ui.form.on("Customer", {
 		frm.make_methods = {
 			Quotation: () =>
 				frappe.model.open_mapped_doc({
-					method: "erpnext.selling.doctype.customer.customer.make_quotation",
+					method: "erpnext.selling.doctype.customer.mapper.make_quotation",
 					frm: frm,
 				}),
 			"Sales Order": () =>
@@ -24,12 +24,12 @@ frappe.ui.form.on("Customer", {
 				}),
 			Opportunity: () =>
 				frappe.model.open_mapped_doc({
-					method: "erpnext.selling.doctype.customer.customer.make_opportunity",
+					method: "erpnext.selling.doctype.customer.mapper.make_opportunity",
 					frm: frm,
 				}),
 			"Payment Entry": () =>
 				frappe.model.open_mapped_doc({
-					method: "erpnext.selling.doctype.customer.customer.make_payment_entry",
+					method: "erpnext.selling.doctype.customer.mapper.make_payment_entry",
 					frm: frm,
 				}),
 			"Pricing Rule": () => frm.trigger("make_pricing_rule"),
@@ -38,7 +38,7 @@ frappe.ui.form.on("Customer", {
 
 		frm.add_fetch("lead_name", "company_name", "customer_name");
 		frm.add_fetch("default_sales_partner", "commission_rate", "default_commission_rate");
-		frm.set_query("default_price_list", { selling: 1 });
+		frm.set_query("default_price_list", () => ({ filters: { selling: 1 } }));
 		frm.set_query("account", "accounts", function (doc, cdt, cdn) {
 			let d = locals[cdt][cdn];
 			let filters = {
@@ -185,13 +185,15 @@ frappe.ui.form.on("Customer", {
 				frm.add_custom_button(__(doctype), frm.make_methods[doctype], __("Create"));
 			}
 
-			frm.add_custom_button(
-				__("Get Customer Group Details"),
-				function () {
-					frm.trigger("get_customer_group_details");
-				},
-				__("Actions")
-			);
+			if (frm.doc.customer_group) {
+				frm.add_custom_button(
+					__("Get Customer Group Details"),
+					function () {
+						frm.trigger("get_customer_group_details");
+					},
+					__("Actions")
+				);
+			}
 
 			if (
 				cint(frappe.defaults.get_default("enable_common_party_accounting")) &&

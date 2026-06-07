@@ -11,19 +11,19 @@ from frappe.utils.data import today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.party import get_due_date_from_template
-from erpnext.buying.doctype.purchase_order.purchase_order import (
+from erpnext.buying.doctype.purchase_order.mapper import (
 	make_inter_company_sales_order,
 	make_purchase_receipt,
 )
-from erpnext.buying.doctype.purchase_order.purchase_order import (
+from erpnext.buying.doctype.purchase_order.mapper import (
 	make_purchase_invoice as make_pi_from_po,
 )
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
 from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.doctype.material_request.material_request import make_purchase_order
+from erpnext.stock.doctype.material_request.mapper import make_purchase_order
 from erpnext.stock.doctype.material_request.test_material_request import make_material_request
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+from erpnext.stock.doctype.purchase_receipt.mapper import (
 	make_purchase_invoice as make_pi_from_pr,
 )
 from erpnext.tests.utils import ERPNextTestSuite
@@ -98,6 +98,60 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		po.load_from_db()
 		self.assertEqual(po.get("items")[0].received_qty, 4)
 
+	def test_make_purchase_receipt_respects_over_receipt_allowance(self):
+		"""make_purchase_receipt must include fully-received PO lines when
+		over_delivery_receipt_allowance permits further receipt.
+
+		Regression test for #55246: the mapper dropped rows once
+		received_qty >= qty, ignoring the configured tolerance.
+		"""
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
+
+		# 50% tolerance — 10 ordered allows up to 15 received
+		frappe.db.set_value("Item", "_Test Item", "over_delivery_receipt_allowance", 50)
+		try:
+			po = create_purchase_order()
+			create_pr_against_po(po.name, received_qty=10)
+
+			po.load_from_db()
+			self.assertEqual(po.get("items")[0].received_qty, 10)
+
+			# onload must flag pending receivable qty so the UI keeps the
+			# "Create > Purchase Receipt" button visible even at per_received = 100
+			po.run_method("onload")
+			self.assertTrue(
+				po.get_onload("has_pending_receivable_qty"),
+				"onload should flag pending receivable qty while tolerance is available",
+			)
+
+			# Re-mapping the same PO must yield a PR with the row present
+			# and qty pre-filled to the remaining tolerance (15 - 10 = 5)
+			pr = make_purchase_receipt(po.name)
+			self.assertEqual(
+				len(pr.get("items")), 1, "Fully-received row dropped despite available tolerance"
+			)
+			self.assertEqual(pr.get("items")[0].item_code, "_Test Item")
+			self.assertEqual(pr.get("items")[0].qty, 5)
+			self.assertEqual(pr.get("items")[0].purchase_order_item, po.get("items")[0].name)
+
+			# Tolerance exhausted → row must be filtered out as before
+			create_pr_against_po(po.name, received_qty=5)
+			po.load_from_db()
+			self.assertEqual(po.get("items")[0].received_qty, 15)
+
+			po.run_method("onload")
+			self.assertFalse(
+				po.get_onload("has_pending_receivable_qty"),
+				"onload should clear pending receivable flag once tolerance is exhausted",
+			)
+
+			pr_empty = make_purchase_receipt(po.name)
+			self.assertEqual(
+				len(pr_empty.get("items")), 0, "Row should be dropped once tolerance is exhausted"
+			)
+		finally:
+			frappe.db.set_value("Item", "_Test Item", "over_delivery_receipt_allowance", 0)
+
 	def test_ordered_qty_against_pi_with_update_stock(self):
 		existing_ordered_qty = get_ordered_qty()
 		po = create_purchase_order()
@@ -127,6 +181,44 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		frappe.db.set_value("Item", "_Test Item", "over_delivery_receipt_allowance", 0)
 		frappe.db.set_value("Item", "_Test Item", "over_billing_allowance", 0)
 		frappe.db.set_single_value("Accounts Settings", "over_billing_allowance", 0)
+
+	def test_over_order_allowance_against_material_request(self) -> None:
+		"""Over Order Allowance in Buying Settings must govern PO qty vs MR qty independently
+		from Over Delivery/Receipt Allowance which governs receipt/delivery against a PO."""
+		mr = make_material_request(qty=100)
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.items[0].qty = 110  # 10% over the MR qty
+
+		# Without any allowance, submitting should raise an OverAllowanceError
+		from erpnext.controllers.status_updater import OverAllowanceError
+
+		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 0)
+		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 0)
+		self.assertRaises(OverAllowanceError, po.submit)
+
+		# Granting 10% in Over Order Allowance (Buying Settings) must allow the submit
+		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 10)
+		po.reload()
+		po.items[0].qty = 110
+		po.submit()
+		self.assertEqual(po.docstatus, 1)
+		po.cancel()
+
+		# Over Delivery/Receipt Allowance must remain independent — changing it must not
+		# affect the MR → PO validation when Over Order Allowance is 0.
+		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 0)
+		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 50)
+
+		mr2 = make_material_request(qty=100)
+		po2 = make_purchase_order(mr2.name)
+		po2.supplier = "_Test Supplier"
+		po2.items[0].qty = 110
+		self.assertRaises(OverAllowanceError, po2.submit)
+
+		# cleanup
+		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 0)
+		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 0)
 
 	def test_update_remove_child_linked_to_mr(self):
 		"""Test impact on linked PO and MR on deleting/updating row."""
@@ -519,7 +611,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(po.get("items")[0].received_qty, 5)
 
 	def test_purchase_order_invoice_receipt_workflow(self):
-		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_purchase_receipt
+		from erpnext.accounts.doctype.purchase_invoice.mapper import make_purchase_receipt
 
 		po = create_purchase_order()
 		pi = make_pi_from_po(po.name)
@@ -958,14 +1050,14 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 	def test_internal_transfer_flow(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
-		from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
+		from erpnext.accounts.doctype.sales_invoice.mapper import (
 			make_inter_company_purchase_invoice,
 		)
-		from erpnext.selling.doctype.sales_order.sales_order import (
+		from erpnext.selling.doctype.sales_order.mapper import (
 			make_delivery_note,
 			make_sales_invoice,
 		)
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 
 		frappe.db.set_single_value("Selling Settings", "maintain_same_sales_rate", 1)
 		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 1)
@@ -1106,7 +1198,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(po.items[0].fg_item_qty, 30)
 
 	def test_new_sc_flow(self):
-		from erpnext.buying.doctype.purchase_order.purchase_order import make_subcontracting_order
+		from erpnext.buying.doctype.purchase_order.mapper import make_subcontracting_order
 
 		po = create_po_for_sc_testing()
 		sco = make_subcontracting_order(po.name)
@@ -1234,7 +1326,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Not Initiated")
 
 	def test_po_billed_amount_against_return_entry(self):
-		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_debit_note
+		from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note
 
 		# Create a Purchase Order and Fully Bill it
 		po = create_purchase_order()
@@ -1431,7 +1523,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		pi1.submit()
 
 		self.assertEqual(pi1.grand_total, 10000.0)
-		self.assertTrue(len(pi1.items) == 1)
+		self.assertEqual(len(pi1.items), 1)
 
 		pi2 = make_pi_from_po(po.name)
 		self.assertEqual(len(pi2.items), 2)

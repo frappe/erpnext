@@ -258,7 +258,7 @@ frappe.ui.form.on("Material Request", {
 
 	get_items_from_sales_order: function (frm) {
 		erpnext.utils.map_current_doc({
-			method: "erpnext.selling.doctype.sales_order.sales_order.make_material_request",
+			method: "erpnext.selling.doctype.sales_order.mapper.make_material_request",
 			source_doctype: "Sales Order",
 			target: frm,
 			setters: {
@@ -411,7 +411,7 @@ frappe.ui.form.on("Material Request", {
 
 	make_purchase_order: function (frm) {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order",
+			method: "erpnext.stock.doctype.material_request.mapper.make_purchase_order",
 			frm: frm,
 			run_link_triggers: true,
 		});
@@ -419,7 +419,7 @@ frappe.ui.form.on("Material Request", {
 
 	make_request_for_quotation: function (frm) {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.stock.doctype.material_request.material_request.make_request_for_quotation",
+			method: "erpnext.stock.doctype.material_request.mapper.make_request_for_quotation",
 			frm: frm,
 			run_link_triggers: true,
 		});
@@ -427,14 +427,14 @@ frappe.ui.form.on("Material Request", {
 
 	make_supplier_quotation: function (frm) {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.stock.doctype.material_request.material_request.make_supplier_quotation",
+			method: "erpnext.stock.doctype.material_request.mapper.make_supplier_quotation",
 			frm: frm,
 		});
 	},
 
 	make_stock_entry: function (frm) {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.stock.doctype.material_request.material_request.make_stock_entry",
+			method: "erpnext.stock.doctype.material_request.mapper.make_stock_entry",
 			frm: frm,
 		});
 	},
@@ -461,7 +461,7 @@ frappe.ui.form.on("Material Request", {
 			],
 			(values) => {
 				frappe.call({
-					method: "erpnext.stock.doctype.material_request.material_request.make_in_transit_stock_entry",
+					method: "erpnext.stock.doctype.material_request.mapper.make_in_transit_stock_entry",
 					args: {
 						source_name: frm.doc.name,
 						in_transit_warehouse: values.in_transit_warehouse,
@@ -481,7 +481,7 @@ frappe.ui.form.on("Material Request", {
 
 	create_pick_list: (frm) => {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.stock.doctype.material_request.material_request.create_pick_list",
+			method: "erpnext.stock.doctype.material_request.mapper.create_pick_list",
 			frm: frm,
 		});
 	},

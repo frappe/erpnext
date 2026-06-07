@@ -60,7 +60,7 @@ frappe.ui.form.on("Dunning", {
 		if (frm.doc.docstatus === 0) {
 			frm.add_custom_button(__("Fetch Overdue Payments"), () => {
 				erpnext.utils.map_current_doc({
-					method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.create_dunning",
+					method: "erpnext.accounts.doctype.sales_invoice.mapper.create_dunning",
 					source_doctype: "Sales Invoice",
 					date_field: "due_date",
 					target: frm,

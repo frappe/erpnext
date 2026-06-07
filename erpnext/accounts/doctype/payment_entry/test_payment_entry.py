@@ -196,7 +196,7 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertEqual(outstanding_amount, 100)
 
 	def test_reference_outstanding_amount_on_advance_pull(self):
-		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
 
 		so = make_sales_order(qty=1, rate=1000)
 		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
@@ -1119,7 +1119,7 @@ class TestPaymentEntry(ERPNextTestSuite):
 		with self.assertRaises(frappe.ValidationError) as err:
 			pe.save()
 
-		self.assertTrue("is on hold" in str(err.exception).lower())
+		self.assertIn("is on hold", str(err.exception).lower())
 
 	def test_payment_entry_for_employee(self):
 		employee = make_employee("test_payment_entry@salary.com", company="_Test Company")
@@ -1567,7 +1567,7 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.check_pl_entries()
 
 	def test_advance_as_liability_against_order(self):
-		from erpnext.buying.doctype.purchase_order.purchase_order import (
+		from erpnext.buying.doctype.purchase_order.mapper import (
 			make_purchase_invoice as _make_purchase_invoice,
 		)
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
@@ -2035,8 +2035,8 @@ class TestPaymentEntry(ERPNextTestSuite):
 
 		# check cancellation of payment entry and journal entry
 		pe.cancel()
-		self.assertTrue(pe.docstatus == 2)
-		self.assertTrue(frappe.db.get_value("Journal Entry", {"name": jv[0]}, "docstatus") == 2)
+		self.assertEqual(pe.docstatus, 2)
+		self.assertEqual(frappe.db.get_value("Journal Entry", {"name": jv[0]}, "docstatus"), 2)
 
 		# check deletion of payment entry and journal entry
 		pe.delete()

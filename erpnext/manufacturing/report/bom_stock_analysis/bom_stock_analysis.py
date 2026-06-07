@@ -4,7 +4,7 @@
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Floor, IfNull, Sum
-from frappe.utils import flt, fmt_money
+from frappe.utils import flt
 from frappe.utils.data import comma_and
 from pypika.terms import ExistsCriterion
 

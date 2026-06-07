@@ -14,7 +14,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { Button } from "@/components/ui/button"
 import CurrencyInput from 'react-currency-input-field'
 import { getCurrencySymbol } from "@/lib/currency"
-import { Virtuoso } from 'react-virtuoso'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import { formatDate } from "@/lib/date"
 import { Badge } from "@/components/ui/badge"
 import { formatCurrency, getCurrencyFormatInfo } from "@/lib/numbers"
@@ -22,10 +22,10 @@ import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/comp
 import { Skeleton } from "@/components/ui/skeleton"
 import { slug } from "@/lib/frappe"
 import _ from "@/lib/translate"
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import TransferModal from "./TransferModal"
 import BankEntryModal from "./BankEntryModal"
 import RecordPaymentModal from "./RecordPaymentModal"
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import SelectedTransactionsTable from "./SelectedTransactionsTable"
 import MatchFilters from "./MatchFilters"
 import { useHotkeys } from "react-hotkeys-hook"
@@ -69,6 +69,59 @@ const MatchAndReconcile = ({ contentHeight }: { contentHeight: number }) => {
     </>
 }
 
+/** TanStack requires `estimateSize` for initial scroll range; `measureElement` on each row sets the real height. */
+function VirtualizedListBody<T>({
+    items,
+    height,
+    getItemKey,
+    children,
+    estimateSize = 74,
+}: {
+    items: T[]
+    height: number
+    getItemKey: (item: T, index: number) => string | number
+    children: (item: T, index: number) => React.ReactNode
+    estimateSize?: number
+}) {
+    const scrollRef = useRef<HTMLDivElement>(null)
+
+    const rowVirtualizer = useVirtualizer({
+        count: items.length,
+        getScrollElement: () => scrollRef.current,
+        estimateSize: () => estimateSize,
+        overscan: 8,
+        getItemKey: (index) => String(getItemKey(items[index], index)),
+    })
+
+    if (items.length === 0) {
+        return null
+    }
+
+    return (
+        <div
+            ref={scrollRef}
+            className="overflow-auto contain-strict"
+            style={{ height }}
+        >
+            <div
+                className="relative w-full"
+                style={{ height: rowVirtualizer.getTotalSize() }}
+            >
+                {rowVirtualizer.getVirtualItems().map((virtualRow) => (
+                    <div
+                        key={virtualRow.key}
+                        data-index={virtualRow.index}
+                        ref={rowVirtualizer.measureElement}
+                        className="absolute top-0 left-0 w-full"
+                        style={{ transform: `translateY(${virtualRow.start}px)` }}
+                    >
+                        {children(items[virtualRow.index], virtualRow.index)}
+                    </div>
+                ))}
+            </div>
+        </div>
+    )
+}
 
 const UnreconciledTransactions = ({ contentHeight }: { contentHeight: number }) => {
     const bankAccount = useAtomValue(selectedBankAccountAtom)
@@ -134,6 +187,7 @@ const UnreconciledTransactions = ({ contentHeight }: { contentHeight: number }) 
     }
 
     const hasFilters = search !== '' || typeFilter !== 'All' || amountFilter.value !== 0
+    const listHeight = contentHeight - 72
 
     if (isLoading) {
         return <UnreconciledTransactionsLoadingState />
@@ -222,14 +276,14 @@ const UnreconciledTransactions = ({ contentHeight }: { contentHeight: number }) 
             text={hasFilters ? _("No transactions found for the given filters.") : _("No unreconciled transactions found")}
             description={hasFilters ? _("Try adjusting your search or filter criteria.") : _("Import your bank statement to get started.")} />}
 
-        <Virtuoso
-            data={results}
-            itemContent={(_index, transaction) => (
-                <UnreconciledTransactionItem transaction={transaction} />
-            )}
-            style={{ minHeight: Math.max(contentHeight - 80, 400) }}
-            totalCount={results?.length}
-        />
+        <VirtualizedListBody
+            items={results}
+            height={listHeight}
+            estimateSize={74}
+            getItemKey={(transaction) => transaction.name}
+        >
+            {(transaction) => <UnreconciledTransactionItem transaction={transaction} />}
+        </VirtualizedListBody>
 
     </div>
 }
@@ -559,11 +613,8 @@ const RuleAction = ({ transaction }: { transaction: UnreconciledTransaction }) =
     const setRecordPaymentModalOpen = useSetAtom(bankRecRecordPaymentModalAtom)
     const setRecordJournalEntryModalOpen = useSetAtom(bankRecRecordJournalEntryModalAtom)
 
-    if (!rule) {
-        return null
-    }
-
     const getActionIcon = () => {
+        if (!rule) return null
         switch (rule.classify_as) {
             case "Bank Entry":
                 return <Landmark />
@@ -577,6 +628,7 @@ const RuleAction = ({ transaction }: { transaction: UnreconciledTransaction }) =
     }
 
     const getActionStyles = () => {
+        if (!rule) return {}
         switch (rule.classify_as) {
             case "Bank Entry":
                 return {
@@ -610,6 +662,7 @@ const RuleAction = ({ transaction }: { transaction: UnreconciledTransaction }) =
     }
 
     const handleActionClick = () => {
+        if (!rule) return
         switch (rule.classify_as) {
             case "Bank Entry":
                 setRecordJournalEntryModalOpen(true)
@@ -624,6 +677,7 @@ const RuleAction = ({ transaction }: { transaction: UnreconciledTransaction }) =
     }
 
     const getActionDescription = () => {
+        if (!rule) return ""
         switch (rule.classify_as) {
             case "Bank Entry":
                 return _("Create a journal entry for expenses, income or split transactions")
@@ -636,8 +690,7 @@ const RuleAction = ({ transaction }: { transaction: UnreconciledTransaction }) =
         }
     }
 
-    useHotkeys('meta+r', () => {
-        // 
+    useHotkeys('alt+r', () => {
         handleActionClick()
     }, {
         enabled: true,
@@ -646,6 +699,10 @@ const RuleAction = ({ transaction }: { transaction: UnreconciledTransaction }) =
     })
 
     const styles = getActionStyles()
+
+    if (!rule) {
+        return null
+    }
 
     return (
         <Card className={`border ${styles.border} ${styles.bg} shadow-sm hover:shadow-md transition-all duration-200`}>
@@ -721,6 +778,9 @@ const VouchersForTransaction = ({ transaction, contentHeight }: { transaction: U
 
     const { data: vouchers, isLoading, error } = useGetVouchersForTransaction(transaction)
 
+    const voucherList = vouchers?.message ?? []
+    const listHeight = contentHeight - 120
+
     if (error) {
         return <ErrorBanner error={error} />
     }
@@ -747,7 +807,7 @@ const VouchersForTransaction = ({ transaction, contentHeight }: { transaction: U
             <span>or</span>
             <Separator className="flex-1" />
         </div>
-        {vouchers?.message.length === 0 && <Empty className="my-4">
+        {voucherList.length === 0 && <Empty className="my-4">
             <EmptyMedia>
                 <ReceiptIcon />
             </EmptyMedia>
@@ -756,14 +816,14 @@ const VouchersForTransaction = ({ transaction, contentHeight }: { transaction: U
                 <EmptyTitle>{_("No vouchers found for this transaction")}</EmptyTitle>
             </EmptyHeader>
         </Empty>}
-        <Virtuoso
-            data={vouchers?.message}
-            itemContent={(index, voucher) => (
-                <VoucherItem voucher={voucher} index={index} />
-            )}
-            style={{ height: contentHeight }}
-            totalCount={vouchers?.message.length}
-        />
+        <VirtualizedListBody
+            items={voucherList}
+            height={listHeight}
+            estimateSize={121}
+            getItemKey={(voucher) => voucher.name}
+        >
+            {(voucher, index) => <VoucherItem voucher={voucher} index={index} />}
+        </VirtualizedListBody>
     </div >
 }
 

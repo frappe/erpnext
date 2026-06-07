@@ -7,6 +7,7 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import ErrorBanner from "@/components/ui/error-banner"
 import { FileDropzone } from "@/components/ui/file-dropzone"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { H3, Paragraph } from "@/components/ui/typography"
@@ -16,7 +17,7 @@ import { flt, formatCurrency } from "@/lib/numbers"
 import _ from "@/lib/translate"
 import { cn } from "@/lib/utils"
 import { BankStatementImportLog } from "@/types/Accounts/BankStatementImportLog"
-import { useFrappeCreateDoc, useFrappeFileUpload, useFrappeGetDocList } from "frappe-react-sdk"
+import { useFrappeCreateDoc, useFrappeFileUpload, useFrappeGetDocList, useFrappeUpdateDoc } from "frappe-react-sdk"
 import { useAtom, useAtomValue } from "jotai"
 import { ListIcon, Loader2Icon } from "lucide-react"
 import { useState } from "react"
@@ -30,11 +31,15 @@ const BankStatementImporter = () => {
     const [selectedBankAccount] = useAtom(selectedBankAccountAtom)
 
     const [files, setFiles] = useState<File[]>([])
+    const [password, setPassword] = useState("")
 
     const { upload, error, loading } = useFrappeFileUpload()
 
     const navigate = useNavigate()
     const { createDoc, loading: createLoading, error: createError } = useFrappeCreateDoc<BankStatementImportLog>()
+    const { updateDoc, error: updateError } = useFrappeUpdateDoc()
+
+    const isPdf = files[0]?.name?.toLowerCase().endsWith(".pdf") ?? false
 
     const onUpload = () => {
 
@@ -44,12 +49,18 @@ const BankStatementImporter = () => {
 
         const id = `new-bank-statement-import-log-${Date.now()}`
 
-        upload(files[0], {
+        // For protected PDFs, persist the password on the Bank Account so it is reused for
+        // every statement of this account (and is available before the import doc is created).
+        const ensurePassword = isPdf && password
+            ? updateDoc("Bank Account", selectedBankAccount.name, { statement_password: password })
+            : Promise.resolve()
+
+        ensurePassword.then(() => upload(files[0], {
             isPrivate: true,
             doctype: "Bank Statement Import Log",
             docname: id,
             fieldname: 'file'
-        }).then((file) => {
+        })).then((file) => {
             return createDoc("Bank Statement Import Log",
                 // @ts-expect-error - not filling everything else
                 {
@@ -67,6 +78,7 @@ const BankStatementImporter = () => {
             <div className="w-[52%]">
                 {error && <ErrorBanner error={error} />}
                 {createError && <ErrorBanner error={createError} />}
+                {updateError && <ErrorBanner error={updateError} />}
                 <div className="py-2 flex flex-col gap-6">
                     <div className="flex flex-col gap-2">
                         <Label>{_("Company")}<span className="text-ink-red-3">*</span></Label>
@@ -89,7 +101,7 @@ const BankStatementImporter = () => {
                                     data-slot="form-description"
                                     className={cn("text-ink-gray-5 text-xs")}
                                 >
-                                    {_("Upload your bank statement file to start the import process. We support CSV, and XLSX files.")}
+                                    {_("Upload your bank statement file to start the import process. We support CSV, XLSX and PDF files.")}
                                 </p>
                             </div>
                             <div>
@@ -105,10 +117,27 @@ const BankStatementImporter = () => {
                                 'text/csv': ['.csv'],
                                 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
                                 'application/vnd.ms-excel': ['.xls'],
+                                'application/pdf': ['.pdf'],
                                 // 'application/xml': ['.xml'],
                             }}
                             multiple={false}
                         />
+
+                        {isPdf && <div className="flex flex-col gap-2">
+                            <Label htmlFor="pdf-password">{_("PDF Password")}</Label>
+                            <Input
+                                id="pdf-password"
+                                type="password"
+                                autoComplete="off"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder={_("Only if the PDF is password protected")}
+                                className="max-w-sm"
+                            />
+                            <p data-slot="form-description" className={cn("text-ink-gray-5 text-p-sm")}>
+                                {_("Leave blank to use the password already saved for this bank account (if any). It is stored encrypted and reused for future statements.")}
+                            </p>
+                        </div>}
                     </div>}
                     <div className="flex justify-end px-4">
                         <Button
@@ -137,9 +166,10 @@ const StatementInstructions = () => {
         <DialogContent className="min-w-7xl">
             <DialogHeader>
                 <DialogTitle>{_("Statement Import Instructions")}</DialogTitle>
-                <DialogDescription>{_("We support uploading CSV, XLSX and XLS files. Please make sure the file contains the correct columns.")}</DialogDescription>
+                <DialogDescription>{_("We support uploading CSV, XLSX, XLS and PDF files. Please make sure the file contains the correct columns.")}</DialogDescription>
             </DialogHeader>
             <Paragraph className="text-sm">{_("The file should contain the following columns with a distinct header row. You can upload most bank statements as is without changing the columns.")}</Paragraph>
+            <Paragraph className="text-sm text-ink-gray-6">{_("For PDF statements, we auto-detect the tables on each page. You can then confirm each detected table, map its columns, and exclude anything that is not transactions (e.g. ads or summaries). Password-protected PDFs are supported - the password is saved on the bank account and reused.")}</Paragraph>
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -231,7 +261,13 @@ const StatementImportLog = () => {
                             <TableRow key={item.name} onClick={() => onViewDetails(item.name)} className="cursor-pointer hover:bg-surface-gray-2">
                                 <TableCell>{formatDate(item.creation, 'Do MMM YYYY')}</TableCell>
                                 <TableCell><Badge theme={item.status === "Completed" ? "green" : "gray"}>{item.status}</Badge></TableCell>
-                                <TableCell>{formatDate(item.start_date, 'Do MMM YYYY')} to {formatDate(item.end_date, 'Do MMM YYYY')}</TableCell>
+                                <TableCell>
+                                    {item.start_date && item.end_date ? (
+                                        <span>{formatDate(item.start_date, 'Do MMM YYYY')} to {formatDate(item.end_date, 'Do MMM YYYY')}</span>
+                                    ) : (
+                                        <span>-</span>
+                                    )}
+                                </TableCell>
                                 <TableCell className="text-end">{item.number_of_transactions}</TableCell>
                                 <TableCell className="text-end font-numeric">{formatCurrency(flt(item.closing_balance, 2))}</TableCell>
                                 <TableCell><a

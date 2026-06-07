@@ -8,13 +8,15 @@ import frappe
 from frappe.tests import change_settings
 from frappe.utils import nowdate
 
-from erpnext.buying.doctype.request_for_quotation.request_for_quotation import (
+from erpnext.buying.doctype.request_for_quotation.mapper import (
 	create_supplier_quotation,
-	get_pdf,
 	make_supplier_quotation_from_rfq,
 )
+from erpnext.buying.doctype.request_for_quotation.request_for_quotation import (
+	get_pdf,
+)
 from erpnext.controllers.accounts_controller import InvalidQtyError
-from erpnext.crm.doctype.opportunity.opportunity import make_request_for_quotation as make_rfq
+from erpnext.crm.doctype.opportunity.mapper import make_request_for_quotation as make_rfq
 from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.templates.pages.rfq import check_supplier_has_docname_access

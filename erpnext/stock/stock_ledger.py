@@ -17,7 +17,6 @@ from frappe.utils import (
 	format_date,
 	get_datetime,
 	get_link_to_form,
-	getdate,
 	now,
 	nowdate,
 	nowtime,
@@ -434,8 +433,7 @@ def get_reposting_data(file_path) -> dict:
 	except Exception:
 		return frappe._dict()
 
-	if data := json.loads(data.decode("utf-8")):
-		data = data
+	data = json.loads(data.decode("utf-8"))
 
 	return parse_json(data)
 
@@ -895,7 +893,7 @@ class update_entries_after:
 			# Only run in reposting
 			self.get_serialized_values(sle)
 			self.wh_data.qty_after_transaction += flt(sle.actual_qty)
-			if sle.voucher_type == "Stock Reconciliation" and not sle.batch_no:
+			if sle.voucher_type == "Stock Reconciliation" and not sle.batch_no and has_correct_data(sle):
 				self.wh_data.qty_after_transaction = sle.qty_after_transaction
 
 			self.wh_data.stock_value = flt(self.wh_data.qty_after_transaction) * flt(
@@ -1457,8 +1455,7 @@ class update_entries_after:
 				item.amount = flt(item.qty) * flt(item.valuation_rate)
 				item.quantity_difference = item.qty - item.current_qty
 				item.amount_difference = item.amount - item.current_amount
-			else:
-				sr.difference_amount = sum([item.amount_difference for item in sr.items])
+			sr.difference_amount = sum([item.amount_difference for item in sr.items])
 			sr.db_update()
 
 			for item in sr.items:
@@ -2470,3 +2467,28 @@ def get_incoming_rate_for_serial_and_batch(item_code, row, sn_obj, company):
 @frappe.request_cache
 def is_repack_entry(stock_entry_id):
 	return frappe.get_cached_value("Stock Entry", stock_entry_id, "purpose") == "Repack"
+
+
+def has_correct_data(sle):
+	previous_sle = get_previous_sle(
+		{
+			"item_code": sle.item_code,
+			"warehouse": sle.warehouse,
+			"posting_date": sle.posting_date,
+			"posting_time": sle.posting_time,
+			"creation": sle.creation,
+			"sle": sle.name,
+		}
+	)
+
+	if not previous_sle:
+		return True
+
+	previous_qty = previous_sle.get("qty_after_transaction") or 0
+	if previous_qty and not frappe.db.get_value(
+		"Stock Ledger Entry",
+		{"voucher_detail_no": sle.voucher_detail_no, "is_cancelled": 0, "actual_qty": ("<", 0)},
+	):
+		return False
+
+	return True

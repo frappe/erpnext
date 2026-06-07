@@ -245,7 +245,7 @@ class TestIssue(TestSetUp):
 
 		issue = make_issue(frappe.flags.current_time, index=1)
 		create_communication(issue.name, "test@example.com", "Received", frappe.flags.current_time)
-		self.assertTrue(issue.status == "Open")
+		self.assertEqual(issue.status, "Open")
 
 		# send a reply within response SLA
 		frappe.flags.current_time = get_datetime("2021-11-02 11:00")

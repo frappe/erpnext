@@ -139,48 +139,50 @@ def get_cost_of_on_time_shipments(scorecard):
 
 def get_total_days_late(scorecard):
 	"""Gets the number of item days late in the period (based on Purchase Receipts vs POs)"""
-	supplier = frappe.get_doc("Supplier", scorecard.supplier)
-	total_delivered_late_days = frappe.db.sql(
-		"""
-			SELECT
-				SUM(DATEDIFF(pr.posting_date,po_item.schedule_date)* pr_item.qty)
-			FROM
-				`tabPurchase Order Item` po_item,
-				`tabPurchase Receipt Item` pr_item,
-				`tabPurchase Order` po,
-				`tabPurchase Receipt` pr
-			WHERE
-				po.supplier = %(supplier)s
-				AND po_item.schedule_date BETWEEN %(start_date)s AND %(end_date)s
-				AND po_item.schedule_date < pr.posting_date
-				AND pr_item.docstatus = 1
-				AND pr_item.purchase_order_item = po_item.name
-				AND po_item.parent = po.name
-				AND pr_item.parent = pr.name""",
-		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
-		as_dict=0,
-	)[0][0]
-	if not total_delivered_late_days:
-		total_delivered_late_days = 0
 
-	total_missed_late_days = frappe.db.sql(
-		"""
-			SELECT
-				SUM(DATEDIFF( %(end_date)s, po_item.schedule_date) * (po_item.qty - po_item.received_qty))
-			FROM
-				`tabPurchase Order Item` po_item,
-				`tabPurchase Order` po
-			WHERE
-				po.supplier = %(supplier)s
-				AND po_item.received_qty < po_item.qty
-				AND po_item.schedule_date BETWEEN %(start_date)s AND %(end_date)s
-				AND po_item.parent = po.name""",
-		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
-		as_dict=0,
-	)[0][0]
+	PO = frappe.qb.DocType("Purchase Order")
+	PO_Item = frappe.qb.DocType("Purchase Order Item")
+	PR = frappe.qb.DocType("Purchase Receipt")
+	PR_Item = frappe.qb.DocType("Purchase Receipt Item")
 
-	if not total_missed_late_days:
-		total_missed_late_days = 0
+	query_delivered = (
+		frappe.qb.from_(PR_Item)
+		.join(PR)
+		.on(PR_Item.parent == PR.name)
+		.join(PO_Item)
+		.on(PR_Item.purchase_order_item == PO_Item.name)
+		.join(PO)
+		.on(PO_Item.parent == PO.name)
+		.select(Sum(frappe.qb.fn.DATEDIFF(PR.posting_date, PO_Item.schedule_date) * PR_Item.qty))
+		.where(PO.supplier == scorecard.supplier)
+		.where(PO_Item.schedule_date[scorecard.start_date : scorecard.end_date])
+		.where(PO_Item.schedule_date < PR.posting_date)
+		.where(PR_Item.docstatus == 1)
+	)
+
+	res_delivered = query_delivered.run(as_list=True)
+	total_delivered_late_days = (
+		res_delivered[0][0] if res_delivered and res_delivered[0][0] is not None else 0
+	)
+
+	query_missed = (
+		frappe.qb.from_(PO_Item)
+		.join(PO)
+		.on(PO_Item.parent == PO.name)
+		.select(
+			Sum(
+				frappe.qb.fn.DATEDIFF(scorecard.end_date, PO_Item.schedule_date)
+				* (PO_Item.qty - PO_Item.received_qty)
+			)
+		)
+		.where(PO.supplier == scorecard.supplier)
+		.where(PO_Item.received_qty < PO_Item.qty)
+		.where(PO_Item.schedule_date[scorecard.start_date : scorecard.end_date])
+	)
+
+	res_missed = query_missed.run(as_list=True)
+	total_missed_late_days = res_missed[0][0] if res_missed and res_missed[0][0] is not None else 0
+
 	return total_missed_late_days + total_delivered_late_days
 
 

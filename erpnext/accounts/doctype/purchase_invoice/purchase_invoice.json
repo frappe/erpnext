@@ -28,8 +28,6 @@
   "update_billed_amount_in_purchase_receipt",
   "apply_tds",
   "amended_from",
-  "section_break_ecfi",
-  "title",
   "supplier_invoice_details",
   "bill_no",
   "column_break_15",
@@ -202,6 +200,7 @@
   "hold_comment",
   "additional_info_section",
   "is_internal_supplier",
+  "title",
   "represents_company",
   "supplier_group",
   "sender",
@@ -1684,10 +1683,6 @@
    "fieldname": "automation_section",
    "fieldtype": "Section Break",
    "label": "Automation"
-  },
-  {
-   "fieldname": "section_break_ecfi",
-   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
@@ -1695,7 +1690,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-04 10:10:11.717131",
+ "modified": "2026-05-28 12:36:55.215363",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

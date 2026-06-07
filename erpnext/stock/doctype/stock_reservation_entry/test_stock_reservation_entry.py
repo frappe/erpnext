@@ -6,7 +6,7 @@ from random import randint
 import frappe
 from frappe.utils import today
 
-from erpnext.selling.doctype.sales_order.sales_order import create_pick_list, make_delivery_note
+from erpnext.selling.doctype.sales_order.mapper import create_pick_list, make_delivery_note
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
@@ -525,9 +525,9 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		},
 	)
 	def test_stock_reservation_from_purchase_receipt(self) -> None:
-		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
-		from erpnext.selling.doctype.sales_order.sales_order import make_material_request
-		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
+		from erpnext.selling.doctype.sales_order.mapper import make_material_request
+		from erpnext.stock.doctype.material_request.mapper import make_purchase_order
 
 		items_details = create_items()
 		create_material_receipt(items_details, self.warehouse, qty=10)

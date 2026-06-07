@@ -18,7 +18,7 @@ from erpnext.tests.utils import ERPNextTestSuite
 class TestPlaidSettings(ERPNextTestSuite):
 	def test_plaid_disabled(self):
 		frappe.db.set_single_value("Plaid Settings", "enabled", 0)
-		self.assertTrue(get_plaid_configuration() == "disabled")
+		self.assertEqual(get_plaid_configuration(), "disabled")
 
 	def test_add_account_type(self):
 		add_account_type("brokerage")
@@ -98,4 +98,4 @@ class TestPlaidSettings(ERPNextTestSuite):
 
 		new_bank_transaction(transactions)
 
-		self.assertTrue(len(frappe.get_all("Bank Transaction")) == 1)
+		self.assertEqual(len(frappe.get_all("Bank Transaction")), 1)

@@ -31,7 +31,7 @@ class TestPartySpecificItem(ERPNextTestSuite):
 		items = item_query(
 			doctype="Item", txt="", searchfield="name", start=0, page_len=20, filters=filters, as_dict=False
 		)
-		self.assertTrue(item in flatten(items))
+		self.assertIn(item, flatten(items))
 
 	def test_item_query_for_supplier(self):
 		supplier = "_Test Supplier With Template 1"
@@ -47,7 +47,24 @@ class TestPartySpecificItem(ERPNextTestSuite):
 		items = item_query(
 			doctype="Item", txt="", searchfield="name", start=0, page_len=20, filters=filters, as_dict=False
 		)
-		self.assertTrue(item in flatten(items))
+		self.assertIn(item, flatten(items))
+
+	def test_party_group(self):
+		customer = "_Test Customer With Template"
+		item = "_Test Item"
+		frappe.set_value("Customer", customer, "customer_group", "Government")
+
+		create_party_specific_item(
+			party_type="Customer Group",
+			party="Government",
+			restrict_based_on="Item",
+			based_on_value=item,
+		)
+		filters = {"is_sales_item": 1, "customer": customer}
+		items = item_query(
+			doctype="Item", txt="", searchfield="name", start=0, page_len=20, filters=filters, as_dict=False
+		)
+		self.assertIn(item, flatten(items))
 
 
 def flatten(lst):
