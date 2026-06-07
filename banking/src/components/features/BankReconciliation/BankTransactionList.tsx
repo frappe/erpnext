@@ -176,7 +176,7 @@ const BankTransactionListView = () => {
                 ),
             },
         ],
-        [_, accountCurrency, onUndo],
+        [accountCurrency, onUndo],
     )
 
     const [search, setSearch] = useDebounceValue('', 250)

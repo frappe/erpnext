@@ -68,7 +68,7 @@ frappe.ui.form.on("Subcontracting Receipt", {
 					__("Purchase Receipt"),
 					() => {
 						frappe.model.open_mapped_doc({
-							method: "erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt.make_purchase_receipt",
+							method: "erpnext.subcontracting.doctype.subcontracting_receipt.mapper.make_purchase_receipt",
 							frm: frm,
 							freeze: true,
 							freeze_message: __("Creating Purchase Receipt ..."),
@@ -85,7 +85,7 @@ frappe.ui.form.on("Subcontracting Receipt", {
 				() => {
 					const make_standard_return = () => {
 						frappe.model.open_mapped_doc({
-							method: "erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt.make_subcontract_return",
+							method: "erpnext.subcontracting.doctype.subcontracting_receipt.mapper.make_subcontract_return",
 							frm: frm,
 						});
 					};
@@ -109,7 +109,7 @@ frappe.ui.form.on("Subcontracting Receipt", {
 							function (values) {
 								if (values.return_for_rejected_warehouse) {
 									frappe.call({
-										method: "erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt.make_subcontract_return_against_rejected_warehouse",
+										method: "erpnext.subcontracting.doctype.subcontracting_receipt.mapper.make_subcontract_return_against_rejected_warehouse",
 										args: {
 											source_name: frm.doc.name,
 										},

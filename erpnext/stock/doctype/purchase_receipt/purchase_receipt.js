@@ -45,7 +45,7 @@ frappe.ui.form.on("Purchase Receipt", {
 				__("Debit Note"),
 				function () {
 					frappe.model.open_mapped_doc({
-						method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
+						method: "erpnext.stock.doctype.purchase_receipt.mapper.make_purchase_invoice",
 						frm: cur_frm,
 					});
 				},
@@ -59,7 +59,7 @@ frappe.ui.form.on("Purchase Receipt", {
 				__("Delivery Note"),
 				function () {
 					frappe.model.open_mapped_doc({
-						method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_inter_company_delivery_note",
+						method: "erpnext.stock.doctype.purchase_receipt.mapper.make_inter_company_delivery_note",
 						frm: cur_frm,
 					});
 				},
@@ -124,7 +124,7 @@ frappe.ui.form.on("Purchase Receipt", {
 						});
 					}
 					erpnext.utils.map_current_doc({
-						method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_purchase_receipt",
+						method: "erpnext.accounts.doctype.purchase_invoice.mapper.make_purchase_receipt",
 						source_doctype: "Purchase Invoice",
 						target: frm,
 						setters: {
@@ -223,7 +223,7 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 							});
 						}
 						erpnext.utils.map_current_doc({
-							method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
+							method: "erpnext.buying.doctype.purchase_order.mapper.make_purchase_receipt",
 							source_doctype: "Purchase Order",
 							target: me.frm,
 							setters: {
@@ -282,7 +282,7 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 
 	make_purchase_invoice() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
+			method: "erpnext.stock.doctype.purchase_receipt.mapper.make_purchase_invoice",
 			frm: cur_frm,
 		});
 	}
@@ -309,7 +309,7 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 				function (values) {
 					if (values.return_for_rejected_warehouse) {
 						frappe.call({
-							method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_return_against_rejected_warehouse",
+							method: "erpnext.stock.doctype.purchase_receipt.mapper.make_purchase_return_against_rejected_warehouse",
 							args: {
 								source_name: cur_frm.doc.name,
 							},
@@ -342,7 +342,7 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 
 	make_retention_stock_entry() {
 		frappe.call({
-			method: "erpnext.stock.doctype.stock_entry.stock_entry.move_sample_to_retention_warehouse",
+			method: "erpnext.stock.doctype.stock_entry.stock_entry_handler.manufacturing.move_sample_to_retention_warehouse",
 			args: {
 				company: cur_frm.doc.company,
 				items: cur_frm.doc.items,
@@ -439,14 +439,14 @@ frappe.ui.form.on("Purchase Receipt Item", {
 
 cur_frm.cscript._make_purchase_return = function () {
 	frappe.model.open_mapped_doc({
-		method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_return",
+		method: "erpnext.stock.doctype.purchase_receipt.mapper.make_purchase_return",
 		frm: cur_frm,
 	});
 };
 
 cur_frm.cscript["Make Stock Entry"] = function () {
 	frappe.model.open_mapped_doc({
-		method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_stock_entry",
+		method: "erpnext.stock.doctype.purchase_receipt.mapper.make_stock_entry",
 		frm: cur_frm,
 	});
 };
@@ -455,7 +455,7 @@ var validate_sample_quantity = function (frm, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (d.sample_quantity && d.qty) {
 		frappe.call({
-			method: "erpnext.stock.doctype.stock_entry.stock_entry.validate_sample_quantity",
+			method: "erpnext.stock.doctype.stock_entry.stock_entry_handler.manufacturing.validate_sample_quantity",
 			args: {
 				batch_no: d.batch_no,
 				item_code: d.item_code,

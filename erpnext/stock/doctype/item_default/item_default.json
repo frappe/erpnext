@@ -5,34 +5,60 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "company_section",
   "company",
+  "from_section",
+  "column_break_general",
+  "vf_default_warehouse",
+  "vf_default_price_list",
+  "vf_default_discount_account",
+  "vf_default_inventory_account",
+  "column_break_njfg",
   "default_warehouse",
-  "column_break_3",
   "default_price_list",
   "default_discount_account",
   "default_inventory_account",
   "inventory_account_currency",
   "purchase_defaults",
+  "column_break_purchase",
+  "vf_buying_cost_center",
+  "vf_default_supplier",
+  "vf_expense_account",
+  "vf_default_provisional_account",
+  "vf_purchase_expense_account",
+  "vf_purchase_expense_contra_account",
+  "column_break_ghzl",
   "buying_cost_center",
   "default_supplier",
-  "column_break_8",
   "expense_account",
   "default_provisional_account",
-  "column_break_cpif",
   "purchase_expense_account",
   "purchase_expense_contra_account",
   "selling_defaults",
+  "column_break_sales",
+  "vf_selling_cost_center",
+  "vf_income_account",
+  "column_break_ilsl",
   "selling_cost_center",
-  "column_break_12",
   "income_account",
   "cost_of_good_sold_section",
+  "column_break_cogs",
+  "vf_default_cogs_account",
+  "column_break_vnkl",
   "default_cogs_account",
   "deferred_accounting_defaults_section",
+  "column_break_deferred",
+  "vf_deferred_expense_account",
+  "vf_deferred_revenue_account",
+  "column_break_okiu",
   "deferred_expense_account",
-  "column_break_kwad",
   "deferred_revenue_account"
  ],
  "fields": [
+  {
+   "fieldname": "company_section",
+   "fieldtype": "Section Break"
+  },
   {
    "fieldname": "company",
    "fieldtype": "Link",
@@ -46,157 +72,30 @@
    "fieldname": "default_warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Default Warehouse",
+   "label": "Warehouse",
    "options": "Warehouse",
    "search_index": 1
-  },
-  {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
   },
   {
    "description": "Default price list for buying or selling this item",
    "fieldname": "default_price_list",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Default Price List",
+   "label": "Price List",
    "options": "Price List",
-   "show_description_on_click": 1
-  },
-  {
-   "fieldname": "purchase_defaults",
-   "fieldtype": "Section Break",
-   "label": "Purchase Defaults"
-  },
-  {
-   "description": "Cost center used for tracking purchase expenses for this item",
-   "fieldname": "buying_cost_center",
-   "fieldtype": "Link",
-   "label": "Default Buying Cost Center",
-   "options": "Cost Center",
-   "show_description_on_click": 1
-  },
-  {
-   "description": "This supplier will be auto-selected in new purchase transactions",
-   "fieldname": "default_supplier",
-   "fieldtype": "Link",
-   "label": "Default Supplier",
-   "options": "Supplier"
-  },
-  {
-   "fieldname": "column_break_8",
-   "fieldtype": "Column Break"
-  },
-  {
-   "description": "Account where the cost of this item will be debited on purchase",
-   "fieldname": "expense_account",
-   "fieldtype": "Link",
-   "label": "Default Expense Account",
-   "options": "Account",
-   "show_description_on_click": 1
-  },
-  {
-   "fieldname": "selling_defaults",
-   "fieldtype": "Section Break",
-   "label": "Sales Defaults"
-  },
-  {
-   "description": "Cost center used for tracking sales revenue for this item",
-   "fieldname": "selling_cost_center",
-   "fieldtype": "Link",
-   "label": "Default Selling Cost Center",
-   "options": "Cost Center",
-   "show_description_on_click": 1
-  },
-  {
-   "fieldname": "column_break_12",
-   "fieldtype": "Column Break"
-  },
-  {
-   "description": "Account where revenue from selling this item will be credited",
-   "fieldname": "income_account",
-   "fieldtype": "Link",
-   "label": "Default Income Account",
-   "options": "Account",
    "show_description_on_click": 1
   },
   {
    "fieldname": "default_discount_account",
    "fieldtype": "Link",
-   "label": "Default Discount Account",
-   "options": "Account"
-  },
-  {
-   "description": "Provisional liability account used for service items before invoice is received",
-   "fieldname": "default_provisional_account",
-   "fieldtype": "Link",
-   "label": "Default Provisional Account (Service)",
-   "options": "Account"
-  },
-  {
-   "fieldname": "deferred_accounting_defaults_section",
-   "fieldtype": "Section Break",
-   "label": "Deferred Accounting Defaults"
-  },
-  {
-   "depends_on": "eval: parent.enable_deferred_expense",
-   "description": "When you pay for something upfront (like annual insurance), the cost is held here and recognized gradually over time",
-   "fieldname": "deferred_expense_account",
-   "fieldtype": "Link",
-   "label": "Deferred Expense Account",
-   "options": "Account",
-   "show_description_on_click": 1
-  },
-  {
-   "depends_on": "eval: parent.enable_deferred_revenue",
-   "description": "Revenue received in advance (e.g. annual subscription) is held here and recognized gradually over time",
-   "fieldname": "deferred_revenue_account",
-   "fieldtype": "Link",
-   "label": "Deferred Revenue Account",
-   "options": "Account",
-   "show_description_on_click": 1
-  },
-  {
-   "fieldname": "column_break_kwad",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_cpif",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "cost_of_good_sold_section",
-   "fieldtype": "Section Break",
-   "label": "Cost of Goods Sold"
-  },
-  {
-   "description": "Account where cost of goods sold will be posted when this item is sold",
-   "fieldname": "default_cogs_account",
-   "fieldtype": "Link",
-   "label": "Default COGS Account",
-   "options": "Account",
-   "show_description_on_click": 1
-  },
-  {
-   "description": "Account to record additional purchase expenses like freight or customs for this item",
-   "fieldname": "purchase_expense_account",
-   "fieldtype": "Link",
-   "label": "Purchase Expense Account",
-   "options": "Account",
-   "show_description_on_click": 1
-  },
-  {
-   "description": "Used to balance the books when recording extra purchase costs like freight or customs",
-   "fieldname": "purchase_expense_contra_account",
-   "fieldtype": "Link",
-   "label": "Purchase Expense Contra Account",
+   "label": "Discount Account",
    "options": "Account"
   },
   {
    "description": "Stock account where inventory value for this item will be tracked",
    "fieldname": "default_inventory_account",
    "fieldtype": "Link",
-   "label": "Default Inventory Account",
+   "label": "Inventory Account",
    "options": "Account",
    "show_description_on_click": 1
   },
@@ -207,11 +106,257 @@
    "label": "Inventory Account Currency",
    "options": "Currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_general",
+   "fieldtype": "Column Break",
+   "label": "Inherited Default"
+  },
+  {
+   "fieldname": "vf_default_warehouse",
+   "fieldtype": "Read Only",
+   "is_virtual": 1,
+   "label": "Warehouse"
+  },
+  {
+   "fieldname": "vf_default_price_list",
+   "fieldtype": "Read Only",
+   "is_virtual": 1,
+   "label": "Price List"
+  },
+  {
+   "fieldname": "vf_default_discount_account",
+   "fieldtype": "Read Only",
+   "is_virtual": 1,
+   "label": "Discount Account"
+  },
+  {
+   "fieldname": "vf_default_inventory_account",
+   "fieldtype": "Read Only",
+   "is_virtual": 1,
+   "label": "Inventory Account"
+  },
+  {
+   "fieldname": "purchase_defaults",
+   "fieldtype": "Section Break",
+   "label": "Purchase Defaults"
+  },
+  {
+   "description": "Cost center used for tracking purchase expenses for this item",
+   "fieldname": "buying_cost_center",
+   "fieldtype": "Link",
+   "label": "Buying Cost Center",
+   "options": "Cost Center",
+   "show_description_on_click": 1
+  },
+  {
+   "description": "This supplier will be auto-selected in new purchase transactions",
+   "fieldname": "default_supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "options": "Supplier",
+   "show_description_on_click": 1
+  },
+  {
+   "description": "Account where the cost of this item will be debited on purchase",
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "label": "Expense Account",
+   "options": "Account",
+   "show_description_on_click": 1
+  },
+  {
+   "description": "Provisional liability account used for service items before invoice is received",
+   "fieldname": "default_provisional_account",
+   "fieldtype": "Link",
+   "label": "Provisional Account (Service)",
+   "options": "Account",
+   "show_description_on_click": 1
+  },
+  {
+   "description": "Account to record additional purchase expenses like freight or customs",
+   "fieldname": "purchase_expense_account",
+   "fieldtype": "Link",
+   "label": "Purchase Expense Account",
+   "options": "Account",
+   "show_description_on_click": 1
+  },
+  {
+   "description": "Used to balance the books when recording extra purchase costs",
+   "fieldname": "purchase_expense_contra_account",
+   "fieldtype": "Link",
+   "label": "Purchase Expense Contra Account",
+   "options": "Account",
+   "show_description_on_click": 1
+  },
+  {
+   "fieldname": "column_break_purchase",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vf_buying_cost_center",
+   "fieldtype": "Read Only",
+   "is_virtual": 1,
+   "label": "Buying Cost Center"
+  },
+  {
+   "fieldname": "vf_default_supplier",
+   "fieldtype": "Read Only",
+   "is_virtual": 1,
+   "label": "Supplier"
+  },
+  {
+   "fieldname": "vf_expense_account",
+   "fieldtype": "Read Only",
+   "is_virtual": 1,
+   "label": "Expense Account"
+  },
+  {
+   "fieldname": "vf_default_provisional_account",
+   "fieldtype": "Read Only",
+   "is_virtual": 1,
+   "label": "Provisional Account (Service)"
+  },
+  {
+   "fieldname": "vf_purchase_expense_account",
+   "fieldtype": "Read Only",
+   "is_virtual": 1,
+   "label": "Purchase Expense Account"
+  },
+  {
+   "fieldname": "vf_purchase_expense_contra_account",
+   "fieldtype": "Read Only",
+   "is_virtual": 1,
+   "label": "Purchase Expense Contra Account"
+  },
+  {
+   "fieldname": "selling_defaults",
+   "fieldtype": "Section Break",
+   "label": "Sales Defaults"
+  },
+  {
+   "description": "Cost center used for tracking sales revenue for this item",
+   "fieldname": "selling_cost_center",
+   "fieldtype": "Link",
+   "label": "Selling Cost Center",
+   "options": "Cost Center",
+   "show_description_on_click": 1
+  },
+  {
+   "description": "Account where revenue from selling this item will be credited",
+   "fieldname": "income_account",
+   "fieldtype": "Link",
+   "label": "Income Account",
+   "options": "Account",
+   "show_description_on_click": 1
+  },
+  {
+   "fieldname": "column_break_sales",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vf_selling_cost_center",
+   "fieldtype": "Read Only",
+   "is_virtual": 1,
+   "label": "Selling Cost Center"
+  },
+  {
+   "fieldname": "vf_income_account",
+   "fieldtype": "Read Only",
+   "is_virtual": 1,
+   "label": "Income Account"
+  },
+  {
+   "fieldname": "cost_of_good_sold_section",
+   "fieldtype": "Section Break",
+   "label": "Cost of Goods Sold"
+  },
+  {
+   "description": "Account where cost of goods sold will be posted when this item is sold",
+   "fieldname": "default_cogs_account",
+   "fieldtype": "Link",
+   "label": "COGS Account",
+   "options": "Account",
+   "show_description_on_click": 1
+  },
+  {
+   "fieldname": "column_break_cogs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vf_default_cogs_account",
+   "fieldtype": "Read Only",
+   "is_virtual": 1,
+   "label": "COGS Account"
+  },
+  {
+   "fieldname": "deferred_accounting_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Deferred Accounting Defaults"
+  },
+  {
+   "depends_on": "eval: parent.enable_deferred_expense",
+   "fieldname": "deferred_expense_account",
+   "fieldtype": "Link",
+   "label": "Expense Account",
+   "options": "Account",
+   "show_description_on_click": 1
+  },
+  {
+   "depends_on": "eval: parent.enable_deferred_revenue",
+   "fieldname": "deferred_revenue_account",
+   "fieldtype": "Link",
+   "label": "Revenue Account",
+   "options": "Account",
+   "show_description_on_click": 1
+  },
+  {
+   "fieldname": "column_break_deferred",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval: parent.enable_deferred_expense",
+   "fieldname": "vf_deferred_expense_account",
+   "fieldtype": "Read Only",
+   "is_virtual": 1,
+   "label": "Deferred Expense Account"
+  },
+  {
+   "depends_on": "eval: parent.enable_deferred_revenue",
+   "fieldname": "vf_deferred_revenue_account",
+   "fieldtype": "Read Only",
+   "is_virtual": 1,
+   "label": "Deferred Revenue Account"
+  },
+  {
+   "fieldname": "column_break_njfg",
+   "fieldtype": "Column Break",
+   "label": "Item Override"
+  },
+  {
+   "fieldname": "column_break_ghzl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ilsl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_vnkl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_okiu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "from_section",
+   "fieldtype": "Section Break"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2026-04-27 01:49:01.396845",
+ "modified": "2026-06-03 17:25:35.982082",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Default",

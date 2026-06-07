@@ -443,7 +443,7 @@ class PaymentRequest(Document):
 		self.update_reference_advance_payment_status()
 
 	def make_invoice(self):
-		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
 
 		si = make_sales_invoice(self.reference_name, ignore_permissions=True)
 		si.allocate_advances_automatically = True
@@ -1293,11 +1293,16 @@ def get_open_payment_requests_query(
 	)
 
 	return [
-		(
-			pr.name,
-			_("<strong>Grand Total:</strong> {0}").format(pr.grand_total),
-			_("<strong>Outstanding Amount:</strong> {0}").format(pr.outstanding_amount),
-		)
+		{
+			"value": pr.name,
+			"description": ", ".join(
+				[
+					_("<strong>Grand Total:</strong> {0}").format(pr.grand_total),
+					_("<strong>Outstanding Amount:</strong> {0}").format(pr.outstanding_amount),
+				]
+			),
+			"description_html": True,
+		}
 		for pr in open_payment_requests
 	]
 

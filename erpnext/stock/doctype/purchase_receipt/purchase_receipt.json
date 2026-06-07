@@ -26,8 +26,6 @@
   "apply_putaway_rule",
   "is_return",
   "return_against",
-  "section_break_zwvg",
-  "title",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -151,6 +149,7 @@
   "instructions",
   "is_internal_supplier",
   "represents_company",
+  "title",
   "inter_company_reference",
   "column_break_131",
   "remarks",
@@ -1287,10 +1286,6 @@
   {
    "fieldname": "column_break_ugyv",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break_zwvg",
-   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
@@ -1298,7 +1293,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-04 10:19:44.638858",
+ "modified": "2026-05-28 12:38:05.907578",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

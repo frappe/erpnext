@@ -255,8 +255,9 @@ def update_qty(bin_name, args):
 	# actual qty is already updated by processing current voucher
 	actual_qty = bin_details.actual_qty or 0.0
 
-	# actual qty is not up to date in case of backdated transaction
-	if future_sle_exists(args):
+	# actual qty is not up to date in case of backdated transactions
+	# or when cancellations are the most recent SLE
+	if future_sle_exists(args) or args.get("is_cancelled"):
 		actual_qty = get_actual_qty(args.get("item_code"), args.get("warehouse"))
 
 	ordered_qty = flt(bin_details.ordered_qty) + flt(args.get("ordered_qty"))

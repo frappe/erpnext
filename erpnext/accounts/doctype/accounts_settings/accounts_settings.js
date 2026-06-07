@@ -10,6 +10,9 @@ frappe.ui.form.on("Accounts Settings", {
 				},
 			};
 		});
+		if (!frm.naming_controller) frm.naming_controller = new erpnext.NamingSeriesController(frm);
+
+		frm.naming_controller.render_table("transaction_naming_html", get_transactions(frm));
 	},
 	enable_immutable_ledger: function (frm) {
 		if (!frm.doc.enable_immutable_ledger) {
@@ -38,16 +41,6 @@ frappe.ui.form.on("Accounts Settings", {
 	add_taxes_from_item_tax_template(frm) {
 		toggle_tax_settings(frm, "add_taxes_from_item_tax_template");
 	},
-
-	drop_ar_procedures: function (frm) {
-		frm.call({
-			doc: frm.doc,
-			method: "drop_ar_sql_procedures",
-			callback: function (r) {
-				frappe.show_alert(__("Procedures dropped"), 5);
-			},
-		});
-	},
 });
 
 function toggle_tax_settings(frm, field_name) {
@@ -58,4 +51,17 @@ function toggle_tax_settings(frm, field_name) {
 				: "add_taxes_from_item_tax_template";
 		frm.set_value(other_field, 0);
 	}
+}
+
+function get_transactions(frm) {
+	const transactions = [
+		{ label: __("Journal Entry"), doctype: "Journal Entry" },
+		{ label: __("Payment Entry"), doctype: "Payment Entry" },
+		{ label: __("Purchase Invoice"), doctype: "Purchase Invoice" },
+		{ label: __("Purchase Order"), doctype: "Purchase Order" },
+		{ label: __("Purchase Receipt"), doctype: "Purchase Receipt" },
+		{ label: __("Sales Invoice"), doctype: "Sales Invoice" },
+	];
+
+	return transactions;
 }

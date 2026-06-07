@@ -89,19 +89,11 @@ class SupplierScorecard(Document):
 			throw(_("Criteria weights must add up to 100%"))
 
 	def calculate_total_score(self):
-		scorecards = frappe.db.sql(
-			"""
-			SELECT
-				scp.name
-			FROM
-				`tabSupplier Scorecard Period` scp
-			WHERE
-				scp.scorecard = %(sc)s
-				AND scp.docstatus = 1
-			ORDER BY
-				scp.end_date DESC""",
-			{"sc": self.name},
-			as_dict=1,
+		scorecards = frappe.get_all(
+			"Supplier Scorecard Period",
+			fields=["name"],
+			filters={"scorecard": self.name, "docstatus": 1},
+			order_by="end_date desc",
 		)
 
 		period = 0
@@ -148,28 +140,20 @@ class SupplierScorecard(Document):
 @frappe.whitelist()
 def get_timeline_data(doctype: str, name: str):
 	# Get a list of all the associated scorecards
-	scs = frappe.get_doc(doctype, name)
+
 	out = {}
 	timeline_data = {}
-	scorecards = frappe.db.sql(
-		"""
-		SELECT
-			sc.name
-		FROM
-			`tabSupplier Scorecard Period` sc
-		WHERE
-			sc.scorecard = %(scs)s
-			AND sc.docstatus = 1""",
-		{"scs": scs.name},
-		as_dict=1,
+
+	scorecards = frappe.get_all(
+		"Supplier Scorecard Period",
+		fields=["name", "start_date", "end_date", "total_score"],
+		filters={"scorecard": name, "docstatus": 1},
+		order_by="end_date desc",
 	)
 
 	for sc in scorecards:
-		start_date, end_date, total_score = frappe.db.get_value(
-			"Supplier Scorecard Period", sc.name, ["start_date", "end_date", "total_score"]
-		)
-		for single_date in daterange(start_date, end_date):
-			timeline_data[time.mktime(single_date.timetuple())] = total_score
+		for single_date in daterange(sc.start_date, sc.end_date):
+			timeline_data[time.mktime(single_date.timetuple())] = sc.total_score
 
 	out["timeline_data"] = timeline_data
 	return out
@@ -207,25 +191,16 @@ def make_all_scorecards(docname: str):
 
 	while (start_date < todays) and (end_date <= todays):
 		# check to make sure there is no scorecard period already created
-		scorecards = frappe.db.sql(
-			"""
-			SELECT
-				scp.name
-			FROM
-				`tabSupplier Scorecard Period` scp
-			WHERE
-				scp.scorecard = %(sc)s
-				AND scp.docstatus = 1
-				AND (
-					(scp.start_date > %(end_date)s
-					AND scp.end_date < %(start_date)s)
-				OR
-					(scp.start_date < %(end_date)s
-					AND scp.end_date > %(start_date)s))
-			ORDER BY
-				scp.end_date DESC""",
-			{"sc": docname, "start_date": start_date, "end_date": end_date},
-			as_dict=1,
+		scorecards = frappe.get_all(
+			"Supplier Scorecard Period",
+			fields=["name"],
+			filters={
+				"scorecard": docname,
+				"docstatus": 1,
+				"start_date": ["<", end_date],
+				"end_date": [">", start_date],
+			},
+			order_by="end_date desc",
 		)
 		if len(scorecards) == 0:
 			period_card = make_supplier_scorecard(docname, None)

@@ -9,8 +9,12 @@ from frappe.tests import timeout
 from frappe.utils import add_days, add_months, add_to_date, cint, flt, now, nowdate, nowtime, today
 
 from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError
-from erpnext.manufacturing.doctype.job_card.job_card import make_stock_entry as make_stock_entry_from_jc
+from erpnext.manufacturing.doctype.job_card.mapper import make_stock_entry as make_stock_entry_from_jc
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from erpnext.manufacturing.doctype.work_order.mapper import (
+	make_stock_entry,
+	make_stock_return_entry,
+)
 from erpnext.manufacturing.doctype.work_order.work_order import (
 	CapacityError,
 	ItemHasVariantError,
@@ -18,8 +22,6 @@ from erpnext.manufacturing.doctype.work_order.work_order import (
 	StockOverProductionError,
 	close_work_order,
 	make_job_card,
-	make_stock_entry,
-	make_stock_return_entry,
 	stop_unstop,
 )
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -683,7 +685,10 @@ class TestWorkOrder(ERPNextTestSuite):
 
 	def test_cost_center_for_manufacture(self):
 		wo_order = make_wo_order_test_record()
-		ste = make_stock_entry(wo_order.name, "Material Transfer for Manufacture", wo_order.qty)
+		ste = frappe.get_doc(
+			make_stock_entry(wo_order.name, "Material Transfer for Manufacture", wo_order.qty)
+		)
+		ste.save()
 		self.assertEqual(ste.get("items")[0].get("cost_center"), "_Test Cost Center - _TC")
 
 	def test_operation_time_with_batch_size(self):
@@ -803,7 +808,7 @@ class TestWorkOrder(ERPNextTestSuite):
 
 				bundle_id = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
 				for bundle_row in bundle_id.get("entries"):
-					self.assertTrue(bundle_row.batch_no in batches)
+					self.assertIn(bundle_row.batch_no, batches)
 					batches.remove(bundle_row.batch_no)
 
 		ste1.submit()
@@ -817,7 +822,7 @@ class TestWorkOrder(ERPNextTestSuite):
 
 				bundle_id = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
 				for bundle_row in bundle_id.get("entries"):
-					self.assertTrue(bundle_row.batch_no in batches)
+					self.assertIn(bundle_row.batch_no, batches)
 					remaining_batches.append(bundle_row.batch_no)
 
 		self.assertEqual(sorted(remaining_batches), sorted(batches))
@@ -1092,7 +1097,7 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
 		for row in stock_entry.items:
-			if row.type or row.is_legacy_scrap_item:
+			if row.secondary_item_type or row.is_legacy_scrap_item:
 				self.assertEqual(row.qty, 1)
 
 		# Partial Job Card 1 with qty 10
@@ -1104,7 +1109,7 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
 		for row in stock_entry.items:
-			if row.type or row.is_legacy_scrap_item:
+			if row.secondary_item_type or row.is_legacy_scrap_item:
 				self.assertEqual(row.qty, 2)
 
 		# Partial Job Card 2 with qty 10
@@ -1319,7 +1324,6 @@ class TestWorkOrder(ERPNextTestSuite):
 
 			stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
 			stock_entry.set_work_order_details()
-			stock_entry.set_serial_no_batch_for_finished_good()
 			for row in stock_entry.items:
 				if row.item_code == fg_item:
 					self.assertTrue(row.serial_and_batch_bundle)
@@ -1360,7 +1364,6 @@ class TestWorkOrder(ERPNextTestSuite):
 
 			stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
 			stock_entry.set_work_order_details()
-			stock_entry.set_serial_no_batch_for_finished_good()
 			for row in stock_entry.items:
 				if row.item_code == fg_item:
 					self.assertTrue(row.serial_and_batch_bundle)
@@ -2191,7 +2194,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertTrue(se_doc.additional_costs)
 		secondary_items = []
 		for item in se_doc.items:
-			if item.type or item.is_legacy_scrap_item:
+			if item.secondary_item_type or item.is_legacy_scrap_item:
 				secondary_items.append(item.item_code)
 
 		self.assertEqual(
@@ -2656,7 +2659,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		# Secondary/Scrap item: should be taken from scrap warehouse in disassembly
 		scrap_row = next((i for i in stock_entry.items if i.item_code == scrap_item), None)
 		self.assertIsNotNone(scrap_row)
-		self.assertEqual(scrap_row.type, "Scrap")
+		self.assertEqual(scrap_row.secondary_item_type, "Scrap")
 		self.assertTrue(scrap_row.s_warehouse)
 		self.assertFalse(scrap_row.t_warehouse)
 		self.assertEqual(scrap_row.s_warehouse, wo.scrap_warehouse)
@@ -3171,12 +3174,12 @@ class TestWorkOrder(ERPNextTestSuite):
 		transfer_entry.items[0].original_item = raw_materials[0]
 		transfer_entry.submit()
 
-		self.assertTrue(transfer_entry.docstatus == 1)
+		self.assertEqual(transfer_entry.docstatus, 1)
 
 		manufacture_entry = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 10))
 		manufacture_entry.save()
-		self.assertTrue(manufacture_entry.items[0].item_code == alternate_item[0])
-		self.assertTrue(manufacture_entry.items[0].original_item == raw_materials[0])
+		self.assertEqual(manufacture_entry.items[0].item_code, alternate_item[0])
+		self.assertEqual(manufacture_entry.items[0].original_item, raw_materials[0])
 
 		manufacture_entry.submit()
 
@@ -3880,7 +3883,7 @@ class TestWorkOrder(ERPNextTestSuite):
 				self.assertEqual(sorted(serial_nos), sorted(value.serial_nos))
 
 			if value.batch_nos:
-				self.assertTrue(row.batch_no in value.batch_nos)
+				self.assertIn(row.batch_no, value.batch_nos)
 
 		_before_reserved_item = get_reserved_entries(wo.name, mt_stock_entry.items[0].t_warehouse)
 
@@ -3896,16 +3899,16 @@ class TestWorkOrder(ERPNextTestSuite):
 			if row.serial_no:
 				serial_nos = get_serial_nos_from_bundle(row.serial_and_batch_bundle)
 				for sn in serial_nos:
-					self.assertTrue(sn in value.serial_nos)
+					self.assertIn(sn, value.serial_nos)
 					value.serial_nos.remove(sn)
 
 			if row.batch_no:
-				self.assertTrue(row.batch_no in value.batch_nos)
+				self.assertIn(row.batch_no, value.batch_nos)
 				value.batch_nos[row.batch_no] -= row.qty
 				if row.serial_no:
 					sns = get_serial_nos_from_bundle(row.serial_and_batch_bundle)
 					for sn in sns:
-						self.assertTrue(sn in value.serial_batches[row.batch_no])
+						self.assertIn(sn, value.serial_batches[row.batch_no])
 						value.serial_batches[row.batch_no].remove(sn)
 
 		# Manufacture 3 qty
@@ -3923,7 +3926,7 @@ class TestWorkOrder(ERPNextTestSuite):
 				self.assertEqual(sorted(serial_nos), sorted(value.serial_nos))
 
 			if row.batch_no:
-				self.assertTrue(row.batch_no in value.batch_nos)
+				self.assertIn(row.batch_no, value.batch_nos)
 				self.assertEqual(value.batch_nos[row.batch_no], row.qty)
 				if row.serial_no:
 					sns = get_serial_nos_from_bundle(row.serial_and_batch_bundle)
@@ -4223,6 +4226,7 @@ class TestWorkOrder(ERPNextTestSuite):
 			"operations",
 			{
 				"operation": fg_operation.name,
+				"batch_size": fg_operation.batch_size,
 				"time_in_mins": 60,
 				"workstation": workstation.name,
 			},
@@ -4231,6 +4235,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		fg_bom.items[0].bom_no = subassembly_bom.name
 		fg_bom.save()
 		fg_bom.submit()
+		self.assertEqual(fg_bom.operations[0].batch_size, 25)
 
 		wo_order = make_wo_order_test_record(
 			item=fg_item.name,
@@ -4291,7 +4296,6 @@ class TestWorkOrder(ERPNextTestSuite):
 		)
 
 		material_transfer_entry.submit()
-
 		manufacture_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 1))
 		manufacture_entry.save()
 
@@ -4299,6 +4303,154 @@ class TestWorkOrder(ERPNextTestSuite):
 		for row in manufacture_entry.items:
 			if row.s_warehouse:
 				self.assertIn(row.item_code, [raw_material_1, raw_material_2])
+
+	def test_non_stock_items_shown_in_work_order(self):
+		"""Non stock, non phantom raw materials should appear in non_stock_items with scaled qty & amount."""
+		fg_item = make_item("_Test WO Non Stock FG", {"is_stock_item": 1}).name
+		stock_rm = make_item(
+			"_Test WO Non Stock - Stock RM", {"is_stock_item": 1, "valuation_rate": 100}
+		).name
+		non_stock_rm = make_item(
+			"_Test WO Non Stock - Non Stock RM", {"is_stock_item": 0, "valuation_rate": 7}
+		).name
+
+		bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": fg_item,
+				"currency": "INR",
+				"quantity": 8,
+				"company": "_Test Company",
+			}
+		)
+		bom.append("items", {"item_code": stock_rm, "qty": 5})
+		bom.append("items", {"item_code": non_stock_rm, "qty": 3})
+		bom.insert()
+		bom.submit()
+
+		wo_order = make_wo_order_test_record(
+			production_item=fg_item, bom_no=bom.name, qty=20, skip_transfer=1, do_not_save=True
+		)
+
+		non_stock_items = wo_order.non_stock_items
+		# only the non stock, non phantom item is shown; the stock item is excluded
+		self.assertEqual(len(non_stock_items), 1)
+		row = non_stock_items[0]
+		self.assertEqual(row.item_code, non_stock_rm)
+		# qty = (bom_item_qty / bom_qty) * wo_qty = (3 / 8) * 20 = 7.5
+		self.assertEqual(flt(row.qty, 6), 7.5)
+		# amount = base_rate * qty = 7 * 7.5 = 52.5
+		self.assertEqual(flt(row.amount, 6), 52.5)
+
+	def test_secondary_items_from_bom_without_manufacture_entry(self):
+		"""Without any manufacture entry, secondary items are derived from the BOM with scaled qty & amount."""
+		fg_item = make_item("_Test WO Sec BOM FG", {"is_stock_item": 1}).name
+		stock_rm = make_item("_Test WO Sec BOM RM", {"is_stock_item": 1, "valuation_rate": 100}).name
+		scrap_item = make_item("_Test WO Sec BOM Scrap", {"is_stock_item": 1, "valuation_rate": 0}).name
+
+		bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": fg_item,
+				"currency": "INR",
+				"quantity": 8,
+				"company": "_Test Company",
+			}
+		)
+		bom.append("items", {"item_code": stock_rm, "qty": 2})
+		bom.append(
+			"secondary_items",
+			{
+				"secondary_item_type": "Scrap",
+				"item_code": scrap_item,
+				"item_name": scrap_item,
+				"qty": 3,
+				"cost_allocation_per": 25,
+				"process_loss_per": 0,
+			},
+		)
+		bom.insert()
+		bom.submit()
+		# cost = raw_material_cost * (cost_allocation_per / 100) = 200 * 0.25 = 50
+		self.assertEqual(flt(bom.secondary_items[0].cost, 6), 50.0)
+
+		wo_order = make_wo_order_test_record(
+			production_item=fg_item, bom_no=bom.name, qty=20, skip_transfer=1
+		)
+
+		secondary_items = wo_order.secondary_items
+		self.assertEqual(len(secondary_items), 1)
+		row = secondary_items[0]
+		self.assertEqual(row.item_code, scrap_item)
+		self.assertEqual(row.secondary_item_type, "Scrap")
+		# data is fetched from the BOM (carries bom_qty)
+		self.assertEqual(flt(row.bom_qty), 8.0)
+		# qty = (bom_secondary_qty / bom_qty) * wo_qty = (3 / 8) * 20 = 7.5
+		self.assertEqual(flt(row.qty, 6), 7.5)
+		# amount = cost * qty = 50 * 7.5 = 375
+		self.assertEqual(flt(row.amount, 6), 375.0)
+
+	def test_secondary_items_reflect_manufacture_entry(self):
+		"""Once a manufacture entry exists, secondary items reflect what was generated, not the BOM."""
+		fg_item = make_item("_Test WO Sec SE FG", {"is_stock_item": 1}).name
+		stock_rm = make_item("_Test WO Sec SE RM", {"is_stock_item": 1, "valuation_rate": 100}).name
+		scrap_item = make_item("_Test WO Sec SE Scrap", {"is_stock_item": 1, "valuation_rate": 0}).name
+
+		bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": fg_item,
+				"currency": "INR",
+				"quantity": 8,
+				"company": "_Test Company",
+			}
+		)
+		bom.append("items", {"item_code": stock_rm, "qty": 2})
+		bom.append(
+			"secondary_items",
+			{
+				"secondary_item_type": "Scrap",
+				"item_code": scrap_item,
+				"item_name": scrap_item,
+				"qty": 3,
+				"cost_allocation_per": 25,
+				"process_loss_per": 0,
+			},
+		)
+		bom.insert()
+		bom.submit()
+
+		wo_order = make_wo_order_test_record(
+			production_item=fg_item,
+			bom_no=bom.name,
+			qty=20,
+			skip_transfer=1,
+			source_warehouse="_Test Warehouse - _TC",
+		)
+
+		# before any manufacture entry, data comes from the BOM
+		self.assertEqual(flt(wo_order.secondary_items[0].qty, 6), 7.5)
+
+		# make raw material available and manufacture a partial quantity
+		test_stock_entry.make_stock_entry(
+			item_code=stock_rm, target="_Test Warehouse - _TC", qty=100, basic_rate=100
+		)
+		manufacture_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 8))
+		manufacture_entry.submit()
+
+		generated_row = next(row for row in manufacture_entry.items if row.secondary_item_type == "Scrap")
+
+		wo_order.reload()
+		secondary_items = wo_order.secondary_items
+		self.assertEqual(len(secondary_items), 1)
+		row = secondary_items[0]
+		# now sourced from the manufacture entry, not the BOM
+		self.assertIsNone(row.get("bom_qty"))
+		self.assertEqual(row.item_code, scrap_item)
+		self.assertEqual(flt(row.qty, 6), flt(generated_row.qty, 6))
+		self.assertEqual(flt(row.amount, 6), flt(generated_row.amount, 6))
+		# generated qty (3.0 for 8 units) differs from the BOM-scaled qty (7.5 for 20 units)
+		self.assertEqual(flt(row.qty, 6), 3.0)
 
 
 def get_reserved_entries(voucher_no, warehouse=None):

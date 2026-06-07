@@ -2,10 +2,10 @@ import frappe
 from frappe import qb
 from frappe.utils import add_days, flt, get_first_day, get_last_day, nowdate
 
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_delivery_note, make_sales_return
+from erpnext.accounts.doctype.sales_invoice.mapper import make_delivery_note, make_sales_return
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.gross_profit.gross_profit import execute
-from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
+from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -354,7 +354,7 @@ class TestGrossProfit(ERPNextTestSuite):
 			do_not_submit=False,
 		)
 
-		from erpnext.selling.doctype.sales_order.sales_order import (
+		from erpnext.selling.doctype.sales_order.mapper import (
 			make_delivery_note,
 			make_sales_invoice,
 		)
@@ -522,7 +522,7 @@ class TestGrossProfit(ERPNextTestSuite):
 			do_not_submit=False,
 		)
 
-		from erpnext.selling.doctype.sales_order.sales_order import (
+		from erpnext.selling.doctype.sales_order.mapper import (
 			make_delivery_note,
 			make_sales_invoice,
 		)
@@ -732,8 +732,8 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertEqual(total[8], 100.0)
 
 	def test_drop_ship(self):
-		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
-		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order, make_sales_invoice
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
+		from erpnext.selling.doctype.sales_order.mapper import make_purchase_order, make_sales_invoice
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 		from erpnext.stock.doctype.item.test_item import make_item
 

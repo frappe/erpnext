@@ -25,6 +25,7 @@ def after_install():
 	setup_repost_defaults()
 	create_print_setting_custom_fields()
 	create_marketing_campaign_custom_fields()
+	create_address_and_contact_custom_fields()
 	create_custom_company_links()
 	add_all_roles_to("Administrator")
 	create_default_success_action()
@@ -37,7 +38,6 @@ def after_install():
 	make_default_operations()
 	update_pegged_currencies()
 	set_default_print_formats()
-	create_letter_head()
 	toggle_hidden_fields()
 	frappe.db.commit()
 
@@ -141,6 +141,37 @@ def create_marketing_campaign_custom_fields():
 					"insert_after": "campaign_description",
 				},
 			]
+		}
+	)
+
+
+def create_address_and_contact_custom_fields():
+	create_custom_fields(
+		{
+			"Address": [
+				{
+					"label": _("Tax Category"),
+					"fieldname": "tax_category",
+					"fieldtype": "Link",
+					"options": "Tax Category",
+					"insert_after": "fax",
+				},
+				{
+					"label": _("Is Your Company Address"),
+					"fieldname": "is_your_company_address",
+					"fieldtype": "Check",
+					"default": "0",
+					"insert_after": "linked_with",
+				},
+			],
+			"Contact": [
+				{
+					"label": _("Is Billing Contact"),
+					"fieldname": "is_billing_contact",
+					"fieldtype": "Check",
+					"insert_after": "is_primary_contact",
+				},
+			],
 		}
 	)
 
@@ -340,30 +371,6 @@ def set_default_print_formats():
 			},
 			validate_fields_for_doctype=False,
 		)
-
-
-def create_letter_head():
-	base_path = frappe.get_app_path("erpnext", "accounts", "letterhead")
-
-	letterheads = {
-		"Company Letterhead": "company_letterhead.html",
-		"Company Letterhead - Grey": "company_letterhead_grey.html",
-	}
-
-	for name, filename in letterheads.items():
-		if not frappe.db.exists("Letter Head", name):
-			content = frappe.read_file(os.path.join(base_path, filename))
-			doc = frappe.get_doc(
-				{
-					"doctype": "Letter Head",
-					"letter_head_name": name,
-					"source": "HTML",
-					"content": content,
-					"is_default": 1 if name == "Company Letterhead - Grey" else 0,
-					"letter_head_for": "Report",
-				}
-			)
-			doc.insert(ignore_permissions=True)
 
 
 def toggle_hidden_fields():

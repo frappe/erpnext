@@ -198,9 +198,8 @@ class SubcontractingOrder(SubcontractingController):
 			item.amount = item.qty * item.rate
 			total_qty += flt(item.qty)
 			total += flt(item.amount)
-		else:
-			self.total_qty = total_qty
-			self.total = total
+		self.total_qty = total_qty
+		self.total = total
 
 	def update_ordered_qty_for_subcontracting(self, sco_item_rows=None):
 		item_wh_list = []

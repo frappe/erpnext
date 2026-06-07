@@ -459,19 +459,22 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				reference_name: frm.doc.name,
 			},
 		});
+
+		if (!schedules?.length) {
+			this.make_payment_request();
+			return;
+		}
+
 		const value = await frappe.db.get_single_value(
 			"Accounts Settings",
 			"fetch_payment_schedule_in_payment_request"
 		);
 
-		if (!value || !schedules.length) {
+		if (!value) {
 			this.make_payment_request();
 			return;
 		}
-		if (!schedules || !schedules.length) {
-			frappe.msgprint(__("No pending payment schedules available."));
-			return;
-		}
+
 		schedules.forEach((schedule) => (schedule.__checked = 1));
 
 		const dialog = new frappe.ui.Dialog({
@@ -833,26 +836,24 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 								},
 								async () => {
 									// for internal customer instead of pricing rule directly apply valuation rate on item
-									const fetch_valuation_rate_for_internal_transactions =
-										await frappe.db.get_single_value(
-											"Accounts Settings",
-											"fetch_valuation_rate_for_internal_transaction"
-										);
-									if (
-										(me.frm.doc.is_internal_customer ||
-											me.frm.doc.is_internal_supplier) &&
-										fetch_valuation_rate_for_internal_transactions
-									) {
-										me.get_incoming_rate(
-											item,
-											me.frm.posting_date,
-											me.frm.posting_time,
-											me.frm.doc.doctype,
-											me.frm.doc.company
-										);
-									} else {
-										me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
+									if (me.frm.doc.is_internal_customer || me.frm.doc.is_internal_supplier) {
+										const fetch_valuation_rate_for_internal_transactions =
+											await frappe.db.get_single_value(
+												"Accounts Settings",
+												"fetch_valuation_rate_for_internal_transaction"
+											);
+										if (fetch_valuation_rate_for_internal_transactions) {
+											me.get_incoming_rate(
+												item,
+												me.frm.posting_date,
+												me.frm.posting_time,
+												me.frm.doc.doctype,
+												me.frm.doc.company
+											);
+											return;
+										}
 									}
+									me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
 								},
 								() => {
 									if (me.frm.doc.is_internal_customer || me.frm.doc.is_internal_supplier) {
@@ -2260,6 +2261,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			for (const [key, value] of Object.entries(child)) {
 				if (!["doctype", "name"].includes(key)) {
 					if (key === "price_list_rate") {
+						const doc = frappe.get_doc(child.doctype, child.name);
+						if (doc) doc.price_list_rate = value; // silent update so rate trigger uses correct value
 						frappe.model.set_value(child.doctype, child.name, "rate", value);
 					}
 
@@ -2921,10 +2924,28 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			method: "erpnext.controllers.stock_controller.check_item_quality_inspection",
 			args: {
 				doctype: this.frm.doc.doctype,
+				docstatus: this.frm.doc.docstatus,
 				items: this.frm.doc.items,
 			},
 			freeze: true,
 			callback: function (r) {
+				if (r.message.length == 0) {
+					let type = inspection_type === "Incoming" ? "Purchase" : "Delivery";
+					let fieldname =
+						inspection_type === "Incoming"
+							? "Inspection Required before Purchase"
+							: "Inspection Required before Delivery";
+
+					frappe.msgprint({
+						title: __("Quality Inspection Not Configured"),
+						message: __(`Enable <b>{0}</b> on the Item master to proceed with {1} inspection.`, [
+							fieldname,
+							type,
+						]),
+					});
+					return;
+				}
+
 				r.message.forEach((item) => {
 					if (me.has_inspection_required(item)) {
 						let dialog_items = dialog.fields_dict.items;

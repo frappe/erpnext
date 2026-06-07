@@ -20,7 +20,7 @@ export const Preferences = () => {
 
     const { updateDoc, error } = useFrappeUpdateDoc<AccountsSettings>()
 
-    const onUpdate = (field: keyof AccountsSettings, value: any) => {
+    const onUpdate = <K extends keyof AccountsSettings>(field: K, value: AccountsSettings[K]) => {
         mutate(updateDoc("Accounts Settings", "Accounts Settings", {
             [field]: value
         }), {

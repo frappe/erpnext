@@ -16,6 +16,7 @@
   "item_name",
   "item_group",
   "stock_uom",
+  "image",
   "column_break0",
   "disabled",
   "is_stock_item",
@@ -31,7 +32,6 @@
   "column_break_kpmi",
   "is_purchase_item",
   "is_customer_provided_item",
-  "customer",
   "section_break_gjns",
   "standard_rate",
   "column_break_ixrh",
@@ -40,7 +40,6 @@
   "over_delivery_receipt_allowance",
   "column_break_wugd",
   "over_billing_allowance",
-  "image",
   "section_break_11",
   "brand",
   "description",
@@ -139,6 +138,9 @@
   "inspection_required_before_delivery",
   "column_break_pxjh",
   "quality_inspection_template",
+  "pricing_tab",
+  "item_prices_column",
+  "prices_html",
   "dashboard_tab"
  ],
  "fields": [
@@ -237,7 +239,7 @@
    "description": "ERPNext will make a stock ledger entry for each transaction of this item. Keep unchecked for non-stock or service items.",
    "fieldname": "is_stock_item",
    "fieldtype": "Check",
-   "in_list_view": 1,
+   "in_list_view": 0,
    "label": "Maintain Stock",
    "oldfieldname": "is_stock_item",
    "oldfieldtype": "Select",
@@ -257,6 +259,7 @@
    "description": "Used to create an opening Stock Entry with the Valuation Rate when the item is saved",
    "fieldname": "opening_stock",
    "fieldtype": "Float",
+   "hidden": 1,
    "label": "Opening Stock"
   },
   {
@@ -280,7 +283,8 @@
    "fieldname": "is_fixed_asset",
    "fieldtype": "Check",
    "label": "Is Fixed Asset",
-   "read_only_depends_on": "eval:doc.is_stock_item"
+   "read_only_depends_on": "eval:doc.is_stock_item",
+   "in_list_view": 1
   },
   {
    "allow_in_quick_entry": 1,
@@ -593,7 +597,7 @@
    "oldfieldtype": "Currency"
   },
   {
-   "description": "Minimum stock level to maintain as a buffer. Used to calculate recommended reorder level: Reorder Level = Safety Stock + (Average Daily Consumption \u00d7 Lead Time).",
+   "description": "Minimum stock level to maintain as a buffer. Used to calculate recommended reorder level: Reorder Level = Safety Stock + (Average Daily Consumption × Lead Time).",
    "fieldname": "safety_stock",
    "fieldtype": "Float",
    "label": "Safety Stock",
@@ -633,13 +637,6 @@
    "show_description_on_click": 1
   },
   {
-   "depends_on": "eval:doc.is_customer_provided_item",
-   "fieldname": "customer",
-   "fieldtype": "Link",
-   "label": "Customer",
-   "options": "Customer"
-  },
-  {
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "supplier_details",
    "fieldtype": "Section Break",
@@ -648,7 +645,7 @@
   },
   {
    "default": "0",
-   "description": "Enable for drop shipping - supplier delivers directly to the customer without passing through your warehouse.",
+   "description": "If checked, this item is treated as drop-shipped by default in Sales Orders, Sales Invoices and Purchase Orders. The flag can be overridden on each transaction line.",
    "fieldname": "delivered_by_supplier",
    "fieldtype": "Check",
    "label": "Delivered by Supplier (Drop Ship)",
@@ -704,7 +701,8 @@
    "fieldname": "is_sales_item",
    "fieldtype": "Check",
    "label": "Allow Sales",
-   "show_description_on_click": 1
+   "show_description_on_click": 1,
+   "in_list_view": 1
   },
   {
    "fieldname": "column_break3",
@@ -1070,6 +1068,23 @@
   {
    "fieldname": "column_break_kpmi",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "prices_html",
+   "fieldtype": "HTML",
+   "label": "Prices HTML",
+   "options": "<div id=\\\"item-prices-container\\\"></div>"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "pricing_tab",
+   "fieldtype": "Tab Break",
+   "label": "Pricing"
+  },
+  {
+   "fieldname": "item_prices_column",
+   "fieldtype": "Column Break",
+   "label": "Item Prices"
   }
  ],
  "icon": "fa fa-tag",
@@ -1077,7 +1092,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2026-04-28 17:31:47.613279",
+ "modified": "2026-05-27 10:18:46.862670",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

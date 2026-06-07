@@ -79,6 +79,7 @@ class TestCompany(ERPNextTestSuite):
 						"Receivable",
 						"Stock Adjustment",
 						"Stock Received But Not Billed",
+						"Stock Delivered But Not Billed",
 						"Bank",
 						"Cash",
 						"Stock",
@@ -118,12 +119,12 @@ class TestCompany(ERPNextTestSuite):
 
 			self.assertTrue(lft)
 			self.assertTrue(rgt)
-			self.assertTrue(lft < rgt)
-			self.assertTrue(parent_lft < parent_rgt)
-			self.assertTrue(lft > parent_lft)
-			self.assertTrue(rgt < parent_rgt)
-			self.assertTrue(lft >= min_lft)
-			self.assertTrue(rgt <= max_rgt)
+			self.assertLess(lft, rgt)
+			self.assertLess(parent_lft, parent_rgt)
+			self.assertGreater(lft, parent_lft)
+			self.assertLess(rgt, parent_rgt)
+			self.assertGreaterEqual(lft, min_lft)
+			self.assertLessEqual(rgt, max_rgt)
 
 	def test_primary_address(self):
 		company = "_Test Company"

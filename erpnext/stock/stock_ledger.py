@@ -17,7 +17,6 @@ from frappe.utils import (
 	format_date,
 	get_datetime,
 	get_link_to_form,
-	getdate,
 	now,
 	nowdate,
 	nowtime,
@@ -434,8 +433,7 @@ def get_reposting_data(file_path) -> dict:
 	except Exception:
 		return frappe._dict()
 
-	if data := json.loads(data.decode("utf-8")):
-		data = data
+	data = json.loads(data.decode("utf-8"))
 
 	return parse_json(data)
 
@@ -875,15 +873,6 @@ class update_entries_after:
 			self.get_dynamic_incoming_outgoing_rate(sle)
 
 		if (
-			sle.voucher_type == "Stock Reconciliation"
-			and (sle.serial_and_batch_bundle)
-			and sle.voucher_detail_no
-			and not self.args.get("sle_id")
-			and sle.is_cancelled == 0
-		):
-			self.reset_actual_qty_for_stock_reco(sle)
-
-		if (
 			sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"]
 			and sle.voucher_detail_no
 			and sle.actual_qty < 0
@@ -904,7 +893,7 @@ class update_entries_after:
 			# Only run in reposting
 			self.get_serialized_values(sle)
 			self.wh_data.qty_after_transaction += flt(sle.actual_qty)
-			if sle.voucher_type == "Stock Reconciliation" and not sle.batch_no:
+			if sle.voucher_type == "Stock Reconciliation" and not sle.batch_no and has_correct_data(sle):
 				self.wh_data.qty_after_transaction = sle.qty_after_transaction
 
 			self.wh_data.stock_value = flt(self.wh_data.qty_after_transaction) * flt(
@@ -1058,31 +1047,6 @@ class update_entries_after:
 			allow_zero_rate = self.check_if_allow_zero_valuation_rate(sle.voucher_type, sle.voucher_detail_no)
 			if not allow_zero_rate:
 				self.wh_data.valuation_rate = self.get_fallback_rate(sle)
-
-	def reset_actual_qty_for_stock_reco(self, sle):
-		doc = frappe.get_doc("Stock Reconciliation", sle.voucher_no)
-		doc.recalculate_current_qty(sle.voucher_detail_no, sle.creation, sle.actual_qty > 0)
-
-		if sle.actual_qty < 0:
-			doc.reload()
-
-			sle.actual_qty = (
-				flt(frappe.db.get_value("Stock Reconciliation Item", sle.voucher_detail_no, "current_qty"))
-				* -1
-			)
-
-			if abs(sle.actual_qty) == 0.0:
-				sle.is_cancelled = 1
-
-				if sle.serial_and_batch_bundle:
-					for row in doc.items:
-						if row.name == sle.voucher_detail_no:
-							row.db_set("current_serial_and_batch_bundle", "")
-
-					sabb_doc = frappe.get_doc("Serial and Batch Bundle", sle.serial_and_batch_bundle)
-					sabb_doc.voucher_detail_no = None
-					sabb_doc.voucher_no = None
-					sabb_doc.cancel()
 
 	def calculate_valuation_for_serial_batch_bundle(self, sle):
 		if not frappe.db.exists("Serial and Batch Bundle", sle.serial_and_batch_bundle):
@@ -1491,8 +1455,7 @@ class update_entries_after:
 				item.amount = flt(item.qty) * flt(item.valuation_rate)
 				item.quantity_difference = item.qty - item.current_qty
 				item.amount_difference = item.amount - item.current_amount
-			else:
-				sr.difference_amount = sum([item.amount_difference for item in sr.items])
+			sr.difference_amount = sum([item.amount_difference for item in sr.items])
 			sr.db_update()
 
 			for item in sr.items:
@@ -2433,7 +2396,9 @@ def get_stock_value_difference(
 	)
 
 	if voucher_detail_no:
-		query = query.where(table.voucher_detail_no != voucher_detail_no)
+		query = query.where(
+			(table.voucher_detail_no != voucher_detail_no) | (table.voucher_detail_no.isnull())
+		)
 
 	elif voucher_no:
 		query = query.where(table.voucher_no != voucher_no)
@@ -2502,3 +2467,28 @@ def get_incoming_rate_for_serial_and_batch(item_code, row, sn_obj, company):
 @frappe.request_cache
 def is_repack_entry(stock_entry_id):
 	return frappe.get_cached_value("Stock Entry", stock_entry_id, "purpose") == "Repack"
+
+
+def has_correct_data(sle):
+	previous_sle = get_previous_sle(
+		{
+			"item_code": sle.item_code,
+			"warehouse": sle.warehouse,
+			"posting_date": sle.posting_date,
+			"posting_time": sle.posting_time,
+			"creation": sle.creation,
+			"sle": sle.name,
+		}
+	)
+
+	if not previous_sle:
+		return True
+
+	previous_qty = previous_sle.get("qty_after_transaction") or 0
+	if previous_qty and not frappe.db.get_value(
+		"Stock Ledger Entry",
+		{"voucher_detail_no": sle.voucher_detail_no, "is_cancelled": 0, "actual_qty": ("<", 0)},
+	):
+		return False
+
+	return True

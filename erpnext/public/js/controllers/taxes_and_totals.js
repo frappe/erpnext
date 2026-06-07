@@ -258,6 +258,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		if (has_inclusive_tax == false) return;
 
 		$.each(this.frm.doc.items || [], function (n, item) {
+			item._unrounded_net_amount = null;
 			var item_tax_map = me._load_item_tax_rate(item.item_tax_rate);
 			var cumulated_tax_fraction = 0.0;
 			var total_inclusive_tax_amount_per_qty = 0;
@@ -284,7 +285,8 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				(total_inclusive_tax_amount_per_qty || cumulated_tax_fraction)
 			) {
 				var amount = flt(item.amount) - total_inclusive_tax_amount_per_qty;
-				item.net_amount = flt(amount / (1 + cumulated_tax_fraction), precision("net_amount", item));
+				item._unrounded_net_amount = amount / (1 + cumulated_tax_fraction);
+				item.net_amount = flt(item._unrounded_net_amount, precision("net_amount", item));
 				item.net_rate = item.qty ? flt(item.net_amount / item.qty, precision("net_rate", item)) : 0;
 
 				me.set_in_company_currency(item, ["net_rate", "net_amount"]);
@@ -567,7 +569,14 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			if (tax.account_head in item_tax_map) {
 				current_net_amount = item.net_amount;
 			}
-			current_tax_amount = (tax_rate / 100.0) * item.net_amount;
+			// Use unrounded net for inclusive taxes to avoid double rounding
+			var net_for_tax =
+				cint(tax.included_in_print_rate) &&
+				!this.discount_amount_applied &&
+				item._unrounded_net_amount !== null
+					? item._unrounded_net_amount
+					: item.net_amount;
+			current_tax_amount = (tax_rate / 100.0) * net_for_tax;
 		} else if (tax.charge_type == "On Previous Row Amount") {
 			current_net_amount = this.frm.doc["taxes"][cint(tax.row_id) - 1].tax_amount_for_current_item;
 			current_tax_amount =

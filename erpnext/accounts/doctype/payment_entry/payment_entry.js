@@ -807,11 +807,14 @@ frappe.ui.form.on("Payment Entry", {
 		frm.set_value("base_paid_amount", flt(frm.doc.paid_amount) * flt(frm.doc.source_exchange_rate));
 		let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
 		if (!frm.doc.received_amount) {
-			if (frm.doc.paid_from_account_currency == frm.doc.paid_to_account_currency) {
-				frm.set_value("received_amount", frm.doc.paid_amount);
-			} else if (company_currency == frm.doc.paid_to_account_currency) {
+			frm.set_value("base_received_amount", frm.doc.base_paid_amount);
+			if (company_currency == frm.doc.paid_to_account_currency) {
 				frm.set_value("received_amount", frm.doc.base_paid_amount);
-				frm.set_value("base_received_amount", frm.doc.base_paid_amount);
+			} else if (frm.doc.target_exchange_rate) {
+				frm.set_value(
+					"received_amount",
+					flt(frm.doc.base_paid_amount) / flt(frm.doc.target_exchange_rate)
+				);
 			}
 		}
 		frm.trigger("reset_received_amount");
@@ -828,15 +831,14 @@ frappe.ui.form.on("Payment Entry", {
 		);
 
 		if (!frm.doc.paid_amount) {
-			if (frm.doc.paid_from_account_currency == frm.doc.paid_to_account_currency) {
-				frm.set_value("paid_amount", frm.doc.received_amount);
-				if (frm.doc.target_exchange_rate) {
-					frm.set_value("source_exchange_rate", frm.doc.target_exchange_rate);
-				}
-				frm.set_value("base_paid_amount", frm.doc.base_received_amount);
-			} else if (company_currency == frm.doc.paid_from_account_currency) {
+			frm.set_value("base_paid_amount", frm.doc.base_received_amount);
+			if (company_currency == frm.doc.paid_from_account_currency) {
 				frm.set_value("paid_amount", frm.doc.base_received_amount);
-				frm.set_value("base_paid_amount", frm.doc.base_received_amount);
+			} else if (frm.doc.source_exchange_rate) {
+				frm.set_value(
+					"paid_amount",
+					flt(frm.doc.base_received_amount) / flt(frm.doc.source_exchange_rate)
+				);
 			}
 		}
 
@@ -1722,6 +1724,35 @@ frappe.ui.form.on("Payment Entry", {
 					});
 				},
 			},
+		});
+	},
+
+	before_cancel: function (frm) {
+		return new Promise((resolve, reject) => {
+			frappe.call({
+				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_linked_bank_transactions",
+				args: { payment_entry: frm.doc.name },
+				callback: function (r) {
+					const linked = r.message || [];
+					if (!linked.length) {
+						resolve();
+						return;
+					}
+					const bt_links = linked
+						.map((name) => frappe.utils.get_form_link("Bank Transaction", name, true))
+						.join(", ");
+					frappe.confirm(
+						__(
+							"This Payment Entry is reconciled with {0}. Cancelling will automatically unreconcile it. Do you want to proceed?",
+							[bt_links]
+						),
+						() => resolve(),
+						() => reject(),
+						__("Yes"),
+						__("No")
+					);
+				},
+			});
 		});
 	},
 });

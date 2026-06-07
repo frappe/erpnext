@@ -7,7 +7,7 @@ from collections import defaultdict
 import frappe
 from frappe.utils import flt
 
-from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_subcontracting_order
+from erpnext.buying.doctype.purchase_order.mapper import get_mapped_subcontracting_order
 from erpnext.controllers.subcontracting_controller import (
 	get_materials_from_supplier,
 	make_rm_stock_entry,
@@ -554,7 +554,12 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		scr.submit()
 
 		# Get RM from Supplier
-		ste = get_materials_from_supplier(sco.name, [d.name for d in sco.supplied_items])
+		frappe.flags.args = frappe._dict(
+			subcontract_order=sco.name,
+			rm_details=[d.name for d in sco.supplied_items],
+			order_doctype=sco.doctype,
+		)
+		ste = get_materials_from_supplier(sco.name)
 		ste.save()
 		ste.submit()
 
@@ -624,7 +629,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		self.assertEqual(ordered_qty + 10, new_ordered_qty)
 
 	def test_requested_qty_for_subcontracting_order(self):
-		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
+		from erpnext.stock.doctype.material_request.mapper import make_purchase_order
 		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
 
 		requested_qty = frappe.db.get_value(
@@ -640,7 +645,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 			qty=10,
 		)
 
-		self.assertTrue(mr.docstatus == 1)
+		self.assertEqual(mr.docstatus, 1)
 
 		new_requested_qty = frappe.db.get_value(
 			"Bin",
@@ -726,7 +731,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		sco.submit()
 
 		sre_list = get_sre_details_for_voucher("Subcontracting Order", sco.name)
-		self.assertTrue(len(sre_list) > 0)
+		self.assertGreater(len(sre_list), 0)
 
 		se_dict = make_rm_stock_entry(sco.name)
 		se = frappe.get_doc(se_dict)
@@ -843,9 +848,8 @@ def create_subcontracting_order(**args):
 			warehouses = []
 			for item in po.items:
 				warehouses.append(item.warehouse)
-			else:
-				for idx, val in enumerate(sco.items):
-					val.warehouse = warehouses[idx]
+			for idx, val in enumerate(sco.items):
+				val.warehouse = warehouses[idx]
 
 	warehouses = set()
 	for item in sco.items:

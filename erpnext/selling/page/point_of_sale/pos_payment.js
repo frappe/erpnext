@@ -519,7 +519,7 @@ erpnext.PointOfSale.Payment = class {
 					return `
 					<div class="payment-mode-wrapper">
 						<div class="mode-of-payment" data-mode="${mode}" data-payment-type="${payment_type}">
-							${p.mode_of_payment}
+							${frappe.utils.escape_html(p.mode_of_payment)}
 							<div class="${mode}-amount pay-amount">${amount}</div>
 							<div class="${mode} mode-of-payment-control"></div>
 						</div>
@@ -603,7 +603,7 @@ erpnext.PointOfSale.Payment = class {
 				<div class="mode-of-payment loyalty-card" data-mode="loyalty-amount" data-payment-type="loyalty-amount">
 					Redeem Loyalty Points
 					<div class="loyalty-amount-amount pay-amount">${amount}</div>
-					<div class="loyalty-amount-name">${loyalty_program}</div>
+					<div class="loyalty-amount-name">${frappe.utils.escape_html(loyalty_program)}</div>
 					<div class="loyalty-amount mode-of-payment-control"></div>
 				</div>
 			</div>`

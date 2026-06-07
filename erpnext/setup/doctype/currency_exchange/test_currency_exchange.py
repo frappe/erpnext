@@ -104,11 +104,11 @@ class TestCurrencyExchange(ERPNextTestSuite):
 		# Exchange rate as on 15th Dec, 2015
 		self.clear_cache()
 		exchange_rate = get_exchange_rate("USD", "INR", "2015-12-15", "for_selling")
-		self.assertFalse(exchange_rate == 60)
+		self.assertNotEqual(exchange_rate, 60)
 		self.assertEqual(flt(exchange_rate, 3), 66.999)
 
 		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-20", "for_buying")
-		self.assertFalse(exchange_rate == 60)
+		self.assertNotEqual(exchange_rate, 60)
 		self.assertEqual(flt(exchange_rate, 3), 65.1)
 
 	def test_exchange_rate_via_exchangerate_host(self, mock_get):
@@ -134,11 +134,11 @@ class TestCurrencyExchange(ERPNextTestSuite):
 		# Exchange rate as on 15th Dec, 2015
 		self.clear_cache()
 		exchange_rate = get_exchange_rate("USD", "INR", "2015-12-15", "for_selling")
-		self.assertFalse(exchange_rate == 60)
+		self.assertNotEqual(exchange_rate, 60)
 		self.assertEqual(flt(exchange_rate, 3), 66.999)
 
 		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-20", "for_buying")
-		self.assertFalse(exchange_rate == 60)
+		self.assertNotEqual(exchange_rate, 60)
 		self.assertEqual(flt(exchange_rate, 3), 65.1)
 
 		settings = frappe.get_single("Currency Exchange Settings")
@@ -175,5 +175,5 @@ class TestCurrencyExchange(ERPNextTestSuite):
 
 		self.clear_cache()
 		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-30", "for_buying")
-		self.assertFalse(exchange_rate == 65)
+		self.assertNotEqual(exchange_rate, 65)
 		self.assertEqual(flt(exchange_rate, 3), 62.9)

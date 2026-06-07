@@ -427,42 +427,80 @@ def get_past_order_list(search_term: str, status: str, limit: int = 20):
 
 @frappe.whitelist()
 def set_customer_info(fieldname: str, customer: str, value: str = ""):
+	customer_doc = frappe.get_doc("Customer", customer)
+	customer_doc.check_permission("write")
+
 	if fieldname == "loyalty_program":
-		frappe.db.set_value("Customer", customer, "loyalty_program", value)
+		customer_doc.loyalty_program = value
+	else:
+		contact = customer_doc.get("customer_primary_contact")
+		if not contact:
+			Contact = DocType("Contact")
+			DynamicLink = DocType("Dynamic Link")
 
-	contact = frappe.get_cached_value("Customer", customer, "customer_primary_contact")
-	if not contact:
-		contact = frappe.db.sql(
-			"""
-			SELECT parent FROM `tabDynamic Link`
-			WHERE
-				parenttype = 'Contact' AND
-				parentfield = 'links' AND
-				link_doctype = 'Customer' AND
-				link_name = %s
-			""",
-			(customer),
-			as_dict=1,
-		)
-		contact = contact[0].get("parent") if contact else None
+			# Inner join with Contact DocType, to priorities records that have is_primary_contact set.
+			query = (
+				frappe.qb.from_(DynamicLink)
+				.join(Contact)
+				.on(DynamicLink.parent == Contact.name)
+				.select(DynamicLink.parent)
+				.where(
+					(DynamicLink.link_name == customer)
+					& (DynamicLink.parentfield == "links")
+					& (DynamicLink.parenttype == "Contact")
+					& (DynamicLink.link_doctype == "Customer")
+				)
+				.orderby(Contact.is_primary_contact, order=Order.desc)
+			)
 
-	if not contact:
-		new_contact = frappe.new_doc("Contact")
-		new_contact.is_primary_contact = 1
-		new_contact.first_name = customer
-		new_contact.set("links", [{"link_doctype": "Customer", "link_name": customer}])
-		new_contact.save()
-		contact = new_contact.name
-		frappe.db.set_value("Customer", customer, "customer_primary_contact", contact)
+			contacts = query.run(pluck=DynamicLink.parent)
 
-	contact_doc = frappe.get_doc("Contact", contact)
-	if fieldname == "email_id":
-		contact_doc.set("email_ids", [{"email_id": value, "is_primary": 1}])
-		frappe.db.set_value("Customer", customer, "email_id", value)
-	elif fieldname == "mobile_no":
-		contact_doc.set("phone_nos", [{"phone": value, "is_primary_mobile_no": 1}])
-		frappe.db.set_value("Customer", customer, "mobile_no", value)
-	contact_doc.save()
+			contact = contacts[0] if contacts else None
+
+		if not contact:
+			new_contact = frappe.new_doc("Contact")
+			new_contact.is_primary_contact = 1
+			new_contact.first_name = customer
+			new_contact.set("links", [{"link_doctype": "Customer", "link_name": customer}])
+			new_contact.save()
+			contact = new_contact.name
+
+		def set_primary_phone_no_email(field, value):
+			# Create new record instead deleting existing email or phone_no and setting the new row as primary.
+			field_mapper = {
+				"email_ids": {"field": "email_id", "primary": "is_primary"},
+				"phone_nos": {"field": "phone", "primary": "is_primary_mobile_no"},
+			}
+
+			value_already_exists = False
+			for d in contact_doc.get(field):
+				if d.get(field_mapper[field].get("field")) == value and not value_already_exists:
+					d.set(field_mapper[field]["primary"], 1)
+					value_already_exists = True
+					continue
+				d.set(field_mapper[field]["primary"], 0)
+
+			if not value_already_exists:
+				contact_doc.append(
+					field, {field_mapper[field]["field"]: value, field_mapper[field]["primary"]: 1}
+				)
+
+		contact_doc = frappe.get_doc("Contact", contact)
+		# setting is_primary_contact = 1 on Contact to refetch the same contact incase it's removed from Customer records.
+		contact_doc.set("is_primary_contact", 1)
+		if fieldname == "email_id":
+			set_primary_phone_no_email("email_ids", value)
+		elif fieldname == "mobile_no":
+			set_primary_phone_no_email("phone_nos", value)
+		# Saving contact_doc to set mobile_no and email.
+		contact_doc.save()
+
+		# Auto-fetches from Contact DocType, no need to set values separately.
+		customer_doc.customer_primary_contact = contact
+
+	# using save method instead db.set_value which bypasses the validation for loyalty program
+	# and auto sets the mobile_no and email field on customer records.
+	customer_doc.save()
 
 
 @frappe.whitelist()

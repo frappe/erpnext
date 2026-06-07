@@ -8,8 +8,8 @@ from frappe.utils import add_days, cint, flt, getdate, nowdate, today
 import erpnext
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_purchase_invoice
-from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice as make_pi_from_po
+from erpnext.buying.doctype.purchase_order.mapper import get_mapped_purchase_invoice
+from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice as make_pi_from_po
 from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 	create_pr_against_po,
 	create_purchase_order,
@@ -20,9 +20,9 @@ from erpnext.controllers.buying_controller import QtyMismatchError
 from erpnext.exceptions import InvalidCurrency
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import create_item
-from erpnext.stock.doctype.material_request.material_request import make_purchase_order
+from erpnext.stock.doctype.material_request.mapper import make_purchase_order
 from erpnext.stock.doctype.material_request.test_material_request import make_material_request
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+from erpnext.stock.doctype.purchase_receipt.mapper import (
 	make_purchase_invoice as create_purchase_invoice_from_receipt,
 )
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
@@ -80,7 +80,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		pi.delete()
 
 	def test_update_received_qty_in_material_request(self):
-		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
 
 		"""
 		Test if the received_qty in Material Request is updated correctly when
@@ -346,7 +346,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
 	)
 	def test_purchase_invoice_with_exchange_rate_difference(self):
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
 			make_purchase_invoice as create_purchase_invoice,
 		)
 
@@ -388,7 +388,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		)
 
 	def test_purchase_invoice_with_exchange_rate_difference_for_non_stock_item(self):
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
 			make_purchase_invoice as create_purchase_invoice,
 		)
 
@@ -2077,7 +2077,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		return_pi = make_return_doc(pi.doctype, pi.name)
 		return_pi.save().submit()
 
-		self.assertTrue(return_pi.docstatus == 1)
+		self.assertEqual(return_pi.docstatus, 1)
 
 	def test_advance_entries_as_asset(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
@@ -2162,7 +2162,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			create_pr_against_po,
 			create_purchase_order,
 		)
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
 			make_purchase_invoice as make_pi_from_pr,
 		)
 
@@ -2748,10 +2748,10 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 	def test_invoice_against_returned_pr(self):
 		from erpnext.stock.doctype.item.test_item import make_item
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
 			make_purchase_invoice as make_purchase_invoice_from_pr,
 		)
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
 			make_purchase_return_against_rejected_warehouse,
 		)
 
@@ -2892,7 +2892,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(invoice.grand_total, 300)
 
 	def test_pr_pi_over_billing(self):
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
 			make_purchase_invoice as make_purchase_invoice_from_pr,
 		)
 
@@ -2940,7 +2940,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(pi.discount_amount, discount_amount)
 
 	def test_returned_item_purchase_receipt(self):
-		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
+		from erpnext.accounts.doctype.purchase_invoice.mapper import (
 			make_purchase_receipt as make_purchase_receipt_from_pi,
 		)
 
@@ -2961,6 +2961,52 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 		pr = make_purchase_receipt_from_pi(pi.name)
 		self.assertFalse(pr.items)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"enable_common_party_accounting": True})
+	def test_purchase_invoice_return_common_party_je_has_no_negative_amounts(self):
+		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
+			make_customer,
+		)
+		from erpnext.accounts.doctype.party_link.party_link import create_party_link
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		customer = make_customer(customer="_Test Common Party Return PI")
+		supplier = create_supplier(supplier_name="_Test Common Party Return PI").name
+		# Supplier must be secondary so get_common_party_link finds it via the PI's party_type
+		party_link = create_party_link("Customer", customer, supplier)
+
+		pi = make_purchase_invoice(supplier=supplier, parent_cost_center="_Test Cost Center - _TC")
+
+		return_pi = make_return_doc(pi.doctype, pi.name)
+		return_pi.submit()
+
+		# JE for the return should credit the supplier (secondary/reconciliation) account
+		# and debit the customer (primary) account — all positive amounts
+		jv_accounts = frappe.get_all(
+			"Journal Entry Account",
+			filters={"reference_type": return_pi.doctype, "reference_name": return_pi.name, "docstatus": 1},
+			fields=["debit_in_account_currency", "credit_in_account_currency", "account"],
+		)
+
+		self.assertTrue(jv_accounts, "Expected a Journal Entry for the return invoice")
+		for row in jv_accounts:
+			self.assertGreaterEqual(
+				row.debit_in_account_currency,
+				0,
+				f"Negative debit on account {row.account}",
+			)
+			self.assertGreaterEqual(
+				row.credit_in_account_currency,
+				0,
+				f"Negative credit on account {row.account}",
+			)
+
+		# Supplier (secondary) account must be credited, not debited
+		supplier_row = next(r for r in jv_accounts if r.account == pi.credit_to)
+		self.assertGreater(supplier_row.credit_in_account_currency, 0)
+		self.assertEqual(supplier_row.debit_in_account_currency, 0)
+
+		party_link.delete()
 
 
 def set_advance_flag(company, flag, default_account):

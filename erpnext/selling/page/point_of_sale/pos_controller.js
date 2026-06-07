@@ -217,7 +217,7 @@ erpnext.PointOfSale.Controller = class {
 	set_opening_entry_status() {
 		this.page.set_title_sub(
 			`<span class="indicator orange">
-				<a class="text-muted" href="#Form/POS%20Opening%20Entry/${this.pos_opening}">
+				<a class="text-muted" href="#Form/POS%20Opening%20Entry/${encodeURIComponent(this.pos_opening)}">
 					Opened at ${frappe.datetime.str_to_user(this.pos_opening_time)}
 				</a>
 			</span>`
@@ -617,7 +617,7 @@ erpnext.PointOfSale.Controller = class {
 			method:
 				doc.doctype == "POS Invoice"
 					? "erpnext.accounts.doctype.pos_invoice.pos_invoice.make_sales_return"
-					: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_sales_return",
+					: "erpnext.accounts.doctype.sales_invoice.mapper.make_sales_return",
 			args: {
 				source_name: doc.name,
 				target_doc: this.frm.doc,

@@ -54,7 +54,7 @@ frappe.ui.form.on("Delivery Trip", {
 				__("Delivery Note"),
 				() => {
 					erpnext.utils.map_current_doc({
-						method: "erpnext.stock.doctype.delivery_note.delivery_note.make_delivery_trip",
+						method: "erpnext.stock.doctype.delivery_note.mapper.make_delivery_trip",
 						source_doctype: "Delivery Note",
 						target: frm,
 						date_field: "posting_date",

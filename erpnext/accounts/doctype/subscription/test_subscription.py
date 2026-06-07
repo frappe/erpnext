@@ -16,7 +16,7 @@ from frappe.utils.data import (
 )
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-from erpnext.accounts.doctype.subscription.subscription import get_prorata_factor
+from erpnext.accounts.doctype.subscription.subscription import Subscription, get_prorata_factor, process_all
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -636,6 +636,62 @@ class TestSubscription(ERPNextTestSuite):
 		self.assertEqual(subscription.status, "Cancelled")
 
 		self.assertRaises(frappe.ValidationError, subscription.process, posting_date=add_days(start_date, 7))
+
+	def test_invoice_generated_when_scheduler_runs_one_day_late(self):
+		subscription = create_subscription(start_date="2018-01-01")
+		self.assertEqual(subscription.current_invoice_end, "2018-01-31")
+
+		subscription.process(posting_date="2018-02-01")
+		self.assertEqual(len(subscription.invoices), 1)
+
+	def test_deferred_revenue_applied_for_customer_subscription(self):
+		item_code = "_Test Non Stock Item"
+		frappe.db.set_value("Item", item_code, "enable_deferred_revenue", 1)
+		try:
+			subscription = create_subscription(start_date="2018-01-01")
+			items = subscription.get_items_from_plans(subscription.plans)
+			self.assertEqual(items[0].get("enable_deferred_revenue"), 1)
+			self.assertEqual(getdate(items[0]["service_start_date"]), getdate("2018-01-01"))
+			self.assertEqual(getdate(items[0]["service_end_date"]), getdate("2018-01-31"))
+		finally:
+			frappe.db.set_value("Item", item_code, "enable_deferred_revenue", 0)
+
+	def test_validate_end_date_with_no_plans_does_not_crash(self):
+		sub = frappe.new_doc("Subscription")
+		sub.party_type = "Customer"
+		sub.party = "_Test Customer"
+		sub.company = "_Test Company"
+		sub.start_date = "2018-01-01"
+		sub.end_date = "2018-03-01"
+		try:
+			sub.validate_end_date()
+		except TypeError as e:
+			self.fail(f"validate_end_date crashed with no plans: {e}")
+
+	def test_process_all_logs_error_when_first_subscription_fails(self):
+		sub1 = create_subscription(start_date="2018-01-01")
+		sub2 = create_subscription(start_date="2018-01-02")
+
+		processed = []
+		original_process = Subscription.process
+		original_rollback = frappe.db.rollback
+
+		def patched(self, posting_date=None):
+			processed.append(self.name)
+			if self.name == sub1.name:
+				raise frappe.ValidationError("forced failure")
+
+		Subscription.process = patched
+		# process_all calls frappe.db.rollback() on error which would otherwise wipe
+		# the test transaction; stub it so we can observe the iteration in isolation.
+		frappe.db.rollback = lambda *a, **kw: None
+		try:
+			process_all([sub1.name, sub2.name])
+		finally:
+			Subscription.process = original_process
+			frappe.db.rollback = original_rollback
+
+		self.assertEqual(processed, [sub1.name, sub2.name])
 
 	def test_subscription_auto_completion(self):
 		create_plan(

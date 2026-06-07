@@ -15,13 +15,13 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import g
 from erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation import (
 	is_any_doc_running,
 )
+from erpnext.accounts.services.advances import get_advance_payment_entries_for_regional
 from erpnext.accounts.utils import (
 	QueryPaymentLedger,
 	create_gain_loss_journal,
 	get_outstanding_invoices,
 	reconcile_against_document,
 )
-from erpnext.controllers.accounts_controller import get_advance_payment_entries_for_regional
 
 
 class PaymentReconciliation(Document):
