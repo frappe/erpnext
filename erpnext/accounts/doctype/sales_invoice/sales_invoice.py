@@ -27,6 +27,7 @@ from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger 
 	validate_docs_for_voucher_types,
 )
 from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import SalesTaxWithholding
+<<<<<<< HEAD
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 from erpnext.accounts.party import get_due_date, get_party_account, get_party_details
 from erpnext.accounts.utils import (
@@ -42,6 +43,10 @@ from erpnext.assets.doctype.asset.depreciation import (
 	reverse_depreciation_entry_made_on_disposal,
 )
 from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
+=======
+from erpnext.accounts.party import get_due_date, get_party_account
+from erpnext.accounts.utils import refresh_subscription_status, update_voucher_outstanding
+>>>>>>> bb36e956ac (fix(subscription): bill on creation and keep status in sync with invoices (#55615))
 from erpnext.controllers.accounts_controller import validate_account_head
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
@@ -808,6 +813,17 @@ class SalesInvoice(SellingController):
 				"set_default_payment": pos.get("set_grand_total_to_default_mop", 1),
 			}
 
+<<<<<<< HEAD
+=======
+	# Called by POS Invoice
+	def set_pos_fields(self, for_validate=False):
+		return POSService(self).set_pos_fields(for_validate)
+
+	def refresh_subscription_status(self):
+		if self.get("subscription"):
+			refresh_subscription_status(self.subscription)
+
+>>>>>>> bb36e956ac (fix(subscription): bill on creation and keep status in sync with invoices (#55615))
 	@frappe.whitelist()
 	def reset_mode_of_payments(self):
 		if self.pos_profile:
