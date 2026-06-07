@@ -386,14 +386,9 @@ doc_events = {
 	"Sales Invoice": {
 		"on_submit": [
 			"erpnext.regional.italy.utils.sales_invoice_on_submit",
-			"erpnext.accounts.utils.update_subscription_on_invoice_update",
-		],
-		"on_update_after_submit": [
-			"erpnext.accounts.utils.update_subscription_on_invoice_update",
 		],
 		"on_cancel": [
 			"erpnext.regional.italy.utils.sales_invoice_on_cancel",
-			"erpnext.accounts.utils.update_subscription_on_invoice_update",
 		],
 		"on_trash": "erpnext.regional.check_deletion_permission",
 	},
@@ -402,19 +397,8 @@ doc_events = {
 			"erpnext.regional.united_arab_emirates.utils.update_grand_total_for_rcm",
 			"erpnext.regional.united_arab_emirates.utils.validate_returns",
 		],
-		"on_submit": [
-			"erpnext.accounts.utils.update_subscription_on_invoice_update",
-		],
-		"on_update_after_submit": [
-			"erpnext.accounts.utils.update_subscription_on_invoice_update",
-		],
-		"on_cancel": [
-			"erpnext.accounts.utils.update_subscription_on_invoice_update",
-		],
 	},
 	"Payment Entry": {
-		"on_submit": "erpnext.accounts.utils.update_subscriptions_on_payment",
-		"on_cancel": "erpnext.accounts.utils.update_subscriptions_on_payment",
 		"on_trash": "erpnext.regional.check_deletion_permission",
 	},
 	"Address": {

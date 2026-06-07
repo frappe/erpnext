@@ -754,7 +754,7 @@ class TestSubscription(ERPNextTestSuite):
 		# Test that payment entry → invoice → subscription status update chain works
 		subscription = create_subscription(
 			start_date=nowdate(),
-			generate_invoice_at="Beginning of the current subscription period",
+			generate_invoice_at="Prepaid (bill at period start)",
 			submit_invoice=1,
 		)
 		subscription.process(posting_date=nowdate())
@@ -773,7 +773,6 @@ class TestSubscription(ERPNextTestSuite):
 		# Subscription status should now be Active (via on_update_after_submit hook)
 		subscription.reload()
 		self.assertEqual(subscription.status, "Active")
-
 
 	def test_first_invoice_generated_on_create_for_prepaid(self):
 		subscription = create_subscription(
@@ -954,7 +953,7 @@ class TestSubscription(ERPNextTestSuite):
 
 
 def make_full_credit_note(invoice_name):
-	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
+	from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
 
 	credit_note = make_sales_return(invoice_name)
 	credit_note.insert()

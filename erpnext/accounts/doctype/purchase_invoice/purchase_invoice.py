@@ -653,6 +653,9 @@ class PurchaseInvoice(BuyingController):
 
 		self.process_common_party_accounting()
 
+		if self.is_return:
+			self.refresh_subscription_status()
+
 	def on_update_after_submit(self):
 		fields_to_check = [
 			"cash_bank_account",
@@ -771,6 +774,8 @@ class PurchaseInvoice(BuyingController):
 			"Serial and Batch Bundle",
 			"Tax Withholding Entry",
 		)
+
+		self.refresh_subscription_status()
 
 	def update_project(self):
 		projects = frappe._dict()

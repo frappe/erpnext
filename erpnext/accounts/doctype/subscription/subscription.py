@@ -150,10 +150,22 @@ class Subscription(Document):
 		return period_end
 
 	def update_subscription_period(self, date: DateTimeLikeObject | None = None):
+		"""
+		Subscription period is the period to be billed. This method updates the
+		beginning of the billing period and end of the billing period.
+		The beginning of the billing period is represented in the doctype as
+		`next_billing_period_start` and the end of the billing period is represented
+		as `next_billing_period_end`.
+		"""
 		self.next_billing_period_start = self.get_current_invoice_start(date)
 		self.next_billing_period_end = self.get_current_invoice_end(self.next_billing_period_start)
 
 	def get_current_invoice_start(self, date: DateTimeLikeObject | None = None) -> DateTimeLikeObject:
+		"""
+		This returns the date of the beginning of the current billing period.
+		If the `date` parameter is not given , it will be automatically set as today's
+		date.
+		"""
 		_current_invoice_start = None
 
 		if self.trial_period_end and getdate(self.trial_period_end) > getdate(self.start_date):
@@ -168,6 +180,14 @@ class Subscription(Document):
 		return _current_invoice_start
 
 	def get_current_invoice_end(self, date: DateTimeLikeObject | None = None) -> DateTimeLikeObject:
+		"""
+		This returns the date of the end of the current billing period.
+		If the subscription is in trial period, it will be set as the end of the
+		trial period.
+		If is not in a trial period, it will be `x` days from the beginning of the
+		current billing period where `x` is the billing interval from the
+		`Subscription Plan` in the `Subscription`.
+		"""
 		_current_invoice_end = None
 
 		if self.is_trialling() and getdate(date) < getdate(self.trial_period_end):
@@ -210,6 +230,10 @@ class Subscription(Document):
 			frappe.throw(_("You can only have Plans with the same billing cycle in a Subscription"))
 
 	def get_billing_cycle_and_interval(self) -> list[dict[str, str]]:
+		"""
+		Returns a dict representing the billing interval and cycle for this `Subscription`.
+		You shouldn't need to call this directly. Use `get_billing_cycle` instead.
+		"""
 		plan_names = [plan.plan for plan in self.plans]
 
 		subscription_plan = frappe.qb.DocType("Subscription Plan")
@@ -223,6 +247,10 @@ class Subscription(Document):
 		return billing_info
 
 	def get_billing_cycle_data(self) -> dict[str, int]:
+		"""
+		Returns dict contain the billing cycle data.
+		You shouldn't need to call this directly. Use `get_billing_cycle` instead.
+		"""
 		billing_info = self.get_billing_cycle_and_interval()
 		if not billing_info:
 			return None
@@ -246,6 +274,9 @@ class Subscription(Document):
 		return data
 
 	def set_subscription_status(self, posting_date: DateTimeLikeObject | None = None) -> None:
+		"""
+		Sets the status of the `Subscription`
+		"""
 		self._set_current_invoice_dates()
 		if self.is_trialling():
 			self.status = STATUS_TRIALING
@@ -277,12 +308,18 @@ class Subscription(Document):
 		self.current_invoice_end = invoice[0].to_date if invoice else None
 
 	def is_trialling(self) -> bool:
+		"""
+		Returns `True` if the `Subscription` is in trial period.
+		"""
 		return not self.period_has_passed(self.trial_period_end)
 
 	@staticmethod
 	def period_has_passed(
 		end_date: DateTimeLikeObject, posting_date: DateTimeLikeObject | None = None
 	) -> bool:
+		"""
+		Returns true if the given `end_date` has passed
+		"""
 		if not end_date:
 			return True
 
@@ -298,6 +335,9 @@ class Subscription(Document):
 		return status
 
 	def is_past_grace_period(self, posting_date: DateTimeLikeObject | None = None) -> bool:
+		"""
+		Returns `True` if the grace period for the `Subscription` has passed
+		"""
 		if not self.current_invoice_is_past_due():
 			return False
 
@@ -305,6 +345,9 @@ class Subscription(Document):
 		return getdate(posting_date) >= getdate(add_days(self.current_invoice.due_date, grace_period))
 
 	def current_invoice_is_past_due(self, posting_date: DateTimeLikeObject | None = None) -> bool:
+		"""
+		Returns `True` if the current generated invoice is overdue
+		"""
 		if not self.current_invoice or self.is_paid(self.current_invoice):
 			return False
 
@@ -361,6 +404,9 @@ class Subscription(Document):
 				)
 
 	def validate_trial_period(self) -> None:
+		"""
+		Runs sanity checks on trial period dates for the `Subscription`
+		"""
 		if self.trial_period_start and self.trial_period_end:
 			if getdate(self.trial_period_end) < getdate(self.trial_period_start):
 				frappe.throw(_("Trial Period End Date Cannot be before Trial Period Start Date"))
@@ -413,6 +459,9 @@ class Subscription(Document):
 		to_date: DateTimeLikeObject | None = None,
 		posting_date: DateTimeLikeObject | None = None,
 	) -> Document:
+		"""
+		Creates a `Invoice`, submits it and returns it
+		"""
 		company = self._resolve_company()
 		invoice = self._init_invoice_doc(company, posting_date)
 		self._set_invoice_party(invoice)
@@ -672,9 +721,15 @@ class Subscription(Document):
 
 	@property
 	def current_invoice(self) -> Document | None:
+		"""
+		Adds property for accessing the current_invoice
+		"""
 		return self.get_current_invoice()
 
 	def get_current_invoice(self) -> Document | None:
+		"""
+		Returns the most recent generated invoice.
+		"""
 		invoice = frappe.get_all(
 			self.invoice_document_type,
 			{"subscription": self.name, "docstatus": ("<", 2), "is_return": 0},
@@ -696,6 +751,9 @@ class Subscription(Document):
 
 	@staticmethod
 	def is_paid(invoice: Document) -> bool:
+		"""
+		Return `True` if the given invoice is paid
+		"""
 		return invoice.status == INVOICE_PAID
 
 	def has_outstanding_invoice(self) -> int:

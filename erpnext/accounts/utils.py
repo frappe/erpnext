@@ -2844,31 +2844,8 @@ def _check_packed_qty_warn(doc):
 
 
 def update_subscription_on_invoice_update(doc: "Document", method: str | None = None) -> None:
-	if not doc.get("subscription"):
-		return
-
-	# Generation submits the invoice itself and sets status in the same flow; only
-	# react to a fresh submit when it is a credit note (return) so refunds register.
-	if method == "on_submit" and not doc.get("is_return"):
-		return
-
-	refresh_subscription_status(doc.subscription)
-
-
-def update_subscriptions_on_payment(doc: "Document", method: str | None = None) -> None:
-	subscriptions = set()
-	for reference in doc.get("references", []):
-		if reference.reference_doctype not in ("Sales Invoice", "Purchase Invoice"):
-			continue
-		subscription = frappe.db.get_value(
-			reference.reference_doctype, reference.reference_name, "subscription"
-		)
-		if subscription:
-			subscriptions.add(subscription)
-
-	for subscription in subscriptions:
-		refresh_subscription_status(subscription)
-
+	if doc.get("subscription"):
+		refresh_subscription_status(doc.subscription)
 
 
 def refresh_subscription_status(name: str) -> None:
