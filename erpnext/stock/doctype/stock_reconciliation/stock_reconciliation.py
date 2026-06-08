@@ -17,12 +17,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	get_available_serial_nos,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-<<<<<<< HEAD
-from erpnext.stock.utils import get_combine_datetime, get_incoming_rate, get_stock_balance
-=======
-from erpnext.stock.doctype.stock_reconciliation_item.stock_reconciliation_item import StockReconciliationItem
 from erpnext.stock.utils import get_incoming_rate, get_stock_balance
->>>>>>> e36426e235 (fix: do not allow to make changes in SABB after submit)
 
 
 class OpeningEntryAccountError(frappe.ValidationError):
