@@ -308,6 +308,7 @@ def pos_profile_query(doctype, txt, searchfield, start, page_len, filters):
 		)
 
 	return pos_profile
+<<<<<<< HEAD
 
 
 @frappe.whitelist()
@@ -337,3 +338,5 @@ def set_default_profile(pos_profile, company):
 			(modified, user, user, company, pos_profile),
 			auto_commit=1,
 		)
+=======
+>>>>>>> ba936eefab (fix: Add authorization checks on internal functions (#55709))
