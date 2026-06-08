@@ -8,7 +8,7 @@ from collections import defaultdict
 import frappe
 from frappe import _, bold, qb, throw
 from frappe.contacts.doctype.address.address import get_address_display
-from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied
+from frappe.model.workflow import get_workflow_name
 from frappe.query_builder import Criterion, DocType
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Abs, Sum
@@ -3853,7 +3853,9 @@ def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
 
 
 @frappe.whitelist()
-def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, child_docname="items"):
+def update_child_qty_rate(
+	parent_doctype: str, trans_items: str, parent_doctype_name: str, child_docname: str = "items"
+):
 	from erpnext.buying.doctype.supplier_quotation.supplier_quotation import get_purchased_items
 	from erpnext.selling.doctype.quotation.quotation import get_ordered_items
 
@@ -3879,14 +3881,12 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		current_state = doc.get(workflow_doc.workflow_state_field)
 		roles = frappe.get_roles()
 
-		transitions = []
-		for transition in workflow_doc.transitions:
-			if transition.next_state == current_state and transition.allowed in roles:
-				if not is_transition_condition_satisfied(transition, doc):
-					continue
-				transitions.append(transition.as_dict())
+		allowed = any(
+			state.state == current_state and (not state.allow_edit or state.allow_edit in roles)
+			for state in workflow_doc.states
+		)
 
-		if not transitions:
+		if not allowed:
 			frappe.throw(
 				_("You are not allowed to update as per the conditions set in {} Workflow.").format(
 					get_link_to_form("Workflow", workflow)
