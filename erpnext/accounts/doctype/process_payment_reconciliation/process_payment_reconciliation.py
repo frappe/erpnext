@@ -131,6 +131,7 @@ def is_job_running(job_name: str) -> bool:
 @frappe.whitelist()
 def pause_job_for_doc(docname: str | None = None):
 	if docname:
+		frappe.has_permission("Process Payment Reconciliation", "write", doc=docname, throw=True)
 		frappe.db.set_value("Process Payment Reconciliation", docname, "status", "Paused")
 		log = frappe.db.get_value("Process Payment Reconciliation Log", filters={"process_pr": docname})
 		if log:
@@ -144,6 +145,8 @@ def trigger_job_for_doc(docname: str | None = None):
 	"""
 	if not docname:
 		return
+
+	frappe.has_permission("Process Payment Reconciliation", "write", doc=docname, throw=True)
 
 	if not frappe.get_single_value("Accounts Settings", "auto_reconcile_payments"):
 		frappe.throw(
