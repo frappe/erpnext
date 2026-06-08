@@ -31,6 +31,7 @@ from erpnext.accounts.general_ledger import get_round_off_account_and_cost_cente
 from erpnext.accounts.party import get_due_date, get_party_account, get_party_details
 from erpnext.accounts.utils import (
 	get_account_currency,
+	refresh_subscription_status,
 	update_voucher_outstanding,
 )
 from erpnext.assets.doctype.asset.asset import split_asset
@@ -807,6 +808,10 @@ class SalesInvoice(SellingController):
 				"allow_print_before_pay": pos.get("allow_print_before_pay"),
 				"set_default_payment": pos.get("set_grand_total_to_default_mop", 1),
 			}
+
+	def refresh_subscription_status(self):
+		if self.get("subscription"):
+			refresh_subscription_status(self.subscription)
 
 	@frappe.whitelist()
 	def reset_mode_of_payments(self):

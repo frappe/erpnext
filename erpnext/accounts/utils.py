@@ -43,6 +43,8 @@ from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.utils import get_combine_datetime, get_stock_value_on
 
 if TYPE_CHECKING:
+	from frappe.model.document import Document
+
 	from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import RepostItemValuation
 
 
@@ -2710,3 +2712,14 @@ def build_qb_match_conditions(doctype, user=None) -> list:
 
 def is_immutable_ledger_enabled():
 	return frappe.get_single_value("Accounts Settings", "enable_immutable_ledger")
+
+
+def update_subscription_on_invoice_update(doc: "Document", method: str | None = None) -> None:
+	if doc.get("subscription"):
+		refresh_subscription_status(doc.subscription)
+
+
+def refresh_subscription_status(name: str) -> None:
+	subscription = frappe.get_doc("Subscription", name)
+	subscription.set_subscription_status()
+	subscription.save(ignore_permissions=True)

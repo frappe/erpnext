@@ -32,7 +32,12 @@ from erpnext.accounts.general_ledger import (
 	merge_similar_entries,
 )
 from erpnext.accounts.party import get_due_date, get_party_account
-from erpnext.accounts.utils import get_account_currency, get_fiscal_year, update_voucher_outstanding
+from erpnext.accounts.utils import (
+	get_account_currency,
+	get_fiscal_year,
+	refresh_subscription_status,
+	update_voucher_outstanding,
+)
 from erpnext.assets.doctype.asset.asset import is_cwip_accounting_enabled
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.controllers.accounts_controller import merge_taxes, validate_account_head
@@ -822,6 +827,10 @@ class PurchaseInvoice(BuyingController):
 		if self.needs_repost:
 			self.validate_for_repost()
 			self.repost_accounting_entries()
+
+	def refresh_subscription_status(self):
+		if self.get("subscription"):
+			refresh_subscription_status(self.subscription)
 
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		update_outstanding = "No" if (cint(self.is_paid) or self.write_off_account) else "Yes"
