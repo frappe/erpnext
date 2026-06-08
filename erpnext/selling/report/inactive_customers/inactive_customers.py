@@ -26,63 +26,63 @@ def execute(filters=None):
 	customers = get_sales_details(doctype)
 
 	data = []
-	for C in customers:
-		if cint(C[8]) >= cint(days_since_last_order):
-			C.insert(7, get_last_sales_amt(C[0], doctype))
-			data.append(C)
+	for row in customers:
+		if cint(row[8]) >= cint(days_since_last_order):
+			row.insert(7, get_last_sales_amt(row[0], doctype))
+			data.append(row)
 	return columns, data
 
 
 def get_sales_details(doctype):
-	C = frappe.qb.DocType("Customer")
-	DT = frappe.qb.DocType(doctype)
+	customer = frappe.qb.DocType("Customer")
+	sales = frappe.qb.DocType(doctype)
 
-	DateDiff = CustomFunction("DATEDIFF", ["d1", "d2"])
-	CurDate = CustomFunction("CURRENT_DATE", [])
+	date_diff = CustomFunction("DATEDIFF", ["d1", "d2"])
+	current_date = CustomFunction("CURRENT_DATE", [])
 
 	if doctype == "Sales Order":
 		total_considered = Sum(
 			Case()
-			.when(DT.status == "Stopped", DT.base_net_total * DT.per_delivered / 100)
-			.else_(DT.base_net_total)
+			.when(sales.status == "Stopped", sales.base_net_total * sales.per_delivered / 100)
+			.else_(sales.base_net_total)
 		)
-		date_col = DT.transaction_date
+		date_col = sales.transaction_date
 	else:
-		total_considered = Sum(DT.base_net_total)
-		date_col = DT.posting_date
+		total_considered = Sum(sales.base_net_total)
+		date_col = sales.posting_date
 
 	last_order_date = Max(date_col)
-	days_since_last_order = DateDiff(CurDate(), last_order_date)
+	days_since_last_order = date_diff(current_date(), last_order_date)
 
 	return (
-		frappe.qb.from_(C)
-		.inner_join(DT)
-		.on(C.name == DT.customer)
+		frappe.qb.from_(customer)
+		.inner_join(sales)
+		.on(customer.name == sales.customer)
 		.select(
-			C.name,
-			C.customer_name,
-			C.territory,
-			C.customer_group,
-			Count(DT.name).distinct().as_("num_of_order"),
-			Sum(DT.base_net_total).as_("total_order_value"),
+			customer.name,
+			customer.customer_name,
+			customer.territory,
+			customer.customer_group,
+			Count(sales.name).distinct().as_("num_of_order"),
+			Sum(sales.base_net_total).as_("total_order_value"),
 			total_considered.as_("total_order_considered"),
 			last_order_date.as_("last_order_date"),
 			days_since_last_order.as_("days_since_last_order"),
 		)
-		.where(DT.docstatus == 1)
-		.groupby(C.name)
+		.where(sales.docstatus == 1)
+		.groupby(customer.name)
 		.orderby(days_since_last_order, order=frappe.qb.desc)
 	).run(as_list=True)
 
 
 def get_last_sales_amt(customer, doctype):
-	DT = frappe.qb.DocType(doctype)
-	date_col = DT.transaction_date if doctype == "Sales Order" else DT.posting_date
+	sales = frappe.qb.DocType(doctype)
+	date_col = sales.transaction_date if doctype == "Sales Order" else sales.posting_date
 
 	res = (
-		frappe.qb.from_(DT)
-		.select(DT.base_net_total)
-		.where((DT.customer == customer) & (DT.docstatus == 1))
+		frappe.qb.from_(sales)
+		.select(sales.base_net_total)
+		.where((sales.customer == customer) & (sales.docstatus == 1))
 		.orderby(date_col, order=frappe.qb.desc)
 		.limit(1)
 	).run()
