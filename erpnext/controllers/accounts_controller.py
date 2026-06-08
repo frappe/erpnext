@@ -7,12 +7,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold, qb, throw
-<<<<<<< HEAD
-from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied
-=======
-from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.workflow import get_workflow_name
->>>>>>> 76b9b6a34e (fix: update items respects workflow "Only Allow Edit For" role (#55667))
 from frappe.query_builder import Criterion, DocType
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Abs, Sum
