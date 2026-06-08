@@ -321,12 +321,9 @@ def deactivate_sales_person(status=None, employee=None):
 @frappe.whitelist()
 def create_user(employee, user=None, email=None):
 	emp = frappe.get_doc("Employee", employee)
-<<<<<<< HEAD
-=======
 	emp.check_permission("write")
 	if emp.user_id:
 		frappe.throw(_("Employee {0} already has a linked user").format(emp.name))
->>>>>>> 2ae6451f10 (fix: Add authorization checks on internal functions (backport #55709) (#55726))
 
 	employee_name = emp.employee_name.split(" ")
 	middle_name = last_name = ""

@@ -143,13 +143,9 @@ def trigger_job_for_doc(docname: str | None = None):
 	if not docname:
 		return
 
-<<<<<<< HEAD
-	if not frappe.db.get_single_value("Accounts Settings", "auto_reconcile_payments"):
-=======
 	frappe.has_permission("Process Payment Reconciliation", "write", doc=docname, throw=True)
 
-	if not frappe.get_single_value("Accounts Settings", "auto_reconcile_payments"):
->>>>>>> 2ae6451f10 (fix: Add authorization checks on internal functions (backport #55709) (#55726))
+	if not frappe.db.get_single_value("Accounts Settings", "auto_reconcile_payments"):
 		frappe.throw(
 			_("Auto Reconciliation of Payments has been disabled. Enable it through {0}").format(
 				get_link_to_form("Accounts Settings", "Accounts Settings")
