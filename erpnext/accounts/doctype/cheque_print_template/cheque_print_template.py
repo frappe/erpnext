@@ -47,13 +47,9 @@ class ChequePrintTemplate(Document):
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
 def create_or_update_cheque_print_format(template_name):
-=======
-def create_or_update_cheque_print_format(template_name: str):
 	frappe.only_for("System Manager")
-
->>>>>>> faf92b1368 (fix(cheque_print_template): print format creation from cheque print template requires system manager (#55708))
+	
 	if not frappe.db.exists("Print Format", template_name):
 		cheque_print = frappe.new_doc("Print Format")
 		cheque_print.update(
