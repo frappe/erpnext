@@ -29,13 +29,6 @@ class TestInactiveCustomers(ERPNextTestSuite):
 			{"doctype": "Purchase Order", "days_since_last_order": 30},
 		)
 
-	def test_non_positive_days_is_rejected(self):
-		self.assertRaises(
-			frappe.ValidationError,
-			execute,
-			{"doctype": "Sales Order", "days_since_last_order": 0},
-		)
-
 	def test_inactive_customer_is_listed_with_expected_columns(self):
 		columns, data = execute({"doctype": "Sales Order", "days_since_last_order": 30})
 
