@@ -775,7 +775,7 @@ def make_purchase_order(
 						["parent", "sales_order"],
 						["uom", "uom"],
 						["conversion_factor", "conversion_factor"],
-						["parent_item", "product_bundle"],
+						["product_bundle", "product_bundle"],
 						["rate", "rate"],
 					],
 					"field_no_map": [
@@ -804,17 +804,20 @@ def make_purchase_order(
 
 
 def set_delivery_date(items: list, sales_order: str) -> None:
+	# `product_bundle` now holds the Product Bundle *version*, so match the Purchase
+	# Order rows to their originating Sales Order rows by that version.
 	delivery_dates = frappe.get_all(
-		"Sales Order Item", filters={"parent": sales_order}, fields=["delivery_date", "item_code"]
+		"Sales Order Item", filters={"parent": sales_order}, fields=["delivery_date", "product_bundle"]
 	)
 
-	delivery_by_item = frappe._dict()
+	delivery_by_bundle = frappe._dict()
 	for date in delivery_dates:
-		delivery_by_item[date.item_code] = date.delivery_date
+		if date.product_bundle:
+			delivery_by_bundle[date.product_bundle] = date.delivery_date
 
 	for item in items:
 		if item.product_bundle:
-			item.schedule_date = delivery_by_item[item.product_bundle]
+			item.schedule_date = delivery_by_bundle.get(item.product_bundle)
 
 
 @frappe.whitelist()

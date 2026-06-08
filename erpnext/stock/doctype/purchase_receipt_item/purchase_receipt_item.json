@@ -953,11 +953,12 @@
    "search_index": 1
   },
   {
-   "description": "Parent item of the Product Bundle this row was packed from",
+   "description": "Product Bundle version this row was packed from",
    "fieldname": "product_bundle",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Product Bundle",
-   "options": "Item",
+   "options": "Product Bundle",
    "read_only": 1
   },
   {
@@ -1121,7 +1122,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-05-04 10:52:43.188507",
+ "modified": "2026-06-08 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

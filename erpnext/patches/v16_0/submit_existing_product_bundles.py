@@ -1,25 +1,42 @@
-"""Make existing Product Bundles submittable & versioned.
+"""Migrate Product Bundles to the submittable, versioned model (issue #29462).
 
-Product Bundle became a submittable, versioned doctype (issue #29462). Pre-existing
-bundles were drafts named after their parent item (``name == new_item_code``). This
-patch migrates them to the new model:
+Pre-existing bundles were editable drafts named after their parent item
+(``name == new_item_code``). This patch:
 
-1. rename each legacy bundle to the versioned name ``PB-<parent item>-001``
-2. mark it submitted (``docstatus = 1``)
-3. seed ``is_active`` from the legacy ``disabled`` flag (active = not disabled)
+1. renames each legacy bundle to the versioned name ``PB-<parent item>-001``,
+   marks it submitted (``docstatus = 1``) and seeds ``is_active`` from the legacy
+   ``disabled`` flag (active = not disabled), and
+2. stamps the resolved version onto existing transaction rows, so documents keep a
+   reference to the exact bundle version they were packed from.
 
-No transaction stores a bundle's *name* (they snapshot components into their own
-``packed_items`` tables and reference the parent item code), so renaming is
-reference-safe. The patch is idempotent: already-migrated bundles (docstatus != 0 or
-already prefixed) are skipped.
+Both steps ship together (v16 is unreleased), so they are a single migration. No
+transaction stores a bundle's *name* (they snapshot components and reference the
+parent item code), so renaming is reference-safe. The whole patch is idempotent.
 """
 
 import frappe
 
 from erpnext.selling.doctype.product_bundle.product_bundle import NAME_PREFIX, build_bundle_name
 
+# doctype -> column holding the bundle parent item code
+SELLING_ITEM_TABLES = {
+	"Sales Order Item": "item_code",
+	"Delivery Note Item": "item_code",
+	"Sales Invoice Item": "item_code",
+	"POS Invoice Item": "item_code",
+	"Quotation Item": "item_code",
+	"Packed Item": "parent_item",
+}
+
+BUYING_ITEM_TABLES = ["Purchase Order Item", "Purchase Invoice Item", "Purchase Receipt Item"]
+
 
 def execute():
+	submit_existing_bundles()
+	stamp_versions_on_transactions()
+
+
+def submit_existing_bundles():
 	legacy_bundles = frappe.get_all(
 		"Product Bundle",
 		filters={"docstatus": 0},
@@ -49,6 +66,63 @@ def execute():
 		)
 
 	_enforce_single_active_version()
+
+
+def stamp_versions_on_transactions():
+	"""Backfill the ``product_bundle`` version link onto existing transaction rows.
+
+	- Selling / packed rows: a row whose item is a bundle parent is stamped with that
+	  bundle's version (the field was newly added, so only blank rows are touched) and
+	  flagged via ``is_product_bundle`` so the version field stays visible.
+	- Buying rows: the ``product_bundle`` field previously stored the parent *item code*;
+	  convert those legacy values to the bundle version name. Idempotent: once converted,
+	  the value is a bundle name and no longer matches a ``new_item_code``.
+	"""
+	# parent item code -> migrated bundle version name (active version preferred)
+	version_by_item = {}
+	for bundle in frappe.get_all(
+		"Product Bundle",
+		filters={"docstatus": 1},
+		fields=["name", "new_item_code"],
+		order_by="is_active desc, creation asc",
+	):
+		version_by_item.setdefault(bundle.new_item_code, bundle.name)
+
+	if not version_by_item:
+		return
+
+	for doctype, item_field in SELLING_ITEM_TABLES.items():
+		if not frappe.db.has_column(doctype, "product_bundle"):
+			continue
+		table = frappe.qb.DocType(doctype)
+		item_column = getattr(table, item_field)
+		flag_bundle_rows = frappe.db.has_column(doctype, "is_product_bundle")
+		for item_code, version in version_by_item.items():
+			(
+				frappe.qb.update(table)
+				.set(table.product_bundle, version)
+				.where(
+					(item_column == item_code)
+					& ((table.product_bundle.isnull()) | (table.product_bundle == ""))
+				)
+			).run()
+			if flag_bundle_rows:
+				# keep the version field visible on bundle rows even if its value is cleared
+				(
+					frappe.qb.update(table).set(table.is_product_bundle, 1).where(item_column == item_code)
+				).run()
+
+	for doctype in BUYING_ITEM_TABLES:
+		if not frappe.db.has_column(doctype, "product_bundle"):
+			continue
+		table = frappe.qb.DocType(doctype)
+		for item_code, version in version_by_item.items():
+			# only legacy rows still holding the item code are matched
+			(
+				frappe.qb.update(table)
+				.set(table.product_bundle, version)
+				.where(table.product_bundle == item_code)
+			).run()
 
 
 def _next_index(item_code: str) -> int:

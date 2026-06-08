@@ -1415,6 +1415,14 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(purchase_order.items[0].item_code, "_Test Bundle Item 1")
 		self.assertEqual(purchase_order.items[1].item_code, "_Test Bundle Item 2")
 
+		# each Purchase Order row records the Product Bundle version it was packed from
+		from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
+
+		version = get_active_product_bundle("_Test Product Bundle")
+		self.assertTrue(version and version.startswith("PB-"))
+		self.assertEqual(purchase_order.items[0].product_bundle, version)
+		self.assertEqual(purchase_order.items[1].product_bundle, version)
+
 	def test_purchase_order_updates_packed_item_ordered_qty(self):
 		"""
 		Tests if the packed item's `ordered_qty` is updated with the quantity of the Purchase Order

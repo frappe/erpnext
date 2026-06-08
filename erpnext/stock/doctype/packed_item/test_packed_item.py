@@ -77,6 +77,94 @@ class TestPackedItem(ERPNextTestSuite):
 
 		self.assertEqual(len(so.packed_items), 0)
 
+	def test_item_and_packed_rows_record_bundle_version(self):
+		"The item row and its packed items record the resolved Product Bundle version."
+		from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
+
+		version = get_active_product_bundle(self.bundle)
+		self.assertTrue(version and version.startswith("PB-"))
+
+		so = make_sales_order(item_code=self.bundle, qty=1, warehouse=self.warehouse)
+		self.assertEqual(so.items[0].product_bundle, version)
+		self.assertEqual(so.items[0].is_product_bundle, 1)
+		self.assertEqual(len(so.packed_items), 2)
+		for pi in so.packed_items:
+			self.assertEqual(pi.product_bundle, version)
+
+		# the version carries onto a Delivery Note mapped from the Sales Order
+		dn = make_delivery_note(so.name)
+		self.assertEqual(dn.items[0].product_bundle, version)
+		for pi in dn.packed_items:
+			self.assertEqual(pi.product_bundle, version)
+
+	def test_clearing_version_keeps_bundle_flag_and_redefaults(self):
+		"Clearing the version must not lose the bundle flag (keeps the field visible)."
+		so = make_sales_order(item_code=self.bundle, qty=1, warehouse=self.warehouse, do_not_submit=True)
+		version = so.items[0].product_bundle
+		self.assertEqual(so.items[0].is_product_bundle, 1)
+
+		# user blanks the version field
+		so.items[0].product_bundle = None
+		so.save()
+
+		# the flag stays set (so depends_on keeps the field visible) and the value
+		# re-defaults to the active version
+		self.assertEqual(so.items[0].is_product_bundle, 1)
+		self.assertEqual(so.items[0].product_bundle, version)
+
+	def test_backfill_patch_stamps_existing_rows(self):
+		"The backfill patch stamps the version on rows that predate the field."
+		from erpnext.patches.v16_0.submit_existing_product_bundles import (
+			stamp_versions_on_transactions as stamp_versions,
+		)
+		from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
+
+		version = get_active_product_bundle(self.bundle)
+		so = make_sales_order(item_code=self.bundle, qty=1, do_not_submit=True)
+
+		# simulate pre-migration rows with no version recorded and no bundle flag
+		frappe.db.set_value("Sales Order Item", so.items[0].name, "product_bundle", None)
+		frappe.db.set_value("Sales Order Item", so.items[0].name, "is_product_bundle", 0)
+		for pi in so.packed_items:
+			frappe.db.set_value("Packed Item", pi.name, "product_bundle", None)
+
+		stamp_versions()
+
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "product_bundle"), version)
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "is_product_bundle"), 1)
+		for pi in so.packed_items:
+			self.assertEqual(frappe.db.get_value("Packed Item", pi.name, "product_bundle"), version)
+
+	def test_choosing_an_older_version_packs_its_components(self):
+		"Default picks the active version; choosing an older version re-packs its components."
+		from erpnext.selling.doctype.product_bundle.product_bundle import (
+			get_active_product_bundle,
+			make_new_version,
+		)
+
+		v1 = get_active_product_bundle(self.bundle)
+
+		# new version with a different component becomes the active one
+		new_component = make_item().name
+		make_stock_entry(item=new_component, to_warehouse=self.warehouse, qty=50, rate=100)
+		v2 = make_new_version(v1)
+		v2.items = []
+		v2.append("items", {"item_code": new_component, "qty": 1})
+		v2.insert()
+		v2.submit()
+		self.assertEqual(get_active_product_bundle(self.bundle), v2.name)
+
+		# default: the active version (v2) and its component
+		so = make_sales_order(item_code=self.bundle, qty=1, warehouse=self.warehouse, do_not_submit=True)
+		self.assertEqual(so.items[0].product_bundle, v2.name)
+		self.assertEqual([pi.item_code for pi in so.packed_items], [new_component])
+
+		# choose the older version -> its components are packed instead
+		so.items[0].product_bundle = v1
+		so.save()
+		self.assertEqual(so.items[0].product_bundle, v1)
+		self.assertEqual(sorted(pi.item_code for pi in so.packed_items), sorted(self.bundle_items))
+
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_recurring_bundle_item(self):
 		"Test impact on packed items if same bundle item is added and removed."

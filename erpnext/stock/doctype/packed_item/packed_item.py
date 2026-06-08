@@ -84,8 +84,16 @@ def make_packing_list(doc):
 	reset = reset_packing_list(doc)
 
 	for item_row in doc.get("items"):
-		if is_product_bundle(item_row.item_code):
-			for bundle_item in get_product_bundle_items(item_row.item_code):
+		# Pack from the version chosen on the row (default: the item's active version)
+		# and record it so the document keeps a reference to the exact version used.
+		bundle_name = get_bundle_version_for_row(item_row)
+		if item_row.meta.has_field("product_bundle"):
+			item_row.product_bundle = bundle_name
+		if item_row.meta.has_field("is_product_bundle"):
+			item_row.is_product_bundle = 1 if bundle_name else 0
+
+		if bundle_name:
+			for bundle_item in get_product_bundle_items_by_name(bundle_name):
 				pi_row = add_packed_item_row(
 					doc=doc,
 					packing_item=bundle_item,
@@ -93,6 +101,7 @@ def make_packing_list(doc):
 					packed_items_table=stale_packed_items_table,
 					reset=reset,
 				)
+				pi_row.product_bundle = bundle_name
 				item_data = get_packed_item_details(bundle_item.item_code, doc.company)
 				update_packed_item_basic_data(item_row, pi_row, bundle_item, item_data)
 				update_packed_item_stock_data(item_row, pi_row, bundle_item, item_data, doc)
@@ -146,8 +155,13 @@ def reset_packing_list(doc):
 		# 1. items were deleted
 		# 2. if bundle item replaced by another item (same no. of items but different items)
 		# we maintain list to track recurring item rows as well
-		items_before_save = [(item.name, item.item_code) for item in doc_before_save.get("items")]
-		items_after_save = [(item.name, item.item_code) for item in doc.get("items")]
+		# include product_bundle so picking a different version re-packs the components
+		items_before_save = [
+			(item.name, item.item_code, item.get("product_bundle")) for item in doc_before_save.get("items")
+		]
+		items_after_save = [
+			(item.name, item.item_code, item.get("product_bundle")) for item in doc.get("items")
+		]
 		reset_table = items_before_save != items_after_save
 	else:
 		# reset: if via Update Items OR
@@ -182,6 +196,40 @@ def get_product_bundle_items(item_code):
 		.orderby(product_bundle_item.idx)
 	)
 	return query.run(as_dict=True)
+
+
+def get_product_bundle_items_by_name(bundle_name):
+	"Component rows of a specific Product Bundle version."
+	product_bundle_item = frappe.qb.DocType("Product Bundle Item")
+	return (
+		frappe.qb.from_(product_bundle_item)
+		.select(
+			product_bundle_item.item_code,
+			product_bundle_item.qty,
+			product_bundle_item.uom,
+			product_bundle_item.description,
+		)
+		.where(product_bundle_item.parent == bundle_name)
+		.orderby(product_bundle_item.idx)
+	).run(as_dict=True)
+
+
+def get_bundle_version_for_row(item_row):
+	"""Product Bundle version to pack ``item_row`` from.
+
+	Honours a version explicitly chosen on the row (validated to be a submitted
+	bundle of that item); otherwise falls back to the item's active version. A stale
+	choice (e.g. left over after changing the item) self-heals back to the active one.
+	"""
+	from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
+
+	chosen = item_row.get("product_bundle") if item_row.meta.has_field("product_bundle") else None
+	if chosen:
+		bundle = frappe.db.get_value("Product Bundle", chosen, ["new_item_code", "docstatus"], as_dict=True)
+		if bundle and bundle.new_item_code == item_row.item_code and bundle.docstatus == 1:
+			return chosen
+
+	return get_active_product_bundle(item_row.item_code)
 
 
 def add_packed_item_row(doc, packing_item, main_item_row, packed_items_table, reset):
