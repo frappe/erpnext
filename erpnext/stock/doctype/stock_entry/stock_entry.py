@@ -80,17 +80,7 @@ from erpnext.controllers.stock_controller import StockController
 form_grid_templates = {"items": "templates/form_grid/stock_entry_grid.html"}
 
 
-<<<<<<< HEAD
 class StockEntry(StockController):
-=======
-def _qty_tolerance(precision: int) -> float:
-	"""One unit at the column's precision -- absorbs float rounding without letting a real
-	(whole-unit) quantity divergence slip through."""
-	return 1.0 / (10**precision)
-
-
-class StockEntry(StockController, SubcontractingInwardController):
->>>>>>> 4453c1072a (fix: validate fg and materials qty in the disassemble entry)
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
@@ -3489,6 +3479,12 @@ def move_sample_to_retention_warehouse(company, items):
 				)
 	if stock_entry.get("items"):
 		return stock_entry.as_dict()
+
+
+def _qty_tolerance(precision: int) -> float:
+	"""One unit at the column's precision -- absorbs float rounding without letting a real
+	(whole-unit) quantity divergence slip through."""
+	return 1.0 / (10**precision)
 
 
 @frappe.whitelist()
