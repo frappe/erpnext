@@ -651,7 +651,6 @@ class StockEntry(StockController):
 		):
 			return
 
-<<<<<<< HEAD
 		if self.project:
 			amount = frappe.db.sql(
 				""" select ifnull(sum(sed.amount), 0)
