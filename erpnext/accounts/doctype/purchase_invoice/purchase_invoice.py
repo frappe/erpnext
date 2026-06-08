@@ -2085,7 +2085,12 @@ def make_stock_entry(source_name, target_doc=None):
 @frappe.whitelist()
 def change_release_date(name, release_date=None):
 	if frappe.db.exists("Purchase Invoice", name):
+<<<<<<< HEAD
 		pi = frappe.get_doc("Purchase Invoice", name)
+=======
+		pi = frappe.get_lazy_doc("Purchase Invoice", name)
+		pi.check_permission()
+>>>>>>> 2ae6451f10 (fix: Add authorization checks on internal functions (backport #55709) (#55726))
 		pi.db_set("release_date", release_date)
 
 
