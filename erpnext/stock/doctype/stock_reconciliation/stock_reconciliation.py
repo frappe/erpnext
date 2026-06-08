@@ -9,14 +9,19 @@ from frappe.utils import add_to_date, cint, cstr, flt, get_datetime, now
 
 import erpnext
 from erpnext.accounts.utils import get_company_default
-from erpnext.controllers.stock_controller import StockController, create_repost_item_valuation_entry
+from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.batch.batch import get_available_batches, get_batch_qty
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	get_available_serial_nos,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+<<<<<<< HEAD
 from erpnext.stock.utils import get_combine_datetime, get_incoming_rate, get_stock_balance
+=======
+from erpnext.stock.doctype.stock_reconciliation_item.stock_reconciliation_item import StockReconciliationItem
+from erpnext.stock.utils import get_incoming_rate, get_stock_balance
+>>>>>>> e36426e235 (fix: do not allow to make changes in SABB after submit)
 
 
 class OpeningEntryAccountError(frappe.ValidationError):
@@ -842,22 +847,6 @@ class StockReconciliation(StockController):
 
 			sl_entries.append(args)
 
-	def update_valuation_rate_for_serial_no(self):
-		for d in self.items:
-			if not d.serial_no:
-				continue
-
-			serial_nos = get_serial_nos(d.serial_no)
-			self.update_valuation_rate_for_serial_nos(d, serial_nos)
-
-	def update_valuation_rate_for_serial_nos(self, row, serial_nos):
-		valuation_rate = row.valuation_rate if self.docstatus == 1 else row.current_valuation_rate
-		if valuation_rate is None:
-			return
-
-		for d in serial_nos:
-			frappe.db.set_value("Serial No", d, "purchase_rate", valuation_rate)
-
 	def get_sle_for_items(self, row, serial_nos=None, current_bundle=True):
 		"""Insert Stock Ledger Entries"""
 
@@ -1011,11 +1000,6 @@ class StockReconciliation(StockController):
 			d.quantity_difference = flt(d.qty) - flt(d.current_qty)
 			d.amount_difference = flt(d.amount) - flt(d.current_amount)
 
-	def get_items_for(self, warehouse):
-		self.items = []
-		for item in get_items(warehouse, self.posting_date, self.posting_time, self.company):
-			self.append("items", item)
-
 	def submit(self):
 		if len(self.items) > 100:
 			msgprint(
@@ -1038,6 +1022,7 @@ class StockReconciliation(StockController):
 		else:
 			self._cancel()
 
+<<<<<<< HEAD
 	def add_missing_stock_ledger_entry(self, row, voucher_detail_no, sle_creation):
 		if row.current_qty == 0:
 			return
@@ -1177,6 +1162,8 @@ def get_batch_qty_for_stock_reco(
 
 	return flt(qty)
 
+=======
+>>>>>>> e36426e235 (fix: do not allow to make changes in SABB after submit)
 
 @frappe.whitelist()
 def get_items(warehouse, posting_date, posting_time, company, item_code=None, ignore_empty_stock=False):
