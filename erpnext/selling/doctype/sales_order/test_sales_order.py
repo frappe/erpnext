@@ -692,6 +692,40 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		workflow.is_active = 0
 		workflow.save()
 
+	def test_update_child_qty_rate_follows_allow_edit(self):
+		from frappe.model.workflow import apply_workflow
+
+		workflow = make_sales_order_edit_perm_workflow()
+		so = make_sales_order(item_code="_Test Item", qty=1, rate=150, do_not_submit=1)
+		apply_workflow(so, "Approve")
+
+		trans_item = json.dumps(
+			[{"item_code": "_Test Item", "rate": 150, "qty": 2, "docname": so.items[0].name}]
+		)
+
+		mover = "test@example.com"
+		mover_user = frappe.get_doc("User", mover)
+		mover_user.add_roles("Sales User", "Test Junior Approver")
+		with self.set_user(mover):
+			# transitioned the doc into Approved but is not the configured editor
+			self.assertRaises(
+				frappe.ValidationError, update_child_qty_rate, "Sales Order", trans_item, so.name
+			)
+
+		editor = "test2@example.com"
+		editor_user = frappe.get_doc("User", editor)
+		editor_user.add_roles("Sales User", "Test Approver")
+		with self.set_user(editor):
+			# Test Approver is the "Only Allow Edit For" role on Approved
+			update_child_qty_rate("Sales Order", trans_item, so.name)
+			so.reload()
+			self.assertEqual(so.items[0].qty, 2)
+
+		mover_user.remove_roles("Sales User", "Test Junior Approver", "Test Approver")
+		editor_user.remove_roles("Sales User", "Test Junior Approver", "Test Approver")
+		workflow.is_active = 0
+		workflow.save()
+
 	def test_material_request_for_product_bundle(self):
 		# Create the Material Request from the sales order for the Packing Items
 		# Check whether the material request has the correct packing item or not.
@@ -2678,6 +2712,44 @@ def make_sales_order_workflow():
 			allowed="Test Approver",
 			allow_self_approval=1,
 			condition="doc.grand_total > 200",
+		),
+	)
+	workflow.insert(ignore_permissions=True)
+
+	return workflow
+
+
+def make_sales_order_edit_perm_workflow():
+	if frappe.db.exists("Workflow", "SO Edit Perm Workflow"):
+		doc = frappe.get_doc("Workflow", "SO Edit Perm Workflow")
+		doc.set("is_active", 1)
+		doc.save()
+		return doc
+
+	frappe.get_doc(doctype="Role", role_name="Test Junior Approver").insert(ignore_if_duplicate=True)
+	frappe.get_doc(doctype="Role", role_name="Test Approver").insert(ignore_if_duplicate=True)
+	frappe.cache().hdel("roles", frappe.session.user)
+
+	workflow = frappe.get_doc(
+		{
+			"doctype": "Workflow",
+			"workflow_name": "SO Edit Perm Workflow",
+			"document_type": "Sales Order",
+			"workflow_state_field": "workflow_state",
+			"is_active": 1,
+			"send_email_alert": 0,
+		}
+	)
+	workflow.append("states", dict(state="Pending", allow_edit="All"))
+	workflow.append("states", dict(state="Approved", allow_edit="Test Approver", doc_status=1))
+	workflow.append(
+		"transitions",
+		dict(
+			state="Pending",
+			action="Approve",
+			next_state="Approved",
+			allowed="Test Junior Approver",
+			allow_self_approval=1,
 		),
 	)
 	workflow.insert(ignore_permissions=True)
