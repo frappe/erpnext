@@ -92,6 +92,7 @@ class ProcessPeriodClosingVoucher(Document):
 @frappe.whitelist()
 def start_pcv_processing(docname: str):
 	if frappe.db.get_value("Process Period Closing Voucher", docname, "status") in ["Queued", "Running"]:
+		frappe.has_permission("Process Payment Reconciliation", "write", doc=docname, throw=True)
 		frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Running")
 
 		ppcvd = qb.DocType("Process Period Closing Voucher Detail")
