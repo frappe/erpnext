@@ -427,6 +427,7 @@ def deactivate_sales_person(status: str, employee: str):
 @frappe.whitelist()
 def create_user(employee: str, email: str | None = None, create_user_permission: int = 0) -> str:
 	emp = frappe.get_doc("Employee", employee)
+	emp.check_permission("write")
 	if emp.user_id:
 		frappe.throw(_("Employee {0} already has a linked user").format(emp.name))
 

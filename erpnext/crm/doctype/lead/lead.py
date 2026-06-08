@@ -386,7 +386,7 @@ def get_lead_with_phone_number(number):
 def add_lead_to_prospect(lead: str, prospect: str):
 	prospect = frappe.get_doc("Prospect", prospect)
 	prospect.append("leads", {"lead": lead})
-	prospect.save(ignore_permissions=True)
+	prospect.save()
 
 	carry_forward_communication_and_comments = frappe.db.get_single_value(
 		"CRM Settings", "carry_forward_communication_and_comments"

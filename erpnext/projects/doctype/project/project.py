@@ -754,7 +754,7 @@ def set_project_status(project: str, status: str):
 		frappe.throw(_("Status must be Cancelled or Completed"))
 
 	project = frappe.get_doc("Project", project)
-	frappe.has_permission(doc=project, throw=True)
+	project.check_permission("write")
 
 	for task in frappe.get_all("Task", dict(project=project.name)):
 		frappe.db.set_value("Task", task.name, "status", status)

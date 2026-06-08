@@ -405,6 +405,7 @@ def sanitize_address(address):
 @frappe.whitelist()
 def notify_customers(delivery_trip: str):
 	delivery_trip = frappe.get_doc("Delivery Trip", delivery_trip)
+	delivery_trip.check_permission()
 
 	context = delivery_trip.as_dict()
 

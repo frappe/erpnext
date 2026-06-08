@@ -180,6 +180,7 @@ def refresh_scorecards():
 def make_all_scorecards(docname: str):
 	sc = frappe.get_doc("Supplier Scorecard", docname)
 	supplier = frappe.get_doc("Supplier", sc.supplier)
+	supplier.check_permission("write")
 
 	start_date = getdate(supplier.creation)
 	end_date = get_scorecard_date(sc.period, start_date)
