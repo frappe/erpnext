@@ -1256,13 +1256,10 @@ class JobCard(Document):
 
 	@frappe.whitelist()
 	def pause_job(self, **kwargs):
-<<<<<<< HEAD
-=======
 		frappe.has_permission("Job Card", "write", doc=self, throw=True)
 
 		self.validate_docstatus()
 
->>>>>>> 8db1eb0d27 (fix: allow specific methods to run)
 		if isinstance(kwargs, dict):
 			kwargs = frappe._dict(kwargs)
 
@@ -1271,13 +1268,10 @@ class JobCard(Document):
 
 	@frappe.whitelist()
 	def resume_job(self, **kwargs):
-<<<<<<< HEAD
-=======
 		frappe.has_permission("Job Card", "write", doc=self, throw=True)
 
 		self.validate_docstatus()
 
->>>>>>> 8db1eb0d27 (fix: allow specific methods to run)
 		if isinstance(kwargs, dict):
 			kwargs = frappe._dict(kwargs)
 
@@ -1450,13 +1444,9 @@ class JobCard(Document):
 
 	@frappe.whitelist()
 	def start_timer(self, **kwargs):
-<<<<<<< HEAD
-=======
 		frappe.has_permission("Job Card", "write", doc=self, throw=True)
-
 		self.validate_docstatus()
 
->>>>>>> 8db1eb0d27 (fix: allow specific methods to run)
 		if isinstance(kwargs, dict):
 			kwargs = frappe._dict(kwargs)
 
@@ -1468,13 +1458,10 @@ class JobCard(Document):
 
 	@frappe.whitelist()
 	def complete_job_card(self, **kwargs):
-<<<<<<< HEAD
 		if isinstance(kwargs, dict):
 			kwargs = frappe._dict(kwargs)
 
-=======
 		frappe.has_permission("Job Card", "write", doc=self, throw=True)
-
 		self.validate_docstatus()
 
 		if isinstance(kwargs, dict):
