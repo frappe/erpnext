@@ -741,7 +741,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			amount += additional_cost_amt
 			project = frappe.get_doc("Project", project)
 			project.total_consumed_material_cost = amount
-			project.save()
+			project.save(ignore_permissions=True)
 
 	def validate_item(self):
 		stock_items = self.get_stock_items()
