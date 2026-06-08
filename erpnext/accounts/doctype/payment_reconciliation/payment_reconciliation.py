@@ -385,6 +385,31 @@ class OpenBalanceFetcher:
 			)
 			alloc_by_key = {(a.je_name, a.account): flt(a.allocated) for a in alloc_rows}
 
+			# Self-settlement: a JE reconciled against ITSELF (two opposing party
+			# legs) writes a split leg referencing the same JE. The base query
+			# excludes it (reference_type='Journal Entry') and PLE netting skips it
+			# (JE-self), so the settled side would otherwise keep its full value.
+			# Net those legs into the base leg here.
+			self_settle_rows = (
+				qb.from_(jea)
+				.inner_join(je)
+				.on(jea.parent == je.name)
+				.select(jea.parent.as_("je_name"), jea.account, Sum(signed_amount).as_("settled"))
+				.where(
+					(je.docstatus == 1)
+					& jea.parent.isin(je_names)
+					& (jea.reference_type == "Journal Entry")
+					& (jea.reference_name == jea.parent)
+					& (jea.party_type == self.party_type)
+					& (jea.party == self.party)
+				)
+				.groupby(jea.parent, jea.account)
+				.run(as_dict=True)
+			)
+			for s in self_settle_rows:
+				key = (s.je_name, s.account)
+				alloc_by_key[key] = alloc_by_key.get(key, 0) + flt(s.settled)
+
 			for r in rows:
 				alloc = alloc_by_key.get((r.voucher_no, r.account), 0)
 				if alloc:
@@ -510,19 +535,28 @@ class Allocator:
 		allocations = []
 		recv_remaining = [flt(r.outstanding_amount) for r in receivables]
 		pay_remaining = [flt(p.outstanding_amount) for p in payables]
-		pay_idx = 0
 
-		for i, recv in enumerate(receivables):
-			while recv_remaining[i] > 0 and pay_idx < len(payables):
-				amt = min(recv_remaining[i], pay_remaining[pay_idx])
-				if amt > 0:
-					allocations.append(self._make_allocation(recv, payables[pay_idx], amt))
-					recv_remaining[i] -= amt
-					pay_remaining[pay_idx] -= amt
-				if pay_remaining[pay_idx] <= 0:
-					pay_idx += 1
-			if pay_idx >= len(payables):
-				break
+		# Two tiers within the currency bucket: drain SAME-account counterparties
+		# first, then fall back to cross-account. This avoids minting a bridge JE
+		# when a same-account match exists (cross-account pairs are settled by the
+		# transfer-JE bridge in `reconcile_cross_account_bridge`). FIFO order is
+		# preserved within each tier.
+		for same_account_only in (True, False):
+			for i, recv in enumerate(receivables):
+				if recv_remaining[i] <= 0:
+					continue
+				for j, pay in enumerate(payables):
+					if recv_remaining[i] <= 0:
+						break
+					if pay_remaining[j] <= 0:
+						continue
+					if (pay.account == recv.account) != same_account_only:
+						continue
+					amt = min(recv_remaining[i], pay_remaining[j])
+					if amt > 0:
+						allocations.append(self._make_allocation(recv, payables[j], amt))
+						recv_remaining[i] -= amt
+						pay_remaining[j] -= amt
 
 		return allocations
 
