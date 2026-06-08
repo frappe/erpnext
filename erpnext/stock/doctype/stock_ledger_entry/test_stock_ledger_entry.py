@@ -1416,14 +1416,17 @@ def create_repack_entry(**args):
 
 
 def create_product_bundle_item(new_item_code, packed_items):
-	if not frappe.db.exists("Product Bundle", new_item_code):
+	from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
+
+	if not get_active_product_bundle(new_item_code):
 		item = frappe.new_doc("Product Bundle")
 		item.new_item_code = new_item_code
 
 		for d in packed_items:
 			item.append("items", {"item_code": d[0], "qty": d[1]})
 
-		item.save()
+		item.insert()
+		item.submit()
 
 
 def create_items(items=None, uoms=None):

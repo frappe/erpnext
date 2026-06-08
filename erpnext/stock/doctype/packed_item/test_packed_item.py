@@ -36,6 +36,7 @@ def create_product_bundle(
 			make_stock_entry(item=compoenent, to_warehouse=warehouse, qty=10 * qty, rate=100)
 
 	bundle_doc.insert()
+	bundle_doc.submit()
 
 	return bundle, components
 

@@ -10,7 +10,9 @@
   "new_item_code",
   "description",
   "column_break_eonk",
+  "is_active",
   "disabled",
+  "amended_from",
   "item_section",
   "items",
   "section_break_4",
@@ -64,10 +66,32 @@
    "options": "<h3>About Product Bundle</h3>\n\n<p>Aggregate group of <b>Items</b> into another <b>Item</b>. This is useful if you are bundling a certain <b>Items</b> into a package and you maintain stock of the packed <b>Items</b> and not the aggregate <b>Item</b>.</p>\n<p>The package <b>Item</b> will have <code>Is Stock Item</code> as <b>No</b> and <code>Is Sales Item</code> as <b>Yes</b>.</p>\n<h4>Example:</h4>\n<p>If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Product Bundle Item.</p>"
   },
   {
+   "allow_on_submit": 1,
+   "default": "1",
+   "description": "Only one version of a Product Bundle can be active at a time for a given Parent Item. Activating a version deactivates the previously active one.",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Active",
+   "no_copy": 1
+  },
+  {
    "default": "0",
+   "depends_on": "disabled",
+   "description": "Deprecated: use Cancel / Is Active instead. Retained for backward compatibility.",
    "fieldname": "disabled",
    "fieldtype": "Check",
-   "label": "Disabled"
+   "label": "Disabled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Product Bundle",
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "column_break_eonk",
@@ -76,14 +100,17 @@
  ],
  "icon": "fa fa-sitemap",
  "idx": 1,
+ "is_submittable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:19.599302",
+ "modified": "2026-06-08 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Product Bundle",
  "owner": "Administrator",
  "permissions": [
   {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -92,6 +119,7 @@
    "report": 1,
    "role": "Stock Manager",
    "share": 1,
+   "submit": 1,
    "write": 1
   },
   {
@@ -102,6 +130,8 @@
    "role": "Stock User"
   },
   {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -110,6 +140,7 @@
    "report": 1,
    "role": "Sales User",
    "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],

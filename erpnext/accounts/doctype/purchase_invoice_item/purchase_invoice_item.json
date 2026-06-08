@@ -886,10 +886,11 @@
    "read_only": 1
   },
   {
+   "description": "Parent item of the Product Bundle this row was packed from",
    "fieldname": "product_bundle",
    "fieldtype": "Link",
    "label": "Product Bundle",
-   "options": "Product Bundle",
+   "options": "Item",
    "read_only": 1
   },
   {

@@ -425,7 +425,7 @@ class SellingController(StockController):
 			row.new_item_code
 			for row in frappe.get_all(
 				"Product Bundle",
-				filters={"new_item_code": ("in", items_to_fetch), "disabled": 0},
+				filters={"new_item_code": ("in", items_to_fetch), "is_active": 1, "docstatus": 1},
 				fields="new_item_code",
 			)
 		}

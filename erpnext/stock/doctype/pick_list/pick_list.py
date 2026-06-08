@@ -14,6 +14,7 @@ from frappe.query_builder.functions import Coalesce, Locate, Replace, Sum
 from frappe.utils import cint, floor, flt, get_link_to_form
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	get_auto_batch_nos,
 )
@@ -650,7 +651,7 @@ class PickList(TransactionBase):
 				frappe.throw(f"Row #{item.idx}: Item Code is Mandatory")
 			if not cint(
 				frappe.get_cached_value("Item", item.item_code, "is_stock_item")
-			) and not frappe.db.exists("Product Bundle", {"new_item_code": item.item_code, "disabled": 0}):
+			) and not get_active_product_bundle(item.item_code):
 				continue
 			item_code = item.item_code
 			reference = item.sales_order_item or item.material_request_item
@@ -850,7 +851,7 @@ class PickList(TransactionBase):
 	def _get_product_bundle_qty_map(self, bundles) -> dict[str, dict[str, float]]:
 		product_bundle_qty_map = {}
 		for data in bundles:
-			bundle = frappe.get_last_doc("Product Bundle", {"new_item_code": data.item_code, "disabled": 0})
+			bundle = frappe.get_doc("Product Bundle", get_active_product_bundle(data.item_code))
 			product_bundle_qty_map[data.item_code] = {item.item_code: item.qty for item in bundle.items}
 		return product_bundle_qty_map
 

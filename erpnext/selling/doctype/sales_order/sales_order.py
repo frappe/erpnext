@@ -326,9 +326,15 @@ class SalesOrder(SellingController):
 			d.projected_qty = bin_data.get((d.item_code, d.warehouse), 0.0)
 
 	def product_bundle_has_stock_item(self, product_bundle):
-		"""Returns true if product bundle has stock item"""
+		"""Returns true if the active bundle for `product_bundle` (a parent item code) has a stock item"""
+		from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
+
+		bundle_name = get_active_product_bundle(product_bundle)
+		if not bundle_name:
+			return False
+
 		bundle_items = frappe.get_all(
-			"Product Bundle Item", filters={"parent": product_bundle}, pluck="item_code"
+			"Product Bundle Item", filters={"parent": bundle_name}, pluck="item_code"
 		)
 
 		if not bundle_items:
@@ -807,7 +813,9 @@ def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 		product_bundle_parents = [
 			pb.new_item_code
 			for pb in frappe.get_all(
-				"Product Bundle", {"new_item_code": ["in", item_codes], "disabled": 0}, ["new_item_code"]
+				"Product Bundle",
+				{"new_item_code": ["in", item_codes], "is_active": 1, "docstatus": 1},
+				["new_item_code"],
 			)
 		]
 

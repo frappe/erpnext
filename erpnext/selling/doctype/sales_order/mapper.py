@@ -17,6 +17,7 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_items_for_material_requests,
 	get_sales_orders,
 )
+from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle, make_packing_list
@@ -71,8 +72,15 @@ def make_material_request(source_name: str, target_doc: str | Document | None = 
 			"Sales Order Item", {"name": so_item.parent_detail_docname}, ["delivered_qty"]
 		)
 
-		bundle_item_qty = frappe.db.get_value(
-			"Product Bundle Item", {"parent": so_item.parent_item, "item_code": so_item.item_code}, ["qty"]
+		bundle_name = get_active_product_bundle(so_item.parent_item)
+		bundle_item_qty = (
+			frappe.db.get_value(
+				"Product Bundle Item",
+				{"parent": bundle_name, "item_code": so_item.item_code},
+				["qty"],
+			)
+			if bundle_name
+			else None
 		)
 
 		return flt(
@@ -133,9 +141,7 @@ def make_material_request(source_name: str, target_doc: str | Document | None = 
 					"delivery_date": "schedule_date",
 					"bom_no": "bom_no",
 				},
-				"condition": lambda item: not frappe.db.exists(
-					"Product Bundle", {"name": item.item_code, "disabled": 0}
-				)
+				"condition": lambda item: not is_product_bundle(item.item_code)
 				and get_remaining_qty(item) > 0,
 				"postprocess": update_item,
 			},

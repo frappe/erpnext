@@ -44,7 +44,7 @@ class PackingService:
 		items_list = [item.item_code for item in self.doc.items]
 		return frappe.db.get_all(
 			"Product Bundle",
-			filters={"new_item_code": ["in", items_list], "disabled": 0},
+			filters={"new_item_code": ["in", items_list], "is_active": 1, "docstatus": 1},
 			pluck="name",
 		)
 

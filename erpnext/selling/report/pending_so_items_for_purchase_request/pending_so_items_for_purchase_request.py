@@ -144,7 +144,9 @@ def get_data():
 
 def get_items_with_product_bundle(item_list):
 	bundled_items = frappe.get_all(
-		"Product Bundle", filters=[("new_item_code", "IN", item_list)], fields=["new_item_code"]
+		"Product Bundle",
+		filters=[("new_item_code", "IN", item_list), ("is_active", "=", 1), ("docstatus", "=", 1)],
+		fields=["new_item_code"],
 	)
 
 	return [d.new_item_code for d in bundled_items]

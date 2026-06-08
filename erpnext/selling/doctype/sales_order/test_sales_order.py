@@ -82,7 +82,7 @@ class TestSalesOrder(ERPNextTestSuite):
 		product_bundle = make_product_bundle(
 			"_Test Product Bundle Item", ["_Test Item", "_Test Item Home Desktop 100"]
 		)
-		so = make_sales_order(item_code=product_bundle.name, qty=2)
+		so = make_sales_order(item_code=product_bundle.new_item_code, qty=2)
 		mr = make_material_request(so.name)
 		mr.items[0].qty = 4
 		mr.items[1].qty = 2

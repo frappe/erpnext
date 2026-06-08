@@ -139,7 +139,7 @@ def get_items(filters):
 			item.brand,
 			item.stock_uom,
 		)
-		.where(IfNull(item.disabled, 0) == 0)
+		.where((IfNull(item.disabled, 0) == 0) & (pb.is_active == 1) & (pb.docstatus == 1))
 	)
 
 	if item_code := filters.get("item_code"):
@@ -181,7 +181,7 @@ def get_items(filters):
 				pbi.uom,
 				pbi.qty,
 			)
-			.where(pb.new_item_code.isin(parent_items))
+			.where(pb.new_item_code.isin(parent_items) & (pb.is_active == 1) & (pb.docstatus == 1))
 		).run(as_dict=1)
 
 	child_items = set()

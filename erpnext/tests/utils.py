@@ -1916,7 +1916,12 @@ class BootStrapTestData:
 		self.make_records(["item_code", "item_name"], records)
 
 	def make_product_bundle(self):
-		records = [
+		from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
+
+		if get_active_product_bundle("_Test Product Bundle Item"):
+			return
+
+		frappe.get_doc(
 			{
 				"doctype": "Product Bundle",
 				"new_item_code": "_Test Product Bundle Item",
@@ -1935,8 +1940,7 @@ class BootStrapTestData:
 					},
 				],
 			}
-		]
-		self.make_records(["new_item_code"], records)
+		).insert().submit()
 
 	def make_test_account(self):
 		records = [
