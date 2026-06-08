@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
  "allow_copy": 0, 
  "allow_import": 0, 
  "allow_rename": 0, 
@@ -9,6 +10,55 @@
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "", 
+=======
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "autoname": "field:bank_name",
+ "creation": "2016-05-04 14:35:00.402544",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "settings",
+  "has_print_format",
+  "primary_settings",
+  "bank_name",
+  "cheque_size",
+  "starting_position_from_top_edge",
+  "cheque_width",
+  "cheque_height",
+  "scanned_cheque",
+  "column_break_5",
+  "is_account_payable",
+  "acc_pay_dist_from_top_edge",
+  "acc_pay_dist_from_left_edge",
+  "message_to_show",
+  "date_and_payer_settings",
+  "date_settings",
+  "date_dist_from_top_edge",
+  "date_dist_from_left_edge",
+  "payer_settings",
+  "payer_name_from_top_edge",
+  "payer_name_from_left_edge",
+  "amount_in_words_and_figure_settings",
+  "html_19",
+  "amt_in_words_from_top_edge",
+  "amt_in_words_from_left_edge",
+  "amt_in_word_width",
+  "amt_in_words_line_spacing",
+  "amount_in_figure",
+  "amt_in_figures_from_top_edge",
+  "amt_in_figures_from_left_edge",
+  "account_number_and_signatory_settings",
+  "account_no_settings",
+  "acc_no_dist_from_top_edge",
+  "acc_no_dist_from_left_edge",
+  "signatory_position",
+  "signatory_from_top_edge",
+  "signatory_from_left_edge",
+  "preview",
+  "cheque_print_preview"
+ ],
+>>>>>>> faf92b1368 (fix(cheque_print_template): print format creation from cheque print template requires system manager (#55708))
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -1014,6 +1064,7 @@
    "set_only_once": 0, 
    "unique": 0
   }
+<<<<<<< HEAD
  ], 
  "hide_heading": 0, 
  "hide_toolbar": 0, 
@@ -1031,6 +1082,16 @@
  "name": "Cheque Print Template", 
  "name_case": "", 
  "owner": "Administrator", 
+=======
+ ],
+ "links": [],
+ "max_attachments": 1,
+ "modified": "2026-06-08 12:10:35.829531",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Cheque Print Template",
+ "owner": "Administrator",
+>>>>>>> faf92b1368 (fix(cheque_print_template): print format creation from cheque print template requires system manager (#55708))
  "permissions": [
   {
    "amend": 0, 
@@ -1073,6 +1134,7 @@
    "write": 1
   }, 
   {
+<<<<<<< HEAD
    "amend": 0, 
    "apply_user_permissions": 0, 
    "cancel": 0, 
@@ -1100,3 +1162,19 @@
  "sort_order": "DESC", 
  "track_seen": 0
 }
+=======
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
+>>>>>>> faf92b1368 (fix(cheque_print_template): print format creation from cheque print template requires system manager (#55708))
