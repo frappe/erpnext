@@ -1485,7 +1485,6 @@ class JobCard(Document):
 			frappe.throw(_("Submitted Job Card cannot be processed."))
 
 	def validate_complete_job_card_qty(self, kwargs):
->>>>>>> 8db1eb0d27 (fix: allow specific methods to run)
 		if flt(kwargs.pending_qty) and flt(kwargs.pending_qty) < 0:
 			frappe.throw(_("Pending quantity cannot be negative."))
 
