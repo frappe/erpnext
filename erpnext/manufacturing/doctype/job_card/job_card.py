@@ -1469,14 +1469,6 @@ class JobCard(Document):
 
 		self.validate_complete_job_card_qty(kwargs)
 
-		self.pending_qty = flt(kwargs.pending_qty)
-		self.process_loss_qty = flt(kwargs.process_loss_qty)
-
-		self.add_completion_time_logs(kwargs)
-
-		if kwargs.auto_submit:
-			self.auto_submit_job_card(kwargs.auto_submit)
-
 	def validate_docstatus(self):
 		if self.docstatus == 2:
 			frappe.throw(_("Cancelled Job Card cannot be processed."))
