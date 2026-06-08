@@ -857,9 +857,6 @@ class JobCard(Document):
 			)
 
 	def validate_job_card(self):
-		if self.track_semi_finished_goods:
-			return
-
 		if self.work_order and frappe.get_cached_value("Work Order", self.work_order, "status") == "Stopped":
 			frappe.throw(
 				_("Transaction not allowed against stopped Work Order {0}").format(
@@ -1259,6 +1256,13 @@ class JobCard(Document):
 
 	@frappe.whitelist()
 	def pause_job(self, **kwargs):
+<<<<<<< HEAD
+=======
+		frappe.has_permission("Job Card", "write", doc=self, throw=True)
+
+		self.validate_docstatus()
+
+>>>>>>> 8db1eb0d27 (fix: allow specific methods to run)
 		if isinstance(kwargs, dict):
 			kwargs = frappe._dict(kwargs)
 
@@ -1267,6 +1271,13 @@ class JobCard(Document):
 
 	@frappe.whitelist()
 	def resume_job(self, **kwargs):
+<<<<<<< HEAD
+=======
+		frappe.has_permission("Job Card", "write", doc=self, throw=True)
+
+		self.validate_docstatus()
+
+>>>>>>> 8db1eb0d27 (fix: allow specific methods to run)
 		if isinstance(kwargs, dict):
 			kwargs = frappe._dict(kwargs)
 
@@ -1439,6 +1450,13 @@ class JobCard(Document):
 
 	@frappe.whitelist()
 	def start_timer(self, **kwargs):
+<<<<<<< HEAD
+=======
+		frappe.has_permission("Job Card", "write", doc=self, throw=True)
+
+		self.validate_docstatus()
+
+>>>>>>> 8db1eb0d27 (fix: allow specific methods to run)
 		if isinstance(kwargs, dict):
 			kwargs = frappe._dict(kwargs)
 
@@ -1450,9 +1468,37 @@ class JobCard(Document):
 
 	@frappe.whitelist()
 	def complete_job_card(self, **kwargs):
+<<<<<<< HEAD
 		if isinstance(kwargs, dict):
 			kwargs = frappe._dict(kwargs)
 
+=======
+		frappe.has_permission("Job Card", "write", doc=self, throw=True)
+
+		self.validate_docstatus()
+
+		if isinstance(kwargs, dict):
+			kwargs = frappe._dict(kwargs)
+
+		self.validate_complete_job_card_qty(kwargs)
+
+		self.pending_qty = flt(kwargs.pending_qty)
+		self.process_loss_qty = flt(kwargs.process_loss_qty)
+
+		self.add_completion_time_logs(kwargs)
+
+		if kwargs.auto_submit:
+			self.auto_submit_job_card(kwargs.auto_submit)
+
+	def validate_docstatus(self):
+		if self.docstatus == 2:
+			frappe.throw(_("Cancelled Job Card cannot be processed."))
+
+		if self.docstatus == 1:
+			frappe.throw(_("Submitted Job Card cannot be processed."))
+
+	def validate_complete_job_card_qty(self, kwargs):
+>>>>>>> 8db1eb0d27 (fix: allow specific methods to run)
 		if flt(kwargs.pending_qty) and flt(kwargs.pending_qty) < 0:
 			frappe.throw(_("Pending quantity cannot be negative."))
 
