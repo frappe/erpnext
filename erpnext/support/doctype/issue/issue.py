@@ -119,7 +119,6 @@ class Issue(Document):
 
 	@frappe.whitelist()
 	def split_issue(self, subject: str, communication_id: str):
-		# Bug: Pressing enter doesn't send subject
 		from copy import deepcopy
 
 		replicated_issue = deepcopy(self)
