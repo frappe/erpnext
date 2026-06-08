@@ -409,3 +409,78 @@ def get_workstations(**kwargs):
 			d.status_image = d.off_status_image
 
 	return data
+<<<<<<< HEAD
+=======
+
+
+def get_color_map():
+	return {
+		"Production": "green",
+		"Off": "gray",
+		"Idle": "gray",
+		"Problem": "red",
+		"Maintenance": "yellow",
+		"Setup": "blue",
+	}
+
+
+ALLOWED_JOB_CARD_METHODS = frozenset(
+	{
+		"start_timer",
+		"pause_job",
+		"resume_job",
+		"complete_job_card",
+	}
+)
+
+
+@frappe.whitelist()
+def update_job_card(job_card: str, method: str, **kwargs):
+	if method not in ALLOWED_JOB_CARD_METHODS:
+		frappe.throw(
+			_("Method {0} is not allowed to be run on a Job Card.").format(bold(method)),
+			frappe.PermissionError,
+			title=_("Not Allowed"),
+		)
+
+	frappe.has_permission("Job Card", "read", throw=True)
+
+	doc = frappe.get_doc("Job Card", job_card)
+
+	# These methods mutate the Job Card, but frappe.get_doc does not enforce permissions —
+	# require write access before running anything.
+	frappe.has_permission("Job Card", "write", doc=doc, throw=True)
+
+	if isinstance(kwargs, dict):
+		kwargs = frappe._dict(kwargs)
+
+	if kwargs.get("employees"):
+		kwargs.employees = frappe.parse_json(kwargs.employees)
+
+	if kwargs.qty and isinstance(kwargs.qty, str):
+		kwargs.qty = flt(kwargs.qty)
+
+	doc.run_method(method, **kwargs)
+
+
+@frappe.whitelist()
+def validate_job_card(job_card: str, status: str):
+	job_card_details = frappe.db.get_value("Job Card", job_card, ["status", "for_quantity"], as_dict=1)
+
+	current_status = job_card_details.status
+	if current_status != status:
+		if status == "Open":
+			frappe.throw(
+				_("The job card {0} is in {1} state and you cannot start it again.").format(
+					job_card, current_status
+				)
+			)
+		else:
+			frappe.throw(
+				_("The job card {0} is in {1} state and you cannot complete.").format(
+					job_card, current_status
+				)
+			)
+
+	return job_card_details.for_quantity
+>>>>>>> 8db1eb0d27 (fix: allow specific methods to run)
