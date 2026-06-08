@@ -35,7 +35,7 @@ def execute(filters=None):
 
 def get_sales_details(doctype):
 	customer = frappe.qb.DocType("Customer")
-	sales = frappe.qb.DocType(doctype)
+	sales_doctype = frappe.qb.DocType(doctype)
 
 	date_diff = CustomFunction("DATEDIFF", ["d1", "d2"])
 	current_date = CustomFunction("CURRENT_DATE", [])
@@ -43,46 +43,49 @@ def get_sales_details(doctype):
 	if doctype == "Sales Order":
 		total_considered = Sum(
 			Case()
-			.when(sales.status == "Stopped", sales.base_net_total * sales.per_delivered / 100)
-			.else_(sales.base_net_total)
+			.when(
+				sales_doctype.status == "Stopped",
+				sales_doctype.base_net_total * sales_doctype.per_delivered / 100,
+			)
+			.else_(sales_doctype.base_net_total)
 		)
-		date_col = sales.transaction_date
+		date_col = sales_doctype.transaction_date
 	else:
-		total_considered = Sum(sales.base_net_total)
-		date_col = sales.posting_date
+		total_considered = Sum(sales_doctype.base_net_total)
+		date_col = sales_doctype.posting_date
 
 	last_order_date = Max(date_col)
 	days_since_last_order = date_diff(current_date(), last_order_date)
 
 	return (
 		frappe.qb.from_(customer)
-		.inner_join(sales)
-		.on(customer.name == sales.customer)
+		.inner_join(sales_doctype)
+		.on(customer.name == sales_doctype.customer)
 		.select(
 			customer.name,
 			customer.customer_name,
 			customer.territory,
 			customer.customer_group,
-			Count(sales.name).distinct().as_("num_of_order"),
-			Sum(sales.base_net_total).as_("total_order_value"),
+			Count(sales_doctype.name).distinct().as_("num_of_order"),
+			Sum(sales_doctype.base_net_total).as_("total_order_value"),
 			total_considered.as_("total_order_considered"),
 			last_order_date.as_("last_order_date"),
 			days_since_last_order.as_("days_since_last_order"),
 		)
-		.where(sales.docstatus == 1)
+		.where(sales_doctype.docstatus == 1)
 		.groupby(customer.name)
 		.orderby(days_since_last_order, order=frappe.qb.desc)
 	).run(as_list=True)
 
 
 def get_last_sales_amt(customer, doctype):
-	sales = frappe.qb.DocType(doctype)
-	date_col = sales.transaction_date if doctype == "Sales Order" else sales.posting_date
+	sales_doctype = frappe.qb.DocType(doctype)
+	date_col = sales_doctype.transaction_date if doctype == "Sales Order" else sales_doctype.posting_date
 
 	res = (
-		frappe.qb.from_(sales)
-		.select(sales.base_net_total)
-		.where((sales.customer == customer) & (sales.docstatus == 1))
+		frappe.qb.from_(sales_doctype)
+		.select(sales_doctype.base_net_total)
+		.where((sales_doctype.customer == customer) & (sales_doctype.docstatus == 1))
 		.orderby(date_col, order=frappe.qb.desc)
 		.limit(1)
 	).run()
