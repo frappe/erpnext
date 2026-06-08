@@ -118,12 +118,8 @@ class Issue(Document):
 		communication.save()
 
 	@frappe.whitelist()
-<<<<<<< HEAD
 	def split_issue(self, subject, communication_id):
 		# Bug: Pressing enter doesn't send subject
-=======
-	def split_issue(self, subject: str, communication_id: str):
->>>>>>> ba936eefab (fix: Add authorization checks on internal functions (#55709))
 		from copy import deepcopy
 
 		replicated_issue = deepcopy(self)

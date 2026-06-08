@@ -1980,7 +1980,6 @@ def make_regional_gl_entries(gl_entries, doc):
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
 def make_debit_note(source_name, target_doc=None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
@@ -2009,13 +2008,8 @@ def make_stock_entry(source_name, target_doc=None):
 def change_release_date(name, release_date=None):
 	if frappe.db.exists("Purchase Invoice", name):
 		pi = frappe.get_lazy_doc("Purchase Invoice", name)
+		pi.check_permission()
 		pi.db_set("release_date", release_date)
-=======
-def change_release_date(name: str, release_date: str | None = None):
-	pi = frappe.get_lazy_doc("Purchase Invoice", name)
-	pi.check_permission("write")
-	pi.db_set("release_date", release_date)
->>>>>>> ba936eefab (fix: Add authorization checks on internal functions (#55709))
 
 
 @frappe.whitelist()

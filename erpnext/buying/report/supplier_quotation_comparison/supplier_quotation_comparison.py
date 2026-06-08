@@ -297,12 +297,8 @@ def get_message():
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
-def set_default_supplier(item_code, supplier, company):
-=======
 def set_default_supplier(item_code: str, supplier: str, company: str):
 	frappe.has_permission("Item", "write", doc=item_code, throw=True)
->>>>>>> ba936eefab (fix: Add authorization checks on internal functions (#55709))
 	frappe.db.set_value(
 		"Item Default",
 		{"parent": item_code, "company": company},
