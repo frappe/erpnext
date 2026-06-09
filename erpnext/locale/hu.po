@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version:  frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-06-07 10:19+0000\n"
-"PO-Revision-Date: 2026-06-08 11:36+0000\n"
+"PO-Revision-Date: 2026-06-09 12:47+0000\n"
 "Last-Translator: hello@frappe.io\n"
 "Language: hu_HU\n"
 "Language-Team: Hungarian\n"
@@ -671,7 +671,7 @@ msgstr "<div id=\"stock-levels-placeholder\"></div>"
 #. Content of the 'Prices HTML' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "<div id=\\\"item-prices-container\\\"></div>"
-msgstr ""
+msgstr "<div id=\\\"item-prices-container\\\"></div>"
 
 #. Content of the 'uom_help_html' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -2691,7 +2691,7 @@ msgstr ""
 #. List'
 #: erpnext/setup/doctype/holiday_list/holiday_list.json
 msgid "Add Weekly Holidays"
-msgstr ""
+msgstr "Heti ünnepek hozzáadása"
 
 #: erpnext/public/js/utils/crm_activities.js:144
 msgid "Add a Note"
@@ -10054,7 +10054,7 @@ msgstr "Értesítések Törlése"
 #. Label of the clear_table (Button) field in DocType 'Holiday List'
 #: erpnext/setup/doctype/holiday_list/holiday_list.json
 msgid "Clear Table"
-msgstr ""
+msgstr "Tábla törlése"
 
 #. Label of the clearance_date (Date) field in DocType 'Bank Clearance Detail'
 #. Label of the clearance_date (Date) field in DocType 'Bank Transaction
@@ -12599,7 +12599,7 @@ msgstr ""
 
 #: erpnext/utilities/activation.py:79
 msgid "Create Lead"
-msgstr ""
+msgstr "Érdeklődés létrehozása"
 
 #: erpnext/utilities/activation.py:77
 msgid "Create Leads"
@@ -12812,7 +12812,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Create Tasks'
 #: erpnext/projects/onboarding_step/create_tasks/create_tasks.json
 msgid "Create Task"
-msgstr ""
+msgstr "Feladat létrehozása"
 
 #. Title of an Onboarding Step
 #: erpnext/projects/onboarding_step/create_tasks/create_tasks.json
@@ -19728,7 +19728,7 @@ msgstr ""
 #. Label of the first_responded_on (Datetime) field in DocType 'Issue'
 #: erpnext/support/doctype/issue/issue.json
 msgid "First Responded On"
-msgstr ""
+msgstr "Első válasz időpontja"
 
 #. Option for the 'Service Level Agreement Status' (Select) field in DocType
 #. 'Issue'
@@ -19995,7 +19995,7 @@ msgstr "Láb/másodperc"
 
 #: erpnext/accounts/print_format/payment_receipt_voucher/payment_receipt_voucher.html:23
 msgid "For"
-msgstr ""
+msgstr "Ennek"
 
 #: erpnext/public/js/utils/sales_common.js:389
 msgid "For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table, values will be copied to 'Packing List' table."
@@ -23593,7 +23593,7 @@ msgstr ""
 #: erpnext/accounts/doctype/payment_request/payment_request.json
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 msgid "Initiated"
-msgstr ""
+msgstr "kezdeményezett"
 
 #. Label of the inspected_by (Link) field in DocType 'Quality Inspection'
 #: erpnext/manufacturing/report/quality_inspection_summary/quality_inspection_summary.js:33
@@ -27793,7 +27793,7 @@ msgstr ""
 #: erpnext/setup/doctype/sales_partner/sales_partner.json
 #: erpnext/stock/doctype/manufacturer/manufacturer.json
 msgid "Logo"
-msgstr ""
+msgstr "Logó"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:183
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:318
@@ -31702,7 +31702,7 @@ msgstr ""
 #. Order'
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 msgid "Ongoing"
-msgstr ""
+msgstr "Folyamatban lévő"
 
 #: erpnext/manufacturing/dashboard_fixtures.py:228
 msgid "Ongoing Job Cards"
@@ -32281,7 +32281,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/downtime_entry/downtime_entry.json
 #: erpnext/manufacturing/report/downtime_analysis/downtime_analysis.py:85
 msgid "Operator"
-msgstr ""
+msgstr "Operátor"
 
 #: erpnext/crm/report/campaign_efficiency/campaign_efficiency.py:21
 #: erpnext/crm/report/lead_owner_efficiency/lead_owner_efficiency.py:27
@@ -37846,7 +37846,7 @@ msgstr ""
 #. Label of the probability (Percent) field in DocType 'Prospect Opportunity'
 #: erpnext/crm/doctype/prospect_opportunity/prospect_opportunity.json
 msgid "Probability"
-msgstr ""
+msgstr "Valószínűség"
 
 #. Label of the probability (Percent) field in DocType 'Opportunity'
 #: erpnext/crm/doctype/opportunity/opportunity.json
@@ -59428,7 +59428,7 @@ msgstr ""
 
 #: erpnext/buying/utils.py:117
 msgid "{0} {1} status is {2}."
-msgstr ""
+msgstr "{0} {1} állapota {2}."
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:241
 msgid "{0} {1} via CSV File"
@@ -59565,7 +59565,7 @@ msgstr ""
 
 #: erpnext/controllers/stock_controller.py:1966
 msgid "{ref_doctype} {ref_name} status is {status}."
-msgstr ""
+msgstr "{ref_doctype} {ref_name} állapota {status}."
 
 #: erpnext/assets/report/fixed_asset_register/fixed_asset_register.py:432
 msgid "{}"
