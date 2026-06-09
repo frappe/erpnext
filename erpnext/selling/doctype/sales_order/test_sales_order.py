@@ -25,6 +25,7 @@ from erpnext.selling.doctype.sales_order.sales_order import (
 	make_delivery_note,
 	make_material_request,
 	make_purchase_order,
+	make_purchase_order_for_default_supplier,
 	make_raw_material_request,
 	make_sales_invoice,
 	make_work_orders,
@@ -2536,7 +2537,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		so.payment_terms_template = "_Test Payment Term Template"
 		so.submit()
 
-		po = make_purchase_order(so.name, selected_items=so_items)
+		po = make_purchase_order_for_default_supplier(so.name, selected_items=so_items)[0]
 
 		supplier = frappe.get_doc("Supplier", "_Test Supplier")
 		self.assertEqual(po.tax_category or None, supplier.tax_category or None)
