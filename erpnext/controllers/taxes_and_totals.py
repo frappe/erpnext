@@ -32,7 +32,13 @@ from erpnext.utilities.regional import temporary_flag
 class calculate_taxes_and_totals:
 	def __init__(self, doc: Document):
 		self.doc = doc
+<<<<<<< HEAD
 		frappe.flags.round_off_applicable_accounts = []
+=======
+		frappe.flags.round_off_applicable_accounts = (
+			get_round_off_applicable_accounts(self.doc.company, [], self.doc) or []
+		)
+>>>>>>> 08129ff71c (fix: update round off account functions to accept document context for regional overrides (#55758))
 		frappe.flags.round_row_wise_tax = frappe.get_single_value("Accounts Settings", "round_row_wise_tax")
 
 		self._items = self.filter_rows() if self.doc.doctype == "Quotation" else self.doc.get("items")
@@ -1240,14 +1246,20 @@ def get_itemised_tax_breakup_html(doc):
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def get_round_off_applicable_accounts(company, account_list):
+=======
+def get_round_off_applicable_accounts(
+	company: str, account_list: list | str, doc: str | dict | Document | None = None
+):
+>>>>>>> 08129ff71c (fix: update round off account functions to accept document context for regional overrides (#55758))
 	# required to set correct region
 	with temporary_flag("company", company):
-		return get_regional_round_off_accounts(company, account_list)
+		return get_regional_round_off_accounts(company, account_list, doc)
 
 
 @erpnext.allow_regional
-def get_regional_round_off_accounts(company, account_list):
+def get_regional_round_off_accounts(company, account_list, doc=None):
 	pass
 
 
