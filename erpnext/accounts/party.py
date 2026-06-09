@@ -74,7 +74,6 @@ class DuplicatePartyAccountError(frappe.ValidationError):
 
 @frappe.whitelist()
 def get_party_details(
-<<<<<<< HEAD
 	party=None,
 	account=None,
 	party_type="Customer",
@@ -91,23 +90,6 @@ def get_party_details(
 	shipping_address=None,
 	dispatch_address=None,
 	pos_profile=None,
-=======
-	party: str | None = None,
-	account: str | None = None,
-	party_type: str = "Customer",
-	company: str | None = None,
-	posting_date: str | None = None,
-	bill_date: str | None = None,
-	price_list: str | None = None,
-	currency: str | None = None,
-	doctype: str | None = None,
-	fetch_payment_terms_template: bool = True,
-	party_address: str | None = None,
-	company_address: str | None = None,
-	shipping_address: str | None = None,
-	dispatch_address: str | None = None,
-	pos_profile: str | None = None,
->>>>>>> efb8336bf8 (fix: remove ignore_permissions from get_party_details signature (#55491))
 ):
 	if not party:
 		return frappe._dict()
