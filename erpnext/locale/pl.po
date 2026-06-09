@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version:  frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-06-07 10:19+0000\n"
-"PO-Revision-Date: 2026-05-29 17:37+0000\n"
+"PO-Revision-Date: 2026-06-09 12:47+0000\n"
 "Last-Translator: hello@frappe.io\n"
 "Language: pl_PL\n"
 "Language-Team: Polish\n"
@@ -687,7 +687,7 @@ msgstr "<div id=\"stock-levels-placeholder\"></div>"
 #. Content of the 'Prices HTML' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "<div id=\\\"item-prices-container\\\"></div>"
-msgstr ""
+msgstr "<div id=\\\"item-prices-container\\\"></div>"
 
 #. Content of the 'uom_help_html' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -32931,7 +32931,7 @@ msgstr ""
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Over Picking Allowance (%)"
-msgstr ""
+msgstr "Dopuszczalne przekroczenie kompletacji (%)"
 
 #: erpnext/controllers/stock_controller.py:1737
 msgid "Over Receipt"
