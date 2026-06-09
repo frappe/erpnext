@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version:  frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-06-07 10:19+0000\n"
-"PO-Revision-Date: 2026-05-29 17:05+0000\n"
+"PO-Revision-Date: 2026-06-09 12:47+0000\n"
 "Last-Translator: hello@frappe.io\n"
 "Language: sr_SP\n"
 "Language-Team: Serbian (Cyrillic)\n"
@@ -692,7 +692,7 @@ msgstr "<div id=\"stock-levels-placeholder\"></div>"
 #. Content of the 'Prices HTML' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "<div id=\\\"item-prices-container\\\"></div>"
-msgstr ""
+msgstr "<div id=\\\"item-prices-container\\\"></div>"
 
 #. Content of the 'uom_help_html' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -33043,7 +33043,7 @@ msgstr ""
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Over Picking Allowance (%)"
-msgstr ""
+msgstr "Дозвола за преузимање вишка (%)"
 
 #: erpnext/controllers/stock_controller.py:1737
 msgid "Over Receipt"
@@ -56512,7 +56512,7 @@ msgstr "Датум завршетка важења није у фискално�
 
 #: erpnext/stock/doctype/item/item_prices.html:86
 msgid "Valid Upto"
-msgstr ""
+msgstr "Важи до"
 
 #. Label of the countries (Table) field in DocType 'Shipping Rule'
 #: erpnext/accounts/doctype/shipping_rule/shipping_rule.json
@@ -59628,7 +59628,7 @@ msgstr "За {0} {1} није дозвољено поновно књижење. 
 
 #: erpnext/buying/utils.py:117
 msgid "{0} {1} status is {2}."
-msgstr ""
+msgstr "Статус {0} {1} је {2}."
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:241
 msgid "{0} {1} via CSV File"
@@ -59765,7 +59765,7 @@ msgstr "Величина узорка за {item_name} ({sample_size}) не мо
 
 #: erpnext/controllers/stock_controller.py:1966
 msgid "{ref_doctype} {ref_name} status is {status}."
-msgstr ""
+msgstr "Статус {ref_doctype} {ref_name} је {status}."
 
 #: erpnext/assets/report/fixed_asset_register/fixed_asset_register.py:432
 msgid "{}"
