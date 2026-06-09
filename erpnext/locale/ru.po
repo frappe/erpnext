@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version:  frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-06-07 10:19+0000\n"
-"PO-Revision-Date: 2026-05-29 17:05+0000\n"
+"PO-Revision-Date: 2026-06-09 12:47+0000\n"
 "Last-Translator: hello@frappe.io\n"
 "Language: ru_RU\n"
 "Language-Team: Russian\n"
@@ -693,7 +693,7 @@ msgstr "<div id=\"stock-levels-placeholder\"></div>"
 #. Content of the 'Prices HTML' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "<div id=\\\"item-prices-container\\\"></div>"
-msgstr ""
+msgstr "<div id=\\\"item-prices-container\\\"></div>"
 
 #. Content of the 'uom_help_html' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -33040,7 +33040,7 @@ msgstr ""
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Over Picking Allowance (%)"
-msgstr ""
+msgstr "Допустимое превышение при подборе (%)"
 
 #: erpnext/controllers/stock_controller.py:1737
 msgid "Over Receipt"
@@ -34725,7 +34725,7 @@ msgstr "Платеж получен"
 #: erpnext/workspace_sidebar/invoicing.json
 #: erpnext/workspace_sidebar/payments.json
 msgid "Payment Reconciliation"
-msgstr "Сверка платежей"
+msgstr "Оплата Примирение"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/payment_reconciliation_allocation/payment_reconciliation_allocation.json
@@ -59620,7 +59620,7 @@ msgstr ""
 
 #: erpnext/buying/utils.py:117
 msgid "{0} {1} status is {2}."
-msgstr ""
+msgstr "{0} {1} статус — {2}."
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:241
 msgid "{0} {1} via CSV File"
@@ -59757,7 +59757,7 @@ msgstr "Размер выборки {item_name}({sample_size}) не может �
 
 #: erpnext/controllers/stock_controller.py:1966
 msgid "{ref_doctype} {ref_name} status is {status}."
-msgstr ""
+msgstr "{ref_doctype} {ref_name} статус — {status}."
 
 #: erpnext/assets/report/fixed_asset_register/fixed_asset_register.py:432
 msgid "{}"
