@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
@@ -5,10 +7,7 @@ from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 
-<<<<<<< HEAD
 class TestTaxesAndTotals(FrappeTestCase):
-=======
-class TestTaxesAndTotals(ERPNextTestSuite):
 	def test_regional_round_off_accounts(self):
 		"""
 		Regional overrides cannot extend the list in-place — the return
@@ -31,7 +30,6 @@ class TestTaxesAndTotals(ERPNextTestSuite):
 
 		self.assertIn(test_account, frappe.flags.round_off_applicable_accounts)
 
->>>>>>> 08129ff71c (fix: update round off account functions to accept document context for regional overrides (#55758))
 	def test_disabling_rounded_total_resets_base_fields(self):
 		"""Disabling rounded total should also clear base rounded values."""
 		so = make_sales_order(do_not_save=True)

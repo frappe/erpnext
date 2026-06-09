@@ -204,19 +204,11 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 		if (me.frm.doc.company) {
 			frappe.call({
-<<<<<<< HEAD
 				"method": "erpnext.controllers.taxes_and_totals.get_round_off_applicable_accounts",
 				"args": {
 					"company": me.frm.doc.company,
-					"account_list": frappe.flags.round_off_applicable_accounts
-=======
-				method: "erpnext.controllers.taxes_and_totals.get_round_off_applicable_accounts",
-				args: {
-					company: me.frm.doc.company,
-					account_list: frappe.flags.round_off_applicable_accounts,
-					// pass the doc so regional overrides can inspect it
-					doc: me.frm.doc,
->>>>>>> 08129ff71c (fix: update round off account functions to accept document context for regional overrides (#55758))
+					"account_list": frappe.flags.round_off_applicable_accounts,
+					"doc": me.frm.doc,
 				},
 				callback(r) {
 					if (r.message) {
