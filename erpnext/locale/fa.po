@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version:  frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-06-07 10:19+0000\n"
-"PO-Revision-Date: 2026-06-08 11:36+0000\n"
+"PO-Revision-Date: 2026-06-09 12:47+0000\n"
 "Last-Translator: hello@frappe.io\n"
 "Language: fa_IR\n"
 "Language-Team: Persian\n"
@@ -671,7 +671,7 @@ msgstr "<div id=\"stock-levels-placeholder\"></div>"
 #. Content of the 'Prices HTML' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "<div id=\\\"item-prices-container\\\"></div>"
-msgstr ""
+msgstr "<div id=\\\"item-prices-container\\\"></div>"
 
 #. Content of the 'uom_help_html' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -32887,13 +32887,13 @@ msgstr "اضافه تحویل/دریافت مجاز (%)"
 #. Label of the over_order_allowance (Float) field in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Over Order Allowance (%)"
-msgstr ""
+msgstr "سفارش مازاد مجاز (٪)"
 
 #. Label of the over_picking_allowance (Percent) field in DocType 'Stock
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Over Picking Allowance (%)"
-msgstr ""
+msgstr "اجازه برداشت بیش از حد (%)"
 
 #: erpnext/controllers/stock_controller.py:1737
 msgid "Over Receipt"
@@ -34578,7 +34578,7 @@ msgstr "پرداخت دریافت شد"
 #: erpnext/workspace_sidebar/invoicing.json
 #: erpnext/workspace_sidebar/payments.json
 msgid "Payment Reconciliation"
-msgstr ""
+msgstr "تطبیق پرداخت"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/payment_reconciliation_allocation/payment_reconciliation_allocation.json
@@ -36441,7 +36441,7 @@ msgstr "لطفاً قبل از تنظیم انبار یک کد آیتم را ا�
 
 #: erpnext/controllers/item_variant.py:237
 msgid "Please select at least one attribute value"
-msgstr ""
+msgstr "لطفا حداقل یک مقدار ویژگی انتخاب کنید"
 
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:43
 msgid "Please select at least one filter: Item Code, Batch, or Serial No."
@@ -44881,7 +44881,7 @@ msgstr "فروش"
 
 #: erpnext/stock/doctype/item/item_list.js:28
 msgid "Sales & Purchase"
-msgstr ""
+msgstr "فروش و خرید"
 
 #: erpnext/setup/doctype/company/company.py:649
 msgid "Sales Account"
@@ -46339,7 +46339,7 @@ msgstr "از هر مجموعه یک آیتم را برای استفاده در �
 
 #: erpnext/stock/doctype/item/item.js:852
 msgid "Select at least one attribute value."
-msgstr ""
+msgstr "حداقل یک مقدار ویژگی انتخاب کنید."
 
 #: erpnext/public/js/utils/party.js:379
 msgid "Select company first"
@@ -59460,7 +59460,7 @@ msgstr ""
 
 #: erpnext/buying/utils.py:117
 msgid "{0} {1} status is {2}."
-msgstr ""
+msgstr "وضعیت {0} {1} {2} است."
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:241
 msgid "{0} {1} via CSV File"
@@ -59597,7 +59597,7 @@ msgstr "اندازه نمونه {item_name} ({sample_size}) نمی‌تواند 
 
 #: erpnext/controllers/stock_controller.py:1966
 msgid "{ref_doctype} {ref_name} status is {status}."
-msgstr ""
+msgstr "وضعیت {ref_doctype} {ref_name} {status} است."
 
 #: erpnext/assets/report/fixed_asset_register/fixed_asset_register.py:432
 msgid "{}"
