@@ -864,11 +864,8 @@ class JobCard(Document):
 				)
 			)
 
-<<<<<<< HEAD
-=======
 		self.validate_not_on_hold()
 		self.validate_time_logs_present()
-		self.validate_completed_qty_matches_for_quantity()
 
 	def validate_not_on_hold(self):
 		if self.is_paused:
@@ -880,7 +877,6 @@ class JobCard(Document):
 			)
 
 	def validate_time_logs_present(self):
->>>>>>> 9c23229cbf (fix: don't allow to submit job card with hold status)
 		if not self.time_logs:
 			frappe.throw(
 				_("Time logs are required for {0} {1}").format(
