@@ -1062,6 +1062,8 @@ class TestPurchaseReceipt(FrappeTestCase):
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
 
+		make_purchase_receipt(warehouse="Stores - TCP1", company=company)
+
 		dn = create_delivery_note(
 			company=company,
 			customer=customer,

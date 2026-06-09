@@ -2536,7 +2536,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		so.payment_terms_template = "_Test Payment Term Template"
 		so.submit()
 
-		po = make_purchase_order(so.name, selected_items=so_items)[0]
+		po = make_purchase_order(so.name, selected_items=so_items)
 
 		supplier = frappe.get_doc("Supplier", "_Test Supplier")
 		self.assertEqual(po.tax_category or None, supplier.tax_category or None)
