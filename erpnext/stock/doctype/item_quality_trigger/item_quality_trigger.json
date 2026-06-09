@@ -9,6 +9,7 @@
   "transaction_section",
   "document_type",
   "transaction_sub_type",
+  "party_transaction_type",
   "column_break_txn",
   "warehouse_role",
   "applicable_warehouse",
@@ -49,17 +50,24 @@
    "options": "\nMaterial Receipt\nMaterial Issue\nMaterial Transfer\nMaterial Transfer for Manufacture\nManufacture\nRepack\nSend to Subcontractor\nDisassemble"
   },
   {
+   "depends_on": "eval:['Purchase Receipt','Purchase Invoice','Delivery Note','Sales Invoice'].includes(doc.document_type)",
+   "description": "Restrict to external party transactions or internal (inter-company) transfers. Leave blank to apply to both.",
+   "fieldname": "party_transaction_type",
+   "fieldtype": "Select",
+   "label": "Transaction Type",
+   "options": "\nExternal\nInternal Transfer"
+  },
+  {
    "fieldname": "column_break_txn",
    "fieldtype": "Column Break"
   },
   {
-   "description": "Inbound = stock entering a warehouse (target). Outbound = stock leaving a warehouse (source).",
+   "description": "Inbound = stock entering a warehouse (target); Outbound = stock leaving (source). Auto-set when the document type allows only one direction.",
    "fieldname": "warehouse_role",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Warehouse Role",
-   "options": "Inbound\nOutbound",
-   "reqd": 1
+   "options": "Inbound\nOutbound"
   },
   {
    "description": "Optional. Restrict this trigger to a single warehouse (matched against the source or target per Warehouse Role).",

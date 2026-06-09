@@ -4,6 +4,7 @@
 import frappe
 
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.item_quality_trigger.item_quality_trigger import allowed_warehouse_roles
 from erpnext.tests.utils import ERPNextTestSuite
 
 TEST_TEMPLATE = "_Test QC Trigger Template"
@@ -125,3 +126,35 @@ class TestItemQualityTrigger(ERPNextTestSuite):
 		self.assertIsNone(meta.get_field("allow_to_make_quality_inspection_after_purchase_or_delivery"))
 		self.assertIsNone(meta.get_field("action_if_quality_inspection_is_rejected"))
 		self.assertIsNone(meta.get_field("action_if_quality_inspection_is_not_submitted"))
+
+	def test_allowed_warehouse_roles_matrix(self):
+		self.assertEqual(allowed_warehouse_roles("Purchase Receipt"), {"Inbound"})
+		self.assertEqual(allowed_warehouse_roles("Delivery Note"), {"Outbound"})
+		self.assertEqual(allowed_warehouse_roles("Stock Entry", "Material Receipt"), {"Inbound"})
+		self.assertEqual(allowed_warehouse_roles("Stock Entry", "Material Issue"), {"Outbound"})
+		self.assertEqual(allowed_warehouse_roles("Stock Entry", "Material Transfer"), {"Inbound", "Outbound"})
+
+	def test_single_direction_role_is_autoset(self):
+		item = make_item(properties={"is_stock_item": 1})
+		item.append("quality_triggers", trigger_row(warehouse_role=None))  # Purchase Receipt
+		item.save()
+		self.assertEqual(item.quality_triggers[0].warehouse_role, "Inbound")
+
+	def test_invalid_direction_is_rejected(self):
+		item = make_item(properties={"is_stock_item": 1})
+		# Purchase Receipt is inbound-only; Outbound must be rejected
+		item.append("quality_triggers", trigger_row(warehouse_role="Outbound"))
+		self.assertRaises(frappe.ValidationError, item.save)
+
+	def test_party_transaction_type_only_on_party_documents(self):
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry",
+				transaction_sub_type="Material Receipt",
+				warehouse_role=None,
+				party_transaction_type="Internal Transfer",
+			),
+		)
+		self.assertRaises(frappe.ValidationError, item.save)

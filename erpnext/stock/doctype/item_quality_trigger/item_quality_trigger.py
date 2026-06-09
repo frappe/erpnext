@@ -1,7 +1,43 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import frappe
+from frappe import _
 from frappe.model.document import Document
+
+# Document types that carry a party and can be an external transaction or an
+# internal (inter-company) transfer.
+PARTY_DOCTYPES = ("Purchase Receipt", "Purchase Invoice", "Delivery Note", "Sales Invoice")
+
+# Direction matrix: which warehouse role(s) make sense for a given document type
+# (and, for Stock Entry, a given purpose). A pure receipt is inbound-only, a pure
+# issue is outbound-only, and transfer/manufacture-style movements expose both.
+_INBOUND_ONLY = {"Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"}
+_OUTBOUND_ONLY = {"Delivery Note", "Sales Invoice"}
+_BOTH = {"Inbound", "Outbound"}
+_STOCK_ENTRY_ROLES = {
+	"Material Receipt": {"Inbound"},
+	"Material Issue": {"Outbound"},
+	"Send to Subcontractor": {"Outbound"},
+	"Material Transfer": set(_BOTH),
+	"Material Transfer for Manufacture": set(_BOTH),
+	"Manufacture": set(_BOTH),
+	"Repack": set(_BOTH),
+	"Disassemble": set(_BOTH),
+}
+
+
+def allowed_warehouse_roles(document_type: str, stock_entry_purpose: str | None = None) -> set[str]:
+	"""Warehouse roles valid for a document type / Stock Entry purpose."""
+	if document_type in _INBOUND_ONLY:
+		return {"Inbound"}
+	if document_type in _OUTBOUND_ONLY:
+		return {"Outbound"}
+	if document_type == "Stock Entry":
+		if not stock_entry_purpose:
+			return set(_BOTH)
+		return set(_STOCK_ENTRY_ROLES.get(stock_entry_purpose, _BOTH))
+	return set(_BOTH)
 
 
 class ItemQualityTrigger(Document):
@@ -29,6 +65,7 @@ class ItemQualityTrigger(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+		party_transaction_type: DF.Literal["", "External", "Internal Transfer"]
 		qc_mode: DF.Literal["Quarantine", "Block", "Warn", "Monitor"]
 		sample_size: DF.Float
 		sample_size_is_percentage: DF.Check
@@ -48,3 +85,56 @@ class ItemQualityTrigger(Document):
 	# end: auto-generated types
 
 	pass
+
+
+def validate_item_quality_triggers(doc, method=None):
+	"""Validate the quality_triggers child rows on Item / Item Group.
+
+	Wired via doc_events because a child doctype's own validate() is not invoked
+	automatically by the framework.
+	"""
+	for row in doc.get("quality_triggers") or []:
+		_validate_trigger_row(row)
+
+
+def _validate_trigger_row(row):
+	# Stock Entry purpose only applies to Stock Entry rows.
+	if row.transaction_sub_type and row.document_type != "Stock Entry":
+		frappe.throw(_("Row #{0}: Stock Entry Purpose applies only to Stock Entry.").format(row.idx))
+
+	# External / Internal Transfer only applies to party documents.
+	if row.get("party_transaction_type") and row.document_type not in PARTY_DOCTYPES:
+		frappe.throw(
+			_(
+				"Row #{0}: Transaction Type (External / Internal Transfer) applies only to "
+				"Purchase Receipt, Purchase Invoice, Delivery Note and Sales Invoice."
+			).format(row.idx)
+		)
+
+	# Warehouse role must respect the direction implied by the document / purpose.
+	allowed = allowed_warehouse_roles(row.document_type, row.transaction_sub_type)
+	context = f" ({row.transaction_sub_type})" if row.transaction_sub_type else ""
+
+	if len(allowed) == 1:
+		(only,) = tuple(allowed)
+		if row.warehouse_role and row.warehouse_role != only:
+			frappe.throw(
+				_("Row #{0}: {1}{2} can only use the {3} warehouse role.").format(
+					row.idx, row.document_type, context, only
+				)
+			)
+		# auto-set so the user need not pick the only valid direction
+		row.warehouse_role = only
+	else:
+		if not row.warehouse_role:
+			frappe.throw(
+				_("Row #{0}: Select a warehouse role (Inbound or Outbound) for {1}{2}.").format(
+					row.idx, row.document_type, context
+				)
+			)
+		if row.warehouse_role not in allowed:
+			frappe.throw(
+				_("Row #{0}: {1}{2} cannot use the {3} warehouse role.").format(
+					row.idx, row.document_type, context, row.warehouse_role
+				)
+			)
