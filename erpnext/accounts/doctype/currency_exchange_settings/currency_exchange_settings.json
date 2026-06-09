@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "creation": "2022-01-10 13:03:26.237081",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -78,7 +79,7 @@
    "fieldname": "service_provider",
    "fieldtype": "Select",
    "label": "Service Provider",
-   "options": "frankfurter.dev\nexchangerate.host\nCustom",
+   "options": "frankfurter.dev\nexchangerate.host\nfrankfurter.dev - v2\nCustom",
    "reqd": 1
   },
   {
@@ -104,7 +105,11 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2025-11-25 13:03:41.896424",
+=======
+ "modified": "2026-06-09 11:34:10.432378",
+>>>>>>> 56bfe6b6a6 (feat(currency exchange settings): frankfurter v2 support)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Currency Exchange Settings",

@@ -29,7 +29,7 @@ class CurrencyExchangeSettings(Document):
 		disabled: DF.Check
 		req_params: DF.Table[CurrencyExchangeSettingsDetails]
 		result_key: DF.Table[CurrencyExchangeSettingsResult]
-		service_provider: DF.Literal["frankfurter.dev", "exchangerate.host", "Custom"]
+		service_provider: DF.Literal["frankfurter.dev", "exchangerate.host", "frankfurter.dev - v2", "Custom"]
 		url: DF.Data | None
 		use_http: DF.Check
 	# end: auto-generated types
@@ -70,6 +70,14 @@ class CurrencyExchangeSettings(Document):
 			self.append("req_params", {"key": "base", "value": "{from_currency}"})
 			self.append("req_params", {"key": "symbols", "value": "{to_currency}"})
 
+		elif self.service_provider == "frankfurter.dev - v2":
+			self.set("result_key", [])
+			self.set("req_params", [])
+
+			self.api_endpoint = get_api_endpoint(self.service_provider, self.use_http)
+			self.append("result_key", {"key": "rate"})
+			self.append("req_params", {"key": "date", "value": "{transaction_date}"})
+
 	def validate_parameters(self):
 		params = {}
 		for row in self.req_params:
@@ -105,13 +113,20 @@ class CurrencyExchangeSettings(Document):
 
 @frappe.whitelist()
 def get_api_endpoint(service_provider: str | None = None, use_http: bool = False):
-	if service_provider and service_provider in ["exchangerate.host", "frankfurter.dev", "frankfurter.app"]:
+	if service_provider and service_provider in [
+		"exchangerate.host",
+		"frankfurter.dev",
+		"frankfurter.app",
+		"frankfurter.dev - v2",
+	]:
 		if service_provider == "exchangerate.host":
 			api = "api.exchangerate.host/convert"
 		elif service_provider == "frankfurter.app":
 			api = "api.frankfurter.app/{transaction_date}"
 		elif service_provider == "frankfurter.dev":
 			api = "api.frankfurter.dev/v1/{transaction_date}"
+		elif service_provider == "frankfurter.dev - v2":
+			api = "api.frankfurter.dev/v2/rate/{from_currency}/{to_currency}"
 
 		protocol = "https://"
 		if use_http:
