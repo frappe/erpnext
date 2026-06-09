@@ -95,16 +95,12 @@ def get_data(filters):
 def get_sales_details(filters):
 	item_details_map = {}
 
-<<<<<<< HEAD
-	date_field = "s.transaction_date" if filters["based_on"] == "Sales Order" else "s.posting_date"
-=======
 	if filters["based_on"] not in ("Sales Order", "Sales Invoice"):
 		frappe.throw(_("Invalid value {0} for 'Based On'").format(filters["based_on"]))
 
 	parent = frappe.qb.DocType(filters["based_on"])
 	child_doctype = "Sales Order Item" if filters["based_on"] == "Sales Order" else "Sales Invoice Item"
 	child = frappe.qb.DocType(child_doctype)
->>>>>>> bd0acf4413 (fix: sql injection)
 
 	date_diff = CustomFunction("DATEDIFF", ["d1", "d2"])
 	current_date = CustomFunction("CURRENT_DATE", [])
