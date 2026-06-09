@@ -538,6 +538,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.update_disassembled_order()
 		self.adjust_stock_reservation_entries_for_return()
 		self.update_stock_reservation_entries()
+		# Release the Work Order's own reservation for items being sent to the subcontractor
+		# before the negative-stock guard runs in update_stock_ledger().
+		self.update_wo_reservation_for_subcontracting()
 		self.update_stock_ledger()
 		self.make_stock_reserve_for_wip_and_fg()
 		self.reserve_stock_for_subcontracting()
@@ -589,6 +592,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.update_quality_inspection()
 		self.adjust_stock_reservation_entries_for_return()
 		self.update_stock_reservation_entries()
+		# Recompute (now excludes this cancelled entry) so the freed reservation is restored.
+		self.update_wo_reservation_for_subcontracting()
 		self.delete_auto_created_batches()
 		self.delete_linked_stock_entry()
 
@@ -2375,6 +2380,52 @@ class StockEntry(StockController, SubcontractingInwardController):
 			return True
 
 		return False
+
+	def update_wo_reservation_for_subcontracting(self):
+		# A "Send to Subcontractor" entry never keeps its `work_order` (validate clears it for this
+		# purpose), so the owning Work Order is derived from the Subcontracting Order / Purchase Order
+		# that raised the transfer. Each such Work Order that reserves stock gets its reservation for
+		# the sent items released, so the negative-stock guard stops blocking the consumption.
+		if self.purpose != "Send to Subcontractor":
+			return
+
+		for wo_name in self.get_reserved_work_orders_for_subcontracting():
+			frappe.get_doc("Work Order", wo_name).release_reserved_qty_for_subcontract_transfer()
+
+	def get_reserved_work_orders_for_subcontracting(self):
+		job_cards = set()
+		if self.subcontracting_order:
+			job_cards.update(
+				frappe.get_all(
+					"Subcontracting Order Item",
+					filters={"parent": self.subcontracting_order},
+					pluck="job_card",
+				)
+			)
+		if self.purchase_order:
+			job_cards.update(
+				frappe.get_all(
+					"Purchase Order Item", filters={"parent": self.purchase_order}, pluck="job_card"
+				)
+			)
+
+		job_cards = {jc for jc in job_cards if jc}
+		if not job_cards:
+			return []
+
+		work_orders = frappe.get_all(
+			"Job Card", filters={"name": ["in", list(job_cards)]}, pluck="work_order"
+		)
+
+		reserved_work_orders = []
+		for work_order in set(work_orders):
+			if not work_order:
+				continue
+
+			if frappe.get_cached_value("Work Order", work_order, "reserve_stock"):
+				reserved_work_orders.append(work_order)
+
+		return reserved_work_orders
 
 	@frappe.whitelist()
 	def get_item_details(self, args: ItemDetailsCtx = None, for_update=False):
