@@ -73,12 +73,17 @@ def format_report_data(filters: Filters, item_details: dict, to_date: str) -> li
 	return data
 
 
+def normalize_fifo_queue(fifo_queue: list) -> list:
+	"""Convert batch valuation slots to the standard [qty, posting_date, value] shape."""
+	return [get_batch_report_slot(slot) if is_batch_slot(slot) else slot for slot in fifo_queue]
+
+
 def get_report_fifo_queue(fifo_queue: list, has_batch_no: bool) -> list:
 	get_posting_date = itemgetter(FIFO_POSTING_DATE_INDEX)
 	fifo_queue = sorted([slot for slot in fifo_queue if get_posting_date(slot)], key=get_posting_date)
 
 	if has_batch_no:
-		return [get_batch_report_slot(slot) for slot in fifo_queue]
+		return normalize_fifo_queue(fifo_queue)
 
 	return fifo_queue
 
@@ -114,7 +119,7 @@ def get_report_row(filters: Filters, item_dict: dict, fifo_queue: list, to_date:
 
 def get_average_age(fifo_queue: list, to_date: str) -> float:
 	age_qty = total_qty = 0.0
-	for slot in fifo_queue:
+	for slot in normalize_fifo_queue(fifo_queue):
 		qty = get_slot_qty(slot)
 		age_qty += date_diff(to_date, slot[FIFO_DATE_INDEX]) * qty
 		total_qty += qty
