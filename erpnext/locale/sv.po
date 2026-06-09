@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-06-07 10:20+0000\n"
-"PO-Revision-Date: 2026-06-08 19:39\n"
+"PO-Revision-Date: 2026-06-09 20:05\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -40266,7 +40266,7 @@ msgstr "Framsteg % för uppgift kan inte vara mer än 100."
 
 #: erpnext/projects/report/delayed_tasks_summary/delayed_tasks_summary.py:116
 msgid "Progress (%)"
-msgstr "Framsteg(%)"
+msgstr "Framsteg (%)"
 
 #: erpnext/projects/doctype/project/project.py:412
 msgid "Project Collaboration Invitation"
