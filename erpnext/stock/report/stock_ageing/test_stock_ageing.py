@@ -3,7 +3,7 @@
 
 import frappe
 
-from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots, format_report_data
+from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots, format_report_data, get_average_age
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -124,6 +124,18 @@ class TestStockAgeing(ERPNextTestSuite):
 		self.assertEqual(result["qty_after_transaction"], result["total_qty"])
 		self.assertEqual(queue[0][0], 10.0)
 		self.assertEqual(queue[1][0], 10.0)
+
+	def test_item_filter_supports_multi_select_values(self):
+		bundle = frappe.qb.DocType("Serial and Batch Bundle")
+		query = frappe.qb.from_(bundle).select(bundle.name)
+
+		filtered_query = FIFOSlots(frappe._dict(item_code=["Item A"]), [])._apply_filter(
+			query, bundle, "item_code"
+		)
+
+		sql = filtered_query.get_sql()
+		self.assertIn(" IN ", sql)
+		self.assertNotIn("=[", sql)
 
 	def test_basic_stock_reconciliation(self):
 		"""
@@ -892,6 +904,11 @@ class TestStockAgeing(ERPNextTestSuite):
 		report_data = format_report_data(self.filters, item_details, self.filters["to_date"])
 
 		self.assertEqual(report_data[0][7:15], [8.0, 80.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+
+	def test_average_age_accepts_batchwise_valuation_slots(self):
+		fifo_queue = [["SA-BATCH-SLOT", 1, 5.0, "2021-12-01", 50.0]]
+
+		self.assertEqual(get_average_age(fifo_queue, "2021-12-10"), 9.0)
 
 	def test_serial_transfer_replay_preserves_serial_slots(self):
 		fifo_slots = FIFOSlots(self.filters, [])
