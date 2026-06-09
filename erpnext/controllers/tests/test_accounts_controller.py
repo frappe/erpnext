@@ -988,6 +988,34 @@ class TestAccountsController(ERPNextTestSuite):
 		self.assertEqual(sinv.taxes[0].account_head, "_Test Account Excise Duty - _TC")
 		self.assertEqual(sinv.total_taxes_and_charges, 5)
 
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"add_taxes_from_item_tax_template": 1, "add_taxes_from_taxes_and_charges_template": 0},
+	)
+	def test_19b_fetch_taxes_from_item_tax_template_purchase_invoice(self):
+		pinv = frappe.new_doc("Purchase Invoice")
+		pinv.supplier = "_Test Supplier"
+		pinv.company = self.company
+		pinv.currency = "INR"
+		item = pinv.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"qty": 1,
+				"rate": 50,
+				"item_tax_template": "_Test Account Excise Duty @ 10 - _TC",
+			},
+		)
+
+		item_details = pinv.fetch_item_details(item)
+		pinv.add_taxes_from_item_template(item, item_details)
+
+		self.assertEqual(len(pinv.taxes), 1)
+		tax_row = pinv.taxes[0]
+		self.assertEqual(tax_row.account_head, "_Test Account Excise Duty - _TC")
+		self.assertEqual(tax_row.category, "Total")
+		self.assertEqual(tax_row.add_deduct_tax, "Add")
+
 	def test_20_journal_against_sales_invoice(self):
 		# Invoice in Foreign Currency
 		si = self.create_sales_invoice(qty=1, conversion_rate=80, rate=1)
