@@ -1062,7 +1062,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
 
-		make_purchase_receipt(warehouse="Stores - TCP1", company=company)
+		stock = make_purchase_receipt(warehouse="Stores - TCP1", company=company)
 
 		dn = create_delivery_note(
 			company=company,
@@ -1085,6 +1085,8 @@ class TestPurchaseReceipt(FrappeTestCase):
 		supplier = frappe.get_doc("Supplier", "_Test Internal Supplier 2")
 		self.assertEqual(pr.tax_category or None, supplier.tax_category or None)
 		self.assertEqual(pr.language or None, supplier.language or None)
+		dn.cancel()
+		stock.cancel()
 
 	def test_lcv_for_internal_transfer(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt

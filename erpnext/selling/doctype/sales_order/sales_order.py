@@ -1510,7 +1510,6 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 		target.shipping_rule = ""
 		target.tc_name = ""
 		target.terms = ""
-		target.payment_terms_template = ""
 		target.payment_schedule = []
 
 		if is_drop_ship_order(target):
@@ -1549,16 +1548,7 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 		{
 			"Sales Order": {
 				"doctype": "Purchase Order",
-				"field_no_map": [
-					"address_display",
-					"contact_display",
-					"contact_mobile",
-					"contact_email",
-					"contact_person",
-					"taxes_and_charges",
-					"shipping_address",
-					"dispatch_address",
-				],
+				"field_no_map": [*CROSS_PARTY_FIELD_NO_MAP],
 				"validation": {"docstatus": ["=", 1]},
 			},
 			"Sales Order Item": {
