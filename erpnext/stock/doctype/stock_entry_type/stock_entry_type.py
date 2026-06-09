@@ -38,6 +38,7 @@ class StockEntryType(Document):
 			"Return Raw Material to Customer",
 			"Subcontracting Delivery",
 			"Subcontracting Return",
+			"QC Release",
 		]
 	# end: auto-generated types
 
@@ -61,6 +62,7 @@ class StockEntryType(Document):
 			"Return Raw Material to Customer",
 			"Subcontracting Delivery",
 			"Subcontracting Return",
+			"QC Release",
 		]:
 			frappe.throw(_("Stock Entry Type {0} cannot be set as standard").format(self.name))
 

@@ -89,6 +89,12 @@ def get_preset_records(country=None):
 		},
 		{
 			"doctype": "Stock Entry Type",
+			"name": _("QC Release"),
+			"purpose": "QC Release",
+			"is_standard": 1,
+		},
+		{
+			"doctype": "Stock Entry Type",
 			"name": _("Manufacture"),
 			"purpose": "Manufacture",
 			"is_standard": 1,
