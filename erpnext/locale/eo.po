@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version:  frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-06-07 10:19+0000\n"
-"PO-Revision-Date: 2026-06-08 11:36+0000\n"
+"PO-Revision-Date: 2026-06-09 12:47+0000\n"
 "Last-Translator: hello@frappe.io\n"
 "Language: eo_UY\n"
 "Language-Team: Esperanto\n"
@@ -461,7 +461,7 @@ msgstr "crwdns132130:0crwdne132130:0"
 #: erpnext/stock/doctype/item/item_prices.html:128
 #: erpnext/stock/doctype/item/item_prices.html:136
 msgid "+ Add Price"
-msgstr ""
+msgstr "crwdns202015:0crwdne202015:0"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:112
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:360
@@ -670,7 +670,7 @@ msgstr "crwdns200702:0crwdne200702:0"
 #. Content of the 'Prices HTML' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "<div id=\\\"item-prices-container\\\"></div>"
-msgstr ""
+msgstr "crwdns202017:0crwdne202017:0"
 
 #. Content of the 'uom_help_html' (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -2037,7 +2037,7 @@ msgstr "crwdns154818:0crwdne154818:0"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Accounts Receivable / Payable remarks length"
-msgstr ""
+msgstr "crwdns202023:0crwdne202023:0"
 
 #. Label of the accounts_receivable_credit (Link) field in DocType 'Invoice
 #. Discounting'
@@ -2223,13 +2223,13 @@ msgstr "crwdns155134:0crwdne155134:0"
 #. DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Action if Quality Inspection is not submitted"
-msgstr ""
+msgstr "crwdns202025:0crwdne202025:0"
 
 #. Label of the action_if_quality_inspection_is_rejected (Select) field in
 #. DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Action if Quality Inspection is rejected"
-msgstr ""
+msgstr "crwdns202027:0crwdne202027:0"
 
 #. Label of the maintain_same_rate_action (Select) field in DocType 'Buying
 #. Settings'
@@ -2241,7 +2241,7 @@ msgstr "crwdns201743:0crwdne201743:0"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Action if same rate is not maintained throughout internal transaction"
-msgstr ""
+msgstr "crwdns202029:0crwdne202029:0"
 
 #. Label of the maintain_same_rate_action (Select) field in DocType 'Selling
 #. Settings'
@@ -2797,7 +2797,7 @@ msgstr "crwdns132384:0crwdne132384:0"
 #. Label of the non_stock_items (Table) field in DocType 'Work Order'
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 msgid "Additional Costs (as per BOM)"
-msgstr ""
+msgstr "crwdns202031:0crwdne202031:0"
 
 #. Label of the additional_data (Code) field in DocType 'Common Code'
 #: erpnext/edi/doctype/common_code/common_code.json
@@ -3737,7 +3737,7 @@ msgstr "crwdns64032:0crwdne64032:0"
 
 #: erpnext/stock/doctype/item/item_prices.html:72
 msgid "All active prices for this item across buying and selling price lists."
-msgstr ""
+msgstr "crwdns202033:0crwdne202033:0"
 
 #. Description of the 'Reconciled' (Check) field in DocType 'Process Payment
 #. Reconciliation Log'
@@ -4106,7 +4106,7 @@ msgstr "crwdns154832:0crwdne154832:0"
 #. DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Allow UOM with conversion rate defined in Item"
-msgstr ""
+msgstr "crwdns202035:0crwdne202035:0"
 
 #. Label of the allow_discount_change (Check) field in DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
@@ -4174,7 +4174,7 @@ msgstr "crwdns151932:0crwdne151932:0"
 #. DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Allow internal transfers at user-defined rate"
-msgstr ""
+msgstr "crwdns202037:0crwdne202037:0"
 
 #. Description of the 'Allow Continuous Material Consumption' (Check) field in
 #. DocType 'Manufacturing Settings'
@@ -4206,19 +4206,19 @@ msgstr "crwdns200508:0crwdne200508:0"
 #. Label of the allow_negative_stock (Check) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Allow negative stock"
-msgstr ""
+msgstr "crwdns202039:0crwdne202039:0"
 
 #. Label of the allow_negative_stock_for_batch (Check) field in DocType 'Stock
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Allow negative stock for Batch"
-msgstr ""
+msgstr "crwdns202041:0crwdne202041:0"
 
 #. Label of the allow_partial_reservation (Check) field in DocType 'Stock
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Allow partial reservation"
-msgstr ""
+msgstr "crwdns202043:0crwdne202043:0"
 
 #. Description of the 'Zero-Quantity Line Items' (Section Break) field in
 #. DocType 'Selling Settings'
@@ -4256,19 +4256,19 @@ msgstr "crwdns200726:0crwdne200726:0"
 #. DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Allow to edit stock UOM qty for Purchase documents"
-msgstr ""
+msgstr "crwdns202049:0crwdne202049:0"
 
 #. Label of the allow_to_edit_stock_uom_qty_for_sales (Check) field in DocType
 #. 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Allow to edit stock UOM qty for Sales documents"
-msgstr ""
+msgstr "crwdns202051:0crwdne202051:0"
 
 #. Label of the allow_to_make_quality_inspection_after_purchase_or_delivery
 #. (Check) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Allow to make Quality Inspection after Purchase / Delivery"
-msgstr ""
+msgstr "crwdns202053:0crwdne202053:0"
 
 #. Description of the 'Allow Excess Material Transfer' (Check) field in DocType
 #. 'Manufacturing Settings'
@@ -4285,7 +4285,7 @@ msgstr "crwdns64216:0crwdne64216:0"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Allowed DocTypes"
-msgstr ""
+msgstr "crwdns202055:0crwdne202055:0"
 
 #. Group in Supplier's connections
 #. Group in Customer's connections
@@ -4734,7 +4734,7 @@ msgstr "crwdns111618:0crwdne111618:0"
 #. Request' (Check) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "An email will be sent to notify the User with the role 'Purchase Manager' when an automatic Material Request is created."
-msgstr ""
+msgstr "crwdns202059:0crwdne202059:0"
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:565
 msgid "An error has been appeared while reposting item valuation via {0}"
@@ -6145,7 +6145,7 @@ msgstr "crwdns154232:0crwdne154232:0"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Auto Reconciliation job trigger"
-msgstr ""
+msgstr "crwdns202061:0crwdne202061:0"
 
 #: erpnext/accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.py:150
 #: erpnext/accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.py:198
@@ -6182,7 +6182,7 @@ msgstr "crwdns201753:0crwdne201753:0"
 #. in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Auto create Serial and Batch Bundle for outward"
-msgstr ""
+msgstr "crwdns202063:0crwdne202063:0"
 
 #. Label of the auto_create_subcontracting_order (Check) field in DocType
 #. 'Buying Settings'
@@ -6199,7 +6199,7 @@ msgstr "crwdns200730:0crwdne200730:0"
 #. 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Auto insert Item Price if missing"
-msgstr ""
+msgstr "crwdns202065:0crwdne202065:0"
 
 #. Description of the 'Enable Automatic Party Matching' (Check) field in
 #. DocType 'Accounts Settings'
@@ -6216,7 +6216,7 @@ msgstr "crwdns132804:0crwdne132804:0"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Auto reconcile Payments"
-msgstr ""
+msgstr "crwdns202067:0crwdne202067:0"
 
 #: erpnext/public/js/controllers/buying.js:377
 #: erpnext/public/js/utils/sales_common.js:484
@@ -6227,18 +6227,18 @@ msgstr "crwdns65254:0crwdne65254:0"
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Auto reserve Serial and Batch Nos"
-msgstr ""
+msgstr "crwdns202069:0crwdne202069:0"
 
 #. Label of the auto_reserve_stock_for_sales_order_on_purchase (Check) field in
 #. DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Auto reserve Stock for Sales Order on Purchase"
-msgstr ""
+msgstr "crwdns202071:0crwdne202071:0"
 
 #. Label of the auto_reserve_stock (Check) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Auto reserve stock"
-msgstr ""
+msgstr "crwdns202073:0crwdne202073:0"
 
 #. Description of the 'Write Off Limit' (Currency) field in DocType 'POS
 #. Profile'
@@ -6260,19 +6260,19 @@ msgstr "crwdns132812:0crwdne132812:0"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Automatically add Taxes and Charges from Item Tax Template"
-msgstr ""
+msgstr "crwdns202075:0crwdne202075:0"
 
 #. Label of the add_taxes_from_taxes_and_charges_template (Check) field in
 #. DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Automatically add taxes from Taxes and Charges Template"
-msgstr ""
+msgstr "crwdns202077:0crwdne202077:0"
 
 #. Label of the automatically_fetch_payment_terms (Check) field in DocType
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Automatically fetch Payment Terms from Order/Quotation"
-msgstr ""
+msgstr "crwdns202079:0crwdne202079:0"
 
 #. Label of the automatically_post_balancing_accounting_entry (Check) field in
 #. DocType 'Accounting Dimension Detail'
@@ -6284,7 +6284,7 @@ msgstr "crwdns132818:0crwdne132818:0"
 #. in DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Automatically process deferred Accounting entry"
-msgstr ""
+msgstr "crwdns202081:0crwdne202081:0"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:7
 msgid "Automotive"
@@ -7536,7 +7536,7 @@ msgstr "crwdns65808:0crwdne65808:0"
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Batch Item settings"
-msgstr ""
+msgstr "crwdns202083:0crwdne202083:0"
 
 #. Label of the batch_no (Link) field in DocType 'POS Invoice Item'
 #. Label of the batch_no (Link) field in DocType 'Purchase Invoice Item'
@@ -8184,13 +8184,13 @@ msgstr "crwdns66088:0crwdne66088:0"
 #. DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Book Asset Depreciation entry automatically"
-msgstr ""
+msgstr "crwdns202085:0crwdne202085:0"
 
 #. Label of the book_deferred_entries_based_on (Select) field in DocType
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Book Deferred entries based on"
-msgstr ""
+msgstr "crwdns202087:0crwdne202087:0"
 
 #: erpnext/www/book_appointment/index.html:15
 msgid "Book an appointment"
@@ -8200,13 +8200,13 @@ msgstr "crwdns66098:0crwdne66098:0"
 #. DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Book deferred entries via Journal Entry"
-msgstr ""
+msgstr "crwdns202089:0crwdne202089:0"
 
 #. Label of the book_tax_discount_loss (Check) field in DocType 'Accounts
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Book tax loss on early payment discount"
-msgstr ""
+msgstr "crwdns202091:0crwdne202091:0"
 
 #. Option for the 'Status' (Select) field in DocType 'Shipment'
 #: erpnext/stock/doctype/shipment/shipment.json
@@ -8538,7 +8538,7 @@ msgstr "crwdns66230:0crwdne66230:0"
 
 #: erpnext/stock/doctype/item/item_prices.html:96
 msgid "Buy & Sell"
-msgstr ""
+msgstr "crwdns202093:0crwdne202093:0"
 
 #. Description of a DocType
 #: erpnext/selling/doctype/customer/customer.json
@@ -9725,7 +9725,7 @@ msgstr "crwdns66762:0crwdne66762:0"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Changing the account in any transaction of the DocTypes listed below will trigger a repost. To prevent reposting, remove the relevant DocType from the list."
-msgstr ""
+msgstr "crwdns202099:0crwdne202099:0"
 
 #: erpnext/stock/doctype/item/item.js:16
 msgid "Changing the valuation method to Moving Average will affect new transactions. If backdated entries are added, earlier FIFO-based entries will be reposted, which may change closing balances."
@@ -9833,7 +9833,7 @@ msgstr "crwdns161992:0crwdne161992:0"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Check Supplier invoice number uniqueness"
-msgstr ""
+msgstr "crwdns202101:0crwdne202101:0"
 
 #. Description of the 'Is Container' (Check) field in DocType 'Location'
 #: erpnext/assets/doctype/location/location.json
@@ -11899,7 +11899,7 @@ msgstr "crwdns154381:0crwdne154381:0"
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Convert Item description to clean HTML in transactions"
-msgstr ""
+msgstr "crwdns202105:0crwdne202105:0"
 
 #: erpnext/accounts/doctype/account/account.js:124
 #: erpnext/accounts/doctype/cost_center/cost_center.js:123
@@ -12896,7 +12896,7 @@ msgstr "crwdns197168:0crwdne197168:0"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Create payment requests in Draft status"
-msgstr ""
+msgstr "crwdns202117:0crwdne202117:0"
 
 #. Label of an action in the Onboarding Step 'Create Supplier'
 #: erpnext/buying/onboarding_step/create_supplier/create_supplier.json
@@ -12974,7 +12974,7 @@ msgstr "crwdns68474:0crwdne68474:0"
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:604
 msgid "Creating Return of Components ..."
-msgstr ""
+msgstr "crwdns202119:0crwdne202119:0"
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:59
 msgid "Creating Sales Invoices ..."
@@ -14403,7 +14403,7 @@ msgstr "crwdns161078:0crwdne161078:0"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Data fetch method"
-msgstr ""
+msgstr "crwdns202121:0crwdne202121:0"
 
 #. Label of the date (Date) field in DocType 'Bulk Transaction Log Detail'
 #: erpnext/bulk_transaction/doctype/bulk_transaction_log_detail/bulk_transaction_log_detail.json
@@ -15410,7 +15410,7 @@ msgstr "crwdns69670:0crwdne69670:0"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Delete Accounting and Stock Ledger entries on deletion of transaction"
-msgstr ""
+msgstr "crwdns202123:0crwdne202123:0"
 
 #. Label of the delete_bin_data_status (Select) field in DocType 'Transaction
 #. Deletion Record'
@@ -16079,7 +16079,7 @@ msgstr "crwdns70108:0crwdne70108:0"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Determine Address Tax Category from"
-msgstr ""
+msgstr "crwdns202127:0crwdne202127:0"
 
 #. Option for the 'Fuel Type' (Select) field in DocType 'Vehicle'
 #: erpnext/setup/doctype/vehicle/vehicle.json
@@ -16328,7 +16328,7 @@ msgstr "crwdns133996:0crwdne133996:0"
 #. 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Disable Serial No and Batch selector"
-msgstr ""
+msgstr "crwdns202131:0crwdne202131:0"
 
 #. Label of the disable_transaction_threshold (Check) field in DocType 'Tax
 #. Withholding Category'
@@ -16741,7 +16741,7 @@ msgstr "crwdns134044:0crwdne134044:0"
 #. DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Display & Data Formatting"
-msgstr ""
+msgstr "crwdns202135:0crwdne202135:0"
 
 #. Label of the display_name (Data) field in DocType 'Financial Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
@@ -16897,7 +16897,7 @@ msgstr "crwdns134072:0crwdne134072:0"
 #. field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Do not update Serial / Batch on creation of auto bundle"
-msgstr ""
+msgstr "crwdns202137:0crwdne202137:0"
 
 #. Label of the do_not_update_variants (Check) field in DocType 'Item Variant
 #. Settings'
@@ -16909,7 +16909,7 @@ msgstr "crwdns134074:0crwdne134074:0"
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Do not use Batch-wise Valuation"
-msgstr ""
+msgstr "crwdns202139:0crwdne202139:0"
 
 #: erpnext/assets/doctype/asset/asset.js:956
 msgid "Do you really want to restore this scrapped asset?"
@@ -17866,7 +17866,7 @@ msgstr "crwdns112320:0crwdne112320:0"
 
 #: erpnext/public/js/controllers/transaction.js:2947
 msgid "Enable <b>{0}</b> on the Item master to proceed with {1} inspection."
-msgstr ""
+msgstr "crwdns202143:0{0}crwdnd202143:0{1}crwdne202143:0"
 
 #. Label of the enable_accounting_dimensions (Check) field in DocType 'Accounts
 #. Settings'
@@ -18083,7 +18083,7 @@ msgstr "crwdns134234:0crwdne134234:0"
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Enable stock reservation"
-msgstr ""
+msgstr "crwdns202145:0crwdne202145:0"
 
 #. Description of the 'Has Priority' (Check) field in DocType 'Pricing Rule'
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
@@ -18094,7 +18094,7 @@ msgstr "crwdns134236:0crwdne134236:0"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable this if you are experiencing issues with the new budget controller. Uses the older budget validation logic"
-msgstr ""
+msgstr "crwdns202147:0crwdne202147:0"
 
 #. Description of the 'Calculate daily depreciation using total days in
 #. depreciation period' (Check) field in DocType 'Accounts Settings'
@@ -19256,7 +19256,7 @@ msgstr "crwdns71678:0crwdne71678:0"
 #. DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Fetch Payment Schedule in Payment Request"
-msgstr ""
+msgstr "crwdns202151:0crwdne202151:0"
 
 #: erpnext/accounts/doctype/subscription/subscription.js:36
 msgid "Fetch Subscription Updates"
@@ -19287,7 +19287,7 @@ msgstr "crwdns71686:0crwdne71686:0"
 #. DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Fetch valuation rate for internal Transaction"
-msgstr ""
+msgstr "crwdns202153:0crwdne202153:0"
 
 #: erpnext/selling/page/point_of_sale/pos_item_details.js:457
 msgid "Fetched only {0} available serial numbers."
@@ -20300,7 +20300,7 @@ msgstr "crwdns72030:0{0}crwdne72030:0"
 #. Label of the stock_frozen_upto_days (Int) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Freeze stocks older than (days)"
-msgstr ""
+msgstr "crwdns202157:0crwdne202157:0"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:107
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:185
@@ -20908,7 +20908,7 @@ msgstr "crwdns72350:0crwdne72350:0"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "General Ledger remarks length"
-msgstr ""
+msgstr "crwdns202161:0crwdne202161:0"
 
 #. Label of the gs (Section Break) field in DocType 'Item Group'
 #: erpnext/setup/doctype/item_group/item_group.json
@@ -21827,7 +21827,7 @@ msgstr "crwdns134716:0crwdne134716:0"
 #. Label of the use_naming_series (Check) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Have default Naming Series for Batch ID?"
-msgstr ""
+msgstr "crwdns202167:0crwdne202167:0"
 
 #: erpnext/setup/setup_wizard/data/designation.txt:19
 msgid "Head of Marketing and Sales"
@@ -22463,7 +22463,7 @@ msgstr "crwdns155374:0crwdne155374:0"
 #. DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "If enabled, users must enter Serial No. / Batch data manually instead of using the selector dialog."
-msgstr ""
+msgstr "crwdns202169:0crwdne202169:0"
 
 #. Description of the 'Variant Of' (Link) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -22678,7 +22678,7 @@ msgstr "crwdns134856:0crwdne134856:0"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Ignore Account closing balance"
-msgstr ""
+msgstr "crwdns202173:0crwdne202173:0"
 
 #: erpnext/stock/report/stock_balance/stock_balance.js:125
 msgid "Ignore Closing Balance"
@@ -23914,7 +23914,7 @@ msgstr "crwdns73692:0crwdne73692:0"
 #. DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Internal Transfer Rules"
-msgstr ""
+msgstr "crwdns202183:0crwdne202183:0"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice_dashboard.py:37
 msgid "Internal Transfers"
@@ -24027,7 +24027,7 @@ msgstr "crwdns73734:0crwdne73734:0"
 
 #: erpnext/selling/report/sales_analytics/sales_analytics.py:529
 msgid "Invalid Document Type {0}"
-msgstr ""
+msgstr "crwdns202185:0{0}crwdne202185:0"
 
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.py:325
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.py:330
@@ -24140,7 +24140,7 @@ msgstr "crwdns160658:0crwdne160658:0"
 
 #: erpnext/selling/report/sales_analytics/sales_analytics.py:507
 msgid "Invalid Tree Type {0}"
-msgstr ""
+msgstr "crwdns202187:0{0}crwdne202187:0"
 
 #: erpnext/edi/doctype/code_list/code_list_import.py:37
 msgid "Invalid Upload"
@@ -24197,11 +24197,11 @@ msgstr "crwdns157204:0crwdne157204:0"
 
 #: erpnext/accounts/report/inactive_sales_items/inactive_sales_items.py:98
 msgid "Invalid value {0} for 'Based On'"
-msgstr ""
+msgstr "crwdns202189:0{0}crwdne202189:0"
 
 #: erpnext/selling/report/inactive_customers/inactive_customers.py:18
 msgid "Invalid value {0} for 'Doctype'"
-msgstr ""
+msgstr "crwdns202191:0{0}crwdne202191:0"
 
 #: erpnext/accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:109
 #: erpnext/accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:119
@@ -28068,7 +28068,7 @@ msgstr "crwdns135398:0crwdne135398:0"
 #. DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Maintain same rate throughout internal Transaction"
-msgstr ""
+msgstr "crwdns202205:0crwdne202205:0"
 
 #. Label of the maintain_same_sales_rate (Check) field in DocType 'Selling
 #. Settings'
@@ -29381,7 +29381,7 @@ msgstr "crwdns76254:0crwdne76254:0"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Merge similar Account Heads"
-msgstr ""
+msgstr "crwdns202207:0crwdne202207:0"
 
 #: erpnext/public/js/utils.js:1098
 msgid "Merge taxes from multiple documents"
@@ -30202,7 +30202,7 @@ msgstr "crwdns76734:0crwdne76734:0"
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Negative Stock"
-msgstr ""
+msgstr "crwdns202211:0crwdne202211:0"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1608
 #: erpnext/stock/serial_batch_bundle.py:1548
@@ -30865,7 +30865,7 @@ msgstr "crwdns77070:0{0}crwdne77070:0"
 
 #: erpnext/stock/doctype/item/item_prices.html:135
 msgid "No active item prices found."
-msgstr ""
+msgstr "crwdns202215:0crwdne202215:0"
 
 #: erpnext/stock/doctype/item_variant_settings/item_variant_settings.js:46
 msgid "No additional fields available"
@@ -31185,7 +31185,7 @@ msgstr "crwdns77174:0crwdne77174:0"
 #. Period Closing Voucher'
 #: erpnext/accounts/doctype/process_period_closing_voucher/process_period_closing_voucher.json
 msgid "Normal Balances"
-msgstr ""
+msgstr "crwdns202221:0crwdne202221:0"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json erpnext/stock/utils.py:693
@@ -31422,7 +31422,7 @@ msgstr "crwdns135738:0crwdne135738:0"
 #. Label of the reorder_email_notify (Check) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Notify by email on creation of automatic Material Request"
-msgstr ""
+msgstr "crwdns202225:0crwdne202225:0"
 
 #. Description of the 'Notify Via Email' (Check) field in DocType 'Appointment
 #. Booking Settings'
@@ -32856,7 +32856,7 @@ msgstr "crwdns201981:0crwdne201981:0"
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Over Picking Allowance (%)"
-msgstr ""
+msgstr "crwdns202229:0crwdne202229:0"
 
 #: erpnext/controllers/stock_controller.py:1737
 msgid "Over Receipt"
@@ -34541,7 +34541,7 @@ msgstr "crwdns78710:0crwdne78710:0"
 #: erpnext/workspace_sidebar/invoicing.json
 #: erpnext/workspace_sidebar/payments.json
 msgid "Payment Reconciliation"
-msgstr "crwdns195880:0crwdne195880:0"
+msgstr "crwdns78712:0crwdne78712:0"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/payment_reconciliation_allocation/payment_reconciliation_allocation.json
@@ -36003,11 +36003,11 @@ msgstr "crwdns79324:0crwdne79324:0"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:665
 msgid "Please enter a valid Write Off Account"
-msgstr ""
+msgstr "crwdns202249:0crwdne202249:0"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:676
 msgid "Please enter a valid Write Off Cost Center"
-msgstr ""
+msgstr "crwdns202251:0crwdne202251:0"
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:723
 msgid "Please enter a valid number of deliveries"
@@ -37046,7 +37046,7 @@ msgstr "crwdns79740:0crwdne79740:0"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Posting Date inheritance for exchange gain / loss"
-msgstr ""
+msgstr "crwdns202253:0crwdne202253:0"
 
 #: erpnext/public/js/controllers/transaction.js:1110
 msgid "Posting Date will change to today's date as Edit Posting Date and Time is unchecked. Are you sure want to proceed?"
@@ -37541,7 +37541,7 @@ msgstr "crwdns79974:0crwdne79974:0"
 #. Label of the prices_html (HTML) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Prices HTML"
-msgstr ""
+msgstr "crwdns202257:0crwdne202257:0"
 
 #. Label of the pricing_tab (Tab Break) field in DocType 'Buying Settings'
 #. Label of the item_price_tab (Tab Break) field in DocType 'Selling Settings'
@@ -39862,7 +39862,7 @@ msgstr "crwdns81252:0crwdne81252:0"
 
 #: erpnext/public/js/controllers/transaction.js:2946
 msgid "Quality Inspection Not Configured"
-msgstr ""
+msgstr "crwdns202263:0crwdne202263:0"
 
 #. Name of a DocType
 #: erpnext/stock/doctype/quality_inspection_parameter/quality_inspection_parameter.json
@@ -40132,7 +40132,7 @@ msgstr "crwdns200570:0crwdne200570:0"
 
 #: erpnext/selling/page/point_of_sale/pos_item_selector.js:118
 msgid "Quantity Available"
-msgstr ""
+msgstr "crwdns202265:0crwdne202265:0"
 
 #. Label of the quantity_difference (Read Only) field in DocType 'Stock
 #. Reconciliation Item'
@@ -40144,7 +40144,7 @@ msgstr "crwdns136496:0crwdne136496:0"
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Quantity Tolerance"
-msgstr ""
+msgstr "crwdns202267:0crwdne202267:0"
 
 #. Label of the section_break_19 (Section Break) field in DocType 'Pricing
 #. Rule'
@@ -40429,7 +40429,7 @@ msgstr "crwdns81518:0{0}crwdnd81518:0{1}crwdne81518:0"
 #. Label of the auto_indent (Check) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Raise Material Request when stock reaches re-order level"
-msgstr ""
+msgstr "crwdns202269:0crwdne202269:0"
 
 #. Label of the complaint_raised_by (Data) field in DocType 'Warranty Claim'
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
@@ -41336,7 +41336,7 @@ msgstr "crwdns152226:0crwdne152226:0"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Reconciliation queue size"
-msgstr ""
+msgstr "crwdns202273:0crwdne202273:0"
 
 #. Label of the recording_html (HTML) field in DocType 'Call Log'
 #: erpnext/telephony/doctype/call_log/call_log.json
@@ -43244,12 +43244,12 @@ msgstr "crwdns136920:0crwdne136920:0"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Role Allowed to over bill "
-msgstr ""
+msgstr "crwdns202279:0crwdne202279:0"
 
 #. Label of the credit_controller (Link) field in DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Role allowed to bypass credit limit"
-msgstr ""
+msgstr "crwdns202281:0crwdne202281:0"
 
 #. Description of the 'Exempted Role' (Link) field in DocType 'Accounting
 #. Period'
@@ -43261,12 +43261,12 @@ msgstr "crwdns163970:0crwdne163970:0"
 #. field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Role allowed to create/edit back-dated transactions"
-msgstr ""
+msgstr "crwdns202283:0crwdne202283:0"
 
 #. Label of the stock_auth_role (Link) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Role allowed to edit frozen stock"
-msgstr ""
+msgstr "crwdns202285:0crwdne202285:0"
 
 #. Label of the role_to_override_stop_action (Link) field in DocType 'Accounts
 #. Settings'
@@ -43370,7 +43370,7 @@ msgstr "crwdns148826:0crwdne148826:0"
 #. Label of the round_row_wise_tax (Check) field in DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Round tax amount row-wise"
-msgstr ""
+msgstr "crwdns202287:0crwdne202287:0"
 
 #. Label of the rounded_total (Currency) field in DocType 'POS Invoice'
 #. Label of the base_rounded_total (Currency) field in DocType 'Purchase
@@ -44327,7 +44327,7 @@ msgstr "crwdns83312:0{0}crwdne83312:0"
 
 #: erpnext/controllers/selling_controller.py:909
 msgid "Row {0}: Cannot sell item {1} from Sample Retention Warehouse {2}"
-msgstr ""
+msgstr "crwdns202289:0{0}crwdnd202289:0{1}crwdnd202289:0{2}crwdne202289:0"
 
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:616
 msgid ""
@@ -44551,7 +44551,7 @@ msgstr "crwdns164260:0{0}crwdnd164260:0{1}crwdnd164260:0{2}crwdne164260:0"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:317
 msgid "Row {0}: Serial/Batch has been reset to values linked with Work Order {1} because the previously selected serial/batch does not belong to this Work Order."
-msgstr ""
+msgstr "crwdns202291:0{0}crwdnd202291:0{1}crwdne202291:0"
 
 #: erpnext/assets/doctype/asset_shift_allocation/asset_shift_allocation.py:58
 msgid "Row {0}: Shift cannot be changed since the depreciation has already been processed"
@@ -44595,7 +44595,7 @@ msgstr "crwdns83420:0{0}crwdne83420:0"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:401
 msgid "Row {0}: Update Stock must be checked for item {1} because it is against Pick List {2}."
-msgstr ""
+msgstr "crwdns202293:0{0}crwdnd202293:0{1}crwdnd202293:0{2}crwdne202293:0"
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:173
 msgid "Row {0}: Warehouse is required"
@@ -45984,11 +45984,11 @@ msgstr "crwdns198354:0crwdne198354:0"
 #: erpnext/manufacturing/doctype/work_order/work_order.js:136
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 msgid "Secondary Items (as per BOM)"
-msgstr ""
+msgstr "crwdns202295:0crwdne202295:0"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:135
 msgid "Secondary Items (as per Manufacture Entries)"
-msgstr ""
+msgstr "crwdns202297:0crwdne202297:0"
 
 #. Label of the secondary_items_cost (Currency) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
@@ -46640,7 +46640,7 @@ msgstr "crwdns84330:0crwdne84330:0"
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Serial Item settings"
-msgstr ""
+msgstr "crwdns202301:0crwdne202301:0"
 
 #. Label of the serial_no (Text) field in DocType 'POS Invoice Item'
 #. Label of the serial_no (Text) field in DocType 'Purchase Invoice Item'
@@ -48207,7 +48207,7 @@ msgstr "crwdns85050:0crwdne85050:0"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Show Payment Schedule in print"
-msgstr ""
+msgstr "crwdns202303:0crwdne202303:0"
 
 #. Label of the show_remarks (Check) field in DocType 'Process Statement Of
 #. Accounts'
@@ -48251,12 +48251,12 @@ msgstr "crwdns199606:0crwdne199606:0"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Show balances in Chart of Accounts"
-msgstr ""
+msgstr "crwdns202305:0crwdne202305:0"
 
 #. Label of the show_barcode_field (Check) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Show barcode field in stock transactions"
-msgstr ""
+msgstr "crwdns202307:0crwdne202307:0"
 
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.js:88
 msgid "Show in Bucket View"
@@ -48271,7 +48271,7 @@ msgstr "crwdns137334:0crwdne137334:0"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Show inclusive tax in print"
-msgstr ""
+msgstr "crwdns202309:0crwdne202309:0"
 
 #. Description of the 'Reverse Sign' (Check) field in DocType 'Financial Report
 #. Row'
@@ -48305,7 +48305,7 @@ msgstr "crwdns85082:0crwdne85082:0"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Show taxes as table in print"
-msgstr ""
+msgstr "crwdns202311:0crwdne202311:0"
 
 #: erpnext/accounts/report/consolidated_trial_balance/consolidated_trial_balance.js:80
 #: erpnext/accounts/report/trial_balance/trial_balance.js:100
@@ -49784,7 +49784,7 @@ msgstr "crwdns200050:0crwdne200050:0"
 #. Label of the stock_frozen_upto (Date) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Stock frozen up to"
-msgstr ""
+msgstr "crwdns202315:0crwdne202315:0"
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1131
 msgid "Stock has been unreserved for work order {0}."
@@ -50265,7 +50265,7 @@ msgstr "crwdns137502:0crwdne137502:0"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Submit Journal entries"
-msgstr ""
+msgstr "crwdns202317:0crwdne202317:0"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:185
 msgid "Submit this Work Order for further processing."
@@ -52902,7 +52902,7 @@ msgstr "crwdns87262:0crwdne87262:0"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:1745
 msgid "This Payment Entry is reconciled with {0}. Cancelling will automatically unreconcile it. Do you want to proceed?"
-msgstr ""
+msgstr "crwdns202331:0{0}crwdne202331:0"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.py:985
 msgid "This Purchase Order has been fully subcontracted."
@@ -52938,7 +52938,7 @@ msgstr "crwdns154986:0crwdne154986:0"
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "This can be enabled at specific Item level as well"
-msgstr ""
+msgstr "crwdns202333:0crwdne202333:0"
 
 #: erpnext/buying/doctype/supplier_scorecard/supplier_scorecard_dashboard.py:7
 msgid "This covers all scorecards tied to this Setup"
@@ -53069,7 +53069,7 @@ msgstr "crwdns87328:0crwdne87328:0"
 #. level' (Check) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "This option is useful if you want to ensure a constant supply of raw materials/products and avoid shortage. A Material Request will be raised automatically when stock reached the re-order level defined in the Item form."
-msgstr ""
+msgstr "crwdns202337:0crwdne202337:0"
 
 #: erpnext/assets/doctype/asset_value_adjustment/asset_value_adjustment.py:212
 msgid "This schedule was created when Asset {0} was adjusted through Asset Value Adjustment {1}."
@@ -53154,7 +53154,7 @@ msgstr "crwdns137764:0crwdne137764:0"
 #. in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "This will be applied if no naming series is configured in Item master"
-msgstr ""
+msgstr "crwdns202341:0crwdne202341:0"
 
 #. Description of the 'Create User Permission' (Check) field in DocType
 #. 'Employee'
@@ -55299,7 +55299,7 @@ msgstr "crwdns88542:0{0}crwdne88542:0"
 #. 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "UOM Defaults"
-msgstr ""
+msgstr "crwdns202345:0crwdne202345:0"
 
 #. Label of the uom_name (Data) field in DocType 'UOM'
 #: erpnext/setup/doctype/uom/uom.json
@@ -55495,13 +55495,13 @@ msgstr "crwdns88612:0crwdne88612:0"
 #. DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Unlink Advance Payment on cancellation of order"
-msgstr ""
+msgstr "crwdns202347:0crwdne202347:0"
 
 #. Label of the unlink_payment_on_cancellation_of_invoice (Check) field in
 #. DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Unlink Payment on cancellation of invoice"
-msgstr ""
+msgstr "crwdns202349:0crwdne202349:0"
 
 #: erpnext/accounts/doctype/bank_account/bank_account.js:33
 msgid "Unlink external integrations"
@@ -55825,7 +55825,7 @@ msgstr "crwdns138098:0crwdne138098:0"
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Update Price List based on"
-msgstr ""
+msgstr "crwdns202351:0crwdne202351:0"
 
 #: erpnext/accounts/doctype/cheque_print_template/cheque_print_template.js:10
 msgid "Update Print Format"
@@ -55860,7 +55860,7 @@ msgstr "crwdns138104:0crwdne138104:0"
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Update existing Price List Rate"
-msgstr ""
+msgstr "crwdns202353:0crwdne202353:0"
 
 #. Label of the update_latest_price_in_all_boms (Button) field in DocType 'BOM
 #. Update Tool'
@@ -56030,7 +56030,7 @@ msgstr "crwdns195082:0crwdne195082:0"
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Use Serial / Batch fields"
-msgstr ""
+msgstr "crwdns202357:0crwdne202357:0"
 
 #. Label of the use_serial_batch_fields (Check) field in DocType 'POS Invoice
 #. Item'
@@ -56086,13 +56086,13 @@ msgstr "crwdns138140:0crwdne138140:0"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Use legacy Budget Controller"
-msgstr ""
+msgstr "crwdns202359:0crwdne202359:0"
 
 #. Label of the use_legacy_controller_for_pcv (Check) field in DocType
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Use legacy controller for Period Closing Voucher"
-msgstr ""
+msgstr "crwdns202361:0crwdne202361:0"
 
 #. Label of the fallback_to_default_price_list (Check) field in DocType
 #. 'Selling Settings'
@@ -56305,7 +56305,7 @@ msgstr "crwdns104702:0{0}crwdne104702:0"
 
 #: erpnext/stock/doctype/item/item_prices.html:86
 msgid "Valid Upto"
-msgstr ""
+msgstr "crwdns202369:0crwdne202369:0"
 
 #. Label of the countries (Table) field in DocType 'Shipping Rule'
 #: erpnext/accounts/doctype/shipping_rule/shipping_rule.json
@@ -56342,7 +56342,7 @@ msgstr "crwdns152098:0crwdne152098:0"
 #. 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Validate Material Transfer warehouses"
-msgstr ""
+msgstr "crwdns202371:0crwdne202371:0"
 
 #. Label of the validate_negative_stock (Check) field in DocType 'Inventory
 #. Dimension'
@@ -56789,7 +56789,7 @@ msgstr "crwdns161208:0crwdne161208:0"
 
 #: erpnext/stock/doctype/item/item_prices.html:123
 msgid "View All Prices"
-msgstr ""
+msgstr "crwdns202373:0crwdne202373:0"
 
 #: erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.js:25
 msgid "View BOM Update Log"
@@ -57193,7 +57193,7 @@ msgstr "crwdns138248:0crwdne138248:0"
 #. 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Warehouse Defaults"
-msgstr ""
+msgstr "crwdns202375:0crwdne202375:0"
 
 #. Label of the warehouse_detail (Section Break) field in DocType 'Warehouse'
 #: erpnext/stock/doctype/warehouse/warehouse.json
@@ -57896,7 +57896,7 @@ msgstr "crwdns89704:0crwdne89704:0"
 #. Name of a DocType
 #: erpnext/manufacturing/doctype/work_order_additional_item/work_order_additional_item.json
 msgid "Work Order Additional Item"
-msgstr ""
+msgstr "crwdns202381:0crwdne202381:0"
 
 #: erpnext/manufacturing/dashboard_fixtures.py:93
 msgid "Work Order Analysis"
@@ -59421,7 +59421,7 @@ msgstr "crwdns200228:0{0}crwdnd200228:0{1}crwdnd200228:0{2}crwdnd200228:0{3}crwd
 
 #: erpnext/buying/utils.py:117
 msgid "{0} {1} status is {2}."
-msgstr ""
+msgstr "crwdns202383:0{0}crwdnd202383:0{1}crwdnd202383:0{2}crwdne202383:0"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:241
 msgid "{0} {1} via CSV File"
@@ -59558,7 +59558,7 @@ msgstr "crwdns90442:0{item_name}crwdnd90442:0{sample_size}crwdnd90442:0{accepted
 
 #: erpnext/controllers/stock_controller.py:1966
 msgid "{ref_doctype} {ref_name} status is {status}."
-msgstr ""
+msgstr "crwdns202385:0{ref_doctype}crwdnd202385:0{ref_name}crwdnd202385:0{status}crwdne202385:0"
 
 #: erpnext/assets/report/fixed_asset_register/fixed_asset_register.py:432
 msgid "{}"
