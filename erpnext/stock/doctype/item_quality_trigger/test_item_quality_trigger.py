@@ -110,7 +110,6 @@ class TestItemQualityTrigger(ERPNextTestSuite):
 
 	def test_document_type_scoped_to_supported_doctypes(self):
 		options = frappe.get_meta("Item Quality Trigger").get_field("document_type").options.split("\n")
-		self.assertNotIn("Job Card", options)
 		for doctype in (
 			"Stock Entry",
 			"Purchase Receipt",
@@ -118,6 +117,7 @@ class TestItemQualityTrigger(ERPNextTestSuite):
 			"Subcontracting Receipt",
 			"Sales Invoice",
 			"Purchase Invoice",
+			"Job Card",
 		):
 			self.assertIn(doctype, options)
 
@@ -133,6 +133,7 @@ class TestItemQualityTrigger(ERPNextTestSuite):
 		self.assertEqual(allowed_warehouse_roles("Stock Entry", "Material Receipt"), {"Inbound"})
 		self.assertEqual(allowed_warehouse_roles("Stock Entry", "Material Issue"), {"Outbound"})
 		self.assertEqual(allowed_warehouse_roles("Stock Entry", "Material Transfer"), {"Inbound", "Outbound"})
+		self.assertEqual(allowed_warehouse_roles("Job Card"), {"Inbound"})
 
 	def test_single_direction_role_is_autoset(self):
 		item = make_item(properties={"is_stock_item": 1})
@@ -157,4 +158,10 @@ class TestItemQualityTrigger(ERPNextTestSuite):
 				party_transaction_type="Internal Transfer",
 			),
 		)
+		self.assertRaises(frappe.ValidationError, item.save)
+
+	def test_job_card_inspection_point_only_on_job_card(self):
+		item = make_item(properties={"is_stock_item": 1})
+		# Purchase Receipt row carrying a Job Card-only option must be rejected
+		item.append("quality_triggers", trigger_row(job_card_inspection_point="Every Job Card"))
 		self.assertRaises(frappe.ValidationError, item.save)
