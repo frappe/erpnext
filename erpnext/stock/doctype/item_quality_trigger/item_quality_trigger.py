@@ -12,7 +12,7 @@ PARTY_DOCTYPES = ("Purchase Receipt", "Purchase Invoice", "Delivery Note", "Sale
 # Direction matrix: which warehouse role(s) make sense for a given document type
 # (and, for Stock Entry, a given purpose). A pure receipt is inbound-only, a pure
 # issue is outbound-only, and transfer/manufacture-style movements expose both.
-_INBOUND_ONLY = {"Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"}
+_INBOUND_ONLY = {"Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt", "Job Card"}
 _OUTBOUND_ONLY = {"Delivery Note", "Sales Invoice"}
 _BOTH = {"Inbound", "Outbound"}
 _STOCK_ENTRY_ROLES = {
@@ -59,9 +59,11 @@ class ItemQualityTrigger(Document):
 			"Delivery Note",
 			"Sales Invoice",
 			"Stock Entry",
+			"Job Card",
 		]
 		inspection_basis: DF.Literal["Sample", "Each Quantity"]
 		inspection_template: DF.Link
+		job_card_inspection_point: DF.Literal["", "Every Job Card", "Final FG Only"]
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
@@ -110,6 +112,10 @@ def _validate_trigger_row(row):
 				"Purchase Receipt, Purchase Invoice, Delivery Note and Sales Invoice."
 			).format(row.idx)
 		)
+
+	# Inspect On (Every Job Card / Final FG Only) only applies to Job Card rows.
+	if row.get("job_card_inspection_point") and row.document_type != "Job Card":
+		frappe.throw(_("Row #{0}: Inspect On applies only to Job Card.").format(row.idx))
 
 	# Warehouse role must respect the direction implied by the document / purpose.
 	allowed = allowed_warehouse_roles(row.document_type, row.transaction_sub_type)

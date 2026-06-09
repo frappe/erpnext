@@ -10,6 +10,7 @@
   "document_type",
   "transaction_sub_type",
   "party_transaction_type",
+  "job_card_inspection_point",
   "column_break_txn",
   "warehouse_role",
   "applicable_warehouse",
@@ -37,7 +38,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Document Type",
-   "options": "Purchase Receipt\nPurchase Invoice\nSubcontracting Receipt\nDelivery Note\nSales Invoice\nStock Entry",
+   "options": "Purchase Receipt\nPurchase Invoice\nSubcontracting Receipt\nDelivery Note\nSales Invoice\nStock Entry\nJob Card",
    "reqd": 1
   },
   {
@@ -56,6 +57,15 @@
    "fieldtype": "Select",
    "label": "Transaction Type",
    "options": "\nExternal\nInternal Transfer"
+  },
+  {
+   "depends_on": "eval:doc.document_type=='Job Card'",
+   "description": "Job Card triggers apply only when the Work Order tracks semi-finished goods. Choose whether to inspect after every job card or only at final FG production.",
+   "fieldname": "job_card_inspection_point",
+   "fieldtype": "Select",
+   "label": "Inspect On",
+   "mandatory_depends_on": "eval:doc.document_type=='Job Card'",
+   "options": "\nEvery Job Card\nFinal FG Only"
   },
   {
    "fieldname": "column_break_txn",
