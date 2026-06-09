@@ -429,7 +429,7 @@ class TransactionBase(StatusUpdater):
 
 				found = [x for x in self.taxes if x.account_head == tax_head]
 				if not found:
-					child_doctype = self._table_fieldnames.get("taxes")
+					child_doctype = self.get_table_field_doctype("taxes")
 					child = frappe.new_doc(child_doctype, parent_doc=self, parentfield="taxes")
 					child.charge_type = "On Net Total"
 					child.account_head = tax_head
