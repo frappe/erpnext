@@ -516,8 +516,33 @@ def get_color_map():
 	}
 
 
+ALLOWED_JOB_CARD_METHODS = frozenset(
+	{
+		"start_timer",
+		"pause_job",
+		"resume_job",
+		"complete_job_card",
+	}
+)
+
+
 @frappe.whitelist()
 def update_job_card(job_card: str, method: str, **kwargs):
+	if method not in ALLOWED_JOB_CARD_METHODS:
+		frappe.throw(
+			_("Method {0} is not allowed to be run on a Job Card.").format(bold(method)),
+			frappe.PermissionError,
+			title=_("Not Allowed"),
+		)
+
+	frappe.has_permission("Job Card", "read", throw=True)
+
+	doc = frappe.get_doc("Job Card", job_card)
+
+	# These methods mutate the Job Card, but frappe.get_doc does not enforce permissions —
+	# require write access before running anything.
+	frappe.has_permission("Job Card", "write", doc=doc, throw=True)
+
 	if isinstance(kwargs, dict):
 		kwargs = frappe._dict(kwargs)
 
@@ -527,7 +552,6 @@ def update_job_card(job_card: str, method: str, **kwargs):
 	if kwargs.qty and isinstance(kwargs.qty, str):
 		kwargs.qty = flt(kwargs.qty)
 
-	doc = frappe.get_doc("Job Card", job_card)
 	doc.run_method(method, **kwargs)
 
 
