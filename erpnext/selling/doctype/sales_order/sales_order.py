@@ -10,6 +10,7 @@ import frappe.utils
 from frappe import _, qb
 from frappe.contacts.doctype.address.address import get_company_address
 from frappe.desk.notifications import clear_doctype_notifications
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.query_builder.functions import Sum
@@ -1332,7 +1333,9 @@ def get_events(start, end, filters=None):
 
 
 @frappe.whitelist()
-def make_purchase_order_for_default_supplier(source_name, selected_items=None, target_doc=None):
+def make_purchase_order_for_default_supplier(
+	source_name: str, selected_items: str | list | None = None, target_doc: str | Document | None = None
+):
 	"""Creates Purchase Order for each Supplier. Returns a list of doc objects."""
 
 	from erpnext.setup.utils import get_exchange_rate
@@ -1482,7 +1485,9 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 
 
 @frappe.whitelist()
-def make_purchase_order(source_name, selected_items=None, target_doc=None):
+def make_purchase_order(
+	source_name: str, selected_items: str | list | None = None, target_doc: str | Document | None = None
+):
 	if not selected_items:
 		return
 
