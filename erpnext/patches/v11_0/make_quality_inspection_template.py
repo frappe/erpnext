@@ -9,6 +9,12 @@ def execute():
 	frappe.reload_doc("stock", "doctype", "quality_inspection_template")
 	frappe.reload_doc("stock", "doctype", "item")
 
+	# Item.quality_inspection_template was removed in the Quality module refactor
+	# (replaced by the Item Quality Trigger child table). This legacy patch only
+	# populated that field, so it is now a no-op when the field is absent.
+	if not frappe.get_meta("Item").has_field("quality_inspection_template"):
+		return
+
 	for data in frappe.get_all(
 		"Item Quality Inspection Parameter", fields=["parent"], filters={"parenttype": "Item"}, distinct=True
 	):

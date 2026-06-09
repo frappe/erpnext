@@ -17,6 +17,7 @@ class ItemGroup(NestedSet):
 		from frappe.types import DF
 
 		from erpnext.stock.doctype.item_default.item_default import ItemDefault
+		from erpnext.stock.doctype.item_quality_trigger.item_quality_trigger import ItemQualityTrigger
 		from erpnext.stock.doctype.item_tax.item_tax import ItemTax
 
 		image: DF.AttachImage | None
@@ -26,6 +27,7 @@ class ItemGroup(NestedSet):
 		lft: DF.Int
 		old_parent: DF.Link | None
 		parent_item_group: DF.Link | None
+		quality_triggers: DF.Table[ItemQualityTrigger]
 		rgt: DF.Int
 		taxes: DF.Table[ItemTax]
 	# end: auto-generated types

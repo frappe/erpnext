@@ -1,0 +1,160 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-06-09 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "transaction_section",
+  "document_type",
+  "transaction_sub_type",
+  "column_break_txn",
+  "warehouse_role",
+  "applicable_warehouse",
+  "filters_section",
+  "supplier",
+  "column_break_party",
+  "customer",
+  "condition",
+  "inspection_section",
+  "inspection_template",
+  "qc_mode",
+  "column_break_insp",
+  "inspection_basis",
+  "sample_size",
+  "sample_size_is_percentage"
+ ],
+ "fields": [
+  {
+   "fieldname": "transaction_section",
+   "fieldtype": "Section Break",
+   "label": "Transaction"
+  },
+  {
+   "fieldname": "document_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Document Type",
+   "options": "Purchase Receipt\nPurchase Invoice\nSubcontracting Receipt\nDelivery Note\nSales Invoice\nStock Entry\nJob Card",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.document_type=='Stock Entry'",
+   "description": "Applies only to Stock Entry. Use one row per purpose (e.g. one row for Material Receipt, another for Material Transfer).",
+   "fieldname": "transaction_sub_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Stock Entry Purpose",
+   "options": "\nMaterial Receipt\nMaterial Issue\nMaterial Transfer\nMaterial Transfer for Manufacture\nManufacture\nRepack\nSend to Subcontractor\nDisassemble"
+  },
+  {
+   "fieldname": "column_break_txn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Inbound = stock entering a warehouse (target). Outbound = stock leaving a warehouse (source).",
+   "fieldname": "warehouse_role",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Warehouse Role",
+   "options": "Inbound\nOutbound",
+   "reqd": 1
+  },
+  {
+   "description": "Optional. Restrict this trigger to a single warehouse (matched against the source or target per Warehouse Role).",
+   "fieldname": "applicable_warehouse",
+   "fieldtype": "Link",
+   "label": "Applicable Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "filters_section",
+   "fieldtype": "Section Break",
+   "label": "Filters"
+  },
+  {
+   "depends_on": "eval:['Purchase Receipt','Purchase Invoice','Subcontracting Receipt'].includes(doc.document_type)",
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "column_break_party",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:['Delivery Note','Sales Invoice'].includes(doc.document_type)",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "description": "Optional Python expression evaluated against the transaction row, e.g. row.qty > 100.",
+   "fieldname": "condition",
+   "fieldtype": "Code",
+   "label": "Condition"
+  },
+  {
+   "fieldname": "inspection_section",
+   "fieldtype": "Section Break",
+   "label": "Inspection"
+  },
+  {
+   "fieldname": "inspection_template",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Inspection Template",
+   "options": "Quality Inspection Template",
+   "reqd": 1
+  },
+  {
+   "description": "Inbound: Quarantine routes stock to a QC warehouse and locks it until release; Monitor inspects without locking. Outbound: Block stops the document until inspection passes; Warn allows with a warning; Monitor only records.",
+   "fieldname": "qc_mode",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "QC Mode",
+   "options": "Quarantine\nBlock\nWarn\nMonitor",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_insp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Sample",
+   "description": "Sample: inspect a subset and accept/reject the lot. Each Quantity: inspect every unit (per-unit readings).",
+   "fieldname": "inspection_basis",
+   "fieldtype": "Select",
+   "label": "Inspection Basis",
+   "options": "Sample\nEach Quantity",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.inspection_basis=='Sample'",
+   "fieldname": "sample_size",
+   "fieldtype": "Float",
+   "label": "Sample Size"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.inspection_basis=='Sample'",
+   "fieldname": "sample_size_is_percentage",
+   "fieldtype": "Check",
+   "label": "Sample Size is Percentage"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-06-09 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Item Quality Trigger",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -16,15 +16,14 @@ from erpnext.exceptions import (
 	QualityInspectionRequiredError,
 )
 
-# Doctype -> the document-level "inspection required" flag. Shared with
-# check_item_quality_inspection in stock_controller so the two stay in sync.
-INSPECTION_FIELDNAME_MAP = {
-	"Purchase Receipt": "inspection_required_before_purchase",
-	"Purchase Invoice": "inspection_required_before_purchase",
-	"Subcontracting Receipt": "inspection_required_before_purchase",
-	"Sales Invoice": "inspection_required_before_delivery",
-	"Delivery Note": "inspection_required_before_delivery",
-}
+# Doctype -> the document-level "inspection required" flag.
+#
+# The old per-Item flags (inspection_required_before_purchase / _delivery) have
+# been removed in favour of the Item Quality Trigger model. This map is emptied
+# as part of that refactor; document-level enforcement is reimplemented by the
+# trigger-resolution engine in a later step. Stock Entry inward inspection
+# (driven by the document-level `inspection_required` flag) is unaffected.
+INSPECTION_FIELDNAME_MAP = {}
 
 # Purposes whose inward (t_warehouse) row is inspected.
 QI_INCOMING_PURPOSES = (

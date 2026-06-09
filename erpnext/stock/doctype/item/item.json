@@ -137,10 +137,7 @@
   "column_break_vipt",
   "customer_code",
   "quality_tab",
-  "inspection_required_before_purchase",
-  "inspection_required_before_delivery",
-  "column_break_pxjh",
-  "quality_inspection_template",
+  "quality_triggers",
   "pricing_tab",
   "item_prices_column",
   "prices_html",
@@ -776,29 +773,10 @@
    "options": "Item Tax"
   },
   {
-   "default": "0",
-   "description": "A quality inspection must be completed before generating a Purchase Receipt for this item.",
-   "fieldname": "inspection_required_before_purchase",
-   "fieldtype": "Check",
-   "label": "Inspection Required before Purchase",
-   "oldfieldname": "inspection_required",
-   "oldfieldtype": "Select",
-   "show_description_on_click": 1
-  },
-  {
-   "default": "0",
-   "description": "A quality inspection must be completed before generating a Delivery Note for this item.",
-   "fieldname": "inspection_required_before_delivery",
-   "fieldtype": "Check",
-   "label": "Inspection Required before Delivery",
-   "show_description_on_click": 1
-  },
-  {
-   "fieldname": "quality_inspection_template",
-   "fieldtype": "Link",
-   "label": "Quality Inspection Template",
-   "options": "Quality Inspection Template",
-   "print_hide": 1
+   "fieldname": "quality_triggers",
+   "fieldtype": "Table",
+   "label": "Quality Triggers",
+   "options": "Item Quality Trigger"
   },
   {
    "collapsible": 1,
@@ -1012,10 +990,6 @@
   },
   {
    "fieldname": "column_break_ixrh",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_pxjh",
    "fieldtype": "Column Break"
   },
   {

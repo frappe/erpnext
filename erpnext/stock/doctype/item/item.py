@@ -64,6 +64,7 @@ class Item(Document):
 		from erpnext.stock.doctype.item_barcode.item_barcode import ItemBarcode
 		from erpnext.stock.doctype.item_customer_detail.item_customer_detail import ItemCustomerDetail
 		from erpnext.stock.doctype.item_default.item_default import ItemDefault
+		from erpnext.stock.doctype.item_quality_trigger.item_quality_trigger import ItemQualityTrigger
 		from erpnext.stock.doctype.item_reorder.item_reorder import ItemReorder
 		from erpnext.stock.doctype.item_supplier.item_supplier import ItemSupplier
 		from erpnext.stock.doctype.item_tax.item_tax import ItemTax
@@ -104,8 +105,6 @@ class Item(Document):
 		has_variants: DF.Check
 		image: DF.AttachImage | None
 		include_item_in_manufacturing: DF.Check
-		inspection_required_before_delivery: DF.Check
-		inspection_required_before_purchase: DF.Check
 		is_customer_provided_item: DF.Check
 		is_fixed_asset: DF.Check
 		is_grouped_asset: DF.Check
@@ -130,7 +129,7 @@ class Item(Document):
 		production_capacity: DF.Int
 		purchase_tax_withholding_category: DF.Link | None
 		purchase_uom: DF.Link | None
-		quality_inspection_template: DF.Link | None
+		quality_triggers: DF.Table[ItemQualityTrigger]
 		reorder_levels: DF.Table[ItemReorder]
 		restrict_to_companies: DF.Check
 		retain_sample: DF.Check

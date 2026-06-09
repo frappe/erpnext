@@ -76,9 +76,12 @@ class QualityInspection(Document):
 		if not self.readings and self.item_code:
 			self.get_item_specification_details()
 
-		if self.inspection_type == "In Process" and self.reference_type == "Job Card":
-			item_qi_template = frappe.db.get_value("Item", self.item_code, "quality_inspection_template")
-			parameters = get_template_details(item_qi_template)
+		if (
+			self.inspection_type == "In Process"
+			and self.reference_type == "Job Card"
+			and self.quality_inspection_template
+		):
+			parameters = get_template_details(self.quality_inspection_template)
 			for reading in self.readings:
 				for d in parameters:
 					if reading.specification == d.specification:
@@ -159,11 +162,6 @@ class QualityInspection(Document):
 
 	@frappe.whitelist()
 	def get_item_specification_details(self):
-		if not self.quality_inspection_template:
-			self.quality_inspection_template = frappe.db.get_value(
-				"Item", self.item_code, "quality_inspection_template"
-			)
-
 		if not self.quality_inspection_template:
 			return
 

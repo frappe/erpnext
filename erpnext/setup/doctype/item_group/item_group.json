@@ -20,6 +20,8 @@
   "item_group_defaults",
   "sec_break_taxes",
   "taxes",
+  "sec_break_quality",
+  "quality_triggers",
   "lft",
   "old_parent",
   "rgt"
@@ -93,6 +95,17 @@
    "fieldtype": "Table",
    "label": "Taxes",
    "options": "Item Tax"
+  },
+  {
+   "fieldname": "sec_break_quality",
+   "fieldtype": "Section Break",
+   "label": "Quality"
+  },
+  {
+   "fieldname": "quality_triggers",
+   "fieldtype": "Table",
+   "label": "Quality Triggers",
+   "options": "Item Quality Trigger"
   },
   {
    "fieldname": "lft",
