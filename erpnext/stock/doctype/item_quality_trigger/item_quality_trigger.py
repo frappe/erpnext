@@ -23,7 +23,6 @@ class ItemQualityTrigger(Document):
 			"Delivery Note",
 			"Sales Invoice",
 			"Stock Entry",
-			"Job Card",
 		]
 		inspection_basis: DF.Literal["Sample", "Each Quantity"]
 		inspection_template: DF.Link

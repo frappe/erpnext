@@ -22,8 +22,6 @@ class StockSettings(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		action_if_quality_inspection_is_not_submitted: DF.Literal["Stop", "Warn"]
-		action_if_quality_inspection_is_rejected: DF.Literal["Stop", "Warn"]
 		allow_existing_serial_no: DF.Check
 		allow_internal_transfer_at_arms_length_price: DF.Check
 		allow_negative_stock: DF.Check
@@ -32,7 +30,6 @@ class StockSettings(Document):
 		allow_to_edit_stock_uom_qty_for_purchase: DF.Check
 		allow_to_edit_stock_uom_qty_for_sales: DF.Check
 		allow_to_edit_stock_uom_qty_for_stock_entry: DF.Check
-		allow_to_make_quality_inspection_after_purchase_or_delivery: DF.Check
 		allow_uom_with_conversion_rate_defined_in_item: DF.Check
 		auto_create_serial_and_batch_bundle_for_outward: DF.Check
 		auto_indent: DF.Check

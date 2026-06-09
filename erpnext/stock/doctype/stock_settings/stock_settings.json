@@ -66,11 +66,6 @@
   "auto_reserve_stock_for_sales_order_on_purchase",
   "serial_and_batch_reservation_section",
   "auto_reserve_serial_and_batch",
-  "quality_tab",
-  "quality_inspection_settings_section",
-  "allow_to_make_quality_inspection_after_purchase_or_delivery",
-  "action_if_quality_inspection_is_rejected",
-  "action_if_quality_inspection_is_not_submitted",
   "stock_planning_tab",
   "auto_material_request",
   "auto_indent",
@@ -127,13 +122,6 @@
    "fieldtype": "Float",
    "label": "Over Delivery/Receipt Allowance (%)",
    "non_negative": 1
-  },
-  {
-   "default": "Stop",
-   "fieldname": "action_if_quality_inspection_is_not_submitted",
-   "fieldtype": "Select",
-   "label": "Action if Quality Inspection is not submitted",
-   "options": "Stop\nWarn"
   },
   {
    "default": "1",
@@ -261,17 +249,6 @@
    "fieldname": "section_break_9",
    "fieldtype": "Section Break",
    "label": "Quantity Tolerance"
-  },
-  {
-   "fieldname": "quality_inspection_settings_section",
-   "fieldtype": "Section Break"
-  },
-  {
-   "default": "Stop",
-   "fieldname": "action_if_quality_inspection_is_rejected",
-   "fieldtype": "Select",
-   "label": "Action if Quality Inspection is rejected",
-   "options": "Stop\nWarn"
   },
   {
    "description": "The percentage you are allowed to transfer more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed transfer 110 units.",
@@ -473,17 +450,6 @@
    "fieldname": "allow_uom_with_conversion_rate_defined_in_item",
    "fieldtype": "Check",
    "label": "Allow UOM with conversion rate defined in Item"
-  },
-  {
-   "fieldname": "quality_tab",
-   "fieldtype": "Tab Break",
-   "label": "Quality"
-  },
-  {
-   "default": "0",
-   "fieldname": "allow_to_make_quality_inspection_after_purchase_or_delivery",
-   "fieldtype": "Check",
-   "label": "Allow to make Quality Inspection after Purchase / Delivery"
   },
   {
    "default": "Rate",
