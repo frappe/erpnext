@@ -106,3 +106,22 @@ class TestItemQualityTrigger(ERPNextTestSuite):
 		self.assertIsNone(meta.get_field("inspection_required_before_delivery"))
 		self.assertIsNone(meta.get_field("quality_inspection_template"))
 		self.assertIsNotNone(meta.get_field("quality_triggers"))
+
+	def test_document_type_scoped_to_supported_doctypes(self):
+		options = frappe.get_meta("Item Quality Trigger").get_field("document_type").options.split("\n")
+		self.assertNotIn("Job Card", options)
+		for doctype in (
+			"Stock Entry",
+			"Purchase Receipt",
+			"Delivery Note",
+			"Subcontracting Receipt",
+			"Sales Invoice",
+			"Purchase Invoice",
+		):
+			self.assertIn(doctype, options)
+
+	def test_stock_settings_quality_fields_removed(self):
+		meta = frappe.get_meta("Stock Settings")
+		self.assertIsNone(meta.get_field("allow_to_make_quality_inspection_after_purchase_or_delivery"))
+		self.assertIsNone(meta.get_field("action_if_quality_inspection_is_rejected"))
+		self.assertIsNone(meta.get_field("action_if_quality_inspection_is_not_submitted"))
