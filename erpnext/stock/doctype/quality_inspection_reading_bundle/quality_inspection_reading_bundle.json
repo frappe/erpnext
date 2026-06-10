@@ -25,7 +25,7 @@
    "options": "Item",
    "reqd": 1,
    "fetch_from": "quality_inspection.item_code",
-   "read_only": 1
+   "read_only_depends_on": "eval:doc.quality_inspection"
   },
   {
    "description": "The inspection this bundle was created from and belongs to; it cannot be selected on any other inspection.",
