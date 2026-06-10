@@ -24,6 +24,7 @@ class QualityInspectionReadingEntry(Document):
 		specification: DF.Link
 		status: DF.Literal["Accepted", "Rejected"]
 		unit_no: DF.Int
+		value: DF.Data | None
 	# end: auto-generated types
 
 	pass

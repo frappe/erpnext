@@ -13,6 +13,7 @@ accommodates templates with any number of parameters.
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import flt
 
 
 class QualityInspectionReadingBundle(Document):
@@ -29,6 +30,7 @@ class QualityInspectionReadingBundle(Document):
 		)
 
 		accepted_qty: DF.Int
+		amended_from: DF.Link | None
 		entries: DF.Table[QualityInspectionReadingEntry]
 		item_code: DF.Link
 		quality_inspection_template: DF.Link | None
@@ -38,7 +40,38 @@ class QualityInspectionReadingBundle(Document):
 
 	def validate(self):
 		self.validate_units()
+		self.evaluate_entry_statuses()
 		self.roll_up_unit_results()
+
+	def on_cancel(self):
+		inspection = frappe.db.exists("Quality Inspection", {"reading_bundle": self.name, "docstatus": 1})
+		if inspection:
+			frappe.throw(
+				_("Cannot cancel: Quality Inspection {0} was decided on this reading bundle.").format(
+					frappe.bold(inspection)
+				)
+			)
+
+	def evaluate_entry_statuses(self):
+		"""Derive each entry's status from its reading, like the inspection readings.
+
+		Numeric readings pass inside [min, max]; non-numeric readings are compared
+		case-insensitively against the acceptance criteria value. Entries without a
+		reading keep their manually chosen status.
+		"""
+		for entry in self.entries:
+			reading = (entry.reading_value or "").strip()
+			if not reading:
+				continue
+
+			if entry.numeric:
+				passed = flt(entry.min_value) <= flt(reading) <= flt(entry.max_value)
+			elif (entry.value or "").strip():
+				passed = reading.casefold() == entry.value.strip().casefold()
+			else:
+				continue
+
+			entry.status = "Accepted" if passed else "Rejected"
 
 	def validate_units(self):
 		units = {entry.unit_no for entry in self.entries}
@@ -75,6 +108,7 @@ class QualityInspectionReadingBundle(Document):
 						"unit_no": unit_no,
 						"specification": parameter.specification,
 						"numeric": parameter.numeric,
+						"value": parameter.value,
 						"min_value": parameter.min_value,
 						"max_value": parameter.max_value,
 						"status": "Accepted",

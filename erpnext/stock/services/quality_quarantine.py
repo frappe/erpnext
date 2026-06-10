@@ -102,6 +102,14 @@ def process_inspection_result(doc, method=None):
 
 	if doc.get("reading_bundle"):
 		bundle = frappe.get_doc("Quality Inspection Reading Bundle", doc.reading_bundle)
+		if bundle.docstatus != 1:
+			frappe.throw(
+				_(
+					"Submit Reading Bundle {0} before submitting the inspection — its per-unit "
+					"readings decide the lot and must be frozen first."
+				).format(frappe.bold(bundle.name)),
+				title=_("Reading Bundle Not Submitted"),
+			)
 		if bundle.item_code != lot.item_code:
 			frappe.throw(
 				_("Reading Bundle {0} is for item {1}, not the lot's item {2}.").format(

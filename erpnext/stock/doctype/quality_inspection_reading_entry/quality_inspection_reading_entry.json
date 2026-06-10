@@ -9,6 +9,7 @@
   "unit_no",
   "serial_no",
   "specification",
+  "value",
   "reading_value",
   "numeric",
   "min_value",
@@ -36,6 +37,13 @@
    "label": "Parameter",
    "options": "Quality Inspection Parameter",
    "reqd": 1
+  },
+  {
+   "depends_on": "eval:!doc.numeric",
+   "description": "Expected value for non-numeric parameters; compared case-insensitively against the reading.",
+   "fieldname": "value",
+   "fieldtype": "Data",
+   "label": "Acceptance Criteria Value"
   },
   {
    "fieldname": "reading_value",

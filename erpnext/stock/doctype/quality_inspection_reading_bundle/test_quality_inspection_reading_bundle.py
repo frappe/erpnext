@@ -31,6 +31,7 @@ def make_bundle(quantity, unit_results, item_code=None):
 				},
 			)
 	bundle.insert(ignore_permissions=True)
+	bundle.submit()
 	return bundle
 
 
@@ -49,3 +50,26 @@ class TestQualityInspectionReadingBundle(ERPNextTestSuite):
 
 	def test_unit_numbers_must_fit_the_quantity(self):
 		self.assertRaises(frappe.ValidationError, make_bundle, 2, {5: ["Accepted"]})
+
+	def test_entry_status_derived_from_reading(self):
+		bundle = frappe.new_doc("Quality Inspection Reading Bundle")
+		bundle.item_code = make_item(properties={"is_stock_item": 1}).name
+		bundle.quantity = 2
+		entry_rows = [
+			# numeric: inside and outside [1, 10]
+			{"unit_no": 1, "numeric": 1, "min_value": 1, "max_value": 10, "reading_value": "5"},
+			{"unit_no": 2, "numeric": 1, "min_value": 1, "max_value": 10, "reading_value": "12"},
+			# non-numeric: case-insensitive match against the criteria value
+			{"unit_no": 1, "numeric": 0, "value": "Yes", "reading_value": " yes "},
+			{"unit_no": 2, "numeric": 0, "value": "Yes", "reading_value": "no"},
+		]
+		for row in entry_rows:
+			row["specification"] = ensure_parameter("_Test Derived Status Parameter")
+			bundle.append("entries", row)
+		bundle.insert(ignore_permissions=True)
+
+		self.assertEqual(
+			[entry.status for entry in bundle.entries], ["Accepted", "Rejected", "Accepted", "Rejected"]
+		)
+		self.assertEqual(bundle.accepted_qty, 1)  # unit 1 passed both readings
+		self.assertEqual(bundle.rejected_qty, 1)  # unit 2 failed both
