@@ -1,0 +1,449 @@
+{
+	"country_code": "nz",
+	"name": "New Zealand - Chart of Accounts with Account Numbers",
+	"disabled": "No",
+	"tree": {
+		"Application of Funds (Assets)": {
+			"Current Assets": {
+				"Bank Accounts": {
+					"Business Transaction Account": {
+						"account_number": "11011",
+						"account_type": "Bank"
+					},
+					"Business Savings Account": {
+						"account_number": "11012",
+						"account_type": "Bank"
+					},
+					"account_number": "11010",
+					"is_group": 1
+				},
+				"Cash on Hand": {
+					"account_number": "11020",
+					"account_type": "Cash"
+				},
+				"Accounts Receivable": {
+					"Debtors": {
+						"account_number": "11210",
+						"account_type": "Receivable"
+					},
+					"Provision for Doubtful Debts": {
+						"account_number": "11220"
+					},
+					"account_number": "11200",
+					"is_group": 1
+				},
+				"Inventory": {
+					"Stock on Hand": {
+						"account_number": "11311",
+						"account_type": "Stock"
+					},
+					"Work In Progress": {
+						"account_number": "11312",
+						"account_type": "Stock"
+					},
+					"account_number": "11310",
+					"account_type": "Stock",
+					"is_group": 1
+				},
+				"Prepayments": {
+					"Prepayments": {
+						"account_number": "11411"
+					},
+					"Supplier Advances": {
+						"account_number": "11412"
+					},
+					"Deferred Expense": {
+						"account_number": "11413"
+					},
+					"account_number": "11410",
+					"is_group": 1
+				},
+				"GST Receivable": {
+					"account_number": "11510",
+					"account_type": "Tax"
+				},
+				"Income Tax Receivable": {
+					"account_number": "11520",
+					"account_type": "Tax"
+				},
+				"account_number": "11000",
+				"is_group": 1
+			},
+			"Fixed Assets": {
+				"Plant & Equipment": {
+					"Plant & Equipment": {
+						"account_number": "16011",
+						"account_type": "Fixed Asset"
+					},
+					"Accumulated Depreciation - Plant & Equipment": {
+						"account_number": "16012",
+						"account_type": "Accumulated Depreciation"
+					},
+					"account_number": "16010",
+					"is_group": 1
+				},
+				"Motor Vehicles": {
+					"Motor Vehicles": {
+						"account_number": "16021",
+						"account_type": "Fixed Asset"
+					},
+					"Accumulated Depreciation - Motor Vehicles": {
+						"account_number": "16022",
+						"account_type": "Accumulated Depreciation"
+					},
+					"account_number": "16020",
+					"is_group": 1
+				},
+				"Office Equipment": {
+					"Office Equipment": {
+						"account_number": "16031",
+						"account_type": "Fixed Asset"
+					},
+					"Accumulated Depreciation - Office Equipment": {
+						"account_number": "16032",
+						"account_type": "Accumulated Depreciation"
+					},
+					"account_number": "16030",
+					"is_group": 1
+				},
+				"Buildings": {
+					"Buildings": {
+						"account_number": "16041",
+						"account_type": "Fixed Asset"
+					},
+					"Accumulated Depreciation - Buildings": {
+						"account_number": "16042",
+						"account_type": "Accumulated Depreciation"
+					},
+					"account_number": "16040",
+					"is_group": 1
+				},
+				"Computer Equipment": {
+					"Computer Equipment": {
+						"account_number": "16051",
+						"account_type": "Fixed Asset"
+					},
+					"Accumulated Depreciation - Computer Equipment": {
+						"account_number": "16052",
+						"account_type": "Accumulated Depreciation"
+					},
+					"account_number": "16050",
+					"is_group": 1
+				},
+				"Capital Work in Progress": {
+					"account_number": "16090",
+					"account_type": "Capital Work in Progress"
+				},
+				"account_number": "16000",
+				"is_group": 1
+			},
+			"account_number": "10000",
+			"root_type": "Asset"
+		},
+		"Source of Funds (Liabilities)": {
+			"Current Liabilities": {
+				"Accounts Payable": {
+					"Creditors": {
+						"account_number": "21010",
+						"account_type": "Payable"
+					},
+					"account_number": "21000",
+					"is_group": 1
+				},
+				"Goods Received Not Invoiced": {
+					"account_number": "21100",
+					"account_type": "Stock Received But Not Billed"
+				},
+				"Asset Received Not Invoiced": {
+					"account_number": "21110",
+					"account_type": "Asset Received But Not Billed"
+				},
+				"Service Received Not Invoiced": {
+					"account_number": "21120",
+					"account_type": "Service Received But Not Billed"
+				},
+				"Accrued Expenses": {
+					"account_number": "21200"
+				},
+				"Wages Payable": {
+					"account_number": "21300"
+				},
+				"PAYE Payable": {
+					"account_number": "22010"
+				},
+				"KiwiSaver Payable": {
+					"account_number": "22020"
+				},
+				"ACC Payable": {
+					"account_number": "22030"
+				},
+				"Credit Cards": {
+					"Business Credit Card": {
+						"account_number": "22110"
+					},
+					"account_number": "22100",
+					"is_group": 1
+				},
+				"Customer Advances": {
+					"account_number": "22200"
+				},
+				"Deferred Revenue": {
+					"account_number": "22210"
+				},
+				"Provisional Account": {
+					"account_number": "22220"
+				},
+				"Tax Liabilities": {
+					"GST Payable": {
+						"account_number": "22310",
+						"account_type": "Tax"
+					},
+					"GST Suspense": {
+						"account_number": "22320",
+						"account_type": "Tax"
+					},
+					"FBT Payable": {
+						"account_number": "22330",
+						"account_type": "Tax"
+					},
+					"Income Tax Payable": {
+						"account_number": "22340",
+						"account_type": "Tax"
+					},
+					"account_number": "22300",
+					"is_group": 1
+				},
+				"account_number": "21500",
+				"is_group": 1
+			},
+			"Non-Current Liabilities": {
+				"Bank Loans": {
+					"Bank Loan": {
+						"account_number": "25011"
+					},
+					"account_number": "25010",
+					"is_group": 1
+				},
+				"Lease Liabilities": {
+					"Lease Liability": {
+						"account_number": "25021"
+					},
+					"account_number": "25020",
+					"is_group": 1
+				},
+				"Shareholder Loans": {
+					"Shareholder Loan": {
+						"account_number": "25031"
+					},
+					"account_number": "25030",
+					"is_group": 1
+				},
+				"account_number": "25000",
+				"is_group": 1
+			},
+			"account_number": "20000",
+			"root_type": "Liability"
+		},
+		"Equity": {
+			"Share Capital": {
+				"account_number": "31010",
+				"account_type": "Equity"
+			},
+			"Drawings": {
+				"account_number": "31020",
+				"account_type": "Equity"
+			},
+			"Current Year Earnings": {
+				"account_number": "35010",
+				"account_type": "Equity"
+			},
+			"Retained Earnings": {
+				"account_number": "35020",
+				"account_type": "Equity"
+			},
+			"account_number": "30000",
+			"root_type": "Equity"
+		},
+		"Income": {
+			"Sales": {
+				"account_number": "41010",
+				"account_type": "Income Account"
+			},
+			"Other Income": {
+				"Interest Income": {
+					"account_number": "47010",
+					"account_type": "Income Account"
+				},
+				"Rounding Gain/Loss": {
+					"account_number": "47020",
+					"account_type": "Income Account"
+				},
+				"Foreign Exchange Gain": {
+					"account_number": "47030",
+					"account_type": "Income Account"
+				},
+				"account_number": "47000",
+				"is_group": 1
+			},
+			"account_number": "40000",
+			"root_type": "Income"
+		},
+		"Expenses": {
+			"Cost of Goods Sold": {
+				"Purchases": {
+					"account_number": "51010",
+					"account_type": "Cost of Goods Sold"
+				},
+				"Freight Inwards": {
+					"account_number": "51020",
+					"account_type": "Expenses Included In Valuation"
+				},
+				"Duty and Landing Costs": {
+					"account_number": "51030",
+					"account_type": "Expenses Included In Valuation"
+				},
+				"Stock Adjustment": {
+					"account_number": "51040",
+					"account_type": "Stock Adjustment"
+				},
+				"Stock Write Off": {
+					"account_number": "51050",
+					"account_type": "Stock Adjustment"
+				},
+				"account_number": "51000",
+				"account_type": "Cost of Goods Sold",
+				"is_group": 1
+			},
+			"Operating Expenses": {
+				"Wages & Salaries": {
+					"account_number": "61010",
+					"account_type": "Expense Account"
+				},
+				"KiwiSaver Employer Contribution": {
+					"account_number": "61020",
+					"account_type": "Expense Account"
+				},
+				"ACC Levies": {
+					"account_number": "61030",
+					"account_type": "Expense Account"
+				},
+				"Rent": {
+					"account_number": "65010",
+					"account_type": "Expense Account"
+				},
+				"Power": {
+					"account_number": "65020",
+					"account_type": "Expense Account"
+				},
+				"Telephone": {
+					"account_number": "66010",
+					"account_type": "Expense Account"
+				},
+				"Insurance": {
+					"account_number": "64010",
+					"account_type": "Expense Account"
+				},
+				"Accounting Fees": {
+					"account_number": "64020",
+					"account_type": "Expense Account"
+				},
+				"Legal Fees": {
+					"account_number": "64030",
+					"account_type": "Expense Account"
+				},
+				"Advertising and Marketing": {
+					"account_number": "65030",
+					"account_type": "Expense Account"
+				},
+				"Repairs and Maintenance": {
+					"account_number": "65040",
+					"account_type": "Expense Account"
+				},
+				"Freight and Courier": {
+					"account_number": "65050",
+					"account_type": "Expense Account"
+				},
+				"Operating Costs": {
+					"account_number": "65060",
+					"account_type": "Expense Account"
+				},
+				"account_number": "60000",
+				"is_group": 1
+			},
+			"Depreciation and Amortisation": {
+				"Depreciation - Plant & Equipment": {
+					"account_number": "62010",
+					"account_type": "Depreciation"
+				},
+				"Depreciation - Motor Vehicles": {
+					"account_number": "62020",
+					"account_type": "Depreciation"
+				},
+				"Depreciation - Office Equipment": {
+					"account_number": "62030",
+					"account_type": "Depreciation"
+				},
+				"Depreciation - Computer Equipment": {
+					"account_number": "62040",
+					"account_type": "Depreciation"
+				},
+				"account_number": "62000",
+				"is_group": 1
+			},
+			"Finance Costs": {
+				"Bank Charges": {
+					"account_number": "67010",
+					"account_type": "Expense Account"
+				},
+				"Interest Expense": {
+					"account_number": "67020",
+					"account_type": "Expense Account"
+				},
+				"Rounding Off": {
+					"account_number": "67030",
+					"account_type": "Round Off"
+				},
+				"Payment Discounts": {
+					"account_number": "67040",
+					"account_type": "Expense Account"
+				},
+				"account_number": "67000",
+				"is_group": 1
+			},
+			"Income Tax Expense": {
+				"account_number": "81010",
+				"account_type": "Expense Account"
+			},
+			"Foreign Exchange": {
+				"Exchange Gain/Loss": {
+					"account_number": "82010",
+					"account_type": "Expense Account"
+				},
+				"Unrealized Exchange Gain/Loss": {
+					"account_number": "82020",
+					"account_type": "Expense Account"
+				},
+				"account_number": "82000",
+				"is_group": 1
+			},
+			"Bad Debts": {
+				"account_number": "83010",
+				"account_type": "Expense Account"
+			},
+			"Write Off": {
+				"account_number": "83020",
+				"account_type": "Expense Account"
+			},
+			"Gain/Loss on Asset Disposal": {
+				"account_number": "83030",
+				"account_type": "Expense Account"
+			},
+			"Expenses Included In Asset Valuation": {
+				"account_number": "84010",
+				"account_type": "Expenses Included In Asset Valuation"
+			},
+			"account_number": "50000",
+			"root_type": "Expense"
+		}
+	}
+}

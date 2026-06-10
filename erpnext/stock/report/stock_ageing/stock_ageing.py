@@ -11,6 +11,7 @@ from frappe.query_builder.functions import Abs, Count
 from frappe.utils import cint, date_diff, flt, get_datetime
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 from erpnext.stock.valuation import round_off_if_near_zero
 
 Filters = frappe._dict
@@ -72,12 +73,17 @@ def format_report_data(filters: Filters, item_details: dict, to_date: str) -> li
 	return data
 
 
+def normalize_fifo_queue(fifo_queue: list) -> list:
+	"""Convert batch valuation slots to the standard [qty, posting_date, value] shape."""
+	return [get_batch_report_slot(slot) if is_batch_slot(slot) else slot for slot in fifo_queue]
+
+
 def get_report_fifo_queue(fifo_queue: list, has_batch_no: bool) -> list:
 	get_posting_date = itemgetter(FIFO_POSTING_DATE_INDEX)
 	fifo_queue = sorted([slot for slot in fifo_queue if get_posting_date(slot)], key=get_posting_date)
 
 	if has_batch_no:
-		return [get_batch_report_slot(slot) for slot in fifo_queue]
+		return normalize_fifo_queue(fifo_queue)
 
 	return fifo_queue
 
@@ -113,7 +119,7 @@ def get_report_row(filters: Filters, item_dict: dict, fifo_queue: list, to_date:
 
 def get_average_age(fifo_queue: list, to_date: str) -> float:
 	age_qty = total_qty = 0.0
-	for slot in fifo_queue:
+	for slot in normalize_fifo_queue(fifo_queue):
 		qty = get_slot_qty(slot)
 		age_qty += date_diff(to_date, slot[FIFO_DATE_INDEX]) * qty
 		total_qty += qty
@@ -925,9 +931,7 @@ class FIFOSlots:
 			)
 		)
 
-		for field in ["item_code"]:
-			if self.filters.get(field):
-				query = query.where(bundle[field] == self.filters.get(field))
+		query = self._apply_filter(query, bundle, "item_code")
 
 		if self.filters.get("warehouse"):
 			query = self._get_warehouse_conditions(bundle, query)
@@ -965,9 +969,7 @@ class FIFOSlots:
 			)
 		)
 
-		for field in ["item_code"]:
-			if self.filters.get(field):
-				query = query.where(bundle[field] == self.filters.get(field))
+		query = self._apply_filter(query, bundle, "item_code")
 
 		if self.filters.get("warehouse"):
 			query = self._get_warehouse_conditions(bundle, query)
@@ -997,27 +999,25 @@ class FIFOSlots:
 			"has_batch_no",
 		)
 
-		if self.filters.get("item_code"):
-			item = item.where(item_table.item_code == self.filters.get("item_code"))
+		item = self._apply_filter(item, item_table, "item_code")
 
 		if self.filters.get("brand"):
 			item = item.where(item_table.brand == self.filters.get("brand"))
 
 		return item
 
+	def _apply_filter(self, query, table, fieldname: str):
+		filter_value = self.filters.get(fieldname)
+		if not filter_value:
+			return query
+
+		if isinstance(filter_value, list | tuple | set):
+			return query.where(table[fieldname].isin(filter_value))
+
+		return query.where(table[fieldname] == filter_value)
+
 	def _get_warehouse_conditions(self, sle, sle_query) -> str:
-		warehouse = frappe.qb.DocType("Warehouse")
-		lft, rgt = frappe.db.get_value("Warehouse", self.filters.get("warehouse"), ["lft", "rgt"])
-
-		warehouse_results = (
-			frappe.qb.from_(warehouse)
-			.select("name")
-			.where((warehouse.lft >= lft) & (warehouse.rgt <= rgt))
-			.run()
-		)
-		warehouse_results = [x[0] for x in warehouse_results]
-
-		return sle_query.where(sle.warehouse.isin(warehouse_results))
+		return apply_warehouse_filter(sle_query, sle, self.filters)
 
 	def prepare_stock_reco_voucher_wise_count(self):
 		self.stock_reco_voucher_wise_count = frappe._dict()

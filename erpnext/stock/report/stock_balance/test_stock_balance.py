@@ -6,7 +6,7 @@ from frappe.utils import today
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.report.stock_balance.stock_balance import execute
+from erpnext.stock.report.stock_balance.stock_balance import execute, get_stock_ageing_data
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -166,3 +166,19 @@ class TestStockBalance(ERPNextTestSuite):
 		rows = stock_balance(self.filters.update({"show_variant_attributes": 1, "item_code": [variant.name]}))
 		self.assertPartialDictEq(attributes, rows[0])
 		self.assertInvariants(rows)
+
+	def test_stock_ageing_data_accepts_batchwise_valuation_slots(self):
+		fifo_queue = [
+			["SA-BATCH-NEWER", 1, 2.0, "2021-12-05", 20.0],
+			["SA-BATCH-OLDER", 1, 3.0, "2021-12-01", 30.0],
+		]
+
+		stock_ageing_data = get_stock_ageing_data(fifo_queue, "2021-12-10")
+
+		self.assertEqual(stock_ageing_data["average_age"], 7.4)
+		self.assertEqual(stock_ageing_data["earliest_age"], 9)
+		self.assertEqual(stock_ageing_data["latest_age"], 5)
+		self.assertEqual(
+			stock_ageing_data["fifo_queue"],
+			[[3.0, "2021-12-01", 30.0], [2.0, "2021-12-05", 20.0]],
+		)

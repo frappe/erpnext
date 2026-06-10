@@ -734,6 +734,7 @@ erpnext.utils.update_child_items = function (opts) {
 			read_only: 0,
 			disabled: 0,
 			label: __("Item Code"),
+			formatter: (value) => value,
 			get_query: function () {
 				let filters;
 				if (frm.doc.doctype == "Sales Order") {

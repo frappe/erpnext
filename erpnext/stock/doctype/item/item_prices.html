@@ -1,0 +1,139 @@
+<!-- Item Prices Tab -->
+<style>
+	.item-price-table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: var(--text-md);
+		color: var(--text-color);
+	}
+
+	.item-price-table thead tr {
+		background: var(--subtle-fg);
+	}
+
+	.item-price-table th {
+		padding: 8px 10px;
+		font-weight: 400;
+		color: var(--text-muted);
+		border-bottom: 1px solid var(--border-color);
+		white-space: nowrap;
+	}
+
+	.item-price-table td {
+		padding: 9px 10px;
+		border-bottom: 1px solid var(--border-color);
+	}
+
+	.item-price-table tbody tr:last-child td {
+		border-bottom: none;
+	}
+
+	.item-price-table tbody tr.price-row {
+		cursor: pointer;
+	}
+
+	.item-price-table tbody tr.price-row:hover {
+		background: var(--fg-hover-color);
+	}
+
+	.item-price-table .col-no {
+		width: 42px;
+		text-align: center;
+		color: var(--text-muted);
+		font-size: var(--text-sm);
+	}
+
+	.item-price-table .col-rate {
+		text-align: right;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.item-price-table th.col-rate {
+		text-align: right;
+	}
+
+	.item-price-table .col-muted {
+		color: var(--text-muted);
+	}
+
+	.item-price-table a {
+		color: var(--text-color);
+	}
+
+	.item-prices-footer {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-top: 10px;
+		margin-bottom: 16px;
+	}
+</style>
+<div style="margin-bottom: 12px;">
+	<div class="text-extra-muted" style="font-size: var(--text-sm);">{{ __("All active prices for this item across buying and selling price lists.") }}</div>
+</div>
+{% if (prices && prices.length) { %}
+
+<div style="border: 1px solid var(--border-color); border-radius: var(--border-radius-md); overflow: hidden; margin-bottom: 16px;">
+	<table class="item-price-table">
+		<thead>
+			<tr>
+				<th class="col-no">{{ __("No.") }}</th>
+				<th>{{ __("Price List") }}</th>
+				<th>{{ __("Type") }}</th>
+				<th>{{ __("Party") }}</th>
+				<th class="col-rate">{{ __("Rate") }}</th>
+				<th>{{ __("UOM") }}</th>
+				<th>{{ __("Valid Upto") }}</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for (var i=0; i < prices.length; i++) { var p = prices[i]; %}
+			<tr class="price-row" data-name="{{ p.name }}">
+				<td class="col-no">{{ i + 1 }}</td>
+				<td>{{ p.price_list }}</td>
+				<td>
+					{% if (p.buying && p.selling) { %}
+						{{ __("Buy & Sell") }}
+					{% } else if (p.buying) { %}
+						{{ __("Buying") }}
+					{% } else if (p.selling) { %}
+						{{ __("Selling") }}
+					{% } %}
+				</td>
+				<td>
+					{% if (p.customer) { %}
+						<a href="/app/customer/{{ encodeURIComponent(p.customer) }}" onclick="event.stopPropagation()">{{ p.customer }}</a>
+					{% } else if (p.supplier) { %}
+						<a href="/app/supplier/{{ encodeURIComponent(p.supplier) }}" onclick="event.stopPropagation()">{{ p.supplier }}</a>
+					{% } %}
+				</td>
+				<td class="col-rate">{{ format_currency(p.price_list_rate, p.currency) }}</td>
+				<td class="col-muted">{{ p.uom || stock_uom }}</td>
+				<td class="col-muted">{{ p.valid_upto ? frappe.datetime.str_to_user(p.valid_upto) : "" }}</td>
+			</tr>
+			{% } %}
+		</tbody>
+	</table>
+</div>
+
+<div class="item-prices-footer">
+	<div>
+		{% if (has_more) { %}
+		<a href="/app/item-price?item_code={{ encodeURIComponent(item_code) }}" class="btn btn-xs btn-default">
+			{{ __("View All Prices") }}
+		</a>
+		{% } %}
+	</div>
+	<button class="btn btn-xs btn-default add-price-btn">
+		{{ __("+ Add Price") }}
+	</button>
+</div>
+
+{% } else { %}
+
+<div style="text-align: center; padding: 40px 20px; color: var(--text-muted); border: 1px dashed var(--border-color); border-radius: var(--border-radius-md); margin-bottom: 14px;">
+	<p style="margin-bottom: 12px;">{{ __("No active item prices found.") }}</p>
+	<button class="btn btn-sm btn-default add-price-btn">{{ __("+ Add Price") }}</button>
+</div>
+
+{% } %}

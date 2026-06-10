@@ -737,6 +737,60 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		docstatus = frappe.db.get_value("Serial and Batch Bundle", bundle, "docstatus")
 		self.assertEqual(docstatus, 2)
 
+	def test_submitted_bundle_entries_cannot_be_mutated(self):
+		# A submitted Serial and Batch Bundle is the immutable source of truth for the stock
+		# ledger, live batch availability and repost/valuation replay. update_serial_batch_no_ledgers
+		# (which the whitelisted add_serial_batch_ledgers delegates to for an existing bundle) must
+		# refuse to rebuild -- and thereby inflate -- the quantities of an already submitted bundle.
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+			update_serial_batch_no_ledgers,
+		)
+
+		item_code = make_item(
+			properties={
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TAMPER-SBB-.#####",
+			}
+		).name
+
+		se = make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=10,
+			rate=100,
+		)
+
+		bundle = se.items[0].serial_and_batch_bundle
+		self.assertEqual(frappe.db.get_value("Serial and Batch Bundle", bundle, "docstatus"), 1)
+
+		original = frappe.db.get_value(
+			"Serial and Batch Entry", {"parent": bundle}, ["name", "batch_no", "qty"], as_dict=True
+		)
+		self.assertEqual(original.qty, 10)
+
+		# Attempt to forge the submitted bundle: keep the same batch but inflate qty. The guard
+		# fires immediately after the bundle is loaded (docstatus check), so child_row / parent_doc
+		# only need the minimal fields the function reads.
+		tampered_entries = [{"batch_no": original.batch_no, "qty": 1000}]
+		child_row = frappe._dict({"name": se.items[0].name})
+		parent_doc = frappe._dict({"posting_date": today(), "posting_time": nowtime()})
+
+		self.assertRaises(
+			frappe.ValidationError,
+			update_serial_batch_no_ledgers,
+			bundle,
+			tampered_entries,
+			child_row,
+			parent_doc,
+		)
+
+		# The on-disk quantity must be untouched by the rejected mutation attempt.
+		self.assertEqual(
+			frappe.db.get_value("Serial and Batch Entry", original.name, "qty"),
+			10,
+		)
+
 	def test_batch_duplicate_entry(self):
 		item_code = make_item(properties={"has_batch_no": 1}).name
 
