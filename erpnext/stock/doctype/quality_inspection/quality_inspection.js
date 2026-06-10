@@ -73,8 +73,13 @@ frappe.ui.form.on("Quality Inspection", {
 	},
 
 	refresh: function (frm) {
-		// Ignore cancellation of reference doctype on cancel all.
-		frm.ignore_doctypes_on_cancel_all = [frm.doc.reference_type, "Serial and Batch Bundle"];
+		// Ignore cancellation of reference doctype on cancel all. The reading
+		// bundle is frozen evidence — released by the server on cancel, not cancelled.
+		frm.ignore_doctypes_on_cancel_all = [
+			frm.doc.reference_type,
+			"Serial and Batch Bundle",
+			"Quality Inspection Reading Bundle",
+		];
 		frm.trigger("toggle_batch_and_serial_fields");
 
 		if (
