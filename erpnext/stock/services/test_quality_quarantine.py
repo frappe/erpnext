@@ -299,6 +299,28 @@ class TestQualityQuarantine(ERPNextTestSuite):
 			frappe.ValidationError, submit_inspection_for_lot, second_lot, reading_bundle=bundle.name
 		)
 
+	def test_cancelling_an_inspection_releases_its_bundle(self):
+		from erpnext.stock.doctype.quality_inspection_reading_bundle.test_quality_inspection_reading_bundle import (
+			make_bundle,
+		)
+
+		qc = make_qc_warehouse("_Test QC Cancel Bundle WH")
+		item = make_item(properties={"is_stock_item": 1}).name
+		se = make_stock_entry(item_code=item, qty=2, to_warehouse=qc, purpose="Material Receipt", rate=100)
+		lot = quality_control_lots_for(se.name)[0].name
+
+		bundle = make_bundle(2, {1: ["Accepted"], 2: ["Accepted"]}, item_code=item)
+		inspection = submit_inspection_for_lot(lot, reading_bundle=bundle.name)
+
+		# cancelling the inspection must not deadlock on the bundle guard;
+		# the bundle is released, not cancelled, and is then cancellable itself
+		inspection.cancel()
+		self.assertIsNone(
+			frappe.db.get_value("Quality Inspection Reading Bundle", bundle.name, "quality_inspection")
+		)
+		bundle.reload()
+		bundle.cancel()
+
 	def test_manual_inspection_overrides_each_quantity(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
 

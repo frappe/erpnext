@@ -294,9 +294,15 @@ class QualityInspection(Document):
 		self.update_qc_reference()
 
 	def on_cancel(self):
-		self.ignore_linked_doctypes = "Serial and Batch Bundle"
+		# the reading bundle is frozen evidence, not a downstream document: it is
+		# released (claim cleared), not cancelled along with the inspection
+		self.ignore_linked_doctypes = ("Serial and Batch Bundle", "Quality Inspection Reading Bundle")
 
 		self.update_qc_reference()
+		if self.reading_bundle:
+			frappe.db.set_value(
+				"Quality Inspection Reading Bundle", self.reading_bundle, "quality_inspection", None
+			)
 
 	def on_trash(self):
 		self.update_qc_reference(remove_reference=True)
