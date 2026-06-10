@@ -16,6 +16,8 @@ import frappe
 from frappe import _
 from frappe.utils.nestedset import get_ancestors_of
 
+from erpnext.stock.services.quality_warehouse import is_transit_warehouse
+
 INBOUND = "Inbound"
 OUTBOUND = "Outbound"
 
@@ -50,11 +52,17 @@ def movements_of(doc):
 					yield row, OUTBOUND, row.warehouse
 
 	elif doctype == "Stock Entry":
+		# In-transit transfers move stock through a dummy Transit warehouse, which
+		# is not a real inspection point: skip the first entry's move into transit
+		# and the end entry's move out of transit. The real source-out and
+		# target-in legs still apply.
 		for row in doc.get("items") or []:
-			if row.get("t_warehouse"):
-				yield row, INBOUND, row.t_warehouse
-			if row.get("s_warehouse"):
-				yield row, OUTBOUND, row.s_warehouse
+			t_warehouse = row.get("t_warehouse")
+			if t_warehouse and not is_transit_warehouse(t_warehouse):
+				yield row, INBOUND, t_warehouse
+			s_warehouse = row.get("s_warehouse")
+			if s_warehouse and not is_transit_warehouse(s_warehouse):
+				yield row, OUTBOUND, s_warehouse
 
 
 def _ordered_triggers(item_code):
