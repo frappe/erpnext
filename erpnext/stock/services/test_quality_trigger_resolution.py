@@ -268,24 +268,28 @@ class TestJobCardInspection(ERPNextTestSuite):
 
 
 class TestMakeInspectionButton(ERPNextTestSuite):
-	def test_only_triggered_items_are_offered(self):
+	def test_all_items_offered_with_required_marking(self):
 		triggered = make_item(properties={"is_stock_item": 1})
 		triggered.append("quality_triggers", trigger_row())  # Purchase Receipt
 		triggered.save()
 		plain = make_item(properties={"is_stock_item": 1})
 
+		# every item is offered (ad-hoc inspection is allowed); the trigger marks
+		# which ones inspection is required for
 		result = check_item_quality_inspection(
 			"Purchase Receipt", 0, [{"item_code": triggered.name}, {"item_code": plain.name}]
 		)
-		self.assertEqual({i["item_code"] for i in result}, {triggered.name})
+		required = {item["item_code"]: item["inspection_required"] for item in result}
+		self.assertEqual(required, {triggered.name: True, plain.name: False})
 
-	def test_trigger_for_other_doctype_is_not_offered(self):
+	def test_trigger_for_other_doctype_is_not_required(self):
 		item = make_item(properties={"is_stock_item": 1})
 		item.append("quality_triggers", trigger_row())  # Purchase Receipt only
 		item.save()
 
-		# a Delivery Note should offer nothing for this item
-		self.assertEqual(check_item_quality_inspection("Delivery Note", 0, [{"item_code": item.name}]), [])
+		# offered on a Delivery Note for ad-hoc use, but not required there
+		result = check_item_quality_inspection("Delivery Note", 0, [{"item_code": item.name}])
+		self.assertFalse(result[0]["inspection_required"])
 
 	def test_stale_client_inspection_link_is_refreshed_from_the_database(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry

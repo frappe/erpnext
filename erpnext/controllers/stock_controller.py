@@ -694,6 +694,11 @@ def repost_required_for_queue(doc: StockController) -> bool:
 
 @frappe.whitelist()
 def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str | list[dict]):
+	"""Annotate a document's items for the inspection dialog.
+
+	Every item is offered — inspection can be created ad hoc for items without a
+	trigger — with inspection_required marking the ones the triggers demand.
+	"""
 	from erpnext.stock.services.quality_trigger_resolution import (
 		get_inspection_basis,
 		item_has_trigger_for_doctype,
@@ -701,14 +706,14 @@ def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str
 
 	items = frappe.parse_json(items)
 
-	item_codes = {item.get("item_code") for item in items}
-	needing = {code for code in item_codes if code and item_has_trigger_for_doctype(code, doctype)}
-
-	items = [item for item in items if item.get("item_code") in needing]
-
+	required = {}
 	child_doctype = "Stock Entry Detail" if doctype == "Stock Entry" else doctype + " Item"
 	for item in items:
-		item["inspection_basis"] = get_inspection_basis(item.get("item_code"), doctype)
+		item_code = item.get("item_code")
+		if item_code not in required:
+			required[item_code] = item_has_trigger_for_doctype(item_code, doctype)
+		item["inspection_required"] = required[item_code]
+		item["inspection_basis"] = get_inspection_basis(item_code, doctype)
 		# the browser may hold a stale row (e.g. its inspection was cancelled since
 		# the form was loaded) — the database decides whether a link still exists
 		if item.get("name"):

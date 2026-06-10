@@ -2980,6 +2980,13 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						read_only_depends_on: 'eval:doc.inspection_basis === "Each Quantity"',
 					},
 					{
+						fieldtype: "Check",
+						fieldname: "inspection_required",
+						label: __("Required"),
+						in_list_view: true,
+						read_only: true,
+					},
+					{
 						fieldtype: "Data",
 						fieldname: "inspection_basis",
 						label: __("Inspection Basis"),
@@ -3060,22 +3067,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			},
 			freeze: true,
 			callback: function (r) {
-				if (r.message.length == 0) {
-					frappe.msgprint({
-						title: __("Quality Inspection Not Configured"),
-						message: __(
-							"No Quality Trigger is configured for the items in this document. Add a Quality Trigger on the Item or its Item Group to require inspection."
-						),
-					});
-					return;
-				}
-
-				r.message.forEach((item) => {
+				(r.message || []).forEach((item) => {
 					if (me.has_inspection_required(item)) {
 						let dialog_items = dialog.fields_dict.items;
 						dialog_items.df.data.push({
-							// every offered row needs inspection: pre-select it
-							__checked: 1,
+							// rows the triggers demand start checked; the rest can be
+							// ticked for an ad-hoc inspection
+							__checked: item.inspection_required ? 1 : 0,
+							inspection_required: item.inspection_required,
 							item_code: item.item_code,
 							item_name: item.item_name,
 							qty: item.qty,
