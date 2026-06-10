@@ -848,31 +848,31 @@ class JobCard(Document):
 		self.set_transferred_qty()
 
 	def validate_inspection(self):
-		bom_inspection_required = frappe.get_value("BOM", self.bom_no, "inspection_required")
-		operation_inspection_required = frappe.get_value(
-			"Work Order Operation", self.operation_id, "quality_inspection_required"
-		)
-		if not (bom_inspection_required and operation_inspection_required):
+		from erpnext.stock.services.quality_trigger_resolution import resolve_job_card_inspection
+
+		trigger = resolve_job_card_inspection(self)
+		if not trigger or trigger.quality_control_mode == "Monitor":
 			return
 
-		if not self.quality_inspection:
-			frappe.throw(
-				_(
-					"Quality Inspection is required for the item {0} before completing the job card {1}"
-				).format(get_link_to_form("Item", self.finished_good), bold(self.name))
-			)
+		action = "Stop" if trigger.quality_control_mode == "Block" else "Warn"
 
-		# The global Stock Settings QC actions were removed in the quality refactor;
-		# Job Card inspection defaults to blocking until wired to the trigger model.
-		action_submit = action_reject = "Stop"
+		if not self.quality_inspection:
+			message = _(
+				"Quality Inspection is required for the item {0} before completing the job card {1}"
+			).format(get_link_to_form("Item", self.finished_good), bold(self.name))
+			if action == "Stop":
+				frappe.throw(message, title=_("Inspection Required"))
+			else:
+				frappe.msgprint(message, alert=True, indicator="orange")
+			return
 
 		qa_status, docstatus = frappe.get_value(
 			"Quality Inspection", self.quality_inspection, ["status", "docstatus"]
 		)
 		if docstatus != 1:
-			self.handle_unsubmitted_inspection(action_submit)
+			self.handle_unsubmitted_inspection(action)
 		elif qa_status == "Rejected":
-			self.handle_rejected_inspection(action_reject)
+			self.handle_rejected_inspection(action)
 
 	def handle_unsubmitted_inspection(self, action_submit):
 		message = _("Quality Inspection {0} is not submitted for the item: {1}").format(

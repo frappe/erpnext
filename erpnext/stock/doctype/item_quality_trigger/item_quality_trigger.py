@@ -152,3 +152,13 @@ def _validate_trigger_row(row):
 				"be quarantined. Use Block, Warn or Monitor instead."
 			).format(row.idx)
 		)
+
+	# A Job Card gates the completion of an operation, not a stock movement, so it
+	# cannot quarantine. Quarantine the produced stock with a Stock Entry trigger.
+	if row.document_type == "Job Card" and row.quality_control_mode == "Quarantine":
+		frappe.throw(
+			_(
+				"Row #{0}: Job Card supports Block, Warn or Monitor. To quarantine the produced "
+				"stock, add a Stock Entry trigger instead."
+			).format(row.idx)
+		)

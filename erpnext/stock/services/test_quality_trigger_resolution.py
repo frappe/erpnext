@@ -16,6 +16,7 @@ from erpnext.stock.services.quality_trigger_resolution import (
 	enforce_inspection_points,
 	movements_of,
 	resolve_inspection_points,
+	resolve_job_card_inspection,
 )
 from erpnext.stock.services.test_quality_warehouse import make_warehouse
 from erpnext.tests.utils import ERPNextTestSuite
@@ -218,6 +219,52 @@ class TestInspectionEnforcement(ERPNextTestSuite):
 	def test_warn_does_not_block_submission(self):
 		item = self._item_with_outbound_trigger("Warn")
 		enforce_inspection_points(dn_doc(item))  # warns, but does not raise
+
+
+class TestJobCardInspection(ERPNextTestSuite):
+	def _job_card_item(self, inspection_point):
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Job Card",
+				warehouse_role=None,  # auto-set to Inbound
+				quality_control_mode="Block",
+				job_card_inspection_point=inspection_point,
+			),
+		)
+		item.save()
+		return item.name
+
+	def job_card(self, finished_good, track_semi_finished_goods=1):
+		return frappe._dict(
+			doctype="Job Card",
+			track_semi_finished_goods=track_semi_finished_goods,
+			finished_good=finished_good,
+			target_warehouse=REAL_WH,
+		)
+
+	def test_requires_track_semi_finished_goods(self):
+		item = self._job_card_item("Every Job Card")
+		card = self.job_card(item, track_semi_finished_goods=0)
+		self.assertIsNone(resolve_job_card_inspection(card, production_item=item))
+
+	def test_every_job_card_matches_intermediate_and_final(self):
+		item = self._job_card_item("Every Job Card")
+		card = self.job_card(item)
+		# matches whether or not this job card produces the final output
+		self.assertIsNotNone(resolve_job_card_inspection(card, production_item=item))
+		self.assertIsNotNone(resolve_job_card_inspection(card, production_item="SOME-OTHER-ITEM"))
+
+	def test_final_output_only_matches_just_the_final_job_card(self):
+		item = self._job_card_item("Final Output Only")
+		card = self.job_card(item)
+		# intermediate operation (finished good != production item): no inspection
+		self.assertIsNone(resolve_job_card_inspection(card, production_item="SOME-OTHER-ITEM"))
+		# final operation: inspection required
+		trigger = resolve_job_card_inspection(card, production_item=item)
+		self.assertIsNotNone(trigger)
+		self.assertEqual(trigger.quality_control_mode, "Block")
 
 
 class TestMakeInspectionButton(ERPNextTestSuite):

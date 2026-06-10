@@ -95,6 +95,19 @@ class TestItemQualityTrigger(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, item.save)
 
+	def test_job_card_cannot_quarantine(self):
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Job Card",
+				warehouse_role=None,
+				quality_control_mode="Quarantine",
+				job_card_inspection_point="Every Job Card",
+			),
+		)
+		self.assertRaises(frappe.ValidationError, item.save)
+
 	def test_job_card_inspection_point_only_on_job_card(self):
 		item = make_item(properties={"is_stock_item": 1})
 		# Purchase Receipt row carrying a Job Card-only option must be rejected
