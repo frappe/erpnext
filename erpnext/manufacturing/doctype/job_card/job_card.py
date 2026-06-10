@@ -851,7 +851,7 @@ class JobCard(Document):
 		from erpnext.stock.services.quality_trigger_resolution import resolve_job_card_inspection
 
 		trigger = resolve_job_card_inspection(self)
-		if not trigger or trigger.quality_control_mode == "Monitor":
+		if not trigger:
 			return
 
 		action = "Stop" if trigger.quality_control_mode == "Block" else "Warn"

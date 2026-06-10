@@ -71,7 +71,7 @@ class ItemQualityTrigger(Document):
 		parentfield: DF.Data
 		parenttype: DF.Data
 		party_transaction_type: DF.Literal["External", "Internal Transfer"]
-		quality_control_mode: DF.Literal["Quarantine", "Block", "Warn", "Monitor"]
+		quality_control_mode: DF.Literal["Quarantine", "Block", "Warn"]
 		retest_interval_days: DF.Int
 		sample_size: DF.Float
 		sample_size_is_percentage: DF.Check
@@ -245,7 +245,7 @@ def _validate_trigger_row(row):
 		frappe.throw(
 			_(
 				"Row #{0}: Quarantine applies only to inbound movements — outbound stock cannot "
-				"be quarantined. Use Block, Warn or Monitor instead."
+				"be quarantined. Use Block or Warn instead."
 			).format(row.idx)
 		)
 
@@ -254,7 +254,7 @@ def _validate_trigger_row(row):
 	if row.document_type == "Job Card" and row.quality_control_mode == "Quarantine":
 		frappe.throw(
 			_(
-				"Row #{0}: Job Card supports Block, Warn or Monitor. To quarantine the produced "
+				"Row #{0}: Job Card supports Block or Warn. To quarantine the produced "
 				"stock, add a Stock Entry trigger instead."
 			).format(row.idx)
 		)

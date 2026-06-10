@@ -156,13 +156,13 @@
   },
   {
    "depends_on": "eval:doc.trigger_type!='Periodic Re-test'",
-   "description": "Inbound: Quarantine routes stock to a Quality Control warehouse and locks it until release; Monitor inspects without locking. Outbound: Block stops the document until inspection passes; Warn allows with a warning; Monitor only records. Periodic Re-test rows always quarantine.",
+   "description": "Inbound: Quarantine routes stock to a Quality Control warehouse and locks it until release. Outbound: Block stops the document until inspection passes; Warn allows it with a warning. Periodic Re-test rows always quarantine.",
    "fieldname": "quality_control_mode",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Quality Control Mode",
    "mandatory_depends_on": "eval:doc.trigger_type!='Periodic Re-test'",
-   "options": "Quarantine\nBlock\nWarn\nMonitor"
+   "options": "Quarantine\nBlock\nWarn"
   },
   {
    "fieldname": "column_break_insp",

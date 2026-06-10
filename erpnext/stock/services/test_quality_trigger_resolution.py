@@ -135,7 +135,7 @@ class TestQualityTriggerResolution(ERPNextTestSuite):
 		group = create_test_item_group("_Test QC Override Group")
 		doc = frappe.get_doc("Item Group", group)
 		doc.set("quality_triggers", [])
-		doc.append("quality_triggers", trigger_row(quality_control_mode="Monitor"))
+		doc.append("quality_triggers", trigger_row(quality_control_mode="Warn"))
 		doc.save()
 
 		item = make_item(properties={"is_stock_item": 1, "item_group": group})

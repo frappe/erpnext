@@ -8,8 +8,8 @@ Each item row of a stock voucher is decomposed into directional movements
 movement is matched against the Item / Item Group quality triggers, most-specific
 first, to produce the set of required inspection points.
 
-This module only *resolves* points; enforcing them (block / warn / quarantine /
-monitor) is wired separately.
+This module only *resolves* points; enforcing them (block / warn / quarantine)
+is wired separately.
 """
 
 import frappe
@@ -259,9 +259,9 @@ def resolve_inspection_points(doc):
 def enforce_inspection_points(doc):
 	"""Enforce Block / Warn inspection points on a stock transaction.
 
-	Quarantine is handled by warehouse routing and Monitor is informational, so
-	neither gates the document here. Block stops submission when the row's Quality
-	Inspection is missing, unsubmitted or rejected; Warn only flags it.
+	Quarantine is handled by warehouse routing and does not gate the document
+	here. Block stops submission when the row's Quality Inspection is missing,
+	unsubmitted or rejected; Warn only flags it.
 	"""
 	from frappe.utils import get_link_to_form
 
