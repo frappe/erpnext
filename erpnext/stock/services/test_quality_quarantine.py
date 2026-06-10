@@ -484,6 +484,35 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		return_doc.cancel()
 		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "returned_qty"), 0)
 
+	def test_reading_bundle_born_from_inspection(self):
+		from erpnext.stock.doctype.quality_inspection.quality_inspection import make_reading_bundle
+
+		qc = make_qc_warehouse("_Test QC Born Bundle WH")
+		item = make_quarantine_item(qc)
+		se = make_stock_entry(item_code=item, qty=3, to_warehouse=qc, purpose="Material Receipt", rate=100)
+		lot = quality_control_lots_for(se.name)[0].name
+
+		inspection = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Incoming",
+				"reference_type": "Quality Control Lot",
+				"reference_name": lot,
+				"item_code": item,
+				"sample_size": 1,
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+			}
+		)
+		inspection.insert(ignore_permissions=True)
+
+		# created server-side so the no_copy backlink survives: born linked, with
+		# the item and the full quantity under inspection
+		bundle = make_reading_bundle(inspection.name)
+		self.assertEqual(bundle.quality_inspection, inspection.name)
+		self.assertEqual(bundle.item_code, item)
+		self.assertEqual(bundle.quantity, 3)
+
 	def test_purchase_return_created_from_the_lot(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 		from erpnext.stock.services.quality_quarantine import make_purchase_return_for_lot

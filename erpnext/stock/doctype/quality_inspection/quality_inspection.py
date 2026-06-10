@@ -751,6 +751,22 @@ def parse_reading(value: str, decimal_str: str, comma_str: str) -> float | None:
 	return number if isfinite(number) else None
 
 
+@frappe.whitelist()
+def make_reading_bundle(quality_inspection: str):
+	"""A reading bundle born from its inspection, fully formed.
+
+	Created server-side because the client's route options skip no_copy fields —
+	the inspection backlink would be dropped and the bundle born unlinked.
+	"""
+	inspection = frappe.get_doc("Quality Inspection", quality_inspection)
+	bundle = frappe.new_doc("Quality Inspection Reading Bundle")
+	bundle.quality_inspection = inspection.name
+	bundle.item_code = inspection.item_code
+	bundle.quality_inspection_template = inspection.quality_inspection_template
+	bundle.quantity = cint(inspection.get_qty_under_inspection())
+	return bundle
+
+
 def parse_float(num: str) -> float:
 	"""Since reading_# fields are `Data` field they might contain number which
 	is representation in user's prefered number format instead of machine
