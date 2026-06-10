@@ -247,6 +247,22 @@ def get_row_serial_nos(row):
 	return serials
 
 
+def get_row_batch_nos(row):
+	"""The batch numbers a transaction row carries (legacy field or bundle)."""
+	batches = set()
+	if row.get("batch_no"):
+		batches.add(row.get("batch_no"))
+	if row.get("serial_and_batch_bundle"):
+		batches.update(
+			frappe.get_all(
+				"Serial and Batch Entry",
+				filters={"parent": row.get("serial_and_batch_bundle"), "batch_no": ("is", "set")},
+				pluck="batch_no",
+			)
+		)
+	return batches
+
+
 def validate_inspected_serial_consistency(doc, method=None):
 	"""A row's inspection must describe the row's serials.
 
@@ -262,13 +278,15 @@ def validate_inspected_serial_consistency(doc, method=None):
 	if doc.docstatus != 1:
 		return
 
+	child_doctype = "Stock Entry Detail" if doc.doctype == "Stock Entry" else doc.doctype + " Item"
+
 	for row in doc.get("items") or []:
 		inspection = row.get("quality_inspection")
 		if not inspection:
 			continue
 
 		qi = frappe.db.get_value(
-			"Quality Inspection", inspection, ["serial_no", "reading_bundle"], as_dict=True
+			"Quality Inspection", inspection, ["serial_no", "reading_bundle", "batch_no"], as_dict=True
 		)
 		sampled = set(get_serial_nos(qi.serial_no or "")) if qi else set()
 		if qi and qi.reading_bundle:
@@ -280,35 +298,47 @@ def validate_inspected_serial_consistency(doc, method=None):
 					pluck="serial_no",
 				)
 			)
-		if not sampled:
+		if not sampled and not (qi and qi.batch_no):
 			continue
 
-		row_serials = get_row_serial_nos(row)
-		if not row_serials and row.get("name"):
-			# inward documents materialise serials/bundles during submission via
-			# direct writes — the in-memory row may be stale, the database is not
-			child_doctype = "Stock Entry Detail" if doc.doctype == "Stock Entry" else doc.doctype + " Item"
+		# inward documents materialise serials/bundles during submission via
+		# direct writes — the in-memory row may be stale, the database is not
+		db_row = None
+		if row.get("name"):
 			db_row = frappe.db.get_value(
-				child_doctype, row.name, ["serial_no", "serial_and_batch_bundle"], as_dict=True
+				child_doctype, row.name, ["serial_no", "serial_and_batch_bundle", "batch_no"], as_dict=True
 			)
-			if db_row:
-				row_serials = get_row_serial_nos(db_row)
-		if not row_serials:
-			continue  # serial assignment may follow later in submission; core enforces it
 
-		missing = sampled - row_serials
-		if missing:
-			frappe.throw(
-				_(
-					"Row #{0}: Quality Inspection {1} sampled serial number(s) {2}, which this row "
-					"does not carry. The inspection must describe the stock actually moving."
-				).format(
-					row.idx,
-					frappe.utils.get_link_to_form("Quality Inspection", inspection),
-					frappe.bold(", ".join(sorted(missing))),
-				),
-				title=_("Inspected Serials Mismatch"),
-			)
+		row_serials = get_row_serial_nos(row) or (get_row_serial_nos(db_row) if db_row else set())
+		if sampled and row_serials:
+			missing = sampled - row_serials
+			if missing:
+				frappe.throw(
+					_(
+						"Row #{0}: Quality Inspection {1} sampled serial number(s) {2}, which this row "
+						"does not carry. The inspection must describe the stock actually moving."
+					).format(
+						row.idx,
+						frappe.utils.get_link_to_form("Quality Inspection", inspection),
+						frappe.bold(", ".join(sorted(missing))),
+					),
+					title=_("Inspected Serials Mismatch"),
+				)
+
+		if qi and qi.batch_no:
+			row_batches = get_row_batch_nos(row) or (get_row_batch_nos(db_row) if db_row else set())
+			if row_batches and qi.batch_no not in row_batches:
+				frappe.throw(
+					_(
+						"Row #{0}: Quality Inspection {1} covers batch {2}, which this row does not "
+						"carry. The inspection must describe the stock actually moving."
+					).format(
+						row.idx,
+						frappe.utils.get_link_to_form("Quality Inspection", inspection),
+						frappe.bold(qi.batch_no),
+					),
+					title=_("Inspected Batch Mismatch"),
+				)
 
 
 def enforce_inspection_points(doc):

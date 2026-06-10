@@ -264,6 +264,26 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		batch_one, lot_one = receive_batch("_Test QC Batch One")
 		batch_two, lot_two = receive_batch("_Test QC Batch Two")
 
+		# a verdict claiming the wrong batch is refused
+		mismatched = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Incoming",
+				"reference_type": "Quality Control Lot",
+				"reference_name": lot_one,
+				"item_code": item.name,
+				"sample_size": 1,
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+				"manual_inspection": 1,
+				"status": "Accepted",
+				"batch_no": batch_two,
+			}
+		)
+		mismatched.insert(ignore_permissions=True)
+		self.assertRaises(frappe.ValidationError, mismatched.submit)
+		mismatched.delete()
+
 		# a batched verdict must say which batch it covers
 		anonymous = frappe.get_doc(
 			{
@@ -1044,6 +1064,88 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		# with the inspected serials restored, the issue submits
 		issue.reload()
 		issue.items[0].serial_no = "\n".join(serials[:2])
+		issue.save()
+		issue.submit()
+
+	def test_inspected_batch_guards_the_document(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
+		item = make_item(
+			properties={"is_stock_item": 1, "has_batch_no": 1, "batch_number_series": "QCBG.#####"}
+		)
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry",
+				stock_entry_type="Material Issue",
+				warehouse_role="Outbound",
+				quality_control_mode="Block",
+			),
+		)
+		item.save()
+
+		def receive_batch(batch_id):
+			batch = frappe.get_doc({"doctype": "Batch", "item": item.name, "batch_id": batch_id}).insert(
+				ignore_permissions=True
+			)
+			make_stock_entry(
+				item_code=item.name,
+				qty=2,
+				to_warehouse=REAL_WH,
+				purpose="Material Receipt",
+				rate=100,
+				batch_no=batch.name,
+				use_serial_batch_fields=1,
+			)
+			return batch.name
+
+		batch_one = receive_batch("_Test QC Guard Batch One")
+		batch_two = receive_batch("_Test QC Guard Batch Two")
+
+		issue = make_stock_entry(
+			item_code=item.name,
+			qty=1,
+			from_warehouse=REAL_WH,
+			purpose="Material Issue",
+			batch_no=batch_one,
+			use_serial_batch_fields=1,
+			do_not_submit=True,
+		)
+
+		# inspecting a batch the row does not carry is refused outright
+		wrong = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Outgoing",
+				"reference_type": "Stock Entry",
+				"reference_name": issue.name,
+				"item_code": item.name,
+				"sample_size": 1,
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+				"manual_inspection": 1,
+				"status": "Accepted",
+				"batch_no": batch_two,
+			}
+		)
+		wrong.insert(ignore_permissions=True)
+		self.assertRaises(frappe.ValidationError, wrong.submit)
+		wrong.delete()
+
+		inspection = frappe.copy_doc(wrong)
+		inspection.batch_no = batch_one
+		inspection.insert(ignore_permissions=True)
+		inspection.submit()
+
+		# swapping the issued batch after the inspection is caught at submission
+		issue.reload()
+		issue.items[0].batch_no = batch_two
+		issue.save()
+		self.assertRaises(frappe.ValidationError, issue.submit)
+
+		issue.reload()
+		issue.items[0].batch_no = batch_one
 		issue.save()
 		issue.submit()
 

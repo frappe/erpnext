@@ -260,7 +260,51 @@ class QualityInspection(Document):
 		self.validate_readings_recorded()
 		self.validate_tracking_identity_recorded()
 		self.validate_inspected_serials_against_reference()
+		self.validate_inspected_batch_against_reference()
 		self.validate_reading_bundle_coverage()
+
+	def validate_inspected_batch_against_reference(self):
+		"""The inspected batch must be the batch of the stock under inspection."""
+		from erpnext.stock.services.quality_trigger_resolution import get_row_batch_nos
+
+		if not self.batch_no:
+			return
+
+		if self.reference_type == "Quality Control Lot" and self.reference_name:
+			lot_batch = frappe.db.get_value("Quality Control Lot", self.reference_name, "batch_no")
+			if lot_batch and self.batch_no != lot_batch:
+				frappe.throw(
+					_("Quality Control Lot {0} holds batch {1}, not {2}.").format(
+						self.reference_name, frappe.bold(lot_batch), frappe.bold(self.batch_no)
+					),
+					title=_("Inspected Batch Mismatch"),
+				)
+			return
+
+		if not self.child_row_reference:
+			return
+
+		child_doctype = (
+			"Stock Entry Detail" if self.reference_type == "Stock Entry" else self.reference_type + " Item"
+		)
+		row = frappe.db.get_value(
+			child_doctype,
+			self.child_row_reference,
+			["batch_no", "serial_and_batch_bundle"],
+			as_dict=True,
+		)
+		if not row:
+			return
+
+		row_batches = get_row_batch_nos(row)
+		if row_batches and self.batch_no not in row_batches:
+			frappe.throw(
+				_(
+					"Batch {0} is not on the document row under inspection — only the stock "
+					"actually moving can be inspected."
+				).format(frappe.bold(self.batch_no)),
+				title=_("Inspected Batch Mismatch"),
+			)
 
 	def validate_inspected_serials_against_reference(self):
 		"""The inspected serials must belong to the stock under inspection.
@@ -379,15 +423,14 @@ class QualityInspection(Document):
 		Each Quantity / bundle-decided inspections are exempt: their identity
 		lives per unit in the reading bundle and on the Quality Control Lot.
 		"""
-		if self.inspection_basis == "Each Quantity" or self.reading_bundle:
-			return
 		if not self.item_code:
 			return
 
+		bundle_decided = self.inspection_basis == "Each Quantity" or bool(self.reading_bundle)
 		item = frappe.get_cached_value(
 			"Item", self.item_code, ["has_serial_no", "has_batch_no"], as_dict=True
 		)
-		if item.has_serial_no and not (self.serial_no or "").strip():
+		if not bundle_decided and item.has_serial_no and not (self.serial_no or "").strip():
 			frappe.throw(
 				_(
 					"Record the sampled Serial Nos before submission — {0} is serialized, and the "
@@ -395,6 +438,10 @@ class QualityInspection(Document):
 				).format(frappe.bold(self.item_code)),
 				title=_("Serial Nos Missing"),
 			)
+		# the bundle carries serials per unit but no batch: only a lot reference
+		# (which holds the batch itself) exempts the batch requirement
+		if bundle_decided and self.reference_type == "Quality Control Lot":
+			return
 		if item.has_batch_no and not self.batch_no:
 			frappe.throw(
 				_(
