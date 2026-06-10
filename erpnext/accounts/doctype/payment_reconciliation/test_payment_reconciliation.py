@@ -1103,8 +1103,6 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		self.assertCountEqual(payment_vouchers, [je2.name, pe2.name])
 
 	def test_user_permission_on_accounting_dimension_filters_vouchers(self):
-		from frappe.permissions import add_user_permission
-
 		test_user = "test@example.com"
 		permitted_ccs = ["_Test Cost Center - _TC", "_Test Cost Center 2 - _TC"]
 		restricted_cc = "_Test Write Off Cost Center - _TC"
@@ -1145,8 +1143,7 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 
 		# Set user permission.
 		for cc in permitted_ccs:
-			add_user_permission("Cost Center", cc, test_user)
-		self.addCleanup(frappe.cache.hdel, "user_permissions", test_user)
+			frappe.permissions.add_user_permission("Cost Center", cc, test_user)
 
 		# without setting any dimension filter on the tool itself.
 		with self.set_user(test_user):
@@ -1165,6 +1162,9 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		self.assertNotIn(si_restricted.name, invoice_numbers)
 		self.assertNotIn(pe_restricted.name, payment_vouchers)
 		self.assertNotIn(je_restricted.name, payment_vouchers)
+
+		for cc in permitted_ccs:
+			frappe.permissions.remove_user_permission("Cost Center", cc, test_user)
 
 	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
