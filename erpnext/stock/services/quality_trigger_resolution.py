@@ -150,39 +150,6 @@ def get_sample_size(trigger, qty):
 	return min(qty, flt(trigger.sample_size)) if qty else flt(trigger.sample_size)
 
 
-def resolve_job_card_inspection(job_card, production_item=None):
-	"""Return the matching Job Card trigger for a job card's output, or None.
-
-	Job Card triggers only apply when the Work Order tracks semi-finished goods —
-	that is the only mode where each job card produces an identifiable output.
-	"Final Output Only" rows match just the job card whose finished good is the
-	work order's production item; "Every Job Card" rows match them all.
-	"""
-	if not job_card.get("track_semi_finished_goods") or not job_card.get("finished_good"):
-		return None
-
-	if production_item is None and job_card.get("work_order"):
-		production_item = frappe.db.get_value("Work Order", job_card.work_order, "production_item")
-	is_final_output = job_card.finished_good == production_item
-
-	for trigger in _ordered_triggers(job_card.finished_good):
-		if trigger.document_type != "Job Card":
-			continue
-		if trigger.applicable_warehouse and trigger.applicable_warehouse != job_card.get("target_warehouse"):
-			continue
-		if trigger.job_card_inspection_point == "Final Output Only" and not is_final_output:
-			continue
-		if trigger.condition:
-			try:
-				if not frappe.safe_eval(trigger.condition, None, {"doc": job_card}):
-					continue
-			except Exception:
-				continue
-		return trigger
-
-	return None
-
-
 def _is_internal_transfer(doc):
 	return bool(doc.get("is_internal_supplier") or doc.get("is_internal_customer"))
 

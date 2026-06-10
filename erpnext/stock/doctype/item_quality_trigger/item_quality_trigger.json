@@ -12,7 +12,6 @@
   "document_type",
   "stock_entry_type",
   "party_transaction_type",
-  "job_card_inspection_point",
   "column_break_txn",
   "warehouse_role",
   "applicable_warehouse",
@@ -60,7 +59,7 @@
    "in_list_view": 1,
    "label": "Document Type",
    "mandatory_depends_on": "eval:doc.trigger_type!='Periodic Re-test'",
-   "options": "Purchase Receipt\nPurchase Invoice\nSubcontracting Receipt\nDelivery Note\nSales Invoice\nStock Entry\nJob Card"
+   "options": "Purchase Receipt\nPurchase Invoice\nSubcontracting Receipt\nDelivery Note\nSales Invoice\nStock Entry"
   },
   {
    "depends_on": "eval:doc.trigger_type != 'Periodic Re-test' && (doc.document_type=='Stock Entry')",
@@ -79,15 +78,6 @@
    "fieldtype": "Select",
    "label": "Transaction Type",
    "options": "External\nInternal Transfer"
-  },
-  {
-   "depends_on": "eval:doc.trigger_type != 'Periodic Re-test' && (doc.document_type=='Job Card')",
-   "description": "Job Card triggers apply only when the Work Order tracks semi-finished goods. Choose whether to inspect after every job card or only at the final output.",
-   "fieldname": "job_card_inspection_point",
-   "fieldtype": "Select",
-   "label": "Inspect On",
-   "mandatory_depends_on": "eval:doc.trigger_type != 'Periodic Re-test' && (doc.document_type=='Job Card')",
-   "options": "\nEvery Job Card\nFinal Output Only"
   },
   {
    "fieldname": "column_break_txn",

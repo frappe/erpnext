@@ -56,7 +56,6 @@ class TestItemQualityTrigger(ERPNextTestSuite):
 		self.assertEqual(allowed_warehouse_roles("Stock Entry", "Material Receipt"), {"Inbound"})
 		self.assertEqual(allowed_warehouse_roles("Stock Entry", "Material Issue"), {"Outbound"})
 		self.assertEqual(allowed_warehouse_roles("Stock Entry", "Material Transfer"), {"Inbound", "Outbound"})
-		self.assertEqual(allowed_warehouse_roles("Job Card"), {"Inbound"})
 
 	def test_single_direction_role_is_autoset(self):
 		item = make_item(properties={"is_stock_item": 1})
@@ -166,22 +165,3 @@ class TestItemQualityTrigger(ERPNextTestSuite):
 		)
 		item.save()
 		self.assertEqual(item.quality_triggers[0].quality_control_mode, "Quarantine")
-
-	def test_job_card_cannot_quarantine(self):
-		item = make_item(properties={"is_stock_item": 1})
-		item.append(
-			"quality_triggers",
-			trigger_row(
-				document_type="Job Card",
-				warehouse_role=None,
-				quality_control_mode="Quarantine",
-				job_card_inspection_point="Every Job Card",
-			),
-		)
-		self.assertRaises(frappe.ValidationError, item.save)
-
-	def test_job_card_inspection_point_only_on_job_card(self):
-		item = make_item(properties={"is_stock_item": 1})
-		# Purchase Receipt row carrying a Job Card-only option must be rejected
-		item.append("quality_triggers", trigger_row(job_card_inspection_point="Every Job Card"))
-		self.assertRaises(frappe.ValidationError, item.save)

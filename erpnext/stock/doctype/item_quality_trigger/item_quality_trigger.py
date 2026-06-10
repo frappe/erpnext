@@ -12,7 +12,7 @@ PARTY_DOCTYPES = ("Purchase Receipt", "Purchase Invoice", "Delivery Note", "Sale
 # Direction matrix: which warehouse role(s) make sense for a given document type
 # (and, for Stock Entry, a given purpose). A pure receipt is inbound-only, a pure
 # issue is outbound-only, and transfer/manufacture-style movements expose both.
-_INBOUND_ONLY = {"Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt", "Job Card"}
+_INBOUND_ONLY = {"Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"}
 # Delivery Note / Sales Invoice are outbound for normal documents but inbound for
 # returns (a customer return brings stock back in), so both roles are valid:
 # Outbound inspects the delivery, Inbound inspects the return.
@@ -62,11 +62,9 @@ class ItemQualityTrigger(Document):
 			"Delivery Note",
 			"Sales Invoice",
 			"Stock Entry",
-			"Job Card",
 		]
 		inspection_basis: DF.Literal["Sample", "Each Quantity"]
 		inspection_template: DF.Link | None
-		job_card_inspection_point: DF.Literal["", "Every Job Card", "Final Output Only"]
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
@@ -122,7 +120,6 @@ def _scopes_overlap(first, second):
 			"party_transaction_type",
 			"supplier",
 			"customer",
-			"job_card_inspection_point",
 		)
 	)
 
@@ -175,7 +172,6 @@ def _validate_trigger_row(row):
 			"supplier",
 			"customer",
 			"condition",
-			"job_card_inspection_point",
 		):
 			row.set(fieldname, None)
 		return
@@ -191,10 +187,6 @@ def _validate_trigger_row(row):
 	# defaults to External, so it is cleared (not rejected) on other doctypes.
 	if row.get("party_transaction_type") and row.document_type not in PARTY_DOCTYPES:
 		row.party_transaction_type = None
-
-	# Inspect On (Every Job Card / Final Output Only) only applies to Job Card rows.
-	if row.get("job_card_inspection_point") and row.document_type != "Job Card":
-		frappe.throw(_("Row #{0}: Inspect On applies only to Job Card.").format(row.idx))
 
 	# Warehouse role must respect the direction implied by the document / Stock Entry Type.
 	stock_entry_purpose = (
@@ -246,15 +238,5 @@ def _validate_trigger_row(row):
 			_(
 				"Row #{0}: Quarantine applies only to inbound movements — outbound stock cannot "
 				"be quarantined. Use Block or Warn instead."
-			).format(row.idx)
-		)
-
-	# A Job Card gates the completion of an operation, not a stock movement, so it
-	# cannot quarantine. Quarantine the produced stock with a Stock Entry trigger.
-	if row.document_type == "Job Card" and row.quality_control_mode == "Quarantine":
-		frappe.throw(
-			_(
-				"Row #{0}: Job Card supports Block or Warn. To quarantine the produced "
-				"stock, add a Stock Entry trigger instead."
 			).format(row.idx)
 		)

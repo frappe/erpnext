@@ -23,10 +23,6 @@ from frappe.utils import (
 	time_diff_in_hours,
 )
 
-from erpnext.controllers.stock_controller import (
-	QualityInspectionNotSubmittedError,
-	QualityInspectionRejectedError,
-)
 from erpnext.manufacturing.doctype.bom.bom import (
 	add_additional_cost,
 	get_backflush_based_on,
@@ -837,7 +833,6 @@ class JobCard(Document):
 		self.set_process_loss()
 
 	def on_submit(self):
-		self.validate_inspection()
 		self.validate_transfer_qty()
 		self.validate_job_card()
 		self.update_work_order()
@@ -846,53 +841,6 @@ class JobCard(Document):
 	def on_cancel(self):
 		self.update_work_order()
 		self.set_transferred_qty()
-
-	def validate_inspection(self):
-		from erpnext.stock.services.quality_trigger_resolution import resolve_job_card_inspection
-
-		trigger = resolve_job_card_inspection(self)
-		if not trigger:
-			return
-
-		action = "Stop" if trigger.quality_control_mode == "Block" else "Warn"
-
-		if not self.quality_inspection:
-			message = _(
-				"Quality Inspection is required for the item {0} before completing the job card {1}"
-			).format(get_link_to_form("Item", self.finished_good), bold(self.name))
-			if action == "Stop":
-				frappe.throw(message, title=_("Inspection Required"))
-			else:
-				frappe.msgprint(message, alert=True, indicator="orange")
-			return
-
-		qa_status, docstatus = frappe.get_value(
-			"Quality Inspection", self.quality_inspection, ["status", "docstatus"]
-		)
-		if docstatus != 1:
-			self.handle_unsubmitted_inspection(action)
-		elif qa_status == "Rejected":
-			self.handle_rejected_inspection(action)
-
-	def handle_unsubmitted_inspection(self, action_submit):
-		message = _("Quality Inspection {0} is not submitted for the item: {1}").format(
-			get_link_to_form("Quality Inspection", self.quality_inspection),
-			get_link_to_form("Item", self.finished_good),
-		)
-		if action_submit == "Stop":
-			frappe.throw(message, title=_("Inspection Submission"), exc=QualityInspectionNotSubmittedError)
-		else:
-			frappe.msgprint(message, alert=True, indicator="orange")
-
-	def handle_rejected_inspection(self, action_reject):
-		message = _("Quality Inspection {0} is rejected for the item: {1}").format(
-			get_link_to_form("Quality Inspection", self.quality_inspection),
-			get_link_to_form("Item", self.finished_good),
-		)
-		if action_reject == "Stop":
-			frappe.throw(message, title=_("Inspection Rejected"), exc=QualityInspectionRejectedError)
-		else:
-			frappe.msgprint(message, alert=True, indicator="orange")
 
 	def validate_transfer_qty(self):
 		if self.track_semi_finished_goods and self.skip_material_transfer:
