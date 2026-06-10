@@ -216,6 +216,10 @@ class QualityInspection(Document):
 		if self.inspection_basis != "Each Quantity" or not self.reading_bundle:
 			return
 
+		# a manual inspection's verdict overrides the per-unit machinery
+		if self.manual_inspection:
+			return
+
 		bundle = frappe.db.get_value(
 			"Quality Inspection Reading Bundle",
 			self.reading_bundle,

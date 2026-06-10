@@ -25,7 +25,7 @@ def quality_control_lots_for(source_name, source_doctype="Stock Entry"):
 	)
 
 
-def submit_inspection_for_lot(lot_name, status="Accepted", reading_bundle=None):
+def submit_inspection_for_lot(lot_name, status="Accepted", reading_bundle=None, manual_inspection=0):
 	lot = frappe.get_doc("Quality Control Lot", lot_name)
 	inspection = frappe.get_doc(
 		{
@@ -37,7 +37,7 @@ def submit_inspection_for_lot(lot_name, status="Accepted", reading_bundle=None):
 			"sample_size": 1,
 			"report_date": nowdate(),
 			"inspected_by": frappe.session.user,
-			"manual_inspection": 1,
+			"manual_inspection": manual_inspection,
 			"status": status,
 			"reading_bundle": reading_bundle,
 		}
@@ -298,6 +298,34 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertRaises(
 			frappe.ValidationError, submit_inspection_for_lot, second_lot, reading_bundle=bundle.name
 		)
+
+	def test_manual_inspection_overrides_each_quantity(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+
+		qc = make_qc_warehouse("_Test QC Manual WH")
+		store = make_warehouse("_Test QC Manual Store", quality_warehouse=qc)
+
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry",
+				warehouse_role="Inbound",
+				quality_control_mode="Quarantine",
+				inspection_basis="Each Quantity",
+			),
+		)
+		item.save()
+
+		receipt = make_stock_entry(
+			item_code=item.name, qty=3, to_warehouse=store, purpose="Material Receipt", rate=100
+		)
+		lot = quality_control_lots_for(receipt.name)[0].name
+
+		# the inspector's manual verdict needs no reading bundle, even on Each Quantity
+		submit_inspection_for_lot(lot, status="Accepted", manual_inspection=1)
+		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "status"), "Released")
+		self.assertEqual(get_qty(item.name, store), 3)
 
 	def test_purchase_receipt_stamps_basis_on_the_lot(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row

@@ -219,13 +219,14 @@
    "options": "Simple"
   },
   {
+   "depends_on": "eval:!doc.manual_inspection",
    "fieldname": "quality_inspection_template",
    "fieldtype": "Link",
    "label": "Quality Inspection Template",
    "options": "Quality Inspection Template"
   },
   {
-   "depends_on": "eval:doc.inspection_basis != 'Each Quantity'",
+   "depends_on": "eval:doc.inspection_basis != 'Each Quantity' && !doc.manual_inspection",
    "fieldname": "readings",
    "fieldtype": "Table",
    "label": "Readings",
@@ -235,10 +236,12 @@
   },
   {
    "default": "Accepted",
+   "description": "Derived from the readings (or the reading bundle). Check Manual Inspection to set the verdict yourself.",
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
    "options": "\nAccepted\nRejected\nCancelled",
+   "read_only_depends_on": "eval:!doc.manual_inspection",
    "reqd": 1
   },
   {
@@ -248,12 +251,12 @@
    "label": "Manual Inspection"
   },
   {
-   "depends_on": "eval:doc.inspection_basis == 'Each Quantity'",
+   "depends_on": "eval:doc.inspection_basis == 'Each Quantity' && !doc.manual_inspection",
    "description": "For Each Quantity inspections: per-unit readings live in a Quality Inspection Reading Bundle, and its accepted/rejected unit counts drive a partial release of the Quality Control Lot.",
    "fieldname": "reading_bundle",
    "fieldtype": "Link",
    "label": "Reading Bundle",
-   "mandatory_depends_on": "eval:doc.inspection_basis == 'Each Quantity'",
+   "mandatory_depends_on": "eval:doc.inspection_basis == 'Each Quantity' && !doc.manual_inspection",
    "options": "Quality Inspection Reading Bundle"
   },
   {
