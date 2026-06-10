@@ -86,6 +86,20 @@ class TestItemQualityTrigger(ERPNextTestSuite):
 		item.save()
 		self.assertFalse(item.quality_triggers[0].party_transaction_type)
 
+	def test_overlapping_triggers_are_rejected(self):
+		item = make_item(properties={"is_stock_item": 1})
+		# two Purchase Receipt rows that can match the same receipt — whichever
+		# sat first would silently win (e.g. Sample over Each Quantity)
+		item.append("quality_triggers", trigger_row(inspection_basis="Sample"))
+		item.append("quality_triggers", trigger_row(inspection_basis="Each Quantity"))
+		self.assertRaises(frappe.ValidationError, item.save)
+
+		# rows scoped to different warehouses cannot match the same movement
+		item.reload()
+		item.append("quality_triggers", trigger_row(applicable_warehouse="_Test Warehouse - _TC"))
+		item.append("quality_triggers", trigger_row(applicable_warehouse="_Test Warehouse 1 - _TC"))
+		item.save()
+
 	def test_quarantine_rejected_on_outbound_rows(self):
 		item = make_item(properties={"is_stock_item": 1})
 		item.append(

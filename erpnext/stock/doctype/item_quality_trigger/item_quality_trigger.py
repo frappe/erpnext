@@ -90,8 +90,56 @@ def validate_item_quality_triggers(doc, method=None):
 	Wired via doc_events because a child doctype's own validate() is not invoked
 	automatically by the framework.
 	"""
-	for row in doc.get("quality_triggers") or []:
+	rows = doc.get("quality_triggers") or []
+	for row in rows:
 		_validate_trigger_row(row)
+	_validate_no_overlapping_rows(rows)
+
+
+def _scopes_overlap(first, second):
+	"""Whether two trigger rows can match the same movement (blank = wildcard)."""
+	if first.get("trigger_type") != second.get("trigger_type"):
+		return False
+	if first.get("trigger_type") == "Periodic Re-test":
+		return True  # one re-test interval per item
+
+	if first.document_type != second.document_type:
+		return False
+	if (first.warehouse_role or "") != (second.warehouse_role or ""):
+		return False
+	# rows with a condition may legitimately share a scope — the condition decides
+	if first.get("condition") or second.get("condition"):
+		return False
+
+	def wildcard_equal(a, b):
+		return not a or not b or a == b
+
+	return all(
+		wildcard_equal(first.get(fieldname), second.get(fieldname))
+		for fieldname in (
+			"stock_entry_type",
+			"applicable_warehouse",
+			"party_transaction_type",
+			"supplier",
+			"customer",
+			"job_card_inspection_point",
+		)
+	)
+
+
+def _validate_no_overlapping_rows(rows):
+	"""Two triggers matching the same movement make resolution ambiguous —
+	whichever sits first would silently win."""
+	for index, row in enumerate(rows):
+		for other in rows[index + 1 :]:
+			if _scopes_overlap(row, other):
+				frappe.throw(
+					_(
+						"Rows #{0} and #{1} overlap: both can match the same movement, making it "
+						"ambiguous which inspection settings apply. Narrow one of them or remove it."
+					).format(row.idx, other.idx),
+					title=_("Overlapping Quality Triggers"),
+				)
 
 
 def _validate_trigger_row(row):

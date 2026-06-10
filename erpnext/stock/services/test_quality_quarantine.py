@@ -299,6 +299,32 @@ class TestQualityQuarantine(ERPNextTestSuite):
 			frappe.ValidationError, submit_inspection_for_lot, second_lot, reading_bundle=bundle.name
 		)
 
+	def test_purchase_receipt_stamps_basis_on_the_lot(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		qc = make_qc_warehouse("_Test QC PR Basis WH")
+		store = make_warehouse("_Test QC PR Basis Store", quality_warehouse=qc)
+
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Purchase Receipt",
+				warehouse_role=None,  # auto-set Inbound
+				quality_control_mode="Quarantine",
+				inspection_basis="Each Quantity",
+			),
+		)
+		item.save()
+
+		receipt = make_purchase_receipt(item_code=item.name, qty=3, warehouse=store, rate=100)
+		lot = quality_control_lots_for(receipt.name, "Purchase Receipt")[0]
+		self.assertEqual(lot.quality_warehouse, qc)  # routed
+		self.assertEqual(
+			frappe.db.get_value("Quality Control Lot", lot.name, "inspection_basis"), "Each Quantity"
+		)
+
 	def test_inspection_rejection_keeps_stock_quarantined(self):
 		qc = make_qc_warehouse("_Test QC Reject WH")
 		item = make_item(properties={"is_stock_item": 1}).name
