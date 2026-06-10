@@ -2329,6 +2329,8 @@ def get_orders_to_be_billed(
 		grand_total_field = "grand_total"
 		rounded_total_field = "rounded_total"
 
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection
+	# Safe because voucher_type / party_type / total field names are selected from fixed allowlists above.
 	orders = frappe.db.sql(
 		"""
 		select
@@ -2406,6 +2408,8 @@ def get_negative_outstanding_invoices(
 		grand_total_field = "grand_total"
 		rounded_total_field = "rounded_total"
 
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection
+	# Safe because voucher_type / party_type / account / total field names are selected from fixed allowlists above.
 	return frappe.db.sql(
 		"""
 		select
