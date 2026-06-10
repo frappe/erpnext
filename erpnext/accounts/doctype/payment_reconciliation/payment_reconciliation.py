@@ -6,6 +6,7 @@ import frappe
 from frappe import _, msgprint, qb
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
+from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
 from frappe.query_builder import Case, Criterion
 from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import flt, fmt_money, get_link_to_form, getdate, nowdate, today
@@ -73,6 +74,7 @@ class PaymentReconciliation(Document):
 		self.accounting_dimension_filter_conditions = []
 		self.ple_posting_date_filter = []
 		self.dimensions = get_dimensions(with_cost_center_and_project=True)[0]
+		self.user_permissions = get_user_permissions(frappe.session.user)
 
 	def load_from_db(self):
 		# 'modified' attribute is required for `run_doc_method` to work properly.
@@ -153,6 +155,11 @@ class PaymentReconciliation(Document):
 
 		self.add_payment_entries(non_reconciled_payments)
 
+	def get_permitted_dimension_values(self, dimension, reference_doctype):
+		return get_allowed_docs_for_doctype(
+			self.user_permissions.get(frappe.unscrub(dimension), []), reference_doctype
+		)
+
 	def get_payment_entries(self):
 		party_account = [self.receivable_payable_account]
 
@@ -178,6 +185,9 @@ class PaymentReconciliation(Document):
 			dimension = x.fieldname
 			if self.get(dimension):
 				dimensions.update({dimension: self.get(dimension)})
+			elif allowed := self.get_permitted_dimension_values(dimension, "Payment Entry"):
+				dimensions[dimension] = allowed
+
 		condition.update({"accounting_dimensions": dimensions})
 
 		payment_entries = get_advance_payment_entries_for_regional(
@@ -203,6 +213,8 @@ class PaymentReconciliation(Document):
 			dimension = x.fieldname
 			if self.get(dimension):
 				conditions.append(jea[dimension] == self.get(dimension))
+			elif allowed := self.get_permitted_dimension_values(dimension, "Journal Entry Account"):
+				conditions.append(jea[dimension].isin(allowed))
 
 		if self.payment_name:
 			conditions.append(je.name.like(f"%%{self.payment_name}%%"))
@@ -748,8 +760,11 @@ class PaymentReconciliation(Document):
 		ple = qb.DocType("Payment Ledger Entry")
 		for x in self.dimensions:
 			dimension = x.fieldname
-			if self.get(dimension) and frappe.db.has_column("Payment Ledger Entry", dimension):
-				self.accounting_dimension_filter_conditions.append(ple[dimension] == self.get(dimension))
+			if frappe.db.has_column("Payment Ledger Entry", dimension):
+				if self.get(dimension):
+					self.accounting_dimension_filter_conditions.append(ple[dimension] == self.get(dimension))
+				elif allowed := self.get_permitted_dimension_values(dimension, "Payment Ledger Entry"):
+					self.accounting_dimension_filter_conditions.append(ple[dimension].isin(allowed))
 
 	def build_qb_filter_conditions(self, get_invoices=False, get_return_invoices=False):
 		self.common_filter_conditions.clear()

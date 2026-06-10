@@ -482,7 +482,10 @@ def get_common_query(
 				common_filter_conditions.append(payment_entry.cost_center == condition["cost_center"])
 			if condition.get("accounting_dimensions"):
 				for field, val in condition.get("accounting_dimensions").items():
-					common_filter_conditions.append(payment_entry[field] == val)
+					if isinstance(val, list | tuple | set):
+						common_filter_conditions.append(payment_entry[field].isin(val))
+					else:
+						common_filter_conditions.append(payment_entry[field] == val)
 			if condition.get("minimum_payment_amount"):
 				common_filter_conditions.append(
 					payment_entry.unallocated_amount.gte(condition["minimum_payment_amount"])
