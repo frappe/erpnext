@@ -167,6 +167,12 @@ def _trigger_matches(trigger, doc, row, role, warehouse):
 		if trigger.stock_entry_type != doc.get("stock_entry_type"):
 			return False
 
+	# party filters (blank = any supplier / customer)
+	if trigger.supplier and doc.get("supplier") != trigger.supplier:
+		return False
+	if trigger.customer and doc.get("customer") != trigger.customer:
+		return False
+
 	# External / Internal Transfer filter (blank = both)
 	if trigger.party_transaction_type:
 		internal = _is_internal_transfer(doc)

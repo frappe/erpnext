@@ -23,11 +23,12 @@ from erpnext.tests.utils import ERPNextTestSuite
 REAL_WH = "_Test Warehouse - _TC"
 
 
-def pr_doc(item_code, warehouse=REAL_WH, qty=5):
+def pr_doc(item_code, warehouse=REAL_WH, qty=5, supplier=None):
 	# lightweight stand-in for a Purchase Receipt; resolution reads item rows and
 	# warehouses, not a persisted document
 	return frappe._dict(
 		doctype="Purchase Receipt",
+		supplier=supplier,
 		items=[frappe._dict(item_code=item_code, warehouse=warehouse, qty=qty, stock_qty=qty)],
 	)
 
@@ -144,6 +145,15 @@ class TestQualityTriggerResolution(ERPNextTestSuite):
 		points = resolve_inspection_points(pr_doc(item.name))
 		self.assertEqual(len(points), 1)
 		self.assertEqual(points[0].quality_control_mode, "Quarantine")  # most-specific (item) wins
+
+	def test_supplier_scoped_trigger_matches_only_that_supplier(self):
+		item = make_item(properties={"is_stock_item": 1})
+		item.append("quality_triggers", trigger_row(supplier="_Test Supplier"))
+		item.save()
+
+		# a receipt from another supplier is not this trigger's business
+		self.assertEqual(resolve_inspection_points(pr_doc(item.name, supplier="_Test Supplier 1")), [])
+		self.assertEqual(len(resolve_inspection_points(pr_doc(item.name, supplier="_Test Supplier"))), 1)
 
 	def test_applicable_warehouse_filters_movements(self):
 		item = make_item(properties={"is_stock_item": 1})
