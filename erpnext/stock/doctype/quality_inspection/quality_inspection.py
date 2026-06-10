@@ -313,8 +313,10 @@ class QualityInspection(Document):
 
 	def set_status_based_on_acceptance_values(self, reading):
 		if not cint(reading.numeric):
-			reading_value = reading.get("reading_value") or ""
-			value = reading.get("value") or ""
+			# compare case-insensitively and ignore surrounding whitespace, so a
+			# reading of "yes" passes an acceptance criteria of "Yes"
+			reading_value = (reading.get("reading_value") or "").strip().casefold()
+			value = (reading.get("value") or "").strip().casefold()
 			result = reading_value == value
 		else:
 			# numeric readings
