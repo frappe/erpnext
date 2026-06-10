@@ -528,7 +528,9 @@ class TestQualityQuarantine(ERPNextTestSuite):
 			},
 			item_code=item,
 		)
-		submit_inspection_for_lot(lot, status="Accepted", reading_bundle=bundle.name)
+		inspection = submit_inspection_for_lot(lot, status="Accepted", reading_bundle=bundle.name)
+		# a mixed outcome is named, not collapsed into Accepted
+		self.assertEqual(inspection.status, "Partially Accepted")
 
 		# accepted units released to the store, rejected units stay quarantined
 		self.assertEqual(get_qty(item, store), 3)

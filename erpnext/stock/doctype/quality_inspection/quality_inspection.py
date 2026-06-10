@@ -67,7 +67,7 @@ class QualityInspection(Document):
 		remarks: DF.Text | None
 		report_date: DF.Date
 		sample_size: DF.Float
-		status: DF.Literal["", "Accepted", "Rejected", "Cancelled"]
+		status: DF.Literal["", "Accepted", "Partially Accepted", "Rejected", "Cancelled"]
 		verified_by: DF.Data | None
 
 	# end: auto-generated types
@@ -206,10 +206,18 @@ class QualityInspection(Document):
 
 	def set_status_from_reading_bundle(self):
 		"""With per-unit readings, the verdict follows the bundle's unit counts."""
-		accepted_qty = frappe.db.get_value(
-			"Quality Inspection Reading Bundle", self.reading_bundle, "accepted_qty"
+		counts = frappe.db.get_value(
+			"Quality Inspection Reading Bundle",
+			self.reading_bundle,
+			["accepted_qty", "rejected_qty"],
+			as_dict=True,
 		)
-		self.status = "Accepted" if accepted_qty else "Rejected"
+		if counts.accepted_qty and counts.rejected_qty:
+			self.status = "Partially Accepted"
+		elif counts.accepted_qty:
+			self.status = "Accepted"
+		else:
+			self.status = "Rejected"
 
 	def validate_inspection_required(self):
 		# Obsolete under the Item Quality Trigger model: Quality Inspection requirement is governed
