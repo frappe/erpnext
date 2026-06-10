@@ -362,6 +362,9 @@ def trim_return_to_rejected_outstanding(return_doc):
 	for row in return_doc.items:
 		warehouse = row.get("warehouse")
 		if not warehouse or not is_quality_warehouse(warehouse):
+			# Block flow: stock was never held, but the row's inspection still
+			# knows what was rejected — prefill as an editable default
+			_prefill_rejections_from_row_inspection(return_doc, row)
 			kept.append(row)
 			continue
 
@@ -416,6 +419,91 @@ def trim_return_to_rejected_outstanding(return_doc):
 		return_doc.set("items", kept)
 		for idx, row in enumerate(return_doc.items, start=1):
 			row.idx = idx
+
+
+def _prefill_rejections_from_row_inspection(return_doc, row):
+	"""Best-effort prefill for Block-flow returns.
+
+	Without quarantine there is no lot ledger or lock — the rejected units sit
+	saleable in the store — so this only proposes a default: the inspection
+	bundle's rejected count minus what prior returns already took, with the
+	rejected serials still present in the warehouse. The row stays editable.
+	"""
+	source = getattr(return_doc, "_quality_source_doc", None)
+	if source is None:
+		source = frappe.get_doc(return_doc.doctype, return_doc.return_against)
+		return_doc._quality_source_doc = source
+
+	source_row = next(
+		(
+			r
+			for r in source.items
+			if r.item_code == row.item_code
+			and r.get("warehouse") == row.get("warehouse")
+			and r.get("quality_inspection")
+		),
+		None,
+	)
+	if not source_row:
+		return
+
+	inspection = frappe.db.get_value(
+		"Quality Inspection",
+		{"name": source_row.quality_inspection, "docstatus": 1},
+		["name", "reading_bundle"],
+		as_dict=True,
+	)
+	if not inspection or not inspection.reading_bundle:
+		return
+
+	bundle = frappe.get_doc("Quality Inspection Reading Bundle", inspection.reading_bundle)
+	if not flt(bundle.rejected_qty):
+		return
+
+	prior_returns = frappe.get_all(
+		return_doc.doctype,
+		filters={"return_against": return_doc.return_against, "docstatus": 1},
+		pluck="name",
+	)
+	already_returned = 0.0
+	if prior_returns:
+		already_returned = abs(
+			flt(
+				frappe.db.get_value(
+					f"{return_doc.doctype} Item",
+					{"parent": ("in", prior_returns), "item_code": row.item_code},
+					"sum(qty)",
+				)
+			)
+		)
+
+	outstanding = min(flt(bundle.rejected_qty) - already_returned, abs(flt(row.qty)))
+	if outstanding <= 0:
+		return
+
+	row.qty = -outstanding
+	if row.meta.has_field("received_qty"):
+		row.received_qty = -outstanding
+
+	rejected_serials = [
+		serial
+		for serial in bundle.get_unit_serials("Rejected")
+		if frappe.db.get_value("Serial No", serial, "warehouse") == row.get("warehouse")
+	][: int(outstanding)]
+	if rejected_serials:
+		row.serial_and_batch_bundle = None
+		row.serial_no = None
+		tracking = stamp_tracking_on_outward_row(
+			{},
+			item_code=row.item_code,
+			warehouse=row.get("warehouse"),
+			qty=outstanding,
+			company=source.company,
+			batch_no=row.get("batch_no"),
+			serial_nos=rejected_serials,
+			voucher_type=return_doc.doctype,
+		)
+		row.update(tracking)
 
 
 def _rejected_serials_awaiting_return(lot, outstanding):

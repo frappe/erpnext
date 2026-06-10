@@ -981,6 +981,55 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "returned_qty"), 1)
 		self.assertNotEqual(frappe.db.get_value("Serial No", serials[2], "warehouse"), qc)
 
+	def test_block_flow_return_prefilled_with_rejected_count(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+		from erpnext.stock.doctype.quality_inspection_reading_bundle.test_quality_inspection_reading_bundle import (
+			make_bundle,
+		)
+
+		# Block holds the document, not the stock: the receipt lands in the store
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Purchase Receipt",
+				warehouse_role=None,
+				quality_control_mode="Block",
+				inspection_basis="Each Quantity",
+			),
+		)
+		item.save()
+
+		receipt = make_purchase_receipt(
+			item_code=item.name, qty=3, warehouse=REAL_WH, rate=100, do_not_submit=True
+		)
+
+		bundle = make_bundle(3, {1: ["Accepted"], 2: ["Accepted"], 3: ["Rejected"]}, item_code=item.name)
+		inspection = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Incoming",
+				"reference_type": "Purchase Receipt",
+				"reference_name": receipt.name,
+				"item_code": item.name,
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+				"reading_bundle": bundle.name,
+			}
+		)
+		inspection.insert(ignore_permissions=True)
+		inspection.submit()
+		self.assertEqual(inspection.status, "Partially Accepted")
+
+		receipt.reload()
+		receipt.submit()  # the gate passes: an inspection decided the row
+
+		# the return proposes the rejected count as an editable default
+		return_doc = make_return_doc("Purchase Receipt", receipt.name)
+		self.assertEqual(return_doc.items[0].qty, -1)
+
 	def test_purchase_return_created_from_the_lot(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 		from erpnext.stock.services.quality_quarantine import make_purchase_return_for_lot
