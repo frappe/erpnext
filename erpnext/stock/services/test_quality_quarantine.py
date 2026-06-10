@@ -25,7 +25,7 @@ def quality_control_lots_for(stock_entry_name):
 	)
 
 
-def submit_inspection_for_lot(lot_name, status="Accepted"):
+def submit_inspection_for_lot(lot_name, status="Accepted", reading_bundle=None):
 	lot = frappe.get_doc("Quality Control Lot", lot_name)
 	inspection = frappe.get_doc(
 		{
@@ -39,6 +39,7 @@ def submit_inspection_for_lot(lot_name, status="Accepted"):
 			"inspected_by": frappe.session.user,
 			"manual_inspection": 1,
 			"status": status,
+			"reading_bundle": reading_bundle,
 		}
 	)
 	inspection.insert(ignore_permissions=True)
@@ -194,6 +195,38 @@ class TestQualityQuarantine(ERPNextTestSuite):
 
 		# the source receipt can no longer be cancelled while the release stands
 		self.assertRaises(frappe.ValidationError, receipt.cancel)
+
+	def test_per_unit_inspection_splits_the_lot(self):
+		from erpnext.stock.doctype.quality_inspection_reading_bundle.test_quality_inspection_reading_bundle import (
+			make_bundle,
+		)
+
+		qc = make_qc_warehouse("_Test QC Split WH")
+		store = make_warehouse("_Test QC Split Store", quality_warehouse=qc)
+		item = make_item(properties={"is_stock_item": 1}).name
+		se = make_stock_entry(item_code=item, qty=5, to_warehouse=qc, purpose="Material Receipt", rate=100)
+		lot = quality_control_lots_for(se.name)[0].name
+
+		# 5 units inspected individually: 3 pass, 2 fail
+		bundle = make_bundle(
+			5,
+			{
+				1: ["Accepted"],
+				2: ["Accepted"],
+				3: ["Rejected"],
+				4: ["Accepted"],
+				5: ["Rejected"],
+			},
+		)
+		submit_inspection_for_lot(lot, status="Accepted", reading_bundle=bundle.name)
+
+		# accepted units released to the store, rejected units stay quarantined
+		self.assertEqual(get_qty(item, store), 3)
+		self.assertEqual(get_qty(item, qc), 2)
+		lot_doc = frappe.get_doc("Quality Control Lot", lot)
+		self.assertEqual(lot_doc.accepted_qty, 3)
+		self.assertEqual(lot_doc.rejected_qty, 2)
+		self.assertEqual(lot_doc.pending_qty, 0)
 
 	def test_inspection_rejection_keeps_stock_quarantined(self):
 		qc = make_qc_warehouse("_Test QC Reject WH")

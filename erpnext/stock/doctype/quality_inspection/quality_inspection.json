@@ -28,6 +28,7 @@
   "specification_details",
   "quality_inspection_template",
   "manual_inspection",
+  "reading_bundle",
   "readings",
   "section_break_14",
   "inspected_by",
@@ -242,6 +243,13 @@
    "fieldname": "manual_inspection",
    "fieldtype": "Check",
    "label": "Manual Inspection"
+  },
+  {
+   "description": "For Each Quantity inspections: per-unit readings live in a Quality Inspection Reading Bundle, and its accepted/rejected unit counts drive a partial release of the Quality Control Lot.",
+   "fieldname": "reading_bundle",
+   "fieldtype": "Link",
+   "label": "Reading Bundle",
+   "options": "Quality Inspection Reading Bundle"
   },
   {
    "fieldname": "child_row_reference",

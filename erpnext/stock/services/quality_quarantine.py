@@ -72,16 +72,17 @@ def get_release_warehouse(quality_warehouse):
 def process_inspection_result(doc, method=None):
 	"""React to a submitted Quality Inspection that decides a Quality Control Lot.
 
-	Accepted: auto-create a Quality Control Release moving the pending quantity to
-	the store warehouse (when it can be resolved unambiguously). Rejected: record
-	the rejection on the lot — the stock stays quarantined until it is sent back
-	with a purchase return.
+	Sample basis: the inspection's overall status accepts or rejects the whole
+	pending quantity. Each Quantity basis: the reading bundle's per-unit counts
+	split it — accepted units are released, rejected units stay quarantined for
+	the purchase return, and uninspected units remain pending.
 	"""
 	if doc.reference_type != "Quality Control Lot" or not doc.reference_name:
 		return
 
 	lot = frappe.get_doc("Quality Control Lot", doc.reference_name)
-	if not flt(lot.pending_qty):
+	pending_qty = flt(lot.pending_qty)
+	if not pending_qty:
 		return
 
 	if lot.batch_no:
@@ -89,10 +90,21 @@ def process_inspection_result(doc, method=None):
 
 		schedule_next_retest(lot.item_code, lot.batch_no)
 
-	if doc.status == "Rejected":
-		lot.rejected_qty = flt(lot.rejected_qty) + flt(lot.pending_qty)
+	if doc.get("reading_bundle"):
+		bundle = frappe.get_doc("Quality Inspection Reading Bundle", doc.reading_bundle)
+		accepted_qty = min(flt(bundle.accepted_qty), pending_qty)
+		rejected_qty = min(flt(bundle.rejected_qty), pending_qty - accepted_qty)
+	elif doc.status == "Rejected":
+		accepted_qty, rejected_qty = 0.0, pending_qty
+	else:
+		accepted_qty, rejected_qty = pending_qty, 0.0
+
+	if rejected_qty:
+		lot.rejected_qty = flt(lot.rejected_qty) + rejected_qty
 		lot.flags.ignore_permissions = True
 		lot.save()
+
+	if not accepted_qty:
 		return
 
 	release_warehouse = get_release_warehouse(lot.quality_warehouse)
@@ -115,7 +127,7 @@ def process_inspection_result(doc, method=None):
 		"items",
 		{
 			"item_code": lot.item_code,
-			"qty": lot.pending_qty,
+			"qty": accepted_qty,
 			"s_warehouse": lot.quality_warehouse,
 			"t_warehouse": release_warehouse,
 			"batch_no": lot.batch_no,
@@ -129,7 +141,7 @@ def process_inspection_result(doc, method=None):
 	frappe.msgprint(
 		_("Quality Control Release {0} created: {1} released to {2}.").format(
 			frappe.utils.get_link_to_form("Stock Entry", release.name),
-			lot.pending_qty,
+			accepted_qty,
 			frappe.bold(release_warehouse),
 		),
 		alert=True,

@@ -49,6 +49,7 @@ class QualityInspection(Document):
 		manual_inspection: DF.Check
 		naming_series: DF.Literal["MAT-QA-.YYYY.-"]
 		quality_inspection_template: DF.Link | None
+		reading_bundle: DF.Link | None
 		readings: DF.Table[QualityInspectionReading]
 		reference_name: DF.DynamicLink
 		reference_type: DF.Literal[
