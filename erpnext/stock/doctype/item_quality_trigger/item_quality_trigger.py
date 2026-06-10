@@ -153,8 +153,20 @@ def _validate_trigger_row(row):
 				).format(row.idx)
 			)
 		row.quality_control_mode = "Quarantine"
-		row.document_type = None
-		row.warehouse_role = None
+		# none of the transaction dimensions apply to an interval-driven trigger;
+		# clear any values lingering from before the row was switched over
+		for fieldname in (
+			"document_type",
+			"warehouse_role",
+			"stock_entry_type",
+			"party_transaction_type",
+			"applicable_warehouse",
+			"supplier",
+			"customer",
+			"condition",
+			"job_card_inspection_point",
+		):
+			row.set(fieldname, None)
 		return
 
 	if not row.document_type:

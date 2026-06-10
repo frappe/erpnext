@@ -103,6 +103,7 @@
    "options": "Inbound\nOutbound"
   },
   {
+   "depends_on": "eval:doc.trigger_type != 'Periodic Re-test'",
    "description": "Optional. Restrict this trigger to a single warehouse (matched against the source or target per Warehouse Role).",
    "fieldname": "applicable_warehouse",
    "fieldtype": "Link",
@@ -133,6 +134,7 @@
    "options": "Customer"
   },
   {
+   "depends_on": "eval:doc.trigger_type != 'Periodic Re-test'",
    "description": "Optional Python expression evaluated against the transaction row, e.g. row.qty > 100.",
    "fieldname": "condition",
    "fieldtype": "Code",
