@@ -26,7 +26,7 @@
    "reqd": 1
   },
   {
-   "description": "Stamped by the Quality Inspection that uses this bundle; a claimed bundle cannot be selected on another inspection.",
+   "description": "The inspection this bundle was created from and belongs to; it cannot be selected on any other inspection.",
    "fieldname": "quality_inspection",
    "fieldtype": "Link",
    "label": "Quality Inspection",

@@ -35,12 +35,13 @@ frappe.ui.form.on("Quality Inspection", {
 			};
 		});
 
-		// only unclaimed bundles of this inspection's item are selectable
+		// bundles are born from their inspection: only this inspection's own
+		// bundles are selectable
 		frm.set_query("reading_bundle", function (doc) {
 			return {
 				filters: {
 					item_code: doc.item_code,
-					quality_inspection: ["is", "not set"],
+					quality_inspection: doc.name,
 					docstatus: ["!=", 2],
 				},
 			};
@@ -83,9 +84,10 @@ frappe.ui.form.on("Quality Inspection", {
 		frm.trigger("toggle_batch_and_serial_fields");
 		frm.trigger("fetch_qty_under_inspection");
 
-		// a bundle created from this inspection starts with its item, template and
-		// the full quantity under inspection
+		// a bundle created from this inspection is born linked to it, with its
+		// item, template and the full quantity under inspection
 		frm.fields_dict.reading_bundle.get_route_options_for_new_doc = () => ({
+			quality_inspection: frm.is_new() ? null : frm.doc.name,
 			item_code: frm.doc.item_code,
 			quality_inspection_template: frm.doc.quality_inspection_template,
 			quantity: frm.__qty_under_inspection,
@@ -99,6 +101,7 @@ frappe.ui.form.on("Quality Inspection", {
 		) {
 			frm.add_custom_button(__("Create Reading Bundle"), () => {
 				frappe.new_doc("Quality Inspection Reading Bundle", {
+					quality_inspection: frm.doc.name,
 					item_code: frm.doc.item_code,
 					quality_inspection_template: frm.doc.quality_inspection_template,
 					quantity: frm.__qty_under_inspection,

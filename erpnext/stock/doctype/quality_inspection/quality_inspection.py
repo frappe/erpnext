@@ -319,10 +319,12 @@ class QualityInspection(Document):
 
 	def on_trash(self):
 		self.update_qc_reference(remove_reference=True)
-		if self.reading_bundle:
-			frappe.db.set_value(
-				"Quality Inspection Reading Bundle", self.reading_bundle, "quality_inspection", None
-			)
+		# release every bundle born from this inspection, not just the attached
+		# one — orphan drafts would otherwise block the deletion
+		for bundle in frappe.get_all(
+			"Quality Inspection Reading Bundle", filters={"quality_inspection": self.name}, pluck="name"
+		):
+			frappe.db.set_value("Quality Inspection Reading Bundle", bundle, "quality_inspection", None)
 
 	def validate_readings_status_mandatory(self):
 		for reading in self.readings:
