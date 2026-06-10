@@ -22,6 +22,7 @@ class QualityControlLot(Document):
 		item_code: DF.Link
 		naming_series: DF.Literal["QCLOT-.YYYY.-"]
 		pending_qty: DF.Float
+		quality_inspection: DF.Link | None
 		quality_warehouse: DF.Link
 		received_qty: DF.Float
 		rejected_qty: DF.Float

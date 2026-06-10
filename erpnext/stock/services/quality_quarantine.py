@@ -10,6 +10,7 @@ the stock got there (receipt, transfer, redirect).
 
 import frappe
 from frappe import _
+from frappe.utils import flt
 
 from erpnext.stock.services.quality_trigger_resolution import (
 	INBOUND,
@@ -52,6 +53,108 @@ def apply_quarantine_routing(doc):
 			),
 			alert=True,
 		)
+
+
+def get_release_warehouse(quality_warehouse):
+	"""The store warehouse to release accepted stock into.
+
+	Resolved by reverse lookup: the warehouse whose quality_warehouse points at
+	this Quality Control warehouse. Ambiguous (several stores sharing one Quality
+	Control warehouse) resolves to None — the user releases manually and picks the
+	target.
+	"""
+	stores = frappe.get_all(
+		"Warehouse", filters={"quality_warehouse": quality_warehouse, "disabled": 0}, pluck="name"
+	)
+	return stores[0] if len(stores) == 1 else None
+
+
+def process_inspection_result(doc, method=None):
+	"""React to a submitted Quality Inspection that decides a Quality Control Lot.
+
+	Accepted: auto-create a Quality Control Release moving the pending quantity to
+	the store warehouse (when it can be resolved unambiguously). Rejected: record
+	the rejection on the lot — the stock stays quarantined until it is sent back
+	with a purchase return.
+	"""
+	if doc.reference_type != "Quality Control Lot" or not doc.reference_name:
+		return
+
+	lot = frappe.get_doc("Quality Control Lot", doc.reference_name)
+	if not flt(lot.pending_qty):
+		return
+
+	if doc.status == "Rejected":
+		lot.rejected_qty = flt(lot.rejected_qty) + flt(lot.pending_qty)
+		lot.flags.ignore_permissions = True
+		lot.save()
+		return
+
+	release_warehouse = get_release_warehouse(lot.quality_warehouse)
+	if not release_warehouse:
+		frappe.msgprint(
+			_(
+				"Quality Control Lot {0} is accepted, but no unique release warehouse points at {1}. "
+				"Create the Quality Control Release manually."
+			).format(frappe.bold(lot.name), frappe.bold(lot.quality_warehouse)),
+			alert=True,
+		)
+		return
+
+	release = frappe.new_doc("Stock Entry")
+	release.purpose = "Quality Control Release"
+	release.stock_entry_type = "Quality Control Release"
+	release.company = lot.company
+	release.quality_control_lot = lot.name
+	release.append(
+		"items",
+		{
+			"item_code": lot.item_code,
+			"qty": lot.pending_qty,
+			"s_warehouse": lot.quality_warehouse,
+			"t_warehouse": release_warehouse,
+			"batch_no": lot.batch_no,
+		},
+	)
+	release.flags.ignore_permissions = True
+	release.insert()
+	release.submit()
+
+	frappe.msgprint(
+		_("Quality Control Release {0} created: {1} released to {2}.").format(
+			frappe.utils.get_link_to_form("Stock Entry", release.name),
+			lot.pending_qty,
+			frappe.bold(release_warehouse),
+		),
+		alert=True,
+	)
+
+
+def handle_source_document_cancel(doc, method=None):
+	"""Cascade a source-document cancellation onto its Quality Control Lots.
+
+	An untouched lot (nothing released or rejected yet) is deleted along with the
+	reversed stock. A lot that already released or rejected quantity blocks the
+	cancellation — the Quality Control Release or purchase return must be
+	unwound first, mirroring how ERPNext blocks cancelling documents with
+	downstream submitted documents.
+	"""
+	lots = frappe.get_all(
+		"Quality Control Lot",
+		filters={"source_document_type": doc.doctype, "source_document": doc.name},
+		fields=["name", "accepted_qty", "rejected_qty"],
+	)
+
+	for lot in lots:
+		if flt(lot.accepted_qty) or flt(lot.rejected_qty):
+			frappe.throw(
+				_(
+					"Cannot cancel: Quality Control Lot {0} created by this document has already been "
+					"released or rejected. Unwind the Quality Control Release or purchase return first."
+				).format(frappe.bold(lot.name)),
+				title=_("Quality Control Lot In Use"),
+			)
+		frappe.delete_doc("Quality Control Lot", lot.name, ignore_permissions=True)
 
 
 def block_stock_reconciliation_on_quality_warehouse(doc, method=None):

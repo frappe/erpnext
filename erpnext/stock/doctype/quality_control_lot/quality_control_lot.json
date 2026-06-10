@@ -25,6 +25,7 @@
   "source_document_type",
   "source_document",
   "column_break_source",
+  "quality_inspection",
   "inspection_template",
   "inspection_basis"
  ],
@@ -140,6 +141,14 @@
   {
    "fieldname": "column_break_source",
    "fieldtype": "Column Break"
+  },
+  {
+   "description": "The submitted Quality Inspection that decided this lot.",
+   "fieldname": "quality_inspection",
+   "fieldtype": "Link",
+   "label": "Quality Inspection",
+   "options": "Quality Inspection",
+   "read_only": 1
   },
   {
    "fieldname": "inspection_template",

@@ -126,6 +126,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		posting_time: DF.Time | None
 		process_loss_percentage: DF.Percent
 		process_loss_qty: DF.Float
+		quality_control_lot: DF.Link | None
 		project: DF.Link | None
 		purchase_receipt_no: DF.Link | None
 		purpose: DF.Literal[

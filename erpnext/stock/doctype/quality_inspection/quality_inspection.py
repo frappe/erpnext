@@ -60,6 +60,7 @@ class QualityInspection(Document):
 			"Sales Invoice",
 			"Stock Entry",
 			"Job Card",
+			"Quality Control Lot",
 		]
 		remarks: DF.Text | None
 		report_date: DF.Date
@@ -107,6 +108,10 @@ class QualityInspection(Document):
 			return
 
 		if not (self.reference_type and self.reference_name):
+			return
+
+		# a Quality Control Lot has no item child table to reference
+		if self.reference_type == "Quality Control Lot":
 			return
 
 		doctype = self.reference_type + " Item"
@@ -189,6 +194,13 @@ class QualityInspection(Document):
 
 	def update_qc_reference(self, remove_reference=False):
 		quality_inspection = self.name if self.docstatus < 2 and not remove_reference else ""
+
+		if self.reference_type == "Quality Control Lot":
+			if self.reference_name:
+				frappe.db.set_value(
+					"Quality Control Lot", self.reference_name, "quality_inspection", quality_inspection
+				)
+			return
 
 		if self.reference_type == "Job Card":
 			if self.reference_name:

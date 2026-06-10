@@ -389,6 +389,12 @@ class StockController(AccountsController):
 		from erpnext.stock.services.quality_quarantine import apply_quarantine_routing
 		from erpnext.stock.services.quality_trigger_resolution import enforce_inspection_points
 
+		# A Quality Control Release is itself the outcome of an inspection: routing
+		# it again would quarantine the released stock in a loop, and gating it
+		# would contradict the recorded decision.
+		if self.doctype == "Stock Entry" and self.get("purpose") == "Quality Control Release":
+			return
+
 		apply_quarantine_routing(self)
 		enforce_inspection_points(self)
 
