@@ -385,9 +385,9 @@ class StockController(AccountsController):
 		return qty_map
 
 	def validate_inspection(self):
-		from erpnext.stock.services.quality_inspection_service import QualityInspectionService
+		from erpnext.stock.services.quality_trigger_resolution import enforce_inspection_points
 
-		return QualityInspectionService(self).validate_inspection()
+		enforce_inspection_points(self)
 
 	def update_blanket_order(self):
 		blanket_orders = list(set([d.blanket_order for d in self.items if d.blanket_order]))

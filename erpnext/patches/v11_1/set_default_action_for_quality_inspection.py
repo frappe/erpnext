@@ -14,5 +14,4 @@ def execute():
 	if stock_settings.stock_uom and not frappe.db.exists("UOM", stock_settings.stock_uom):
 		stock_settings.stock_uom = None
 	stock_settings.flags.ignore_mandatory = True
-	stock_settings.action_if_quality_inspection_is_not_submitted = "Stop"
 	stock_settings.save()

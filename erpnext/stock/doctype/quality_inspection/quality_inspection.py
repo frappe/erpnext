@@ -134,28 +134,9 @@ class QualityInspection(Document):
 			self.child_row_reference = child_row_references[0]
 
 	def validate_inspection_required(self):
-		if frappe.db.get_single_value(
-			"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"
-		):
-			return
-
-		if self.reference_type in ["Purchase Receipt", "Purchase Invoice"] and not frappe.get_cached_value(
-			"Item", self.item_code, "inspection_required_before_purchase"
-		):
-			frappe.throw(
-				_(
-					"'Inspection Required before Purchase' is disabled for the item {0}, no need to create the QI"
-				).format(get_link_to_form("Item", self.item_code))
-			)
-
-		if self.reference_type in ["Delivery Note", "Sales Invoice"] and not frappe.get_cached_value(
-			"Item", self.item_code, "inspection_required_before_delivery"
-		):
-			frappe.throw(
-				_(
-					"'Inspection Required before Delivery' is disabled for the item {0}, no need to create the QI"
-				).format(get_link_to_form("Item", self.item_code))
-			)
+		# Obsolete under the Item Quality Trigger model: QI requirement is governed
+		# by triggers on the transaction, not by per-Item flags or a global setting.
+		pass
 
 	def before_submit(self):
 		self.validate_readings_status_mandatory()
@@ -188,19 +169,10 @@ class QualityInspection(Document):
 		self.get_item_specification_details()
 
 	def on_update(self):
-		action_if_qi_in_draft = frappe.db.get_single_value(
-			"Stock Settings", "action_if_quality_inspection_is_not_submitted"
-		)
-
-		if not action_if_qi_in_draft or action_if_qi_in_draft == "Warn":
-			self.update_qc_reference()
+		self.update_qc_reference()
 
 	def on_submit(self):
-		if (
-			frappe.db.get_single_value("Stock Settings", "action_if_quality_inspection_is_not_submitted")
-			== "Stop"
-		):
-			self.update_qc_reference()
+		self.update_qc_reference()
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = "Serial and Batch Bundle"
@@ -472,25 +444,6 @@ def item_query(doctype: Any, txt: str | None, searchfield: Any, start: int, page
 			else:
 				# purpose requires no quality inspection
 				return []
-		elif filters.get("inspection_type") != "In Process":
-			my_filters.extend(
-				[
-					"and",
-					[
-						"items.item_code",
-						"in",
-						frappe.get_list(
-							"Item",
-							filters={
-								"inspection_required_before_purchase"
-								if filters.get("inspection_type") == "Incoming"
-								else "inspection_required_before_delivery": 1
-							},
-							pluck="name",
-						),
-					],
-				]
-			)
 
 		query = frappe.get_query(
 			reference_doctype,

@@ -13,6 +13,7 @@ monitor) is wired separately.
 """
 
 import frappe
+from frappe import _
 from frappe.utils.nestedset import get_ancestors_of
 
 INBOUND = "Inbound"
@@ -153,3 +154,52 @@ def resolve_inspection_points(doc):
 				break  # most-specific wins
 
 	return points
+
+
+def enforce_inspection_points(doc):
+	"""Enforce Block / Warn inspection points on a stock transaction.
+
+	Quarantine is handled by warehouse routing and Monitor is informational, so
+	neither gates the document here. Block stops submission when the row's Quality
+	Inspection is missing, unsubmitted or rejected; Warn only flags it.
+	"""
+	from frappe.utils import get_link_to_form
+
+	submitting = doc.docstatus == 1
+
+	for point in resolve_inspection_points(doc):
+		if point.qc_mode not in ("Block", "Warn"):
+			continue
+
+		block = point.qc_mode == "Block"
+		row = point.row
+		qi = row.get("quality_inspection")
+
+		if not qi:
+			msg = _("Row #{0}: Quality Inspection is required for Item {1}.").format(
+				row.idx, frappe.bold(row.get("item_code"))
+			)
+			if block and submitting:
+				frappe.throw(msg, title=_("Inspection Required"))
+			else:
+				frappe.msgprint(
+					msg, title=_("Inspection Required"), indicator="orange" if submitting else "blue"
+				)
+			continue
+
+		if not submitting:
+			continue
+
+		info = frappe.db.get_value("Quality Inspection", qi, ["docstatus", "status"], as_dict=True)
+		link = get_link_to_form("Quality Inspection", qi)
+		if not info or info.docstatus != 1:
+			msg = _("Row #{0}: Quality Inspection {1} is not submitted.").format(row.idx, link)
+		elif info.status == "Rejected":
+			msg = _("Row #{0}: Quality Inspection {1} was rejected.").format(row.idx, link)
+		else:
+			continue
+
+		if block:
+			frappe.throw(msg, title=_("Quality Inspection"))
+		else:
+			frappe.msgprint(msg, title=_("Quality Inspection"), indicator="orange", alert=True)

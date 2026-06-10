@@ -36,14 +36,6 @@ class SellingController(StockController):
 					)
 				)
 
-		if self.docstatus == 1 and self.doctype in ["Delivery Note", "Sales Invoice"]:
-			self.set_onload(
-				"allow_to_make_qc_after_submission",
-				frappe.get_single_value(
-					"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"
-				),
-			)
-
 		if (
 			self.get("company")
 			and (

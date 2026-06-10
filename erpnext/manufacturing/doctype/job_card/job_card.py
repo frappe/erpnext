@@ -862,10 +862,9 @@ class JobCard(Document):
 				).format(get_link_to_form("Item", self.finished_good), bold(self.name))
 			)
 
-		action_submit, action_reject = frappe.get_single_value(
-			"Stock Settings",
-			["action_if_quality_inspection_is_not_submitted", "action_if_quality_inspection_is_rejected"],
-		)
+		# The global Stock Settings QC actions were removed in the quality refactor;
+		# Job Card inspection defaults to blocking until wired to the trigger model.
+		action_submit = action_reject = "Stop"
 
 		qa_status, docstatus = frappe.get_value(
 			"Quality Inspection", self.quality_inspection, ["status", "docstatus"]
