@@ -294,8 +294,8 @@ def get_product_bundle_component_rows(item):
 def get_product_bundle_parent_rows(item):
 	rows = frappe.get_all(
 		"Product Bundle",
-		filters={"new_item_code": item, "docstatus": 1},
-		fields=["name", "new_item_code", "is_active", "disabled"],
+		filters={"new_item_code": item, "docstatus": 0},
+		fields=["name", "new_item_code", "disabled"],
 		order_by="name asc",
 	)
 
@@ -463,8 +463,8 @@ def get_product_bundle_map(bundle_names):
 		row.name: row
 		for row in frappe.get_all(
 			"Product Bundle",
-			filters={"name": ["in", bundle_names], "docstatus": 1},
-			fields=["name", "new_item_code", "is_active", "disabled"],
+			filters={"name": ["in", bundle_names], "docstatus": 0},
+			fields=["name", "new_item_code", "disabled"],
 		)
 	}
 
