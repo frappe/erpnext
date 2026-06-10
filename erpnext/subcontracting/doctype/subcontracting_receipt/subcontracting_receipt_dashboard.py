@@ -6,6 +6,7 @@ def get_data():
 		"fieldname": "subcontracting_receipt",
 		"non_standard_fieldnames": {
 			"Subcontracting Receipt": "return_against",
+			"Quality Control Lot": "source_document",
 		},
 		"internal_links": {
 			"Subcontracting Order": ["items", "subcontracting_order"],
@@ -21,6 +22,7 @@ def get_data():
 					"Purchase Receipt",
 					"Subcontracting Order",
 					"Quality Inspection",
+					"Quality Control Lot",
 					"Project",
 				],
 			},
