@@ -26,3 +26,46 @@ frappe.ui.form.on("Quality Inspection Reading Bundle", {
 		}
 	},
 });
+
+// Live evaluation while readings are typed; the server re-derives on save.
+frappe.ui.form.on("Quality Inspection Reading Entry", {
+	reading_value(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		const reading = (row.reading_value || "").trim();
+		if (!reading) {
+			return; // no reading yet: the chosen status stands
+		}
+
+		let status;
+		if (cint(row.numeric)) {
+			const value = parseFloat(reading);
+			status = value >= flt(row.min_value) && value <= flt(row.max_value) ? "Accepted" : "Rejected";
+		} else if ((row.value || "").trim()) {
+			status = reading.toLowerCase() === row.value.trim().toLowerCase() ? "Accepted" : "Rejected";
+		} else {
+			return; // no acceptance criteria: manual judgement
+		}
+
+		if (row.status !== status) {
+			frappe.model.set_value(cdt, cdn, "status", status);
+		}
+		roll_up_unit_counts(frm);
+	},
+
+	status(frm) {
+		roll_up_unit_counts(frm);
+	},
+});
+
+function roll_up_unit_counts(frm) {
+	const rejected_units = new Set();
+	const inspected_units = new Set();
+	for (const entry of frm.doc.entries || []) {
+		inspected_units.add(entry.unit_no);
+		if (entry.status === "Rejected") {
+			rejected_units.add(entry.unit_no);
+		}
+	}
+	frm.set_value("rejected_qty", rejected_units.size);
+	frm.set_value("accepted_qty", inspected_units.size - rejected_units.size);
+}

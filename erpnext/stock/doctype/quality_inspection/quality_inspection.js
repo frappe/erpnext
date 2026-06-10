@@ -130,3 +130,69 @@ frappe.ui.form.on("Quality Inspection", {
 		}
 	},
 });
+
+// Live status evaluation while readings are typed. The server re-derives on
+// save and remains the authority; this mirrors its rules for instant feedback.
+frappe.ui.form.on("Quality Inspection Reading", {
+	reading_value: evaluate_reading_status,
+	reading_1: evaluate_reading_status,
+	reading_2: evaluate_reading_status,
+	reading_3: evaluate_reading_status,
+	reading_4: evaluate_reading_status,
+	reading_5: evaluate_reading_status,
+	reading_6: evaluate_reading_status,
+	reading_7: evaluate_reading_status,
+	reading_8: evaluate_reading_status,
+	reading_9: evaluate_reading_status,
+	reading_10: evaluate_reading_status,
+	status: function (frm) {
+		set_overall_inspection_status(frm);
+	},
+});
+
+function evaluate_reading_status(frm, cdt, cdn) {
+	const row = locals[cdt][cdn];
+	// manual rows are the inspector's call; formula rows only the server can evaluate
+	if (cint(row.manual_inspection) || cint(row.formula_based_criteria)) {
+		return;
+	}
+
+	let status;
+	if (cint(row.numeric)) {
+		const readings = [];
+		for (let i = 1; i <= 10; i++) {
+			const reading = row["reading_" + i];
+			if (reading != null && String(reading).trim() !== "") {
+				readings.push(parseFloat(reading));
+			}
+		}
+		if (!readings.length) {
+			return;
+		}
+		status = readings.every((value) => value >= flt(row.min_value) && value <= flt(row.max_value))
+			? "Accepted"
+			: "Rejected";
+	} else {
+		const reading = (row.reading_value || "").trim().toLowerCase();
+		if (!reading) {
+			return;
+		}
+		status = reading === (row.value || "").trim().toLowerCase() ? "Accepted" : "Rejected";
+	}
+
+	if (row.status !== status) {
+		frappe.model.set_value(cdt, cdn, "status", status);
+	}
+	set_overall_inspection_status(frm);
+}
+
+function set_overall_inspection_status(frm) {
+	if (cint(frm.doc.manual_inspection) || frm.doc.docstatus !== 0) {
+		return;
+	}
+	const rejected = (frm.doc.readings || []).some((reading) => reading.status === "Rejected");
+	const status = rejected ? "Rejected" : "Accepted";
+	if (frm.doc.status !== status) {
+		frm.set_value("status", status);
+	}
+}
