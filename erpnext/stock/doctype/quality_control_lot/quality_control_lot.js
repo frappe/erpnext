@@ -17,7 +17,8 @@ frappe.ui.form.on("Quality Control Lot", {
 					reference_name: frm.doc.name,
 					item_code: frm.doc.item_code,
 					batch_no: frm.doc.batch_no,
-					sample_size: frm.doc.pending_qty,
+					inspection_basis: frm.doc.inspection_basis,
+					sample_size: frm.doc.inspection_basis === "Each Quantity" ? 0 : frm.doc.pending_qty,
 					quality_inspection_template: frm.doc.inspection_template,
 				});
 			});

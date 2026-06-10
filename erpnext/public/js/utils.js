@@ -1488,7 +1488,8 @@ erpnext.utils.add_quality_control_lot_buttons = function (frm) {
 							reference_name: lot.name,
 							item_code: lot.item_code,
 							batch_no: lot.batch_no,
-							sample_size: lot.pending_qty,
+							inspection_basis: lot.inspection_basis,
+							sample_size: lot.inspection_basis === "Each Quantity" ? 0 : lot.pending_qty,
 							quality_inspection_template: lot.inspection_template,
 						});
 					},

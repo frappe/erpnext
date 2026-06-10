@@ -110,6 +110,19 @@ frappe.ui.form.on("Quality Inspection", {
 		});
 	},
 
+	reference_name: function (frm) {
+		// the lot dictates how it is inspected; the server re-derives on save
+		if (frm.doc.reference_type === "Quality Control Lot" && frm.doc.reference_name) {
+			frappe.db
+				.get_value("Quality Control Lot", frm.doc.reference_name, "inspection_basis")
+				.then((r) => {
+					frm.set_value("inspection_basis", r.message?.inspection_basis || "Sample");
+				});
+		} else {
+			frm.set_value("inspection_basis", "Sample");
+		}
+	},
+
 	item_code: function (frm) {
 		frm.trigger("toggle_batch_and_serial_fields");
 		if (frm.doc.item_code && !frm.doc.quality_inspection_template) {
