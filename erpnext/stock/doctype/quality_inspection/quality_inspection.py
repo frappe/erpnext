@@ -209,7 +209,29 @@ class QualityInspection(Document):
 
 	def before_submit(self):
 		self.validate_readings_status_mandatory()
+		self.validate_readings_recorded()
 		self.validate_reading_bundle_coverage()
+
+	def validate_readings_recorded(self):
+		"""The decision must rest on recorded readings.
+
+		Draft saves leave unrecorded rows untouched, so without this gate an
+		untouched row would pass on its default status. Manual rows, formula rows
+		and manual inspections are exempt.
+		"""
+		if self.manual_inspection:
+			return
+
+		for reading in self.readings:
+			if reading.manual_inspection or cint(reading.formula_based_criteria):
+				continue
+			if not self.has_recorded_reading(reading):
+				frappe.throw(
+					_("Row #{0}: Record a reading for {1} before submission.").format(
+						reading.idx, frappe.bold(reading.specification)
+					),
+					title=_("Reading Missing"),
+				)
 
 	def validate_reading_bundle_coverage(self):
 		"""An Each Quantity inspection's bundle must cover the stock it decides."""
@@ -450,6 +472,11 @@ class QualityInspection(Document):
 					)
 
 	def set_status_based_on_acceptance_values(self, reading):
+		# an unrecorded reading is a draft in progress, not a failure: leave its
+		# status alone — submission separately demands that readings be recorded
+		if not self.has_recorded_reading(reading):
+			return
+
 		if not cint(reading.numeric):
 			# compare case-insensitively and ignore surrounding whitespace, so a
 			# reading of "yes" passes an acceptance criteria of "Yes"
@@ -461,6 +488,12 @@ class QualityInspection(Document):
 			result = self.min_max_criteria_passed(reading)
 
 		reading.status = "Accepted" if result else "Rejected"
+
+	@staticmethod
+	def has_recorded_reading(reading):
+		if not cint(reading.numeric):
+			return bool((reading.get("reading_value") or "").strip())
+		return any((reading.get(f"reading_{i}") or "").strip() for i in range(1, 11))
 
 	def min_max_criteria_passed(self, reading):
 		"""Determine whether all readings fall in the acceptable range."""
