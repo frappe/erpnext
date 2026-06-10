@@ -44,6 +44,7 @@ class Warehouse(NestedSet):
 		parent_warehouse: DF.Link | None
 		phone_no: DF.Data | None
 		pin: DF.Data | None
+		quality_warehouse: DF.Link | None
 		rgt: DF.Int
 		state: DF.Data | None
 		warehouse_name: DF.Data

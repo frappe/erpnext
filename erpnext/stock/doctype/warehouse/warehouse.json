@@ -39,6 +39,7 @@
   "warehouse_type",
   "column_break_qajx",
   "default_in_transit_warehouse",
+  "quality_warehouse",
   "tree_details",
   "lft",
   "rgt",
@@ -244,6 +245,14 @@
    "fieldname": "default_in_transit_warehouse",
    "fieldtype": "Link",
    "label": "Default In-Transit Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "depends_on": "eval:!doc.is_group && doc.warehouse_type != 'Quality';",
+   "description": "Stock received for items that require inbound quality inspection is quarantined into this warehouse until released by a Quality Inspection.",
+   "fieldname": "quality_warehouse",
+   "fieldtype": "Link",
+   "label": "Quality (QC) Warehouse",
    "options": "Warehouse"
   },
   {
