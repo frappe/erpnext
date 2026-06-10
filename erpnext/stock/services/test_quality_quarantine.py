@@ -962,6 +962,46 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		sales_return.save()
 		sales_return.submit()
 
+	def test_receipt_inspection_serials_must_match_the_receipt(self):
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "QCPR.#####"}
+		)
+
+		# a serial of the same item from an unrelated receipt
+		make_stock_entry(
+			item_code=item.name, qty=1, to_warehouse=REAL_WH, purpose="Material Receipt", rate=100
+		)
+		foreign_serial = frappe.get_all("Serial No", filters={"item_code": item.name}, pluck="name")[0]
+
+		# the receipt's serials are auto-created at submission — nothing on the
+		# draft row for validate-time checks to see
+		receipt = make_purchase_receipt(
+			item_code=item.name, qty=2, warehouse=REAL_WH, rate=100, do_not_submit=True
+		)
+		inspection = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Incoming",
+				"reference_type": "Purchase Receipt",
+				"reference_name": receipt.name,
+				"item_code": item.name,
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+				"manual_inspection": 1,
+				"status": "Accepted",
+				"serial_no": foreign_serial,
+			}
+		)
+		inspection.insert(ignore_permissions=True)
+		inspection.submit()  # the draft row carries no serials yet: nothing to compare
+
+		# at receipt submission the serials exist — the foreign sample is caught
+		receipt.reload()
+		self.assertRaises(frappe.ValidationError, receipt.submit)
+
 	def test_customer_return_is_quarantined_and_released(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note

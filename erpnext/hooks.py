@@ -398,7 +398,10 @@ doc_events = {
 		"Delivery Note",
 		"Sales Invoice",
 	): {
-		"on_submit": "erpnext.stock.services.quality_quarantine.create_quality_control_lots",
+		"on_submit": [
+			"erpnext.stock.services.quality_trigger_resolution.validate_inspected_serial_consistency",
+			"erpnext.stock.services.quality_quarantine.create_quality_control_lots",
+		],
 		"on_cancel": "erpnext.stock.services.quality_quarantine.handle_source_document_cancel",
 	},
 	("Purchase Receipt", "Purchase Invoice"): {

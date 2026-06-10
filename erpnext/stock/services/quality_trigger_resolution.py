@@ -247,13 +247,15 @@ def get_row_serial_nos(row):
 	return serials
 
 
-def validate_inspected_serial_consistency(doc):
+def validate_inspected_serial_consistency(doc, method=None):
 	"""A row's inspection must describe the row's serials.
 
 	The inspection samples specific units; if the row no longer carries them
 	(e.g. the serials on a return were changed after the inspection), the
 	recorded verdict says nothing about the stock actually moving. Enforced at
-	submission for every row with a linked inspection, regardless of mode.
+	submission for every row with a linked inspection, regardless of mode —
+	and re-checked on submit, when inward documents have materialised their
+	auto-created serials and bundles that validate time cannot see.
 	"""
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
@@ -272,6 +274,15 @@ def validate_inspected_serial_consistency(doc):
 			continue
 
 		row_serials = get_row_serial_nos(row)
+		if not row_serials and row.get("name"):
+			# inward documents materialise serials/bundles during submission via
+			# direct writes — the in-memory row may be stale, the database is not
+			child_doctype = "Stock Entry Detail" if doc.doctype == "Stock Entry" else doc.doctype + " Item"
+			db_row = frappe.db.get_value(
+				child_doctype, row.name, ["serial_no", "serial_and_batch_bundle"], as_dict=True
+			)
+			if db_row:
+				row_serials = get_row_serial_nos(db_row)
 		if not row_serials:
 			continue  # serial assignment may follow later in submission; core enforces it
 
