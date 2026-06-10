@@ -219,7 +219,7 @@
    "options": "Simple"
   },
   {
-   "depends_on": "eval:!doc.manual_inspection",
+   "depends_on": "eval:!doc.manual_inspection && doc.inspection_basis != 'Each Quantity'",
    "fieldname": "quality_inspection_template",
    "fieldtype": "Link",
    "label": "Quality Inspection Template",
