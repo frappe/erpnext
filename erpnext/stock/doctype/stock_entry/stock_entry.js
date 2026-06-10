@@ -201,11 +201,9 @@ frappe.ui.form.on("Stock Entry", {
 			erpnext.utils.add_quality_control_lot_buttons(frm);
 		}
 
-		if (!frm.doc.inspection_required) {
-			return;
-		}
-
-		if (!frm.is_new() && frm.doc.docstatus === 0) {
+		// inspection requirements come from the item quality triggers, not the
+		// legacy inspection_required checkbox (which only Manufacture entries show)
+		if (!frm.is_new() && frm.doc.docstatus === 0 && frappe.model.can_create("Quality Inspection")) {
 			frm.add_custom_button(
 				__("Quality Inspection(s)"),
 				() => {
