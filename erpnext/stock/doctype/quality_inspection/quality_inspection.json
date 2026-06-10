@@ -252,11 +252,12 @@
   },
   {
    "depends_on": "eval:doc.inspection_basis == 'Each Quantity' && !doc.manual_inspection",
-   "description": "For Each Quantity inspections: per-unit readings live in a Quality Inspection Reading Bundle, and its accepted/rejected unit counts drive a partial release of the Quality Control Lot.",
+   "description": "For Each Quantity inspections: per-unit readings live in a Quality Inspection Reading Bundle, and its accepted/rejected unit counts drive a partial release of the Quality Control Lot. Save the inspection first \u2014 bundles are created from it.",
    "fieldname": "reading_bundle",
    "fieldtype": "Link",
    "label": "Reading Bundle",
-   "mandatory_depends_on": "eval:doc.inspection_basis == 'Each Quantity' && !doc.manual_inspection",
+   "mandatory_depends_on": "eval:doc.inspection_basis == 'Each Quantity' && !doc.manual_inspection && !doc.__islocal",
+   "read_only_depends_on": "eval:doc.__islocal",
    "no_copy": 1,
    "options": "Quality Inspection Reading Bundle"
   },
