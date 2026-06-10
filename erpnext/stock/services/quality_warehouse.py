@@ -62,8 +62,9 @@ def validate_quality_warehouse_exit(sle):
 
 	frappe.throw(
 		_(
-			"Stock of {0} in {1} is under quality hold and cannot be consumed. Release it with a "
-			"Quality Control Release stock entry, or return it to the supplier with a purchase return."
+			"Stock of {0} in {1} is under quality hold and cannot be consumed until its Quality "
+			"Inspection is decided. Accepted stock leaves with a Quality Control Release stock "
+			"entry; rejected purchased goods can also leave with a purchase return."
 		).format(frappe.bold(sle.get("item_code")), frappe.bold(sle.get("warehouse"))),
 		title=_("Stock Under Quality Hold"),
 	)

@@ -50,13 +50,15 @@
    "in_standard_filter": 1,
    "label": "Item",
    "options": "Item",
-   "reqd": 1
+   "reqd": 1,
+   "read_only": 1
   },
   {
    "fieldname": "batch_no",
    "fieldtype": "Link",
    "label": "Batch",
-   "options": "Batch"
+   "options": "Batch",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_item",
@@ -66,7 +68,8 @@
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "read_only": 1
   },
   {
    "description": "The Quality Control warehouse this lot is quarantined in.",
@@ -75,7 +78,8 @@
    "in_standard_filter": 1,
    "label": "Quality Warehouse",
    "options": "Warehouse",
-   "reqd": 1
+   "reqd": 1,
+   "read_only": 1
   },
   {
    "fieldname": "qty_section",
@@ -87,7 +91,8 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Received Qty",
-   "reqd": 1
+   "reqd": 1,
+   "read_only": 1
   },
   {
    "fieldname": "accepted_qty",
@@ -138,13 +143,15 @@
    "fieldname": "source_document_type",
    "fieldtype": "Link",
    "label": "Source Document Type",
-   "options": "DocType"
+   "options": "DocType",
+   "read_only": 1
   },
   {
    "fieldname": "source_document",
    "fieldtype": "Dynamic Link",
    "label": "Source Document",
-   "options": "source_document_type"
+   "options": "source_document_type",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_source",
@@ -162,14 +169,16 @@
    "fieldname": "inspection_template",
    "fieldtype": "Link",
    "label": "Inspection Template",
-   "options": "Quality Inspection Template"
+   "options": "Quality Inspection Template",
+   "read_only": 1
   },
   {
    "default": "Sample",
    "fieldname": "inspection_basis",
    "fieldtype": "Select",
    "label": "Inspection Basis",
-   "options": "Sample\nEach Quantity"
+   "options": "Sample\nEach Quantity",
+   "read_only": 1
   }
  ],
  "links": [],

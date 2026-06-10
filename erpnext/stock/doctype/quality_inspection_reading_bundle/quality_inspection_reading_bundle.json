@@ -45,12 +45,13 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Number of units inspected individually.",
+   "description": "Number of units inspected individually. For an Each Quantity inspection this must cover the full quantity under inspection.",
    "fieldname": "quantity",
    "fieldtype": "Int",
    "in_list_view": 1,
    "label": "Inspected Quantity",
-   "reqd": 1
+   "reqd": 1,
+   "read_only_depends_on": "eval:doc.quality_inspection"
   },
   {
    "description": "Units whose readings all passed.",

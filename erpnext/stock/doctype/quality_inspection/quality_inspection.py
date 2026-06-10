@@ -245,6 +245,7 @@ class QualityInspection(Document):
 				title=_("Incomplete Per-Unit Readings"),
 			)
 
+	@frappe.whitelist()
 	def get_qty_under_inspection(self):
 		if self.reference_type == "Quality Control Lot" and self.reference_name:
 			return frappe.db.get_value("Quality Control Lot", self.reference_name, "pending_qty")

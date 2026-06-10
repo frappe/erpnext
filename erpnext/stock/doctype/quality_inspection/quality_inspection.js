@@ -81,6 +81,15 @@ frappe.ui.form.on("Quality Inspection", {
 			"Quality Inspection Reading Bundle",
 		];
 		frm.trigger("toggle_batch_and_serial_fields");
+		frm.trigger("fetch_qty_under_inspection");
+
+		// a bundle created from this inspection starts with its item, template and
+		// the full quantity under inspection
+		frm.fields_dict.reading_bundle.get_route_options_for_new_doc = () => ({
+			item_code: frm.doc.item_code,
+			quality_inspection_template: frm.doc.quality_inspection_template,
+			quantity: frm.__qty_under_inspection,
+		});
 
 		if (
 			frm.doc.docstatus === 0 &&
@@ -92,9 +101,20 @@ frappe.ui.form.on("Quality Inspection", {
 				frappe.new_doc("Quality Inspection Reading Bundle", {
 					item_code: frm.doc.item_code,
 					quality_inspection_template: frm.doc.quality_inspection_template,
+					quantity: frm.__qty_under_inspection,
 				});
 			});
 		}
+	},
+
+	fetch_qty_under_inspection(frm) {
+		frm.__qty_under_inspection = null;
+		if (!frm.doc.reference_name) {
+			return;
+		}
+		frm.call({ doc: frm.doc, method: "get_qty_under_inspection" }).then((r) => {
+			frm.__qty_under_inspection = r.message || null;
+		});
 	},
 
 	toggle_batch_and_serial_fields(frm) {
@@ -111,6 +131,7 @@ frappe.ui.form.on("Quality Inspection", {
 	},
 
 	reference_name: function (frm) {
+		frm.trigger("fetch_qty_under_inspection");
 		// the lot dictates how it is inspected; the server re-derives on save
 		if (frm.doc.reference_type === "Quality Control Lot" && frm.doc.reference_name) {
 			frappe.db
