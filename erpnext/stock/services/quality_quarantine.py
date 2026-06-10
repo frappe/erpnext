@@ -14,6 +14,7 @@ from frappe.utils import flt
 
 from erpnext.stock.services.quality_trigger_resolution import (
 	INBOUND,
+	OUTBOUND,
 	movements_of,
 	resolve_inspection_points,
 )
@@ -188,6 +189,87 @@ def handle_source_document_cancel(doc, method=None):
 				title=_("Quality Control Lot In Use"),
 			)
 		frappe.delete_doc("Quality Control Lot", lot.name, ignore_permissions=True)
+
+
+def update_lots_for_purchase_return(doc, method=None):
+	"""Book a purchase return out of a Quality Control warehouse against its lots.
+
+	The return has no explicit lot link, so allocation is implicit: rows taking
+	stock out of a Quality Control warehouse are matched to that item's lots with
+	rejected quantity still awaiting return — batch matches first, then oldest
+	first. A return larger than the rejected-outstanding quantity is refused,
+	which also stops returns from smuggling accepted or pending stock out of
+	quarantine. Cancelling the return books the allocation back.
+	"""
+	if doc.doctype not in ("Purchase Receipt", "Purchase Invoice") or not doc.get("is_return"):
+		return
+
+	for row, role, warehouse in movements_of(doc):
+		if role != OUTBOUND or not is_quality_warehouse(warehouse):
+			continue
+
+		return_qty = abs(flt(row.get("stock_qty")) or flt(row.get("qty")))
+		if not return_qty:
+			continue
+
+		if method == "before_submit":
+			# capacity is checked before anything persists, so a refused return
+			# leaves no half-submitted state behind
+			_validate_return_capacity(row, warehouse, return_qty)
+		elif method == "on_cancel":
+			_allocate_return_to_lots(row, warehouse, return_qty, -1)
+		else:
+			_allocate_return_to_lots(row, warehouse, return_qty, +1)
+
+
+def _rejected_outstanding_lots(item_code, warehouse, batch_no=None):
+	lots = frappe.get_all(
+		"Quality Control Lot",
+		filters={"item_code": item_code, "quality_warehouse": warehouse},
+		fields=["name", "batch_no", "rejected_qty", "returned_qty"],
+		order_by="creation",
+	)
+	# prefer lots of the same batch, then first-in-first-out
+	lots.sort(key=lambda lot: 0 if batch_no and lot.batch_no == batch_no else 1)
+	return lots
+
+
+def _validate_return_capacity(row, warehouse, return_qty):
+	lots = _rejected_outstanding_lots(row.get("item_code"), warehouse, row.get("batch_no"))
+	capacity = sum(flt(lot.rejected_qty) - flt(lot.returned_qty) for lot in lots)
+	if return_qty > capacity:
+		frappe.throw(
+			_(
+				"Row #{0}: Only {1} rejected unit(s) of {2} in {3} are awaiting return. Stock that "
+				"is pending or accepted leaves quarantine through a Quality Control Release, not a "
+				"purchase return."
+			).format(row.idx, capacity, frappe.bold(row.get("item_code")), frappe.bold(warehouse)),
+			title=_("Return Exceeds Rejected Stock"),
+		)
+
+
+def _allocate_return_to_lots(row, warehouse, return_qty, direction):
+	remaining = return_qty
+	for lot in _rejected_outstanding_lots(row.get("item_code"), warehouse, row.get("batch_no")):
+		if remaining <= 0:
+			break
+
+		if direction > 0:
+			capacity = flt(lot.rejected_qty) - flt(lot.returned_qty)
+		else:
+			capacity = flt(lot.returned_qty)
+		if capacity <= 0:
+			continue
+
+		allocated = min(capacity, remaining)
+		frappe.db.set_value(
+			"Quality Control Lot",
+			lot.name,
+			"returned_qty",
+			flt(lot.returned_qty) + direction * allocated,
+			update_modified=False,
+		)
+		remaining -= allocated
 
 
 def block_stock_reconciliation_on_quality_warehouse(doc, method=None):

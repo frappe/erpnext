@@ -26,6 +26,7 @@ class QualityControlLot(Document):
 		quality_warehouse: DF.Link
 		received_qty: DF.Float
 		rejected_qty: DF.Float
+		returned_qty: DF.Float
 		source_document: DF.DynamicLink | None
 		source_document_type: DF.Link | None
 		status: DF.Literal["Under Inspection", "Partially Released", "Released", "Rejected"]

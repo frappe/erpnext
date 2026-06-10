@@ -17,10 +17,10 @@ def make_qc_warehouse(name="_Test QC Mint WH"):
 	return make_warehouse(name, warehouse_type="Quality")
 
 
-def quality_control_lots_for(stock_entry_name):
+def quality_control_lots_for(source_name, source_doctype="Stock Entry"):
 	return frappe.get_all(
 		"Quality Control Lot",
-		filters={"source_document_type": "Stock Entry", "source_document": stock_entry_name},
+		filters={"source_document_type": source_doctype, "source_document": source_name},
 		fields=["name", "item_code", "received_qty", "quality_warehouse", "status"],
 	)
 
@@ -276,6 +276,33 @@ class TestQualityQuarantine(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "status"), "Rejected")
 		self.assertEqual(get_qty(item, qc), 4)  # stays under quality hold for the purchase return
+
+	def test_purchase_return_books_against_rejected_lot(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		qc = make_qc_warehouse("_Test QC Return WH")
+		item = make_item(properties={"is_stock_item": 1}).name
+		receipt = make_purchase_receipt(item_code=item, qty=4, warehouse=qc, rate=100)
+		lot = quality_control_lots_for(receipt.name, "Purchase Receipt")[0].name
+
+		# a return before any rejection would smuggle uninspected stock out
+		premature = make_return_doc("Purchase Receipt", receipt.name)
+		premature.save()
+		self.assertRaises(frappe.ValidationError, premature.submit)
+
+		submit_inspection_for_lot(lot, status="Rejected")
+
+		# now the return books cleanly against the rejected lot
+		return_doc = make_return_doc("Purchase Receipt", receipt.name)
+		return_doc.save()
+		return_doc.submit()
+		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "returned_qty"), 4)
+		self.assertEqual(get_qty(item, qc), 0)
+
+		# cancelling the return books the allocation back
+		return_doc.cancel()
+		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "returned_qty"), 0)
 
 	def test_stock_reconciliation_blocked_on_quality_warehouse(self):
 		qc = make_qc_warehouse()

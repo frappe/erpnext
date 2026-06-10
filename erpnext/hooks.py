@@ -393,6 +393,11 @@ doc_events = {
 		"on_submit": "erpnext.stock.services.quality_quarantine.create_quality_control_lots",
 		"on_cancel": "erpnext.stock.services.quality_quarantine.handle_source_document_cancel",
 	},
+	("Purchase Receipt", "Purchase Invoice"): {
+		"before_submit": "erpnext.stock.services.quality_quarantine.update_lots_for_purchase_return",
+		"on_submit": "erpnext.stock.services.quality_quarantine.update_lots_for_purchase_return",
+		"on_cancel": "erpnext.stock.services.quality_quarantine.update_lots_for_purchase_return",
+	},
 	"Stock Reconciliation": {
 		"validate": "erpnext.stock.services.quality_quarantine.block_stock_reconciliation_on_quality_warehouse",
 	},

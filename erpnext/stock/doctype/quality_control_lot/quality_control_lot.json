@@ -18,6 +18,7 @@
   "received_qty",
   "accepted_qty",
   "rejected_qty",
+  "returned_qty",
   "column_break_qty",
   "pending_qty",
   "status",
@@ -98,6 +99,13 @@
    "fieldname": "rejected_qty",
    "fieldtype": "Float",
    "label": "Rejected Qty",
+   "read_only": 1
+  },
+  {
+   "description": "Rejected quantity already sent back to the supplier with a purchase return.",
+   "fieldname": "returned_qty",
+   "fieldtype": "Float",
+   "label": "Returned Qty",
    "read_only": 1
   },
   {

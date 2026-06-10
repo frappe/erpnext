@@ -54,6 +54,12 @@ def get_columns():
 			"width": 130,
 		},
 		{
+			"fieldname": "returned_qty",
+			"label": _("Returned to Supplier"),
+			"fieldtype": "Float",
+			"width": 140,
+		},
+		{
 			"fieldname": "difference",
 			"label": _("Difference"),
 			"fieldtype": "Float",
@@ -88,12 +94,13 @@ def get_data(filters):
 	for lot in frappe.get_all(
 		"Quality Control Lot",
 		filters={"quality_warehouse": ("in", quality_warehouses)},
-		fields=["quality_warehouse", "item_code", "pending_qty", "rejected_qty"],
+		fields=["quality_warehouse", "item_code", "pending_qty", "rejected_qty", "returned_qty"],
 	):
 		key = (lot.quality_warehouse, lot.item_code)
-		entry = lots.setdefault(key, {"pending_qty": 0.0, "rejected_qty": 0.0})
+		entry = lots.setdefault(key, {"pending_qty": 0.0, "rejected_qty": 0.0, "returned_qty": 0.0})
 		entry["pending_qty"] += flt(lot.pending_qty)
 		entry["rejected_qty"] += flt(lot.rejected_qty)
+		entry["returned_qty"] += flt(lot.returned_qty)
 
 	data = []
 	for key in sorted(set(balances) | set(lots)):
@@ -101,7 +108,9 @@ def get_data(filters):
 		ledger_qty = balances.get(key, 0.0)
 		pending_qty = lots.get(key, {}).get("pending_qty", 0.0)
 		rejected_qty = lots.get(key, {}).get("rejected_qty", 0.0)
-		difference = ledger_qty - pending_qty - rejected_qty
+		returned_qty = lots.get(key, {}).get("returned_qty", 0.0)
+		# rejected stock already sent back to the supplier has left the ledger
+		difference = ledger_qty - pending_qty - (rejected_qty - returned_qty)
 
 		if not (ledger_qty or pending_qty or rejected_qty):
 			continue
@@ -113,6 +122,7 @@ def get_data(filters):
 				"ledger_qty": ledger_qty,
 				"pending_qty": pending_qty,
 				"rejected_qty": rejected_qty,
+				"returned_qty": returned_qty,
 				"difference": difference,
 			}
 		)
