@@ -709,6 +709,8 @@ def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str
 	triggers = {}
 	child_doctype = "Stock Entry Detail" if doctype == "Stock Entry" else doctype + " Item"
 	for item in items:
+		# returns carry negative quantities; inspection thinks in physical units
+		item["qty"] = abs(flt(item.get("qty")))
 		item_code = item.get("item_code")
 		if item_code not in triggers:
 			triggers[item_code] = get_trigger_for_doctype(item_code, doctype)
@@ -745,7 +747,7 @@ def make_quality_inspections(
 		# size does not apply to them (resolved server-side, not trusted from the dialog)
 		each_quantity = get_inspection_basis(item.get("item_code"), doctype) == "Each Quantity"
 
-		if not each_quantity and flt(item.get("sample_size")) > flt(item.get("qty")):
+		if not each_quantity and flt(item.get("sample_size")) > abs(flt(item.get("qty"))):
 			frappe.throw(
 				_(
 					"{item_name}'s Sample Size ({sample_size}) cannot be greater than the Accepted Quantity ({accepted_quantity})"

@@ -323,6 +323,25 @@ class TestMakeInspectionButton(ERPNextTestSuite):
 		)
 		self.assertEqual(offered[0]["sample_quantity"], 5)
 
+	def test_offered_return_rows_use_physical_quantities(self):
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Delivery Note",
+				warehouse_role="Inbound",
+				quality_control_mode="Block",
+				sample_size=20,
+				sample_size_is_percentage=1,
+			),
+		)
+		item.save()
+
+		# a customer return row carries -5; inspection thinks in physical units
+		offered = check_item_quality_inspection("Delivery Note", 0, [{"item_code": item.name, "qty": -5}])
+		self.assertEqual(offered[0]["qty"], 5)
+		self.assertEqual(offered[0]["sample_quantity"], 1)  # ceil(20% of 5)
+
 	def test_offered_items_carry_their_inspection_basis(self):
 		from erpnext.stock.services.quality_trigger_resolution import get_inspection_basis
 

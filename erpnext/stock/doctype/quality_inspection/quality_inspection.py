@@ -329,7 +329,8 @@ class QualityInspection(Document):
 				if self.reference_type == "Stock Entry"
 				else self.reference_type + " Item"
 			)
-			return frappe.db.get_value(child_doctype, self.child_row_reference, "qty")
+			# returns carry negative quantities; inspection thinks in physical units
+			return abs(flt(frappe.db.get_value(child_doctype, self.child_row_reference, "qty")))
 
 		return None
 
