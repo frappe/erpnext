@@ -974,6 +974,79 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		sales_return.save()
 		sales_return.submit()
 
+	def test_bundle_serials_guard_the_document_after_inspection(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+		from erpnext.stock.doctype.quality_inspection_reading_bundle.test_quality_inspection_reading_bundle import (
+			make_bundle,
+		)
+
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "QCTB.#####"}
+		)
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry",
+				stock_entry_type="Material Issue",
+				warehouse_role="Outbound",
+				quality_control_mode="Block",
+				inspection_basis="Each Quantity",
+			),
+		)
+		item.save()
+
+		make_stock_entry(
+			item_code=item.name, qty=3, to_warehouse=REAL_WH, purpose="Material Receipt", rate=100
+		)
+		serials = frappe.get_all(
+			"Serial No", filters={"item_code": item.name, "warehouse": REAL_WH}, pluck="name", order_by="name"
+		)
+
+		issue = make_stock_entry(
+			item_code=item.name,
+			qty=2,
+			from_warehouse=REAL_WH,
+			purpose="Material Issue",
+			serial_no="\n".join(serials[:2]),
+			use_serial_batch_fields=1,
+			do_not_submit=True,
+		)
+
+		bundle = make_bundle(
+			2,
+			{1: ["Accepted"], 2: ["Accepted"]},
+			item_code=item.name,
+			unit_serials={1: serials[0], 2: serials[1]},
+		)
+		inspection = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Outgoing",
+				"reference_type": "Stock Entry",
+				"reference_name": issue.name,
+				"item_code": item.name,
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+				"inspection_basis": "Each Quantity",
+				"reading_bundle": bundle.name,
+			}
+		)
+		inspection.insert(ignore_permissions=True)
+		inspection.submit()
+
+		# swapping the issued serials after the inspection is caught at submission
+		issue.reload()
+		issue.items[0].serial_no = "\n".join([serials[0], serials[2]])
+		issue.save()
+		self.assertRaises(frappe.ValidationError, issue.submit)
+
+		# with the inspected serials restored, the issue submits
+		issue.reload()
+		issue.items[0].serial_no = "\n".join(serials[:2])
+		issue.save()
+		issue.submit()
+
 	def test_receipt_inspection_serials_must_match_the_receipt(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 

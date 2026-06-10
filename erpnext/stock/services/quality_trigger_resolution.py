@@ -267,9 +267,19 @@ def validate_inspected_serial_consistency(doc, method=None):
 		if not inspection:
 			continue
 
-		sampled = set(
-			get_serial_nos(frappe.db.get_value("Quality Inspection", inspection, "serial_no") or "")
+		qi = frappe.db.get_value(
+			"Quality Inspection", inspection, ["serial_no", "reading_bundle"], as_dict=True
 		)
+		sampled = set(get_serial_nos(qi.serial_no or "")) if qi else set()
+		if qi and qi.reading_bundle:
+			# Each Quantity inspections carry their serials per unit in the bundle
+			sampled.update(
+				frappe.get_all(
+					"Quality Inspection Reading Entry",
+					filters={"parent": qi.reading_bundle, "serial_no": ("is", "set")},
+					pluck="serial_no",
+				)
+			)
 		if not sampled:
 			continue
 
