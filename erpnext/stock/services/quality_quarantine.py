@@ -217,6 +217,61 @@ def process_inspection_result(doc, method=None):
 	)
 
 
+@frappe.whitelist()
+def make_purchase_return_for_lot(lot_name: str):
+	"""A purchase return pre-filled with the lot's rejected quantity awaiting return.
+
+	Built from the lot's source document, trimmed to the lot's item, with the
+	quantity set to the rejected-outstanding units and the Quality Control
+	warehouse as the source — the only stock a return may take out of quarantine.
+	"""
+	from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+	lot = frappe.get_doc("Quality Control Lot", lot_name)
+
+	if lot.source_document_type not in ("Purchase Receipt", "Purchase Invoice"):
+		frappe.throw(
+			_(
+				"A purchase return applies only to lots sourced from a Purchase Receipt or "
+				"Purchase Invoice. Lot {0} came from {1}."
+			).format(frappe.bold(lot.name), frappe.bold(lot.source_document_type))
+		)
+
+	outstanding = flt(lot.rejected_qty) - flt(lot.returned_qty)
+	if outstanding <= 0:
+		frappe.throw(
+			_("Quality Control Lot {0} has no rejected quantity awaiting return.").format(
+				frappe.bold(lot.name)
+			)
+		)
+
+	return_doc = make_return_doc(lot.source_document_type, lot.source_document)
+	rows = [
+		row
+		for row in return_doc.items
+		if row.item_code == lot.item_code and row.get("warehouse") == lot.quality_warehouse
+	]
+	if not rows:
+		frappe.throw(
+			_("{0} has no returnable row for item {1} in {2}.").format(
+				frappe.bold(lot.source_document),
+				frappe.bold(lot.item_code),
+				frappe.bold(lot.quality_warehouse),
+			)
+		)
+
+	row = rows[0]
+	return_doc.set("items", [row])
+	row.qty = -outstanding
+	if row.meta.has_field("received_qty"):
+		row.received_qty = -outstanding
+	if lot.batch_no:
+		row.batch_no = lot.batch_no
+		row.use_serial_batch_fields = 1
+
+	return return_doc
+
+
 def handle_source_document_cancel(doc, method=None):
 	"""Cascade a source-document cancellation onto its Quality Control Lots.
 

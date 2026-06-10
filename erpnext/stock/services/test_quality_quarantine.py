@@ -484,6 +484,40 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		return_doc.cancel()
 		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "returned_qty"), 0)
 
+	def test_purchase_return_created_from_the_lot(self):
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+		from erpnext.stock.services.quality_quarantine import make_purchase_return_for_lot
+
+		qc = make_qc_warehouse("_Test QC Lot Return WH")
+		item = make_quarantine_item(qc, "Purchase Receipt")
+		other_item = make_item(properties={"is_stock_item": 1}).name
+
+		# a receipt with a second, untriggered item — the return must not drag it along
+		receipt = make_purchase_receipt(item_code=item, qty=4, warehouse=qc, rate=100, do_not_submit=True)
+		receipt.append(
+			"items", {"item_code": other_item, "qty": 2, "warehouse": REAL_WH, "rate": 50, "received_qty": 2}
+		)
+		receipt.save()
+		receipt.submit()
+
+		lot = quality_control_lots_for(receipt.name, "Purchase Receipt")[0].name
+
+		# nothing rejected yet: no return to make
+		self.assertRaises(frappe.ValidationError, make_purchase_return_for_lot, lot)
+
+		submit_inspection_for_lot(lot, status="Rejected")
+
+		return_doc = make_purchase_return_for_lot(lot)
+		self.assertEqual(len(return_doc.items), 1)
+		self.assertEqual(return_doc.items[0].item_code, item)
+		self.assertEqual(return_doc.items[0].qty, -4)
+		self.assertEqual(return_doc.items[0].warehouse, qc)
+
+		return_doc.save()
+		return_doc.submit()
+		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "returned_qty"), 4)
+		self.assertEqual(get_qty(item, qc), 0)
+
 	def test_stock_reconciliation_blocked_on_quality_warehouse(self):
 		qc = make_qc_warehouse()
 		item = make_quarantine_item(qc)

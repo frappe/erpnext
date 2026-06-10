@@ -29,5 +29,23 @@ frappe.ui.form.on("Quality Control Lot", {
 				frappe.set_route("Form", "Quality Inspection", frm.doc.quality_inspection);
 			});
 		}
+
+		const rejected_outstanding = flt(frm.doc.rejected_qty) - flt(frm.doc.returned_qty);
+		if (
+			rejected_outstanding > 0 &&
+			["Purchase Receipt", "Purchase Invoice"].includes(frm.doc.source_document_type)
+		) {
+			frm.add_custom_button(__("Create Purchase Return"), () => {
+				frappe.call({
+					method: "erpnext.stock.services.quality_quarantine.make_purchase_return_for_lot",
+					args: { lot_name: frm.doc.name },
+					freeze: true,
+					callback: (r) => {
+						const doc = frappe.model.sync(r.message)[0];
+						frappe.set_route("Form", doc.doctype, doc.name);
+					},
+				});
+			});
+		}
 	},
 });
