@@ -33,6 +33,7 @@ class QualityInspectionReadingBundle(Document):
 		amended_from: DF.Link | None
 		entries: DF.Table[QualityInspectionReadingEntry]
 		item_code: DF.Link
+		quality_inspection: DF.Link | None
 		quality_inspection_template: DF.Link | None
 		quantity: DF.Int
 		rejected_qty: DF.Int

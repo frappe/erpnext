@@ -93,6 +93,8 @@ class QualityInspection(Document):
 						reading.update(d)
 						reading.status = "Accepted"
 
+		self.validate_reading_bundle_is_free()
+
 		if self.readings:
 			self.validate_reading_number_format()
 			self.inspect_and_set_status()
@@ -161,6 +163,37 @@ class QualityInspection(Document):
 			self.inspection_basis = get_inspection_basis(self.item_code, self.reference_type)
 		else:
 			self.inspection_basis = "Sample"
+
+	def validate_reading_bundle_is_free(self):
+		"""A reading bundle belongs to exactly one inspection."""
+		if not self.reading_bundle:
+			return
+
+		owner = frappe.db.get_value(
+			"Quality Inspection Reading Bundle", self.reading_bundle, "quality_inspection"
+		)
+		if owner and owner != self.name:
+			frappe.throw(
+				_("Reading Bundle {0} already belongs to Quality Inspection {1}.").format(
+					frappe.bold(self.reading_bundle), get_link_to_form("Quality Inspection", owner)
+				),
+				title=_("Reading Bundle In Use"),
+			)
+
+	def sync_reading_bundle_link(self):
+		"""Stamp the bundle with this inspection; release a bundle that was swapped out."""
+		before = self.get_doc_before_save()
+		previous_bundle = before.reading_bundle if before else None
+
+		if previous_bundle and previous_bundle != self.reading_bundle:
+			frappe.db.set_value(
+				"Quality Inspection Reading Bundle", previous_bundle, "quality_inspection", None
+			)
+
+		if self.reading_bundle:
+			frappe.db.set_value(
+				"Quality Inspection Reading Bundle", self.reading_bundle, "quality_inspection", self.name
+			)
 
 	def set_status_from_reading_bundle(self):
 		"""With per-unit readings, the verdict follows the bundle's unit counts."""
@@ -251,6 +284,7 @@ class QualityInspection(Document):
 
 	def on_update(self):
 		self.update_qc_reference()
+		self.sync_reading_bundle_link()
 
 	def on_submit(self):
 		self.update_qc_reference()
@@ -262,6 +296,10 @@ class QualityInspection(Document):
 
 	def on_trash(self):
 		self.update_qc_reference(remove_reference=True)
+		if self.reading_bundle:
+			frappe.db.set_value(
+				"Quality Inspection Reading Bundle", self.reading_bundle, "quality_inspection", None
+			)
 
 	def validate_readings_status_mandatory(self):
 		for reading in self.readings:

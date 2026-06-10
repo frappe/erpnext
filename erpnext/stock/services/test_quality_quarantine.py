@@ -283,8 +283,21 @@ class TestQualityQuarantine(ERPNextTestSuite):
 
 		# and accepted with a bundle covering every unit
 		bundle = make_bundle(2, {1: ["Accepted"], 2: ["Accepted"]}, item_code=item.name)
-		submit_inspection_for_lot(lot, reading_bundle=bundle.name)
+		inspection = submit_inspection_for_lot(lot, reading_bundle=bundle.name)
 		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "status"), "Released")
+
+		# the bundle is claimed by that inspection and cannot decide another one
+		self.assertEqual(
+			frappe.db.get_value("Quality Inspection Reading Bundle", bundle.name, "quality_inspection"),
+			inspection.name,
+		)
+		second_receipt = make_stock_entry(
+			item_code=item.name, qty=2, to_warehouse=store, purpose="Material Receipt", rate=100
+		)
+		second_lot = quality_control_lots_for(second_receipt.name)[0].name
+		self.assertRaises(
+			frappe.ValidationError, submit_inspection_for_lot, second_lot, reading_bundle=bundle.name
+		)
 
 	def test_inspection_rejection_keeps_stock_quarantined(self):
 		qc = make_qc_warehouse("_Test QC Reject WH")

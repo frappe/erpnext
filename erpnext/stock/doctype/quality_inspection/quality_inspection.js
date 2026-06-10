@@ -35,6 +35,17 @@ frappe.ui.form.on("Quality Inspection", {
 			};
 		});
 
+		// only unclaimed bundles of this inspection's item are selectable
+		frm.set_query("reading_bundle", function (doc) {
+			return {
+				filters: {
+					item_code: doc.item_code,
+					quality_inspection: ["is", "not set"],
+					docstatus: ["!=", 2],
+				},
+			};
+		});
+
 		// Serial No based on item_code
 		frm.set_query("serial_no", function () {
 			let filters = {};
@@ -65,6 +76,20 @@ frappe.ui.form.on("Quality Inspection", {
 		// Ignore cancellation of reference doctype on cancel all.
 		frm.ignore_doctypes_on_cancel_all = [frm.doc.reference_type, "Serial and Batch Bundle"];
 		frm.trigger("toggle_batch_and_serial_fields");
+
+		if (
+			frm.doc.docstatus === 0 &&
+			!frm.is_new() &&
+			frm.doc.inspection_basis === "Each Quantity" &&
+			!frm.doc.reading_bundle
+		) {
+			frm.add_custom_button(__("Create Reading Bundle"), () => {
+				frappe.new_doc("Quality Inspection Reading Bundle", {
+					item_code: frm.doc.item_code,
+					quality_inspection_template: frm.doc.quality_inspection_template,
+				});
+			});
+		}
 	},
 
 	toggle_batch_and_serial_fields(frm) {

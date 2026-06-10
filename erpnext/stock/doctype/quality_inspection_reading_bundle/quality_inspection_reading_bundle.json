@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "item_code",
+  "quality_inspection",
   "quality_inspection_template",
   "column_break_head",
   "quantity",
@@ -23,6 +24,15 @@
    "label": "Item",
    "options": "Item",
    "reqd": 1
+  },
+  {
+   "description": "Stamped by the Quality Inspection that uses this bundle; a claimed bundle cannot be selected on another inspection.",
+   "fieldname": "quality_inspection",
+   "fieldtype": "Link",
+   "label": "Quality Inspection",
+   "no_copy": 1,
+   "options": "Quality Inspection",
+   "read_only": 1
   },
   {
    "fieldname": "quality_inspection_template",
