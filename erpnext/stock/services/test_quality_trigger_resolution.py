@@ -184,6 +184,7 @@ def make_submitted_inspection(item_code):
 			"sample_size": 1,
 			"report_date": nowdate(),
 			"inspected_by": frappe.session.user,
+			"manual_inspection": 1,
 		}
 	)
 	qi.flags.ignore_links = True

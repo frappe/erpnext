@@ -220,15 +220,26 @@ class QualityInspection(Document):
 		"""The decision must rest on recorded readings.
 
 		Draft saves leave unrecorded rows untouched, so without this gate an
-		untouched row would pass on its default status. Manual rows, formula rows
-		and manual inspections are exempt.
+		untouched row would pass on its default status. Manual inspections and
+		manual rows are the inspector's explicit call and exempt; Each Quantity
+		inspections and bundle-decided ones carry their readings in the bundle.
 		"""
-		if self.manual_inspection or self.inspection_basis == "Each Quantity":
+		if self.manual_inspection or self.inspection_basis == "Each Quantity" or self.reading_bundle:
 			return
 
+		if not self.readings:
+			frappe.throw(
+				_(
+					"Add readings before submission, or check Manual Inspection to record a "
+					"verdict-style decision."
+				),
+				title=_("Readings Missing"),
+			)
+
 		for reading in self.readings:
-			if reading.manual_inspection or cint(reading.formula_based_criteria):
+			if reading.manual_inspection:
 				continue
+			# formula rows included: a formula with no readings has nothing to evaluate
 			if not self.has_recorded_reading(reading):
 				frappe.throw(
 					_("Row #{0}: Record a reading for {1} before submission.").format(

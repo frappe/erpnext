@@ -61,6 +61,21 @@ def submit_inspection_for_lot(lot_name, status="Accepted", reading_bundle=None, 
 			"reading_bundle": reading_bundle,
 		}
 	)
+	if not manual_inspection and not reading_bundle:
+		# submission demands recorded readings; one verdict-carrying row
+		if not frappe.db.exists("Quality Inspection Parameter", "_Test Lot Verdict"):
+			frappe.get_doc(
+				{"doctype": "Quality Inspection Parameter", "parameter": "_Test Lot Verdict"}
+			).insert(ignore_permissions=True)
+		inspection.append(
+			"readings",
+			{
+				"specification": "_Test Lot Verdict",
+				"numeric": 0,
+				"value": "OK",
+				"reading_value": "OK" if status == "Accepted" else "NOT OK",
+			},
+		)
 	inspection.insert(ignore_permissions=True)
 	inspection.submit()
 	return inspection
@@ -594,6 +609,50 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		bundle.reload()
 		self.assertEqual(bundle.docstatus, 2)
 		self.assertEqual(bundle.quality_inspection, inspection.name)
+
+	def test_sample_inspection_demands_recorded_readings(self):
+		qc = make_qc_warehouse("_Test QC Rubber Stamp WH")
+		item = make_quarantine_item(qc)
+		se = make_stock_entry(item_code=item, qty=1, to_warehouse=qc, purpose="Material Receipt", rate=100)
+		lot = quality_control_lots_for(se.name)[0].name
+
+		def build_inspection():
+			return frappe.get_doc(
+				{
+					"doctype": "Quality Inspection",
+					"inspection_type": "Incoming",
+					"reference_type": "Quality Control Lot",
+					"reference_name": lot,
+					"item_code": item,
+					"sample_size": 1,
+					"report_date": nowdate(),
+					"inspected_by": frappe.session.user,
+				}
+			)
+
+		# no readings, not manual: a rubber stamp — refused
+		empty = build_inspection()
+		empty.insert(ignore_permissions=True)
+		self.assertRaises(frappe.ValidationError, empty.submit)
+		empty.delete()
+
+		# a formula row without a recorded reading is no better
+		if not frappe.db.exists("Quality Inspection Parameter", "_Test Lot Verdict"):
+			frappe.get_doc(
+				{"doctype": "Quality Inspection Parameter", "parameter": "_Test Lot Verdict"}
+			).insert(ignore_permissions=True)
+		formula = build_inspection()
+		formula.append(
+			"readings",
+			{
+				"specification": "_Test Lot Verdict",
+				"numeric": 0,
+				"formula_based_criteria": 1,
+				"acceptance_formula": "reading_value == 'OK'",
+			},
+		)
+		formula.insert(ignore_permissions=True)
+		self.assertRaises(frappe.ValidationError, formula.submit)
 
 	def test_manual_inspection_overrides_each_quantity(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
