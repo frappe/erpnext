@@ -443,7 +443,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		const me = this;
 		if (
 			!this.frm.is_new() &&
-			(this.frm.doc.docstatus === 0 || this.frm.doc.__onload?.allow_to_make_qc_after_submission) &&
+			this.frm.doc.docstatus === 0 &&
 			frappe.model.can_create("Quality Inspection") &&
 			show_qc_button
 		) {
@@ -3048,18 +3048,11 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			freeze: true,
 			callback: function (r) {
 				if (r.message.length == 0) {
-					let type = inspection_type === "Incoming" ? "Purchase" : "Delivery";
-					let fieldname =
-						inspection_type === "Incoming"
-							? "Inspection Required before Purchase"
-							: "Inspection Required before Delivery";
-
 					frappe.msgprint({
 						title: __("Quality Inspection Not Configured"),
-						message: __(`Enable <b>{0}</b> on the Item master to proceed with {1} inspection.`, [
-							fieldname,
-							type,
-						]),
+						message: __(
+							"No Quality Trigger is configured for the items in this document. Add a Quality Trigger on the Item or its Item Group to require inspection."
+						),
 					});
 					return;
 				}

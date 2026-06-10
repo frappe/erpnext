@@ -681,34 +681,14 @@ def repost_required_for_queue(doc: StockController) -> bool:
 
 @frappe.whitelist()
 def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str | list[dict]):
-	from erpnext.stock.services.quality_inspection_service import INSPECTION_FIELDNAME_MAP
+	from erpnext.stock.services.quality_trigger_resolution import item_has_trigger_for_doctype
 
 	items = frappe.parse_json(items)
 
-	inspection_fieldname = INSPECTION_FIELDNAME_MAP.get(doctype)
-	if inspection_fieldname is None:
-		return items if doctype == "Stock Entry" else []
+	item_codes = {item.get("item_code") for item in items}
+	needing = {code for code in item_codes if code and item_has_trigger_for_doctype(code, doctype)}
 
-	allow_after_transaction = cint(docstatus) == 1 and frappe.get_single_value(
-		"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"
-	)
-
-	if allow_after_transaction:
-		return items
-
-	item_codes = list({item.get("item_code") for item in items})
-
-	Item = frappe.qb.DocType("Item")
-	results = (
-		frappe.qb.from_(Item)
-		.select(Item.name)
-		.where((Item.name.isin(item_codes)) & (Item[inspection_fieldname] == 1))
-		.run(as_dict=True)
-	)
-
-	inspection_required_items = {row.name for row in results}
-
-	return [item for item in items if item.get("item_code") in inspection_required_items]
+	return [item for item in items if item.get("item_code") in needing]
 
 
 @frappe.whitelist(methods=["POST"])

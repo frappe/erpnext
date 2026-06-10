@@ -83,6 +83,16 @@ def _ordered_triggers(item_code):
 	return rows
 
 
+def item_has_trigger_for_doctype(item_code, document_type):
+	"""Whether an item (or its Item Group ancestors) has any trigger for a doctype.
+
+	Used to offer the "Make Quality Inspection" button. Looser than full
+	resolution (it ignores warehouse / role / party specifics) on purpose — the
+	precise gate is applied at submission.
+	"""
+	return any(trigger.document_type == document_type for trigger in _ordered_triggers(item_code))
+
+
 def _is_internal_transfer(doc):
 	return bool(doc.get("is_internal_supplier") or doc.get("is_internal_customer"))
 
