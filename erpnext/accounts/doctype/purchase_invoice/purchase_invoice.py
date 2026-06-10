@@ -306,6 +306,13 @@ class PurchaseInvoice(BuyingController):
 		PurchaseTaxWithholding(self).on_validate()
 		self.set_percentage_received()
 
+		if (
+			self.docstatus == 0
+			and self.company
+			and frappe.get_cached_value("Accounts Settings", None, "preview_mode")
+		):
+			self.check_prev_docstatus()
+
 	def set_percentage_received(self):
 		total_billed_qty = 0.0
 		total_received_qty = 0.0

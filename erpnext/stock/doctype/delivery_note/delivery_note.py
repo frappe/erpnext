@@ -298,6 +298,17 @@ class DeliveryNote(SellingController):
 		self.validate_against_stock_reservation_entries()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 
+		if (
+			self.docstatus == 0
+			and self.company
+			and frappe.get_cached_value("Accounts Settings", None, "preview_mode")
+		):
+			try:
+				self.check_credit_limit(preview=True)
+			except frappe.ValidationError as e:
+				frappe.msgprint(str(e), title=_("Credit Limit Warning"), indicator="orange")
+			self.warn_packed_qty()
+
 	def validate_with_previous_doc(self):
 		super().validate_with_previous_doc(
 			{
@@ -566,7 +577,10 @@ class DeliveryNote(SellingController):
 					)
 					frappe.throw(msg, title=_("Stock Reservation Warehouse Mismatch"))
 
-	def check_credit_limit(self):
+	def check_credit_limit(self, preview: bool = False):
+		if self.is_return:
+			return
+
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
 
 		if self.per_billed == 100:
@@ -589,15 +603,27 @@ class DeliveryNote(SellingController):
 					extra_amount = self.base_grand_total
 					break
 		else:
-			for d in self.get("items"):
-				if not (d.against_sales_order or d.against_sales_invoice):
-					validate_against_credit_limit = True
-					break
+			unlinked = [
+				d for d in self.get("items") if not (d.against_sales_order or d.against_sales_invoice)
+			]
+			if unlinked and preview:
+				if flt(self.base_net_total):
+					unlinked_net = sum(flt(d.base_amount) for d in unlinked)
+					extra_amount = (unlinked_net / flt(self.base_net_total)) * flt(self.base_grand_total)
+					validate_against_credit_limit = bool(extra_amount)
+			elif unlinked:
+				validate_against_credit_limit = True
 
 		if validate_against_credit_limit:
 			check_credit_limit(
 				self.customer, self.company, bypass_credit_limit_check_at_sales_order, extra_amount
 			)
+
+	def warn_packed_qty(self):
+		try:
+			self.validate_packed_qty()
+		except frappe.ValidationError as e:
+			frappe.msgprint(str(e), title=_("Pre-Submit Warning: Packed Qty"), indicator="orange")
 
 	def validate_packed_qty(self):
 		"""Validate that if packed qty exists, it should be equal to qty"""

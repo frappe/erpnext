@@ -250,6 +250,16 @@ class SalesOrder(SellingController):
 		if not self.get("is_subcontracted"):
 			SalesOrderStockReservation(self).enable_auto_reserve_stock()
 
+		if (
+			self.docstatus == 0
+			and self.company
+			and frappe.get_cached_value("Accounts Settings", None, "preview_mode")
+		):
+			try:
+				self.check_credit_limit(extra_amount=flt(self.base_grand_total))
+			except frappe.ValidationError as e:
+				frappe.msgprint(str(e), title=_("Credit Limit Warning"), indicator="orange")
+
 	def set_has_unit_price_items(self):
 		"""
 		If permitted in settings and any item has 0 qty, the SO has unit price items.
@@ -511,7 +521,7 @@ class SalesOrder(SellingController):
 			project.update_sales_amount()
 			project.db_update()
 
-	def check_credit_limit(self):
+	def check_credit_limit(self, extra_amount: float = 0):
 		# if bypass credit limit check is set to true (1) at sales order level,
 		# then we need not to check credit limit and vise versa
 		if not cint(
@@ -521,7 +531,7 @@ class SalesOrder(SellingController):
 				"bypass_credit_limit_check",
 			)
 		):
-			check_credit_limit(self.customer, self.company)
+			check_credit_limit(self.customer, self.company, extra_amount=extra_amount)
 
 	def check_nextdoc_docstatus(self):
 		linked_invoices = frappe.get_all(

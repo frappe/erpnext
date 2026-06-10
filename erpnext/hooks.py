@@ -340,14 +340,6 @@ period_closing_doctypes = [
 	"Subcontracting Receipt",
 ]
 
-pre_submit_validation_doctypes = [
-	"Sales Invoice",
-	"Purchase Invoice",
-	"Delivery Note",
-	"Purchase Receipt",
-	"Sales Order",
-]
-
 doc_events = {
 	"*": {
 		"validate": [
@@ -357,9 +349,6 @@ doc_events = {
 	},
 	tuple(period_closing_doctypes): {
 		"validate": "erpnext.accounts.doctype.accounting_period.accounting_period.validate_accounting_period_on_doc_save",
-	},
-	tuple(pre_submit_validation_doctypes): {
-		"validate": "erpnext.accounts.utils.pre_submit_validation",
 	},
 	"Stock Entry": {
 		"on_submit": "erpnext.stock.doctype.material_request.material_request.update_completed_and_requested_qty",

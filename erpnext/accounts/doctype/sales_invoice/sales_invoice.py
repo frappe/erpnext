@@ -379,6 +379,17 @@ class SalesInvoice(SellingController):
 		self.validate_subcontracted_sales_order()
 		self.validate_scio_self_rm_qty()
 
+		if (
+			self.docstatus == 0
+			and self.company
+			and frappe.get_cached_value("Accounts Settings", None, "preview_mode")
+		):
+			self.check_prev_docstatus()
+			try:
+				self.check_credit_limit(extra_amount=flt(self.base_grand_total))
+			except frappe.ValidationError as e:
+				frappe.msgprint(str(e), title=_("Credit Limit Warning"), indicator="orange")
+
 	def validate_update_stock_for_pick_list_reference(self):
 		if self.update_stock or self.is_return:
 			return
@@ -649,7 +660,10 @@ class SalesInvoice(SellingController):
 			}
 		)
 
-	def check_credit_limit(self):
+	def check_credit_limit(self, extra_amount: float = 0):
+		if self.is_return:
+			return
+
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
 
 		validate_against_credit_limit = False
@@ -667,7 +681,12 @@ class SalesInvoice(SellingController):
 				validate_against_credit_limit = True
 				break
 		if validate_against_credit_limit:
-			check_credit_limit(self.customer, self.company, bypass_credit_limit_check_at_sales_order)
+			check_credit_limit(
+				self.customer,
+				self.company,
+				bypass_credit_limit_check_at_sales_order,
+				extra_amount=extra_amount,
+			)
 
 	@frappe.whitelist()
 	def set_missing_values(self, for_validate: bool = False):
