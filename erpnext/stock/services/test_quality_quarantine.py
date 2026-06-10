@@ -843,10 +843,9 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		receipt = make_purchase_receipt(item_code=item, qty=4, warehouse=qc, rate=100)
 		lot = quality_control_lots_for(receipt.name, "Purchase Receipt")[0].name
 
-		# a return before any rejection would smuggle uninspected stock out
-		premature = make_return_doc("Purchase Receipt", receipt.name)
-		premature.save()
-		self.assertRaises(frappe.ValidationError, premature.submit)
+		# a return before any rejection has nothing to draw from quarantine —
+		# the mapping itself refuses
+		self.assertRaises(frappe.ValidationError, make_return_doc, "Purchase Receipt", receipt.name)
 
 		submit_inspection_for_lot(lot, status="Rejected")
 
@@ -930,6 +929,57 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertEqual(bundle.quality_inspection, inspection.name)
 		self.assertEqual(bundle.item_code, item)
 		self.assertEqual(bundle.quantity, 3)
+
+	def test_receipt_return_prefilled_with_rejected_details(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+		from erpnext.stock.doctype.quality_inspection_reading_bundle.test_quality_inspection_reading_bundle import (
+			make_bundle,
+		)
+
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
+		qc = make_qc_warehouse("_Test QC Prefill WH")
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "QCPF.#####"}
+		)
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Purchase Receipt",
+				warehouse_role=None,
+				quality_control_mode="Quarantine",
+				inspection_basis="Each Quantity",
+				applicable_warehouse=qc,
+			),
+		)
+		item.save()
+
+		receipt = make_purchase_receipt(item_code=item.name, qty=3, warehouse=qc, rate=100)
+		lot = quality_control_lots_for(receipt.name, "Purchase Receipt")[0].name
+		serials = frappe.get_all(
+			"Serial No", filters={"item_code": item.name, "warehouse": qc}, pluck="name", order_by="name"
+		)
+
+		bundle = make_bundle(
+			3,
+			{1: ["Accepted"], 2: ["Accepted"], 3: ["Rejected"]},
+			item_code=item.name,
+			unit_serials={1: serials[0], 2: serials[1], 3: serials[2]},
+		)
+		submit_inspection_for_lot(lot, reading_bundle=bundle.name)
+
+		# the receipt's own Create > Purchase Return arrives shaped around the
+		# verdict: only the rejected unit, identified by its serial
+		return_doc = make_return_doc("Purchase Receipt", receipt.name)
+		self.assertEqual(len(return_doc.items), 1)
+		self.assertEqual(return_doc.items[0].qty, -1)
+		self.assertEqual(return_doc.items[0].serial_no, serials[2])
+
+		return_doc.save()
+		return_doc.submit()
+		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "returned_qty"), 1)
+		self.assertNotEqual(frappe.db.get_value("Serial No", serials[2], "warehouse"), qc)
 
 	def test_purchase_return_created_from_the_lot(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt

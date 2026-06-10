@@ -348,6 +348,76 @@ def make_purchase_return_for_lot(lot_name: str):
 	return return_doc
 
 
+def trim_return_to_rejected_outstanding(return_doc):
+	"""Shape a purchase return around the quality verdicts.
+
+	Rows drawing from a Quality Control warehouse are trimmed to the rejected
+	quantity still awaiting return — with the lot's batch and the rejected
+	serials stamped — and dropped entirely when nothing awaits return there
+	(pending and accepted stock leaves quarantine through inspection, not
+	returns). Rows from normal warehouses are untouched.
+	"""
+	kept = []
+	touched = False
+	for row in return_doc.items:
+		warehouse = row.get("warehouse")
+		if not warehouse or not is_quality_warehouse(warehouse):
+			kept.append(row)
+			continue
+
+		touched = True
+		lots = frappe.get_all(
+			"Quality Control Lot",
+			filters={
+				"source_document_type": return_doc.get("return_against") and return_doc.doctype,
+				"source_document": return_doc.get("return_against"),
+				"item_code": row.item_code,
+				"quality_warehouse": warehouse,
+			},
+			fields=["name", "rejected_qty", "returned_qty"],
+		)
+		outstanding = sum(max(flt(lot.rejected_qty) - flt(lot.returned_qty), 0) for lot in lots)
+		if outstanding <= 0:
+			continue  # nothing awaits return from quarantine for this row
+
+		row.qty = -outstanding
+		if row.meta.has_field("received_qty"):
+			row.received_qty = -outstanding
+
+		row.serial_and_batch_bundle = None
+		row.batch_no = None
+		row.serial_no = None
+		if len(lots) == 1:
+			lot = frappe.get_doc("Quality Control Lot", lots[0].name)
+			tracking = stamp_tracking_on_outward_row(
+				{},
+				item_code=lot.item_code,
+				warehouse=warehouse,
+				qty=outstanding,
+				company=lot.company,
+				batch_no=lot.batch_no,
+				serial_nos=_rejected_serials_awaiting_return(lot, outstanding),
+				voucher_type=return_doc.doctype,
+			)
+			row.update(tracking)
+		kept.append(row)
+
+	if touched and not kept:
+		frappe.throw(
+			_(
+				"Nothing awaits return from quarantine: only rejected stock leaves with a purchase "
+				"return. Pending stock needs its inspection decision, and accepted stock leaves "
+				"with a Quality Control Release."
+			),
+			title=_("No Rejected Stock"),
+		)
+
+	if len(kept) != len(return_doc.items):
+		return_doc.set("items", kept)
+		for idx, row in enumerate(return_doc.items, start=1):
+			row.idx = idx
+
+
 def _rejected_serials_awaiting_return(lot, outstanding):
 	"""The rejected units' serials that are still in the Quality Control warehouse."""
 	if not lot.quality_inspection:

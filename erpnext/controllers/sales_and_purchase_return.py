@@ -753,6 +753,11 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 		set_missing_values,
 	)
 
+	if doctype in ("Purchase Receipt", "Purchase Invoice") and not return_against_rejected_qty:
+		from erpnext.stock.services.quality_quarantine import trim_return_to_rejected_outstanding
+
+		trim_return_to_rejected_outstanding(doclist)
+
 	return doclist
 
 
