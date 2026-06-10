@@ -51,6 +51,44 @@ class TestQualityTriggerResolution(ERPNextTestSuite):
 		si.update_stock = 1
 		self.assertEqual(next(movements_of(si))[1], OUTBOUND)
 
+	def test_returns_reverse_the_movement_direction(self):
+		# a customer return on a Delivery Note brings stock back in
+		dn_return = frappe._dict(
+			doctype="Delivery Note",
+			is_return=1,
+			items=[frappe._dict(item_code="X", warehouse=REAL_WH, qty=-1)],
+		)
+		self.assertEqual(next(movements_of(dn_return))[1], INBOUND)
+
+		# a purchase return sends stock back out
+		pr_return = frappe._dict(
+			doctype="Purchase Receipt",
+			is_return=1,
+			items=[frappe._dict(item_code="X", warehouse=REAL_WH, qty=-1)],
+		)
+		self.assertEqual(next(movements_of(pr_return))[1], OUTBOUND)
+
+	def test_inbound_trigger_matches_delivery_note_return(self):
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Delivery Note", warehouse_role="Inbound", quality_control_mode="Block"
+			),
+		)
+		item.save()
+
+		# the return (inbound) matches…
+		dn_return = frappe._dict(
+			doctype="Delivery Note",
+			is_return=1,
+			items=[frappe._dict(item_code=item.name, warehouse=REAL_WH, qty=-1, idx=1)],
+		)
+		self.assertEqual(len(resolve_inspection_points(dn_return)), 1)
+
+		# …while the normal delivery (outbound) does not
+		self.assertEqual(resolve_inspection_points(dn_doc(item.name, docstatus=0)), [])
+
 	def test_transit_warehouse_legs_are_skipped(self):
 		transit = make_warehouse("_Test Transit WH", warehouse_type="Transit")
 

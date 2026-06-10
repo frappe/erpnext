@@ -13,7 +13,10 @@ PARTY_DOCTYPES = ("Purchase Receipt", "Purchase Invoice", "Delivery Note", "Sale
 # (and, for Stock Entry, a given purpose). A pure receipt is inbound-only, a pure
 # issue is outbound-only, and transfer/manufacture-style movements expose both.
 _INBOUND_ONLY = {"Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt", "Job Card"}
-_OUTBOUND_ONLY = {"Delivery Note", "Sales Invoice"}
+# Delivery Note / Sales Invoice are outbound for normal documents but inbound for
+# returns (a customer return brings stock back in), so both roles are valid:
+# Outbound inspects the delivery, Inbound inspects the return.
+_RETURNABLE_OUTBOUND = {"Delivery Note", "Sales Invoice"}
 _BOTH = {"Inbound", "Outbound"}
 _STOCK_ENTRY_ROLES = {
 	"Material Receipt": {"Inbound"},
@@ -31,8 +34,8 @@ def allowed_warehouse_roles(document_type: str, stock_entry_purpose: str | None 
 	"""Warehouse roles valid for a document type / Stock Entry purpose."""
 	if document_type in _INBOUND_ONLY:
 		return {"Inbound"}
-	if document_type in _OUTBOUND_ONLY:
-		return {"Outbound"}
+	if document_type in _RETURNABLE_OUTBOUND:
+		return set(_BOTH)
 	if document_type == "Stock Entry":
 		if not stock_entry_purpose:
 			return set(_BOTH)

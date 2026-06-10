@@ -72,8 +72,8 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.document_type=='Stock Entry'",
-   "description": "Inbound = stock entering a warehouse (target); Outbound = stock leaving (source). Auto-set for document types that allow only one direction; shown for Stock Entry, where the movement can be inbound or outbound.",
+   "depends_on": "eval:['Stock Entry','Delivery Note','Sales Invoice'].includes(doc.document_type)",
+   "description": "Inbound = stock entering a warehouse (target); Outbound = stock leaving (source). Auto-set for document types that allow only one direction. For Delivery Note and Sales Invoice, Outbound inspects the delivery while Inbound inspects the customer return.",
    "fieldname": "warehouse_role",
    "fieldtype": "Select",
    "in_list_view": 1,

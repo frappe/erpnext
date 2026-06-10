@@ -50,8 +50,9 @@ class StockController(AccountsController):
 			for table_name in ["items", "packed_items", "supplied_items"]:
 				sbb.validate_duplicate_serial_and_batch_bundle(table_name)
 
-		if not self.get("is_return"):
-			self.validate_inspection()
+		# returns are inspectable too: a sales return brings stock back in and can
+		# carry its own (Inbound) quality triggers
+		self.validate_inspection()
 
 		sbb.validate_warehouse_of_sabb()
 		sbb.validate_serialized_batch()

@@ -22,34 +22,44 @@ INBOUND = "Inbound"
 OUTBOUND = "Outbound"
 
 
+def _reverse(role):
+	return INBOUND if role == OUTBOUND else OUTBOUND
+
+
 def movements_of(doc):
 	"""Yield (row, role, warehouse) for each directional stock movement on a doc.
 
-	Sales/Purchase Invoices only move stock when update_stock is set.
+	Sales/Purchase Invoices only move stock when update_stock is set. A return
+	reverses the stock direction: a sales (Delivery Note / Sales Invoice) return
+	brings stock back in, a purchase return sends it back out.
 	"""
 	doctype = doc.doctype
+	inbound_natural = doctype in ("Purchase Receipt", "Subcontracting Receipt", "Purchase Invoice")
+	role = INBOUND if inbound_natural else OUTBOUND
+	if doc.get("is_return"):
+		role = _reverse(role)
 
 	if doctype in ("Purchase Receipt", "Subcontracting Receipt"):
 		for row in doc.get("items") or []:
 			if row.get("warehouse"):
-				yield row, INBOUND, row.warehouse
+				yield row, role, row.warehouse
 
 	elif doctype == "Purchase Invoice":
 		if doc.get("update_stock"):
 			for row in doc.get("items") or []:
 				if row.get("warehouse"):
-					yield row, INBOUND, row.warehouse
+					yield row, role, row.warehouse
 
 	elif doctype == "Delivery Note":
 		for row in doc.get("items") or []:
 			if row.get("warehouse"):
-				yield row, OUTBOUND, row.warehouse
+				yield row, role, row.warehouse
 
 	elif doctype == "Sales Invoice":
 		if doc.get("update_stock"):
 			for row in doc.get("items") or []:
 				if row.get("warehouse"):
-					yield row, OUTBOUND, row.warehouse
+					yield row, role, row.warehouse
 
 	elif doctype == "Stock Entry":
 		# In-transit transfers move stock through a dummy Transit warehouse, which
