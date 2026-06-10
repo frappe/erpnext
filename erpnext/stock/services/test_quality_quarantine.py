@@ -1149,6 +1149,105 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		issue.save()
 		issue.submit()
 
+	def test_serial_and_batch_must_agree(self):
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "QCSB.#####",
+				"has_batch_no": 1,
+				"batch_number_series": "QCSBB.#####",
+			}
+		)
+
+		def receive_batch(batch_id):
+			batch = frappe.get_doc({"doctype": "Batch", "item": item.name, "batch_id": batch_id}).insert(
+				ignore_permissions=True
+			)
+			receipt = make_stock_entry(
+				item_code=item.name,
+				qty=1,
+				to_warehouse=REAL_WH,
+				purpose="Material Receipt",
+				rate=100,
+				batch_no=batch.name,
+				use_serial_batch_fields=1,
+			)
+			serial = frappe.get_all(
+				"Serial No",
+				filters={"item_code": item.name, "batch_no": batch.name},
+				pluck="name",
+			)[0]
+			return batch.name, serial, receipt
+
+		batch_one, serial_one, receipt_one = receive_batch("_Test QC Agree One")
+		batch_two, serial_two, _ = receive_batch("_Test QC Agree Two")
+
+		# naming batch one while sampling a serial of batch two is incoherent
+		disagreeing = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Incoming",
+				"reference_type": "Stock Entry",
+				"reference_name": receipt_one.name,
+				"item_code": item.name,
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+				"manual_inspection": 1,
+				"status": "Accepted",
+				"batch_no": batch_one,
+				"serial_no": serial_two,
+			}
+		)
+		self.assertRaises(frappe.ValidationError, disagreeing.insert)
+
+	def test_inward_block_inspection_accepts_typed_serials(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
+		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Purchase Receipt",
+				warehouse_role=None,
+				quality_control_mode="Block",
+			),
+		)
+		item.save()
+
+		# serials typed on the draft row do not exist yet — they are created at
+		# the receipt's submission, which Block holds until the inspection exists
+		receipt = make_purchase_receipt(
+			item_code=item.name, qty=2, warehouse=REAL_WH, rate=100, do_not_submit=True
+		)
+		receipt.items[0].serial_no = "QC-TYPED-001\nQC-TYPED-002"
+		receipt.items[0].use_serial_batch_fields = 1
+		receipt.save()
+
+		inspection = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Incoming",
+				"reference_type": "Purchase Receipt",
+				"reference_name": receipt.name,
+				"item_code": item.name,
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+				"manual_inspection": 1,
+				"status": "Accepted",
+				"serial_no": "QC-TYPED-001\nQC-TYPED-002",
+			}
+		)
+		inspection.insert(ignore_permissions=True)
+		inspection.submit()
+
+		receipt.reload()
+		receipt.submit()
+		self.assertEqual(frappe.db.get_value("Serial No", "QC-TYPED-001", "warehouse"), REAL_WH)
+
 	def test_receipt_inspection_serials_must_match_the_receipt(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 

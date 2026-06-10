@@ -106,8 +106,8 @@ class QualityInspection(Document):
 			self.set_status_from_reading_bundle()
 
 		self.validate_inspection_required()
-		self.validate_serial_nos()
 		self.set_child_row_reference()
+		self.validate_serial_nos()
 		self.set_company()
 		self.warn_unrecorded_readings()
 
@@ -236,19 +236,46 @@ class QualityInspection(Document):
 			return
 
 		serial_nos = get_serial_nos(self.serial_no)
+		incoming = self._referenced_row_typed_serials()
 		for serial in serial_nos:
-			item_code = frappe.db.get_value("Serial No", serial, "item_code")
-			if not item_code:
+			info = frappe.db.get_value("Serial No", serial, ["item_code", "batch_no"], as_dict=True)
+			if not info:
+				if serial in incoming:
+					# inward documents create their serials at submission; a serial
+					# typed on the row under inspection is legitimate before then
+					continue
 				frappe.throw(_("Serial No {0} does not exist.").format(frappe.bold(serial)))
-			if item_code != self.item_code:
+			if info.item_code != self.item_code:
 				frappe.throw(
 					_("Serial No {0} belongs to item {1}, not {2}.").format(
-						frappe.bold(serial), frappe.bold(item_code), frappe.bold(self.item_code)
+						frappe.bold(serial), frappe.bold(info.item_code), frappe.bold(self.item_code)
 					)
+				)
+			# both-tracked items: the serial's own batch is the truth the named
+			# batch must agree with
+			if self.batch_no and info.batch_no and info.batch_no != self.batch_no:
+				frappe.throw(
+					_("Serial No {0} belongs to batch {1}, not {2}.").format(
+						frappe.bold(serial), frappe.bold(info.batch_no), frappe.bold(self.batch_no)
+					),
+					title=_("Serial and Batch Disagree"),
 				)
 
 		if serial_nos:
 			self.sample_size = len(serial_nos)
+
+	def _referenced_row_typed_serials(self):
+		"""Serials typed on the referenced row — acceptable before they exist."""
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+		if not self.child_row_reference or self.reference_type == "Quality Control Lot":
+			return set()
+
+		child_doctype = (
+			"Stock Entry Detail" if self.reference_type == "Stock Entry" else self.reference_type + " Item"
+		)
+		typed = frappe.db.get_value(child_doctype, self.child_row_reference, "serial_no")
+		return set(get_serial_nos(typed or ""))
 
 	def validate_inspection_required(self):
 		# Obsolete under the Item Quality Trigger model: Quality Inspection requirement is governed
