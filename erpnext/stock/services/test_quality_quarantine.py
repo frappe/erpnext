@@ -484,6 +484,47 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		return_doc.cancel()
 		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "returned_qty"), 0)
 
+	def test_each_quantity_inspection_sheds_lurking_readings(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+
+		qc = make_qc_warehouse("_Test QC Lurking WH")
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry",
+				warehouse_role="Inbound",
+				quality_control_mode="Quarantine",
+				inspection_basis="Each Quantity",
+				applicable_warehouse=qc,
+			),
+		)
+		item.save()
+		se = make_stock_entry(
+			item_code=item.name, qty=1, to_warehouse=qc, purpose="Material Receipt", rate=100
+		)
+		lot = quality_control_lots_for(se.name)[0].name
+
+		inspection = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Incoming",
+				"reference_type": "Quality Control Lot",
+				"reference_name": lot,
+				"item_code": item.name,
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+				# a row lurking from an earlier template fetch — invisible on the
+				# form, it must not block submission
+				"readings": [{"specification": "_Test Lurking Parameter", "numeric": 0, "value": "Yes"}],
+			}
+		)
+		frappe.get_doc(
+			{"doctype": "Quality Inspection Parameter", "parameter": "_Test Lurking Parameter"}
+		).insert(ignore_permissions=True, ignore_if_duplicate=True)
+		inspection.insert(ignore_permissions=True)
+		self.assertEqual(inspection.readings, [])
+
 	def test_reading_bundle_born_from_inspection(self):
 		from erpnext.stock.doctype.quality_inspection.quality_inspection import make_reading_bundle
 

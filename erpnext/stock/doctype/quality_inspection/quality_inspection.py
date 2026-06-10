@@ -78,7 +78,11 @@ class QualityInspection(Document):
 	def validate(self):
 		self.set_inspection_basis_from_lot()
 
-		if self.inspection_basis != "Each Quantity" and not self.readings and self.item_code:
+		if self.inspection_basis == "Each Quantity":
+			# per-unit readings live in the reading bundle; rows lurking in the
+			# hidden readings table would invisibly block submission
+			self.set("readings", [])
+		elif not self.readings and self.item_code:
 			self.get_item_specification_details()
 
 		if (
@@ -219,7 +223,7 @@ class QualityInspection(Document):
 		untouched row would pass on its default status. Manual rows, formula rows
 		and manual inspections are exempt.
 		"""
-		if self.manual_inspection:
+		if self.manual_inspection or self.inspection_basis == "Each Quantity":
 			return
 
 		for reading in self.readings:
