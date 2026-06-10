@@ -1434,6 +1434,80 @@ class TestStockAgeing(ERPNextTestSuite):
 			item_result["fifo_queue"], [[batch_no.upper(), 1, 5.0, getdate(add_days(base_date, -2)), 50.0]]
 		)
 
+	def test_legacy_batch_no_sle_with_streaming_cursor(self):
+		"""SLEs carrying the legacy batch_no field must not trigger nested
+		queries while entries stream through an unbuffered cursor."""
+		from unittest.mock import patch
+
+		from frappe.utils import add_days, nowdate
+
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+			get_batch_from_bundle,
+		)
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		suffix = frappe.generate_hash(length=8).upper()
+		item_code = make_item(
+			f"Test Stock Ageing Legacy Batch {suffix}",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": f"SA-LEG-{suffix}-.###",
+				"valuation_method": "FIFO",
+			},
+		).name
+		warehouse = "_Test Warehouse - _TC"
+		base_date = nowdate()
+
+		reco = create_stock_reconciliation(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=10,
+			rate=10,
+			posting_date=add_days(base_date, -2),
+			posting_time="10:00:00",
+		)
+		batch_no = get_batch_from_bundle(reco.items[0].serial_and_batch_bundle)
+		frappe.db.set_value("Batch", batch_no, "use_batchwise_valuation", 1)
+
+		create_stock_reconciliation(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=5,
+			rate=10,
+			batch_no=batch_no,
+			posting_date=add_days(base_date, -1),
+			posting_time="10:00:00",
+		)
+
+		# mimic pre-bundle data where SLEs carry batch_no directly
+		frappe.db.set_value(
+			"Stock Ledger Entry",
+			{"item_code": item_code},
+			"batch_no",
+			batch_no,
+		)
+
+		filters = frappe._dict(
+			company="_Test Company",
+			to_date=base_date,
+			ranges=["30", "60", "90"],
+			item_code=item_code,
+		)
+		fifo_slots = FIFOSlots(filters)
+
+		# fetch row by row so the streaming result set is still active
+		# while each stock ledger entry is processed
+		with patch("frappe.database.database.SQL_ITERATOR_BATCH_SIZE", 1):
+			slots = fifo_slots.generate()
+
+		self.assertEqual(fifo_slots.batchwise_valuation_by_batch.get(batch_no), 1)
+		self.assertEqual(slots[item_code]["total_qty"], 5.0)
+
 
 def generate_item_and_item_wh_wise_slots(filters, sle):
 	"Return results with and without 'show_warehouse_wise_stock'"
