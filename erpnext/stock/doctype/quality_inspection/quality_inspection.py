@@ -176,6 +176,51 @@ class QualityInspection(Document):
 
 	def before_submit(self):
 		self.validate_readings_status_mandatory()
+		self.validate_reading_bundle_coverage()
+
+	def validate_reading_bundle_coverage(self):
+		"""An Each Quantity inspection's bundle must cover the stock it decides."""
+		if self.inspection_basis != "Each Quantity" or not self.reading_bundle:
+			return
+
+		bundle = frappe.db.get_value(
+			"Quality Inspection Reading Bundle",
+			self.reading_bundle,
+			["item_code", "quantity"],
+			as_dict=True,
+		)
+		if bundle.item_code != self.item_code:
+			frappe.throw(
+				_("Reading Bundle {0} is for item {1}, not {2}.").format(
+					frappe.bold(self.reading_bundle),
+					frappe.bold(bundle.item_code),
+					frappe.bold(self.item_code),
+				)
+			)
+
+		inspected_qty = self.get_qty_under_inspection()
+		if inspected_qty and flt(bundle.quantity) != flt(inspected_qty):
+			frappe.throw(
+				_(
+					"Reading Bundle {0} inspects {1} unit(s), but {2} are under inspection. Every "
+					"unit needs its own readings on an Each Quantity basis."
+				).format(frappe.bold(self.reading_bundle), bundle.quantity, inspected_qty),
+				title=_("Incomplete Per-Unit Readings"),
+			)
+
+	def get_qty_under_inspection(self):
+		if self.reference_type == "Quality Control Lot" and self.reference_name:
+			return frappe.db.get_value("Quality Control Lot", self.reference_name, "pending_qty")
+
+		if self.child_row_reference:
+			child_doctype = (
+				"Stock Entry Detail"
+				if self.reference_type == "Stock Entry"
+				else self.reference_type + " Item"
+			)
+			return frappe.db.get_value(child_doctype, self.child_row_reference, "qty")
+
+		return None
 
 	@frappe.whitelist()
 	def get_item_specification_details(self):

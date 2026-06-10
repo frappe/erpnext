@@ -27,6 +27,8 @@ def make_bundle(quantity, unit_results, item_code=None):
 				{
 					"unit_no": unit_no,
 					"specification": ensure_parameter(f"_Test Bundle Parameter {index}"),
+					# a manual observation: no acceptance criteria, so the given status holds
+					"reading_value": "observed",
 					"status": status,
 				},
 			)
@@ -50,6 +52,26 @@ class TestQualityInspectionReadingBundle(ERPNextTestSuite):
 
 	def test_unit_numbers_must_fit_the_quantity(self):
 		self.assertRaises(frappe.ValidationError, make_bundle, 2, {5: ["Accepted"]})
+
+	def test_submission_requires_every_unit_inspected(self):
+		# 3 declared units but only 2 with readings: not every quantity was inspected
+		self.assertRaises(frappe.ValidationError, make_bundle, 3, {1: ["Accepted"], 2: ["Accepted"]})
+
+	def test_submission_requires_a_reading_on_every_entry(self):
+		bundle = frappe.new_doc("Quality Inspection Reading Bundle")
+		bundle.item_code = make_item(properties={"is_stock_item": 1}).name
+		bundle.quantity = 1
+		# an untouched row would pass on its default status without anyone looking
+		bundle.append(
+			"entries",
+			{
+				"unit_no": 1,
+				"specification": ensure_parameter("_Test Bundle Parameter 0"),
+				"status": "Accepted",
+			},
+		)
+		bundle.insert(ignore_permissions=True)
+		self.assertRaises(frappe.ValidationError, bundle.submit)
 
 	def test_entry_status_derived_from_reading(self):
 		bundle = frappe.new_doc("Quality Inspection Reading Bundle")

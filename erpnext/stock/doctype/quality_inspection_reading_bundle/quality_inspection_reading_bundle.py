@@ -43,6 +43,35 @@ class QualityInspectionReadingBundle(Document):
 		self.evaluate_entry_statuses()
 		self.roll_up_unit_results()
 
+	def before_submit(self):
+		self.validate_completeness()
+
+	def validate_completeness(self):
+		"""An Each Quantity inspection means every unit was actually inspected.
+
+		On submission every declared unit must have readings, and every entry must
+		carry one — otherwise untouched rows would pass on their default status
+		without anyone having looked at the unit.
+		"""
+		inspected_units = {entry.unit_no for entry in self.entries}
+		missing_units = sorted(set(range(1, (self.quantity or 0) + 1)) - inspected_units)
+		if missing_units:
+			frappe.throw(
+				_("Unit(s) {0} have no readings. Every unit must be inspected before submission.").format(
+					frappe.bold(", ".join(map(str, missing_units)))
+				),
+				title=_("Units Not Inspected"),
+			)
+
+		for entry in self.entries:
+			if not (entry.reading_value or "").strip():
+				frappe.throw(
+					_("Row #{0}: Record a reading for unit {1} ({2}) before submission.").format(
+						entry.idx, entry.unit_no, entry.specification
+					),
+					title=_("Reading Missing"),
+				)
+
 	def on_cancel(self):
 		inspection = frappe.db.exists("Quality Inspection", {"reading_bundle": self.name, "docstatus": 1})
 		if inspection:

@@ -275,7 +275,13 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		# ...so an inspection without per-unit readings is refused
 		self.assertRaises(frappe.ValidationError, submit_inspection_for_lot, lot)
 
-		# and accepted with a bundle
+		# a bundle covering fewer units than are under inspection is refused too
+		short_bundle = make_bundle(1, {1: ["Accepted"]}, item_code=item.name)
+		self.assertRaises(
+			frappe.ValidationError, submit_inspection_for_lot, lot, reading_bundle=short_bundle.name
+		)
+
+		# and accepted with a bundle covering every unit
 		bundle = make_bundle(2, {1: ["Accepted"], 2: ["Accepted"]}, item_code=item.name)
 		submit_inspection_for_lot(lot, reading_bundle=bundle.name)
 		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "status"), "Released")
