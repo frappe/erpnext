@@ -86,6 +86,19 @@ class TestItemQualityTrigger(ERPNextTestSuite):
 		item.save()
 		self.assertFalse(item.quality_triggers[0].party_transaction_type)
 
+	def test_quality_control_release_cannot_be_a_trigger(self):
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry",
+				stock_entry_type="Quality Control Release",
+				warehouse_role="Inbound",
+				quality_control_mode="Block",
+			),
+		)
+		self.assertRaises(frappe.ValidationError, item.save)
+
 	def test_template_optional_except_for_each_quantity(self):
 		# a sample trigger without a template is a verdict-style inspection
 		item = make_item(properties={"is_stock_item": 1})

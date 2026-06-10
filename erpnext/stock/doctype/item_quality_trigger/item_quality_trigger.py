@@ -202,6 +202,16 @@ def _validate_trigger_row(row):
 		if row.stock_entry_type
 		else None
 	)
+
+	# a Quality Control Release is the outcome of an inspection — it is exempt
+	# from inspection processing and cannot trigger one
+	if stock_entry_purpose == "Quality Control Release":
+		frappe.throw(
+			_(
+				"Row #{0}: A Quality Control Release cannot trigger an inspection — it is the "
+				"outcome of one."
+			).format(row.idx)
+		)
 	allowed = allowed_warehouse_roles(row.document_type, stock_entry_purpose)
 	context = f" ({row.stock_entry_type})" if row.stock_entry_type else ""
 

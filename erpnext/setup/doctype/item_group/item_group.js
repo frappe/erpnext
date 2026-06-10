@@ -3,6 +3,12 @@
 
 frappe.ui.form.on("Item Group", {
 	onload: function (frm) {
+		frm.set_query("stock_entry_type", "quality_triggers", function () {
+			// a Quality Control Release is the outcome of an inspection, not a
+			// movement that can trigger one
+			return { filters: { purpose: ["!=", "Quality Control Release"] } };
+		});
+
 		frm.list_route = "Tree/Item Group";
 
 		//get query select item group
