@@ -36,7 +36,7 @@ frappe.ui.form.on("Quality Inspection", {
 		});
 
 		// Serial No based on item_code
-		frm.set_query("item_serial_no", function () {
+		frm.set_query("serial_no", function () {
 			let filters = {};
 			if (frm.doc.item_code) {
 				filters = {
@@ -64,9 +64,24 @@ frappe.ui.form.on("Quality Inspection", {
 	refresh: function (frm) {
 		// Ignore cancellation of reference doctype on cancel all.
 		frm.ignore_doctypes_on_cancel_all = [frm.doc.reference_type, "Serial and Batch Bundle"];
+		frm.trigger("toggle_batch_and_serial_fields");
+	},
+
+	toggle_batch_and_serial_fields(frm) {
+		// only show batch / serial for items that are actually tracked that way
+		if (!frm.doc.item_code) {
+			frm.toggle_display(["batch_no", "serial_no"], false);
+			return;
+		}
+
+		frappe.db.get_value("Item", frm.doc.item_code, ["has_batch_no", "has_serial_no"]).then((r) => {
+			frm.toggle_display("batch_no", cint(r.message?.has_batch_no));
+			frm.toggle_display("serial_no", cint(r.message?.has_serial_no));
+		});
 	},
 
 	item_code: function (frm) {
+		frm.trigger("toggle_batch_and_serial_fields");
 		if (frm.doc.item_code && !frm.doc.quality_inspection_template) {
 			return frm.call({
 				method: "get_quality_inspection_template",

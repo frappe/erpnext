@@ -1452,3 +1452,60 @@ $.extend(erpnext.stock.utils, {
 		});
 	},
 });
+
+erpnext.utils.add_quality_control_lot_buttons = function (frm) {
+	// On a submitted source document, surface the Quality Control Lots it
+	// quarantined so the inspection can be created right from here.
+	frappe.db
+		.get_list("Quality Control Lot", {
+			filters: {
+				source_document_type: frm.doc.doctype,
+				source_document: frm.doc.name,
+				status: ["in", ["Under Inspection", "Partially Released"]],
+			},
+			fields: [
+				"name",
+				"item_code",
+				"batch_no",
+				"pending_qty",
+				"inspection_template",
+				"inspection_basis",
+			],
+		})
+		.then((lots) => {
+			if (!lots || !lots.length) {
+				return;
+			}
+
+			if (lots.length === 1) {
+				const lot = lots[0];
+				frm.add_custom_button(
+					__("Quality Inspection"),
+					() => {
+						frappe.new_doc("Quality Inspection", {
+							inspection_type: "Incoming",
+							reference_type: "Quality Control Lot",
+							reference_name: lot.name,
+							item_code: lot.item_code,
+							batch_no: lot.batch_no,
+							sample_size: lot.pending_qty,
+							quality_inspection_template: lot.inspection_template,
+						});
+					},
+					__("Create")
+				);
+			} else {
+				frm.add_custom_button(
+					__("Quality Control Lots"),
+					() => {
+						frappe.route_options = {
+							source_document_type: frm.doc.doctype,
+							source_document: frm.doc.name,
+						};
+						frappe.set_route("List", "Quality Control Lot");
+					},
+					__("View")
+				);
+			}
+		});
+};

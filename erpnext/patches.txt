@@ -517,3 +517,4 @@ erpnext.patches.v16_0.remove_frappe_crm_custom_fields
 erpnext.patches.v16_0.create_quality_control_release_stock_entry_type
 erpnext.patches.v16_0.create_quality_warehouse_type
 erpnext.patches.v16_0.replace_is_rejected_warehouse_with_warehouse_type
+erpnext.patches.v16_0.rename_quality_inspection_item_serial_no

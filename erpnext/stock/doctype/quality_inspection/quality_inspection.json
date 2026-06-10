@@ -18,7 +18,7 @@
   "reference_name",
   "section_break_7",
   "item_code",
-  "item_serial_no",
+  "serial_no",
   "batch_no",
   "sample_size",
   "column_break1",
@@ -113,9 +113,9 @@
    "search_index": 1
   },
   {
-   "fieldname": "item_serial_no",
+   "fieldname": "serial_no",
    "fieldtype": "Link",
-   "label": "Item Serial No",
+   "label": "Serial No",
    "oldfieldname": "item_serial_no",
    "oldfieldtype": "Link",
    "options": "Serial No"
