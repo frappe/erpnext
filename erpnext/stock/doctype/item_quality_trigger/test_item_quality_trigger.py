@@ -86,6 +86,20 @@ class TestItemQualityTrigger(ERPNextTestSuite):
 		item.save()
 		self.assertFalse(item.quality_triggers[0].party_transaction_type)
 
+	def test_template_optional_except_for_each_quantity(self):
+		# a sample trigger without a template is a verdict-style inspection
+		item = make_item(properties={"is_stock_item": 1})
+		item.append("quality_triggers", trigger_row(inspection_template=None))
+		item.save()
+
+		# Each Quantity generates per-unit readings from the template — required
+		other = make_item(properties={"is_stock_item": 1})
+		other.append(
+			"quality_triggers",
+			trigger_row(inspection_template=None, inspection_basis="Each Quantity"),
+		)
+		self.assertRaises(frappe.ValidationError, other.save)
+
 	def test_overlapping_triggers_are_rejected(self):
 		item = make_item(properties={"is_stock_item": 1})
 		# two Purchase Receipt rows that can match the same receipt — whichever

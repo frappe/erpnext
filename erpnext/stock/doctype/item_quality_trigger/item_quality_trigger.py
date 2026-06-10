@@ -65,7 +65,7 @@ class ItemQualityTrigger(Document):
 			"Job Card",
 		]
 		inspection_basis: DF.Literal["Sample", "Each Quantity"]
-		inspection_template: DF.Link
+		inspection_template: DF.Link | None
 		job_card_inspection_point: DF.Literal["", "Every Job Card", "Final Output Only"]
 		parent: DF.Data
 		parentfield: DF.Data
@@ -143,6 +143,17 @@ def _validate_no_overlapping_rows(rows):
 
 
 def _validate_trigger_row(row):
+	# Without a template the inspection is verdict-style, which is fine for a
+	# sample — but Each Quantity generates its per-unit readings from the
+	# template's parameters, so it cannot do without one.
+	if row.inspection_basis == "Each Quantity" and not row.inspection_template:
+		frappe.throw(
+			_(
+				"Row #{0}: An Each Quantity trigger needs an Inspection Template — the per-unit "
+				"readings are generated from its parameters."
+			).format(row.idx)
+		)
+
 	# Periodic Re-test rows are interval-driven and always quarantine; none of the
 	# transaction dimensions (document type, direction, parties) apply to them.
 	if row.get("trigger_type") == "Periodic Re-test":

@@ -146,12 +146,13 @@
    "label": "Inspection"
   },
   {
+   "description": "Optional for Sample inspections: without a template the inspection is verdict-style (manual or ad-hoc readings). Each Quantity requires one, since the per-unit readings are generated from its parameters.",
    "fieldname": "inspection_template",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Inspection Template",
-   "options": "Quality Inspection Template",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.inspection_basis == 'Each Quantity'",
+   "options": "Quality Inspection Template"
   },
   {
    "depends_on": "eval:doc.trigger_type!='Periodic Re-test'",
