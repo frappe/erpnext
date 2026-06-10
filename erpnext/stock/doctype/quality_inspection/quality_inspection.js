@@ -82,6 +82,10 @@ frappe.ui.form.on("Quality Inspection", {
 			"Quality Inspection Reading Bundle",
 		];
 		frm.trigger("toggle_batch_and_serial_fields");
+		// this Frappe version's DocField schema drops only_select from the doctype
+		// JSON, so set it client-side: bundles are born from the Create Reading
+		// Bundle button (server-side), never from the link field
+		frm.set_df_property("reading_bundle", "only_select", 1);
 
 		if (
 			frm.doc.docstatus === 0 &&
