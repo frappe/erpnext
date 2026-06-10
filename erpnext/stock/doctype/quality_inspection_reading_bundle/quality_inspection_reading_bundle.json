@@ -23,7 +23,9 @@
    "in_list_view": 1,
    "label": "Item",
    "options": "Item",
-   "reqd": 1
+   "reqd": 1,
+   "fetch_from": "quality_inspection.item_code",
+   "read_only": 1
   },
   {
    "description": "The inspection this bundle was created from and belongs to; it cannot be selected on any other inspection.",
