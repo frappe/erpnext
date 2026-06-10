@@ -259,6 +259,7 @@
    "mandatory_depends_on": "eval:doc.inspection_basis == 'Each Quantity' && !doc.manual_inspection && !doc.__islocal",
    "read_only_depends_on": "eval:doc.__islocal",
    "no_copy": 1,
+   "only_select": 1,
    "options": "Quality Inspection Reading Bundle"
   },
   {
