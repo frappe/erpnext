@@ -108,6 +108,7 @@ class QualityInspection(Document):
 		self.validate_inspection_required()
 		self.set_child_row_reference()
 		self.set_company()
+		self.warn_unrecorded_readings()
 
 	def set_company(self):
 		if self.reference_type and self.reference_name:
@@ -215,6 +216,29 @@ class QualityInspection(Document):
 		self.validate_readings_status_mandatory()
 		self.validate_readings_recorded()
 		self.validate_reading_bundle_coverage()
+
+	def warn_unrecorded_readings(self):
+		"""A heads-up on save: drafts may be incomplete, but submission will not be.
+
+		Silent on creation — the dialog and the lot button create drafts with
+		empty readings by design — and a toast on subsequent saves.
+		"""
+		if self.docstatus != 0 or self.is_new():
+			return
+		if self.manual_inspection or self.inspection_basis == "Each Quantity" or self.reading_bundle:
+			return
+
+		unrecorded = [
+			reading
+			for reading in self.readings
+			if not reading.manual_inspection and not self.has_recorded_reading(reading)
+		]
+		if unrecorded:
+			frappe.msgprint(
+				_("{0} reading(s) not yet recorded — required before submission.").format(len(unrecorded)),
+				indicator="orange",
+				alert=True,
+			)
 
 	def validate_readings_recorded(self):
 		"""The decision must rest on recorded readings.
