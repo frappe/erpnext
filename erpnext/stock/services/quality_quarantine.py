@@ -56,6 +56,44 @@ def apply_quarantine_routing(doc):
 		)
 
 
+def validate_quality_warehouse_usage(doc):
+	"""A Quality Control warehouse only receives stock that requires quarantine.
+
+	Allowed inbound movements: those whose trigger resolves to Quarantine (the
+	routed flow, or a direct receipt of a quarantine-triggered item) and items
+	under a Periodic Re-test trigger (the scheduler's transfer). Anything else —
+	parking ordinary stock in quarantine — is refused: it would sit locked behind
+	the exit guard with no inspection path to release it.
+	"""
+	points = {(id(point.row), point.role): point for point in resolve_inspection_points(doc)}
+	retest_items = {}
+
+	for row, role, warehouse in movements_of(doc):
+		if role != INBOUND or not is_quality_warehouse(warehouse):
+			continue
+
+		point = points.get((id(row), INBOUND))
+		if point and point.quality_control_mode == "Quarantine":
+			continue
+
+		item_code = row.get("item_code")
+		if item_code not in retest_items:
+			from erpnext.stock.services.quality_retest import get_retest_trigger
+
+			retest_items[item_code] = bool(get_retest_trigger(item_code))
+		if retest_items[item_code]:
+			continue
+
+		frappe.throw(
+			_(
+				"Row #{0}: {1} is a Quality Control warehouse — it only receives stock that "
+				"requires quarantine. Item {2} has no Quarantine trigger for this movement; "
+				"receive it into a normal warehouse instead."
+			).format(row.idx, frappe.bold(warehouse), frappe.bold(item_code)),
+			title=_("Quality Control Warehouse"),
+		)
+
+
 def get_release_warehouse(quality_warehouse):
 	"""The store warehouse to release accepted stock into.
 

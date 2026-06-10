@@ -386,7 +386,10 @@ class StockController(AccountsController):
 		return qty_map
 
 	def validate_inspection(self):
-		from erpnext.stock.services.quality_quarantine import apply_quarantine_routing
+		from erpnext.stock.services.quality_quarantine import (
+			apply_quarantine_routing,
+			validate_quality_warehouse_usage,
+		)
 		from erpnext.stock.services.quality_trigger_resolution import enforce_inspection_points
 
 		# A Quality Control Release is itself the outcome of an inspection: routing
@@ -396,6 +399,7 @@ class StockController(AccountsController):
 			return
 
 		apply_quarantine_routing(self)
+		validate_quality_warehouse_usage(self)
 		enforce_inspection_points(self)
 
 	def update_blanket_order(self):

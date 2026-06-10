@@ -17,6 +17,25 @@ def make_qc_warehouse(name="_Test QC Mint WH"):
 	return make_warehouse(name, warehouse_type="Quality")
 
 
+def make_quarantine_item(qc_warehouse, document_type="Stock Entry"):
+	"""An item whose Quarantine trigger marks this Quality Control warehouse as
+	its quarantine destination, so receiving it there is a legitimate flow."""
+	from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+
+	item = make_item(properties={"is_stock_item": 1})
+	item.append(
+		"quality_triggers",
+		trigger_row(
+			document_type=document_type,
+			warehouse_role="Inbound" if document_type == "Stock Entry" else None,
+			quality_control_mode="Quarantine",
+			applicable_warehouse=qc_warehouse,
+		),
+	)
+	item.save()
+	return item.name
+
+
 def quality_control_lots_for(source_name, source_doctype="Stock Entry"):
 	return frappe.get_all(
 		"Quality Control Lot",
@@ -77,7 +96,7 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		from erpnext.stock.doctype.quality_inspection.quality_inspection import item_query
 
 		qc = make_qc_warehouse()
-		item = make_item(properties={"is_stock_item": 1}).name
+		item = make_quarantine_item(qc)
 		se = make_stock_entry(item_code=item, qty=7, to_warehouse=qc, purpose="Material Receipt", rate=100)
 
 		lots = quality_control_lots_for(se.name)
@@ -97,6 +116,22 @@ class TestQualityQuarantine(ERPNextTestSuite):
 			{"reference_doctype": "Quality Control Lot", "reference_name": lots[0].name},
 		)
 		self.assertEqual(result[0][0], item)
+
+	def test_quality_warehouse_refuses_unrelated_stock(self):
+		qc = make_qc_warehouse("_Test QC Strict WH")
+		plain_item = make_item(properties={"is_stock_item": 1}).name
+
+		# an item with no quarantine requirement cannot be parked in quarantine —
+		# it would sit locked with no inspection path to release it
+		self.assertRaises(
+			frappe.ValidationError,
+			make_stock_entry,
+			item_code=plain_item,
+			qty=1,
+			to_warehouse=qc,
+			purpose="Material Receipt",
+			rate=100,
+		)
 
 	def test_no_quality_control_lot_for_normal_warehouse(self):
 		item = make_item(properties={"is_stock_item": 1}).name
@@ -138,7 +173,7 @@ class TestQualityQuarantine(ERPNextTestSuite):
 	def test_quality_warehouse_exit_is_locked(self):
 		# dedicated Quality Control warehouse no store points at, so nothing auto-releases
 		qc = make_qc_warehouse("_Test QC Lock WH")
-		item = make_item(properties={"is_stock_item": 1}).name
+		item = make_quarantine_item(qc)
 		se = make_stock_entry(item_code=item, qty=5, to_warehouse=qc, purpose="Material Receipt", rate=100)
 		lot = quality_control_lots_for(se.name)[0].name
 
@@ -172,7 +207,7 @@ class TestQualityQuarantine(ERPNextTestSuite):
 
 	def test_cancellation_reversal_is_exempt_from_the_lock(self):
 		qc = make_qc_warehouse()
-		item = make_item(properties={"is_stock_item": 1}).name
+		item = make_quarantine_item(qc)
 		se = make_stock_entry(item_code=item, qty=3, to_warehouse=qc, purpose="Material Receipt", rate=100)
 		lot = quality_control_lots_for(se.name)[0].name
 
@@ -217,7 +252,7 @@ class TestQualityQuarantine(ERPNextTestSuite):
 
 		qc = make_qc_warehouse("_Test QC Split WH")
 		store = make_warehouse("_Test QC Split Store", quality_warehouse=qc)
-		item = make_item(properties={"is_stock_item": 1}).name
+		item = make_quarantine_item(qc)
 		se = make_stock_entry(item_code=item, qty=5, to_warehouse=qc, purpose="Material Receipt", rate=100)
 		lot = quality_control_lots_for(se.name)[0].name
 
@@ -305,7 +340,7 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		)
 
 		qc = make_qc_warehouse("_Test QC Cancel Bundle WH")
-		item = make_item(properties={"is_stock_item": 1}).name
+		item = make_quarantine_item(qc)
 		se = make_stock_entry(item_code=item, qty=2, to_warehouse=qc, purpose="Material Receipt", rate=100)
 		lot = quality_control_lots_for(se.name)[0].name
 
@@ -376,7 +411,7 @@ class TestQualityQuarantine(ERPNextTestSuite):
 
 	def test_inspection_rejection_keeps_stock_quarantined(self):
 		qc = make_qc_warehouse("_Test QC Reject WH")
-		item = make_item(properties={"is_stock_item": 1}).name
+		item = make_quarantine_item(qc)
 		se = make_stock_entry(item_code=item, qty=4, to_warehouse=qc, purpose="Material Receipt", rate=100)
 		lot = quality_control_lots_for(se.name)[0].name
 
@@ -390,7 +425,7 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
 		qc = make_qc_warehouse("_Test QC Return WH")
-		item = make_item(properties={"is_stock_item": 1}).name
+		item = make_quarantine_item(qc, "Purchase Receipt")
 		receipt = make_purchase_receipt(item_code=item, qty=4, warehouse=qc, rate=100)
 		lot = quality_control_lots_for(receipt.name, "Purchase Receipt")[0].name
 
@@ -414,7 +449,7 @@ class TestQualityQuarantine(ERPNextTestSuite):
 
 	def test_stock_reconciliation_blocked_on_quality_warehouse(self):
 		qc = make_qc_warehouse()
-		item = make_item(properties={"is_stock_item": 1}).name
+		item = make_quarantine_item(qc)
 
 		reconciliation = frappe.new_doc("Stock Reconciliation")
 		reconciliation.company = "_Test Company"
