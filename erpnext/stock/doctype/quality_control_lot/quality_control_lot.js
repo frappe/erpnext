@@ -33,7 +33,9 @@ frappe.ui.form.on("Quality Control Lot", {
 		const rejected_outstanding = flt(frm.doc.rejected_qty) - flt(frm.doc.returned_qty);
 		if (
 			rejected_outstanding > 0 &&
-			["Purchase Receipt", "Purchase Invoice"].includes(frm.doc.source_document_type)
+			["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"].includes(
+				frm.doc.source_document_type
+			)
 		) {
 			frm.add_custom_button(__("Create Purchase Return"), () => {
 				frappe.call({

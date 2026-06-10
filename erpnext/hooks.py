@@ -404,7 +404,7 @@ doc_events = {
 		],
 		"on_cancel": "erpnext.stock.services.quality_quarantine.handle_source_document_cancel",
 	},
-	("Purchase Receipt", "Purchase Invoice"): {
+	("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"): {
 		"before_submit": "erpnext.stock.services.quality_quarantine.update_lots_for_purchase_return",
 		"on_submit": "erpnext.stock.services.quality_quarantine.update_lots_for_purchase_return",
 		"on_cancel": "erpnext.stock.services.quality_quarantine.update_lots_for_purchase_return",

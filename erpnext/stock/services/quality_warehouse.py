@@ -56,7 +56,7 @@ def validate_quality_warehouse_exit(sle):
 	if voucher_type == "Stock Entry":
 		if frappe.db.get_value("Stock Entry", voucher_no, "purpose") == "Quality Control Release":
 			return
-	elif voucher_type in ("Purchase Receipt", "Purchase Invoice"):
+	elif voucher_type in ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"):
 		if frappe.db.get_value(voucher_type, voucher_no, "is_return"):
 			return
 

@@ -291,11 +291,11 @@ def make_purchase_return_for_lot(lot_name: str):
 
 	lot = frappe.get_doc("Quality Control Lot", lot_name)
 
-	if lot.source_document_type not in ("Purchase Receipt", "Purchase Invoice"):
+	if lot.source_document_type not in ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"):
 		frappe.throw(
 			_(
-				"A purchase return applies only to lots sourced from a Purchase Receipt or "
-				"Purchase Invoice. Lot {0} came from {1}."
+				"A purchase return applies only to lots sourced from a Purchase Receipt, Purchase "
+				"Invoice or Subcontracting Receipt. Lot {0} came from {1}."
 			).format(frappe.bold(lot.name), frappe.bold(lot.source_document_type))
 		)
 
@@ -636,7 +636,11 @@ def update_lots_for_purchase_return(doc, method=None):
 	which also stops returns from smuggling accepted or pending stock out of
 	quarantine. Cancelling the return books the allocation back.
 	"""
-	if doc.doctype not in ("Purchase Receipt", "Purchase Invoice") or not doc.get("is_return"):
+	if doc.doctype not in (
+		"Purchase Receipt",
+		"Purchase Invoice",
+		"Subcontracting Receipt",
+	) or not doc.get("is_return"):
 		return
 
 	for row, role, warehouse in movements_of(doc):
