@@ -4,6 +4,7 @@
 import frappe
 from frappe.utils import nowdate
 
+from erpnext.controllers.stock_controller import check_item_quality_inspection
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import (
 	create_test_item_group,
@@ -157,3 +158,24 @@ class TestInspectionEnforcement(ERPNextTestSuite):
 	def test_warn_does_not_block_submission(self):
 		item = self._item_with_outbound_trigger("Warn")
 		enforce_inspection_points(dn_doc(item))  # warns, but does not raise
+
+
+class TestMakeInspectionButton(ERPNextTestSuite):
+	def test_only_triggered_items_are_offered(self):
+		triggered = make_item(properties={"is_stock_item": 1})
+		triggered.append("quality_triggers", trigger_row())  # Purchase Receipt
+		triggered.save()
+		plain = make_item(properties={"is_stock_item": 1})
+
+		result = check_item_quality_inspection(
+			"Purchase Receipt", 0, [{"item_code": triggered.name}, {"item_code": plain.name}]
+		)
+		self.assertEqual({i["item_code"] for i in result}, {triggered.name})
+
+	def test_trigger_for_other_doctype_is_not_offered(self):
+		item = make_item(properties={"is_stock_item": 1})
+		item.append("quality_triggers", trigger_row())  # Purchase Receipt only
+		item.save()
+
+		# a Delivery Note should offer nothing for this item
+		self.assertEqual(check_item_quality_inspection("Delivery Note", 0, [{"item_code": item.name}]), [])
