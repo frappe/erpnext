@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe.utils import nowdate
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import (
@@ -11,6 +12,7 @@ from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import
 from erpnext.stock.services.quality_trigger_resolution import (
 	INBOUND,
 	OUTBOUND,
+	enforce_inspection_points,
 	movements_of,
 	resolve_inspection_points,
 )
@@ -95,3 +97,63 @@ class TestQualityTriggerResolution(ERPNextTestSuite):
 		self.assertEqual(resolve_inspection_points(pr_doc(item.name, warehouse="_Other - _TC")), [])
 		# movement into the applicable warehouse matches
 		self.assertEqual(len(resolve_inspection_points(pr_doc(item.name, warehouse=REAL_WH))), 1)
+
+
+def dn_doc(item_code, quality_inspection=None, docstatus=1):
+	# lightweight stand-in for a submitting Delivery Note
+	return frappe._dict(
+		doctype="Delivery Note",
+		docstatus=docstatus,
+		items=[
+			frappe._dict(
+				item_code=item_code,
+				warehouse=REAL_WH,
+				qty=1,
+				idx=1,
+				quality_inspection=quality_inspection,
+			)
+		],
+	)
+
+
+def make_submitted_inspection(item_code):
+	qi = frappe.get_doc(
+		{
+			"doctype": "Quality Inspection",
+			"inspection_type": "Outgoing",
+			"reference_type": "Delivery Note",
+			"reference_name": "_Test QC Reference",
+			"item_code": item_code,
+			"sample_size": 1,
+			"report_date": nowdate(),
+			"inspected_by": frappe.session.user,
+		}
+	)
+	qi.flags.ignore_links = True
+	qi.insert(ignore_permissions=True, ignore_links=True)
+	qi.submit()
+	return qi.name
+
+
+class TestInspectionEnforcement(ERPNextTestSuite):
+	def _item_with_outbound_trigger(self, qc_mode):
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(document_type="Delivery Note", qc_mode=qc_mode, warehouse_role="Outbound"),
+		)
+		item.save()
+		return item.name
+
+	def test_block_stops_submission_without_inspection(self):
+		item = self._item_with_outbound_trigger("Block")
+		self.assertRaises(frappe.ValidationError, enforce_inspection_points, dn_doc(item))
+
+	def test_block_allows_submission_with_submitted_inspection(self):
+		item = self._item_with_outbound_trigger("Block")
+		qi = make_submitted_inspection(item)
+		enforce_inspection_points(dn_doc(item, quality_inspection=qi))  # no exception
+
+	def test_warn_does_not_block_submission(self):
+		item = self._item_with_outbound_trigger("Warn")
+		enforce_inspection_points(dn_doc(item))  # warns, but does not raise
