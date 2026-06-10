@@ -183,6 +183,9 @@ class SalesInvoice(SellingController):
 		pos_profile: DF.Link | None
 		posting_date: DF.Date
 		posting_time: DF.Time | None
+		quality_status: DF.Literal[
+			"", "Under Inspection", "Partially Released", "Released", "Rejected", "Inspection Completed"
+		]
 		price_list_currency: DF.Link
 		pricing_rules: DF.Table[PricingRuleDetail]
 		project: DF.Link | None

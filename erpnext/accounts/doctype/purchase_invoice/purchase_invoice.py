@@ -151,6 +151,9 @@ class PurchaseInvoice(BuyingController):
 		plc_conversion_rate: DF.Float
 		posting_date: DF.Date
 		posting_time: DF.Time | None
+		quality_status: DF.Literal[
+			"", "Under Inspection", "Partially Released", "Released", "Rejected", "Inspection Completed"
+		]
 		price_list_currency: DF.Link | None
 		pricing_rules: DF.Table[PricingRuleDetail]
 		project: DF.Link | None

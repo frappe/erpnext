@@ -467,8 +467,10 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		lot = quality_control_lots_for(se.name)[0].name
 
 		se.cancel()  # reversal takes stock back out of the Quality Control warehouse — allowed
-		# the untouched lot is removed along with the reversed stock
+		# the untouched lot is removed along with the reversed stock, and the
+		# document sheds its quality status with it
 		self.assertFalse(frappe.db.exists("Quality Control Lot", lot))
+		self.assertFalse(frappe.db.get_value("Stock Entry", se.name, "quality_status"))
 
 	def test_inspection_acceptance_releases_quarantined_stock(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
@@ -596,8 +598,12 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		se = make_stock_entry(item_code=item, qty=5, to_warehouse=qc, purpose="Material Receipt", rate=100)
 		lot = quality_control_lots_for(se.name)[0].name
 
+		# the receipt wears the quarantine state
+		self.assertEqual(frappe.db.get_value("Stock Entry", se.name, "quality_status"), "Under Inspection")
+
 		# accept: the auto-release moves the stock to the store
 		inspection = submit_inspection_for_lot(lot)
+		self.assertEqual(frappe.db.get_value("Stock Entry", se.name, "quality_status"), "Released")
 		release = frappe.get_doc(
 			"Stock Entry", {"quality_control_lot": lot, "purpose": "Quality Control Release"}
 		)
@@ -616,9 +622,12 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertEqual(lot_state.pending_qty, 5)
 		self.assertEqual(lot_state.status, "Under Inspection")
 
+		self.assertEqual(frappe.db.get_value("Stock Entry", se.name, "quality_status"), "Under Inspection")
+
 		# reject: cancelling clears the booked rejection too
 		rejecting = submit_inspection_for_lot(lot, status="Rejected")
 		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "rejected_qty"), 5)
+		self.assertEqual(frappe.db.get_value("Stock Entry", se.name, "quality_status"), "Rejected")
 		rejecting.cancel()
 		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "rejected_qty"), 0)
 		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "status"), "Under Inspection")

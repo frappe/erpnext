@@ -367,6 +367,37 @@ def _rejected_serials_awaiting_return(lot, outstanding):
 	return still_held[: int(outstanding)] or None
 
 
+def sync_source_document_quality_status(source_doctype, source_name):
+	"""Aggregate a document's lot statuses onto its Quality Status field."""
+	if not source_doctype or not source_name:
+		return
+	if not frappe.get_meta(source_doctype).has_field("quality_status"):
+		return
+
+	statuses = set(
+		frappe.get_all(
+			"Quality Control Lot",
+			filters={"source_document_type": source_doctype, "source_document": source_name},
+			pluck="status",
+		)
+	)
+
+	if "Under Inspection" in statuses:
+		value = "Under Inspection"
+	elif "Partially Released" in statuses:
+		value = "Partially Released"
+	elif statuses == {"Released"}:
+		value = "Released"
+	elif statuses == {"Rejected"}:
+		value = "Rejected"
+	elif statuses:
+		value = "Inspection Completed"
+	else:
+		value = None
+
+	frappe.db.set_value(source_doctype, source_name, "quality_status", value, update_modified=False)
+
+
 def reverse_inspection_result(doc, method=None):
 	"""Cancelling the deciding inspection unwinds its consequences on the lot.
 

@@ -73,6 +73,9 @@ class SubcontractingReceipt(SubcontractingController):
 		per_returned: DF.Percent
 		posting_date: DF.Date
 		posting_time: DF.Time
+		quality_status: DF.Literal[
+			"", "Under Inspection", "Partially Released", "Released", "Rejected", "Inspection Completed"
+		]
 		project: DF.Link | None
 		range: DF.Data | None
 		rejected_warehouse: DF.Link | None

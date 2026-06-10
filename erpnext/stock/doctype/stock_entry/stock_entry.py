@@ -124,6 +124,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 		pick_list: DF.Link | None
 		posting_date: DF.Date | None
 		posting_time: DF.Time | None
+		quality_status: DF.Literal[
+			"", "Under Inspection", "Partially Released", "Released", "Rejected", "Inspection Completed"
+		]
 		process_loss_percentage: DF.Percent
 		process_loss_qty: DF.Float
 		quality_control_lot: DF.Link | None

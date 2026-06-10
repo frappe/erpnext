@@ -29,6 +29,7 @@
   "update_billed_amount_in_delivery_note",
   "is_debit_note",
   "apply_tds",
+  "quality_status",
   "amended_from",
   "is_created_using_pos",
   "pos_closing_entry",
@@ -2348,6 +2349,18 @@
    "label": "Title",
    "no_copy": 1,
    "print_hide": 1
+  },
+  {
+   "depends_on": "eval:doc.quality_status",
+   "description": "Aggregated from this document's Quality Control Lots.",
+   "fieldname": "quality_status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Quality Status",
+   "no_copy": 1,
+   "options": "\nUnder Inspection\nPartially Released\nReleased\nRejected\nInspection Completed",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,

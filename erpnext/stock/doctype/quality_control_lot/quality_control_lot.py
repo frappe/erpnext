@@ -32,6 +32,17 @@ class QualityControlLot(Document):
 		status: DF.Literal["Under Inspection", "Partially Released", "Released", "Rejected"]
 	# end: auto-generated types
 
+	def on_update(self):
+		self._sync_source_quality_status()
+
+	def after_delete(self):
+		self._sync_source_quality_status()
+
+	def _sync_source_quality_status(self):
+		from erpnext.stock.services.quality_quarantine import sync_source_document_quality_status
+
+		sync_source_document_quality_status(self.source_document_type, self.source_document)
+
 	def validate(self):
 		self.set_pending_qty_and_status()
 

@@ -154,6 +154,7 @@
   "column_break_131",
   "remarks",
   "range",
+  "quality_status",
   "amended_from",
   "other_details",
   "connections_tab"
@@ -1287,6 +1288,18 @@
   {
    "fieldname": "column_break_ugyv",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.quality_status",
+   "description": "Aggregated from this document's Quality Control Lots.",
+   "fieldname": "quality_status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Quality Status",
+   "no_copy": 1,
+   "options": "\nUnder Inspection\nPartially Released\nReleased\nRejected\nInspection Completed",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
