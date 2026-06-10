@@ -37,6 +37,42 @@ class ProductBundle(Document):
 
 		validate_uom_is_integer(self, "uom", "qty")
 
+<<<<<<< HEAD
+=======
+	def on_submit(self):
+		self.make_active()
+
+	def on_cancel(self):
+		self.db_set("is_active", 0)
+
+	def on_update_after_submit(self):
+		# `is_active` and `disabled` are the only fields editable after submit; keep a
+		# single active version per parent item in sync when the user (re)activates a
+		# version. `disabled` is orthogonal: it parks a version without ceding the
+		# active slot, so re-enabling restores it without re-activation.
+		if self.is_active:
+			self.make_active()
+
+	def make_active(self):
+		"""Mark this version active and deactivate every other submitted version
+		of the same parent item."""
+		if not self.is_active:
+			self.db_set("is_active", 1)
+
+		others = frappe.get_all(
+			"Product Bundle",
+			filters={
+				"new_item_code": self.new_item_code,
+				"is_active": 1,
+				"docstatus": 1,
+				"name": ("!=", self.name),
+			},
+			pluck="name",
+		)
+		for name in others:
+			frappe.db.set_value("Product Bundle", name, "is_active", 0)
+
+>>>>>>> cf37478870 (feat(selling): allow disabling a Product Bundle)
 	def on_trash(self):
 		linked_doctypes = [
 			"Delivery Note",
@@ -99,6 +135,80 @@ class ProductBundle(Document):
 				)
 
 
+<<<<<<< HEAD
+=======
+def build_bundle_name(item_code: str, index: int) -> str:
+	"""Build a ``PB-<item>-NNN`` name, truncating the item part to stay within 140 chars."""
+	suffix = "%.3i" % index
+	name = f"{NAME_PREFIX}-{item_code}-{suffix}"
+	if len(name) <= 140:
+		return name
+
+	truncated_length = 140 - (len(NAME_PREFIX) + len(suffix) + 2)
+	truncated_item = item_code[:truncated_length].rsplit(" ", 1)[0]
+	return f"{NAME_PREFIX}-{truncated_item}-{suffix}"
+
+
+def get_next_version_index(existing_names: list[str]) -> int:
+	"""Highest trailing version index across ``existing_names`` plus one (1 if none)."""
+	pattern = "|".join(re.escape(delim) for delim in ("/", "-"))
+	parts = [re.split(pattern, name) for name in existing_names]
+	valid = [p for p in parts if len(p) > 1 and p[-1]]
+	if not valid:
+		return 1
+	return max(cint(p[-1]) for p in valid) + 1
+
+
+def get_active_product_bundle(item_code: str) -> str | None:
+	"""Return the name of the active, enabled, submitted Product Bundle for
+	``item_code``, else None.
+
+	This is the single resolution entry point for every consumer of bundles; it
+	replaces the legacy ``exists("Product Bundle", {name/new_item_code, disabled: 0})``
+	lookups that assumed one mutable bundle per item. A disabled bundle resolves to
+	None even if it still holds the active slot for its parent item.
+	"""
+	if not item_code:
+		return None
+	return frappe.db.get_value(
+		"Product Bundle",
+		{"new_item_code": item_code, "is_active": 1, "docstatus": 1, "disabled": 0},
+		"name",
+	)
+
+
+@frappe.whitelist()
+def make_new_version(source_name: str, target_doc: str | None = None):
+	"""Create a fresh draft bundle copied from an existing (typically submitted) one.
+
+	The copy keeps the same parent item and component rows but gets a new version
+	name on submit; it does not carry over docstatus or the active flag.
+	"""
+	from frappe.model.mapper import get_mapped_doc
+
+	def post_process(source, target):
+		target.is_active = 1
+		target.disabled = 0
+
+	return get_mapped_doc(
+		"Product Bundle",
+		source_name,
+		{
+			"Product Bundle": {
+				"doctype": "Product Bundle",
+				"field_map": {"new_item_code": "new_item_code"},
+				"field_no_map": ["amended_from", "is_active", "disabled"],
+			},
+			"Product Bundle Item": {
+				"doctype": "Product Bundle Item",
+			},
+		},
+		target_doc,
+		post_process,
+	)
+
+
+>>>>>>> cf37478870 (feat(selling): allow disabling a Product Bundle)
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_new_item_code(doctype, txt, searchfield, start, page_len, filters):

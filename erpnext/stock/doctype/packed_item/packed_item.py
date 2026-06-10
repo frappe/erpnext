@@ -8,6 +8,7 @@ import json
 
 import frappe
 import frappe.defaults
+from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
@@ -171,12 +172,69 @@ def get_product_bundle_items(item_code):
 			product_bundle_item.uom,
 			product_bundle_item.description,
 		)
+<<<<<<< HEAD
 		.where((product_bundle.new_item_code == item_code) & (product_bundle.disabled == 0))
+=======
+		.where(
+			(product_bundle.new_item_code == item_code)
+			& (product_bundle.is_active == 1)
+			& (product_bundle.docstatus == 1)
+			& (product_bundle.disabled == 0)
+		)
+>>>>>>> cf37478870 (feat(selling): allow disabling a Product Bundle)
 		.orderby(product_bundle_item.idx)
 	)
 	return query.run(as_dict=True)
 
 
+<<<<<<< HEAD
+=======
+def get_product_bundle_items_by_name(bundle_name):
+	"Component rows of a specific Product Bundle version."
+	product_bundle_item = frappe.qb.DocType("Product Bundle Item")
+	return (
+		frappe.qb.from_(product_bundle_item)
+		.select(
+			product_bundle_item.item_code,
+			product_bundle_item.qty,
+			product_bundle_item.uom,
+			product_bundle_item.description,
+		)
+		.where(product_bundle_item.parent == bundle_name)
+		.orderby(product_bundle_item.idx)
+	).run(as_dict=True)
+
+
+def get_bundle_version_for_row(item_row):
+	"""Product Bundle version to pack ``item_row`` from.
+
+	Honours a version explicitly chosen on the row (validated to be a submitted
+	bundle of that item); otherwise falls back to the item's active version. A stale
+	choice (e.g. left over after changing the item) self-heals back to the active
+	one, but a disabled choice blocks the transaction instead of silently switching
+	versions behind the user's back.
+	"""
+	from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
+
+	chosen = item_row.get("product_bundle") if item_row.meta.has_field("product_bundle") else None
+	if chosen:
+		bundle = frappe.db.get_value(
+			"Product Bundle", chosen, ["new_item_code", "docstatus", "disabled"], as_dict=True
+		)
+		if bundle and bundle.new_item_code == item_row.item_code and bundle.docstatus == 1:
+			if bundle.disabled:
+				frappe.throw(
+					_("Row #{0}: Product Bundle {1} is disabled and cannot be used in transactions.").format(
+						item_row.idx, frappe.bold(chosen)
+					),
+					title=_("Disabled Product Bundle"),
+				)
+			return chosen
+
+	return get_active_product_bundle(item_row.item_code)
+
+
+>>>>>>> cf37478870 (feat(selling): allow disabling a Product Bundle)
 def add_packed_item_row(doc, packing_item, main_item_row, packed_items_table, reset):
 	"""Add and return packed item row.
 	doc: Transaction document

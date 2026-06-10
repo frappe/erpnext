@@ -425,7 +425,16 @@ class SellingController(StockController):
 			row.new_item_code
 			for row in frappe.get_all(
 				"Product Bundle",
+<<<<<<< HEAD
 				filters={"new_item_code": ("in", items_to_fetch), "disabled": 0},
+=======
+				filters={
+					"new_item_code": ("in", items_to_fetch),
+					"is_active": 1,
+					"docstatus": 1,
+					"disabled": 0,
+				},
+>>>>>>> cf37478870 (feat(selling): allow disabling a Product Bundle)
 				fields="new_item_code",
 			)
 		}

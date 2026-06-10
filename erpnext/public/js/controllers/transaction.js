@@ -200,6 +200,24 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			});
 		}
 
+<<<<<<< HEAD
+=======
+		if (this.frm.fields_dict["items"].grid.get_field("product_bundle")) {
+			// restrict the version picker to enabled, submitted Product Bundles of the row's item
+			this.frm.set_query("product_bundle", "items", function (doc, cdt, cdn) {
+				let row = locals[cdt][cdn];
+
+				return {
+					filters: {
+						new_item_code: row.item_code,
+						docstatus: 1,
+						disabled: 0,
+					},
+				};
+			});
+		}
+
+>>>>>>> cf37478870 (feat(selling): allow disabling a Product Bundle)
 		if (
 			this.frm.docstatus < 2 &&
 			this.frm.fields_dict["payment_terms_template"] &&
