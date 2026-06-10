@@ -37,7 +37,7 @@
   },
   {
    "default": "Transaction",
-   "description": "Transaction: inspect when a document moves the stock. Periodic Re-test: re-inspect stored batches on an interval — due batches are auto-quarantined into the Quality Control warehouse.",
+   "description": "Transaction: inspect when a document moves the stock. Periodic Re-test: re-inspect stored batches on an interval \u2014 due batches are auto-quarantined into the Quality Control warehouse.",
    "fieldname": "trigger_type",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -63,7 +63,7 @@
    "options": "Purchase Receipt\nPurchase Invoice\nSubcontracting Receipt\nDelivery Note\nSales Invoice\nStock Entry\nJob Card"
   },
   {
-   "depends_on": "eval:doc.document_type=='Stock Entry'",
+   "depends_on": "eval:doc.trigger_type != 'Periodic Re-test' && (doc.document_type=='Stock Entry')",
    "description": "Applies only to Stock Entry. Use one row per Stock Entry Type (e.g. one row for Material Receipt, another for Material Transfer).",
    "fieldname": "stock_entry_type",
    "fieldtype": "Link",
@@ -73,20 +73,20 @@
   },
   {
    "default": "External",
-   "depends_on": "eval:['Purchase Receipt','Purchase Invoice','Delivery Note','Sales Invoice'].includes(doc.document_type)",
-   "description": "Defaults to External — most companies do not inspect internal (inter-company) transfers. To cover both, add a second row for Internal Transfer.",
+   "depends_on": "eval:doc.trigger_type != 'Periodic Re-test' && (['Purchase Receipt','Purchase Invoice','Delivery Note','Sales Invoice'].includes(doc.document_type))",
+   "description": "Defaults to External \u2014 most companies do not inspect internal (inter-company) transfers. To cover both, add a second row for Internal Transfer.",
    "fieldname": "party_transaction_type",
    "fieldtype": "Select",
    "label": "Transaction Type",
    "options": "External\nInternal Transfer"
   },
   {
-   "depends_on": "eval:doc.document_type=='Job Card'",
+   "depends_on": "eval:doc.trigger_type != 'Periodic Re-test' && (doc.document_type=='Job Card')",
    "description": "Job Card triggers apply only when the Work Order tracks semi-finished goods. Choose whether to inspect after every job card or only at the final output.",
    "fieldname": "job_card_inspection_point",
    "fieldtype": "Select",
    "label": "Inspect On",
-   "mandatory_depends_on": "eval:doc.document_type=='Job Card'",
+   "mandatory_depends_on": "eval:doc.trigger_type != 'Periodic Re-test' && (doc.document_type=='Job Card')",
    "options": "\nEvery Job Card\nFinal Output Only"
   },
   {
@@ -94,7 +94,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:['Stock Entry','Delivery Note','Sales Invoice'].includes(doc.document_type)",
+   "depends_on": "eval:doc.trigger_type != 'Periodic Re-test' && (['Stock Entry','Delivery Note','Sales Invoice'].includes(doc.document_type))",
    "description": "Inbound = stock entering a warehouse (target); Outbound = stock leaving (source). Auto-set for document types that allow only one direction. For Delivery Note and Sales Invoice, Outbound inspects the delivery while Inbound inspects the customer return.",
    "fieldname": "warehouse_role",
    "fieldtype": "Select",
@@ -116,7 +116,7 @@
    "label": "Filters"
   },
   {
-   "depends_on": "eval:['Purchase Receipt','Purchase Invoice','Subcontracting Receipt'].includes(doc.document_type)",
+   "depends_on": "eval:doc.trigger_type != 'Periodic Re-test' && (['Purchase Receipt','Purchase Invoice','Subcontracting Receipt'].includes(doc.document_type))",
    "fieldname": "supplier",
    "fieldtype": "Link",
    "label": "Supplier",
@@ -127,7 +127,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:['Delivery Note','Sales Invoice'].includes(doc.document_type)",
+   "depends_on": "eval:doc.trigger_type != 'Periodic Re-test' && (['Delivery Note','Sales Invoice'].includes(doc.document_type))",
    "fieldname": "customer",
    "fieldtype": "Link",
    "label": "Customer",
