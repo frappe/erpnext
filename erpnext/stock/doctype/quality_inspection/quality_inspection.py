@@ -258,27 +258,39 @@ class QualityInspection(Document):
 	def before_submit(self):
 		self.validate_readings_status_mandatory()
 		self.validate_readings_recorded()
-		self.validate_sampled_serials_recorded()
+		self.validate_tracking_identity_recorded()
 		self.validate_reading_bundle_coverage()
 
-	def validate_sampled_serials_recorded(self):
-		"""A serialized item's verdict must say which units it covers.
+	def validate_tracking_identity_recorded(self):
+		"""A tracked item's verdict must say which units it covers.
 
-		Each Quantity / bundle-decided inspections record serials per unit in the
-		reading bundle; a Sample inspection records the pulled serials here.
+		Serialized items record the sampled serials, batched items the batch.
+		Each Quantity / bundle-decided inspections are exempt: their identity
+		lives per unit in the reading bundle and on the Quality Control Lot.
 		"""
 		if self.inspection_basis == "Each Quantity" or self.reading_bundle:
 			return
-		if not self.item_code or not frappe.get_cached_value("Item", self.item_code, "has_serial_no"):
+		if not self.item_code:
 			return
 
-		if not (self.serial_no or "").strip():
+		item = frappe.get_cached_value(
+			"Item", self.item_code, ["has_serial_no", "has_batch_no"], as_dict=True
+		)
+		if item.has_serial_no and not (self.serial_no or "").strip():
 			frappe.throw(
 				_(
 					"Record the sampled Serial Nos before submission — {0} is serialized, and the "
 					"verdict must say which units it covers."
 				).format(frappe.bold(self.item_code)),
 				title=_("Serial Nos Missing"),
+			)
+		if item.has_batch_no and not self.batch_no:
+			frappe.throw(
+				_(
+					"Record the Batch No before submission — {0} is batch-tracked, and the verdict "
+					"must say which batch it covers."
+				).format(frappe.bold(self.item_code)),
+				title=_("Batch No Missing"),
 			)
 
 	def warn_unrecorded_readings(self):

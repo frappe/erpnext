@@ -55,6 +55,7 @@ def submit_inspection_for_lot(
 			"reference_type": "Quality Control Lot",
 			"reference_name": lot.name,
 			"item_code": lot.item_code,
+			"batch_no": lot.batch_no,
 			"sample_size": 1,
 			"report_date": nowdate(),
 			"inspected_by": frappe.session.user,
@@ -262,6 +263,25 @@ class TestQualityQuarantine(ERPNextTestSuite):
 
 		batch_one, lot_one = receive_batch("_Test QC Batch One")
 		batch_two, lot_two = receive_batch("_Test QC Batch Two")
+
+		# a batched verdict must say which batch it covers
+		anonymous = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Incoming",
+				"reference_type": "Quality Control Lot",
+				"reference_name": lot_one,
+				"item_code": item.name,
+				"sample_size": 1,
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+				"manual_inspection": 1,
+				"status": "Accepted",
+			}
+		)
+		anonymous.insert(ignore_permissions=True)
+		self.assertRaises(frappe.ValidationError, anonymous.submit)
+		anonymous.delete()
 
 		submit_inspection_for_lot(lot_one)
 
