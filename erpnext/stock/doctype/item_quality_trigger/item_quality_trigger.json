@@ -74,11 +74,11 @@
   {
    "default": "External",
    "depends_on": "eval:['Purchase Receipt','Purchase Invoice','Delivery Note','Sales Invoice'].includes(doc.document_type)",
-   "description": "Defaults to External — most companies do not inspect internal (inter-company) transfers. Clear the field to apply to both.",
+   "description": "Defaults to External — most companies do not inspect internal (inter-company) transfers. To cover both, add a second row for Internal Transfer.",
    "fieldname": "party_transaction_type",
    "fieldtype": "Select",
    "label": "Transaction Type",
-   "options": "\nExternal\nInternal Transfer"
+   "options": "External\nInternal Transfer"
   },
   {
    "depends_on": "eval:doc.document_type=='Job Card'",

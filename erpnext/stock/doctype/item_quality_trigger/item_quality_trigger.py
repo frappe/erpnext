@@ -70,7 +70,7 @@ class ItemQualityTrigger(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
-		party_transaction_type: DF.Literal["", "External", "Internal Transfer"]
+		party_transaction_type: DF.Literal["External", "Internal Transfer"]
 		quality_control_mode: DF.Literal["Quarantine", "Block", "Warn", "Monitor"]
 		retest_interval_days: DF.Int
 		sample_size: DF.Float
