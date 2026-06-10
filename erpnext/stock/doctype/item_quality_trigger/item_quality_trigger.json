@@ -65,7 +65,7 @@
    "fieldtype": "Select",
    "label": "Inspect On",
    "mandatory_depends_on": "eval:doc.document_type=='Job Card'",
-   "options": "\nEvery Job Card\nOnly the Final Output"
+   "options": "\nEvery Job Card\nFinal Output Only"
   },
   {
    "fieldname": "column_break_txn",

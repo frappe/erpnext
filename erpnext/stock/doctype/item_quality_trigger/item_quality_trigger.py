@@ -63,7 +63,7 @@ class ItemQualityTrigger(Document):
 		]
 		inspection_basis: DF.Literal["Sample", "Each Quantity"]
 		inspection_template: DF.Link
-		job_card_inspection_point: DF.Literal["", "Every Job Card", "Only the Final Output"]
+		job_card_inspection_point: DF.Literal["", "Every Job Card", "Final Output Only"]
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
@@ -103,7 +103,7 @@ def _validate_trigger_row(row):
 			).format(row.idx)
 		)
 
-	# Inspect On (Every Job Card / Only the Final Output) only applies to Job Card rows.
+	# Inspect On (Every Job Card / Final Output Only) only applies to Job Card rows.
 	if row.get("job_card_inspection_point") and row.document_type != "Job Card":
 		frappe.throw(_("Row #{0}: Inspect On applies only to Job Card.").format(row.idx))
 
