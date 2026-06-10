@@ -258,7 +258,28 @@ class QualityInspection(Document):
 	def before_submit(self):
 		self.validate_readings_status_mandatory()
 		self.validate_readings_recorded()
+		self.validate_sampled_serials_recorded()
 		self.validate_reading_bundle_coverage()
+
+	def validate_sampled_serials_recorded(self):
+		"""A serialized item's verdict must say which units it covers.
+
+		Each Quantity / bundle-decided inspections record serials per unit in the
+		reading bundle; a Sample inspection records the pulled serials here.
+		"""
+		if self.inspection_basis == "Each Quantity" or self.reading_bundle:
+			return
+		if not self.item_code or not frappe.get_cached_value("Item", self.item_code, "has_serial_no"):
+			return
+
+		if not (self.serial_no or "").strip():
+			frappe.throw(
+				_(
+					"Record the sampled Serial Nos before submission — {0} is serialized, and the "
+					"verdict must say which units it covers."
+				).format(frappe.bold(self.item_code)),
+				title=_("Serial Nos Missing"),
+			)
 
 	def warn_unrecorded_readings(self):
 		"""A heads-up on save: drafts may be incomplete, but submission will not be.

@@ -345,20 +345,30 @@ class TestQualityQuarantine(ERPNextTestSuite):
 			"Serial No", filters={"item_code": item.name, "warehouse": qc}, pluck="name", order_by="name"
 		)
 
-		inspection = frappe.get_doc(
-			{
-				"doctype": "Quality Inspection",
-				"inspection_type": "Incoming",
-				"reference_type": "Quality Control Lot",
-				"reference_name": lot,
-				"item_code": item.name,
-				"report_date": nowdate(),
-				"inspected_by": frappe.session.user,
-				"manual_inspection": 1,
-				"status": "Accepted",
-				"serial_no": "\n".join(serials[:2]),
-			}
-		)
+		def build_inspection(serial_no=None):
+			return frappe.get_doc(
+				{
+					"doctype": "Quality Inspection",
+					"inspection_type": "Incoming",
+					"reference_type": "Quality Control Lot",
+					"reference_name": lot,
+					"item_code": item.name,
+					"report_date": nowdate(),
+					"inspected_by": frappe.session.user,
+					"manual_inspection": 1,
+					"status": "Accepted",
+					"sample_size": 2,
+					"serial_no": serial_no,
+				}
+			)
+
+		# a serialized verdict must say which units it covers
+		anonymous = build_inspection()
+		anonymous.insert(ignore_permissions=True)
+		self.assertRaises(frappe.ValidationError, anonymous.submit)
+		anonymous.delete()
+
+		inspection = build_inspection("\n".join(serials[:2]))
 		inspection.insert(ignore_permissions=True)
 		# the recorded serials are the sample
 		self.assertEqual(inspection.sample_size, 2)
