@@ -287,6 +287,31 @@ class TestMakeInspectionButton(ERPNextTestSuite):
 		# a Delivery Note should offer nothing for this item
 		self.assertEqual(check_item_quality_inspection("Delivery Note", 0, [{"item_code": item.name}]), [])
 
+	def test_stale_client_inspection_link_is_refreshed_from_the_database(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(document_type="Stock Entry", warehouse_role="Inbound", quality_control_mode="Block"),
+		)
+		item.save()
+
+		entry = make_stock_entry(
+			item_code=item.name, qty=1, to_warehouse=REAL_WH, purpose="Material Receipt", do_not_submit=True
+		)
+
+		# the browser still carries a link to an inspection cancelled meanwhile;
+		# the database row has none, so the item must be offered again
+		stale_row = {
+			"item_code": item.name,
+			"name": entry.items[0].name,
+			"quality_inspection": "MAT-QA-STALE",
+		}
+		offered = check_item_quality_inspection("Stock Entry", 0, [stale_row])
+		self.assertEqual(len(offered), 1)
+		self.assertFalse(offered[0]["quality_inspection"])
+
 	def test_offered_items_carry_their_inspection_basis(self):
 		from erpnext.stock.services.quality_trigger_resolution import get_inspection_basis
 

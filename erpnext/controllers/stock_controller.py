@@ -701,8 +701,16 @@ def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str
 	needing = {code for code in item_codes if code and item_has_trigger_for_doctype(code, doctype)}
 
 	items = [item for item in items if item.get("item_code") in needing]
+
+	child_doctype = "Stock Entry Detail" if doctype == "Stock Entry" else doctype + " Item"
 	for item in items:
 		item["inspection_basis"] = get_inspection_basis(item.get("item_code"), doctype)
+		# the browser may hold a stale row (e.g. its inspection was cancelled since
+		# the form was loaded) — the database decides whether a link still exists
+		if item.get("name"):
+			item["quality_inspection"] = frappe.db.get_value(
+				child_doctype, item.get("name"), "quality_inspection"
+			)
 
 	return items
 
