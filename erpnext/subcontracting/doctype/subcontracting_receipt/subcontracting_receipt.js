@@ -332,7 +332,9 @@ frappe.ui.form.on("Subcontracting Receipt", {
 	},
 
 	setup_quality_inspection: (frm) => {
-		if (!frm.is_new() && frm.doc.docstatus === 0 && !frm.doc.is_return) {
+		// the controller handles every docstatus itself: the item dialog on
+		// drafts, the Quality Control Lot buttons on submitted receipts
+		if (!frm.is_new()) {
 			let transaction_controller = new erpnext.TransactionController({ frm: frm });
 			transaction_controller.setup_quality_inspection();
 		}
