@@ -1454,7 +1454,7 @@ def get_rejected_warehouses():
 
 	if not frappe.local.rejected_warehouses:
 		frappe.local.rejected_warehouses = frappe.get_all(
-			"Warehouse", filters={"is_rejected_warehouse": 1}, pluck="name"
+			"Warehouse", filters={"warehouse_type": "Rejected"}, pluck="name"
 		)
 
 	return frappe.local.rejected_warehouses

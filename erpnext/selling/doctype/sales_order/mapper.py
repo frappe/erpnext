@@ -1102,17 +1102,18 @@ def get_mapped_subcontracting_inward_order(
 	source_name: str, target_doc: str | dict | Document | None = None
 ) -> Document:
 	def post_process(source_doc, target_doc):
-		if (
-			frappe.db.count(
-				"Warehouse", {"customer": source_doc.customer, "disabled": 0, "is_rejected_warehouse": 0}
-			)
-			== 1
-		):
-			target_doc.customer_warehouse = frappe.get_cached_value(
-				"Warehouse",
-				{"customer": source_doc.customer, "disabled": 0, "is_rejected_warehouse": 0},
-				"name",
-			)
+		customer_warehouses = frappe.get_all(
+			"Warehouse",
+			filters={
+				"customer": source_doc.customer,
+				"disabled": 0,
+				"warehouse_type": ("!=", "Rejected"),
+			},
+			pluck="name",
+			limit=2,
+		)
+		if len(customer_warehouses) == 1:
+			target_doc.customer_warehouse = customer_warehouses[0]
 		target_doc.populate_items_table()
 
 	if target_doc and isinstance(target_doc, str):

@@ -2660,7 +2660,7 @@ class TestSalesOrder(ERPNextTestSuite):
 					"warehouse_name": rejected_warehouse,
 					"company": "_Test Company",
 					"warehouse_group": "_Test Warehouse Group",
-					"is_rejected_warehouse": 1,
+					"warehouse_type": "Rejected",
 				}
 			).insert()
 

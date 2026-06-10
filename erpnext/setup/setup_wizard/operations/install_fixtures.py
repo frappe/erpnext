@@ -321,6 +321,7 @@ def get_preset_records(country=None):
 		# Warehouse Type
 		{"doctype": "Warehouse Type", "name": "Transit"},
 		{"doctype": "Warehouse Type", "name": "Quality"},
+		{"doctype": "Warehouse Type", "name": "Rejected"},
 		{"doctype": "Workstation Operating Component", "component_name": _("Electricity")},
 		{"doctype": "Workstation Operating Component", "component_name": _("Consumables")},
 		{"doctype": "Workstation Operating Component", "component_name": _("Rent")},

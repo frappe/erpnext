@@ -31,7 +31,7 @@ frappe.ui.form.on("Subcontracting Inward Order", {
 			return {
 				filters: {
 					is_group: 0,
-					is_rejected_warehouse: 0,
+					warehouse_type: ["!=", "Rejected"],
 					company: frm.doc.company,
 					customer: frm.doc.customer,
 					disabled: 0,
@@ -52,7 +52,7 @@ frappe.ui.form.on("Subcontracting Inward Order", {
 			return {
 				filters: {
 					is_group: 0,
-					is_rejected_warehouse: 0,
+					warehouse_type: ["!=", "Rejected"],
 					company: frm.doc.company,
 					disabled: 0,
 					customer: ["is", "not set"],
@@ -72,7 +72,7 @@ frappe.ui.form.on("Subcontracting Inward Order", {
 			return {
 				filters: {
 					is_group: 0,
-					is_rejected_warehouse: 0,
+					warehouse_type: ["!=", "Rejected"],
 					company: frm.doc.company,
 					disabled: 0,
 					customer: ["is", "not set"],

@@ -13,7 +13,7 @@
   "warehouse_name",
   "column_break_3",
   "company",
-  "is_rejected_warehouse",
+  "warehouse_type",
   "column_break_4",
   "account",
   "section_break_ujhu",
@@ -36,7 +36,6 @@
   "state",
   "pin",
   "transit_section",
-  "warehouse_type",
   "column_break_qajx",
   "default_in_transit_warehouse",
   "quality_control_section",
@@ -232,6 +231,7 @@
   },
   {
    "depends_on": "eval:(!doc.is_group);",
+   "description": "Classifies the warehouse: leave blank for a normal warehouse, or pick Rejected (stores rejected materials), Quality (holds quarantined stock pending inspection) or Transit.",
    "fieldname": "warehouse_type",
    "fieldtype": "Link",
    "label": "Warehouse Type",
@@ -272,13 +272,6 @@
   {
    "fieldname": "column_break_qajx",
    "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "description": "If yes, then this warehouse will be used to store rejected materials",
-   "fieldname": "is_rejected_warehouse",
-   "fieldtype": "Check",
-   "label": "Is Rejected Warehouse"
   },
   {
    "allow_in_quick_entry": 1,
