@@ -71,7 +71,7 @@ class TestItemQualityTrigger(ERPNextTestSuite):
 			"quality_triggers",
 			trigger_row(
 				document_type="Stock Entry",
-				transaction_sub_type="Material Transfer",
+				stock_entry_type="Material Transfer",
 				warehouse_role="Outbound",
 				qc_mode="Block",
 			),
@@ -80,8 +80,8 @@ class TestItemQualityTrigger(ERPNextTestSuite):
 
 		reloaded = frappe.get_doc("Item", item.name)
 		self.assertEqual(len(reloaded.quality_triggers), 2)
-		sub_types = {t.transaction_sub_type for t in reloaded.quality_triggers}
-		self.assertIn("Material Transfer", sub_types)
+		stock_entry_types = {t.stock_entry_type for t in reloaded.quality_triggers}
+		self.assertIn("Material Transfer", stock_entry_types)
 
 	def test_item_group_holds_quality_triggers(self):
 		group_name = create_test_item_group(is_group=1)
@@ -91,7 +91,7 @@ class TestItemQualityTrigger(ERPNextTestSuite):
 			"quality_triggers",
 			trigger_row(
 				document_type="Stock Entry",
-				transaction_sub_type="Material Transfer",
+				stock_entry_type="Material Transfer",
 				warehouse_role="Outbound",
 				qc_mode="Block",
 			),
@@ -153,7 +153,7 @@ class TestItemQualityTrigger(ERPNextTestSuite):
 			"quality_triggers",
 			trigger_row(
 				document_type="Stock Entry",
-				transaction_sub_type="Material Receipt",
+				stock_entry_type="Material Receipt",
 				warehouse_role=None,
 				party_transaction_type="Internal Transfer",
 			),
