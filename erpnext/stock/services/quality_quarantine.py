@@ -94,6 +94,53 @@ def validate_quality_warehouse_usage(doc):
 		)
 
 
+def stamp_tracking_on_outward_row(
+	row, *, item_code, warehouse, qty, company, batch_no=None, serial_nos=None, voucher_type="Stock Entry"
+):
+	"""Stamp batch / serial identity on a generated outward row, honouring Stock Settings.
+
+	With use_serial_batch_fields enabled the legacy fields carry the (single)
+	batch or the serial list; otherwise a Serial and Batch Bundle is created for
+	the outward leg. Serial-tracked rows without an explicit list auto-pick.
+	"""
+	from frappe.utils import cint
+
+	if not batch_no and not serial_nos:
+		has_serial_no = frappe.get_cached_value("Item", item_code, "has_serial_no")
+		if not has_serial_no:
+			return row
+
+	if cint(frappe.db.get_single_value("Stock Settings", "use_serial_batch_fields")):
+		row["use_serial_batch_fields"] = 1
+		if batch_no:
+			row["batch_no"] = batch_no
+		if serial_nos:
+			row["serial_no"] = "\n".join(serial_nos)
+		return row
+
+	from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+
+	args = {
+		"item_code": item_code,
+		"warehouse": warehouse,
+		"actual_qty": -flt(qty),
+		"qty": -flt(qty),
+		"type_of_transaction": "Outward",
+		"voucher_type": voucher_type,
+		"company": company,
+		"do_not_submit": True,
+	}
+	if serial_nos:
+		args["serial_nos"] = serial_nos
+	if batch_no:
+		args["batches"] = frappe._dict({batch_no: qty})
+
+	bundle = SerialBatchCreation(args).make_serial_and_batch_bundle()
+	if bundle.get("name"):
+		row["serial_and_batch_bundle"] = bundle.name
+	return row
+
+
 def get_release_warehouse(quality_warehouse):
 	"""The store warehouse to release accepted stock into.
 
@@ -187,22 +234,36 @@ def process_inspection_result(doc, method=None):
 		)
 		return
 
+	accepted_serials = None
+	if doc.get("reading_bundle"):
+		accepted_serials = (
+			frappe.get_doc("Quality Inspection Reading Bundle", doc.reading_bundle).get_unit_serials(
+				"Accepted"
+			)
+			or None
+		)
+
 	release = frappe.new_doc("Stock Entry")
 	release.purpose = "Quality Control Release"
 	release.stock_entry_type = "Quality Control Release"
 	release.company = lot.company
 	release.quality_control_lot = lot.name
-	release.append(
-		"items",
-		{
-			"item_code": lot.item_code,
-			"qty": accepted_qty,
-			"s_warehouse": lot.quality_warehouse,
-			"t_warehouse": release_warehouse,
-			"batch_no": lot.batch_no,
-			"use_serial_batch_fields": 1 if lot.batch_no else 0,
-		},
+	release_row = {
+		"item_code": lot.item_code,
+		"qty": accepted_qty,
+		"s_warehouse": lot.quality_warehouse,
+		"t_warehouse": release_warehouse,
+	}
+	stamp_tracking_on_outward_row(
+		release_row,
+		item_code=lot.item_code,
+		warehouse=lot.quality_warehouse,
+		qty=accepted_qty,
+		company=lot.company,
+		batch_no=lot.batch_no,
+		serial_nos=accepted_serials,
 	)
+	release.append("items", release_row)
 	release.flags.ignore_permissions = True
 	release.insert()
 	release.submit()
@@ -265,11 +326,45 @@ def make_purchase_return_for_lot(lot_name: str):
 	row.qty = -outstanding
 	if row.meta.has_field("received_qty"):
 		row.received_qty = -outstanding
-	if lot.batch_no:
-		row.batch_no = lot.batch_no
-		row.use_serial_batch_fields = 1
+
+	# the return carries the lot's batch and exactly the rejected serials still
+	# held in quarantine
+	row.serial_and_batch_bundle = None
+	row.batch_no = None
+	row.serial_no = None
+	tracking = stamp_tracking_on_outward_row(
+		{},
+		item_code=lot.item_code,
+		warehouse=lot.quality_warehouse,
+		qty=outstanding,
+		company=lot.company,
+		batch_no=lot.batch_no,
+		serial_nos=_rejected_serials_awaiting_return(lot, outstanding),
+		voucher_type=lot.source_document_type,
+	)
+	row.update(tracking)
 
 	return return_doc
+
+
+def _rejected_serials_awaiting_return(lot, outstanding):
+	"""The rejected units' serials that are still in the Quality Control warehouse."""
+	if not lot.quality_inspection:
+		return None
+
+	reading_bundle = frappe.db.get_value("Quality Inspection", lot.quality_inspection, "reading_bundle")
+	if not reading_bundle:
+		return None
+
+	rejected = frappe.get_doc("Quality Inspection Reading Bundle", reading_bundle).get_unit_serials(
+		"Rejected"
+	)
+	still_held = [
+		serial
+		for serial in rejected
+		if frappe.db.get_value("Serial No", serial, "warehouse") == lot.quality_warehouse
+	]
+	return still_held[: int(outstanding)] or None
 
 
 def handle_source_document_cancel(doc, method=None):
@@ -417,6 +512,19 @@ def create_quality_control_lots(doc, method=None):
 		if not received_qty:
 			continue
 
+		batch_no = row.get("batch_no")
+		if not batch_no and row.get("serial_and_batch_bundle"):
+			# receipts in bundle mode carry the batch inside the bundle
+			bundle_batches = set(
+				frappe.get_all(
+					"Serial and Batch Entry",
+					filters={"parent": row.serial_and_batch_bundle, "batch_no": ("is", "set")},
+					pluck="batch_no",
+				)
+			)
+			if len(bundle_batches) == 1:
+				batch_no = bundle_batches.pop()
+
 		# carry the inspection template/basis from the trigger that caused the
 		# quarantine; periodic re-test transfers fall back to the re-test trigger
 		point = points_by_row.get(id(row))
@@ -434,7 +542,7 @@ def create_quality_control_lots(doc, method=None):
 				"item_code": row.get("item_code"),
 				"company": doc.get("company"),
 				"quality_warehouse": warehouse,
-				"batch_no": row.get("batch_no"),
+				"batch_no": batch_no,
 				"received_qty": received_qty,
 				"source_document_type": doc.doctype,
 				"source_document": doc.name,

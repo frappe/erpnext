@@ -82,6 +82,24 @@ class QualityInspectionReadingBundle(Document):
 				)
 			)
 
+	def get_unit_serials(self, status):
+		"""Serial numbers of units whose roll-up matches the status.
+
+		A unit is rejected if any of its readings rejected. Units without a
+		recorded serial are skipped — quantity accounting covers them.
+		"""
+		rejected_units = {entry.unit_no for entry in self.entries if entry.status == "Rejected"}
+		serial_by_unit = {}
+		for entry in self.entries:
+			if entry.serial_no:
+				serial_by_unit.setdefault(entry.unit_no, entry.serial_no)
+
+		if status == "Accepted":
+			units = set(serial_by_unit) - rejected_units
+		else:
+			units = set(serial_by_unit) & rejected_units
+		return sorted(serial_by_unit[unit] for unit in units)
+
 	def evaluate_entry_statuses(self):
 		"""Derive each entry's status from its reading, like the inspection readings.
 

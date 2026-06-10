@@ -15,7 +15,7 @@ def ensure_parameter(name):
 	return name
 
 
-def make_bundle(quantity, unit_results, item_code=None):
+def make_bundle(quantity, unit_results, item_code=None, unit_serials=None):
 	"""unit_results: {unit_no: [status, status, ...]} — one status per parameter row."""
 	bundle = frappe.new_doc("Quality Inspection Reading Bundle")
 	bundle.item_code = item_code or make_item(properties={"is_stock_item": 1}).name
@@ -26,6 +26,7 @@ def make_bundle(quantity, unit_results, item_code=None):
 				"entries",
 				{
 					"unit_no": unit_no,
+					"serial_no": (unit_serials or {}).get(unit_no),
 					"specification": ensure_parameter(f"_Test Bundle Parameter {index}"),
 					# a manual observation: no acceptance criteria, so the given status holds
 					"reading_value": "observed",

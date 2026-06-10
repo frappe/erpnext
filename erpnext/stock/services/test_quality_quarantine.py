@@ -253,6 +253,111 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		make_release(lot_one, 2, REAL_WH, batch_no=batch_one)
 		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot_one, "status"), "Released")
 
+	def test_release_moves_exactly_the_accepted_serials(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+		from erpnext.stock.doctype.quality_inspection_reading_bundle.test_quality_inspection_reading_bundle import (
+			make_bundle,
+		)
+
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
+		qc = make_qc_warehouse("_Test QC Serial WH")
+		store = make_warehouse("_Test QC Serial Store", quality_warehouse=qc)
+
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "QCSN.#####"}
+		)
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry",
+				warehouse_role="Inbound",
+				quality_control_mode="Quarantine",
+				inspection_basis="Each Quantity",
+				applicable_warehouse=qc,
+			),
+		)
+		item.save()
+
+		se = make_stock_entry(
+			item_code=item.name, qty=3, to_warehouse=qc, purpose="Material Receipt", rate=100
+		)
+		lot = quality_control_lots_for(se.name)[0].name
+		serials = frappe.get_all(
+			"Serial No", filters={"item_code": item.name, "warehouse": qc}, pluck="name", order_by="name"
+		)
+		self.assertEqual(len(serials), 3)
+
+		# units 1 and 3 pass, unit 2 fails — each unit identified by its serial
+		bundle = make_bundle(
+			3,
+			{1: ["Accepted"], 2: ["Rejected"], 3: ["Accepted"]},
+			item_code=item.name,
+			unit_serials={1: serials[0], 2: serials[1], 3: serials[2]},
+		)
+		submit_inspection_for_lot(lot, reading_bundle=bundle.name)
+
+		# exactly the accepted serials were released; the rejected one stays held
+		self.assertEqual(frappe.db.get_value("Serial No", serials[0], "warehouse"), store)
+		self.assertEqual(frappe.db.get_value("Serial No", serials[2], "warehouse"), store)
+		self.assertEqual(frappe.db.get_value("Serial No", serials[1], "warehouse"), qc)
+
+	def test_generated_release_honors_bundle_mode(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+
+		# legacy serial/batch fields disabled: generated entries must carry a
+		# Serial and Batch Bundle instead
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
+		try:
+			qc = make_qc_warehouse("_Test QC Bundle Mode WH")
+			store = make_warehouse("_Test QC Bundle Mode Store", quality_warehouse=qc)
+
+			item = make_item(
+				properties={"is_stock_item": 1, "has_batch_no": 1, "batch_number_series": "QCBM.#####"}
+			)
+			item.append(
+				"quality_triggers",
+				trigger_row(
+					document_type="Stock Entry",
+					warehouse_role="Inbound",
+					quality_control_mode="Quarantine",
+					applicable_warehouse=qc,
+				),
+			)
+			item.save()
+
+			batch = frappe.get_doc(
+				{"doctype": "Batch", "item": item.name, "batch_id": "_Test QC Bundle Mode Batch"}
+			).insert(ignore_permissions=True)
+			se = make_stock_entry(
+				item_code=item.name,
+				qty=2,
+				to_warehouse=qc,
+				purpose="Material Receipt",
+				rate=100,
+				batch_no=batch.name,
+				use_serial_batch_fields=1,
+			)
+			lot = quality_control_lots_for(se.name)[0].name
+			self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "batch_no"), batch.name)
+
+			submit_inspection_for_lot(lot)
+
+			release = frappe.get_doc(
+				"Stock Entry", {"quality_control_lot": lot, "purpose": "Quality Control Release"}
+			)
+			row = release.items[0]
+			self.assertTrue(row.serial_and_batch_bundle)
+			self.assertFalse(row.batch_no)
+			bundle_batches = frappe.get_all(
+				"Serial and Batch Entry",
+				filters={"parent": row.serial_and_batch_bundle},
+				pluck="batch_no",
+			)
+			self.assertEqual(set(bundle_batches), {batch.name})
+			self.assertEqual(get_qty(item.name, store), 2)
+		finally:
+			frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
+
 	def test_return_allocation_respects_batches(self):
 		from erpnext.stock.services.quality_quarantine import _rejected_outstanding_lots
 

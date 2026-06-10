@@ -113,21 +113,28 @@ def quarantine_batch_for_retest(item_code, batch_no):
 		if not quality_warehouse:
 			continue  # not configured for this store; retried on the next run
 
+		from erpnext.stock.services.quality_quarantine import stamp_tracking_on_outward_row
+
+		company = frappe.get_cached_value("Warehouse", warehouse, "company")
 		transfer = frappe.new_doc("Stock Entry")
 		transfer.purpose = "Material Transfer"
 		transfer.stock_entry_type = "Material Transfer"
-		transfer.company = frappe.get_cached_value("Warehouse", warehouse, "company")
-		transfer.append(
-			"items",
-			{
-				"item_code": item_code,
-				"qty": qty,
-				"s_warehouse": warehouse,
-				"t_warehouse": quality_warehouse,
-				"batch_no": batch_no,
-				"use_serial_batch_fields": 1,
-			},
+		transfer.company = company
+		transfer_row = {
+			"item_code": item_code,
+			"qty": qty,
+			"s_warehouse": warehouse,
+			"t_warehouse": quality_warehouse,
+		}
+		stamp_tracking_on_outward_row(
+			transfer_row,
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=qty,
+			company=company,
+			batch_no=batch_no,
 		)
+		transfer.append("items", transfer_row)
 		transfer.flags.ignore_permissions = True
 		transfer.insert()
 		transfer.submit()
