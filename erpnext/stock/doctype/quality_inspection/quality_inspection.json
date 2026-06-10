@@ -136,7 +136,8 @@
    "label": "Sample Size",
    "mandatory_depends_on": "eval:doc.inspection_basis != 'Each Quantity'",
    "oldfieldname": "sample_size",
-   "oldfieldtype": "Currency"
+   "oldfieldtype": "Currency",
+   "description": "For serialized items this is derived from the recorded Serial Nos."
   },
   {
    "fieldname": "column_break1",

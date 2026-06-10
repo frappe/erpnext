@@ -104,13 +104,33 @@ frappe.ui.form.on("Quality Inspection", {
 		}
 
 		frappe.db.get_value("Item", frm.doc.item_code, ["has_batch_no", "has_serial_no"]).then((r) => {
+			frm.__item_is_serialized = cint(r.message?.has_serial_no);
 			frm.toggle_display("batch_no", cint(r.message?.has_batch_no));
 			// Each Quantity inspections record serials per unit in the bundle
 			frm.toggle_display(
 				"serial_no",
-				cint(r.message?.has_serial_no) && frm.doc.inspection_basis !== "Each Quantity"
+				frm.__item_is_serialized && frm.doc.inspection_basis !== "Each Quantity"
+			);
+			// the recorded serials drive the sample size for serialized items
+			frm.set_df_property(
+				"sample_size",
+				"read_only",
+				frm.__item_is_serialized && frm.doc.inspection_basis !== "Each Quantity" ? 1 : 0
 			);
 		});
+	},
+
+	serial_no: function (frm) {
+		if (!frm.__item_is_serialized || frm.doc.inspection_basis === "Each Quantity") {
+			return;
+		}
+		const count = (frm.doc.serial_no || "")
+			.split("\n")
+			.map((serial) => serial.trim())
+			.filter(Boolean).length;
+		if (count) {
+			frm.set_value("sample_size", count);
+		}
 	},
 
 	reference_name: function (frm) {
