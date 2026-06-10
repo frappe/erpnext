@@ -2,14 +2,14 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, getdate, today
 
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.selling.report.inactive_customers.inactive_customers import execute
-from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestInactiveCustomers(ERPNextTestSuite):
+class TestInactiveCustomers(FrappeTestCase):
 	def setUp(self):
 		self.customer = frappe.get_doc(doctype="Customer", customer_name="_Test Inactive Customer").insert()
 		self.last_order_date = add_days(today(), -120)
