@@ -60,6 +60,7 @@ class QualityControlReleaseStockEntry(MaterialTransferStockEntry):
 						"Row #{0}: Source warehouse must be {1}, where Quality Control Lot {2} is held."
 					).format(row.idx, frappe.bold(lot.quality_warehouse), lot.name)
 				)
+			self._validate_row_batch(row, lot)
 			release_qty += flt(row.transfer_qty or row.qty)
 
 		if release_qty > flt(lot.pending_qty):
@@ -68,6 +69,43 @@ class QualityControlReleaseStockEntry(MaterialTransferStockEntry):
 					"Cannot release {0} from Quality Control Lot {1}: only {2} is pending inspection release."
 				).format(release_qty, lot.name, lot.pending_qty),
 				title=_("Quantity Exceeds Lot"),
+			)
+
+	def _validate_row_batch(self, row, lot):
+		"""The release moves the lot's own batch — not another batch of the same
+		item that happens to share the Quality Control warehouse."""
+		if not lot.batch_no:
+			return
+
+		row_batches = set()
+		if row.get("batch_no"):
+			row_batches.add(row.batch_no)
+		if row.get("serial_and_batch_bundle"):
+			row_batches.update(
+				frappe.get_all(
+					"Serial and Batch Entry",
+					filters={"parent": row.serial_and_batch_bundle},
+					pluck="batch_no",
+				)
+			)
+
+		if row_batches - {lot.batch_no}:
+			frappe.throw(
+				_("Row #{0}: Quality Control Lot {1} holds batch {2} — a release cannot move {3}.").format(
+					row.idx,
+					lot.name,
+					frappe.bold(lot.batch_no),
+					frappe.bold(", ".join(sorted(row_batches - {lot.batch_no}))),
+				),
+				title=_("Batch Mismatch"),
+			)
+
+		if not row_batches:
+			frappe.throw(
+				_("Row #{0}: Specify batch {1} of Quality Control Lot {2} on the release.").format(
+					row.idx, frappe.bold(lot.batch_no), lot.name
+				),
+				title=_("Batch Missing"),
 			)
 
 	def on_submit(self):

@@ -66,7 +66,7 @@ def submit_inspection_for_lot(lot_name, status="Accepted", reading_bundle=None, 
 	return inspection
 
 
-def make_release(lot_name, qty, to_warehouse):
+def make_release(lot_name, qty, to_warehouse, batch_no=None):
 	lot = frappe.get_doc("Quality Control Lot", lot_name)
 	release = frappe.new_doc("Stock Entry")
 	release.purpose = "Quality Control Release"
@@ -80,6 +80,8 @@ def make_release(lot_name, qty, to_warehouse):
 			"qty": qty,
 			"s_warehouse": lot.quality_warehouse,
 			"t_warehouse": to_warehouse,
+			"batch_no": batch_no,
+			"use_serial_batch_fields": 1 if batch_no else 0,
 		},
 	)
 	release.insert()
@@ -204,6 +206,90 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		submit_inspection_for_lot(lot)
 		make_release(lot, 2, REAL_WH)
 		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "status"), "Partially Released")
+
+	def test_release_moves_only_the_lots_batch(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+
+		# dedicated Quality Control warehouse with no store, so nothing auto-releases
+		qc = make_qc_warehouse("_Test QC Batch WH")
+		item = make_item(
+			properties={"is_stock_item": 1, "has_batch_no": 1, "batch_number_series": "QCBT.#####"}
+		)
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry",
+				warehouse_role="Inbound",
+				quality_control_mode="Quarantine",
+				applicable_warehouse=qc,
+			),
+		)
+		item.save()
+
+		def receive_batch(batch_id):
+			batch = frappe.get_doc({"doctype": "Batch", "item": item.name, "batch_id": batch_id}).insert(
+				ignore_permissions=True
+			)
+			se = make_stock_entry(
+				item_code=item.name,
+				qty=2,
+				to_warehouse=qc,
+				purpose="Material Receipt",
+				rate=100,
+				batch_no=batch.name,
+				use_serial_batch_fields=1,
+			)
+			return batch.name, quality_control_lots_for(se.name)[0].name
+
+		batch_one, lot_one = receive_batch("_Test QC Batch One")
+		batch_two, lot_two = receive_batch("_Test QC Batch Two")
+
+		submit_inspection_for_lot(lot_one)
+
+		# the release must carry the lot's own batch — another batch of the same
+		# item in the same warehouse is refused, as is a batchless release
+		self.assertRaises(frappe.ValidationError, make_release, lot_one, 2, REAL_WH, batch_no=batch_two)
+		self.assertRaises(frappe.ValidationError, make_release, lot_one, 2, REAL_WH)
+		make_release(lot_one, 2, REAL_WH, batch_no=batch_one)
+		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot_one, "status"), "Released")
+
+	def test_return_allocation_respects_batches(self):
+		from erpnext.stock.services.quality_quarantine import _rejected_outstanding_lots
+
+		qc = make_qc_warehouse("_Test QC Alloc WH")
+		item = make_item(
+			properties={"is_stock_item": 1, "has_batch_no": 1, "batch_number_series": "QCAL.#####"}
+		).name
+
+		def make_lot(batch_no, rejected):
+			return (
+				frappe.get_doc(
+					{
+						"doctype": "Quality Control Lot",
+						"item_code": item,
+						"company": "_Test Company",
+						"quality_warehouse": qc,
+						"batch_no": batch_no,
+						"received_qty": rejected,
+						"rejected_qty": rejected,
+					}
+				)
+				.insert(ignore_permissions=True)
+				.name
+			)
+
+		frappe.get_doc({"doctype": "Batch", "item": item, "batch_id": "_Test QC Alloc A"}).insert(
+			ignore_permissions=True
+		)
+		frappe.get_doc({"doctype": "Batch", "item": item, "batch_id": "_Test QC Alloc B"}).insert(
+			ignore_permissions=True
+		)
+		lot_a = make_lot("_Test QC Alloc A", 4)
+		make_lot("_Test QC Alloc B", 2)
+
+		# a return carrying batch A books only against batch A's lots
+		offered = _rejected_outstanding_lots(item, qc, batch_no="_Test QC Alloc A")
+		self.assertEqual([lot.name for lot in offered], [lot_a])
 
 	def test_cancellation_reversal_is_exempt_from_the_lock(self):
 		qc = make_qc_warehouse()

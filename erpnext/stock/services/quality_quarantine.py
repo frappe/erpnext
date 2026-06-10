@@ -337,8 +337,11 @@ def _rejected_outstanding_lots(item_code, warehouse, batch_no=None):
 		fields=["name", "batch_no", "rejected_qty", "returned_qty"],
 		order_by="creation",
 	)
-	# prefer lots of the same batch, then first-in-first-out
-	lots.sort(key=lambda lot: 0 if batch_no and lot.batch_no == batch_no else 1)
+	# a return carrying a batch books only against that batch's lots — never
+	# against a lot holding a different batch
+	if batch_no:
+		lots = [lot for lot in lots if not lot.batch_no or lot.batch_no == batch_no]
+		lots.sort(key=lambda lot: 0 if lot.batch_no == batch_no else 1)
 	return lots
 
 
