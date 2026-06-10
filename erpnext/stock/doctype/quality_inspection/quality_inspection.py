@@ -145,12 +145,20 @@ class QualityInspection(Document):
 			self.child_row_reference = child_row_references[0]
 
 	def set_inspection_basis_from_lot(self):
-		"""The Quality Control Lot dictates how it is inspected (Sample / Each Quantity)."""
+		"""How the stock is inspected (Sample / Each Quantity).
+
+		A Quality Control Lot carries its basis; inspections referencing a
+		transaction resolve it from the item's quality trigger for that doctype.
+		"""
+		from erpnext.stock.services.quality_trigger_resolution import get_inspection_basis
+
 		if self.reference_type == "Quality Control Lot" and self.reference_name:
 			self.inspection_basis = (
 				frappe.db.get_value("Quality Control Lot", self.reference_name, "inspection_basis")
 				or "Sample"
 			)
+		elif self.reference_type and self.item_code:
+			self.inspection_basis = get_inspection_basis(self.item_code, self.reference_type)
 		else:
 			self.inspection_basis = "Sample"
 

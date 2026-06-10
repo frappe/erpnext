@@ -111,6 +111,15 @@ def item_has_trigger_for_doctype(item_code, document_type):
 	return any(trigger.document_type == document_type for trigger in _ordered_triggers(item_code))
 
 
+def get_inspection_basis(item_code, document_type):
+	"""The inspection basis (Sample / Each Quantity) of the item's most specific
+	trigger for a document type. Items without a trigger inspect on a sample."""
+	for trigger in _ordered_triggers(item_code):
+		if trigger.document_type == document_type:
+			return trigger.inspection_basis or "Sample"
+	return "Sample"
+
+
 def resolve_job_card_inspection(job_card, production_item=None):
 	"""Return the matching Job Card trigger for a job card's output, or None.
 

@@ -690,14 +690,21 @@ def repost_required_for_queue(doc: StockController) -> bool:
 
 @frappe.whitelist()
 def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str | list[dict]):
-	from erpnext.stock.services.quality_trigger_resolution import item_has_trigger_for_doctype
+	from erpnext.stock.services.quality_trigger_resolution import (
+		get_inspection_basis,
+		item_has_trigger_for_doctype,
+	)
 
 	items = frappe.parse_json(items)
 
 	item_codes = {item.get("item_code") for item in items}
 	needing = {code for code in item_codes if code and item_has_trigger_for_doctype(code, doctype)}
 
-	return [item for item in items if item.get("item_code") in needing]
+	items = [item for item in items if item.get("item_code") in needing]
+	for item in items:
+		item["inspection_basis"] = get_inspection_basis(item.get("item_code"), doctype)
+
+	return items
 
 
 @frappe.whitelist(methods=["POST"])
@@ -706,9 +713,15 @@ def make_quality_inspections(
 ):
 	items = frappe.parse_json(items)
 
+	from erpnext.stock.services.quality_trigger_resolution import get_inspection_basis
+
 	inspections = []
 	for item in items:
-		if flt(item.get("sample_size")) > flt(item.get("qty")):
+		# Each Quantity inspections record per-unit readings in a bundle; a sample
+		# size does not apply to them (resolved server-side, not trusted from the dialog)
+		each_quantity = get_inspection_basis(item.get("item_code"), doctype) == "Each Quantity"
+
+		if not each_quantity and flt(item.get("sample_size")) > flt(item.get("qty")):
 			frappe.throw(
 				_(
 					"{item_name}'s Sample Size ({sample_size}) cannot be greater than the Accepted Quantity ({accepted_quantity})"
@@ -729,7 +742,7 @@ def make_quality_inspections(
 				"reference_name": docname,
 				"item_code": item.get("item_code"),
 				"description": item.get("description"),
-				"sample_size": flt(item.get("sample_size")),
+				"sample_size": 0 if each_quantity else flt(item.get("sample_size")),
 				"serial_no": item.get("serial_no").split("\n")[0] if item.get("serial_no") else None,
 				"batch_no": item.get("batch_no"),
 				"child_row_reference": item.get("child_row_reference"),

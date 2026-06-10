@@ -2973,8 +2973,15 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						fieldtype: "Float",
 						fieldname: "sample_size",
 						label: __("Sample Size"),
-						reqd: true,
 						in_list_view: true,
+						// Each Quantity items record per-unit readings; a sample size does not apply
+						read_only_depends_on: 'eval:doc.inspection_basis === "Each Quantity"',
+					},
+					{
+						fieldtype: "Data",
+						fieldname: "inspection_basis",
+						label: __("Inspection Basis"),
+						hidden: true,
 					},
 					{
 						fieldtype: "Data",
@@ -3071,7 +3078,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							description: item.description,
 							serial_no: item.serial_no,
 							batch_no: item.batch_no,
-							sample_size: item.sample_quantity,
+							sample_size:
+								item.inspection_basis === "Each Quantity" ? null : item.sample_quantity,
+							inspection_basis: item.inspection_basis,
 							child_row_reference: item.name,
 						});
 						dialog_items.grid.refresh();

@@ -286,3 +286,16 @@ class TestMakeInspectionButton(ERPNextTestSuite):
 
 		# a Delivery Note should offer nothing for this item
 		self.assertEqual(check_item_quality_inspection("Delivery Note", 0, [{"item_code": item.name}]), [])
+
+	def test_offered_items_carry_their_inspection_basis(self):
+		from erpnext.stock.services.quality_trigger_resolution import get_inspection_basis
+
+		item = make_item(properties={"is_stock_item": 1})
+		item.append("quality_triggers", trigger_row(inspection_basis="Each Quantity"))
+		item.save()
+
+		self.assertEqual(get_inspection_basis(item.name, "Purchase Receipt"), "Each Quantity")
+		offered = check_item_quality_inspection("Purchase Receipt", 0, [{"item_code": item.name}])
+		self.assertEqual(offered[0]["inspection_basis"], "Each Quantity")
+		# no trigger for the doctype falls back to a sample inspection
+		self.assertEqual(get_inspection_basis(item.name, "Delivery Note"), "Sample")
