@@ -63,7 +63,7 @@ class ItemQualityTrigger(Document):
 		]
 		inspection_basis: DF.Literal["Sample", "Each Quantity"]
 		inspection_template: DF.Link
-		job_card_inspection_point: DF.Literal["", "Every Job Card", "Final FG Only"]
+		job_card_inspection_point: DF.Literal["", "Every Job Card", "Only the Final Output"]
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
@@ -71,18 +71,8 @@ class ItemQualityTrigger(Document):
 		qc_mode: DF.Literal["Quarantine", "Block", "Warn", "Monitor"]
 		sample_size: DF.Float
 		sample_size_is_percentage: DF.Check
+		stock_entry_type: DF.Link | None
 		supplier: DF.Link | None
-		transaction_sub_type: DF.Literal[
-			"",
-			"Material Receipt",
-			"Material Issue",
-			"Material Transfer",
-			"Material Transfer for Manufacture",
-			"Manufacture",
-			"Repack",
-			"Send to Subcontractor",
-			"Disassemble",
-		]
 		warehouse_role: DF.Literal["Inbound", "Outbound"]
 	# end: auto-generated types
 
@@ -100,9 +90,9 @@ def validate_item_quality_triggers(doc, method=None):
 
 
 def _validate_trigger_row(row):
-	# Stock Entry purpose only applies to Stock Entry rows.
-	if row.transaction_sub_type and row.document_type != "Stock Entry":
-		frappe.throw(_("Row #{0}: Stock Entry Purpose applies only to Stock Entry.").format(row.idx))
+	# Stock Entry Type only applies to Stock Entry rows.
+	if row.stock_entry_type and row.document_type != "Stock Entry":
+		frappe.throw(_("Row #{0}: Stock Entry Type applies only to Stock Entry.").format(row.idx))
 
 	# External / Internal Transfer only applies to party documents.
 	if row.get("party_transaction_type") and row.document_type not in PARTY_DOCTYPES:
@@ -113,13 +103,18 @@ def _validate_trigger_row(row):
 			).format(row.idx)
 		)
 
-	# Inspect On (Every Job Card / Final FG Only) only applies to Job Card rows.
+	# Inspect On (Every Job Card / Only the Final Output) only applies to Job Card rows.
 	if row.get("job_card_inspection_point") and row.document_type != "Job Card":
 		frappe.throw(_("Row #{0}: Inspect On applies only to Job Card.").format(row.idx))
 
-	# Warehouse role must respect the direction implied by the document / purpose.
-	allowed = allowed_warehouse_roles(row.document_type, row.transaction_sub_type)
-	context = f" ({row.transaction_sub_type})" if row.transaction_sub_type else ""
+	# Warehouse role must respect the direction implied by the document / Stock Entry Type.
+	stock_entry_purpose = (
+		frappe.db.get_value("Stock Entry Type", row.stock_entry_type, "purpose")
+		if row.stock_entry_type
+		else None
+	)
+	allowed = allowed_warehouse_roles(row.document_type, stock_entry_purpose)
+	context = f" ({row.stock_entry_type})" if row.stock_entry_type else ""
 
 	if len(allowed) == 1:
 		(only,) = tuple(allowed)

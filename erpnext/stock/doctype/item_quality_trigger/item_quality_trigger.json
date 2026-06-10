@@ -8,7 +8,7 @@
  "field_order": [
   "transaction_section",
   "document_type",
-  "transaction_sub_type",
+  "stock_entry_type",
   "party_transaction_type",
   "job_card_inspection_point",
   "column_break_txn",
@@ -43,12 +43,12 @@
   },
   {
    "depends_on": "eval:doc.document_type=='Stock Entry'",
-   "description": "Applies only to Stock Entry. Use one row per purpose (e.g. one row for Material Receipt, another for Material Transfer).",
-   "fieldname": "transaction_sub_type",
-   "fieldtype": "Select",
+   "description": "Applies only to Stock Entry. Use one row per Stock Entry Type (e.g. one row for Material Receipt, another for Material Transfer).",
+   "fieldname": "stock_entry_type",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Stock Entry Purpose",
-   "options": "\nMaterial Receipt\nMaterial Issue\nMaterial Transfer\nMaterial Transfer for Manufacture\nManufacture\nRepack\nSend to Subcontractor\nDisassemble"
+   "label": "Stock Entry Type",
+   "options": "Stock Entry Type"
   },
   {
    "depends_on": "eval:['Purchase Receipt','Purchase Invoice','Delivery Note','Sales Invoice'].includes(doc.document_type)",
@@ -60,19 +60,20 @@
   },
   {
    "depends_on": "eval:doc.document_type=='Job Card'",
-   "description": "Job Card triggers apply only when the Work Order tracks semi-finished goods. Choose whether to inspect after every job card or only at final FG production.",
+   "description": "Job Card triggers apply only when the Work Order tracks semi-finished goods. Choose whether to inspect after every job card or only at the final output.",
    "fieldname": "job_card_inspection_point",
    "fieldtype": "Select",
    "label": "Inspect On",
    "mandatory_depends_on": "eval:doc.document_type=='Job Card'",
-   "options": "\nEvery Job Card\nFinal FG Only"
+   "options": "\nEvery Job Card\nOnly the Final Output"
   },
   {
    "fieldname": "column_break_txn",
    "fieldtype": "Column Break"
   },
   {
-   "description": "Inbound = stock entering a warehouse (target); Outbound = stock leaving (source). Auto-set when the document type allows only one direction.",
+   "depends_on": "eval:doc.document_type=='Stock Entry'",
+   "description": "Inbound = stock entering a warehouse (target); Outbound = stock leaving (source). Auto-set for document types that allow only one direction; shown for Stock Entry, where the movement can be inbound or outbound.",
    "fieldname": "warehouse_role",
    "fieldtype": "Select",
    "in_list_view": 1,
