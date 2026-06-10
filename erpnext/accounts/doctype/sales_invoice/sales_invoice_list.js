@@ -4,6 +4,7 @@
 // render
 frappe.listview_settings["Sales Invoice"] = {
 	add_fields: [
+		"quality_status",
 		"customer",
 		"customer_name",
 		"base_grand_total",
@@ -14,6 +15,8 @@ frappe.listview_settings["Sales Invoice"] = {
 		"is_return",
 	],
 	get_indicator: function (doc) {
+		const quality = erpnext.utils.get_quality_indicator(doc);
+		if (quality) return quality;
 		const status_colors = {
 			Draft: "red",
 			Unpaid: "orange",

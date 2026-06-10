@@ -2,7 +2,10 @@
 // For license information, please see license.txt
 
 frappe.listview_settings["Subcontracting Receipt"] = {
+	add_fields: ["quality_status"],
 	get_indicator: function (doc) {
+		const quality = erpnext.utils.get_quality_indicator(doc);
+		if (quality) return quality;
 		const status_colors = {
 			Draft: "red",
 			Return: "gray",

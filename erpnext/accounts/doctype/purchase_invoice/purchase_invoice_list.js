@@ -4,6 +4,7 @@
 // render
 frappe.listview_settings["Purchase Invoice"] = {
 	add_fields: [
+		"quality_status",
 		"supplier",
 		"supplier_name",
 		"base_grand_total",
@@ -18,6 +19,8 @@ frappe.listview_settings["Purchase Invoice"] = {
 		"is_internal_supplier",
 	],
 	get_indicator(doc) {
+		const quality = erpnext.utils.get_quality_indicator(doc);
+		if (quality) return quality;
 		if (doc.status == "Debit Note Issued") {
 			return [__(doc.status), "gray", "status,=," + doc.status];
 		}

@@ -1510,3 +1510,18 @@ erpnext.utils.add_quality_control_lot_buttons = function (frm) {
 			}
 		});
 };
+
+erpnext.utils.get_quality_indicator = function (doc) {
+	// quality overrides the list pill only while it is the thing that matters;
+	// once resolved (Released / Inspection Completed) the normal pill returns
+	if (doc.quality_status === "Under Inspection") {
+		return [__("Under Inspection"), "orange", "quality_status,=,Under Inspection"];
+	}
+	if (doc.quality_status === "Partially Released") {
+		return [__("Partially Released"), "yellow", "quality_status,=,Partially Released"];
+	}
+	if (doc.quality_status === "Rejected") {
+		return [__("Quality Rejected"), "red", "quality_status,=,Rejected"];
+	}
+	return null;
+};

@@ -1,5 +1,6 @@
 frappe.listview_settings["Delivery Note"] = {
 	add_fields: [
+		"quality_status",
 		"customer",
 		"customer_name",
 		"base_grand_total",
@@ -12,6 +13,8 @@ frappe.listview_settings["Delivery Note"] = {
 		"currency",
 	],
 	get_indicator: function (doc) {
+		const quality = erpnext.utils.get_quality_indicator(doc);
+		if (quality) return quality;
 		if (cint(doc.is_return) == 1 && doc.status == "Return") {
 			return [__("Return"), "gray", "is_return,=,1"];
 		} else if (doc.status === "Closed") {

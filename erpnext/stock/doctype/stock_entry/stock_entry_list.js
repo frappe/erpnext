@@ -1,5 +1,6 @@
 frappe.listview_settings["Stock Entry"] = {
 	add_fields: [
+		"quality_status",
 		"from_warehouse",
 		"to_warehouse",
 		"purpose",
@@ -10,6 +11,8 @@ frappe.listview_settings["Stock Entry"] = {
 		"per_transferred",
 	],
 	get_indicator: function (doc) {
+		const quality = erpnext.utils.get_quality_indicator(doc);
+		if (quality) return quality;
 		if (doc.is_return === 1 && doc.purpose === "Material Transfer for Manufacture") {
 			return [
 				__("Material Returned from WIP"),
