@@ -134,7 +134,7 @@ class QualityInspection(Document):
 			self.child_row_reference = child_row_references[0]
 
 	def validate_inspection_required(self):
-		# Obsolete under the Item Quality Trigger model: QI requirement is governed
+		# Obsolete under the Item Quality Trigger model: Quality Inspection requirement is governed
 		# by triggers on the transaction, not by per-Item flags or a global setting.
 		pass
 
