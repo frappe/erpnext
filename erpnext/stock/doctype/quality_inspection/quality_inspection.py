@@ -389,9 +389,7 @@ class QualityInspection(Document):
 	def inspect_and_set_status(self):
 		for reading in self.readings:
 			if not reading.manual_inspection:  # dont auto set status if manual
-				# formulas apply to numeric parameters only; non-numeric readings
-				# compare against the acceptance criteria value
-				if reading.formula_based_criteria and cint(reading.numeric):
+				if reading.formula_based_criteria:
 					self.set_status_based_on_acceptance_formula(reading)
 				else:
 					# if not formula based check acceptance values set
