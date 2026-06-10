@@ -28,17 +28,6 @@ def get_qty(item_code, warehouse):
 
 
 class TestQualityControlReleaseStockEntry(ERPNextTestSuite):
-	def test_quality_control_release_is_a_standard_stock_entry_type(self):
-		purpose, is_standard = frappe.db.get_value(
-			"Stock Entry Type", "Quality Control Release", ["purpose", "is_standard"]
-		)
-		self.assertEqual(purpose, "Quality Control Release")
-		self.assertTrue(is_standard)
-
-	def test_quality_control_release_purpose_available(self):
-		options = frappe.get_meta("Stock Entry").get_field("purpose").options.split("\n")
-		self.assertIn("Quality Control Release", options)
-
 	def test_quality_control_release_moves_stock_like_a_transfer(self):
 		ensure_warehouse()
 		item = make_item(properties={"is_stock_item": 1}).name

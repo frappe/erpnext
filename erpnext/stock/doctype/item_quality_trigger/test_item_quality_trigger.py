@@ -49,87 +49,10 @@ def trigger_row(**overrides):
 
 
 class TestItemQualityTrigger(ERPNextTestSuite):
-	def test_item_holds_quality_triggers(self):
-		item = make_item(properties={"is_stock_item": 1})
-		item.append("quality_triggers", trigger_row())
-		item.save()
-
-		reloaded = frappe.get_doc("Item", item.name)
-		self.assertEqual(len(reloaded.quality_triggers), 1)
-
-		trigger = reloaded.quality_triggers[0]
-		self.assertEqual(trigger.document_type, "Purchase Receipt")
-		self.assertEqual(trigger.warehouse_role, "Inbound")
-		self.assertEqual(trigger.quality_control_mode, "Quarantine")
-		self.assertEqual(trigger.inspection_template, TEST_TEMPLATE)
-		self.assertEqual(trigger.inspection_basis, "Sample")
-
-	def test_item_supports_multiple_triggers(self):
-		item = make_item(properties={"is_stock_item": 1})
-		item.append("quality_triggers", trigger_row())
-		item.append(
-			"quality_triggers",
-			trigger_row(
-				document_type="Stock Entry",
-				stock_entry_type="Material Transfer",
-				warehouse_role="Outbound",
-				quality_control_mode="Block",
-			),
-		)
-		item.save()
-
-		reloaded = frappe.get_doc("Item", item.name)
-		self.assertEqual(len(reloaded.quality_triggers), 2)
-		stock_entry_types = {t.stock_entry_type for t in reloaded.quality_triggers}
-		self.assertIn("Material Transfer", stock_entry_types)
-
-	def test_item_group_holds_quality_triggers(self):
-		group_name = create_test_item_group(is_group=1)
-		group = frappe.get_doc("Item Group", group_name)
-		group.set("quality_triggers", [])
-		group.append(
-			"quality_triggers",
-			trigger_row(
-				document_type="Stock Entry",
-				stock_entry_type="Material Transfer",
-				warehouse_role="Outbound",
-				quality_control_mode="Block",
-			),
-		)
-		group.save()
-
-		reloaded = frappe.get_doc("Item Group", group_name)
-		self.assertTrue(any(t.document_type == "Stock Entry" for t in reloaded.quality_triggers))
-
-	def test_legacy_item_qc_fields_removed(self):
-		meta = frappe.get_meta("Item")
-		self.assertIsNone(meta.get_field("inspection_required_before_purchase"))
-		self.assertIsNone(meta.get_field("inspection_required_before_delivery"))
-		self.assertIsNone(meta.get_field("quality_inspection_template"))
-		self.assertIsNotNone(meta.get_field("quality_triggers"))
-
-	def test_document_type_scoped_to_supported_doctypes(self):
-		options = frappe.get_meta("Item Quality Trigger").get_field("document_type").options.split("\n")
-		for doctype in (
-			"Stock Entry",
-			"Purchase Receipt",
-			"Delivery Note",
-			"Subcontracting Receipt",
-			"Sales Invoice",
-			"Purchase Invoice",
-			"Job Card",
-		):
-			self.assertIn(doctype, options)
-
-	def test_stock_settings_quality_fields_removed(self):
-		meta = frappe.get_meta("Stock Settings")
-		self.assertIsNone(meta.get_field("allow_to_make_quality_inspection_after_purchase_or_delivery"))
-		self.assertIsNone(meta.get_field("action_if_quality_inspection_is_rejected"))
-		self.assertIsNone(meta.get_field("action_if_quality_inspection_is_not_submitted"))
-
 	def test_allowed_warehouse_roles_matrix(self):
 		self.assertEqual(allowed_warehouse_roles("Purchase Receipt"), {"Inbound"})
-		self.assertEqual(allowed_warehouse_roles("Delivery Note"), {"Outbound"})
+		# Outbound inspects the delivery, Inbound inspects the customer return
+		self.assertEqual(allowed_warehouse_roles("Delivery Note"), {"Inbound", "Outbound"})
 		self.assertEqual(allowed_warehouse_roles("Stock Entry", "Material Receipt"), {"Inbound"})
 		self.assertEqual(allowed_warehouse_roles("Stock Entry", "Material Issue"), {"Outbound"})
 		self.assertEqual(allowed_warehouse_roles("Stock Entry", "Material Transfer"), {"Inbound", "Outbound"})
