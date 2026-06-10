@@ -217,6 +217,7 @@ class TestQualityQuarantine(ERPNextTestSuite):
 				4: ["Accepted"],
 				5: ["Rejected"],
 			},
+			item_code=item,
 		)
 		submit_inspection_for_lot(lot, status="Accepted", reading_bundle=bundle.name)
 
@@ -227,6 +228,43 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertEqual(lot_doc.accepted_qty, 3)
 		self.assertEqual(lot_doc.rejected_qty, 2)
 		self.assertEqual(lot_doc.pending_qty, 0)
+
+	def test_each_quantity_basis_is_stamped_and_requires_a_bundle(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+		from erpnext.stock.doctype.quality_inspection_reading_bundle.test_quality_inspection_reading_bundle import (
+			make_bundle,
+		)
+
+		qc = make_qc_warehouse("_Test QC Basis WH")
+		store = make_warehouse("_Test QC Basis Store", quality_warehouse=qc)
+
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry",
+				warehouse_role="Inbound",
+				quality_control_mode="Quarantine",
+				inspection_basis="Each Quantity",
+			),
+		)
+		item.save()
+
+		receipt = make_stock_entry(
+			item_code=item.name, qty=2, to_warehouse=store, purpose="Material Receipt", rate=100
+		)
+		lot = quality_control_lots_for(receipt.name)[0].name
+
+		# the trigger's basis landed on the lot...
+		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "inspection_basis"), "Each Quantity")
+
+		# ...so an inspection without per-unit readings is refused
+		self.assertRaises(frappe.ValidationError, submit_inspection_for_lot, lot)
+
+		# and accepted with a bundle
+		bundle = make_bundle(2, {1: ["Accepted"], 2: ["Accepted"]}, item_code=item.name)
+		submit_inspection_for_lot(lot, reading_bundle=bundle.name)
+		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "status"), "Released")
 
 	def test_inspection_rejection_keeps_stock_quarantined(self):
 		qc = make_qc_warehouse("_Test QC Reject WH")

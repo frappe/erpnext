@@ -90,8 +90,23 @@ def process_inspection_result(doc, method=None):
 
 		schedule_next_retest(lot.item_code, lot.batch_no)
 
+	if lot.inspection_basis == "Each Quantity" and not doc.get("reading_bundle"):
+		frappe.throw(
+			_(
+				"Quality Control Lot {0} is inspected on an Each Quantity basis: every unit needs "
+				"its own readings. Attach a Quality Inspection Reading Bundle before submitting."
+			).format(frappe.bold(lot.name)),
+			title=_("Per-Unit Readings Required"),
+		)
+
 	if doc.get("reading_bundle"):
 		bundle = frappe.get_doc("Quality Inspection Reading Bundle", doc.reading_bundle)
+		if bundle.item_code != lot.item_code:
+			frappe.throw(
+				_("Reading Bundle {0} is for item {1}, not the lot's item {2}.").format(
+					frappe.bold(bundle.name), frappe.bold(bundle.item_code), frappe.bold(lot.item_code)
+				)
+			)
 		accepted_qty = min(flt(bundle.accepted_qty), pending_qty)
 		rejected_qty = min(flt(bundle.rejected_qty), pending_qty - accepted_qty)
 	elif doc.status == "Rejected":
@@ -195,6 +210,10 @@ def block_stock_reconciliation_on_quality_warehouse(doc, method=None):
 
 def create_quality_control_lots(doc, method=None):
 	"""Mint a Quality Control Lot for each item moving into a Quality warehouse on this document."""
+	from erpnext.stock.services.quality_retest import get_retest_trigger
+
+	points_by_row = {id(point.row): point for point in resolve_inspection_points(doc)}
+
 	for row, role, warehouse in movements_of(doc):
 		if role != INBOUND or not is_quality_warehouse(warehouse):
 			continue
@@ -203,7 +222,18 @@ def create_quality_control_lots(doc, method=None):
 		if not received_qty:
 			continue
 
-		frappe.get_doc(
+		# carry the inspection template/basis from the trigger that caused the
+		# quarantine; periodic re-test transfers fall back to the re-test trigger
+		point = points_by_row.get(id(row))
+		template = point.inspection_template if point else None
+		basis = point.inspection_basis if point else None
+		if not template:
+			retest_trigger = get_retest_trigger(row.get("item_code"))
+			if retest_trigger:
+				template = retest_trigger.inspection_template
+				basis = retest_trigger.inspection_basis
+
+		lot = frappe.get_doc(
 			{
 				"doctype": "Quality Control Lot",
 				"item_code": row.get("item_code"),
@@ -213,5 +243,9 @@ def create_quality_control_lots(doc, method=None):
 				"received_qty": received_qty,
 				"source_document_type": doc.doctype,
 				"source_document": doc.name,
+				"inspection_template": template,
 			}
-		).insert(ignore_permissions=True)
+		)
+		if basis:
+			lot.inspection_basis = basis
+		lot.insert(ignore_permissions=True)

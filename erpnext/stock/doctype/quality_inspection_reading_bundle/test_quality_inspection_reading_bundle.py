@@ -15,10 +15,10 @@ def ensure_parameter(name):
 	return name
 
 
-def make_bundle(quantity, unit_results):
+def make_bundle(quantity, unit_results, item_code=None):
 	"""unit_results: {unit_no: [status, status, ...]} — one status per parameter row."""
 	bundle = frappe.new_doc("Quality Inspection Reading Bundle")
-	bundle.item_code = make_item(properties={"is_stock_item": 1}).name
+	bundle.item_code = item_code or make_item(properties={"is_stock_item": 1}).name
 	bundle.quantity = quantity
 	for unit_no, statuses in unit_results.items():
 		for index, status in enumerate(statuses):
