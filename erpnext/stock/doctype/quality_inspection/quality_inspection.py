@@ -45,7 +45,7 @@ class QualityInspection(Document):
 		inspection_type: DF.Literal["", "Incoming", "Outgoing", "In Process"]
 		item_code: DF.Link
 		item_name: DF.Data | None
-		serial_no: DF.Link | None
+		serial_no: DF.SmallText | None
 		letter_head: DF.Link | None
 		manual_inspection: DF.Check
 		naming_series: DF.Literal["MAT-QA-.YYYY.-"]
@@ -106,6 +106,7 @@ class QualityInspection(Document):
 			self.set_status_from_reading_bundle()
 
 		self.validate_inspection_required()
+		self.validate_serial_nos()
 		self.set_child_row_reference()
 		self.set_company()
 		self.warn_unrecorded_readings()
@@ -218,6 +219,36 @@ class QualityInspection(Document):
 			self.status = "Accepted"
 		else:
 			self.status = "Rejected"
+
+	def validate_serial_nos(self):
+		"""The recorded serials must be real and the item's; they set the sample size.
+
+		Each Quantity inspections record serials per unit in the reading bundle,
+		so the document-level field is cleared there.
+		"""
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+		if self.inspection_basis == "Each Quantity":
+			self.serial_no = None
+			return
+
+		if not self.serial_no:
+			return
+
+		serial_nos = get_serial_nos(self.serial_no)
+		for serial in serial_nos:
+			item_code = frappe.db.get_value("Serial No", serial, "item_code")
+			if not item_code:
+				frappe.throw(_("Serial No {0} does not exist.").format(frappe.bold(serial)))
+			if item_code != self.item_code:
+				frappe.throw(
+					_("Serial No {0} belongs to item {1}, not {2}.").format(
+						frappe.bold(serial), frappe.bold(item_code), frappe.bold(self.item_code)
+					)
+				)
+
+		if serial_nos:
+			self.sample_size = len(serial_nos)
 
 	def validate_inspection_required(self):
 		# Obsolete under the Item Quality Trigger model: Quality Inspection requirement is governed

@@ -114,11 +114,12 @@
   },
   {
    "fieldname": "serial_no",
-   "fieldtype": "Link",
-   "label": "Serial No",
+   "fieldtype": "Small Text",
+   "label": "Serial Nos",
    "oldfieldname": "item_serial_no",
    "oldfieldtype": "Link",
-   "options": "Serial No"
+   "options": "",
+   "description": "Serials covered by this inspection, one per line. Recording them sets the Sample Size. Each Quantity inspections record serials per unit in the Reading Bundle."
   },
   {
    "fieldname": "batch_no",

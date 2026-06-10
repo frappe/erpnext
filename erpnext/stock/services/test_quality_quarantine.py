@@ -320,6 +320,60 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Serial No", serials[2], "warehouse"), store)
 		self.assertEqual(frappe.db.get_value("Serial No", serials[1], "warehouse"), qc)
 
+	def test_recorded_serials_set_the_sample_size(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+
+		qc = make_qc_warehouse("_Test QC Sample Serials WH")
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "QCSS.#####"}
+		)
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry",
+				warehouse_role="Inbound",
+				quality_control_mode="Quarantine",
+				applicable_warehouse=qc,
+			),
+		)
+		item.save()
+		se = make_stock_entry(
+			item_code=item.name, qty=3, to_warehouse=qc, purpose="Material Receipt", rate=100
+		)
+		lot = quality_control_lots_for(se.name)[0].name
+		serials = frappe.get_all(
+			"Serial No", filters={"item_code": item.name, "warehouse": qc}, pluck="name", order_by="name"
+		)
+
+		inspection = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Incoming",
+				"reference_type": "Quality Control Lot",
+				"reference_name": lot,
+				"item_code": item.name,
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+				"manual_inspection": 1,
+				"status": "Accepted",
+				"serial_no": "\n".join(serials[:2]),
+			}
+		)
+		inspection.insert(ignore_permissions=True)
+		# the recorded serials are the sample
+		self.assertEqual(inspection.sample_size, 2)
+
+		# a serial belonging to another item is refused
+		other = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "QCSO.#####"}
+		)
+		make_stock_entry(
+			item_code=other.name, qty=1, to_warehouse=REAL_WH, purpose="Material Receipt", rate=100
+		)
+		foreign_serial = frappe.get_all("Serial No", filters={"item_code": other.name}, pluck="name")[0]
+		inspection.serial_no = foreign_serial
+		self.assertRaises(frappe.ValidationError, inspection.save)
+
 	def test_manual_release_refuses_rejected_serials(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
 		from erpnext.stock.doctype.quality_inspection_reading_bundle.test_quality_inspection_reading_bundle import (

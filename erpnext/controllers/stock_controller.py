@@ -769,7 +769,7 @@ def make_quality_inspections(
 				"item_code": item.get("item_code"),
 				"description": item.get("description"),
 				"sample_size": 0 if each_quantity else flt(item.get("sample_size")),
-				"serial_no": item.get("serial_no").split("\n")[0] if item.get("serial_no") else None,
+				"serial_no": item.get("serial_no"),
 				"batch_no": item.get("batch_no"),
 				"child_row_reference": item.get("child_row_reference"),
 			}

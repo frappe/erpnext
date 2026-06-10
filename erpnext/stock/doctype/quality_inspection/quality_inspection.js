@@ -47,17 +47,6 @@ frappe.ui.form.on("Quality Inspection", {
 			};
 		});
 
-		// Serial No based on item_code
-		frm.set_query("serial_no", function () {
-			let filters = {};
-			if (frm.doc.item_code) {
-				filters = {
-					item_code: frm.doc.item_code,
-				};
-			}
-			return { filters: filters };
-		});
-
 		// item code based on GRN/DN
 		frm.set_query("item_code", function (doc) {
 			if (doc.reference_type && doc.reference_name) {
@@ -116,7 +105,11 @@ frappe.ui.form.on("Quality Inspection", {
 
 		frappe.db.get_value("Item", frm.doc.item_code, ["has_batch_no", "has_serial_no"]).then((r) => {
 			frm.toggle_display("batch_no", cint(r.message?.has_batch_no));
-			frm.toggle_display("serial_no", cint(r.message?.has_serial_no));
+			// Each Quantity inspections record serials per unit in the bundle
+			frm.toggle_display(
+				"serial_no",
+				cint(r.message?.has_serial_no) && frm.doc.inspection_basis !== "Each Quantity"
+			);
 		});
 	},
 
