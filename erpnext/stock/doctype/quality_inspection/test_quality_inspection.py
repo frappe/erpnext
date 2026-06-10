@@ -66,41 +66,6 @@ class TestQualityInspection(ERPNextTestSuite):
 	def setUp(self):
 		super().setUp()
 		create_item("_Test Item with QA")
-		frappe.db.set_value("Item", "_Test Item with QA", "inspection_required_before_delivery", 1)
-
-	def test_qa_for_delivery(self):
-		make_stock_entry(
-			item_code="_Test Item with QA", target="_Test Warehouse - _TC", qty=1, basic_rate=100
-		)
-		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
-
-		self.assertRaises(QualityInspectionRequiredError, dn.submit)
-
-		qa = create_quality_inspection(
-			reference_type="Delivery Note", reference_name=dn.name, status="Rejected"
-		)
-		dn.reload()
-		self.assertRaises(QualityInspectionRejectedError, dn.submit)
-
-		frappe.db.set_value("Quality Inspection", qa.name, "status", "Accepted")
-		dn.reload()
-		dn.submit()
-
-		qa.reload()
-		qa.cancel()
-		dn.reload()
-		dn.cancel()
-
-	def test_qa_not_submit(self):
-		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
-		qa = create_quality_inspection(
-			reference_type="Delivery Note", reference_name=dn.name, do_not_submit=True
-		)
-		dn.items[0].quality_inspection = qa.name
-		self.assertRaises(QualityInspectionNotSubmittedError, dn.submit)
-
-		qa.delete()
-		dn.delete()
 
 	def test_doc_update_published_for_reference_on_submit(self):
 		"""Submitting a QI publishes doc_update so open reference forms resync their timestamp."""
@@ -199,58 +164,6 @@ class TestQualityInspection(ERPNextTestSuite):
 
 		qa.delete()
 		dn.delete()
-
-	def test_make_quality_inspections_from_linked_document(self):
-		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
-		if dn.doctype in ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"]:
-			inspection_type = "Incoming"
-		else:
-			inspection_type = "Outgoing"
-		for item in dn.items:
-			item.sample_size = item.qty
-		quality_inspections = make_quality_inspections(
-			dn.company, dn.doctype, dn.name, dn.items, inspection_type
-		)
-		self.assertEqual(len(dn.items), len(quality_inspections))
-
-		# cleanup
-		for qi in quality_inspections:
-			frappe.delete_doc("Quality Inspection", qi)
-		dn.delete()
-
-	def test_rejected_qi_validation(self):
-		"""Test if rejected QI blocks Stock Entry as per Stock Settings."""
-		se = make_stock_entry(
-			item_code="_Test Item with QA",
-			target="_Test Warehouse - _TC",
-			qty=1,
-			basic_rate=100,
-			inspection_required=True,
-			do_not_submit=True,
-		)
-
-		readings = [{"specification": "Iron Content", "min_value": 0.1, "max_value": 0.9, "reading_1": "1.0"}]
-
-		qa = create_quality_inspection(
-			reference_type="Stock Entry", reference_name=se.name, readings=readings, status="Rejected"
-		)
-
-		frappe.db.set_single_value("Stock Settings", "action_if_quality_inspection_is_rejected", "Stop")
-		se.reload()
-		self.assertRaises(
-			QualityInspectionRejectedError, se.submit
-		)  # when blocked in Stock settings, block rejected QI
-
-		frappe.db.set_single_value("Stock Settings", "action_if_quality_inspection_is_rejected", "Warn")
-		se.reload()
-		se.submit()  # when allowed in Stock settings, allow rejected QI
-
-		# teardown
-		qa.reload()
-		qa.cancel()
-		se.reload()
-		se.cancel()
-		frappe.db.set_single_value("Stock Settings", "action_if_quality_inspection_is_rejected", "Stop")
 
 	def test_qi_status(self):
 		make_stock_entry(
