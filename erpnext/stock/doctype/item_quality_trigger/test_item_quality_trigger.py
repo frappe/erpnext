@@ -95,6 +95,34 @@ class TestItemQualityTrigger(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, item.save)
 
+	def test_periodic_retest_row_needs_interval_and_forces_quarantine(self):
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				trigger_type="Periodic Re-test",
+				document_type=None,
+				warehouse_role=None,
+				quality_control_mode=None,
+			),
+		)
+		# missing interval is rejected
+		self.assertRaises(frappe.ValidationError, item.save)
+
+		item.reload()
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				trigger_type="Periodic Re-test",
+				document_type=None,
+				warehouse_role=None,
+				quality_control_mode=None,
+				retest_interval_days=90,
+			),
+		)
+		item.save()
+		self.assertEqual(item.quality_triggers[0].quality_control_mode, "Quarantine")
+
 	def test_job_card_cannot_quarantine(self):
 		item = make_item(properties={"is_stock_item": 1})
 		item.append(

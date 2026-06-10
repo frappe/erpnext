@@ -1134,6 +1134,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 					"Material Transfer",
 					"Send to Subcontractor",
 					"Material Transfer for Manufacture",
+					"Quality Control Release",
 				]
 
 				if self.purpose in allowed_types and d.serial_and_batch_bundle and self.docstatus == 1:

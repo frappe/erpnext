@@ -18,6 +18,7 @@
   "batch_qty",
   "stock_uom",
   "expiry_date",
+  "next_quality_inspection_date",
   "use_batchwise_valuation",
   "allow_negative_stock_for_batch",
   "disabled",
@@ -97,6 +98,13 @@
    "label": "Expiry Date",
    "oldfieldname": "expiry_date",
    "oldfieldtype": "Date"
+  },
+  {
+   "description": "Set by the Periodic Re-test quality trigger. When this date arrives, the batch is auto-quarantined into the Quality Control warehouse for re-inspection.",
+   "fieldname": "next_quality_inspection_date",
+   "fieldtype": "Date",
+   "label": "Next Quality Inspection Date",
+   "read_only": 1
   },
   {
    "fieldname": "source",

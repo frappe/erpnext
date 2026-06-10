@@ -72,10 +72,12 @@ class ItemQualityTrigger(Document):
 		parenttype: DF.Data
 		party_transaction_type: DF.Literal["", "External", "Internal Transfer"]
 		quality_control_mode: DF.Literal["Quarantine", "Block", "Warn", "Monitor"]
+		retest_interval_days: DF.Int
 		sample_size: DF.Float
 		sample_size_is_percentage: DF.Check
 		stock_entry_type: DF.Link | None
 		supplier: DF.Link | None
+		trigger_type: DF.Literal["Transaction", "Periodic Re-test"]
 		warehouse_role: DF.Literal["Inbound", "Outbound"]
 	# end: auto-generated types
 
@@ -93,6 +95,23 @@ def validate_item_quality_triggers(doc, method=None):
 
 
 def _validate_trigger_row(row):
+	# Periodic Re-test rows are interval-driven and always quarantine; none of the
+	# transaction dimensions (document type, direction, parties) apply to them.
+	if row.get("trigger_type") == "Periodic Re-test":
+		if not row.retest_interval_days or row.retest_interval_days < 1:
+			frappe.throw(
+				_(
+					"Row #{0}: A Periodic Re-test trigger needs a re-test interval of at least one day."
+				).format(row.idx)
+			)
+		row.quality_control_mode = "Quarantine"
+		row.document_type = None
+		row.warehouse_role = None
+		return
+
+	if not row.document_type:
+		frappe.throw(_("Row #{0}: Document Type is required for a Transaction trigger.").format(row.idx))
+
 	# Stock Entry Type only applies to Stock Entry rows.
 	if row.stock_entry_type and row.document_type != "Stock Entry":
 		frappe.throw(_("Row #{0}: Stock Entry Type applies only to Stock Entry.").format(row.idx))

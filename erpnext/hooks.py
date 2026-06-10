@@ -505,7 +505,9 @@ scheduler_events = {
 		"erpnext.utilities.doctype.video.video.update_youtube_data",
 		"erpnext.accounts.doctype.bank_transaction_rule.bank_transaction_rule.scheduler_run_rule_evaluation",
 	],
-	"daily": [],
+	"daily": [
+		"erpnext.stock.services.quality_retest.process_periodic_retests",
+	],
 	"daily_long": [],
 	"daily_maintenance": [
 		"erpnext.support.doctype.issue.issue.auto_close_tickets",

@@ -84,6 +84,11 @@ def process_inspection_result(doc, method=None):
 	if not flt(lot.pending_qty):
 		return
 
+	if lot.batch_no:
+		from erpnext.stock.services.quality_retest import schedule_next_retest
+
+		schedule_next_retest(lot.item_code, lot.batch_no)
+
 	if doc.status == "Rejected":
 		lot.rejected_qty = flt(lot.rejected_qty) + flt(lot.pending_qty)
 		lot.flags.ignore_permissions = True
@@ -114,6 +119,7 @@ def process_inspection_result(doc, method=None):
 			"s_warehouse": lot.quality_warehouse,
 			"t_warehouse": release_warehouse,
 			"batch_no": lot.batch_no,
+			"use_serial_batch_fields": 1 if lot.batch_no else 0,
 		},
 	)
 	release.flags.ignore_permissions = True

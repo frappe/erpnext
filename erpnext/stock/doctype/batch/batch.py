@@ -104,6 +104,7 @@ class Batch(Document):
 		item: DF.Link
 		item_name: DF.Data | None
 		manufacturing_date: DF.Date | None
+		next_quality_inspection_date: DF.Date | None
 		parent_batch: DF.Link | None
 		produced_qty: DF.Float
 		qty_to_produce: DF.Float
