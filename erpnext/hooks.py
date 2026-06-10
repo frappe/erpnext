@@ -392,6 +392,9 @@ doc_events = {
 	("Purchase Receipt", "Purchase Invoice", "Stock Entry", "Subcontracting Receipt"): {
 		"on_submit": "erpnext.stock.services.quality_quarantine.create_quality_control_lots",
 	},
+	"Stock Reconciliation": {
+		"validate": "erpnext.stock.services.quality_quarantine.block_stock_reconciliation_on_quality_warehouse",
+	},
 	"User": {
 		"after_insert": "frappe.contacts.doctype.contact.contact.update_contact",
 		"validate": "erpnext.setup.doctype.employee.employee.validate_employee_role",

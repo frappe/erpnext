@@ -54,6 +54,24 @@ def apply_quarantine_routing(doc):
 		)
 
 
+def block_stock_reconciliation_on_quality_warehouse(doc, method=None):
+	"""Stock Reconciliation may not touch a Quality Control warehouse.
+
+	Reconciliation sets absolute quantities, which would silently desynchronise
+	the warehouse balance from its Quality Control Lots. Quarantined stock only
+	moves through controlled flows (release / return / cancellation).
+	"""
+	for row in doc.get("items") or []:
+		if is_quality_warehouse(row.get("warehouse")):
+			frappe.throw(
+				_(
+					"Row #{0}: {1} is a Quality Control warehouse. Stock Reconciliation is not "
+					"allowed on quarantined stock."
+				).format(row.idx, frappe.bold(row.warehouse)),
+				title=_("Quality Control Warehouse"),
+			)
+
+
 def create_quality_control_lots(doc, method=None):
 	"""Mint a Quality Control Lot for each item moving into a Quality warehouse on this document."""
 	for row, role, warehouse in movements_of(doc):

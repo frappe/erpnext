@@ -73,6 +73,43 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertEqual(lots[0].quality_warehouse, qc)
 		self.assertEqual(lots[0].received_qty, 4)
 
+	def test_quality_warehouse_exit_is_locked(self):
+		qc = make_qc_warehouse()
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item, qty=5, to_warehouse=qc, purpose="Material Receipt", rate=100)
+
+		# an ordinary transfer out of the Quality Control warehouse is blocked…
+		self.assertRaises(
+			frappe.ValidationError,
+			make_stock_entry,
+			item_code=item,
+			qty=2,
+			from_warehouse=qc,
+			to_warehouse=REAL_WH,
+			purpose="Material Transfer",
+		)
+
+		# …while a Quality Control Release takes it out cleanly
+		make_stock_entry(
+			item_code=item, qty=2, from_warehouse=qc, to_warehouse=REAL_WH, purpose="Quality Control Release"
+		)
+
+	def test_cancellation_reversal_is_exempt_from_the_lock(self):
+		qc = make_qc_warehouse()
+		item = make_item(properties={"is_stock_item": 1}).name
+		se = make_stock_entry(item_code=item, qty=3, to_warehouse=qc, purpose="Material Receipt", rate=100)
+		se.cancel()  # reversal takes stock back out of the Quality Control warehouse — allowed
+
+	def test_stock_reconciliation_blocked_on_quality_warehouse(self):
+		qc = make_qc_warehouse()
+		item = make_item(properties={"is_stock_item": 1}).name
+
+		reconciliation = frappe.new_doc("Stock Reconciliation")
+		reconciliation.company = "_Test Company"
+		reconciliation.purpose = "Stock Reconciliation"
+		reconciliation.append("items", {"item_code": item, "warehouse": qc, "qty": 10, "valuation_rate": 100})
+		self.assertRaises(frappe.ValidationError, reconciliation.save)
+
 	def test_quarantine_requires_configured_quality_warehouse(self):
 		store = make_warehouse("_Test QC Unconfigured Store")  # no quality_warehouse
 		item = self._quarantine_item()

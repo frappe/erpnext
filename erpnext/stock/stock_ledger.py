@@ -138,6 +138,7 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 	                        stock)
 	"""
 	from erpnext.controllers.stock_controller import future_sle_exists, invalidate_future_sle_cache
+	from erpnext.stock.services.quality_warehouse import validate_quality_warehouse_exit
 
 	if sl_entries:
 		# Sorted so two vouchers touching the same pairs can't take the gates in opposite order.
@@ -157,6 +158,7 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 		future_sle_exists(args, sl_entries)
 
 		for sle in sl_entries:
+			validate_quality_warehouse_exit(sle)
 			if cancelled:
 				sle["actual_qty"] = -flt(sle.get("actual_qty"))
 
