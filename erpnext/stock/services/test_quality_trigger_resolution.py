@@ -155,6 +155,30 @@ class TestQualityTriggerResolution(ERPNextTestSuite):
 		self.assertEqual(resolve_inspection_points(pr_doc(item.name, supplier="_Test Supplier 1")), [])
 		self.assertEqual(len(resolve_inspection_points(pr_doc(item.name, supplier="_Test Supplier"))), 1)
 
+	def test_customer_scoped_trigger_matches_only_that_customer(self):
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Delivery Note",
+				warehouse_role="Outbound",
+				quality_control_mode="Block",
+				customer="_Test Customer",
+			),
+		)
+		item.save()
+
+		def dn(customer):
+			return frappe._dict(
+				doctype="Delivery Note",
+				customer=customer,
+				items=[frappe._dict(item_code=item.name, warehouse=REAL_WH, qty=1, idx=1)],
+			)
+
+		# a delivery to another customer is not this trigger's business
+		self.assertEqual(resolve_inspection_points(dn("_Test Customer 1")), [])
+		self.assertEqual(len(resolve_inspection_points(dn("_Test Customer"))), 1)
+
 	def test_applicable_warehouse_filters_movements(self):
 		item = make_item(properties={"is_stock_item": 1})
 		item.append("quality_triggers", trigger_row(applicable_warehouse=REAL_WH))
