@@ -2951,16 +2951,18 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						hidden: true,
 					},
 					{
-						fieldtype: "Read Only",
+						fieldtype: "Data",
 						fieldname: "item_code",
 						label: __("Item Code"),
 						in_list_view: true,
+						read_only: true,
 					},
 					{
-						fieldtype: "Read Only",
+						fieldtype: "Data",
 						fieldname: "item_name",
 						label: __("Item Name"),
 						in_list_view: true,
+						read_only: true,
 					},
 					{
 						fieldtype: "Float",
@@ -3072,6 +3074,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					if (me.has_inspection_required(item)) {
 						let dialog_items = dialog.fields_dict.items;
 						dialog_items.df.data.push({
+							// every offered row needs inspection: pre-select it
+							__checked: 1,
 							item_code: item.item_code,
 							item_name: item.item_name,
 							qty: item.qty,

@@ -2,6 +2,12 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Quality Control Lot", {
+	setup(frm) {
+		frm.set_query("batch_no", function (doc) {
+			return { filters: { item: doc.item_code } };
+		});
+	},
+
 	refresh(frm) {
 		if (!frm.is_new() && frm.doc.pending_qty > 0 && !frm.doc.quality_inspection) {
 			frm.add_custom_button(__("Create Quality Inspection"), () => {
