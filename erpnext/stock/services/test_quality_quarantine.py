@@ -393,6 +393,18 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		# the recorded serials are the sample
 		self.assertEqual(inspection.sample_size, 2)
 
+		# a serial of the same item that never came through the lot's source is refused
+		make_stock_entry(
+			item_code=item.name, qty=1, to_warehouse=REAL_WH, purpose="Material Receipt", rate=100
+		)
+		stray = frappe.get_all(
+			"Serial No", filters={"item_code": item.name, "warehouse": REAL_WH}, pluck="name"
+		)[0]
+		stray_inspection = build_inspection(stray)
+		stray_inspection.insert(ignore_permissions=True)
+		self.assertRaises(frappe.ValidationError, stray_inspection.submit)
+		stray_inspection.delete()
+
 		# a serial belonging to another item is refused
 		other = make_item(
 			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "QCSO.#####"}

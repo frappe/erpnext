@@ -259,19 +259,91 @@ class QualityInspection(Document):
 		self.validate_readings_status_mandatory()
 		self.validate_readings_recorded()
 		self.validate_tracking_identity_recorded()
-		self.validate_sampled_serials_on_reference_row()
+		self.validate_inspected_serials_against_reference()
 		self.validate_reading_bundle_coverage()
 
-	def validate_sampled_serials_on_reference_row(self):
-		"""Early feedback: the sampled serials must be on the row being inspected.
+	def validate_inspected_serials_against_reference(self):
+		"""The inspected serials must belong to the stock under inspection.
 
-		Only checked when the referenced row already carries serials — the
-		document-side gate at its submission is the authority either way.
+		Lot-referenced inspections check against the serials that arrived through
+		the lot's source document (falling back to "currently held in the lot's
+		Quality Control warehouse"); transaction-referenced ones check against the
+		referenced row when it already carries serials — the document-side gate at
+		its submission is the authority there either way. Covers the sampled
+		Serial Nos and the reading bundle's per-unit serials alike.
 		"""
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 		from erpnext.stock.services.quality_trigger_resolution import get_row_serial_nos
 
-		if not self.child_row_reference or not (self.serial_no or "").strip():
+		inspected = set(get_serial_nos(self.serial_no)) if (self.serial_no or "").strip() else set()
+		if self.reading_bundle:
+			inspected.update(
+				frappe.get_all(
+					"Quality Inspection Reading Entry",
+					filters={"parent": self.reading_bundle, "serial_no": ("is", "set")},
+					pluck="serial_no",
+				)
+			)
+		if not inspected:
+			return
+
+		if self.reference_type == "Quality Control Lot" and self.reference_name:
+			lot = frappe.db.get_value(
+				"Quality Control Lot",
+				self.reference_name,
+				["item_code", "quality_warehouse", "source_document_type", "source_document"],
+				as_dict=True,
+			)
+
+			members = set()
+			if lot.source_document_type and lot.source_document:
+				child_doctype = (
+					"Stock Entry Detail"
+					if lot.source_document_type == "Stock Entry"
+					else lot.source_document_type + " Item"
+				)
+				for row in frappe.get_all(
+					child_doctype,
+					filters={"parent": lot.source_document, "item_code": lot.item_code},
+					fields=["serial_no", "serial_and_batch_bundle"],
+				):
+					members.update(get_row_serial_nos(row))
+
+			if members:
+				missing = inspected - members
+				if missing:
+					frappe.throw(
+						_(
+							"Serial number(s) {0} did not arrive through {1}, the source of "
+							"Quality Control Lot {2} — only the lot's own units can be inspected."
+						).format(
+							frappe.bold(", ".join(sorted(missing))),
+							frappe.bold(lot.source_document),
+							self.reference_name,
+						),
+						title=_("Inspected Serials Mismatch"),
+					)
+			else:
+				strangers = [
+					serial
+					for serial in sorted(inspected)
+					if frappe.db.get_value("Serial No", serial, "warehouse") != lot.quality_warehouse
+				]
+				if strangers:
+					frappe.throw(
+						_(
+							"Serial number(s) {0} are not held in {1}, where Quality Control Lot "
+							"{2} is quarantined."
+						).format(
+							frappe.bold(", ".join(strangers)),
+							frappe.bold(lot.quality_warehouse),
+							self.reference_name,
+						),
+						title=_("Inspected Serials Mismatch"),
+					)
+			return
+
+		if not self.child_row_reference:
 			return
 
 		child_doctype = (
@@ -290,7 +362,7 @@ class QualityInspection(Document):
 		if not row_serials:
 			return
 
-		missing = set(get_serial_nos(self.serial_no)) - row_serials
+		missing = inspected - row_serials
 		if missing:
 			frappe.throw(
 				_(
