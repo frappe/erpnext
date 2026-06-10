@@ -66,7 +66,7 @@ def submit_inspection_for_lot(lot_name, status="Accepted", reading_bundle=None, 
 	return inspection
 
 
-def make_release(lot_name, qty, to_warehouse, batch_no=None):
+def make_release(lot_name, qty, to_warehouse, batch_no=None, serial_no=None):
 	lot = frappe.get_doc("Quality Control Lot", lot_name)
 	release = frappe.new_doc("Stock Entry")
 	release.purpose = "Quality Control Release"
@@ -81,7 +81,8 @@ def make_release(lot_name, qty, to_warehouse, batch_no=None):
 			"s_warehouse": lot.quality_warehouse,
 			"t_warehouse": to_warehouse,
 			"batch_no": batch_no,
-			"use_serial_batch_fields": 1 if batch_no else 0,
+			"serial_no": serial_no,
+			"use_serial_batch_fields": 1 if (batch_no or serial_no) else 0,
 		},
 	)
 	release.insert()
@@ -299,6 +300,54 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		# exactly the accepted serials were released; the rejected one stays held
 		self.assertEqual(frappe.db.get_value("Serial No", serials[0], "warehouse"), store)
 		self.assertEqual(frappe.db.get_value("Serial No", serials[2], "warehouse"), store)
+		self.assertEqual(frappe.db.get_value("Serial No", serials[1], "warehouse"), qc)
+
+	def test_manual_release_refuses_rejected_serials(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+		from erpnext.stock.doctype.quality_inspection_reading_bundle.test_quality_inspection_reading_bundle import (
+			make_bundle,
+		)
+
+		# no store points at this Quality Control warehouse, so nothing auto-releases
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
+		qc = make_qc_warehouse("_Test QC Manual Serial WH")
+
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "QCMS.#####"}
+		)
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry",
+				warehouse_role="Inbound",
+				quality_control_mode="Quarantine",
+				inspection_basis="Each Quantity",
+				applicable_warehouse=qc,
+			),
+		)
+		item.save()
+
+		se = make_stock_entry(
+			item_code=item.name, qty=3, to_warehouse=qc, purpose="Material Receipt", rate=100
+		)
+		lot = quality_control_lots_for(se.name)[0].name
+		serials = frappe.get_all(
+			"Serial No", filters={"item_code": item.name, "warehouse": qc}, pluck="name", order_by="name"
+		)
+
+		bundle = make_bundle(
+			3,
+			{1: ["Accepted"], 2: ["Rejected"], 3: ["Accepted"]},
+			item_code=item.name,
+			unit_serials={1: serials[0], 2: serials[1], 3: serials[2]},
+		)
+		submit_inspection_for_lot(lot, reading_bundle=bundle.name)
+
+		# the rejected serial cannot be released, and serials must be named
+		self.assertRaises(frappe.ValidationError, make_release, lot, 1, REAL_WH, serial_no=serials[1])
+		self.assertRaises(frappe.ValidationError, make_release, lot, 2, REAL_WH)
+
+		make_release(lot, 2, REAL_WH, serial_no=f"{serials[0]}\n{serials[2]}")
 		self.assertEqual(frappe.db.get_value("Serial No", serials[1], "warehouse"), qc)
 
 	def test_generated_release_honors_bundle_mode(self):

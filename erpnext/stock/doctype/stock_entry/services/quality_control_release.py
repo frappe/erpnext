@@ -46,6 +46,7 @@ class QualityControlReleaseStockEntry(MaterialTransferStockEntry):
 				title=_("Inspection Pending"),
 			)
 
+		accepted_serials = self._get_accepted_serials(lot)
 		release_qty = 0.0
 		for row in doc.items:
 			if row.item_code != lot.item_code:
@@ -61,6 +62,7 @@ class QualityControlReleaseStockEntry(MaterialTransferStockEntry):
 					).format(row.idx, frappe.bold(lot.quality_warehouse), lot.name)
 				)
 			self._validate_row_batch(row, lot)
+			self._validate_row_serials(row, lot, accepted_serials)
 			release_qty += flt(row.transfer_qty or row.qty)
 
 		if release_qty > flt(lot.pending_qty):
@@ -106,6 +108,63 @@ class QualityControlReleaseStockEntry(MaterialTransferStockEntry):
 					row.idx, frappe.bold(lot.batch_no), lot.name
 				),
 				title=_("Batch Missing"),
+			)
+
+	def _get_accepted_serials(self, lot):
+		"""The serials the lot's inspection accepted, or None when no per-serial
+		verdicts were recorded (quantity and batch guards apply instead)."""
+		if not lot.quality_inspection:
+			return None
+
+		reading_bundle = frappe.db.get_value("Quality Inspection", lot.quality_inspection, "reading_bundle")
+		if not reading_bundle:
+			return None
+
+		accepted = frappe.get_doc("Quality Inspection Reading Bundle", reading_bundle).get_unit_serials(
+			"Accepted"
+		)
+		return set(accepted) or None
+
+	def _validate_row_serials(self, row, lot, accepted_serials):
+		"""A release moves only serials the inspection accepted.
+
+		With per-serial verdicts on record, a row must name its serials — left
+		unspecified, submission would auto-pick first-in-first-out and could
+		smuggle a rejected unit out of quarantine.
+		"""
+		if accepted_serials is None:
+			return
+
+		row_serials = set()
+		if row.get("serial_no"):
+			from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+			row_serials.update(get_serial_nos(row.serial_no))
+		if row.get("serial_and_batch_bundle"):
+			row_serials.update(
+				frappe.get_all(
+					"Serial and Batch Entry",
+					filters={"parent": row.serial_and_batch_bundle, "serial_no": ("is", "set")},
+					pluck="serial_no",
+				)
+			)
+
+		if not row_serials:
+			frappe.throw(
+				_("Row #{0}: Specify the accepted serial numbers of Quality Control Lot {1}.").format(
+					row.idx, lot.name
+				),
+				title=_("Serial Numbers Missing"),
+			)
+
+		rejected = row_serials - accepted_serials
+		if rejected:
+			frappe.throw(
+				_(
+					"Row #{0}: Serial number(s) {1} were not accepted by the inspection of Quality "
+					"Control Lot {2} and cannot be released."
+				).format(row.idx, frappe.bold(", ".join(sorted(rejected))), lot.name),
+				title=_("Serial Not Accepted"),
 			)
 
 	def on_submit(self):
