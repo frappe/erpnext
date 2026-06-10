@@ -111,13 +111,43 @@ def item_has_trigger_for_doctype(item_code, document_type):
 	return any(trigger.document_type == document_type for trigger in _ordered_triggers(item_code))
 
 
+def get_trigger_for_doctype(item_code, document_type):
+	"""The item's most specific trigger for a document type, or None.
+
+	Looser than full resolution (warehouse / party specifics ignored), used for
+	form defaults; the precise gate is applied at submission.
+	"""
+	for trigger in _ordered_triggers(item_code):
+		if trigger.document_type == document_type:
+			return trigger
+	return None
+
+
 def get_inspection_basis(item_code, document_type):
 	"""The inspection basis (Sample / Each Quantity) of the item's most specific
 	trigger for a document type. Items without a trigger inspect on a sample."""
-	for trigger in _ordered_triggers(item_code):
-		if trigger.document_type == document_type:
-			return trigger.inspection_basis or "Sample"
-	return "Sample"
+	trigger = get_trigger_for_doctype(item_code, document_type)
+	return (trigger.inspection_basis if trigger else None) or "Sample"
+
+
+def get_sample_size(trigger, qty):
+	"""The sample to inspect for a quantity, per the trigger's configuration.
+
+	A percentage is taken of the quantity and rounded up — a sample is at least
+	one unit — and a fixed size is capped at the quantity on hand.
+	"""
+	import math
+
+	from frappe.utils import flt
+
+	if not trigger or not flt(trigger.sample_size):
+		return None
+
+	qty = flt(qty)
+	if trigger.sample_size_is_percentage:
+		return min(qty, math.ceil(qty * flt(trigger.sample_size) / 100)) if qty else None
+
+	return min(qty, flt(trigger.sample_size)) if qty else flt(trigger.sample_size)
 
 
 def resolve_job_card_inspection(job_card, production_item=None):

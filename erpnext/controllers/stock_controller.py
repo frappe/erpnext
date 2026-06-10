@@ -700,20 +700,27 @@ def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str
 	trigger — with inspection_required marking the ones the triggers demand.
 	"""
 	from erpnext.stock.services.quality_trigger_resolution import (
-		get_inspection_basis,
-		item_has_trigger_for_doctype,
+		get_sample_size,
+		get_trigger_for_doctype,
 	)
 
 	items = frappe.parse_json(items)
 
-	required = {}
+	triggers = {}
 	child_doctype = "Stock Entry Detail" if doctype == "Stock Entry" else doctype + " Item"
 	for item in items:
 		item_code = item.get("item_code")
-		if item_code not in required:
-			required[item_code] = item_has_trigger_for_doctype(item_code, doctype)
-		item["inspection_required"] = required[item_code]
-		item["inspection_basis"] = get_inspection_basis(item_code, doctype)
+		if item_code not in triggers:
+			triggers[item_code] = get_trigger_for_doctype(item_code, doctype)
+		trigger = triggers[item_code]
+
+		item["inspection_required"] = bool(trigger)
+		item["inspection_basis"] = (trigger.inspection_basis if trigger else None) or "Sample"
+		# the trigger's sample size (fixed or percentage of the quantity) pre-fills
+		# the dialog; without one the core sample_quantity default stands
+		computed_sample = get_sample_size(trigger, item.get("qty"))
+		if computed_sample is not None:
+			item["sample_quantity"] = computed_sample
 		# the browser may hold a stale row (e.g. its inspection was cancelled since
 		# the form was loaded) — the database decides whether a link still exists
 		if item.get("name"):

@@ -316,6 +316,25 @@ class TestMakeInspectionButton(ERPNextTestSuite):
 		self.assertEqual(len(offered), 1)
 		self.assertFalse(offered[0]["quality_inspection"])
 
+	def test_sample_size_computed_from_the_trigger(self):
+		# 10% of the quantity, rounded up
+		percent_item = make_item(properties={"is_stock_item": 1})
+		percent_item.append("quality_triggers", trigger_row(sample_size=10, sample_size_is_percentage=1))
+		percent_item.save()
+		offered = check_item_quality_inspection(
+			"Purchase Receipt", 0, [{"item_code": percent_item.name, "qty": 55}]
+		)
+		self.assertEqual(offered[0]["sample_quantity"], 6)  # ceil(5.5)
+
+		# a fixed sample is capped at the quantity on hand
+		fixed_item = make_item(properties={"is_stock_item": 1})
+		fixed_item.append("quality_triggers", trigger_row(sample_size=100))
+		fixed_item.save()
+		offered = check_item_quality_inspection(
+			"Purchase Receipt", 0, [{"item_code": fixed_item.name, "qty": 5}]
+		)
+		self.assertEqual(offered[0]["sample_quantity"], 5)
+
 	def test_offered_items_carry_their_inspection_basis(self):
 		from erpnext.stock.services.quality_trigger_resolution import get_inspection_basis
 
