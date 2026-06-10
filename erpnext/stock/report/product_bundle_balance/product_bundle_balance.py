@@ -182,7 +182,7 @@ def get_items(filters):
 				pbi.uom,
 				pbi.qty,
 			)
-			.where(pb.new_item_code.isin(parent_items) & (IfNull(pb.disabled, 0) == 0))
+			.where(pb.new_item_code.isin(parent_items))
 		).run(as_dict=1)
 
 	child_items = set()
