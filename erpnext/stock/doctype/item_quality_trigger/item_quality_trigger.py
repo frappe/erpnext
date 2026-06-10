@@ -142,3 +142,13 @@ def _validate_trigger_row(row):
 					row.idx, row.document_type, context, row.warehouse_role
 				)
 			)
+
+	# Quarantine holds incoming stock, so it is only meaningful on inbound rows.
+	# Checked after the role is resolved (it may have been auto-set above).
+	if row.quality_control_mode == "Quarantine" and row.warehouse_role == "Outbound":
+		frappe.throw(
+			_(
+				"Row #{0}: Quarantine applies only to inbound movements — outbound stock cannot "
+				"be quarantined. Use Block, Warn or Monitor instead."
+			).format(row.idx)
+		)

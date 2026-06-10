@@ -42,3 +42,47 @@ class TestQualityQuarantine(ERPNextTestSuite):
 			item_code=item, qty=5, to_warehouse=REAL_WH, purpose="Material Receipt", rate=100
 		)
 		self.assertEqual(quality_control_lots_for(se.name), [])
+
+	def _quarantine_item(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry",
+				warehouse_role="Inbound",
+				quality_control_mode="Quarantine",
+			),
+		)
+		item.save()
+		return item.name
+
+	def test_quarantine_routes_to_quality_warehouse_and_mints_lot(self):
+		qc = make_qc_warehouse()
+		store = make_warehouse("_Test QC Routed Store", quality_warehouse=qc)
+		item = self._quarantine_item()
+
+		se = make_stock_entry(item_code=item, qty=4, to_warehouse=store, purpose="Material Receipt", rate=100)
+
+		# the receipt was redirected into the Quality Control warehouse on validate…
+		self.assertEqual(se.items[0].t_warehouse, qc)
+		# …the document still submitted freely, and the lot was minted there
+		lots = quality_control_lots_for(se.name)
+		self.assertEqual(len(lots), 1)
+		self.assertEqual(lots[0].quality_warehouse, qc)
+		self.assertEqual(lots[0].received_qty, 4)
+
+	def test_quarantine_requires_configured_quality_warehouse(self):
+		store = make_warehouse("_Test QC Unconfigured Store")  # no quality_warehouse
+		item = self._quarantine_item()
+
+		self.assertRaises(
+			frappe.ValidationError,
+			make_stock_entry,
+			item_code=item,
+			qty=1,
+			to_warehouse=store,
+			purpose="Material Receipt",
+			rate=100,
+		)
