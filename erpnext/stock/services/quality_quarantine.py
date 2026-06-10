@@ -353,7 +353,9 @@ def create_quality_control_lots(doc, method=None):
 		if role != INBOUND or not is_quality_warehouse(warehouse):
 			continue
 
-		received_qty = row.get("transfer_qty") or row.get("stock_qty") or row.get("qty")
+		# a customer return carries negative quantities; the lot records the
+		# absolute quantity that physically entered the Quality Control warehouse
+		received_qty = abs(flt(row.get("transfer_qty") or row.get("stock_qty") or row.get("qty")))
 		if not received_qty:
 			continue
 

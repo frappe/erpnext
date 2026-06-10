@@ -420,6 +420,43 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "status"), "Rejected")
 		self.assertEqual(get_qty(item, qc), 4)  # stays under quality hold for the purchase return
 
+	def test_customer_return_is_quarantined_and_released(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+
+		qc = make_qc_warehouse("_Test QC Sales Return WH")
+		store = make_warehouse("_Test QC Sales Return Store", quality_warehouse=qc)
+
+		# returned goods must be re-inspected before they re-enter the store
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Delivery Note",
+				warehouse_role="Inbound",
+				quality_control_mode="Quarantine",
+			),
+		)
+		item.save()
+
+		make_stock_entry(item_code=item.name, qty=5, to_warehouse=store, purpose="Material Receipt", rate=100)
+		delivery = create_delivery_note(item_code=item.name, warehouse=store, qty=5)
+
+		# the customer sends the goods back: the return is routed into quarantine
+		sales_return = make_return_doc("Delivery Note", delivery.name)
+		sales_return.save()
+		sales_return.submit()
+		self.assertEqual(sales_return.items[0].warehouse, qc)
+		self.assertEqual(get_qty(item.name, qc), 5)
+
+		lot = quality_control_lots_for(sales_return.name, "Delivery Note")[0].name
+
+		# the inspection decision releases the returned goods back to the store
+		submit_inspection_for_lot(lot, status="Accepted")
+		self.assertEqual(get_qty(item.name, store), 5)
+		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "status"), "Released")
+
 	def test_purchase_return_books_against_rejected_lot(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt

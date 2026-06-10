@@ -389,7 +389,15 @@ doc_events = {
 	("Item", "Item Group"): {
 		"validate": "erpnext.stock.doctype.item_quality_trigger.item_quality_trigger.validate_item_quality_triggers",
 	},
-	("Purchase Receipt", "Purchase Invoice", "Stock Entry", "Subcontracting Receipt"): {
+	(
+		"Purchase Receipt",
+		"Purchase Invoice",
+		"Stock Entry",
+		"Subcontracting Receipt",
+		# customer returns bring stock back in and can quarantine it
+		"Delivery Note",
+		"Sales Invoice",
+	): {
 		"on_submit": "erpnext.stock.services.quality_quarantine.create_quality_control_lots",
 		"on_cancel": "erpnext.stock.services.quality_quarantine.handle_source_document_cancel",
 	},
