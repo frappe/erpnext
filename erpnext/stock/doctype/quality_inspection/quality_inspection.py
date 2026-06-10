@@ -41,6 +41,7 @@ class QualityInspection(Document):
 		company: DF.Link | None
 		description: DF.SmallText | None
 		inspected_by: DF.Link
+		inspection_basis: DF.Literal["Sample", "Each Quantity"]
 		inspection_type: DF.Literal["", "Incoming", "Outgoing", "In Process"]
 		item_code: DF.Link
 		item_name: DF.Data | None
@@ -75,7 +76,9 @@ class QualityInspection(Document):
 		self.db_set("status", "Cancelled")
 
 	def validate(self):
-		if not self.readings and self.item_code:
+		self.set_inspection_basis_from_lot()
+
+		if self.inspection_basis != "Each Quantity" and not self.readings and self.item_code:
 			self.get_item_specification_details()
 
 		if (
@@ -93,6 +96,8 @@ class QualityInspection(Document):
 		if self.readings:
 			self.validate_reading_number_format()
 			self.inspect_and_set_status()
+		elif self.reading_bundle and not self.manual_inspection:
+			self.set_status_from_reading_bundle()
 
 		self.validate_inspection_required()
 		self.set_child_row_reference()
@@ -138,6 +143,23 @@ class QualityInspection(Document):
 
 		if len(child_row_references):
 			self.child_row_reference = child_row_references[0]
+
+	def set_inspection_basis_from_lot(self):
+		"""The Quality Control Lot dictates how it is inspected (Sample / Each Quantity)."""
+		if self.reference_type == "Quality Control Lot" and self.reference_name:
+			self.inspection_basis = (
+				frappe.db.get_value("Quality Control Lot", self.reference_name, "inspection_basis")
+				or "Sample"
+			)
+		else:
+			self.inspection_basis = "Sample"
+
+	def set_status_from_reading_bundle(self):
+		"""With per-unit readings, the verdict follows the bundle's unit counts."""
+		accepted_qty = frappe.db.get_value(
+			"Quality Inspection Reading Bundle", self.reading_bundle, "accepted_qty"
+		)
+		self.status = "Accepted" if accepted_qty else "Rejected"
 
 	def validate_inspection_required(self):
 		# Obsolete under the Item Quality Trigger model: Quality Inspection requirement is governed

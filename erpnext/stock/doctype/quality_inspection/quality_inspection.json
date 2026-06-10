@@ -28,6 +28,7 @@
   "specification_details",
   "quality_inspection_template",
   "manual_inspection",
+  "inspection_basis",
   "reading_bundle",
   "readings",
   "section_break_14",
@@ -128,12 +129,13 @@
    "options": "Batch"
   },
   {
+   "depends_on": "eval:doc.inspection_basis != 'Each Quantity'",
    "fieldname": "sample_size",
    "fieldtype": "Float",
    "label": "Sample Size",
+   "mandatory_depends_on": "eval:doc.inspection_basis != 'Each Quantity'",
    "oldfieldname": "sample_size",
-   "oldfieldtype": "Currency",
-   "reqd": 1
+   "oldfieldtype": "Currency"
   },
   {
    "fieldname": "column_break1",
@@ -223,6 +225,7 @@
    "options": "Quality Inspection Template"
   },
   {
+   "depends_on": "eval:doc.inspection_basis != 'Each Quantity'",
    "fieldname": "readings",
    "fieldtype": "Table",
    "label": "Readings",
@@ -245,11 +248,23 @@
    "label": "Manual Inspection"
   },
   {
+   "depends_on": "eval:doc.inspection_basis == 'Each Quantity'",
    "description": "For Each Quantity inspections: per-unit readings live in a Quality Inspection Reading Bundle, and its accepted/rejected unit counts drive a partial release of the Quality Control Lot.",
    "fieldname": "reading_bundle",
    "fieldtype": "Link",
    "label": "Reading Bundle",
+   "mandatory_depends_on": "eval:doc.inspection_basis == 'Each Quantity'",
    "options": "Quality Inspection Reading Bundle"
+  },
+  {
+   "default": "Sample",
+   "depends_on": "eval:doc.reference_type == 'Quality Control Lot'",
+   "description": "Carried from the Quality Control Lot: Sample inspections record readings below; Each Quantity inspections record per-unit readings in a Reading Bundle.",
+   "fieldname": "inspection_basis",
+   "fieldtype": "Select",
+   "label": "Inspection Basis",
+   "options": "Sample\nEach Quantity",
+   "read_only": 1
   },
   {
    "fieldname": "child_row_reference",
