@@ -305,6 +305,7 @@
    "fieldname": "customer_primary_contact",
    "fieldtype": "Link",
    "label": "Customer Primary Contact",
+   "no_copy": 1,
    "options": "Contact"
   },
   {
@@ -312,6 +313,7 @@
    "fieldname": "mobile_no",
    "fieldtype": "Read Only",
    "label": "Mobile No",
+   "no_copy": 1,
    "options": "Mobile"
   },
   {
@@ -319,6 +321,7 @@
    "fieldname": "email_id",
    "fieldtype": "Read Only",
    "label": "Email Id",
+   "no_copy": 1,
    "options": "Email"
   },
   {
@@ -330,12 +333,14 @@
    "fieldname": "customer_primary_address",
    "fieldtype": "Link",
    "label": "Customer Primary Address",
+   "no_copy": 1,
    "options": "Address"
   },
   {
    "fieldname": "primary_address",
    "fieldtype": "Text",
    "label": "Primary Address",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -590,14 +595,16 @@
    "fieldname": "first_name",
    "fieldtype": "Read Only",
    "hidden": 1,
-   "label": "First Name"
+   "label": "First Name",
+   "no_copy": 1
   },
   {
    "fetch_from": "customer_primary_contact.last_name",
    "fieldname": "last_name",
    "fieldtype": "Read Only",
    "hidden": 1,
-   "label": "Last Name"
+   "label": "Last Name",
+   "no_copy": 1
   }
  ],
  "icon": "fa fa-user",
@@ -611,7 +618,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-01-21 17:23:42.151114",
+ "modified": "2026-05-29 16:52:59.441272",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

@@ -129,6 +129,18 @@ class TestStockAgeing(FrappeTestCase):
 		self.assertEqual(queue[0][0], 10.0)
 		self.assertEqual(queue[1][0], 10.0)
 
+	def test_item_filter_supports_multi_select_values(self):
+		bundle = frappe.qb.DocType("Serial and Batch Bundle")
+		query = frappe.qb.from_(bundle).select(bundle.name)
+
+		filtered_query = FIFOSlots(frappe._dict(item_code=["Item A"]), [])._apply_filter(
+			query, bundle, "item_code"
+		)
+
+		sql = filtered_query.get_sql()
+		self.assertIn(" IN ", sql)
+		self.assertNotIn("=[", sql)
+
 	def test_basic_stock_reconciliation(self):
 		"""
 		Ledger (same wh): [+30, reco reset >> 50, -10]

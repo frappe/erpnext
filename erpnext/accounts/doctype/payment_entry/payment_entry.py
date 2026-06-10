@@ -2279,6 +2279,9 @@ def get_outstanding_reference_documents(args, validate=False):
 	if args.get("party_type") == "Member":
 		return
 
+	if args.get("party_type") and args.get("party"):
+		frappe.has_permission(args["party_type"], "read", args["party"], throw=True)
+
 	if not args.get("get_outstanding_invoices") and not args.get("get_orders_to_be_billed"):
 		args["get_outstanding_invoices"] = True
 
@@ -2788,7 +2791,8 @@ def get_reference_details(
 ):
 	total_amount = outstanding_amount = exchange_rate = account = None
 
-	ref_doc = frappe.get_doc(reference_doctype, reference_name)
+	frappe.has_permission(reference_doctype, "read", reference_name, throw=True)
+	ref_doc = frappe.get_lazy_doc(reference_doctype, reference_name)
 	company_currency = ref_doc.get("company_currency") or erpnext.get_company_currency(ref_doc.company)
 
 	# Only applies for Reverse Payment Entries

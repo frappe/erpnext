@@ -278,6 +278,7 @@ def get_balance_on(
 		)
 
 	if party_type and party:
+		frappe.has_permission(party_type, "read", party, throw=True)
 		cond.append(
 			f"""gle.party_type = {frappe.db.escape(party_type)} and gle.party = {frappe.db.escape(party)} """
 		)
@@ -397,15 +398,13 @@ def add_ac(args=None):
 	if not args:
 		args = frappe.local.form_dict
 
+	args.pop("ignore_permissions", None)
+	frappe.has_permission("Account", "create", throw=True)
+
 	args.doctype = "Account"
 	args = make_tree_args(**args)
 
 	ac = frappe.new_doc("Account")
-
-	if args.get("ignore_permissions"):
-		ac.flags.ignore_permissions = True
-		args.pop("ignore_permissions")
-
 	ac.update(args)
 
 	if not ac.parent_account:

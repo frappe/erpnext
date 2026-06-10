@@ -1397,7 +1397,7 @@ def get_material_request_items(
 			"sales_order": sales_order,
 			"description": row.get("description"),
 			"uom": row.get("purchase_uom") or row.get("stock_uom"),
-			"main_bom_item": row.get("main_bom_item"),
+			"main_item_code": row.get("main_bom_item"),
 		}
 
 
@@ -1557,6 +1557,8 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 							"item_code": sa_row.production_item,
 							"required_qty": sa_row.qty,
 							"include_exploded_items": 0,
+							"sales_order": sa_row.sales_order,
+							"main_bom_item": sa_row.parent_item_code,
 						}
 					)
 				)
@@ -1660,6 +1662,7 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 					"stock_uom": item_master.stock_uom,
 					"conversion_factor": conversion_factor,
 					"safety_stock": item_master.safety_stock,
+					"main_bom_item": data.get("main_bom_item"),
 				}
 			)
 
