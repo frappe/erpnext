@@ -411,6 +411,7 @@ doc_events = {
 	},
 	"Quality Inspection": {
 		"on_submit": "erpnext.stock.services.quality_quarantine.process_inspection_result",
+		"on_cancel": "erpnext.stock.services.quality_quarantine.reverse_inspection_result",
 	},
 	"User": {
 		"after_insert": "frappe.contacts.doctype.contact.contact.update_contact",

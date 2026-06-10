@@ -589,6 +589,40 @@ class TestQualityQuarantine(ERPNextTestSuite):
 			frappe.ValidationError, submit_inspection_for_lot, second_lot, reading_bundle=bundle.name
 		)
 
+	def test_cancelling_inspection_unwinds_the_decision(self):
+		qc = make_qc_warehouse("_Test QC Unwind WH")
+		store = make_warehouse("_Test QC Unwind Store", quality_warehouse=qc)
+		item = make_quarantine_item(qc)
+		se = make_stock_entry(item_code=item, qty=5, to_warehouse=qc, purpose="Material Receipt", rate=100)
+		lot = quality_control_lots_for(se.name)[0].name
+
+		# accept: the auto-release moves the stock to the store
+		inspection = submit_inspection_for_lot(lot)
+		release = frappe.get_doc(
+			"Stock Entry", {"quality_control_lot": lot, "purpose": "Quality Control Release"}
+		)
+		self.assertEqual(get_qty(item, store), 5)
+
+		# cancelling the inspection cancels the release and restores the lot
+		inspection.cancel()
+		release.reload()
+		self.assertEqual(release.docstatus, 2)
+		self.assertEqual(get_qty(item, qc), 5)
+		self.assertEqual(get_qty(item, store), 0)
+		lot_state = frappe.db.get_value(
+			"Quality Control Lot", lot, ["accepted_qty", "pending_qty", "status"], as_dict=True
+		)
+		self.assertEqual(lot_state.accepted_qty, 0)
+		self.assertEqual(lot_state.pending_qty, 5)
+		self.assertEqual(lot_state.status, "Under Inspection")
+
+		# reject: cancelling clears the booked rejection too
+		rejecting = submit_inspection_for_lot(lot, status="Rejected")
+		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "rejected_qty"), 5)
+		rejecting.cancel()
+		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "rejected_qty"), 0)
+		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "status"), "Under Inspection")
+
 	def test_cancelling_an_inspection_cancels_its_bundle(self):
 		from erpnext.stock.doctype.quality_inspection_reading_bundle.test_quality_inspection_reading_bundle import (
 			make_bundle,

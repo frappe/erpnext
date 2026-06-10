@@ -367,6 +367,48 @@ def _rejected_serials_awaiting_return(lot, outstanding):
 	return still_held[: int(outstanding)] or None
 
 
+def reverse_inspection_result(doc, method=None):
+	"""Cancelling the deciding inspection unwinds its consequences on the lot.
+
+	The Quality Control Releases it caused are cancelled (stock returns to
+	quarantine, the release reverses the accepted quantity) and the rejected
+	quantity it booked is cleared, so the lot is back under inspection in full.
+	A purchase return already booked against the lot blocks the cancellation —
+	unwind the return first, mirroring every other dependency chain here.
+	"""
+	if doc.reference_type != "Quality Control Lot" or not doc.reference_name:
+		return
+	if not frappe.db.exists("Quality Control Lot", doc.reference_name):
+		return
+
+	lot = frappe.get_doc("Quality Control Lot", doc.reference_name)
+
+	if flt(lot.returned_qty):
+		frappe.throw(
+			_(
+				"Cannot cancel: a purchase return is already booked against Quality Control Lot {0}. "
+				"Unwind the return first."
+			).format(frappe.bold(lot.name)),
+			title=_("Purchase Return Booked"),
+		)
+
+	releases = frappe.get_all(
+		"Stock Entry",
+		filters={"quality_control_lot": lot.name, "docstatus": 1},
+		pluck="name",
+	)
+	for name in releases:
+		release = frappe.get_doc("Stock Entry", name)
+		release.flags.ignore_permissions = True
+		release.cancel()
+
+	lot.reload()
+	if flt(lot.rejected_qty):
+		lot.rejected_qty = 0
+		lot.flags.ignore_permissions = True
+		lot.save()
+
+
 def handle_source_document_cancel(doc, method=None):
 	"""Cascade a source-document cancellation onto its Quality Control Lots.
 
