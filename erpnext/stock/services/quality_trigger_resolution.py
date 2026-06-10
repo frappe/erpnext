@@ -243,14 +243,22 @@ def enforce_inspection_points(doc):
 		qi = row.get("quality_inspection")
 
 		if not qi:
-			msg = _("Row #{0}: Quality Inspection is required for Item {1}.").format(
-				row.idx, frappe.bold(row.get("item_code"))
-			)
-			if block and submitting:
-				frappe.throw(msg, title=_("Inspection Required"))
+			if block:
+				msg = _("Row #{0}: Quality Inspection is required for Item {1}.").format(
+					row.idx, frappe.bold(row.get("item_code"))
+				)
+				if submitting:
+					frappe.throw(msg, title=_("Inspection Required"))
+				else:
+					frappe.msgprint(msg, title=_("Inspection Required"), indicator="orange", alert=True)
 			else:
+				# Warn never demands — it nudges
 				frappe.msgprint(
-					msg, title=_("Inspection Required"), indicator="orange" if submitting else "blue"
+					_("Row #{0}: Quality Inspection not created for Item {1}.").format(
+						row.idx, frappe.bold(row.get("item_code"))
+					),
+					indicator="orange",
+					alert=True,
 				)
 			continue
 
