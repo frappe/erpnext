@@ -9,6 +9,14 @@ frappe.ui.form.on("Item Group", {
 			return { filters: { purpose: ["!=", "Quality Control Release"] } };
 		});
 
+		frm.set_query("supplier", "quality_triggers", function () {
+			return { filters: { disabled: 0 } };
+		});
+
+		frm.set_query("customer", "quality_triggers", function () {
+			return { filters: { disabled: 0 } };
+		});
+
 		frm.list_route = "Tree/Item Group";
 
 		//get query select item group

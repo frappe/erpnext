@@ -76,6 +76,15 @@ frappe.ui.form.on("Item", {
 			// movement that can trigger one
 			return { filters: { purpose: ["!=", "Quality Control Release"] } };
 		});
+
+		frm.set_query("supplier", "quality_triggers", function () {
+			return { filters: { disabled: 0 } };
+		});
+
+		frm.set_query("customer", "quality_triggers", function () {
+			return { filters: { disabled: 0 } };
+		});
+
 		frm.add_fetch("attribute", "numeric_values", "numeric_values");
 		frm.add_fetch("attribute", "from_range", "from_range");
 		frm.add_fetch("attribute", "to_range", "to_range");
