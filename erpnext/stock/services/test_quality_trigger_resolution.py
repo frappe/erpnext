@@ -17,6 +17,7 @@ from erpnext.stock.services.quality_trigger_resolution import (
 	movements_of,
 	resolve_inspection_points,
 )
+from erpnext.stock.services.test_quality_warehouse import make_warehouse
 from erpnext.tests.utils import ERPNextTestSuite
 
 REAL_WH = "_Test Warehouse - _TC"
@@ -49,6 +50,23 @@ class TestQualityTriggerResolution(ERPNextTestSuite):
 		self.assertEqual(list(movements_of(si)), [])
 		si.update_stock = 1
 		self.assertEqual(next(movements_of(si))[1], OUTBOUND)
+
+	def test_transit_warehouse_legs_are_skipped(self):
+		transit = make_warehouse("_Test Transit WH", warehouse_type="Transit")
+
+		# first transit entry (real source -> transit): only the source-out leg counts
+		first = frappe._dict(
+			doctype="Stock Entry",
+			items=[frappe._dict(item_code="X", s_warehouse=REAL_WH, t_warehouse=transit)],
+		)
+		self.assertEqual([(role, wh) for _r, role, wh in movements_of(first)], [(OUTBOUND, REAL_WH)])
+
+		# end transit entry (transit -> real target): only the target-in leg counts
+		end = frappe._dict(
+			doctype="Stock Entry",
+			items=[frappe._dict(item_code="X", s_warehouse=transit, t_warehouse=REAL_WH)],
+		)
+		self.assertEqual([(role, wh) for _r, role, wh in movements_of(end)], [(INBOUND, REAL_WH)])
 
 	def test_resolves_item_level_trigger(self):
 		item = make_item(properties={"is_stock_item": 1})
