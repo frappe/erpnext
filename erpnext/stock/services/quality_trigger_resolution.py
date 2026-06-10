@@ -165,7 +165,7 @@ def resolve_inspection_points(doc):
 						row=row,
 						trigger=trigger,
 						inspection_template=trigger.inspection_template,
-						qc_mode=trigger.qc_mode,
+						quality_control_mode=trigger.quality_control_mode,
 						inspection_basis=trigger.inspection_basis,
 					)
 				)
@@ -186,10 +186,10 @@ def enforce_inspection_points(doc):
 	submitting = doc.docstatus == 1
 
 	for point in resolve_inspection_points(doc):
-		if point.qc_mode not in ("Block", "Warn"):
+		if point.quality_control_mode not in ("Block", "Warn"):
 			continue
 
-		block = point.qc_mode == "Block"
+		block = point.quality_control_mode == "Block"
 		row = point.row
 		qi = row.get("quality_inspection")
 

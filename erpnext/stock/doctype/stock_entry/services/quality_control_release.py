@@ -4,8 +4,8 @@
 from .material_transfer import MaterialTransferStockEntry
 
 
-class QCReleaseStockEntry(MaterialTransferStockEntry):
-	"""Release quarantined stock out of a Quality (QC) warehouse.
+class QualityControlReleaseStockEntry(MaterialTransferStockEntry):
+	"""Release quarantined stock out of a Quality Control warehouse.
 
 	Behaves exactly like a Material Transfer — source and target warehouse,
 	stock value carried over, no GL impact — but is a distinct purpose so it can

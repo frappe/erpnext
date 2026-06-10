@@ -40,7 +40,7 @@ def trigger_row(**overrides):
 	row = {
 		"document_type": "Purchase Receipt",
 		"warehouse_role": "Inbound",
-		"qc_mode": "Quarantine",
+		"quality_control_mode": "Quarantine",
 		"inspection_template": create_test_template(),
 		"inspection_basis": "Sample",
 	}
@@ -60,7 +60,7 @@ class TestItemQualityTrigger(ERPNextTestSuite):
 		trigger = reloaded.quality_triggers[0]
 		self.assertEqual(trigger.document_type, "Purchase Receipt")
 		self.assertEqual(trigger.warehouse_role, "Inbound")
-		self.assertEqual(trigger.qc_mode, "Quarantine")
+		self.assertEqual(trigger.quality_control_mode, "Quarantine")
 		self.assertEqual(trigger.inspection_template, TEST_TEMPLATE)
 		self.assertEqual(trigger.inspection_basis, "Sample")
 
@@ -73,7 +73,7 @@ class TestItemQualityTrigger(ERPNextTestSuite):
 				document_type="Stock Entry",
 				stock_entry_type="Material Transfer",
 				warehouse_role="Outbound",
-				qc_mode="Block",
+				quality_control_mode="Block",
 			),
 		)
 		item.save()
@@ -93,7 +93,7 @@ class TestItemQualityTrigger(ERPNextTestSuite):
 				document_type="Stock Entry",
 				stock_entry_type="Material Transfer",
 				warehouse_role="Outbound",
-				qc_mode="Block",
+				quality_control_mode="Block",
 			),
 		)
 		group.save()

@@ -75,7 +75,7 @@ class TestQualityTriggerResolution(ERPNextTestSuite):
 
 		points = resolve_inspection_points(pr_doc(item.name))
 		self.assertEqual(len(points), 1)
-		self.assertEqual(points[0].qc_mode, "Quarantine")
+		self.assertEqual(points[0].quality_control_mode, "Quarantine")
 		self.assertEqual(points[0].role, INBOUND)
 
 	def test_no_trigger_yields_no_points(self):
@@ -96,16 +96,16 @@ class TestQualityTriggerResolution(ERPNextTestSuite):
 		group = create_test_item_group("_Test QC Override Group")
 		doc = frappe.get_doc("Item Group", group)
 		doc.set("quality_triggers", [])
-		doc.append("quality_triggers", trigger_row(qc_mode="Monitor"))
+		doc.append("quality_triggers", trigger_row(quality_control_mode="Monitor"))
 		doc.save()
 
 		item = make_item(properties={"is_stock_item": 1, "item_group": group})
-		item.append("quality_triggers", trigger_row(qc_mode="Quarantine"))
+		item.append("quality_triggers", trigger_row(quality_control_mode="Quarantine"))
 		item.save()
 
 		points = resolve_inspection_points(pr_doc(item.name))
 		self.assertEqual(len(points), 1)
-		self.assertEqual(points[0].qc_mode, "Quarantine")  # most-specific (item) wins
+		self.assertEqual(points[0].quality_control_mode, "Quarantine")  # most-specific (item) wins
 
 	def test_applicable_warehouse_filters_movements(self):
 		item = make_item(properties={"is_stock_item": 1})
@@ -155,11 +155,15 @@ def make_submitted_inspection(item_code):
 
 
 class TestInspectionEnforcement(ERPNextTestSuite):
-	def _item_with_outbound_trigger(self, qc_mode):
+	def _item_with_outbound_trigger(self, quality_control_mode):
 		item = make_item(properties={"is_stock_item": 1})
 		item.append(
 			"quality_triggers",
-			trigger_row(document_type="Delivery Note", qc_mode=qc_mode, warehouse_role="Outbound"),
+			trigger_row(
+				document_type="Delivery Note",
+				quality_control_mode=quality_control_mode,
+				warehouse_role="Outbound",
+			),
 		)
 		item.save()
 		return item.name

@@ -67,7 +67,7 @@
    "options": "Company"
   },
   {
-   "description": "The Quality (QC) warehouse this lot is quarantined in.",
+   "description": "The Quality Control warehouse this lot is quarantined in.",
    "fieldname": "quality_warehouse",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -159,7 +159,7 @@
  "modified": "2026-06-10 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
- "name": "QC Lot",
+ "name": "Quality Control Lot",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [

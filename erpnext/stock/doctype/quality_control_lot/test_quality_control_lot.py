@@ -10,13 +10,13 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 def qc_warehouse():
 	ensure_quality_warehouse_type()
-	return make_warehouse("_Test QC Lot WH", warehouse_type="Quality")
+	return make_warehouse("_Test Quality Control Lot WH", warehouse_type="Quality")
 
 
-def make_qc_lot(received_qty=10, accepted_qty=0, rejected_qty=0):
+def make_quality_control_lot(received_qty=10, accepted_qty=0, rejected_qty=0):
 	return frappe.get_doc(
 		{
-			"doctype": "QC Lot",
+			"doctype": "Quality Control Lot",
 			"item_code": make_item(properties={"is_stock_item": 1}).name,
 			"company": "_Test Company",
 			"quality_warehouse": qc_warehouse(),
@@ -27,23 +27,23 @@ def make_qc_lot(received_qty=10, accepted_qty=0, rejected_qty=0):
 	).insert(ignore_permissions=True)
 
 
-class TestQCLot(ERPNextTestSuite):
+class TestQualityControlLot(ERPNextTestSuite):
 	def test_status_under_inspection(self):
-		lot = make_qc_lot()
+		lot = make_quality_control_lot()
 		self.assertEqual(lot.status, "Under Inspection")
 		self.assertEqual(lot.pending_qty, 10)
 
 	def test_status_partially_released(self):
-		lot = make_qc_lot(accepted_qty=4)
+		lot = make_quality_control_lot(accepted_qty=4)
 		self.assertEqual(lot.status, "Partially Released")
 		self.assertEqual(lot.pending_qty, 6)
 
 	def test_status_released_when_fully_resolved(self):
-		lot = make_qc_lot(accepted_qty=8, rejected_qty=2)
+		lot = make_quality_control_lot(accepted_qty=8, rejected_qty=2)
 		self.assertEqual(lot.status, "Released")
 		self.assertEqual(lot.pending_qty, 0)
 
 	def test_status_rejected_when_all_rejected(self):
-		lot = make_qc_lot(rejected_qty=10)
+		lot = make_quality_control_lot(rejected_qty=10)
 		self.assertEqual(lot.status, "Rejected")
 		self.assertEqual(lot.pending_qty, 0)

@@ -8,7 +8,7 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
 
 SOURCE_WH = "_Test Warehouse - _TC"
-TARGET_WH = "_Test QC Release Target - _TC"
+TARGET_WH = "_Test Quality Control Release Target - _TC"
 
 
 def ensure_warehouse(name=TARGET_WH):
@@ -16,7 +16,7 @@ def ensure_warehouse(name=TARGET_WH):
 		frappe.get_doc(
 			{
 				"doctype": "Warehouse",
-				"warehouse_name": "_Test QC Release Target",
+				"warehouse_name": "_Test Quality Control Release Target",
 				"company": "_Test Company",
 			}
 		).insert(ignore_permissions=True)
@@ -27,19 +27,19 @@ def get_qty(item_code, warehouse):
 	return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty") or 0.0
 
 
-class TestQCReleaseStockEntry(ERPNextTestSuite):
-	def test_qc_release_is_a_standard_stock_entry_type(self):
+class TestQualityControlReleaseStockEntry(ERPNextTestSuite):
+	def test_quality_control_release_is_a_standard_stock_entry_type(self):
 		purpose, is_standard = frappe.db.get_value(
-			"Stock Entry Type", "QC Release", ["purpose", "is_standard"]
+			"Stock Entry Type", "Quality Control Release", ["purpose", "is_standard"]
 		)
-		self.assertEqual(purpose, "QC Release")
+		self.assertEqual(purpose, "Quality Control Release")
 		self.assertTrue(is_standard)
 
-	def test_qc_release_purpose_available(self):
+	def test_quality_control_release_purpose_available(self):
 		options = frappe.get_meta("Stock Entry").get_field("purpose").options.split("\n")
-		self.assertIn("QC Release", options)
+		self.assertIn("Quality Control Release", options)
 
-	def test_qc_release_moves_stock_like_a_transfer(self):
+	def test_quality_control_release_moves_stock_like_a_transfer(self):
 		ensure_warehouse()
 		item = make_item(properties={"is_stock_item": 1}).name
 
@@ -54,12 +54,12 @@ class TestQCReleaseStockEntry(ERPNextTestSuite):
 			qty=6,
 			from_warehouse=SOURCE_WH,
 			to_warehouse=TARGET_WH,
-			purpose="QC Release",
+			purpose="Quality Control Release",
 		)
 
 		# behaves like a transfer: distinct purpose, resolves to the standard type,
 		# and stock moves source -> target with no quantity lost
-		self.assertEqual(se.purpose, "QC Release")
-		self.assertEqual(se.stock_entry_type, "QC Release")
+		self.assertEqual(se.purpose, "Quality Control Release")
+		self.assertEqual(se.stock_entry_type, "Quality Control Release")
 		self.assertEqual(get_qty(item, SOURCE_WH), src_before - 6)
 		self.assertEqual(get_qty(item, TARGET_WH), tgt_before + 6)

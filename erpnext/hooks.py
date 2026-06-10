@@ -390,7 +390,7 @@ doc_events = {
 		"validate": "erpnext.stock.doctype.item_quality_trigger.item_quality_trigger.validate_item_quality_triggers",
 	},
 	("Purchase Receipt", "Purchase Invoice", "Stock Entry", "Subcontracting Receipt"): {
-		"on_submit": "erpnext.stock.services.quality_quarantine.create_qc_lots",
+		"on_submit": "erpnext.stock.services.quality_quarantine.create_quality_control_lots",
 	},
 	"User": {
 		"after_insert": "frappe.contacts.doctype.contact.contact.update_contact",

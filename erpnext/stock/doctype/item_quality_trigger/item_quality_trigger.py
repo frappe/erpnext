@@ -68,7 +68,7 @@ class ItemQualityTrigger(Document):
 		parentfield: DF.Data
 		parenttype: DF.Data
 		party_transaction_type: DF.Literal["", "External", "Internal Transfer"]
-		qc_mode: DF.Literal["Quarantine", "Block", "Warn", "Monitor"]
+		quality_control_mode: DF.Literal["Quarantine", "Block", "Warn", "Monitor"]
 		sample_size: DF.Float
 		sample_size_is_percentage: DF.Check
 		stock_entry_type: DF.Link | None

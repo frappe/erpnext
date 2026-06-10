@@ -1,7 +1,7 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # License: GNU General Public License v3. See license.txt
 
-"""Quarantine actions: mint QC Lots when stock lands in a Quality (QC) warehouse.
+"""Quarantine actions: mint Quality Control Lots when stock lands in a Quality Control warehouse.
 
 This is deliberately route-agnostic — it reacts to a positive movement into a
 Quality warehouse rather than re-resolving the trigger, so it works no matter how
@@ -14,8 +14,8 @@ from erpnext.stock.services.quality_trigger_resolution import INBOUND, movements
 from erpnext.stock.services.quality_warehouse import is_quality_warehouse
 
 
-def create_qc_lots(doc, method=None):
-	"""Mint a QC Lot for each item moving into a Quality warehouse on this document."""
+def create_quality_control_lots(doc, method=None):
+	"""Mint a Quality Control Lot for each item moving into a Quality warehouse on this document."""
 	for row, role, warehouse in movements_of(doc):
 		if role != INBOUND or not is_quality_warehouse(warehouse):
 			continue
@@ -26,7 +26,7 @@ def create_qc_lots(doc, method=None):
 
 		frappe.get_doc(
 			{
-				"doctype": "QC Lot",
+				"doctype": "Quality Control Lot",
 				"item_code": row.get("item_code"),
 				"company": doc.get("company"),
 				"quality_warehouse": warehouse,

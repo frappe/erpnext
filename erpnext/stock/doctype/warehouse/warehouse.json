@@ -252,7 +252,7 @@
    "description": "Stock received for items that require inbound quality inspection is quarantined into this warehouse until released by a Quality Inspection.",
    "fieldname": "quality_warehouse",
    "fieldtype": "Link",
-   "label": "Quality (QC) Warehouse",
+   "label": "Quality Control Warehouse",
    "options": "Warehouse"
   },
   {

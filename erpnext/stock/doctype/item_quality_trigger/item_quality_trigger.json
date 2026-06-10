@@ -21,7 +21,7 @@
   "condition",
   "inspection_section",
   "inspection_template",
-  "qc_mode",
+  "quality_control_mode",
   "column_break_insp",
   "inspection_basis",
   "sample_size",
@@ -130,11 +130,11 @@
    "reqd": 1
   },
   {
-   "description": "Inbound: Quarantine routes stock to a QC warehouse and locks it until release; Monitor inspects without locking. Outbound: Block stops the document until inspection passes; Warn allows with a warning; Monitor only records.",
-   "fieldname": "qc_mode",
+   "description": "Inbound: Quarantine routes stock to a Quality Control warehouse and locks it until release; Monitor inspects without locking. Outbound: Block stops the document until inspection passes; Warn allows with a warning; Monitor only records.",
+   "fieldname": "quality_control_mode",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "QC Mode",
+   "label": "Quality Control Mode",
    "options": "Quarantine\nBlock\nWarn\nMonitor",
    "reqd": 1
   },
