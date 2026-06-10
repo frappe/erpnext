@@ -744,18 +744,20 @@ def create_quality_control_lots(doc, method=None):
 		if not received_qty:
 			continue
 
-		batch_no = row.get("batch_no")
-		if not batch_no and row.get("serial_and_batch_bundle"):
-			# receipts in bundle mode carry the batch inside the bundle
-			bundle_batches = set(
-				frappe.get_all(
-					"Serial and Batch Entry",
-					filters={"parent": row.serial_and_batch_bundle, "batch_no": ("is", "set")},
-					pluck="batch_no",
-				)
-			)
-			if len(bundle_batches) == 1:
-				batch_no = bundle_batches.pop()
+		# one lot per batch: a row carrying several batches in its bundle splits,
+		# so every lot keeps the batch guarantees (release, return, re-test)
+		batch_qty_map = {}
+		if row.get("batch_no"):
+			batch_qty_map[row.batch_no] = received_qty
+		elif row.get("serial_and_batch_bundle"):
+			for entry in frappe.get_all(
+				"Serial and Batch Entry",
+				filters={"parent": row.serial_and_batch_bundle, "batch_no": ("is", "set")},
+				fields=["batch_no", "qty"],
+			):
+				batch_qty_map[entry.batch_no] = batch_qty_map.get(entry.batch_no, 0) + abs(flt(entry.qty))
+		if not batch_qty_map:
+			batch_qty_map = {None: received_qty}
 
 		# carry the inspection template/basis from the trigger that caused the
 		# quarantine; periodic re-test transfers fall back to the re-test trigger
@@ -768,19 +770,20 @@ def create_quality_control_lots(doc, method=None):
 				template = retest_trigger.inspection_template
 				basis = retest_trigger.inspection_basis
 
-		lot = frappe.get_doc(
-			{
-				"doctype": "Quality Control Lot",
-				"item_code": row.get("item_code"),
-				"company": doc.get("company"),
-				"quality_warehouse": warehouse,
-				"batch_no": batch_no,
-				"received_qty": received_qty,
-				"source_document_type": doc.doctype,
-				"source_document": doc.name,
-				"inspection_template": template,
-			}
-		)
-		if basis:
-			lot.inspection_basis = basis
-		lot.insert(ignore_permissions=True)
+		for batch_no, batch_qty in batch_qty_map.items():
+			lot = frappe.get_doc(
+				{
+					"doctype": "Quality Control Lot",
+					"item_code": row.get("item_code"),
+					"company": doc.get("company"),
+					"quality_warehouse": warehouse,
+					"batch_no": batch_no,
+					"received_qty": batch_qty,
+					"source_document_type": doc.doctype,
+					"source_document": doc.name,
+					"inspection_template": template,
+				}
+			)
+			if basis:
+				lot.inspection_basis = basis
+			lot.insert(ignore_permissions=True)

@@ -139,6 +139,74 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		)
 		self.assertEqual(result[0][0], item)
 
+	def test_multi_batch_row_mints_one_lot_per_batch(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+
+		qc = make_qc_warehouse("_Test QC Multi Batch WH")
+		item = make_item(
+			properties={"is_stock_item": 1, "has_batch_no": 1, "batch_number_series": "QCMB2.#####"}
+		)
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry",
+				warehouse_role="Inbound",
+				quality_control_mode="Quarantine",
+				applicable_warehouse=qc,
+			),
+		)
+		item.save()
+
+		batches = {}
+		for batch_id, qty in (("_Test QC Multi One", 2), ("_Test QC Multi Two", 3)):
+			batch = frappe.get_doc({"doctype": "Batch", "item": item.name, "batch_id": batch_id}).insert(
+				ignore_permissions=True
+			)
+			batches[batch.name] = qty
+
+		bundle = SerialBatchCreation(
+			{
+				"item_code": item.name,
+				"warehouse": qc,
+				"voucher_type": "Stock Entry",
+				"qty": 5,
+				"actual_qty": 5,
+				"batches": frappe._dict(batches),
+				"type_of_transaction": "Inward",
+				"company": "_Test Company",
+				"do_not_submit": True,
+			}
+		).make_serial_and_batch_bundle()
+
+		receipt = frappe.new_doc("Stock Entry")
+		receipt.purpose = "Material Receipt"
+		receipt.stock_entry_type = "Material Receipt"
+		receipt.company = "_Test Company"
+		receipt.append(
+			"items",
+			{
+				"item_code": item.name,
+				"qty": 5,
+				"t_warehouse": qc,
+				"basic_rate": 100,
+				"serial_and_batch_bundle": bundle.name,
+			},
+		)
+		receipt.insert()
+		receipt.submit()
+
+		# one row, two batches: one lot per batch, each carrying its own quantity
+		lots = frappe.get_all(
+			"Quality Control Lot",
+			filters={"source_document": receipt.name},
+			fields=["batch_no", "received_qty"],
+		)
+		self.assertEqual(
+			{lot.batch_no: lot.received_qty for lot in lots},
+			{name: float(qty) for name, qty in batches.items()},
+		)
+
 	def test_quality_warehouse_refuses_unrelated_stock(self):
 		qc = make_qc_warehouse("_Test QC Strict WH")
 		plain_item = make_item(properties={"is_stock_item": 1}).name
