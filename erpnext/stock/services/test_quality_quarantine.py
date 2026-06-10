@@ -74,6 +74,8 @@ def get_qty(item_code, warehouse):
 
 class TestQualityQuarantine(ERPNextTestSuite):
 	def test_quality_control_lot_minted_on_receipt_into_qc_warehouse(self):
+		from erpnext.stock.doctype.quality_inspection.quality_inspection import item_query
+
 		qc = make_qc_warehouse()
 		item = make_item(properties={"is_stock_item": 1}).name
 		se = make_stock_entry(item_code=item, qty=7, to_warehouse=qc, purpose="Material Receipt", rate=100)
@@ -83,6 +85,18 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertEqual(lots[0].received_qty, 7)
 		self.assertEqual(lots[0].quality_warehouse, qc)
 		self.assertEqual(lots[0].status, "Under Inspection")
+
+		# the inspection form's item link query resolves a lot to its single item
+		# (a lot has no items child table like the stock vouchers do)
+		result = item_query(
+			"Item",
+			"",
+			"name",
+			0,
+			20,
+			{"reference_doctype": "Quality Control Lot", "reference_name": lots[0].name},
+		)
+		self.assertEqual(result[0][0], item)
 
 	def test_no_quality_control_lot_for_normal_warehouse(self):
 		item = make_item(properties={"is_stock_item": 1}).name

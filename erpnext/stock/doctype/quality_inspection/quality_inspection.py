@@ -433,6 +433,12 @@ def item_query(doctype: Any, txt: str | None, searchfield: Any, start: int, page
 			"Job Card", filters.get("reference_name"), ["production_item", "item_name"]
 		)
 		return ((production_item, item_name),)
+	elif reference_doctype == "Quality Control Lot":
+		# a lot quarantines exactly one item; it has no items child table
+		item_code = frappe.get_value("Quality Control Lot", filters.get("reference_name"), "item_code")
+		if not item_code:
+			return []
+		return ((item_code, frappe.get_cached_value("Item", item_code, "item_name")),)
 	else:
 		my_filters = [
 			["items.parent", "=", filters.get("reference_name")],
