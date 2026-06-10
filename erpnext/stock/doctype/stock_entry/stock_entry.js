@@ -132,6 +132,24 @@ frappe.ui.form.on("Stock Entry", {
 			}
 		});
 
+		frm.set_query("s_warehouse", "items", function () {
+			// a Quality Control Release drains quarantine; everything else avoids it
+			if (frm.doc.purpose === "Quality Control Release") {
+				return {
+					filters: {
+						warehouse_type: "Quality",
+						is_group: 0,
+						company: frm.doc.company,
+					},
+				};
+			}
+			return erpnext.queries.warehouse(frm.doc);
+		});
+
+		frm.set_query("t_warehouse", "items", function () {
+			return erpnext.queries.warehouse(frm.doc);
+		});
+
 		frm.set_query("serial_and_batch_bundle", "items", (doc, cdt, cdn) => {
 			let row = locals[cdt][cdn];
 			return {

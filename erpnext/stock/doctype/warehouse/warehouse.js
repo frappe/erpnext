@@ -3,6 +3,17 @@
 
 frappe.ui.form.on("Warehouse", {
 	setup: function (frm) {
+		frm.set_query("quality_warehouse", function (doc) {
+			return {
+				filters: {
+					warehouse_type: "Quality",
+					is_group: 0,
+					company: doc.company,
+					name: ["!=", doc.name],
+				},
+			};
+		});
+
 		frm.set_query("default_in_transit_warehouse", function (doc) {
 			return {
 				filters: {

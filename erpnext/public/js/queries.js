@@ -182,6 +182,9 @@ $.extend(erpnext.queries, {
 			filters: [
 				["Warehouse", "company", "in", ["", cstr(doc.company)]],
 				["Warehouse", "is_group", "=", 0],
+				// quarantine is entered by routing and left by release/return —
+				// never by picking the Quality Control warehouse on a transaction
+				["Warehouse", "warehouse_type", "!=", "Quality"],
 			],
 		};
 	},
