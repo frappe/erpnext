@@ -41,7 +41,7 @@ class QualityInspection(Document):
 		company: DF.Link | None
 		description: DF.SmallText | None
 		inspected_by: DF.Link
-		inspection_basis: DF.Literal["Sample", "Each Quantity"]
+		inspection_basis: DF.Literal["", "Sample", "Each Quantity"]
 		inspection_type: DF.Literal["", "Incoming", "Outgoing", "In Process"]
 		item_code: DF.Link
 		item_name: DF.Data | None
@@ -152,12 +152,16 @@ class QualityInspection(Document):
 			self.child_row_reference = child_row_references[0]
 
 	def set_inspection_basis_from_lot(self):
-		"""How the stock is inspected (Sample / Each Quantity).
+		"""Prefill how the stock is inspected (Sample / Each Quantity).
 
-		A Quality Control Lot carries its basis; inspections referencing a
-		transaction resolve it from the item's quality trigger for that doctype.
+		The Quality Control Lot (or the item's quality trigger) proposes the
+		basis; a basis already on the document is the inspector's choice and is
+		left alone.
 		"""
 		from erpnext.stock.services.quality_trigger_resolution import get_inspection_basis
+
+		if self.inspection_basis:
+			return
 
 		if self.reference_type == "Quality Control Lot" and self.reference_name:
 			self.inspection_basis = (

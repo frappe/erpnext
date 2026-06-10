@@ -263,14 +263,11 @@
    "options": "Quality Inspection Reading Bundle"
   },
   {
-   "default": "Sample",
-   "depends_on": "eval:doc.reference_type == 'Quality Control Lot'",
-   "description": "Carried from the Quality Control Lot: Sample inspections record readings below; Each Quantity inspections record per-unit readings in a Reading Bundle.",
+   "description": "Fetched from the Quality Control Lot or the item's quality trigger; override to inspect differently this time. Sample inspections record readings below; Each Quantity inspections record per-unit readings in a Reading Bundle.",
    "fieldname": "inspection_basis",
    "fieldtype": "Select",
    "label": "Inspection Basis",
-   "options": "Sample\nEach Quantity",
-   "read_only": 1
+   "options": "\nSample\nEach Quantity"
   },
   {
    "fieldname": "child_row_reference",

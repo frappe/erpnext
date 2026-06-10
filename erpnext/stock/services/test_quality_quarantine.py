@@ -44,7 +44,9 @@ def quality_control_lots_for(source_name, source_doctype="Stock Entry"):
 	)
 
 
-def submit_inspection_for_lot(lot_name, status="Accepted", reading_bundle=None, manual_inspection=0):
+def submit_inspection_for_lot(
+	lot_name, status="Accepted", reading_bundle=None, manual_inspection=0, inspection_basis=None
+):
 	lot = frappe.get_doc("Quality Control Lot", lot_name)
 	inspection = frappe.get_doc(
 		{
@@ -59,6 +61,7 @@ def submit_inspection_for_lot(lot_name, status="Accepted", reading_bundle=None, 
 			"manual_inspection": manual_inspection,
 			"status": status,
 			"reading_bundle": reading_bundle,
+			"inspection_basis": inspection_basis,
 		}
 	)
 	if not manual_inspection and not reading_bundle:
@@ -696,6 +699,36 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		)
 		formula.insert(ignore_permissions=True)
 		self.assertRaises(frappe.ValidationError, formula.submit)
+
+	def test_inspector_can_override_the_basis(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+
+		qc = make_qc_warehouse("_Test QC Override Basis WH")
+		store = make_warehouse("_Test QC Override Basis Store", quality_warehouse=qc)
+
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry",
+				warehouse_role="Inbound",
+				quality_control_mode="Quarantine",
+				inspection_basis="Each Quantity",
+				applicable_warehouse=qc,
+			),
+		)
+		item.save()
+
+		receipt = make_stock_entry(
+			item_code=item.name, qty=2, to_warehouse=qc, purpose="Material Receipt", rate=100
+		)
+		lot = quality_control_lots_for(receipt.name)[0].name
+
+		# the lot proposes Each Quantity, but the inspector overrides to Sample —
+		# no bundle demanded, the recorded reading decides the whole quantity
+		submit_inspection_for_lot(lot, inspection_basis="Sample")
+		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "status"), "Released")
+		self.assertEqual(get_qty(item.name, store), 2)
 
 	def test_manual_inspection_overrides_each_quantity(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row

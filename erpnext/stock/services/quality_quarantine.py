@@ -176,19 +176,20 @@ def process_inspection_result(doc, method=None):
 
 		schedule_next_retest(lot.item_code, lot.batch_no)
 
-	# a manual inspection is the inspector's overriding verdict: it decides the
-	# whole pending quantity without per-unit readings
+	# the inspection's basis governs (the lot's is the fetched proposal, which
+	# the inspector may override); a manual inspection decides the whole pending
+	# quantity without per-unit readings
 	if (
-		lot.inspection_basis == "Each Quantity"
+		doc.get("inspection_basis") == "Each Quantity"
 		and not doc.get("reading_bundle")
 		and not doc.get("manual_inspection")
 	):
 		frappe.throw(
 			_(
-				"Quality Control Lot {0} is inspected on an Each Quantity basis: every unit needs "
-				"its own readings. Attach a Quality Inspection Reading Bundle before submitting, "
-				"or check Manual Inspection to record an overriding verdict."
-			).format(frappe.bold(lot.name)),
+				"This inspection is on an Each Quantity basis: every unit needs its own readings. "
+				"Attach a Quality Inspection Reading Bundle before submitting, or check Manual "
+				"Inspection to record an overriding verdict."
+			),
 			title=_("Per-Unit Readings Required"),
 		)
 
