@@ -70,7 +70,7 @@ class TestItemQualityTrigger(ERPNextTestSuite):
 		item.append("quality_triggers", trigger_row(warehouse_role="Outbound"))
 		self.assertRaises(frappe.ValidationError, item.save)
 
-	def test_party_transaction_type_only_on_party_documents(self):
+	def test_party_transaction_type_cleared_on_non_party_documents(self):
 		item = make_item(properties={"is_stock_item": 1})
 		item.append(
 			"quality_triggers",
@@ -81,7 +81,10 @@ class TestItemQualityTrigger(ERPNextTestSuite):
 				party_transaction_type="Internal Transfer",
 			),
 		)
-		self.assertRaises(frappe.ValidationError, item.save)
+		# the field defaults to External on every row, so non-party document
+		# types silently clear it instead of rejecting the row
+		item.save()
+		self.assertFalse(item.quality_triggers[0].party_transaction_type)
 
 	def test_quarantine_rejected_on_outbound_rows(self):
 		item = make_item(properties={"is_stock_item": 1})

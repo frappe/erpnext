@@ -72,8 +72,9 @@
    "options": "Stock Entry Type"
   },
   {
+   "default": "External",
    "depends_on": "eval:['Purchase Receipt','Purchase Invoice','Delivery Note','Sales Invoice'].includes(doc.document_type)",
-   "description": "Restrict to external party transactions or internal (inter-company) transfers. Leave blank to apply to both.",
+   "description": "Defaults to External — most companies do not inspect internal (inter-company) transfers. Clear the field to apply to both.",
    "fieldname": "party_transaction_type",
    "fieldtype": "Select",
    "label": "Transaction Type",

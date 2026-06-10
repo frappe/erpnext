@@ -5,6 +5,8 @@
 
 import frappe
 
+from erpnext.tests.utils import ERPNextTestSuite
+
 
 def ensure_quality_warehouse_type():
 	if not frappe.db.exists("Warehouse Type", "Quality"):
@@ -24,3 +26,19 @@ def make_warehouse(name, warehouse_type=None, quality_warehouse=None):
 			}
 		).insert(ignore_permissions=True)
 	return full
+
+
+class TestQualityWarehouseConfiguration(ERPNextTestSuite):
+	def test_quality_warehouse_target_must_be_quality_type(self):
+		ensure_quality_warehouse_type()
+		plain_target = make_warehouse("_Test QW Plain Target")  # no warehouse type
+		store = frappe.get_doc("Warehouse", make_warehouse("_Test QW Config Store"))
+
+		# pointing at an untyped warehouse would route stock into an unlocked
+		# destination and break submission downstream — refused at config time
+		store.quality_warehouse = plain_target
+		self.assertRaises(frappe.ValidationError, store.save)
+
+		store.reload()
+		store.quality_warehouse = make_warehouse("_Test QW Typed Target", warehouse_type="Quality")
+		store.save()

@@ -74,6 +74,30 @@ class Warehouse(NestedSet):
 	def validate(self):
 		self.validate_inventory_account()
 		self.warn_about_multiple_warehouse_account()
+		self.validate_quality_warehouse()
+
+	def validate_quality_warehouse(self):
+		"""The quarantine target must itself be marked as a Quality warehouse.
+
+		Without the Quality warehouse type, the quarantine machinery does not
+		recognise the destination: stock routed into it is not locked, and the
+		trigger resolves against it again on submission.
+		"""
+		if not self.quality_warehouse:
+			return
+
+		if self.quality_warehouse == self.name:
+			frappe.throw(_("A warehouse cannot be its own Quality Control Warehouse."))
+
+		warehouse_type = frappe.db.get_value("Warehouse", self.quality_warehouse, "warehouse_type")
+		if warehouse_type != "Quality":
+			frappe.throw(
+				_(
+					"{0} cannot be used as a Quality Control Warehouse: set its Warehouse Type to "
+					"{1} first."
+				).format(frappe.bold(self.quality_warehouse), frappe.bold("Quality")),
+				title=_("Not a Quality Warehouse"),
+			)
 
 	def validate_inventory_account(self):
 		if (

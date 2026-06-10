@@ -39,6 +39,7 @@
   "warehouse_type",
   "column_break_qajx",
   "default_in_transit_warehouse",
+  "quality_control_section",
   "quality_warehouse",
   "tree_details",
   "lft",
@@ -246,6 +247,13 @@
    "fieldtype": "Link",
    "label": "Default In-Transit Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "eval:!doc.is_group && doc.warehouse_type != 'Quality';",
+   "fieldname": "quality_control_section",
+   "fieldtype": "Section Break",
+   "label": "Quality Control"
   },
   {
    "depends_on": "eval:!doc.is_group && doc.warehouse_type != 'Quality';",

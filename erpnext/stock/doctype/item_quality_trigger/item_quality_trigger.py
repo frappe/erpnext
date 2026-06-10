@@ -116,14 +116,10 @@ def _validate_trigger_row(row):
 	if row.stock_entry_type and row.document_type != "Stock Entry":
 		frappe.throw(_("Row #{0}: Stock Entry Type applies only to Stock Entry.").format(row.idx))
 
-	# External / Internal Transfer only applies to party documents.
+	# External / Internal Transfer only applies to party documents. The field
+	# defaults to External, so it is cleared (not rejected) on other doctypes.
 	if row.get("party_transaction_type") and row.document_type not in PARTY_DOCTYPES:
-		frappe.throw(
-			_(
-				"Row #{0}: Transaction Type (External / Internal Transfer) applies only to "
-				"Purchase Receipt, Purchase Invoice, Delivery Note and Sales Invoice."
-			).format(row.idx)
-		)
+		row.party_transaction_type = None
 
 	# Inspect On (Every Job Card / Final Output Only) only applies to Job Card rows.
 	if row.get("job_card_inspection_point") and row.document_type != "Job Card":
