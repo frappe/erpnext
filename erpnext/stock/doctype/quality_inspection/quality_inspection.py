@@ -294,15 +294,27 @@ class QualityInspection(Document):
 		self.update_qc_reference()
 
 	def on_cancel(self):
-		# the reading bundle is frozen evidence, not a downstream document: it is
-		# released (claim cleared), not cancelled along with the inspection
+		# the bundle is cancelled server-side below, in the right order — the
+		# client cancel-all dialog must not try it first
 		self.ignore_linked_doctypes = ("Serial and Batch Bundle", "Quality Inspection Reading Bundle")
 
 		self.update_qc_reference()
-		if self.reading_bundle:
-			frappe.db.set_value(
-				"Quality Inspection Reading Bundle", self.reading_bundle, "quality_inspection", None
-			)
+		self.cancel_reading_bundle()
+
+	def cancel_reading_bundle(self):
+		"""A voided inspection voids its per-unit readings with it.
+
+		The claim stays on the cancelled pair for the audit trail, so the
+		readings can never decide other stock; re-inspection goes through an
+		amended bundle.
+		"""
+		if not self.reading_bundle:
+			return
+
+		bundle = frappe.get_doc("Quality Inspection Reading Bundle", self.reading_bundle)
+		if bundle.docstatus == 1:
+			bundle.flags.ignore_permissions = True
+			bundle.cancel()
 
 	def on_trash(self):
 		self.update_qc_reference(remove_reference=True)

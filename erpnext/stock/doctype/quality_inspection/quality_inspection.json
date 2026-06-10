@@ -257,6 +257,7 @@
    "fieldtype": "Link",
    "label": "Reading Bundle",
    "mandatory_depends_on": "eval:doc.inspection_basis == 'Each Quantity' && !doc.manual_inspection",
+   "no_copy": 1,
    "options": "Quality Inspection Reading Bundle"
   },
   {
