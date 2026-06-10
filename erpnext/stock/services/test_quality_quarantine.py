@@ -881,6 +881,87 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "status"), "Rejected")
 		self.assertEqual(get_qty(item, qc), 4)  # stays under quality hold for the purchase return
 
+	def test_return_inspection_serials_must_match_the_return(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "QCRS.#####"}
+		)
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Delivery Note", warehouse_role="Inbound", quality_control_mode="Block"
+			),
+		)
+		item.save()
+
+		make_stock_entry(
+			item_code=item.name, qty=3, to_warehouse=REAL_WH, purpose="Material Receipt", rate=100
+		)
+		serials = frappe.get_all(
+			"Serial No", filters={"item_code": item.name, "warehouse": REAL_WH}, pluck="name", order_by="name"
+		)
+		delivery = create_delivery_note(
+			item_code=item.name,
+			warehouse=REAL_WH,
+			qty=3,
+			serial_no="\n".join(serials),
+			use_serial_batch_fields=1,
+		)
+
+		# the customer returns two specific units
+		sales_return = make_return_doc("Delivery Note", delivery.name)
+		sales_return.items[0].qty = -2
+		sales_return.items[0].serial_no = "\n".join(serials[:2])
+		sales_return.items[0].use_serial_batch_fields = 1
+		sales_return.items[0].serial_and_batch_bundle = None
+		sales_return.save()
+
+		def build_inspection(serial_no):
+			return frappe.get_doc(
+				{
+					"doctype": "Quality Inspection",
+					"inspection_type": "Incoming",
+					"reference_type": "Delivery Note",
+					"reference_name": sales_return.name,
+					"item_code": item.name,
+					"report_date": nowdate(),
+					"inspected_by": frappe.session.user,
+					"manual_inspection": 1,
+					"status": "Accepted",
+					"serial_no": serial_no,
+				}
+			)
+
+		# sampling a delivered serial that is NOT on this return is refused
+		wrong = build_inspection(serials[2])
+		wrong.insert(ignore_permissions=True)
+		self.assertRaises(frappe.ValidationError, wrong.submit)
+		wrong.delete()
+
+		# sampling a returned serial passes
+		inspection = build_inspection(serials[0])
+		inspection.insert(ignore_permissions=True)
+		inspection.submit()
+
+		# tampering with the return's serials after the inspection is caught at
+		# the return's own submission
+		sales_return.reload()
+		sales_return.items[0].qty = -1
+		sales_return.items[0].serial_no = serials[2]
+		sales_return.save()
+		self.assertRaises(frappe.ValidationError, sales_return.submit)
+
+		# with the inspected serials restored, the return submits
+		sales_return.reload()
+		sales_return.items[0].qty = -2
+		sales_return.items[0].serial_no = "\n".join(serials[:2])
+		sales_return.save()
+		sales_return.submit()
+
 	def test_customer_return_is_quarantined_and_released(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note

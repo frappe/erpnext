@@ -390,7 +390,10 @@ class StockController(AccountsController):
 			apply_quarantine_routing,
 			validate_quality_warehouse_usage,
 		)
-		from erpnext.stock.services.quality_trigger_resolution import enforce_inspection_points
+		from erpnext.stock.services.quality_trigger_resolution import (
+			enforce_inspection_points,
+			validate_inspected_serial_consistency,
+		)
 
 		# A Quality Control Release is itself the outcome of an inspection: routing
 		# it again would quarantine the released stock in a loop, and gating it
@@ -401,6 +404,7 @@ class StockController(AccountsController):
 		apply_quarantine_routing(self)
 		validate_quality_warehouse_usage(self)
 		enforce_inspection_points(self)
+		validate_inspected_serial_consistency(self)
 
 	def update_blanket_order(self):
 		blanket_orders = list(set([d.blanket_order for d in self.items if d.blanket_order]))

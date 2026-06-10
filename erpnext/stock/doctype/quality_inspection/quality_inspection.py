@@ -259,7 +259,46 @@ class QualityInspection(Document):
 		self.validate_readings_status_mandatory()
 		self.validate_readings_recorded()
 		self.validate_tracking_identity_recorded()
+		self.validate_sampled_serials_on_reference_row()
 		self.validate_reading_bundle_coverage()
+
+	def validate_sampled_serials_on_reference_row(self):
+		"""Early feedback: the sampled serials must be on the row being inspected.
+
+		Only checked when the referenced row already carries serials — the
+		document-side gate at its submission is the authority either way.
+		"""
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		from erpnext.stock.services.quality_trigger_resolution import get_row_serial_nos
+
+		if not self.child_row_reference or not (self.serial_no or "").strip():
+			return
+
+		child_doctype = (
+			"Stock Entry Detail" if self.reference_type == "Stock Entry" else self.reference_type + " Item"
+		)
+		row = frappe.db.get_value(
+			child_doctype,
+			self.child_row_reference,
+			["serial_no", "serial_and_batch_bundle"],
+			as_dict=True,
+		)
+		if not row:
+			return
+
+		row_serials = get_row_serial_nos(row)
+		if not row_serials:
+			return
+
+		missing = set(get_serial_nos(self.serial_no)) - row_serials
+		if missing:
+			frappe.throw(
+				_(
+					"Sampled serial number(s) {0} are not on the document row under inspection — "
+					"only the stock actually moving can be sampled."
+				).format(frappe.bold(", ".join(sorted(missing)))),
+				title=_("Sampled Serials Mismatch"),
+			)
 
 	def validate_tracking_identity_recorded(self):
 		"""A tracked item's verdict must say which units it covers.

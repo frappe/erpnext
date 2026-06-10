@@ -229,6 +229,67 @@ def resolve_inspection_points(doc):
 	return points
 
 
+def get_row_serial_nos(row):
+	"""The serial numbers a transaction row carries (legacy field or bundle)."""
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+	serials = set()
+	if row.get("serial_no"):
+		serials.update(get_serial_nos(row.get("serial_no")))
+	if row.get("serial_and_batch_bundle"):
+		serials.update(
+			frappe.get_all(
+				"Serial and Batch Entry",
+				filters={"parent": row.get("serial_and_batch_bundle"), "serial_no": ("is", "set")},
+				pluck="serial_no",
+			)
+		)
+	return serials
+
+
+def validate_inspected_serial_consistency(doc):
+	"""A row's inspection must describe the row's serials.
+
+	The inspection samples specific units; if the row no longer carries them
+	(e.g. the serials on a return were changed after the inspection), the
+	recorded verdict says nothing about the stock actually moving. Enforced at
+	submission for every row with a linked inspection, regardless of mode.
+	"""
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+	if doc.docstatus != 1:
+		return
+
+	for row in doc.get("items") or []:
+		inspection = row.get("quality_inspection")
+		if not inspection:
+			continue
+
+		sampled = set(
+			get_serial_nos(frappe.db.get_value("Quality Inspection", inspection, "serial_no") or "")
+		)
+		if not sampled:
+			continue
+
+		row_serials = get_row_serial_nos(row)
+		if not row_serials:
+			continue  # serial assignment may follow later in submission; core enforces it
+
+		missing = sampled - row_serials
+		if missing:
+			frappe.throw(
+				_(
+					"Row #{0}: Quality Inspection {1} sampled serial number(s) {2}, which this row "
+					"does not carry. The inspection must describe the stock actually moving."
+				).format(
+					row.idx,
+					frappe.utils.get_link_to_form("Quality Inspection", inspection),
+					frappe.bold(", ".join(sorted(missing))),
+				),
+				title=_("Inspected Serials Mismatch"),
+			)
+
+
 def enforce_inspection_points(doc):
 	"""Enforce Block / Warn inspection points on a stock transaction.
 
