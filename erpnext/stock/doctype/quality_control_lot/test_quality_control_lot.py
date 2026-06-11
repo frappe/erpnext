@@ -42,6 +42,12 @@ class TestQualityControlLot(ERPNextTestSuite):
 		self.assertEqual(lot.status, "Partially Released")
 		self.assertEqual(lot.pending_qty, 6)
 
+	def test_status_under_inspection_while_partly_decided_and_unmoved(self):
+		# a rejection is a verdict, not a movement: with units undecided and
+		# nothing released, the lot is still under inspection
+		lot = make_quality_control_lot(rejected_qty=1, decided_qty=2)
+		self.assertEqual(lot.status, "Under Inspection")
+
 	def test_status_awaiting_release_when_decided_but_unmoved(self):
 		lot = make_quality_control_lot(decided_qty=10)
 		self.assertEqual(lot.status, "Awaiting Release")

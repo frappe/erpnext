@@ -57,9 +57,10 @@ class QualityControlLot(Document):
 		moved = flt(self.accepted_qty) + flt(self.rejected_qty)
 		if undecided > 0:
 			# inspections may decide the lot in parts; until every unit is
-			# decided the lot stays under inspection (partially, once anything
-			# was accepted or rejected)
-			self.status = "Under Inspection" if moved <= 0 else "Partially Released"
+			# decided the lot stays under inspection — Partially Released only
+			# once accepted stock has actually left (a rejection is a verdict,
+			# not a movement)
+			self.status = "Partially Released" if flt(self.accepted_qty) > 0 else "Under Inspection"
 		elif awaiting_release > 0:
 			if flt(self.accepted_qty) > 0:
 				self.status = "Partially Released"
