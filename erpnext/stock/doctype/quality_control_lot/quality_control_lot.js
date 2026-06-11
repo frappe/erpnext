@@ -6,6 +6,37 @@ frappe.ui.form.on("Quality Control Lot", {
 		frm.toggle_display("serial_numbers_section", false);
 		if (frm.is_new()) return;
 
+		const wrapper = frm.get_field("serial_numbers_html").$wrapper;
+		wrapper.empty();
+
+		if (frm.doc.batch_no) {
+			frappe.call({
+				method: "erpnext.stock.doctype.quality_control_lot.quality_control_lot.get_batch_summary",
+				args: { lot_name: frm.doc.name },
+				callback: (r) => {
+					const summary = r.message;
+					if (!summary) return;
+
+					const matches = summary.held_qty === summary.expected_qty;
+					const balance = matches
+						? `<span class="indicator-pill green">${__("In Quarantine: {0}", [
+								summary.held_qty,
+							])}</span>`
+						: `<span class="indicator-pill orange">${__(
+								"In Quarantine: {0} (lot expects {1})",
+								[summary.held_qty, summary.expected_qty]
+							)}</span>`;
+					wrapper.prepend(`
+						<p>${__("Batch")} ${frappe.utils.get_form_link(
+							"Batch",
+							summary.batch_no,
+							true
+						)} &nbsp; ${balance}</p>`);
+					frm.toggle_display("serial_numbers_section", true);
+				},
+			});
+		}
+
 		frappe.call({
 			method: "erpnext.stock.doctype.quality_control_lot.quality_control_lot.get_serial_numbers",
 			args: { lot_name: frm.doc.name },
@@ -40,7 +71,7 @@ frappe.ui.form.on("Quality Control Lot", {
 					})
 					.join("");
 
-				frm.get_field("serial_numbers_html").$wrapper.html(`
+				wrapper.append(`
 					<table class="table table-bordered table-sm">
 						<thead>
 							<tr>

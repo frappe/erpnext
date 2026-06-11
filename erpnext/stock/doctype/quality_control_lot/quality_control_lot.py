@@ -63,6 +63,31 @@ class QualityControlLot(Document):
 
 
 @frappe.whitelist()
+def get_batch_summary(lot_name: str):
+	"""The lot's batch with its live quarantine balance against the expected hold.
+
+	The lot ledger says what should still be in the Quality Control warehouse
+	(pending plus rejected stock not yet returned or disposed); the batch's
+	actual balance there says what is. Computed fresh so a mismatch — however it
+	came about — is visible right on the lot.
+	"""
+	from erpnext.stock.doctype.batch.batch import get_batch_qty
+
+	lot = frappe.get_doc("Quality Control Lot", lot_name)
+	if not lot.batch_no:
+		return None
+
+	expected_qty = (
+		flt(lot.pending_qty) + flt(lot.rejected_qty) - flt(lot.returned_qty) - flt(lot.disposed_qty)
+	)
+	return {
+		"batch_no": lot.batch_no,
+		"held_qty": flt(get_batch_qty(lot.batch_no, lot.quality_warehouse)),
+		"expected_qty": expected_qty,
+	}
+
+
+@frappe.whitelist()
 def get_serial_numbers(lot_name: str):
 	"""The lot's serials with their inspection verdict and current whereabouts.
 

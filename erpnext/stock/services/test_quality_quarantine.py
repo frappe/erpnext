@@ -443,6 +443,16 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		make_release(lot_one, 2, REAL_WH, batch_no=batch_one)
 		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot_one, "status"), "Released")
 
+		# the lot's batch view reconciles the live quarantine balance
+		from erpnext.stock.doctype.quality_control_lot.quality_control_lot import get_batch_summary
+
+		self.assertEqual(
+			get_batch_summary(lot_one), {"batch_no": batch_one, "held_qty": 0, "expected_qty": 0}
+		)
+		self.assertEqual(
+			get_batch_summary(lot_two), {"batch_no": batch_two, "held_qty": 2, "expected_qty": 2}
+		)
+
 	def test_release_moves_exactly_the_accepted_serials(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
 		from erpnext.stock.doctype.quality_inspection_reading_bundle.test_quality_inspection_reading_bundle import (

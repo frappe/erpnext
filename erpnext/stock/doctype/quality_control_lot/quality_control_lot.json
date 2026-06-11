@@ -195,12 +195,12 @@
    "collapsible": 1,
    "fieldname": "serial_numbers_section",
    "fieldtype": "Section Break",
-   "label": "Serial Numbers"
+   "label": "Serial and Batch Tracking"
   },
   {
    "fieldname": "serial_numbers_html",
    "fieldtype": "HTML",
-   "label": "Serial Numbers"
+   "label": "Serial and Batch Tracking"
   }
  ],
  "links": [],
