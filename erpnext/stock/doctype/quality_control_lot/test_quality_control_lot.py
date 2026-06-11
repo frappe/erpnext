@@ -13,7 +13,10 @@ def qc_warehouse():
 	return make_warehouse("_Test Quality Control Lot WH", warehouse_type="Quality")
 
 
-def make_quality_control_lot(received_qty=10, accepted_qty=0, rejected_qty=0):
+def make_quality_control_lot(received_qty=10, accepted_qty=0, rejected_qty=0, decided_qty=None):
+	if decided_qty is None:
+		# released or rejected stock implies a verdict that decided it
+		decided_qty = accepted_qty + rejected_qty
 	return frappe.get_doc(
 		{
 			"doctype": "Quality Control Lot",
@@ -21,6 +24,7 @@ def make_quality_control_lot(received_qty=10, accepted_qty=0, rejected_qty=0):
 			"company": "_Test Company",
 			"quality_warehouse": qc_warehouse(),
 			"received_qty": received_qty,
+			"decided_qty": decided_qty,
 			"accepted_qty": accepted_qty,
 			"rejected_qty": rejected_qty,
 		}
@@ -37,6 +41,11 @@ class TestQualityControlLot(ERPNextTestSuite):
 		lot = make_quality_control_lot(accepted_qty=4)
 		self.assertEqual(lot.status, "Partially Released")
 		self.assertEqual(lot.pending_qty, 6)
+
+	def test_status_awaiting_release_when_decided_but_unmoved(self):
+		lot = make_quality_control_lot(decided_qty=10)
+		self.assertEqual(lot.status, "Awaiting Release")
+		self.assertEqual(lot.pending_qty, 10)
 
 	def test_status_released_when_fully_resolved(self):
 		lot = make_quality_control_lot(accepted_qty=8, rejected_qty=2)

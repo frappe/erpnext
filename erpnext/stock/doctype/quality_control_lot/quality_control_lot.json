@@ -16,6 +16,7 @@
   "quality_warehouse",
   "qty_section",
   "received_qty",
+  "decided_qty",
   "accepted_qty",
   "rejected_qty",
   "returned_qty",
@@ -95,6 +96,13 @@
    "in_list_view": 1,
    "label": "Received Qty",
    "reqd": 1,
+   "read_only": 1
+  },
+  {
+   "description": "Quantity decided by submitted inspections so far, accepted or rejected. Inspections may decide the lot in parts.",
+   "fieldname": "decided_qty",
+   "fieldtype": "Float",
+   "label": "Decided Qty",
    "read_only": 1
   },
   {

@@ -97,7 +97,10 @@ frappe.ui.form.on("Quality Control Lot", {
 	refresh(frm) {
 		frm.trigger("render_serial_numbers");
 
-		if (!frm.is_new() && frm.doc.pending_qty > 0 && !frm.doc.quality_inspection) {
+		// inspections may decide the lot in parts: offer another one while
+		// anything remains undecided
+		const undecided = flt(frm.doc.received_qty) - flt(frm.doc.decided_qty);
+		if (!frm.is_new() && undecided > 0) {
 			frm.add_custom_button(__("Create Quality Inspection"), () => {
 				frappe.new_doc("Quality Inspection", {
 					inspection_type: "Incoming",
@@ -106,7 +109,10 @@ frappe.ui.form.on("Quality Control Lot", {
 					item_code: frm.doc.item_code,
 					batch_no: frm.doc.batch_no,
 					inspection_basis: frm.doc.inspection_basis,
-					sample_size: frm.doc.inspection_basis === "Each Quantity" ? 0 : frm.doc.pending_qty,
+					sample_size:
+						frm.doc.inspection_basis === "Each Quantity"
+							? 0
+							: flt(frm.doc.received_qty) - flt(frm.doc.decided_qty),
 					quality_inspection_template: frm.doc.inspection_template,
 				});
 			});
@@ -118,7 +124,9 @@ frappe.ui.form.on("Quality Control Lot", {
 			});
 		}
 
-		if (frm.doc.pending_qty > 0 && frm.doc.quality_inspection) {
+		const awaiting_release =
+			flt(frm.doc.decided_qty) - flt(frm.doc.rejected_qty) - flt(frm.doc.accepted_qty);
+		if (awaiting_release > 0) {
 			frm.add_custom_button(__("Create Quality Control Release"), () => {
 				frappe.prompt(
 					{

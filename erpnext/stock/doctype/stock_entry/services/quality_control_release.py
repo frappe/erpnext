@@ -77,12 +77,17 @@ class QualityControlReleaseStockEntry(MaterialTransferStockEntry):
 				self._validate_row_serials(row, lot, accepted_serials, verdict="Accepted")
 				release_qty += flt(row.transfer_qty or row.qty)
 
-		if release_qty > flt(lot.pending_qty):
+		# inspections may decide the lot in parts: only the accepted-and-not-yet-
+		# released quantity may leave — never undecided stock that merely shares
+		# the warehouse
+		awaiting_release = lot.awaiting_release_qty()
+		if release_qty > awaiting_release:
 			frappe.throw(
 				_(
-					"Cannot release {0} from Quality Control Lot {1}: only {2} is pending inspection release."
-				).format(release_qty, lot.name, lot.pending_qty),
-				title=_("Quantity Exceeds Lot"),
+					"Cannot release {0} from Quality Control Lot {1}: only {2} accepted unit(s) "
+					"await release."
+				).format(release_qty, lot.name, awaiting_release),
+				title=_("Quantity Exceeds Accepted Stock"),
 			)
 
 		rejected_outstanding = flt(lot.rejected_qty) - flt(lot.returned_qty) - flt(lot.disposed_qty)
@@ -133,16 +138,26 @@ class QualityControlReleaseStockEntry(MaterialTransferStockEntry):
 			)
 
 	def _get_unit_serials(self, lot, status):
-		"""The serials the lot's inspection gave this verdict, or None when no
-		per-serial verdicts were recorded (quantity and batch guards apply instead)."""
-		if not lot.quality_inspection:
+		"""The serials the lot's verdicts allow this movement, or None when no
+		per-serial verdicts were recorded (quantity and batch guards apply instead).
+
+		Verdicts accumulate across the lot's inspections. Accepted releases may
+		also move the serials of a verdict-less remainder once the lot is fully
+		decided — never a rejected or undecided serial.
+		"""
+		from erpnext.stock.services.quality_quarantine import (
+			_accepted_serials_awaiting_release,
+			_union_unit_serials,
+		)
+
+		rejected = _union_unit_serials(lot, "Rejected")
+		if not rejected and not _union_unit_serials(lot, "Accepted"):
 			return None
 
-		inspection = frappe.get_doc("Quality Inspection", lot.quality_inspection)
-		if not inspection.get("unit_readings"):
-			return None
+		if status == "Rejected":
+			return rejected or None
 
-		return set(inspection.get_unit_serials(status)) or None
+		return set(_accepted_serials_awaiting_release(lot) or []) or None
 
 	def _validate_row_serials(self, row, lot, allowed_serials, verdict):
 		"""A row moves only serials whose inspection verdict matches its target.

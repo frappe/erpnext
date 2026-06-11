@@ -29,6 +29,7 @@
   "quality_inspection_template",
   "manual_inspection",
   "inspection_basis",
+  "decided_quantity",
   "unit_quantity",
   "unit_readings",
   "accepted_unit_quantity",
@@ -319,6 +320,13 @@
    "fieldtype": "Int",
    "label": "Rejected Unit Quantity",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.reference_type == 'Quality Control Lot' && (doc.inspection_basis != 'Each Quantity' || doc.manual_inspection)",
+   "description": "How much of the lot's undecided quantity this verdict decides. Left blank, it decides everything still undecided \u2014 inspections may decide the lot in parts.",
+   "fieldname": "decided_quantity",
+   "fieldtype": "Float",
+   "label": "Decided Quantity"
   }
  ],
  "icon": "fa fa-search",

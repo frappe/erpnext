@@ -70,6 +70,7 @@ class QualityInspection(Document):
 		remarks: DF.Text | None
 		report_date: DF.Date
 		sample_size: DF.Float
+		decided_quantity: DF.Float
 		accepted_unit_quantity: DF.Int
 		rejected_unit_quantity: DF.Int
 		unit_quantity: DF.Int
@@ -353,6 +354,93 @@ class QualityInspection(Document):
 		self.validate_inspected_serials_against_reference()
 		self.validate_inspected_batch_against_reference()
 		self.validate_unit_readings_coverage()
+		self.validate_decided_quantity()
+		self.validate_units_not_already_decided()
+
+	def validate_decided_quantity(self):
+		"""Resolve and bound how much of the lot this verdict decides.
+
+		Each Quantity verdicts decide exactly their units. Sample and manual
+		verdicts decide the stated quantity, defaulting to everything still
+		undecided — and for serialized items a partial verdict must name its
+		units, so it has to be on an Each Quantity basis.
+		"""
+		if self.reference_type != "Quality Control Lot" or not self.reference_name:
+			self.decided_quantity = 0
+			return
+
+		undecided = flt(self.get_qty_under_inspection())
+		if self.inspection_basis == "Each Quantity" and not self.manual_inspection:
+			self.decided_quantity = flt(self.unit_quantity)
+		elif not flt(self.decided_quantity):
+			self.decided_quantity = undecided
+
+		if flt(self.decided_quantity) <= 0:
+			frappe.throw(
+				_("This inspection decides nothing — the Decided Quantity must be greater than zero."),
+				title=_("Nothing To Decide"),
+			)
+		if flt(self.decided_quantity) > undecided:
+			frappe.throw(
+				_(
+					"This inspection decides {0} unit(s), but only {1} remain undecided on Quality "
+					"Control Lot {2}."
+				).format(self.decided_quantity, undecided, frappe.bold(self.reference_name)),
+				title=_("More Than Undecided"),
+			)
+
+		if (
+			flt(self.decided_quantity) < undecided
+			and not (self.inspection_basis == "Each Quantity" and not self.manual_inspection)
+			and frappe.get_cached_value("Item", self.item_code, "has_serial_no")
+		):
+			frappe.throw(
+				_(
+					"A partial verdict on a serialized item must say which units it covers — "
+					"use the Each Quantity basis with per-unit readings."
+				),
+				title=_("Partial Verdict Needs Unit Readings"),
+			)
+
+	def validate_units_not_already_decided(self):
+		"""A serial decided by an earlier verdict cannot be decided again."""
+		if self.reference_type != "Quality Control Lot" or not self.unit_readings:
+			return
+
+		decided_serials = set(
+			frappe.get_all(
+				"Quality Inspection Reading Entry",
+				filters={
+					"parenttype": "Quality Inspection",
+					"parentfield": "unit_readings",
+					"parent": (
+						"in",
+						frappe.get_all(
+							"Quality Inspection",
+							filters={
+								"reference_type": "Quality Control Lot",
+								"reference_name": self.reference_name,
+								"docstatus": 1,
+								"name": ("!=", self.name),
+							},
+							pluck="name",
+						),
+					),
+					"serial_no": ("is", "set"),
+				},
+				pluck="serial_no",
+			)
+		)
+		repeated = {
+			entry.serial_no for entry in self.unit_readings if entry.serial_no
+		} & decided_serials
+		if repeated:
+			frappe.throw(
+				_("Serial number(s) {0} were already decided by an earlier inspection of this lot.").format(
+					frappe.bold(", ".join(sorted(repeated)))
+				),
+				title=_("Serials Already Decided"),
+			)
 
 	def validate_sample_size(self):
 		"""A Sample inspection of zero units is a verdict about nothing."""
@@ -610,7 +698,17 @@ class QualityInspection(Document):
 			return
 
 		inspected_qty = self.get_qty_under_inspection()
-		if inspected_qty and flt(self.unit_quantity) != flt(inspected_qty):
+		if self.reference_type == "Quality Control Lot":
+			# the lot may be decided in parts — but never beyond what is undecided
+			if inspected_qty is not None and flt(self.unit_quantity) > flt(inspected_qty):
+				frappe.throw(
+					_(
+						"The unit readings inspect {0} unit(s), but only {1} remain undecided on "
+						"the Quality Control Lot."
+					).format(self.unit_quantity, inspected_qty),
+					title=_("More Units Than Undecided"),
+				)
+		elif inspected_qty and flt(self.unit_quantity) != flt(inspected_qty):
 			frappe.throw(
 				_(
 					"The unit readings inspect {0} unit(s), but {1} are under inspection. Every "
@@ -885,7 +983,12 @@ class QualityInspection(Document):
 	@frappe.whitelist()
 	def get_qty_under_inspection(self):
 		if self.reference_type == "Quality Control Lot" and self.reference_name:
-			return frappe.db.get_value("Quality Control Lot", self.reference_name, "pending_qty")
+			# inspections may decide the lot in parts: what remains to inspect
+			# is what no submitted inspection has decided yet
+			lot = frappe.db.get_value(
+				"Quality Control Lot", self.reference_name, ["received_qty", "decided_qty"], as_dict=True
+			)
+			return flt(lot.received_qty) - flt(lot.decided_qty)
 
 		if self.child_row_reference:
 			child_doctype = (
@@ -948,6 +1051,22 @@ class QualityInspection(Document):
 
 		if self.reference_type == "Quality Control Lot":
 			if self.reference_name:
+				if not quality_inspection:
+					# fall back to the latest remaining verdict of the lot
+					quality_inspection = (
+						frappe.db.get_value(
+							"Quality Inspection",
+							{
+								"reference_type": "Quality Control Lot",
+								"reference_name": self.reference_name,
+								"docstatus": 1,
+								"name": ("!=", self.name),
+							},
+							"name",
+							order_by="modified desc",
+						)
+						or ""
+					)
 				frappe.db.set_value(
 					"Quality Control Lot", self.reference_name, "quality_inspection", quality_inspection
 				)

@@ -88,6 +88,8 @@ def submit_inspection_for_lot(
 			"manual_inspection": manual_inspection,
 			"status": status,
 			"unit_readings": unit_reading_rows(unit_results, unit_serials) if unit_results else [],
+			# the tranche declares how many units it inspects
+			"unit_quantity": max(unit_results) if unit_results else 0,
 			# per-unit results are an Each Quantity inspection by definition
 			"inspection_basis": inspection_basis or ("Each Quantity" if unit_results else None),
 		}
@@ -994,13 +996,14 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		# ...so an inspection without per-unit readings is refused
 		self.assertRaises(frappe.ValidationError, submit_inspection_for_lot, lot)
 
-		# readings covering fewer units than are under inspection are refused too
-		self.assertRaises(
-			frappe.ValidationError, submit_inspection_for_lot, lot, unit_results={1: ["Accepted"]}
-		)
+		# readings covering fewer units form a tranche: they decide just those
+		submit_inspection_for_lot(lot, unit_results={1: ["Accepted"]})
+		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "decided_qty"), 1)
+		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "status"), "Partially Released")
 
-		# and accepted with readings covering every unit
-		submit_inspection_for_lot(lot, unit_results={1: ["Accepted"], 2: ["Accepted"]})
+		# the remainder is decided by a second inspection
+		submit_inspection_for_lot(lot, unit_results={1: ["Accepted"]})
+		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "decided_qty"), 2)
 		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "status"), "Released")
 
 	def test_cancelling_inspection_unwinds_the_decision(self):
@@ -1135,6 +1138,115 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		unread.insert(ignore_permissions=True)
 		self.assertRaises(frappe.ValidationError, unread.submit)
 		unread.delete()
+
+	def test_lot_decided_in_parts(self):
+		from erpnext.stock.services.quality_quarantine import make_release_for_lot
+
+		qc = make_qc_warehouse("_Test QC Tranche WH")
+		store = make_warehouse("_Test QC Tranche Store", quality_warehouse=qc)
+		item = make_quarantine_item(qc)
+		se = make_stock_entry(item_code=item, qty=5, to_warehouse=qc, purpose="Material Receipt", rate=100)
+		lot = quality_control_lots_for(se.name)[0].name
+
+		# first tranche: 2 of 5 inspected per unit, one rejected
+		first = submit_inspection_for_lot(lot, unit_results={1: ["Accepted"], 2: ["Rejected"]})
+		lot_doc = frappe.get_doc("Quality Control Lot", lot)
+		self.assertEqual(lot_doc.decided_qty, 2)
+		self.assertEqual(lot_doc.rejected_qty, 1)
+		self.assertEqual(lot_doc.accepted_qty, 1)  # auto-released
+		self.assertEqual(lot_doc.status, "Partially Released")
+		self.assertEqual(get_qty(item, store), 1)
+
+		# the 3 undecided units cannot leave, even though they are pending
+		self.assertRaises(frappe.ValidationError, make_release, lot, 2, store)
+
+		# the remainder is decided by a verdict-less sample acceptance
+		submit_inspection_for_lot(lot)
+		lot_doc.reload()
+		self.assertEqual(lot_doc.decided_qty, 5)
+		self.assertEqual(lot_doc.accepted_qty, 4)
+		self.assertEqual(lot_doc.status, "Released")
+		self.assertEqual(get_qty(item, store), 4)
+		self.assertEqual(get_qty(item, qc), 1)  # the rejected unit awaits return
+
+		# cancelling the first tranche is refused: the releases already moved
+		# more accepted stock than the remaining verdict covers
+		self.assertRaises(frappe.ValidationError, first.cancel)
+
+	def test_serialized_lot_decided_in_parts(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
+		qc = make_qc_warehouse("_Test QC Serial Tranche WH")
+		store = make_warehouse("_Test QC Serial Tranche Store", quality_warehouse=qc)
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "QCST.#####"}
+		)
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry",
+				warehouse_role="Inbound",
+				quality_control_mode="Quarantine",
+				inspection_basis="Each Quantity",
+				applicable_warehouse=qc,
+			),
+		)
+		item.save()
+
+		se = make_stock_entry(
+			item_code=item.name, qty=3, to_warehouse=qc, purpose="Material Receipt", rate=100
+		)
+		lot = quality_control_lots_for(se.name)[0].name
+		serials = frappe.get_all(
+			"Serial No", filters={"item_code": item.name, "warehouse": qc}, pluck="name", order_by="name"
+		)
+
+		# a partial verdict on a serialized item must name its units
+		partial = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Incoming",
+				"reference_type": "Quality Control Lot",
+				"reference_name": lot,
+				"item_code": item.name,
+				"inspection_basis": "Sample",
+				"manual_inspection": 1,
+				"status": "Accepted",
+				"sample_size": 1,
+				"decided_quantity": 1,
+				"serial_no": serials[0],
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+			}
+		)
+		partial.insert(ignore_permissions=True)
+		self.assertRaises(frappe.ValidationError, partial.submit)
+		partial.delete()
+
+		# first tranche rejects one named unit
+		submit_inspection_for_lot(lot, unit_results={1: ["Rejected"]}, unit_serials={1: serials[0]})
+		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "rejected_qty"), 1)
+
+		# a serial decided once cannot be decided again
+		self.assertRaises(
+			frappe.ValidationError,
+			submit_inspection_for_lot,
+			lot,
+			unit_results={1: ["Accepted"]},
+			unit_serials={1: serials[0]},
+		)
+
+		# the remaining tranche accepts the other two — exactly those release
+		submit_inspection_for_lot(
+			lot,
+			unit_results={1: ["Accepted"], 2: ["Accepted"]},
+			unit_serials={1: serials[1], 2: serials[2]},
+		)
+		self.assertEqual(frappe.db.get_value("Serial No", serials[0], "warehouse"), qc)
+		self.assertEqual(frappe.db.get_value("Serial No", serials[1], "warehouse"), store)
+		self.assertEqual(frappe.db.get_value("Serial No", serials[2], "warehouse"), store)
+		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "status"), "Released")
 
 	def test_sample_inspection_demands_recorded_readings(self):
 		qc = make_qc_warehouse("_Test QC Rubber Stamp WH")

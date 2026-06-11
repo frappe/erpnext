@@ -18,6 +18,7 @@ class QualityControlLot(Document):
 		accepted_qty: DF.Float
 		batch_no: DF.Link | None
 		company: DF.Link | None
+		decided_qty: DF.Float
 		disposed_qty: DF.Float
 		inspection_basis: DF.Literal["Sample", "Each Quantity"]
 		inspection_template: DF.Link | None
@@ -51,22 +52,33 @@ class QualityControlLot(Document):
 	def set_pending_qty_and_status(self):
 		self.pending_qty = flt(self.received_qty) - flt(self.accepted_qty) - flt(self.rejected_qty)
 
-		resolved = flt(self.accepted_qty) + flt(self.rejected_qty)
-		if self.pending_qty > 0:
-			if not self.quality_inspection:
-				self.status = "Under Inspection" if resolved <= 0 else "Partially Released"
-			elif flt(self.accepted_qty) > 0:
+		undecided = flt(self.received_qty) - flt(self.decided_qty)
+		awaiting_release = flt(self.decided_qty) - flt(self.rejected_qty) - flt(self.accepted_qty)
+		moved = flt(self.accepted_qty) + flt(self.rejected_qty)
+		if undecided > 0:
+			# inspections may decide the lot in parts; until every unit is
+			# decided the lot stays under inspection (partially, once anything
+			# was accepted or rejected)
+			self.status = "Under Inspection" if moved <= 0 else "Partially Released"
+		elif awaiting_release > 0:
+			if flt(self.accepted_qty) > 0:
 				self.status = "Partially Released"
 			else:
 				# the verdict is in but no stock has left yet — typically no
 				# unique release warehouse, so the release awaits the user
 				self.status = "Awaiting Release"
-		elif resolved <= 0:
+		elif flt(self.received_qty) <= 0 or moved <= 0:
 			self.status = "Under Inspection"
 		elif flt(self.accepted_qty) <= 0:
 			self.status = "Rejected"
 		else:
 			self.status = "Released"
+
+	def undecided_qty(self):
+		return flt(self.received_qty) - flt(self.decided_qty)
+
+	def awaiting_release_qty(self):
+		return flt(self.decided_qty) - flt(self.rejected_qty) - flt(self.accepted_qty)
 
 
 @frappe.whitelist()
@@ -126,14 +138,13 @@ def get_serial_numbers(lot_name: str):
 	):
 		members.update(get_row_serial_nos(row))
 
+	from erpnext.stock.services.quality_quarantine import _union_unit_serials
+
 	verdicts = {}
-	if lot.quality_inspection:
-		inspection = frappe.get_doc("Quality Inspection", lot.quality_inspection)
-		if inspection.get("unit_readings"):
-			for serial in inspection.get_unit_serials("Accepted"):
-				verdicts[serial] = "Accepted"
-			for serial in inspection.get_unit_serials("Rejected"):
-				verdicts[serial] = "Rejected"
+	for serial in _union_unit_serials(lot, "Accepted"):
+		verdicts[serial] = "Accepted"
+	for serial in _union_unit_serials(lot, "Rejected"):
+		verdicts[serial] = "Rejected"
 
 	serials = []
 	for serial in sorted(members):

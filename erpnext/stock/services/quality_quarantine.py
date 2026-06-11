@@ -188,8 +188,8 @@ def process_inspection_result(doc, method=None):
 		return
 
 	lot = frappe.get_doc("Quality Control Lot", doc.reference_name)
-	pending_qty = flt(lot.pending_qty)
-	if not pending_qty:
+	undecided_qty = lot.undecided_qty()
+	if undecided_qty <= 0:
 		return
 
 	if lot.batch_no:
@@ -198,16 +198,19 @@ def process_inspection_result(doc, method=None):
 		schedule_next_retest(lot.item_code, lot.batch_no)
 
 	# the inspection's basis governs (the lot's is the fetched proposal, which
-	# the inspector may override); a manual inspection decides the whole pending
-	# quantity without per-unit readings
+	# the inspector may override); inspections may decide the lot in parts, so
+	# every increment is bounded by what no earlier verdict has decided
 	if doc.get("inspection_basis") == "Each Quantity" and not doc.get("manual_inspection"):
-		accepted_qty = min(flt(doc.accepted_unit_quantity), pending_qty)
-		rejected_qty = min(flt(doc.rejected_unit_quantity), pending_qty - accepted_qty)
-	elif doc.status == "Rejected":
-		accepted_qty, rejected_qty = 0.0, pending_qty
+		accepted_qty = min(flt(doc.accepted_unit_quantity), undecided_qty)
+		rejected_qty = min(flt(doc.rejected_unit_quantity), undecided_qty - accepted_qty)
 	else:
-		accepted_qty, rejected_qty = pending_qty, 0.0
+		decided_qty = min(flt(doc.decided_quantity) or undecided_qty, undecided_qty)
+		if doc.status == "Rejected":
+			accepted_qty, rejected_qty = 0.0, decided_qty
+		else:
+			accepted_qty, rejected_qty = decided_qty, 0.0
 
+	lot.decided_qty = flt(lot.decided_qty) + accepted_qty + rejected_qty
 	if rejected_qty:
 		lot.rejected_qty = flt(lot.rejected_qty) + rejected_qty
 	# save unconditionally: the deciding inspection is on record now, so the
@@ -233,6 +236,10 @@ def process_inspection_result(doc, method=None):
 	accepted_serials = None
 	if doc.get("unit_readings"):
 		accepted_serials = doc.get_unit_serials("Accepted") or None
+	elif _union_unit_serials(lot, "Rejected") or _union_unit_serials(lot, "Accepted"):
+		# a verdict-less remainder after per-unit tranches: release exactly the
+		# serials no verdict rejected and no other verdict claimed
+		accepted_serials = _accepted_serials_awaiting_release(lot)
 
 	release = frappe.new_doc("Stock Entry")
 	release.purpose = "Quality Control Release"
@@ -362,28 +369,17 @@ def make_release_for_lot(lot_name: str, release_warehouse: str | None = None):
 			title=_("Inspection Pending"),
 		)
 
-	pending_qty = flt(lot.pending_qty)
-	inspection = frappe.get_doc("Quality Inspection", lot.quality_inspection)
-
-	accepted_serials = None
-	if inspection.get("unit_readings"):
-		accepted_qty = min(flt(inspection.accepted_unit_quantity) - flt(lot.accepted_qty), pending_qty)
-		accepted_serials = [
-			serial
-			for serial in inspection.get_unit_serials("Accepted")
-			if frappe.db.get_value("Serial No", serial, "warehouse") == lot.quality_warehouse
-		] or None
-	elif inspection.status == "Rejected":
-		accepted_qty = 0.0
-	else:
-		accepted_qty = pending_qty
-
+	accepted_qty = lot.awaiting_release_qty()
 	if accepted_qty <= 0:
 		frappe.throw(
 			_("Quality Control Lot {0} has no accepted quantity awaiting release.").format(
 				frappe.bold(lot.name)
 			)
 		)
+
+	accepted_serials = _accepted_serials_awaiting_release(lot)
+	if accepted_serials:
+		accepted_serials = accepted_serials[: int(accepted_qty)]
 
 	stock_uom = frappe.get_cached_value("Item", lot.item_code, "stock_uom")
 	entry = frappe.new_doc("Stock Entry")
@@ -637,16 +633,57 @@ def _prefill_rejections_from_row_inspection(return_doc, row):
 		row.update(tracking)
 
 
+def _submitted_inspections_of(lot):
+	return frappe.get_all(
+		"Quality Inspection",
+		filters={
+			"reference_type": "Quality Control Lot",
+			"reference_name": lot.name,
+			"docstatus": 1,
+		},
+		pluck="name",
+	)
+
+
+def _union_unit_serials(lot, status):
+	"""The serials every submitted verdict of the lot gave this status."""
+	serials = set()
+	for name in _submitted_inspections_of(lot):
+		inspection = frappe.get_doc("Quality Inspection", name)
+		if inspection.get("unit_readings"):
+			serials.update(inspection.get_unit_serials(status))
+	return serials
+
+
+def _accepted_serials_awaiting_release(lot):
+	"""The serials a release may move: accepted by a verdict, or — once the lot
+	is fully decided — claimed by no per-unit verdict at all (a verdict-less
+	remainder), and still in the Quality Control warehouse. Never a rejected or
+	undecided serial."""
+	allowed = _union_unit_serials(lot, "Accepted")
+	if lot.undecided_qty() <= 0:
+		# fully decided: serials no per-unit verdict claimed belong to a
+		# verdict-less remainder verdict (partial verdicts of serialized items
+		# must name their units, so nothing here is undecided)
+		from erpnext.stock.doctype.quality_control_lot.quality_control_lot import get_serial_numbers
+
+		claimed = allowed | _union_unit_serials(lot, "Rejected")
+		allowed = allowed | {
+			row["serial_no"] for row in get_serial_numbers(lot.name) if row["serial_no"] not in claimed
+		}
+
+	return sorted(
+		serial
+		for serial in allowed
+		if frappe.db.get_value("Serial No", serial, "warehouse") == lot.quality_warehouse
+	) or None
+
+
 def _rejected_serials_awaiting_return(lot, outstanding):
 	"""The rejected units' serials that are still in the Quality Control warehouse."""
-	if not lot.quality_inspection:
+	rejected = sorted(_union_unit_serials(lot, "Rejected"))
+	if not rejected:
 		return None
-
-	inspection = frappe.get_doc("Quality Inspection", lot.quality_inspection)
-	if not inspection.get("unit_readings"):
-		return None
-
-	rejected = inspection.get_unit_serials("Rejected")
 	still_held = [
 		serial
 		for serial in rejected
@@ -689,13 +726,14 @@ def sync_source_document_quality_status(source_doctype, source_name):
 
 
 def reverse_inspection_result(doc, method=None):
-	"""Cancelling the deciding inspection unwinds its consequences on the lot.
+	"""Cancelling a deciding inspection unwinds its increment on the lot.
 
-	The Quality Control Releases it caused are cancelled (stock returns to
-	quarantine, the release reverses the accepted quantity) and the rejected
-	quantity it booked is cleared, so the lot is back under inspection in full.
-	A purchase return already booked against the lot blocks the cancellation —
-	unwind the return first, mirroring every other dependency chain here.
+	The lot's only verdict: its Quality Control Releases are cancelled (stock
+	returns to quarantine) and the booked quantities cleared, so the lot is
+	back under inspection in full. One verdict of several: only its decided and
+	rejected increments are removed — and the cancellation is refused while
+	physical bookings (releases, returns, dispositions) exceed what the
+	remaining verdicts support, mirroring every other dependency chain here.
 	"""
 	if doc.reference_type != "Quality Control Lot" or not doc.reference_name:
 		return
@@ -703,29 +741,75 @@ def reverse_inspection_result(doc, method=None):
 		return
 
 	lot = frappe.get_doc("Quality Control Lot", doc.reference_name)
-
-	if flt(lot.returned_qty):
-		frappe.throw(
-			_(
-				"Cannot cancel: a purchase return is already booked against Quality Control Lot {0}. "
-				"Unwind the return first."
-			).format(frappe.bold(lot.name)),
-			title=_("Purchase Return Booked"),
-		)
-
-	releases = frappe.get_all(
-		"Stock Entry",
-		filters={"quality_control_lot": lot.name, "docstatus": 1},
+	other_verdicts = frappe.get_all(
+		"Quality Inspection",
+		filters={
+			"reference_type": "Quality Control Lot",
+			"reference_name": lot.name,
+			"docstatus": 1,
+			"name": ("!=", doc.name),
+		},
 		pluck="name",
 	)
-	for name in releases:
-		release = frappe.get_doc("Stock Entry", name)
-		release.flags.ignore_permissions = True
-		release.cancel()
 
-	lot.reload()
-	if flt(lot.rejected_qty):
+	if not other_verdicts:
+		if flt(lot.returned_qty) or flt(lot.disposed_qty):
+			frappe.throw(
+				_(
+					"Cannot cancel: a purchase return or disposition is already booked against "
+					"Quality Control Lot {0}. Unwind it first."
+				).format(frappe.bold(lot.name)),
+				title=_("Rejected Stock Already Moved"),
+			)
+
+		releases = frappe.get_all(
+			"Stock Entry",
+			filters={"quality_control_lot": lot.name, "docstatus": 1},
+			pluck="name",
+		)
+		for name in releases:
+			release = frappe.get_doc("Stock Entry", name)
+			release.flags.ignore_permissions = True
+			release.cancel()
+
+		lot.reload()
+		lot.decided_qty = 0
 		lot.rejected_qty = 0
+		lot.flags.ignore_permissions = True
+		lot.save()
+		return
+
+	# one verdict of several: remove its increment, keep the rest standing
+	if doc.get("inspection_basis") == "Each Quantity" and not doc.get("manual_inspection"):
+		accepted_qty = flt(doc.accepted_unit_quantity)
+		rejected_qty = flt(doc.rejected_unit_quantity)
+	elif doc.status == "Rejected":
+		accepted_qty, rejected_qty = 0.0, flt(doc.decided_quantity)
+	else:
+		accepted_qty, rejected_qty = flt(doc.decided_quantity), 0.0
+
+	remaining_decided = flt(lot.decided_qty) - accepted_qty - rejected_qty
+	remaining_rejected = flt(lot.rejected_qty) - rejected_qty
+
+	if remaining_rejected < flt(lot.returned_qty) + flt(lot.disposed_qty):
+		frappe.throw(
+			_(
+				"Cannot cancel: returns or dispositions already moved more rejected stock of "
+				"Quality Control Lot {0} than the remaining verdicts cover. Unwind them first."
+			).format(frappe.bold(lot.name)),
+			title=_("Rejected Stock Already Moved"),
+		)
+	if remaining_decided - remaining_rejected < flt(lot.accepted_qty):
+		frappe.throw(
+			_(
+				"Cannot cancel: releases already moved more accepted stock of Quality Control "
+				"Lot {0} than the remaining verdicts cover. Unwind the releases first."
+			).format(frappe.bold(lot.name)),
+			title=_("Accepted Stock Already Released"),
+		)
+
+	lot.decided_qty = remaining_decided
+	lot.rejected_qty = remaining_rejected
 	lot.flags.ignore_permissions = True
 	lot.save()
 
