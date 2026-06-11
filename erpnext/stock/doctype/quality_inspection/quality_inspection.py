@@ -927,53 +927,16 @@ def item_query(doctype: Any, txt: str | None, searchfield: Any, start: int, page
 			return []
 		return ((item_code, frappe.get_cached_value("Item", item_code, "item_name")),)
 	else:
+		# every item on the reference document is inspectable — already-linked
+		# rows can carry further ad-hoc inspections, and the row link plus the
+		# consistency gates do the bookkeeping
 		my_filters = [
 			["items.parent", "=", filters.get("reference_name")],
 			"and",
 			["items.item_code", "like", f"%{txt}%"],
 			"and",
 			["docstatus", "<", 2],
-			"and",
-			["items.quality_inspection", "is", "not set"],
 		]
-
-		require_distinct_warehouse = False
-
-		if reference_doctype == "Stock Entry":
-			purpose = frappe.get_cached_value("Stock Entry", filters.get("reference_name"), "purpose")
-			my_filters.extend(
-				[
-					"and",
-					["items.secondary_item_type", "is", "not set"],
-					"and",
-					["items.is_legacy_scrap_item", "=", 0],
-				]
-			)
-			if purpose == "Manufacture":
-				my_filters.extend(
-					[
-						"and",
-						["items.is_finished_item", "=", 1],
-					]
-				)
-			elif purpose in QI_INCOMING_PURPOSES:
-				my_filters.extend(
-					[
-						"and",
-						["items.t_warehouse", "is", "set"],
-					]
-				)
-			elif purpose in QI_OUTGOING_PURPOSES:
-				my_filters.extend(
-					[
-						"and",
-						["items.s_warehouse", "is", "set"],
-					]
-				)
-				require_distinct_warehouse = True
-			else:
-				# purpose requires no quality inspection
-				return []
 
 		query = frappe.get_query(
 			reference_doctype,
@@ -990,8 +953,6 @@ def item_query(doctype: Any, txt: str | None, searchfield: Any, start: int, page
 		items_field = frappe.get_meta(reference_doctype).get_field("items")
 		if items_field:
 			child = frappe.qb.DocType(items_field.options)
-			if require_distinct_warehouse:
-				query = query.where(child.t_warehouse.isnull() | (child.s_warehouse != child.t_warehouse))
 			query = query.orderby(child.item_code)
 		return query.run()
 
