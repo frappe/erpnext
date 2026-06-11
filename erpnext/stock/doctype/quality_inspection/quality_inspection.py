@@ -311,10 +311,21 @@ class QualityInspection(Document):
 	def before_submit(self):
 		self.validate_readings_status_mandatory()
 		self.validate_readings_recorded()
+		self.validate_sample_size()
 		self.validate_tracking_identity_recorded()
 		self.validate_inspected_serials_against_reference()
 		self.validate_inspected_batch_against_reference()
 		self.validate_reading_bundle_coverage()
+
+	def validate_sample_size(self):
+		"""A Sample inspection of zero units is a verdict about nothing."""
+		if self.inspection_basis == "Each Quantity" or self.reading_bundle:
+			return
+		if flt(self.sample_size) <= 0:
+			frappe.throw(
+				_("A Sample inspection must inspect at least one unit — set the Sample Size."),
+				title=_("Sample Size Missing"),
+			)
 
 	def validate_inspected_batch_against_reference(self):
 		"""The inspected batch must be the batch of the stock under inspection."""
