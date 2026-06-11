@@ -245,10 +245,14 @@ class BOMCreator(Document):
 				frappe.throw(_("Please set {0} in BOM Creator {1}").format(_(label), self.name))
 
 	def on_submit(self):
-		self.enqueue_create_boms()
+		self.enqueue_bom_creation()
 
 	@frappe.whitelist()
 	def enqueue_create_boms(self):
+		self.check_permission("submit")
+		self.enqueue_bom_creation()
+
+	def enqueue_bom_creation(self):
 		frappe.enqueue(
 			self.create_boms,
 			queue="short",
@@ -395,7 +399,13 @@ class BOMCreator(Document):
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def get_children(doctype=None, parent=None, **kwargs):
+=======
+def get_children(parent: str | None = None, **kwargs):
+	frappe.has_permission("BOM Creator", "read", throw=True)
+
+>>>>>>> daf3f2e142 (fix: multiple issues related to BOM Creator)
 	if isinstance(kwargs, str):
 		kwargs = frappe.parse_json(kwargs)
 
@@ -431,6 +441,8 @@ def get_children(doctype=None, parent=None, **kwargs):
 
 @frappe.whitelist()
 def add_item(**kwargs):
+	frappe.has_permission("BOM Creator", "write", throw=True)
+
 	if isinstance(kwargs, str):
 		kwargs = frappe.parse_json(kwargs)
 
@@ -463,6 +475,8 @@ def add_item(**kwargs):
 
 @frappe.whitelist()
 def add_sub_assembly(**kwargs):
+	frappe.has_permission("BOM Creator", "write", throw=True)
+
 	if isinstance(kwargs, str):
 		kwargs = frappe.parse_json(kwargs)
 
@@ -552,39 +566,58 @@ def get_parent_row_no(doc, name):
 
 @frappe.whitelist()
 def delete_node(**kwargs):
+	frappe.has_permission("BOM Creator", "write", throw=True)
+
 	if isinstance(kwargs, str):
 		kwargs = frappe.parse_json(kwargs)
 
 	if isinstance(kwargs, dict):
 		kwargs = frappe._dict(kwargs)
 
-	items = get_children(parent=kwargs.fg_item, parent_id=kwargs.parent)
+	updated = False
 	if kwargs.docname:
+		if not frappe.db.exists("BOM Creator Item", {"name": kwargs.docname, "parent": kwargs.parent}):
+			frappe.throw(_("BOM Creator Item with name {0} does not exist").format(kwargs.docname))
+
 		frappe.delete_doc("BOM Creator Item", kwargs.docname)
+		updated = True
 
-	for item in items:
-		frappe.delete_doc("BOM Creator Item", item.name)
-		if item.expandable:
-			delete_node(fg_item=item.value, parent=item.parent_id)
+	items = get_children(parent=kwargs.fg_item, parent_id=kwargs.parent)
+	if items:
+		for item in items:
+			updated = True
+			frappe.delete_doc("BOM Creator Item", item.name)
+			if item.expandable:
+				delete_node(fg_item=item.value, parent=item.parent_id)
 
-	doc = frappe.get_doc("BOM Creator", kwargs.parent)
-	doc.set_rate_for_items()
-	doc.save()
+	if updated:
+		doc = frappe.get_doc("BOM Creator", kwargs.parent)
+		doc.set_rate_for_items()
+		doc.save()
 
-	return doc
+		return doc
+
+	return frappe._dict()
 
 
 @frappe.whitelist()
-def edit_bom_creator(doctype: str, docname: str, data: str | dict, parent: str):
-	if not frappe.has_permission(doctype=doctype, ptype="write", parent_doctype="BOM Creator"):
-		frappe.throw(_("You do not have permission to edit this document"), frappe.PermissionError)
+def edit_bom_creator(docname: str, data: str | dict, parent: str):
+	frappe.has_permission("BOM Creator", "write", throw=True)
+
+	if not frappe.db.exists("BOM Creator Item", {"parent": parent, "name": docname}):
+		frappe.throw(_("BOM Creator Item with name {0} does not exist").format(docname))
 
 	if isinstance(data, str):
 		data = frappe.parse_json(data)
 
-	frappe.db.set_value(doctype, docname, data)
-
 	doc = frappe.get_doc("BOM Creator", parent)
+	for row in doc.items:
+		if row.name == docname:
+			for key, value in data.items():
+				if key in BOM_ITEM_FIELDS:
+					row.set(key, value)
+			break
+
 	doc.set_rate_for_items()
 	doc.save()
 

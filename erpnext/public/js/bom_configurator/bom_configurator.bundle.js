@@ -74,6 +74,7 @@ class BOMConfigurator {
 			onload: function (me) {
 				me.args["parent_id"] = frm_obj.frm.doc.name;
 				me.args["parent"] = frm_obj.frm.doc.item_code;
+				delete me.args["doctype"];
 				me.parent = frm_obj.$wrapper.get(0);
 				me.body = frm_obj.$wrapper.get(0);
 				me.make_tree();
@@ -507,7 +508,6 @@ class BOMConfigurator {
 				frappe.call({
 					method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.edit_bom_creator",
 					args: {
-						doctype: doctype,
 						docname: docname,
 						data: data,
 						parent: node.data.parent_id || this.frm.doc.name,
@@ -540,6 +540,13 @@ class BOMConfigurator {
 	}
 
 	load_tree(response, node) {
+		// delete_node returns an empty response when nothing was removed; just
+		// refresh the node and bail out so we don't read undefined fields below.
+		if (!response?.message?.items) {
+			frappe.views.trees["BOM Configurator"].tree.load_children(node);
+			return;
+		}
+
 		let item_row = "";
 		let parent_dom = "";
 		let total_amount = response.message.raw_material_cost;

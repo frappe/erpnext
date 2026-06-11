@@ -8,6 +8,8 @@ import frappe
 from erpnext.manufacturing.doctype.bom_creator.bom_creator import (
 	add_item,
 	add_sub_assembly,
+	delete_node,
+	edit_bom_creator,
 )
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.tests.utils import ERPNextTestSuite
@@ -250,6 +252,45 @@ class TestBOMCreator(ERPNextTestSuite):
 		doc.create_boms()
 		data = frappe.get_all("BOM", filters={"bom_creator": doc.name, "docstatus": 1})
 		self.assertEqual(len(data), 2)
+
+	def test_edit_and_delete_reject_unknown_item(self):
+		final_product = "Bicycle"
+		make_item(
+			final_product,
+			{
+				"item_group": "Raw Material",
+				"stock_uom": "Nos",
+			},
+		)
+
+		doc = make_bom_creator(
+			name="Bicycle BOM Guarded",
+			company="_Test Company",
+			item_code=final_product,
+			qty=1,
+			rm_cosy_as_per="Valuation Rate",
+			currency="INR",
+			plc_conversion_rate=1,
+			conversion_rate=1,
+		)
+
+		# Editing a row that does not belong to this BOM Creator must be rejected.
+		self.assertRaises(
+			frappe.ValidationError,
+			edit_bom_creator,
+			docname="non-existent-row",
+			data={"qty": 5},
+			parent=doc.name,
+		)
+
+		# Deleting a row that does not belong to this BOM Creator must be rejected.
+		self.assertRaises(
+			frappe.ValidationError,
+			delete_node,
+			parent=doc.name,
+			fg_item=final_product,
+			docname="non-existent-row",
+		)
 
 
 def create_items():
