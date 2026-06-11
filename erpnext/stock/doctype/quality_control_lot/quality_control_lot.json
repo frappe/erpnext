@@ -17,13 +17,14 @@
   "qty_section",
   "received_qty",
   "decided_qty",
+  "pending_qty",
+  "column_break_qty",
   "accepted_qty",
+  "status",
+  "column_break_outcomes",
   "rejected_qty",
   "returned_qty",
   "disposed_qty",
-  "column_break_qty",
-  "pending_qty",
-  "status",
   "source_section",
   "source_document_type",
   "source_document",
@@ -76,7 +77,7 @@
    "read_only": 1
   },
   {
-   "description": "The Quality Control warehouse this lot is quarantined in.",
+   "description": "The warehouse this lot is quarantined in.",
    "fieldname": "quality_warehouse",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -99,7 +100,7 @@
    "read_only": 1
   },
   {
-   "description": "Quantity decided by submitted inspections so far, accepted or rejected. Inspections may decide the lot in parts.",
+   "description": "Decided by inspections so far \u2014 a lot may be decided in parts.",
    "fieldname": "decided_qty",
    "fieldtype": "Float",
    "label": "Decided Qty",
@@ -110,7 +111,7 @@
    "fieldtype": "Float",
    "label": "Released Qty",
    "read_only": 1,
-   "description": "Accepted quantity that has physically left quarantine through a Quality Control Release. The verdict's accepted count is Decided Qty minus Rejected Qty."
+   "description": "Accepted stock that has left quarantine through a release."
   },
   {
    "fieldname": "rejected_qty",
@@ -119,7 +120,7 @@
    "read_only": 1
   },
   {
-   "description": "Rejected quantity already sent back to the supplier with a purchase return.",
+   "description": "Rejected stock sent back with a purchase return.",
    "fieldname": "returned_qty",
    "fieldtype": "Float",
    "label": "Returned Qty",
@@ -127,7 +128,7 @@
    "depends_on": "eval:['Purchase Receipt', 'Purchase Invoice', 'Subcontracting Receipt'].includes(doc.source_document_type)"
   },
   {
-   "description": "Rejected quantity moved out of quarantine into a Rejected warehouse for scrap or rework.",
+   "description": "Rejected stock moved to a Rejected warehouse.",
    "fieldname": "disposed_qty",
    "fieldtype": "Float",
    "label": "Disposed Qty",
@@ -178,7 +179,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "The submitted Quality Inspection that decided this lot.",
+   "description": "The latest submitted inspection of this lot.",
    "fieldname": "quality_inspection",
    "fieldtype": "Link",
    "label": "Quality Inspection",
@@ -210,6 +211,10 @@
    "fieldname": "serial_numbers_html",
    "fieldtype": "HTML",
    "label": "Serial and Batch Tracking"
+  },
+  {
+   "fieldname": "column_break_outcomes",
+   "fieldtype": "Column Break"
   }
  ],
  "links": [],

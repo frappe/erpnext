@@ -36,7 +36,7 @@
   },
   {
    "default": "Transaction",
-   "description": "Transaction: inspect when a document moves the stock. Periodic Re-test: re-inspect stored batches on an interval \u2014 due batches are auto-quarantined into the Quality Control warehouse.",
+   "description": "Transaction inspects when a document moves stock; Periodic Re-test re-quarantines stored batches on an interval.",
    "fieldname": "trigger_type",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -46,7 +46,7 @@
   },
   {
    "depends_on": "eval:doc.trigger_type=='Periodic Re-test'",
-   "description": "Days between re-inspections of a stored batch, counted from the batch's manufacturing date or its last inspection decision.",
+   "description": "Days between re-tests, counted from the batch's manufacturing date or its last decision.",
    "fieldname": "retest_interval_days",
    "fieldtype": "Int",
    "label": "Re-test Interval (Days)",
@@ -63,7 +63,7 @@
   },
   {
    "depends_on": "eval:doc.trigger_type != 'Periodic Re-test' && (doc.document_type=='Stock Entry')",
-   "description": "Applies only to Stock Entry. Use one row per Stock Entry Type (e.g. one row for Material Receipt, another for Material Transfer).",
+   "description": "One row per Stock Entry Type.",
    "fieldname": "stock_entry_type",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -74,7 +74,7 @@
   {
    "default": "External",
    "depends_on": "eval:doc.trigger_type != 'Periodic Re-test' && (['Purchase Receipt','Purchase Invoice','Delivery Note','Sales Invoice'].includes(doc.document_type))",
-   "description": "Defaults to External \u2014 most companies do not inspect internal (inter-company) transfers. To cover both, add a second row for Internal Transfer.",
+   "description": "Defaults to External. Add a second row to also cover Internal Transfer.",
    "fieldname": "party_transaction_type",
    "fieldtype": "Select",
    "label": "Transaction Type",
@@ -86,7 +86,7 @@
   },
   {
    "depends_on": "eval:doc.trigger_type != 'Periodic Re-test' && (['Stock Entry','Delivery Note','Sales Invoice'].includes(doc.document_type))",
-   "description": "Inbound = stock entering a warehouse (target); Outbound = stock leaving (source). Auto-set for document types that allow only one direction. For Delivery Note and Sales Invoice, Outbound inspects the delivery while Inbound inspects the customer return.",
+   "description": "Inbound inspects stock entering (target warehouse); Outbound stock leaving (source). Auto-set when only one direction is valid.",
    "fieldname": "warehouse_role",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -95,7 +95,7 @@
   },
   {
    "depends_on": "eval:doc.trigger_type != 'Periodic Re-test'",
-   "description": "Optional. Restrict this trigger to a single warehouse (matched against the source or target per Warehouse Role).",
+   "description": "Restrict this trigger to one warehouse.",
    "fieldname": "applicable_warehouse",
    "fieldtype": "Link",
    "label": "Applicable Warehouse",
@@ -126,7 +126,7 @@
   },
   {
    "depends_on": "eval:doc.trigger_type != 'Periodic Re-test'",
-   "description": "Optional Python expression evaluated against the transaction row, e.g. row.qty > 100.",
+   "description": "Python expression on the transaction row, e.g. row.qty > 100.",
    "fieldname": "condition",
    "fieldtype": "Code",
    "label": "Condition"
@@ -137,7 +137,7 @@
    "label": "Inspection"
   },
   {
-   "description": "Optional for Sample inspections: without a template the inspection is verdict-style (manual or ad-hoc readings). Each Quantity requires one, since the per-unit readings are generated from its parameters.",
+   "description": "Required for Each Quantity \u2014 its parameters generate the per-unit readings.",
    "fieldname": "inspection_template",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -147,7 +147,7 @@
   },
   {
    "depends_on": "eval:doc.trigger_type!='Periodic Re-test'",
-   "description": "Inbound: Quarantine routes stock to a Quality Control warehouse and locks it until release. Outbound: Block stops the document until inspection passes; Warn allows it with a warning. Periodic Re-test rows always quarantine.",
+   "description": "Quarantine routes stock to the Quality Control warehouse and locks it; Block stops submission until inspection passes; Warn only warns.",
    "fieldname": "quality_control_mode",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -161,7 +161,7 @@
   },
   {
    "default": "Sample",
-   "description": "Sample: inspect a subset and accept/reject the lot. Each Quantity: inspect every unit (per-unit readings).",
+   "description": "Sample inspects a subset; Each Quantity inspects every unit.",
    "fieldname": "inspection_basis",
    "fieldtype": "Select",
    "label": "Inspection Basis",

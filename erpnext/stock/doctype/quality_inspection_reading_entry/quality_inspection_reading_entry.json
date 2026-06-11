@@ -41,7 +41,7 @@
   },
   {
    "depends_on": "eval:!doc.numeric",
-   "description": "Expected value for non-numeric parameters; compared case-insensitively against the reading.",
+   "description": "Expected value for non-numeric parameters.",
    "fieldname": "value",
    "fieldtype": "Data",
    "label": "Acceptance Criteria Value"

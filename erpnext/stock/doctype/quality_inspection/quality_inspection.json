@@ -27,14 +27,18 @@
   "bom_no",
   "specification_details",
   "quality_inspection_template",
-  "manual_inspection",
   "inspection_basis",
+  "column_break_specification",
+  "manual_inspection",
   "decided_quantity",
   "unit_quantity",
+  "readings_section",
   "unit_readings",
-  "accepted_unit_quantity",
-  "rejected_unit_quantity",
   "readings",
+  "unit_results_section",
+  "accepted_unit_quantity",
+  "column_break_unit_results",
+  "rejected_unit_quantity",
   "section_break_14",
   "inspected_by",
   "verified_by",
@@ -124,7 +128,7 @@
    "oldfieldname": "item_serial_no",
    "oldfieldtype": "Link",
    "options": "",
-   "description": "Serials covered by this inspection, one per line. Recording them sets the Sample Size. Each Quantity inspections record serials per unit in the Reading Bundle."
+   "description": "Inspected serials, one per line; they set the Sample Size."
   },
   {
    "fieldname": "batch_no",
@@ -142,7 +146,7 @@
    "mandatory_depends_on": "eval:doc.inspection_basis != 'Each Quantity'",
    "oldfieldname": "sample_size",
    "oldfieldtype": "Currency",
-   "description": "For serialized items this is derived from the recorded Serial Nos."
+   "description": "Derived from the recorded Serial Nos for serialized items."
   },
   {
    "fieldname": "column_break1",
@@ -243,7 +247,7 @@
   },
   {
    "default": "Accepted",
-   "description": "Derived from the readings (or the reading bundle). Check Manual Inspection to set the verdict yourself.",
+   "description": "Derived from the readings. Check Manual Inspection to set it yourself.",
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
@@ -258,7 +262,7 @@
    "label": "Manual Inspection"
   },
   {
-   "description": "Fetched from the Quality Control Lot or the item's quality trigger; override to inspect differently this time. Sample inspections record readings below; Each Quantity inspections record per-unit readings in the Unit Readings table.",
+   "description": "Sample: inspect a subset and decide the lot. Each Quantity: every unit records its own readings.",
    "fieldname": "inspection_basis",
    "fieldtype": "Select",
    "label": "Inspection Basis",
@@ -295,7 +299,7 @@
   },
   {
    "depends_on": "eval:doc.inspection_basis == 'Each Quantity' && !doc.manual_inspection",
-   "description": "The number of units under inspection \u2014 every unit records its own readings below.",
+   "description": "Units inspected \u2014 one set of readings per unit below.",
    "fieldname": "unit_quantity",
    "fieldtype": "Int",
    "label": "Unit Quantity"
@@ -323,10 +327,28 @@
   },
   {
    "depends_on": "eval:doc.reference_type == 'Quality Control Lot' && (doc.inspection_basis != 'Each Quantity' || doc.manual_inspection)",
-   "description": "How much of the lot's undecided quantity this verdict decides. Left blank, it decides everything still undecided \u2014 inspections may decide the lot in parts.",
+   "description": "How much of the lot this verdict decides; defaults to everything still undecided.",
    "fieldname": "decided_quantity",
    "fieldtype": "Float",
    "label": "Decided Quantity"
+  },
+  {
+   "fieldname": "column_break_specification",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "readings_section",
+   "fieldtype": "Section Break",
+   "depends_on": "eval:!doc.manual_inspection"
+  },
+  {
+   "fieldname": "unit_results_section",
+   "fieldtype": "Section Break",
+   "depends_on": "eval:doc.inspection_basis == 'Each Quantity' && !doc.manual_inspection"
+  },
+  {
+   "fieldname": "column_break_unit_results",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-search",

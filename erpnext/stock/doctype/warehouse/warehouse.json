@@ -231,7 +231,7 @@
   },
   {
    "depends_on": "eval:(!doc.is_group);",
-   "description": "Classifies the warehouse: leave blank for a normal warehouse, or pick Rejected (stores rejected materials), Quality (holds quarantined stock pending inspection) or Transit.",
+   "description": "Blank for a normal warehouse. Quality holds quarantined stock, Rejected holds rejected stock, Transit is a pass-through.",
    "fieldname": "warehouse_type",
    "fieldtype": "Link",
    "label": "Warehouse Type",
@@ -257,7 +257,7 @@
   },
   {
    "depends_on": "eval:!doc.is_group && ![\"Quality\", \"Rejected\", \"Transit\"].includes(doc.warehouse_type)",
-   "description": "Stock received for items that require inbound quality inspection is quarantined into this warehouse until released by a Quality Inspection.",
+   "description": "Receipts requiring inspection are quarantined into this warehouse until released.",
    "fieldname": "quality_warehouse",
    "fieldtype": "Link",
    "label": "Quality Control Warehouse",
