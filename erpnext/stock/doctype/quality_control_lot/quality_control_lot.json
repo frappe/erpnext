@@ -29,7 +29,9 @@
   "column_break_source",
   "quality_inspection",
   "inspection_template",
-  "inspection_basis"
+  "inspection_basis",
+  "serial_numbers_section",
+  "serial_numbers_html"
  ],
  "fields": [
   {
@@ -188,6 +190,17 @@
    "label": "Inspection Basis",
    "options": "Sample\nEach Quantity",
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "serial_numbers_section",
+   "fieldtype": "Section Break",
+   "label": "Serial Numbers"
+  },
+  {
+   "fieldname": "serial_numbers_html",
+   "fieldtype": "HTML",
+   "label": "Serial Numbers"
   }
  ],
  "links": [],

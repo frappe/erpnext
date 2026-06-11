@@ -2,6 +2,61 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Quality Control Lot", {
+	render_serial_numbers(frm) {
+		frm.toggle_display("serial_numbers_section", false);
+		if (frm.is_new()) return;
+
+		frappe.call({
+			method: "erpnext.stock.doctype.quality_control_lot.quality_control_lot.get_serial_numbers",
+			args: { lot_name: frm.doc.name },
+			callback: (r) => {
+				const serials = r.message || [];
+				if (!serials.length) return;
+
+				const state_colors = {
+					"In Quarantine": "orange",
+					Released: "green",
+					"Rejected Stock": "red",
+					Returned: "gray",
+				};
+				const rows = serials
+					.map((row) => {
+						const verdict = row.verdict
+							? `<span class="indicator-pill ${
+									row.verdict === "Accepted" ? "green" : "red"
+								}">${__(row.verdict)}</span>`
+							: "";
+						const warehouse = row.warehouse
+							? frappe.utils.get_form_link("Warehouse", row.warehouse, true)
+							: "";
+						return `<tr>
+							<td>${frappe.utils.get_form_link("Serial No", row.serial_no, true)}</td>
+							<td>${verdict}</td>
+							<td>${warehouse}</td>
+							<td><span class="indicator-pill ${state_colors[row.state] || "gray"}">${__(
+								row.state
+							)}</span></td>
+						</tr>`;
+					})
+					.join("");
+
+				frm.get_field("serial_numbers_html").$wrapper.html(`
+					<table class="table table-bordered table-sm">
+						<thead>
+							<tr>
+								<th>${__("Serial No")}</th>
+								<th>${__("Verdict")}</th>
+								<th>${__("Current Warehouse")}</th>
+								<th>${__("State")}</th>
+							</tr>
+						</thead>
+						<tbody>${rows}</tbody>
+					</table>`);
+				frm.toggle_display("serial_numbers_section", true);
+			},
+		});
+	},
+
 	setup(frm) {
 		frm.set_query("batch_no", function (doc) {
 			return { filters: { item: doc.item_code } };
@@ -9,6 +64,8 @@ frappe.ui.form.on("Quality Control Lot", {
 	},
 
 	refresh(frm) {
+		frm.trigger("render_serial_numbers");
+
 		if (!frm.is_new() && frm.doc.pending_qty > 0 && !frm.doc.quality_inspection) {
 			frm.add_custom_button(__("Create Quality Inspection"), () => {
 				frappe.new_doc("Quality Inspection", {

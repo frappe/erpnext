@@ -563,6 +563,18 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		# nothing rejected remains in quarantine: a second disposition is refused
 		self.assertRaises(frappe.ValidationError, make_rejected_stock_transfer_for_lot, lot)
 
+		# the lot's serial view tells where every unit went
+		from erpnext.stock.doctype.quality_control_lot.quality_control_lot import get_serial_numbers
+
+		self.assertEqual(
+			[(row["serial_no"], row["verdict"], row["state"]) for row in get_serial_numbers(lot)],
+			[
+				(serials[0], "Accepted", "Released"),
+				(serials[1], "Rejected", "Rejected Stock"),
+				(serials[2], "Accepted", "Released"),
+			],
+		)
+
 	def test_recorded_serials_set_the_sample_size(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
 

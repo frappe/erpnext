@@ -1,6 +1,7 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import frappe
 from frappe.model.document import Document
 from frappe.utils import flt
 
@@ -59,3 +60,74 @@ class QualityControlLot(Document):
 			self.status = "Rejected"
 		else:
 			self.status = "Released"
+
+
+@frappe.whitelist()
+def get_serial_numbers(lot_name: str):
+	"""The lot's serials with their inspection verdict and current whereabouts.
+
+	Membership comes from the lot's source document rows (the serials that
+	physically entered quarantine with this lot), the verdict from the deciding
+	inspection's reading bundle, and the state from where each serial sits now —
+	computed fresh, since serials leave the lot piecemeal through releases,
+	returns and dispositions.
+	"""
+	from erpnext.stock.services.quality_trigger_resolution import get_row_serial_nos
+	from erpnext.stock.services.quality_warehouse import is_rejected_warehouse
+
+	lot = frappe.get_doc("Quality Control Lot", lot_name)
+	if not frappe.get_cached_value("Item", lot.item_code, "has_serial_no"):
+		return []
+	if not lot.source_document_type or not lot.source_document:
+		return []
+
+	child_doctype = (
+		"Stock Entry Detail"
+		if lot.source_document_type == "Stock Entry"
+		else lot.source_document_type + " Item"
+	)
+	members = set()
+	for row in frappe.get_all(
+		child_doctype,
+		filters={"parent": lot.source_document, "item_code": lot.item_code},
+		fields=["serial_no", "serial_and_batch_bundle"],
+	):
+		members.update(get_row_serial_nos(row))
+
+	verdicts = {}
+	if lot.quality_inspection:
+		reading_bundle = frappe.db.get_value("Quality Inspection", lot.quality_inspection, "reading_bundle")
+		if reading_bundle:
+			bundle = frappe.get_doc("Quality Inspection Reading Bundle", reading_bundle)
+			for serial in bundle.get_unit_serials("Accepted"):
+				verdicts[serial] = "Accepted"
+			for serial in bundle.get_unit_serials("Rejected"):
+				verdicts[serial] = "Rejected"
+
+	serials = []
+	for serial in sorted(members):
+		info = frappe.db.get_value("Serial No", serial, ["warehouse", "batch_no"], as_dict=True)
+		if not info:
+			continue
+		# a per-batch lot covers only its own batch's serials
+		if lot.batch_no and info.batch_no and info.batch_no != lot.batch_no:
+			continue
+
+		if info.warehouse == lot.quality_warehouse:
+			state = "In Quarantine"
+		elif is_rejected_warehouse(info.warehouse):
+			state = "Rejected Stock"
+		elif info.warehouse:
+			state = "Released"
+		else:
+			state = "Returned"
+
+		serials.append(
+			{
+				"serial_no": serial,
+				"verdict": verdicts.get(serial),
+				"warehouse": info.warehouse,
+				"state": state,
+			}
+		)
+	return serials
