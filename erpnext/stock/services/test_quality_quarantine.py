@@ -1608,6 +1608,83 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertEqual(bundle.item_code, item)
 		self.assertEqual(bundle.quantity, 3)
 
+	def test_populated_bundle_carries_the_lot_serials(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+		from erpnext.stock.doctype.quality_inspection.quality_inspection import make_reading_bundle
+		from erpnext.stock.doctype.quality_inspection_reading_bundle.test_quality_inspection_reading_bundle import (
+			ensure_parameter,
+		)
+
+		qc = make_qc_warehouse("_Test QC Unit Serials WH")
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "QCUS.#####"}
+		)
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry",
+				warehouse_role="Inbound",
+				quality_control_mode="Quarantine",
+				inspection_basis="Each Quantity",
+				applicable_warehouse=qc,
+			),
+		)
+		item.save()
+
+		template = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection Template",
+				"quality_inspection_template_name": "_Test Unit Serial Template",
+				"item_quality_inspection_parameter": [
+					{"specification": ensure_parameter("_Test Unit Serial Parameter"), "value": "Yes"}
+				],
+			}
+		).insert(ignore_permissions=True, ignore_if_duplicate=True)
+
+		se = make_stock_entry(
+			item_code=item.name, qty=2, to_warehouse=qc, purpose="Material Receipt", rate=100
+		)
+		lot = quality_control_lots_for(se.name)[0].name
+		serials = frappe.get_all(
+			"Serial No", filters={"item_code": item.name, "warehouse": qc}, pluck="name", order_by="name"
+		)
+
+		inspection = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Incoming",
+				"reference_type": "Quality Control Lot",
+				"reference_name": lot,
+				"item_code": item.name,
+				"quality_inspection_template": template.name,
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+			}
+		)
+		inspection.insert(ignore_permissions=True)
+
+		bundle = make_reading_bundle(inspection.name)
+		bundle.populate_units()
+		bundle.insert(ignore_permissions=True)
+
+		# the lot's source receipt names the serials under inspection: prefilled
+		self.assertEqual([entry.serial_no for entry in bundle.entries], serials)
+
+		# a lot-flow bundle of a serialized item must identify every unit
+		for entry in bundle.entries:
+			entry.reading_value = "Yes"
+			entry.serial_no = None
+		bundle.save()
+		self.assertRaises(frappe.ValidationError, bundle.submit)
+
+		bundle.reload()
+		for entry, serial in zip(bundle.entries, serials, strict=True):
+			entry.reading_value = "Yes"
+			entry.serial_no = serial
+		bundle.save()
+		bundle.submit()
+		self.assertEqual(bundle.docstatus, 1)
+
 	def test_receipt_return_prefilled_with_rejected_details(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row

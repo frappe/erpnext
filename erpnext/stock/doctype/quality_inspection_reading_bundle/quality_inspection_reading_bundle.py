@@ -47,6 +47,81 @@ class QualityInspectionReadingBundle(Document):
 	def before_submit(self):
 		self.validate_completeness()
 
+	def _get_unit_serials_for_population(self):
+		"""Map units to serials when the stock under inspection names them.
+
+		Lot flow: the serials that arrived through the lot's source document and
+		still sit in its Quality Control warehouse. Row flow: the referenced
+		row's serials. Only an unambiguous one-serial-per-unit match prefills.
+		"""
+		from erpnext.stock.services.quality_trigger_resolution import get_row_serial_nos
+
+		if not self.quality_inspection or not frappe.get_cached_value(
+			"Item", self.item_code, "has_serial_no"
+		):
+			return {}
+
+		inspection = frappe.db.get_value(
+			"Quality Inspection",
+			self.quality_inspection,
+			["reference_type", "reference_name", "child_row_reference"],
+			as_dict=True,
+		)
+		if not inspection:
+			return {}
+
+		serials = []
+		if inspection.reference_type == "Quality Control Lot" and inspection.reference_name:
+			lot = frappe.db.get_value(
+				"Quality Control Lot",
+				inspection.reference_name,
+				["item_code", "batch_no", "quality_warehouse", "source_document_type", "source_document"],
+				as_dict=True,
+			)
+			if lot and lot.source_document_type and lot.source_document:
+				child_doctype = (
+					"Stock Entry Detail"
+					if lot.source_document_type == "Stock Entry"
+					else lot.source_document_type + " Item"
+				)
+				members = set()
+				for row in frappe.get_all(
+					child_doctype,
+					filters={"parent": lot.source_document, "item_code": lot.item_code},
+					fields=["serial_no", "serial_and_batch_bundle"],
+				):
+					members.update(get_row_serial_nos(row))
+				serials = []
+				for serial in members:
+					info = frappe.db.get_value(
+						"Serial No", serial, ["warehouse", "batch_no"], as_dict=True
+					)
+					if not info or info.warehouse != lot.quality_warehouse:
+						continue
+					# a per-batch lot covers only its own batch's serials
+					if lot.batch_no and info.batch_no and info.batch_no != lot.batch_no:
+						continue
+					serials.append(serial)
+				serials.sort()
+		elif inspection.child_row_reference:
+			child_doctype = (
+				"Stock Entry Detail"
+				if inspection.reference_type == "Stock Entry"
+				else inspection.reference_type + " Item"
+			)
+			row = frappe.db.get_value(
+				child_doctype,
+				inspection.child_row_reference,
+				["serial_no", "serial_and_batch_bundle"],
+				as_dict=True,
+			)
+			if row:
+				serials = sorted(get_row_serial_nos(row))
+
+		if len(serials) != (self.quantity or 0):
+			return {}
+		return {unit_no: serial for unit_no, serial in enumerate(serials, start=1)}
+
 	def validate_completeness(self):
 		"""An Each Quantity inspection means every unit was actually inspected.
 
@@ -54,6 +129,7 @@ class QualityInspectionReadingBundle(Document):
 		carry one — otherwise untouched rows would pass on their default status
 		without anyone having looked at the unit.
 		"""
+		self._validate_unit_serials()
 		inspected_units = {entry.unit_no for entry in self.entries}
 		missing_units = sorted(set(range(1, (self.quantity or 0) + 1)) - inspected_units)
 		if missing_units:
@@ -81,6 +157,44 @@ class QualityInspectionReadingBundle(Document):
 					frappe.bold(inspection)
 				)
 			)
+
+	def _validate_unit_serials(self):
+		"""Lot-flow bundles of serialized items must name every unit's serial.
+
+		Without them the release falls back to picking units by age instead of
+		by verdict. Row-referenced bundles are exempt — inward serials may not
+		exist before the document submits.
+		"""
+		if not frappe.get_cached_value("Item", self.item_code, "has_serial_no"):
+			return
+		if not self.quality_inspection:
+			return
+		if (
+			frappe.db.get_value("Quality Inspection", self.quality_inspection, "reference_type")
+			!= "Quality Control Lot"
+		):
+			return
+
+		units_without_serial = sorted(
+			{entry.unit_no for entry in self.entries if not entry.serial_no}
+			- {entry.unit_no for entry in self.entries if entry.serial_no}
+		)
+		if units_without_serial:
+			frappe.throw(
+				_("Unit(s) {0} have no Serial No — every unit of a serialized item must be identified.").format(
+					frappe.bold(", ".join(map(str, units_without_serial)))
+				),
+				title=_("Unit Serials Missing"),
+			)
+
+		unit_serials = {}
+		for entry in self.entries:
+			if entry.serial_no and unit_serials.setdefault(entry.unit_no, entry.serial_no) != entry.serial_no:
+				frappe.throw(
+					_("Unit {0} carries two different serials.").format(frappe.bold(entry.unit_no))
+				)
+		if len(set(unit_serials.values())) != len(unit_serials):
+			frappe.throw(_("The same Serial No is recorded against more than one unit."))
 
 	def get_unit_serials(self, status):
 		"""Serial numbers of units whose roll-up matches the status.
@@ -147,6 +261,7 @@ class QualityInspectionReadingBundle(Document):
 		if not parameters:
 			frappe.throw(_("Select a Quality Inspection Template with parameters first."))
 
+		unit_serials = self._get_unit_serials_for_population()
 		self.set("entries", [])
 		for unit_no in range(1, (self.quantity or 0) + 1):
 			for parameter in parameters:
@@ -154,6 +269,7 @@ class QualityInspectionReadingBundle(Document):
 					"entries",
 					{
 						"unit_no": unit_no,
+						"serial_no": unit_serials.get(unit_no),
 						"specification": parameter.specification,
 						"numeric": parameter.numeric,
 						"value": parameter.value,

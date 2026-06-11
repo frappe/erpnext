@@ -27,6 +27,7 @@
   {
    "fieldname": "serial_no",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Serial No",
    "options": "Serial No"
   },
