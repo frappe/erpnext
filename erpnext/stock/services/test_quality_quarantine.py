@@ -246,6 +246,36 @@ class TestQualityQuarantine(ERPNextTestSuite):
 			batch_no,
 		)
 
+	def test_manual_release_built_from_the_lot(self):
+		from erpnext.stock.services.quality_quarantine import make_release_for_lot
+
+		# two stores share the Quality Control warehouse: no unique release
+		# target, so nothing auto-releases on inspection submission
+		qc = make_qc_warehouse("_Test QC Ambiguous WH")
+		store_one = make_warehouse("_Test QC Ambiguous Store One", quality_warehouse=qc)
+		make_warehouse("_Test QC Ambiguous Store Two", quality_warehouse=qc)
+
+		item = make_quarantine_item(qc)
+		se = make_stock_entry(item_code=item, qty=4, to_warehouse=qc, purpose="Material Receipt", rate=100)
+		lot = quality_control_lots_for(se.name)[0].name
+
+		# the maker refuses while the inspection is pending
+		self.assertRaises(frappe.ValidationError, make_release_for_lot, lot)
+
+		submit_inspection_for_lot(lot)
+		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "pending_qty"), 4)
+
+		# pre-filled with the accepted quantity; the user picked the store
+		release = make_release_for_lot(lot, store_one)
+		self.assertEqual(release.items[0].qty, 4)
+		self.assertEqual(release.items[0].s_warehouse, qc)
+		self.assertEqual(release.items[0].t_warehouse, store_one)
+		release.insert()
+		release.submit()
+
+		self.assertEqual(get_qty(item, store_one), 4)
+		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "status"), "Released")
+
 	def test_multi_batch_row_mints_one_lot_per_batch(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
 		from erpnext.stock.serial_batch_bundle import SerialBatchCreation

@@ -118,6 +118,40 @@ frappe.ui.form.on("Quality Control Lot", {
 			});
 		}
 
+		if (frm.doc.pending_qty > 0 && frm.doc.quality_inspection) {
+			frm.add_custom_button(__("Create Quality Control Release"), () => {
+				frappe.prompt(
+					{
+						label: __("Release Warehouse"),
+						fieldname: "release_warehouse",
+						fieldtype: "Link",
+						options: "Warehouse",
+						reqd: 1,
+						description: __("The store the accepted stock is released into."),
+						get_query: () => ({
+							filters: {
+								company: frm.doc.company,
+								is_group: 0,
+								warehouse_type: ["not in", ["Quality", "Rejected"]],
+							},
+						}),
+					},
+					(values) => {
+						frappe.call({
+							method: "erpnext.stock.services.quality_quarantine.make_release_for_lot",
+							args: { lot_name: frm.doc.name, release_warehouse: values.release_warehouse },
+							freeze: true,
+							callback: (r) => {
+								const doc = frappe.model.sync(r.message)[0];
+								frappe.set_route("Form", doc.doctype, doc.name);
+							},
+						});
+					},
+					__("Release Accepted Stock")
+				);
+			});
+		}
+
 		const rejected_outstanding =
 			flt(frm.doc.rejected_qty) - flt(frm.doc.returned_qty) - flt(frm.doc.disposed_qty);
 		if (rejected_outstanding > 0) {

@@ -370,6 +370,84 @@ def make_purchase_return_for_lot(lot_name: str):
 
 
 @frappe.whitelist()
+def make_release_for_lot(lot_name: str, release_warehouse: str | None = None):
+	"""A Quality Control Release pre-filled with the lot's accepted stock.
+
+	The path for when the automatic release could not run — typically several
+	stores share one Quality Control warehouse, so no unique release target
+	exists. Pre-filled with the quantity the inspection accepted that is still
+	in quarantine, the lot's batch and exactly the accepted serials; the caller
+	(or the form) picks the target warehouse.
+	"""
+	lot = frappe.get_doc("Quality Control Lot", lot_name)
+
+	if (
+		not lot.quality_inspection
+		or frappe.db.get_value("Quality Inspection", lot.quality_inspection, "docstatus") != 1
+	):
+		frappe.throw(
+			_(
+				"Quality Control Lot {0} has no submitted Quality Inspection. Stock cannot leave "
+				"quarantine without a recorded inspection decision."
+			).format(frappe.bold(lot.name)),
+			title=_("Inspection Pending"),
+		)
+
+	pending_qty = flt(lot.pending_qty)
+	inspection = frappe.db.get_value(
+		"Quality Inspection", lot.quality_inspection, ["status", "reading_bundle"], as_dict=True
+	)
+
+	accepted_serials = None
+	if inspection.reading_bundle:
+		bundle = frappe.get_doc("Quality Inspection Reading Bundle", inspection.reading_bundle)
+		accepted_qty = min(flt(bundle.accepted_qty) - flt(lot.accepted_qty), pending_qty)
+		accepted_serials = [
+			serial
+			for serial in bundle.get_unit_serials("Accepted")
+			if frappe.db.get_value("Serial No", serial, "warehouse") == lot.quality_warehouse
+		] or None
+	elif inspection.status == "Rejected":
+		accepted_qty = 0.0
+	else:
+		accepted_qty = pending_qty
+
+	if accepted_qty <= 0:
+		frappe.throw(
+			_("Quality Control Lot {0} has no accepted quantity awaiting release.").format(
+				frappe.bold(lot.name)
+			)
+		)
+
+	stock_uom = frappe.get_cached_value("Item", lot.item_code, "stock_uom")
+	entry = frappe.new_doc("Stock Entry")
+	entry.purpose = "Quality Control Release"
+	entry.stock_entry_type = "Quality Control Release"
+	entry.company = lot.company
+	entry.quality_control_lot = lot.name
+	row = {
+		"item_code": lot.item_code,
+		"qty": accepted_qty,
+		"uom": stock_uom,
+		"stock_uom": stock_uom,
+		"conversion_factor": 1,
+		"s_warehouse": lot.quality_warehouse,
+		"t_warehouse": release_warehouse or get_release_warehouse(lot.quality_warehouse),
+	}
+	stamp_tracking_on_outward_row(
+		row,
+		item_code=lot.item_code,
+		warehouse=lot.quality_warehouse,
+		qty=accepted_qty,
+		company=lot.company,
+		batch_no=lot.batch_no,
+		serial_nos=accepted_serials,
+	)
+	entry.append("items", row)
+	return entry
+
+
+@frappe.whitelist()
 def make_rejected_stock_transfer_for_lot(lot_name: str):
 	"""A Quality Control Release moving the lot's rejected stock to a Rejected warehouse.
 
