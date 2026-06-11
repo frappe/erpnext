@@ -242,7 +242,7 @@
    "fieldtype": "Section Break"
   },
   {
-   "depends_on": "eval: doc.warehouse_type !== 'Transit';",
+   "depends_on": "eval:![\"Transit\", \"Quality\"].includes(doc.warehouse_type)",
    "fieldname": "default_in_transit_warehouse",
    "fieldtype": "Link",
    "label": "Default In-Transit Warehouse",
@@ -250,13 +250,13 @@
   },
   {
    "collapsible": 1,
-   "depends_on": "eval:!doc.is_group && doc.warehouse_type != 'Quality';",
+   "depends_on": "eval:!doc.is_group && ![\"Quality\", \"Rejected\", \"Transit\"].includes(doc.warehouse_type)",
    "fieldname": "quality_control_section",
    "fieldtype": "Section Break",
    "label": "Quality Control"
   },
   {
-   "depends_on": "eval:!doc.is_group && doc.warehouse_type != 'Quality';",
+   "depends_on": "eval:!doc.is_group && ![\"Quality\", \"Rejected\", \"Transit\"].includes(doc.warehouse_type)",
    "description": "Stock received for items that require inbound quality inspection is quarantined into this warehouse until released by a Quality Inspection.",
    "fieldname": "quality_warehouse",
    "fieldtype": "Link",

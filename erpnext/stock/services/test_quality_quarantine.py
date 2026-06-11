@@ -1751,6 +1751,7 @@ class TestQualityQuarantine(ERPNextTestSuite):
 			entry.reading_value = "Yes"
 			entry.serial_no = None
 		bundle.save()
+		bundle.flags.via_quality_inspection = True
 		self.assertRaises(frappe.ValidationError, bundle.submit)
 
 		bundle.reload()
@@ -1758,6 +1759,13 @@ class TestQualityQuarantine(ERPNextTestSuite):
 			entry.reading_value = "Yes"
 			entry.serial_no = serial
 		bundle.save()
+
+		# a born-linked bundle is frozen by its inspection, never by hand
+		bundle.flags.via_quality_inspection = False
+		self.assertRaises(frappe.ValidationError, bundle.submit)
+
+		bundle.reload()
+		bundle.flags.via_quality_inspection = True
 		bundle.submit()
 		self.assertEqual(bundle.docstatus, 1)
 
@@ -1927,12 +1935,15 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		for entry in bundle.entries:
 			entry.reading_value = "no" if entry.serial_no == serials[1] else "Yes"
 		bundle.insert(ignore_permissions=True)
-		bundle.submit()
 
 		inspection.reload()
 		inspection.reading_bundle = bundle.name
 		inspection.save(ignore_permissions=True)
 		inspection.submit()
+
+		# the verdict froze its evidence: the bundle submitted with the inspection
+		bundle.reload()
+		self.assertEqual(bundle.docstatus, 1)
 
 		receipt.reload()
 		outcomes = get_inspection_outcomes(receipt.as_dict())

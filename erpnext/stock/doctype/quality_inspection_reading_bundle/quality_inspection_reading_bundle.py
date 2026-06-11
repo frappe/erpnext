@@ -97,7 +97,24 @@ class QualityInspectionReadingBundle(Document):
 		return bool(row) and not (unborn - set(get_row_serial_nos(row)))
 
 	def before_submit(self):
+		self.validate_manual_submission()
 		self.validate_completeness()
+
+	def validate_manual_submission(self):
+		"""A born-linked bundle submits with its inspection, not by hand.
+
+		The verdict and its evidence freeze together — submitting the bundle
+		alone would let readings change underneath a draft inspection's feet.
+		Standalone bundles (no owning inspection) stay manually submittable.
+		"""
+		if self.quality_inspection and not self.flags.via_quality_inspection:
+			frappe.throw(
+				_(
+					"This reading bundle belongs to Quality Inspection {0} and is submitted "
+					"automatically with it. Submit the inspection instead."
+				).format(frappe.bold(self.quality_inspection)),
+				title=_("Submitted With The Inspection"),
+			)
 
 	def _get_unit_serials_for_population(self):
 		"""Map units to serials when the stock under inspection names them.

@@ -85,6 +85,12 @@ class Warehouse(NestedSet):
 		if not self.quality_warehouse:
 			return
 
+		if self.warehouse_type in ("Quality", "Rejected", "Transit"):
+			# a special-type warehouse is never a quarantine source itself; a
+			# lingering target would invisibly route receipts into quarantine
+			self.quality_warehouse = None
+			return
+
 		if self.quality_warehouse == self.name:
 			frappe.throw(_("A warehouse cannot be its own Quality Control Warehouse."))
 

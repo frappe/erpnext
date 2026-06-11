@@ -219,8 +219,8 @@ def process_inspection_result(doc, method=None):
 		if bundle.docstatus != 1:
 			frappe.throw(
 				_(
-					"Submit Reading Bundle {0} before submitting the inspection — its per-unit "
-					"readings decide the lot and must be frozen first."
+					"Reading Bundle {0} is not submitted — its per-unit readings decide the lot "
+					"and must be frozen with the inspection."
 				).format(frappe.bold(bundle.name)),
 				title=_("Reading Bundle Not Submitted"),
 			)
@@ -414,9 +414,13 @@ def make_rejected_stock_transfer_for_lot(lot_name: str):
 	entry.stock_entry_type = "Quality Control Release"
 	entry.company = lot.company
 	entry.quality_control_lot = lot.name
+	stock_uom = frappe.get_cached_value("Item", lot.item_code, "stock_uom")
 	row = {
 		"item_code": lot.item_code,
 		"qty": outstanding,
+		"uom": stock_uom,
+		"stock_uom": stock_uom,
+		"conversion_factor": 1,
 		"s_warehouse": lot.quality_warehouse,
 		"t_warehouse": rejected_warehouses[0] if len(rejected_warehouses) == 1 else None,
 	}

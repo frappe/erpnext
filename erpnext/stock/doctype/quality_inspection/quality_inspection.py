@@ -316,6 +316,22 @@ class QualityInspection(Document):
 		self.validate_inspected_serials_against_reference()
 		self.validate_inspected_batch_against_reference()
 		self.validate_reading_bundle_coverage()
+		self.submit_reading_bundle()
+
+	def submit_reading_bundle(self):
+		"""The inspection's verdict freezes its evidence: submitting the
+		inspection submits the reading bundle with it. The bundle refuses
+		manual submission, so the two can never go out of step."""
+		if not self.reading_bundle:
+			return
+
+		bundle = frappe.get_doc("Quality Inspection Reading Bundle", self.reading_bundle)
+		if bundle.docstatus != 0:
+			return
+
+		bundle.flags.via_quality_inspection = True
+		bundle.flags.ignore_permissions = True
+		bundle.submit()
 
 	def validate_sample_size(self):
 		"""A Sample inspection of zero units is a verdict about nothing."""
