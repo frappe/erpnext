@@ -1139,6 +1139,50 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, unread.submit)
 		unread.delete()
 
+	def test_sample_cannot_exceed_decided_quantity(self):
+		qc = make_qc_warehouse("_Test QC Sample Bound WH")
+		item = make_quarantine_item(qc)
+		se = make_stock_entry(item_code=item, qty=5, to_warehouse=qc, purpose="Material Receipt", rate=100)
+		lot = quality_control_lots_for(se.name)[0].name
+
+		inspection = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Incoming",
+				"reference_type": "Quality Control Lot",
+				"reference_name": lot,
+				"item_code": item,
+				"manual_inspection": 1,
+				"status": "Accepted",
+				"sample_size": 5,
+				"decided_quantity": 2,
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+			}
+		)
+		inspection.insert(ignore_permissions=True)
+		# a sample of 5 cannot decide only 2 — it is drawn from what it decides
+		self.assertRaises(frappe.ValidationError, inspection.submit)
+		inspection.delete()
+
+		# left blank, the decided quantity fills with everything undecided on save
+		blank = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Incoming",
+				"reference_type": "Quality Control Lot",
+				"reference_name": lot,
+				"item_code": item,
+				"manual_inspection": 1,
+				"status": "Accepted",
+				"sample_size": 5,
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+			}
+		)
+		blank.insert(ignore_permissions=True)
+		self.assertEqual(blank.decided_quantity, 5)
+
 	def test_lot_decided_in_parts(self):
 		from erpnext.stock.services.quality_quarantine import make_release_for_lot
 

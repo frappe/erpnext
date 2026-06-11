@@ -125,6 +125,7 @@ class QualityInspection(Document):
 		elif self.unit_readings and not self.manual_inspection:
 			self.set_status_from_unit_readings()
 
+		self.set_decided_quantity_default()
 		self.validate_inspection_required()
 		self.validate_serial_nos()
 		self.set_company()
@@ -357,6 +358,16 @@ class QualityInspection(Document):
 		self.validate_decided_quantity()
 		self.validate_units_not_already_decided()
 
+	def set_decided_quantity_default(self):
+		"""A blank (or zero) Decided Quantity means everything still undecided."""
+		if (
+			self.reference_type == "Quality Control Lot"
+			and self.reference_name
+			and (self.inspection_basis != "Each Quantity" or self.manual_inspection)
+			and not flt(self.decided_quantity)
+		):
+			self.decided_quantity = flt(self.get_qty_under_inspection())
+
 	def validate_decided_quantity(self):
 		"""Resolve and bound how much of the lot this verdict decides.
 
@@ -387,6 +398,15 @@ class QualityInspection(Document):
 					"Control Lot {2}."
 				).format(self.decided_quantity, undecided, frappe.bold(self.reference_name)),
 				title=_("More Than Undecided"),
+			)
+
+		if self.inspection_basis != "Each Quantity" and flt(self.sample_size) > flt(self.decided_quantity):
+			frappe.throw(
+				_(
+					"The sample of {0} unit(s) exceeds the {1} unit(s) this verdict decides — a "
+					"sample is drawn from the quantity it decides."
+				).format(self.sample_size, self.decided_quantity),
+				title=_("Sample Exceeds Decided Quantity"),
 			)
 
 		if (

@@ -67,6 +67,7 @@ frappe.ui.form.on("Quality Inspection", {
 	inspection_basis(frm) {
 		frm.trigger("toggle_batch_and_serial_fields");
 		frm.trigger("toggle_populate_units_button");
+		frm.trigger("prefill_decided_quantity_from_lot");
 	},
 
 	quality_inspection_template(frm) {
@@ -167,13 +168,46 @@ frappe.ui.form.on("Quality Inspection", {
 		// the lot dictates how it is inspected; the server re-derives on save
 		if (frm.doc.reference_type === "Quality Control Lot" && frm.doc.reference_name) {
 			frappe.db
-				.get_value("Quality Control Lot", frm.doc.reference_name, "inspection_basis")
+				.get_value("Quality Control Lot", frm.doc.reference_name, [
+					"inspection_basis",
+					"received_qty",
+					"decided_qty",
+				])
 				.then((r) => {
 					frm.set_value("inspection_basis", r.message?.inspection_basis || "Sample");
+					frm.trigger("prefill_decided_quantity_from_lot");
 				});
 		} else {
 			frm.set_value("inspection_basis", "Sample");
 		}
+	},
+
+	manual_inspection(frm) {
+		frm.trigger("prefill_decided_quantity_from_lot");
+	},
+
+	prefill_decided_quantity_from_lot(frm) {
+		// the verdict decides everything still undecided unless the inspector
+		// narrows it to a tranche
+		if (
+			frm.doc.docstatus !== 0 ||
+			frm.doc.reference_type !== "Quality Control Lot" ||
+			!frm.doc.reference_name ||
+			(frm.doc.inspection_basis === "Each Quantity" && !frm.doc.manual_inspection) ||
+			flt(frm.doc.decided_quantity)
+		) {
+			return;
+		}
+		frappe.db
+			.get_value("Quality Control Lot", frm.doc.reference_name, ["received_qty", "decided_qty"])
+			.then((r) => {
+				if (r.message) {
+					frm.set_value(
+						"decided_quantity",
+						flt(r.message.received_qty) - flt(r.message.decided_qty)
+					);
+				}
+			});
 	},
 
 	item_code: function (frm) {
