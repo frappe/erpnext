@@ -6,6 +6,7 @@
 import frappe
 
 QUALITY_WAREHOUSE_TYPE = "Quality"
+REJECTED_WAREHOUSE_TYPE = "Rejected"
 TRANSIT_WAREHOUSE_TYPE = "Transit"
 
 
@@ -14,6 +15,13 @@ def is_quality_warehouse(warehouse: str | None) -> bool:
 	if not warehouse:
 		return False
 	return frappe.get_cached_value("Warehouse", warehouse, "warehouse_type") == QUALITY_WAREHOUSE_TYPE
+
+
+def is_rejected_warehouse(warehouse: str | None) -> bool:
+	"""Whether a warehouse is a Rejected warehouse holding stock that failed inspection."""
+	if not warehouse:
+		return False
+	return frappe.get_cached_value("Warehouse", warehouse, "warehouse_type") == REJECTED_WAREHOUSE_TYPE
 
 
 def is_transit_warehouse(warehouse: str | None) -> bool:

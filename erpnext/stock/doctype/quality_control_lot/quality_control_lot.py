@@ -17,6 +17,7 @@ class QualityControlLot(Document):
 		accepted_qty: DF.Float
 		batch_no: DF.Link | None
 		company: DF.Link | None
+		disposed_qty: DF.Float
 		inspection_basis: DF.Literal["Sample", "Each Quantity"]
 		inspection_template: DF.Link | None
 		item_code: DF.Link

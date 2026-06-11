@@ -30,16 +30,30 @@ frappe.ui.form.on("Quality Control Lot", {
 			});
 		}
 
-		const rejected_outstanding = flt(frm.doc.rejected_qty) - flt(frm.doc.returned_qty);
-		if (
-			rejected_outstanding > 0 &&
-			["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"].includes(
-				frm.doc.source_document_type
-			)
-		) {
-			frm.add_custom_button(__("Create Purchase Return"), () => {
+		const rejected_outstanding =
+			flt(frm.doc.rejected_qty) - flt(frm.doc.returned_qty) - flt(frm.doc.disposed_qty);
+		if (rejected_outstanding > 0) {
+			if (
+				["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"].includes(
+					frm.doc.source_document_type
+				)
+			) {
+				frm.add_custom_button(__("Create Purchase Return"), () => {
+					frappe.call({
+						method: "erpnext.stock.services.quality_quarantine.make_purchase_return_for_lot",
+						args: { lot_name: frm.doc.name },
+						freeze: true,
+						callback: (r) => {
+							const doc = frappe.model.sync(r.message)[0];
+							frappe.set_route("Form", doc.doctype, doc.name);
+						},
+					});
+				});
+			}
+
+			frm.add_custom_button(__("Move Rejected Stock Out"), () => {
 				frappe.call({
-					method: "erpnext.stock.services.quality_quarantine.make_purchase_return_for_lot",
+					method: "erpnext.stock.services.quality_quarantine.make_rejected_stock_transfer_for_lot",
 					args: { lot_name: frm.doc.name },
 					freeze: true,
 					callback: (r) => {

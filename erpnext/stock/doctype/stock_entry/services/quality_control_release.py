@@ -5,6 +5,8 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+from erpnext.stock.services.quality_warehouse import is_rejected_warehouse
+
 from .material_transfer import MaterialTransferStockEntry
 
 
@@ -17,6 +19,10 @@ class QualityControlReleaseStockEntry(MaterialTransferStockEntry):
 	Quality Control warehouse. Every release must be backed by a Quality Control
 	Lot with a submitted Quality Inspection, so stock cannot leave quarantine
 	without a recorded decision.
+
+	The target warehouse decides what a row may move: an ordinary warehouse
+	receives accepted stock; a Rejected warehouse receives rejected stock, where
+	normal stock rules take over (scrap, rework, sale as scrap).
 	"""
 
 	def validate(self):
@@ -46,8 +52,10 @@ class QualityControlReleaseStockEntry(MaterialTransferStockEntry):
 				title=_("Inspection Pending"),
 			)
 
-		accepted_serials = self._get_accepted_serials(lot)
+		accepted_serials = self._get_unit_serials(lot, "Accepted")
+		rejected_serials = self._get_unit_serials(lot, "Rejected")
 		release_qty = 0.0
+		disposal_qty = 0.0
 		for row in doc.items:
 			if row.item_code != lot.item_code:
 				frappe.throw(
@@ -62,8 +70,12 @@ class QualityControlReleaseStockEntry(MaterialTransferStockEntry):
 					).format(row.idx, frappe.bold(lot.quality_warehouse), lot.name)
 				)
 			self._validate_row_batch(row, lot)
-			self._validate_row_serials(row, lot, accepted_serials)
-			release_qty += flt(row.transfer_qty or row.qty)
+			if is_rejected_warehouse(row.t_warehouse):
+				self._validate_row_serials(row, lot, rejected_serials, verdict="Rejected")
+				disposal_qty += flt(row.transfer_qty or row.qty)
+			else:
+				self._validate_row_serials(row, lot, accepted_serials, verdict="Accepted")
+				release_qty += flt(row.transfer_qty or row.qty)
 
 		if release_qty > flt(lot.pending_qty):
 			frappe.throw(
@@ -71,6 +83,16 @@ class QualityControlReleaseStockEntry(MaterialTransferStockEntry):
 					"Cannot release {0} from Quality Control Lot {1}: only {2} is pending inspection release."
 				).format(release_qty, lot.name, lot.pending_qty),
 				title=_("Quantity Exceeds Lot"),
+			)
+
+		rejected_outstanding = flt(lot.rejected_qty) - flt(lot.returned_qty) - flt(lot.disposed_qty)
+		if disposal_qty > rejected_outstanding:
+			frappe.throw(
+				_(
+					"Cannot move {0} to a Rejected warehouse from Quality Control Lot {1}: only {2} "
+					"rejected unit(s) remain in quarantine."
+				).format(disposal_qty, lot.name, rejected_outstanding),
+				title=_("Quantity Exceeds Rejected Stock"),
 			)
 
 	def _validate_row_batch(self, row, lot):
@@ -110,9 +132,9 @@ class QualityControlReleaseStockEntry(MaterialTransferStockEntry):
 				title=_("Batch Missing"),
 			)
 
-	def _get_accepted_serials(self, lot):
-		"""The serials the lot's inspection accepted, or None when no per-serial
-		verdicts were recorded (quantity and batch guards apply instead)."""
+	def _get_unit_serials(self, lot, status):
+		"""The serials the lot's inspection gave this verdict, or None when no
+		per-serial verdicts were recorded (quantity and batch guards apply instead)."""
 		if not lot.quality_inspection:
 			return None
 
@@ -120,19 +142,20 @@ class QualityControlReleaseStockEntry(MaterialTransferStockEntry):
 		if not reading_bundle:
 			return None
 
-		accepted = frappe.get_doc("Quality Inspection Reading Bundle", reading_bundle).get_unit_serials(
-			"Accepted"
+		serials = frappe.get_doc("Quality Inspection Reading Bundle", reading_bundle).get_unit_serials(
+			status
 		)
-		return set(accepted) or None
+		return set(serials) or None
 
-	def _validate_row_serials(self, row, lot, accepted_serials):
-		"""A release moves only serials the inspection accepted.
+	def _validate_row_serials(self, row, lot, allowed_serials, verdict):
+		"""A row moves only serials whose inspection verdict matches its target.
 
 		With per-serial verdicts on record, a row must name its serials — left
 		unspecified, submission would auto-pick first-in-first-out and could
-		smuggle a rejected unit out of quarantine.
+		smuggle a rejected unit out to the store, or an accepted one to the
+		Rejected warehouse.
 		"""
-		if accepted_serials is None:
+		if allowed_serials is None:
 			return
 
 		row_serials = set()
@@ -151,20 +174,26 @@ class QualityControlReleaseStockEntry(MaterialTransferStockEntry):
 
 		if not row_serials:
 			frappe.throw(
-				_("Row #{0}: Specify the accepted serial numbers of Quality Control Lot {1}.").format(
-					row.idx, lot.name
+				_("Row #{0}: Specify the {1} serial numbers of Quality Control Lot {2}.").format(
+					row.idx, _(verdict.lower()), lot.name
 				),
 				title=_("Serial Numbers Missing"),
 			)
 
-		rejected = row_serials - accepted_serials
-		if rejected:
+		mismatched = row_serials - allowed_serials
+		if mismatched:
 			frappe.throw(
 				_(
-					"Row #{0}: Serial number(s) {1} were not accepted by the inspection of Quality "
-					"Control Lot {2} and cannot be released."
-				).format(row.idx, frappe.bold(", ".join(sorted(rejected))), lot.name),
-				title=_("Serial Not Accepted"),
+					"Row #{0}: Serial number(s) {1} were not {2} by the inspection of Quality "
+					"Control Lot {3} and cannot move to {4}."
+				).format(
+					row.idx,
+					frappe.bold(", ".join(sorted(mismatched))),
+					_(verdict.lower()),
+					lot.name,
+					frappe.bold(row.t_warehouse),
+				),
+				title=_("Serial Verdict Mismatch"),
 			)
 
 	def on_submit(self):
@@ -178,7 +207,13 @@ class QualityControlReleaseStockEntry(MaterialTransferStockEntry):
 	def _apply_to_lot(self, direction):
 		doc = self.doc
 		lot = frappe.get_doc("Quality Control Lot", doc.quality_control_lot)
-		released = sum(flt(row.transfer_qty or row.qty) for row in doc.items)
+		released = disposed = 0.0
+		for row in doc.items:
+			if is_rejected_warehouse(row.t_warehouse):
+				disposed += flt(row.transfer_qty or row.qty)
+			else:
+				released += flt(row.transfer_qty or row.qty)
 		lot.accepted_qty = flt(lot.accepted_qty) + direction * released
+		lot.disposed_qty = flt(lot.disposed_qty) + direction * disposed
 		lot.flags.ignore_permissions = True
 		lot.save()

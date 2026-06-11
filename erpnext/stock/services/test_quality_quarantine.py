@@ -491,6 +491,78 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Serial No", serials[2], "warehouse"), store)
 		self.assertEqual(frappe.db.get_value("Serial No", serials[1], "warehouse"), qc)
 
+	def test_rejected_stock_moves_to_a_rejected_warehouse(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+		from erpnext.stock.doctype.quality_inspection_reading_bundle.test_quality_inspection_reading_bundle import (
+			make_bundle,
+		)
+		from erpnext.stock.services.quality_quarantine import make_rejected_stock_transfer_for_lot
+
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
+		if not frappe.db.exists("Warehouse Type", "Rejected"):
+			frappe.get_doc({"doctype": "Warehouse Type", "name": "Rejected"}).insert(
+				ignore_permissions=True
+			)
+
+		qc = make_qc_warehouse("_Test QC Disposition WH")
+		make_warehouse("_Test QC Disposition Store", quality_warehouse=qc)
+		rejected_warehouse = make_warehouse("_Test QC Disposition Rejects", warehouse_type="Rejected")
+
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "QCDS.#####"}
+		)
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry",
+				warehouse_role="Inbound",
+				quality_control_mode="Quarantine",
+				inspection_basis="Each Quantity",
+				applicable_warehouse=qc,
+			),
+		)
+		item.save()
+
+		se = make_stock_entry(
+			item_code=item.name, qty=3, to_warehouse=qc, purpose="Material Receipt", rate=100
+		)
+		lot = quality_control_lots_for(se.name)[0].name
+		serials = frappe.get_all(
+			"Serial No", filters={"item_code": item.name, "warehouse": qc}, pluck="name", order_by="name"
+		)
+
+		bundle = make_bundle(
+			3,
+			{1: ["Accepted"], 2: ["Rejected"], 3: ["Accepted"]},
+			item_code=item.name,
+			unit_serials={1: serials[0], 2: serials[1], 3: serials[2]},
+		)
+		submit_inspection_for_lot(lot, reading_bundle=bundle.name)
+
+		# an accepted serial cannot be smuggled into the Rejected warehouse
+		self.assertRaises(
+			frappe.ValidationError, make_release, lot, 1, rejected_warehouse, serial_no=serials[0]
+		)
+
+		# the pre-filled disposition carries exactly the rejected serial
+		entry = make_rejected_stock_transfer_for_lot(lot)
+		row = entry.items[0]
+		self.assertEqual(row.qty, 1)
+		self.assertEqual(row.serial_no, serials[1])
+		self.assertEqual(row.s_warehouse, qc)
+		row.t_warehouse = rejected_warehouse
+		entry.insert()
+		entry.submit()
+
+		# quarantine is drained: the rejected unit sits in the Rejected warehouse,
+		# booked on the lot as disposed
+		self.assertEqual(frappe.db.get_value("Serial No", serials[1], "warehouse"), rejected_warehouse)
+		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "disposed_qty"), 1)
+		self.assertEqual(get_qty(item.name, qc), 0)
+
+		# nothing rejected remains in quarantine: a second disposition is refused
+		self.assertRaises(frappe.ValidationError, make_rejected_stock_transfer_for_lot, lot)
+
 	def test_recorded_serials_set_the_sample_size(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
 

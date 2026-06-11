@@ -320,7 +320,7 @@ def make_purchase_return_for_lot(lot_name: str):
 			).format(frappe.bold(lot.name), frappe.bold(lot.source_document_type))
 		)
 
-	outstanding = flt(lot.rejected_qty) - flt(lot.returned_qty)
+	outstanding = flt(lot.rejected_qty) - flt(lot.returned_qty) - flt(lot.disposed_qty)
 	if outstanding <= 0:
 		frappe.throw(
 			_("Quality Control Lot {0} has no rejected quantity awaiting return.").format(
@@ -369,6 +369,70 @@ def make_purchase_return_for_lot(lot_name: str):
 	return return_doc
 
 
+@frappe.whitelist()
+def make_rejected_stock_transfer_for_lot(lot_name: str):
+	"""A Quality Control Release moving the lot's rejected stock to a Rejected warehouse.
+
+	The other disposition for rejected stock besides a purchase return: out of
+	quarantine into a Rejected warehouse, where normal stock rules take over
+	(scrap with a Material Issue, rework, sale as scrap). Pre-filled with the
+	rejected quantity still in quarantine, the lot's batch and exactly the
+	rejected serials; the target is resolved when the company has a single
+	Rejected warehouse, otherwise the user picks it.
+	"""
+	lot = frappe.get_doc("Quality Control Lot", lot_name)
+
+	outstanding = flt(lot.rejected_qty) - flt(lot.returned_qty) - flt(lot.disposed_qty)
+	if outstanding <= 0:
+		frappe.throw(
+			_("Quality Control Lot {0} has no rejected quantity in quarantine.").format(
+				frappe.bold(lot.name)
+			)
+		)
+
+	rejected_warehouses = frappe.get_all(
+		"Warehouse",
+		filters={
+			"warehouse_type": "Rejected",
+			"company": lot.company,
+			"is_group": 0,
+			"disabled": 0,
+		},
+		pluck="name",
+	)
+	if not rejected_warehouses:
+		frappe.throw(
+			_(
+				"No Rejected warehouse exists for {0}. Create a warehouse with type Rejected to "
+				"move rejected stock out of quarantine."
+			).format(frappe.bold(lot.company)),
+			title=_("Rejected Warehouse Missing"),
+		)
+
+	entry = frappe.new_doc("Stock Entry")
+	entry.purpose = "Quality Control Release"
+	entry.stock_entry_type = "Quality Control Release"
+	entry.company = lot.company
+	entry.quality_control_lot = lot.name
+	row = {
+		"item_code": lot.item_code,
+		"qty": outstanding,
+		"s_warehouse": lot.quality_warehouse,
+		"t_warehouse": rejected_warehouses[0] if len(rejected_warehouses) == 1 else None,
+	}
+	stamp_tracking_on_outward_row(
+		row,
+		item_code=lot.item_code,
+		warehouse=lot.quality_warehouse,
+		qty=outstanding,
+		company=lot.company,
+		batch_no=lot.batch_no,
+		serial_nos=_rejected_serials_awaiting_return(lot, outstanding),
+	)
+	entry.append("items", row)
+	return entry
+
+
 def trim_return_to_rejected_outstanding(return_doc):
 	"""Shape a purchase return around the quality verdicts.
 
@@ -398,9 +462,11 @@ def trim_return_to_rejected_outstanding(return_doc):
 				"item_code": row.item_code,
 				"quality_warehouse": warehouse,
 			},
-			fields=["name", "rejected_qty", "returned_qty"],
+			fields=["name", "rejected_qty", "returned_qty", "disposed_qty"],
 		)
-		outstanding = sum(max(flt(lot.rejected_qty) - flt(lot.returned_qty), 0) for lot in lots)
+		outstanding = sum(
+			max(flt(lot.rejected_qty) - flt(lot.returned_qty) - flt(lot.disposed_qty), 0) for lot in lots
+		)
 		if outstanding <= 0:
 			continue  # nothing awaits return from quarantine for this row
 
@@ -686,7 +752,7 @@ def _rejected_outstanding_lots(item_code, warehouse, batch_no=None):
 	lots = frappe.get_all(
 		"Quality Control Lot",
 		filters={"item_code": item_code, "quality_warehouse": warehouse},
-		fields=["name", "batch_no", "rejected_qty", "returned_qty"],
+		fields=["name", "batch_no", "rejected_qty", "returned_qty", "disposed_qty"],
 		order_by="creation",
 	)
 	# a return carrying a batch books only against that batch's lots — never
@@ -699,7 +765,9 @@ def _rejected_outstanding_lots(item_code, warehouse, batch_no=None):
 
 def _validate_return_capacity(row, warehouse, return_qty):
 	lots = _rejected_outstanding_lots(row.get("item_code"), warehouse, row.get("batch_no"))
-	capacity = sum(flt(lot.rejected_qty) - flt(lot.returned_qty) for lot in lots)
+	capacity = sum(
+		flt(lot.rejected_qty) - flt(lot.returned_qty) - flt(lot.disposed_qty) for lot in lots
+	)
 	if return_qty > capacity:
 		frappe.throw(
 			_(
@@ -718,7 +786,7 @@ def _allocate_return_to_lots(row, warehouse, return_qty, direction):
 			break
 
 		if direction > 0:
-			capacity = flt(lot.rejected_qty) - flt(lot.returned_qty)
+			capacity = flt(lot.rejected_qty) - flt(lot.returned_qty) - flt(lot.disposed_qty)
 		else:
 			capacity = flt(lot.returned_qty)
 		if capacity <= 0:

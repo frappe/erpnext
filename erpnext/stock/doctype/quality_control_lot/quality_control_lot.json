@@ -19,6 +19,7 @@
   "accepted_qty",
   "rejected_qty",
   "returned_qty",
+  "disposed_qty",
   "column_break_qty",
   "pending_qty",
   "status",
@@ -113,6 +114,13 @@
    "label": "Returned Qty",
    "read_only": 1,
    "depends_on": "eval:['Purchase Receipt', 'Purchase Invoice', 'Subcontracting Receipt'].includes(doc.source_document_type)"
+  },
+  {
+   "description": "Rejected quantity moved out of quarantine into a Rejected warehouse for scrap or rework.",
+   "fieldname": "disposed_qty",
+   "fieldtype": "Float",
+   "label": "Disposed Qty",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_qty",

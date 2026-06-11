@@ -141,6 +141,17 @@ frappe.ui.form.on("Stock Entry", {
 		});
 
 		frm.set_query("t_warehouse", "items", function () {
+			// a Quality Control Release may also send rejected stock to a
+			// Rejected warehouse; everything else avoids both special types
+			if (frm.doc.purpose === "Quality Control Release") {
+				return {
+					filters: {
+						warehouse_type: ["!=", "Quality"],
+						is_group: 0,
+						company: frm.doc.company,
+					},
+				};
+			}
 			return erpnext.queries.warehouse(frm.doc);
 		});
 
