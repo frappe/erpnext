@@ -812,6 +812,11 @@ def update_lots_for_purchase_return(doc, method=None):
 	) or not doc.get("is_return"):
 		return
 
+	# a return gives back the receipt's own stock: book against the lots that
+	# receipt minted, never against another lot of the same item that happens
+	# to share the Quality Control warehouse
+	source = (doc.doctype, doc.return_against) if doc.get("return_against") else None
+
 	for row, role, warehouse in movements_of(doc):
 		if role != OUTBOUND or not is_quality_warehouse(warehouse):
 			continue
@@ -823,17 +828,20 @@ def update_lots_for_purchase_return(doc, method=None):
 		if method == "before_submit":
 			# capacity is checked before anything persists, so a refused return
 			# leaves no half-submitted state behind
-			_validate_return_capacity(row, warehouse, return_qty)
+			_validate_return_capacity(row, warehouse, return_qty, source)
 		elif method == "on_cancel":
-			_allocate_return_to_lots(row, warehouse, return_qty, -1)
+			_allocate_return_to_lots(row, warehouse, return_qty, -1, source)
 		else:
-			_allocate_return_to_lots(row, warehouse, return_qty, +1)
+			_allocate_return_to_lots(row, warehouse, return_qty, +1, source)
 
 
-def _rejected_outstanding_lots(item_code, warehouse, batch_no=None):
+def _rejected_outstanding_lots(item_code, warehouse, batch_no=None, source=None):
+	filters = {"item_code": item_code, "quality_warehouse": warehouse}
+	if source:
+		filters["source_document_type"], filters["source_document"] = source
 	lots = frappe.get_all(
 		"Quality Control Lot",
-		filters={"item_code": item_code, "quality_warehouse": warehouse},
+		filters=filters,
 		fields=["name", "batch_no", "rejected_qty", "returned_qty", "disposed_qty"],
 		order_by="creation",
 	)
@@ -845,8 +853,8 @@ def _rejected_outstanding_lots(item_code, warehouse, batch_no=None):
 	return lots
 
 
-def _validate_return_capacity(row, warehouse, return_qty):
-	lots = _rejected_outstanding_lots(row.get("item_code"), warehouse, row.get("batch_no"))
+def _validate_return_capacity(row, warehouse, return_qty, source=None):
+	lots = _rejected_outstanding_lots(row.get("item_code"), warehouse, row.get("batch_no"), source)
 	capacity = sum(
 		flt(lot.rejected_qty) - flt(lot.returned_qty) - flt(lot.disposed_qty) for lot in lots
 	)
@@ -861,9 +869,9 @@ def _validate_return_capacity(row, warehouse, return_qty):
 		)
 
 
-def _allocate_return_to_lots(row, warehouse, return_qty, direction):
+def _allocate_return_to_lots(row, warehouse, return_qty, direction, source=None):
 	remaining = return_qty
-	for lot in _rejected_outstanding_lots(row.get("item_code"), warehouse, row.get("batch_no")):
+	for lot in _rejected_outstanding_lots(row.get("item_code"), warehouse, row.get("batch_no"), source):
 		if remaining <= 0:
 			break
 

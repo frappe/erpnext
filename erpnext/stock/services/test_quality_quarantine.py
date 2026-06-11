@@ -2095,6 +2095,42 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "returned_qty"), 4)
 		self.assertEqual(get_qty(item, qc), 0)
 
+	def test_return_books_against_its_own_receipts_lot(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		qc = make_qc_warehouse("_Test QC Own Lot WH")
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Purchase Receipt",
+				warehouse_role=None,
+				quality_control_mode="Quarantine",
+				applicable_warehouse=qc,
+			),
+		)
+		item.save()
+
+		def receive_and_reject():
+			receipt = make_purchase_receipt(item_code=item.name, qty=2, warehouse=qc, rate=100)
+			lot = quality_control_lots_for(receipt.name, "Purchase Receipt")[0].name
+			submit_inspection_for_lot(lot, status="Rejected")
+			return receipt, lot
+
+		first_receipt, first_lot = receive_and_reject()
+		second_receipt, second_lot = receive_and_reject()
+
+		# the return is against the second receipt: it books against that
+		# receipt's lot, not the oldest lot of the same item in the warehouse
+		return_doc = make_return_doc("Purchase Receipt", second_receipt.name)
+		return_doc.insert()
+		return_doc.submit()
+
+		self.assertEqual(frappe.db.get_value("Quality Control Lot", first_lot, "returned_qty"), 0)
+		self.assertEqual(frappe.db.get_value("Quality Control Lot", second_lot, "returned_qty"), 2)
+
 	def test_stock_reconciliation_blocked_on_quality_warehouse(self):
 		qc = make_qc_warehouse()
 		item = make_quarantine_item(qc)
