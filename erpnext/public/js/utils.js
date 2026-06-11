@@ -1495,19 +1495,8 @@ erpnext.utils.add_quality_control_lot_buttons = function (frm) {
 					},
 					__("Create")
 				);
-			} else {
-				frm.add_custom_button(
-					__("Quality Control Lots"),
-					() => {
-						frappe.route_options = {
-							source_document_type: frm.doc.doctype,
-							source_document: frm.doc.name,
-						};
-						frappe.set_route("List", "Quality Control Lot");
-					},
-					__("View")
-				);
 			}
+			// several open lots: the connections dashboard lists them
 		});
 };
 
@@ -1519,7 +1508,9 @@ erpnext.utils.add_apply_inspection_outcome_button = function (frm) {
 	if (frm.doc.docstatus !== 0) return;
 	if (!(frm.doc.items || []).some((row) => row.quality_inspection)) return;
 
-	frm.add_custom_button(__("Apply Inspection Outcome"), () => {
+	frm.add_custom_button(
+		__("Inspection Outcome"),
+		() => {
 		frappe.call({
 			method: "erpnext.stock.services.quality_trigger_resolution.get_inspection_outcomes",
 			args: { doc: frm.doc },
@@ -1552,9 +1543,11 @@ erpnext.utils.add_apply_inspection_outcome_button = function (frm) {
 					message: __("Inspection outcome applied to {0} row(s).", [outcomes.length]),
 					indicator: "green",
 				});
-			},
-		});
-	});
+				},
+			});
+		},
+		__("Apply")
+	);
 };
 
 erpnext.utils.get_quality_indicator = function (doc) {

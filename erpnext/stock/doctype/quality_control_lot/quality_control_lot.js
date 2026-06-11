@@ -101,7 +101,9 @@ frappe.ui.form.on("Quality Control Lot", {
 		// anything remains undecided
 		const undecided = flt(frm.doc.received_qty) - flt(frm.doc.decided_qty);
 		if (!frm.is_new() && undecided > 0) {
-			frm.add_custom_button(__("Create Quality Inspection"), () => {
+			frm.add_custom_button(
+				__("Quality Inspection"),
+				() => {
 				frappe.new_doc("Quality Inspection", {
 					inspection_type: "Incoming",
 					reference_type: "Quality Control Lot",
@@ -114,20 +116,18 @@ frappe.ui.form.on("Quality Control Lot", {
 							? 0
 							: flt(frm.doc.received_qty) - flt(frm.doc.decided_qty),
 					quality_inspection_template: frm.doc.inspection_template,
-				});
-			});
-		}
-
-		if (frm.doc.quality_inspection) {
-			frm.add_custom_button(__("Open Quality Inspection"), () => {
-				frappe.set_route("Form", "Quality Inspection", frm.doc.quality_inspection);
-			});
+					});
+				},
+				__("Create")
+			);
 		}
 
 		const awaiting_release =
 			flt(frm.doc.decided_qty) - flt(frm.doc.rejected_qty) - flt(frm.doc.accepted_qty);
 		if (awaiting_release > 0) {
-			frm.add_custom_button(__("Create Quality Control Release"), () => {
+			frm.add_custom_button(
+				__("Quality Control Release"),
+				() => {
 				frappe.prompt(
 					{
 						label: __("Release Warehouse"),
@@ -156,8 +156,10 @@ frappe.ui.form.on("Quality Control Lot", {
 						});
 					},
 					__("Release Accepted Stock")
-				);
-			});
+					);
+				},
+				__("Create")
+			);
 		}
 
 		const rejected_outstanding =
@@ -168,9 +170,28 @@ frappe.ui.form.on("Quality Control Lot", {
 					frm.doc.source_document_type
 				)
 			) {
-				frm.add_custom_button(__("Create Purchase Return"), () => {
+				frm.add_custom_button(
+					__("Purchase Return"),
+					() => {
+						frappe.call({
+							method: "erpnext.stock.services.quality_quarantine.make_purchase_return_for_lot",
+							args: { lot_name: frm.doc.name },
+							freeze: true,
+							callback: (r) => {
+								const doc = frappe.model.sync(r.message)[0];
+								frappe.set_route("Form", doc.doctype, doc.name);
+							},
+						});
+					},
+					__("Create")
+				);
+			}
+
+			frm.add_custom_button(
+				__("Rejected Stock Transfer"),
+				() => {
 					frappe.call({
-						method: "erpnext.stock.services.quality_quarantine.make_purchase_return_for_lot",
+						method: "erpnext.stock.services.quality_quarantine.make_rejected_stock_transfer_for_lot",
 						args: { lot_name: frm.doc.name },
 						freeze: true,
 						callback: (r) => {
@@ -178,20 +199,11 @@ frappe.ui.form.on("Quality Control Lot", {
 							frappe.set_route("Form", doc.doctype, doc.name);
 						},
 					});
-				});
-			}
-
-			frm.add_custom_button(__("Move Rejected Stock Out"), () => {
-				frappe.call({
-					method: "erpnext.stock.services.quality_quarantine.make_rejected_stock_transfer_for_lot",
-					args: { lot_name: frm.doc.name },
-					freeze: true,
-					callback: (r) => {
-						const doc = frappe.model.sync(r.message)[0];
-						frappe.set_route("Form", doc.doctype, doc.name);
-					},
-				});
-			});
+				},
+				__("Create")
+			);
 		}
+
+		frm.page.set_inner_btn_group_as_primary(__("Create"));
 	},
 });
