@@ -52,14 +52,13 @@
    "fieldtype": "Data",
    "label": "Acceptance Criteria Value",
    "oldfieldname": "value",
-   "oldfieldtype": "Data"
+   "oldfieldtype": "Data",
+   "in_list_view": 1
   },
   {
-   "columns": 2,
    "depends_on": "eval:doc.numeric",
    "fieldname": "reading_1",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Reading 1",
    "oldfieldname": "reading_1",
    "oldfieldtype": "Data"
@@ -213,13 +212,14 @@
    "description": "Set the status manually.",
    "fieldname": "manual_inspection",
    "fieldtype": "Check",
-   "label": "Manual Inspection"
+   "label": "Manual Inspection",
+   "in_list_view": 1,
+   "columns": 1
   },
   {
-   "default": "1",
+   "default": "0",
    "fieldname": "numeric",
    "fieldtype": "Check",
-   "in_list_view": 1,
    "label": "Numeric"
   },
   {
