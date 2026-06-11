@@ -243,7 +243,7 @@ class UnitReadingsMixin:
 		if missing_units:
 			frappe.throw(
 				_("Unit(s) {0} have no readings. Every unit must be inspected before submission.").format(
-					frappe.bold(", ".join(map(str, missing_units)))
+					frappe.bold(", ".join(str(unit) for unit in missing_units))
 				),
 				title=_("Units Not Inspected"),
 			)
@@ -277,7 +277,7 @@ class UnitReadingsMixin:
 			frappe.throw(
 				_(
 					"Unit(s) {0} have no Serial No — every unit of a serialized item must be identified."
-				).format(frappe.bold(", ".join(map(str, units_without_serial)))),
+				).format(frappe.bold(", ".join(str(unit) for unit in units_without_serial))),
 				title=_("Unit Serials Missing"),
 			)
 
