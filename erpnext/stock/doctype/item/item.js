@@ -1761,7 +1761,12 @@ function enforce_trigger_warehouse_role(cdt, cdn) {
 				{
 					"Material Receipt": "Inbound",
 					"Material Issue": "Outbound",
+					"Material Consumption for Manufacture": "Outbound",
 					"Send to Subcontractor": "Outbound",
+					"Receive from Customer": "Inbound",
+					"Subcontracting Return": "Inbound",
+					"Subcontracting Delivery": "Outbound",
+					"Return Raw Material to Customer": "Outbound",
 				}[r.message?.purpose]
 			);
 		});

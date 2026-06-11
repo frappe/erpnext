@@ -21,7 +21,15 @@ _BOTH = {"Inbound", "Outbound"}
 _STOCK_ENTRY_ROLES = {
 	"Material Receipt": {"Inbound"},
 	"Material Issue": {"Outbound"},
+	"Material Consumption for Manufacture": {"Outbound"},
 	"Send to Subcontractor": {"Outbound"},
+	# subcontracting inward flow: the customer's material arrives with a
+	# receipt or a return of what we delivered; deliveries and raw material
+	# going back to the customer only ever leave
+	"Receive from Customer": {"Inbound"},
+	"Subcontracting Return": {"Inbound"},
+	"Subcontracting Delivery": {"Outbound"},
+	"Return Raw Material to Customer": {"Outbound"},
 	"Material Transfer": set(_BOTH),
 	"Material Transfer for Manufacture": set(_BOTH),
 	"Manufacture": set(_BOTH),

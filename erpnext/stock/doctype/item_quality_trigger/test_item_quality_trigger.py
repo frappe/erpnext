@@ -56,6 +56,17 @@ class TestItemQualityTrigger(ERPNextTestSuite):
 		self.assertEqual(allowed_warehouse_roles("Stock Entry", "Material Receipt"), {"Inbound"})
 		self.assertEqual(allowed_warehouse_roles("Stock Entry", "Material Issue"), {"Outbound"})
 		self.assertEqual(allowed_warehouse_roles("Stock Entry", "Material Transfer"), {"Inbound", "Outbound"})
+		self.assertEqual(
+			allowed_warehouse_roles("Stock Entry", "Material Consumption for Manufacture"), {"Outbound"}
+		)
+		# subcontracting inward flow: receipts and returns of our delivery come
+		# in; deliveries and raw material going back to the customer only leave
+		self.assertEqual(allowed_warehouse_roles("Stock Entry", "Receive from Customer"), {"Inbound"})
+		self.assertEqual(allowed_warehouse_roles("Stock Entry", "Subcontracting Return"), {"Inbound"})
+		self.assertEqual(allowed_warehouse_roles("Stock Entry", "Subcontracting Delivery"), {"Outbound"})
+		self.assertEqual(
+			allowed_warehouse_roles("Stock Entry", "Return Raw Material to Customer"), {"Outbound"}
+		)
 
 	def test_single_direction_role_is_autoset(self):
 		item = make_item(properties={"is_stock_item": 1})
