@@ -16,10 +16,12 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestItemVariant(ERPNextTestSuite):
 	def test_tables_in_template_copied_to_variant(self):
-		fields = [{"field_name": "quality_inspection_template"}]
+		fields = [{"field_name": "quality_triggers"}]
 		set_item_variant_settings(fields)
 		variant = make_item_variant()
-		self.assertEqual(variant.get("quality_inspection_template"), "_Test QC Template")
+		triggers = variant.get("quality_triggers")
+		self.assertEqual(len(triggers), 1)
+		self.assertEqual(triggers[0].inspection_template, "_Test QC Template")
 
 	def test_generate_keyed_value_combinations_ignores_empty_attributes(self):
 		combinations = generate_keyed_value_combinations(
@@ -41,7 +43,16 @@ def create_variant_with_tables(item, args):
 
 	qc_name = make_quality_inspection_template()
 	template = frappe.get_doc("Item", item)
-	template.quality_inspection_template = qc_name
+	template.set("quality_triggers", [])
+	template.append(
+		"quality_triggers",
+		{
+			"document_type": "Purchase Receipt",
+			"quality_control_mode": "Warn",
+			"inspection_basis": "Sample",
+			"inspection_template": qc_name,
+		},
+	)
 	template.save()
 
 	variant = frappe.new_doc("Item")

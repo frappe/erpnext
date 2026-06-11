@@ -1155,6 +1155,7 @@ class TestStockEntry(ERPNextTestSuite):
 						"reference_type": "Stock Entry",
 						"inspection_type": "In Process",
 						"status": "Accepted",
+						"manual_inspection": 1,
 						"sample_size": 1,
 						"item_code": row.item_code,
 					}
@@ -1176,8 +1177,22 @@ class TestStockEntry(ERPNextTestSuite):
 		if not frappe.db.exists("Item", item_code):
 			create_item(item_code)
 
+		# a Block trigger demands a decided inspection before the inbound row submits
+		item = frappe.get_doc("Item", item_code)
+		item.set("quality_triggers", [])
+		item.append(
+			"quality_triggers",
+			{
+				"document_type": "Stock Entry",
+				"stock_entry_type": "Repack",
+				"warehouse_role": "Inbound",
+				"quality_control_mode": "Block",
+				"inspection_basis": "Sample",
+			},
+		)
+		item.save()
+
 		repack = frappe.copy_doc(self.globalTestRecords["Stock Entry"][3])
-		repack.inspection_required = 1
 		for d in repack.items:
 			if not d.s_warehouse and d.t_warehouse:
 				d.item_code = item_code
