@@ -96,6 +96,7 @@ def get_batch_summary(lot_name: str):
 	from erpnext.stock.doctype.batch.batch import get_batch_qty
 
 	lot = frappe.get_doc("Quality Control Lot", lot_name)
+	lot.check_permission("read")
 	if not lot.batch_no:
 		return None
 
@@ -115,7 +116,7 @@ def get_serial_numbers(lot_name: str):
 
 	Membership comes from the lot's source document rows (the serials that
 	physically entered quarantine with this lot), the verdict from the deciding
-	inspection's reading bundle, and the state from where each serial sits now —
+	inspections' per-unit verdicts, and the state from where each serial sits now —
 	computed fresh, since serials leave the lot piecemeal through releases,
 	returns and dispositions.
 	"""
@@ -123,6 +124,7 @@ def get_serial_numbers(lot_name: str):
 	from erpnext.stock.services.quality_warehouse import is_rejected_warehouse
 
 	lot = frappe.get_doc("Quality Control Lot", lot_name)
+	lot.check_permission("read")
 	if not frappe.get_cached_value("Item", lot.item_code, "has_serial_no"):
 		return []
 	if not lot.source_document_type or not lot.source_document:

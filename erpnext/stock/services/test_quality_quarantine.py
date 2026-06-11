@@ -1191,7 +1191,6 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertEqual(blank.decided_quantity, 5)
 
 	def test_lot_decided_in_parts(self):
-		from erpnext.stock.services.quality_release import make_release_for_lot
 
 		qc = make_qc_warehouse("_Test QC Tranche WH")
 		store = make_warehouse("_Test QC Tranche Store", quality_warehouse=qc)

@@ -33,10 +33,9 @@ def get_release_warehouse(quality_warehouse):
 def process_inspection_result(doc, method=None):
 	"""React to a submitted Quality Inspection that decides a Quality Control Lot.
 
-	Sample basis: the inspection's overall status accepts or rejects the whole
-	pending quantity. Each Quantity basis: the reading bundle's per-unit counts
-	split it — accepted units are released, rejected units stay quarantined for
-	the purchase return, and uninspected units remain pending.
+	The verdict books its increment on the lot — per-unit counts for an Each
+	Quantity inspection, the decided quantity otherwise — and the accepted part
+	auto-releases when a unique store points at the Quality Control warehouse.
 	"""
 	if doc.reference_type != "Quality Control Lot" or not doc.reference_name:
 		return
@@ -90,7 +89,7 @@ def process_inspection_result(doc, method=None):
 	accepted_serials = None
 	if doc.get("unit_readings"):
 		accepted_serials = doc.get_unit_serials("Accepted") or None
-	elif _union_unit_serials(lot, "Rejected") or _union_unit_serials(lot, "Accepted"):
+	elif _union_unit_serials(lot, "Rejected") | _union_unit_serials(lot, "Accepted"):
 		# a verdict-less remainder after per-unit tranches: release exactly the
 		# serials no verdict rejected and no other verdict claimed
 		accepted_serials = _accepted_serials_awaiting_release(lot)
@@ -229,7 +228,9 @@ def make_release_for_lot(lot_name: str, release_warehouse: str | None = None):
 	in quarantine, the lot's batch and exactly the accepted serials; the caller
 	(or the form) picks the target warehouse.
 	"""
+	frappe.has_permission("Stock Entry", "create", throw=True)
 	lot = frappe.get_doc("Quality Control Lot", lot_name)
+	lot.check_permission("read")
 
 	if (
 		not lot.quality_inspection
@@ -294,7 +295,9 @@ def make_rejected_stock_transfer_for_lot(lot_name: str):
 	rejected serials; the target is resolved when the company has a single
 	Rejected warehouse, otherwise the user picks it.
 	"""
+	frappe.has_permission("Stock Entry", "create", throw=True)
 	lot = frappe.get_doc("Quality Control Lot", lot_name)
+	lot.check_permission("read")
 
 	outstanding = flt(lot.rejected_qty) - flt(lot.returned_qty) - flt(lot.disposed_qty)
 	if outstanding <= 0:

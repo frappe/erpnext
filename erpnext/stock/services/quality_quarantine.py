@@ -14,7 +14,6 @@ from frappe.utils import flt
 
 from erpnext.stock.services.quality_trigger_resolution import (
 	INBOUND,
-	OUTBOUND,
 	movements_of,
 	resolve_inspection_points,
 )

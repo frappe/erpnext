@@ -351,7 +351,7 @@ def get_inspection_outcomes(doc: dict | str):
 	the inspection verdict does not move anything by itself — the row's
 	accepted and rejected quantities do. This reads each row's submitted
 	inspection and proposes the matching split: rejected count from the
-	reading bundle (or the whole row on an outright rejection), rejected
+	unit readings (or the whole row on an outright rejection), rejected
 	serials into the rejected serial field, and a Rejected warehouse when the
 	company has exactly one. Rows whose current split already matches are
 	skipped; everything returned stays editable on the form.
@@ -366,6 +366,7 @@ def get_inspection_outcomes(doc: dict | str):
 		doc = json.loads(doc)
 	doc = frappe._dict(doc)
 
+	frappe.has_permission(doc.doctype, "write", throw=True)
 	if doc.doctype not in ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"):
 		return []
 	if doc.doctype == "Purchase Invoice" and not cint(doc.update_stock):

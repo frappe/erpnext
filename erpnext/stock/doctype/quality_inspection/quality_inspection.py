@@ -9,7 +9,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import cint, flt, get_link_to_form
+from frappe.utils import cint, flt, get_link_to_form, get_number_format_info
 from frappe.utils.number_format import NUMBER_FORMAT_MAP, NumberFormat
 
 from erpnext.stock.doctype.quality_inspection.unit_readings import UnitReadingsMixin
@@ -252,7 +252,7 @@ class QualityInspection(UnitReadingsMixin, Document):
 	def validate_serial_nos(self):
 		"""The recorded serials must be real and the item's; they set the sample size.
 
-		Each Quantity inspections record serials per unit in the reading bundle,
+		Each Quantity inspections record serials per unit in the unit readings,
 		so the document-level field is cleared there.
 		"""
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -410,7 +410,7 @@ class QualityInspection(UnitReadingsMixin, Document):
 		Quality Control warehouse"); transaction-referenced ones check against the
 		referenced row when it already carries serials — the document-side gate at
 		its submission is the authority there either way. Covers the sampled
-		Serial Nos and the reading bundle's per-unit serials alike.
+		Serial Nos and the per-unit serials alike.
 		"""
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 		from erpnext.stock.services.quality_trigger_resolution import get_row_serial_nos
@@ -510,7 +510,7 @@ class QualityInspection(UnitReadingsMixin, Document):
 
 		Serialized items record the sampled serials, batched items the batch.
 		Each Quantity / bundle-decided inspections are exempt: their identity
-		lives per unit in the reading bundle and on the Quality Control Lot.
+		lives per unit in the unit readings and on the Quality Control Lot.
 		"""
 		if not self.item_code:
 			return

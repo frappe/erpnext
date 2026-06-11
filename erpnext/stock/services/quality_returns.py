@@ -126,6 +126,7 @@ def make_purchase_return_for_lot(lot_name: str):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 	lot = frappe.get_doc("Quality Control Lot", lot_name)
+	lot.check_permission("read")
 
 	if lot.source_document_type not in ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"):
 		frappe.throw(
@@ -208,7 +209,7 @@ def trim_return_to_rejected_outstanding(return_doc):
 		lots = frappe.get_all(
 			"Quality Control Lot",
 			filters={
-				"source_document_type": return_doc.get("return_against") and return_doc.doctype,
+				"source_document_type": return_doc.doctype,
 				"source_document": return_doc.get("return_against"),
 				"item_code": row.item_code,
 				"quality_warehouse": warehouse,
@@ -263,9 +264,9 @@ def _prefill_rejections_from_row_inspection(return_doc, row):
 	"""Best-effort prefill for Block-flow returns.
 
 	Without quarantine there is no lot ledger or lock — the rejected units sit
-	saleable in the store — so this only proposes a default: the inspection
-	bundle's rejected count minus what prior returns already took, with the
-	rejected serials still present in the warehouse. The row stays editable.
+	saleable in the store — so this only proposes a default: the inspection's
+	rejected unit count minus what prior returns already took, with the rejected
+	serials still present in the warehouse. The row stays editable.
 	"""
 	source = getattr(return_doc, "_quality_source_doc", None)
 	if source is None:
