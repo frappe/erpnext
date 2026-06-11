@@ -45,6 +45,11 @@ def trigger_row(**overrides):
 		"inspection_basis": "Sample",
 	}
 	row.update(overrides)
+	if row.get("document_type") == "Stock Entry" and not row.get("stock_entry_type"):
+		# mandatory per row; pick the type matching the requested direction
+		row["stock_entry_type"] = (
+			"Material Issue" if row.get("warehouse_role") == "Outbound" else "Material Receipt"
+		)
 	return row
 
 

@@ -196,6 +196,18 @@ def _validate_trigger_row(row):
 	if row.get("party_transaction_type") and row.document_type not in PARTY_DOCTYPES:
 		row.party_transaction_type = None
 
+	# a blanket Stock Entry trigger is ambiguous about direction and intent:
+	# one row per Stock Entry Type, always
+	if (
+		row.document_type == "Stock Entry"
+		and (row.get("trigger_type") or "") != "Periodic Re-test"
+		and not row.stock_entry_type
+	):
+		frappe.throw(
+			_("Row #{0}: Select a Stock Entry Type for the Stock Entry trigger.").format(row.idx),
+			title=_("Stock Entry Type Missing"),
+		)
+
 	# Warehouse role must respect the direction implied by the document / Stock Entry Type.
 	stock_entry_purpose = (
 		frappe.db.get_value("Stock Entry Type", row.stock_entry_type, "purpose")

@@ -68,7 +68,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Stock Entry Type",
-   "options": "Stock Entry Type"
+   "options": "Stock Entry Type",
+   "mandatory_depends_on": "eval:doc.trigger_type != 'Periodic Re-test' && doc.document_type == 'Stock Entry'"
   },
   {
    "default": "External",
