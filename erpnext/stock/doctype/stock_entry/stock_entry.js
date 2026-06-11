@@ -5,6 +5,39 @@ frappe.provide("erpnext.accounts.dimensions");
 
 erpnext.landed_cost_taxes_and_charges.setup_triggers("Stock Entry");
 
+function set_quarantine_warehouse_queries(frm) {
+	frm.set_query("from_warehouse", () => source_warehouse_query(frm));
+
+	frm.set_query("s_warehouse", "items", function () {
+		// a Quality Control Release drains quarantine; everything else avoids it
+		if (frm.doc.purpose === "Quality Control Release") {
+			return {
+				filters: {
+					warehouse_type: "Quality",
+					is_group: 0,
+					company: frm.doc.company,
+				},
+			};
+		}
+		return source_warehouse_query(frm);
+	});
+
+	frm.set_query("t_warehouse", "items", function () {
+		// a Quality Control Release may also send rejected stock to a
+		// Rejected warehouse; everything else avoids both special types
+		if (frm.doc.purpose === "Quality Control Release") {
+			return {
+				filters: {
+					warehouse_type: ["!=", "Quality"],
+					is_group: 0,
+					company: frm.doc.company,
+				},
+			};
+		}
+		return erpnext.queries.warehouse(frm.doc);
+	});
+}
+
 function source_warehouse_query(frm) {
 	const query = erpnext.queries.warehouse(frm.doc);
 	if (frm.__sample_retention_warehouse) {
@@ -77,7 +110,7 @@ frappe.ui.form.on("Stock Entry", {
 			frm.__sample_retention_warehouse = r.sample_retention_warehouse;
 		});
 
-		frm.set_query("from_warehouse", () => source_warehouse_query(frm));
+		set_quarantine_warehouse_queries(frm);
 
 		frm.set_query("batch_no", "items", function (doc, cdt, cdn) {
 			let item = locals[cdt][cdn];
@@ -124,35 +157,6 @@ frappe.ui.form.on("Stock Entry", {
 					filters: filters,
 				};
 			}
-		});
-
-		frm.set_query("s_warehouse", "items", function () {
-			// a Quality Control Release drains quarantine; everything else avoids it
-			if (frm.doc.purpose === "Quality Control Release") {
-				return {
-					filters: {
-						warehouse_type: "Quality",
-						is_group: 0,
-						company: frm.doc.company,
-					},
-				};
-			}
-			return source_warehouse_query(frm);
-		});
-
-		frm.set_query("t_warehouse", "items", function () {
-			// a Quality Control Release may also send rejected stock to a
-			// Rejected warehouse; everything else avoids both special types
-			if (frm.doc.purpose === "Quality Control Release") {
-				return {
-					filters: {
-						warehouse_type: ["!=", "Quality"],
-						is_group: 0,
-						company: frm.doc.company,
-					},
-				};
-			}
-			return erpnext.queries.warehouse(frm.doc);
 		});
 
 		frm.set_query("serial_and_batch_bundle", "items", (doc, cdt, cdn) => {
@@ -1216,6 +1220,13 @@ frappe.ui.form.on("Landed Cost Taxes and Charges", {
 });
 
 erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockController {
+	setup_warehouse_query() {
+		super.setup_warehouse_query();
+		// the blanket warehouse query covers every Warehouse link on the form,
+		// clobbering the quarantine-aware pickers registered in setup
+		set_quarantine_warehouse_queries(this.frm);
+	}
+
 	setup() {
 		var me = this;
 

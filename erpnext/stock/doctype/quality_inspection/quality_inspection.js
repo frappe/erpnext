@@ -6,6 +6,13 @@ cur_frm.cscript.refresh = cur_frm.cscript.inspection_type;
 frappe.ui.form.on("Quality Inspection", {
 	onload(frm) {
 		frm.trigger("set_default_company");
+
+		// the blank option exists only so the server can tell "not chosen yet"
+		// from an inspector's choice; the form never offers it
+		frm.set_df_property("inspection_basis", "options", ["Sample", "Each Quantity"]);
+		if (frm.is_new() && !frm.doc.inspection_basis) {
+			frm.set_value("inspection_basis", "Sample");
+		}
 	},
 
 	set_default_company(frm) {
