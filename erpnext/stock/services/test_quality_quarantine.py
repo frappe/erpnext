@@ -2133,6 +2133,33 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Quality Control Lot", first_lot, "returned_qty"), 0)
 		self.assertEqual(frappe.db.get_value("Quality Control Lot", second_lot, "returned_qty"), 2)
 
+	def test_inspected_item_must_be_on_the_reference(self):
+		# the form's picker only offers the reference's items; the server is
+		# the authority — an unrelated item cannot decide a lot or a document
+		qc = make_qc_warehouse("_Test QC Wrong Item WH")
+		item = make_quarantine_item(qc)
+		stranger = make_item(properties={"is_stock_item": 1}).name
+
+		se = make_stock_entry(item_code=item, qty=1, to_warehouse=qc, purpose="Material Receipt", rate=100)
+		lot = quality_control_lots_for(se.name)[0].name
+
+		def build(reference_type, reference_name):
+			return frappe.get_doc(
+				{
+					"doctype": "Quality Inspection",
+					"inspection_type": "Incoming",
+					"reference_type": reference_type,
+					"reference_name": reference_name,
+					"item_code": stranger,
+					"sample_size": 1,
+					"report_date": nowdate(),
+					"inspected_by": frappe.session.user,
+				}
+			)
+
+		self.assertRaises(frappe.ValidationError, build("Quality Control Lot", lot).insert)
+		self.assertRaises(frappe.ValidationError, build("Stock Entry", se.name).insert)
+
 	def test_stock_reconciliation_blocked_on_quality_warehouse(self):
 		qc = make_qc_warehouse()
 		item = make_quarantine_item(qc)

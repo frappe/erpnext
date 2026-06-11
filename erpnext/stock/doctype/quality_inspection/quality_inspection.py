@@ -106,6 +106,7 @@ class QualityInspection(Document):
 			self.set_status_from_reading_bundle()
 
 		self.validate_inspection_required()
+		self.validate_item_belongs_to_reference()
 		self.set_child_row_reference()
 		self.validate_serial_nos()
 		self.set_company()
@@ -116,6 +117,57 @@ class QualityInspection(Document):
 			company = frappe.get_cached_value(self.reference_type, self.reference_name, "company")
 			if company != self.company:
 				self.company = company
+
+	def validate_item_belongs_to_reference(self):
+		"""The inspected item must be on the referenced document.
+
+		The form's item picker only offers the reference's items; this is the
+		server-side authority behind it — an inspection of an unrelated item
+		would still decide the reference (a wrong-item verdict could book a
+		lot's quantities or gate a document row it never looked at).
+		"""
+		if not (self.reference_type and self.reference_name and self.item_code):
+			return
+
+		if self.reference_type == "Quality Control Lot":
+			lot_item = frappe.db.get_value("Quality Control Lot", self.reference_name, "item_code")
+			if lot_item and lot_item != self.item_code:
+				frappe.throw(
+					_("Quality Control Lot {0} holds item {1}, not {2}.").format(
+						frappe.bold(self.reference_name), frappe.bold(lot_item), frappe.bold(self.item_code)
+					),
+					title=_("Item Not On Reference"),
+				)
+			return
+
+		if self.reference_type == "Job Card":
+			production_item = frappe.db.get_value("Job Card", self.reference_name, "production_item")
+			if production_item and production_item != self.item_code:
+				frappe.throw(
+					_("Job Card {0} produces item {1}, not {2}.").format(
+						frappe.bold(self.reference_name),
+						frappe.bold(production_item),
+						frappe.bold(self.item_code),
+					),
+					title=_("Item Not On Reference"),
+				)
+			return
+
+		child_doctype = (
+			"Stock Entry Detail" if self.reference_type == "Stock Entry" else self.reference_type + " Item"
+		)
+		if not frappe.db.exists(
+			child_doctype,
+			{"parent": self.reference_name, "item_code": self.item_code, "docstatus": ("<", 2)},
+		):
+			frappe.throw(
+				_("Item {0} is not on {1} {2}.").format(
+					frappe.bold(self.item_code),
+					_(self.reference_type),
+					frappe.bold(self.reference_name),
+				),
+				title=_("Item Not On Reference"),
+			)
 
 	def set_child_row_reference(self):
 		if self.child_row_reference:
