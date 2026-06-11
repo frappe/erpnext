@@ -272,3 +272,33 @@ function update_item_group_vf_labels(frm, cdn, defaults) {
 		$label.text(source ? `${base} (${__(source)})` : base);
 	});
 }
+
+frappe.ui.form.on("Item Quality Trigger", {
+	document_type(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		let role = null;
+		if (["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"].includes(row.document_type)) {
+			role = "Inbound"; // the only valid direction
+		} else if (["Delivery Note", "Sales Invoice"].includes(row.document_type)) {
+			role = "Outbound"; // the default; Inbound inspects the customer return
+		}
+		frappe.model.set_value(cdt, cdn, "warehouse_role", role);
+	},
+
+	stock_entry_type(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		if (row.document_type !== "Stock Entry" || !row.stock_entry_type) {
+			return;
+		}
+		frappe.db.get_value("Stock Entry Type", row.stock_entry_type, "purpose").then((r) => {
+			const role = {
+				"Material Receipt": "Inbound",
+				"Material Issue": "Outbound",
+				"Send to Subcontractor": "Outbound",
+			}[r.message?.purpose];
+			if (role) {
+				frappe.model.set_value(cdt, cdn, "warehouse_role", role);
+			}
+		});
+	},
+});
