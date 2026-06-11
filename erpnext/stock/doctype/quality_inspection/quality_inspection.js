@@ -170,10 +170,19 @@ frappe.ui.form.on("Quality Inspection", {
 			frappe.db
 				.get_value("Quality Control Lot", frm.doc.reference_name, [
 					"inspection_basis",
+					"item_code",
+					"batch_no",
 					"received_qty",
 					"decided_qty",
 				])
 				.then((r) => {
+					// a lot quarantines exactly one item: fill it in, nothing to pick
+					if (r.message?.item_code && !frm.doc.item_code) {
+						frm.set_value("item_code", r.message.item_code);
+					}
+					if (r.message?.batch_no && !frm.doc.batch_no) {
+						frm.set_value("batch_no", r.message.batch_no);
+					}
 					frm.set_value("inspection_basis", r.message?.inspection_basis || "Sample");
 					frm.trigger("prefill_decided_quantity_from_lot");
 				});
