@@ -1708,7 +1708,11 @@ class TestQualityQuarantine(ERPNextTestSuite):
 				"doctype": "Quality Inspection Template",
 				"quality_inspection_template_name": "_Test Unit Serial Template",
 				"item_quality_inspection_parameter": [
-					{"specification": ensure_parameter("_Test Unit Serial Parameter"), "value": "Yes"}
+					{
+						"specification": ensure_parameter("_Test Unit Serial Parameter"),
+						"numeric": 0,
+						"value": "Yes",
+					}
 				],
 			}
 		).insert(ignore_permissions=True, ignore_if_duplicate=True)
@@ -1860,8 +1864,9 @@ class TestQualityQuarantine(ERPNextTestSuite):
 	def test_inspection_outcome_proposes_the_document_split(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+		from erpnext.stock.doctype.quality_inspection.quality_inspection import make_reading_bundle
 		from erpnext.stock.doctype.quality_inspection_reading_bundle.test_quality_inspection_reading_bundle import (
-			make_bundle,
+			ensure_parameter,
 		)
 		from erpnext.stock.services.quality_trigger_resolution import get_inspection_outcomes
 
@@ -1877,18 +1882,22 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		)
 		item.save()
 
-		serials = []
-		for index in range(3):
-			serial = frappe.get_doc(
-				{
-					"doctype": "Serial No",
-					"serial_no": f"QCOUT-{item.name}-{index}",
-					"item_code": item.name,
-					"company": "_Test Company",
-				}
-			).insert(ignore_permissions=True)
-			serials.append(serial.name)
+		template = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection Template",
+				"quality_inspection_template_name": "_Test Outcome Split Template",
+				"item_quality_inspection_parameter": [
+					{
+						"specification": ensure_parameter("_Test Outcome Split Parameter"),
+						"numeric": 0,
+						"value": "Yes",
+					}
+				],
+			}
+		).insert(ignore_permissions=True, ignore_if_duplicate=True)
 
+		# Block inspects the draft: the typed serials exist nowhere else yet
+		serials = [f"QCOUT-{item.name}-{index}" for index in range(3)]
 		receipt = make_purchase_receipt(
 			item_code=item.name, qty=3, warehouse=REAL_WH, rate=100, do_not_submit=True
 		)
@@ -1897,12 +1906,6 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		row.use_serial_batch_fields = 1
 		receipt.save()
 
-		bundle = make_bundle(
-			3,
-			{1: ["Accepted"], 2: ["Rejected"], 3: ["Accepted"]},
-			item_code=item.name,
-			unit_serials={1: serials[0], 2: serials[1], 3: serials[2]},
-		)
 		inspection = frappe.get_doc(
 			{
 				"doctype": "Quality Inspection",
@@ -1910,12 +1913,25 @@ class TestQualityQuarantine(ERPNextTestSuite):
 				"reference_type": "Purchase Receipt",
 				"reference_name": receipt.name,
 				"item_code": item.name,
+				"quality_inspection_template": template.name,
 				"report_date": nowdate(),
 				"inspected_by": frappe.session.user,
-				"reading_bundle": bundle.name,
 			}
 		)
 		inspection.insert(ignore_permissions=True)
+
+		# the bundle's units carry the unborn typed serials, vouched for by the row
+		bundle = make_reading_bundle(inspection.name)
+		bundle.populate_units()
+		self.assertEqual([entry.serial_no for entry in bundle.entries], serials)
+		for entry in bundle.entries:
+			entry.reading_value = "no" if entry.serial_no == serials[1] else "Yes"
+		bundle.insert(ignore_permissions=True)
+		bundle.submit()
+
+		inspection.reload()
+		inspection.reading_bundle = bundle.name
+		inspection.save(ignore_permissions=True)
 		inspection.submit()
 
 		receipt.reload()

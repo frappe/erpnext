@@ -44,6 +44,58 @@ class QualityInspectionReadingBundle(Document):
 		self.evaluate_entry_statuses()
 		self.roll_up_unit_results()
 
+	def _validate_links(self):
+		# frappe validates links before validate() runs, so the waiver must
+		# intercept here rather than set a flag from validate
+		if self._unborn_serials_vouched_by_referenced_row():
+			return
+		super()._validate_links()
+
+	def _unborn_serials_vouched_by_referenced_row(self):
+		"""Whether every unborn entry serial is one the inspected document will create.
+
+		An inward document inspected before submission (Block / Warn) types its
+		serials on the row; they exist nowhere else yet. Entries may name them —
+		the per-unit verdicts are exactly what the accepted/rejected split needs
+		— so when every unborn serial is vouched for by the referenced row's
+		typed serials, link validation stands down.
+		"""
+		unborn = {
+			entry.serial_no
+			for entry in self.entries
+			if entry.serial_no and not frappe.db.exists("Serial No", entry.serial_no)
+		}
+		if not unborn or not self.quality_inspection:
+			return False
+
+		inspection = frappe.db.get_value(
+			"Quality Inspection",
+			self.quality_inspection,
+			["reference_type", "child_row_reference"],
+			as_dict=True,
+		)
+		if (
+			not inspection
+			or inspection.reference_type == "Quality Control Lot"
+			or not inspection.child_row_reference
+		):
+			return False
+
+		from erpnext.stock.services.quality_trigger_resolution import get_row_serial_nos
+
+		child_doctype = (
+			"Stock Entry Detail"
+			if inspection.reference_type == "Stock Entry"
+			else inspection.reference_type + " Item"
+		)
+		row = frappe.db.get_value(
+			child_doctype,
+			inspection.child_row_reference,
+			["serial_no", "serial_and_batch_bundle"],
+			as_dict=True,
+		)
+		return bool(row) and not (unborn - set(get_row_serial_nos(row)))
+
 	def before_submit(self):
 		self.validate_completeness()
 
@@ -116,13 +168,7 @@ class QualityInspectionReadingBundle(Document):
 				as_dict=True,
 			)
 			if row:
-				# typed serials on an inward row may not exist yet — a Link
-				# entry cannot name an unborn serial
-				serials = sorted(
-					serial
-					for serial in get_row_serial_nos(row)
-					if frappe.db.exists("Serial No", serial)
-				)
+				serials = sorted(get_row_serial_nos(row))
 
 		if len(serials) != (self.quantity or 0):
 			return {}
