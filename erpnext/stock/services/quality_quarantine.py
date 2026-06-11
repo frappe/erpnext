@@ -843,13 +843,28 @@ def create_quality_control_lots(doc, method=None):
 
 		# one lot per batch: a row carrying several batches in its bundle splits,
 		# so every lot keeps the batch guarantees (release, return, re-test)
+		batch_no = row.get("batch_no")
+		bundle = row.get("serial_and_batch_bundle")
+		if not batch_no and not bundle:
+			# tracking auto-created during submission (series-named serials,
+			# batches and their bundle) is stamped on the database row only;
+			# the in-memory child row stays bare
+			db_tracking = (
+				frappe.db.get_value(
+					row.doctype, row.name, ["batch_no", "serial_and_batch_bundle"], as_dict=True
+				)
+				or frappe._dict()
+			)
+			batch_no = db_tracking.batch_no
+			bundle = db_tracking.serial_and_batch_bundle
+
 		batch_qty_map = {}
-		if row.get("batch_no"):
-			batch_qty_map[row.batch_no] = received_qty
-		elif row.get("serial_and_batch_bundle"):
+		if batch_no:
+			batch_qty_map[batch_no] = received_qty
+		elif bundle:
 			for entry in frappe.get_all(
 				"Serial and Batch Entry",
-				filters={"parent": row.serial_and_batch_bundle, "batch_no": ("is", "set")},
+				filters={"parent": bundle, "batch_no": ("is", "set")},
 				fields=["batch_no", "qty"],
 			):
 				batch_qty_map[entry.batch_no] = batch_qty_map.get(entry.batch_no, 0) + abs(flt(entry.qty))

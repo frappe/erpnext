@@ -202,6 +202,50 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertEqual(lots[0].quality_warehouse, qc)
 		self.assertEqual(frappe.db.get_value("Quality Control Lot", lots[0].name, "batch_no"), batch.name)
 
+	def test_auto_created_tracking_reaches_the_lot(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+
+		# nothing typed, no manual bundle: serial numbers, the batch and the
+		# bundle are all auto-created from the item's series during submission,
+		# stamped on the database row only — the in-memory row stays bare
+		qc = make_qc_warehouse("_Test QC Auto Tracking WH")
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "QCAT.#####",
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "QCATB.#####",
+			}
+		)
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry",
+				warehouse_role="Inbound",
+				quality_control_mode="Quarantine",
+				applicable_warehouse=qc,
+			),
+		)
+		item.save()
+
+		se = make_stock_entry(
+			item_code=item.name, qty=2, to_warehouse=qc, purpose="Material Receipt", rate=100
+		)
+		lot = quality_control_lots_for(se.name)[0].name
+
+		batch_no = frappe.db.get_value("Quality Control Lot", lot, "batch_no")
+		self.assertTrue(batch_no)
+		self.assertEqual(
+			frappe.db.get_value(
+				"Serial and Batch Entry",
+				{"parent": frappe.db.get_value("Stock Entry Detail", {"parent": se.name}, "serial_and_batch_bundle")},
+				"batch_no",
+			),
+			batch_no,
+		)
+
 	def test_multi_batch_row_mints_one_lot_per_batch(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
 		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
