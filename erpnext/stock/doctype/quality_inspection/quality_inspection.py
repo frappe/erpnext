@@ -264,6 +264,32 @@ class QualityInspection(Document):
 		if serial_nos:
 			self.sample_size = len(serial_nos)
 
+	def _referenced_row_awaits_batch(self):
+		"""Whether the row under inspection will only get its batch at submission.
+
+		Auto-created batches do not exist before the inbound document submits, so
+		the inspection cannot name one — the document-side consistency gate takes
+		over once the batch materialises.
+		"""
+		if not self.child_row_reference or self.reference_type == "Quality Control Lot":
+			return False
+
+		child_doctype = (
+			"Stock Entry Detail" if self.reference_type == "Stock Entry" else self.reference_type + " Item"
+		)
+		row = frappe.db.get_value(
+			child_doctype,
+			self.child_row_reference,
+			["batch_no", "serial_and_batch_bundle"],
+			as_dict=True,
+		)
+		if not row:
+			return False
+
+		from erpnext.stock.services.quality_trigger_resolution import get_row_batch_nos
+
+		return not get_row_batch_nos(row)
+
 	def _referenced_row_typed_serials(self):
 		"""Serials typed on the referenced row — acceptable before they exist."""
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -469,7 +495,7 @@ class QualityInspection(Document):
 		# (which holds the batch itself) exempts the batch requirement
 		if bundle_decided and self.reference_type == "Quality Control Lot":
 			return
-		if item.has_batch_no and not self.batch_no:
+		if item.has_batch_no and not self.batch_no and not self._referenced_row_awaits_batch():
 			frappe.throw(
 				_(
 					"Record the Batch No before submission — {0} is batch-tracked, and the verdict "

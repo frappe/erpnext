@@ -1270,6 +1270,54 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, disagreeing.insert)
 
+	def test_inward_block_inspection_waives_unborn_batch(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "QCAB.#####",
+			}
+		)
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Purchase Receipt",
+				warehouse_role=None,
+				quality_control_mode="Block",
+			),
+		)
+		item.save()
+
+		# the batch is auto-created at submission, which Block holds until the
+		# inspection exists — the inspection cannot name an unborn batch
+		receipt = make_purchase_receipt(
+			item_code=item.name, qty=2, warehouse=REAL_WH, rate=100, do_not_submit=True
+		)
+		inspection = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Incoming",
+				"reference_type": "Purchase Receipt",
+				"reference_name": receipt.name,
+				"item_code": item.name,
+				"sample_size": 1,
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+				"manual_inspection": 1,
+				"status": "Accepted",
+			}
+		)
+		inspection.insert(ignore_permissions=True)
+		inspection.submit()
+
+		receipt.reload()
+		receipt.submit()
+		self.assertTrue(frappe.db.exists("Batch", {"item": item.name, "batch_id": ("like", "QCAB%")}))
+
 	def test_inward_block_inspection_accepts_typed_serials(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
