@@ -74,7 +74,6 @@ class BOMConfigurator {
 			onload: function (me) {
 				me.args["parent_id"] = frm_obj.frm.doc.name;
 				me.args["parent"] = frm_obj.frm.doc.item_code;
-				delete me.args["doctype"];
 				me.parent = frm_obj.$wrapper.get(0);
 				me.body = frm_obj.$wrapper.get(0);
 				me.make_tree();
@@ -506,11 +505,11 @@ class BOMConfigurator {
 				let docname = node.data.name || this.frm.doc.name;
 
 				frappe.call({
-					method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.edit_bom_creator",
+					method: "edit_bom_creator",
+					doc: me.frm.doc,
 					args: {
 						docname: docname,
 						data: data,
-						parent: node.data.parent_id || this.frm.doc.name,
 					},
 					callback: (r) => {
 						for (let key in data) {
