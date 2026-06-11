@@ -697,12 +697,15 @@ class QualityInspection(UnitReadingsMixin, Document):
 
 		if self.reference_type == "Job Card":
 			if self.reference_name:
-				ref = frappe.qb.DocType(self.reference_type)
+				job_card = frappe.qb.DocType("Job Card")
 				(
-					frappe.qb.update(ref)
-					.set(ref.quality_inspection, quality_inspection)
-					.set(ref.modified, self.modified)
-					.where((ref.name == self.reference_name) & (ref.production_item == self.item_code))
+					frappe.qb.update(job_card)
+					.set(job_card.quality_inspection, quality_inspection)
+					.set(job_card.modified, self.modified)
+					.where(
+						(job_card.name == self.reference_name)
+						& (job_card.production_item == self.item_code)
+					)
 				).run()
 
 		else:

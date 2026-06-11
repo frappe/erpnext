@@ -76,10 +76,8 @@ def _redirect_draft_bundle(row, quality_warehouse):
 	frappe.db.set_value(
 		"Serial and Batch Bundle", bundle, "warehouse", quality_warehouse, update_modified=False
 	)
-	frappe.db.sql(
-		"""update `tabSerial and Batch Entry` set warehouse = %s where parent = %s""",
-		(quality_warehouse, bundle),
-	)
+	entry = frappe.qb.DocType("Serial and Batch Entry")
+	frappe.qb.update(entry).set(entry.warehouse, quality_warehouse).where(entry.parent == bundle).run()
 
 
 def validate_quality_warehouse_usage(doc):
