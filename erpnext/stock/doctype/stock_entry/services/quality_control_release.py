@@ -145,7 +145,7 @@ class QualityControlReleaseStockEntry(MaterialTransferStockEntry):
 		also move the serials of a verdict-less remainder once the lot is fully
 		decided — never a rejected or undecided serial.
 		"""
-		from erpnext.stock.services.quality_quarantine import (
+		from erpnext.stock.services.quality_release import (
 			_accepted_serials_awaiting_release,
 			_union_unit_serials,
 		)

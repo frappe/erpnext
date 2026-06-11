@@ -71,7 +71,12 @@ def unit_reading_rows(unit_results, unit_serials=None):
 
 
 def submit_inspection_for_lot(
-	lot_name, status="Accepted", unit_results=None, unit_serials=None, manual_inspection=0, inspection_basis=None
+	lot_name,
+	status="Accepted",
+	unit_results=None,
+	unit_serials=None,
+	manual_inspection=0,
+	inspection_basis=None,
 ):
 	lot = frappe.get_doc("Quality Control Lot", lot_name)
 	inspection = frappe.get_doc(
@@ -269,14 +274,18 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertEqual(
 			frappe.db.get_value(
 				"Serial and Batch Entry",
-				{"parent": frappe.db.get_value("Stock Entry Detail", {"parent": se.name}, "serial_and_batch_bundle")},
+				{
+					"parent": frappe.db.get_value(
+						"Stock Entry Detail", {"parent": se.name}, "serial_and_batch_bundle"
+					)
+				},
 				"batch_no",
 			),
 			batch_no,
 		)
 
 	def test_manual_release_built_from_the_lot(self):
-		from erpnext.stock.services.quality_quarantine import make_release_for_lot
+		from erpnext.stock.services.quality_release import make_release_for_lot
 
 		# two stores share the Quality Control warehouse: no unique release
 		# target, so nothing auto-releases on inspection submission
@@ -603,13 +612,11 @@ class TestQualityQuarantine(ERPNextTestSuite):
 
 	def test_rejected_stock_moves_to_a_rejected_warehouse(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
-		from erpnext.stock.services.quality_quarantine import make_rejected_stock_transfer_for_lot
+		from erpnext.stock.services.quality_release import make_rejected_stock_transfer_for_lot
 
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 		if not frappe.db.exists("Warehouse Type", "Rejected"):
-			frappe.get_doc({"doctype": "Warehouse Type", "name": "Rejected"}).insert(
-				ignore_permissions=True
-			)
+			frappe.get_doc({"doctype": "Warehouse Type", "name": "Rejected"}).insert(ignore_permissions=True)
 
 		qc = make_qc_warehouse("_Test QC Disposition WH")
 		make_warehouse("_Test QC Disposition Store", quality_warehouse=qc)
@@ -857,7 +864,7 @@ class TestQualityQuarantine(ERPNextTestSuite):
 			frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 
 	def test_return_allocation_respects_batches(self):
-		from erpnext.stock.services.quality_quarantine import _rejected_outstanding_lots
+		from erpnext.stock.services.quality_returns import _rejected_outstanding_lots
 
 		qc = make_qc_warehouse("_Test QC Alloc WH")
 		item = make_item(
@@ -1184,7 +1191,7 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertEqual(blank.decided_quantity, 5)
 
 	def test_lot_decided_in_parts(self):
-		from erpnext.stock.services.quality_quarantine import make_release_for_lot
+		from erpnext.stock.services.quality_release import make_release_for_lot
 
 		qc = make_qc_warehouse("_Test QC Tranche WH")
 		store = make_warehouse("_Test QC Tranche Store", quality_warehouse=qc)
@@ -1700,8 +1707,8 @@ class TestQualityQuarantine(ERPNextTestSuite):
 			)[0]
 			return batch.name, serial, receipt
 
-		batch_one, serial_one, receipt_one = receive_batch("_Test QC Agree One")
-		batch_two, serial_two, _ = receive_batch("_Test QC Agree Two")
+		batch_one, _serial_one, receipt_one = receive_batch("_Test QC Agree One")
+		_batch_two, serial_two, _ = receive_batch("_Test QC Agree Two")
 
 		# naming batch one while sampling a serial of batch two is incoherent
 		disagreeing = frappe.get_doc(
@@ -2155,9 +2162,7 @@ class TestQualityQuarantine(ERPNextTestSuite):
 				"report_date": nowdate(),
 				"inspected_by": frappe.session.user,
 				"inspection_basis": "Each Quantity",
-				"unit_readings": unit_reading_rows(
-					{1: ["Accepted"], 2: ["Accepted"], 3: ["Rejected"]}
-				),
+				"unit_readings": unit_reading_rows({1: ["Accepted"], 2: ["Accepted"], 3: ["Rejected"]}),
 			}
 		)
 		inspection.insert(ignore_permissions=True)
@@ -2256,7 +2261,7 @@ class TestQualityQuarantine(ERPNextTestSuite):
 
 	def test_purchase_return_created_from_the_lot(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-		from erpnext.stock.services.quality_quarantine import make_purchase_return_for_lot
+		from erpnext.stock.services.quality_returns import make_purchase_return_for_lot
 
 		qc = make_qc_warehouse("_Test QC Lot Return WH")
 		item = make_quarantine_item(qc, "Purchase Receipt")
@@ -2312,7 +2317,7 @@ class TestQualityQuarantine(ERPNextTestSuite):
 			submit_inspection_for_lot(lot, status="Rejected")
 			return receipt, lot
 
-		first_receipt, first_lot = receive_and_reject()
+		_first_receipt, first_lot = receive_and_reject()
 		second_receipt, second_lot = receive_and_reject()
 
 		# the return is against the second receipt: it books against that

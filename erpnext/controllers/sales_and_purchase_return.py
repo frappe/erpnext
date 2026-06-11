@@ -757,7 +757,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 		doctype in ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt")
 		and not return_against_rejected_qty
 	):
-		from erpnext.stock.services.quality_quarantine import trim_return_to_rejected_outstanding
+		from erpnext.stock.services.quality_returns import trim_return_to_rejected_outstanding
 
 		trim_return_to_rejected_outstanding(doclist)
 

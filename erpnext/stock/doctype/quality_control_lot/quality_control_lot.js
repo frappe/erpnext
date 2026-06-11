@@ -21,17 +21,13 @@ frappe.ui.form.on("Quality Control Lot", {
 					const balance = matches
 						? `<span class="indicator-pill green">${__("In Quarantine: {0}", [
 								summary.held_qty,
-							])}</span>`
-						: `<span class="indicator-pill orange">${__(
-								"In Quarantine: {0} (lot expects {1})",
-								[summary.held_qty, summary.expected_qty]
-							)}</span>`;
+						  ])}</span>`
+						: `<span class="indicator-pill orange">${__("In Quarantine: {0} (lot expects {1})", [
+								summary.held_qty,
+								summary.expected_qty,
+						  ])}</span>`;
 					wrapper.prepend(`
-						<p>${__("Batch")} ${frappe.utils.get_form_link(
-							"Batch",
-							summary.batch_no,
-							true
-						)} &nbsp; ${balance}</p>`);
+						<p>${__("Batch")} ${frappe.utils.get_form_link("Batch", summary.batch_no, true)} &nbsp; ${balance}</p>`);
 					frm.toggle_display("serial_numbers_section", true);
 				},
 			});
@@ -55,7 +51,7 @@ frappe.ui.form.on("Quality Control Lot", {
 						const verdict = row.verdict
 							? `<span class="indicator-pill ${
 									row.verdict === "Accepted" ? "green" : "red"
-								}">${__(row.verdict)}</span>`
+							  }">${__(row.verdict)}</span>`
 							: "";
 						const warehouse = row.warehouse
 							? frappe.utils.get_form_link("Warehouse", row.warehouse, true)
@@ -64,9 +60,7 @@ frappe.ui.form.on("Quality Control Lot", {
 							<td>${frappe.utils.get_form_link("Serial No", row.serial_no, true)}</td>
 							<td>${verdict}</td>
 							<td>${warehouse}</td>
-							<td><span class="indicator-pill ${state_colors[row.state] || "gray"}">${__(
-								row.state
-							)}</span></td>
+							<td><span class="indicator-pill ${state_colors[row.state] || "gray"}">${__(row.state)}</span></td>
 						</tr>`;
 					})
 					.join("");
@@ -107,18 +101,18 @@ frappe.ui.form.on("Quality Control Lot", {
 			frm.add_custom_button(
 				__("Quality Inspection"),
 				() => {
-				frappe.new_doc("Quality Inspection", {
-					inspection_type: "Incoming",
-					reference_type: "Quality Control Lot",
-					reference_name: frm.doc.name,
-					item_code: frm.doc.item_code,
-					batch_no: frm.doc.batch_no,
-					inspection_basis: frm.doc.inspection_basis,
-					sample_size:
-						frm.doc.inspection_basis === "Each Quantity"
-							? 0
-							: flt(frm.doc.received_qty) - flt(frm.doc.decided_qty),
-					quality_inspection_template: frm.doc.inspection_template,
+					frappe.new_doc("Quality Inspection", {
+						inspection_type: "Incoming",
+						reference_type: "Quality Control Lot",
+						reference_name: frm.doc.name,
+						item_code: frm.doc.item_code,
+						batch_no: frm.doc.batch_no,
+						inspection_basis: frm.doc.inspection_basis,
+						sample_size:
+							frm.doc.inspection_basis === "Each Quantity"
+								? 0
+								: flt(frm.doc.received_qty) - flt(frm.doc.decided_qty),
+						quality_inspection_template: frm.doc.inspection_template,
 					});
 				},
 				__("Create")
@@ -131,34 +125,34 @@ frappe.ui.form.on("Quality Control Lot", {
 			frm.add_custom_button(
 				__("Quality Control Release"),
 				() => {
-				frappe.prompt(
-					{
-						label: __("Release Warehouse"),
-						fieldname: "release_warehouse",
-						fieldtype: "Link",
-						options: "Warehouse",
-						reqd: 1,
-						description: __("The store the accepted stock is released into."),
-						get_query: () => ({
-							filters: {
-								company: frm.doc.company,
-								is_group: 0,
-								warehouse_type: ["not in", ["Quality", "Rejected"]],
-							},
-						}),
-					},
-					(values) => {
-						frappe.call({
-							method: "erpnext.stock.services.quality_quarantine.make_release_for_lot",
-							args: { lot_name: frm.doc.name, release_warehouse: values.release_warehouse },
-							freeze: true,
-							callback: (r) => {
-								const doc = frappe.model.sync(r.message)[0];
-								frappe.set_route("Form", doc.doctype, doc.name);
-							},
-						});
-					},
-					__("Release Accepted Stock")
+					frappe.prompt(
+						{
+							label: __("Release Warehouse"),
+							fieldname: "release_warehouse",
+							fieldtype: "Link",
+							options: "Warehouse",
+							reqd: 1,
+							description: __("The store the accepted stock is released into."),
+							get_query: () => ({
+								filters: {
+									company: frm.doc.company,
+									is_group: 0,
+									warehouse_type: ["not in", ["Quality", "Rejected"]],
+								},
+							}),
+						},
+						(values) => {
+							frappe.call({
+								method: "erpnext.stock.services.quality_release.make_release_for_lot",
+								args: { lot_name: frm.doc.name, release_warehouse: values.release_warehouse },
+								freeze: true,
+								callback: (r) => {
+									const doc = frappe.model.sync(r.message)[0];
+									frappe.set_route("Form", doc.doctype, doc.name);
+								},
+							});
+						},
+						__("Release Accepted Stock")
 					);
 				},
 				__("Create")
@@ -177,7 +171,7 @@ frappe.ui.form.on("Quality Control Lot", {
 					__("Purchase Return"),
 					() => {
 						frappe.call({
-							method: "erpnext.stock.services.quality_quarantine.make_purchase_return_for_lot",
+							method: "erpnext.stock.services.quality_returns.make_purchase_return_for_lot",
 							args: { lot_name: frm.doc.name },
 							freeze: true,
 							callback: (r) => {
@@ -194,7 +188,7 @@ frappe.ui.form.on("Quality Control Lot", {
 				__("Rejected Stock Transfer"),
 				() => {
 					frappe.call({
-						method: "erpnext.stock.services.quality_quarantine.make_rejected_stock_transfer_for_lot",
+						method: "erpnext.stock.services.quality_release.make_rejected_stock_transfer_for_lot",
 						args: { lot_name: frm.doc.name },
 						freeze: true,
 						callback: (r) => {

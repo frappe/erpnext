@@ -285,9 +285,7 @@ def validate_inspected_serial_consistency(doc, method=None):
 		if not inspection:
 			continue
 
-		qi = frappe.db.get_value(
-			"Quality Inspection", inspection, ["serial_no", "batch_no"], as_dict=True
-		)
+		qi = frappe.db.get_value("Quality Inspection", inspection, ["serial_no", "batch_no"], as_dict=True)
 		sampled = set(get_serial_nos(qi.serial_no or "")) if qi else set()
 		if qi:
 			# Each Quantity inspections carry their serials per unit
@@ -426,7 +424,8 @@ def get_inspection_outcomes(doc: dict | str):
 				outcome["rejected_warehouse"] = rejected_warehouses[0]
 
 		unchanged = all(
-			outcome[field] == ((row.get(field) or "") if isinstance(outcome[field], str) else flt(row.get(field)))
+			outcome[field]
+			== ((row.get(field) or "") if isinstance(outcome[field], str) else flt(row.get(field)))
 			for field in outcome
 			if field != "idx"
 		)

@@ -405,16 +405,16 @@ doc_events = {
 		"on_cancel": "erpnext.stock.services.quality_quarantine.handle_source_document_cancel",
 	},
 	("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"): {
-		"before_submit": "erpnext.stock.services.quality_quarantine.update_lots_for_purchase_return",
-		"on_submit": "erpnext.stock.services.quality_quarantine.update_lots_for_purchase_return",
-		"on_cancel": "erpnext.stock.services.quality_quarantine.update_lots_for_purchase_return",
+		"before_submit": "erpnext.stock.services.quality_returns.update_lots_for_purchase_return",
+		"on_submit": "erpnext.stock.services.quality_returns.update_lots_for_purchase_return",
+		"on_cancel": "erpnext.stock.services.quality_returns.update_lots_for_purchase_return",
 	},
 	"Stock Reconciliation": {
 		"validate": "erpnext.stock.services.quality_quarantine.block_stock_reconciliation_on_quality_warehouse",
 	},
 	"Quality Inspection": {
-		"on_submit": "erpnext.stock.services.quality_quarantine.process_inspection_result",
-		"on_cancel": "erpnext.stock.services.quality_quarantine.reverse_inspection_result",
+		"on_submit": "erpnext.stock.services.quality_release.process_inspection_result",
+		"on_cancel": "erpnext.stock.services.quality_release.reverse_inspection_result",
 	},
 	"User": {
 		"after_insert": "frappe.contacts.doctype.contact.contact.update_contact",

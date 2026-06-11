@@ -231,5 +231,4 @@ frappe.ui.form.on("Quality Inspection", {
 			});
 		}
 	},
-
 });

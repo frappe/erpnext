@@ -32,7 +32,9 @@ class QualityControlLot(Document):
 		returned_qty: DF.Float
 		source_document: DF.DynamicLink | None
 		source_document_type: DF.Link | None
-		status: DF.Literal["Under Inspection", "Awaiting Release", "Partially Released", "Released", "Rejected"]
+		status: DF.Literal[
+			"Under Inspection", "Awaiting Release", "Partially Released", "Released", "Rejected"
+		]
 	# end: auto-generated types
 
 	def on_update(self):
@@ -139,7 +141,7 @@ def get_serial_numbers(lot_name: str):
 	):
 		members.update(get_row_serial_nos(row))
 
-	from erpnext.stock.services.quality_quarantine import _union_unit_serials
+	from erpnext.stock.services.quality_release import _union_unit_serials
 
 	verdicts = {}
 	for serial in _union_unit_serials(lot, "Accepted"):
