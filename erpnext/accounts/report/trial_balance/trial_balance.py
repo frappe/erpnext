@@ -571,3 +571,23 @@ def hide_group_accounts(data):
 			d.update(indent=0)
 			non_group_accounts_data.append(d)
 	return non_group_accounts_data
+
+
+def execute_duckdb(filters, duckdb_conn):
+	validate_filters(filters)
+	conn = duckdb_conn
+	data = []
+	res = conn.sql(
+		f"select account, sum(debit), sum(credit), account_currency from \"tabGL Entry\" where company = '{filters.company}' and posting_date between '{filters.from_date}' and '{filters.to_date}' and is_opening = 'No' group by account, account_currency;"
+	).fetchall()
+	for x in res:
+		data.append(
+			{
+				"account": x[0],
+				"debit": x[1],
+				"credit": x[2],
+			}
+		)
+
+	columns = get_columns()
+	return columns, data

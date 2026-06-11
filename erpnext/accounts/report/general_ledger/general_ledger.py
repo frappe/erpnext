@@ -818,3 +818,12 @@ def get_columns(filters):
 		columns.extend([{"label": _("Remarks"), "fieldname": "remarks", "width": 400}])
 
 	return columns
+
+
+def execute_duckdb(filters, duckdb_conn):
+	print(filters)
+	conn = duckdb_conn
+	columns = get_columns(filters)
+	res = []
+
+	return columns, res
