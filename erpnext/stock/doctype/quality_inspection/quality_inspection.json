@@ -110,7 +110,8 @@
    "oldfieldtype": "Link",
    "options": "Item",
    "reqd": 1,
-   "search_index": 1
+   "search_index": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "serial_no",
