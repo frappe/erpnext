@@ -44,8 +44,34 @@ def quality_control_lots_for(source_name, source_doctype="Stock Entry"):
 	)
 
 
+def ensure_parameter(name):
+	if not frappe.db.exists("Quality Inspection Parameter", name):
+		frappe.get_doc({"doctype": "Quality Inspection Parameter", "parameter": name}).insert(
+			ignore_permissions=True
+		)
+	return name
+
+
+def unit_reading_rows(unit_results, unit_serials=None):
+	"""unit_results: {unit_no: [status, status, ...]} — one status per parameter row."""
+	rows = []
+	for unit_no, statuses in unit_results.items():
+		for index, status in enumerate(statuses):
+			rows.append(
+				{
+					"unit_no": unit_no,
+					"serial_no": (unit_serials or {}).get(unit_no),
+					"specification": ensure_parameter(f"_Test Unit Parameter {index}"),
+					# a manual observation: no acceptance criteria, so the given status holds
+					"reading_value": "observed",
+					"status": status,
+				}
+			)
+	return rows
+
+
 def submit_inspection_for_lot(
-	lot_name, status="Accepted", reading_bundle=None, manual_inspection=0, inspection_basis=None
+	lot_name, status="Accepted", unit_results=None, unit_serials=None, manual_inspection=0, inspection_basis=None
 ):
 	lot = frappe.get_doc("Quality Control Lot", lot_name)
 	inspection = frappe.get_doc(
@@ -61,11 +87,12 @@ def submit_inspection_for_lot(
 			"inspected_by": frappe.session.user,
 			"manual_inspection": manual_inspection,
 			"status": status,
-			"reading_bundle": reading_bundle,
-			"inspection_basis": inspection_basis,
+			"unit_readings": unit_reading_rows(unit_results, unit_serials) if unit_results else [],
+			# per-unit results are an Each Quantity inspection by definition
+			"inspection_basis": inspection_basis or ("Each Quantity" if unit_results else None),
 		}
 	)
-	if not manual_inspection and not reading_bundle:
+	if not manual_inspection and not unit_results:
 		# submission demands recorded readings; one verdict-carrying row
 		if not frappe.db.exists("Quality Inspection Parameter", "_Test Lot Verdict"):
 			frappe.get_doc(
@@ -531,9 +558,6 @@ class TestQualityQuarantine(ERPNextTestSuite):
 
 	def test_release_moves_exactly_the_accepted_serials(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
-		from erpnext.stock.doctype.quality_inspection_reading_bundle.test_quality_inspection_reading_bundle import (
-			make_bundle,
-		)
 
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 		qc = make_qc_warehouse("_Test QC Serial WH")
@@ -564,13 +588,11 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertEqual(len(serials), 3)
 
 		# units 1 and 3 pass, unit 2 fails — each unit identified by its serial
-		bundle = make_bundle(
-			3,
-			{1: ["Accepted"], 2: ["Rejected"], 3: ["Accepted"]},
-			item_code=item.name,
+		submit_inspection_for_lot(
+			lot,
+			unit_results={1: ["Accepted"], 2: ["Rejected"], 3: ["Accepted"]},
 			unit_serials={1: serials[0], 2: serials[1], 3: serials[2]},
 		)
-		submit_inspection_for_lot(lot, reading_bundle=bundle.name)
 
 		# exactly the accepted serials were released; the rejected one stays held
 		self.assertEqual(frappe.db.get_value("Serial No", serials[0], "warehouse"), store)
@@ -579,9 +601,6 @@ class TestQualityQuarantine(ERPNextTestSuite):
 
 	def test_rejected_stock_moves_to_a_rejected_warehouse(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
-		from erpnext.stock.doctype.quality_inspection_reading_bundle.test_quality_inspection_reading_bundle import (
-			make_bundle,
-		)
 		from erpnext.stock.services.quality_quarantine import make_rejected_stock_transfer_for_lot
 
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
@@ -617,13 +636,11 @@ class TestQualityQuarantine(ERPNextTestSuite):
 			"Serial No", filters={"item_code": item.name, "warehouse": qc}, pluck="name", order_by="name"
 		)
 
-		bundle = make_bundle(
-			3,
-			{1: ["Accepted"], 2: ["Rejected"], 3: ["Accepted"]},
-			item_code=item.name,
+		submit_inspection_for_lot(
+			lot,
+			unit_results={1: ["Accepted"], 2: ["Rejected"], 3: ["Accepted"]},
 			unit_serials={1: serials[0], 2: serials[1], 3: serials[2]},
 		)
-		submit_inspection_for_lot(lot, reading_bundle=bundle.name)
 
 		# an accepted serial cannot be smuggled into the Rejected warehouse
 		self.assertRaises(
@@ -739,9 +756,6 @@ class TestQualityQuarantine(ERPNextTestSuite):
 
 	def test_manual_release_refuses_rejected_serials(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
-		from erpnext.stock.doctype.quality_inspection_reading_bundle.test_quality_inspection_reading_bundle import (
-			make_bundle,
-		)
 
 		# no store points at this Quality Control warehouse, so nothing auto-releases
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
@@ -770,13 +784,11 @@ class TestQualityQuarantine(ERPNextTestSuite):
 			"Serial No", filters={"item_code": item.name, "warehouse": qc}, pluck="name", order_by="name"
 		)
 
-		bundle = make_bundle(
-			3,
-			{1: ["Accepted"], 2: ["Rejected"], 3: ["Accepted"]},
-			item_code=item.name,
+		submit_inspection_for_lot(
+			lot,
+			unit_results={1: ["Accepted"], 2: ["Rejected"], 3: ["Accepted"]},
 			unit_serials={1: serials[0], 2: serials[1], 3: serials[2]},
 		)
-		submit_inspection_for_lot(lot, reading_bundle=bundle.name)
 
 		# the rejected serial cannot be released, and serials must be named
 		self.assertRaises(frappe.ValidationError, make_release, lot, 1, REAL_WH, serial_no=serials[1])
@@ -923,9 +935,6 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, receipt.cancel)
 
 	def test_per_unit_inspection_splits_the_lot(self):
-		from erpnext.stock.doctype.quality_inspection_reading_bundle.test_quality_inspection_reading_bundle import (
-			make_bundle,
-		)
 
 		qc = make_qc_warehouse("_Test QC Split WH")
 		store = make_warehouse("_Test QC Split Store", quality_warehouse=qc)
@@ -934,18 +943,17 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		lot = quality_control_lots_for(se.name)[0].name
 
 		# 5 units inspected individually: 3 pass, 2 fail
-		bundle = make_bundle(
-			5,
-			{
+		inspection = submit_inspection_for_lot(
+			lot,
+			status="Accepted",
+			unit_results={
 				1: ["Accepted"],
 				2: ["Accepted"],
 				3: ["Rejected"],
 				4: ["Accepted"],
 				5: ["Rejected"],
 			},
-			item_code=item,
 		)
-		inspection = submit_inspection_for_lot(lot, status="Accepted", reading_bundle=bundle.name)
 		# a mixed outcome is named, not collapsed into Accepted
 		self.assertEqual(inspection.status, "Partially Accepted")
 
@@ -957,11 +965,8 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertEqual(lot_doc.rejected_qty, 2)
 		self.assertEqual(lot_doc.pending_qty, 0)
 
-	def test_each_quantity_basis_is_stamped_and_requires_a_bundle(self):
+	def test_each_quantity_basis_is_stamped_and_requires_unit_readings(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
-		from erpnext.stock.doctype.quality_inspection_reading_bundle.test_quality_inspection_reading_bundle import (
-			make_bundle,
-		)
 
 		qc = make_qc_warehouse("_Test QC Basis WH")
 		store = make_warehouse("_Test QC Basis Store", quality_warehouse=qc)
@@ -989,29 +994,14 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		# ...so an inspection without per-unit readings is refused
 		self.assertRaises(frappe.ValidationError, submit_inspection_for_lot, lot)
 
-		# a bundle covering fewer units than are under inspection is refused too
-		short_bundle = make_bundle(1, {1: ["Accepted"]}, item_code=item.name)
+		# readings covering fewer units than are under inspection are refused too
 		self.assertRaises(
-			frappe.ValidationError, submit_inspection_for_lot, lot, reading_bundle=short_bundle.name
+			frappe.ValidationError, submit_inspection_for_lot, lot, unit_results={1: ["Accepted"]}
 		)
 
-		# and accepted with a bundle covering every unit
-		bundle = make_bundle(2, {1: ["Accepted"], 2: ["Accepted"]}, item_code=item.name)
-		inspection = submit_inspection_for_lot(lot, reading_bundle=bundle.name)
+		# and accepted with readings covering every unit
+		submit_inspection_for_lot(lot, unit_results={1: ["Accepted"], 2: ["Accepted"]})
 		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "status"), "Released")
-
-		# the bundle is claimed by that inspection and cannot decide another one
-		self.assertEqual(
-			frappe.db.get_value("Quality Inspection Reading Bundle", bundle.name, "quality_inspection"),
-			inspection.name,
-		)
-		second_receipt = make_stock_entry(
-			item_code=item.name, qty=2, to_warehouse=store, purpose="Material Receipt", rate=100
-		)
-		second_lot = quality_control_lots_for(second_receipt.name)[0].name
-		self.assertRaises(
-			frappe.ValidationError, submit_inspection_for_lot, second_lot, reading_bundle=bundle.name
-		)
 
 	def test_cancelling_inspection_unwinds_the_decision(self):
 		qc = make_qc_warehouse("_Test QC Unwind WH")
@@ -1054,26 +1044,97 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "rejected_qty"), 0)
 		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "status"), "Under Inspection")
 
-	def test_cancelling_an_inspection_cancels_its_bundle(self):
-		from erpnext.stock.doctype.quality_inspection_reading_bundle.test_quality_inspection_reading_bundle import (
-			make_bundle,
-		)
-
+	def test_cancelling_an_inspection_voids_its_unit_readings(self):
 		qc = make_qc_warehouse("_Test QC Cancel Bundle WH")
 		item = make_quarantine_item(qc)
 		se = make_stock_entry(item_code=item, qty=2, to_warehouse=qc, purpose="Material Receipt", rate=100)
 		lot = quality_control_lots_for(se.name)[0].name
 
-		bundle = make_bundle(2, {1: ["Accepted"], 2: ["Accepted"]}, item_code=item)
-		inspection = submit_inspection_for_lot(lot, reading_bundle=bundle.name)
+		inspection = submit_inspection_for_lot(lot, unit_results={1: ["Accepted"], 2: ["Accepted"]})
 
-		# a voided inspection voids its per-unit readings with it (no deadlock on
-		# the bundle guard), and the claim stays on the cancelled pair so the
-		# readings can never decide other stock
+		# a voided inspection voids its per-unit readings with it — they live on
+		# the document and freeze and cancel as one
 		inspection.cancel()
-		bundle.reload()
-		self.assertEqual(bundle.docstatus, 2)
-		self.assertEqual(bundle.quality_inspection, inspection.name)
+		self.assertEqual(inspection.docstatus, 2)
+		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "status"), "Under Inspection")
+
+	def test_unit_readings_roll_up_and_derive(self):
+		qc = make_qc_warehouse("_Test QC Unit Roll Up WH")
+		item = make_quarantine_item(qc)
+		se = make_stock_entry(item_code=item, qty=3, to_warehouse=qc, purpose="Material Receipt", rate=100)
+		lot = quality_control_lots_for(se.name)[0].name
+
+		inspection = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Incoming",
+				"reference_type": "Quality Control Lot",
+				"reference_name": lot,
+				"item_code": item,
+				"inspection_basis": "Each Quantity",
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+			}
+		)
+		parameter = ensure_parameter("_Test Derived Status Parameter")
+		entry_rows = [
+			# numeric: inside and outside [1, 10]
+			{"unit_no": 1, "numeric": 1, "min_value": 1, "max_value": 10, "reading_value": "5"},
+			{"unit_no": 2, "numeric": 1, "min_value": 1, "max_value": 10, "reading_value": "12"},
+			# non-numeric: case-insensitive match against the criteria value
+			{"unit_no": 1, "numeric": 0, "value": "Yes", "reading_value": " yes "},
+			{"unit_no": 3, "numeric": 0, "value": "Yes", "reading_value": "no"},
+		]
+		for row in entry_rows:
+			row["specification"] = parameter
+			inspection.append("unit_readings", row)
+		inspection.insert(ignore_permissions=True)
+
+		self.assertEqual(
+			[entry.status for entry in inspection.unit_readings],
+			["Accepted", "Rejected", "Accepted", "Rejected"],
+		)
+		# a unit is rejected if any of its readings rejected
+		self.assertEqual(inspection.accepted_unit_quantity, 1)
+		self.assertEqual(inspection.rejected_unit_quantity, 2)
+		self.assertEqual(inspection.status, "Partially Accepted")
+
+	def test_unit_readings_submission_gates(self):
+		qc = make_qc_warehouse("_Test QC Unit Gates WH")
+		item = make_quarantine_item(qc)
+		se = make_stock_entry(item_code=item, qty=3, to_warehouse=qc, purpose="Material Receipt", rate=100)
+		lot = quality_control_lots_for(se.name)[0].name
+
+		def build(unit_results):
+			return frappe.get_doc(
+				{
+					"doctype": "Quality Inspection",
+					"inspection_type": "Incoming",
+					"reference_type": "Quality Control Lot",
+					"reference_name": lot,
+					"item_code": item,
+					"inspection_basis": "Each Quantity",
+					"unit_readings": unit_reading_rows(unit_results),
+					"report_date": nowdate(),
+					"inspected_by": frappe.session.user,
+				}
+			)
+
+		# unit numbers must fit the quantity under inspection
+		self.assertRaises(frappe.ValidationError, build({5: ["Accepted"]}).insert)
+
+		# 3 declared units but only 2 with readings: not every unit was inspected
+		short = build({1: ["Accepted"], 2: ["Accepted"]})
+		short.insert(ignore_permissions=True)
+		self.assertRaises(frappe.ValidationError, short.submit)
+		short.delete()
+
+		# an entry without a reading would pass on its default status unseen
+		unread = build({1: ["Accepted"], 2: ["Accepted"], 3: ["Accepted"]})
+		unread.unit_readings[2].reading_value = ""
+		unread.insert(ignore_permissions=True)
+		self.assertRaises(frappe.ValidationError, unread.submit)
+		unread.delete()
 
 	def test_sample_inspection_demands_recorded_readings(self):
 		qc = make_qc_warehouse("_Test QC Rubber Stamp WH")
@@ -1305,9 +1366,6 @@ class TestQualityQuarantine(ERPNextTestSuite):
 
 	def test_bundle_serials_guard_the_document_after_inspection(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
-		from erpnext.stock.doctype.quality_inspection_reading_bundle.test_quality_inspection_reading_bundle import (
-			make_bundle,
-		)
 
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 		item = make_item(
@@ -1342,12 +1400,6 @@ class TestQualityQuarantine(ERPNextTestSuite):
 			do_not_submit=True,
 		)
 
-		bundle = make_bundle(
-			2,
-			{1: ["Accepted"], 2: ["Accepted"]},
-			item_code=item.name,
-			unit_serials={1: serials[0], 2: serials[1]},
-		)
 		inspection = frappe.get_doc(
 			{
 				"doctype": "Quality Inspection",
@@ -1358,7 +1410,9 @@ class TestQualityQuarantine(ERPNextTestSuite):
 				"report_date": nowdate(),
 				"inspected_by": frappe.session.user,
 				"inspection_basis": "Each Quantity",
-				"reading_bundle": bundle.name,
+				"unit_readings": unit_reading_rows(
+					{1: ["Accepted"], 2: ["Accepted"]}, {1: serials[0], 2: serials[1]}
+				),
 			}
 		)
 		inspection.insert(ignore_permissions=True)
@@ -1749,13 +1803,25 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		inspection.insert(ignore_permissions=True)
 		self.assertEqual(inspection.readings, [])
 
-	def test_reading_bundle_born_from_inspection(self):
-		from erpnext.stock.doctype.quality_inspection.quality_inspection import make_reading_bundle
-
+	def test_populate_units_builds_the_unit_readings(self):
 		qc = make_qc_warehouse("_Test QC Born Bundle WH")
 		item = make_quarantine_item(qc)
 		se = make_stock_entry(item_code=item, qty=3, to_warehouse=qc, purpose="Material Receipt", rate=100)
 		lot = quality_control_lots_for(se.name)[0].name
+
+		template = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection Template",
+				"quality_inspection_template_name": "_Test Populate Units Template",
+				"item_quality_inspection_parameter": [
+					{
+						"specification": ensure_parameter("_Test Populate Units Parameter"),
+						"numeric": 0,
+						"value": "Yes",
+					}
+				],
+			}
+		).insert(ignore_permissions=True, ignore_if_duplicate=True)
 
 		inspection = frappe.get_doc(
 			{
@@ -1764,26 +1830,23 @@ class TestQualityQuarantine(ERPNextTestSuite):
 				"reference_type": "Quality Control Lot",
 				"reference_name": lot,
 				"item_code": item,
-				"sample_size": 1,
+				"quality_inspection_template": template.name,
+				"inspection_basis": "Each Quantity",
 				"report_date": nowdate(),
 				"inspected_by": frappe.session.user,
 			}
 		)
 		inspection.insert(ignore_permissions=True)
 
-		# created server-side so the no_copy backlink survives: born linked, with
-		# the item and the full quantity under inspection
-		bundle = make_reading_bundle(inspection.name)
-		self.assertEqual(bundle.quality_inspection, inspection.name)
-		self.assertEqual(bundle.item_code, item)
-		self.assertEqual(bundle.quantity, 3)
+		# the unit quantity defaults to the full quantity under inspection, and
+		# Populate Units builds one row per unit and template parameter
+		self.assertEqual(inspection.unit_quantity, 3)
+		inspection.populate_units()
+		self.assertEqual(len(inspection.unit_readings), 3)
+		self.assertEqual([entry.unit_no for entry in inspection.unit_readings], [1, 2, 3])
 
-	def test_populated_bundle_carries_the_lot_serials(self):
+	def test_populated_units_carry_the_lot_serials(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
-		from erpnext.stock.doctype.quality_inspection.quality_inspection import make_reading_bundle
-		from erpnext.stock.doctype.quality_inspection_reading_bundle.test_quality_inspection_reading_bundle import (
-			ensure_parameter,
-		)
 
 		qc = make_qc_warehouse("_Test QC Unit Serials WH")
 		item = make_item(
@@ -1837,43 +1900,31 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		)
 		inspection.insert(ignore_permissions=True)
 
-		bundle = make_reading_bundle(inspection.name)
-		bundle.populate_units()
-		bundle.insert(ignore_permissions=True)
+		inspection.populate_units()
+		inspection.save(ignore_permissions=True)
 
 		# the lot's source receipt names the serials under inspection: prefilled
-		self.assertEqual([entry.serial_no for entry in bundle.entries], serials)
+		self.assertEqual([entry.serial_no for entry in inspection.unit_readings], serials)
 
-		# a lot-flow bundle of a serialized item must identify every unit
-		for entry in bundle.entries:
+		# a lot-flow inspection of a serialized item must identify every unit
+		for entry in inspection.unit_readings:
 			entry.reading_value = "Yes"
 			entry.serial_no = None
-		bundle.save()
-		bundle.flags.via_quality_inspection = True
-		self.assertRaises(frappe.ValidationError, bundle.submit)
+		inspection.save(ignore_permissions=True)
+		self.assertRaises(frappe.ValidationError, inspection.submit)
 
-		bundle.reload()
-		for entry, serial in zip(bundle.entries, serials, strict=True):
+		inspection.reload()
+		for entry, serial in zip(inspection.unit_readings, serials, strict=True):
 			entry.reading_value = "Yes"
 			entry.serial_no = serial
-		bundle.save()
-
-		# a born-linked bundle is frozen by its inspection, never by hand
-		bundle.flags.via_quality_inspection = False
-		self.assertRaises(frappe.ValidationError, bundle.submit)
-
-		bundle.reload()
-		bundle.flags.via_quality_inspection = True
-		bundle.submit()
-		self.assertEqual(bundle.docstatus, 1)
+		inspection.save(ignore_permissions=True)
+		inspection.submit()
+		self.assertEqual(inspection.docstatus, 1)
 
 	def test_receipt_return_prefilled_with_rejected_details(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-		from erpnext.stock.doctype.quality_inspection_reading_bundle.test_quality_inspection_reading_bundle import (
-			make_bundle,
-		)
 
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 		qc = make_qc_warehouse("_Test QC Prefill WH")
@@ -1898,13 +1949,11 @@ class TestQualityQuarantine(ERPNextTestSuite):
 			"Serial No", filters={"item_code": item.name, "warehouse": qc}, pluck="name", order_by="name"
 		)
 
-		bundle = make_bundle(
-			3,
-			{1: ["Accepted"], 2: ["Accepted"], 3: ["Rejected"]},
-			item_code=item.name,
+		submit_inspection_for_lot(
+			lot,
+			unit_results={1: ["Accepted"], 2: ["Accepted"], 3: ["Rejected"]},
 			unit_serials={1: serials[0], 2: serials[1], 3: serials[2]},
 		)
-		submit_inspection_for_lot(lot, reading_bundle=bundle.name)
 
 		# the receipt's own Create > Purchase Return arrives shaped around the
 		# verdict: only the rejected unit, identified by its serial
@@ -1922,9 +1971,6 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-		from erpnext.stock.doctype.quality_inspection_reading_bundle.test_quality_inspection_reading_bundle import (
-			make_bundle,
-		)
 
 		# Block holds the document, not the stock: the receipt lands in the store
 		item = make_item(properties={"is_stock_item": 1})
@@ -1943,7 +1989,6 @@ class TestQualityQuarantine(ERPNextTestSuite):
 			item_code=item.name, qty=3, warehouse=REAL_WH, rate=100, do_not_submit=True
 		)
 
-		bundle = make_bundle(3, {1: ["Accepted"], 2: ["Accepted"], 3: ["Rejected"]}, item_code=item.name)
 		inspection = frappe.get_doc(
 			{
 				"doctype": "Quality Inspection",
@@ -1953,7 +1998,10 @@ class TestQualityQuarantine(ERPNextTestSuite):
 				"item_code": item.name,
 				"report_date": nowdate(),
 				"inspected_by": frappe.session.user,
-				"reading_bundle": bundle.name,
+				"inspection_basis": "Each Quantity",
+				"unit_readings": unit_reading_rows(
+					{1: ["Accepted"], 2: ["Accepted"], 3: ["Rejected"]}
+				),
 			}
 		)
 		inspection.insert(ignore_permissions=True)
@@ -1970,10 +2018,6 @@ class TestQualityQuarantine(ERPNextTestSuite):
 	def test_inspection_outcome_proposes_the_document_split(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-		from erpnext.stock.doctype.quality_inspection.quality_inspection import make_reading_bundle
-		from erpnext.stock.doctype.quality_inspection_reading_bundle.test_quality_inspection_reading_bundle import (
-			ensure_parameter,
-		)
 		from erpnext.stock.services.quality_trigger_resolution import get_inspection_outcomes
 
 		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1})
@@ -2026,22 +2070,13 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		)
 		inspection.insert(ignore_permissions=True)
 
-		# the bundle's units carry the unborn typed serials, vouched for by the row
-		bundle = make_reading_bundle(inspection.name)
-		bundle.populate_units()
-		self.assertEqual([entry.serial_no for entry in bundle.entries], serials)
-		for entry in bundle.entries:
+		# the unit readings carry the unborn typed serials, vouched for by the row
+		inspection.populate_units()
+		self.assertEqual([entry.serial_no for entry in inspection.unit_readings], serials)
+		for entry in inspection.unit_readings:
 			entry.reading_value = "no" if entry.serial_no == serials[1] else "Yes"
-		bundle.insert(ignore_permissions=True)
-
-		inspection.reload()
-		inspection.reading_bundle = bundle.name
 		inspection.save(ignore_permissions=True)
 		inspection.submit()
-
-		# the verdict froze its evidence: the bundle submitted with the inspection
-		bundle.reload()
-		self.assertEqual(bundle.docstatus, 1)
 
 		receipt.reload()
 		outcomes = get_inspection_outcomes(receipt.as_dict())

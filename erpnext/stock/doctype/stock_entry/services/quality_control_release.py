@@ -138,14 +138,11 @@ class QualityControlReleaseStockEntry(MaterialTransferStockEntry):
 		if not lot.quality_inspection:
 			return None
 
-		reading_bundle = frappe.db.get_value("Quality Inspection", lot.quality_inspection, "reading_bundle")
-		if not reading_bundle:
+		inspection = frappe.get_doc("Quality Inspection", lot.quality_inspection)
+		if not inspection.get("unit_readings"):
 			return None
 
-		serials = frappe.get_doc("Quality Inspection Reading Bundle", reading_bundle).get_unit_serials(
-			status
-		)
-		return set(serials) or None
+		return set(inspection.get_unit_serials(status)) or None
 
 	def _validate_row_serials(self, row, lot, allowed_serials, verdict):
 		"""A row moves only serials whose inspection verdict matches its target.

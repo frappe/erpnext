@@ -29,7 +29,10 @@
   "quality_inspection_template",
   "manual_inspection",
   "inspection_basis",
-  "reading_bundle",
+  "unit_quantity",
+  "unit_readings",
+  "accepted_unit_quantity",
+  "rejected_unit_quantity",
   "readings",
   "section_break_14",
   "inspected_by",
@@ -222,7 +225,7 @@
    "options": "Simple"
   },
   {
-   "depends_on": "eval:!doc.manual_inspection && doc.inspection_basis != 'Each Quantity'",
+   "depends_on": "eval:!doc.manual_inspection",
    "fieldname": "quality_inspection_template",
    "fieldtype": "Link",
    "label": "Quality Inspection Template",
@@ -254,19 +257,7 @@
    "label": "Manual Inspection"
   },
   {
-   "depends_on": "eval:doc.inspection_basis == 'Each Quantity' && !doc.manual_inspection",
-   "description": "For Each Quantity inspections: per-unit readings live in a Quality Inspection Reading Bundle, and its accepted/rejected unit counts drive a partial release of the Quality Control Lot. Save the inspection first \u2014 bundles are created from it.",
-   "fieldname": "reading_bundle",
-   "fieldtype": "Link",
-   "label": "Reading Bundle",
-   "mandatory_depends_on": "eval:doc.inspection_basis == 'Each Quantity' && !doc.manual_inspection && !doc.__islocal",
-   "read_only_depends_on": "eval:doc.__islocal",
-   "no_copy": 1,
-   "only_select": 1,
-   "options": "Quality Inspection Reading Bundle"
-  },
-  {
-   "description": "Fetched from the Quality Control Lot or the item's quality trigger; override to inspect differently this time. Sample inspections record readings below; Each Quantity inspections record per-unit readings in a Reading Bundle.",
+   "description": "Fetched from the Quality Control Lot or the item's quality trigger; override to inspect differently this time. Sample inspections record readings below; Each Quantity inspections record per-unit readings in the Unit Readings table.",
    "fieldname": "inspection_basis",
    "fieldtype": "Select",
    "label": "Inspection Basis",
@@ -300,6 +291,34 @@
    "fieldtype": "Link",
    "label": "Letter Head",
    "options": "Letter Head"
+  },
+  {
+   "depends_on": "eval:doc.inspection_basis == 'Each Quantity' && !doc.manual_inspection",
+   "description": "The number of units under inspection \u2014 every unit records its own readings below.",
+   "fieldname": "unit_quantity",
+   "fieldtype": "Int",
+   "label": "Unit Quantity"
+  },
+  {
+   "depends_on": "eval:doc.inspection_basis == 'Each Quantity' && !doc.manual_inspection",
+   "fieldname": "unit_readings",
+   "fieldtype": "Table",
+   "label": "Unit Readings",
+   "options": "Quality Inspection Reading Entry"
+  },
+  {
+   "depends_on": "eval:doc.inspection_basis == 'Each Quantity' && !doc.manual_inspection",
+   "fieldname": "accepted_unit_quantity",
+   "fieldtype": "Int",
+   "label": "Accepted Unit Quantity",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.inspection_basis == 'Each Quantity' && !doc.manual_inspection",
+   "fieldname": "rejected_unit_quantity",
+   "fieldtype": "Int",
+   "label": "Rejected Unit Quantity",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-search",

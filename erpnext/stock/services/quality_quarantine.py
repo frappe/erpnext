@@ -200,38 +200,9 @@ def process_inspection_result(doc, method=None):
 	# the inspection's basis governs (the lot's is the fetched proposal, which
 	# the inspector may override); a manual inspection decides the whole pending
 	# quantity without per-unit readings
-	if (
-		doc.get("inspection_basis") == "Each Quantity"
-		and not doc.get("reading_bundle")
-		and not doc.get("manual_inspection")
-	):
-		frappe.throw(
-			_(
-				"This inspection is on an Each Quantity basis: every unit needs its own readings. "
-				"Attach a Quality Inspection Reading Bundle before submitting, or check Manual "
-				"Inspection to record an overriding verdict."
-			),
-			title=_("Per-Unit Readings Required"),
-		)
-
-	if doc.get("reading_bundle"):
-		bundle = frappe.get_doc("Quality Inspection Reading Bundle", doc.reading_bundle)
-		if bundle.docstatus != 1:
-			frappe.throw(
-				_(
-					"Reading Bundle {0} is not submitted — its per-unit readings decide the lot "
-					"and must be frozen with the inspection."
-				).format(frappe.bold(bundle.name)),
-				title=_("Reading Bundle Not Submitted"),
-			)
-		if bundle.item_code != lot.item_code:
-			frappe.throw(
-				_("Reading Bundle {0} is for item {1}, not the lot's item {2}.").format(
-					frappe.bold(bundle.name), frappe.bold(bundle.item_code), frappe.bold(lot.item_code)
-				)
-			)
-		accepted_qty = min(flt(bundle.accepted_qty), pending_qty)
-		rejected_qty = min(flt(bundle.rejected_qty), pending_qty - accepted_qty)
+	if doc.get("inspection_basis") == "Each Quantity" and not doc.get("manual_inspection"):
+		accepted_qty = min(flt(doc.accepted_unit_quantity), pending_qty)
+		rejected_qty = min(flt(doc.rejected_unit_quantity), pending_qty - accepted_qty)
 	elif doc.status == "Rejected":
 		accepted_qty, rejected_qty = 0.0, pending_qty
 	else:
@@ -260,13 +231,8 @@ def process_inspection_result(doc, method=None):
 		return
 
 	accepted_serials = None
-	if doc.get("reading_bundle"):
-		accepted_serials = (
-			frappe.get_doc("Quality Inspection Reading Bundle", doc.reading_bundle).get_unit_serials(
-				"Accepted"
-			)
-			or None
-		)
+	if doc.get("unit_readings"):
+		accepted_serials = doc.get_unit_serials("Accepted") or None
 
 	release = frappe.new_doc("Stock Entry")
 	release.purpose = "Quality Control Release"
@@ -397,17 +363,14 @@ def make_release_for_lot(lot_name: str, release_warehouse: str | None = None):
 		)
 
 	pending_qty = flt(lot.pending_qty)
-	inspection = frappe.db.get_value(
-		"Quality Inspection", lot.quality_inspection, ["status", "reading_bundle"], as_dict=True
-	)
+	inspection = frappe.get_doc("Quality Inspection", lot.quality_inspection)
 
 	accepted_serials = None
-	if inspection.reading_bundle:
-		bundle = frappe.get_doc("Quality Inspection Reading Bundle", inspection.reading_bundle)
-		accepted_qty = min(flt(bundle.accepted_qty) - flt(lot.accepted_qty), pending_qty)
+	if inspection.get("unit_readings"):
+		accepted_qty = min(flt(inspection.accepted_unit_quantity) - flt(lot.accepted_qty), pending_qty)
 		accepted_serials = [
 			serial
-			for serial in bundle.get_unit_serials("Accepted")
+			for serial in inspection.get_unit_serials("Accepted")
 			if frappe.db.get_value("Serial No", serial, "warehouse") == lot.quality_warehouse
 		] or None
 	elif inspection.status == "Rejected":
@@ -619,17 +582,13 @@ def _prefill_rejections_from_row_inspection(return_doc, row):
 	if not source_row:
 		return
 
-	inspection = frappe.db.get_value(
-		"Quality Inspection",
-		{"name": source_row.quality_inspection, "docstatus": 1},
-		["name", "reading_bundle"],
-		as_dict=True,
-	)
-	if not inspection or not inspection.reading_bundle:
+	if (
+		frappe.db.get_value("Quality Inspection", source_row.quality_inspection, "docstatus") != 1
+	):
 		return
 
-	bundle = frappe.get_doc("Quality Inspection Reading Bundle", inspection.reading_bundle)
-	if not flt(bundle.rejected_qty):
+	inspection = frappe.get_doc("Quality Inspection", source_row.quality_inspection)
+	if not inspection.get("unit_readings") or not flt(inspection.rejected_unit_quantity):
 		return
 
 	prior_returns = frappe.get_all(
@@ -649,7 +608,7 @@ def _prefill_rejections_from_row_inspection(return_doc, row):
 			)
 		)
 
-	outstanding = min(flt(bundle.rejected_qty) - already_returned, abs(flt(row.qty)))
+	outstanding = min(flt(inspection.rejected_unit_quantity) - already_returned, abs(flt(row.qty)))
 	if outstanding <= 0:
 		return
 
@@ -659,7 +618,7 @@ def _prefill_rejections_from_row_inspection(return_doc, row):
 
 	rejected_serials = [
 		serial
-		for serial in bundle.get_unit_serials("Rejected")
+		for serial in inspection.get_unit_serials("Rejected")
 		if frappe.db.get_value("Serial No", serial, "warehouse") == row.get("warehouse")
 	][: int(outstanding)]
 	if rejected_serials:
@@ -683,13 +642,11 @@ def _rejected_serials_awaiting_return(lot, outstanding):
 	if not lot.quality_inspection:
 		return None
 
-	reading_bundle = frappe.db.get_value("Quality Inspection", lot.quality_inspection, "reading_bundle")
-	if not reading_bundle:
+	inspection = frappe.get_doc("Quality Inspection", lot.quality_inspection)
+	if not inspection.get("unit_readings"):
 		return None
 
-	rejected = frappe.get_doc("Quality Inspection Reading Bundle", reading_bundle).get_unit_serials(
-		"Rejected"
-	)
+	rejected = inspection.get_unit_serials("Rejected")
 	still_held = [
 		serial
 		for serial in rejected

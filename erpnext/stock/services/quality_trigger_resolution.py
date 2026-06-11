@@ -286,15 +286,19 @@ def validate_inspected_serial_consistency(doc, method=None):
 			continue
 
 		qi = frappe.db.get_value(
-			"Quality Inspection", inspection, ["serial_no", "reading_bundle", "batch_no"], as_dict=True
+			"Quality Inspection", inspection, ["serial_no", "batch_no"], as_dict=True
 		)
 		sampled = set(get_serial_nos(qi.serial_no or "")) if qi else set()
-		if qi and qi.reading_bundle:
-			# Each Quantity inspections carry their serials per unit in the bundle
+		if qi:
+			# Each Quantity inspections carry their serials per unit
 			sampled.update(
 				frappe.get_all(
 					"Quality Inspection Reading Entry",
-					filters={"parent": qi.reading_bundle, "serial_no": ("is", "set")},
+					filters={
+						"parent": inspection,
+						"parentfield": "unit_readings",
+						"serial_no": ("is", "set"),
+					},
 					pluck="serial_no",
 				)
 			)
@@ -375,21 +379,15 @@ def get_inspection_outcomes(doc: dict | str):
 		if not row.quality_inspection:
 			continue
 
-		info = frappe.db.get_value(
-			"Quality Inspection",
-			row.quality_inspection,
-			["docstatus", "status", "reading_bundle"],
-			as_dict=True,
-		)
-		if not info or info.docstatus != 1:
+		if frappe.db.get_value("Quality Inspection", row.quality_inspection, "docstatus") != 1:
 			continue
 
+		info = frappe.get_doc("Quality Inspection", row.quality_inspection)
 		received_qty = flt(row.received_qty) or flt(row.qty) + flt(row.rejected_qty)
 		rejected_serials = None
-		if info.reading_bundle:
-			bundle = frappe.get_doc("Quality Inspection Reading Bundle", info.reading_bundle)
-			rejected_qty = min(flt(bundle.rejected_qty), received_qty)
-			rejected_serials = bundle.get_unit_serials("Rejected")
+		if info.get("unit_readings"):
+			rejected_qty = min(flt(info.rejected_unit_quantity), received_qty)
+			rejected_serials = info.get_unit_serials("Rejected")
 		elif info.status == "Rejected":
 			rejected_qty = received_qty
 		elif info.status == "Accepted":

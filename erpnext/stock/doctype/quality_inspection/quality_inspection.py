@@ -30,6 +30,10 @@ class QualityInspection(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		from erpnext.stock.doctype.quality_inspection_reading_entry.quality_inspection_reading_entry import (
+			QualityInspectionReadingEntry,
+		)
+
 		from erpnext.stock.doctype.quality_inspection_reading.quality_inspection_reading import (
 			QualityInspectionReading,
 		)
@@ -50,7 +54,6 @@ class QualityInspection(Document):
 		manual_inspection: DF.Check
 		naming_series: DF.Literal["MAT-QA-.YYYY.-"]
 		quality_inspection_template: DF.Link | None
-		reading_bundle: DF.Link | None
 		readings: DF.Table[QualityInspectionReading]
 		reference_name: DF.DynamicLink
 		reference_type: DF.Literal[
@@ -67,6 +70,10 @@ class QualityInspection(Document):
 		remarks: DF.Text | None
 		report_date: DF.Date
 		sample_size: DF.Float
+		accepted_unit_quantity: DF.Int
+		rejected_unit_quantity: DF.Int
+		unit_quantity: DF.Int
+		unit_readings: DF.Table[QualityInspectionReadingEntry]
 		status: DF.Literal["", "Accepted", "Partially Accepted", "Rejected", "Cancelled"]
 		verified_by: DF.Data | None
 
@@ -77,13 +84,27 @@ class QualityInspection(Document):
 
 	def validate(self):
 		self.set_inspection_basis_from_lot()
+		# the reference must be resolved before the unit machinery runs: the
+		# quantity under inspection comes off the referenced row or lot
+		self.validate_item_belongs_to_reference()
+		self.set_child_row_reference()
 
 		if self.inspection_basis == "Each Quantity":
-			# per-unit readings live in the reading bundle; rows lurking in the
-			# hidden readings table would invisibly block submission
+			# per-unit readings live in the unit readings table; rows lurking in
+			# the hidden readings table would invisibly block submission
 			self.set("readings", [])
-		elif not self.readings and self.item_code:
-			self.get_item_specification_details()
+			if not cint(self.unit_quantity):
+				self.unit_quantity = cint(self.get_qty_under_inspection() or 0)
+			self.validate_units()
+			self.evaluate_unit_entry_statuses()
+			self.roll_up_unit_results()
+		else:
+			# symmetric shed: a basis flipped back to Sample drops per-unit rows
+			self.set("unit_readings", [])
+			self.unit_quantity = 0
+			self.roll_up_unit_results()
+			if not self.readings and self.item_code:
+				self.get_item_specification_details()
 
 		if (
 			self.inspection_type == "In Process"
@@ -97,17 +118,13 @@ class QualityInspection(Document):
 						reading.update(d)
 						reading.status = "Accepted"
 
-		self.validate_reading_bundle_is_free()
-
 		if self.readings:
 			self.validate_reading_number_format()
 			self.inspect_and_set_status()
-		elif self.reading_bundle and not self.manual_inspection:
-			self.set_status_from_reading_bundle()
+		elif self.unit_readings and not self.manual_inspection:
+			self.set_status_from_unit_readings()
 
 		self.validate_inspection_required()
-		self.validate_item_belongs_to_reference()
-		self.set_child_row_reference()
 		self.validate_serial_nos()
 		self.set_company()
 		self.warn_unrecorded_readings()
@@ -127,6 +144,10 @@ class QualityInspection(Document):
 		lot's quantities or gate a document row it never looked at).
 		"""
 		if not (self.reference_type and self.reference_name and self.item_code):
+			return
+
+		# a caller that skips link validation has no real reference to check against
+		if self.flags.ignore_links:
 			return
 
 		if self.reference_type == "Quality Control Lot":
@@ -226,48 +247,11 @@ class QualityInspection(Document):
 		else:
 			self.inspection_basis = "Sample"
 
-	def validate_reading_bundle_is_free(self):
-		"""A reading bundle belongs to exactly one inspection."""
-		if not self.reading_bundle:
-			return
-
-		owner = frappe.db.get_value(
-			"Quality Inspection Reading Bundle", self.reading_bundle, "quality_inspection"
-		)
-		if owner and owner != self.name:
-			frappe.throw(
-				_("Reading Bundle {0} already belongs to Quality Inspection {1}.").format(
-					frappe.bold(self.reading_bundle), get_link_to_form("Quality Inspection", owner)
-				),
-				title=_("Reading Bundle In Use"),
-			)
-
-	def sync_reading_bundle_link(self):
-		"""Stamp the bundle with this inspection; release a bundle that was swapped out."""
-		before = self.get_doc_before_save()
-		previous_bundle = before.reading_bundle if before else None
-
-		if previous_bundle and previous_bundle != self.reading_bundle:
-			frappe.db.set_value(
-				"Quality Inspection Reading Bundle", previous_bundle, "quality_inspection", None
-			)
-
-		if self.reading_bundle:
-			frappe.db.set_value(
-				"Quality Inspection Reading Bundle", self.reading_bundle, "quality_inspection", self.name
-			)
-
-	def set_status_from_reading_bundle(self):
-		"""With per-unit readings, the verdict follows the bundle's unit counts."""
-		counts = frappe.db.get_value(
-			"Quality Inspection Reading Bundle",
-			self.reading_bundle,
-			["accepted_qty", "rejected_qty"],
-			as_dict=True,
-		)
-		if counts.accepted_qty and counts.rejected_qty:
+	def set_status_from_unit_readings(self):
+		"""The per-unit roll-up decides the verdict unless the inspector overrides."""
+		if self.accepted_unit_quantity and self.rejected_unit_quantity:
 			self.status = "Partially Accepted"
-		elif counts.accepted_qty:
+		elif self.accepted_unit_quantity:
 			self.status = "Accepted"
 		else:
 			self.status = "Rejected"
@@ -364,30 +348,15 @@ class QualityInspection(Document):
 		self.validate_readings_status_mandatory()
 		self.validate_readings_recorded()
 		self.validate_sample_size()
+		self.validate_unit_readings_complete()
 		self.validate_tracking_identity_recorded()
 		self.validate_inspected_serials_against_reference()
 		self.validate_inspected_batch_against_reference()
-		self.validate_reading_bundle_coverage()
-		self.submit_reading_bundle()
-
-	def submit_reading_bundle(self):
-		"""The inspection's verdict freezes its evidence: submitting the
-		inspection submits the reading bundle with it. The bundle refuses
-		manual submission, so the two can never go out of step."""
-		if not self.reading_bundle:
-			return
-
-		bundle = frappe.get_doc("Quality Inspection Reading Bundle", self.reading_bundle)
-		if bundle.docstatus != 0:
-			return
-
-		bundle.flags.via_quality_inspection = True
-		bundle.flags.ignore_permissions = True
-		bundle.submit()
+		self.validate_unit_readings_coverage()
 
 	def validate_sample_size(self):
 		"""A Sample inspection of zero units is a verdict about nothing."""
-		if self.inspection_basis == "Each Quantity" or self.reading_bundle:
+		if self.inspection_basis == "Each Quantity":
 			return
 		if flt(self.sample_size) <= 0:
 			frappe.throw(
@@ -452,14 +421,7 @@ class QualityInspection(Document):
 		from erpnext.stock.services.quality_trigger_resolution import get_row_serial_nos
 
 		inspected = set(get_serial_nos(self.serial_no)) if (self.serial_no or "").strip() else set()
-		if self.reading_bundle:
-			inspected.update(
-				frappe.get_all(
-					"Quality Inspection Reading Entry",
-					filters={"parent": self.reading_bundle, "serial_no": ("is", "set")},
-					pluck="serial_no",
-				)
-			)
+		inspected.update(entry.serial_no for entry in self.get("unit_readings") if entry.serial_no)
 		if not inspected:
 			return
 
@@ -558,7 +520,7 @@ class QualityInspection(Document):
 		if not self.item_code:
 			return
 
-		bundle_decided = self.inspection_basis == "Each Quantity" or bool(self.reading_bundle)
+		bundle_decided = self.inspection_basis == "Each Quantity"
 		item = frappe.get_cached_value(
 			"Item", self.item_code, ["has_serial_no", "has_batch_no"], as_dict=True
 		)
@@ -591,7 +553,7 @@ class QualityInspection(Document):
 		"""
 		if self.docstatus != 0 or self.is_new():
 			return
-		if self.manual_inspection or self.inspection_basis == "Each Quantity" or self.reading_bundle:
+		if self.manual_inspection or self.inspection_basis == "Each Quantity":
 			return
 
 		unrecorded = [
@@ -614,7 +576,7 @@ class QualityInspection(Document):
 		manual rows are the inspector's explicit call and exempt; Each Quantity
 		inspections and bundle-decided ones carry their readings in the bundle.
 		"""
-		if self.manual_inspection or self.inspection_basis == "Each Quantity" or self.reading_bundle:
+		if self.manual_inspection or self.inspection_basis == "Each Quantity":
 			return
 
 		if not self.readings:
@@ -638,39 +600,287 @@ class QualityInspection(Document):
 					title=_("Reading Missing"),
 				)
 
-	def validate_reading_bundle_coverage(self):
-		"""An Each Quantity inspection's bundle must cover the stock it decides."""
-		if self.inspection_basis != "Each Quantity" or not self.reading_bundle:
+	def validate_unit_readings_coverage(self):
+		"""An Each Quantity inspection must cover exactly the stock it decides."""
+		if self.inspection_basis != "Each Quantity":
 			return
 
 		# a manual inspection's verdict overrides the per-unit machinery
 		if self.manual_inspection:
 			return
 
-		bundle = frappe.db.get_value(
-			"Quality Inspection Reading Bundle",
-			self.reading_bundle,
-			["item_code", "quantity"],
-			as_dict=True,
-		)
-		if bundle.item_code != self.item_code:
+		inspected_qty = self.get_qty_under_inspection()
+		if inspected_qty and flt(self.unit_quantity) != flt(inspected_qty):
 			frappe.throw(
-				_("Reading Bundle {0} is for item {1}, not {2}.").format(
-					frappe.bold(self.reading_bundle),
-					frappe.bold(bundle.item_code),
-					frappe.bold(self.item_code),
+				_(
+					"The unit readings inspect {0} unit(s), but {1} are under inspection. Every "
+					"unit needs its own readings on an Each Quantity basis."
+				).format(self.unit_quantity, inspected_qty),
+				title=_("Incomplete Per-Unit Readings"),
+			)
+
+	def validate_units(self):
+		units = {entry.unit_no for entry in self.unit_readings}
+		if units and (min(units) < 1 or max(units) > cint(self.unit_quantity)):
+			frappe.throw(
+				_("Unit numbers must lie between 1 and the unit quantity ({0}).").format(
+					self.unit_quantity
 				)
 			)
 
-		inspected_qty = self.get_qty_under_inspection()
-		if inspected_qty and flt(bundle.quantity) != flt(inspected_qty):
+	def evaluate_unit_entry_statuses(self):
+		"""Derive each unit entry's status from its reading, like the sampled readings.
+
+		Numeric readings pass inside [min, max]; non-numeric readings are compared
+		case-insensitively against the acceptance criteria value. Entries without a
+		reading keep their manually chosen status.
+		"""
+		for entry in self.unit_readings:
+			reading = (entry.reading_value or "").strip()
+			if not reading:
+				continue
+
+			if entry.numeric:
+				passed = flt(entry.min_value) <= flt(reading) <= flt(entry.max_value)
+			elif (entry.value or "").strip():
+				passed = reading.casefold() == entry.value.strip().casefold()
+			else:
+				continue
+
+			entry.status = "Accepted" if passed else "Rejected"
+
+	def roll_up_unit_results(self):
+		"""A unit is accepted only if every one of its readings is accepted."""
+		rejected_units = {entry.unit_no for entry in self.unit_readings if entry.status == "Rejected"}
+		inspected_units = {entry.unit_no for entry in self.unit_readings}
+
+		self.rejected_unit_quantity = len(rejected_units)
+		self.accepted_unit_quantity = len(inspected_units - rejected_units)
+
+	def get_unit_serials(self, status):
+		"""Serial numbers of units whose roll-up matches the status.
+
+		A unit is rejected if any of its readings rejected. Units without a
+		recorded serial are skipped — quantity accounting covers them.
+		"""
+		rejected_units = {entry.unit_no for entry in self.unit_readings if entry.status == "Rejected"}
+		serial_by_unit = {}
+		for entry in self.unit_readings:
+			if entry.serial_no:
+				serial_by_unit.setdefault(entry.unit_no, entry.serial_no)
+
+		if status == "Accepted":
+			units = set(serial_by_unit) - rejected_units
+		else:
+			units = set(serial_by_unit) & rejected_units
+		return sorted(serial_by_unit[unit] for unit in units)
+
+	def validate_unit_readings_complete(self):
+		"""An Each Quantity inspection means every unit was actually inspected.
+
+		On submission every declared unit must have readings, and every entry
+		must carry one — otherwise untouched rows would pass on their default
+		status without anyone having looked at the unit.
+		"""
+		if self.inspection_basis != "Each Quantity" or self.manual_inspection:
+			return
+
+		if not self.unit_readings:
 			frappe.throw(
 				_(
-					"Reading Bundle {0} inspects {1} unit(s), but {2} are under inspection. Every "
-					"unit needs its own readings on an Each Quantity basis."
-				).format(frappe.bold(self.reading_bundle), bundle.quantity, inspected_qty),
-				title=_("Incomplete Per-Unit Readings"),
+					"This inspection is on an Each Quantity basis: every unit needs its own "
+					"readings. Use Populate Units to build the grid, or check Manual Inspection "
+					"to record an overriding verdict."
+				),
+				title=_("Per-Unit Readings Required"),
 			)
+
+		self._validate_unit_serials()
+		inspected_units = {entry.unit_no for entry in self.unit_readings}
+		missing_units = sorted(set(range(1, cint(self.unit_quantity) + 1)) - inspected_units)
+		if missing_units:
+			frappe.throw(
+				_("Unit(s) {0} have no readings. Every unit must be inspected before submission.").format(
+					frappe.bold(", ".join(map(str, missing_units)))
+				),
+				title=_("Units Not Inspected"),
+			)
+
+		for entry in self.unit_readings:
+			if not (entry.reading_value or "").strip():
+				frappe.throw(
+					_("Row #{0}: Record a reading for unit {1} ({2}) before submission.").format(
+						entry.idx, entry.unit_no, entry.specification
+					),
+					title=_("Reading Missing"),
+				)
+
+	def _validate_unit_serials(self):
+		"""Lot-flow unit readings of serialized items must name every unit's serial.
+
+		Without them the release falls back to picking units by age instead of
+		by verdict. Row-referenced inspections are exempt — inward serials may
+		not exist before the document submits.
+		"""
+		if not self.item_code or not frappe.get_cached_value("Item", self.item_code, "has_serial_no"):
+			return
+		if self.reference_type != "Quality Control Lot":
+			return
+
+		units_without_serial = sorted(
+			{entry.unit_no for entry in self.unit_readings if not entry.serial_no}
+			- {entry.unit_no for entry in self.unit_readings if entry.serial_no}
+		)
+		if units_without_serial:
+			frappe.throw(
+				_("Unit(s) {0} have no Serial No — every unit of a serialized item must be identified.").format(
+					frappe.bold(", ".join(map(str, units_without_serial)))
+				),
+				title=_("Unit Serials Missing"),
+			)
+
+		unit_serials = {}
+		for entry in self.unit_readings:
+			if entry.serial_no and unit_serials.setdefault(entry.unit_no, entry.serial_no) != entry.serial_no:
+				frappe.throw(
+					_("Unit {0} carries two different serials.").format(frappe.bold(entry.unit_no))
+				)
+		if len(set(unit_serials.values())) != len(unit_serials):
+			frappe.throw(_("The same Serial No is recorded against more than one unit."))
+
+	@frappe.whitelist()
+	def populate_units(self):
+		"""Generate one unit reading row per unit and template parameter."""
+		parameters = get_template_details(self.quality_inspection_template)
+		if not parameters:
+			frappe.throw(_("Select a Quality Inspection Template with parameters first."))
+
+		if not cint(self.unit_quantity):
+			self.unit_quantity = cint(self.get_qty_under_inspection() or 0)
+		if not cint(self.unit_quantity):
+			frappe.throw(_("Set the Unit Quantity first."))
+
+		unit_serials = self._get_unit_serials_for_population()
+		self.set("unit_readings", [])
+		for unit_no in range(1, cint(self.unit_quantity) + 1):
+			for parameter in parameters:
+				self.append(
+					"unit_readings",
+					{
+						"unit_no": unit_no,
+						"serial_no": unit_serials.get(unit_no),
+						"specification": parameter.specification,
+						"numeric": parameter.numeric,
+						"value": parameter.value,
+						"min_value": parameter.min_value,
+						"max_value": parameter.max_value,
+						"status": "Accepted",
+					},
+				)
+		self.roll_up_unit_results()
+
+	def _get_unit_serials_for_population(self):
+		"""Map units to serials when the stock under inspection names them.
+
+		Lot flow: the serials that arrived through the lot's source document and
+		still sit in its Quality Control warehouse. Row flow: the referenced
+		row's serials. Only an unambiguous one-serial-per-unit match prefills.
+		"""
+		from erpnext.stock.services.quality_trigger_resolution import get_row_serial_nos
+
+		if not self.item_code or not frappe.get_cached_value("Item", self.item_code, "has_serial_no"):
+			return {}
+
+		serials = []
+		if self.reference_type == "Quality Control Lot" and self.reference_name:
+			lot = frappe.db.get_value(
+				"Quality Control Lot",
+				self.reference_name,
+				["item_code", "batch_no", "quality_warehouse", "source_document_type", "source_document"],
+				as_dict=True,
+			)
+			if lot and lot.source_document_type and lot.source_document:
+				child_doctype = (
+					"Stock Entry Detail"
+					if lot.source_document_type == "Stock Entry"
+					else lot.source_document_type + " Item"
+				)
+				members = set()
+				for row in frappe.get_all(
+					child_doctype,
+					filters={"parent": lot.source_document, "item_code": lot.item_code},
+					fields=["serial_no", "serial_and_batch_bundle"],
+				):
+					members.update(get_row_serial_nos(row))
+				for serial in members:
+					info = frappe.db.get_value(
+						"Serial No", serial, ["warehouse", "batch_no"], as_dict=True
+					)
+					if not info or info.warehouse != lot.quality_warehouse:
+						continue
+					# a per-batch lot covers only its own batch's serials
+					if lot.batch_no and info.batch_no and info.batch_no != lot.batch_no:
+						continue
+					serials.append(serial)
+				serials.sort()
+		elif self.child_row_reference:
+			child_doctype = (
+				"Stock Entry Detail"
+				if self.reference_type == "Stock Entry"
+				else self.reference_type + " Item"
+			)
+			row = frappe.db.get_value(
+				child_doctype,
+				self.child_row_reference,
+				["serial_no", "serial_and_batch_bundle"],
+				as_dict=True,
+			)
+			if row:
+				serials = sorted(get_row_serial_nos(row))
+
+		if len(serials) != cint(self.unit_quantity):
+			return {}
+		return {unit_no: serial for unit_no, serial in enumerate(serials, start=1)}
+
+	def _validate_links(self):
+		# frappe validates links before validate() runs, so the waiver must
+		# intercept here rather than set a flag from validate
+		if self._unborn_unit_serials_vouched_by_referenced_row():
+			return
+		super()._validate_links()
+
+	def _unborn_unit_serials_vouched_by_referenced_row(self):
+		"""Whether every unborn unit-reading serial is one the inspected document will create.
+
+		An inward document inspected before submission (Block / Warn) types its
+		serials on the row; they exist nowhere else yet. Unit readings may name
+		them — the per-unit verdicts are exactly what the accepted/rejected
+		split needs — so when every unborn serial is vouched for by the
+		referenced row's typed serials, link validation stands down.
+		"""
+		unborn = {
+			entry.serial_no
+			for entry in self.get("unit_readings") or []
+			if entry.serial_no and not frappe.db.exists("Serial No", entry.serial_no)
+		}
+		if not unborn:
+			return False
+
+		if self.reference_type == "Quality Control Lot" or not self.child_row_reference:
+			return False
+
+		from erpnext.stock.services.quality_trigger_resolution import get_row_serial_nos
+
+		child_doctype = (
+			"Stock Entry Detail" if self.reference_type == "Stock Entry" else self.reference_type + " Item"
+		)
+		row = frappe.db.get_value(
+			child_doctype,
+			self.child_row_reference,
+			["serial_no", "serial_and_batch_bundle"],
+			as_dict=True,
+		)
+		return bool(row) and not (unborn - set(get_row_serial_nos(row)))
 
 	@frappe.whitelist()
 	def get_qty_under_inspection(self):
@@ -717,42 +927,16 @@ class QualityInspection(Document):
 
 	def on_update(self):
 		self.update_qc_reference()
-		self.sync_reading_bundle_link()
 
 	def on_submit(self):
 		self.update_qc_reference()
 
 	def on_cancel(self):
-		# the bundle is cancelled server-side below, in the right order — the
-		# client cancel-all dialog must not try it first
-		self.ignore_linked_doctypes = ("Serial and Batch Bundle", "Quality Inspection Reading Bundle")
-
+		self.ignore_linked_doctypes = ("Serial and Batch Bundle",)
 		self.update_qc_reference()
-		self.cancel_reading_bundle()
-
-	def cancel_reading_bundle(self):
-		"""A voided inspection voids its per-unit readings with it.
-
-		The claim stays on the cancelled pair for the audit trail, so the
-		readings can never decide other stock; re-inspection goes through an
-		amended bundle.
-		"""
-		if not self.reading_bundle:
-			return
-
-		bundle = frappe.get_doc("Quality Inspection Reading Bundle", self.reading_bundle)
-		if bundle.docstatus == 1:
-			bundle.flags.ignore_permissions = True
-			bundle.cancel()
 
 	def on_trash(self):
 		self.update_qc_reference(remove_reference=True)
-		# release every bundle born from this inspection, not just the attached
-		# one — orphan drafts would otherwise block the deletion
-		for bundle in frappe.get_all(
-			"Quality Inspection Reading Bundle", filters={"quality_inspection": self.name}, pluck="name"
-		):
-			frappe.db.set_value("Quality Inspection Reading Bundle", bundle, "quality_inspection", None)
 
 	def validate_readings_status_mandatory(self):
 		for reading in self.readings:
@@ -1116,22 +1300,6 @@ def parse_reading(value: str, decimal_str: str, comma_str: str) -> float | None:
 		return None
 
 	return number if isfinite(number) else None
-
-
-@frappe.whitelist()
-def make_reading_bundle(quality_inspection: str):
-	"""A reading bundle born from its inspection, fully formed.
-
-	Created server-side because the client's route options skip no_copy fields —
-	the inspection backlink would be dropped and the bundle born unlinked.
-	"""
-	inspection = frappe.get_doc("Quality Inspection", quality_inspection)
-	bundle = frappe.new_doc("Quality Inspection Reading Bundle")
-	bundle.quality_inspection = inspection.name
-	bundle.item_code = inspection.item_code
-	bundle.quality_inspection_template = inspection.quality_inspection_template
-	bundle.quantity = cint(inspection.get_qty_under_inspection())
-	return bundle
 
 
 def parse_float(num: str) -> float:

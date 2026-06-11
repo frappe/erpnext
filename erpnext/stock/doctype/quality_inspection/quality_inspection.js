@@ -42,18 +42,6 @@ frappe.ui.form.on("Quality Inspection", {
 			};
 		});
 
-		// bundles are born from their inspection: only this inspection's own
-		// bundles are selectable
-		frm.set_query("reading_bundle", function (doc) {
-			return {
-				filters: {
-					item_code: doc.item_code,
-					quality_inspection: doc.name,
-					docstatus: ["!=", 2],
-				},
-			};
-		});
-
 		// item code based on GRN/DN
 		frm.set_query("item_code", function (doc) {
 			if (doc.reference_type && doc.reference_name) {
@@ -70,34 +58,42 @@ frappe.ui.form.on("Quality Inspection", {
 	},
 
 	refresh: function (frm) {
-		// Ignore cancellation of reference doctype on cancel all. The reading
-		// bundle is frozen evidence — released by the server on cancel, not cancelled.
-		frm.ignore_doctypes_on_cancel_all = [
-			frm.doc.reference_type,
-			"Serial and Batch Bundle",
-			"Quality Inspection Reading Bundle",
-		];
+		// Ignore cancellation of reference doctype on cancel all.
+		frm.ignore_doctypes_on_cancel_all = [frm.doc.reference_type, "Serial and Batch Bundle"];
 		frm.trigger("toggle_batch_and_serial_fields");
-		// this Frappe version's DocField schema drops only_select from the doctype
-		// JSON, so set it client-side: bundles are born from the Create Reading
-		// Bundle button (server-side), never from the link field
-		frm.set_df_property("reading_bundle", "only_select", 1);
+		frm.trigger("toggle_populate_units_button");
+	},
 
+	inspection_basis(frm) {
+		frm.trigger("toggle_batch_and_serial_fields");
+		frm.trigger("toggle_populate_units_button");
+	},
+
+	quality_inspection_template(frm) {
+		frm.trigger("toggle_populate_units_button");
+		if (frm.doc.quality_inspection_template && frm.doc.inspection_basis !== "Each Quantity") {
+			return frm.call({
+				method: "get_item_specification_details",
+				doc: frm.doc,
+				callback: function () {
+					refresh_field("readings");
+				},
+			});
+		}
+	},
+
+	toggle_populate_units_button(frm) {
+		frm.remove_custom_button(__("Populate Units"));
 		if (
 			frm.doc.docstatus === 0 &&
-			!frm.is_new() &&
 			frm.doc.inspection_basis === "Each Quantity" &&
-			!frm.doc.reading_bundle
+			!frm.doc.manual_inspection &&
+			frm.doc.quality_inspection_template
 		) {
-			frm.add_custom_button(__("Create Reading Bundle"), () => {
-				frappe.call({
-					method: "erpnext.stock.doctype.quality_inspection.quality_inspection.make_reading_bundle",
-					args: { quality_inspection: frm.doc.name },
-					freeze: true,
-					callback: (r) => {
-						const bundle = frappe.model.sync(r.message)[0];
-						frappe.set_route("Form", bundle.doctype, bundle.name);
-					},
+			frm.add_custom_button(__("Populate Units"), () => {
+				frm.call("populate_units").then(() => {
+					frm.refresh_field("unit_readings");
+					frm.dirty();
 				});
 			});
 		}
@@ -115,15 +111,14 @@ frappe.ui.form.on("Quality Inspection", {
 		frappe.db.get_value("Item", frm.doc.item_code, ["has_batch_no", "has_serial_no"]).then((r) => {
 			frm.__item_is_serialized = cint(r.message?.has_serial_no);
 			const has_batch = cint(r.message?.has_batch_no);
-			const bundle_decided =
-				frm.doc.inspection_basis === "Each Quantity" || Boolean(frm.doc.reading_bundle);
+			const bundle_decided = frm.doc.inspection_basis === "Each Quantity";
 			const show_serial = frm.__item_is_serialized && !bundle_decided;
-			// a lot-referenced bundle inspection draws its identity from the lot:
-			// serials per unit in the bundle, the batch on the lot itself
+			// a lot-referenced Each Quantity inspection draws its identity from
+			// the lot: serials per unit below, the batch on the lot itself
 			const batch_exempt = bundle_decided && frm.doc.reference_type === "Quality Control Lot";
 
 			frm.toggle_display("batch_no", has_batch && !batch_exempt);
-			// Each Quantity inspections record serials per unit in the bundle
+			// Each Quantity inspections record serials per unit below
 			frm.toggle_display("serial_no", show_serial);
 			// the recorded serials drive the sample size for serialized items
 			frm.set_df_property("sample_size", "read_only", show_serial ? 1 : 0);
@@ -194,15 +189,4 @@ frappe.ui.form.on("Quality Inspection", {
 		}
 	},
 
-	quality_inspection_template: function (frm) {
-		if (frm.doc.quality_inspection_template) {
-			return frm.call({
-				method: "get_item_specification_details",
-				doc: frm.doc,
-				callback: function () {
-					refresh_field("readings");
-				},
-			});
-		}
-	},
 });

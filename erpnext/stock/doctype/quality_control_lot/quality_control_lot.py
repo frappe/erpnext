@@ -128,12 +128,11 @@ def get_serial_numbers(lot_name: str):
 
 	verdicts = {}
 	if lot.quality_inspection:
-		reading_bundle = frappe.db.get_value("Quality Inspection", lot.quality_inspection, "reading_bundle")
-		if reading_bundle:
-			bundle = frappe.get_doc("Quality Inspection Reading Bundle", reading_bundle)
-			for serial in bundle.get_unit_serials("Accepted"):
+		inspection = frappe.get_doc("Quality Inspection", lot.quality_inspection)
+		if inspection.get("unit_readings"):
+			for serial in inspection.get_unit_serials("Accepted"):
 				verdicts[serial] = "Accepted"
-			for serial in bundle.get_unit_serials("Rejected"):
+			for serial in inspection.get_unit_serials("Rejected"):
 				verdicts[serial] = "Rejected"
 
 	serials = []
