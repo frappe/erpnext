@@ -108,8 +108,9 @@
   {
    "fieldname": "accepted_qty",
    "fieldtype": "Float",
-   "label": "Accepted Qty",
-   "read_only": 1
+   "label": "Released Qty",
+   "read_only": 1,
+   "description": "Accepted quantity that has physically left quarantine through a Quality Control Release. The verdict's accepted count is Decided Qty minus Rejected Qty."
   },
   {
    "fieldname": "rejected_qty",
