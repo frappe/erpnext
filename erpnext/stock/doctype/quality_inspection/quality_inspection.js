@@ -100,23 +100,49 @@ frappe.ui.form.on("Quality Inspection", {
 		// only show batch / serial for items that are actually tracked that way
 		if (!frm.doc.item_code) {
 			frm.toggle_display(["batch_no", "serial_no"], false);
+			frm.set_df_property("batch_no", "reqd", 0);
+			frm.set_df_property("serial_no", "reqd", 0);
 			return;
 		}
 
 		frappe.db.get_value("Item", frm.doc.item_code, ["has_batch_no", "has_serial_no"]).then((r) => {
 			frm.__item_is_serialized = cint(r.message?.has_serial_no);
-			frm.toggle_display("batch_no", cint(r.message?.has_batch_no));
+			const has_batch = cint(r.message?.has_batch_no);
+			const bundle_decided =
+				frm.doc.inspection_basis === "Each Quantity" || Boolean(frm.doc.reading_bundle);
+			const show_serial = frm.__item_is_serialized && !bundle_decided;
+
+			frm.toggle_display("batch_no", has_batch);
 			// Each Quantity inspections record serials per unit in the bundle
-			frm.toggle_display(
-				"serial_no",
-				frm.__item_is_serialized && frm.doc.inspection_basis !== "Each Quantity"
-			);
+			frm.toggle_display("serial_no", show_serial);
 			// the recorded serials drive the sample size for serialized items
-			frm.set_df_property(
-				"sample_size",
-				"read_only",
-				frm.__item_is_serialized && frm.doc.inspection_basis !== "Each Quantity" ? 1 : 0
-			);
+			frm.set_df_property("sample_size", "read_only", show_serial ? 1 : 0);
+
+			// mirror the server's identity gates as mandatory marks
+			frm.set_df_property("serial_no", "reqd", show_serial ? 1 : 0);
+
+			const batch_exempt = bundle_decided && frm.doc.reference_type === "Quality Control Lot";
+			if (!has_batch || batch_exempt) {
+				frm.set_df_property("batch_no", "reqd", 0);
+			} else if (frm.doc.child_row_reference && frm.doc.reference_type !== "Quality Control Lot") {
+				// an auto-created batch does not exist before the inbound document
+				// submits — the field cannot be filled, so it cannot be mandatory
+				const child_doctype =
+					frm.doc.reference_type === "Stock Entry"
+						? "Stock Entry Detail"
+						: frm.doc.reference_type + " Item";
+				frappe.db
+					.get_value(child_doctype, frm.doc.child_row_reference, [
+						"batch_no",
+						"serial_and_batch_bundle",
+					])
+					.then((row) => {
+						const row_has_batch = row.message?.batch_no || row.message?.serial_and_batch_bundle;
+						frm.set_df_property("batch_no", "reqd", row_has_batch ? 1 : 0);
+					});
+			} else {
+				frm.set_df_property("batch_no", "reqd", 1);
+			}
 		});
 	},
 
