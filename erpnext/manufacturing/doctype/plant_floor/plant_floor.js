@@ -28,12 +28,7 @@ frappe.ui.form.on("Plant Floor", {
 				frappe.throw(__("Please select Company first"));
 			}
 
-			return {
-				filters: {
-					is_group: 0,
-					company: doc.company,
-				},
-			};
+			return erpnext.queries.warehouse(doc);
 		});
 	},
 

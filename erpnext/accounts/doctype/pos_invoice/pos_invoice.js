@@ -33,13 +33,7 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 			this.frm.refresh_fields();
 		}
 
-		this.frm.set_query("set_warehouse", function (doc) {
-			return {
-				filters: {
-					company: doc.company ? doc.company : "",
-				},
-			};
-		});
+		this.frm.set_query("set_warehouse", (doc) => erpnext.queries.warehouse(doc));
 
 		this.frm.set_query("item_code", "items", function (doc) {
 			return {

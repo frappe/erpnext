@@ -17,13 +17,7 @@ frappe.ui.form.on("Work Order", {
 		frm.events.set_company_filters(frm, "fg_warehouse");
 		frm.events.set_company_filters(frm, "scrap_warehouse");
 
-		frm.set_query("source_warehouse", "required_items", function () {
-			return {
-				filters: {
-					company: frm.doc.company,
-				},
-			};
-		});
+		frm.set_query("source_warehouse", "required_items", () => erpnext.queries.warehouse(frm.doc));
 
 		frm.set_query("sales_order", function () {
 			return {

@@ -8,6 +8,14 @@ erpnext.buying = {
 		erpnext.buying.BuyingController = class BuyingController extends erpnext.TransactionController {
 			setup() {
 				super.setup();
+
+				// rejected stock goes to Rejected-type warehouses
+				this.frm.set_query("rejected_warehouse", () =>
+					erpnext.queries.rejected_warehouse(this.frm.doc)
+				);
+				this.frm.set_query("rejected_warehouse", "items", () =>
+					erpnext.queries.rejected_warehouse(this.frm.doc)
+				);
 				this.toggle_enable_for_stock_uom("allow_to_edit_stock_uom_qty_for_purchase");
 				this.frm.email_field = "contact_email";
 				this.frm.add_fetch("project", "cost_center", "cost_center");

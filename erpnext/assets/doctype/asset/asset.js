@@ -15,14 +15,7 @@ frappe.ui.form.on("Asset", {
 			};
 		});
 
-		frm.set_query("warehouse", function () {
-			return {
-				filters: {
-					company: frm.doc.company,
-					is_group: 0,
-				},
-			};
-		});
+		frm.set_query("warehouse", () => erpnext.queries.warehouse(frm.doc));
 
 		frm.set_query("department", function () {
 			return {

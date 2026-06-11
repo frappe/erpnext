@@ -182,9 +182,19 @@ $.extend(erpnext.queries, {
 			filters: [
 				["Warehouse", "company", "in", ["", cstr(doc.company)]],
 				["Warehouse", "is_group", "=", 0],
-				// quarantine is entered by routing and left by release/return —
-				// never by picking the Quality Control warehouse on a transaction
-				["Warehouse", "warehouse_type", "!=", "Quality"],
+				// quarantine is entered by routing and left by release/return, and
+				// rejected stock by its dedicated fields — neither is an ordinary pick
+				["Warehouse", "warehouse_type", "not in", ["Quality", "Rejected"]],
+			],
+		};
+	},
+
+	rejected_warehouse: function (doc) {
+		return {
+			filters: [
+				["Warehouse", "company", "in", ["", cstr(doc.company)]],
+				["Warehouse", "is_group", "=", 0],
+				["Warehouse", "warehouse_type", "=", "Rejected"],
 			],
 		};
 	},

@@ -27,14 +27,7 @@ frappe.ui.form.on("Stock Reservation Entry", {
 	},
 
 	set_queries(frm) {
-		frm.set_query("warehouse", () => {
-			return {
-				filters: {
-					is_group: 0,
-					company: frm.doc.company,
-				},
-			};
-		});
+		frm.set_query("warehouse", () => erpnext.queries.warehouse(frm.doc));
 
 		frm.set_query("serial_no", "sb_entries", function (doc, cdt, cdn) {
 			var selected_serial_nos = doc.sb_entries.map((row) => {

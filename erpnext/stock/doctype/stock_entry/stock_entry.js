@@ -5,6 +5,14 @@ frappe.provide("erpnext.accounts.dimensions");
 
 erpnext.landed_cost_taxes_and_charges.setup_triggers("Stock Entry");
 
+function source_warehouse_query(frm) {
+	const query = erpnext.queries.warehouse(frm.doc);
+	if (frm.__sample_retention_warehouse) {
+		query.filters.push(["Warehouse", "name", "!=", frm.__sample_retention_warehouse]);
+	}
+	return query;
+}
+
 frappe.ui.form.on("Stock Entry", {
 	setup: function (frm) {
 		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
@@ -66,24 +74,10 @@ frappe.ui.form.on("Stock Entry", {
 		});
 
 		frappe.db.get_value("Company", frm.doc.company, "sample_retention_warehouse", (r) => {
-			if (r.sample_retention_warehouse) {
-				let filters = [
-					["Warehouse", "company", "=", frm.doc.company],
-					["Warehouse", "is_group", "=", 0],
-					["Warehouse", "name", "!=", r.sample_retention_warehouse],
-				];
-				frm.set_query("from_warehouse", function () {
-					return {
-						filters: filters,
-					};
-				});
-				frm.set_query("s_warehouse", "items", function () {
-					return {
-						filters: filters,
-					};
-				});
-			}
+			frm.__sample_retention_warehouse = r.sample_retention_warehouse;
 		});
+
+		frm.set_query("from_warehouse", () => source_warehouse_query(frm));
 
 		frm.set_query("batch_no", "items", function (doc, cdt, cdn) {
 			let item = locals[cdt][cdn];
@@ -143,7 +137,7 @@ frappe.ui.form.on("Stock Entry", {
 					},
 				};
 			}
-			return erpnext.queries.warehouse(frm.doc);
+			return source_warehouse_query(frm);
 		});
 
 		frm.set_query("t_warehouse", "items", function () {

@@ -29,14 +29,7 @@ frappe.ui.form.on("Material Request", {
 			};
 		});
 
-		frm.set_query("from_warehouse", "items", function (doc) {
-			return {
-				filters: {
-					company: doc.company,
-					is_group: 0,
-				},
-			};
-		});
+		frm.set_query("from_warehouse", "items", (doc) => erpnext.queries.warehouse(doc));
 
 		frm.set_query("bom_no", "items", function (doc, cdt, cdn) {
 			var row = locals[cdt][cdn];
@@ -72,32 +65,11 @@ frappe.ui.form.on("Material Request", {
 		// set schedule_date
 		set_schedule_date(frm);
 
-		frm.set_query("warehouse", "items", function (doc) {
-			return {
-				filters: {
-					company: doc.company,
-					is_group: 0,
-				},
-			};
-		});
+		frm.set_query("warehouse", "items", (doc) => erpnext.queries.warehouse(doc));
 
-		frm.set_query("set_warehouse", function (doc) {
-			return {
-				filters: {
-					company: doc.company,
-					is_group: 0,
-				},
-			};
-		});
+		frm.set_query("set_warehouse", (doc) => erpnext.queries.warehouse(doc));
 
-		frm.set_query("set_from_warehouse", function (doc) {
-			return {
-				filters: {
-					company: doc.company,
-					is_group: 0,
-				},
-			};
-		});
+		frm.set_query("set_from_warehouse", (doc) => erpnext.queries.warehouse(doc));
 
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 		if (!frm.doc.buying_price_list) {

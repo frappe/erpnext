@@ -3,14 +3,7 @@
 
 frappe.ui.form.on("Putaway Rule", {
 	setup: function (frm) {
-		frm.set_query("warehouse", function () {
-			return {
-				filters: {
-					company: frm.doc.company,
-					is_group: 0,
-				},
-			};
-		});
+		frm.set_query("warehouse", () => erpnext.queries.warehouse(frm.doc));
 	},
 
 	uom: function (frm) {

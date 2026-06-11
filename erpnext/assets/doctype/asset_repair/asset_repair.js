@@ -50,14 +50,7 @@ frappe.ui.form.on("Asset Repair", {
 			};
 		});
 
-		frm.set_query("warehouse", "stock_items", function () {
-			return {
-				filters: {
-					is_group: 0,
-					company: frm.doc.company,
-				},
-			};
-		});
+		frm.set_query("warehouse", "stock_items", () => erpnext.queries.warehouse(frm.doc));
 
 		frm.set_query("serial_and_batch_bundle", "stock_items", (doc, cdt, cdn) => {
 			let row = locals[cdt][cdn];
