@@ -175,6 +175,9 @@ frappe.ui.form.on("BOM", {
 	with_operations: function (frm) {
 		frm.set_df_property("fg_based_operating_cost", "hidden", frm.doc.with_operations ? 1 : 0);
 		frm.trigger("toggle_fields_for_semi_finished_goods");
+		if (frm.doc.routing && frm.doc.with_operations && !frm.doc.operations.length) {
+			frm.trigger("routing");
+		}
 	},
 
 	fg_based_operating_cost: function (frm) {
@@ -583,7 +586,7 @@ frappe.ui.form.on("BOM", {
 	},
 
 	routing(frm) {
-		if (frm.doc.routing && frm.doc.with_operations && !frm.doc.operations) {
+		if (frm.doc.routing && frm.doc.with_operations && !frm.doc.operations.length) {
 			frappe.call({
 				doc: frm.doc,
 				method: "get_routing",
