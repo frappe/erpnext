@@ -36,7 +36,7 @@ frappe.ui.form.on("Quotation", {
 			};
 		});
 
-		frm.set_query("warehouse", "items", (doc) => erpnext.queries.warehouse(doc));
+		frm.set_query("warehouse", "items", (doc) => erpnext.queries.source_warehouse(doc));
 
 		frm.set_indicator_formatter("item_code", function (doc) {
 			return !doc.qty && frm.doc.has_unit_price_items ? "yellow" : "";

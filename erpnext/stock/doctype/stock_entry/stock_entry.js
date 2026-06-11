@@ -39,7 +39,7 @@ function set_quarantine_warehouse_queries(frm) {
 }
 
 function source_warehouse_query(frm) {
-	const query = erpnext.queries.warehouse(frm.doc);
+	const query = erpnext.queries.source_warehouse(frm.doc);
 	if (frm.__sample_retention_warehouse) {
 		query.filters.push(["Warehouse", "name", "!=", frm.__sample_retention_warehouse]);
 	}

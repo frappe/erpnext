@@ -15,10 +15,9 @@ def execute():
 		frappe.get_doc({"doctype": "Warehouse Type", "name": "Rejected"}).insert(ignore_permissions=True)
 
 	if frappe.db.has_column("Warehouse", "is_rejected_warehouse"):
-		frappe.db.sql(
-			"""
-			UPDATE `tabWarehouse`
-			SET warehouse_type = 'Rejected'
-			WHERE is_rejected_warehouse = 1
-			"""
-		)
+		warehouse = frappe.qb.DocType("Warehouse")
+		(
+			frappe.qb.update(warehouse)
+			.set(warehouse.warehouse_type, "Rejected")
+			.where(warehouse.is_rejected_warehouse == 1)
+		).run()

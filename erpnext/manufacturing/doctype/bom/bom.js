@@ -62,7 +62,7 @@ frappe.ui.form.on("BOM", {
 			};
 		});
 
-		frm.set_query("source_warehouse", "items", () => erpnext.queries.warehouse(frm.doc));
+		frm.set_query("source_warehouse", "items", () => erpnext.queries.source_warehouse(frm.doc));
 
 		frm.phantom_bom_filters = {
 			query: "erpnext.manufacturing.doctype.bom.bom.item_query",

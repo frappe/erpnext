@@ -34,7 +34,7 @@ frappe.ui.form.on("Job Card", {
 		frm.events.set_company_filters(frm, "source_warehouse");
 		frm.events.set_company_filters(frm, "wip_warehouse");
 
-		frm.set_query("source_warehouse", "items", () => erpnext.queries.warehouse(frm.doc));
+		frm.set_query("source_warehouse", "items", () => erpnext.queries.source_warehouse(frm.doc));
 
 		frm.set_indicator_formatter("sub_operation", (doc) => {
 			if (doc.status === "Pending") return "red";

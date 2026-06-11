@@ -189,6 +189,19 @@ $.extend(erpnext.queries, {
 		};
 	},
 
+	source_warehouse: function (doc) {
+		return {
+			filters: [
+				["Warehouse", "company", "in", ["", cstr(doc.company)]],
+				["Warehouse", "is_group", "=", 0],
+				// quarantine only leaves through a release or return — but rejected
+				// stock moved to a Rejected warehouse re-enters normal flows there
+				// (scrap, rework, sale as scrap), so outbound picks may offer it
+				["Warehouse", "warehouse_type", "!=", "Quality"],
+			],
+		};
+	},
+
 	rejected_warehouse: function (doc) {
 		return {
 			filters: [

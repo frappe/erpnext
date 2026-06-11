@@ -988,7 +988,7 @@ def warehouse_query(doctype: str, txt: str, searchfield: str, start: int, page_l
 			Concat("Actual Qty", " : ", IfNull(Round(bin_dt.actual_qty, 2), 0)).as_("actual_qty"),
 		)
 		.where(wh[searchfield].like(f"%{txt}%"))
-		.where(IfNull(wh.warehouse_type, "").notin(["Quality", "Rejected"]))
+		.where(IfNull(wh.warehouse_type, "") != "Quality")
 	)
 
 	for condition in get_filter_conditions_qb("Warehouse", filter_dict.get("Warehouse")):
