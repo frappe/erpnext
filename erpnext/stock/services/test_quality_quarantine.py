@@ -264,6 +264,8 @@ class TestQualityQuarantine(ERPNextTestSuite):
 
 		submit_inspection_for_lot(lot)
 		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "pending_qty"), 4)
+		# decided but nothing has physically left quarantine yet
+		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "status"), "Awaiting Release")
 
 		# pre-filled with the accepted quantity; the user picked the store
 		release = make_release_for_lot(lot, store_one)

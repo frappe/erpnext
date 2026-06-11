@@ -239,8 +239,11 @@ def process_inspection_result(doc, method=None):
 
 	if rejected_qty:
 		lot.rejected_qty = flt(lot.rejected_qty) + rejected_qty
-		lot.flags.ignore_permissions = True
-		lot.save()
+	# save unconditionally: the deciding inspection is on record now, so the
+	# status recomputes even when nothing books yet (Awaiting Release when the
+	# release cannot run automatically)
+	lot.flags.ignore_permissions = True
+	lot.save()
 
 	if not accepted_qty:
 		return
@@ -712,6 +715,8 @@ def sync_source_document_quality_status(source_doctype, source_name):
 
 	if "Under Inspection" in statuses:
 		value = "Under Inspection"
+	elif "Awaiting Release" in statuses:
+		value = "Awaiting Release"
 	elif "Partially Released" in statuses:
 		value = "Partially Released"
 	elif statuses == {"Released"}:
@@ -764,8 +769,8 @@ def reverse_inspection_result(doc, method=None):
 	lot.reload()
 	if flt(lot.rejected_qty):
 		lot.rejected_qty = 0
-		lot.flags.ignore_permissions = True
-		lot.save()
+	lot.flags.ignore_permissions = True
+	lot.save()
 
 
 def handle_source_document_cancel(doc, method=None):

@@ -1477,7 +1477,7 @@
    "in_standard_filter": 1,
    "label": "Quality Status",
    "no_copy": 1,
-   "options": "\nUnder Inspection\nPartially Released\nReleased\nRejected\nInspection Completed",
+   "options": "\nUnder Inspection\nAwaiting Release\nPartially Released\nReleased\nRejected\nInspection Completed",
    "print_hide": 1,
    "read_only": 1
   }

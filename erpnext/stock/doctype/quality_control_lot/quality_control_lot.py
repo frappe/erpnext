@@ -31,7 +31,7 @@ class QualityControlLot(Document):
 		returned_qty: DF.Float
 		source_document: DF.DynamicLink | None
 		source_document_type: DF.Link | None
-		status: DF.Literal["Under Inspection", "Partially Released", "Released", "Rejected"]
+		status: DF.Literal["Under Inspection", "Awaiting Release", "Partially Released", "Released", "Rejected"]
 	# end: auto-generated types
 
 	def on_update(self):
@@ -52,10 +52,17 @@ class QualityControlLot(Document):
 		self.pending_qty = flt(self.received_qty) - flt(self.accepted_qty) - flt(self.rejected_qty)
 
 		resolved = flt(self.accepted_qty) + flt(self.rejected_qty)
-		if resolved <= 0:
+		if self.pending_qty > 0:
+			if not self.quality_inspection:
+				self.status = "Under Inspection" if resolved <= 0 else "Partially Released"
+			elif flt(self.accepted_qty) > 0:
+				self.status = "Partially Released"
+			else:
+				# the verdict is in but no stock has left yet — typically no
+				# unique release warehouse, so the release awaits the user
+				self.status = "Awaiting Release"
+		elif resolved <= 0:
 			self.status = "Under Inspection"
-		elif self.pending_qty > 0:
-			self.status = "Partially Released"
 		elif flt(self.accepted_qty) <= 0:
 			self.status = "Rejected"
 		else:

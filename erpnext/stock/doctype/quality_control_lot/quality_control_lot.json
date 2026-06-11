@@ -142,7 +142,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Under Inspection\nPartially Released\nReleased\nRejected",
+   "options": "Under Inspection\nAwaiting Release\nPartially Released\nReleased\nRejected",
    "read_only": 1
   },
   {
