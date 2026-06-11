@@ -152,6 +152,7 @@ class BOMCreator(Document):
 
 	@frappe.whitelist()
 	def add_boms(self):
+		frappe.has_permission("BOM Creator", "submit", doc=self, throw=True)
 		self.submit()
 
 	def set_rate_for_items(self):
@@ -209,10 +210,14 @@ class BOMCreator(Document):
 				frappe.throw(_("Please set {0} in BOM Creator {1}").format(_(label), self.name))
 
 	def on_submit(self):
-		self.enqueue_create_boms()
+		self.enqueue_bom_creation()
 
 	@frappe.whitelist()
 	def enqueue_create_boms(self):
+		frappe.has_permission("BOM Creator", "submit", doc=self, throw=True)
+		self.enqueue_bom_creation()
+
+	def enqueue_bom_creation(self):
 		frappe.enqueue(
 			self.create_boms,
 			queue="short",
@@ -281,6 +286,23 @@ class BOMCreator(Document):
 
 			frappe.msgprint(_("BOMs creation failed"))
 
+	@frappe.whitelist()
+	def edit_qty(self, docname: str, qty: float):
+		frappe.has_permission("BOM Creator", "write", doc=self, throw=True)
+
+		if not frappe.db.exists("BOM Creator Item", {"name": docname, "parent": self.name}):
+			frappe.throw(_("BOM Creator Item {0} does not exist").format(docname))
+
+		for row in self.items:
+			if row.name == docname:
+				row.qty = flt(qty)
+				break
+
+		self.set_rate_for_items()
+		self.save()
+
+		return self
+
 	def create_bom(self, row, production_item_wise_rm):
 		bom_creator_item = row.name if row.name != self.name else ""
 		if frappe.db.exists(
@@ -336,17 +358,22 @@ class BOMCreator(Document):
 		production_item_wise_rm[(row.item_code, row.name)].bom_no = bom.name
 
 	@frappe.whitelist()
-	def get_default_bom(self, item_code) -> str:
+	def get_default_bom(self, item_code: str) -> str:
+		frappe.has_permission("BOM Creator", "read", doc=self, throw=True)
 		return frappe.get_cached_value("Item", item_code, "default_bom")
 
 
 @frappe.whitelist()
-def get_children(doctype=None, parent=None, **kwargs):
+def get_children(doctype: str | None = None, parent: str | None = None, **kwargs):
+	# by default get_children takes first parameter as doctype, so added in the function
+
 	if isinstance(kwargs, str):
 		kwargs = frappe.parse_json(kwargs)
 
 	if isinstance(kwargs, dict):
 		kwargs = frappe._dict(kwargs)
+
+	frappe.has_permission("BOM Creator", "read", doc=kwargs.parent_id, throw=True)
 
 	fields = [
 		"item_code as value",
@@ -381,6 +408,8 @@ def add_item(**kwargs):
 	if isinstance(kwargs, dict):
 		kwargs = frappe._dict(kwargs)
 
+	frappe.has_permission("BOM Creator", "write", doc=kwargs.parent, throw=True)
+
 	doc = frappe.get_doc("BOM Creator", kwargs.parent)
 	item_info = get_item_details(kwargs.item_code)
 
@@ -412,6 +441,8 @@ def add_sub_assembly(**kwargs):
 
 	if isinstance(kwargs, dict):
 		kwargs = frappe._dict(kwargs)
+
+	frappe.has_permission("BOM Creator", "write", doc=kwargs.parent, throw=True)
 
 	doc = frappe.get_doc("BOM Creator", kwargs.parent)
 	bom_item = frappe.parse_json(kwargs.bom_item)
@@ -496,27 +527,29 @@ def delete_node(**kwargs):
 	if isinstance(kwargs, dict):
 		kwargs = frappe._dict(kwargs)
 
-	items = get_children(parent=kwargs.fg_item, parent_id=kwargs.parent)
+	frappe.has_permission("BOM Creator", "write", doc=kwargs.parent, throw=True)
+
+	updated = False
 	if kwargs.docname:
+		if not frappe.db.exists("BOM Creator Item", {"name": kwargs.docname, "parent": kwargs.parent}):
+			frappe.throw(_("BOM Creator Item with name {0} does not exist").format(kwargs.docname))
+
 		frappe.delete_doc("BOM Creator Item", kwargs.docname)
+		updated = True
 
-	for item in items:
-		frappe.delete_doc("BOM Creator Item", item.name)
-		if item.expandable:
-			delete_node(fg_item=item.value, parent=item.parent_id)
+	items = get_children(parent=kwargs.fg_item, parent_id=kwargs.parent)
+	if items:
+		for item in items:
+			updated = True
+			frappe.delete_doc("BOM Creator Item", item.name)
+			if item.expandable:
+				delete_node(fg_item=item.value, parent=item.parent_id)
 
-	doc = frappe.get_doc("BOM Creator", kwargs.parent)
-	doc.set_rate_for_items()
-	doc.save()
+	if updated:
+		doc = frappe.get_doc("BOM Creator", kwargs.parent)
+		doc.set_rate_for_items()
+		doc.save()
 
-	return doc
+		return doc
 
-
-@frappe.whitelist()
-def edit_qty(doctype, docname, qty, parent):
-	frappe.db.set_value(doctype, docname, "qty", qty)
-	doc = frappe.get_doc("BOM Creator", parent)
-	doc.set_rate_for_items()
-	doc.save()
-
-	return doc
+	return {}

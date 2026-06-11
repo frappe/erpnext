@@ -408,16 +408,14 @@ class BOMConfigurator {
 		frappe.prompt(
 			[{ label: __("Qty"), fieldname: "qty", default: qty, fieldtype: "Float", reqd: 1 }],
 			(data) => {
-				let doctype = node.data.doctype || this.frm.doc.doctype;
 				let docname = node.data.name || this.frm.doc.name;
 
 				frappe.call({
-					method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.edit_qty",
+					method: "edit_qty",
+					doc: this.frm.doc,
 					args: {
-						doctype: doctype,
 						docname: docname,
 						qty: data.qty,
-						parent: node.data.parent_id ? node.data.parent_id : this.frm.doc.name,
 					},
 					callback: (r) => {
 						node.data.qty = data.qty;
