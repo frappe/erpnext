@@ -111,8 +111,11 @@ frappe.ui.form.on("Quality Inspection", {
 			const bundle_decided =
 				frm.doc.inspection_basis === "Each Quantity" || Boolean(frm.doc.reading_bundle);
 			const show_serial = frm.__item_is_serialized && !bundle_decided;
+			// a lot-referenced bundle inspection draws its identity from the lot:
+			// serials per unit in the bundle, the batch on the lot itself
+			const batch_exempt = bundle_decided && frm.doc.reference_type === "Quality Control Lot";
 
-			frm.toggle_display("batch_no", has_batch);
+			frm.toggle_display("batch_no", has_batch && !batch_exempt);
 			// Each Quantity inspections record serials per unit in the bundle
 			frm.toggle_display("serial_no", show_serial);
 			// the recorded serials drive the sample size for serialized items
@@ -121,7 +124,6 @@ frappe.ui.form.on("Quality Inspection", {
 			// mirror the server's identity gates as mandatory marks
 			frm.set_df_property("serial_no", "reqd", show_serial ? 1 : 0);
 
-			const batch_exempt = bundle_decided && frm.doc.reference_type === "Quality Control Lot";
 			if (!has_batch || batch_exempt) {
 				frm.set_df_property("batch_no", "reqd", 0);
 			} else if (frm.doc.child_row_reference && frm.doc.reference_type !== "Quality Control Lot") {
