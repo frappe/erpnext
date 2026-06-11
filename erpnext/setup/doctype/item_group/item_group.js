@@ -9,6 +9,17 @@ frappe.ui.form.on("Item Group", {
 			return { filters: { purpose: ["!=", "Quality Control Release"] } };
 		});
 
+		frm.set_query("applicable_warehouse", "quality_triggers", function () {
+			// triggers scope to real, ordinary warehouses — quarantine and reject
+			// destinations are reached by the machinery, not by configuration
+			return {
+				filters: {
+					is_group: 0,
+					warehouse_type: ["not in", ["Quality", "Rejected"]],
+				},
+			};
+		});
+
 		frm.set_query("supplier", "quality_triggers", function () {
 			return { filters: { disabled: 0 } };
 		});
@@ -273,6 +284,44 @@ function update_item_group_vf_labels(frm, cdn, defaults) {
 	});
 }
 
+function enforce_trigger_warehouse_role(cdt, cdn) {
+	// snap the role to the only valid direction for the combination; the
+	// server-side matrix remains the validating authority
+	const row = locals[cdt][cdn];
+	const single_direction = {
+		"Purchase Receipt": "Inbound",
+		"Purchase Invoice": "Inbound",
+		"Subcontracting Receipt": "Inbound",
+	};
+
+	const snap = (role) => {
+		if (role && row.warehouse_role !== role) {
+			frappe.model.set_value(cdt, cdn, "warehouse_role", role);
+			frappe.show_alert({
+				message: __("Warehouse Role set to {0} — the only valid direction here.", [__(role)]),
+				indicator: "blue",
+			});
+		}
+	};
+
+	if (single_direction[row.document_type]) {
+		snap(single_direction[row.document_type]);
+		return;
+	}
+
+	if (row.document_type === "Stock Entry" && row.stock_entry_type) {
+		frappe.db.get_value("Stock Entry Type", row.stock_entry_type, "purpose").then((r) => {
+			snap(
+				{
+					"Material Receipt": "Inbound",
+					"Material Issue": "Outbound",
+					"Send to Subcontractor": "Outbound",
+				}[r.message?.purpose]
+			);
+		});
+	}
+}
+
 frappe.ui.form.on("Item Quality Trigger", {
 	document_type(frm, cdt, cdn) {
 		const row = locals[cdt][cdn];
@@ -286,19 +335,10 @@ frappe.ui.form.on("Item Quality Trigger", {
 	},
 
 	stock_entry_type(frm, cdt, cdn) {
-		const row = locals[cdt][cdn];
-		if (row.document_type !== "Stock Entry" || !row.stock_entry_type) {
-			return;
-		}
-		frappe.db.get_value("Stock Entry Type", row.stock_entry_type, "purpose").then((r) => {
-			const role = {
-				"Material Receipt": "Inbound",
-				"Material Issue": "Outbound",
-				"Send to Subcontractor": "Outbound",
-			}[r.message?.purpose];
-			if (role) {
-				frappe.model.set_value(cdt, cdn, "warehouse_role", role);
-			}
-		});
+		enforce_trigger_warehouse_role(cdt, cdn);
+	},
+
+	warehouse_role(frm, cdt, cdn) {
+		enforce_trigger_warehouse_role(cdt, cdn);
 	},
 });
