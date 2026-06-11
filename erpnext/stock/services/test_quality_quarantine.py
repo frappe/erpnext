@@ -139,6 +139,69 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		)
 		self.assertEqual(result[0][0], item)
 
+	def test_routing_carries_a_manually_built_bundle(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+
+		qc = make_qc_warehouse("_Test QC Carry WH")
+		store = make_warehouse("_Test QC Carry Store", quality_warehouse=qc)
+
+		item = make_item(
+			properties={"is_stock_item": 1, "has_batch_no": 1, "batch_number_series": "QCCB.#####"}
+		)
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry",
+				warehouse_role="Inbound",
+				quality_control_mode="Quarantine",
+			),
+		)
+		item.save()
+
+		batch = frappe.get_doc(
+			{"doctype": "Batch", "item": item.name, "batch_id": "_Test QC Carry Batch"}
+		).insert(ignore_permissions=True)
+
+		# the user builds the bundle for the store before routing redirects the row
+		bundle = SerialBatchCreation(
+			{
+				"item_code": item.name,
+				"warehouse": store,
+				"voucher_type": "Stock Entry",
+				"qty": 2,
+				"actual_qty": 2,
+				"batches": frappe._dict({batch.name: 2}),
+				"type_of_transaction": "Inward",
+				"company": "_Test Company",
+				"do_not_submit": True,
+			}
+		).make_serial_and_batch_bundle()
+
+		receipt = frappe.new_doc("Stock Entry")
+		receipt.purpose = "Material Receipt"
+		receipt.stock_entry_type = "Material Receipt"
+		receipt.company = "_Test Company"
+		receipt.append(
+			"items",
+			{
+				"item_code": item.name,
+				"qty": 2,
+				"t_warehouse": store,
+				"basic_rate": 100,
+				"serial_and_batch_bundle": bundle.name,
+			},
+		)
+		receipt.insert()
+		receipt.submit()
+
+		# routing redirected the row and carried the bundle with it
+		self.assertEqual(receipt.items[0].t_warehouse, qc)
+		self.assertEqual(frappe.db.get_value("Serial and Batch Bundle", bundle.name, "warehouse"), qc)
+		lots = quality_control_lots_for(receipt.name)
+		self.assertEqual(lots[0].quality_warehouse, qc)
+		self.assertEqual(frappe.db.get_value("Quality Control Lot", lots[0].name, "batch_no"), batch.name)
+
 	def test_multi_batch_row_mints_one_lot_per_batch(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
 		from erpnext.stock.serial_batch_bundle import SerialBatchCreation

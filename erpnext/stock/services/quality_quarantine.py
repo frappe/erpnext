@@ -48,12 +48,33 @@ def apply_quarantine_routing(doc):
 			)
 
 		point.row.set(target_fieldname, quality_warehouse)
+		_redirect_draft_bundle(point.row, quality_warehouse)
 		frappe.msgprint(
 			_("Row #{0}: Item {1} is routed to {2} for quality inspection.").format(
 				point.row.idx, frappe.bold(point.item_code), frappe.bold(quality_warehouse)
 			),
 			alert=True,
 		)
+
+
+def _redirect_draft_bundle(row, quality_warehouse):
+	"""A draft Serial and Batch Bundle built before routing still points at the
+	original warehouse — carry it along, or its validation rightly refuses."""
+	bundle = row.get("serial_and_batch_bundle")
+	if not bundle:
+		return
+
+	info = frappe.db.get_value("Serial and Batch Bundle", bundle, ["docstatus", "warehouse"], as_dict=True)
+	if not info or info.docstatus != 0 or info.warehouse == quality_warehouse:
+		return
+
+	frappe.db.set_value(
+		"Serial and Batch Bundle", bundle, "warehouse", quality_warehouse, update_modified=False
+	)
+	frappe.db.sql(
+		"""update `tabSerial and Batch Entry` set warehouse = %s where parent = %s""",
+		(quality_warehouse, bundle),
+	)
 
 
 def validate_quality_warehouse_usage(doc):
