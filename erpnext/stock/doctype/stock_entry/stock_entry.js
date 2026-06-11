@@ -230,7 +230,12 @@ frappe.ui.form.on("Stock Entry", {
 
 		// inspection requirements come from the item quality triggers, not the
 		// legacy inspection_required checkbox (which only Manufacture entries show)
-		if (!frm.is_new() && frm.doc.docstatus === 0 && frappe.model.can_create("Quality Inspection")) {
+		if (
+			!frm.is_new() &&
+			frm.doc.docstatus === 0 &&
+			frm.doc.purpose !== "Quality Control Release" &&
+			frappe.model.can_create("Quality Inspection")
+		) {
 			frm.add_custom_button(
 				__("Quality Inspection(s)"),
 				() => {
@@ -326,7 +331,11 @@ frappe.ui.form.on("Stock Entry", {
 		frm.trigger("toggle_warehouse_fields");
 		erpnext.toggle_serial_batch_fields(frm);
 
-		if (!frm.doc.docstatus && !frm.doc.subcontracting_inward_order) {
+		if (
+			!frm.doc.docstatus &&
+			!frm.doc.subcontracting_inward_order &&
+			frm.doc.purpose !== "Quality Control Release"
+		) {
 			frm.trigger("validate_purpose_consumption");
 			frm.add_custom_button(
 				__("Material Request"),
