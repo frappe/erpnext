@@ -5,12 +5,6 @@ import random
 
 import frappe
 
-from erpnext.manufacturing.doctype.bom_creator.bom_creator import (
-	add_item,
-	add_sub_assembly,
-	delete_node,
-	edit_bom_creator,
-)
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -40,8 +34,7 @@ class TestBOMCreator(ERPNextTestSuite):
 			conversion_rate=1,
 		)
 
-		add_sub_assembly(
-			parent=doc.name,
+		doc.add_sub_assembly(
 			fg_item=final_product,
 			fg_reference_id=doc.name,
 			bom_item={
@@ -95,8 +88,7 @@ class TestBOMCreator(ERPNextTestSuite):
 			conversion_rate=1,
 		)
 
-		add_item(
-			parent=doc.name,
+		doc.add_item(
 			fg_item=final_product,
 			fg_reference_id=doc.name,
 			item_code="Pedal Assembly",
@@ -139,8 +131,7 @@ class TestBOMCreator(ERPNextTestSuite):
 			conversion_rate=1,
 		)
 
-		add_item(
-			parent=doc.name,
+		doc.add_item(
 			fg_item=final_product,
 			fg_reference_id=doc.name,
 			item_code="Pedal Assembly",
@@ -150,9 +141,8 @@ class TestBOMCreator(ERPNextTestSuite):
 		doc.reload()
 		self.assertEqual(doc.items[0].is_expandable, 0)
 
-		add_sub_assembly(
+		doc.add_sub_assembly(
 			convert_to_sub_assembly=1,
-			parent=doc.name,
 			fg_item=final_product,
 			fg_reference_id=doc.items[0].name,
 			bom_item={
@@ -207,8 +197,7 @@ class TestBOMCreator(ERPNextTestSuite):
 			conversion_rate=1,
 		)
 
-		add_item(
-			parent=doc.name,
+		doc.add_item(
 			fg_item=final_product,
 			fg_reference_id=doc.name,
 			item_code="Pedal Assembly",
@@ -218,9 +207,8 @@ class TestBOMCreator(ERPNextTestSuite):
 		doc.reload()
 		self.assertEqual(doc.items[0].is_expandable, 0)
 
-		add_sub_assembly(
+		doc.add_sub_assembly(
 			convert_to_sub_assembly=1,
-			parent=doc.name,
 			fg_item=final_product,
 			fg_reference_id=doc.items[0].name,
 			bom_item={
@@ -277,17 +265,15 @@ class TestBOMCreator(ERPNextTestSuite):
 		# Editing a row that does not belong to this BOM Creator must be rejected.
 		self.assertRaises(
 			frappe.ValidationError,
-			edit_bom_creator,
+			doc.edit_bom_creator,
 			docname="non-existent-row",
 			data={"qty": 5},
-			parent=doc.name,
 		)
 
 		# Deleting a row that does not belong to this BOM Creator must be rejected.
 		self.assertRaises(
 			frappe.ValidationError,
-			delete_node,
-			parent=doc.name,
+			doc.delete_node,
 			fg_item=final_product,
 			docname="non-existent-row",
 		)
