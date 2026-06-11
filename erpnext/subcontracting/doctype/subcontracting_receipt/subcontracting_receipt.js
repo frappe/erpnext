@@ -208,6 +208,7 @@ frappe.ui.form.on("Subcontracting Receipt", {
 				filters: {
 					company: frm.doc.company,
 					is_group: 0,
+					warehouse_type: ["!=", "Quality"],
 				},
 			};
 		});
@@ -226,6 +227,7 @@ frappe.ui.form.on("Subcontracting Receipt", {
 				filters: {
 					company: frm.doc.company,
 					is_group: 0,
+					warehouse_type: ["!=", "Quality"],
 				},
 			};
 		});
@@ -251,6 +253,7 @@ frappe.ui.form.on("Subcontracting Receipt", {
 				filters: {
 					company: frm.doc.company,
 					is_group: 0,
+					warehouse_type: ["!=", "Quality"],
 				},
 			};
 		});
@@ -259,6 +262,7 @@ frappe.ui.form.on("Subcontracting Receipt", {
 			filters: {
 				company: frm.doc.company,
 				is_group: 0,
+				warehouse_type: ["!=", "Quality"],
 			},
 		}));
 
@@ -266,6 +270,7 @@ frappe.ui.form.on("Subcontracting Receipt", {
 			filters: {
 				company: frm.doc.company,
 				is_group: 0,
+				warehouse_type: ["!=", "Quality"],
 			},
 		}));
 

@@ -46,6 +46,7 @@ frappe.ui.form.on("Subcontracting Order", {
 				filters: {
 					company: frm.doc.company,
 					is_group: 0,
+					warehouse_type: ["!=", "Quality"],
 				},
 			};
 		});
@@ -80,6 +81,7 @@ frappe.ui.form.on("Subcontracting Order", {
 				filters: {
 					company: frm.doc.company,
 					is_group: 0,
+					warehouse_type: ["!=", "Quality"],
 				},
 			};
 		});
@@ -88,6 +90,7 @@ frappe.ui.form.on("Subcontracting Order", {
 			filters: {
 				company: frm.doc.company,
 				is_group: 0,
+				warehouse_type: ["!=", "Quality"],
 			},
 		}));
 
@@ -116,6 +119,7 @@ frappe.ui.form.on("Subcontracting Order", {
 					company: frm.doc.company,
 					name: ["!=", frm.doc.supplier_warehouse],
 					is_group: 0,
+					warehouse_type: ["!=", "Quality"],
 				},
 			};
 		});

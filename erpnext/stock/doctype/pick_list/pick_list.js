@@ -13,7 +13,9 @@ frappe.ui.form.on("Pick List", {
 		const query = () => {
 			let filters = { company: frm.doc.company };
 
-			frm.doc.consider_rejected_warehouses ? null : (filters.warehouse_type = ["!=", "Rejected"]);
+			filters.warehouse_type = frm.doc.consider_rejected_warehouses
+				? ["!=", "Quality"]
+				: ["not in", ["Rejected", "Quality"]];
 
 			return { filters };
 		};
