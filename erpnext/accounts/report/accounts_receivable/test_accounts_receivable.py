@@ -1257,6 +1257,15 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 	def test_accounts_receivable_respects_user_permissions(self):
 		# Party is a dynamic link on Payment Ledger Entry, so user permissions on Customer
 		# must be applied explicitly. The report should only show permitted customers.
+
+		# Running the report writes an access log that commits, so these invoices survive
+		# tearDown's rollback. Delete and commit them so they don't leak into other tests.
+		def remove_committed_entries():
+			self.clear_old_entries()
+			frappe.db.commit()  # nosemgrep
+
+		self.addCleanup(remove_committed_entries)
+
 		original_customer = self.customer
 		second_customer = "_Test AR Perm Customer"
 
