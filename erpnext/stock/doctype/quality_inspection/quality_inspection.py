@@ -95,7 +95,7 @@ class QualityInspection(UnitReadingsMixin, Document):
 			# the hidden readings table would invisibly block submission
 			self.set("readings", [])
 			if not cint(self.unit_quantity):
-				self.unit_quantity = cint(self.get_qty_under_inspection() or 0)
+				self.unit_quantity = self._whole_quantity_under_inspection()
 			self.validate_units()
 			self.evaluate_unit_entry_statuses()
 			self.roll_up_unit_results()

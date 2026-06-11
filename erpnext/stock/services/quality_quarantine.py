@@ -317,3 +317,61 @@ def create_quality_control_lots(doc, method=None):
 			if basis:
 				lot.inspection_basis = basis
 			lot.insert(ignore_permissions=True)
+
+
+def remind_pending_quality_inspections():
+	"""Daily: nudge Quality Managers about lots awaiting inspection too long.
+
+	Quarantined stock that nobody decides is working capital standing still;
+	the threshold lives in Stock Settings and zero disables the reminder.
+	"""
+	from frappe.utils import add_days, cint, today
+
+	days = cint(frappe.db.get_single_value("Stock Settings", "pending_quality_inspection_reminder_days"))
+	if days < 1:
+		return
+
+	lots = frappe.get_all(
+		"Quality Control Lot",
+		filters={"creation": ("<", add_days(today(), -days))},
+		fields=["name", "item_code", "received_qty", "decided_qty"],
+		order_by="creation",
+	)
+	pending = [lot for lot in lots if flt(lot.received_qty) > flt(lot.decided_qty)]
+	if not pending:
+		return
+
+	quality_managers = frappe.get_all(
+		"Has Role",
+		filters={"role": "Quality Manager", "parenttype": "User"},
+		pluck="parent",
+	)
+	enabled = set(frappe.get_all("User", filters={"enabled": 1}, pluck="name"))
+
+	subject = _("{0} Quality Control Lot(s) have been awaiting inspection for over {1} day(s)").format(
+		len(pending), days
+	)
+	details = "<br>".join(
+		_("{0}: {1} ({2} of {3} undecided)").format(
+			get_link_to_form("Quality Control Lot", lot.name),
+			lot.item_code,
+			flt(lot.received_qty) - flt(lot.decided_qty),
+			lot.received_qty,
+		)
+		for lot in pending[:20]
+	)
+
+	for user in quality_managers:
+		if user not in enabled:
+			continue
+		frappe.get_doc(
+			{
+				"doctype": "Notification Log",
+				"for_user": user,
+				"type": "Alert",
+				"document_type": "Quality Control Lot",
+				"document_name": pending[0].name,
+				"subject": subject,
+				"email_content": details,
+			}
+		).insert(ignore_permissions=True)

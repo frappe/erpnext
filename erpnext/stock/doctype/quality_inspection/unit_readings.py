@@ -163,6 +163,24 @@ class UnitReadingsMixin:
 				title=_("Incomplete Per-Unit Readings"),
 			)
 
+	def _whole_quantity_under_inspection(self):
+		"""Per-unit readings need whole units — refuse to truncate silently.
+
+		A fractional quantity (12.5 kg) has no unit number 12.5; inspecting it
+		per unit is incoherent, and rounding it down would quietly leave a
+		fraction undecided forever.
+		"""
+		qty = flt(self.get_qty_under_inspection() or 0)
+		if qty != cint(qty):
+			frappe.throw(
+				_(
+					"{0} under inspection is fractional — per-unit readings need whole units. "
+					"Inspect this stock on the Sample basis instead."
+				).format(qty),
+				title=_("Fractional Quantity"),
+			)
+		return cint(qty)
+
 	def validate_units(self):
 		units = {entry.unit_no for entry in self.unit_readings}
 		if units and (min(units) < 1 or max(units) > cint(self.unit_quantity)):
@@ -296,7 +314,7 @@ class UnitReadingsMixin:
 			frappe.throw(_("Select a Quality Inspection Template with parameters first."))
 
 		if not cint(self.unit_quantity):
-			self.unit_quantity = cint(self.get_qty_under_inspection() or 0)
+			self.unit_quantity = self._whole_quantity_under_inspection()
 		if not cint(self.unit_quantity):
 			frappe.throw(_("Set the Unit Quantity first."))
 

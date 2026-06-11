@@ -38,6 +38,8 @@
   "internal_transfer_rules_section",
   "allow_internal_transfer_at_arms_length_price",
   "validate_material_transfer_warehouses",
+  "quality_inspection_section",
+  "pending_quality_inspection_reminder_days",
   "serial_and_batch_item_settings_tab",
   "enable_serial_and_batch_no_for_item",
   "section_break_7",
@@ -552,6 +554,18 @@
    "fieldname": "use_inline_serial_batch_editor",
    "fieldtype": "Check",
    "label": "Use Inline Serial / Batch Editor"
+  },
+  {
+   "fieldname": "quality_inspection_section",
+   "fieldtype": "Section Break",
+   "label": "Quality Inspection"
+  },
+  {
+   "default": "0",
+   "description": "Notify Quality Managers about Quality Control Lots awaiting inspection for longer than this many days. Zero disables the reminder.",
+   "fieldname": "pending_quality_inspection_reminder_days",
+   "fieldtype": "Int",
+   "label": "Pending Quality Inspection Reminder Days"
   }
  ],
  "icon": "icon-cog",

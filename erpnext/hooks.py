@@ -524,6 +524,7 @@ scheduler_events = {
 	],
 	"daily": [
 		"erpnext.stock.services.quality_retest.process_periodic_retests",
+		"erpnext.stock.services.quality_quarantine.remind_pending_quality_inspections",
 	],
 	"daily_long": [],
 	"daily_maintenance": [

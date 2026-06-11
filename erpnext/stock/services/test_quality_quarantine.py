@@ -2353,6 +2353,114 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, build("Quality Control Lot", lot).insert)
 		self.assertRaises(frappe.ValidationError, build("Stock Entry", se.name).insert)
 
+	def test_each_quantity_refuses_fractional_quantities(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+
+		qc = make_qc_warehouse("_Test QC Fractional WH")
+		item_doc = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"})
+		item_doc.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry",
+				warehouse_role="Inbound",
+				quality_control_mode="Quarantine",
+				applicable_warehouse=qc,
+			),
+		)
+		item_doc.save()
+		item = item_doc.name
+		se = make_stock_entry(item_code=item, qty=2.5, to_warehouse=qc, purpose="Material Receipt", rate=100)
+		lot = quality_control_lots_for(se.name)[0].name
+
+		# 2.5 units cannot be read per unit — rounding would quietly leave a
+		# fraction undecided forever
+		fractional = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Incoming",
+				"reference_type": "Quality Control Lot",
+				"reference_name": lot,
+				"item_code": item,
+				"inspection_basis": "Each Quantity",
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+			}
+		)
+		self.assertRaises(frappe.ValidationError, fractional.insert)
+
+		# the Sample basis decides fractional stock fine
+		submit_inspection_for_lot(lot)
+		self.assertEqual(frappe.db.get_value("Quality Control Lot", lot, "decided_qty"), 2.5)
+
+	def test_pending_inspection_reminder_notifies_quality_managers(self):
+		from erpnext.stock.services.quality_quarantine import remind_pending_quality_inspections
+
+		qc = make_qc_warehouse("_Test QC Reminder WH")
+		item = make_quarantine_item(qc)
+		se = make_stock_entry(item_code=item, qty=3, to_warehouse=qc, purpose="Material Receipt", rate=100)
+		lot = quality_control_lots_for(se.name)[0].name
+
+		manager = "_test_quality_manager@example.com"
+		if not frappe.db.exists("User", manager):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": manager,
+					"first_name": "Quality",
+					"roles": [{"role": "Quality Manager"}],
+				}
+			).insert(ignore_permissions=True)
+
+		frappe.db.set_single_value("Stock Settings", "pending_quality_inspection_reminder_days", 2)
+		frappe.db.set_value(
+			"Quality Control Lot",
+			lot,
+			"creation",
+			frappe.utils.add_days(nowdate(), -3),
+			update_modified=False,
+		)
+
+		frappe.db.delete("Notification Log", {"for_user": manager})
+		remind_pending_quality_inspections()
+
+		notifications = frappe.get_all("Notification Log", filters={"for_user": manager}, fields=["subject"])
+		self.assertEqual(len(notifications), 1)
+		self.assertIn("awaiting inspection", notifications[0].subject)
+
+		# a decided lot stops nagging
+		frappe.db.delete("Notification Log", {"for_user": manager})
+		submit_inspection_for_lot(lot)
+		remind_pending_quality_inspections()
+		self.assertEqual(frappe.db.count("Notification Log", {"for_user": manager}), 0)
+		frappe.db.set_single_value("Stock Settings", "pending_quality_inspection_reminder_days", 0)
+
+	def test_quality_reports_run(self):
+		from erpnext.stock.report.quality_inspection_turnaround.quality_inspection_turnaround import (
+			execute as turnaround,
+		)
+		from erpnext.stock.report.quality_rejection_analysis.quality_rejection_analysis import (
+			execute as rejection_analysis,
+		)
+
+		qc = make_qc_warehouse("_Test QC Reports WH")
+		item = make_quarantine_item(qc)
+		se = make_stock_entry(item_code=item, qty=4, to_warehouse=qc, purpose="Material Receipt", rate=100)
+		lot = quality_control_lots_for(se.name)[0].name
+		submit_inspection_for_lot(lot, unit_results={1: ["Accepted"], 2: ["Rejected"]})
+
+		_columns, rows = rejection_analysis({"group_by": "Item", "item_code": item})
+		row = next(r for r in rows if r["group_value"] == item)
+		self.assertEqual(row["rejected_qty"], 1)
+
+		_columns, rows = rejection_analysis({"group_by": "Parameter"})
+		self.assertTrue(any(r["rejections"] >= 1 for r in rows))
+
+		_columns, rows = turnaround({"item_code": item})
+		row = next(r for r in rows if r["quality_control_lot"] == lot)
+		self.assertEqual(row["undecided_qty"], 2)
+		self.assertIsNotNone(row["first_verdict_on"])
+		self.assertIsNone(row["fully_decided_on"])
+
 	def test_stock_reconciliation_blocked_on_quality_warehouse(self):
 		qc = make_qc_warehouse()
 		item = make_quarantine_item(qc)
