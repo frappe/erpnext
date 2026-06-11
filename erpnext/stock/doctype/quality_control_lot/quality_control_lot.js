@@ -95,6 +95,9 @@ frappe.ui.form.on("Quality Control Lot", {
 	},
 
 	refresh(frm) {
+		// the lot is a system-managed ledger: every field is read-only and all
+		// bookings come from the quarantine machinery — nothing to save by hand
+		frm.disable_save();
 		frm.trigger("render_serial_numbers");
 
 		// inspections may decide the lot in parts: offer another one while
