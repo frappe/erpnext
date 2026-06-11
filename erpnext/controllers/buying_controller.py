@@ -63,7 +63,7 @@ class BuyingController(SubcontractingController):
 			# sub-contracting
 			self.validate_for_subcontracting()
 			if self.get("is_old_subcontracting_flow"):
-				self.create_raw_materials_supplied()
+				self.create_raw_materials_supplied_or_received()
 			self.set_landed_cost_voucher_amount()
 
 		if self.doctype in ("Purchase Receipt", "Purchase Invoice"):

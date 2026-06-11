@@ -4213,7 +4213,7 @@ def update_child_qty_rate(
 			if parent.is_old_subcontracting_flow:
 				if should_update_supplied_items(parent):
 					parent.update_reserved_qty_for_subcontract()
-					parent.create_raw_materials_supplied()
+					parent.create_raw_materials_supplied_or_received()
 				parent.save()
 			else:
 				if not parent.can_update_items():
