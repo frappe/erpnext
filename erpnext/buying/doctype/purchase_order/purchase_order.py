@@ -218,7 +218,7 @@ class PurchaseOrder(BuyingController):
 
 		if self.is_old_subcontracting_flow:
 			self.validate_bom_for_subcontracting_items()
-			self.create_raw_materials_supplied()
+			self.create_raw_materials_supplied_or_received()
 
 		self.validate_fg_item_for_subcontracting()
 
