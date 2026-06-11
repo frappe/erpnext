@@ -150,6 +150,9 @@ class Employee(NestedSet):
 		)
 
 	def validate_user_details(self):
+		if not self.user_id:
+			return
+
 		self.validate_for_enabled_user_id()
 		self.validate_duplicate_user_id()
 
@@ -172,6 +175,7 @@ class Employee(NestedSet):
 		if self.user_id:
 			self.update_user()
 			self.update_user_permissions()
+			self.update_user_status()
 		self.reset_employee_emails_cache()
 
 	def before_insert(self):
@@ -293,10 +297,15 @@ class Employee(NestedSet):
 		if not frappe.db.exists("User", self.user_id):
 			frappe.throw(_("User {0} does not exist").format(self.user_id))
 
+	def update_user_status(self):
+		if not self.user_id:
+			return
+
 		user = frappe.get_doc("User", self.user_id)
 		enabled = user.enabled
 		if self.status != "Active" and enabled or self.status == "Active" and enabled == 0:
 			user.enabled = not enabled
+			# Keep linked User status in sync from the Employee lifecycle and record the audit log.
 			user.save(ignore_permissions=True)
 
 	def validate_duplicate_user_id(self):
