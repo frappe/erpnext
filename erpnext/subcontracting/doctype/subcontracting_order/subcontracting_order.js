@@ -41,15 +41,7 @@ frappe.ui.form.on("Subcontracting Order", {
 
 		frm.set_indicator_formatter("item_code", (doc) => (doc.qty <= doc.received_qty ? "green" : "orange"));
 
-		frm.set_query("supplier_warehouse", () => {
-			return {
-				filters: {
-					company: frm.doc.company,
-					is_group: 0,
-					warehouse_type: ["!=", "Quality"],
-				},
-			};
-		});
+		frm.set_query("supplier_warehouse", () => erpnext.queries.warehouse(frm.doc));
 
 		frm.set_query("purchase_order", () => {
 			return {
@@ -76,23 +68,9 @@ frappe.ui.form.on("Subcontracting Order", {
 			};
 		});
 
-		frm.set_query("set_warehouse", () => {
-			return {
-				filters: {
-					company: frm.doc.company,
-					is_group: 0,
-					warehouse_type: ["!=", "Quality"],
-				},
-			};
-		});
+		frm.set_query("set_warehouse", () => erpnext.queries.warehouse(frm.doc));
 
-		frm.set_query("warehouse", "items", () => ({
-			filters: {
-				company: frm.doc.company,
-				is_group: 0,
-				warehouse_type: ["!=", "Quality"],
-			},
-		}));
+		frm.set_query("warehouse", "items", () => erpnext.queries.warehouse(frm.doc));
 
 		frm.set_query("expense_account", "items", () => ({
 			query: "erpnext.controllers.queries.get_expense_account",

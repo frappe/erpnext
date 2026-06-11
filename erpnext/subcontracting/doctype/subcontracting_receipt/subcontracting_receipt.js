@@ -203,15 +203,7 @@ frappe.ui.form.on("Subcontracting Receipt", {
 	},
 
 	set_queries: (frm) => {
-		frm.set_query("set_warehouse", () => {
-			return {
-				filters: {
-					company: frm.doc.company,
-					is_group: 0,
-					warehouse_type: ["!=", "Quality"],
-				},
-			};
-		});
+		frm.set_query("set_warehouse", () => erpnext.queries.warehouse(frm.doc));
 
 		frm.set_query("contact_person", erpnext.queries.contact_query);
 		frm.set_query("supplier_address", erpnext.queries.address_query);
@@ -222,15 +214,7 @@ frappe.ui.form.on("Subcontracting Receipt", {
 			return erpnext.queries.company_address_query(frm.doc);
 		});
 
-		frm.set_query("rejected_warehouse", () => {
-			return {
-				filters: {
-					company: frm.doc.company,
-					is_group: 0,
-					warehouse_type: ["!=", "Quality"],
-				},
-			};
-		});
+		frm.set_query("rejected_warehouse", () => erpnext.queries.warehouse(frm.doc));
 
 		frm.set_query("cost_center", (doc) => {
 			return {
@@ -248,31 +232,11 @@ frappe.ui.form.on("Subcontracting Receipt", {
 			};
 		});
 
-		frm.set_query("supplier_warehouse", () => {
-			return {
-				filters: {
-					company: frm.doc.company,
-					is_group: 0,
-					warehouse_type: ["!=", "Quality"],
-				},
-			};
-		});
+		frm.set_query("supplier_warehouse", () => erpnext.queries.warehouse(frm.doc));
 
-		frm.set_query("warehouse", "items", () => ({
-			filters: {
-				company: frm.doc.company,
-				is_group: 0,
-				warehouse_type: ["!=", "Quality"],
-			},
-		}));
+		frm.set_query("warehouse", "items", () => erpnext.queries.warehouse(frm.doc));
 
-		frm.set_query("rejected_warehouse", "items", () => ({
-			filters: {
-				company: frm.doc.company,
-				is_group: 0,
-				warehouse_type: ["!=", "Quality"],
-			},
-		}));
+		frm.set_query("rejected_warehouse", "items", () => erpnext.queries.warehouse(frm.doc));
 
 		frm.set_query("expense_account", "items", () => {
 			return {
