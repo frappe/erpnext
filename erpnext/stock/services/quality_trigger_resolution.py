@@ -341,6 +341,103 @@ def validate_inspected_serial_consistency(doc, method=None):
 				)
 
 
+@frappe.whitelist()
+def get_inspection_outcomes(doc: dict | str):
+	"""Propose the accepted/rejected split each row's decided inspection implies.
+
+	For documents that receive stock without quarantine (Block / Warn modes),
+	the inspection verdict does not move anything by itself — the row's
+	accepted and rejected quantities do. This reads each row's submitted
+	inspection and proposes the matching split: rejected count from the
+	reading bundle (or the whole row on an outright rejection), rejected
+	serials into the rejected serial field, and a Rejected warehouse when the
+	company has exactly one. Rows whose current split already matches are
+	skipped; everything returned stays editable on the form.
+	"""
+	import json
+
+	from frappe.utils import cint, flt
+
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+	if isinstance(doc, str):
+		doc = json.loads(doc)
+	doc = frappe._dict(doc)
+
+	if doc.doctype not in ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"):
+		return []
+	if doc.doctype == "Purchase Invoice" and not cint(doc.update_stock):
+		return []
+
+	outcomes = []
+	for row in doc.get("items") or []:
+		row = frappe._dict(row)
+		if not row.quality_inspection:
+			continue
+
+		info = frappe.db.get_value(
+			"Quality Inspection",
+			row.quality_inspection,
+			["docstatus", "status", "reading_bundle"],
+			as_dict=True,
+		)
+		if not info or info.docstatus != 1:
+			continue
+
+		received_qty = flt(row.received_qty) or flt(row.qty) + flt(row.rejected_qty)
+		rejected_serials = None
+		if info.reading_bundle:
+			bundle = frappe.get_doc("Quality Inspection Reading Bundle", info.reading_bundle)
+			rejected_qty = min(flt(bundle.rejected_qty), received_qty)
+			rejected_serials = bundle.get_unit_serials("Rejected")
+		elif info.status == "Rejected":
+			rejected_qty = received_qty
+		elif info.status == "Accepted":
+			rejected_qty = 0.0
+		else:
+			# partially accepted without per-unit verdicts: nothing says which units
+			continue
+
+		outcome = {"idx": row.idx, "qty": received_qty - rejected_qty, "rejected_qty": rejected_qty}
+
+		row_serials = get_serial_nos(row.serial_no) if row.serial_no else []
+		split_serials = list(get_serial_nos(row.rejected_serial_no)) if row.rejected_serial_no else []
+		all_serials = row_serials + [serial for serial in split_serials if serial not in row_serials]
+		if all_serials:
+			if rejected_serials is None:
+				rejected_serials = all_serials if rejected_qty else []
+			rejected_in_row = [serial for serial in all_serials if serial in set(rejected_serials)]
+			accepted_in_row = [serial for serial in all_serials if serial not in set(rejected_serials)]
+			# only a clean one-serial-per-unit match redistributes the fields
+			if len(rejected_in_row) == int(rejected_qty):
+				outcome["serial_no"] = "\n".join(accepted_in_row)
+				outcome["rejected_serial_no"] = "\n".join(rejected_in_row)
+
+		if rejected_qty and not row.rejected_warehouse and not doc.rejected_warehouse:
+			rejected_warehouses = frappe.get_all(
+				"Warehouse",
+				filters={
+					"warehouse_type": "Rejected",
+					"company": doc.company,
+					"is_group": 0,
+					"disabled": 0,
+				},
+				pluck="name",
+			)
+			if len(rejected_warehouses) == 1:
+				outcome["rejected_warehouse"] = rejected_warehouses[0]
+
+		unchanged = all(
+			outcome[field] == ((row.get(field) or "") if isinstance(outcome[field], str) else flt(row.get(field)))
+			for field in outcome
+			if field != "idx"
+		)
+		if not unchanged:
+			outcomes.append(outcome)
+
+	return outcomes
+
+
 def enforce_inspection_points(doc):
 	"""Enforce Block / Warn inspection points on a stock transaction.
 

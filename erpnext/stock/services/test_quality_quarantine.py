@@ -1857,6 +1857,87 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		return_doc = make_return_doc("Purchase Receipt", receipt.name)
 		self.assertEqual(return_doc.items[0].qty, -1)
 
+	def test_inspection_outcome_proposes_the_document_split(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+		from erpnext.stock.doctype.quality_inspection_reading_bundle.test_quality_inspection_reading_bundle import (
+			make_bundle,
+		)
+		from erpnext.stock.services.quality_trigger_resolution import get_inspection_outcomes
+
+		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Purchase Receipt",
+				warehouse_role=None,
+				quality_control_mode="Block",
+				inspection_basis="Each Quantity",
+			),
+		)
+		item.save()
+
+		serials = []
+		for index in range(3):
+			serial = frappe.get_doc(
+				{
+					"doctype": "Serial No",
+					"serial_no": f"QCOUT-{item.name}-{index}",
+					"item_code": item.name,
+					"company": "_Test Company",
+				}
+			).insert(ignore_permissions=True)
+			serials.append(serial.name)
+
+		receipt = make_purchase_receipt(
+			item_code=item.name, qty=3, warehouse=REAL_WH, rate=100, do_not_submit=True
+		)
+		row = receipt.items[0]
+		row.serial_no = "\n".join(serials)
+		row.use_serial_batch_fields = 1
+		receipt.save()
+
+		bundle = make_bundle(
+			3,
+			{1: ["Accepted"], 2: ["Rejected"], 3: ["Accepted"]},
+			item_code=item.name,
+			unit_serials={1: serials[0], 2: serials[1], 3: serials[2]},
+		)
+		inspection = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Incoming",
+				"reference_type": "Purchase Receipt",
+				"reference_name": receipt.name,
+				"item_code": item.name,
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+				"reading_bundle": bundle.name,
+			}
+		)
+		inspection.insert(ignore_permissions=True)
+		inspection.submit()
+
+		receipt.reload()
+		outcomes = get_inspection_outcomes(receipt.as_dict())
+
+		# the verdict becomes the row's split: 2 accepted, 1 rejected, with the
+		# rejected serial moved to the rejected serial field
+		self.assertEqual(len(outcomes), 1)
+		outcome = outcomes[0]
+		self.assertEqual(outcome["qty"], 2)
+		self.assertEqual(outcome["rejected_qty"], 1)
+		self.assertEqual(outcome["serial_no"].split("\n"), [serials[0], serials[2]])
+		self.assertEqual(outcome["rejected_serial_no"], serials[1])
+
+		# applying the split and asking again proposes nothing further
+		row = receipt.items[0]
+		row.rejected_qty = 1
+		row.qty = 2
+		row.serial_no = outcome["serial_no"]
+		row.rejected_serial_no = outcome["rejected_serial_no"]
+		self.assertEqual(get_inspection_outcomes(receipt.as_dict()), [])
+
 	def test_purchase_return_created_from_the_lot(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 		from erpnext.stock.services.quality_quarantine import make_purchase_return_for_lot

@@ -116,7 +116,13 @@ class QualityInspectionReadingBundle(Document):
 				as_dict=True,
 			)
 			if row:
-				serials = sorted(get_row_serial_nos(row))
+				# typed serials on an inward row may not exist yet — a Link
+				# entry cannot name an unborn serial
+				serials = sorted(
+					serial
+					for serial in get_row_serial_nos(row)
+					if frappe.db.exists("Serial No", serial)
+				)
 
 		if len(serials) != (self.quantity or 0):
 			return {}

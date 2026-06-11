@@ -149,6 +149,10 @@ erpnext.buying = {
 					this.set_from_product_bundle();
 				}
 
+				if (["Purchase Receipt", "Purchase Invoice"].includes(this.frm.doc.doctype)) {
+					erpnext.utils.add_apply_inspection_outcome_button(this.frm);
+				}
+
 				this.toggle_subcontracting_fields();
 				super.refresh();
 			}

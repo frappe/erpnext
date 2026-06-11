@@ -1511,6 +1511,52 @@ erpnext.utils.add_quality_control_lot_buttons = function (frm) {
 		});
 };
 
+erpnext.utils.add_apply_inspection_outcome_button = function (frm) {
+	// On a draft receiving document whose rows were inspected without
+	// quarantine (Block / Warn), apply the verdict to the rows: rejected
+	// count into Rejected Qty, rejected serials into the rejected serial
+	// field. The proposal stays editable.
+	if (frm.doc.docstatus !== 0) return;
+	if (!(frm.doc.items || []).some((row) => row.quality_inspection)) return;
+
+	frm.add_custom_button(__("Apply Inspection Outcome"), () => {
+		frappe.call({
+			method: "erpnext.stock.services.quality_trigger_resolution.get_inspection_outcomes",
+			args: { doc: frm.doc },
+			freeze: true,
+			callback: (r) => {
+				const outcomes = r.message || [];
+				if (!outcomes.length) {
+					frappe.show_alert({
+						message: __("Every row already matches its inspection outcome."),
+						indicator: "blue",
+					});
+					return;
+				}
+				for (const outcome of outcomes) {
+					const row = (frm.doc.items || []).find((item) => item.idx === outcome.idx);
+					if (!row) continue;
+					for (const field of [
+						"rejected_qty",
+						"qty",
+						"serial_no",
+						"rejected_serial_no",
+						"rejected_warehouse",
+					]) {
+						if (outcome[field] !== undefined) {
+							frappe.model.set_value(row.doctype, row.name, field, outcome[field]);
+						}
+					}
+				}
+				frappe.show_alert({
+					message: __("Inspection outcome applied to {0} row(s).", [outcomes.length]),
+					indicator: "green",
+				});
+			},
+		});
+	});
+};
+
 erpnext.utils.get_quality_indicator = function (doc) {
 	// quality overrides the list pill only while it is the thing that matters;
 	// once resolved (Released / Inspection Completed) the normal pill returns
