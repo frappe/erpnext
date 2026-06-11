@@ -150,15 +150,8 @@ class Employee(NestedSet):
 		)
 
 	def validate_user_details(self):
-		if self.user_id:
-			data = frappe.db.get_value("User", self.user_id, ["enabled"], as_dict=1)
-
-			if not data:
-				self.user_id = None
-				return
-
-			self.validate_for_enabled_user_id(data.get("enabled", 0))
-			self.validate_duplicate_user_id()
+		self.validate_for_enabled_user_id()
+		self.validate_duplicate_user_id()
 
 	def validate_auto_user_creation(self):
 		if self.create_user_automatically and not (
@@ -296,12 +289,15 @@ class Employee(NestedSet):
 			if not self.relieving_date:
 				throw(_("Please enter relieving date."))
 
-	def validate_for_enabled_user_id(self, enabled):
-		if enabled is None:
+	def validate_for_enabled_user_id(self):
+		if not frappe.db.exists("User", self.user_id):
 			frappe.throw(_("User {0} does not exist").format(self.user_id))
 
+		user = frappe.get_doc("User", self.user_id)
+		enabled = user.enabled
 		if self.status != "Active" and enabled or self.status == "Active" and enabled == 0:
-			frappe.db.set_value("User", self.user_id, "enabled", not enabled)
+			user.enabled = not enabled
+			user.save(ignore_permissions=True)
 
 	def validate_duplicate_user_id(self):
 		Employee = frappe.qb.DocType("Employee")
