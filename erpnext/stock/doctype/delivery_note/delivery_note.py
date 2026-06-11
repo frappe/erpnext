@@ -102,7 +102,13 @@ class DeliveryNote(SellingController):
 		posting_date: DF.Date
 		posting_time: DF.Time
 		quality_status: DF.Literal[
-			"", "Under Inspection", "Awaiting Release", "Partially Released", "Released", "Rejected", "Inspection Completed"
+			"",
+			"Under Inspection",
+			"Awaiting Release",
+			"Partially Released",
+			"Released",
+			"Rejected",
+			"Inspection Completed",
 		]
 		price_list_currency: DF.Link
 		pricing_rules: DF.Table[PricingRuleDetail]

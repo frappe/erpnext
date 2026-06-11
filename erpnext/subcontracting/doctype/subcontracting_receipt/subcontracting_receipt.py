@@ -74,7 +74,13 @@ class SubcontractingReceipt(SubcontractingController):
 		posting_date: DF.Date
 		posting_time: DF.Time
 		quality_status: DF.Literal[
-			"", "Under Inspection", "Awaiting Release", "Partially Released", "Released", "Rejected", "Inspection Completed"
+			"",
+			"Under Inspection",
+			"Awaiting Release",
+			"Partially Released",
+			"Released",
+			"Rejected",
+			"Inspection Completed",
 		]
 		project: DF.Link | None
 		range: DF.Data | None

@@ -944,7 +944,6 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, receipt.cancel)
 
 	def test_per_unit_inspection_splits_the_lot(self):
-
 		qc = make_qc_warehouse("_Test QC Split WH")
 		store = make_warehouse("_Test QC Split Store", quality_warehouse=qc)
 		item = make_quarantine_item(qc)
@@ -1191,7 +1190,6 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertEqual(blank.decided_quantity, 5)
 
 	def test_lot_decided_in_parts(self):
-
 		qc = make_qc_warehouse("_Test QC Tranche WH")
 		store = make_warehouse("_Test QC Tranche Store", quality_warehouse=qc)
 		item = make_quarantine_item(qc)

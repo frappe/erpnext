@@ -703,8 +703,7 @@ class QualityInspection(UnitReadingsMixin, Document):
 					.set(job_card.quality_inspection, quality_inspection)
 					.set(job_card.modified, self.modified)
 					.where(
-						(job_card.name == self.reference_name)
-						& (job_card.production_item == self.item_code)
+						(job_card.name == self.reference_name) & (job_card.production_item == self.item_code)
 					)
 				).run()
 
