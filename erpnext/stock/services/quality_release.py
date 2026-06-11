@@ -11,7 +11,7 @@ every verdict of the lot — never a rejected or undecided serial leaves.
 
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt, get_link_to_form
 
 from erpnext.stock.services.quality_quarantine import stamp_tracking_on_outward_row
 
@@ -81,7 +81,10 @@ def process_inspection_result(doc, method=None):
 			_(
 				"Quality Control Lot {0} is accepted, but no unique release warehouse points at {1}. "
 				"Create the Quality Control Release manually."
-			).format(frappe.bold(lot.name), frappe.bold(lot.quality_warehouse)),
+			).format(
+				get_link_to_form("Quality Control Lot", lot.name),
+				get_link_to_form("Warehouse", lot.quality_warehouse),
+			),
 			alert=True,
 		)
 		return
@@ -123,7 +126,7 @@ def process_inspection_result(doc, method=None):
 		_("Quality Control Release {0} created: {1} released to {2}.").format(
 			frappe.utils.get_link_to_form("Stock Entry", release.name),
 			accepted_qty,
-			frappe.bold(release_warehouse),
+			get_link_to_form("Warehouse", release_warehouse),
 		),
 		alert=True,
 	)
@@ -162,7 +165,7 @@ def reverse_inspection_result(doc, method=None):
 				_(
 					"Cannot cancel: a purchase return or disposition is already booked against "
 					"Quality Control Lot {0}. Unwind it first."
-				).format(frappe.bold(lot.name)),
+				).format(get_link_to_form("Quality Control Lot", lot.name)),
 				title=_("Rejected Stock Already Moved"),
 			)
 
@@ -200,7 +203,7 @@ def reverse_inspection_result(doc, method=None):
 			_(
 				"Cannot cancel: returns or dispositions already moved more rejected stock of "
 				"Quality Control Lot {0} than the remaining verdicts cover. Unwind them first."
-			).format(frappe.bold(lot.name)),
+			).format(get_link_to_form("Quality Control Lot", lot.name)),
 			title=_("Rejected Stock Already Moved"),
 		)
 	if remaining_decided - remaining_rejected < flt(lot.accepted_qty):
@@ -208,7 +211,7 @@ def reverse_inspection_result(doc, method=None):
 			_(
 				"Cannot cancel: releases already moved more accepted stock of Quality Control "
 				"Lot {0} than the remaining verdicts cover. Unwind the releases first."
-			).format(frappe.bold(lot.name)),
+			).format(get_link_to_form("Quality Control Lot", lot.name)),
 			title=_("Accepted Stock Already Released"),
 		)
 
@@ -240,7 +243,7 @@ def make_release_for_lot(lot_name: str, release_warehouse: str | None = None):
 			_(
 				"Quality Control Lot {0} has no submitted Quality Inspection. Stock cannot leave "
 				"quarantine without a recorded inspection decision."
-			).format(frappe.bold(lot.name)),
+			).format(get_link_to_form("Quality Control Lot", lot.name)),
 			title=_("Inspection Pending"),
 		)
 
@@ -248,7 +251,7 @@ def make_release_for_lot(lot_name: str, release_warehouse: str | None = None):
 	if accepted_qty <= 0:
 		frappe.throw(
 			_("Quality Control Lot {0} has no accepted quantity awaiting release.").format(
-				frappe.bold(lot.name)
+				get_link_to_form("Quality Control Lot", lot.name)
 			)
 		)
 
@@ -302,7 +305,9 @@ def make_rejected_stock_transfer_for_lot(lot_name: str):
 	outstanding = flt(lot.rejected_qty) - flt(lot.returned_qty) - flt(lot.disposed_qty)
 	if outstanding <= 0:
 		frappe.throw(
-			_("Quality Control Lot {0} has no rejected quantity in quarantine.").format(frappe.bold(lot.name))
+			_("Quality Control Lot {0} has no rejected quantity in quarantine.").format(
+				get_link_to_form("Quality Control Lot", lot.name)
+			)
 		)
 
 	rejected_warehouses = frappe.get_all(
@@ -320,7 +325,7 @@ def make_rejected_stock_transfer_for_lot(lot_name: str):
 			_(
 				"No Rejected warehouse exists for {0}. Create a warehouse with type Rejected to "
 				"move rejected stock out of quarantine."
-			).format(frappe.bold(lot.company)),
+			).format(get_link_to_form("Company", lot.company)),
 			title=_("Rejected Warehouse Missing"),
 		)
 

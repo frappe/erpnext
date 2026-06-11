@@ -11,7 +11,7 @@ inspections, each covering a tranche of units.
 
 import frappe
 from frappe import _
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, get_link_to_form
 
 from erpnext.stock.doctype.quality_inspection_template.quality_inspection_template import (
 	get_template_details,
@@ -66,7 +66,11 @@ class UnitReadingsMixin:
 				_(
 					"This inspection decides {0} unit(s), but only {1} remain undecided on Quality "
 					"Control Lot {2}."
-				).format(self.decided_quantity, undecided, frappe.bold(self.reference_name)),
+				).format(
+					self.decided_quantity,
+					undecided,
+					get_link_to_form("Quality Control Lot", self.reference_name),
+				),
 				title=_("More Than Undecided"),
 			)
 
@@ -125,7 +129,7 @@ class UnitReadingsMixin:
 		if repeated:
 			frappe.throw(
 				_("Serial number(s) {0} were already decided by an earlier inspection of this lot.").format(
-					frappe.bold(", ".join(sorted(repeated)))
+					", ".join(get_link_to_form("Serial No", serial) for serial in sorted(repeated))
 				),
 				title=_("Serials Already Decided"),
 			)

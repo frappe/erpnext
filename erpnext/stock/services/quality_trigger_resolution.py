@@ -14,6 +14,7 @@ is wired separately.
 
 import frappe
 from frappe import _
+from frappe.utils import get_link_to_form
 from frappe.utils.nestedset import get_ancestors_of
 
 from erpnext.stock.services.quality_warehouse import is_transit_warehouse
@@ -337,7 +338,7 @@ def validate_inspected_serial_consistency(doc, method=None):
 					).format(
 						row.idx,
 						frappe.utils.get_link_to_form("Quality Inspection", inspection),
-						frappe.bold(qi.batch_no),
+						get_link_to_form("Batch", qi.batch_no),
 					),
 					title=_("Inspected Batch Mismatch"),
 				)
@@ -367,6 +368,7 @@ def get_inspection_outcomes(doc: dict | str):
 	doc = frappe._dict(doc)
 
 	frappe.has_permission(doc.doctype, "write", throw=True)
+	frappe.has_permission("Quality Inspection", "read", throw=True)
 	if doc.doctype not in ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"):
 		return []
 	if doc.doctype == "Purchase Invoice" and not cint(doc.update_stock):
@@ -458,7 +460,7 @@ def enforce_inspection_points(doc):
 		if not qi:
 			if block:
 				msg = _("Row #{0}: Quality Inspection is required for Item {1}.").format(
-					row.idx, frappe.bold(row.get("item_code"))
+					row.idx, get_link_to_form("Item", row.get("item_code"))
 				)
 				if submitting:
 					frappe.throw(msg, title=_("Inspection Required"))
@@ -468,7 +470,7 @@ def enforce_inspection_points(doc):
 				# Warn never demands — it nudges
 				frappe.msgprint(
 					_("Row #{0}: Quality Inspection not created for Item {1}.").format(
-						row.idx, frappe.bold(row.get("item_code"))
+						row.idx, get_link_to_form("Item", row.get("item_code"))
 					),
 					indicator="orange",
 					alert=True,

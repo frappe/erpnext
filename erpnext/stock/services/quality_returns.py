@@ -11,7 +11,7 @@ and pre-filled with the rejected units still held.
 
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt, get_link_to_form
 
 from erpnext.stock.services.quality_quarantine import stamp_tracking_on_outward_row
 from erpnext.stock.services.quality_release import _rejected_serials_awaiting_return
@@ -86,7 +86,12 @@ def _validate_return_capacity(row, warehouse, return_qty, source=None):
 				"Row #{0}: Only {1} rejected unit(s) of {2} in {3} are awaiting return. Stock that "
 				"is pending or accepted leaves quarantine through a Quality Control Release, not a "
 				"purchase return."
-			).format(row.idx, capacity, frappe.bold(row.get("item_code")), frappe.bold(warehouse)),
+			).format(
+				row.idx,
+				capacity,
+				get_link_to_form("Item", row.get("item_code")),
+				get_link_to_form("Warehouse", warehouse),
+			),
 			title=_("Return Exceeds Rejected Stock"),
 		)
 
@@ -133,14 +138,14 @@ def make_purchase_return_for_lot(lot_name: str):
 			_(
 				"A purchase return applies only to lots sourced from a Purchase Receipt, Purchase "
 				"Invoice or Subcontracting Receipt. Lot {0} came from {1}."
-			).format(frappe.bold(lot.name), frappe.bold(lot.source_document_type))
+			).format(get_link_to_form("Quality Control Lot", lot.name), frappe.bold(lot.source_document_type))
 		)
 
 	outstanding = flt(lot.rejected_qty) - flt(lot.returned_qty) - flt(lot.disposed_qty)
 	if outstanding <= 0:
 		frappe.throw(
 			_("Quality Control Lot {0} has no rejected quantity awaiting return.").format(
-				frappe.bold(lot.name)
+				get_link_to_form("Quality Control Lot", lot.name)
 			)
 		)
 
@@ -153,9 +158,9 @@ def make_purchase_return_for_lot(lot_name: str):
 	if not rows:
 		frappe.throw(
 			_("{0} has no returnable row for item {1} in {2}.").format(
-				frappe.bold(lot.source_document),
-				frappe.bold(lot.item_code),
-				frappe.bold(lot.quality_warehouse),
+				get_link_to_form(lot.source_document_type, lot.source_document),
+				get_link_to_form("Item", lot.item_code),
+				get_link_to_form("Warehouse", lot.quality_warehouse),
 			)
 		)
 

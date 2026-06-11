@@ -10,7 +10,7 @@ from frappe import _, throw
 from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.query_builder import Field
 from frappe.query_builder.functions import IfNull
-from frappe.utils import cint
+from frappe.utils import cint, get_link_to_form
 from frappe.utils.caching import request_cache
 from frappe.utils.nestedset import NestedSet
 from pypika.terms import ExistsCriterion
@@ -98,9 +98,8 @@ class Warehouse(NestedSet):
 		if warehouse_type != "Quality":
 			frappe.throw(
 				_(
-					"{0} cannot be used as a Quality Control Warehouse: set its Warehouse Type to "
-					"{1} first."
-				).format(frappe.bold(self.quality_warehouse), frappe.bold("Quality")),
+					"{0} cannot be used as a Quality Control Warehouse: set its Warehouse Type to {1} first."
+				).format(get_link_to_form("Warehouse", self.quality_warehouse), frappe.bold("Quality")),
 				title=_("Not a Quality Warehouse"),
 			)
 

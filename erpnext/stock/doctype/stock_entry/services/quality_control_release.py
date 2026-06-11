@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt, get_link_to_form
 
 from erpnext.stock.services.quality_warehouse import is_rejected_warehouse
 
@@ -48,7 +48,7 @@ class QualityControlReleaseStockEntry(MaterialTransferStockEntry):
 				_(
 					"Quality Control Lot {0} has no submitted Quality Inspection. Stock cannot leave "
 					"quarantine without a recorded inspection decision."
-				).format(frappe.bold(lot.name)),
+				).format(get_link_to_form("Quality Control Lot", lot.name)),
 				title=_("Inspection Pending"),
 			)
 
@@ -60,14 +60,21 @@ class QualityControlReleaseStockEntry(MaterialTransferStockEntry):
 			if row.item_code != lot.item_code:
 				frappe.throw(
 					_("Row #{0}: Item {1} does not belong to Quality Control Lot {2} (item {3}).").format(
-						row.idx, frappe.bold(row.item_code), lot.name, frappe.bold(lot.item_code)
+						row.idx,
+						get_link_to_form("Item", row.item_code),
+						get_link_to_form("Quality Control Lot", lot.name),
+						get_link_to_form("Item", lot.item_code),
 					)
 				)
 			if row.s_warehouse != lot.quality_warehouse:
 				frappe.throw(
 					_(
 						"Row #{0}: Source warehouse must be {1}, where Quality Control Lot {2} is held."
-					).format(row.idx, frappe.bold(lot.quality_warehouse), lot.name)
+					).format(
+						row.idx,
+						get_link_to_form("Warehouse", lot.quality_warehouse),
+						get_link_to_form("Quality Control Lot", lot.name),
+					)
 				)
 			self._validate_row_batch(row, lot)
 			if is_rejected_warehouse(row.t_warehouse):
@@ -123,8 +130,10 @@ class QualityControlReleaseStockEntry(MaterialTransferStockEntry):
 				_("Row #{0}: Quality Control Lot {1} holds batch {2} — a release cannot move {3}.").format(
 					row.idx,
 					lot.name,
-					frappe.bold(lot.batch_no),
-					frappe.bold(", ".join(sorted(row_batches - {lot.batch_no}))),
+					get_link_to_form("Batch", lot.batch_no),
+					", ".join(
+						get_link_to_form("Batch", batch) for batch in sorted(row_batches - {lot.batch_no})
+					),
 				),
 				title=_("Batch Mismatch"),
 			)
@@ -132,7 +141,7 @@ class QualityControlReleaseStockEntry(MaterialTransferStockEntry):
 		if not row_batches:
 			frappe.throw(
 				_("Row #{0}: Specify batch {1} of Quality Control Lot {2} on the release.").format(
-					row.idx, frappe.bold(lot.batch_no), lot.name
+					row.idx, get_link_to_form("Batch", lot.batch_no), lot.name
 				),
 				title=_("Batch Missing"),
 			)
@@ -187,7 +196,7 @@ class QualityControlReleaseStockEntry(MaterialTransferStockEntry):
 		if not row_serials:
 			frappe.throw(
 				_("Row #{0}: Specify the {1} serial numbers of Quality Control Lot {2}.").format(
-					row.idx, _(verdict.lower()), lot.name
+					row.idx, _(verdict.lower()), get_link_to_form("Quality Control Lot", lot.name)
 				),
 				title=_("Serial Numbers Missing"),
 			)
@@ -200,10 +209,10 @@ class QualityControlReleaseStockEntry(MaterialTransferStockEntry):
 					"Control Lot {3} and cannot move to {4}."
 				).format(
 					row.idx,
-					frappe.bold(", ".join(sorted(mismatched))),
+					", ".join(get_link_to_form("Serial No", serial) for serial in sorted(mismatched)),
 					_(verdict.lower()),
 					lot.name,
-					frappe.bold(row.t_warehouse),
+					get_link_to_form("Warehouse", row.t_warehouse),
 				),
 				title=_("Serial Verdict Mismatch"),
 			)

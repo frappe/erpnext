@@ -10,7 +10,7 @@ the stock got there (receipt, transfer, redirect).
 
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt, get_link_to_form
 
 from erpnext.stock.services.quality_trigger_resolution import (
 	INBOUND,
@@ -42,7 +42,11 @@ def apply_quarantine_routing(doc):
 				_(
 					"Row #{0}: Item {1} requires quarantine for quality inspection, but warehouse {2} "
 					"has no Quality Control Warehouse configured."
-				).format(point.row.idx, frappe.bold(point.item_code), frappe.bold(point.warehouse)),
+				).format(
+					point.row.idx,
+					get_link_to_form("Item", point.item_code),
+					get_link_to_form("Warehouse", point.warehouse),
+				),
 				title=_("Quality Control Warehouse Missing"),
 			)
 
@@ -50,7 +54,9 @@ def apply_quarantine_routing(doc):
 		_redirect_draft_bundle(point.row, quality_warehouse)
 		frappe.msgprint(
 			_("Row #{0}: Item {1} is routed to {2} for quality inspection.").format(
-				point.row.idx, frappe.bold(point.item_code), frappe.bold(quality_warehouse)
+				point.row.idx,
+				get_link_to_form("Item", point.item_code),
+				get_link_to_form("Warehouse", quality_warehouse),
 			),
 			alert=True,
 		)
@@ -109,7 +115,7 @@ def validate_quality_warehouse_usage(doc):
 				"Row #{0}: {1} is a Quality Control warehouse — it only receives stock that "
 				"requires quarantine. Item {2} has no Quarantine trigger for this movement; "
 				"receive it into a normal warehouse instead."
-			).format(row.idx, frappe.bold(warehouse), frappe.bold(item_code)),
+			).format(row.idx, get_link_to_form("Warehouse", warehouse), get_link_to_form("Item", item_code)),
 			title=_("Quality Control Warehouse"),
 		)
 
@@ -215,7 +221,7 @@ def handle_source_document_cancel(doc, method=None):
 				_(
 					"Cannot cancel: Quality Control Lot {0} created by this document has already been "
 					"released or rejected. Unwind the Quality Control Release or purchase return first."
-				).format(frappe.bold(lot.name)),
+				).format(get_link_to_form("Quality Control Lot", lot.name)),
 				title=_("Quality Control Lot In Use"),
 			)
 		frappe.delete_doc("Quality Control Lot", lot.name, ignore_permissions=True)
@@ -234,7 +240,7 @@ def block_stock_reconciliation_on_quality_warehouse(doc, method=None):
 				_(
 					"Row #{0}: {1} is a Quality Control warehouse. Stock Reconciliation is not "
 					"allowed on quarantined stock."
-				).format(row.idx, frappe.bold(row.warehouse)),
+				).format(row.idx, get_link_to_form("Warehouse", row.warehouse)),
 				title=_("Quality Control Warehouse"),
 			)
 
