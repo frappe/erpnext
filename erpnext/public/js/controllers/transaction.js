@@ -2956,6 +2956,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						label: __("Item Code"),
 						in_list_view: true,
 						read_only: true,
+						columns: 5,
 					},
 					{
 						fieldtype: "Data",
@@ -2963,50 +2964,43 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						label: __("Item Name"),
 						in_list_view: true,
 						read_only: true,
+						columns: 5,
 					},
+					// the rest rides along unseen — quantities and sample sizes
+					// are reviewed on the draft inspections themselves
 					{
 						fieldtype: "Float",
 						fieldname: "qty",
-						label: __("Accepted Quantity"),
-						in_list_view: true,
-						read_only: true,
+						hidden: true,
 					},
 					{
 						fieldtype: "Float",
 						fieldname: "sample_size",
-						label: __("Sample Size"),
-						in_list_view: true,
-						// Each Quantity items record per-unit readings; a sample size does not apply
-						read_only_depends_on: 'eval:doc.inspection_basis === "Each Quantity"',
+						hidden: true,
 					},
 					{
 						fieldtype: "Data",
 						fieldname: "inspection_basis",
-						label: __("Inspection Basis"),
 						hidden: true,
 					},
 					{
 						fieldtype: "Data",
 						fieldname: "description",
-						label: __("Description"),
 						hidden: true,
 					},
 					{
 						fieldtype: "Data",
 						fieldname: "serial_no",
-						label: __("Serial No"),
 						hidden: true,
 					},
 					{
 						fieldtype: "Data",
 						fieldname: "batch_no",
-						label: __("Batch No"),
 						hidden: true,
 					},
 					{
 						fieldtype: "Data",
 						fieldname: "child_row_reference",
-						label: __("Child Row Reference"),
 						hidden: true,
 					},
 				],
@@ -3017,7 +3011,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		const inspection_type = this.quality_inspection_type();
 		const dialog = new frappe.ui.Dialog({
 			title: __("Select Items for Quality Inspection"),
-			size: "extra-large",
+			size: "large",
 			fields: fields,
 			primary_action: function () {
 				const data = dialog.get_values();
