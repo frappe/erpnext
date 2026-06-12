@@ -70,6 +70,8 @@ from erpnext.controllers.subcontracting_inward_controller import SubcontractingI
 
 form_grid_templates = {"items": "templates/form_grid/stock_entry_grid.html"}
 
+ZERO_QTY_ALLOWED_ITEM_TYPES = frozenset({"Co-Product", "By-Product", "Scrap", "Additional Finished Good"})
+
 
 class StockEntry(StockController, SubcontractingInwardController):
 	# begin: auto-generated types
@@ -435,6 +437,25 @@ class StockEntry(StockController, SubcontractingInwardController):
 		for row in self.items:
 			row.delink_asset_repair_sabb(self.asset_repair)
 
+	def validate_qty_is_not_zero(self):
+		if self.flags.allow_zero_qty:
+			return
+
+		for item in self.items:
+			if item.get("secondary_item_type") in ZERO_QTY_ALLOWED_ITEM_TYPES:
+				continue
+
+			if not flt(item.qty):
+				from erpnext.controllers.accounts_controller import InvalidQtyError
+
+				frappe.throw(
+					msg=_("Row #{0}: Quantity for Item {1} cannot be zero.").format(
+						item.idx, frappe.bold(item.item_code)
+					),
+					title=_("Invalid Quantity"),
+					exc=InvalidQtyError,
+				)
+
 	def set_transfer_qty(self):
 		self.validate_qty_is_not_zero()
 		for item in self.get("items"):
@@ -575,7 +596,11 @@ class StockEntry(StockController, SubcontractingInwardController):
 			cost_allocation_per = frappe.get_value(
 				"BOM Secondary Item", d.bom_secondary_item, "cost_allocation_per"
 			)
-			d.basic_rate = (outgoing_items_cost * (cost_allocation_per / 100)) / d.transfer_qty
+			d.basic_rate = (
+				(outgoing_items_cost * (cost_allocation_per / 100)) / d.transfer_qty
+				if d.transfer_qty
+				else 0
+			)
 
 		if not d.basic_rate and not d.allow_zero_valuation_rate:
 			d.basic_rate = get_valuation_rate(

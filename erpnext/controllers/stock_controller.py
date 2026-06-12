@@ -95,6 +95,7 @@ class StockController(AccountsController):
 						or (item.get("incoming_rate") == 0 and self.get("update_stock", 1))
 					)
 					and item.get("allow_zero_valuation_rate") == 0
+					and flt(item.get("qty"))
 					and frappe.get_cached_value("Item", item.item_code, "is_stock_item")
 				):
 					frappe.toast(

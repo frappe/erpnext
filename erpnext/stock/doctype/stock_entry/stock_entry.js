@@ -1035,6 +1035,20 @@ frappe.ui.form.on("Stock Entry Detail", {
 		frm.events.calculate_basic_amount(frm, item);
 	},
 
+	qty(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		const zero_qty_types = ["Co-Product", "By-Product", "Scrap", "Additional Finished Good"];
+		if (flt(row.qty) === 0 && zero_qty_types.includes(row.secondary_item_type)) {
+			frappe.show_alert({
+				message: __(
+					"Row #{0}: Qty for {1} is set to zero. Zero output is allowed for {2} type items.",
+					[row.idx, frappe.bold(row.item_code), row.secondary_item_type]
+				),
+				indicator: "orange",
+			});
+		}
+	},
+
 	uom(doc, cdt, cdn) {
 		var d = locals[cdt][cdn];
 		if (d.uom && d.item_code) {

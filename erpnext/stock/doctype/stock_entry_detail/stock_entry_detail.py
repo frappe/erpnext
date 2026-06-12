@@ -185,7 +185,12 @@ class StockEntryDetail(Document):
 
 		self.transfer_qty = flt(flt(self.qty) * flt(self.conversion_factor), self.precision("transfer_qty"))
 
-		if not flt(self.transfer_qty):
+		if not flt(self.transfer_qty) and self.secondary_item_type not in (
+			"Co-Product",
+			"By-Product",
+			"Scrap",
+			"Additional Finished Good",
+		):
 			frappe.throw(
 				_("Row {0}: Qty in Stock UOM can not be zero.").format(self.idx), title=_("Zero quantity")
 			)
