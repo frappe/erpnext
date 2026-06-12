@@ -13,12 +13,15 @@ class GoodsInwardNoteItem(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		conversion_factor: DF.Float
 		item_code: DF.Link
 		item_name: DF.Data | None
 		order_item: DF.Data | None
 		qty: DF.Float
 		quality_inspection: DF.Link | None
 		received_qty: DF.Float
+		stock_qty: DF.Float
+		stock_uom: DF.Link | None
 		supplier_reference: DF.Data | None
 		uom: DF.Link | None
 	# end: auto-generated types

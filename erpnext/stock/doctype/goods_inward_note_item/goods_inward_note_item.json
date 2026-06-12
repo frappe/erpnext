@@ -10,6 +10,9 @@
   "item_name",
   "qty",
   "uom",
+  "conversion_factor",
+  "stock_qty",
+  "stock_uom",
   "column_break_qty",
   "received_qty",
   "section_break_reference",
@@ -54,6 +57,31 @@
    "options": "UOM",
    "read_only": 1,
    "columns": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "conversion_factor",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Conversion Factor",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.conversion_factor && doc.conversion_factor != 1",
+   "description": "What the packages hold, in the item's stock unit.",
+   "fieldname": "stock_qty",
+   "fieldtype": "Float",
+   "label": "Stock Qty",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.conversion_factor && doc.conversion_factor != 1",
+   "fetch_from": "item_code.stock_uom",
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "label": "Stock UOM",
+   "options": "UOM",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_qty",
@@ -105,7 +133,7 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2026-06-12 00:00:04.000000",
+ "modified": "2026-06-12 00:00:05.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Goods Inward Note Item",

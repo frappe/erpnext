@@ -216,6 +216,15 @@ frappe.ui.form.on("Quality Inspection", {
 					frm.set_value("decided_quantity", flt(r.message));
 				}
 			});
+			// package-counted rows: say what a "unit" is here
+			frm.call("get_custody_packing_unit").then((r) => {
+				if (r.message) {
+					const hint = __("Counted in {0} — custody decides handling units.", [r.message]);
+					frm.set_df_property("unit_quantity", "description", hint);
+					frm.set_df_property("sample_size", "description", hint);
+					frm.set_df_property("decided_quantity", "description", hint);
+				}
+			});
 			return;
 		}
 		frappe.db

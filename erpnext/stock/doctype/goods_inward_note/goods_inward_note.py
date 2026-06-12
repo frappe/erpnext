@@ -166,12 +166,13 @@ class GoodsInwardNote(Document):
 		Quantities live in the order row's unit of measure — receipts made from
 		the note are in the same space — so the order's unit is authoritative.
 		"""
+		fields = ["name", "item_code", f"{ORDER_UOM_FIELDS[self.order_type]} as uom"]
+		if self.order_type == "Purchase Order":
+			fields.append("conversion_factor")
 		order_items = {
 			row.name: row
 			for row in frappe.get_all(
-				ORDER_ITEM_DOCTYPES[self.order_type],
-				filters={"parent": self.order},
-				fields=["name", "item_code", f"{ORDER_UOM_FIELDS[self.order_type]} as uom"],
+				ORDER_ITEM_DOCTYPES[self.order_type], filters={"parent": self.order}, fields=fields
 			)
 		}
 		items_on_order = {row.item_code for row in order_items.values()}
@@ -205,6 +206,9 @@ class GoodsInwardNote(Document):
 					name for name, order_row in order_items.items() if order_row.item_code == row.item_code
 				)
 			row.uom = order_items[row.order_item].uom
+			# the stock equivalent of the packages, as a hint beside the count
+			row.conversion_factor = flt(order_items[row.order_item].get("conversion_factor")) or 1
+			row.stock_qty = flt(row.qty) * row.conversion_factor
 
 	def validate_quantities(self):
 		for row in self.items:
@@ -313,16 +317,20 @@ class GoodsInwardNote(Document):
 		# rows, so the client-side mandatory check is already satisfied
 		self.set_details_from_order()
 		received_by_order_item = self._received_against_order()
+		fields = ["name", "item_code", "item_name", "qty", f"{ORDER_UOM_FIELDS[self.order_type]} as uom"]
+		if self.order_type == "Purchase Order":
+			fields.append("conversion_factor")
 		self.set("items", [])
 		for row in frappe.get_all(
 			ORDER_ITEM_DOCTYPES[self.order_type],
 			filters={"parent": self.order},
-			fields=["name", "item_code", "item_name", "qty", f"{ORDER_UOM_FIELDS[self.order_type]} as uom"],
+			fields=fields,
 			order_by="idx",
 		):
 			pending = flt(row.qty) - received_by_order_item.get(row.name, 0)
 			if pending <= 0:
 				continue
+			conversion_factor = flt(row.get("conversion_factor")) or 1
 			self.append(
 				"items",
 				{
@@ -330,6 +338,8 @@ class GoodsInwardNote(Document):
 					"item_name": row.item_name,
 					"qty": pending,
 					"uom": row.uom,
+					"conversion_factor": conversion_factor,
+					"stock_qty": pending * conversion_factor,
 					"order_item": row.name,
 				},
 			)

@@ -130,14 +130,76 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 			]
 		)
 
-		# arrivals, receipts and capacities all live in the order row's unit
+		# arrivals, receipts and capacities all live in the order row's unit,
+		# with the stock equivalent shown beside the count
 		note = make_goods_inward_note(order)
 		self.assertEqual(note.items[0].qty, 2)
 		self.assertEqual(note.items[0].uom, "Box")
+		self.assertEqual(note.items[0].conversion_factor, 10)
+		self.assertEqual(note.items[0].stock_qty, 20)
 
 		receipt = make_receipt_from_goods_inward_note(note.name)
 		self.assertEqual(receipt.items[0].qty, 2)
 		self.assertEqual(receipt.items[0].uom, "Box")
+
+	def test_package_counted_rows_decide_boxes_not_pieces(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "BOX-SN-.#####",
+			}
+		)
+		item.append("uoms", {"uom": "Box", "conversion_factor": 10})
+		item.save()
+
+		order = create_purchase_order(
+			rm_items=[
+				{
+					"item_code": item.name,
+					"warehouse": "_Test Warehouse - _TC",
+					"qty": 2,
+					"uom": "Box",
+					"conversion_factor": 10,
+					"rate": 100,
+					"schedule_date": nowdate(),
+				}
+			]
+		)
+		note = make_goods_inward_note(order)
+
+		def sample_inspection(**values):
+			inspection = frappe.get_doc(
+				{
+					"doctype": "Quality Inspection",
+					"inspection_type": "Incoming",
+					"reference_type": "Goods Inward Note",
+					"reference_name": note.name,
+					"item_code": item.name,
+					"manual_inspection": 1,
+					"status": "Accepted",
+					"sample_size": 1,
+					"report_date": nowdate(),
+					"inspected_by": frappe.session.user,
+					**values,
+				}
+			)
+			return inspection
+
+		# a serial names a piece, not a box — refused on a package-counted row
+		serialled = sample_inspection(serial_no="BOX-SN-0001")
+		self.assertRaises(frappe.ValidationError, serialled.insert)
+
+		# without serials, a partial verdict decides whole boxes — even for a
+		# serialized item, whose serials only exist after the receipt
+		partial = sample_inspection(decided_quantity=1)
+		partial.insert(ignore_permissions=True)
+		partial.submit()
+
+		# and the quantities speak the packing unit
+		oversized = sample_inspection(sample_size=5)
+		oversized.insert(ignore_permissions=True)
+		self.assertRaisesRegex(frappe.ValidationError, "Box", oversized.submit)
 
 	def test_disabled_inward_location_is_refused(self):
 		location = make_inward_location("_Test Closed Yard")

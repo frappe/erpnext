@@ -113,3 +113,11 @@ frappe.ui.form.on("Goods Inward Note", {
 		frm.set_value("net_weight", flt(frm.doc.gross_weight) - flt(frm.doc.tare_weight));
 	},
 });
+
+frappe.ui.form.on("Goods Inward Note Item", {
+	qty(frm, cdt, cdn) {
+		// keep the stock-unit hint honest while the operator corrects the count
+		const row = frappe.get_doc(cdt, cdn);
+		frappe.model.set_value(cdt, cdn, "stock_qty", flt(row.qty) * (flt(row.conversion_factor) || 1));
+	},
+});

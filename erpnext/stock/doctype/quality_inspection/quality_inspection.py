@@ -128,6 +128,7 @@ class QualityInspection(UnitReadingsMixin, Document):
 
 		self.set_decided_quantity_default()
 		self.validate_inspection_required()
+		self.validate_package_units_carry_no_serials()
 		self.validate_serial_nos()
 		self.set_company()
 		self.warn_unrecorded_readings()
@@ -282,6 +283,52 @@ class QualityInspection(UnitReadingsMixin, Document):
 		else:
 			self.inspection_basis = "Sample"
 
+	@frappe.whitelist()
+	def get_custody_packing_unit(self):
+		"""The handling unit a custody row counts in, when it is not the stock unit.
+
+		A Goods Inward Note row arrives in the order line's unit of measure —
+		boxes, drums, pallets. Custody verdicts decide those handling units;
+		piece-level inspection happens after receipt, in quarantine.
+		"""
+		if self.reference_type != "Goods Inward Note" or not self.item_code:
+			return None
+		if not self.child_row_reference:
+			self.set_child_row_reference()
+		if not self.child_row_reference:
+			return None
+
+		row_uom = frappe.db.get_value("Goods Inward Note Item", self.child_row_reference, "uom")
+		stock_uom = frappe.get_cached_value("Item", self.item_code, "stock_uom")
+		return row_uom if row_uom and row_uom != stock_uom else None
+
+	def _format_inspectable_qty(self, qty):
+		"""A quantity under inspection, with its handling unit where one applies."""
+		packing_unit = self.get_custody_packing_unit()
+		return f"{flt(qty)} {packing_unit}" if packing_unit else qty
+
+	def validate_package_units_carry_no_serials(self):
+		"""Package-counted custody rows take no serials — a serial names a piece.
+
+		The verdict here decides boxes; which pieces inside them pass is a
+		question for quarantine, after the receipt creates the serials.
+		"""
+		if not (
+			(self.serial_no or "").strip()
+			or any(entry.serial_no for entry in self.get("unit_readings") or [])
+		):
+			return
+
+		packing_unit = self.get_custody_packing_unit()
+		if packing_unit:
+			frappe.throw(
+				_(
+					"This inspection counts in {0} — a Serial No identifies a single {1}. "
+					"Inspect serials after the receipt, in quarantine."
+				).format(packing_unit, frappe.get_cached_value("Item", self.item_code, "stock_uom")),
+				title=_("Packages Carry No Serials"),
+			)
+
 	def validate_serial_nos(self):
 		"""The recorded serials must be real and the item's; they set the sample size.
 
@@ -413,7 +460,7 @@ class QualityInspection(UnitReadingsMixin, Document):
 		if (strict or flt(qty_under_inspection) > 0) and flt(self.sample_size) > flt(qty_under_inspection):
 			frappe.throw(
 				_("The sample of {0} unit(s) exceeds the {1} unit(s) under inspection.").format(
-					self.sample_size, qty_under_inspection
+					self.sample_size, self._format_inspectable_qty(qty_under_inspection)
 				),
 				title=_("Sample Larger Than Quantity"),
 			)
@@ -577,7 +624,13 @@ class QualityInspection(UnitReadingsMixin, Document):
 		item = frappe.get_cached_value(
 			"Item", self.item_code, ["has_serial_no", "has_batch_no"], as_dict=True
 		)
-		if not bundle_decided and item.has_serial_no and not (self.serial_no or "").strip():
+		if (
+			not bundle_decided
+			and item.has_serial_no
+			and not (self.serial_no or "").strip()
+			# package-counted custody rows decide boxes; serials wait for quarantine
+			and not self.get_custody_packing_unit()
+		):
 			frappe.throw(
 				_(
 					"Record the sampled Serial Nos before submission — {0} is serialized, and the "
