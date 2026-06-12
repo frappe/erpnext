@@ -66,13 +66,7 @@ class Workstation(Document):
 	# end: auto-generated types
 
 	def before_save(self):
-<<<<<<< HEAD
-		self.set_data_based_on_workstation_type()
-=======
-		if self.has_value_changed("workstation_type"):
-			self._set_data_based_on_workstation_type()
-
->>>>>>> 0fea93388d (fix: permissions in workstation file)
+		self._set_data_based_on_workstation_type()
 		self.set_hour_rate()
 		self.set_total_working_hours()
 
@@ -269,20 +263,11 @@ def get_status_color(status):
 	return color_map.get(status, "var(--bg-blue)")
 
 
-<<<<<<< HEAD
 def get_raw_materials(job_cards):
 	raw_materials = {}
 
 	data = frappe.get_all(
 		"Job Card Item",
-=======
-@frappe.whitelist()
-def get_raw_materials(job_card: str):
-	frappe.has_permission("Job Card", "read", doc=job_card, throw=True)
-
-	raw_materials = frappe.get_all(
-		"Job Card",
->>>>>>> 0fea93388d (fix: permissions in workstation file)
 		fields=[
 			"parent",
 			"item_code",
@@ -435,75 +420,3 @@ def get_workstations(**kwargs):
 			d.status_image = d.off_status_image
 
 	return data
-<<<<<<< HEAD
-=======
-
-
-def get_color_map():
-	return {
-		"Production": "green",
-		"Off": "gray",
-		"Idle": "gray",
-		"Problem": "red",
-		"Maintenance": "yellow",
-		"Setup": "blue",
-	}
-
-
-ALLOWED_JOB_CARD_METHODS = frozenset(
-	{
-		"start_timer",
-		"pause_job",
-		"resume_job",
-		"complete_job_card",
-	}
-)
-
-
-@frappe.whitelist()
-def update_job_card(job_card: str, method: str, **kwargs):
-	if method not in ALLOWED_JOB_CARD_METHODS:
-		frappe.throw(
-			_("Method {0} is not allowed to be run on a Job Card.").format(bold(method)),
-			frappe.PermissionError,
-			title=_("Not Allowed"),
-		)
-
-	doc = frappe.get_doc("Job Card", job_card)
-	doc.check_permission("write")
-
-	if isinstance(kwargs, dict):
-		kwargs = frappe._dict(kwargs)
-
-	if kwargs.get("employees"):
-		kwargs.employees = frappe.parse_json(kwargs.employees)
-
-	if kwargs.qty and isinstance(kwargs.qty, str):
-		kwargs.qty = flt(kwargs.qty)
-
-	doc.run_method(method, **kwargs)
-
-
-@frappe.whitelist()
-def validate_job_card(job_card: str, status: str):
-	frappe.has_permission("Job Card", "read", doc=job_card, throw=True)
-
-	job_card_details = frappe.db.get_value("Job Card", job_card, ["status", "for_quantity"], as_dict=1)
-
-	current_status = job_card_details.status
-	if current_status != status:
-		if status == "Open":
-			frappe.throw(
-				_("The job card {0} is in {1} state and you cannot start it again.").format(
-					job_card, current_status
-				)
-			)
-		else:
-			frappe.throw(
-				_("The job card {0} is in {1} state and you cannot complete.").format(
-					job_card, current_status
-				)
-			)
-
-	return job_card_details.for_quantity
->>>>>>> 0fea93388d (fix: permissions in workstation file)
