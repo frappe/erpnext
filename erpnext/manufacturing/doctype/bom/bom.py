@@ -341,10 +341,15 @@ class BOM(WebsiteGenerator):
 					).format(item.idx, get_link_to_form("Item", item.item_code))
 				)
 
-			if not item.qty:
+			if item.qty is None:
 				frappe.throw(
+<<<<<<< HEAD
 					_("Row #{0}: Quantity should be greater than 0 for {1} Item {2}").format(
 						item.idx, item.type, get_link_to_form("Item", item.item_code)
+=======
+					_("Row #{0}: Quantity is required for {1} Item {2}").format(
+						item.idx, item.secondary_item_type, get_link_to_form("Item", item.item_code)
+>>>>>>> 6771daf6a1 (fix(bom): allow zero qty for secondary items (Co-Product, By-Product, Scrap, Additional Finished Good))
 					)
 				)
 

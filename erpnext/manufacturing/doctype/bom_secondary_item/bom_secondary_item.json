@@ -138,8 +138,7 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Qty",
-   "non_negative": 1,
-   "reqd": 1
+   "non_negative": 1
   },
   {
    "default": "0",
