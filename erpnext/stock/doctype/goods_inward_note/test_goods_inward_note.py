@@ -282,6 +282,101 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 			[],
 		)
 
+	def test_subcontracting_receipt_path(self):
+		import copy
+
+		from erpnext.controllers.tests.test_subcontracting_controller import (
+			get_rm_items,
+			get_subcontracting_order,
+			make_bom_for_subcontracted_items,
+			make_raw_materials,
+			make_service_items,
+			make_stock_in_entry,
+			make_stock_transfer_entry,
+			make_subcontracted_items,
+			set_backflush_based_on,
+		)
+
+		set_backflush_based_on("BOM")
+		make_subcontracted_items()
+		make_raw_materials()
+		make_service_items()
+		make_bom_for_subcontracted_items()
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 6,
+				"rate": 100,
+				"fg_item": "_Test FG Item",
+				"fg_item_qty": 6,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		# the job worker's truck arrives with the finished goods
+		note = frappe.get_doc(
+			{
+				"doctype": "Goods Inward Note",
+				"order_type": "Subcontracting Order",
+				"order": sco.name,
+				"current_inward_location": make_inward_location(),
+			}
+		)
+		note.get_items_from_order()
+		note.insert(ignore_permissions=True)
+		note.submit()
+		self.assertEqual(note.supplier, sco.supplier)
+		self.assertEqual(note.items[0].item_code, "_Test FG Item")
+		self.assertEqual(note.items[0].qty, 6)
+
+		# the receipt comes through the order's own mapper: supplied items intact
+		receipt = make_receipt_from_goods_inward_note(note.name)
+		self.assertEqual(receipt.doctype, "Subcontracting Receipt")
+		self.assertEqual(receipt.items[0].qty, 6)
+		self.assertEqual(receipt.items[0].goods_inward_note, note.name)
+
+		# partial receipt books back onto the note
+		receipt.items[0].qty = 4
+		receipt.items[0].received_qty = 4
+		receipt.save(ignore_permissions=True)
+		# raw materials backflush as usual: custody changes nothing downstream
+		self.assertTrue(receipt.supplied_items)
+		receipt.submit()
+		note.reload()
+		self.assertEqual(note.items[0].received_qty, 4)
+		self.assertEqual(note.status, "Partially Received")
+
+		# the remainder may not be exceeded
+		second = make_receipt_from_goods_inward_note(note.name)
+		self.assertEqual(second.items[0].qty, 2)
+		second.items[0].qty = 3
+		second.items[0].received_qty = 3
+		second.save(ignore_permissions=True)
+		self.assertRaises(frappe.ValidationError, second.submit)
+
+		second.reload()
+		second.items[0].qty = 2
+		second.items[0].received_qty = 2
+		second.save(ignore_permissions=True)
+		second.submit()
+		note.reload()
+		self.assertEqual(note.status, "Received")
+
+		# cancelling the receipt gives the quantity back to custody
+		second.cancel()
+		note.reload()
+		self.assertEqual(note.items[0].received_qty, 4)
+		self.assertEqual(note.status, "Partially Received")
+
 	def test_goods_awaiting_receipt_report(self):
 		from erpnext.stock.report.goods_awaiting_receipt.goods_awaiting_receipt import execute
 
