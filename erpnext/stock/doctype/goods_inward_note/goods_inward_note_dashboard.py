@@ -11,7 +11,7 @@ def get_data():
 		"transactions": [
 			{
 				"label": _("Receipt"),
-				"items": ["Purchase Receipt", "Subcontracting Receipt"],
+				"items": ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"],
 			},
 			{
 				"label": _("Quality"),

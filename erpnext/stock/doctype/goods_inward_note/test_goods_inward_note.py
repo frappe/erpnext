@@ -156,6 +156,45 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		note.get_items_from_order()
 		self.assertRaises(frappe.ValidationError, note.insert)
 
+	def test_stock_updating_invoice_path(self):
+		from erpnext.stock.services.goods_inward import make_invoice_from_goods_inward_note
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		order = create_purchase_order(item_code=item, qty=10)
+		note = make_goods_inward_note(order, qty=6)
+
+		# receive and bill in one document, capped to custody like a receipt
+		invoice = make_invoice_from_goods_inward_note(note.name)
+		self.assertEqual(invoice.doctype, "Purchase Invoice")
+		self.assertEqual(invoice.update_stock, 1)
+		self.assertEqual(invoice.items[0].qty, 6)
+		self.assertEqual(invoice.items[0].goods_inward_note, note.name)
+
+		# without Update Stock the goods never become stock — refused
+		invoice.update_stock = 0
+		invoice.items[0].qty = 4
+		invoice.items[0].received_qty = 4
+		invoice.insert(ignore_permissions=True)
+		self.assertRaises(frappe.ValidationError, invoice.submit)
+
+		invoice.reload()
+		invoice.update_stock = 1
+		invoice.save(ignore_permissions=True)
+		invoice.submit()
+
+		# the invoice books back onto the note like a receipt would
+		note.reload()
+		self.assertEqual(note.items[0].received_qty, 4)
+		self.assertEqual(note.status, "Partially Received")
+		second = make_invoice_from_goods_inward_note(note.name)
+		self.assertEqual(second.items[0].qty, 2)
+
+		# and cancellation gives the quantity back to custody
+		invoice.cancel()
+		note.reload()
+		self.assertEqual(note.items[0].received_qty, 0)
+		self.assertEqual(note.status, "In Custody")
+
 	def test_outside_receipts_respect_custody_claims(self):
 		from erpnext.buying.doctype.purchase_order.mapper import (
 			make_purchase_invoice,

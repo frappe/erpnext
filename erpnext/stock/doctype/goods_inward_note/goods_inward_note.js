@@ -69,25 +69,30 @@ frappe.ui.form.on("Goods Inward Note", {
 		};
 
 		if (frm.doc.docstatus === 1 && ["In Custody", "Partially Received"].includes(frm.doc.status)) {
-			const receipt_label =
-				frm.doc.order_type === "Purchase Order"
-					? __("Purchase Receipt")
-					: __("Subcontracting Receipt");
-			frm.add_custom_button(
-				receipt_label,
-				() => {
-					frappe.call({
-						method: "erpnext.stock.services.goods_inward.make_receipt_from_goods_inward_note",
-						args: { goods_inward_note: frm.doc.name },
-						freeze: true,
-						callback: (r) => {
-							const doc = frappe.model.sync(r.message)[0];
-							frappe.set_route("Form", doc.doctype, doc.name);
-						},
-					});
-				},
-				__("Create")
-			);
+			const receive_via = (label, method) => {
+				frm.add_custom_button(
+					label,
+					() => {
+						frappe.call({
+							method: "erpnext.stock.services.goods_inward." + method,
+							args: { goods_inward_note: frm.doc.name },
+							freeze: true,
+							callback: (r) => {
+								const doc = frappe.model.sync(r.message)[0];
+								frappe.set_route("Form", doc.doctype, doc.name);
+							},
+						});
+					},
+					__("Create")
+				);
+			};
+			if (frm.doc.order_type === "Purchase Order") {
+				receive_via(__("Purchase Receipt"), "make_receipt_from_goods_inward_note");
+				// receive and bill in one document
+				receive_via(__("Purchase Invoice"), "make_invoice_from_goods_inward_note");
+			} else {
+				receive_via(__("Subcontracting Receipt"), "make_receipt_from_goods_inward_note");
+			}
 			frm.page.set_inner_btn_group_as_primary(__("Create"));
 		}
 	},

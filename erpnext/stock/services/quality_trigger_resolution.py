@@ -200,8 +200,8 @@ def _trigger_matches(trigger, doc, row, role, warehouse):
 
 
 def _decided_in_custody(doc, row):
-	"""Whether a custody inspection already decided this receipt row's goods."""
-	if doc.doctype not in ("Purchase Receipt", "Subcontracting Receipt"):
+	"""Whether a custody inspection already decided this receiving row's goods."""
+	if doc.doctype not in ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"):
 		return False
 	if not row.get("goods_inward_note"):
 		return False

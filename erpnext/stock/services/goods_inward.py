@@ -33,8 +33,21 @@ def make_receipt_from_goods_inward_note(goods_inward_note: str):
 	verdicts have released, with the accepted/rejected split prefilled.
 	"""
 	note = frappe.get_doc("Goods Inward Note", goods_inward_note)
+	return _make_receiver(note, RECEIPT_DOCTYPES[note.order_type])
+
+
+@frappe.whitelist()
+def make_invoice_from_goods_inward_note(goods_inward_note: str):
+	"""A stock-updating Purchase Invoice: the goods become stock and are
+	billed in one document, under the same custody rules as a receipt."""
+	note = frappe.get_doc("Goods Inward Note", goods_inward_note)
+	if note.order_type != "Purchase Order":
+		frappe.throw(_("Only a purchase consignment can be received on an invoice."))
+	return _make_receiver(note, "Purchase Invoice")
+
+
+def _make_receiver(note, receipt_doctype):
 	note.check_permission("read")
-	receipt_doctype = RECEIPT_DOCTYPES[note.order_type]
 	frappe.has_permission(receipt_doctype, "create", throw=True)
 
 	if note.docstatus != 1:
@@ -80,7 +93,7 @@ def make_receipt_from_goods_inward_note(goods_inward_note: str):
 			alert=True,
 		)
 
-	receipt = _map_order_to_receipt(note)
+	receipt = _map_order_to_receiver(note, receipt_doctype)
 	order_item_field = ORDER_REFERENCE_FIELDS[receipt_doctype][1]
 	rejected_pool = _custody_rejected_by_order_item(note, verdicts)
 	rejected_warehouse = _default_rejected_warehouse(note.company) if rejected_pool else None
@@ -116,7 +129,14 @@ def make_receipt_from_goods_inward_note(goods_inward_note: str):
 	return receipt
 
 
-def _map_order_to_receipt(note):
+def _map_order_to_receiver(note, receipt_doctype):
+	if receipt_doctype == "Purchase Invoice":
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
+
+		invoice = make_purchase_invoice(note.order)
+		invoice.update_stock = 1
+		return invoice
+
 	if note.order_type == "Purchase Order":
 		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
 
@@ -214,12 +234,6 @@ def _default_rejected_warehouse(company):
 	return rejected_warehouses[0] if len(rejected_warehouses) == 1 else None
 
 
-# where a receiving document's rows point at their order row
-ORDER_ROW_FIELDS = {
-	"Purchase Receipt": "purchase_order_item",
-	"Purchase Invoice": "po_detail",
-	"Subcontracting Receipt": "subcontracting_order_item",
-}
 ORDER_ITEM_DOCTYPES_BY_RECEIVER = {
 	"Purchase Receipt": "Purchase Order Item",
 	"Purchase Invoice": "Purchase Order Item",
@@ -239,9 +253,9 @@ def validate_custody_claims(doc, method=None):
 
 	if doc.doctype == "Purchase Invoice" and not doc.get("update_stock"):
 		return
-	order_row_field = ORDER_ROW_FIELDS.get(doc.doctype)
-	if not order_row_field:
+	if doc.doctype not in ORDER_REFERENCE_FIELDS:
 		return
+	order_row_field = ORDER_REFERENCE_FIELDS[doc.doctype][1]
 
 	taken = {}
 	for row in doc.get("items") or []:
@@ -295,8 +309,21 @@ def validate_custody_claims(doc, method=None):
 
 
 def update_goods_inward_note_on_receipt(doc, method=None):
-	"""Book a receipt's quantities back onto the notes it draws from."""
-	if doc.doctype not in ("Purchase Receipt", "Subcontracting Receipt"):
+	"""Book a receiving document's quantities back onto the notes it draws from."""
+	if doc.doctype not in ("Purchase Receipt", "Subcontracting Receipt", "Purchase Invoice"):
+		return
+
+	if doc.doctype == "Purchase Invoice" and not doc.get("update_stock"):
+		# the goods only become stock through Update Stock — without it the
+		# invoice must not draw from custody
+		if method == "before_submit" and any(row.get("goods_inward_note") for row in doc.get("items") or []):
+			frappe.throw(
+				_(
+					"This invoice draws goods from custody on a Goods Inward Note — "
+					"enable Update Stock so they become stock, or remove the note reference."
+				),
+				title=_("Update Stock Required"),
+			)
 		return
 
 	drawn = {}

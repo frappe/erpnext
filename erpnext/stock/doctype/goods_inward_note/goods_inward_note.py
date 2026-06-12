@@ -24,9 +24,11 @@ RECEIPT_DOCTYPES = {
 	"Purchase Order": "Purchase Receipt",
 	"Subcontracting Order": "Subcontracting Receipt",
 }
-# receipt rows point back at their order through (link field, row link field)
+# receiving rows point back at their order through (link field, row link field);
+# a stock-updating Purchase Invoice receives like a receipt
 ORDER_REFERENCE_FIELDS = {
 	"Purchase Receipt": ("purchase_order", "purchase_order_item"),
+	"Purchase Invoice": ("purchase_order", "po_detail"),
 	"Subcontracting Receipt": ("subcontracting_order", "subcontracting_order_item"),
 }
 # subcontracted goods are ordered in stock units; purchases in the purchase unit
@@ -255,6 +257,9 @@ class GoodsInwardNote(Document):
 			fields=[f"{order_item_field} as order_item", "received_qty", "qty"],
 		):
 			claimed[received.order_item] += flt(received.received_qty) or flt(received.qty)
+		for received in self._stock_invoice_rows():
+			if received.order_item in claimed:
+				claimed[received.order_item] += flt(received.received_qty) or flt(received.qty)
 
 		item_allowance = {}
 		global_qty_allowance = global_amount_allowance = None
@@ -340,6 +345,9 @@ class GoodsInwardNote(Document):
 		):
 			covered[row.order_item] = covered.get(row.order_item, 0) + flt(row.qty)
 
+		for row in self._stock_invoice_rows():
+			covered[row.order_item] = covered.get(row.order_item, 0) + flt(row.qty)
+
 		order_rows = frappe.get_all(
 			ORDER_ITEM_DOCTYPES[self.order_type], filters={"parent": self.order}, pluck="name"
 		)
@@ -351,6 +359,30 @@ class GoodsInwardNote(Document):
 			# an open note already accounts for its unreceived quantity
 			covered[row.order_item] = covered.get(row.order_item, 0) + self.outstanding_qty(row)
 		return covered
+
+	def _stock_invoice_rows(self):
+		"""Submitted stock-updating Purchase Invoice rows against this order.
+
+		They receive like receipts; rows drawn from a note are excluded — the
+		note's own claim already covers them.
+		"""
+		if self.order_type != "Purchase Order":
+			return []
+
+		invoice = frappe.qb.DocType("Purchase Invoice")
+		row = frappe.qb.DocType("Purchase Invoice Item")
+		return (
+			frappe.qb.from_(row)
+			.join(invoice)
+			.on(row.parent == invoice.name)
+			.select(row.po_detail.as_("order_item"), row.received_qty, row.qty)
+			.where(
+				(row.docstatus == 1)
+				& (invoice.update_stock == 1)
+				& (row.purchase_order == self.order)
+				& ((row.goods_inward_note == "") | row.goods_inward_note.isnull())
+			)
+		).run(as_dict=True)
 
 
 def get_custody_verdicts(row_name, exclude_inspection=None, row_qty=None):

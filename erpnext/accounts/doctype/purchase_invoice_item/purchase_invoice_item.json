@@ -109,6 +109,7 @@
   "col_break6",
   "purchase_order",
   "po_detail",
+  "goods_inward_note",
   "purchase_receipt",
   "pr_detail",
   "sales_invoice_item",
@@ -691,6 +692,17 @@
    "no_copy": 1,
    "oldfieldname": "po_detail",
    "oldfieldtype": "Data",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "description": "The custody note this row receives against.",
+   "fieldname": "goods_inward_note",
+   "fieldtype": "Link",
+   "label": "Goods Inward Note",
+   "no_copy": 1,
+   "options": "Goods Inward Note",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
