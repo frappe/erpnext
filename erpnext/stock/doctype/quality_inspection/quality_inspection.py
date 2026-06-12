@@ -628,15 +628,24 @@ class QualityInspection(UnitReadingsMixin, Document):
 				else self.reference_type + " Item"
 			)
 			if self.reference_type == "Goods Inward Note":
-				# only what still sits in custody can be inspected — received
-				# units became stock, returned units went back with the truck
+				# only what still sits in custody, undecided, can be inspected —
+				# received units became stock, returned units went back with the
+				# truck, and earlier batch inspections keep their verdicts
+				from erpnext.stock.doctype.goods_inward_note.goods_inward_note import (
+					get_custody_verdicts,
+				)
+
 				row = frappe.db.get_value(
 					child_doctype,
 					self.child_row_reference,
 					["qty", "received_qty", "returned_qty"],
 					as_dict=True,
 				)
-				return max(flt(row.qty) - flt(row.received_qty) - flt(row.returned_qty), 0) if row else None
+				if not row:
+					return None
+				in_custody = max(flt(row.qty) - flt(row.received_qty) - flt(row.returned_qty), 0)
+				decided = get_custody_verdicts(self.child_row_reference, exclude_inspection=self.name).decided
+				return min(in_custody, max(flt(row.qty) - decided, 0))
 			# returns carry negative quantities; inspection thinks in physical units
 			return abs(flt(frappe.db.get_value(child_doctype, self.child_row_reference, "qty")))
 

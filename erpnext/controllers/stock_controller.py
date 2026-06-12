@@ -716,9 +716,16 @@ def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str
 		# returns carry negative quantities; inspection thinks in physical units
 		item["qty"] = abs(flt(item.get("qty")))
 		if doctype == "Goods Inward Note":
-			# only what still sits in custody can be inspected — received units
-			# became stock, returned units went back with the truck
-			item["qty"] = max(item["qty"] - flt(item.get("received_qty")) - flt(item.get("returned_qty")), 0)
+			# only what still sits in custody, undecided, can be inspected —
+			# received units became stock, returned units went back with the
+			# truck, and earlier batch inspections keep their verdicts
+			from erpnext.stock.doctype.goods_inward_note.goods_inward_note import get_custody_verdicts
+
+			in_custody = max(item["qty"] - flt(item.get("received_qty")) - flt(item.get("returned_qty")), 0)
+			undecided = item["qty"]
+			if item.get("name"):
+				undecided = max(item["qty"] - get_custody_verdicts(item.get("name")).decided, 0)
+			item["qty"] = min(in_custody, undecided)
 		item_code = item.get("item_code")
 		if item_code not in triggers:
 			triggers[item_code] = get_trigger_for_doctype(item_code, doctype)
@@ -737,6 +744,10 @@ def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str
 			item["quality_inspection"] = frappe.db.get_value(
 				child_doctype, item.get("name"), "quality_inspection"
 			)
+		if doctype == "Goods Inward Note" and item["qty"] > 0:
+			# a custody row may be inspected in batches: keep offering it while
+			# undecided units remain, past inspections notwithstanding
+			item["quality_inspection"] = None
 
 	return items
 

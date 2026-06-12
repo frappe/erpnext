@@ -209,6 +209,72 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		inspection.save(ignore_permissions=True)
 		inspection.submit()
 
+	def test_each_quantity_inspection_decides_in_batches(self):
+		from erpnext.controllers.stock_controller import check_item_quality_inspection
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+		from erpnext.stock.services.test_quality_quarantine import unit_reading_rows
+
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Goods Inward Note",
+				warehouse_role=None,
+				quality_control_mode="Block",
+				inspection_basis="Each Quantity",
+			),
+		)
+		item.save()
+
+		order = create_purchase_order(item_code=item.name, qty=4)
+		note = make_goods_inward_note(order)
+
+		def batch(unit_results):
+			inspection = frappe.get_doc(
+				{
+					"doctype": "Quality Inspection",
+					"inspection_type": "Incoming",
+					"reference_type": "Goods Inward Note",
+					"reference_name": note.name,
+					"child_row_reference": note.items[0].name,
+					"item_code": item.name,
+					"inspection_basis": "Each Quantity",
+					"unit_quantity": len(unit_results),
+					"unit_readings": unit_reading_rows(unit_results),
+					"report_date": nowdate(),
+					"inspected_by": frappe.session.user,
+				}
+			)
+			inspection.insert(ignore_permissions=True)
+			return inspection
+
+		# the first tranche decides two of the four units, rejecting one
+		batch({1: ["Accepted"], 2: ["Rejected"]}).submit()
+
+		# half decided: the receipt still waits for the rest
+		self.assertRaises(frappe.ValidationError, make_receipt_from_goods_inward_note, note.name)
+
+		# the dialog keeps offering the row, with the undecided remainder
+		note.reload()
+		rows = check_item_quality_inspection("Goods Inward Note", note.docstatus, [note.items[0].as_dict()])
+		self.assertEqual(rows[0]["qty"], 2)
+		self.assertFalse(rows[0]["quality_inspection"])
+
+		# no batch may decide more units than remain undecided
+		oversized = batch({1: ["Accepted"], 2: ["Accepted"], 3: ["Accepted"]})
+		self.assertRaises(frappe.ValidationError, oversized.submit)
+		oversized.reload()
+		oversized.delete()
+
+		batch({1: ["Accepted"], 2: ["Accepted"]}).submit()
+
+		# fully decided: the verdicts pool across batches — three accepted, one rejected
+		receipt = make_receipt_from_goods_inward_note(note.name)
+		row = receipt.items[0]
+		self.assertEqual(row.received_qty, 4)
+		self.assertEqual(row.qty, 3)
+		self.assertEqual(row.rejected_qty, 1)
+
 	def test_block_trigger_gates_the_receipt_not_the_note(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
 

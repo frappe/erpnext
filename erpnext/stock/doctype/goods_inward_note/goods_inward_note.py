@@ -322,3 +322,42 @@ class GoodsInwardNote(Document):
 			# an open note already accounts for its unreceived quantity
 			covered[row.order_item] = covered.get(row.order_item, 0) + self.outstanding_qty(row)
 		return covered
+
+
+def get_custody_verdicts(row_name, exclude_inspection=None):
+	"""Submitted verdicts on a note row, summed across batch inspections.
+
+	A row may be inspected a tranche at a time: each Each Quantity inspection
+	decides its unit quantity, while a Sample or manual verdict decides the
+	whole row at once. Returns how many units the verdicts decided and how
+	many of those they rejected, both capped at what arrived.
+	"""
+	row_qty = flt(frappe.db.get_value("Goods Inward Note Item", row_name, "qty"))
+	filters = {
+		"reference_type": "Goods Inward Note",
+		"child_row_reference": row_name,
+		"docstatus": 1,
+	}
+	if exclude_inspection:
+		filters["name"] = ("!=", exclude_inspection)
+
+	decided = rejected = 0.0
+	for verdict in frappe.get_all(
+		"Quality Inspection",
+		filters=filters,
+		fields=[
+			"inspection_basis",
+			"manual_inspection",
+			"status",
+			"unit_quantity",
+			"rejected_unit_quantity",
+		],
+	):
+		if verdict.inspection_basis == "Each Quantity" and not verdict.manual_inspection:
+			decided += flt(verdict.unit_quantity)
+			rejected += flt(verdict.rejected_unit_quantity)
+		else:
+			decided = row_qty
+			if verdict.status == "Rejected":
+				rejected = row_qty
+	return frappe._dict(decided=min(decided, row_qty), rejected=min(rejected, row_qty))

@@ -144,14 +144,16 @@ class UnitReadingsMixin:
 			return
 
 		inspected_qty = self.get_qty_under_inspection()
-		if self.reference_type == "Quality Control Lot":
-			# the lot may be decided in parts — but never beyond what is undecided
+		if self.reference_type in ("Quality Control Lot", "Goods Inward Note"):
+			# a lot or a custody row may be decided in parts, one batch of units
+			# per inspection — but never beyond what is undecided
 			if inspected_qty is not None and flt(self.unit_quantity) > flt(inspected_qty):
 				frappe.throw(
-					_(
-						"The unit readings inspect {0} unit(s), but only {1} remain undecided on "
-						"the Quality Control Lot."
-					).format(self.unit_quantity, inspected_qty),
+					_("The unit readings inspect {0} unit(s), but only {1} remain undecided on {2}.").format(
+						self.unit_quantity,
+						inspected_qty,
+						get_link_to_form(self.reference_type, self.reference_name),
+					),
 					title=_("More Units Than Undecided"),
 				)
 		elif inspected_qty and flt(self.unit_quantity) != flt(inspected_qty):

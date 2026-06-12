@@ -17,7 +17,10 @@ import frappe
 from frappe import _
 from frappe.utils import flt, get_link_to_form
 
-from erpnext.stock.doctype.goods_inward_note.goods_inward_note import RECEIPT_DOCTYPES
+from erpnext.stock.doctype.goods_inward_note.goods_inward_note import (
+	RECEIPT_DOCTYPES,
+	get_custody_verdicts,
+)
 
 ORDER_REFERENCE_FIELDS = {
 	"Purchase Receipt": ("purchase_order", "purchase_order_item"),
@@ -131,8 +134,11 @@ def _custody_inspection_state(note):
 	blocked, warned = set(), set()
 	for point in resolve_inspection_points(note):
 		row = point.row
-		inspection = row.get("quality_inspection")
-		if inspection and frappe.db.get_value("Quality Inspection", inspection, "docstatus") == 1:
+		verdicts = get_custody_verdicts(row.name)
+		# returns beyond the rejected pool went back uninspected — nobody need
+		# decide them; everything else wants a verdict before it becomes stock
+		required = flt(row.qty) - max(flt(row.returned_qty) - verdicts.rejected, 0)
+		if flt(required, 6) <= 0 or flt(verdicts.decided - required, 6) >= 0:
 			continue
 		if point.quality_control_mode == "Block":
 			blocked.add(row.name)
@@ -185,21 +191,9 @@ def _custody_rejected_by_order_item(note, blocked=frozenset()):
 
 
 def _rejected_by_inspection(row):
-	"""What the row's custody inspection rejected, less what already went back
+	"""What the row's custody verdicts rejected, less what already went back
 	with the truck (returned units come out of the rejected pool first)."""
-	if not row.quality_inspection:
-		return 0.0
-	if frappe.db.get_value("Quality Inspection", row.quality_inspection, "docstatus") != 1:
-		return 0.0
-
-	inspection = frappe.get_doc("Quality Inspection", row.quality_inspection)
-	if inspection.get("unit_readings"):
-		rejected = flt(inspection.rejected_unit_quantity)
-	elif inspection.status == "Rejected":
-		rejected = flt(row.qty)
-	else:
-		rejected = 0.0
-	return max(rejected - flt(row.returned_qty), 0.0)
+	return max(get_custody_verdicts(row.name).rejected - flt(row.returned_qty), 0.0)
 
 
 def _default_rejected_warehouse(company):
