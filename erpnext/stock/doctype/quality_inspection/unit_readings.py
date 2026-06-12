@@ -385,12 +385,9 @@ class UnitReadingsMixin:
 				if self.reference_type == "Stock Entry"
 				else self.reference_type + " Item"
 			)
-			row = frappe.db.get_value(
-				child_doctype,
-				self.child_row_reference,
-				["serial_no", "serial_and_batch_bundle"],
-				as_dict=True,
-			)
+			from erpnext.stock.services.quality_trigger_resolution import get_reference_row_tracking
+
+			row = get_reference_row_tracking(child_doctype, self.child_row_reference)
 			if row:
 				serials = sorted(get_row_serial_nos(row))
 
@@ -430,10 +427,7 @@ class UnitReadingsMixin:
 		child_doctype = (
 			"Stock Entry Detail" if self.reference_type == "Stock Entry" else self.reference_type + " Item"
 		)
-		row = frappe.db.get_value(
-			child_doctype,
-			self.child_row_reference,
-			["serial_no", "serial_and_batch_bundle"],
-			as_dict=True,
-		)
+		from erpnext.stock.services.quality_trigger_resolution import get_reference_row_tracking
+
+		row = get_reference_row_tracking(child_doctype, self.child_row_reference)
 		return bool(row) and not (unborn - set(get_row_serial_nos(row)))

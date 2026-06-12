@@ -59,7 +59,7 @@
    "in_list_view": 1,
    "label": "Document Type",
    "mandatory_depends_on": "eval:doc.trigger_type!='Periodic Re-test'",
-   "options": "Purchase Receipt\nPurchase Invoice\nSubcontracting Receipt\nDelivery Note\nSales Invoice\nStock Entry"
+   "options": "Purchase Receipt\nGoods Inward Note\nPurchase Invoice\nSubcontracting Receipt\nDelivery Note\nSales Invoice\nStock Entry"
   },
   {
    "depends_on": "eval:doc.trigger_type != 'Periodic Re-test' && (doc.document_type=='Stock Entry')",

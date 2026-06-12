@@ -1738,6 +1738,7 @@ function enforce_trigger_warehouse_role(cdt, cdn) {
 		"Purchase Receipt": "Inbound",
 		"Purchase Invoice": "Inbound",
 		"Subcontracting Receipt": "Inbound",
+		"Goods Inward Note": "Inbound",
 	};
 
 	const snap = (role) => {

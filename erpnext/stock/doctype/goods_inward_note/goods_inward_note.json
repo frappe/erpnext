@@ -1,0 +1,279 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-06-12 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "order_section",
+  "naming_series",
+  "order_type",
+  "order",
+  "supplier",
+  "column_break_order",
+  "company",
+  "current_inward_location",
+  "arrived_on",
+  "status",
+  "items_section",
+  "items",
+  "transport_section",
+  "transporter",
+  "vehicle_number",
+  "transport_document_number",
+  "transport_document_date",
+  "column_break_transport",
+  "supplier_document_number",
+  "supplier_document_date",
+  "customs_reference",
+  "weight_section",
+  "gross_weight",
+  "tare_weight",
+  "column_break_weight",
+  "net_weight",
+  "remarks_section",
+  "remarks",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "order_section",
+   "fieldtype": "Section Break",
+   "label": "Order"
+  },
+  {
+   "default": "GIN-.YYYY.-",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "GIN-.YYYY.-"
+  },
+  {
+   "default": "Purchase Order",
+   "fieldname": "order_type",
+   "fieldtype": "Select",
+   "label": "Order Type",
+   "options": "Purchase Order\nSubcontracting Order",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "order",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Order",
+   "options": "order_type",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Supplier",
+   "options": "Supplier",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_order",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Where the goods physically wait \u2014 updated as the consignment moves (customs, gate, yard).",
+   "fieldname": "current_inward_location",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Current Inward Location",
+   "options": "Inward Location",
+   "reqd": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "arrived_on",
+   "fieldtype": "Datetime",
+   "label": "Arrived On",
+   "reqd": 1
+  },
+  {
+   "default": "In Custody",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "In Custody\nPartially Received\nReceived\nReturned",
+   "read_only": 1,
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "items_section",
+   "fieldtype": "Section Break",
+   "label": "Items"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Goods Inward Note Item",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "transport_section",
+   "fieldtype": "Section Break",
+   "label": "Transport & References"
+  },
+  {
+   "fieldname": "transporter",
+   "fieldtype": "Link",
+   "label": "Transporter",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "vehicle_number",
+   "fieldtype": "Data",
+   "label": "Vehicle Number"
+  },
+  {
+   "description": "Lorry receipt, bill of lading or airway bill number.",
+   "fieldname": "transport_document_number",
+   "fieldtype": "Data",
+   "label": "Transport Document Number"
+  },
+  {
+   "fieldname": "transport_document_date",
+   "fieldtype": "Date",
+   "label": "Transport Document Date"
+  },
+  {
+   "fieldname": "column_break_transport",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "The supplier's challan or invoice number.",
+   "fieldname": "supplier_document_number",
+   "fieldtype": "Data",
+   "label": "Supplier Document Number"
+  },
+  {
+   "fieldname": "supplier_document_date",
+   "fieldtype": "Date",
+   "label": "Supplier Document Date"
+  },
+  {
+   "description": "Bill of entry or other customs reference.",
+   "fieldname": "customs_reference",
+   "fieldtype": "Data",
+   "label": "Customs Reference"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "weight_section",
+   "fieldtype": "Section Break",
+   "label": "Weighbridge"
+  },
+  {
+   "fieldname": "gross_weight",
+   "fieldtype": "Float",
+   "label": "Gross Weight"
+  },
+  {
+   "fieldname": "tare_weight",
+   "fieldtype": "Float",
+   "label": "Tare Weight"
+  },
+  {
+   "fieldname": "column_break_weight",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "net_weight",
+   "fieldtype": "Float",
+   "label": "Net Weight",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "remarks_section",
+   "fieldtype": "Section Break",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Goods Inward Note",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-06-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Goods Inward Note",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Quality Manager",
+   "share": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

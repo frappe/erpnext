@@ -5,6 +5,7 @@ def get_data():
 	return {
 		"fieldname": "purchase_order",
 		"non_standard_fieldnames": {
+			"Goods Inward Note": "order",
 			"Journal Entry": "reference_name",
 			"Payment Entry": "reference_name",
 			"Payment Request": "reference_name",
@@ -20,7 +21,10 @@ def get_data():
 			"Blanket Order": ["items", "blanket_order"],
 		},
 		"transactions": [
-			{"label": _("Related"), "items": ["Purchase Receipt", "Purchase Invoice", "Sales Order"]},
+			{
+				"label": _("Related"),
+				"items": ["Goods Inward Note", "Purchase Receipt", "Purchase Invoice", "Sales Order"],
+			},
 			{"label": _("Payment"), "items": ["Payment Entry", "Journal Entry", "Payment Request"]},
 			{
 				"label": _("Reference"),

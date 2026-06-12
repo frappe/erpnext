@@ -40,6 +40,12 @@ def movements_of(doc):
 	if doc.get("is_return"):
 		role = _reverse(role)
 
+	if doctype == "Goods Inward Note":
+		# custody, not stock: the goods are inbound but sit in no warehouse yet
+		for row in doc.get("items") or []:
+			yield row, INBOUND, None
+		return
+
 	if doctype in ("Purchase Receipt", "Subcontracting Receipt"):
 		for row in doc.get("items") or []:
 			if row.get("warehouse"):
@@ -193,6 +199,30 @@ def _trigger_matches(trigger, doc, row, role, warehouse):
 	return True
 
 
+def _decided_in_custody(doc, row):
+	"""Whether a custody inspection already decided this receipt row's goods."""
+	if doc.doctype not in ("Purchase Receipt", "Subcontracting Receipt"):
+		return False
+	if not row.get("goods_inward_note"):
+		return False
+
+	order_item_field = (
+		"purchase_order_item" if doc.doctype == "Purchase Receipt" else "subcontracting_order_item"
+	)
+	inspections = frappe.get_all(
+		"Goods Inward Note Item",
+		filters={
+			"parent": row.goods_inward_note,
+			"order_item": row.get(order_item_field),
+			"quality_inspection": ("is", "set"),
+		},
+		pluck="quality_inspection",
+	)
+	return any(
+		frappe.db.get_value("Quality Inspection", inspection, "docstatus") == 1 for inspection in inspections
+	)
+
+
 def resolve_inspection_points(doc):
 	"""Return the inspection points a transaction requires.
 
@@ -205,6 +235,10 @@ def resolve_inspection_points(doc):
 	for row, role, warehouse in movements_of(doc):
 		item_code = row.get("item_code")
 		if not item_code:
+			continue
+
+		# goods decided by a custody inspection are not re-inspected on receipt
+		if role == INBOUND and _decided_in_custody(doc, row):
 			continue
 
 		if item_code not in triggers_by_item:
@@ -228,6 +262,18 @@ def resolve_inspection_points(doc):
 				break  # most-specific wins
 
 	return points
+
+
+def get_reference_row_tracking(child_doctype, row_name):
+	"""The tracking values of a referenced child row, tolerant of doctypes
+	without tracking columns (a Goods Inward Note row has none)."""
+	meta = frappe.get_meta(child_doctype)
+	fields = [
+		field for field in ("serial_no", "batch_no", "serial_and_batch_bundle") if meta.has_field(field)
+	]
+	if not fields:
+		return frappe._dict()
+	return frappe.db.get_value(child_doctype, row_name, fields, as_dict=True) or frappe._dict()
 
 
 def get_row_serial_nos(row):

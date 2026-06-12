@@ -409,6 +409,11 @@ doc_events = {
 		"on_submit": "erpnext.stock.services.quality_returns.update_lots_for_purchase_return",
 		"on_cancel": "erpnext.stock.services.quality_returns.update_lots_for_purchase_return",
 	},
+	("Purchase Receipt", "Subcontracting Receipt"): {
+		"before_submit": "erpnext.stock.services.goods_inward.update_goods_inward_note_on_receipt",
+		"on_submit": "erpnext.stock.services.goods_inward.update_goods_inward_note_on_receipt",
+		"on_cancel": "erpnext.stock.services.goods_inward.update_goods_inward_note_on_receipt",
+	},
 	"Stock Reconciliation": {
 		"validate": "erpnext.stock.services.quality_quarantine.block_stock_reconciliation_on_quality_warehouse",
 	},

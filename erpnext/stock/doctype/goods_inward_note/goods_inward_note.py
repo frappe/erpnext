@@ -1,0 +1,229 @@
+# Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
+# For license information, please see license.txt
+
+"""Custody before ownership: goods that have physically arrived but are not stock yet.
+
+A consignment waiting at a custody point — a factory gate, a customs area, a
+port warehouse — is recorded here against its order, without any stock or
+accounting impact: nothing is owned until a receipt is made from this note.
+One note follows the consignment from its first custody point to receipt; the
+current location is updated as it moves, and quality triggers may demand an
+inspection before the goods are allowed to become stock at all.
+"""
+
+import frappe
+from frappe import _
+from frappe.model.document import Document
+from frappe.utils import flt, get_link_to_form
+
+ORDER_ITEM_DOCTYPES = {
+	"Purchase Order": "Purchase Order Item",
+	"Subcontracting Order": "Subcontracting Order Item",
+}
+RECEIPT_DOCTYPES = {
+	"Purchase Order": "Purchase Receipt",
+	"Subcontracting Order": "Subcontracting Receipt",
+}
+
+
+class GoodsInwardNote(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.stock.doctype.goods_inward_note_item.goods_inward_note_item import (
+			GoodsInwardNoteItem,
+		)
+
+		amended_from: DF.Link | None
+		arrived_on: DF.Datetime
+		company: DF.Link
+		current_inward_location: DF.Link
+		customs_reference: DF.Data | None
+		gross_weight: DF.Float
+		items: DF.Table[GoodsInwardNoteItem]
+		naming_series: DF.Literal["GIN-.YYYY.-"]
+		net_weight: DF.Float
+		order: DF.DynamicLink
+		order_type: DF.Literal["Purchase Order", "Subcontracting Order"]
+		remarks: DF.Text | None
+		status: DF.Literal["In Custody", "Partially Received", "Received", "Returned"]
+		supplier: DF.Link
+		supplier_document_date: DF.Date | None
+		supplier_document_number: DF.Data | None
+		tare_weight: DF.Float
+		transport_document_date: DF.Date | None
+		transport_document_number: DF.Data | None
+		transporter: DF.Link | None
+		vehicle_number: DF.Data | None
+	# end: auto-generated types
+
+	def validate(self):
+		from erpnext.stock.services.quality_trigger_resolution import enforce_inspection_points
+
+		self.set_details_from_order()
+		self.validate_items_against_order()
+		self.validate_quantities()
+		self.set_net_weight()
+		self.set_status()
+		# Block / Warn triggers: a nudge on draft saves, a gate on submission
+		enforce_inspection_points(self)
+
+	def on_update_after_submit(self):
+		self.validate_quantities()
+		self.update_status()
+
+	def update_status(self):
+		# runs after the database write: the recomputed status must persist itself
+		self.set_status()
+		self.db_set("status", self.status, update_modified=False)
+
+	def set_details_from_order(self):
+		order = frappe.db.get_value(
+			self.order_type, self.order, ["supplier", "company", "docstatus", "status"], as_dict=True
+		)
+		if not order:
+			return
+		if order.docstatus != 1:
+			frappe.throw(
+				_("{0} {1} is not submitted.").format(
+					_(self.order_type), get_link_to_form(self.order_type, self.order)
+				)
+			)
+		if order.status == "Closed":
+			frappe.throw(
+				_("{0} {1} is closed.").format(
+					_(self.order_type), get_link_to_form(self.order_type, self.order)
+				)
+			)
+		self.supplier = order.supplier
+		self.company = order.company
+
+	def validate_items_against_order(self):
+		"""Every arrival row fulfils a row of the order it references."""
+		order_items = {
+			row.name: row
+			for row in frappe.get_all(
+				ORDER_ITEM_DOCTYPES[self.order_type],
+				filters={"parent": self.order},
+				fields=["name", "item_code"],
+			)
+		}
+		items_on_order = {row.item_code for row in order_items.values()}
+
+		for row in self.items:
+			if row.order_item and row.order_item not in order_items:
+				frappe.throw(
+					_("Row #{0}: Order Item {1} is not on {2}.").format(
+						row.idx, row.order_item, get_link_to_form(self.order_type, self.order)
+					)
+				)
+			if row.order_item and order_items[row.order_item].item_code != row.item_code:
+				frappe.throw(
+					_("Row #{0}: Order Item {1} is for {2}, not {3}.").format(
+						row.idx,
+						row.order_item,
+						get_link_to_form("Item", order_items[row.order_item].item_code),
+						get_link_to_form("Item", row.item_code),
+					)
+				)
+			if not row.order_item:
+				if row.item_code not in items_on_order:
+					frappe.throw(
+						_("Row #{0}: Item {1} is not on {2}.").format(
+							row.idx,
+							get_link_to_form("Item", row.item_code),
+							get_link_to_form(self.order_type, self.order),
+						)
+					)
+				row.order_item = next(
+					name for name, order_row in order_items.items() if order_row.item_code == row.item_code
+				)
+
+	def validate_quantities(self):
+		for row in self.items:
+			if flt(row.qty) <= 0:
+				frappe.throw(_("Row #{0}: Quantity must be greater than zero.").format(row.idx))
+			if flt(row.returned_qty) < 0 or flt(row.received_qty) < 0:
+				frappe.throw(_("Row #{0}: Quantities cannot be negative.").format(row.idx))
+			if flt(row.received_qty) + flt(row.returned_qty) > flt(row.qty):
+				frappe.throw(
+					_(
+						"Row #{0}: Received ({1}) plus returned ({2}) cannot exceed the {3} unit(s) "
+						"that arrived."
+					).format(row.idx, row.received_qty, row.returned_qty, row.qty),
+					title=_("More Than Arrived"),
+				)
+
+	def set_net_weight(self):
+		if self.gross_weight or self.tare_weight:
+			self.net_weight = flt(self.gross_weight) - flt(self.tare_weight)
+
+	def set_status(self):
+		total = sum(flt(row.qty) for row in self.items)
+		received = sum(flt(row.received_qty) for row in self.items)
+		returned = sum(flt(row.returned_qty) for row in self.items)
+
+		if received + returned >= total and total > 0:
+			self.status = "Received" if received > 0 else "Returned"
+		elif received > 0:
+			self.status = "Partially Received"
+		else:
+			self.status = "In Custody"
+
+	def outstanding_qty(self, row):
+		"""What may still be received: arrived, minus received, minus returned."""
+		return flt(row.qty) - flt(row.received_qty) - flt(row.returned_qty)
+
+	@frappe.whitelist()
+	def get_items_from_order(self):
+		"""Prefill arrival rows from the order — the operator corrects quantities."""
+		received_by_order_item = self._received_against_order()
+		self.set("items", [])
+		for row in frappe.get_all(
+			ORDER_ITEM_DOCTYPES[self.order_type],
+			filters={"parent": self.order},
+			fields=["name", "item_code", "item_name", "qty", "stock_uom"],
+			order_by="idx",
+		):
+			pending = flt(row.qty) - received_by_order_item.get(row.name, 0)
+			if pending <= 0:
+				continue
+			self.append(
+				"items",
+				{
+					"item_code": row.item_code,
+					"item_name": row.item_name,
+					"qty": pending,
+					"uom": row.stock_uom,
+					"order_item": row.name,
+				},
+			)
+
+	def _received_against_order(self):
+		"""Order quantities already covered by receipts or other open notes."""
+		covered = {}
+		receipt_item_doctype = RECEIPT_DOCTYPES[self.order_type] + " Item"
+		order_field = "purchase_order" if self.order_type == "Purchase Order" else "subcontracting_order"
+		for row in frappe.get_all(
+			receipt_item_doctype,
+			filters={order_field: self.order, "docstatus": 1},
+			fields=[f"{order_field}_item as order_item", "qty"],
+		):
+			covered[row.order_item] = covered.get(row.order_item, 0) + flt(row.qty)
+		for row in frappe.get_all(
+			"Goods Inward Note Item",
+			filters={
+				"parenttype": "Goods Inward Note",
+				"docstatus": 1,
+				"order_item": ("is", "set"),
+			},
+			fields=["order_item", "qty", "received_qty", "returned_qty"],
+		):
+			# an open note already accounts for its unreceived quantity
+			covered[row.order_item] = covered.get(row.order_item, 0) + self.outstanding_qty(row)
+		return covered

@@ -7,12 +7,18 @@ from frappe.model.document import Document
 
 # Document types that carry a party and can be an external transaction or an
 # internal (inter-company) transfer.
-PARTY_DOCTYPES = ("Purchase Receipt", "Purchase Invoice", "Delivery Note", "Sales Invoice")
+PARTY_DOCTYPES = (
+	"Purchase Receipt",
+	"Purchase Invoice",
+	"Goods Inward Note",
+	"Delivery Note",
+	"Sales Invoice",
+)
 
 # Direction matrix: which warehouse role(s) make sense for a given document type
 # (and, for Stock Entry, a given purpose). A pure receipt is inbound-only, a pure
 # issue is outbound-only, and transfer/manufacture-style movements expose both.
-_INBOUND_ONLY = {"Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"}
+_INBOUND_ONLY = {"Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt", "Goods Inward Note"}
 # Delivery Note / Sales Invoice are outbound for normal documents but inbound for
 # returns (a customer return brings stock back in), so both roles are valid:
 # Outbound inspects the delivery, Inbound inspects the return.
@@ -65,6 +71,7 @@ class ItemQualityTrigger(Document):
 		customer: DF.Link | None
 		document_type: DF.Literal[
 			"Purchase Receipt",
+			"Goods Inward Note",
 			"Purchase Invoice",
 			"Subcontracting Receipt",
 			"Delivery Note",
@@ -214,6 +221,17 @@ def _validate_trigger_row(row):
 		if row.stock_entry_type
 		else None
 	)
+
+	# custody holds goods, not stock: there is nothing to route to a Quality
+	# Control warehouse before a receipt exists — inspect with Block or Warn
+	if row.document_type == "Goods Inward Note" and row.quality_control_mode == "Quarantine":
+		frappe.throw(
+			_(
+				"Row #{0}: A Goods Inward Note holds goods in custody, not stock — there is "
+				"nothing to quarantine yet. Use Block or Warn, or trigger on the receipt instead."
+			).format(row.idx),
+			title=_("Quarantine Needs Stock"),
+		)
 
 	# a Quality Control Release is the outcome of an inspection — it is exempt
 	# from inspection processing and cannot trigger one

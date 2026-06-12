@@ -1,0 +1,123 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-06-12 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "item_name",
+  "qty",
+  "uom",
+  "column_break_qty",
+  "received_qty",
+  "returned_qty",
+  "section_break_reference",
+  "order_item",
+  "supplier_reference",
+  "column_break_reference",
+  "quality_inspection"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item",
+   "options": "Item",
+   "reqd": 1,
+   "columns": 3
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty",
+   "reqd": 1,
+   "columns": 2
+  },
+  {
+   "fetch_from": "item_code.stock_uom",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_qty",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Already taken into stock through a receipt.",
+   "fieldname": "received_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Received Qty",
+   "no_copy": 1,
+   "read_only": 1,
+   "columns": 2
+  },
+  {
+   "default": "0",
+   "description": "Sent back without ever becoming stock.",
+   "fieldname": "returned_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Returned Qty",
+   "no_copy": 1,
+   "allow_on_submit": 1,
+   "columns": 2
+  },
+  {
+   "fieldname": "section_break_reference",
+   "fieldtype": "Section Break"
+  },
+  {
+   "description": "The order row this arrival fulfils.",
+   "fieldname": "order_item",
+   "fieldtype": "Data",
+   "label": "Order Item",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "description": "The supplier's batch or package reference, as printed.",
+   "fieldname": "supplier_reference",
+   "fieldtype": "Data",
+   "label": "Supplier Reference"
+  },
+  {
+   "fieldname": "column_break_reference",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "quality_inspection",
+   "fieldtype": "Link",
+   "label": "Quality Inspection",
+   "no_copy": 1,
+   "options": "Quality Inspection",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-06-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Goods Inward Note Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

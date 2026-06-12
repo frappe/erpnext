@@ -59,6 +59,7 @@ class QualityInspection(UnitReadingsMixin, Document):
 		reference_type: DF.Literal[
 			"",
 			"Purchase Receipt",
+			"Goods Inward Note",
 			"Purchase Invoice",
 			"Subcontracting Receipt",
 			"Delivery Note",
@@ -312,16 +313,14 @@ class QualityInspection(UnitReadingsMixin, Document):
 		child_doctype = (
 			"Stock Entry Detail" if self.reference_type == "Stock Entry" else self.reference_type + " Item"
 		)
-		row = frappe.db.get_value(
-			child_doctype,
-			self.child_row_reference,
-			["batch_no", "serial_and_batch_bundle"],
-			as_dict=True,
+		from erpnext.stock.services.quality_trigger_resolution import (
+			get_reference_row_tracking,
+			get_row_batch_nos,
 		)
+
+		row = get_reference_row_tracking(child_doctype, self.child_row_reference)
 		if not row:
 			return False
-
-		from erpnext.stock.services.quality_trigger_resolution import get_row_batch_nos
 
 		return not get_row_batch_nos(row)
 
@@ -335,7 +334,9 @@ class QualityInspection(UnitReadingsMixin, Document):
 		child_doctype = (
 			"Stock Entry Detail" if self.reference_type == "Stock Entry" else self.reference_type + " Item"
 		)
-		typed = frappe.db.get_value(child_doctype, self.child_row_reference, "serial_no")
+		from erpnext.stock.services.quality_trigger_resolution import get_reference_row_tracking
+
+		typed = get_reference_row_tracking(child_doctype, self.child_row_reference).get("serial_no")
 		return set(get_serial_nos(typed or ""))
 
 	def validate_inspection_required(self):
@@ -490,12 +491,9 @@ class QualityInspection(UnitReadingsMixin, Document):
 		child_doctype = (
 			"Stock Entry Detail" if self.reference_type == "Stock Entry" else self.reference_type + " Item"
 		)
-		row = frappe.db.get_value(
-			child_doctype,
-			self.child_row_reference,
-			["serial_no", "serial_and_batch_bundle"],
-			as_dict=True,
-		)
+		from erpnext.stock.services.quality_trigger_resolution import get_reference_row_tracking
+
+		row = get_reference_row_tracking(child_doctype, self.child_row_reference)
 		if not row:
 			return
 

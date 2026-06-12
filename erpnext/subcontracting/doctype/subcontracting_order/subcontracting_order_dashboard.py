@@ -4,11 +4,11 @@ from frappe import _
 def get_data():
 	return {
 		"fieldname": "subcontracting_order",
-		"non_standard_fieldnames": {"Stock Reservation Entry": "voucher_no"},
+		"non_standard_fieldnames": {"Stock Reservation Entry": "voucher_no", "Goods Inward Note": "order"},
 		"transactions": [
 			{
 				"label": _("Reference"),
-				"items": ["Subcontracting Receipt", "Stock Entry"],
+				"items": ["Goods Inward Note", "Subcontracting Receipt", "Stock Entry"],
 			},
 			{
 				"label": _("Stock Reservation"),

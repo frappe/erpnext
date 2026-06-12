@@ -41,6 +41,7 @@
   "warehouse",
   "subcontracting_order",
   "subcontracting_order_item",
+  "goods_inward_note",
   "subcontracting_receipt_item",
   "job_card",
   "column_break_40",
@@ -652,6 +653,17 @@
    "fieldtype": "Float",
    "label": "Process Loss Qty",
    "non_negative": 1
+  },
+  {
+   "description": "The custody note this row receives against.",
+   "fieldname": "goods_inward_note",
+   "fieldtype": "Link",
+   "label": "Goods Inward Note",
+   "no_copy": 1,
+   "options": "Goods Inward Note",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,

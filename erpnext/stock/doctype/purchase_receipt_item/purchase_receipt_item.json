@@ -90,6 +90,7 @@
   "quality_inspection",
   "material_request_item",
   "purchase_order_item",
+  "goods_inward_note",
   "purchase_invoice_item",
   "purchase_receipt_item",
   "delivery_note_item",
@@ -1140,6 +1141,17 @@
   {
    "fieldname": "rejected_serial_batch_entries_html",
    "fieldtype": "HTML"
+  },
+  {
+   "description": "The custody note this row receives against.",
+   "fieldname": "goods_inward_note",
+   "fieldtype": "Link",
+   "label": "Goods Inward Note",
+   "no_copy": 1,
+   "options": "Goods Inward Note",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "idx": 1,
