@@ -306,6 +306,10 @@ class QualityInspection(UnitReadingsMixin, Document):
 					# inward documents create their serials at submission; a serial
 					# typed on the row under inspection is legitimate before then
 					continue
+				if self.reference_type == "Goods Inward Note":
+					# custody precedes stock identity: the supplier's printed
+					# serials exist on paper only until a receipt creates them
+					continue
 				frappe.throw(_("Serial No {0} does not exist.").format(frappe.bold(serial)))
 			if info.item_code != self.item_code:
 				frappe.throw(

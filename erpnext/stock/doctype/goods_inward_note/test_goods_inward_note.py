@@ -669,6 +669,37 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		inspection.submit()
 		self.assertEqual(inspection.docstatus, 1)
 
+	def test_serialized_item_inspects_in_custody_with_typed_serials(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "GIN-SN-.#####",
+			}
+		).name
+		order = create_purchase_order(item_code=item, qty=2)
+		note = make_goods_inward_note(order)
+
+		# the supplier's printed serials exist on paper only — no Serial No
+		# records exist before the receipt creates them
+		inspection = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Incoming",
+				"reference_type": "Goods Inward Note",
+				"reference_name": note.name,
+				"item_code": item,
+				"manual_inspection": 1,
+				"status": "Accepted",
+				"serial_no": "SUP-SN-0001\nSUP-SN-0002",
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+			}
+		)
+		inspection.insert(ignore_permissions=True)
+		inspection.submit()
+		self.assertEqual(inspection.sample_size, 2)
+
 	def test_subcontracted_purchase_order_is_refused(self):
 		from erpnext.controllers.tests.test_subcontracting_controller import (
 			get_subcontracting_order,
