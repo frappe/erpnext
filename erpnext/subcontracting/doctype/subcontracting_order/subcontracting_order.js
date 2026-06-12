@@ -620,6 +620,16 @@ erpnext.buying.SubcontractingOrderController = class SubcontractingOrderControll
 						() => this.frm.events.make_subcontracting_receipt(this),
 						__("Create")
 					);
+					this.frm.add_custom_button(
+						__("Goods Inward Note"),
+						() => {
+							frappe.new_doc("Goods Inward Note", {
+								order_type: "Subcontracting Order",
+								order: doc.name,
+							});
+						},
+						__("Create")
+					);
 					if (me.has_unsupplied_items()) {
 						this.frm.add_custom_button(
 							__("Material to Supplier"),

@@ -2,6 +2,16 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Goods Inward Note", {
+	onload_post_render(frm) {
+		// arriving from an order's Create button sets the order through route
+		// options, which apply after onload and fire no field trigger — fetch
+		// the rows the same way picking the order by hand would
+		const has_rows = (frm.doc.items || []).some((row) => row.item_code);
+		if (frm.is_new() && frm.doc.order && !has_rows) {
+			frm.trigger("order");
+		}
+	},
+
 	setup(frm) {
 		frm.set_query("order", (doc) => {
 			const filters = { docstatus: 1, status: ["!=", "Closed"] };
