@@ -117,7 +117,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 
 			if (!doc.is_debit_note) {
 				this.frm.add_custom_button(
-					__("Rate Adjustment Entry (Debit Note)"),
+					__("Rate Adjustment (Debit Note)"),
 					this.make_debit_note.bind(this),
 					__("Create")
 				);
