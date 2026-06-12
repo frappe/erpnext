@@ -15,7 +15,6 @@
   "section_break_reference",
   "order_item",
   "supplier_reference",
-  "supplier_declared_qty",
   "column_break_reference",
   "quality_inspection"
  ],
@@ -92,12 +91,6 @@
    "label": "Supplier Reference"
   },
   {
-   "description": "Quantity per the supplier's challan — evidence when the count disagrees.",
-   "fieldname": "supplier_declared_qty",
-   "fieldtype": "Float",
-   "label": "Supplier Declared Qty"
-  },
-  {
    "fieldname": "column_break_reference",
    "fieldtype": "Column Break"
   },
@@ -112,7 +105,7 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2026-06-12 00:00:03.000000",
+ "modified": "2026-06-12 00:00:04.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Goods Inward Note Item",
