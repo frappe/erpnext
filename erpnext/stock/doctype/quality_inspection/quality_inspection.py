@@ -210,6 +210,36 @@ class QualityInspection(UnitReadingsMixin, Document):
 		if self.reference_type == "Stock Entry":
 			doctype = "Stock Entry Detail"
 
+		if self.reference_type == "Goods Inward Note":
+			# a custody row may be inspected in batches: bind to the first row of
+			# this item that still has undecided units in custody, past
+			# inspections notwithstanding
+			from erpnext.stock.doctype.goods_inward_note.goods_inward_note import get_custody_verdicts
+
+			rows = frappe.get_all(
+				doctype,
+				filters={
+					"parent": self.reference_name,
+					"item_code": self.item_code,
+					"docstatus": ("<", 2),
+				},
+				fields=["name", "qty", "received_qty", "returned_qty"],
+				order_by="idx",
+			)
+			for row in rows:
+				in_custody = flt(row.qty) - flt(row.received_qty) - flt(row.returned_qty)
+				undecided = (
+					flt(row.qty) - get_custody_verdicts(row.name, exclude_inspection=self.name).decided
+				)
+				if min(in_custody, undecided) > 0:
+					self.child_row_reference = row.name
+					return
+			if rows:
+				# nothing left to inspect: bind anyway so the quantity resolves
+				# to zero and submission is refused, instead of slipping the cap
+				self.child_row_reference = rows[0].name
+			return
+
 		child_doc = frappe.qb.DocType(doctype)
 		qi_doc = frappe.qb.DocType("Quality Inspection")
 
@@ -367,8 +397,13 @@ class QualityInspection(UnitReadingsMixin, Document):
 				title=_("Sample Size Missing"),
 			)
 
-		qty_under_inspection = flt(self.get_qty_under_inspection() or 0)
-		if qty_under_inspection > 0 and flt(self.sample_size) > qty_under_inspection:
+		qty_under_inspection = self.get_qty_under_inspection()
+		if qty_under_inspection is None:
+			return
+		# custody rows resolve to zero once fully decided or departed — a sample
+		# against nothing must be refused, not waved past the cap
+		strict = self.reference_type == "Goods Inward Note"
+		if (strict or flt(qty_under_inspection) > 0) and flt(self.sample_size) > flt(qty_under_inspection):
 			frappe.throw(
 				_("The sample of {0} unit(s) exceeds the {1} unit(s) under inspection.").format(
 					self.sample_size, qty_under_inspection

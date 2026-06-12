@@ -275,6 +275,78 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		self.assertEqual(row.qty, 3)
 		self.assertEqual(row.rejected_qty, 1)
 
+	def test_sample_after_batches_covers_only_the_remainder(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+		from erpnext.stock.services.test_quality_quarantine import unit_reading_rows
+
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Goods Inward Note",
+				warehouse_role=None,
+				quality_control_mode="Block",
+				inspection_basis="Each Quantity",
+			),
+		)
+		item.save()
+
+		order = create_purchase_order(item_code=item.name, qty=3)
+		note = make_goods_inward_note(order)
+
+		# one unit decided per-unit; it passes
+		first = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Incoming",
+				"reference_type": "Goods Inward Note",
+				"reference_name": note.name,
+				"child_row_reference": note.items[0].name,
+				"item_code": item.name,
+				"inspection_basis": "Each Quantity",
+				"unit_quantity": 1,
+				"unit_readings": unit_reading_rows({1: ["Accepted"]}),
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+			}
+		)
+		first.insert(ignore_permissions=True)
+		first.submit()
+
+		# the inspector fails the rest on a sample — without naming the row
+		sample = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Incoming",
+				"reference_type": "Goods Inward Note",
+				"reference_name": note.name,
+				"item_code": item.name,
+				"inspection_basis": "Sample",
+				"manual_inspection": 1,
+				"status": "Rejected",
+				"sample_size": 3,
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+			}
+		)
+		sample.insert(ignore_permissions=True)
+		# it binds to the same row, the earlier inspection notwithstanding
+		self.assertEqual(sample.child_row_reference, note.items[0].name)
+		# and three sampled units cannot describe the two undecided ones
+		self.assertRaises(frappe.ValidationError, sample.submit)
+
+		sample.reload()
+		sample.sample_size = 2
+		sample.save(ignore_permissions=True)
+		sample.submit()
+
+		# the rejection covers only the remainder the sample decided
+		receipt = make_receipt_from_goods_inward_note(note.name)
+		row = receipt.items[0]
+		self.assertEqual(row.received_qty, 3)
+		self.assertEqual(row.qty, 1)
+		self.assertEqual(row.rejected_qty, 2)
+
 	def test_block_trigger_gates_the_receipt_not_the_note(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
 
