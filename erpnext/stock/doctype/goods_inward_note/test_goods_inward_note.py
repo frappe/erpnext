@@ -156,6 +156,99 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		note.get_items_from_order()
 		self.assertRaises(frappe.ValidationError, note.insert)
 
+	def test_outside_receipts_respect_custody_claims(self):
+		from erpnext.buying.doctype.purchase_order.mapper import (
+			make_purchase_invoice,
+			make_purchase_receipt,
+		)
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		order = create_purchase_order(item_code=item, qty=10)
+		make_goods_inward_note(order, qty=6)
+
+		# a direct receipt ignoring the note may only take what custody does not claim
+		direct = make_purchase_receipt(order.name)
+		direct.items[0].qty = 5
+		direct.items[0].received_qty = 5
+		direct.insert(ignore_permissions=True)
+		self.assertRaises(frappe.ValidationError, direct.submit)
+
+		direct.reload()
+		direct.items[0].qty = 4
+		direct.items[0].received_qty = 4
+		direct.save(ignore_permissions=True)
+		direct.submit()
+
+		# a stock-updating invoice receives like a receipt — same rule
+		invoice = make_purchase_invoice(order.name)
+		invoice.update_stock = 1
+		invoice.items[0].qty = 1
+		invoice.insert(ignore_permissions=True)
+		self.assertRaises(frappe.ValidationError, invoice.submit)
+
+	def test_received_custody_verdict_cannot_be_cancelled(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+		from erpnext.stock.services.test_quality_quarantine import unit_reading_rows
+
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Goods Inward Note",
+				warehouse_role=None,
+				quality_control_mode="Block",
+				inspection_basis="Each Quantity",
+			),
+		)
+		item.save()
+
+		order = create_purchase_order(item_code=item.name, qty=4)
+		note = make_goods_inward_note(order)
+
+		def batch():
+			inspection = frappe.get_doc(
+				{
+					"doctype": "Quality Inspection",
+					"inspection_type": "Incoming",
+					"reference_type": "Goods Inward Note",
+					"reference_name": note.name,
+					"child_row_reference": note.items[0].name,
+					"item_code": item.name,
+					"inspection_basis": "Each Quantity",
+					"unit_quantity": 2,
+					"unit_readings": unit_reading_rows({1: ["Accepted"], 2: ["Accepted"]}),
+					"report_date": nowdate(),
+					"inspected_by": frappe.session.user,
+				}
+			)
+			inspection.insert(ignore_permissions=True)
+			inspection.submit()
+			return inspection
+
+		first = batch()
+		batch()
+		receipt = receive_from_note(note)
+
+		# the received units stand on this verdict: it may not be cancelled
+		self.assertRaises(frappe.ValidationError, first.cancel)
+
+		# cancelling the receipt puts the goods back in custody — then it may
+		receipt.cancel()
+		first.reload()
+		first.cancel()
+
+	def test_closed_order_keeps_custody_with_a_pointer(self):
+		item = make_item(properties={"is_stock_item": 1}).name
+		order = create_purchase_order(item_code=item, qty=5)
+		note = make_goods_inward_note(order)
+
+		frappe.db.set_value("Purchase Order", order.name, "status", "Closed")
+		self.assertRaises(frappe.ValidationError, make_receipt_from_goods_inward_note, note.name)
+
+		frappe.db.set_value("Purchase Order", order.name, "status", "To Receive and Bill")
+		receipt = make_receipt_from_goods_inward_note(note.name)
+		self.assertEqual(receipt.items[0].qty, 5)
+
 	def test_purchase_return_frees_the_order_claim(self):
 		item = make_item(properties={"is_stock_item": 1}).name
 		order = create_purchase_order(item_code=item, qty=5)

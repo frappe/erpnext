@@ -410,7 +410,10 @@ doc_events = {
 		"on_cancel": "erpnext.stock.services.quality_returns.update_lots_for_purchase_return",
 	},
 	("Purchase Receipt", "Subcontracting Receipt"): {
-		"before_submit": "erpnext.stock.services.goods_inward.update_goods_inward_note_on_receipt",
+		"before_submit": [
+			"erpnext.stock.services.goods_inward.validate_custody_claims",
+			"erpnext.stock.services.goods_inward.update_goods_inward_note_on_receipt",
+		],
 		"on_submit": "erpnext.stock.services.goods_inward.update_goods_inward_note_on_receipt",
 		"on_cancel": "erpnext.stock.services.goods_inward.update_goods_inward_note_on_receipt",
 	},
@@ -456,6 +459,9 @@ doc_events = {
 			"erpnext.regional.united_arab_emirates.utils.update_grand_total_for_rcm",
 			"erpnext.regional.united_arab_emirates.utils.validate_returns",
 		],
+		# a stock-updating invoice receives like a receipt: it must respect
+		# what open Goods Inward Notes still hold in custody
+		"before_submit": "erpnext.stock.services.goods_inward.validate_custody_claims",
 	},
 	"Payment Entry": {
 		"on_trash": "erpnext.regional.check_deletion_permission",

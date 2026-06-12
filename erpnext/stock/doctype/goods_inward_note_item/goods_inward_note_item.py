@@ -19,6 +19,7 @@ class GoodsInwardNoteItem(Document):
 		qty: DF.Float
 		quality_inspection: DF.Link | None
 		received_qty: DF.Float
+		supplier_declared_qty: DF.Float
 		supplier_reference: DF.Data | None
 		uom: DF.Link | None
 	# end: auto-generated types

@@ -731,6 +731,39 @@ class QualityInspection(UnitReadingsMixin, Document):
 	def on_submit(self):
 		self.update_qc_reference()
 
+	def before_cancel(self):
+		self.protect_received_custody_verdict()
+
+	def protect_received_custody_verdict(self):
+		"""Units released into stock keep the verdict that released them.
+
+		A receipt drawn from a Goods Inward Note stands on the custody
+		verdicts; cancelling one from under it would leave received stock with
+		no verdict behind it. Cancel the receipt first.
+		"""
+		if self.reference_type != "Goods Inward Note" or not self.child_row_reference:
+			return
+
+		from erpnext.stock.doctype.goods_inward_note.goods_inward_note import get_custody_verdicts
+
+		row = frappe.db.get_value(
+			"Goods Inward Note Item", self.child_row_reference, ["qty", "received_qty"], as_dict=True
+		)
+		if not row or not flt(row.received_qty):
+			return
+
+		decided_without = get_custody_verdicts(
+			self.child_row_reference, exclude_inspection=self.name, row_qty=row.qty
+		).decided
+		if flt(flt(row.received_qty) - decided_without, 6) > 0:
+			frappe.throw(
+				_(
+					"{0} unit(s) of this custody row were already received on this verdict's "
+					"strength. Cancel the receipt before cancelling the inspection."
+				).format(row.received_qty),
+				title=_("Verdict Already Acted On"),
+			)
+
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ("Serial and Batch Bundle",)
 		self.update_qc_reference()

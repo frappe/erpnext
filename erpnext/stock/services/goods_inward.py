@@ -44,6 +44,17 @@ def make_receipt_from_goods_inward_note(goods_inward_note: str):
 			)
 		)
 
+	order_status = frappe.db.get_value(note.order_type, note.order, "status")
+	if order_status in ("Closed", "On Hold"):
+		frappe.throw(
+			_("{0} is {1} — reopen it to receive the goods waiting in custody on {2}.").format(
+				get_link_to_form(note.order_type, note.order),
+				_(order_status),
+				get_link_to_form("Goods Inward Note", note.name),
+			),
+			title=_("Order Not Open"),
+		)
+
 	verdicts = _verdicts_by_row(note)
 	caps, warned = _custody_inspection_state(note, verdicts)
 	receivable = _receivable_by_order_item(note, caps)
@@ -201,6 +212,86 @@ def _default_rejected_warehouse(company):
 		pluck="name",
 	)
 	return rejected_warehouses[0] if len(rejected_warehouses) == 1 else None
+
+
+# where a receiving document's rows point at their order row
+ORDER_ROW_FIELDS = {
+	"Purchase Receipt": "purchase_order_item",
+	"Purchase Invoice": "po_detail",
+	"Subcontracting Receipt": "subcontracting_order_item",
+}
+ORDER_ITEM_DOCTYPES_BY_RECEIVER = {
+	"Purchase Receipt": "Purchase Order Item",
+	"Purchase Invoice": "Purchase Order Item",
+	"Subcontracting Receipt": "Subcontracting Order Item",
+}
+
+
+def validate_custody_claims(doc, method=None):
+	"""Receiving outside a note must leave room for what waits in custody.
+
+	An open note claims the unreceived part of its order rows. A receipt or
+	stock-updating invoice made directly against the order — ignoring the
+	note — could overshoot the order together with those claims; rows drawn
+	from a note answer to the note's own capacity check instead.
+	"""
+	from erpnext.controllers.status_updater import get_allowance_for
+
+	if doc.doctype == "Purchase Invoice" and not doc.get("update_stock"):
+		return
+	order_row_field = ORDER_ROW_FIELDS.get(doc.doctype)
+	if not order_row_field:
+		return
+
+	taken = {}
+	for row in doc.get("items") or []:
+		if row.get("goods_inward_note") or not row.get(order_row_field):
+			continue
+		amount = flt(row.get("received_qty")) or (flt(row.get("qty")) + flt(row.get("rejected_qty")))
+		taken[row.get(order_row_field)] = taken.get(row.get(order_row_field), 0) + amount
+	if not taken:
+		return
+
+	in_custody = {}
+	for note_row in frappe.get_all(
+		"Goods Inward Note Item",
+		filters={"order_item": ("in", list(taken)), "docstatus": 1},
+		fields=["order_item", "qty", "received_qty"],
+	):
+		outstanding = flt(note_row.qty) - flt(note_row.received_qty)
+		if outstanding > 0:
+			in_custody[note_row.order_item] = in_custody.get(note_row.order_item, 0) + outstanding
+	if not in_custody:
+		return
+
+	order_doctype = ORDER_ITEM_DOCTYPES_BY_RECEIVER[doc.doctype].removesuffix(" Item")
+	item_allowance = {}
+	global_qty_allowance = global_amount_allowance = None
+	for order_row in frappe.get_all(
+		ORDER_ITEM_DOCTYPES_BY_RECEIVER[doc.doctype],
+		filters={"name": ("in", list(in_custody))},
+		fields=["name", "parent", "item_code", "qty", "received_qty"],
+	):
+		allowance, item_allowance, global_qty_allowance, global_amount_allowance = get_allowance_for(
+			order_row.item_code, item_allowance, global_qty_allowance, global_amount_allowance, "qty"
+		)
+		allowed = flt(order_row.qty) * (100 + flt(allowance)) / 100
+		claim = flt(order_row.received_qty) + in_custody[order_row.name] + taken.get(order_row.name, 0)
+		if flt(claim - allowed, 6) > 0:
+			frappe.throw(
+				_(
+					"{0} unit(s) of {1} wait in custody on open Goods Inward Notes. With this "
+					"document, {2} unit(s) would arrive against {3}, which orders only {4} "
+					"(allowance included) — receive the custody goods through their note instead."
+				).format(
+					in_custody[order_row.name],
+					get_link_to_form("Item", order_row.item_code),
+					claim,
+					get_link_to_form(order_doctype, order_row.parent),
+					allowed,
+				),
+				title=_("Goods Waiting In Custody"),
+			)
 
 
 def update_goods_inward_note_on_receipt(doc, method=None):
