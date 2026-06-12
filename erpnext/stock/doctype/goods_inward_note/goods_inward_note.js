@@ -35,7 +35,13 @@ frappe.ui.form.on("Goods Inward Note", {
 	},
 
 	refresh(frm) {
-		if (frm.doc.docstatus === 0 && !frm.is_new() && frappe.model.can_create("Quality Inspection")) {
+		// quality is inspected in custody, after the arrival is recorded —
+		// the note submits regardless, the receipt waits for the verdict
+		if (
+			frm.doc.docstatus === 1 &&
+			["In Custody", "Partially Received"].includes(frm.doc.status) &&
+			frappe.model.can_create("Quality Inspection")
+		) {
 			frm.add_custom_button(
 				__("Quality Inspection(s)"),
 				() => {

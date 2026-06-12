@@ -63,15 +63,41 @@ class GoodsInwardNote(Document):
 	# end: auto-generated types
 
 	def validate(self):
-		from erpnext.stock.services.quality_trigger_resolution import enforce_inspection_points
-
 		self.set_details_from_order()
 		self.validate_items_against_order()
 		self.validate_quantities()
 		self.set_net_weight()
 		self.set_status()
-		# Block / Warn triggers: a nudge on draft saves, a gate on submission
-		enforce_inspection_points(self)
+
+	def on_submit(self):
+		self.notify_pending_inspections()
+
+	def notify_pending_inspections(self):
+		"""Custody never waits for quality: arrival is a fact, the note records it.
+
+		Items whose triggers demand a custody inspection are flagged here — their
+		quantities stay out of receipts until an inspection at the inward location
+		decides them.
+		"""
+		from erpnext.stock.services.quality_trigger_resolution import resolve_inspection_points
+
+		pending = sorted(
+			{
+				point.item_code
+				for point in resolve_inspection_points(self)
+				if point.quality_control_mode in ("Block", "Warn") and not point.row.get("quality_inspection")
+			}
+		)
+		if pending:
+			frappe.msgprint(
+				_("Quality inspection pending at {0} for: {1}.").format(
+					get_link_to_form("Inward Location", self.current_inward_location),
+					", ".join(get_link_to_form("Item", item) for item in pending),
+				),
+				title=_("Inspect In Custody"),
+				indicator="orange",
+				alert=True,
+			)
 
 	def on_update_after_submit(self):
 		self.validate_quantities()

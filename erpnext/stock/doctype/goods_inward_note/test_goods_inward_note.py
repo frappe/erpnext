@@ -118,7 +118,7 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		note.items[0].returned_qty = 6
 		self.assertRaises(frappe.ValidationError, note.save)
 
-	def test_block_trigger_gates_the_note(self):
+	def test_block_trigger_gates_the_receipt_not_the_note(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
 
 		item = make_item(properties={"is_stock_item": 1})
@@ -132,11 +132,23 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		)
 		item.save()
 
+		# arrival is a fact: the note submits with no inspection in sight
 		order = create_purchase_order(item_code=item.name, qty=4)
-		note = make_goods_inward_note(order, submit=False)
-		self.assertRaises(frappe.ValidationError, note.submit)
+		note = make_goods_inward_note(order)
 
-		# a custody verdict opens the gate
+		# but the goods may not become stock until the custody verdict is in
+		self.assertRaises(frappe.ValidationError, make_receipt_from_goods_inward_note, note.name)
+
+		# nor may a hand-built receipt slip past the gate
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
+
+		sneak = make_purchase_receipt(order.name)
+		sneak.items[0].goods_inward_note = note.name
+		sneak.insert(ignore_permissions=True)
+		self.assertRaises(frappe.ValidationError, sneak.submit)
+		sneak.reload()
+		sneak.delete()
+
 		inspection = frappe.get_doc(
 			{
 				"doctype": "Quality Inspection",
@@ -155,8 +167,10 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		inspection.submit()
 
 		note.reload()
-		note.submit()
 		self.assertEqual(note.items[0].quality_inspection, inspection.name)
+
+		receipt = make_receipt_from_goods_inward_note(note.name)
+		self.assertEqual(receipt.items[0].qty, 4)
 
 	def test_custody_quarantine_is_refused(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
@@ -189,8 +203,9 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		item.save()
 
 		order = create_purchase_order(item_code=item.name, qty=3)
-		note = make_goods_inward_note(order, submit=False)
+		note = make_goods_inward_note(order)
 
+		# inspected in custody, against the submitted note
 		inspection = frappe.get_doc(
 			{
 				"doctype": "Quality Inspection",
@@ -207,9 +222,7 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		)
 		inspection.insert(ignore_permissions=True)
 		inspection.submit()
-
 		note.reload()
-		note.submit()
 
 		# the rejected unit is held back from the receipt until returned
 		receipt = make_receipt_from_goods_inward_note(note.name)
@@ -251,7 +264,7 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		item.save()
 
 		order = create_purchase_order(item_code=item.name, qty=2)
-		note = make_goods_inward_note(order, submit=False)
+		note = make_goods_inward_note(order)
 
 		inspection = frappe.get_doc(
 			{
@@ -270,7 +283,6 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		inspection.insert(ignore_permissions=True)
 		inspection.submit()
 		note.reload()
-		note.submit()
 
 		# already decided in custody: the receipt is not routed to quarantine
 		receipt = make_receipt_from_goods_inward_note(note.name)
