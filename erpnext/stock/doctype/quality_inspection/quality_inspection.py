@@ -223,11 +223,11 @@ class QualityInspection(UnitReadingsMixin, Document):
 					"item_code": self.item_code,
 					"docstatus": ("<", 2),
 				},
-				fields=["name", "qty", "received_qty", "returned_qty"],
+				fields=["name", "qty", "received_qty"],
 				order_by="idx",
 			)
 			for row in rows:
-				in_custody = flt(row.qty) - flt(row.received_qty) - flt(row.returned_qty)
+				in_custody = flt(row.qty) - flt(row.received_qty)
 				undecided = (
 					flt(row.qty) - get_custody_verdicts(row.name, exclude_inspection=self.name).decided
 				)
@@ -669,8 +669,8 @@ class QualityInspection(UnitReadingsMixin, Document):
 			)
 			if self.reference_type == "Goods Inward Note":
 				# only what still sits in custody, undecided, can be inspected —
-				# received units became stock, returned units went back with the
-				# truck, and earlier batch inspections keep their verdicts
+				# received units became stock, and earlier batch inspections
+				# keep their verdicts
 				from erpnext.stock.doctype.goods_inward_note.goods_inward_note import (
 					get_custody_verdicts,
 				)
@@ -678,12 +678,12 @@ class QualityInspection(UnitReadingsMixin, Document):
 				row = frappe.db.get_value(
 					child_doctype,
 					self.child_row_reference,
-					["qty", "received_qty", "returned_qty"],
+					["qty", "received_qty"],
 					as_dict=True,
 				)
 				if not row:
 					return None
-				in_custody = max(flt(row.qty) - flt(row.received_qty) - flt(row.returned_qty), 0)
+				in_custody = max(flt(row.qty) - flt(row.received_qty), 0)
 				decided = get_custody_verdicts(self.child_row_reference, exclude_inspection=self.name).decided
 				return min(in_custody, max(flt(row.qty) - decided, 0))
 			# returns carry negative quantities; inspection thinks in physical units

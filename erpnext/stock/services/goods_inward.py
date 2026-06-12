@@ -136,18 +136,12 @@ def _custody_inspection_state(note):
 	for point in resolve_inspection_points(note):
 		row = point.row
 		verdicts = get_custody_verdicts(row.name)
-		# returns beyond the rejected pool went back uninspected — nobody need
-		# decide them; everything else wants a verdict before it becomes stock
-		required = flt(row.qty) - max(flt(row.returned_qty) - verdicts.rejected, 0)
-		if flt(required, 6) <= 0 or flt(verdicts.decided - required, 6) >= 0:
+		# every arrived unit wants a verdict before it becomes stock
+		if flt(verdicts.decided - flt(row.qty), 6) >= 0:
 			continue
 		if point.quality_control_mode == "Block":
-			# decided units may go: less the rejects already returned, less
-			# what earlier receipts took
-			caps[row.name] = max(
-				verdicts.decided - min(flt(row.returned_qty), verdicts.rejected) - flt(row.received_qty),
-				0,
-			)
+			# decided units may go, less what earlier receipts took
+			caps[row.name] = max(verdicts.decided - flt(row.received_qty), 0)
 		elif point.quality_control_mode == "Warn":
 			warned.add(row.get("item_code"))
 	return caps, warned
@@ -169,10 +163,10 @@ def _receivable_by_order_item(note, caps=None):
 def _custody_rejected_by_order_item(note):
 	"""Units the custody verdicts rejected that still await a receipt.
 
-	They prefill the receipt's rejected quantity — rejected goods either went
-	back with the truck (returned quantity) or enter stock in a Rejected
-	warehouse, where the standard purchase-return path takes over. Whatever a
-	prior receipt already booked as rejected is not proposed again.
+	They prefill the receipt's rejected quantity — rejected goods enter stock
+	in a Rejected warehouse, where the standard purchase-return path takes
+	over. Whatever a prior receipt already booked as rejected is not proposed
+	again.
 	"""
 	rejected = {}
 	for row in note.items:
@@ -195,9 +189,8 @@ def _custody_rejected_by_order_item(note):
 
 
 def _rejected_by_inspection(row):
-	"""What the row's custody verdicts rejected, less what already went back
-	with the truck (returned units come out of the rejected pool first)."""
-	return max(get_custody_verdicts(row.name).rejected - flt(row.returned_qty), 0.0)
+	"""What the row's custody verdicts rejected."""
+	return get_custody_verdicts(row.name).rejected
 
 
 def _default_rejected_warehouse(company):
@@ -252,7 +245,7 @@ def _note_rows(note_name, order_item):
 	return frappe.get_all(
 		"Goods Inward Note Item",
 		filters={"parent": note_name, "order_item": order_item},
-		fields=["name", "qty", "received_qty", "returned_qty", "quality_inspection"],
+		fields=["name", "qty", "received_qty"],
 		order_by="idx",
 	)
 
@@ -260,7 +253,7 @@ def _note_rows(note_name, order_item):
 def _validate_note_capacity(note_name, order_item, qty, caps=None):
 	capacity = 0.0
 	for row in _note_rows(note_name, order_item):
-		room = max(flt(row.qty) - flt(row.received_qty) - flt(row.returned_qty), 0)
+		room = max(flt(row.qty) - flt(row.received_qty), 0)
 		cap = (caps or {}).get(row.name)
 		if cap is not None:
 			room = min(room, cap)
@@ -269,7 +262,7 @@ def _validate_note_capacity(note_name, order_item, qty, caps=None):
 		frappe.throw(
 			_(
 				"Only {0} unit(s) of this order row remain receivable on {1} — what arrived, less "
-				"what was already received, returned or still awaiting inspection in custody."
+				"what was already received or still awaiting inspection in custody."
 			).format(capacity, get_link_to_form("Goods Inward Note", note_name)),
 			title=_("More Than In Custody"),
 		)
@@ -281,7 +274,7 @@ def _allocate_to_note(note_name, order_item, qty, direction, caps=None):
 		if remaining <= 0:
 			break
 		if direction > 0:
-			capacity = flt(row.qty) - flt(row.received_qty) - flt(row.returned_qty)
+			capacity = flt(row.qty) - flt(row.received_qty)
 			cap = (caps or {}).get(row.name)
 			if cap is not None:
 				capacity = min(capacity, cap)

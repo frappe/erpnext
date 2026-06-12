@@ -717,11 +717,11 @@ def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str
 		item["qty"] = abs(flt(item.get("qty")))
 		if doctype == "Goods Inward Note":
 			# only what still sits in custody, undecided, can be inspected —
-			# received units became stock, returned units went back with the
-			# truck, and earlier batch inspections keep their verdicts
+			# received units became stock, and earlier batch inspections keep
+			# their verdicts
 			from erpnext.stock.doctype.goods_inward_note.goods_inward_note import get_custody_verdicts
 
-			in_custody = max(item["qty"] - flt(item.get("received_qty")) - flt(item.get("returned_qty")), 0)
+			in_custody = max(item["qty"] - flt(item.get("received_qty")), 0)
 			undecided = item["qty"]
 			if item.get("name"):
 				undecided = max(item["qty"] - get_custody_verdicts(item.get("name")).decided, 0)

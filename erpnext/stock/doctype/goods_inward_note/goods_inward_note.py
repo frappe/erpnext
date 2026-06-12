@@ -51,7 +51,7 @@ class GoodsInwardNote(Document):
 		order: DF.DynamicLink
 		order_type: DF.Literal["Purchase Order", "Subcontracting Order"]
 		remarks: DF.Text | None
-		status: DF.Literal["In Custody", "Partially Received", "Received", "Returned"]
+		status: DF.Literal["In Custody", "Partially Received", "Received"]
 		supplier: DF.Link
 		supplier_document_date: DF.Date | None
 		supplier_document_number: DF.Data | None
@@ -175,24 +175,24 @@ class GoodsInwardNote(Document):
 		for row in self.items:
 			if flt(row.qty) <= 0:
 				frappe.throw(_("Row #{0}: Quantity must be greater than zero.").format(row.idx))
-			if flt(row.returned_qty) < 0 or flt(row.received_qty) < 0:
+			if flt(row.received_qty) < 0:
 				frappe.throw(_("Row #{0}: Quantities cannot be negative.").format(row.idx))
-			if flt(row.received_qty) + flt(row.returned_qty) > flt(row.qty):
+			if flt(row.received_qty) > flt(row.qty):
 				frappe.throw(
-					_(
-						"Row #{0}: Received ({1}) plus returned ({2}) cannot exceed the {3} unit(s) "
-						"that arrived."
-					).format(row.idx, row.received_qty, row.returned_qty, row.qty),
+					_("Row #{0}: Received ({1}) cannot exceed the {2} unit(s) that arrived.").format(
+						row.idx, row.received_qty, row.qty
+					),
 					title=_("More Than Arrived"),
 				)
 
 	def validate_arrivals_against_order_qty(self):
 		"""All arrivals together may not overshoot the order (plus allowance).
 
-		An order row is claimed by this note, by other submitted notes (less what
-		went back with the truck — its replacement may arrive again), and by
+		An order row is claimed by this note, by other submitted notes, and by
 		receipts made directly against the order outside any note. Receipts drawn
-		from a note are already inside that note's claim.
+		from a note are already inside that note's claim, and a purchase return
+		carries negative quantities — sending rejects back frees the claim, so
+		their replacement may arrive on a new note.
 		"""
 		from erpnext.controllers.status_updater import get_allowance_for
 
@@ -207,9 +207,9 @@ class GoodsInwardNote(Document):
 				"docstatus": 1,
 				"parent": ("!=", self.name),
 			},
-			fields=["order_item", "qty", "returned_qty"],
+			fields=["order_item", "qty"],
 		):
-			claimed[other.order_item] += flt(other.qty) - flt(other.returned_qty)
+			claimed[other.order_item] += flt(other.qty)
 
 		order_item_field = (
 			"purchase_order_item" if self.order_type == "Purchase Order" else "subcontracting_order_item"
@@ -258,18 +258,17 @@ class GoodsInwardNote(Document):
 	def set_status(self):
 		total = sum(flt(row.qty) for row in self.items)
 		received = sum(flt(row.received_qty) for row in self.items)
-		returned = sum(flt(row.returned_qty) for row in self.items)
 
-		if received + returned >= total and total > 0:
-			self.status = "Received" if received > 0 else "Returned"
+		if total > 0 and received >= total:
+			self.status = "Received"
 		elif received > 0:
 			self.status = "Partially Received"
 		else:
 			self.status = "In Custody"
 
 	def outstanding_qty(self, row):
-		"""What may still be received: arrived, minus received, minus returned."""
-		return flt(row.qty) - flt(row.received_qty) - flt(row.returned_qty)
+		"""What may still be received: arrived, minus already received."""
+		return flt(row.qty) - flt(row.received_qty)
 
 	@frappe.whitelist()
 	def get_items_from_order(self):
@@ -317,7 +316,7 @@ class GoodsInwardNote(Document):
 				"docstatus": 1,
 				"order_item": ("is", "set"),
 			},
-			fields=["order_item", "qty", "received_qty", "returned_qty"],
+			fields=["order_item", "qty", "received_qty"],
 		):
 			# an open note already accounts for its unreceived quantity
 			covered[row.order_item] = covered.get(row.order_item, 0) + self.outstanding_qty(row)

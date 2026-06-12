@@ -8,7 +8,6 @@ frappe.listview_settings["Goods Inward Note"] = {
 			"In Custody": "orange",
 			"Partially Received": "yellow",
 			Received: "green",
-			Returned: "red",
 		};
 		let label = __(doc.status);
 		// goods waiting in custody wear their age, like quarantined lots

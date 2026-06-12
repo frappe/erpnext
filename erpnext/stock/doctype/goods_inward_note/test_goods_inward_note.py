@@ -16,6 +16,16 @@ def make_inward_location(name="_Test Factory Gate"):
 	return name
 
 
+def receive_from_note(note, qty=None):
+	receipt = make_receipt_from_goods_inward_note(note.name)
+	if qty is not None:
+		receipt.items[0].qty = qty
+		receipt.items[0].received_qty = qty
+	receipt.insert(ignore_permissions=True)
+	receipt.submit()
+	return receipt
+
+
 def make_goods_inward_note(order, qty=None, submit=True):
 	note = frappe.get_doc(
 		{
@@ -101,22 +111,28 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		self.assertEqual(note.items[0].received_qty, 4)
 		self.assertEqual(note.status, "Partially Received")
 
-	def test_returned_quantity_shrinks_what_is_receivable(self):
+	def test_purchase_return_frees_the_order_claim(self):
 		item = make_item(properties={"is_stock_item": 1}).name
 		order = create_purchase_order(item_code=item, qty=5)
 		note = make_goods_inward_note(order)
-
-		# two units go back with the truck
-		note.items[0].returned_qty = 2
-		note.save(ignore_permissions=True)
-
-		receipt = make_receipt_from_goods_inward_note(note.name)
-		self.assertEqual(receipt.items[0].qty, 3)
-
-		# returned plus received may never exceed what arrived
+		receipt = receive_from_note(note)
 		note.reload()
-		note.items[0].returned_qty = 6
-		self.assertRaises(frappe.ValidationError, note.save)
+		self.assertEqual(note.status, "Received")
+
+		# a reject goes back to the supplier the formal way: a purchase return
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		return_doc = make_return_doc("Purchase Receipt", receipt.name)
+		return_doc.items[0].qty = -1
+		return_doc.items[0].received_qty = -1
+		return_doc.insert(ignore_permissions=True)
+		return_doc.submit()
+
+		# the return's negative quantities free the claim: its replacement
+		# may arrive on a new note
+		replacement = make_goods_inward_note(order, submit=False)
+		self.assertEqual(replacement.items[0].qty, 1)
+		replacement.submit()
 
 	def test_arrivals_may_not_overshoot_the_order(self):
 		item = make_item(properties={"is_stock_item": 1}).name
@@ -127,14 +143,7 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		duplicate = frappe.copy_doc(note)
 		self.assertRaises(frappe.ValidationError, duplicate.insert)
 
-		# two rejects go back with the truck — their replacement may arrive
-		note.reload()
-		note.items[0].returned_qty = 2
-		note.save(ignore_permissions=True)
-		replacement = make_goods_inward_note(order)
-		self.assertEqual(replacement.items[0].qty, 2)
-
-		# but a single unit on top of that overshoots the order again
+		# even a single unit on top overshoots the order
 		excess = frappe.get_doc(
 			{
 				"doctype": "Goods Inward Note",
@@ -158,8 +167,7 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		item = make_item(properties={"is_stock_item": 1}).name
 		order = create_purchase_order(item_code=item, qty=5)
 		note = make_goods_inward_note(order)
-		note.items[0].returned_qty = 2
-		note.save(ignore_permissions=True)
+		receive_from_note(note, qty=2)
 		note.reload()
 
 		# the dialog proposes what may still be inspected, not what arrived
@@ -183,8 +191,8 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		item = make_item(properties={"is_stock_item": 1}).name
 		order = create_purchase_order(item_code=item, qty=5)
 		note = make_goods_inward_note(order)
-		note.items[0].returned_qty = 2
-		note.save(ignore_permissions=True)
+		receive_from_note(note, qty=2)
+		note.reload()
 
 		# a sample of seven cannot describe the three units in custody
 		inspection = frappe.get_doc(

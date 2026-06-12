@@ -114,7 +114,7 @@
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
-   "options": "In Custody\nPartially Received\nReceived\nReturned",
+   "options": "In Custody\nPartially Received\nReceived",
    "read_only": 1,
    "allow_on_submit": 1
   },
@@ -229,7 +229,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-12 00:00:00.000000",
+ "modified": "2026-06-12 00:00:01.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Goods Inward Note",

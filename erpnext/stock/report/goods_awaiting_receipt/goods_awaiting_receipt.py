@@ -82,10 +82,10 @@ def get_data(filters):
 		for row in frappe.get_all(
 			"Goods Inward Note Item",
 			filters=item_filters,
-			fields=["item_code", "qty", "received_qty", "returned_qty"],
+			fields=["item_code", "qty", "received_qty"],
 			order_by="idx",
 		):
-			awaiting = flt(row.qty) - flt(row.received_qty) - flt(row.returned_qty)
+			awaiting = flt(row.qty) - flt(row.received_qty)
 			if awaiting <= 0:
 				continue
 			data.append(
