@@ -179,6 +179,36 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		)
 		self.assertEqual(inspection.get_qty_under_inspection(), 3)
 
+	def test_sample_may_not_exceed_what_is_in_custody(self):
+		item = make_item(properties={"is_stock_item": 1}).name
+		order = create_purchase_order(item_code=item, qty=5)
+		note = make_goods_inward_note(order)
+		note.items[0].returned_qty = 2
+		note.save(ignore_permissions=True)
+
+		# a sample of seven cannot describe the three units in custody
+		inspection = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Incoming",
+				"reference_type": "Goods Inward Note",
+				"reference_name": note.name,
+				"item_code": item,
+				"manual_inspection": 1,
+				"status": "Accepted",
+				"sample_size": 7,
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+			}
+		)
+		inspection.insert(ignore_permissions=True)
+		self.assertRaises(frappe.ValidationError, inspection.submit)
+
+		inspection.reload()
+		inspection.sample_size = 3
+		inspection.save(ignore_permissions=True)
+		inspection.submit()
+
 	def test_block_trigger_gates_the_receipt_not_the_note(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
 

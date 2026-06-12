@@ -357,13 +357,23 @@ class QualityInspection(UnitReadingsMixin, Document):
 		self.validate_units_not_already_decided()
 
 	def validate_sample_size(self):
-		"""A Sample inspection of zero units is a verdict about nothing."""
+		"""A Sample inspection of zero units is a verdict about nothing, and a
+		sample cannot be larger than the stock it claims to describe."""
 		if self.inspection_basis == "Each Quantity":
 			return
 		if flt(self.sample_size) <= 0:
 			frappe.throw(
 				_("A Sample inspection must inspect at least one unit — set the Sample Size."),
 				title=_("Sample Size Missing"),
+			)
+
+		qty_under_inspection = flt(self.get_qty_under_inspection() or 0)
+		if qty_under_inspection > 0 and flt(self.sample_size) > qty_under_inspection:
+			frappe.throw(
+				_("The sample of {0} unit(s) exceeds the {1} unit(s) under inspection.").format(
+					self.sample_size, qty_under_inspection
+				),
+				title=_("Sample Larger Than Quantity"),
 			)
 
 	def validate_inspected_batch_against_reference(self):
