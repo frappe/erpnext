@@ -182,6 +182,9 @@ class GoodsInwardNote(Document):
 	@frappe.whitelist()
 	def get_items_from_order(self):
 		"""Prefill arrival rows from the order — the operator corrects quantities."""
+		# the form syncs this document back: supplier and company arrive with the
+		# rows, so the client-side mandatory check is already satisfied
+		self.set_details_from_order()
 		received_by_order_item = self._received_against_order()
 		self.set("items", [])
 		for row in frappe.get_all(
