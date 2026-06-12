@@ -19,6 +19,7 @@ from frappe.utils import (
 	time_diff_in_seconds,
 	to_timedelta,
 )
+from frappe.utils.data import DateTimeLikeObject
 
 from erpnext.support.doctype.issue.issue import get_holidays
 
@@ -213,7 +214,7 @@ class Workstation(Document):
 		return schedule_date
 
 	@frappe.whitelist()
-	def start_job(self, job_card, from_time, employee):
+	def start_job(self, job_card: str, from_time: DateTimeLikeObject, employee: str):
 		doc = frappe.get_doc("Job Card", job_card)
 		doc.check_permission("write")
 
@@ -223,7 +224,7 @@ class Workstation(Document):
 		return doc
 
 	@frappe.whitelist()
-	def complete_job(self, job_card, qty, to_time):
+	def complete_job(self, job_card: str, qty: float, to_time: DateTimeLikeObject):
 		doc = frappe.get_doc("Job Card", job_card)
 		doc.check_permission("submit")
 
