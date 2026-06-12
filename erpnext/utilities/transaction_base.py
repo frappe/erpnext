@@ -96,6 +96,7 @@ class TransactionBase(StatusUpdater):
 
 	def validate_with_previous_doc(self, ref):
 		self.exclude_fields = ["conversion_factor", "uom"] if self.get("is_return") else []
+		self.unsubmitted_refs = []
 
 		for key, val in ref.items():
 			is_child = val.get("is_child_table")
@@ -115,15 +116,31 @@ class TransactionBase(StatusUpdater):
 						if ref_dn not in ref_doc[key]:
 							ref_doc[key].append(ref_dn)
 			if ref_doc:
-				self.compare_values(ref_doc, val["compare_fields"])
+				self.compare_values(
+					ref_doc, val["compare_fields"], check_docstatus=val.get("check_docstatus")
+				)
 
-	def compare_values(self, ref_doc, fields, doc=None):
+		self.validate_prev_docstatus()
+
+	def validate_prev_docstatus(self):
+		if self.unsubmitted_refs:
+			frappe.throw(
+				_("The following documents must be submitted first:")
+				+ "<br>"
+				+ "<br>".join(self.unsubmitted_refs),
+				title=_("Previous Document Not Submitted"),
+			)
+
+	def compare_values(self, ref_doc, fields, doc=None, check_docstatus=False):
 		for reference_doctype, ref_dn_list in ref_doc.items():
 			prev_doc_detail_map = self.get_prev_doc_reference_details(ref_dn_list, reference_doctype, fields)
 			for reference_name in ref_dn_list:
 				prevdoc_values = prev_doc_detail_map.get(reference_name)
 				if not prevdoc_values:
 					frappe.throw(_("Invalid reference {0} {1}").format(reference_doctype, reference_name))
+
+				if check_docstatus and prevdoc_values.docstatus != 1:
+					self.unsubmitted_refs.append(f"{_(reference_doctype)} {frappe.bold(reference_name)}")
 
 				for field, condition in fields:
 					if prevdoc_values[field] not in [None, ""] and field not in self.exclude_fields:
@@ -134,7 +151,7 @@ class TransactionBase(StatusUpdater):
 		details = frappe.get_all(
 			reference_doctype,
 			filters={"name": ("in", reference_names)},
-			fields=["name"] + [d[0] for d in fields],
+			fields=["name", "docstatus"] + [d[0] for d in fields],
 		)
 
 		for d in details:

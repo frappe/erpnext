@@ -306,13 +306,6 @@ class PurchaseInvoice(BuyingController):
 		PurchaseTaxWithholding(self).on_validate()
 		self.set_percentage_received()
 
-		if (
-			self.docstatus == 0
-			and self.company
-			and frappe.get_cached_value("Accounts Settings", None, "preview_mode")
-		):
-			self.check_prev_docstatus()
-
 	def set_percentage_received(self):
 		total_billed_qty = 0.0
 		total_received_qty = 0.0
@@ -404,6 +397,7 @@ class PurchaseInvoice(BuyingController):
 				"Purchase Order": {
 					"ref_dn_field": "purchase_order",
 					"compare_fields": [["supplier", "="], ["company", "="], ["currency", "="]],
+					"check_docstatus": True,
 				},
 				"Purchase Order Item": {
 					"ref_dn_field": "po_detail",
@@ -414,6 +408,7 @@ class PurchaseInvoice(BuyingController):
 				"Purchase Receipt": {
 					"ref_dn_field": "purchase_receipt",
 					"compare_fields": [["supplier", "="], ["company", "="], ["currency", "="]],
+					"check_docstatus": True,
 				},
 				"Purchase Receipt Item": {
 					"ref_dn_field": "pr_detail",
@@ -528,17 +523,6 @@ class PurchaseInvoice(BuyingController):
 		if not doc or doc.is_group or doc.company != self.company:
 			throw(_("Please enter a valid Write Off Cost Center"))
 
-	def check_prev_docstatus(self):
-		for d in self.get("items"):
-			if d.purchase_order:
-				submitted = frappe.db.exists("Purchase Order", {"docstatus": 1, "name": d.purchase_order})
-				if not submitted:
-					frappe.throw(_("Purchase Order {0} is not submitted").format(d.purchase_order))
-			if d.purchase_receipt:
-				submitted = frappe.db.exists("Purchase Receipt", {"docstatus": 1, "name": d.purchase_receipt})
-				if not submitted:
-					frappe.throw(_("Purchase Receipt {0} is not submitted").format(d.purchase_receipt))
-
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
 			self.status_updater.append(
@@ -614,8 +598,6 @@ class PurchaseInvoice(BuyingController):
 	def on_submit(self):
 		super().on_submit()
 		PurchaseTaxWithholding(self).on_submit()
-
-		self.check_prev_docstatus()
 
 		if self.is_return and not self.update_billed_amount_in_purchase_order:
 			# NOTE status updating bypassed for is_return

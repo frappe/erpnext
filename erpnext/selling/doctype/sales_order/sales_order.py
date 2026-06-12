@@ -250,15 +250,8 @@ class SalesOrder(SellingController):
 		if not self.get("is_subcontracted"):
 			SalesOrderStockReservation(self).enable_auto_reserve_stock()
 
-		if (
-			self.docstatus == 0
-			and self.company
-			and frappe.get_cached_value("Accounts Settings", None, "preview_mode")
-		):
-			try:
-				self.check_credit_limit(extra_amount=flt(self.base_grand_total))
-			except frappe.ValidationError as e:
-				frappe.msgprint(str(e), title=_("Credit Limit Warning"), indicator="orange")
+		if self.docstatus == 0:
+			self.check_credit_limit(extra_amount=flt(self.base_grand_total))
 
 	def set_has_unit_price_items(self):
 		"""
@@ -424,7 +417,11 @@ class SalesOrder(SellingController):
 	def validate_with_previous_doc(self):
 		super().validate_with_previous_doc(
 			{
-				"Quotation": {"ref_dn_field": "prevdoc_docname", "compare_fields": [["company", "="]]},
+				"Quotation": {
+					"ref_dn_field": "prevdoc_docname",
+					"compare_fields": [["company", "="]],
+					"check_docstatus": True,
+				},
 				"Quotation Item": {
 					"ref_dn_field": "quotation_item",
 					"compare_fields": [["item_code", "="], ["uom", "="], ["conversion_factor", "="]],

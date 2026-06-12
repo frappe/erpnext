@@ -290,6 +290,7 @@ class PurchaseReceipt(BuyingController):
 				"Purchase Order": {
 					"ref_dn_field": "purchase_order",
 					"compare_fields": [["supplier", "="], ["company", "="], ["currency", "="]],
+					"check_docstatus": True,
 				},
 				"Purchase Order Item": {
 					"ref_dn_field": "purchase_order_item",

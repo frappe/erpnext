@@ -379,16 +379,8 @@ class SalesInvoice(SellingController):
 		self.validate_subcontracted_sales_order()
 		self.validate_scio_self_rm_qty()
 
-		if (
-			self.docstatus == 0
-			and self.company
-			and frappe.get_cached_value("Accounts Settings", None, "preview_mode")
-		):
-			self.check_prev_docstatus()
-			try:
-				self.check_credit_limit(extra_amount=flt(self.base_grand_total))
-			except frappe.ValidationError as e:
-				frappe.msgprint(str(e), title=_("Credit Limit Warning"), indicator="orange")
+		if self.docstatus == 0:
+			self.check_credit_limit(extra_amount=flt(self.base_grand_total))
 
 	def validate_update_stock_for_pick_list_reference(self):
 		if self.update_stock or self.is_return:
@@ -436,8 +428,6 @@ class SalesInvoice(SellingController):
 			frappe.get_cached_doc("Authorization Control").validate_approving_authority(
 				self.doctype, self.company, self.base_grand_total, self
 			)
-
-		self.check_prev_docstatus()
 
 		if self.is_return and not self.update_billed_amount_in_sales_order:
 			# NOTE status updating bypassed for is_return
@@ -805,6 +795,7 @@ class SalesInvoice(SellingController):
 						["project", "="],
 						["currency", "="],
 					],
+					"check_docstatus": True,
 				},
 				"Sales Order Item": {
 					"ref_dn_field": "so_detail",
@@ -820,6 +811,7 @@ class SalesInvoice(SellingController):
 						["project", "="],
 						["currency", "="],
 					],
+					"check_docstatus": True,
 				},
 				"Delivery Note Item": {
 					"ref_dn_field": "dn_detail",
@@ -1025,20 +1017,6 @@ class SalesInvoice(SellingController):
 	@frappe.whitelist()
 	def add_timesheet_data(self):
 		TimesheetBillingService(self).add_timesheet_data()
-
-	def check_prev_docstatus(self):
-		for d in self.get("items"):
-			if (
-				d.sales_order
-				and frappe.db.get_value("Sales Order", d.sales_order, "docstatus", cache=True) != 1
-			):
-				frappe.throw(_("Sales Order {0} is not submitted").format(d.sales_order))
-
-			if (
-				d.delivery_note
-				and frappe.db.get_value("Delivery Note", d.delivery_note, "docstatus", cache=True) != 1
-			):
-				throw(_("Delivery Note {0} is not submitted").format(d.delivery_note))
 
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries

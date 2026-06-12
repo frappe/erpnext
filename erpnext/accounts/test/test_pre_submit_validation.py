@@ -1,16 +1,11 @@
 # Copyright (c) 2024, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from unittest.mock import patch
-
 import frappe
 
 from erpnext.selling.doctype.customer.test_customer import set_credit_limit
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.tests.utils import ERPNextTestSuite
-
-
-def _get_orange_warnings():
-	return [m for m in frappe.message_log if m.get("indicator") == "orange"]
 
 
 class _CreditLimitBase(ERPNextTestSuite):
@@ -159,40 +154,37 @@ class TestCreditLimitWarnDeliveryNote(_CreditLimitBase):
 		self._assert_credit(dn, raises=False, preview=True)
 
 
-class TestPackedQtyWarn(ERPNextTestSuite):
-	COMPANY = "_Test Company"
-	CUSTOMER = "_Test Customer"
-
-	def setUp(self):
-		frappe.message_log.clear()
-
-	def _make_dn(self):
+class TestDeliveryNotePrevDocstatus(ERPNextTestSuite):
+	def _make_dn(self, sales_order, **item):
 		dn = frappe.new_doc("Delivery Note")
-		dn.company = self.COMPANY
-		dn.customer = self.CUSTOMER
+		dn.company = "_Test Company"
+		dn.customer = "_Test Customer"
+		dn.currency = "INR"
 		dn.append(
 			"items",
-			{"item_code": "_Test Item", "qty": 2, "rate": 100, "amount": 200, "base_amount": 200},
+			{"item_code": "_Test Item", "qty": 1, "rate": 100, "against_sales_order": sales_order, **item},
 		)
 		return dn
 
-	def test_no_warning_for_new_doc(self):
-		dn = self._make_dn()
-		dn.warn_packed_qty()
-		self.assertFalse(_get_orange_warnings())
+	def test_throws_when_referenced_sales_order_not_submitted(self):
+		so = make_sales_order(do_not_submit=True)
+		dn = self._make_dn(so.name)
+		with self.assertRaises(frappe.ValidationError):
+			dn.validate_with_previous_doc()
 
-	def test_warns_when_packed_qty_mismatches(self):
-		dn = self._make_dn()
-		with patch.object(
-			dn,
-			"validate_packed_qty",
-			side_effect=frappe.ValidationError("Packed Qty must be equal to qty"),
-		):
-			dn.warn_packed_qty()
-		self.assertTrue(_get_orange_warnings())
+	def test_no_throw_when_referenced_sales_order_submitted(self):
+		so = make_sales_order()
+		dn = self._make_dn(so.name)
+		dn.validate_with_previous_doc()
 
-	def test_no_warning_when_packed_qty_matches(self):
-		dn = self._make_dn()
-		with patch.object(dn, "validate_packed_qty", return_value=None):
-			dn.warn_packed_qty()
-		self.assertFalse(_get_orange_warnings())
+	def test_all_unsubmitted_refs_reported_in_single_message(self):
+		so1 = make_sales_order(do_not_submit=True)
+		so2 = make_sales_order(do_not_submit=True)
+		dn = self._make_dn(so1.name)
+		dn.append(
+			"items", {"item_code": "_Test Item", "qty": 1, "rate": 100, "against_sales_order": so2.name}
+		)
+		with self.assertRaises(frappe.ValidationError) as cm:
+			dn.validate_with_previous_doc()
+		self.assertIn(so1.name, str(cm.exception))
+		self.assertIn(so2.name, str(cm.exception))
