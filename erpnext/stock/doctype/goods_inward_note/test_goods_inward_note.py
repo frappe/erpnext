@@ -118,6 +118,40 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		note.items[0].returned_qty = 6
 		self.assertRaises(frappe.ValidationError, note.save)
 
+	def test_arrivals_may_not_overshoot_the_order(self):
+		item = make_item(properties={"is_stock_item": 1}).name
+		order = create_purchase_order(item_code=item, qty=5)
+		note = make_goods_inward_note(order)
+
+		# a duplicated note would claim the same five units twice
+		duplicate = frappe.copy_doc(note)
+		self.assertRaises(frappe.ValidationError, duplicate.insert)
+
+		# two rejects go back with the truck — their replacement may arrive
+		note.reload()
+		note.items[0].returned_qty = 2
+		note.save(ignore_permissions=True)
+		replacement = make_goods_inward_note(order)
+		self.assertEqual(replacement.items[0].qty, 2)
+
+		# but a single unit on top of that overshoots the order again
+		excess = frappe.get_doc(
+			{
+				"doctype": "Goods Inward Note",
+				"order_type": "Purchase Order",
+				"order": order.name,
+				"current_inward_location": make_inward_location(),
+				"items": [
+					{
+						"item_code": item,
+						"qty": 1,
+						"uom": frappe.db.get_value("Item", item, "stock_uom"),
+					}
+				],
+			}
+		)
+		self.assertRaises(frappe.ValidationError, excess.insert)
+
 	def test_block_trigger_gates_the_receipt_not_the_note(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
 

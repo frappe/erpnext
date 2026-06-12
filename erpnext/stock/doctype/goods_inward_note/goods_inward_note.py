@@ -66,6 +66,7 @@ class GoodsInwardNote(Document):
 		self.set_details_from_order()
 		self.validate_items_against_order()
 		self.validate_quantities()
+		self.validate_arrivals_against_order_qty()
 		self.set_net_weight()
 		self.set_status()
 
@@ -183,6 +184,71 @@ class GoodsInwardNote(Document):
 						"that arrived."
 					).format(row.idx, row.received_qty, row.returned_qty, row.qty),
 					title=_("More Than Arrived"),
+				)
+
+	def validate_arrivals_against_order_qty(self):
+		"""All arrivals together may not overshoot the order (plus allowance).
+
+		An order row is claimed by this note, by other submitted notes (less what
+		went back with the truck — its replacement may arrive again), and by
+		receipts made directly against the order outside any note. Receipts drawn
+		from a note are already inside that note's claim.
+		"""
+		from erpnext.controllers.status_updater import get_allowance_for
+
+		claimed = {}
+		for row in self.items:
+			claimed[row.order_item] = claimed.get(row.order_item, 0) + flt(row.qty)
+
+		for other in frappe.get_all(
+			"Goods Inward Note Item",
+			filters={
+				"order_item": ("in", list(claimed)),
+				"docstatus": 1,
+				"parent": ("!=", self.name),
+			},
+			fields=["order_item", "qty", "returned_qty"],
+		):
+			claimed[other.order_item] += flt(other.qty) - flt(other.returned_qty)
+
+		order_item_field = (
+			"purchase_order_item" if self.order_type == "Purchase Order" else "subcontracting_order_item"
+		)
+		for received in frappe.get_all(
+			RECEIPT_DOCTYPES[self.order_type] + " Item",
+			filters={
+				order_item_field: ("in", list(claimed)),
+				"docstatus": 1,
+				"goods_inward_note": ("is", "not set"),
+			},
+			fields=[f"{order_item_field} as order_item", "received_qty", "qty"],
+		):
+			claimed[received.order_item] += flt(received.received_qty) or flt(received.qty)
+
+		item_allowance = {}
+		global_qty_allowance = global_amount_allowance = None
+		for order_row in frappe.get_all(
+			ORDER_ITEM_DOCTYPES[self.order_type],
+			filters={"name": ("in", list(claimed))},
+			fields=["name", "item_code", "qty"],
+		):
+			allowance, item_allowance, global_qty_allowance, global_amount_allowance = get_allowance_for(
+				order_row.item_code, item_allowance, global_qty_allowance, global_amount_allowance, "qty"
+			)
+			allowed = flt(order_row.qty) * (100 + flt(allowance)) / 100
+			if flt(claimed[order_row.name] - allowed, 6) > 0:
+				frappe.throw(
+					_(
+						"With this note, {0} unit(s) of {1} would have arrived against {2}, which "
+						"orders only {3} (allowance included). Other open notes and receipts "
+						"already claim the rest."
+					).format(
+						claimed[order_row.name],
+						get_link_to_form("Item", order_row.item_code),
+						get_link_to_form(self.order_type, self.order),
+						allowed,
+					),
+					title=_("More Than Ordered"),
 				)
 
 	def set_net_weight(self):
