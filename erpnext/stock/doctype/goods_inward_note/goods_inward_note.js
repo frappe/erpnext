@@ -18,6 +18,10 @@ frappe.ui.form.on("Goods Inward Note", {
 			if (doc.supplier) {
 				filters.supplier = doc.supplier;
 			}
+			if (doc.order_type === "Purchase Order") {
+				// a subcontracted order's goods arrive against its Subcontracting Order
+				filters.is_subcontracted = 0;
+			}
 			return { filters };
 		});
 		frm.set_query("transporter", () => ({ filters: { is_transporter: 1 } }));

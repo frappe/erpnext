@@ -110,11 +110,20 @@ class GoodsInwardNote(Document):
 		self.db_set("status", self.status, update_modified=False)
 
 	def set_details_from_order(self):
-		order = frappe.db.get_value(
-			self.order_type, self.order, ["supplier", "company", "docstatus", "status"], as_dict=True
-		)
+		fields = ["supplier", "company", "docstatus", "status"]
+		if self.order_type == "Purchase Order":
+			fields.append("is_subcontracted")
+		order = frappe.db.get_value(self.order_type, self.order, fields, as_dict=True)
 		if not order:
 			return
+		if order.get("is_subcontracted"):
+			frappe.throw(
+				_(
+					"{0} is subcontracted — the goods arrive against its Subcontracting Order. "
+					"Record the arrival there."
+				).format(get_link_to_form(self.order_type, self.order)),
+				title=_("Use the Subcontracting Order"),
+			)
 		if order.docstatus != 1:
 			frappe.throw(
 				_("{0} {1} is not submitted.").format(

@@ -638,6 +638,43 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 			[],
 		)
 
+	def test_subcontracted_purchase_order_is_refused(self):
+		from erpnext.controllers.tests.test_subcontracting_controller import (
+			get_subcontracting_order,
+			make_bom_for_subcontracted_items,
+			make_raw_materials,
+			make_service_items,
+			make_subcontracted_items,
+		)
+
+		make_subcontracted_items()
+		make_raw_materials()
+		make_service_items()
+		make_bom_for_subcontracted_items()
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 2,
+				"rate": 100,
+				"fg_item": "_Test FG Item",
+				"fg_item_qty": 2,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+
+		# the goods arrive against the Subcontracting Order, not its purchase order
+		note = frappe.get_doc(
+			{
+				"doctype": "Goods Inward Note",
+				"order_type": "Purchase Order",
+				"order": sco.purchase_order,
+				"current_inward_location": make_inward_location(),
+			}
+		)
+		self.assertRaises(frappe.ValidationError, note.insert)
+
 	def test_subcontracting_receipt_path(self):
 		import copy
 

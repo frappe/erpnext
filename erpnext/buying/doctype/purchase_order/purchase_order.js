@@ -364,16 +364,20 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 							},
 							__("Create")
 						);
-						this.frm.add_custom_button(
-							__("Goods Inward Note"),
-							() => {
-								frappe.new_doc("Goods Inward Note", {
-									order_type: "Purchase Order",
-									order: doc.name,
-								});
-							},
-							__("Create")
-						);
+						// a subcontracted order's goods arrive against the
+						// Subcontracting Order — the note is created from there
+						if (!doc.is_subcontracted) {
+							this.frm.add_custom_button(
+								__("Goods Inward Note"),
+								() => {
+									frappe.new_doc("Goods Inward Note", {
+										order_type: "Purchase Order",
+										order: doc.name,
+									});
+								},
+								__("Create")
+							);
+						}
 						if (doc.is_subcontracted) {
 							if (!doc.items.every((item) => item.qty == item.subcontracted_qty)) {
 								this.frm.add_custom_button(
