@@ -326,8 +326,8 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.reference_type == 'Quality Control Lot' && (doc.inspection_basis != 'Each Quantity' || doc.manual_inspection)",
-   "description": "How much of the lot this verdict decides; defaults to everything still undecided.",
+   "depends_on": "eval:['Quality Control Lot', 'Goods Inward Note'].includes(doc.reference_type) && (doc.inspection_basis != 'Each Quantity' || doc.manual_inspection)",
+   "description": "How much of the stock this verdict decides; defaults to everything still undecided.",
    "fieldname": "decided_quantity",
    "fieldtype": "Float",
    "label": "Decided Quantity"
@@ -356,7 +356,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-24 15:21:03.240008",
+ "modified": "2026-06-12 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Quality Inspection",

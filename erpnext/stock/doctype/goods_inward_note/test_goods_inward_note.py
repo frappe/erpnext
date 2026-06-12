@@ -251,11 +251,25 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		# the first tranche decides two of the four units, rejecting one
 		batch({1: ["Accepted"], 2: ["Rejected"]}).submit()
 
-		# half decided: the receipt still waits for the rest
-		self.assertRaises(frappe.ValidationError, make_receipt_from_goods_inward_note, note.name)
+		# the decided tranche is receivable at once: one accepted, one rejected
+		from erpnext.stock.services.test_quality_warehouse import make_warehouse
+
+		note.reload()
+		receipt = make_receipt_from_goods_inward_note(note.name)
+		row = receipt.items[0]
+		self.assertEqual(row.received_qty, 2)
+		self.assertEqual(row.qty, 1)
+		self.assertEqual(row.rejected_qty, 1)
+		row.rejected_warehouse = row.rejected_warehouse or make_warehouse(
+			"_Test Custody Rejects", warehouse_type="Rejected"
+		)
+		receipt.insert(ignore_permissions=True)
+		receipt.submit()
+		note.reload()
+		self.assertEqual(note.items[0].received_qty, 2)
+		self.assertEqual(note.status, "Partially Received")
 
 		# the dialog keeps offering the row, with the undecided remainder
-		note.reload()
 		rows = check_item_quality_inspection("Goods Inward Note", note.docstatus, [note.items[0].as_dict()])
 		self.assertEqual(rows[0]["qty"], 2)
 		self.assertFalse(rows[0]["quality_inspection"])
@@ -268,7 +282,84 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 
 		batch({1: ["Accepted"], 2: ["Accepted"]}).submit()
 
-		# fully decided: the verdicts pool across batches — three accepted, one rejected
+		# fully decided: the rest follows, clean of rejections already booked
+		second = make_receipt_from_goods_inward_note(note.name)
+		self.assertEqual(second.items[0].received_qty, 2)
+		self.assertEqual(second.items[0].qty, 2)
+		self.assertEqual(second.items[0].rejected_qty, 0)
+		second.insert(ignore_permissions=True)
+		second.submit()
+		note.reload()
+		self.assertEqual(note.status, "Received")
+
+	def test_mixed_bases_decide_in_tranches(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+		from erpnext.stock.services.test_quality_quarantine import unit_reading_rows
+
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Goods Inward Note",
+				warehouse_role=None,
+				quality_control_mode="Block",
+			),
+		)
+		item.save()
+
+		order = create_purchase_order(item_code=item.name, qty=4)
+		note = make_goods_inward_note(order)
+
+		# a sample verdict over the first tranche only — not the whole row
+		sample = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Incoming",
+				"reference_type": "Goods Inward Note",
+				"reference_name": note.name,
+				"item_code": item.name,
+				"inspection_basis": "Sample",
+				"manual_inspection": 1,
+				"status": "Accepted",
+				"sample_size": 2,
+				"decided_quantity": 5,
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+			}
+		)
+		sample.insert(ignore_permissions=True)
+		# it cannot decide more than is undecided
+		self.assertRaises(frappe.ValidationError, sample.submit)
+
+		sample.reload()
+		sample.decided_quantity = 2
+		sample.save(ignore_permissions=True)
+		sample.submit()
+
+		# the decided tranche is receivable; the rest still waits
+		receipt = make_receipt_from_goods_inward_note(note.name)
+		self.assertEqual(receipt.items[0].received_qty, 2)
+		self.assertEqual(receipt.items[0].qty, 2)
+
+		# the remainder is decided per unit — bases mix freely across tranches
+		batch = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Incoming",
+				"reference_type": "Goods Inward Note",
+				"reference_name": note.name,
+				"child_row_reference": note.items[0].name,
+				"item_code": item.name,
+				"inspection_basis": "Each Quantity",
+				"unit_quantity": 2,
+				"unit_readings": unit_reading_rows({1: ["Accepted"], 2: ["Rejected"]}),
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+			}
+		)
+		batch.insert(ignore_permissions=True)
+		batch.submit()
+
 		receipt = make_receipt_from_goods_inward_note(note.name)
 		row = receipt.items[0]
 		self.assertEqual(row.received_qty, 4)

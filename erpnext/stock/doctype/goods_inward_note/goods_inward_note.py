@@ -351,6 +351,7 @@ def get_custody_verdicts(row_name, exclude_inspection=None):
 			"status",
 			"unit_quantity",
 			"rejected_unit_quantity",
+			"decided_quantity",
 		],
 		order_by="creation asc",
 	):
@@ -358,9 +359,10 @@ def get_custody_verdicts(row_name, exclude_inspection=None):
 			decided += flt(verdict.unit_quantity)
 			rejected += flt(verdict.rejected_unit_quantity)
 		else:
-			# a whole-row verdict decides whatever the earlier batches left
-			remainder = max(row_qty - decided, 0)
-			decided = row_qty
+			# a Sample or manual verdict decides its stated tranche, defaulting
+			# to whatever the earlier batches left
+			tranche = min(flt(verdict.decided_quantity) or row_qty, max(row_qty - decided, 0))
+			decided += tranche
 			if verdict.status == "Rejected":
-				rejected += remainder
+				rejected += tranche
 	return frappe._dict(decided=min(decided, row_qty), rejected=min(rejected, row_qty))

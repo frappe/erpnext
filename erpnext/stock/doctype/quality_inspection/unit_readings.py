@@ -31,7 +31,7 @@ class UnitReadingsMixin:
 	def set_decided_quantity_default(self):
 		"""A blank (or zero) Decided Quantity means everything still undecided."""
 		if (
-			self.reference_type == "Quality Control Lot"
+			self.reference_type in ("Quality Control Lot", "Goods Inward Note")
 			and self.reference_name
 			and (self.inspection_basis != "Each Quantity" or self.manual_inspection)
 			and not flt(self.decided_quantity)
@@ -39,14 +39,15 @@ class UnitReadingsMixin:
 			self.decided_quantity = flt(self.get_qty_under_inspection())
 
 	def validate_decided_quantity(self):
-		"""Resolve and bound how much of the lot this verdict decides.
+		"""Resolve and bound how much of the stock this verdict decides.
 
+		A lot — or a custody row, batch by batch — may be decided in parts.
 		Each Quantity verdicts decide exactly their units. Sample and manual
 		verdicts decide the stated quantity, defaulting to everything still
 		undecided — and for serialized items a partial verdict must name its
 		units, so it has to be on an Each Quantity basis.
 		"""
-		if self.reference_type != "Quality Control Lot" or not self.reference_name:
+		if self.reference_type not in ("Quality Control Lot", "Goods Inward Note") or not self.reference_name:
 			self.decided_quantity = 0
 			return
 
@@ -63,13 +64,10 @@ class UnitReadingsMixin:
 			)
 		if flt(self.decided_quantity) > undecided:
 			frappe.throw(
-				_(
-					"This inspection decides {0} unit(s), but only {1} remain undecided on Quality "
-					"Control Lot {2}."
-				).format(
+				_("This inspection decides {0} unit(s), but only {1} remain undecided on {2}.").format(
 					self.decided_quantity,
 					undecided,
-					get_link_to_form("Quality Control Lot", self.reference_name),
+					get_link_to_form(self.reference_type, self.reference_name),
 				),
 				title=_("More Than Undecided"),
 			)

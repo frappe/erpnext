@@ -5,10 +5,10 @@
 
 The note records what physically arrived; the receipt is where ownership,
 stock and accounting begin. A receipt built from a note is capped to the
-note's outstanding quantity — rows a Block trigger still holds for custody
-inspection offer nothing, and where an inspection has already decided the
-goods, the verdict prefills the accepted/rejected split: rejected units ride
-the receipt as rejected quantity into a Rejected warehouse, the standard
+note's outstanding quantity — under a Block trigger, to the units the custody
+verdicts have decided so far: tranches release as their inspections submit.
+The verdicts prefill the accepted/rejected split: rejected units ride the
+receipt as rejected quantity into a Rejected warehouse, the standard
 purchase-return path from there. Submission books the full received quantity
 (accepted and rejected) back onto the note, oldest arrival row first.
 """
@@ -48,10 +48,10 @@ def make_receipt_from_goods_inward_note(goods_inward_note: str):
 			)
 		)
 
-	blocked, warned = _custody_inspection_state(note)
-	receivable = _receivable_by_order_item(note, blocked)
+	caps, warned = _custody_inspection_state(note)
+	receivable = _receivable_by_order_item(note, caps)
 	if not receivable:
-		if blocked:
+		if caps:
 			frappe.throw(
 				_(
 					"The goods on {0} await a quality inspection in custody and cannot be "
@@ -74,7 +74,7 @@ def make_receipt_from_goods_inward_note(goods_inward_note: str):
 
 	receipt = _map_order_to_receipt(note)
 	order_item_field = ORDER_REFERENCE_FIELDS[receipt_doctype][1]
-	rejected_pool = _custody_rejected_by_order_item(note, blocked)
+	rejected_pool = _custody_rejected_by_order_item(note)
 	rejected_warehouse = _default_rejected_warehouse(note.company) if rejected_pool else None
 
 	kept = []
@@ -124,14 +124,15 @@ def _map_order_to_receipt(note):
 def _custody_inspection_state(note):
 	"""What the note's quality triggers hold back or grumble about.
 
-	Returns (blocked row names, item codes to warn about). A Block trigger keeps
-	the row's quantity out of receipts until a custody inspection is submitted;
-	Warn only flags the missing inspection. Decided rows pass through — what the
-	verdict rejected is handled separately.
+	Returns (receivable caps by row name, item codes to warn about). A Block
+	trigger releases a row's quantity tranche by tranche: only units a custody
+	verdict has decided may be received, the rest wait. Warn only flags the
+	missing inspection. Fully decided rows carry no cap — what the verdicts
+	rejected is handled separately.
 	"""
 	from erpnext.stock.services.quality_trigger_resolution import resolve_inspection_points
 
-	blocked, warned = set(), set()
+	caps, warned = {}, set()
 	for point in resolve_inspection_points(note):
 		row = point.row
 		verdicts = get_custody_verdicts(row.name)
@@ -141,26 +142,31 @@ def _custody_inspection_state(note):
 		if flt(required, 6) <= 0 or flt(verdicts.decided - required, 6) >= 0:
 			continue
 		if point.quality_control_mode == "Block":
-			blocked.add(row.name)
+			# decided units may go: less the rejects already returned, less
+			# what earlier receipts took
+			caps[row.name] = max(
+				verdicts.decided - min(flt(row.returned_qty), verdicts.rejected) - flt(row.received_qty),
+				0,
+			)
 		elif point.quality_control_mode == "Warn":
 			warned.add(row.get("item_code"))
-	return blocked, warned
+	return caps, warned
 
 
-def _receivable_by_order_item(note, blocked=frozenset()):
-	"""Outstanding per order row, skipping what a Block trigger still holds
-	for inspection."""
+def _receivable_by_order_item(note, caps=None):
+	"""Outstanding per order row, within what a Block trigger has released."""
 	receivable = {}
 	for row in note.items:
-		if row.name in blocked:
-			continue
 		outstanding = note.outstanding_qty(row)
+		cap = (caps or {}).get(row.name)
+		if cap is not None:
+			outstanding = min(outstanding, cap)
 		if outstanding > 0:
 			receivable[row.order_item] = receivable.get(row.order_item, 0) + outstanding
 	return receivable
 
 
-def _custody_rejected_by_order_item(note, blocked=frozenset()):
+def _custody_rejected_by_order_item(note):
 	"""Units the custody verdicts rejected that still await a receipt.
 
 	They prefill the receipt's rejected quantity — rejected goods either went
@@ -170,8 +176,6 @@ def _custody_rejected_by_order_item(note, blocked=frozenset()):
 	"""
 	rejected = {}
 	for row in note.items:
-		if row.name in blocked:
-			continue
 		amount = _rejected_by_inspection(row)
 		if amount > 0:
 			rejected[row.order_item] = rejected.get(row.order_item, 0) + amount
@@ -221,24 +225,24 @@ def update_goods_inward_note_on_receipt(doc, method=None):
 		taken = flt(row.get("received_qty")) or flt(row.get("qty")) + flt(row.get("rejected_qty"))
 		drawn[key] = drawn.get(key, 0) + taken
 
-	blocked_rows = {}
+	caps_by_note = {}
 
-	def blocked_on(note_name):
-		if note_name not in blocked_rows:
+	def caps_on(note_name):
+		if note_name not in caps_by_note:
 			note = frappe.get_doc("Goods Inward Note", note_name)
-			blocked_rows[note_name] = _custody_inspection_state(note)[0]
-		return blocked_rows[note_name]
+			caps_by_note[note_name] = _custody_inspection_state(note)[0]
+		return caps_by_note[note_name]
 
 	if method == "before_submit":
 		for (note_name, order_item), qty in drawn.items():
-			_validate_note_capacity(note_name, order_item, qty, blocked_on(note_name))
+			_validate_note_capacity(note_name, order_item, qty, caps_on(note_name))
 	else:
 		direction = -1 if method == "on_cancel" else +1
 		notes = set()
 		for (note_name, order_item), qty in drawn.items():
-			# nothing is allocated to a blocked row; cancellation unwinds anywhere
-			blocked = blocked_on(note_name) if direction > 0 else frozenset()
-			_allocate_to_note(note_name, order_item, qty, direction, blocked)
+			# allocation honours what the verdicts released; cancellation unwinds anywhere
+			caps = caps_on(note_name) if direction > 0 else None
+			_allocate_to_note(note_name, order_item, qty, direction, caps)
 			notes.add(note_name)
 		for note_name in notes:
 			_refresh_note_status(note_name)
@@ -253,13 +257,14 @@ def _note_rows(note_name, order_item):
 	)
 
 
-def _validate_note_capacity(note_name, order_item, qty, blocked=frozenset()):
-	rows = _note_rows(note_name, order_item)
-	capacity = sum(
-		max(flt(row.qty) - flt(row.received_qty) - flt(row.returned_qty), 0)
-		for row in rows
-		if row.name not in blocked
-	)
+def _validate_note_capacity(note_name, order_item, qty, caps=None):
+	capacity = 0.0
+	for row in _note_rows(note_name, order_item):
+		room = max(flt(row.qty) - flt(row.received_qty) - flt(row.returned_qty), 0)
+		cap = (caps or {}).get(row.name)
+		if cap is not None:
+			room = min(room, cap)
+		capacity += room
 	if qty > capacity:
 		frappe.throw(
 			_(
@@ -270,15 +275,16 @@ def _validate_note_capacity(note_name, order_item, qty, blocked=frozenset()):
 		)
 
 
-def _allocate_to_note(note_name, order_item, qty, direction, blocked=frozenset()):
+def _allocate_to_note(note_name, order_item, qty, direction, caps=None):
 	remaining = qty
 	for row in _note_rows(note_name, order_item):
 		if remaining <= 0:
 			break
-		if row.name in blocked:
-			continue
 		if direction > 0:
 			capacity = flt(row.qty) - flt(row.received_qty) - flt(row.returned_qty)
+			cap = (caps or {}).get(row.name)
+			if cap is not None:
+				capacity = min(capacity, cap)
 		else:
 			capacity = flt(row.received_qty)
 		if capacity <= 0:

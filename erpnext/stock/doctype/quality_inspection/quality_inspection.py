@@ -648,6 +648,11 @@ class QualityInspection(UnitReadingsMixin, Document):
 
 	@frappe.whitelist()
 	def get_qty_under_inspection(self):
+		# an unsaved form has no child row reference yet — resolve it the same
+		# way saving would, so the quantity answers for the right row
+		if not self.child_row_reference:
+			self.set_child_row_reference()
+
 		if self.reference_type == "Quality Control Lot" and self.reference_name:
 			# inspections may decide the lot in parts: what remains to inspect
 			# is what no submitted inspection has decided yet

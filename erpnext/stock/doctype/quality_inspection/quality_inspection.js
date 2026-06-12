@@ -200,11 +200,19 @@ frappe.ui.form.on("Quality Inspection", {
 		// narrows it to a tranche
 		if (
 			frm.doc.docstatus !== 0 ||
-			frm.doc.reference_type !== "Quality Control Lot" ||
+			!["Quality Control Lot", "Goods Inward Note"].includes(frm.doc.reference_type) ||
 			!frm.doc.reference_name ||
 			(frm.doc.inspection_basis === "Each Quantity" && !frm.doc.manual_inspection) ||
 			flt(frm.doc.decided_quantity)
 		) {
+			return;
+		}
+		if (frm.doc.reference_type === "Goods Inward Note") {
+			frm.call("get_qty_under_inspection").then((r) => {
+				if (r.message != null) {
+					frm.set_value("decided_quantity", flt(r.message));
+				}
+			});
 			return;
 		}
 		frappe.db
@@ -221,6 +229,8 @@ frappe.ui.form.on("Quality Inspection", {
 
 	item_code: function (frm) {
 		frm.trigger("toggle_batch_and_serial_fields");
+		// a custody row resolves its quantity through the item's row
+		frm.trigger("prefill_decided_quantity_from_lot");
 		if (frm.doc.item_code && !frm.doc.quality_inspection_template) {
 			return frm.call({
 				method: "get_quality_inspection_template",
