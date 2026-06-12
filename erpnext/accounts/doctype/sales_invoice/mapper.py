@@ -100,11 +100,17 @@ def make_debit_note(source_name: str, target_doc: Document | None = None):
 		target.return_against = source.name
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
+		# Reset rates after set_missing_values since it may re-fetch rates from
+		# linked Delivery Note items or the item master, overriding our zeroing.
+		for item in target.items:
+			item.rate = 0
+			item.price_list_rate = 0
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = source_doc.qty
 		target_doc.rate = 0
+		target_doc.price_list_rate = 0
 		target_doc.sales_invoice_item = source_doc.name
 
 	return get_mapped_doc(
