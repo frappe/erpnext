@@ -111,6 +111,51 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		self.assertEqual(note.items[0].received_qty, 4)
 		self.assertEqual(note.status, "Partially Received")
 
+	def test_note_speaks_the_orders_unit_of_measure(self):
+		item = make_item(properties={"is_stock_item": 1})
+		item.append("uoms", {"uom": "Box", "conversion_factor": 10})
+		item.save()
+
+		order = create_purchase_order(
+			rm_items=[
+				{
+					"item_code": item.name,
+					"warehouse": "_Test Warehouse - _TC",
+					"qty": 2,
+					"uom": "Box",
+					"conversion_factor": 10,
+					"rate": 100,
+					"schedule_date": nowdate(),
+				}
+			]
+		)
+
+		# arrivals, receipts and capacities all live in the order row's unit
+		note = make_goods_inward_note(order)
+		self.assertEqual(note.items[0].qty, 2)
+		self.assertEqual(note.items[0].uom, "Box")
+
+		receipt = make_receipt_from_goods_inward_note(note.name)
+		self.assertEqual(receipt.items[0].qty, 2)
+		self.assertEqual(receipt.items[0].uom, "Box")
+
+	def test_disabled_inward_location_is_refused(self):
+		location = make_inward_location("_Test Closed Yard")
+		frappe.db.set_value("Inward Location", location, "disabled", 1)
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		order = create_purchase_order(item_code=item, qty=2)
+		note = frappe.get_doc(
+			{
+				"doctype": "Goods Inward Note",
+				"order_type": "Purchase Order",
+				"order": order.name,
+				"current_inward_location": location,
+			}
+		)
+		note.get_items_from_order()
+		self.assertRaises(frappe.ValidationError, note.insert)
+
 	def test_purchase_return_frees_the_order_claim(self):
 		item = make_item(properties={"is_stock_item": 1}).name
 		order = create_purchase_order(item_code=item, qty=5)

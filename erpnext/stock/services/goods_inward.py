@@ -18,14 +18,10 @@ from frappe import _
 from frappe.utils import flt, get_link_to_form
 
 from erpnext.stock.doctype.goods_inward_note.goods_inward_note import (
+	ORDER_REFERENCE_FIELDS,
 	RECEIPT_DOCTYPES,
 	get_custody_verdicts,
 )
-
-ORDER_REFERENCE_FIELDS = {
-	"Purchase Receipt": ("purchase_order", "purchase_order_item"),
-	"Subcontracting Receipt": ("subcontracting_order", "subcontracting_order_item"),
-}
 
 
 @frappe.whitelist()
@@ -33,8 +29,8 @@ def make_receipt_from_goods_inward_note(goods_inward_note: str):
 	"""A receipt pre-filled with the note's outstanding quantities.
 
 	Built through the order's own mapper (rates, taxes and supplied items come
-	from there), then trimmed to what the note still holds — minus anything a
-	custody inspection rejected, which never becomes stock.
+	from there), then trimmed to what the note still holds and the custody
+	verdicts have released, with the accepted/rejected split prefilled.
 	"""
 	note = frappe.get_doc("Goods Inward Note", goods_inward_note)
 	note.check_permission("read")
@@ -48,7 +44,8 @@ def make_receipt_from_goods_inward_note(goods_inward_note: str):
 			)
 		)
 
-	caps, warned = _custody_inspection_state(note)
+	verdicts = _verdicts_by_row(note)
+	caps, warned = _custody_inspection_state(note, verdicts)
 	receivable = _receivable_by_order_item(note, caps)
 	if not receivable:
 		if caps:
@@ -74,7 +71,7 @@ def make_receipt_from_goods_inward_note(goods_inward_note: str):
 
 	receipt = _map_order_to_receipt(note)
 	order_item_field = ORDER_REFERENCE_FIELDS[receipt_doctype][1]
-	rejected_pool = _custody_rejected_by_order_item(note)
+	rejected_pool = _custody_rejected_by_order_item(note, verdicts)
 	rejected_warehouse = _default_rejected_warehouse(note.company) if rejected_pool else None
 
 	kept = []
@@ -121,7 +118,12 @@ def _map_order_to_receipt(note):
 	return make_subcontracting_receipt(note.order)
 
 
-def _custody_inspection_state(note):
+def _verdicts_by_row(note):
+	"""The custody verdicts of every note row, fetched once for the caller."""
+	return {row.name: get_custody_verdicts(row.name, row_qty=row.qty) for row in note.items}
+
+
+def _custody_inspection_state(note, verdicts=None):
 	"""What the note's quality triggers hold back or grumble about.
 
 	Returns (receivable caps by row name, item codes to warn about). A Block
@@ -132,16 +134,19 @@ def _custody_inspection_state(note):
 	"""
 	from erpnext.stock.services.quality_trigger_resolution import resolve_inspection_points
 
+	if verdicts is None:
+		verdicts = _verdicts_by_row(note)
+
 	caps, warned = {}, set()
 	for point in resolve_inspection_points(note):
 		row = point.row
-		verdicts = get_custody_verdicts(row.name)
+		verdict = verdicts[row.name]
 		# every arrived unit wants a verdict before it becomes stock
-		if flt(verdicts.decided - flt(row.qty), 6) >= 0:
+		if flt(verdict.decided - flt(row.qty), 6) >= 0:
 			continue
 		if point.quality_control_mode == "Block":
 			# decided units may go, less what earlier receipts took
-			caps[row.name] = max(verdicts.decided - flt(row.received_qty), 0)
+			caps[row.name] = max(verdict.decided - flt(row.received_qty), 0)
 		elif point.quality_control_mode == "Warn":
 			warned.add(row.get("item_code"))
 	return caps, warned
@@ -160,7 +165,7 @@ def _receivable_by_order_item(note, caps=None):
 	return receivable
 
 
-def _custody_rejected_by_order_item(note):
+def _custody_rejected_by_order_item(note, verdicts):
 	"""Units the custody verdicts rejected that still await a receipt.
 
 	They prefill the receipt's rejected quantity — rejected goods enter stock
@@ -170,7 +175,7 @@ def _custody_rejected_by_order_item(note):
 	"""
 	rejected = {}
 	for row in note.items:
-		amount = _rejected_by_inspection(row)
+		amount = verdicts[row.name].rejected
 		if amount > 0:
 			rejected[row.order_item] = rejected.get(row.order_item, 0) + amount
 
@@ -186,11 +191,6 @@ def _custody_rejected_by_order_item(note):
 				rejected[prior.order_item] = max(rejected[prior.order_item] - flt(prior.rejected_qty), 0)
 
 	return {order_item: amount for order_item, amount in rejected.items() if amount > 0}
-
-
-def _rejected_by_inspection(row):
-	"""What the row's custody verdicts rejected."""
-	return get_custody_verdicts(row.name).rejected
 
 
 def _default_rejected_warehouse(company):
@@ -215,7 +215,7 @@ def update_goods_inward_note_on_receipt(doc, method=None):
 		order_item_field = ORDER_REFERENCE_FIELDS[doc.doctype][1]
 		key = (row.goods_inward_note, row.get(order_item_field))
 		# rejected units leave custody too — into the Rejected warehouse
-		taken = flt(row.get("received_qty")) or flt(row.get("qty")) + flt(row.get("rejected_qty"))
+		taken = flt(row.get("received_qty")) or (flt(row.get("qty")) + flt(row.get("rejected_qty")))
 		drawn[key] = drawn.get(key, 0) + taken
 
 	caps_by_note = {}
@@ -242,12 +242,19 @@ def update_goods_inward_note_on_receipt(doc, method=None):
 
 
 def _note_rows(note_name, order_item):
-	return frappe.get_all(
-		"Goods Inward Note Item",
-		filters={"parent": note_name, "order_item": order_item},
-		fields=["name", "qty", "received_qty"],
-		order_by="idx",
-	)
+	"""The note's rows for an order row, locked until the booking commits.
+
+	Capacity is validated and allocated in separate steps; the row lock keeps
+	a concurrent receipt from drawing the same custody units in between.
+	"""
+	table = frappe.qb.DocType("Goods Inward Note Item")
+	return (
+		frappe.qb.from_(table)
+		.select(table.name, table.qty, table.received_qty)
+		.where((table.parent == note_name) & (table.order_item == order_item))
+		.orderby(table.idx)
+		.for_update()
+	).run(as_dict=True)
 
 
 def _validate_note_capacity(note_name, order_item, qty, caps=None):

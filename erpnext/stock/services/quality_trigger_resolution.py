@@ -206,9 +206,9 @@ def _decided_in_custody(doc, row):
 	if not row.get("goods_inward_note"):
 		return False
 
-	order_item_field = (
-		"purchase_order_item" if doc.doctype == "Purchase Receipt" else "subcontracting_order_item"
-	)
+	from erpnext.stock.doctype.goods_inward_note.goods_inward_note import ORDER_REFERENCE_FIELDS
+
+	order_item_field = ORDER_REFERENCE_FIELDS[doc.doctype][1]
 	inspections = frappe.get_all(
 		"Goods Inward Note Item",
 		filters={

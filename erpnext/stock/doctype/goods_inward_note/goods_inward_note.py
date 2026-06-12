@@ -24,6 +24,13 @@ RECEIPT_DOCTYPES = {
 	"Purchase Order": "Purchase Receipt",
 	"Subcontracting Order": "Subcontracting Receipt",
 }
+# receipt rows point back at their order through (link field, row link field)
+ORDER_REFERENCE_FIELDS = {
+	"Purchase Receipt": ("purchase_order", "purchase_order_item"),
+	"Subcontracting Receipt": ("subcontracting_order", "subcontracting_order_item"),
+}
+# subcontracted goods are ordered in stock units; purchases in the purchase unit
+ORDER_UOM_FIELDS = {"Purchase Order": "uom", "Subcontracting Order": "stock_uom"}
 
 
 class GoodsInwardNote(Document):
@@ -64,6 +71,7 @@ class GoodsInwardNote(Document):
 
 	def validate(self):
 		self.set_details_from_order()
+		self.validate_inward_location()
 		self.validate_items_against_order()
 		self.validate_quantities()
 		self.validate_arrivals_against_order_qty()
@@ -101,8 +109,19 @@ class GoodsInwardNote(Document):
 			)
 
 	def on_update_after_submit(self):
+		# the location may change while the consignment moves
+		self.validate_inward_location()
 		self.validate_quantities()
 		self.update_status()
+
+	def validate_inward_location(self):
+		# the picker filters disabled locations; the server is the authority
+		if frappe.db.get_value("Inward Location", self.current_inward_location, "disabled"):
+			frappe.throw(
+				_("Inward Location {0} is disabled.").format(
+					get_link_to_form("Inward Location", self.current_inward_location)
+				)
+			)
 
 	def update_status(self):
 		# runs after the database write: the recomputed status must persist itself
@@ -140,13 +159,17 @@ class GoodsInwardNote(Document):
 		self.company = order.company
 
 	def validate_items_against_order(self):
-		"""Every arrival row fulfils a row of the order it references."""
+		"""Every arrival row fulfils a row of the order it references.
+
+		Quantities live in the order row's unit of measure — receipts made from
+		the note are in the same space — so the order's unit is authoritative.
+		"""
 		order_items = {
 			row.name: row
 			for row in frappe.get_all(
 				ORDER_ITEM_DOCTYPES[self.order_type],
 				filters={"parent": self.order},
-				fields=["name", "item_code"],
+				fields=["name", "item_code", f"{ORDER_UOM_FIELDS[self.order_type]} as uom"],
 			)
 		}
 		items_on_order = {row.item_code for row in order_items.values()}
@@ -179,6 +202,7 @@ class GoodsInwardNote(Document):
 				row.order_item = next(
 					name for name, order_row in order_items.items() if order_row.item_code == row.item_code
 				)
+			row.uom = order_items[row.order_item].uom
 
 	def validate_quantities(self):
 		for row in self.items:
@@ -220,9 +244,7 @@ class GoodsInwardNote(Document):
 		):
 			claimed[other.order_item] += flt(other.qty)
 
-		order_item_field = (
-			"purchase_order_item" if self.order_type == "Purchase Order" else "subcontracting_order_item"
-		)
+		order_item_field = ORDER_REFERENCE_FIELDS[RECEIPT_DOCTYPES[self.order_type]][1]
 		for received in frappe.get_all(
 			RECEIPT_DOCTYPES[self.order_type] + " Item",
 			filters={
@@ -290,7 +312,7 @@ class GoodsInwardNote(Document):
 		for row in frappe.get_all(
 			ORDER_ITEM_DOCTYPES[self.order_type],
 			filters={"parent": self.order},
-			fields=["name", "item_code", "item_name", "qty", "stock_uom"],
+			fields=["name", "item_code", "item_name", "qty", f"{ORDER_UOM_FIELDS[self.order_type]} as uom"],
 			order_by="idx",
 		):
 			pending = flt(row.qty) - received_by_order_item.get(row.name, 0)
@@ -302,7 +324,7 @@ class GoodsInwardNote(Document):
 					"item_code": row.item_code,
 					"item_name": row.item_name,
 					"qty": pending,
-					"uom": row.stock_uom,
+					"uom": row.uom,
 					"order_item": row.name,
 				},
 			)
@@ -310,21 +332,20 @@ class GoodsInwardNote(Document):
 	def _received_against_order(self):
 		"""Order quantities already covered by receipts or other open notes."""
 		covered = {}
-		receipt_item_doctype = RECEIPT_DOCTYPES[self.order_type] + " Item"
-		order_field = "purchase_order" if self.order_type == "Purchase Order" else "subcontracting_order"
+		order_field, order_item_field = ORDER_REFERENCE_FIELDS[RECEIPT_DOCTYPES[self.order_type]]
 		for row in frappe.get_all(
-			receipt_item_doctype,
+			RECEIPT_DOCTYPES[self.order_type] + " Item",
 			filters={order_field: self.order, "docstatus": 1},
-			fields=[f"{order_field}_item as order_item", "qty"],
+			fields=[f"{order_item_field} as order_item", "qty"],
 		):
 			covered[row.order_item] = covered.get(row.order_item, 0) + flt(row.qty)
+
+		order_rows = frappe.get_all(
+			ORDER_ITEM_DOCTYPES[self.order_type], filters={"parent": self.order}, pluck="name"
+		)
 		for row in frappe.get_all(
 			"Goods Inward Note Item",
-			filters={
-				"parenttype": "Goods Inward Note",
-				"docstatus": 1,
-				"order_item": ("is", "set"),
-			},
+			filters={"order_item": ("in", order_rows), "docstatus": 1},
 			fields=["order_item", "qty", "received_qty"],
 		):
 			# an open note already accounts for its unreceived quantity
@@ -332,7 +353,7 @@ class GoodsInwardNote(Document):
 		return covered
 
 
-def get_custody_verdicts(row_name, exclude_inspection=None):
+def get_custody_verdicts(row_name, exclude_inspection=None, row_qty=None):
 	"""Submitted verdicts on a note row, summed across batch inspections.
 
 	A row may be inspected a tranche at a time: each Each Quantity inspection
@@ -340,7 +361,9 @@ def get_custody_verdicts(row_name, exclude_inspection=None):
 	whole row at once. Returns how many units the verdicts decided and how
 	many of those they rejected, both capped at what arrived.
 	"""
-	row_qty = flt(frappe.db.get_value("Goods Inward Note Item", row_name, "qty"))
+	if row_qty is None:
+		row_qty = frappe.db.get_value("Goods Inward Note Item", row_name, "qty")
+	row_qty = flt(row_qty)
 	filters = {
 		"reference_type": "Goods Inward Note",
 		"child_row_reference": row_name,

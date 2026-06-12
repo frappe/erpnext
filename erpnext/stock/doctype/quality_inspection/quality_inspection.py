@@ -798,7 +798,9 @@ class QualityInspection(UnitReadingsMixin, Document):
 					)
 				)
 
-				if self.batch_no and self.docstatus < 2:
+				# not every referenced child table carries a batch column
+				# (a Goods Inward Note row has none)
+				if self.batch_no and self.docstatus < 2 and frappe.get_meta(doctype).has_field("batch_no"):
 					query = query.where(child_doc.batch_no == self.batch_no)
 
 				if self.docstatus == 2:  # if cancel, then remove qi link wherever same name
