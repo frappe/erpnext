@@ -7,8 +7,10 @@ The note records what physically arrived; the receipt is where ownership,
 stock and accounting begin. A receipt built from a note is capped to the
 note's outstanding quantity — rows a Block trigger still holds for custody
 inspection offer nothing, and where an inspection has already decided the
-goods, only the accepted part — and submission books the received quantity
-back onto the note, oldest arrival row first.
+goods, the verdict prefills the accepted/rejected split: rejected units ride
+the receipt as rejected quantity into a Rejected warehouse, the standard
+purchase-return path from there. Submission books the full received quantity
+(accepted and rejected) back onto the note, oldest arrival row first.
 """
 
 import frappe
@@ -69,15 +71,25 @@ def make_receipt_from_goods_inward_note(goods_inward_note: str):
 
 	receipt = _map_order_to_receipt(note)
 	order_item_field = ORDER_REFERENCE_FIELDS[receipt_doctype][1]
+	rejected_pool = _custody_rejected_by_order_item(note, blocked)
+	rejected_warehouse = _default_rejected_warehouse(note.company) if rejected_pool else None
 
 	kept = []
 	for row in receipt.items:
-		outstanding = receivable.get(row.get(order_item_field))
+		order_item = row.get(order_item_field)
+		outstanding = receivable.get(order_item)
 		if not outstanding:
 			continue
-		row.qty = min(flt(row.qty) or outstanding, outstanding)
+		total = min(flt(row.qty) or outstanding, outstanding)
+		rejected = min(rejected_pool.get(order_item, 0), total)
+		if rejected:
+			rejected_pool[order_item] -= rejected
+		row.qty = total - rejected
+		row.rejected_qty = rejected
 		if row.meta.has_field("received_qty"):
-			row.received_qty = row.qty
+			row.received_qty = total
+		if rejected and rejected_warehouse and not row.get("rejected_warehouse"):
+			row.rejected_warehouse = rejected_warehouse
 		row.goods_inward_note = note.name
 		kept.append(row)
 
@@ -130,24 +142,51 @@ def _custody_inspection_state(note):
 
 
 def _receivable_by_order_item(note, blocked=frozenset()):
-	"""Outstanding per order row, less whatever a custody inspection rejected
-	or a Block trigger still holds for inspection."""
+	"""Outstanding per order row, skipping what a Block trigger still holds
+	for inspection."""
 	receivable = {}
 	for row in note.items:
 		if row.name in blocked:
 			continue
-		outstanding = note.outstanding_qty(row) - _rejected_in_custody(row)
+		outstanding = note.outstanding_qty(row)
 		if outstanding > 0:
 			receivable[row.order_item] = receivable.get(row.order_item, 0) + outstanding
 	return receivable
 
 
-def _rejected_in_custody(row):
-	"""Quantity a custody inspection rejected that has not been returned yet.
+def _custody_rejected_by_order_item(note, blocked=frozenset()):
+	"""Units the custody verdicts rejected that still await a receipt.
 
-	Rejected goods go back with the truck (returned quantity); until someone
-	records that, they must not slip into a receipt.
+	They prefill the receipt's rejected quantity — rejected goods either went
+	back with the truck (returned quantity) or enter stock in a Rejected
+	warehouse, where the standard purchase-return path takes over. Whatever a
+	prior receipt already booked as rejected is not proposed again.
 	"""
+	rejected = {}
+	for row in note.items:
+		if row.name in blocked:
+			continue
+		amount = _rejected_by_inspection(row)
+		if amount > 0:
+			rejected[row.order_item] = rejected.get(row.order_item, 0) + amount
+
+	if rejected:
+		receipt_doctype = RECEIPT_DOCTYPES[note.order_type]
+		order_item_field = ORDER_REFERENCE_FIELDS[receipt_doctype][1]
+		for prior in frappe.get_all(
+			receipt_doctype + " Item",
+			filters={"goods_inward_note": note.name, "docstatus": 1},
+			fields=[f"{order_item_field} as order_item", "rejected_qty"],
+		):
+			if prior.order_item in rejected:
+				rejected[prior.order_item] = max(rejected[prior.order_item] - flt(prior.rejected_qty), 0)
+
+	return {order_item: amount for order_item, amount in rejected.items() if amount > 0}
+
+
+def _rejected_by_inspection(row):
+	"""What the row's custody inspection rejected, less what already went back
+	with the truck (returned units come out of the rejected pool first)."""
 	if not row.quality_inspection:
 		return 0.0
 	if frappe.db.get_value("Quality Inspection", row.quality_inspection, "docstatus") != 1:
@@ -163,6 +202,16 @@ def _rejected_in_custody(row):
 	return max(rejected - flt(row.returned_qty), 0.0)
 
 
+def _default_rejected_warehouse(company):
+	"""The company's Rejected warehouse, when there is exactly one to propose."""
+	rejected_warehouses = frappe.get_all(
+		"Warehouse",
+		filters={"warehouse_type": "Rejected", "company": company, "is_group": 0, "disabled": 0},
+		pluck="name",
+	)
+	return rejected_warehouses[0] if len(rejected_warehouses) == 1 else None
+
+
 def update_goods_inward_note_on_receipt(doc, method=None):
 	"""Book a receipt's quantities back onto the notes it draws from."""
 	if doc.doctype not in ("Purchase Receipt", "Subcontracting Receipt"):
@@ -174,7 +223,9 @@ def update_goods_inward_note_on_receipt(doc, method=None):
 			continue
 		order_item_field = ORDER_REFERENCE_FIELDS[doc.doctype][1]
 		key = (row.goods_inward_note, row.get(order_item_field))
-		drawn[key] = drawn.get(key, 0) + flt(row.get("qty"))
+		# rejected units leave custody too — into the Rejected warehouse
+		taken = flt(row.get("received_qty")) or flt(row.get("qty")) + flt(row.get("rejected_qty"))
+		drawn[key] = drawn.get(key, 0) + taken
 
 	blocked_rows = {}
 
@@ -211,7 +262,7 @@ def _note_rows(note_name, order_item):
 def _validate_note_capacity(note_name, order_item, qty, blocked=frozenset()):
 	rows = _note_rows(note_name, order_item)
 	capacity = sum(
-		max(flt(row.qty) - flt(row.received_qty) - flt(row.returned_qty) - _rejected_in_custody(row), 0)
+		max(flt(row.qty) - flt(row.received_qty) - flt(row.returned_qty), 0)
 		for row in rows
 		if row.name not in blocked
 	)
@@ -219,7 +270,7 @@ def _validate_note_capacity(note_name, order_item, qty, blocked=frozenset()):
 		frappe.throw(
 			_(
 				"Only {0} unit(s) of this order row remain receivable on {1} — what arrived, less "
-				"what was already received, returned, rejected or still awaiting inspection in custody."
+				"what was already received, returned or still awaiting inspection in custody."
 			).format(capacity, get_link_to_form("Goods Inward Note", note_name)),
 			title=_("More Than In Custody"),
 		)

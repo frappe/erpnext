@@ -186,9 +186,10 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, item.save)
 
-	def test_custody_rejection_never_becomes_stock(self):
+	def test_custody_rejection_rides_the_receipt_as_rejected_qty(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
 		from erpnext.stock.services.test_quality_quarantine import unit_reading_rows
+		from erpnext.stock.services.test_quality_warehouse import make_warehouse
 
 		item = make_item(properties={"is_stock_item": 1})
 		item.append(
@@ -224,19 +225,34 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		inspection.submit()
 		note.reload()
 
-		# the rejected unit is held back from the receipt until returned
+		# the verdict prefills the split: the full delivery is received, the
+		# rejected unit as rejected quantity bound for a Rejected warehouse
 		receipt = make_receipt_from_goods_inward_note(note.name)
-		self.assertEqual(receipt.items[0].qty, 2)
+		row = receipt.items[0]
+		self.assertEqual(row.received_qty, 3)
+		self.assertEqual(row.qty, 2)
+		self.assertEqual(row.rejected_qty, 1)
 
+		rejects = row.rejected_warehouse or make_warehouse("_Test Custody Rejects", warehouse_type="Rejected")
+		row.rejected_warehouse = rejects
 		receipt.insert(ignore_permissions=True)
 		receipt.submit()
 
+		# everything left custody: accepted into stock, rejected into Rejected
 		note.reload()
-		self.assertEqual(note.items[0].received_qty, 2)
-		note.items[0].returned_qty = 1
-		note.save(ignore_permissions=True)
-		note.reload()
+		self.assertEqual(note.items[0].received_qty, 3)
 		self.assertEqual(note.status, "Received")
+		self.assertEqual(
+			frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": receipt.name, "warehouse": rejects, "is_cancelled": 0},
+				"actual_qty",
+			),
+			1,
+		)
+
+		# a second receipt has nothing left to propose
+		self.assertRaises(frappe.ValidationError, make_receipt_from_goods_inward_note, note.name)
 
 	def test_custody_verdict_skips_requarantine_at_the_receipt(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
