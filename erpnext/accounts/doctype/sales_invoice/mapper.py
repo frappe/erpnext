@@ -97,6 +97,7 @@ def make_debit_note(source_name: str, target_doc: Document | None = None):
 	def set_missing_values(source, target):
 		target.is_debit_note = 1
 		target.is_return = 0
+		target.update_stock = 0
 		target.return_against = source.name
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
