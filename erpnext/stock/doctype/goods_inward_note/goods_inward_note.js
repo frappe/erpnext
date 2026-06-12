@@ -59,6 +59,7 @@ frappe.ui.form.on("Goods Inward Note", {
 				inspection_type: "Incoming",
 				reference_type: frm.doc.doctype,
 				reference_name: frm.doc.name,
+				child_row_reference: row.doc.name,
 				item_code: row.doc.item_code,
 			};
 		};

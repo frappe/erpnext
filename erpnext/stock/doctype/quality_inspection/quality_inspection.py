@@ -617,6 +617,16 @@ class QualityInspection(UnitReadingsMixin, Document):
 				if self.reference_type == "Stock Entry"
 				else self.reference_type + " Item"
 			)
+			if self.reference_type == "Goods Inward Note":
+				# only what still sits in custody can be inspected — received
+				# units became stock, returned units went back with the truck
+				row = frappe.db.get_value(
+					child_doctype,
+					self.child_row_reference,
+					["qty", "received_qty", "returned_qty"],
+					as_dict=True,
+				)
+				return max(flt(row.qty) - flt(row.received_qty) - flt(row.returned_qty), 0) if row else None
 			# returns carry negative quantities; inspection thinks in physical units
 			return abs(flt(frappe.db.get_value(child_doctype, self.child_row_reference, "qty")))
 

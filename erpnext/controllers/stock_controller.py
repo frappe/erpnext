@@ -715,6 +715,10 @@ def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str
 	for item in items:
 		# returns carry negative quantities; inspection thinks in physical units
 		item["qty"] = abs(flt(item.get("qty")))
+		if doctype == "Goods Inward Note":
+			# only what still sits in custody can be inspected — received units
+			# became stock, returned units went back with the truck
+			item["qty"] = max(item["qty"] - flt(item.get("received_qty")) - flt(item.get("returned_qty")), 0)
 		item_code = item.get("item_code")
 		if item_code not in triggers:
 			triggers[item_code] = get_trigger_for_doctype(item_code, doctype)

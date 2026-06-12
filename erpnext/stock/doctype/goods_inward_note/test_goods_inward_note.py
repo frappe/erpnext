@@ -152,6 +152,33 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, excess.insert)
 
+	def test_inspection_offers_only_what_is_in_custody(self):
+		from erpnext.controllers.stock_controller import check_item_quality_inspection
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		order = create_purchase_order(item_code=item, qty=5)
+		note = make_goods_inward_note(order)
+		note.items[0].returned_qty = 2
+		note.save(ignore_permissions=True)
+		note.reload()
+
+		# the dialog proposes what may still be inspected, not what arrived
+		rows = check_item_quality_inspection("Goods Inward Note", note.docstatus, [note.items[0].as_dict()])
+		self.assertEqual(rows[0]["qty"], 3)
+
+		# and so does the inspection form itself
+		inspection = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Incoming",
+				"reference_type": "Goods Inward Note",
+				"reference_name": note.name,
+				"child_row_reference": note.items[0].name,
+				"item_code": item,
+			}
+		)
+		self.assertEqual(inspection.get_qty_under_inspection(), 3)
+
 	def test_block_trigger_gates_the_receipt_not_the_note(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
 
