@@ -3,9 +3,9 @@ from frappe import _
 
 def get_data():
 	return {
+		# the default link field; without one the form never asks for counts
+		"fieldname": "goods_inward_note",
 		"non_standard_fieldnames": {
-			"Purchase Receipt": "goods_inward_note",
-			"Subcontracting Receipt": "goods_inward_note",
 			"Quality Inspection": "reference_name",
 		},
 		"transactions": [
