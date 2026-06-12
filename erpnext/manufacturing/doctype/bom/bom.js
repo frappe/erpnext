@@ -1012,19 +1012,6 @@ frappe.ui.form.on("BOM Secondary Item", {
 	item_code(frm, cdt, cdn) {
 		const { item_code } = locals[cdt][cdn];
 	},
-
-	qty(frm, cdt, cdn) {
-		const row = locals[cdt][cdn];
-		if (flt(row.qty) === 0) {
-			frappe.show_alert({
-				message: __(
-					"Row #{0}: Qty is set to zero for {1}. The actual output will be entered at the time of manufacture.",
-					[row.idx, frappe.bold(row.item_code)]
-				),
-				indicator: "blue",
-			});
-		}
-	},
 });
 
 function trigger_process_loss_qty_prompt(frm, cdt, cdn, item_code) {
