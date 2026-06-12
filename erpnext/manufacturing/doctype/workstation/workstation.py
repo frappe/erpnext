@@ -276,13 +276,9 @@ def get_raw_materials(job_cards):
 		"Job Card Item",
 =======
 @frappe.whitelist()
-<<<<<<< HEAD
-def get_raw_materials(job_card):
-=======
 def get_raw_materials(job_card: str):
 	frappe.has_permission("Job Card", "read", doc=job_card, throw=True)
 
->>>>>>> cf127e8900 (fix: permissions in workstation file)
 	raw_materials = frappe.get_all(
 		"Job Card",
 >>>>>>> 0fea93388d (fix: permissions in workstation file)
@@ -488,13 +484,9 @@ def update_job_card(job_card: str, method: str, **kwargs):
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
-def validate_job_card(job_card, status):
-=======
 def validate_job_card(job_card: str, status: str):
 	frappe.has_permission("Job Card", "read", doc=job_card, throw=True)
 
->>>>>>> cf127e8900 (fix: permissions in workstation file)
 	job_card_details = frappe.db.get_value("Job Card", job_card, ["status", "for_quantity"], as_dict=1)
 
 	current_status = job_card_details.status
