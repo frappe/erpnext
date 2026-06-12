@@ -85,6 +85,46 @@ def make_sales_return(source_name: str, target_doc: Document | None = None):
 	return make_return_doc("Sales Invoice", source_name, target_doc)
 
 
+@frappe.whitelist()
+def make_debit_note(source_name: str, target_doc: Document | None = None):
+	"""Create a Rate Adjustment Entry (Debit Note) from a submitted Sales Invoice.
+
+	Copies the original invoice with positive quantities and rate set to 0 so the
+	user can enter the revised rate. Sets ``is_debit_note = 1`` and links back via
+	``return_against``.
+	"""
+
+	def set_missing_values(source, target):
+		target.is_debit_note = 1
+		target.is_return = 0
+		target.return_against = source.name
+		target.ignore_pricing_rule = 1
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
+
+	def update_item(source_doc, target_doc, source_parent):
+		target_doc.qty = source_doc.qty
+		target_doc.rate = 0
+		target_doc.sales_invoice_item = source_doc.name
+
+	return get_mapped_doc(
+		"Sales Invoice",
+		source_name,
+		{
+			"Sales Invoice": {
+				"doctype": "Sales Invoice",
+				"validation": {"docstatus": ["=", 1]},
+			},
+			"Sales Invoice Item": {
+				"doctype": "Sales Invoice Item",
+				"postprocess": update_item,
+			},
+		},
+		target_doc,
+		set_missing_values,
+	)
+
+
 def get_inter_company_details(doc, doctype):
 	if doctype in ["Sales Invoice", "Sales Order", "Delivery Note"]:
 		parties = frappe.db.get_all(

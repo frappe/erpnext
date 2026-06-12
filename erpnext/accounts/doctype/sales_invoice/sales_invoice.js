@@ -115,6 +115,14 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 				this.frm.page.set_inner_btn_group_as_primary(__("Create"));
 			}
 
+			if (!doc.is_debit_note) {
+				this.frm.add_custom_button(
+					__("Rate Adjustment Entry (Debit Note)"),
+					this.make_debit_note.bind(this),
+					__("Create")
+				);
+			}
+
 			if (cint(doc.update_stock) != 1) {
 				if (!is_delivered_by_supplier) {
 					const should_create_delivery_note = doc.items.some(
@@ -601,6 +609,13 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 	make_sales_return() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.accounts.doctype.sales_invoice.mapper.make_sales_return",
+			frm: this.frm,
+		});
+	}
+
+	make_debit_note() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.accounts.doctype.sales_invoice.mapper.make_debit_note",
 			frm: this.frm,
 		});
 	}
