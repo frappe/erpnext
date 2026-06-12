@@ -115,8 +115,11 @@ frappe.ui.form.on("Quality Inspection", {
 			const bundle_decided = frm.doc.inspection_basis === "Each Quantity";
 			const show_serial = frm.__item_is_serialized && !bundle_decided;
 			// a lot-referenced Each Quantity inspection draws its identity from
-			// the lot: serials per unit below, the batch on the lot itself
-			const batch_exempt = bundle_decided && frm.doc.reference_type === "Quality Control Lot";
+			// the lot: serials per unit below, the batch on the lot itself.
+			// custody goods have no batch at all — the receipt mints it later
+			const batch_exempt =
+				(bundle_decided && frm.doc.reference_type === "Quality Control Lot") ||
+				frm.doc.reference_type === "Goods Inward Note";
 
 			frm.toggle_display("batch_no", has_batch && !batch_exempt);
 			// Each Quantity inspections record serials per unit below

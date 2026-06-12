@@ -337,6 +337,9 @@ class QualityInspection(UnitReadingsMixin, Document):
 		the inspection cannot name one — the document-side consistency gate takes
 		over once the batch materialises.
 		"""
+		if self.reference_type == "Goods Inward Note":
+			# custody precedes stock identity: the batch is minted by the receipt
+			return True
 		if not self.child_row_reference or self.reference_type == "Quality Control Lot":
 			return False
 

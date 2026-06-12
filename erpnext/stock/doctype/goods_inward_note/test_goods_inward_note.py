@@ -638,6 +638,37 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 			[],
 		)
 
+	def test_batch_tracked_item_inspects_in_custody_without_a_batch(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "GIN-BATCH-.#####",
+			}
+		).name
+		order = create_purchase_order(item_code=item, qty=2)
+		note = make_goods_inward_note(order)
+
+		# custody precedes stock identity: no batch exists to record yet
+		inspection = frappe.get_doc(
+			{
+				"doctype": "Quality Inspection",
+				"inspection_type": "Incoming",
+				"reference_type": "Goods Inward Note",
+				"reference_name": note.name,
+				"item_code": item,
+				"manual_inspection": 1,
+				"status": "Accepted",
+				"sample_size": 1,
+				"report_date": nowdate(),
+				"inspected_by": frappe.session.user,
+			}
+		)
+		inspection.insert(ignore_permissions=True)
+		inspection.submit()
+		self.assertEqual(inspection.docstatus, 1)
+
 	def test_subcontracted_purchase_order_is_refused(self):
 		from erpnext.controllers.tests.test_subcontracting_controller import (
 			get_subcontracting_order,
