@@ -219,14 +219,10 @@ class BOMConfigurator {
 				},
 			],
 			(data) => {
-				if (!node.data.parent_id) {
-					node.data.parent_id = this.frm.doc.name;
-				}
-
 				frappe.call({
-					method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.add_item",
+					method: "add_item",
+					doc: this.frm.doc,
 					args: {
-						parent: node.data.parent_id,
 						fg_item: node.data.value,
 						item_code: data.item_code,
 						fg_reference_id: node.data.name || this.frm.doc.name,
@@ -255,14 +251,10 @@ class BOMConfigurator {
 		dialog.set_primary_action(__("Add"), () => {
 			let bom_item = dialog.get_values();
 
-			if (!node.data?.parent_id) {
-				node.data.parent_id = this.frm.doc.name;
-			}
-
 			frappe.call({
-				method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.add_sub_assembly",
+				method: "add_sub_assembly",
+				doc: this.frm.doc,
 				args: {
-					parent: node.data.parent_id,
 					fg_item: node.data.value,
 					fg_reference_id: node.data.name || this.frm.doc.name,
 					bom_item: bom_item,
@@ -357,9 +349,9 @@ class BOMConfigurator {
 			let bom_item = dialog.get_values();
 
 			frappe.call({
-				method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.add_sub_assembly",
+				method: "add_sub_assembly",
+				doc: this.frm.doc,
 				args: {
-					parent: node.data.parent_id,
 					fg_item: node.data.value,
 					bom_item: bom_item,
 					fg_reference_id: node.data.name || this.frm.doc.name,
@@ -389,11 +381,10 @@ class BOMConfigurator {
 	delete_node(node, view) {
 		frappe.confirm(__("Are you sure you want to delete this Item?"), () => {
 			frappe.call({
-				method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.delete_node",
+				method: "delete_node",
+				doc: this.frm.doc,
 				args: {
-					parent: node.data.parent_id,
 					fg_item: node.data.value,
-					doctype: node.data.doctype,
 					docname: node.data.name,
 				},
 				callback: (r) => {
