@@ -601,17 +601,19 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 
 	add_update_stock_tooltip() {
 		const $label = this.frm.get_field("update_stock").$wrapper.find(".label-area");
-		if (!$label.find(".update-stock-info").length) {
-			$(`<span class="update-stock-info"
-					data-toggle="tooltip"
-					data-placement="top"
-					title="${__("If checked, updates inventory; stock and accounting entries are created together. Leave unchecked if a Delivery Note is created separately.")}"
-					style="margin-left:4px;cursor:pointer;color:var(--text-muted);">
-					${frappe.utils.icon("info", "xs")}
-				</span>`)
-				.appendTo($label)
-				.tooltip();
-		}
+		if ($label.find(".update-stock-info").length) return;
+
+		const $icon = $(`<span class="update-stock-info"
+				style="position:relative;margin-left:4px;cursor:pointer;vertical-align:middle;color:var(--text-muted);">
+				${frappe.utils.icon("info", "xs")}
+				<span class="tooltip-content" style="white-space:normal;width:220px;cursor:default;">
+					${__("If checked, updates inventory; stock and accounting entries are created together. Leave unchecked if a Delivery Note is created separately.")}
+				</span>
+			</span>`).appendTo($label);
+
+		$icon
+			.on("mouseenter", () => $icon.find(".tooltip-content").css("opacity", "1"))
+			.on("mouseleave", () => $icon.find(".tooltip-content").css("opacity", "0"));
 	}
 
 	make_sales_return() {
