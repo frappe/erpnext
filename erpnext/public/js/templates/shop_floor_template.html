@@ -61,18 +61,24 @@
 	.mes-active-row > [class*="col-"] { padding: 0 6px; margin-bottom: 12px; }
 	.mes-slot-wrap { display: flex; flex-direction: column; gap: 0; }
 
-	/* When a collapsible Materials panel follows a job card, fuse the two into one
-	   continuous card: square the touching corners and drop the duplicated border/
-	   shadow so it reads as a single section (Materials stays collapsible). */
-	.mes-job:has(+ .mes-materials-inline) {
+	/* Fuse the job card and its collapsible panels (Materials, Work Instructions) into one
+	   continuous card: square the touching corners and drop the duplicated border/shadow so the
+	   whole stack reads as a single section (each panel stays collapsible). The order in the DOM
+	   is: card → Materials → Work Instructions (any of the panels may be absent). */
+	.mes-job:has(+ .mes-materials-inline),
+	.mes-job:has(+ .mes-instructions-inline),
+	.mes-materials-inline:has(+ .mes-instructions-inline) {
 		border-bottom-left-radius: 0;
 		border-bottom-right-radius: 0;
 		border-bottom: none;
 		box-shadow: none;
 	}
-	.mes-job + .mes-materials-inline {
+	.mes-job + .mes-materials-inline,
+	.mes-job + .mes-instructions-inline,
+	.mes-materials-inline + .mes-instructions-inline {
 		border-top-left-radius: 0;
 		border-top-right-radius: 0;
+		margin-top: 0;
 	}
 
 	/* Active job card — denser than before */
@@ -98,6 +104,14 @@
 	.mes-job-id {
 		color: var(--text-muted);
 		font-size: 14px;
+		/* Match the indicator-pill's fixed 20px height so the Job Card id sits vertically
+		   centered against the status pill in the meta row (otherwise the pill reads higher). */
+		line-height: 20px;
+	}
+	/* Status/QC pills read as a secondary badge after the Job Card id — one notch smaller than
+	   the desk default (--text-sm: 13px). */
+	.mes-job-meta .indicator-pill {
+		font-size: 12px;
 	}
 	.mes-job-timer {
 		font-variant-numeric: tabular-nums;
@@ -148,8 +162,8 @@
 		margin-bottom: 0;
 	}
 	.mes-job-image {
-		width: 64px;
-		height: 64px;
+		width: 66px;
+		height: 66px;
 		aspect-ratio: 1 / 1;
 		align-self: center;
 		flex-shrink: 0;
@@ -170,7 +184,7 @@
 		text-transform: uppercase;
 	}
 	.mes-job-info { flex: 1; min-width: 0; }
-	.mes-job-info .mes-job-meta { margin-bottom: 4px; }
+	.mes-job-info .mes-job-meta { margin-bottom: 2px; }
 	.mes-job-title {
 		font-size: 17px;
 		font-weight: 600;
@@ -448,8 +462,8 @@
 	}
 	.mes-row-info--ready { color: var(--text-color); }
 	.mes-row-info--warn { color: var(--orange-500, #d97706); }
-	.mes-row-action { flex: 0 0 110px; text-align: right; }
-	.mes-row-action .btn { font-size: 14px; padding: 5px 12px; min-width: 96px; }
+	.mes-row-action { flex: 0 0 auto; text-align: right; }
+	.mes-row-action .btn { font-size: 14px; padding: 5px 12px; min-width: 96px; white-space: nowrap; }
 
 	@media (max-width: 768px) {
 		.mes-row { flex-wrap: wrap; gap: 8px; }
@@ -554,6 +568,81 @@
 	.mes-materials-inline .mes-materials-status-dot.green { background: var(--green-500, #38a169); }
 	.mes-materials-inline .mes-materials-status-dot.yellow { background: var(--yellow-500, #d97706); }
 	.mes-materials-inline .mes-materials-status-dot.red { background: var(--red-500, #e53e3e); }
+
+	/* Inline collapsible Work Instructions panel — same disclosure pattern as Materials.
+	   Sits directly under the job card (after Materials) and fuses into the card stack (see the
+	   fusion rules above) so the operator reads step-by-step guidance without leaving the view. */
+	.mes-instructions-inline {
+		border: 1px solid var(--border-color);
+		border-radius: var(--border-radius);
+		background: var(--fg-color);
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+	}
+	.mes-instructions-summary {
+		padding: 10px 16px;
+		cursor: pointer;
+		font-size: 14px;
+		font-weight: 600;
+		color: var(--text-color);
+		user-select: none;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+	.mes-instructions-toggle {
+		display: inline-flex;
+		align-items: center;
+		color: var(--text-muted);
+		transition: transform 0.2s ease;
+		pointer-events: none;
+	}
+	.mes-instructions-toggle .icon { width: 14px; height: 14px; }
+	.mes-instructions-inline.is-open .mes-instructions-toggle { transform: rotate(180deg); }
+	.mes-instructions-inline .mes-instructions-body { display: none; }
+	.mes-instructions-inline.is-open .mes-instructions-body {
+		display: block;
+		padding: 10px 16px 14px;
+		border-top: 1px solid var(--border-color);
+		font-size: 14px;
+		color: var(--text-color);
+		line-height: 1.5;
+	}
+	/* Rich Work Instructions content (sanitized HTML from the Operation): keep images in-bounds
+	   and give lists/headings sensible spacing inside the panel. */
+	.mes-instructions-body img { max-width: 100%; height: auto; border-radius: var(--border-radius); }
+	.mes-instructions-body p:last-child { margin-bottom: 0; }
+	.mes-instructions-desc {
+		color: var(--text-muted);
+		white-space: pre-wrap;
+		margin-bottom: 8px;
+	}
+	.mes-instructions-desc:last-child { margin-bottom: 0; }
+
+	/* QC reading rows inside the inline Quality Check dialog */
+	.mes-qc-row {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		padding: 10px 0;
+		border-bottom: 1px solid var(--border-color);
+	}
+	.mes-qc-row:last-child { border-bottom: none; }
+	.mes-qc-spec { flex: 1; min-width: 0; }
+	.mes-qc-spec-name { font-weight: 500; color: var(--text-color); }
+	.mes-qc-spec-sub { font-size: 13px; color: var(--text-muted); }
+	.mes-qc-controls { flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
+	.mes-qc-controls input.form-control { width: 120px; }
+	.mes-qc-passfail { display: inline-flex; border: 1px solid var(--border-color); border-radius: var(--border-radius); overflow: hidden; }
+	.mes-qc-passfail button {
+		border: none;
+		background: var(--fg-color);
+		padding: 6px 14px;
+		font-size: 14px;
+		cursor: pointer;
+		color: var(--text-muted);
+	}
+	.mes-qc-passfail button.active.pass { background: var(--green-500, #38a169); color: #fff; }
+	.mes-qc-passfail button.active.fail { background: var(--red-500, #e53e3e); color: #fff; }
 </style>
 
 <!-- Summary strip -->
@@ -601,14 +690,13 @@
 									{% } %}
 								</div>
 								<div class="mes-job-info">
+									<div class="mes-job-title">{{ slot.finished_good || slot.production_item }}</div>
 									<div class="mes-job-meta">
-										<span class="indicator-pill no-indicator-dot blue">{{ __("Next Up") }}</span>
 										{% if (slot.is_subcontracted) { %}
 											<span class="indicator-pill no-indicator-dot purple">{{ __("Subcontract") }}</span>
 										{% } %}
 										<a class="mes-job-id" href="/app/job-card/{{ slot.name }}">{{ slot.name }}</a>
 									</div>
-									<div class="mes-job-title">{{ slot.finished_good || slot.production_item }}</div>
 									<div class="mes-job-sub">
 										{{ slot.operation }} · {{ format_number(slot.for_quantity, null, 0) }} {{ slot.fg_uom || '' }}
 										{% if (slot.work_order) { %} · {{ slot.work_order }}{% } %}
@@ -638,14 +726,23 @@
 											{% } %}
 										</div>
 										<div class="mes-job-info">
+											<div class="mes-job-title">{{ slot.finished_good || slot.production_item }}</div>
 											<div class="mes-job-meta">
+												<a class="mes-job-id" href="/app/job-card/{{ slot.name }}">{{ slot.name }}</a>
 												<span class="indicator-pill no-indicator-dot {{ slot.status_colour }}">{{ __(slot.status) }}</span>
 												{% if (slot.is_subcontracted) { %}
 													<span class="indicator-pill no-indicator-dot purple">{{ __("Subcontract") }}</span>
 												{% } %}
-												<a class="mes-job-id" href="/app/job-card/{{ slot.name }}">{{ slot.name }}</a>
+												{% if (slot.qc && slot.qc.status === 'Accepted') { %}
+													<span class="indicator-pill no-indicator-dot green">{{ __("QC Passed") }}</span>
+												{% } else if (slot.qc && slot.qc.status === 'Rejected') { %}
+													<span class="indicator-pill no-indicator-dot red">{{ __("QC Rejected") }}</span>
+												{% } else if (slot.qc && slot.qc.required) { %}
+													<span class="indicator-pill no-indicator-dot orange mes-qc-pill" data-job-card="{{ slot.name }}" style="cursor: pointer;" title="{{ __("Run quality check") }}">{{ __("QC Required") }}</span>
+												{% } else if (slot.qc && slot.qc.has_checklist) { %}
+													<span class="indicator-pill no-indicator-dot blue mes-qc-pill" data-job-card="{{ slot.name }}" style="cursor: pointer;" title="{{ __("Run quality check") }}">{{ __("QC Available") }}</span>
+												{% } %}
 											</div>
-											<div class="mes-job-title">{{ slot.finished_good || slot.production_item }}</div>
 											<div class="mes-job-sub">
 												{{ slot.operation }} · {{ format_number(slot.total_completed_qty, null, 0) }}/{{ format_number(slot.for_quantity, null, 0) }} {{ slot.fg_uom || '' }}
 												{% if (slot.work_order) { %} · <a href="/app/work-order/{{ slot.work_order }}">{{ slot.work_order }}</a>{% } %}
@@ -724,11 +821,30 @@
 							</div>
 						</div>
 					{% } %}
+
+					{% if (slot && slot.instructions) { %}
+						<div class="mes-instructions-inline" data-job-card="{{ slot.name }}">
+							<div class="mes-instructions-summary">
+								<span class="mes-instructions-toggle">{{ frappe.utils.icon("es-line-down", "sm") }}</span>
+								<span>{{ __("Work Instructions") }}</span>
+							</div>
+							<div class="mes-instructions-body">
+								{% if (slot.instructions.description) { %}
+									<!-- plain-text Operation.description — escaped (microtemplate output is raw) -->
+									<div class="mes-instructions-desc">{{ frappe.utils.escape_html(slot.instructions.description) }}</div>
+								{% } %}
+								{% if (slot.instructions.work_instruction) { %}
+									<!-- work_instruction is a Text Editor field, bleach-sanitized server-side -> render as HTML -->
+									<div class="mes-instructions-rich">{%= slot.instructions.work_instruction %}</div>
+								{% } %}
+							</div>
+						</div>
+					{% } %}
 				</div>
 			</div>
 		{% }); %}
 	</div>
-{% } else if (!(completed && completed.length) && !(pending_submission && pending_submission.length) && !(queue && queue.length) && !(today_sessions && today_sessions.length)) { %}
+{% } else if (!(completed && completed.length) && !(pending_submission && pending_submission.length) && !(to_manufacture && to_manufacture.length) && !(queue && queue.length) && !(today_sessions && today_sessions.length)) { %}
 	<div class="mes-empty-row" style="padding: 32px 16px;">
 		{{ __("No active jobs and the queue is empty.") }}
 	</div>
@@ -767,6 +883,47 @@
 				<div class="mes-row-action">
 					<button class="btn btn-default btn-sm mes-btn-submit" data-job-card="{{ jc.name }}">
 						{{ __("Submit") }}
+					</button>
+				</div>
+			</div>
+		{% }); %}
+		</div>
+	</div>
+{% } %}
+
+<!-- To Manufacture — submitted, qty done, finished goods not yet booked (Manufacture entry pending) -->
+{% if (to_manufacture && to_manufacture.length > 0) { %}
+	<div class="mes-list-card">
+		<div class="mes-list-card-header">
+			<div>
+				<div class="mes-list-card-title">{{ __("To Manufacture") }}</div>
+				<div class="mes-list-card-subtitle">
+					{{ to_manufacture.length === 1 ? __("1 job card awaiting Manufacture entry") : __("{0} job cards awaiting Manufacture entry", [to_manufacture.length]) }}
+				</div>
+			</div>
+		</div>
+		<div class="mes-list-card-body">
+		{% to_manufacture.forEach((jc) => { %}
+			<div class="mes-row" data-sf-focusable data-kind="job">
+				<div class="mes-row-status">
+					<span class="indicator-pill no-indicator-dot purple">{{ __("To Manufacture") }}</span>
+				</div>
+				<div class="mes-row-item">
+					<div class="mes-row-image">
+						{% if (jc.item_image) { %}<img src="{{ jc.item_image }}" alt="">{% } else { %}<span class="mes-row-image-fallback">{{ frappe.get_abbr(jc.finished_good || jc.production_item, 2) }}</span>{% } %}
+					</div>
+					<div class="mes-row-title">{{ jc.finished_good || jc.production_item }}</div>
+				</div>
+				<div class="mes-row-operation">{{ jc.operation }}</div>
+				<div class="mes-row-id"><a href="/app/job-card/{{ jc.name }}">{{ jc.name }}</a></div>
+				<div class="mes-row-qty">
+					{{ format_number(jc.total_completed_qty, null, 0) }} / {{ format_number(jc.for_quantity, null, 0) }}
+					<span class="mes-row-qty-uom">{{ jc.fg_uom || '' }}</span>
+				</div>
+				<div class="mes-row-info"></div>
+				<div class="mes-row-action">
+					<button class="btn btn-default btn-sm mes-btn-make-entry" data-job-card="{{ jc.name }}">
+						{{ __("Make Stock Entry") }}
 					</button>
 				</div>
 			</div>

@@ -272,7 +272,7 @@
    "fieldtype": "Select",
    "label": "Status",
    "no_copy": 1,
-   "options": "Open\nWork In Progress\nPartially Transferred\nMaterial Transferred\nOn Hold\nSubmitted\nCancelled\nCompleted",
+   "options": "Open\nWork In Progress\nPartially Transferred\nMaterial Transferred\nOn Hold\nSubmitted\nTo Manufacture\nCancelled\nCompleted",
    "read_only": 1
   },
   {
@@ -695,7 +695,7 @@
  "grid_page_length": 50,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-19 17:39:42.293242",
+ "modified": "2026-06-20 17:39:42.293242",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",

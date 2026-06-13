@@ -131,6 +131,7 @@ class JobCard(Document):
 			"Material Transferred",
 			"On Hold",
 			"Submitted",
+			"To Manufacture",
 			"Cancelled",
 			"Completed",
 		]
@@ -1302,8 +1303,13 @@ class JobCard(Document):
 			self.update_workstation_status()
 
 	def set_finished_good_status(self):
+		# Only reached for a submitted job card (docstatus == 1) with a finished good, see set_status().
 		if (self.manufactured_qty + self.process_loss_qty) >= self.for_quantity:
 			self.status = "Completed"
+		elif (self.total_completed_qty + self.process_loss_qty) >= self.for_quantity:
+			# Production is done and the card is submitted, but the finished goods have not been
+			# booked into stock yet (Manufacture Stock Entry pending) — distinct from active WIP.
+			self.status = "To Manufacture"
 		elif self.transferred_qty > 0 or self.skip_material_transfer:
 			self.status = "Work In Progress"
 

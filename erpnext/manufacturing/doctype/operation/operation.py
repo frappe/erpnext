@@ -25,6 +25,7 @@ class Operation(Document):
 		quality_inspection_template: DF.Link | None
 		sub_operations: DF.Table[SubOperation]
 		total_operation_time: DF.Float
+		work_instruction: DF.TextEditor | None
 		workstation: DF.Link | None
 	# end: auto-generated types
 

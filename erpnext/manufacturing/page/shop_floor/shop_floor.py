@@ -8,6 +8,9 @@ from erpnext.manufacturing.doctype.workstation.workstation import (
 	get_status_color,
 	get_time_logs,
 )
+from erpnext.stock.doctype.quality_inspection_template.quality_inspection_template import (
+	get_template_details,
+)
 
 JOB_CARD_FIELDS = [
 	"name",
@@ -32,6 +35,10 @@ JOB_CARD_FIELDS = [
 	"is_subcontracted",
 	"workstation",
 	"sequence_id",
+	"bom_no",
+	"operation_id",
+	"quality_inspection",
+	"quality_inspection_template",
 ]
 
 TODAY_SESSION_FIELDS = [
@@ -153,6 +160,123 @@ def make_manufacture_stock_entry(job_card: str):
 	doc = frappe.get_doc("Job Card", job_card)
 	se = doc.make_stock_entry_for_semi_fg_item(auto_submit=False)
 	return {"name": se.get("name")}
+
+
+@frappe.whitelist()
+def get_quality_inspection_checklist(job_card: str):
+	"""Template parameters for the inline quality check an operator fills before submitting a
+	job card. Returns the resolved template, its parameter rows, any already-linked inspection,
+	and the item being inspected.
+	"""
+	frappe.has_permission("Job Card", "read", throw=True)
+
+	jc = frappe.db.get_value(
+		"Job Card",
+		job_card,
+		[
+			"quality_inspection",
+			"quality_inspection_template",
+			"operation",
+			"production_item",
+			"finished_good",
+		],
+		as_dict=True,
+	)
+	if not jc:
+		frappe.throw(_("Job Card {0} not found").format(job_card))
+
+	template = jc.quality_inspection_template
+	if not template and jc.operation:
+		template = frappe.get_cached_value("Operation", jc.operation, "quality_inspection_template")
+
+	parameters = []
+	for p in get_template_details(template):
+		parameters.append(
+			{
+				"specification": p.specification,
+				"value": p.value,
+				"numeric": cint(p.numeric),
+				"min_value": p.min_value,
+				"max_value": p.max_value,
+				"formula_based_criteria": cint(p.formula_based_criteria),
+				"acceptance_formula": p.acceptance_formula,
+			}
+		)
+
+	return {
+		"template": template,
+		"parameters": parameters,
+		"existing": jc.quality_inspection,
+		"item_code": jc.finished_good or jc.production_item,
+	}
+
+
+@frappe.whitelist()
+def submit_quality_inspection(job_card: str, readings: str | None = None):
+	"""Create + submit an In-Process Quality Inspection for the job card and link it back, so the
+	standard Job Card.validate_inspection() gate passes when the card is submitted.
+
+	`readings` is a JSON list of {specification, status, reading_value} captured inline. For numeric
+	/ formula parameters the measured value is stored and the Quality Inspection auto-evaluates
+	pass/fail against min/max (or the formula); for qualitative parameters the operator's explicit
+	Accepted/Rejected is taken as authoritative (manual_inspection). The QI's own validation then
+	sets the overall Accepted/Rejected status.
+	"""
+	frappe.has_permission("Job Card", "write", throw=True)
+	frappe.has_permission("Quality Inspection", "submit", throw=True)
+
+	jc = frappe.get_doc("Job Card", job_card)
+
+	# Idempotent: if a submitted inspection is already linked, don't create another.
+	if jc.quality_inspection:
+		existing = frappe.db.get_value(
+			"Quality Inspection", jc.quality_inspection, ["status", "docstatus"], as_dict=True
+		)
+		if existing and existing.docstatus == 1:
+			return {"name": jc.quality_inspection, "status": existing.status}
+
+	template = jc.quality_inspection_template
+	if not template and jc.operation:
+		template = frappe.get_cached_value("Operation", jc.operation, "quality_inspection_template")
+	if not template:
+		frappe.throw(_("No Quality Inspection Template is configured for this operation."))
+
+	reading_map = {r.get("specification"): r for r in (frappe.parse_json(readings) or [])}
+
+	qi = frappe.new_doc("Quality Inspection")
+	qi.inspection_type = "In Process"
+	qi.reference_type = "Job Card"
+	qi.reference_name = job_card
+	qi.item_code = jc.finished_good or jc.production_item
+	qi.bom_no = jc.bom_no
+	qi.quality_inspection_template = template
+	qi.inspected_by = frappe.session.user
+	qi.get_item_specification_details()  # load readings from the template
+
+	for reading in qi.readings:
+		entry = reading_map.get(reading.specification)
+		if not entry:
+			continue
+		value = entry.get("reading_value")
+		if reading.numeric or reading.formula_based_criteria:
+			# Measured value → let the Quality Inspection judge it against min/max or the formula.
+			if value not in (None, ""):
+				reading.reading_value = value
+				reading.reading_1 = value
+		else:
+			# Qualitative check → the operator's explicit pass/fail wins.
+			reading.manual_inspection = 1
+			reading.status = entry.get("status") or "Accepted"
+			if value not in (None, ""):
+				reading.reading_value = value
+
+	qi.insert()
+	qi.submit()  # validate() → inspect_and_set_status() sets the overall Accepted/Rejected status
+
+	# Link explicitly: the QI's own back-reference matches on production_item, which can differ
+	# from the operation's finished_good, so we set it directly to be safe.
+	jc.db_set("quality_inspection", qi.name)
+	return {"name": qi.name, "status": qi.status}
 
 
 @frappe.whitelist()
@@ -335,7 +459,9 @@ def _get_job_card_status_counts(wo_names: list[str]) -> dict[str, dict]:
 		status = "Not Started" if (row.status or "Open") == "Open" else row.status
 		entry["by_status"][status] = entry["by_status"].get(status, 0) + 1
 		entry["total"] += 1
-		if status in ("Completed", "Submitted"):
+		# "To Manufacture" = operation done, only the Manufacture Stock Entry is pending — count it
+		# as completed so the work order's progress bar reflects the finished operation.
+		if status in ("Completed", "Submitted", "To Manufacture"):
 			entry["completed"] += 1
 		elif status == "Work In Progress":
 			entry["in_progress"] += 1
@@ -409,7 +535,9 @@ def _fetch_job_cards(filters, mode):
 		limit=50,
 	)
 	if mode == "workstation":
-		jc_data = [row for row in jc_data if row.docstatus == 0]
+		# Drafts are the operator's working set; submitted "To Manufacture" cards are also kept so
+		# the station shows what still needs a Manufacture Stock Entry (its own section, client-side).
+		jc_data = [row for row in jc_data if row.docstatus == 0 or row.status == "To Manufacture"]
 	return jc_data
 
 
@@ -435,6 +563,66 @@ def _enrich_job_card_row(row, time_logs, allow_excess_transfer):
 	row.make_material_request = bool(row.for_quantity > row.transferred_qty or allow_excess_transfer)
 	# Required vs transferred + on-hand in source — operator sees shortages before starting work.
 	row.materials = get_job_card_materials(row.name)
+	# Guided execution: per-operation work instructions + quality-check state for the card.
+	row.instructions = _get_operation_instructions(row.operation)
+	row.qc = _get_job_card_qc(row)
+
+
+def _get_operation_instructions(operation: str | None) -> dict | None:
+	"""Description + rich Work Instructions from the Operation master, for the card's
+	Instructions panel. Returns None when the operation has neither, so the panel stays hidden.
+
+	`work_instruction` is a Text Editor field (HTML) — Frappe bleach-sanitizes it on save, so it
+	is safe to render as-is on the client. `description` is plain text and must be escaped there.
+	"""
+	if not operation:
+		return None
+
+	op = frappe.get_cached_value("Operation", operation, ["description", "work_instruction"], as_dict=True)
+	if not op:
+		return None
+
+	description = (op.description or "").strip()
+	work_instruction = (op.work_instruction or "").strip()
+	if not description and not work_instruction:
+		return None
+	return {"description": description, "work_instruction": work_instruction}
+
+
+def _get_job_card_qc(row) -> dict:
+	"""Quality-check state for a job card row: whether an inspection is required before submit,
+	which template to use, and any inspection already linked (name + status + docstatus).
+
+	"Required" mirrors Job Card.validate_inspection() — BOM inspection_required AND the Work Order
+	Operation's quality_inspection_required. When only a template is configured the check is
+	offered but not enforced.
+	"""
+	required = bool(
+		row.get("bom_no")
+		and frappe.get_cached_value("BOM", row.bom_no, "inspection_required")
+		and row.get("operation_id")
+		and frappe.db.get_value("Work Order Operation", row.operation_id, "quality_inspection_required")
+	)
+
+	template = row.get("quality_inspection_template")
+	if not template and row.get("operation"):
+		template = frappe.get_cached_value("Operation", row.operation, "quality_inspection_template")
+
+	info = {
+		"required": required,
+		"template": template,
+		"has_checklist": bool(template),
+		"name": None,
+		"status": None,
+		"docstatus": None,
+	}
+	if row.get("quality_inspection"):
+		qi = frappe.db.get_value(
+			"Quality Inspection", row.quality_inspection, ["name", "status", "docstatus"], as_dict=True
+		)
+		if qi:
+			info.update({"name": qi.name, "status": qi.status, "docstatus": qi.docstatus})
+	return info
 
 
 def get_job_card_materials(job_card: str) -> list[dict]:
@@ -522,8 +710,16 @@ def get_today_sessions(workstation: str | None, work_order: str | None) -> list[
 
 
 def _today_sessions_filters(workstation, work_order) -> dict | None:
-	"""Submitted-today filter scoped to a work order or workstation; None if neither given."""
-	filters = {"docstatus": 1, "modified": [">=", get_datetime(f"{getdate()} 00:00:00")]}
+	"""Submitted-today filter scoped to a work order or workstation; None if neither given.
+
+	"To Manufacture" cards are excluded — they aren't finalized yet (Manufacture Stock Entry
+	pending) and get their own section, so they shouldn't appear among finished sessions.
+	"""
+	filters = {
+		"docstatus": 1,
+		"modified": [">=", get_datetime(f"{getdate()} 00:00:00")],
+		"status": ["!=", "To Manufacture"],
+	}
 	if work_order:
 		filters["work_order"] = work_order
 	elif workstation:

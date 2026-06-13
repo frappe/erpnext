@@ -259,6 +259,7 @@ def get_status_color(status):
 		"Closed": "green",
 		"Completed": "green",
 		"Work In Progress": "orange",
+		"To Manufacture": "purple",
 	}
 
 	return color_map.get(status, "blue")

@@ -38,6 +38,8 @@ class ShopFloor {
 		// Remembers each Materials panel's open/closed state (keyed by job card) so it
 		// survives re-renders — otherwise a reload right after a click resets the panel.
 		this.materials_open = {};
+		// Same idea for the per-operation Work Instructions panel.
+		this.instructions_open = {};
 
 		// View state.
 		this.view = "operator"; // overwritten once context loads
@@ -347,7 +349,7 @@ class ShopFloor {
 						<div class="sf-wo-title">${frappe.utils.escape_html(item)}</div>
 						${workstation_line}
 						<div class="sf-wo-id">
-							<span class="indicator-pill no-indicator-dot ${wo.status_colour}">${__(wo.status)}</span>
+							<span class="sf-wo-status-dot ${wo.status_colour}" title="${frappe.utils.escape_html(__(wo.status))}"></span>
 							<a href="/app/work-order/${wo.name}" onclick="event.stopPropagation()">${wo.name}</a>
 						</div>
 					</div>
@@ -472,6 +474,9 @@ class ShopFloor {
 		this.queue = [];
 		this.pending_submission = [];
 		this.completed = [];
+		// Submitted but the finished goods aren't booked yet (status "To Manufacture") — its own
+		// actionable section, kept out of Completed Operations / Today's Sessions.
+		this.to_manufacture = [];
 
 		for (const jc of this.job_cards) {
 			// Same materials-ready rule as job_card.js make_dashboard.
@@ -481,9 +486,14 @@ class ShopFloor {
 				!jc.finished_good
 			);
 
-			// Submitted JCs are historical from the Shop Floor's POV — only appear here in work_order mode.
+			// Submitted JCs are historical from the Shop Floor's POV — only appear here in work_order
+			// mode (and, for "To Manufacture", in workstation mode too — see _fetch_job_cards).
 			if (jc.docstatus === 1) {
-				this.completed.push(jc);
+				if (jc.status === "To Manufacture") {
+					this.to_manufacture.push(jc);
+				} else {
+					this.completed.push(jc);
+				}
 				continue;
 			}
 
@@ -526,7 +536,9 @@ class ShopFloor {
 
 		this.summary = {
 			active_count: this.active_jobs.length,
-			queue_count: this.queue.length,
+			// "To Manufacture" (submitted, qty done, but the Manufacture Stock Entry is still pending)
+			// isn't actually finished — count it as Pending, not Completed.
+			queue_count: this.queue.length + this.to_manufacture.length,
 			completed_count: this.completed.length + this.pending_submission.length,
 			capacity: this.capacity,
 		};
@@ -544,6 +556,7 @@ class ShopFloor {
 			active_jobs: this.active_jobs,
 			queue: this.queue,
 			pending_submission: this.pending_submission,
+			to_manufacture: this.to_manufacture,
 			completed: this.completed,
 			today_sessions: this.today_sessions || [],
 			summary: this.summary,
@@ -560,6 +573,15 @@ class ShopFloor {
 				$el.toggleClass("is-open", this.materials_open[name]);
 			} else {
 				this.materials_open[name] = $el.hasClass("is-open");
+			}
+		});
+
+		// Restore each Work Instructions panel to its remembered open/closed state.
+		$container.find(".mes-instructions-inline").each((i, el) => {
+			const $el = $(el);
+			const name = $el.attr("data-job-card");
+			if (name && name in this.instructions_open) {
+				$el.toggleClass("is-open", this.instructions_open[name]);
 			}
 		});
 
@@ -593,6 +615,21 @@ class ShopFloor {
 			if (name) me.materials_open[name] = open;
 		});
 
+		$container.find(".mes-instructions-summary").on("click", function () {
+			const $inline = $(this).closest(".mes-instructions-inline");
+			const open = !$inline.hasClass("is-open");
+			$inline.toggleClass("is-open", open);
+			const name = $inline.attr("data-job-card");
+			if (name) me.instructions_open[name] = open;
+		});
+
+		// Clicking a "QC Required" / "QC Available" pill runs the inline check ahead of End Session.
+		$container.find(".mes-qc-pill").on("click", function () {
+			const name = $(this).attr("data-job-card");
+			const jc = (me.active_jobs || []).find((j) => j.name === name);
+			if (jc) me.run_quality_check(jc, () => me.reload());
+		});
+
 		$container.find(".mes-btn-start").on("click", function () {
 			me.start_job($(this).attr("data-job-card"));
 		});
@@ -607,6 +644,9 @@ class ShopFloor {
 		});
 		$container.find(".mes-btn-submit").on("click", function () {
 			me.submit_job_card($(this).attr("data-job-card"));
+		});
+		$container.find(".mes-btn-make-entry").on("click", function () {
+			me.make_manufacture_entry($(this).attr("data-job-card"));
 		});
 		$container.find(".mes-btn-transfer").on("click", function (e) {
 			e.preventDefault();
@@ -807,10 +847,7 @@ class ShopFloor {
 			});
 		};
 
-		const submit_session = () => {
-			const args = get_payload();
-			if (!args) return;
-			me.session_dialog.hide();
+		const finalize_submit = (args) => {
 			frappe.call({
 				method: "erpnext.manufacturing.page.shop_floor.shop_floor.complete_and_submit",
 				args: args,
@@ -825,6 +862,20 @@ class ShopFloor {
 			});
 		};
 
+		const submit_session = () => {
+			const args = get_payload();
+			if (!args) return;
+			me.session_dialog.hide();
+			// Guided QC gate: a job card that requires inspection must pass an inline Quality Check
+			// before it is submitted (mirrors Job Card.validate_inspection on the server). Once the
+			// inspection is recorded, finalize the session submit.
+			if (jc.qc && jc.qc.required && jc.qc.status !== "Accepted") {
+				me.run_quality_check(jc, () => finalize_submit(args));
+			} else {
+				finalize_submit(args);
+			}
+		};
+
 		me.session_dialog = new frappe.ui.Dialog({
 			title: __("End Session"),
 			fields: fields,
@@ -837,6 +888,144 @@ class ShopFloor {
 		me.bind_enter_submit(me.session_dialog);
 	}
 
+	// ── Inline Quality Check ─────────────────────────────────────────────────────
+	// Fetch the operation's Quality Inspection template and open a guided pass/fail checklist.
+	// `on_pass` runs once the inspection has been recorded (and is not rejected).
+	run_quality_check(jc, on_pass) {
+		const me = this;
+		frappe.call({
+			method: "erpnext.manufacturing.page.shop_floor.shop_floor.get_quality_inspection_checklist",
+			args: { job_card: jc.name },
+			freeze: true,
+			freeze_message: __("Loading quality checklist..."),
+			callback: (r) => {
+				const info = r.message || {};
+				if (!info.template || !(info.parameters || []).length) {
+					// Inspection is required but the operation has no template/parameters to fill —
+					// there is nothing to capture inline. Point the user at the configuration.
+					frappe.msgprint({
+						title: __("Quality Inspection Template Missing"),
+						indicator: "orange",
+						message: __(
+							"This operation requires a Quality Inspection but no template with parameters is configured. Set a Quality Inspection Template on Operation {0} to inspect from the Shop Floor.",
+							[jc.operation || ""]
+						),
+					});
+					return;
+				}
+				me.show_qc_dialog(jc, info, on_pass);
+			},
+		});
+	}
+
+	show_qc_dialog(jc, info, on_pass) {
+		const me = this;
+		const params = info.parameters || [];
+		// Per-row operator input, keyed by row index (avoids escaping issues with parameter names).
+		const state = {}; // idx -> "Accepted" | "Rejected"
+
+		const rows = params
+			.map((p, i) => {
+				const spec = frappe.utils.escape_html(p.specification);
+				let criteria = "";
+				if (p.numeric) {
+					const lo = p.min_value !== null && p.min_value !== undefined ? p.min_value : "−∞";
+					const hi = p.max_value !== null && p.max_value !== undefined ? p.max_value : "∞";
+					criteria = __("Acceptable range: {0} to {1}", [lo, hi]);
+				} else if (p.value) {
+					criteria = __("Expected: {0}", [frappe.utils.escape_html(p.value)]);
+				}
+				const control = p.numeric
+					? `<input type="number" step="any" class="form-control mes-qc-reading" data-idx="${i}" placeholder="${__(
+							"Measured value"
+					  )}">`
+					: `<span class="mes-qc-passfail" data-idx="${i}">
+							<button type="button" class="pass" data-val="Accepted">${__("Pass")}</button>
+							<button type="button" class="fail" data-val="Rejected">${__("Fail")}</button>
+						</span>`;
+				return `<div class="mes-qc-row">
+						<div class="mes-qc-spec">
+							<div class="mes-qc-spec-name">${spec}</div>
+							${criteria ? `<div class="mes-qc-spec-sub">${criteria}</div>` : ""}
+						</div>
+						<div class="mes-qc-controls">${control}</div>
+					</div>`;
+			})
+			.join("");
+
+		const dialog = new frappe.ui.Dialog({
+			title: __("Quality Check"),
+			size: "large",
+			fields: [
+				{
+					fieldtype: "HTML",
+					options: `<div class="mes-qc-intro text-muted" style="margin-bottom: 8px;">${__(
+						"Inspect {0} for job card {1}",
+						[frappe.utils.escape_html(info.item_code || ""), frappe.utils.escape_html(jc.name)]
+					)}</div><div class="mes-qc-list">${rows}</div>`,
+				},
+			],
+			primary_action_label: __("Submit Inspection"),
+			primary_action: () => {
+				const readings = [];
+				let missing = false;
+				params.forEach((p, i) => {
+					if (p.numeric) {
+						const val = dialog.$wrapper.find(`.mes-qc-reading[data-idx="${i}"]`).val();
+						if (val === "" || val === undefined || val === null) missing = true;
+						readings.push({ specification: p.specification, reading_value: val });
+					} else {
+						if (!state[i]) missing = true;
+						readings.push({
+							specification: p.specification,
+							status: state[i],
+							reading_value: "",
+						});
+					}
+				});
+				if (missing) {
+					frappe.msgprint(__("Please complete every check before submitting the inspection."));
+					return;
+				}
+				dialog.hide();
+				frappe.call({
+					method: "erpnext.manufacturing.page.shop_floor.shop_floor.submit_quality_inspection",
+					args: { job_card: jc.name, readings: JSON.stringify(readings) },
+					freeze: true,
+					freeze_message: __("Recording inspection..."),
+					callback: (r) => {
+						const res = r.message || {};
+						if (res.status === "Rejected") {
+							// Don't auto-proceed on a rejected inspection — the server gate may block the
+							// submit anyway (per Stock Settings), and the operator should decide next steps.
+							frappe.msgprint({
+								title: __("Inspection Rejected"),
+								indicator: "red",
+								message: __(
+									"Quality Inspection {0} is Rejected. Resolve the issue or follow your rejection process before submitting the job card.",
+									[res.name || ""]
+								),
+							});
+							me.reload();
+							return;
+						}
+						if (on_pass) on_pass();
+					},
+				});
+			},
+		});
+
+		dialog.show();
+		// Pass/Fail toggles for qualitative parameters.
+		dialog.$wrapper.find(".mes-qc-passfail button").on("click", function () {
+			const $btn = $(this);
+			const $grp = $btn.closest(".mes-qc-passfail");
+			$grp.find("button").removeClass("active");
+			$btn.addClass("active");
+			state[$grp.attr("data-idx")] = $btn.attr("data-val");
+		});
+	}
+
 	prompt_manufacture_entry(jc_name) {
 		const me = this;
 		const dialog = new frappe.ui.Dialog({
@@ -845,7 +1034,7 @@ class ShopFloor {
 				{
 					fieldtype: "HTML",
 					options: `
-						<div style="text-align: center; padding: 12px 0 4px;">
+						<div style="text-align: left; padding: 12px 0 4px;">
 							<div style="font-size: 1.05em; margin-bottom: 6px;">
 								${__("Job card {0} has been submitted.", [frappe.utils.escape_html(jc_name)])}
 							</div>
@@ -1423,7 +1612,7 @@ class ShopFloor {
 			.sf-wo-card.sf-selected { border-color: var(--primary); }
 			.sf-wo-card.sf-focused { box-shadow: 0 0 0 2px var(--primary); }
 			.sf-wo-top { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-			.sf-wo-image { width: 64px; height: 64px; aspect-ratio: 1 / 1; align-self: center; border-radius: 12px; overflow: hidden; background: var(--bg-color); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+			.sf-wo-image { width: 66px; height: 66px; aspect-ratio: 1 / 1; align-self: center; border-radius: 12px; overflow: hidden; background: var(--bg-color); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 			.sf-wo-image img { width: 100%; height: 100%; object-fit: cover; }
 			.sf-wo-image-fallback { font-size: 18px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
 			.sf-wo-head { flex: 1; min-width: 0; }
@@ -1431,8 +1620,17 @@ class ShopFloor {
 			.sf-wo-ws { font-size: 13px; font-weight: 500; color: var(--text-color); margin-bottom: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 			.sf-wo-ws-icon { margin-right: 2px; }
 			.sf-wo-id { display: flex; align-items: center; gap: 8px; font-size: 12px; min-width: 0; }
-			.sf-wo-id .indicator-pill { flex-shrink: 0; }
 			.sf-wo-id a { color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+			/* Compact status indicator on the work-order card — the active tab already names the
+			   bucket, so a coloured dot (status text in the tooltip) is enough. */
+			.sf-wo-status-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
+			.sf-wo-status-dot.green { background: var(--green-500, #38a169); }
+			.sf-wo-status-dot.orange { background: var(--orange-500, #d97706); }
+			.sf-wo-status-dot.yellow { background: var(--yellow-500, #d97706); }
+			.sf-wo-status-dot.blue { background: var(--blue-500, #2490ef); }
+			.sf-wo-status-dot.red { background: var(--red-500, #e53e3e); }
+			.sf-wo-status-dot.purple { background: var(--purple-500, #7c3aed); }
+			.sf-wo-status-dot.gray { background: var(--gray-500, #9ca3af); }
 			.sf-wo-progress-block { margin-bottom: 12px; }
 			.sf-wo-progress-label { display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
 			.sf-wo-progress-count { font-weight: 600; color: var(--text-color); font-variant-numeric: tabular-nums; }
