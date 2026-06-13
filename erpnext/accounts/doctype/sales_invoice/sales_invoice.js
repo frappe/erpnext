@@ -601,19 +601,28 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 
 	add_update_stock_tooltip() {
 		const $label = this.frm.get_field("update_stock").$wrapper.find(".label-area");
-		if ($label.find(".update-stock-info").length) return;
+		if ($label.find(".update-stock-info-trigger").length) return;
 
-		const $icon = $(`<span class="update-stock-info"
-				style="position:relative;margin-left:4px;cursor:pointer;vertical-align:middle;color:var(--text-muted);">
-				${frappe.utils.icon("info", "xs")}
-				<span class="tooltip-content" style="white-space:normal;width:220px;cursor:default;">
-					${__("If checked, updates inventory; stock and accounting entries are created together. Leave unchecked if a Delivery Note is created separately.")}
-				</span>
-			</span>`).appendTo($label);
+		const $icon = $(
+			frappe.utils.icon("info", "xs", "", "", "cursor-pointer m-0 update-stock-info-trigger card-icons")
+		).appendTo($label);
 
-		$icon
-			.on("mouseenter", () => $icon.find(".tooltip-content").css("opacity", "1"))
-			.on("mouseleave", () => $icon.find(".tooltip-content").css("opacity", "0"));
+		$label.css({ display: "flex", gap: "6px", "align-items": "center" });
+
+		const $card_container = $("<div class='info-card'></div>").appendTo($label);
+		const card = new frappe.ui.SidebarCard({
+			title: "",
+			message: __("If checked, updates inventory; stock and accounting entries are created together. Leave unchecked if a Delivery Note is created separately."),
+			parent: $card_container,
+			trigger: $icon.get(0),
+			close_button: false,
+			popper: true,
+			hide_icon: true,
+			custom_class: "py-1 px-1",
+		});
+
+		card.hide();
+		$icon.on("mouseenter", () => card.show()).on("mouseleave", () => card.hide());
 	}
 
 	make_sales_return() {
