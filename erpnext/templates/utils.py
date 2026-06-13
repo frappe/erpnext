@@ -7,8 +7,8 @@ from frappe.rate_limiter import rate_limit
 from frappe.utils import escape_html
 
 
-@frappe.whitelist(allow_guest=True)
-@rate_limit(limit=1000, seconds=60 * 60)
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=10, seconds=3 * 60)
 def send_message(sender: str, message: str, subject: str = "Website Query"):
 	from frappe.www.contact import send_message as website_send_message
 
