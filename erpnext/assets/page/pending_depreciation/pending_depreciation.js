@@ -197,12 +197,17 @@ erpnext.assets.PendingDepreciation = class PendingDepreciation {
 	}
 
 	update_action_button() {
-		this.$create_btn.prop("disabled", this.selected.size === 0);
-		if (this.selected.size > 0) {
-			this.$create_btn.text(__("Create Depreciation Entries ({0})", [this.selected.size]));
-		} else {
-			this.$create_btn.text(__("Create Depreciation Entries"));
-		}
+		const has_selection = this.selected.size > 0;
+		this.$create_btn
+			.prop("disabled", !has_selection)
+			.toggleClass("btn-success", !has_selection)
+			.toggleClass("btn-dark", has_selection);
+
+		this.$create_btn.text(
+			has_selection
+				? __("Create Depreciation Entries ({0})", [this.selected.size])
+				: __("Create Depreciation Entries")
+		);
 	}
 
 	create_entries() {
