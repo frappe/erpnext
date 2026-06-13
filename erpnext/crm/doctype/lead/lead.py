@@ -7,9 +7,15 @@ from frappe.contacts.address_and_contact import (
 	delete_contact_and_address,
 	load_address_and_contact,
 )
+<<<<<<< HEAD
 from frappe.email.inbox import link_communication_to_document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import comma_and, get_link_to_form, has_gravatar, validate_email_address
+=======
+from frappe.model.document import Document
+from frappe.utils import comma_and, get_link_to_form, validate_email_address
+from frappe.utils.data import DateTimeLikeObject
+>>>>>>> 93d6be2ed7 (fix(Lead): stop storing Gravatar image URLs for Leads (#55880))
 
 from erpnext.accounts.party import set_taxes
 from erpnext.controllers.selling_controller import SellingController
@@ -170,9 +176,6 @@ class Lead(SellingController, CRMNote):
 
 			if self.email_id == self.lead_owner:
 				frappe.throw(_("Lead Owner cannot be same as the Lead Email Address"))
-
-			if self.is_new() or not self.image:
-				self.image = has_gravatar(self.email_id)
 
 	def link_to_contact(self):
 		# update contact links
