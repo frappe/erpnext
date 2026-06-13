@@ -615,7 +615,6 @@
    "default": "0",
    "depends_on": "eval:doc.items.every((item) => !item.pr_detail)",
    "description": "If checked, updates inventory; stock and accounting entries are created together. Leave unchecked if a Purchase Receipt is created separately.",
-   "description": "If checked, updates inventory; stock and accounting entries are created together. Leave unchecked if a Purchase Receipt is created separately.",
    "fieldname": "update_stock",
    "fieldtype": "Check",
    "label": "Update Stock",
