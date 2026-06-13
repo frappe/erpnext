@@ -58,8 +58,11 @@ erpnext.assets.PendingDepreciation = class PendingDepreciation {
 			change: () => this.refresh_table(),
 		});
 
-		this.page.add_inner_button(__("Fetch Assets"), () => this.refresh_table()).addClass(
-			"btn-primary"
+		this.$fetch_btn = this.page.add_inner_button(
+			__("Fetch Assets"),
+			() => this.refresh_table(),
+			null,
+			"primary"
 		);
 	}
 
@@ -204,6 +207,11 @@ erpnext.assets.PendingDepreciation = class PendingDepreciation {
 				"border-color": has_selection ? "#000" : "",
 				color: has_selection ? "#fff" : "",
 			});
+		this.$fetch_btn.css({
+			"background-color": "",
+			"border-color": "",
+			color: "",
+		});
 
 		this.$create_btn.text(
 			has_selection
