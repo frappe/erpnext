@@ -107,19 +107,11 @@
    "label": "Enable Opportunity Creation from Contact Us"
   }
  ],
-<<<<<<< HEAD
-=======
- "grid_page_length": 50,
->>>>>>> c933e34914 (fix: opportunity creation from contact us page (#55841))
  "icon": "fa fa-cog",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2025-01-16 16:12:14.889455",
-=======
  "modified": "2026-06-11 23:09:49.750381",
->>>>>>> c933e34914 (fix: opportunity creation from contact us page (#55841))
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM Settings",
