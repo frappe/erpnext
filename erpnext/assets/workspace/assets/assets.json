@@ -166,6 +166,17 @@
   {
    "dependencies": "Asset",
    "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pending Depreciation",
+   "link_count": 0,
+   "link_to": "pending-depreciation",
+   "link_type": "Page",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Asset",
+   "hidden": 0,
    "is_query_report": 1,
    "label": "Asset Depreciations and Balances",
    "link_count": 0,
