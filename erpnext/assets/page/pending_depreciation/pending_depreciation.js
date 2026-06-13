@@ -66,7 +66,6 @@ erpnext.assets.PendingDepreciation = class PendingDepreciation {
 	make_action_button() {
 		this.$create_btn = this.page
 			.add_inner_button(__("Create Depreciation Entries"), () => this.create_entries())
-			.addClass("btn-success")
 			.prop("disabled", true);
 	}
 
@@ -200,8 +199,11 @@ erpnext.assets.PendingDepreciation = class PendingDepreciation {
 		const has_selection = this.selected.size > 0;
 		this.$create_btn
 			.prop("disabled", !has_selection)
-			.toggleClass("btn-success", !has_selection)
-			.toggleClass("btn-dark", has_selection);
+			.css({
+				"background-color": has_selection ? "#000" : "",
+				"border-color": has_selection ? "#000" : "",
+				color: has_selection ? "#fff" : "",
+			});
 
 		this.$create_btn.text(
 			has_selection
