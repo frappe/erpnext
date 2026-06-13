@@ -80,7 +80,6 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			this.frm.msgbox.hide();
 		}
 
-		this.add_update_stock_tooltip();
 		this.frm.toggle_reqd("due_date", !this.frm.doc.is_return);
 
 		if (this.frm.doc.is_return) {
@@ -597,32 +596,6 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 
 	packed_items_on_form_rendered(doc, grid_row) {
 		erpnext.setup_serial_or_batch_no();
-	}
-
-	add_update_stock_tooltip() {
-		const $label = this.frm.get_field("update_stock").$wrapper.find(".label-area");
-		if ($label.find(".update-stock-info-trigger").length) return;
-
-		const $icon = $(
-			frappe.utils.icon("info", "xs", "", "", "cursor-pointer m-0 update-stock-info-trigger card-icons")
-		).appendTo($label);
-
-		$label.css({ display: "flex", gap: "6px", "align-items": "center" });
-
-		const $card_container = $("<div class='info-card'></div>").appendTo($label);
-		const card = new frappe.ui.SidebarCard({
-			title: "",
-			message: __("If checked, updates inventory; stock and accounting entries are created together. Leave unchecked if a Delivery Note is created separately."),
-			parent: $card_container,
-			trigger: $icon.get(0),
-			close_button: false,
-			popper: true,
-			hide_icon: true,
-			custom_class: "py-1 px-1",
-		});
-
-		card.hide();
-		$icon.on("mouseenter", () => card.show()).on("mouseleave", () => card.hide());
 	}
 
 	make_sales_return() {

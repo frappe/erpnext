@@ -715,6 +715,7 @@
   {
    "default": "0",
    "depends_on": "eval:doc.items.every((item) => !item.dn_detail)",
+   "description": "If checked, updates inventory; stock and accounting entries are created together. Leave unchecked if a Delivery Note is created separately.",
    "fieldname": "update_stock",
    "fieldtype": "Check",
    "hide_days": 1,
@@ -722,7 +723,8 @@
    "label": "Update Stock",
    "oldfieldname": "update_stock",
    "oldfieldtype": "Check",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_description_on_click": 1
   },
   {
    "fieldname": "scan_barcode",
