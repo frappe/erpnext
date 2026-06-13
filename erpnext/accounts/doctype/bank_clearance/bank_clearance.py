@@ -90,27 +90,14 @@ class BankClearance(Document):
 
 	@frappe.whitelist()
 	def update_clearance_date(self):
-<<<<<<< HEAD
-		clearance_date_updated = False
-=======
-		self.check_permission("write")
-		invalid_document = []
-		invalid_cheque_date = []
-		entries_to_update = []
+		payment_docs = []
+		for d in self.get("payment_entries"):
+			if d.payment_document not in payment_docs:
+				payment_docs.append(d.payment_document)
 
-		def validate_entry(d):
-			is_valid = True
-			if not d.payment_document:
-				invalid_document.append(str(d.idx))
-				is_valid = False
+		for doctype in payment_docs:
+			frappe.has_permission(doctype, "write", throw=True)
 
-			if d.clearance_date and d.cheque_date and getdate(d.clearance_date) < getdate(d.cheque_date):
-				invalid_cheque_date.append(str(d.idx))
-				is_valid = False
-
-			return is_valid
-
->>>>>>> dd56e80512 (fix: pemission for whitelist functions)
 		for d in self.get("payment_entries"):
 			if d.clearance_date:
 				if not d.payment_document:
