@@ -118,7 +118,9 @@ class Issue(Document):
 		communication.save()
 
 	@frappe.whitelist()
-	def split_issue(self, subject, communication_id):
+	def split_issue(self, subject: str, communication_id: str):
+		self.check_permission("write")
+
 		# Bug: Pressing enter doesn't send subject
 		from copy import deepcopy
 
@@ -274,7 +276,7 @@ def make_task(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_issue_from_communication(communication, ignore_communication_links=False):
+def make_issue_from_communication(communication: str, ignore_communication_links: bool = False):
 	"""raise a issue from email"""
 
 	doc = frappe.get_doc("Communication", communication)
@@ -286,7 +288,7 @@ def make_issue_from_communication(communication, ignore_communication_links=Fals
 			"raised_by": doc.sender or "",
 			"raised_by_phone": doc.phone_no or "",
 		}
-	).insert(ignore_permissions=True)
+	).insert()
 
 	link_communication_to_document(doc, "Issue", issue.name, ignore_communication_links)
 

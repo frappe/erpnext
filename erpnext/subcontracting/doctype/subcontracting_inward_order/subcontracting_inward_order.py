@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import comma_and, flt, get_link_to_form
 
@@ -550,8 +551,9 @@ class SubcontractingInwardOrder(SubcontractingController):
 
 
 @frappe.whitelist()
-def update_subcontracting_inward_order_status(scio, status=None):
+def update_subcontracting_inward_order_status(scio: str | Document, status: str | None = None):
 	if isinstance(scio, str):
 		scio = frappe.get_doc("Subcontracting Inward Order", scio)
 
+	scio.check_permission("write")
 	scio.update_status(status)
