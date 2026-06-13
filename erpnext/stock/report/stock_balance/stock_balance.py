@@ -605,7 +605,7 @@ class StockBalanceReport:
 		add_additional_uom_columns(self.columns, self.data, self.filters.include_uom, conversion_factors)
 
 	def add_alt_uom_columns(self) -> None:
-		"""Add up to 2 alternate UOM balance columns per item after the Balance Qty column."""
+		"""Add an alternate UOM balance column after the Balance Qty column."""
 		if not self.filters.get("show_alt_uom_balance"):
 			return
 
@@ -613,7 +613,6 @@ class StockBalanceReport:
 		if not item_alt_uom_map:
 			return
 
-		# Insert columns right after bal_qty (in reverse order so slot 1 comes first)
 		bal_qty_idx = next(
 			(i for i, col in enumerate(self.columns) if isinstance(col, dict) and col.get("fieldname") == "bal_qty"),
 			None,
@@ -621,37 +620,35 @@ class StockBalanceReport:
 		if bal_qty_idx is None:
 			return
 
-		for slot in (2, 1):
-			self.columns.insert(
-				bal_qty_idx + 1,
-				{
-					"label": _(f"Balance Qty (Alt UOM {slot})"),
-					"fieldname": f"alt_uom_{slot}_bal_qty",
-					"fieldtype": "Float",
-					"width": 140,
-				},
-			)
-			self.columns.insert(
-				bal_qty_idx + 1,
-				{
-					"label": _(f"Alt UOM {slot}"),
-					"fieldname": f"alt_uom_{slot}",
-					"fieldtype": "Data",
-					"width": 90,
-				},
-			)
+		# Insert in reverse so "Alt UOM" name column appears before qty column
+		self.columns.insert(
+			bal_qty_idx + 1,
+			{
+				"label": _("Balance Qty (Alt UOM)"),
+				"fieldname": "alt_uom_bal_qty",
+				"fieldtype": "Float",
+				"width": 140,
+			},
+		)
+		self.columns.insert(
+			bal_qty_idx + 1,
+			{
+				"label": _("Alt UOM"),
+				"fieldname": "alt_uom",
+				"fieldtype": "Data",
+				"width": 90,
+			},
+		)
 
 		for row in self.data:
 			alt_uoms = item_alt_uom_map.get(row.item_code, [])
-			for slot in (1, 2):
-				idx = slot - 1
-				if idx < len(alt_uoms):
-					uom, factor = alt_uoms[idx]["uom"], flt(alt_uoms[idx]["conversion_factor"])
-					row[f"alt_uom_{slot}"] = uom
-					row[f"alt_uom_{slot}_bal_qty"] = flt(row.get("bal_qty", 0)) / factor if factor else 0.0
-				else:
-					row[f"alt_uom_{slot}"] = ""
-					row[f"alt_uom_{slot}_bal_qty"] = 0.0
+			if alt_uoms:
+				uom, factor = alt_uoms[0]["uom"], flt(alt_uoms[0]["conversion_factor"])
+				row["alt_uom"] = uom
+				row["alt_uom_bal_qty"] = flt(row.get("bal_qty", 0)) / factor if factor else 0.0
+			else:
+				row["alt_uom"] = ""
+				row["alt_uom_bal_qty"] = 0.0
 
 	def get_item_alt_uom_map(self) -> dict:
 		"""Return {item_code: [{uom, conversion_factor}, ...]} for alternate UOMs (excluding stock UOM)."""
@@ -679,7 +676,7 @@ class StockBalanceReport:
 		result: dict = {}
 		for row in rows:
 			result.setdefault(row.parent, [])
-			if len(result[row.parent]) < 2:  # keep up to 2 alternate UOMs
+			if not result[row.parent]:  # keep only the first alternate UOM (lowest idx)
 				result[row.parent].append({"uom": row.uom, "conversion_factor": row.conversion_factor})
 
 		return result

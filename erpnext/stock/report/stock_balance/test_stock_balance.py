@@ -167,6 +167,52 @@ class TestStockBalance(ERPNextTestSuite):
 		self.assertPartialDictEq(attributes, rows[0])
 		self.assertInvariants(rows)
 
+	def test_alt_uom_balance_single_uom(self):
+		"""Alt UOM columns show correct name and converted qty for an item with one alternate UOM."""
+		self.item.append("uoms", {"conversion_factor": 12, "uom": "Box"})
+		self.item.save()
+
+		self.generate_stock_ledger(self.item.name, [_dict(qty=24, rate=10)])
+
+		rows = stock_balance(self.filters.update({"show_alt_uom_balance": 1}))
+		self.assertEqual(len(rows), 1)
+		self.assertEqual(rows[0].get("alt_uom"), "Box")
+		self.assertAlmostEqual(rows[0].get("alt_uom_bal_qty"), 2.0)  # 24 / 12
+
+	def test_alt_uom_balance_no_alternate_uom(self):
+		"""Alt UOM columns are not added when no items in the report have alt UOMs."""
+		self.generate_stock_ledger(self.item.name, [_dict(qty=5, rate=10)])
+
+		columns, _ = execute(self.filters.update({"show_alt_uom_balance": 1}))
+		col_fieldnames = [c.get("fieldname") for c in columns if isinstance(c, dict)]
+		self.assertNotIn("alt_uom", col_fieldnames)
+		self.assertNotIn("alt_uom_bal_qty", col_fieldnames)
+
+	def test_alt_uom_balance_filter_disabled(self):
+		"""No alt UOM columns are injected when show_alt_uom_balance is not set."""
+		self.item.append("uoms", {"conversion_factor": 12, "uom": "Box"})
+		self.item.save()
+
+		self.generate_stock_ledger(self.item.name, [_dict(qty=24, rate=10)])
+
+		columns, _ = execute(self.filters)
+		col_fieldnames = [c.get("fieldname") for c in columns if isinstance(c, dict)]
+		self.assertNotIn("alt_uom", col_fieldnames)
+		self.assertNotIn("alt_uom_bal_qty", col_fieldnames)
+
+	def test_alt_uom_balance_uses_first_alternate_uom(self):
+		"""When an item has multiple alt UOMs, only the first (lowest idx) is shown."""
+		self.item.append("uoms", {"conversion_factor": 12, "uom": "Box"})
+		self.item.append("uoms", {"conversion_factor": 144, "uom": "Carton"})
+		self.item.save()
+
+		self.generate_stock_ledger(self.item.name, [_dict(qty=144, rate=10)])
+
+		rows = stock_balance(self.filters.update({"show_alt_uom_balance": 1}))
+		self.assertEqual(len(rows), 1)
+		self.assertEqual(rows[0].get("alt_uom"), "Box")
+		self.assertAlmostEqual(rows[0].get("alt_uom_bal_qty"), 12.0)  # 144 / 12, not 144 / 144
+
 	def test_stock_ageing_data_accepts_batchwise_valuation_slots(self):
 		fifo_queue = [
 			["SA-BATCH-NEWER", 1, 2.0, "2021-12-05", 20.0],
