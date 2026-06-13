@@ -288,8 +288,6 @@ class BOMCreator(Document):
 
 	@frappe.whitelist()
 	def edit_qty(self, docname: str, qty: float):
-		self.check_permission("write")
-
 		if not frappe.db.exists("BOM Creator Item", {"name": docname, "parent": self.name}):
 			frappe.throw(_("BOM Creator Item {0} does not exist").format(docname))
 
@@ -358,53 +356,12 @@ class BOMCreator(Document):
 		production_item_wise_rm[(row.item_code, row.name)].bom_no = bom.name
 
 	@frappe.whitelist()
-<<<<<<< HEAD
 	def get_default_bom(self, item_code: str) -> str:
 		self.check_permission("read")
-=======
-	def edit_bom_creator(self, docname: str, data: str | dict):
-		if not frappe.db.exists("BOM Creator Item", {"parent": self.name, "name": docname}):
-			frappe.throw(_("BOM Creator Item with name {0} does not exist").format(docname))
-
-		if isinstance(data, str):
-			data = frappe.parse_json(data)
-
-		updated = False
-		for row in self.items:
-			if row.name == docname:
-				for key, value in data.items():
-					if key in BOM_ITEM_FIELDS and row.get(key) != value:
-						row.set(key, value)
-						updated = True
-				break
-
-		if updated:
-			self.set_rate_for_items()
-			self.save()
-
-		frappe.msgprint(_("Updated successfully"), alert=True)
-
-		return self
-
-	def has_operations(self):
-		for row in self.items:
-			if row.operation:
-				return True
-
-		return False
-
-	@frappe.whitelist()
-	def get_default_bom(self, item_code) -> str:
->>>>>>> dd56e80512 (fix: pemission for whitelist functions)
 		return frappe.get_cached_value("Item", item_code, "default_bom")
 
 	@frappe.whitelist()
 	def add_item(self, **kwargs):
-<<<<<<< HEAD
-		self.check_permission("write")
-
-=======
->>>>>>> dd56e80512 (fix: pemission for whitelist functions)
 		if isinstance(kwargs, str):
 			kwargs = frappe.parse_json(kwargs)
 
@@ -439,11 +396,6 @@ class BOMCreator(Document):
 
 	@frappe.whitelist()
 	def add_sub_assembly(self, **kwargs):
-<<<<<<< HEAD
-		self.check_permission("write")
-
-=======
->>>>>>> dd56e80512 (fix: pemission for whitelist functions)
 		if isinstance(kwargs, str):
 			kwargs = frappe.parse_json(kwargs)
 
@@ -479,12 +431,6 @@ class BOMCreator(Document):
 			parent_row_no = item_row.idx
 			name = ""
 		else:
-<<<<<<< HEAD
-=======
-			if sbool(kwargs.phantom):
-				parent_row = next(item for item in self.items if item.name == kwargs.fg_reference_id)
-				parent_row.is_phantom_item = 1
->>>>>>> dd56e80512 (fix: pemission for whitelist functions)
 			parent_row_no = get_parent_row_no(self, kwargs.fg_reference_id)
 
 		for row in bom_item.get("items"):
@@ -512,11 +458,6 @@ class BOMCreator(Document):
 
 	@frappe.whitelist()
 	def delete_node(self, **kwargs):
-<<<<<<< HEAD
-		self.check_permission("write")
-
-=======
->>>>>>> dd56e80512 (fix: pemission for whitelist functions)
 		if isinstance(kwargs, str):
 			kwargs = frappe.parse_json(kwargs)
 
