@@ -7,17 +7,11 @@ from frappe.contacts.address_and_contact import (
 	delete_contact_and_address,
 	load_address_and_contact,
 )
-<<<<<<< HEAD
 from frappe.contacts.doctype.address.address import get_default_address
 from frappe.contacts.doctype.contact.contact import get_default_contact
 from frappe.email.inbox import link_communication_to_document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import comma_and, get_link_to_form, has_gravatar, validate_email_address
-=======
-from frappe.model.document import Document
 from frappe.utils import comma_and, get_link_to_form, validate_email_address
-from frappe.utils.data import DateTimeLikeObject
->>>>>>> 93d6be2ed7 (fix(Lead): stop storing Gravatar image URLs for Leads (#55880))
 
 from erpnext.accounts.party import set_taxes
 from erpnext.controllers.selling_controller import SellingController
