@@ -14,6 +14,7 @@
   "opportunity_section",
   "close_opportunity_after_days",
   "column_break_9",
+  "enable_opportunity_creation_from_contact_us",
   "quotation_section",
   "default_valid_till",
   "section_break_13",
@@ -98,15 +99,20 @@
    "fieldname": "update_timestamp_on_new_communication",
    "fieldtype": "Check",
    "label": "Update timestamp on new communication"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_opportunity_creation_from_contact_us",
+   "fieldtype": "Check",
+   "label": "Enable Opportunity Creation from Contact Us"
   }
  ],
  "grid_page_length": 50,
- "hide_toolbar": 0,
  "icon": "fa fa-cog",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-03-16 13:28:19.573964",
+ "modified": "2026-06-11 23:09:49.750381",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM Settings",
