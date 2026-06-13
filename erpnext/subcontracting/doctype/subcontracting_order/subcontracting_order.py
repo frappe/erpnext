@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt
 
@@ -364,8 +365,9 @@ def get_mapped_subcontracting_receipt(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def update_subcontracting_order_status(sco, status=None):
+def update_subcontracting_order_status(sco: str | Document, status: str | None = None):
 	if isinstance(sco, str):
 		sco = frappe.get_doc("Subcontracting Order", sco)
 
+	sco.check_permission("write")
 	sco.update_status(status)
