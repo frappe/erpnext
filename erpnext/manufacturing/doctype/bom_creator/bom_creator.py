@@ -288,8 +288,6 @@ class BOMCreator(Document):
 
 	@frappe.whitelist()
 	def edit_qty(self, docname: str, qty: float):
-		self.check_permission("write")
-
 		if not frappe.db.exists("BOM Creator Item", {"name": docname, "parent": self.name}):
 			frappe.throw(_("BOM Creator Item {0} does not exist").format(docname))
 
@@ -364,8 +362,6 @@ class BOMCreator(Document):
 
 	@frappe.whitelist()
 	def add_item(self, **kwargs):
-		self.check_permission("write")
-
 		if isinstance(kwargs, str):
 			kwargs = frappe.parse_json(kwargs)
 
@@ -400,8 +396,6 @@ class BOMCreator(Document):
 
 	@frappe.whitelist()
 	def add_sub_assembly(self, **kwargs):
-		self.check_permission("write")
-
 		if isinstance(kwargs, str):
 			kwargs = frappe.parse_json(kwargs)
 
@@ -464,8 +458,6 @@ class BOMCreator(Document):
 
 	@frappe.whitelist()
 	def delete_node(self, **kwargs):
-		self.check_permission("write")
-
 		if isinstance(kwargs, str):
 			kwargs = frappe.parse_json(kwargs)
 
