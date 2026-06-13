@@ -481,7 +481,7 @@ def get_lead_details(lead, posting_date=None, company=None, doctype=None):
 
 
 @frappe.whitelist()
-def make_lead_from_communication(communication, ignore_communication_links=False):
+def make_lead_from_communication(communication: str, ignore_communication_links: bool = False):
 	"""raise a issue from email"""
 
 	doc = frappe.get_doc("Communication", communication)
@@ -500,7 +500,6 @@ def make_lead_from_communication(communication, ignore_communication_links=False
 			}
 		)
 		lead.flags.ignore_mandatory = True
-		lead.flags.ignore_permissions = True
 		lead.insert()
 
 		lead_name = lead.name

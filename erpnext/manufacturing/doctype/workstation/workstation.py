@@ -219,7 +219,7 @@ class Workstation(Document):
 		doc.check_permission("write")
 
 		doc.append("time_logs", {"from_time": from_time, "employee": employee})
-		doc.save(ignore_permissions=True)
+		doc.save()
 
 		return doc
 
@@ -234,7 +234,7 @@ class Workstation(Document):
 				row.time_in_mins = time_diff_in_hours(row.to_time, row.from_time) / 60
 				row.completed_qty = qty
 
-		doc.save(ignore_permissions=True)
+		doc.save()
 		doc.submit()
 
 		return doc

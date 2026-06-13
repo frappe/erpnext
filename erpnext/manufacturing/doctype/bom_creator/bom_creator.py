@@ -388,8 +388,6 @@ class BOMCreator(Document):
 
 	@frappe.whitelist()
 	def edit_bom_creator(self, docname: str, data: str | dict):
-		frappe.has_permission("BOM Creator", "write", doc=self, throw=True)
-
 		if not frappe.db.exists("BOM Creator Item", {"parent": self.name, "name": docname}):
 			frappe.throw(_("BOM Creator Item with name {0} does not exist").format(docname))
 
@@ -426,8 +424,6 @@ class BOMCreator(Document):
 
 	@frappe.whitelist()
 	def add_item(self, **kwargs):
-		frappe.has_permission("BOM Creator", "write", doc=self, throw=True)
-
 		if isinstance(kwargs, str):
 			kwargs = frappe.parse_json(kwargs)
 
@@ -458,8 +454,6 @@ class BOMCreator(Document):
 
 	@frappe.whitelist()
 	def add_sub_assembly(self, **kwargs):
-		frappe.has_permission("BOM Creator", "write", doc=self, throw=True)
-
 		if isinstance(kwargs, str):
 			kwargs = frappe.parse_json(kwargs)
 
@@ -499,7 +493,7 @@ class BOMCreator(Document):
 		else:
 			if sbool(kwargs.phantom):
 				parent_row = next(item for item in self.items if item.name == kwargs.fg_reference_id)
-				parent_row.db_set("is_phantom_item", 1)
+				parent_row.is_phantom_item = 1
 			parent_row_no = get_parent_row_no(self, kwargs.fg_reference_id)
 
 		for row in bom_item.get("items"):
@@ -528,8 +522,6 @@ class BOMCreator(Document):
 
 	@frappe.whitelist()
 	def delete_node(self, **kwargs):
-		frappe.has_permission("BOM Creator", "write", doc=self, throw=True)
-
 		if isinstance(kwargs, str):
 			kwargs = frappe.parse_json(kwargs)
 
