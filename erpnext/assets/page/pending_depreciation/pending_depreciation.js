@@ -207,11 +207,9 @@ erpnext.assets.PendingDepreciation = class PendingDepreciation {
 				"border-color": has_selection ? "#000" : "",
 				color: has_selection ? "#fff" : "",
 			});
-		this.$fetch_btn.css({
-			"background-color": "",
-			"border-color": "",
-			color: "",
-		});
+		this.$fetch_btn
+			.toggleClass("btn-primary", !has_selection)
+			.toggleClass("btn-default", has_selection);
 
 		this.$create_btn.text(
 			has_selection
