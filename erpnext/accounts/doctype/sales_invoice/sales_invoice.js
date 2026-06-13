@@ -80,6 +80,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			this.frm.msgbox.hide();
 		}
 
+		this.add_update_stock_tooltip();
 		this.frm.toggle_reqd("due_date", !this.frm.doc.is_return);
 
 		if (this.frm.doc.is_return) {
@@ -596,6 +597,21 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 
 	packed_items_on_form_rendered(doc, grid_row) {
 		erpnext.setup_serial_or_batch_no();
+	}
+
+	add_update_stock_tooltip() {
+		const $label = this.frm.get_field("update_stock").$wrapper.find(".label-area");
+		if (!$label.find(".update-stock-info").length) {
+			$(`<span class="update-stock-info"
+					data-toggle="tooltip"
+					data-placement="top"
+					title="${__("If checked, updates inventory; stock and accounting entries are created together. Leave unchecked if a Delivery Note is created separately.")}"
+					style="margin-left:4px;cursor:pointer;color:var(--text-muted);">
+					${frappe.utils.icon("info", "xs")}
+				</span>`)
+				.appendTo($label)
+				.tooltip();
+		}
 	}
 
 	make_sales_return() {

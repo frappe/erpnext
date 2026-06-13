@@ -78,6 +78,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		const me = this;
 		super.refresh();
 
+		this.add_update_stock_tooltip();
 		hide_fields(this.frm.doc);
 		// Show / Hide button
 		this.show_general_ledger();
@@ -409,6 +410,21 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 					}
 				},
 			});
+		}
+	}
+
+	add_update_stock_tooltip() {
+		const $label = this.frm.get_field("update_stock").$wrapper.find(".label-area");
+		if (!$label.find(".update-stock-info").length) {
+			$(`<span class="update-stock-info"
+					data-toggle="tooltip"
+					data-placement="top"
+					title="${__("If checked, updates inventory; stock and accounting entries are created together. Leave unchecked if a Purchase Receipt is created separately.")}"
+					style="margin-left:4px;cursor:pointer;color:var(--text-muted);">
+					${frappe.utils.icon("info", "xs")}
+				</span>`)
+				.appendTo($label)
+				.tooltip();
 		}
 	}
 
