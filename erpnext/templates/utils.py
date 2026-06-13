@@ -7,14 +7,9 @@ from frappe.rate_limiter import rate_limit
 from frappe.utils import escape_html
 
 
-<<<<<<< HEAD
-@frappe.whitelist(allow_guest=True)
-def send_message(sender, message, subject="Website Query"):
-=======
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=10, seconds=3 * 60)
-def send_message(sender: str, message: str, subject: str = "Website Query"):
->>>>>>> c933e34914 (fix: opportunity creation from contact us page (#55841))
+def send_message(sender, message, subject="Website Query"):
 	from frappe.www.contact import send_message as website_send_message
 
 	website_send_message(sender, message, subject)
