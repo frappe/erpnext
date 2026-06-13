@@ -109,11 +109,21 @@ frappe.ui.form.on("Quality Inspection", {
 			return;
 		}
 
-		frappe.db.get_value("Item", frm.doc.item_code, ["has_batch_no", "has_serial_no"]).then((r) => {
+		// package-counted custody rows count handling units — a serial names a
+		// piece, so the field is forbidden there (the receipt mints serials later)
+		const packing_unit =
+			frm.doc.reference_type === "Goods Inward Note"
+				? frm.call("get_custody_packing_unit").then((r) => r.message)
+				: Promise.resolve(null);
+
+		Promise.all([
+			frappe.db.get_value("Item", frm.doc.item_code, ["has_batch_no", "has_serial_no"]),
+			packing_unit,
+		]).then(([r, packing_unit]) => {
 			frm.__item_is_serialized = cint(r.message?.has_serial_no);
 			const has_batch = cint(r.message?.has_batch_no);
 			const bundle_decided = frm.doc.inspection_basis === "Each Quantity";
-			const show_serial = frm.__item_is_serialized && !bundle_decided;
+			const show_serial = frm.__item_is_serialized && !bundle_decided && !packing_unit;
 			// a lot-referenced Each Quantity inspection draws its identity from
 			// the lot: serials per unit below, the batch on the lot itself.
 			// custody goods have no batch at all — the receipt mints it later

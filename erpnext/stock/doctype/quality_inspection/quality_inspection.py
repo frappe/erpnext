@@ -130,6 +130,8 @@ class QualityInspection(UnitReadingsMixin, Document):
 		self.validate_inspection_required()
 		self.validate_package_units_carry_no_serials()
 		self.validate_serial_nos()
+		# a sample larger than the stock it describes is wrong on a draft too
+		self.validate_sample_within_quantity()
 		self.set_company()
 		self.warn_unrecorded_readings()
 
@@ -441,8 +443,12 @@ class QualityInspection(UnitReadingsMixin, Document):
 		self.validate_units_not_already_decided()
 
 	def validate_sample_size(self):
-		"""A Sample inspection of zero units is a verdict about nothing, and a
-		sample cannot be larger than the stock it claims to describe."""
+		"""A Sample inspection of zero units is a verdict about nothing.
+
+		Submission-only: a draft may carry no sample yet (the dialog and the lot
+		button create drafts to be filled in). The sample-vs-quantity ceiling is
+		a current-state check and runs on every save in validate_sample_within_quantity.
+		"""
 		if self.inspection_basis == "Each Quantity":
 			return
 		if flt(self.sample_size) <= 0:
@@ -450,6 +456,11 @@ class QualityInspection(UnitReadingsMixin, Document):
 				_("A Sample inspection must inspect at least one unit — set the Sample Size."),
 				title=_("Sample Size Missing"),
 			)
+
+	def validate_sample_within_quantity(self):
+		"""A sample cannot be larger than the stock it claims to describe."""
+		if self.inspection_basis == "Each Quantity" or flt(self.sample_size) <= 0:
+			return
 
 		qty_under_inspection = self.get_qty_under_inspection()
 		if qty_under_inspection is None:

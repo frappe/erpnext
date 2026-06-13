@@ -196,10 +196,9 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		partial.insert(ignore_permissions=True)
 		partial.submit()
 
-		# and the quantities speak the packing unit
+		# and the quantities speak the packing unit, refused on save
 		oversized = sample_inspection(sample_size=5)
-		oversized.insert(ignore_permissions=True)
-		self.assertRaisesRegex(frappe.ValidationError, "Box", oversized.submit)
+		self.assertRaisesRegex(frappe.ValidationError, "Box", oversized.insert)
 
 	def test_disabled_inward_location_is_refused(self):
 		location = make_inward_location("_Test Closed Yard")
@@ -433,7 +432,8 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		receive_from_note(note, qty=2)
 		note.reload()
 
-		# a sample of seven cannot describe the three units in custody
+		# a sample of seven cannot describe the three units in custody — and the
+		# consistency check fires on save, not only at submission
 		inspection = frappe.get_doc(
 			{
 				"doctype": "Quality Inspection",
@@ -448,12 +448,10 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 				"inspected_by": frappe.session.user,
 			}
 		)
-		inspection.insert(ignore_permissions=True)
-		self.assertRaises(frappe.ValidationError, inspection.submit)
+		self.assertRaises(frappe.ValidationError, inspection.insert)
 
-		inspection.reload()
 		inspection.sample_size = 3
-		inspection.save(ignore_permissions=True)
+		inspection.insert(ignore_permissions=True)
 		inspection.submit()
 
 	def test_each_quantity_inspection_decides_in_batches(self):
@@ -662,7 +660,7 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 				"inspection_basis": "Sample",
 				"manual_inspection": 1,
 				"status": "Rejected",
-				"sample_size": 3,
+				"sample_size": 2,
 				"report_date": nowdate(),
 				"inspected_by": frappe.session.user,
 			}
@@ -670,12 +668,12 @@ class TestGoodsInwardNote(ERPNextTestSuite):
 		sample.insert(ignore_permissions=True)
 		# it binds to the same row, the earlier inspection notwithstanding
 		self.assertEqual(sample.child_row_reference, note.items[0].name)
-		# and three sampled units cannot describe the two undecided ones
-		self.assertRaises(frappe.ValidationError, sample.submit)
+
+		# three sampled units cannot describe the two undecided ones — on save
+		sample.sample_size = 3
+		self.assertRaises(frappe.ValidationError, sample.save)
 
 		sample.reload()
-		sample.sample_size = 2
-		sample.save(ignore_permissions=True)
 		sample.submit()
 
 		# the rejection covers only the remainder the sample decided
