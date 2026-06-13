@@ -78,7 +78,6 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		const me = this;
 		super.refresh();
 
-		this.add_update_stock_tooltip();
 		hide_fields(this.frm.doc);
 		// Show / Hide button
 		this.show_general_ledger();
@@ -411,32 +410,6 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 				},
 			});
 		}
-	}
-
-	add_update_stock_tooltip() {
-		const $label = this.frm.get_field("update_stock").$wrapper.find(".label-area");
-		if ($label.find(".update-stock-info-trigger").length) return;
-
-		const $icon = $(
-			frappe.utils.icon("info", "xs", "", "", "cursor-pointer m-0 update-stock-info-trigger card-icons")
-		).appendTo($label);
-
-		$label.css({ display: "flex", gap: "6px", "align-items": "center" });
-
-		const $card_container = $("<div class='info-card'></div>").appendTo($label);
-		const card = new frappe.ui.SidebarCard({
-			title: "",
-			message: __("If checked, updates inventory; stock and accounting entries are created together. Leave unchecked if a Purchase Receipt is created separately."),
-			parent: $card_container,
-			trigger: $icon.get(0),
-			close_button: false,
-			popper: true,
-			hide_icon: true,
-			custom_class: "py-1 px-1",
-		});
-
-		card.hide();
-		$icon.on("mouseenter", () => card.show()).on("mouseleave", () => card.hide());
 	}
 
 	make_inter_company_invoice(frm) {
