@@ -373,7 +373,7 @@ def set_expired_status():
 	frappe.db.multisql(
 		{
 			"mariadb": f"""UPDATE `tabQuotation`  SET `tabQuotation`.status = 'Expired' WHERE {cond} and not exists({so_against_quo})""",
-			"postgres": f"""UPDATE `tabQuotation` SET status = 'Expired' FROM `tabSales Order`, `tabSales Order Item` WHERE {cond} and not exists({so_against_quo})""",
+			"postgres": f"""UPDATE `tabQuotation` SET status = 'Expired' WHERE {cond} and not exists({so_against_quo})""",
 		},
 		(nowdate()),
 	)
