@@ -193,6 +193,6 @@ def get_maintenance_log(asset_name: str):
 	return frappe.get_all(
 		"Asset Maintenance Log",
 		filters={"asset_name": asset_name},
-		fields=["maintenance_status", "count(asset_name) as count", "asset_name"],
+		fields=["maintenance_status", {"COUNT": "asset_name", "as": "count"}, "asset_name"],
 		group_by="maintenance_status, asset_name",
 	)
