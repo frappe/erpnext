@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import cstr, flt
+from frappe.utils import flt
 
 import erpnext
 from erpnext.accounts.report.financial_statements import (
@@ -81,42 +81,34 @@ def get_data(filters, dimension_list):
 
 
 def set_gl_entries_by_account(dimension_list, filters, account, gl_entries_by_account):
-	condition = get_condition(filters.get("dimension"))
-
-	if account:
-		condition += " and account in ({})".format(", ".join([frappe.db.escape(d) for d in account]))
+	dimension_field = frappe.scrub(filters.get("dimension"))
 
 	gl_filters = {
 		"company": filters.get("company"),
-		"from_date": filters.get("from_date"),
-		"to_date": filters.get("to_date"),
-		"finance_book": cstr(filters.get("finance_book")),
+		dimension_field: ["in", list(set(dimension_list))],
+		"posting_date": ["between", [filters.get("from_date"), filters.get("to_date")]],
+		"is_cancelled": 0,
 	}
+	if account:
+		gl_filters["account"] = ["in", account]
 
-	gl_filters["dimensions"] = tuple(set(dimension_list))
-
-	if filters.get("include_default_book_entries"):
-		gl_filters["company_fb"] = frappe.get_cached_value("Company", filters.company, "default_finance_book")
-
-	gl_entries = frappe.db.sql(
-		"""
-		select
-			posting_date, account, {dimension}, debit, credit, is_opening, fiscal_year,
-			debit_in_account_currency, credit_in_account_currency, account_currency
-		from
-			`tabGL Entry`
-		where
-			company=%(company)s
-		{condition}
-		and posting_date >= %(from_date)s
-		and posting_date <= %(to_date)s
-		and is_cancelled = 0
-		order by account, posting_date""".format(
-			dimension=frappe.scrub(filters.get("dimension")), condition=condition
-		),
-		gl_filters,
-		as_dict=True,
-	)  # nosec
+	gl_entries = frappe.get_all(
+		"GL Entry",
+		filters=gl_filters,
+		fields=[
+			"posting_date",
+			"account",
+			dimension_field,
+			"debit",
+			"credit",
+			"is_opening",
+			"fiscal_year",
+			"debit_in_account_currency",
+			"credit_in_account_currency",
+			"account_currency",
+		],
+		order_by="account, posting_date",
+	)
 
 	for entry in gl_entries:
 		gl_entries_by_account.setdefault(entry.account, []).append(entry)
@@ -182,14 +174,6 @@ def accumulate_values_into_parents(accounts, accounts_by_name, dimension_list):
 				accounts_by_name[d.parent_account][frappe.scrub(dimension)] = accounts_by_name[
 					d.parent_account
 				].get(frappe.scrub(dimension), 0.0) + d.get(frappe.scrub(dimension), 0.0)
-
-
-def get_condition(dimension):
-	conditions = []
-
-	conditions.append(f"{frappe.scrub(dimension)} in %(dimensions)s")
-
-	return " and {}".format(" and ".join(conditions)) if conditions else ""
 
 
 def get_dimensions(filters):
