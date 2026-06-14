@@ -427,32 +427,21 @@ class ReceivablePayableReport:
 			self.delivery_notes = frappe._dict()
 
 			# delivery note link inside sales invoice
-			# nosemgrep
-			si_against_dn = frappe.db.sql(
-				"""
-				select parent, delivery_note
-				from `tabSales Invoice Item`
-				where docstatus=1 and parent in (%s)
-			"""
-				% (",".join(["%s"] * len(self.invoices))),
-				tuple(self.invoices),
-				as_dict=1,
+			si_against_dn = frappe.get_all(
+				"Sales Invoice Item",
+				filters={"docstatus": 1, "parent": ["in", list(self.invoices)]},
+				fields=["parent", "delivery_note"],
 			)
 
 			for d in si_against_dn:
 				if d.delivery_note:
 					self.delivery_notes.setdefault(d.parent, set()).add(d.delivery_note)
 
-			# nosemgrep
-			dn_against_si = frappe.db.sql(
-				"""
-				select distinct parent, against_sales_invoice
-				from `tabDelivery Note Item`
-				where against_sales_invoice in (%s)
-			"""
-				% (",".join(["%s"] * len(self.invoices))),
-				tuple(self.invoices),
-				as_dict=1,
+			dn_against_si = frappe.get_all(
+				"Delivery Note Item",
+				filters={"against_sales_invoice": ["in", list(self.invoices)]},
+				fields=["parent", "against_sales_invoice"],
+				distinct=True,
 			)
 
 			for d in dn_against_si:
@@ -476,14 +465,10 @@ class ReceivablePayableReport:
 
 			# Get Sales Team
 			if self.filters.show_sales_person:
-				# nosemgrep
-				sales_team = frappe.db.sql(
-					"""
-					select parent, sales_person
-					from `tabSales Team`
-					where parenttype = 'Sales Invoice'
-				""",
-					as_dict=1,
+				sales_team = frappe.get_all(
+					"Sales Team",
+					filters={"parenttype": "Sales Invoice"},
+					fields=["parent", "sales_person"],
 				)
 				for d in sales_team:
 					self.invoice_details.setdefault(d.parent, {}).setdefault("sales_team", []).append(
@@ -548,22 +533,31 @@ class ReceivablePayableReport:
 
 	def get_payment_terms(self, row):
 		# build payment_terms for row
-		# nosemgrep
-		payment_terms_details = frappe.db.sql(
-			f"""
-			select
-				si.name, si.party_account_currency, si.currency, si.conversion_rate,
-				si.total_advance, ps.due_date, ps.payment_term, ps.payment_amount, ps.base_payment_amount,
-				ps.description, ps.paid_amount, ps.base_paid_amount, ps.discounted_amount
-			from `tab{row.voucher_type}` si, `tabPayment Schedule` ps
-			where
-				si.name = ps.parent and ps.parenttype = '{row.voucher_type}' and
-				si.name = %s and
-				si.is_return = 0
-			order by ps.paid_amount desc, due_date
-		""",
-			row.voucher_no,
-			as_dict=1,
+		si = frappe.qb.DocType(row.voucher_type)
+		ps = frappe.qb.DocType("Payment Schedule")
+		payment_terms_details = (
+			frappe.qb.from_(si)
+			.inner_join(ps)
+			.on(si.name == ps.parent)
+			.select(
+				si.name,
+				si.party_account_currency,
+				si.currency,
+				si.conversion_rate,
+				si.total_advance,
+				ps.due_date,
+				ps.payment_term,
+				ps.payment_amount,
+				ps.base_payment_amount,
+				ps.description,
+				ps.paid_amount,
+				ps.base_paid_amount,
+				ps.discounted_amount,
+			)
+			.where((ps.parenttype == row.voucher_type) & (si.name == row.voucher_no) & (si.is_return == 0))
+			.orderby(ps.paid_amount, order=frappe.qb.desc)
+			.orderby(ps.due_date)
+			.run(as_dict=1)
 		)
 
 		original_row = frappe._dict(row)
@@ -891,16 +885,19 @@ class ReceivablePayableReport:
 		if self.filters.get("sales_person"):
 			lft, rgt = frappe.db.get_value("Sales Person", self.filters.get("sales_person"), ["lft", "rgt"])
 
-			# nosemgrep
-			records = frappe.db.sql(
-				"""
-				select distinct parent, parenttype
-				from `tabSales Team` steam
-				where parenttype in ('Customer', 'Sales Invoice')
-					and exists(select name from `tabSales Person` where lft >= %s and rgt <= %s and name = steam.sales_person)
-			""",
-				(lft, rgt),
-				as_dict=1,
+			steam = frappe.qb.DocType("Sales Team")
+			sp = frappe.qb.DocType("Sales Person")
+			records = (
+				frappe.qb.from_(steam)
+				.select(steam.parent, steam.parenttype)
+				.distinct()
+				.where(
+					steam.parenttype.isin(["Customer", "Sales Invoice"])
+					& steam.sales_person.isin(
+						frappe.qb.from_(sp).select(sp.name).where((sp.lft >= lft) & (sp.rgt <= rgt))
+					)
+				)
+				.run(as_dict=1)
 			)
 
 			self.sales_person_records = frappe._dict()
