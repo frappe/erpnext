@@ -73,7 +73,10 @@ class PeriodClosingVoucher(AccountsController):
 		if not previous_fiscal_year:
 			return
 
-		previous_fiscal_year_start_date = previous_fiscal_year[0][1]
+		# get_fiscal_year() returns a single (name, start_date, end_date) tuple, so the start date
+		# is [1]; the old [0][1] read the 2nd char of the name ('T'), which MariaDB silently
+		# coerced to NULL but postgres rejects as an invalid date.
+		previous_fiscal_year_start_date = previous_fiscal_year[1]
 		previous_fiscal_year_closed = frappe.db.exists(
 			"Period Closing Voucher",
 			{

@@ -68,7 +68,7 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		]
 		pcv.reload()
 		self.assertEqual(pcv.gle_processing_status, "Completed")
-		self.assertEqual(pcv_gle, expected_gle)
+		self.assertEqual(tuple(pcv_gle), expected_gle)
 
 	def test_cost_center_wise_posting(self):
 		company = create_company()
@@ -186,7 +186,8 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 			)
 		]
 
-		self.assertSequenceEqual(pcv_gle, expected_gle)
+		# compare order-independently: postgres and MariaDB order NULL finance_book differently
+		self.assertSequenceEqual(sorted(pcv_gle, key=str), sorted(expected_gle, key=str))
 
 	def test_gl_entries_restrictions(self):
 		company = create_company()
