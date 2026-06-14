@@ -82,12 +82,21 @@ def validate_filters(filters):
 
 
 def get_data(filters):
-	accounts = frappe.db.sql(
-		"""select name, account_number, parent_account, account_name, root_type, report_type, is_group, lft, rgt
-
-		from `tabAccount` where company=%s order by lft""",
-		filters.company,
-		as_dict=True,
+	accounts = frappe.get_all(
+		"Account",
+		filters={"company": filters.company},
+		fields=[
+			"name",
+			"account_number",
+			"parent_account",
+			"account_name",
+			"root_type",
+			"report_type",
+			"is_group",
+			"lft",
+			"rgt",
+		],
+		order_by="lft",
 	)
 	company_currency = filters.presentation_currency or erpnext.get_company_currency(filters.company)
 
