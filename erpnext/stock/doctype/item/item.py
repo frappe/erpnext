@@ -6,9 +6,9 @@ import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 from frappe.model.naming import NamingSeries
-from frappe.query_builder import Interval
-from frappe.query_builder.functions import Count, CurDate, UnixTimestamp
+from frappe.query_builder.functions import Count, UnixTimestamp
 from frappe.utils import (
+	add_to_date,
 	cint,
 	cstr,
 	flt,
@@ -1216,7 +1216,8 @@ def get_timeline_data(doctype: str, name: str) -> dict[int, int]:
 		frappe.qb.from_(sle)
 		.select(UnixTimestamp(sle.posting_date), Count("*"))
 		.where(sle.item_code == name)
-		.where(sle.posting_date > CurDate() - Interval(years=1))
+		# portable "one year ago" (MySQL CURRENT_DATE() - INTERVAL is not valid on postgres)
+		.where(sle.posting_date > add_to_date(getdate(), years=-1))
 		.groupby(sle.posting_date)
 		.run()
 	)
