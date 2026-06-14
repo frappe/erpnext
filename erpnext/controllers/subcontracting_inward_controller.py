@@ -509,8 +509,9 @@ class SubcontractingInwardController:
 					(
 						Case()
 						.when(
+							# bool() so the literal renders as true/false; postgres rejects `OR <integer>`
 							(table.produced_qty < table.qty)
-							| ValueWrapper(allow_delivery_of_overproduced_qty),
+							| ValueWrapper(bool(allow_delivery_of_overproduced_qty)),
 							table.produced_qty,
 						)
 						.else_(table.qty)

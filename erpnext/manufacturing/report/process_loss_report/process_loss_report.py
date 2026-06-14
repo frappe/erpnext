@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Max, Sum
 
 Filters = frappe._dict
 Row = frappe._dict
@@ -29,12 +29,14 @@ def get_data(filters: Filters) -> Data:
 		.inner_join(se)
 		.on(wo.name == se.work_order)
 		.select(
-			wo.name,
-			wo.status,
-			wo.production_item,
-			wo.produced_qty,
-			wo.process_loss_qty,
-			wo.qty.as_("qty_to_manufacture"),
+			# grouped by se.work_order (== wo.name); the work-order columns are constant per group ->
+			# Max() keeps the GROUP BY valid on postgres with the same value.
+			Max(wo.name).as_("name"),
+			Max(wo.status).as_("status"),
+			Max(wo.production_item).as_("production_item"),
+			Max(wo.produced_qty).as_("produced_qty"),
+			Max(wo.process_loss_qty).as_("process_loss_qty"),
+			Max(wo.qty).as_("qty_to_manufacture"),
 			Sum(se.total_incoming_value).as_("total_fg_value"),
 			Sum(se.total_outgoing_value).as_("total_rm_value"),
 		)
