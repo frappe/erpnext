@@ -342,7 +342,7 @@ def get_avg_purchase_rate(serial_nos):
 	serial_nos = get_valid_serial_nos(serial_nos)
 	return flt(
 		frappe.get_all(
-			"Serial No", filters={"name": ["in", serial_nos]}, fields=["avg(purchase_rate) as rate"]
+			"Serial No", filters={"name": ["in", serial_nos]}, fields=[{"AVG": "purchase_rate", "as": "rate"}]
 		)[0].rate
 	)
 
