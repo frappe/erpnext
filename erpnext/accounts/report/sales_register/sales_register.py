@@ -500,7 +500,7 @@ def get_invoice_income_map(invoice_list):
 	income_details = frappe.get_all(
 		"Sales Invoice Item",
 		filters={"parent": ["in", [inv.name for inv in invoice_list]]},
-		fields=["parent", "income_account", "sum(base_net_amount) as amount"],
+		fields=["parent", "income_account", {"SUM": "base_net_amount", "as": "amount"}],
 		group_by="parent, income_account",
 	)
 
@@ -537,7 +537,11 @@ def get_invoice_tax_map(invoice_list, invoice_income_map, income_accounts, inclu
 	tax_details = frappe.get_all(
 		"Sales Taxes and Charges",
 		filters={"parent": ["in", [inv.name for inv in invoice_list]], "parenttype": "Sales Invoice"},
-		fields=["parent", "account_head", "sum(base_tax_amount_after_discount_amount) as tax_amount"],
+		fields=[
+			"parent",
+			"account_head",
+			{"SUM": "base_tax_amount_after_discount_amount", "as": "tax_amount"},
+		],
 		group_by="parent, account_head",
 	)
 
