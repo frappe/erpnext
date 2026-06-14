@@ -505,19 +505,16 @@ class POSInvoice(SalesInvoice):
 			if d.get("serial_no"):
 				serial_nos = get_serial_nos(d.serial_no)
 				for sr in serial_nos:
-					serial_no_exists = frappe.db.sql(
-						"""
-						SELECT name
-						FROM `tabPOS Invoice Item`
-						WHERE
-							parent = %s
-							and (serial_no = %s
-								or serial_no like %s
-								or serial_no like %s
-								or serial_no like %s
-							)
-					""",
-						(self.return_against, sr, sr + "\n%", "%\n" + sr, "%\n" + sr + "\n%"),
+					serial_no_exists = frappe.get_all(
+						"POS Invoice Item",
+						filters={"parent": self.return_against},
+						or_filters=[
+							["serial_no", "=", sr],
+							["serial_no", "like", f"{sr}\n%"],
+							["serial_no", "like", f"%\n{sr}"],
+							["serial_no", "like", f"%\n{sr}\n%"],
+						],
+						limit=1,
 					)
 
 					if not serial_no_exists:
@@ -963,15 +960,9 @@ def get_bundle_availability(bundle_item_code, warehouse):
 
 
 def get_bin_qty(item_code, warehouse):
-	bin_qty = frappe.db.sql(
-		"""select actual_qty from `tabBin`
-		where item_code = %s and warehouse = %s
-		limit 1""",
-		(item_code, warehouse),
-		as_dict=1,
-	)
+	actual_qty = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty")
 
-	return bin_qty[0].actual_qty or 0 if bin_qty else 0
+	return actual_qty or 0
 
 
 def get_pos_reserved_qty(item_code, warehouse):
