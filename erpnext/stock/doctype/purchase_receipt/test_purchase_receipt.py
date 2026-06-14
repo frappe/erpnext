@@ -5848,12 +5848,11 @@ def prepare_data_for_internal_transfer():
 
 
 def get_sl_entries(voucher_type, voucher_no):
-	return frappe.db.sql(
-		""" select actual_qty, warehouse, stock_value_difference
-		from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s
-		order by posting_time desc""",
-		(voucher_type, voucher_no),
-		as_dict=1,
+	return frappe.get_all(
+		"Stock Ledger Entry",
+		filters={"voucher_type": voucher_type, "voucher_no": voucher_no},
+		fields=["actual_qty", "warehouse", "stock_value_difference"],
+		order_by="posting_time desc",
 	)
 
 
