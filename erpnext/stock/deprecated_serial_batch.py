@@ -146,7 +146,6 @@ class DeprecatedBatchNoValuation:
 				& (sle.batch_no.isnotnull())
 				& (sle.is_cancelled == 0)
 			)
-			# FOR UPDATE is invalid with GROUP BY on postgres (deprecated valuation path)
 			.groupby(sle.batch_no)
 		)
 
@@ -155,6 +154,10 @@ class DeprecatedBatchNoValuation:
 
 		if self.sle.name:
 			query = query.where(sle.name != self.sle.name)
+
+		# lock scanned rows on MariaDB; FOR UPDATE is invalid with GROUP BY on postgres
+		if frappe.db.db_type != "postgres":
+			query = query.for_update()
 
 		return query.run(as_dict=True)
 
@@ -267,7 +270,6 @@ class DeprecatedBatchNoValuation:
 				& (sle.is_cancelled == 0)
 				& (sle.batch_no.isin(self.non_batchwise_valuation_batches))
 			)
-			# FOR UPDATE is invalid with GROUP BY on postgres (deprecated valuation path)
 			.where(timestamp_condition)
 			.groupby(sle.batch_no)
 		)
@@ -283,6 +285,10 @@ class DeprecatedBatchNoValuation:
 			):
 				query = query.where(batch.use_batchwise_valuation == 0)
 				moving_avg_item_non_batch_value = True
+
+		# lock scanned rows on MariaDB; FOR UPDATE is invalid with GROUP BY on postgres
+		if frappe.db.db_type != "postgres":
+			query = query.for_update()
 
 		batch_data = query.run(as_dict=True)
 		for d in batch_data:
@@ -409,6 +415,10 @@ class DeprecatedBatchNoValuation:
 			):
 				query = query.where(batch.use_batchwise_valuation == 0)
 				moving_avg_item_non_batch_value = True
+
+		# lock scanned rows on MariaDB; FOR UPDATE is invalid with GROUP BY on postgres
+		if frappe.db.db_type != "postgres":
+			query = query.for_update()
 
 		batch_data = query.run(as_dict=True)
 		for d in batch_data:
