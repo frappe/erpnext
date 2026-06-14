@@ -662,7 +662,7 @@ class PurchaseOrder(BuyingController):
 
 	def update_subcontracting_order_status(self):
 		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
-			update_subcontracting_order_status as update_sco_status,
+			set_subcontracting_order_status as update_sco_status,
 		)
 
 		if self.is_subcontracted and not self.is_old_subcontracting_flow:

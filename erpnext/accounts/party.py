@@ -510,10 +510,10 @@ def get_party_advance_account(party_type, party, company):
 	return account
 
 
-@frappe.whitelist()
 def get_party_bank_account(party_type: str, party: str):
-	frappe.has_permission("Bank Account", "read", throw=True)
-	return frappe.db.get_value("Bank Account", {"party_type": party_type, "party": party, "is_default": 1})
+	return frappe.db.get_value(
+		"Bank Account", {"party_type": party_type, "party": party, "is_default": 1, "disabled": 0}, "name"
+	)
 
 
 def get_party_account_currency(party_type, party, company):
