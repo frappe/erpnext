@@ -60,8 +60,9 @@ class TestGLEntry(ERPNextTestSuite):
 		)
 
 		self.assertTrue(all(entry.to_rename == 1 for entry in gl_entries))
-		old_naming_series_current_value = frappe.db.sql(
-			"SELECT current from tabSeries where name = %s", naming_series
+		series = frappe.qb.DocType("Series")
+		old_naming_series_current_value = (
+			frappe.qb.from_(series).select(series["current"]).where(series.name == naming_series).run()
 		)[0][0]
 
 		rename_gle_sle_docs()
@@ -78,8 +79,8 @@ class TestGLEntry(ERPNextTestSuite):
 			all(new.name != old.name for new, old in zip(gl_entries, new_gl_entries, strict=False))
 		)
 
-		new_naming_series_current_value = frappe.db.sql(
-			"SELECT current from tabSeries where name = %s", naming_series
+		new_naming_series_current_value = (
+			frappe.qb.from_(series).select(series["current"]).where(series.name == naming_series).run()
 		)[0][0]
 		self.assertEqual(old_naming_series_current_value + 2, new_naming_series_current_value)
 
