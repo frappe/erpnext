@@ -1,6 +1,7 @@
 import frappe
 from frappe import _
 from frappe.email import sendmail_to_system_managers
+from frappe.query_builder.functions import Sum
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -136,26 +137,39 @@ def get_booking_dates(doc, item, posting_date=None, prev_posting_date=None):
 	)
 
 	if not prev_posting_date:
-		prev_gl_entry = frappe.db.sql(
-			"""
-			select name, posting_date from `tabGL Entry` where company=%s and account=%s and
-			voucher_type=%s and voucher_no=%s and voucher_detail_no=%s
-			and is_cancelled = 0
-			order by posting_date desc limit 1
-		""",
-			(doc.company, item.get(deferred_account), doc.doctype, doc.name, item.name),
-			as_dict=True,
+		prev_gl_entry = frappe.get_all(
+			"GL Entry",
+			filters={
+				"company": doc.company,
+				"account": item.get(deferred_account),
+				"voucher_type": doc.doctype,
+				"voucher_no": doc.name,
+				"voucher_detail_no": item.name,
+				"is_cancelled": 0,
+			},
+			fields=["name", "posting_date"],
+			order_by="posting_date desc",
+			limit=1,
 		)
 
-		prev_gl_via_je = frappe.db.sql(
-			"""
-			SELECT p.name, p.posting_date FROM `tabJournal Entry` p, `tabJournal Entry Account` c
-			WHERE p.name = c.parent and p.company=%s and c.account=%s
-			and c.reference_type=%s and c.reference_name=%s
-			and c.reference_detail_no=%s and c.docstatus < 2 order by posting_date desc limit 1
-		""",
-			(doc.company, item.get(deferred_account), doc.doctype, doc.name, item.name),
-			as_dict=True,
+		je = frappe.qb.DocType("Journal Entry")
+		jea = frappe.qb.DocType("Journal Entry Account")
+		prev_gl_via_je = (
+			frappe.qb.from_(je)
+			.inner_join(jea)
+			.on(je.name == jea.parent)
+			.select(je.name, je.posting_date)
+			.where(
+				(je.company == doc.company)
+				& (jea.account == item.get(deferred_account))
+				& (jea.reference_type == doc.doctype)
+				& (jea.reference_name == doc.name)
+				& (jea.reference_detail_no == item.name)
+				& (jea.docstatus < 2)
+			)
+			.orderby(je.posting_date, order=frappe.qb.desc)
+			.limit(1)
+			.run(as_dict=True)
 		)
 
 		if prev_gl_via_je:
@@ -277,26 +291,47 @@ def get_already_booked_amount(doc, item):
 		total_credit_debit, total_credit_debit_currency = "credit", "credit_in_account_currency"
 		deferred_account = "deferred_expense_account"
 
-	gl_entries_details = frappe.db.sql(
-		"""
-		select sum({}) as total_credit, sum({}) as total_credit_in_account_currency, voucher_detail_no
-		from `tabGL Entry` where company=%s and account=%s and voucher_type=%s and voucher_no=%s and voucher_detail_no=%s
-		and is_cancelled = 0
-		group by voucher_detail_no
-	""".format(total_credit_debit, total_credit_debit_currency),
-		(doc.company, item.get(deferred_account), doc.doctype, doc.name, item.name),
-		as_dict=True,
+	gle = frappe.qb.DocType("GL Entry")
+	gl_entries_details = (
+		frappe.qb.from_(gle)
+		.select(
+			Sum(gle[total_credit_debit]).as_("total_credit"),
+			Sum(gle[total_credit_debit_currency]).as_("total_credit_in_account_currency"),
+			gle.voucher_detail_no,
+		)
+		.where(
+			(gle.company == doc.company)
+			& (gle.account == item.get(deferred_account))
+			& (gle.voucher_type == doc.doctype)
+			& (gle.voucher_no == doc.name)
+			& (gle.voucher_detail_no == item.name)
+			& (gle.is_cancelled == 0)
+		)
+		.groupby(gle.voucher_detail_no)
+		.run(as_dict=True)
 	)
 
-	journal_entry_details = frappe.db.sql(
-		"""
-		SELECT sum(c.{}) as total_credit, sum(c.{}) as total_credit_in_account_currency, reference_detail_no
-		FROM `tabJournal Entry` p , `tabJournal Entry Account` c WHERE p.name = c.parent and
-		p.company = %s and c.account=%s and c.reference_type=%s and c.reference_name=%s and c.reference_detail_no=%s
-		and p.docstatus < 2 group by reference_detail_no
-	""".format(total_credit_debit, total_credit_debit_currency),
-		(doc.company, item.get(deferred_account), doc.doctype, doc.name, item.name),
-		as_dict=True,
+	je = frappe.qb.DocType("Journal Entry")
+	jea = frappe.qb.DocType("Journal Entry Account")
+	journal_entry_details = (
+		frappe.qb.from_(je)
+		.inner_join(jea)
+		.on(je.name == jea.parent)
+		.select(
+			Sum(jea[total_credit_debit]).as_("total_credit"),
+			Sum(jea[total_credit_debit_currency]).as_("total_credit_in_account_currency"),
+			jea.reference_detail_no,
+		)
+		.where(
+			(je.company == doc.company)
+			& (jea.account == item.get(deferred_account))
+			& (jea.reference_type == doc.doctype)
+			& (jea.reference_name == doc.name)
+			& (jea.reference_detail_no == item.name)
+			& (je.docstatus < 2)
+		)
+		.groupby(jea.reference_detail_no)
+		.run(as_dict=True)
 	)
 
 	already_booked_amount = gl_entries_details[0].total_credit if gl_entries_details else 0
