@@ -510,12 +510,6 @@ def get_party_advance_account(party_type, party, company):
 	return account
 
 
-def get_party_bank_account(party_type: str, party: str):
-	return frappe.db.get_value(
-		"Bank Account", {"party_type": party_type, "party": party, "is_default": 1, "disabled": 0}, "name"
-	)
-
-
 def get_party_account_currency(party_type, party, company):
 	def generator():
 		party_account = get_party_account(party_type, party, company)

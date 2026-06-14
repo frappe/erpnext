@@ -11,12 +11,18 @@ from erpnext import get_company_currency
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
+from erpnext.accounts.doctype.bank_account.bank_account import get_party_bank_account
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	get_payment_entry,
 )
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
+<<<<<<< HEAD
 from erpnext.accounts.party import get_party_account, get_party_bank_account
 from erpnext.accounts.utils import get_account_currency, get_currency_precision
+=======
+from erpnext.accounts.party import get_party_account
+from erpnext.accounts.utils import get_account_currency, get_advance_payment_doctypes, get_currency_precision
+>>>>>>> ede13cb3bd (refactor: consolidate duplicate get_party_bank_account into bank_account.py)
 from erpnext.utilities import payment_app_import_guard
 
 ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST = [
