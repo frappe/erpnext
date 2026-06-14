@@ -309,19 +309,24 @@ class FIFOSlots:
 		self.prepare_stock_reco_voucher_wise_count()
 
 		if stock_ledger_entries is None:
-			# nested queries invalidate the streaming cursor below,
+			# streaming path: nested queries invalidate the streaming cursor below,
 			# so batchwise valuation flags must be resolved beforehand
 			self._prefetch_batchwise_valuations()
 
-		with frappe.db.unbuffered_cursor():
-			if stock_ledger_entries is None:
+			with frappe.db.unbuffered_cursor():
 				stock_ledger_entries = self._get_stock_ledger_entries()
 
+				for row in stock_ledger_entries:
+					self._process_stock_ledger_entry(row, bundle_wise_serial_nos, bundle_wise_batch_nos)
+
+				# Note that stock_ledger_entries is an iterator, you can not reuse it like a list
+				del stock_ledger_entries
+		else:
+			# entries passed in directly as a list: no streaming cursor is opened, so the batchwise
+			# valuation flags can be resolved lazily — a nested get_value here is safe on postgres too
+			# (running it inside an unbuffered/named cursor would raise on postgres).
 			for row in stock_ledger_entries:
 				self._process_stock_ledger_entry(row, bundle_wise_serial_nos, bundle_wise_batch_nos)
-
-			# Note that stock_ledger_entries is an iterator, you can not reuse it like a list
-			del stock_ledger_entries
 
 		if not self.filters.get("show_warehouse_wise_stock"):
 			# (Item 1, WH 1), (Item 1, WH 2) => (Item 1)

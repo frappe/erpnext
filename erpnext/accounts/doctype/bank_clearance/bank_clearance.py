@@ -7,7 +7,7 @@ from frappe import _, msgprint
 from frappe.model.document import Document
 from frappe.query_builder import Case
 from frappe.query_builder.custom import ConstantColumn
-from frappe.query_builder.functions import Coalesce, Sum
+from frappe.query_builder.functions import Coalesce, Max, Sum
 from frappe.utils import cint, flt, fmt_money, getdate
 from pypika import Order
 
@@ -195,14 +195,17 @@ def get_payment_entries_for_bank_clearance(
 		.select(
 			ConstantColumn("Journal Entry").as_("payment_document"),
 			journal_entry.name.as_("payment_entry"),
-			journal_entry.cheque_no.as_("cheque_number"),
-			journal_entry.cheque_date,
+			# non-grouped columns are constant per grouped JE name / account (against_account is
+			# arbitrary per group on MySQL) -> Max() keeps the GROUP BY valid on postgres with the
+			# same value MySQL picked.
+			Max(journal_entry.cheque_no).as_("cheque_number"),
+			Max(journal_entry.cheque_date).as_("cheque_date"),
 			Sum(journal_entry_account.debit_in_account_currency).as_("debit"),
 			Sum(journal_entry_account.credit_in_account_currency).as_("credit"),
-			journal_entry.posting_date,
-			journal_entry_account.against_account,
-			journal_entry.clearance_date,
-			journal_entry_account.account_currency,
+			Max(journal_entry.posting_date).as_("posting_date"),
+			Max(journal_entry_account.against_account).as_("against_account"),
+			Max(journal_entry.clearance_date).as_("clearance_date"),
+			Max(journal_entry_account.account_currency).as_("account_currency"),
 		)
 		.where(
 			(journal_entry_account.account == account)
@@ -221,7 +224,7 @@ def get_payment_entries_for_bank_clearance(
 
 	journal_entries = (
 		journal_entry_query.groupby(journal_entry_account.account, journal_entry.name)
-		.orderby(journal_entry.posting_date)
+		.orderby(Max(journal_entry.posting_date))
 		.orderby(journal_entry.name, order=Order.desc)
 	).run(as_dict=True)
 

@@ -404,7 +404,10 @@ def make_variant_item_code(template_item_code, template_item_name, variant):
 			.select(ia.numeric_values, iav.abbr)
 			.where(
 				(ia.name == attr.attribute)
-				& ((iav.attribute_value == attr.attribute_value) | (ia.numeric_values == 1))
+				# attribute_value is a varchar column; cast the param to str so postgres doesn't choke on
+				# `varchar = numeric` for numeric attributes (where this side is irrelevant anyway, since
+				# numeric_values == 1 already satisfies the OR). Non-numeric values are already strings.
+				& ((iav.attribute_value == cstr(attr.attribute_value)) | (ia.numeric_values == 1))
 			)
 			.run(as_dict=True)
 		)
