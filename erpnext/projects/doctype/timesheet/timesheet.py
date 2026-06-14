@@ -7,6 +7,7 @@ import json
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder.functions import Date
 from frappe.utils import flt, get_datetime, getdate
 from frappe.utils.deprecations import deprecated
 
@@ -308,41 +309,41 @@ def get_projectwise_timesheet_data(
 	from_time: str | None = None,
 	to_time: str | None = None,
 ):
-	condition = ""
+	tsd = frappe.qb.DocType("Timesheet Detail")
+	ts = frappe.qb.DocType("Timesheet")
+
+	query = (
+		frappe.qb.from_(tsd)
+		.inner_join(ts)
+		.on(ts.name == tsd.parent)
+		.select(
+			tsd.name.as_("name"),
+			tsd.parent.as_("time_sheet"),
+			tsd.from_time.as_("from_time"),
+			tsd.to_time.as_("to_time"),
+			tsd.billing_hours.as_("billing_hours"),
+			tsd.billing_amount.as_("billing_amount"),
+			tsd.activity_type.as_("activity_type"),
+			tsd.description.as_("description"),
+			ts.currency.as_("currency"),
+			tsd.project_name.as_("project_name"),
+		)
+		.where(
+			(tsd.parenttype == "Timesheet")
+			& (tsd.docstatus == 1)
+			& (tsd.is_billable == 1)
+			& tsd.sales_invoice.isnull()
+		)
+	)
+
 	if project:
-		condition += "AND tsd.project = %(project)s "
+		query = query.where(tsd.project == project)
 	if parent:
-		condition += "AND tsd.parent = %(parent)s "
+		query = query.where(tsd.parent == parent)
 	if from_time and to_time:
-		condition += "AND CAST(tsd.from_time as DATE) BETWEEN %(from_time)s AND %(to_time)s"
+		query = query.where(Date(tsd.from_time).between(from_time, to_time))
 
-	query = f"""
-		SELECT
-			tsd.name as name,
-			tsd.parent as time_sheet,
-			tsd.from_time as from_time,
-			tsd.to_time as to_time,
-			tsd.billing_hours as billing_hours,
-			tsd.billing_amount as billing_amount,
-			tsd.activity_type as activity_type,
-			tsd.description as description,
-			ts.currency as currency,
-			tsd.project_name as project_name
-		FROM `tabTimesheet Detail` tsd
-			INNER JOIN `tabTimesheet` ts
-			ON ts.name = tsd.parent
-		WHERE
-			tsd.parenttype = 'Timesheet'
-			AND tsd.docstatus = 1
-			AND tsd.is_billable = 1
-			AND tsd.sales_invoice is NULL
-			{condition}
-		ORDER BY tsd.from_time ASC
-	"""
-
-	filters = {"project": project, "parent": parent, "from_time": from_time, "to_time": to_time}
-
-	return frappe.db.sql(query, filters, as_dict=1)
+	return query.orderby(tsd.from_time).run(as_dict=1)
 
 
 @frappe.whitelist()
@@ -372,24 +373,27 @@ def get_timesheet(doctype: str, txt: str, searchfield: str, start: int, page_len
 	if not filters:
 		filters = {}
 
-	condition = ""
-	if filters.get("project"):
-		condition = "and tsd.project = %(project)s"
+	tsd = frappe.qb.DocType("Timesheet Detail")
+	ts = frappe.qb.DocType("Timesheet")
 
-	return frappe.db.sql(
-		f"""select distinct tsd.parent from `tabTimesheet Detail` tsd,
-			`tabTimesheet` ts where
-			ts.status in ('Submitted', 'Payslip') and tsd.parent = ts.name and
-			tsd.docstatus = 1 and ts.total_billable_amount > 0
-			and tsd.parent LIKE %(txt)s {condition}
-			order by tsd.parent limit %(page_len)s offset %(start)s""",
-		{
-			"txt": "%" + txt + "%",
-			"start": start,
-			"page_len": page_len,
-			"project": filters.get("project"),
-		},
+	query = (
+		frappe.qb.from_(tsd)
+		.inner_join(ts)
+		.on(tsd.parent == ts.name)
+		.select(tsd.parent)
+		.distinct()
+		.where(
+			ts.status.isin(["Submitted", "Payslip"])
+			& (tsd.docstatus == 1)
+			& (ts.total_billable_amount > 0)
+			& tsd.parent.like(f"%{txt}%")
+		)
 	)
+
+	if filters.get("project"):
+		query = query.where(tsd.project == filters.get("project"))
+
+	return query.orderby(tsd.parent).limit(page_len).offset(start).run()
 
 
 @frappe.whitelist()
