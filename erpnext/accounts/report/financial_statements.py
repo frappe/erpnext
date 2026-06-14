@@ -179,11 +179,10 @@ def get_data(
 	company_currency = get_appropriate_currency(company, filters)
 
 	gl_entries_by_account = {}
-	for root in frappe.db.sql(
-		"""select lft, rgt from tabAccount
-			where root_type=%s and ifnull(parent_account, '') = ''""",
-		root_type,
-		as_dict=1,
+	for root in frappe.get_all(
+		"Account",
+		filters={"root_type": root_type, "parent_account": ["is", "not set"]},
+		fields=["lft", "rgt"],
 	):
 		set_gl_entries_by_account(
 			company,
@@ -373,13 +372,23 @@ def add_total_row(out, root_type, balance_must_be, period_list, company_currency
 
 
 def get_accounts(company, root_type):
-	return frappe.db.sql(
-		"""
-		select name, account_number, parent_account, lft, rgt, root_type, report_type, account_name, include_in_gross, account_type, is_group, lft, rgt
-		from `tabAccount`
-		where company=%s and root_type=%s order by lft""",
-		(company, root_type),
-		as_dict=True,
+	return frappe.get_all(
+		"Account",
+		filters={"company": company, "root_type": root_type},
+		fields=[
+			"name",
+			"account_number",
+			"parent_account",
+			"lft",
+			"rgt",
+			"root_type",
+			"report_type",
+			"account_name",
+			"include_in_gross",
+			"account_type",
+			"is_group",
+		],
+		order_by="lft",
 	)
 
 
