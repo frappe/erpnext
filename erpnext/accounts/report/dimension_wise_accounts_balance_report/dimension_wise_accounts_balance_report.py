@@ -31,18 +31,23 @@ def execute(filters=None):
 def get_data(filters, dimension_list):
 	company_currency = erpnext.get_company_currency(filters.company)
 
-	acc = frappe.db.sql(
-		"""
-		select
-			name, account_number, parent_account, lft, rgt, root_type,
-			report_type, account_name, include_in_gross, account_type, is_group
-		from
-			`tabAccount`
-		where
-			company=%s
-			order by lft""",
-		(filters.company),
-		as_dict=True,
+	acc = frappe.get_all(
+		"Account",
+		filters={"company": filters.company},
+		fields=[
+			"name",
+			"account_number",
+			"parent_account",
+			"lft",
+			"rgt",
+			"root_type",
+			"report_type",
+			"account_name",
+			"include_in_gross",
+			"account_type",
+			"is_group",
+		],
+		order_by="lft",
 	)
 
 	if not acc:
@@ -50,16 +55,17 @@ def get_data(filters, dimension_list):
 
 	accounts, accounts_by_name, parent_children_map = filter_accounts(acc)
 
-	min_lft, max_rgt = frappe.db.sql(
-		"""select min(lft), max(rgt) from `tabAccount`
-		where company=%s""",
-		(filters.company),
+	lft_rgt = frappe.get_all(
+		"Account",
+		filters={"company": filters.company},
+		fields=["min(lft) as min_lft", "max(rgt) as max_rgt"],
 	)[0]
+	min_lft, max_rgt = lft_rgt.min_lft, lft_rgt.max_rgt
 
-	account = frappe.db.sql_list(
-		"""select name from `tabAccount`
-		where lft >= %s and rgt <= %s and company = %s""",
-		(min_lft, max_rgt, filters.company),
+	account = frappe.get_all(
+		"Account",
+		filters={"lft": [">=", min_lft], "rgt": ["<=", max_rgt], "company": filters.company},
+		pluck="name",
 	)
 
 	gl_entries_by_account = {}
