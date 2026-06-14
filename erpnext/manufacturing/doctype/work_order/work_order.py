@@ -843,15 +843,16 @@ class WorkOrder(Document):
 			frappe.throw(_("Stopped Work Order cannot be cancelled, Unstop it first to cancel"))
 
 		# Check whether any stock entry exists against this Work Order
-		stock_entry = frappe.db.sql(
-			"""select name from `tabStock Entry`
-			where work_order = %s and docstatus = 1""",
-			self.name,
+		stock_entry = frappe.get_all(
+			"Stock Entry",
+			filters={"work_order": self.name, "docstatus": 1},
+			pluck="name",
+			limit=1,
 		)
 		if stock_entry:
 			frappe.throw(
 				_("Cannot cancel because submitted Stock Entry {0} exists").format(
-					frappe.utils.get_link_to_form("Stock Entry", stock_entry[0][0])
+					frappe.utils.get_link_to_form("Stock Entry", stock_entry[0])
 				)
 			)
 
@@ -942,14 +943,20 @@ class WorkOrder(Document):
 
 	@frappe.whitelist()
 	def make_bom(self):
-		data = frappe.db.sql(
-			""" select sed.item_code, sed.qty, sed.s_warehouse
-			from `tabStock Entry Detail` sed, `tabStock Entry` se
-			where se.name = sed.parent and se.purpose = 'Manufacture'
-			and (sed.t_warehouse is null or sed.t_warehouse = '') and se.docstatus = 1
-			and se.work_order = %s""",
-			(self.name),
-			as_dict=1,
+		sed = frappe.qb.DocType("Stock Entry Detail")
+		se = frappe.qb.DocType("Stock Entry")
+		data = (
+			frappe.qb.from_(sed)
+			.inner_join(se)
+			.on(se.name == sed.parent)
+			.select(sed.item_code, sed.qty, sed.s_warehouse)
+			.where(
+				(se.purpose == "Manufacture")
+				& (sed.t_warehouse.isnull() | (sed.t_warehouse == ""))
+				& (se.docstatus == 1)
+				& (se.work_order == self.name)
+			)
+			.run(as_dict=1)
 		)
 
 		bom = frappe.new_doc("BOM")
