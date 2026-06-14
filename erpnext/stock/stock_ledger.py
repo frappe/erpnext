@@ -383,7 +383,15 @@ def get_items_to_be_repost(voucher_type=None, voucher_no=None, doc=None, reposti
 		items_to_be_repost = frappe.db.get_all(
 			"Stock Ledger Entry",
 			filters={"voucher_type": voucher_type, "voucher_no": voucher_no},
-			fields=["item_code", "warehouse", "posting_date", "posting_time", "creation", "posting_datetime"],
+			fields=[
+				"item_code",
+				"warehouse",
+				# aggregate non-grouped columns (earliest row per item+warehouse) so postgres accepts the GROUP BY
+				{"MIN": "posting_date", "as": "posting_date"},
+				{"MIN": "posting_time", "as": "posting_time"},
+				{"MIN": "creation", "as": "creation"},
+				{"MIN": "posting_datetime", "as": "posting_datetime"},
+			],
 			order_by="creation asc",
 			group_by="item_code, warehouse",
 		)

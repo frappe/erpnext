@@ -431,7 +431,9 @@ def reconcile(doc: None | str = None) -> None:
 					# Update reconciled flag
 					allocation_names = [x.name for x in allocations]
 					ppa = qb.DocType("Process Payment Reconciliation Log Allocations")
-					qb.update(ppa).set(ppa.reconciled, True).where(ppa.name.isin(allocation_names)).run()
+					qb.update(ppa).set(ppa.reconciled, 1).where(
+						ppa.name.isin(allocation_names)
+					).run()  # smallint, not bool
 
 					# Update reconciled count
 					reconciled_count = frappe.db.count(
