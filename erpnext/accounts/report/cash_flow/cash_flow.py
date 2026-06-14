@@ -367,11 +367,10 @@ def get_net_income(company, period_list, filters):
 	from_date, to_date = get_opening_range_using_fiscal_year(company, period_list)
 
 	for root_type in ["Income", "Expense"]:
-		for root in frappe.db.sql(
-			"""select lft, rgt from tabAccount
-				where root_type=%s and ifnull(parent_account, '') = ''""",
-			root_type,
-			as_dict=1,
+		for root in frappe.get_all(
+			"Account",
+			filters={"root_type": root_type, "parent_account": ["is", "not set"]},
+			fields=["lft", "rgt"],
 		):
 			set_gl_entries_by_account(
 				company,
