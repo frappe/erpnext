@@ -11,6 +11,7 @@ are called from other modules.
 import frappe
 from dateutil.relativedelta import relativedelta
 from frappe import _
+from frappe.query_builder.functions import CombineDatetime
 from frappe.utils import (
 	cint,
 	date_diff,
@@ -268,13 +269,17 @@ class OperationsService:
 			self.doc.actual_end_date = max(end_dates)
 
 	def _set_dates_from_stock_entries(self):
-		data = frappe.get_all(
-			"Stock Entry",
-			fields=[{"TIMESTAMP": ["posting_date", "posting_time"], "as": "posting_datetime"}],
-			filters={
-				"work_order": self.doc.name,
-				"purpose": ("in", ["Material Transfer for Manufacture", "Manufacture"]),
-			},
+		# {"TIMESTAMP": [...]} renders MySQL's TIMESTAMP(date, time), invalid on postgres; use the
+		# portable CombineDatetime via query builder instead.
+		se = frappe.qb.DocType("Stock Entry")
+		data = (
+			frappe.qb.from_(se)
+			.select(CombineDatetime(se.posting_date, se.posting_time).as_("posting_datetime"))
+			.where(
+				(se.work_order == self.doc.name)
+				& (se.purpose.isin(["Material Transfer for Manufacture", "Manufacture"]))
+			)
+			.run(as_dict=True)
 		)
 		if not data:
 			return

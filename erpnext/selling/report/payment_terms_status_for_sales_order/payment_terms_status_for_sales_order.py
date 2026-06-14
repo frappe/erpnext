@@ -4,6 +4,7 @@
 import frappe
 from frappe import _, qb, query_builder
 from frappe.query_builder import Criterion
+from frappe.query_builder.functions import Max
 from frappe.utils.dateutils import getdate
 
 
@@ -228,7 +229,13 @@ def get_so_with_invoices(filters):
 			.on(si.name == sii.parent)
 			.inner_join(soi)
 			.on(soi.name == sii.so_detail)
-			.select(sii.sales_order, sii.parent.as_("invoice"), si.base_grand_total.as_("invoice_amount"))
+			.select(
+				# grouped by the invoice (sii.parent); sales_order is arbitrary per invoice on MySQL and
+				# base_grand_total is constant per invoice -> Max() keeps the GROUP BY postgres-valid.
+				Max(sii.sales_order).as_("sales_order"),
+				sii.parent.as_("invoice"),
+				Max(si.base_grand_total).as_("invoice_amount"),
+			)
 			.where((sii.sales_order.isin([x.name for x in sorders])) & (si.docstatus == 1))
 			.groupby(sii.parent)
 		)
