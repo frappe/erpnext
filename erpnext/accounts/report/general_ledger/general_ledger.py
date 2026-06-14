@@ -35,7 +35,7 @@ def execute(filters=None):
 	if filters and filters.get("print_in_account_currency") and not filters.get("account"):
 		frappe.throw(_("Select an account to print in account currency"))
 
-	for acc in frappe.db.sql("""select name, is_group from tabAccount""", as_dict=1):
+	for acc in frappe.get_all("Account", fields=["name", "is_group"]):
 		account_details.setdefault(acc.name, acc)
 
 	if filters.get("party"):
@@ -650,10 +650,8 @@ def get_result_as_list(data, filters):
 
 def get_supplier_invoice_details():
 	inv_details = {}
-	for d in frappe.db.sql(
-		""" select name, bill_no from `tabPurchase Invoice`
-		where docstatus = 1 and bill_no is not null and bill_no != '' """,
-		as_dict=1,
+	for d in frappe.get_all(
+		"Purchase Invoice", filters={"docstatus": 1, "bill_no": ["is", "set"]}, fields=["name", "bill_no"]
 	):
 		inv_details[d.name] = d.bill_no
 
