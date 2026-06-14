@@ -26,12 +26,17 @@ class TestGLEntry(ERPNextTestSuite):
 		jv.flags.ignore_validate = True
 		jv.submit()
 
-		round_off_entry = frappe.db.sql(
-			"""select name from `tabGL Entry`
-			where voucher_type='Journal Entry' and voucher_no = %s
-			and account='_Test Write Off - _TC' and cost_center='_Test Cost Center - _TC'
-			and debit = 0 and credit = '.01'""",
-			jv.name,
+		round_off_entry = frappe.get_all(
+			"GL Entry",
+			filters={
+				"voucher_type": "Journal Entry",
+				"voucher_no": jv.name,
+				"account": "_Test Write Off - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"debit": 0,
+				"credit": 0.01,
+			},
+			pluck="name",
 		)
 
 		self.assertTrue(round_off_entry)
