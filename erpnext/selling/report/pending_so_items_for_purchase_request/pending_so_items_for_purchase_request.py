@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Sum
 from frappe.utils import flt
 
 
@@ -49,9 +50,13 @@ def get_columns():
 
 
 def get_data():
-	sales_order_entry = frappe.db.sql(
-		"""
-		SELECT
+	so = frappe.qb.DocType("Sales Order")
+	so_item = frappe.qb.DocType("Sales Order Item")
+	sales_order_entry = (
+		frappe.qb.from_(so)
+		.inner_join(so_item)
+		.on(so.name == so_item.parent)
+		.select(
 			so_item.item_code,
 			so_item.item_name,
 			so_item.description,
@@ -59,17 +64,12 @@ def get_data():
 			so.transaction_date,
 			so.customer,
 			so.territory,
-			sum(so_item.qty) as total_qty,
-			so.company
-		FROM `tabSales Order` so, `tabSales Order Item` so_item
-		WHERE
-			so.docstatus = 1
-			and so.name = so_item.parent
-			and so.status not in  ('Closed','Completed','Cancelled')
-		GROUP BY
-			so.name,so_item.item_code
-		""",
-		as_dict=1,
+			Sum(so_item.qty).as_("total_qty"),
+			so.company,
+		)
+		.where((so.docstatus == 1) & so.status.notin(["Closed", "Completed", "Cancelled"]))
+		.groupby(so.name, so_item.item_code)
+		.run(as_dict=1)
 	)
 
 	sales_orders = [row.name for row in sales_order_entry]
