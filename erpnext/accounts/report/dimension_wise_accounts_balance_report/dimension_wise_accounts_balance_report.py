@@ -58,7 +58,7 @@ def get_data(filters, dimension_list):
 	lft_rgt = frappe.get_all(
 		"Account",
 		filters={"company": filters.company},
-		fields=["min(lft) as min_lft", "max(rgt) as max_rgt"],
+		fields=[{"MIN": "lft", "as": "min_lft"}, {"MAX": "rgt", "as": "max_rgt"}],
 	)[0]
 	min_lft, max_rgt = lft_rgt.min_lft, lft_rgt.max_rgt
 
