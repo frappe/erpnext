@@ -86,10 +86,12 @@ class SalesPipelineAnalytics:
 
 		if self.filters.get("range") == "Monthly":
 			self.group_by_period = Month(opp.expected_closing)
-			self.duration = MonthName(opp.expected_closing).as_("month")
+			self.duration_expr = MonthName(opp.expected_closing)
+			self.duration = self.duration_expr.as_("month")
 		else:
 			self.group_by_period = Quarter(opp.expected_closing)
-			self.duration = Quarter(opp.expected_closing).as_("quarter")
+			self.duration_expr = Quarter(opp.expected_closing)
+			self.duration = self.duration_expr.as_("quarter")
 
 		self.pipeline_by = {"Owner": "opportunity_owner", "Sales Stage": "sales_stage"}[
 			self.filters.get("pipeline_by")
@@ -110,13 +112,17 @@ class SalesPipelineAnalytics:
 		pipeline_field = opp._assign if self.group_by_based_on == "_assign" else opp.sales_stage
 
 		if self.filters.get("based_on") == "Number":
+			# drop get_query's default "name" select (it would be un-grouped); also group by the
+			# displayed period expression so postgres accepts MonthName alongside the numeric Month
+			# used for chronological ordering (for Quarterly they're the same expression).
+			query._selects = []
 			self.query_result = (
 				query.select(
 					pipeline_field.as_(self.pipeline_by),
 					frappe.query_builder.functions.Count("*").as_("count"),
 					self.duration,
 				)
-				.groupby(pipeline_field, self.group_by_period)
+				.groupby(pipeline_field, self.group_by_period, self.duration_expr)
 				.orderby(self.group_by_period)
 				.run(as_dict=True)
 			)
