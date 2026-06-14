@@ -58,10 +58,8 @@ def set_single_defaults():
 		"Selling Settings",
 		"Stock Settings",
 	):
-		default_values = frappe.db.sql(
-			"""select fieldname, `default` from `tabDocField`
-			where parent=%s""",
-			dt,
+		default_values = frappe.get_all(
+			"DocField", filters={"parent": dt}, fields=["fieldname", "default"], as_list=True
 		)
 		if default_values:
 			try:
