@@ -412,8 +412,8 @@ class SalesInvoice(SellingController):
 			validate_account_head(item.idx, item.income_account, self.company, _("Income"))
 
 	def before_save(self):
+		POSService(self).update_paid_amount()
 		POSService(self).set_account_for_mode_of_payment()
-		POSService(self).set_paid_amount()
 
 	def before_submit(self):
 		self.add_remarks()
