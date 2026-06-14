@@ -23,10 +23,11 @@ def get_invoiced_qty_map(purchase_receipt: str) -> dict:
 	"""returns a map: {pr_detail: invoiced_qty}"""
 	invoiced_qty_map = {}
 
-	for pr_detail, qty in frappe.db.sql(
-		"""select pr_detail, qty from `tabPurchase Invoice Item`
-		where purchase_receipt=%s and docstatus=1""",
-		purchase_receipt,
+	for pr_detail, qty in frappe.get_all(
+		"Purchase Invoice Item",
+		filters={"purchase_receipt": purchase_receipt, "docstatus": 1},
+		fields=["pr_detail", "qty"],
+		as_list=True,
 	):
 		if not invoiced_qty_map.get(pr_detail):
 			invoiced_qty_map[pr_detail] = 0
