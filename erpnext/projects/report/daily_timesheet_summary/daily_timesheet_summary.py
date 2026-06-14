@@ -4,9 +4,9 @@
 
 import frappe
 from frappe import _
+from frappe.desk.reportview import get_match_conditions_qb
 from frappe.utils import add_days, getdate
 
-from erpnext.accounts.utils import build_qb_match_conditions
 from erpnext.stock.utils import get_combine_datetime
 
 
@@ -66,8 +66,8 @@ def get_data(filters):
 		end_of_to_date = get_combine_datetime(add_days(getdate(filters.get("to_date")), 1), "00:00:00")
 		query = query.where(tsd.to_time <= end_of_to_date)
 
-	# apply Timesheet user-permission match conditions (same as build_match_conditions / get_match_cond)
-	for condition in build_qb_match_conditions("Timesheet"):
+	# apply Timesheet user-permission match conditions (query-builder form of build_match_conditions)
+	for condition in get_match_conditions_qb("Timesheet"):
 		query = query.where(condition)
 
 	return query.orderby(ts.name).run(as_list=True)
