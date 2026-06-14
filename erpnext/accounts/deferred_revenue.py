@@ -1,7 +1,7 @@
 import frappe
 from frappe import _
 from frappe.email import sendmail_to_system_managers
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -54,20 +54,24 @@ def validate_service_stop_date(doc):
 
 
 def build_conditions(process_type, account, company):
-	conditions = ""
-	deferred_account = (
-		"item.deferred_revenue_account" if process_type == "Income" else "item.deferred_expense_account"
-	)
+	if process_type == "Income":
+		item = frappe.qb.DocType("Sales Invoice Item")
+		parent = frappe.qb.DocType("Sales Invoice")
+		deferred_account = item.deferred_revenue_account
+	else:
+		item = frappe.qb.DocType("Purchase Invoice Item")
+		parent = frappe.qb.DocType("Purchase Invoice")
+		deferred_account = item.deferred_expense_account
 
 	if account:
-		conditions += f"AND {deferred_account}={frappe.db.escape(account)}"
+		return deferred_account == account
 	elif company:
-		conditions += f"AND p.company = {frappe.db.escape(company)}"
+		return parent.company == company
 
-	return conditions
+	return None
 
 
-def convert_deferred_expense_to_expense(deferred_process, start_date=None, end_date=None, conditions=""):
+def convert_deferred_expense_to_expense(deferred_process, start_date=None, end_date=None, conditions=None):
 	# book the expense/income on the last day, but it will be trigger on the 1st of month at 12:00 AM
 
 	if not start_date:
@@ -76,17 +80,25 @@ def convert_deferred_expense_to_expense(deferred_process, start_date=None, end_d
 		end_date = add_days(today(), -1)
 
 	# check for the purchase invoice for which GL entries has to be done
-	invoices = frappe.db.sql_list(
-		f"""
-		select distinct item.parent
-		from `tabPurchase Invoice Item` item, `tabPurchase Invoice` p
-		where item.service_start_date<=%s and item.service_end_date>=%s
-		and item.enable_deferred_expense = 1 and item.parent=p.name
-		and item.docstatus = 1 and ifnull(item.amount, 0) > 0
-		{conditions}
-	""",
-		(end_date, start_date),
-	)  # nosec
+	item = frappe.qb.DocType("Purchase Invoice Item")
+	parent = frappe.qb.DocType("Purchase Invoice")
+	query = (
+		frappe.qb.from_(item)
+		.inner_join(parent)
+		.on(item.parent == parent.name)
+		.select(item.parent)
+		.distinct()
+		.where(
+			(item.service_start_date <= end_date)
+			& (item.service_end_date >= start_date)
+			& (item.enable_deferred_expense == 1)
+			& (item.docstatus == 1)
+			& (IfNull(item.amount, 0) > 0)
+		)
+	)
+	if conditions is not None:
+		query = query.where(conditions)
+	invoices = query.run(pluck=True)
 
 	# For each invoice, book deferred expense
 	for invoice in invoices:
@@ -97,7 +109,7 @@ def convert_deferred_expense_to_expense(deferred_process, start_date=None, end_d
 		send_mail(deferred_process)
 
 
-def convert_deferred_revenue_to_income(deferred_process, start_date=None, end_date=None, conditions=""):
+def convert_deferred_revenue_to_income(deferred_process, start_date=None, end_date=None, conditions=None):
 	# book the expense/income on the last day, but it will be trigger on the 1st of month at 12:00 AM
 
 	if not start_date:
@@ -106,17 +118,25 @@ def convert_deferred_revenue_to_income(deferred_process, start_date=None, end_da
 		end_date = add_days(today(), -1)
 
 	# check for the sales invoice for which GL entries has to be done
-	invoices = frappe.db.sql_list(
-		f"""
-		select distinct item.parent
-		from `tabSales Invoice Item` item, `tabSales Invoice` p
-		where item.service_start_date<=%s and item.service_end_date>=%s
-		and item.enable_deferred_revenue = 1 and item.parent=p.name
-		and item.docstatus = 1 and ifnull(item.amount, 0) > 0
-		{conditions}
-	""",
-		(end_date, start_date),
-	)  # nosec
+	item = frappe.qb.DocType("Sales Invoice Item")
+	parent = frappe.qb.DocType("Sales Invoice")
+	query = (
+		frappe.qb.from_(item)
+		.inner_join(parent)
+		.on(item.parent == parent.name)
+		.select(item.parent)
+		.distinct()
+		.where(
+			(item.service_start_date <= end_date)
+			& (item.service_end_date >= start_date)
+			& (item.enable_deferred_revenue == 1)
+			& (item.docstatus == 1)
+			& (IfNull(item.amount, 0) > 0)
+		)
+	)
+	if conditions is not None:
+		query = query.where(conditions)
+	invoices = query.run(pluck=True)
 
 	for invoice in invoices:
 		doc = frappe.get_doc("Sales Invoice", invoice)
