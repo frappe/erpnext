@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-06-14 10:35+0000\n"
-"PO-Revision-Date: 2026-06-14 17:00\n"
+"PO-Revision-Date: 2026-06-14 17:40\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -4591,7 +4591,7 @@ msgstr "Standard i Kassa Profil {0} för Användare {1} redan angiven. Inaktiver
 
 #: erpnext/stock/doctype/item/item.js:38
 msgid "Also you can't switch back to FIFO after setting the valuation method to Moving Average for this item."
-msgstr "Du kan inte byta tillbaka till FIFO efter att ha angivit värdering sätt till MA för denna artikel."
+msgstr "Du kan inte byta tillbaka till FIFO efter att ha angivit värdering sätt till MV för denna artikel."
 
 #: erpnext/manufacturing/doctype/bom/bom.js:291
 #: erpnext/manufacturing/doctype/work_order/work_order.js:158
@@ -10296,7 +10296,7 @@ msgstr "Att byta konto i någon transaktion av DocTypes som listas nedan kommer 
 
 #: erpnext/stock/doctype/item/item.js:34
 msgid "Changing the valuation method to Moving Average will affect new transactions. If backdated entries are added, earlier FIFO-based entries will be reposted, which may change closing balances."
-msgstr "Om värdering sätt ändras till MA kommer det att påverka nya transaktioner. Om retroaktiva poster läggs till kommer tidigare FIFO baserade poster att bokas om, vilket kan ändra stängning saldo."
+msgstr "Om värdering sätt ändras till MV kommer det att påverka nya transaktioner. Om retroaktiva poster läggs till kommer tidigare FIFO baserade poster att bokas om, vilket kan ändra stängning saldo."
 
 #. Option for the 'Lead Type' (Select) field in DocType 'Lead'
 #: erpnext/crm/doctype/lead/lead.json
@@ -23610,7 +23610,7 @@ msgstr "Om aktiverad använder system lager konto angiven i Artikel Inställning
 #. DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "If enabled, the system will use the moving average valuation method to calculate the valuation rate for the batched items and will not consider the individual batch-wise incoming rate."
-msgstr "Om aktiverad, kommer system att använda MA värdering sätt för att beräkna värdering för artikel partier och kommer inte att beakta individuell per parti pris."
+msgstr "Om aktiverad, kommer system att använda MV värdering sätt för att beräkna värdering för artikel partier och kommer inte att beakta individuell per parti pris."
 
 #. Description of the 'Validate Applied Rule' (Check) field in DocType 'Pricing
 #. Rule'
@@ -31187,7 +31187,7 @@ msgstr "Lägsta kvantitet ska vara enligt Lager Enhet\n\n"
 #. Description of the 'Safety Stock' (Float) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Minimum stock level to maintain as a buffer. Used to calculate recommended reorder level: Reorder Level = Safety Stock + (Average Daily Consumption × Lead Time)."
-msgstr "Lägsta lagernivå att upprätthålla som buffert. Används för att beräkna rekommenderad order nivå: Order nivå = Säkerhet Lager + (Medel Daglig Förbrukning × Ledtid)."
+msgstr "Lägsta lager nivå att upprätthålla som buffert. Används för att beräkna rekommenderad order nivå: Order nivå = Säkerhet Lager + (Medel Daglig Förbrukning × Ledtid)."
 
 #. Label of the minute (Text Editor) field in DocType 'Quality Meeting Minutes'
 #. Name of a UOM
@@ -31521,7 +31521,7 @@ msgstr "Förflyttning"
 #: erpnext/stock/doctype/item/item.json
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Moving Average"
-msgstr "MA"
+msgstr "Medel Värde"
 
 #: erpnext/accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.js:82
 msgid "Moving up in tree ..."
@@ -55601,7 +55601,7 @@ msgstr "Det finns inga transaktioner i system för vald bankkonto och datum som 
 
 #: erpnext/stock/doctype/item/item.js:1356
 msgid "There are two options to maintain valuation of stock. FIFO (first in - first out) and Moving Average. To understand this topic in detail please visit <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>Item Valuation, FIFO and Moving Average.</a>"
-msgstr "Det finns två alternativ för att upprätthålla värderingen av aktier. FIFO (först in - först ut) och MA medelvärde. För att förstå detta ämne i detalj, besök <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>Artikelvärdering, FIFO och MA.</a>"
+msgstr "Det finns två alternativ för att upprätthålla lager värdering. FIFO (först in - först ut) och Medel Värde. För att förstå detta ämne i detalj, besök <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>Artikel värdering, FIFO och MV.</a>"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:982
 msgid "There are {0} unreconciled transactions before {1}."
@@ -59339,7 +59339,7 @@ msgstr "Användare med den här rollen kommer att meddelas om avskrivning av til
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.js:103
 msgid "Using negative stock disables FIFO/Moving average valuation when inventory is negative."
-msgstr "Användning av negativ lager inaktiverar FIFO/MA värdering sätt när lager värde är negativ."
+msgstr "Användning av negativ lager inaktiverar FIFO/MV värdering sätt när lager värde är negativ."
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:133
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:220
