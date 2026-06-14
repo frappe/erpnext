@@ -7,11 +7,10 @@ import json
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder.functions import Date
+from frappe.query_builder.functions import Concat, Date, Round
 from frappe.utils import flt, get_datetime, getdate
 from frappe.utils.deprecations import deprecated
 
-from erpnext.controllers.queries import get_match_cond
 from erpnext.setup.utils import get_exchange_rate
 
 
@@ -504,26 +503,36 @@ def get_events(start: str, end: str, filters: str | None = None):
 	:param end: End date-time.
 	:param filters: Filters (JSON).
 	"""
-	filters = json.loads(filters) if filters else {}
 	from frappe.desk.calendar import get_event_conditions
 
-	conditions = get_event_conditions("Timesheet", filters)
+	filters = json.loads(filters) if filters else {}
 
-	return frappe.db.sql(
-		"""select `tabTimesheet Detail`.name as name,
-			`tabTimesheet Detail`.docstatus as status, `tabTimesheet Detail`.parent as parent,
-			from_time as start_date, hours, activity_type,
-			`tabTimesheet Detail`.project, to_time as end_date,
-			CONCAT(`tabTimesheet Detail`.parent, ' (', ROUND(hours,2),' hrs)') as title
-		from `tabTimesheet Detail`, `tabTimesheet`
-		where `tabTimesheet Detail`.parent = `tabTimesheet`.name
-			and `tabTimesheet`.docstatus < 2
-			and (from_time <= %(end)s and to_time >= %(start)s) {conditions} {match_cond}
-		""".format(conditions=conditions, match_cond=get_match_cond("Timesheet")),
-		{"start": start, "end": end},
-		as_dict=True,
-		update={"allDay": 0},
+	tsd = frappe.qb.DocType("Timesheet Detail")
+	ts = frappe.qb.DocType("Timesheet")
+
+	query = (
+		frappe.qb.from_(tsd)
+		.inner_join(ts)
+		.on(tsd.parent == ts.name)
+		.select(
+			tsd.name.as_("name"),
+			tsd.docstatus.as_("status"),
+			tsd.parent.as_("parent"),
+			tsd.from_time.as_("start_date"),
+			tsd.hours,
+			tsd.activity_type,
+			tsd.project,
+			tsd.to_time.as_("end_date"),
+			Concat(tsd.parent, " (", Round(tsd.hours, 2), " hrs)").as_("title"),
+		)
+		.where((ts.docstatus < 2) & (tsd.from_time <= end) & (tsd.to_time >= start))
 	)
+
+	# user-permission match conditions + calendar filters on Timesheet (query-builder form)
+	for condition in get_event_conditions("Timesheet", filters, as_qb=True):
+		query = query.where(condition)
+
+	return query.run(as_dict=True, update={"allDay": 0})
 
 
 def get_timesheets_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by="creation"):
