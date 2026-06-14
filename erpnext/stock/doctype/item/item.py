@@ -603,12 +603,8 @@ class Item(Document):
 
 	def stock_ledger_created(self):
 		if not hasattr(self, "_stock_ledger_created"):
-			self._stock_ledger_created = len(
-				frappe.get_all(
-					"Stock Ledger Entry",
-					filters={"item_code": self.name, "is_cancelled": 0},
-					limit=1,
-				)
+			self._stock_ledger_created = bool(
+				frappe.db.exists("Stock Ledger Entry", {"item_code": self.name, "is_cancelled": 0})
 			)
 		return self._stock_ledger_created
 
