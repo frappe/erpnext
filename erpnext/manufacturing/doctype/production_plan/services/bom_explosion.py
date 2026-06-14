@@ -38,22 +38,25 @@ def _exploded_items_query(company, bom_no, include_non_stock_items, planned_qty)
 
 
 def _exploded_item_columns(bei, bom, item, item_default, item_uom, planned_qty):
+	# only item_code/stock_uom are grouped; the rest are functionally dependent on the grouped item
+	# or arbitrary per BOM Item on MySQL -> Max() keeps the GROUP BY valid on postgres with the same
+	# value MySQL picked.
 	return [
 		(IfNull(Sum(bei.stock_qty / IfNull(bom.quantity, 1)), 0) * planned_qty).as_("qty"),
-		item.item_name,
-		item.name.as_("item_code"),
-		bei.description,
+		Max(item.item_name).as_("item_name"),
+		Max(item.name).as_("item_code"),
+		Max(bei.description).as_("description"),
 		bei.stock_uom,
-		item.min_order_qty,
-		bei.source_warehouse,
-		item.default_material_request_type,
-		item.min_order_qty,
-		item_default.default_warehouse,
-		item.purchase_uom,
-		item_uom.conversion_factor,
-		item.safety_stock,
-		bom.item.as_("main_bom_item"),
-		bom.name.as_("main_bom"),
+		Max(item.min_order_qty).as_("min_order_qty"),
+		Max(bei.source_warehouse).as_("source_warehouse"),
+		Max(item.default_material_request_type).as_("default_material_request_type"),
+		Max(item.min_order_qty).as_("min_order_qty"),
+		Max(item_default.default_warehouse).as_("default_warehouse"),
+		Max(item.purchase_uom).as_("purchase_uom"),
+		Max(item_uom.conversion_factor).as_("conversion_factor"),
+		Max(item.safety_stock).as_("safety_stock"),
+		Max(bom.item).as_("main_bom_item"),
+		Max(bom.name).as_("main_bom"),
 	]
 
 

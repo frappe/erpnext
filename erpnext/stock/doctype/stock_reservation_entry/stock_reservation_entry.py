@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder import Case
-from frappe.query_builder.functions import Min, Sum
+from frappe.query_builder.functions import Max, Min, Sum
 from frappe.utils import cint, flt, nowdate, nowtime, parse_json
 
 from erpnext.stock.utils import get_or_make_bin, get_stock_balance
@@ -1531,10 +1531,12 @@ class StockReservation:
 			.inner_join(child_doctype)
 			.on(doctype.name == child_doctype.parent)
 			.select(
-				doctype.name.as_("voucher_no"),
+				# grouped by the child PK (name), so child columns are valid on postgres via functional
+				# dependency; the parent (doctype) columns aren't, so Max() them -- constant per child row.
+				Max(doctype.name).as_("voucher_no"),
 				child_doctype.name.as_("voucher_detail_no"),
 				child_doctype[item_code_fieldname].as_("item_code"),
-				doctype.company,
+				Max(doctype.company).as_("company"),
 				child_doctype.stock_uom,
 			)
 			.where((doctype.docstatus == 1) & (doctype[field].isin(docnames)))
@@ -1544,9 +1546,9 @@ class StockReservation:
 		if to_doctype == "Work Order":
 			query = query.select(
 				child_doctype.source_warehouse,
-				doctype.wip_warehouse,
-				doctype.skip_transfer,
-				doctype.from_wip_warehouse,
+				Max(doctype.wip_warehouse).as_("wip_warehouse"),
+				Max(doctype.skip_transfer).as_("skip_transfer"),
+				Max(doctype.from_wip_warehouse).as_("from_wip_warehouse"),
 				child_doctype.required_qty,
 				(child_doctype.required_qty - child_doctype.transferred_qty).as_("qty"),
 				child_doctype.stock_reserved_qty,

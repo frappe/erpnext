@@ -7,7 +7,7 @@ from collections import OrderedDict
 import frappe
 from frappe import _, qb, query_builder, scrub
 from frappe.query_builder import Criterion
-from frappe.query_builder.functions import Date, Substring, Sum
+from frappe.query_builder.functions import Date, Max, Substring, Sum
 from frappe.utils import cint, cstr, flt, getdate, nowdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -691,11 +691,13 @@ class ReceivablePayableReport:
 			.inner_join(jea)
 			.on(jea.parent == je.name)
 			.select(
-				jea.reference_name.as_("invoice_no"),
-				jea.party,
-				jea.party_type,
-				je.posting_date.as_("future_date"),
-				je.cheque_no.as_("future_ref"),
+				# Sum() below makes this an implicit aggregate (no GROUP BY); the non-aggregated columns
+				# are arbitrary per the single group on MySQL -> Max() keeps it valid on postgres.
+				Max(jea.reference_name).as_("invoice_no"),
+				Max(jea.party).as_("party"),
+				Max(jea.party_type).as_("party_type"),
+				Max(je.posting_date).as_("future_date"),
+				Max(je.cheque_no).as_("future_ref"),
 			)
 			.where(
 				(je.docstatus < 2)
@@ -708,30 +710,25 @@ class ReceivablePayableReport:
 
 		if self.filters.get("party"):
 			if self.account_type == "Payable":
-				query = query.select(
-					Sum(jea.debit_in_account_currency - jea.credit_in_account_currency).as_("future_amount")
-				)
-				query = query.select(Sum(jea.debit - jea.credit).as_("future_amount_in_base_currency"))
+				future_amount = Sum(jea.debit_in_account_currency - jea.credit_in_account_currency)
+				future_amount_in_base_currency = Sum(jea.debit - jea.credit)
 			else:
-				query = query.select(
-					Sum(jea.credit_in_account_currency - jea.debit_in_account_currency).as_("future_amount")
-				)
-				query = query.select(Sum(jea.credit - jea.debit).as_("future_amount_in_base_currency"))
+				future_amount = Sum(jea.credit_in_account_currency - jea.debit_in_account_currency)
+				future_amount_in_base_currency = Sum(jea.credit - jea.debit)
 		else:
-			query = query.select(
-				Sum(jea.debit if self.account_type == "Payable" else jea.credit).as_(
-					"future_amount_in_base_currency"
-				)
-			)
-			query = query.select(
-				Sum(
-					jea.debit_in_account_currency
-					if self.account_type == "Payable"
-					else jea.credit_in_account_currency
-				).as_("future_amount")
+			future_amount_in_base_currency = Sum(jea.debit if self.account_type == "Payable" else jea.credit)
+			future_amount = Sum(
+				jea.debit_in_account_currency
+				if self.account_type == "Payable"
+				else jea.credit_in_account_currency
 			)
 
-		query = query.having(qb.Field("future_amount") > 0)
+		query = query.select(
+			future_amount.as_("future_amount"),
+			future_amount_in_base_currency.as_("future_amount_in_base_currency"),
+		)
+		# use the aggregate expression in HAVING; postgres can't reference a SELECT alias there
+		query = query.having(future_amount > 0)
 		return query.run(as_dict=True)
 
 	def allocate_future_payments(self, row):
