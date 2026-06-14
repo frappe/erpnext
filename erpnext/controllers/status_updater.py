@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder.functions import Sum
 from frappe.utils import comma_or, flt, get_link_to_form, getdate, now, nowdate, safe_div
 
 
@@ -684,18 +685,10 @@ class StatusUpdater(Document):
 		if not ref_docs:
 			return
 
-		zero_amount_refdocs = frappe.db.sql_list(
-			f"""
-			SELECT
-				name
-			from
-				`tab{ref_dt}`
-			where
-				docstatus = 1
-				and base_net_total = 0
-				and name in %(ref_docs)s
-		""",
-			{"ref_docs": ref_docs},
+		zero_amount_refdocs = frappe.get_all(
+			ref_dt,
+			filters={"docstatus": 1, "base_net_total": 0, "name": ["in", ref_docs]},
+			pluck="name",
 		)
 
 		if zero_amount_refdocs:
@@ -703,20 +696,20 @@ class StatusUpdater(Document):
 
 	def update_billing_status(self, zero_amount_refdoc, ref_dt, ref_fieldname):
 		for ref_dn in zero_amount_refdoc:
+			ref_item = frappe.qb.DocType(f"{ref_dt} Item")
 			ref_doc_qty = flt(
-				frappe.db.sql(
-					"""select ifnull(sum(qty), 0) from `tab{} Item`
-				where parent={}""".format(ref_dt, "%s"),
-					(ref_dn),
-				)[0][0]
+				frappe.qb.from_(ref_item)
+				.select(Sum(ref_item.qty))
+				.where(ref_item.parent == ref_dn)
+				.run()[0][0]
 			)
 
+			doc_item = frappe.qb.DocType(f"{self.doctype} Item")
 			billed_qty = flt(
-				frappe.db.sql(
-					"""select ifnull(sum(qty), 0)
-				from `tab{} Item` where {}={} and docstatus=1""".format(self.doctype, ref_fieldname, "%s"),
-					(ref_dn),
-				)[0][0]
+				frappe.qb.from_(doc_item)
+				.select(Sum(doc_item.qty))
+				.where((doc_item[ref_fieldname] == ref_dn) & (doc_item.docstatus == 1))
+				.run()[0][0]
 			)
 
 			per_billed = safe_div(min(ref_doc_qty, billed_qty), ref_doc_qty) * 100
