@@ -8,7 +8,7 @@ from frappe import _, qb
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import Criterion, Order
-from frappe.query_builder.functions import NullIf, Sum
+from frappe.query_builder.functions import Max, NullIf, Sum
 from frappe.utils import flt, get_link_to_form
 
 import erpnext
@@ -209,17 +209,17 @@ class ExchangeRateRevaluation(Document):
 					qb.from_(gle)
 					.select(
 						gle.account,
-						gle.party_type,
-						gle.party,
-						gle.account_currency,
+						# grouped by NullIf(party_type/party, ""); the bare columns + account_currency are
+						# constant per group -> Max() keeps the GROUP BY valid on postgres with the same value.
+						Max(gle.party_type).as_("party_type"),
+						Max(gle.party).as_("party"),
+						Max(gle.account_currency).as_("account_currency"),
 						(Sum(gle.debit_in_account_currency) - Sum(gle.credit_in_account_currency)).as_(
 							"balance_in_account_currency"
 						),
 						(Sum(gle.debit) - Sum(gle.credit)).as_("balance"),
-						(Sum(gle.debit) - Sum(gle.credit) == 0)
-						^ (Sum(gle.debit_in_account_currency) - Sum(gle.credit_in_account_currency) == 0).as_(
-							"zero_balance"
-						),
+						# zero_balance is recomputed in Python below (after rounding), so the SQL value is
+						# unused -- dropped (it used MySQL's XOR operator, which postgres lacks).
 					)
 					.where(Criterion.all(conditions))
 					.groupby(gle.account, NullIf(gle.party_type, ""), NullIf(gle.party, ""))
