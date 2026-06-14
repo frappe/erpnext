@@ -465,7 +465,7 @@ def get_invoice_expense_map(invoice_list):
 	expense_details = frappe.get_all(
 		"Purchase Invoice Item",
 		filters={"parent": ["in", [inv.name for inv in invoice_list]], "parenttype": "Purchase Invoice"},
-		fields=["parent", "expense_account", "sum(base_net_amount) as amount"],
+		fields=["parent", "expense_account", {"SUM": "base_net_amount", "as": "amount"}],
 		group_by="parent, expense_account",
 	)
 
