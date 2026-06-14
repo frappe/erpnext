@@ -683,13 +683,15 @@ class TestItem(ERPNextTestSuite):
 	def test_index_creation(self):
 		"check if index is getting created in db"
 
-		indices = frappe.db.sql("show index from tabItem", as_dict=1)
-		expected_columns = {"item_code", "item_name", "item_group"}
-		for index in indices:
-			expected_columns.discard(index.get("Column_name"))
+		index_checks = {
+			"item_code": frappe.db.get_column_index("tabItem", "item_code", unique=True),
+			"item_name": frappe.db.get_column_index("tabItem", "item_name"),
+			"item_group": frappe.db.get_column_index("tabItem", "item_group"),
+		}
+		missing = [column for column, index in index_checks.items() if not index]
 
-		if expected_columns:
-			self.fail(f"Expected db index on these columns: {', '.join(expected_columns)}")
+		if missing:
+			self.fail(f"Expected db index on these columns: {', '.join(missing)}")
 
 	def test_attribute_completions(self):
 		expected_attrs = {"Small", "Extra Small", "Extra Large", "Large", "2XL", "Medium"}
