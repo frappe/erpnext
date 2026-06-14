@@ -115,23 +115,26 @@ class Budget(Document):
 		if not account:
 			return
 
-		existing_budget = frappe.db.sql(
-			f"""
-			SELECT name, account
-			FROM `tabBudget`
-			WHERE
-				docstatus < 2
-				AND company = %s
-				AND {budget_against_field} = %s
-				AND account = %s
-				AND name != %s
-				AND (
-					(SELECT year_start_date FROM `tabFiscal Year` WHERE name = from_fiscal_year) <= %s
-					AND (SELECT year_end_date FROM `tabFiscal Year` WHERE name = to_fiscal_year) >= %s
-				)
-			""",
-			(self.company, budget_against, account, self.name, self.budget_end_date, self.budget_start_date),
-			as_dict=True,
+		budget = frappe.qb.DocType("Budget")
+		fy_from = frappe.qb.DocType("Fiscal Year").as_("fy_from")
+		fy_to = frappe.qb.DocType("Fiscal Year").as_("fy_to")
+		existing_budget = (
+			frappe.qb.from_(budget)
+			.inner_join(fy_from)
+			.on(fy_from.name == budget.from_fiscal_year)
+			.inner_join(fy_to)
+			.on(fy_to.name == budget.to_fiscal_year)
+			.select(budget.name, budget.account)
+			.where(
+				(budget.docstatus < 2)
+				& (budget.company == self.company)
+				& (budget[budget_against_field] == budget_against)
+				& (budget.account == account)
+				& (budget.name != self.name)
+				& (fy_from.year_start_date <= self.budget_end_date)
+				& (fy_to.year_end_date >= self.budget_start_date)
+			)
+			.run(as_dict=True)
 		)
 
 		if existing_budget:
@@ -381,17 +384,24 @@ def validate_expense_against_budget(params, expense_amount=0):
 	posting_fiscal_year = get_fiscal_year(posting_date, company=params.get("company"))[0]
 	year_start_date, year_end_date = get_fiscal_year_date_range(posting_fiscal_year, posting_fiscal_year)
 
-	budget_exists = frappe.db.sql(
-		"""
-		select name
-		from `tabBudget`
-		where company = %s
-		and docstatus = 1
-		and (SELECT year_start_date FROM `tabFiscal Year` WHERE name = from_fiscal_year) <= %s
-		and (SELECT year_end_date FROM `tabFiscal Year` WHERE name = to_fiscal_year) >= %s
-		limit 1
-		""",
-		(params.company, year_end_date, year_start_date),
+	budget = frappe.qb.DocType("Budget")
+	fy_from = frappe.qb.DocType("Fiscal Year").as_("fy_from")
+	fy_to = frappe.qb.DocType("Fiscal Year").as_("fy_to")
+	budget_exists = (
+		frappe.qb.from_(budget)
+		.inner_join(fy_from)
+		.on(fy_from.name == budget.from_fiscal_year)
+		.inner_join(fy_to)
+		.on(fy_to.name == budget.to_fiscal_year)
+		.select(budget.name)
+		.where(
+			(budget.company == params.company)
+			& (budget.docstatus == 1)
+			& (fy_from.year_start_date <= year_end_date)
+			& (fy_to.year_end_date >= year_start_date)
+		)
+		.limit(1)
+		.run()
 	)
 
 	if not budget_exists:
