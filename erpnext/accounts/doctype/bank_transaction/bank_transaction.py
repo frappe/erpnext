@@ -5,6 +5,8 @@ import frappe
 from frappe import _
 from frappe.model.docstatus import DocStatus
 from frappe.model.document import Document
+from frappe.query_builder import Tuple
+from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import flt, getdate
 
 
@@ -478,30 +480,28 @@ def get_clearance_details(transaction, payment_entry, bt_allocations, gl_entries
 
 
 def get_related_bank_gl_entries(docs):
-	# nosemgrep: frappe-semgrep-rules.rules.frappe-using-db-sql
 	if not docs:
 		return {}
 
-	result = frappe.db.sql(
-		"""
-        SELECT
-            gle.voucher_type AS doctype,
-            gle.voucher_no AS docname,
-            gle.account AS gl_account,
-            SUM(ABS(gle.credit_in_account_currency - gle.debit_in_account_currency)) AS amount
-        FROM
-            `tabGL Entry` gle
-        LEFT JOIN
-            `tabAccount` ac ON ac.name = gle.account
-        WHERE
-            ac.account_type = 'Bank'
-            AND (gle.voucher_type, gle.voucher_no) IN %(docs)s
-            AND gle.is_cancelled = 0
-        GROUP BY
-            gle.voucher_type, gle.voucher_no, gle.account
-        """,
-		{"docs": docs},
-		as_dict=True,
+	gle = frappe.qb.DocType("GL Entry")
+	ac = frappe.qb.DocType("Account")
+	result = (
+		frappe.qb.from_(gle)
+		.left_join(ac)
+		.on(ac.name == gle.account)
+		.select(
+			gle.voucher_type.as_("doctype"),
+			gle.voucher_no.as_("docname"),
+			gle.account.as_("gl_account"),
+			Sum(Abs(gle.credit_in_account_currency - gle.debit_in_account_currency)).as_("amount"),
+		)
+		.where(
+			(ac.account_type == "Bank")
+			& Tuple(gle.voucher_type, gle.voucher_no).isin([Tuple(vt, vn) for vt, vn in docs])
+			& (gle.is_cancelled == 0)
+		)
+		.groupby(gle.voucher_type, gle.voucher_no, gle.account)
+		.run(as_dict=True)
 	)
 
 	entries = {}
