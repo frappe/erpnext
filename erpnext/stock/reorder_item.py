@@ -136,7 +136,7 @@ def get_items_for_reorder() -> dict[str, list]:
 			& (
 				(item_table.end_of_life.isnull())
 				| (item_table.end_of_life > nowdate())
-				| (item_table.end_of_life == "0000-00-00")
+				| (item_table.end_of_life == ("0000-00-00" if frappe.db.db_type != "postgres" else None))
 			)
 		)
 	)
@@ -166,7 +166,7 @@ def get_reorder_levels_for_variants(itemwise_reorder):
 			& (
 				(item_table.end_of_life.isnull())
 				| (item_table.end_of_life > nowdate())
-				| (item_table.end_of_life == "0000-00-00")
+				| (item_table.end_of_life == ("0000-00-00" if frappe.db.db_type != "postgres" else None))
 			)
 			& (item_table.variant_of.notnull())
 		)

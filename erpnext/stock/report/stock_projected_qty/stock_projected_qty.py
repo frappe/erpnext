@@ -293,7 +293,7 @@ def get_item_map(item_code, include_uom):
 			& (
 				(item.end_of_life > today())
 				| (item.end_of_life.isnull())
-				| (item.end_of_life == "0000-00-00")
+				| (item.end_of_life == ("0000-00-00" if frappe.db.db_type != "postgres" else None))
 			)
 			& (ExistsCriterion(frappe.qb.from_(bin).select(bin.name).where(bin.item_code == item.name)))
 		)

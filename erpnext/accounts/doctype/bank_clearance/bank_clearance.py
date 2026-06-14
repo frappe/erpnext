@@ -215,7 +215,8 @@ def get_payment_entries_for_bank_clearance(
 
 	if not include_reconciled_entries:
 		journal_entry_query = journal_entry_query.where(
-			(journal_entry.clearance_date.isnull()) | (journal_entry.clearance_date == "0000-00-00")
+			(journal_entry.clearance_date.isnull())
+			| (journal_entry.clearance_date == ("0000-00-00" if frappe.db.db_type != "postgres" else None))
 		)
 
 	journal_entries = (
@@ -290,7 +291,8 @@ def get_payment_entries_for_bank_clearance(
 
 	if not include_reconciled_entries:
 		payment_entry_query = payment_entry_query.where(
-			(pe.clearance_date.isnull()) | (pe.clearance_date == "0000-00-00")
+			(pe.clearance_date.isnull())
+			| (pe.clearance_date == ("0000-00-00" if frappe.db.db_type != "postgres" else None))
 		)
 
 	payment_entries = (payment_entry_query.orderby(pe.posting_date).orderby(pe.name, order=Order.desc)).run(
@@ -327,7 +329,8 @@ def get_payment_entries_for_bank_clearance(
 
 	if not include_reconciled_entries:
 		paid_purchase_invoices_query = paid_purchase_invoices_query.where(
-			(pi.clearance_date.isnull()) | (pi.clearance_date == "0000-00-00")
+			(pi.clearance_date.isnull())
+			| (pi.clearance_date == ("0000-00-00" if frappe.db.db_type != "postgres" else None))
 		)
 
 	paid_purchase_invoices = (
@@ -367,7 +370,8 @@ def get_payment_entries_for_bank_clearance(
 
 		if not include_reconciled_entries:
 			pos_sales_invoices_query = pos_sales_invoices_query.where(
-				(si_payment.clearance_date.isnull()) | (si_payment.clearance_date == "0000-00-00")
+				(si_payment.clearance_date.isnull())
+				| (si_payment.clearance_date == ("0000-00-00" if frappe.db.db_type != "postgres" else None))
 			)
 
 		pos_sales_invoices = (

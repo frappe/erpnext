@@ -265,7 +265,7 @@ def item_query(
 	date_conditions = [eol > nowdate(), eol.isnull()]
 	#  Add the condition if the db can evaluate it
 	if frappe.db.db_type not in ["postgres"]:
-		date_conditions.append(eol == "0000-00-00")
+		date_conditions.append(eol == ("0000-00-00" if frappe.db.db_type != "postgres" else None))
 
 	date_condition = Criterion.any(date_conditions)
 
