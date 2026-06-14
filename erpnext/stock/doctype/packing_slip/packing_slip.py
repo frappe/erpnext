@@ -207,13 +207,24 @@ class PackingSlip(StatusUpdater):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def item_details(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
-	from erpnext.controllers.queries import get_match_cond
+	item = frappe.qb.DocType("Item")
+	dn_item = frappe.qb.DocType("Delivery Note Item")
+	delivery_note = (filters or {}).get("delivery_note")
 
-	return frappe.db.sql(
-		"""select name, item_name, description from `tabItem`
-				where name in ( select item_code FROM `tabDelivery Note Item`
-	 						where parent= {})
-	 			and {} like "{}" {}
-	 			limit  {} offset {} """.format("%s", searchfield, "%s", get_match_cond(doctype), "%s", "%s"),
-		((filters or {}).get("delivery_note"), "%%%s%%" % txt, page_len, start),
+	query = frappe.qb.get_query(
+		"Item",
+		fields=["name", "item_name", "description"],
+		ignore_permissions=False,
+	)
+
+	return (
+		query.where(
+			item.name.isin(
+				frappe.qb.from_(dn_item).select(dn_item.item_code).where(dn_item.parent == delivery_note)
+			)
+			& item[searchfield].like(f"%{txt}%")
+		)
+		.limit(page_len)
+		.offset(start)
+		.run()
 	)
