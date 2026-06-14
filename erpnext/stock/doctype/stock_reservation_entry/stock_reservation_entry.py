@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder import Case
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Min, Sum
 from frappe.utils import cint, flt, nowdate, nowtime, parse_json
 
 from erpnext.stock.utils import get_or_make_bin, get_stock_balance
@@ -715,11 +715,14 @@ def get_available_qty_to_reserve(
 				& (sre.warehouse == warehouse)
 				& (sre.delivered_qty < sre.reserved_qty)
 			)
-			.for_update()
 		)
 
 		if ignore_sre:
 			query = query.where(sre.name != ignore_sre)
+
+		# FOR UPDATE is invalid with aggregates on postgres; lock scanned rows on MariaDB only
+		if frappe.db.db_type != "postgres":
+			query = query.for_update()
 
 		reserved_qty = query.run()[0][0] or 0.0
 
@@ -870,14 +873,16 @@ def get_sre_reserved_warehouses_for_voucher(
 	query = (
 		frappe.qb.from_(sre)
 		.select(sre.warehouse)
-		.distinct()
 		.where(
 			(sre.docstatus == 1)
 			& (sre.voucher_type == voucher_type)
 			& (sre.voucher_no == voucher_no)
 			& (sre.delivered_qty < sre.reserved_qty)
 		)
-		.orderby(sre.creation)
+		# distinct warehouses, earliest reservation first (postgres can't ORDER BY a
+		# non-selected column under SELECT DISTINCT, so group + Min instead)
+		.groupby(sre.warehouse)
+		.orderby(Min(sre.creation))
 	)
 
 	if voucher_detail_no:

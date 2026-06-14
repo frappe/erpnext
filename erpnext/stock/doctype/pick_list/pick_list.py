@@ -914,7 +914,6 @@ def get_picked_items_qty(items, contains_packed_items=False) -> list[dict]:
 			Sum(pi_item.picked_qty).as_("picked_qty"),
 		)
 		.where(pi_item.docstatus == 1)
-		.for_update()
 	)
 
 	if contains_packed_items:
@@ -927,6 +926,10 @@ def get_picked_items_qty(items, contains_packed_items=False) -> list[dict]:
 			pi_item.sales_order_item,
 			pi_item.sales_order,
 		).where(pi_item.sales_order_item.isin(items))
+
+	# FOR UPDATE is invalid with GROUP BY on postgres; lock scanned rows on MariaDB only
+	if frappe.db.db_type != "postgres":
+		query = query.for_update()
 
 	return query.run(as_dict=True)
 

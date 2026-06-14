@@ -865,9 +865,12 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 				& (child.docstatus == 1)
 				& (child.type_of_transaction.isin(["Inward", "Outward"]))
 			)
-			.for_update()
 			.groupby(child.batch_no)
 		)
+
+		# FOR UPDATE is invalid with GROUP BY on postgres; lock scanned rows on MariaDB only
+		if frappe.db.db_type != "postgres":
+			query = query.for_update()
 
 		# Important to exclude the current voucher detail no / voucher no to calculate the correct stock value difference
 		if self.sle.voucher_detail_no:

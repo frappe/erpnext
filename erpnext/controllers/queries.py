@@ -12,7 +12,6 @@ from frappe.permissions import has_permission
 from frappe.query_builder import Case, Criterion, DocType
 from frappe.query_builder.functions import (
 	Concat,
-	CustomFunction,
 	IfNull,
 	Length,
 	Locate,
@@ -387,7 +386,6 @@ def get_project_name(
 	proj = qb.DocType("Project")
 	qb_filter_and_conditions = []
 	qb_filter_or_conditions = []
-	ifelse = CustomFunction("IF", ["condition", "then", "else"])
 
 	if filters:
 		if filters.get("customer"):
@@ -421,7 +419,9 @@ def get_project_name(
 	# ordering
 	if txt:
 		# project_name containing search string 'txt' will be given higher precedence
-		q = q.orderby(ifelse(Locate(txt, proj.project_name) > 0, Locate(txt, proj.project_name), 99999))
+		q = q.orderby(
+			Case().when(Locate(txt, proj.project_name) > 0, Locate(txt, proj.project_name)).else_(99999)
+		)
 	q = q.orderby(proj.idx, order=Order.desc).orderby(proj.name)
 
 	if page_len:
