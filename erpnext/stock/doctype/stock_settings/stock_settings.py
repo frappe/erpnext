@@ -170,11 +170,20 @@ class StockSettings(Document):
 		if previous_valuation_method and previous_valuation_method != self.valuation_method:
 			# check if there are any stock ledger entries against items
 			# which does not have it's own valuation method
-			sle = frappe.db.sql(
-				"""select name from `tabStock Ledger Entry` sle
-				where exists(select name from tabItem
-					where name=sle.item_code and (valuation_method is null or valuation_method='')) limit 1
-			"""
+			sle_dt = frappe.qb.DocType("Stock Ledger Entry")
+			item = frappe.qb.DocType("Item")
+			sle = (
+				frappe.qb.from_(sle_dt)
+				.select(sle_dt.name)
+				.where(
+					sle_dt.item_code.isin(
+						frappe.qb.from_(item)
+						.select(item.name)
+						.where(item.valuation_method.isnull() | (item.valuation_method == ""))
+					)
+				)
+				.limit(1)
+				.run()
 			)
 
 			if sle:
