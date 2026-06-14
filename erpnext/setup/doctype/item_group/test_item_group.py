@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
+from frappe.query_builder.functions import IfNull
 from frappe.utils.nestedset import (
 	NestedSetChildExistsError,
 	NestedSetInvalidMergeError,
@@ -20,7 +21,7 @@ class TestItemGroup(ERPNextTestSuite):
 
 	def test_basic_tree(self, records=None):
 		min_lft = 1
-		max_rgt = frappe.db.sql("select max(rgt) from `tabItem Group`")[0][0]
+		max_rgt = frappe.get_all("Item Group", fields=[{"MAX": "rgt", "as": "max_rgt"}])[0].max_rgt
 
 		if not records:
 			records = self.globalTestRecords["Item Group"][2:]
@@ -131,11 +132,10 @@ class TestItemGroup(ERPNextTestSuite):
 		frappe.db.get_value("Item Group", parent_item_group, "rgt")
 
 		ancestors = get_ancestors_of("Item Group", "_Test Item Group B - 3")
-		ancestors = frappe.db.sql(
-			"""select name, rgt from `tabItem Group`
-			where name in ({})""".format(", ".join(["%s"] * len(ancestors))),
-			tuple(ancestors),
-			as_dict=True,
+		ancestors = frappe.get_all(
+			"Item Group",
+			filters={"name": ["in", ancestors]},
+			fields=["name", "rgt"],
 		)
 
 		frappe.delete_doc("Item Group", "_Test Item Group B - 3")
@@ -168,9 +168,8 @@ class TestItemGroup(ERPNextTestSuite):
 		self.test_basic_tree()
 
 		# move its children back
-		for name in frappe.db.sql_list(
-			"""select name from `tabItem Group`
-			where parent_item_group='_Test Item Group C'"""
+		for name in frappe.get_all(
+			"Item Group", filters={"parent_item_group": "_Test Item Group C"}, pluck="name"
 		):
 			doc = frappe.get_doc("Item Group", name)
 			doc.parent_item_group = "_Test Item Group B"
@@ -218,10 +217,12 @@ class TestItemGroup(ERPNextTestSuite):
 		def get_no_of_children(item_groups, no_of_children):
 			children = []
 			for ig in item_groups:
-				children += frappe.db.sql_list(
-					"""select name from `tabItem Group`
-				where ifnull(parent_item_group, '')=%s""",
-					ig or "",
+				item_group_dt = frappe.qb.DocType("Item Group")
+				children += (
+					frappe.qb.from_(item_group_dt)
+					.select(item_group_dt.name)
+					.where(IfNull(item_group_dt.parent_item_group, "") == (ig or ""))
+					.run(pluck=True)
 				)
 
 			if len(children):
