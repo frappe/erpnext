@@ -295,7 +295,8 @@ def get_payments(invoices):
 		.groupby(SalesInvoicePayment.mode_of_payment)
 		.select(
 			SalesInvoicePayment.mode_of_payment,
-			SalesInvoicePayment.account,
+			# account is constant per grouped mode_of_payment -> Max() keeps the GROUP BY postgres-valid
+			fn.Max(SalesInvoicePayment.account).as_("account"),
 			fn.Sum(SalesInvoicePayment.amount).as_("amount"),
 		)
 	)

@@ -3330,6 +3330,10 @@ def get_stock_ledgers_for_serial_nos(kwargs):
 			stock_ledger_entry.actual_qty,
 			stock_ledger_entry.serial_no,
 			stock_ledger_entry.serial_and_batch_bundle,
+			# creation is the ORDER BY tiebreaker; postgres requires ORDER BY columns to be in the
+			# select list when the query is DISTINCT (added below for serial-no filters). It is unique
+			# per SLE so it doesn't change the distinct row set (serial_and_batch_bundle already is).
+			stock_ledger_entry.creation,
 		)
 		.where(stock_ledger_entry.is_cancelled == 0)
 		.orderby(stock_ledger_entry.posting_datetime)
