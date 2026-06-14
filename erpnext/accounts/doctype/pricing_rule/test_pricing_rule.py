@@ -91,7 +91,10 @@ class TestPricingRule(ERPNextTestSuite):
 		details = get_item_details(args)
 		self.assertEqual(details.get("discount_percentage"), 5)
 
-		frappe.db.sql("update `tabPricing Rule` set priority=NULL where campaign='_Test Campaign'")
+		pricing_rule = frappe.qb.DocType("Pricing Rule")
+		frappe.qb.update(pricing_rule).set(pricing_rule.priority, None).where(
+			pricing_rule.campaign == "_Test Campaign"
+		).run()
 		from erpnext.accounts.doctype.pricing_rule.utils import MultiplePricingRuleConflict
 
 		self.assertRaises(MultiplePricingRuleConflict, get_item_details, args)
