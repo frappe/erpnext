@@ -100,7 +100,7 @@ class Project(Document):
 		"""
 		Copy tasks from template
 		"""
-		if self.project_template and not frappe.db.get_all("Task", dict(project=self.name), limit=1):
+		if self.project_template and not frappe.db.exists("Task", {"project": self.name}):
 			# has a template, and no loaded tasks, so lets create
 			if not self.expected_start_date:
 				# project starts today
