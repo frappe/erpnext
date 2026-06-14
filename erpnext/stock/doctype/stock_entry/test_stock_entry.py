@@ -40,18 +40,12 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 def get_sle(**args):
-	condition, values = "", []
-	for key, value in args.items():
-		condition += " and " if condition else " where "
-		condition += f"`{key}`=%s"
-		values.append(value)
-
-	return frappe.db.sql(
-		"""select * from `tabStock Ledger Entry` %s
-		order by timestamp(posting_date, posting_time) desc, creation desc limit 1"""
-		% condition,
-		values,
-		as_dict=1,
+	return frappe.get_all(
+		"Stock Ledger Entry",
+		filters=args,
+		fields=["*"],
+		order_by="posting_datetime desc, creation desc",
+		limit=1,
 	)
 
 
@@ -268,18 +262,18 @@ class TestStockEntry(ERPNextTestSuite):
 		mr.cancel()
 
 		self.assertTrue(
-			frappe.db.sql(
-				"""select * from `tabStock Ledger Entry`
-			where voucher_type='Stock Entry' and voucher_no=%s""",
-				mr.name,
+			frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_type": "Stock Entry", "voucher_no": mr.name},
+				fields=["*"],
 			)
 		)
 
 		self.assertTrue(
-			frappe.db.sql(
-				"""select * from `tabGL Entry`
-			where voucher_type='Stock Entry' and voucher_no=%s""",
-				mr.name,
+			frappe.get_all(
+				"GL Entry",
+				filters={"voucher_type": "Stock Entry", "voucher_no": mr.name},
+				fields=["*"],
 			)
 		)
 
@@ -360,11 +354,10 @@ class TestStockEntry(ERPNextTestSuite):
 		if source_warehouse_account == target_warehouse_account:
 			# no gl entry as both source and target warehouse has linked to same account.
 			self.assertFalse(
-				frappe.db.sql(
-					"""select * from `tabGL Entry`
-				where voucher_type='Stock Entry' and voucher_no=%s""",
-					mtn.name,
-					as_dict=1,
+				frappe.get_all(
+					"GL Entry",
+					filters={"voucher_type": "Stock Entry", "voucher_no": mtn.name},
+					fields=["*"],
 				)
 			)
 
@@ -459,12 +452,11 @@ class TestStockEntry(ERPNextTestSuite):
 			],
 		)
 
-		gl_entries = frappe.db.sql(
-			"""select account, debit, credit
-			from `tabGL Entry` where voucher_type='Stock Entry' and voucher_no=%s
-			order by account desc""",
-			repack.name,
-			as_dict=1,
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Stock Entry", "voucher_no": repack.name},
+			fields=["account", "debit", "credit"],
+			order_by="account desc",
 		)
 		self.assertFalse(gl_entries)
 
@@ -546,12 +538,12 @@ class TestStockEntry(ERPNextTestSuite):
 		expected_sle.sort(key=lambda x: x[1])
 
 		# check stock ledger entries
-		sle = frappe.db.sql(
-			"""select item_code, warehouse, actual_qty
-			from `tabStock Ledger Entry` where voucher_type = %s
-			and voucher_no = %s order by item_code, warehouse, actual_qty""",
-			(voucher_type, voucher_no),
-			as_list=1,
+		sle = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_type": voucher_type, "voucher_no": voucher_no},
+			fields=["item_code", "warehouse", "actual_qty"],
+			order_by="item_code, warehouse, actual_qty",
+			as_list=True,
 		)
 		self.assertTrue(sle)
 		sle.sort(key=lambda x: x[1])
@@ -564,12 +556,12 @@ class TestStockEntry(ERPNextTestSuite):
 	def check_gl_entries(self, voucher_type, voucher_no, expected_gl_entries):
 		expected_gl_entries.sort(key=lambda x: x[0])
 
-		gl_entries = frappe.db.sql(
-			"""select account, debit, credit
-			from `tabGL Entry` where voucher_type=%s and voucher_no=%s
-			order by account asc, debit asc""",
-			(voucher_type, voucher_no),
-			as_list=1,
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": voucher_type, "voucher_no": voucher_no},
+			fields=["account", "debit", "credit"],
+			order_by="account asc, debit asc",
+			as_list=True,
 		)
 
 		self.assertTrue(gl_entries)
