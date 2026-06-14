@@ -76,10 +76,9 @@ class Task(NestedSet):
 	nsm_parent_field = "parent_task"
 
 	def get_customer_details(self):
-		cust = frappe.db.sql("select customer_name from `tabCustomer` where name=%s", self.customer)
-		if cust:
-			ret = {"customer_name": cust and cust[0][0] or ""}
-			return ret
+		customer_name = frappe.db.get_value("Customer", self.customer, "customer_name")
+		if customer_name:
+			return {"customer_name": customer_name or ""}
 
 	def validate(self):
 		self.validate_dates()
@@ -252,9 +251,11 @@ class Task(NestedSet):
 		for d in check_list:
 			task_list, count = [self.name], 0
 			while len(task_list) > count:
-				tasks = frappe.db.sql(
-					" select {} from `tabTask Depends On` where {} = {} ".format(d[0], d[1], "%s"),
-					cstr(task_list[count]),
+				tasks = frappe.get_all(
+					"Task Depends On",
+					filters={d[1]: cstr(task_list[count])},
+					fields=[d[0]],
+					as_list=True,
 				)
 				count = count + 1
 				for b in tasks:
@@ -268,30 +269,34 @@ class Task(NestedSet):
 
 	def reschedule_dependent_tasks(self):
 		end_date = self.exp_end_date or self.act_end_date
-		if end_date:
-			for task_name in frappe.db.sql(
-				"""
-				select name from `tabTask` as parent
-				where parent.project = %(project)s
-					and parent.name in (
-						select parent from `tabTask Depends On` as child
-						where child.task = %(task)s and child.project = %(project)s)
-			""",
-				{"project": self.project, "task": self.name},
-				as_dict=1,
+		if not end_date:
+			return
+
+		dependent_parents = frappe.get_all(
+			"Task Depends On",
+			filters={"task": self.name, "project": self.project},
+			pluck="parent",
+		)
+		if not dependent_parents:
+			return
+
+		for task_name in frappe.get_all(
+			"Task",
+			filters={"project": self.project, "name": ["in", dependent_parents]},
+			pluck="name",
+		):
+			task = frappe.get_doc("Task", task_name)
+			if (
+				task.exp_start_date
+				and task.exp_end_date
+				and task.exp_start_date < end_date
+				and task.status == "Open"
 			):
-				task = frappe.get_doc("Task", task_name.name)
-				if (
-					task.exp_start_date
-					and task.exp_end_date
-					and task.exp_start_date < end_date
-					and task.status == "Open"
-				):
-					task_duration = date_diff(task.exp_end_date, task.exp_start_date)
-					task.exp_start_date = add_days(end_date, 1)
-					task.exp_end_date = add_days(task.exp_start_date, task_duration)
-					task.flags.ignore_recursion_check = True
-					task.save()
+				task_duration = date_diff(task.exp_end_date, task.exp_start_date)
+				task.exp_start_date = add_days(end_date, 1)
+				task.exp_end_date = add_days(task.exp_start_date, task_duration)
+				task.flags.ignore_recursion_check = True
+				task.save()
 
 	def has_webform_permission(self):
 		project_user = frappe.db.get_value(
@@ -337,27 +342,23 @@ def check_if_child_exists(name: str):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_project(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
-	from erpnext.controllers.queries import get_match_cond
+	from frappe.query_builder import Criterion
 
-	meta = frappe.get_meta(doctype)
-	searchfields = meta.get_search_fields()
-	search_columns = ", " + ", ".join(searchfields) if searchfields else ""
-	search_cond = " or " + " or ".join(field + " like %(txt)s" for field in searchfields)
+	searchfields = frappe.get_meta(doctype).get_search_fields()
 
-	return frappe.db.sql(
-		f""" select name {search_columns} from `tabProject`
-		where %(key)s like %(txt)s
-			%(mcond)s
-			{search_cond}
-		order by name
-		limit %(page_len)s offset %(start)s""",
-		{
-			"key": searchfield,
-			"txt": "%" + txt + "%",
-			"mcond": get_match_cond(doctype),
-			"start": start,
-			"page_len": page_len,
-		},
+	Project = frappe.qb.DocType("Project")
+	search_str = f"%{txt}%"
+	search_fields = list(dict.fromkeys([searchfield, *searchfields]))
+	search_conditions = [Project[field].like(search_str) for field in search_fields]
+
+	query = frappe.qb.get_query("Project", fields=["name", *searchfields], ignore_permissions=False)
+
+	return (
+		query.where(Criterion.any(search_conditions))
+		.orderby(Project.name)
+		.limit(page_len)
+		.offset(start)
+		.run()
 	)
 
 
