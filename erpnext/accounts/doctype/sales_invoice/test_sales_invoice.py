@@ -739,12 +739,11 @@ class TestSalesInvoice(ERPNextTestSuite):
 		si.insert()
 		si.submit()
 
-		gl_entries = frappe.db.sql(
-			"""select account, debit, credit
-			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			order by account asc""",
-			si.name,
-			as_dict=1,
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Sales Invoice", "voucher_no": si.name},
+			fields=["account", "debit", "credit"],
+			order_by="account asc",
 		)
 
 		self.assertTrue(gl_entries)
@@ -775,10 +774,10 @@ class TestSalesInvoice(ERPNextTestSuite):
 		# cancel
 		si.cancel()
 
-		gle = frappe.db.sql(
-			"""select * from `tabGL Entry`
-			where voucher_type='Sales Invoice' and voucher_no=%s""",
-			si.name,
+		gle = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Sales Invoice", "voucher_no": si.name},
+			fields=["*"],
 		)
 
 		self.assertTrue(gle)
@@ -1195,12 +1194,11 @@ class TestSalesInvoice(ERPNextTestSuite):
 		si.insert()
 		si.submit()
 
-		gl_entries = frappe.db.sql(
-			"""select account, debit, credit
-			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			order by account asc""",
-			si.name,
-			as_dict=1,
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Sales Invoice", "voucher_no": si.name},
+			fields=["account", "debit", "credit"],
+			order_by="account asc",
 		)
 
 		self.assertTrue(gl_entries)
@@ -1223,10 +1221,10 @@ class TestSalesInvoice(ERPNextTestSuite):
 		# cancel
 		si.cancel()
 
-		gle = frappe.db.sql(
-			"""select * from `tabGL Entry`
-			where voucher_type='Sales Invoice' and voucher_no=%s""",
-			si.name,
+		gle = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Sales Invoice", "voucher_no": si.name},
+			fields=["*"],
 		)
 
 		self.assertTrue(gle)
@@ -1481,11 +1479,10 @@ class TestSalesInvoice(ERPNextTestSuite):
 			cash_amount -= pos.change_amount
 
 		# check stock ledger entries
-		sle = frappe.db.sql(
-			"""select * from `tabStock Ledger Entry`
-			where voucher_type = 'Sales Invoice' and voucher_no = %s""",
-			si.name,
-			as_dict=1,
+		sle = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_type": "Sales Invoice", "voucher_no": si.name},
+			fields=["*"],
 		)[0]
 		self.assertTrue(sle)
 		self.assertEqual(
@@ -1493,12 +1490,11 @@ class TestSalesInvoice(ERPNextTestSuite):
 		)
 
 		# check gl entries
-		gl_entries = frappe.db.sql(
-			"""select account, debit, credit
-			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			order by account asc, debit asc, credit asc""",
-			si.name,
-			as_dict=1,
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Sales Invoice", "voucher_no": si.name},
+			fields=["account", "debit", "credit"],
+			order_by="account asc, debit asc, credit asc",
 		)
 		self.assertTrue(gl_entries)
 
@@ -1525,15 +1521,15 @@ class TestSalesInvoice(ERPNextTestSuite):
 			self.assertEqual(expected_gl_entries[i][2], gle.credit)
 
 		si.cancel()
-		gle = frappe.db.sql(
-			"""select * from `tabGL Entry`
-			where voucher_type='Sales Invoice' and voucher_no=%s""",
-			si.name,
+		gle = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Sales Invoice", "voucher_no": si.name},
+			fields=["*"],
 		)
 
 		self.assertTrue(gle)
 
-		frappe.db.sql("delete from `tabPOS Profile`")
+		frappe.db.delete("POS Profile")
 
 	def test_bin_details_of_packed_item(self):
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
@@ -1600,12 +1596,11 @@ class TestSalesInvoice(ERPNextTestSuite):
 		si.insert()
 		si.submit()
 
-		gl_entries = frappe.db.sql(
-			"""select account, debit, credit
-			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			order by account asc""",
-			si.name,
-			as_dict=1,
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Sales Invoice", "voucher_no": si.name},
+			fields=["account", "debit", "credit"],
+			order_by="account asc",
 		)
 		self.assertTrue(gl_entries)
 
@@ -1620,12 +1615,11 @@ class TestSalesInvoice(ERPNextTestSuite):
 	def test_sales_invoice_gl_entry_with_perpetual_inventory_non_stock_item(self):
 		si = create_sales_invoice(item="_Test Non Stock Item")
 
-		gl_entries = frappe.db.sql(
-			"""select account, debit, credit
-			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			order by account asc""",
-			si.name,
-			as_dict=1,
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Sales Invoice", "voucher_no": si.name},
+			fields=["account", "debit", "credit"],
+			order_by="account asc",
 		)
 		self.assertTrue(gl_entries)
 
@@ -1679,18 +1673,18 @@ class TestSalesInvoice(ERPNextTestSuite):
 		si.load_from_db()
 
 		self.assertTrue(
-			frappe.db.sql(
-				"""select name from `tabJournal Entry Account`
-			where reference_name=%s""",
-				si.name,
+			frappe.get_all(
+				"Journal Entry Account",
+				filters={"reference_name": si.name},
+				pluck="name",
 			)
 		)
 
 		self.assertTrue(
-			frappe.db.sql(
-				"""select name from `tabJournal Entry Account`
-			where reference_name=%s and credit_in_account_currency=300""",
-				si.name,
+			frappe.get_all(
+				"Journal Entry Account",
+				filters={"reference_name": si.name, "credit_in_account_currency": 300},
+				pluck="name",
 			)
 		)
 
@@ -2002,13 +1996,18 @@ class TestSalesInvoice(ERPNextTestSuite):
 			conversion_rate=50,
 		)
 
-		gl_entries = frappe.db.sql(
-			"""select account, account_currency, debit, credit,
-			debit_in_account_currency, credit_in_account_currency
-			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			order by account asc""",
-			si.name,
-			as_dict=1,
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Sales Invoice", "voucher_no": si.name},
+			fields=[
+				"account",
+				"account_currency",
+				"debit",
+				"credit",
+				"debit_in_account_currency",
+				"credit_in_account_currency",
+			],
+			order_by="account asc",
 		)
 
 		self.assertTrue(gl_entries)
@@ -2043,10 +2042,10 @@ class TestSalesInvoice(ERPNextTestSuite):
 		# cancel
 		si.cancel()
 
-		gle = frappe.db.sql(
-			"""select name from `tabGL Entry`
-			where voucher_type='Sales Invoice' and voucher_no=%s""",
-			si.name,
+		gle = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Sales Invoice", "voucher_no": si.name},
+			pluck="name",
 		)
 
 		self.assertTrue(gle)
@@ -2073,14 +2072,16 @@ class TestSalesInvoice(ERPNextTestSuite):
 		)
 		si.submit()
 
-		gl_entries = frappe.db.sql(
-			"""select transaction_currency, transaction_exchange_rate,
-			debit_in_transaction_currency, credit_in_transaction_currency
-			from `tabGL Entry`
-			where voucher_type='Sales Invoice' and voucher_no=%s and account = 'Sales - _TC'
-			order by account asc""",
-			si.name,
-			as_dict=1,
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Sales Invoice", "voucher_no": si.name, "account": "Sales - _TC"},
+			fields=[
+				"transaction_currency",
+				"transaction_exchange_rate",
+				"debit_in_transaction_currency",
+				"credit_in_transaction_currency",
+			],
+			order_by="account asc",
 		)
 
 		expected_gle = {
@@ -2425,12 +2426,11 @@ class TestSalesInvoice(ERPNextTestSuite):
 			]
 		)
 
-		gl_entries = frappe.db.sql(
-			"""select account, debit, credit
-			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			order by account asc""",
-			si.name,
-			as_dict=1,
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Sales Invoice", "voucher_no": si.name},
+			fields=["account", "debit", "credit"],
+			order_by="account asc",
 		)
 
 		for gle in gl_entries:
@@ -2482,13 +2482,12 @@ class TestSalesInvoice(ERPNextTestSuite):
 			"Sales - _TC": [0.0, 1272.20],
 		}
 
-		gl_entries = frappe.db.sql(
-			"""select account, sum(debit) as debit, sum(credit) as credit
-			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			group by account
-			order by account asc""",
-			si.name,
-			as_dict=1,
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Sales Invoice", "voucher_no": si.name},
+			fields=["account", {"SUM": "debit", "as": "debit"}, {"SUM": "credit", "as": "credit"}],
+			group_by="account",
+			order_by="account asc",
 		)
 
 		for gle in gl_entries:
@@ -2549,13 +2548,12 @@ class TestSalesInvoice(ERPNextTestSuite):
 			]
 		)
 
-		gl_entries = frappe.db.sql(
-			"""select account, sum(debit) as debit, sum(credit) as credit
-			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			group by account
-			order by account asc""",
-			si.name,
-			as_dict=1,
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Sales Invoice", "voucher_no": si.name},
+			fields=["account", {"SUM": "debit", "as": "debit"}, {"SUM": "credit", "as": "credit"}],
+			group_by="account",
+			order_by="account asc",
 		)
 
 		debit_credit_diff = 0
@@ -2649,13 +2647,19 @@ class TestSalesInvoice(ERPNextTestSuite):
 			"Sales - _TC": {"cost_center": cost_center},
 		}
 
-		gl_entries = frappe.db.sql(
-			"""select account, cost_center, account_currency, debit, credit,
-			debit_in_account_currency, credit_in_account_currency
-			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			order by account asc""",
-			si.name,
-			as_dict=1,
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Sales Invoice", "voucher_no": si.name},
+			fields=[
+				"account",
+				"cost_center",
+				"account_currency",
+				"debit",
+				"credit",
+				"debit_in_account_currency",
+				"credit_in_account_currency",
+			],
+			order_by="account asc",
 		)
 
 		self.assertTrue(gl_entries)
@@ -2692,13 +2696,20 @@ class TestSalesInvoice(ERPNextTestSuite):
 			"Sales - _TC": {"project": item_project.name},
 		}
 
-		gl_entries = frappe.db.sql(
-			"""select account, cost_center, project, account_currency, debit, credit,
-			debit_in_account_currency, credit_in_account_currency
-			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			order by account asc""",
-			sales_invoice.name,
-			as_dict=1,
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Sales Invoice", "voucher_no": sales_invoice.name},
+			fields=[
+				"account",
+				"cost_center",
+				"project",
+				"account_currency",
+				"debit",
+				"credit",
+				"debit_in_account_currency",
+				"credit_in_account_currency",
+			],
+			order_by="account asc",
 		)
 
 		self.assertTrue(gl_entries)
@@ -2715,13 +2726,19 @@ class TestSalesInvoice(ERPNextTestSuite):
 			"Sales - _TC": {"cost_center": cost_center},
 		}
 
-		gl_entries = frappe.db.sql(
-			"""select account, cost_center, account_currency, debit, credit,
-			debit_in_account_currency, credit_in_account_currency
-			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			order by account asc""",
-			si.name,
-			as_dict=1,
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Sales Invoice", "voucher_no": si.name},
+			fields=[
+				"account",
+				"cost_center",
+				"account_currency",
+				"debit",
+				"credit",
+				"debit_in_account_currency",
+				"credit_in_account_currency",
+			],
+			order_by="account asc",
 		)
 
 		self.assertTrue(gl_entries)
@@ -3935,13 +3952,15 @@ class TestSalesInvoice(ERPNextTestSuite):
 			[deferred_account, 2022.47, 0.0, "2019-03-15"],
 		]
 
-		gl_entries = frappe.db.sql(
-			"""select account, debit, credit, posting_date
-			from `tabGL Entry`
-			where voucher_type='Journal Entry' and voucher_detail_no=%s and posting_date <= %s
-			order by posting_date asc, account asc""",
-			(si.items[0].name, si.posting_date),
-			as_dict=1,
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={
+				"voucher_type": "Journal Entry",
+				"voucher_detail_no": si.items[0].name,
+				"posting_date": ["<=", si.posting_date],
+			},
+			fields=["account", "debit", "credit", "posting_date"],
+			order_by="posting_date asc, account asc",
 		)
 
 		for i, gle in enumerate(gl_entries):
@@ -4888,7 +4907,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 	def test_pos_sales_invoice_creation_during_pos_invoice_mode(self):
 		# Deleting all opening entry
-		frappe.db.sql("delete from `tabPOS Opening Entry`")
+		frappe.db.delete("POS Opening Entry")
 
 		with self.change_settings("POS Settings", {"invoice_type": "POS Invoice"}):
 			pos_profile = make_pos_profile()
@@ -5405,17 +5424,21 @@ def create_sales_invoice_against_cost_center(**args):
 
 
 def get_outstanding_amount(against_voucher_type, against_voucher, account, party, party_type):
-	bal = flt(
-		frappe.db.sql(
-			"""
-		select sum(debit_in_account_currency) - sum(credit_in_account_currency)
-		from `tabGL Entry`
-		where against_voucher_type=%s and against_voucher=%s
-		and account = %s and party = %s and party_type = %s""",
-			(against_voucher_type, against_voucher, account, party, party_type),
-		)[0][0]
-		or 0.0
+	balance = frappe.get_all(
+		"GL Entry",
+		filters={
+			"against_voucher_type": against_voucher_type,
+			"against_voucher": against_voucher,
+			"account": account,
+			"party": party,
+			"party_type": party_type,
+		},
+		fields=[
+			{"SUM": "debit_in_account_currency", "as": "debit"},
+			{"SUM": "credit_in_account_currency", "as": "credit"},
+		],
 	)
+	bal = flt(balance[0].debit) - flt(balance[0].credit)
 
 	if against_voucher_type == "Purchase Invoice":
 		bal = bal * -1
