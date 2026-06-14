@@ -1556,7 +1556,7 @@ class TestSalesOrder(ERPNextTestSuite):
 			wo_qty = frappe.get_all(
 				"Work Order",
 				filters={"sales_order": so.name, "sales_order_item": item},
-				fields=["sum(qty) as qty"],
+				fields=[{"SUM": "qty", "as": "qty"}],
 			)
 			self.assertEqual(wo_qty[0].qty, so_item_name.get(item))
 
