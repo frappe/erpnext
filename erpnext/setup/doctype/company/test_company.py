@@ -4,6 +4,7 @@ import json
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import IfNull
 from frappe.utils import random_string
 
 from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import (
@@ -100,7 +101,7 @@ class TestCompany(ERPNextTestSuite):
 	def test_basic_tree(self, records=None):
 		self.load_test_records("Company")
 		min_lft = 1
-		max_rgt = frappe.db.sql("select max(rgt) from `tabCompany`")[0][0]
+		max_rgt = frappe.get_all("Company", fields=[{"MAX": "rgt", "as": "max_rgt"}])[0].max_rgt
 
 		if not records:
 			records = self.globalTestRecords["Company"][2:]
@@ -162,10 +163,12 @@ class TestCompany(ERPNextTestSuite):
 		def get_no_of_children(companies, no_of_children):
 			children = []
 			for company in companies:
-				children += frappe.db.sql_list(
-					"""select name from `tabCompany`
-				where ifnull(parent_company, '')=%s""",
-					company or "",
+				company_dt = frappe.qb.DocType("Company")
+				children += (
+					frappe.qb.from_(company_dt)
+					.select(company_dt.name)
+					.where(IfNull(company_dt.parent_company, "") == (company or ""))
+					.run(pluck=True)
 				)
 
 			if len(children):
