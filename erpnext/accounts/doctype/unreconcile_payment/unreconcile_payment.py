@@ -72,7 +72,7 @@ class UnreconcilePayment(Document):
 				alloc.party,
 			)
 
-			frappe.db.set_value("Unreconcile Payment Entries", alloc.name, "unlinked", True)
+			frappe.db.set_value("Unreconcile Payment Entries", alloc.name, "unlinked", 1)
 
 
 @frappe.whitelist()

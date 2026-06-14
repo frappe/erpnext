@@ -12,7 +12,7 @@ import frappe
 from frappe import _
 from frappe.query_builder import Criterion
 from frappe.query_builder.custom import ConstantColumn
-from frappe.query_builder.functions import Abs, Sum
+from frappe.query_builder.functions import Abs, Max, Sum
 from frappe.utils import flt
 
 import erpnext
@@ -150,7 +150,7 @@ def calculate_total_advance_from_ledger(doc) -> list:
 	adv = frappe.qb.DocType("Advance Payment Ledger Entry")
 	return (
 		frappe.qb.from_(adv)
-		.select(Abs(Sum(adv.amount)).as_("amount"), adv.currency.as_("account_currency"))
+		.select(Abs(Sum(adv.amount)).as_("amount"), Max(adv.currency).as_("account_currency"))
 		.where(adv.company == doc.company)
 		.where(adv.delinked == 0)
 		.where(adv.against_voucher_type == doc.doctype)

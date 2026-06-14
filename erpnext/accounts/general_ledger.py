@@ -672,7 +672,7 @@ def make_reverse_gl_entries(
 				)
 
 				if not immutable_ledger_enabled:
-					query = query.set(gle.is_cancelled, True)
+					query = query.set(gle.is_cancelled, 1)  # smallint column; postgres rejects boolean true
 
 				query.run()
 		else:
