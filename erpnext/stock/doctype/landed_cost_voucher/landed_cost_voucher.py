@@ -395,12 +395,12 @@ class LandedCostVoucher(Document):
 			if not item.is_fixed_asset and item.serial_no:
 				serial_nos = get_serial_nos(item.serial_no)
 				if serial_nos:
-					frappe.db.sql(
-						"update `tabSerial No` set purchase_rate=%s where name in ({})".format(
-							", ".join(["%s"] * len(serial_nos))
-						),
-						tuple([item.valuation_rate, *serial_nos]),
-					)
+					serial_no = frappe.qb.DocType("Serial No")
+					(
+						frappe.qb.update(serial_no)
+						.set(serial_no.purchase_rate, item.valuation_rate)
+						.where(serial_no.name.isin(serial_nos))
+					).run()
 
 	@frappe.whitelist()
 	def get_vendor_invoice_amount(self, vendor_invoice: str):
