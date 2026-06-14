@@ -157,15 +157,11 @@ def get_actual_transactions(dimension_name, filters):
 
 
 def get_budget_distributions(budget):
-	return frappe.db.sql(
-		"""
-			SELECT start_date, end_date, amount, percent
-			FROM `tabBudget Distribution`
-			WHERE parent = %s
-			ORDER BY start_date ASC
-		  """,
-		(budget.name,),
-		as_dict=True,
+	return frappe.get_all(
+		"Budget Distribution",
+		filters={"parent": budget.name},
+		fields=["start_date", "end_date", "amount", "percent"],
+		order_by="start_date asc",
 	)
 
 
@@ -351,19 +347,12 @@ def get_columns(filters):
 
 
 def get_fiscal_years(filters):
-	fiscal_year = frappe.db.sql(
-		"""
-			select
-				name
-			from
-				`tabFiscal Year`
-			where
-				name between %(from_fiscal_year)s and %(to_fiscal_year)s
-		""",
-		{"from_fiscal_year": filters["from_fiscal_year"], "to_fiscal_year": filters["to_fiscal_year"]},
+	return frappe.get_all(
+		"Fiscal Year",
+		filters={"name": ["between", [filters["from_fiscal_year"], filters["to_fiscal_year"]]]},
+		fields=["name"],
+		as_list=True,
 	)
-
-	return fiscal_year
 
 
 def get_cost_center_with_children(cost_centers):
