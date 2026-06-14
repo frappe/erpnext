@@ -331,7 +331,7 @@ class StockClosing:
 				],
 				filters={
 					"company": self.company,
-					"closing_stock_balance": self.last_closing_balance.name,
+					"stock_closing_entry": self.last_closing_balance.name,
 				},
 			)
 
