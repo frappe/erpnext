@@ -304,21 +304,22 @@ def get_item_group_condition(pos_profile):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def item_group_query(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
-	item_groups = []
-	cond = "1=1"
 	pos_profile = filters.get("pos_profile")
 
+	item_filters = [["name", "like", f"%{txt}%"]]
 	if pos_profile:
 		item_groups = get_item_groups(pos_profile)
-
 		if item_groups:
-			cond = "name in (%s)" % (", ".join(["%s"] * len(item_groups)))
-			cond = cond % tuple(item_groups)
+			item_filters.append(["name", "in", item_groups])
 
-	return frappe.db.sql(
-		f""" select distinct name from `tabItem Group`
-			where {cond} and (name like %(txt)s) limit {page_len} offset {start}""",
-		{"txt": "%%%s%%" % txt},
+	return frappe.get_all(
+		"Item Group",
+		filters=item_filters,
+		fields=["name"],
+		distinct=True,
+		limit_start=start,
+		limit_page_length=page_len,
+		as_list=True,
 	)
 
 
