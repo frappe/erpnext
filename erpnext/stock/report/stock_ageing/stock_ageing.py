@@ -316,11 +316,19 @@ class FIFOSlots:
 			with frappe.db.unbuffered_cursor():
 				stock_ledger_entries = self._get_stock_ledger_entries()
 
-				for row in stock_ledger_entries:
-					self._process_stock_ledger_entry(row, bundle_wise_serial_nos, bundle_wise_batch_nos)
+				if frappe.db.db_type == "postgres":
+					# postgres named (server-side) cursors can't run another query mid-iteration, and
+					# _process_stock_ledger_entry may issue nested lookups; materialize the rows here and
+					# process them after the cursor is closed (below), where nested queries are safe.
+					stock_ledger_entries = list(stock_ledger_entries)
+				else:
+					for row in stock_ledger_entries:
+						self._process_stock_ledger_entry(row, bundle_wise_serial_nos, bundle_wise_batch_nos)
+					# Note that stock_ledger_entries is an iterator, you can not reuse it like a list
+					stock_ledger_entries = []
 
-				# Note that stock_ledger_entries is an iterator, you can not reuse it like a list
-				del stock_ledger_entries
+			for row in stock_ledger_entries:
+				self._process_stock_ledger_entry(row, bundle_wise_serial_nos, bundle_wise_batch_nos)
 		else:
 			# entries passed in directly as a list: no streaming cursor is opened, so the batchwise
 			# valuation flags can be resolved lazily — a nested get_value here is safe on postgres too
