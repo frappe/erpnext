@@ -347,7 +347,7 @@ class PurchaseReceipt(BuyingController):
 				"purchase_order": po,
 				"parent": ["!=", self.name],
 			},
-			fields=["sum(qty) as qty"],
+			fields=[{"SUM": "qty", "as": "qty"}],
 		)
 		return flt(qty[0].qty) if qty and qty[0].qty else 0.0
 
