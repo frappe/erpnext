@@ -9,8 +9,8 @@ import frappe
 from frappe import ValidationError, _, qb, scrub, throw
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
-from frappe.query_builder import Tuple
-from frappe.query_builder.functions import Count
+from frappe.query_builder import Case, Tuple
+from frappe.query_builder.functions import Abs, Count
 from frappe.utils import cint, comma_or, flt, getdate, nowdate
 from frappe.utils.data import comma_and, fmt_money, get_link_to_form
 from pypika.functions import Coalesce, Sum
@@ -2296,12 +2296,7 @@ def get_orders_to_be_billed(
 	if not voucher_type:
 		return []
 
-	# dynamic dimension filters
-	condition = ""
 	active_dimensions = get_dimensions(True)[0]
-	for dim in active_dimensions:
-		if filters.get(dim.fieldname):
-			condition += f" and {dim.fieldname}={frappe.db.escape(filters.get(dim.fieldname))}"
 
 	if party_account_currency == company_currency:
 		grand_total_field = "base_grand_total"
@@ -2310,37 +2305,37 @@ def get_orders_to_be_billed(
 		grand_total_field = "grand_total"
 		rounded_total_field = "rounded_total"
 
-	orders = frappe.db.sql(
-		"""
-		select
-			name as voucher_no,
-			if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) as invoice_amount,
-			(if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) - advance_paid) as outstanding_amount,
-			transaction_date as posting_date
-		from
-			`tab{voucher_type}`
-		where
-			{party_type} = %s
-			and docstatus = 1
-			and company = %s
-			and status != "Closed"
-			and if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) > advance_paid
-			and abs(100 - per_billed) > 0.01
-			{condition}
-		order by
-			transaction_date, name
-	""".format(
-			**{
-				"rounded_total_field": rounded_total_field,
-				"grand_total_field": grand_total_field,
-				"voucher_type": voucher_type,
-				"party_type": scrub(party_type),
-				"condition": condition,
-			}
-		),
-		(party, company),
-		as_dict=True,
+	voucher = frappe.qb.DocType(voucher_type)
+	invoice_amount = (
+		Case()
+		.when(voucher[rounded_total_field] != 0, voucher[rounded_total_field])
+		.else_(voucher[grand_total_field])
 	)
+
+	query = (
+		frappe.qb.from_(voucher)
+		.select(
+			voucher.name.as_("voucher_no"),
+			invoice_amount.as_("invoice_amount"),
+			(invoice_amount - voucher.advance_paid).as_("outstanding_amount"),
+			voucher.transaction_date.as_("posting_date"),
+		)
+		.where(
+			(voucher[scrub(party_type)] == party)
+			& (voucher.docstatus == 1)
+			& (voucher.company == company)
+			& (voucher.status != "Closed")
+			& (invoice_amount > voucher.advance_paid)
+			& (Abs(100 - voucher.per_billed) > 0.01)
+		)
+	)
+
+	# dynamic dimension filters
+	for dim in active_dimensions:
+		if filters.get(dim.fieldname):
+			query = query.where(voucher[dim.fieldname] == filters.get(dim.fieldname))
+
+	orders = query.orderby(voucher.transaction_date).orderby(voucher.name).run(as_dict=True)
 
 	order_list = []
 	for d in orders:
