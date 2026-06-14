@@ -37,25 +37,22 @@ def validate_disabled_accounts(gl_map):
 
 
 def validate_accounting_period(gl_map):
-	accounting_periods = frappe.db.sql(
-		""" SELECT
-			ap.name as name, ap.exempted_role as exempted_role
-		FROM
-			`tabAccounting Period` ap, `tabClosed Document` cd
-		WHERE
-			ap.name = cd.parent
-			AND ap.company = %(company)s
-			AND ap.disabled = 0
-			AND cd.closed = 1
-			AND cd.document_type = %(voucher_type)s
-			AND %(date)s between ap.start_date and ap.end_date
-			""",
-		{
-			"date": gl_map[0].posting_date,
-			"company": gl_map[0].company,
-			"voucher_type": gl_map[0].voucher_type,
-		},
-		as_dict=1,
+	ap = frappe.qb.DocType("Accounting Period")
+	cd = frappe.qb.DocType("Closed Document")
+	accounting_periods = (
+		frappe.qb.from_(ap)
+		.inner_join(cd)
+		.on(ap.name == cd.parent)
+		.select(ap.name.as_("name"), ap.exempted_role.as_("exempted_role"))
+		.where(
+			(ap.company == gl_map[0].company)
+			& (ap.disabled == 0)
+			& (cd.closed == 1)
+			& (cd.document_type == gl_map[0].voucher_type)
+			& (ap.start_date <= gl_map[0].posting_date)
+			& (ap.end_date >= gl_map[0].posting_date)
+		)
+		.run(as_dict=1)
 	)
 
 	if accounting_periods:
@@ -81,13 +78,11 @@ def validate_cwip_accounts(gl_map):
 		for ac in frappe.db.get_all("Asset Category", "enable_cwip_accounting")
 	)
 	if cwip_enabled:
-		cwip_accounts = [
-			d[0]
-			for d in frappe.db.sql(
-				"""select name from tabAccount
-			where account_type = 'Capital Work in Progress' and is_group=0"""
-			)
-		]
+		cwip_accounts = frappe.get_all(
+			"Account",
+			filters={"account_type": "Capital Work in Progress", "is_group": 0},
+			pluck="name",
+		)
 
 		for entry in gl_map:
 			if entry.account in cwip_accounts:
