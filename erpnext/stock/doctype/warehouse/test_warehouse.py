@@ -19,11 +19,10 @@ class TestWarehouse(ERPNextTestSuite):
 	def test_warehouse_hierarchy(self):
 		p_warehouse = frappe.get_doc("Warehouse", "_Test Warehouse Group - _TC")
 
-		child_warehouses = frappe.db.sql(
-			"""select name, is_group, parent_warehouse from `tabWarehouse` wh
-			where wh.lft > %s and wh.rgt < %s""",
-			(p_warehouse.lft, p_warehouse.rgt),
-			as_dict=1,
+		child_warehouses = frappe.get_all(
+			"Warehouse",
+			filters={"lft": [">", p_warehouse.lft], "rgt": ["<", p_warehouse.rgt]},
+			fields=["name", "is_group", "parent_warehouse"],
 		)
 
 		for child_warehouse in child_warehouses:
