@@ -628,11 +628,9 @@ class PaymentRequest(Document):
 
 	def check_if_payment_entry_exists(self):
 		if self.status == "Paid":
-			if frappe.get_all(
+			if frappe.db.exists(
 				"Payment Entry Reference",
-				filters={"reference_name": self.reference_name, "docstatus": ["<", 2]},
-				fields=["parent"],
-				limit=1,
+				{"reference_name": self.reference_name, "docstatus": ["<", 2]},
 			):
 				frappe.throw(_("Payment Entry already exists"), title=_("Error"))
 
