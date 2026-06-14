@@ -16,12 +16,7 @@ def get_list_context(context=None):
 		"global_number_format": frappe.db.get_default("number_format") or "#,###.##",
 		"currency": frappe.db.get_default("currency"),
 		"currency_symbols": json.dumps(
-			dict(
-				frappe.db.sql(
-					"""select name, symbol
-			from tabCurrency where enabled=1"""
-				)
-			)
+			dict(frappe.get_all("Currency", filters={"enabled": 1}, fields=["name", "symbol"], as_list=True))
 		),
 		"row_template": "templates/includes/transaction_row.html",
 		"get_list": get_transaction_list,
