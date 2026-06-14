@@ -86,13 +86,20 @@ class ItemAlternative(Document):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_alternative_items(doctype: Any, txt: str, searchfield: Any, start: int, page_len: int, filters: dict):
-	return frappe.db.sql(
-		f""" (select alternative_item_code from `tabItem Alternative`
-			where item_code = %(item_code)s and alternative_item_code like %(txt)s)
-		union
-			(select item_code from `tabItem Alternative`
-			where alternative_item_code = %(item_code)s and item_code like %(txt)s
-			and two_way = 1) limit {page_len} offset {start}
-		""",
-		{"item_code": filters.get("item_code"), "txt": "%" + txt + "%"},
+	item_code = filters.get("item_code")
+	search = f"%{txt}%"
+
+	alternatives = frappe.get_all(
+		"Item Alternative",
+		filters={"item_code": item_code, "alternative_item_code": ["like", search]},
+		pluck="alternative_item_code",
 	)
+	alternatives += frappe.get_all(
+		"Item Alternative",
+		filters={"alternative_item_code": item_code, "item_code": ["like", search], "two_way": 1},
+		pluck="item_code",
+	)
+
+	# union (dedupe, preserve order) + paginate
+	unique_items = list(dict.fromkeys(alternatives))
+	return [[item] for item in unique_items[start : start + page_len]]
