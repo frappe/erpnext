@@ -132,6 +132,8 @@ def get_linked_payments_for_doc(
 				.where(Criterion.all(criteria))
 				.groupby(ple.voucher_no, ple.against_voucher_no)
 				.having(Abs(Sum(ple.amount_in_account_currency)) > 0)
+				# deterministic order across backends (postgres GROUP BY does not imply ordering)
+				.orderby(ple.voucher_no)
 				.run(as_dict=True)
 			)
 			return res
@@ -157,6 +159,8 @@ def get_linked_payments_for_doc(
 				)
 				.where(Criterion.all(criteria))
 				.groupby(ple.against_voucher_no)
+				# deterministic order across backends (postgres GROUP BY does not imply ordering)
+				.orderby(ple.against_voucher_no)
 			)
 
 			res = query.run(as_dict=True)
@@ -190,6 +194,8 @@ def get_linked_advances(company, docname):
 		.where(Criterion.all(criteria))
 		.having(Abs(Sum(adv.amount)) > 0)
 		.groupby(adv.against_voucher_no)
+		# deterministic order across backends (postgres GROUP BY does not imply ordering)
+		.orderby(adv.against_voucher_no)
 		.run(as_dict=True)
 	)
 
