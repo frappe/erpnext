@@ -34,28 +34,35 @@ def boot_session(bootinfo):
 		)
 
 		# if no company, show a dialog box to create a new company
-		bootinfo.customer_count = frappe.db.sql("""SELECT count(*) FROM `tabCustomer`""")[0][0]
+		bootinfo.customer_count = frappe.db.count("Customer")
 
 		if not bootinfo.customer_count:
-			bootinfo.setup_complete = (
-				frappe.db.sql(
-					"""SELECT `name`
-				FROM `tabCompany`
-				LIMIT 1"""
-				)
-				and "Yes"
-				or "No"
-			)
+			bootinfo.setup_complete = "Yes" if frappe.db.get_all("Company", limit=1) else "No"
 
-		bootinfo.docs += frappe.db.sql(
-			"""select name, default_currency, cost_center, default_selling_terms, default_buying_terms,
-			default_letter_head, default_letter_head_report, default_bank_account, enable_perpetual_inventory, country, exchange_gain_loss_account from `tabCompany`""",
-			as_dict=1,
-			update={"doctype": ":Company"},
+		companies = frappe.get_all(
+			"Company",
+			fields=[
+				"name",
+				"default_currency",
+				"cost_center",
+				"default_selling_terms",
+				"default_buying_terms",
+				"default_letter_head",
+				"default_letter_head_report",
+				"default_bank_account",
+				"enable_perpetual_inventory",
+				"country",
+				"exchange_gain_loss_account",
+			],
 		)
+		for company in companies:
+			company.doctype = ":Company"
+		bootinfo.docs += companies
 
-		party_account_types = frappe.db.sql(""" select name, ifnull(account_type, '') from `tabParty Type`""")
-		bootinfo.party_account_types = frappe._dict(party_account_types)
+		party_account_types = frappe.get_all("Party Type", fields=["name", "account_type"], as_list=True)
+		bootinfo.party_account_types = frappe._dict(
+			(name, account_type or "") for name, account_type in party_account_types
+		)
 		fiscal_year = erpnext.accounts.utils.get_fiscal_years(
 			frappe.utils.nowdate(), company=get_user_default("company"), raise_on_missing=False
 		)
