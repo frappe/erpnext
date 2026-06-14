@@ -63,7 +63,7 @@ def get_redemption_details(customer, loyalty_program, company):
 				"loyalty_points": ["<", 0],
 				"company": company,
 			},
-			fields=["redeem_against", "sum(loyalty_points)"],
+			fields=["redeem_against", {"SUM": "loyalty_points", "as": "loyalty_points"}],
 			group_by="redeem_against",
 			as_list=True,
 		)
