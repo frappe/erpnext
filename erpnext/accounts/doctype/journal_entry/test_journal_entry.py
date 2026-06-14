@@ -43,18 +43,18 @@ class TestJournalEntry(ERPNextTestSuite):
 
 		if test_voucher.doctype == "Journal Entry":
 			self.assertTrue(
-				frappe.db.sql(
-					"""select name from `tabJournal Entry Account`
-				where account = %s and docstatus = 1 and parent = %s""",
-					("Debtors - _TC", test_voucher.name),
+				frappe.get_all(
+					"Journal Entry Account",
+					filters={"account": "Debtors - _TC", "docstatus": 1, "parent": test_voucher.name},
+					pluck="name",
 				)
 			)
 
 		self.assertFalse(
-			frappe.db.sql(
-				"""select name from `tabJournal Entry Account`
-			where reference_type = %s and reference_name = %s""",
-				(test_voucher.doctype, test_voucher.name),
+			frappe.get_all(
+				"Journal Entry Account",
+				filters={"reference_type": test_voucher.doctype, "reference_name": test_voucher.name},
+				pluck="name",
 			)
 		)
 
@@ -69,10 +69,14 @@ class TestJournalEntry(ERPNextTestSuite):
 		submitted_voucher = frappe.get_doc(test_voucher.doctype, test_voucher.name)
 
 		self.assertTrue(
-			frappe.db.sql(
-				f"""select name from `tabJournal Entry Account`
-			where reference_type = %s and reference_name = %s and {dr_or_cr}=400""",
-				(submitted_voucher.doctype, submitted_voucher.name),
+			frappe.get_all(
+				"Journal Entry Account",
+				filters={
+					"reference_type": submitted_voucher.doctype,
+					"reference_name": submitted_voucher.name,
+					dr_or_cr: 400,
+				},
+				pluck="name",
 			)
 		)
 
@@ -82,24 +86,20 @@ class TestJournalEntry(ERPNextTestSuite):
 
 	def advance_paid_testcase(self, base_jv, test_voucher, dr_or_cr):
 		# Test advance paid field
-		advance_paid = frappe.db.sql(
-			"""select advance_paid from `tab{}`
-					where name={}""".format(test_voucher.doctype, "%s"),
-			(test_voucher.name),
-		)
+		advance_paid = frappe.db.get_value(test_voucher.doctype, test_voucher.name, "advance_paid")
 		payment_against_order = base_jv.get("accounts")[0].get(dr_or_cr)
 
-		self.assertEqual(flt(advance_paid[0][0]), flt(payment_against_order))
+		self.assertEqual(flt(advance_paid), flt(payment_against_order))
 
 	def cancel_against_voucher_testcase(self, test_voucher):
 		if test_voucher.doctype == "Journal Entry":
 			# if test_voucher is a Journal Entry, test cancellation of test_voucher
 			test_voucher.cancel()
 			self.assertFalse(
-				frappe.db.sql(
-					"""select name from `tabJournal Entry Account`
-				where reference_type='Journal Entry' and reference_name=%s""",
-					test_voucher.name,
+				frappe.get_all(
+					"Journal Entry Account",
+					filters={"reference_type": "Journal Entry", "reference_name": test_voucher.name},
+					pluck="name",
 				)
 			)
 
@@ -202,10 +202,10 @@ class TestJournalEntry(ERPNextTestSuite):
 		# cancel
 		jv.cancel()
 
-		gle = frappe.db.sql(
-			"""select name from `tabGL Entry`
-			where voucher_type='Sales Invoice' and voucher_no=%s""",
-			jv.name,
+		gle = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Sales Invoice", "voucher_no": jv.name},
+			pluck="name",
 		)
 
 		self.assertFalse(gle)
