@@ -71,7 +71,7 @@ def get_purchased_items_cost():
 	pr_items = frappe.get_all(
 		"Purchase Receipt Item",
 		filters={"project": ["is", "set"], "docstatus": 1},
-		fields=["project", "sum(base_net_amount) as amount"],
+		fields=["project", {"SUM": "base_net_amount", "as": "amount"}],
 		group_by="project",
 	)
 
