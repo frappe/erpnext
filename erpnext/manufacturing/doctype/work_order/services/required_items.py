@@ -158,7 +158,13 @@ class RequiredItemsService:
 			frappe.qb.from_(ste)
 			.inner_join(ste_child)
 			.on(ste_child.parent == ste.name)
-			.select(ste_child.item_code, ste_child.original_item, fn.Sum(ste_child.transfer_qty).as_("qty"))
+			# original_item is arbitrary per grouped item_code on MySQL -> Max() keeps the GROUP BY valid
+			# on postgres while returning the same value (it is only used as a dict key fallback below)
+			.select(
+				ste_child.item_code,
+				fn.Max(ste_child.original_item).as_("original_item"),
+				fn.Sum(ste_child.transfer_qty).as_("qty"),
+			)
 			.where(self._material_transfer_filter(ste, is_return))
 			.groupby(ste_child.item_code)
 		)

@@ -254,11 +254,13 @@ def get_stock_ledger_entries(filters, items):
 
 
 def get_item_wise_max_posting_datetime(filters, items):
-	"""Get the maximum Stock Ledger Entry name for the given filters and items."""
+	"""Get the latest posting datetime per item+warehouse for the given filters and items."""
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 	query = (
 		frappe.qb.from_(sle)
-		.select(sle.item_code, sle.warehouse, sle.name, Max(sle.posting_datetime).as_("posting_datetime"))
+		# `name` was selected but never read by the caller (the join below only uses item_code,
+		# warehouse and posting_datetime); drop it so the GROUP BY is valid on postgres.
+		.select(sle.item_code, sle.warehouse, Max(sle.posting_datetime).as_("posting_datetime"))
 		.where(sle.item_code.isin(items) & (sle.is_cancelled == 0))
 		.groupby(sle.item_code, sle.warehouse)
 	)

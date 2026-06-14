@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.utils import cint, flt, fmt_money
+from frappe.utils import cint, cstr, flt, fmt_money
 
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
 
@@ -132,7 +132,11 @@ def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
 		item_codes = set(
 			frappe.qb.from_(iva)
 			.select(iva.parent)
-			.where((iva.attribute == attribute) & (iva.attribute_value.isin(attribute_values)))
+			# attribute_value is a varchar column; cast values to str so postgres doesn't choke on
+			# `varchar = numeric` for numeric attributes (stored values are strings on both backends)
+			.where(
+				(iva.attribute == attribute) & (iva.attribute_value.isin([cstr(v) for v in attribute_values]))
+			)
 			.where(iva.parent.isin(item_subquery))
 			.groupby(iva.parent)
 			.run(pluck=True)

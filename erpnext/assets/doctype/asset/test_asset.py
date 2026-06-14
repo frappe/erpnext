@@ -85,8 +85,8 @@ class TestAsset(AssetSetup):
 		self.assertRaises(frappe.ValidationError, asset.save)
 
 	def test_validate_item(self):
-		asset = create_asset(item_code="MacBook Pro", do_not_save=1)
-		item = frappe.get_doc("Item", "MacBook Pro")
+		asset = create_asset(item_code="Macbook Pro", do_not_save=1)
+		item = frappe.get_doc("Item", "Macbook Pro")
 
 		item.disabled = 1
 		item.save()
