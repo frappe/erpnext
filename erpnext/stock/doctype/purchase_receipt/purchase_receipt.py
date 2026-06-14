@@ -339,14 +339,17 @@ class PurchaseReceipt(BuyingController):
 					frappe.throw(_(msg))
 
 	def get_already_received_qty(self, po, po_detail):
-		qty = frappe.db.sql(
-			"""select sum(qty) from `tabPurchase Receipt Item`
-			where purchase_order_item = %s and docstatus = 1
-			and purchase_order=%s
-			and parent != %s""",
-			(po_detail, po, self.name),
+		qty = frappe.get_all(
+			"Purchase Receipt Item",
+			filters={
+				"purchase_order_item": po_detail,
+				"docstatus": 1,
+				"purchase_order": po,
+				"parent": ["!=", self.name],
+			},
+			fields=["sum(qty) as qty"],
 		)
-		return qty and flt(qty[0][0]) or 0.0
+		return flt(qty[0].qty) if qty and qty[0].qty else 0.0
 
 	def get_po_qty_and_warehouse(self, po_detail):
 		po_qty, po_warehouse = frappe.db.get_value("Purchase Order Item", po_detail, ["qty", "warehouse"])
@@ -415,11 +418,11 @@ class PurchaseReceipt(BuyingController):
 					)
 
 	def check_next_docstatus(self):
-		submit_rv = frappe.db.sql(
-			"""select t1.name
-			from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2
-			where t1.name = t2.parent and t2.purchase_receipt = %s and t1.docstatus = 1""",
-			(self.name),
+		submit_rv = frappe.get_all(
+			"Purchase Invoice Item",
+			filters={"purchase_receipt": self.name, "docstatus": 1},
+			fields=["parent"],
+			as_list=True,
 		)
 		if submit_rv:
 			frappe.throw(_("Purchase Invoice {0} is already submitted").format(self.submit_rv[0][0]))
@@ -429,11 +432,11 @@ class PurchaseReceipt(BuyingController):
 
 		self.check_for_on_hold_or_closed_status("Purchase Order", "purchase_order")
 		# Check if Purchase Invoice has been submitted against current Purchase Order
-		submitted = frappe.db.sql(
-			"""select t1.name
-			from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2
-			where t1.name = t2.parent and t2.purchase_receipt = %s and t1.docstatus = 1""",
-			self.name,
+		submitted = frappe.get_all(
+			"Purchase Invoice Item",
+			filters={"purchase_receipt": self.name, "docstatus": 1},
+			fields=["parent"],
+			as_list=True,
 		)
 		if submitted:
 			frappe.throw(_("Purchase Invoice {0} is already submitted").format(submitted[0][0]))
