@@ -9,7 +9,7 @@ import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 from frappe.query_builder import Field
-from frappe.query_builder.functions import Count, IfNull, Sum
+from frappe.query_builder.functions import Count, IfNull, Min, Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form, parse_json
 from frappe.website.website_generator import WebsiteGenerator
 
@@ -1201,7 +1201,9 @@ def _query_bom_items(bom, company, opts):
 	t = _get_bom_item_tables(opts)
 	query = _build_base_bom_items_query(bom, company, opts.qty, t)
 	query, group_by = _add_bom_item_columns(query, t, bom, opts, track_semi_finished_goods)
-	return query.groupby(*group_by).orderby(Field("idx")).run(as_dict=True)
+	# qualify + aggregate idx: bare "idx" is ambiguous across the joined tables and isn't grouped
+	# (idx is unique per BOM item, so Min() preserves the original ordering) — needed for postgres
+	return query.groupby(*group_by).orderby(Min(t.bom_item.idx)).run(as_dict=True)
 
 
 def _get_bom_item_tables(opts):

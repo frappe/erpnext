@@ -180,14 +180,15 @@ def get_linked_advances(company, docname):
 	return (
 		qb.from_(adv)
 		.select(
-			adv.company,
-			adv.against_voucher_type.as_("reference_doctype"),
+			# non-grouped columns are constant per against_voucher_no -> Max() is unchanged and postgres-valid
+			Max(adv.company).as_("company"),
+			Max(adv.against_voucher_type).as_("reference_doctype"),
 			adv.against_voucher_no.as_("reference_name"),
 			Abs(Sum(adv.amount)).as_("allocated_amount"),
-			adv.currency,
+			Max(adv.currency).as_("currency"),
 		)
 		.where(Criterion.all(criteria))
-		.having(qb.Field("allocated_amount") > 0)
+		.having(Abs(Sum(adv.amount)) > 0)
 		.groupby(adv.against_voucher_no)
 		.run(as_dict=True)
 	)
