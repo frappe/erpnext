@@ -412,10 +412,9 @@ def get_count_on(account, fieldname, date):
 			else:
 				dr_or_cr = "debit" if fieldname == "invoiced_amount" else "credit"
 				cr_or_dr = "credit" if fieldname == "invoiced_amount" else "debit"
-				select_fields = (
-					"ifnull(sum(credit-debit),0)"
-					if fieldname == "invoiced_amount"
-					else "ifnull(sum(debit-credit),0)"
+				gl = frappe.qb.DocType("GL Entry")
+				amount_expr = (
+					Sum(gl.credit - gl.debit) if fieldname == "invoiced_amount" else Sum(gl.debit - gl.credit)
 				)
 
 				if (
@@ -423,14 +422,21 @@ def get_count_on(account, fieldname, date):
 					or (gle.against_voucher_type in ["Sales Order", "Purchase Order"])
 					or (gle.against_voucher == gle.voucher_no and gle.get(dr_or_cr) > 0)
 				):
-					payment_amount = frappe.db.sql(
-						f"""
-						SELECT {select_fields}
-						FROM `tabGL Entry` gle
-						WHERE docstatus < 2 and posting_date <= %(date)s and against_voucher = %(voucher_no)s
-						and party = %(party)s and name != %(name)s""",
-						{"date": date, "voucher_no": gle.voucher_no, "party": gle.party, "name": gle.name},
-					)[0][0]
+					payment_amount = (
+						(
+							frappe.qb.from_(gl)
+							.select(amount_expr)
+							.where(
+								(gl.docstatus < 2)
+								& (gl.posting_date <= date)
+								& (gl.against_voucher == gle.voucher_no)
+								& (gl.party == gle.party)
+								& (gl.name != gle.name)
+							)
+							.run()[0][0]
+						)
+						or 0
+					)
 
 					outstanding_amount = flt(gle.get(dr_or_cr)) - flt(gle.get(cr_or_dr)) - payment_amount
 					currency_precision = get_currency_precision() or 2
@@ -1170,26 +1176,27 @@ def get_company_default(company: str, fieldname: str, ignore_validation: bool = 
 
 
 def fix_total_debit_credit():
-	vouchers = frappe.db.sql(
-		"""select voucher_type, voucher_no,
-		sum(debit) - sum(credit) as diff
-		from `tabGL Entry`
-		group by voucher_type, voucher_no
-		having sum(debit) != sum(credit)""",
-		as_dict=1,
+	gle = frappe.qb.DocType("GL Entry")
+	vouchers = (
+		frappe.qb.from_(gle)
+		.select(gle.voucher_type, gle.voucher_no, (Sum(gle.debit) - Sum(gle.credit)).as_("diff"))
+		.groupby(gle.voucher_type, gle.voucher_no)
+		.having(Sum(gle.debit) != Sum(gle.credit))
+		.run(as_dict=1)
 	)
 
 	for d in vouchers:
 		if abs(d.diff) > 0:
 			dr_or_cr = d.voucher_type == "Sales Invoice" and "credit" or "debit"
 
-			frappe.db.sql(
-				"""update `tabGL Entry` set {} = {} + {}
-				where voucher_type = {} and voucher_no = {} and {} > 0 limit 1""".format(
-					dr_or_cr, dr_or_cr, "%s", "%s", "%s", dr_or_cr
-				),
-				(d.diff, d.voucher_type, d.voucher_no),
+			gle = frappe.qb.DocType("GL Entry")
+			name = frappe.db.get_value(
+				"GL Entry",
+				{"voucher_type": d.voucher_type, "voucher_no": d.voucher_no, dr_or_cr: [">", 0]},
+				"name",
 			)
+			if name:
+				frappe.qb.update(gle).set(gle[dr_or_cr], gle[dr_or_cr] + d.diff).where(gle.name == name).run()
 
 
 def get_currency_precision():
@@ -1231,11 +1238,12 @@ def get_held_invoices(party_type, party):
 	held_invoices = None
 
 	if party_type == "Supplier":
-		held_invoices = frappe.db.sql(
-			"select name from `tabPurchase Invoice` where on_hold = 1 and release_date IS NOT NULL and release_date > CURDATE()",
-			as_dict=1,
+		held_invoices = frappe.get_all(
+			"Purchase Invoice",
+			filters={"on_hold": 1, "release_date": [">", nowdate()]},
+			pluck="name",
 		)
-		held_invoices = set(d["name"] for d in held_invoices)
+		held_invoices = set(held_invoices)
 
 	return held_invoices
 
@@ -1810,14 +1818,10 @@ def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
 
 	voucher_nos = [d[1] for d in future_stock_vouchers]
 
-	gles = frappe.db.sql(
-		"""
-		select name, account, credit, debit, cost_center, project, voucher_type, voucher_no
-			from `tabGL Entry`
-		where
-			posting_date >= {} and voucher_no in ({})""".format("%s", ", ".join(["%s"] * len(voucher_nos))),
-		tuple([posting_date, *voucher_nos]),
-		as_dict=1,
+	gles = frappe.get_all(
+		"GL Entry",
+		filters={"posting_date": [">=", posting_date], "voucher_no": ["in", voucher_nos]},
+		fields=["name", "account", "credit", "debit", "cost_center", "project", "voucher_type", "voucher_no"],
 	)
 
 	for d in gles:
