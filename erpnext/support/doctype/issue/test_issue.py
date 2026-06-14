@@ -14,11 +14,11 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestSetUp(ERPNextTestSuite):
 	def setUp(self):
-		frappe.db.sql("delete from `tabService Level Agreement`")
-		frappe.db.sql("delete from `tabService Level Priority`")
-		frappe.db.sql("delete from `tabSLA Fulfilled On Status`")
-		frappe.db.sql("delete from `tabPause SLA On Status`")
-		frappe.db.sql("delete from `tabService Day`")
+		frappe.db.delete("Service Level Agreement")
+		frappe.db.delete("Service Level Priority")
+		frappe.db.delete("SLA Fulfilled On Status")
+		frappe.db.delete("Pause SLA On Status")
+		frappe.db.delete("Service Day")
 		frappe.db.set_single_value("Support Settings", "track_service_level_agreement", 1)
 		create_service_level_agreements_for_issues()
 
