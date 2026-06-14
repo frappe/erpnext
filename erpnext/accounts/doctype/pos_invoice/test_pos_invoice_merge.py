@@ -10,9 +10,9 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_pu
 
 class TestPOSInvoiceMerging(POSInvoiceTestMixin):
 	def clear_pos_data(self):
-		frappe.db.sql("delete from `tabPOS Opening Entry`;")
-		frappe.db.sql("delete from `tabPOS Closing Entry`;")
-		frappe.db.sql("delete from `tabPOS Invoice`;")
+		frappe.db.delete("POS Opening Entry")
+		frappe.db.delete("POS Closing Entry")
+		frappe.db.delete("POS Invoice")
 
 	def setUp(self):
 		self.clear_pos_data()
