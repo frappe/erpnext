@@ -7,10 +7,19 @@ from collections import OrderedDict, defaultdict
 
 import frappe
 from frappe import qb, scrub
-from frappe.desk.reportview import get_filters_cond, get_match_cond
+from frappe.desk.reportview import get_filter_conditions_qb, get_match_conditions_qb
 from frappe.permissions import has_permission
 from frappe.query_builder import Case, Criterion, DocType
-from frappe.query_builder.functions import Concat, CustomFunction, Length, Locate, Substring, Sum
+from frappe.query_builder.functions import (
+	Concat,
+	CustomFunction,
+	IfNull,
+	Length,
+	Locate,
+	Round,
+	Substring,
+	Sum,
+)
 from frappe.utils import nowdate, today, unique
 from pypika import Order
 
@@ -840,8 +849,6 @@ def get_expense_account(doctype: str, txt: str, searchfield: str, start: int, pa
 @frappe.validate_and_sanitize_search_inputs
 def warehouse_query(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: list):
 	# Should be used when item code is passed in filters.
-	doctype = "Warehouse"
-	conditions, bin_conditions = [], []
 	filter_dict = get_doctype_wise_filters(filters)
 
 	warehouse_field = "name"
@@ -850,30 +857,37 @@ def warehouse_query(doctype: str, txt: str, searchfield: str, start: int, page_l
 		searchfield = meta.get("title_field")
 		warehouse_field = meta.get("title_field")
 
-	query = """select `tabWarehouse`.`{warehouse_field}`,
-		CONCAT_WS(' : ', 'Actual Qty', ifnull(round(`tabBin`.actual_qty, 2), 0 )) actual_qty
-		from `tabWarehouse` left join `tabBin`
-		on `tabBin`.warehouse = `tabWarehouse`.name {bin_conditions}
-		where
-			`tabWarehouse`.`{key}` like {txt}
-			{fcond} {mcond}
-		order by ifnull(`tabBin`.actual_qty, 0) desc, `tabWarehouse`.`{warehouse_field}` asc
-		limit
-			{page_len} offset {start}
-		""".format(
-		warehouse_field=warehouse_field,
-		bin_conditions=get_filters_cond(
-			doctype, filter_dict.get("Bin"), bin_conditions, ignore_permissions=True
-		),
-		key=searchfield,
-		fcond=get_filters_cond(doctype, filter_dict.get("Warehouse"), conditions),
-		mcond=get_match_cond(doctype),
-		start=start,
-		page_len=page_len,
-		txt=frappe.db.escape(f"%{txt}%"),
+	wh = frappe.qb.DocType("Warehouse")
+	bin_dt = frappe.qb.DocType("Bin")
+
+	# Bin filters go on the LEFT JOIN so warehouses without a matching Bin row are still returned
+	join_condition = bin_dt.warehouse == wh.name
+	for condition in get_filter_conditions_qb("Bin", filter_dict.get("Bin")):
+		join_condition &= condition
+
+	query = (
+		frappe.qb.from_(wh)
+		.left_join(bin_dt)
+		.on(join_condition)
+		.select(
+			wh[warehouse_field],
+			Concat("Actual Qty", " : ", IfNull(Round(bin_dt.actual_qty, 2), 0)).as_("actual_qty"),
+		)
+		.where(wh[searchfield].like(f"%{txt}%"))
 	)
 
-	return frappe.db.sql(query)
+	for condition in get_filter_conditions_qb("Warehouse", filter_dict.get("Warehouse")):
+		query = query.where(condition)
+	for condition in get_match_conditions_qb("Warehouse"):
+		query = query.where(condition)
+
+	return (
+		query.orderby(IfNull(bin_dt.actual_qty, 0), order=Order.desc)
+		.orderby(wh[warehouse_field], order=Order.asc)
+		.limit(page_len)
+		.offset(start)
+		.run()
+	)
 
 
 def get_doctype_wise_filters(filters):
