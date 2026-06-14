@@ -6,7 +6,7 @@ import copy
 
 import frappe
 from frappe import _
-from frappe.desk.reportview import get_match_cond
+from frappe.desk.reportview import get_match_conditions_qb
 from frappe.model.document import Document
 from frappe.utils import add_days, add_months, format_date, getdate, today
 from frappe.utils.jinja import validate_template
@@ -472,30 +472,29 @@ def get_customer_emails(customer_name: str, primary_mandatory: str | int, billin
 
 	frappe.has_permission("Customer", "read", customer_name, throw=True)
 
-	billing_email = frappe.db.sql(
-		"""
-		SELECT
-			email.email_id
-		FROM
-			`tabContact Email` AS email
-		JOIN
-			`tabDynamic Link` AS link
-		ON
-			email.parent=link.parent
-		JOIN
-			`tabContact` AS contact
-		ON
-			contact.name=link.parent
-		WHERE
-			link.link_doctype='Customer'
-			and link.link_name=%s
-			and contact.is_billing_contact=1
-			{mcond}
-		ORDER BY
-			contact.creation desc
-		""".format(mcond=get_match_cond("Contact")),
-		customer_name,
+	email = frappe.qb.DocType("Contact Email")
+	link = frappe.qb.DocType("Dynamic Link")
+	contact = frappe.qb.DocType("Contact")
+
+	query = (
+		frappe.qb.from_(email)
+		.join(link)
+		.on(email.parent == link.parent)
+		.join(contact)
+		.on(contact.name == link.parent)
+		.select(email.email_id)
+		.where(
+			(link.link_doctype == "Customer")
+			& (link.link_name == customer_name)
+			& (contact.is_billing_contact == 1)
+		)
+		.orderby(contact.creation, order=frappe.qb.desc)
 	)
+
+	for condition in get_match_conditions_qb("Contact", table=contact):
+		query = query.where(condition)
+
+	billing_email = query.run()
 
 	if len(billing_email) == 0 or (billing_email[0][0] is None):
 		if billing_and_primary:
