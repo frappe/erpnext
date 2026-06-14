@@ -133,14 +133,14 @@ class MaterialRequest(BuyingController):
 						"docstatus": 1,
 						"parent": ["!=", self.name],
 					},
-					fields=["sum(qty) as qty"],
+					fields=[{"SUM": "qty", "as": "qty"}],
 				)
 				already_indented = flt(already_indented[0].qty) if already_indented else 0
 
 				actual_so_qty = frappe.get_all(
 					"Sales Order Item",
 					filters={"parent": so_no, "item_code": item, "docstatus": 1},
-					fields=["sum(stock_qty) as stock_qty"],
+					fields=[{"SUM": "stock_qty", "as": "stock_qty"}],
 				)
 				actual_so_qty = flt(actual_so_qty[0].stock_qty) if actual_so_qty else 0
 
