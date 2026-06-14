@@ -63,13 +63,10 @@ class TestLoyaltyPointEntry(ERPNextTestSuite):
 		self.assertEqual(doc.loyalty_points, -7)
 
 		# Check balance
-		balance = frappe.db.sql(
-			"""
-			SELECT SUM(loyalty_points)
-			FROM `tabLoyalty Point Entry`
-			WHERE customer = %s
-		""",
-			(self.customer_name,),
-		)[0][0]
+		balance = frappe.get_all(
+			"Loyalty Point Entry",
+			filters={"customer": self.customer_name},
+			fields=[{"SUM": "loyalty_points", "as": "loyalty_points"}],
+		)[0].loyalty_points
 
 		self.assertEqual(balance, 3)  # 10 added, 7 redeemed
