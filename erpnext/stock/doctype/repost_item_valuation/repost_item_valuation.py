@@ -320,28 +320,23 @@ class RepostItemValuation(Document):
 		if self.based_on != "Item and Warehouse":
 			return
 
-		filters = {
-			"item_code": self.item_code,
-			"warehouse": self.warehouse,
-			"name": self.name,
-			"posting_date": self.posting_date,
-			"posting_time": self.posting_time,
-		}
-
-		frappe.db.sql(
-			"""
-			update `tabRepost Item Valuation`
-			set status = 'Skipped'
-			WHERE item_code = %(item_code)s
-				and warehouse = %(warehouse)s
-				and name != %(name)s
-				and TIMESTAMP(posting_date, posting_time) > TIMESTAMP(%(posting_date)s, %(posting_time)s)
-				and docstatus = 1
-				and status = 'Queued'
-				and based_on = 'Item and Warehouse'
-				""",
-			filters,
-		)
+		riv = frappe.qb.DocType("Repost Item Valuation")
+		(
+			frappe.qb.update(riv)
+			.set(riv.status, "Skipped")
+			.where(
+				(riv.item_code == self.item_code)
+				& (riv.warehouse == self.warehouse)
+				& (riv.name != self.name)
+				& (
+					(riv.posting_date > self.posting_date)
+					| ((riv.posting_date == self.posting_date) & (riv.posting_time > self.posting_time))
+				)
+				& (riv.docstatus == 1)
+				& (riv.status == "Queued")
+				& (riv.based_on == "Item and Warehouse")
+			)
+		).run()
 
 	def recreate_stock_ledger_entries(self):
 		"""Recreate Stock Ledger Entries for the transaction."""
