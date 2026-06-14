@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Max, Sum
 
 
 def execute(filters=None):
@@ -43,7 +43,13 @@ def get_data(filters):
 	gle = frappe.qb.DocType("GL Entry")
 	query = (
 		frappe.qb.from_(gle)
-		.select(gle.voucher_type, gle.voucher_no, Sum(gle.debit).as_("debit"), Sum(gle.credit).as_("credit"))
+		# voucher_type is constant per grouped voucher_no -> Max() keeps the GROUP BY valid on postgres
+		.select(
+			Max(gle.voucher_type).as_("voucher_type"),
+			gle.voucher_no,
+			Sum(gle.debit).as_("debit"),
+			Sum(gle.credit).as_("credit"),
+		)
 		.where(gle.is_cancelled == 0)
 		.groupby(gle.voucher_no)
 	)

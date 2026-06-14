@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Max, Sum
 from frappe.utils import flt
 
 
@@ -58,14 +58,16 @@ def get_data():
 		.on(so.name == so_item.parent)
 		.select(
 			so_item.item_code,
-			so_item.item_name,
-			so_item.description,
+			# non-grouped columns are constant per grouped so.name / item_code -> Max() keeps the
+			# GROUP BY valid on postgres while returning the same value MySQL picked.
+			Max(so_item.item_name).as_("item_name"),
+			Max(so_item.description).as_("description"),
 			so.name,
-			so.transaction_date,
-			so.customer,
-			so.territory,
+			Max(so.transaction_date).as_("transaction_date"),
+			Max(so.customer).as_("customer"),
+			Max(so.territory).as_("territory"),
 			Sum(so_item.qty).as_("total_qty"),
-			so.company,
+			Max(so.company).as_("company"),
 		)
 		.where((so.docstatus == 1) & so.status.notin(["Closed", "Completed", "Cancelled"]))
 		.groupby(so.name, so_item.item_code)

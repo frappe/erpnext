@@ -3,7 +3,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Max, Min, Sum
 from frappe.utils import ceil, cint, flt, get_link_to_form
 
 from erpnext.manufacturing.doctype.bom.bom import add_additional_cost
@@ -985,11 +985,13 @@ def get_secondary_items_from_job_card(work_order, jc_name=None):
 		.select(
 			Sum(job_card_secondary_item.stock_qty).as_("stock_qty"),
 			job_card_secondary_item.item_code,
-			job_card_secondary_item.item_name,
-			job_card_secondary_item.description,
-			job_card_secondary_item.stock_uom,
+			# non-grouped columns are constant per grouped item_code -> Max() keeps the GROUP BY valid
+			# on postgres while returning the same value MySQL picked.
+			Max(job_card_secondary_item.item_name).as_("item_name"),
+			Max(job_card_secondary_item.description).as_("description"),
+			Max(job_card_secondary_item.stock_uom).as_("stock_uom"),
 			job_card_secondary_item.secondary_item_type,
-			job_card_secondary_item.bom_secondary_item,
+			Max(job_card_secondary_item.bom_secondary_item).as_("bom_secondary_item"),
 		)
 		.join(job_card_secondary_item)
 		.on(job_card_secondary_item.parent == job_card.name)
@@ -999,7 +1001,8 @@ def get_secondary_items_from_job_card(work_order, jc_name=None):
 			& (job_card.docstatus == 1)
 		)
 		.groupby(job_card_secondary_item.item_code, job_card_secondary_item.secondary_item_type)
-		.orderby(job_card_secondary_item.idx)
+		# idx is not grouped; Min() preserves the original ordering and is valid on postgres
+		.orderby(Min(job_card_secondary_item.idx))
 	)
 
 	if jc_name:

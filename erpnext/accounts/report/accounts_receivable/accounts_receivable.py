@@ -655,7 +655,6 @@ class ReceivablePayableReport:
 	def get_future_payments_from_payment_entry(self):
 		pe = frappe.qb.DocType("Payment Entry")
 		pe_ref = frappe.qb.DocType("Payment Entry Reference")
-		ifelse = query_builder.CustomFunction("IF", ["condition", "then", "else"])
 
 		return (
 			frappe.qb.from_(pe)
@@ -668,11 +667,14 @@ class ReceivablePayableReport:
 				(pe.posting_date).as_("future_date"),
 				(pe_ref.allocated_amount).as_("future_amount"),
 				(pe.reference_no).as_("future_ref"),
-				ifelse(
+				# CASE is portable; MySQL's IF() does not exist on postgres
+				query_builder.Case()
+				.when(
 					pe.payment_type == "Receive",
 					pe.source_exchange_rate * pe_ref.allocated_amount,
-					pe.target_exchange_rate * pe_ref.allocated_amount,
-				).as_("future_amount_in_base_currency"),
+				)
+				.else_(pe.target_exchange_rate * pe_ref.allocated_amount)
+				.as_("future_amount_in_base_currency"),
 			)
 			.where(
 				(pe.docstatus < 2)

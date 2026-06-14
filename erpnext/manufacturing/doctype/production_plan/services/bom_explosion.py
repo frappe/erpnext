@@ -4,7 +4,7 @@
 """BOM explosion helpers for Production Plan material planning."""
 
 import frappe
-from frappe.query_builder.functions import IfNull, Sum
+from frappe.query_builder.functions import IfNull, Max, Min, Sum
 
 from erpnext.manufacturing.doctype.production_plan.services.planning_queries import get_uom_conversion_factor
 
@@ -106,30 +106,34 @@ def _subitems_query(company, bom_no, include_non_stock_items, parent_qty, planne
 		.select(*_subitem_columns(bom_item, bom, item, item_default, item_uom, parent_qty, planned_qty))
 		.where(_subitem_filter(bom_item, bom, item, bom_no, include_non_stock_items))
 		.groupby(bom_item.item_code)
-		.orderby(bom_item.idx)
+		# idx is not grouped; Min() preserves the original ordering and is valid on postgres
+		.orderby(Min(bom_item.idx))
 	).run(as_dict=True)
 
 
 def _subitem_columns(bom_item, bom, item, item_default, item_uom, parent_qty, planned_qty):
 	qty = IfNull(parent_qty * Sum(bom_item.stock_qty / IfNull(bom.quantity, 1)) * planned_qty, 0).as_("qty")
+	# only item_code is grouped; the rest are functionally dependent on the grouped item (item
+	# attributes) or arbitrary per BOM Item on MySQL -> Max() keeps the GROUP BY valid on postgres
+	# while returning the same value MySQL picked.
 	return [
 		bom_item.item_code,
-		item.default_material_request_type,
-		item.item_name,
+		Max(item.default_material_request_type).as_("default_material_request_type"),
+		Max(item.item_name).as_("item_name"),
 		qty,
-		item.is_sub_contracted_item.as_("is_sub_contracted"),
-		bom_item.source_warehouse,
-		item.default_bom.as_("default_bom"),
-		bom_item.description.as_("description"),
-		bom_item.stock_uom.as_("stock_uom"),
-		item.min_order_qty.as_("min_order_qty"),
-		item.safety_stock.as_("safety_stock"),
-		item_default.default_warehouse,
-		item.purchase_uom,
-		item_uom.conversion_factor,
-		bom.item.as_("main_bom_item"),
-		bom.name.as_("main_bom"),
-		bom_item.is_phantom_item,
+		Max(item.is_sub_contracted_item).as_("is_sub_contracted"),
+		Max(bom_item.source_warehouse).as_("source_warehouse"),
+		Max(item.default_bom).as_("default_bom"),
+		Max(bom_item.description).as_("description"),
+		Max(bom_item.stock_uom).as_("stock_uom"),
+		Max(item.min_order_qty).as_("min_order_qty"),
+		Max(item.safety_stock).as_("safety_stock"),
+		Max(item_default.default_warehouse).as_("default_warehouse"),
+		Max(item.purchase_uom).as_("purchase_uom"),
+		Max(item_uom.conversion_factor).as_("conversion_factor"),
+		Max(bom.item).as_("main_bom_item"),
+		Max(bom.name).as_("main_bom"),
+		Max(bom_item.is_phantom_item).as_("is_phantom_item"),
 	]
 
 

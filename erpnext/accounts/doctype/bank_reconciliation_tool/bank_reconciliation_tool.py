@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.custom import ConstantColumn
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Max, Sum
 from frappe.utils import cint, create_batch, flt
 
 from erpnext import get_default_cost_center
@@ -1410,12 +1410,14 @@ def get_je_matching_query(
 			Sum(getattr(jea, amount_field)).as_("paid_amount"),
 			ConstantColumn("Journal Entry").as_("doctype"),
 			je.name,
-			je.cheque_no.as_("reference_no"),
-			je.cheque_date.as_("reference_date"),
-			je.pay_to_recd_from.as_("party"),
-			jea.party_type,
-			je.posting_date,
-			jea.account_currency.as_("currency"),
+			# non-grouped columns are constant per grouped JE name (party_type/currency come from the
+			# single bank-account line) -> Max() keeps the GROUP BY valid on postgres with the same value
+			Max(je.cheque_no).as_("reference_no"),
+			Max(je.cheque_date).as_("reference_date"),
+			Max(je.pay_to_recd_from).as_("party"),
+			Max(jea.party_type).as_("party_type"),
+			Max(je.posting_date).as_("posting_date"),
+			Max(jea.account_currency).as_("currency"),
 		)
 		.where(je.docstatus == 1)
 		.where(je.voucher_type != "Opening Entry")
@@ -1423,7 +1425,7 @@ def get_je_matching_query(
 		.where(jea.account == common_filters.bank_account)
 		.where(filter_by_date)
 		.groupby(je.name)
-		.orderby(je.cheque_date if cint(filter_by_reference_date) else je.posting_date)
+		.orderby(Max(je.cheque_date) if cint(filter_by_reference_date) else Max(je.posting_date))
 	)
 
 	if frappe.flags.auto_reconcile_vouchers is True:
