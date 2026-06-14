@@ -319,56 +319,48 @@ class InvoiceDiscounting(AccountsController):
 @frappe.whitelist()
 def get_invoices(filters: str):
 	filters = frappe._dict(json.loads(filters))
-	cond = []
-	if filters.customer:
-		cond.append("customer=%(customer)s")
-	if filters.from_date:
-		cond.append("posting_date >= %(from_date)s")
-	if filters.to_date:
-		cond.append("posting_date <= %(to_date)s")
-	if filters.min_amount:
-		cond.append("base_grand_total >= %(min_amount)s")
-	if filters.max_amount:
-		cond.append("base_grand_total <= %(max_amount)s")
+	si = frappe.qb.DocType("Sales Invoice")
+	di = frappe.qb.DocType("Discounted Invoice")
 
-	where_condition = ""
-	if cond:
-		where_condition += " and " + " and ".join(cond)
+	discounted = frappe.qb.from_(di).select(di.sales_invoice).where(di.docstatus == 1)
 
-	return frappe.db.sql(
-		"""
-		select
-			name as sales_invoice,
-			customer,
-			posting_date,
-			outstanding_amount,
-			debit_to
-		from `tabSales Invoice` si
-		where
-			docstatus = 1
-			and outstanding_amount > 0
-			%s
-			and not exists(select di.name from `tabDiscounted Invoice` di
-				where di.docstatus=1 and di.sales_invoice=si.name)
-	"""
-		% where_condition,
-		filters,
-		as_dict=1,
+	query = (
+		frappe.qb.from_(si)
+		.select(
+			si.name.as_("sales_invoice"),
+			si.customer,
+			si.posting_date,
+			si.outstanding_amount,
+			si.debit_to,
+		)
+		.where((si.docstatus == 1) & (si.outstanding_amount > 0) & si.name.notin(discounted))
 	)
+
+	if filters.customer:
+		query = query.where(si.customer == filters.customer)
+	if filters.from_date:
+		query = query.where(si.posting_date >= filters.from_date)
+	if filters.to_date:
+		query = query.where(si.posting_date <= filters.to_date)
+	if filters.min_amount:
+		query = query.where(si.base_grand_total >= filters.min_amount)
+	if filters.max_amount:
+		query = query.where(si.base_grand_total <= filters.max_amount)
+
+	return query.run(as_dict=1)
 
 
 def get_party_account_based_on_invoice_discounting(sales_invoice):
 	party_account = None
-	invoice_discounting = frappe.db.sql(
-		"""
-		select par.accounts_receivable_discounted, par.accounts_receivable_unpaid, par.status
-		from `tabInvoice Discounting` par, `tabDiscounted Invoice` ch
-		where par.name=ch.parent
-			and par.docstatus=1
-			and ch.sales_invoice = %s
-	""",
-		(sales_invoice),
-		as_dict=1,
+	par = frappe.qb.DocType("Invoice Discounting")
+	ch = frappe.qb.DocType("Discounted Invoice")
+	invoice_discounting = (
+		frappe.qb.from_(par)
+		.inner_join(ch)
+		.on(par.name == ch.parent)
+		.select(par.accounts_receivable_discounted, par.accounts_receivable_unpaid, par.status)
+		.where((par.docstatus == 1) & (ch.sales_invoice == sales_invoice))
+		.run(as_dict=1)
 	)
 	if invoice_discounting:
 		if invoice_discounting[0].status == "Disbursed":
