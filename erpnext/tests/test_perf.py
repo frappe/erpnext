@@ -11,14 +11,11 @@ INDEXED_FIELDS = {
 
 class TestPerformance(ERPNextTestSuite):
 	def test_ensure_indexes(self):
-		# These fields are not explicitly indexed BUT they are prefix in some
-		# other composite index. If those are removed this test should be
-		# updated accordingly.
+		# Each of these fields has its own single-column index (search_index / Link).
+		# If those are removed this test should be updated accordingly.
 		for doctype, fields in INDEXED_FIELDS.items():
 			for field in fields:
 				self.assertTrue(
-					frappe.db.sql(
-						f"""SHOW INDEX FROM `tab{doctype}`
-						WHERE Column_name = "{field}" AND Seq_in_index = 1"""
-					)
+					frappe.db.get_column_index(f"tab{doctype}", field, unique=False),
+					msg=f"Expected an index with {field} as the leading column on {doctype}",
 				)
