@@ -467,9 +467,9 @@ def validate_expense_against_budget(params, expense_amount=0):
 					b.to_fiscal_year,
 					b.budget_start_date,
 					b.budget_end_date,
-					IFNULL(b.applicable_on_material_request, 0) AS for_material_request,
-					IFNULL(b.applicable_on_purchase_order, 0) AS for_purchase_order,
-					IFNULL(b.applicable_on_booking_actual_expenses, 0) AS for_actual_expenses,
+					COALESCE(b.applicable_on_material_request, 0) AS for_material_request,
+					COALESCE(b.applicable_on_purchase_order, 0) AS for_purchase_order,
+					COALESCE(b.applicable_on_booking_actual_expenses, 0) AS for_actual_expenses,
 					b.action_if_annual_budget_exceeded,
 					b.action_if_accumulated_monthly_budget_exceeded,
 					b.action_if_annual_budget_exceeded_on_mr,
@@ -687,7 +687,7 @@ def get_requested_amount(params):
 	condition = get_other_condition(params, "Material Request")
 
 	data = frappe.db.sql(
-		""" select ifnull((sum(child.stock_qty - child.ordered_qty) * rate), 0) as amount
+		""" select coalesce((sum(child.stock_qty - child.ordered_qty) * rate), 0) as amount
 		from `tabMaterial Request Item` child, `tabMaterial Request` parent where parent.name = child.parent and
 		child.item_code = %s and parent.docstatus = 1 and child.stock_qty > child.ordered_qty and {} and
 		parent.material_request_type = 'Purchase' and parent.status != 'Stopped'""".format(condition),
@@ -703,7 +703,7 @@ def get_ordered_amount(params):
 	condition = get_other_condition(params, "Purchase Order")
 
 	data = frappe.db.sql(
-		f""" select ifnull(sum(child.amount - child.billed_amt), 0) as amount
+		f""" select coalesce(sum(child.amount - child.billed_amt), 0) as amount
 		from `tabPurchase Order Item` child, `tabPurchase Order` parent where
 		parent.name = child.parent and child.item_code = %s and parent.docstatus = 1 and child.amount > child.billed_amt
 		and parent.status != 'Closed' and {condition}""",

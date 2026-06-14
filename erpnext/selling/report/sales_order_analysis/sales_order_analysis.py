@@ -60,6 +60,13 @@ def get_conditions(filters):
 
 
 def get_data(conditions, filters):
+	# DATEDIFF is MariaDB-only (postgres subtracts dates directly), and MySQL's IF() plus its
+	# "(SELECT delay_days)" select-alias reference are not valid on postgres.
+	if frappe.db.db_type == "postgres":
+		delay_days = "(CURRENT_DATE - soi.delivery_date)"
+	else:
+		delay_days = "DATEDIFF(CURRENT_DATE, soi.delivery_date)"
+
 	data = frappe.db.sql(
 		f"""
 		SELECT
@@ -67,15 +74,15 @@ def get_data(conditions, filters):
 			soi.delivery_date as delivery_date,
 			so.name as sales_order,
 			so.status, so.customer, soi.item_code,
-			DATEDIFF(CURRENT_DATE, soi.delivery_date) as delay_days,
-			IF(so.status in ('Completed','To Bill'), 0, (SELECT delay_days)) as delay,
+			{delay_days} as delay_days,
+			CASE WHEN so.status in ('Completed','To Bill') THEN 0 ELSE {delay_days} END as delay,
 			soi.qty, soi.delivered_qty,
 			(soi.qty - soi.delivered_qty) AS pending_qty,
-			IFNULL(SUM(sii.qty), 0) as billed_qty,
+			COALESCE(SUM(sii.qty), 0) as billed_qty,
 			soi.base_amount as amount,
 			(soi.delivered_qty * soi.base_rate) as delivered_qty_amount,
-			(soi.billed_amt * IFNULL(so.conversion_rate, 1)) as billed_amount,
-			(soi.base_amount - (soi.billed_amt * IFNULL(so.conversion_rate, 1))) as pending_amount,
+			(soi.billed_amt * COALESCE(so.conversion_rate, 1)) as billed_amount,
+			(soi.base_amount - (soi.billed_amt * COALESCE(so.conversion_rate, 1))) as pending_amount,
 			soi.warehouse as warehouse,
 			so.company, soi.name,
 			soi.description as description
@@ -89,7 +96,7 @@ def get_data(conditions, filters):
 			and so.status not in ('Stopped', 'On Hold')
 			and so.docstatus = 1
 			{conditions}
-		GROUP BY soi.name
+		GROUP BY soi.name, so.name
 		ORDER BY so.transaction_date ASC, soi.item_code ASC
 	""",
 		filters,
@@ -112,7 +119,15 @@ def get_so_elapsed_time(data):
 		dn = qb.DocType("Delivery Note")
 		dni = qb.DocType("Delivery Note Item")
 
-		to_seconds = CustomFunction("TO_SECONDS", ["date"])
+		# TO_SECONDS is MariaDB-only. On postgres, subtracting dates yields days, so multiply
+		# by 86400 for the equivalent second delta.
+		if frappe.db.db_type == "postgres":
+			elapsed_seconds = ((Max(dn.posting_date) - so.transaction_date) * 86400).as_("elapsed_seconds")
+		else:
+			to_seconds = CustomFunction("TO_SECONDS", ["date"])
+			elapsed_seconds = (to_seconds(Max(dn.posting_date)) - to_seconds(so.transaction_date)).as_(
+				"elapsed_seconds"
+			)
 
 		query = (
 			qb.from_(so)
@@ -125,11 +140,11 @@ def get_so_elapsed_time(data):
 			.select(
 				so.name.as_("sales_order"),
 				soi.item_code.as_("so_item_code"),
-				(to_seconds(Max(dn.posting_date)) - to_seconds(so.transaction_date)).as_("elapsed_seconds"),
+				elapsed_seconds,
 			)
 			.where((so.name.isin(sales_orders)) & (dn.docstatus == 1))
 			.orderby(so.name, soi.name)
-			.groupby(soi.name)
+			.groupby(soi.name, so.name)
 		)
 		dn_elapsed_time = query.run(as_dict=True)
 

@@ -555,7 +555,7 @@ class StatusUpdater(Document):
 					args["second_source_extra_cond"] = ""
 
 				args["second_source_condition"] = frappe.db.sql(
-					""" select ifnull((select sum({second_source_field})
+					""" select coalesce((select sum({second_source_field})
 					from `tab{second_source_dt}`
 					where `{second_join_field}`=%(detail_id)s
 					and (`tab{second_source_dt}`.docstatus=1)
@@ -570,7 +570,7 @@ class StatusUpdater(Document):
 				args["source_dt_value"] = (
 					frappe.db.sql(
 						"""
-						(select ifnull(sum({source_field}), 0)
+						(select coalesce(sum({source_field}), 0)
 							from `tab{source_dt}` where `{join_field}`=%(detail_id)s
 							and (docstatus=1 {cond}) {extra_cond})
 				""".format(**args),
