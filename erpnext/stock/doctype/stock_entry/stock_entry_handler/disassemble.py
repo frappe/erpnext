@@ -2,7 +2,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Max, Min, Sum
 from frappe.utils import flt
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -348,12 +348,18 @@ class DisassembleStockEntry(BaseStockEntry):
 				.run(as_dict=True)
 			)
 
+		# grouped by item_code; Max-wrap the other columns (constant per item / arbitrary per row on
+		# MySQL) so the GROUP BY is valid on postgres, and order by Min(idx) (idx is not grouped).
 		return (
-			query.select(Sum(SED.qty).as_("qty"), Sum(SED.transfer_qty).as_("transfer_qty"), *common_fields)
+			query.select(
+				Sum(SED.qty).as_("qty"),
+				Sum(SED.transfer_qty).as_("transfer_qty"),
+				*[Max(field).as_(field.name) for field in common_fields],
+			)
 			.where(SE.purpose == "Manufacture")
 			.where(SE.work_order == self.doc.work_order)
 			.groupby(SED.item_code)
-			.orderby(SED.idx)
+			.orderby(Min(SED.idx))
 			.run(as_dict=True)
 		)
 

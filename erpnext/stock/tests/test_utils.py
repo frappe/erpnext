@@ -1,7 +1,7 @@
 import json
 
 import frappe
-from frappe.query_builder.functions import Timestamp
+from frappe.query_builder.functions import CombineDatetime
 
 from erpnext.stock.utils import scan_barcode
 from erpnext.tests.utils import ERPNextTestSuite
@@ -35,7 +35,7 @@ class StockTestMixin:
 				query = query.where(sle[key] == value)
 
 		sles = (
-			query.orderby(Timestamp(sle.posting_date, sle.posting_time))
+			query.orderby(CombineDatetime(sle.posting_date, sle.posting_time))
 			.orderby(sle.creation)
 			.run(as_dict=True)
 		)
