@@ -185,12 +185,14 @@ def validate_cancellation(kargs):
 
 
 def set_as_cancel(voucher_type, voucher_no):
-	frappe.db.sql(
-		"""update `tabStock Ledger Entry` set is_cancelled=1,
-		modified=%s, modified_by=%s
-		where voucher_type=%s and voucher_no=%s and is_cancelled = 0""",
-		(now(), frappe.session.user, voucher_type, voucher_no),
-	)
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	(
+		frappe.qb.update(sle)
+		.set(sle.is_cancelled, 1)
+		.set(sle.modified, now())
+		.set(sle.modified_by, frappe.session.user)
+		.where((sle.voucher_type == voucher_type) & (sle.voucher_no == voucher_no) & (sle.is_cancelled == 0))
+	).run()
 
 
 def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
