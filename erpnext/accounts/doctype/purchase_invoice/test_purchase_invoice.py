@@ -895,13 +895,10 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			filters={"voucher_type": "Purchase Invoice", "voucher_no": pi.name},
 			fields=[
 				"account",
-				"account_currency",
 				{"SUM": "debit", "as": "debit"},
 				{"SUM": "credit", "as": "credit"},
-				"debit_in_account_currency",
-				"credit_in_account_currency",
 			],
-			group_by="account, voucher_no, account_currency, debit_in_account_currency, credit_in_account_currency",
+			group_by="account, voucher_no",
 			order_by="account asc",
 		)
 
