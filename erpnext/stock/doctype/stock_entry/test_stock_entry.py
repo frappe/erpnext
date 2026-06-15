@@ -546,7 +546,9 @@ class TestStockEntry(ERPNextTestSuite):
 			as_list=True,
 		)
 		self.assertTrue(sle)
-		sle.sort(key=lambda x: x[1])
+		# get_all(as_list=True) returns a tuple of rows on postgres (and on PyMySQL >= 1.4);
+		# sort via sorted() so the helper does not depend on the container being a mutable list.
+		sle = sorted(sle, key=lambda x: x[1])
 
 		for i, sle_value in enumerate(sle):
 			self.assertEqual(expected_sle[i][0], sle_value[0])
@@ -565,7 +567,7 @@ class TestStockEntry(ERPNextTestSuite):
 		)
 
 		self.assertTrue(gl_entries)
-		gl_entries.sort(key=lambda x: x[0])
+		gl_entries = sorted(gl_entries, key=lambda x: x[0])
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_gl_entries[i][0], gle[0])
 			self.assertEqual(expected_gl_entries[i][1], gle[1])
