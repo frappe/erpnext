@@ -271,38 +271,48 @@ def get_ref_item_dict(valid_items, ref_item_row):
 
 
 def get_already_returned_items(doc):
-	column = "child.item_code, sum(abs(child.qty)) as qty, sum(abs(child.stock_qty)) as stock_qty"
-	if doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
-		column += """, sum(abs(child.rejected_qty) * child.conversion_factor) as rejected_qty,
-			sum(abs(child.received_qty) * child.conversion_factor) as received_qty"""
+	from frappe.query_builder.functions import Abs, Sum
+
+	par = frappe.qb.DocType(doc.doctype)
+	child = frappe.qb.DocType(doc.doctype + " Item")
 
 	field = (
 		frappe.scrub(doc.doctype) + "_item"
 		if doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Sales Invoice", "POS Invoice"]
 		else "dn_detail"
 	)
+	child_field = getattr(child, field)
+
+	query = (
+		frappe.qb.from_(par)
+		.inner_join(child)
+		.on(child.parent == par.name)
+		.select(
+			child.item_code,
+			Sum(Abs(child.qty)).as_("qty"),
+			Sum(Abs(child.stock_qty)).as_("stock_qty"),
+			child_field,
+		)
+		.where(
+			(par.docstatus == 1)
+			& (par.is_return == 1)
+			& (par.return_against == doc.return_against)
+		)
+		.groupby(child.item_code, child_field)
+	)
+
+	if doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
+		query = query.select(
+			Sum(Abs(child.rejected_qty) * child.conversion_factor).as_("rejected_qty"),
+			Sum(Abs(child.received_qty) * child.conversion_factor).as_("received_qty"),
+		)
 
 	# For invoice doctypes, only count returns with matching update_stock so that
 	# rate-adjustment returns (update_stock=0) don't block stock returns (update_stock=1) and vice versa.
-	update_stock_condition = ""
 	if doc.doctype in ["Sales Invoice", "Purchase Invoice"]:
-		update_stock_val = 1 if doc.get("update_stock") else 0
-		update_stock_condition = f"and par.update_stock = {update_stock_val}"
+		query = query.where(par.update_stock == (1 if doc.get("update_stock") else 0))
 
-	data = frappe.db.sql(
-		f"""
-		select {column}, child.{field}
-		from
-			`tab{doc.doctype} Item` child, `tab{doc.doctype}` par
-		where
-			child.parent = par.name and par.docstatus = 1
-			and par.is_return = 1 and par.return_against = %s
-			{update_stock_condition}
-		group by item_code, {field}
-	""",
-		doc.return_against,
-		as_dict=1,
-	)
+	data = query.run(as_dict=True)
 
 	items = {}
 
