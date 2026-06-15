@@ -5,18 +5,25 @@ import frappe
 from frappe.utils import flt
 
 from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
+	AccountData,
 	DependencyResolver,
 	FilterExpressionParser,
 	FinancialQueryBuilder,
 	FinancialReportEngine,
+	FormattingEngine,
 	FormulaCalculator,
+	FormulaFieldExtractor,
+	GrowthViewTransformer,
+	PeriodValue,
+	RowData,
+	SegmentOrganizer,
 )
 from erpnext.accounts.doctype.financial_report_template.test_financial_report_template import (
 	FinancialReportTemplateTestCase,
 )
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.utils import get_currency_precision, get_fiscal_year
-from erpnext.tests.utils import change_settings
+from erpnext.tests.utils import ERPNextTestSuite, change_settings
 
 
 class TestDependencyResolver(FinancialReportTemplateTestCase):
@@ -2482,3 +2489,435 @@ class TestFinancialQueryBuilder(FinancialReportTemplateTestCase):
 
 			if template and frappe.db.exists("Financial Report Template", template.name):
 				frappe.delete_doc("Financial Report Template", template.name, force=1)
+
+
+class TestPeriodValueMath(ERPNextTestSuite):
+	"""Pure-logic tests for PeriodValue / AccountData balance math (no DB)."""
+
+	def _make_account(self) -> AccountData:
+		account = AccountData(account="Cash - _TC", account_name="Cash", account_number="1001")
+		account.add_period(PeriodValue("p1", opening=100.0, closing=150.0, movement=50.0))
+		account.add_period(PeriodValue("p2", opening=150.0, closing=210.0, movement=60.0))
+		return account
+
+	# 1. PeriodValue.get_value dispatch
+	def test_period_value_get_value_by_balance_type(self):
+		pv = PeriodValue("p1", opening=100.0, closing=150.0, movement=50.0)
+
+		self.assertEqual(pv.get_value("Opening Balance"), 100.0)
+		self.assertEqual(pv.get_value("Closing Balance"), 150.0)
+		self.assertEqual(pv.get_value("Period Movement (Debits - Credits)"), 50.0)
+		# Unknown balance type falls back to 0.0
+		self.assertEqual(pv.get_value("Nonexistent"), 0.0)
+
+	def test_period_value_copy_is_independent(self):
+		pv = PeriodValue("p1", opening=100.0, closing=150.0, movement=50.0)
+		clone = pv.copy()
+
+		self.assertEqual((clone.opening, clone.closing, clone.movement), (100.0, 150.0, 50.0))
+
+		# Mutating the clone must not affect the original
+		clone.opening = 999.0
+		self.assertEqual(pv.opening, 100.0)
+
+	# 2. AccountData ordered values + has_periods
+	def test_get_ordered_values_respects_period_order_and_missing(self):
+		account = self._make_account()
+
+		# Reversed period order, plus a missing key that must default to 0.0
+		ordered = account.get_ordered_values(["p2", "p1", "missing"], "Closing Balance")
+		self.assertEqual(ordered, [210.0, 150.0, 0.0])
+
+		movements = account.get_ordered_values(["p1", "p2"], "Period Movement (Debits - Credits)")
+		self.assertEqual(movements, [50.0, 60.0])
+
+	def test_has_periods(self):
+		empty = AccountData(account="Empty - _TC")
+		self.assertFalse(empty.has_periods())
+		self.assertTrue(self._make_account().has_periods())
+
+	# 3. reverse_values sign flip
+	def test_reverse_values_negates_all_components(self):
+		account = self._make_account()
+		account.reverse_values()
+
+		p1 = account.get_period("p1")
+		self.assertEqual((p1.opening, p1.closing, p1.movement), (-100.0, -150.0, -50.0))
+
+		p2 = account.get_period("p2")
+		self.assertEqual((p2.opening, p2.closing, p2.movement), (-150.0, -210.0, -60.0))
+
+	def test_reverse_values_keeps_zero_as_positive_zero(self):
+		account = AccountData(account="Z - _TC")
+		account.add_period(PeriodValue("p1", opening=0.0, closing=0.0, movement=0.0))
+		account.reverse_values()
+
+		p1 = account.get_period("p1")
+		# `-x if x else 0.0` guard means zeros stay +0.0 (never -0.0)
+		self.assertEqual(p1.opening, 0.0)
+		self.assertEqual(p1.closing, 0.0)
+		self.assertEqual(p1.movement, 0.0)
+		# `-x if x else 0.0` short-circuits on falsy zero, so it stays +0.0 (not -0.0)
+		self.assertEqual(str(p1.opening), "0.0", "zero must not become -0.0")
+
+	# 4. accumulate / unaccumulate
+	def test_accumulate_values_adds_opening_into_movement(self):
+		account = self._make_account()
+		account.accumulate_values()
+
+		# movement becomes movement + opening; closing untouched (already accumulated)
+		self.assertEqual(account.get_period("p1").movement, 150.0)  # 50 + 100
+		self.assertEqual(account.get_period("p1").closing, 150.0)
+		self.assertEqual(account.get_period("p2").movement, 210.0)  # 60 + 150
+		self.assertEqual(account.get_period("p2").closing, 210.0)
+
+	def test_unaccumulate_values_subtracts_opening_from_closing(self):
+		account = self._make_account()
+		account.unaccumulate_values()
+
+		# closing becomes closing - opening; movement untouched (already unaccumulated)
+		self.assertEqual(account.get_period("p1").closing, 50.0)  # 150 - 100
+		self.assertEqual(account.get_period("p1").movement, 50.0)
+		self.assertEqual(account.get_period("p2").closing, 60.0)  # 210 - 150
+		self.assertEqual(account.get_period("p2").movement, 60.0)
+
+	# 5. deep copy
+	def test_account_data_copy_is_deep(self):
+		account = self._make_account()
+		clone = account.copy()
+
+		self.assertEqual(clone.account, account.account)
+		self.assertEqual(clone.account_name, account.account_name)
+		self.assertEqual(clone.account_number, account.account_number)
+
+		# Mutating clone's nested PeriodValue must not affect the original
+		clone.get_period("p1").closing = 9999.0
+		self.assertEqual(account.get_period("p1").closing, 150.0)
+
+	def test_get_values_by_type_returns_all_periods(self):
+		account = self._make_account()
+		self.assertEqual(account.get_values_by_type("Closing Balance"), [150.0, 210.0])
+		self.assertEqual(account.get_values_by_type("Opening Balance"), [100.0, 150.0])
+
+
+class TestGrowthViewTransformer(ERPNextTestSuite):
+	"""Pure-logic tests for GrowthViewTransformer (period-over-period growth %)."""
+
+	def _make_transformer(self, period_keys: list[str], formatted_rows: list[dict]) -> GrowthViewTransformer:
+		# GrowthViewTransformer only reads `period_list[i]["key"]` and
+		# `context.raw_data["formatted_data"]`, so a lightweight context suffices.
+		context = frappe._dict(
+			{
+				"period_list": [{"key": key} for key in period_keys],
+				"raw_data": {"formatted_data": formatted_rows},
+			}
+		)
+		return GrowthViewTransformer(context)
+
+	# 1. _calculate_growth branches
+	def test_calculate_positive_growth(self):
+		transformer = self._make_transformer(["p1"], [])
+		# (120 - 100) / 100 * 100 = 20.0
+		self.assertEqual(transformer._calculate_growth(100.0, 120.0), 20.0)
+
+	def test_calculate_negative_growth(self):
+		transformer = self._make_transformer(["p1"], [])
+		# (80 - 100) / 100 * 100 = -20.0
+		self.assertEqual(transformer._calculate_growth(100.0, 80.0), -20.0)
+
+	def test_calculate_growth_uses_abs_of_previous(self):
+		transformer = self._make_transformer(["p1"], [])
+		# previous is negative: (current - prev) / abs(prev) * 100
+		# (-50 - (-100)) / 100 * 100 = 50.0
+		self.assertEqual(transformer._calculate_growth(-100.0, -50.0), 50.0)
+
+	def test_calculate_growth_rounds_to_two_places(self):
+		transformer = self._make_transformer(["p1"], [])
+		# (200 - 150) / 150 * 100 = 33.333... -> 33.33
+		self.assertEqual(transformer._calculate_growth(150.0, 200.0), 33.33)
+
+	def test_calculate_growth_zero_base_positive_current(self):
+		transformer = self._make_transformer(["p1"], [])
+		# previous == 0 and current > 0 -> sentinel 100.0 (avoids div-by-zero)
+		self.assertEqual(transformer._calculate_growth(0, 500.0), 100.0)
+
+	def test_calculate_growth_zero_base_nonpositive_current(self):
+		transformer = self._make_transformer(["p1"], [])
+		# previous == 0 and current <= 0 -> 0.0 (both zero and negative branches)
+		self.assertEqual(transformer._calculate_growth(0, 0), 0.0)
+		self.assertEqual(transformer._calculate_growth(0, -10.0), 0.0)
+
+	def test_calculate_growth_none_current_returns_none(self):
+		transformer = self._make_transformer(["p1"], [])
+		self.assertIsNone(transformer._calculate_growth(100.0, None))
+
+	# 2. transform() end-to-end
+	def test_transform_keeps_first_period_raw_and_growths_rest(self):
+		rows = [
+			{"account_name": "Revenue", "p1": 100.0, "p2": 150.0, "p3": 300.0},
+		]
+		transformer = self._make_transformer(["p1", "p2", "p3"], rows)
+		transformer.transform()
+
+		row = rows[0]
+		# First period kept as raw absolute value
+		self.assertEqual(row["p1"], 100.0)
+		# p2 = (150 - 100)/100*100 = 50.0
+		self.assertEqual(row["p2"], 50.0)
+		# p3 = (300 - 150)/150*100 = 100.0
+		self.assertEqual(row["p3"], 100.0)
+
+	def test_transform_skips_blank_line_rows(self):
+		blank = {"is_blank_line": True, "p1": 100.0, "p2": 200.0}
+		data = {"account_name": "Sales", "p1": 100.0, "p2": 200.0}
+		transformer = self._make_transformer(["p1", "p2"], [blank, data])
+		transformer.transform()
+
+		# Blank line untouched
+		self.assertEqual(blank["p2"], 200.0)
+		# Data row transformed: (200 - 100)/100*100 = 100.0
+		self.assertEqual(data["p1"], 100.0)
+		self.assertEqual(data["p2"], 100.0)
+
+	def test_transform_zero_base_period_uses_sentinel(self):
+		rows = [{"account_name": "New Line", "p1": 0.0, "p2": 250.0}]
+		transformer = self._make_transformer(["p1", "p2"], rows)
+		transformer.transform()
+
+		self.assertEqual(rows[0]["p1"], 0.0)
+		# previous 0, current > 0 -> 100.0 sentinel
+		self.assertEqual(rows[0]["p2"], 100.0)
+
+
+class TestSegmentOrganizer(ERPNextTestSuite):
+	"""Pure-logic tests for SegmentOrganizer (Column/Section Break organization)."""
+
+	def _row(self, data_source: str = "Account Data", values=None, **attrs) -> RowData:
+		row_fields = {"data_source": data_source, **attrs}
+		return RowData(row=frappe._dict(row_fields), values=values if values is not None else [10.0])
+
+	# 1. Single segment (no breaks)
+	def test_single_segment_when_no_breaks(self):
+		rows = [self._row(display_name="Income"), self._row(display_name="Expense")]
+		organizer = SegmentOrganizer(rows)
+
+		self.assertTrue(organizer.is_single_segment)
+		self.assertEqual(organizer.max_segments, 1)
+		self.assertEqual(len(organizer.sections), 1)
+		self.assertEqual(organizer.max_rows(organizer.sections[0]), 2)
+
+	# 2. Column Break -> multiple segments in one section
+	def test_column_break_creates_multiple_segments(self):
+		rows = [
+			self._row(display_name="A"),
+			self._row(data_source="Column Break", values=[], display_name="Right Side"),
+			self._row(display_name="B"),
+			self._row(display_name="C"),
+		]
+		organizer = SegmentOrganizer(rows)
+
+		self.assertFalse(organizer.is_single_segment)
+		self.assertEqual(organizer.max_segments, 2)
+		section = organizer.sections[0]
+		self.assertEqual(len(section.segments), 2)
+		# Second segment carries the column-break label
+		self.assertEqual(section.segments[1].label, "Right Side")
+		# Segment ids use the SEGMENT_PREFIX convention
+		self.assertEqual(section.segments[0].id, "seg_0")
+		self.assertEqual(section.segments[1].id, "seg_1")
+
+	# 3. Section Break -> multiple sections, with header injection
+	def test_section_break_creates_multiple_sections(self):
+		rows = [
+			self._row(display_name="Row A"),
+			self._row(data_source="Section Break", values=[], display_name="Second Section"),
+			self._row(display_name="Row B"),
+		]
+		organizer = SegmentOrganizer(rows)
+
+		self.assertEqual(len(organizer.sections), 2)
+		# Second section labelled by the Section Break's display_name
+		self.assertEqual(organizer.sections[1].label, "Second Section")
+		# A labelled section injects a bold header Blank Line at the top of its first segment
+		second_segment_rows = organizer.sections[1].segments[0].rows
+		self.assertEqual(second_segment_rows[0].row.data_source, "Blank Line")
+		self.assertEqual(second_segment_rows[0].row.display_name, "Second Section")
+		self.assertTrue(second_segment_rows[0].row.bold_text)
+
+	# 4. Segment padding equalizes segment counts across sections
+	def test_sections_padded_to_max_segments(self):
+		rows = [
+			# Section 1: two segments (one column break)
+			self._row(display_name="A"),
+			self._row(data_source="Column Break", values=[]),
+			self._row(display_name="B"),
+			# Section 2: single segment
+			self._row(data_source="Section Break", values=[], display_name="Sec2"),
+			self._row(display_name="C"),
+		]
+		organizer = SegmentOrganizer(rows)
+
+		self.assertEqual(organizer.max_segments, 2)
+		# Every section must end up with max_segments segments (padded with empties)
+		for section in organizer.sections:
+			self.assertEqual(len(section.segments), 2)
+
+		# section_with_max_segments returns a section that actually has the max
+		self.assertEqual(len(organizer.section_with_max_segments.segments), 2)
+
+	# 5. _should_show_row visibility rules
+	def test_should_show_blank_line_always(self):
+		organizer = SegmentOrganizer([self._row(display_name="x")])
+		blank = self._row(data_source="Blank Line", hide_when_empty=True, values=[0.0, 0.0])
+		self.assertTrue(organizer._should_show_row(blank))
+
+	def test_should_hide_hidden_calculation_row(self):
+		organizer = SegmentOrganizer([self._row(display_name="x")])
+		hidden = self._row(hidden_calculation=True, values=[100.0])
+		self.assertFalse(organizer._should_show_row(hidden))
+
+	def test_should_show_row_hide_when_empty(self):
+		organizer = SegmentOrganizer([self._row(display_name="x")])
+
+		# All values below the 0.01 threshold -> hidden
+		empty_row = self._row(hide_when_empty=True, values=[0.0, 0.005, ""])
+		self.assertFalse(organizer._should_show_row(empty_row))
+
+		# Has a significant value -> shown
+		nonempty_row = self._row(hide_when_empty=True, values=[0.0, 12.5])
+		self.assertTrue(organizer._should_show_row(nonempty_row))
+
+	def test_default_row_is_shown(self):
+		organizer = SegmentOrganizer([self._row(display_name="x")])
+		self.assertTrue(organizer._should_show_row(self._row(values=[1.0])))
+
+
+class TestFormattingEngine(ERPNextTestSuite):
+	"""Pure-logic tests for FormattingEngine rule application."""
+
+	def _row_data(self, is_detail_row: bool = False, values=None, **attrs) -> RowData:
+		return RowData(
+			row=frappe._dict(attrs),
+			values=values if values is not None else [1.0],
+			is_detail_row=is_detail_row,
+		)
+
+	def test_bold_and_italic_rules(self):
+		engine = FormattingEngine()
+
+		bold = engine.get_formatting(self._row_data(bold_text=True))
+		self.assertEqual(bold.get("bold"), True)
+
+		italic = engine.get_formatting(self._row_data(italic_text=True))
+		self.assertEqual(italic.get("italic"), True)
+
+	def test_no_formatting_for_plain_row(self):
+		engine = FormattingEngine()
+		# A bare account row with no flags yields the account_filters key only.
+		formatting = engine.get_formatting(self._row_data(data_source="Custom API"))
+		self.assertNotIn("bold", formatting)
+		self.assertNotIn("italic", formatting)
+		self.assertNotIn("is_detail", formatting)
+
+	def test_detail_row_gets_prefix(self):
+		engine = FormattingEngine()
+		formatting = engine.get_formatting(self._row_data(is_detail_row=True))
+		self.assertTrue(formatting.get("is_detail"))
+		self.assertEqual(formatting.get("prefix"), "• ")
+
+	def test_blank_line_flagged(self):
+		engine = FormattingEngine()
+		formatting = engine.get_formatting(self._row_data(data_source="Blank Line"))
+		self.assertTrue(formatting.get("is_blank_line"))
+
+	def test_warn_if_negative_flag(self):
+		engine = FormattingEngine()
+		formatting = engine.get_formatting(self._row_data(warn_if_negative=True))
+		self.assertTrue(formatting.get("warn_if_negative"))
+
+	def test_color_and_fieldtype_are_stripped(self):
+		engine = FormattingEngine()
+		formatting = engine.get_formatting(self._row_data(color="  #ff0000  ", fieldtype="  Currency  "))
+		self.assertEqual(formatting.get("color"), "#ff0000")
+		self.assertEqual(formatting.get("fieldtype"), "Currency")
+
+	def test_account_data_row_carries_account_filters(self):
+		engine = FormattingEngine()
+		formatting = engine.get_formatting(
+			self._row_data(
+				data_source="Account Data",
+				calculation_formula='  ["root_type", "=", "Income"]  ',
+			)
+		)
+		self.assertEqual(formatting.get("account_filters"), '["root_type", "=", "Income"]')
+
+	def test_multiple_rules_combine(self):
+		engine = FormattingEngine()
+		formatting = engine.get_formatting(
+			self._row_data(bold_text=True, italic_text=True, warn_if_negative=True)
+		)
+		self.assertTrue(formatting.get("bold"))
+		self.assertTrue(formatting.get("italic"))
+		self.assertTrue(formatting.get("warn_if_negative"))
+
+
+class TestFormulaFieldExtractor(ERPNextTestSuite):
+	"""Pure-logic tests for FormulaFieldExtractor (ast-based value extraction)."""
+
+	def _rows(self, *formulas) -> list:
+		return [frappe._dict({"calculation_formula": f}) for f in formulas]
+
+	def test_extract_simple_equality(self):
+		extractor = FormulaFieldExtractor("account_category")
+		rows = self._rows('["account_category", "=", "Direct Income"]')
+		self.assertEqual(extractor.extract_from_rows(rows), {"Direct Income"})
+
+	def test_extract_ignores_other_fields(self):
+		extractor = FormulaFieldExtractor("account_category")
+		rows = self._rows('["root_type", "=", "Income"]')
+		self.assertEqual(extractor.extract_from_rows(rows), set())
+
+	def test_extract_from_nested_logical(self):
+		extractor = FormulaFieldExtractor("account_category")
+		rows = self._rows(
+			"""{"and": [
+				["account_category", "=", "Direct Income"],
+				{"or": [
+					["account_category", "=", "Indirect Income"],
+					["root_type", "=", "Income"]
+				]}
+			]}"""
+		)
+		self.assertEqual(extractor.extract_from_rows(rows), {"Direct Income", "Indirect Income"})
+
+	def test_extract_handles_in_operator_list(self):
+		extractor = FormulaFieldExtractor("account_category")
+		rows = self._rows('["account_category", "in", ["Cat A", "Cat B"]]')
+		self.assertEqual(extractor.extract_from_rows(rows), {"Cat A", "Cat B"})
+
+	def test_extract_respects_exclude_operators(self):
+		extractor = FormulaFieldExtractor("account_category", exclude_operators=["like"])
+		rows = self._rows(
+			'["account_category", "like", "Income"]',
+			'["account_category", "=", "Direct Income"]',
+		)
+		# `like` excluded -> only the `=` value is collected
+		self.assertEqual(extractor.extract_from_rows(rows), {"Direct Income"})
+
+	def test_extract_skips_invalid_and_empty_formulas(self):
+		extractor = FormulaFieldExtractor("account_category")
+		rows = self._rows(
+			"not valid python literal",
+			"",
+			'["account_category", "=", "Valid"]',
+		)
+		# Invalid/empty formulas are skipped without raising
+		self.assertEqual(extractor.extract_from_rows(rows), {"Valid"})
+
+	def test_extract_aggregates_across_rows(self):
+		extractor = FormulaFieldExtractor("account_category")
+		rows = self._rows(
+			'["account_category", "=", "A"]',
+			'["account_category", "=", "B"]',
+		)
+		self.assertEqual(extractor.extract_from_rows(rows), {"A", "B"})

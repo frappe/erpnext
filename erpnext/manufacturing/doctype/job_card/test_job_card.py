@@ -5,13 +5,18 @@
 from typing import Literal
 
 import frappe
-from frappe.utils import flt, random_string
+from frappe.utils import flt, get_datetime, random_string
 from frappe.utils.data import add_to_date, now, today
 
 from erpnext.manufacturing.doctype.job_card.job_card import (
+	FILTER_OPERATORS,
 	JobCardOverTransferError,
 	OperationMismatchError,
 	OverlapError,
+	get_calendar_event,
+	normalize_calendar_filters,
+	normalize_dict_filters,
+	time_diff_in_minutes,
 )
 from erpnext.manufacturing.doctype.job_card.mapper import (
 	make_corrective_job_card,
@@ -1408,3 +1413,424 @@ def create_semi_fg_bom(semi_fg_item, raw_item, inspection_required):
 	bom.append("items", {"item_code": raw_item, "qty": 1})
 	bom.submit()
 	return bom.name
+
+
+def _slot(from_time, to_time, workstation=None):
+	"""Build a time-log dict shaped like the rows returned by the overlap queries.
+
+	The scheduling/capacity helpers only read ``from_time`` / ``to_time`` (and
+	``workstation`` for the busy-slot grouping), so a plain ``frappe._dict`` with
+	real ``datetime`` values is enough and keeps the assertions DB-independent.
+	"""
+	row = {"from_time": get_datetime(from_time), "to_time": get_datetime(to_time)}
+	if workstation is not None:
+		row["workstation"] = workstation
+	return frappe._dict(row)
+
+
+class TestJobCardCoverage(ERPNextTestSuite):
+	"""Coverage for the pure scheduling / capacity / status / filter helpers in
+	``job_card.py``.
+
+	These intentionally avoid the heavy Work Order / Stock Entry creation flows
+	(those are exercised by ``TestJobCard``); the focus here is on the logic that
+	operates on plain dicts / lists and on an unsaved ``frappe.new_doc("Job Card")``
+	so the assertions are exact and cross-DB safe.
+	"""
+
+	# ----- time_diff_in_minutes (pure) ------------------------------------
+
+	def test_time_diff_in_minutes(self):
+		self.assertAlmostEqual(
+			time_diff_in_minutes("2024-01-01 09:30:00", "2024-01-01 08:00:00"), 90.0, places=2
+		)
+		# sub-minute / fractional difference
+		self.assertAlmostEqual(
+			time_diff_in_minutes("2024-01-01 08:00:30", "2024-01-01 08:00:00"), 0.5, places=2
+		)
+		# end before start -> negative
+		self.assertAlmostEqual(
+			time_diff_in_minutes("2024-01-01 08:00:00", "2024-01-01 08:30:00"), -30.0, places=2
+		)
+
+	# ----- normalize_dict_filters (pure) ----------------------------------
+
+	def test_normalize_dict_filters_plain_equality(self):
+		result = normalize_dict_filters({"status": "Open", "company": "_Test Company"})
+		self.assertEqual(sorted(result), sorted([("status", "=", "Open"), ("company", "=", "_Test Company")]))
+
+	def test_normalize_dict_filters_operator_value_pair(self):
+		result = normalize_dict_filters({"for_quantity": [">", 5]})
+		self.assertEqual(result, [("for_quantity", ">", 5)])
+
+	def test_normalize_dict_filters_tuple_operator_value_pair(self):
+		result = normalize_dict_filters({"docstatus": ("!=", 2)})
+		self.assertEqual(result, [("docstatus", "!=", 2)])
+
+	def test_normalize_dict_filters_bang_prefix_negation(self):
+		# A string value prefixed with "!" becomes a "!=" filter on the stripped value.
+		result = normalize_dict_filters({"status": "!Cancelled"})
+		self.assertEqual(result, [("status", "!=", "Cancelled")])
+
+	def test_normalize_dict_filters_three_element_value_is_equality(self):
+		# Only 2-element lists are treated as [operator, value]; anything else is "=".
+		result = normalize_dict_filters({"status": ["Open", "Completed", "On Hold"]})
+		self.assertEqual(result, [("status", "=", ["Open", "Completed", "On Hold"])])
+
+	# ----- normalize_calendar_filters (pure) ------------------------------
+
+	def test_normalize_calendar_filters_dict_delegates(self):
+		# A dict input must delegate to normalize_dict_filters.
+		self.assertEqual(
+			normalize_calendar_filters({"status": "Open"}),
+			normalize_dict_filters({"status": "Open"}),
+		)
+
+	def test_normalize_calendar_filters_four_element_drops_doctype(self):
+		# [doctype, fieldname, operator, value] -> (fieldname, operator, value)
+		result = normalize_calendar_filters([["Job Card", "status", "=", "Open"]])
+		self.assertEqual(result, [("status", "=", "Open")])
+
+	def test_normalize_calendar_filters_three_element_passthrough(self):
+		result = normalize_calendar_filters([["status", "in", ["Open", "Completed"]]])
+		self.assertEqual(result, [("status", "in", ["Open", "Completed"])])
+
+	def test_normalize_calendar_filters_two_element_is_equality(self):
+		result = normalize_calendar_filters([["status", "Open"]])
+		self.assertEqual(result, [("status", "=", "Open")])
+
+	def test_normalize_calendar_filters_mixed_and_empty(self):
+		# Mixed lengths normalize together; an empty list normalizes to nothing.
+		result = normalize_calendar_filters(
+			[["Job Card", "status", "=", "Open"], ["company", "_Test Company"]]
+		)
+		self.assertEqual(result, [("status", "=", "Open"), ("company", "=", "_Test Company")])
+		self.assertEqual(normalize_calendar_filters([]), [])
+
+	# ----- FILTER_OPERATORS (pure) ----------------------------------------
+
+	def test_filter_operators_cover_supported_set(self):
+		expected = {
+			"=",
+			"!=",
+			">",
+			"<",
+			">=",
+			"<=",
+			"like",
+			"not like",
+			"in",
+			"not in",
+			"between",
+			"is",
+		}
+		self.assertEqual(set(FILTER_OPERATORS.keys()), expected)
+
+	def test_filter_operators_build_conditions_without_error(self):
+		# Each builder must accept a query-builder column and produce a (truthy)
+		# condition object. We assert it does not raise and returns something.
+		jc = frappe.qb.DocType("Job Card")
+		column = jc.status
+		samples = {
+			"=": "Open",
+			"!=": "Open",
+			">": 1,
+			"<": 1,
+			">=": 1,
+			"<=": 1,
+			"like": "%Open%",
+			"not like": "%Open%",
+			"in": ["Open", "Completed"],
+			"not in": ["Open", "Completed"],
+			"between": [1, 5],
+			"is": "set",
+		}
+		for operator, value in samples.items():
+			condition = FILTER_OPERATORS[operator](column, value)
+			self.assertIsNotNone(condition, msg=f"operator {operator!r} produced no condition")
+
+	def test_filter_operators_is_set_vs_unset(self):
+		# The "is" operator branches on the literal "set" sentinel; both branches
+		# must build a condition without raising.
+		jc = frappe.qb.DocType("Job Card")
+		self.assertIsNotNone(FILTER_OPERATORS["is"](jc.remarks, "set"))
+		self.assertIsNotNone(FILTER_OPERATORS["is"](jc.remarks, "not set"))
+
+	# ----- get_calendar_event (pure) --------------------------------------
+
+	def test_get_calendar_event_known_status_color(self):
+		event = get_calendar_event(
+			frappe._dict(
+				{
+					"name": "JC-0001",
+					"work_order": "WO-0001",
+					"remarks": "rush order",
+					"status": "Completed",
+					"from_time": "2024-01-01 08:00:00",
+					"to_time": "2024-01-01 09:00:00",
+				}
+			)
+		)
+		self.assertEqual(event["name"], "JC-0001")
+		self.assertEqual(event["color"], "#cdf5a6")
+		# subject joins the populated name / work_order / remarks fields, in order.
+		self.assertEqual(event["subject"], "JC-0001\nWO-0001\nrush order")
+		self.assertEqual(event["from_time"], "2024-01-01 08:00:00")
+		self.assertEqual(event["to_time"], "2024-01-01 09:00:00")
+
+	def test_get_calendar_event_unknown_status_default_color(self):
+		# An unmapped status falls back to the default blue, and blank fields are
+		# dropped from the subject.
+		event = get_calendar_event(
+			frappe._dict({"name": "JC-0002", "work_order": "", "remarks": None, "status": "Open"})
+		)
+		self.assertEqual(event["color"], "#89bcde")
+		self.assertEqual(event["subject"], "JC-0002")
+
+	def test_get_calendar_event_status_color_map(self):
+		for status, color in [
+			("Material Transferred", "#ffdd9e"),
+			("Work In Progress", "#D3D3D3"),
+		]:
+			event = get_calendar_event(frappe._dict({"name": "JC", "status": status}))
+			self.assertEqual(event["color"], color)
+
+	# ----- get_alloted_capacity / has_overlap (operate on list of dicts) --
+
+	def test_get_alloted_capacity_sequential_logs_single_slot(self):
+		jc = frappe.new_doc("Job Card")
+		# back-to-back logs (to_time of first == from_time of next) are sequential,
+		# so they share one capacity slot.
+		logs = [
+			_slot("2024-01-01 08:00:00", "2024-01-01 10:00:00"),
+			_slot("2024-01-01 10:00:00", "2024-01-01 12:00:00"),
+		]
+		alloted = jc.get_alloted_capacity(logs)
+		self.assertEqual(len(alloted), 1)
+		self.assertEqual(alloted[1], get_datetime("2024-01-01 12:00:00"))
+
+	def test_get_alloted_capacity_overlapping_logs_two_slots(self):
+		jc = frappe.new_doc("Job Card")
+		# overlapping logs need separate slots.
+		logs = [
+			_slot("2024-01-01 08:00:00", "2024-01-01 12:00:00"),
+			_slot("2024-01-01 09:00:00", "2024-01-01 13:00:00"),
+		]
+		alloted = jc.get_alloted_capacity(logs)
+		self.assertEqual(len(alloted), 2)
+
+	def test_get_alloted_capacity_unsorted_input(self):
+		jc = frappe.new_doc("Job Card")
+		# input order should not matter; the helper sorts by from_time internally.
+		logs = [
+			_slot("2024-01-01 10:00:00", "2024-01-01 12:00:00"),
+			_slot("2024-01-01 08:00:00", "2024-01-01 10:00:00"),
+		]
+		alloted = jc.get_alloted_capacity(logs)
+		self.assertEqual(len(alloted), 1)
+
+	def test_has_overlap_capacity_one(self):
+		jc = frappe.new_doc("Job Card")
+		# With production capacity 1, any single existing log is an overlap.
+		self.assertTrue(jc.has_overlap(1, [_slot("2024-01-01 08:00:00", "2024-01-01 10:00:00")]))
+		# No logs -> no overlap.
+		self.assertFalse(jc.has_overlap(1, []))
+
+	def test_has_overlap_capacity_respects_free_slots(self):
+		jc = frappe.new_doc("Job Card")
+		overlapping = [
+			_slot("2024-01-01 08:00:00", "2024-01-01 12:00:00"),
+			_slot("2024-01-01 09:00:00", "2024-01-01 13:00:00"),
+		]
+		# 2 overlapping logs fully utilize capacity 2 -> overlap.
+		self.assertTrue(jc.has_overlap(2, overlapping))
+		# but capacity 3 still has a free slot -> no overlap.
+		self.assertFalse(jc.has_overlap(3, overlapping))
+
+	def test_has_overlap_sequential_logs_under_capacity(self):
+		jc = frappe.new_doc("Job Card")
+		sequential = [
+			_slot("2024-01-01 08:00:00", "2024-01-01 10:00:00"),
+			_slot("2024-01-01 10:00:00", "2024-01-01 12:00:00"),
+		]
+		# sequential logs collapse to a single slot, so capacity 2 is not exceeded.
+		self.assertFalse(jc.has_overlap(2, sequential))
+
+	# ----- time_slot_wise_busy_workstations (staticmethod, pure) ----------
+
+	def test_time_slot_wise_busy_workstations_groups_by_slot(self):
+		from erpnext.manufacturing.doctype.job_card.job_card import JobCard
+
+		logs = [
+			_slot("2024-01-01 08:00:00", "2024-01-01 10:00:00", workstation="WS-1"),
+			_slot("2024-01-01 08:00:00", "2024-01-01 10:00:00", workstation="WS-2"),
+			_slot("2024-01-01 10:00:00", "2024-01-01 12:00:00", workstation="WS-1"),
+		]
+		busy = JobCard.time_slot_wise_busy_workstations(logs)
+
+		first_slot = ("2024-01-01 08:00", "2024-01-01 10:00")
+		second_slot = ("2024-01-01 10:00", "2024-01-01 12:00")
+		self.assertEqual(set(busy.keys()), {first_slot, second_slot})
+		self.assertEqual(sorted(busy[first_slot]), ["WS-1", "WS-2"])
+		self.assertEqual(busy[second_slot], ["WS-1"])
+
+	# ----- set_status / set_finished_good_status / set_non_semi_fg_status -
+
+	def _new_status_jc(self, **kwargs):
+		jc = frappe.new_doc("Job Card")
+		jc.process_loss_qty = 0
+		jc.for_quantity = 2
+		jc.transferred_qty = 0
+		jc.total_completed_qty = 0
+		jc.track_semi_finished_goods = 0
+		jc.is_paused = 0
+		# leave workstation unset so set_status() does not touch the DB.
+		jc.update(kwargs)
+		return jc
+
+	def test_set_status_open_when_nothing_done(self):
+		jc = self._new_status_jc()
+		jc.set_status()
+		self.assertEqual(jc.status, "Open")
+
+	def test_set_status_material_transferred(self):
+		jc = self._new_status_jc(transferred_qty=2)
+		jc.set_status()
+		self.assertEqual(jc.status, "Material Transferred")
+
+	def test_set_status_work_in_progress_with_time_logs(self):
+		jc = self._new_status_jc(transferred_qty=2)
+		jc.append("time_logs", {})
+		jc.set_status()
+		self.assertEqual(jc.status, "Work In Progress")
+
+	def test_set_status_on_hold_overrides_when_paused(self):
+		jc = self._new_status_jc(transferred_qty=2, is_paused=1)
+		jc.append("time_logs", {})
+		jc.set_status()
+		self.assertEqual(jc.status, "On Hold")
+
+	def test_set_status_completed_on_submit(self):
+		jc = self._new_status_jc()
+		jc.docstatus = 1
+		jc.total_completed_qty = jc.for_quantity
+		jc.set_status()
+		self.assertEqual(jc.status, "Completed")
+
+	def test_set_status_completed_with_process_loss(self):
+		# completed + process loss together meeting for_quantity completes the card.
+		jc = self._new_status_jc(total_completed_qty=1, process_loss_qty=1)
+		jc.docstatus = 1
+		jc.set_status()
+		self.assertEqual(jc.status, "Completed")
+
+	def test_set_status_cancelled(self):
+		jc = self._new_status_jc(total_completed_qty=2)
+		jc.docstatus = 2
+		jc.set_status()
+		self.assertEqual(jc.status, "Cancelled")
+
+	def test_set_finished_good_status_completed(self):
+		jc = self._new_status_jc()
+		jc.finished_good = "_Test FG Item 2"
+		jc.docstatus = 1
+		jc.track_semi_finished_goods = 1
+		jc.manufactured_qty = 2
+		jc.process_loss_qty = 0
+		jc.set_status()
+		self.assertEqual(jc.status, "Completed")
+
+	def test_set_finished_good_status_work_in_progress(self):
+		jc = self._new_status_jc(transferred_qty=1)
+		jc.finished_good = "_Test FG Item 2"
+		jc.docstatus = 1
+		jc.track_semi_finished_goods = 1
+		jc.manufactured_qty = 0
+		jc.set_status()
+		self.assertEqual(jc.status, "Work In Progress")
+
+	def test_set_non_semi_fg_status_completed_when_no_items(self):
+		# On submit, a job card without raw-material items is Completed regardless
+		# of completed qty.
+		jc = self._new_status_jc(for_quantity=2, total_completed_qty=0)
+		jc.docstatus = 1
+		jc.set_status()
+		self.assertEqual(jc.status, "Completed")
+
+	# ----- set_process_loss (pure computation) ----------------------------
+
+	def test_set_process_loss_computes_shortfall(self):
+		jc = frappe.new_doc("Job Card")
+		jc.for_quantity = 10
+		jc.total_completed_qty = 8
+		jc.pending_qty = 0
+		jc.set_process_loss()
+		self.assertAlmostEqual(jc.process_loss_qty, 2.0, places=2)
+
+	def test_set_process_loss_accounts_for_pending(self):
+		jc = frappe.new_doc("Job Card")
+		jc.for_quantity = 10
+		jc.total_completed_qty = 6
+		jc.pending_qty = 3
+		jc.set_process_loss()
+		# loss = for_qty - completed - pending = 10 - 6 - 3
+		self.assertAlmostEqual(jc.process_loss_qty, 1.0, places=2)
+
+	def test_set_process_loss_zero_when_fully_completed(self):
+		jc = frappe.new_doc("Job Card")
+		jc.for_quantity = 5
+		jc.total_completed_qty = 5
+		jc.pending_qty = 0
+		jc.set_process_loss()
+		self.assertAlmostEqual(jc.process_loss_qty, 0.0, places=2)
+
+	def test_set_process_loss_zero_when_nothing_completed(self):
+		# Guarded by `if self.total_completed_qty` -> stays 0.
+		jc = frappe.new_doc("Job Card")
+		jc.for_quantity = 5
+		jc.total_completed_qty = 0
+		jc.pending_qty = 0
+		jc.set_process_loss()
+		self.assertAlmostEqual(jc.process_loss_qty, 0.0, places=2)
+
+	# ----- validate_completed_qty_matches_for_quantity --------------------
+
+	def test_completed_qty_matches_for_quantity_passes_in_bounds(self):
+		# completed + process loss + pending == for_quantity -> no error.
+		jc = frappe.new_doc("Job Card")
+		jc.for_quantity = 10
+		jc.total_completed_qty = 7
+		jc.process_loss_qty = 2
+		jc.pending_qty = 1
+		# Should not raise.
+		jc.validate_completed_qty_matches_for_quantity()
+
+	def test_completed_qty_mismatch_raises(self):
+		jc = frappe.new_doc("Job Card")
+		jc.for_quantity = 10
+		jc.total_completed_qty = 5
+		jc.process_loss_qty = 1
+		jc.pending_qty = 1  # 5 + 1 + 1 = 7 != 10
+		self.assertRaises(frappe.ValidationError, jc.validate_completed_qty_matches_for_quantity)
+
+	def test_completed_qty_validation_skipped_for_subcontracted_sfg(self):
+		# When tracking semi-finished goods AND subcontracted, the check is a no-op
+		# even with a clear mismatch.
+		jc = frappe.new_doc("Job Card")
+		jc.track_semi_finished_goods = 1
+		jc.is_subcontracted = 1
+		jc.for_quantity = 10
+		jc.total_completed_qty = 0
+		jc.process_loss_qty = 0
+		jc.pending_qty = 0
+		# Should not raise despite mismatch.
+		jc.validate_completed_qty_matches_for_quantity()
+
+	def test_completed_qty_no_for_quantity_is_noop(self):
+		# Without a for_quantity the validation does nothing.
+		jc = frappe.new_doc("Job Card")
+		jc.for_quantity = 0
+		jc.total_completed_qty = 5
+		jc.process_loss_qty = 0
+		jc.pending_qty = 0
+		jc.validate_completed_qty_matches_for_quantity()

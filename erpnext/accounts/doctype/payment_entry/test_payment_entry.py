@@ -2269,3 +2269,232 @@ def create_customer(name="_Test Customer 2 USD", currency="USD"):
 		customer.save()
 		customer = customer.name
 	return customer
+
+
+class TestPaymentEntryTaxes(ERPNextTestSuite):
+	"""Tests for the Payment Entry tax-calculation engine.
+
+	These exercise `initialize_taxes`, `determine_exclusive_rate`, `calculate_taxes`,
+	`get_current_tax_amount`, `get_current_tax_fraction` and `set_liability_account`.
+
+	All payment entries here use the default ``create_payment_entry`` fixture
+	(payment_type="Pay", company="_Test Company", paid_from="_Test Bank - _TC",
+	paid_to="Creditors - _TC"). Both of those accounts are in company currency (INR),
+	so ``source_exchange_rate`` and ``target_exchange_rate`` are both 1. That means:
+
+	    base_paid_amount == paid_amount
+	    paid_amount_after_tax (after initialize_taxes, exclusive) == base_paid_amount
+	    total_taxes_and_charges == base_total_taxes_and_charges  (no FX division)
+
+	which keeps the expected numbers derivable by hand. ``_Test Account Service Tax - _TC``
+	is the tax account head and is also in company currency (existing tests in this file
+	assert its base amount passes through 1:1).
+	"""
+
+	SERVICE_TAX_ACCOUNT = "_Test Account Service Tax - _TC"
+
+	def _make_taxes_pe(self, paid_amount=1000):
+		"""Build an unsaved Pay-type Payment Entry in company currency.
+
+		Returns a doc whose taxes table is empty; callers append rows then either
+		call the engine method directly or ``.save()``.
+		"""
+		pe = create_payment_entry(
+			party="_Test Supplier",
+			paid_to="Creditors - _TC",
+			paid_amount=paid_amount,
+		)
+		# Default fixture is company-currency on both sides; guard the assumptions the
+		# derived expected values rely on so a fixture change surfaces as a clear failure.
+		self.assertEqual(flt(pe.source_exchange_rate), 1.0)
+		self.assertEqual(flt(pe.target_exchange_rate), 1.0)
+		return pe
+
+	def _append_tax(self, pe, charge_type, rate=None, tax_amount=None, add_deduct="Add", included=0):
+		row = {
+			"account_head": self.SERVICE_TAX_ACCOUNT,
+			"charge_type": charge_type,
+			"add_deduct_tax": add_deduct,
+			"description": "Test Tax",
+			"included_in_paid_amount": included,
+		}
+		if rate is not None:
+			row["rate"] = rate
+		if tax_amount is not None:
+			row["tax_amount"] = tax_amount
+		return pe.append("taxes", row)
+
+	def test_on_paid_amount_single_tax(self):
+		"""A single exclusive 'On Paid Amount' tax: tax_amount == paid_amount * rate/100."""
+		pe = self._make_taxes_pe(paid_amount=1000)
+		self._append_tax(pe, "On Paid Amount", rate=10)
+		pe.save()
+
+		self.assertEqual(len(pe.taxes), 1)
+		tax = pe.taxes[0]
+		# 10% of paid_amount_after_tax (== base_paid_amount == 1000 for exclusive tax).
+		self.assertAlmostEqual(flt(tax.tax_amount), 100.0, places=2)
+		self.assertAlmostEqual(flt(tax.base_tax_amount), 100.0, places=2)
+		# Single 'Add' row: cumulative total == paid_amount_after_tax + tax.
+		self.assertAlmostEqual(flt(tax.total), 1100.0, places=2)
+		# Company-currency tax on a Pay entry -> no FX division.
+		self.assertAlmostEqual(flt(pe.total_taxes_and_charges), 100.0, places=2)
+		self.assertAlmostEqual(flt(pe.base_total_taxes_and_charges), 100.0, places=2)
+
+	def test_on_paid_amount_rate_scales_with_paid_amount(self):
+		"""The 'On Paid Amount' charge scales linearly with paid_amount and rate."""
+		pe = self._make_taxes_pe(paid_amount=2500)
+		self._append_tax(pe, "On Paid Amount", rate=18)
+		pe.save()
+
+		# 18% of 2500 = 450.
+		self.assertAlmostEqual(flt(pe.taxes[0].tax_amount), 450.0, places=2)
+		self.assertAlmostEqual(flt(pe.total_taxes_and_charges), 450.0, places=2)
+
+	def test_actual_charge_flows_through_unchanged(self):
+		"""An 'Actual' charge_type contributes its fixed tax_amount verbatim."""
+		pe = self._make_taxes_pe(paid_amount=1000)
+		self._append_tax(pe, "Actual", tax_amount=75)
+		pe.save()
+
+		tax = pe.taxes[0]
+		self.assertAlmostEqual(flt(tax.tax_amount), 75.0, places=2)
+		self.assertAlmostEqual(flt(tax.base_tax_amount), 75.0, places=2)
+		self.assertAlmostEqual(flt(pe.total_taxes_and_charges), 75.0, places=2)
+		self.assertAlmostEqual(flt(pe.base_total_taxes_and_charges), 75.0, places=2)
+		# validate_taxes_and_charges nulls the rate for 'Actual' charges.
+		self.assertFalse(flt(tax.rate))
+
+	def test_add_and_deduct_multiple_rows_cumulative_total(self):
+		"""'Add' and 'Deduct' rows net against each other in the cumulative totals."""
+		pe = self._make_taxes_pe(paid_amount=1000)
+		# +10% On Paid Amount = +100, then a fixed -40 deduction.
+		self._append_tax(pe, "On Paid Amount", rate=10, add_deduct="Add")
+		self._append_tax(pe, "Actual", tax_amount=40, add_deduct="Deduct")
+		pe.save()
+
+		self.assertEqual(len(pe.taxes), 2)
+		add_row, deduct_row = pe.taxes[0], pe.taxes[1]
+		self.assertAlmostEqual(flt(add_row.tax_amount), 100.0, places=2)
+		self.assertAlmostEqual(flt(deduct_row.tax_amount), 40.0, places=2)
+		# Running total: 1000 + 100 (add) - 40 (deduct) = 1060.
+		self.assertAlmostEqual(flt(add_row.total), 1100.0, places=2)
+		self.assertAlmostEqual(flt(deduct_row.total), 1060.0, places=2)
+		# Net charges: +100 - 40 = 60.
+		self.assertAlmostEqual(flt(pe.total_taxes_and_charges), 60.0, places=2)
+		self.assertAlmostEqual(flt(pe.base_total_taxes_and_charges), 60.0, places=2)
+
+	def test_two_add_rows_sum(self):
+		"""Two 'Add' rows accumulate into total_taxes_and_charges."""
+		pe = self._make_taxes_pe(paid_amount=1000)
+		self._append_tax(pe, "On Paid Amount", rate=10, add_deduct="Add")  # 100
+		self._append_tax(pe, "Actual", tax_amount=25, add_deduct="Add")  # 25
+		pe.save()
+
+		self.assertAlmostEqual(flt(pe.total_taxes_and_charges), 125.0, places=2)
+		self.assertAlmostEqual(flt(pe.base_total_taxes_and_charges), 125.0, places=2)
+
+	def test_inclusive_on_paid_amount_tax(self):
+		"""An inclusive 'On Paid Amount' tax is backed out of the paid amount.
+
+		determine_exclusive_rate sets paid_amount_after_tax = base_paid_amount/(1+rate/100),
+		then the tax is rate% of that net amount. For 10% on a gross of 1100:
+		net = 1100 / 1.1 = 1000, tax = 0.10 * 1000 = 100.
+		"""
+		pe = self._make_taxes_pe(paid_amount=1100)
+		self._append_tax(pe, "On Paid Amount", rate=10, included=1)
+		pe.save()
+
+		tax = pe.taxes[0]
+		self.assertTrue(int(tax.included_in_paid_amount))
+		self.assertAlmostEqual(flt(tax.tax_amount), 100.0, places=2)
+		self.assertAlmostEqual(flt(pe.total_taxes_and_charges), 100.0, places=2)
+
+	def test_inclusive_vs_exclusive_differ(self):
+		"""Same rate + same gross amount: inclusive yields a smaller tax than exclusive.
+
+		Exclusive 10% on 1100 -> 110. Inclusive 10% on 1100 -> 100 (backed out).
+		"""
+		exclusive_pe = self._make_taxes_pe(paid_amount=1100)
+		self._append_tax(exclusive_pe, "On Paid Amount", rate=10, included=0)
+		exclusive_pe.save()
+
+		inclusive_pe = self._make_taxes_pe(paid_amount=1100)
+		self._append_tax(inclusive_pe, "On Paid Amount", rate=10, included=1)
+		inclusive_pe.save()
+
+		self.assertAlmostEqual(flt(exclusive_pe.taxes[0].tax_amount), 110.0, places=2)
+		self.assertAlmostEqual(flt(inclusive_pe.taxes[0].tax_amount), 100.0, places=2)
+		self.assertGreater(flt(exclusive_pe.taxes[0].tax_amount), flt(inclusive_pe.taxes[0].tax_amount))
+
+	def test_get_current_tax_amount_on_paid_amount(self):
+		"""Unit-level: get_current_tax_amount for 'On Paid Amount' reads paid_amount_after_tax."""
+		pe = self._make_taxes_pe(paid_amount=1000)
+		tax = self._append_tax(pe, "On Paid Amount", rate=12)
+		# Mirror what initialize_taxes does for an exclusive tax before calculate_taxes.
+		pe.paid_amount_after_tax = 1000.0
+		self.assertAlmostEqual(pe.get_current_tax_amount(tax), 120.0, places=2)
+
+	def test_get_current_tax_amount_actual(self):
+		"""Unit-level: 'Actual' charge returns its own tax_amount unchanged."""
+		pe = self._make_taxes_pe(paid_amount=1000)
+		tax = self._append_tax(pe, "Actual", tax_amount=63)
+		self.assertAlmostEqual(pe.get_current_tax_amount(tax), 63.0, places=2)
+
+	def test_get_current_tax_fraction_inclusive(self):
+		"""Unit-level: inclusive 'On Paid Amount' fraction == rate/100; 'Add' keeps it positive."""
+		pe = self._make_taxes_pe(paid_amount=1000)
+		tax = self._append_tax(pe, "On Paid Amount", rate=10, add_deduct="Add", included=1)
+		self.assertAlmostEqual(pe.get_current_tax_fraction(tax), 0.10, places=4)
+
+	def test_get_current_tax_fraction_exclusive_is_zero(self):
+		"""Unit-level: an exclusive tax contributes no fraction (not backed out)."""
+		pe = self._make_taxes_pe(paid_amount=1000)
+		tax = self._append_tax(pe, "On Paid Amount", rate=10, included=0)
+		self.assertAlmostEqual(pe.get_current_tax_fraction(tax), 0.0, places=4)
+
+	def test_get_current_tax_fraction_deduct_is_negative(self):
+		"""Unit-level: a 'Deduct' inclusive tax flips the fraction sign."""
+		pe = self._make_taxes_pe(paid_amount=1000)
+		tax = self._append_tax(pe, "On Paid Amount", rate=10, add_deduct="Deduct", included=1)
+		self.assertAlmostEqual(pe.get_current_tax_fraction(tax), -0.10, places=4)
+
+	def test_initialize_taxes_resets_computed_fields(self):
+		"""initialize_taxes zeroes the running fields and seeds paid_amount_after_tax."""
+		pe = self._make_taxes_pe(paid_amount=1000)
+		tax = self._append_tax(pe, "On Paid Amount", rate=10)
+		# Pre-dirty the computed fields to prove they get reset.
+		tax.total = 999
+		tax.tax_fraction_for_current_item = 999
+		tax.grand_total_fraction_for_current_item = 999
+		pe.set_amounts_in_company_currency()
+		pe.initialize_taxes()
+
+		self.assertEqual(flt(tax.total), 0.0)
+		self.assertEqual(flt(tax.tax_fraction_for_current_item), 0.0)
+		self.assertEqual(flt(tax.grand_total_fraction_for_current_item), 0.0)
+		# Seeded from base_paid_amount (== paid_amount in company currency).
+		self.assertAlmostEqual(flt(pe.paid_amount_after_tax), 1000.0, places=2)
+
+	def test_set_liability_account_non_party_type(self):
+		"""set_liability_account short-circuits for non Customer/Supplier party types.
+
+		For an Employee party it must set is_opening='No' and disable the separate
+		party-account flag, regardless of company settings.
+		"""
+		employee = make_employee("test_pe_tax_liability@salary.com", company="_Test Company")
+		pe = create_payment_entry(party_type="Employee", party=employee)
+		pe.book_advance_payments_in_separate_party_account = True
+		pe.set_liability_account()
+
+		self.assertFalse(pe.book_advance_payments_in_separate_party_account)
+		self.assertEqual(pe.is_opening, "No")
+
+	def test_set_liability_account_noop_when_submitted(self):
+		"""set_liability_account is a no-op once the document is submitted."""
+		pe = self._make_taxes_pe(paid_amount=1000)
+		pe.docstatus = 1
+		pe.book_advance_payments_in_separate_party_account = True
+		pe.set_liability_account()
+		# Submitted docs are left untouched by the auto-setting logic.
+		self.assertTrue(pe.book_advance_payments_in_separate_party_account)
