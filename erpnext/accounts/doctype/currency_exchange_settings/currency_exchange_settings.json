@@ -1,6 +1,5 @@
 {
  "actions": [],
- "allow_bulk_edit": 1,
  "creation": "2022-01-10 13:03:26.237081",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -105,7 +104,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-06-09 11:34:10.432378",
+ "modified": "2026-06-15 11:25:55.873110",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Currency Exchange Settings",
@@ -122,24 +121,11 @@
    "write": 1
   },
   {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "print": 1,
-   "read": 1,
-   "role": "Accounts Manager",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "delete": 1,
    "email": 1,
    "print": 1,
    "read": 1,
    "role": "Accounts User",
-   "share": 1,
-   "write": 1
+   "share": 1
   }
  ],
  "row_format": "Dynamic",
