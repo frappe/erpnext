@@ -379,9 +379,6 @@ class SalesInvoice(SellingController):
 		self.validate_subcontracted_sales_order()
 		self.validate_scio_self_rm_qty()
 
-		if self.docstatus == 0:
-			self.check_credit_limit(extra_amount=flt(self.base_grand_total))
-
 	def validate_update_stock_for_pick_list_reference(self):
 		if self.update_stock or self.is_return:
 			return
@@ -650,33 +647,37 @@ class SalesInvoice(SellingController):
 			}
 		)
 
-	def check_credit_limit(self, extra_amount: float = 0):
+	def check_credit_limit(self, extra_amount: float = 0, raise_exception: bool = True) -> bool:
 		if self.is_return:
-			return
+			return False
 
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
 
-		validate_against_credit_limit = False
 		bypass_credit_limit_check_at_sales_order = frappe.db.get_value(
 			"Customer Credit Limit",
 			filters={"parent": self.customer, "parenttype": "Customer", "company": self.company},
 			fieldname=["bypass_credit_limit_check"],
 		)
 
-		if bypass_credit_limit_check_at_sales_order:
-			validate_against_credit_limit = True
+		# Credit for fully SO/DN-linked items is already counted at that stage; only check
+		# when bypass is on or some item has no Sales Order / Delivery Note reference.
+		validate_against_credit_limit = bool(bypass_credit_limit_check_at_sales_order) or any(
+			not (d.sales_order or d.delivery_note) for d in self.get("items")
+		)
+		if not validate_against_credit_limit:
+			return False
 
-		for d in self.get("items"):
-			if not (d.sales_order or d.delivery_note):
-				validate_against_credit_limit = True
-				break
-		if validate_against_credit_limit:
-			check_credit_limit(
-				self.customer,
-				self.company,
-				bypass_credit_limit_check_at_sales_order,
-				extra_amount=extra_amount,
-			)
+		# A draft is not yet part of the customer's outstanding, so include its own amount.
+		if self.docstatus == 0:
+			extra_amount = flt(self.base_grand_total)
+
+		return check_credit_limit(
+			self.customer,
+			self.company,
+			bypass_credit_limit_check_at_sales_order,
+			extra_amount=extra_amount,
+			raise_exception=raise_exception,
+		)
 
 	@frappe.whitelist()
 	def set_missing_values(self, for_validate: bool = False):

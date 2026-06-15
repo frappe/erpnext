@@ -298,9 +298,6 @@ class DeliveryNote(SellingController):
 		self.validate_against_stock_reservation_entries()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 
-		if self.docstatus == 0:
-			self.check_credit_limit(preview=True)
-
 	def validate_with_previous_doc(self):
 		super().validate_with_previous_doc(
 			{
@@ -571,19 +568,17 @@ class DeliveryNote(SellingController):
 					)
 					frappe.throw(msg, title=_("Stock Reservation Warehouse Mismatch"))
 
-	def check_credit_limit(self, preview: bool = False):
-		"""Enforce the customer credit limit on submit; on a draft (preview=True) only the
-		unlinked items (not against an SO/SI) count as new exposure, scaled net→grand total."""
+	def check_credit_limit(self, extra_amount: float = 0, raise_exception: bool = True) -> bool:
+		# `extra_amount` is part of the shared check_credit_limit_on_save interface; the amount this
+		# Delivery Note contributes is derived below from its Sales Order / Sales Invoice linkage.
 		if self.is_return:
-			return
+			return False
 
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
 
 		if self.per_billed == 100:
-			return
+			return False
 
-		extra_amount = 0
-		validate_against_credit_limit = False
 		bypass_credit_limit_check_at_sales_order = cint(
 			frappe.db.get_value(
 				"Customer Credit Limit",
@@ -592,6 +587,8 @@ class DeliveryNote(SellingController):
 			)
 		)
 
+		extra_amount = 0
+		validate_against_credit_limit = False
 		if bypass_credit_limit_check_at_sales_order:
 			for d in self.get("items"):
 				if not d.against_sales_invoice:
@@ -602,18 +599,23 @@ class DeliveryNote(SellingController):
 			unlinked = [
 				d for d in self.get("items") if not (d.against_sales_order or d.against_sales_invoice)
 			]
-			if unlinked and preview:
-				if flt(self.base_net_total):
-					unlinked_net = sum(flt(d.base_amount) for d in unlinked)
-					extra_amount = (unlinked_net / flt(self.base_net_total)) * flt(self.base_grand_total)
-					validate_against_credit_limit = bool(extra_amount)
-			elif unlinked:
+			if unlinked:
 				validate_against_credit_limit = True
 
-		if validate_against_credit_limit:
-			check_credit_limit(
-				self.customer, self.company, bypass_credit_limit_check_at_sales_order, extra_amount
-			)
+		if not validate_against_credit_limit:
+			return False
+
+		# A draft is not yet part of the customer's outstanding, so include its own amount.
+		if self.docstatus == 0:
+			extra_amount = flt(self.base_grand_total)
+
+		return check_credit_limit(
+			self.customer,
+			self.company,
+			bypass_credit_limit_check_at_sales_order,
+			extra_amount,
+			raise_exception=raise_exception,
+		)
 
 	def validate_packed_qty(self):
 		"""Validate that if packed qty exists, it should be equal to qty"""

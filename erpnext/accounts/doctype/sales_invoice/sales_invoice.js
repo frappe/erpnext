@@ -1185,11 +1185,26 @@ frappe.ui.form.on("Sales Invoice", {
 	},
 
 	refresh: function (frm) {
+		frm._submitting = false;
+		frm._credit_checked_grand_total = frm.doc.base_grand_total;
+
 		if (frm.doc.is_debit_note) {
 			frm.set_df_property("return_against", "label", __("Adjustment Against"));
 		}
 
 		frm.set_df_property("update_stock", "read_only", frm.doc.has_subcontracted);
+	},
+
+	before_submit(frm) {
+		frm._submitting = true;
+	},
+
+	validate(frm) {
+		if (frm._submitting) {
+			frm._submitting = false;
+			return;
+		}
+		return erpnext.utils.confirm_credit_limit_before_save(frm);
 	},
 });
 

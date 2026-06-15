@@ -56,6 +56,11 @@ class SellingController(StockController):
 			self.tc_name = default_selling_terms
 			self.terms = frappe.get_value("Terms and Conditions", self.get("tc_name"), "terms")
 
+	@frappe.whitelist()
+	def check_credit_limit_on_save(self, extra_amount: float = 0, raise_exception: bool = True) -> bool:
+		frappe.has_permission("Customer", "read", self.customer, throw=True)
+		return self.check_credit_limit(extra_amount, raise_exception)
+
 	def validate(self):
 		super().validate()
 		self.validate_items()

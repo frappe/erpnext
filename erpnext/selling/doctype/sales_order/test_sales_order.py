@@ -18,6 +18,7 @@ from erpnext.maintenance.doctype.maintenance_visit.test_maintenance_visit import
 	make_maintenance_visit,
 )
 from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
+from erpnext.selling.doctype.customer.test_customer import set_credit_limit
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 from erpnext.selling.doctype.sales_order.mapper import (
 	create_pick_list,
@@ -2957,6 +2958,37 @@ class TestSalesOrder(ERPNextTestSuite):
 
 		self.assertEqual(serial_nos, serial_nos_in_bundle)
 		self.assertEqual(batch_nos, batches_in_bundle)
+
+	def test_credit_limit_warning(self):
+		set_credit_limit("_Test Customer", "_Test Company", 100.0)
+
+		with self.subTest("warns when amount exceeds credit limit"):
+			so = self._make_so(200.0)
+			with self.assertRaises(frappe.ValidationError):
+				so.check_credit_limit(extra_amount=so.base_grand_total)
+
+		with self.subTest("no warning when amount within credit limit"):
+			so = self._make_so(50.0)
+			so.check_credit_limit(extra_amount=so.base_grand_total)
+
+	def test_credit_limit_bypass(self):
+		set_credit_limit("_Test Customer", "_Test Company", 100.0)
+		frappe.db.set_value(
+			"Customer Credit Limit",
+			{"parent": "_Test Customer", "company": "_Test Company"},
+			"bypass_credit_limit_check",
+			1,
+		)
+		so = self._make_so(200.0)
+		so.check_credit_limit(extra_amount=so.base_grand_total)
+
+	def _make_so(self, amount):
+		so = frappe.new_doc("Sales Order")
+		so.company = "_Test Company"
+		so.customer = "_Test Customer"
+		so.base_grand_total = amount
+		so.append("items", {"item_code": "_Test Item", "qty": 1, "rate": amount})
+		return so
 
 
 def compare_payment_schedules(doc, doc1, doc2):

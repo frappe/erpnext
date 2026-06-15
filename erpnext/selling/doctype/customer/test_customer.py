@@ -248,15 +248,18 @@ class TestCustomer(ERPNextTestSuite):
 		if not credit_limit:
 			set_credit_limit("_Test Customer", "_Test Company", outstanding_amt - 50)
 
-		# credit limit is now enforced on save (validate), not only on submit
+		# credit limit is enforced on submit; drafts only warn via the JS confirmation
 		# Sales Order
-		self.assertRaises(frappe.ValidationError, make_sales_order, do_not_submit=True)
+		so = make_sales_order(do_not_submit=True)
+		self.assertRaises(frappe.ValidationError, so.submit)
 
 		# Delivery Note
-		self.assertRaises(frappe.ValidationError, create_delivery_note, do_not_submit=True)
+		dn = create_delivery_note(do_not_submit=True)
+		self.assertRaises(frappe.ValidationError, dn.submit)
 
 		# Sales Invoice
-		self.assertRaises(frappe.ValidationError, create_sales_invoice, do_not_submit=True)
+		si = create_sales_invoice(do_not_submit=True)
+		self.assertRaises(frappe.ValidationError, si.submit)
 
 		if credit_limit > outstanding_amt:
 			set_credit_limit("_Test Customer", "_Test Company", credit_limit)

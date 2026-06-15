@@ -29,7 +29,7 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_invoice_status
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
-from erpnext.selling.doctype.customer.test_customer import get_customer_dict
+from erpnext.selling.doctype.customer.test_customer import get_customer_dict, set_credit_limit
 from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
@@ -5219,6 +5219,58 @@ class TestSalesInvoice(ERPNextTestSuite):
 		si.is_debit_note = 1
 		si.update_stock = 1
 		self.assertRaises(frappe.ValidationError, si.save)
+
+	def test_credit_limit_warning_on_submit(self):
+		credit_limit, over_limit, under_limit = 100.0, 200.0, 50.0
+		set_credit_limit("_Test Customer", "_Test Company", credit_limit)
+
+		with self.subTest("warns when amount exceeds credit limit"):
+			si = self._make_si(over_limit)
+			with self.assertRaises(frappe.ValidationError):
+				si.check_credit_limit(extra_amount=si.base_grand_total)
+
+		with self.subTest("no warning when amount within credit limit"):
+			si = self._make_si(under_limit)
+			si.check_credit_limit(extra_amount=si.base_grand_total)
+
+		with self.subTest("return invoice is skipped"):
+			si = self._make_si(over_limit, is_return=1)
+			si.check_credit_limit(extra_amount=si.base_grand_total)
+
+		with self.subTest("skipped when all items linked to sales order"):
+			si = self._make_si(over_limit, sales_order="SO-TEST-0001")
+			si.check_credit_limit(extra_amount=si.base_grand_total)
+
+		with self.subTest("crossed returns true when over limit"):
+			self.assertTrue(self._make_si(over_limit).check_credit_limit(raise_exception=False))
+
+		with self.subTest("not crossed when all items linked to sales order"):
+			self.assertFalse(
+				self._make_si(over_limit, sales_order="SO-TEST-0001").check_credit_limit(
+					raise_exception=False
+				)
+			)
+
+		with self.subTest("crossed returns false when under limit"):
+			self.assertFalse(self._make_si(under_limit).check_credit_limit(raise_exception=False))
+
+	def test_credit_limit_skipped_when_no_limit(self):
+		set_credit_limit("_Test Customer", "_Test Company", 100.0)
+		frappe.db.delete("Customer Credit Limit", {"parent": "_Test Customer"})
+		si = self._make_si(200.0)
+		si.check_credit_limit(extra_amount=si.base_grand_total)
+
+	def _make_si(self, amount, is_return=0, sales_order=None):
+		si = frappe.new_doc("Sales Invoice")
+		si.company = "_Test Company"
+		si.customer = "_Test Customer"
+		si.is_return = is_return
+		si.base_grand_total = amount
+		item = {"item_code": "_Test Item", "qty": 1, "rate": amount}
+		if sales_order:
+			item["sales_order"] = sales_order
+		si.append("items", item)
+		return si
 
 
 def make_item_for_si(item_code, properties=None):

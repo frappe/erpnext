@@ -1134,6 +1134,47 @@ erpnext.utils.map_current_doc = function (opts) {
 	}
 };
 
+erpnext.utils.confirm_credit_limit_before_save = async function (frm) {
+	if (!frm.doc.customer) {
+		return;
+	}
+
+	if (frm.doc.base_grand_total === frm._credit_checked_grand_total) {
+		return;
+	}
+
+	const r = await frm
+		.call({
+			doc: frm.doc,
+			method: "check_credit_limit_on_save",
+			args: { extra_amount: frm.doc.base_grand_total, raise_exception: 0 },
+		})
+		.catch(() => null);
+
+	// A server error (null) must not advance the cache, else this amount is never re-checked.
+	if (r !== null) {
+		frm._credit_checked_grand_total = frm.doc.base_grand_total;
+	}
+	if (!r || !r.message) {
+		return;
+	}
+
+	const proceed = await new Promise((resolve) => {
+		frappe.confirm(
+			__("Credit limit has been crossed for customer {0}. Do you still want to save?", [
+				frm.doc.customer,
+			]),
+			() => resolve(true),
+			() => resolve(false)
+		);
+	});
+
+	if (!proceed) {
+		frappe.validated = false;
+		frm._credit_checked_grand_total = null;
+	}
+};
+
 frappe.form.link_formatters["Item"] = function (value, doc, df) {
 	return add_link_title(value, doc, df, "item_name");
 };

@@ -68,6 +68,7 @@ class AccountsSettings(Document):
 		confirm_before_resetting_posting_date: DF.Check
 		create_pr_in_draft_status: DF.Check
 		credit_controller: DF.Link | None
+		credit_controller_for_sales_order: DF.Link | None
 		default_ageing_range: DF.Data | None
 		delete_linked_ledger_entries: DF.Check
 		determine_address_tax_category_from: DF.Literal["Billing Address", "Shipping Address"]

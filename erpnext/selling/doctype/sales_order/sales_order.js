@@ -73,6 +73,9 @@ frappe.ui.form.on("Sales Order", {
 	},
 
 	refresh: function (frm) {
+		frm._submitting = false;
+		frm._credit_checked_grand_total = frm.doc.base_grand_total;
+
 		frm.fields_dict["items"].grid.update_docfield_property(
 			"add_schedule",
 			"hidden",
@@ -832,6 +835,18 @@ frappe.ui.form.on("Sales Order", {
 				frappe.model.set_value(row.doctype, row.name, "reserve_stock", frm.doc.reserve_stock);
 			});
 		});
+	},
+
+	before_submit(frm) {
+		frm._submitting = true;
+	},
+
+	validate(frm) {
+		if (frm._submitting) {
+			frm._submitting = false;
+			return;
+		}
+		return erpnext.utils.confirm_credit_limit_before_save(frm);
 	},
 });
 

@@ -13,6 +13,7 @@ from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_ce
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.utils import get_balance_on
 from erpnext.controllers.accounts_controller import InvalidQtyError
+from erpnext.selling.doctype.customer.test_customer import set_credit_limit
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 from erpnext.selling.doctype.sales_order.test_sales_order import (
 	compare_payment_schedules,
@@ -3375,6 +3376,108 @@ class TestDeliveryNote(ERPNextTestSuite):
 		dn.items[0].incoming_rate = 0
 		dn.items[0].stock_qty = 2
 		dn.save()
+
+	def test_credit_limit_confirmation(self):
+		credit_limit, over_limit, under_limit = 100.0, 200.0, 50.0
+		set_credit_limit("_Test Customer", "_Test Company", credit_limit)
+
+		with self.subTest("warns when over limit"):
+			self.assertTrue(self._make_dn(over_limit).check_credit_limit(raise_exception=False))
+
+		with self.subTest("no warning when all items linked"):
+			self.assertFalse(
+				self._make_dn(over_limit, against_sales_order="SO-TEST-0001").check_credit_limit(
+					raise_exception=False
+				)
+			)
+
+		with self.subTest("warns when one item unlinked"):
+			dn = self._make_dn(over_limit, against_sales_order="SO-TEST-0001")
+			dn.append("items", {"item_code": "_Test Item", "qty": 1, "rate": over_limit})
+			self.assertTrue(dn.check_credit_limit(raise_exception=False))
+
+		with self.subTest("no warning when under limit"):
+			self.assertFalse(self._make_dn(under_limit).check_credit_limit(raise_exception=False))
+
+		with self.subTest("return is skipped"):
+			self.assertFalse(self._make_dn(over_limit, is_return=1).check_credit_limit(raise_exception=False))
+
+	def test_credit_limit_on_submit(self):
+		credit_limit, over_limit = 100.0, 200.0
+		set_credit_limit("_Test Customer", "_Test Company", credit_limit)
+
+		with self.subTest("warns when bypass and unbilled"):
+			dn = self._make_dn(over_limit, bypass=True)
+			with self.assertRaises(frappe.ValidationError):
+				dn.check_credit_limit()
+
+		with self.subTest("no warning when all items billed"):
+			dn = self._make_dn(over_limit, bypass=True, against_sales_invoice="SINV-TEST-0001")
+			dn.check_credit_limit()
+
+		with self.subTest("no warning when fully billed"):
+			dn = self._make_dn(over_limit)
+			dn.per_billed = 100
+			dn.check_credit_limit()
+
+	def test_delivery_note_prev_docstatus(self):
+		with self.subTest("throws when referenced sales order not submitted"):
+			so = make_sales_order(do_not_submit=True)
+			dn = self._make_dn_against_so(so.name)
+			with self.assertRaises(frappe.ValidationError):
+				dn.validate_with_previous_doc()
+
+		with self.subTest("no throw when referenced sales order submitted"):
+			so = make_sales_order()
+			dn = self._make_dn_against_so(so.name)
+			dn.validate_with_previous_doc()
+
+		with self.subTest("all unsubmitted refs reported in single message"):
+			so1 = make_sales_order(do_not_submit=True)
+			so2 = make_sales_order(do_not_submit=True)
+			dn = self._make_dn_against_so(so1.name)
+			dn.append(
+				"items", {"item_code": "_Test Item", "qty": 1, "rate": 100, "against_sales_order": so2.name}
+			)
+			with self.assertRaises(frappe.ValidationError) as cm:
+				dn.validate_with_previous_doc()
+			self.assertIn(so1.name, str(cm.exception))
+			self.assertIn(so2.name, str(cm.exception))
+
+	def _make_dn(
+		self, amount, bypass=False, against_sales_order=None, against_sales_invoice=None, is_return=0
+	):
+		dn = frappe.new_doc("Delivery Note")
+		dn.company = "_Test Company"
+		dn.customer = "_Test Customer"
+		dn.is_return = is_return
+		dn.base_grand_total = amount
+		item = {"item_code": "_Test Item", "qty": 1, "rate": amount}
+		if against_sales_order:
+			item["against_sales_order"] = against_sales_order
+		if against_sales_invoice:
+			item["against_sales_invoice"] = against_sales_invoice
+		dn.append("items", item)
+
+		if bypass:
+			frappe.db.set_value(
+				"Customer Credit Limit",
+				{"parent": "_Test Customer", "company": "_Test Company"},
+				"bypass_credit_limit_check",
+				1,
+			)
+		return dn
+
+	def _make_dn_against_so(self, sales_order, **item):
+		dn = frappe.new_doc("Delivery Note")
+		dn.company = "_Test Company"
+		dn.customer = "_Test Customer"
+		dn.currency = "INR"
+		dn.append(
+			"items",
+			{"item_code": "_Test Item", "qty": 1, "rate": 100, "against_sales_order": sales_order, **item},
+		)
+		return dn
 
 
 def create_delivery_note(**args):

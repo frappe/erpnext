@@ -486,64 +486,77 @@ def get_nested_links(link_doctype, link_name, ignore_permissions=False):
 	return links
 
 
-def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, extra_amount=0):
+def check_credit_limit(
+	customer,
+	company,
+	ignore_outstanding_sales_order=False,
+	extra_amount=0,
+	credit_controller_role=None,
+	raise_exception=True,
+) -> bool:
 	credit_limit = get_credit_limit(customer, company)
 	if not credit_limit:
-		return
+		return False
 
 	customer_outstanding = get_customer_outstanding(customer, company, ignore_outstanding_sales_order)
 	if extra_amount > 0:
 		customer_outstanding += flt(extra_amount)
 
-	if credit_limit > 0 and flt(customer_outstanding) > credit_limit:
-		message = _("Credit limit has been crossed for customer {0} ({1}/{2})").format(
-			customer, customer_outstanding, credit_limit
+	if not (credit_limit > 0 and flt(customer_outstanding) > credit_limit):
+		return False
+
+	credit_controller_role = credit_controller_role or frappe.get_single_value(
+		"Accounts Settings", "credit_controller"
+	)
+	if credit_controller_role and credit_controller_role in frappe.get_roles():
+		return False
+
+	# Crossed, and the current user is not authorized to bypass.
+	if not raise_exception:
+		return True
+
+	message = _("Credit limit has been crossed for customer {0} ({1}/{2})").format(
+		customer, customer_outstanding, credit_limit
+	)
+	message += "<br><br>"
+
+	# form a list of emails for the credit controller users
+	credit_controller_users = get_users_with_role(credit_controller_role or "Sales Master Manager")
+
+	# form a list of emails and names to show to the user
+	credit_controller_users_formatted = [
+		get_formatted_email(user).replace("<", "(").replace(">", ")") for user in credit_controller_users
+	]
+	if not credit_controller_users_formatted:
+		frappe.throw(
+			_("Please contact your administrator to extend the credit limits for {0}.").format(customer)
 		)
 
-		message += "<br><br>"
+	user_list = "<br><br><ul><li>{}</li></ul>".format("<li>".join(credit_controller_users_formatted))
 
-		# If not authorized person raise exception
-		credit_controller_role = frappe.get_single_value("Accounts Settings", "credit_controller")
-		if not credit_controller_role or credit_controller_role not in frappe.get_roles():
-			# form a list of emails for the credit controller users
-			credit_controller_users = get_users_with_role(credit_controller_role or "Sales Master Manager")
+	message += _("Please contact any of the following users to extend the credit limits for {0}: {1}").format(
+		customer, user_list
+	)
 
-			# form a list of emails and names to show to the user
-			credit_controller_users_formatted = [
-				get_formatted_email(user).replace("<", "(").replace(">", ")")
-				for user in credit_controller_users
-			]
-			if not credit_controller_users_formatted:
-				frappe.throw(
-					_("Please contact your administrator to extend the credit limits for {0}.").format(
-						customer
-					)
-				)
-
-			user_list = "<br><br><ul><li>{}</li></ul>".format("<li>".join(credit_controller_users_formatted))
-
-			message += _(
-				"Please contact any of the following users to extend the credit limits for {0}: {1}"
-			).format(customer, user_list)
-
-			# if the current user does not have permissions to override credit limit,
-			# prompt them to send out an email to the controller users
-			frappe.msgprint(
-				message,
-				title=_("Credit Limit Crossed"),
-				raise_exception=1,
-				primary_action={
-					"label": "Send Email",
-					"server_action": "erpnext.selling.doctype.customer.customer.send_emails",
-					"hide_on_success": True,
-					"args": {
-						"customer": customer,
-						"customer_outstanding": customer_outstanding,
-						"credit_limit": credit_limit,
-						"credit_controller_users_list": credit_controller_users,
-					},
-				},
-			)
+	# if the current user does not have permissions to override credit limit,
+	# prompt them to send out an email to the controller users
+	frappe.msgprint(
+		message,
+		title=_("Credit Limit Crossed"),
+		raise_exception=1,
+		primary_action={
+			"label": "Send Email",
+			"server_action": "erpnext.selling.doctype.customer.customer.send_emails",
+			"hide_on_success": True,
+			"args": {
+				"customer": customer,
+				"customer_outstanding": customer_outstanding,
+				"credit_limit": credit_limit,
+				"credit_controller_users_list": credit_controller_users,
+			},
+		},
+	)
+	return True
 
 
 @frappe.whitelist()

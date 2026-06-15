@@ -79,6 +79,9 @@ frappe.ui.form.on("Delivery Note", {
 	},
 
 	refresh: function (frm) {
+		frm._submitting = false;
+		frm._credit_checked_grand_total = frm.doc.base_grand_total;
+
 		if (
 			frm.doc.docstatus === 1 &&
 			frm.doc.is_return === 1 &&
@@ -122,6 +125,18 @@ frappe.ui.form.on("Delivery Note", {
 				);
 			}
 		}
+	},
+
+	before_submit(frm) {
+		frm._submitting = true;
+	},
+
+	validate(frm) {
+		if (frm._submitting) {
+			frm._submitting = false;
+			return;
+		}
+		return erpnext.utils.confirm_credit_limit_before_save(frm);
 	},
 });
 

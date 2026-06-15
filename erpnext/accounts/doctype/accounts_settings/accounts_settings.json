@@ -74,6 +74,7 @@
   "make_payment_via_journal_entry",
   "over_billing_allowance",
   "credit_controller",
+  "credit_controller_for_sales_order",
   "role_allowed_to_over_bill",
   "column_break_11",
   "assets_tab",
@@ -126,7 +127,7 @@
    "fieldname": "credit_controller",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Role allowed to bypass credit limit",
+   "label": "Sales Invoice Credit Limit Bypass Role",
    "options": "Role"
   },
   {
@@ -740,6 +741,13 @@
    "description": "Changing the account in any transaction of the DocTypes listed below will trigger a repost. To prevent reposting, remove the relevant DocType from the list.",
    "fieldname": "column_break_mfor",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "credit_controller_for_sales_order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sales Order Credit Limit Bypass Role",
+   "options": "Role"
   }
  ],
  "grid_page_length": 50,
@@ -748,7 +756,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-06-11 13:43:29.352659",
+ "modified": "2026-06-15 16:13:33.406514",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
