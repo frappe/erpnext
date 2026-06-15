@@ -1555,13 +1555,13 @@ def update_invoice_status():
 
 		total = (
 			frappe.qb.terms.Case()
-			.when(invoice.disable_rounded_total, invoice.grand_total)
+			.when(invoice.disable_rounded_total == 1, invoice.grand_total)
 			.else_(invoice.rounded_total)
 		)
 
 		base_total = (
 			frappe.qb.terms.Case()
-			.when(invoice.disable_rounded_total, invoice.base_grand_total)
+			.when(invoice.disable_rounded_total == 1, invoice.base_grand_total)
 			.else_(invoice.base_rounded_total)
 		)
 
@@ -1574,7 +1574,7 @@ def update_invoice_status():
 			& (invoice.outstanding_amount > 0)
 			& (invoice.status.like("Unpaid%") | invoice.status.like("Partly Paid%"))
 			& (
-				((invoice.is_pos & invoice.due_date < today) | is_overdue)
+				(((invoice.is_pos == 1) & (invoice.due_date < today)) | is_overdue)
 				if doctype == "Sales Invoice"
 				else is_overdue
 			)
