@@ -1407,16 +1407,19 @@ def validate_bom_no(item, bom_no):
 
 
 def _bom_contains_item(bom, item):
-	item = item.lower()
+	# Lower-case only for the case-insensitive item_code comparisons; keep the original `item`
+	# for the Item lookup, whose name is case-sensitive on postgres (lower-casing it would miss
+	# the row and wrongly reject a variant's template BOM).
+	item_code = item.lower()
 	for d in bom.items:
-		if d.item_code.lower() == item:
+		if d.item_code.lower() == item_code:
 			return True
 	for d in bom.secondary_items:
-		if d.item_code.lower() == item:
+		if d.item_code.lower() == item_code:
 			return True
 
 	return (
-		bom.item.lower() == item
+		bom.item.lower() == item_code
 		or bom.item.lower() == cstr(frappe.db.get_value("Item", item, "variant_of")).lower()
 	)
 
