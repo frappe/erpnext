@@ -351,12 +351,13 @@ class StockBalanceReport:
 				qty_dict.opening_qty -= self.stock_reco_voucher_wise_count.get(entry.voucher_detail_no, 0)
 				qty_dict.bal_qty = 0.0
 				qty_diff = flt(entry.actual_qty)
+				value_diff = flt(entry.stock_value_difference)
 			else:
 				qty_diff = flt(entry.qty_after_transaction) - flt(qty_dict.bal_qty)
+				value_diff = flt(entry.stock_value) - flt(qty_dict.bal_val)
 		else:
 			qty_diff = flt(entry.actual_qty)
-
-		value_diff = flt(entry.stock_value_difference)
+			value_diff = flt(entry.stock_value_difference)
 
 		if entry.posting_date < self.from_date or entry.voucher_no in self.opening_vouchers.get(
 			entry.voucher_type, []
