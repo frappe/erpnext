@@ -1,6 +1,5 @@
 {
  "actions": [],
- "allow_bulk_edit": 1,
  "creation": "2022-01-10 13:03:26.237081",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -106,10 +105,14 @@
  "issingle": 1,
  "links": [],
 <<<<<<< HEAD
+<<<<<<< HEAD
  "modified": "2025-11-25 13:03:41.896424",
 =======
  "modified": "2026-06-09 11:34:10.432378",
 >>>>>>> 56bfe6b6a6 (feat(currency exchange settings): frankfurter v2 support)
+=======
+ "modified": "2026-06-15 11:25:55.873110",
+>>>>>>> 0c2d5488a6 (fix: restricting currency_exchange_settings write permission only to system manager)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Currency Exchange Settings",
@@ -126,24 +129,11 @@
    "write": 1
   },
   {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "print": 1,
-   "read": 1,
-   "role": "Accounts Manager",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "delete": 1,
    "email": 1,
    "print": 1,
    "read": 1,
    "role": "Accounts User",
-   "share": 1,
-   "write": 1
+   "share": 1
   }
  ],
  "row_format": "Dynamic",
