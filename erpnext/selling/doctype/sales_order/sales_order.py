@@ -536,22 +536,6 @@ class SalesOrder(SellingController):
 		clear_doctype_notifications(self)
 		self.update_blanket_order()
 
-<<<<<<< HEAD
-=======
-	def update_subcontracting_order_status(self):
-		from erpnext.subcontracting.doctype.subcontracting_inward_order.subcontracting_inward_order import (
-			set_subcontracting_inward_order_status as update_scio_status,
-		)
-
-		if self.is_subcontracted:
-			scio = frappe.get_cached_value(
-				"Subcontracting Inward Order", {"sales_order": self.name, "docstatus": 1}, "name"
-			)
-
-			if scio:
-				update_scio_status(scio, "Closed" if self.status == "Closed" else None)
-
->>>>>>> be1aa0e5eb (fix: regression issues related to security fixes)
 	def update_reserved_qty(self, so_item_rows=None):
 		"""update requested qty (before ordered_qty is updated)"""
 		item_wh_list = []
