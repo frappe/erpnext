@@ -873,10 +873,13 @@ class ReceivablePayableReport:
 		if match_conditions := build_qb_match_conditions("Payment Ledger Entry"):
 			query = query.where(Criterion.all(match_conditions))
 
+		# `creation` is a deterministic final tiebreak: without it, rows that share posting_date and
+		# party come back in the database's physical order, which isn't portable between MariaDB and
+		# PostgreSQL (and isn't stable across runs).
 		if self.filters.get("group_by_party"):
-			query = query.orderby(self.ple.party, self.ple.posting_date)
+			query = query.orderby(self.ple.party, self.ple.posting_date, self.ple.creation)
 		else:
-			query = query.orderby(self.ple.posting_date, self.ple.party)
+			query = query.orderby(self.ple.posting_date, self.ple.party, self.ple.creation)
 
 		self.ple_query = query
 

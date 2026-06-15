@@ -3088,30 +3088,25 @@ def check_gl_entries(
 
 	gl_entries = query.run(as_dict=True)
 
-	# MariaDB and Postgres collate `account` differently, so the DB ordering of the rows isn't
-	# portable; sort both sides by every compared field (so ties resolve identically) before the
-	# positional check.
+	# MariaDB and Postgres collate `account` differently, so the DB row order isn't portable.
+	# Match each actual GL row against the expected set instead of comparing positionally; like the
+	# original loop (which iterated the actual rows), extra expected rows are tolerated.
 	cols = additional_columns or []
-	gl_entries = sorted(
-		gl_entries,
-		key=lambda g: (g.account, g.debit, g.credit, str(g.posting_date), *(str(g[c]) for c in cols)),
-	)
-	expected_gle = sorted(
-		expected_gle,
-		key=lambda e: (e[0], e[1], e[2], str(getdate(e[3])), *(str(v) for v in e[4 : 4 + len(cols)])),
-	)
 
-	for i, gle in enumerate(gl_entries):
-		doc.assertEqual(expected_gle[i][0], gle.account)
-		doc.assertEqual(expected_gle[i][1], gle.debit)
-		doc.assertEqual(expected_gle[i][2], gle.credit)
-		doc.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
+	def _key(account, debit, credit, posting_date, extras):
+		return (account, flt(debit), flt(credit), getdate(posting_date), *(str(v) for v in extras))
 
-		if additional_columns:
-			j = 4
-			for col in additional_columns:
-				doc.assertEqual(expected_gle[i][j], gle[col])
-				j += 1
+	remaining = {}
+	for e in expected_gle:
+		k = _key(e[0], e[1], e[2], e[3], e[4 : 4 + len(cols)])
+		remaining[k] = remaining.get(k, 0) + 1
+
+	for gle in gl_entries:
+		k = _key(gle.account, gle.debit, gle.credit, gle.posting_date, [gle[c] for c in cols])
+		doc.assertGreater(
+			remaining.get(k, 0), 0, msg=f"Unexpected GL entry {k}; expected one of {list(remaining)}"
+		)
+		remaining[k] -= 1
 
 
 def create_tax_witholding_category(category_name, company, account):
