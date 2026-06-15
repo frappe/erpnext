@@ -104,6 +104,36 @@ class TestBankTransaction(ERPNextTestSuite):
 		self.assertEqual(bank_transaction.unallocated_amount, 1700)
 		self.assertEqual(bank_transaction.payment_entries, [])
 
+	# Amending a reconciled payment entry must not carry over its clearance date
+	def test_clearance_date_cleared_on_amend(self):
+		bank_transaction = frappe.get_doc(
+			"Bank Transaction",
+			dict(description="1512567 BG/000003025 OPSKATTUZWXXX AT776000000098709849 Herr G"),
+		)
+		payment = frappe.get_doc("Payment Entry", dict(party="Mr G", paid_amount=1700))
+		vouchers = json.dumps(
+			[
+				{
+					"payment_doctype": "Payment Entry",
+					"payment_name": payment.name,
+					"amount": bank_transaction.unallocated_amount,
+				}
+			]
+		)
+		reconcile_vouchers(bank_transaction.name, vouchers)
+
+		self.assertTrue(frappe.db.get_value("Payment Entry", payment.name, "clearance_date"))
+
+		payment.reload()
+		payment.cancel()
+
+		amended = frappe.copy_doc(payment)
+		amended.amended_from = payment.name
+		amended.docstatus = 0
+		amended.insert()
+
+		self.assertFalse(amended.clearance_date)
+
 	# Check if ERPNext can correctly filter a linked payments based on the debit/credit amount
 	def test_debit_credit_output(self):
 		bank_transaction = frappe.get_doc(
