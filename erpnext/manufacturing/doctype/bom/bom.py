@@ -341,6 +341,7 @@ class BOM(WebsiteGenerator):
 					).format(item.idx, get_link_to_form("Item", item.item_code))
 				)
 
+<<<<<<< HEAD
 			if item.qty is None:
 				frappe.throw(
 <<<<<<< HEAD
@@ -353,6 +354,8 @@ class BOM(WebsiteGenerator):
 					)
 				)
 
+=======
+>>>>>>> c1bef53f92 (refactor(bom): drop redundant secondary item qty None check)
 			if item.process_loss_per >= 100:
 				frappe.throw(
 					_("Row #{0}: Process Loss Percentage should be less than 100% for {1} Item {2}").format(
