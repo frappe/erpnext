@@ -648,7 +648,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 	def test_purchase_order_on_hold(self):
 		po = create_purchase_order(item_code="_Test Product Bundle Item")
-		po.db_set("Status", "On Hold")
+		po.db_set("status", "On Hold")
 		pi = make_pi_from_po(po.name)
 		pr = make_purchase_receipt(po.name)
 		self.assertRaises(frappe.ValidationError, pr.submit)
