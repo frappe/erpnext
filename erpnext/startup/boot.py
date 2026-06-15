@@ -37,7 +37,7 @@ def boot_session(bootinfo):
 		bootinfo.customer_count = frappe.db.count("Customer")
 
 		if not bootinfo.customer_count:
-			bootinfo.setup_complete = "Yes" if frappe.db.exists("Company") else "No"
+			bootinfo.setup_complete = "Yes" if frappe.db.get_all("Company", limit=1) else "No"
 
 		companies = frappe.get_all(
 			"Company",

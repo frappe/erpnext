@@ -978,7 +978,7 @@ class StockReconciliation(StockController):
 
 		if not self.expense_account:
 			frappe.throw(_("Please enter Expense Account"))
-		elif self.purpose == "Opening Stock" or not frappe.db.exists("Stock Ledger Entry"):
+		elif self.purpose == "Opening Stock" or not frappe.db.get_all("Stock Ledger Entry", limit=1):
 			if frappe.db.get_value("Account", self.expense_account, "report_type") == "Profit and Loss":
 				frappe.throw(
 					_(
