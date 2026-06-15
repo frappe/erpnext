@@ -1443,6 +1443,12 @@ class JournalTaxWithholding(TaxWithholdingController):
 			self.doc.tax_withholding_entries = []
 			return False
 
+		if not self.party_type:
+			frappe.throw(
+				_("To apply Tax Withholding, add a row with a Supplier or Customer party."),
+				title=_("Party Required for Tax Withholding"),
+			)
+
 		return True
 
 	def _get_linked_payments(self):
