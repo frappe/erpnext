@@ -104,15 +104,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
-<<<<<<< HEAD
-<<<<<<< HEAD
- "modified": "2025-11-25 13:03:41.896424",
-=======
- "modified": "2026-06-09 11:34:10.432378",
->>>>>>> 56bfe6b6a6 (feat(currency exchange settings): frankfurter v2 support)
-=======
  "modified": "2026-06-15 11:25:55.873110",
->>>>>>> 0c2d5488a6 (fix: restricting currency_exchange_settings write permission only to system manager)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Currency Exchange Settings",
