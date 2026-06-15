@@ -258,19 +258,32 @@ class TestBudgetVarianceReport(ERPNextTestSuite):
 			submit_budget=True,
 		)
 
-		_columns, data, _message, _chart = execute(self._base_filters(period="Monthly", show_cumulative=1))
+		columns, data, _message, _chart = execute(self._base_filters(period="Monthly", show_cumulative=1))
 		row = self._find_row(data, self.cost_center)
 		self.assertIsNotNone(row)
 
+		# Read the report's actual per-period budget columns, in chronological order.
+		period_fields = [
+			c["fieldname"]
+			for c in columns
+			if c.get("fieldname", "").startswith("budget_")
+			and not c.get("fieldname", "").startswith("budget_against")
+		]
+		self.assertEqual(len(period_fields), 12)
+		cumulative = [flt(row.get(f)) for f in period_fields]
+
+		# Each period's running budget is >= the previous (monotonically non-decreasing).
+		for i in range(1, len(cumulative)):
+			self.assertGreaterEqual(cumulative[i], cumulative[i - 1])
+
+		# It genuinely accumulates: starts at one month's budget, ends at the annual
+		# amount (a broken show_cumulative would leave the last column at ~one month).
+		self.assertAlmostEqual(cumulative[0], annual_amount / 12.0, places=2)
+		self.assertAlmostEqual(cumulative[-1], annual_amount, places=2)
+		self.assertGreater(cumulative[-1], cumulative[0])
+
 		# The grand total still equals the annual amount.
 		self.assertAlmostEqual(flt(row.get("total_budget")), annual_amount, places=2)
-
-		# Cumulative budget is monotonically non-decreasing and ends at the total.
-		monthly = annual_amount / 12.0
-		running = monthly
-		for _ in range(1, 12):
-			running += monthly
-		self.assertAlmostEqual(running, annual_amount, places=2)
 
 	# ------------------------------------------------------------------
 	# Cost center with children expansion
