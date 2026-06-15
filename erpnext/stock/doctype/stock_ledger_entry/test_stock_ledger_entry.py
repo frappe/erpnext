@@ -7,7 +7,7 @@ from uuid import uuid4
 
 import frappe
 from frappe.core.page.permission_manager.permission_manager import reset
-from frappe.query_builder.functions import Timestamp
+from frappe.query_builder.functions import CombineDatetime
 from frappe.utils import add_days, add_to_date, flt, today
 
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
@@ -1275,7 +1275,7 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 			.where(sle.voucher_no == transfer.name)
 			.where(sle.voucher_type == transfer.doctype)
 			.where(sle.is_cancelled == 0)
-			.orderby(Timestamp(sle.posting_date, sle.posting_time))
+			.orderby(CombineDatetime(sle.posting_date, sle.posting_time))
 			.orderby(sle.creation)
 			.run(as_dict=True)
 		)
