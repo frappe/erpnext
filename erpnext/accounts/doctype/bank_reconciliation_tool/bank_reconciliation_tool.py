@@ -3,6 +3,7 @@
 
 
 import json
+from datetime import date
 
 import frappe
 from frappe import _
@@ -47,16 +48,12 @@ class BankReconciliationTool(Document):
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
-def get_bank_transactions(bank_account, from_date=None, to_date=None):
-=======
 def get_bank_transactions(
 	bank_account: str,
 	from_date: str | date | None = None,
 	to_date: str | date | None = None,
 	all_transactions: bool = False,
 ):
->>>>>>> 6de5367f12 (feat: new banking module (#54720))
 	# returns bank transactions for a bank account
 	filters = []
 	filters.append(["bank_account", "=", bank_account])
@@ -1059,11 +1056,7 @@ def get_auto_reconcile_message(partially_reconciled, reconciled):
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
-def reconcile_vouchers(bank_transaction_name, vouchers):
-=======
 def reconcile_vouchers(bank_transaction_name: str | int, vouchers: str, is_new_voucher: bool = False):
->>>>>>> 6de5367f12 (feat: new banking module (#54720))
 	# updated clear date of all the vouchers based on the bank transaction
 	vouchers = json.loads(vouchers)
 	transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
