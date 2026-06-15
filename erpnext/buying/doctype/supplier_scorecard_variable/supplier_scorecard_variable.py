@@ -7,11 +7,8 @@ import sys
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder import CustomFunction
-from frappe.query_builder.functions import Count, Sum
+from frappe.query_builder.functions import Count, DateDiff, Sum
 from frappe.utils import getdate
-
-DateDiff = CustomFunction("DATEDIFF", ["date1", "date2"])
 
 
 class VariablePathNotFound(frappe.ValidationError):
