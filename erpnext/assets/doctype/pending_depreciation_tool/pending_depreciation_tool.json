@@ -10,7 +10,7 @@
   "asset_category",
   "finance_book",
   "section_break_assets",
-  "pending_assets"
+  "assets"
  ],
  "fields": [
   {
@@ -46,8 +46,10 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "pending_assets",
-   "fieldtype": "HTML"
+   "fieldname": "assets",
+   "fieldtype": "Table",
+   "label": "Assets",
+   "options": "Pending Depreciation Asset"
   }
  ],
  "hide_toolbar": 1,

@@ -2,11 +2,6 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Pending Depreciation Tool", {
-	setup(frm) {
-		frm._selected = new Set();
-		frm._data = [];
-	},
-
 	onload(frm) {
 		if (!frm.doc.company) {
 			frm.set_value("company", frappe.defaults.get_default("company"));
@@ -19,11 +14,14 @@ frappe.ui.form.on("Pending Depreciation Tool", {
 	refresh(frm) {
 		frm.disable_save();
 
+		const grid = frm.get_field("assets").grid;
+		grid.cannot_add_rows = true;
+		grid.df.cannot_delete_rows = true;
+
 		frm.add_custom_button(__("Fetch Assets"), () => frm.trigger("fetch_assets"), null, "primary");
 		frm.add_custom_button(__("Create Depreciation Entries"), () => frm.trigger("create_entries"));
 
-		frm.trigger("update_create_button");
-		frm.trigger("render_table");
+		frm.custom_buttons[__("Create Depreciation Entries")].prop("disabled", true);
 	},
 
 	company: (frm) => frm.trigger("fetch_assets"),
@@ -32,12 +30,7 @@ frappe.ui.form.on("Pending Depreciation Tool", {
 	finance_book: (frm) => frm.trigger("fetch_assets"),
 
 	fetch_assets(frm) {
-		if (!frm.doc.date) {
-			frm.get_field("pending_assets").$wrapper.html(
-				`<div class="text-muted text-center" style="padding: 40px 0;">${__("Please select an Up to Date.")}</div>`
-			);
-			return;
-		}
+		if (!frm.doc.date) return;
 
 		frappe.call({
 			method: "erpnext.assets.doctype.pending_depreciation_tool.pending_depreciation_tool.get_pending_depreciation_assets",
@@ -50,128 +43,62 @@ frappe.ui.form.on("Pending Depreciation Tool", {
 			freeze: true,
 			freeze_message: __("Fetching pending assets..."),
 			callback(r) {
-				frm._data = r.message || [];
-				frm._selected = new Set();
-				frm.trigger("render_table");
+				frm.clear_table("assets");
+				for (const row of r.message || []) {
+					frm.add_child("assets", row);
+				}
+				frm.refresh_field("assets");
+				frm.trigger("update_create_button");
 			},
 		});
 	},
 
-	render_table(frm) {
-		const $wrapper = frm.get_field("pending_assets").$wrapper.empty();
-		frm.trigger("update_create_button");
-
-		if (!frm._data || !frm._data.length) {
-			if (frm.doc.date) {
-				$wrapper.html(
-					`<div class="text-muted text-center" style="padding: 40px 0;">${__("No pending depreciation entries found.")}</div>`
-				);
-			}
-			return;
-		}
-
-		const currency = frappe.boot.sysdefaults.currency;
-
-		const $container = $(`
-			<div class="table-responsive">
-				<p class="text-muted" style="margin-bottom: 8px;">
-					${__("{0} asset(s) with pending depreciation found.", [`<strong>${frm._data.length}</strong>`])}
-				</p>
-				<table class="table table-bordered table-hover" style="font-size: 13px;">
-					<thead>
-						<tr>
-							<th style="width: 36px;">
-								<input type="checkbox" class="select-all" title="${__("Select All")}">
-							</th>
-							<th>${__("Asset")}</th>
-							<th>${__("Asset Name")}</th>
-							<th>${__("Asset Category")}</th>
-							<th>${__("Finance Book")}</th>
-							<th>${__("Depreciation Method")}</th>
-							<th>${__("Next Depreciation Date")}</th>
-							<th class="text-right">${__("Pending Amount")}</th>
-						</tr>
-					</thead>
-					<tbody></tbody>
-				</table>
-			</div>
-		`);
-
-		const $tbody = $container.find("tbody");
-
-		frm._data.forEach((row) => {
-			const $tr = $(`
-				<tr>
-					<td><input type="checkbox" class="row-select"></td>
-					<td><a href="/app/asset/${row.asset}" target="_blank">${row.asset}</a></td>
-					<td>${row.asset_name}</td>
-					<td>${row.asset_category}</td>
-					<td>${row.finance_book || ""}</td>
-					<td>${__(row.depreciation_method)}</td>
-					<td>${frappe.datetime.str_to_user(row.next_depreciation_date)}</td>
-					<td class="text-right">${format_currency(row.pending_depreciation_amount, currency)}</td>
-				</tr>
-			`);
-
-			$tr.find(".row-select").on("change", (e) => {
-				e.target.checked
-					? frm._selected.add(row.depr_schedule_name)
-					: frm._selected.delete(row.depr_schedule_name);
-				if (!e.target.checked) $container.find(".select-all").prop("checked", false);
-				frm.trigger("update_create_button");
-			});
-
-			$tbody.append($tr);
-		});
-
-		$container.find(".select-all").on("change", (e) => {
-			const checked = e.target.checked;
-			frm._data.forEach((row) =>
-				checked ? frm._selected.add(row.depr_schedule_name) : frm._selected.delete(row.depr_schedule_name)
-			);
-			$container.find(".row-select").prop("checked", checked);
-			frm.trigger("update_create_button");
-		});
-
-		$wrapper.append($container);
-	},
-
 	update_create_button(frm) {
-		const has_selection = frm._selected && frm._selected.size > 0;
-		const $create = frm.custom_buttons[__("Create Depreciation Entries")];
+		const grid = frm.get_field("assets").grid;
+		const selected = grid.get_selected_children() || [];
+		const has_data = (frm.doc.assets || []).length > 0;
+		const $btn = frm.custom_buttons[__("Create Depreciation Entries")];
 		const $fetch = frm.custom_buttons[__("Fetch Assets")];
 
-		if (!$create) return;
+		if (!$btn) return;
 
-		$create.prop("disabled", !has_selection).css({
-			"background-color": has_selection ? "#000" : "",
-			"border-color": has_selection ? "#000" : "",
-			color: has_selection ? "#fff" : "",
+		$btn.prop("disabled", !has_data).css({
+			"background-color": has_data ? "#000" : "",
+			"border-color": has_data ? "#000" : "",
+			color: has_data ? "#fff" : "",
 		});
 
 		if ($fetch) {
-			$fetch
-				.toggleClass("btn-primary", !has_selection)
-				.toggleClass("btn-default", has_selection);
+			$fetch.toggleClass("btn-primary", !has_data).toggleClass("btn-default", has_data);
 		}
 
-		$create.text(
-			has_selection
-				? __("Create Depreciation Entries ({0})", [frm._selected.size])
+		$btn.text(
+			selected.length
+				? __("Create Depreciation Entries ({0})", [selected.length])
 				: __("Create Depreciation Entries")
 		);
 	},
 
 	create_entries(frm) {
-		if (!frm._selected || !frm._selected.size) return;
+		const grid = frm.get_field("assets").grid;
+		const selected = grid.get_selected_children() || [];
+		const rows = selected.length ? selected : frm.doc.assets || [];
 
-		const names = Array.from(frm._selected);
+		if (!rows.length) {
+			frappe.msgprint(__("No assets to process. Please fetch assets first."));
+			return;
+		}
+
+		const names = rows.map((r) => r.depr_schedule_name);
+		const label = selected.length
+			? __("{0} selected asset(s)", [selected.length])
+			: __("all {0} asset(s)", [rows.length]);
 
 		frappe.confirm(
-			__(
-				"Create depreciation journal entries for {0} selected asset(s) up to {1}?",
-				[`<strong>${names.length}</strong>`, `<strong>${frm.doc.date}</strong>`]
-			),
+			__("Create depreciation journal entries for {0} up to {1}?", [
+				`<strong>${label}</strong>`,
+				`<strong>${frm.doc.date}</strong>`,
+			]),
 			() => {
 				frappe.call({
 					method: "erpnext.assets.doctype.pending_depreciation_tool.pending_depreciation_tool.create_depreciation_entries",

@@ -26,7 +26,12 @@ class PendingDepreciationTool(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		from erpnext.assets.doctype.pending_depreciation_asset.pending_depreciation_asset import (
+			PendingDepreciationAsset,
+		)
+
 		asset_category: DF.Link | None
+		assets: DF.Table[PendingDepreciationAsset]
 		company: DF.Link | None
 		date: DF.Date | None
 		finance_book: DF.Link | None
