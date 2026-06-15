@@ -7,7 +7,7 @@ from frappe.utils import flt, today
 
 from erpnext.accounts.report.consolidated_trial_balance.consolidated_trial_balance import execute
 from erpnext.setup.utils import get_exchange_rate
-from erpnext.tests.utils import ERPNextTestSuite
+from erpnext.tests.utils import ERPNextTestSuite, create_exchange_rate
 
 
 class ForeignCurrencyTranslationReserveNotFoundError(frappe.ValidationError):
@@ -17,6 +17,18 @@ class ForeignCurrencyTranslationReserveNotFoundError(frappe.ValidationError):
 class TestConsolidatedTrialBalance(ERPNextTestSuite):
 	def setUp(self):
 		from erpnext.accounts.utils import get_fiscal_year
+
+		fiscal_year = get_fiscal_year(today(), company="Parent Group Company India")
+		self.fiscal_year = fiscal_year[0]
+
+		# Seed self-contained USD->INR rates BEFORE the multi-currency JEs, so the journal entries
+		# and the report translate at the same rate and don't depend on a Currency Exchange record
+		# left by another test (such cross-test committed rows aren't visible across the parallel
+		# suite on postgres). Two rates (opening at the fiscal-year start, closing at today) keep the
+		# translation reserve non-zero as the test expects.
+		frappe.cache().delete_keys("currency_exchange_rate")
+		create_exchange_rate("USD", "INR", fiscal_year[1], 60)
+		create_exchange_rate("USD", "INR", today(), 70)
 
 		create_journal_entry(
 			company="Parent Group Company India",
@@ -32,8 +44,6 @@ class TestConsolidatedTrialBalance(ERPNextTestSuite):
 		create_journal_entry(
 			company="Child Company US", acc1="Marketing Expenses - CCU", acc2="Cash - CCU", amount=1000
 		)
-
-		self.fiscal_year = get_fiscal_year(today(), company="Parent Group Company India")[0]
 
 	def test_single_company_report(self):
 		filters = frappe._dict({"company": ["Parent Group Company India"], "fiscal_year": self.fiscal_year})

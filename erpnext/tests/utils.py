@@ -79,6 +79,27 @@ def if_lending_app_not_installed(function):
 	return wrapper
 
 
+def create_exchange_rate(from_currency, to_currency, date, exchange_rate):
+	"""Insert a static Currency Exchange rate so a test doesn't depend on a record left behind by
+	another test. Such cross-test committed rows aren't reliably visible across the parallel suite
+	on postgres (snapshot isolation), so multi-currency tests must seed their own rates."""
+	if frappe.db.exists(
+		"Currency Exchange", {"date": date, "from_currency": from_currency, "to_currency": to_currency}
+	):
+		return
+	frappe.get_doc(
+		{
+			"doctype": "Currency Exchange",
+			"date": date,
+			"from_currency": from_currency,
+			"to_currency": to_currency,
+			"exchange_rate": exchange_rate,
+			"for_buying": 1,
+			"for_selling": 1,
+		}
+	).insert(ignore_permissions=True)
+
+
 class BootStrapTestData:
 	def __init__(self):
 		self.make_presets()

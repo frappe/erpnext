@@ -1082,13 +1082,19 @@ class TestQuotation(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"allow_pegged_currencies_exchange_rates": True})
 	def test_make_quotation_qar_to_inr(self):
+		# Seed the pegged base rate in cache so the conversion is deterministic and doesn't depend
+		# on the external exchange-rate API (flaky/unreachable in CI) or on a record left by another
+		# test. get_exchange_rate reads this key, applies the QAR peg (/3.64); the assertion below
+		# reads the same key.
+		cache = frappe.cache()
+		key = "currency_exchange_rate_{}:{}:{}".format("2026-01-01", "QAR", "INR")
+		cache.setex(name=key, time=21600, value=flt(218.4))
+
 		quotation = make_quotation(
 			currency="QAR",
 			transaction_date="2026-01-01",
 		)
 
-		cache = frappe.cache()
-		key = "currency_exchange_rate_{}:{}:{}".format("2026-01-01", "QAR", "INR")
 		value = cache.get(key)
 		expected_rate = flt(value) / 3.64
 
