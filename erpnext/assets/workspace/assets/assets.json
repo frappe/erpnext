@@ -169,8 +169,8 @@
    "is_query_report": 0,
    "label": "Pending Depreciation",
    "link_count": 0,
-   "link_to": "pending-depreciation",
-   "link_type": "Page",
+   "link_to": "Pending Depreciation Tool",
+   "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
   },

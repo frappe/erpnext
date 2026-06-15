@@ -9,14 +9,14 @@ from erpnext.assets.doctype.asset.test_asset import create_asset
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
 )
-from erpnext.assets.page.pending_depreciation.pending_depreciation import (
+from erpnext.assets.doctype.pending_depreciation_tool.pending_depreciation_tool import (
 	create_depreciation_entries,
 	get_pending_depreciation_assets,
 )
 from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestPendingDepreciation(ERPNextTestSuite):
+class TestPendingDepreciationTool(ERPNextTestSuite):
 	def setUp(self):
 		# Asset with 3 monthly depreciations starting 2023-01-31
 		self.asset = create_asset(
@@ -108,7 +108,6 @@ class TestPendingDepreciation(ERPNextTestSuite):
 		)
 		rows = get_pending_depreciation_assets(date="2023-01-31", company="_Test Company")
 		names = [r.asset for r in rows]
-		# Asset still pending for Feb and Mar; for Jan-only query it should not appear
 		self.assertNotIn(self.asset.name, names)
 
 	# ─── create_depreciation_entries ────────────────────────────────────────────
@@ -122,7 +121,6 @@ class TestPendingDepreciation(ERPNextTestSuite):
 		self.assertEqual(len(result["success"]), 1)
 		self.assertEqual(len(result["failed"]), 0)
 
-		# Verify journal_entry is set on the first schedule row
 		self.depr_schedule.reload()
 		first_row = self.depr_schedule.depreciation_schedule[0]
 		self.assertTrue(first_row.journal_entry, "Journal entry was not created")

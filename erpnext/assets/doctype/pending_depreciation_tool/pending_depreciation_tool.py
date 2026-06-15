@@ -3,9 +3,10 @@
 
 import frappe
 from frappe import _
+from frappe.model.document import Document
 from frappe.query_builder import Order
 from frappe.query_builder.functions import Max, Min, Sum
-from frappe.utils import DateTimeLikeObject, getdate
+from frappe.utils import getdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
@@ -16,6 +17,24 @@ from erpnext.assets.doctype.asset.depreciation import (
 )
 
 
+class PendingDepreciationTool(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		asset_category: DF.Link | None
+		company: DF.Link | None
+		date: DF.Date | None
+		finance_book: DF.Link | None
+
+	# end: auto-generated types
+	pass
+
+
 @frappe.whitelist()
 def get_pending_depreciation_assets(
 	date: str,
@@ -23,11 +42,7 @@ def get_pending_depreciation_assets(
 	asset_category: str | None = None,
 	finance_book: str | None = None,
 ) -> list[dict]:
-	"""Return all assets that have pending depreciation entries up to ``date``.
-
-	Each row represents one Asset Depreciation Schedule (one finance-book per
-	asset) and carries the aggregated pending amount for the requested period.
-	"""
+	"""Return all assets that have pending depreciation entries up to ``date``."""
 	a = frappe.qb.DocType("Asset")
 	ads = frappe.qb.DocType("Asset Depreciation Schedule")
 	ds = frappe.qb.DocType("Depreciation Schedule")
@@ -78,10 +93,7 @@ def get_pending_depreciation_assets(
 
 @frappe.whitelist()
 def create_depreciation_entries(depr_schedule_names: list | str, date: str) -> dict:
-	"""Create depreciation journal entries for the given schedules.
-
-	Returns a summary dict with ``success`` and ``failed`` lists.
-	"""
+	"""Create depreciation journal entries for the given schedules."""
 	import json
 
 	if isinstance(depr_schedule_names, str):
@@ -92,7 +104,6 @@ def create_depreciation_entries(depr_schedule_names: list | str, date: str) -> d
 
 	accounting_dimensions = get_checks_for_pl_and_bs_accounts()
 
-	# Fetch sch_start_idx / sch_end_idx for every selected schedule
 	ds = frappe.qb.DocType("Depreciation Schedule")
 	ads_names = list(depr_schedule_names)
 
