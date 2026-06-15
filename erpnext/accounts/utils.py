@@ -522,14 +522,14 @@ def reconcile_against_document(
 	# To optimize making GL Entry for PE or JV with multiple references
 	reconciled_entries = {}
 	for row in args:
-		if not reconciled_entries.get((row.voucher_type, row.voucher_no)):
-			reconciled_entries[(row.voucher_type, row.voucher_no)] = []
+		if not reconciled_entries.get((row.writable_voucher_type, row.writable_voucher_no)):
+			reconciled_entries[(row.writable_voucher_type, row.writable_voucher_no)] = []
 
-		reconciled_entries[(row.voucher_type, row.voucher_no)].append(row)
+		reconciled_entries[(row.writable_voucher_type, row.writable_voucher_no)].append(row)
 	for key, entries in reconciled_entries.items():
-		voucher_type, voucher_no = key
+		writable_voucher_type, writable_voucher_no = key
 
-		doc = frappe.get_doc(voucher_type, voucher_no)
+		doc = frappe.get_doc(writable_voucher_type, writable_voucher_no)
 		frappe.flags.ignore_party_validation = True
 
 		reposting_rows = []
@@ -539,7 +539,7 @@ def reconcile_against_document(
 
 			dimensions_dict = _build_dimensions_dict_for_exc_gain_loss(entry, active_dimensions)
 
-			if voucher_type == "Journal Entry":
+			if writable_voucher_type == "Journal Entry":
 				referenced_row = update_reference_in_journal_entry(entry, doc, do_not_save=False)
 				# advance section in sales/purchase invoice and reconciliation tool,both pass on exchange gain/loss
 				# amount and account in args
@@ -561,12 +561,12 @@ def reconcile_against_document(
 
 		doc.save(ignore_permissions=True)
 
-		if voucher_type == "Payment Entry" and doc.book_advance_payments_in_separate_party_account:
+		if writable_voucher_type == "Payment Entry" and doc.book_advance_payments_in_separate_party_account:
 			for row in reposting_rows:
 				doc.make_advance_gl_entries(entry=row)
 		else:
-			_delete_pl_entries(voucher_type, voucher_no)
-			_delete_adv_pl_entries(voucher_type, voucher_no)
+			_delete_pl_entries(writable_voucher_type, writable_voucher_no)
+			_delete_adv_pl_entries(writable_voucher_type, writable_voucher_no)
 			gl_map = doc.build_gl_map()
 			# Make sure there is no overallocation
 			from erpnext.accounts.general_ledger import process_debit_credit_difference
@@ -577,8 +577,8 @@ def reconcile_against_document(
 		# Only update outstanding for newly linked vouchers
 		for entry in entries:
 			update_voucher_outstanding(
-				entry.against_voucher_type,
-				entry.against_voucher,
+				entry.non_writable_voucher_type,
+				entry.non_writable_voucher_no,
 				entry.account,
 				entry.party_type,
 				entry.party,
@@ -596,7 +596,7 @@ def check_if_advance_entry_modified(args):
 		args.update({"unreconciled_amount": args.get("unadjusted_amount")})
 
 	ret = None
-	if args.voucher_type == "Journal Entry":
+	if args.writable_voucher_type == "Journal Entry":
 		journal_entry = frappe.qb.DocType("Journal Entry")
 		journal_acc = frappe.qb.DocType("Journal Entry Account")
 
@@ -613,8 +613,8 @@ def check_if_advance_entry_modified(args):
 					(journal_acc.reference_type.isnull())
 					| (journal_acc.reference_type.isin(["", "Sales Order", "Purchase Order"]))
 				)
-				& (journal_entry.name == args.get("voucher_no"))
-				& (journal_acc.name == args.get("voucher_detail_no"))
+				& (journal_entry.name == args.get("writable_voucher_no"))
+				& (journal_acc.name == args.get("writable_voucher_detail_no"))
 				& (journal_entry.docstatus == 1)
 			)
 		)
@@ -628,17 +628,17 @@ def check_if_advance_entry_modified(args):
 		q = (
 			frappe.qb.from_(payment_entry)
 			.select(payment_entry.name)
-			.where(payment_entry.name == args.get("voucher_no"))
+			.where(payment_entry.name == args.get("writable_voucher_no"))
 			.where(payment_entry.docstatus == 1)
 			.where(payment_entry.party_type == args.get("party_type"))
 			.where(payment_entry.party == args.get("party"))
 		)
 
-		if args.voucher_detail_no:
+		if args.writable_voucher_detail_no:
 			q = (
 				q.inner_join(payment_ref)
 				.on(payment_entry.name == payment_ref.parent)
-				.where(payment_ref.name == args.get("voucher_detail_no"))
+				.where(payment_ref.name == args.get("writable_voucher_detail_no"))
 				.where(
 					payment_ref.reference_doctype.isin(
 						("", "Sales Order", "Purchase Order", "Employee Advance")
@@ -670,7 +670,7 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 	"""
 	Updates against document, if partial amount splits into rows
 	"""
-	jv_detail = journal_entry.get("accounts", {"name": d["voucher_detail_no"]})[0]
+	jv_detail = journal_entry.get("accounts", {"name": d["writable_voucher_detail_no"]})[0]
 
 	rev_dr_or_cr = (
 		"debit_in_account_currency"
@@ -680,14 +680,12 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 	if jv_detail.get(rev_dr_or_cr):
 		d["dr_or_cr"] = rev_dr_or_cr
 		d["allocated_amount"] = d["allocated_amount"] * -1
-		d["unadjusted_amount"] = d["unadjusted_amount"] * -1
 
 	insert_position = -1
-	if flt(d["unadjusted_amount"]) - flt(d["allocated_amount"]) != 0:
-		# adjust the unreconciled balance
-		amount_in_account_currency = flt(d["unadjusted_amount"]) - flt(d["allocated_amount"])
-		amount_in_company_currency = amount_in_account_currency * flt(jv_detail.exchange_rate)
-		jv_detail.set(d["dr_or_cr"], amount_in_account_currency)
+	remaining_amount = flt(jv_detail.get(d["dr_or_cr"])) - flt(d["allocated_amount"])
+	if remaining_amount != 0:
+		amount_in_company_currency = remaining_amount * flt(jv_detail.exchange_rate)
+		jv_detail.set(d["dr_or_cr"], remaining_amount)
 		jv_detail.set(
 			"debit" if d["dr_or_cr"] == "debit_in_account_currency" else "credit",
 			amount_in_company_currency,
@@ -719,8 +717,8 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 	)
 	new_row.set("credit" if d["dr_or_cr"] == "debit_in_account_currency" else "debit", 0)
 
-	new_row.set("reference_type", d["against_voucher_type"])
-	new_row.set("reference_name", d["against_voucher"])
+	new_row.set("reference_type", d["non_writable_voucher_type"])
+	new_row.set("reference_name", d["non_writable_voucher_no"])
 
 	new_row.against_account = cstr(jv_detail.against_account)
 	new_row.is_advance = cstr(jv_detail.is_advance)
@@ -744,8 +742,8 @@ def update_reference_in_payment_entry(
 	d, payment_entry, do_not_save=False, skip_ref_details_update_for_pe=False, dimensions_dict=None
 ):
 	reference_details = {
-		"reference_doctype": d.against_voucher_type,
-		"reference_name": d.against_voucher,
+		"reference_doctype": d.non_writable_voucher_type,
+		"reference_name": d.non_writable_voucher_no,
 		"total_amount": d.grand_total,
 		"outstanding_amount": d.outstanding_amount,
 		"allocated_amount": d.allocated_amount,
@@ -762,12 +760,15 @@ def update_reference_in_payment_entry(
 	# Update Reconciliation effect date in reference
 	if payment_entry.book_advance_payments_in_separate_party_account:
 		reconcile_on = get_reconciliation_effect_date(
-			d.against_voucher_type, d.against_voucher, payment_entry.company, payment_entry.posting_date
+			d.non_writable_voucher_type,
+			d.non_writable_voucher_no,
+			payment_entry.company,
+			payment_entry.posting_date,
 		)
 		reference_details.update({"reconcile_effect_on": reconcile_on})
 
-	if d.voucher_detail_no:
-		existing_row = payment_entry.get("references", {"name": d["voucher_detail_no"]})[0]
+	if d.writable_voucher_detail_no:
+		existing_row = payment_entry.get("references", {"name": d["writable_voucher_detail_no"]})[0]
 
 		if d.allocated_amount <= existing_row.allocated_amount:
 			existing_row.allocated_amount -= d.allocated_amount
@@ -795,16 +796,16 @@ def update_reference_in_payment_entry(
 	payment_entry.set_missing_values()
 	if not skip_ref_details_update_for_pe:
 		reference_exchange_details = frappe._dict()
-		if d.against_voucher_type == "Journal Entry" and d.exchange_rate:
+		if d.non_writable_voucher_type == "Journal Entry" and d.exchange_rate:
 			reference_exchange_details.update(
 				{
-					"reference_doctype": d.against_voucher_type,
-					"reference_name": d.against_voucher,
+					"reference_doctype": d.non_writable_voucher_type,
+					"reference_name": d.non_writable_voucher_no,
 					"exchange_rate": d.exchange_rate,
 				}
 			)
 		payment_entry.set_missing_ref_details(
-			update_ref_details_only_for=[(d.against_voucher_type, d.against_voucher)],
+			update_ref_details_only_for=[(d.non_writable_voucher_type, d.non_writable_voucher_no)],
 			reference_exchange_details=reference_exchange_details,
 		)
 	payment_entry.set_amounts()

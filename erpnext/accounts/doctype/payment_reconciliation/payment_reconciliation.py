@@ -7,9 +7,9 @@ from frappe import _, msgprint, qb
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.permissions import get_user_permissions
-from frappe.query_builder import Case, Criterion
+from frappe.query_builder import Criterion
 from frappe.query_builder.custom import ConstantColumn
-from frappe.utils import flt, fmt_money, get_link_to_form, getdate, nowdate, today
+from frappe.utils import flt, get_link_to_form, getdate, nowdate, today
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
@@ -18,8 +18,9 @@ from erpnext.accounts.doctype.process_payment_reconciliation.process_payment_rec
 )
 from erpnext.accounts.services.exchange_gain_loss import get_exchange_gain_loss_account
 from erpnext.accounts.utils import (
+	CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE,
 	QueryPaymentLedger,
-	create_gain_loss_journal,
+	get_reconciliation_effect_date,
 	reconcile_against_document,
 )
 
@@ -30,8 +31,7 @@ PAYABLE = "Payable"
 def classify(account_type: str, amount: float) -> str:
 	"""Sort a PLE row into Receivable or Payable by `(account_type, sign)`.
 
-	Receivable account + +ve  →  Receivable      Payable account + +ve  →  Payable
-	Receivable account + -ve  →  Payable         Payable account + -ve  →  Receivable
+	Receivable+positive or Payable+negative → Receivable; the inverse → Payable.
 	"""
 	if account_type not in (RECEIVABLE, PAYABLE):
 		frappe.throw(_("Unsupported account type {0}").format(account_type))
@@ -58,36 +58,29 @@ _WRITABLE_VOUCHER_TYPES = {"Payment Entry", "Journal Entry"}
 
 
 def link_strategy(recv, pay) -> str:
-	"""`voucher_mutation` if either side is PE/JE (append PE.references or
-	split JEA); `bridge_je` if both sides are SI/PI/CN/DN (create a system JE).
-	"""
+	"""`voucher_mutation` if either side is PE/JE; else `bridge_je`."""
 	if recv.voucher_type in _WRITABLE_VOUCHER_TYPES or pay.voucher_type in _WRITABLE_VOUCHER_TYPES:
 		return "voucher_mutation"
 	return "bridge_je"
 
 
-def pick_voucher_side(recv, pay, party_type=None) -> str:
-	"""Return `"receive"` or `"pay"` — the side that owns the `voucher_no`
-	slot in `reconcile_against_document`. PE > JE > others.
-
-	For PE-PE pairs, voucher = the advance PE (Receive for Customer, Pay for
-	Supplier) to match legacy `add_payment_entries` behaviour. The advance side
-	classifies opposite to the party's natural direction: to_pay for Customer,
-	to_receive for Supplier. Required for `add_advance_gl_for_reference` to
-	emit the bridge GL on the side whose self-PLE row balances the bridge.
+def pick_voucher_side(recv, pay, party_type=None) -> str | None:
+	"""Return `"receive"`/`"pay"` — the side owning the `voucher_no` slot in
+	`reconcile_against_document` — or `None` if neither side has a mutable voucher
+	(pair must be bridged). Priority: PE on the party's natural payment side
+	(to_pay for Customer, to_receive for Supplier), else a JE (`to_pay` preferred).
 	"""
-	pe_pair = recv.voucher_type == "Payment Entry" and pay.voucher_type == "Payment Entry"
-	if pe_pair and party_type:
-		return "pay" if party_type == "Customer" else "receive"
-	if pay.voucher_type == "Payment Entry":
-		return "pay"
-	if recv.voucher_type == "Payment Entry":
-		return "receive"
+	natural = "pay" if party_type == "Customer" else "receive"
+	side_row = {"receive": recv, "pay": pay}
+
+	if side_row[natural].voucher_type == "Payment Entry":
+		return natural
+	# `to_pay` preferred preserves legacy split order (JExJE same-account isolation).
 	if pay.voucher_type == "Journal Entry":
 		return "pay"
 	if recv.voucher_type == "Journal Entry":
 		return "receive"
-	frappe.throw(_("bridge_je pair without PE/JE: {0} × {1}").format(recv.voucher_type, pay.voucher_type))
+	return None
 
 
 class OpenBalanceFetcher:
@@ -355,10 +348,9 @@ class OpenBalanceFetcher:
 		raw = query.run(as_dict=True)
 		rows = [frappe._dict(r) for r in raw]
 
-		# Net JEA balance against PE-side PLE allocations. A PE settling a JE
-		# doesn't touch the JEA (splitting it would drop the JE's self-ref PLE row
-		# and break aggregation); instead the PE writes `(voucher=PE, against=JE)`,
-		# which nets signed_amount to zero when fully settled.
+		# Net JEA balance against PE-side PLE allocations. A PE settling a JE writes
+		# `(voucher=PE, against=JE)` rather than touching the JEA, so signed_amount
+		# nets to zero only after applying these allocations.
 		if rows:
 			je_names = list({r.voucher_no for r in rows})
 			ple_dt = qb.DocType("Payment Ledger Entry")
@@ -385,11 +377,9 @@ class OpenBalanceFetcher:
 			)
 			alloc_by_key = {(a.je_name, a.account): flt(a.allocated) for a in alloc_rows}
 
-			# Self-settlement: a JE reconciled against ITSELF (two opposing party
-			# legs) writes a split leg referencing the same JE. The base query
-			# excludes it (reference_type='Journal Entry') and PLE netting skips it
-			# (JE-self), so the settled side would otherwise keep its full value.
-			# Net those legs into the base leg here.
+			# Self-settlement: a JE reconciled against itself writes a split leg
+			# referencing the same JE. The base query excludes it and PLE netting
+			# skips JE-self, so net those legs into the base leg here.
 			self_settle_rows = (
 				qb.from_(jea)
 				.inner_join(je)
@@ -490,8 +480,7 @@ class Allocator:
 	"""
 
 	def __init__(self, pr, to_receive=None, to_pay=None):
-		# `to_receive` / `to_pay` overrides let the form pass user-selected
-		# rows (the "select rows then Allocate" UX); defaults to full tables.
+		# Overrides let the form pass user-selected rows; default to full tables.
 		self.pr = pr
 		self.company = pr.company
 		self.party_type = pr.party_type
@@ -517,7 +506,6 @@ class Allocator:
 			pay_rows = buckets_pay.get(currency, [])
 			if not pay_rows:
 				continue
-			# Shared `_fifo_key` ensures PE-Reference rows drain before PE-self (PR-E).
 			recv_rows = sorted(recv_rows, key=_fifo_key)
 			pay_rows = sorted(pay_rows, key=_fifo_key)
 			allocations.extend(self._walk(recv_rows, pay_rows))
@@ -536,11 +524,8 @@ class Allocator:
 		recv_remaining = [flt(r.outstanding_amount) for r in receivables]
 		pay_remaining = [flt(p.outstanding_amount) for p in payables]
 
-		# Two tiers within the currency bucket: drain SAME-account counterparties
-		# first, then fall back to cross-account. This avoids minting a bridge JE
-		# when a same-account match exists (cross-account pairs are settled by the
-		# transfer-JE bridge in `reconcile_cross_account_bridge`). FIFO order is
-		# preserved within each tier.
+		# Drain same-account counterparties first, then cross-account. Avoids minting
+		# a bridge JE when a same-account match exists. FIFO preserved within each tier.
 		for same_account_only in (True, False):
 			for i, recv in enumerate(receivables):
 				if recv_remaining[i] <= 0:
@@ -565,16 +550,13 @@ class Allocator:
 		gain_loss_posting_date = self._gain_loss_posting_date(recv, pay)
 		is_cross_account = recv.account != pay.account
 
-		# Pick voucher side using the same rule as `ReconcileRouter` — see
-		# `pick_voucher_side`. Bridge_je pairs fall back to the party_type
-		# convention (CN on to_pay for Customer, DN on to_receive for Supplier)
-		# since neither side has a writable refs table.
-		if link_strategy(recv, pay) == "voucher_mutation":
-			side = pick_voucher_side(recv, pay, self.party_type)
-		else:
+		# Pairs with no mutable voucher are bridged at reconcile time; for preview
+		# metadata fall back to the party_type convention.
+		side = pick_voucher_side(recv, pay, self.party_type)
+		if side is None:
 			side = "pay" if self.party_type == "Customer" else "receive"
-		voucher_side_row = pay if side == "pay" else recv
-		against_side_row = recv if side == "pay" else pay
+		mutated_row = pay if side == "pay" else recv
+		referenced_row = recv if side == "pay" else pay
 
 		row = frappe._dict(
 			{
@@ -591,19 +573,17 @@ class Allocator:
 				"to_pay_party_type": pay.party_type,
 				"to_pay_party": pay.party,
 				"allocated_amount": allocated_amount,
-				"unreconciled_amount": flt(voucher_side_row.outstanding_amount),
-				"amount": flt(voucher_side_row.amount or voucher_side_row.outstanding_amount),
+				"unreconciled_amount": flt(mutated_row.outstanding_amount),
+				"amount": flt(mutated_row.amount or mutated_row.outstanding_amount),
 				"is_advance": 1 if (pay.is_advance or recv.is_advance) else 0,
 				"is_cross_account": 1 if is_cross_account else 0,
-				# `exchange_rate` is the AGAINST side's rate. PE-Reference uses it in
-				# `calculate_base_allocated_amount_for_reference` to compute FX gain/loss
-				# as (base_rate - ref_rate) x amt; setting it to the voucher-side rate
-				# would zero out the gain/loss and skip the FX JE.
+				# `exchange_rate` must be the AGAINST side's rate; the voucher-side rate
+				# would zero out the FX gain/loss and skip the FX JE.
 				"difference_amount": difference_amount,
 				"difference_account": self.exchange_gain_loss_account if difference_amount else None,
 				"gain_loss_posting_date": gain_loss_posting_date,
-				"exchange_rate": flt(against_side_row.exchange_rate) or 1.0,
-				"currency": voucher_side_row.currency,
+				"exchange_rate": flt(referenced_row.exchange_rate) or 1.0,
+				"currency": mutated_row.currency,
 				# TODO: is opp of voucher side relevant here? Depends on how it's used
 				"cost_center": pay.cost_center or recv.cost_center,
 			}
@@ -621,10 +601,7 @@ class Allocator:
 	def _fx_difference(self, recv, pay, allocated_amount):
 		"""FX gain/loss when the two sides booked at different exchange rates.
 
-		Sign convention matches `Payment Entry Reference.exchange_gain_loss` so
-		`make_exchange_gain_loss_journal` produces correct JEs. Phase 3 PRE will
-		replace this with `amount x (received_rate - paid_rate)` once both rates
-		live on a single PRE row.
+		Sign convention matches `Payment Entry Reference.exchange_gain_loss`.
 		"""
 		recv_rate = flt(recv.exchange_rate) or 1.0
 		pay_rate = flt(pay.exchange_rate) or 1.0
@@ -636,13 +613,12 @@ class Allocator:
 		amt_in_pay_rate = flt(pay_rate * flt(allocated_amount), self.diff_precision)
 		amt_in_recv_rate = flt(recv_rate * flt(allocated_amount), self.diff_precision)
 
-		# Cash-event pair (PExPE, JExE, PExJE): neither side is the "booked"
-		# asset/liability so use the Receivable-style formula for both parties.
+		# Cash-event pair (no invoice side): Receivable-style formula for both parties.
 		invoice_doctypes = ("Sales Invoice", "Purchase Invoice")
 		if recv.voucher_type not in invoice_doctypes and pay.voucher_type not in invoice_doctypes:
 			return amt_in_pay_rate - amt_in_recv_rate
 
-		# Standard SI/PI ↔ PE: invert sign for Payable accounts (Supplier).
+		# SI/PI ↔ PE: invert sign for Payable accounts (Supplier).
 		if recv.account_type == PAYABLE:
 			return amt_in_recv_rate - amt_in_pay_rate
 		return amt_in_pay_rate - amt_in_recv_rate
@@ -657,6 +633,161 @@ class Allocator:
 		elif self.exc_gain_loss_posting_date_setting == "Reconciliation Date":
 			date = nowdate()
 		return date
+
+
+class ReconcileRouter:
+	"""Per-Allocation-row dispatch. Each pair is settled by mutating a writable
+	voucher via `reconcile_against_document`. A pair with no writable voucher in a
+	shared account is first re-expressed as two rows against a minted bridge JE.
+	"""
+
+	def __init__(self, pr):
+		self.pr = pr
+		self.company = pr.company
+		self.party_type = pr.party_type
+
+	def execute(self, skip_ref_details_update_for_pe=False):
+		adjust_allocations_for_taxes(self.pr)
+
+		standard_args = []
+
+		for row in self.pr.get("allocation") or []:
+			if not (row.allocated_amount and row.to_receive_voucher_no and row.to_pay_voucher_no):
+				continue
+
+			sub_rows = self._bridge_cross_account(row) if self._needs_bridge(row) else [row]
+
+			for r in sub_rows:
+				standard_args.append(self._build_payment_args(r))
+
+		if standard_args:
+			reconcile_against_document(standard_args, skip_ref_details_update_for_pe, self.pr.dimensions)
+
+	def _bridge_cross_account(self, row):
+		"""Re-express the pair as two same-account rows against a minted transfer JE,
+		each pairing an original voucher with the matching bridge leg. FX rides on
+		the to_pay sub-row (transfer legs are rate-matched).
+		"""
+		bridge = _post_cross_account_transfer(row, self.company, self.pr.dimensions)
+
+		# accounts[0] = credit leg (to_receive account); accounts[1] = debit leg (to_pay account).
+		recv_leg, pay_leg = bridge.accounts[0], bridge.accounts[1]
+
+		row_r = frappe._dict(row.as_dict())
+		row_r.update(
+			{
+				"to_pay_voucher_type": "Journal Entry",
+				"to_pay_voucher_no": bridge.name,
+				"to_pay_voucher_row": recv_leg.name,
+				"to_pay_account": row.to_receive_account,
+				"to_pay_party_type": row.to_receive_party_type,
+				"to_pay_party": row.to_receive_party,
+				"difference_amount": 0,
+				"difference_account": None,
+			}
+		)
+
+		# Keeps difference_amount/difference_account so the FX JE is booked on this leg.
+		row_p = frappe._dict(row.as_dict())
+		row_p.update(
+			{
+				"to_receive_voucher_type": "Journal Entry",
+				"to_receive_voucher_no": bridge.name,
+				"to_receive_voucher_row": pay_leg.name,
+				"to_receive_account": row.to_pay_account,
+				"to_receive_party_type": row.to_pay_party_type,
+				"to_receive_party": row.to_pay_party,
+			}
+		)
+
+		return [row_r, row_p]
+
+	@staticmethod
+	def _voucher_fields(row, side):
+		"""Collapse a `to_receive`/`to_pay` row half into side-agnostic voucher fields."""
+		return frappe._dict(
+			voucher_type=row.get(f"{side}_voucher_type"),
+			voucher_no=row.get(f"{side}_voucher_no"),
+			voucher_row=row.get(f"{side}_voucher_row"),
+			account=row.get(f"{side}_account"),
+			party_type=row.get(f"{side}_party_type"),
+			party=row.get(f"{side}_party"),
+		)
+
+	def _needs_bridge(self, row):
+		"""Bridge when a shared-account pair has no mutable voucher, or for any
+		cross-account pair. Exception: a natural-side PE booking its advance in a
+		separate party account is mutated directly and posts its own reconciliation
+		GL, so bridging would double-handle it. A reverse-side separate-advance PE
+		is not exempt — it is never mutated, so it must be bridged.
+		"""
+		if row.to_receive_account == row.to_pay_account:
+			recv = frappe._dict(voucher_type=row.to_receive_voucher_type)
+			pay = frappe._dict(voucher_type=row.to_pay_voucher_type)
+			return pick_voucher_side(recv, pay, self.party_type) is None
+
+		natural = "to_pay" if self.party_type == "Customer" else "to_receive"
+		if row.get(f"{natural}_voucher_type") == "Payment Entry" and frappe.db.get_value(
+			"Payment Entry",
+			row.get(f"{natural}_voucher_no"),
+			"book_advance_payments_in_separate_party_account",
+		):
+			return False
+
+		return True
+
+	def _build_payment_args(self, row):
+		"""Build `reconcile_against_document` args. Every row here must have a writable
+		voucher, so `pick_voucher_side` always resolves; a `None` side means a routing
+		bug let an un-bridged reverse-PE pair through.
+		"""
+		recv = frappe._dict(voucher_type=row.to_receive_voucher_type)
+		pay = frappe._dict(voucher_type=row.to_pay_voucher_type)
+		side = pick_voucher_side(recv, pay, self.party_type)
+
+		writable = self._voucher_fields(row, "to_pay" if side == "pay" else "to_receive")
+		non_writable = self._voucher_fields(row, "to_receive" if side == "pay" else "to_pay")
+
+		if writable.voucher_type == "Journal Entry":
+			account = writable.account
+			dr_or_cr = "credit_in_account_currency" if side == "pay" else "debit_in_account_currency"
+		else:
+			account = non_writable.account
+			dr_or_cr = (
+				"credit_in_account_currency"
+				if erpnext.get_party_account_type(self.party_type) == RECEIVABLE
+				else "debit_in_account_currency"
+			)
+
+		args = frappe._dict(
+			{
+				"writable_voucher_type": writable.voucher_type,
+				"writable_voucher_no": writable.voucher_no,
+				"writable_voucher_detail_no": writable.voucher_row,
+				"non_writable_voucher_type": non_writable.voucher_type,
+				"non_writable_voucher_no": non_writable.voucher_no,
+				"account": account or self.pr.receivable_payable_account,
+				"exchange_rate": row.get("exchange_rate"),
+				"party_type": writable.party_type or self.party_type,
+				"party": writable.party or self.pr.party,
+				"is_advance": row.get("is_advance"),
+				"dr_or_cr": dr_or_cr,
+				"unreconciled_amount": flt(row.get("unreconciled_amount")),
+				"unadjusted_amount": flt(row.get("amount")),
+				"allocated_amount": flt(row.get("allocated_amount")),
+				"difference_amount": flt(row.get("difference_amount")),
+				"difference_account": row.get("difference_account"),
+				"difference_posting_date": row.get("gain_loss_posting_date"),
+				"cost_center": row.get("cost_center"),
+				"currency": row.get("currency"),
+			}
+		)
+
+		for dim in self.pr.dimensions:
+			if row.get(dim.fieldname):
+				args[dim.fieldname] = row.get(dim.fieldname)
+
+		return args
 
 
 class PaymentReconciliation(Document):
@@ -757,7 +888,6 @@ class PaymentReconciliation(Document):
 
 	@frappe.whitelist()
 	def get_unreconciled_entries(self):
-		# Pipeline: fetch → classify (Receivable/Payable) → cap per `fetch_limit`.
 		self.set("to_receive", [])
 		self.set("to_pay", [])
 		self.check_mandatory_to_fetch()
@@ -850,33 +980,6 @@ class PaymentReconciliation(Document):
 				row = self.append("allocation", {})
 				row.update(entry)
 
-	def reconcile_allocations(self, skip_ref_details_update_for_pe=False):
-		adjust_allocations_for_taxes(self)
-		dr_or_cr = (
-			"credit_in_account_currency"
-			if erpnext.get_party_account_type(self.party_type) == "Receivable"
-			else "debit_in_account_currency"
-		)
-
-		entry_list = []
-		dr_or_cr_notes = []
-		for row in self.get("allocation"):
-			reconciled_entry = []
-			if row.invoice_number and row.allocated_amount:
-				if row.reference_type in ["Sales Invoice", "Purchase Invoice"]:
-					reconciled_entry = dr_or_cr_notes
-				else:
-					reconciled_entry = entry_list
-
-				payment_details = self.get_payment_details(row, dr_or_cr)
-				reconciled_entry.append(payment_details)
-
-		if entry_list:
-			reconcile_against_document(entry_list, skip_ref_details_update_for_pe, self.dimensions)
-
-		if dr_or_cr_notes:
-			reconcile_dr_cr_note(dr_or_cr_notes, self.company, self.dimensions)
-
 	@frappe.whitelist()
 	def reconcile(self):
 		if frappe.get_single_value("Accounts Settings", "auto_reconcile_payments"):
@@ -898,284 +1001,175 @@ class PaymentReconciliation(Document):
 				return
 
 		self.validate_allocation()
-		self.reconcile_allocations()
+		ReconcileRouter(self).execute()
 		msgprint(_("Successfully Reconciled"))
 
 		self.get_unreconciled_entries()
 
-	def get_payment_details(self, row, dr_or_cr):
-		payment_details = frappe._dict(
-			{
-				"voucher_type": row.get("reference_type"),
-				"voucher_no": row.get("reference_name"),
-				"voucher_detail_no": row.get("reference_row"),
-				"against_voucher_type": row.get("invoice_type"),
-				"against_voucher": row.get("invoice_number"),
-				"account": self.receivable_payable_account,
-				"exchange_rate": row.get("exchange_rate"),
-				"party_type": self.party_type,
-				"party": self.party,
-				"is_advance": row.get("is_advance"),
-				"dr_or_cr": dr_or_cr,
-				"unreconciled_amount": flt(row.get("unreconciled_amount")),
-				"unadjusted_amount": flt(row.get("amount")),
-				"allocated_amount": flt(row.get("allocated_amount")),
-				"difference_amount": flt(row.get("difference_amount")),
-				"difference_account": row.get("difference_account"),
-				"difference_posting_date": row.get("gain_loss_posting_date"),
-				"debit_or_credit_note_posting_date": row.get("debit_or_credit_note_posting_date"),
-				"cost_center": row.get("cost_center"),
-			}
-		)
+	def validate_allocation(self):
+		"""Per-row checks: both sides set, allocated ≤ each side's outstanding,
+		matching currency and party. Guards manual edits (Allocator already
+		prevents cross-currency).
+		"""
+		recv_index = {
+			(r.voucher_type, r.voucher_no, r.voucher_row or ""): r for r in self.get("to_receive") or []
+		}
+		pay_index = {(r.voucher_type, r.voucher_no, r.voucher_row or ""): r for r in self.get("to_pay") or []}
 
-		for x in self.dimensions:
-			if row.get(x.fieldname):
-				payment_details[x.fieldname] = row.get(x.fieldname)
+		any_valid = False
+		for row in self.get("allocation") or []:
+			if not (row.allocated_amount and row.to_receive_voucher_no and row.to_pay_voucher_no):
+				continue
+			any_valid = True
 
-		return payment_details
+			recv_key = (
+				row.to_receive_voucher_type,
+				row.to_receive_voucher_no,
+				row.to_receive_voucher_row or "",
+			)
+			pay_key = (row.to_pay_voucher_type, row.to_pay_voucher_no, row.to_pay_voucher_row or "")
+
+			recv_src = recv_index.get(recv_key)
+			pay_src = pay_index.get(pay_key)
+			recv_outs = flt(recv_src.outstanding_amount) if recv_src else 0
+			pay_outs = flt(pay_src.outstanding_amount) if pay_src else 0
+			allocated = flt(row.allocated_amount)
+
+			if recv_outs and allocated - recv_outs > 0.009:
+				frappe.throw(
+					_("Row {0}: Allocated amount {1} exceeds receivable outstanding {2} for {3}").format(
+						row.idx, allocated, recv_outs, row.to_receive_voucher_no
+					)
+				)
+			if pay_outs and allocated - pay_outs > 0.009:
+				frappe.throw(
+					_("Row {0}: Allocated amount {1} exceeds payable outstanding {2} for {3}").format(
+						row.idx, allocated, pay_outs, row.to_pay_voucher_no
+					)
+				)
+
+			if recv_src and pay_src and recv_src.currency and pay_src.currency:
+				if recv_src.currency != pay_src.currency:
+					frappe.throw(
+						_(
+							"Row {0}: Cross-currency reconciliation is not supported. "
+							"Receivable {1} ({2}) does not match payable {3} ({4})."
+						).format(
+							row.idx,
+							row.to_receive_voucher_no,
+							recv_src.currency,
+							row.to_pay_voucher_no,
+							pay_src.currency,
+						)
+					)
+
+			if (
+				row.to_receive_party_type
+				and row.to_pay_party_type
+				and (
+					row.to_receive_party_type != row.to_pay_party_type
+					or row.to_receive_party != row.to_pay_party
+				)
+			):
+				frappe.throw(
+					_(
+						"Row {0}: Cross-party reconciliation is not supported in this phase ({1} {2} vs {3} {4})"
+					).format(
+						row.idx,
+						row.to_receive_party_type,
+						row.to_receive_party,
+						row.to_pay_party_type,
+						row.to_pay_party,
+					)
+				)
+
+		if not any_valid:
+			frappe.throw(_("No records found in Allocation table"))
 
 	def check_mandatory_to_fetch(self):
 		for fieldname in ["company", "party_type", "party"]:
 			if not self.get(fieldname):
 				frappe.throw(_("Please select {0} first").format(self.meta.get_translated_label(fieldname)))
 
-	def validate_entries(self):
-		if not self.get("invoices"):
-			frappe.throw(_("No records found in the Invoices table"))
 
-		if not self.get("payments"):
-			frappe.throw(_("No records found in the Payments table"))
-
-	def get_invoice_exchange_map(self, invoices, payments):
-		sales_invoices = [
-			d.get("invoice_number") for d in invoices if d.get("invoice_type") == "Sales Invoice"
-		]
-
-		sales_invoices.extend(
-			[d.get("reference_name") for d in payments if d.get("reference_type") == "Sales Invoice"]
-		)
-		purchase_invoices = [
-			d.get("invoice_number") for d in invoices if d.get("invoice_type") == "Purchase Invoice"
-		]
-		purchase_invoices.extend(
-			[d.get("reference_name") for d in payments if d.get("reference_type") == "Purchase Invoice"]
-		)
-
-		invoice_exchange_map = frappe._dict()
-
-		if sales_invoices:
-			sales_invoice_map = frappe._dict(
-				frappe.db.get_all(
-					"Sales Invoice",
-					filters={"name": ("in", sales_invoices)},
-					fields=["name", "conversion_rate"],
-					as_list=1,
-				)
-			)
-
-			invoice_exchange_map.update(sales_invoice_map)
-
-		if purchase_invoices:
-			purchase_invoice_map = frappe._dict(
-				frappe.db.get_all(
-					"Purchase Invoice",
-					filters={"name": ("in", purchase_invoices)},
-					fields=["name", "conversion_rate"],
-					as_list=1,
-				)
-			)
-
-			invoice_exchange_map.update(purchase_invoice_map)
-
-		journals = [d.get("invoice_number") for d in invoices if d.get("invoice_type") == "Journal Entry"]
-		journals.extend(
-			[d.get("reference_name") for d in payments if d.get("reference_type") == "Journal Entry"]
-		)
-		if journals:
-			journals = list(set(journals))
-			journals_map = frappe._dict(
-				frappe.db.get_all(
-					"Journal Entry Account",
-					filters={
-						"parent": ("in", journals),
-						"account": ("in", [self.receivable_payable_account]),
-						"party_type": self.party_type,
-						"party": self.party,
-					},
-					fields=[
-						"parent as name",
-						"exchange_rate",
-					],
-					as_list=1,
-				)
-			)
-			invoice_exchange_map.update(journals_map)
-
-		payment_entries = [
-			d.get("invoice_number") for d in invoices if d.get("invoice_type") == "Payment Entry"
-		]
-		payment_entries.extend(
-			[d.get("reference_name") for d in payments if d.get("reference_type") == "Payment Entry"]
-		)
-		if payment_entries:
-			pe = frappe.qb.DocType("Payment Entry")
-			query = (
-				frappe.qb.from_(pe)
-				.select(
-					pe.name,
-					Case()
-					.when(pe.payment_type == "Receive", pe.source_exchange_rate)
-					.else_(pe.target_exchange_rate)
-					.as_("exchange_rate"),
-				)
-				.where(pe.name.isin(payment_entries))
-			)
-			payment_entries = query.run(as_list=1)
-			invoice_exchange_map.update(payment_entries)
-
-		return invoice_exchange_map
-
-	def validate_allocation(self):
-		unreconciled_invoices = frappe._dict()
-
-		for inv in self.get("invoices"):
-			unreconciled_invoices.setdefault(inv.invoice_type, {}).setdefault(
-				inv.invoice_number, inv.outstanding_amount
-			)
-
-		invoices_to_reconcile = []
-		for row in self.get("allocation"):
-			if row.invoice_type and row.invoice_number and row.allocated_amount:
-				invoices_to_reconcile.append(row.invoice_number)
-
-				if flt(row.amount) - flt(row.allocated_amount) < 0:
-					frappe.throw(
-						_(
-							"Row {0}: Allocated amount {1} must be less than or equal to remaining payment amount {2}"
-						).format(row.idx, row.allocated_amount, row.amount)
-					)
-
-				invoice_outstanding = unreconciled_invoices.get(row.invoice_type, {}).get(row.invoice_number)
-				if flt(row.allocated_amount) - invoice_outstanding > 0.009:
-					frappe.throw(
-						_(
-							"Row {0}: Allocated amount {1} must be less than or equal to invoice outstanding amount {2}"
-						).format(row.idx, row.allocated_amount, invoice_outstanding)
-					)
-
-		if not invoices_to_reconcile:
-			frappe.throw(_("No records found in Allocation table"))
-
-
-def reconcile_dr_cr_note(dr_cr_notes, company, active_dimensions=None):
-	allocated_amount_precision = get_field_precision(
-		frappe.get_meta("Payment Reconciliation Allocation").get_field("allocated_amount")
+def _make_system_journal(**kwargs):
+	"""Create + submit a system-generated JE from kwargs, with standard system defaults."""
+	jv = frappe.get_doc(
+		{
+			"doctype": "Journal Entry",
+			"voucher_type": kwargs.get("voucher_type"),
+			"company": kwargs.get("company"),
+			"posting_date": kwargs.get("posting_date") or today(),
+			"multi_currency": kwargs.get("multi_currency", 0),
+			"accounts": kwargs.get("accounts"),
+		}
 	)
-	for inv in dr_cr_notes:
-		if (
-			flt(
-				abs(frappe.db.get_value(inv.voucher_type, inv.voucher_no, "outstanding_amount"))
-				- inv.allocated_amount,
-				allocated_amount_precision,
-			)
-			< 0
-		):
-			frappe.throw(
-				_("{0} has been modified after you pulled it. Please pull it again.").format(inv.voucher_type)
-			)
+	jv.flags.ignore_mandatory = kwargs.get("ignore_mandatory", True)
+	jv.flags.ignore_exchange_rate = kwargs.get("ignore_exchange_rate", True)
+	jv.flags.skip_remarks_creation = kwargs.get("skip_remarks_creation", True)
+	jv.is_system_generated = kwargs.get("is_system_generated", True)
+	jv.remark = kwargs.get("remark", None)
+	jv.submit()
+	return jv
 
-		voucher_type = "Credit Note" if inv.voucher_type == "Sales Invoice" else "Debit Note"
 
-		reconcile_dr_or_cr = (
-			"debit_in_account_currency"
-			if inv.dr_or_cr == "credit_in_account_currency"
-			else "credit_in_account_currency"
-		)
+def _post_cross_account_transfer(row, company, active_dimensions=None):
+	"""Post + submit the no-reference bridge transfer JE (same party, both legs).
+	Cross-account: a genuine transfer between the accounts. Same-account invoice↔note:
+	legs net to zero, settling is done by the later JEA splits.
+	"""
+	amount = abs(flt(row.allocated_amount))
+	cost_center = row.cost_center or erpnext.get_default_cost_center(company)
+	company_currency = erpnext.get_company_currency(company)
+	exchange_rate = flt(row.exchange_rate) or 1.0
 
-		company_currency = erpnext.get_company_currency(company)
-
-		jv = frappe.get_doc(
+	def leg(account, party_type, party, dr_or_cr):
+		entry = frappe._dict(
 			{
-				"doctype": "Journal Entry",
-				"voucher_type": voucher_type,
-				"posting_date": inv.get("debit_or_credit_note_posting_date") or today(),
-				"company": company,
-				"multi_currency": 1 if inv.currency != company_currency else 0,
-				"accounts": [
-					{
-						"account": inv.account,
-						"party": inv.party,
-						"party_type": inv.party_type,
-						inv.dr_or_cr: abs(inv.allocated_amount),
-						"reference_type": inv.against_voucher_type,
-						"reference_name": inv.against_voucher,
-						"cost_center": inv.cost_center or erpnext.get_default_cost_center(company),
-						"exchange_rate": inv.exchange_rate,
-						"user_remark": f"{fmt_money(flt(inv.allocated_amount), currency=company_currency)} against {inv.against_voucher}",
-					},
-					{
-						"account": inv.account,
-						"party": inv.party,
-						"party_type": inv.party_type,
-						reconcile_dr_or_cr: (
-							abs(inv.allocated_amount)
-							if abs(inv.unadjusted_amount) > abs(inv.allocated_amount)
-							else abs(inv.unadjusted_amount)
-						),
-						"reference_type": inv.voucher_type,
-						"reference_name": inv.voucher_no,
-						"cost_center": inv.cost_center or erpnext.get_default_cost_center(company),
-						"exchange_rate": inv.exchange_rate,
-						"user_remark": f"{fmt_money(flt(inv.allocated_amount), currency=company_currency)} from {inv.voucher_no}",
-					},
-				],
+				"account": account,
+				"party_type": party_type,
+				"party": party,
+				"cost_center": cost_center,
+				"exchange_rate": exchange_rate,
+				dr_or_cr: amount,
 			}
 		)
-
-		# Credit Note(JE) will inherit the same dimension values as payment
-		dimensions_dict = frappe._dict()
 		if active_dimensions:
 			for dim in active_dimensions:
-				dimensions_dict[dim.fieldname] = inv.get(dim.fieldname)
+				if row.get(dim.fieldname):
+					entry[dim.fieldname] = row.get(dim.fieldname)
+		return entry
 
-		jv.accounts[0].update(dimensions_dict)
-		jv.accounts[1].update(dimensions_dict)
+	accounts = [
+		# to_receive voucher carries a debit balance → credit its account.
+		leg(
+			row.to_receive_account,
+			row.to_receive_party_type,
+			row.to_receive_party,
+			"credit_in_account_currency",
+		),
+		# to_pay voucher carries a credit balance → debit its account.
+		leg(row.to_pay_account, row.to_pay_party_type, row.to_pay_party, "debit_in_account_currency"),
+	]
 
-		jv.flags.ignore_mandatory = True
-		jv.flags.ignore_exchange_rate = True
-		jv.remark = None
-		jv.flags.skip_remarks_creation = True
-		jv.is_system_generated = True
-		jv.submit()
+	# Posting date follows `reconciliation_takes_effect_on`
+	invoice_types = ("Sales Invoice", "Purchase Invoice")
+	if row.to_pay_voucher_type in invoice_types:
+		invoice_type, invoice_no = row.to_pay_voucher_type, row.to_pay_voucher_no
+		pay_type, pay_no = row.to_receive_voucher_type, row.to_receive_voucher_no
+	else:
+		invoice_type, invoice_no = row.to_receive_voucher_type, row.to_receive_voucher_no
+		pay_type, pay_no = row.to_pay_voucher_type, row.to_pay_voucher_no
+	pay_date = frappe.db.get_value(pay_type, pay_no, "posting_date") or today()
+	posting_date = get_reconciliation_effect_date(invoice_type, invoice_no, company, pay_date)
 
-		if inv.difference_amount != 0:
-			# make gain/loss journal
-			if inv.party_type == "Customer":
-				dr_or_cr = "credit" if inv.difference_amount < 0 else "debit"
-			else:
-				dr_or_cr = "debit" if inv.difference_amount < 0 else "credit"
-
-			reverse_dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
-
-			create_gain_loss_journal(
-				company,
-				inv.difference_posting_date,
-				inv.party_type,
-				inv.party,
-				inv.account,
-				inv.difference_account,
-				inv.difference_amount,
-				dr_or_cr,
-				reverse_dr_or_cr,
-				inv.voucher_type,
-				inv.voucher_no,
-				None,
-				inv.against_voucher_type,
-				inv.against_voucher,
-				None,
-				inv.cost_center,
-				dimensions_dict,
-			)
+	return _make_system_journal(
+		company=company,
+		voucher_type=CROSS_ACCOUNT_BRIDGE_VOUCHER_TYPE,
+		posting_date=posting_date,
+		multi_currency=1 if row.currency != company_currency else 0,
+		accounts=accounts,
+	)
 
 
 @erpnext.allow_regional
