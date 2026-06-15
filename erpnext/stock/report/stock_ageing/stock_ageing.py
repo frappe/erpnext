@@ -313,22 +313,20 @@ class FIFOSlots:
 			# so batchwise valuation flags must be resolved beforehand
 			self._prefetch_batchwise_valuations()
 
-			with frappe.db.unbuffered_cursor():
-				stock_ledger_entries = self._get_stock_ledger_entries()
+			if frappe.db.db_type == "postgres":
+				# postgres server-side cursors can't run nested queries mid-iteration; _get_stock_ledger_entries
+				# returns a buffered result there, so process it directly (no unbuffered cursor).
+				for row in self._get_stock_ledger_entries():
+					self._process_stock_ledger_entry(row, bundle_wise_serial_nos, bundle_wise_batch_nos)
+			else:
+				with frappe.db.unbuffered_cursor():
+					stock_ledger_entries = self._get_stock_ledger_entries()
 
-				if frappe.db.db_type == "postgres":
-					# postgres named (server-side) cursors can't run another query mid-iteration, and
-					# _process_stock_ledger_entry may issue nested lookups; materialize the rows here and
-					# process them after the cursor is closed (below), where nested queries are safe.
-					stock_ledger_entries = list(stock_ledger_entries)
-				else:
 					for row in stock_ledger_entries:
 						self._process_stock_ledger_entry(row, bundle_wise_serial_nos, bundle_wise_batch_nos)
-					# Note that stock_ledger_entries is an iterator, you can not reuse it like a list
-					stock_ledger_entries = []
 
-			for row in stock_ledger_entries:
-				self._process_stock_ledger_entry(row, bundle_wise_serial_nos, bundle_wise_batch_nos)
+					# Note that stock_ledger_entries is an iterator, you can not reuse it like a list
+					del stock_ledger_entries
 		else:
 			# entries passed in directly as a list: no streaming cursor is opened, so the batchwise
 			# valuation flags can be resolved lazily — a nested get_value here is safe on postgres too
@@ -957,7 +955,9 @@ class FIFOSlots:
 
 		sle_query = sle_query.orderby(sle.posting_datetime, sle.creation)
 
-		return sle_query.run(as_dict=True, as_iterator=True)
+		# postgres server-side (named) cursors can't run nested queries mid-iteration, which
+		# _process_stock_ledger_entry needs; fall back to a buffered fetch there. MariaDB streams.
+		return sle_query.run(as_dict=True, as_iterator=frappe.db.db_type != "postgres")
 
 	def _get_bundle_wise_serial_nos(self) -> dict:
 		bundle = frappe.qb.DocType("Serial and Batch Bundle")
