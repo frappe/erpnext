@@ -520,13 +520,18 @@ def execute_duckdb(filters, duckdb_conn):
 
 
 def get_data_duckdb(filters, conn):
-	accounts = get_accounts_duckdb(conn, filters.company)
+	# accounts and all metadata via frappe.db — only GL Entry comes from DuckDB
+	accounts = frappe.db.sql(
+		"""select name, account_number, parent_account, account_name, root_type, report_type, is_group, lft, rgt
+		from `tabAccount` where company=%s order by lft""",
+		filters.company,
+		as_dict=True,
+	)
 	if not accounts:
 		return None
 
 	company_currency = filters.presentation_currency or erpnext.get_company_currency(filters.company)
 	ignore_is_opening = frappe.get_single_value("Accounts Settings", "ignore_is_opening_check_for_reporting")
-
 	accounts, accounts_by_name, parent_children_map = filter_accounts(accounts)
 
 	gl_entries_by_account = get_period_gl_entries_duckdb(conn, filters, ignore_is_opening)
@@ -542,50 +547,24 @@ def get_data_duckdb(filters, conn):
 	accumulate_values_into_parents(accounts, accounts_by_name)
 
 	data = prepare_data(accounts, filters, parent_children_map, company_currency)
-	data = filter_out_zero_value_rows(
+	return filter_out_zero_value_rows(
 		data, parent_children_map, show_zero_values=filters.get("show_zero_values")
 	)
 
-	return data
 
-
-def get_accounts_duckdb(conn, company):
-	rows = conn.execute(
-		"""SELECT name, account_number, parent_account, account_name, root_type,
-		          report_type, is_group, lft, rgt
-		   FROM "tabAccount" WHERE company = ? ORDER BY lft""",
-		[company],
-	).fetchall()
-	cols = [
-		"name",
-		"account_number",
-		"parent_account",
-		"account_name",
-		"root_type",
-		"report_type",
-		"is_group",
-		"lft",
-		"rgt",
-	]
-	return [frappe._dict(zip(cols, row, strict=False)) for row in rows]
-
-
-def _build_common_gl_filters(filters):
-	"""Returns (sql_fragments, params) for filters shared across all GL/ACB queries."""
-	sql = []
-	params = []
+def _extra_gl_conditions(filters):
+	"""Returns (conditions, params) for optional shared GL Entry filters."""
+	conditions, params = [], []
 
 	if filters.get("cost_center"):
-		cost_centers = get_cost_centers_with_children(filters.get("cost_center"))
-		placeholders = ", ".join(["?" for _ in cost_centers])
-		sql.append(f"AND cost_center IN ({placeholders})")
-		params.extend(cost_centers)
+		cc = get_cost_centers_with_children(filters.get("cost_center"))
+		conditions.append(f"cost_center IN ({', '.join(['?'] * len(cc))})")
+		params.extend(cc)
 
 	if filters.get("project"):
-		proj_list = filters.project if isinstance(filters.project, list) else [filters.project]
-		placeholders = ", ".join(["?" for _ in proj_list])
-		sql.append(f"AND project IN ({placeholders})")
-		params.extend(proj_list)
+		proj = filters.project if isinstance(filters.project, list) else [filters.project]
+		conditions.append(f"project IN ({', '.join(['?'] * len(proj))})")
+		params.extend(proj)
 
 	if frappe.db.count("Finance Book"):
 		company_fb = frappe.get_cached_value("Company", filters.company, "default_finance_book")
@@ -597,55 +576,27 @@ def _build_common_gl_filters(filters):
 			fb_list = [cstr(filters.get("finance_book")), cstr(company_fb), ""]
 		else:
 			fb_list = [cstr(filters.get("finance_book")), ""]
-		placeholders = ", ".join(["?" for _ in fb_list])
-		sql.append(f"AND (finance_book IN ({placeholders}) OR finance_book IS NULL)")
+		conditions.append(f"(finance_book IN ({', '.join(['?'] * len(fb_list))}) OR finance_book IS NULL)")
 		params.extend(fb_list)
 
-	accounting_dimensions = get_accounting_dimensions(as_list=False)
-	for dimension in accounting_dimensions:
-		if filters.get(dimension.fieldname):
-			if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-				filters[dimension.fieldname] = get_dimension_with_children(
-					dimension.document_type, filters.get(dimension.fieldname)
+	for dim in get_accounting_dimensions(as_list=False):
+		if filters.get(dim.fieldname):
+			if frappe.get_cached_value("DocType", dim.document_type, "is_tree"):
+				filters[dim.fieldname] = get_dimension_with_children(
+					dim.document_type, filters.get(dim.fieldname)
 				)
-			dim_vals = filters[dimension.fieldname]
-			if not isinstance(dim_vals, list):
-				dim_vals = [dim_vals]
-			placeholders = ", ".join(["?" for _ in dim_vals])
-			sql.append(f"AND {dimension.fieldname} IN ({placeholders})")
-			params.extend(dim_vals)
+			vals = (
+				filters[dim.fieldname]
+				if isinstance(filters[dim.fieldname], list)
+				else [filters[dim.fieldname]]
+			)
+			conditions.append(f"{dim.fieldname} IN ({', '.join(['?'] * len(vals))})")
+			params.extend(vals)
 
-	return sql, params
+	return conditions, params
 
 
-def get_period_gl_entries_duckdb(conn, filters, ignore_is_opening):
-	ignore_closing_entries = not flt(filters.get("with_period_closing_entry_for_current_period"))
-	common_sql, common_params = _build_common_gl_filters(filters)
-
-	sql_parts = [
-		"SELECT account, SUM(debit) AS debit, SUM(credit) AS credit,",
-		"       SUM(debit_in_account_currency) AS debit_in_account_currency,",
-		"       SUM(credit_in_account_currency) AS credit_in_account_currency,",
-		"       account_currency",
-		'FROM "tabGL Entry"',
-		"WHERE company = ?",
-		"  AND is_cancelled = 0",
-		"  AND posting_date >= ?",
-		"  AND posting_date <= ?",
-	]
-	params = [filters.company, filters.from_date, filters.to_date]
-
-	if not ignore_is_opening:
-		sql_parts.append("  AND is_opening = 'No'")
-
-	if ignore_closing_entries:
-		sql_parts.append("  AND voucher_type != 'Period Closing Voucher'")
-
-	sql_parts.extend(common_sql)
-	params.extend(common_params)
-	sql_parts.append("GROUP BY account, account_currency")
-
-	rows = conn.execute("\n".join(sql_parts), params).fetchall()
+def _fetch_gl_rows_duckdb(conn, conditions, params):
 	cols = [
 		"account",
 		"debit",
@@ -654,135 +605,115 @@ def get_period_gl_entries_duckdb(conn, filters, ignore_is_opening):
 		"credit_in_account_currency",
 		"account_currency",
 	]
-	entries = [frappe._dict(zip(cols, row, strict=False)) for row in rows]
+	sql = f"""SELECT account, SUM(debit), SUM(credit),
+	                 SUM(debit_in_account_currency), SUM(credit_in_account_currency), account_currency
+	          FROM "tabGL Entry" WHERE {" AND ".join(conditions)}
+	          GROUP BY account, account_currency"""
+	return [frappe._dict(zip(cols, row, strict=False)) for row in conn.execute(sql, params).fetchall()]
 
+
+def get_period_gl_entries_duckdb(conn, filters, ignore_is_opening):
+	conditions = ["company = ?", "is_cancelled = 0", "posting_date >= ?", "posting_date <= ?"]
+	params = [filters.company, filters.from_date, filters.to_date]
+
+	if not ignore_is_opening:
+		conditions.append("is_opening = 'No'")
+	if not flt(filters.get("with_period_closing_entry_for_current_period")):
+		conditions.append("voucher_type != 'Period Closing Voucher'")
+
+	extra_cond, extra_params = _extra_gl_conditions(filters)
+	conditions.extend(extra_cond)
+	params.extend(extra_params)
+
+	entries = _fetch_gl_rows_duckdb(conn, conditions, params)
 	if filters.get("presentation_currency"):
 		convert_to_presentation_currency(entries, get_currency(filters))
 
 	gl_entries_by_account = {}
 	for entry in entries:
 		gl_entries_by_account.setdefault(entry.account, []).append(entry)
-
 	return gl_entries_by_account
 
 
 def get_opening_balances_duckdb(conn, filters, ignore_is_opening):
-	bs = _get_rootwise_opening_balances_duckdb(conn, filters, "Balance Sheet", ignore_is_opening)
-	pl = _get_rootwise_opening_balances_duckdb(conn, filters, "Profit and Loss", ignore_is_opening)
+	bs = _get_rootwise_opening_duckdb(conn, filters, "Balance Sheet", ignore_is_opening)
+	pl = _get_rootwise_opening_duckdb(conn, filters, "Profit and Loss", ignore_is_opening)
 	bs.update(pl)
 	return bs
 
 
-def _get_rootwise_opening_balances_duckdb(conn, filters, report_type, ignore_is_opening):
+def _get_rootwise_opening_duckdb(conn, filters, report_type, ignore_is_opening):
+	accounting_dimensions = get_accounting_dimensions(as_list=False)
 	ignore_closing_balances = frappe.get_single_value("Accounts Settings", "ignore_account_closing_balance")
-	last_period_closing_voucher = None
+	last_pcv = ""
 
 	if not ignore_closing_balances:
-		pcv = frappe.db.get_all(
+		last_pcv = frappe.db.get_all(
 			"Period Closing Voucher",
 			filters={"docstatus": 1, "company": filters.company, "period_end_date": ("<", filters.from_date)},
 			fields=["period_end_date", "name"],
 			order_by="period_end_date desc",
 			limit=1,
 		)
-		if pcv:
-			last_period_closing_voucher = pcv[0]
 
-	gle = []
-	if last_period_closing_voucher:
-		gle = _query_opening_balance_duckdb(
-			conn,
+	if last_pcv:
+		# Account Closing Balance fetched via frappe (not GL Entry)
+		gle = get_opening_balance(
 			"Account Closing Balance",
 			filters,
 			report_type,
-			ignore_is_opening,
-			period_closing_voucher=last_period_closing_voucher.name,
+			accounting_dimensions,
+			period_closing_voucher=last_pcv[0].name,
+			ignore_is_opening=ignore_is_opening,
 		)
-		if getdate(last_period_closing_voucher.period_end_date) < getdate(add_days(filters.from_date, -1)):
-			start_date = add_days(last_period_closing_voucher.period_end_date, 1)
-			gle += _query_opening_balance_duckdb(
-				conn,
-				"GL Entry",
-				filters,
-				report_type,
-				ignore_is_opening,
-				start_date=start_date,
+		if getdate(last_pcv[0].period_end_date) < getdate(add_days(filters.from_date, -1)):
+			start_date = add_days(last_pcv[0].period_end_date, 1)
+			gle += _get_gl_entry_opening_duckdb(
+				conn, filters, report_type, ignore_is_opening, start_date=start_date
 			)
 	else:
-		gle = _query_opening_balance_duckdb(conn, "GL Entry", filters, report_type, ignore_is_opening)
+		gle = _get_gl_entry_opening_duckdb(conn, filters, report_type, ignore_is_opening)
 
 	opening = frappe._dict()
 	for d in gle:
 		opening.setdefault(d.account, {"account": d.account, "opening_debit": 0.0, "opening_credit": 0.0})
 		opening[d.account]["opening_debit"] += flt(d.debit)
 		opening[d.account]["opening_credit"] += flt(d.credit)
-
 	return opening
 
 
-def _query_opening_balance_duckdb(
-	conn, doctype, filters, report_type, ignore_is_opening, period_closing_voucher=None, start_date=None
-):
-	table = f'"tab{doctype}"'
-	common_sql, common_params = _build_common_gl_filters(filters)
+def _get_gl_entry_opening_duckdb(conn, filters, report_type, ignore_is_opening, start_date=None):
+	accounts = frappe.db.get_all("Account", filters={"report_type": report_type}, pluck="name")
+	if not accounts:
+		return []
 
-	sql_parts = [
-		"SELECT account, SUM(debit) AS debit, SUM(credit) AS credit,",
-		"       SUM(debit_in_account_currency) AS debit_in_account_currency,",
-		"       SUM(credit_in_account_currency) AS credit_in_account_currency,",
-		"       account_currency",
-		f"FROM {table}",
-		"WHERE company = ?",
-		'  AND account IN (SELECT name FROM "tabAccount" WHERE report_type = ?)',
-	]
-	params = [filters.company, report_type]
+	conditions = ["company = ?", f"account IN ({', '.join(['?'] * len(accounts))})", "is_cancelled = 0"]
+	params = [filters.company, *accounts]
 
-	if doctype == "GL Entry":
-		sql_parts.append("  AND is_cancelled = 0")
-
-		if start_date:
-			sql_parts.append("  AND posting_date >= ?")
-			sql_parts.append("  AND posting_date < ?")
-			params.extend([start_date, filters.from_date])
-			if not ignore_is_opening:
-				sql_parts.append("  AND is_opening = 'No'")
-		else:
-			if not ignore_is_opening:
-				sql_parts.append("  AND (posting_date < ? OR is_opening = 'Yes')")
-				params.append(filters.from_date)
-			else:
-				sql_parts.append("  AND posting_date < ?")
-				params.append(filters.from_date)
-
-		if not filters.get("show_unclosed_fy_pl_balances") and report_type == "Profit and Loss":
-			sql_parts.append("  AND posting_date >= ?")
-			params.append(filters.year_start_date)
-
-		if not flt(filters.get("with_period_closing_entry_for_opening")):
-			sql_parts.append("  AND voucher_type != 'Period Closing Voucher'")
+	if start_date:
+		conditions.append("posting_date >= ? AND posting_date < ?")
+		params.extend([start_date, filters.from_date])
+		if not ignore_is_opening:
+			conditions.append("is_opening = 'No'")
+	elif not ignore_is_opening:
+		conditions.append("(posting_date < ? OR is_opening = 'Yes')")
+		params.append(filters.from_date)
 	else:
-		sql_parts.append("  AND period_closing_voucher = ?")
-		params.append(period_closing_voucher)
+		conditions.append("posting_date < ?")
+		params.append(filters.from_date)
 
-		if not flt(filters.get("with_period_closing_entry_for_opening")):
-			sql_parts.append("  AND is_period_closing_voucher_entry = 0")
+	if not filters.get("show_unclosed_fy_pl_balances") and report_type == "Profit and Loss":
+		conditions.append("posting_date >= ?")
+		params.append(filters.year_start_date)
 
-	sql_parts.extend(common_sql)
-	params.extend(common_params)
-	sql_parts.append("GROUP BY account, account_currency")
+	if not flt(filters.get("with_period_closing_entry_for_opening")):
+		conditions.append("voucher_type != 'Period Closing Voucher'")
 
-	rows = conn.execute("\n".join(sql_parts), params).fetchall()
-	cols = [
-		"account",
-		"debit",
-		"credit",
-		"debit_in_account_currency",
-		"credit_in_account_currency",
-		"account_currency",
-	]
-	gle = [frappe._dict(zip(cols, row, strict=False)) for row in rows]
+	extra_cond, extra_params = _extra_gl_conditions(filters)
+	conditions.extend(extra_cond)
+	params.extend(extra_params)
 
+	gle = _fetch_gl_rows_duckdb(conn, conditions, params)
 	if filters.get("presentation_currency"):
 		convert_to_presentation_currency(gle, get_currency(filters))
-
 	return gle
