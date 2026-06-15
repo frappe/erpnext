@@ -4886,6 +4886,52 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		self.assertRaises(StockOverReturnError, return_doc.save)
 
+	def test_stock_return_allowed_after_rate_adjustment_credit_note(self):
+		from erpnext.controllers.sales_and_purchase_return import StockOverReturnError, make_return_doc
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		# Original sales invoice with stock effect
+		invoice = create_sales_invoice(qty=5, rate=100, update_stock=1)
+
+		# Rate-adjustment credit note: adjusts price only, no stock movement (update_stock=0)
+		create_sales_invoice(
+			qty=-5,
+			rate=20,
+			is_return=1,
+			return_against=invoice.name,
+			update_stock=0,
+		)
+
+		# Stock return should not be blocked by the rate-adjustment credit note
+		stock_return = make_return_doc(invoice.doctype, invoice.name)
+		stock_return.update_stock = 1
+		self.assertEqual(stock_return.items[0].qty, -5)
+
+		# Should not raise StockOverReturnError — save and submit should succeed
+		stock_return.save()
+		stock_return.submit()
+
+	def test_rate_adjustment_credit_note_blocked_by_prior_rate_adjustment(self):
+		from erpnext.controllers.sales_and_purchase_return import StockOverReturnError, make_return_doc
+
+		# Original sales invoice without stock effect
+		invoice = create_sales_invoice(qty=5, rate=100)
+
+		# Full rate-adjustment credit note (update_stock=0)
+		create_sales_invoice(
+			qty=-5,
+			rate=100,
+			is_return=1,
+			return_against=invoice.name,
+			update_stock=0,
+		)
+
+		# A second rate-adjustment credit note should be blocked
+		return_doc = make_return_doc(invoice.doctype, invoice.name)
+		return_doc.items[0].qty = -1
+		self.assertRaises(StockOverReturnError, return_doc.save)
+
 	def test_pos_sales_invoice_creation_during_pos_invoice_mode(self):
 		# Deleting all opening entry
 		frappe.db.sql("delete from `tabPOS Opening Entry`")

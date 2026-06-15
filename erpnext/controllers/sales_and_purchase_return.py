@@ -281,6 +281,14 @@ def get_already_returned_items(doc):
 		if doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Sales Invoice", "POS Invoice"]
 		else "dn_detail"
 	)
+
+	# For invoice doctypes, only count returns with matching update_stock so that
+	# rate-adjustment returns (update_stock=0) don't block stock returns (update_stock=1) and vice versa.
+	update_stock_condition = ""
+	if doc.doctype in ["Sales Invoice", "Purchase Invoice"]:
+		update_stock_val = 1 if doc.get("update_stock") else 0
+		update_stock_condition = f"and par.update_stock = {update_stock_val}"
+
 	data = frappe.db.sql(
 		f"""
 		select {column}, child.{field}
@@ -289,6 +297,7 @@ def get_already_returned_items(doc):
 		where
 			child.parent = par.name and par.docstatus = 1
 			and par.is_return = 1 and par.return_against = %s
+			{update_stock_condition}
 		group by item_code, {field}
 	""",
 		doc.return_against,
