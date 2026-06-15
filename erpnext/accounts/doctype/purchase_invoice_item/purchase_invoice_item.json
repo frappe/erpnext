@@ -121,6 +121,7 @@
   "dimension_col_break",
   "cost_center",
   "section_break_82",
+  "grant_commission",
   "page_break"
  ],
  "fields": [
@@ -1002,6 +1003,15 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Delivered by Supplier",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.grant_commission",
+   "fieldname": "grant_commission",
+   "fieldtype": "Check",
+   "label": "Grant Commission",
    "print_hide": 1,
    "read_only": 1
   }

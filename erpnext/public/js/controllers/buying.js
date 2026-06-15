@@ -473,7 +473,69 @@ erpnext.buying = {
 				});
 			}
 
-			add_serial_batch_for_rejected_qty(doc, cdt, cdn) {
+			purchase_partner() {
+			this.calculate_purchase_commission();
+		}
+
+		commission_rate() {
+			if (
+				["Purchase Order", "Purchase Receipt", "Purchase Invoice"].includes(
+					this.frm.doc.doctype
+				)
+			) {
+				this.calculate_purchase_commission();
+			}
+		}
+
+		total_commission() {
+			if (
+				!["Purchase Order", "Purchase Receipt", "Purchase Invoice"].includes(
+					this.frm.doc.doctype
+				)
+			)
+				return;
+			frappe.model.round_floats_in(this.frm.doc, [
+				"amount_eligible_for_commission",
+				"total_commission",
+			]);
+			const { amount_eligible_for_commission } = this.frm.doc;
+			if (!amount_eligible_for_commission) return;
+			this.frm.set_value(
+				"commission_rate",
+				flt((this.frm.doc.total_commission * 100.0) / amount_eligible_for_commission)
+			);
+		}
+
+		calculate_purchase_commission() {
+			if (!this.frm.fields_dict.commission_rate || this.frm.doc.docstatus === 1) return;
+
+			if (this.frm.doc.commission_rate > 100) {
+				this.frm.set_value("commission_rate", 100);
+				frappe.throw(
+					`${__(
+						frappe.meta.get_label(
+							this.frm.doc.doctype,
+							"commission_rate",
+							this.frm.doc.name
+						)
+					)} ${__("cannot be greater than 100")}`
+				);
+			}
+
+			this.frm.doc.amount_eligible_for_commission = (this.frm.doc.items || []).reduce(
+				(sum, item) => (item.grant_commission ? sum + item.base_net_amount : sum),
+				0
+			);
+
+			this.frm.doc.total_commission = flt(
+				(this.frm.doc.amount_eligible_for_commission * this.frm.doc.commission_rate) / 100.0,
+				precision("total_commission")
+			);
+
+			refresh_field(["amount_eligible_for_commission", "total_commission"]);
+		}
+
+		add_serial_batch_for_rejected_qty(doc, cdt, cdn) {
 				let item = locals[cdt][cdn];
 				let me = this;
 				let fields = ["has_batch_no", "has_serial_no"];

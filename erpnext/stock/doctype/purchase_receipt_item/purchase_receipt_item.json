@@ -126,6 +126,7 @@
   "dimension_col_break",
   "cost_center",
   "section_break_80",
+  "grant_commission",
   "page_break",
   "sales_order",
   "sales_order_item",
@@ -1115,6 +1116,15 @@
    "fieldtype": "Currency",
    "label": "Amount Difference with Purchase Invoice",
    "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.grant_commission",
+   "fieldname": "grant_commission",
+   "fieldtype": "Check",
+   "label": "Grant Commission",
    "print_hide": 1,
    "read_only": 1
   }

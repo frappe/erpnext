@@ -384,6 +384,31 @@ class BuyingController(SubcontractingController):
 				item=row,
 			)
 
+	def calculate_commission(self):
+		if not self.meta.get_field("commission_rate"):
+			return
+
+		self.round_floats_in(self, ("amount_eligible_for_commission", "commission_rate"))
+
+		if not (0 <= self.commission_rate <= 100.0):
+			from frappe import throw
+
+			throw(
+				"{} {}".format(
+					_(self.meta.get_label("commission_rate")),
+					_("must be between 0 and 100"),
+				)
+			)
+
+		self.amount_eligible_for_commission = sum(
+			item.base_net_amount for item in self.items if item.grant_commission
+		)
+
+		self.total_commission = flt(
+			self.amount_eligible_for_commission * self.commission_rate / 100.0,
+			self.precision("total_commission"),
+		)
+
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
 

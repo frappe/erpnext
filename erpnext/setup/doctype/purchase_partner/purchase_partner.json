@@ -1,0 +1,145 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:partner_name",
+ "creation": "2026-06-15 00:00:00",
+ "description": "A third party agent / broker / commission agent who facilitates purchases for a commission.",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "partner_name",
+  "partner_type",
+  "territory",
+  "column_break0",
+  "commission_rate",
+  "address_contacts",
+  "address_desc",
+  "address_html",
+  "column_break1",
+  "contact_desc",
+  "contact_html",
+  "partner_target_details_section_break",
+  "targets"
+ ],
+ "fields": [
+  {
+   "fieldname": "partner_name",
+   "fieldtype": "Data",
+   "label": "Purchase Partner Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "partner_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Partner Type",
+   "options": "Purchase Partner Type"
+  },
+  {
+   "fieldname": "territory",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Territory",
+   "options": "Territory",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break0",
+   "fieldtype": "Column Break",
+   "width": "50%"
+  },
+  {
+   "fieldname": "commission_rate",
+   "fieldtype": "Float",
+   "label": "Commission Rate",
+   "reqd": 1
+  },
+  {
+   "fieldname": "address_contacts",
+   "fieldtype": "Section Break",
+   "label": "Address & Contacts"
+  },
+  {
+   "depends_on": "eval:doc.__islocal",
+   "fieldname": "address_desc",
+   "fieldtype": "HTML",
+   "label": "Address Desc"
+  },
+  {
+   "fieldname": "address_html",
+   "fieldtype": "HTML",
+   "label": "Address HTML",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.__islocal",
+   "fieldname": "contact_desc",
+   "fieldtype": "HTML",
+   "label": "Contact Desc"
+  },
+  {
+   "fieldname": "contact_html",
+   "fieldtype": "HTML",
+   "label": "Contact HTML",
+   "read_only": 1
+  },
+  {
+   "fieldname": "partner_target_details_section_break",
+   "fieldtype": "Section Break",
+   "label": "Purchase Partner Target"
+  },
+  {
+   "fieldname": "targets",
+   "fieldtype": "Table",
+   "label": "Targets",
+   "options": "Target Detail"
+  }
+ ],
+ "icon": "fa fa-user",
+ "idx": 1,
+ "links": [],
+ "modified": "2026-06-15 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Purchase Partner",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase Manager"
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase User"
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase Master Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "show_name_in_global_search": 1,
+ "sort_field": "creation",
+ "sort_order": "ASC",
+ "states": []
+}

@@ -388,6 +388,69 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Purchase Partner",
+   "link_count": 0,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Purchase Partner",
+   "link_count": 0,
+   "link_to": "Purchase Partner",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Purchase Partner Type",
+   "link_count": 0,
+   "link_to": "Purchase Partner Type",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Purchase Partner",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Purchase Partners Commission",
+   "link_count": 0,
+   "link_to": "Purchase Partners Commission",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Purchase Partner",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Purchase Partner Commission Summary",
+   "link_count": 0,
+   "link_to": "Purchase Partner Commission Summary",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Purchase Partner",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Purchase Partner Transaction Summary",
+   "link_count": 0,
+   "link_to": "Purchase Partner Transaction Summary",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Other Reports",
    "link_count": 0,
    "onboard": 0,

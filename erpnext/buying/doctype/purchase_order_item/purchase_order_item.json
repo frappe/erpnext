@@ -111,6 +111,7 @@
   "production_plan",
   "production_plan_item",
   "production_plan_sub_assembly_item",
+  "grant_commission",
   "page_break",
   "column_break_pjyo",
   "job_card"
@@ -932,6 +933,15 @@
    "label": "Subcontracted Quantity",
    "no_copy": 1,
    "non_negative": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.grant_commission",
+   "fieldname": "grant_commission",
+   "fieldtype": "Check",
+   "label": "Grant Commission",
    "print_hide": 1,
    "read_only": 1
   }

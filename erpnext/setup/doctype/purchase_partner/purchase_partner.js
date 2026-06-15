@@ -1,0 +1,25 @@
+// Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
+// License: GNU General Public License v3. See license.txt
+
+frappe.ui.form.on("Purchase Partner", {
+	refresh: function (frm) {
+		if (frm.doc.__islocal) {
+			hide_field(["address_html", "contact_html", "address_contacts"]);
+			frappe.contacts.clear_address_and_contact(frm);
+		} else {
+			unhide_field(["address_html", "contact_html", "address_contacts"]);
+			frappe.contacts.render_address_and_contact(frm);
+		}
+	},
+
+	setup: function (frm) {
+		frm.fields_dict["targets"].grid.get_field("distribution_id").get_query = function (doc, cdt, cdn) {
+			var row = locals[cdt][cdn];
+			return {
+				filters: {
+					fiscal_year: row.fiscal_year,
+				},
+			};
+		};
+	},
+});

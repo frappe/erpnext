@@ -76,6 +76,11 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			this.calculate_contribution();
 		}
 
+		// Purchase partner commission
+		if (["Purchase Order", "Purchase Receipt", "Purchase Invoice"].includes(this.frm.doc.doctype)) {
+			this.calculate_purchase_commission();
+		}
+
 		// Update paid amount on return/debit note creation
 		if (
 			this.frm.doc.doctype === "Purchase Invoice" &&

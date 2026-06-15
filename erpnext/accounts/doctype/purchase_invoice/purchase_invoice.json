@@ -167,6 +167,12 @@
   "terms_section_break",
   "tc_name",
   "terms",
+  "commission_section",
+  "purchase_partner",
+  "amount_eligible_for_commission",
+  "column_break_commission",
+  "commission_rate",
+  "total_commission",
   "more_info_tab",
   "status_section",
   "status",
@@ -1683,6 +1689,50 @@
    "fieldname": "automation_section",
    "fieldtype": "Section Break",
    "label": "Automation"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "purchase_partner",
+   "fieldname": "commission_section",
+   "fieldtype": "Section Break",
+   "label": "Commission",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "purchase_partner",
+   "fieldtype": "Link",
+   "label": "Purchase Partner",
+   "options": "Purchase Partner",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "amount_eligible_for_commission",
+   "fieldtype": "Currency",
+   "label": "Amount Eligible for Commission",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_commission",
+   "fieldtype": "Column Break",
+   "print_hide": 1
+  },
+  {
+   "fetch_from": "purchase_partner.commission_rate",
+   "fetch_if_empty": 1,
+   "fieldname": "commission_rate",
+   "fieldtype": "Float",
+   "label": "Commission Rate (%)",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "total_commission",
+   "fieldtype": "Currency",
+   "label": "Total Commission",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
