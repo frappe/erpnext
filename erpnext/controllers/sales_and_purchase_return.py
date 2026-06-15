@@ -384,7 +384,7 @@ def get_returned_qty_map_for_purchase_flow(return_against, supplier, row_name, d
 	return _return_map
 
 
-def get_returned_qty_map_for_row(return_against, party, row_name, doctype):
+def get_returned_qty_map_for_row(return_against, party, row_name, doctype, update_stock=None):
 	child_doctype = doctype + " Item"
 	reference_field = "dn_detail" if doctype == "Delivery Note" else frappe.scrub(child_doctype)
 
@@ -414,16 +414,23 @@ def get_returned_qty_map_for_row(return_against, party, row_name, doctype):
 			]
 
 	# Used retrun against and supplier and is_retrun because there is an index added for it
+	filters = [
+		[doctype, "return_against", "=", return_against],
+		[doctype, party_type, "=", party],
+		[doctype, "docstatus", "=", 1],
+		[doctype, "is_return", "=", 1],
+		[child_doctype, reference_field, "=", row_name],
+	]
+
+	# For invoice doctypes, only count returns with matching update_stock so that
+	# rate-adjustment returns (update_stock=0) don't reduce the returnable qty for stock returns (update_stock=1).
+	if update_stock is not None and doctype in ("Sales Invoice", "Purchase Invoice"):
+		filters.append([doctype, "update_stock", "=", 1 if update_stock else 0])
+
 	data = frappe.get_all(
 		doctype,
 		fields=fields,
-		filters=[
-			[doctype, "return_against", "=", return_against],
-			[doctype, party_type, "=", party],
-			[doctype, "docstatus", "=", 1],
-			[doctype, "is_return", "=", 1],
-			[child_doctype, reference_field, "=", row_name],
-		],
+		filters=filters,
 	)
 
 	return data[0]
@@ -575,7 +582,11 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 
 		elif doctype == "Purchase Invoice":
 			returned_qty_map = get_returned_qty_map_for_row(
-				source_parent.name, source_parent.supplier, source_doc.name, doctype
+				source_parent.name,
+				source_parent.supplier,
+				source_doc.name,
+				doctype,
+				update_stock=source_parent.get("update_stock"),
 			)
 			target_doc.received_qty = -1 * flt(
 				source_doc.received_qty - (returned_qty_map.get("received_qty") or 0)
@@ -612,7 +623,11 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 				target_doc.warehouse = default_warehouse_for_sales_return
 		elif doctype == "Sales Invoice" or doctype == "POS Invoice":
 			returned_qty_map = get_returned_qty_map_for_row(
-				source_parent.name, source_parent.customer, source_doc.name, doctype
+				source_parent.name,
+				source_parent.customer,
+				source_doc.name,
+				doctype,
+				update_stock=source_parent.get("update_stock") if doctype == "Sales Invoice" else None,
 			)
 			target_doc.qty = -1 * flt(source_doc.qty - (returned_qty_map.get("qty") or 0))
 			target_doc.stock_qty = -1 * flt(source_doc.stock_qty - (returned_qty_map.get("stock_qty") or 0))
