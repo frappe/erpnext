@@ -47,6 +47,19 @@ from erpnext.tests.utils import ERPNextTestSuite
 class TestDeliveryNote(ERPNextTestSuite):
 	def setUp(self):
 		self.load_test_records("Stock Entry")
+<<<<<<< HEAD
+=======
+
+	def get_perpetual_defaults(self):
+		company = frappe.get_doc("Company", "_Test Company with perpetual inventory")
+		self.perpetual_company = company.name
+		self.perpetual_account = company.stock_delivered_but_not_billed
+		self.perpetual_cost_center = company.cost_center
+		self.perpetual_warehouse = f"Stores - {company.abbr}"
+		self.perpetual_expense_account = f"Cost of Goods Sold - {company.abbr}"
+		self.perpetual_income_account = f"Sales - {company.abbr}"
+		self.perpetual_debit_to = f"Debtors - {company.abbr}"
+>>>>>>> df0ad93262 (refactor(test): dont create company in setUp of Deliv Note)
 
 	def test_delivery_note_qty(self):
 		dn = create_delivery_note(qty=0, do_not_save=True)
@@ -2866,6 +2879,492 @@ class TestDeliveryNote(ERPNextTestSuite):
 		for entry in sabb.entries:
 			self.assertEqual(entry.incoming_rate, 200)
 
+<<<<<<< HEAD
+=======
+	def test_sdbnb_gl_entry_on_delivery_note(self):
+		"""Test that DN GL entries use SDBNB account when configured on the company."""
+		self.get_perpetual_defaults()
+		item_code = make_item("SDBNB Test Item", properties={"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=item_code,
+			target=self.perpetual_warehouse,
+			qty=10,
+			basic_rate=100,
+			company=self.perpetual_company,
+		)
+
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=5,
+			rate=150,
+			company=self.perpetual_company,
+			warehouse=self.perpetual_warehouse,
+			cost_center=self.perpetual_cost_center,
+			expense_account=self.perpetual_expense_account,
+		)
+
+		# DN expense_account should be overridden to SDBNB
+		dn.reload()
+		self.assertEqual(dn.items[0].expense_account, self.perpetual_account)
+
+		# Verify DN GL entries use SDBNB account (not COGS)
+		gl_entries = get_gl_entries("Delivery Note", dn.name)
+		self.assertTrue(gl_entries)
+
+		stock_in_hand_account = get_inventory_account(self.perpetual_company)
+		expected_values = {
+			self.perpetual_account: {"debit": True},
+			stock_in_hand_account: {"credit": True},
+		}
+		for gle in gl_entries:
+			self.assertIn(gle.account, expected_values)
+			if expected_values[gle.account].get("debit"):
+				self.assertGreater(gle.debit, 0)
+			if expected_values[gle.account].get("credit"):
+				self.assertGreater(gle.credit, 0)
+
+	def test_sdbnb_reversal_on_sales_invoice(self):
+		"""Test that SI created from DN reverses SDBNB entries (credits SDBNB, debits COGS)."""
+		self.get_perpetual_defaults()
+		item_code = make_item("SDBNB Reversal Test Item", properties={"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=item_code,
+			target=self.perpetual_warehouse,
+			qty=10,
+			basic_rate=100,
+			company=self.perpetual_company,
+		)
+
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=5,
+			rate=150,
+			company=self.perpetual_company,
+			warehouse=self.perpetual_warehouse,
+			cost_center=self.perpetual_cost_center,
+			expense_account=self.perpetual_expense_account,
+		)
+
+		si = make_sales_invoice(dn.name)
+		si.submit()
+
+		# Get the stock value difference from the DN's SLE
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": "Delivery Note",
+				"voucher_no": dn.name,
+				"item_code": item_code,
+				"is_cancelled": 0,
+			},
+			["stock_value_difference", "actual_qty"],
+			as_dict=True,
+		)
+
+		valuation_rate = abs(flt(sle.stock_value_difference) / flt(sle.actual_qty))
+		expected_amount = flt(valuation_rate * 5)  # SI qty = 5
+
+		# SI GL entries should have SDBNB reversal
+		si_gl_entries = get_gl_entries("Sales Invoice", si.name)
+		self.assertTrue(si_gl_entries)
+		self.assertGreater(
+			sum(gle.debit for gle in si_gl_entries if gle.account == self.perpetual_expense_account), 0
+		)
+		sdbnb_credit = sum(gle.credit for gle in si_gl_entries if gle.account == self.perpetual_account)
+		cogs_debit = sum(gle.debit for gle in si_gl_entries if gle.account == self.perpetual_expense_account)
+
+		self.assertEqual(flt(sdbnb_credit, 2), flt(expected_amount, 2))
+		self.assertEqual(flt(cogs_debit, 2), flt(expected_amount, 2))
+
+	def test_sdbnb_partial_billing(self):
+		"""Test SDBNB reversal for partial invoicing - only billed qty should be reversed."""
+		self.get_perpetual_defaults()
+		item_code = make_item("SDBNB Partial Bill Item", properties={"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=item_code,
+			target=self.perpetual_warehouse,
+			qty=10,
+			basic_rate=100,
+			company=self.perpetual_company,
+		)
+
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=10,
+			rate=150,
+			company=self.perpetual_company,
+			warehouse=self.perpetual_warehouse,
+			cost_center=self.perpetual_cost_center,
+			expense_account=self.perpetual_expense_account,
+		)
+
+		# Create SI from DN and reduce qty to 4 (partial billing)
+		si = make_sales_invoice(dn.name)
+		si.items[0].qty = 4
+		si.save()
+		si.submit()
+
+		# Get valuation rate from DN's SLE
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": "Delivery Note",
+				"voucher_no": dn.name,
+				"item_code": item_code,
+				"is_cancelled": 0,
+			},
+			["stock_value_difference", "actual_qty"],
+			as_dict=True,
+		)
+
+		valuation_rate = abs(flt(sle.stock_value_difference) / flt(sle.actual_qty))
+		expected_amount = flt(valuation_rate * 4)  # Only 4 out of 10
+
+		si_gl_entries = get_gl_entries("Sales Invoice", si.name)
+		sdbnb_credit = sum(gle.credit for gle in si_gl_entries if gle.account == self.perpetual_account)
+
+		self.assertEqual(flt(sdbnb_credit, 2), flt(expected_amount, 2))
+
+	def test_sdbnb_disabled_for_sales_return(self):
+		"""Test that sales return DN uses default expense account when disable_sdbnb_in_sr is enabled."""
+		self.get_perpetual_defaults()
+		frappe.db.set_value("Company", self.perpetual_company, "disable_sdbnb_in_sr", 1)
+
+		try:
+			item_code = make_item("SDBNB Return Disable Item", properties={"is_stock_item": 1}).name
+			make_stock_entry(
+				item_code=item_code,
+				target=self.perpetual_warehouse,
+				qty=10,
+				basic_rate=100,
+				company=self.perpetual_company,
+			)
+
+			dn = create_delivery_note(
+				item_code=item_code,
+				qty=5,
+				rate=150,
+				company=self.perpetual_company,
+				warehouse=self.perpetual_warehouse,
+				cost_center=self.perpetual_cost_center,
+				expense_account=self.perpetual_expense_account,
+			)
+
+			# Original DN should use SDBNB
+			dn.reload()
+			self.assertEqual(dn.items[0].expense_account, self.perpetual_account)
+
+			return_dn = create_delivery_note(
+				item_code=item_code,
+				qty=-3,
+				rate=150,
+				company=self.perpetual_company,
+				warehouse=self.perpetual_warehouse,
+				cost_center=self.perpetual_cost_center,
+				expense_account=self.perpetual_expense_account,
+				is_return=1,
+				return_against=dn.name,
+			)
+
+			# Return DN should not use SDBNB (disable_sdbnb_in_sr is on)
+			return_dn.reload()
+			self.assertNotEqual(return_dn.items[0].expense_account, self.perpetual_account)
+		finally:
+			frappe.db.set_value("Company", self.perpetual_company, "disable_sdbnb_in_sr", 0)
+
+	def test_sdbnb_enabled_for_sales_return(self):
+		"""Test that sales return DN uses SDBNB account when disable_sdbnb_in_sr is off."""
+		self.get_perpetual_defaults()
+		item_code = make_item("SDBNB Return Enable Item", properties={"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=item_code,
+			target=self.perpetual_warehouse,
+			qty=10,
+			basic_rate=100,
+			company=self.perpetual_company,
+		)
+
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=5,
+			rate=150,
+			company=self.perpetual_company,
+			warehouse=self.perpetual_warehouse,
+			cost_center=self.perpetual_cost_center,
+			expense_account=self.perpetual_expense_account,
+		)
+
+		return_dn = create_delivery_note(
+			item_code=item_code,
+			qty=-3,
+			rate=150,
+			company=self.perpetual_company,
+			warehouse=self.perpetual_warehouse,
+			cost_center=self.perpetual_cost_center,
+			expense_account=self.perpetual_expense_account,
+			is_return=1,
+			return_against=dn.name,
+		)
+
+		# Return DN should also use SDBNB since disable flag is off by default
+		return_dn.reload()
+		self.assertEqual(return_dn.items[0].expense_account, self.perpetual_account)
+
+	def test_sdbnb_no_reversal_with_update_stock(self):
+		"""Test that SI with update_stock=1 (standalone, no DN link) does NOT create SDBNB GL entries."""
+		self.get_perpetual_defaults()
+		item_code = make_item("SDBNB Update Stock Item", properties={"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=item_code,
+			target=self.perpetual_warehouse,
+			qty=10,
+			basic_rate=100,
+			company=self.perpetual_company,
+		)
+
+		# Create standalone SI with update_stock=1 (no DN link)
+		si = create_sales_invoice(
+			company=self.perpetual_company,
+			currency="INR",
+			debit_to=self.perpetual_debit_to,
+			income_account=self.perpetual_income_account,
+			update_stock=1,
+			item_code=item_code,
+			qty=5,
+			rate=150,
+			warehouse=self.perpetual_warehouse,
+			cost_center=self.perpetual_cost_center,
+			expense_account=self.perpetual_expense_account,
+		)
+
+		# SI GL entries should not have SDBNB account
+		si_gl_entries = get_gl_entries("Sales Invoice", si.name)
+		sdbnb_entries = [gle for gle in si_gl_entries if gle.account == self.perpetual_account]
+		self.assertEqual(len(sdbnb_entries), 0)
+
+	def test_sdbnb_skip_for_dn_against_sales_invoice(self):
+		"""Test that DN items with against_sales_invoice reference skips SDBNB account assignment."""
+		from erpnext.accounts.doctype.sales_invoice.mapper import (
+			make_delivery_note as make_dn_from_si,
+		)
+
+		self.get_perpetual_defaults()
+
+		item_code = make_item("SDBNB Against SI Item", properties={"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=item_code,
+			target=self.perpetual_warehouse,
+			qty=10,
+			basic_rate=100,
+			company=self.perpetual_company,
+		)
+
+		si = create_sales_invoice(
+			company=self.perpetual_company,
+			currency="INR",
+			debit_to=self.perpetual_debit_to,
+			income_account=self.perpetual_income_account,
+			update_stock=0,
+			item_code=item_code,
+			qty=5,
+			rate=150,
+			warehouse=self.perpetual_warehouse,
+			cost_center=self.perpetual_cost_center,
+			expense_account=self.perpetual_expense_account,
+		)
+
+		dn = make_dn_from_si(si.name)
+		self.assertEqual(dn.items[0].expense_account, self.perpetual_expense_account)
+		dn.submit()
+
+		# DN items created from SI have against_sales_invoice set,
+		# so SDBNB should be skipped
+		dn.reload()
+		self.assertEqual(dn.items[0].expense_account, self.perpetual_expense_account)
+
+	def test_sdbnb_non_stock_item_skipped(self):
+		"""Test that non-stock items are not assigned SDBNB account."""
+		self.get_perpetual_defaults()
+		non_stock_item = make_item(
+			"SDBNB Non Stock Item",
+			properties={"is_stock_item": 0},
+		).name
+
+		dn = create_delivery_note(
+			company=self.perpetual_company,
+			item_code=non_stock_item,
+			warehouse=self.perpetual_warehouse,
+			qty=5,
+			rate=150,
+			cost_center=self.perpetual_cost_center,
+			expense_account=self.perpetual_expense_account,
+			do_not_submit=True,
+		)
+
+		# Non-stock item should retain original expense_account, not SDBNB
+		self.assertNotEqual(dn.items[0].expense_account, self.perpetual_account)
+		self.assertEqual(dn.items[0].expense_account, self.perpetual_expense_account)
+
+	def test_sdbnb_reposting_with_fifo(self):
+		"""Test that backdated inward entry triggers reposting and updates SDBNB GL entries (FIFO)."""
+		self.get_perpetual_defaults()
+		item_code = make_item(
+			"SDBNB Repost FIFO Item", properties={"is_stock_item": 1, "valuation_method": "FIFO"}
+		).name
+
+		posting_date = add_days(nowdate(), -1)
+
+		# Inward 10 qty @ 100
+		make_stock_entry(
+			item_code=item_code,
+			target=self.perpetual_warehouse,
+			qty=10,
+			basic_rate=100,
+			company=self.perpetual_company,
+			posting_date=posting_date,
+		)
+
+		# DN 5 qty → FIFO consumes 5 @ 100 → stock_value_diff = -500
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=5,
+			rate=150,
+			company=self.perpetual_company,
+			warehouse=self.perpetual_warehouse,
+			cost_center=self.perpetual_cost_center,
+			expense_account=self.perpetual_expense_account,
+			posting_date=posting_date,
+		)
+
+		# Verify initial DN GL: SDBNB Dr 500, Stock In Hand Cr 500
+		dn_gl = get_gl_entries("Delivery Note", dn.name)
+		sdbnb_debit = sum(gle.debit for gle in dn_gl if gle.account == self.perpetual_account)
+		self.assertEqual(flt(sdbnb_debit, 2), 500.0)
+
+		# SI from DN
+		si = make_sales_invoice(dn.name)
+		si.set_posting_time = 1
+		si.posting_date = posting_date
+		si.submit()
+
+		# Verify initial SI GL: SDBNB Cr 500, COGS Dr 500
+		si_gl = get_gl_entries("Sales Invoice", si.name)
+		sdbnb_credit = sum(gle.credit for gle in si_gl if gle.account == self.perpetual_account)
+		cogs_debit = sum(gle.debit for gle in si_gl if gle.account == self.perpetual_expense_account)
+		self.assertEqual(flt(sdbnb_credit, 2), 500.0)
+		self.assertEqual(flt(cogs_debit, 2), 500.0)
+
+		# Backdated inward: 5 qty @ 50 → FIFO queue becomes [[5,50],[10,100]]
+		# DN now consumes 5@50 from front → stock_value_diff = -250
+		make_stock_entry(
+			item_code=item_code,
+			target=self.perpetual_warehouse,
+			qty=5,
+			basic_rate=50,
+			company=self.perpetual_company,
+			posting_date=add_days(posting_date, -1),
+		)
+
+		# After repost: DN GL should reflect new valuation (250 instead of 500)
+		dn_gl = get_gl_entries("Delivery Note", dn.name)
+		sdbnb_debit = sum(gle.debit for gle in dn_gl if gle.account == self.perpetual_account)
+		self.assertEqual(flt(sdbnb_debit, 2), 250.0)
+
+		# After repost: SI GL should also reflect new valuation
+		si_gl = get_gl_entries("Sales Invoice", si.name)
+		sdbnb_credit = sum(gle.credit for gle in si_gl if gle.account == self.perpetual_account)
+		cogs_debit = sum(gle.debit for gle in si_gl if gle.account == self.perpetual_expense_account)
+		self.assertEqual(flt(sdbnb_credit, 2), 250.0)
+		self.assertEqual(flt(cogs_debit, 2), 250.0)
+
+	def test_sdbnb_reposting_with_moving_average(self):
+		"""Test that backdated inward entry triggers reposting and updates SDBNB GL entries (Moving Average)."""
+		self.get_perpetual_defaults()
+		item_code = make_item(
+			"SDBNB Repost MA Item", properties={"is_stock_item": 1, "valuation_method": "Moving Average"}
+		).name
+
+		posting_date = add_days(nowdate(), -1)
+
+		# Inward 10 qty @ 100 → avg = 100
+		make_stock_entry(
+			item_code=item_code,
+			target=self.perpetual_warehouse,
+			qty=10,
+			basic_rate=100,
+			company=self.perpetual_company,
+			posting_date=posting_date,
+		)
+
+		# DN 5 qty → avg = 100 → stock_value_diff = -500
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=5,
+			rate=150,
+			company=self.perpetual_company,
+			warehouse=self.perpetual_warehouse,
+			cost_center=self.perpetual_cost_center,
+			expense_account=self.perpetual_expense_account,
+			posting_date=posting_date,
+		)
+
+		# Verify initial DN GL: SDBNB Dr 500, Stock In Hand Cr 500
+		dn_gl = get_gl_entries("Delivery Note", dn.name)
+		sdbnb_debit = sum(gle.debit for gle in dn_gl if gle.account == self.perpetual_account)
+		self.assertEqual(flt(sdbnb_debit, 2), 500.0)
+
+		# SI from DN
+		si = make_sales_invoice(dn.name)
+		si.set_posting_time = 1
+		si.posting_date = posting_date
+		si.submit()
+
+		# Verify initial SI GL: SDBNB Cr 500, COGS Dr 500
+		si_gl = get_gl_entries("Sales Invoice", si.name)
+		sdbnb_credit = sum(gle.credit for gle in si_gl if gle.account == self.perpetual_account)
+		cogs_debit = sum(gle.debit for gle in si_gl if gle.account == self.perpetual_expense_account)
+		self.assertEqual(flt(sdbnb_credit, 2), 500.0)
+		self.assertEqual(flt(cogs_debit, 2), 500.0)
+
+		# Backdated inward: 5 qty @ 50
+		# Moving avg becomes: (5*50 + 10*100) / 15 = 1250/15 ≈ 83.33
+		# DN 5 qty → reposted stock_value_diff ≈ -416.67
+		make_stock_entry(
+			item_code=item_code,
+			target=self.perpetual_warehouse,
+			qty=5,
+			basic_rate=50,
+			company=self.perpetual_company,
+			posting_date=add_days(posting_date, -1),
+		)
+
+		# Read actual stock_value_difference from reposted SLE
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": "Delivery Note",
+				"voucher_no": dn.name,
+				"item_code": item_code,
+				"is_cancelled": 0,
+			},
+			"stock_value_difference",
+		)
+		expected_amount = abs(flt(sle, 2))
+
+		# DN GL should reflect new moving average valuation
+		dn_gl = get_gl_entries("Delivery Note", dn.name)
+		sdbnb_debit = sum(gle.debit for gle in dn_gl if gle.account == self.perpetual_account)
+		self.assertEqual(flt(sdbnb_debit, 2), expected_amount)
+		self.assertLess(expected_amount, 500.0)
+
+		# SI GL should also reflect new valuation
+		si_gl = get_gl_entries("Sales Invoice", si.name)
+		sdbnb_credit = sum(gle.credit for gle in si_gl if gle.account == self.perpetual_account)
+		cogs_debit = sum(gle.debit for gle in si_gl if gle.account == self.perpetual_expense_account)
+		self.assertEqual(flt(sdbnb_credit, 2), expected_amount)
+		self.assertEqual(flt(cogs_debit, 2), expected_amount)
+
+>>>>>>> df0ad93262 (refactor(test): dont create company in setUp of Deliv Note)
 	@ERPNextTestSuite.change_settings("Selling Settings", {"validate_selling_price": 1})
 	def test_validate_selling_price(self):
 		item_code = make_item("VSP Item", properties={"is_stock_item": 1}).name
