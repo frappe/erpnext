@@ -130,8 +130,10 @@ jobs:
         env:
           DB: postgres
           TYPE: server
-          FRAPPE_USER: ${{ github.event.inputs.user }}
-          FRAPPE_BRANCH: ${{ github.event.client_payload.sha || github.event.inputs.branch }}
+          # TEMPORARY: build ERPNext against the dependent frappe PR branch (frappe#39974).
+          # Revert this commit once that PR is merged into frappe develop.
+          FRAPPE_USER: mihir-kandoi
+          FRAPPE_BRANCH: qb-perm-filter-conditions
 
       - name: Run Tests
         run: 'cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --lightmode --app erpnext --total-builds ${{ strategy.job-total }} --build-number ${{ matrix.container }} --with-coverage'
