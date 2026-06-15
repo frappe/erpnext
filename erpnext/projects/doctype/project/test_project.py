@@ -317,7 +317,10 @@ class TestProjectCoverage(ERPNextTestSuite):
 
 	def _make_task(self, project, subject, status="Open", progress=0, task_weight=0):
 		"""Create a saved Task linked to ``project`` with the given rollup inputs."""
-		task = create_task(subject=subject, project=project.name, save=False)
+		# create_task() ignores its `project` arg for non-template tasks (an
+		# operator-precedence quirk in the helper), so set the link explicitly.
+		task = create_task(subject=subject, save=False)
+		task.project = project.name
 		task.status = status
 		task.progress = progress
 		task.task_weight = task_weight
@@ -358,14 +361,17 @@ class TestProjectCoverage(ERPNextTestSuite):
 		self.assertEqual(project.status, "Completed")
 
 	def test_percent_complete_empty_method_defaults_to_task_completion(self):
-		# No percent_complete_method set -> falls into the Task Completion branch
+		# An empty percent_complete_method takes the `not self.percent_complete_method`
+		# branch, which behaves like Task Completion.
 		project = self._make_bare_project("Test Coverage % Empty Method")
-		self.assertFalse(project.percent_complete_method)
 		self._make_task(project, "Coverage Empty Method Task A", status="Completed")
 		self._make_task(project, "Coverage Empty Method Task B", status="Open")
 		self._make_task(project, "Coverage Empty Method Task C", status="Open")
 		self._make_task(project, "Coverage Empty Method Task D", status="Open")
 
+		# The doctype defaults the method to "Task Completion"; clear it in-memory
+		# to exercise the empty-method branch (update_percent_complete does not save).
+		project.percent_complete_method = ""
 		project.update_percent_complete()
 
 		self.assertAlmostEqual(project.percent_complete, 25.0, places=2)
@@ -396,15 +402,16 @@ class TestProjectCoverage(ERPNextTestSuite):
 		self.assertAlmostEqual(project.percent_complete, 70.0, places=2)
 
 	def test_percent_complete_manual_open_is_noop(self):
-		# Manual + Open: method returns early, percent_complete untouched (stays 0)
+		# Manual + Open: method returns early, percent_complete untouched.
 		project = self._make_bare_project("Test Coverage % Manual Open", percent_complete_method="Manual")
 		self._make_task(project, "Coverage Manual Task A", status="Completed")
 		self._make_task(project, "Coverage Manual Task B", status="Open")
 
+		# Sentinel proves the Manual+Open path does not derive the value from tasks.
+		project.percent_complete = 42.0
 		project.update_percent_complete()
 
-		# Manual method never derives the percentage from tasks
-		self.assertAlmostEqual(project.percent_complete, 0.0, places=2)
+		self.assertAlmostEqual(project.percent_complete, 42.0, places=2)
 
 	def test_percent_complete_manual_completed_sets_hundred(self):
 		# Manual + Completed: percent forced to 100 without scanning tasks

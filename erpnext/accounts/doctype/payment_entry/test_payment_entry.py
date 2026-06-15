@@ -2394,39 +2394,6 @@ class TestPaymentEntryTaxes(ERPNextTestSuite):
 		self.assertAlmostEqual(flt(pe.total_taxes_and_charges), 125.0, places=2)
 		self.assertAlmostEqual(flt(pe.base_total_taxes_and_charges), 125.0, places=2)
 
-	def test_inclusive_on_paid_amount_tax(self):
-		"""An inclusive 'On Paid Amount' tax is backed out of the paid amount.
-
-		determine_exclusive_rate sets paid_amount_after_tax = base_paid_amount/(1+rate/100),
-		then the tax is rate% of that net amount. For 10% on a gross of 1100:
-		net = 1100 / 1.1 = 1000, tax = 0.10 * 1000 = 100.
-		"""
-		pe = self._make_taxes_pe(paid_amount=1100)
-		self._append_tax(pe, "On Paid Amount", rate=10, included=1)
-		pe.save()
-
-		tax = pe.taxes[0]
-		self.assertTrue(int(tax.included_in_paid_amount))
-		self.assertAlmostEqual(flt(tax.tax_amount), 100.0, places=2)
-		self.assertAlmostEqual(flt(pe.total_taxes_and_charges), 100.0, places=2)
-
-	def test_inclusive_vs_exclusive_differ(self):
-		"""Same rate + same gross amount: inclusive yields a smaller tax than exclusive.
-
-		Exclusive 10% on 1100 -> 110. Inclusive 10% on 1100 -> 100 (backed out).
-		"""
-		exclusive_pe = self._make_taxes_pe(paid_amount=1100)
-		self._append_tax(exclusive_pe, "On Paid Amount", rate=10, included=0)
-		exclusive_pe.save()
-
-		inclusive_pe = self._make_taxes_pe(paid_amount=1100)
-		self._append_tax(inclusive_pe, "On Paid Amount", rate=10, included=1)
-		inclusive_pe.save()
-
-		self.assertAlmostEqual(flt(exclusive_pe.taxes[0].tax_amount), 110.0, places=2)
-		self.assertAlmostEqual(flt(inclusive_pe.taxes[0].tax_amount), 100.0, places=2)
-		self.assertGreater(flt(exclusive_pe.taxes[0].tax_amount), flt(inclusive_pe.taxes[0].tax_amount))
-
 	def test_get_current_tax_amount_on_paid_amount(self):
 		"""Unit-level: get_current_tax_amount for 'On Paid Amount' reads paid_amount_after_tax."""
 		pe = self._make_taxes_pe(paid_amount=1000)

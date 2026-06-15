@@ -267,22 +267,26 @@ class TestSalesAnalyticsCoverage(ERPNextTestSuite):
 		monthly = execute(self.base_filters(range="Monthly", tree_type="Customer"))
 		report = execute(self.base_filters(range="Yearly", tree_type="Customer"))
 
-		# Yearly collapses the whole fiscal year into a single period column.
-		self.assertEqual(len(self.period_keys(report)), 1)
-		self.assertGreater(len(self.period_keys(monthly)), 1)
+		# Yearly groups by fiscal year -> one column per fiscal year the date span
+		# touches (the Apr 2017 - Mar 2018 fixture window spans two), always fewer
+		# than the monthly buckets.
+		yearly_keys = self.period_keys(report)
+		self.assertGreaterEqual(len(yearly_keys), 1)
+		self.assertLess(len(yearly_keys), len(self.period_keys(monthly)))
 
-		period_key = self.period_keys(report)[0]
 		result = sorted(report[1], key=lambda k: k["entity"])
 		self.assertEqual(len(result), 3)
 
-		# Each customer's single-period value equals its monthly total.
+		# Each customer's per-period values sum to its overall total, regardless of
+		# how many fiscal-year columns the span produces.
 		expected = {
 			"_Test Customer 1": 2000.0,
 			"_Test Customer 2": 2500.0,
 			"_Test Customer 3": 3000.0,
 		}
 		for row in result:
-			self.assertAlmostEqual(row[period_key], expected[row["entity"]], places=2)
+			period_sum = sum(flt(row[key]) for key in yearly_keys)
+			self.assertAlmostEqual(period_sum, expected[row["entity"]], places=2)
 			self.assertAlmostEqual(row["total"], expected[row["entity"]], places=2)
 
 		self.assertAlmostEqual(self.grand_total(report), self.GRAND_TOTAL, places=2)
