@@ -379,7 +379,7 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 
 		expected_data_after_credit_note = [
 			[100.0, 100.0, 40.0, 0.0, 60.0, si.name],
-			[0, 0, 100.0, 0.0, -100.0, cr_note.name],
+			[0, 0, 0.0, 100.0, -100.0, cr_note.name],
 		]
 		self.assertEqual(len(report[1]), 2)
 		si_row = next(
@@ -1284,3 +1284,55 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		self.assertIn(original_customer, parties)
 		self.assertNotIn(second_customer, parties)
 		self.assertEqual(allowed_invoice.customer, original_customer)
+
+	def test_credit_note_linked_to_invoice_appears_in_credit_note_column(self):
+		"""
+		Credit note linked to a Sales Invoice (return_against set, update_outstanding_for_self=False)
+		must appear in the Credit Note column, not the Paid Amount column.
+		"""
+		si = self.create_sales_invoice(no_payment_schedule=True)
+
+		cr_note = self.create_credit_note(si.name, do_not_submit=True)
+		cr_note.update_outstanding_for_self = False
+		cr_note.save().submit()
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+		}
+		report = execute(filters)
+
+		# Invoice is fully cancelled by the credit note — no rows should appear
+		self.assertEqual(report[1], [])
+
+	def test_standalone_credit_note_appears_in_credit_note_column(self):
+		"""
+		Standalone credit note (update_outstanding_for_self=True) must appear in the
+		Credit Note column, NOT in the Paid Amount column.
+
+		Regression test for: credit note amount incorrectly showing in Paid Amount
+		when the PLE's against_voucher_no equals its own voucher_no (self-reference).
+		"""
+		si = self.create_sales_invoice(no_payment_schedule=True)
+
+		cr_note = self.create_credit_note(si.name, do_not_submit=True)
+		cr_note.update_outstanding_for_self = True
+		cr_note.save().submit()
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+		}
+		report = execute(filters)
+
+		# Two rows: original invoice and the standalone credit note
+		self.assertEqual(len(report[1]), 2)
+
+		cr_note_row = next(r for r in report[1] if r.voucher_no == cr_note.name)
+
+		# Credit note amount must be in credit_note column, NOT in paid column
+		self.assertEqual(cr_note_row.paid, 0)
+		self.assertEqual(cr_note_row.credit_note, 100)
+		self.assertEqual(cr_note_row.outstanding, -100)

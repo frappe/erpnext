@@ -310,7 +310,10 @@ class ReceivablePayableReport:
 				row.invoiced_in_account_currency += amount_in_account_currency
 		else:
 			if self.is_invoice(ple):
-				if row.voucher_no == ple.voucher_no == ple.against_voucher_no:
+				if (
+					row.voucher_no == ple.voucher_no == ple.against_voucher_no
+					and ple.voucher_no not in self.return_entries
+				):
 					row.paid -= amount
 					row.paid_in_account_currency -= amount_in_account_currency
 				else:
@@ -777,7 +780,6 @@ class ReceivablePayableReport:
 			"is_return": 1,
 			"docstatus": 1,
 			"company": self.filters.company,
-			"update_outstanding_for_self": 0,
 		}
 
 		or_filters = {}
