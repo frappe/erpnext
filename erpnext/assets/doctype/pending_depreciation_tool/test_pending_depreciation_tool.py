@@ -2,9 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.utils import add_months, getdate, nowdate
 
-from erpnext.assets.doctype.asset.depreciation import get_asset_depr_schedule_name
 from erpnext.assets.doctype.asset.test_asset import create_asset
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
