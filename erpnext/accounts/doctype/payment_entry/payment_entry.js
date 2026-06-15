@@ -257,6 +257,22 @@ frappe.ui.form.on("Payment Entry", {
 		}
 		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(frm);
 		frappe.flags.allocate_payment_amount = true;
+
+		if (frm.doc.docstatus === 1) {
+			frm.add_custom_button(
+				__("Payment Advice"),
+				function () {
+					frappe.utils.print(
+						frm.doc.doctype,
+						frm.doc.name,
+						"Payment Advice",
+						frm.doc.letter_head,
+						frm.doc.language
+					);
+				},
+				__("Print")
+			);
+		}
 	},
 
 	validate: async function (frm) {
