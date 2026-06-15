@@ -526,9 +526,16 @@ class TestJournalEntry(ERPNextTestSuite):
 
 		gl_entries = query.run(as_dict=True)
 
-		for i in range(len(self.expected_gle)):
+		# MariaDB and Postgres collate `account` differently, so the DB ordering isn't portable;
+		# sort both sides identically before the positional comparison.
+		def _key(row):
+			return tuple(str(row[f]) for f in self.fields)
+
+		gl_entries = sorted(gl_entries, key=_key)
+		expected_gle = sorted(self.expected_gle, key=_key)
+		for i in range(len(expected_gle)):
 			for field in self.fields:
-				self.assertEqual(self.expected_gle[i][field], gl_entries[i][field])
+				self.assertEqual(expected_gle[i][field], gl_entries[i][field])
 
 	def test_negative_debit_and_credit_with_same_account_head(self):
 		from erpnext.accounts.general_ledger import process_gl_map

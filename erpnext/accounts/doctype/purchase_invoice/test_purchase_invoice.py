@@ -473,10 +473,11 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			["Creditors - TCP1", 0, 250],
 		]
 
-		for i, gle in enumerate(gl_entries):
-			self.assertEqual(expected_values[i][0], gle.account)
-			self.assertEqual(expected_values[i][1], gle.debit)
-			self.assertEqual(expected_values[i][2], gle.credit)
+		# DB account collation isn't portable across MariaDB/Postgres; compare order-independently.
+		self.assertEqual(
+			sorted((gle.account, gle.debit, gle.credit) for gle in gl_entries),
+			sorted((e[0], e[1], e[2]) for e in expected_values),
+		)
 
 	def test_purchase_invoice_calculation(self):
 		pi = frappe.copy_doc(self.globalTestRecords["Purchase Invoice"][0])
@@ -1484,9 +1485,11 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			.run(as_dict=1)
 		)
 
-		for i, gle in enumerate(gl_entries):
-			self.assertEqual(expected_gle[i][0], gle.account)
-			self.assertEqual(expected_gle[i][1], gle.balance)
+		# DB account collation isn't portable across MariaDB/Postgres; compare order-independently.
+		self.assertEqual(
+			sorted((gle.account, gle.balance) for gle in gl_entries),
+			sorted((e[0], e[1]) for e in expected_gle),
+		)
 
 		total_debit_amount = frappe.db.get_all(
 			"Journal Entry Account",
@@ -1592,10 +1595,11 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			order_by="account asc",
 		)
 
-		for i, gle in enumerate(gl_entries):
-			self.assertEqual(expected_gle[i][0], gle.account)
-			self.assertEqual(expected_gle[i][1], gle.debit)
-			self.assertEqual(expected_gle[i][2], gle.credit)
+		# DB account collation isn't portable across MariaDB/Postgres; compare order-independently.
+		self.assertEqual(
+			sorted((gle.account, gle.debit, gle.credit) for gle in gl_entries),
+			sorted((e[0], e[1], e[2]) for e in expected_gle),
+		)
 
 		# Create Purchase Invoice against Purchase Order
 		purchase_invoice = get_mapped_purchase_invoice(po.name)
@@ -1619,9 +1623,11 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			.run(as_dict=1)
 		)
 
-		for i, gle in enumerate(gl_entries):
-			self.assertEqual(expected_gle[i][0], gle.account)
-			self.assertEqual(expected_gle[i][1], gle.amount)
+		# DB account collation isn't portable across MariaDB/Postgres; compare order-independently.
+		self.assertEqual(
+			sorted((gle.account, gle.amount) for gle in gl_entries),
+			sorted((e[0], e[1]) for e in expected_gle),
+		)
 
 		payment_entry.load_from_db()
 		tax_allocated = sum(
@@ -3081,6 +3087,19 @@ def check_gl_entries(
 			query = query.select(gl[col])
 
 	gl_entries = query.run(as_dict=True)
+
+	# MariaDB and Postgres collate `account` differently, so the DB ordering of the rows isn't
+	# portable; sort both sides by every compared field (so ties resolve identically) before the
+	# positional check.
+	cols = additional_columns or []
+	gl_entries = sorted(
+		gl_entries,
+		key=lambda g: (g.account, g.debit, g.credit, str(g.posting_date), *(str(g[c]) for c in cols)),
+	)
+	expected_gle = sorted(
+		expected_gle,
+		key=lambda e: (e[0], e[1], e[2], str(getdate(e[3])), *(str(v) for v in e[4 : 4 + len(cols)])),
+	)
 
 	for i, gle in enumerate(gl_entries):
 		doc.assertEqual(expected_gle[i][0], gle.account)

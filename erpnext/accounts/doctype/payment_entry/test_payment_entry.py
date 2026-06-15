@@ -1753,9 +1753,18 @@ class TestPaymentEntry(ERPNextTestSuite):
 			.where((gle.voucher_no == self.voucher_no) & (gle.is_cancelled == 0))
 			.orderby(gle.account, gle.debit, gle.credit, order=frappe.qb.desc)
 		).run(as_dict=True)
-		for row in range(len(self.expected_gle)):
-			for field in ["account", "debit", "credit"]:
-				self.assertEqual(self.expected_gle[row][field], gl_entries[row][field])
+		# MariaDB and Postgres collate `account` differently, so the DB ordering isn't portable;
+		# sort both sides identically before the positional comparison.
+		fields = ["account", "debit", "credit"]
+
+		def _key(row):
+			return tuple(str(row[f]) for f in fields)
+
+		gl_entries = sorted(gl_entries, key=_key)
+		expected_gle = sorted(self.expected_gle, key=_key)
+		for row in range(len(expected_gle)):
+			for field in fields:
+				self.assertEqual(expected_gle[row][field], gl_entries[row][field])
 
 	def test_reverse_payment_reconciliation(self):
 		customer = create_customer(frappe.generate_hash(length=10), "INR")

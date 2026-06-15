@@ -2563,7 +2563,9 @@ class TestSalesInvoice(ERPNextTestSuite):
 			self.assertEqual(expected_values[gle.account][2], gle.credit)
 			debit_credit_diff += gle.debit - gle.credit
 
-		self.assertEqual(debit_credit_diff, 0)
+		# Postgres returns DECIMAL columns as float (DEC2FLOAT), so a debit-credit sum carries a
+		# tiny FP residue where MariaDB's DECIMAL arithmetic is exact; assert it's ~0.
+		self.assertAlmostEqual(debit_credit_diff, 0)
 
 		round_off_gle = frappe.db.get_value(
 			"GL Entry",
@@ -4602,7 +4604,8 @@ class TestSalesInvoice(ERPNextTestSuite):
 			{"account": "Temporary Opening - _TC", "debit": 0.0, "credit": 138.09, "is_opening": "Yes"},
 		]
 		self.assertEqual(len(actual), 4)
-		self.assertEqual(expected, actual)
+		# DB account collation isn't portable across MariaDB/Postgres; compare order-independently.
+		self.assertCountEqual(actual, expected)
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"enable_common_party_accounting": True})
 	def test_common_party_with_foreign_currency_jv(self):
@@ -5276,6 +5279,11 @@ def check_gl_entries(doc, voucher_no, expected_gle, posting_date, voucher_type="
 	gl_entries = q.run(as_dict=True)
 
 	doc.assertGreater(len(gl_entries), 0)
+
+	# MariaDB and Postgres collate `account` differently, so the DB ordering isn't portable;
+	# sort both sides identically (by the compared values) before the positional check.
+	gl_entries = sorted(gl_entries, key=lambda g: (g.account, g.debit, g.credit))
+	expected_gle = sorted(expected_gle, key=lambda e: (e[0], e[1], e[2]))
 
 	for i, gle in enumerate(gl_entries):
 		doc.assertEqual(expected_gle[i][0], gle.account)
