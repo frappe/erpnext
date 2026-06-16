@@ -28,7 +28,8 @@
   "detected_transaction_starting_index",
   "detected_transaction_ending_index",
   "section_break_yulq",
-  "column_mapping"
+  "column_mapping",
+  "pdf_tables"
  ],
  "fields": [
   {
@@ -127,6 +128,13 @@
    "fieldtype": "Table",
    "label": "Column Mapping",
    "options": "Bank Statement Import Log Column Map"
+  },
+  {
+   "description": "Per-table extraction data for PDF statements (rows, bbox, page image, column mapping). Edited via the banking app.",
+   "fieldname": "pdf_tables",
+   "fieldtype": "JSON",
+   "label": "PDF Tables",
+   "read_only": 1
   },
   {
    "default": "Not Started",
