@@ -22,9 +22,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
-	def tearDown(self):
-		frappe.flags.dont_execute_stock_reposts = False
-
 	def test_repost_time_slot(self):
 		repost_settings = frappe.get_doc("Stock Reposting Settings")
 
@@ -198,6 +195,7 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 	@ERPNextTestSuite.change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
 	def test_prevention_of_cancelled_transaction_riv(self):
 		frappe.flags.dont_execute_stock_reposts = True
+		self.addCleanup(frappe.flags.pop, "dont_execute_stock_reposts")
 
 		item = make_item()
 		warehouse = "_Test Warehouse - _TC"
