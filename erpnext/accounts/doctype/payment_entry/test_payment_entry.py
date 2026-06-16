@@ -1037,14 +1037,17 @@ class TestPaymentEntry(ERPNextTestSuite):
 				gle.credit_in_account_currency,
 				gle.debit_in_transaction_currency,
 				gle.credit_in_transaction_currency,
+				gle.transaction_currency,
+				gle.transaction_exchange_rate,
 			)
 			.orderby(gle.account)
 			.where(gle.voucher_no == payment_entry.name)
 			.run()
 		)
+		# transaction currency/rate come from the paid-from USD account (company currency is INR)
 		expected_gl_entries = (
-			(paid_from, 0.0, 8440.0, 0.0, 100.0, 0.0, 100.0),
-			("_Test Payable USD - _TC", 8440.0, 0.0, 100.0, 0.0, 100.0, 0.0),
+			(paid_from, 0.0, 8440.0, 0.0, 100.0, 0.0, 100.0, "USD", 84.4),
+			("_Test Payable USD - _TC", 8440.0, 0.0, 100.0, 0.0, 100.0, 0.0, "USD", 84.4),
 		)
 		self.assertEqual(gl_entries, expected_gl_entries)
 
