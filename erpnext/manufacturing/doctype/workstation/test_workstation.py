@@ -303,6 +303,28 @@ class TestWorkstationCoverage(ERPNextTestSuite):
 				"2024-01-01 18:00:00",
 			)
 
+	def test_is_within_operating_hours_exact_boundary(self):
+		# slot_length >= operation_length: an operation exactly as long as the 8h
+		# slot fits, one second longer does not. Pins the boundary comparison.
+		self._make_workstation_with_hours("_Test WS Cov Boundary", [("09:00:00", "17:00:00")])
+		with self.change_settings("Manufacturing Settings", allow_overtime=0):
+			# Exactly 8h -> fits (no exception).
+			is_within_operating_hours(
+				"_Test WS Cov Boundary",
+				"_Test WS Cov Op",
+				"2024-01-01 09:00:00",
+				"2024-01-01 17:00:00",
+			)
+			# 8h + 1s -> exceeds every slot.
+			self.assertRaises(
+				NotInWorkingHoursError,
+				is_within_operating_hours,
+				"_Test WS Cov Boundary",
+				"_Test WS Cov Op",
+				"2024-01-01 09:00:00",
+				"2024-01-01 17:00:01",
+			)
+
 	def test_is_within_operating_hours_no_working_hours_is_noop(self):
 		# With no working_hours rows the function returns early without raising.
 		doc = make_workstation({"workstation_name": "_Test WS Cov NoHours"})

@@ -2433,6 +2433,48 @@ class TestPaymentEntryTaxes(ERPNextTestSuite):
 		tax = self._append_tax(pe, "On Paid Amount", rate=10, add_deduct="Deduct", included=1)
 		self.assertAlmostEqual(pe.get_current_tax_fraction(tax), -0.10, places=4)
 
+	def _run_tax_engine(self, pe):
+		"""Drive the full Payment Entry tax engine on an unsaved doc:
+		initialize_taxes -> determine_exclusive_rate -> calculate_taxes.
+		This is the same sequence the save flow runs, exercising the inclusive
+		back-out end-to-end without needing a fully-wired submittable document."""
+		pe.set_amounts_in_company_currency()
+		pe.initialize_taxes()
+		pe.determine_exclusive_rate()
+		pe.calculate_taxes()
+
+	def test_inclusive_on_paid_amount_backs_out_via_calculate_taxes(self):
+		"""End-to-end: a 10% inclusive 'On Paid Amount' tax is backed OUT of the
+		gross 1100 (net 1000) by calculate_taxes -> tax_amount 100, not 110."""
+		pe = self._make_taxes_pe(paid_amount=1100)
+		self._append_tax(pe, "On Paid Amount", rate=10, included=1)
+
+		self._run_tax_engine(pe)
+
+		tax = pe.taxes[0]
+		self.assertTrue(int(tax.included_in_paid_amount))
+		# determine_exclusive_rate nets the gross down: 1100 / 1.10 = 1000.
+		self.assertAlmostEqual(flt(tax.tax_amount), 100.0, places=2)
+		self.assertAlmostEqual(flt(pe.total_taxes_and_charges), 100.0, places=2)
+		self.assertAlmostEqual(flt(pe.base_total_taxes_and_charges), 100.0, places=2)
+
+	def test_inclusive_vs_exclusive_via_calculate_taxes(self):
+		"""Same 10% rate on the same gross 1100 through the full engine: an
+		exclusive tax adds 110 on top, an inclusive one backs out 100 from
+		within, so the inclusive charge is strictly smaller."""
+
+		def charge_for(included):
+			pe = self._make_taxes_pe(paid_amount=1100)
+			self._append_tax(pe, "On Paid Amount", rate=10, included=included)
+			self._run_tax_engine(pe)
+			return flt(pe.taxes[0].tax_amount)
+
+		exclusive_tax = charge_for(0)
+		inclusive_tax = charge_for(1)
+		self.assertAlmostEqual(exclusive_tax, 110.0, places=2)
+		self.assertAlmostEqual(inclusive_tax, 100.0, places=2)
+		self.assertGreater(exclusive_tax, inclusive_tax)
+
 	def test_initialize_taxes_resets_computed_fields(self):
 		"""initialize_taxes zeroes the running fields and seeds paid_amount_after_tax."""
 		pe = self._make_taxes_pe(paid_amount=1000)

@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe.utils import flt
+from frappe.utils import add_days, flt, nowdate
 
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
@@ -71,6 +71,21 @@ class TestProductionPlanningReport(ERPNextTestSuite):
 
 	def _raw_material_codes(self, data):
 		return sorted({row.get("item_code") for row in data if row.get("item_code")})
+
+	def _ordered_names(self, data):
+		"""Distinct order ids in their order of first appearance.
+
+		Unlike _row_names this deliberately does NOT sort: it captures the
+		sequence the report's ORDER BY produced, so order_by behaviour can be
+		asserted. The report orders by a single distinct-valued column, so the
+		sequence is deterministic on both MariaDB and PostgreSQL.
+		"""
+		ordered = []
+		for row in data:
+			name = row.get("name")
+			if name and name not in ordered:
+				ordered.append(name)
+		return ordered
 
 	# -------------------------------------------------------------- work order
 	def test_execute_based_on_work_order(self):
@@ -161,11 +176,30 @@ class TestProductionPlanningReport(ERPNextTestSuite):
 			if row.get("item_code") in (self.rm_item_1, self.rm_item_2):
 				self.assertAlmostEqual(flt(row.get("required_qty")), 8.0, places=2)
 
-	def test_sales_order_order_by_branches(self):
-		"""Both order_by columns must still return the same order rows."""
-		so = make_sales_order(
+	def test_sales_order_order_by_actually_orders_rows(self):
+		"""order_by must order the rows, not just return the same set.
+
+		The report sorts Sales Orders by delivery_date ASC for "Delivery Date"
+		and by base_grand_total DESC for "Total Amount". Two orders whose
+		date-order is the opposite of their amount-order must come back in
+		opposite sequences.
+		"""
+		# SO A: earlier delivery (today), lower amount (2 * 100 = 200).
+		so_early_cheap = make_sales_order(
 			item_code=self.fg_item,
 			qty=2,
+			rate=100,
+			transaction_date=add_days(nowdate(), -10),
+			warehouse=WAREHOUSE,
+			company=COMPANY,
+			currency="INR",
+		)
+		# SO B: later delivery (today + 10), higher amount (10 * 100 = 1000).
+		so_late_pricey = make_sales_order(
+			item_code=self.fg_item,
+			qty=10,
+			rate=100,
+			transaction_date=nowdate(),
 			warehouse=WAREHOUSE,
 			company=COMPANY,
 			currency="INR",
@@ -174,19 +208,22 @@ class TestProductionPlanningReport(ERPNextTestSuite):
 		base_filters = {
 			"company": COMPANY,
 			"based_on": "Sales Order",
-			"docnames": [so.name],
+			"docnames": [so_early_cheap.name, so_late_pricey.name],
 		}
 
 		_c1, data_by_date = execute({**base_filters, "order_by": "Delivery Date"})
 		_c2, data_by_amount = execute({**base_filters, "order_by": "Total Amount"})
 
-		# Sort in the test; never rely on the report's own ordering.
-		self.assertIn(so.name, self._row_names(data_by_date))
-		self.assertIn(so.name, self._row_names(data_by_amount))
+		# Delivery Date ascending -> the earlier-delivery order comes first.
 		self.assertEqual(
-			self._row_names(data_by_date),
-			self._row_names(data_by_amount),
-			"both order_by columns must surface the same orders",
+			self._ordered_names(data_by_date),
+			[so_early_cheap.name, so_late_pricey.name],
+		)
+		# Total Amount descending -> the higher-amount order comes first: the
+		# exact opposite sequence, proving the ORDER BY is really applied.
+		self.assertEqual(
+			self._ordered_names(data_by_amount),
+			[so_late_pricey.name, so_early_cheap.name],
 		)
 
 	def test_total_amount_column_for_sales_order(self):
