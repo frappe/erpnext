@@ -22,6 +22,9 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
+	def tearDown(self):
+		frappe.flags.dont_execute_stock_reposts = False
+
 	def test_repost_time_slot(self):
 		repost_settings = frappe.get_doc("Stock Reposting Settings")
 
