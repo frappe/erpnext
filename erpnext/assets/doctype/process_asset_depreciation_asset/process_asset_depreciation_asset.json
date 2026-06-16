@@ -80,7 +80,7 @@
  "modified": "2026-06-15 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Assets",
- "name": "Pending Depreciation Asset",
+ "name": "Process Asset Depreciation Asset",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "creation",

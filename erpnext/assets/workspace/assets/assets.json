@@ -167,9 +167,9 @@
    "dependencies": "Asset",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Pending Depreciation",
+   "label": "Process Asset Depreciation",
    "link_count": 0,
-   "link_to": "Pending Depreciation Tool",
+   "link_to": "Process Asset Depreciation",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"

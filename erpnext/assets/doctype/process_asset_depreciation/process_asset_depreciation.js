@@ -1,7 +1,7 @@
 // Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on("Pending Depreciation Tool", {
+frappe.ui.form.on("Process Asset Depreciation", {
 	onload(frm) {
 		if (!frm.doc.company) {
 			frm.set_value("company", frappe.defaults.get_default("company"));
@@ -33,7 +33,7 @@ frappe.ui.form.on("Pending Depreciation Tool", {
 		if (!frm.doc.date) return;
 
 		frappe.call({
-			method: "erpnext.assets.doctype.pending_depreciation_tool.pending_depreciation_tool.get_pending_depreciation_assets",
+			method: "erpnext.assets.doctype.process_asset_depreciation.process_asset_depreciation.get_pending_depreciation_assets",
 			args: {
 				date: frm.doc.date,
 				company: frm.doc.company,
@@ -101,7 +101,7 @@ frappe.ui.form.on("Pending Depreciation Tool", {
 			]),
 			() => {
 				frappe.call({
-					method: "erpnext.assets.doctype.pending_depreciation_tool.pending_depreciation_tool.create_depreciation_entries",
+					method: "erpnext.assets.doctype.process_asset_depreciation.process_asset_depreciation.create_depreciation_entries",
 					args: { depr_schedule_names: names, date: frm.doc.date },
 					freeze: true,
 					freeze_message: __("Creating depreciation entries..."),

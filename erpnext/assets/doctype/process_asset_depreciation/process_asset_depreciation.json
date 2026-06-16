@@ -49,7 +49,7 @@
    "fieldname": "assets",
    "fieldtype": "Table",
    "label": "Assets",
-   "options": "Pending Depreciation Asset"
+   "options": "Process Asset Depreciation Asset"
   }
  ],
  "hide_toolbar": 1,
@@ -59,7 +59,7 @@
  "modified": "2026-06-15 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Assets",
- "name": "Pending Depreciation Tool",
+ "name": "Process Asset Depreciation",
  "owner": "Administrator",
  "permissions": [
   {

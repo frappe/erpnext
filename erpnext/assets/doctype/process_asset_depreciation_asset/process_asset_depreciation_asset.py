@@ -4,7 +4,7 @@
 from frappe.model.document import Document
 
 
-class PendingDepreciationAsset(Document):
+class ProcessAssetDepreciationAsset(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 

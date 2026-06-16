@@ -17,7 +17,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 )
 
 
-class PendingDepreciationTool(Document):
+class ProcessAssetDepreciation(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
@@ -26,12 +26,12 @@ class PendingDepreciationTool(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.assets.doctype.pending_depreciation_asset.pending_depreciation_asset import (
-			PendingDepreciationAsset,
+		from erpnext.assets.doctype.process_asset_depreciation_asset.process_asset_depreciation_asset import (
+			ProcessAssetDepreciationAsset,
 		)
 
 		asset_category: DF.Link | None
-		assets: DF.Table[PendingDepreciationAsset]
+		assets: DF.Table[ProcessAssetDepreciationAsset]
 		company: DF.Link | None
 		date: DF.Date | None
 		finance_book: DF.Link | None

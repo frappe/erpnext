@@ -7,14 +7,14 @@ from erpnext.assets.doctype.asset.test_asset import create_asset
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
 )
-from erpnext.assets.doctype.pending_depreciation_tool.pending_depreciation_tool import (
+from erpnext.assets.doctype.process_asset_depreciation.process_asset_depreciation import (
 	create_depreciation_entries,
 	get_pending_depreciation_assets,
 )
 from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestPendingDepreciationTool(ERPNextTestSuite):
+class TestProcessAssetDepreciation(ERPNextTestSuite):
 	def setUp(self):
 		# Asset with 3 monthly depreciations starting 2023-01-31
 		self.asset = create_asset(
