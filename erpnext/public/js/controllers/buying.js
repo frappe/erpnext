@@ -474,8 +474,8 @@ erpnext.buying = {
 			}
 
 			purchase_partner() {
-			this.calculate_purchase_commission();
-		}
+				this.calculate_purchase_commission();
+			}
 
 		commission_rate() {
 			if (
@@ -509,8 +509,7 @@ erpnext.buying = {
 		calculate_purchase_commission() {
 			if (!this.frm.fields_dict.commission_rate || this.frm.doc.docstatus === 1) return;
 
-			if (this.frm.doc.commission_rate > 100) {
-				this.frm.set_value("commission_rate", 100);
+			if (this.frm.doc.commission_rate < 0 || this.frm.doc.commission_rate > 100) {
 				frappe.throw(
 					`${__(
 						frappe.meta.get_label(
@@ -518,7 +517,7 @@ erpnext.buying = {
 							"commission_rate",
 							this.frm.doc.name
 						)
-					)} ${__("cannot be greater than 100")}`
+					)} ${__("must be between 0 and 100")}`
 				);
 			}
 

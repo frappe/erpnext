@@ -328,6 +328,7 @@ def install(country=None):
 		("Industry Type", "industry", "industry_type.txt"),
 		("UTM Source", "name", "marketing_source.txt"),
 		("Sales Partner Type", "sales_partner_type", "sales_partner_type.txt"),
+		("Purchase Partner Type", "purchase_partner_type", "purchase_partner_type.txt"),
 	):
 		records += [{"doctype": doctype, title_field: title} for title in read_lines(filename)]
 

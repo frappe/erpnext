@@ -15,7 +15,7 @@
  "name": "Purchase Partners Commission",
  "owner": "Administrator",
  "prepared_report": 0,
- "query": "SELECT\n   purchase_partner as \"Purchase Partner:Link/Purchase Partner:220\",\n   sum(base_net_total) as \"Invoiced Amount (Excl. Tax):Currency:220\",\n   sum(amount_eligible_for_commission) as \"Amount Eligible for Commission:Currency:220\",\n   sum(total_commission) as \"Total Commission:Currency:170\",\n   sum(total_commission)*100 / sum(amount_eligible_for_commission) as \"Average Commission Rate:Percent:220\"\nFROM\n   `tabPurchase Invoice`\nWHERE\n   docstatus = 1\n   AND IFNULL(base_net_total, 0) > 0\n   AND IFNULL(total_commission, 0) > 0\nGROUP BY\n   purchase_partner\nORDER BY\n   sum(total_commission) DESC",
+ "query": "SELECT\n   purchase_partner as \"Purchase Partner:Link/Purchase Partner:220\",\n   sum(base_net_total) as \"Invoiced Amount (Excl. Tax):Currency:220\",\n   sum(amount_eligible_for_commission) as \"Amount Eligible for Commission:Currency:220\",\n   sum(total_commission) as \"Total Commission:Currency:170\",\n   sum(total_commission)*100 / NULLIF(sum(amount_eligible_for_commission), 0) as \"Average Commission Rate:Percent:220\"\nFROM\n   `tabPurchase Invoice`\nWHERE\n   docstatus = 1\n   AND IFNULL(base_net_total, 0) > 0\n   AND IFNULL(total_commission, 0) > 0\nGROUP BY\n   purchase_partner\nORDER BY\n   sum(total_commission) DESC",
  "ref_doctype": "Purchase Invoice",
  "report_name": "Purchase Partners Commission",
  "report_type": "Query Report",

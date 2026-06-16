@@ -391,9 +391,7 @@ class BuyingController(SubcontractingController):
 		self.round_floats_in(self, ("amount_eligible_for_commission", "commission_rate"))
 
 		if not (0 <= self.commission_rate <= 100.0):
-			from frappe import throw
-
-			throw(
+			frappe.throw(
 				"{} {}".format(
 					_(self.meta.get_label("commission_rate")),
 					_("must be between 0 and 100"),

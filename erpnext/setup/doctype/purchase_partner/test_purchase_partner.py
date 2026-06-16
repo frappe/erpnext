@@ -2,7 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase
 
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.tests.utils import ERPNextTestSuite
