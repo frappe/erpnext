@@ -382,7 +382,7 @@ function ListViewInner<TData>({
                                 <div
                                     key={header.id}
                                     className={cn(
-                                        "text-ink-gray-5 group relative flex min-w-0 items-center px-1 text-sm",
+                                        "text-ink-gray-5 group relative flex min-w-0 items-center px-0 text-sm",
                                         alignClass(meta),
                                     )}
                                     role="columnheader"
@@ -397,7 +397,7 @@ function ListViewInner<TData>({
                                             <span
                                                 aria-hidden
                                                 className={cn(
-                                                    "pointer-events-none absolute ltr:right-0 rtl:left-0 z-1 w-0.5 bg-gray-400",
+                                                    "pointer-events-none absolute ltr:-right-2 rtl:-left-2 z-1 w-0.5 bg-gray-400",
                                                     "opacity-0 transition-[opacity,background-color] ease-in-out duration-150",
                                                     "group-hover:opacity-100 group-hover:bg-gray-400",
                                                     header.column.getIsResizing() && "bg-outline-gray-6 opacity-100",
@@ -421,7 +421,7 @@ function ListViewInner<TData>({
                                                     header.getResizeHandler()(e)
                                                 }}
                                                 onTouchStart={header.getResizeHandler()}
-                                                className="absolute top-0 ltr:right-0 rtl:left-0 z-10 h-full w-2 max-w-[12px] cursor-col-resize touch-none select-none bg-transparent"
+                                                className="absolute top-0 ltr:-right-2 rtl:-left-2 z-10 h-full w-2 max-w-[12px] cursor-col-resize touch-none select-none bg-transparent"
                                             />
                                         </>
                                     ) : null}

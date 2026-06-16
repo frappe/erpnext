@@ -53,7 +53,7 @@ const OpeningBalance = () => {
 
     return <StatContainer className="min-w-48">
         <StatLabel>{_("Opening Balance")}</StatLabel>
-        {isLoading ? <Skeleton className="w-[150px] h-9" /> : <StatValue className="font-numeric">{formatCurrency(flt(data?.message, 2), bankAccount?.account_currency ?? getCompanyCurrency(bankAccount?.company ?? ''))}</StatValue>}
+        {isLoading ? <Skeleton className="w-[150px] h-5 rounded-sm" /> : <StatValue className="font-numeric">{formatCurrency(flt(data?.message, 2), bankAccount?.account_currency ?? getCompanyCurrency(bankAccount?.company ?? ''))}</StatValue>}
     </StatContainer>
 }
 
@@ -86,7 +86,7 @@ const ClosingBalance = () => {
                 </HoverCard>
 
             </div>
-            {isLoading ? <Skeleton className="w-[150px] h-9" /> : <StatValue className="font-numeric">{formatCurrency(flt(data?.message, 2), bankAccount?.account_currency ?? getCompanyCurrency(bankAccount?.company ?? ''))}</StatValue>}
+            {isLoading ? <Skeleton className="w-[150px] h-5 rounded-sm" /> : <StatValue className="font-numeric">{formatCurrency(flt(data?.message, 2), bankAccount?.account_currency ?? getCompanyCurrency(bankAccount?.company ?? ''))}</StatValue>}
         </StatContainer>
     )
 }
@@ -104,7 +104,7 @@ const Difference = () => {
 
     return <StatContainer className="w-fit text-end sm:min-w-56">
         <StatLabel className="text-end">{_("Difference")}</StatLabel>
-        {isLoading ? <Skeleton className="w-[150px] h-9" /> : <StatValue className={isError ? 'text-ink-red-3 font-numeric' : 'font-numeric'}>
+        {isLoading ? <Skeleton className="w-[150px] h-5 self-end rounded-sm" /> : <StatValue className={isError ? 'text-ink-red-3 font-numeric' : 'font-numeric'}>
             {formatCurrency(difference,
                 bankAccount?.account_currency ?? getCompanyCurrency(bankAccount?.company ?? ''))
             }</StatValue>}
@@ -175,7 +175,7 @@ const ClosingBalanceAsPerStatement = () => {
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <div className="flex items-center gap-4 underline cursor-pointer underline-offset-6" role="button">
-                                {isLoading ? <Skeleton className="w-[150px] h-9" /> : <StatValue className="font-numeric">{formatCurrency(flt(data?.message?.balance, 2), bankAccount?.account_currency ?? getCompanyCurrency(bankAccount?.company ?? ''))}</StatValue>}
+                                {isLoading ? <Skeleton className="w-[150px] h-5 rounded-sm" /> : <StatValue className="font-numeric">{formatCurrency(flt(data?.message?.balance, 2), bankAccount?.account_currency ?? getCompanyCurrency(bankAccount?.company ?? ''))}</StatValue>}
                                 <Edit className="w-4 h-4" />
                             </div>
                         </TooltipTrigger>
