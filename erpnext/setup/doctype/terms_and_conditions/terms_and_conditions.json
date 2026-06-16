@@ -142,8 +142,6 @@
   {
    "read": 1,
    "role": "Stock User"
-<<<<<<< HEAD
-=======
   },
   {
    "role": "HR User",
@@ -163,7 +161,6 @@
    "report": 1,
    "role": "Accounts User",
    "share": 1
->>>>>>> 0ba2961103 (fix: updated role based permission for terms and conditions doctype (#55674))
   }
  ],
  "quick_entry": 1,
