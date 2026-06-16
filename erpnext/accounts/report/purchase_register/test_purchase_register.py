@@ -114,22 +114,10 @@ class TestPurchaseRegister(ERPNextTestSuite):
 		local_invoice.db_set("outstanding_amount", 200.456)
 		columns, data, *_ = execute(frappe._dict({"company": foreign_invoice.company}))
 		outstanding_precision = 2
-		for row in data:
-			if row.get("invoice") == foreign_invoice.name:
-				expected_value = flt(
-					foreign_invoice.outstanding_amount * (foreign_invoice.conversion_rate or 1),
-					outstanding_precision,
-				)
-				self.assertEqual(row.get("outstanding_amount"), expected_value)
-				self.assertEqual(
-					row.get("outstanding_amount"), round(row.get("outstanding_amount"), outstanding_precision)
-				)
-			if row.get("invoice") == local_invoice.name:
-				expected_value = flt(
-					local_invoice.outstanding_amount * (local_invoice.conversion_rate or 1),
-					outstanding_precision,
-				)
-				self.assertEqual(row.get("outstanding_amount"), expected_value)
+
+		data_by_name = {x.get("voucher_no"): x.get("outstanding_amount") for x in data}
+		self.assertEqual(data_by_name.get(foreign_invoice.name), flt((100.236 * 80), outstanding_precision))
+		self.assertEqual(data_by_name.get(local_invoice.name), flt(200.456, outstanding_precision))
 
 	def test_purchase_register_ledger_view(self):
 		filters = frappe._dict(
