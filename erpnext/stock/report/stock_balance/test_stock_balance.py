@@ -202,6 +202,7 @@ class TestStockBalance(ERPNextTestSuite):
 
 	def test_alt_uom_balance_uses_first_alternate_uom(self):
 		"""When an item has multiple alt UOMs, only the first (lowest idx) is shown."""
+		frappe.get_doc({"doctype": "UOM", "uom_name": "Carton"}).insert(ignore_if_duplicate=True)
 		self.item.append("uoms", {"conversion_factor": 12, "uom": "Box"})
 		self.item.append("uoms", {"conversion_factor": 144, "uom": "Carton"})
 		self.item.save()

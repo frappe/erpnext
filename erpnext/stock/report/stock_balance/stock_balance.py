@@ -614,7 +614,11 @@ class StockBalanceReport:
 			return
 
 		bal_qty_idx = next(
-			(i for i, col in enumerate(self.columns) if isinstance(col, dict) and col.get("fieldname") == "bal_qty"),
+			(
+				i
+				for i, col in enumerate(self.columns)
+				if isinstance(col, dict) and col.get("fieldname") == "bal_qty"
+			),
 			None,
 		)
 		if bal_qty_idx is None:
