@@ -1694,7 +1694,7 @@ def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str
 
 	inspection_fieldname = inspection_fieldname_map.get(doctype)
 	if inspection_fieldname is None:
-		return []
+		return items if doctype == "Stock Entry" else []
 
 	allow_after_transaction = cint(docstatus) == 1 and frappe.get_single_value(
 		"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"
@@ -1719,7 +1719,7 @@ def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str
 
 
 @frappe.whitelist()
-def make_quality_inspections(company, doctype, docname, items):
+def make_quality_inspections(company, doctype, docname, items, inspection_type):
 	if isinstance(items, str):
 		items = json.loads(items)
 
@@ -1740,7 +1740,7 @@ def make_quality_inspections(company, doctype, docname, items):
 			{
 				"company": company,
 				"doctype": "Quality Inspection",
-				"inspection_type": "Incoming",
+				"inspection_type": inspection_type,
 				"inspected_by": frappe.session.user,
 				"reference_type": doctype,
 				"reference_name": docname,
