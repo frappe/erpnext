@@ -17,6 +17,7 @@ frappe.ui.form.on("Budget", {
 				filters: {
 					is_group: 0,
 					company: frm.doc.company,
+					root_type: ["in", ["Income", "Expense"]],
 				},
 			};
 		});
