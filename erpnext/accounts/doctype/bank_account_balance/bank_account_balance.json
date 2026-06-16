@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "allow_rename": 1,
  "creation": "2026-04-11 19:48:13.622253",
  "doctype": "DocType",
@@ -7,7 +8,8 @@
  "field_order": [
   "bank_account",
   "date",
-  "balance"
+  "balance",
+  "company"
  ],
  "fields": [
   {
@@ -31,12 +33,20 @@
    "in_list_view": 1,
    "label": "Balance",
    "reqd": 1
+  },
+  {
+   "fetch_from": "bank_account.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-11 19:49:45.374695",
+ "modified": "2026-06-16 22:17:48.007982",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Account Balance",

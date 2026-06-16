@@ -250,7 +250,7 @@ const ClosingBalanceForm = ({ defaultBalance, date, bankAccount, onClose }: { de
                     {_("Enter the closing balance you see in your bank statement for {0} as of the {1}", [bankAccount?.account_name ?? bankAccount?.name ?? '', formatDate(date, 'Do MMM YYYY')])}
                 </DialogDescription>
             </DialogHeader>
-            {error && <ErrorBanner error={error} />}
+            {error && <div className="py-2"><ErrorBanner error={error} /></div>}
             <div className="py-4">
                 <CurrencyFormField
                     name="balance"

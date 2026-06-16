@@ -194,8 +194,6 @@ def set_closing_balance_as_per_statement(bank_account: str, date: str | datetime
 	Set the closing balance as per statement for a bank account and date
 	"""
 
-	frappe.has_permission("Bank Account", doc=bank_account, ptype="write", throw=True)
-
 	existing = frappe.db.exists("Bank Account Balance", {"bank_account": bank_account, "date": date})
 
 	if existing:
