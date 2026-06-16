@@ -429,9 +429,15 @@ def _resolve_transfer_qty(desire_to_transfer, pending_to_issue, can_transfer):
 
 
 def get_transferred_qty(material_request):
+	from pypika import Case
+
+	se = frappe.qb.DocType("Stock Entry")
 	sed = frappe.qb.DocType("Stock Entry Detail")
+	completed_qty = Case().when(se.add_to_transit == 1, sed.transferred_qty).else_(sed.transfer_qty)
 	return (
 		frappe.qb.from_(sed)
-		.select(Sum(sed.transfer_qty).as_("transfer_qty"), Sum(sed.transferred_qty).as_("transferred_qty"))
+		.inner_join(se)
+		.on(se.name == sed.parent)
+		.select(Sum(sed.transfer_qty).as_("transfer_qty"), Sum(completed_qty).as_("transferred_qty"))
 		.where((sed.material_request == material_request) & (sed.docstatus == 1))
 	).run(as_dict=True)[0]

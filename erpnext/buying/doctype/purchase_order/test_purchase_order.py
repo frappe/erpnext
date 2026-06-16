@@ -477,10 +477,8 @@ class TestPurchaseOrder(ERPNextTestSuite):
 			item_doc.save()
 		else:
 			# update valid from
-			frappe.db.sql(
-				"""UPDATE `tabItem Tax` set valid_from = CURRENT_DATE
-				where parent = %(item)s and item_tax_template = %(tax)s""",
-				{"item": item, "tax": tax_template},
+			frappe.db.set_value(
+				"Item Tax", {"parent": item, "item_tax_template": tax_template}, "valid_from", nowdate()
 			)
 
 		po = create_purchase_order(item_code=item, qty=1, do_not_save=1)
@@ -527,10 +525,8 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(po.taxes[1].total, 840)
 
 		# teardown
-		frappe.db.sql(
-			"""UPDATE `tabItem Tax` set valid_from = NULL
-			where parent = %(item)s and item_tax_template = %(tax)s""",
-			{"item": item, "tax": tax_template},
+		frappe.db.set_value(
+			"Item Tax", {"parent": item, "item_tax_template": tax_template}, "valid_from", None
 		)
 		po.cancel()
 		po.delete()
@@ -652,7 +648,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 	def test_purchase_order_on_hold(self):
 		po = create_purchase_order(item_code="_Test Product Bundle Item")
-		po.db_set("Status", "On Hold")
+		po.db_set("status", "On Hold")
 		pi = make_pi_from_po(po.name)
 		pr = make_purchase_receipt(po.name)
 		self.assertRaises(frappe.ValidationError, pr.submit)

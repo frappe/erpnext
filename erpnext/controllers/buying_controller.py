@@ -416,20 +416,21 @@ class BuyingController(SubcontractingController):
 		stock_and_asset_items_qty, stock_and_asset_items_amount = 0, 0
 		last_item_idx = 1
 		for d in self.get("items"):
-			if d.item_code and d.item_code in stock_and_asset_items:
+			if d.item_code:
 				stock_and_asset_items_qty += flt(d.qty)
 				stock_and_asset_items_amount += flt(d.base_net_amount)
 
 			last_item_idx = d.idx
 
 		tax_accounts, total_valuation_amount, total_actual_tax_amount = self.get_tax_details()
+		remaining_amount = total_actual_tax_amount
 
 		for i, item in enumerate(self.get("items")):
 			if item.item_code and (item.qty or item.get("rejected_qty")):
 				item_tax_amount, actual_tax_amount = 0.0, 0.0
 				if i == (last_item_idx - 1):
 					item_tax_amount = total_valuation_amount
-					actual_tax_amount = total_actual_tax_amount
+					actual_tax_amount = remaining_amount
 				else:
 					# calculate item tax amount
 					item_tax_amount = self.get_item_tax_amount(item, tax_accounts)
@@ -442,7 +443,8 @@ class BuyingController(SubcontractingController):
 							stock_and_asset_items_amount,
 							stock_and_asset_items_qty,
 						)
-						total_actual_tax_amount -= actual_tax_amount
+
+						remaining_amount -= actual_tax_amount
 
 				# This code is required here to calculate the correct valuation for stock items
 				if item.item_code not in stock_and_asset_items:

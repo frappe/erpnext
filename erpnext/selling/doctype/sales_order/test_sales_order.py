@@ -907,10 +907,8 @@ class TestSalesOrder(ERPNextTestSuite):
 			item_doc.save()
 		else:
 			# update valid from
-			frappe.db.sql(
-				"""UPDATE `tabItem Tax` set valid_from = CURRENT_DATE
-				where parent = %(item)s and item_tax_template = %(tax)s""",
-				{"item": item, "tax": tax_template},
+			frappe.db.set_value(
+				"Item Tax", {"parent": item, "item_tax_template": tax_template}, "valid_from", nowdate()
 			)
 
 		so = make_sales_order(item_code=item, qty=1, do_not_save=1)
@@ -960,10 +958,8 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(so.taxes[1].total, 480)
 
 		# teardown
-		frappe.db.sql(
-			"""UPDATE `tabItem Tax` set valid_from = NULL
-			where parent = %(item)s and item_tax_template = %(tax)s""",
-			{"item": item, "tax": tax_template},
+		frappe.db.set_value(
+			"Item Tax", {"parent": item, "item_tax_template": tax_template}, "valid_from", None
 		)
 		so.cancel()
 		so.delete()
@@ -1557,11 +1553,12 @@ class TestSalesOrder(ERPNextTestSuite):
 
 		# Check if Work Orders were raised
 		for item in so_item_name:
-			wo_qty = frappe.db.sql(
-				"select sum(qty) from `tabWork Order` where sales_order=%s and sales_order_item=%s",
-				(so.name, item),
+			wo_qty = frappe.get_all(
+				"Work Order",
+				filters={"sales_order": so.name, "sales_order_item": item},
+				fields=[{"SUM": "qty", "as": "qty"}],
 			)
-			self.assertEqual(wo_qty[0][0], so_item_name.get(item))
+			self.assertEqual(wo_qty[0].qty, so_item_name.get(item))
 
 	def test_advance_payment_entry_unlink_against_sales_order(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
@@ -1740,9 +1737,7 @@ class TestSalesOrder(ERPNextTestSuite):
 		mr_dict["include_exploded_items"] = 0
 		mr_dict["ignore_existing_ordered_qty"] = 1
 		make_raw_material_request(mr_dict, so.company, so.name)
-		mr = frappe.db.sql(
-			"""select name from `tabMaterial Request` ORDER BY creation DESC LIMIT 1""", as_dict=1
-		)[0]
+		mr = frappe.get_all("Material Request", fields=["name"], order_by="creation desc", limit=1)[0]
 		mr_doc = frappe.get_doc("Material Request", mr.get("name"))
 		self.assertEqual(mr_doc.items[0].sales_order, so.name)
 
