@@ -209,11 +209,7 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 5,
-<<<<<<< HEAD
- "modified": "2023-11-09 12:17:28.339975",
-=======
  "modified": "2026-06-16 16:01:26.556324",
->>>>>>> 62f6d18143 (fix(stock): show only batched items in batch item selector)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",
