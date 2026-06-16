@@ -22,6 +22,19 @@ frappe.ui.form.on("Budget", {
 			};
 		});
 
+<<<<<<< HEAD
+=======
+		frm.set_query("account", function () {
+			return {
+				filters: {
+					is_group: 0,
+					company: frm.doc.company,
+					root_type: ["in", ["Income", "Expense"]],
+				},
+			};
+		});
+
+>>>>>>> 52b406f5f1 (fix(budget): add root_type filter on account field (#55934))
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
