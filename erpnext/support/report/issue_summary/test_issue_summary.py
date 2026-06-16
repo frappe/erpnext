@@ -18,17 +18,6 @@ def create_issue_priority(priority):
 		frappe.get_doc({"doctype": "Issue Priority", "name": priority}).insert(ignore_permissions=True)
 
 
-def create_customer(customer_name):
-	if not frappe.db.exists("Customer", customer_name):
-		frappe.get_doc(
-			{
-				"doctype": "Customer",
-				"customer_name": customer_name,
-			}
-		).insert(ignore_permissions=True)
-	return customer_name
-
-
 def create_user(email):
 	if not frappe.db.exists("User", email):
 		frappe.get_doc(
@@ -90,8 +79,10 @@ class TestIssueSummary(ERPNextTestSuite):
 		self.from_date = add_days(self.today, -5)
 		self.to_date = add_days(self.today, 5)
 
-		self.customer_a = create_customer("_Test Issue Summary Customer A")
-		self.customer_b = create_customer("_Test Issue Summary Customer B")
+		# Reuse the bootstrap customer masters (tests/utils.py) instead of creating new ones;
+		# the report only groups by the customer link, so any two distinct customers work.
+		self.customer_a = "_Test Customer"
+		self.customer_b = "_Test Customer 1"
 		self.assignee = create_user("issue_summary_assignee@example.com")
 
 		# Customer A: 2 Bug / High issues (1 Open, 1 Closed)

@@ -7,7 +7,6 @@ from frappe.utils import flt, getdate
 
 from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice as make_pi_from_po
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
-from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 from erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_variable import (
 	VariablePathNotFound,
 	get_cost_of_delayed_shipments,
@@ -96,9 +95,14 @@ class TestSupplierScorecardVariableMetrics(ERPNextTestSuite):
 	company currency (conversion_rate == 1), which holds for ``_Test Company``.
 	"""
 
-	# Fixed past window fully inside the auto-created test fiscal years.
+	# Fixed past window fully inside the auto-created test fiscal years. The window
+	# (plus per-test rollback) is what isolates these metrics: no other test books
+	# POs/PRs for "_Test Supplier" in July 2023, so the date-bounded queries only
+	# ever see the documents created here. We reuse the bootstrap "_Test Supplier"
+	# and "_Test Item" masters rather than creating new ones.
 	START_DATE = "2023-07-01"
 	END_DATE = "2023-07-31"
+	SUPPLIER = "_Test Supplier"
 
 	def _scorecard(self, supplier):
 		return frappe._dict(
@@ -151,7 +155,7 @@ class TestSupplierScorecardVariableMetrics(ERPNextTestSuite):
 
 		Returns (scorecard, supplier).
 		"""
-		supplier = create_supplier(supplier_name=frappe.generate_hash(length=10)).name
+		supplier = self.SUPPLIER
 
 		po_a = self._make_po(supplier, qty=10, rate=100, schedule_date="2023-07-10")
 		po_b = self._make_po(supplier, qty=5, rate=200, schedule_date="2023-07-20")
@@ -186,7 +190,7 @@ class TestSupplierScorecardVariableMetrics(ERPNextTestSuite):
 
 	def test_metrics_isolated_to_window(self):
 		"""A PO scheduled outside the window must not be counted."""
-		supplier = create_supplier(supplier_name=frappe.generate_hash(length=10)).name
+		supplier = self.SUPPLIER
 		self._make_po(supplier, qty=7, rate=100, schedule_date="2023-07-15")
 		# Scheduled in August -> outside the July window.
 		self._make_po(supplier, qty=3, rate=100, schedule_date="2023-08-15")
@@ -246,7 +250,7 @@ class TestSupplierScorecardVariableMetrics(ERPNextTestSuite):
 
 	def test_undelivered_item_workdays_and_days_late(self):
 		"""A submitted-but-unreceived PO drives the received_qty < qty branch."""
-		supplier = create_supplier(supplier_name=frappe.generate_hash(length=10)).name
+		supplier = self.SUPPLIER
 		# qty 4, scheduled 2023-07-15, never received -> received_qty 0 < 4.
 		self._make_po(supplier, qty=4, rate=100, schedule_date="2023-07-15")
 		sc = self._scorecard(supplier)
@@ -260,7 +264,7 @@ class TestSupplierScorecardVariableMetrics(ERPNextTestSuite):
 	# ----- Purchase Invoice based qty -----
 
 	def test_invoiced_qty(self):
-		supplier = create_supplier(supplier_name=frappe.generate_hash(length=10)).name
+		supplier = self.SUPPLIER
 		po = self._make_po(supplier, qty=8, rate=100, schedule_date="2023-07-12")
 
 		pi = make_pi_from_po(po.name)
@@ -275,7 +279,7 @@ class TestSupplierScorecardVariableMetrics(ERPNextTestSuite):
 	# ----- empty-supplier guards (defaults) -----
 
 	def test_zero_defaults_for_unknown_supplier(self):
-		sc = self._scorecard(create_supplier(supplier_name=frappe.generate_hash(length=10)).name)
+		sc = self._scorecard(self.SUPPLIER)
 
 		self.assertEqual(get_total_shipments(sc), 0)
 		self.assertEqual(get_total_received(sc), 0)
