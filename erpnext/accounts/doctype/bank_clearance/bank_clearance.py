@@ -90,7 +90,14 @@ class BankClearance(Document):
 
 	@frappe.whitelist()
 	def update_clearance_date(self):
-		clearance_date_updated = False
+		payment_docs = []
+		for d in self.get("payment_entries"):
+			if d.payment_document not in payment_docs:
+				payment_docs.append(d.payment_document)
+
+		for doctype in payment_docs:
+			frappe.has_permission(doctype, "write", throw=True)
+
 		for d in self.get("payment_entries"):
 			if d.clearance_date:
 				if not d.payment_document:

@@ -15,7 +15,7 @@ from frappe.query_builder import DocType
 from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import cint, flt
 
-from erpnext.accounts.party import get_due_date
+from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_due_date
 from erpnext.controllers.accounts_controller import get_taxes_and_charges, merge_taxes
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.stock.stock_ledger import validate_reserved_stock
@@ -1405,8 +1405,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			doctype: {
 				"doctype": target_doctype,
 				"postprocess": update_details,
-				"field_no_map": ["taxes_and_charges", "set_warehouse"],
-				"field_map": {"shipping_address_name": "shipping_address"},
+				"field_no_map": [*CROSS_PARTY_FIELD_NO_MAP, "set_warehouse"],
 			},
 			doctype + " Item": {
 				"doctype": target_doctype + " Item",
