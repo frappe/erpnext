@@ -484,6 +484,12 @@ class JournalEntry(AccountsController):
 							d.idx, d.account, d.party_type
 						)
 					)
+			elif d.party_type or d.party:
+				frappe.throw(
+					_(
+						"Row {0}: Party Type or Party can only be set for Receivable / Payable account, but account {1} is of type {2}"
+					).format(d.idx, d.account, account_type or _("None"))
+				)
 
 	def check_credit_limit(self):
 		customers = list(

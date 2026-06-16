@@ -662,6 +662,13 @@ class TestJournalEntry(ERPNextTestSuite):
 		jv.save()
 		self.assertRaises(frappe.ValidationError, jv.submit)
 
+	def test_party_not_allowed_for_non_receivable_payable_account(self):
+		customer = make_customer("_Test New Customer")
+		jv = make_journal_entry(account1="_Test Cash - _TC", account2="_Test Bank - _TC", amount=100, save=False)
+		jv.accounts[0].party_type = "Customer"
+		jv.accounts[0].party = customer
+		self.assertRaises(frappe.ValidationError, jv.save)
+
 	def test_validate_reference_doc_debit_against_sales_order_throws(self):
 		"""Characterize: a debit entry linked to a Sales Order is rejected."""
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
