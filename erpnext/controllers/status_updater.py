@@ -647,13 +647,26 @@ class StatusUpdater(Document):
 		update_data = {}
 
 		if args.get("target_parent_field"):
-			update_data[args.get("target_parent_field")] = self._calculate_target_parent_percentage(
-				args["name"],
-				args["target_parent_dt"],
-				args["target_dt"],
-				args["target_ref_field"],
-				args["target_field"],
-			)
+
+			quantity_based_billing = (
+            args.get("target_parent_dt") == "Delivery Note"
+            and frappe.db.get_single_value("Selling Settings", "quantity_based_billing_percentage")
+        	)
+
+			if quantity_based_billing:
+				total_qty = flt(args.get("total_qty", 0))
+				total_invoiced_qty = flt(args.get("total_invoiced_qty", 0))
+				per_billed = (total_invoiced_qty / total_qty * 100) if total_qty > 0 else 0
+				update_data[args.get("target_parent_field")] = per_billed
+
+			else:
+				update_data[args.get("target_parent_field")] = self._calculate_target_parent_percentage(
+					args["name"],
+					args["target_parent_dt"],
+					args["target_dt"],
+					args["target_ref_field"],
+					args["target_field"],
+				)
 			# update field
 			if args.get("status_field"):
 				update_data[args.get("status_field")] = self._determine_status(

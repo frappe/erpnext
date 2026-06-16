@@ -6,6 +6,7 @@ import json
 import frappe
 from frappe import _, bold
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
+from frappe.query_builder.functions import Sum
 
 import erpnext
 from erpnext.accounts.general_ledger import (
@@ -309,14 +310,33 @@ class StockController(AccountsController):
 
 	def update_billing_percentage(self, update_modified=True):
 		target_ref_field = "amount"
+		target_field = "billed_amt"
+
+		total_amount = total_returned = 0
+		total_qty = total_invoiced_qty = 0
+
 		if self.doctype == "Delivery Note":
-			total_amount = total_returned = 0
 			for item in self.items:
 				total_amount += flt(item.amount)
 				total_returned += flt(item.returned_qty * item.rate)
+				total_qty += flt(item.qty)           
 
-			if total_returned < total_amount:
-				target_ref_field = {"SUB": ["amount", {"MUL": ["returned_qty", "rate"]}], "as": "ref_amount"}
+				Sales_Invoice_Item = frappe.qb.DocType("Sales Invoice Item")
+				invoiced_qty = (
+					frappe.qb.from_(Sales_Invoice_Item)
+					.select(Sum(Sales_Invoice_Item.qty))
+					.where(
+						(Sales_Invoice_Item.dn_detail == item.name)
+						& (Sales_Invoice_Item.docstatus == 1)
+						& (Sales_Invoice_Item.delivery_note == self.name)
+        				& (Sales_Invoice_Item.item_code == item.item_code)
+					)
+				).run()
+				total_invoiced_qty += flt(invoiced_qty[0][0] if invoiced_qty else 0)
+
+				if total_returned < total_amount:
+					target_ref_field = {"SUB": ["amount", {"MUL": ["returned_qty", "rate"]}], "as": "ref_amount"}
+				
 
 		self._update_percent_field(
 			{
@@ -324,12 +344,13 @@ class StockController(AccountsController):
 				"target_parent_dt": self.doctype,
 				"target_parent_field": "per_billed",
 				"target_ref_field": target_ref_field,
-				"target_field": "billed_amt",
+				"target_field": target_field,
 				"name": self.name,
+				"total_qty": total_qty,
+            	"total_invoiced_qty": total_invoiced_qty,
 			},
 			update_modified,
 		)
-
 	def validate_inspection(self):
 		from erpnext.stock.services.quality_inspection_service import QualityInspectionService
 

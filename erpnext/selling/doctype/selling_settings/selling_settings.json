@@ -37,6 +37,7 @@
   "allow_multiple_items",
   "allow_against_multiple_purchase_orders",
   "hide_tax_id",
+  "quantity_based_billing_percentage",
   "section_break_jcmi",
   "allow_sales_order_creation_for_expired_quotation",
   "dont_reserve_sales_order_qty_on_sales_return",
@@ -405,6 +406,14 @@
    "fieldname": "transaction_naming_html",
    "fieldtype": "HTML"
   }
+  ,
+  {
+   "default": "0",
+   "description": "When enabled, billing status is calculated using delivered and invoiced quantities. When disabled, billing status is calculated using invoiced amount versus the total Delivery Note amount.",
+   "fieldname": "quantity_based_billing_percentage",
+   "fieldtype": "Check",
+   "label": "Quantity Based Billing Percentage In Delivery Note"
+  }
  ],
  "grid_page_length": 50,
  "icon": "fa fa-cog",
@@ -412,7 +421,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-04-29 11:05:48.836362",
+ "modified": "2026-06-16 13:23:31.413701",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
