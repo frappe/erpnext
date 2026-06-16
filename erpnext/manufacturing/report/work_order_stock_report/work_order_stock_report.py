@@ -47,7 +47,10 @@ def get_item_list(wo_list, filters):
 						& (bom_item.item_code == wo_item_details.item_code)
 						& (bom.name == wo_details.bom_no)
 					)
-					.groupby(bom_item.item_code)
+					# build_qty multiplies columns from bin/bom/bom_item that aren't functionally
+					# dependent on the grouped item_code, so postgres requires them in the GROUP BY.
+					# The WHERE pins bom, item and warehouse to single rows, so this stays one row.
+					.groupby(bom_item.item_code, bom.quantity, bom_item.stock_qty, bin.actual_qty)
 				).run(as_dict=1)
 
 				stock_qty = 0

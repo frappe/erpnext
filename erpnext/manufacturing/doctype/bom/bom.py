@@ -9,7 +9,7 @@ import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 from frappe.query_builder import Field
-from frappe.query_builder.functions import Count, IfNull, Sum
+from frappe.query_builder.functions import Count, IfNull, Max, Min, Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form, parse_json
 from frappe.website.website_generator import WebsiteGenerator
 
@@ -1194,7 +1194,9 @@ def _query_bom_items(bom, company, opts):
 	t = _get_bom_item_tables(opts)
 	query = _build_base_bom_items_query(bom, company, opts.qty, t)
 	query, group_by = _add_bom_item_columns(query, t, bom, opts, track_semi_finished_goods)
-	return query.groupby(*group_by).orderby(Field("idx")).run(as_dict=True)
+	# qualify + aggregate idx: bare "idx" is ambiguous across the joined tables and isn't grouped
+	# (idx is unique per BOM item, so Min() preserves the original ordering) — needed for postgres
+	return query.groupby(*group_by).orderby(Min(t.bom_item.idx)).run(as_dict=True)
 
 
 def _get_bom_item_tables(opts):
@@ -1228,17 +1230,20 @@ def _build_base_bom_items_query(bom, company, qty, t):
 		.on((t.item_default.parent == t.item_doc.name) & (t.item_default.company == company))
 		.select(
 			t.bom_item.item_code,
-			t.bom_item.idx,
-			t.item_doc.item_name,
+			# every non-grouped column here is functionally dependent on the grouped item_code
+			# (item attributes / the single BOM's project / per-item Item Default), so Max()/Min()
+			# returns the value MySQL picked arbitrarily while making the GROUP BY valid on postgres.
+			Min(t.bom_item.idx).as_("idx"),
+			Max(t.item_doc.item_name).as_("item_name"),
 			(Sum(t.qty_field_col / IfNull(t.bom_doc.quantity, 1)) * qty).as_("qty"),
-			t.item_doc.image,
-			t.bom_doc.project,
-			t.item_doc.stock_uom,
-			t.item_doc.item_group,
-			t.item_doc.allow_alternative_item,
-			t.item_default.default_warehouse,
-			t.item_default.expense_account.as_("expense_account"),
-			t.item_default.buying_cost_center.as_("cost_center"),
+			Max(t.item_doc.image).as_("image"),
+			Max(t.bom_doc.project).as_("project"),
+			Max(t.item_doc.stock_uom).as_("stock_uom"),
+			Max(t.item_doc.item_group).as_("item_group"),
+			Max(t.item_doc.allow_alternative_item).as_("allow_alternative_item"),
+			Max(t.item_default.default_warehouse).as_("default_warehouse"),
+			Max(t.item_default.expense_account).as_("expense_account"),
+			Max(t.item_default.buying_cost_center).as_("cost_center"),
 		)
 		.where((t.bom_item.docstatus < 2) & (t.bom_doc.name == bom))
 	)
@@ -1247,9 +1252,11 @@ def _build_base_bom_items_query(bom, company, qty, t):
 def _add_bom_item_columns(query, t, bom, opts, track_semi_finished_goods):
 	is_stock_item = cint(not opts.include_non_stock_items)
 	stock_item_condition = t.item_doc.is_stock_item.isin([1, is_stock_item])
-	amount_col = (Sum(t.bom_item.stock_qty / IfNull(t.bom_doc.quantity, 1)) * t.bom_item.rate * opts.qty).as_(
-		"amount"
-	)
+	# rate is constant per grouped item -> Max() keeps it out of the Sum (preserving the original
+	# Sum(...) * rate * qty arithmetic) while making the expression postgres-valid under GROUP BY.
+	amount_col = (
+		Sum(t.bom_item.stock_qty / IfNull(t.bom_doc.quantity, 1)) * Max(t.bom_item.rate) * opts.qty
+	).as_("amount")
 
 	if cint(opts.fetch_exploded):
 		return _add_exploded_item_columns(query, t, bom, amount_col, stock_item_condition)
@@ -1267,13 +1274,16 @@ def _add_exploded_item_columns(query, t, bom, amount_col, stock_item_condition):
 		.limit(1)
 	)
 
+	# non-grouped columns are constant per grouped item_code -> Max() preserves the value while
+	# keeping the GROUP BY postgres-valid; the correlated idx subquery references only item_code
+	# (a grouped column) so it stays valid and still overrides the explosion idx for display.
 	query = query.select(
-		t.bom_item.source_warehouse,
-		t.bom_item.operation,
-		t.bom_item.include_item_in_manufacturing,
-		t.bom_item.description,
-		t.bom_item.rate,
-		t.bom_item.sourced_by_supplier,
+		Max(t.bom_item.source_warehouse).as_("source_warehouse"),
+		Max(t.bom_item.operation).as_("operation"),
+		Max(t.bom_item.include_item_in_manufacturing).as_("include_item_in_manufacturing"),
+		Max(t.bom_item.description).as_("description"),
+		Max(t.bom_item.rate).as_("rate"),
+		Max(t.bom_item.sourced_by_supplier).as_("sourced_by_supplier"),
 		amount_col,
 		idx_subquery.as_("idx"),
 	).where(stock_item_condition)
@@ -1282,33 +1292,37 @@ def _add_exploded_item_columns(query, t, bom, amount_col, stock_item_condition):
 
 
 def _add_secondary_item_columns(query, t, stock_item_condition):
+	# non-grouped columns are constant per grouped item_code -> Max() keeps the GROUP BY valid on
+	# postgres while returning the same value MySQL picked arbitrarily.
 	query = query.select(
-		t.item_doc.description,
-		t.bom_item.cost_allocation_per,
-		t.bom_item.process_loss_per,
-		t.bom_item.secondary_item_type,
-		t.bom_item.name,
-		t.bom_item.is_legacy,
+		Max(t.item_doc.description).as_("description"),
+		Max(t.bom_item.cost_allocation_per).as_("cost_allocation_per"),
+		Max(t.bom_item.process_loss_per).as_("process_loss_per"),
+		Max(t.bom_item.secondary_item_type).as_("secondary_item_type"),
+		Max(t.bom_item.name).as_("name"),
+		Max(t.bom_item.is_legacy).as_("is_legacy"),
 	).where(stock_item_condition)
 
 	return query, [t.bom_item.item_code]
 
 
 def _add_normal_item_columns(query, t, amount_col, stock_item_condition, track_semi_finished_goods):
+	# non-grouped columns are constant per grouped item_code (+operation/operation_row_id) -> Max()
+	# keeps the GROUP BY valid on postgres while returning the value MySQL picked arbitrarily.
 	query = query.select(
-		t.bom_item.rate,
-		t.bom_item.uom,
-		t.bom_item.conversion_factor,
-		t.bom_item.source_warehouse,
-		t.bom_item.operation,
-		t.bom_item.include_item_in_manufacturing,
-		t.bom_item.sourced_by_supplier,
+		Max(t.bom_item.rate).as_("rate"),
+		Max(t.bom_item.uom).as_("uom"),
+		Max(t.bom_item.conversion_factor).as_("conversion_factor"),
+		Max(t.bom_item.source_warehouse).as_("source_warehouse"),
+		Max(t.bom_item.operation).as_("operation"),
+		Max(t.bom_item.include_item_in_manufacturing).as_("include_item_in_manufacturing"),
+		Max(t.bom_item.sourced_by_supplier).as_("sourced_by_supplier"),
 		amount_col,
-		t.bom_item.description,
-		t.bom_item.base_rate.as_("rate"),
-		t.bom_item.operation_row_id,
-		t.bom_item.is_phantom_item,
-		t.bom_item.bom_no,
+		Max(t.bom_item.description).as_("description"),
+		Max(t.bom_item.base_rate).as_("rate"),
+		Max(t.bom_item.operation_row_id).as_("operation_row_id"),
+		Max(t.bom_item.is_phantom_item).as_("is_phantom_item"),
+		Max(t.bom_item.bom_no).as_("bom_no"),
 	).where(stock_item_condition | (t.bom_item.is_phantom_item == 1))
 
 	if track_semi_finished_goods:
@@ -1386,16 +1400,19 @@ def validate_bom_no(item, bom_no):
 
 
 def _bom_contains_item(bom, item):
-	item = item.lower()
+	# Lower-case only for the case-insensitive item_code comparisons; keep the original `item`
+	# for the Item lookup, whose name is case-sensitive on postgres (lower-casing it would miss
+	# the row and wrongly reject a variant's template BOM).
+	item_code = item.lower()
 	for d in bom.items:
-		if d.item_code.lower() == item:
+		if d.item_code.lower() == item_code:
 			return True
 	for d in bom.secondary_items:
-		if d.item_code.lower() == item:
+		if d.item_code.lower() == item_code:
 			return True
 
 	return (
-		bom.item.lower() == item
+		bom.item.lower() == item_code
 		or bom.item.lower() == cstr(frappe.db.get_value("Item", item, "variant_of")).lower()
 	)
 
