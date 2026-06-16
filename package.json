@@ -11,6 +11,11 @@
   "bugs": {
     "url": "https://github.com/frappe/erpnext/issues"
   },
+  "scripts": {
+    "postinstall": "cd banking && yarn install",
+    "dev": "cd banking && yarn dev",
+    "build": "cd banking && yarn build"
+  },
   "devDependencies": {},
   "dependencies": {
     "onscan.js": "^1.5.2"

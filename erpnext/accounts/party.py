@@ -93,8 +93,6 @@ def get_party_details(
 ):
 	if not party:
 		return frappe._dict()
-	if not frappe.db.exists(party_type, party):
-		frappe.throw(_("{0}: {1} does not exists").format(party_type, party))
 	return _get_party_details(
 		party,
 		account,
@@ -105,7 +103,7 @@ def get_party_details(
 		price_list,
 		currency,
 		doctype,
-		ignore_permissions,
+		False,
 		fetch_payment_terms_template,
 		party_address,
 		company_address,
@@ -509,11 +507,6 @@ def get_party_advance_account(party_type, party, company):
 	return account
 
 
-@frappe.whitelist()
-def get_party_bank_account(party_type, party):
-	return frappe.db.get_value("Bank Account", {"party_type": party_type, "party": party, "is_default": 1})
-
-
 def get_party_account_currency(party_type, party, company):
 	def generator():
 		party_account = get_party_account(party_type, party, company)
@@ -548,11 +541,19 @@ def get_party_gle_currency(party_type, party, company):
 
 def get_party_gle_account(party_type, party, company):
 	def generator():
-		existing_gle_account = frappe.db.sql(
-			"""select account from `tabGL Entry`
-			where docstatus=1 and company=%(company)s and party_type=%(party_type)s and party=%(party)s
-			limit 1""",
-			{"company": company, "party_type": party_type, "party": party},
+		gl = qb.DocType("GL Entry")
+		existing_gle_account = (
+			qb.from_(gl)
+			.select(gl.account)
+			.where(
+				(gl.docstatus == 1)
+				& (gl.company == company)
+				& (gl.party_type == party_type)
+				& (gl.party == party)
+				& (gl.is_cancelled == 0)
+			)
+			.limit(1)
+			.run()
 		)
 
 		return existing_gle_account[0][0] if existing_gle_account else None

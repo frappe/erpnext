@@ -928,7 +928,27 @@ class ReceivablePayableReport:
 		if self.filters.project:
 			self.qb_selection_filter.append(self.ple.project.isin(self.filters.project))
 
+		self.add_user_permission_filters()
+
 		self.add_accounting_dimensions_filters()
+
+	def add_user_permission_filters(self):
+		# Party is a dynamic link, so match conditions cannot auto-apply Customer/Supplier user permissions
+		from frappe.core.doctype.user_permission.user_permission import get_user_permissions
+		from frappe.permissions import get_allowed_docs_for_doctype
+
+		user_permissions = get_user_permissions()
+		if not user_permissions:
+			return
+
+		for party_type in self.party_type:
+			if party_type not in user_permissions:
+				continue
+
+			allowed_parties = get_allowed_docs_for_doctype(user_permissions[party_type], party_type)
+			self.qb_selection_filter.append(
+				(self.ple.party_type != party_type) | self.ple.party.isin(allowed_parties or [""])
+			)
 
 	def get_cost_center_conditions(self):
 		cost_center_list = get_cost_centers_with_children(self.filters.cost_center)
@@ -1129,6 +1149,7 @@ class ReceivablePayableReport:
 			fieldtype="Dynamic Link",
 			options="party_type",
 			width=180,
+			sticky=(self.party_naming_by not in ["Naming Series", "Auto Name"]),
 		)
 		if self.account_type == "Receivable":
 			label = _("Receivable Account")
@@ -1143,6 +1164,7 @@ class ReceivablePayableReport:
 			fieldtype="Link",
 			options="Account",
 			width=180,
+			sticky=True,
 		)
 
 		if self.party_naming_by == "Naming Series":
@@ -1156,6 +1178,7 @@ class ReceivablePayableReport:
 				label=label,
 				fieldname=fieldname,
 				fieldtype="Data",
+				sticky=True,
 			)
 
 		if self.account_type == "Receivable":
@@ -1240,7 +1263,7 @@ class ReceivablePayableReport:
 		if self.filters.show_remarks:
 			self.add_column(label=_("Remarks"), fieldname="remarks", fieldtype="Text", width=200)
 
-	def add_column(self, label, fieldname=None, fieldtype="Currency", options=None, width=120):
+	def add_column(self, label, fieldname=None, fieldtype="Currency", options=None, width=120, sticky=False):
 		if not fieldname:
 			fieldname = scrub(label)
 		if fieldtype == "Currency":
@@ -1249,7 +1272,14 @@ class ReceivablePayableReport:
 			width = 90
 
 		self.columns.append(
-			dict(label=label, fieldname=fieldname, fieldtype=fieldtype, options=options, width=width)
+			dict(
+				label=label,
+				fieldname=fieldname,
+				fieldtype=fieldtype,
+				options=options,
+				width=width,
+				sticky=sticky,
+			)
 		)
 
 	def setup_ageing_columns(self):

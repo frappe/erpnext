@@ -111,6 +111,12 @@ frappe.query_reports["Stock Balance"] = {
 			options: "UOM",
 		},
 		{
+			fieldname: "show_alt_uom_balance",
+			label: __("Show Alternate UOM Balance"),
+			fieldtype: "Check",
+			default: 0,
+		},
+		{
 			fieldname: "show_variant_attributes",
 			label: __("Show Variant Attributes"),
 			fieldtype: "Check",

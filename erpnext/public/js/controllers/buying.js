@@ -611,6 +611,9 @@ erpnext.buying.get_items_from_product_bundle = function (frm) {
 				fieldname: "product_bundle",
 				options: "Product Bundle",
 				reqd: 1,
+				get_query: () => {
+					return { filters: { disabled: 0 } };
+				},
 			},
 			{
 				fieldtype: "Currency",

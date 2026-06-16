@@ -19,6 +19,7 @@ from frappe.utils import (
 	time_diff_in_seconds,
 	to_timedelta,
 )
+from frappe.utils.data import DateTimeLikeObject
 
 from erpnext.support.doctype.issue.issue import get_holidays
 
@@ -83,7 +84,7 @@ class Workstation(Document):
 
 	def before_save(self):
 		if self.has_value_changed("workstation_type"):
-			self.set_data_based_on_workstation_type()
+			self._set_data_based_on_workstation_type()
 
 		self.set_hour_rate()
 		self.set_total_working_hours()
@@ -114,6 +115,10 @@ class Workstation(Document):
 
 	@frappe.whitelist()
 	def set_data_based_on_workstation_type(self):
+		self.check_permission("write")
+		self._set_data_based_on_workstation_type()
+
+	def _set_data_based_on_workstation_type(self):
 		if self.workstation_type:
 			data = frappe.get_all(
 				"Workstation Cost",
@@ -209,23 +214,27 @@ class Workstation(Document):
 		return schedule_date
 
 	@frappe.whitelist()
-	def start_job(self, job_card, from_time, employee):
+	def start_job(self, job_card: str, from_time: DateTimeLikeObject, employee: str):
 		doc = frappe.get_doc("Job Card", job_card)
+		doc.check_permission("write")
+
 		doc.append("time_logs", {"from_time": from_time, "employee": employee})
-		doc.save(ignore_permissions=True)
+		doc.save()
 
 		return doc
 
 	@frappe.whitelist()
-	def complete_job(self, job_card, qty, to_time):
+	def complete_job(self, job_card: str, qty: float, to_time: DateTimeLikeObject):
 		doc = frappe.get_doc("Job Card", job_card)
+		doc.check_permission("submit")
+
 		for row in doc.time_logs:
 			if not row.to_time:
 				row.to_time = to_time
 				row.time_in_mins = time_diff_in_hours(row.to_time, row.from_time) / 60
 				row.completed_qty = qty
 
-		doc.save(ignore_permissions=True)
+		doc.save()
 		doc.submit()
 
 		return doc
@@ -316,7 +325,9 @@ def get_status_color(status):
 
 
 @frappe.whitelist()
-def get_raw_materials(job_card):
+def get_raw_materials(job_card: str):
+	frappe.has_permission("Job Card", "read", doc=job_card, throw=True)
+
 	raw_materials = frappe.get_all(
 		"Job Card",
 		fields=[
@@ -460,6 +471,8 @@ def check_workstation_for_holiday(workstation, from_datetime, to_datetime):
 
 @frappe.whitelist()
 def get_workstations(**kwargs):
+	frappe.has_permission("Workstation", "read", throw=True)
+
 	kwargs = frappe._dict(kwargs)
 	_workstation = frappe.qb.DocType("Workstation")
 
@@ -535,13 +548,8 @@ def update_job_card(job_card: str, method: str, **kwargs):
 			title=_("Not Allowed"),
 		)
 
-	frappe.has_permission("Job Card", "read", throw=True)
-
 	doc = frappe.get_doc("Job Card", job_card)
-
-	# These methods mutate the Job Card, but frappe.get_doc does not enforce permissions —
-	# require write access before running anything.
-	frappe.has_permission("Job Card", "write", doc=doc, throw=True)
+	doc.check_permission("write")
 
 	if isinstance(kwargs, dict):
 		kwargs = frappe._dict(kwargs)
@@ -556,7 +564,9 @@ def update_job_card(job_card: str, method: str, **kwargs):
 
 
 @frappe.whitelist()
-def validate_job_card(job_card, status):
+def validate_job_card(job_card: str, status: str):
+	frappe.has_permission("Job Card", "read", doc=job_card, throw=True)
+
 	job_card_details = frappe.db.get_value("Job Card", job_card, ["status", "for_quantity"], as_dict=1)
 
 	current_status = job_card_details.status

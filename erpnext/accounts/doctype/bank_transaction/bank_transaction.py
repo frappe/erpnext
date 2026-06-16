@@ -34,6 +34,8 @@ class BankTransaction(Document):
 		description: DF.SmallText | None
 		excluded_fee: DF.Currency
 		included_fee: DF.Currency
+		is_rule_evaluated: DF.Check
+		matched_transaction_rule: DF.Link | None
 		naming_series: DF.Literal["ACC-BTN-.YYYY.-"]
 		party: DF.DynamicLink | None
 		party_type: DF.Link | None
@@ -146,8 +148,13 @@ class BankTransaction(Document):
 
 		self.set_status()
 
-	def add_payment_entries(self, vouchers):
-		"Add the vouchers with zero allocation. Save() will perform the allocations and clearance"
+	def add_payment_entries(self, vouchers, is_new_voucher: bool = False):
+		"""
+		Add the vouchers with zero allocation. Save() will perform the allocations and clearance
+
+		is_new_voucher - is used to set the reonciliation type - whether the voucher was added as a result of "Matching" or a new voucher was created.
+		Used in bank reconciliation
+		"""
 		if 0.0 >= self.unallocated_amount:
 			frappe.throw(_("Bank Transaction {0} is already fully reconciled").format(self.name))
 
@@ -158,6 +165,7 @@ class BankTransaction(Document):
 					"payment_document": voucher["payment_doctype"],
 					"payment_entry": voucher["payment_name"],
 					"allocated_amount": 0.0,  # Temporary
+					"reconciliation_type": "Voucher Created" if is_new_voucher else "Matched",
 				},
 			)
 
@@ -355,6 +363,55 @@ class BankTransaction(Document):
 def get_doctypes_for_bank_reconciliation():
 	"""Get Bank Reconciliation doctypes from all the apps"""
 	return frappe.get_hooks("bank_reconciliation_doctypes")
+
+
+@frappe.whitelist()
+def unreconcile_transaction(transaction_name: str | int):
+	"""
+	Unreconcile an entire bank transaction - this does not handle individual entries but clears the entire transaction
+
+	If the individual entries in the bank transaction are matched, just remove the payment entries
+	Else, cancel the individual entries
+	"""
+	transaction = frappe.get_doc("Bank Transaction", transaction_name)
+
+	vouchers_to_cancel = []
+
+	for entry in transaction.payment_entries:
+		if entry.reconciliation_type == "Voucher Created":
+			vouchers_to_cancel.append(
+				{
+					"doctype": entry.payment_document,
+					"name": entry.payment_entry,
+				}
+			)
+
+	transaction.remove_payment_entries()
+
+	# Any accounting vouchers that were created as a result of bank reconciliation will be cancelled
+
+	for voucher in vouchers_to_cancel:
+		frappe.get_doc(voucher["doctype"], voucher["name"]).cancel()
+
+
+@frappe.whitelist()
+def unreconcile_transaction_entry(bank_transaction_id: str | int, voucher_type: str, voucher_id: str | int):
+	"""
+	Removes a single payment entry from a bank transaction - for example only undoing one voucher instead of undoing the entire transaction
+	"""
+
+	bank_transaction = frappe.get_doc("Bank Transaction", bank_transaction_id)
+
+	# Find the voucher in the bank transaction and depending on the action, either remove it or cancel the voucher
+	for entry in bank_transaction.payment_entries:
+		if entry.payment_document == voucher_type and entry.payment_entry == voucher_id:
+			if entry.reconciliation_type == "Voucher Created":
+				frappe.get_doc(voucher_type, voucher_id).cancel()
+			else:
+				bank_transaction.remove_payment_entry(entry)
+				bank_transaction.save()
+
+	return {"success": True}
 
 
 def get_clearance_details(transaction, payment_entry, bt_allocations, gl_entries, gl_bank_account):

@@ -218,7 +218,7 @@ class PurchaseOrder(BuyingController):
 
 		if self.is_old_subcontracting_flow:
 			self.validate_bom_for_subcontracting_items()
-			self.create_raw_materials_supplied()
+			self.create_raw_materials_supplied_or_received()
 
 		self.validate_fg_item_for_subcontracting()
 
@@ -700,7 +700,7 @@ class PurchaseOrder(BuyingController):
 
 	def update_subcontracting_order_status(self):
 		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
-			update_subcontracting_order_status as update_sco_status,
+			set_subcontracting_order_status as update_sco_status,
 		)
 
 		if self.is_subcontracted and not self.is_old_subcontracting_flow:

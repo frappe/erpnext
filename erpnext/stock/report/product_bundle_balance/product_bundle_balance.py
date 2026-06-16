@@ -140,7 +140,7 @@ def get_items(filters):
 			item.brand,
 			item.stock_uom,
 		)
-		.where(IfNull(item.disabled, 0) == 0)
+		.where((IfNull(item.disabled, 0) == 0) & (IfNull(pb.disabled, 0) == 0))
 	)
 
 	if item_code := filters.get("item_code"):

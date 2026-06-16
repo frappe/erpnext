@@ -1380,6 +1380,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 			if d.s_warehouse or d.set_basic_rate_manually:
 				continue
 
+			# Zero-qty secondary items carry no inventory value; skip rate calculation
+			if d.type and flt(d.transfer_qty) == 0:
+				d.basic_rate = 0.0
+				d.basic_amount = 0.0
+				continue
+
 			if d.allow_zero_valuation_rate and d.basic_rate and self.purpose != "Receive from Customer":
 				d.basic_rate = 0.0
 				items.append(d.item_code)
@@ -1397,7 +1403,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 				cost_allocation_per = frappe.get_value(
 					"BOM Secondary Item", d.bom_secondary_item, "cost_allocation_per"
 				)
-				d.basic_rate = (outgoing_items_cost * (cost_allocation_per / 100)) / d.transfer_qty
+				# Only recalculate when cost is actually allocated; otherwise preserve the
+				# user-entered rate (or fall through to get_valuation_rate below)
+				if cost_allocation_per and flt(d.transfer_qty):
+					d.basic_rate = (outgoing_items_cost * (cost_allocation_per / 100)) / d.transfer_qty
 
 			if not d.basic_rate and not d.allow_zero_valuation_rate:
 				if self.is_new():
@@ -3972,10 +3981,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 	def update_subcontracting_order_status(self):
 		if self.subcontracting_order and self.purpose in ["Send to Subcontractor", "Material Transfer"]:
 			from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
-				update_subcontracting_order_status,
+				set_subcontracting_order_status,
 			)
 
-			update_subcontracting_order_status(self.subcontracting_order)
+			# Trusted submit/cancel flow — a Stock operation must not require Subcontracting Order
+			# write permission, so use the no-check internal helper (not the whitelisted boundary).
+			set_subcontracting_order_status(self.subcontracting_order)
 
 	def update_pick_list_status(self):
 		from erpnext.stock.doctype.pick_list.pick_list import update_pick_list_status

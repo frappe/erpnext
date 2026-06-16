@@ -59,6 +59,10 @@ jobs:
         env:
           TZ: 'Asia/Kolkata'
           MARIADB_ROOT_PASSWORD: 'root'
+          # Disable durability guarantees that are unnecessary in a throwaway CI container.
+          # innodb_flush_log_at_trx_commit=0 avoids an fsync on every commit (biggest win).
+          # sync_binlog=0 skips binary-log syncs; innodb_doublewrite=0 skips the doublewrite buffer.
+          MARIADB_EXTRA_FLAGS: --innodb-flush-log-at-trx-commit=0 --sync-binlog=0 --innodb-doublewrite=0
         ports:
           - 3306:3306
         options: --health-cmd="mariadb-admin ping" --health-interval=5s --health-timeout=2s --health-retries=3
@@ -122,6 +126,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
+      - name: Cache wkhtmltopdf
+        uses: actions/cache@v4
+        with:
+          path: /tmp/wkhtmltox.deb
+          key: wkhtmltox-0.12.6.1-2-jammy-amd64
+
       - name: Install
         run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
         env:
@@ -131,7 +141,14 @@ jobs:
           FRAPPE_BRANCH: ${{ github.event.client_payload.sha || github.event.inputs.branch }}
 
       - name: Run Tests
-        run: 'cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --lightmode --app erpnext --total-builds ${{ strategy.job-total }} --build-number ${{ matrix.container }} --with-coverage'
+        run: |
+          cd ~/frappe-bench/
+          coverage_flag=""
+          if [ "$WITH_COVERAGE" = "true" ]; then coverage_flag="--with-coverage"; fi
+          bench --site test_site run-parallel-tests --lightmode --app erpnext \
+            --total-builds ${{ strategy.job-total }} \
+            --build-number ${{ matrix.container }} \
+            $coverage_flag
         env:
           TYPE: server
 
@@ -141,6 +158,7 @@ jobs:
         run: cat ~/frappe-bench/bench_start.log || true
 
       - name: Upload coverage data
+        if: ${{ env.WITH_COVERAGE == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: coverage-${{ matrix.container }}
@@ -149,6 +167,7 @@ jobs:
   coverage:
     name: Coverage Wrap Up
     needs: test
+    if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     steps:
       - name: Clone

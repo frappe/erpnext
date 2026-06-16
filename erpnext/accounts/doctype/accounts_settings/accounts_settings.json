@@ -105,6 +105,7 @@
   "enable_party_matching",
   "automatically_run_rules_on_unreconciled_transactions",
   "enable_fuzzy_matching",
+  "transfer_match_days",
   "payment_request_section",
   "create_pr_in_draft_status",
   "budget_section",
@@ -701,6 +702,21 @@
    "label": "Fetch Payment Schedule in Payment Request"
   },
   {
+   "default": "3",
+   "description": "Number of days to consider for matching transfers across bank accounts",
+   "fieldname": "transfer_match_days",
+   "fieldtype": "Int",
+   "label": "Match transfers within 'N' days",
+   "non_negative": 1
+  },
+  {
+   "default": "1",
+   "description": "If enabled, rule matching algorithm will run every hour",
+   "fieldname": "automatically_run_rules_on_unreconciled_transactions",
+   "fieldtype": "Check",
+   "label": "Automatically run rules on unreconciled transactions"
+  },
+  {
    "fieldname": "repost_section",
    "fieldtype": "Section Break",
    "label": "Repost"
@@ -727,13 +743,12 @@
   }
  ],
  "grid_page_length": 50,
- "hide_toolbar": 0,
  "icon": "icon-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-06-03 13:11:54.721495",
+ "modified": "2026-06-15 18:26:50.778723",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
