@@ -1097,6 +1097,316 @@ class TestStockEntry(ERPNextTestSuite):
 		repack.insert()
 		self.assertRaises(frappe.ValidationError, repack.submit)
 
+	def test_check_item_quality_inspection_returns_items_for_stock_entry(self):
+		from erpnext.controllers.stock_controller import check_item_quality_inspection
+
+		items = [
+			{"item_code": "_Test Item", "qty": 1},
+			{"item_code": "_Test Item Home Desktop 100", "qty": 1},
+		]
+
+		se_result = check_item_quality_inspection("Stock Entry", 0, items)
+		self.assertEqual(len(se_result), 2)
+
+		# a doctype not in INSPECTION_FIELDNAME_MAP and not a Stock Entry returns nothing
+		self.assertEqual(check_item_quality_inspection("Material Request", 0, items), [])
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"action_if_quality_inspection_is_rejected": "Stop"})
+	def test_quality_inspection_across_stock_entry_purposes(self):
+		from erpnext.controllers.stock_controller import check_item_quality_inspection
+		from erpnext.exceptions import QualityInspectionRejectedError, QualityInspectionRequiredError
+		from erpnext.stock.doctype.quality_inspection.test_quality_inspection import (
+			create_quality_inspection,
+		)
+
+		item_code = "_Test Item For QI Purposes"
+		if not frappe.db.exists("Item", item_code):
+			create_item(item_code, is_stock_item=1)
+
+		s_wh = "Stores - _TC"
+		t_wh = "_Test Warehouse - _TC"
+		# stock the source warehouse for transfer / issue purposes
+		make_stock_entry(item_code=item_code, target=s_wh, qty=100, basic_rate=100)
+
+		# purpose -> warehouses for the moved row; inward (with target) requires QI
+		purposes = {
+			"Material Receipt": {"to_warehouse": t_wh},
+			"Material Transfer": {"from_warehouse": s_wh, "to_warehouse": t_wh},
+			"Material Issue": {"from_warehouse": s_wh},
+		}
+
+		for purpose, warehouses in purposes.items():
+			with self.subTest(purpose=purpose):
+				needs_qi = "to_warehouse" in warehouses
+
+				se = make_stock_entry(
+					item_code=item_code,
+					qty=5,
+					basic_rate=100,
+					purpose=purpose,
+					inspection_required=True,
+					do_not_submit=True,
+					**warehouses,
+				)
+
+				# QI can be created from the Stock Entry for any purpose
+				allowed = check_item_quality_inspection("Stock Entry", 0, se.as_dict().get("items"))
+				self.assertTrue(any(row.get("item_code") == item_code for row in allowed))
+
+				if not needs_qi:
+					# outward-only entry: QI is not enforced
+					se.submit()
+					self.assertEqual(se.docstatus, 1)
+					continue
+
+				# inward entry without QI must block submission
+				self.assertRaises(QualityInspectionRequiredError, se.submit)
+
+				# a rejected QI must also block submission
+				se_rej = make_stock_entry(
+					item_code=item_code,
+					qty=5,
+					basic_rate=100,
+					purpose=purpose,
+					inspection_required=True,
+					do_not_submit=True,
+					**warehouses,
+				)
+				create_quality_inspection(
+					reference_type="Stock Entry",
+					reference_name=se_rej.name,
+					item_code=item_code,
+					inspection_type="Incoming",
+					status="Rejected",
+				)
+				se_rej.reload()
+				self.assertRaises(QualityInspectionRejectedError, se_rej.submit)
+
+				# a submitted, accepted QI links itself to the inward row; submission then succeeds
+				se_ok = make_stock_entry(
+					item_code=item_code,
+					qty=5,
+					basic_rate=100,
+					purpose=purpose,
+					inspection_required=True,
+					do_not_submit=True,
+					**warehouses,
+				)
+				create_quality_inspection(
+					reference_type="Stock Entry",
+					reference_name=se_ok.name,
+					item_code=item_code,
+					inspection_type="Incoming",
+					status="Accepted",
+				)
+				se_ok.reload()
+				se_ok.submit()
+				self.assertEqual(se_ok.docstatus, 1)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"action_if_quality_inspection_is_rejected": "Stop"})
+	def test_quality_inspection_required_for_manufacture(self):
+		from erpnext.exceptions import QualityInspectionRejectedError, QualityInspectionRequiredError
+		from erpnext.manufacturing.doctype.work_order.mapper import (
+			make_stock_entry as make_wo_stock_entry,
+		)
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.stock.doctype.quality_inspection.test_quality_inspection import (
+			create_quality_inspection,
+		)
+
+		wo = make_wo_order_test_record(qty=1)
+		make_stock_entry(item_code="_Test Item", target="Stores - _TC", qty=10, basic_rate=100)
+		make_stock_entry(
+			item_code="_Test Item Home Desktop 100", target="Stores - _TC", qty=10, basic_rate=100
+		)
+
+		# transfer raw materials to WIP (no inspection on the transfer)
+		transfer = frappe.get_doc(make_wo_stock_entry(wo.name, "Material Transfer for Manufacture", 1))
+		for d in transfer.get("items"):
+			d.s_warehouse = "Stores - _TC"
+		transfer.insert()
+		transfer.submit()
+
+		# manufacture with inspection required
+		mfg = frappe.get_doc(make_wo_stock_entry(wo.name, "Manufacture", 1))
+		mfg.inspection_required = 1
+		mfg.insert()
+		self.assertRaises(QualityInspectionRequiredError, mfg.submit)
+
+		# a rejected QI on the finished-good row must also block submission
+		qi = create_quality_inspection(
+			reference_type="Stock Entry",
+			reference_name=mfg.name,
+			item_code=wo.production_item,
+			inspection_type="Incoming",
+			status="Rejected",
+		)
+		mfg.reload()
+		self.assertRaises(QualityInspectionRejectedError, mfg.submit)
+
+		# accepting the QI then allows submission
+		frappe.db.set_value("Quality Inspection", qi.name, "status", "Accepted")
+		mfg.reload()
+		mfg.submit()
+		self.assertEqual(mfg.docstatus, 1)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"action_if_quality_inspection_is_rejected": "Stop"})
+	def test_quality_inspection_required_for_material_transfer_for_manufacture(self):
+		from erpnext.exceptions import QualityInspectionRejectedError, QualityInspectionRequiredError
+		from erpnext.manufacturing.doctype.work_order.mapper import (
+			make_stock_entry as make_wo_stock_entry,
+		)
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.stock.doctype.quality_inspection.test_quality_inspection import (
+			create_quality_inspection,
+		)
+
+		wo = make_wo_order_test_record(qty=1)
+		make_stock_entry(item_code="_Test Item", target="Stores - _TC", qty=10, basic_rate=100)
+		make_stock_entry(
+			item_code="_Test Item Home Desktop 100", target="Stores - _TC", qty=10, basic_rate=100
+		)
+
+		transfer = frappe.get_doc(make_wo_stock_entry(wo.name, "Material Transfer for Manufacture", 1))
+		for d in transfer.get("items"):
+			d.s_warehouse = "Stores - _TC"
+		transfer.inspection_required = 1
+		transfer.insert()
+		self.assertRaises(QualityInspectionRequiredError, transfer.submit)
+
+		# a rejected QI on any row moved into WIP must block submission;
+		# every raw-material row moved into WIP needs a QI
+		qis = []
+		for item_code in {d.item_code for d in transfer.items if d.t_warehouse}:
+			qis.append(
+				create_quality_inspection(
+					reference_type="Stock Entry",
+					reference_name=transfer.name,
+					item_code=item_code,
+					inspection_type="Incoming",
+					status="Rejected",
+				)
+			)
+		transfer.reload()
+		self.assertRaises(QualityInspectionRejectedError, transfer.submit)
+
+		# accepting every QI then allows submission
+		for qi in qis:
+			frappe.db.set_value("Quality Inspection", qi.name, "status", "Accepted")
+		transfer.reload()
+		transfer.submit()
+		self.assertEqual(transfer.docstatus, 1)
+
+	def test_quality_inspection_required_for_send_to_subcontractor(self):
+		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
+		from erpnext.controllers.tests.test_subcontracting_controller import (
+			get_subcontracting_order,
+			make_service_item,
+		)
+		from erpnext.exceptions import QualityInspectionRequiredError
+		from erpnext.stock.doctype.quality_inspection.test_quality_inspection import (
+			create_quality_inspection,
+		)
+
+		make_service_item("Subcontracted Service Item 1")
+		sco = get_subcontracting_order(
+			service_items=[
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": "Subcontracted Service Item 1",
+					"qty": 10,
+					"rate": 500,
+					"fg_item": "_Test FG Item",
+					"fg_item_qty": 10,
+				}
+			]
+		)
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=100, basic_rate=100)
+		make_stock_entry(
+			item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TC", qty=100, basic_rate=100
+		)
+
+		se = frappe.get_doc(make_rm_stock_entry(sco.name))
+		se.from_warehouse = "_Test Warehouse - _TC"
+		se.to_warehouse = "_Test Warehouse - _TC"
+		se.stock_entry_type = "Send to Subcontractor"
+		se.inspection_required = 1
+		se.insert()
+		self.assertRaises(QualityInspectionRequiredError, se.submit)
+
+		for item_code in {row.item_code for row in se.items if row.t_warehouse}:
+			create_quality_inspection(
+				reference_type="Stock Entry",
+				reference_name=se.name,
+				item_code=item_code,
+				inspection_type="Outgoing",
+				status="Accepted",
+			)
+		se.reload()
+		se.submit()
+		self.assertEqual(se.docstatus, 1)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"action_if_quality_inspection_is_rejected": "Stop"})
+	def test_quality_inspection_required_for_disassemble(self):
+		from erpnext.exceptions import QualityInspectionRejectedError, QualityInspectionRequiredError
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.mapper import (
+			make_stock_entry as make_wo_stock_entry,
+		)
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.quality_inspection.test_quality_inspection import (
+			create_quality_inspection,
+		)
+
+		source_warehouse = "Stores - _TC"
+		fg_item = make_item("Test Disassemble FG QI", {"is_stock_item": 1}).name
+		raw_materials = ["Test Disassemble RM QI 1", "Test Disassemble RM QI 2"]
+		for item in raw_materials:
+			make_item(item, {"is_stock_item": 1})
+			make_stock_entry(item_code=item, target=source_warehouse, qty=5, basic_rate=100)
+
+		make_bom(item=fg_item, source_warehouse=source_warehouse, raw_materials=raw_materials)
+
+		wo = make_wo_order_test_record(
+			item=fg_item, qty=1, source_warehouse=source_warehouse, skip_transfer=1
+		)
+
+		# manufacture the FG so there is something to disassemble
+		mfg = frappe.get_doc(make_wo_stock_entry(wo.name, "Manufacture", 1))
+		for row in mfg.items:
+			if row.item_code in raw_materials:
+				row.s_warehouse = source_warehouse
+		mfg.submit()
+
+		# disassemble with inspection required -> the component rows need a QI
+		dis = frappe.get_doc(make_wo_stock_entry(wo.name, "Disassemble", 1))
+		dis.inspection_required = 1
+		dis.insert()
+		self.assertRaises(QualityInspectionRequiredError, dis.submit)
+
+		# a rejected QI on any disassembled component row must also block submission
+		qis = []
+		for item_code in {row.item_code for row in dis.items if row.t_warehouse}:
+			qis.append(
+				create_quality_inspection(
+					reference_type="Stock Entry",
+					reference_name=dis.name,
+					item_code=item_code,
+					inspection_type="Outgoing",
+					status="Rejected",
+				)
+			)
+		dis.reload()
+		self.assertRaises(QualityInspectionRejectedError, dis.submit)
+
+		# accepting every QI then allows submission
+		for qi in qis:
+			frappe.db.set_value("Quality Inspection", qi.name, "status", "Accepted")
+		dis.reload()
+		dis.submit()
+		self.assertEqual(dis.docstatus, 1)
+
 	def test_customer_provided_parts_se(self):
 		create_item("CUST-0987", is_customer_provided_item=1, customer="_Test Customer", is_purchase_item=0)
 		se = make_stock_entry(
@@ -2388,7 +2698,7 @@ class TestStockEntry(ERPNextTestSuite):
 		"Stock Settings", {"sample_retention_warehouse": "_Test Warehouse 1 - _TC"}
 	)
 	def test_sample_retention_stock_entry(self):
-		from erpnext.stock.doctype.stock_entry.stock_entry_handler.manufacturing import (
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
 			move_sample_to_retention_warehouse,
 		)
 
@@ -2558,7 +2868,7 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 	# ── ceil_qty_if_uom_has_whole_number ──────────────────────────────────────
 
 	def test_ceil_qty_rounds_up_for_whole_number_uom(self):
-		from erpnext.stock.doctype.stock_entry.stock_entry_handler.manufacturing import (
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
 			ceil_qty_if_uom_has_whole_number,
 		)
 
@@ -2567,7 +2877,7 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 		frappe.set_value("UOM", "Nos", "must_be_whole_number", 0)
 
 	def test_ceil_qty_no_rounding_for_decimal_uom(self):
-		from erpnext.stock.doctype.stock_entry.stock_entry_handler.manufacturing import (
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
 			ceil_qty_if_uom_has_whole_number,
 		)
 
@@ -2644,7 +2954,7 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 	# ── get_production_item_details ────────────────────────────────────────────
 
 	def test_get_production_item_details_from_bom(self):
-		from erpnext.stock.doctype.stock_entry.stock_entry_handler.manufacturing import (
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
 			get_production_item_details,
 		)
 
@@ -2654,7 +2964,7 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 		self.assertIsNotNone(result.stock_uom)
 
 	def test_get_production_item_details_from_work_order(self):
-		from erpnext.stock.doctype.stock_entry.stock_entry_handler.manufacturing import (
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
 			get_production_item_details,
 		)
 
@@ -2680,7 +2990,7 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 	# ── get_bom_items ──────────────────────────────────────────────────────────
 
 	def test_get_bom_items_returns_raw_materials_with_structure(self):
-		from erpnext.stock.doctype.stock_entry.stock_entry_handler.manufacturing import get_bom_items
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import get_bom_items
 
 		bom_no = frappe.db.get_value("BOM", {"item": "_Test FG Item 2", "is_default": 1, "docstatus": 1})
 		items = get_bom_items(bom_no)
@@ -2690,7 +3000,7 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 			self.assertIn("qty", item)
 
 	def test_get_bom_items_scales_qty_proportionally(self):
-		from erpnext.stock.doctype.stock_entry.stock_entry_handler.manufacturing import get_bom_items
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import get_bom_items
 
 		bom_no = frappe.db.get_value("BOM", {"item": "_Test FG Item 2", "is_default": 1, "docstatus": 1})
 		items_1 = {i["item_code"]: i["qty"] for i in get_bom_items(bom_no, qty=1)}
@@ -2704,7 +3014,7 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 		"Stock Settings", {"sample_retention_warehouse": "_Test Warehouse 1 - _TC"}
 	)
 	def test_validate_sample_quantity_raises_when_sample_exceeds_received_qty(self):
-		from erpnext.stock.doctype.stock_entry.stock_entry_handler.manufacturing import (
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
 			validate_sample_quantity,
 		)
 
@@ -2718,7 +3028,7 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 
 	def test_get_expired_batches_includes_expired_batch(self):
 		from erpnext.stock.doctype.batch.test_batch import make_new_batch
-		from erpnext.stock.doctype.stock_entry.stock_entry_handler.serial_batch import (
+		from erpnext.stock.doctype.stock_entry.services.serial_batch import (
 			get_expired_batches,
 		)
 
@@ -2735,7 +3045,7 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 
 	def test_get_expired_batches_excludes_future_batch(self):
 		from erpnext.stock.doctype.batch.test_batch import make_new_batch
-		from erpnext.stock.doctype.stock_entry.stock_entry_handler.serial_batch import (
+		from erpnext.stock.doctype.stock_entry.services.serial_batch import (
 			get_expired_batches,
 		)
 
@@ -2848,7 +3158,7 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 		from erpnext.manufacturing.doctype.work_order.mapper import (
 			make_stock_entry as _make_stock_entry,
 		)
-		from erpnext.stock.doctype.stock_entry.stock_entry_handler.disassemble import (
+		from erpnext.stock.doctype.stock_entry.services.disassemble import (
 			get_available_materials,
 		)
 
@@ -2893,7 +3203,7 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 		from erpnext.manufacturing.doctype.work_order.mapper import (
 			make_stock_entry as _make_stock_entry,
 		)
-		from erpnext.stock.doctype.stock_entry.stock_entry_handler.disassemble import (
+		from erpnext.stock.doctype.stock_entry.services.disassemble import (
 			get_available_materials,
 		)
 

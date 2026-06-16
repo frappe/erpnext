@@ -1653,7 +1653,7 @@ class JobCard(Document):
 		)
 
 	def populate_manufacture_stock_entry(self, ste):
-		from erpnext.stock.doctype.stock_entry.stock_entry_handler.manufacturing import ManufactureStockEntry
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import ManufactureStockEntry
 
 		ste.make_stock_entry()
 		ste.stock_entry.flags.ignore_mandatory = True

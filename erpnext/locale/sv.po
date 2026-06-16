@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-06-14 10:35+0000\n"
-"PO-Revision-Date: 2026-06-14 17:00\n"
+"PO-Revision-Date: 2026-06-15 17:43\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -1108,7 +1108,7 @@ msgstr "Kund måste ha primär kontakt e-post adress."
 #. Description of the 'Disabled' (Check) field in DocType 'Product Bundle'
 #: erpnext/selling/doctype/product_bundle/product_bundle.json
 msgid "A disabled Product Bundle cannot be selected in transactions."
-msgstr ""
+msgstr "Inaktiverad Artikel Paket kan inte väljas i transaktioner."
 
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.py:59
 msgid "A driver must be set to submit."
@@ -4493,7 +4493,7 @@ msgstr "Tillåt att redigera Lager Enhet kvantitet för Försäljning Dokument"
 #. DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Allow to edit stock UOM qty for Stock Entry"
-msgstr ""
+msgstr "Tillåt redigering av Lager Enhet kvantitet för Lager Post"
 
 #. Label of the allow_to_make_quality_inspection_after_purchase_or_delivery
 #. (Check) field in DocType 'Stock Settings'
@@ -4591,7 +4591,7 @@ msgstr "Standard i Kassa Profil {0} för Användare {1} redan angiven. Inaktiver
 
 #: erpnext/stock/doctype/item/item.js:38
 msgid "Also you can't switch back to FIFO after setting the valuation method to Moving Average for this item."
-msgstr "Du kan inte byta tillbaka till FIFO efter att ha angivit värdering sätt till MA för denna artikel."
+msgstr "Du kan inte byta tillbaka till FIFO efter att ha angivit värdering sätt till MV för denna artikel."
 
 #: erpnext/manufacturing/doctype/bom/bom.js:291
 #: erpnext/manufacturing/doctype/work_order/work_order.js:158
@@ -4603,7 +4603,7 @@ msgstr "Alternativ Artikel"
 
 #: erpnext/stock/report/item_where_used/item_where_used.py:427
 msgid "Alternative For Item"
-msgstr ""
+msgstr "Alternativ Artikel"
 
 #. Label of the alternative_item_code (Link) field in DocType 'Item
 #. Alternative'
@@ -6924,7 +6924,7 @@ msgstr "Stycklista Jämförelse Verktyg"
 
 #: erpnext/stock/report/item_where_used/item_where_used.py:178
 msgid "BOM Component"
-msgstr ""
+msgstr "Stycklista Komponent"
 
 #. Label of the bom_conf_tab (Tab Break) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
@@ -6955,7 +6955,7 @@ msgstr "Stycklista Post"
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:392
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:535
 msgid "BOM Creator Item with name {0} does not exist"
-msgstr ""
+msgstr "Stycklista Artikel med namn {0} finns inte"
 
 #. Label of the bom_detail_no (Data) field in DocType 'Purchase Receipt Item
 #. Supplied'
@@ -7055,7 +7055,7 @@ msgstr "Stycklista Åtgärd Tid"
 
 #: erpnext/stock/report/item_where_used/item_where_used.py:248
 msgid "BOM Output"
-msgstr ""
+msgstr "Stycklista"
 
 #: erpnext/stock/report/item_prices/item_prices.py:60
 msgid "BOM Rate"
@@ -8228,13 +8228,13 @@ msgstr "Faktura Datum"
 #. 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
 msgid "Bill Even If Previous Invoice Unpaid"
-msgstr ""
+msgstr "Fakturera även om tidigare faktura är obetald"
 
 #. Option for the 'Generate Invoice At' (Select) field in DocType
 #. 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
 msgid "Bill N days before period start"
-msgstr ""
+msgstr "Fakturera N dagar före period start"
 
 #. Label of the bill_no (Data) field in DocType 'Journal Entry'
 #. Label of the bill_no (Data) field in DocType 'Subcontracting Receipt'
@@ -8416,13 +8416,13 @@ msgstr "Faktura E-post"
 #. Label of the billing_heatmap (HTML) field in DocType 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
 msgid "Billing Heatmap"
-msgstr ""
+msgstr "Fakturering Karta"
 
 #. Label of the billing_history_section (Section Break) field in DocType
 #. 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
 msgid "Billing History"
-msgstr ""
+msgstr "Fakturering Historik"
 
 #. Label of the billing_hours (Float) field in DocType 'Sales Invoice
 #. Timesheet'
@@ -8456,7 +8456,7 @@ msgstr "Fakturering Intervall i Prenumeration Plan måste vara Månad för att f
 #. 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
 msgid "Billing Period"
-msgstr ""
+msgstr "Fakturering Period"
 
 #. Label of the billing_rate (Currency) field in DocType 'Activity Cost'
 #. Label of the billing_rate (Currency) field in DocType 'Timesheet Detail'
@@ -9553,7 +9553,7 @@ msgstr "Annullera Prenumeration efter Anstånd Period"
 #. Label of the cancel_at_period_end (Check) field in DocType 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
 msgid "Cancel When Period Ends"
-msgstr ""
+msgstr "Avbryt vid Period Slut"
 
 #. Label of the cancelation_date (Date) field in DocType 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
@@ -9562,7 +9562,7 @@ msgstr "Annullering Datum"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1567
 msgid "Cancelled Job Card cannot be processed."
-msgstr ""
+msgstr "Avbrutet Jobbkort kan inte behandlas."
 
 #: erpnext/accounts/doctype/pos_opening_entry/pos_opening_entry.py:76
 msgid "Cannot Assign Cashier"
@@ -9697,7 +9697,7 @@ msgstr "Kan inte konvertera till Grupp eftersom Konto Typ valts."
 
 #: erpnext/accounts/doctype/sales_invoice/mapper.py:372
 msgid "Cannot create Intercompany {0}. All items in the source {1} have already been fully invoiced. Please check the existing linked {2}s."
-msgstr ""
+msgstr "Kan inte skapa mellan bolag {0}. Alla ursprung artiklar {1} är redan fakturerade fullt. Kontrollera befintliga länkade {2}."
 
 #: erpnext/stock/doctype/purchase_receipt/services/reservation.py:49
 msgid "Cannot create Stock Reservation Entries for future dated Purchase Receipts."
@@ -9776,7 +9776,7 @@ msgstr "Kan inte aktivera Lager Konto per Lager, eftersom det redan finns befint
 
 #: erpnext/crm/doctype/crm_settings/crm_settings.py:37
 msgid "Cannot enable Opportunity creation from Contact Us because the Contact Us form is disabled."
-msgstr ""
+msgstr "Kan inte aktivera Möjlighet skapande från Kontakta Oss eftersom Kontakta Oss formulär är inaktiverad."
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:624
 #: erpnext/selling/doctype/sales_order/sales_order.py:647
@@ -9884,7 +9884,7 @@ msgstr "Kan inte starta borttagning. Annan borttagning {0} är redan i kö/körs
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:922
 msgid "Cannot submit Job Card {0} while it is On Hold. Please resume and complete the job before submission."
-msgstr ""
+msgstr "Kan inte godkänna jobbkort {0} medan det är Pausad. Fortsätt och avsluta jobb innan godkännade."
 
 #: erpnext/accounts/services/child_item_update.py:283
 msgid "Cannot update rate as item {0} is already ordered or purchased against this quotation"
@@ -10296,7 +10296,7 @@ msgstr "Att byta konto i någon transaktion av DocTypes som listas nedan kommer 
 
 #: erpnext/stock/doctype/item/item.js:34
 msgid "Changing the valuation method to Moving Average will affect new transactions. If backdated entries are added, earlier FIFO-based entries will be reposted, which may change closing balances."
-msgstr "Om värdering sätt ändras till MA kommer det att påverka nya transaktioner. Om retroaktiva poster läggs till kommer tidigare FIFO baserade poster att bokas om, vilket kan ändra stängning saldo."
+msgstr "Om värdering sätt ändras till MV kommer det att påverka nya transaktioner. Om retroaktiva poster läggs till kommer tidigare FIFO baserade poster att bokas om, vilket kan ändra stängning saldo."
 
 #. Option for the 'Lead Type' (Select) field in DocType 'Lead'
 #: erpnext/crm/doctype/lead/lead.json
@@ -13416,7 +13416,7 @@ msgstr "Skapa Ny Potentiell Kund"
 
 #: erpnext/selling/doctype/product_bundle/product_bundle.js:16
 msgid "Create New Version"
-msgstr ""
+msgstr "Skapa ny Version"
 
 #: banking/src/components/common/LinkFieldCombobox.tsx:284
 msgid "Create New {0}"
@@ -14297,12 +14297,12 @@ msgstr "Aktuell Växelkurs"
 #. Label of the current_invoice_end (Date) field in DocType 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
 msgid "Current Invoice End"
-msgstr ""
+msgstr "Aktuell Faktura Slut Datum"
 
 #. Label of the current_invoice_start (Date) field in DocType 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
 msgid "Current Invoice Start"
-msgstr ""
+msgstr "Aktuell Faktura Start Datum"
 
 #. Label of the current_level (Int) field in DocType 'BOM Update Log'
 #: erpnext/manufacturing/doctype/bom_update_log/bom_update_log.json
@@ -17249,7 +17249,7 @@ msgstr "Inaktiverat Bankkonto"
 
 #: erpnext/stock/doctype/packed_item/packed_item.py:216
 msgid "Disabled Product Bundle"
-msgstr ""
+msgstr "Inaktiverade Artikel Paket"
 
 #: erpnext/stock/utils.py:434
 msgid "Disabled Warehouse {0} cannot be used for this transaction."
@@ -18945,7 +18945,7 @@ msgstr "Aktivera Lojalitet Poäng Program"
 #. DocType 'CRM Settings'
 #: erpnext/crm/doctype/crm_settings/crm_settings.json
 msgid "Enable Opportunity Creation from Contact Us"
-msgstr ""
+msgstr "Aktivera skapande av affärsmöjligheter från Kontakta Oss"
 
 #. Label of the enable_parallel_reposting (Check) field in DocType 'Stock
 #. Reposting Settings'
@@ -20230,7 +20230,7 @@ msgstr "Misslyckades med att uppdatera regelprioriteringar"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:521
 msgid "Failed to update subscription status for {0} {1}"
-msgstr ""
+msgstr "Misslyckades med att uppdatera prenumeration status för {0} {1}"
 
 #. Label of the failure_date (Datetime) field in DocType 'Asset Repair'
 #: erpnext/assets/doctype/asset_repair/asset_repair.json
@@ -20770,7 +20770,7 @@ msgstr "Färdig Artikel {0} stämmer inte med Arbetsorder {1}"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry_handler/disassemble.py:71
 msgid "Finished good quantity being consumed ({0} in stock UOM) must equal the quantity to disassemble ({1}). Do not change the UOM, conversion factor or quantity of the finished good row."
-msgstr ""
+msgstr "Kvantitet färdiga artiklar som förbrukas ({0} i lager enhet) måste vara lika med kvantitet som ska demonteras ({1}). Ändra inte enhet, konvertering faktor eller kvantitet för färdig artikel rad."
 
 #: erpnext/selling/doctype/sales_order/sales_order.js:615
 msgid "First Delivery Date"
@@ -23440,13 +23440,13 @@ msgstr "Om vald betraktas denna artikel som direktlevererad som standard i Förs
 #. Description of the 'Update Stock' (Check) field in DocType 'Sales Invoice'
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "If checked, updates inventory; stock and accounting entries are created together. Leave unchecked if a Delivery Note is created separately."
-msgstr ""
+msgstr "Om vald uppdateras lager, lager och bokföring poster skapas tillsammans. Lämna tomt om Försäljning Följesedel skapas separat."
 
 #. Description of the 'Update Stock' (Check) field in DocType 'Purchase
 #. Invoice'
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 msgid "If checked, updates inventory; stock and accounting entries are created together. Leave unchecked if a Purchase Receipt is created separately."
-msgstr ""
+msgstr "Om vald uppdateras lager, lager och bokföring poster skapas tillsammans. Lämna tomt om Inköp Följesedel skapas separat."
 
 #: erpnext/public/js/setup_wizard.js:56
 msgid "If checked, we will create demo data for you to explore the system. This demo data can be erased later."
@@ -23610,7 +23610,7 @@ msgstr "Om aktiverad använder system lager konto angiven i Artikel Inställning
 #. DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "If enabled, the system will use the moving average valuation method to calculate the valuation rate for the batched items and will not consider the individual batch-wise incoming rate."
-msgstr "Om aktiverad, kommer system att använda MA värdering sätt för att beräkna värdering för artikel partier och kommer inte att beakta individuell per parti pris."
+msgstr "Om aktiverad, kommer system att använda MV värdering sätt för att beräkna värdering för artikel partier och kommer inte att beakta individuell per parti pris."
 
 #. Description of the 'Validate Applied Rule' (Check) field in DocType 'Pricing
 #. Rule'
@@ -25260,7 +25260,7 @@ msgstr "Ogiltig Bolag för Intern Bolag Transaktion"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:972
 msgid "Invalid Configuration"
-msgstr ""
+msgstr "Ogiltig Konfiguration"
 
 #: erpnext/accounts/services/taxes.py:294
 #: erpnext/assets/doctype/asset/asset.py:361
@@ -25278,12 +25278,12 @@ msgstr "Ogiltig Leverans Datum"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry_handler/disassemble.py:110
 msgid "Invalid Disassembly Item"
-msgstr ""
+msgstr "Ogiltig Demontering Artikel"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry_handler/disassemble.py:76
 #: erpnext/stock/doctype/stock_entry/stock_entry_handler/disassemble.py:125
 msgid "Invalid Disassembly Quantity"
-msgstr ""
+msgstr "Ogiltig Demontering Kvantitet"
 
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:414
 msgid "Invalid Discount"
@@ -26149,7 +26149,7 @@ msgstr "Är Virtuell Artikel"
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 msgid "Is Product Bundle"
-msgstr ""
+msgstr "Är Artikel Paket"
 
 #. Label of the po_required (Select) field in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
@@ -27657,7 +27657,7 @@ msgstr "Artikel Vikt Detaljer"
 #. Name of a report
 #: erpnext/stock/report/item_where_used/item_where_used.json
 msgid "Item Where Used"
-msgstr ""
+msgstr "Var Används Artikel"
 
 #. Label of a Link in the Buying Workspace
 #. Name of a report
@@ -27780,7 +27780,7 @@ msgstr "Artikel {0} har lagt till flera gånger under samma överordnad artikel 
 
 #: erpnext/selling/doctype/product_bundle/product_bundle.js:54
 msgid "Item {0} already has an active Product Bundle ({1}). Submitting this will create a new version and deactivate {1}."
-msgstr ""
+msgstr "Artikel {0} har redan aktivt Artikel Paket ({1}). Vid godkännade av detta skapas ny version och {1} inaktiveras."
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:119
 msgid "Item {0} cannot be added as a sub-assembly of itself"
@@ -28111,7 +28111,7 @@ msgstr "Jobbkort Post"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:925
 msgid "Job Card On Hold"
-msgstr ""
+msgstr "Jobbkort Pausad"
 
 #. Name of a DocType
 #: erpnext/manufacturing/doctype/job_card_operation/job_card_operation.json
@@ -30314,7 +30314,7 @@ msgstr "Avstämd"
 
 #: erpnext/stock/report/item_where_used/item_where_used.py:57
 msgid "Matched Field"
-msgstr ""
+msgstr "Avstämd Fält"
 
 #. Label of the matched_transaction_rule (Link) field in DocType 'Bank
 #. Transaction'
@@ -30933,7 +30933,7 @@ msgstr "Meter/Sekund"
 
 #: erpnext/manufacturing/doctype/workstation/workstation.py:546
 msgid "Method {0} is not allowed to be run on a Job Card."
-msgstr ""
+msgstr "Metod {0} får inte köras på Jobbkort."
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -31187,7 +31187,7 @@ msgstr "Lägsta kvantitet ska vara enligt Lager Enhet\n\n"
 #. Description of the 'Safety Stock' (Float) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Minimum stock level to maintain as a buffer. Used to calculate recommended reorder level: Reorder Level = Safety Stock + (Average Daily Consumption × Lead Time)."
-msgstr "Lägsta lagernivå att upprätthålla som buffert. Används för att beräkna rekommenderad order nivå: Order nivå = Säkerhet Lager + (Medel Daglig Förbrukning × Ledtid)."
+msgstr "Lägsta lager nivå att upprätthålla som buffert. Används för att beräkna rekommenderad order nivå: Order nivå = Säkerhet Lager + (Medel Daglig Förbrukning × Ledtid)."
 
 #. Label of the minute (Text Editor) field in DocType 'Quality Meeting Minutes'
 #. Name of a UOM
@@ -31521,7 +31521,7 @@ msgstr "Förflyttning"
 #: erpnext/stock/doctype/item/item.json
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Moving Average"
-msgstr "MA"
+msgstr "Medel Värde"
 
 #: erpnext/accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.js:82
 msgid "Moving up in tree ..."
@@ -32263,13 +32263,13 @@ msgstr "Newton"
 #. Label of the next_billing_period_end (Date) field in DocType 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
 msgid "Next Billing Period End"
-msgstr ""
+msgstr "Nästa Fakturering Period Slutar"
 
 #. Label of the next_billing_period_start (Date) field in DocType
 #. 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
 msgid "Next Billing Period Start"
-msgstr ""
+msgstr "Nästa Fakturering Period Startar"
 
 #. Label of the next_depreciation_date (Date) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
@@ -33481,7 +33481,7 @@ msgstr "Endast en operation kan ha \"Är Slutgiltig Färdig Artikel\" angiven n�
 #. Description of the 'Is Active' (Check) field in DocType 'Product Bundle'
 #: erpnext/selling/doctype/product_bundle/product_bundle.json
 msgid "Only one version of a Product Bundle can be active at a time for a given Parent Item. Activating a version deactivates the previously active one."
-msgstr ""
+msgstr "Endast en version av ett Artikel Paket kan vara aktiv åt gången för given överordnad artikel. Aktivering av en version inaktiverar tidigare aktiva Artikel Paket."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:719
 msgid "Only one {0} entry can be created against the Work Order {1}"
@@ -39088,7 +39088,7 @@ msgstr "Registrering tidsstämpel måste vara efter {0}"
 #. 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
 msgid "Postpaid (bill at period end)"
-msgstr ""
+msgstr "Efterbetalt (faktura vid period slut)"
 
 #. Description of a DocType
 #: erpnext/crm/doctype/opportunity/opportunity.json
@@ -39191,7 +39191,7 @@ msgstr "Förvald E-Post"
 #. 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
 msgid "Prepaid (bill at period start)"
-msgstr ""
+msgstr "Förbetalt (faktura vid period start)"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:34
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:51
@@ -40179,7 +40179,7 @@ msgstr "Artikel Paket Saldo"
 
 #: erpnext/stock/report/item_where_used/item_where_used.py:278
 msgid "Product Bundle Component"
-msgstr ""
+msgstr "Artikel Paket Komponent"
 
 #. Label of the product_bundle_help (HTML) field in DocType 'POS Invoice'
 #. Label of the product_bundle_help (HTML) field in DocType 'Sales Invoice'
@@ -40204,7 +40204,7 @@ msgstr "Artikel Paket Artikel"
 
 #: erpnext/stock/report/item_where_used/item_where_used.py:305
 msgid "Product Bundle Parent"
-msgstr ""
+msgstr "Artikel Paket Överordnad"
 
 #. Description of the 'Product Bundle' (Link) field in DocType 'Purchase
 #. Invoice Item'
@@ -40218,15 +40218,15 @@ msgstr ""
 #: erpnext/stock/doctype/packed_item/packed_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Product Bundle version this row was packed from"
-msgstr ""
+msgstr "Artikel Paket version som denna rad packades från"
 
 #: erpnext/stock/doctype/packed_item/packed_item.py:453
 msgid "Product Bundle {0} is disabled and cannot be used in transactions."
-msgstr ""
+msgstr "Artikel Paket {0} är inaktiverad och kan inte användas i transaktioner."
 
 #: erpnext/stock/doctype/packed_item/packed_item.py:450
 msgid "Product Bundle {0} is not submitted"
-msgstr ""
+msgstr "Artikel Paket {0} är inte godkänd"
 
 #. Label of the product_discount_scheme_section (Section Break) field in
 #. DocType 'Pricing Rule'
@@ -43886,7 +43886,7 @@ msgstr "Uppdatera Plaid Länk"
 #. Option for the 'Status' (Select) field in DocType 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
 msgid "Refunded"
-msgstr ""
+msgstr "Återbetald"
 
 #: erpnext/stock/reorder_item.py:390
 msgid "Regards,"
@@ -43997,7 +43997,7 @@ msgstr "Relaterad"
 
 #: erpnext/stock/report/item_where_used/item_where_used.py:50
 msgid "Related Item"
-msgstr ""
+msgstr "Relaterad Artikel"
 
 #. Label of the relation (Data) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -46069,7 +46069,7 @@ msgstr "Rad # {0}: Färdig Artikel är inte specificerad för Service Artikel {1
 
 #: erpnext/manufacturing/doctype/bom/bom.py:371
 msgid "Row #{0}: Finished Good Item {1} cannot be added in the Secondary Items table."
-msgstr ""
+msgstr "Rad #{0}: Färdigt artikel {1} kan inte läggas till i Sekundär Artikel tabell."
 
 #: erpnext/buying/doctype/purchase_order/services/subcontracting.py:28
 #: erpnext/selling/doctype/sales_order/services/subcontracting.py:27
@@ -46160,7 +46160,7 @@ msgstr "Rad # {0}: Artikel {1} är inte service artikel"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry_handler/disassemble.py:106
 msgid "Row #{0}: Item {1} is not part of the source manufacture entry and cannot be added to this disassembly."
-msgstr ""
+msgstr "Rad #{0}: Artikel {1} är inte del av ursprunglig artikel post och kan inte läggas till i denna demontering."
 
 #: erpnext/controllers/subcontracting_inward_controller.py:79
 msgid "Row #{0}: Item {1} mismatch. Changing of item code is not permitted, add another row instead."
@@ -46172,7 +46172,7 @@ msgstr "Rad #{0}: Artikel {1} stämmer inte. Ändring av Artikel Kod är inte ti
 
 #: erpnext/stock/doctype/stock_entry/stock_entry_handler/disassemble.py:115
 msgid "Row #{0}: Item {1} quantity ({2} in stock UOM) does not match the quantity derived from the source ({3}). Do not change the UOM, conversion factor or quantity of disassembly rows."
-msgstr ""
+msgstr "Rad #{0}: Artikel {1} kvantitet ({2} i lager enhet) stämmer inte överens med kvantitet som härleds från källa ({3}). Ändra inte enhet, konvertering faktor eller kvantitet för demontering rader."
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:780
 msgid "Row #{0}: Journal Entry {1} does not have account {2} or already matched against another voucher"
@@ -46238,7 +46238,7 @@ msgstr "Rad #{0}: Procentuell Process Förlust ska vara lägre än 100 % för {1
 
 #: erpnext/stock/doctype/packed_item/packed_item.py:213
 msgid "Row #{0}: Product Bundle {1} is disabled and cannot be used in transactions."
-msgstr ""
+msgstr "Rad #{0}: Artikel Paket {1} är inaktiverad och kan inte användas i transaktioner."
 
 #: erpnext/public/js/utils/barcode_scanner.js:425
 msgid "Row #{0}: Qty increased by {1}"
@@ -49496,7 +49496,7 @@ msgstr "Serie och Parti Paket {0} är inte godkänd"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2251
 msgid "Serial and Batch Bundle {0} is submitted and its entries cannot be modified."
-msgstr ""
+msgstr "Serie och Parti Paket {0} är godkänd och deras poster kan inte ändras."
 
 #. Label of the section_break_45 (Section Break) field in DocType
 #. 'Subcontracting Receipt Item'
@@ -52674,7 +52674,7 @@ msgstr "Lager Post"
 
 #: erpnext/stock/report/item_where_used/item_where_used.py:362
 msgid "Subcontracting Finished Good"
-msgstr ""
+msgstr "Underleverantör Färdig Artikel"
 
 #. Label of the subcontracting_inward_tab (Tab Break) field in DocType 'Selling
 #. Settings'
@@ -52858,7 +52858,7 @@ msgstr "Försäljning Order"
 
 #: erpnext/stock/report/item_where_used/item_where_used.py:336
 msgid "Subcontracting Service Item"
-msgstr ""
+msgstr "Underleverantör Service Artikel"
 
 #. Label of the subcontract (Tab Break) field in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
@@ -52906,7 +52906,7 @@ msgstr "Godkänn Offert"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1570
 msgid "Submitted Job Card cannot be processed."
-msgstr ""
+msgstr "Godkänd Jobbkort kan inte behandlas."
 
 #. Label of the subscription_section (Section Break) field in DocType 'Payment
 #. Request'
@@ -55601,7 +55601,7 @@ msgstr "Det finns inga transaktioner i system för vald bankkonto och datum som 
 
 #: erpnext/stock/doctype/item/item.js:1356
 msgid "There are two options to maintain valuation of stock. FIFO (first in - first out) and Moving Average. To understand this topic in detail please visit <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>Item Valuation, FIFO and Moving Average.</a>"
-msgstr "Det finns två alternativ för att upprätthålla värderingen av aktier. FIFO (först in - först ut) och MA medelvärde. För att förstå detta ämne i detalj, besök <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>Artikelvärdering, FIFO och MA.</a>"
+msgstr "Det finns två alternativ för att upprätthålla lager värdering. FIFO (först in - först ut) och Medel Värde. För att förstå detta ämne i detalj, besök <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>Artikel värdering, FIFO och MV.</a>"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:982
 msgid "There are {0} unreconciled transactions before {1}."
@@ -59339,7 +59339,7 @@ msgstr "Användare med den här rollen kommer att meddelas om avskrivning av til
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.js:103
 msgid "Using negative stock disables FIFO/Moving average valuation when inventory is negative."
-msgstr "Användning av negativ lager inaktiverar FIFO/MA värdering sätt när lager värde är negativ."
+msgstr "Användning av negativ lager inaktiverar FIFO/MV värdering sätt när lager värde är negativ."
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:133
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:220
@@ -61726,7 +61726,7 @@ msgstr "Du kan inte godkänna order utan betalning."
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:968
 msgid "You cannot update stock for a Debit Note. A Debit Note is a financial document that should not affect inventory. Please disable 'Update Stock'."
-msgstr ""
+msgstr "Du kan inte uppdatera lager för Debet Nota. Debet Nota är finansiellt dokument som inte ska påverka lager. Vänligen inaktivera \"Uppdatera Lager\"."
 
 #: erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py:106
 msgid "You cannot {0} this document because another Period Closing Entry {1} exists after {2}"
@@ -62840,7 +62840,7 @@ msgstr "{0}, slutför åtgärd {1} före åtgärd {2}."
 
 #: erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py:61
 msgid "{0}, {1} or {2} are the only allowed options."
-msgstr ""
+msgstr "{0}, {1} eller {2} är enda tillåtna alternativ."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:525
 msgid "{0}: Child table (auto-deleted with parent)"

@@ -9,13 +9,13 @@ from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 from erpnext.stock.utils import get_combine_datetime
 
-from .base import BaseStockEntry
 from .manufacturing import (
 	ceil_qty_if_uom_has_whole_number,
 	get_bom_items,
 	get_production_item_details,
 	get_secondary_items,
 )
+from .stock_entry_base import BaseStockEntry
 
 
 def _qty_tolerance(precision: int) -> float:

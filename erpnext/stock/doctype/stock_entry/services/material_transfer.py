@@ -3,8 +3,8 @@ from frappe import _
 from frappe.query_builder.functions import Sum
 from frappe.utils import cstr, flt
 
-from .base import BaseStockEntry
 from .manufacturing import _check_bom_component_qty, get_bom_items
+from .stock_entry_base import BaseStockEntry
 
 
 class BaseMaterialTransferStockEntry(BaseStockEntry):

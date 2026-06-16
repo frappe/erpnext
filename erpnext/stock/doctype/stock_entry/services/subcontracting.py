@@ -8,7 +8,7 @@ from frappe.utils import flt
 
 from erpnext.stock.utils import get_bin
 
-from .base import BaseStockEntry
+from .stock_entry_base import BaseStockEntry
 
 
 class SendToSubcontractorStockEntry(BaseStockEntry):

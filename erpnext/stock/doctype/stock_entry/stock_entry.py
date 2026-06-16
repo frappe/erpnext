@@ -37,20 +37,20 @@ from erpnext.stock.get_item_details import (
 from erpnext.stock.stock_ledger import get_previous_sle, get_valuation_rate
 from erpnext.stock.utils import get_incoming_rate
 
-from .stock_entry_handler.disassemble import DisassembleStockEntry
-from .stock_entry_handler.manufacturing import (
+from .services.disassemble import DisassembleStockEntry
+from .services.manufacturing import (
 	ManufactureStockEntry,
 	MaterialConsumptionForManufactureStockEntry,
 	RepackStockEntry,
 )
-from .stock_entry_handler.material_receipt_issue import MaterialIssueStockEntry, MaterialReceiptStockEntry
-from .stock_entry_handler.material_transfer import (
+from .services.material_receipt_issue import MaterialIssueStockEntry, MaterialReceiptStockEntry
+from .services.material_transfer import (
 	MaterialRequestStockEntry,
 	MaterialTransferForManufactureStockEntry,
 	MaterialTransferStockEntry,
 )
-from .stock_entry_handler.serial_batch import StockEntrySABB
-from .stock_entry_handler.subcontracting import SendToSubcontractorStockEntry
+from .services.serial_batch import StockEntrySABB
+from .services.subcontracting import SendToSubcontractorStockEntry
 
 
 class FinishedGoodError(frappe.ValidationError):
@@ -554,6 +554,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 		for d in self.get("items"):
 			if d.s_warehouse or d.set_basic_rate_manually:
 				continue
+
+			# Zero-qty secondary items carry no inventory value; skip rate calculation
+			if d.secondary_item_type and flt(d.transfer_qty) == 0:
+				d.basic_rate = 0.0
+				d.basic_amount = 0.0
+				continue
+
 			self._set_incoming_item_rate(d, outgoing_items_cost, raise_error_if_no_rate, zero_valuation_items)
 
 		if zero_valuation_items:
@@ -575,7 +582,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 			cost_allocation_per = frappe.get_value(
 				"BOM Secondary Item", d.bom_secondary_item, "cost_allocation_per"
 			)
-			d.basic_rate = (outgoing_items_cost * (cost_allocation_per / 100)) / d.transfer_qty
+			# Only recalculate when cost is actually allocated; otherwise preserve the
+			# user-entered rate (or fall through to get_valuation_rate below)
+			if cost_allocation_per and flt(d.transfer_qty):
+				d.basic_rate = (outgoing_items_cost * (cost_allocation_per / 100)) / d.transfer_qty
 
 		if not d.basic_rate and not d.allow_zero_valuation_rate:
 			d.basic_rate = get_valuation_rate(

@@ -34,7 +34,13 @@ class PaymentEntryGLComposer(BaseGLComposer):
 		self.add_deductions_gl_entries(gl_entries)
 		self.add_tax_gl_entries(gl_entries)
 		add_regional_gl_entries(gl_entries, doc)
+		self.set_transaction_currency_and_rate_in_gl_map(gl_entries, doc)
 		return gl_entries
+
+	def set_transaction_currency_and_rate_in_gl_map(self, gl_entries, doc):
+		for gle in gl_entries:
+			gle.setdefault("transaction_currency", doc.transaction_currency)
+			gle.setdefault("transaction_exchange_rate", doc.transaction_exchange_rate)
 
 	def add_party_gl_entries(self, gl_entries):
 		doc = self.doc

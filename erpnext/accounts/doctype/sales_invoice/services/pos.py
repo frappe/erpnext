@@ -114,10 +114,17 @@ class POSService:
 
 		return pos
 
-	def set_paid_amount(self) -> None:
+	def update_paid_amount(self) -> None:
 		doc = self.doc
 		paid_amount = 0.0
 		base_paid_amount = 0.0
+
+		if not cint(doc.is_pos) and doc.is_return:
+			doc.set("payments", [])
+			doc.paid_amount = paid_amount
+			doc.base_paid_amount = base_paid_amount
+			return
+
 		for data in doc.payments:
 			data.base_amount = flt(data.amount * doc.conversion_rate, doc.precision("base_paid_amount"))
 			paid_amount += data.amount

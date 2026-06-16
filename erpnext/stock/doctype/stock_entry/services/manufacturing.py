@@ -16,8 +16,8 @@ from erpnext.stock.serial_batch_bundle import (
 	get_serial_nos_from_bundle,
 )
 
-from .base import BaseStockEntry
 from .serial_batch import create_serial_and_batch_bundle
+from .stock_entry_base import BaseStockEntry
 
 
 class BaseManufactureStockEntry(BaseStockEntry):
@@ -388,7 +388,12 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		self.add_secondary_items_from_job_card()
 
 	def add_raw_materials(self):
-		if not frappe.db.get_single_value("Manufacturing Settings", "material_consumption"):
+		material_consumption = frappe.db.get_single_value("Manufacturing Settings", "material_consumption")
+
+		if material_consumption and self.raw_materials_already_consumed():
+			return
+
+		if not material_consumption:
 			if self.backflush_based_on == "BOM" or self.wo_doc.skip_transfer:
 				self.add_raw_materials_based_on_work_order()
 			else:
@@ -397,6 +402,21 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			self.add_unconsumed_raw_materials()
 		else:
 			self.add_raw_materials_based_on_transfer()
+
+	def raw_materials_already_consumed(self) -> bool:
+		if not self.doc.work_order:
+			return False
+
+		return bool(
+			frappe.db.exists(
+				"Stock Entry",
+				{
+					"work_order": self.doc.work_order,
+					"purpose": "Material Consumption for Manufacture",
+					"docstatus": 1,
+				},
+			)
+		)
 
 	def add_unconsumed_raw_materials(self):
 		wo = self.wo_doc

@@ -518,7 +518,7 @@ def _set_pick_list_item_qty(source, target, source_parent, for_qty, max_finished
 
 @frappe.whitelist()
 def make_stock_return_entry(work_order: str):
-	from erpnext.stock.doctype.stock_entry.stock_entry_handler.manufacturing import (
+	from erpnext.stock.doctype.stock_entry.services.manufacturing import (
 		ManufactureStockEntry,
 	)
 
