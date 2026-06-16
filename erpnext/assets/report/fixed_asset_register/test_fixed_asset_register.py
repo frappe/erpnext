@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.utils import add_months, getdate, nowdate
+from frappe.utils import add_months, flt, getdate, nowdate
 
 from erpnext.assets.doctype.asset.test_asset import create_asset
 from erpnext.assets.report.fixed_asset_register.fixed_asset_register import (
@@ -249,7 +249,22 @@ class TestFixedAssetRegister(ERPNextTestSuite):
 	# ------------------------------------------------------------------ #
 
 	def test_execute_group_by_asset_category_aggregates(self):
-		"""Group-by Asset Category sums net_purchase_amount across that category's assets."""
+		"""Group-by Asset Category sums net_purchase_amount across that category's assets.
+
+		Asserted as the delta over a baseline rather than by re-deriving the expected
+		value from the report's own query (which would be a tautology): adding two
+		assets worth 10000 and 25000 must raise the Computers category total by exactly
+		35000. This stays correct even if other Computers assets exist.
+		"""
+		filters = self._base_filters(group_by="Asset Category", asset_category="Computers")
+
+		def computers_total():
+			_columns, data, _message, _chart = execute(filters)
+			rows = [d for d in data if d.get("asset_category") == "Computers"]
+			return flt(rows[0]["net_purchase_amount"]) if rows else 0.0
+
+		baseline = computers_total()
+
 		create_asset(
 			asset_name="FAR Cat Asset 1",
 			net_purchase_amount=10000,
@@ -265,7 +280,6 @@ class TestFixedAssetRegister(ERPNextTestSuite):
 			submit=1,
 		)
 
-		filters = self._base_filters(group_by="Asset Category", asset_category="Computers")
 		_columns, data, _message, chart = execute(filters)
 
 		# Aggregated reports return no chart.
@@ -273,24 +287,8 @@ class TestFixedAssetRegister(ERPNextTestSuite):
 
 		computers = [d for d in data if d.get("asset_category") == "Computers"]
 		self.assertEqual(len(computers), 1, "Category rows should be collapsed to one per category")
-		row = computers[0]
-		# Filtered to the Computers category, so the row total equals the sum of
-		# every Computers asset's net purchase amount (>= the two we just created).
-		expected_total = sum(
-			frappe.get_all(
-				"Asset",
-				filters={
-					"docstatus": 1,
-					"company": "_Test Company",
-					"asset_category": "Computers",
-					# Mirror the report's status="In Location" (exclude disposed) condition.
-					"status": ["not in", ["Sold", "Scrapped", "Capitalized"]],
-				},
-				pluck="net_purchase_amount",
-			)
-		)
-		self.assertAlmostEqual(row["net_purchase_amount"], expected_total, places=2)
-		self.assertGreaterEqual(row["net_purchase_amount"], 35000)
+		# The two new assets raise the category total by exactly their combined value.
+		self.assertAlmostEqual(flt(computers[0]["net_purchase_amount"]) - baseline, 35000.0, places=2)
 
 	def test_execute_group_by_location(self):
 		"""Group-by Location returns per-location rows for the created assets."""
