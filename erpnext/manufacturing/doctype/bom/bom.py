@@ -341,21 +341,6 @@ class BOM(WebsiteGenerator):
 					).format(item.idx, get_link_to_form("Item", item.item_code))
 				)
 
-<<<<<<< HEAD
-			if item.qty is None:
-				frappe.throw(
-<<<<<<< HEAD
-					_("Row #{0}: Quantity should be greater than 0 for {1} Item {2}").format(
-						item.idx, item.type, get_link_to_form("Item", item.item_code)
-=======
-					_("Row #{0}: Quantity is required for {1} Item {2}").format(
-						item.idx, item.secondary_item_type, get_link_to_form("Item", item.item_code)
->>>>>>> 6771daf6a1 (fix(bom): allow zero qty for secondary items (Co-Product, By-Product, Scrap, Additional Finished Good))
-					)
-				)
-
-=======
->>>>>>> c1bef53f92 (refactor(bom): drop redundant secondary item qty None check)
 			if item.process_loss_per >= 100:
 				frappe.throw(
 					_("Row #{0}: Process Loss Percentage should be less than 100% for {1} Item {2}").format(

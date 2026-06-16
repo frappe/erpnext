@@ -1379,17 +1379,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 		for d in self.get("items"):
 			if d.s_warehouse or d.set_basic_rate_manually:
 				continue
-<<<<<<< HEAD
-=======
 
 			# Zero-qty secondary items carry no inventory value; skip rate calculation
-			if d.secondary_item_type and flt(d.transfer_qty) == 0:
+			if d.type and flt(d.transfer_qty) == 0:
 				d.basic_rate = 0.0
 				d.basic_amount = 0.0
 				continue
-
-			self._set_incoming_item_rate(d, outgoing_items_cost, raise_error_if_no_rate, zero_valuation_items)
->>>>>>> de3df6bcef (fix(manufacture): preserve user-entered rate for secondary items with zero cost allocation)
 
 			if d.allow_zero_valuation_rate and d.basic_rate and self.purpose != "Receive from Customer":
 				d.basic_rate = 0.0
@@ -1408,24 +1403,14 @@ class StockEntry(StockController, SubcontractingInwardController):
 				cost_allocation_per = frappe.get_value(
 					"BOM Secondary Item", d.bom_secondary_item, "cost_allocation_per"
 				)
-				d.basic_rate = (outgoing_items_cost * (cost_allocation_per / 100)) / d.transfer_qty
+				# Only recalculate when cost is actually allocated; otherwise preserve the
+				# user-entered rate (or fall through to get_valuation_rate below)
+				if cost_allocation_per and flt(d.transfer_qty):
+					d.basic_rate = (outgoing_items_cost * (cost_allocation_per / 100)) / d.transfer_qty
 
-<<<<<<< HEAD
 			if not d.basic_rate and not d.allow_zero_valuation_rate:
 				if self.is_new():
 					raise_error_if_no_rate = False
-=======
-			if self.bom_no:
-				d.basic_rate *= frappe.get_value("BOM", self.bom_no, "cost_allocation_per") / 100
-		elif d.secondary_item_type and d.bom_secondary_item:
-			cost_allocation_per = frappe.get_value(
-				"BOM Secondary Item", d.bom_secondary_item, "cost_allocation_per"
-			)
-			# Only recalculate when cost is actually allocated; otherwise preserve the
-			# user-entered rate (or fall through to get_valuation_rate below)
-			if cost_allocation_per and flt(d.transfer_qty):
-				d.basic_rate = (outgoing_items_cost * (cost_allocation_per / 100)) / d.transfer_qty
->>>>>>> de3df6bcef (fix(manufacture): preserve user-entered rate for secondary items with zero cost allocation)
 
 				d.basic_rate = get_valuation_rate(
 					d.item_code,
