@@ -18,7 +18,6 @@ class TestCustomerLedgerSummary(ERPNextTestSuite, AccountsTestMixin):
 		self.debit_to = "Debtors - _TC"
 		self.cost_center = "Main - _TC"
 		self.cash = "Cash - _TC"
-		self.clear_old_entries()
 
 	def create_sales_invoice(self, do_not_submit=False, **args):
 		si = create_sales_invoice(

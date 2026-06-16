@@ -12,7 +12,6 @@ class TestSupplierLedgerSummary(ERPNextTestSuite, AccountsTestMixin):
 		self.company = "_Test Company"
 		self.supplier = "_Test Supplier"
 		self.item = "_Test Item"
-		self.clear_old_entries()
 
 	def create_purchase_invoice(self, do_not_submit=False):
 		frappe.set_user("Administrator")

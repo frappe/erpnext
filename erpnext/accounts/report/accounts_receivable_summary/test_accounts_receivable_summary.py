@@ -16,7 +16,6 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		self.item = "_Test Item"
 		self.debit_to = "Debtors - _TC"
 		self.cost_center = "Main - _TC"
-		self.clear_old_entries()
 
 	def test_01_receivable_summary_output(self):
 		"""

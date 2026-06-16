@@ -24,7 +24,6 @@ class TestUnreconcilePayment(ERPNextTestSuite, AccountsTestMixin):
 		self.cost_center = "Main - _TC"
 		self.cash = "Cash - _TC"
 		self.debtors_usd = "_Test Receivable USD - _TC"
-		self.clear_old_entries()
 
 	def create_sales_invoice(self, do_not_submit=False):
 		si = create_sales_invoice(
@@ -375,7 +374,6 @@ class TestUnreconcilePayment(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual(so.advance_paid, 0)
 
 	def test_06_unreconcile_advance_from_payment_entry(self):
-		self.enable_advance_as_liability()
 		so1 = self.create_sales_order()
 		so2 = self.create_sales_order()
 
@@ -426,7 +424,11 @@ class TestUnreconcilePayment(ERPNextTestSuite, AccountsTestMixin):
 		self.disable_advance_as_liability()
 
 	def test_07_adv_from_so_to_invoice(self):
-		self.enable_advance_as_liability()
+		frappe.db.set_value("Company", self.company, "book_advance_payments_in_separate_party_account", True)
+		frappe.db.set_value(
+			"Company", self.company, "default_advance_received_account", "Advance Received - _TC"
+		)
+
 		so = self.create_sales_order()
 		pe = self.create_payment_entry()
 		pe.paid_amount = 1000

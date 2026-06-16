@@ -23,7 +23,6 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		self.debit_to = "Debtors - _TC"
 		self.cash = "Cash - _TC"
 		self.debtors_usd = "_Test Receivable USD - _TC"
-		self.clear_old_entries()
 
 	def create_sales_invoice(self, no_payment_schedule=False, do_not_submit=False, **args):
 		frappe.set_user("Administrator")

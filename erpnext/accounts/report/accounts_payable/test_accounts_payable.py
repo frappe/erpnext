@@ -11,7 +11,7 @@ class TestAccountsPayable(ERPNextTestSuite, AccountsTestMixin):
 	def setUp(self):
 		self.company = "_Test Company"
 		self.item = "_Test Item"
-		self.supplier = "_Test Supplier USD"
+		self.supplier = "_Test Supplier 2"
 		self.creditors_usd = "_Test Payable USD - _TC"
 
 	def test_accounts_payable_for_foreign_currency_supplier(self):

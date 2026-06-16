@@ -16,7 +16,6 @@ class TestBankTransactionRule(ERPNextTestSuite, AccountsTestMixin):
 		self.bank = "HDFC - _TC"
 		self.debit_to = "Debtors - _TC"
 		self.cash = "Cash - _TC"
-		self.clear_old_entries()
 		bank_dt = qb.DocType("Bank")
 		qb.from_(bank_dt).delete().where(bank_dt.name == "HDFC").run()
 		self.create_bank_account()

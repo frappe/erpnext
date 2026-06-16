@@ -21,7 +21,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 class TestTaxWithholdingDetails(ERPNextTestSuite, AccountsTestMixin):
 	def setUp(self):
 		self.company = "_Test Company"
-		self.clear_old_entries()
 		create_records()
 
 	def test_tax_withholding_for_customers(self):

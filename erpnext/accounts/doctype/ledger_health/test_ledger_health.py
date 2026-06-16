@@ -17,7 +17,6 @@ class TestLedgerHealth(ERPNextTestSuite, AccountsTestMixin):
 		self.debit_to = "Debtors - _TC"
 		self.income_account = "Sales - _TC"
 		self.configure_monitoring_tool()
-		self.clear_old_entries()
 
 	def configure_monitoring_tool(self):
 		monitor_settings = frappe.get_doc("Ledger Health Monitor")
