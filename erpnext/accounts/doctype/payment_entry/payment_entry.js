@@ -266,7 +266,7 @@ frappe.ui.form.on("Payment Entry", {
 						frm.doc.doctype,
 						frm.doc.name,
 						"Payment Advice",
-						frm.doc.letter_head,
+						frm.doc.letter_head || "",
 						frm.doc.language
 					);
 				},
