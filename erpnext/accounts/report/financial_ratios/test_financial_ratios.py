@@ -46,7 +46,8 @@ class TestFinancialRatios(ERPNextTestSuite):
 
 		columns, data = execute(self.get_report_filters())
 		year_key = columns[1]["fieldname"]
-		ratio_row = next(row for row in data if row.get("ratio") == "Fixed Asset Turnover Ratio")
+		ratio_row = next((row for row in data if row.get("ratio") == "Fixed Asset Turnover Ratio"), None)
+		self.assertIsNotNone(ratio_row, "Fixed Asset Turnover Ratio row not found in report output")
 
 		# Net Sales / Net Fixed Assets = 20,000 / 10,000 = 2.0
 		# (the old behaviour divided by total assets, giving 20,000 / 30,000 = 0.667)
