@@ -4,8 +4,8 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder import Case, CustomFunction
-from frappe.query_builder.functions import Count, Max, Sum
+from frappe.query_builder import Case
+from frappe.query_builder.functions import Count, CurDate, DateDiff, Max, Sum
 from frappe.utils import cint
 
 
@@ -37,9 +37,6 @@ def get_sales_details(doctype):
 	customer = frappe.qb.DocType("Customer")
 	sales_doctype = frappe.qb.DocType(doctype)
 
-	date_diff = CustomFunction("DATEDIFF", ["d1", "d2"])
-	current_date = CustomFunction("CURRENT_DATE", [])
-
 	if doctype == "Sales Order":
 		total_considered = Sum(
 			Case()
@@ -55,7 +52,9 @@ def get_sales_details(doctype):
 		date_col = sales_doctype.posting_date
 
 	last_order_date = Max(date_col)
-	days_since_last_order = date_diff(current_date(), last_order_date)
+	# DateDiff is cross-database (DATEDIFF on MariaDB, date subtraction on postgres); CurDate()
+	# renders the bare CURRENT_DATE keyword. Yields the integer number of days.
+	days_since_last_order = DateDiff(CurDate(), last_order_date)
 
 	return (
 		frappe.qb.from_(customer)

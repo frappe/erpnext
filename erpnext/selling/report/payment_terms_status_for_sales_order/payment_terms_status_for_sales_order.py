@@ -3,7 +3,8 @@
 
 import frappe
 from frappe import _, qb, query_builder
-from frappe.query_builder import Criterion, functions
+from frappe.query_builder import Criterion
+from frappe.query_builder.functions import Max
 from frappe.utils.dateutils import getdate
 
 
@@ -185,9 +186,6 @@ def get_so_with_invoices(filters):
 	conditions = get_conditions(filters)
 	filter_criterions = build_filter_criterions(filters)
 
-	datediff = query_builder.CustomFunction("DATEDIFF", ["cur_date", "due_date"])
-	ifelse = query_builder.CustomFunction("IF", ["condition", "then", "else"])
-
 	query_so = (
 		qb.from_(so)
 		.join(soi)
@@ -199,7 +197,8 @@ def get_so_with_invoices(filters):
 		.select(
 			so.customer,
 			so.transaction_date.as_("submitted"),
-			ifelse(datediff(ps.due_date, functions.CurDate()) < 0, "Overdue", "Unpaid").as_("status"),
+			# CASE + a Python date is portable; MySQL's IF()/DATEDIFF()/CURDATE() don't exist on postgres
+			query_builder.Case().when(ps.due_date < getdate(), "Overdue").else_("Unpaid").as_("status"),
 			ps.payment_term,
 			ps.description,
 			ps.due_date,
@@ -230,7 +229,13 @@ def get_so_with_invoices(filters):
 			.on(si.name == sii.parent)
 			.inner_join(soi)
 			.on(soi.name == sii.so_detail)
-			.select(sii.sales_order, sii.parent.as_("invoice"), si.base_grand_total.as_("invoice_amount"))
+			.select(
+				# grouped by the invoice (sii.parent); sales_order is arbitrary per invoice on MySQL and
+				# base_grand_total is constant per invoice -> Max() keeps the GROUP BY postgres-valid.
+				Max(sii.sales_order).as_("sales_order"),
+				sii.parent.as_("invoice"),
+				Max(si.base_grand_total).as_("invoice_amount"),
+			)
 			.where((sii.sales_order.isin([x.name for x in sorders])) & (si.docstatus == 1))
 			.groupby(sii.parent)
 		)

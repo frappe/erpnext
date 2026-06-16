@@ -15,7 +15,7 @@ from frappe.model.document import Document
 from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
 from frappe.model.utils.rename_doc import update_linked_doctypes
 from frappe.query_builder import CustomFunction, Field, functions
-from frappe.query_builder.functions import Cast, Coalesce, Max, Substring
+from frappe.query_builder.functions import Cast, Coalesce, Max
 from frappe.utils import cint, cstr, flt, get_formatted_email, today
 from frappe.utils.user import get_users_with_role
 
@@ -128,9 +128,11 @@ class Customer(TransactionBase):
 			Customer = frappe.qb.DocType("Customer")
 
 			if frappe.db.db_type == "postgres":
-				# Postgres: extract trailing digits (e.g. "Customer - 3") and cast to int.
-				# NOTE: PostgreSQL is strict about types; MySQL's UNSIGNED cast does not exist.
-				extracted_part = Substring(Customer.name, r"\d+$")
+				# Postgres: take the token after the last space (mirrors MariaDB
+				# SUBSTRING_INDEX(name, ' ', -1)) and cast to int. (pypika's Substring is start/length,
+				# not a regex, so it can't be used here; UNSIGNED also doesn't exist on postgres.)
+				regexp_replace = CustomFunction("regexp_replace", ["source", "pattern", "replacement"])
+				extracted_part = regexp_replace(Customer.name, "^.* ", "")
 				casted_part = Cast(extracted_part, "INTEGER")
 			else:
 				# MariaDB/MySQL: keep existing behavior.
