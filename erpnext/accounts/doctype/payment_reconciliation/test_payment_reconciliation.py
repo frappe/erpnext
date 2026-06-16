@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe.utils import add_days, add_years, flt, getdate, nowdate, today
+from frappe.utils import add_days, add_years, cint, flt, getdate, nowdate, today
 from frappe.utils.data import getdate as convert_to_date
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -1106,6 +1106,15 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		test_user = "test@example.com"
 		permitted_ccs = ["_Test Cost Center - _TC", "_Test Cost Center 2 - _TC"]
 		restricted_cc = "_Test Write Off Cost Center - _TC"
+		existing_apply_strict_user_permissions = cint(
+			frappe.db.get_single_value("System Settings", "apply_strict_user_permissions")
+		)
+		self.addCleanup(
+			frappe.db.set_single_value,
+			"System Settings",
+			"apply_strict_user_permissions",
+			existing_apply_strict_user_permissions,
+		)
 		transaction_date = nowdate()
 		rate = 100
 
@@ -1141,24 +1150,40 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		pe_restricted = make_payment(restricted_cc)
 		je_restricted = make_journal(restricted_cc)
 
-		# Set user permission.
+		# Payment entry with a BLANK cost center
+		pe_blank = make_payment(None)
+
 		for cc in permitted_ccs:
 			frappe.permissions.add_user_permission("Cost Center", cc, test_user)
 
-		# without setting any dimension filter on the tool itself.
+		# Without strict user permissions
+		frappe.db.set_single_value("System Settings", "apply_strict_user_permissions", 0)
 		with self.set_user(test_user):
 			pr = self.create_payment_reconciliation()
 			pr.get_unreconciled_entries()
 
 		invoice_numbers = [x.get("invoice_number") for x in pr.get("invoices")]
 		payment_vouchers = [x.get("reference_name") for x in pr.get("payments")]
-
-		# Vouchers under the permitted cost centers
 		self.assertIn(si_allowed.name, invoice_numbers)
 		self.assertIn(pe_allowed.name, payment_vouchers)
 		self.assertIn(je_allowed.name, payment_vouchers)
+		self.assertIn(pe_blank.name, payment_vouchers)
+		self.assertNotIn(si_restricted.name, invoice_numbers)
+		self.assertNotIn(pe_restricted.name, payment_vouchers)
+		self.assertNotIn(je_restricted.name, payment_vouchers)
 
-		# Vouchers under the restricted cost center are filtered out
+		# With strict user permissions
+		frappe.db.set_single_value("System Settings", "apply_strict_user_permissions", 1)
+		with self.set_user(test_user):
+			pr = self.create_payment_reconciliation()
+			pr.get_unreconciled_entries()
+
+		invoice_numbers = [x.get("invoice_number") for x in pr.get("invoices")]
+		payment_vouchers = [x.get("reference_name") for x in pr.get("payments")]
+		self.assertIn(si_allowed.name, invoice_numbers)
+		self.assertIn(pe_allowed.name, payment_vouchers)
+		self.assertIn(je_allowed.name, payment_vouchers)
+		self.assertNotIn(pe_blank.name, payment_vouchers)
 		self.assertNotIn(si_restricted.name, invoice_numbers)
 		self.assertNotIn(pe_restricted.name, payment_vouchers)
 		self.assertNotIn(je_restricted.name, payment_vouchers)
