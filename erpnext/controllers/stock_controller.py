@@ -321,15 +321,15 @@ class StockController(AccountsController):
 				total_returned += flt(item.returned_qty * item.rate)
 				total_qty += flt(item.qty)           
 
-				Sales_Invoice_Item = frappe.qb.DocType("Sales Invoice Item")
+				SalesInvoiceItem = frappe.qb.DocType("Sales Invoice Item")
 				invoiced_qty = (
-					frappe.qb.from_(Sales_Invoice_Item)
-					.select(Sum(Sales_Invoice_Item.qty))
+					frappe.qb.from_(SalesInvoiceItem)
+					.select(Sum(SalesInvoiceItem.qty))
 					.where(
-						(Sales_Invoice_Item.dn_detail == item.name)
-						& (Sales_Invoice_Item.docstatus == 1)
-						& (Sales_Invoice_Item.delivery_note == self.name)
-        				& (Sales_Invoice_Item.item_code == item.item_code)
+						(SalesInvoiceItem.dn_detail == item.name)
+						& (SalesInvoiceItem.docstatus == 1)
+						& (SalesInvoiceItem.delivery_note == self.name)
+        				& (SalesInvoiceItem.item_code == item.item_code)
 					)
 				).run()
 				total_invoiced_qty += flt(invoiced_qty[0][0] if invoiced_qty else 0)
@@ -337,7 +337,6 @@ class StockController(AccountsController):
 				if total_returned < total_amount:
 					target_ref_field = {"SUB": ["amount", {"MUL": ["returned_qty", "rate"]}], "as": "ref_amount"}
 				
-
 		self._update_percent_field(
 			{
 				"target_dt": self.doctype + " Item",

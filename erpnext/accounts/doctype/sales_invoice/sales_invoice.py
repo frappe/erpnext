@@ -350,7 +350,16 @@ class SalesInvoice(SellingController):
 
 		from erpnext.accounts.services.billing_validation import BillingValidationService
 
-		BillingValidationService(self).validate_multiple_billing("Delivery Note", "dn_detail", "amount")
+		based_on = (
+			"qty"
+			if frappe.db.get_single_value(
+				"Selling Settings",
+				"quantity_based_billing_percentage"
+			)
+			else "amount"
+		)
+
+		BillingValidationService(self).validate_multiple_billing("Delivery Note", "dn_detail", based_on)
 
 		if self.is_return and self.return_against:
 			for row in self.timesheets:
