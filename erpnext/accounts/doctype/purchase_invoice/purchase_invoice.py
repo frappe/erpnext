@@ -2086,6 +2086,7 @@ def make_stock_entry(source_name, target_doc=None):
 def change_release_date(name, release_date=None):
 	if frappe.db.exists("Purchase Invoice", name):
 		pi = frappe.get_doc("Purchase Invoice", name)
+		pi.check_permission()
 		pi.db_set("release_date", release_date)
 
 

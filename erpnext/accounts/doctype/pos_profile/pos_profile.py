@@ -308,32 +308,3 @@ def pos_profile_query(doctype, txt, searchfield, start, page_len, filters):
 		)
 
 	return pos_profile
-
-
-@frappe.whitelist()
-def set_default_profile(pos_profile, company):
-	modified = now()
-	user = frappe.session.user
-
-	if pos_profile and company:
-		frappe.db.sql(
-			""" update `tabPOS Profile User` pfu, `tabPOS Profile` pf
-			set
-				pfu.default = 0, pf.modified = %s, pf.modified_by = %s
-			where
-				pfu.user = %s and pf.name = pfu.parent and pf.company = %s
-				and pfu.default = 1""",
-			(modified, user, user, company),
-			auto_commit=1,
-		)
-
-		frappe.db.sql(
-			""" update `tabPOS Profile User` pfu, `tabPOS Profile` pf
-			set
-				pfu.default = 1, pf.modified = %s, pf.modified_by = %s
-			where
-				pfu.user = %s and pf.name = pfu.parent and pf.company = %s and pf.name = %s
-			""",
-			(modified, user, user, company, pos_profile),
-			auto_commit=1,
-		)
