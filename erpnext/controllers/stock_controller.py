@@ -1694,7 +1694,7 @@ def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str
 
 	inspection_fieldname = inspection_fieldname_map.get(doctype)
 	if inspection_fieldname is None:
-		return []
+		return items if doctype == "Stock Entry" else []
 
 	allow_after_transaction = cint(docstatus) == 1 and frappe.get_single_value(
 		"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"

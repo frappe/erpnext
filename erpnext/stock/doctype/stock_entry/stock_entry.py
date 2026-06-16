@@ -2467,9 +2467,24 @@ class StockEntry(StockController):
 				):
 					self.get_unconsumed_raw_materials()
 
+				elif self.pro_doc and (
+					self.purpose == "Manufacture" or self.purpose == "Material Consumption for Manufacture"
+				):
+					if not self.fg_completed_qty:
+						frappe.throw(_("{0} is mandatory").format(_(self.meta.get_label("fg_completed_qty"))))
+
+					item_dict = self.get_work_order_raw_materials(self.fg_completed_qty)
+
+					for item in item_dict.values():
+						if self.pro_doc.from_wip_warehouse:
+							item["from_warehouse"] = self.pro_doc.wip_warehouse
+						item["to_warehouse"] = ""
+
+					self.add_to_stock_entry_detail(item_dict)
+
 				else:
 					if not self.fg_completed_qty:
-						frappe.throw(_("Manufacturing Quantity is mandatory"))
+						frappe.throw(_("{0} is mandatory").format(_(self.meta.get_label("fg_completed_qty"))))
 
 					item_dict = self.get_bom_raw_materials(self.fg_completed_qty)
 
@@ -2721,6 +2736,56 @@ class StockEntry(StockController):
 				item.uom = alternative_item_data.uom
 				item.conversion_factor = alternative_item_data.conversion_factor
 				item.description = alternative_item_data.description
+
+		return item_dict
+
+	def get_work_order_raw_materials(self, qty):
+		item_dict = frappe._dict()
+
+		used_alternative_items = get_used_alternative_items(
+			subcontract_order_field=self.subcontract_data.order_field, work_order=self.work_order
+		)
+
+		for d in self.pro_doc.get("required_items"):
+			item_qty = flt(
+				(d.required_qty / self.pro_doc.qty) * qty, frappe.get_precision("Stock Entry Detail", "qty")
+			)
+			from_warehouse = (
+				d.source_warehouse
+				if self.pro_doc.skip_transfer and not self.pro_doc.from_wip_warehouse
+				else self.from_warehouse or d.source_warehouse
+			)
+
+			item_row = frappe._dict(
+				{
+					"item_code": d.item_code,
+					"item_name": d.item_name,
+					"description": d.description,
+					"qty": item_qty,
+					"stock_uom": d.stock_uom,
+					"uom": d.stock_uom,
+					"conversion_factor": 1,
+					"from_warehouse": from_warehouse,
+					"allow_alternative_item": d.allow_alternative_item
+					and self.pro_doc.allow_alternative_item,
+				}
+			)
+
+			if d.item_code in used_alternative_items:
+				alt = used_alternative_items.get(d.item_code)
+				item_row.update(
+					{
+						"item_code": alt.item_code,
+						"item_name": alt.item_name,
+						"stock_uom": alt.stock_uom,
+						"uom": alt.uom,
+						"conversion_factor": alt.conversion_factor,
+						"description": alt.description,
+						"original_item": d.item_code,
+					}
+				)
+
+			item_dict[d.item_code] = item_row
 
 		return item_dict
 
@@ -3410,10 +3475,12 @@ class StockEntry(StockController):
 	def update_subcontracting_order_status(self):
 		if self.subcontracting_order and self.purpose in ["Send to Subcontractor", "Material Transfer"]:
 			from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
-				update_subcontracting_order_status,
+				set_subcontracting_order_status,
 			)
 
-			update_subcontracting_order_status(self.subcontracting_order)
+			# Trusted submit/cancel flow — a Stock operation must not require Subcontracting Order
+			# write permission, so use the no-check internal helper (not the whitelisted boundary).
+			set_subcontracting_order_status(self.subcontracting_order)
 
 	def update_pick_list_status(self):
 		from erpnext.stock.doctype.pick_list.pick_list import update_pick_list_status
