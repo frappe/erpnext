@@ -22,10 +22,13 @@ class TestAdvancePaymentLedgerEntry(ERPNextTestSuite, AccountsTestMixin):
 	"""
 
 	def setUp(self):
-		self.create_company()
-		self.create_usd_receivable_account()
-		self.create_usd_payable_account()
-		self.create_item()
+		self.company = "_Test Company"
+		self.customer = "_Test Customer"
+		self.supplier = "_Test Supplier"
+		self.item = "_Test Item"
+		self.cash = "Cash - _TC"
+		self.debtors_usd = "_Test Receivable USD - _TC"
+		self.creditors_usd = "_Test Payable USD - _TC"
 		self.clear_old_entries()
 
 	def create_sales_order(self, qty=1, rate=100, currency="INR", do_not_submit=False):

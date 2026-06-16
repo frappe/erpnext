@@ -12,8 +12,10 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestLedgerHealth(ERPNextTestSuite, AccountsTestMixin):
 	def setUp(self):
-		self.create_company()
-		self.create_customer()
+		self.company = "_Test Company"
+		self.customer = "_Test Customer"
+		self.debit_to = "Debtors - _TC"
+		self.income_account = "Sales - _TC"
 		self.configure_monitoring_tool()
 		self.clear_old_entries()
 

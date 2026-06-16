@@ -9,9 +9,9 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestSupplierLedgerSummary(ERPNextTestSuite, AccountsTestMixin):
 	def setUp(self):
-		self.create_company()
-		self.create_supplier()
-		self.create_item()
+		self.company = "_Test Company"
+		self.supplier = "_Test Supplier"
+		self.item = "_Test Item"
 		self.clear_old_entries()
 
 	def create_purchase_invoice(self, do_not_submit=False):

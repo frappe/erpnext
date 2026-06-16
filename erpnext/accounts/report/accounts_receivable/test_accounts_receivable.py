@@ -12,10 +12,17 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 	def setUp(self):
-		self.create_company()
-		self.create_customer()
-		self.create_item()
-		self.create_usd_receivable_account()
+		self.company = "_Test Company"
+		self.company_abbr = "_TC"
+		self.customer = "_Test Customer"
+		self.item = "_Test Item"
+		self.cost_center = "Main - _TC"
+		self.warehouse = "Stores - _TC"
+		self.income_account = "Sales - _TC"
+		self.expense_account = "Cost of Goods Sold - _TC"
+		self.debit_to = "Debtors - _TC"
+		self.cash = "Cash - _TC"
+		self.debtors_usd = "_Test Receivable USD - _TC"
 		self.clear_old_entries()
 
 	def create_sales_invoice(self, no_payment_schedule=False, do_not_submit=False, **args):
