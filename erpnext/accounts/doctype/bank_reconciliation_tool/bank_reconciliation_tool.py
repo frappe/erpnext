@@ -518,6 +518,7 @@ def create_internal_transfer(
 	"""
 
 	bank_transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
+	bank_transaction.check_permission("write")
 
 	bank_account = frappe.get_cached_value("Bank Account", bank_transaction.bank_account, "account")
 	company = frappe.get_cached_value("Account", bank_account, "company")
@@ -778,7 +779,6 @@ def create_bulk_payment_entry_and_reconcile(
 	"""
 	Create a payment entry and reconcile it with the bank transaction
 	"""
-
 	output = []
 
 	for bank_transaction_name in bank_transaction_names:

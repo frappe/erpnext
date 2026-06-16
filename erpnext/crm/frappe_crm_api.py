@@ -31,20 +31,16 @@ def create_custom_fields_for_frappe_crm():
 @frappe.whitelist()
 def create_prospect_against_crm_deal():
 	doc = frappe.form_dict
-	prospect = frappe.get_doc(
-		{
-			"doctype": "Prospect",
-			"company_name": doc.organization or doc.lead_name,
-			"no_of_employees": doc.no_of_employees,
-			"prospect_owner": doc.deal_owner,
-			"company": doc.erpnext_company,
-			"crm_deal": doc.crm_deal,
-			"territory": doc.territory,
-			"industry": doc.industry,
-			"website": doc.website,
-			"annual_revenue": doc.annual_revenue,
-		}
-	)
+	prospect = frappe.new_doc("Prospect")
+	prospect.company_name = doc.organization or doc.lead_name
+	prospect.no_of_employees = doc.no_of_employees
+	prospect.prospect_owner = doc.deal_owner
+	prospect.company = doc.erpnext_company
+	prospect.crm_deal = doc.crm_deal
+	prospect.territory = doc.territory
+	prospect.industry = doc.industry
+	prospect.website = doc.website
+	prospect.annual_revenue = doc.annual_revenue
 
 	try:
 		prospect_name = frappe.db.get_value("Prospect", {"company_name": prospect.company_name})
@@ -150,6 +146,18 @@ def contact_exists(email, mobile_no):
 	return False
 
 
+CUSTOMER_ALLOWED_FIELDS = {
+	"customer_name",
+	"customer_group",
+	"customer_type",
+	"territory",
+	"default_currency",
+	"industry",
+	"website",
+	"crm_deal",
+}
+
+
 @frappe.whitelist()
 def create_customer(customer_data: dict | None = None):
 	if not customer_data:
@@ -158,9 +166,11 @@ def create_customer(customer_data: dict | None = None):
 	try:
 		customer_name = frappe.db.exists("Customer", {"customer_name": customer_data.get("customer_name")})
 		if not customer_name:
-			customer = frappe.get_doc({"doctype": "Customer", **customer_data}).insert(
-				ignore_permissions=True
-			)
+			customer = frappe.new_doc("Customer")
+			for field in CUSTOMER_ALLOWED_FIELDS:
+				if customer_data.get(field) is not None:
+					customer.set(field, customer_data.get(field))
+			customer.insert(ignore_permissions=True)
 			customer_name = customer.name
 
 		contacts = json.loads(customer_data.get("contacts"))

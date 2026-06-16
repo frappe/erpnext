@@ -2343,6 +2343,47 @@ class TestStockEntry(ERPNextTestSuite):
 		se.save()
 		se.submit()
 
+	def test_disassemble_blocks_finished_good_qty_tampering(self):
+		# A disassembly consuming N finished goods must consume exactly N (in stock UOM).
+		# Switching the finished-good row to a larger UOM with a tiny conversion_factor previously
+		# let a user consume ~0 finished goods while still producing the full raw materials --
+		# minting inventory. The quantity invariant must reject this.
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		fg_item = make_item("_Disassemble Mint FG", properties={"is_stock_item": 1}).name
+		rm_item1 = make_item("_Disassemble Mint RM1", properties={"is_stock_item": 1}).name
+		rm_item2 = make_item("_Disassemble Mint RM2", properties={"is_stock_item": 1}).name
+		warehouse = "_Test Warehouse - _TC"
+
+		# Give the finished good a non-stock UOM. When uom == stock_uom the system resets the
+		# conversion_factor to 1, so the tamper is only possible (and worth guarding) on a
+		# non-stock UOM, where the user-supplied conversion_factor is preserved.
+		if not frappe.db.get_value("UOM Conversion Detail", {"parent": fg_item, "uom": "Box"}):
+			item_doc = frappe.get_doc("Item", fg_item)
+			item_doc.append("uoms", {"uom": "Box", "conversion_factor": 0.01})
+			item_doc.save(ignore_permissions=True)
+
+		make_stock_entry(item_code=fg_item, target=warehouse, qty=100, purpose="Material Receipt")
+		bom_no = make_bom(item=fg_item, raw_materials=[rm_item1, rm_item2]).name
+
+		se = make_stock_entry(item_code=fg_item, qty=100, purpose="Disassemble", do_not_save=True)
+		se.from_bom = 1
+		se.use_multi_level_bom = 1
+		se.bom_no = bom_no
+		se.fg_completed_qty = 100
+		se.from_warehouse = warehouse
+		se.to_warehouse = warehouse
+		se.get_items()
+
+		# Tamper the finished-good row: a tiny conversion factor on the larger UOM means only
+		# 100 * 0.01 = 1 unit is actually consumed, while raw materials are still produced at full
+		# quantity. The finished-good consumption invariant must reject the save.
+		fg_row = next(d for d in se.items if d.is_finished_item)
+		fg_row.uom = "Box"
+		fg_row.conversion_factor = 0.01
+
+		self.assertRaises(frappe.ValidationError, se.save)
+
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"sample_retention_warehouse": "_Test Warehouse 1 - _TC"}
 	)

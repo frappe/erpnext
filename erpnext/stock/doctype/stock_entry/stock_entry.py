@@ -293,6 +293,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 			else:
 				self.validate_job_card_fg_item()
 
+		# Disassembly rows are fully derived from the source manufacture entry / work order;
+		# verify the posted stock quantities have not been tampered with (raw-material minting).
+		# Must run after set_transfer_qty() so row.transfer_qty reflects qty * conversion_factor.
+		if self.purpose == "Disassemble" and self.purpose_cls:
+			self.purpose_cls(self).validate_disassembly_quantities()
+
 		self.validate_batch()
 		self.validate_inspection()
 		self.validate_fg_completed_qty()
@@ -321,6 +327,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.make_bundle_using_old_serial_batch_fields()
 		self.adjust_stock_reservation_entries_for_return()
 		self.update_stock_reservation_entries()
+		# Release the Work Order's own reservation for items being sent to the subcontractor
+		# before the negative-stock guard runs in update_stock_ledger().
+		self.update_wo_reservation_for_subcontracting()
 		self.update_stock_ledger()
 		self.make_stock_reserve_for_wip_and_fg()
 		self.reserve_stock_for_subcontracting()
@@ -362,6 +371,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.update_quality_inspection()
 		self.adjust_stock_reservation_entries_for_return()
 		self.update_stock_reservation_entries()
+		# Recompute (now excludes this cancelled entry) so the freed reservation is restored.
+		self.update_wo_reservation_for_subcontracting()
 		self.delete_auto_created_batches()
 		self.delete_linked_stock_entry()
 		super().on_cancel_subcontracting_inward()
@@ -439,7 +450,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		for project in projects:
 			project_doc = frappe.get_doc("Project", project)
 			project_doc.set_consumed_material_cost()
-			project_doc.save()
+			project_doc.save(ignore_permissions=True)
 
 	def validate_item(self):
 		for item in self.get("items"):
@@ -1050,8 +1061,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 		return getattr(self, "_wo_doc", None)
 
 	def make_stock_reserve_for_wip_and_fg(self):
-		from erpnext.manufacturing.doctype.work_order.services.stock_reservation import (
-			StockReservationService,
+		from erpnext.manufacturing.doctype.work_order.services.reservation import (
+			WorkOrderStockReservation,
 		)
 
 		if self.is_stock_reserve_for_work_order():
@@ -1065,7 +1076,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			):
 				return
 
-			StockReservationService(pro_doc).set_reserved_qty_for_wip_and_fg(self)
+			WorkOrderStockReservation(pro_doc).set_reserved_qty_for_wip_and_fg(self)
 
 	def reserve_stock_for_subcontracting(self):
 		if self.purpose == "Send to Subcontractor" and frappe.get_value(
@@ -1092,8 +1103,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 			)
 
 	def cancel_stock_reserve_for_wip_and_fg(self):
-		from erpnext.manufacturing.doctype.work_order.services.stock_reservation import (
-			StockReservationService,
+		from erpnext.manufacturing.doctype.work_order.services.reservation import (
+			WorkOrderStockReservation,
 		)
 
 		if self.is_stock_reserve_for_work_order():
@@ -1105,7 +1116,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			):
 				return
 
-			StockReservationService(pro_doc).cancel_reserved_qty_for_wip_and_fg(self)
+			WorkOrderStockReservation(pro_doc).cancel_reserved_qty_for_wip_and_fg(self)
 
 	def is_stock_reserve_for_work_order(self):
 		if (
@@ -1116,6 +1127,57 @@ class StockEntry(StockController, SubcontractingInwardController):
 			return True
 
 		return False
+
+	def update_wo_reservation_for_subcontracting(self):
+		# A "Send to Subcontractor" entry never keeps its `work_order` (validate clears it for this
+		# purpose), so the owning Work Order is derived from the Subcontracting Order / Purchase Order
+		# that raised the transfer. Each such Work Order that reserves stock gets its reservation for
+		# the sent items released, so the negative-stock guard stops blocking the consumption.
+		from erpnext.manufacturing.doctype.work_order.services.reservation import (
+			WorkOrderStockReservation,
+		)
+
+		if self.purpose != "Send to Subcontractor":
+			return
+
+		for wo_name in self.get_reserved_work_orders_for_subcontracting():
+			pro_doc = frappe.get_doc("Work Order", wo_name)
+			WorkOrderStockReservation(pro_doc).release_reserved_qty_for_subcontract_transfer()
+
+	def get_reserved_work_orders_for_subcontracting(self):
+		job_cards = set()
+		if self.subcontracting_order:
+			job_cards.update(
+				frappe.get_all(
+					"Subcontracting Order Item",
+					filters={"parent": self.subcontracting_order},
+					pluck="job_card",
+				)
+			)
+		if self.purchase_order:
+			job_cards.update(
+				frappe.get_all(
+					"Purchase Order Item", filters={"parent": self.purchase_order}, pluck="job_card"
+				)
+			)
+
+		job_cards = {jc for jc in job_cards if jc}
+		if not job_cards:
+			return []
+
+		work_orders = frappe.get_all(
+			"Job Card", filters={"name": ["in", list(job_cards)]}, pluck="work_order"
+		)
+
+		reserved_work_orders = []
+		for work_order in set(work_orders):
+			if not work_order:
+				continue
+
+			if frappe.get_cached_value("Work Order", work_order, "reserve_stock"):
+				reserved_work_orders.append(work_order)
+
+		return reserved_work_orders
 
 	@frappe.whitelist()
 	def get_item_details(self, args: ItemDetailsCtx | None = None, for_update: bool = False):
@@ -1403,10 +1465,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 	def update_subcontracting_order_status(self):
 		if self.subcontracting_order and self.purpose in ["Send to Subcontractor", "Material Transfer"]:
 			from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
-				update_subcontracting_order_status,
+				set_subcontracting_order_status,
 			)
 
-			update_subcontracting_order_status(self.subcontracting_order)
+			# Trusted submit/cancel flow — a Stock operation must not require Subcontracting Order
+			# write permission, so use the no-check internal helper (not the whitelisted boundary).
+			set_subcontracting_order_status(self.subcontracting_order)
 
 	def update_pick_list_status(self):
 		from erpnext.stock.doctype.pick_list.pick_list import update_pick_list_status

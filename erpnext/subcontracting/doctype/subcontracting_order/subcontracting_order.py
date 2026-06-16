@@ -479,9 +479,18 @@ def get_mapped_subcontracting_receipt(source_name, target_doc=None, items=None):
 	return target_doc
 
 
-@frappe.whitelist()
-def update_subcontracting_order_status(sco: str | Document, status: str | None = None):
+def set_subcontracting_order_status(sco: str | Document, status: str | None = None):
 	if isinstance(sco, str):
 		sco = frappe.get_doc("Subcontracting Order", sco)
 
 	sco.update_status(status)
+
+
+@frappe.whitelist()
+def update_subcontracting_order_status(sco: str | Document, status: str | None = None):
+	"""Whitelisted boundary for direct API/UI calls — enforces write permission, then delegates."""
+	if isinstance(sco, str):
+		sco = frappe.get_doc("Subcontracting Order", sco)
+
+	sco.check_permission("write")
+	set_subcontracting_order_status(sco, status)

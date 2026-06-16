@@ -366,6 +366,13 @@ class BOM(WebsiteGenerator):
 
 	def validate_secondary_items(self):
 		for item in self.secondary_items:
+			if not item.is_legacy and item.item_code == self.item:
+				frappe.throw(
+					_(
+						"Row #{0}: Finished Good Item {1} cannot be added in the Secondary Items table."
+					).format(item.idx, get_link_to_form("Item", item.item_code))
+				)
+
 			if not item.qty:
 				frappe.throw(
 					_("Row #{0}: Quantity should be greater than 0 for {1} Item {2}").format(

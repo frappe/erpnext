@@ -227,7 +227,9 @@ frappe.ui.form.on("Company", {
 							{
 								fieldtype: "Data",
 								fieldname: "company_name",
-								label: __("Please enter the company name to confirm"),
+								label: __('Please enter the company name <b>"{0}"</b> to confirm', [
+									frappe.utils.escape_html(frm.doc.name),
+								]),
 								reqd: 1,
 								description: __(
 									"Please make sure you really want to delete all the transactions for this company. Your master data will remain as it is. This action cannot be undone."

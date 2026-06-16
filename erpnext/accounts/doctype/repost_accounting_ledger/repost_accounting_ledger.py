@@ -158,6 +158,7 @@ def start_repost(account_repost_doc: str | None = None) -> None:
 	frappe.flags.through_repost_accounting_ledger = True
 	if account_repost_doc:
 		repost_doc = frappe.get_doc("Repost Accounting Ledger", account_repost_doc)
+		repost_doc.check_permission("write")
 
 		if repost_doc.docstatus == 1:
 			# Prevent repost on invoices with deferred accounting

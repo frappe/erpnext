@@ -86,7 +86,7 @@ class SubcontractingService:
 
 	def update_subcontracting_order_status(self) -> None:
 		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
-			update_subcontracting_order_status as update_sco_status,
+			set_subcontracting_order_status as update_sco_status,
 		)
 
 		doc = self.doc

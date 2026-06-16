@@ -17,6 +17,7 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_items_for_material_requests,
 	get_sales_orders,
 )
+from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle, make_packing_list
@@ -71,8 +72,15 @@ def make_material_request(source_name: str, target_doc: str | Document | None = 
 			"Sales Order Item", {"name": so_item.parent_detail_docname}, ["delivered_qty"]
 		)
 
-		bundle_item_qty = frappe.db.get_value(
-			"Product Bundle Item", {"parent": so_item.parent_item, "item_code": so_item.item_code}, ["qty"]
+		bundle_name = get_active_product_bundle(so_item.parent_item)
+		bundle_item_qty = (
+			frappe.db.get_value(
+				"Product Bundle Item",
+				{"parent": bundle_name, "item_code": so_item.item_code},
+				["qty"],
+			)
+			if bundle_name
+			else None
 		)
 
 		return flt(
@@ -133,9 +141,7 @@ def make_material_request(source_name: str, target_doc: str | Document | None = 
 					"delivery_date": "schedule_date",
 					"bom_no": "bom_no",
 				},
-				"condition": lambda item: not frappe.db.exists(
-					"Product Bundle", {"name": item.item_code, "disabled": 0}
-				)
+				"condition": lambda item: not is_product_bundle(item.item_code)
 				and get_remaining_qty(item) > 0,
 				"postprocess": update_item,
 			},
@@ -370,12 +376,27 @@ def make_delivery_note(
 				dn_item.qty = flt(sre.reserved_qty) / flt(dn_item.get("conversion_factor", 1))
 				dn_item.warehouse = sre.warehouse
 
-				if (
-					not use_serial_batch_fields
-					and sre.reservation_based_on == "Serial and Batch"
-					and (sre.has_serial_no or sre.has_batch_no)
-				):
-					dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher([sre]).name
+				if sre.reservation_based_on == "Serial and Batch" and (sre.has_serial_no or sre.has_batch_no):
+					if use_serial_batch_fields:
+						# Carry the reserved serial/batch in the row fields. A single field can't hold
+						# multiple batches, so fall back to a bundle in that case.
+						dn_item.use_serial_batch_fields = 1
+						sb_entries = frappe.get_all(
+							"Serial and Batch Entry",
+							filters={"parent": sre.name},
+							fields=["serial_no", "batch_no"],
+						)
+						serial_nos = [d.serial_no for d in sb_entries if d.serial_no]
+						batch_nos = list({d.batch_no for d in sb_entries if d.batch_no})
+						if serial_nos:
+							dn_item.serial_no = "\n".join(serial_nos)
+						if len(batch_nos) == 1:
+							dn_item.batch_no = batch_nos[0]
+						elif len(batch_nos) > 1:
+							dn_item.use_serial_batch_fields = 0
+							dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher([sre]).name
+					else:
+						dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher([sre]).name
 
 				target_doc.append("items", dn_item)
 			# Correct rows index.
@@ -769,7 +790,7 @@ def make_purchase_order(
 						["parent", "sales_order"],
 						["uom", "uom"],
 						["conversion_factor", "conversion_factor"],
-						["parent_item", "product_bundle"],
+						["product_bundle", "product_bundle"],
 						["rate", "rate"],
 					],
 					"field_no_map": [
@@ -798,17 +819,20 @@ def make_purchase_order(
 
 
 def set_delivery_date(items: list, sales_order: str) -> None:
+	# `product_bundle` now holds the Product Bundle *version*, so match the Purchase
+	# Order rows to their originating Sales Order rows by that version.
 	delivery_dates = frappe.get_all(
-		"Sales Order Item", filters={"parent": sales_order}, fields=["delivery_date", "item_code"]
+		"Sales Order Item", filters={"parent": sales_order}, fields=["delivery_date", "product_bundle"]
 	)
 
-	delivery_by_item = frappe._dict()
+	delivery_by_bundle = frappe._dict()
 	for date in delivery_dates:
-		delivery_by_item[date.item_code] = date.delivery_date
+		if date.product_bundle:
+			delivery_by_bundle[date.product_bundle] = date.delivery_date
 
 	for item in items:
 		if item.product_bundle:
-			item.schedule_date = delivery_by_item[item.product_bundle]
+			item.schedule_date = delivery_by_bundle.get(item.product_bundle)
 
 
 @frappe.whitelist()

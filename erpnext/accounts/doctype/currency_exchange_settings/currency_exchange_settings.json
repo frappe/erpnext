@@ -78,7 +78,7 @@
    "fieldname": "service_provider",
    "fieldtype": "Select",
    "label": "Service Provider",
-   "options": "frankfurter.dev\nexchangerate.host\nCustom",
+   "options": "frankfurter.dev\nexchangerate.host\nfrankfurter.dev - v2\nCustom",
    "reqd": 1
   },
   {
@@ -101,11 +101,10 @@
    "label": "Use HTTP Protocol"
   }
  ],
- "hide_toolbar": 0,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-03-16 13:28:21.075743",
+ "modified": "2026-06-15 11:25:55.873110",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Currency Exchange Settings",
@@ -122,24 +121,11 @@
    "write": 1
   },
   {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "print": 1,
-   "read": 1,
-   "role": "Accounts Manager",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "delete": 1,
    "email": 1,
    "print": 1,
    "read": 1,
    "role": "Accounts User",
-   "share": 1,
-   "write": 1
+   "share": 1
   }
  ],
  "row_format": "Dynamic",

@@ -1243,3 +1243,44 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual(len(report[1]), 1)
 		row = report[1][0]
 		self.assertEqual([si.name, project.name, 60], [row.voucher_no, row.project, row.outstanding])
+
+	def test_accounts_receivable_respects_user_permissions(self):
+		# Party is a dynamic link on Payment Ledger Entry, so user permissions on Customer
+		# must be applied explicitly. The report should only show permitted customers.
+		original_customer = self.customer
+		second_customer = "_Test AR Perm Customer"
+
+		# create_customer overrides self.customer, so build the restricted invoice first
+		self.create_customer(customer_name=second_customer)
+		self.create_sales_invoice(no_payment_schedule=True)
+
+		self.customer = original_customer
+		allowed_invoice = self.create_sales_invoice(no_payment_schedule=True)
+
+		test_user = "test_ar_user_permission@example.com"
+		if not frappe.db.exists("User", test_user):
+			user = frappe.new_doc("User")
+			user.email = test_user
+			user.first_name = "AR Perm"
+			user.append("roles", {"role": "Accounts User"})
+			user.save()
+
+		frappe.permissions.add_user_permission("Customer", original_customer, test_user)
+
+		filters = {
+			"company": self.company,
+			"party_type": "Customer",
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+		}
+
+		frappe.set_user(test_user)
+		try:
+			report = execute(filters)
+		finally:
+			frappe.set_user("Administrator")
+
+		parties = {row.party for row in report[1]}
+		self.assertIn(original_customer, parties)
+		self.assertNotIn(second_customer, parties)
+		self.assertEqual(allowed_invoice.customer, original_customer)

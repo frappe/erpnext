@@ -15,6 +15,7 @@ from frappe.utils import flt
 
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_due_date
 from erpnext.controllers.accounts_controller import get_taxes_and_charges, merge_taxes
+from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle
 
 
 def get_invoiced_qty_map(delivery_note: str) -> dict:
@@ -287,8 +288,7 @@ def make_packing_slip(source_name: str, target_doc: str | Document | None = None
 				},
 				"postprocess": update_item,
 				"condition": lambda item: (
-					not frappe.db.exists("Product Bundle", {"new_item_code": item.item_code, "disabled": 0})
-					and flt(item.packed_qty) < flt(item.qty)
+					not is_product_bundle(item.item_code) and flt(item.packed_qty) < flt(item.qty)
 				),
 			},
 			"Packed Item": {

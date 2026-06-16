@@ -15,7 +15,7 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 from erpnext.stock.stock_balance import get_reserved_qty, update_bin_qty
 
 
-class StockReservationService:
+class SalesOrderStockReservation:
 	def __init__(self, doc):
 		self.doc = doc
 

@@ -18,7 +18,8 @@
    "label": "UOM",
    "oldfieldname": "uom",
    "oldfieldtype": "Link",
-   "options": "UOM"
+   "options": "UOM",
+   "reqd": 1
   },
   {
    "fieldname": "conversion_factor",
@@ -37,7 +38,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-27 02:22:52.652036",
+ "modified": "2026-06-11 23:02:54.800673",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "UOM Conversion Detail",

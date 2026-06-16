@@ -712,8 +712,10 @@ class Item(Document):
 
 	def validate_duplicate_product_bundles_before_merge(self, old_name, new_name):
 		"Block merge if both old and new items have product bundles."
-		old_bundle = frappe.get_value("Product Bundle", filters={"new_item_code": old_name, "disabled": 0})
-		new_bundle = frappe.get_value("Product Bundle", filters={"new_item_code": new_name, "disabled": 0})
+		from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
+
+		old_bundle = get_active_product_bundle(old_name)
+		new_bundle = get_active_product_bundle(new_name)
 
 		if old_bundle and new_bundle:
 			bundle_link = get_link_to_form("Product Bundle", old_bundle)
@@ -1146,7 +1148,7 @@ class Item(Document):
 
 			if doctype in ("Product Bundle", "BOM"):
 				if doctype == "Product Bundle":
-					filters = {"new_item_code": self.name}
+					filters = {"new_item_code": self.name, "is_active": 1, "docstatus": 1}
 					fieldname = "new_item_code as docname"
 				else:
 					filters = {"item": self.name, "docstatus": 1}

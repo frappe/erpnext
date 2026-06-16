@@ -2322,6 +2322,74 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual(len(reserved_entries), 0)
 		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
 
+	def test_stock_reservation_restored_on_work_order_cancel(self):
+		# Spec #5 (cancellation path): when a Work Order created from a Production Plan is cancelled,
+		# the reservation that was transferred PP -> WO must flow back to the still-open Production
+		# Plan, not silently vanish.
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 1)
+		try:
+			bom_tree = {
+				"FG For SR Cancel": {"Sub Assembly For SR Cancel 1": {"Raw Material For SR Cancel 1": {}}}
+			}
+			parent_bom = create_nested_bom(bom_tree, prefix="")
+			warehouse = "_Test Warehouse - _TC"
+
+			# Plenty of stock so the Production Plan reserves everything directly on submit.
+			for item_code in ["Sub Assembly For SR Cancel 1", "Raw Material For SR Cancel 1"]:
+				make_stock_entry(item_code=item_code, target=warehouse, qty=20, basic_rate=100)
+
+			plan = create_production_plan(
+				item_code=parent_bom.item,
+				planned_qty=10,
+				skip_available_sub_assembly_item=1,
+				ignore_existing_ordered_qty=1,
+				do_not_submit=1,
+				warehouse=warehouse,
+				sub_assembly_warehouse=warehouse,
+				for_warehouse=warehouse,
+				reserve_stock=1,
+			)
+			plan.get_sub_assembly_items()
+			plan.set("mr_items", [])
+			for d in get_items_for_material_requests(plan.as_dict()):
+				plan.append("mr_items", d)
+			plan.save()
+			plan.submit()
+
+			def pp_reserved():
+				return sum(
+					r.reserved_qty
+					for r in StockReservation(plan).get_reserved_entries("Production Plan", plan.name)
+				)
+
+			reserved_before = pp_reserved()
+			self.assertGreater(reserved_before, 0, "Production Plan should reserve stock on submit")
+
+			plan.make_work_order()
+			work_orders = frappe.get_all("Work Order", filters={"production_plan": plan.name}, pluck="name")
+			work_orders = list(set(work_orders))
+			for wo_name in work_orders:
+				wo_doc = frappe.get_doc("Work Order", wo_name)
+				wo_doc.source_warehouse = warehouse
+				wo_doc.wip_warehouse = warehouse
+				wo_doc.fg_warehouse = warehouse
+				wo_doc.submit()
+
+			# After all Work Orders are submitted the reservation has fully transferred off the plan.
+			self.assertEqual(pp_reserved(), 0, "Reservation should transfer PP -> WO on submit")
+
+			# Cancelling the Work Orders must return the reservation to the Production Plan.
+			for wo_name in work_orders:
+				frappe.get_doc("Work Order", wo_name).cancel()
+
+			self.assertEqual(
+				pp_reserved(), reserved_before, "Cancelling the Work Order must restore the PP reservation"
+			)
+		finally:
+			frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
+
 	def test_stock_reservation_of_serial_nos_against_production_plan(self):
 		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom

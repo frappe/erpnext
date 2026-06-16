@@ -18,6 +18,12 @@ from .manufacturing import (
 )
 
 
+def _qty_tolerance(precision: int) -> float:
+	"""One unit at the column's precision -- absorbs float rounding without letting a real
+	(whole-unit) quantity divergence slip through."""
+	return 1.0 / (10**precision)
+
+
 class DisassembleStockEntry(BaseStockEntry):
 	def validate(self):
 		self.validate_warehouse()
@@ -46,6 +52,94 @@ class DisassembleStockEntry(BaseStockEntry):
 				),
 				title=_("Excess Disassembly"),
 			)
+
+	def validate_disassembly_quantities(self):
+		self.validate_fg_completed_qty()
+		self.validate_finished_good_consumption()
+		self.validate_materials_against_source()
+
+	def validate_finished_good_consumption(self):
+		"""The finished good consumed (in stock UOM) must equal the quantity to disassemble."""
+		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
+		tolerance = _qty_tolerance(precision)
+
+		fg_stock_qty = sum(flt(row.transfer_qty) for row in self.doc.items if row.is_finished_item)
+		fg_completed_qty = flt(self.doc.fg_completed_qty)
+
+		if abs(flt(fg_stock_qty, precision) - flt(fg_completed_qty, precision)) > tolerance:
+			frappe.throw(
+				_(
+					"Finished good quantity being consumed ({0} in stock UOM) must equal the quantity "
+					"to disassemble ({1}). Do not change the UOM, conversion factor or quantity of the "
+					"finished good row."
+				).format(flt(fg_stock_qty, precision), flt(fg_completed_qty, precision)),
+				title=_("Invalid Disassembly Quantity"),
+			)
+
+	def validate_materials_against_source(self):
+		"""Every non-finished-good row's posted stock qty must equal the source qty x scale."""
+		scale_factor = self._get_disassembly_scale_factor()
+		if not scale_factor:
+			# Standalone BOM disassembly: no source entry to scale against. The finished-good
+			# invariant above still applies; raw-material amounts come from the BOM.
+			return
+
+		source_rows = self.get_items_from_manufacture_stock_entry()
+		source_by_name = {row.name: row for row in source_rows if row.get("name")}
+		source_by_item = defaultdict(float)
+		for row in source_rows:
+			source_by_item[row.item_code] += flt(row.transfer_qty)
+
+		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
+		tolerance = _qty_tolerance(precision)
+
+		for row in self.doc.items:
+			if row.is_finished_item:
+				continue  # covered by validate_finished_good_consumption
+
+			if row.ste_detail and row.ste_detail in source_by_name:
+				expected = flt(source_by_name[row.ste_detail].transfer_qty) * scale_factor
+			elif row.item_code in source_by_item:
+				expected = source_by_item[row.item_code] * scale_factor
+			else:
+				frappe.throw(
+					_(
+						"Row #{0}: Item {1} is not part of the source manufacture entry and cannot be "
+						"added to this disassembly."
+					).format(row.idx, frappe.bold(row.item_code)),
+					title=_("Invalid Disassembly Item"),
+				)
+
+			if abs(flt(row.transfer_qty, precision) - flt(expected, precision)) > tolerance:
+				frappe.throw(
+					_(
+						"Row #{0}: Item {1} quantity ({2} in stock UOM) does not match the quantity "
+						"derived from the source ({3}). Do not change the UOM, conversion factor or "
+						"quantity of disassembly rows."
+					).format(
+						row.idx,
+						frappe.bold(row.item_code),
+						flt(row.transfer_qty, precision),
+						flt(expected, precision),
+					),
+					title=_("Invalid Disassembly Quantity"),
+				)
+
+	def _get_disassembly_scale_factor(self) -> float:
+		disassemble_qty = flt(self.doc.fg_completed_qty)
+		if self.doc.source_stock_entry:
+			source_fg_qty = flt(
+				frappe.db.get_value("Stock Entry", self.doc.source_stock_entry, "fg_completed_qty")
+			)
+		elif self.doc.work_order:
+			source_fg_qty = flt(frappe.db.get_value("Work Order", self.doc.work_order, "produced_qty"))
+		else:
+			return 0.0
+
+		if not source_fg_qty:
+			return 0.0
+
+		return disassemble_qty / source_fg_qty
 
 	def add_items(self):
 		"""

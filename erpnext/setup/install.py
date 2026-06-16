@@ -86,14 +86,7 @@ def setup_repost_defaults():
 def setup_currency_exchange():
 	ces = frappe.get_single("Currency Exchange Settings")
 	try:
-		ces.set("result_key", [])
-		ces.set("req_params", [])
-
-		ces.api_endpoint = "https://api.frankfurter.dev/v1/{transaction_date}"
-		ces.append("result_key", {"key": "rates"})
-		ces.append("result_key", {"key": "{to_currency}"})
-		ces.append("req_params", {"key": "base", "value": "{from_currency}"})
-		ces.append("req_params", {"key": "symbols", "value": "{to_currency}"})
+		ces.service_provider = "frankfurter.dev - v2"
 		ces.save()
 	except frappe.ValidationError:
 		pass

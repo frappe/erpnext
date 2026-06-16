@@ -197,6 +197,28 @@ class TestJobCard(ERPNextTestSuite):
 			)
 			self.assertEqual(completed_qty, job_card.for_quantity)
 
+	def test_job_card_cannot_be_submitted_while_on_hold(self):
+		# Regression for #55756: a paused (On Hold) job card must not be submittable, otherwise
+		# the document gets locked in the On Hold state with Resume/Complete no longer available.
+		job_card = frappe.get_all(
+			"Job Card",
+			filters={"work_order": self.work_order.name},
+			fields=["name", "for_quantity"],
+		)[0]
+
+		doc = frappe.get_doc("Job Card", job_card.name)
+		doc.append(
+			"time_logs",
+			{
+				"from_time": "2024-01-01 08:00:00",
+				"to_time": "2024-01-01 09:00:00",
+				"time_in_mins": 60,
+				"completed_qty": job_card.for_quantity,
+			},
+		)
+		doc.is_paused = 1
+		self.assertRaises(frappe.ValidationError, doc.submit)
+
 	def test_job_card_overlap(self):
 		wo2 = make_wo_order_test_record(item="_Test FG Item 2", qty=2)
 

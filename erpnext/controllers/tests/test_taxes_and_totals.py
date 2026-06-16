@@ -15,7 +15,7 @@ class TestTaxesAndTotals(ERPNextTestSuite):
 		"""
 		test_account = "_Test Round Off Account"
 
-		def mock_regional(company, account_list: list) -> list:
+		def mock_regional(company, account_list: list, doc=None) -> list:
 			# Simulates a regional override
 			account_list.extend([test_account])
 			return account_list

@@ -15,7 +15,9 @@ from erpnext.stock.doctype.purchase_receipt.services.billing_status import Billi
 from erpnext.stock.doctype.purchase_receipt.services.provisional_accounting import (
 	ProvisionalAccountingService,
 )
-from erpnext.stock.doctype.purchase_receipt.services.stock_reservation import StockReservationService
+from erpnext.stock.doctype.purchase_receipt.services.reservation import (
+	PurchaseReceiptStockReservation,
+)
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -374,7 +376,7 @@ class PurchaseReceipt(BuyingController):
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 		self.set_consumed_qty_in_subcontract_order()
-		StockReservationService(self).reserve_stock()
+		PurchaseReceiptStockReservation(self).reserve_stock()
 		self.update_received_qty_if_from_pp()
 
 	def update_received_qty_if_from_pp(self):

@@ -4,7 +4,7 @@
 from random import randint
 
 import frappe
-from frappe.utils import today
+from frappe.utils import flt, today
 
 from erpnext.selling.doctype.sales_order.mapper import create_pick_list, make_delivery_note
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -312,6 +312,231 @@ class TestStockReservationEntry(ERPNextTestSuite):
 
 				for sre_detail in sre_details:
 					self.assertEqual(sre_detail.reserved_qty, sre_detail.delivered_qty)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_partial_reservation": 1}
+	)
+	def test_reservation_restored_on_delivery_note_cancel(self) -> None:
+		# Cancellation path (spec #1): delivering reserved stock via a Delivery Note marks the SRE
+		# delivered; cancelling that Delivery Note must restore the reservation (delivered_qty -> 0),
+		# otherwise the reserved stock is silently lost.
+		so = make_sales_order(
+			item_code=self.sr_item.name,
+			warehouse=self.warehouse,
+			qty=10,
+			rate=100,
+			do_not_submit=True,
+		)
+		so.reserve_stock = 1
+		so.items[0].reserve_stock = 1
+		so.save()
+		so.submit()
+		so.create_stock_reservation_entries()
+
+		def sre():
+			return frappe.get_all(
+				"Stock Reservation Entry",
+				filters={"voucher_no": so.name, "item_code": self.sr_item.name, "docstatus": 1},
+				fields=["reserved_qty", "delivered_qty", "status"],
+			)[0]
+
+		self.assertEqual(sre().reserved_qty, 10)
+		self.assertEqual(sre().delivered_qty, 0)
+
+		dn = make_delivery_note(so.name)
+		dn.submit()
+		after = sre()
+		self.assertEqual(after.delivered_qty, 10, "Delivery Note should mark the reservation delivered")
+		self.assertEqual(after.status, "Delivered")
+
+		dn.cancel()
+		restored = sre()
+		self.assertEqual(
+			restored.delivered_qty, 0, "Cancelling the Delivery Note must restore the reservation"
+		)
+		self.assertEqual(restored.status, "Reserved")
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
+	)
+	def test_reserved_stock_cannot_be_delivered_against_a_different_sales_order(self) -> None:
+		# Spec #2: stock reserved for one Sales Order must not be deliverable through a Delivery Note
+		# raised for a different Sales Order. Pin allow_negative_stock off so the guard is enforced
+		# regardless of any global Stock Settings left enabled by other tests in the suite.
+		from erpnext.stock.stock_ledger import NegativeStockError
+
+		item_doc = make_item(properties={"is_stock_item": 1, "valuation_rate": 100})
+		item = item_doc.name
+		warehouse = self.warehouse
+		create_material_receipt(items={item: item_doc}, warehouse=warehouse, qty=10)
+
+		# SO-A reserves the entire available stock.
+		so_a = make_sales_order(item_code=item, warehouse=warehouse, qty=10, rate=100, do_not_submit=True)
+		so_a.reserve_stock = 1
+		so_a.items[0].reserve_stock = 1
+		so_a.save()
+		so_a.submit()
+		so_a.create_stock_reservation_entries()
+		self.assertTrue(has_reserved_stock("Sales Order", so_a.name))
+
+		# SO-B (a different order) for the same item must not be able to deliver the reserved stock.
+		so_b = make_sales_order(item_code=item, warehouse=warehouse, qty=10, rate=100, do_not_submit=True)
+		so_b.save()
+		so_b.submit()
+		dn = make_delivery_note(so_b.name)
+		dn.save()
+		self.assertRaises(NegativeStockError, dn.submit)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_stock_can_be_unreserved_and_reserved_against_another_sales_order(self) -> None:
+		# Spec #3: a user can manually unreserve stock from one Sales Order and reserve the same stock
+		# against another Sales Order.
+		item_doc = make_item(properties={"is_stock_item": 1, "valuation_rate": 100})
+		item = item_doc.name
+		warehouse = self.warehouse
+		create_material_receipt(items={item: item_doc}, warehouse=warehouse, qty=10)
+
+		so_a = make_sales_order(item_code=item, warehouse=warehouse, qty=10, rate=100, do_not_submit=True)
+		so_a.reserve_stock = 1
+		so_a.items[0].reserve_stock = 1
+		so_a.save()
+		so_a.submit()
+		so_a.create_stock_reservation_entries()
+		self.assertTrue(has_reserved_stock("Sales Order", so_a.name))
+
+		so_b = make_sales_order(item_code=item, warehouse=warehouse, qty=10, rate=100, do_not_submit=True)
+		so_b.reserve_stock = 1
+		so_b.items[0].reserve_stock = 1
+		so_b.save()
+		so_b.submit()
+
+		# With all stock reserved by SO-A, SO-B cannot reserve anything yet.
+		so_b.create_stock_reservation_entries()
+		self.assertFalse(has_reserved_stock("Sales Order", so_b.name))
+
+		# Manually unreserve SO-A, then SO-B can reserve the freed stock.
+		cancel_stock_reservation_entries("Sales Order", so_a.name)
+		self.assertFalse(has_reserved_stock("Sales Order", so_a.name))
+
+		so_b.create_stock_reservation_entries()
+		self.assertTrue(has_reserved_stock("Sales Order", so_b.name))
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
+		},
+	)
+	def test_serial_and_batch_reservation_can_be_unreserved(self) -> None:
+		# Spec #9 (cancellation): an auto-reserved serial/batch Sales Order reservation pins specific
+		# serial/batch entries on the SRE (`sb_entries`). Manually unreserving it must cancel the SRE
+		# (and its pinned entries) and free the stock for another order.
+		items_details = create_items()
+		create_material_receipt(items_details, self.warehouse, qty=10)
+
+		serial_item = next(
+			name for name, p in items_details.items() if p.get("has_serial_no") and not p.get("has_batch_no")
+		)
+		batch_item = next(
+			name for name, p in items_details.items() if p.get("has_batch_no") and not p.get("has_serial_no")
+		)
+
+		item_list = [
+			{"item_code": serial_item, "warehouse": self.warehouse, "qty": 10, "rate": 100},
+			{"item_code": batch_item, "warehouse": self.warehouse, "qty": 10, "rate": 100},
+		]
+		so = make_sales_order(item_list=item_list, warehouse=self.warehouse)
+		so.create_stock_reservation_entries()
+		so.load_from_db()
+
+		def sre_row(so_item):
+			return frappe.get_all(
+				"Stock Reservation Entry",
+				filters={"voucher_no": so.name, "voucher_detail_no": so_item, "docstatus": 1},
+				fields=["name", "reserved_qty", "reservation_based_on"],
+			)
+
+		# Each item is reserved on a Serial-and-Batch basis with the specific entries pinned.
+		self.assertTrue(has_reserved_stock("Sales Order", so.name))
+		for item in so.items:
+			rows = sre_row(item.name)
+			self.assertEqual(len(rows), 1)
+			self.assertEqual(rows[0].reserved_qty, 10)
+			self.assertEqual(rows[0].reservation_based_on, "Serial and Batch")
+			pinned = frappe.get_all(
+				"Serial and Batch Entry",
+				filters={"parent": rows[0].name, "parentfield": "sb_entries"},
+			)
+			self.assertGreaterEqual(len(pinned), 1, "serial/batch entries should be pinned on the SRE")
+
+		# Manually unreserve: the SRE (and its pinned entries) must be cancelled and the stock freed.
+		cancel_stock_reservation_entries("Sales Order", so.name)
+		self.assertFalse(has_reserved_stock("Sales Order", so.name))
+		for item in so.items:
+			self.assertEqual(sre_row(item.name), [])
+
+		# The freed serial/batch stock can be reserved by another Sales Order.
+		so_b = make_sales_order(item_list=item_list, warehouse=self.warehouse)
+		so_b.create_stock_reservation_entries()
+		self.assertTrue(has_reserved_stock("Sales Order", so_b.name))
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
+			"use_serial_batch_fields": 1,
+		},
+	)
+	def test_serial_and_batch_reserved_stock_delivery_and_cancel(self) -> None:
+		# Regression: delivering a serial/batch reserved Sales Order used to crash with
+		# "Serial and Batch Bundle None not found" when the delivered serial/batch was carried in the
+		# row's serial_no/batch_no fields (use_serial_batch_fields) rather than a bundle. Delivery
+		# must mark the reservation delivered, and cancelling the Delivery Note must restore it.
+		items_details = create_items()
+		create_material_receipt(items_details, self.warehouse, qty=10)
+
+		serial_item = next(
+			name for name, p in items_details.items() if p.get("has_serial_no") and not p.get("has_batch_no")
+		)
+		batch_item = next(
+			name for name, p in items_details.items() if p.get("has_batch_no") and not p.get("has_serial_no")
+		)
+
+		item_list = [
+			{"item_code": serial_item, "warehouse": self.warehouse, "qty": 10, "rate": 100},
+			{"item_code": batch_item, "warehouse": self.warehouse, "qty": 10, "rate": 100},
+		]
+		so = make_sales_order(item_list=item_list, warehouse=self.warehouse)
+		so.create_stock_reservation_entries()
+
+		def sre_row(so_item):
+			return frappe.get_all(
+				"Stock Reservation Entry",
+				filters={"voucher_no": so.name, "voucher_detail_no": so_item, "docstatus": 1},
+				fields=["reserved_qty", "delivered_qty", "status"],
+			)[0]
+
+		# Deliver the reserved stock (serial/batch carried in row fields, no bundle).
+		dn = make_delivery_note(so.name, kwargs={"for_reserved_stock": True})
+		dn.save()
+		dn.submit()
+		for item in so.items:
+			row = sre_row(item.name)
+			self.assertEqual(
+				row.delivered_qty, 10, "delivery should mark the serial/batch reservation delivered"
+			)
+			self.assertEqual(row.status, "Delivered")
+
+		# Cancelling the Delivery Note restores the reservation.
+		dn.cancel()
+		for item in so.items:
+			row = sre_row(item.name)
+			self.assertEqual(row.delivered_qty, 0, "DN cancel must restore the serial/batch reservation")
+			self.assertEqual(row.status, "Reserved")
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",

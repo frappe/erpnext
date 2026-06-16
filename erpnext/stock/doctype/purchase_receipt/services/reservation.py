@@ -10,7 +10,7 @@ from frappe.utils import get_datetime
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
 
 
-class StockReservationService:
+class PurchaseReceiptStockReservation:
 	def __init__(self, doc):
 		self.doc = doc
 

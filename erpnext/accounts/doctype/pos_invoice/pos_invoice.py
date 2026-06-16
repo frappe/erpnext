@@ -21,6 +21,7 @@ from erpnext.accounts.doctype.sales_invoice.services.loyalty import LoyaltyServi
 from erpnext.accounts.party import get_due_date, get_party_account
 from erpnext.controllers.queries import item_query as _item_query
 from erpnext.controllers.sales_and_purchase_return import get_sales_invoice_item_from_consolidated_invoice
+from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.stock_ledger import is_negative_stock_allowed
 
@@ -403,7 +404,7 @@ class POSInvoice(SalesInvoice):
 
 		for d in self.get("items"):
 			if not d.serial_and_batch_bundle:
-				if frappe.db.exists("Product Bundle", d.item_code):
+				if get_active_product_bundle(d.item_code):
 					(
 						availability,
 						is_stock_item,
@@ -916,7 +917,7 @@ def get_stock_availability(item_code: str | None, warehouse: str):
 		return bin_qty - pos_sales_qty, is_stock_item, is_negative_stock_allowed(item_code=item_code)
 	else:
 		is_stock_item = True
-		if frappe.db.exists("Product Bundle", {"name": item_code, "disabled": 0}):
+		if get_active_product_bundle(item_code):
 			return get_bundle_availability(item_code, warehouse), is_stock_item, False
 		else:
 			is_stock_item = False
@@ -926,7 +927,7 @@ def get_stock_availability(item_code: str | None, warehouse: str):
 
 def get_product_bundle_stock_availability(item_code, warehouse, item_qty):
 	is_stock_item = True
-	bundle = frappe.get_doc("Product Bundle", item_code)
+	bundle = frappe.get_doc("Product Bundle", get_active_product_bundle(item_code))
 	availabilities = []
 	for bundle_item in bundle.items:
 		if frappe.get_value("Item", bundle_item.item_code, "is_stock_item"):
@@ -945,7 +946,7 @@ def get_product_bundle_stock_availability(item_code, warehouse, item_qty):
 
 
 def get_bundle_availability(bundle_item_code, warehouse):
-	product_bundle = frappe.get_doc("Product Bundle", bundle_item_code)
+	product_bundle = frappe.get_doc("Product Bundle", get_active_product_bundle(bundle_item_code))
 
 	bundle_bin_qty = 1000000
 	for item in product_bundle.items:

@@ -178,7 +178,7 @@ frappe.ui.form.on("Journal Entry", {
 					voucher_type: frm.doc.voucher_type,
 					company: args.company,
 				},
-				method: "erpnext.accounts.doctype.journal_entry.journal_entry.make_inter_company_journal_entry",
+				method: "erpnext.accounts.doctype.journal_entry.mapper.make_inter_company_journal_entry",
 				callback: function (r) {
 					if (r.message) {
 						var doc = frappe.model.sync(r.message)[0];
@@ -409,18 +409,16 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 	}
 
 	get_outstanding(doctype, docname, company, child) {
-		var args = {
-			doctype: doctype,
-			docname: docname,
-			party: child.party,
-			account: child.account,
-			account_currency: child.account_currency,
-			company: company,
-		};
-
 		return frappe.call({
 			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_outstanding",
-			args: { args: args },
+			args: {
+				doctype: doctype,
+				docname: docname,
+				company: company,
+				account: child.account,
+				party: child.party,
+				account_currency: child.account_currency,
+			},
 			callback: function (r) {
 				if (r.message) {
 					$.each(r.message, function (field, value) {
@@ -731,7 +729,7 @@ $.extend(erpnext.journal_entry, {
 
 	reverse_journal_entry: function (frm) {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.accounts.doctype.journal_entry.journal_entry.make_reverse_journal_entry",
+			method: "erpnext.accounts.doctype.journal_entry.mapper.make_reverse_journal_entry",
 			frm: frm,
 		});
 	},

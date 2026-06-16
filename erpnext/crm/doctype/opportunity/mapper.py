@@ -145,7 +145,7 @@ def make_opportunity_from_communication(
 			"opportunity_from": opportunity_from,
 			"party_name": lead,
 		}
-	).insert(ignore_permissions=True)
+	).insert()
 
 	link_communication_to_document(doc, "Opportunity", opportunity.name, ignore_communication_links)
 

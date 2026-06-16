@@ -5,7 +5,7 @@
 
 import frappe
 from frappe import _
-from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied
+from frappe.model.workflow import get_workflow_name
 from frappe.utils import flt, get_link_to_form, getdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
@@ -222,15 +222,12 @@ class ChildItemUpdater:
 		current_state = self.parent.get(workflow_doc.workflow_state_field)
 		roles = frappe.get_roles()
 
-		transitions = [
-			t.as_dict()
-			for t in workflow_doc.transitions
-			if t.next_state == current_state
-			and t.allowed in roles
-			and is_transition_condition_satisfied(t, self.parent)
-		]
+		allowed = any(
+			state.state == current_state and (not state.allow_edit or state.allow_edit in roles)
+			for state in workflow_doc.states
+		)
 
-		if not transitions:
+		if not allowed:
 			frappe.throw(
 				_("You are not allowed to update as per the conditions set in {} Workflow.").format(
 					get_link_to_form("Workflow", workflow)

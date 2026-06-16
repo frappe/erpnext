@@ -164,6 +164,18 @@ def get_item_details(
 	if ctx.is_subcontracted:
 		out.bom = ctx.bom or get_default_bom(ctx.item_code)
 
+	from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
+
+	active_bundle = get_active_product_bundle(ctx.item_code)
+	# flag bundle rows so the version field stays visible regardless of its value
+	out.is_product_bundle = 1 if active_bundle else 0
+	if not active_bundle:
+		out.product_bundle = None
+	elif not ctx.get("product_bundle"):
+		# prefill the active version so a freshly added bundle row defaults to it
+		# (guarded so re-fetches never overwrite a version the user picked)
+		out.product_bundle = active_bundle
+
 	get_gross_profit(out)
 	if ctx.doctype == "Material Request":
 		out.rate = ctx.rate or out.price_list_rate
@@ -180,9 +192,12 @@ def remove_standard_fields(out: ItemDetails):
 
 
 def set_valuation_rate(out: ItemDetails | dict, ctx: ItemDetailsCtx):
-	if frappe.db.exists("Product Bundle", {"name": ctx.item_code, "disabled": 0}, cache=True):
+	from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
+
+	active_bundle = get_active_product_bundle(ctx.item_code)
+	if active_bundle:
 		valuation_rate = 0.0
-		bundled_items = frappe.get_doc("Product Bundle", ctx.item_code)
+		bundled_items = frappe.get_doc("Product Bundle", active_bundle)
 
 		for bundle_item in bundled_items.items:
 			valuation_rate += flt(

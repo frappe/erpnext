@@ -71,7 +71,8 @@ def get_item_warehouse_quantity_map():
 					 FROM tabBin AS bi, (SELECT pb.new_item_code as parent, b.item_code, b.qty, w.name
 										 FROM `tabProduct Bundle Item` b, `tabWarehouse` w,
 											  `tabProduct Bundle` pb
-										 where b.parent = pb.name) AS b
+										 where b.parent = pb.name
+										   and pb.is_active = 1 and pb.docstatus = 1) AS b
 					 WHERE bi.item_code = b.item_code
 						   AND bi.warehouse = b.name
 					 GROUP BY b.parent, b.item_code, bi.warehouse
@@ -80,7 +81,8 @@ def get_item_warehouse_quantity_map():
 					 FROM (SELECT pb.new_item_code as parent, b.item_code, b.qty, w.name
 						   FROM `tabProduct Bundle Item` b, `tabWarehouse` w,
 								`tabProduct Bundle` pb
-						   where b.parent = pb.name) AS b
+						   where b.parent = pb.name
+							 and pb.is_active = 1 and pb.docstatus = 1) AS b
 					 WHERE NOT EXISTS(SELECT *
 									  FROM `tabBin` AS bi
 									  WHERE bi.item_code = b.item_code

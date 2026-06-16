@@ -9,6 +9,8 @@ frappe.ui.form.on("Stock Entry", {
 	setup: function (frm) {
 		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
 
+		frm.trigger("toggle_enable_for_stock_uom_qty");
+
 		frm.set_indicator_formatter("item_code", function (doc) {
 			if (!doc.s_warehouse) {
 				return "blue";
@@ -272,6 +274,20 @@ frappe.ui.form.on("Stock Entry", {
 			method: "set_items_for_stock_in",
 			callback: function () {
 				refresh_field("items");
+			},
+		});
+	},
+
+	toggle_enable_for_stock_uom_qty: function (frm) {
+		frappe.call({
+			method: "erpnext.stock.doctype.stock_settings.stock_settings.get_enable_stock_uom_editing",
+			callback: (r) => {
+				if (r.message) {
+					frm.fields_dict["items"].grid.toggle_enable(
+						"transfer_qty",
+						r.message.allow_to_edit_stock_uom_qty_for_stock_entry
+					);
+				}
 			},
 		});
 	},
@@ -1014,6 +1030,21 @@ frappe.ui.form.on("Stock Entry Detail", {
 
 	conversion_factor(frm, cdt, cdn) {
 		frm.events.set_basic_rate(frm, cdt, cdn);
+	},
+
+	transfer_qty(frm, cdt, cdn) {
+		let item = locals[cdt][cdn];
+		let old_conversion_factor = item.conversion_factor;
+		let conversion_factor = 1.0;
+		if (flt(item.qty) && flt(item.transfer_qty)) {
+			conversion_factor = flt(item.transfer_qty) / flt(item.qty);
+		}
+
+		if (old_conversion_factor !== conversion_factor) {
+			item.conversion_factor = conversion_factor;
+			refresh_field("conversion_factor", item.name, item.parentfield);
+			frm.events.set_basic_rate(frm, cdt, cdn);
+		}
 	},
 
 	s_warehouse(frm, cdt, cdn) {

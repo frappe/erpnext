@@ -22,7 +22,7 @@ from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger 
 )
 from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import SalesTaxWithholding
 from erpnext.accounts.party import get_due_date, get_party_account
-from erpnext.accounts.utils import update_voucher_outstanding
+from erpnext.accounts.utils import refresh_subscription_status, update_voucher_outstanding
 from erpnext.controllers.accounts_controller import validate_account_head
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
@@ -304,6 +304,7 @@ class SalesInvoice(SellingController):
 		self.validate_uom_is_integer("uom", "qty")
 		self.check_sales_order_on_hold_or_close("sales_order")
 		self.validate_debit_to_acc()
+		self.validate_debit_note_with_update_stock()
 		self.clear_unallocated_advances("Sales Invoice Advance", "advances")
 		FixedAssetService(self).validate_fixed_asset()
 		FixedAssetService(self).set_income_account_for_fixed_assets()
@@ -411,8 +412,8 @@ class SalesInvoice(SellingController):
 			validate_account_head(item.idx, item.income_account, self.company, _("Income"))
 
 	def before_save(self):
+		POSService(self).update_paid_amount()
 		POSService(self).set_account_for_mode_of_payment()
-		POSService(self).set_paid_amount()
 
 	def before_submit(self):
 		self.add_remarks()
@@ -496,6 +497,9 @@ class SalesInvoice(SellingController):
 
 		self.process_common_party_accounting()
 		self.update_billed_qty_in_scio()
+
+		if self.is_return:
+			self.refresh_subscription_status()
 
 	def before_cancel(self):
 		POSService(self).check_if_created_using_pos_and_pos_closing_entry_generated()
@@ -584,6 +588,7 @@ class SalesInvoice(SellingController):
 			POSService(self).cancel_pos_invoice_credit_note_generated_during_sales_invoice_mode()
 
 		self.update_billed_qty_in_scio()
+		self.refresh_subscription_status()
 
 	def update_status_updater_args(self):
 		if not cint(self.update_stock):
@@ -703,6 +708,10 @@ class SalesInvoice(SellingController):
 	# Called by POS Invoice
 	def set_pos_fields(self, for_validate=False):
 		return POSService(self).set_pos_fields(for_validate)
+
+	def refresh_subscription_status(self):
+		if self.get("subscription"):
+			refresh_subscription_status(self.subscription)
 
 	@frappe.whitelist()
 	def reset_mode_of_payments(self):
@@ -951,6 +960,17 @@ class SalesInvoice(SellingController):
 	def validate_account_for_change_amount(self):
 		if flt(self.change_amount) and not self.account_for_change_amount:
 			msgprint(_("Please enter Account for Change Amount"), raise_exception=1)
+
+	def validate_debit_note_with_update_stock(self):
+		"""Prevent stock update when Sales Invoice is marked as Debit Note."""
+		if self.is_debit_note and cint(self.update_stock):
+			frappe.throw(
+				_(
+					"You cannot update stock for a Debit Note. A Debit Note is a financial "
+					"document that should not affect inventory. Please disable 'Update Stock'."
+				),
+				title=_("Invalid Configuration"),
+			)
 
 	def validate_dropship_item(self):
 		"""If items are drop shipped, stock cannot be updated."""

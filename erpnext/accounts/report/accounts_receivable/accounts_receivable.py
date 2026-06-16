@@ -927,7 +927,27 @@ class ReceivablePayableReport:
 		if self.filters.project:
 			self.qb_selection_filter.append(self.ple.project.isin(self.filters.project))
 
+		self.add_user_permission_filters()
+
 		self.add_accounting_dimensions_filters()
+
+	def add_user_permission_filters(self):
+		# Party is a dynamic link, so match conditions cannot auto-apply Customer/Supplier user permissions
+		from frappe.core.doctype.user_permission.user_permission import get_user_permissions
+		from frappe.permissions import get_allowed_docs_for_doctype
+
+		user_permissions = get_user_permissions()
+		if not user_permissions:
+			return
+
+		for party_type in self.party_type:
+			if party_type not in user_permissions:
+				continue
+
+			allowed_parties = get_allowed_docs_for_doctype(user_permissions[party_type], party_type)
+			self.qb_selection_filter.append(
+				(self.ple.party_type != party_type) | self.ple.party.isin(allowed_parties or [""])
+			)
 
 	def get_cost_center_conditions(self):
 		cost_center_list = get_cost_centers_with_children(self.filters.cost_center)

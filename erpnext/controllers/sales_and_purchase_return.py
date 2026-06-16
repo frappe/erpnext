@@ -598,6 +598,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			target_doc.so_detail = source_doc.so_detail
 			target_doc.expense_account = source_doc.expense_account
 			target_doc.dn_detail = source_doc.name
+			target_doc.cost_center = source_doc.cost_center
 			if default_warehouse_for_sales_return:
 				target_doc.warehouse = default_warehouse_for_sales_return
 		elif doctype == "Sales Invoice" or doctype == "POS Invoice":

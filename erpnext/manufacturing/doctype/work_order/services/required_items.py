@@ -14,8 +14,8 @@ from pypika import functions as fn
 
 from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 from erpnext.manufacturing.doctype.work_order.mapper import check_if_scrap_warehouse_mandatory
-from erpnext.manufacturing.doctype.work_order.services.stock_reservation import (
-	StockReservationService,
+from erpnext.manufacturing.doctype.work_order.services.reservation import (
+	WorkOrderStockReservation,
 	get_consumed_qty,
 	get_row_wise_serial_batch,
 )
@@ -44,7 +44,7 @@ class RequiredItemsService:
 			# update in bin
 			self.update_reserved_qty_for_production()
 
-		StockReservationService(self.doc).validate_reserved_qty()
+		WorkOrderStockReservation(self.doc).validate_reserved_qty()
 
 	def update_reserved_qty_for_production(self, items=None):
 		"""update reserved_qty_for_production in bins"""
@@ -142,7 +142,7 @@ class RequiredItemsService:
 			transferred_qty = transferred_items.get(row.item_code) or 0.0
 			row.db_set("transferred_qty", transferred_qty, update_modified=False)
 			if self.doc.reserve_stock:
-				StockReservationService(self.doc).update_qty_in_stock_reservation(
+				WorkOrderStockReservation(self.doc).update_qty_in_stock_reservation(
 					row, transferred_qty, row_wise_serial_batch
 				)
 
@@ -189,7 +189,7 @@ class RequiredItemsService:
 				continue
 
 			warehouse = wip_warehouse or item.source_warehouse
-			StockReservationService(self.doc).update_consumed_qty_in_stock_reservation(
+			WorkOrderStockReservation(self.doc).update_consumed_qty_in_stock_reservation(
 				item, consumed_qty, warehouse
 			)
 

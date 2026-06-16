@@ -208,6 +208,7 @@ class PaymentEntry(AccountsController):
 		self.make_gl_entries()
 		self.update_outstanding_amounts()
 		self.set_status()
+		self.trigger_invoice_update_for_subscriptions()
 
 	def validate_for_repost(self):
 		validate_docs_for_voucher_types(["Payment Entry"])
@@ -314,6 +315,7 @@ class PaymentEntry(AccountsController):
 		self.update_outstanding_amounts()
 		self.delink_advance_entry_references()
 		self.set_status()
+		self.trigger_invoice_update_for_subscriptions()
 
 	def update_payment_requests(self, cancel=False):
 		from erpnext.accounts.doctype.payment_request.payment_request import (
@@ -504,6 +506,19 @@ class PaymentEntry(AccountsController):
 			if reference.reference_doctype in ("Sales Invoice", "Purchase Invoice"):
 				doc = frappe.get_lazy_doc(reference.reference_doctype, reference.reference_name)
 				doc.delink_advance_entries(self.name)
+
+	def trigger_invoice_update_for_subscriptions(self):
+		invoice_names = set()
+		for ref in self.references:
+			if ref.reference_doctype in ("Sales Invoice", "Purchase Invoice"):
+				invoice_names.add((ref.reference_doctype, ref.reference_name))
+
+		for doctype, name in invoice_names:
+			try:
+				doc = frappe.get_doc(doctype, name)
+				doc.refresh_subscription_status()
+			except Exception:
+				frappe.log_error(_("Failed to update subscription status for {0} {1}").format(doctype, name))
 
 	def set_missing_values(self):
 		if self.payment_type == "Internal Transfer":
@@ -2021,6 +2036,9 @@ def get_outstanding_reference_documents(args: str | dict, validate: bool = False
 	if args.get("party_type") == "Member":
 		return
 
+	if args.get("party_type") and args.get("party"):
+		frappe.has_permission(args["party_type"], "read", args["party"], throw=True)
+
 	if not args.get("get_outstanding_invoices") and not args.get("get_orders_to_be_billed"):
 		args["get_outstanding_invoices"] = True
 
@@ -2516,6 +2534,7 @@ def get_reference_details(
 ):
 	total_amount = outstanding_amount = exchange_rate = account = None
 
+	frappe.has_permission(reference_doctype, "read", reference_name, throw=True)
 	ref_doc = frappe.get_lazy_doc(reference_doctype, reference_name)
 	company_currency = ref_doc.get("company_currency") or erpnext.get_company_currency(ref_doc.company)
 

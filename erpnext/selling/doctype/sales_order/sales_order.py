@@ -23,8 +23,8 @@ from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
 )
 from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.selling.doctype.sales_order.services.delivery_schedule import DeliveryScheduleService
+from erpnext.selling.doctype.sales_order.services.reservation import SalesOrderStockReservation
 from erpnext.selling.doctype.sales_order.services.status import StatusService
-from erpnext.selling.doctype.sales_order.services.stock_reservation import StockReservationService
 from erpnext.selling.doctype.sales_order.services.subcontracting import SubcontractingService
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import has_reserved_stock
@@ -226,7 +226,7 @@ class SalesOrder(SellingController):
 		self.validate_for_items()
 		self.validate_warehouse()
 		self.validate_drop_ship()
-		StockReservationService(self).validate_reserved_stock()
+		SalesOrderStockReservation(self).validate_reserved_stock()
 		self.validate_serial_no_based_delivery()
 		validate_against_blanket_order(self)
 		validate_inter_company_party(
@@ -248,7 +248,7 @@ class SalesOrder(SellingController):
 
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		if not self.get("is_subcontracted"):
-			StockReservationService(self).enable_auto_reserve_stock()
+			SalesOrderStockReservation(self).enable_auto_reserve_stock()
 
 	def set_has_unit_price_items(self):
 		"""
@@ -326,9 +326,15 @@ class SalesOrder(SellingController):
 			d.projected_qty = bin_data.get((d.item_code, d.warehouse), 0.0)
 
 	def product_bundle_has_stock_item(self, product_bundle):
-		"""Returns true if product bundle has stock item"""
+		"""Returns true if the active bundle for `product_bundle` (a parent item code) has a stock item"""
+		from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
+
+		bundle_name = get_active_product_bundle(product_bundle)
+		if not bundle_name:
+			return False
+
 		bundle_items = frappe.get_all(
-			"Product Bundle Item", filters={"parent": product_bundle}, pluck="item_code"
+			"Product Bundle Item", filters={"parent": bundle_name}, pluck="item_code"
 		)
 
 		if not bundle_items:
@@ -536,7 +542,7 @@ class SalesOrder(SellingController):
 		StatusService(self).update_status(status)
 
 	def update_reserved_qty(self, so_item_rows=None):
-		StockReservationService(self).update_reserved_qty(so_item_rows)
+		SalesOrderStockReservation(self).update_reserved_qty(so_item_rows)
 
 	def on_update_after_submit(self):
 		self.calculate_commission()
@@ -646,7 +652,7 @@ class SalesOrder(SellingController):
 	@frappe.whitelist()
 	def has_unreserved_stock(self, table_name: str = "items") -> dict:
 		"""Returns unreserved qty per item if there is any unreserved item in the Sales Order."""
-		return StockReservationService(self).has_unreserved_stock(table_name)
+		return SalesOrderStockReservation(self).has_unreserved_stock(table_name)
 
 	@frappe.whitelist()
 	def create_stock_reservation_entries(
@@ -656,14 +662,14 @@ class SalesOrder(SellingController):
 		notify: bool = True,
 	) -> None:
 		"""Creates Stock Reservation Entries for Sales Order Items."""
-		StockReservationService(self).create_stock_reservation_entries(
+		SalesOrderStockReservation(self).create_stock_reservation_entries(
 			items_details, from_voucher_type, notify
 		)
 
 	@frappe.whitelist()
 	def cancel_stock_reservation_entries(self, sre_list: list | None = None, notify: bool = True) -> None:
 		"""Cancel Stock Reservation Entries for Sales Order Items."""
-		StockReservationService(self).cancel_stock_reservation_entries(sre_list, notify)
+		SalesOrderStockReservation(self).cancel_stock_reservation_entries(sre_list, notify)
 
 	def set_missing_values(self, for_validate=False):
 		super().set_missing_values(for_validate)
@@ -807,7 +813,9 @@ def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 		product_bundle_parents = [
 			pb.new_item_code
 			for pb in frappe.get_all(
-				"Product Bundle", {"new_item_code": ["in", item_codes], "disabled": 0}, ["new_item_code"]
+				"Product Bundle",
+				{"new_item_code": ["in", item_codes], "is_active": 1, "docstatus": 1},
+				["new_item_code"],
 			)
 		]
 

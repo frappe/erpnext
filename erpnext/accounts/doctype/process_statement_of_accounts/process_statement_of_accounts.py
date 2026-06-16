@@ -101,6 +101,7 @@ class ProcessStatementOfAccounts(Document):
 
 		validate_template(self.subject)
 		validate_template(self.body)
+		validate_template(self.pdf_name)
 
 		if not self.customers:
 			frappe.throw(_("Customers not selected."))
@@ -521,6 +522,7 @@ def download_statements(document_name: str):
 @frappe.whitelist()
 def send_emails(document_name: str, from_scheduler: bool = False, posting_date: str | None = None):
 	doc = frappe.get_doc("Process Statement Of Accounts", document_name)
+	doc.check_permission()
 	report = get_report_pdf(doc, consolidated=False)
 
 	if report:
@@ -577,6 +579,7 @@ def send_emails(document_name: str, from_scheduler: bool = False, posting_date: 
 
 @frappe.whitelist()
 def send_auto_email():
+	frappe.has_permission("Process Statement Of Accounts", throw=True)
 	selected = frappe.get_list(
 		"Process Statement Of Accounts",
 		filters={"enable_auto_email": 1},

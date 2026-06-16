@@ -542,6 +542,7 @@ class TestItem(ERPNextTestSuite):
 		with self.assertRaises(DataValidationError):
 			frappe.rename_doc("Item", "Test Item Bundle Item 1", "Test Item Bundle Item 2", merge=True)
 
+		bundle1.cancel()
 		bundle1.delete()
 		frappe.rename_doc("Item", "Test Item Bundle Item 1", "Test Item Bundle Item 2", merge=True)
 
@@ -862,18 +863,21 @@ class TestItem(ERPNextTestSuite):
 		item.reload()
 		self.assertEqual(item.is_stock_item, 0)
 
-		# Step - 3: Create Product Bundle
+		# Step - 3: Create (and submit) an active Product Bundle for the item
+		component = make_item(properties={"is_stock_item": 1}).name
 		pb = frappe.new_doc("Product Bundle")
 		pb.new_item_code = item.name
-		pb.flags.ignore_mandatory = True
-		pb.save()
+		pb.append("items", {"item_code": component, "qty": 1})
+		pb.insert()
+		pb.submit()
 
 		# Step - 4: Try to enable Maintain Stock, should throw a validation error
 		item.is_stock_item = 1
 		self.assertRaises(frappe.ValidationError, item.save)
 		item.reload()
 
-		# Step - 5: Delete Product Bundle
+		# Step - 5: Cancel & delete Product Bundle
+		pb.cancel()
 		pb.delete()
 
 		# Step - 6: Again try to enable Maintain Stock

@@ -1194,6 +1194,7 @@ class update_entries_after:
 			sle.recalculate_rate
 			or self.has_landed_cost_based_on_pi(sle)
 			or (sle.voucher_type == "Stock Entry" and sle.actual_qty > 0 and is_repack_entry(sle.voucher_no))
+			or (sle.voucher_type in ("Purchase Receipt", "Purchase Invoice"))
 		):
 			rate = self.get_incoming_outgoing_rate_from_transaction(sle)
 

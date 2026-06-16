@@ -577,6 +577,10 @@ frappe.ui.form.on("Job Card", {
 		const wrapper = $(frm.fields_dict["job_card_dashboard"].wrapper);
 		wrapper.empty();
 
+		if (frm.doc.docstatus !== 0) {
+			return;
+		}
+
 		const { doc } = frm;
 		const { time_logs, status } = doc;
 

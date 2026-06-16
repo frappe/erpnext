@@ -2243,7 +2243,16 @@ def get_type_of_transaction(parent_doc, child_row):
 
 
 def update_serial_batch_no_ledgers(bundle, entries, child_row, parent_doc, warehouse=None) -> object:
+	frappe.has_permission("Serial and Batch Bundle", "write", throw=True)
 	doc = frappe.get_doc("Serial and Batch Bundle", bundle)
+
+	if doc.docstatus == 1:
+		doc.throw_error_message(
+			_("Serial and Batch Bundle {0} is submitted and its entries cannot be modified.").format(
+				frappe.bold(bundle)
+			)
+		)
+
 	doc.voucher_detail_no = child_row.name
 	doc.posting_datetime = combine_datetime(parent_doc.get("posting_date"), parent_doc.get("posting_time"))
 

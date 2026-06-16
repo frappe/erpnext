@@ -1124,10 +1124,10 @@ class SubcontractingInwardController:
 	def update_inward_order_status(self):
 		if self.subcontracting_inward_order:
 			from erpnext.subcontracting.doctype.subcontracting_inward_order.subcontracting_inward_order import (
-				update_subcontracting_inward_order_status,
+				set_subcontracting_inward_order_status,
 			)
 
-			update_subcontracting_inward_order_status(self.subcontracting_inward_order)
+			set_subcontracting_inward_order_status(self.subcontracting_inward_order)
 
 
 @frappe.whitelist()

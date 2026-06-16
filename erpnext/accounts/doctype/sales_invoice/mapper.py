@@ -327,7 +327,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			"rate": "rate",
 		},
 		"postprocess": update_item,
-		"condition": lambda doc: doc.qty > 0,
+		"condition": lambda doc: doc.qty - received_items.get(doc.name, 0.0) > 0,
 	}
 
 	if doctype in ["Sales Invoice", "Sales Order"]:
@@ -367,11 +367,19 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		target_doc,
 		set_missing_values,
 	)
+	if not doclist.get("items"):
+		frappe.throw(
+			_(
+				"Cannot create Intercompany {0}. All items in the source {1} have already been fully invoiced. "
+				"Please check the existing linked {2}s."
+			).format(target_doctype, doctype, target_doctype)
+		)
 
 	return doclist
 
 
-def get_received_items(reference_name, doctype, reference_fieldname):
+@frappe.whitelist()
+def get_received_items(reference_name: str, doctype: str, reference_fieldname: str):
 	reference_field = "inter_company_invoice_reference"
 	if doctype == "Purchase Order":
 		reference_field = "inter_company_order_reference"
@@ -384,20 +392,19 @@ def get_received_items(reference_name, doctype, reference_fieldname):
 	target_doctypes = frappe.get_all(
 		doctype,
 		filters=filters,
-		as_list=True,
+		pluck="name",
 	)
-
+	received_items_map = {}
 	if target_doctypes:
-		target_doctypes = list(target_doctypes[0])
-
-	received_items_map = frappe._dict(
-		frappe.get_all(
+		received_items_data = frappe.get_all(
 			doctype + " Item",
 			filters={"parent": ("in", target_doctypes)},
 			fields=[reference_fieldname, "qty"],
-			as_list=1,
 		)
-	)
+		for item in received_items_data:
+			key = item.get(reference_fieldname)
+			if key:
+				received_items_map[key] = received_items_map.get(key, 0.0) + flt(item.qty)
 
 	return received_items_map
 

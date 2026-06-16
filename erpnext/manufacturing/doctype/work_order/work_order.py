@@ -46,17 +46,17 @@ from erpnext.manufacturing.doctype.work_order.services.operations import (
 from erpnext.manufacturing.doctype.work_order.services.required_items import (
 	RequiredItemsService,
 )
-from erpnext.manufacturing.doctype.work_order.services.status import (
-	StatusService,
-)
-from erpnext.manufacturing.doctype.work_order.services.stock_reservation import (
-	StockReservationService,
+from erpnext.manufacturing.doctype.work_order.services.reservation import (
+	WorkOrderStockReservation,
 	cancel_stock_reservation_entries,
 	get_consumed_qty,
 	get_reserved_qty_for_production,
 	get_row_wise_serial_batch,
 	get_sre_details,
 	make_stock_reservation_entries,
+)
+from erpnext.manufacturing.doctype.work_order.services.status import (
+	StatusService,
 )
 from erpnext.stock.doctype.batch.batch import make_batch
 from erpnext.stock.doctype.item.item import validate_end_of_life
@@ -297,8 +297,8 @@ class WorkOrder(Document):
 		self.status = self.get_status()
 		self.validate_workstation_type()
 		self.reset_use_multi_level_bom()
-		StockReservationService(self).set_reserve_stock()
-		StockReservationService(self).validate_fg_warehouse_for_reservation()
+		WorkOrderStockReservation(self).set_reserve_stock()
+		WorkOrderStockReservation(self).validate_fg_warehouse_for_reservation()
 		self.validate_dates()
 
 		if self.source_warehouse:
@@ -311,7 +311,7 @@ class WorkOrder(Document):
 		):
 			self.set_required_items(reset_only_qty=len(self.get("required_items")))
 
-		StockReservationService(self).enable_auto_reserve_stock()
+		WorkOrderStockReservation(self).enable_auto_reserve_stock()
 		self.validate_operations_sequence()
 		self.validate_subcontracting_inward_order()
 
@@ -625,7 +625,7 @@ class WorkOrder(Document):
 		self.create_job_card_from_wo()
 
 		if self.reserve_stock:
-			StockReservationService(self).update_stock_reservation()
+			WorkOrderStockReservation(self).update_stock_reservation()
 
 		self.update_subcontracting_inward_order_received_items()
 
@@ -649,7 +649,7 @@ class WorkOrder(Document):
 		self.update_reserved_qty_for_production()
 
 		if self.reserve_stock:
-			StockReservationService(self).update_stock_reservation()
+			WorkOrderStockReservation(self).update_stock_reservation()
 
 		self.update_subcontracting_inward_order_received_items()
 

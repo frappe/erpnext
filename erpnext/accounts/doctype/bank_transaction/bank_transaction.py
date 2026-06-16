@@ -374,6 +374,7 @@ def unreconcile_transaction(transaction_name: str | int):
 	Else, cancel the individual entries
 	"""
 	transaction = frappe.get_doc("Bank Transaction", transaction_name)
+	transaction.check_permission("write")
 
 	vouchers_to_cancel = []
 
@@ -401,6 +402,7 @@ def unreconcile_transaction_entry(bank_transaction_id: str | int, voucher_type: 
 	"""
 
 	bank_transaction = frappe.get_doc("Bank Transaction", bank_transaction_id)
+	bank_transaction.check_permission("write")
 
 	# Find the voucher in the bank transaction and depending on the action, either remove it or cancel the voucher
 	for entry in bank_transaction.payment_entries:

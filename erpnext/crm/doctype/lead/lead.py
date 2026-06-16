@@ -8,7 +8,7 @@ from frappe.contacts.address_and_contact import (
 	load_address_and_contact,
 )
 from frappe.model.document import Document
-from frappe.utils import comma_and, get_link_to_form, has_gravatar, validate_email_address
+from frappe.utils import comma_and, get_link_to_form, validate_email_address
 from frappe.utils.data import DateTimeLikeObject
 
 from erpnext.accounts.party import set_taxes
@@ -172,9 +172,6 @@ class Lead(SellingController, CRMNote):
 
 			if self.email_id == self.lead_owner:
 				frappe.throw(_("Lead Owner cannot be same as the Lead Email Address"))
-
-			if self.is_new() or not self.image:
-				self.image = has_gravatar(self.email_id)
 
 	def link_to_contact(self):
 		# update contact links
@@ -386,7 +383,7 @@ def get_lead_with_phone_number(number):
 def add_lead_to_prospect(lead: str, prospect: str):
 	prospect = frappe.get_doc("Prospect", prospect)
 	prospect.append("leads", {"lead": lead})
-	prospect.save(ignore_permissions=True)
+	prospect.save()
 
 	carry_forward_communication_and_comments = frappe.db.get_single_value(
 		"CRM Settings", "carry_forward_communication_and_comments"
