@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.utils import flt, nowdate
+from frappe.utils import flt, getdate, nowdate
 
 from erpnext.accounts.doctype.budget.test_budget import make_budget, set_total_expense_zero
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
@@ -17,7 +17,13 @@ class TestBudgetVarianceReport(ERPNextTestSuite):
 		self.company = "_Test Company"
 		self.account = "_Test Account Cost for Goods Sold - _TC"
 		self.cost_center = "_Test Cost Center - _TC"
-		self.fiscal_year = get_fiscal_year(nowdate())[0]
+		# Derive period counts from the fiscal-year dates rather than assuming a
+		# Jan-Dec calendar year, so the assertions hold for any fiscal-year start.
+		fy = get_fiscal_year(nowdate())
+		self.fiscal_year = fy[0]
+		fy_start, fy_end = getdate(fy[1]), getdate(fy[2])
+		self.fy_months = (fy_end.year - fy_start.year) * 12 + (fy_end.month - fy_start.month) + 1
+		self.fy_quarters = (self.fy_months + 2) // 3  # ceil(months / 3)
 
 	def _base_filters(self, **overrides):
 		filters = frappe._dict(
@@ -79,12 +85,12 @@ class TestBudgetVarianceReport(ERPNextTestSuite):
 		# Total budget for the year equals the annual amount regardless of split.
 		self.assertAlmostEqual(flt(row.get("total_budget")), annual_amount, places=2)
 
-		# A calendar fiscal year has 12 months -> 12 equal monthly slices.
-		monthly = annual_amount / 12.0
+		# One budget period per month of the fiscal year, split evenly.
 		budget_period_fields = [
 			f for f in row if f.startswith("budget_") and not f.startswith("budget_against")
 		]
-		self.assertEqual(len(budget_period_fields), 12)
+		self.assertEqual(len(budget_period_fields), self.fy_months)
+		monthly = annual_amount / self.fy_months
 		for field in budget_period_fields:
 			self.assertAlmostEqual(flt(row.get(field)), monthly, places=2)
 
@@ -117,9 +123,9 @@ class TestBudgetVarianceReport(ERPNextTestSuite):
 			if c.get("fieldname", "").startswith("budget_")
 			and not c.get("fieldname", "").startswith("budget_against")
 		]
-		self.assertEqual(len(monthly_budget_cols), 12)
+		self.assertEqual(len(monthly_budget_cols), self.fy_months)
 
-		# Quarterly: a calendar year yields 4 quarters.
+		# Quarterly: the fiscal year's months grouped into quarters.
 		quarterly_cols, quarterly_data, _m2, _c2 = execute(self._base_filters(period="Quarterly"))
 		quarterly_budget_cols = [
 			c
@@ -127,7 +133,7 @@ class TestBudgetVarianceReport(ERPNextTestSuite):
 			if c.get("fieldname", "").startswith("budget_")
 			and not c.get("fieldname", "").startswith("budget_against")
 		]
-		self.assertEqual(len(quarterly_budget_cols), 4)
+		self.assertEqual(len(quarterly_budget_cols), self.fy_quarters)
 
 		# Yearly: a single period.
 		yearly_cols, yearly_data, _m3, _c3 = execute(self._base_filters(period="Yearly"))
@@ -269,7 +275,7 @@ class TestBudgetVarianceReport(ERPNextTestSuite):
 			if c.get("fieldname", "").startswith("budget_")
 			and not c.get("fieldname", "").startswith("budget_against")
 		]
-		self.assertEqual(len(period_fields), 12)
+		self.assertEqual(len(period_fields), self.fy_months)
 		cumulative = [flt(row.get(f)) for f in period_fields]
 
 		# Each period's running budget is >= the previous (monotonically non-decreasing).
@@ -278,7 +284,7 @@ class TestBudgetVarianceReport(ERPNextTestSuite):
 
 		# It genuinely accumulates: starts at one month's budget, ends at the annual
 		# amount (a broken show_cumulative would leave the last column at ~one month).
-		self.assertAlmostEqual(cumulative[0], annual_amount / 12.0, places=2)
+		self.assertAlmostEqual(cumulative[0], annual_amount / self.fy_months, places=2)
 		self.assertAlmostEqual(cumulative[-1], annual_amount, places=2)
 		self.assertGreater(cumulative[-1], cumulative[0])
 
