@@ -1051,6 +1051,37 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(dn2.get("items")[0].billed_amt, 300)
 		self.assertEqual(dn2.per_billed, 100)
 		self.assertEqual(dn2.status, "Completed")
+		
+	@ERPNextTestSuite.change_settings("Selling Settings", {"quantity_based_billing_percentage": 1})
+	
+	def test_dn_billing_status_quantity_based(self):
+		# SO -> DN -> SI (quantity based billing)
+		so = make_sales_order(po_no="12345")
+		dn = create_dn_against_so(so.name, delivered_qty=5)
+
+		self.assertEqual(dn.status, "To Bill")
+		self.assertEqual(dn.per_billed, 0)
+
+		# Partial qty invoice → Partially Billed
+		si1 = make_sales_invoice(dn.name)
+		si1.items[0].qty = 2
+		si1.items[0].rate = 250
+		si1.save()
+		si1.submit()
+
+		dn.load_from_db()
+		self.assertEqual(dn.per_billed, 40)
+		self.assertEqual(dn.status, "Partially Billed")
+
+		# Full qty invoiced → Completed
+		si2 = make_sales_invoice(dn.name)
+		si2.items[0].qty = 3
+		si2.save()
+		si2.submit()
+
+		dn.load_from_db()
+		self.assertEqual(dn.per_billed, 100)
+		self.assertEqual(dn.status, "Completed")
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"delete_linked_ledger_entries": True})
 	def test_sales_invoice_qty_after_return(self):
