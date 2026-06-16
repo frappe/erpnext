@@ -26,7 +26,13 @@ class TestProductionPlanningReport(ERPNextTestSuite):
 	rolls back the DB after every test, so nothing here needs cleanup.
 	"""
 
-	def setUp(self):
+	def _make_fixtures(self):
+		"""Build the manufacturing fixture (FG item + 2 RMs + default BOM) the
+		report needs. Called from the individual tests that require it rather than
+		setUp, so tests that don't (e.g. the empty-result cases) create nothing.
+		The bootstrap has no FG item whose BOM carries the controlled raw-material
+		quantities and source warehouse this report's assertions rely on, so the
+		idempotent create_item/make_bom helpers are used here."""
 		self.fg_item = "_Test PPR FG Item"
 		self.rm_item_1 = "_Test PPR RM 1"
 		self.rm_item_2 = "_Test PPR RM 2"
@@ -89,6 +95,7 @@ class TestProductionPlanningReport(ERPNextTestSuite):
 
 	# -------------------------------------------------------------- work order
 	def test_execute_based_on_work_order(self):
+		self._make_fixtures()
 		wo = make_wo_order_test_record(
 			production_item=self.fg_item,
 			bom_no=self.bom.name,
@@ -119,6 +126,7 @@ class TestProductionPlanningReport(ERPNextTestSuite):
 			self.assertEqual(row.get("production_item"), self.fg_item)
 
 	def test_work_order_raw_materials_gathered(self):
+		self._make_fixtures()
 		wo = make_wo_order_test_record(
 			production_item=self.fg_item,
 			bom_no=self.bom.name,
@@ -144,6 +152,7 @@ class TestProductionPlanningReport(ERPNextTestSuite):
 
 	# ------------------------------------------------------------- sales order
 	def test_execute_based_on_sales_order(self):
+		self._make_fixtures()
 		so = make_sales_order(
 			item_code=self.fg_item,
 			qty=4,
@@ -184,6 +193,7 @@ class TestProductionPlanningReport(ERPNextTestSuite):
 		date-order is the opposite of their amount-order must come back in
 		opposite sequences.
 		"""
+		self._make_fixtures()
 		# SO A: earlier delivery (today), lower amount (2 * 100 = 200).
 		so_early_cheap = make_sales_order(
 			item_code=self.fg_item,
@@ -227,6 +237,7 @@ class TestProductionPlanningReport(ERPNextTestSuite):
 		)
 
 	def test_total_amount_column_for_sales_order(self):
+		self._make_fixtures()
 		so = make_sales_order(
 			item_code=self.fg_item,
 			qty=2,
@@ -250,6 +261,7 @@ class TestProductionPlanningReport(ERPNextTestSuite):
 
 	# -------------------------------------------------------- material request
 	def test_execute_based_on_material_request(self):
+		self._make_fixtures()
 		mr = make_material_request(
 			item_code=self.fg_item,
 			material_request_type="Manufacture",
@@ -302,6 +314,7 @@ class TestProductionPlanningReport(ERPNextTestSuite):
 		self.assertEqual(data, [])
 
 	def test_company_with_no_orders_returns_empty_data(self):
+		self._make_fixtures()
 		# Use a valid-but-unused docname filter under a company that has no
 		# matching open orders for the given window.
 		so = make_sales_order(
