@@ -747,6 +747,18 @@ cur_frm.cscript.expense_account = function (doc, cdt, cdn) {
 };
 
 frappe.ui.form.on("Sales Invoice", {
+	before_submit(frm) {
+		frm._submitting = true;
+	},
+
+	validate(frm) {
+		if (frm._submitting) {
+			frm._submitting = false;
+			return;
+		}
+		return erpnext.utils.confirm_budget_before_save(frm);
+	},
+
 	setup: function (frm) {
 		frm.add_fetch("customer", "tax_id", "tax_id");
 		frm.add_fetch("payment_term", "invoice_portion", "invoice_portion");

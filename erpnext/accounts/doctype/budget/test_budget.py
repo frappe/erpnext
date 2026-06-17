@@ -13,6 +13,7 @@ from erpnext.accounts.doctype.budget.budget import (
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.controllers.budget_controller import BudgetValidation
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -597,6 +598,102 @@ class TestBudget(ERPNextTestSuite):
 		with self.assertRaises(frappe.ValidationError):
 			new_budget.insert()
 
+	def test_budget_validation_default_mode_unchanged(self):
+		"""Default mode must still throw on Stop, msgprint on Warn, and stay silent on Ignore."""
+		for action, expect_message in [("Stop", None), ("Warn", True), ("Ignore", False)]:
+			set_total_expense_zero(nowdate(), "cost_center")
+			budget = make_budget(
+				applicable_on_purchase_order=1,
+				action_if_annual_budget_exceeded_on_po=action,
+				action_if_accumulated_monthly_budget_exceeded_on_po=action,
+				budget_against="Cost Center",
+				do_not_save=False,
+				submit_budget=True,
+			)
+			accumulated_limit = get_accumulated_monthly_budget(budget.name, nowdate())
+			po = create_purchase_order(
+				transaction_date=nowdate(), qty=1, rate=accumulated_limit + 1, do_not_submit=True
+			)
+			po.set_missing_values()
+
+			if action == "Stop":
+				self.assertRaises(BudgetError, po.submit)
+			else:
+				frappe.local.message_log = []
+				po.submit()
+				self.assertEqual(po.docstatus, 1)
+				logged = "Budget Exceeded" in frappe.as_json(frappe.local.message_log)
+				self.assertEqual(logged, expect_message)
+				po.cancel()
+
+			budget.load_from_db()
+			budget.cancel()
+
+	def test_budget_validation_non_throwing_mode_returns_exceptions(self):
+		"""raise_=False must return the exceeded budgets with their resolved action, never throw or msgprint."""
+		for action in ("Stop", "Warn", "Ignore"):
+			budget, consuming_po, po = make_overbooked_po_budget(action)
+
+			frappe.local.message_log = []
+			exceeded = BudgetValidation(doc=po).validate(raise_=False)
+
+			self.assertIsInstance(exceeded, list)
+			self.assertNotIn("Budget Exceeded", frappe.as_json(frappe.local.message_log))
+			self.assertIn(action, [d.get("action") for d in exceeded])
+			self.assertTrue(all(d.get("message") for d in exceeded))
+			self.assertTrue(any(d.get("account") == self.account for d in exceeded))
+
+			consuming_po.cancel()
+			budget.load_from_db()
+			budget.cancel()
+
+	def test_budget_exceptions_pure_gl_map(self):
+		"""Journal Entry (pure get_budget_gl_map) reports the overrun without persisting any GL."""
+		set_total_expense_zero(nowdate(), "cost_center")
+		budget = make_budget(budget_against="Cost Center", do_not_save=False, submit_budget=True)
+		frappe.db.set_value("Budget", budget.name, "action_if_accumulated_monthly_budget_exceeded", "Stop")
+
+		accumulated_limit = get_accumulated_monthly_budget(budget.name, nowdate())
+		jv = make_journal_entry(
+			"_Test Account Cost for Goods Sold - _TC",
+			"_Test Bank - _TC",
+			accumulated_limit + 1,
+			"_Test Cost Center - _TC",
+			posting_date=nowdate(),
+		)
+
+		exceeded = jv.budget_exceptions()
+		self.assertTrue(any(d.get("action") == "Stop" for d in exceeded))
+		self.assertFalse(
+			frappe.db.exists("GL Entry", {"voucher_type": "Journal Entry", "voucher_no": jv.name})
+		)
+
+		budget.load_from_db()
+		budget.cancel()
+
+	def test_budget_gl_map_dry_run_persists_nothing(self):
+		"""Stock-voucher get_budget_gl_map builds GL via an in-memory dry run and rolls it back."""
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		se = make_stock_entry(
+			item_code="_Test Item",
+			qty=1,
+			rate=100,
+			to_warehouse="Stores - TCP1",
+			company="_Test Company with perpetual inventory",
+			do_not_save=True,
+		)
+		se.save()
+
+		gl_map = se.get_budget_gl_map()
+
+		self.assertTrue(gl_map)
+		self.assertFalse(frappe.flags.get("in_budget_preview"))
+		self.assertFalse(frappe.db.exists("GL Entry", {"voucher_type": "Stock Entry", "voucher_no": se.name}))
+		self.assertFalse(
+			frappe.db.exists("Stock Ledger Entry", {"voucher_type": "Stock Entry", "voucher_no": se.name})
+		)
+
 
 def set_total_expense_zero(posting_date, budget_against_field=None, budget_against_CC=None):
 	if budget_against_field == "project":
@@ -741,3 +838,36 @@ def make_budget(**args):
 		budget.submit()
 
 	return budget
+
+
+def make_overbooked_po_budget(po_action):
+	"""Over-book a PO budget with a submitted consuming PO, then set the monthly PO action.
+
+	The exceed is real from existing submitted data, so a fresh draft PO trips it regardless
+	of how the non-throwing path counts the current document.
+	"""
+	set_total_expense_zero(nowdate(), "cost_center")
+	budget = make_budget(
+		applicable_on_purchase_order=1,
+		action_if_annual_budget_exceeded_on_po="Ignore",
+		action_if_accumulated_monthly_budget_exceeded_on_po="Ignore",
+		budget_against="Cost Center",
+		do_not_save=False,
+		submit_budget=True,
+	)
+
+	accumulated_limit = get_accumulated_monthly_budget(budget.name, nowdate())
+	consuming_po = create_purchase_order(
+		transaction_date=nowdate(), qty=1, rate=accumulated_limit + 1, do_not_submit=True
+	)
+	consuming_po.set_missing_values()
+	consuming_po.submit()
+
+	frappe.db.set_value(
+		"Budget", budget.name, "action_if_accumulated_monthly_budget_exceeded_on_po", po_action
+	)
+
+	po = create_purchase_order(transaction_date=nowdate(), qty=1, rate=10, do_not_submit=True)
+	po.set_missing_values()
+
+	return budget, consuming_po, po

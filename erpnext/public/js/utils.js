@@ -1134,6 +1134,26 @@ erpnext.utils.map_current_doc = function (opts) {
 	}
 };
 
+erpnext.utils.confirm_budget_before_save = async function (frm) {
+	const r = await frm.call({ doc: frm.doc, method: "budget_exceptions" }).catch(() => null);
+	if (!r || !r.message || !r.message.length) {
+		return;
+	}
+
+	const messages = r.message.map((d) => d.message).join("<br>");
+	const proceed = await new Promise((resolve) => {
+		frappe.confirm(
+			__("Budget will be exceeded:<br>{0}<br><br>Do you still want to save?", [messages]),
+			() => resolve(true),
+			() => resolve(false)
+		);
+	});
+
+	if (!proceed) {
+		frappe.validated = false;
+	}
+};
+
 frappe.form.link_formatters["Item"] = function (value, doc, df) {
 	return add_link_title(value, doc, df, "item_name");
 };

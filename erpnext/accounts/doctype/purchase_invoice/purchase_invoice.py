@@ -712,6 +712,10 @@ class PurchaseInvoice(BuyingController):
 
 		return PurchaseInvoiceGLComposer(self).compose(inventory_account_map)
 
+	def get_budget_gl_map(self) -> list:
+		# Expense GL comes from item expense lines (not SLE-dependent), so no dry run needed.
+		return self.get_gl_entries()
+
 	def check_asset_cwip_enabled(self):
 		# Check if there exists any item with cwip accounting enabled in it's asset category
 		for item in self.get("items"):

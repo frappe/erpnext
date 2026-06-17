@@ -859,6 +859,9 @@ class JournalEntry(AccountsController):
 
 		return JournalEntryGLComposer(self).compose()
 
+	def get_budget_gl_map(self) -> list:
+		return self.build_gl_map()
+
 	def make_gl_entries(self, cancel: int = 0, adv_adj: int = 0) -> None:
 		from erpnext.accounts.general_ledger import make_gl_entries
 

@@ -6,6 +6,18 @@ frappe.provide("erpnext.buying");
 erpnext.landed_cost_taxes_and_charges.setup_triggers("Subcontracting Receipt");
 
 frappe.ui.form.on("Subcontracting Receipt", {
+	before_submit(frm) {
+		frm._submitting = true;
+	},
+
+	validate(frm) {
+		if (frm._submitting) {
+			frm._submitting = false;
+			return;
+		}
+		return erpnext.utils.confirm_budget_before_save(frm);
+	},
+
 	setup: (frm) => {
 		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
 		frm.get_field("supplied_items").grid.cannot_add_rows = true;

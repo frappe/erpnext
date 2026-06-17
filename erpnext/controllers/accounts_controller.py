@@ -1017,6 +1017,28 @@ class AccountsController(TransactionBase):
 		).run()
 
 	@frappe.whitelist()
+	def budget_exceptions(self) -> list[frappe._dict]:
+		self.check_permission("read")
+		if frappe.get_single_value("Accounts Settings", "use_legacy_budget_controller"):
+			return []
+
+		# Cheap guard: avoid the (possibly dry-run) GL build when no budget can apply.
+		if not frappe.db.exists("Budget", {"company": self.company, "docstatus": 1}):
+			return []
+
+		gl_map = self.get_budget_gl_map()
+		if not gl_map:
+			return []
+
+		from erpnext.controllers.budget_controller import BudgetValidation
+
+		exceeded = BudgetValidation(gl_map=gl_map).validate(raise_=False)
+		return [e for e in exceeded if e.get("action") in ("Stop", "Warn")]
+
+	def get_budget_gl_map(self) -> list:
+		return self.get_gl_entries()
+
+	@frappe.whitelist()
 	def apply_shipping_rule(self):
 		if self.shipping_rule:
 			shipping_rule = frappe.get_doc("Shipping Rule", self.shipping_rule)

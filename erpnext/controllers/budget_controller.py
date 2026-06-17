@@ -4,7 +4,7 @@ import frappe
 from frappe import _, qb
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import IfNull, Sum
-from frappe.utils import fmt_money
+from frappe.utils import flt, fmt_money
 
 from erpnext.accounts.doctype.budget.budget import BudgetError, get_accumulated_monthly_budget
 from erpnext.accounts.utils import get_fiscal_year
@@ -34,9 +34,12 @@ class BudgetValidation:
 			"Company", self.company, "exception_budget_approver_role"
 		)
 
-	def validate(self):
+	def validate(self, raise_: bool = True) -> list[frappe._dict]:
+		self.raise_ = raise_
+		self.exceptions: list[frappe._dict] = []
 		self.build_validation_map()
 		self.validate_for_overbooking()
+		return self.exceptions
 
 	def build_validation_map(self):
 		self.build_budget_keys()
@@ -84,6 +87,11 @@ class BudgetValidation:
 		for key, v in self.to_validate.items():
 			self.get_ordered_amount(key)
 			self.get_requested_amount(key)
+
+			# At submit the document is already counted in the queries above; on the
+			# save-time (non-throwing) check it is still a draft, so add it explicitly.
+			if not self.raise_:
+				self.set_current_amount(v)
 
 			# Pre-emptive validation before hitting ledger
 			self.handle_actions(key, v)
@@ -285,13 +293,24 @@ class BudgetValidation:
 			if actual_expense := query.run(as_dict=True):
 				self.to_validate[key].actual_expense = actual_expense[0].balance or 0
 
+	def set_current_amount(self, v_map) -> None:
+		amount = sum(flt(itm.amount) for itm in v_map.get("items_to_process", []))
+		if self.document_type == "Purchase Order":
+			v_map.current_ordered_amount = amount
+		elif self.document_type == "Material Request":
+			v_map.current_requested_amount = amount
+
 	def stop(self, msg):
 		frappe.throw(msg, BudgetError, title=_("Budget Exceeded"))
 
 	def warn(self, msg):
 		frappe.msgprint(msg, _("Budget Exceeded"))
 
-	def execute_action(self, action, msg):
+	def execute_action(self, action: str, msg: str, account: str | None = None) -> None:
+		if not self.raise_:
+			self.exceptions.append(frappe._dict({"account": account, "message": msg, "action": action}))
+			return
+
 		if self.exception_approver_role and self.exception_approver_role in frappe.get_roles(
 			frappe.session.user
 		):
@@ -320,7 +339,7 @@ class BudgetValidation:
 					frappe.bold(fmt_money(budget_amt, currency=currency)),
 					frappe.bold(fmt_money(annual_diff, currency=currency)),
 				)
-				self.execute_action(config.action_for_annual, _msg)
+				self.execute_action(config.action_for_annual, _msg, key[2])
 
 			monthly_diff = (existing_amt + current_amt) - acc_monthly_budget
 			if monthly_diff > 0:
@@ -333,7 +352,7 @@ class BudgetValidation:
 					frappe.bold(fmt_money(acc_monthly_budget, currency=currency)),
 					frappe.bold(fmt_money(monthly_diff, currency=currency)),
 				)
-				self.execute_action(config.action_for_monthly, _msg)
+				self.execute_action(config.action_for_monthly, _msg, key[2])
 
 	def handle_purchase_order_overlimit(self, key, v_map):
 		self.handle_individual_doctype_action(
@@ -434,7 +453,7 @@ class BudgetValidation:
 			)
 
 			self.execute_action(
-				v_map.budget_doc.action_if_accumulated_monthly_exceeded_on_cumulative_expense, _msg
+				v_map.budget_doc.action_if_accumulated_monthly_exceeded_on_cumulative_expense, _msg, key[2]
 			)
 
 	def handle_cumulative_overlimit_for_annual(self, key, v_map):
@@ -456,4 +475,6 @@ class BudgetValidation:
 				self.budget_applicable_for(v_map, current_amt),
 				frappe.bold(fmt_money(total_diff, currency=currency)),
 			)
-			self.execute_action(v_map.budget_doc.action_if_annual_exceeded_on_cumulative_expense, _msg)
+			self.execute_action(
+				v_map.budget_doc.action_if_annual_exceeded_on_cumulative_expense, _msg, key[2]
+			)

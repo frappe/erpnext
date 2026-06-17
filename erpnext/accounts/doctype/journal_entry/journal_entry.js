@@ -5,6 +5,18 @@ frappe.provide("erpnext.accounts");
 frappe.provide("erpnext.journal_entry");
 
 frappe.ui.form.on("Journal Entry", {
+	before_submit(frm) {
+		frm._submitting = true;
+	},
+
+	validate(frm) {
+		if (frm._submitting) {
+			frm._submitting = false;
+			return;
+		}
+		return erpnext.utils.confirm_budget_before_save(frm);
+	},
+
 	setup: function (frm) {
 		frm.add_fetch("bank_account", "account", "account");
 		frm.ignore_doctypes_on_cancel_all = [

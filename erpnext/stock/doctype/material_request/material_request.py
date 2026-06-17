@@ -228,6 +228,17 @@ class MaterialRequest(BuyingController):
 			items = ", ".join([d.item_name for d in self.items][:3])
 			self.title = _("{0} Request for {1}").format(_(self.material_request_type), items)[:100]
 
+	@frappe.whitelist()
+	def budget_exceptions(self) -> list:
+		self.check_permission("read")
+		if frappe.get_single_value("Accounts Settings", "use_legacy_budget_controller"):
+			return []
+
+		from erpnext.controllers.budget_controller import BudgetValidation
+
+		exceeded = BudgetValidation(doc=self).validate(raise_=False)
+		return [e for e in exceeded if e.get("action") in ("Stop", "Warn")]
+
 	def on_submit(self):
 		self.update_requested_qty_in_production_plan()
 		self.update_requested_qty()

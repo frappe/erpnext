@@ -10,6 +10,18 @@ erpnext.accounts.taxes.setup_tax_validations("Purchase Receipt");
 erpnext.buying.setup_buying_controller();
 
 frappe.ui.form.on("Purchase Receipt", {
+	before_submit(frm) {
+		frm._submitting = true;
+	},
+
+	validate(frm) {
+		if (frm._submitting) {
+			frm._submitting = false;
+			return;
+		}
+		return erpnext.utils.confirm_budget_before_save(frm);
+	},
+
 	setup: (frm) => {
 		frm.custom_make_buttons = {
 			"Stock Entry": "Return",

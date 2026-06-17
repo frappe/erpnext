@@ -34,6 +34,17 @@ from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.services.internal_transfer import StockInternalTransferService
 from erpnext.stock.stock_ledger import get_items_to_be_repost
 
+# Vouchers whose budget-relevant GL is derived from Stock Ledger Entries and so needs an
+# in-memory dry run (materialise SLEs, compose GL, read back, roll back) for the save-time check.
+STOCK_VOUCHERS = (
+	"Purchase Receipt",
+	"Delivery Note",
+	"Stock Entry",
+	"Stock Reconciliation",
+	"Subcontracting Receipt",
+	"Asset Capitalization",
+)
+
 
 class StockController(AccountsController):
 	def validate(self):
@@ -227,6 +238,40 @@ class StockController(AccountsController):
 		return BaseStockGLComposer(self).compose(
 			inventory_account_map, default_expense_account, default_cost_center
 		)
+
+	def get_budget_gl_map(self) -> list:
+		"""Stock-voucher GL is computed from persisted SLEs, so build it via an in-memory dry
+		run: submit, materialise SLEs + GL, read them back, then roll back to the savepoint."""
+		from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+			get_accounting_dimensions,
+		)
+
+		fields = [
+			"account",
+			"debit",
+			"credit",
+			"company",
+			"posting_date",
+			"cost_center",
+			"project",
+			*get_accounting_dimensions(),
+		]
+		frappe.flags.in_budget_preview = True
+		frappe.db.savepoint("budget_preview")
+		try:
+			self.docstatus = 1
+			if self.get("update_stock") or self.doctype in STOCK_VOUCHERS:
+				self.update_stock_ledger()
+			self.make_gl_entries()
+			return frappe.get_all(
+				"GL Entry",
+				filters={"voucher_type": self.doctype, "voucher_no": self.name},
+				fields=fields,
+			)
+		finally:
+			frappe.db.rollback(save_point="budget_preview")
+			self.docstatus = 0
+			frappe.flags.in_budget_preview = False
 
 	def get_items_and_warehouses(self) -> tuple[list[str], list[str]]:
 		from erpnext.stock.services.stock_ledger_service import StockLedgerService

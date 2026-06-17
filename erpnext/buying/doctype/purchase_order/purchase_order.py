@@ -368,6 +368,17 @@ class PurchaseOrder(BuyingController):
 	def update_status(self, status):
 		StatusService(self).update_status(status)
 
+	@frappe.whitelist()
+	def budget_exceptions(self) -> list:
+		self.check_permission("read")
+		if frappe.get_single_value("Accounts Settings", "use_legacy_budget_controller"):
+			return []
+
+		from erpnext.controllers.budget_controller import BudgetValidation
+
+		exceeded = BudgetValidation(doc=self).validate(raise_=False)
+		return [e for e in exceeded if e.get("action") in ("Stop", "Warn")]
+
 	def on_submit(self):
 		super().on_submit()
 

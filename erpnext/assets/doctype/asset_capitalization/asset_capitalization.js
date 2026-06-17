@@ -3,6 +3,20 @@
 
 frappe.provide("erpnext.assets");
 
+frappe.ui.form.on("Asset Capitalization", {
+	before_submit(frm) {
+		frm._submitting = true;
+	},
+
+	validate(frm) {
+		if (frm._submitting) {
+			frm._submitting = false;
+			return;
+		}
+		return erpnext.utils.confirm_budget_before_save(frm);
+	},
+});
+
 erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.stock.StockController {
 	setup() {
 		this.frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle", "Asset Movement"];

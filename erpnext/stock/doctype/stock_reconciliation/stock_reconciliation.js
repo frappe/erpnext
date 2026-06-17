@@ -5,6 +5,18 @@ frappe.provide("erpnext.stock");
 frappe.provide("erpnext.accounts.dimensions");
 
 frappe.ui.form.on("Stock Reconciliation", {
+	before_submit(frm) {
+		frm._submitting = true;
+	},
+
+	validate(frm) {
+		if (frm._submitting) {
+			frm._submitting = false;
+			return;
+		}
+		return erpnext.utils.confirm_budget_before_save(frm);
+	},
+
 	setup(frm) {
 		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
 		frm.barcode_scanner = new erpnext.utils.BarcodeScanner({
