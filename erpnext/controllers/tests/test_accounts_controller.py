@@ -864,7 +864,7 @@ class TestAccountsController(ERPNextTestSuite):
 
 		# Create a Sales Invoice
 		sinv = frappe.new_doc("Sales Invoice")
-		sinv.customer = self.customer
+		sinv.customer = "_Test Customer"
 		sinv.company = self.company
 		sinv.currency = "INR"
 		sinv.taxes_and_charges = "_Test Tax - _TC"
@@ -880,7 +880,7 @@ class TestAccountsController(ERPNextTestSuite):
 	def test_19_fetch_taxes_based_on_item_tax_template_template(self):
 		# Create a Sales Invoice
 		sinv = frappe.new_doc("Sales Invoice")
-		sinv.customer = self.customer
+		sinv.customer = "_Test Customer"
 		sinv.company = self.company
 		sinv.currency = "INR"
 		sinv.append(
