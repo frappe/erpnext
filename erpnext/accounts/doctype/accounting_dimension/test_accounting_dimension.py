@@ -51,6 +51,23 @@ class TestAccountingDimension(ERPNextTestSuite):
 		self.assertEqual(gle.get("department"), "_Test Department - _TC")
 		self.assertEqual(gle1.get("department"), "_Test Department - _TC")
 
+	def test_cannot_create_dimension_when_feature_disabled(self):
+		frappe.db.set_single_value("Accounts Settings", "enable_accounting_dimensions", 0)
+		try:
+			dim = frappe.new_doc("Accounting Dimension")
+			dim.document_type = "Branch"
+			self.assertRaises(frappe.ValidationError, dim.insert)
+		finally:
+			frappe.db.set_single_value("Accounts Settings", "enable_accounting_dimensions", 1)
+
+	def test_can_create_dimension_when_feature_enabled(self):
+		frappe.db.set_single_value("Accounts Settings", "enable_accounting_dimensions", 1)
+		dim = frappe.new_doc("Accounting Dimension")
+		dim.document_type = "Branch"
+		# insert should not raise
+		dim.insert(ignore_permissions=True)
+		frappe.delete_doc("Accounting Dimension", dim.name, force=True)
+
 	def test_mandatory(self):
 		location = frappe.get_doc("Accounting Dimension", "Location")
 		location.dimension_defaults[0].mandatory_for_bs = True

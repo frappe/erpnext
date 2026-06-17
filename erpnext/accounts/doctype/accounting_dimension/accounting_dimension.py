@@ -39,12 +39,22 @@ class AccountingDimension(Document):
 
 	def before_insert(self):
 		self.set_fieldname_and_label()
+		self.validate_accounting_dimensions_enabled()
 
 	def validate(self):
 		self.validate_doctype()
 		validate_column_name(self.fieldname)
 		self.validate_fieldname_conflict()
 		self.validate_dimension_defaults()
+
+	def validate_accounting_dimensions_enabled(self):
+		if not frappe.db.get_single_value("Accounts Settings", "enable_accounting_dimensions"):
+			frappe.throw(
+				_("Please enable {0} in {1} before creating an Accounting Dimension.").format(
+					frappe.bold(_("Enable Accounting Dimensions")),
+					frappe.utils.get_link_to_form("Accounts Settings", "Accounts Settings"),
+				)
+			)
 
 	def validate_doctype(self):
 		if self.document_type in (
