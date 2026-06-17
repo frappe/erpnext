@@ -55,12 +55,6 @@ frappe.query_reports["Purchase Person-wise Transaction Summary"] = {
 			options: "Supplier",
 		},
 		{
-			fieldname: "territory",
-			label: __("Territory"),
-			fieldtype: "Link",
-			options: "Territory",
-		},
-		{
 			fieldname: "show_return_entries",
 			label: __("Show Return Entries"),
 			fieldtype: "Check",

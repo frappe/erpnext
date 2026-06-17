@@ -41,11 +41,5 @@ frappe.query_reports["Purchase Person Commission Summary"] = {
 			fieldtype: "Link",
 			options: "Supplier",
 		},
-		{
-			fieldname: "territory",
-			label: __("Territory"),
-			fieldtype: "Link",
-			options: "Territory",
-		},
 	],
 };

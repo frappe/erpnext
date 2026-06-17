@@ -28,7 +28,6 @@ def execute(filters=None):
 				[
 					d.name,
 					d.supplier,
-					d.territory,
 					d.warehouse,
 					d.posting_date,
 					d.item_code,
@@ -74,13 +73,6 @@ def get_columns(filters):
 			"label": _("Supplier"),
 			"options": "Supplier",
 			"fieldname": "supplier",
-			"fieldtype": "Link",
-			"width": 140,
-		},
-		{
-			"label": _("Territory"),
-			"options": "Territory",
-			"fieldname": "territory",
 			"fieldtype": "Link",
 			"width": 140,
 		},
@@ -192,7 +184,6 @@ def get_entries(filters):
 		.select(
 			dt.name,
 			dt.supplier,
-			dt.territory,
 			dt[date_field].as_("posting_date"),
 			dt_item.item_code,
 			pt.purchase_person,
@@ -215,7 +206,7 @@ def get_entries(filters):
 def get_conditions(dt, pt, filters, date_field):
 	conditions = []
 
-	for field in ["company", "supplier", "territory"]:
+	for field in ["company", "supplier"]:
 		if filters.get(field):
 			conditions.append(dt[field].eq(filters[field]))
 

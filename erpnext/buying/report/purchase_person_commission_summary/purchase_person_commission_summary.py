@@ -18,7 +18,6 @@ def execute(filters=None):
 			[
 				d.name,
 				d.supplier,
-				d.territory,
 				d.posting_date,
 				d.base_net_amount,
 				d.purchase_person,
@@ -54,13 +53,6 @@ def get_columns(filters):
 			"fieldname": "supplier",
 			"fieldtype": "Link",
 			"width": 140,
-		},
-		{
-			"label": _("Territory"),
-			"options": "Territory",
-			"fieldname": "territory",
-			"fieldtype": "Link",
-			"width": 100,
 		},
 		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 100},
 		{"label": _("Amount"), "fieldname": "amount", "fieldtype": "Currency", "width": 120},
@@ -106,7 +98,6 @@ def get_entries(filters):
 		.select(
 			dt.name,
 			dt.supplier,
-			dt.territory,
 			date_field.as_("posting_date"),
 			dt.base_net_total.as_("base_net_amount"),
 			pt.commission_rate,
@@ -133,7 +124,7 @@ def get_conditions(dt, pt, filters, date_field):
 	elif to_dt:
 		conditions.append(date_field.lte(to_dt))
 
-	for field in ["company", "supplier", "territory"]:
+	for field in ["company", "supplier"]:
 		if filters.get(field):
 			conditions.append(dt[field].eq(filters.get(field)))
 
