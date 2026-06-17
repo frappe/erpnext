@@ -248,6 +248,13 @@ def get_preset_records(country=None):
 			"is_group": 1,
 			"parent_sales_person": "",
 		},
+		# Purchase Person
+		{
+			"doctype": "Purchase Person",
+			"purchase_person_name": _("Purchase Team"),
+			"is_group": 1,
+			"parent_purchase_person": "",
+		},
 		# Mode of Payment
 		{
 			"doctype": "Mode of Payment",
