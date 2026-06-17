@@ -14,71 +14,17 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestGrossProfit(ERPNextTestSuite):
 	def setUp(self):
-		self.create_company()
-		self.create_item()
-		self.create_bundle()
-		self.create_customer()
-
-	def create_company(self):
-		company_name = "_Test Gross Profit"
-		abbr = "_GP"
-		if frappe.db.exists("Company", company_name):
-			company = frappe.get_doc("Company", company_name)
-		else:
-			company = frappe.get_doc(
-				{
-					"doctype": "Company",
-					"company_name": company_name,
-					"country": "India",
-					"default_currency": "INR",
-					"create_chart_of_accounts_based_on": "Standard Template",
-					"chart_of_accounts": "Standard",
-				}
-			)
-			company = company.save()
-
-		self.company = company.name
-		self.cost_center = company.cost_center
-		self.warehouse = "Stores - " + abbr
-		self.finished_warehouse = "Finished Goods - " + abbr
-		self.income_account = "Sales - " + abbr
-		self.expense_account = "Cost of Goods Sold - " + abbr
-		self.debit_to = "Debtors - " + abbr
-		self.creditors = "Creditors - " + abbr
-
-	def create_item(self):
-		item = create_item(
-			item_code="_Test GP Item", is_stock_item=1, company=self.company, warehouse=self.warehouse
-		)
-		self.item = item if isinstance(item, str) else item.item_code
-
-	def create_bundle(self):
-		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
-
-		item2 = create_item(
-			item_code="_Test GP Item 2", is_stock_item=1, company=self.company, warehouse=self.warehouse
-		)
-		self.item2 = item2 if isinstance(item2, str) else item2.item_code
-
-		# This will be parent item
-		bundle = create_item(
-			item_code="_Test GP bundle", is_stock_item=0, company=self.company, warehouse=self.warehouse
-		)
-		self.bundle = bundle if isinstance(bundle, str) else bundle.item_code
-
-		# Create Product Bundle
-		self.product_bundle = make_product_bundle(parent=self.bundle, items=[self.item, self.item2])
-
-	def create_customer(self):
-		name = "_Test GP Customer"
-		if frappe.db.exists("Customer", name):
-			self.customer = name
-		else:
-			customer = frappe.new_doc("Customer")
-			customer.customer_name = name
-			customer.type = "Individual"
-			customer.save()
-			self.customer = customer.name
+		self.company = "_Test Company"
+		self.cost_center = "Main - _TC"
+		self.warehouse = "Stores - _TC"
+		self.finished_warehouse = "Finished Goods - _TC"
+		self.income_account = "Sales - _TC"
+		self.expense_account = "Cost of Goods Sold - _TC"
+		self.debit_to = "Debtors - _TC"
+		self.item = "_Test Item"
+		self.item2 = "_Test Item Home Desktop 100"
+		self.bundle = "_Test Product Bundle Item"
+		self.customer = "_Test Customer"
 
 	def create_sales_invoice(
 		self, qty=1, rate=100, posting_date=None, do_not_save=False, do_not_submit=False
@@ -212,7 +158,7 @@ class TestGrossProfit(ERPNextTestSuite):
 			"posting_date": frappe.utils.datetime.date.fromisoformat(nowdate()),
 			"item_code": self.item,
 			"item_name": self.item,
-			"warehouse": "Stores - _GP",
+			"warehouse": "Stores - _TC",
 			"qty": 1.0,
 			"avg._selling_rate": 100.0,
 			"valuation_rate": 150.0,
@@ -241,7 +187,7 @@ class TestGrossProfit(ERPNextTestSuite):
 			"posting_date": frappe.utils.datetime.date.fromisoformat(nowdate()),
 			"item_code": self.item,
 			"item_name": self.item,
-			"warehouse": "Stores - _GP",
+			"warehouse": "Stores - _TC",
 			"qty": 1.0,
 			"avg._selling_rate": 100.0,
 			"valuation_rate": 100.0,
@@ -373,7 +319,7 @@ class TestGrossProfit(ERPNextTestSuite):
 			"posting_date": frappe.utils.datetime.date.fromisoformat(nowdate()),
 			"item_code": self.item,
 			"item_name": self.item,
-			"warehouse": "Stores - _GP",
+			"warehouse": "Stores - _TC",
 			"qty": 4.0,
 			"avg._selling_rate": 100.0,
 			"valuation_rate": 125.0,
@@ -414,7 +360,7 @@ class TestGrossProfit(ERPNextTestSuite):
 			"posting_date": frappe.utils.datetime.date.fromisoformat(nowdate()),
 			"item_code": self.item,
 			"item_name": self.item,
-			"warehouse": "Stores - _GP",
+			"warehouse": "Stores - _TC",
 			"qty": 0.0,
 			"avg._selling_rate": 100,
 			"valuation_rate": 0.0,
@@ -460,7 +406,7 @@ class TestGrossProfit(ERPNextTestSuite):
 			"posting_date": frappe.utils.datetime.date.fromisoformat(nowdate()),
 			"item_code": self.item,
 			"item_name": self.item,
-			"warehouse": "Stores - _GP",
+			"warehouse": "Stores - _TC",
 			"qty": -1.0,
 			"avg._selling_rate": 100.0,
 			"valuation_rate": 0.0,
@@ -553,7 +499,7 @@ class TestGrossProfit(ERPNextTestSuite):
 			"posting_date": frappe.utils.datetime.date.fromisoformat(nowdate()),
 			"item_code": self.item,
 			"item_name": self.item,
-			"warehouse": "Stores - _GP",
+			"warehouse": "Stores - _TC",
 			"qty": 4.0,
 			"avg._selling_rate": 800.0,
 			"valuation_rate": 700.0,

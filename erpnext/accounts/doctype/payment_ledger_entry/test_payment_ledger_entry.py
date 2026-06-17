@@ -10,75 +10,23 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_ent
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestPaymentLedgerEntry(ERPNextTestSuite):
 	def setUp(self):
 		self.ple = qb.DocType("Payment Ledger Entry")
-		self.create_company()
-		self.create_item()
-		self.create_customer()
-
-	def create_company(self):
-		company_name = "_Test Payment Ledger"
-		company = None
-		if frappe.db.exists("Company", company_name):
-			company = frappe.get_doc("Company", company_name)
-		else:
-			company = frappe.get_doc(
-				{
-					"doctype": "Company",
-					"company_name": company_name,
-					"country": "India",
-					"default_currency": "INR",
-					"create_chart_of_accounts_based_on": "Standard Template",
-					"chart_of_accounts": "Standard",
-				}
-			)
-			company = company.save()
-
-		self.company = company.name
-		self.cost_center = company.cost_center
-		self.warehouse = "All Warehouses - _PL"
-		self.income_account = "Sales - _PL"
-		self.expense_account = "Cost of Goods Sold - _PL"
-		self.debit_to = "Debtors - _PL"
-		self.creditors = "Creditors - _PL"
-
-		# create bank account
-		if frappe.db.exists("Account", "HDFC - _PL"):
-			self.bank = "HDFC - _PL"
-		else:
-			bank_acc = frappe.get_doc(
-				{
-					"doctype": "Account",
-					"account_name": "HDFC",
-					"parent_account": "Bank Accounts - _PL",
-					"company": self.company,
-				}
-			)
-			bank_acc.save()
-			self.bank = bank_acc.name
-
-	def create_item(self):
-		item_name = "_Test PL Item"
-		item = create_item(
-			item_code=item_name, is_stock_item=0, company=self.company, warehouse=self.warehouse
-		)
-		self.item = item if isinstance(item, str) else item.item_code
-
-	def create_customer(self):
-		name = "_Test PL Customer"
-		if frappe.db.exists("Customer", name):
-			self.customer = name
-		else:
-			customer = frappe.new_doc("Customer")
-			customer.customer_name = name
-			customer.type = "Individual"
-			customer.save()
-			self.customer = customer.name
+		self.company = "_Test Company"
+		self.cost_center = "Main - _TC"
+		self.warehouse = "Stores - _TC"
+		self.income_account = "Sales - _TC"
+		self.expense_account = "Cost of Goods Sold - _TC"
+		self.debit_to = "Debtors - _TC"
+		self.creditors = "Creditors - _TC"
+		self.bank = "Cash - _TC"
+		self.item = "_Test Item"
+		self.customer = "_Test Customer"
+		self.clear_old_entries()
 
 	def create_sales_invoice(
 		self, qty=1, rate=100, posting_date=None, do_not_save=False, do_not_submit=False

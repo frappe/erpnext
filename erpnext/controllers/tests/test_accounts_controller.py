@@ -18,37 +18,7 @@ from erpnext.buying.doctype.purchase_order.test_purchase_order import (
 	prepare_data_for_internal_transfer,
 )
 from erpnext.projects.doctype.project.test_project import make_project
-from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.tests.utils import ERPNextTestSuite
-
-
-def make_customer(customer_name, currency=None):
-	if not frappe.db.exists("Customer", customer_name):
-		customer = frappe.new_doc("Customer")
-		customer.customer_name = customer_name
-		customer.customer_type = "Individual"
-
-		if currency:
-			customer.default_currency = currency
-		customer.save()
-		return customer.name
-	else:
-		return customer_name
-
-
-def make_supplier(supplier_name, currency=None):
-	if not frappe.db.exists("Supplier", supplier_name):
-		supplier = frappe.new_doc("Supplier")
-		supplier.supplier_name = supplier_name
-		supplier.supplier_type = "Individual"
-		supplier.supplier_group = "All Supplier Groups"
-
-		if currency:
-			supplier.default_currency = currency
-		supplier.save()
-		return supplier.name
-	else:
-		return supplier_name
 
 
 class TestAccountsController(ERPNextTestSuite):
@@ -67,79 +37,29 @@ class TestAccountsController(ERPNextTestSuite):
 	"""
 
 	def setUp(self):
-		self.create_company()
+		self.company = "_Test Company"
+		self.company_abbr = "_TC"
+		self.cost_center = "Main - _TC"
+		self.warehouse = "Stores - _TC"
+		self.finished_warehouse = "Finished Goods - _TC"
+		self.income_account = "Sales - _TC"
+		self.expense_account = "Cost of Goods Sold - _TC"
+		self.debit_to = "Debtors - _TC"
+		self.debit_usd = "_Test Receivable USD - _TC"
+		self.debtors_usd = "_Test Receivable USD - _TC"
+		self.cash = "Cash - _TC"
+		self.creditors = "Creditors - _TC"
+		self.creditors_usd = "_Test Payable USD - _TC"
+		self.item = "_Test Item"
+		self.customer = "_Test Customer USD"
+		self.supplier = "_Test Supplier USD"
 		self.create_account()
-		self.create_item()
-		self.create_parties()
 		self.clear_old_entries()
 		frappe.flags.is_reverse_depr_entry = False
 
-	def create_company(self):
-		company_name = "_Test Company"
-		self.company_abbr = abbr = "_TC"
-		if frappe.db.exists("Company", company_name):
-			company = frappe.get_doc("Company", company_name)
-		else:
-			company = frappe.get_doc(
-				{
-					"doctype": "Company",
-					"company_name": company_name,
-					"country": "India",
-					"default_currency": "INR",
-					"create_chart_of_accounts_based_on": "Standard Template",
-					"chart_of_accounts": "Standard",
-				}
-			)
-			company = company.save()
-
-		self.company = company.name
-		self.cost_center = company.cost_center
-		self.warehouse = "Stores - " + abbr
-		self.finished_warehouse = "Finished Goods - " + abbr
-		self.income_account = "Sales - " + abbr
-		self.expense_account = "Cost of Goods Sold - " + abbr
-		self.debit_to = "Debtors - " + abbr
-		self.debit_usd = "Debtors USD - " + abbr
-		self.cash = "Cash - " + abbr
-		self.creditors = "Creditors - " + abbr
-
-	def create_item(self):
-		item = create_item(
-			item_code="_Test Notebook", is_stock_item=0, company=self.company, warehouse=self.warehouse
-		)
-		self.item = item if isinstance(item, str) else item.item_code
-
-	def create_parties(self):
-		self.create_customer()
-		self.create_supplier()
-
-	def create_customer(self):
-		self.customer = make_customer("_Test MC Customer USD", "USD")
-
-	def create_supplier(self):
-		self.supplier = make_supplier("_Test MC Supplier USD", "USD")
-
 	def create_account(self):
+		# Advance accounts are not in persistent test data — create them on demand.
 		accounts = [
-			frappe._dict(
-				{
-					"attribute_name": "debtors_usd",
-					"name": "Debtors USD",
-					"account_type": "Receivable",
-					"account_currency": "USD",
-					"parent_account": "Accounts Receivable - " + self.company_abbr,
-				}
-			),
-			frappe._dict(
-				{
-					"attribute_name": "creditors_usd",
-					"name": "Creditors USD",
-					"account_type": "Payable",
-					"account_currency": "USD",
-					"parent_account": "Accounts Payable - " + self.company_abbr,
-				}
-			),
-			# Advance accounts under Asset and Liability header
 			frappe._dict(
 				{
 					"attribute_name": "advance_received_usd",
@@ -185,6 +105,7 @@ class TestAccountsController(ERPNextTestSuite):
 		company.save()
 
 		customer = frappe.get_doc("Customer", self.customer)
+		customer.accounts = []
 		customer.append(
 			"accounts",
 			{
@@ -196,6 +117,7 @@ class TestAccountsController(ERPNextTestSuite):
 		customer.save()
 
 		supplier = frappe.get_doc("Supplier", self.supplier)
+		supplier.accounts = []
 		supplier.append(
 			"accounts",
 			{
