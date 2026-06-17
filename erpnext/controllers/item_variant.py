@@ -7,6 +7,7 @@ import json
 
 import frappe
 from frappe import _
+from frappe.query_builder import Case
 from frappe.utils import cstr, flt
 
 from erpnext.utilities.product import get_item_codes_by_attributes
@@ -156,18 +157,22 @@ def update_variant_attribute_values(item_attribute):
 
 	item_variant_table = frappe.qb.DocType("Item Variant Attribute")
 	item_table = frappe.qb.DocType("Item")
+	attribute_value = item_variant_table.attribute_value
+	attribute_value_case = Case()
 
 	for old_value, new_value in value_map.items():
-		(
-			frappe.qb.update(item_variant_table)
-			.join(item_table)
-			.on(item_table.name == item_variant_table.parent)
-			.set(item_variant_table.attribute_value, new_value)
-			.where(item_table.variant_of.isnotnull())
-			.where(item_table.variant_of != "")
-			.where(item_variant_table.attribute == item_attribute.name)
-			.where(item_variant_table.attribute_value == old_value)
-		).run()
+		attribute_value_case = attribute_value_case.when(attribute_value == old_value, new_value)
+
+	(
+		frappe.qb.update(item_variant_table)
+		.join(item_table)
+		.on(item_table.name == item_variant_table.parent)
+		.set(attribute_value, attribute_value_case.else_(attribute_value))
+		.where(item_table.variant_of.isnotnull())
+		.where(item_table.variant_of != "")
+		.where(item_variant_table.attribute == item_attribute.name)
+		.where(attribute_value.isin(list(value_map)))
+	).run()
 
 	frappe.flags.attribute_values = None
 
