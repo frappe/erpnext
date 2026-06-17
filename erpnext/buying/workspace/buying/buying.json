@@ -23,6 +23,7 @@
    "is_query_report": 0,
    "label": "Buying",
    "link_count": 0,
+   "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -86,6 +87,7 @@
    "is_query_report": 0,
    "label": "Items & Pricing",
    "link_count": 0,
+   "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -171,6 +173,7 @@
    "is_query_report": 0,
    "label": "Settings",
    "link_count": 0,
+   "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -212,6 +215,7 @@
    "is_query_report": 0,
    "label": "Supplier",
    "link_count": 0,
+   "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -264,6 +268,7 @@
    "is_query_report": 0,
    "label": "Supplier Scorecard",
    "link_count": 0,
+   "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -316,6 +321,7 @@
    "is_query_report": 0,
    "label": "Key Reports",
    "link_count": 0,
+   "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -390,6 +396,7 @@
    "is_query_report": 0,
    "label": "Purchase Partner",
    "link_count": 0,
+   "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -413,25 +420,6 @@
    "link_to": "Purchase Partner Type",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Purchase Person",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Purchase Person",
-   "link_count": 0,
-   "link_to": "Purchase Person",
-   "link_type": "DocType",
-   "onboard": 1,
    "type": "Link"
   },
   {
@@ -470,8 +458,62 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Purchase Person",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Purchase Person",
+   "link_count": 0,
+   "link_to": "Purchase Person",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Purchase Person",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Purchase Person-wise Transaction Summary",
+   "link_count": 0,
+   "link_to": "Purchase Person-wise Transaction Summary",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Purchase Person",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Purchase Person Commission Summary",
+   "link_count": 0,
+   "link_to": "Purchase Person Commission Summary",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Purchase Person",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Purchase Person Target Variance Based On Item Group",
+   "link_count": 0,
+   "link_to": "Purchase Person Target Variance Based On Item Group",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Other Reports",
    "link_count": 0,
+   "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -579,6 +621,7 @@
    "is_query_report": 0,
    "label": "Regional",
    "link_count": 0,
+   "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -594,7 +637,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-02 14:55:59.078773",
+ "modified": "2026-06-17 13:01:33.296280",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying",
