@@ -372,6 +372,17 @@ class TestItem(FrappeTestCase):
 				row.attribute_value = "Larger"
 				break
 
+		def restore_test_size_large():
+			doc = frappe.get_doc("Item Attribute", "Test Size")
+			for row in doc.item_attribute_values:
+				if row.attribute_value == "Larger":
+					row.attribute_value = "Large"
+					break
+			frappe.flags.attribute_values = None
+			doc.save()
+
+		self.addCleanup(restore_test_size_large)
+
 		frappe.flags.attribute_values = None
 		attribute.save()
 
