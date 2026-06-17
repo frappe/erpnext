@@ -456,6 +456,17 @@
    "type": "Link"
   },
   {
+   "dependencies": "Purchase Partner",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Purchase Partner Target Variance Based On Item Group",
+   "link_count": 0,
+   "link_to": "Purchase Partner Target Variance Based On Item Group",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
    "hidden": 0,
    "is_query_report": 0,
    "label": "Purchase Person",
@@ -637,7 +648,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-06-17 13:01:33.296280",
+ "modified": "2026-06-17 13:13:38.489837",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying",
