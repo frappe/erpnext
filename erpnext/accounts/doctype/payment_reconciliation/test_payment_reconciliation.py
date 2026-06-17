@@ -1188,6 +1188,12 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		self.assertNotIn(pe_restricted.name, payment_vouchers)
 		self.assertNotIn(je_restricted.name, payment_vouchers)
 
+		# with restricted dimension as a filter
+		with self.set_user(test_user):
+			pr = self.create_payment_reconciliation()
+			pr.cost_center = restricted_cc
+			self.assertRaises(frappe.PermissionError, pr.get_unreconciled_entries)
+
 		for cc in permitted_ccs:
 			frappe.permissions.remove_user_permission("Cost Center", cc, test_user)
 

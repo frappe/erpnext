@@ -159,6 +159,13 @@ class PaymentReconciliation(Document):
 	def get_permitted_dimension_values(self, document_type, reference_doctype):
 		return get_allowed_docs_for_doctype(self.user_permissions.get(document_type, []), reference_doctype)
 
+	def validate_permitted_dimension_value(self, document_type, value, allowed):
+		if value and allowed and value not in allowed:
+			frappe.throw(
+				_("You do not have enough permission to access {0}: {1}").format(_(document_type), value),
+				frappe.PermissionError,
+			)
+
 	def get_user_permission_dimension_condition(self, field, allowed):
 		value_condition = field.isin(allowed)
 		if frappe.get_system_settings("apply_strict_user_permissions"):
@@ -188,9 +195,11 @@ class PaymentReconciliation(Document):
 		dimensions = {}
 		for x in self.dimensions:
 			dimension = x.fieldname
-			if self.get(dimension):
-				dimensions.update({dimension: self.get(dimension)})
-			elif allowed := self.get_permitted_dimension_values(x.document_type, "Payment Entry"):
+			allowed = self.get_permitted_dimension_values(x.document_type, "Payment Entry")
+			if value := self.get(dimension):
+				self.validate_permitted_dimension_value(x.document_type, value, allowed)
+				dimensions[dimension] = value
+			elif allowed:
 				dimensions[dimension] = allowed
 
 		condition.update({"accounting_dimensions": dimensions})
@@ -216,9 +225,11 @@ class PaymentReconciliation(Document):
 		# Dimension filters
 		for x in self.dimensions:
 			dimension = x.fieldname
-			if self.get(dimension):
-				conditions.append(jea[dimension] == self.get(dimension))
-			elif allowed := self.get_permitted_dimension_values(x.document_type, "Journal Entry Account"):
+			allowed = self.get_permitted_dimension_values(x.document_type, "Journal Entry Account")
+			if value := self.get(dimension):
+				self.validate_permitted_dimension_value(x.document_type, value, allowed)
+				conditions.append(jea[dimension] == value)
+			elif allowed:
 				conditions.append(self.get_user_permission_dimension_condition(jea[dimension], allowed))
 
 		if self.payment_name:
@@ -766,9 +777,11 @@ class PaymentReconciliation(Document):
 		for x in self.dimensions:
 			dimension = x.fieldname
 			if frappe.db.has_column("Payment Ledger Entry", dimension):
-				if self.get(dimension):
-					self.accounting_dimension_filter_conditions.append(ple[dimension] == self.get(dimension))
-				elif allowed := self.get_permitted_dimension_values(x.document_type, "Payment Ledger Entry"):
+				allowed = self.get_permitted_dimension_values(x.document_type, "Payment Ledger Entry")
+				if value := self.get(dimension):
+					self.validate_permitted_dimension_value(x.document_type, value, allowed)
+					self.accounting_dimension_filter_conditions.append(ple[dimension] == value)
+				elif allowed:
 					self.accounting_dimension_filter_conditions.append(
 						self.get_user_permission_dimension_condition(ple[dimension], allowed)
 					)
