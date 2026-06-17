@@ -395,6 +395,54 @@ class TestItem(FrappeTestCase):
 			"Larger",
 		)
 
+	def test_swapped_attribute_value_renames_update_variants(self):
+		frappe.delete_doc_if_exists("Item", "_Test Variant Item-L", force=1)
+		frappe.delete_doc_if_exists("Item", "_Test Variant Item-S", force=1)
+
+		large_variant = create_variant("_Test Variant Item", {"Test Size": "Large"})
+		large_variant.save()
+
+		small_variant = create_variant("_Test Variant Item", {"Test Size": "Small"})
+		small_variant.save()
+
+		attribute = frappe.get_doc("Item Attribute", "Test Size")
+		original_values = {row.name: row.attribute_value for row in attribute.item_attribute_values}
+
+		def restore_test_size_values():
+			doc = frappe.get_doc("Item Attribute", "Test Size")
+			for row in doc.item_attribute_values:
+				row.attribute_value = original_values[row.name]
+			frappe.flags.attribute_values = None
+			doc.save()
+
+		self.addCleanup(restore_test_size_values)
+
+		for row in attribute.item_attribute_values:
+			if row.attribute_value == "Large":
+				row.attribute_value = "Small"
+			elif row.attribute_value == "Small":
+				row.attribute_value = "Large"
+
+		frappe.flags.attribute_values = None
+		attribute.save()
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Item Variant Attribute",
+				{"parent": large_variant.name, "attribute": "Test Size"},
+				"attribute_value",
+			),
+			"Small",
+		)
+		self.assertEqual(
+			frappe.db.get_value(
+				"Item Variant Attribute",
+				{"parent": small_variant.name, "attribute": "Test Size"},
+				"attribute_value",
+			),
+			"Large",
+		)
+
 	def test_make_item_variant(self):
 		frappe.delete_doc_if_exists("Item", "_Test Variant Item-L", force=1)
 
