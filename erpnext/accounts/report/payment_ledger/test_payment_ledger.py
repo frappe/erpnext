@@ -15,17 +15,6 @@ class TestPaymentLedger(ERPNextTestSuite):
 		self.income_account = "Sales - _TC"
 		self.expense_account = "Cost of Goods Sold - _TC"
 		self.debit_to = "Debtors - _TC"
-		self.cleanup()
-
-	def cleanup(self):
-		doctypes = []
-		doctypes.append(qb.DocType("GL Entry"))
-		doctypes.append(qb.DocType("Payment Ledger Entry"))
-		doctypes.append(qb.DocType("Sales Invoice"))
-		doctypes.append(qb.DocType("Payment Entry"))
-
-		for doctype in doctypes:
-			qb.from_(doctype).delete().where(doctype.company == self.company).run()
 
 	def test_unpaid_invoice_outstanding(self):
 		sinv = create_sales_invoice(

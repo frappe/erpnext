@@ -26,7 +26,6 @@ class TestPaymentLedgerEntry(ERPNextTestSuite):
 		self.bank = "Cash - _TC"
 		self.item = "_Test Item"
 		self.customer = "_Test Customer"
-		self.clear_old_entries()
 
 	def create_sales_invoice(
 		self, qty=1, rate=100, posting_date=None, do_not_save=False, do_not_submit=False
@@ -98,18 +97,6 @@ class TestPaymentLedgerEntry(ERPNextTestSuite):
 			do_not_submit=do_not_submit,
 		)
 		return so
-
-	def clear_old_entries(self):
-		doctype_list = [
-			"GL Entry",
-			"Payment Ledger Entry",
-			"Sales Invoice",
-			"Purchase Invoice",
-			"Payment Entry",
-			"Journal Entry",
-		]
-		for doctype in doctype_list:
-			qb.from_(qb.DocType(doctype)).delete().where(qb.DocType(doctype).company == self.company).run()
 
 	def create_journal_entry(self, acc1=None, acc2=None, amount=0, posting_date=None, cost_center=None):
 		je = frappe.new_doc("Journal Entry")

@@ -54,7 +54,6 @@ class TestAccountsController(ERPNextTestSuite):
 		self.customer = "_Test Customer USD"
 		self.supplier = "_Test Supplier USD"
 		self.create_account()
-		self.clear_old_entries()
 		frappe.flags.is_reverse_depr_entry = False
 
 	def create_account(self):
@@ -242,18 +241,6 @@ class TestAccountsController(ERPNextTestSuite):
 			if not do_not_submit:
 				pinv.submit()
 		return pinv
-
-	def clear_old_entries(self):
-		doctype_list = [
-			"GL Entry",
-			"Payment Ledger Entry",
-			"Sales Invoice",
-			"Purchase Invoice",
-			"Payment Entry",
-			"Journal Entry",
-		]
-		for doctype in doctype_list:
-			qb.from_(qb.DocType(doctype)).delete().where(qb.DocType(doctype).company == self.company).run()
 
 	def create_payment_reconciliation(self):
 		pr = frappe.new_doc("Payment Reconciliation")
