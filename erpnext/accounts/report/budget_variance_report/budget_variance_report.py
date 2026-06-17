@@ -84,7 +84,13 @@ def build_budget_map(budget_records, filters):
 		budget_distributions = get_budget_distributions(budget)
 
 		for row in budget_distributions:
+			if not row.start_date or not row.end_date:
+				continue
+
 			months = get_months_in_range(row.start_date, row.end_date)
+			if not months:
+				continue
+
 			monthly_budget = flt(row.amount) / len(months)
 
 			for month_date in months:

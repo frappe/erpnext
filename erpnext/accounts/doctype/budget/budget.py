@@ -355,8 +355,8 @@ class Budget(Document):
 		if self.should_regenerate_budget_distribution():
 			return
 
-		total_amount = sum(d.amount for d in self.budget_distribution)
-		total_percent = sum(d.percent for d in self.budget_distribution)
+		total_amount = sum(flt(d.amount) for d in self.budget_distribution)
+		total_percent = sum(flt(d.percent) for d in self.budget_distribution)
 
 		if flt(abs(total_amount - self.budget_amount), 2) > 0.10:
 			frappe.throw(
