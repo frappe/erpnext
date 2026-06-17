@@ -6,7 +6,7 @@ import copy
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Coalesce, Max, Sum
+from frappe.query_builder.functions import Coalesce, Sum
 from frappe.utils import cint, date_diff, flt, getdate
 
 
@@ -44,15 +44,13 @@ def get_data(filters):
 		.on(mr_item.parent == mr.name)
 		.select(
 			mr.name.as_("material_request"),
-			# non-grouped columns are constant per grouped mr.name / item_code -> Max() keeps the
-			# GROUP BY valid on postgres while returning the same value MySQL picked.
-			Max(mr.transaction_date).as_("date"),
-			Max(mr_item.schedule_date).as_("required_date"),
+			mr.transaction_date.as_("date"),
+			mr_item.schedule_date.as_("required_date"),
 			mr_item.item_code.as_("item_code"),
 			Sum(Coalesce(mr_item.qty, 0)).as_("qty"),
 			Sum(Coalesce(mr_item.stock_qty, 0)).as_("stock_qty"),
-			Max(Coalesce(mr_item.uom, "")).as_("uom"),
-			Max(Coalesce(mr_item.stock_uom, "")).as_("stock_uom"),
+			Coalesce(mr_item.uom, "").as_("uom"),
+			Coalesce(mr_item.stock_uom, "").as_("stock_uom"),
 			Sum(Coalesce(mr_item.ordered_qty, 0)).as_("ordered_qty"),
 			Sum(Coalesce(mr_item.received_qty, 0)).as_("received_qty"),
 			(Sum(Coalesce(mr_item.stock_qty, 0)) - Sum(Coalesce(mr_item.received_qty, 0))).as_(
@@ -60,9 +58,9 @@ def get_data(filters):
 			),
 			Sum(Coalesce(mr_item.received_qty, 0)).as_("received_qty"),
 			(Sum(Coalesce(mr_item.stock_qty, 0)) - Sum(Coalesce(mr_item.ordered_qty, 0))).as_("qty_to_order"),
-			Max(mr_item.item_name).as_("item_name"),
-			Max(mr_item.description).as_("description"),
-			Max(mr.company).as_("company"),
+			mr_item.item_name,
+			mr_item.description,
+			mr.company,
 		)
 		.where(
 			(mr.material_request_type == "Purchase")
@@ -74,7 +72,7 @@ def get_data(filters):
 
 	query = get_conditions(filters, query, mr, mr_item)  # add conditional conditions
 
-	query = query.groupby(mr.name, mr_item.item_code).orderby(Max(mr.transaction_date), Max(mr.schedule_date))
+	query = query.groupby(mr.name, mr_item.item_code).orderby(mr.transaction_date, mr.schedule_date)
 	data = query.run(as_dict=True)
 	return data
 

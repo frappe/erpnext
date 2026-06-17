@@ -305,9 +305,7 @@ def get_po_entries(filters):
 			& (parent.name == child.parent)
 			& (parent.status.notin(("Closed", "Completed", "Cancelled")))
 		)
-		# This is one row per PO item; the selected child.* columns are only functionally dependent
-		# on the child PK, which postgres requires in the GROUP BY (MariaDB allows omitting it).
-		.groupby(parent.name, child.material_request_item, child.name)
+		.groupby(parent.name, child.material_request_item)
 	)
 	query = apply_filters_on_query(filters, parent, child, query)
 

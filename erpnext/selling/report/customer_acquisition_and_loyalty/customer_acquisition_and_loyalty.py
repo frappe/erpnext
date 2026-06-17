@@ -112,8 +112,8 @@ def get_data_by_territory(filters, common_columns):
 	customers_in = get_customer_stats(filters, tree_view=True)
 
 	territory_dict = {}
-	for t in frappe.get_all(
-		"Territory", fields=["name", "lft", "parent_territory", "is_group"], order_by="lft"
+	for t in frappe.db.sql(
+		"""SELECT name, lft, parent_territory, is_group FROM `tabTerritory` ORDER BY lft""", as_dict=1
 	):
 		territory_dict.update({t.name: {"parent": t.parent_territory, "is_group": t.is_group}})
 
@@ -155,18 +155,19 @@ def get_data_by_territory(filters, common_columns):
 
 def get_customer_stats(filters, tree_view=False):
 	"""Calculates number of new and repeated customers and revenue."""
+	company_condition = ""
+	if filters.get("company"):
+		company_condition = " and company=%(company)s"
+
 	customers = []
 	customers_in = {}
 
-	si_filters = {"docstatus": 1, "posting_date": ["<=", filters.get("to_date")]}
-	if filters.get("company"):
-		si_filters["company"] = filters.get("company")
-
-	for si in frappe.get_all(
-		"Sales Invoice",
-		filters=si_filters,
-		fields=["territory", "posting_date", "customer", "base_grand_total"],
-		order_by="posting_date",
+	for si in frappe.db.sql(
+		f"""select territory, posting_date, customer, base_grand_total from `tabSales Invoice`
+		where docstatus=1 and posting_date <= %(to_date)s
+		{company_condition} order by posting_date""",
+		filters,
+		as_dict=1,
 	):
 		key = si.territory if tree_view else si.posting_date.strftime("%Y-%m")
 		new_or_repeat = "new" if si.customer not in customers else "repeat"

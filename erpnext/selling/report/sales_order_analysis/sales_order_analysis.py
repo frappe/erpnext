@@ -6,9 +6,9 @@ from collections import OrderedDict
 
 import frappe
 from frappe import _, qb
-from frappe.query_builder import Case, CustomFunction
-from frappe.query_builder.functions import Coalesce, DateDiff, Max, Sum
-from frappe.utils import date_diff, flt, getdate, nowdate
+from frappe.query_builder import CustomFunction
+from frappe.query_builder.functions import Max
+from frappe.utils import date_diff, flt, getdate
 
 
 def execute(filters=None):
@@ -18,7 +18,8 @@ def execute(filters=None):
 	validate_filters(filters)
 
 	columns = get_columns(filters)
-	data = get_data(filters)
+	conditions = get_conditions(filters)
+	data = get_data(conditions, filters)
 	so_elapsed_time = get_so_elapsed_time(data)
 
 	if not data:
@@ -38,66 +39,64 @@ def validate_filters(filters):
 		frappe.throw(_("To Date cannot be before From Date."))
 
 
-def get_data(filters):
-	so = qb.DocType("Sales Order")
-	soi = qb.DocType("Sales Order Item")
-	sii = qb.DocType("Sales Invoice Item")
+def get_conditions(filters):
+	conditions = ""
+	if filters.get("from_date") and filters.get("to_date"):
+		conditions += " and so.transaction_date between %(from_date)s and %(to_date)s"
 
-	# Use the application's today (nowdate, System Settings timezone) rather than the database
-	# server's CURRENT_DATE: the two differ by a day when the DB server runs in a different timezone
-	# (e.g. UTC DB + IST app near midnight), which made delay_days non-deterministic on postgres CI.
-	# DateDiff is cross-database: DATEDIFF() on MariaDB, date subtraction on postgres; it casts the
-	# string date to a date on postgres. delivery_date is functionally dependent on the grouped
-	# soi.name primary key, so this is valid under both.
-	delay = DateDiff(nowdate(), soi.delivery_date)
-	conversion_rate = Coalesce(so.conversion_rate, 1)
+	if filters.get("company"):
+		conditions += " and so.company = %(company)s"
 
-	query = (
-		qb.from_(so)
-		.join(soi)
-		.on(soi.parent == so.name)
-		.left_join(sii)
-		.on((sii.so_detail == soi.name) & (sii.docstatus == 1))
-		.select(
-			so.transaction_date.as_("date"),
-			soi.delivery_date.as_("delivery_date"),
-			so.name.as_("sales_order"),
-			so.status,
-			so.customer,
-			soi.item_code,
-			delay.as_("delay_days"),
-			Case().when(so.status.isin(["Completed", "To Bill"]), 0).else_(delay).as_("delay"),
-			soi.qty,
-			soi.delivered_qty,
-			(soi.qty - soi.delivered_qty).as_("pending_qty"),
-			Coalesce(Sum(sii.qty), 0).as_("billed_qty"),
-			soi.base_amount.as_("amount"),
-			(soi.delivered_qty * soi.base_rate).as_("delivered_qty_amount"),
-			(soi.billed_amt * conversion_rate).as_("billed_amount"),
-			(soi.base_amount - (soi.billed_amt * conversion_rate)).as_("pending_amount"),
-			soi.warehouse.as_("warehouse"),
-			so.company,
-			soi.name,
-			soi.description.as_("description"),
-		)
-		.where((so.status.notin(["Stopped", "On Hold"])) & (so.docstatus == 1))
-		.groupby(soi.name, so.name)
-		.orderby(so.transaction_date)
-		.orderby(soi.item_code)
+	if filters.get("sales_order"):
+		conditions += " and so.name in %(sales_order)s"
+
+	if filters.get("status"):
+		conditions += " and so.status in %(status)s"
+
+	if filters.get("warehouse"):
+		conditions += " and soi.warehouse = %(warehouse)s"
+
+	return conditions
+
+
+def get_data(conditions, filters):
+	data = frappe.db.sql(
+		f"""
+		SELECT
+			so.transaction_date as date,
+			soi.delivery_date as delivery_date,
+			so.name as sales_order,
+			so.status, so.customer, soi.item_code,
+			DATEDIFF(CURRENT_DATE, soi.delivery_date) as delay_days,
+			IF(so.status in ('Completed','To Bill'), 0, (SELECT delay_days)) as delay,
+			soi.qty, soi.delivered_qty,
+			(soi.qty - soi.delivered_qty) AS pending_qty,
+			IFNULL(SUM(sii.qty), 0) as billed_qty,
+			soi.base_amount as amount,
+			(soi.delivered_qty * soi.base_rate) as delivered_qty_amount,
+			(soi.billed_amt * IFNULL(so.conversion_rate, 1)) as billed_amount,
+			(soi.base_amount - (soi.billed_amt * IFNULL(so.conversion_rate, 1))) as pending_amount,
+			soi.warehouse as warehouse,
+			so.company, soi.name,
+			soi.description as description
+		FROM
+			`tabSales Order` so,
+			`tabSales Order Item` soi
+		LEFT JOIN `tabSales Invoice Item` sii
+			ON sii.so_detail = soi.name and sii.docstatus = 1
+		WHERE
+			soi.parent = so.name
+			and so.status not in ('Stopped', 'On Hold')
+			and so.docstatus = 1
+			{conditions}
+		GROUP BY soi.name
+		ORDER BY so.transaction_date ASC, soi.item_code ASC
+	""",
+		filters,
+		as_dict=1,
 	)
 
-	if filters.get("from_date") and filters.get("to_date"):
-		query = query.where(so.transaction_date[filters.get("from_date") : filters.get("to_date")])
-	if filters.get("company"):
-		query = query.where(so.company == filters.get("company"))
-	if filters.get("sales_order"):
-		query = query.where(so.name.isin(filters.get("sales_order")))
-	if filters.get("status"):
-		query = query.where(so.status.isin(filters.get("status")))
-	if filters.get("warehouse"):
-		query = query.where(soi.warehouse == filters.get("warehouse"))
-
-	return query.run(as_dict=True)
+	return data
 
 
 def get_so_elapsed_time(data):
@@ -113,17 +112,7 @@ def get_so_elapsed_time(data):
 		dn = qb.DocType("Delivery Note")
 		dni = qb.DocType("Delivery Note Item")
 
-		# TO_SECONDS is MariaDB-only. On postgres, subtracting dates yields days, so multiply
-		# by 86400 for the equivalent second delta. so.transaction_date is neither aggregated nor
-		# in the GROUP BY, but it is selectable under postgres' strict GROUP BY because it is
-		# functionally dependent on the grouped so.name (a doctype's `name` is always the PK).
-		if frappe.db.db_type == "postgres":
-			elapsed_seconds = ((Max(dn.posting_date) - so.transaction_date) * 86400).as_("elapsed_seconds")
-		else:
-			to_seconds = CustomFunction("TO_SECONDS", ["date"])
-			elapsed_seconds = (to_seconds(Max(dn.posting_date)) - to_seconds(so.transaction_date)).as_(
-				"elapsed_seconds"
-			)
+		to_seconds = CustomFunction("TO_SECONDS", ["date"])
 
 		query = (
 			qb.from_(so)
@@ -136,11 +125,11 @@ def get_so_elapsed_time(data):
 			.select(
 				so.name.as_("sales_order"),
 				soi.item_code.as_("so_item_code"),
-				elapsed_seconds,
+				(to_seconds(Max(dn.posting_date)) - to_seconds(so.transaction_date)).as_("elapsed_seconds"),
 			)
 			.where((so.name.isin(sales_orders)) & (dn.docstatus == 1))
 			.orderby(so.name, soi.name)
-			.groupby(soi.name, so.name)
+			.groupby(soi.name)
 		)
 		dn_elapsed_time = query.run(as_dict=True)
 

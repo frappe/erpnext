@@ -510,10 +510,10 @@ class Analytics:
 
 		self.depth_map = frappe._dict()
 
-		self.group_entries = frappe.get_all(
-			self.filters.tree_type,
-			fields=["name", "lft", "rgt", f"{parent} as parent"],
-			order_by="lft",
+		self.group_entries = frappe.db.sql(
+			f"""select name, lft, rgt , {parent} as parent
+			from `tab{self.filters.tree_type}` order by lft""",
+			as_dict=1,
 		)
 
 		for d in self.group_entries:
@@ -528,18 +528,13 @@ class Analytics:
 		if not frappe.db.exists("DocType", self.filters.doc_type):
 			frappe.throw(_("Invalid Document Type {0}").format(self.filters.doc_type))
 
-		order_types = frappe.get_all(
-			self.filters.doc_type,
-			filters={"order_type": ["is", "set"]},
-			pluck="order_type",
-			distinct=True,
-			order_by="order_type",
+		self.group_entries = frappe.db.sql(
+			f""" select * from (select "Order Types" as name, 0 as lft,
+			2 as rgt, '' as parent union select distinct order_type as name, 1 as lft, 1 as rgt, "Order Types" as parent
+			from `tab{self.filters.doc_type}` where ifnull(order_type, '') != '') as b order by lft, name
+		""",
+			as_dict=1,
 		)
-
-		self.group_entries = [frappe._dict(name="Order Types", lft=0, rgt=2, parent="")]
-		self.group_entries += [
-			frappe._dict(name=order_type, lft=1, rgt=1, parent="Order Types") for order_type in order_types
-		]
 
 		for d in self.group_entries:
 			if d.parent:
@@ -549,7 +544,7 @@ class Analytics:
 
 	def get_supplier_parent_child_map(self):
 		self.parent_child_map = frappe._dict(
-			frappe.get_all("Supplier", fields=["name", "supplier_group"], as_list=True)
+			frappe.db.sql(""" select name, supplier_group from `tabSupplier`""")
 		)
 
 	def get_chart_data(self):

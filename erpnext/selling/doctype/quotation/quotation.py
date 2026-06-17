@@ -6,7 +6,6 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate, nowdate
-from pypika.terms import ExistsCriterion
 
 from erpnext.controllers.selling_controller import SellingController
 
@@ -359,31 +358,22 @@ def get_list_context(context=None):
 
 
 def set_expired_status():
-	quotation = frappe.qb.DocType("Quotation")
-	so = frappe.qb.DocType("Sales Order")
-	so_item = frappe.qb.DocType("Sales Order Item")
+	# filter out submitted non expired quotations whose validity has been ended
+	cond = "`tabQuotation`.docstatus = 1 and `tabQuotation`.status NOT IN ('Expired', 'Lost') and `tabQuotation`.valid_till < %s"
+	# check if those QUO have SO against it
+	so_against_quo = """
+		SELECT
+			so.name FROM `tabSales Order` so, `tabSales Order Item` so_item
+		WHERE
+			so_item.docstatus = 1 and so.docstatus = 1
+			and so_item.parent = so.name
+			and so_item.prevdoc_docname = `tabQuotation`.name"""
 
-	# submitted Sales Orders raised against the quotation (correlated to the quotation being updated)
-	so_against_quo = (
-		frappe.qb.from_(so)
-		.from_(so_item)
-		.select(so.name)
-		.where(
-			(so_item.docstatus == 1)
-			& (so.docstatus == 1)
-			& (so_item.parent == so.name)
-			& (so_item.prevdoc_docname == quotation.name)
-		)
+	# if not exists any SO, set status as Expired
+	frappe.db.multisql(
+		{
+			"mariadb": f"""UPDATE `tabQuotation`  SET `tabQuotation`.status = 'Expired' WHERE {cond} and not exists({so_against_quo})""",
+			"postgres": f"""UPDATE `tabQuotation` SET status = 'Expired' FROM `tabSales Order`, `tabSales Order Item` WHERE {cond} and not exists({so_against_quo})""",
+		},
+		(nowdate()),
 	)
-
-	# expire submitted, non-expired/lost quotations whose validity has ended and that have no SO
-	(
-		frappe.qb.update(quotation)
-		.set(quotation.status, "Expired")
-		.where(
-			(quotation.docstatus == 1)
-			& (quotation.status.notin(["Expired", "Lost"]))
-			& (quotation.valid_till < nowdate())
-			& ExistsCriterion(so_against_quo).negate()
-		)
-	).run()

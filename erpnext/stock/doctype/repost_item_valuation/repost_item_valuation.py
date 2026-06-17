@@ -47,6 +47,7 @@ class RepostItemValuation(Document):
 		items_to_be_repost: DF.Code | None
 		posting_date: DF.Date
 		posting_time: DF.Time | None
+		recalculate_valuation_rate: DF.Check
 		recreate_stock_ledgers: DF.Check
 		repost_only_accounting_ledgers: DF.Check
 		reposting_data_file: DF.Attach | None
@@ -343,6 +344,12 @@ class RepostItemValuation(Document):
 			filters,
 		)
 
+	def _recalculate_valuation_rate(self):
+		doc = frappe.get_doc(self.voucher_type, self.voucher_no)
+		doc.update_valuation_rate()
+		for item in doc.items:
+			item.db_set("valuation_rate", item.valuation_rate)
+
 	def recreate_stock_ledger_entries(self):
 		"""Recreate Stock Ledger Entries for the transaction."""
 		if self.based_on == "Transaction" and self.recreate_stock_ledgers:
@@ -383,6 +390,12 @@ def repost(doc):
 		doc.set_status("In Progress")
 		if not frappe.in_test:
 			frappe.db.commit()
+
+		if (
+			doc.voucher_type in ["Purchase Receipt", "Purchase Invoice", "Stock Entry"]
+			and doc.recalculate_valuation_rate
+		):
+			doc._recalculate_valuation_rate()
 
 		if doc.recreate_stock_ledgers:
 			doc.recreate_stock_ledger_entries()

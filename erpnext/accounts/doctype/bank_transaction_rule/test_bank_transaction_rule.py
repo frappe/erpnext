@@ -11,9 +11,11 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestBankTransactionRule(ERPNextTestSuite, AccountsTestMixin):
 	def setUp(self):
-		self.create_company()
-		self.create_customer()
-		self.clear_old_entries()
+		self.company = "_Test Company"
+		self.customer = "_Test Customer"
+		self.bank = "HDFC - _TC"
+		self.debit_to = "Debtors - _TC"
+		self.cash = "Cash - _TC"
 		bank_dt = qb.DocType("Bank")
 		qb.from_(bank_dt).delete().where(bank_dt.name == "HDFC").run()
 		self.create_bank_account()
