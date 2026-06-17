@@ -360,6 +360,30 @@ class TestItem(FrappeTestCase):
 		self.assertRaises(InvalidItemAttributeValueError, attribute.save)
 		frappe.db.rollback()
 
+	def test_rename_attribute_value_updates_variants(self):
+		frappe.delete_doc_if_exists("Item", "_Test Variant Item-L", force=1)
+
+		variant = create_variant("_Test Variant Item", {"Test Size": "Large"})
+		variant.save()
+
+		attribute = frappe.get_doc("Item Attribute", "Test Size")
+		for row in attribute.item_attribute_values:
+			if row.attribute_value == "Large":
+				row.attribute_value = "Larger"
+				break
+
+		frappe.flags.attribute_values = None
+		attribute.save()
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Item Variant Attribute",
+				{"parent": variant.name, "attribute": "Test Size"},
+				"attribute_value",
+			),
+			"Larger",
+		)
+
 	def test_make_item_variant(self):
 		frappe.delete_doc_if_exists("Item", "_Test Variant Item-L", force=1)
 
