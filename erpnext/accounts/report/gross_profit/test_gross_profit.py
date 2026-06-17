@@ -219,7 +219,7 @@ class TestGrossProfit(ERPNextTestSuite):
 				"item_code": self.item2,
 				"s_warehouse": "",
 				"t_warehouse": self.finished_warehouse,
-				"qty": 1,
+				"qty": 2,
 				"basic_rate": 100,
 				"conversion_factor": item.conversion_factor or 1.0,
 				"transfer_qty": flt(item.qty) * (flt(item.conversion_factor) or 1.0),
@@ -362,8 +362,8 @@ class TestGrossProfit(ERPNextTestSuite):
 			"item_name": self.item,
 			"warehouse": "Stores - _TC",
 			"qty": 0.0,
-			"avg._selling_rate": 100,
-			"valuation_rate": 0.0,
+			"avg._selling_rate": 100.0,
+			"valuation_rate": 100.0,
 			"selling_amount": 0.0,
 			"buying_amount": 0.0,
 			"gross_profit": 0.0,
@@ -383,7 +383,7 @@ class TestGrossProfit(ERPNextTestSuite):
 		"""
 		# Make Cr Note
 		sinv = self.create_sales_invoice(
-			qty=-1, rate=100, posting_date=nowdate(), do_not_save=True, do_not_submit=True
+			qty=-1, rate=200, posting_date=nowdate(), do_not_save=True, do_not_submit=True
 		)
 		sinv.is_return = 1
 		sinv.items[0].allow_zero_valuation_rate = 1
@@ -408,12 +408,12 @@ class TestGrossProfit(ERPNextTestSuite):
 			"item_name": self.item,
 			"warehouse": "Stores - _TC",
 			"qty": -1.0,
-			"avg._selling_rate": 100.0,
-			"valuation_rate": 0.0,
-			"selling_amount": -100.0,
-			"buying_amount": 0.0,
+			"avg._selling_rate": 200.0,
+			"valuation_rate": 100.0,
+			"selling_amount": -200.0,
+			"buying_amount": -100.0,
 			"gross_profit": -100.0,
-			"gross_profit_%": -100.0,
+			"gross_profit_%": -50.0,
 		}
 		gp_entry = [x for x in data if x.parent_invoice == sinv.name]
 		report_output = {k: v for k, v in gp_entry[0].items() if k in expected_entry}
@@ -562,7 +562,7 @@ class TestGrossProfit(ERPNextTestSuite):
 	def test_gross_profit_groupby_invoices(self):
 		create_sales_invoice(
 			qty=1,
-			rate=100,
+			rate=200,
 			company=self.company,
 			customer=self.customer,
 			item_code=self.item,
@@ -584,10 +584,10 @@ class TestGrossProfit(ERPNextTestSuite):
 		_, data = execute(filters=filters)
 		total = data[-1]
 
-		self.assertEqual(total.selling_amount, 100.0)
-		self.assertEqual(total.buying_amount, 0.0)
+		self.assertEqual(total.selling_amount, 200.0)
+		self.assertEqual(total.buying_amount, 100.0)
 		self.assertEqual(total.gross_profit, 100.0)
-		self.assertEqual(total.get("gross_profit_%"), 100.0)
+		self.assertEqual(total.get("gross_profit_%"), 50.0)
 
 	def test_profit_for_later_period_return(self):
 		month_start_date, month_end_date = get_first_day(nowdate()), get_last_day(nowdate())
@@ -596,7 +596,7 @@ class TestGrossProfit(ERPNextTestSuite):
 		return_inv_date = add_days(month_end_date, 1)
 
 		# create sales invoice on month start date
-		sinv = self.create_sales_invoice(qty=1, rate=100, do_not_save=True, do_not_submit=True)
+		sinv = self.create_sales_invoice(qty=1, rate=200, do_not_save=True, do_not_submit=True)
 		sinv.set_posting_time = 1
 		sinv.posting_date = sales_inv_date
 		sinv.save().submit()
@@ -615,10 +615,10 @@ class TestGrossProfit(ERPNextTestSuite):
 		_, data = execute(filters=filters)
 		total = data[-1]
 
-		self.assertEqual(total.selling_amount, 100.0)
-		self.assertEqual(total.buying_amount, 0.0)
+		self.assertEqual(total.selling_amount, 200.0)
+		self.assertEqual(total.buying_amount, 100.0)
 		self.assertEqual(total.gross_profit, 100.0)
-		self.assertEqual(total.get("gross_profit_%"), 100.0)
+		self.assertEqual(total.get("gross_profit_%"), 50.0)
 
 		# extend filters upto returned period
 		filters.update({"to_date": return_inv_date})
@@ -636,10 +636,10 @@ class TestGrossProfit(ERPNextTestSuite):
 		_, data = execute(filters=filters)
 		total = data[-1]
 
-		self.assertEqual(total.selling_amount, -100.0)
-		self.assertEqual(total.buying_amount, 0.0)
+		self.assertEqual(total.selling_amount, -200.0)
+		self.assertEqual(total.buying_amount, -100.0)
 		self.assertEqual(total.gross_profit, -100.0)
-		self.assertEqual(total.get("gross_profit_%"), -100.0)
+		self.assertEqual(total.get("gross_profit_%"), -50.0)
 
 	def test_sales_person_wise_gross_profit(self):
 		sales_person = make_sales_person("_Test Sales Person")
@@ -670,10 +670,10 @@ class TestGrossProfit(ERPNextTestSuite):
 		_, data = execute(filters=filters)
 		total = data[-1]
 
-		self.assertEqual(total[5], 1000.0)
-		self.assertEqual(total[6], 0.0)
-		self.assertEqual(total[7], 1000.0)
-		self.assertEqual(total[8], 100.0)
+		self.assertEqual(total[5], 1000.0)  # selling amount
+		self.assertEqual(total[6], 1000.0)  # buying amount
+		self.assertEqual(total[7], 0.0)  # gross profit
+		self.assertEqual(total[8], 0.0)  # gross profit %
 
 	def test_drop_ship(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
