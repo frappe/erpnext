@@ -55,7 +55,9 @@ def get_data(filters, period_list, partner_doctype):
 		if d.item_group:
 			sales_user_wise_item_groups[d.parent].append(d.item_group)
 
-	date_field = "transaction_date" if filters.get("doctype") == "Sales Order" else "posting_date"
+	date_field = (
+		"transaction_date" if filters.get("doctype") in ("Sales Order", "Purchase Order") else "posting_date"
+	)
 
 	actual_data = get_actual_data(filters, sales_users, date_field, sales_field)
 
