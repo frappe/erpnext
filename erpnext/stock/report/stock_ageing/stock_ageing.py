@@ -358,7 +358,7 @@ class FIFOSlots:
 		if row.voucher_type != "Stock Reconciliation":
 			return
 
-		if not row.batch_no or row.serial_no or row.serial_and_batch_bundle:
+		if row.has_serial_no and (not row.batch_no or row.serial_no or row.serial_and_batch_bundle):
 			if row.voucher_detail_no in self.stock_reco_voucher_wise_count:
 				# Legacy reconciliation with a single SLE has qty_after_transaction and
 				# stock_value_difference without an outward entry, so reset the queue first.
@@ -1083,6 +1083,7 @@ class FIFOSlots:
 				(doctype.voucher_type == "Stock Reconciliation")
 				& (doctype.docstatus < 2)
 				& (doctype.is_cancelled == 0)
+				& (item.has_serial_no == 1)
 			)
 			.groupby(doctype.voucher_detail_no)
 		)
