@@ -19,12 +19,9 @@ def execute(filters=None):
 
 class PurchasePartnerTransactionSummaryReport(PurchasePartnerSummaryReport):
 	def prepare_columns(self):
-		self.make_column(
-			_(self.filters.get("doctype")), "name", "Link", options=self.filters.get("doctype")
-		)
+		self.make_column(_(self.filters.get("doctype")), "name", "Link", options=self.filters.get("doctype"))
 		self.make_column(_("Supplier"), "supplier", "Link", options="Supplier")
 		self.make_column(_("Currency"), "currency", "Data", 80, hidden=1)
-		self.make_column(_("Territory"), "territory", "Link", 100, "Territory")
 		self.make_column(self.date_label, "posting_date", "Date")
 		self.make_column(_("Item Code"), "item_code", "Link", 100, "Item")
 		self.make_column(_("Item Group"), "item_group", "Link", 100, "Item Group")

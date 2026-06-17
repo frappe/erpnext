@@ -87,7 +87,6 @@ class PurchasePartnerSummaryReport:
 			.select(
 				self.dt.name,
 				self.dt.supplier,
-				self.dt.territory,
 				Field(self.date_field, "posting_date", table=self.dt),
 				self.dt.purchase_partner,
 				self.dt.commission_rate,
@@ -106,7 +105,7 @@ class PurchasePartnerSummaryReport:
 		pass
 
 	def _apply_common_filters(self):
-		for field in ["company", "supplier", "territory", "purchase_partner"]:
+		for field in ["company", "supplier", "purchase_partner"]:
 			if self.filters.get(field):
 				self.query = self.query.where(Field(field, table=self.dt) == self.filters.get(field))
 
@@ -146,12 +145,9 @@ class PurchasePartnerSummaryReport:
 
 class PurchasePartnerCommissionSummaryReport(PurchasePartnerSummaryReport):
 	def prepare_columns(self):
-		self.make_column(
-			_(self.filters.get("doctype")), "name", "Link", options=self.filters.get("doctype")
-		)
+		self.make_column(_(self.filters.get("doctype")), "name", "Link", options=self.filters.get("doctype"))
 		self.make_column(_("Supplier"), "supplier", "Link", options="Supplier")
 		self.make_column(_("Currency"), "currency", "Data", 80, hidden=1)
-		self.make_column(_("Territory"), "territory", "Link", 100, "Territory")
 		self.make_column(self.date_label, "posting_date", "Date")
 		self.make_column(_("Amount"), "amount", "Currency", 120, "currency")
 		self.make_column(_("Purchase Partner"), "purchase_partner", "Link", options="Purchase Partner")

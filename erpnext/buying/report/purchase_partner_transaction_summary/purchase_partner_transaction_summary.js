@@ -43,12 +43,6 @@ frappe.query_reports["Purchase Partner Transaction Summary"] = {
 			options: "Supplier",
 		},
 		{
-			fieldname: "territory",
-			label: __("Territory"),
-			fieldtype: "Link",
-			options: "Territory",
-		},
-		{
 			fieldname: "item_group",
 			label: __("Item Group"),
 			fieldtype: "Link",
