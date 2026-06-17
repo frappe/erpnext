@@ -528,7 +528,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						},
 						{
 							fieldtype: "Currency",
-							fieldname: "payment_amount",
+							fieldname: "outstanding",
 							label: __("Amount"),
 							in_list_view: 1,
 							read_only: 1,

@@ -2203,9 +2203,40 @@ def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, pa
 		outstanding_amount,
 	)
 
+	update_payment_schedule_outstanding(ref_doc, flt(outstanding["outstanding"]))
+
 	update_linked_dunnings(ref_doc, previous_outstanding_amount)
 	ref_doc.set_status(update=True)
 	ref_doc.notify_update()
+
+
+def update_payment_schedule_outstanding(ref_doc, base_outstanding_amount):
+	if not ref_doc.meta.has_field("payment_schedule"):
+		return
+
+	terms = frappe.get_all(
+		"Payment Schedule",
+		filters={"parent": ref_doc.name, "parenttype": ref_doc.doctype},
+		fields=["name", "payment_amount", "base_payment_amount"],
+	)
+	total_base_payment_amount = sum(flt(term.base_payment_amount) for term in terms)
+	if not total_base_payment_amount:
+		return
+
+	outstanding_fraction = base_outstanding_amount / total_base_payment_amount
+	precision = ref_doc.precision("outstanding_amount")
+	base_precision = ref_doc.precision("base_grand_total")
+
+	for term in terms:
+		frappe.db.set_value(
+			"Payment Schedule",
+			term.name,
+			{
+				"outstanding": flt(term.payment_amount * outstanding_fraction, precision),
+				"base_outstanding": flt(term.base_payment_amount * outstanding_fraction, base_precision),
+			},
+			update_modified=False,
+		)
 
 
 def delink_original_entry(pl_entry, partial_cancel=False):
