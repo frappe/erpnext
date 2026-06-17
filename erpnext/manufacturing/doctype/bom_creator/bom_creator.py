@@ -411,6 +411,49 @@ class BOMCreator(Document):
 
 		return self
 
+	@frappe.whitelist()
+	def process_item_selection(self, item_idx: int):
+		item_obj = self.get("items", {"idx": item_idx})
+		if not item_obj:
+			return
+
+		item_obj = item_obj[0]
+		if not item_obj.item_code:
+			return
+
+		item_details = get_item_details(item_obj.item_code)
+		if not item_details:
+			frappe.throw(_("Item {0} does not exist in the system").format(item_obj.item_code))
+
+		item_obj.item_name = item_details.item_name
+		item_obj.description = item_details.description
+		item_obj.stock_uom = item_details.stock_uom
+		if not item_obj.uom:
+			item_obj.uom = item_details.stock_uom
+		if not item_obj.conversion_factor:
+			item_obj.conversion_factor = 1.0
+		if not item_obj.qty:
+			item_obj.qty = 1.0
+
+		item_obj.stock_qty = flt(item_obj.qty) * flt(item_obj.conversion_factor)
+
+		item_obj.rate = get_bom_item_rate(
+			{
+				"company": self.company,
+				"item_code": item_obj.item_code,
+				"bom_no": "",
+				"qty": item_obj.qty,
+				"uom": item_obj.uom,
+				"stock_uom": item_obj.stock_uom,
+				"conversion_factor": item_obj.conversion_factor,
+				"sourced_by_supplier": item_obj.sourced_by_supplier,
+			},
+			self,
+		)
+		item_obj.amount = flt(item_obj.rate) * flt(item_obj.qty)
+
+		return self
+
 	def has_operations(self):
 		for row in self.items:
 			if row.operation:

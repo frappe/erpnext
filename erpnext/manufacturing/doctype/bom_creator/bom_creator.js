@@ -215,6 +215,13 @@ frappe.ui.form.on("BOM Creator Item", {
 		}
 	},
 
+	qty(frm, cdt, cdn) {
+		let item = frappe.get_doc(cdt, cdn);
+		if (!item.qty) {
+			frappe.model.set_value(cdt, cdn, "qty", 1.0);
+		}
+	},
+
 	do_not_explode(frm, cdt, cdn) {
 		let item = frappe.get_doc(cdt, cdn);
 		if (!item.do_not_explode) {
