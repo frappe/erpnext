@@ -87,6 +87,15 @@ erpnext.buying = {
 				me.frm.set_query("supplier_address", erpnext.queries.address_query);
 
 				me.frm.set_query("billing_address", erpnext.queries.company_address_query);
+
+				me.frm.set_query("purchase_person", "purchase_team", function () {
+					return {
+						filters: {
+							is_group: 0,
+							enabled: 1,
+						},
+					};
+				});
 				erpnext.accounts.dimensions.setup_dimension_filters(me.frm, me.frm.doctype);
 
 				this.frm.set_query("item_code", "items", function () {
