@@ -1,0 +1,504 @@
+# Copyright (c) 2024, Frappe Technologies Pvt. Ltd. and Contributors
+# License: GNU General Public License v3. See license.txt
+
+"""
+Cash Basis Financial Statements Engine.
+
+Under cash accounting:
+- Revenue is recognized when payment is received
+- Expenses are recognized when payment is made
+- Partial payments proportionally recognize income/expense based on the
+  original account distribution of the invoice
+
+For P&L:  GL entries from invoices are replaced by payment-date virtual entries
+          scaled by (allocated_payment / invoice_grand_total).
+For Balance Sheet: Invoice GL entries are scaled by settlement_ratio computed
+                   as of the report date; non-invoice entries pass through unchanged.
+"""
+
+import frappe
+from frappe import _
+from frappe.utils import cstr, flt
+
+from erpnext.accounts.report.financial_statements import (
+    accumulate_values_into_parents,
+    add_total_row,
+    calculate_values,
+    filter_accounts,
+    filter_out_zero_value_rows,
+    get_accounts,
+    get_appropriate_currency,
+    get_cost_centers_with_children,
+    prepare_data,
+)
+
+
+def get_cash_basis_data(
+    company,
+    root_type,
+    balance_must_be,
+    period_list,
+    filters=None,
+    accumulated_values=1,
+    only_current_fiscal_year=True,
+    total=True,
+):
+    """
+    Drop-in replacement for financial_statements.get_data() that uses cash basis GL entries.
+
+    For Income/Expense (P&L):  income/expense recognised at payment date.
+    For Asset/Liability/Equity (Balance Sheet): invoice entries scaled by settlement ratio.
+    """
+    accounts = get_accounts(company, root_type)
+    if not accounts:
+        return None
+
+    accounts, accounts_by_name, parent_children_map = filter_accounts(accounts)
+    company_currency = get_appropriate_currency(company, filters)
+
+    # For P&L: fetch from fiscal-year start.  For Balance Sheet: all time (None).
+    from_date = period_list[0]["year_start_date"] if only_current_fiscal_year else None
+    to_date = period_list[-1]["to_date"]
+
+    gl_entries_by_account = _set_cash_basis_gl_entries_by_account(
+        company=company,
+        from_date=from_date,
+        to_date=to_date,
+        filters=filters or frappe._dict(),
+        root_type=root_type,
+        accounts_by_name=accounts_by_name,
+    )
+
+    calculate_values(
+        accounts_by_name,
+        gl_entries_by_account,
+        period_list,
+        accumulated_values,
+        ignore_accumulated_values_for_fy=False,
+    )
+    accumulate_values_into_parents(accounts, accounts_by_name, period_list)
+
+    show_zero = getattr(filters, "show_zero_values", False) if filters else False
+    acc_values = getattr(filters, "accumulated_values", accumulated_values) if filters else accumulated_values
+
+    out = prepare_data(accounts, balance_must_be, period_list, company_currency, accumulated_values=acc_values)
+    out = filter_out_zero_value_rows(out, parent_children_map, show_zero)
+
+    if out and total:
+        add_total_row(out, root_type, balance_must_be, period_list, company_currency)
+
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Internal routing
+# ---------------------------------------------------------------------------
+
+
+def _set_cash_basis_gl_entries_by_account(company, from_date, to_date, filters, root_type, accounts_by_name):
+    """Build {account: [gl-entry-like dicts]} using cash basis logic."""
+    gl_entries_by_account = {}
+
+    if root_type in ("Income", "Expense"):
+        invoice_type = "Sales Invoice" if root_type == "Income" else "Purchase Invoice"
+
+        # 1. Direct (non-invoice) GL entries – recognised on posting date as-is
+        for entry in _get_non_invoice_gl_entries(
+            company, from_date, to_date, filters, accounts_by_name, invoice_type
+        ):
+            gl_entries_by_account.setdefault(entry.account, []).append(entry)
+
+        # 2. Payment-proportional entries – recognised on payment date
+        for entry in _get_payment_based_gl_entries(
+            company, from_date, to_date, filters, root_type, accounts_by_name
+        ):
+            gl_entries_by_account.setdefault(entry.account, []).append(entry)
+
+    else:
+        # Balance Sheet: scale invoice GL entries by settlement ratio
+        for entry in _get_balance_sheet_cash_basis_entries(
+            company, from_date, to_date, filters, accounts_by_name
+        ):
+            gl_entries_by_account.setdefault(entry.account, []).append(entry)
+
+    return gl_entries_by_account
+
+
+# ---------------------------------------------------------------------------
+# P&L helpers
+# ---------------------------------------------------------------------------
+
+
+def _get_non_invoice_gl_entries(company, from_date, to_date, filters, accounts_by_name, exclude_voucher_type):
+    """
+    Standard GL entries for the given accounts excluding the specified invoice voucher type
+    (Sales Invoice or Purchase Invoice) and Period Closing Vouchers.
+    """
+    account_names = list(accounts_by_name.keys())
+    if not account_names:
+        return []
+
+    conditions = [
+        "gl.company = %(company)s",
+        "gl.is_cancelled = 0",
+        "gl.posting_date <= %(to_date)s",
+        "gl.voucher_type != %(exclude_voucher_type)s",
+        "gl.voucher_type != 'Period Closing Voucher'",
+        "gl.account IN %(accounts)s",
+    ]
+    params = {
+        "company": company,
+        "to_date": to_date,
+        "exclude_voucher_type": exclude_voucher_type,
+        "accounts": tuple(account_names),
+    }
+
+    if from_date:
+        conditions.append("gl.posting_date >= %(from_date)s")
+        params["from_date"] = from_date
+
+    _apply_gl_filter_conditions(conditions, params, filters)
+
+    return frappe.db.sql(
+        """
+        SELECT
+            gl.account, gl.debit, gl.credit,
+            gl.posting_date, gl.fiscal_year,
+            gl.account_currency,
+            gl.debit_in_account_currency, gl.credit_in_account_currency,
+            gl.is_opening
+        FROM `tabGL Entry` gl
+        WHERE {where}
+        """.format(where=" AND ".join(conditions)),
+        params,
+        as_dict=True,
+    )
+
+
+def _get_payment_based_gl_entries(company, from_date, to_date, filters, root_type, accounts_by_name):
+    """
+    Generate virtual GL entries dated at payment date with proportional income/expense amounts.
+
+    Handles:
+    - Payment Entry References (standard payments, advance application)
+    - Journal Entry settlements (against_voucher_type = SI/PI)
+    """
+    is_income = root_type == "Income"
+    invoice_type = "Sales Invoice" if is_income else "Purchase Invoice"
+    invoice_table = "tabSales Invoice" if is_income else "tabPurchase Invoice"
+
+    account_names = list(accounts_by_name.keys())
+    if not account_names:
+        return []
+
+    entries = []
+
+    # --- Payment Entry Reference path ---
+    pe_conditions = [
+        "pe.company = %(company)s",
+        "pe.docstatus = 1",
+        "pe.posting_date <= %(to_date)s",
+        "per.reference_doctype = %(invoice_type)s",
+        "inv_gl.account IN %(accounts)s",
+        "inv_gl.voucher_type = %(invoice_type)s",
+        "inv_gl.is_cancelled = 0",
+    ]
+    pe_params = {
+        "company": company,
+        "to_date": to_date,
+        "invoice_type": invoice_type,
+        "accounts": tuple(account_names),
+    }
+    if from_date:
+        pe_conditions.append("pe.posting_date >= %(from_date)s")
+        pe_params["from_date"] = from_date
+
+    _apply_payment_filter_conditions(pe_conditions, pe_params, filters)
+
+    pe_entries = frappe.db.sql(
+        """
+        SELECT
+            inv_gl.account,
+            pe.posting_date,
+            '' AS fiscal_year,
+            (inv_gl.debit  * per.allocated_amount / NULLIF(inv.grand_total, 0)) AS debit,
+            (inv_gl.credit * per.allocated_amount / NULLIF(inv.grand_total, 0)) AS credit,
+            (inv_gl.debit_in_account_currency  * per.allocated_amount / NULLIF(inv.grand_total, 0)) AS debit_in_account_currency,
+            (inv_gl.credit_in_account_currency * per.allocated_amount / NULLIF(inv.grand_total, 0)) AS credit_in_account_currency,
+            inv_gl.account_currency
+        FROM `tabPayment Entry Reference` per
+        INNER JOIN `tabPayment Entry` pe  ON pe.name = per.parent
+        INNER JOIN `{invoice_table}` inv  ON inv.name = per.reference_name
+        INNER JOIN `tabGL Entry` inv_gl   ON inv_gl.voucher_no = per.reference_name
+        WHERE {where}
+        """.format(
+            invoice_table=invoice_table,
+            where=" AND ".join(pe_conditions),
+        ),
+        pe_params,
+        as_dict=True,
+    )
+    entries.extend(pe_entries)
+
+    # --- Journal Entry settlement path ---
+    # A JE used to settle an invoice posts a credit (income) or debit (expense) to the
+    # AR/AP account with against_voucher pointing to the invoice.
+    ar_ap_account_type = "Receivable" if is_income else "Payable"
+
+    # For income: the JE credits AR (credit > debit means collection)
+    # For expense: the JE debits AP (debit > credit means payment)
+    settled_amount_expr = (
+        "(je_gl.credit - je_gl.debit)" if is_income else "(je_gl.debit - je_gl.credit)"
+    )
+
+    je_conditions = [
+        "je_gl.company = %(company)s",
+        "je_gl.is_cancelled = 0",
+        "je_gl.voucher_type = 'Journal Entry'",
+        "je_gl.against_voucher_type = %(invoice_type)s",
+        "je_gl.posting_date <= %(to_date)s",
+        f"{settled_amount_expr} > 0",
+        "inv_gl.account IN %(accounts)s",
+        "inv_gl.voucher_type = %(invoice_type)s",
+        "inv_gl.is_cancelled = 0",
+        "ar_ap_acc.account_type = %(ar_ap_type)s",
+    ]
+    je_params = {
+        "company": company,
+        "to_date": to_date,
+        "invoice_type": invoice_type,
+        "ar_ap_type": ar_ap_account_type,
+        "accounts": tuple(account_names),
+    }
+    if from_date:
+        je_conditions.append("je_gl.posting_date >= %(from_date)s")
+        je_params["from_date"] = from_date
+
+    je_entries = frappe.db.sql(
+        """
+        SELECT
+            inv_gl.account,
+            je_gl.posting_date,
+            je_gl.fiscal_year,
+            (inv_gl.debit  * ABS({settled}) / NULLIF(inv.grand_total, 0)) AS debit,
+            (inv_gl.credit * ABS({settled}) / NULLIF(inv.grand_total, 0)) AS credit,
+            (inv_gl.debit_in_account_currency  * ABS({settled}) / NULLIF(inv.grand_total, 0)) AS debit_in_account_currency,
+            (inv_gl.credit_in_account_currency * ABS({settled}) / NULLIF(inv.grand_total, 0)) AS credit_in_account_currency,
+            inv_gl.account_currency
+        FROM `tabGL Entry` je_gl
+        INNER JOIN tabAccount ar_ap_acc ON ar_ap_acc.name = je_gl.account
+        INNER JOIN `{invoice_table}` inv   ON inv.name = je_gl.against_voucher
+        INNER JOIN `tabGL Entry` inv_gl
+            ON inv_gl.voucher_no = je_gl.against_voucher
+        WHERE {where}
+        """.format(
+            settled=settled_amount_expr,
+            invoice_table=invoice_table,
+            where=" AND ".join(je_conditions),
+        ),
+        je_params,
+        as_dict=True,
+    )
+    entries.extend(je_entries)
+
+    return entries
+
+
+# ---------------------------------------------------------------------------
+# Balance Sheet helpers
+# ---------------------------------------------------------------------------
+
+
+def _get_balance_sheet_cash_basis_entries(company, from_date, to_date, filters, accounts_by_name):
+    """
+    Get GL entries for balance sheet accounts with invoice entries scaled by
+    the settlement ratio as of to_date.
+
+    - Sales Invoice GL entries → scaled by (payments received / grand_total as of to_date)
+    - Purchase Invoice GL entries → scaled by (payments made / grand_total as of to_date)
+    - All other GL entries → passed through unchanged (ratio = 1.0)
+    """
+    si_ratios = _get_invoice_settlement_ratios(company, to_date, "Sales Invoice")
+    pi_ratios = _get_invoice_settlement_ratios(company, to_date, "Purchase Invoice")
+
+    account_names = list(accounts_by_name.keys())
+    if not account_names:
+        return []
+
+    conditions = [
+        "gl.company = %(company)s",
+        "gl.is_cancelled = 0",
+        "gl.posting_date <= %(to_date)s",
+        "gl.account IN %(accounts)s",
+    ]
+    params = {
+        "company": company,
+        "to_date": to_date,
+        "accounts": tuple(account_names),
+    }
+
+    if from_date:
+        conditions.append("gl.posting_date >= %(from_date)s")
+        params["from_date"] = from_date
+
+    _apply_gl_filter_conditions(conditions, params, filters)
+
+    raw_entries = frappe.db.sql(
+        """
+        SELECT
+            gl.account, gl.debit, gl.credit,
+            gl.posting_date, gl.fiscal_year,
+            gl.account_currency,
+            gl.debit_in_account_currency, gl.credit_in_account_currency,
+            gl.is_opening, gl.voucher_type, gl.voucher_no
+        FROM `tabGL Entry` gl
+        WHERE {where}
+        """.format(where=" AND ".join(conditions)),
+        params,
+        as_dict=True,
+    )
+
+    result = []
+    for gl in raw_entries:
+        ratio = 1.0
+        if gl.voucher_type == "Sales Invoice":
+            ratio = si_ratios.get(gl.voucher_no, 0.0)
+        elif gl.voucher_type == "Purchase Invoice":
+            ratio = pi_ratios.get(gl.voucher_no, 0.0)
+
+        if ratio != 1.0:
+            gl = frappe._dict(gl)
+            gl.debit = flt(gl.debit) * ratio
+            gl.credit = flt(gl.credit) * ratio
+            gl.debit_in_account_currency = flt(gl.debit_in_account_currency) * ratio
+            gl.credit_in_account_currency = flt(gl.credit_in_account_currency) * ratio
+
+        result.append(gl)
+
+    return result
+
+
+def _get_invoice_settlement_ratios(company, as_of_date, invoice_doctype):
+    """
+    Return {invoice_name: settled_ratio} where settled_ratio is in [0, 1].
+
+    settled_ratio = total payments allocated to invoice before as_of_date / invoice grand_total
+    Includes both Payment Entry Reference allocations and Journal Entry settlements.
+    """
+    invoice_table = "tabSales Invoice" if invoice_doctype == "Sales Invoice" else "tabPurchase Invoice"
+    ar_ap_type = "Receivable" if invoice_doctype == "Sales Invoice" else "Payable"
+
+    # Payment Entry Reference allocations
+    per_rows = frappe.db.sql(
+        f"""
+        SELECT inv.name, inv.grand_total,
+               COALESCE(SUM(per.allocated_amount), 0) AS total_paid
+        FROM `{invoice_table}` inv
+        LEFT JOIN `tabPayment Entry Reference` per
+            ON per.reference_name = inv.name
+            AND per.reference_doctype = %(invoice_doctype)s
+        LEFT JOIN `tabPayment Entry` pe
+            ON pe.name = per.parent
+            AND pe.posting_date <= %(as_of_date)s
+            AND pe.docstatus = 1
+        WHERE inv.docstatus = 1
+          AND inv.company = %(company)s
+        GROUP BY inv.name, inv.grand_total
+        """,
+        {"company": company, "as_of_date": as_of_date, "invoice_doctype": invoice_doctype},
+        as_dict=True,
+    )
+
+    # Journal Entry settlements (against_voucher links)
+    je_sign = "(je_gl.credit - je_gl.debit)" if invoice_doctype == "Sales Invoice" else "(je_gl.debit - je_gl.credit)"
+    je_rows = frappe.db.sql(
+        f"""
+        SELECT je_gl.against_voucher AS name,
+               SUM(ABS({je_sign})) AS total_paid
+        FROM `tabGL Entry` je_gl
+        INNER JOIN tabAccount acc ON acc.name = je_gl.account AND acc.account_type = %(ar_ap_type)s
+        WHERE je_gl.voucher_type = 'Journal Entry'
+          AND je_gl.against_voucher_type = %(invoice_doctype)s
+          AND je_gl.is_cancelled = 0
+          AND je_gl.company = %(company)s
+          AND je_gl.posting_date <= %(as_of_date)s
+          AND {je_sign} > 0
+        GROUP BY je_gl.against_voucher
+        """,
+        {"company": company, "as_of_date": as_of_date, "invoice_doctype": invoice_doctype, "ar_ap_type": ar_ap_type},
+        as_dict=True,
+    )
+
+    # Build grand_total map from per_rows
+    grand_totals = {row.name: flt(row.grand_total) for row in per_rows}
+    pe_paid = {row.name: flt(row.total_paid) for row in per_rows}
+    je_paid = {row.name: flt(row.total_paid) for row in je_rows}
+
+    ratios = {}
+    for invoice_name, grand_total in grand_totals.items():
+        if not grand_total:
+            ratios[invoice_name] = 1.0
+            continue
+        total = pe_paid.get(invoice_name, 0.0) + je_paid.get(invoice_name, 0.0)
+        ratios[invoice_name] = min(total / abs(grand_total), 1.0)
+
+    return ratios
+
+
+# ---------------------------------------------------------------------------
+# Filter helpers
+# ---------------------------------------------------------------------------
+
+
+def _apply_gl_filter_conditions(conditions, params, filters):
+    """Apply standard dimension and finance book filters to GL entry WHERE conditions."""
+    if not filters:
+        return
+
+    if filters.get("cost_center"):
+        cost_centers = get_cost_centers_with_children(filters.cost_center)
+        conditions.append("gl.cost_center IN %(cost_centers)s")
+        params["cost_centers"] = tuple(cost_centers)
+
+    if filters.get("project"):
+        projects = (
+            filters.project if isinstance(filters.project, list) else frappe.parse_json(filters.project)
+        )
+        conditions.append("gl.project IN %(projects)s")
+        params["projects"] = tuple(projects)
+
+    _apply_finance_book_condition("gl", conditions, params, filters)
+
+
+def _apply_payment_filter_conditions(conditions, params, filters):
+    """Apply cost_center / project filters against the Payment Entry table."""
+    if not filters:
+        return
+
+    if filters.get("cost_center"):
+        cost_centers = get_cost_centers_with_children(filters.cost_center)
+        conditions.append("pe.cost_center IN %(pe_cost_centers)s")
+        params["pe_cost_centers"] = tuple(cost_centers)
+
+    if filters.get("project"):
+        projects = (
+            filters.project if isinstance(filters.project, list) else frappe.parse_json(filters.project)
+        )
+        conditions.append("pe.project IN %(pe_projects)s")
+        params["pe_projects"] = tuple(projects)
+
+
+def _apply_finance_book_condition(table_alias, conditions, params, filters):
+    """Add finance book filter to conditions list."""
+    if not filters:
+        return
+
+    if filters.get("include_default_book_entries"):
+        company_fb = frappe.get_cached_value("Company", filters.get("company"), "default_finance_book")
+        finance_books = {cstr(filters.get("finance_book", "")), cstr(company_fb), ""}
+        conditions.append(f"({table_alias}.finance_book IN %(finance_books)s OR {table_alias}.finance_book IS NULL)")
+        params["finance_books"] = tuple(finance_books)
+    else:
+        finance_books = {cstr(filters.get("finance_book", "")), ""}
+        conditions.append(f"({table_alias}.finance_book IN %(finance_books)s OR {table_alias}.finance_book IS NULL)")
+        params["finance_books"] = tuple(finance_books)
