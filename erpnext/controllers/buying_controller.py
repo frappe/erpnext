@@ -407,6 +407,48 @@ class BuyingController(SubcontractingController):
 			self.precision("total_commission"),
 		)
 
+	def calculate_contribution(self):
+		if not self.meta.get_field("purchase_team"):
+			return
+
+		total = 0.0
+		purchase_team = self.get("purchase_team")
+
+		self.validate_purchase_team(purchase_team)
+
+		for purchase_person in purchase_team:
+			self.round_floats_in(purchase_person)
+
+			purchase_person.allocated_amount = flt(
+				flt(self.amount_eligible_for_commission) * purchase_person.allocated_percentage / 100.0,
+				self.precision("allocated_amount", purchase_person),
+			)
+
+			if purchase_person.commission_rate:
+				purchase_person.incentives = flt(
+					purchase_person.allocated_amount * flt(purchase_person.commission_rate) / 100.0,
+					self.precision("incentives", purchase_person),
+				)
+
+			total += purchase_person.allocated_percentage
+
+		if purchase_team and total != 100.0:
+			frappe.throw(_("Total allocated percentage for purchase team should be 100"))
+
+	def validate_purchase_team(self, purchase_team):
+		purchase_persons = [d.purchase_person for d in purchase_team]
+
+		if not purchase_persons:
+			return
+
+		purchase_person_status = frappe.db.get_all(
+			"Purchase Person", filters={"name": ["in", purchase_persons]}, fields=["name", "enabled"]
+		)
+
+		for row in purchase_person_status:
+			if not row.enabled:
+				frappe.throw(_("Purchase Person <b>{0}</b> is disabled.").format(row.name))
+
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
 

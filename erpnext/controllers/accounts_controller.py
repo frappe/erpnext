@@ -645,6 +645,7 @@ class AccountsController(TransactionBase):
 			"Purchase Invoice",
 		):
 			self.calculate_commission()
+			self.calculate_contribution()
 
 	def validate_date_with_fiscal_year(self):
 		if self.meta.get_field("fiscal_year"):

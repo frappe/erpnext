@@ -477,64 +477,89 @@ erpnext.buying = {
 				this.calculate_purchase_commission();
 			}
 
-		commission_rate() {
-			if (
-				["Purchase Order", "Purchase Receipt", "Purchase Invoice"].includes(
-					this.frm.doc.doctype
-				)
-			) {
-				this.calculate_purchase_commission();
+			commission_rate() {
+				if (
+					["Purchase Order", "Purchase Receipt", "Purchase Invoice"].includes(this.frm.doc.doctype)
+				) {
+					this.calculate_purchase_commission();
+				}
 			}
-		}
 
-		total_commission() {
-			if (
-				!["Purchase Order", "Purchase Receipt", "Purchase Invoice"].includes(
-					this.frm.doc.doctype
+			total_commission() {
+				if (
+					!["Purchase Order", "Purchase Receipt", "Purchase Invoice"].includes(this.frm.doc.doctype)
 				)
-			)
-				return;
-			frappe.model.round_floats_in(this.frm.doc, [
-				"amount_eligible_for_commission",
-				"total_commission",
-			]);
-			const { amount_eligible_for_commission } = this.frm.doc;
-			if (!amount_eligible_for_commission) return;
-			this.frm.set_value(
-				"commission_rate",
-				flt((this.frm.doc.total_commission * 100.0) / amount_eligible_for_commission)
-			);
-		}
-
-		calculate_purchase_commission() {
-			if (!this.frm.fields_dict.commission_rate || this.frm.doc.docstatus === 1) return;
-
-			if (this.frm.doc.commission_rate < 0 || this.frm.doc.commission_rate > 100) {
-				frappe.throw(
-					`${__(
-						frappe.meta.get_label(
-							this.frm.doc.doctype,
-							"commission_rate",
-							this.frm.doc.name
-						)
-					)} ${__("must be between 0 and 100")}`
+					return;
+				frappe.model.round_floats_in(this.frm.doc, [
+					"amount_eligible_for_commission",
+					"total_commission",
+				]);
+				const { amount_eligible_for_commission } = this.frm.doc;
+				if (!amount_eligible_for_commission) return;
+				this.frm.set_value(
+					"commission_rate",
+					flt((this.frm.doc.total_commission * 100.0) / amount_eligible_for_commission)
 				);
 			}
 
-			this.frm.doc.amount_eligible_for_commission = (this.frm.doc.items || []).reduce(
-				(sum, item) => (item.grant_commission ? sum + item.base_net_amount : sum),
-				0
-			);
+			purchase_team_add(doc, cdt, cdn) {
+				this.calculate_purchase_contribution();
+			}
 
-			this.frm.doc.total_commission = flt(
-				(this.frm.doc.amount_eligible_for_commission * this.frm.doc.commission_rate) / 100.0,
-				precision("total_commission")
-			);
+			purchase_team_remove() {
+				this.calculate_purchase_contribution();
+			}
 
-			refresh_field(["amount_eligible_for_commission", "total_commission"]);
-		}
+			calculate_purchase_contribution() {
+				if (!this.frm.fields_dict.purchase_team || this.frm.doc.docstatus === 1) return;
 
-		add_serial_batch_for_rejected_qty(doc, cdt, cdn) {
+				const purchaseTeam = this.frm.doc.purchase_team || [];
+				let total = 0.0;
+
+				purchaseTeam.forEach((row) => {
+					row.allocated_amount = flt(
+						(flt(this.frm.doc.amount_eligible_for_commission) * row.allocated_percentage) / 100.0
+					);
+
+					if (row.commission_rate) {
+						row.incentives = flt((row.allocated_amount * flt(row.commission_rate)) / 100.0);
+					}
+
+					total += flt(row.allocated_percentage);
+				});
+
+				if (purchaseTeam.length && total !== 100.0) {
+					frappe.msgprint(__("Total allocated percentage for purchase team should be 100"));
+				}
+
+				refresh_field("purchase_team");
+			}
+
+			calculate_purchase_commission() {
+				if (!this.frm.fields_dict.commission_rate || this.frm.doc.docstatus === 1) return;
+
+				if (this.frm.doc.commission_rate < 0 || this.frm.doc.commission_rate > 100) {
+					frappe.throw(
+						`${__(
+							frappe.meta.get_label(this.frm.doc.doctype, "commission_rate", this.frm.doc.name)
+						)} ${__("must be between 0 and 100")}`
+					);
+				}
+
+				this.frm.doc.amount_eligible_for_commission = (this.frm.doc.items || []).reduce(
+					(sum, item) => (item.grant_commission ? sum + item.base_net_amount : sum),
+					0
+				);
+
+				this.frm.doc.total_commission = flt(
+					(this.frm.doc.amount_eligible_for_commission * this.frm.doc.commission_rate) / 100.0,
+					precision("total_commission")
+				);
+
+				refresh_field(["amount_eligible_for_commission", "total_commission"]);
+			}
+
+			add_serial_batch_for_rejected_qty(doc, cdt, cdn) {
 				let item = locals[cdt][cdn];
 				let me = this;
 				let fields = ["has_batch_no", "has_serial_no"];

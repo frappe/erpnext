@@ -90,6 +90,50 @@ class TestPurchasePartner(ERPNextTestSuite):
 
 		po.cancel()
 
+	def test_purchase_team_contribution_on_purchase_order(self):
+		purchase_person = make_purchase_person()
+
+		po = create_purchase_order(do_not_submit=True)
+		for item in po.items:
+			item.grant_commission = 1
+		po.save()
+
+		po.append(
+			"purchase_team",
+			{
+				"purchase_person": purchase_person.purchase_person_name,
+				"allocated_percentage": 100.0,
+			},
+		)
+		po.save()
+
+		self.assertEqual(len(po.purchase_team), 1)
+		self.assertAlmostEqual(
+			po.purchase_team[0].allocated_amount, po.amount_eligible_for_commission, places=2
+		)
+
+		frappe.delete_doc("Purchase Person", purchase_person.name, force=True)
+
+	def test_purchase_team_total_percentage_validation(self):
+		purchase_person = make_purchase_person()
+
+		po = create_purchase_order(do_not_submit=True)
+		for item in po.items:
+			item.grant_commission = 1
+		po.save()
+
+		po.append(
+			"purchase_team",
+			{
+				"purchase_person": purchase_person.purchase_person_name,
+				"allocated_percentage": 60.0,
+			},
+		)
+		with self.assertRaises(frappe.ValidationError):
+			po.save()
+
+		frappe.delete_doc("Purchase Person", purchase_person.name, force=True)
+
 
 def make_purchase_partner(**kwargs):
 	kwargs = frappe._dict(kwargs)
@@ -102,3 +146,20 @@ def make_purchase_partner(**kwargs):
 	else:
 		partner = frappe.get_doc("Purchase Partner", partner.partner_name)
 	return partner
+
+
+def make_purchase_person(**kwargs):
+	kwargs = frappe._dict(kwargs)
+	name = kwargs.purchase_person_name or "_Test Purchase Person"
+	if frappe.db.exists("Purchase Person", name):
+		frappe.delete_doc("Purchase Person", name, force=True)
+	person = frappe.get_doc(
+		{
+			"doctype": "Purchase Person",
+			"purchase_person_name": name,
+			"commission_rate": kwargs.commission_rate or "10",
+			"enabled": 1,
+		}
+	)
+	person.insert(ignore_permissions=True)
+	return person

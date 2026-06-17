@@ -173,6 +173,8 @@
   "column_break_commission",
   "commission_rate",
   "total_commission",
+  "purchase_team_section",
+  "purchase_team",
   "more_info_tab",
   "status_section",
   "status",
@@ -1733,6 +1735,22 @@
    "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "purchase_team",
+   "fieldname": "purchase_team_section",
+   "fieldtype": "Section Break",
+   "label": "Purchase Team",
+   "print_hide": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "purchase_team",
+   "fieldtype": "Table",
+   "label": "Purchase Contributions and Incentives",
+   "options": "Purchase Team",
+   "print_hide": 1
   }
  ],
  "grid_page_length": 50,

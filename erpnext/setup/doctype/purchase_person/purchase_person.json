@@ -1,0 +1,181 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:purchase_person_name",
+ "creation": "2026-06-17 00:00:00",
+ "description": "All Purchase Transactions can be tagged against multiple Purchase Persons so that you can set and monitor targets.",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "name_and_employee_id",
+  "purchase_person_name",
+  "parent_purchase_person",
+  "commission_rate",
+  "is_group",
+  "enabled",
+  "cb0",
+  "employee",
+  "department",
+  "lft",
+  "rgt",
+  "old_parent",
+  "target_details_section_break",
+  "targets"
+ ],
+ "fields": [
+  {
+   "fieldname": "name_and_employee_id",
+   "fieldtype": "Section Break",
+   "label": "Name and Employee ID",
+   "options": "icon-user"
+  },
+  {
+   "fieldname": "purchase_person_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Purchase Person Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "description": "Select company name first.",
+   "fieldname": "parent_purchase_person",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "label": "Parent Purchase Person",
+   "options": "Purchase Person"
+  },
+  {
+   "fieldname": "commission_rate",
+   "fieldtype": "Data",
+   "label": "Commission Rate",
+   "print_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_group",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Group",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
+  },
+  {
+   "fieldname": "cb0",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "fetch_from": "employee.department",
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Department",
+   "read_only": 1
+  },
+  {
+   "fieldname": "lft",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "lft",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "rgt",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "rgt",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "old_parent",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Old Parent",
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "target_details_section_break",
+   "fieldtype": "Section Break",
+   "label": "Target Details"
+  },
+  {
+   "fieldname": "targets",
+   "fieldtype": "Table",
+   "label": "Target Details",
+   "options": "Target Detail"
+  }
+ ],
+ "icon": "fa fa-user",
+ "idx": 1,
+ "is_tree": 1,
+ "links": [],
+ "max_attachments": 0,
+ "modified": "2026-06-17 00:00:00",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Purchase Person",
+ "nsm_parent_field": "parent_purchase_person",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase User",
+   "share": 1
+  }
+ ],
+ "quick_entry": 0,
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

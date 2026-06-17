@@ -416,6 +416,25 @@
    "type": "Link"
   },
   {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Purchase Person",
+   "link_count": 0,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Purchase Person",
+   "link_count": 0,
+   "link_to": "Purchase Person",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
    "dependencies": "Purchase Partner",
    "hidden": 0,
    "is_query_report": 1,
