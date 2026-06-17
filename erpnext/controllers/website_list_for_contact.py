@@ -183,7 +183,7 @@ def rfq_transaction_list(parties_doctype, doctype, parties, limit_start, limit_p
 		frappe.qb.from_(party)
 		.select(party.parent.as_("name"), party.supplier)
 		.distinct()
-		.where((party.supplier == party[0]) & (party.docstatus == 1))
+		.where((party.supplier.isin(parties)) & (party.docstatus == 1))
 		.orderby(party.creation, order=frappe.qb.desc)
 		.limit(limit_page_length)
 		.offset(limit_start)
