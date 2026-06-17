@@ -18,8 +18,6 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.create_item()
 		self.create_bundle()
 		self.create_customer()
-		self.create_sales_invoice()
-		self.clear_old_entries()
 
 	def create_company(self):
 		company_name = "_Test Gross Profit"

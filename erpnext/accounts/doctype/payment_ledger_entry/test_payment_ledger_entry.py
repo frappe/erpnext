@@ -20,7 +20,6 @@ class TestPaymentLedgerEntry(ERPNextTestSuite):
 		self.create_company()
 		self.create_item()
 		self.create_customer()
-		self.clear_old_entries()
 
 	def create_company(self):
 		company_name = "_Test Payment Ledger"
