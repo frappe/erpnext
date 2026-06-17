@@ -262,6 +262,17 @@ frappe.ui.form.on("BOM", {
 				__("Create")
 			);
 
+			const has_sub_assemblies = frm.doc.items && frm.doc.items.some((i) => i.bom_no);
+			if (has_sub_assemblies) {
+				frm.add_custom_button(
+					__("Work Orders (All Levels)"),
+					function () {
+						frm.trigger("make_work_orders_for_sub_assemblies");
+					},
+					__("Create")
+				);
+			}
+
 			if (frm.doc.has_variants) {
 				frm.add_custom_button(
 					__("Variant BOM"),
@@ -353,6 +364,53 @@ frappe.ui.form.on("BOM", {
 				});
 			}
 		);
+	},
+
+	make_work_orders_for_sub_assemblies(frm) {
+		let dialog = new frappe.ui.Dialog({
+			title: __("Create Work Orders for All BOM Levels"),
+			fields: [
+				{
+					fieldname: "qty",
+					fieldtype: "Float",
+					label: __("Qty to Manufacture"),
+					reqd: 1,
+					default: 1,
+				},
+			],
+			primary_action_label: __("Create"),
+			primary_action(data) {
+				dialog.hide();
+				frappe.call({
+					method: "erpnext.manufacturing.doctype.bom.bom.make_work_orders_for_sub_assemblies",
+					args: {
+						bom_no: frm.doc.name,
+						qty: data.qty,
+						company: frm.doc.company,
+						project: frm.doc.project || null,
+					},
+					freeze: true,
+					callback(r) {
+						if (r.message && r.message.length) {
+							const links = r.message
+								.map(
+									(wo) =>
+										`<a href="/app/work-order/${encodeURIComponent(wo.name)}">${
+											wo.name
+										}</a>` + ` &mdash; ${wo.item} (Qty: ${wo.qty})`
+								)
+								.join("<br>");
+							frappe.msgprint({
+								title: __("{0} Work Order(s) Created", [r.message.length]),
+								message: links,
+								indicator: "green",
+							});
+						}
+					},
+				});
+			},
+		});
+		dialog.show();
 	},
 
 	make_variant_bom(frm) {

@@ -1411,3 +1411,55 @@ def get_backflush_based_on(bom_no=None):
 		)
 
 	return backflush_based_on
+
+
+@frappe.whitelist()
+def make_work_orders_for_sub_assemblies(
+	bom_no: str, qty: float, company: str, project: str | None = None
+) -> list[frappe._dict]:
+	"""Create a Work Order for the given BOM and one for every sub-assembly BOM in its tree.
+
+	Each Work Order is created flat (use_multi_level_bom=0) so that its required-items
+	list reflects only the direct inputs for that assembly level.  Sub-assembly quantities
+	are scaled from the root qty using the exploded_qty values in the BOM tree.
+
+	Returns a list of dicts: {name, item, qty, bom_no} for every Work Order created.
+	"""
+	from erpnext import get_default_company
+	from erpnext.manufacturing.doctype.work_order.mapper import get_item_details as _wo_item_details
+
+	if not frappe.has_permission("Work Order", "write"):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+	qty = flt(qty)
+	if not qty:
+		frappe.throw(_("Quantity to Manufacture is required"))
+
+	company = company or get_default_company()
+	bom_tree = BOMTree(bom_no)
+
+	# Root node first, then every sub-assembly node (breadth-first)
+	nodes: list[tuple[BOMTree, float]] = [(bom_tree, qty)]
+	for node in bom_tree.level_order_traversal():
+		if node.is_bom:
+			nodes.append((node, flt(qty) * flt(node.exploded_qty)))
+
+	created = []
+	for node, node_qty in nodes:
+		item_details = _wo_item_details(node.item_code, project, throw=False)
+		wo_doc = frappe.new_doc("Work Order")
+		wo_doc.production_item = node.item_code
+		wo_doc.company = company
+		wo_doc.track_semi_finished_goods = frappe.db.get_value("BOM", node.name, "track_semi_finished_goods")
+		wo_doc.update(item_details)
+		# override with the specific BOM for this node (item_details may carry a different default)
+		wo_doc.bom_no = node.name
+		wo_doc.use_multi_level_bom = 0
+		wo_doc.qty = flt(node_qty)
+		wo_doc.get_items_and_operations_from_bom()
+		wo_doc.insert()
+		created.append(
+			frappe._dict(name=wo_doc.name, item=node.item_code, qty=flt(node_qty), bom_no=node.name)
+		)
+
+	return created
