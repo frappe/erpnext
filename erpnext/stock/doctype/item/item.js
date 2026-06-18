@@ -1219,35 +1219,53 @@ $.extend(erpnext.item, {
 		frm.doc.attributes.forEach(function (d) {
 			if (!d.disabled) {
 				let p = new Promise((resolve) => {
-					if (!d.numeric_values) {
-						frappe
-							.call({
-								method: "frappe.client.get_list",
-								args: {
-									doctype: "Item Attribute Value",
-									filters: [["parent", "=", d.attribute]],
-									fields: ["attribute_value"],
-									limit_page_length: 0,
-									parent: "Item Attribute",
-									order_by: "idx",
-								},
-							})
-							.then((r) => {
-								if (r.message) {
-									attr_val_fields[d.attribute] = r.message.map(function (d) {
-										return d.attribute_value;
+					// Read the numeric configuration from the Item Attribute master
+					// instead of the variant attribute row, which may be stale or
+					// blank if the attribute was made numeric after it was added here.
+					frappe.db
+						.get_value("Item Attribute", d.attribute, [
+							"numeric_values",
+							"from_range",
+							"to_range",
+							"increment",
+						])
+						.then((res) => {
+							let attr = res.message || {};
+
+							if (!attr.numeric_values) {
+								frappe
+									.call({
+										method: "frappe.client.get_list",
+										args: {
+											doctype: "Item Attribute Value",
+											filters: [["parent", "=", d.attribute]],
+											fields: ["attribute_value"],
+											limit_page_length: 0,
+											parent: "Item Attribute",
+											order_by: "idx",
+										},
+									})
+									.then((r) => {
+										attr_val_fields[d.attribute] = (r.message || []).map(
+											(row) => row.attribute_value
+										);
+										resolve();
 									});
-									resolve();
+							} else {
+								let values = [];
+								if (flt(attr.increment) > 0) {
+									for (
+										var i = flt(attr.from_range);
+										i <= flt(attr.to_range);
+										i = flt(i + flt(attr.increment), 6)
+									) {
+										values.push(String(i));
+									}
 								}
-							});
-					} else {
-						let values = [];
-						for (var i = d.from_range; i <= d.to_range; i = flt(i + d.increment, 6)) {
-							values.push(String(i));
-						}
-						attr_val_fields[d.attribute] = values;
-						resolve();
-					}
+								attr_val_fields[d.attribute] = values;
+								resolve();
+							}
+						});
 				});
 
 				promises.push(p);
