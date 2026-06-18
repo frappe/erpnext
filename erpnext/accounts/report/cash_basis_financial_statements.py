@@ -469,19 +469,21 @@ def _get_je_credit_payment_entries(company, from_date, to_date, filters, root_ty
 
     party_type = "Customer" if is_income else "Supplier"
     ar_ap_type = "Receivable" if is_income else "Payable"
-    # Direction of the AR/AP entry in the original credit JE
-    # Income: JE debits AR (debit > credit)  |  Expense: JE credits AP (credit > debit)
-    ar_ap_net = "debit - credit" if is_income else "credit - debit"
-    # Direction of the P&L entry in the credit JE
-    # Income: income account credited  |  Expense: expense account debited
-    pl_net = "credit - debit" if is_income else "debit - credit"
-    # Direction of settlement in the settlement JE
-    # Income: AR credited (collected)  |  Expense: AP debited (paid)
-    settle_net = "credit - debit" if is_income else "debit - credit"
+
+    # Fully-qualified column expressions (avoids "Column 'debit' is ambiguous" in multi-join SQL)
+    # AR/AP direction in the credit JE: Income → AR debited; Expense → AP credited
+    if is_income:
+        je_par_net = "je_par.debit - je_par.credit"          # AR debit > credit
+        je_pl_net = "je_pl.credit - je_pl.debit"             # Income credit > debit
+        settle_gl_net = "settlement_gl.credit - settlement_gl.debit"  # AR credited when collected
+    else:
+        je_par_net = "je_par.credit - je_par.debit"          # AP credit > debit
+        je_pl_net = "je_pl.debit - je_pl.credit"             # Expense debit > credit
+        settle_gl_net = "settlement_gl.debit - settlement_gl.credit"  # AP debited when paid
 
     # Sub-query: total AR/AP amount per credit JE
     ar_ap_subquery = f"""
-        SELECT je_par.voucher_no, SUM(je_par.{ar_ap_net}) AS total_amount
+        SELECT je_par.voucher_no, SUM({je_par_net}) AS total_amount
         FROM `tabGL Entry` je_par
         INNER JOIN tabAccount ar_ap_acc
             ON ar_ap_acc.name = je_par.account AND ar_ap_acc.account_type = %(ar_ap_type)s
@@ -490,7 +492,7 @@ def _get_je_credit_payment_entries(company, from_date, to_date, filters, root_ty
           AND je_par.party_type = %(party_type)s
           AND je_par.party IS NOT NULL
           AND je_par.party != ''
-          AND (je_par.{ar_ap_net}) > 0
+          AND ({je_par_net}) > 0
         GROUP BY je_par.voucher_no
     """
 
@@ -509,7 +511,7 @@ def _get_je_credit_payment_entries(company, from_date, to_date, filters, root_ty
         "je_pl.account IN %(accounts)s",
         "je_pl.voucher_type = 'Journal Entry'",
         "je_pl.is_cancelled = 0",
-        f"(je_pl.{pl_net}) > 0",
+        f"({je_pl_net}) > 0",
     ]
     pe_params = dict(base_params)
     if from_date:
@@ -519,7 +521,7 @@ def _get_je_credit_payment_entries(company, from_date, to_date, filters, root_ty
 
     entries.extend(
         frappe.db.sql(
-            f"""
+            """
             SELECT
                 je_pl.account,
                 pe.posting_date,
@@ -534,8 +536,8 @@ def _get_je_credit_payment_entries(company, from_date, to_date, filters, root_ty
             INNER JOIN `tabPayment Entry` pe ON pe.name = per.parent
             INNER JOIN ({ar_ap_subquery}) ar_ap ON ar_ap.voucher_no = per.reference_name
             INNER JOIN `tabGL Entry` je_pl ON je_pl.voucher_no = per.reference_name
-            WHERE {{where}}
-            """.format(where=" AND ".join(pe_conditions)),
+            WHERE {where}
+            """.format(ar_ap_subquery=ar_ap_subquery, where=" AND ".join(pe_conditions)),
             pe_params,
             as_dict=True,
         )
@@ -549,13 +551,13 @@ def _get_je_credit_payment_entries(company, from_date, to_date, filters, root_ty
         "settlement_gl.against_voucher IS NOT NULL",
         "settlement_gl.is_cancelled = 0",
         "settlement_gl.party_type = %(party_type)s",
-        f"(settlement_gl.{settle_net}) > 0",
+        f"({settle_gl_net}) > 0",
         "settlement_gl.posting_date <= %(to_date)s",
         "settle_acc.account_type = %(ar_ap_type)s",
         "je_pl.account IN %(accounts)s",
         "je_pl.voucher_type = 'Journal Entry'",
         "je_pl.is_cancelled = 0",
-        f"(je_pl.{pl_net}) > 0",
+        f"({je_pl_net}) > 0",
     ]
     je_params = dict(base_params)
     if from_date:
@@ -564,23 +566,27 @@ def _get_je_credit_payment_entries(company, from_date, to_date, filters, root_ty
 
     entries.extend(
         frappe.db.sql(
-            f"""
+            """
             SELECT
                 je_pl.account,
                 settlement_gl.posting_date,
                 settlement_gl.fiscal_year,
                 je_pl.account_currency,
                 0 AS is_opening,
-                (je_pl.debit  * (settlement_gl.{settle_net}) / NULLIF(ar_ap.total_amount, 0)) AS debit,
-                (je_pl.credit * (settlement_gl.{settle_net}) / NULLIF(ar_ap.total_amount, 0)) AS credit,
-                (je_pl.debit_in_account_currency  * (settlement_gl.{settle_net}) / NULLIF(ar_ap.total_amount, 0)) AS debit_in_account_currency,
-                (je_pl.credit_in_account_currency * (settlement_gl.{settle_net}) / NULLIF(ar_ap.total_amount, 0)) AS credit_in_account_currency
+                (je_pl.debit  * ({settle_gl_net}) / NULLIF(ar_ap.total_amount, 0)) AS debit,
+                (je_pl.credit * ({settle_gl_net}) / NULLIF(ar_ap.total_amount, 0)) AS credit,
+                (je_pl.debit_in_account_currency  * ({settle_gl_net}) / NULLIF(ar_ap.total_amount, 0)) AS debit_in_account_currency,
+                (je_pl.credit_in_account_currency * ({settle_gl_net}) / NULLIF(ar_ap.total_amount, 0)) AS credit_in_account_currency
             FROM `tabGL Entry` settlement_gl
             INNER JOIN tabAccount settle_acc ON settle_acc.name = settlement_gl.account
             INNER JOIN ({ar_ap_subquery}) ar_ap ON ar_ap.voucher_no = settlement_gl.against_voucher
             INNER JOIN `tabGL Entry` je_pl ON je_pl.voucher_no = settlement_gl.against_voucher
-            WHERE {{where}}
-            """.format(where=" AND ".join(je_conditions)),
+            WHERE {where}
+            """.format(
+                settle_gl_net=settle_gl_net,
+                ar_ap_subquery=ar_ap_subquery,
+                where=" AND ".join(je_conditions),
+            ),
             je_params,
             as_dict=True,
         )
@@ -693,14 +699,18 @@ def _get_je_credit_settlement_ratios(company, as_of_date, is_income=False):
     """
     party_type = "Customer" if is_income else "Supplier"
     ar_ap_type = "Receivable" if is_income else "Payable"
-    # Direction of the AR/AP entry in the credit JE
-    ar_ap_net = "debit - credit" if is_income else "credit - debit"
-    # Direction of the settlement JE (collecting AR or paying AP)
-    settle_net = "credit - debit" if is_income else "debit - credit"
+
+    # Fully-qualified column expressions (avoids "Column 'debit' is ambiguous" in multi-join SQL)
+    if is_income:
+        je_par_net = "je_par.debit - je_par.credit"    # AR debited in income credit JE
+        je_gl_settle = "je_gl.credit - je_gl.debit"    # AR credited when collected
+    else:
+        je_par_net = "je_par.credit - je_par.debit"    # AP credited in expense credit JE
+        je_gl_settle = "je_gl.debit - je_gl.credit"    # AP debited when paid
 
     ar_ap_rows = frappe.db.sql(
         f"""
-        SELECT je_par.voucher_no, SUM(je_par.{ar_ap_net}) AS total_amount
+        SELECT je_par.voucher_no, SUM({je_par_net}) AS total_amount
         FROM `tabGL Entry` je_par
         INNER JOIN tabAccount ar_ap_acc
             ON ar_ap_acc.name = je_par.account AND ar_ap_acc.account_type = %(ar_ap_type)s
@@ -710,7 +720,7 @@ def _get_je_credit_settlement_ratios(company, as_of_date, is_income=False):
           AND je_par.party_type = %(party_type)s
           AND je_par.party IS NOT NULL
           AND je_par.party != ''
-          AND (je_par.{ar_ap_net}) > 0
+          AND ({je_par_net}) > 0
         GROUP BY je_par.voucher_no
         """,
         {"company": company, "ar_ap_type": ar_ap_type, "party_type": party_type},
@@ -739,7 +749,7 @@ def _get_je_credit_settlement_ratios(company, as_of_date, is_income=False):
 
     je_settle_rows = frappe.db.sql(
         f"""
-        SELECT je_gl.against_voucher, SUM(je_gl.{settle_net}) AS settled
+        SELECT je_gl.against_voucher, SUM({je_gl_settle}) AS settled
         FROM `tabGL Entry` je_gl
         INNER JOIN tabAccount ar_ap_acc
             ON ar_ap_acc.name = je_gl.account AND ar_ap_acc.account_type = %(ar_ap_type)s
@@ -749,7 +759,7 @@ def _get_je_credit_settlement_ratios(company, as_of_date, is_income=False):
           AND je_gl.is_cancelled = 0
           AND je_gl.company = %(company)s
           AND je_gl.posting_date <= %(as_of_date)s
-          AND (je_gl.{settle_net}) > 0
+          AND ({je_gl_settle}) > 0
         GROUP BY je_gl.against_voucher
         """,
         {"company": company, "as_of_date": as_of_date, "je_names": je_names, "ar_ap_type": ar_ap_type},
