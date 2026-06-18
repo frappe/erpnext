@@ -803,18 +803,20 @@ def _get_invoice_settlement_ratios(company, as_of_date, invoice_doctype):
     per_rows = frappe.db.sql(
         f"""
         SELECT inv.name, inv.grand_total, {extra_fields}
-               COALESCE(SUM(per.allocated_amount), 0) AS total_pe_paid
+               COALESCE(pe_sum.total_pe_paid, 0) AS total_pe_paid
         FROM `{invoice_table}` inv
-        LEFT JOIN `tabPayment Entry Reference` per
-            ON per.reference_name = inv.name
-            AND per.reference_doctype = %(invoice_doctype)s
-        LEFT JOIN `tabPayment Entry` pe
-            ON pe.name = per.parent
-            AND pe.posting_date <= %(as_of_date)s
-            AND pe.docstatus = 1
+        LEFT JOIN (
+            SELECT per.reference_name, SUM(per.allocated_amount) AS total_pe_paid
+            FROM `tabPayment Entry Reference` per
+            INNER JOIN `tabPayment Entry` pe
+                ON pe.name = per.parent
+                AND pe.posting_date <= %(as_of_date)s
+                AND pe.docstatus = 1
+            WHERE per.reference_doctype = %(invoice_doctype)s
+            GROUP BY per.reference_name
+        ) pe_sum ON pe_sum.reference_name = inv.name
         WHERE inv.docstatus = 1
           AND inv.company = %(company)s
-        GROUP BY inv.name, inv.grand_total, {extra_group} 1
         """,
         {"company": company, "as_of_date": as_of_date, "invoice_doctype": invoice_doctype},
         as_dict=True,
