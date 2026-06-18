@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
  "add_total_row": 0, 
  "apply_user_permissions": 1, 
  "creation": "2014-07-22 11:41:23.743564", 
@@ -14,6 +15,34 @@
  "owner": "Administrator", 
  "ref_doctype": "GL Entry", 
  "report_name": "Trial Balance", 
+=======
+ "add_total_row": 0,
+ "add_translate_data": 0,
+ "columns": [],
+ "creation": "2014-07-22 11:41:23.743564",
+ "default_print_format": "Trial Balance Standard",
+ "disable_prepared_report_automation": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "doctype_to_sync": [
+  {
+   "doc_type": "GL Entry"
+  }
+ ],
+ "filters": [],
+ "generate_csv": 0,
+ "idx": 4,
+ "is_standard": "Yes",
+ "modified": "2026-06-18 11:41:42.774023",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Trial Balance",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "GL Entry",
+ "report_name": "Trial Balance",
+>>>>>>> 5c536b8ad1 (refactor: maintain sync dependency in report master)
  "report_type": "Script Report",
  "roles": [
   {
@@ -25,5 +54,12 @@
   {
    "role": "Auditor"
   }
+<<<<<<< HEAD
  ]
 }
+=======
+ ],
+ "synced_report": 1,
+ "timeout": 0
+}
+>>>>>>> 5c536b8ad1 (refactor: maintain sync dependency in report master)
