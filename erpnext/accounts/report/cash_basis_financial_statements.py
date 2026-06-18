@@ -114,6 +114,12 @@ def _set_cash_basis_gl_entries_by_account(company, from_date, to_date, filters, 
         ):
             gl_entries_by_account.setdefault(entry.account, []).append(entry)
 
+        # 3. Self-paid invoices: is_paid=1 PI and is_pos=1 SI – no separate PE, recognised at invoice date
+        for entry in _get_self_paid_invoice_gl_entries(
+            company, from_date, to_date, filters, root_type, accounts_by_name
+        ):
+            gl_entries_by_account.setdefault(entry.account, []).append(entry)
+
     else:
         # Balance Sheet: scale invoice GL entries by settlement ratio
         for entry in _get_balance_sheet_cash_basis_entries(
@@ -304,6 +310,94 @@ def _get_payment_based_gl_entries(company, from_date, to_date, filters, root_typ
     return entries
 
 
+def _get_self_paid_invoice_gl_entries(company, from_date, to_date, filters, root_type, accounts_by_name):
+    """
+    GL entries from invoices where payment is embedded — no separate Payment Entry exists.
+
+    - Purchase Invoice with is_paid=1: fully paid at invoice posting date (ratio 1.0)
+    - Sales Invoice with is_pos=1 and paid_amount>0: POS payment portion recognised at
+      invoice posting date, scaled by paid_amount / grand_total.  Any outstanding amount
+      is handled by the regular PE path when a Payment Entry is created later.
+    """
+    is_income = root_type == "Income"
+    account_names = list(accounts_by_name.keys())
+    if not account_names:
+        return []
+
+    entries = []
+
+    if is_income:
+        conditions = [
+            "gl.company = %(company)s",
+            "gl.is_cancelled = 0",
+            "gl.voucher_type = 'Sales Invoice'",
+            "gl.posting_date <= %(to_date)s",
+            "gl.account IN %(accounts)s",
+            "si.is_pos = 1",
+            "si.paid_amount > 0",
+            "si.docstatus = 1",
+        ]
+        params = {"company": company, "to_date": to_date, "accounts": tuple(account_names)}
+        if from_date:
+            conditions.append("gl.posting_date >= %(from_date)s")
+            params["from_date"] = from_date
+        _apply_gl_filter_conditions(conditions, params, filters)
+
+        entries.extend(
+            frappe.db.sql(
+                """
+                SELECT
+                    gl.account, gl.posting_date, gl.fiscal_year,
+                    gl.account_currency, gl.is_opening,
+                    (gl.debit  * si.paid_amount / NULLIF(si.grand_total, 0)) AS debit,
+                    (gl.credit * si.paid_amount / NULLIF(si.grand_total, 0)) AS credit,
+                    (gl.debit_in_account_currency  * si.paid_amount / NULLIF(si.grand_total, 0)) AS debit_in_account_currency,
+                    (gl.credit_in_account_currency * si.paid_amount / NULLIF(si.grand_total, 0)) AS credit_in_account_currency
+                FROM `tabGL Entry` gl
+                INNER JOIN `tabSales Invoice` si ON si.name = gl.voucher_no
+                WHERE {where}
+                """.format(where=" AND ".join(conditions)),
+                params,
+                as_dict=True,
+            )
+        )
+
+    else:
+        conditions = [
+            "gl.company = %(company)s",
+            "gl.is_cancelled = 0",
+            "gl.voucher_type = 'Purchase Invoice'",
+            "gl.posting_date <= %(to_date)s",
+            "gl.account IN %(accounts)s",
+            "pi.is_paid = 1",
+            "pi.docstatus = 1",
+        ]
+        params = {"company": company, "to_date": to_date, "accounts": tuple(account_names)}
+        if from_date:
+            conditions.append("gl.posting_date >= %(from_date)s")
+            params["from_date"] = from_date
+        _apply_gl_filter_conditions(conditions, params, filters)
+
+        entries.extend(
+            frappe.db.sql(
+                """
+                SELECT
+                    gl.account, gl.posting_date, gl.fiscal_year,
+                    gl.account_currency, gl.is_opening,
+                    gl.debit, gl.credit,
+                    gl.debit_in_account_currency, gl.credit_in_account_currency
+                FROM `tabGL Entry` gl
+                INNER JOIN `tabPurchase Invoice` pi ON pi.name = gl.voucher_no
+                WHERE {where}
+                """.format(where=" AND ".join(conditions)),
+                params,
+                as_dict=True,
+            )
+        )
+
+    return entries
+
+
 # ---------------------------------------------------------------------------
 # Balance Sheet helpers
 # ---------------------------------------------------------------------------
@@ -382,17 +476,25 @@ def _get_invoice_settlement_ratios(company, as_of_date, invoice_doctype):
     """
     Return {invoice_name: settled_ratio} where settled_ratio is in [0, 1].
 
-    settled_ratio = total payments allocated to invoice before as_of_date / invoice grand_total
-    Includes both Payment Entry Reference allocations and Journal Entry settlements.
+    settled_ratio = total cash received/paid / invoice grand_total as of as_of_date.
+    Sources:
+    - Payment Entry Reference allocations
+    - Journal Entry against_voucher settlements
+    - is_paid=1 Purchase Invoices (paid at invoice time, ratio = 1.0)
+    - is_pos=1 Sales Invoices with embedded POS payment (paid_amount / grand_total)
     """
     invoice_table = "tabSales Invoice" if invoice_doctype == "Sales Invoice" else "tabPurchase Invoice"
     ar_ap_type = "Receivable" if invoice_doctype == "Sales Invoice" else "Payable"
+    is_si = invoice_doctype == "Sales Invoice"
 
-    # Payment Entry Reference allocations
+    # Payment Entry Reference allocations; also fetch self-payment fields
+    extra_fields = "inv.paid_amount, inv.is_pos," if is_si else "inv.is_paid,"
+    extra_group = "inv.paid_amount, inv.is_pos," if is_si else "inv.is_paid,"
+
     per_rows = frappe.db.sql(
         f"""
-        SELECT inv.name, inv.grand_total,
-               COALESCE(SUM(per.allocated_amount), 0) AS total_paid
+        SELECT inv.name, inv.grand_total, {extra_fields}
+               COALESCE(SUM(per.allocated_amount), 0) AS total_pe_paid
         FROM `{invoice_table}` inv
         LEFT JOIN `tabPayment Entry Reference` per
             ON per.reference_name = inv.name
@@ -403,14 +505,14 @@ def _get_invoice_settlement_ratios(company, as_of_date, invoice_doctype):
             AND pe.docstatus = 1
         WHERE inv.docstatus = 1
           AND inv.company = %(company)s
-        GROUP BY inv.name, inv.grand_total
+        GROUP BY inv.name, inv.grand_total, {extra_group} 1
         """,
         {"company": company, "as_of_date": as_of_date, "invoice_doctype": invoice_doctype},
         as_dict=True,
     )
 
     # Journal Entry settlements (against_voucher links)
-    je_sign = "(je_gl.credit - je_gl.debit)" if invoice_doctype == "Sales Invoice" else "(je_gl.debit - je_gl.credit)"
+    je_sign = "(je_gl.credit - je_gl.debit)" if is_si else "(je_gl.debit - je_gl.credit)"
     je_rows = frappe.db.sql(
         f"""
         SELECT je_gl.against_voucher AS name,
@@ -429,18 +531,29 @@ def _get_invoice_settlement_ratios(company, as_of_date, invoice_doctype):
         as_dict=True,
     )
 
-    # Build grand_total map from per_rows
     grand_totals = {row.name: flt(row.grand_total) for row in per_rows}
-    pe_paid = {row.name: flt(row.total_paid) for row in per_rows}
     je_paid = {row.name: flt(row.total_paid) for row in je_rows}
 
     ratios = {}
-    for invoice_name, grand_total in grand_totals.items():
+    for row in per_rows:
+        grand_total = flt(row.grand_total)
         if not grand_total:
-            ratios[invoice_name] = 1.0
+            ratios[row.name] = 1.0
             continue
-        total = pe_paid.get(invoice_name, 0.0) + je_paid.get(invoice_name, 0.0)
-        ratios[invoice_name] = min(total / abs(grand_total), 1.0)
+
+        # is_paid=1 PI: fully paid at invoice time
+        if not is_si and row.get("is_paid"):
+            ratios[row.name] = 1.0
+            continue
+
+        pe_total = flt(row.total_pe_paid)
+        je_total = je_paid.get(row.name, 0.0)
+
+        # is_pos=1 SI: add embedded POS payment; subsequent PE handles the outstanding
+        pos_total = flt(row.get("paid_amount", 0)) if is_si and row.get("is_pos") else 0.0
+
+        total = pe_total + je_total + pos_total
+        ratios[row.name] = min(total / abs(grand_total), 1.0)
 
     return ratios
 
