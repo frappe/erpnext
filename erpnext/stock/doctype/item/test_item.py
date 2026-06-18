@@ -1239,13 +1239,24 @@ class TestItem(ERPNextTestSuite):
 		for item_code, properties in items.items():
 			make_item(item_code, properties)
 
-			serial_and_batch_bundle = frappe.db.get_value(
+			stock_entry_bundle = frappe.db.get_value(
 				"Stock Entry Detail", {"docstatus": 1, "item_code": item_code}, "serial_and_batch_bundle"
+			)
+			self.assertFalse(stock_entry_bundle)
+
+			serial_and_batch_bundle = frappe.db.get_value(
+				"Stock Ledger Entry",
+				{
+					"voucher_type": "Stock Reconciliation",
+					"is_cancelled": 0,
+					"item_code": item_code,
+				},
+				"serial_and_batch_bundle",
 			)
 			self.assertTrue(serial_and_batch_bundle)
 
 			sabb_qty = frappe.db.get_value("Serial and Batch Bundle", serial_and_batch_bundle, "total_qty")
-			self.assertEqual(sabb_qty, properties["opening_stock"])
+			self.assertEqual(abs(sabb_qty), properties["opening_stock"])
 
 
 def set_item_variant_settings(fields):
