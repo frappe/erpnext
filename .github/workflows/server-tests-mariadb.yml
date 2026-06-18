@@ -59,13 +59,14 @@ jobs:
         env:
           TZ: 'Asia/Kolkata'
           MARIADB_ROOT_PASSWORD: 'root'
-          # Disable durability guarantees that are unnecessary in a throwaway CI container.
-          # innodb_flush_log_at_trx_commit=0 avoids an fsync on every commit (biggest win).
-          # sync_binlog=0 skips binary-log syncs; innodb_doublewrite=0 skips the doublewrite buffer.
-          MARIADB_EXTRA_FLAGS: --innodb-flush-log-at-trx-commit=0 --sync-binlog=0 --innodb-doublewrite=0
         ports:
           - 3306:3306
-        options: --health-cmd="mariadb-admin ping" --health-interval=5s --health-timeout=2s --health-retries=3
+        options: >-
+          --health-cmd="mariadb-admin ping"
+          --health-interval=5s
+          --health-timeout=2s
+          --health-retries=3
+          --tmpfs /var/lib/mysql:rw,noexec,nosuid,size=1024m
 
     steps:
       - name: Clone
