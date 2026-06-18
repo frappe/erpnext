@@ -49,7 +49,13 @@ jobs:
       fail-fast: false
 
       matrix:
-        container: [1, 2, 3, 4]
+        # 4 runners, each owning 2 shards (8 total builds).
+        # Format per element: [[site_name, build_no, total_builds], ...]
+        sites:
+          - [["test_site_1", 1, 8], ["test_site_2", 2, 8]]
+          - [["test_site_3", 3, 8], ["test_site_4", 4, 8]]
+          - [["test_site_5", 5, 8], ["test_site_6", 6, 8]]
+          - [["test_site_7", 7, 8], ["test_site_8", 8, 8]]
 
     name: Python Unit Tests
 
@@ -71,6 +77,15 @@ jobs:
       - name: Clone
         uses: actions/checkout@v6
 
+      - name: Extract site variables
+        run: |
+          sites='${{ toJSON(matrix.sites) }}'
+          echo "SITE1=$(echo "$sites"  | jq -r '.[0][0]')"        >> "$GITHUB_ENV"
+          echo "BUILD1=$(echo "$sites" | jq -r '.[0][1]')"        >> "$GITHUB_ENV"
+          echo "SITE2=$(echo "$sites"  | jq -r '.[1][0]')"        >> "$GITHUB_ENV"
+          echo "BUILD2=$(echo "$sites" | jq -r '.[1][1]')"        >> "$GITHUB_ENV"
+          echo "TOTAL_BUILDS=$(echo "$sites" | jq -r '.[0][2]')"  >> "$GITHUB_ENV"
+
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
@@ -91,7 +106,9 @@ jobs:
           check-latest: true
 
       - name: Add to Hosts
-        run: echo "127.0.0.1 test_site" | sudo tee -a /etc/hosts
+        run: |
+          echo "127.0.0.1 ${{ env.SITE1 }}" | sudo tee -a /etc/hosts
+          echo "127.0.0.1 ${{ env.SITE2 }}" | sudo tee -a /etc/hosts
 
       - name: Cache pip
         uses: actions/cache@v4
@@ -145,10 +162,25 @@ jobs:
           cd ~/frappe-bench/
           coverage_flag=""
           if [ "$WITH_COVERAGE" = "true" ]; then coverage_flag="--with-coverage"; fi
-          bench --site test_site run-parallel-tests --lightmode --app erpnext \
-            --total-builds ${{ strategy.job-total }} \
-            --build-number ${{ matrix.container }} \
-            $coverage_flag
+
+          bench --site "$SITE1" run-parallel-tests --lightmode --app erpnext \
+            --total-builds "$TOTAL_BUILDS" \
+            --build-number "$BUILD1" \
+            $coverage_flag > test_output1.txt 2>&1 &
+          pid1=$!
+          bench --site "$SITE2" run-parallel-tests --lightmode --app erpnext \
+            --total-builds "$TOTAL_BUILDS" \
+            --build-number "$BUILD2" \
+            $coverage_flag > test_output2.txt 2>&1 &
+          pid2=$!
+
+          wait $pid1; exit1=$?
+          wait $pid2; exit2=$?
+
+          cat test_output1.txt
+          cat test_output2.txt
+
+          [ $exit1 -eq 0 ] && [ $exit2 -eq 0 ]
         env:
           TYPE: server
 
@@ -157,12 +189,19 @@ jobs:
         if: ${{ always() }}
         run: cat ~/frappe-bench/bench_start.log || true
 
-      - name: Upload coverage data
+      - name: Upload coverage data (site1)
         if: ${{ env.WITH_COVERAGE == 'true' }}
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-${{ matrix.container }}
-          path: /home/runner/frappe-bench/sites/coverage.xml
+          name: coverage-${{ env.BUILD1 }}
+          path: /home/runner/frappe-bench/sites/${{ env.SITE1 }}/coverage.xml
+
+      - name: Upload coverage data (site2)
+        if: ${{ env.WITH_COVERAGE == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ env.BUILD2 }}
+          path: /home/runner/frappe-bench/sites/${{ env.SITE2 }}/coverage.xml
 
   coverage:
     name: Coverage Wrap Up
