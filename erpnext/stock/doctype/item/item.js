@@ -1243,7 +1243,7 @@ $.extend(erpnext.item, {
 					} else {
 						let values = [];
 						for (var i = d.from_range; i <= d.to_range; i = flt(i + d.increment, 6)) {
-							values.push(i);
+							values.push(String(i));
 						}
 						attr_val_fields[d.attribute] = values;
 						resolve();
