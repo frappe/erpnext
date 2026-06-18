@@ -21,6 +21,7 @@ from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger 
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
 	get_party_tax_withholding_details,
 )
+from erpnext.accounts.general_ledger import validate_opening_entry_against_pcv
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
@@ -122,6 +123,9 @@ class JournalEntry(AccountsController):
 
 		if not self.is_opening:
 			self.is_opening = "No"
+
+		if self.is_opening == "Yes":
+			validate_opening_entry_against_pcv(self.company)
 
 		self.clearance_date = None
 
