@@ -573,11 +573,16 @@ def hide_group_accounts(data):
 	return non_group_accounts_data
 
 
-def execute_duckdb(filters, duckdb_conn):
-	validate_filters(filters)
-	columns = get_columns()
-	data = get_data_duckdb(filters, duckdb_conn)
-	return columns, data
+def execute_synced_report(filters):
+	from frappe.database.duckdb.database import get_latest_sync
+
+	if conn := get_latest_sync("GL Entry"):
+		validate_filters(filters)
+		columns = get_columns()
+		data = get_data_duckdb(filters, conn)
+		return columns, data
+	else:
+		frappe.throw(_("Trial Balance requires {0} to be synced to DuckDB").format(frappe.bold("GL Entry")))
 
 
 def get_data_duckdb(filters, conn):
