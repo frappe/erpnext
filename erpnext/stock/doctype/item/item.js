@@ -1250,7 +1250,8 @@ $.extend(erpnext.item, {
 											(row) => row.attribute_value
 										);
 										resolve();
-									});
+									})
+									.catch(() => resolve());
 							} else {
 								let values = [];
 								if (flt(attr.increment) > 0) {
@@ -1265,7 +1266,8 @@ $.extend(erpnext.item, {
 								attr_val_fields[d.attribute] = values;
 								resolve();
 							}
-						});
+						})
+						.catch(() => resolve());
 				});
 
 				promises.push(p);
