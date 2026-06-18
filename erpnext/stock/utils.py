@@ -2,12 +2,14 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import datetime
 import json
 
 import frappe
 from frappe import _
 from frappe.query_builder.functions import CombineDatetime, IfNull, Sum
 from frappe.utils import cstr, flt, get_link_to_form, get_time, getdate, nowdate, nowtime
+from frappe.utils.data import DateTimeLikeObject
 
 import erpnext
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
@@ -94,13 +96,13 @@ def get_stock_value_on(
 
 @frappe.whitelist()
 def get_stock_balance(
-	item_code,
-	warehouse,
-	posting_date=None,
-	posting_time=None,
-	with_valuation_rate=False,
-	with_serial_no=False,
-	inventory_dimensions_dict=None,
+	item_code: str,
+	warehouse: str | None,
+	posting_date: DateTimeLikeObject | None = None,
+	posting_time: DateTimeLikeObject | datetime.timedelta | None = None,
+	with_valuation_rate: bool = False,
+	with_serial_no: bool = False,
+	inventory_dimensions_dict: dict | None = None,
 ):
 	"""Returns stock balance quantity at given warehouse on given posting date or current date.
 
@@ -146,8 +148,7 @@ def get_stock_balance(
 					{
 						"item_code": item_code,
 						"warehouse": warehouse,
-						"posting_date": posting_date,
-						"posting_time": posting_time,
+						"posting_datetime": get_combine_datetime(posting_date, posting_time),
 						"ignore_warehouse": 1,
 					}
 				)
@@ -247,12 +248,15 @@ def _create_bin(item_code, warehouse):
 
 
 @frappe.whitelist()
-def get_incoming_rate(args, raise_error_if_no_rate=True, fallbacks: bool = True):
+def get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fallbacks: bool = True):
 	"""Get Incoming Rate based on valuation method"""
 	from erpnext.stock.stock_ledger import get_previous_sle, get_valuation_rate
 
 	if isinstance(args, str):
 		args = json.loads(args)
+
+	if not args.get("posting_datetime") and args.get("posting_date"):
+		args["posting_datetime"] = get_combine_datetime(args.get("posting_date"), args.get("posting_time"))
 
 	in_rate = None
 
