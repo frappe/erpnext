@@ -400,21 +400,6 @@
    "fieldtype": "Select",
    "label": "Categorize By",
    "options": "\nCategorize by Voucher\nCategorize by Voucher (Consolidated)"
-<<<<<<< HEAD
-=======
-  },
-  {
-   "default": "0",
-   "depends_on": "eval:(doc.report == 'Accounts Receivable');",
-   "fieldname": "show_future_payments",
-   "fieldtype": "Check",
-   "label": "Show Future Payments"
-  },
-  {
-   "fieldname": "print_format",
-   "fieldtype": "Link",
-   "label": "Print Format",
-   "options": "Print Format"
   },
   {
    "default": "0",
@@ -422,7 +407,6 @@
    "fieldname": "show_opening_entries",
    "fieldtype": "Check",
    "label": "Show Opening Entries"
->>>>>>> d0f1239d2b (fix(accounts): allow process statement of account generation with opening entries)
   }
  ],
  "links": [],
