@@ -120,6 +120,13 @@ def _set_cash_basis_gl_entries_by_account(company, from_date, to_date, filters, 
         ):
             gl_entries_by_account.setdefault(entry.account, []).append(entry)
 
+        # 4. Credit-expense JEs (DR Expense, CR Supplier Payable) – recognised when the payable is settled
+        if root_type == "Expense":
+            for entry in _get_je_credit_expense_payment_entries(
+                company, from_date, to_date, filters, accounts_by_name
+            ):
+                gl_entries_by_account.setdefault(entry.account, []).append(entry)
+
     else:
         # Balance Sheet: scale invoice GL entries by settlement ratio
         for entry in _get_balance_sheet_cash_basis_entries(
@@ -139,6 +146,10 @@ def _get_non_invoice_gl_entries(company, from_date, to_date, filters, accounts_b
     """
     Standard GL entries for the given accounts excluding the specified invoice voucher type
     (Sales Invoice or Purchase Invoice) and Period Closing Vouchers.
+
+    For the Expense path (exclude_voucher_type='Purchase Invoice'), Journal Entries that credit
+    a Supplier Payable account are also excluded — they are credit purchases equivalent to a PI
+    and should only be recognised when the payable is settled (handled by path 4).
     """
     account_names = list(accounts_by_name.keys())
     if not account_names:
@@ -162,6 +173,28 @@ def _get_non_invoice_gl_entries(company, from_date, to_date, filters, accounts_b
     if from_date:
         conditions.append("gl.posting_date >= %(from_date)s")
         params["from_date"] = from_date
+
+    # For the Expense path: exclude JEs that credit a Supplier Payable account (credit purchases via JE).
+    # These are handled by _get_je_credit_expense_payment_entries and must not be double-counted here.
+    if exclude_voucher_type == "Purchase Invoice":
+        conditions.append(
+            """NOT (
+                gl.voucher_type = 'Journal Entry'
+                AND EXISTS (
+                    SELECT 1
+                    FROM `tabGL Entry` je_pay
+                    INNER JOIN tabAccount pay_acc
+                        ON pay_acc.name = je_pay.account
+                        AND pay_acc.account_type = 'Payable'
+                    WHERE je_pay.voucher_no = gl.voucher_no
+                      AND je_pay.is_cancelled = 0
+                      AND je_pay.party_type = 'Supplier'
+                      AND je_pay.party IS NOT NULL
+                      AND je_pay.party != ''
+                      AND (je_pay.credit - je_pay.debit) > 0
+                )
+            )"""
+        )
 
     _apply_gl_filter_conditions(conditions, params, filters)
 
@@ -398,6 +431,128 @@ def _get_self_paid_invoice_gl_entries(company, from_date, to_date, filters, root
     return entries
 
 
+def _get_je_credit_expense_payment_entries(company, from_date, to_date, filters, accounts_by_name):
+    """
+    Recognize expenses from credit-expense JEs (DR Expense, CR Supplier Payable) at the date
+    the payable is settled — mirroring the treatment of Purchase Invoices.
+
+    A "credit-expense JE" is a Journal Entry that debits an expense account and credits a
+    Payable account with a Supplier party (equivalent to a credit purchase via PI).
+
+    Settlement is detected via:
+    - Payment Entry Reference: reference_doctype='Journal Entry', reference_name=<JE>
+    - Journal Entry: against_voucher_type='Journal Entry', against_voucher=<JE> on the payable side
+    """
+    account_names = list(accounts_by_name.keys())
+    if not account_names:
+        return []
+
+    # Inline sub-query reused in both paths: total payable amount per credit-expense JE
+    payable_subquery = """
+        SELECT je_pay.voucher_no, SUM(je_pay.credit - je_pay.debit) AS total_payable
+        FROM `tabGL Entry` je_pay
+        INNER JOIN tabAccount pay_acc
+            ON pay_acc.name = je_pay.account AND pay_acc.account_type = 'Payable'
+        WHERE je_pay.voucher_type = 'Journal Entry'
+          AND je_pay.is_cancelled = 0
+          AND je_pay.party_type = 'Supplier'
+          AND je_pay.party IS NOT NULL
+          AND je_pay.party != ''
+          AND (je_pay.credit - je_pay.debit) > 0
+        GROUP BY je_pay.voucher_no
+    """
+
+    entries = []
+
+    # --- Path A: PE Reference pointing to a credit-expense JE ---
+    pe_conditions = [
+        "pe.company = %(company)s",
+        "pe.docstatus = 1",
+        "pe.posting_date <= %(to_date)s",
+        "per.reference_doctype = 'Journal Entry'",
+        "je_exp.account IN %(accounts)s",
+        "je_exp.voucher_type = 'Journal Entry'",
+        "je_exp.is_cancelled = 0",
+        "(je_exp.debit - je_exp.credit) > 0",
+    ]
+    pe_params = {"company": company, "to_date": to_date, "accounts": tuple(account_names)}
+    if from_date:
+        pe_conditions.append("pe.posting_date >= %(from_date)s")
+        pe_params["from_date"] = from_date
+    _apply_payment_filter_conditions(pe_conditions, pe_params, filters)
+
+    entries.extend(
+        frappe.db.sql(
+            """
+            SELECT
+                je_exp.account,
+                pe.posting_date,
+                '' AS fiscal_year,
+                je_exp.account_currency,
+                0 AS is_opening,
+                (je_exp.debit  * per.allocated_amount / NULLIF(je_payable.total_payable, 0)) AS debit,
+                (je_exp.credit * per.allocated_amount / NULLIF(je_payable.total_payable, 0)) AS credit,
+                (je_exp.debit_in_account_currency  * per.allocated_amount / NULLIF(je_payable.total_payable, 0)) AS debit_in_account_currency,
+                (je_exp.credit_in_account_currency * per.allocated_amount / NULLIF(je_payable.total_payable, 0)) AS credit_in_account_currency
+            FROM `tabPayment Entry Reference` per
+            INNER JOIN `tabPayment Entry` pe ON pe.name = per.parent
+            INNER JOIN ({payable_subquery}) je_payable ON je_payable.voucher_no = per.reference_name
+            INNER JOIN `tabGL Entry` je_exp ON je_exp.voucher_no = per.reference_name
+            WHERE {where}
+            """.format(payable_subquery=payable_subquery, where=" AND ".join(pe_conditions)),
+            pe_params,
+            as_dict=True,
+        )
+    )
+
+    # --- Path B: Settlement JE debiting the payable of the credit-expense JE ---
+    je_conditions = [
+        "settlement_gl.company = %(company)s",
+        "settlement_gl.voucher_type = 'Journal Entry'",
+        "settlement_gl.against_voucher_type = 'Journal Entry'",
+        "settlement_gl.against_voucher IS NOT NULL",
+        "settlement_gl.is_cancelled = 0",
+        "settlement_gl.party_type = 'Supplier'",
+        "(settlement_gl.debit - settlement_gl.credit) > 0",
+        "settlement_gl.posting_date <= %(to_date)s",
+        "pay_acc.account_type = 'Payable'",
+        "je_exp.account IN %(accounts)s",
+        "je_exp.voucher_type = 'Journal Entry'",
+        "je_exp.is_cancelled = 0",
+        "(je_exp.debit - je_exp.credit) > 0",
+    ]
+    je_params = {"company": company, "to_date": to_date, "accounts": tuple(account_names)}
+    if from_date:
+        je_conditions.append("settlement_gl.posting_date >= %(from_date)s")
+        je_params["from_date"] = from_date
+
+    entries.extend(
+        frappe.db.sql(
+            """
+            SELECT
+                je_exp.account,
+                settlement_gl.posting_date,
+                settlement_gl.fiscal_year,
+                je_exp.account_currency,
+                0 AS is_opening,
+                (je_exp.debit  * (settlement_gl.debit - settlement_gl.credit) / NULLIF(je_payable.total_payable, 0)) AS debit,
+                (je_exp.credit * (settlement_gl.debit - settlement_gl.credit) / NULLIF(je_payable.total_payable, 0)) AS credit,
+                (je_exp.debit_in_account_currency  * (settlement_gl.debit - settlement_gl.credit) / NULLIF(je_payable.total_payable, 0)) AS debit_in_account_currency,
+                (je_exp.credit_in_account_currency * (settlement_gl.debit - settlement_gl.credit) / NULLIF(je_payable.total_payable, 0)) AS credit_in_account_currency
+            FROM `tabGL Entry` settlement_gl
+            INNER JOIN tabAccount pay_acc ON pay_acc.name = settlement_gl.account
+            INNER JOIN ({payable_subquery}) je_payable ON je_payable.voucher_no = settlement_gl.against_voucher
+            INNER JOIN `tabGL Entry` je_exp ON je_exp.voucher_no = settlement_gl.against_voucher
+            WHERE {where}
+            """.format(payable_subquery=payable_subquery, where=" AND ".join(je_conditions)),
+            je_params,
+            as_dict=True,
+        )
+    )
+
+    return entries
+
+
 # ---------------------------------------------------------------------------
 # Balance Sheet helpers
 # ---------------------------------------------------------------------------
@@ -410,10 +565,20 @@ def _get_balance_sheet_cash_basis_entries(company, from_date, to_date, filters, 
 
     - Sales Invoice GL entries → scaled by (payments received / grand_total as of to_date)
     - Purchase Invoice GL entries → scaled by (payments made / grand_total as of to_date)
+    - Credit-expense JE payable entries → scaled by JE settlement ratio (mirrors PI treatment)
     - All other GL entries → passed through unchanged (ratio = 1.0)
     """
     si_ratios = _get_invoice_settlement_ratios(company, to_date, "Sales Invoice")
     pi_ratios = _get_invoice_settlement_ratios(company, to_date, "Purchase Invoice")
+    je_credit_ratios = _get_je_credit_settlement_ratios(company, to_date)
+    # Set of Payable-type accounts — used to limit JE scaling to the payable side only
+    payable_accounts = frozenset(
+        frappe.db.get_all(
+            "Account",
+            filters={"company": company, "account_type": "Payable", "is_group": 0},
+            pluck="name",
+        )
+    )
 
     account_names = list(accounts_by_name.keys())
     if not account_names:
@@ -459,6 +624,10 @@ def _get_balance_sheet_cash_basis_entries(company, from_date, to_date, filters, 
             ratio = si_ratios.get(gl.voucher_no, 0.0)
         elif gl.voucher_type == "Purchase Invoice":
             ratio = pi_ratios.get(gl.voucher_no, 0.0)
+        elif gl.voucher_type == "Journal Entry" and gl.voucher_no in je_credit_ratios:
+            # Only scale the payable account entry; other JE lines (if any) pass through unchanged
+            if gl.account in payable_accounts:
+                ratio = je_credit_ratios[gl.voucher_no]
 
         if ratio != 1.0:
             gl = frappe._dict(gl)
@@ -470,6 +639,91 @@ def _get_balance_sheet_cash_basis_entries(company, from_date, to_date, filters, 
         result.append(gl)
 
     return result
+
+
+def _get_je_credit_settlement_ratios(company, as_of_date):
+    """
+    Return {je_voucher_no: settled_ratio} for credit-expense JEs (DR Expense, CR Supplier Payable).
+
+    settled_ratio = total payments made against the JE payable / total JE payable amount.
+    Sources: PE References and JE against_voucher settlements.
+
+    Used by the Balance Sheet to mirror the same deferral treatment applied to Purchase Invoices.
+    """
+    # All credit-expense JEs with their payable totals
+    payable_rows = frappe.db.sql(
+        """
+        SELECT je_pay.voucher_no, SUM(je_pay.credit - je_pay.debit) AS total_payable
+        FROM `tabGL Entry` je_pay
+        INNER JOIN tabAccount pay_acc
+            ON pay_acc.name = je_pay.account AND pay_acc.account_type = 'Payable'
+        WHERE je_pay.voucher_type = 'Journal Entry'
+          AND je_pay.is_cancelled = 0
+          AND je_pay.company = %(company)s
+          AND je_pay.party_type = 'Supplier'
+          AND je_pay.party IS NOT NULL
+          AND je_pay.party != ''
+          AND (je_pay.credit - je_pay.debit) > 0
+        GROUP BY je_pay.voucher_no
+        """,
+        {"company": company},
+        as_dict=True,
+    )
+    if not payable_rows:
+        return {}
+
+    je_names = tuple(r.voucher_no for r in payable_rows)
+
+    # Payments via Payment Entry Reference
+    pe_rows = frappe.db.sql(
+        """
+        SELECT per.reference_name, COALESCE(SUM(per.allocated_amount), 0) AS paid
+        FROM `tabPayment Entry Reference` per
+        INNER JOIN `tabPayment Entry` pe
+            ON pe.name = per.parent
+            AND pe.docstatus = 1
+            AND pe.posting_date <= %(as_of_date)s
+        WHERE per.reference_doctype = 'Journal Entry'
+          AND per.reference_name IN %(je_names)s
+        GROUP BY per.reference_name
+        """,
+        {"as_of_date": as_of_date, "je_names": je_names},
+        as_dict=True,
+    )
+
+    # Payments via Journal Entry (against_voucher_type = 'Journal Entry')
+    je_pay_rows = frappe.db.sql(
+        """
+        SELECT je_gl.against_voucher, SUM(je_gl.debit - je_gl.credit) AS paid
+        FROM `tabGL Entry` je_gl
+        INNER JOIN tabAccount pay_acc
+            ON pay_acc.name = je_gl.account AND pay_acc.account_type = 'Payable'
+        WHERE je_gl.voucher_type = 'Journal Entry'
+          AND je_gl.against_voucher_type = 'Journal Entry'
+          AND je_gl.against_voucher IN %(je_names)s
+          AND je_gl.is_cancelled = 0
+          AND je_gl.company = %(company)s
+          AND je_gl.posting_date <= %(as_of_date)s
+          AND (je_gl.debit - je_gl.credit) > 0
+        GROUP BY je_gl.against_voucher
+        """,
+        {"company": company, "as_of_date": as_of_date, "je_names": je_names},
+        as_dict=True,
+    )
+
+    total_payable = {r.voucher_no: flt(r.total_payable) for r in payable_rows}
+    pe_paid = {r.reference_name: flt(r.paid) for r in pe_rows}
+    je_paid = {r.against_voucher: flt(r.paid) for r in je_pay_rows}
+
+    ratios = {}
+    for je_name, payable_amount in total_payable.items():
+        if not payable_amount:
+            ratios[je_name] = 1.0
+            continue
+        total_paid = pe_paid.get(je_name, 0.0) + je_paid.get(je_name, 0.0)
+        ratios[je_name] = min(total_paid / payable_amount, 1.0)
+
+    return ratios
 
 
 def _get_invoice_settlement_ratios(company, as_of_date, invoice_doctype):
