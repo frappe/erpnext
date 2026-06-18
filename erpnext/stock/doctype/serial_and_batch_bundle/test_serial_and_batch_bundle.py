@@ -10,6 +10,7 @@ from frappe.utils import flt, nowtime, today
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	add_serial_batch_ledgers,
+	combine_datetime,
 	make_batch_nos,
 	make_serial_nos,
 )
@@ -1271,14 +1272,17 @@ def make_serial_batch_bundle(kwargs):
 	if kwargs.get("type_of_transaction"):
 		type_of_transaction = kwargs.get("type_of_transaction")
 
+	posting_datetime = None
+	if kwargs.get("posting_date"):
+		posting_datetime = combine_datetime(kwargs.posting_date, kwargs.posting_time or nowtime())
+
 	sb = SerialBatchCreation(
 		{
 			"item_code": kwargs.item_code,
 			"warehouse": kwargs.warehouse,
 			"voucher_type": kwargs.voucher_type,
 			"voucher_no": kwargs.voucher_no,
-			"posting_date": kwargs.posting_date,
-			"posting_time": kwargs.posting_time,
+			"posting_datetime": posting_datetime,
 			"qty": kwargs.qty,
 			"avg_rate": kwargs.rate,
 			"batches": kwargs.batches,
