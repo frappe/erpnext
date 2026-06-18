@@ -95,6 +95,7 @@ class Batch(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		allow_negative_stock_for_batch: DF.Check
 		batch_id: DF.Data
 		batch_qty: DF.Float
 		description: DF.SmallText | None
