@@ -295,7 +295,7 @@ def get_payments(invoices):
 		.groupby(SalesInvoicePayment.mode_of_payment)
 		.select(
 			SalesInvoicePayment.mode_of_payment,
-			SalesInvoicePayment.account,
+			SalesInvoicePayment.account.as_("account"),
 			fn.Sum(SalesInvoicePayment.amount).as_("amount"),
 		)
 	)
@@ -419,7 +419,7 @@ def build_invoice_query(invoice_doctype, user, pos_profile, start, end):
 			InvoiceDocType.account_for_change_amount,
 			InvoiceDocType.is_return,
 			InvoiceDocType.return_against,
-			fn.Timestamp(InvoiceDocType.posting_date, InvoiceDocType.posting_time).as_("timestamp"),
+			fn.CombineDatetime(InvoiceDocType.posting_date, InvoiceDocType.posting_time).as_("timestamp"),
 			ConstantColumn(invoice_doctype).as_("doctype"),
 		)
 		.where(
@@ -428,8 +428,8 @@ def build_invoice_query(invoice_doctype, user, pos_profile, start, end):
 			& (InvoiceDocType.is_pos == 1)
 			& (InvoiceDocType.pos_profile == pos_profile)
 			& (
-				(fn.Timestamp(InvoiceDocType.posting_date, InvoiceDocType.posting_time) >= start)
-				& (fn.Timestamp(InvoiceDocType.posting_date, InvoiceDocType.posting_time) <= end)
+				(fn.CombineDatetime(InvoiceDocType.posting_date, InvoiceDocType.posting_time) >= start)
+				& (fn.CombineDatetime(InvoiceDocType.posting_date, InvoiceDocType.posting_time) <= end)
 			)
 		)
 	)

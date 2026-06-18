@@ -402,7 +402,8 @@ def get_mode_of_payments_info(mode_of_payments: list, company: str) -> dict:
 		.where(ModeOfPaymentAccount.company == company)
 		.where(ModeOfPayment.enabled == 1)
 		.where(ModeOfPayment.name.isin(mode_of_payments))
-		.groupby(ModeOfPayment.name)
+		# group by all selected columns so postgres accepts it (one row per mode of payment)
+		.groupby(ModeOfPaymentAccount.default_account, ModeOfPaymentAccount.parent, ModeOfPayment.type)
 	)
 
 	data = query.run(as_dict=1)
