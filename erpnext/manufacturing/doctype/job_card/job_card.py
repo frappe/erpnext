@@ -127,6 +127,7 @@ class JobCard(Document):
 		status: DF.Literal[
 			"Open",
 			"Work In Progress",
+			"Partially Transferred",
 			"Material Transferred",
 			"On Hold",
 			"Submitted",
@@ -1195,6 +1196,8 @@ class JobCard(Document):
 
 			frappe.db.set_value("Job Card Item", row.job_card_item, "transferred_qty", flt(transferred_qty))
 
+		self.set_status(update_status=True)
+
 	def get_job_card_items_transferred_qty(self, ste_doc):
 		from frappe.query_builder.functions import Sum
 
@@ -1305,7 +1308,22 @@ class JobCard(Document):
 			self.status = "Work In Progress"
 
 	def set_non_semi_fg_status(self):
-		if flt(self.for_quantity) <= flt(self.transferred_qty):
+		if self.items:
+			item_data = frappe.get_all(
+				"Job Card Item",
+				filters={"parent": self.name},
+				fields=["transferred_qty", "required_qty"],
+			)
+			all_transferred = item_data and all(
+				flt(d.transferred_qty) >= flt(d.required_qty) for d in item_data
+			)
+			any_transferred = any(flt(d.transferred_qty) > 0 for d in item_data)
+
+			if all_transferred:
+				self.status = "Material Transferred"
+			elif any_transferred:
+				self.status = "Partially Transferred"
+		elif flt(self.for_quantity) <= flt(self.transferred_qty):
 			self.status = "Material Transferred"
 
 		if self.time_logs:
@@ -1829,6 +1847,7 @@ def get_calendar_event(d):
 	event_color = {
 		"Completed": "#cdf5a6",
 		"Material Transferred": "#ffdd9e",
+		"Partially Transferred": "#ffe5b4",
 		"Work In Progress": "#D3D3D3",
 	}
 
