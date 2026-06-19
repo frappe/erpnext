@@ -95,6 +95,9 @@
   "actual_batch_qty",
   "column_break_atna",
   "company_total_stock",
+  "inventory_dimension_section",
+  "add_inventory_dimension",
+  "inventory_dimension_bundle",
   "section_break_kejd",
   "installed_qty",
   "packed_qty",
@@ -888,6 +891,27 @@
    "search_index": 1
   },
   {
+   "fieldname": "inventory_dimension_bundle",
+   "fieldtype": "Link",
+   "label": "Inventory Dimension Bundle",
+   "no_copy": 1,
+   "options": "Inventory Dimension Bundle",
+   "print_hide": 1,
+   "search_index": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "inventory_dimension_section",
+   "fieldtype": "Section Break",
+   "label": "Inventory Dimension"
+  },
+  {
+   "depends_on": "eval:parent.docstatus == 0",
+   "fieldname": "add_inventory_dimension",
+   "fieldtype": "Button",
+   "label": "Add Inventory Dimension"
+  },
+  {
    "depends_on": "eval:doc.use_serial_batch_fields === 0 || doc.docstatus === 1",
    "fieldname": "pick_serial_and_batch",
    "fieldtype": "Button",
@@ -971,7 +995,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-06-08 20:00:00.000000",
+ "modified": "2026-06-21 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

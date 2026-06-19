@@ -101,6 +101,9 @@
   "column_break_swqr",
   "barcode",
   "batch_no",
+  "inventory_dimension_section",
+  "add_inventory_dimension",
+  "inventory_dimension_bundle",
   "connections_tab"
  ],
  "fields": [
@@ -453,6 +456,27 @@
    "read_only": 1
   },
   {
+   "fieldname": "inventory_dimension_bundle",
+   "fieldtype": "Link",
+   "label": "Inventory Dimension Bundle",
+   "no_copy": 1,
+   "options": "Inventory Dimension Bundle",
+   "print_hide": 1,
+   "search_index": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "inventory_dimension_section",
+   "fieldtype": "Section Break",
+   "label": "Inventory Dimension"
+  },
+  {
+   "depends_on": "eval:parent.docstatus == 0",
+   "fieldname": "add_inventory_dimension",
+   "fieldtype": "Button",
+   "label": "Add Inventory Dimension"
+  },
+  {
    "depends_on": "process_loss_qty",
    "fieldname": "process_loss_qty",
    "fieldtype": "Float",
@@ -695,7 +719,7 @@
  "grid_page_length": 50,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-19 17:39:42.293242",
+ "modified": "2026-06-21 11:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",

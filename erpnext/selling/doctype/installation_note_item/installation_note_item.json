@@ -13,7 +13,10 @@
   "description",
   "prevdoc_detail_docname",
   "prevdoc_docname",
-  "prevdoc_doctype"
+  "prevdoc_doctype",
+  "inventory_dimension_section",
+  "add_inventory_dimension",
+  "inventory_dimension_bundle"
  ],
  "fields": [
   {
@@ -107,12 +110,33 @@
    "no_copy": 1,
    "options": "Serial and Batch Bundle",
    "print_hide": 1
+  },
+  {
+   "fieldname": "inventory_dimension_bundle",
+   "fieldtype": "Link",
+   "label": "Inventory Dimension Bundle",
+   "no_copy": 1,
+   "options": "Inventory Dimension Bundle",
+   "print_hide": 1,
+   "search_index": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "inventory_dimension_section",
+   "fieldtype": "Section Break",
+   "label": "Inventory Dimension"
+  },
+  {
+   "depends_on": "eval:parent.docstatus == 0",
+   "fieldname": "add_inventory_dimension",
+   "fieldtype": "Button",
+   "label": "Add Inventory Dimension"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:09:51.390239",
+ "modified": "2026-06-21 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Installation Note Item",

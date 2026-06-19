@@ -1708,49 +1708,54 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 	def test_stock_reco_with_opening_stock_with_diff_inventory(self):
 		from erpnext.stock.doctype.inventory_dimension.test_inventory_dimension import (
 			create_inventory_dimension,
+			make_inventory_dimension_bundle,
+			reset_inventory_dimension_flags,
+		)
+		from erpnext.stock.doctype.inventory_dimension_bundle.inventory_dimension_bundle import (
+			get_dimension_sub_ledger_balance,
 		)
 
-		if frappe.db.exists("DocType", "Plant"):
-			return
+		# Inventory Dimensions are gated behind a feature flag; enable it for this test only.
+		frappe.flags.enable_inventory_dimension = 1
+		self.addCleanup(frappe.flags.pop, "enable_inventory_dimension", None)
 
-		doctype = frappe.get_doc(
-			{
-				"doctype": "DocType",
-				"name": "Plant",
-				"module": "Stock",
-				"custom": 1,
-				"fields": [
-					{
-						"fieldname": "plant_name",
-						"fieldtype": "Data",
-						"label": "Plant Name",
-						"reqd": 1,
-					}
-				],
-				"autoname": "field:plant_name",
-			}
-		)
-		doctype.insert(ignore_permissions=True)
+		# Inventory Dimension records are committed via Custom Field DDL, so a sibling test's
+		# mandatory (reqd) dimension can leak in and impose itself on this test. Neutralise those
+		# flags for this run (rolled back at teardown).
+		reset_inventory_dimension_flags()
+
+		if not frappe.db.exists("DocType", "Plant"):
+			frappe.get_doc(
+				{
+					"doctype": "DocType",
+					"name": "Plant",
+					"module": "Stock",
+					"custom": 1,
+					"fields": [
+						{
+							"fieldname": "plant_name",
+							"fieldtype": "Data",
+							"label": "Plant Name",
+							"reqd": 1,
+						}
+					],
+					"autoname": "field:plant_name",
+				}
+			).insert(ignore_permissions=True)
+
 		create_inventory_dimension(dimension_name="ID-Plant", reference_document="Plant")
 
-		plant_a = frappe.get_doc(
-			{
-				"doctype": "Plant",
-				"plant_name": "Plant A",
-			}
-		).insert(ignore_permissions=True)
-
-		plant_b = frappe.get_doc(
-			{
-				"doctype": "Plant",
-				"plant_name": "Plant B",
-			}
-		).insert(ignore_permissions=True)
+		for plant in ["Plant A", "Plant B"]:
+			if not frappe.db.exists("Plant", plant):
+				frappe.get_doc({"doctype": "Plant", "plant_name": plant}).insert(ignore_permissions=True)
 
 		warehouse = "_Test Warehouse - _TC"
-
 		item_code = "Item-Test"
 		item = self.make_item(item_code, {"is_stock_item": 1})
+
+		# The dimension split for each row is captured in its own Inventory Dimension Bundle.
+		bundle_a = make_inventory_dimension_bundle(item.name, warehouse, [{"qty": 5, "id_plant": "Plant A"}])
+		bundle_b = make_inventory_dimension_bundle(item.name, warehouse, [{"qty": 3, "id_plant": "Plant B"}])
 
 		sr = frappe.new_doc("Stock Reconciliation")
 		sr.purpose = "Opening Stock"
@@ -1765,10 +1770,9 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 				"warehouse": warehouse,
 				"qty": 5,
 				"valuation_rate": 100,
-				"id_plant": plant_a.name,
+				"inventory_dimension_bundle": bundle_a,
 			},
 		)
-
 		sr.append(
 			"items",
 			{
@@ -1776,7 +1780,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 				"warehouse": warehouse,
 				"qty": 3,
 				"valuation_rate": 110,
-				"id_plant": plant_b.name,
+				"inventory_dimension_bundle": bundle_b,
 			},
 		)
 
@@ -1784,21 +1788,16 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		sr.submit()
 
 		self.assertEqual(len(sr.items), 2)
-		sle_count = frappe.db.count(
-			"Stock Ledger Entry",
-			{"voucher_type": "Stock Reconciliation", "voucher_no": sr.name, "is_cancelled": 0},
+
+		# Each dimension value's quantity lives on the sub-ledger.
+		self.assertEqual(
+			get_dimension_sub_ledger_balance(item.name, warehouse, {"id_plant": "Plant A"}, inclusive=True),
+			5,
 		)
-		self.assertEqual(sle_count, 2)
-		sle = frappe.get_all(
-			"Stock Ledger Entry",
-			{"voucher_type": "Stock Reconciliation", "voucher_no": sr.name, "is_cancelled": 0},
-			["item_code", "id_plant", "actual_qty", "valuation_rate"],
+		self.assertEqual(
+			get_dimension_sub_ledger_balance(item.name, warehouse, {"id_plant": "Plant B"}, inclusive=True),
+			3,
 		)
-		for s in sle:
-			if s.id_plant == plant_a.name:
-				self.assertEqual(s.actual_qty, 5)
-			elif s.id_plant == plant_b.name:
-				self.assertEqual(s.actual_qty, 3)
 
 	def test_serial_no_status_with_backdated_stock_reco(self):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note

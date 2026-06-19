@@ -6,10 +6,14 @@ import copy
 
 import frappe
 from frappe import _
+from frappe.query_builder import Order
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, get_datetime
 
-from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
+from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
+	get_inventory_dimensions,
+	is_inventory_dimension_enabled,
+)
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import get_stock_balance_for
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
@@ -24,8 +28,27 @@ def execute(filters=None):
 	include_uom = filters.get("include_uom")
 	columns = get_columns(filters)
 	items = get_items(filters)
-	sl_entries = get_stock_ledger_entries(filters, items)
+
+	# Sub-ledger-backed inventory dimensions: filter by the matching bundles and read the dimension
+	# split from the Inventory Dimension Entry sub-ledger instead of (now non-existent) SLE columns.
+	# Skip entirely when the feature is disabled in Stock Settings.
+	dimension_enabled = is_inventory_dimension_enabled()
+	dimension_filter, dimension_display = ({}, {})
+	dimension_contributions, dimension_bundles = {}, None
+	if dimension_enabled:
+		dimension_filter, dimension_display = get_dimension_sub_ledger_filter(filters)
+		if dimension_filter:
+			dimension_contributions, dimension_bundles = get_dimension_bundle_contributions(
+				filters, dimension_filter, items
+			)
+
+	sl_entries = get_stock_ledger_entries(filters, items, bundles=dimension_bundles)
 	item_details = get_item_details(items, sl_entries, include_uom)
+
+	# When the report is not already filtered by a dimension, still show each row's dimension
+	# value(s) from its bundle so the dimension columns aren't blank.
+	if dimension_enabled and not dimension_filter:
+		set_sub_ledger_dimension_values(sl_entries)
 
 	inv_dimension_key = []
 	inv_dimension_wise_value = get_inv_dimension_wise_value(filters)
@@ -39,6 +62,8 @@ def execute(filters=None):
 
 	if filters.get("batch_no"):
 		opening_row = get_opening_balance_from_batch(filters, columns, sl_entries)
+	elif dimension_filter:
+		opening_row = get_sub_ledger_dimension_opening(filters, dimension_filter, dimension_display)
 	elif inv_dimension_wise_value:
 		opening_row = get_opening_balance_for_inv_dimension(filters, inv_dimension_wise_value)
 	else:
@@ -72,11 +97,30 @@ def execute(filters=None):
 		inv_dimension_wise_dict, filters, inv_dimension_key=inv_dimension_key, opening_row=opening_row
 	)
 
+	# Running balance per (item_code, warehouse) for the dimension-filtered path. An opening row only
+	# exists for a single item+warehouse combination; seed that combination from it.
+	dimension_running = {}
+	opening_item_codes = as_filter_list(filters.get("item_code"))
+	opening_warehouses = as_filter_list(filters.get("warehouse"))
+	if opening_row and len(opening_item_codes) == 1 and len(opening_warehouses) == 1:
+		dimension_running[(opening_item_codes[0], opening_warehouses[0])] = {
+			"qty": flt(opening_row.get("qty_after_transaction")),
+			"value": flt(opening_row.get("stock_value")),
+		}
+
 	item_wh_wise_prev_sle = {}
 	for sle in sl_entries:
 		item_detail = item_details[sle.item_code]
 
 		sle.update(item_detail)
+
+		if dimension_filter:
+			apply_sub_ledger_dimension(sle, dimension_contributions, dimension_display, dimension_running)
+			data.append(sle)
+			if include_uom:
+				conversion_factors.append(item_detail.conversion_factor)
+			continue
+
 		if bundle_info := bundle_details.get(sle.serial_and_batch_bundle):
 			data.extend(get_segregated_bundle_entries(sle, bundle_info, batch_balance_dict, filters))
 			continue
@@ -450,7 +494,7 @@ def get_columns(filters):
 	return columns
 
 
-def get_stock_ledger_entries(filters, items):
+def get_stock_ledger_entries(filters, items, bundles=None):
 	from_date = get_datetime(filters.from_date + " 00:00:00")
 	to_date = get_datetime(filters.to_date + " 23:59:59")
 
@@ -471,6 +515,7 @@ def get_stock_ledger_entries(filters, items):
 			sle.qty_after_transaction,
 			sle.stock_value_difference,
 			sle.serial_and_batch_bundle,
+			sle.inventory_dimension_bundle,
 			sle.voucher_no,
 			sle.stock_value,
 			sle.batch_no,
@@ -488,6 +533,13 @@ def get_stock_ledger_entries(filters, items):
 			query = query.select(fieldname)
 			if fieldname in filters and filters.get(fieldname):
 				query = query.where(sle[fieldname].isin(filters.get(fieldname)))
+
+	# Sub-ledger-backed dimensions are filtered by the matching bundles (the dimension value is no
+	# longer a column on Stock Ledger Entry); an empty set means nothing matched the dimension.
+	if bundles is not None:
+		if not bundles:
+			return []
+		query = query.where(sle.inventory_dimension_bundle.isin(list(bundles)))
 
 	if items:
 		query = query.where(sle.item_code.isin(items))
@@ -532,7 +584,16 @@ def get_serial_and_batch_bundles(filters):
 
 
 def get_inventory_dimension_fields():
-	return [dimension.fieldname for dimension in get_inventory_dimensions()]
+	# Inventory dimensions are stored in the qty-only sub-ledger now. A dimension that has a
+	# sub-ledger column (Inventory Dimension Entry) is read from there, not from Stock Ledger Entry,
+	# even if the legacy SLE column still physically exists (it is left as an unpopulated orphan).
+	# Only a truly legacy dimension - one with an SLE column but no sub-ledger column - uses this path.
+	return [
+		dimension.fieldname
+		for dimension in get_inventory_dimensions()
+		if frappe.db.has_column("Stock Ledger Entry", dimension.fieldname)
+		and not frappe.db.has_column("Inventory Dimension Entry", dimension.source_fieldname)
+	]
 
 
 def get_items(filters):
@@ -845,7 +906,15 @@ def get_opening_balance_for_inv_dimension(filters, inv_dimension_wise_value):
 def get_inv_dimension_wise_value(filters) -> list:
 	inv_dimension_key = frappe._dict({})
 	for dimension in get_inventory_dimensions():
-		if dimension.fieldname in filters and filters.get(dimension.fieldname):
+		# Sub-ledger-backed dimensions are handled separately via the Inventory Dimension Entry
+		# sub-ledger; only truly legacy column-backed dimensions (SLE column, no sub-ledger column)
+		# use this running-balance path.
+		if (
+			dimension.fieldname in filters
+			and filters.get(dimension.fieldname)
+			and frappe.db.has_column("Stock Ledger Entry", dimension.fieldname)
+			and not frappe.db.has_column("Inventory Dimension Entry", dimension.source_fieldname)
+		):
 			inv_dimension_key[dimension.fieldname] = filters.get(dimension.fieldname)
 
 	if filters.get("project") and not frappe.get_all(
@@ -854,3 +923,223 @@ def get_inv_dimension_wise_value(filters) -> list:
 		inv_dimension_key["project"] = filters.get("project")
 
 	return inv_dimension_key
+
+
+def get_dimension_sub_ledger_filter(filters):
+	"""Dimensions the user filtered on that are backed by the Inventory Dimension Entry sub-ledger.
+
+	Returns ``({source_fieldname: value}, {report_column_fieldname: display_value})``. The first drives
+	the sub-ledger query; the second sets the dimension column on each row for display.
+	"""
+	entry_doctype = "Inventory Dimension Entry"
+	source_values, display_map = {}, {}
+	for dimension in get_inventory_dimensions():
+		target, source = dimension.fieldname, dimension.source_fieldname
+		if not source or not filters.get(target) or not frappe.db.has_column(entry_doctype, source):
+			continue
+
+		source_values[source] = filters.get(target)
+		value = filters.get(target)
+		display_map[target] = value[0] if isinstance(value, list | tuple) else value
+
+	return source_values, display_map
+
+
+def set_sub_ledger_dimension_values(sl_entries):
+	"""Populate each SLE row's inventory-dimension columns from its bundle's sub-ledger entries.
+
+	A bundle may split a row's qty across several dimension values; they are shown comma-separated.
+	"""
+	entry_doctype = "Inventory Dimension Entry"
+	dimensions = [
+		frappe._dict(source=dimension.source_fieldname, target=dimension.fieldname)
+		for dimension in get_inventory_dimensions()
+		if dimension.source_fieldname and frappe.db.has_column(entry_doctype, dimension.source_fieldname)
+	]
+	if not dimensions:
+		return
+
+	bundles = {
+		sle.get("inventory_dimension_bundle") for sle in sl_entries if sle.get("inventory_dimension_bundle")
+	}
+	if not bundles:
+		return
+
+	entry = frappe.qb.DocType(entry_doctype)
+	query = (
+		frappe.qb.from_(entry)
+		.select(entry.parent, *[entry[dimension.source] for dimension in dimensions])
+		.where((entry.parent.isin(list(bundles))) & (entry.is_cancelled == 0))
+	)
+
+	values_by_bundle = {}
+	for row in query.run(as_dict=True):
+		bucket = values_by_bundle.setdefault(
+			row.parent, {dimension.target: set() for dimension in dimensions}
+		)
+		for dimension in dimensions:
+			if row.get(dimension.source):
+				bucket[dimension.target].add(row.get(dimension.source))
+
+	for sle in sl_entries:
+		bucket = values_by_bundle.get(sle.get("inventory_dimension_bundle"))
+		if not bucket:
+			continue
+
+		for target, values in bucket.items():
+			if values:
+				sle[target] = ", ".join(sorted(values))
+
+
+def _apply_dimension_filter(query, entry, source_values):
+	for source, value in source_values.items():
+		if isinstance(value, list | tuple):
+			query = query.where(entry[source].isin(value))
+		else:
+			query = query.where(entry[source] == value)
+	return query
+
+
+def get_dimension_bundle_contributions(filters, source_values, items):
+	"""Net qty each bundle contributes to the filtered dimension, keyed by ``(bundle, warehouse)``.
+
+	Also returns the set of bundles touching the dimension so the SLE query can be restricted to them.
+	"""
+	entry = frappe.qb.DocType("Inventory Dimension Entry")
+	bundle = frappe.qb.DocType("Inventory Dimension Bundle")
+
+	query = (
+		frappe.qb.from_(entry)
+		.join(bundle)
+		.on(entry.parent == bundle.name)
+		.select(
+			entry.parent.as_("bundle"),
+			entry.warehouse,
+			entry.qty,
+		)
+		.where((entry.is_cancelled == 0) & (entry.docstatus == 1))
+	)
+	query = _apply_dimension_filter(query, entry, source_values)
+
+	if items:
+		query = query.where(entry.item_code.isin(items))
+	if filters.get("warehouse"):
+		query = query.where(entry.warehouse.isin(filters.get("warehouse")))
+	if filters.get("company"):
+		query = query.where(bundle.company == filters.get("company"))
+
+	contributions, bundles = {}, set()
+	for row in query.run(as_dict=True):
+		bundles.add(row.bundle)
+		# Inventory Dimension Entry qty is stored signed (negative for outward).
+		signed_qty = flt(row.qty)
+		contributions[(row.bundle, row.warehouse)] = (
+			contributions.get((row.bundle, row.warehouse), 0.0) + signed_qty
+		)
+
+	return contributions, bundles
+
+
+def as_filter_list(value) -> list:
+	"""Normalise a filter value (scalar or list) to a list so ``[0]``/``len`` are safe.
+
+	The report passes item_code/warehouse as MultiSelectLists, but the function may also be called
+	with a scalar string; ``len("ITEM-001") > 1`` would otherwise misfire.
+	"""
+	if not value:
+		return []
+	return list(value) if isinstance(value, list | tuple) else [value]
+
+
+def get_sub_ledger_dimension_opening(filters, source_values, display_map):
+	"""Opening row for the filtered dimension, computed from the sub-ledger before ``from_date``."""
+	item_codes = as_filter_list(filters.get("item_code"))
+	warehouses = as_filter_list(filters.get("warehouse"))
+	if not item_codes or not warehouses or not filters.get("from_date"):
+		return
+
+	if len(item_codes) > 1 or len(warehouses) > 1:
+		return
+
+	item_code, warehouse = item_codes[0], warehouses[0]
+	entry = frappe.qb.DocType("Inventory Dimension Entry")
+	bundle = frappe.qb.DocType("Inventory Dimension Bundle")
+	from_datetime = get_datetime(filters.from_date + " 00:00:00")
+
+	query = (
+		frappe.qb.from_(entry)
+		.join(bundle)
+		.on(entry.parent == bundle.name)
+		.select(entry.qty)
+		.where(
+			(entry.is_cancelled == 0)
+			& (entry.docstatus == 1)
+			& (entry.item_code == item_code)
+			& (entry.warehouse == warehouse)
+			& (entry.posting_datetime < from_datetime)
+		)
+	)
+	query = _apply_dimension_filter(query, entry, source_values)
+	if filters.get("company"):
+		query = query.where(bundle.company == filters.get("company"))
+
+	# Inventory Dimension Entry qty is stored signed (negative for outward).
+	opening_qty = sum(flt(row.qty) for row in query.run(as_dict=True))
+	if not opening_qty:
+		return
+
+	rate = get_valuation_rate_before(item_code, warehouse, filters.from_date)
+	opening_row = frappe._dict(
+		{
+			"item_code": _("'Opening'"),
+			"qty_after_transaction": opening_qty,
+			"stock_value": opening_qty * rate,
+			"valuation_rate": rate,
+		}
+	)
+	opening_row.update(display_map)
+	return opening_row
+
+
+def get_valuation_rate_before(item_code, warehouse, from_date):
+	"""Valuation rate of the last Stock Ledger Entry for the item/warehouse before ``from_date``."""
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	rate = (
+		frappe.qb.from_(sle)
+		.select(sle.valuation_rate)
+		.where(
+			(sle.item_code == item_code)
+			& (sle.warehouse == warehouse)
+			& (sle.is_cancelled == 0)
+			& (sle.posting_date < from_date)
+		)
+		.orderby(sle.posting_datetime, order=Order.desc)
+		.orderby(sle.creation, order=Order.desc)
+		.limit(1)
+	).run()
+
+	return flt(rate[0][0]) if rate else 0.0
+
+
+def apply_sub_ledger_dimension(sle, contributions, display_map, running):
+	"""Override an SLE row with the filtered dimension's qty/value and running balance.
+
+	The running balance is tracked per ``(item_code, warehouse)`` so a dimension filter spanning
+	multiple items/warehouses does not produce a meaningless combined balance.
+	"""
+	dim_qty = flt(contributions.get((sle.get("inventory_dimension_bundle"), sle.warehouse), 0.0))
+	valuation_rate = flt(sle.valuation_rate)
+	dim_value = dim_qty * valuation_rate
+
+	balance = running.setdefault((sle.item_code, sle.warehouse), {"qty": 0.0, "value": 0.0})
+	balance["qty"] += dim_qty
+	balance["value"] += dim_value
+
+	sle.actual_qty = dim_qty
+	sle.stock_value_difference = dim_value
+	sle.update({"in_qty": max(dim_qty, 0), "out_qty": min(dim_qty, 0)})
+	sle.qty_after_transaction = balance["qty"]
+	sle.stock_value = balance["value"]
+	sle.incoming_rate = valuation_rate if dim_qty > 0 else 0
+	sle.in_out_rate = valuation_rate
+	sle.update(display_map)

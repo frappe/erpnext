@@ -9,7 +9,7 @@ from typing import Any, TypedDict
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Coalesce, Count
-from frappe.utils import add_days, cint, date_diff, flt, getdate
+from frappe.utils import add_days, cint, date_diff, flt, get_datetime, getdate
 from frappe.utils.nestedset import get_descendants_of
 
 import erpnext
@@ -72,6 +72,7 @@ class StockBalanceReport:
 		self.prepare_sle_query()
 		self.prepare_item_warehouse_map_for_current_period()
 		self.prepare_new_data()
+		self.add_dimension_wise_stock()
 
 		if not self.columns:
 			self.columns = self.get_columns()
@@ -328,6 +329,147 @@ class StockBalanceReport:
 				continue
 
 			self.data.append(report_data)
+
+	def add_dimension_wise_stock(self):
+		"""Expand each item/warehouse row into per-dimension rows from the qty-only sub-ledger.
+
+		Inventory dimensions no longer live on Stock Ledger Entry; their quantity split is recorded
+		on Inventory Dimension Entry (the sub-ledger). Since that sub-ledger is qty-only, each
+		dimension row's value is derived from the item/warehouse valuation rate, and any qty/value
+		not captured against a dimension is reconciled into a single residual row so the report
+		totals still match the non-dimension view.
+		"""
+		from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
+			is_inventory_dimension_enabled,
+		)
+
+		if not self.filters.get("show_dimension_wise_stock") or not is_inventory_dimension_enabled():
+			return
+
+		dimensions = self.get_sub_ledger_dimensions()
+		if not dimensions or not self.data:
+			return
+
+		balances = self.get_dimension_sub_ledger_balances(dimensions)
+		if not balances:
+			return
+
+		expanded = []
+		for row in self.data:
+			combos = balances.get((row.item_code, row.warehouse))
+			if not combos:
+				expanded.append(row)
+				continue
+
+			expanded.extend(self.build_dimension_rows(row, combos, dimensions))
+
+		self.data = expanded
+
+	def get_sub_ledger_dimensions(self) -> list:
+		"""Dimensions whose value column exists on Inventory Dimension Entry, with the report column
+		(``target``) and sub-ledger column (``source``) fieldnames."""
+		entry_doctype = "Inventory Dimension Entry"
+		dimensions = []
+		for dimension in get_inventory_dimensions():
+			if dimension.source_fieldname and frappe.db.has_column(entry_doctype, dimension.source_fieldname):
+				dimensions.append(frappe._dict(source=dimension.source_fieldname, target=dimension.fieldname))
+
+		return dimensions
+
+	def get_dimension_sub_ledger_balances(self, dimensions) -> dict:
+		"""Net qty per (item, warehouse, dimension-combination) split into opening / in / out / balance."""
+		item_codes = list({row.item_code for row in self.data})
+		warehouses = list({row.warehouse for row in self.data})
+		if not item_codes or not warehouses:
+			return {}
+
+		entry = frappe.qb.DocType("Inventory Dimension Entry")
+		query = (
+			frappe.qb.from_(entry)
+			.select(entry.item_code, entry.warehouse, entry.qty, entry.posting_datetime)
+			.where((entry.is_cancelled == 0) & (entry.docstatus == 1))
+			.where(entry.item_code.isin(item_codes))
+			.where(entry.warehouse.isin(warehouses))
+			.where(entry.posting_datetime <= get_datetime(f"{self.to_date} 23:59:59"))
+		)
+
+		for dimension in dimensions:
+			query = query.select(entry[dimension.source])
+
+		if company := self.filters.get("company"):
+			bundle = frappe.qb.DocType("Inventory Dimension Bundle")
+			query = query.join(bundle).on(entry.parent == bundle.name).where(bundle.company == company)
+
+		from_datetime = get_datetime(self.from_date)
+		balances = {}
+		for record in query.run(as_dict=True):
+			combo = tuple(record.get(dimension.source) for dimension in dimensions)
+			if not any(combo):
+				# An entry with no dimension value contributes nothing to a dimension breakdown.
+				continue
+
+			combos = balances.setdefault((record.item_code, record.warehouse), {})
+			agg = combos.setdefault(
+				combo, frappe._dict(opening_qty=0.0, in_qty=0.0, out_qty=0.0, bal_qty=0.0)
+			)
+
+			# Inventory Dimension Entry qty is stored signed (negative for outward).
+			signed_qty = flt(record.qty)
+			agg.bal_qty += signed_qty
+			if record.posting_datetime < from_datetime:
+				agg.opening_qty += signed_qty
+			elif signed_qty >= 0:
+				agg.in_qty += signed_qty
+			else:
+				agg.out_qty += abs(signed_qty)
+
+		return balances
+
+	def build_dimension_rows(self, row, combos, dimensions) -> list:
+		"""One report row per dimension combination, plus a residual row for the uncaptured remainder."""
+		val_rate = flt(row.val_rate)
+		qty_fields = ["opening_qty", "in_qty", "out_qty", "bal_qty"]
+		val_fields = {
+			"opening_qty": "opening_val",
+			"in_qty": "in_val",
+			"out_qty": "out_val",
+			"bal_qty": "bal_val",
+		}
+
+		rows = []
+		totals = frappe._dict({field: 0.0 for field in qty_fields})
+		val_totals = frappe._dict({val_fields[field]: 0.0 for field in qty_fields})
+
+		for combo, agg in combos.items():
+			dimension_row = row.copy()
+			for dimension, value in zip(dimensions, combo, strict=False):
+				dimension_row[dimension.target] = value
+
+			for field in qty_fields:
+				dimension_row[field] = agg[field]
+				dimension_row[val_fields[field]] = agg[field] * val_rate
+				totals[field] += agg[field]
+				val_totals[val_fields[field]] += agg[field] * val_rate
+
+			rows.append(dimension_row)
+
+		# Stock that was never captured against a dimension (and valuation rounding) lands here so the
+		# per-dimension rows still add up to the original item/warehouse balance.
+		residual = {field: flt(row.get(field)) - totals[field] for field in qty_fields}
+		if any(abs(flt(value, self.float_precision)) for value in residual.values()):
+			residual_row = row.copy()
+			for dimension in dimensions:
+				residual_row[dimension.target] = None
+
+			for field in qty_fields:
+				residual_row[field] = residual[field]
+				residual_row[val_fields[field]] = (
+					flt(row.get(val_fields[field])) - val_totals[val_fields[field]]
+				)
+
+			rows.append(residual_row)
+
+		return rows
 
 	def get_sre_reserved_qty_details(self) -> dict:
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
@@ -769,7 +911,16 @@ class StockBalanceReport:
 
 	@staticmethod
 	def get_inventory_dimension_fields():
-		return [dimension.fieldname for dimension in get_inventory_dimensions()]
+		# Dimensions are a quantity-only sub-ledger now. A dimension with a sub-ledger column
+		# (Inventory Dimension Entry) is surfaced via add_dimension_wise_stock(), not this column path,
+		# even if the legacy SLE column still physically exists as an unpopulated orphan. Only a truly
+		# legacy dimension (SLE column, no sub-ledger column) uses this column-based path.
+		return [
+			dimension.fieldname
+			for dimension in get_inventory_dimensions()
+			if frappe.db.has_column("Stock Ledger Entry", dimension.fieldname)
+			and not frappe.db.has_column("Inventory Dimension Entry", dimension.source_fieldname)
+		]
 
 	@staticmethod
 	def get_opening_fifo_queue(report_data):

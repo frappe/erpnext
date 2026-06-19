@@ -767,6 +767,7 @@ class PurchaseInvoice(BuyingController):
 			"Unreconcile Payment Entries",
 			"Payment Ledger Entry",
 			"Serial and Batch Bundle",
+			"Inventory Dimension Bundle",
 			"Tax Withholding Entry",
 		)
 

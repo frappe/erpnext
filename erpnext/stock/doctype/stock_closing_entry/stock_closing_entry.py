@@ -162,7 +162,14 @@ class StockClosing:
 		self.from_date = from_date
 		self.to_date = to_date
 		self.kwargs = kwargs
-		self.inv_dimensions = get_inventory_dimensions()
+		# Dimensions are a quantity-only sub-ledger and no longer live on Stock Ledger Entry.
+		# Closing is a valuation snapshot (item + warehouse), so only legacy dimensions that still
+		# have a real SLE column are partitioned here (none after the old columns are dropped).
+		self.inv_dimensions = [
+			dimension
+			for dimension in get_inventory_dimensions()
+			if frappe.db.has_column("Stock Ledger Entry", dimension.fieldname)
+		]
 		self.last_closing_balance = self.get_last_stock_closing_entry()
 
 	def get_stock_closing_entries(self):

@@ -13,9 +13,6 @@ import frappe
 from frappe.utils import flt
 
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
-	get_evaluated_inventory_dimension,
-)
 
 
 class StockLedgerService:
@@ -83,6 +80,7 @@ class StockLedgerService:
 				"item_code": d.get("item_code", None),
 				"warehouse": d.get("warehouse", None),
 				"serial_and_batch_bundle": d.get("serial_and_batch_bundle"),
+				"inventory_dimension_bundle": d.get("inventory_dimension_bundle"),
 				"posting_date": self.doc.posting_date,
 				"posting_time": self.doc.posting_time,
 				"fiscal_year": get_fiscal_year(self.doc.posting_date, company=self.doc.company)[0],
@@ -101,7 +99,6 @@ class StockLedgerService:
 		)
 
 		sl_dict.update(args)
-		self.update_inventory_dimensions(d, sl_dict)
 
 		if self.doc.docstatus == 2:
 			from erpnext.deprecation_dumpster import deprecation_warning
@@ -114,97 +111,18 @@ class StockLedgerService:
 
 		return sl_dict
 
-	def update_inventory_dimensions(self, row, sl_dict) -> None:
-		# To handle delivery note and sales invoice
-		if row.get("item_row"):
-			row = row.get("item_row")
-
-		dimensions = get_evaluated_inventory_dimension(row, sl_dict, parent_doc=self.doc)
-		for dimension in dimensions:
-			if not dimension:
-				continue
-
-			if (
-				self.doc.doctype in ["Purchase Invoice", "Purchase Receipt"]
-				and row.get("rejected_warehouse")
-				and sl_dict.get("warehouse") == row.get("rejected_warehouse")
-			):
-				fieldname = f"rejected_{dimension.source_fieldname}"
-				sl_dict[dimension.target_fieldname] = row.get(fieldname)
-				continue
-
-			if self.doc.doctype in [
-				"Purchase Invoice",
-				"Purchase Receipt",
-				"Sales Invoice",
-				"Delivery Note",
-				"Stock Entry",
-			]:
-				if (
-					(
-						sl_dict.actual_qty > 0
-						and not self.doc.get("is_return")
-						or sl_dict.actual_qty < 0
-						and self.doc.get("is_return")
-					)
-					and self.doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Stock Entry"]
-				) or (
-					(
-						sl_dict.actual_qty < 0
-						and not self.doc.get("is_return")
-						or sl_dict.actual_qty > 0
-						and self.doc.get("is_return")
-					)
-					and self.doc.doctype in ["Sales Invoice", "Delivery Note", "Stock Entry"]
-				):
-					if self.doc.doctype == "Stock Entry":
-						if row.get("t_warehouse") == sl_dict.warehouse and sl_dict.get("actual_qty") > 0:
-							fieldname = f"to_{dimension.source_fieldname}"
-							if dimension.source_fieldname.startswith("to_"):
-								fieldname = f"{dimension.source_fieldname}"
-
-							sl_dict[dimension.target_fieldname] = row.get(fieldname)
-							continue
-
-					sl_dict[dimension.target_fieldname] = row.get(dimension.source_fieldname)
-				else:
-					fieldname_start_with = "to"
-					if self.doc.doctype in ["Purchase Invoice", "Purchase Receipt"]:
-						fieldname_start_with = "from"
-
-					fieldname = f"{fieldname_start_with}_{dimension.source_fieldname}"
-					sl_dict[dimension.target_fieldname] = row.get(fieldname)
-
-					if not sl_dict.get(dimension.target_fieldname):
-						sl_dict[dimension.target_fieldname] = row.get(dimension.source_fieldname)
-
-			elif row.get(dimension.source_fieldname):
-				sl_dict[dimension.target_fieldname] = row.get(dimension.source_fieldname)
-
-			if not sl_dict.get(dimension.target_fieldname) and dimension.fetch_from_parent:
-				sl_dict[dimension.target_fieldname] = self.doc.get(dimension.fetch_from_parent)
-
-				# Get value based on doctype name
-				if not sl_dict.get(dimension.target_fieldname):
-					fieldname = next(
-						(
-							field.fieldname
-							for field in frappe.get_meta(self.doc.doctype).fields
-							if field.options == dimension.fetch_from_parent
-						),
-						None,
-					)
-
-					if fieldname and self.doc.get(fieldname):
-						sl_dict[dimension.target_fieldname] = self.doc.get(fieldname)
-
-				if sl_dict[dimension.target_fieldname] and self.doc.docstatus == 1:
-					row.db_set(dimension.source_fieldname, sl_dict[dimension.target_fieldname])
-
 	def make_sl_entries(self, sl_entries, allow_negative_stock=False, via_landed_cost_voucher=False):
 		from erpnext.stock.serial_batch_bundle import update_batch_qty
+		from erpnext.stock.services.inventory_dimension_bundle_service import (
+			InventoryDimensionBundleService,
+		)
 		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
 		from erpnext.stock.stock_ledger import make_sl_entries
+
+		# Submit (on docstatus 1) or cancel (on docstatus 2) the linked inventory dimension
+		# bundles, posting/reversing the quantity sub-ledger alongside the stock ledger.
+		if self.doc.meta.get_field("items"):
+			InventoryDimensionBundleService(self.doc).process_bundles_on_stock_posting()
 
 		make_sl_entries(sl_entries, allow_negative_stock, via_landed_cost_voucher)
 		update_batch_qty(

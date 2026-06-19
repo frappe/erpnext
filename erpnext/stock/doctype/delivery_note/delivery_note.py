@@ -517,6 +517,7 @@ class DeliveryNote(SellingController):
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
 			"Serial and Batch Bundle",
+			"Inventory Dimension Bundle",
 		)
 
 		self.delete_auto_created_batches()

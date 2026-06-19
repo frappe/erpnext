@@ -13,7 +13,6 @@ from frappe.utils import add_days, cint, flt, formatdate, get_datetime, getdate
 
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.item_variant import ItemTemplateCannotHaveStock
-from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.serial_batch_bundle import SerialBatchBundle
 
 
@@ -22,10 +21,6 @@ class StockFreezeError(frappe.ValidationError):
 
 
 class BackDatedStockTransaction(frappe.ValidationError):
-	pass
-
-
-class InventoryDimensionNegativeStockError(frappe.ValidationError):
 	pass
 
 
@@ -96,80 +91,11 @@ class StockLedgerEntry(Document):
 		self.validate_and_set_fiscal_year()
 		self.block_transactions_against_group_warehouse()
 		self.validate_with_last_transaction_posting_time()
-		self.validate_inventory_dimension_negative_stock()
 
 	def set_posting_datetime(self):
 		from erpnext.stock.utils import get_combine_datetime
 
 		self.posting_datetime = get_combine_datetime(self.posting_date, self.posting_time)
-
-	def validate_inventory_dimension_negative_stock(self):
-		if self.is_cancelled or self.actual_qty >= 0:
-			return
-
-		dimensions = self._get_inventory_dimensions()
-		if not dimensions:
-			return
-
-		flt_precision = cint(frappe.db.get_default("float_precision")) or 2
-		available_qty = self.get_available_qty_after_prev_transaction(dimensions)
-
-		diff = flt(available_qty + flt(self.actual_qty), flt_precision)  # qty after current transaction
-		if diff < 0 and abs(diff) > 0.0001:
-			self.throw_validation_error(diff, dimensions)
-
-	def get_available_qty_after_prev_transaction(self, dimensions):
-		sle = frappe.qb.DocType("Stock Ledger Entry")
-		available_qty_query = (
-			frappe.qb.from_(sle)
-			.select(Sum(sle.actual_qty))
-			.where(
-				(sle.item_code == self.item_code)
-				& (sle.warehouse == self.warehouse)
-				& (sle.posting_datetime < self.posting_datetime)
-				& (sle.company == self.company)
-				& (sle.is_cancelled == 0)
-			)
-		)
-
-		for dimension, values in dimensions.items():
-			dimension_value = values.get("value")
-			available_qty_query = available_qty_query.where(sle[dimension] == dimension_value)
-
-		available_qty = available_qty_query.run()
-
-		return available_qty[0][0] or 0
-
-	def throw_validation_error(self, diff, dimensions):
-		msg = _(
-			"{0} units of {1} are required in {2} with the inventory dimension: {3} on {4} {5} for {6} to complete the transaction."
-		).format(
-			abs(diff),
-			frappe.get_desk_link("Item", self.item_code),
-			frappe.get_desk_link("Warehouse", self.warehouse),
-			frappe.bold(
-				", ".join([f"{dimension}: {values.get('value')}" for dimension, values in dimensions.items()])
-			),
-			self.posting_date,
-			self.posting_time,
-			frappe.get_desk_link(self.voucher_type, self.voucher_no),
-		)
-
-		frappe.throw(
-			msg, title=_("Inventory Dimension Negative Stock"), exc=InventoryDimensionNegativeStockError
-		)
-
-	def _get_inventory_dimensions(self):
-		inv_dimensions = get_inventory_dimensions()
-		inv_dimension_dict = {}
-		for dimension in inv_dimensions:
-			if not dimension.get("validate_negative_stock") or not self.get(dimension.fieldname):
-				continue
-
-			dimension["value"] = self.get(dimension.fieldname)
-			inv_dimension_dict.setdefault(dimension.fieldname, dimension)
-
-		return inv_dimension_dict
 
 	def on_submit(self):
 		self.check_stock_frozen_date()
@@ -190,6 +116,72 @@ class StockLedgerEntry(Document):
 			)
 
 		self.validate_serial_batch_no_bundle()
+		self.validate_inventory_dimension_bundle()
+
+	def validate_inventory_dimension_bundle(self):
+		from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
+			is_inventory_dimension_enabled,
+		)
+
+		if self.is_cancelled or not is_inventory_dimension_enabled():
+			return
+
+		if self.inventory_dimension_bundle:
+			self.validate_unique_inventory_dimension_bundle()
+		else:
+			self.validate_mandatory_inventory_dimension()
+
+	def validate_mandatory_inventory_dimension(self):
+		"""Require an Inventory Dimension Bundle when a mandatory dimension applies to the item.
+
+		Mirrors the serial/batch bundle requirement: if the voucher's item rows have an applicable
+		mandatory inventory dimension, the resulting Stock Ledger Entry must carry the bundle.
+		Conditional dimensions are skipped here (the condition needs the source row); they are
+		enforced at the voucher level.
+		"""
+		from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
+			get_mandatory_inventory_dimensions,
+			get_voucher_child_doctype,
+		)
+
+		child_doctype = get_voucher_child_doctype(self.voucher_type)
+		mandatory = [d for d in get_mandatory_inventory_dimensions(child_doctype) if not d.get("condition")]
+		if not mandatory:
+			return
+
+		names = ", ".join(frappe.bold(d.get("name")) for d in mandatory)
+		self.throw_error_message(
+			_(
+				"Inventory Dimension {0} is mandatory for Item {1}. Please set the Inventory Dimension Bundle."
+			).format(names, self.item_code)
+		)
+
+	def validate_unique_inventory_dimension_bundle(self):
+		"""An Inventory Dimension Bundle records the dimension split for a single voucher.
+
+		It must not be shared with the stock ledger of a different voucher, which would double-count
+		the quantity sub-ledger. The two legs of a transfer (source + target) share one bundle, so
+		only a *different* voucher is rejected.
+		"""
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		existing = (
+			frappe.qb.from_(sle)
+			.select(sle.voucher_type, sle.voucher_no)
+			.where(
+				(sle.inventory_dimension_bundle == self.inventory_dimension_bundle)
+				& (sle.name != self.name)
+				& (sle.is_cancelled == 0)
+				& ((sle.voucher_no != self.voucher_no) | (sle.voucher_type != self.voucher_type))
+			)
+			.limit(1)
+		).run()
+
+		if existing:
+			self.throw_error_message(
+				_("Inventory Dimension Bundle {0} is already linked to {1} {2}.").format(
+					self.inventory_dimension_bundle, existing[0][0], existing[0][1]
+				)
+			)
 
 	def validate_mandatory(self):
 		mandatory = ["warehouse", "posting_date", "voucher_type", "voucher_no", "company"]

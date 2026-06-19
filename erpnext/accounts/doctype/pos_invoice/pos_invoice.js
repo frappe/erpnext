@@ -26,6 +26,7 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 			"POS Invoice Merge Log",
 			"POS Closing Entry",
 			"Serial and Batch Bundle",
+			"Inventory Dimension Bundle",
 		];
 
 		if (doc.__islocal && doc.is_pos && frappe.get_route_str() !== "point-of-sale") {

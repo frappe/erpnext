@@ -57,6 +57,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			"Unreconcile Payment",
 			"Unreconcile Payment Entries",
 			"Serial and Batch Bundle",
+			"Inventory Dimension Bundle",
 			"Bank Transaction",
 		];
 

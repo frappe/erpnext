@@ -18,6 +18,7 @@
   "apply_to_all_doctypes",
   "column_break_niy2u",
   "validate_negative_stock",
+  "negative_stock_validation_method",
   "column_break_13",
   "document_type",
   "type_of_transaction",
@@ -27,7 +28,6 @@
   "condition",
   "conditional_mandatory_section",
   "reqd",
-  "mandatory_depends_on",
   "conditional_rule_examples_section",
   "html_19"
  ],
@@ -152,19 +152,12 @@
    "label": "Conditional Rule Examples"
   },
   {
-   "depends_on": "eval:!doc.apply_to_all_doctypes",
-   "description": "To apply condition on parent field use parent.field_name and to apply condition on child table use doc.field_name. Here field_name could be based on the actual column name of the respective field.",
-   "fieldname": "mandatory_depends_on",
-   "fieldtype": "Small Text",
-   "label": "Mandatory Depends On"
-  },
-  {
    "fieldname": "conditional_mandatory_section",
    "fieldtype": "Section Break",
    "label": "Mandatory Section"
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "reqd",
    "fieldtype": "Check",
    "label": "Mandatory"
@@ -174,15 +167,24 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "validate_negative_stock",
    "fieldtype": "Check",
    "label": "Validate Negative Stock"
+  },
+  {
+   "default": "Per Dimension",
+   "depends_on": "validate_negative_stock",
+   "description": "Per Dimension validates each inventory dimension's available balance independently. Combined validates the exact combination of all negative-stock dimensions present on a line together.",
+   "fieldname": "negative_stock_validation_method",
+   "fieldtype": "Select",
+   "label": "Negative Stock Validation Method",
+   "options": "Per Dimension\nCombined"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-08 10:10:16.884388",
+ "modified": "2026-06-23 11:55:47.694616",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Inventory Dimension",

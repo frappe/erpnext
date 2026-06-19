@@ -101,15 +101,17 @@ class StockReconciliation(StockController):
 		self.set_serial_and_batch_bundle(ignore_validate=True)
 
 	def validate_inventory_dimension(self):
-		dimensions = get_inventory_dimensions()
-		for dimension in dimensions:
-			for row in self.items:
-				if not row.batch_no and row.current_qty and row.get(dimension.get("source_fieldname")):
-					frappe.throw(
-						_(
-							"Row #{0}: You cannot use the inventory dimension '{1}' in Stock Reconciliation to modify the quantity or valuation rate. Stock reconciliation with inventory dimensions is intended solely for performing opening entries."
-						).format(row.idx, bold(dimension.get("doctype")))
-					)
+		if not get_inventory_dimensions():
+			return
+
+		# Dimension values now live in the Inventory Dimension Bundle linked to the row.
+		for row in self.items:
+			if not row.batch_no and row.current_qty and row.get("inventory_dimension_bundle"):
+				frappe.throw(
+					_(
+						"Row #{0}: You cannot use inventory dimensions in Stock Reconciliation to modify the quantity or valuation rate. Stock reconciliation with inventory dimensions is intended solely for performing opening entries."
+					).format(row.idx)
+				)
 
 	def on_submit(self):
 		self.make_bundle_for_current_qty()
@@ -125,6 +127,7 @@ class StockReconciliation(StockController):
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
 			"Serial and Batch Bundle",
+			"Inventory Dimension Bundle",
 		)
 		self.make_sle_on_cancel()
 		self.make_gl_entries_on_cancel()
@@ -604,9 +607,10 @@ class StockReconciliation(StockController):
 				if row.get(field):
 					key.append(row.get(field))
 
-			for dimension in get_inventory_dimensions():
-				if row.get(dimension.get("fieldname")):
-					key.append(row.get(dimension.get("fieldname")))
+			# Inventory dimension values now live on the row's Inventory Dimension Bundle, so the
+			# bundle distinguishes otherwise-identical item/warehouse rows (one per dimension split).
+			if row.get("inventory_dimension_bundle"):
+				key.append(row.get("inventory_dimension_bundle"))
 
 			if key in item_warehouse_combinations:
 				self.validation_messages.append(
@@ -881,6 +885,7 @@ class StockReconciliation(StockController):
 				"stock_uom": frappe.db.get_value("Item", row.item_code, "stock_uom"),
 				"is_cancelled": 1 if self.docstatus == 2 else 0,
 				"valuation_rate": flt(row.valuation_rate),
+				"inventory_dimension_bundle": row.get("inventory_dimension_bundle"),
 			}
 		)
 
@@ -913,10 +918,6 @@ class StockReconciliation(StockController):
 			data.actual_qty = row.qty
 			data.qty_after_transaction = 0.0
 			data.incoming_rate = flt(row.valuation_rate)
-
-		from erpnext.stock.services.stock_ledger_service import StockLedgerService
-
-		StockLedgerService(self).update_inventory_dimensions(row, data)
 
 		return data
 

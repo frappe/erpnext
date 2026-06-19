@@ -86,7 +86,9 @@
   "section_break_kcvr",
   "role_allowed_to_create_edit_back_dated_transactions",
   "document_naming_tab",
-  "transaction_naming_html"
+  "transaction_naming_html",
+  "inventory_dimension_tab",
+  "enable_inventory_dimension"
  ],
  "fields": [
   {
@@ -595,6 +597,18 @@
   {
    "fieldname": "section_break_kcvr",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "inventory_dimension_tab",
+   "fieldtype": "Tab Break",
+   "label": "Inventory Dimension"
+  },
+  {
+   "default": "0",
+   "description": "Enable to capture inventory dimensions (e.g. rack, shelf, pallet) on stock transactions.",
+   "fieldname": "enable_inventory_dimension",
+   "fieldtype": "Check",
+   "label": "Enable Inventory Dimension"
   }
  ],
  "icon": "icon-cog",
@@ -602,7 +616,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-06-13 12:38:02.202183",
+ "modified": "2026-06-22 12:38:02.202183",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

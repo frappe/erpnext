@@ -2,27 +2,55 @@
 # See license.txt
 
 import frappe
-from frappe.custom.doctype.custom_field.custom_field import create_custom_field
-from frappe.utils import nowdate, nowtime
 
-from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
 	CanNotBeChildDoc,
 	CanNotBeDefaultDimension,
-	DoNotChangeError,
+	InventoryDimensionNotEnabled,
 	delete_dimension,
+)
+from erpnext.stock.doctype.inventory_dimension_bundle.inventory_dimension_bundle import (
+	InventoryDimensionNegativeStockError,
+	get_dimension_sub_ledger_balance,
 )
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import InventoryDimensionNegativeStockError
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+from erpnext.stock.services.inventory_dimension_bundle_service import InventoryDimensionBundleService
 from erpnext.tests.utils import ERPNextTestSuite
+
+ENTRY_DOCTYPE = "Inventory Dimension Entry"
 
 
 class TestInventoryDimension(ERPNextTestSuite):
+	def setUp(self):
+		# Enable the feature via a flag (not the committed Stock Settings single) so it can never
+		# leak into unrelated test modules. Dimension Custom Fields are committed (DDL), so dimension
+		# records and their reqd / validate_negative_stock flags survive the per-test rollback; reset
+		# them so a sibling test's flag cannot make this one fail.
+		frappe.flags.enable_inventory_dimension = 1
+		reset_inventory_dimension_flags()
+
+	def tearDown(self):
+		frappe.flags.enable_inventory_dimension = None
+		super().tearDown()
+		clear_dimension_cache()
+
+	def test_inventory_dimension_requires_stock_setting(self):
+		# With the feature off, creating a dimension must be blocked.
+		frappe.flags.enable_inventory_dimension = 0
+
+		inv_dim = create_inventory_dimension(
+			reference_document="Shelf",
+			dimension_name="From Shelf",
+			apply_to_all_doctypes=1,
+			do_not_save=True,
+		)
+		self.assertRaises(InventoryDimensionNotEnabled, inv_dim.insert)
+
 	def test_validate_inventory_dimension(self):
-		# Can not be child doc
+		# The reference document can not be a child table.
 		inv_dim1 = create_inventory_dimension(
 			reference_document="Stock Entry Detail",
 			type_of_transaction="Outward",
@@ -32,9 +60,9 @@ class TestInventoryDimension(ERPNextTestSuite):
 			document_type="Stock Entry",
 			do_not_save=True,
 		)
-
 		self.assertRaises(CanNotBeChildDoc, inv_dim1.insert)
 
+		# The reference document can not be one of the built-in dimensions.
 		inv_dim1 = create_inventory_dimension(
 			reference_document="Batch",
 			type_of_transaction="Outward",
@@ -43,513 +71,766 @@ class TestInventoryDimension(ERPNextTestSuite):
 			document_type="Stock Entry Detail",
 			do_not_save=True,
 		)
-
 		self.assertRaises(CanNotBeDefaultDimension, inv_dim1.insert)
 
-	def test_delete_inventory_dimension(self):
-		inv_dim1 = create_inventory_dimension(
+	def test_dimension_creates_and_drops_subledger_column(self):
+		"""A dimension adds a single column to the quantity sub-ledger - not to every stock doctype."""
+		inv_dim = create_inventory_dimension(
 			reference_document="Shelf",
-			type_of_transaction="Outward",
 			dimension_name="From Shelf",
-			apply_to_all_doctypes=0,
-			document_type="Stock Entry Detail",
-			condition="parent.purpose == 'Material Issue'",
-		)
-
-		inv_dim1.save()
-
-		custom_field = frappe.db.get_value(
-			"Custom Field", {"fieldname": "from_shelf", "dt": "Stock Entry Detail"}, "name"
-		)
-
-		self.assertTrue(custom_field)
-
-		delete_dimension(inv_dim1.name)
-
-		custom_field = frappe.db.get_value(
-			"Custom Field", {"fieldname": "from_shelf", "dt": "Stock Entry Detail"}, "name"
-		)
-
-		self.assertFalse(custom_field)
-
-	def test_inventory_dimension(self):
-		create_warehouse("Shelf Warehouse")
-		warehouse = "Shelf Warehouse - _TC"
-		item_code = "_Test Item"
-
-		inv_dim1 = create_inventory_dimension(
-			reference_document="Shelf",
-			type_of_transaction="Outward",
-			dimension_name="Shelf",
-			apply_to_all_doctypes=0,
-			document_type="Stock Entry Detail",
-			condition="parent.purpose == 'Material Issue'",
-		)
-
-		inv_dim1.reqd = 0
-		inv_dim1.save()
-
-		create_inventory_dimension(
-			reference_document="Shelf",
-			type_of_transaction="Inward",
-			dimension_name="To Shelf",
-			apply_to_all_doctypes=0,
-			document_type="Stock Entry Detail",
-			condition="parent.purpose == 'Material Receipt'",
-		)
-
-		inward = make_stock_entry(
-			item_code=item_code,
-			target=warehouse,
-			qty=5,
-			basic_rate=10,
-			do_not_save=True,
-			purpose="Material Receipt",
-		)
-
-		inward.items[0].to_shelf = "Shelf 1"
-		inward.save()
-		inward.submit()
-		inward.load_from_db()
-
-		sle_data = frappe.db.get_value(
-			"Stock Ledger Entry", {"voucher_no": inward.name}, ["to_shelf", "warehouse"], as_dict=1
-		)
-
-		self.assertEqual(inward.items[0].to_shelf, "Shelf 1")
-		self.assertEqual(sle_data.warehouse, warehouse)
-		self.assertEqual(sle_data.to_shelf, "Shelf 1")
-
-		outward = make_stock_entry(
-			item_code=item_code,
-			source=warehouse,
-			qty=3,
-			basic_rate=10,
-			do_not_save=True,
-			purpose="Material Issue",
-		)
-
-		outward.items[0].shelf = "Shelf 1"
-		outward.save()
-		outward.submit()
-		outward.load_from_db()
-
-		sle_shelf = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": outward.name}, "shelf")
-		self.assertEqual(sle_shelf, "Shelf 1")
-
-		inv_dim1.load_from_db()
-		inv_dim1.apply_to_all_doctypes = 1
-
-		self.assertTrue(inv_dim1.has_stock_ledger())
-		self.assertRaises(DoNotChangeError, inv_dim1.save)
-
-	def test_inventory_dimension_for_purchase_receipt_and_delivery_note(self):
-		inv_dimension = create_inventory_dimension(
-			reference_document="Rack", dimension_name="Rack", apply_to_all_doctypes=1
-		)
-
-		inv_dimension.db_set("fetch_from_parent", "Rack")
-
-		self.assertEqual(inv_dimension.type_of_transaction, "Both")
-		self.assertEqual(inv_dimension.fetch_from_parent, "Rack")
-
-		create_custom_field(
-			"Purchase Receipt", dict(fieldname="rack", label="Rack", fieldtype="Link", options="Rack")
-		)
-
-		create_custom_field(
-			"Delivery Note", dict(fieldname="rack", label="Rack", fieldtype="Link", options="Rack")
-		)
-
-		pr_doc = make_purchase_receipt(qty=2, do_not_submit=True)
-		pr_doc.rack = "Rack 1"
-		pr_doc.save()
-		pr_doc.submit()
-
-		pr_doc.load_from_db()
-
-		self.assertEqual(pr_doc.items[0].rack, "Rack 1")
-		sle_rack = frappe.db.get_value(
-			"Stock Ledger Entry",
-			{"voucher_detail_no": pr_doc.items[0].name, "voucher_type": pr_doc.doctype},
-			"rack",
-		)
-
-		self.assertEqual(sle_rack, "Rack 1")
-
-		dn_doc = create_delivery_note(qty=2, do_not_submit=True)
-		dn_doc.rack = "Rack 1"
-		dn_doc.save()
-		dn_doc.submit()
-
-		dn_doc.load_from_db()
-
-		self.assertEqual(dn_doc.items[0].rack, "Rack 1")
-		sle_rack = frappe.db.get_value(
-			"Stock Ledger Entry",
-			{"voucher_detail_no": dn_doc.items[0].name, "voucher_type": dn_doc.doctype},
-			"rack",
-		)
-
-		self.assertEqual(sle_rack, "Rack 1")
-
-	def test_check_standard_dimensions(self):
-		create_inventory_dimension(
-			reference_document="Project",
-			type_of_transaction="Outward",
-			dimension_name="Project",
-			apply_to_all_doctypes=0,
-			document_type="Stock Ledger Entry",
-		)
-
-		self.assertFalse(
-			frappe.db.get_value("Custom Field", {"fieldname": "project", "dt": "Stock Ledger Entry"}, "name")
-		)
-
-	def test_check_mandatory_dimensions(self):
-		doc = create_inventory_dimension(
-			reference_document="Pallet",
-			type_of_transaction="Outward",
-			dimension_name="Pallet 75",
-			apply_to_all_doctypes=0,
-			document_type="Delivery Note Item",
-		)
-
-		doc.reqd = 1
-		doc.save()
-
-		self.assertTrue(
-			frappe.db.get_value(
-				"Custom Field", {"fieldname": "pallet_75", "dt": "Delivery Note Item", "reqd": 1}, "name"
-			)
-		)
-
-		doc.reqd = 0
-		doc.save()
-
-	def test_check_mandatory_depends_on_dimensions(self):
-		doc = create_inventory_dimension(
-			reference_document="Pallet",
-			type_of_transaction="Outward",
-			dimension_name="Pallet",
-			apply_to_all_doctypes=0,
-			document_type="Stock Entry Detail",
-		)
-
-		doc.mandatory_depends_on = "t_warehouse"
-		doc.save()
-
-		self.assertTrue(
-			frappe.db.get_value(
-				"Custom Field",
-				{"fieldname": "pallet", "dt": "Stock Entry Detail", "mandatory_depends_on": "t_warehouse"},
-				"name",
-			)
-		)
-
-	def test_for_purchase_sales_and_stock_transaction(self):
-		from erpnext.controllers.sales_and_purchase_return import make_return_doc
-
-		create_inventory_dimension(
-			reference_document="Store",
-			type_of_transaction="Outward",
-			dimension_name="Store",
 			apply_to_all_doctypes=1,
 		)
 
-		item_code = "Test Inventory Dimension Item"
+		# One Link column is added to Inventory Dimension Entry.
+		self.assertTrue(frappe.db.get_value("Custom Field", {"dt": ENTRY_DOCTYPE, "fieldname": "from_shelf"}))
+
+		# No per-doctype custom field is created on the stock transaction doctypes anymore.
+		self.assertFalse(
+			frappe.db.get_value("Custom Field", {"dt": "Stock Entry Detail", "fieldname": "from_shelf"})
+		)
+
+		delete_dimension(inv_dim.name)
+		self.assertFalse(
+			frappe.db.get_value("Custom Field", {"dt": ENTRY_DOCTYPE, "fieldname": "from_shelf"})
+		)
+
+	def test_inventory_dimension_subledger_posting(self):
+		"""Submitting a voucher posts its bundle to the sub-ledger; cancelling reverses it."""
+		create_inventory_dimension(
+			reference_document="Shelf", dimension_name="Shelf", apply_to_all_doctypes=1
+		)
+
+		warehouse = create_warehouse("Shelf Warehouse")
+		item_code = "_Test Item"
+
+		se = make_stock_entry(item_code=item_code, target=warehouse, qty=5, basic_rate=10, do_not_save=True)
+		bundle = make_inventory_dimension_bundle(item_code, warehouse, [{"qty": 5, "shelf": "Shelf 1"}])
+		se.items[0].inventory_dimension_bundle = bundle
+		se.submit()
+
+		# The Stock Ledger Entry links the single bundle.
+		self.assertEqual(
+			frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": se.name, "is_cancelled": 0},
+				"inventory_dimension_bundle",
+			),
+			bundle,
+		)
+
+		# The dimension value lives on the sub-ledger entry, not on the SLE.
+		entry = frappe.get_all(
+			ENTRY_DOCTYPE, filters={"parent": bundle}, fields=["shelf", "qty", "is_outward"]
+		)[0]
+		self.assertEqual(entry.shelf, "Shelf 1")
+		self.assertEqual(entry.is_outward, 0)
+
+		self.assertEqual(
+			get_dimension_sub_ledger_balance(item_code, warehouse, {"shelf": "Shelf 1"}, inclusive=True),
+			5,
+		)
+
+		# Cancelling the voucher cancels the bundle and removes the qty from the sub-ledger.
+		se.cancel()
+		self.assertEqual(
+			get_dimension_sub_ledger_balance(item_code, warehouse, {"shelf": "Shelf 1"}, inclusive=True),
+			0,
+		)
+
+	def test_outward_bundle_stores_signed_qty(self):
+		"""An outward bundle stores qty negative + is_outward set (mirrors SLE actual_qty)."""
+		create_inventory_dimension(reference_document="Rack", dimension_name="Rack", apply_to_all_doctypes=1)
+
+		item_code = "Test Signed Qty Item"
 		create_item(item_code)
-		warehouse = create_warehouse("Store Warehouse")
-		rj_warehouse = create_warehouse("RJ Warehouse")
+		warehouse = create_warehouse("Signed Qty Warehouse")
 
-		if not frappe.db.exists("Store", "Rejected Store"):
-			frappe.get_doc({"doctype": "Store", "store_name": "Rejected Store"}).insert(
-				ignore_permissions=True
+		# Receive 50 first so the outward issue has stock to draw from.
+		se_in = make_stock_entry(
+			item_code=item_code, target=warehouse, qty=50, basic_rate=10, do_not_save=True
+		)
+		se_in.items[0].inventory_dimension_bundle = make_inventory_dimension_bundle(
+			item_code, warehouse, [{"qty": 50, "rack": "Rack 1"}]
+		)
+		se_in.submit()
+
+		# Issue 10: the bundle is stamped Outward on submit, so its entry qty is signed negative.
+		se_out = make_stock_entry(item_code=item_code, source=warehouse, qty=10, do_not_save=True)
+		bundle = make_inventory_dimension_bundle(item_code, warehouse, [{"qty": 10, "rack": "Rack 1"}])
+		se_out.items[0].inventory_dimension_bundle = bundle
+		se_out.submit()
+
+		doc = frappe.get_doc("Inventory Dimension Bundle", bundle)
+		self.assertEqual(doc.type_of_transaction, "Outward")
+		self.assertEqual(doc.entries[0].is_outward, 1)
+		self.assertEqual(doc.entries[0].qty, -10)
+		self.assertEqual(doc.total_qty, -10)
+
+		# The signed sub-ledger nets to 40 (50 in - 10 out).
+		self.assertEqual(
+			get_dimension_sub_ledger_balance(item_code, warehouse, {"rack": "Rack 1"}, inclusive=True), 40
+		)
+
+	def test_material_transfer_posts_both_legs(self):
+		"""A Stock Entry transfer posts the dimension out of the source and into the target warehouse."""
+		create_inventory_dimension(reference_document="Rack", dimension_name="Rack", apply_to_all_doctypes=1)
+
+		item_code = "Test Transfer Item"
+		create_item(item_code)
+		wh_a = create_warehouse("Transfer Source Warehouse")
+		wh_b = create_warehouse("Transfer Target Warehouse")
+
+		# Receive 10 into the source warehouse / Rack 1.
+		se_in = make_stock_entry(item_code=item_code, target=wh_a, qty=10, basic_rate=100, do_not_save=True)
+		se_in.items[0].inventory_dimension_bundle = make_inventory_dimension_bundle(
+			item_code, wh_a, [{"qty": 10, "rack": "Rack 1"}]
+		)
+		se_in.submit()
+
+		# Transfer 4 from source to target: the outward leg draws Rack 1 down at the source and the
+		# inward leg posts it into the target (the bug was the inward leg being lost).
+		se_t = make_stock_entry(item_code=item_code, source=wh_a, target=wh_b, qty=4, do_not_save=True)
+		se_t.items[0].inventory_dimension_bundle = make_inventory_dimension_bundle(
+			item_code, wh_a, [{"qty": 4, "rack": "Rack 1"}]
+		)
+		se_t.submit()
+
+		self.assertEqual(
+			get_dimension_sub_ledger_balance(item_code, wh_a, {"rack": "Rack 1"}, inclusive=True), 6
+		)
+		self.assertEqual(
+			get_dimension_sub_ledger_balance(item_code, wh_b, {"rack": "Rack 1"}, inclusive=True), 4
+		)
+
+		# Cancelling the transfer reverses both legs (including the target's inward bundle).
+		se_t.reload()
+		se_t.cancel()
+		self.assertEqual(
+			get_dimension_sub_ledger_balance(item_code, wh_a, {"rack": "Rack 1"}, inclusive=True), 10
+		)
+		self.assertEqual(
+			get_dimension_sub_ledger_balance(item_code, wh_b, {"rack": "Rack 1"}, inclusive=True), 0
+		)
+
+	def test_delivery_note_dimension_bundle_posts_to_sle(self):
+		"""A dimension bundle assigned to a Delivery Note row must reach the Stock Ledger Entry.
+
+		Regression: the selling controller rebuilt each row via get_item_list() and dropped
+		inventory_dimension_bundle, so the SLE was posted without it and the mandatory-dimension
+		check spuriously failed.
+		"""
+		create_inventory_dimension(reference_document="Rack", dimension_name="Rack", apply_to_all_doctypes=1)
+
+		item_code = "Test DN Dimension Item"
+		create_item(item_code, is_stock_item=1)
+		warehouse = create_warehouse("DN Dimension Warehouse")
+		company = frappe.db.get_value("Warehouse", warehouse, "company")
+
+		# Stock the item so there is something to deliver.
+		se = make_stock_entry(item_code=item_code, target=warehouse, qty=10, basic_rate=100, do_not_save=True)
+		se.items[0].inventory_dimension_bundle = make_inventory_dimension_bundle(
+			item_code, warehouse, [{"qty": 10, "rack": "Rack 1"}]
+		)
+		se.submit()
+
+		dn = frappe.new_doc("Delivery Note")
+		dn.company = company
+		dn.customer = "_Test Customer"
+		dn.append(
+			"items",
+			{"item_code": item_code, "warehouse": warehouse, "qty": 4, "rate": 150},
+		)
+		dn.insert()
+		dn.items[0].inventory_dimension_bundle = make_inventory_dimension_bundle(
+			item_code, warehouse, [{"qty": 4, "rack": "Rack 1"}]
+		)
+		dn.save()
+		dn.submit()
+
+		# The Stock Ledger Entry carries the bundle (no mandatory-dimension error was raised).
+		sle_bundle = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": dn.name, "is_cancelled": 0}, "inventory_dimension_bundle"
+		)
+		self.assertTrue(sle_bundle)
+
+		# The outward delivery draws Rack 1 down from 10 to 6.
+		self.assertEqual(
+			get_dimension_sub_ledger_balance(item_code, warehouse, {"rack": "Rack 1"}, inclusive=True), 6
+		)
+
+	def test_product_bundle_packed_item_dimension_bundle_is_submitted(self):
+		"""A dimension bundle on a Product Bundle's packed item must be submitted with the voucher."""
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+
+		create_inventory_dimension(reference_document="Rack", dimension_name="Rack", apply_to_all_doctypes=1)
+
+		parent_item = "Test PB Parent Item"
+		child_item = "Test PB Child Item"
+		create_item(parent_item, is_stock_item=0)
+		create_item(child_item, is_stock_item=1)
+		make_product_bundle(parent_item, [child_item])
+
+		warehouse = create_warehouse("PB Dimension Warehouse")
+		company = frappe.db.get_value("Warehouse", warehouse, "company")
+
+		# Stock the child item into Rack 1.
+		se = make_stock_entry(
+			item_code=child_item, target=warehouse, qty=10, basic_rate=100, do_not_save=True
+		)
+		se.items[0].inventory_dimension_bundle = make_inventory_dimension_bundle(
+			child_item, warehouse, [{"qty": 10, "rack": "Rack 1"}]
+		)
+		se.submit()
+
+		dn = frappe.new_doc("Delivery Note")
+		dn.company = company
+		dn.customer = "_Test Customer"
+		dn.append("items", {"item_code": parent_item, "warehouse": warehouse, "qty": 3, "rate": 150})
+		dn.insert()  # packed_items are generated for the product bundle's child
+
+		packed = dn.packed_items[0]
+		bundle = make_inventory_dimension_bundle(
+			child_item, packed.warehouse, [{"qty": packed.qty, "rack": "Rack 1"}]
+		)
+		packed.inventory_dimension_bundle = bundle
+		dn.save()
+		dn.submit()
+
+		# The packed item's bundle is submitted (posted to the sub-ledger), not left a draft.
+		self.assertEqual(frappe.db.get_value("Inventory Dimension Bundle", bundle, "docstatus"), 1)
+
+		# Rack 1 was drawn down by the delivered packed qty (10 received - 3 delivered).
+		self.assertEqual(
+			get_dimension_sub_ledger_balance(child_item, warehouse, {"rack": "Rack 1"}, inclusive=True),
+			10 - packed.qty,
+		)
+
+	def test_manual_bundle_infers_direction_from_voucher(self):
+		"""A bundle created/linked manually for a Delivery Note is stamped Outward on save."""
+		create_inventory_dimension(reference_document="Rack", dimension_name="Rack", apply_to_all_doctypes=1)
+
+		item_code = "Test Manual Direction Item"
+		create_item(item_code)
+		warehouse = create_warehouse("Manual Direction Warehouse")
+		company = frappe.db.get_value("Warehouse", warehouse, "company")
+
+		doc = frappe.new_doc("Inventory Dimension Bundle")
+		doc.company = company
+		doc.item_code = item_code
+		doc.warehouse = warehouse
+		doc.voucher_type = "Delivery Note"
+		doc.append("entries", {"qty": 5, "rack": "Rack 1", "warehouse": warehouse})
+		doc.flags.ignore_permissions = True
+		doc.save()
+
+		# Direction inferred from the voucher type while still a draft (no voucher submit yet).
+		self.assertEqual(doc.type_of_transaction, "Outward")
+		self.assertEqual(doc.entries[0].is_outward, 1)
+		self.assertEqual(doc.entries[0].qty, -5)
+
+	def test_bundle_cannot_be_submitted_manually(self):
+		"""The bundle is submitted only by its voucher; a manual submit must be blocked."""
+		create_inventory_dimension(reference_document="Rack", dimension_name="Rack", apply_to_all_doctypes=1)
+
+		item_code = "Test Manual Submit Item"
+		create_item(item_code)
+		warehouse = create_warehouse("Manual Submit Warehouse")
+		bundle = make_inventory_dimension_bundle(item_code, warehouse, [{"qty": 5, "rack": "Rack 1"}])
+
+		doc = frappe.get_doc("Inventory Dimension Bundle", bundle)
+		self.assertRaises(frappe.ValidationError, doc.submit)
+
+	def test_bundle_cannot_be_cancelled_manually(self):
+		"""The bundle is cancelled only by its voucher; a manual cancel must be blocked."""
+		create_inventory_dimension(reference_document="Rack", dimension_name="Rack", apply_to_all_doctypes=1)
+
+		item_code = "Test Manual Cancel Item"
+		create_item(item_code)
+		warehouse = create_warehouse("Manual Cancel Warehouse")
+
+		# Submit a bundle the only legitimate way - through its voucher.
+		se = make_stock_entry(item_code=item_code, target=warehouse, qty=5, basic_rate=10, do_not_save=True)
+		bundle = make_inventory_dimension_bundle(item_code, warehouse, [{"qty": 5, "rack": "Rack 1"}])
+		se.items[0].inventory_dimension_bundle = bundle
+		se.submit()
+
+		doc = frappe.get_doc("Inventory Dimension Bundle", bundle)
+		self.assertRaises(frappe.ValidationError, doc.cancel)
+
+	def test_cancelling_voucher_unlinks_bundle(self):
+		"""Cancelling a voucher detaches its now-cancelled bundle so the voucher can be amended."""
+		create_inventory_dimension(reference_document="Rack", dimension_name="Rack", apply_to_all_doctypes=1)
+
+		item_code = "Test Unlink Item"
+		create_item(item_code)
+		warehouse = create_warehouse("Unlink Warehouse")
+
+		se = make_stock_entry(item_code=item_code, target=warehouse, qty=10, basic_rate=100, do_not_save=True)
+		bundle = make_inventory_dimension_bundle(item_code, warehouse, [{"qty": 10, "rack": "Rack 1"}])
+		se.items[0].inventory_dimension_bundle = bundle
+		se.submit()
+
+		se.reload()
+		se.cancel()
+
+		# The bundle is cancelled and detached from the voucher row.
+		self.assertEqual(frappe.db.get_value("Inventory Dimension Bundle", bundle, "docstatus"), 2)
+		self.assertFalse(
+			frappe.db.get_value("Stock Entry Detail", se.items[0].name, "inventory_dimension_bundle")
+		)
+
+		# Amending the cancelled voucher saves without a "Cannot link cancelled document" error.
+		amended = frappe.copy_doc(se)
+		amended.amended_from = se.name
+		amended.docstatus = 0
+		amended.save()
+		self.assertFalse(amended.items[0].inventory_dimension_bundle)
+
+	def test_dimension_wise_stock_balance_report(self):
+		"""The Stock Balance report splits an item/warehouse row by dimension from the sub-ledger."""
+		from frappe.utils import add_days, today
+
+		from erpnext.stock.report.stock_balance.stock_balance import execute
+
+		create_inventory_dimension(reference_document="Rack", dimension_name="Rack", apply_to_all_doctypes=1)
+
+		item_code = "Test Dimension Balance Item"
+		create_item(item_code)
+		warehouse = create_warehouse("Dimension Balance Warehouse")
+		company = frappe.db.get_value("Warehouse", warehouse, "company")
+
+		# Receive 30 into Rack 1 and 20 into Rack 2 (same item + warehouse).
+		for rack, qty in [("Rack 1", 30), ("Rack 2", 20)]:
+			se = make_stock_entry(
+				item_code=item_code, target=warehouse, qty=qty, basic_rate=10, do_not_save=True
 			)
+			bundle = make_inventory_dimension_bundle(item_code, warehouse, [{"qty": qty, "rack": rack}])
+			se.items[0].inventory_dimension_bundle = bundle
+			se.submit()
 
-		# Purchase Receipt -> Inward in Store 1
-		pr_doc = make_purchase_receipt(
+		filters = frappe._dict(
+			company=company,
+			from_date=add_days(today(), -1),
+			to_date=today(),
+			item_code=[item_code],
+			warehouse=[warehouse],
+			show_dimension_wise_stock=1,
+		)
+
+		_columns, data = execute(filters)
+		rack_balances = {
+			row.get("rack"): row.get("bal_qty") for row in data if row.get("item_code") == item_code
+		}
+
+		# One row per rack, each carrying only its own balance (no residual since all 50 is captured).
+		self.assertEqual(rack_balances.get("Rack 1"), 30)
+		self.assertEqual(rack_balances.get("Rack 2"), 20)
+		self.assertNotIn(None, rack_balances)
+		self.assertEqual(sum(rack_balances.values()), 50)
+
+	def test_dimension_wise_stock_ledger_report(self):
+		"""Filtering the Stock Ledger report by a dimension shows that dimension's ledger only."""
+		from frappe.utils import add_days, today
+
+		from erpnext.stock.report.stock_ledger.stock_ledger import execute
+
+		create_inventory_dimension(reference_document="Rack", dimension_name="Rack", apply_to_all_doctypes=1)
+
+		item_code = "Test Dimension Ledger Item"
+		create_item(item_code)
+		warehouse = create_warehouse("Dimension Ledger Warehouse")
+		company = frappe.db.get_value("Warehouse", warehouse, "company")
+
+		# Receive 30 into Rack 1 and 20 into Rack 2, then issue 10 from Rack 1.
+		for rack, qty in [("Rack 1", 30), ("Rack 2", 20)]:
+			se = make_stock_entry(
+				item_code=item_code, target=warehouse, qty=qty, basic_rate=10, do_not_save=True
+			)
+			bundle = make_inventory_dimension_bundle(item_code, warehouse, [{"qty": qty, "rack": rack}])
+			se.items[0].inventory_dimension_bundle = bundle
+			se.submit()
+
+		se = make_stock_entry(item_code=item_code, source=warehouse, qty=10, do_not_save=True)
+		bundle = make_inventory_dimension_bundle(item_code, warehouse, [{"qty": 10, "rack": "Rack 1"}])
+		se.items[0].inventory_dimension_bundle = bundle
+		se.submit()
+
+		filters = frappe._dict(
+			company=company,
+			from_date=add_days(today(), -1),
+			to_date=today(),
+			item_code=[item_code],
+			warehouse=[warehouse],
+			rack=["Rack 1"],
+		)
+
+		_columns, data = execute(filters)
+		rows = [row for row in data if row.get("item_code") == item_code]
+
+		# Only Rack 1 movements: a +30 receipt and a -10 issue (Rack 2 is excluded).
+		self.assertEqual(len(rows), 2)
+		self.assertTrue(all(row.get("rack") == "Rack 1" for row in rows))
+		self.assertEqual([row.get("actual_qty") for row in rows], [30, -10])
+		# Running balance for Rack 1 ends at 20.
+		self.assertEqual(rows[-1].get("qty_after_transaction"), 20)
+
+		# Without a dimension filter, each row still shows its bundle's dimension value in the column.
+		unfiltered = frappe._dict(
+			company=company,
+			from_date=add_days(today(), -1),
+			to_date=today(),
+			item_code=[item_code],
+			warehouse=[warehouse],
+		)
+		_columns, data = execute(unfiltered)
+		rack_values = {row.get("rack") for row in data if row.get("voucher_type") == "Stock Entry"}
+		self.assertEqual(rack_values, {"Rack 1", "Rack 2"})
+
+		# With the feature disabled, the report must not fetch any sub-ledger dimension data.
+		frappe.flags.enable_inventory_dimension = 0
+		_columns, data = execute(unfiltered)
+		self.assertTrue(all(not row.get("rack") for row in data))
+
+	def test_dimension_ledger_running_balance_is_per_item_warehouse(self):
+		"""A dimension filter spanning warehouses keeps a separate running balance per warehouse."""
+		from frappe.utils import add_days, today
+
+		from erpnext.stock.report.stock_ledger.stock_ledger import execute
+
+		frappe.flags.enable_inventory_dimension = 1
+		create_inventory_dimension(reference_document="Rack", dimension_name="Rack", apply_to_all_doctypes=1)
+
+		item_code = "Test Dimension Multi WH Item"
+		create_item(item_code)
+		wh_a = create_warehouse("Dimension WH A")
+		wh_b = create_warehouse("Dimension WH B")
+		company = frappe.db.get_value("Warehouse", wh_a, "company")
+
+		# Receive Rack 1: 30 into WH A and 50 into WH B.
+		for warehouse, qty in [(wh_a, 30), (wh_b, 50)]:
+			se = make_stock_entry(
+				item_code=item_code, target=warehouse, qty=qty, basic_rate=10, do_not_save=True
+			)
+			bundle = make_inventory_dimension_bundle(item_code, warehouse, [{"qty": qty, "rack": "Rack 1"}])
+			se.items[0].inventory_dimension_bundle = bundle
+			se.submit()
+
+		# Filter by Rack 1 only (no warehouse restriction): each warehouse keeps its own balance.
+		filters = frappe._dict(
+			company=company,
+			from_date=add_days(today(), -1),
+			to_date=today(),
+			item_code=[item_code],
+			rack=["Rack 1"],
+		)
+		_columns, data = execute(filters)
+		balances = {
+			row.get("warehouse"): row.get("qty_after_transaction")
+			for row in data
+			if row.get("voucher_type") == "Stock Entry"
+		}
+		self.assertEqual(balances.get(wh_a), 30)
+		self.assertEqual(balances.get(wh_b), 50)
+
+	def test_mandatory_dimension_for_stock_item(self):
+		"""A mandatory dimension is enforced for stock rows at submit (gated on is_stock_item)."""
+		item_code = "_Test Item"
+		dimension = create_inventory_dimension(
+			reference_document="Pallet", dimension_name="Pallet", apply_to_all_doctypes=1
+		)
+		dimension.db_set("reqd", 1)
+		clear_dimension_cache()
+
+		if not frappe.db.exists("Pallet", "Pallet 1"):
+			frappe.get_doc({"doctype": "Pallet", "pallet_name": "Pallet 1"}).insert(ignore_permissions=True)
+
+		warehouse = create_warehouse("Pallet Warehouse")
+
+		try:
+			# No bundle attached -> the SLE requires the bundle (req #1).
+			se = make_stock_entry(
+				item_code=item_code, target=warehouse, qty=5, basic_rate=10, do_not_save=True
+			)
+			se.save()
+			self.assertRaises(frappe.ValidationError, se.submit)
+
+			# Bundle attached but missing the mandatory dimension value -> the entry requires it (req #2).
+			se = make_stock_entry(
+				item_code=item_code, target=warehouse, qty=5, basic_rate=10, do_not_save=True
+			)
+			bundle = make_inventory_dimension_bundle(item_code, warehouse, [{"qty": 5}])
+			se.items[0].inventory_dimension_bundle = bundle
+			self.assertRaises(frappe.ValidationError, se.submit)
+
+			# With the dimension captured in a bundle, the voucher submits fine.
+			se = make_stock_entry(
+				item_code=item_code, target=warehouse, qty=5, basic_rate=10, do_not_save=True
+			)
+			bundle = make_inventory_dimension_bundle(item_code, warehouse, [{"qty": 5, "pallet": "Pallet 1"}])
+			se.items[0].inventory_dimension_bundle = bundle
+			se.submit()
+			self.assertEqual(se.docstatus, 1)
+		finally:
+			dimension.db_set("reqd", 0)
+			clear_dimension_cache()
+
+	def test_bundle_cannot_be_shared_across_vouchers(self):
+		"""One Inventory Dimension Bundle may back only a single voucher's stock ledger."""
+		create_inventory_dimension(
+			reference_document="Shelf", dimension_name="Shelf", apply_to_all_doctypes=1
+		)
+		warehouse = create_warehouse("Shelf Share Warehouse")
+		item_code = "_Test Item"
+
+		se = make_stock_entry(item_code=item_code, target=warehouse, qty=5, basic_rate=10, do_not_save=True)
+		bundle = make_inventory_dimension_bundle(item_code, warehouse, [{"qty": 5, "shelf": "Shelf 1"}])
+		se.items[0].inventory_dimension_bundle = bundle
+		se.submit()
+
+		# Re-using the same bundle on a different voucher must be rejected.
+		other = make_stock_entry(
+			item_code=item_code, target=warehouse, qty=5, basic_rate=10, do_not_save=True
+		)
+		other.items[0].inventory_dimension_bundle = bundle
+		self.assertRaises(frappe.ValidationError, other.submit)
+
+	def test_rejected_inventory_dimension_bundle(self):
+		"""The rejected-qty bundle posts to the rejected warehouse's dimension sub-ledger."""
+		item_code = "_Test Item"
+		create_inventory_dimension(
+			reference_document="Shelf", dimension_name="Shelf", apply_to_all_doctypes=1
+		)
+		warehouse = create_warehouse("PR Accepted Warehouse")
+		rejected_warehouse = create_warehouse("PR Rejected Warehouse")
+
+		pr = make_purchase_receipt(
 			item_code=item_code,
 			warehouse=warehouse,
 			qty=10,
-			rejected_qty=5,
+			rejected_qty=4,
 			rate=100,
-			rejected_warehouse=rj_warehouse,
+			rejected_warehouse=rejected_warehouse,
 			do_not_submit=True,
 		)
+		pr.items[0].inventory_dimension_bundle = make_inventory_dimension_bundle(
+			item_code, warehouse, [{"qty": 10, "shelf": "Shelf 1"}]
+		)
+		pr.items[0].rejected_inventory_dimension_bundle = make_inventory_dimension_bundle(
+			item_code, rejected_warehouse, [{"qty": 4, "shelf": "Shelf 2"}]
+		)
+		pr.submit()
 
-		pr_doc.items[0].store = "Store 1"
-		pr_doc.items[0].rejected_store = "Rejected Store"
-		pr_doc.save()
-		pr_doc.submit()
-
-		entries = frappe.get_all(
-			"Stock Ledger Entry",
-			filters={"voucher_no": pr_doc.name, "warehouse": warehouse},
-			fields=["store"],
-			order_by="creation",
+		self.assertEqual(
+			get_dimension_sub_ledger_balance(item_code, warehouse, {"shelf": "Shelf 1"}, inclusive=True),
+			10,
+		)
+		self.assertEqual(
+			get_dimension_sub_ledger_balance(
+				item_code, rejected_warehouse, {"shelf": "Shelf 2"}, inclusive=True
+			),
+			4,
 		)
 
-		self.assertEqual(entries[0].store, "Store 1")
+	def test_service_item_skips_dimension(self):
+		"""Non-stock (service) rows never require a dimension - they are skipped entirely."""
+		service_item = "Test Service Dimension Item"
+		if not frappe.db.exists("Item", service_item):
+			create_item(service_item)
+		frappe.db.set_value("Item", service_item, "is_stock_item", 0)
 
-		entries = frappe.get_all(
-			"Stock Ledger Entry",
-			filters={"voucher_no": pr_doc.name, "warehouse": rj_warehouse},
-			fields=["store"],
-			order_by="creation",
-		)
+		service = InventoryDimensionBundleService(frappe.new_doc("Delivery Note"))
 
-		self.assertEqual(entries[0].store, "Rejected Store")
+		# Service / non-stock row -> skipped (no dimension demanded).
+		self.assertFalse(service.row_has_dimension_qty(frappe._dict(item_code=service_item, qty=5)))
 
-		# Stock Entry -> Transfer from Store 1 to Store 2
-		se_doc = make_stock_entry(
-			item_code=item_code, qty=10, from_warehouse=warehouse, to_warehouse=warehouse, do_not_save=True
-		)
+		# A stock row with qty -> participates.
+		self.assertTrue(service.row_has_dimension_qty(frappe._dict(item_code="_Test Item", qty=5)))
 
-		se_doc.items[0].store = "Store 1"
-		se_doc.items[0].to_store = "Store 2"
-
-		se_doc.save()
-		se_doc.submit()
-
-		entries = get_voucher_sl_entries(se_doc.name, ["warehouse", "store", "incoming_rate", "actual_qty"])
-
-		for entry in entries:
-			self.assertEqual(entry.warehouse, warehouse)
-			if entry.actual_qty > 0:
-				self.assertEqual(entry.store, "Store 2")
-				self.assertEqual(entry.incoming_rate, 100.0)
-			else:
-				self.assertEqual(entry.store, "Store 1")
-
-		# Delivery Note -> Outward from Store 2
-
-		dn_doc = create_delivery_note(item_code=item_code, qty=10, warehouse=warehouse, do_not_save=True)
-
-		dn_doc.items[0].store = "Store 2"
-		dn_doc.save()
-		dn_doc.submit()
-
-		entries = get_voucher_sl_entries(dn_doc.name, ["warehouse", "store", "actual_qty"])
-
-		self.assertEqual(entries[0].warehouse, warehouse)
-		self.assertEqual(entries[0].store, "Store 2")
-		self.assertEqual(entries[0].actual_qty, -10.0)
-
-		return_dn = make_return_doc("Delivery Note", dn_doc.name)
-		return_dn.submit()
-		entries = get_voucher_sl_entries(return_dn.name, ["warehouse", "store", "actual_qty"])
-
-		self.assertEqual(entries[0].warehouse, warehouse)
-		self.assertEqual(entries[0].store, "Store 2")
-		self.assertEqual(entries[0].actual_qty, 10.0)
-
-		se_doc = make_stock_entry(
-			item_code=item_code, qty=10, from_warehouse=warehouse, to_warehouse=warehouse, do_not_save=True
-		)
-
-		se_doc.items[0].store = "Store 2"
-		se_doc.items[0].to_store = "Store 1"
-
-		se_doc.save()
-		se_doc.submit()
-
-		return_pr = make_return_doc("Purchase Receipt", pr_doc.name)
-		return_pr.submit()
-		entries = get_voucher_sl_entries(return_pr.name, ["warehouse", "store", "actual_qty"])
-
-		self.assertEqual(entries[0].warehouse, warehouse)
-		self.assertEqual(entries[0].store, "Store 1")
-		self.assertEqual(entries[0].actual_qty, -10.0)
-
-	def test_inter_transfer_return_against_inventory_dimension(self):
-		from erpnext.controllers.sales_and_purchase_return import make_return_doc
-		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
-
-		data = prepare_data_for_internal_transfer()
-
-		dn_doc = create_delivery_note(
-			customer=data.customer,
-			company=data.company,
-			warehouse=data.from_warehouse,
-			target_warehouse=data.to_warehouse,
-			qty=5,
-			cost_center=data.cost_center,
-			expense_account=data.expense_account,
-			do_not_submit=True,
-		)
-
-		dn_doc.items[0].store = "Inter Transfer Store 1"
-		dn_doc.items[0].to_store = "Inter Transfer Store 2"
-		dn_doc.save()
-		dn_doc.submit()
-
-		for d in get_voucher_sl_entries(dn_doc.name, ["store", "actual_qty"]):
-			if d.actual_qty > 0:
-				self.assertEqual(d.store, "Inter Transfer Store 2")
-			else:
-				self.assertEqual(d.store, "Inter Transfer Store 1")
-
-		pr_doc = make_inter_company_purchase_receipt(dn_doc.name)
-		pr_doc.items[0].warehouse = data.store_warehouse
-		pr_doc.items[0].from_store = "Inter Transfer Store 2"
-		pr_doc.items[0].store = "Inter Transfer Store 3"
-		pr_doc.save()
-		pr_doc.submit()
-
-		for d in get_voucher_sl_entries(pr_doc.name, ["store", "actual_qty"]):
-			if d.actual_qty > 0:
-				self.assertEqual(d.store, "Inter Transfer Store 3")
-			else:
-				self.assertEqual(d.store, "Inter Transfer Store 2")
-
-		return_doc = make_return_doc("Purchase Receipt", pr_doc.name)
-		return_doc.submit()
-
-		for d in get_voucher_sl_entries(return_doc.name, ["store", "actual_qty"]):
-			if d.actual_qty > 0:
-				self.assertEqual(d.store, "Inter Transfer Store 2")
-			else:
-				self.assertEqual(d.store, "Inter Transfer Store 3")
-
-		dn_doc.load_from_db()
-
-		return_doc1 = make_return_doc("Delivery Note", dn_doc.name)
-		return_doc1.posting_date = nowdate()
-		return_doc1.posting_time = nowtime()
-		return_doc1.items[0].target_warehouse = dn_doc.items[0].target_warehouse
-		return_doc1.items[0].warehouse = dn_doc.items[0].warehouse
-		return_doc1.save()
-		return_doc1.submit()
-
-		for d in get_voucher_sl_entries(return_doc1.name, ["store", "actual_qty"]):
-			if d.actual_qty > 0:
-				self.assertEqual(d.store, "Inter Transfer Store 1")
-			else:
-				self.assertEqual(d.store, "Inter Transfer Store 2")
-
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 1})
 	def test_validate_negative_stock_for_inventory_dimension(self):
 		item_code = "Test Negative Inventory Dimension Item"
-		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 		create_item(item_code)
 
 		inv_dimension = create_inventory_dimension(
 			apply_to_all_doctypes=1,
 			dimension_name="Inv Site",
 			reference_document="Inv Site",
-			document_type="Inv Site",
 			validate_negative_stock=1,
 		)
+		inv_dimension.db_set("validate_negative_stock", 1)
+		clear_dimension_cache()
 
 		warehouse = create_warehouse("Negative Stock Warehouse")
 
-		# Try issuing 10 qty, more than available stock against inventory dimension
-		doc = make_stock_entry(item_code=item_code, source=warehouse, qty=10, do_not_submit=True)
-		doc.items[0].inv_site = "Site 1"
-		self.assertRaises(InventoryDimensionNegativeStockError, doc.submit)
+		# Issue 10 against Site 1 with no stock -> blocked on the dimension.
+		se = make_stock_entry(item_code=item_code, source=warehouse, qty=10, do_not_save=True)
+		bundle = make_inventory_dimension_bundle(item_code, warehouse, [{"qty": 10, "inv_site": "Site 1"}])
+		se.items[0].inventory_dimension_bundle = bundle
+		self.assertRaises(InventoryDimensionNegativeStockError, se.submit)
 
-		# cancel the stock entry
-		doc.reload()
-		if doc.docstatus == 1:
-			doc.cancel()
+		# Receive 10 against Site 1.
+		se = make_stock_entry(item_code=item_code, target=warehouse, qty=10, basic_rate=10, do_not_save=True)
+		bundle = make_inventory_dimension_bundle(item_code, warehouse, [{"qty": 10, "inv_site": "Site 1"}])
+		se.items[0].inventory_dimension_bundle = bundle
+		se.submit()
+		self.assertEqual(
+			get_dimension_sub_ledger_balance(item_code, warehouse, {"inv_site": "Site 1"}, inclusive=True),
+			10,
+		)
 
-		# Receive 10 qty against inventory dimension
-		doc = make_stock_entry(item_code=item_code, target=warehouse, qty=10, do_not_submit=True)
-		doc.items[0].to_inv_site = "Site 1"
-		doc.submit()
+		# Receive another 100 with no dimension (general warehouse stock).
+		make_stock_entry(item_code=item_code, target=warehouse, qty=100, basic_rate=10)
 
-		# check inventory dimension value in stock ledger entry
-		site_name = frappe.get_all(
-			"Stock Ledger Entry", filters={"voucher_no": doc.name, "is_cancelled": 0}, fields=["inv_site"]
-		)[0].inv_site
+		# Issue 100 against Site 1: warehouse has 110 but Site 1 only has 10 -> blocked.
+		se = make_stock_entry(item_code=item_code, source=warehouse, qty=100, do_not_save=True)
+		bundle = make_inventory_dimension_bundle(item_code, warehouse, [{"qty": 100, "inv_site": "Site 1"}])
+		se.items[0].inventory_dimension_bundle = bundle
+		self.assertRaises(InventoryDimensionNegativeStockError, se.submit)
 
-		self.assertEqual(site_name, "Site 1")
-
-		# Receive another 100 qty without inventory dimension
-		doc = make_stock_entry(item_code=item_code, target=warehouse, qty=100)
-
-		# Try issuing 100 qty, more than available stock against inventory dimension
-		# Note: total available qty for the item is 110, but against inventory dimension, only 10 qty is available
-		doc = make_stock_entry(item_code=item_code, source=warehouse, qty=100, do_not_submit=True)
-		doc.items[0].inv_site = "Site 1"
-		self.assertRaises(InventoryDimensionNegativeStockError, doc.submit)
-
-		# disable validate_negative_stock for inventory dimension
+		# Disable the check on the dimension -> the same issue now goes through.
 		inv_dimension.reload()
 		inv_dimension.db_set("validate_negative_stock", 0)
-		frappe.clear_cache(doctype="Inventory Dimension")
+		clear_dimension_cache()
 
-		# Try issuing 100 qty, more than available stock against inventory dimension
-		doc = make_stock_entry(item_code=item_code, source=warehouse, qty=100, do_not_submit=True)
-		doc.items[0].inv_site = "Site 1"
-		doc.submit()
-		self.assertEqual(doc.docstatus, 1)
+		se = make_stock_entry(item_code=item_code, source=warehouse, qty=100, do_not_save=True)
+		bundle = make_inventory_dimension_bundle(item_code, warehouse, [{"qty": 100, "inv_site": "Site 1"}])
+		se.items[0].inventory_dimension_bundle = bundle
+		se.submit()
+		self.assertEqual(se.docstatus, 1)
 
-		# check inventory dimension value in stock ledger entry
-		site_name = frappe.get_all(
-			"Stock Ledger Entry", filters={"voucher_no": doc.name, "is_cancelled": 0}, fields=["inv_site"]
-		)[0].inv_site
-
-		self.assertEqual(site_name, "Site 1")
-
-	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
-	def test_validate_negative_stock_with_multiple_dimension(self):
-		item_code = "Test Negative Multi Inventory Dimension Item"
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 1})
+	def test_negative_stock_per_dimension_method(self):
+		"""Per Dimension: each dimension is validated independently (combination may be short)."""
+		item_code = "Test ND Per Dimension Item"
 		create_item(item_code)
+		self._setup_two_dimensions("Per Dimension")
+		warehouse = create_warehouse("ND Per Dimension Warehouse")
 
-		inv_dimension_1 = create_inventory_dimension(
-			apply_to_all_doctypes=1,
-			dimension_name="Inv Site",
-			reference_document="Inv Site",
-			document_type="Inv Site",
-			validate_negative_stock=1,
+		# Balances after receipts: Site 1 = 30, Site 2 = 55, Rack 1 = 60, Rack 2 = 25.
+		self._receive(
+			item_code,
+			warehouse,
+			[("Site 1", "Rack 1", 30), ("Site 2", "Rack 1", 30), ("Site 2", "Rack 2", 25)],
 		)
-		inv_dimension_1.db_set("validate_negative_stock", 1)
 
-		inv_dimension_2 = create_inventory_dimension(
-			apply_to_all_doctypes=1,
-			dimension_name="Rack",
-			reference_document="Rack",
-			document_type="Rack",
-			validate_negative_stock=1,
+		# Issue 35 from Site 2 + Rack 1. Per dimension both are sufficient (55, 60) even though the
+		# exact combination Site 2 + Rack 1 only has 30 -> allowed.
+		se = make_stock_entry(item_code=item_code, source=warehouse, qty=35, do_not_save=True)
+		bundle = make_inventory_dimension_bundle(
+			item_code, warehouse, [{"qty": 35, "inv_site": "Site 2", "rack": "Rack 1"}]
 		)
-		inv_dimension_2.db_set("validate_negative_stock", 1)
+		se.items[0].inventory_dimension_bundle = bundle
+		se.submit()
+		self.assertEqual(se.docstatus, 1)
 
-		pr_doc = make_purchase_receipt(item_code=item_code, qty=30, do_not_submit=True)
-		pr_doc.items[0].inv_site = "Site 1"
-		pr_doc.items[0].rack = "Rack 1"
-		pr_doc.save()
-		pr_doc.submit()
+		# Issue 30 from Rack 2 (only 25 available on that single dimension) -> blocked.
+		se = make_stock_entry(item_code=item_code, source=warehouse, qty=30, do_not_save=True)
+		bundle = make_inventory_dimension_bundle(
+			item_code, warehouse, [{"qty": 30, "inv_site": "Site 2", "rack": "Rack 2"}]
+		)
+		se.items[0].inventory_dimension_bundle = bundle
+		self.assertRaises(InventoryDimensionNegativeStockError, se.submit)
 
-		pr_doc = make_purchase_receipt(item_code=item_code, qty=15, do_not_submit=True)
-		pr_doc.items[0].inv_site = "Site 1"
-		pr_doc.items[0].rack = "Rack 2"
-		pr_doc.save()
-		pr_doc.submit()
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 1})
+	def test_negative_stock_combined_method(self):
+		"""Combined: the exact combination of all combined-method dimensions is validated together."""
+		item_code = "Test ND Combined Item"
+		create_item(item_code)
+		self._setup_two_dimensions("Combined")
+		warehouse = create_warehouse("ND Combined Warehouse")
 
-		pr_doc = make_purchase_receipt(item_code=item_code, qty=30, do_not_submit=True)
-		pr_doc.items[0].inv_site = "Site 2"
-		pr_doc.items[0].rack = "Rack 1"
-		pr_doc.save()
-		pr_doc.submit()
+		# Same balances: Site 2 = 55, Rack 1 = 60, but the combination Site 2 + Rack 1 = 30.
+		self._receive(
+			item_code,
+			warehouse,
+			[("Site 1", "Rack 1", 30), ("Site 2", "Rack 1", 30), ("Site 2", "Rack 2", 25)],
+		)
 
-		pr_doc = make_purchase_receipt(item_code=item_code, qty=25, do_not_submit=True)
-		pr_doc.items[0].inv_site = "Site 2"
-		pr_doc.items[0].rack = "Rack 2"
-		pr_doc.save()
-		pr_doc.submit()
+		# Issue 35 from Site 2 + Rack 1: the combination only has 30 -> blocked.
+		se = make_stock_entry(item_code=item_code, source=warehouse, qty=35, do_not_save=True)
+		bundle = make_inventory_dimension_bundle(
+			item_code, warehouse, [{"qty": 35, "inv_site": "Site 2", "rack": "Rack 1"}]
+		)
+		se.items[0].inventory_dimension_bundle = bundle
+		self.assertRaises(InventoryDimensionNegativeStockError, se.submit)
 
-		dn_doc = create_delivery_note(item_code=item_code, qty=35, do_not_submit=True)
-		dn_doc.items[0].inv_site = "Site 2"
-		dn_doc.items[0].rack = "Rack 1"
-		dn_doc.save()
-		self.assertRaises(InventoryDimensionNegativeStockError, dn_doc.submit)
+		# Issue 30 from Site 2 + Rack 1 (exactly the combination balance) -> allowed.
+		se = make_stock_entry(item_code=item_code, source=warehouse, qty=30, do_not_save=True)
+		bundle = make_inventory_dimension_bundle(
+			item_code, warehouse, [{"qty": 30, "inv_site": "Site 2", "rack": "Rack 1"}]
+		)
+		se.items[0].inventory_dimension_bundle = bundle
+		se.submit()
+		self.assertEqual(se.docstatus, 1)
+
+	# ------------------------------------------------------------------ helpers
+
+	def _setup_two_dimensions(self, method):
+		for name, reference in [("Inv Site", "Inv Site"), ("Rack", "Rack")]:
+			dimension = create_inventory_dimension(
+				apply_to_all_doctypes=1,
+				dimension_name=name,
+				reference_document=reference,
+				validate_negative_stock=1,
+			)
+			dimension.db_set("validate_negative_stock", 1)
+			dimension.db_set("negative_stock_validation_method", method)
+		clear_dimension_cache()
+
+	def _receive(self, item_code, warehouse, allocations):
+		for site, rack, qty in allocations:
+			se = make_stock_entry(
+				item_code=item_code, target=warehouse, qty=qty, basic_rate=10, do_not_save=True
+			)
+			bundle = make_inventory_dimension_bundle(
+				item_code, warehouse, [{"qty": qty, "inv_site": site, "rack": rack}]
+			)
+			se.items[0].inventory_dimension_bundle = bundle
+			se.submit()
 
 
-def get_voucher_sl_entries(voucher_no, fields):
-	return frappe.get_all(
-		"Stock Ledger Entry", filters={"voucher_no": voucher_no}, fields=fields, order_by="creation"
-	)
+def make_inventory_dimension_bundle(item_code, warehouse, entries):
+	"""Build and save a draft Inventory Dimension Bundle (the dialog's job in the UI).
+
+	``entries`` is a list of dicts: ``{"qty": <qty>, "<dimension_source_fieldname>": <value>, ...}``.
+	"""
+	company = frappe.db.get_value("Warehouse", warehouse, "company")
+
+	doc = frappe.new_doc("Inventory Dimension Bundle")
+	doc.company = company
+	doc.item_code = item_code
+	doc.warehouse = warehouse
+	for entry in entries:
+		row = {"qty": entry["qty"], "warehouse": entry.get("warehouse") or warehouse}
+		for key, value in entry.items():
+			if key not in ("qty", "warehouse"):
+				row[key] = value
+		doc.append("entries", row)
+
+	doc.flags.ignore_permissions = True
+	doc.save()
+	return doc.name
+
+
+def reset_inventory_dimension_flags():
+	"""Clear ``reqd`` / ``validate_negative_stock`` on every dimension so leaked records from a
+	committed Custom Field DDL cannot impose mandatory/negative-stock validation on other tests."""
+	for name in frappe.get_all("Inventory Dimension", pluck="name"):
+		frappe.db.set_value(
+			"Inventory Dimension", name, {"reqd": 0, "validate_negative_stock": 0}, update_modified=False
+		)
+	clear_dimension_cache()
+
+
+def clear_dimension_cache():
+	"""Reset the per-request caches so dimension config changes are picked up mid-test.
+
+	``get_inventory_dimensions`` / ``get_document_wise_inventory_dimensions`` are ``@request_cache``d;
+	clear the request cache in place (it is a ``defaultdict(dict)``, so it must not be replaced).
+	"""
+	frappe.clear_cache(doctype="Inventory Dimension")
+	if getattr(frappe.local, "request_cache", None) is not None:
+		frappe.local.request_cache.clear()
 
 
 def create_inventory_dimension(**args):
@@ -565,75 +846,3 @@ def create_inventory_dimension(**args):
 		doc.insert(ignore_permissions=True)
 
 	return doc
-
-
-def prepare_data_for_internal_transfer():
-	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
-	from erpnext.selling.doctype.customer.test_customer import create_internal_customer
-	from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-
-	company = "_Test Company with perpetual inventory"
-
-	customer = create_internal_customer(
-		"_Test Internal Customer 2",
-		company,
-		company,
-	)
-
-	supplier = create_internal_supplier(
-		"_Test Internal Supplier 2",
-		company,
-		company,
-	)
-
-	for store in ["Inter Transfer Store 1", "Inter Transfer Store 2", "Inter Transfer Store 3"]:
-		if not frappe.db.exists("Store", store):
-			frappe.get_doc({"doctype": "Store", "store_name": store}).insert(ignore_permissions=True)
-
-	warehouse = create_warehouse("_Test Internal Warehouse New A", company=company)
-
-	to_warehouse = create_warehouse("_Test Internal Warehouse GIT A", company=company)
-
-	pr_doc = make_purchase_receipt(company=company, warehouse=warehouse, qty=10, rate=100, do_not_submit=True)
-	pr_doc.items[0].store = "Inter Transfer Store 1"
-	pr_doc.submit()
-
-	if not frappe.db.get_value("Company", company, "unrealized_profit_loss_account"):
-		account = "Unrealized Profit and Loss - TCP1"
-		if not frappe.db.exists("Account", account):
-			frappe.get_doc(
-				{
-					"doctype": "Account",
-					"account_name": "Unrealized Profit and Loss",
-					"parent_account": "Direct Income - TCP1",
-					"company": company,
-					"is_group": 0,
-					"account_type": "Income Account",
-				}
-			).insert()
-
-		frappe.db.set_value("Company", company, "unrealized_profit_loss_account", account)
-
-	cost_center = frappe.db.get_value("Company", company, "cost_center") or frappe.db.get_value(
-		"Cost Center", {"company": company}, "name"
-	)
-
-	expene_account = frappe.db.get_value(
-		"Company", company, "stock_adjustment_account"
-	) or frappe.db.get_value("Account", {"company": company, "account_type": "Expense Account"}, "name")
-
-	return frappe._dict(
-		{
-			"from_warehouse": warehouse,
-			"to_warehouse": to_warehouse,
-			"customer": customer,
-			"supplier": supplier,
-			"company": company,
-			"cost_center": cost_center,
-			"expene_account": expene_account,
-			"store_warehouse": frappe.db.get_value(
-				"Warehouse", {"name": ("like", "Store%"), "company": company}, "name"
-			),
-		}
-	)

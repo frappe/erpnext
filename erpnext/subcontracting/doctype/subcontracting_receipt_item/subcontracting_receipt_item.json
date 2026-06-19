@@ -62,6 +62,12 @@
   "rejected_serial_no",
   "column_break_henr",
   "batch_no",
+  "inventory_dimension_section",
+  "add_inventory_dimension",
+  "inventory_dimension_bundle",
+  "column_break_inv_dim",
+  "add_inventory_dimension_for_rejected_qty",
+  "rejected_inventory_dimension_bundle",
   "manufacture_details",
   "manufacturer",
   "column_break_16",
@@ -499,6 +505,46 @@
    "print_hide": 1
   },
   {
+   "fieldname": "inventory_dimension_bundle",
+   "fieldtype": "Link",
+   "label": "Inventory Dimension Bundle",
+   "no_copy": 1,
+   "options": "Inventory Dimension Bundle",
+   "print_hide": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_inv_dim",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "inventory_dimension_section",
+   "fieldtype": "Section Break",
+   "label": "Inventory Dimension"
+  },
+  {
+   "depends_on": "eval:parent.docstatus == 0",
+   "fieldname": "add_inventory_dimension",
+   "fieldtype": "Button",
+   "label": "Add Inventory Dimension"
+  },
+  {
+   "depends_on": "eval:parent.docstatus == 0",
+   "fieldname": "add_inventory_dimension_for_rejected_qty",
+   "fieldtype": "Button",
+   "label": "Add Inventory Dimension (Rejected Qty)"
+  },
+  {
+   "fieldname": "rejected_inventory_dimension_bundle",
+   "fieldtype": "Link",
+   "label": "Rejected Inventory Dimension Bundle",
+   "no_copy": 1,
+   "options": "Inventory Dimension Bundle",
+   "print_hide": 1,
+   "search_index": 1
+  },
+  {
    "depends_on": "eval:(doc.use_serial_batch_fields === 0 || doc.docstatus === 1) && !doc.secondary_item_type && !doc.is_legacy_scrap_item",
    "fieldname": "rejected_serial_and_batch_bundle",
    "fieldtype": "Link",
@@ -635,7 +681,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-06-01 10:00:00.000000",
+ "modified": "2026-06-21 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt Item",

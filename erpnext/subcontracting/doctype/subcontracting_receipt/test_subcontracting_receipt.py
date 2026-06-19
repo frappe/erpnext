@@ -2037,22 +2037,29 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 	def test_inventory_dimensions(self):
 		"""
-		The subcontracting controller resets the supplied items table on each save causing the inventory dimensions to be lost.
-		This test ensures that the inventory dimensions are retained on each save.
+		The subcontracting controller resets the supplied items table on each save. This test ensures
+		the inventory dimension bundle linked on a supplied item is retained across saves.
 		"""
 		from erpnext.stock.doctype.inventory_dimension.test_inventory_dimension import (
 			create_inventory_dimension,
+			make_inventory_dimension_bundle,
+			reset_inventory_dimension_flags,
 		)
 
-		inventory_dimension = create_inventory_dimension(
+		# Inventory Dimensions are gated behind a feature flag; enable it for this test only.
+		frappe.flags.enable_inventory_dimension = 1
+		self.addCleanup(frappe.flags.pop, "enable_inventory_dimension", None)
+
+		# Inventory Dimension records are committed via Custom Field DDL, so a sibling test's
+		# mandatory (reqd) dimension can leak in and block this test's bundle-less setup receipts.
+		# Neutralise those flags for this run (rolled back at teardown).
+		reset_inventory_dimension_flags()
+
+		create_inventory_dimension(
 			apply_to_all_doctypes=1,
 			dimension_name="Inv Site",
 			reference_document="Inv Site",
-			document_type="Inv Site",
 		)
-
-		inventory_dimension.reqd = 1
-		inventory_dimension.save()
 
 		set_backflush_based_on("BOM")
 
@@ -2065,16 +2072,19 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			itemwise_details=copy.deepcopy(itemwise_details),
 		)
 		scr = make_subcontracting_receipt(sco.name)
-		scr.items[0].inv_site = "Site 1"
 		scr.save()
 
-		scr.supplied_items[0].inv_site = "Site 1"
+		supplied = scr.supplied_items[0]
+		warehouse = supplied.get("warehouse") or "_Test Warehouse - _TC"
+		bundle = make_inventory_dimension_bundle(
+			supplied.rm_item_code,
+			warehouse,
+			[{"qty": supplied.required_qty, "inv_site": "Site 1"}],
+		)
+		scr.supplied_items[0].inventory_dimension_bundle = bundle
 		scr.save()
 
-		self.assertEqual(scr.supplied_items[0].inv_site, "Site 1")
-
-		inventory_dimension.reqd = 0
-		inventory_dimension.save()
+		self.assertEqual(scr.supplied_items[0].inventory_dimension_bundle, bundle)
 
 
 def make_return_subcontracting_receipt(**args):

@@ -13,7 +13,10 @@
   "serial_no",
   "column_break_xzfr",
   "pick_serial_and_batch",
-  "serial_and_batch_bundle"
+  "serial_and_batch_bundle",
+  "inventory_dimension_section",
+  "add_inventory_dimension",
+  "inventory_dimension_bundle"
  ],
  "fields": [
   {
@@ -57,6 +60,27 @@
    "options": "Serial and Batch Bundle"
   },
   {
+   "fieldname": "inventory_dimension_bundle",
+   "fieldtype": "Link",
+   "label": "Inventory Dimension Bundle",
+   "no_copy": 1,
+   "options": "Inventory Dimension Bundle",
+   "print_hide": 1,
+   "search_index": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "inventory_dimension_section",
+   "fieldtype": "Section Break",
+   "label": "Inventory Dimension"
+  },
+  {
+   "depends_on": "eval:parent.docstatus == 0",
+   "fieldname": "add_inventory_dimension",
+   "fieldtype": "Button",
+   "label": "Add Inventory Dimension"
+  },
+  {
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -77,7 +101,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-06-27 14:52:56.311166",
+ "modified": "2026-06-21 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair Consumed Item",

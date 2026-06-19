@@ -363,6 +363,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
 			"Serial and Batch Bundle",
+			"Inventory Dimension Bundle",
 		)
 
 		self.make_gl_entries_on_cancel()
@@ -1039,6 +1040,32 @@ class StockEntry(StockController, SubcontractingInwardController):
 				if self.purpose in allowed_types and d.serial_and_batch_bundle and self.docstatus == 1:
 					sle.serial_and_batch_bundle = self.make_package_for_transfer(
 						d.serial_and_batch_bundle, d.t_warehouse
+					)
+
+				# A transfer's inward (target) leg needs its own inward Inventory Dimension Bundle;
+				# the row's bundle covers only the outward (source) leg.
+				if (
+					self.purpose in allowed_types
+					and d.get("inventory_dimension_bundle")
+					and self.docstatus == 1
+				):
+					from erpnext.stock.doctype.inventory_dimension_bundle.inventory_dimension_bundle import (
+						make_inventory_dimension_bundle_for_transfer,
+					)
+
+					sle.inventory_dimension_bundle = make_inventory_dimension_bundle_for_transfer(
+						d.inventory_dimension_bundle, d.t_warehouse, self, d.name
+					)
+				elif sle.get("inventory_dimension_bundle") and self.docstatus == 2:
+					sle.inventory_dimension_bundle = frappe.get_cached_value(
+						"Inventory Dimension Bundle",
+						{
+							"voucher_detail_no": d.name,
+							"voucher_no": self.name,
+							"is_cancelled": 0,
+							"type_of_transaction": "Inward",
+						},
+						"name",
 					)
 
 				if sle.serial_and_batch_bundle and self.docstatus == 2:

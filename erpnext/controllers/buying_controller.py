@@ -874,6 +874,7 @@ class BuyingController(SubcontractingController):
 							"incoming_rate": valuation_rate_for_rejected_item if not self.is_return else 0.0,
 							"outgoing_rate": valuation_rate_for_rejected_item if self.is_return else 0.0,
 							"serial_and_batch_bundle": d.rejected_serial_and_batch_bundle,
+							"inventory_dimension_bundle": d.get("rejected_inventory_dimension_bundle"),
 						},
 					)
 				)

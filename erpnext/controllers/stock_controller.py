@@ -250,6 +250,22 @@ class StockController(AccountsController):
 
 		return SerialBatchBundleService(self).set_serial_and_batch_bundle(table_name, ignore_validate)
 
+	def set_inventory_dimension_bundle(self, table_name=None, ignore_validate=False):
+		from erpnext.stock.services.inventory_dimension_bundle_service import (
+			InventoryDimensionBundleService,
+		)
+
+		return InventoryDimensionBundleService(self).set_inventory_dimension_bundle(
+			table_name, ignore_validate
+		)
+
+	def validate_inventory_dimension_bundle(self, table_name=None):
+		from erpnext.stock.services.inventory_dimension_bundle_service import (
+			InventoryDimensionBundleService,
+		)
+
+		return InventoryDimensionBundleService(self).validate_inventory_dimension_bundle(table_name)
+
 	def make_package_for_transfer(
 		self, serial_and_batch_bundle, warehouse, type_of_transaction=None, do_not_submit=None, qty=0
 	):

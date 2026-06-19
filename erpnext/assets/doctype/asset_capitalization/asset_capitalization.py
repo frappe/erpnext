@@ -119,6 +119,7 @@ class AssetCapitalization(StockController):
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
 			"Serial and Batch Bundle",
+			"Inventory Dimension Bundle",
 			"Asset",
 			"Asset Movement",
 		)

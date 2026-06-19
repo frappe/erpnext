@@ -125,22 +125,44 @@ def get_stock_balance(
 		"posting_time": posting_time,
 	}
 
-	extra_cond = ""
-
 	if inventory_dimensions_dict:
-		inventory_dimensions_fieldname = [d.get("fieldname") for d in get_inventory_dimensions()]
+		# Dimensions are a quantity-only sub-ledger (Inventory Dimension Entry); they no longer
+		# live on Stock Ledger Entry. The dimension-filtered figure is therefore a qty only -
+		# the valuation rate is not dimension-specific.
+		from erpnext.stock.doctype.inventory_dimension_bundle.inventory_dimension_bundle import (
+			get_dimension_sub_ledger_balance,
+		)
 
+		valid_fields = {d.get("fieldname"): d.get("source_fieldname") for d in get_inventory_dimensions()}
+		combination = {}
 		for field, value in inventory_dimensions_dict.items():
-			if field not in inventory_dimensions_fieldname:
+			if field not in valid_fields:
 				frappe.throw(
 					_("{0} is not a valid {1} fieldname.").format(
 						frappe.bold(field), frappe.bold("Inventory Dimension")
 					)
 				)
-			args[field] = value
-			extra_cond += f" and {field} = %({field})s"
+			combination[valid_fields.get(field) or field] = value
 
-	last_entry = get_previous_sle(args, extra_cond=extra_cond)
+		qty = get_dimension_sub_ledger_balance(
+			item_code,
+			warehouse,
+			combination,
+			posting_datetime=get_combine_datetime(posting_date, posting_time),
+			inclusive=True,
+		)
+
+		if with_valuation_rate:
+			_qty, rate = get_stock_balance(
+				item_code, warehouse, posting_date, posting_time, with_valuation_rate=True
+			)
+
+			_qty = 0 if _qty is None else _qty  # ignore this code
+
+			return (qty, rate, None) if with_serial_no else (qty, rate)
+		return qty
+
+	last_entry = get_previous_sle(args)
 
 	if with_valuation_rate:
 		if with_serial_no:

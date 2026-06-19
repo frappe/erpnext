@@ -13,7 +13,6 @@ import erpnext
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
-from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.get_item_details import get_default_cost_center, get_default_expense_account
 from erpnext.stock.stock_ledger import get_valuation_rate
@@ -195,6 +194,7 @@ class SubcontractingReceipt(SubcontractingController):
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
 			"Serial and Batch Bundle",
+			"Inventory Dimension Bundle",
 		)
 		self.validate_closed_subcontracting_order()
 		self.update_status_updater_args()
@@ -315,20 +315,15 @@ class SubcontractingReceipt(SubcontractingController):
 				)
 
 	def set_supplied_items_inventory_dimensions(self):
-		if hasattr(self, "inventory_dimensions") and (inventory_dimensions := get_inventory_dimensions()):
-			for item in self.supplied_items:
-				key = (
-					item.reference_name,
-					item.rm_item_code,
-					item.main_item_code,
-					item.batch_no,
-					item.serial_no,
-				)
+		"""Restore the Inventory Dimension Bundle captured before the supplied items were rebuilt."""
+		saved = getattr(self, "_supplied_item_dimension_bundles", None)
+		if not saved:
+			return
 
-				for dimension in inventory_dimensions:
-					dimension_values = self.inventory_dimensions.get(dimension.source_fieldname, {})
-					if key in dimension_values:
-						item.set(dimension.source_fieldname, dimension_values[key])
+		for item in self.supplied_items:
+			key = (item.reference_name, item.rm_item_code, item.main_item_code)
+			if not item.get("inventory_dimension_bundle") and key in saved:
+				item.inventory_dimension_bundle = saved[key]
 
 	def set_supplied_items_expense_account(self):
 		for item in self.supplied_items:
@@ -347,17 +342,16 @@ class SubcontractingReceipt(SubcontractingController):
 				)
 
 	def save_inventory_dimensions(self):
-		if inventory_dimensions := get_inventory_dimensions():
-			if not getattr(self, "inventory_dimensions", None):
-				self.inventory_dimensions = {}
+		"""Capture each supplied item's Inventory Dimension Bundle before the table is rebuilt.
 
-			for dimension in inventory_dimensions:
-				self.inventory_dimensions[dimension.source_fieldname] = {
-					(d.reference_name, d.rm_item_code, d.main_item_code, d.batch_no, d.serial_no): d.get(
-						dimension.source_fieldname
-					)
-					for d in self.supplied_items
-				}
+		The supplied items are reset and rebuilt from the BOM on save (``reset_supplied_items``);
+		stash the bundle links so they can be restored onto the matching rebuilt rows.
+		"""
+		self._supplied_item_dimension_bundles = {
+			(d.reference_name, d.rm_item_code, d.main_item_code): d.inventory_dimension_bundle
+			for d in self.supplied_items
+			if d.get("inventory_dimension_bundle")
+		}
 
 	def reset_supplied_items(self):
 		if (

@@ -7,7 +7,7 @@ erpnext.landed_cost_taxes_and_charges.setup_triggers("Subcontracting Receipt");
 
 frappe.ui.form.on("Subcontracting Receipt", {
 	setup: (frm) => {
-		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
+		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle", "Inventory Dimension Bundle"];
 		frm.get_field("supplied_items").grid.cannot_add_rows = true;
 		frm.get_field("supplied_items").grid.only_sortable();
 		frm.trigger("set_queries");

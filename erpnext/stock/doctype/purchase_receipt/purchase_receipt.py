@@ -458,6 +458,7 @@ class PurchaseReceipt(BuyingController):
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
 			"Serial and Batch Bundle",
+			"Inventory Dimension Bundle",
 		)
 		self.delete_auto_created_batches()
 		self.set_consumed_qty_in_subcontract_order()

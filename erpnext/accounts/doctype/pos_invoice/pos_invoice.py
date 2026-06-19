@@ -286,7 +286,11 @@ class POSInvoice(SalesInvoice):
 			)
 
 	def on_cancel(self):
-		self.ignore_linked_doctypes = ["Payment Ledger Entry", "Serial and Batch Bundle"]
+		self.ignore_linked_doctypes = [
+			"Payment Ledger Entry",
+			"Serial and Batch Bundle",
+			"Inventory Dimension Bundle",
+		]
 		# run on cancel method of selling controller
 		super(SalesInvoice, self).on_cancel()
 		if not self.is_return and self.loyalty_program:

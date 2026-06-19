@@ -5,7 +5,11 @@ frappe.provide("erpnext.assets");
 
 erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.stock.StockController {
 	setup() {
-		this.frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle", "Asset Movement"];
+		this.frm.ignore_doctypes_on_cancel_all = [
+			"Serial and Batch Bundle",
+			"Inventory Dimension Bundle",
+			"Asset Movement",
+		];
 		this.setup_posting_date_time_check();
 	}
 

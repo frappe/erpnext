@@ -40,6 +40,7 @@ class PurchaseReceiptItem(Document):
 		from_warehouse: DF.Link | None
 		has_item_scanned: DF.Check
 		image: DF.Attach | None
+		inventory_dimension_bundle: DF.Link | None
 		is_fixed_asset: DF.Check
 		is_free_item: DF.Check
 		item_code: DF.Link
@@ -78,6 +79,7 @@ class PurchaseReceiptItem(Document):
 		rate_with_margin: DF.Currency
 		received_qty: DF.Float
 		received_stock_qty: DF.Float
+		rejected_inventory_dimension_bundle: DF.Link | None
 		rejected_qty: DF.Float
 		rejected_serial_and_batch_bundle: DF.Link | None
 		rejected_serial_no: DF.Text | None

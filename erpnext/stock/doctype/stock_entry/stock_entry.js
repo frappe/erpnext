@@ -7,7 +7,7 @@ erpnext.landed_cost_taxes_and_charges.setup_triggers("Stock Entry");
 
 frappe.ui.form.on("Stock Entry", {
 	setup: function (frm) {
-		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
+		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle", "Inventory Dimension Bundle"];
 
 		frm.trigger("toggle_enable_for_stock_uom_qty");
 

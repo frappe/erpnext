@@ -366,6 +366,7 @@ class SellingController(StockController):
 									"uom": p.uom,
 									"serial_and_batch_bundle": p.serial_and_batch_bundle
 									or get_serial_and_batch_bundle(p, self, d),
+									"inventory_dimension_bundle": p.get("inventory_dimension_bundle"),
 									"name": d.name,
 									"target_warehouse": p.target_warehouse,
 									"company": self.company,
@@ -391,6 +392,7 @@ class SellingController(StockController):
 							"stock_uom": d.stock_uom,
 							"conversion_factor": d.conversion_factor,
 							"serial_and_batch_bundle": d.serial_and_batch_bundle,
+							"inventory_dimension_bundle": d.get("inventory_dimension_bundle"),
 							"name": d.name,
 							"target_warehouse": d.target_warehouse,
 							"company": self.company,

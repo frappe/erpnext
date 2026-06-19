@@ -20,6 +20,7 @@
   "voucher_no",
   "voucher_detail_no",
   "serial_and_batch_bundle",
+  "inventory_dimension_bundle",
   "dependant_sle_voucher_detail_no",
   "section_break_11",
   "recalculate_rate",
@@ -323,6 +324,15 @@
    "search_index": 1
   },
   {
+   "fieldname": "inventory_dimension_bundle",
+   "fieldtype": "Link",
+   "label": "Inventory Dimension Bundle",
+   "no_copy": 1,
+   "options": "Inventory Dimension Bundle",
+   "print_hide": 1,
+   "search_index": 1
+  },
+  {
    "default": "0",
    "fetch_from": "item_code.has_batch_no",
    "fieldname": "has_batch_no",
@@ -363,7 +373,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-26 19:07:43.537450",
+ "modified": "2026-06-23 19:07:43.537450",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",
