@@ -310,6 +310,8 @@ def validate_inclusive_tax(tax, doc) -> None:
 					tax.idx
 				)
 			)
+		elif cint(getattr(tax, "gross_up_inclusive", 0)):
+			pass
 		elif tax.charge_type == "On Previous Row Amount" and not cint(
 			doc.get("taxes")[cint(tax.row_id) - 1].included_in_print_rate
 		):

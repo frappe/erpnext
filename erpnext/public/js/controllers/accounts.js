@@ -209,6 +209,8 @@ erpnext.accounts.taxes = {
 			if (tax.charge_type == "Actual") {
 				// inclusive tax cannot be of type Actual
 				actual_type_error();
+			} else if (cint(tax.gross_up_inclusive)) {
+				// gross-up rows don't compound, so can coexist with non-inclusive rows
 			} else if (
 				tax.charge_type == "On Previous Row Amount" &&
 				this.frm &&
