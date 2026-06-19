@@ -668,11 +668,12 @@ def _get_balance_sheet_cash_basis_entries(company, from_date, to_date, filters, 
         elif gl.voucher_type == "Purchase Invoice":
             ratio = pi_ratios.get(gl.voucher_no, 0.0)
         elif gl.voucher_type == "Journal Entry":
-            # Credit-expense JE: scale only the Payable account entry
-            if gl.account in payable_accounts and gl.voucher_no in je_expense_ratios:
+            # Scale ALL entries in a credit JE (e.g. DR Office Equipment / CR Creditors)
+            # by the payment ratio — not just the AP/AR leg — so unpaid asset purchases
+            # don't appear on the balance sheet prematurely.
+            if gl.voucher_no in je_expense_ratios:
                 ratio = je_expense_ratios[gl.voucher_no]
-            # Credit-income JE: scale only the Receivable account entry
-            elif gl.account in receivable_accounts and gl.voucher_no in je_income_ratios:
+            elif gl.voucher_no in je_income_ratios:
                 ratio = je_income_ratios[gl.voucher_no]
 
         if ratio != 1.0:
