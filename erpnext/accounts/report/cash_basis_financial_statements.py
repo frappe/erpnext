@@ -300,61 +300,47 @@ def _get_payment_based_gl_entries(company, from_date, to_date, filters, root_typ
     )
     entries.extend(pe_entries)
 
-    # --- Journal Entry settlement path ---
-    # A JE used to settle an invoice posts a credit (income) or debit (expense) to the
-    # AR/AP account with against_voucher pointing to the invoice.
-    ar_ap_account_type = "Receivable" if is_income else "Payable"
-
-    # For income: the JE credits AR (credit > debit means collection)
-    # For expense: the JE debits AP (debit > credit means payment)
-    settled_amount_expr = (
-        "(je_gl.credit - je_gl.debit)" if is_income else "(je_gl.debit - je_gl.credit)"
-    )
-
-    je_conditions = [
-        "je_gl.company = %(company)s",
-        "je_gl.is_cancelled = 0",
-        "je_gl.voucher_type = 'Journal Entry'",
-        "je_gl.against_voucher_type = %(invoice_type)s",
-        "je_gl.posting_date <= %(to_date)s",
-        f"{settled_amount_expr} > 0",
-        "inv_gl.account IN %(accounts)s",
-        "inv_gl.voucher_type = %(invoice_type)s",
-        "inv_gl.is_cancelled = 0",
-        "ar_ap_acc.account_type = %(ar_ap_type)s",
-    ]
+    # --- Journal Entry settlement path (via Payment Ledger Entry) ---
+    # PLE captures JE settlements from both direct GL against_voucher tagging and the
+    # Payment Reconciliation tool (which writes PLE but does not set GL against_voucher).
     je_params = {
         "company": company,
         "to_date": to_date,
         "invoice_type": invoice_type,
-        "ar_ap_type": ar_ap_account_type,
         "accounts": tuple(account_names),
     }
     if from_date:
-        je_conditions.append("je_gl.posting_date >= %(from_date)s")
         je_params["from_date"] = from_date
 
     je_entries = frappe.db.sql(
         """
         SELECT
             inv_gl.account,
-            je_gl.posting_date,
-            je_gl.fiscal_year,
-            (inv_gl.debit  * ABS({settled}) / NULLIF(inv.grand_total, 0)) AS debit,
-            (inv_gl.credit * ABS({settled}) / NULLIF(inv.grand_total, 0)) AS credit,
-            (inv_gl.debit_in_account_currency  * ABS({settled}) / NULLIF(inv.grand_total, 0)) AS debit_in_account_currency,
-            (inv_gl.credit_in_account_currency * ABS({settled}) / NULLIF(inv.grand_total, 0)) AS credit_in_account_currency,
+            ple.posting_date,
+            '' AS fiscal_year,
+            (inv_gl.debit  * ABS(ple.amount) / NULLIF(inv.grand_total, 0)) AS debit,
+            (inv_gl.credit * ABS(ple.amount) / NULLIF(inv.grand_total, 0)) AS credit,
+            (inv_gl.debit_in_account_currency  * ABS(ple.amount) / NULLIF(inv.grand_total, 0)) AS debit_in_account_currency,
+            (inv_gl.credit_in_account_currency * ABS(ple.amount) / NULLIF(inv.grand_total, 0)) AS credit_in_account_currency,
             inv_gl.account_currency
-        FROM `tabGL Entry` je_gl
-        INNER JOIN tabAccount ar_ap_acc ON ar_ap_acc.name = je_gl.account
-        INNER JOIN `{invoice_table}` inv   ON inv.name = je_gl.against_voucher
+        FROM `tabPayment Ledger Entry` ple
+        INNER JOIN `{invoice_table}` inv
+            ON inv.name = ple.against_voucher_no AND inv.docstatus = 1
         INNER JOIN `tabGL Entry` inv_gl
-            ON inv_gl.voucher_no = je_gl.against_voucher
-        WHERE {where}
+            ON inv_gl.voucher_no = ple.against_voucher_no
+           AND inv_gl.account IN %(accounts)s
+           AND inv_gl.voucher_type = %(invoice_type)s
+           AND inv_gl.is_cancelled = 0
+        WHERE ple.voucher_type = 'Journal Entry'
+          AND ple.against_voucher_type = %(invoice_type)s
+          AND ple.delinked = 0
+          AND ple.amount < 0
+          AND ple.company = %(company)s
+          AND ple.posting_date <= %(to_date)s
+          {from_date_cond}
         """.format(
-            settled=settled_amount_expr,
             invoice_table=invoice_table,
-            where=" AND ".join(je_conditions),
+            from_date_cond="AND ple.posting_date >= %(from_date)s" if from_date else "",
         ),
         je_params,
         as_dict=True,
@@ -473,13 +459,11 @@ def _get_je_credit_payment_entries(company, from_date, to_date, filters, root_ty
     # Fully-qualified column expressions (avoids "Column 'debit' is ambiguous" in multi-join SQL)
     # AR/AP direction in the credit JE: Income → AR debited; Expense → AP credited
     if is_income:
-        je_par_net = "je_par.debit - je_par.credit"          # AR debit > credit
-        je_pl_net = "je_pl.credit - je_pl.debit"             # Income credit > debit
-        settle_gl_net = "settlement_gl.credit - settlement_gl.debit"  # AR credited when collected
+        je_par_net = "je_par.debit - je_par.credit"   # AR debit > credit
+        je_pl_net = "je_pl.credit - je_pl.debit"      # Income credit > debit
     else:
-        je_par_net = "je_par.credit - je_par.debit"          # AP credit > debit
-        je_pl_net = "je_pl.debit - je_pl.credit"             # Expense debit > credit
-        settle_gl_net = "settlement_gl.debit - settlement_gl.credit"  # AP debited when paid
+        je_par_net = "je_par.credit - je_par.debit"   # AP credit > debit
+        je_pl_net = "je_pl.debit - je_pl.credit"      # Expense debit > credit
 
     # Sub-query: total AR/AP amount per credit JE
     ar_ap_subquery = f"""
@@ -543,25 +527,11 @@ def _get_je_credit_payment_entries(company, from_date, to_date, filters, root_ty
         )
     )
 
-    # --- Path B: Settlement JE that debits/credits the AR/AP of the credit JE ---
-    je_conditions = [
-        "settlement_gl.company = %(company)s",
-        "settlement_gl.voucher_type = 'Journal Entry'",
-        "settlement_gl.against_voucher_type = 'Journal Entry'",
-        "settlement_gl.against_voucher IS NOT NULL",
-        "settlement_gl.is_cancelled = 0",
-        "settlement_gl.party_type = %(party_type)s",
-        f"({settle_gl_net}) > 0",
-        "settlement_gl.posting_date <= %(to_date)s",
-        "settle_acc.account_type = %(ar_ap_type)s",
-        "je_pl.account IN %(accounts)s",
-        "je_pl.voucher_type = 'Journal Entry'",
-        "je_pl.is_cancelled = 0",
-        f"({je_pl_net}) > 0",
-    ]
+    # --- Path B: Settlement JE for the credit JE (via Payment Ledger Entry) ---
+    # PLE captures both directly-tagged settlement JEs (GL against_voucher set) and
+    # those linked only via the Payment Reconciliation tool (PLE only, no GL against_voucher).
     je_params = dict(base_params)
     if from_date:
-        je_conditions.append("settlement_gl.posting_date >= %(from_date)s")
         je_params["from_date"] = from_date
 
     entries.extend(
@@ -569,23 +539,32 @@ def _get_je_credit_payment_entries(company, from_date, to_date, filters, root_ty
             """
             SELECT
                 je_pl.account,
-                settlement_gl.posting_date,
-                settlement_gl.fiscal_year,
+                ple.posting_date,
+                '' AS fiscal_year,
                 je_pl.account_currency,
                 0 AS is_opening,
-                (je_pl.debit  * ({settle_gl_net}) / NULLIF(ar_ap.total_amount, 0)) AS debit,
-                (je_pl.credit * ({settle_gl_net}) / NULLIF(ar_ap.total_amount, 0)) AS credit,
-                (je_pl.debit_in_account_currency  * ({settle_gl_net}) / NULLIF(ar_ap.total_amount, 0)) AS debit_in_account_currency,
-                (je_pl.credit_in_account_currency * ({settle_gl_net}) / NULLIF(ar_ap.total_amount, 0)) AS credit_in_account_currency
-            FROM `tabGL Entry` settlement_gl
-            INNER JOIN tabAccount settle_acc ON settle_acc.name = settlement_gl.account
-            INNER JOIN ({ar_ap_subquery}) ar_ap ON ar_ap.voucher_no = settlement_gl.against_voucher
-            INNER JOIN `tabGL Entry` je_pl ON je_pl.voucher_no = settlement_gl.against_voucher
-            WHERE {where}
+                (je_pl.debit  * ABS(ple.amount) / NULLIF(ar_ap.total_amount, 0)) AS debit,
+                (je_pl.credit * ABS(ple.amount) / NULLIF(ar_ap.total_amount, 0)) AS credit,
+                (je_pl.debit_in_account_currency  * ABS(ple.amount) / NULLIF(ar_ap.total_amount, 0)) AS debit_in_account_currency,
+                (je_pl.credit_in_account_currency * ABS(ple.amount) / NULLIF(ar_ap.total_amount, 0)) AS credit_in_account_currency
+            FROM `tabPayment Ledger Entry` ple
+            INNER JOIN ({ar_ap_subquery}) ar_ap ON ar_ap.voucher_no = ple.against_voucher_no
+            INNER JOIN `tabGL Entry` je_pl ON je_pl.voucher_no = ple.against_voucher_no
+            WHERE ple.voucher_type = 'Journal Entry'
+              AND ple.against_voucher_type = 'Journal Entry'
+              AND ple.delinked = 0
+              AND ple.amount < 0
+              AND ple.company = %(company)s
+              AND ple.posting_date <= %(to_date)s
+              {from_date_cond}
+              AND je_pl.account IN %(accounts)s
+              AND je_pl.voucher_type = 'Journal Entry'
+              AND je_pl.is_cancelled = 0
+              AND ({je_pl_net}) > 0
             """.format(
-                settle_gl_net=settle_gl_net,
                 ar_ap_subquery=ar_ap_subquery,
-                where=" AND ".join(je_conditions),
+                from_date_cond="AND ple.posting_date >= %(from_date)s" if from_date else "",
+                je_pl_net=je_pl_net,
             ),
             je_params,
             as_dict=True,
