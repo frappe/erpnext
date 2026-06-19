@@ -123,6 +123,7 @@ class JobCard(Document):
 		status: DF.Literal[
 			"Open",
 			"Work In Progress",
+			"Partially Transferred",
 			"Material Transferred",
 			"On Hold",
 			"Submitted",
@@ -1168,6 +1169,48 @@ class JobCard(Document):
 
 			frappe.db.set_value("Job Card Item", row.job_card_item, "transferred_qty", flt(transferred_qty))
 
+<<<<<<< HEAD
+=======
+		self.set_status(update_status=True)
+
+	def get_job_card_items_transferred_qty(self, ste_doc):
+		from frappe.query_builder.functions import Sum
+
+		job_card_items = [x.get("job_card_item") for x in ste_doc.get("items") if x.get("job_card_item")]
+		if not job_card_items:
+			return {}
+
+		se = frappe.qb.DocType("Stock Entry")
+		sed = frappe.qb.DocType("Stock Entry Detail")
+
+		query = (
+			frappe.qb.from_(sed)
+			.join(se)
+			.on(sed.parent == se.name)
+			.select(sed.job_card_item, Sum(sed.qty))
+			.where(
+				(sed.job_card_item.isin(job_card_items))
+				& (se.docstatus == 1)
+				& (se.purpose == "Material Transfer for Manufacture")
+			)
+			.groupby(sed.job_card_item)
+		)
+
+		return frappe._dict(query.run(as_list=True))
+
+	def validate_over_transfer(self, ste_doc, row, transferred_qty):
+		"Block over transfer of items if not allowed in settings."
+		required_qty = frappe.db.get_value("Job Card Item", row.job_card_item, "required_qty")
+		if flt(transferred_qty) > flt(required_qty):
+			frappe.throw(
+				_(
+					"Row #{0}: Cannot transfer more than Required Qty {1} for Item {2} against Job Card {3}"
+				).format(row.idx, frappe.bold(required_qty), frappe.bold(row.item_code), ste_doc.job_card),
+				title=_("Excess Transfer"),
+				exc=JobCardOverTransferError,
+			)
+
+>>>>>>> a22b83a97f (fix: add partially transferred status and fix button visibility for partial material transfer on job card)
 	def set_transferred_qty(self, update_status=False):
 		from frappe.query_builder.functions import Sum
 
@@ -1249,6 +1292,42 @@ class JobCard(Document):
 		if self.workstation:
 			self.update_workstation_status()
 
+<<<<<<< HEAD
+=======
+	def set_finished_good_status(self):
+		if (self.manufactured_qty + self.process_loss_qty) >= self.for_quantity:
+			self.status = "Completed"
+		elif self.transferred_qty > 0 or self.skip_material_transfer:
+			self.status = "Work In Progress"
+
+	def set_non_semi_fg_status(self):
+		if self.items:
+			item_data = frappe.get_all(
+				"Job Card Item",
+				filters={"parent": self.name},
+				fields=["transferred_qty", "required_qty"],
+			)
+			all_transferred = item_data and all(
+				flt(d.transferred_qty) >= flt(d.required_qty) for d in item_data
+			)
+			any_transferred = any(flt(d.transferred_qty) > 0 for d in item_data)
+
+			if all_transferred:
+				self.status = "Material Transferred"
+			elif any_transferred:
+				self.status = "Partially Transferred"
+		elif flt(self.for_quantity) <= flt(self.transferred_qty):
+			self.status = "Material Transferred"
+
+		if self.time_logs:
+			self.status = "Work In Progress"
+
+		if self.docstatus == 1 and (
+			self.for_quantity <= (self.total_completed_qty + self.process_loss_qty) or not self.items
+		):
+			self.status = "Completed"
+
+>>>>>>> a22b83a97f (fix: add partially transferred status and fix button visibility for partial material transfer on job card)
 	def set_wip_warehouse(self):
 		if not self.wip_warehouse:
 			self.wip_warehouse = frappe.get_cached_value("Company", self.company, "default_wip_warehouse")
@@ -1780,6 +1859,7 @@ def get_job_details(start, end, filters=None):
 	event_color = {
 		"Completed": "#cdf5a6",
 		"Material Transferred": "#ffdd9e",
+		"Partially Transferred": "#ffe5b4",
 		"Work In Progress": "#D3D3D3",
 	}
 
