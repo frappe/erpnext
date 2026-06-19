@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_rename": 1,
  "autoname": "field:parameter",
  "creation": "2020-12-28 17:06:00.254129",
  "doctype": "DocType",
