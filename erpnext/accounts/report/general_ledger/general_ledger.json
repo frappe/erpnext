@@ -26,8 +26,12 @@
  "generate_csv": 0,
  "idx": 4,
  "is_standard": "Yes",
+<<<<<<< HEAD
  "modified": "2026-06-18 11:53:29.057634",
 >>>>>>> 5c536b8ad1 (refactor: maintain sync dependency in report master)
+=======
+ "modified": "2026-06-22 11:50:08.020553",
+>>>>>>> 6b4895bcc9 (feat(general-ledger): implement execute_synced_report with full parity to normal report)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "General Ledger",
