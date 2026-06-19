@@ -371,8 +371,8 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 	def update_job_card_and_work_order(self):
 		if self.doc.job_card:
 			job_doc = frappe.get_doc("Job Card", self.doc.job_card)
-			job_doc.set_transferred_qty(update_status=True)
 			job_doc.set_transferred_qty_in_job_card_item(self.doc)
+			job_doc.set_transferred_qty(update_status=True)
 
 		if self.doc.work_order:
 			self._validate_work_order()

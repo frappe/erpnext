@@ -55,8 +55,9 @@ def make_subcontracting_po(source_name: str, target_doc: Document | str | None =
 
 @frappe.whitelist()
 def make_material_request(source_name: str, target_doc: Document | str | None = None):
-	def update_item(obj, target, source_parent):
+	def update_item(source, target, source_parent):
 		target.warehouse = source_parent.wip_warehouse
+		target.qty = flt(source.required_qty) - flt(source.transferred_qty)
 
 	def set_missing_values(source, target):
 		target.material_request_type = "Material Transfer"
@@ -75,6 +76,7 @@ def make_material_request(source_name: str, target_doc: Document | str | None = 
 				"doctype": "Material Request Item",
 				"field_map": {"required_qty": "qty", "uom": "stock_uom", "name": "job_card_item"},
 				"postprocess": update_item,
+				"condition": lambda doc: flt(doc.required_qty) - flt(doc.transferred_qty) > 0,
 			},
 		},
 		target_doc,
