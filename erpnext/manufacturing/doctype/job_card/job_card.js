@@ -207,7 +207,9 @@ frappe.ui.form.on("Job Card", {
 		if (frm.is_new() || doc.skip_material_transfer || doc.docstatus >= 2) return;
 
 		const excess_transfer_allowed = doc.__onload.job_card_excess_transfer;
-		const to_request = doc.for_quantity > doc.transferred_qty;
+		const to_transfer =
+			has_items && doc.items.some((row) => flt(row.transferred_qty) < flt(row.required_qty));
+		const to_request = to_transfer;
 
 		if (has_items && (to_request || excess_transfer_allowed)) {
 			frm.add_custom_button(
@@ -216,9 +218,6 @@ frappe.ui.form.on("Job Card", {
 				__("Create")
 			);
 		}
-
-		// check if any row has untransferred materials in case of multiple items in JC
-		const to_transfer = doc.items.some((row) => row.transferred_qty < row.required_qty);
 
 		if (has_items && (to_transfer || excess_transfer_allowed)) {
 			frm.add_custom_button(
@@ -586,11 +585,10 @@ frappe.ui.form.on("Job Card", {
 
 		// ── Determine which action buttons to show ────────────────────────
 		const has_remaining_qty = doc.for_quantity + doc.process_loss_qty > doc.total_completed_qty;
+		const pending_transfer =
+			has_items && doc.items.some((row) => flt(row.transferred_qty) < flt(row.required_qty));
 		const materials_ready =
-			doc.skip_material_transfer ||
-			doc.transferred_qty >= doc.for_quantity + doc.process_loss_qty ||
-			!doc.finished_good ||
-			!has_items?.length;
+			doc.skip_material_transfer || !pending_transfer || !doc.finished_good || !has_items;
 
 		let last_row = {};
 		const has_sub_ops_or_pending_qty = doc.sub_operations?.length || doc.pending_qty > 0;
