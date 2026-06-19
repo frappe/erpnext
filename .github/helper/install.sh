@@ -116,6 +116,11 @@ wait $wkpid
 
 bench start &>> ~/frappe-bench/bench_start.log &
 CI=Yes bench build --app frappe &
+reinstall_pids=()
 for site in "${sites[@]}"; do
-    bench --site $site reinstall --yes
+    bench --site "$site" reinstall --yes &
+    reinstall_pids+=($!)
+done
+for pid in "${reinstall_pids[@]}"; do
+    wait "$pid"
 done
