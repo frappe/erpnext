@@ -547,8 +547,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 	def set_basic_rate(self, reset_outgoing_rate=True, raise_error_if_no_rate=True):
 		"""Set rate for outgoing, secondary and finished items."""
+		raise_error_if_no_rate = raise_error_if_no_rate and self.docstatus == 1
 		outgoing_items_cost = self.set_rate_for_outgoing_items(reset_outgoing_rate, raise_error_if_no_rate)
-		raise_error_if_no_rate = raise_error_if_no_rate and not self.is_new()
 
 		zero_valuation_items = []
 		for d in self.get("items"):
