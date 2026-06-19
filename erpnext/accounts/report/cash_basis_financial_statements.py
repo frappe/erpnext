@@ -823,27 +823,29 @@ def _get_invoice_settlement_ratios(company, as_of_date, invoice_doctype):
         as_dict=True,
     )
 
-    # Journal Entry settlements (against_voucher links)
-    je_sign = "(je_gl.credit - je_gl.debit)" if is_si else "(je_gl.debit - je_gl.credit)"
-    je_rows = frappe.db.sql(
-        f"""
-        SELECT je_gl.against_voucher AS name,
-               SUM(ABS({je_sign})) AS total_paid
-        FROM `tabGL Entry` je_gl
-        INNER JOIN tabAccount acc ON acc.name = je_gl.account AND acc.account_type = %(ar_ap_type)s
-        WHERE je_gl.voucher_type = 'Journal Entry'
-          AND je_gl.against_voucher_type = %(invoice_doctype)s
-          AND je_gl.is_cancelled = 0
-          AND je_gl.company = %(company)s
-          AND je_gl.posting_date <= %(as_of_date)s
-          AND {je_sign} > 0
-        GROUP BY je_gl.against_voucher
-        """,
-        {"company": company, "as_of_date": as_of_date, "invoice_doctype": invoice_doctype, "ar_ap_type": ar_ap_type},
-        as_dict=True,
-    )
+    # Journal Entry settlements via Payment Ledger Entry (PLE).
+    # PLE is the authoritative source in ERPNext v15 for all reconciliation links —
+    # it captures both JEs with GL against_voucher set directly AND JEs reconciled
+    # via the Payment Reconciliation tool (which creates PLE but does not tag GL against_voucher).
+    inv_names = tuple(row.name for row in per_rows)
+    je_rows = []
+    if inv_names:
+        je_rows = frappe.db.sql(
+            """
+            SELECT ple.against_voucher_no AS name, SUM(ABS(ple.amount)) AS total_paid
+            FROM `tabPayment Ledger Entry` ple
+            WHERE ple.voucher_type = 'Journal Entry'
+              AND ple.against_voucher_type = %(invoice_doctype)s
+              AND ple.against_voucher_no IN %(inv_names)s
+              AND ple.delinked = 0
+              AND ple.posting_date <= %(as_of_date)s
+              AND ple.amount < 0
+            GROUP BY ple.against_voucher_no
+            """,
+            {"as_of_date": as_of_date, "inv_names": inv_names, "invoice_doctype": invoice_doctype},
+            as_dict=True,
+        )
 
-    grand_totals = {row.name: flt(row.grand_total) for row in per_rows}
     je_paid = {row.name: flt(row.total_paid) for row in je_rows}
 
     ratios = {}
