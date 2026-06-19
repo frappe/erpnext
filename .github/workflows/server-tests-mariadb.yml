@@ -174,8 +174,9 @@ jobs:
             $coverage_flag > test_output2.txt 2>&1 &
           pid2=$!
 
-          wait $pid1; exit1=$?
-          wait $pid2; exit2=$?
+          exit1=0; exit2=0
+          wait $pid1 || exit1=$?
+          wait $pid2 || exit2=$?
 
           cat test_output1.txt
           cat test_output2.txt
