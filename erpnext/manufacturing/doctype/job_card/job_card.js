@@ -167,8 +167,238 @@ frappe.ui.form.on("Job Card", {
 		}
 	},
 
+<<<<<<< HEAD
 	setup_quality_inspection: function (frm) {
 		let quality_inspection_field = frm.get_docfield("quality_inspection");
+=======
+	// Adds Material Request and Material Transfer buttons when items need to be transferred.
+	setup_material_transfer_buttons(frm, has_items) {
+		const { doc } = frm;
+
+		if (frm.is_new() || doc.skip_material_transfer || doc.docstatus >= 2) return;
+
+		const excess_transfer_allowed = doc.__onload.job_card_excess_transfer;
+		const to_transfer =
+			has_items && doc.items.some((row) => flt(row.transferred_qty) < flt(row.required_qty));
+		const to_request = to_transfer;
+
+		if (has_items && (to_request || excess_transfer_allowed)) {
+			frm.add_custom_button(
+				__("Material Request"),
+				() => frm.trigger("make_material_request"),
+				__("Create")
+			);
+		}
+
+		if (has_items && (to_transfer || excess_transfer_allowed)) {
+			frm.add_custom_button(
+				__("Material Transfer"),
+				() => frm.trigger("make_stock_entry"),
+				__("Create")
+			);
+		}
+	},
+
+	// Renders the dashboard widget (info + timer + action buttons) into job_card_dashboard wrapper.
+	// Returns true if the job timer is actively running, so the caller can skip the stock entry button.
+	setup_job_action_buttons(frm, has_items) {
+		return frm.events.make_dashboard(frm, has_items);
+	},
+
+	complete_job_card(frm) {
+		let pending_qty = frm.doc.for_quantity - frm.doc.total_completed_qty;
+		if (frm.doc.pending_qty > 0) {
+			pending_qty = frm.doc.pending_qty;
+		}
+
+		const fields = [
+			{
+				fieldtype: "Float",
+				label: __("Qty to Manufacture"),
+				fieldname: "for_quantity",
+				reqd: 1,
+				default: pending_qty,
+				change() {
+					const dialog = frm.job_completion_dialog;
+					dialog.set_value("completed_qty", dialog.get_value("for_quantity"));
+					dialog.set_value("process_loss_qty", 0);
+				},
+			},
+			{
+				fieldtype: "Float",
+				label: __("Completed Quantity"),
+				fieldname: "completed_qty",
+				reqd: 1,
+				default: pending_qty,
+				change() {
+					const dialog = frm.job_completion_dialog;
+					const remaining = dialog.get_value("for_quantity") - dialog.get_value("completed_qty");
+					if (remaining > 0 && remaining != dialog.get_value("pending_qty")) {
+						dialog.set_value("pending_qty", remaining);
+					}
+				},
+			},
+			{
+				fieldtype: "Float",
+				label: __("Pending Quantity"),
+				fieldname: "pending_qty",
+				default: 0.0,
+				change() {
+					const dialog = frm.job_completion_dialog;
+					const process_loss_qty =
+						dialog.get_value("for_quantity") -
+						dialog.get_value("completed_qty") -
+						dialog.get_value("pending_qty");
+					if (process_loss_qty >= 0 && process_loss_qty != dialog.get_value("process_loss_qty")) {
+						dialog.set_value("process_loss_qty", process_loss_qty);
+					}
+				},
+			},
+			{
+				fieldtype: "Float",
+				label: __("Process Loss Quantity"),
+				fieldname: "process_loss_qty",
+				onchange() {
+					const dialog = frm.job_completion_dialog;
+					const remaining =
+						dialog.get_value("for_quantity") -
+						dialog.get_value("completed_qty") -
+						dialog.get_value("process_loss_qty");
+					if (remaining >= 0 && remaining != dialog.get_value("pending_qty")) {
+						dialog.set_value("pending_qty", remaining);
+					}
+				},
+			},
+			{
+				fieldtype: "Section Break",
+			},
+		];
+
+		if (frm.doc.sub_operations?.length) {
+			fields.push({
+				fieldtype: "Link",
+				label: __("Sub Operation"),
+				fieldname: "sub_operation",
+				options: "Operation",
+				get_query() {
+					const non_completed = frm.doc.sub_operations.filter((d) => d.status === "Pending");
+					return {
+						filters: { name: ["in", non_completed.map((d) => d.sub_operation)] },
+					};
+				},
+				reqd: 1,
+			});
+		}
+
+		const last_completed_row = get_last_completed_row(frm.doc.time_logs);
+		let last_row = {};
+		if (frm.doc.sub_operations?.length && frm.doc.time_logs?.length) {
+			last_row = get_last_row(frm.doc.time_logs);
+		}
+
+		if (!last_completed_row || !last_completed_row.to_time || !last_row.to_time) {
+			fields.push({
+				fieldtype: "Datetime",
+				label: __("End Time"),
+				fieldname: "end_time",
+				default: frappe.datetime.now_datetime(),
+			});
+		}
+
+		frm.job_completion_dialog = frappe.prompt(
+			fields,
+			(data) => {
+				if (data.qty <= 0) {
+					frappe.throw(__("Quantity should be greater than 0"));
+				}
+
+				frm.call({
+					method: "complete_job_card",
+					doc: frm.doc,
+					args: {
+						qty: data.completed_qty,
+						for_quantity: data.for_quantity,
+						pending_qty: data.pending_qty,
+						process_loss_qty: data.process_loss_qty,
+						end_time: data.end_time,
+						sub_operation: data.sub_operation,
+					},
+					callback() {
+						frm.reload_doc();
+					},
+				});
+			},
+			__("Enter Value"),
+			__("Update"),
+			__("Set Finished Good Quantity")
+		);
+	},
+
+	make_subcontracting_po(frm) {
+		if (frm.doc.docstatus === 1 && frm.doc.for_quantity > frm.doc.manufactured_qty) {
+			frm.add_custom_button(__("Make Subcontracting PO"), () => {
+				frappe.model.open_mapped_doc({
+					method: "erpnext.manufacturing.doctype.job_card.mapper.make_subcontracting_po",
+					frm: frm,
+				});
+			}).addClass("btn-primary");
+		}
+	},
+
+	start_timer(frm, start_time, employees) {
+		frm.call({
+			method: "start_timer",
+			doc: frm.doc,
+			args: { start_time, employees },
+			callback() {
+				frm.reload_doc();
+			},
+		});
+	},
+
+	make_finished_good(frm) {
+		const fields = [
+			{
+				fieldtype: "Float",
+				label: __("Completed Quantity"),
+				fieldname: "qty",
+				reqd: 1,
+				default: frm.doc.for_quantity - frm.doc.manufactured_qty,
+			},
+			{
+				fieldtype: "Datetime",
+				label: __("End Time"),
+				fieldname: "end_time",
+				default: frappe.datetime.now_datetime(),
+			},
+		];
+
+		frappe.prompt(
+			fields,
+			(data) => {
+				if (data.qty <= 0) {
+					frappe.throw(__("Quantity should be greater than 0"));
+				}
+
+				frm.call({
+					method: "make_finished_good",
+					doc: frm.doc,
+					args: { qty: data.qty, end_time: data.end_time },
+					callback(r) {
+						const doc = frappe.model.sync(r.message);
+						frappe.set_route("Form", doc[0].doctype, doc[0].name);
+					},
+				});
+			},
+			__("Enter Value"),
+			__("Update"),
+			__("Set Finished Good Quantity")
+		);
+	},
+
+	setup_quality_inspection(frm) {
+		const quality_inspection_field = frm.get_docfield("quality_inspection");
+>>>>>>> a22b83a97f (fix: add partially transferred status and fix button visibility for partial material transfer on job card)
 		quality_inspection_field.get_route_options_for_new_doc = function (frm) {
 			return {
 				inspection_type: "In Process",
@@ -298,9 +528,168 @@ frappe.ui.form.on("Job Card", {
 	prepare_timer_buttons: function (frm) {
 		frm.trigger("make_dashboard");
 
+<<<<<<< HEAD
 		if (!frm.doc.started_time && !frm.doc.current_time) {
 			frm.add_custom_button(__("Start Job"), () => {
 				if ((frm.doc.employee && !frm.doc.employee.length) || !frm.doc.employee) {
+=======
+		frappe.call({
+			method: "erpnext.manufacturing.doctype.job_card.job_card.make_time_log",
+			args: { args },
+			freeze: true,
+			callback() {
+				frm.reload_doc();
+				frm.trigger("make_dashboard");
+			},
+		});
+	},
+
+	update_sub_operation(frm, args) {
+		if (frm.doc.sub_operations?.length) {
+			const pending_sub_ops = frm.doc.sub_operations.filter((d) => d.status != "Complete");
+			if (pending_sub_ops.length) {
+				args["sub_operation"] = pending_sub_ops[0].sub_operation;
+			}
+		}
+	},
+
+	make_dashboard(frm, has_items) {
+		if (frm.doc.__islocal) return false;
+
+		frm.dashboard.refresh();
+
+		// Clear any previously running timer tick before re-rendering.
+		if (frm._jcd_timer_interval) {
+			clearInterval(frm._jcd_timer_interval);
+			frm._jcd_timer_interval = null;
+		}
+
+		const wrapper = $(frm.fields_dict["job_card_dashboard"].wrapper);
+		wrapper.empty();
+
+		if (frm.doc.docstatus !== 0) {
+			return;
+		}
+
+		const { doc } = frm;
+		const { time_logs, status } = doc;
+
+		// ── Determine which action buttons to show ────────────────────────
+		const has_remaining_qty = doc.for_quantity + doc.process_loss_qty > doc.total_completed_qty;
+		const pending_transfer =
+			has_items && doc.items.some((row) => flt(row.transferred_qty) < flt(row.required_qty));
+		const materials_ready =
+			doc.skip_material_transfer || !pending_transfer || !doc.finished_good || !has_items;
+
+		let last_row = {};
+		const has_sub_ops_or_pending_qty = doc.sub_operations?.length || doc.pending_qty > 0;
+		if (has_sub_ops_or_pending_qty && time_logs?.length) {
+			last_row = get_last_row(time_logs);
+		}
+
+		const no_time_logs_yet = !time_logs?.length;
+		const pending_qty_cycle_done = flt(doc.pending_qty) > 0.0 && last_row?.to_time;
+		const sub_operation_cycle_done = doc.sub_operations?.length && last_row?.to_time;
+		const should_show_start =
+			(no_time_logs_yet || pending_qty_cycle_done || sub_operation_cycle_done) && !doc.is_paused;
+
+		const last_log_complete = time_logs?.length && time_logs[time_logs.length - 1].to_time;
+		const is_on_hold = status === "On Hold";
+		const is_actively_running = !!(
+			time_logs?.length &&
+			!last_log_complete &&
+			!is_on_hold &&
+			!doc.is_paused
+		);
+
+		let show_start = false,
+			show_pause = false,
+			show_resume = false,
+			show_complete = false,
+			is_timer_running = false;
+
+		if (has_remaining_qty && materials_ready) {
+			const manufactured_qty = doc.manufactured_qty || doc.total_completed_qty;
+			const qty_yet_to_manufacture = doc.for_quantity - (manufactured_qty + doc.process_loss_qty);
+
+			if (should_show_start) {
+				show_start = true;
+			} else if (doc.is_paused) {
+				show_resume = true;
+			} else if (qty_yet_to_manufacture > 0) {
+				show_pause = true;
+				show_complete = true;
+				is_timer_running = true;
+			}
+		}
+
+		// ── Timer color reflects job state ────────────────────────────────
+		const [timer_color, timer_bg, timer_border] = [
+			"var(--gray-600,#6b7280)",
+			"var(--gray-100,#f3f4f6)",
+			"var(--gray-300,#d1d5db)",
+		];
+
+		// ── Action button HTML ────────────────────────────────────────────
+		const btn = (cls, icon_path, label, icon_color) => `
+			<button class="btn btn-sm ${cls}" style="display:inline-flex;align-items:center;gap:5px;font-weight:600;padding:6px 14px;">
+				${frappe.utils.icon(icon_path, "sm", "", "", "", "", icon_color)}
+				${label}
+			</button>`;
+
+		const icons = {
+			play: { d: '<polygon points="5 3 19 12 5 21 5 3"/>', fill: "currentColor", stroke: "none" },
+			pause: {
+				d: '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>',
+				fill: "currentColor",
+				stroke: "none",
+			},
+			check: { d: '<polyline points="20 6 9 17 4 12"/>', sw: 3 },
+		};
+
+		const buttons_html = [
+			show_start && btn("btn-primary jcd-btn-start", "play", __("Start Job")),
+			show_resume && btn("btn-primary jcd-btn-resume", "play", __("Resume Job")),
+			show_pause && btn("btn-default jcd-btn-pause", "pause", __("Pause Job")),
+			show_complete && btn("btn-primary jcd-btn-complete", "check", __("Complete Job"), "white"),
+		]
+			.filter(Boolean)
+			.join("");
+
+		// ── Render widget ─────────────────────────────────────────────────
+		wrapper.append(`
+			<div class="job-card-dashboard-widget"
+				style="border:1px solid var(--border-color);border-radius:var(--border-radius-lg,8px);
+					background:var(--card-bg,#fff);padding:16px 20px;margin-bottom:16px;">
+				<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+					<div>
+						<div style="font-size:10px;color:var(--text-muted);font-weight:600;
+							text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px;">
+							${__("Elapsed Time")}
+						</div>
+						<div style="display:flex;align-items:center;gap:8px;">
+							${frappe.utils.icon("clock-4", "md", "", "", "", "", timer_color)}
+							<span class="jcd-stopwatch"
+								style="font-family:var(--monospace-font,'Courier New',monospace);
+								font-size:28px;font-weight:700;letter-spacing:2px;color:${timer_color};">
+								00:00:00
+							</span>
+						</div>
+					</div>
+					<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+						${buttons_html}
+					</div>
+				</div>
+			</div>`);
+
+		// ── Wire up button click handlers ─────────────────────────────────
+		if (show_start) {
+			wrapper.find(".jcd-btn-start").on("click", () => {
+				const from_time = frappe.datetime.now_datetime();
+				const has_no_employee = !frm.doc.employee || !frm.doc.employee.length;
+
+				if (has_no_employee) {
+>>>>>>> a22b83a97f (fix: add partially transferred status and fix button visibility for partial material transfer on job card)
 					frappe.prompt(
 						{
 							fieldtype: "Table MultiSelect",

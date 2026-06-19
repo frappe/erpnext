@@ -234,7 +234,7 @@
    "fieldtype": "Select",
    "label": "Status",
    "no_copy": 1,
-   "options": "Open\nWork In Progress\nMaterial Transferred\nOn Hold\nSubmitted\nCancelled\nCompleted",
+   "options": "Open\nWork In Progress\nPartially Transferred\nMaterial Transferred\nOn Hold\nSubmitted\nCancelled\nCompleted",
    "read_only": 1
   },
   {
@@ -513,7 +513,11 @@
  ],
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2026-05-12 12:17:17.750857",
+=======
+ "modified": "2026-06-19 17:39:42.293242",
+>>>>>>> a22b83a97f (fix: add partially transferred status and fix button visibility for partial material transfer on job card)
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",
