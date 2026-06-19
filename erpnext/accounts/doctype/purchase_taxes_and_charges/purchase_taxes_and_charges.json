@@ -20,6 +20,7 @@
   "allocate_full_amount_to_stock_items",
   "column_break_zqtz",
   "included_in_print_rate",
+  "gross_up_inclusive",
   "included_in_paid_amount",
   "section_break_10",
   "rate",
@@ -96,6 +97,16 @@
    "fieldname": "included_in_print_rate",
    "fieldtype": "Check",
    "label": "Is this Tax included in Basic Rate?",
+   "report_hide": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.included_in_print_rate",
+   "description": "Apply the rate to the gross (tax-inclusive) amount instead of the net.",
+   "fieldname": "gross_up_inclusive",
+   "fieldtype": "Check",
+   "label": "Gross-up Inclusive",
+   "print_hide": 1,
    "report_hide": 1
   },
   {
