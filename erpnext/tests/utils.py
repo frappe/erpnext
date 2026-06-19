@@ -902,6 +902,13 @@ class BootStrapTestData:
 			},
 			{
 				"doctype": "Supplier",
+				"supplier_name": "_Test Another Supplier USD",
+				"supplier_group": "_Test Supplier Group",
+				"default_currency": "USD",
+				"accounts": [{"company": "_Test Company", "account": "_Test Payable USD - _TC"}],
+			},
+			{
+				"doctype": "Supplier",
 				"supplier_name": "_Test Supplier With Tax Category",
 				"supplier_group": "_Test Supplier Group",
 				"tax_category": "_Test Tax Category 1",
@@ -947,6 +954,13 @@ class BootStrapTestData:
 			{
 				"company": "_Test Company",
 				"cost_center_name": "_Test Write Off Cost Center",
+				"doctype": "Cost Center",
+				"is_group": 0,
+				"parent_cost_center": "_Test Company - _TC",
+			},
+			{
+				"company": "_Test Company",
+				"cost_center_name": "Sub",
 				"doctype": "Cost Center",
 				"is_group": 0,
 				"parent_cost_center": "_Test Company - _TC",
@@ -1902,7 +1916,12 @@ class BootStrapTestData:
 		self.make_records(["item_code", "item_name"], records)
 
 	def make_product_bundle(self):
-		records = [
+		from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
+
+		if get_active_product_bundle("_Test Product Bundle Item"):
+			return
+
+		frappe.get_doc(
 			{
 				"doctype": "Product Bundle",
 				"new_item_code": "_Test Product Bundle Item",
@@ -1921,8 +1940,7 @@ class BootStrapTestData:
 					},
 				],
 			}
-		]
-		self.make_records(["new_item_code"], records)
+		).insert().submit()
 
 	def make_test_account(self):
 		records = [
@@ -2526,7 +2544,7 @@ class BootStrapTestData:
 				"doctype": "Workstation",
 				"name": "_Test Workstation 1",
 				"workstation_name": "_Test Workstation 1",
-				"warehouse": "_Test warehouse - _TC",
+				"warehouse": "_Test Warehouse - _TC",
 				"hour_rate_labour": 25,
 				"hour_rate_electricity": 25,
 				"hour_rate_consumable": 25,
@@ -2989,6 +3007,9 @@ class ERPNextTestSuite(unittest.TestCase):
 
 	def tearDown(self):
 		frappe.db.rollback()
+		frappe.local.request_cache.clear()
+		if hasattr(frappe.local, "future_sle"):
+			frappe.local.future_sle.clear()
 
 	def load_test_records(self, doctype):
 		if doctype not in self.globalTestRecords:

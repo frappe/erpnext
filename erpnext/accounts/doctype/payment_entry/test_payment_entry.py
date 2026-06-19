@@ -196,7 +196,7 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertEqual(outstanding_amount, 100)
 
 	def test_reference_outstanding_amount_on_advance_pull(self):
-		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
 
 		so = make_sales_order(qty=1, rate=1000)
 		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
@@ -532,6 +532,8 @@ class TestPaymentEntry(ERPNextTestSuite):
 		si.submit()
 
 		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank - _TC", bank_amount=4700)
+		pe.source_exchange_rate = 50
+		pe.set_amounts()
 		pe.reference_no = si.name
 		pe.reference_date = nowdate()
 
@@ -607,6 +609,8 @@ class TestPaymentEntry(ERPNextTestSuite):
 		pe = get_payment_entry(
 			"Sales Invoice", si.name, party_amount=20, bank_account="_Test Bank - _TC", bank_amount=900
 		)
+		pe.source_exchange_rate = 50
+		pe.set_amounts()
 		pe.reference_no = "1"
 		pe.reference_date = "2016-01-01"
 
@@ -1033,14 +1037,17 @@ class TestPaymentEntry(ERPNextTestSuite):
 				gle.credit_in_account_currency,
 				gle.debit_in_transaction_currency,
 				gle.credit_in_transaction_currency,
+				gle.transaction_currency,
+				gle.transaction_exchange_rate,
 			)
 			.orderby(gle.account)
 			.where(gle.voucher_no == payment_entry.name)
 			.run()
 		)
+		# transaction currency/rate come from the paid-from USD account (company currency is INR)
 		expected_gl_entries = (
-			(paid_from, 0.0, 8440.0, 0.0, 100.0, 0.0, 100.0),
-			("_Test Payable USD - _TC", 8440.0, 0.0, 100.0, 0.0, 100.0, 0.0),
+			(paid_from, 0.0, 8440.0, 0.0, 100.0, 0.0, 100.0, "USD", 84.4),
+			("_Test Payable USD - _TC", 8440.0, 0.0, 100.0, 0.0, 100.0, 0.0, "USD", 84.4),
 		)
 		self.assertEqual(gl_entries, expected_gl_entries)
 
@@ -1106,6 +1113,27 @@ class TestPaymentEntry(ERPNextTestSuite):
 
 		self.assertEqual(gl_entries, expected_gl_entries)
 
+	def test_payment_entry_with_inclusive_tax(self):
+		# inclusive tax built server-side: base_tax_amount is None until apply_taxes()
+		payment_entry = create_payment_entry(paid_amount=1180)
+		payment_entry.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 18,
+				"included_in_paid_amount": 1,
+				"add_deduct_tax": "Add",
+				"description": "Service Tax",
+			},
+		)
+		payment_entry.save()
+		payment_entry.submit()
+
+		# 1180 incl 18% => 1000 base + 180 tax
+		self.assertEqual(flt(payment_entry.total_taxes_and_charges, 2), 180.0)
+		self.assertEqual(flt(payment_entry.unallocated_amount, 2), 1000.0)
+
 	def test_payment_entry_against_onhold_purchase_invoice(self):
 		pi = make_purchase_invoice()
 
@@ -1119,7 +1147,7 @@ class TestPaymentEntry(ERPNextTestSuite):
 		with self.assertRaises(frappe.ValidationError) as err:
 			pe.save()
 
-		self.assertTrue("is on hold" in str(err.exception).lower())
+		self.assertIn("is on hold", str(err.exception).lower())
 
 	def test_payment_entry_for_employee(self):
 		employee = make_employee("test_payment_entry@salary.com", company="_Test Company")
@@ -1567,7 +1595,7 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.check_pl_entries()
 
 	def test_advance_as_liability_against_order(self):
-		from erpnext.buying.doctype.purchase_order.purchase_order import (
+		from erpnext.buying.doctype.purchase_order.mapper import (
 			make_purchase_invoice as _make_purchase_invoice,
 		)
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
@@ -2035,8 +2063,8 @@ class TestPaymentEntry(ERPNextTestSuite):
 
 		# check cancellation of payment entry and journal entry
 		pe.cancel()
-		self.assertTrue(pe.docstatus == 2)
-		self.assertTrue(frappe.db.get_value("Journal Entry", {"name": jv[0]}, "docstatus") == 2)
+		self.assertEqual(pe.docstatus, 2)
+		self.assertEqual(frappe.db.get_value("Journal Entry", {"name": jv[0]}, "docstatus"), 2)
 
 		# check deletion of payment entry and journal entry
 		pe.delete()

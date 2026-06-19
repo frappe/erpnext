@@ -642,6 +642,8 @@ class TransactionDeletionRecord(Document):
 
 	@frappe.whitelist()
 	def start_deletion_tasks(self):
+		self.check_permission("write")
+
 		# This method is the entry point for the chain of events that follow
 		self.db_set("status", "Running")
 		self._set_deletion_cache()
@@ -667,11 +669,9 @@ class TransactionDeletionRecord(Document):
 				self.enqueue_task(task="Delete Leads and Addresses")
 				return
 
-			frappe.db.sql(
-				"""delete from `tabBin` where warehouse in
-					(select name from tabWarehouse where company=%s)""",
-				self.company,
-			)
+			warehouses = frappe.get_all("Warehouse", filters={"company": self.company}, pluck="name")
+			if warehouses:
+				frappe.db.delete("Bin", {"warehouse": ["in", warehouses]})
 			self.db_set("delete_bin_data_status", "Completed")
 		self.enqueue_task(task="Delete Leads and Addresses")
 
@@ -738,10 +738,11 @@ class TransactionDeletionRecord(Document):
 				self.enqueue_task(task="Clear Notifications")
 				return
 
-			company_obj = frappe.get_doc("Company", self.company)
-			company_obj.total_monthly_sales = 0
-			company_obj.sales_monthly_history = None
-			company_obj.save()
+			frappe.db.set_value(
+				"Company",
+				self.company,
+				{"total_monthly_sales": 0, "sales_monthly_history": None},
+			)
 			self.db_set("reset_company_default_values_status", "Completed")
 		self.enqueue_task(task="Clear Notifications")
 

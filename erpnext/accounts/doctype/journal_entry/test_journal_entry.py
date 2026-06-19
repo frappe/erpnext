@@ -89,7 +89,7 @@ class TestJournalEntry(ERPNextTestSuite):
 		)
 		payment_against_order = base_jv.get("accounts")[0].get(dr_or_cr)
 
-		self.assertTrue(flt(advance_paid[0][0]) == flt(payment_against_order))
+		self.assertEqual(flt(advance_paid[0][0]), flt(payment_against_order))
 
 	def cancel_against_voucher_testcase(self, test_voucher):
 		if test_voucher.doctype == "Journal Entry":
@@ -169,8 +169,11 @@ class TestJournalEntry(ERPNextTestSuite):
 			"debit_in_account_currency",
 			"credit",
 			"credit_in_account_currency",
+			"debit_in_transaction_currency",
+			"credit_in_transaction_currency",
 		]
 
+		# Transaction currency is USD (first foreign row); the INR row is converted at 1/50.
 		self.expected_gle = [
 			{
 				"account": "_Test Bank - _TC",
@@ -179,6 +182,8 @@ class TestJournalEntry(ERPNextTestSuite):
 				"debit_in_account_currency": 0,
 				"credit": 5000,
 				"credit_in_account_currency": 5000,
+				"debit_in_transaction_currency": 0,
+				"credit_in_transaction_currency": 100,
 			},
 			{
 				"account": "_Test Bank USD - _TC",
@@ -187,6 +192,8 @@ class TestJournalEntry(ERPNextTestSuite):
 				"debit_in_account_currency": 100,
 				"credit": 0,
 				"credit_in_account_currency": 0,
+				"debit_in_transaction_currency": 100,
+				"credit_in_transaction_currency": 0,
 			},
 		]
 
@@ -203,8 +210,54 @@ class TestJournalEntry(ERPNextTestSuite):
 
 		self.assertFalse(gle)
 
+	def test_multi_currency_transaction_currency_on_foreign_debit(self):
+		"""Pin debit_in_transaction_currency for a foreign-currency debit row.
+
+		Transaction currency is USD (the first foreign row); the INR debit row must be
+		converted at 1/exchange_rate, so 5000 INR -> 100 USD. Guards the / vs * direction.
+		"""
+		jv = frappe.new_doc("Journal Entry")
+		jv.company = "_Test Company"
+		jv.posting_date = nowdate()
+		jv.multi_currency = 1
+		jv.append(
+			"accounts",
+			{
+				"account": "_Test Bank USD - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"credit_in_account_currency": 100,
+				"exchange_rate": 50,
+			},
+		)
+		jv.append(
+			"accounts",
+			{
+				"account": "_Test Bank - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"debit_in_account_currency": 5000,
+				"exchange_rate": 1,
+			},
+		)
+		jv.submit()
+
+		self.voucher_no = jv.name
+		self.fields = ["account", "debit_in_transaction_currency", "credit_in_transaction_currency"]
+		self.expected_gle = [
+			{
+				"account": "_Test Bank - _TC",
+				"debit_in_transaction_currency": 100,
+				"credit_in_transaction_currency": 0,
+			},
+			{
+				"account": "_Test Bank USD - _TC",
+				"debit_in_transaction_currency": 0,
+				"credit_in_transaction_currency": 100,
+			},
+		]
+		self.check_gl_entries()
+
 	def test_reverse_journal_entry(self):
-		from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
+		from erpnext.accounts.doctype.journal_entry.mapper import make_reverse_journal_entry
 
 		jv = make_journal_entry("_Test Bank USD - _TC", "Sales - _TC", 100, exchange_rate=50, save=False)
 
@@ -608,6 +661,174 @@ class TestJournalEntry(ERPNextTestSuite):
 		jv.accounts[0].party = customer
 		jv.save()
 		self.assertRaises(frappe.ValidationError, jv.submit)
+
+	def test_validate_reference_doc_debit_against_sales_order_throws(self):
+		"""Characterize: a debit entry linked to a Sales Order is rejected."""
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		sales_order = make_sales_order()
+		jv = make_journal_entry("Debtors - _TC", "_Test Cash - _TC", 100, save=False)
+		jv.accounts[0].party_type = "Customer"
+		jv.accounts[0].party = "_Test Customer"
+		jv.accounts[0].reference_type = "Sales Order"
+		jv.accounts[0].reference_name = sales_order.name
+		self.assertRaisesRegex(frappe.ValidationError, "Debit entry can not be linked", jv.insert)
+
+	def test_validate_reference_doc_credit_against_purchase_order_throws(self):
+		"""Characterize: a credit entry linked to a Purchase Order is rejected."""
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		purchase_order = create_purchase_order()
+		jv = make_journal_entry("_Test Cash - _TC", "Creditors - _TC", 100, save=False)
+		jv.accounts[1].party_type = "Supplier"
+		jv.accounts[1].party = "_Test Supplier"
+		jv.accounts[1].reference_type = "Purchase Order"
+		jv.accounts[1].reference_name = purchase_order.name
+		self.assertRaisesRegex(frappe.ValidationError, "Credit entry can not be linked", jv.insert)
+
+	def test_validate_reference_doc_nonexistent_reference_rejected(self):
+		"""Characterize: a JE referencing a non-existent invoice is rejected by link validation.
+
+		Note: the controller's own "Invalid reference" branch is unreachable in normal flow
+		because Frappe link validation rejects the missing reference before validate_reference_doc.
+		"""
+		jv = make_journal_entry("_Test Cash - _TC", "Debtors - _TC", 100, save=False)
+		jv.accounts[1].party_type = "Customer"
+		jv.accounts[1].party = "_Test Customer"
+		jv.accounts[1].reference_type = "Sales Invoice"
+		jv.accounts[1].reference_name = "NON-EXISTENT-SI"
+		self.assertRaises(frappe.LinkValidationError, jv.insert)
+
+	def test_validate_reference_doc_invoice_party_mismatch_throws(self):
+		"""Characterize: an invoice reference whose party differs from the row party is rejected."""
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		invoice = create_sales_invoice(rate=500)
+		other_customer = make_customer("_Test JE Mismatch Customer")
+		jv = make_journal_entry("_Test Cash - _TC", "Debtors - _TC", 100, save=False)
+		jv.accounts[1].party_type = "Customer"
+		jv.accounts[1].party = other_customer
+		jv.accounts[1].reference_type = "Sales Invoice"
+		jv.accounts[1].reference_name = invoice.name
+		self.assertRaisesRegex(frappe.ValidationError, "Party / Account does not match", jv.insert)
+
+	def test_validate_reference_doc_order_party_mismatch_throws(self):
+		"""Characterize: a Sales Order reference whose party differs from the row party is rejected."""
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		sales_order = make_sales_order()
+		other_customer = make_customer("_Test JE Mismatch Customer")
+		jv = make_journal_entry("_Test Cash - _TC", "Debtors - _TC", 100, save=False)
+		jv.accounts[1].party_type = "Customer"
+		jv.accounts[1].party = other_customer
+		jv.accounts[1].is_advance = "Yes"
+		jv.accounts[1].reference_type = "Sales Order"
+		jv.accounts[1].reference_name = sales_order.name
+		self.assertRaisesRegex(frappe.ValidationError, "does not match", jv.insert)
+
+	def test_validate_reference_doc_populates_reference_side_effects(self):
+		"""Characterize: a valid invoice reference populates reference_totals/types/accounts."""
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		invoice = create_sales_invoice(rate=500)
+		jv = make_journal_entry("_Test Cash - _TC", "Debtors - _TC", 100, save=False)
+		jv.accounts[1].party_type = "Customer"
+		jv.accounts[1].party = "_Test Customer"
+		jv.accounts[1].reference_type = "Sales Invoice"
+		jv.accounts[1].reference_name = invoice.name
+		jv.insert()
+		self.assertEqual(jv.reference_totals[invoice.name], 100.0)
+		self.assertEqual(jv.reference_types[invoice.name], "Sales Invoice")
+		self.assertEqual(jv.reference_accounts[invoice.name], "Debtors - _TC")
+
+	def test_get_balance_places_difference_on_blank_row(self):
+		"""Characterize: get_balance puts the unbalanced difference on an amountless row."""
+		jv = frappe.new_doc("Journal Entry")
+		jv.company = "_Test Company"
+		jv.posting_date = nowdate()
+		jv.append(
+			"accounts",
+			{
+				"account": "_Test Cash - _TC",
+				"debit_in_account_currency": 100,
+				"debit": 100,
+				"exchange_rate": 1,
+			},
+		)
+		jv.append("accounts", {"account": "_Test Bank - _TC", "exchange_rate": 1})  # amountless row
+		jv.set_total_debit_credit()
+		self.assertEqual(jv.difference, 100)
+
+		jv.get_balance()
+		blank_row = jv.accounts[1]
+		self.assertEqual(blank_row.credit_in_account_currency, 100)
+		self.assertEqual(jv.total_debit, jv.total_credit)
+
+	def test_get_outstanding_invoices_builds_write_off_rows(self):
+		"""Characterize: get_outstanding_invoices adds a party row for each outstanding invoice."""
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		invoice = create_sales_invoice(rate=700)
+		jv = frappe.new_doc("Journal Entry")
+		jv.company = "_Test Company"
+		jv.posting_date = nowdate()
+		jv.voucher_type = "Write Off Entry"
+		jv.write_off_based_on = "Accounts Receivable"
+		jv.write_off_amount = 1000
+		jv.get_outstanding_invoices()
+
+		invoice_rows = [row for row in jv.accounts if row.reference_name == invoice.name]
+		self.assertTrue(invoice_rows)
+		self.assertEqual(invoice_rows[0].party_type, "Customer")
+		self.assertEqual(invoice_rows[0].reference_type, "Sales Invoice")
+		self.assertEqual(flt(invoice_rows[0].credit_in_account_currency), 700)
+
+	def test_unlink_advance_entry_reference_on_cancel(self):
+		"""Characterize: cancelling an advance JE against an invoice clears the row's reference."""
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		invoice = create_sales_invoice(rate=700)
+		jv = make_journal_entry("_Test Cash - _TC", "Debtors - _TC", 100, save=False)
+		advance_row = jv.accounts[1]
+		advance_row.party_type = "Customer"
+		advance_row.party = "_Test Customer"
+		advance_row.is_advance = "Yes"
+		advance_row.reference_type = "Sales Invoice"
+		advance_row.reference_name = invoice.name
+		jv.submit()
+
+		jv.cancel()
+		jv.reload()
+		self.assertFalse(jv.accounts[1].reference_type)
+		self.assertFalse(jv.accounts[1].reference_name)
+
+	def test_get_payment_entry_against_order_builds_advance_je(self):
+		"""Characterize the mapper: an advance Bank Entry JE is built against an unbilled order."""
+		from erpnext.accounts.doctype.journal_entry.mapper import get_payment_entry_against_order
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		sales_order = make_sales_order()
+		je = get_payment_entry_against_order("Sales Order", sales_order.name, journal_entry=True)
+
+		self.assertEqual(je.voucher_type, "Bank Entry")
+		party_rows = [row for row in je.accounts if row.party_type == "Customer"]
+		self.assertTrue(party_rows)
+		self.assertEqual(party_rows[0].reference_type, "Sales Order")
+		self.assertEqual(party_rows[0].reference_name, sales_order.name)
+		self.assertEqual(party_rows[0].is_advance, "Yes")
+
+	def test_make_inter_company_journal_entry_builds_linked_draft(self):
+		"""Characterize the mapper: the counterpart JE carries the company and back-reference."""
+		from erpnext.accounts.doctype.journal_entry.mapper import make_inter_company_journal_entry
+
+		source = make_journal_entry("_Test Cash - _TC", "_Test Bank - _TC", 100, submit=True)
+		result = make_inter_company_journal_entry(
+			source.name, "Inter Company Journal Entry", "_Test Company 1"
+		)
+
+		self.assertEqual(result.get("voucher_type"), "Inter Company Journal Entry")
+		self.assertEqual(result.get("company"), "_Test Company 1")
+		self.assertEqual(result.get("inter_company_journal_entry_reference"), source.name)
 
 
 def make_journal_entry(

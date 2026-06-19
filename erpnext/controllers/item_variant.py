@@ -7,6 +7,7 @@ import json
 
 import frappe
 from frappe import _
+from frappe.query_builder import Case
 from frappe.utils import cstr, flt
 
 from erpnext.utilities.product import get_item_codes_by_attributes
@@ -135,6 +136,53 @@ def validate_is_incremental(numeric_attribute, attribute, value, item):
 		)
 
 
+def get_attribute_value_renames(item_attribute):
+	"""Return old to new attribute value mappings for renamed Item Attribute Value rows."""
+	if item_attribute.numeric_values:
+		return {}
+
+	db_value = item_attribute.get_doc_before_save()
+	if not db_value:
+		return {}
+
+	old_values = {d.name: d.attribute_value for d in db_value.item_attribute_values}
+	renames = {}
+
+	for row in item_attribute.item_attribute_values:
+		if row.name in old_values and old_values[row.name] != row.attribute_value:
+			renames[old_values[row.name]] = row.attribute_value
+
+	return renames
+
+
+def update_variant_attribute_values(item_attribute):
+	"""Propagate renamed Item Attribute Values to Item Variant Attribute on variant items."""
+	value_map = get_attribute_value_renames(item_attribute)
+	if not value_map:
+		return
+
+	item_variant_table = frappe.qb.DocType("Item Variant Attribute")
+	item_table = frappe.qb.DocType("Item")
+	attribute_value = item_variant_table.attribute_value
+	attribute_value_case = Case()
+
+	for old_value, new_value in value_map.items():
+		attribute_value_case = attribute_value_case.when(attribute_value == old_value, new_value)
+
+	(
+		frappe.qb.update(item_variant_table)
+		.join(item_table)
+		.on(item_table.name == item_variant_table.parent)
+		.set(attribute_value, attribute_value_case.else_(attribute_value))
+		.where(item_table.variant_of.isnotnull())
+		.where(item_table.variant_of != "")
+		.where(item_variant_table.attribute == item_attribute.name)
+		.where(attribute_value.isin(list(value_map)))
+	).run()
+
+	frappe.flags.attribute_values = None
+
+
 def validate_item_attribute_value(attributes_list, attribute, attribute_value, item, from_variant=True):
 	allow_rename_attribute_value = frappe.db.get_single_value(
 		"Item Variant Settings", "allow_rename_attribute_value"
@@ -215,7 +263,9 @@ def create_variant(item: str, args: dict | str, use_template_image: bool = False
 	variant_attributes = []
 
 	for d in template.attributes:
-		variant_attributes.append({"attribute": d.attribute, "attribute_value": args.get(_(d.attribute))})
+		attribute_value = args.get(_(d.attribute)) or args.get(d.attribute)
+		if attribute_value:
+			variant_attributes.append({"attribute": d.attribute, "attribute_value": attribute_value})
 
 	variant.set("attributes", variant_attributes)
 	copy_attributes_to_variant(template, variant)
@@ -234,6 +284,12 @@ def enqueue_multiple_variant_creation(item: str, args: dict | str, use_template_
 	# There can be innumerable attribute combinations, enqueue
 	if isinstance(args, str):
 		variants = json.loads(args)
+	else:
+		variants = args
+	variants = {key: values for key, values in variants.items() if values}
+	if not variants:
+		frappe.throw(_("Please select at least one attribute value"))
+
 	total_variants = 1
 	for key in variants:
 		total_variants *= len(variants[key])
@@ -257,6 +313,7 @@ def create_multiple_variants(item, args, use_template_image=False):
 	count = 0
 	if isinstance(args, str):
 		args = json.loads(args)
+	args = {key: values for key, values in args.items() if values}
 
 	template_item = frappe.get_doc("Item", item)
 	args_set = generate_keyed_value_combinations(args)
@@ -291,6 +348,9 @@ def generate_keyed_value_combinations(args):
 
 	"""
 	# Return empty list if empty
+	if not args:
+		return []
+	args = {key: values for key, values in args.items() if values}
 	if not args:
 		return []
 

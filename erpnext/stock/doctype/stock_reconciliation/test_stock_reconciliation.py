@@ -1040,11 +1040,11 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		)
 
 		batch1 = get_batch_from_bundle(se1.items[0].serial_and_batch_bundle)
-		self.assertFalse(batch1 == batch)
+		self.assertNotEqual(batch1, batch)
 
 		sr.reload()
 		self.assertTrue(sr.items[0].serial_and_batch_bundle)
-		self.assertTrue(sr.items[0].current_serial_and_batch_bundle)
+		self.assertFalse(sr.items[0].current_serial_and_batch_bundle)
 
 	def test_not_reconcile_all_batch(self):
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
@@ -1418,7 +1418,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		sr.save()
 		self.assertEqual(sr.items[0].current_valuation_rate, 100)
 		self.assertEqual(sr.difference_amount, 100 * -1)
-		self.assertTrue(sr.items[0].qty == 0)
+		self.assertEqual(sr.items[0].qty, 0)
 
 	def test_stock_reco_recalculate_qty_for_backdated_entry(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -1456,7 +1456,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			pluck="name",
 		)
 
-		self.assertTrue(len(stock_ledgers) == 1)
+		self.assertEqual(len(stock_ledgers), 1)
 
 		se = make_stock_entry(
 			item_code=item_code,
@@ -1515,7 +1515,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			"status",
 		)
 
-		self.assertTrue(status == "Active")
+		self.assertEqual(status, "Active")
 
 		sr = create_stock_reconciliation(
 			item_code=serial_item,
@@ -1534,7 +1534,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			"status",
 		)
 
-		self.assertTrue(status == "Active")
+		self.assertEqual(status, "Active")
 
 		se = make_stock_entry(
 			item_code=serial_item,
@@ -1550,7 +1550,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			"status",
 		)
 
-		self.assertFalse(status == "Active")
+		self.assertNotEqual(status, "Active")
 
 		sr.cancel()
 
@@ -1560,7 +1560,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			"status",
 		)
 
-		self.assertFalse(status == "Active")
+		self.assertNotEqual(status, "Active")
 
 	def test_change_valuation_of_batch_using_backdated_stock_reco(self):
 		from erpnext.stock.doctype.batch.batch import get_batch_qty

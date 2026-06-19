@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_auto_repeat": 1,
+ "allow_bulk_edit": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:39",
@@ -23,8 +24,6 @@
   "is_subcontracted",
   "has_unit_price_items",
   "supplier_warehouse",
-  "section_break_zymg",
-  "title",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -56,9 +55,7 @@
   "net_total",
   "section_break_48",
   "pricing_rules",
-  "raw_material_details",
   "set_reserve_warehouse",
-  "supplied_items",
   "taxes_section",
   "tax_category",
   "taxes_and_charges",
@@ -156,6 +153,7 @@
   "auto_repeat",
   "update_auto_repeat_reference",
   "additional_info_section",
+  "title",
   "party_account_currency",
   "represents_company",
   "ref_sq",
@@ -164,7 +162,6 @@
   "mps",
   "is_internal_supplier",
   "inter_company_order_reference",
-  "is_old_subcontracting_flow",
   "connections_tab"
  ],
  "fields": [
@@ -514,23 +511,6 @@
    "fieldtype": "Table",
    "label": "Purchase Order Pricing Rule",
    "options": "Pricing Rule Detail",
-   "read_only": 1
-  },
-  {
-   "collapsible_depends_on": "supplied_items",
-   "fieldname": "raw_material_details",
-   "fieldtype": "Section Break",
-   "label": "Raw Materials Supplied"
-  },
-  {
-   "fieldname": "supplied_items",
-   "fieldtype": "Table",
-   "label": "Supplied Items",
-   "no_copy": 1,
-   "oldfieldname": "po_raw_material_details",
-   "oldfieldtype": "Table",
-   "options": "Purchase Order Item Supplied",
-   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -1143,14 +1123,6 @@
    "options": "Project"
   },
   {
-   "default": "0",
-   "fieldname": "is_old_subcontracting_flow",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Is Old Subcontracting Flow",
-   "read_only": 1
-  },
-  {
    "depends_on": "is_internal_supplier",
    "fieldname": "set_from_warehouse",
    "fieldtype": "Link",
@@ -1319,10 +1291,6 @@
    "fieldname": "auto_repeat_section",
    "fieldtype": "Section Break",
    "label": "Auto Repeat"
-  },
-  {
-   "fieldname": "section_break_zymg",
-   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
@@ -1330,7 +1298,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-30 12:17:43.342204",
+ "modified": "2026-05-28 12:34:19.659621",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

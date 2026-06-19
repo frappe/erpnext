@@ -19,3 +19,7 @@ node_modules/
 .backportrc.json
 # Aider AI Chat
 .aider*
+
+# Banking SPA
+erpnext/public/banking
+erpnext/www/banking.html

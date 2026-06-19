@@ -86,6 +86,13 @@ class Prospect(CRMNote):
 					linked_doc.append("links", {"link_doctype": self.doctype, "link_name": self.name})
 					linked_doc.save(ignore_permissions=True)
 
+	def get_notification_email(self):
+		"""Hook to return the target email address for notifications."""
+		if self.prospect_owner:
+			return frappe.db.get_value("User", self.prospect_owner, "email")
+
+		return None
+
 
 @frappe.whitelist()
 def make_customer(source_name: str, target_doc: str | Document | None = None):

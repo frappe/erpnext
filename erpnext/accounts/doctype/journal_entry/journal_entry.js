@@ -70,6 +70,10 @@ frappe.ui.form.on("Journal Entry", {
 	},
 
 	refresh: function (frm) {
+		if (frm.doc.reversal_of && (frm.is_new() || frm.doc.docstatus == 0)) {
+			frm.set_read_only();
+		}
+
 		erpnext.toggle_naming_series();
 
 		if (frm.doc.docstatus > 0) {
@@ -174,7 +178,7 @@ frappe.ui.form.on("Journal Entry", {
 					voucher_type: frm.doc.voucher_type,
 					company: args.company,
 				},
-				method: "erpnext.accounts.doctype.journal_entry.journal_entry.make_inter_company_journal_entry",
+				method: "erpnext.accounts.doctype.journal_entry.mapper.make_inter_company_journal_entry",
 				callback: function (r) {
 					if (r.message) {
 						var doc = frappe.model.sync(r.message)[0];
@@ -405,18 +409,16 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 	}
 
 	get_outstanding(doctype, docname, company, child) {
-		var args = {
-			doctype: doctype,
-			docname: docname,
-			party: child.party,
-			account: child.account,
-			account_currency: child.account_currency,
-			company: company,
-		};
-
 		return frappe.call({
 			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_outstanding",
-			args: { args: args },
+			args: {
+				doctype: doctype,
+				docname: docname,
+				company: company,
+				account: child.account,
+				party: child.party,
+				account_currency: child.account_currency,
+			},
 			callback: function (r) {
 				if (r.message) {
 					$.each(r.message, function (field, value) {
@@ -429,15 +431,17 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 
 	accounts_add(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
-		row.exchange_rate = 1;
-		$.each(doc.accounts, function (i, d) {
-			if (d.account && d.party && d.party_type) {
-				row.account = d.account;
-				row.party = d.party;
-				row.party_type = d.party_type;
-				row.exchange_rate = d.exchange_rate;
-			}
-		});
+		if (!row.exchange_rate) row.exchange_rate = 1;
+		if (!row.account) {
+			$.each(doc.accounts, function (i, d) {
+				if (d.account && d.party && d.party_type) {
+					row.account = d.account;
+					row.party = d.party;
+					row.party_type = d.party_type;
+					row.exchange_rate = d.exchange_rate;
+				}
+			});
+		}
 
 		// set difference
 		if (doc.difference) {
@@ -725,7 +729,7 @@ $.extend(erpnext.journal_entry, {
 
 	reverse_journal_entry: function (frm) {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.accounts.doctype.journal_entry.journal_entry.make_reverse_journal_entry",
+			method: "erpnext.accounts.doctype.journal_entry.mapper.make_reverse_journal_entry",
 			frm: frm,
 		});
 	},

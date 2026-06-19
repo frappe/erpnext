@@ -89,7 +89,7 @@ frappe.ui.form.on("Delivery Note", {
 				__("Credit Note"),
 				function () {
 					frappe.model.open_mapped_doc({
-						method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
+						method: "erpnext.stock.doctype.delivery_note.mapper.make_sales_invoice",
 						frm: cur_frm,
 					});
 				},
@@ -114,7 +114,7 @@ frappe.ui.form.on("Delivery Note", {
 					__(button_label),
 					function () {
 						frappe.model.open_mapped_doc({
-							method: "erpnext.stock.doctype.delivery_note.delivery_note.make_inter_company_purchase_receipt",
+							method: "erpnext.stock.doctype.delivery_note.mapper.make_inter_company_purchase_receipt",
 							frm: frm,
 						});
 					},
@@ -163,7 +163,7 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 						});
 					}
 					erpnext.utils.map_current_doc({
-						method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
+						method: "erpnext.selling.doctype.sales_order.mapper.make_delivery_note",
 						args: {
 							for_reserved_stock: 1,
 						},
@@ -205,7 +205,7 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 						});
 					}
 					erpnext.utils.map_current_doc({
-						method: "erpnext.stock.doctype.pick_list.pick_list.create_dn_for_pick_lists",
+						method: "erpnext.stock.doctype.pick_list.mapper.create_dn_for_pick_lists",
 						source_doctype: "Pick List",
 						target: me.frm,
 						setters: [
@@ -296,7 +296,7 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 					__("Packing Slip"),
 					function () {
 						frappe.model.open_mapped_doc({
-							method: "erpnext.stock.doctype.delivery_note.delivery_note.make_packing_slip",
+							method: "erpnext.stock.doctype.delivery_note.mapper.make_packing_slip",
 							frm: me.frm,
 						});
 					},
@@ -367,7 +367,7 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 
 	make_shipment() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_shipment",
+			method: "erpnext.stock.doctype.delivery_note.mapper.make_shipment",
 			frm: this.frm,
 		});
 	}
@@ -383,28 +383,28 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 
 	make_sales_invoice() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
+			method: "erpnext.stock.doctype.delivery_note.mapper.make_sales_invoice",
 			frm: this.frm,
 		});
 	}
 
 	make_installation_note() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_installation_note",
+			method: "erpnext.stock.doctype.delivery_note.mapper.make_installation_note",
 			frm: this.frm,
 		});
 	}
 
 	make_sales_return() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_return",
+			method: "erpnext.stock.doctype.delivery_note.mapper.make_sales_return",
 			frm: this.frm,
 		});
 	}
 
 	make_delivery_trip() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_delivery_trip",
+			method: "erpnext.stock.doctype.delivery_note.mapper.make_delivery_trip",
 			frm: cur_frm,
 		});
 	}

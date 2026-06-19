@@ -35,6 +35,10 @@ def get():
 				_("Short-term Investments"): {"account_category": "Short-term Investments"},
 				_("Stock Assets"): {
 					_("Stock In Hand"): {"account_type": "Stock", "account_category": "Stock Assets"},
+					_("Stock Delivered But Not Billed"): {
+						"account_type": "Stock Delivered But Not Billed",
+						"account_category": "Stock Assets",
+					},
 					"account_type": "Stock",
 					"account_category": "Stock Assets",
 				},

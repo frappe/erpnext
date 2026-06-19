@@ -31,6 +31,7 @@ from erpnext.controllers.item_variant import (
 	validate_item_variant_attributes,
 )
 from erpnext.stock.doctype.item_default.item_default import ItemDefault
+from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 from erpnext.stock.utils import get_valuation_method
 
 
@@ -79,7 +80,6 @@ class Item(Document):
 		brand: DF.Link | None
 		country_of_origin: DF.Link | None
 		create_new_batch: DF.Check
-		customer: DF.Link | None
 		customer_code: DF.SmallText | None
 		customer_items: DF.Table[ItemCustomerDetail]
 		customs_tariff_number: DF.Link | None
@@ -197,7 +197,7 @@ class Item(Document):
 				)
 				frappe.msgprint(
 					_(
-						"Opening stock creation has been queued and will be created in the background. Please check the stock entry after some time."
+						"Opening stock creation has been queued and will be created in the background. Please check the Stock Reconciliation after some time."
 					),
 					indicator="orange",
 					alert=True,
@@ -223,6 +223,7 @@ class Item(Document):
 		self.validate_warehouse_for_reorder()
 		self.update_bom_item_desc()
 
+		self.validate_variant()
 		self.validate_has_variants()
 		self.validate_attributes_in_variants()
 		self.validate_stock_exists_for_template_item()
@@ -312,9 +313,6 @@ class Item(Document):
 		if self.valuation_rate is None and not self.is_customer_provided_item:
 			frappe.throw(_("Valuation Rate is mandatory if Opening Stock entered"))
 
-		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-
-		# default warehouse, or Stores
 		for default in self.item_defaults or [
 			frappe._dict({"company": frappe.defaults.get_defaults().company})
 		]:
@@ -330,38 +328,40 @@ class Item(Document):
 				)
 
 			if default_warehouse:
-				stock_entry = make_stock_entry(
-					item_code=self.name,
-					target=default_warehouse,
-					qty=self.opening_stock,
-					rate=self.valuation_rate,
-					company=default.company,
-					posting_date=getdate(),
-					posting_time=nowtime(),
-					do_not_save=True,
+				opening_account = frappe.db.get_value(
+					"Account",
+					{"company": default.company, "account_type": "Temporary", "is_group": 0},
+					"name",
 				)
 
-				if self.valuation_rate == 0:
-					for item in stock_entry.items:
-						item.allow_zero_valuation_rate = 1
+				if not opening_account:
+					frappe.throw(
+						_(
+							"Please set a Temporary Opening account for company {0} to create an Opening Stock reconciliation."
+						).format(frappe.bold(default.company))
+					)
+				stock_reco = create_opening_stock_reconciliation(
+					item_code=self.name,
+					company=default.company,
+					qty=self.opening_stock,
+					valuation_rate=self.valuation_rate,
+					warehouse=default_warehouse,
+					expense_account=opening_account,
+				)
+				stock_reco.add_comment("Comment", _("Opening Stock"))
 
-				stock_entry.insert()
-				stock_entry.submit()
-				stock_entry.load_from_db()
-				stock_entry.add_comment("Comment", _("Opening Stock"))
-
-				stock_entry_link = frappe.utils.get_link_to_form("Stock Entry", stock_entry.name)
+				stock_reco_link = frappe.utils.get_link_to_form("Stock Reconciliation", stock_reco.name)
 				if self.valuation_rate == 0:
 					frappe.msgprint(
-						_("Opening Stock entry created with zero valuation rate: {0}").format(
-							stock_entry_link
+						_("Opening Stock reconciliation created with zero valuation rate: {0}").format(
+							stock_reco_link
 						),
 						indicator="orange",
 						alert=True,
 					)
 				else:
 					frappe.msgprint(
-						_("Opening Stock entry created: {0}").format(stock_entry_link),
+						_("Opening Stock reconciliation created: {0}").format(stock_reco_link),
 						indicator="green",
 						alert=True,
 					)
@@ -712,8 +712,10 @@ class Item(Document):
 
 	def validate_duplicate_product_bundles_before_merge(self, old_name, new_name):
 		"Block merge if both old and new items have product bundles."
-		old_bundle = frappe.get_value("Product Bundle", filters={"new_item_code": old_name, "disabled": 0})
-		new_bundle = frappe.get_value("Product Bundle", filters={"new_item_code": new_name, "disabled": 0})
+		from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
+
+		old_bundle = get_active_product_bundle(old_name)
+		new_bundle = get_active_product_bundle(new_name)
 
 		if old_bundle and new_bundle:
 			bundle_link = get_link_to_form("Product Bundle", old_bundle)
@@ -859,6 +861,48 @@ class Item(Document):
 						timeout=600,
 						enqueue_after_commit=True,
 					)
+
+	def validate_variant(self):
+		if self.variant_of:
+			has_variants, based_on = frappe.get_value(
+				"Item", self.variant_of, ["has_variants", "variant_based_on"]
+			)
+			if not has_variants:
+				frappe.throw(_("Item {0} is not a template item.").format(frappe.bold(self.variant_of)))
+
+			if based_on == "Item Attribute":
+				for d in self.attributes:
+					if not frappe.db.exists(
+						"Item Variant Attribute", {"attribute": d.attribute, "parent": self.variant_of}
+					):
+						frappe.throw(
+							_("Attribute {0} is not valid for the selected template.").format(
+								frappe.bold(d.attribute)
+							)
+						)
+
+					numeric_values, disabled = frappe.get_value(
+						"Item Variant Attribute",
+						{"attribute": d.attribute, "parent": self.variant_of},
+						["numeric_values", "disabled"],
+					)
+
+					if disabled:
+						frappe.throw(_("Attribute {0} is disabled.").format(frappe.bold(d.attribute)))
+
+					if (
+						not numeric_values
+						and d.attribute_value
+						and not frappe.db.exists(
+							"Item Attribute Value",
+							{"parent": d.attribute, "attribute_value": d.attribute_value},
+						)
+					):
+						frappe.throw(
+							_("Attribute Value {0} is not valid for the selected attribute {1}.").format(
+								frappe.bold(d.attribute_value), frappe.bold(d.attribute)
+							)
+						)
 
 	def validate_has_variants(self):
 		if self.is_new():
@@ -1104,7 +1148,7 @@ class Item(Document):
 
 			if doctype in ("Product Bundle", "BOM"):
 				if doctype == "Product Bundle":
-					filters = {"new_item_code": self.name}
+					filters = {"new_item_code": self.name, "is_active": 1, "docstatus": 1}
 					fieldname = "new_item_code as docname"
 				else:
 					filters = {"item": self.name, "docstatus": 1}
@@ -1502,3 +1546,207 @@ def get_child_warehouses(warehouse):
 	from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 
 	return get_child_warehouses(warehouse)
+
+
+@frappe.whitelist()
+def get_item_prices(item_code: str):
+	"""Fetch valid item prices for the item prices tab."""
+	if not frappe.has_permission("Item Price", "read"):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+	today = getdate()
+
+	ItemPrice = frappe.qb.DocType("Item Price")
+
+	prices = (
+		frappe.qb.from_(ItemPrice)
+		.select(
+			ItemPrice.name,
+			ItemPrice.price_list,
+			ItemPrice.price_list_rate,
+			ItemPrice.currency,
+			ItemPrice.uom,
+			ItemPrice.customer,
+			ItemPrice.supplier,
+			ItemPrice.buying,
+			ItemPrice.selling,
+			ItemPrice.valid_upto,
+		)
+		.where(ItemPrice.item_code == item_code)
+		.where(ItemPrice.docstatus != 2)
+		.where((ItemPrice.valid_upto.isnull()) | (ItemPrice.valid_upto >= today))
+		.orderby(ItemPrice.price_list)
+		.limit(11)
+		.run(as_dict=True)
+	)
+
+	has_more = len(prices) == 11
+	return {
+		"prices": prices[:10],
+		"has_more": has_more,
+	}
+
+
+@frappe.whitelist()
+def make_opening_stock_entry(
+	item_code: str,
+	company: str,
+	qty: float,
+	valuation_rate: float,
+	warehouse: str | None = None,
+):
+	if not frappe.has_permission("Item", "write", item_code):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+	item = frappe.get_doc("Item", item_code)
+
+	if not item.is_stock_item:
+		frappe.throw(_("Opening Stock can only be set for stock items."))
+	if item.has_serial_no or item.has_batch_no:
+		frappe.throw(
+			_("Opening Stock for serialised or batch items must be set via the Stock Reconciliation form.")
+		)
+	if item.stock_ledger_created():
+		frappe.throw(
+			_("Opening Stock cannot be created as stock transactions already exist for item {0}.").format(
+				frappe.bold(item_code)
+			)
+		)
+
+	if flt(qty) <= 0:
+		frappe.throw(_("Quantity must be greater than zero."))
+
+	if flt(valuation_rate) < 0:
+		frappe.throw(_("Valuation Rate cannot be negative."))
+
+	if warehouse:
+		warehouse_company = frappe.db.get_value("Warehouse", warehouse, "company")
+		if warehouse_company != company:
+			frappe.throw(_("Warehouse {0} does not belong to Company {1}.").format(warehouse, company))
+
+	target_warehouse = get_default_warehouse_for_opening_stock(item, company, warehouse)
+
+	opening_account = frappe.db.get_value(
+		"Account",
+		{"company": company, "account_type": "Temporary", "is_group": 0},
+		"name",
+	)
+
+	if not opening_account:
+		frappe.throw(
+			_(
+				"Please set a Temporary Opening account for company {0} to create an Opening Stock reconciliation."
+			).format(frappe.bold(company))
+		)
+
+	stock_reco = create_opening_stock_reconciliation(
+		item_code=item_code,
+		company=company,
+		qty=qty,
+		valuation_rate=valuation_rate,
+		warehouse=target_warehouse,
+		expense_account=opening_account,
+	)
+	stock_reco.add_comment("Comment", _("Opening Stock"))
+
+	frappe.msgprint(
+		_("Opening Stock reconciliation created: {0}").format(
+			get_link_to_form("Stock Reconciliation", stock_reco.name)
+		),
+		indicator="green",
+		alert=True,
+	)
+
+	return stock_reco.name
+
+
+def create_opening_stock_reconciliation(
+	item_code: str,
+	company: str,
+	qty: float,
+	valuation_rate: float,
+	warehouse: str,
+	expense_account: str,
+):
+	stock_reco = frappe.get_doc(
+		{
+			"doctype": "Stock Reconciliation",
+			"purpose": "Opening Stock",
+			"company": company,
+			"expense_account": expense_account,
+			"items": [
+				{
+					"item_code": item_code,
+					"warehouse": warehouse,
+					"qty": flt(qty),
+					"valuation_rate": flt(valuation_rate),
+					"allow_zero_valuation_rate": 1 if flt(valuation_rate) == 0 else 0,
+					"reconcile_all_serial_batch": 1,
+				}
+			],
+		}
+	)
+
+	stock_reco.insert()
+	set_opening_stock_serial_batch_bundle(stock_reco)
+	stock_reco.submit()
+
+	return stock_reco
+
+
+def set_opening_stock_serial_batch_bundle(stock_reco):
+	row = stock_reco.items[0]
+	item_details = frappe.get_cached_value(
+		"Item", row.item_code, ["has_serial_no", "has_batch_no"], as_dict=1
+	)
+
+	if not (item_details.has_serial_no or item_details.has_batch_no):
+		return
+
+	bundle = SerialBatchCreation(
+		{
+			"item_code": row.item_code,
+			"warehouse": row.warehouse,
+			"voucher_type": stock_reco.doctype,
+			"voucher_no": stock_reco.name,
+			"voucher_detail_no": row.name,
+			"posting_date": stock_reco.posting_date,
+			"posting_time": stock_reco.posting_time,
+			"qty": row.qty,
+			"avg_rate": row.valuation_rate,
+			"type_of_transaction": "Inward",
+			"company": stock_reco.company,
+			"do_not_submit": True,
+		}
+	).make_serial_and_batch_bundle()
+
+	if not bundle:
+		return
+
+	row.db_set("serial_and_batch_bundle", bundle.name, update_modified=False)
+	row.serial_and_batch_bundle = bundle.name
+
+
+def get_default_warehouse_for_opening_stock(item, company: str, warehouse: str | None):
+	if warehouse:
+		return warehouse
+
+	for default in item.item_defaults:
+		if default.company == company and default.default_warehouse:
+			return default.default_warehouse
+
+	settings_warehouse = frappe.get_single_value("Stock Settings", "default_warehouse")
+	if settings_warehouse:
+		warehouse_company = frappe.db.get_value("Warehouse", settings_warehouse, "company")
+		if warehouse_company == company:
+			return settings_warehouse
+
+	stores_warehouse = frappe.db.get_value("Warehouse", {"warehouse_name": _("Stores"), "company": company})
+
+	if stores_warehouse:
+		return stores_warehouse
+
+	frappe.throw(
+		_(
+			"No warehouse found for company {0}. Please set a Default Warehouse in Item Defaults or Stock Settings."
+		).format(frappe.bold(company))
+	)

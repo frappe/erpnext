@@ -376,7 +376,7 @@ def get_items(filters, additional_table_columns):
 
 
 def get_aii_accounts():
-	return dict(frappe.db.sql("select name, stock_received_but_not_billed from tabCompany"))
+	return dict(frappe.get_all("Company", fields=["name", "stock_received_but_not_billed"], as_list=True))
 
 
 def get_purchase_receipts_against_purchase_order(item_list):
@@ -384,16 +384,11 @@ def get_purchase_receipts_against_purchase_order(item_list):
 	po_item_rows = list(set(d.po_detail for d in item_list))
 
 	if po_item_rows:
-		purchase_receipts = frappe.db.sql(
-			"""
-			select parent, purchase_order_item
-			from `tabPurchase Receipt Item`
-			where docstatus=1 and purchase_order_item in (%s)
-			group by purchase_order_item, parent
-		"""
-			% (", ".join(["%s"] * len(po_item_rows))),
-			tuple(po_item_rows),
-			as_dict=1,
+		purchase_receipts = frappe.get_all(
+			"Purchase Receipt Item",
+			filters={"docstatus": 1, "purchase_order_item": ["in", po_item_rows]},
+			fields=["parent", "purchase_order_item"],
+			group_by="purchase_order_item, parent",
 		)
 
 		for pr in purchase_receipts:

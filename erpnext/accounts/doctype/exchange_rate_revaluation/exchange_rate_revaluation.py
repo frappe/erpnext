@@ -8,7 +8,7 @@ from frappe import _, qb
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import Criterion, Order
-from frappe.query_builder.functions import NullIf, Sum
+from frappe.query_builder.functions import Max, NullIf, Sum
 from frappe.utils import flt, get_link_to_form
 
 import erpnext
@@ -188,11 +188,17 @@ class ExchangeRateRevaluation(Document):
 				accounts = [x[0] for x in res]
 
 			if accounts:
-				having_clause = (qb.Field("balance") != qb.Field("balance_in_account_currency")) & (
-					(qb.Field("balance_in_account_currency") != 0) | (qb.Field("balance") != 0)
-				)
-
 				gle = qb.DocType("GL Entry")
+
+				# balance expressions reused in both SELECT and HAVING; postgres can't reference a
+				# SELECT alias inside HAVING, so the aggregate expression must be repeated there.
+				balance = Sum(gle.debit) - Sum(gle.credit)
+				balance_in_account_currency = Sum(gle.debit_in_account_currency) - Sum(
+					gle.credit_in_account_currency
+				)
+				having_clause = (balance != balance_in_account_currency) & (
+					(balance_in_account_currency != 0) | (balance != 0)
+				)
 
 				# conditions
 				conditions = []
@@ -209,17 +215,15 @@ class ExchangeRateRevaluation(Document):
 					qb.from_(gle)
 					.select(
 						gle.account,
-						gle.party_type,
-						gle.party,
-						gle.account_currency,
-						(Sum(gle.debit_in_account_currency) - Sum(gle.credit_in_account_currency)).as_(
-							"balance_in_account_currency"
-						),
-						(Sum(gle.debit) - Sum(gle.credit)).as_("balance"),
-						(Sum(gle.debit) - Sum(gle.credit) == 0)
-						^ (Sum(gle.debit_in_account_currency) - Sum(gle.credit_in_account_currency) == 0).as_(
-							"zero_balance"
-						),
+						# grouped by NullIf(party_type/party, ""); the bare columns + account_currency are
+						# constant per group -> Max() keeps the GROUP BY valid on postgres with the same value.
+						Max(gle.party_type).as_("party_type"),
+						Max(gle.party).as_("party"),
+						Max(gle.account_currency).as_("account_currency"),
+						balance_in_account_currency.as_("balance_in_account_currency"),
+						balance.as_("balance"),
+						# zero_balance is recomputed in Python below (after rounding), so the SQL value is
+						# unused -- dropped (it used MySQL's XOR operator, which postgres lacks).
 					)
 					.where(Criterion.all(conditions))
 					.groupby(gle.account, NullIf(gle.party_type, ""), NullIf(gle.party, ""))

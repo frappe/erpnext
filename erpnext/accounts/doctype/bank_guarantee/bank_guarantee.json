@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "autoname": "ACC-BG-.YYYY.-.#####",
  "creation": "2016-12-17 10:43:35.731631",
  "doctype": "DocType",
@@ -50,8 +51,7 @@
    "fieldname": "reference_doctype",
    "fieldtype": "Link",
    "label": "Reference Document Type",
-   "options": "DocType",
-   "read_only": 1
+   "options": "DocType"
   },
   {
    "fieldname": "reference_docname",
@@ -60,14 +60,14 @@
    "options": "reference_doctype"
   },
   {
-   "depends_on": "eval: doc.bg_type == \"Receiving\"",
+   "depends_on": "eval: doc.reference_doctype == \"Sales Order\"",
    "fieldname": "customer",
    "fieldtype": "Link",
    "label": "Customer",
    "options": "Customer"
   },
   {
-   "depends_on": "eval: doc.bg_type == \"Providing\"",
+   "depends_on": "eval: doc.reference_doctype == \"Purchase Order\"",
    "fieldname": "supplier",
    "fieldtype": "Link",
    "label": "Supplier",
@@ -218,10 +218,11 @@
  "grid_page_length": 50,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-29 11:52:33.550847",
+ "modified": "2026-05-25 18:12:10.768835",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Guarantee",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

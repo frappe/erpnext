@@ -3,7 +3,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import flt, getdate
 
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import adjust_incoming_rate_for_pr
+from erpnext.stock.doctype.purchase_receipt.services.billing_status import adjust_incoming_rate_for_pr
 
 
 def execute():

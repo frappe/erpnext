@@ -200,6 +200,21 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			});
 		}
 
+		if (this.frm.fields_dict["items"].grid.get_field("product_bundle")) {
+			// restrict the version picker to enabled, submitted Product Bundles of the row's item
+			this.frm.set_query("product_bundle", "items", function (doc, cdt, cdn) {
+				let row = locals[cdt][cdn];
+
+				return {
+					filters: {
+						new_item_code: row.item_code,
+						docstatus: 1,
+						disabled: 0,
+					},
+				};
+			});
+		}
+
 		if (
 			this.frm.docstatus < 2 &&
 			this.frm.fields_dict["payment_terms_template"] &&
@@ -389,11 +404,13 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			);
 		}
 
-		const inspection_type = ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"].includes(
-			this.frm.doc.doctype
-		)
-			? "Incoming"
-			: "Outgoing";
+		const incoming_doctypes = ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"];
+		const incoming_purposes = ["Manufacture", "Material Receipt"];
+		const inspection_type =
+			incoming_doctypes.includes(this.frm.doc.doctype) ||
+			(this.frm.doc.doctype === "Stock Entry" && incoming_purposes.includes(this.frm.doc.purpose))
+				? "Incoming"
+				: "Outgoing";
 
 		let quality_inspection_field = this.frm.get_docfield("items", "quality_inspection");
 		quality_inspection_field.get_route_options_for_new_doc = function (row) {
@@ -459,19 +476,22 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				reference_name: frm.doc.name,
 			},
 		});
+
+		if (!schedules?.length) {
+			this.make_payment_request();
+			return;
+		}
+
 		const value = await frappe.db.get_single_value(
 			"Accounts Settings",
 			"fetch_payment_schedule_in_payment_request"
 		);
 
-		if (!value || !schedules.length) {
+		if (!value) {
 			this.make_payment_request();
 			return;
 		}
-		if (!schedules || !schedules.length) {
-			frappe.msgprint(__("No pending payment schedules available."));
-			return;
-		}
+
 		schedules.forEach((schedule) => (schedule.__checked = 1));
 
 		const dialog = new frappe.ui.Dialog({
@@ -582,6 +602,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	refresh() {
 		erpnext.toggle_naming_series();
 		erpnext.hide_company(this.frm);
+		// Remember the currency the rendered document is denominated in, so that a
+		// real currency change can be told apart from a mere exchange rate refresh
+		// (e.g. triggered by a date change).
+		this._doc_currency = this.frm.doc.currency;
 		this.set_dynamic_labels();
 		this.setup_sms();
 		this.setup_quality_inspection();
@@ -806,7 +830,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							item_tax_template: item.item_tax_template,
 							child_doctype: item.doctype,
 							child_docname: item.name,
-							is_old_subcontracting_flow: me.frm.doc.is_old_subcontracting_flow,
 							use_serial_batch_fields: item.use_serial_batch_fields,
 							serial_and_batch_bundle: item.serial_and_batch_bundle,
 						},
@@ -834,26 +857,24 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 								},
 								async () => {
 									// for internal customer instead of pricing rule directly apply valuation rate on item
-									const fetch_valuation_rate_for_internal_transactions =
-										await frappe.db.get_single_value(
-											"Accounts Settings",
-											"fetch_valuation_rate_for_internal_transaction"
-										);
-									if (
-										(me.frm.doc.is_internal_customer ||
-											me.frm.doc.is_internal_supplier) &&
-										fetch_valuation_rate_for_internal_transactions
-									) {
-										me.get_incoming_rate(
-											item,
-											me.frm.posting_date,
-											me.frm.posting_time,
-											me.frm.doc.doctype,
-											me.frm.doc.company
-										);
-									} else {
-										me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
+									if (me.frm.doc.is_internal_customer || me.frm.doc.is_internal_supplier) {
+										const fetch_valuation_rate_for_internal_transactions =
+											await frappe.db.get_single_value(
+												"Accounts Settings",
+												"fetch_valuation_rate_for_internal_transaction"
+											);
+										if (fetch_valuation_rate_for_internal_transactions) {
+											me.get_incoming_rate(
+												item,
+												me.frm.posting_date,
+												me.frm.posting_time,
+												me.frm.doc.doctype,
+												me.frm.doc.company
+											);
+											return;
+										}
 									}
+									me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
 								},
 								() => {
 									if (me.frm.doc.is_internal_customer || me.frm.doc.is_internal_supplier) {
@@ -1292,7 +1313,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			["Purchase Order", "Purchase Receipt", "Purchase Invoice"].includes(this.frm.doctype) &&
 			!this.frm.doc.shipping_address
 		) {
-			let is_drop_ship = me.frm.doc.items.some((item) => item.delivered_by_supplier);
+			const is_drop_ship = me.frm.doc.items.some((item) => item.delivered_by_supplier);
 
 			if (!is_drop_ship) {
 				erpnext.utils.get_shipping_address(this.frm, function () {
@@ -1455,6 +1476,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		let me = this;
 		this.set_dynamic_labels();
 		let company_currency = this.get_company_currency();
+		// Currency the stored margins/actual charges are denominated in, captured
+		// before this trigger updates the tracker for the next one.
+		let previous_currency = this._doc_currency;
+		this._doc_currency = this.frm.doc.currency;
 		// Added `load_after_mapping` to determine if document is loading after mapping from another doc
 		if (
 			this.frm.doc.currency &&
@@ -1467,8 +1492,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				company_currency,
 				function (exchange_rate) {
 					if (exchange_rate != me.frm.doc.conversion_rate) {
-						me.set_margin_amount_based_on_currency(exchange_rate);
-						me.set_actual_charges_based_on_currency(exchange_rate);
+						// Margins and actual charges are amounts in the transaction
+						// currency; convert them only when the currency itself changed,
+						// not when just the exchange rate was refreshed (e.g. by a date
+						// change), otherwise the entered margin keeps shrinking.
+						if (previous_currency !== me.frm.doc.currency) {
+							me.set_margin_amount_based_on_currency(exchange_rate);
+							me.set_actual_charges_based_on_currency(exchange_rate);
+						}
 						me.frm.set_value("conversion_rate", exchange_rate);
 					}
 				}
@@ -2338,6 +2369,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			for (const [key, value] of Object.entries(child)) {
 				if (!["doctype", "name"].includes(key)) {
 					if (key === "price_list_rate") {
+						const doc = frappe.get_doc(child.doctype, child.name);
+						if (doc) doc.price_list_rate = value; // silent update so rate trigger uses correct value
 						frappe.model.set_value(child.doctype, child.name, "rate", value);
 					}
 
@@ -2954,11 +2987,13 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		];
 
 		const me = this;
-		const inspection_type = ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"].includes(
-			this.frm.doc.doctype
-		)
-			? "Incoming"
-			: "Outgoing";
+		const incoming_doctypes = ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"];
+		const incoming_purposes = ["Manufacture", "Material Receipt"];
+		const inspection_type =
+			incoming_doctypes.includes(this.frm.doc.doctype) ||
+			(this.frm.doc.doctype === "Stock Entry" && incoming_purposes.includes(this.frm.doc.purpose))
+				? "Incoming"
+				: "Outgoing";
 		const dialog = new frappe.ui.Dialog({
 			title: __("Select Items for Quality Inspection"),
 			size: "extra-large",
@@ -2999,10 +3034,28 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			method: "erpnext.controllers.stock_controller.check_item_quality_inspection",
 			args: {
 				doctype: this.frm.doc.doctype,
+				docstatus: this.frm.doc.docstatus,
 				items: this.frm.doc.items,
 			},
 			freeze: true,
 			callback: function (r) {
+				if (r.message.length == 0) {
+					let type = inspection_type === "Incoming" ? "Purchase" : "Delivery";
+					let fieldname =
+						inspection_type === "Incoming"
+							? "Inspection Required before Purchase"
+							: "Inspection Required before Delivery";
+
+					frappe.msgprint({
+						title: __("Quality Inspection Not Configured"),
+						message: __(`Enable <b>{0}</b> on the Item master to proceed with {1} inspection.`, [
+							fieldname,
+							type,
+						]),
+					});
+					return;
+				}
+
 				r.message.forEach((item) => {
 					if (me.has_inspection_required(item)) {
 						let dialog_items = dialog.fields_dict.items;
@@ -3046,11 +3099,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		let method = "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry";
 		if (this.frm.doc.__onload && this.frm.doc.__onload.make_payment_via_journal_entry) {
 			if (["Sales Invoice", "Purchase Invoice"].includes(this.frm.doc.doctype)) {
-				method =
-					"erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_against_invoice";
+				method = "erpnext.accounts.doctype.journal_entry.mapper.get_payment_entry_against_invoice";
 			} else {
-				method =
-					"erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_against_order";
+				method = "erpnext.accounts.doctype.journal_entry.mapper.get_payment_entry_against_order";
 			}
 		}
 

@@ -306,17 +306,6 @@
    "type": "Link"
   },
   {
-   "dependencies": "BOM",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "BOM Stock Report",
-   "link_count": 0,
-   "link_to": "BOM Stock Report",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
    "dependencies": "Work Order",
    "hidden": 0,
    "is_query_report": 1,
@@ -443,7 +432,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-02 15:07:36.968043",
+ "modified": "2026-05-05 11:00:26.131777",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",

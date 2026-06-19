@@ -31,9 +31,9 @@ class TestStockRepostingSettings(ERPNextTestSuite):
 		frappe.db.set_single_value("Stock Reposting Settings", "notify_reposting_error_to_role", "")
 
 		users = get_recipients()
-		self.assertFalse(user in users)
+		self.assertNotIn(user, users)
 
 		frappe.db.set_single_value("Stock Reposting Settings", "notify_reposting_error_to_role", role)
 
 		users = get_recipients()
-		self.assertTrue(user in users)
+		self.assertIn(user, users)

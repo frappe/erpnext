@@ -48,6 +48,8 @@ class ChequePrintTemplate(Document):
 
 @frappe.whitelist()
 def create_or_update_cheque_print_format(template_name: str):
+	frappe.only_for("System Manager")
+
 	if not frappe.db.exists("Print Format", template_name):
 		cheque_print = frappe.new_doc("Print Format")
 		cheque_print.update(

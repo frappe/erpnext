@@ -343,7 +343,6 @@ class TransactionBase(StatusUpdater):
 					"item_tax_template": item.get("item_tax_template"),
 					"child_doctype": item.get("doctype"),
 					"child_docname": item.get("name"),
-					"is_old_subcontracting_flow": self.get("is_old_subcontracting_flow"),
 				}
 			),
 			self,
@@ -430,7 +429,12 @@ class TransactionBase(StatusUpdater):
 
 				found = [x for x in self.taxes if x.account_head == tax_head]
 				if not found:
-					self.append("taxes", {"charge_type": "On Net Total", "account_head": tax_head, "rate": 0})
+					child_doctype = self.get_table_field_doctype("taxes")
+					child = frappe.new_doc(child_doctype, parent_doc=self, parentfield="taxes")
+					child.charge_type = "On Net Total"
+					child.account_head = tax_head
+					child.rate = 0
+					self.append("taxes", child)
 
 	def set_rate_based_on_price_list(self, item_obj: object, item_details: dict) -> None:
 		if item_obj.price_list_rate and item_obj.discount_percentage:

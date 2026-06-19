@@ -346,12 +346,15 @@ def get_account_columns(invoice_list, include_payments):
 	unrealized_profit_loss_account_columns = []
 
 	if invoice_list:
-		income_accounts = frappe.db.sql_list(
-			"""select distinct income_account
-			from `tabSales Invoice Item` where docstatus = 1 and parent in (%s)
-			order by income_account"""
-			% ", ".join(["%s"] * len(invoice_list)),
-			tuple(inv.name for inv in invoice_list),
+		# frappe drops ORDER BY for distinct queries on postgres (db_query), so sort in python to keep
+		# the generated account-column order deterministic and identical on both backends.
+		income_accounts = sorted(
+			frappe.get_all(
+				"Sales Invoice Item",
+				filters={"docstatus": 1, "parent": ["in", [inv.name for inv in invoice_list]]},
+				pluck="income_account",
+				distinct=True,
+			)
 		)
 
 		sales_taxes_query = get_taxes_query(invoice_list, "Sales Taxes and Charges", "Sales Invoice")
@@ -363,14 +366,18 @@ def get_account_columns(invoice_list, include_payments):
 			advance_tax_accounts = advance_taxes_query.run(as_dict=True, pluck="account_head")
 			tax_accounts = set(tax_accounts + advance_tax_accounts)
 
-		unrealized_profit_loss_accounts = frappe.db.sql_list(
-			"""SELECT distinct unrealized_profit_loss_account
-			from `tabSales Invoice` where docstatus = 1 and name in (%s)
-			and is_internal_customer = 1
-			and ifnull(unrealized_profit_loss_account, '') != ''
-			order by unrealized_profit_loss_account"""
-			% ", ".join(["%s"] * len(invoice_list)),
-			tuple(inv.name for inv in invoice_list),
+		unrealized_profit_loss_accounts = sorted(
+			frappe.get_all(
+				"Sales Invoice",
+				filters={
+					"docstatus": 1,
+					"name": ["in", [inv.name for inv in invoice_list]],
+					"is_internal_customer": 1,
+					"unrealized_profit_loss_account": ["is", "set"],
+				},
+				pluck="unrealized_profit_loss_account",
+				distinct=True,
+			)
 		)
 
 	for account in income_accounts:
@@ -494,12 +501,11 @@ def get_payments(filters):
 
 
 def get_invoice_income_map(invoice_list):
-	income_details = frappe.db.sql(
-		"""select parent, income_account, sum(base_net_amount) as amount
-		from `tabSales Invoice Item` where parent in (%s) group by parent, income_account"""
-		% ", ".join(["%s"] * len(invoice_list)),
-		tuple(inv.name for inv in invoice_list),
-		as_dict=1,
+	income_details = frappe.get_all(
+		"Sales Invoice Item",
+		filters={"parent": ["in", [inv.name for inv in invoice_list]]},
+		fields=["parent", "income_account", {"SUM": "base_net_amount", "as": "amount"}],
+		group_by="parent, income_account",
 	)
 
 	invoice_income_map = {}
@@ -511,13 +517,16 @@ def get_invoice_income_map(invoice_list):
 
 
 def get_internal_invoice_map(invoice_list):
-	unrealized_amount_details = frappe.db.sql(
-		"""SELECT name, unrealized_profit_loss_account,
-		base_net_total as amount from `tabSales Invoice` where name in (%s)
-		and is_internal_customer = 1 and company = represents_company"""
-		% ", ".join(["%s"] * len(invoice_list)),
-		tuple(inv.name for inv in invoice_list),
-		as_dict=1,
+	si = frappe.qb.DocType("Sales Invoice")
+	unrealized_amount_details = (
+		frappe.qb.from_(si)
+		.select(si.name, si.unrealized_profit_loss_account, si.base_net_total.as_("amount"))
+		.where(
+			si.name.isin([inv.name for inv in invoice_list])
+			& (si.is_internal_customer == 1)
+			& (si.company == si.represents_company)
+		)
+		.run(as_dict=1)
 	)
 
 	internal_invoice_map = {}
@@ -529,14 +538,15 @@ def get_internal_invoice_map(invoice_list):
 
 
 def get_invoice_tax_map(invoice_list, invoice_income_map, income_accounts, include_payments=False):
-	tax_details = frappe.db.sql(
-		"""select parent, account_head,
-		sum(base_tax_amount_after_discount_amount) as tax_amount
-		from `tabSales Taxes and Charges` where parent in (%s) and parenttype = 'Sales Invoice'
-		group by parent, account_head"""
-		% ", ".join(["%s"] * len(invoice_list)),
-		tuple(inv.name for inv in invoice_list),
-		as_dict=1,
+	tax_details = frappe.get_all(
+		"Sales Taxes and Charges",
+		filters={"parent": ["in", [inv.name for inv in invoice_list]], "parenttype": "Sales Invoice"},
+		fields=[
+			"parent",
+			"account_head",
+			{"SUM": "base_tax_amount_after_discount_amount", "as": "tax_amount"},
+		],
+		group_by="parent, account_head",
 	)
 
 	if include_payments:
@@ -557,13 +567,11 @@ def get_invoice_tax_map(invoice_list, invoice_income_map, income_accounts, inclu
 
 
 def get_invoice_so_dn_map(invoice_list):
-	si_items = frappe.db.sql(
-		"""select parent, sales_order, delivery_note, so_detail
-		from `tabSales Invoice Item` where parent in (%s)
-		and (sales_order != '' or delivery_note != '')"""
-		% ", ".join(["%s"] * len(invoice_list)),
-		tuple(inv.name for inv in invoice_list),
-		as_dict=1,
+	si_items = frappe.get_all(
+		"Sales Invoice Item",
+		filters={"parent": ["in", [inv.name for inv in invoice_list]]},
+		or_filters=[["sales_order", "!=", ""], ["delivery_note", "!=", ""]],
+		fields=["parent", "sales_order", "delivery_note", "so_detail"],
 	)
 
 	invoice_so_dn_map = {}
@@ -577,10 +585,11 @@ def get_invoice_so_dn_map(invoice_list):
 		if d.delivery_note:
 			delivery_note_list = [d.delivery_note]
 		elif d.sales_order:
-			delivery_note_list = frappe.db.sql_list(
-				"""select distinct parent from `tabDelivery Note Item`
-				where docstatus=1 and so_detail=%s""",
-				d.so_detail,
+			delivery_note_list = frappe.get_all(
+				"Delivery Note Item",
+				filters={"docstatus": 1, "so_detail": d.so_detail},
+				pluck="parent",
+				distinct=True,
 			)
 
 		if delivery_note_list:
@@ -592,13 +601,11 @@ def get_invoice_so_dn_map(invoice_list):
 
 
 def get_invoice_cc_wh_map(invoice_list):
-	si_items = frappe.db.sql(
-		"""select parent, cost_center, warehouse
-		from `tabSales Invoice Item` where parent in (%s)
-		and (cost_center != '' or warehouse != '')"""
-		% ", ".join(["%s"] * len(invoice_list)),
-		tuple(inv.name for inv in invoice_list),
-		as_dict=1,
+	si_items = frappe.get_all(
+		"Sales Invoice Item",
+		filters={"parent": ["in", [inv.name for inv in invoice_list]]},
+		or_filters=[["cost_center", "!=", ""], ["warehouse", "!=", ""]],
+		fields=["parent", "cost_center", "warehouse"],
 	)
 
 	invoice_cc_wh_map = {}
@@ -619,12 +626,11 @@ def get_invoice_cc_wh_map(invoice_list):
 def get_mode_of_payments(invoice_list):
 	mode_of_payments = {}
 	if invoice_list:
-		inv_mop = frappe.db.sql(
-			"""select parent, mode_of_payment
-			from `tabSales Invoice Payment` where parent in (%s) group by parent, mode_of_payment"""
-			% ", ".join(["%s"] * len(invoice_list)),
-			tuple(invoice_list),
-			as_dict=1,
+		inv_mop = frappe.get_all(
+			"Sales Invoice Payment",
+			filters={"parent": ["in", list(invoice_list)]},
+			fields=["parent", "mode_of_payment"],
+			group_by="parent, mode_of_payment",
 		)
 
 		for d in inv_mop:

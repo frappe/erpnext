@@ -9,11 +9,23 @@ from erpnext.manufacturing.doctype.workstation.workstation import (
 	NotInWorkingHoursError,
 	WorkstationHolidayError,
 	check_if_within_operating_hours,
+	update_job_card,
 )
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestWorkstation(ERPNextTestSuite):
+	def test_update_job_card_rejects_disallowed_method(self):
+		# The whitelisted update_job_card endpoint must only run an allowlisted set of Job Card
+		# methods. An arbitrary method name must be rejected (PermissionError) before the document
+		# is even loaded, so this needs no Job Card to exist.
+		self.assertRaises(
+			frappe.PermissionError,
+			update_job_card,
+			"NON-EXISTENT-JOB-CARD",
+			"delete",
+		)
+
 	def test_validate_timings(self):
 		check_if_within_operating_hours(
 			"_Test Workstation 1", "Operation 1", "2013-02-02 11:00:00", "2013-02-02 19:00:00"
@@ -97,6 +109,16 @@ class TestWorkstation(ERPNextTestSuite):
 		self.assertEqual(w1.hour_rate, 250)
 		self.assertEqual(bom_doc.operations[0].hour_rate, 250)
 		self.assertEqual(bom_doc.operations[1].hour_rate, 250)
+
+		# update_bom_operation() (run on w1.save()) must write the new rate directly onto the
+		# Routing's BOM Operation rows. This is the converted query's own effect (not the BOM
+		# update_cost above) and is what silently skipped on Postgres when parenttype was 'routing'.
+		routing_op_rate = frappe.db.get_value(
+			"BOM Operation",
+			{"parent": routing_doc.name, "parenttype": "Routing", "workstation": "_Test Workstation A"},
+			"hour_rate",
+		)
+		self.assertEqual(routing_op_rate, 250)
 
 
 def make_workstation(*args, **kwargs):

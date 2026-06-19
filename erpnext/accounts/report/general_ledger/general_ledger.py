@@ -35,7 +35,7 @@ def execute(filters=None):
 	if filters and filters.get("print_in_account_currency") and not filters.get("account"):
 		frappe.throw(_("Select an account to print in account currency"))
 
-	for acc in frappe.db.sql("""select name, is_group from tabAccount""", as_dict=1):
+	for acc in frappe.get_all("Account", fields=["name", "is_group"]):
 		account_details.setdefault(acc.name, acc)
 
 	if filters.get("party"):
@@ -283,7 +283,15 @@ def get_conditions(filters):
 	if filters.get("party"):
 		conditions.append("party in %(party)s")
 
-	if not (
+	if filters.get("disable_opening_balance_calculation"):
+		if not ignore_is_opening:
+			conditions.append("(posting_date >=%(from_date)s or is_opening = 'Yes')")
+		else:
+			conditions.append("posting_date >=%(from_date)s")
+
+	# opening balance calculation is done only if filtered on account/party
+	# so from_date filter is not applied
+	elif not (
 		filters.get("account")
 		or filters.get("party")
 		or filters.get("categorize_by") in ["Categorize by Account", "Categorize by Party"]
@@ -417,7 +425,13 @@ def get_data_with_opening_closing(filters, account_details, accounting_dimension
 	# Opening for filtered account
 	add_total_to_data(totals, "opening")
 
-	if filters.get("categorize_by") != "Categorize by Voucher (Consolidated)":
+	if not filters.get("categorize_by"):
+		all_entries = []
+		for acc_dict in gle_map.values():
+			all_entries.extend(acc_dict.entries)
+		data += all_entries
+
+	elif filters.get("categorize_by") != "Categorize by Voucher (Consolidated)":
 		set_opening_closing = (not filters.get("categorize_by") and not filters.get("voucher_no")) or (
 			filters.get("categorize_by") and filters.get("categorize_by") != "Categorize by Voucher"
 		)
@@ -483,7 +497,6 @@ def initialize_gle_map(gl_entries, filters):
 				totals=get_totals_dict(),
 				entries=[],
 			)
-
 	return gle_map
 
 
@@ -548,7 +561,11 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 		gle.remarks = _(gle.remarks)
 		gle.party_type = _(gle.party_type)
 
-		if gle.posting_date < from_date or (cstr(gle.is_opening) == "Yes" and not show_opening_entries):
+		if gle.posting_date < from_date or (
+			cstr(gle.is_opening) == "Yes"
+			and not show_opening_entries
+			and not filters.disable_opening_balance_calculation
+		):
 			if not group_by_voucher_consolidated:
 				update_value_in_dict(gle_map[group_by_value].totals, "opening", gle, True)
 				update_value_in_dict(gle_map[group_by_value].totals, "closing", gle, True)
@@ -633,10 +650,8 @@ def get_result_as_list(data, filters):
 
 def get_supplier_invoice_details():
 	inv_details = {}
-	for d in frappe.db.sql(
-		""" select name, bill_no from `tabPurchase Invoice`
-		where docstatus = 1 and bill_no is not null and bill_no != '' """,
-		as_dict=1,
+	for d in frappe.get_all(
+		"Purchase Invoice", filters={"docstatus": 1, "bill_no": ["is", "set"]}, fields=["name", "bill_no"]
 	):
 		inv_details[d.name] = d.bill_no
 

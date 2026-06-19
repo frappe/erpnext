@@ -108,10 +108,11 @@ def execute(filters=None):
 		if sle.serial_no:
 			update_available_serial_nos(available_serial_nos, sle)
 
-		if sle.actual_qty:
+		if sle.actual_qty < 0:
 			sle["in_out_rate"] = flt(sle.stock_value_difference / sle.actual_qty, precision)
+			sle["incoming_rate"] = 0
 
-		elif sle.voucher_type == "Stock Reconciliation":
+		elif sle.voucher_type == "Stock Reconciliation" and sle.actual_qty < 0:
 			sle["in_out_rate"] = sle.valuation_rate
 
 		if (
@@ -192,7 +193,7 @@ def get_segregated_bundle_entries(sle, bundle_details, batch_balance_dict, filte
 		new_sle.update(row)
 		new_sle.update(
 			{
-				"in_out_rate": flt(new_sle.stock_value_difference / row.qty) if row.qty else 0,
+				"in_out_rate": flt(new_sle.stock_value_difference / row.qty) if row.qty < 0 else 0,
 				"in_qty": row.qty if row.qty > 0 else 0,
 				"out_qty": row.qty if row.qty < 0 else 0,
 				"qty_after_transaction": qty_before_transaction + row.qty,
@@ -374,7 +375,7 @@ def get_columns(filters):
 				"convertible": "rate",
 			},
 			{
-				"label": _("Valuation Rate"),
+				"label": _("Outgoing Rate"),
 				"fieldname": "in_out_rate",
 				"fieldtype": filters.valuation_field_type,
 				"width": 140,

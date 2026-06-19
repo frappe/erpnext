@@ -25,15 +25,15 @@ erpnext.buying = {
 					};
 				});
 
-				const project_filters = {
+				const get_project_filters = () => ({
 					query: "erpnext.controllers.queries.get_project_name",
 					filters: {
-						company: doc.company,
+						company: this.frm.doc.company,
 					},
-				};
+				});
 
-				this.frm.set_query("project", (_) => project_filters);
-				this.frm.set_query("project", "items", (_, __, ___) => project_filters);
+				this.frm.set_query("project", get_project_filters);
+				this.frm.set_query("project", "items", get_project_filters);
 
 				if (
 					this.frm.doc.__islocal &&
@@ -92,11 +92,7 @@ erpnext.buying = {
 				this.frm.set_query("item_code", "items", function () {
 					if (me.frm.doc.is_subcontracted) {
 						var filters = { supplier: me.frm.doc.supplier };
-						if (me.frm.doc.is_old_subcontracting_flow) {
-							filters["is_sub_contracted_item"] = 1;
-						} else {
-							filters["is_stock_item"] = 0;
-						}
+						filters["is_stock_item"] = 0;
 
 						return {
 							query: "erpnext.controllers.queries.item_query",
@@ -611,6 +607,9 @@ erpnext.buying.get_items_from_product_bundle = function (frm) {
 				fieldname: "product_bundle",
 				options: "Product Bundle",
 				reqd: 1,
+				get_query: () => {
+					return { filters: { docstatus: 1, disabled: 0 } };
+				},
 			},
 			{
 				fieldtype: "Currency",
@@ -629,7 +628,7 @@ erpnext.buying.get_items_from_product_bundle = function (frm) {
 				method: "erpnext.stock.doctype.packed_item.packed_item.get_items_from_product_bundle",
 				args: {
 					row: {
-						item_code: args.product_bundle,
+						product_bundle: args.product_bundle,
 						quantity: args.quantity,
 						parenttype: frm.doc.doctype,
 						parent: frm.doc.name,

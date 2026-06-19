@@ -10,12 +10,14 @@ from frappe.utils import flt, today
 
 from erpnext.controllers.accounts_controller import InvalidQtyError
 from erpnext.stock.doctype.item.test_item import create_item
-from erpnext.stock.doctype.material_request.material_request import (
+from erpnext.stock.doctype.material_request.mapper import (
 	create_pick_list,
 	make_in_transit_stock_entry,
 	make_purchase_order,
 	make_stock_entry,
 	make_supplier_quotation,
+)
+from erpnext.stock.doctype.material_request.material_request import (
 	raise_work_orders,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry import make_stock_in_entry
@@ -915,7 +917,7 @@ class TestMaterialRequest(ERPNextTestSuite):
 		for company, _mr_list in comapnywise_mr_list.items():
 			emails = get_email_list(company)
 
-			self.assertTrue(comapnywise_users[company] in emails)
+			self.assertIn(comapnywise_users[company], emails)
 
 		for perm in permissions:
 			perm.delete()
@@ -980,7 +982,7 @@ class TestMaterialRequest(ERPNextTestSuite):
 		from frappe.utils import add_to_date, today
 
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
-		from erpnext.selling.doctype.sales_order.sales_order import make_material_request
+		from erpnext.selling.doctype.sales_order.mapper import make_material_request
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 		sub_item_a = "_Test Bundle ItemA"
@@ -1019,7 +1021,7 @@ class TestMaterialRequest(ERPNextTestSuite):
 		"""Test for pick list mapped doc qty from partially received Material Request Transfer"""
 		import json
 
-		from erpnext.stock.doctype.pick_list.pick_list import create_stock_entry
+		from erpnext.stock.doctype.pick_list.mapper import create_stock_entry
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 		new_item = create_item("_Test Pick List Item", is_stock_item=1)
@@ -1142,6 +1144,52 @@ class TestMaterialRequest(ERPNextTestSuite):
 		self.assertIsNone(se.to_warehouse)
 		se.save()
 		se.submit()
+
+	def test_mr_status_for_mixed_direct_and_transit_transfer(self):
+		material_request = make_material_request(
+			material_request_type="Material Transfer",
+			item_code="_Test Item Home Desktop 100",
+			qty=5,
+		)
+
+		in_transit_wh = get_in_transit_warehouse(material_request.company)
+
+		# Make stock available
+		self._insert_stock_entry(20.0, 20.0)
+
+		# Direct Transfer for 3 Qty
+		direct_transfer = make_stock_entry(material_request.name)
+		direct_transfer.items[0].update(
+			{
+				"qty": 3,
+				"transfer_qty": 3,
+				"s_warehouse": "_Test Warehouse 1 - _TC",
+			}
+		)
+		direct_transfer.save()
+		direct_transfer.submit()
+
+		# In Transit Transfer for remaining 2 Qty
+		transit_transfer = make_in_transit_stock_entry(material_request.name, in_transit_wh)
+		transit_transfer.items[0].update(
+			{
+				"qty": 2,
+				"s_warehouse": "_Test Warehouse 1 - _TC",
+			}
+		)
+		transit_transfer.save()
+		transit_transfer.submit()
+
+		# Complete End Transit
+		end_transit = make_stock_in_entry(transit_transfer.name)
+		end_transit.save()
+		end_transit.submit()
+
+		material_request.reload()
+
+		self.assertEqual(material_request.per_ordered, 100)
+		self.assertEqual(material_request.status, "Transferred")
+		self.assertEqual(material_request.transfer_status, "Completed")
 
 
 def get_in_transit_warehouse(company):

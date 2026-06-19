@@ -11,6 +11,7 @@
   "add_deduct_tax",
   "charge_type",
   "row_id",
+  "allocate_full_amount_to_stock_items",
   "included_in_print_rate",
   "included_in_paid_amount",
   "col_break1",
@@ -77,6 +78,14 @@
    "label": "Reference Row #",
    "oldfieldname": "row_id",
    "oldfieldtype": "Data"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval:doc.charge_type=='Actual' && ['Valuation', 'Valuation and Total'].includes(doc.category)",
+   "description": "If checked, the entire amount (e.g. Freight) is allocated to the valuation of stock & asset items only. If unchecked, the amount is distributed across all items and the portion belonging to non-stock items is not added to valuation.",
+   "fieldname": "allocate_full_amount_to_stock_items",
+   "fieldtype": "Check",
+   "label": "Allocate Full Amount to Stock Items"
   },
   {
    "default": "0",

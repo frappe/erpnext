@@ -1,0 +1,10 @@
+{
+    "disabledLabels": [
+        "conflicts"
+    ],
+    "context": {
+        "repos": [
+            "frappe/frappe"
+        ]
+    }
+}

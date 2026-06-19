@@ -1,0 +1,52 @@
+# Runner — maintain this file on each hotfix branch, not on develop.
+#
+# Fires when main.pot changes on this branch (i.e. after a POT update PR
+# merges), or when dispatched by the orchestrator on develop (weekly schedule).
+#
+# Uses github.ref_name so the file is identical across all hotfix branches
+# with no branch-specific edits required.
+
+name: Run hotfix translation sync
+
+on:
+  workflow_dispatch:
+
+# One run at a time per branch. cancel-in-progress: false to avoid leaving
+# an orphaned remote branch from a mid-flight git push + gh pr create.
+concurrency:
+  group: sync-hotfix-translations-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  sync-translations:
+    name: Sync translations from develop into ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      HOTFIX_BRANCH: ${{ github.ref_name }}
+      APP_NAME: ${{ github.event.repository.name }}
+
+    steps:
+      - name: Checkout ${{ env.HOTFIX_BRANCH }}
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.HOTFIX_BRANCH }}
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Run sync script
+        run: |
+          bash "${GITHUB_WORKSPACE}/.github/helper/sync_hotfix_translations.sh"
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          PR_REVIEWER: diptanilsaha

@@ -100,14 +100,14 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 			repost_doc.db_update_all()
 
 		logs = frappe.get_all("Repost Item Valuation", filters={"status": "Skipped"})
-		self.assertTrue(len(logs) > 10)
+		self.assertGreater(len(logs), 10)
 
 		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import RepostItemValuation
 
 		RepostItemValuation.clear_old_logs(days=1)
 
 		logs = frappe.get_all("Repost Item Valuation", filters={"status": "Skipped"})
-		self.assertTrue(len(logs) == 0)
+		self.assertEqual(len(logs), 0)
 
 	def test_create_item_wise_repost_item_valuation_entries(self):
 		pr = make_purchase_receipt(
@@ -195,6 +195,7 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 	@ERPNextTestSuite.change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
 	def test_prevention_of_cancelled_transaction_riv(self):
 		frappe.flags.dont_execute_stock_reposts = True
+		self.addCleanup(frappe.flags.pop, "dont_execute_stock_reposts")
 
 		item = make_item()
 		warehouse = "_Test Warehouse - _TC"
@@ -379,13 +380,13 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 			get_multiple_items=True,
 		)
 
-		self.assertTrue(pr.docstatus == 1)
+		self.assertEqual(pr.docstatus, 1)
 		self.assertFalse(frappe.db.exists("Repost Item Valuation", {"voucher_no": pr.name}))
 
 		pr.load_from_db()
 
 		pr.cancel()
-		self.assertTrue(pr.docstatus == 2)
+		self.assertEqual(pr.docstatus, 2)
 		self.assertTrue(frappe.db.exists("Repost Item Valuation", {"voucher_no": pr.name}))
 
 	def test_repost_item_valuation_for_closing_stock_balance(self):
@@ -418,6 +419,62 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 
 		self.assertRaises(frappe.ValidationError, riv.save)
 		doc.cancel()
+
+	def test_recalculate_valuation_rate_for_purchase_receipt(self):
+		item = self.make_item().name
+
+		# receive item at rate 100
+		pr = make_purchase_receipt(item_code=item, qty=1, rate=100)
+		self.assertSLEs(pr, [{"incoming_rate": 100}])
+
+		# change the rate from 100 to 150
+		pr.load_from_db()
+		pr.items[0].db_set(
+			{
+				"base_net_amount": 150,
+				"net_rate": 150,
+			}
+		)
+
+		# repost with recalculate valuation rate
+		riv = frappe.get_doc(
+			doctype="Repost Item Valuation",
+			based_on="Transaction",
+			voucher_type=pr.doctype,
+			voucher_no=pr.name,
+			recalculate_valuation_rate=1,
+			posting_date=pr.posting_date,
+			posting_time=pr.posting_time,
+		)
+		riv.submit()
+
+		# incoming rate after reposting should be 150
+		self.assertSLEs(pr, [{"incoming_rate": 150}])
+
+	def test_recalculate_valuation_rate_for_stock_entry(self):
+		item = self.make_item().name
+
+		# receive item at rate 100
+		se = make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, rate=100)
+		self.assertSLEs(se, [{"incoming_rate": 100}])
+
+		# change the rate from 100 to 150
+		se.items[0].db_set("basic_rate", 150)
+
+		# repost with recalculate valuation rate
+		riv = frappe.get_doc(
+			doctype="Repost Item Valuation",
+			based_on="Transaction",
+			voucher_type=se.doctype,
+			voucher_no=se.name,
+			recalculate_valuation_rate=1,
+			posting_date=se.posting_date,
+			posting_time=se.posting_time,
+		)
+		riv.submit()
+
+		# incoming rate after reposting should be 150
+		self.assertSLEs(se, [{"incoming_rate": 150}])
 
 	def test_remove_attached_file(self):
 		item_code = make_item("_Test Remove Attached File Item", properties={"is_stock_item": 1})

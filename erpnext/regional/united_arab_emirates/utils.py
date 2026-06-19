@@ -140,7 +140,9 @@ def update_totals(vat_tax, base_vat_tax, doc):
 
 	doc.in_words = money_in_words(doc.grand_total, doc.currency)
 	doc.base_in_words = money_in_words(doc.base_grand_total, erpnext.get_company_currency(doc.company))
-	doc.set_payment_schedule()
+	from erpnext.accounts.services.payment_schedule import PaymentScheduleService
+
+	PaymentScheduleService(doc).set_payment_schedule()
 
 
 def make_regional_gl_entries(gl_entries, doc):
