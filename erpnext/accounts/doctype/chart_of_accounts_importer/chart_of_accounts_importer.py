@@ -75,7 +75,10 @@ def validate_company(company: str):
 
 @frappe.whitelist()
 def import_coa(file_name: str, company: str):
+	frappe.only_for("Accounts Manager")
+
 	# delete existing data for accounts
+	frappe.has_permission("Company", "write", company, throw=True)
 	unset_existing_data(company)
 
 	# create accounts
@@ -453,6 +456,7 @@ def unset_existing_data(company):
 	fieldnames = get_linked_fields("Account").get("Company", {}).get("fieldname", [])
 	linked = [{"fieldname": name} for name in fieldnames]
 	update_values = {d.get("fieldname"): "" for d in linked}
+
 	frappe.db.set_value("Company", company, update_values, update_values)
 
 	# remove accounts data from various doctypes
@@ -464,8 +468,7 @@ def unset_existing_data(company):
 		"Sales Taxes and Charges Template",
 		"Purchase Taxes and Charges Template",
 	]:
-		dt = frappe.qb.DocType(doctype)
-		frappe.qb.from_(dt).where(dt.company == company).delete().run()
+		frappe.get_query(doctype, delete=True, filters={"company": company}, ignore_permissions=False).run()
 
 
 def set_default_accounts(company):

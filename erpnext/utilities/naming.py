@@ -20,10 +20,12 @@ def set_by_naming_series(doctype, fieldname, naming_series, hide_name_field=True
 
 		# set values for mandatory
 		try:
-			frappe.db.sql(
-				"""update `tab{doctype}` set naming_series={s} where
-				ifnull(naming_series, '')=''""".format(doctype=doctype, s="%s"),
-				get_default_naming_series(doctype),
+			dt = frappe.qb.DocType(doctype)
+			(
+				frappe.qb.update(dt)
+				.set(dt.naming_series, get_default_naming_series(doctype))
+				.where(dt.naming_series.isnull() | (dt.naming_series == ""))
+				.run()
 			)
 		except NamingSeriesNotSetError:
 			pass
@@ -42,7 +44,10 @@ def set_by_naming_series(doctype, fieldname, naming_series, hide_name_field=True
 			make_property_setter(doctype, fieldname, "reqd", 1, "Check", validate_fields_for_doctype=False)
 
 			# set values for mandatory
-			frappe.db.sql(
-				f"""update `tab{doctype}` set `{fieldname}`=`name` where
-				ifnull({fieldname}, '')=''"""
+			dt = frappe.qb.DocType(doctype)
+			(
+				frappe.qb.update(dt)
+				.set(dt[fieldname], dt.name)
+				.where(dt[fieldname].isnull() | (dt[fieldname] == ""))
+				.run()
 			)

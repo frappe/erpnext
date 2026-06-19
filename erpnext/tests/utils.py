@@ -2544,7 +2544,7 @@ class BootStrapTestData:
 				"doctype": "Workstation",
 				"name": "_Test Workstation 1",
 				"workstation_name": "_Test Workstation 1",
-				"warehouse": "_Test warehouse - _TC",
+				"warehouse": "_Test Warehouse - _TC",
 				"hour_rate_labour": 25,
 				"hour_rate_electricity": 25,
 				"hour_rate_consumable": 25,

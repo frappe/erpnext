@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Max, Sum
 from frappe.utils import flt
 
 
@@ -49,27 +50,28 @@ def get_columns():
 
 
 def get_data():
-	sales_order_entry = frappe.db.sql(
-		"""
-		SELECT
+	so = frappe.qb.DocType("Sales Order")
+	so_item = frappe.qb.DocType("Sales Order Item")
+	sales_order_entry = (
+		frappe.qb.from_(so)
+		.inner_join(so_item)
+		.on(so.name == so_item.parent)
+		.select(
 			so_item.item_code,
-			so_item.item_name,
-			so_item.description,
+			# non-grouped columns are constant per grouped so.name / item_code -> Max() keeps the
+			# GROUP BY valid on postgres while returning the same value MySQL picked.
+			Max(so_item.item_name).as_("item_name"),
+			Max(so_item.description).as_("description"),
 			so.name,
-			so.transaction_date,
-			so.customer,
-			so.territory,
-			sum(so_item.qty) as total_qty,
-			so.company
-		FROM `tabSales Order` so, `tabSales Order Item` so_item
-		WHERE
-			so.docstatus = 1
-			and so.name = so_item.parent
-			and so.status not in  ('Closed','Completed','Cancelled')
-		GROUP BY
-			so.name,so_item.item_code
-		""",
-		as_dict=1,
+			Max(so.transaction_date).as_("transaction_date"),
+			Max(so.customer).as_("customer"),
+			Max(so.territory).as_("territory"),
+			Sum(so_item.qty).as_("total_qty"),
+			Max(so.company).as_("company"),
+		)
+		.where((so.docstatus == 1) & so.status.notin(["Closed", "Completed", "Cancelled"]))
+		.groupby(so.name, so_item.item_code)
+		.run(as_dict=1)
 	)
 
 	sales_orders = [row.name for row in sales_order_entry]

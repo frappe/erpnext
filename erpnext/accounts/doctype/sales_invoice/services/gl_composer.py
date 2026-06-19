@@ -93,54 +93,7 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 		if enable_discount_accounting:
 			for item in doc.get("items"):
 				if item.get("discount_amount") and item.get("discount_account"):
-					discount_amount = item.discount_amount * item.qty
-					income_account = (
-						item.income_account
-						if (not item.enable_deferred_revenue or doc.is_return)
-						else item.deferred_revenue_account
-					)
-
-					account_currency = get_account_currency(item.discount_account)
-					gl_entries.append(
-						doc.get_gl_dict(
-							{
-								"account": item.discount_account,
-								"against": doc.customer,
-								"debit": flt(
-									discount_amount * doc.get("conversion_rate"),
-									item.precision("discount_amount"),
-								),
-								"debit_in_transaction_currency": flt(
-									discount_amount, item.precision("discount_amount")
-								),
-								"cost_center": item.cost_center,
-								"project": item.project,
-							},
-							account_currency,
-							item=item,
-						)
-					)
-
-					account_currency = get_account_currency(income_account)
-					gl_entries.append(
-						doc.get_gl_dict(
-							{
-								"account": income_account,
-								"against": doc.customer,
-								"credit": flt(
-									discount_amount * doc.get("conversion_rate"),
-									item.precision("discount_amount"),
-								),
-								"credit_in_transaction_currency": flt(
-									discount_amount, item.precision("discount_amount")
-								),
-								"cost_center": item.cost_center,
-								"project": item.project or doc.project,
-							},
-							account_currency,
-							item=item,
-						)
-					)
+					self._append_item_discount_gl_entries(item, gl_entries)
 
 		if (
 			(enable_discount_accounting or doc.get("is_cash_or_non_trade_discount"))
@@ -159,81 +112,143 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 				)
 			)
 
+	def _append_item_discount_gl_entries(self, item, gl_entries) -> None:
+		doc = self.doc
+		discount_amount = item.discount_amount * item.qty
+		income_account = (
+			item.income_account
+			if (not item.enable_deferred_revenue or doc.is_return)
+			else item.deferred_revenue_account
+		)
+
+		account_currency = get_account_currency(item.discount_account)
+		gl_entries.append(
+			doc.get_gl_dict(
+				{
+					"account": item.discount_account,
+					"against": doc.customer,
+					"debit": flt(
+						discount_amount * doc.get("conversion_rate"),
+						item.precision("discount_amount"),
+					),
+					"debit_in_transaction_currency": flt(discount_amount, item.precision("discount_amount")),
+					"cost_center": item.cost_center,
+					"project": item.project,
+				},
+				account_currency,
+				item=item,
+			)
+		)
+
+		account_currency = get_account_currency(income_account)
+		gl_entries.append(
+			doc.get_gl_dict(
+				{
+					"account": income_account,
+					"against": doc.customer,
+					"credit": flt(
+						discount_amount * doc.get("conversion_rate"),
+						item.precision("discount_amount"),
+					),
+					"credit_in_transaction_currency": flt(discount_amount, item.precision("discount_amount")),
+					"cost_center": item.cost_center,
+					"project": item.project or doc.project,
+				},
+				account_currency,
+				item=item,
+			)
+		)
+
 	def stock_delivered_but_not_billed_gl_entries(self, gl_entries):
 		doc = self.doc
 		if doc.update_stock or not cint(erpnext.is_perpetual_inventory_enabled(doc.company)):
 			return
 
 		for item in doc.get("items"):
-			if not item.delivery_note and not item.dn_detail:
-				continue
+			booking = self._get_sdbnb_booking_for_item(item)
+			if booking:
+				self._append_sdbnb_gl_entries(item, booking, gl_entries)
 
-			if not frappe.get_cached_value("Item", item.item_code, "is_stock_item"):
-				continue
+	def _get_sdbnb_booking_for_item(self, item) -> dict | None:
+		"""SDBNB account and valuation to reverse for a billed-from-delivery-note item, if any."""
+		if not item.delivery_note and not item.dn_detail:
+			return None
 
-			dn_expense_account = frappe.get_cached_value(
-				"Delivery Note Item", item.dn_detail, "expense_account"
-			)
-			if (
-				not dn_expense_account
-				or frappe.get_cached_value("Account", dn_expense_account, "account_type")
-				!= "Stock Delivered But Not Billed"
-				or not item.expense_account
-				or dn_expense_account == item.expense_account
-			):
-				continue
+		if not frappe.get_cached_value("Item", item.item_code, "is_stock_item"):
+			return None
 
-			delivery_note = item.delivery_note or frappe.get_cached_value(
-				"Delivery Note Item", item.dn_detail, "parent"
-			)
-			if not delivery_note:
-				continue
+		dn_expense_account = frappe.get_cached_value("Delivery Note Item", item.dn_detail, "expense_account")
+		if not self._is_sdbnb_reversal(dn_expense_account, item):
+			return None
 
-			item_g = frappe.get_cached_value(
-				"Stock Ledger Entry",
+		delivery_note = item.delivery_note or frappe.get_cached_value(
+			"Delivery Note Item", item.dn_detail, "parent"
+		)
+		if not delivery_note:
+			return None
+
+		item_g = frappe.get_cached_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_no": delivery_note,
+				"voucher_detail_no": item.dn_detail,
+				"item_code": item.item_code,
+				"is_cancelled": 0,
+			},
+			["stock_value_difference", "actual_qty"],
+			as_dict=True,
+		)
+		if not item_g or not flt(item_g.actual_qty):
+			return None
+
+		valuation_rate = flt(item_g.stock_value_difference) / flt(item_g.actual_qty)
+		return {
+			"dn_expense_account": dn_expense_account,
+			"valuation_amount": valuation_rate * item.stock_qty,
+		}
+
+	def _is_sdbnb_reversal(self, dn_expense_account, item) -> bool:
+		"""True when the DN booked to an SDBNB account distinct from the item's expense account."""
+		return bool(
+			dn_expense_account
+			and frappe.get_cached_value("Account", dn_expense_account, "account_type")
+			== "Stock Delivered But Not Billed"
+			and item.expense_account
+			and dn_expense_account != item.expense_account
+		)
+
+	def _append_sdbnb_gl_entries(self, item, booking, gl_entries) -> None:
+		dn_expense_account = booking["dn_expense_account"]
+		valuation_amount = booking["valuation_amount"]
+		dn_account_currency = get_account_currency(dn_expense_account)
+		item_account_currency = get_account_currency(item.expense_account)
+
+		gl_entries.append(
+			self.get_gl_dict(
 				{
-					"voucher_no": delivery_note,
-					"voucher_detail_no": item.dn_detail,
-					"item_code": item.item_code,
-					"is_cancelled": 0,
+					"account": dn_expense_account,
+					"against": item.expense_account,
+					"credit": flt(valuation_amount),
+					"credit_in_account_currency": flt(valuation_amount),
+					"cost_center": item.cost_center,
 				},
-				["stock_value_difference", "actual_qty"],
-				as_dict=True,
+				dn_account_currency,
+				item=item,
 			)
-
-			if not item_g or not flt(item_g.actual_qty):
-				continue
-			valuation_rate = flt(item_g.stock_value_difference) / flt(item_g.actual_qty)
-			valuation_amount = valuation_rate * item.stock_qty
-			dn_account_currency = get_account_currency(dn_expense_account)
-			item_account_currency = get_account_currency(item.expense_account)
-
-			gl_entries.append(
-				self.get_gl_dict(
-					{
-						"account": dn_expense_account,
-						"against": item.expense_account,
-						"credit": flt(valuation_amount),
-						"credit_in_account_currency": flt(valuation_amount),
-						"cost_center": item.cost_center,
-					},
-					dn_account_currency,
-					item=item,
-				)
+		)
+		gl_entries.append(
+			self.get_gl_dict(
+				{
+					"account": item.expense_account,
+					"against": dn_expense_account,
+					"debit": flt(valuation_amount),
+					"debit_in_account_currency": flt(valuation_amount),
+					"cost_center": item.cost_center,
+				},
+				item_account_currency,
+				item=item,
 			)
-			gl_entries.append(
-				self.get_gl_dict(
-					{
-						"account": item.expense_account,
-						"against": dn_expense_account,
-						"debit": flt(valuation_amount),
-						"debit_in_account_currency": flt(valuation_amount),
-						"cost_center": item.cost_center,
-					},
-					item_account_currency,
-					item=item,
-				)
-			)
+		)
 
 	def make_customer_gl_entry(self, gl_entries):
 		doc = self.doc
@@ -250,10 +265,6 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 		)
 
 		if grand_total and not doc.is_internal_transfer():
-			against_voucher = doc.name
-			if doc.is_return and doc.return_against and not doc.update_outstanding_for_self:
-				against_voucher = doc.return_against
-
 			# Did not use base_grand_total to book rounding loss gle
 			gl_entries.append(
 				self.get_gl_dict(
@@ -264,11 +275,11 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 						"due_date": doc.due_date,
 						"against": doc.against_income_account,
 						"debit": base_grand_total,
-						"debit_in_account_currency": base_grand_total
-						if doc.party_account_currency == doc.company_currency
-						else grand_total,
+						"debit_in_account_currency": self._get_amount_in_account_currency(
+							doc.party_account_currency, base_grand_total, grand_total
+						),
 						"debit_in_transaction_currency": grand_total,
-						"against_voucher": against_voucher,
+						"against_voucher": self._resolve_against_voucher(),
 						"against_voucher_type": doc.doctype,
 						"cost_center": doc.cost_center,
 						"project": doc.project,
@@ -296,10 +307,10 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 							"account": tax.account_head,
 							"against": doc.customer,
 							"credit": flt(base_amount, tax.precision("tax_amount_after_discount_amount")),
-							"credit_in_account_currency": (
-								flt(base_amount, tax.precision("base_tax_amount_after_discount_amount"))
-								if account_currency == doc.company_currency
-								else flt(amount, tax.precision("tax_amount_after_discount_amount"))
+							"credit_in_account_currency": self._get_amount_in_account_currency(
+								account_currency,
+								flt(base_amount, tax.precision("base_tax_amount_after_discount_amount")),
+								flt(amount, tax.precision("tax_amount_after_discount_amount")),
 							),
 							"credit_in_transaction_currency": flt(
 								amount, tax.precision("tax_amount_after_discount_amount")
@@ -341,52 +352,56 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 		)
 
 		for item in doc.get("items"):
-			if (
+			if not (
 				flt(item.base_net_amount, item.precision("base_net_amount"))
 				or item.is_fixed_asset
 				or enable_discount_accounting
 			):
-				# Do not book income for transfer within same company
-				if doc.is_internal_transfer():
-					continue
+				continue
 
-				if item.is_fixed_asset and item.asset:
-					self.get_gl_entries_for_fixed_asset(item, gl_entries)
-				else:
-					income_account = (
-						item.income_account
-						if (not item.enable_deferred_revenue or doc.is_return)
-						else item.deferred_revenue_account
-					)
+			# Do not book income for transfer within same company
+			if doc.is_internal_transfer():
+				continue
 
-					amount, base_amount = tax_service.get_amount_and_base_amount(
-						item, enable_discount_accounting
-					)
-
-					account_currency = get_account_currency(income_account)
-					gl_entries.append(
-						self.get_gl_dict(
-							{
-								"account": income_account,
-								"against": doc.customer,
-								"credit": flt(base_amount, item.precision("base_net_amount")),
-								"credit_in_account_currency": (
-									flt(base_amount, item.precision("base_net_amount"))
-									if account_currency == doc.company_currency
-									else flt(amount, item.precision("net_amount"))
-								),
-								"credit_in_transaction_currency": flt(amount, item.precision("net_amount")),
-								"cost_center": item.cost_center,
-								"project": item.project or doc.project,
-							},
-							account_currency,
-							item=item,
-						)
-					)
+			if item.is_fixed_asset and item.asset:
+				self.get_gl_entries_for_fixed_asset(item, gl_entries)
+			else:
+				self._append_item_income_gl_entry(item, gl_entries, tax_service, enable_discount_accounting)
 
 		# expense account gl entries
 		if cint(doc.update_stock) and erpnext.is_perpetual_inventory_enabled(doc.company):
 			gl_entries += super(SalesInvoice, doc).get_gl_entries()
+
+	def _append_item_income_gl_entry(self, item, gl_entries, tax_service, enable_discount_accounting) -> None:
+		doc = self.doc
+		income_account = (
+			item.income_account
+			if (not item.enable_deferred_revenue or doc.is_return)
+			else item.deferred_revenue_account
+		)
+
+		amount, base_amount = tax_service.get_amount_and_base_amount(item, enable_discount_accounting)
+
+		account_currency = get_account_currency(income_account)
+		gl_entries.append(
+			self.get_gl_dict(
+				{
+					"account": income_account,
+					"against": doc.customer,
+					"credit": flt(base_amount, item.precision("base_net_amount")),
+					"credit_in_account_currency": self._get_amount_in_account_currency(
+						account_currency,
+						flt(base_amount, item.precision("base_net_amount")),
+						flt(amount, item.precision("net_amount")),
+					),
+					"credit_in_transaction_currency": flt(amount, item.precision("net_amount")),
+					"cost_center": item.cost_center,
+					"project": item.project or doc.project,
+				},
+				account_currency,
+				item=item,
+			)
+		)
 
 	def get_gl_entries_for_fixed_asset(self, item, gl_entries):
 		doc = self.doc
@@ -461,10 +476,6 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 				if skip_change_gl_entries and payment_mode.account == doc.account_for_change_amount:
 					payment_mode.base_amount -= flt(doc.change_amount)
 
-				against_voucher = doc.name
-				if doc.is_return and doc.return_against and not doc.update_outstanding_for_self:
-					against_voucher = doc.return_against
-
 				if payment_mode.base_amount:
 					# POS, make payment entries
 					gl_entries.append(
@@ -475,11 +486,11 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 								"party": doc.customer,
 								"against": payment_mode.account,
 								"credit": payment_mode.base_amount,
-								"credit_in_account_currency": payment_mode.base_amount
-								if doc.party_account_currency == doc.company_currency
-								else payment_mode.amount,
+								"credit_in_account_currency": self._get_amount_in_account_currency(
+									doc.party_account_currency, payment_mode.base_amount, payment_mode.amount
+								),
 								"credit_in_transaction_currency": payment_mode.amount,
-								"against_voucher": against_voucher,
+								"against_voucher": self._resolve_against_voucher(),
 								"against_voucher_type": doc.doctype,
 								"cost_center": doc.cost_center,
 							},
@@ -495,9 +506,11 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 								"account": payment_mode.account,
 								"against": doc.customer,
 								"debit": payment_mode.base_amount,
-								"debit_in_account_currency": payment_mode.base_amount
-								if payment_mode_account_currency == doc.company_currency
-								else payment_mode.amount,
+								"debit_in_account_currency": self._get_amount_in_account_currency(
+									payment_mode_account_currency,
+									payment_mode.base_amount,
+									payment_mode.amount,
+								),
 								"debit_in_transaction_currency": payment_mode.amount,
 								"cost_center": doc.cost_center,
 							},
@@ -525,9 +538,9 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 					"party": doc.customer,
 					"against": doc.account_for_change_amount,
 					"debit": flt(doc.base_change_amount),
-					"debit_in_account_currency": flt(doc.base_change_amount)
-					if doc.party_account_currency == doc.company_currency
-					else flt(doc.change_amount),
+					"debit_in_account_currency": self._get_amount_in_account_currency(
+						doc.party_account_currency, flt(doc.base_change_amount), flt(doc.change_amount)
+					),
 					"debit_in_transaction_currency": flt(doc.change_amount),
 					"against_voucher": doc.return_against
 					if cint(doc.is_return) and doc.return_against
@@ -570,10 +583,10 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 						"party": doc.customer,
 						"against": doc.write_off_account,
 						"credit": flt(doc.base_write_off_amount, doc.precision("base_write_off_amount")),
-						"credit_in_account_currency": (
-							flt(doc.base_write_off_amount, doc.precision("base_write_off_amount"))
-							if doc.party_account_currency == doc.company_currency
-							else flt(doc.write_off_amount, doc.precision("write_off_amount"))
+						"credit_in_account_currency": self._get_amount_in_account_currency(
+							doc.party_account_currency,
+							flt(doc.base_write_off_amount, doc.precision("base_write_off_amount")),
+							flt(doc.write_off_amount, doc.precision("write_off_amount")),
 						),
 						"credit_in_transaction_currency": flt(
 							doc.write_off_amount, doc.precision("write_off_amount")
@@ -593,10 +606,10 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 						"account": doc.write_off_account,
 						"against": doc.customer,
 						"debit": flt(doc.base_write_off_amount, doc.precision("base_write_off_amount")),
-						"debit_in_account_currency": (
-							flt(doc.base_write_off_amount, doc.precision("base_write_off_amount"))
-							if write_off_account_currency == doc.company_currency
-							else flt(doc.write_off_amount, doc.precision("write_off_amount"))
+						"debit_in_account_currency": self._get_amount_in_account_currency(
+							write_off_account_currency,
+							flt(doc.base_write_off_amount, doc.precision("base_write_off_amount")),
+							flt(doc.write_off_amount, doc.precision("write_off_amount")),
 						),
 						"debit_in_transaction_currency": flt(
 							doc.write_off_amount, doc.precision("write_off_amount")
@@ -659,3 +672,14 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 					item=doc,
 				)
 			)
+
+	def _get_amount_in_account_currency(self, account_currency, base_amount, transaction_amount):
+		"""Base amount when the account is in company currency, else the transaction amount."""
+		return base_amount if account_currency == self.doc.company_currency else transaction_amount
+
+	def _resolve_against_voucher(self) -> str:
+		"""Settle against the original invoice for returns not kept on their own outstanding."""
+		doc = self.doc
+		if doc.is_return and doc.return_against and not doc.update_outstanding_for_self:
+			return doc.return_against
+		return doc.name

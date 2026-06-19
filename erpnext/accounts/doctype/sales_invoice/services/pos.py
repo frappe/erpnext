@@ -13,106 +13,140 @@ class PartialPaymentValidationError(frappe.ValidationError):
 
 
 class POSService:
-	def __init__(self, doc):
+	def __init__(self, doc) -> None:
 		self.doc = doc
 
-	def set_pos_fields(self, for_validate: bool = False) -> frappe.Document | None:
-		"""Populate POS-profile fields on the invoice; return the profile or None."""
+	def set_pos_fields(self, for_validate: bool = False) -> frappe.Document | dict | None:
+		"""Populate POS-profile fields on the invoice; return the profile, {} or None."""
 		doc = self.doc
 		if cint(doc.is_pos) != 1:
 			return None
 
+		self._set_default_change_amount_account()
+
+		if not self._ensure_pos_profile():
+			return None
+
+		pos = frappe.get_doc("POS Profile", doc.pos_profile) if doc.pos_profile else {}
+		if pos:
+			self._apply_pos_profile(pos, for_validate)
+
+		return pos
+
+	def _set_default_change_amount_account(self) -> None:
+		doc = self.doc
 		if not doc.account_for_change_amount:
 			doc.account_for_change_amount = frappe.get_cached_value(
 				"Company", doc.company, "default_cash_account"
 			)
 
-		from erpnext.stock.get_item_details import (
-			ItemDetailsCtx,
-			get_pos_profile,
-			get_pos_profile_item_details_,
-		)
+	def _ensure_pos_profile(self) -> bool:
+		"""Auto-pick a POS Profile for the company; return False if none could be found."""
+		doc = self.doc
+		if doc.pos_profile or doc.flags.ignore_pos_profile:
+			return True
 
-		if not doc.pos_profile and not doc.flags.ignore_pos_profile:
-			pos_profile = get_pos_profile(doc.company) or {}
-			if not pos_profile:
-				return None
-			doc.pos_profile = pos_profile.get("name")
+		from erpnext.stock.get_item_details import get_pos_profile
 
-		pos = {}
-		if doc.pos_profile:
-			pos = frappe.get_doc("POS Profile", doc.pos_profile)
+		pos_profile = get_pos_profile(doc.company) or {}
+		if not pos_profile:
+			return False
 
-		if pos:
-			if not for_validate:
-				update_multi_mode_option(doc, pos)
-				doc.tax_category = pos.get("tax_category")
+		doc.pos_profile = pos_profile.get("name")
+		return True
 
-			if not for_validate and not doc.customer:
-				doc.customer = pos.customer
+	def _apply_pos_profile(self, pos, for_validate: bool) -> None:
+		doc = self.doc
+		if not for_validate:
+			self._apply_editable_pos_defaults(pos)
 
-			if not for_validate:
-				doc.ignore_pricing_rule = pos.ignore_pricing_rule
+		if pos.get("account_for_change_amount"):
+			doc.account_for_change_amount = pos.get("account_for_change_amount")
 
-			if pos.get("account_for_change_amount"):
-				doc.account_for_change_amount = pos.get("account_for_change_amount")
+		self._copy_pos_profile_fields(pos, for_validate)
 
-			for fieldname in (
-				"currency",
-				"letter_head",
-				"tc_name",
-				"company",
-				"select_print_heading",
-				"write_off_account",
-				"taxes_and_charges",
-				"write_off_cost_center",
-				"apply_discount_on",
-				"cost_center",
-			):
-				if (not for_validate) or (for_validate and not doc.get(fieldname)):
-					doc.set(fieldname, pos.get(fieldname))
+		if pos.get("company_address"):
+			doc.company_address = pos.get("company_address")
 
-			if pos.get("company_address"):
-				doc.company_address = pos.get("company_address")
+		self._set_selling_price_list(pos)
 
-			if doc.customer:
-				customer_price_list, customer_group = frappe.get_value(
-					"Customer", doc.customer, ["default_price_list", "customer_group"]
-				)
-				customer_group_price_list = frappe.get_value(
-					"Customer Group", customer_group, "default_price_list"
-				)
-				selling_price_list = (
-					customer_price_list or customer_group_price_list or pos.get("selling_price_list")
-				)
-			else:
-				selling_price_list = pos.get("selling_price_list")
+		if not for_validate:
+			self._set_update_stock_from_profile(pos)
 
-			if selling_price_list:
-				doc.set("selling_price_list", selling_price_list)
+		self._apply_pos_item_defaults(pos, for_validate)
+		self._set_terms_and_taxes(pos)
 
-			if not for_validate:
-				dn_flag = any(d.get("dn_detail") for d in doc.get("items"))
-				doc.update_stock = 0 if dn_flag else cint(pos.get("update_stock"))
+	def _apply_editable_pos_defaults(self, pos) -> None:
+		"""Profile defaults the user may override; only applied outside validation."""
+		doc = self.doc
+		update_multi_mode_option(doc, pos)
+		doc.tax_category = pos.get("tax_category")
+		if not doc.customer:
+			doc.customer = pos.customer
+		doc.ignore_pricing_rule = pos.ignore_pricing_rule
 
-			for item in doc.get("items"):
-				if item.get("item_code"):
-					profile_details = get_pos_profile_item_details_(
-						ItemDetailsCtx(item.as_dict()), pos, pos, update_data=True
-					)
-					for fname, val in profile_details.items():
-						if (not for_validate) or (for_validate and not item.get(fname)):
-							item.set(fname, val)
+	def _copy_pos_profile_fields(self, pos, for_validate: bool) -> None:
+		doc = self.doc
+		for fieldname in (
+			"currency",
+			"letter_head",
+			"tc_name",
+			"company",
+			"select_print_heading",
+			"write_off_account",
+			"taxes_and_charges",
+			"write_off_cost_center",
+			"apply_discount_on",
+			"cost_center",
+		):
+			if (not for_validate) or (for_validate and not doc.get(fieldname)):
+				doc.set(fieldname, pos.get(fieldname))
 
-			if doc.tc_name and not doc.terms:
-				doc.terms = frappe.db.get_value("Terms and Conditions", doc.tc_name, "terms")
+	def _set_selling_price_list(self, pos) -> None:
+		doc = self.doc
+		if doc.customer:
+			customer_price_list, customer_group = frappe.get_value(
+				"Customer", doc.customer, ["default_price_list", "customer_group"]
+			)
+			customer_group_price_list = frappe.get_value(
+				"Customer Group", customer_group, "default_price_list"
+			)
+			selling_price_list = (
+				customer_price_list or customer_group_price_list or pos.get("selling_price_list")
+			)
+		else:
+			selling_price_list = pos.get("selling_price_list")
 
-			if doc.taxes_and_charges and not len(doc.get("taxes")):
-				from erpnext.accounts.services.taxes import TaxService
+		if selling_price_list:
+			doc.set("selling_price_list", selling_price_list)
 
-				TaxService(doc).set_taxes()
+	def _set_update_stock_from_profile(self, pos) -> None:
+		doc = self.doc
+		dn_flag = any(d.get("dn_detail") for d in doc.get("items"))
+		doc.update_stock = 0 if dn_flag else cint(pos.get("update_stock"))
 
-		return pos
+	def _apply_pos_item_defaults(self, pos, for_validate: bool) -> None:
+		from erpnext.stock.get_item_details import ItemDetailsCtx, get_pos_profile_item_details_
+
+		for item in self.doc.get("items"):
+			if not item.get("item_code"):
+				continue
+			profile_details = get_pos_profile_item_details_(
+				ItemDetailsCtx(item.as_dict()), pos, pos, update_data=True
+			)
+			for fname, val in profile_details.items():
+				if (not for_validate) or (for_validate and not item.get(fname)):
+					item.set(fname, val)
+
+	def _set_terms_and_taxes(self, pos) -> None:
+		doc = self.doc
+		if doc.tc_name and not doc.terms:
+			doc.terms = frappe.db.get_value("Terms and Conditions", doc.tc_name, "terms")
+
+		if doc.taxes_and_charges and not len(doc.get("taxes")):
+			from erpnext.accounts.services.taxes import TaxService
+
+			TaxService(doc).set_taxes()
 
 	def update_paid_amount(self) -> None:
 		doc = self.doc
@@ -144,6 +178,7 @@ class POSService:
 			doc.paid_amount = 0
 
 	def validate_pos_return(self) -> None:
+		"""Ensure POS return payments are not less than the (negative) invoice total."""
 		doc = self.doc
 		if doc.is_consolidated:
 			return
@@ -160,6 +195,7 @@ class POSService:
 			frappe.throw(_("At least one mode of payment is required for POS invoice."))
 
 	def validate_pos(self) -> None:
+		"""On a POS return, paid amount plus write-off cannot exceed the grand total."""
 		doc = self.doc
 		if doc.is_return:
 			invoice_total = doc.rounded_total or doc.grand_total
@@ -180,6 +216,7 @@ class POSService:
 		self.validate_pos_opening_entry()
 
 	def validate_full_payment(self) -> None:
+		"""Block partial payment on a submitted POS invoice unless the profile allows it."""
 		doc = self.doc
 		allow_partial_payment = frappe.db.get_value("POS Profile", doc.pos_profile, "allow_partial_payment")
 		invoice_total = flt(doc.rounded_total) or flt(doc.grand_total)
@@ -196,6 +233,7 @@ class POSService:
 			)
 
 	def validate_pos_opening_entry(self) -> None:
+		"""Require exactly one current, open POS Opening Entry for the profile."""
 		doc = self.doc
 		opening_entries = frappe.get_all(
 			"POS Opening Entry",
@@ -337,62 +375,43 @@ def update_multi_mode_option(doc, pos_profile) -> None:
 
 
 def get_all_mode_of_payments(doc) -> list:
-	ModeOfPaymentAccount = frappe.qb.DocType("Mode of Payment Account")
-	ModeOfPayment = frappe.qb.DocType("Mode of Payment")
-
-	query = (
-		frappe.qb.from_(ModeOfPaymentAccount)
-		.join(ModeOfPayment)
-		.on(ModeOfPaymentAccount.parent == ModeOfPayment.name)
-		.select(
-			ModeOfPaymentAccount.default_account, ModeOfPaymentAccount.parent, ModeOfPayment.type.as_("type")
-		)
-		.where(ModeOfPaymentAccount.company == doc.company)
-		.where(ModeOfPayment.enabled == 1)
-	)
-
-	return query.run(as_dict=1)
+	"""All enabled modes of payment with their default accounts for the doc's company."""
+	query, mopa, mop = _enabled_mode_of_payment_query(doc.company)
+	return query.select(mopa.default_account, mopa.parent, mop.type.as_("type")).run(as_dict=1)
 
 
 def get_mode_of_payments_info(mode_of_payments: list, company: str) -> dict:
-	ModeOfPaymentAccount = frappe.qb.DocType("Mode of Payment Account")
-	ModeOfPayment = frappe.qb.DocType("Mode of Payment")
-
-	query = (
-		frappe.qb.from_(ModeOfPaymentAccount)
-		.join(ModeOfPayment)
-		.on(ModeOfPaymentAccount.parent == ModeOfPayment.name)
-		.select(
-			ModeOfPaymentAccount.default_account,
-			ModeOfPaymentAccount.parent.as_("mop"),
-			ModeOfPayment.type.as_("type"),
-		)
-		.where(ModeOfPaymentAccount.company == company)
-		.where(ModeOfPayment.enabled == 1)
-		.where(ModeOfPayment.name.isin(mode_of_payments))
+	"""Map each of the named modes of payment to its account info for the company."""
+	query, mopa, mop = _enabled_mode_of_payment_query(company)
+	data = (
+		query.select(mopa.default_account, mopa.parent.as_("mop"), mop.type.as_("type"))
+		.where(mop.name.isin(mode_of_payments))
 		# group by all selected columns so postgres accepts it (one row per mode of payment)
-		.groupby(ModeOfPaymentAccount.default_account, ModeOfPaymentAccount.parent, ModeOfPayment.type)
+		.groupby(mopa.default_account, mopa.parent, mop.type)
+		.run(as_dict=1)
 	)
-
-	data = query.run(as_dict=1)
-
 	return {row.get("mop"): row for row in data}
 
 
 def get_mode_of_payment_info(mode_of_payment: str, company: str) -> list:
-	ModeOfPaymentAccount = frappe.qb.DocType("Mode of Payment Account")
-	ModeOfPayment = frappe.qb.DocType("Mode of Payment")
-
-	query = (
-		frappe.qb.from_(ModeOfPayment)
-		.join(ModeOfPaymentAccount)
-		.on(ModeOfPaymentAccount.parent == ModeOfPayment.name)
-		.select(
-			ModeOfPaymentAccount.default_account, ModeOfPaymentAccount.parent, ModeOfPayment.type.as_("type")
-		)
-		.where(ModeOfPaymentAccount.company == company)
-		.where(ModeOfPayment.enabled == 1)
-		.where(ModeOfPayment.name == mode_of_payment)
+	"""Account info for a single mode of payment in the company."""
+	query, mopa, mop = _enabled_mode_of_payment_query(company)
+	return (
+		query.select(mopa.default_account, mopa.parent, mop.type.as_("type"))
+		.where(mop.name == mode_of_payment)
+		.run(as_dict=1)
 	)
 
-	return query.run(as_dict=1)
+
+def _enabled_mode_of_payment_query(company: str):
+	"""Base query joining enabled modes of payment to their accounts for a company."""
+	mopa = frappe.qb.DocType("Mode of Payment Account")
+	mop = frappe.qb.DocType("Mode of Payment")
+	query = (
+		frappe.qb.from_(mopa)
+		.join(mop)
+		.on(mopa.parent == mop.name)
+		.where(mopa.company == company)
+		.where(mop.enabled == 1)
+	)
+	return query, mopa, mop

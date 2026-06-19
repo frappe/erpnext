@@ -37,8 +37,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Serial No",
-   "options": "Serial No",
-   "search_index": 1
+   "options": "Serial No"
   },
   {
    "depends_on": "eval:parent.has_batch_no == 1",
@@ -62,8 +61,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Warehouse",
-   "options": "Warehouse",
-   "search_index": 1
+   "options": "Warehouse"
   },
   {
    "fieldname": "column_break_2",
@@ -178,8 +176,7 @@
    "fieldtype": "Data",
    "label": "Type of Transaction",
    "no_copy": 1,
-   "read_only": 1,
-   "search_index": 1
+   "read_only": 1
   },
   {
    "fieldname": "column_break_eykr",

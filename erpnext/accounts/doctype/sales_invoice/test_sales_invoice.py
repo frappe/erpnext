@@ -20,6 +20,12 @@ from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
 	unlink_payment_on_cancel_of_invoice,
 )
 from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_transaction
+from erpnext.accounts.doctype.sales_invoice.services.pos import (
+	POSService,
+	get_all_mode_of_payments,
+	get_mode_of_payment_info,
+	get_mode_of_payments_info,
+)
 from erpnext.accounts.utils import PaymentEntryUnlinkError
 from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
 from erpnext.assets.doctype.asset.test_asset import create_asset
@@ -1346,6 +1352,101 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(pos.grand_total, 100.0)
 		self.assertEqual(pos.write_off_amount, 0)
 
+	def test_set_pos_fields_populates_invoice_from_profile(self):
+		terms = frappe.db.exists("Terms and Conditions", "_Test POS Terms")
+		if not terms:
+			terms = (
+				frappe.get_doc(
+					{
+						"doctype": "Terms and Conditions",
+						"title": "_Test POS Terms",
+						"terms": "POS terms and conditions",
+						"selling": 1,
+					}
+				)
+				.insert()
+				.name
+			)
+
+		profile = make_pos_profile()
+		profile.customer = "_Test Customer"
+		profile.tax_category = "_Test Tax Category 1"
+		profile.account_for_change_amount = "Cash - _TC"
+		profile.ignore_pricing_rule = 1
+		profile.update_stock = 1
+		profile.apply_discount_on = "Grand Total"
+		profile.tc_name = terms
+		profile.taxes_and_charges = "_Test Sales Taxes and Charges Template - _TC"
+		profile.save()
+
+		si = create_sales_invoice(do_not_save=True)
+		si.is_pos = 1
+		si.pos_profile = profile.name
+		si.customer = None
+		si.taxes = []
+
+		POSService(si).set_pos_fields(for_validate=False)
+
+		self.assertEqual(si.customer, "_Test Customer")
+		self.assertEqual(si.tax_category, "_Test Tax Category 1")
+		self.assertEqual(si.ignore_pricing_rule, 1)
+		self.assertEqual(si.account_for_change_amount, "Cash - _TC")
+		self.assertEqual(si.taxes_and_charges, "_Test Sales Taxes and Charges Template - _TC")
+		self.assertEqual(si.apply_discount_on, "Grand Total")
+		self.assertEqual(si.update_stock, 1)
+		self.assertEqual(si.terms, "POS terms and conditions")
+		self.assertTrue(si.get("payments"))
+		self.assertTrue(si.get("taxes"))
+
+	def test_set_pos_fields_for_validate_preserves_existing_values(self):
+		profile = make_pos_profile()
+		profile.tax_category = "_Test Tax Category 1"
+		profile.save()
+
+		si = create_sales_invoice(do_not_save=True)
+		si.is_pos = 1
+		si.pos_profile = profile.name
+		si.apply_discount_on = "Net Total"
+		existing_customer = si.customer
+
+		POSService(si).set_pos_fields(for_validate=True)
+
+		# for_validate must not overwrite a field the user already set
+		self.assertEqual(si.apply_discount_on, "Net Total")
+		# for_validate skips mode-of-payment fetch and profile-driven customer/tax_category
+		self.assertFalse(si.get("payments"))
+		self.assertEqual(si.customer, existing_customer)
+		self.assertFalse(si.tax_category)
+
+	def test_set_pos_fields_uses_profile_price_list_without_customer(self):
+		profile = make_pos_profile(selling_price_list="_Test Price List")
+		profile.customer = None
+		profile.save()
+
+		si = create_sales_invoice(do_not_save=True)
+		si.is_pos = 1
+		si.pos_profile = profile.name
+		si.customer = None
+
+		POSService(si).set_pos_fields(for_validate=False)
+
+		self.assertEqual(si.selling_price_list, "_Test Price List")
+
+	def test_pos_service_mode_of_payment_queries(self):
+		make_pos_profile()  # ensures a Cash mode-of-payment account for _Test Company
+		si = create_sales_invoice(do_not_save=True)
+
+		single = get_mode_of_payment_info("Cash", "_Test Company")
+		self.assertTrue(single)
+		self.assertEqual(single[0].parent, "Cash")
+
+		all_modes = get_all_mode_of_payments(si)
+		self.assertTrue(any(row.parent == "Cash" for row in all_modes))
+
+		grouped = get_mode_of_payments_info(["Cash"], "_Test Company")
+		self.assertIn("Cash", grouped)
+		self.assertEqual(grouped["Cash"].mop, "Cash")
+
 	def test_auto_write_off_amount(self):
 		make_pos_profile(
 			company="_Test Company with perpetual inventory",
@@ -1475,6 +1576,75 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.validate_pos_gl_entry(pos, pos, 60, validate_without_change_gle=True)
 
 		frappe.db.set_single_value("POS Settings", "post_change_gl_entries", 1)
+
+	def test_stock_delivered_but_not_billed_gl_on_invoice(self):
+		company = "_Test Company with perpetual inventory"
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		make_purchase_receipt(
+			company=company,
+			item_code="_Test FG Item",
+			warehouse="Stores - TCP1",
+			cost_center="Main - TCP1",
+			qty=5,
+			rate=100,
+		)
+
+		dn = create_delivery_note(
+			company=company,
+			item_code="_Test FG Item",
+			warehouse="Stores - TCP1",
+			cost_center="Main - TCP1",
+			qty=2,
+			rate=300,
+		)
+		# A perpetual-inventory Delivery Note books the cost to the SDBNB account
+		self.assertEqual(dn.items[0].expense_account, "Stock Delivered But Not Billed - TCP1")
+
+		si = make_sales_invoice(dn.name)
+		si.insert()
+		si.submit()
+
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": si.name, "is_cancelled": 0},
+			fields=["account", "debit", "credit"],
+		)
+		sdbnb_credit = sum(
+			row.credit for row in gl_entries if row.account == "Stock Delivered But Not Billed - TCP1"
+		)
+		cogs_debit = sum(row.debit for row in gl_entries if row.account == "Cost of Goods Sold - TCP1")
+
+		# Billing reverses SDBNB and recognises the cost in COGS for an equal amount
+		self.assertTrue(sdbnb_credit > 0)
+		self.assertEqual(sdbnb_credit, cogs_debit)
+
+	def test_get_gle_for_change_amount(self):
+		from erpnext.accounts.doctype.sales_invoice.services.gl_composer import SalesInvoiceGLComposer
+
+		si = create_sales_invoice(do_not_save=True)
+		si.is_pos = 1
+		si.party_account_currency = "INR"
+
+		# no change amount -> no entries
+		si.change_amount = 0
+		self.assertEqual(SalesInvoiceGLComposer(si).get_gle_for_change_amount(), [])
+
+		# change amount without an account -> mandatory error
+		si.change_amount = 10
+		si.base_change_amount = 10
+		si.account_for_change_amount = None
+		self.assertRaises(frappe.ValidationError, SalesInvoiceGLComposer(si).get_gle_for_change_amount)
+
+		# change amount with an account -> debit-to debited, change account credited
+		si.account_for_change_amount = "Cash - _TC"
+		entries = SalesInvoiceGLComposer(si).get_gle_for_change_amount()
+		self.assertEqual(len(entries), 2)
+		debit_entry = next(entry for entry in entries if entry["account"] == si.debit_to)
+		credit_entry = next(entry for entry in entries if entry["account"] == "Cash - _TC")
+		self.assertEqual(debit_entry["party"], si.customer)
+		self.assertEqual(flt(debit_entry["debit"]), 10.0)
+		self.assertEqual(flt(credit_entry["credit"]), 10.0)
 
 	def validate_pos_gl_entry(self, si, pos, cash_amount, validate_without_change_gle=False):
 		if validate_without_change_gle:
@@ -3709,6 +3879,27 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(customer_row.credit_in_account_currency, 0)
 
 		party_link.delete()
+
+	def test_status_indicator(self):
+		from erpnext.accounts.doctype.sales_invoice.services.status import StatusService
+
+		si = create_sales_invoice(do_not_save=True)
+		cases = [
+			# outstanding, due_date, is_return -> indicator color, title
+			(-50, nowdate(), 0, "gray", "Credit Note Issued"),
+			(100, add_days(nowdate(), 5), 0, "orange", "Unpaid"),
+			(100, add_days(nowdate(), -5), 0, "red", "Overdue"),
+			(0, nowdate(), 1, "gray", "Return"),
+			(0, nowdate(), 0, "green", "Paid"),
+		]
+		for outstanding, due_date, is_return, color, title in cases:
+			with self.subTest(title=title):
+				si.outstanding_amount = outstanding
+				si.due_date = due_date
+				si.is_return = is_return
+				StatusService(si).set_indicator()
+				self.assertEqual(si.indicator_color, color)
+				self.assertEqual(si.indicator_title, title)
 
 	def test_payment_statuses(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry

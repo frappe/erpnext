@@ -174,6 +174,25 @@ class TestProject(ERPNextTestSuite):
 		so.reload()
 		self.assertFalse(so.project)
 
+	def test_sales_order_link_is_not_overwritten_by_second_project(self):
+		so = make_sales_order()
+
+		first_project = make_project_from_so(so.name).save()
+		so.reload()
+		self.assertEqual(so.project, first_project.name)
+
+		# A second project for the same sales order must not steal the link.
+		second_project = frappe.get_doc(
+			doctype="Project",
+			project_name="Second project for same sales order",
+			company=so.company,
+			sales_order=so.name,
+		).insert()
+		self.assertEqual(second_project.sales_order, so.name)
+
+		so.reload()
+		self.assertEqual(so.project, first_project.name)
+
 	def test_project_with_template_tasks_having_common_name(self):
 		# Step - 1: Create Template Parent Tasks
 		template_parent_task1 = create_task(subject="Parent Task - 1", is_template=1, is_group=1)

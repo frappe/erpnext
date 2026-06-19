@@ -542,6 +542,60 @@ class TestStockEntry(ERPNextTestSuite):
 			sorted([[stock_in_hand_account, 1200, 0.0], ["Cost of Goods Sold - TCP1", 0.0, 1200.0]]),
 		)
 
+	def test_additional_cost_no_rounding_residual_on_stock_adjustment(self):
+		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
+		warehouse = "Stores - TCP1"
+		items = [
+			make_item(f"_Test Addl Cost Rounding {x}", {"is_stock_item": 1}).name for x in ("A", "B", "C")
+		]
+
+		for item_code in items:
+			make_stock_entry(item_code=item_code, target=warehouse, company=company, qty=100, basic_rate=10)
+
+		transfer = make_stock_entry(company=company, purpose="Material Transfer", do_not_save=True)
+		transfer.from_warehouse = warehouse
+		transfer.to_warehouse = warehouse
+		transfer.items = []
+		for item_code in items:
+			transfer.append(
+				"items",
+				{
+					"item_code": item_code,
+					"qty": 100,
+					"s_warehouse": warehouse,
+					"t_warehouse": warehouse,
+					"uom": "Nos",
+					"conversion_factor": 1,
+				},
+			)
+		transfer.append(
+			"additional_costs",
+			{
+				"expense_account": "Expenses Included In Valuation - TCP1",
+				"description": "freight",
+				"amount": 100,
+			},
+		)
+		transfer.insert()
+		transfer.submit()
+
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Stock Entry", "voucher_no": transfer.name},
+			fields=["account", "debit", "credit"],
+		)
+		gl_map = {}
+		for row in gl_entries:
+			account = gl_map.setdefault(row.account, frappe._dict(debit=0.0, credit=0.0))
+			account.debit += row.debit
+			account.credit += row.credit
+
+		self.assertNotIn("Stock Adjustment - TCP1", gl_map)
+
+		stock_in_hand_account = get_inventory_account(company, warehouse)
+		self.assertEqual(flt(gl_map[stock_in_hand_account].debit, 2), 99.99)
+		self.assertEqual(flt(gl_map["Expenses Included In Valuation - TCP1"].credit, 2), 99.99)
+
 	def check_stock_ledger_entries(self, voucher_type, voucher_no, expected_sle):
 		expected_sle.sort(key=lambda x: x[1])
 
