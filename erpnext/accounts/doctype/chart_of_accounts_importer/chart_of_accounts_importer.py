@@ -74,13 +74,9 @@ def validate_company(company):
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
 def import_coa(file_name, company):
-=======
-def import_coa(file_name: str, company: str):
 	frappe.only_for("Accounts Manager")
 
->>>>>>> 8c1a1aafe6 (fix(coa_importer): allow importing COA through `import_coa` only for `Accounts Manager` (#56132))
 	# delete existing data for accounts
 	frappe.has_permission("Company", "write", company, throw=True)
 	unset_existing_data(company)
