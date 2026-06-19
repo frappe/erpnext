@@ -732,52 +732,35 @@ def _get_je_credit_settlement_ratios(company, as_of_date, is_income=False):
 
     je_names = tuple(r.voucher_no for r in ar_ap_rows)
 
-    pe_rows = frappe.db.sql(
+    # Use Payment Ledger Entry as the authoritative settlement source.
+    # PLE captures all settlement types (PE, JE with direct GL tag, JE via
+    # Payment Reconciliation) so a single query replaces the separate
+    # PE-Reference and GL against_voucher queries that would miss
+    # Payment-Reconciliation-only links.
+    ple_rows = frappe.db.sql(
         """
-        SELECT per.reference_name, COALESCE(SUM(per.allocated_amount), 0) AS settled
-        FROM `tabPayment Entry Reference` per
-        INNER JOIN `tabPayment Entry` pe
-            ON pe.name = per.parent
-            AND pe.docstatus = 1
-            AND pe.posting_date <= %(as_of_date)s
-        WHERE per.reference_doctype = 'Journal Entry'
-          AND per.reference_name IN %(je_names)s
-        GROUP BY per.reference_name
+        SELECT ple.against_voucher_no, SUM(ABS(ple.amount)) AS settled
+        FROM `tabPayment Ledger Entry` ple
+        WHERE ple.against_voucher_type = 'Journal Entry'
+          AND ple.against_voucher_no IN %(je_names)s
+          AND ple.delinked = 0
+          AND ple.posting_date <= %(as_of_date)s
+          AND ple.amount < 0
+        GROUP BY ple.against_voucher_no
         """,
         {"as_of_date": as_of_date, "je_names": je_names},
         as_dict=True,
     )
 
-    je_settle_rows = frappe.db.sql(
-        f"""
-        SELECT je_gl.against_voucher, SUM({je_gl_settle}) AS settled
-        FROM `tabGL Entry` je_gl
-        INNER JOIN tabAccount ar_ap_acc
-            ON ar_ap_acc.name = je_gl.account AND ar_ap_acc.account_type = %(ar_ap_type)s
-        WHERE je_gl.voucher_type = 'Journal Entry'
-          AND je_gl.against_voucher_type = 'Journal Entry'
-          AND je_gl.against_voucher IN %(je_names)s
-          AND je_gl.is_cancelled = 0
-          AND je_gl.company = %(company)s
-          AND je_gl.posting_date <= %(as_of_date)s
-          AND ({je_gl_settle}) > 0
-        GROUP BY je_gl.against_voucher
-        """,
-        {"company": company, "as_of_date": as_of_date, "je_names": je_names, "ar_ap_type": ar_ap_type},
-        as_dict=True,
-    )
-
     total_amount = {r.voucher_no: flt(r.total_amount) for r in ar_ap_rows}
-    pe_settled = {r.reference_name: flt(r.settled) for r in pe_rows}
-    je_settled = {r.against_voucher: flt(r.settled) for r in je_settle_rows}
+    ple_settled = {r.against_voucher_no: flt(r.settled) for r in ple_rows}
 
     ratios = {}
     for je_name, amount in total_amount.items():
         if not amount:
             ratios[je_name] = 1.0
             continue
-        total_settled = pe_settled.get(je_name, 0.0) + je_settled.get(je_name, 0.0)
-        ratios[je_name] = min(total_settled / amount, 1.0)
+        ratios[je_name] = min(ple_settled.get(je_name, 0.0) / amount, 1.0)
 
     return ratios
 
