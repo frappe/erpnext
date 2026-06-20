@@ -239,6 +239,11 @@ def item_query(
 			filters.pop("customer", None)
 			filters.pop("supplier", None)
 
+	# Extract company filter before building the query — Item has no company field
+	company = None
+	if filters and isinstance(filters, dict):
+		company = filters.pop("company", None)
+
 	item = DocType(doctype)
 
 	# Condition for the date
@@ -327,7 +332,120 @@ def item_query(
 		.offset(start)
 	)
 
+	if company:
+		attw = DocType("Allowed To Transact With")
+		allowed_sq = (
+			frappe.qb.from_(attw)
+			.select(attw.parent)
+			.where(attw.parenttype == "Item")
+			.where(attw.parentfield == "allowed_companies")
+			.where(attw.company == company)
+		)
+		restricted_sq = (
+			frappe.qb.from_(attw)
+			.select(attw.parent)
+			.where(attw.parenttype == "Item")
+			.where(attw.parentfield == "allowed_companies")
+		)
+		# global items (no rows) OR explicitly allowed for this company
+		query = query.where(item.name.notin(restricted_sq) | item.name.isin(allowed_sq))
+
 	return query.run(as_dict=as_dict)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def supplier_query(
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict | str | None = None,
+):
+	"""Link field query for Supplier — filters by allowed_companies when company is provided."""
+	if isinstance(filters, str):
+		filters = json.loads(filters)
+
+	company = (filters or {}).pop("company", None)
+	supplier = DocType("Supplier")
+	search_str = f"%{txt}%"
+	mcond = get_match_cond("Supplier")
+
+	base = (
+		frappe.get_query("Supplier", filters=filters, ignore_permissions=False)
+		.select(supplier.name, supplier.supplier_name, supplier.supplier_group)
+		.where(supplier.disabled == 0)
+		.where(supplier[searchfield].like(search_str) | supplier.supplier_name.like(search_str))
+		.limit(page_len)
+		.offset(start)
+	)
+
+	if company:
+		attw = DocType("Allowed To Transact With")
+		allowed_sq = (
+			frappe.qb.from_(attw)
+			.select(attw.parent)
+			.where(attw.parenttype == "Supplier")
+			.where(attw.parentfield == "allowed_companies")
+			.where(attw.company == company)
+		)
+		restricted_sq = (
+			frappe.qb.from_(attw)
+			.select(attw.parent)
+			.where(attw.parenttype == "Supplier")
+			.where(attw.parentfield == "allowed_companies")
+		)
+		base = base.where(supplier.name.notin(restricted_sq) | supplier.name.isin(allowed_sq))
+
+	return base.run()
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def customer_query(
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict | str | None = None,
+):
+	"""Link field query for Customer — filters by allowed_companies when company is provided."""
+	if isinstance(filters, str):
+		filters = json.loads(filters)
+
+	company = (filters or {}).pop("company", None)
+	customer = DocType("Customer")
+	search_str = f"%{txt}%"
+
+	base = (
+		frappe.get_query("Customer", filters=filters, ignore_permissions=False)
+		.select(customer.name, customer.customer_name, customer.customer_group)
+		.where(customer.disabled == 0)
+		.where(customer[searchfield].like(search_str) | customer.customer_name.like(search_str))
+		.limit(page_len)
+		.offset(start)
+	)
+
+	if company:
+		attw = DocType("Allowed To Transact With")
+		allowed_sq = (
+			frappe.qb.from_(attw)
+			.select(attw.parent)
+			.where(attw.parenttype == "Customer")
+			.where(attw.parentfield == "allowed_companies")
+			.where(attw.company == company)
+		)
+		restricted_sq = (
+			frappe.qb.from_(attw)
+			.select(attw.parent)
+			.where(attw.parenttype == "Customer")
+			.where(attw.parentfield == "allowed_companies")
+		)
+		base = base.where(customer.name.notin(restricted_sq) | customer.name.isin(allowed_sq))
+
+	return base.run()
 
 
 @frappe.whitelist()

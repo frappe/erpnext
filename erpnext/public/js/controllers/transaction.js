@@ -10,6 +10,27 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.set_fields_onload_for_line_item();
 		this.frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
 
+		// Company-wise master filtering
+		if (this.frm.fields_dict["customer"]) {
+			this.frm.set_query("customer", () => erpnext.queries.customer(me.frm.doc));
+		}
+		if (
+			this.frm.fields_dict["items"] &&
+			this.frm.fields_dict["items"].grid.get_field("item_code")
+		) {
+			// Base item query with company filter; buying.js overrides this for purchase forms
+			// with additional supplier / is_purchase_item constraints.
+			this.frm.set_query("item_code", "items", function () {
+				return {
+					query: "erpnext.controllers.queries.item_query",
+					filters: {
+						customer: me.frm.doc.customer,
+						company: me.frm.doc.company,
+					},
+				};
+			});
+		}
+
 		frappe.flags.hide_serial_batch_dialog = true;
 		frappe.ui.form.on(this.frm.doctype + " Item", "rate", function (frm, cdt, cdn) {
 			var item = frappe.get_doc(cdt, cdn);

@@ -64,6 +64,8 @@
   "tax_withholding_group",
   "tax_withholding_category",
   "settings_tab",
+  "company_restrictions_section",
+  "allowed_companies",
   "so_required",
   "dn_required",
   "column_break_53",
@@ -510,6 +512,18 @@
    "fieldname": "settings_tab",
    "fieldtype": "Tab Break",
    "label": "Settings"
+  },
+  {
+   "fieldname": "company_restrictions_section",
+   "fieldtype": "Section Break",
+   "label": "Company Restrictions",
+   "description": "If set, this Customer is only available for transactions in the listed companies. Leave empty for no restriction."
+  },
+  {
+   "fieldname": "allowed_companies",
+   "fieldtype": "Table",
+   "label": "Allowed Companies",
+   "options": "Allowed To Transact With"
   },
   {
    "collapsible": 1,

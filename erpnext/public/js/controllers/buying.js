@@ -82,7 +82,7 @@ erpnext.buying = {
 					});
 				}
 
-				me.frm.set_query("supplier", erpnext.queries.supplier);
+				me.frm.set_query("supplier", () => erpnext.queries.supplier(me.frm.doc));
 				me.frm.set_query("contact_person", erpnext.queries.contact_query);
 				me.frm.set_query("supplier_address", erpnext.queries.address_query);
 
@@ -91,7 +91,7 @@ erpnext.buying = {
 
 				this.frm.set_query("item_code", "items", function () {
 					if (me.frm.doc.is_subcontracted) {
-						var filters = { supplier: me.frm.doc.supplier };
+						var filters = { supplier: me.frm.doc.supplier, company: me.frm.doc.company };
 						filters["is_stock_item"] = 0;
 
 						return {
@@ -101,7 +101,12 @@ erpnext.buying = {
 					} else {
 						return {
 							query: "erpnext.controllers.queries.item_query",
-							filters: { supplier: me.frm.doc.supplier, is_purchase_item: 1, has_variants: 0 },
+							filters: {
+								supplier: me.frm.doc.supplier,
+								company: me.frm.doc.company,
+								is_purchase_item: 1,
+								has_variants: 0,
+							},
 						};
 					}
 				});

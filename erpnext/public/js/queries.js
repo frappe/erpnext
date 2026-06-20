@@ -18,6 +18,20 @@ $.extend(erpnext.queries, {
 		return args;
 	},
 
+	supplier: function (doc) {
+		return {
+			query: "erpnext.controllers.queries.supplier_query",
+			filters: { company: doc && doc.company },
+		};
+	},
+
+	customer: function (doc) {
+		return {
+			query: "erpnext.controllers.queries.customer_query",
+			filters: { company: doc && doc.company },
+		};
+	},
+
 	bom: function () {
 		return { query: "erpnext.controllers.queries.bom" };
 	},

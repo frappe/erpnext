@@ -65,6 +65,8 @@
   "purchase_tax_withholding_category",
   "column_break_ltlb",
   "sales_tax_withholding_category",
+  "company_restrictions_section",
+  "allowed_companies",
   "inventory_section",
   "stock_levels_section",
   "stock_levels_html",
@@ -343,6 +345,18 @@
    "fieldtype": "Table",
    "label": "Barcodes",
    "options": "Item Barcode"
+  },
+  {
+   "fieldname": "company_restrictions_section",
+   "fieldtype": "Section Break",
+   "label": "Company Restrictions",
+   "description": "If set, this Item is only available for transactions in the listed companies. Leave empty for no restriction."
+  },
+  {
+   "fieldname": "allowed_companies",
+   "fieldtype": "Table",
+   "label": "Allowed Companies",
+   "options": "Allowed To Transact With"
   },
   {
    "collapsible": 1,

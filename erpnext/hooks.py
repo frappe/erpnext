@@ -22,6 +22,18 @@ add_to_apps_screen = [
 
 develop_version = "17.x.x-develop"
 
+permission_query_conditions = {
+	"Supplier": "erpnext.controllers.party_permissions.supplier_query_conditions",
+	"Customer": "erpnext.controllers.party_permissions.customer_query_conditions",
+	"Item": "erpnext.controllers.party_permissions.item_query_conditions",
+}
+
+has_permission = {
+	"Supplier": "erpnext.controllers.party_permissions.party_has_permission",
+	"Customer": "erpnext.controllers.party_permissions.party_has_permission",
+	"Item": "erpnext.controllers.party_permissions.party_has_permission",
+}
+
 app_include_js = "erpnext.bundle.js"
 app_include_css = "erpnext.bundle.css"
 web_include_css = "erpnext-web.bundle.css"
@@ -348,12 +360,28 @@ pre_submit_validation_doctypes = [
 	"Sales Order",
 ]
 
+_party_company_doctypes = (
+	"Purchase Order",
+	"Purchase Invoice",
+	"Purchase Receipt",
+	"Subcontracting Order",
+	"Subcontracting Receipt",
+	"Sales Order",
+	"Sales Invoice",
+	"Delivery Note",
+	"Quotation",
+	"POS Invoice",
+)
+
 doc_events = {
 	"*": {
 		"validate": [
 			"erpnext.support.doctype.service_level_agreement.service_level_agreement.apply",
 			"erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record.check_for_running_deletion_job",
 		],
+	},
+	tuple(_party_company_doctypes): {
+		"validate": "erpnext.controllers.party_permissions.validate_party_company",
 	},
 	tuple(period_closing_doctypes): {
 		"validate": "erpnext.accounts.doctype.accounting_period.accounting_period.validate_accounting_period_on_doc_save",
