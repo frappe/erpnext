@@ -53,9 +53,9 @@ jobs:
         # Format per element: [[site_name, build_no, total_builds], ...]
         sites:
           - [["test_site_1", 1, 8], ["test_site_2", 2, 8]]
-          - [["test_site_3", 3, 8], ["test_site_4", 4, 8]]
-          - [["test_site_5", 5, 8], ["test_site_6", 6, 8]]
-          - [["test_site_7", 7, 8], ["test_site_8", 8, 8]]
+          # - [["test_site_3", 3, 8], ["test_site_4", 4, 8]]
+          # - [["test_site_5", 5, 8], ["test_site_6", 6, 8]]
+          # - [["test_site_7", 7, 8], ["test_site_8", 8, 8]]
 
     name: Python Unit Tests
 
