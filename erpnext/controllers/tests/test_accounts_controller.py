@@ -1487,15 +1487,16 @@ class TestAccountsController(ERPNextTestSuite):
 		self.assertEqual(len(pr.to_receive), 0)
 		self.assertEqual(len(pr.to_pay), 0)
 
-		# Exchange Gain/Loss Journal should've been created.
+		# bridge links both; gain/loss JE links cr note and bridge
 		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
 		exc_je_for_cr_note = self.get_journals_for(cr_note.doctype, cr_note.name)
-		self.assertNotEqual(exc_je_for_si, [])
-		self.assertEqual(len(exc_je_for_si), 2)
+		self.assertEqual(len(exc_je_for_si), 1)
 		self.assertEqual(len(exc_je_for_cr_note), 2)
-		self.assertEqual(exc_je_for_si, exc_je_for_cr_note)
+		self.assertIn(exc_je_for_si[0], exc_je_for_cr_note)
+		self.assert_ledger_outstanding(si.doctype, si.name, 0.0, 0.0)
+		self.assert_ledger_outstanding(cr_note.doctype, cr_note.name, 0.0, 0.0)
 
-		for x in exc_je_for_si + exc_je_for_cr_note:
+		for x in exc_je_for_cr_note:
 			with self.subTest(x=x):
 				self.assertEqual(
 					[self.cost_center, self.cost_center],
@@ -1602,15 +1603,16 @@ class TestAccountsController(ERPNextTestSuite):
 		self.assertEqual(len(pr.to_receive), 0)
 		self.assertEqual(len(pr.to_pay), 0)
 
-		# There should be 2 journals, JE(Cr Note) and JE(Exchange Gain/Loss)
+		# bridge links both; gain/loss JE links cr note and bridge
 		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
 		exc_je_for_cr_note = self.get_journals_for(cr_note.doctype, cr_note.name)
-		self.assertNotEqual(exc_je_for_si, [])
-		self.assertEqual(len(exc_je_for_si), 2)
+		self.assertEqual(len(exc_je_for_si), 1)
 		self.assertEqual(len(exc_je_for_cr_note), 2)
-		self.assertEqual(exc_je_for_si, exc_je_for_cr_note)
+		self.assertIn(exc_je_for_si[0], exc_je_for_cr_note)
+		self.assert_ledger_outstanding(si.doctype, si.name, 0.0, 0.0)
+		self.assert_ledger_outstanding(cr_note.doctype, cr_note.name, 0.0, 0.0)
 
-		for x in exc_je_for_si + exc_je_for_cr_note:
+		for x in exc_je_for_cr_note:
 			with self.subTest(x=x):
 				self.assertEqual(
 					[cr_note.department, cr_note.department],

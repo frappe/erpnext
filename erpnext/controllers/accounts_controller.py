@@ -1210,27 +1210,22 @@ class AccountsController(TransactionBase):
 		from erpnext.accounts.doctype.bank_transaction.bank_transaction import (
 			remove_from_bank_transaction,
 		)
-		from erpnext.accounts.utils import (
-			cancel_common_party_journal,
-			cancel_exchange_gain_loss_journal,
-			unlink_ref_doc_from_payment_entries,
-		)
+		from erpnext.accounts.utils import unwind_reconciliation
 
 		remove_from_bank_transaction(self.doctype, self.name)
 
 		if self.doctype in ["Sales Invoice", "Purchase Invoice", "Payment Entry", "Journal Entry"]:
-			self.cancel_system_generated_credit_debit_notes()
-
-			# Cancel Exchange Gain/Loss Journal before unlinking
-			cancel_exchange_gain_loss_journal(self)
-			cancel_common_party_journal(self)
-
-			if frappe.get_single_value("Accounts Settings", "unlink_payment_on_cancellation_of_invoice"):
-				unlink_ref_doc_from_payment_entries(self)
+			unwind_reconciliation(
+				self,
+				cancel_common_party=True,
+				unlink=frappe.get_single_value(
+					"Accounts Settings", "unlink_payment_on_cancellation_of_invoice"
+				),
+			)
 
 		elif self.doctype in ["Sales Order", "Purchase Order"]:
 			if frappe.get_single_value("Accounts Settings", "unlink_advance_payment_on_cancelation_of_order"):
-				unlink_ref_doc_from_payment_entries(self)
+				unwind_reconciliation(self)
 
 			if self.doctype == "Sales Order":
 				self.unlink_ref_doc_from_po()

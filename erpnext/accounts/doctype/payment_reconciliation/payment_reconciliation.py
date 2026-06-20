@@ -6,9 +6,10 @@ import frappe
 from frappe import _, msgprint, qb
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
-from frappe.permissions import get_user_permissions
+from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
 from frappe.query_builder import Criterion
 from frappe.query_builder.custom import ConstantColumn
+from frappe.query_builder.functions import IfNull
 from frappe.utils import flt, get_link_to_form, getdate, nowdate, today
 
 import erpnext
@@ -83,6 +84,42 @@ def pick_voucher_side(recv, pay, party_type=None) -> str | None:
 	return None
 
 
+class DimensionFilter:
+	"""Dimension conditions from form values and the user's permissions."""
+
+	def __init__(self, pr):
+		self.dimensions = pr.dimensions
+		self.values = {dim.fieldname: pr.get(dim.fieldname) for dim in pr.dimensions}
+		self.user_permissions = get_user_permissions(frappe.session.user)
+		self.strict = frappe.get_system_settings("apply_strict_user_permissions")
+
+	def conditions(self, table, doctype):
+		conditions = []
+		for dim in self.dimensions:
+			if not frappe.db.has_column(doctype, dim.fieldname):
+				continue
+			allowed = get_allowed_docs_for_doctype(self.user_permissions.get(dim.document_type, []), doctype)
+			if value := self.values.get(dim.fieldname):
+				self._check_allowed(dim.document_type, value, allowed)
+				conditions.append(table[dim.fieldname] == value)
+			elif allowed:
+				conditions.append(self._allowed_condition(table[dim.fieldname], allowed))
+		return conditions
+
+	def _check_allowed(self, document_type, value, allowed):
+		if allowed and value not in allowed:
+			frappe.throw(
+				_("You do not have enough permission to access {0}: {1}").format(_(document_type), value),
+				frappe.PermissionError,
+			)
+
+	def _allowed_condition(self, field, allowed):
+		# strict mode hides untagged rows too
+		if self.strict:
+			return field.isin(allowed)
+		return (IfNull(field, "") == "") | field.isin(allowed)
+
+
 class OpenBalanceFetcher:
 	"""
 	Pipeline:
@@ -97,7 +134,7 @@ class OpenBalanceFetcher:
 		self.company = pr.company
 		self.party_type = pr.party_type
 		self.party = pr.party
-		self.dimensions = pr.dimensions
+		self.dimension_filter = DimensionFilter(pr)
 
 	def fetch(self):
 		accounts = self._get_party_accounts()
@@ -166,11 +203,7 @@ class OpenBalanceFetcher:
 		if self.pr.to_date:
 			posting_date_filter.append(ple.posting_date.lte(self.pr.to_date))
 
-		dimension_filter = []
-		for dim in self.dimensions:
-			val = self.pr.get(dim.fieldname)
-			if val and frappe.db.has_column("Payment Ledger Entry", dim.fieldname):
-				dimension_filter.append(ple[dim.fieldname] == val)
+		dimension_filter = self.dimension_filter.conditions(ple, "Payment Ledger Entry")
 
 		return common_filter, posting_date_filter, dimension_filter
 
@@ -311,10 +344,7 @@ class OpenBalanceFetcher:
 			conditions.append(je.posting_date.lte(self.pr.to_date))
 		if self.pr.currency_filter:
 			conditions.append(jea.account_currency == self.pr.currency_filter)
-		for dim in self.dimensions:
-			val = self.pr.get(dim.fieldname)
-			if val and frappe.db.has_column("Journal Entry Account", dim.fieldname):
-				conditions.append(jea[dim.fieldname] == val)
+		conditions += self.dimension_filter.conditions(jea, "Journal Entry Account")
 
 		query = (
 			qb.from_(je)
@@ -486,9 +516,6 @@ class Allocator:
 		self.party_type = pr.party_type
 		self.to_receive = to_receive if to_receive is not None else list(pr.get("to_receive") or [])
 		self.to_pay = to_pay if to_pay is not None else list(pr.get("to_pay") or [])
-		self.exchange_gain_loss_account = frappe.get_cached_value(
-			"Company", pr.company, "exchange_gain_loss_account"
-		)
 		self.exc_gain_loss_posting_date_setting = frappe.db.get_single_value(
 			"Accounts Settings", "exchange_gain_loss_posting_date", cache=True
 		)
@@ -523,6 +550,7 @@ class Allocator:
 		allocations = []
 		recv_remaining = [flt(r.outstanding_amount) for r in receivables]
 		pay_remaining = [flt(p.outstanding_amount) for p in payables]
+		precision = self._amount_precision(receivables[0].currency)
 
 		# Drain same-account counterparties first, then cross-account. Avoids minting
 		# a bridge JE when a same-account match exists. FIFO preserved within each tier.
@@ -540,10 +568,22 @@ class Allocator:
 					amt = min(recv_remaining[i], pay_remaining[j])
 					if amt > 0:
 						allocations.append(self._make_allocation(recv, payables[j], amt))
-						recv_remaining[i] -= amt
-						pay_remaining[j] -= amt
+						# round so float leftovers don't make tiny extra rows
+						recv_remaining[i] = flt(recv_remaining[i] - amt, precision)
+						pay_remaining[j] = flt(pay_remaining[j] - amt, precision)
 
 		return allocations
+
+	@staticmethod
+	def _amount_precision(currency):
+		df = frappe.get_meta("Payment Reconciliation Allocation").get_field("allocated_amount")
+		return get_field_precision(df, currency=currency)
+
+	def _difference_account(self, difference_amount):
+		if not difference_amount:
+			return None
+		is_gain = difference_amount > 0 if self.party_type == "Customer" else difference_amount < 0
+		return get_exchange_gain_loss_account(self.company, is_gain)
 
 	def _make_allocation(self, recv, pay, allocated_amount):
 		difference_amount = self._fx_difference(recv, pay, allocated_amount)
@@ -580,7 +620,7 @@ class Allocator:
 				# `exchange_rate` must be the AGAINST side's rate; the voucher-side rate
 				# would zero out the FX gain/loss and skip the FX JE.
 				"difference_amount": difference_amount,
-				"difference_account": self.exchange_gain_loss_account if difference_amount else None,
+				"difference_account": self._difference_account(difference_amount),
 				"gain_loss_posting_date": gain_loss_posting_date,
 				"exchange_rate": flt(referenced_row.exchange_rate) or 1.0,
 				"currency": mutated_row.currency,
@@ -807,7 +847,6 @@ class PaymentReconciliation(Document):
 		)
 
 		allocation: DF.Table[PaymentReconciliationAllocation]
-		bank_cash_account: DF.Link | None
 		company: DF.Link
 		cost_center: DF.Link | None
 		currency: DF.Link | None
@@ -835,10 +874,6 @@ class PaymentReconciliation(Document):
 		self.accounting_dimension_filter_conditions = []
 		self.ple_posting_date_filter = []
 		self.dimensions = get_dimensions(with_cost_center_and_project=True)[0]
-
-	@property
-	def user_permissions(self):
-		return get_user_permissions(frappe.session.user)
 
 	def load_from_db(self):
 		# 'modified' attribute is required for `run_doc_method` to work properly.

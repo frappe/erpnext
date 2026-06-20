@@ -22,7 +22,6 @@
   "column_break_filters_2",
   "fetch_limit",
   "currency_filter",
-  "bank_cash_account",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -148,14 +147,6 @@
    "options": "Currency"
   },
   {
-   "description": "This filter will be applied to Journal Entry.",
-   "fieldname": "bank_cash_account",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Bank / Cash Account",
-   "options": "Account"
-  },
-  {
    "collapsible": 1,
    "collapsible_depends_on": "eval: doc.to_receive.length == 0 && doc.to_pay.length == 0",
    "depends_on": "eval:doc.party",
@@ -254,7 +245,7 @@
  "is_virtual": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-04-29 13:36:48.913179",
+ "modified": "2026-09-29 16:45:10.195746",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation",
