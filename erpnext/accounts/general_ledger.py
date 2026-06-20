@@ -697,7 +697,7 @@ def make_reverse_gl_entries(
 			partial_cancel=partial_cancel,
 		)
 		validate_accounting_period(gl_entries)
-		check_freezing_date(gl_entries[0]["posting_date"], adv_adj)
+		check_freezing_date(gl_entries[0]["posting_date"], gl_entries[0]["company"], adv_adj)
 
 		is_opening = any(d.get("is_opening") == "Yes" for d in gl_entries)
 
@@ -778,7 +778,7 @@ def make_reverse_gl_entries(
 				make_entry(new_gle, adv_adj, "Yes")
 
 
-def check_freezing_date(posting_date, adv_adj=False):
+def check_freezing_date(posting_date, company=None, adv_adj=False):
 	"""
 	Nobody can do GL Entries where posting date is before freezing date
 	except authorized person
@@ -800,6 +800,22 @@ def check_freezing_date(posting_date, adv_adj=False):
 						formatdate(acc_frozen_upto)
 					)
 				)
+
+		if company:
+			acc_frozen_till_date = frappe.db.get_value("Company", company, "accounts_frozen_till_date")
+			if acc_frozen_till_date:
+				frozen_accounts_modifier = frappe.db.get_value(
+					"Company", company, "role_allowed_for_frozen_entries"
+				)
+				if getdate(posting_date) <= getdate(acc_frozen_till_date) and (
+					frozen_accounts_modifier not in frappe.get_roles()
+					or frappe.session.user == "Administrator"
+				):
+					frappe.throw(
+						_("You are not authorized to add or update entries before {0}").format(
+							formatdate(acc_frozen_till_date)
+						)
+					)
 
 
 def validate_against_pcv(is_opening, posting_date, company):
