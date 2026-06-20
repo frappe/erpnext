@@ -3008,6 +3008,14 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 		party_link.delete()
 
+	def test_purchase_invoice_cancellation_post_account_freezing_date(self):
+		pi = make_purchase_invoice()
+		frappe.db.set_value("Company", "_Test Company", "accounts_frozen_till_date", add_days(getdate(), 1))
+		try:
+			self.assertRaises(frappe.ValidationError, pi.cancel)
+		finally:
+			frappe.db.set_value("Company", "_Test Company", "accounts_frozen_till_date", None)
+
 
 def set_advance_flag(company, flag, default_account):
 	frappe.db.set_value(
