@@ -261,7 +261,7 @@ def get_conditions(filters):
 			filters={
 				"company": filters.get("company"),
 				"docstatus": 1,
-				"voucher_type": ("in", ["Credit Note", "Debit Note"]),
+				"voucher_type": ("in", ["Credit Note", "Debit Note", "Reconciliation Journal"]),
 				"is_system_generated": 1,
 			},
 			as_list=True,

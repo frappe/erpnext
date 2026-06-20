@@ -356,7 +356,7 @@ class PartyLedgerSummaryReport:
 				filters={
 					"company": self.filters.get("company"),
 					"docstatus": 1,
-					"voucher_type": ("in", ["Credit Note", "Debit Note"]),
+					"voucher_type": ("in", ["Credit Note", "Debit Note", "Reconciliation Journal"]),
 					"is_system_generated": 1,
 					"posting_date": ["between", [self.filters.get("from_date"), self.filters.get("to_date")]],
 				},

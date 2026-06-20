@@ -370,13 +370,14 @@ class TestGeneralLedger(ERPNextTestSuite):
 		pr.allocate_entries(to_receive=to_receive_subset, to_pay=to_pay_subset)
 		pr.reconcile()
 
+		# Post-refactor, reconciling an invoice against a note mints a system-generated
+		# "Reconciliation Journal" bridge (the old "Credit Note"/"Debit Note" JE is gone).
 		system_generated_journal = frappe.db.get_all(
 			"Journal Entry",
 			filters={
 				"docstatus": 1,
-				"reference_type": si.doctype,
-				"reference_name": si.name,
-				"voucher_type": "Credit Note",
+				"company": si.company,
+				"voucher_type": "Reconciliation Journal",
 				"is_system_generated": True,
 			},
 			fields=["name"],

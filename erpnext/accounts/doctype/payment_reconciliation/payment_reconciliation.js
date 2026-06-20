@@ -411,35 +411,21 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 
 frappe.ui.form.on("Payment Reconciliation Allocation", {
 	allocated_amount: function (frm, cdt, cdn) {
-		let row = locals[cdt][cdn];
-		// filter invoice
-		let invoice = frm.doc.invoices.filter((x) => x.invoice_number == row.invoice_number);
-		// filter payment
-		let payment = frm.doc.payments.filter((x) => x.reference_name == row.reference_name);
-
-		let amount = payment[0].amount;
-		for (const d of frm.doc.allocation) {
-			if (row.reference_name == d.reference_name && amount) {
-				if (d.allocated_amount <= amount) {
-					d.amount = amount;
-					amount -= d.allocated_amount;
-				}
-			}
-		}
+		const row = locals[cdt][cdn];
+		const recv = (frm.doc.to_receive || []).filter((x) => x.voucher_no == row.to_receive_voucher_no);
+		const pay = (frm.doc.to_pay || []).filter((x) => x.voucher_no == row.to_pay_voucher_no);
+		if (!recv.length || !pay.length) return;
 
 		frm.call({
 			doc: frm.doc,
 			method: "calculate_difference_on_allocation_change",
 			args: {
-				payment_entry: payment,
-				invoice: invoice,
+				payment_entry: pay,
+				invoice: recv,
 				allocated_amount: row.allocated_amount,
 			},
 			callback: (r) => {
-				if (r.message) {
-					row.difference_amount = r.message;
-					frm.refresh();
-				}
+				frappe.model.set_value(cdt, cdn, "difference_amount", r.message || 0);
 			},
 		});
 	},

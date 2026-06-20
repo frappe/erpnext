@@ -1337,13 +1337,16 @@ class TestAccountsController(ERPNextTestSuite):
 		self.assertEqual(len(pr.to_receive), 1)
 		self.assertEqual(len(pr.to_pay), 1)
 
-		# Exchange Gain/Loss Journal should've been created.
+		# Reconcile mints a "Reconciliation Journal" bridge referencing BOTH vouchers,
+		# plus a rate-difference Exchange Gain/Loss JE booked on the cr_note (to_pay) side
+		# whose balancing leg points at the bridge. So si is referenced by the bridge only
+		# (1), while cr_note is referenced by the bridge AND the FX JE (2).
 		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
 		exc_je_for_cr = self.get_journals_for(cr_note.doctype, cr_note.name)
-		self.assertNotEqual(exc_je_for_si, [])
-		self.assertEqual(len(exc_je_for_si), 2)
+		self.assertEqual(len(exc_je_for_si), 1)
 		self.assertEqual(len(exc_je_for_cr), 2)
-		self.assertEqual(exc_je_for_cr, exc_je_for_si)
+		# the bridge is the JE common to both
+		self.assertTrue({x.parent for x in exc_je_for_si}.issubset({x.parent for x in exc_je_for_cr}))
 
 		si.reload()
 		self.assertEqual(si.outstanding_amount, 1)
@@ -1352,8 +1355,8 @@ class TestAccountsController(ERPNextTestSuite):
 		cr_note.reload()
 		cr_note.cancel()
 
-		# with the introduction of 'cancel_system_generated_credit_debit_notes' in accounts controller
-		# JE(Credit Note) will be cancelled once the parent is cancelled
+		# Cancelling the parent unwinds the reconciliation bridge (and its linked
+		# Exchange Gain/Loss journals) via `unwind_reconciliation`.
 		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
 		exc_je_for_cr = self.get_journals_for(cr_note.doctype, cr_note.name)
 		self.assertEqual(exc_je_for_si, [])
