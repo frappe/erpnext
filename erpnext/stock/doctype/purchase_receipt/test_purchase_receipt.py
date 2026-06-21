@@ -1555,6 +1555,79 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		# The whole freight charge (20) is capitalized
 		self.assertAlmostEqual(gl_map["_Test Account Customs Duty - TCP1"].credit, 20.0, places=2)
 
+	def test_multiple_actual_charges_per_item_matches_gl_per_account(self):
+		"""With multiple "Actual" valuation charges over unevenly valued stock items, each charge
+		is distributed individually so the per-item item_tax_amount decomposes exactly into the
+		per-tax-row amount capitalized in the GL (no rounding drift between the two paths).
+
+		2 stock items with net 100 and 200 (total 300), and two freight charges of 10 each, both
+		flagged to capitalize fully onto stock items. Distributing each charge separately gives
+		item1 = round(100/300*10) * 2 = 3.33 * 2 = 6.66 and item2 = 6.67 * 2 = 13.34. Pooling the
+		two charges into 20 first and spreading the aggregate would instead put 6.67 on item1,
+		which no longer matches the 3.33 + 3.33 implied by the two per-account GL credits."""
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+
+		stock_item1 = make_item(properties={"is_stock_item": 1}).name
+		stock_item2 = make_item(properties={"is_stock_item": 1}).name
+
+		pr = frappe.new_doc("Purchase Receipt")
+		pr.company = company
+		pr.supplier = "_Test Supplier"
+		pr.currency = "INR"
+		for code, rate in ((stock_item1, 100), (stock_item2, 200)):
+			pr.append(
+				"items",
+				{
+					"item_code": code,
+					"qty": 1,
+					"rate": rate,
+					"warehouse": warehouse,
+					"cost_center": "Main - TCP1",
+					"expense_account": "Cost of Goods Sold - TCP1",
+				},
+			)
+
+		for account, amount in (
+			("_Test Account Shipping Charges - TCP1", 10),
+			("_Test Account Customs Duty - TCP1", 10),
+		):
+			pr.append(
+				"taxes",
+				{
+					"charge_type": "Actual",
+					"account_head": account,
+					"category": "Valuation and Total",
+					"cost_center": "Main - TCP1",
+					"description": account,
+					"tax_amount": amount,
+					"allocate_full_amount_to_stock_items": 1,
+				},
+			)
+
+		pr.insert()
+
+		# Each charge spread on its own: 3.33 + 3.33 = 6.66 and 6.67 + 6.67 = 13.34 (total 20)
+		self.assertAlmostEqual(pr.items[0].item_tax_amount, 6.66, places=2)
+		self.assertAlmostEqual(pr.items[1].item_tax_amount, 13.34, places=2)
+		self.assertAlmostEqual(pr.items[0].valuation_rate, 106.66, places=2)
+		self.assertAlmostEqual(pr.items[1].valuation_rate, 213.34, places=2)
+
+		pr.submit()
+
+		gl_entries = get_gl_entries("Purchase Receipt", pr.name, skip_cancelled=True, as_dict=True)
+		gl_map = {row.account: row for row in gl_entries}
+
+		warehouse_account = get_warehouse_account_map(company)
+		stock_account = warehouse_account[warehouse]["account"]
+
+		# Stock asset = 300 (goods) + 10 + 10 (both freight charges fully capitalized)
+		self.assertAlmostEqual(gl_map[stock_account].debit, 320.0, places=2)
+		self.assertAlmostEqual(gl_map["Stock Received But Not Billed - TCP1"].credit, 300.0, places=2)
+		# Each charge is credited in full to its own account
+		self.assertAlmostEqual(gl_map["_Test Account Shipping Charges - TCP1"].credit, 10.0, places=2)
+		self.assertAlmostEqual(gl_map["_Test Account Customs Duty - TCP1"].credit, 10.0, places=2)
+
 	def test_po_to_pi_and_po_to_pr_worflow_full(self):
 		"""Test following behaviour:
 		- Create PO
