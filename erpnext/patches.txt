@@ -489,3 +489,4 @@ erpnext.patches.v16_0.submit_existing_product_bundles #1
 erpnext.patches.v16_0.migrate_subscription_generate_invoice_at
 erpnext.patches.v16_0.rename_subscription_billing_period_fields
 erpnext.patches.v16_0.drop_redundant_serial_no_index_from_sabb
+erpnext.patches.v16_0.add_arabic_company_name_field

@@ -33,11 +33,14 @@ frappe.query_reports["UAE VAT 201"] = {
 			default: frappe.datetime.get_today(),
 		},
 	],
+
 	formatter: function (value, row, column, data, default_formatter) {
 		if (
 			data &&
 			(data.legend == "VAT on Sales and All Other Outputs" ||
-				data.legend == "VAT on Expenses and All Other Inputs") &&
+				data.legend == "VAT on Expenses and All Other Inputs" ||
+				data.legend == "Net VAT Due" ||
+				data.legend == "Total") &&
 			data.legend == value
 		) {
 			value = $(`<span>${value}</span>`);

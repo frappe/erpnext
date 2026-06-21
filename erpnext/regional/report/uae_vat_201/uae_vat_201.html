@@ -1,77 +1,104 @@
 {%
-	var report_columns = report.get_columns_for_print();
-	report_columns = report_columns.filter(col => !col.hidden);
+    var report_columns = report.get_columns_for_print();
+    report_columns = report_columns.filter(col => !col.hidden);
 %}
 <style>
-	.print-format {
-		padding: 10mm;
-		font-size: 8.0pt !important;
-		font-family: Tahoma, sans-serif;
-	}
+    .print-format {
+        padding: 10mm;
+        font-size: 8pt !important;
+        font-family: Tahoma, sans-serif;
+    }
+    .print-format th.col-no { width: 8%; }
+    .print-format th.col-legend { width: 58%; }
+    .print-format th.col-amount,
+    .print-format th.col-vat { width: 17%; }
+    .print-format th.nvd-legend { width: 75%; }
+    .print-format td.num,
+    .print-format th.num { text-align: right; }
 </style>
 
-<h1  style="margin-top:0; text-align: center;">{%= __(report.report_name) %}</h1>
+<h1 style="margin-top:0; text-align: center;">{%= __(report.report_name) %}</h1>
 
-<h3  style="margin-top:0; font-weight:500">{%= __("VAT on Sales and All Other Outputs") %}</h2>
+<h3 style="margin-top:0; font-weight:500">{%= __("VAT on Sales and All Other Outputs") %}</h3>
 
 <table class="table table-bordered">
-
     <thead>
-        <th style="width: 13">{%= report_columns[0].label %}</th>
-        <th style="width: {%= 100 - (report_columns.length - 1) * 13%}%">{%= report_columns[1].label %}</th>
-
-        {% for (let i=2; i<report_columns.length; i++) { %}
-            <th style="width: 13">{%= report_columns[i].label %}</th>
-        {% } %}
-    </thead>
-
-    <tbody>
-        {% for (let j=1; j<12; j++)  { %}
-        {%
-            var row = data[j];
-        %}
-        <tr >
-            {% for (let i=0; i<report_columns.length; i++) { %}
-                <td >
-                    {% const fieldname = report_columns[i].fieldname; %}
-                    {% if (!is_null(row[fieldname])) { %}
-                        {%= frappe.format(row[fieldname], report_columns[i], {}, row) %}
-                    {% } %}
-                </td>
-            {% } %}
+        <tr>
+            <th class="col-no">{%= report_columns[0].label %}</th>
+            <th class="col-legend">{%= report_columns[1].label %}</th>
+            <th class="col-amount num">{%= report_columns[2].label %}</th>
+            <th class="col-vat num">{%= report_columns[3].label %}</th>
         </tr>
+    </thead>
+    <tbody>
+        {% for (let j=1; j<13; j++) { %}
+            {% var row = data[j]; %}
+            {% if (row) { %}
+                <tr>
+                    {% for (let i=0; i<report_columns.length; i++) { %}
+                        <td class="{%= report_columns[i].fieldtype == 'Currency' ? 'num' : '' %}">
+                            {% const fieldname = report_columns[i].fieldname; %}
+                            {% if (!is_null(row[fieldname])) { %}
+                                {%= frappe.format(row[fieldname], report_columns[i], {}, row) %}
+                            {% } %}
+                        </td>
+                    {% } %}
+                </tr>
+            {% } %}
         {% } %}
     </tbody>
 </table>
 
-<h3 style="margin-top:0; font-weight:500">{%= __("VAT on Expenses and All Other Inputs") %}</h2>
+<h3 style="margin-top:0; font-weight:500">{%= __("VAT on Expenses and All Other Inputs") %}</h3>
 
-<table  class="table table-bordered">
+<table class="table table-bordered">
     <thead>
-        <th style="width: 13">{%= report_columns[0].label %}</th>
-        <th style="width: {%= 100 - (report_columns.length - 1) * 13%}%">{%= report_columns[1].label %}</th>
-
-        {% for (let i=2; i<report_columns.length; i++) { %}
-            <th style="width: 13">{%= report_columns[i].label %}</th>
-        {% } %}
-    </thead>
-
-    <tbody>
-        {% for (let j=14; j<data.length; j++)  { %}
-        {%
-            var row = data[j];
-        %}
-        <tr >
-            {% for (let i=0; i<report_columns.length; i++) { %}
-                <td >
-                    {% const fieldname = report_columns[i].fieldname; %}
-                    {% if (!is_null(row[fieldname])) { %}
-                        {%= frappe.format(row[fieldname], report_columns[i], {}, row) %}
-                    {% } %}
-                </td>
-            {% } %}
+        <tr>
+            <th class="col-no">{%= report_columns[0].label %}</th>
+            <th class="col-legend">{%= report_columns[1].label %}</th>
+            <th class="col-amount num">{%= report_columns[2].label %}</th>
+            <th class="col-vat num">{%= report_columns[3].label %}</th>
         </tr>
+    </thead>
+    <tbody>
+        {% for (let j=15; j<18; j++) { %}
+            {% var row = data[j]; %}
+            {% if (row) { %}
+                <tr>
+                    {% for (let i=0; i<report_columns.length; i++) { %}
+                        <td class="{%= report_columns[i].fieldtype == 'Currency' ? 'num' : '' %}">
+                            {% const fieldname = report_columns[i].fieldname; %}
+                            {% if (!is_null(row[fieldname])) { %}
+                                {%= frappe.format(row[fieldname], report_columns[i], {}, row) %}
+                            {% } %}
+                        </td>
+                    {% } %}
+                </tr>
+            {% } %}
         {% } %}
     </tbody>
+</table>
 
+<h3 style="margin-top:0; font-weight:500">{%= __("Net VAT Due") %}</h3>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th class="col-no">{%= report_columns[0].label %}</th>
+            <th class="nvd-legend">{%= report_columns[1].label %}</th>
+            <th class="col-vat num">{%= report_columns[3].label %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for (let j=20; j<23; j++) { %}
+            {% var row = data[j]; %}
+            {% if (row) { %}
+                <tr>
+                    <td>{%= row.no %}</td>
+                    <td>{%= row.legend %}</td>
+                    <td class="num">{%= row.vat_amount %}</td>
+                </tr>
+            {% } %}
+        {% } %}
+    </tbody>
 </table>
