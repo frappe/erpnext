@@ -460,8 +460,8 @@ class SalesInvoice(SellingController):
 			validate_account_head(item.idx, item.income_account, self.company, _("Income"))
 
 	def before_save(self):
-		self.set_account_for_mode_of_payment()
 		self.set_paid_amount()
+		self.set_account_for_mode_of_payment()
 
 	def before_submit(self):
 		self.add_remarks()
@@ -900,6 +900,13 @@ class SalesInvoice(SellingController):
 	def set_paid_amount(self):
 		paid_amount = 0.0
 		base_paid_amount = 0.0
+
+		if not cint(self.is_pos) and self.is_return:
+			self.set("payments", [])
+			self.paid_amount = paid_amount
+			self.base_paid_amount = base_paid_amount
+			return
+
 		for data in self.payments:
 			data.base_amount = flt(data.amount * self.conversion_rate, self.precision("base_paid_amount"))
 			paid_amount += data.amount
