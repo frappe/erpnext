@@ -2005,12 +2005,17 @@ class StockEntry(StockController):
 				] += flt(t.base_amount * multiply_based_on) / divide_based_on
 
 		if item_account_wise_additional_cost:
+			precision = self.get_debit_field_precision()
+
 			for d in self.get("items"):
 				for account, amount in item_account_wise_additional_cost.get(
 					(d.item_code, d.name), {}
 				).items():
 					if not amount:
 						continue
+
+					amount["amount"] = flt(amount["amount"], precision)
+					amount["base_amount"] = flt(amount["base_amount"], precision)
 
 					gl_entries.append(
 						self.get_gl_dict(
