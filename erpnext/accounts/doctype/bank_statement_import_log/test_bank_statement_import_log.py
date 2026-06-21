@@ -130,9 +130,11 @@ class TestBankStatementImportLog(ERPNextTestSuite, AccountsTestMixin):
 
 	@staticmethod
 	def _make_pdf(html: str) -> bytes:
+		from io import StringIO
+
 		import pdfkit
 
-		return pdfkit.from_string(html, False)
+		return pdfkit.from_file(StringIO(html), False)
 
 	@staticmethod
 	def _encrypt(pdf_bytes: bytes, password: str) -> bytes:
