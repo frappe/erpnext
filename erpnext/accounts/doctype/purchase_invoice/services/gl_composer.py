@@ -590,6 +590,10 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 		tax_service = TaxService(doc)
 		valuation_tax = {}
 
+		# Amount of each valuation charge actually capitalized into stock/asset valuation, keyed by
+		# tax row name - a non-stock item's share of a spread-across-all-items charge is excluded.
+		capitalized_valuation_tax = doc.get_capitalized_valuation_tax()
+
 		for tax in doc.get("taxes"):
 			amount, base_amount = tax_service.get_tax_amounts(tax, None)
 			if tax.category in ("Total", "Valuation and Total") and flt(base_amount):
@@ -624,8 +628,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 							tax.idx, _(tax.category)
 						)
 					)
-				valuation_tax.setdefault(tax.name, 0)
-				valuation_tax[tax.name] += (tax.add_deduct_tax == "Add" and 1 or -1) * flt(base_amount)
+				valuation_tax[tax.name] = capitalized_valuation_tax.get(tax.name, 0.0)
 
 		if doc.is_opening == "No" and doc.negative_expense_to_be_booked and valuation_tax:
 			total_valuation_amount = sum(valuation_tax.values())
