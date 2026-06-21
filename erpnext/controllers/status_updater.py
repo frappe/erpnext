@@ -186,7 +186,8 @@ class StatusUpdater(Document):
 	"""
 
 	def on_discard(self):
-		self.db_set("status", "Cancelled")
+		if self.meta.has_field("status"):
+			self.db_set("status", "Cancelled")
 
 	def update_prevdoc_status(self):
 		self.update_qty()
