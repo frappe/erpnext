@@ -9,7 +9,6 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
-from frappe.query_builder.functions import CurDate, Sum
 from frappe.utils import cint, flt, get_link_to_form
 from frappe.utils.data import DateTimeLikeObject, add_days
 
@@ -385,6 +384,7 @@ def make_batch_bundle(
 	)
 
 
+<<<<<<< HEAD
 def get_batches(item_code, warehouse, qty=1, throw=False, serial_no=None):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
@@ -428,6 +428,8 @@ def get_batches(item_code, warehouse, qty=1, throw=False, serial_no=None):
 	return query.run(as_dict=True)
 
 
+=======
+>>>>>>> 345cbc97e1 (refactor(stock): remove dead get_batches() in batch.py)
 def validate_serial_no_with_batch(serial_nos, item_code):
 	if frappe.get_cached_value("Serial No", serial_nos[0], "item_code") != item_code:
 		frappe.throw(
