@@ -402,15 +402,21 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		pi.submit()
 
 		gl_entries = get_gl_entries("Purchase Invoice", pi.name, skip_cancelled=True, as_dict=True)
-		gl_map = {row.account: row for row in gl_entries}
+		# Sum per account - the same account can appear in multiple GL rows (e.g. the stock account
+		# is debited once per item), so aggregate rather than keeping only the last row.
+		gl_map = {}
+		for row in gl_entries:
+			acc = gl_map.setdefault(row.account, {"debit": 0.0, "credit": 0.0})
+			acc["debit"] += row.debit
+			acc["credit"] += row.credit
 
 		warehouse_account = get_warehouse_account_map(company)
 		stock_account = warehouse_account[warehouse]["account"]
 
 		# Stock asset = 200 (goods) + 30 (the entire freight charge)
-		self.assertAlmostEqual(gl_map[stock_account].debit, 230.0, places=2)
+		self.assertAlmostEqual(gl_map[stock_account]["debit"], 230.0, places=2)
 		# The whole freight charge (30) is capitalized
-		self.assertAlmostEqual(gl_map["_Test Account Shipping Charges - TCP1"].credit, 30.0, places=2)
+		self.assertAlmostEqual(gl_map["_Test Account Shipping Charges - TCP1"]["credit"], 30.0, places=2)
 
 	@ERPNextTestSuite.change_settings(
 		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
