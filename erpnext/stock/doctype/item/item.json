@@ -170,6 +170,7 @@
    "ignore_user_permissions": 1,
    "in_standard_filter": 1,
    "label": "Variant Of",
+   "link_filters": "[[\"Item\",\"has_variants\",\"=\",1]]",
    "options": "Item",
    "read_only": 1,
    "search_index": 1,
