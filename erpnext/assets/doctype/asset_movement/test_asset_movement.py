@@ -161,6 +161,44 @@ class TestAssetMovement(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, asset_movement.save)
 
+	def test_latest_movement_tiebreaker_on_same_transaction_date(self):
+		# When two movements share the same transaction_date, the latest one (by name) must be chosen
+		# deterministically. Postgres has no implicit row order, so without a name tiebreaker the
+		# resulting Asset.location/custodian could differ between MariaDB and Postgres.
+		asset = create_asset(item_code="Macbook Pro", do_not_save=1)
+		asset.save().submit()
+
+		txn_date = now()
+		create_asset_movement(
+			purpose="Transfer",
+			company=asset.company,
+			transaction_date=txn_date,
+			assets=[
+				{
+					"asset": asset.name,
+					"source_location": "Test Location",
+					"target_location": "Test Location 2",
+				}
+			],
+		)
+		movement2 = create_asset_movement(
+			purpose="Transfer",
+			company=asset.company,
+			transaction_date=txn_date,
+			assets=[
+				{
+					"asset": asset.name,
+					"source_location": "Test Location 2",
+					"target_location": "Test Location",
+				}
+			],
+		)
+
+		# movement2 is the higher-named movement on the tied date -> it is the deterministic latest
+		location, _ = movement2.get_latest_location_and_custodian(asset.name)
+		self.assertEqual(location, "Test Location")
+		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), "Test Location")
+
 
 def create_asset_movement(**args):
 	args = frappe._dict(args)

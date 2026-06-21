@@ -138,7 +138,10 @@ class AssetMovement(Document):
 			.on(asm_item.parent == asm.name)
 			.select(asm_item.target_location, asm_item.to_employee)
 			.where((asm_item.asset == asset) & (asm.company == self.company) & (asm.docstatus == 1))
+			# name tiebreaker so the latest movement is deterministic when transaction_date ties (Postgres
+			# has no implicit row order; without it the chosen location/custodian can differ per engine)
 			.orderby(asm.transaction_date, order=frappe.qb.desc)
+			.orderby(asm.name, order=frappe.qb.desc)
 			.limit(1)
 			.run()
 		)
