@@ -14,7 +14,7 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestVATAuditReport(ERPNextTestSuite):
 	def setUp(self):
-		make_company("_Test Company SA VAT", "_TCSV")
+		self.company = "_Test Company SA VAT"
 
 		create_account(
 			account_name="VAT - 0%",

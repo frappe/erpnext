@@ -7,6 +7,7 @@ import json
 
 import frappe
 from frappe import _
+from frappe.query_builder import Case
 from frappe.utils import cstr, flt
 
 from erpnext.utilities.product import get_item_codes_by_attributes
@@ -133,6 +134,57 @@ def validate_is_incremental(numeric_attribute, attribute, value, item):
 			InvalidItemAttributeValueError,
 			title=_("Invalid Attribute"),
 		)
+
+
+def get_attribute_value_renames(item_attribute):
+	"""Return old to new attribute value mappings for renamed Item Attribute Value rows."""
+	if item_attribute.numeric_values:
+		return {}
+
+	db_value = item_attribute.get_doc_before_save()
+	if not db_value:
+		return {}
+
+	old_values = {d.name: d.attribute_value for d in db_value.item_attribute_values}
+	renames = {}
+
+	for row in item_attribute.item_attribute_values:
+		if row.name in old_values and old_values[row.name] != row.attribute_value:
+			renames[old_values[row.name]] = row.attribute_value
+
+	return renames
+
+
+def update_variant_attribute_values(item_attribute):
+	"""Propagate renamed Item Attribute Values to Item Variant Attribute on variant items."""
+	value_map = get_attribute_value_renames(item_attribute)
+	if not value_map:
+		return
+
+	item_variant_table = frappe.qb.DocType("Item Variant Attribute")
+	item_table = frappe.qb.DocType("Item")
+	attribute_value = item_variant_table.attribute_value
+	attribute_value_case = Case()
+
+	for old_value, new_value in value_map.items():
+		attribute_value_case = attribute_value_case.when(attribute_value == old_value, new_value)
+
+	# Postgres has no UPDATE ... JOIN; restrict to variant items via a subquery on the parent instead.
+	variant_items = (
+		frappe.qb.from_(item_table)
+		.select(item_table.name)
+		.where(item_table.variant_of.isnotnull())
+		.where(item_table.variant_of != "")
+	)
+	(
+		frappe.qb.update(item_variant_table)
+		.set(attribute_value, attribute_value_case.else_(attribute_value))
+		.where(item_variant_table.parent.isin(variant_items))
+		.where(item_variant_table.attribute == item_attribute.name)
+		.where(attribute_value.isin(list(value_map)))
+	).run()
+
+	frappe.flags.attribute_values = None
 
 
 def validate_item_attribute_value(attributes_list, attribute, attribute_value, item, from_variant=True):
@@ -395,13 +447,21 @@ def make_variant_item_code(template_item_code, template_item_name, variant):
 
 	abbreviations = []
 	for attr in variant.attributes:
-		item_attribute = frappe.db.sql(
-			"""select i.numeric_values, v.abbr
-			from `tabItem Attribute` i left join `tabItem Attribute Value` v
-				on (i.name=v.parent)
-			where i.name=%(attribute)s and (v.attribute_value=%(attribute_value)s or i.numeric_values = 1)""",
-			{"attribute": attr.attribute, "attribute_value": attr.attribute_value},
-			as_dict=True,
+		ia = frappe.qb.DocType("Item Attribute")
+		iav = frappe.qb.DocType("Item Attribute Value")
+		item_attribute = (
+			frappe.qb.from_(ia)
+			.left_join(iav)
+			.on(ia.name == iav.parent)
+			.select(ia.numeric_values, iav.abbr)
+			.where(
+				(ia.name == attr.attribute)
+				# attribute_value is a varchar column; cast the param to str so postgres doesn't choke on
+				# `varchar = numeric` for numeric attributes (where this side is irrelevant anyway, since
+				# numeric_values == 1 already satisfies the OR). Non-numeric values are already strings.
+				& ((iav.attribute_value == cstr(attr.attribute_value)) | (ia.numeric_values == 1))
+			)
+			.run(as_dict=True)
 		)
 
 		if not item_attribute:

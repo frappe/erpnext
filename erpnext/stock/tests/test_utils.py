@@ -1,7 +1,7 @@
 import json
 
 import frappe
-from frappe.query_builder.functions import Timestamp
+from frappe.query_builder.functions import CombineDatetime
 
 from erpnext.stock.utils import scan_barcode
 from erpnext.tests.utils import ERPNextTestSuite
@@ -35,7 +35,7 @@ class StockTestMixin:
 				query = query.where(sle[key] == value)
 
 		sles = (
-			query.orderby(Timestamp(sle.posting_date, sle.posting_time))
+			query.orderby(CombineDatetime(sle.posting_date, sle.posting_time))
 			.orderby(sle.creation)
 			.run(as_dict=True)
 		)
@@ -138,3 +138,59 @@ class TestStockUtilities(ERPNextTestSuite, StockTestMixin):
 		item_scan_with_ctx = scan_barcode("w12345", ctx=ctx)
 		self.assertEqual(item_scan_with_ctx["item_code"], item_with_warehouse.name)
 		self.assertEqual(item_scan_with_ctx["default_warehouse"], warehouse_2.name)
+
+	def test_get_latest_stock_qty(self):
+		"""get_latest_stock_qty (Sum(actual_qty) over Bin; the warehouse-subtree EXISTS converted to
+		a qb subquery) must reflect received stock for a non-group warehouse."""
+		from frappe.utils import flt
+
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		from erpnext.stock.utils import get_latest_stock_qty
+
+		warehouse = "_Test Warehouse - _TC"
+		item = self.make_item(properties={"is_stock_item": 1}).name
+		before = flt(get_latest_stock_qty(item, warehouse))
+
+		make_stock_entry(item_code=item, target=warehouse, qty=8, basic_rate=100)
+
+		self.assertEqual(flt(get_latest_stock_qty(item, warehouse)), before + 8)
+
+	def test_get_stock_value_from_bin(self):
+		"""get_stock_value_from_bin (comma-join -> inner_join, `ifnull(disabled,0)=0` ->
+		`disabled==0 | isnull`) must sum the Bin stock_value for an item."""
+		from frappe.utils import flt
+
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		from erpnext.stock.utils import get_stock_value_from_bin
+
+		warehouse = "_Test Warehouse - _TC"
+		item = self.make_item(properties={"is_stock_item": 1}).name
+
+		make_stock_entry(item_code=item, target=warehouse, qty=5, basic_rate=50)
+
+		# returns a single-row result set: [(stock_value,)]
+		self.assertEqual(flt(get_stock_value_from_bin(item_code=item)[0][0]), 5 * 50)
+
+	def test_get_avg_purchase_rate(self):
+		"""get_avg_purchase_rate must average Serial No purchase_rate via the dict-`AVG` get_all
+		field (frappe compiles `[{"AVG": "purchase_rate"}]` to `AVG(purchase_rate)` on both engines)."""
+		from frappe.utils import flt, random_string
+
+		from erpnext.stock.utils import get_avg_purchase_rate
+
+		item = self.make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
+		serial_nos = []
+		for rate in (10, 30):
+			sn = "_TAVG" + random_string(8)
+			frappe.get_doc(
+				{
+					"doctype": "Serial No",
+					"serial_no": sn,
+					"item_code": item,
+					"company": "_Test Company",
+					"purchase_rate": rate,
+				}
+			).insert()
+			serial_nos.append(sn)
+
+		self.assertEqual(flt(get_avg_purchase_rate("\n".join(serial_nos))), 20.0)

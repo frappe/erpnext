@@ -3,7 +3,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Max, Min, Sum
 from frappe.utils import ceil, cint, flt, get_link_to_form
 
 from erpnext.manufacturing.doctype.bom.bom import add_additional_cost
@@ -16,8 +16,8 @@ from erpnext.stock.serial_batch_bundle import (
 	get_serial_nos_from_bundle,
 )
 
-from .base import BaseStockEntry
 from .serial_batch import create_serial_and_batch_bundle
+from .stock_entry_base import BaseStockEntry
 
 
 class BaseManufactureStockEntry(BaseStockEntry):
@@ -388,7 +388,12 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		self.add_secondary_items_from_job_card()
 
 	def add_raw_materials(self):
-		if not frappe.db.get_single_value("Manufacturing Settings", "material_consumption"):
+		material_consumption = frappe.db.get_single_value("Manufacturing Settings", "material_consumption")
+
+		if material_consumption and self.raw_materials_already_consumed():
+			return
+
+		if not material_consumption:
 			if self.backflush_based_on == "BOM" or self.wo_doc.skip_transfer:
 				self.add_raw_materials_based_on_work_order()
 			else:
@@ -397,6 +402,21 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			self.add_unconsumed_raw_materials()
 		else:
 			self.add_raw_materials_based_on_transfer()
+
+	def raw_materials_already_consumed(self) -> bool:
+		if not self.doc.work_order:
+			return False
+
+		return bool(
+			frappe.db.exists(
+				"Stock Entry",
+				{
+					"work_order": self.doc.work_order,
+					"purpose": "Material Consumption for Manufacture",
+					"docstatus": 1,
+				},
+			)
+		)
 
 	def add_unconsumed_raw_materials(self):
 		wo = self.wo_doc
@@ -985,11 +1005,14 @@ def get_secondary_items_from_job_card(work_order, jc_name=None):
 		.select(
 			Sum(job_card_secondary_item.stock_qty).as_("stock_qty"),
 			job_card_secondary_item.item_code,
-			job_card_secondary_item.item_name,
-			job_card_secondary_item.description,
-			job_card_secondary_item.stock_uom,
+			# non-grouped columns are item attributes / the secondary-item BOM link, constant per
+			# grouped (item_code, secondary_item_type) -> Max() keeps the GROUP BY valid on postgres
+			# while returning the value MySQL picked arbitrarily.
+			Max(job_card_secondary_item.item_name).as_("item_name"),
+			Max(job_card_secondary_item.description).as_("description"),
+			Max(job_card_secondary_item.stock_uom).as_("stock_uom"),
 			job_card_secondary_item.secondary_item_type,
-			job_card_secondary_item.bom_secondary_item,
+			Max(job_card_secondary_item.bom_secondary_item).as_("bom_secondary_item"),
 		)
 		.join(job_card_secondary_item)
 		.on(job_card_secondary_item.parent == job_card.name)
@@ -999,7 +1022,7 @@ def get_secondary_items_from_job_card(work_order, jc_name=None):
 			& (job_card.docstatus == 1)
 		)
 		.groupby(job_card_secondary_item.item_code, job_card_secondary_item.secondary_item_type)
-		.orderby(job_card_secondary_item.idx)
+		.orderby(Min(job_card_secondary_item.idx))
 	)
 
 	if jc_name:

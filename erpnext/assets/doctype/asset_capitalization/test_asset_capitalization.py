@@ -2,6 +2,7 @@
 # See license.txt
 
 import frappe
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, now_datetime
 
 from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
@@ -549,34 +550,33 @@ def create_depreciation_asset(**args):
 
 
 def get_actual_gle_dict(name):
+	gle = frappe.qb.DocType("GL Entry")
+	diff = Sum(gle.debit - gle.credit)
 	return dict(
-		frappe.db.sql(
-			"""
-		select account, sum(debit-credit) as diff
-		from `tabGL Entry`
-		where voucher_type = 'Asset Capitalization' and voucher_no = %s
-		group by account
-		having diff != 0
-	""",
-			name,
-		)
+		frappe.qb.from_(gle)
+		.select(gle.account, diff.as_("diff"))
+		.where((gle.voucher_type == "Asset Capitalization") & (gle.voucher_no == name))
+		.groupby(gle.account)
+		.having(diff != 0)
+		.run()
 	)
 
 
 def get_actual_sle_dict(name):
-	sles = frappe.db.sql(
-		"""
-		select
-			item_code, warehouse,
-			sum(actual_qty) as actual_qty,
-			sum(stock_value_difference) as stock_value_difference
-		from `tabStock Ledger Entry`
-		where voucher_type = 'Asset Capitalization' and voucher_no = %s
-		group by item_code, warehouse
-		having actual_qty != 0
-	""",
-		name,
-		as_dict=1,
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	actual_qty = Sum(sle.actual_qty)
+	sles = (
+		frappe.qb.from_(sle)
+		.select(
+			sle.item_code,
+			sle.warehouse,
+			actual_qty.as_("actual_qty"),
+			Sum(sle.stock_value_difference).as_("stock_value_difference"),
+		)
+		.where((sle.voucher_type == "Asset Capitalization") & (sle.voucher_no == name))
+		.groupby(sle.item_code, sle.warehouse)
+		.having(actual_qty != 0)
+		.run(as_dict=1)
 	)
 
 	sle_dict = {}

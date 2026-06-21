@@ -25,10 +25,8 @@ class TestProcessStatementOfAccounts(ERPNextTestSuite, AccountsTestMixin):
 			update_modified=False,
 		)
 
-		self.create_company()
-		self.create_customer()
+		self.company = "_Test Company"
 		self.create_customer(customer_name="Other Customer")
-		self.clear_old_entries()
 		self.si = create_sales_invoice()
 		create_sales_invoice(customer="Other Customer")
 

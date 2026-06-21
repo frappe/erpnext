@@ -114,7 +114,7 @@ def _get_pricing_rules(apply_on, args, values):
 		if apply_on_field == "item_code":
 			if args.get("uom", None):
 				item_conditions += (
-					" and ({child_doc}.uom={item_uom} or IFNULL({child_doc}.uom, '')='')".format(
+					" and ({child_doc}.uom={item_uom} or COALESCE({child_doc}.uom, '')='')".format(
 						child_doc=child_doc, item_uom=frappe.db.escape(args.get("uom"))
 					)
 				)
@@ -127,7 +127,7 @@ def _get_pricing_rules(apply_on, args, values):
 	elif apply_on_field == "item_group":
 		item_conditions = _get_tree_conditions(args, "Item Group", child_doc, False)
 		if args.get("uom", None):
-			item_conditions += " and ({child_doc}.uom={item_uom} or IFNULL({child_doc}.uom, '')='')".format(
+			item_conditions += " and ({child_doc}.uom={item_uom} or COALESCE({child_doc}.uom, '')='')".format(
 				child_doc=child_doc, item_uom=frappe.db.escape(args.get("uom"))
 			)
 
@@ -139,7 +139,7 @@ def _get_pricing_rules(apply_on, args, values):
 	if not args.price_list:
 		args.price_list = None
 
-	conditions += " and ifnull(`tabPricing Rule`.for_price_list, '') in (%(price_list)s, '')"
+	conditions += " and coalesce(`tabPricing Rule`.for_price_list, '') in (%(price_list)s, '')"
 	values["price_list"] = args.get("price_list")
 
 	pricing_rules = (
@@ -195,10 +195,8 @@ def _get_tree_conditions(args, parenttype, table, allow_blank=True):
 		except TypeError:
 			frappe.throw(_("Invalid {0}").format(args.get(field)))
 
-		parent_groups = frappe.db.sql_list(
-			"""select name from `tab{}`
-			where lft<={} and rgt>={}""".format(parenttype, "%s", "%s"),
-			(lft, rgt),
+		parent_groups = frappe.get_all(
+			parenttype, filters={"lft": ["<=", lft], "rgt": [">=", rgt]}, pluck="name"
 		)
 
 		if parenttype in ["Customer Group", "Item Group", "Territory"]:
@@ -217,14 +215,14 @@ def _get_tree_conditions(args, parenttype, table, allow_blank=True):
 		if parent_groups:
 			if allow_blank:
 				parent_groups.append("")
-			condition = "ifnull({table}.{field}, '') in ({parent_groups})".format(
+			condition = "coalesce({table}.{field}, '') in ({parent_groups})".format(
 				table=table, field=field, parent_groups=", ".join(frappe.db.escape(d) for d in parent_groups)
 			)
 
 			frappe.flags.tree_conditions[key] = condition
 
 	elif allow_blank:
-		condition = f"ifnull({table}.{field}, '') = ''"
+		condition = f"coalesce({table}.{field}, '') = ''"
 
 	return condition
 
@@ -232,10 +230,10 @@ def _get_tree_conditions(args, parenttype, table, allow_blank=True):
 def get_other_conditions(conditions, values, args):
 	for field in ["company", "customer", "supplier", "campaign", "sales_partner"]:
 		if args.get(field):
-			conditions += f" and ifnull(`tabPricing Rule`.{field}, '') in (%({field})s, '')"
+			conditions += f" and coalesce(`tabPricing Rule`.{field}, '') in (%({field})s, '')"
 			values[field] = args.get(field)
 		else:
-			conditions += f" and ifnull(`tabPricing Rule`.{field}, '') = ''"
+			conditions += f" and coalesce(`tabPricing Rule`.{field}, '') = ''"
 
 	for parenttype in ["Customer Group", "Territory", "Supplier Group"]:
 		group_condition = _get_tree_conditions(args, parenttype, "`tabPricing Rule`")
@@ -248,8 +246,8 @@ def get_other_conditions(conditions, values, args):
 		or frappe.get_value(args.get("doctype"), args.get("name"), "posting_date", ignore=True)
 	)
 	if date:
-		conditions += """ and %(transaction_date)s between ifnull(`tabPricing Rule`.valid_from, '2000-01-01')
-			and ifnull(`tabPricing Rule`.valid_upto, '2500-12-31')"""
+		conditions += """ and %(transaction_date)s between coalesce(`tabPricing Rule`.valid_from, '2000-01-01')
+			and coalesce(`tabPricing Rule`.valid_upto, '2500-12-31')"""
 		values["transaction_date"] = date
 
 	if args.get("doctype") in [
@@ -264,9 +262,9 @@ def get_other_conditions(conditions, values, args):
 		"POS Invoice",
 		"POS Invoice Item",
 	]:
-		conditions += """ and ifnull(`tabPricing Rule`.selling, 0) = 1"""
+		conditions += """ and coalesce(`tabPricing Rule`.selling, 0) = 1"""
 	else:
-		conditions += """ and ifnull(`tabPricing Rule`.buying, 0) = 1"""
+		conditions += """ and coalesce(`tabPricing Rule`.buying, 0) = 1"""
 
 	return conditions
 

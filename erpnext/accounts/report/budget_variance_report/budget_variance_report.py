@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder import CustomFunction
+from frappe.query_builder.custom import MonthName
 from frappe.utils import add_months, flt, formatdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
@@ -84,7 +84,13 @@ def build_budget_map(budget_records, filters):
 		budget_distributions = get_budget_distributions(budget)
 
 		for row in budget_distributions:
+			if not row.start_date or not row.end_date:
+				continue
+
 			months = get_months_in_range(row.start_date, row.end_date)
+			if not months:
+				continue
+
 			monthly_budget = flt(row.amount) / len(months)
 
 			for month_date in months:
@@ -113,7 +119,6 @@ def build_budget_map(budget_records, filters):
 
 def get_actual_transactions(dimension_name, filters):
 	budget_against = frappe.scrub(filters.get("budget_against"))
-	monthname = CustomFunction("MONTHNAME", ["date"])
 
 	gle = frappe.qb.DocType("GL Entry")
 	budget = frappe.qb.DocType("Budget")
@@ -126,7 +131,7 @@ def get_actual_transactions(dimension_name, filters):
 			gle.debit,
 			gle.credit,
 			gle.fiscal_year,
-			monthname(gle.posting_date).as_("month_name"),
+			MonthName(gle.posting_date).as_("month_name"),
 			budget[budget_against].as_("budget_against"),
 		)
 		.where(
@@ -137,7 +142,10 @@ def get_actual_transactions(dimension_name, filters):
 			& (gle.is_cancelled == 0)
 			& (budget[budget_against] == dimension_name)
 		)
-		.groupby(gle.name)
+		# budget[budget_against] is selected from the Budget table, which is not functionally
+		# dependent on the grouped GL Entry PK, so postgres requires it in the GROUP BY. The WHERE
+		# pins it to dimension_name (a constant), so grouping by it does not change the result.
+		.groupby(gle.name, budget[budget_against])
 		.orderby(gle.fiscal_year)
 	)
 
@@ -157,15 +165,11 @@ def get_actual_transactions(dimension_name, filters):
 
 
 def get_budget_distributions(budget):
-	return frappe.db.sql(
-		"""
-			SELECT start_date, end_date, amount, percent
-			FROM `tabBudget Distribution`
-			WHERE parent = %s
-			ORDER BY start_date ASC
-		  """,
-		(budget.name,),
-		as_dict=True,
+	return frappe.get_all(
+		"Budget Distribution",
+		filters={"parent": budget.name},
+		fields=["start_date", "end_date", "amount", "percent"],
+		order_by="start_date asc",
 	)
 
 
@@ -351,19 +355,15 @@ def get_columns(filters):
 
 
 def get_fiscal_years(filters):
-	fiscal_year = frappe.db.sql(
-		"""
-			select
-				name
-			from
-				`tabFiscal Year`
-			where
-				name between %(from_fiscal_year)s and %(to_fiscal_year)s
-		""",
-		{"from_fiscal_year": filters["from_fiscal_year"], "to_fiscal_year": filters["to_fiscal_year"]},
+	return frappe.get_all(
+		"Fiscal Year",
+		filters={"name": ["between", [filters["from_fiscal_year"], filters["to_fiscal_year"]]]},
+		fields=["name"],
+		# the raw query had no ORDER BY (de-facto oldest-first); get_all would otherwise apply the
+		# Fiscal Year doctype default (name DESC) and reverse column order / cumulative-mode values.
+		order_by="name asc",
+		as_list=True,
 	)
-
-	return fiscal_year
 
 
 def get_cost_center_with_children(cost_centers):

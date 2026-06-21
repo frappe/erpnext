@@ -582,19 +582,16 @@ class TransactionBase(StatusUpdater):
 
 
 def delete_events(ref_type, ref_name):
+	event = frappe.qb.DocType("Event")
+	participant = frappe.qb.DocType("Event Participants")
 	events = (
-		frappe.db.sql_list(
-			""" SELECT
-			distinct `tabEvent`.name
-		from
-			`tabEvent`, `tabEvent Participants`
-		where
-			`tabEvent`.name = `tabEvent Participants`.parent
-			and `tabEvent Participants`.reference_doctype = %s
-			and `tabEvent Participants`.reference_docname = %s
-		""",
-			(ref_type, ref_name),
-		)
+		frappe.qb.from_(event)
+		.inner_join(participant)
+		.on(event.name == participant.parent)
+		.select(event.name)
+		.distinct()
+		.where((participant.reference_doctype == ref_type) & (participant.reference_docname == ref_name))
+		.run(pluck="name")
 		or []
 	)
 

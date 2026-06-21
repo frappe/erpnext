@@ -347,11 +347,10 @@ def get_data(companies, root_type, balance_must_be, fiscal_year, filters=None, i
 	filters.end_date = end_date
 
 	gl_entries_by_account = {}
-	for root in frappe.db.sql(
-		"""select lft, rgt from tabAccount
-			where root_type=%s and ifnull(parent_account, '') = ''""",
-		root_type,
-		as_dict=1,
+	for root in frappe.get_all(
+		"Account",
+		filters={"root_type": root_type, "parent_account": ["is", "not set"]},
+		fields=["lft", "rgt"],
 	):
 		set_gl_entries_by_account(
 			start_date,
@@ -512,9 +511,11 @@ def get_companies(filters):
 def get_subsidiary_companies(company):
 	lft, rgt = frappe.get_cached_value("Company", company, ["lft", "rgt"])
 
-	return frappe.db.sql_list(
-		f"""select name from `tabCompany`
-		where lft >= {lft} and rgt <= {rgt} order by lft, rgt"""
+	return frappe.get_all(
+		"Company",
+		filters={"lft": [">=", lft], "rgt": ["<=", rgt]},
+		pluck="name",
+		order_by="lft, rgt",
 	)
 
 
@@ -604,14 +605,10 @@ def set_gl_entries_by_account(
 
 	company_lft, company_rgt = frappe.get_cached_value("Company", filters.get("company"), ["lft", "rgt"])
 
-	companies = frappe.db.sql(
-		""" select name, default_currency from `tabCompany`
-		where lft >= %(company_lft)s and rgt <= %(company_rgt)s""",
-		{
-			"company_lft": company_lft,
-			"company_rgt": company_rgt,
-		},
-		as_dict=1,
+	companies = frappe.get_all(
+		"Company",
+		filters={"lft": [">=", company_lft], "rgt": ["<=", company_rgt]},
+		fields=["name", "default_currency"],
 	)
 
 	currency_info = frappe._dict(

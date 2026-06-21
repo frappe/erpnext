@@ -261,12 +261,10 @@ class DeliveryNote(SellingController):
 	def set_actual_qty(self):
 		for d in self.get("items"):
 			if d.item_code and d.warehouse:
-				actual_qty = frappe.db.sql(
-					"""select actual_qty from `tabBin`
-					where item_code = %s and warehouse = %s""",
-					(d.item_code, d.warehouse),
+				actual_qty = frappe.db.get_value(
+					"Bin", {"item_code": d.item_code, "warehouse": d.warehouse}, "actual_qty"
 				)
-				d.actual_qty = actual_qty and flt(actual_qty[0][0]) or 0
+				d.actual_qty = flt(actual_qty) or 0
 
 	def so_required(self):
 		"""check in manage account if sales order required or not"""
@@ -385,11 +383,10 @@ class DeliveryNote(SellingController):
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
 		if self.project and self.customer:
-			res = frappe.db.sql(
-				"""select name from `tabProject`
-				where name = %s and (customer = %s or
-					ifnull(customer,'')='')""",
-				(self.project, self.customer),
+			res = frappe.get_all(
+				"Project",
+				filters={"name": self.project},
+				or_filters=[["customer", "=", self.customer], ["customer", "is", "not set"]],
 			)
 			if not res:
 				frappe.throw(
@@ -604,20 +601,20 @@ class DeliveryNote(SellingController):
 		PackingService(self).validate_packed_qty()
 
 	def check_next_docstatus(self):
-		submit_rv = frappe.db.sql(
-			"""select t1.name
-			from `tabSales Invoice` t1,`tabSales Invoice Item` t2
-			where t1.name = t2.parent and t2.delivery_note = %s and t1.docstatus = 1""",
-			(self.name),
+		submit_rv = frappe.get_all(
+			"Sales Invoice Item",
+			filters={"delivery_note": self.name, "docstatus": 1},
+			fields=["parent"],
+			as_list=True,
 		)
 		if submit_rv:
 			frappe.throw(_("Sales Invoice {0} has already been submitted").format(submit_rv[0][0]))
 
-		submit_in = frappe.db.sql(
-			"""select t1.name
-			from `tabInstallation Note` t1, `tabInstallation Note Item` t2
-			where t1.name = t2.parent and t2.prevdoc_docname = %s and t1.docstatus = 1""",
-			(self.name),
+		submit_in = frappe.get_all(
+			"Installation Note Item",
+			filters={"prevdoc_docname": self.name, "docstatus": 1},
+			fields=["parent"],
+			as_list=True,
 		)
 		if submit_in:
 			frappe.throw(_("Installation Note {0} has already been submitted").format(submit_in[0][0]))

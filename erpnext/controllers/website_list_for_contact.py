@@ -17,9 +17,12 @@ def get_list_context(context=None):
 		"currency": frappe.db.get_default("currency"),
 		"currency_symbols": json.dumps(
 			dict(
-				frappe.db.sql(
-					"""select name, symbol
-			from tabCurrency where enabled=1"""
+				frappe.get_all(
+					"Currency",
+					filters={"enabled": 1},
+					fields=["name", "symbol"],
+					as_list=True,
+					limit_page_length=0,  # all enabled currencies are needed for the symbol map
 				)
 			)
 		),
@@ -181,9 +184,10 @@ def rfq_transaction_list(parties_doctype, doctype, parties, limit_start, limit_p
 	party = frappe.qb.DocType(parties_doctype)
 	data = (
 		frappe.qb.from_(party)
-		.select(party.parent.as_("name"), party.supplier)
+		# creation must be selected: Postgres requires SELECT DISTINCT order-by exprs in the select list
+		.select(party.parent.as_("name"), party.supplier, party.creation)
 		.distinct()
-		.where((party.supplier == party[0]) & (party.docstatus == 1))
+		.where((party.supplier == parties[0]) & (party.docstatus == 1))
 		.orderby(party.creation, order=frappe.qb.desc)
 		.limit(limit_page_length)
 		.offset(limit_start)

@@ -35,6 +35,7 @@ class StockBalanceFilter(TypedDict):
 	include_uom: str | None  # include extra info in converted UOM
 	show_stock_ageing_data: bool
 	show_variant_attributes: bool
+	show_alt_uom_balance: bool
 
 
 SLEntry = dict[str, Any]
@@ -76,6 +77,7 @@ class StockBalanceReport:
 			self.columns = self.get_columns()
 
 		self.add_additional_uom_columns()
+		self.add_alt_uom_columns()
 
 		return self.columns, self.data
 
@@ -605,6 +607,87 @@ class StockBalanceReport:
 
 		conversion_factors = self.get_itemwise_conversion_factor()
 		add_additional_uom_columns(self.columns, self.data, self.filters.include_uom, conversion_factors)
+
+	def add_alt_uom_columns(self) -> None:
+		"""Add an alternate UOM balance column after the Balance Qty column."""
+		if not self.filters.get("show_alt_uom_balance"):
+			return
+
+		item_alt_uom_map = self.get_item_alt_uom_map()
+		if not item_alt_uom_map:
+			return
+
+		bal_qty_idx = next(
+			(
+				i
+				for i, col in enumerate(self.columns)
+				if isinstance(col, dict) and col.get("fieldname") == "bal_qty"
+			),
+			None,
+		)
+		if bal_qty_idx is None:
+			return
+
+		# Insert in reverse so "Alt UOM" name column appears before qty column
+		self.columns.insert(
+			bal_qty_idx + 1,
+			{
+				"label": _("Balance Qty (Alt UOM)"),
+				"fieldname": "alt_uom_bal_qty",
+				"fieldtype": "Float",
+				"width": 140,
+			},
+		)
+		self.columns.insert(
+			bal_qty_idx + 1,
+			{
+				"label": _("Alt UOM"),
+				"fieldname": "alt_uom",
+				"fieldtype": "Data",
+				"width": 90,
+			},
+		)
+
+		for row in self.data:
+			alt_uoms = item_alt_uom_map.get(row.item_code, [])
+			if alt_uoms:
+				uom, factor = alt_uoms[0]["uom"], flt(alt_uoms[0]["conversion_factor"])
+				row["alt_uom"] = uom
+				row["alt_uom_bal_qty"] = flt(row.get("bal_qty", 0)) / factor if factor else 0.0
+			else:
+				row["alt_uom"] = ""
+				row["alt_uom_bal_qty"] = 0.0
+
+	def get_item_alt_uom_map(self) -> dict:
+		"""Return {item_code: [{uom, conversion_factor}, ...]} for alternate UOMs (excluding stock UOM)."""
+		item_codes = list({d["item_code"] for d in self.data})
+		if not item_codes:
+			return {}
+
+		uom_detail = frappe.qb.DocType("UOM Conversion Detail")
+		item_table = frappe.qb.DocType("Item")
+
+		rows = (
+			frappe.qb.from_(uom_detail)
+			.join(item_table)
+			.on(uom_detail.parent == item_table.name)
+			.select(uom_detail.parent, uom_detail.uom, uom_detail.conversion_factor)
+			.where(
+				(uom_detail.parenttype == "Item")
+				& (uom_detail.parent.isin(item_codes))
+				& (uom_detail.uom != item_table.stock_uom)
+			)
+			.orderby(uom_detail.parent)
+			.orderby(uom_detail.idx)
+		).run(as_dict=True)
+
+		result: dict = {}
+		for row in rows:
+			result.setdefault(row.parent, [])
+			if not result[row.parent]:  # keep only the first alternate UOM (lowest idx)
+				result[row.parent].append({"uom": row.uom, "conversion_factor": row.conversion_factor})
+
+		return result
 
 	def get_itemwise_conversion_factor(self):
 		items = []

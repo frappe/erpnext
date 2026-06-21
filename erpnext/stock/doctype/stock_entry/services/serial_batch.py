@@ -8,7 +8,7 @@ from erpnext.manufacturing.doctype.bom.bom import get_backflush_based_on
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation, get_serial_or_batch_items
 from erpnext.stock.utils import get_combine_datetime
 
-from .base import BaseStockEntry
+from .stock_entry_base import BaseStockEntry
 
 
 class StockEntrySABB(BaseStockEntry):

@@ -596,6 +596,7 @@ accounting_dimension_doctypes = [
 	"Account Closing Balance",
 	"Supplier Quotation",
 	"Supplier Quotation Item",
+	"Request for Quotation Item",
 	"Payment Reconciliation",
 	"Payment Reconciliation Allocation",
 	"Payment Request",

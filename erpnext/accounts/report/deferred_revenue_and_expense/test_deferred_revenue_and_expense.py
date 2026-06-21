@@ -61,11 +61,16 @@ class TestDeferredRevenueAndExpense(ERPNextTestSuite, AccountsTestMixin):
 		)
 
 	def setUp(self):
-		self.create_company()
-		self.create_customer("_Test Customer")
-		self.create_supplier("_Test Furniture Supplier")
+		self.company = "_Test Company"
+		self.company_abbr = "_TC"
+		self.customer = "_Test Customer"
+		self.supplier = "_Test Supplier"
+		self.warehouse = "Stores - _TC"
+		self.debit_to = "Debtors - _TC"
+		self.cost_center = "Main - _TC"
+		self.income_account = "Sales - _TC"
+		self.expense_account = "Cost of Goods Sold - _TC"
 		self.setup_deferred_accounts_and_items()
-		self.clear_old_entries()
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"book_deferred_entries_based_on": "Months"})
 	def test_deferred_revenue(self):

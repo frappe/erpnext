@@ -524,16 +524,11 @@ class PurchaseInvoice(BuyingController):
 	def check_prev_docstatus(self):
 		for d in self.get("items"):
 			if d.purchase_order:
-				submitted = frappe.db.sql(
-					"select name from `tabPurchase Order` where docstatus = 1 and name = %s", d.purchase_order
-				)
+				submitted = frappe.db.exists("Purchase Order", {"docstatus": 1, "name": d.purchase_order})
 				if not submitted:
 					frappe.throw(_("Purchase Order {0} is not submitted").format(d.purchase_order))
 			if d.purchase_receipt:
-				submitted = frappe.db.sql(
-					"select name from `tabPurchase Receipt` where docstatus = 1 and name = %s",
-					d.purchase_receipt,
-				)
+				submitted = frappe.db.exists("Purchase Receipt", {"docstatus": 1, "name": d.purchase_receipt})
 				if not submitted:
 					frappe.throw(_("Purchase Receipt {0} is not submitted").format(d.purchase_receipt))
 
@@ -801,25 +796,20 @@ class PurchaseInvoice(BuyingController):
 			if cint(frappe.get_single_value("Accounts Settings", "check_supplier_invoice_uniqueness")):
 				fiscal_year = get_fiscal_year(self.posting_date, company=self.company, as_dict=True)
 
-				pi = frappe.db.sql(
-					"""select name from `tabPurchase Invoice`
-					where
-						bill_no = %(bill_no)s
-						and supplier = %(supplier)s
-						and name != %(name)s
-						and docstatus < 2
-						and posting_date between %(year_start_date)s and %(year_end_date)s""",
-					{
+				pi = frappe.get_all(
+					"Purchase Invoice",
+					filters={
 						"bill_no": self.bill_no,
 						"supplier": self.supplier,
-						"name": self.name,
-						"year_start_date": fiscal_year.year_start_date,
-						"year_end_date": fiscal_year.year_end_date,
+						"name": ["!=", self.name],
+						"docstatus": ["<", 2],
+						"posting_date": ["between", [fiscal_year.year_start_date, fiscal_year.year_end_date]],
 					},
+					pluck="name",
 				)
 
 				if pi:
-					pi = pi[0][0]
+					pi = pi[0]
 
 					frappe.throw(
 						_("Supplier Invoice No exists in Purchase Invoice {0}").format(

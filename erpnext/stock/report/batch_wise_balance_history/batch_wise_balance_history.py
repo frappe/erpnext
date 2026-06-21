@@ -137,7 +137,8 @@ def get_stock_ledger_entries_for_batch_no(filters):
 			sle.item_code,
 			sle.warehouse,
 			sle.batch_no,
-			sle.posting_date,
+			# posting_date is constant per voucher_no (grouped) -> Max() is unchanged and postgres-valid
+			fn.Max(sle.posting_date).as_("posting_date"),
 			fn.Sum(sle.actual_qty).as_("actual_qty"),
 			fn.Sum(sle.stock_value_difference).as_("stock_value_difference"),
 		)
@@ -182,10 +183,13 @@ def get_stock_ledger_entries_for_batch_bundle(filters):
 		.inner_join(batch_package)
 		.on(batch_package.parent == sle.serial_and_batch_bundle)
 		.select(
-			sle.item_code,
-			sle.warehouse,
+			# item_code/warehouse/posting_date are constant per grouped voucher_no+batch_no+warehouse
+			# (a batch belongs to one item; warehouse mirrors the grouped batch_package.warehouse;
+			# a voucher has one posting_date) -> Max() is unchanged and postgres-valid
+			fn.Max(sle.item_code).as_("item_code"),
+			fn.Max(sle.warehouse).as_("warehouse"),
 			batch_package.batch_no,
-			sle.posting_date,
+			fn.Max(sle.posting_date).as_("posting_date"),
 			fn.Sum(batch_package.qty).as_("actual_qty"),
 			fn.Sum(batch_package.stock_value_difference).as_("stock_value_difference"),
 		)

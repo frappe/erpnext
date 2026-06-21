@@ -14,73 +14,17 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestGrossProfit(ERPNextTestSuite):
 	def setUp(self):
-		self.create_company()
-		self.create_item()
-		self.create_bundle()
-		self.create_customer()
-		self.create_sales_invoice()
-		self.clear_old_entries()
-
-	def create_company(self):
-		company_name = "_Test Gross Profit"
-		abbr = "_GP"
-		if frappe.db.exists("Company", company_name):
-			company = frappe.get_doc("Company", company_name)
-		else:
-			company = frappe.get_doc(
-				{
-					"doctype": "Company",
-					"company_name": company_name,
-					"country": "India",
-					"default_currency": "INR",
-					"create_chart_of_accounts_based_on": "Standard Template",
-					"chart_of_accounts": "Standard",
-				}
-			)
-			company = company.save()
-
-		self.company = company.name
-		self.cost_center = company.cost_center
-		self.warehouse = "Stores - " + abbr
-		self.finished_warehouse = "Finished Goods - " + abbr
-		self.income_account = "Sales - " + abbr
-		self.expense_account = "Cost of Goods Sold - " + abbr
-		self.debit_to = "Debtors - " + abbr
-		self.creditors = "Creditors - " + abbr
-
-	def create_item(self):
-		item = create_item(
-			item_code="_Test GP Item", is_stock_item=1, company=self.company, warehouse=self.warehouse
-		)
-		self.item = item if isinstance(item, str) else item.item_code
-
-	def create_bundle(self):
-		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
-
-		item2 = create_item(
-			item_code="_Test GP Item 2", is_stock_item=1, company=self.company, warehouse=self.warehouse
-		)
-		self.item2 = item2 if isinstance(item2, str) else item2.item_code
-
-		# This will be parent item
-		bundle = create_item(
-			item_code="_Test GP bundle", is_stock_item=0, company=self.company, warehouse=self.warehouse
-		)
-		self.bundle = bundle if isinstance(bundle, str) else bundle.item_code
-
-		# Create Product Bundle
-		self.product_bundle = make_product_bundle(parent=self.bundle, items=[self.item, self.item2])
-
-	def create_customer(self):
-		name = "_Test GP Customer"
-		if frappe.db.exists("Customer", name):
-			self.customer = name
-		else:
-			customer = frappe.new_doc("Customer")
-			customer.customer_name = name
-			customer.type = "Individual"
-			customer.save()
-			self.customer = customer.name
+		self.company = "_Test Company"
+		self.cost_center = "Main - _TC"
+		self.warehouse = "Stores - _TC"
+		self.finished_warehouse = "Finished Goods - _TC"
+		self.income_account = "Sales - _TC"
+		self.expense_account = "Cost of Goods Sold - _TC"
+		self.debit_to = "Debtors - _TC"
+		self.item = "_Test Item"
+		self.item2 = "_Test Item Home Desktop 100"
+		self.bundle = "_Test Product Bundle Item"
+		self.customer = "_Test Customer"
 
 	def create_sales_invoice(
 		self, qty=1, rate=100, posting_date=None, do_not_save=False, do_not_submit=False
@@ -214,7 +158,7 @@ class TestGrossProfit(ERPNextTestSuite):
 			"posting_date": frappe.utils.datetime.date.fromisoformat(nowdate()),
 			"item_code": self.item,
 			"item_name": self.item,
-			"warehouse": "Stores - _GP",
+			"warehouse": "Stores - _TC",
 			"qty": 1.0,
 			"avg._selling_rate": 100.0,
 			"valuation_rate": 150.0,
@@ -243,7 +187,7 @@ class TestGrossProfit(ERPNextTestSuite):
 			"posting_date": frappe.utils.datetime.date.fromisoformat(nowdate()),
 			"item_code": self.item,
 			"item_name": self.item,
-			"warehouse": "Stores - _GP",
+			"warehouse": "Stores - _TC",
 			"qty": 1.0,
 			"avg._selling_rate": 100.0,
 			"valuation_rate": 100.0,
@@ -275,7 +219,7 @@ class TestGrossProfit(ERPNextTestSuite):
 				"item_code": self.item2,
 				"s_warehouse": "",
 				"t_warehouse": self.finished_warehouse,
-				"qty": 1,
+				"qty": 2,
 				"basic_rate": 100,
 				"conversion_factor": item.conversion_factor or 1.0,
 				"transfer_qty": flt(item.qty) * (flt(item.conversion_factor) or 1.0),
@@ -375,7 +319,7 @@ class TestGrossProfit(ERPNextTestSuite):
 			"posting_date": frappe.utils.datetime.date.fromisoformat(nowdate()),
 			"item_code": self.item,
 			"item_name": self.item,
-			"warehouse": "Stores - _GP",
+			"warehouse": "Stores - _TC",
 			"qty": 4.0,
 			"avg._selling_rate": 100.0,
 			"valuation_rate": 125.0,
@@ -416,10 +360,10 @@ class TestGrossProfit(ERPNextTestSuite):
 			"posting_date": frappe.utils.datetime.date.fromisoformat(nowdate()),
 			"item_code": self.item,
 			"item_name": self.item,
-			"warehouse": "Stores - _GP",
+			"warehouse": "Stores - _TC",
 			"qty": 0.0,
-			"avg._selling_rate": 100,
-			"valuation_rate": 0.0,
+			"avg._selling_rate": 100.0,
+			"valuation_rate": 100.0,
 			"selling_amount": 0.0,
 			"buying_amount": 0.0,
 			"gross_profit": 0.0,
@@ -439,7 +383,7 @@ class TestGrossProfit(ERPNextTestSuite):
 		"""
 		# Make Cr Note
 		sinv = self.create_sales_invoice(
-			qty=-1, rate=100, posting_date=nowdate(), do_not_save=True, do_not_submit=True
+			qty=-1, rate=200, posting_date=nowdate(), do_not_save=True, do_not_submit=True
 		)
 		sinv.is_return = 1
 		sinv.items[0].allow_zero_valuation_rate = 1
@@ -462,14 +406,14 @@ class TestGrossProfit(ERPNextTestSuite):
 			"posting_date": frappe.utils.datetime.date.fromisoformat(nowdate()),
 			"item_code": self.item,
 			"item_name": self.item,
-			"warehouse": "Stores - _GP",
+			"warehouse": "Stores - _TC",
 			"qty": -1.0,
-			"avg._selling_rate": 100.0,
-			"valuation_rate": 0.0,
-			"selling_amount": -100.0,
-			"buying_amount": 0.0,
+			"avg._selling_rate": 200.0,
+			"valuation_rate": 100.0,
+			"selling_amount": -200.0,
+			"buying_amount": -100.0,
 			"gross_profit": -100.0,
-			"gross_profit_%": -100.0,
+			"gross_profit_%": -50.0,
 		}
 		gp_entry = [x for x in data if x.parent_invoice == sinv.name]
 		report_output = {k: v for k, v in gp_entry[0].items() if k in expected_entry}
@@ -555,7 +499,7 @@ class TestGrossProfit(ERPNextTestSuite):
 			"posting_date": frappe.utils.datetime.date.fromisoformat(nowdate()),
 			"item_code": self.item,
 			"item_name": self.item,
-			"warehouse": "Stores - _GP",
+			"warehouse": "Stores - _TC",
 			"qty": 4.0,
 			"avg._selling_rate": 800.0,
 			"valuation_rate": 700.0,
@@ -618,7 +562,7 @@ class TestGrossProfit(ERPNextTestSuite):
 	def test_gross_profit_groupby_invoices(self):
 		create_sales_invoice(
 			qty=1,
-			rate=100,
+			rate=200,
 			company=self.company,
 			customer=self.customer,
 			item_code=self.item,
@@ -640,10 +584,10 @@ class TestGrossProfit(ERPNextTestSuite):
 		_, data = execute(filters=filters)
 		total = data[-1]
 
-		self.assertEqual(total.selling_amount, 100.0)
-		self.assertEqual(total.buying_amount, 0.0)
+		self.assertEqual(total.selling_amount, 200.0)
+		self.assertEqual(total.buying_amount, 100.0)
 		self.assertEqual(total.gross_profit, 100.0)
-		self.assertEqual(total.get("gross_profit_%"), 100.0)
+		self.assertEqual(total.get("gross_profit_%"), 50.0)
 
 	def test_profit_for_later_period_return(self):
 		month_start_date, month_end_date = get_first_day(nowdate()), get_last_day(nowdate())
@@ -652,7 +596,7 @@ class TestGrossProfit(ERPNextTestSuite):
 		return_inv_date = add_days(month_end_date, 1)
 
 		# create sales invoice on month start date
-		sinv = self.create_sales_invoice(qty=1, rate=100, do_not_save=True, do_not_submit=True)
+		sinv = self.create_sales_invoice(qty=1, rate=200, do_not_save=True, do_not_submit=True)
 		sinv.set_posting_time = 1
 		sinv.posting_date = sales_inv_date
 		sinv.save().submit()
@@ -671,10 +615,10 @@ class TestGrossProfit(ERPNextTestSuite):
 		_, data = execute(filters=filters)
 		total = data[-1]
 
-		self.assertEqual(total.selling_amount, 100.0)
-		self.assertEqual(total.buying_amount, 0.0)
+		self.assertEqual(total.selling_amount, 200.0)
+		self.assertEqual(total.buying_amount, 100.0)
 		self.assertEqual(total.gross_profit, 100.0)
-		self.assertEqual(total.get("gross_profit_%"), 100.0)
+		self.assertEqual(total.get("gross_profit_%"), 50.0)
 
 		# extend filters upto returned period
 		filters.update({"to_date": return_inv_date})
@@ -692,10 +636,10 @@ class TestGrossProfit(ERPNextTestSuite):
 		_, data = execute(filters=filters)
 		total = data[-1]
 
-		self.assertEqual(total.selling_amount, -100.0)
-		self.assertEqual(total.buying_amount, 0.0)
+		self.assertEqual(total.selling_amount, -200.0)
+		self.assertEqual(total.buying_amount, -100.0)
 		self.assertEqual(total.gross_profit, -100.0)
-		self.assertEqual(total.get("gross_profit_%"), -100.0)
+		self.assertEqual(total.get("gross_profit_%"), -50.0)
 
 	def test_sales_person_wise_gross_profit(self):
 		sales_person = make_sales_person("_Test Sales Person")
@@ -726,10 +670,10 @@ class TestGrossProfit(ERPNextTestSuite):
 		_, data = execute(filters=filters)
 		total = data[-1]
 
-		self.assertEqual(total[5], 1000.0)
-		self.assertEqual(total[6], 0.0)
-		self.assertEqual(total[7], 1000.0)
-		self.assertEqual(total[8], 100.0)
+		self.assertEqual(total[5], 1000.0)  # selling amount
+		self.assertEqual(total[6], 1000.0)  # buying amount
+		self.assertEqual(total[7], 0.0)  # gross profit
+		self.assertEqual(total[8], 0.0)  # gross profit %
 
 	def test_drop_ship(self):
 		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice

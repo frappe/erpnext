@@ -20,6 +20,21 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestCustomer(ERPNextTestSuite):
+	def test_get_customer_name_dedupes_with_numeric_suffix(self):
+		# When a customer name already exists, get_customer_name appends "- <max trailing number + 1>".
+		# The Postgres branch extracts the trailing digits with regexp_replace/NULLIF/CAST (pypika's
+		# Substring cannot do regex extraction); this exercises that path on both engines.
+		base = "_Test PG Dedup Customer"
+		for nm in (base, f"{base} - 3"):
+			if not frappe.db.exists("Customer", nm):
+				frappe.get_doc(
+					{"doctype": "Customer", "customer_name": nm, "customer_type": "Individual"}
+				).insert()
+			self.addCleanup(frappe.delete_doc, "Customer", nm, force=1)
+
+		doc = frappe.get_doc({"doctype": "Customer", "customer_name": base, "customer_type": "Individual"})
+		self.assertEqual(doc.get_customer_name(), f"{base} - 4")
+
 	def test_get_customer_group_details(self):
 		doc = frappe.new_doc("Customer Group")
 		doc.customer_group_name = "_Testing Customer Group"

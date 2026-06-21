@@ -56,11 +56,12 @@ def _item_master_details(item):
 
 
 def _item_is_alive(item_table):
-	return (
-		item_table.end_of_life.isnull()
-		| (item_table.end_of_life == "0000-00-00")
-		| (item_table.end_of_life > nowdate())
-	)
+	# "not set" end_of_life is NULL on postgres (the MariaDB zero-date '0000-00-00' is an invalid
+	# date constant there), so only add the zero-date term on MariaDB.
+	is_alive = item_table.end_of_life.isnull() | (item_table.end_of_life > nowdate())
+	if frappe.db.db_type != "postgres":
+		is_alive |= item_table.end_of_life == "0000-00-00"
+	return is_alive
 
 
 def _default_bom_for_item(item, project):
@@ -518,7 +519,7 @@ def _set_pick_list_item_qty(source, target, source_parent, for_qty, max_finished
 
 @frappe.whitelist()
 def make_stock_return_entry(work_order: str):
-	from erpnext.stock.doctype.stock_entry.stock_entry_handler.manufacturing import (
+	from erpnext.stock.doctype.stock_entry.services.manufacturing import (
 		ManufactureStockEntry,
 	)
 

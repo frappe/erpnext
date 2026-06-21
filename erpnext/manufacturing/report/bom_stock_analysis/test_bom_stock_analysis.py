@@ -79,6 +79,73 @@ class TestBOMStockAnalysis(ERPNextTestSuite):
 		)
 		self.assertEqual(footer.get("description"), expected_min)
 
+	def _build_duplicate_component_bom(self, phantom_first):
+		"""Parent BOM that lists one `component` twice, once via a phantom sub-BOM and once via a
+		non-phantom sub-BOM. `phantom_first` controls which line is at idx 1. Returns the names of
+		(parent_bom, rm_phantom, rm_normal, component)."""
+		rm_phantom = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		rm_normal = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		component = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+
+		# Phantom sub-BOM created first -> smaller auto-name; non-phantom second -> larger name,
+		# which is exactly what the old Max(bom_no) would (incorrectly) pick.
+		phantom_bom = make_bom(item=component, raw_materials=[rm_phantom], do_not_save=True)
+		phantom_bom.is_phantom_bom = 1
+		phantom_bom.save()
+		phantom_bom.submit()
+		normal_bom = make_bom(item=component, raw_materials=[rm_normal])
+
+		fg_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		first_bom, second_bom = (
+			(phantom_bom.name, normal_bom.name) if phantom_first else (normal_bom.name, phantom_bom.name)
+		)
+		parent = make_bom(item=fg_item, raw_materials=[component], do_not_save=True)
+		parent.items[0].bom_no = first_bom
+		component_doc = frappe.get_doc("Item", component)
+		parent.append(
+			"items",
+			{
+				"item_code": component,
+				"qty": 1,
+				"uom": component_doc.stock_uom,
+				"stock_uom": component_doc.stock_uom,
+				"bom_no": second_bom,
+			},
+		)
+		parent.save()
+		parent.submit()
+		return parent.name, rm_phantom, rm_normal, component
+
+	def _assert_phantom_exploded(self, parent_bom, rm_phantom, rm_normal, component):
+		raw_data = bom_stock_analysis_report(filters={"qty_to_make": 1, "bom": parent_bom})[1]
+		items = {row.get("item") for row in raw_data if row}
+		# Phantom sub-BOM exploded -> its raw material appears; the component row is replaced.
+		self.assertIn(rm_phantom, items)
+		self.assertNotIn(component, items)
+		# The non-phantom line's sub-BOM must NOT be mis-exploded.
+		self.assertNotIn(rm_normal, items)
+
+	def test_phantom_explosion_picks_coherent_sub_bom(self):
+		"""bom_no and is_phantom_item must come from the SAME BOM Item line.
+
+		When a component is listed more than once in a BOM pointing at different sub-BOMs
+		(one phantom, one not), the report groups both lines into a single row by item_code.
+		Aggregating bom_no and is_phantom_item with independent Max() could pair the phantom
+		flag of one line with the bom_no of the other, so explode_phantom_boms recurses into
+		the wrong sub-BOM. We now take one coherent representative line, so the phantom sub-BOM
+		is the one exploded.
+		"""
+		self._assert_phantom_exploded(*self._build_duplicate_component_bom(phantom_first=True))
+
+	def test_phantom_explosion_when_phantom_line_is_not_first(self):
+		"""The phantom flag must win regardless of line order.
+
+		If the non-phantom line is listed first (idx 1) and the phantom line second, a naive
+		first-line representative would drop the phantom flag and skip the sub-BOM explosion.
+		The representative is phantom-preferring, so the phantom sub-BOM is still exploded.
+		"""
+		self._assert_phantom_exploded(*self._build_duplicate_component_bom(phantom_first=False))
+
 
 def split_data_and_footer(raw_data):
 	"""Separate component rows from the footer row. Skips blank spacer rows."""

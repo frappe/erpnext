@@ -19,6 +19,7 @@ from erpnext.controllers.accounts_controller import InvalidQtyError
 from erpnext.crm.doctype.opportunity.mapper import make_request_for_quotation as make_rfq
 from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.material_request.test_material_request import make_material_request
 from erpnext.templates.pages.rfq import check_supplier_has_docname_access
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -249,6 +250,41 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		self.assertEqual(len(sq.items), 1)
 		self.assertEqual(sq.items[0].qty, 0)
 		self.assertEqual(sq.items[0].item_code, rfq.items[0].item_code)
+
+	def test_cost_center_flows_from_mr_to_rfq(self):
+		from erpnext.stock.doctype.material_request.mapper import (
+			make_request_for_quotation as mr_make_rfq,
+		)
+
+		mr = make_material_request(cost_center="_Test Cost Center - _TC")
+		rfq = mr_make_rfq(mr.name)
+
+		self.assertEqual(rfq.items[0].cost_center, "_Test Cost Center - _TC")
+
+	def test_cost_center_flows_from_rfq_to_supplier_quotation(self):
+		rfq = make_request_for_quotation(do_not_submit=True)
+		rfq.items[0].cost_center = "_Test Cost Center - _TC"
+		rfq.save()
+		rfq.submit()
+
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier=rfq.get("suppliers")[0].supplier)
+
+		self.assertEqual(sq.items[0].cost_center, "_Test Cost Center - _TC")
+
+	def test_cost_center_flows_end_to_end_mr_rfq_sq(self):
+		from erpnext.stock.doctype.material_request.mapper import (
+			make_request_for_quotation as mr_make_rfq,
+		)
+
+		mr = make_material_request(cost_center="_Test Cost Center - _TC")
+		rfq = mr_make_rfq(mr.name)
+		rfq.append("suppliers", {"supplier": "_Test Supplier", "supplier_name": "_Test Supplier"})
+		rfq.insert()
+		rfq.submit()
+
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier="_Test Supplier")
+
+		self.assertEqual(sq.items[0].cost_center, "_Test Cost Center - _TC")
 
 
 def make_request_for_quotation(**args):

@@ -9,8 +9,8 @@ import frappe
 from frappe import ValidationError, _, qb, scrub, throw
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
-from frappe.query_builder import Tuple
-from frappe.query_builder.functions import Count
+from frappe.query_builder import Case, Tuple
+from frappe.query_builder.functions import Abs, Count, Max
 from frappe.utils import cint, comma_or, flt, getdate, nowdate
 from frappe.utils.data import comma_and, fmt_money, get_link_to_form
 from pypika.functions import Coalesce, Sum
@@ -766,13 +766,19 @@ class PaymentEntry(AccountsController):
 	def validate_journal_entry(self):
 		for d in self.get("references"):
 			if d.allocated_amount and d.reference_doctype == "Journal Entry":
-				je_accounts = frappe.db.sql(
-					"""select debit, credit from `tabJournal Entry Account`
-					where account = %s and party=%s and docstatus = 1 and parent = %s
-					and (reference_type is null or reference_type in ("", "Sales Order", "Purchase Order"))
-					""",
-					(self.party_account, self.party, d.reference_name),
-					as_dict=True,
+				je_accounts = frappe.get_all(
+					"Journal Entry Account",
+					filters={
+						"account": self.party_account,
+						"party": self.party,
+						"docstatus": 1,
+						"parent": d.reference_name,
+					},
+					or_filters=[
+						["reference_type", "is", "not set"],
+						["reference_type", "in", ["Sales Order", "Purchase Order"]],
+					],
+					fields=["debit", "credit"],
 				)
 
 				if not je_accounts:
@@ -857,27 +863,17 @@ class PaymentEntry(AccountsController):
 			)
 			base_outstanding = flt(allocated_amount * conversion_rate, base_outstanding_precision)
 
+			ps = frappe.qb.DocType("Payment Schedule")
 			if cancel:
-				frappe.db.sql(
-					"""
-					UPDATE `tabPayment Schedule`
-					SET
-						paid_amount = `paid_amount` - %s,
-						base_paid_amount = `base_paid_amount` - %s,
-						discounted_amount = `discounted_amount` - %s,
-						outstanding = `outstanding` + %s,
-						base_outstanding = `base_outstanding` - %s
-					WHERE parent = %s and payment_term = %s""",
-					(
-						allocated_amount - discounted_amt,
-						base_paid_amount,
-						discounted_amt,
-						allocated_amount,
-						base_outstanding,
-						key[1],
-						key[0],
-					),
-				)
+				(
+					frappe.qb.update(ps)
+					.set(ps.paid_amount, ps.paid_amount - (allocated_amount - discounted_amt))
+					.set(ps.base_paid_amount, ps.base_paid_amount - base_paid_amount)
+					.set(ps.discounted_amount, ps.discounted_amount - discounted_amt)
+					.set(ps.outstanding, ps.outstanding + allocated_amount)
+					.set(ps.base_outstanding, ps.base_outstanding - base_outstanding)
+					.where((ps.parent == key[1]) & (ps.payment_term == key[0]))
+				).run()
 			else:
 				if allocated_amount > outstanding:
 					frappe.throw(
@@ -887,26 +883,15 @@ class PaymentEntry(AccountsController):
 					)
 
 				if allocated_amount and outstanding:
-					frappe.db.sql(
-						"""
-						UPDATE `tabPayment Schedule`
-						SET
-							paid_amount = `paid_amount` + %s,
-							base_paid_amount = `base_paid_amount` + %s,
-							discounted_amount = `discounted_amount` + %s,
-							outstanding = `outstanding` - %s,
-							base_outstanding = `base_outstanding` - %s
-						WHERE parent = %s and payment_term = %s""",
-						(
-							allocated_amount - discounted_amt,
-							base_paid_amount,
-							discounted_amt,
-							allocated_amount,
-							base_outstanding,
-							key[1],
-							key[0],
-						),
-					)
+					(
+						frappe.qb.update(ps)
+						.set(ps.paid_amount, ps.paid_amount + (allocated_amount - discounted_amt))
+						.set(ps.base_paid_amount, ps.base_paid_amount + base_paid_amount)
+						.set(ps.discounted_amount, ps.discounted_amount + discounted_amt)
+						.set(ps.outstanding, ps.outstanding - allocated_amount)
+						.set(ps.base_outstanding, ps.base_outstanding - base_outstanding)
+						.where((ps.parent == key[1]) & (ps.payment_term == key[0]))
+					).run()
 
 	def get_allocated_amount_in_transaction_currency(
 		self, allocated_amount, reference_doctype, reference_docname
@@ -1206,9 +1191,9 @@ class PaymentEntry(AccountsController):
 				continue
 
 			if tax.add_deduct_tax == "Add":
-				included_taxes += tax.base_tax_amount
+				included_taxes += flt(tax.base_tax_amount)
 			else:
-				included_taxes -= tax.base_tax_amount
+				included_taxes -= flt(tax.base_tax_amount)
 
 		return included_taxes
 
@@ -1216,11 +1201,7 @@ class PaymentEntry(AccountsController):
 	# Clear the reference document which doesn't have allocated amount on validate so that form can be loaded fast
 	def clear_unallocated_reference_document_rows(self):
 		self.set("references", self.get("references", {"allocated_amount": ["not in", [0, None, ""]]}))
-		frappe.db.sql(
-			"""delete from `tabPayment Entry Reference`
-			where parent = %s and allocated_amount = 0""",
-			self.name,
-		)
+		frappe.db.delete("Payment Entry Reference", {"parent": self.name, "allocated_amount": 0})
 
 	def set_title(self):
 		if frappe.flags.in_import and self.title:
@@ -1876,7 +1857,7 @@ def get_matched_payment_request_of_references(references=None):
 			PR.reference_doctype,
 			PR.reference_name,
 			PR.outstanding_amount.as_("allocated_amount"),
-			PR.name.as_("payment_request"),
+			Max(PR.name).as_("payment_request"),  # count == 1 below ⇒ one row per group; postgres-safe
 			Count("*").as_("count"),
 		)
 		.where(Tuple(PR.reference_doctype, PR.reference_name, PR.outstanding_amount).isin(refs))
@@ -2315,12 +2296,7 @@ def get_orders_to_be_billed(
 	if not voucher_type:
 		return []
 
-	# dynamic dimension filters
-	condition = ""
 	active_dimensions = get_dimensions(True)[0]
-	for dim in active_dimensions:
-		if filters.get(dim.fieldname):
-			condition += f" and {dim.fieldname}={frappe.db.escape(filters.get(dim.fieldname))}"
 
 	if party_account_currency == company_currency:
 		grand_total_field = "base_grand_total"
@@ -2329,37 +2305,37 @@ def get_orders_to_be_billed(
 		grand_total_field = "grand_total"
 		rounded_total_field = "rounded_total"
 
-	orders = frappe.db.sql(
-		"""
-		select
-			name as voucher_no,
-			if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) as invoice_amount,
-			(if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) - advance_paid) as outstanding_amount,
-			transaction_date as posting_date
-		from
-			`tab{voucher_type}`
-		where
-			{party_type} = %s
-			and docstatus = 1
-			and company = %s
-			and status != "Closed"
-			and if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) > advance_paid
-			and abs(100 - per_billed) > 0.01
-			{condition}
-		order by
-			transaction_date, name
-	""".format(
-			**{
-				"rounded_total_field": rounded_total_field,
-				"grand_total_field": grand_total_field,
-				"voucher_type": voucher_type,
-				"party_type": scrub(party_type),
-				"condition": condition,
-			}
-		),
-		(party, company),
-		as_dict=True,
+	voucher = frappe.qb.DocType(voucher_type)
+	invoice_amount = (
+		Case()
+		.when(voucher[rounded_total_field] != 0, voucher[rounded_total_field])
+		.else_(voucher[grand_total_field])
 	)
+
+	query = (
+		frappe.qb.from_(voucher)
+		.select(
+			voucher.name.as_("voucher_no"),
+			invoice_amount.as_("invoice_amount"),
+			(invoice_amount - voucher.advance_paid).as_("outstanding_amount"),
+			voucher.transaction_date.as_("posting_date"),
+		)
+		.where(
+			(voucher[scrub(party_type)] == party)
+			& (voucher.docstatus == 1)
+			& (voucher.company == company)
+			& (voucher.status != "Closed")
+			& (invoice_amount > voucher.advance_paid)
+			& (Abs(100 - voucher.per_billed) > 0.01)
+		)
+	)
+
+	# dynamic dimension filters
+	for dim in active_dimensions:
+		if filters.get(dim.fieldname):
+			query = query.where(voucher[dim.fieldname] == filters.get(dim.fieldname))
+
+	orders = query.orderby(voucher.transaction_date).orderby(voucher.name).run(as_dict=True)
 
 	order_list = []
 	for d in orders:
@@ -2409,8 +2385,8 @@ def get_negative_outstanding_invoices(
 	return frappe.db.sql(
 		"""
 		select
-			"{voucher_type}" as voucher_type, name as voucher_no, {account} as account,
-			if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) as invoice_amount,
+			'{voucher_type}' as voucher_type, name as voucher_no, {account} as account,
+			coalesce(nullif({rounded_total_field}, 0), {grand_total_field}) as invoice_amount,
 			outstanding_amount, posting_date,
 			due_date, conversion_rate as exchange_rate
 		from
@@ -2780,7 +2756,7 @@ def get_payment_entry(
 				pe, doc, discount_amount, base_total_discount_loss, party_account_currency
 			)
 
-		pe.set_exchange_rate(ref_doc=doc)
+		pe.set_exchange_rate()
 		pe.set_amounts()
 
 	# If PE is created from PR directly, then no need to find open PRs for the references
@@ -3272,27 +3248,28 @@ def get_reference_as_per_payment_terms(
 
 
 def get_paid_amount(dt, dn, party_type, party, account, due_date):
+	gle = frappe.qb.DocType("GL Entry")
 	if party_type == "Customer":
-		dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
+		dr_or_cr = gle.credit_in_account_currency - gle.debit_in_account_currency
 	else:
-		dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
+		dr_or_cr = gle.debit_in_account_currency - gle.credit_in_account_currency
 
-	paid_amount = frappe.db.sql(
-		f"""
-		select ifnull(sum({dr_or_cr}), 0) as paid_amount
-		from `tabGL Entry`
-		where against_voucher_type = %s
-			and against_voucher = %s
-			and party_type = %s
-			and party = %s
-			and account = %s
-			and due_date = %s
-			and {dr_or_cr} > 0
-	""",
-		(dt, dn, party_type, party, account, due_date),
+	paid_amount = (
+		frappe.qb.from_(gle)
+		.select(Sum(dr_or_cr))
+		.where(
+			(gle.against_voucher_type == dt)
+			& (gle.against_voucher == dn)
+			& (gle.party_type == party_type)
+			& (gle.party == party)
+			& (gle.account == account)
+			& (gle.due_date == due_date)
+			& (dr_or_cr > 0)
+		)
+		.run()
 	)
 
-	return paid_amount[0][0] if paid_amount else 0
+	return (paid_amount[0][0] or 0) if paid_amount else 0
 
 
 @frappe.whitelist()

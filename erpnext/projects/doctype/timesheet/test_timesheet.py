@@ -126,6 +126,80 @@ class TestTimesheet(ERPNextTestSuite):
 		self.assertEqual(ts.per_billed, 100)
 		self.assertEqual(ts.time_logs[0].sales_invoice, sales_invoice.name)
 
+	def _bill_timesheet_into_invoice(self, emp):
+		"""Submit a billable timesheet into a Sales Invoice; return (timesheet, invoice)."""
+		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
+		sales_invoice = make_sales_invoice(timesheet.name, "_Test Item", "_Test Customer", currency="INR")
+		sales_invoice.due_date = nowdate()
+		sales_invoice.submit()
+		timesheet.reload()
+		# Submitting links the timesheet detail to the invoice and marks it billed
+		self.assertEqual(timesheet.time_logs[0].sales_invoice, sales_invoice.name)
+		self.assertEqual(timesheet.status, "Billed")
+		return timesheet, sales_invoice
+
+	def test_timesheet_billing_link_lifecycle(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+
+		with self.subTest("link released on cancel"):
+			timesheet, sales_invoice = self._bill_timesheet_into_invoice(emp)
+			sales_invoice.reload()
+			sales_invoice.cancel()
+			timesheet.reload()
+			self.assertFalse(timesheet.time_logs[0].sales_invoice)
+			self.assertNotEqual(timesheet.status, "Billed")
+
+		with self.subTest("link released on sales return"):
+			timesheet, sales_invoice = self._bill_timesheet_into_invoice(emp)
+			sales_return = make_sales_return(sales_invoice.name)
+			sales_return.insert()
+			sales_return.submit()
+			timesheet.reload()
+			self.assertFalse(timesheet.time_logs[0].sales_invoice)
+
+	def test_timesheet_billing_validations(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+
+		with self.subTest("unsubmitted timesheet is rejected"):
+			draft = make_timesheet(emp, simulate=True, is_billable=1, do_not_submit=True)
+			sales_invoice = self._invoice_with_timesheet_row(draft.name, draft.time_logs[0].name)
+			self.assertRaises(frappe.ValidationError, sales_invoice.save)
+
+		with self.subTest("already invoiced detail is rejected"):
+			timesheet, _ = self._bill_timesheet_into_invoice(emp)
+			sales_invoice = self._invoice_with_timesheet_row(timesheet.name, timesheet.time_logs[0].name)
+			self.assertRaises(frappe.ValidationError, sales_invoice.save)
+
+	@ERPNextTestSuite.change_settings("Projects Settings", {"fetch_timesheet_in_sales_invoice": 1})
+	def test_timesheet_billing_data_population(self):
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
+
+		with self.subTest("blank hours/amount are back-filled from the timesheet"):
+			timesheet = make_timesheet(emp, simulate=True, is_billable=1)
+			sales_invoice = self._invoice_with_timesheet_row(
+				timesheet.name, timesheet.time_logs[0].name, with_amounts=False
+			)
+			sales_invoice.save()
+			self.assertEqual(sales_invoice.timesheets[0].billing_hours, 2)
+			self.assertEqual(sales_invoice.timesheets[0].billing_amount, 100)
+
+		with self.subTest("project invoice auto-fetches the project's timesheets"):
+			project = frappe.get_value("Project", {"project_name": "_Test Project"})
+			make_timesheet(emp, simulate=True, is_billable=1, project=project, company="_Test Company")
+			sales_invoice = create_sales_invoice(do_not_save=True)
+			sales_invoice.project = project
+			sales_invoice.set("timesheets", [])
+			sales_invoice.save()
+			self.assertTrue(sales_invoice.timesheets)
+
+	def _invoice_with_timesheet_row(self, time_sheet, timesheet_detail, with_amounts=True):
+		sales_invoice = create_sales_invoice(do_not_save=True)
+		row = {"time_sheet": time_sheet, "timesheet_detail": timesheet_detail}
+		if with_amounts:
+			row.update({"billing_hours": 2, "billing_amount": 100})
+		sales_invoice.append("timesheets", row)
+		return sales_invoice
+
 	def test_timesheet_time_overlap(self):
 		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
 
@@ -316,6 +390,42 @@ class TestTimesheet(ERPNextTestSuite):
 		timesheet.load_from_db()
 		self.assertEqual(timesheet.time_logs[1].sales_invoice, sales_invoice2.name)
 		self.assertEqual(timesheet.status, "Billed")
+
+	def test_get_timesheets_list_portal_sales_invoice(self):
+		# get_timesheets_list selects COALESCE(timesheet.sales_invoice, detail.sales_invoice). The earlier
+		# `timesheet.sales_invoice | detail.sales_invoice` bitwise-ORed two varchars -- it errored on
+		# Postgres and returned 0 (names cast to int) on MariaDB.
+		from erpnext.projects.doctype.timesheet.timesheet import get_timesheets_list
+
+		customer = "_Test Customer"
+
+		# tie the current user (Administrator) to the customer so the portal resolves it
+		contact = frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": "_Test Timesheet Portal Contact",
+				"user": "Administrator",
+				"links": [{"link_doctype": "Customer", "link_name": customer}],
+			}
+		).insert(ignore_permissions=True)
+		self.addCleanup(self._delete_if_exists, "Contact", contact.name)
+
+		si = create_sales_invoice(customer=customer)
+
+		employee = make_employee("_test_timesheet_portal@example.com", company="_Test Company")
+		timesheet = make_timesheet(employee, is_billable=0)
+		frappe.db.set_value("Timesheet", timesheet.name, "sales_invoice", si.name)
+
+		rows = get_timesheets_list("Timesheet", None, {}, 0, 500)
+
+		row = next((r for r in rows if r.name == timesheet.name), None)
+		self.assertIsNotNone(row, "billed timesheet not returned by portal list")
+		self.assertEqual(row.sales_invoice, si.name)
+
+	@staticmethod
+	def _delete_if_exists(doctype, name):
+		if frappe.db.exists(doctype, name):
+			frappe.delete_doc(doctype, name, force=True)
 
 
 def make_timesheet(

@@ -5,6 +5,8 @@ import frappe
 from frappe import _
 from frappe.model.docstatus import DocStatus
 from frappe.model.document import Document
+from frappe.query_builder import Tuple
+from frappe.query_builder.functions import Abs, Max, Sum
 from frappe.utils import flt, getdate
 
 
@@ -478,30 +480,28 @@ def get_clearance_details(transaction, payment_entry, bt_allocations, gl_entries
 
 
 def get_related_bank_gl_entries(docs):
-	# nosemgrep: frappe-semgrep-rules.rules.frappe-using-db-sql
 	if not docs:
 		return {}
 
-	result = frappe.db.sql(
-		"""
-        SELECT
-            gle.voucher_type AS doctype,
-            gle.voucher_no AS docname,
-            gle.account AS gl_account,
-            SUM(ABS(gle.credit_in_account_currency - gle.debit_in_account_currency)) AS amount
-        FROM
-            `tabGL Entry` gle
-        LEFT JOIN
-            `tabAccount` ac ON ac.name = gle.account
-        WHERE
-            ac.account_type = 'Bank'
-            AND (gle.voucher_type, gle.voucher_no) IN %(docs)s
-            AND gle.is_cancelled = 0
-        GROUP BY
-            gle.voucher_type, gle.voucher_no, gle.account
-        """,
-		{"docs": docs},
-		as_dict=True,
+	gle = frappe.qb.DocType("GL Entry")
+	ac = frappe.qb.DocType("Account")
+	result = (
+		frappe.qb.from_(gle)
+		.left_join(ac)
+		.on(ac.name == gle.account)
+		.select(
+			gle.voucher_type.as_("doctype"),
+			gle.voucher_no.as_("docname"),
+			gle.account.as_("gl_account"),
+			Sum(Abs(gle.credit_in_account_currency - gle.debit_in_account_currency)).as_("amount"),
+		)
+		.where(
+			(ac.account_type == "Bank")
+			& Tuple(gle.voucher_type, gle.voucher_no).isin([Tuple(vt, vn) for vt, vn in docs])
+			& (gle.is_cancelled == 0)
+		)
+		.groupby(gle.voucher_type, gle.voucher_no, gle.account)
+		.run(as_dict=True)
 	)
 
 	entries = {}
@@ -523,31 +523,32 @@ def get_total_allocated_amount(docs):
 	if not docs:
 		return {}
 
-	# nosemgrep: frappe-semgrep-rules.rules.frappe-using-db-sql
-	result = frappe.db.sql(
-		"""
-		SELECT total, latest_date, gl_account, payment_document, payment_entry FROM (
-			SELECT
-				ROW_NUMBER() OVER w AS rownum,
-				SUM(btp.allocated_amount) OVER(PARTITION BY ba.account, btp.payment_document, btp.payment_entry) AS total,
-				FIRST_VALUE(bt.date) OVER w AS latest_date,
-				ba.account AS gl_account,
-				btp.payment_document,
-				btp.payment_entry
-			FROM
-				`tabBank Transaction Payments` btp
-			LEFT JOIN `tabBank Transaction` bt ON bt.name=btp.parent
-			LEFT JOIN `tabBank Account` ba ON ba.name=bt.bank_account
-			WHERE
-				(btp.payment_document, btp.payment_entry) IN %(docs)s
-				AND bt.docstatus = 1
-			WINDOW w AS (PARTITION BY ba.account, btp.payment_document, btp.payment_entry ORDER BY bt.date DESC)
-		) temp
-		WHERE
-			rownum = 1
-		""",
-		dict(docs=docs),
-		as_dict=True,
+	# The original window query (ROW_NUMBER/FIRST_VALUE + rownum = 1) just collapses to one
+	# row per (account, payment_document, payment_entry) with the partition's allocation total
+	# and most recent transaction date — i.e. a plain GROUP BY with SUM and MAX.
+	btp = frappe.qb.DocType("Bank Transaction Payments")
+	bt = frappe.qb.DocType("Bank Transaction")
+	ba = frappe.qb.DocType("Bank Account")
+
+	result = (
+		frappe.qb.from_(btp)
+		.left_join(bt)
+		.on(bt.name == btp.parent)
+		.left_join(ba)
+		.on(ba.name == bt.bank_account)
+		.select(
+			Sum(btp.allocated_amount).as_("total"),
+			Max(bt.date).as_("latest_date"),
+			ba.account.as_("gl_account"),
+			btp.payment_document,
+			btp.payment_entry,
+		)
+		.where(
+			Tuple(btp.payment_document, btp.payment_entry).isin([Tuple(pd, pe) for pd, pe in docs])
+			& (bt.docstatus == 1)
+		)
+		.groupby(ba.account, btp.payment_document, btp.payment_entry)
+		.run(as_dict=True)
 	)
 
 	payment_allocation_details = {}

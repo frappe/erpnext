@@ -8,6 +8,7 @@ from frappe.utils import add_days, flt, now_datetime, nowdate
 import erpnext
 from erpnext.stock.doctype.delivery_trip.delivery_trip import (
 	get_contact_and_address,
+	get_default_contact,
 	notify_customers,
 )
 from erpnext.tests.utils import ERPNextTestSuite
@@ -107,6 +108,71 @@ class TestDeliveryTrip(ERPNextTestSuite):
 
 		self.delivery_trip.save()
 		self.assertEqual(self.delivery_trip.status, "Completed")
+
+	def test_get_contact_and_address_returns_linked_contact_and_address(self):
+		"""get_contact_and_address (the converted Dynamic Link queries) must return a real Contact
+		and Address that are actually linked to the customer — pins the converted query's output."""
+		out = get_contact_and_address("_Test Customer")
+
+		self.assertTrue(out.contact_person and out.contact_person.parent)
+		self.assertTrue(frappe.db.exists("Contact", out.contact_person.parent))
+		self.assertTrue(
+			frappe.db.exists(
+				"Dynamic Link",
+				{
+					"parenttype": "Contact",
+					"parent": out.contact_person.parent,
+					"link_doctype": "Customer",
+					"link_name": "_Test Customer",
+				},
+			)
+		)
+
+		self.assertTrue(out.shipping_address and out.shipping_address.parent)
+		self.assertTrue(frappe.db.exists("Address", out.shipping_address.parent))
+		self.assertTrue(
+			frappe.db.exists(
+				"Dynamic Link",
+				{
+					"parenttype": "Address",
+					"parent": out.shipping_address.parent,
+					"link_doctype": "Customer",
+					"link_name": "_Test Customer",
+				},
+			)
+		)
+
+	def test_get_default_contact_keeps_orphaned_dynamic_link(self):
+		"""The converted get_default_contact uses a LEFT join, matching the original correlated
+		subquery: a Dynamic Link whose parent Contact no longer exists must STILL be returned
+		(is_primary_contact NULL). An inner join would silently drop it and return None."""
+		customer = "_Test Customer 2"
+		# A Contact linked to the customer, then orphan its Dynamic Link by deleting the Contact row.
+		contact = frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": "_Test Orphan Link Contact",
+				"links": [{"link_doctype": "Customer", "link_name": customer}],
+			}
+		).insert()
+		orphan_parent = contact.name
+		frappe.db.delete("Contact", {"name": orphan_parent})
+
+		self.assertFalse(frappe.db.exists("Contact", orphan_parent))
+		self.assertTrue(
+			frappe.db.exists(
+				"Dynamic Link",
+				{"parenttype": "Contact", "parent": orphan_parent, "link_name": customer},
+			)
+		)
+
+		out = frappe._dict()
+		result = get_default_contact(out, customer)
+
+		# LEFT join keeps the orphaned-link row; an inner join would have returned None.
+		self.assertIsNotNone(result)
+		self.assertEqual(result.parent, orphan_parent)
+		self.assertIsNone(result.is_primary_contact)
 
 
 def create_address(driver):

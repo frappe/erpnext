@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder import Case
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Max, Min, Sum
 from frappe.utils import cint, flt, nowdate, nowtime, parse_json
 
 from erpnext.stock.utils import get_or_make_bin, get_stock_balance
@@ -706,20 +706,28 @@ def get_available_qty_to_reserve(
 
 	if available_qty:
 		sre = frappe.qb.DocType("Stock Reservation Entry")
+		conditions = (
+			(sre.docstatus == 1)
+			& (sre.item_code == item_code)
+			& (sre.warehouse == warehouse)
+			& (sre.delivered_qty < sre.reserved_qty)
+		)
+		if ignore_sre:
+			conditions &= sre.name != ignore_sre
+
+		# Lock the rows being aggregated so a concurrent reservation can't change them mid-transaction.
+		# MariaDB carries the lock on the aggregate query itself; postgres rejects FOR UPDATE with an
+		# aggregate, so on postgres lock the same rows in a separate plain SELECT first (held for the txn).
+		if frappe.db.db_type == "postgres":
+			frappe.qb.from_(sre).select(sre.name).where(conditions).for_update().run()
+
 		query = (
 			frappe.qb.from_(sre)
 			.select(Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty))
-			.where(
-				(sre.docstatus == 1)
-				& (sre.item_code == item_code)
-				& (sre.warehouse == warehouse)
-				& (sre.delivered_qty < sre.reserved_qty)
-			)
-			.for_update()
+			.where(conditions)
 		)
-
-		if ignore_sre:
-			query = query.where(sre.name != ignore_sre)
+		if frappe.db.db_type != "postgres":
+			query = query.for_update()
 
 		reserved_qty = query.run()[0][0] or 0.0
 
@@ -870,14 +878,16 @@ def get_sre_reserved_warehouses_for_voucher(
 	query = (
 		frappe.qb.from_(sre)
 		.select(sre.warehouse)
-		.distinct()
 		.where(
 			(sre.docstatus == 1)
 			& (sre.voucher_type == voucher_type)
 			& (sre.voucher_no == voucher_no)
 			& (sre.delivered_qty < sre.reserved_qty)
 		)
-		.orderby(sre.creation)
+		# distinct warehouses, earliest reservation first (postgres can't ORDER BY a
+		# non-selected column under SELECT DISTINCT, so group + Min instead)
+		.groupby(sre.warehouse)
+		.orderby(Min(sre.creation))
 	)
 
 	if voucher_detail_no:
@@ -984,7 +994,8 @@ def get_sre_reserved_batch_nos_details(item_code: str, warehouse: str, batch_nos
 			& (sre.reservation_based_on == "Serial and Batch")
 		)
 		.groupby(sb_entry.batch_no)
-		.orderby(sb_entry.creation)
+		# result is collapsed into a dict below, so ordering is irrelevant; dropping the (non-grouped)
+		# ORDER BY creation keeps the GROUP BY valid on postgres.
 	)
 
 	if batch_nos:
@@ -1526,10 +1537,12 @@ class StockReservation:
 			.inner_join(child_doctype)
 			.on(doctype.name == child_doctype.parent)
 			.select(
-				doctype.name.as_("voucher_no"),
+				# grouped by the child PK (name), so child columns are valid on postgres via functional
+				# dependency; the parent (doctype) columns aren't, so Max() them -- constant per child row.
+				Max(doctype.name).as_("voucher_no"),
 				child_doctype.name.as_("voucher_detail_no"),
 				child_doctype[item_code_fieldname].as_("item_code"),
-				doctype.company,
+				Max(doctype.company).as_("company"),
 				child_doctype.stock_uom,
 			)
 			.where((doctype.docstatus == 1) & (doctype[field].isin(docnames)))
@@ -1539,9 +1552,9 @@ class StockReservation:
 		if to_doctype == "Work Order":
 			query = query.select(
 				child_doctype.source_warehouse,
-				doctype.wip_warehouse,
-				doctype.skip_transfer,
-				doctype.from_wip_warehouse,
+				Max(doctype.wip_warehouse).as_("wip_warehouse"),
+				Max(doctype.skip_transfer).as_("skip_transfer"),
+				Max(doctype.from_wip_warehouse).as_("from_wip_warehouse"),
 				child_doctype.required_qty,
 				(child_doctype.required_qty - child_doctype.transferred_qty).as_("qty"),
 				child_doctype.stock_reserved_qty,

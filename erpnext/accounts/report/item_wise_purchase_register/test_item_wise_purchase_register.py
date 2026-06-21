@@ -9,9 +9,9 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestItemWisePurchaseRegister(ERPNextTestSuite, AccountsTestMixin):
 	def setUp(self):
-		self.create_company()
-		self.create_supplier()
-		self.create_item()
+		self.company = "_Test Company"
+		self.supplier = "_Test Supplier"
+		self.item = "_Test Item"
 
 	def create_purchase_invoice(self, do_not_submit=False):
 		pi = make_purchase_invoice(

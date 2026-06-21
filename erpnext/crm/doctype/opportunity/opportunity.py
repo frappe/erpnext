@@ -290,13 +290,19 @@ class Opportunity(TransactionBase, CRMNote):
 				"name",
 			)
 		else:
-			return frappe.db.sql(
-				"""
-				select q.name
-				from `tabQuotation` q, `tabQuotation Item` qi
-				where q.name = qi.parent and q.docstatus=1 and qi.prevdoc_docname =%s
-				and q.status not in ('Lost', 'Closed')""",
-				self.name,
+			q = frappe.qb.DocType("Quotation")
+			qi = frappe.qb.DocType("Quotation Item")
+			return (
+				frappe.qb.from_(q)
+				.inner_join(qi)
+				.on(q.name == qi.parent)
+				.select(q.name)
+				.where(
+					(q.docstatus == 1)
+					& (qi.prevdoc_docname == self.name)
+					& q.status.notin(["Lost", "Closed"])
+				)
+				.run()
 			)
 
 	def has_ordered_quotation(self):
@@ -305,24 +311,20 @@ class Opportunity(TransactionBase, CRMNote):
 				"Quotation", {"opportunity": self.name, "status": "Ordered", "docstatus": 1}, "name"
 			)
 		else:
-			return frappe.db.sql(
-				"""
-				select q.name
-				from `tabQuotation` q, `tabQuotation Item` qi
-				where q.name = qi.parent and q.docstatus=1 and qi.prevdoc_docname =%s
-				and q.status = 'Ordered'""",
-				self.name,
+			q = frappe.qb.DocType("Quotation")
+			qi = frappe.qb.DocType("Quotation Item")
+			return (
+				frappe.qb.from_(q)
+				.inner_join(qi)
+				.on(q.name == qi.parent)
+				.select(q.name)
+				.where((q.docstatus == 1) & (qi.prevdoc_docname == self.name) & (q.status == "Ordered"))
+				.run()
 			)
 
 	def has_lost_quotation(self):
-		lost_quotation = frappe.db.sql(
-			"""
-			select name
-			from `tabQuotation`
-			where docstatus=1
-				and opportunity =%s and status = 'Lost'
-			""",
-			self.name,
+		lost_quotation = frappe.get_all(
+			"Quotation", filters={"docstatus": 1, "opportunity": self.name, "status": "Lost"}
 		)
 		if lost_quotation:
 			if self.has_active_quotation():
@@ -371,19 +373,19 @@ class Opportunity(TransactionBase, CRMNote):
 
 @frappe.whitelist()
 def get_item_details(item_code: str):
-	item = frappe.db.sql(
-		"""select item_name, stock_uom, image, description, item_group, brand
-		from `tabItem` where name = %s""",
+	item = frappe.db.get_value(
+		"Item",
 		item_code,
-		as_dict=1,
+		["item_name", "stock_uom", "image", "description", "item_group", "brand"],
+		as_dict=True,
 	)
 	return {
-		"item_name": item and item[0]["item_name"] or "",
-		"uom": item and item[0]["stock_uom"] or "",
-		"description": item and item[0]["description"] or "",
-		"image": item and item[0]["image"] or "",
-		"item_group": item and item[0]["item_group"] or "",
-		"brand": item and item[0]["brand"] or "",
+		"item_name": item and item.item_name or "",
+		"uom": item and item.stock_uom or "",
+		"description": item and item.description or "",
+		"image": item and item.image or "",
+		"item_group": item and item.item_group or "",
+		"brand": item and item.brand or "",
 	}
 
 

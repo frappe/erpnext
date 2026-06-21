@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-06-14 10:35+0000\n"
-"PO-Revision-Date: 2026-06-14 17:01\n"
+"PO-Revision-Date: 2026-06-17 17:52\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -4507,7 +4507,7 @@ msgstr "آیتم جایگزین"
 
 #: erpnext/stock/report/item_where_used/item_where_used.py:427
 msgid "Alternative For Item"
-msgstr ""
+msgstr "جایگزین برای آیتم"
 
 #. Label of the alternative_item_code (Link) field in DocType 'Item
 #. Alternative'
@@ -6828,7 +6828,7 @@ msgstr "ابزار مقایسه BOM"
 
 #: erpnext/stock/report/item_where_used/item_where_used.py:178
 msgid "BOM Component"
-msgstr ""
+msgstr "مولفه BOM"
 
 #. Label of the bom_conf_tab (Tab Break) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
@@ -6859,7 +6859,7 @@ msgstr "آیتم ایجاد کننده BOM"
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:392
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:535
 msgid "BOM Creator Item with name {0} does not exist"
-msgstr ""
+msgstr "آیتم سازنده BOM با نام {0} وجود ندارد"
 
 #. Label of the bom_detail_no (Data) field in DocType 'Purchase Receipt Item
 #. Supplied'
@@ -6959,7 +6959,7 @@ msgstr "زمان عملیات BOM"
 
 #: erpnext/stock/report/item_where_used/item_where_used.py:248
 msgid "BOM Output"
-msgstr ""
+msgstr "خروجی BOM"
 
 #: erpnext/stock/report/item_prices/item_prices.py:60
 msgid "BOM Rate"
@@ -7630,7 +7630,7 @@ msgstr "تراکنش بانکی {0} به روز شد"
 
 #: banking/src/pages/BankReconciliation.tsx:118
 msgid "Bank Transactions"
-msgstr ""
+msgstr "تراکنش‌های بانکی"
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:584
 msgid "Bank account cannot be named as {0}"
@@ -8132,13 +8132,13 @@ msgstr "تاریخ صورتحساب"
 #. 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
 msgid "Bill Even If Previous Invoice Unpaid"
-msgstr ""
+msgstr "صدور صورتحساب حتی اگر فاکتور قبلی پرداخت نشده باشد"
 
 #. Option for the 'Generate Invoice At' (Select) field in DocType
 #. 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
 msgid "Bill N days before period start"
-msgstr ""
+msgstr "صورتحساب N روز قبل از شروع دوره"
 
 #. Label of the bill_no (Data) field in DocType 'Journal Entry'
 #. Label of the bill_no (Data) field in DocType 'Subcontracting Receipt'
@@ -8320,13 +8320,13 @@ msgstr "ایمیل صورتحساب"
 #. Label of the billing_heatmap (HTML) field in DocType 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
 msgid "Billing Heatmap"
-msgstr ""
+msgstr "نقشه حرارتی صورتحساب"
 
 #. Label of the billing_history_section (Section Break) field in DocType
 #. 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
 msgid "Billing History"
-msgstr ""
+msgstr "تاریخچه صورتحساب"
 
 #. Label of the billing_hours (Float) field in DocType 'Sales Invoice
 #. Timesheet'
@@ -8360,7 +8360,7 @@ msgstr "بازه صورتحساب در طرح اشتراک باید ماه با�
 #. 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
 msgid "Billing Period"
-msgstr ""
+msgstr "دوره صورتحساب"
 
 #. Label of the billing_rate (Currency) field in DocType 'Activity Cost'
 #. Label of the billing_rate (Currency) field in DocType 'Timesheet Detail'
@@ -8905,11 +8905,11 @@ msgstr "ساختمان ها"
 
 #: banking/src/components/features/ActionLog/ActionLogDialogBody.tsx:88
 msgid "Bulk Bank Entry"
-msgstr ""
+msgstr "ثبت بانک انبوه"
 
 #: banking/src/components/features/ActionLog/ActionLogDialogBody.tsx:76
 msgid "Bulk Payment"
-msgstr ""
+msgstr "پرداخت انبوه"
 
 #: erpnext/utilities/doctype/rename_tool/rename_tool.js:71
 msgid "Bulk Rename Jobs"
@@ -9457,7 +9457,7 @@ msgstr "لغو اشتراک پس از دوره مهلت"
 #. Label of the cancel_at_period_end (Check) field in DocType 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
 msgid "Cancel When Period Ends"
-msgstr ""
+msgstr "لغو هنگام پایان دوره"
 
 #. Label of the cancelation_date (Date) field in DocType 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
@@ -13320,7 +13320,7 @@ msgstr "ایجاد سرنخ جدید"
 
 #: erpnext/selling/doctype/product_bundle/product_bundle.js:16
 msgid "Create New Version"
-msgstr ""
+msgstr "ایجاد نسخه جدید"
 
 #: banking/src/components/common/LinkFieldCombobox.tsx:284
 msgid "Create New {0}"
@@ -14201,12 +14201,12 @@ msgstr "نرخ ارز فعلی"
 #. Label of the current_invoice_end (Date) field in DocType 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
 msgid "Current Invoice End"
-msgstr ""
+msgstr "پایان فاکتور فعلی"
 
 #. Label of the current_invoice_start (Date) field in DocType 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
 msgid "Current Invoice Start"
-msgstr ""
+msgstr "شروع فاکتور فعلی"
 
 #. Label of the current_level (Int) field in DocType 'BOM Update Log'
 #: erpnext/manufacturing/doctype/bom_update_log/bom_update_log.json
@@ -17153,7 +17153,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/packed_item/packed_item.py:216
 msgid "Disabled Product Bundle"
-msgstr ""
+msgstr "بسته محصول غیرفعال"
 
 #: erpnext/stock/utils.py:434
 msgid "Disabled Warehouse {0} cannot be used for this transaction."
@@ -17162,7 +17162,7 @@ msgstr "از انبار غیرفعال شده {0} نمی‌توان برای ا�
 #. Description of the 'Disabled' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Disabled items cannot be selected in any transaction."
-msgstr ""
+msgstr "اقلام غیرفعال را نمی‌توان در هیچ تراکنشی انتخاب کرد."
 
 #: erpnext/accounts/services/internal_transfer.py:118
 msgid "Disabled pricing rules since this {} is an internal transfer"
@@ -25029,7 +25029,7 @@ msgstr "مرجع فروش داخلی وجود ندارد"
 #. 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "Internal Supplier Details"
-msgstr ""
+msgstr "جزئیات تأمین‌کننده داخلی"
 
 #: erpnext/buying/doctype/supplier/supplier.py:180
 msgid "Internal Supplier for company {0} already exists"
@@ -25060,7 +25060,7 @@ msgstr "مرجع انتقال داخلی وجود ندارد"
 #. DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Internal Transfer Rules"
-msgstr ""
+msgstr "قوانین انتقال داخلی"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice_dashboard.py:37
 msgid "Internal Transfers"
@@ -25196,7 +25196,7 @@ msgstr "نوع سند نامعتبر است"
 
 #: erpnext/selling/report/sales_analytics/sales_analytics.py:529
 msgid "Invalid Document Type {0}"
-msgstr ""
+msgstr "نوع سند نامعتبر {0}"
 
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.py:207
 msgid "Invalid File Type"
@@ -25313,7 +25313,7 @@ msgstr "انبار منبع و هدف نامعتبر"
 
 #: erpnext/selling/report/sales_analytics/sales_analytics.py:507
 msgid "Invalid Tree Type {0}"
-msgstr ""
+msgstr "نوع درخت نامعتبر {0}"
 
 #: erpnext/edi/doctype/code_list/code_list_import.py:37
 msgid "Invalid Upload"
@@ -25374,11 +25374,11 @@ msgstr "پرسمان جستجوی نامعتبر"
 
 #: erpnext/accounts/report/inactive_sales_items/inactive_sales_items.py:99
 msgid "Invalid value {0} for 'Based On'"
-msgstr ""
+msgstr "مقدار نامعتبر {0} برای 'Based On'"
 
 #: erpnext/selling/report/inactive_customers/inactive_customers.py:20
 msgid "Invalid value {0} for 'Doctype'"
-msgstr ""
+msgstr "مقدار نامعتبر {0} برای 'Doctype'"
 
 #: erpnext/accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:109
 #: erpnext/accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:119
@@ -25411,7 +25411,7 @@ msgstr "فهرست موجودی"
 #. Default'
 #: erpnext/stock/doctype/item_default/item_default.json
 msgid "Inventory Account"
-msgstr ""
+msgstr "حساب موجودی"
 
 #. Label of the inventory_account_currency (Link) field in DocType 'Item
 #. Default'
@@ -26993,7 +26993,7 @@ msgstr "نام گروه آیتم"
 
 #: erpnext/setup/doctype/item_group/item_group.js:119
 msgid "Item Group Override"
-msgstr ""
+msgstr "بازتعریف گروه آیتم"
 
 #: erpnext/setup/doctype/item_group/item_group.js:82
 msgid "Item Group Tree"
@@ -27267,7 +27267,7 @@ msgstr "آیتم موجود نیست"
 #. Default'
 #: erpnext/stock/doctype/item_default/item_default.json
 msgid "Item Override"
-msgstr ""
+msgstr "بازتعریف آیتم"
 
 #. Label of a Link in the Buying Workspace
 #. Label of a Link in the Selling Workspace
@@ -29370,7 +29370,7 @@ msgstr "نگهداری موجودی"
 #. DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Maintain same rate throughout internal Transaction"
-msgstr ""
+msgstr "حفظ نرخ یکسان در کل تراکنش‌های داخلی"
 
 #. Label of the maintain_same_sales_rate (Check) field in DocType 'Selling
 #. Settings'
@@ -30760,7 +30760,7 @@ msgstr "ادغام پیشرفت"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Merge similar Account Heads"
-msgstr ""
+msgstr "ادغام سر فصل‌های حساب مشابه"
 
 #: erpnext/public/js/utils.js:1090
 msgid "Merge taxes from multiple documents"
@@ -31140,7 +31140,7 @@ msgstr ""
 
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.py:929
 msgid "Missing Dependency"
-msgstr ""
+msgstr "وابستگی گمشده"
 
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:44
 msgid "Missing Filters"
@@ -31627,7 +31627,7 @@ msgstr "مقدار منفی مجاز نیست"
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Negative Stock"
-msgstr ""
+msgstr "موجودی منفی"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1608
 #: erpnext/stock/serial_batch_bundle.py:1549
@@ -32295,7 +32295,7 @@ msgstr "هیچ تامین کننده ای برای Inter Company Transactions ی
 
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.py:976
 msgid "No Tables Detected"
-msgstr ""
+msgstr "هیچ جدولی شناسایی نشد"
 
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.py:100
 msgid "No Tax Withholding data found for the current posting date."
@@ -32341,7 +32341,7 @@ msgstr "هیچ BOM فعالی برای آیتم {0} یافت نشد. تحویل 
 
 #: erpnext/stock/doctype/item/item_prices.html:135
 msgid "No active item prices found."
-msgstr ""
+msgstr "هیچ قیمت آیتم فعالی یافت نشد."
 
 #: erpnext/stock/doctype/item_variant_settings/item_variant_settings.js:46
 msgid "No additional fields available"
@@ -43778,7 +43778,7 @@ msgstr "پیوند شطرنجی را تازه کنید"
 #. Option for the 'Status' (Select) field in DocType 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
 msgid "Refunded"
-msgstr ""
+msgstr "استرداد وجه شده"
 
 #: erpnext/stock/reorder_item.py:390
 msgid "Regards,"
@@ -43889,7 +43889,7 @@ msgstr "مربوط"
 
 #: erpnext/stock/report/item_where_used/item_where_used.py:50
 msgid "Related Item"
-msgstr ""
+msgstr "آیتم مرتبط"
 
 #. Label of the relation (Data) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -48858,7 +48858,7 @@ msgstr "مبلغ فروش"
 #. Default'
 #: erpnext/stock/doctype/item_default/item_default.json
 msgid "Selling Cost Center"
-msgstr ""
+msgstr "مرکز هزینه فروش"
 
 #: erpnext/stock/report/item_price_stock/item_price_stock.py:48
 msgid "Selling Price List"
@@ -49026,7 +49026,7 @@ msgstr "شماره های سریال / دسته ای"
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Serial Item settings"
-msgstr ""
+msgstr "تنظیمات آیتم سریال"
 
 #. Label of the serial_no (Text) field in DocType 'POS Invoice Item'
 #. Label of the serial_no (Text) field in DocType 'Purchase Invoice Item'
@@ -50640,7 +50640,7 @@ msgstr "نمایش جزئیات پرداخت"
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Show Payment Schedule in print"
-msgstr ""
+msgstr "نمایش زمان‌بندی پرداخت در چاپ"
 
 #. Label of the show_remarks (Check) field in DocType 'Process Statement Of
 #. Accounts'
@@ -50684,12 +50684,12 @@ msgstr ""
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Show balances in Chart of Accounts"
-msgstr ""
+msgstr "نمایش ترازها در نمودار حساب‌ها"
 
 #. Label of the show_barcode_field (Check) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Show barcode field in stock transactions"
-msgstr ""
+msgstr "نمایش فیلد بارکد در تراکنش‌های موجودی"
 
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.js:88
 msgid "Show in Bucket View"
@@ -50704,7 +50704,7 @@ msgstr "نمایش در وب سایت"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Show inclusive tax in print"
-msgstr ""
+msgstr "نمایش مالیات فراگیر در چاپ"
 
 #. Description of the 'Reverse Sign' (Check) field in DocType 'Financial Report
 #. Row'
@@ -50738,7 +50738,7 @@ msgstr "نمایش ثبت‌های در انتظار"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Show taxes as table in print"
-msgstr ""
+msgstr "نمایش مالیات‌ها به صورت جدول در چاپ"
 
 #: erpnext/accounts/report/consolidated_trial_balance/consolidated_trial_balance.js:80
 #: erpnext/accounts/report/trial_balance/trial_balance.js:100
@@ -50839,7 +50839,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:503
 msgid "Since there is a process loss of {0} units for the finished good {1}, you should reduce the quantity by {0} units for the finished good {1} in the Items Table."
-msgstr ""
+msgstr "از آنجایی که برای کالای نهایی {1}، اتلاف فرآیند {0} واحد وجود دارد، شما باید مقدار {0} واحد برای کالای نهایی {1} در جدول آیتم‌ها را کاهش دهید."
 
 #: erpnext/manufacturing/doctype/bom/bom.py:355
 msgid "Since you have enabled 'Track Semi Finished Goods', at least one operation must have 'Is Final Finished Good' checked. For that set the FG / Semi FG Item as {0} against an operation."
@@ -51444,7 +51444,7 @@ msgstr ""
 #. Label of the statement_password (Password) field in DocType 'Bank Account'
 #: erpnext/accounts/doctype/bank_account/bank_account.json
 msgid "Statement PDF Password"
-msgstr ""
+msgstr "گذرواژه PDF صورتحساب"
 
 #: erpnext/accounts/report/general_ledger/general_ledger.html:145
 msgid "Statement Period"
@@ -52288,7 +52288,7 @@ msgstr ""
 #. Label of the stock_frozen_upto (Date) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Stock frozen up to"
-msgstr ""
+msgstr "موجودی منجمد تا"
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1140
 msgid "Stock has been unreserved for work order {0}."
@@ -52556,7 +52556,7 @@ msgstr ""
 
 #: erpnext/stock/report/item_where_used/item_where_used.py:362
 msgid "Subcontracting Finished Good"
-msgstr ""
+msgstr "کالای نهایی پیمان‌کاری فرعی"
 
 #. Label of the subcontracting_inward_tab (Tab Break) field in DocType 'Selling
 #. Settings'
@@ -52740,7 +52740,7 @@ msgstr ""
 
 #: erpnext/stock/report/item_where_used/item_where_used.py:336
 msgid "Subcontracting Service Item"
-msgstr ""
+msgstr "آیتم خدمات پیمانکاری فرعی"
 
 #. Label of the subcontract (Tab Break) field in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
@@ -52776,7 +52776,7 @@ msgstr "فاکتورهای تولید شده را ارسال کنید"
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Submit Journal entries"
-msgstr ""
+msgstr "ارسال ثبت‌های دفتر روزنامه"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:185
 msgid "Submit this Work Order for further processing."
@@ -52788,7 +52788,7 @@ msgstr "پیش‌فاکتور خود را ارسال کنید"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1570
 msgid "Submitted Job Card cannot be processed."
-msgstr ""
+msgstr "کارت شغلی ارسال‌شده قابل پردازش نیست."
 
 #. Label of the subscription_section (Section Break) field in DocType 'Payment
 #. Request'
@@ -53733,7 +53733,7 @@ msgstr "جدول برای آیتم که در وب سایت نشان داده خ�
 #: banking/src/components/features/BankStatementImporter/PDF/PDFTableEditor.tsx:312
 #: banking/src/components/features/BankStatementImporter/PDF/PDFTableEditor.tsx:329
 msgid "Table {0}"
-msgstr ""
+msgstr "جدول {0}"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -54133,7 +54133,7 @@ msgstr "شناسه مالیاتی: {0}"
 #. Label of the taxation_section (Section Break) field in DocType 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "Tax Identification"
-msgstr ""
+msgstr "شناسایی مالیات"
 
 #. Label of a Card Break in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
@@ -55545,7 +55545,7 @@ msgstr "هنگام انجام اقدام خطایی رخ داد."
 
 #: banking/src/components/ui/error-banner.tsx:21
 msgid "There was an error."
-msgstr ""
+msgstr "خطایی رخ داده است."
 
 #: erpnext/accounts/doctype/bank/bank.js:112
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.js:119

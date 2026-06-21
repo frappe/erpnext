@@ -404,11 +404,13 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			);
 		}
 
-		const inspection_type = ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"].includes(
-			this.frm.doc.doctype
-		)
-			? "Incoming"
-			: "Outgoing";
+		const incoming_doctypes = ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"];
+		const incoming_purposes = ["Manufacture", "Material Receipt"];
+		const inspection_type =
+			incoming_doctypes.includes(this.frm.doc.doctype) ||
+			(this.frm.doc.doctype === "Stock Entry" && incoming_purposes.includes(this.frm.doc.purpose))
+				? "Incoming"
+				: "Outgoing";
 
 		let quality_inspection_field = this.frm.get_docfield("items", "quality_inspection");
 		quality_inspection_field.get_route_options_for_new_doc = function (row) {
@@ -600,6 +602,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	refresh() {
 		erpnext.toggle_naming_series();
 		erpnext.hide_company(this.frm);
+		// Remember the currency the rendered document is denominated in, so that a
+		// real currency change can be told apart from a mere exchange rate refresh
+		// (e.g. triggered by a date change).
+		this._doc_currency = this.frm.doc.currency;
 		this.set_dynamic_labels();
 		this.setup_sms();
 		this.setup_quality_inspection();
@@ -1470,6 +1476,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		let me = this;
 		this.set_dynamic_labels();
 		let company_currency = this.get_company_currency();
+		// Currency the stored margins/actual charges are denominated in, captured
+		// before this trigger updates the tracker for the next one.
+		let previous_currency = this._doc_currency;
+		this._doc_currency = this.frm.doc.currency;
 		// Added `load_after_mapping` to determine if document is loading after mapping from another doc
 		if (
 			this.frm.doc.currency &&
@@ -1482,8 +1492,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				company_currency,
 				function (exchange_rate) {
 					if (exchange_rate != me.frm.doc.conversion_rate) {
-						me.set_margin_amount_based_on_currency(exchange_rate);
-						me.set_actual_charges_based_on_currency(exchange_rate);
+						// Margins and actual charges are amounts in the transaction
+						// currency; convert them only when the currency itself changed,
+						// not when just the exchange rate was refreshed (e.g. by a date
+						// change), otherwise the entered margin keeps shrinking.
+						if (previous_currency !== me.frm.doc.currency) {
+							me.set_margin_amount_based_on_currency(exchange_rate);
+							me.set_actual_charges_based_on_currency(exchange_rate);
+						}
 						me.frm.set_value("conversion_rate", exchange_rate);
 					}
 				}
@@ -2894,11 +2910,13 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		];
 
 		const me = this;
-		const inspection_type = ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"].includes(
-			this.frm.doc.doctype
-		)
-			? "Incoming"
-			: "Outgoing";
+		const incoming_doctypes = ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"];
+		const incoming_purposes = ["Manufacture", "Material Receipt"];
+		const inspection_type =
+			incoming_doctypes.includes(this.frm.doc.doctype) ||
+			(this.frm.doc.doctype === "Stock Entry" && incoming_purposes.includes(this.frm.doc.purpose))
+				? "Incoming"
+				: "Outgoing";
 		const dialog = new frappe.ui.Dialog({
 			title: __("Select Items for Quality Inspection"),
 			size: "extra-large",

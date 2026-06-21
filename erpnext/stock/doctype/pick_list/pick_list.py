@@ -9,8 +9,7 @@ import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 from frappe.query_builder import Case
-from frappe.query_builder.custom import GROUP_CONCAT
-from frappe.query_builder.functions import Coalesce, Locate, Replace, Sum
+from frappe.query_builder.functions import Coalesce, GroupConcat, Locate, Lower, Max, Replace, Sum
 from frappe.utils import cint, floor, flt, get_link_to_form
 from frappe.utils.nestedset import get_descendants_of
 
@@ -903,30 +902,32 @@ def update_pick_list_status(pick_list):
 def get_picked_items_qty(items, contains_packed_items=False) -> list[dict]:
 	pi_item = frappe.qb.DocType("Pick List Item")
 
+	group_field = pi_item.product_bundle_item if contains_packed_items else pi_item.sales_order_item
+	conditions = (pi_item.docstatus == 1) & group_field.isin(items)
+
 	query = (
 		frappe.qb.from_(pi_item)
 		.select(
-			pi_item.sales_order_item,
-			pi_item.product_bundle_item,
-			pi_item.item_code,
+			# only one of sales_order_item / product_bundle_item is grouped per branch below; Max()
+			# the rest so postgres accepts the query (each is constant within its group)
+			Max(pi_item.sales_order_item).as_("sales_order_item"),
+			Max(pi_item.product_bundle_item).as_("product_bundle_item"),
+			Max(pi_item.item_code).as_("item_code"),
 			pi_item.sales_order,
 			Sum(pi_item.stock_qty).as_("stock_qty"),
 			Sum(pi_item.picked_qty).as_("picked_qty"),
 		)
-		.where(pi_item.docstatus == 1)
-		.for_update()
+		.where(conditions)
+		.groupby(group_field, pi_item.sales_order)
 	)
 
-	if contains_packed_items:
-		query = query.groupby(
-			pi_item.product_bundle_item,
-			pi_item.sales_order,
-		).where(pi_item.product_bundle_item.isin(items))
+	# Lock the picked-qty rows so a concurrent pick can't change them mid-transaction. MariaDB carries
+	# the lock on the grouped query; postgres rejects FOR UPDATE with GROUP BY, so lock the same rows
+	# in a separate plain SELECT first (held for the transaction).
+	if frappe.db.db_type == "postgres":
+		frappe.qb.from_(pi_item).select(pi_item.name).where(conditions).for_update().run()
 	else:
-		query = query.groupby(
-			pi_item.sales_order_item,
-			pi_item.sales_order,
-		).where(pi_item.sales_order_item.isin(items))
+		query = query.for_update()
 
 	return query.run(as_dict=True)
 
@@ -1300,7 +1301,11 @@ def get_pending_work_orders(
 			& (wo.company == filters.get("company"))
 			& (wo.name.like(f"%{txt}%"))
 		)
-		.orderby(Case().when(Locate(txt, wo.name) > 0, Locate(txt, wo.name)).else_(99999))
+		.orderby(
+			Case()
+			.when(Locate(Lower(txt), Lower(wo.name)) > 0, Locate(Lower(txt), Lower(wo.name)))
+			.else_(99999)
+		)
 		.orderby(wo.name)
 		.limit(cint(page_length))
 		.offset(start)
@@ -1365,13 +1370,16 @@ def get_pick_list_query(doctype: Any, txt: str, searchfield: Any, start: int, pa
 		.select(
 			PICK_LIST.name,
 			SALES_ORDER.customer,
-			Replace(GROUP_CONCAT(PICK_LIST_ITEM.sales_order).distinct(), ",", "<br>").as_("sales_order"),
+			Replace(GroupConcat(PICK_LIST_ITEM.sales_order).distinct(), ",", "<br>").as_("sales_order"),
 		)
 		.where(PICK_LIST.docstatus == 1)
 		.where(PICK_LIST.status.isin(["Open", "Partly Delivered"]))
 		.where(PICK_LIST.company == filters.get("company"))
 		.where(SALES_ORDER.customer == filters.get("customer"))
-		.groupby(PICK_LIST.name)
+		# customer is from the joined Sales Order, not Pick List's PK, so Postgres rejects it as a bare
+		# select under GROUP BY pick_list.name; it is pinned to one value by the filter above, so adding
+		# it to the GROUP BY is valid on Postgres and identical on MariaDB.
+		.groupby(PICK_LIST.name, SALES_ORDER.customer)
 	)
 
 	if filters.get("sales_order"):

@@ -99,23 +99,24 @@ class TimesheetBillingService:
 		doc.total_billing_hours = sum(flt(ts.billing_hours) for ts in doc.timesheets)
 
 	def _update_time_sheet_detail(self, timesheet, args, sales_invoice: str | None) -> None:
-		doc = self.doc
 		for data in timesheet.time_logs:
-			if (
-				(doc.project and args.timesheet_detail == data.name)
-				or (not doc.project and not data.sales_invoice and args.timesheet_detail == data.name)
-				or (
-					not sales_invoice
-					and data.sales_invoice == doc.name
-					and args.timesheet_detail == data.name
-				)
-				or (
-					doc.is_return
-					and doc.return_against
-					and data.sales_invoice
-					and data.sales_invoice == doc.return_against
-					and not sales_invoice
-					and args.timesheet_detail == data.name
-				)
-			):
+			if args.timesheet_detail == data.name and self._should_set_sales_invoice(data, sales_invoice):
 				data.sales_invoice = sales_invoice
+
+	def _should_set_sales_invoice(self, time_log, sales_invoice: str | None) -> bool:
+		"""Whether this time log's sales-invoice link should be (re)set to sales_invoice."""
+		doc = self.doc
+		if doc.project:
+			return True
+		if not time_log.sales_invoice:
+			return True
+		if not sales_invoice and time_log.sales_invoice == doc.name:
+			# clearing the link on cancellation of this invoice
+			return True
+		# clearing the link on a return raised against the original invoice
+		return bool(
+			doc.is_return
+			and doc.return_against
+			and not sales_invoice
+			and time_log.sales_invoice == doc.return_against
+		)

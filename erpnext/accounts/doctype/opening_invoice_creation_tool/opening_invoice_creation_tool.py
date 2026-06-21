@@ -270,6 +270,13 @@ def start_import(invoices):
 	errors = 0
 	names = []
 	for idx, d in enumerate(invoices):
+		# Scope each invoice to a savepoint so a failure only undoes that invoice.
+		# A plain rollback() would discard the whole transaction — including invoices
+		# imported earlier in this batch and the error logs of earlier failures (the
+		# latter only survive on mariadb because the Error Log table is MyISAM; on
+		# postgres they would be lost). Rolling back to a savepoint keeps both.
+		savepoint = f"opening_invoice_{frappe.generate_hash(length=8)}"
+		frappe.db.savepoint(savepoint)
 		try:
 			invoice_number = None
 			if d.invoice_number:
@@ -284,7 +291,7 @@ def start_import(invoices):
 			names.append(doc.name)
 		except Exception:
 			errors += 1
-			frappe.db.rollback()
+			frappe.db.rollback(save_point=savepoint)
 			doc.log_error("Opening invoice creation failed")
 	if errors:
 		frappe.msgprint(

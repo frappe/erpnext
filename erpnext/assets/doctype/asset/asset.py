@@ -735,12 +735,16 @@ class Asset(AccountsController):
 			frappe.throw(_("Asset cannot be cancelled, as it is already {0}").format(self.status))
 
 	def cancel_movement_entries(self):
-		movements = frappe.db.sql(
-			"""SELECT asm.name, asm.docstatus
-			FROM `tabAsset Movement` asm, `tabAsset Movement Item` asm_item
-			WHERE asm_item.parent=asm.name and asm_item.asset=%s and asm.docstatus=1""",
-			self.name,
-			as_dict=1,
+		# filter the parent Asset Movement's docstatus (as the original SQL did), not the child row's
+		asm = frappe.qb.DocType("Asset Movement")
+		asm_item = frappe.qb.DocType("Asset Movement Item")
+		movements = (
+			frappe.qb.from_(asm_item)
+			.inner_join(asm)
+			.on(asm_item.parent == asm.name)
+			.select(asm.name)
+			.where((asm_item.asset == self.name) & (asm.docstatus == 1))
+			.run(as_dict=True)
 		)
 
 		for movement in movements:
@@ -860,15 +864,18 @@ class Asset(AccountsController):
 		cwip_enabled = is_cwip_accounting_enabled(self.asset_category)
 		cwip_account = self.get_cwip_account(cwip_enabled=cwip_enabled)
 
-		query = """SELECT name FROM `tabGL Entry` WHERE voucher_no = %s and account = %s"""
 		if asset_bought_with_invoice:
 			# with invoice purchase either expense or cwip has been booked
-			expense_booked = frappe.db.sql(query, (purchase_document, fixed_asset_account), as_dict=1)
+			expense_booked = frappe.db.exists(
+				"GL Entry", {"voucher_no": purchase_document, "account": fixed_asset_account}
+			)
 			if expense_booked:
 				# if expense is already booked from invoice then do not make gl entries regardless of cwip enabled/disabled
 				return False
 
-			cwip_booked = frappe.db.sql(query, (purchase_document, cwip_account), as_dict=1)
+			cwip_booked = frappe.db.exists(
+				"GL Entry", {"voucher_no": purchase_document, "account": cwip_account}
+			)
 			if cwip_booked:
 				# if cwip is booked from invoice then make gl entries regardless of cwip enabled/disabled
 				return True
@@ -878,10 +885,11 @@ class Asset(AccountsController):
 				# if cwip account isn't available do not make gl entries
 				return False
 
-			cwip_booked = frappe.db.sql(query, (purchase_document, cwip_account), as_dict=1)
 			# if cwip is not booked from receipt then do not make gl entries
 			# if cwip is booked from receipt then make gl entries
-			return cwip_booked
+			return bool(
+				frappe.db.exists("GL Entry", {"voucher_no": purchase_document, "account": cwip_account})
+			)
 
 	def get_purchase_document(self):
 		asset_bought_with_invoice = self.purchase_invoice and frappe.db.get_value(
@@ -1074,11 +1082,15 @@ def make_post_gl_entry():
 
 	for asset_category in asset_categories:
 		if cint(asset_category.enable_cwip_accounting):
-			assets = frappe.db.sql_list(
-				""" select name from `tabAsset`
-				where asset_category = %s and ifnull(booked_fixed_asset, 0) = 0
-				and available_for_use_date = %s and docstatus = 1""",
-				(asset_category.name, nowdate()),
+			assets = frappe.get_all(
+				"Asset",
+				filters={
+					"asset_category": asset_category.name,
+					"booked_fixed_asset": 0,
+					"available_for_use_date": nowdate(),
+					"docstatus": 1,
+				},
+				pluck="name",
 			)
 
 			for asset in assets:

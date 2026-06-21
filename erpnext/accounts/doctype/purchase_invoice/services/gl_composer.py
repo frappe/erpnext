@@ -395,10 +395,14 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 			):
 				# Post reverse entry for Stock-Received-But-Not-Billed if booked in Purchase Receipt
 				if item.purchase_receipt and valuation_tax_accounts:
-					negative_expense_booked_in_pr = frappe.db.sql(
-						"""select name from `tabGL Entry`
-							where voucher_type='Purchase Receipt' and voucher_no=%s and account in %s""",
-						(item.purchase_receipt, valuation_tax_accounts),
+					negative_expense_booked_in_pr = frappe.get_all(
+						"GL Entry",
+						filters={
+							"voucher_type": "Purchase Receipt",
+							"voucher_no": item.purchase_receipt,
+							"account": ["in", valuation_tax_accounts],
+						},
+						pluck="name",
 					)
 
 					(

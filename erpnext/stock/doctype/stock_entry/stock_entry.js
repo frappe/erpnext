@@ -216,10 +216,11 @@ frappe.ui.form.on("Stock Entry", {
 		}
 
 		let quality_inspection_field = frm.get_docfield("items", "quality_inspection");
+		const incoming_purposes = ["Manufacture", "Material Receipt"];
 		quality_inspection_field.get_route_options_for_new_doc = function (row) {
 			if (frm.is_new()) return {};
 			return {
-				inspection_type: "Incoming",
+				inspection_type: incoming_purposes.includes(frm.doc.purpose) ? "Incoming" : "Outgoing",
 				reference_type: frm.doc.doctype,
 				reference_name: frm.doc.name,
 				child_row_reference: row.doc.name,

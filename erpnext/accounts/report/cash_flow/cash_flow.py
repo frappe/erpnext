@@ -7,6 +7,7 @@ from datetime import timedelta
 import frappe
 from frappe import _
 from frappe.query_builder import DocType
+from frappe.query_builder.functions import Sum
 from frappe.utils import cstr, flt
 from pypika import Order
 
@@ -213,37 +214,43 @@ def get_account_type_based_data(company, account_type, period_list, accumulated_
 
 
 def get_account_type_based_gl_data(company, filters=None):
-	cond = ""
 	filters = frappe._dict(filters or {})
+
+	gle = frappe.qb.DocType("GL Entry")
+	account = frappe.qb.DocType("Account")
+
+	query = (
+		frappe.qb.from_(gle)
+		.select(Sum(gle.credit) - Sum(gle.debit))
+		.where(
+			(gle.company == company)
+			& (gle.posting_date >= filters.start_date)
+			& (gle.posting_date <= filters.end_date)
+			& (gle.voucher_type != "Period Closing Voucher")
+			& gle.account.isin(
+				frappe.qb.from_(account)
+				.select(account.name)
+				.where(account.account_type == filters.account_type)
+			)
+		)
+	)
 
 	if filters.include_default_book_entries:
 		company_fb = frappe.get_cached_value("Company", company, "default_finance_book")
-		cond = """ AND (finance_book in ({}, {}, '') OR finance_book IS NULL)
-			""".format(
-			frappe.db.escape(filters.finance_book),
-			frappe.db.escape(company_fb),
+		query = query.where(
+			gle.finance_book.isin([filters.finance_book, company_fb, ""]) | gle.finance_book.isnull()
 		)
 	else:
-		cond = " AND (finance_book in (%s, '') OR finance_book IS NULL)" % (
-			frappe.db.escape(cstr(filters.finance_book))
+		query = query.where(
+			gle.finance_book.isin([cstr(filters.finance_book), ""]) | gle.finance_book.isnull()
 		)
 
 	if filters.get("cost_center"):
-		filters.cost_center = get_cost_centers_with_children(filters.cost_center)
-		cond += " and cost_center in %(cost_center)s"
+		cost_centers = get_cost_centers_with_children(filters.cost_center)
+		query = query.where(gle.cost_center.isin(cost_centers))
 
-	gl_sum = frappe.db.sql_list(
-		f"""
-		select sum(credit) - sum(debit)
-		from `tabGL Entry`
-		where company=%(company)s and posting_date >= %(start_date)s and posting_date <= %(end_date)s
-			and voucher_type != 'Period Closing Voucher'
-			and account in ( SELECT name FROM tabAccount WHERE account_type = %(account_type)s) {cond}
-	""",
-		filters,
-	)
-
-	return gl_sum[0] if gl_sum and gl_sum[0] else 0
+	gl_sum = query.run()
+	return gl_sum[0][0] if gl_sum and gl_sum[0][0] else 0
 
 
 def get_start_date(period, accumulated_values, company):
@@ -367,11 +374,10 @@ def get_net_income(company, period_list, filters):
 	from_date, to_date = get_opening_range_using_fiscal_year(company, period_list)
 
 	for root_type in ["Income", "Expense"]:
-		for root in frappe.db.sql(
-			"""select lft, rgt from tabAccount
-				where root_type=%s and ifnull(parent_account, '') = ''""",
-			root_type,
-			as_dict=1,
+		for root in frappe.get_all(
+			"Account",
+			filters={"root_type": root_type, "parent_account": ["is", "not set"]},
+			fields=["lft", "rgt"],
 		):
 			set_gl_entries_by_account(
 				company,

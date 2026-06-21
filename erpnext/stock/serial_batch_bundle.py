@@ -851,6 +851,30 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 					child.creation < self.sle.creation
 				)
 
+		conditions = (
+			(child.item_code == self.sle.item_code)
+			& (child.warehouse == self.sle.warehouse)
+			& (child.batch_no.isin(self.batchwise_valuation_batches))
+			& (child.docstatus == 1)
+			& (child.type_of_transaction.isin(["Inward", "Outward"]))
+		)
+
+		# Important to exclude the current voucher detail no / voucher no to calculate the correct stock value difference
+		if self.sle.voucher_detail_no:
+			conditions &= child.voucher_detail_no != self.sle.voucher_detail_no
+		elif self.sle.voucher_no:
+			conditions &= child.voucher_no != self.sle.voucher_no
+
+		conditions &= child.voucher_type != "Pick List"
+		if timestamp_condition:
+			conditions &= timestamp_condition
+
+		# Lock the scanned rows so a concurrent stock transaction can't change them mid-valuation.
+		# MariaDB carries the lock on the grouped query; postgres rejects FOR UPDATE with GROUP BY, so
+		# lock the same rows in a separate plain SELECT first (held for the transaction).
+		if frappe.db.db_type == "postgres":
+			frappe.qb.from_(child).select(child.name).where(conditions).for_update().run()
+
 		query = (
 			frappe.qb.from_(child)
 			.select(
@@ -858,26 +882,11 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 				Sum(child.stock_value_difference).as_("incoming_rate"),
 				Sum(child.qty).as_("qty"),
 			)
-			.where(
-				(child.item_code == self.sle.item_code)
-				& (child.warehouse == self.sle.warehouse)
-				& (child.batch_no.isin(self.batchwise_valuation_batches))
-				& (child.docstatus == 1)
-				& (child.type_of_transaction.isin(["Inward", "Outward"]))
-			)
-			.for_update()
+			.where(conditions)
 			.groupby(child.batch_no)
 		)
-
-		# Important to exclude the current voucher detail no / voucher no to calculate the correct stock value difference
-		if self.sle.voucher_detail_no:
-			query = query.where(child.voucher_detail_no != self.sle.voucher_detail_no)
-		elif self.sle.voucher_no:
-			query = query.where(child.voucher_no != self.sle.voucher_no)
-
-		query = query.where(child.voucher_type != "Pick List")
-		if timestamp_condition:
-			query = query.where(timestamp_condition)
+		if frappe.db.db_type != "postgres":
+			query = query.for_update()
 
 		return query.run(as_dict=True)
 

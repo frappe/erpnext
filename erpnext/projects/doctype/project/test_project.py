@@ -12,6 +12,21 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestProject(ERPNextTestSuite):
+	def test_get_timeline_data_runs(self):
+		# get_timeline_data groups Timesheet Detail by Date(from_time); the selected day key must be the
+		# same grouped expression (UnixTimestamp(Date(from_time))) to be valid on Postgres.
+		from erpnext.projects.doctype.project.project import get_timeline_data
+		from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet
+		from erpnext.setup.doctype.employee.test_employee import make_employee
+
+		project = make_project({"project_name": "_Test Timeline Project", "company": "_Test Company"})
+		emp = make_employee("test_timeline@example.com", company="_Test Company")
+		make_timesheet(emp, simulate=True, project=project.name)
+
+		data = get_timeline_data("Project", project.name)
+		self.assertIsInstance(data, dict)
+		self.assertGreaterEqual(sum(data.values()), 1)
+
 	def test_project_total_costing_and_billing_amount(self):
 		from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet
 		from erpnext.setup.doctype.employee.test_employee import make_employee
@@ -173,6 +188,25 @@ class TestProject(ERPNextTestSuite):
 
 		so.reload()
 		self.assertFalse(so.project)
+
+	def test_sales_order_link_is_not_overwritten_by_second_project(self):
+		so = make_sales_order()
+
+		first_project = make_project_from_so(so.name).save()
+		so.reload()
+		self.assertEqual(so.project, first_project.name)
+
+		# A second project for the same sales order must not steal the link.
+		second_project = frappe.get_doc(
+			doctype="Project",
+			project_name="Second project for same sales order",
+			company=so.company,
+			sales_order=so.name,
+		).insert()
+		self.assertEqual(second_project.sales_order, so.name)
+
+		so.reload()
+		self.assertEqual(so.project, first_project.name)
 
 	def test_project_with_template_tasks_having_common_name(self):
 		# Step - 1: Create Template Parent Tasks

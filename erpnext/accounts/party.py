@@ -543,11 +543,19 @@ def get_party_gle_currency(party_type, party, company):
 
 def get_party_gle_account(party_type, party, company):
 	def generator():
-		existing_gle_account = frappe.db.sql(
-			"""select account from `tabGL Entry`
-			where docstatus=1 and company=%(company)s and party_type=%(party_type)s and party=%(party)s
-			limit 1""",
-			{"company": company, "party_type": party_type, "party": party},
+		gl = qb.DocType("GL Entry")
+		existing_gle_account = (
+			qb.from_(gl)
+			.select(gl.account)
+			.where(
+				(gl.docstatus == 1)
+				& (gl.company == company)
+				& (gl.party_type == party_type)
+				& (gl.party == party)
+				& (gl.is_cancelled == 0)
+			)
+			.limit(1)
+			.run()
 		)
 
 		return existing_gle_account[0][0] if existing_gle_account else None
@@ -892,16 +900,13 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 			d.company, {"grand_total": d.grand_total, "base_grand_total": d.base_grand_total}
 		)
 
+	gle = frappe.qb.DocType("GL Entry")
 	company_wise_total_unpaid = frappe._dict(
-		frappe.db.sql(
-			"""
-		select company, sum(debit_in_account_currency) - sum(credit_in_account_currency)
-		from `tabGL Entry`
-		where party_type = %s and party=%s
-		and is_cancelled = 0
-		group by company""",
-			(party_type, party),
-		)
+		frappe.qb.from_(gle)
+		.select(gle.company, Sum(gle.debit_in_account_currency) - Sum(gle.credit_in_account_currency))
+		.where((gle.party_type == party_type) & (gle.party == party) & (gle.is_cancelled == 0))
+		.groupby(gle.company)
+		.run()
 	)
 
 	for d in companies:

@@ -672,7 +672,7 @@ def make_reverse_gl_entries(
 				)
 
 				if not immutable_ledger_enabled:
-					query = query.set(gle.is_cancelled, True)
+					query = query.set(gle.is_cancelled, 1)  # smallint column; postgres rejects boolean true
 
 				query.run()
 		else:
@@ -683,12 +683,14 @@ def make_reverse_gl_entries(
 				if not all(gle_names):
 					set_as_cancel(gl_entries[0]["voucher_type"], gl_entries[0]["voucher_no"])
 				else:
-					frappe.db.sql(
-						"""UPDATE `tabGL Entry` SET is_cancelled = 1,
-						modified=%s, modified_by=%s
-						where name in %s and is_cancelled = 0""",
-						(now(), frappe.session.user, tuple(gle_names)),
-					)
+					gle = frappe.qb.DocType("GL Entry")
+					(
+						frappe.qb.update(gle)
+						.set(gle.is_cancelled, 1)
+						.set(gle.modified, now())
+						.set(gle.modified_by, frappe.session.user)
+						.where(gle.name.isin(gle_names) & (gle.is_cancelled == 0))
+					).run()
 
 		for entry in gl_entries:
 			new_gle = copy.deepcopy(entry)
@@ -725,9 +727,11 @@ def set_as_cancel(voucher_type, voucher_no):
 	"""
 	Set is_cancelled=1 in all original gl entries for the voucher
 	"""
-	frappe.db.sql(
-		"""UPDATE `tabGL Entry` SET is_cancelled = 1,
-		modified=%s, modified_by=%s
-		where voucher_type=%s and voucher_no=%s and is_cancelled = 0""",
-		(now(), frappe.session.user, voucher_type, voucher_no),
-	)
+	gle = frappe.qb.DocType("GL Entry")
+	(
+		frappe.qb.update(gle)
+		.set(gle.is_cancelled, 1)
+		.set(gle.modified, now())
+		.set(gle.modified_by, frappe.session.user)
+		.where((gle.voucher_type == voucher_type) & (gle.voucher_no == voucher_no) & (gle.is_cancelled == 0))
+	).run()

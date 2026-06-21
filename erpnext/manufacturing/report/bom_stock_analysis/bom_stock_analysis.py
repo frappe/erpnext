@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Floor, IfNull, Sum
+from frappe.query_builder.functions import Floor, IfNull, Max, Min, Sum
 from frappe.utils import flt
 from frappe.utils.data import comma_and
 from pypika.terms import ExistsCriterion
@@ -202,14 +202,15 @@ def get_bom_data(filters):
 		.on(bom_item.item_code == bin.item_code)
 		.select(
 			bom_item.item_code,
-			bom_item.description,
-			bom_item.parent.as_("from_bom_no"),
+			# non-grouped columns are constant per grouped item_code -> Max() keeps the GROUP BY valid
+			Max(bom_item.description).as_("description"),
+			Max(bom_item.parent).as_("from_bom_no"),
 			Sum(bom_item.qty_consumed_per_unit).as_("qty_per_unit"),
 			IfNull(Sum(bin.actual_qty), 0).as_("actual_qty"),
 		)
 		.where((bom_item.parent == filters.get("bom")) & (bom_item.parenttype == "BOM"))
 		.groupby(bom_item.item_code)
-		.orderby(bom_item.idx)
+		.orderby(Min(bom_item.idx))
 	)
 
 	if filters.get("warehouse"):
@@ -232,11 +233,33 @@ def get_bom_data(filters):
 		else:
 			query = query.where(bin.warehouse == filters.get("warehouse"))
 
-	if bom_item_table == "BOM Item":
-		query = query.select(bom_item.bom_no, bom_item.is_phantom_item)
-
 	data = query.run(as_dict=True)
-	return explode_phantom_boms(data, filters) if bom_item_table == "BOM Item" else data
+
+	if bom_item_table == "BOM Item":
+		# bom_no + is_phantom_item drive whether/which sub-BOM explode_phantom_boms recurses into, so
+		# they must come from the SAME BOM Item line. Aggregating each independently (Max) could pair a
+		# bom_no from one line with is_phantom_item from another when an item_code repeats in the BOM.
+		# Rows are grouped by item_code (one qty_per_unit total per component), so pick one coherent
+		# representative line: the first line, but upgrade to the first phantom line if any exists, so a
+		# phantom sub-BOM is never dropped just because a non-phantom line happens to be listed first.
+		representative = {}
+		for line in frappe.get_all(
+			"BOM Item",
+			filters={"parent": filters.get("bom"), "parenttype": "BOM"},
+			fields=["item_code", "bom_no", "is_phantom_item"],
+			order_by="idx",
+		):
+			existing = representative.get(line.item_code)
+			if existing is None or (line.is_phantom_item and not existing.is_phantom_item):
+				representative[line.item_code] = line
+		for row in data:
+			line = representative.get(row.item_code)
+			if line:
+				row.bom_no = line.bom_no
+				row.is_phantom_item = line.is_phantom_item
+		return explode_phantom_boms(data, filters)
+
+	return data
 
 
 def explode_phantom_boms(data, filters):
@@ -312,15 +335,17 @@ def get_producible_fg_items(filters):
 		.on(BOM_ITEM.item_code == bin_subquery.item_code)
 		.select(
 			BOM_ITEM.item_code,
-			BOM_ITEM.description,
-			BOM_ITEM.parent.as_("from_bom_no"),
-			(BOM_ITEM.stock_qty / BOM.quantity).as_("qty_per_unit"),
-			IfNull(bin_subquery.actual_qty, 0).as_("available_qty"),
-			Floor(bin_subquery.actual_qty / ((Sum(BOM_ITEM.stock_qty)) / BOM.quantity)),
+			# Sum() below makes this an aggregate query; the other columns are constant per grouped
+			# item_code -> Max() keeps them valid on postgres with the same value MySQL picked.
+			Max(BOM_ITEM.description).as_("description"),
+			Max(BOM_ITEM.parent).as_("from_bom_no"),
+			Max(BOM_ITEM.stock_qty / BOM.quantity).as_("qty_per_unit"),
+			Max(IfNull(bin_subquery.actual_qty, 0)).as_("available_qty"),
+			Floor(Max(bin_subquery.actual_qty) / ((Sum(BOM_ITEM.stock_qty)) / Max(BOM.quantity))),
 		)
 		.where((BOM_ITEM.parent == filters.get("bom")) & (BOM_ITEM.parenttype == "BOM"))
 		.groupby(BOM_ITEM.item_code)
-		.orderby(BOM_ITEM.idx)
+		.orderby(Min(BOM_ITEM.idx))
 	)
 
 	return query.run(as_list=True)

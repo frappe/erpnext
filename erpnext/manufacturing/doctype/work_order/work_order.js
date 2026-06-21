@@ -1149,17 +1149,24 @@ erpnext.work_order = {
 	},
 
 	create_pick_list: function (frm, purpose = "Material Transfer for Manufacture") {
-		this.show_prompt_for_qty_input(frm, purpose)
-			.then((data) => {
-				return frappe.xcall("erpnext.manufacturing.doctype.work_order.mapper.create_pick_list", {
+		const max = this.get_max_transferable_qty(frm, purpose);
+
+		const get_pick_list = (for_qty) =>
+			frappe
+				.xcall("erpnext.manufacturing.doctype.work_order.mapper.create_pick_list", {
 					source_name: frm.doc.name,
-					for_qty: data.qty,
+					for_qty: for_qty,
+				})
+				.then((pick_list) => {
+					frappe.model.sync(pick_list);
+					frappe.set_route("Form", pick_list.doctype, pick_list.name);
 				});
-			})
-			.then((pick_list) => {
-				frappe.model.sync(pick_list);
-				frappe.set_route("Form", pick_list.doctype, pick_list.name);
-			});
+
+		if (max <= 0) {
+			get_pick_list(frm.doc.qty);
+		} else {
+			this.show_prompt_for_qty_input(frm, purpose).then((data) => get_pick_list(data.qty));
+		}
 	},
 
 	make_consumption_se: function (frm, backflush_raw_materials_based_on) {

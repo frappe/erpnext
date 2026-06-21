@@ -3,8 +3,8 @@ from frappe import _
 from frappe.query_builder.functions import Sum
 from frappe.utils import cstr, flt
 
-from .base import BaseStockEntry
 from .manufacturing import _check_bom_component_qty, get_bom_items
+from .stock_entry_base import BaseStockEntry
 
 
 class BaseMaterialTransferStockEntry(BaseStockEntry):
@@ -182,13 +182,66 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		self.validate_same_source_target_warehouse()
 
 	def validate_component_and_quantities(self):
-		if not frappe.db.get_single_value("Manufacturing Settings", "validate_components_quantities_per_bom"):
+		if self.doc.fg_completed_qty:
+			if frappe.db.get_single_value("Manufacturing Settings", "validate_components_quantities_per_bom"):
+				_check_bom_component_qty(
+					self.doc, get_bom_items(self.doc.bom_no, self.doc.use_multi_level_bom)
+				)
+		elif self.doc.work_order:
+			self._validate_no_excess_transfer()
+
+	def _validate_no_excess_transfer(self):
+		if self.doc.is_return:
 			return
 
-		if not self.doc.fg_completed_qty:
+		if (
+			frappe.db.get_single_value("Manufacturing Settings", "backflush_raw_materials_based_on")
+			== "Material Transferred for Manufacture"
+		):
 			return
 
-		_check_bom_component_qty(self.doc, get_bom_items(self.doc.bom_no, self.doc.use_multi_level_bom))
+		wo = self.wo_doc
+		if not wo:
+			return
+
+		pending_by_item = {}
+		for r in wo.required_items:
+			pending_by_item[r.item_code] = (
+				pending_by_item.get(r.item_code, 0.0) + flt(r.required_qty) - flt(r.transferred_qty)
+			)
+
+		transfer_by_item = {}
+		first_row_by_item = {}
+		for item in self.doc.items:
+			if not item.s_warehouse:
+				continue
+
+			key = (
+				item.item_code if item.item_code in pending_by_item else getattr(item, "original_item", None)
+			)
+			if key not in pending_by_item:
+				continue
+
+			transfer_by_item[key] = transfer_by_item.get(key, 0.0) + flt(item.qty)
+			first_row_by_item.setdefault(key, item)
+
+		for key, transfer_qty in transfer_by_item.items():
+			pending_qty = pending_by_item[key]
+			if transfer_qty > pending_qty:
+				item = first_row_by_item[key]
+				frappe.throw(
+					_(
+						"Row #{0}: Cannot transfer {1} {2} of Item {3}. "
+						"Maximum transferable quantity is {4} {2}."
+					).format(
+						item.idx,
+						transfer_qty,
+						item.uom,
+						frappe.bold(item.item_code),
+						pending_qty,
+					),
+					title=_("Excess Material Transfer"),
+				)
 
 	def add_items(self):
 		item_dict = self.get_pending_raw_materials()
@@ -429,9 +482,15 @@ def _resolve_transfer_qty(desire_to_transfer, pending_to_issue, can_transfer):
 
 
 def get_transferred_qty(material_request):
+	from pypika import Case
+
+	se = frappe.qb.DocType("Stock Entry")
 	sed = frappe.qb.DocType("Stock Entry Detail")
+	completed_qty = Case().when(se.add_to_transit == 1, sed.transferred_qty).else_(sed.transfer_qty)
 	return (
 		frappe.qb.from_(sed)
-		.select(Sum(sed.transfer_qty).as_("transfer_qty"), Sum(sed.transferred_qty).as_("transferred_qty"))
+		.inner_join(se)
+		.on(se.name == sed.parent)
+		.select(Sum(sed.transfer_qty).as_("transfer_qty"), Sum(completed_qty).as_("transferred_qty"))
 		.where((sed.material_request == material_request) & (sed.docstatus == 1))
 	).run(as_dict=True)[0]

@@ -1964,3 +1964,23 @@ class TestPickList(ERPNextTestSuite):
 				item_codes = [item.item_code for item in doc.items]
 				self.assertIn(item1, item_codes)
 				self.assertIn(item2, item_codes)
+
+	def test_get_pick_list_query_postgres_valid(self):
+		"""get_pick_list_query selects Sales Order.customer (a joined-table column) under
+		GROUP BY Pick List.name. Postgres rejects that bare column (PK functional dependency does
+		not cross tables), so the link query raised GroupingError. customer is pinned to one value
+		by the filter, so adding it to the GROUP BY is identical on MariaDB and valid on Postgres."""
+		from erpnext.stock.doctype.pick_list.pick_list import get_pick_list_query
+
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item().name
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=100, basic_rate=100)
+		so = make_sales_order(item_code=item, qty=5, rate=100)
+		pl = create_pick_list(so.name)
+		pl.submit()
+
+		# must run without raising on either engine (GroupingError on Postgres before the fix)
+		result = get_pick_list_query(
+			"Pick List", "", "name", 0, 20, {"company": so.company, "customer": so.customer}
+		)
+		self.assertIn(pl.name, [row["name"] for row in result])

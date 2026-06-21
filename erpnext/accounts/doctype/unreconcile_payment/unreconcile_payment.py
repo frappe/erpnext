@@ -7,7 +7,7 @@ import frappe
 from frappe import _, qb
 from frappe.model.document import Document
 from frappe.query_builder import Criterion
-from frappe.query_builder.functions import Abs, Sum
+from frappe.query_builder.functions import Abs, Max, Sum
 from frappe.utils.data import comma_and
 
 from erpnext.accounts.utils import (
@@ -72,7 +72,7 @@ class UnreconcilePayment(Document):
 				alloc.party,
 			)
 
-			frappe.db.set_value("Unreconcile Payment Entries", alloc.name, "unlinked", True)
+			frappe.db.set_value("Unreconcile Payment Entries", alloc.name, "unlinked", 1)
 
 
 @frappe.whitelist()
@@ -120,18 +120,20 @@ def get_linked_payments_for_doc(
 			res = (
 				qb.from_(ple)
 				.select(
-					ple.account,
-					ple.party_type,
-					ple.party,
-					ple.company,
-					ple.voucher_type.as_("reference_doctype"),
+					Max(ple.account).as_("account"),
+					Max(ple.party_type).as_("party_type"),
+					Max(ple.party).as_("party"),
+					Max(ple.company).as_("company"),
+					Max(ple.voucher_type).as_("reference_doctype"),
 					ple.voucher_no.as_("reference_name"),
 					Abs(Sum(ple.amount_in_account_currency)).as_("allocated_amount"),
-					ple.account_currency,
+					Max(ple.account_currency).as_("account_currency"),
 				)
 				.where(Criterion.all(criteria))
 				.groupby(ple.voucher_no, ple.against_voucher_no)
-				.having(qb.Field("allocated_amount") > 0)
+				.having(Abs(Sum(ple.amount_in_account_currency)) > 0)
+				# deterministic order across backends (postgres GROUP BY does not imply ordering)
+				.orderby(ple.voucher_no)
 				.run(as_dict=True)
 			)
 			return res
@@ -146,17 +148,19 @@ def get_linked_payments_for_doc(
 			query = (
 				qb.from_(ple)
 				.select(
-					ple.company,
-					ple.account,
-					ple.party_type,
-					ple.party,
-					ple.against_voucher_type.as_("reference_doctype"),
+					Max(ple.company).as_("company"),
+					Max(ple.account).as_("account"),
+					Max(ple.party_type).as_("party_type"),
+					Max(ple.party).as_("party"),
+					Max(ple.against_voucher_type).as_("reference_doctype"),
 					ple.against_voucher_no.as_("reference_name"),
 					Abs(Sum(ple.amount_in_account_currency)).as_("allocated_amount"),
-					ple.account_currency,
+					Max(ple.account_currency).as_("account_currency"),
 				)
 				.where(Criterion.all(criteria))
 				.groupby(ple.against_voucher_no)
+				# deterministic order across backends (postgres GROUP BY does not imply ordering)
+				.orderby(ple.against_voucher_no)
 			)
 
 			res = query.run(as_dict=True)
@@ -180,15 +184,18 @@ def get_linked_advances(company, docname):
 	return (
 		qb.from_(adv)
 		.select(
-			adv.company,
-			adv.against_voucher_type.as_("reference_doctype"),
+			# non-grouped columns are constant per against_voucher_no -> Max() is unchanged and postgres-valid
+			Max(adv.company).as_("company"),
+			Max(adv.against_voucher_type).as_("reference_doctype"),
 			adv.against_voucher_no.as_("reference_name"),
 			Abs(Sum(adv.amount)).as_("allocated_amount"),
-			adv.currency,
+			Max(adv.currency).as_("currency"),
 		)
 		.where(Criterion.all(criteria))
-		.having(qb.Field("allocated_amount") > 0)
+		.having(Abs(Sum(adv.amount)) > 0)
 		.groupby(adv.against_voucher_no)
+		# deterministic order across backends (postgres GROUP BY does not imply ordering)
+		.orderby(adv.against_voucher_no)
 		.run(as_dict=True)
 	)
 

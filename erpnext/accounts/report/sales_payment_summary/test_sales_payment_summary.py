@@ -2,12 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.utils import today
+from frappe.utils import flt, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.report.sales_payment_summary.sales_payment_summary import (
 	get_mode_of_payment_details,
 	get_mode_of_payments,
+	get_pos_invoice_data,
 )
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -101,6 +102,33 @@ class TestSalesPaymentSummary(ERPNextTestSuite):
 				cc_final_amount = mopd_value[1]
 
 		self.assertGreater(cc_init_amount, cc_final_amount)
+
+	def test_get_pos_invoice_data(self):
+		"""The POS path (is_pos filter -> get_pos_invoice_data) used nested loose-GROUP-BY subqueries
+		that raised on Postgres; it now aggregates deterministically and runs identically on both
+		engines."""
+		si = create_sales_invoice_record()
+		si.is_pos = 1
+		si.append(
+			"payments",
+			{"mode_of_payment": "Cash", "account": "_Test Cash - _TC", "amount": 10000},
+		)
+		si.insert()
+		si.submit()
+
+		filters = frappe._dict(
+			{"is_pos": 1, "company": "_Test Company", "from_date": today(), "to_date": today()}
+		)
+		data = get_pos_invoice_data(filters)
+
+		# the POS invoice's paid amount is aggregated; previously this query raised GroupingError on PG
+		self.assertTrue(data)
+		self.assertTrue(any(flt(row.get("paid_amount")) >= 10000 for row in data))
+
+		# customer filter must work: a.customer was not selected by the invoice subquery before the fix,
+		# so the filter errored on both engines. With the invoice's customer it still returns its payment.
+		filters["customer"] = si.customer
+		self.assertTrue(any(flt(row.get("paid_amount")) >= 10000 for row in get_pos_invoice_data(filters)))
 
 
 def get_filters():

@@ -7,7 +7,7 @@ import sys
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import DateDiff, Sum
 from frappe.utils import getdate
 
 
@@ -68,7 +68,7 @@ def get_item_workdays(scorecard):
 		frappe.qb.from_(PO_Item)
 		.join(PO)
 		.on(PO_Item.parent == PO.name)
-		.select(Sum(frappe.qb.fn.DATEDIFF(scorecard.end_date, PO_Item.schedule_date) * (PO_Item.qty)))
+		.select(Sum(DateDiff(scorecard.end_date, PO_Item.schedule_date) * (PO_Item.qty)))
 		.where(PO.supplier == scorecard.supplier)
 		.where(PO_Item.received_qty < PO_Item.qty)
 		.where(PO_Item.schedule_date[scorecard.start_date : scorecard.end_date])  # Équivalent du BETWEEN
@@ -153,7 +153,7 @@ def get_total_days_late(scorecard):
 		.on(PR_Item.purchase_order_item == PO_Item.name)
 		.join(PO)
 		.on(PO_Item.parent == PO.name)
-		.select(Sum(frappe.qb.fn.DATEDIFF(PR.posting_date, PO_Item.schedule_date) * PR_Item.qty))
+		.select(Sum(DateDiff(PR.posting_date, PO_Item.schedule_date) * PR_Item.qty))
 		.where(PO.supplier == scorecard.supplier)
 		.where(PO_Item.schedule_date[scorecard.start_date : scorecard.end_date])
 		.where(PO_Item.schedule_date < PR.posting_date)
@@ -170,10 +170,7 @@ def get_total_days_late(scorecard):
 		.join(PO)
 		.on(PO_Item.parent == PO.name)
 		.select(
-			Sum(
-				frappe.qb.fn.DATEDIFF(scorecard.end_date, PO_Item.schedule_date)
-				* (PO_Item.qty - PO_Item.received_qty)
-			)
+			Sum(DateDiff(scorecard.end_date, PO_Item.schedule_date) * (PO_Item.qty - PO_Item.received_qty))
 		)
 		.where(PO.supplier == scorecard.supplier)
 		.where(PO_Item.received_qty < PO_Item.qty)
@@ -530,7 +527,7 @@ def get_rfq_response_days(scorecard):
 		.on(sq_item.request_for_quotation_item == rfq_item.name)
 		.join(sq)
 		.on(sq_item.parent == sq.name)
-		.select(frappe.qb.fn.Sum(frappe.qb.fn.Datediff(sq.transaction_date, rfq.transaction_date)))
+		.select(frappe.qb.fn.Sum(DateDiff(sq.transaction_date, rfq.transaction_date)))
 		.where(rfq_sup.supplier == scorecard.supplier)
 		.where(sq.supplier == scorecard.supplier)
 		.where(rfq.transaction_date[scorecard.start_date : scorecard.end_date])

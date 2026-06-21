@@ -2,8 +2,8 @@ import frappe
 from frappe import _
 from frappe.query_builder.functions import Sum
 
-from .base import BaseStockEntry
 from .manufacturing import get_bom_items
+from .stock_entry_base import BaseStockEntry
 
 
 class MaterialReceiptStockEntry(BaseStockEntry):

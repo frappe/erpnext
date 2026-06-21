@@ -69,10 +69,15 @@ class StockEntryGLComposer(BaseStockGLComposer):
 		self, gl_entries: list, item_account_wise_additional_cost: dict
 	) -> None:
 		doc = self.doc
+		precision = self.get_debit_field_precision()
+
 		for d in doc.get("items"):
 			for account, amount in item_account_wise_additional_cost.get((d.item_code, d.name), {}).items():
 				if not amount:
 					continue
+
+				amount["amount"] = flt(amount["amount"], precision)
+				amount["base_amount"] = flt(amount["base_amount"], precision)
 
 				gl_entries.append(
 					self.get_gl_dict(
