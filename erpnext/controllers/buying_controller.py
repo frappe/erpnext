@@ -414,38 +414,28 @@ class BuyingController(SubcontractingController):
 		stock_and_asset_items = []
 		stock_and_asset_items = self.get_stock_items() + self.get_asset_items()
 
-		stock_and_asset_items_qty, stock_and_asset_items_amount = 0, 0
-		last_item_idx = 1
-		for d in self.get("items"):
-			if d.item_code:
-				stock_and_asset_items_qty += flt(d.qty)
-				stock_and_asset_items_amount += flt(d.base_net_amount)
+		(
+			tax_accounts,
+			total_valuation_amount,
+			total_actual_tax_amount,
+			total_actual_tax_on_stock_items,
+		) = self.get_tax_details()
 
-			last_item_idx = d.idx
+		# Pre-compute each item's share of the "Actual" valuation charges (keyed by row idx).
+		actual_charge_per_item = self.distribute_actual_tax_amount(
+			stock_and_asset_items, total_actual_tax_amount, total_actual_tax_on_stock_items
+		)
 
-		tax_accounts, total_valuation_amount, total_actual_tax_amount = self.get_tax_details()
-		remaining_amount = total_actual_tax_amount
+		last_item_idx = max((d.idx for d in self.get("items")), default=1)
 
 		for i, item in enumerate(self.get("items")):
 			if item.item_code and (item.qty or item.get("rejected_qty")):
-				item_tax_amount, actual_tax_amount = 0.0, 0.0
 				if i == (last_item_idx - 1):
+					# dump any rounding remainder of the On Net Total valuation on the last item
 					item_tax_amount = total_valuation_amount
-					actual_tax_amount = remaining_amount
 				else:
-					# calculate item tax amount
 					item_tax_amount = self.get_item_tax_amount(item, tax_accounts)
 					total_valuation_amount -= item_tax_amount
-
-					if total_actual_tax_amount:
-						actual_tax_amount = self.get_item_actual_tax_amount(
-							item,
-							total_actual_tax_amount,
-							stock_and_asset_items_amount,
-							stock_and_asset_items_qty,
-						)
-
-						remaining_amount -= actual_tax_amount
 
 				# This code is required here to calculate the correct valuation for stock items
 				if item.item_code not in stock_and_asset_items:
@@ -454,7 +444,8 @@ class BuyingController(SubcontractingController):
 
 				# Item tax amount is the total tax amount applied on that item and actual tax type amount
 				item.item_tax_amount = flt(
-					item_tax_amount + actual_tax_amount, self.precision("item_tax_amount", item)
+					item_tax_amount + actual_charge_per_item.get(item.idx, 0.0),
+					self.precision("item_tax_amount", item),
 				)
 
 				self.round_floats_in(item)
@@ -504,6 +495,7 @@ class BuyingController(SubcontractingController):
 		tax_accounts = []
 		total_valuation_amount = 0.0
 		total_actual_tax_amount = 0.0
+		total_actual_tax_on_stock_items = 0.0
 
 		for d in self.get("taxes"):
 			if d.category not in ["Valuation", "Valuation and Total"]:
@@ -516,10 +508,13 @@ class BuyingController(SubcontractingController):
 			if d.charge_type == "On Net Total":
 				total_valuation_amount += amount
 				tax_accounts.append(d.account_head)
+			elif d.charge_type == "Actual" and d.get("allocate_full_amount_to_stock_items"):
+				# Allocate the full amount to stock/asset items only (e.g. Freight)
+				total_actual_tax_on_stock_items += amount
 			else:
 				total_actual_tax_amount += amount
 
-		return tax_accounts, total_valuation_amount, total_actual_tax_amount
+		return tax_accounts, total_valuation_amount, total_actual_tax_amount, total_actual_tax_on_stock_items
 
 	def get_item_tax_amount(self, item, tax_accounts):
 		item_tax_amount = 0.0
@@ -540,16 +535,75 @@ class BuyingController(SubcontractingController):
 
 		return item_tax_amount
 
-	def get_item_actual_tax_amount(
-		self, item, actual_tax_amount, stock_and_asset_items_amount, stock_and_asset_items_qty
-	):
-		item_proportion = (
-			flt(item.base_net_amount) / stock_and_asset_items_amount
-			if stock_and_asset_items_amount
-			else flt(item.qty) / stock_and_asset_items_qty
+	def distribute_actual_tax_amount(self, stock_and_asset_items, total_on_all_items, total_on_stock_items):
+		"""Distribute "Actual" valuation charges to each item, keyed by row idx.
+
+		`total_on_all_items` is spread across every item by net amount; a non-stock item's
+		share is computed but never capitalized (e.g. a genuine tax). `total_on_stock_items`
+		(flagged `allocate_full_amount_to_stock_items`) is spread across stock/asset items only,
+		so the whole charge is capitalized (e.g. Freight).
+		"""
+		all_items = [d for d in self.get("items") if d.item_code]
+		stock_items = [d for d in all_items if d.item_code in stock_and_asset_items]
+
+		charge_per_item = {}
+		self._spread_charge_over_items(charge_per_item, total_on_all_items, all_items)
+		self._spread_charge_over_items(charge_per_item, total_on_stock_items, stock_items)
+		return charge_per_item
+
+	def _spread_charge_over_items(self, charge_per_item, total_charge, items):
+		"""Add each item's proportional share of `total_charge` into `charge_per_item`.
+		Proportion is by net amount (falling back to qty); any rounding remainder is assigned
+		to the last item in the group."""
+		if not total_charge or not items:
+			return
+
+		total_amount = sum(flt(d.base_net_amount) for d in items)
+		total_qty = sum(flt(d.qty) for d in items)
+
+		# Nothing to proportion against (all rows have zero amount and zero qty)
+		if not total_amount and not total_qty:
+			return
+
+		remaining = total_charge
+		for d in items[:-1]:
+			proportion = flt(d.base_net_amount) / total_amount if total_amount else flt(d.qty) / total_qty
+			charge = flt(proportion * total_charge, self.precision("item_tax_amount", d))
+			charge_per_item[d.idx] = charge_per_item.get(d.idx, 0.0) + charge
+			remaining -= charge
+
+		last = items[-1]
+		charge_per_item[last.idx] = charge_per_item.get(last.idx, 0.0) + flt(
+			remaining, self.precision("item_tax_amount", last)
 		)
 
-		return flt(item_proportion * actual_tax_amount, self.precision("item_tax_amount", item))
+	def get_capitalized_valuation_tax(self):
+		stock_and_asset_items = self.get_stock_items() + self.get_asset_items()
+		all_items = [d for d in self.get("items") if d.item_code]
+		stock_item_idx = {d.idx for d in all_items if d.item_code in stock_and_asset_items}
+
+		capitalized = {}
+		for tax in self.get("taxes"):
+			if tax.category not in ("Valuation", "Valuation and Total"):
+				continue
+
+			amount = flt(tax.base_tax_amount_after_discount_amount) * (
+				-1 if tax.get("add_deduct_tax") == "Deduct" else 1
+			)
+			if not amount:
+				continue
+
+			if tax.charge_type == "Actual" and not tax.get("allocate_full_amount_to_stock_items"):
+				# Spread across all items; only the stock/asset items' share is capitalized.
+				charge_per_item = {}
+				self._spread_charge_over_items(charge_per_item, amount, all_items)
+				amount = sum(
+					charge for item_idx, charge in charge_per_item.items() if item_idx in stock_item_idx
+				)
+
+			capitalized[tax.name] = amount
+
+		return capitalized
 
 	def set_incoming_rate(self):
 		"""

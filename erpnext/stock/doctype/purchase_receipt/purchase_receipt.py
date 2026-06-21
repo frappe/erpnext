@@ -886,6 +886,12 @@ class PurchaseReceipt(BuyingController):
 
 	def make_tax_gl_entries(self, gl_entries, via_landed_cost_voucher=False):
 		negative_expense_to_be_booked = sum([flt(d.item_tax_amount) for d in self.get("items")])
+
+		# Amount of each valuation charge actually capitalized into stock/asset valuation, keyed by
+		# tax row name. This is what must be credited to each tax account - a non-stock item's share
+		# of a spread-across-all-items charge is not capitalized, so it is excluded here.
+		capitalized_valuation_tax = self.get_capitalized_valuation_tax()
+
 		# Cost center-wise amount breakup for other charges included for valuation
 		valuation_tax = {}
 		for tax in self.get("taxes"):
@@ -898,10 +904,8 @@ class PurchaseReceipt(BuyingController):
 							tax.idx, _(tax.category)
 						)
 					)
-				valuation_tax.setdefault(tax.name, 0)
-				valuation_tax[tax.name] += (tax.add_deduct_tax == "Add" and 1 or -1) * flt(
-					tax.base_tax_amount_after_discount_amount
-				)
+
+				valuation_tax[tax.name] = capitalized_valuation_tax.get(tax.name, 0.0)
 
 		if negative_expense_to_be_booked and valuation_tax:
 			# Backward compatibility:
