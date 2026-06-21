@@ -10,7 +10,7 @@
 		<td width="15"></td>
 		<td valign="top" width="24">
 			{% if user.image %}
-			<img class="sender-avatar" width="24" height="24" embed="{{ user.image }}"/>
+			<img class="sender-avatar" width="24" height="24" embed="{{ user.image | e }}"/>
 			{% else %}
 			<div class="sender-avatar-placeholder">
 				{{ user.full_name[0] }}
