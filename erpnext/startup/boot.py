@@ -24,6 +24,9 @@ def boot_session(bootinfo):
 		bootinfo.sysdefaults.over_billing_allowance = frappe.get_single_value(
 			"Accounts Settings", "over_billing_allowance"
 		)
+		bootinfo.sysdefaults.enable_company_wise_masters = cint(
+			frappe.get_single_value("Accounts Settings", "enable_company_wise_masters")
+		)
 
 		bootinfo.sysdefaults.quotation_valid_till = cint(
 			frappe.db.get_single_value("CRM Settings", "default_valid_till")
