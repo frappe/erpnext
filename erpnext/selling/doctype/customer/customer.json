@@ -13,6 +13,7 @@
   "basic_info",
   "naming_series",
   "customer_name",
+  "alias",
   "customer_type",
   "gender",
   "column_break0",
@@ -674,6 +675,13 @@
   {
    "fieldname": "credit_limit_column",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "alias",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "Alias",
+   "unique": 1
   }
  ],
  "icon": "fa fa-user",
@@ -687,7 +695,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-05-29 16:52:59.441272",
+ "modified": "2026-06-22 12:23:19.196991",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
@@ -766,7 +774,7 @@
  ],
  "quick_entry": 1,
  "row_format": "Dynamic",
- "search_fields": "customer_group,territory, mobile_no,primary_address",
+ "search_fields": "customer_group,territory, mobile_no,primary_address, alias",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",

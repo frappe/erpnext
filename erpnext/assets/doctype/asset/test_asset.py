@@ -85,8 +85,8 @@ class TestAsset(AssetSetup):
 		self.assertRaises(frappe.ValidationError, asset.save)
 
 	def test_validate_item(self):
-		asset = create_asset(item_code="MacBook Pro", do_not_save=1)
-		item = frappe.get_doc("Item", "MacBook Pro")
+		asset = create_asset(item_code="Macbook Pro", do_not_save=1)
+		item = frappe.get_doc("Item", "Macbook Pro")
 
 		item.disabled = 1
 		item.save()
@@ -140,7 +140,7 @@ class TestAsset(AssetSetup):
 		)
 
 		gle = get_gl_entries("Purchase Invoice", pi.name)
-		self.assertSequenceEqual(gle, expected_gle)
+		self.assertCountEqual(gle, expected_gle)
 
 		pi.cancel()
 		asset.cancel()
@@ -283,7 +283,7 @@ class TestAsset(AssetSetup):
 		)
 
 		gle = get_gl_entries("Journal Entry", asset.journal_entry_for_scrap)
-		self.assertSequenceEqual(gle, expected_gle)
+		self.assertCountEqual(gle, expected_gle)
 
 		restore_asset(asset.name)
 		second_asset_depr_schedule.load_from_db()
@@ -362,7 +362,7 @@ class TestAsset(AssetSetup):
 			("Debtors - _TC", 25000.0, 0.0),
 		)
 		gle = get_gl_entries("Sales Invoice", si.name)
-		self.assertSequenceEqual(gle, expected_gle)
+		self.assertCountEqual(gle, expected_gle)
 
 		si.cancel()
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Partially Depreciated")
@@ -436,7 +436,7 @@ class TestAsset(AssetSetup):
 		)
 
 		gle = get_gl_entries("Sales Invoice", si.name)
-		self.assertSequenceEqual(gle, expected_gle)
+		self.assertCountEqual(gle, expected_gle)
 
 	def test_asset_with_maintenance_required_status_after_sale(self):
 		asset = create_asset(
@@ -577,7 +577,7 @@ class TestAsset(AssetSetup):
 		)
 
 		pr_gle = get_gl_entries("Purchase Receipt", pr.name)
-		self.assertSequenceEqual(pr_gle, expected_gle)
+		self.assertCountEqual(pr_gle, expected_gle)
 
 		pi = make_invoice(pr.name)
 		pi.submit()
@@ -590,7 +590,7 @@ class TestAsset(AssetSetup):
 		)
 
 		pi_gle = get_gl_entries("Purchase Invoice", pi.name)
-		self.assertSequenceEqual(pi_gle, expected_gle)
+		self.assertCountEqual(pi_gle, expected_gle)
 
 		asset = frappe.db.get_value("Asset", {"purchase_receipt": pr.name, "docstatus": 0}, "name")
 
@@ -617,7 +617,7 @@ class TestAsset(AssetSetup):
 		expected_gle = (("_Test Fixed Asset - _TC", 5250.0, 0.0), ("CWIP Account - _TC", 0.0, 5250.0))
 
 		gle = get_gl_entries("Asset", asset_doc.name)
-		self.assertSequenceEqual(gle, expected_gle)
+		self.assertCountEqual(gle, expected_gle)
 
 	def test_asset_cwip_toggling_cases(self):
 		cwip = frappe.db.get_value("Asset Category", "Computers", "enable_cwip_accounting")
@@ -1732,14 +1732,18 @@ class TestDepreciationBasics(AssetSetup):
 			("_Test Depreciations - _TC", 30000.0, 0.0),
 		)
 
-		gle = frappe.db.sql(
-			"""select account, debit, credit from `tabGL Entry`
-			where against_voucher_type='Asset' and against_voucher = %s
-			order by account""",
-			asset.name,
-		)
+		gle = [
+			tuple(row)
+			for row in frappe.get_all(
+				"GL Entry",
+				filters={"against_voucher_type": "Asset", "against_voucher": asset.name},
+				fields=["account", "debit", "credit"],
+				order_by="account",
+				as_list=True,
+			)
+		]
 
-		self.assertSequenceEqual(gle, expected_gle)
+		self.assertCountEqual(gle, expected_gle)
 		self.assertEqual(asset.get("value_after_depreciation"), 70000)
 
 	def test_expected_value_change(self):

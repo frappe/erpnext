@@ -893,7 +893,7 @@ class JournalEntry(AccountsController):
 			msgprint(_("'Entries' cannot be empty"), raise_exception=True)
 			return
 
-		self.total_debit, self.total_credit = 0, 0
+		self.set_total_debit_credit()
 		diff = flt(self.difference, self.precision("difference"))
 		if diff:
 			self._apply_difference_to_blank_row(diff, difference_account)

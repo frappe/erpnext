@@ -182,8 +182,15 @@ class SubcontractingOrder(SubcontractingController):
 		self.calculate_items_qty_and_amount()
 
 	def calculate_service_costs(self):
-		for idx, item in enumerate(self.get("service_items")):
-			self.items[idx].service_cost_per_qty = item.amount / self.items[idx].qty
+		# Match by purchase_order_item rather than list position: the service_items and items
+		# tables are not guaranteed to stay index-aligned (e.g. a skipped zero-qty service item).
+		service_amount_by_po_item = {
+			service_item.purchase_order_item: service_item.amount
+			for service_item in self.get("service_items")
+		}
+		for item in self.items:
+			service_amount = flt(service_amount_by_po_item.get(item.purchase_order_item))
+			item.service_cost_per_qty = service_amount / item.qty if item.qty else 0
 
 	def calculate_supplied_items_qty_and_amount(self):
 		for item in self.get("items"):

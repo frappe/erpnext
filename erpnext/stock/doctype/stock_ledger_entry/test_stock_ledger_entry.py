@@ -7,7 +7,7 @@ from uuid import uuid4
 
 import frappe
 from frappe.core.page.permission_manager.permission_manager import reset
-from frappe.query_builder.functions import Timestamp
+from frappe.query_builder.functions import CombineDatetime
 from frappe.utils import add_days, add_to_date, flt, today
 
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
@@ -33,6 +33,54 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 	def setUp(self):
 		create_items()
 		reset("Stock Entry")
+
+	def test_incoming_value_for_transferred_serial_no_is_deterministic(self):
+		"""get_incoming_value_for_serial_nos picks the latest SLE (posting_date desc, limit 1) for a
+		serial transferred to another company. posting_date alone is non-total, so two same-date SLEs
+		with different incoming_rate could be resolved differently on MariaDB vs Postgres. creation/name
+		tie-breaks make the latest SLE win identically on both engines."""
+		from erpnext.stock.stock_ledger import update_entries_after
+
+		item = "_Test Serialized Item"
+		serial = "_Test SN Tie 9"
+		company_a, company_b = "_Test Company", "_Test Company 1"
+		if frappe.db.exists("Serial No", serial):
+			frappe.delete_doc("Serial No", serial, force=1)
+		frappe.get_doc(
+			{"doctype": "Serial No", "serial_no": serial, "item_code": item, "company": company_b}
+		).insert(ignore_permissions=True)
+
+		def mk_sle(name, rate):
+			if frappe.db.exists("Stock Ledger Entry", name):
+				frappe.delete_doc("Stock Ledger Entry", name, force=1)
+			doc = frappe.get_doc(
+				{
+					"doctype": "Stock Ledger Entry",
+					"item_code": item,
+					"warehouse": "_Test Warehouse - _TC",
+					"company": company_a,
+					"posting_date": "2026-06-01",
+					"posting_time": "10:00:00",
+					"actual_qty": 1,
+					"incoming_rate": rate,
+					"is_cancelled": 0,
+					"serial_no": serial,
+					"voucher_type": "Stock Entry",
+					"voucher_no": "TEST-TIE",
+				}
+			)
+			doc.name = name
+			doc.flags.name_set = True
+			doc.db_insert()
+
+		mk_sle("MAT-SLE-TIE-A", 100)
+		mk_sle("MAT-SLE-TIE-B", 200)  # later/larger name -> deterministic winner
+
+		value = update_entries_after.get_incoming_value_for_serial_nos(
+			frappe._dict(company=company_a), [serial]
+		)
+		# the latest (creation/name desc) same-date SLE wins -> 200 on both engines
+		self.assertEqual(value, 200.0)
 
 	def test_item_cost_reposting(self):
 		company = "_Test Company"
@@ -1275,7 +1323,7 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 			.where(sle.voucher_no == transfer.name)
 			.where(sle.voucher_type == transfer.doctype)
 			.where(sle.is_cancelled == 0)
-			.orderby(Timestamp(sle.posting_date, sle.posting_time))
+			.orderby(CombineDatetime(sle.posting_date, sle.posting_time))
 			.orderby(sle.creation)
 			.run(as_dict=True)
 		)
@@ -1530,17 +1578,12 @@ def create_delivery_note_entries_for_batchwise_item_valuation_test(dn_entry_list
 
 
 def fetch_sle_details_for_doc_list(doc_list, columns, as_dict=1):
-	return frappe.db.sql(
-		f"""
-		SELECT { ', '.join(columns)}
-		FROM `tabStock Ledger Entry`
-		WHERE
-			voucher_no IN %(voucher_nos)s
-			and docstatus = 1
-		ORDER BY timestamp(posting_date, posting_time) ASC, CREATION ASC
-	""",
-		dict(voucher_nos=[doc.name for doc in doc_list]),
-		as_dict=as_dict,
+	return frappe.get_all(
+		"Stock Ledger Entry",
+		filters={"voucher_no": ["in", [doc.name for doc in doc_list]], "docstatus": 1},
+		fields=columns,
+		order_by="posting_datetime asc, creation asc",
+		as_list=not as_dict,
 	)
 
 

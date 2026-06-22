@@ -391,6 +391,42 @@ class TestTimesheet(ERPNextTestSuite):
 		self.assertEqual(timesheet.time_logs[1].sales_invoice, sales_invoice2.name)
 		self.assertEqual(timesheet.status, "Billed")
 
+	def test_get_timesheets_list_portal_sales_invoice(self):
+		# get_timesheets_list selects COALESCE(timesheet.sales_invoice, detail.sales_invoice). The earlier
+		# `timesheet.sales_invoice | detail.sales_invoice` bitwise-ORed two varchars -- it errored on
+		# Postgres and returned 0 (names cast to int) on MariaDB.
+		from erpnext.projects.doctype.timesheet.timesheet import get_timesheets_list
+
+		customer = "_Test Customer"
+
+		# tie the current user (Administrator) to the customer so the portal resolves it
+		contact = frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": "_Test Timesheet Portal Contact",
+				"user": "Administrator",
+				"links": [{"link_doctype": "Customer", "link_name": customer}],
+			}
+		).insert(ignore_permissions=True)
+		self.addCleanup(self._delete_if_exists, "Contact", contact.name)
+
+		si = create_sales_invoice(customer=customer)
+
+		employee = make_employee("_test_timesheet_portal@example.com", company="_Test Company")
+		timesheet = make_timesheet(employee, is_billable=0)
+		frappe.db.set_value("Timesheet", timesheet.name, "sales_invoice", si.name)
+
+		rows = get_timesheets_list("Timesheet", None, {}, 0, 500)
+
+		row = next((r for r in rows if r.name == timesheet.name), None)
+		self.assertIsNotNone(row, "billed timesheet not returned by portal list")
+		self.assertEqual(row.sales_invoice, si.name)
+
+	@staticmethod
+	def _delete_if_exists(doctype, name):
+		if frappe.db.exists(doctype, name):
+			frappe.delete_doc(doctype, name, force=True)
+
 
 def make_timesheet(
 	employee,

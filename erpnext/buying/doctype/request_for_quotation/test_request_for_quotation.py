@@ -60,6 +60,42 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		self.assertEqual(rfq.get("suppliers")[0].quote_status, "Received")
 		self.assertEqual(rfq.get("suppliers")[1].quote_status, "Pending")
 
+	def test_duplicate_supplier_rejected(self):
+		rfq = frappe.new_doc("Request for Quotation")
+		rfq.transaction_date = nowdate()
+		rfq.company = "_Test Company"
+		rfq.message_for_supplier = "Please quote"
+		rfq.append("suppliers", {"supplier": "_Test Supplier"})
+		rfq.append("suppliers", {"supplier": "_Test Supplier"})
+		rfq.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"qty": 5,
+				"uom": "_Test UOM",
+				"stock_uom": "_Test UOM",
+				"conversion_factor": 1.0,
+				"warehouse": "_Test Warehouse - _TC",
+				"schedule_date": nowdate(),
+			},
+		)
+		self.assertRaises(frappe.ValidationError, rfq.insert)
+
+	def test_rfq_blocked_for_supplier_with_prevent_rfqs(self):
+		frappe.db.set_value("Supplier", "_Test Supplier", "prevent_rfqs", 1)
+		rfq = make_request_for_quotation(
+			supplier_data=[{"supplier": "_Test Supplier", "supplier_name": "_Test Supplier"}],
+			do_not_save=True,
+		)
+		self.assertRaises(frappe.ValidationError, rfq.save)
+
+	def test_rfq_status_lifecycle(self):
+		rfq = make_request_for_quotation()
+		self.assertEqual(rfq.status, "Submitted")
+
+		rfq.cancel()
+		self.assertEqual(rfq.status, "Cancelled")
+
 	def test_make_supplier_quotation(self):
 		rfq = make_request_for_quotation()
 

@@ -15,7 +15,7 @@ from frappe.model.document import Document
 from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
 from frappe.model.utils.rename_doc import update_linked_doctypes
 from frappe.query_builder import CustomFunction, Field, functions
-from frappe.query_builder.functions import Cast, Coalesce, Max, Substring
+from frappe.query_builder.functions import Cast, Coalesce, Max
 from frappe.utils import cint, cstr, flt, get_formatted_email, today
 from frappe.utils.user import get_users_with_role
 
@@ -55,6 +55,7 @@ class Customer(TransactionBase):
 
 		account_manager: DF.Link | None
 		accounts: DF.Table[PartyAccount]
+		alias: DF.Data | None
 		companies: DF.Table[AllowedToTransactWith]
 		credit_limits: DF.Table[CustomerCreditLimit]
 		customer_details: DF.Text | None
@@ -128,9 +129,17 @@ class Customer(TransactionBase):
 			Customer = frappe.qb.DocType("Customer")
 
 			if frappe.db.db_type == "postgres":
-				# Postgres: extract trailing digits (e.g. "Customer - 3") and cast to int.
-				# NOTE: PostgreSQL is strict about types; MySQL's UNSIGNED cast does not exist.
-				extracted_part = Substring(Customer.name, r"\d+$")
+				# Mirror MariaDB's CAST(SUBSTRING_INDEX(name, ' ', -1) AS UNSIGNED): take the last
+				# whitespace-delimited token, then its LEADING digits, and cast to int. So "X - 3" -> 3,
+				# "X - 3a" -> 3, "X - 1.5" -> 1, matching MariaDB exactly. A non-numeric token (e.g.
+				# "X - Foo") strips to '' which NULLIF turns into NULL: MAX() skips it and COALESCE floors
+				# to 0, matching MariaDB's CAST(... AS UNSIGNED) -> 0. (pypika's Substring is start/length,
+				# not a regex; UNSIGNED doesn't exist on postgres, and a raw CAST of a non-numeric token to
+				# INTEGER would raise instead of yielding NULL.)
+				regexp_replace = CustomFunction("regexp_replace", ["source", "pattern", "replacement"])
+				nullif = CustomFunction("NULLIF", ["expr", "value"])
+				last_token = regexp_replace(Customer.name, r"^.*\s", "")
+				extracted_part = nullif(regexp_replace(last_token, r"^(\d*).*$", r"\1"), "")
 				casted_part = Cast(extracted_part, "INTEGER")
 			else:
 				# MariaDB/MySQL: keep existing behavior.

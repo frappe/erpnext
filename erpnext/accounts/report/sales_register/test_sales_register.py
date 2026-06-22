@@ -55,6 +55,39 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 			si = si.submit()
 		return si
 
+	def _ensure_income_account(self, account_name):
+		name = f"{account_name} - _TC"
+		if not frappe.db.exists("Account", name):
+			frappe.get_doc(
+				{
+					"doctype": "Account",
+					"account_name": account_name,
+					"parent_account": "Income - _TC",
+					"company": self.company,
+					"root_type": "Income",
+					"report_type": "Profit and Loss",
+					"account_type": "Income Account",
+				}
+			).insert()
+		return name
+
+	def test_income_account_columns_sorted_case_insensitively(self):
+		# The dynamic income-account columns must follow MariaDB's case-insensitive collation order and
+		# be identical on both engines. Plain python sorted() is case-sensitive (ASCII), so "ZZZ" would
+		# sort before "aaa"; casefold restores the pre-effort MariaDB order on both backends.
+		lower = self._ensure_income_account("aaa Test Income")
+		upper = self._ensure_income_account("ZZZ Test Income")
+		for account in (upper, lower):  # submit in non-casefold order
+			si = self.create_sales_invoice(do_not_submit=True)
+			si.items[0].income_account = account
+			si.submit()
+
+		filters = frappe._dict({"from_date": today(), "to_date": today(), "company": self.company})
+		columns = execute(filters)[0]
+		labels = [col["label"] for col in columns if col.get("label") in (lower, upper)]
+
+		self.assertEqual(labels, sorted([lower, upper], key=str.casefold))
+
 	def test_basic_report_output(self):
 		si = self.create_sales_invoice(rate=98)
 

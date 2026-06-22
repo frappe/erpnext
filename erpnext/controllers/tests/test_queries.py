@@ -80,6 +80,19 @@ class TestQueries(ERPNextTestSuite):
 		wh = query(filters=[["Bin", "item_code", "=", "_Test Item"]])
 		self.assertGreaterEqual(len(wh), 1)
 
+	def test_get_batch_numbers_query(self):
+		# converted from raw SQL to query builder; assert it executes on both engines
+		query = add_default_params(queries.get_batch_numbers, "Batch")
+		self.assertIsInstance(query(txt="", filters={}), list | tuple)
+
+	def test_get_purchase_receipts_query(self):
+		query = add_default_params(queries.get_purchase_receipts, "Purchase Receipt")
+		self.assertIsInstance(query(txt="", filters={}), list | tuple)
+
+	def test_get_purchase_invoices_query(self):
+		query = add_default_params(queries.get_purchase_invoices, "Purchase Invoice")
+		self.assertIsInstance(query(txt="", filters={}), list | tuple)
+
 	def test_default_uoms(self):
 		self.assertGreaterEqual(frappe.db.count("UOM", {"enabled": 1}), 10)
 

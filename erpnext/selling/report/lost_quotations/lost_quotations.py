@@ -83,7 +83,8 @@ def get_data(company: str, from_date: str, to_date: str, group_by: Literal["Lost
 		.select(
 			Coalesce(dimension[fieldname], _("Not Specified")),
 			Count(q.name).distinct(),
-			Round((Count(q.name).distinct() / total_quotations * 100), 2),
+			# `* 100.0` before dividing: count/count is integer division on Postgres (truncates to 0)
+			Round((Count(q.name).distinct() * 100.0 / total_quotations), 2),
 			Sum(q.base_net_total),
 			Round((Sum(q.base_net_total) / total_value * 100), 2),
 		)

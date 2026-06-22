@@ -818,12 +818,11 @@ class TestPaymentEntry(ERPNextTestSuite):
 			self.assertEqual(expected_gle[gle.account][3], gle.against_voucher)
 
 	def get_gle(self, voucher_no):
-		return frappe.db.sql(
-			"""select account, debit, credit, against_voucher
-			from `tabGL Entry` where voucher_type='Payment Entry' and voucher_no=%s
-			order by account asc""",
-			voucher_no,
-			as_dict=1,
+		return frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Payment Entry", "voucher_no": voucher_no},
+			fields=["account", "debit", "credit", "against_voucher"],
+			order_by="account asc",
 		)
 
 	def test_payment_entry_write_off_difference(self):
@@ -918,13 +917,19 @@ class TestPaymentEntry(ERPNextTestSuite):
 			"Debtors - _TC": {"cost_center": cost_center},
 		}
 
-		gl_entries = frappe.db.sql(
-			"""select account, cost_center, account_currency, debit, credit,
-			debit_in_account_currency, credit_in_account_currency
-			from `tabGL Entry` where voucher_type='Payment Entry' and voucher_no=%s
-			order by account asc""",
-			pe.name,
-			as_dict=1,
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Payment Entry", "voucher_no": pe.name},
+			fields=[
+				"account",
+				"cost_center",
+				"account_currency",
+				"debit",
+				"credit",
+				"debit_in_account_currency",
+				"credit_in_account_currency",
+			],
+			order_by="account asc",
 		)
 
 		self.assertTrue(gl_entries)
@@ -955,13 +960,19 @@ class TestPaymentEntry(ERPNextTestSuite):
 			"Creditors - _TC": {"cost_center": cost_center},
 		}
 
-		gl_entries = frappe.db.sql(
-			"""select account, cost_center, account_currency, debit, credit,
-			debit_in_account_currency, credit_in_account_currency
-			from `tabGL Entry` where voucher_type='Payment Entry' and voucher_no=%s
-			order by account asc""",
-			pe.name,
-			as_dict=1,
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Payment Entry", "voucher_no": pe.name},
+			fields=[
+				"account",
+				"cost_center",
+				"account_currency",
+				"debit",
+				"credit",
+				"debit_in_account_currency",
+				"credit_in_account_currency",
+			],
+			order_by="account asc",
 		)
 
 		self.assertTrue(gl_entries)
@@ -1770,9 +1781,18 @@ class TestPaymentEntry(ERPNextTestSuite):
 			.where((gle.voucher_no == self.voucher_no) & (gle.is_cancelled == 0))
 			.orderby(gle.account, gle.debit, gle.credit, order=frappe.qb.desc)
 		).run(as_dict=True)
-		for row in range(len(self.expected_gle)):
-			for field in ["account", "debit", "credit"]:
-				self.assertEqual(self.expected_gle[row][field], gl_entries[row][field])
+		# MariaDB and Postgres collate `account` differently, so the DB ordering isn't portable;
+		# sort both sides identically before the positional comparison.
+		fields = ["account", "debit", "credit"]
+
+		def _key(row):
+			return tuple(str(row[f]) for f in fields)
+
+		gl_entries = sorted(gl_entries, key=_key)
+		expected_gle = sorted(self.expected_gle, key=_key)
+		for row in range(len(expected_gle)):
+			for field in fields:
+				self.assertEqual(expected_gle[row][field], gl_entries[row][field])
 
 	def test_reverse_payment_reconciliation(self):
 		customer = create_customer(frappe.generate_hash(length=10), "INR")

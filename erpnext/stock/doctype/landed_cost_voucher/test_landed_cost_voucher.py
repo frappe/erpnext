@@ -27,6 +27,28 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 	def setUp(self):
 		self.load_test_records("Currency Exchange")
 
+	def test_get_vendor_invoices_runs(self):
+		# get_vendor_invoice_query filters unclaimed vendor invoices; the threshold moved from a HAVING
+		# (which referenced a SELECT alias with no GROUP BY -- invalid on Postgres) to a WHERE.
+		from erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher import get_vendor_invoices
+
+		pi = make_purchase_invoice(item_code="_Test Non Stock Item", qty=1, rate=100)
+		self.addCleanup(self._cancel_and_delete_pi, pi.name)
+
+		rows = get_vendor_invoices(
+			"Purchase Invoice", "", "name", 0, 20, {"company": "_Test Company", "name": pi.name}
+		)
+		self.assertTrue(any(r[0] == pi.name for r in rows))
+
+	@staticmethod
+	def _cancel_and_delete_pi(name):
+		if not frappe.db.exists("Purchase Invoice", name):
+			return
+		doc = frappe.get_doc("Purchase Invoice", name)
+		if doc.docstatus == 1:
+			doc.cancel()
+		frappe.delete_doc("Purchase Invoice", name, force=1)
+
 	def test_landed_cost_voucher(self):
 		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 

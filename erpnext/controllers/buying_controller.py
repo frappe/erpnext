@@ -1123,15 +1123,14 @@ class BuyingController(SubcontractingController):
 					asset = frappe.get_doc("Asset", asset.name)
 					if delete_asset and is_auto_create_enabled:
 						# need to delete movements to delete assets otherwise throws link exists error
-						movements = frappe.db.sql(
-							"""SELECT asm.name
-							FROM `tabAsset Movement` asm, `tabAsset Movement Item` asm_item
-							WHERE asm_item.parent=asm.name and asm_item.asset=%s""",
-							asset.name,
-							as_dict=1,
+						movements = frappe.get_all(
+							"Asset Movement Item",
+							filters={"asset": asset.name},
+							pluck="parent",
+							limit_page_length=0,  # delete every movement of the asset (no default 20 cap)
 						)
 						for movement in movements:
-							frappe.delete_doc("Asset Movement", movement.name, force=1)
+							frappe.delete_doc("Asset Movement", movement, force=1)
 						frappe.delete_doc("Asset", asset.name, force=1)
 						continue
 
@@ -1224,17 +1223,12 @@ def validate_item_type(doc, fieldname, message):
 	if not items:
 		return
 
-	item_list = ", ".join(["%s" % frappe.db.escape(d) for d in items])
-
-	invalid_items = [
-		d[0]
-		for d in frappe.db.sql(
-			f"""
-		select item_code from tabItem where name in ({item_list}) and {fieldname}=0
-		""",
-			as_list=True,
-		)
-	]
+	invalid_items = frappe.get_all(
+		"Item",
+		filters={"name": ["in", items], fieldname: 0},
+		pluck="item_code",
+		limit_page_length=0,  # validate every item in the document (no default 20 cap)
+	)
 
 	if invalid_items:
 		items = ", ".join([d for d in invalid_items])

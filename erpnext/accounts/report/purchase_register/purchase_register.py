@@ -309,17 +309,22 @@ def get_account_columns(invoice_list, include_payments):
 	unrealized_profit_loss_account_columns = []
 
 	if invoice_list:
-		expense_accounts = frappe.get_all(
-			"Purchase Invoice Item",
-			filters={
-				"docstatus": 1,
-				"expense_account": ["is", "set"],
-				"parenttype": "Purchase Invoice",
-				"parent": ["in", [inv.name for inv in invoice_list]],
-			},
-			pluck="expense_account",
-			distinct=True,
-			order_by="expense_account",
+		# frappe drops ORDER BY for distinct queries on postgres (db_query), so sort in python with
+		# casefold to keep the generated account-column order deterministic and identical on both
+		# backends, matching MariaDB's case-insensitive collation (the original ORDER BY).
+		expense_accounts = sorted(
+			frappe.get_all(
+				"Purchase Invoice Item",
+				filters={
+					"docstatus": 1,
+					"expense_account": ["is", "set"],
+					"parenttype": "Purchase Invoice",
+					"parent": ["in", [inv.name for inv in invoice_list]],
+				},
+				pluck="expense_account",
+				distinct=True,
+			),
+			key=str.casefold,
 		)
 
 		purchase_taxes_query = get_taxes_query(invoice_list, "Purchase Taxes and Charges", "Purchase Invoice")
@@ -331,16 +336,18 @@ def get_account_columns(invoice_list, include_payments):
 			advance_tax_accounts = advance_taxes_query.run(as_dict=True, pluck="account_head")
 			tax_accounts = set(tax_accounts + advance_tax_accounts)
 
-		unrealized_profit_loss_accounts = frappe.get_all(
-			"Purchase Invoice",
-			filters={
-				"docstatus": 1,
-				"name": ["in", [inv.name for inv in invoice_list]],
-				"unrealized_profit_loss_account": ["is", "set"],
-			},
-			pluck="unrealized_profit_loss_account",
-			distinct=True,
-			order_by="unrealized_profit_loss_account",
+		unrealized_profit_loss_accounts = sorted(
+			frappe.get_all(
+				"Purchase Invoice",
+				filters={
+					"docstatus": 1,
+					"name": ["in", [inv.name for inv in invoice_list]],
+					"unrealized_profit_loss_account": ["is", "set"],
+				},
+				pluck="unrealized_profit_loss_account",
+				distinct=True,
+			),
+			key=str.casefold,
 		)
 
 	for account in expense_accounts:

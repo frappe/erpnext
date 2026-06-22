@@ -441,8 +441,10 @@ def get_timeline_data(doctype: str, name: str) -> dict[int, int]:
 	timesheet_detail = frappe.qb.DocType("Timesheet Detail")
 
 	return dict(
+		# select the same day-bucket expression that is grouped on (postgres rejects selecting the
+		# ungrouped from_time); UnixTimestamp(Date(...)) is the day's epoch, which is the timeline key.
 		frappe.qb.from_(timesheet_detail)
-		.select(UnixTimestamp(timesheet_detail.from_time), Count("*"))
+		.select(UnixTimestamp(Date(timesheet_detail.from_time)), Count("*"))
 		.where(timesheet_detail.project == name)
 		.where(timesheet_detail.from_time > CurDate() - Interval(years=1))
 		.where(timesheet_detail.docstatus < 2)

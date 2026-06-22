@@ -1267,6 +1267,10 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		for sle in sl_entries:
 			self.assertEqual(expected_sle[sle.warehouse], sle.actual_qty)
 
+		# MariaDB and Postgres collate `account` differently, so the DB ordering isn't portable;
+		# sort both sides identically (by the compared values) before the positional check.
+		gl_entries = sorted(gl_entries, key=lambda g: (g.account, g.debit, g.credit))
+		expected_gle = sorted(expected_gle, key=lambda e: (e[0], e[1], e[2]))
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(gle.account, expected_gle[i][0])
 			self.assertEqual(gle.debit, expected_gle[i][1])
@@ -6011,6 +6015,35 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		srbnb_credit = sum(flt(row.credit) for row in gl_entries if row.account == srbnb_account)
 		self.assertAlmostEqual(srbnb_credit, pi_base_net_amount, places=2)
 
+	def test_get_already_received_qty(self):
+		"""get_already_received_qty sums prior submitted PR Item qty against the same PO line,
+		excluding the current PR — covers the converted SUM with `parent != self.name`."""
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import (
+			create_purchase_order,
+			make_pr_against_po,
+		)
+
+		po = create_purchase_order(qty=10)
+		po_detail = po.items[0].name
+
+		make_pr_against_po(po.name, 4)  # PR1 receives 4
+		pr2 = make_pr_against_po(po.name, 2)  # PR2 receives 2
+
+		# already received against this PO line, excluding pr2 itself, is pr1's 4
+		self.assertEqual(pr2.get_already_received_qty(po.name, po_detail), 4.0)
+
+	def test_check_next_docstatus_blocks_with_submitted_invoice(self):
+		"""check_next_docstatus must flag a submitted Purchase Invoice drawn from the receipt —
+		covers the converted child-table get_all (Purchase Invoice Item, docstatus=1)."""
+		pr = make_purchase_receipt()
+		pi = make_purchase_invoice(pr.name)
+		pi.insert()
+		pi.submit()
+
+		with self.assertRaises(frappe.ValidationError) as cm:
+			pr.check_next_docstatus()
+		self.assertIn("is already submitted", str(cm.exception))
+
 
 def create_asset_category_for_pr_test():
 	category_name = "Test Asset Category for PR"
@@ -6070,12 +6103,11 @@ def prepare_data_for_internal_transfer():
 
 
 def get_sl_entries(voucher_type, voucher_no):
-	return frappe.db.sql(
-		""" select actual_qty, warehouse, stock_value_difference
-		from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s
-		order by posting_time desc""",
-		(voucher_type, voucher_no),
-		as_dict=1,
+	return frappe.get_all(
+		"Stock Ledger Entry",
+		filters={"voucher_type": voucher_type, "voucher_no": voucher_no},
+		fields=["actual_qty", "warehouse", "stock_value_difference"],
+		order_by="posting_time desc",
 	)
 
 

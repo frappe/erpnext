@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
+from frappe.query_builder.functions import Lower
 from frappe.utils import cint, cstr, flt, fmt_money
 
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
@@ -133,9 +134,12 @@ def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
 			frappe.qb.from_(iva)
 			.select(iva.parent)
 			# attribute_value is a varchar column; cast values to str so postgres doesn't choke on
-			# `varchar = numeric` for numeric attributes (stored values are strings on both backends)
+			# `varchar = numeric` for numeric attributes (stored values are strings on both backends).
+			# Lower() both sides so matching is case-insensitive on Postgres too, matching MariaDB's
+			# default collation (MariaDB result is unchanged -- it already matches case-insensitively).
 			.where(
-				(iva.attribute == attribute) & (iva.attribute_value.isin([cstr(v) for v in attribute_values]))
+				(Lower(iva.attribute) == cstr(attribute).lower())
+				& (Lower(iva.attribute_value).isin([cstr(v).lower() for v in attribute_values]))
 			)
 			.where(iva.parent.isin(item_subquery))
 			.groupby(iva.parent)

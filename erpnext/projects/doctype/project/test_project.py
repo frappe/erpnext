@@ -12,6 +12,21 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestProject(ERPNextTestSuite):
+	def test_get_timeline_data_runs(self):
+		# get_timeline_data groups Timesheet Detail by Date(from_time); the selected day key must be the
+		# same grouped expression (UnixTimestamp(Date(from_time))) to be valid on Postgres.
+		from erpnext.projects.doctype.project.project import get_timeline_data
+		from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet
+		from erpnext.setup.doctype.employee.test_employee import make_employee
+
+		project = make_project({"project_name": "_Test Timeline Project", "company": "_Test Company"})
+		emp = make_employee("test_timeline@example.com", company="_Test Company")
+		make_timesheet(emp, simulate=True, project=project.name)
+
+		data = get_timeline_data("Project", project.name)
+		self.assertIsInstance(data, dict)
+		self.assertGreaterEqual(sum(data.values()), 1)
+
 	def test_project_total_costing_and_billing_amount(self):
 		from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet
 		from erpnext.setup.doctype.employee.test_employee import make_employee

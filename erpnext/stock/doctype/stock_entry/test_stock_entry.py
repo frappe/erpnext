@@ -47,8 +47,9 @@ def get_sle(**args):
 		values.append(value)
 
 	return frappe.db.sql(
+		# posting_datetime is the precomputed date+time column; MySQL-only timestamp(date,time) errors on Postgres
 		"""select * from `tabStock Ledger Entry` %s
-		order by timestamp(posting_date, posting_time) desc, creation desc limit 1"""
+		order by posting_datetime desc, creation desc limit 1"""
 		% condition,
 		values,
 		as_dict=1,

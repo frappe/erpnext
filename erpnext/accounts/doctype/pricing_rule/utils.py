@@ -756,21 +756,16 @@ def validate_coupon_code(coupon_name):
 
 def update_coupon_code_count(coupon_name, transaction_type):
 	coupon = frappe.get_doc("Coupon Code", coupon_name)
-	if coupon:
-		if transaction_type == "used":
-			if not coupon.maximum_use:
-				coupon.used = coupon.used + 1
-				coupon.save(ignore_permissions=True)
-			elif coupon.used < coupon.maximum_use:
-				coupon.used = coupon.used + 1
-				coupon.save(ignore_permissions=True)
-			else:
-				frappe.throw(
-					_("{0} Coupon used are {1}. Allowed quantity is exhausted").format(
-						coupon.coupon_code, coupon.used
-					)
+	if transaction_type == "used":
+		if coupon.maximum_use and coupon.used >= coupon.maximum_use:
+			frappe.throw(
+				_("{0} Coupon used are {1}. Allowed quantity is exhausted").format(
+					coupon.coupon_code, coupon.used
 				)
-		elif transaction_type == "cancelled":
-			if coupon.used > 0:
-				coupon.used = coupon.used - 1
-				coupon.save(ignore_permissions=True)
+			)
+		coupon.used = coupon.used + 1
+		coupon.save(ignore_permissions=True)
+	elif transaction_type == "cancelled":
+		if coupon.used > 0:
+			coupon.used = coupon.used - 1
+			coupon.save(ignore_permissions=True)

@@ -2958,6 +2958,92 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(serial_nos, serial_nos_in_bundle)
 		self.assertEqual(batch_nos, batches_in_bundle)
 
+	def test_sales_team_contribution_follows_grant_commission(self):
+		"""Sales-person allocation tracks the grant-commission-eligible amount, not the gross total.
+
+		The Item "Grant Commission" flag includes an item in both Sales Partner and Sales Person
+		commission, so each sales person's allocated_amount is a share of
+		amount_eligible_for_commission rather than net_total.
+		"""
+		frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
+		frappe.db.set_value("Item", "_Test FG Item", "grant_commission", 0)
+		try:
+			so = make_sales_order(
+				do_not_save=True,
+				item_list=[
+					{"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC", "qty": 10, "rate": 100},
+					{
+						"item_code": "_Test FG Item",
+						"warehouse": "_Test Warehouse - _TC",
+						"qty": 10,
+						"rate": 100,
+					},
+				],
+			)
+			so.append(
+				"sales_team",
+				{"sales_person": "_Test Sales Person 1", "allocated_percentage": 60, "commission_rate": 10},
+			)
+			so.append(
+				"sales_team",
+				{"sales_person": "_Test Sales Person 2", "allocated_percentage": 40, "commission_rate": 0},
+			)
+			so.save()
+
+			self.assertEqual(so.net_total, 2000)
+			self.assertEqual(so.amount_eligible_for_commission, 1000)  # only the grant_commission item
+
+			first, second = so.sales_team
+			# allocation follows the eligible amount (1000), not net_total (2000)
+			self.assertEqual(first.allocated_amount, 600)
+			self.assertEqual(first.incentives, 60)  # 600 * 10%
+			self.assertEqual(second.allocated_amount, 400)
+			self.assertEqual(second.incentives, 0)
+		finally:
+			# grant_commission defaults to 1 for both items; restore
+			frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
+			frappe.db.set_value("Item", "_Test FG Item", "grant_commission", 1)
+
+	def test_sales_team_allocated_percentage_must_total_100(self):
+		with self.subTest("partial allocation is rejected"):
+			so = make_sales_order(do_not_save=True)
+			so.append("sales_team", {"sales_person": "_Test Sales Person 1", "allocated_percentage": 60})
+			self.assertRaises(frappe.ValidationError, so.save)
+
+		with self.subTest("allocation totalling 100 is accepted"):
+			so = make_sales_order(do_not_save=True)
+			so.append("sales_team", {"sales_person": "_Test Sales Person 1", "allocated_percentage": 60})
+			so.append("sales_team", {"sales_person": "_Test Sales Person 2", "allocated_percentage": 40})
+			so.save()
+			self.assertEqual(sum(d.allocated_percentage for d in so.sales_team), 100)
+
+	def test_sales_team_disabled_sales_person_rejected(self):
+		frappe.db.set_value("Sales Person", "_Test Sales Person 2", "enabled", 0)
+		try:
+			so = make_sales_order(do_not_save=True)
+			so.append("sales_team", {"sales_person": "_Test Sales Person 2", "allocated_percentage": 100})
+			self.assertRaises(frappe.ValidationError, so.save)
+		finally:
+			frappe.db.set_value("Sales Person", "_Test Sales Person 2", "enabled", 1)
+
+	def test_sales_partner_commission(self):
+		"""Sales Partner commission: total_commission = amount_eligible_for_commission * rate / 100."""
+		frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
+		try:
+			so = make_sales_order(qty=10, rate=100, do_not_save=True)
+			so.sales_partner = "_Test Sales Partner India - 1"
+			so.commission_rate = 7
+			so.save()
+
+			self.assertEqual(so.amount_eligible_for_commission, 1000)
+			self.assertEqual(so.total_commission, 70)  # 1000 * 7%
+
+			with self.subTest("commission rate above 100 is rejected"):
+				so.commission_rate = 101
+				self.assertRaises(frappe.ValidationError, so.save)
+		finally:
+			frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
+
 
 def compare_payment_schedules(doc, doc1, doc2):
 	for index, schedule in enumerate(doc1.get("payment_schedule")):

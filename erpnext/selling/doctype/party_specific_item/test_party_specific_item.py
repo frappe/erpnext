@@ -16,6 +16,36 @@ def create_party_specific_item(**args):
 	psi.insert()
 
 
+def create_supplier(supplier_name):
+	if frappe.db.exists("Supplier", supplier_name):
+		return frappe.get_doc("Supplier", supplier_name)
+
+	return frappe.get_doc(
+		{
+			"doctype": "Supplier",
+			"supplier_name": supplier_name,
+			"supplier_group": "Services",
+			"supplier_type": "Company",
+		}
+	).insert()
+
+
+def create_item(item_code):
+	if frappe.db.exists("Item", item_code):
+		return frappe.get_doc("Item", item_code)
+
+	return frappe.get_doc(
+		{
+			"doctype": "Item",
+			"item_code": item_code,
+			"item_name": item_code,
+			"description": item_code,
+			"item_group": "Products",
+			"is_purchase_item": 1,
+		}
+	).insert()
+
+
 class TestPartySpecificItem(ERPNextTestSuite):
 	def test_item_query_for_customer(self):
 		customer = "_Test Customer With Template"
@@ -46,6 +76,34 @@ class TestPartySpecificItem(ERPNextTestSuite):
 		filters = {"supplier": supplier, "is_purchase_item": 1}
 		items = item_query(
 			doctype="Item", txt="", searchfield="name", start=0, page_len=20, filters=filters, as_dict=False
+		)
+		self.assertIn(item, flatten(items))
+
+	def test_item_query_for_supplier_with_item_restricted_to_multiple_suppliers(self):
+		item = f"Party Specific Item {frappe.generate_hash(length=8)}"
+		supplier1 = f"Party Specific Supplier {frappe.generate_hash(length=8)}"
+		supplier2 = f"Party Specific Supplier {frappe.generate_hash(length=8)}"
+
+		create_item(item)
+		create_supplier(supplier1)
+		create_supplier(supplier2)
+
+		for supplier in (supplier1, supplier2):
+			create_party_specific_item(
+				party_type="Supplier",
+				party=supplier,
+				restrict_based_on="Item",
+				based_on_value=item,
+			)
+
+		items = item_query(
+			doctype="Item",
+			txt=item,
+			searchfield="name",
+			start=0,
+			page_len=20,
+			filters={"supplier": supplier1, "is_purchase_item": 1},
+			as_dict=False,
 		)
 		self.assertIn(item, flatten(items))
 
