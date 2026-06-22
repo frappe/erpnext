@@ -1887,7 +1887,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				.map((df) => df.fieldname);
 
 			if (this.frm.doc.currency == company_currency && currency == company_currency) {
-				this.reset_currency_labels(
+				this.frm.reset_currency_labels(
 					fields.filter((field) => !field.startsWith("base_")),
 					parentfield
 				);
@@ -1895,27 +1895,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			}
 
 			this.frm.set_currency_labels(fields, currency, parentfield);
-		});
-	}
-
-	reset_currency_labels(fields, parentfield) {
-		if (!fields.length) return;
-
-		const doctype = parentfield ? this.frm.fields_dict[parentfield].grid.doctype : this.frm.doc.doctype;
-
-		fields.forEach((field) => {
-			const docfield = frappe.meta.docfield_map[doctype][field];
-			if (docfield) {
-				const label = __(docfield.label || "", null, docfield.parent)
-					.replace(/\s*\([^\)]*\)\s*$/, "")
-					.trim();
-
-				if (parentfield) {
-					this.frm.fields_dict[parentfield].grid.update_docfield_property(field, "label", label);
-				} else {
-					this.frm.fields_dict[field].set_label(label);
-				}
-			}
 		});
 	}
 
@@ -1974,7 +1953,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 		this.set_currency_labels_from_options(currency_options, null, company_currency);
 		if (this.frm.doc.currency == company_currency) {
-			this.reset_currency_labels(["totals_section"]);
+			this.frm.reset_currency_labels(["totals_section"]);
 		} else {
 			this.frm.set_currency_labels(["totals_section"], this.frm.doc.currency);
 		}
