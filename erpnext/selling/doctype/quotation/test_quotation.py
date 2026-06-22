@@ -465,11 +465,14 @@ class TestQuotation(ERPNextTestSuite):
 
 		rate_with_margin = flt((1500 * 18.75) / 100 + 1500)
 
-		test_record = dict(self.globalTestRecords["Quotation"][0])
+		test_record = frappe.copy_doc(self.globalTestRecords["Quotation"][0])
 
-		test_record["items"][0]["price_list_rate"] = 1500
-		test_record["items"][0]["margin_type"] = "Percentage"
-		test_record["items"][0]["margin_rate_or_amount"] = 18.75
+		test_record.items[0].price_list_rate = 1500
+		test_record.items[0].margin_type = "Percentage"
+		test_record.items[0].margin_rate_or_amount = 18.75
+		# Rate is zeroed out so margin/discount drives the final rate. If a non-zero rate is present
+		# and conflicts with margin/discount, the new logic prioritizes rate and resets margin/discount.
+		test_record.items[0].rate = 0
 
 		quotation = frappe.copy_doc(test_record)
 		quotation.transaction_date = nowdate()
