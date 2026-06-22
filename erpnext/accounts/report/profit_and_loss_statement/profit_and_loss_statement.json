@@ -35,7 +35,7 @@
  "generate_csv": 0,
  "idx": 2,
  "is_standard": "Yes",
- "modified": "2026-06-22 13:06:12.602924",
+ "modified": "2026-06-22 13:38:15.898375",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Profit and Loss Statement",
@@ -60,7 +60,7 @@
 }
 =======
  ],
- "synced_report": 1,
+ "synced_report": 0,
  "timeout": 0
 }
 >>>>>>> 6a93baacf0 (feat(profit-and-loss): implement execute_synced_report with full parity to normal report)
