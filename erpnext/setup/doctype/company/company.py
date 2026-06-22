@@ -649,7 +649,7 @@ class Company(NestedSet):
 			for default_account in default_accounts:
 				self._set_default_account(default_account, default_accounts.get(default_account))
 
-		if not self.default_income_account:
+		if self.update_default_account and not self.default_income_account:
 			income_account = frappe.db.get_all(
 				"Account",
 				filters={"company": self.name, "is_group": 0},
@@ -667,24 +667,24 @@ class Company(NestedSet):
 
 			self.db_set("default_income_account", income_account)
 
-		if not self.default_payable_account:
+		if self.update_default_account and not self.default_payable_account:
 			self.db_set("default_payable_account", self.default_payable_account)
 
-		if not self.write_off_account:
+		if self.update_default_account and not self.write_off_account:
 			write_off_acct = frappe.db.get_value(
 				"Account", {"account_name": _("Write Off"), "company": self.name, "is_group": 0}
 			)
 
 			self.db_set("write_off_account", write_off_acct)
 
-		if not self.exchange_gain_loss_account:
+		if self.update_default_account and not self.exchange_gain_loss_account:
 			exchange_gain_loss_acct = frappe.db.get_value(
 				"Account", {"account_name": _("Exchange Gain/Loss"), "company": self.name, "is_group": 0}
 			)
 
 			self.db_set("exchange_gain_loss_account", exchange_gain_loss_acct)
 
-		if not self.disposal_account:
+		if self.update_default_account and not self.disposal_account:
 			disposal_acct = frappe.db.get_value(
 				"Account",
 				{"account_name": _("Gain/Loss on Asset Disposal"), "company": self.name, "is_group": 0},
