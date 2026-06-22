@@ -149,6 +149,29 @@ class TestLead(ERPNextTestSuite):
 		self.assertEqual(event.event_participants[1].reference_doctype, "Prospect")
 		self.assertEqual(event.event_participants[1].reference_docname, prospect)
 
+	def test_set_lead_name_fallbacks(self):
+		# organization name is used when there is no person name
+		lead = frappe.new_doc("Lead")
+		lead.company_name = "_Test Org Lead"
+		lead.set_lead_name()
+		self.assertEqual(lead.lead_name, "_Test Org Lead")
+
+		# the email local-part is used when only an email is present
+		lead = frappe.new_doc("Lead")
+		lead.email_id = "jane.doe@example.com"
+		lead.set_lead_name()
+		self.assertEqual(lead.lead_name, "jane.doe")
+
+		# data import (ignore_mandatory) with no name/company/email must not crash
+		lead = frappe.new_doc("Lead")
+		lead.flags.ignore_mandatory = True
+		lead.set_lead_name()
+		self.assertFalse(lead.lead_name)
+
+		# otherwise a lead with no name source is rejected
+		lead = frappe.new_doc("Lead")
+		self.assertRaises(frappe.ValidationError, lead.set_lead_name)
+
 
 def create_event(subject, starts_on, reference_type, reference_name):
 	event = frappe.new_doc("Event")
