@@ -291,6 +291,7 @@ class FIFOSlots:
 		self.batchwise_valuation_by_batch = {}
 		self.filters = filters
 		self.sle = sle
+		self.streaming_mode = sle is None
 
 	def generate(self) -> dict:
 		"""
@@ -395,12 +396,12 @@ class FIFOSlots:
 
 		if row.serial_and_batch_bundle:
 			if row.has_serial_no:
-				if bundle_wise_serial_nos:
+				if self.streaming_mode:
 					serial_nos = bundle_wise_serial_nos.get(row.serial_and_batch_bundle) or []
 				else:
 					serial_nos = sorted(get_serial_nos_from_bundle(row.serial_and_batch_bundle)) or []
 			elif row.has_batch_no:
-				if bundle_wise_batch_nos:
+				if self.streaming_mode:
 					batch_nos = bundle_wise_batch_nos.get(row.serial_and_batch_bundle) or []
 				else:
 					batch_nos = (
@@ -440,14 +441,14 @@ class FIFOSlots:
 		return [sn.upper() for sn in serial_nos]
 
 	def _get_batchwise_valuation(self, batch_no: str):
-		if batch_no not in self.batchwise_valuation_by_batch:
+		if not self.streaming_mode and batch_no not in self.batchwise_valuation_by_batch:
 			# only reachable when stock ledger entries are passed in directly;
 			# the streaming path prefetches all flags before iteration
 			self.batchwise_valuation_by_batch[batch_no] = frappe.db.get_value(
 				"Batch", batch_no, "use_batchwise_valuation"
 			)
 
-		return self.batchwise_valuation_by_batch[batch_no]
+		return self.batchwise_valuation_by_batch.get(batch_no)
 
 	def _prefetch_batchwise_valuations(self) -> None:
 		sle = frappe.qb.DocType("Stock Ledger Entry")
