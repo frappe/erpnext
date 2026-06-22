@@ -1130,9 +1130,7 @@ def get_itemised_tax_breakup_html(doc):
 
 
 @frappe.whitelist()
-def get_round_off_applicable_accounts(
-	company: str, account_list: list | str, doc: str | dict | Document | None = None
-):
+def get_round_off_applicable_accounts(company, account_list, doc=None):
 	# required to set correct region
 	with temporary_flag("company", company):
 		return get_regional_round_off_accounts(company, account_list, doc)
