@@ -111,6 +111,8 @@
   "create_pr_in_draft_status",
   "budget_section",
   "use_legacy_budget_controller",
+  "company_wise_masters_section",
+  "enable_company_wise_masters",
   "document_naming_tab",
   "transaction_naming_html"
  ],
@@ -734,6 +736,17 @@
    "fieldname": "preview_mode",
    "fieldtype": "Check",
    "label": "Preview mode"
+  },
+  {
+   "fieldname": "company_wise_masters_section",
+   "fieldtype": "Section Break",
+   "label": "Company-wise Masters"
+  },
+  {
+   "fieldname": "enable_company_wise_masters",
+   "fieldtype": "Check",
+   "label": "Enable Company-wise Master Filtering",
+   "description": "When enabled, Supplier, Customer, and Item records can be restricted to specific companies via their <b>Allowed Companies</b> table. Transactions will only show masters configured for the selected company."
   },
   {
    "fieldname": "document_naming_tab",

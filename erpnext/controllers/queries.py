@@ -239,10 +239,16 @@ def item_query(
 			filters.pop("customer", None)
 			filters.pop("supplier", None)
 
-	# Extract company filter before building the query — Item has no company field
+	# Extract company filter before building the query — Item has no company field.
+	# Always pop so the unknown key doesn't reach frappe.get_query; only use the
+	# value for sub-query filtering when the feature is enabled.
 	company = None
 	if filters and isinstance(filters, dict):
-		company = filters.pop("company", None)
+		from erpnext.controllers.party_permissions import is_enabled
+
+		_company = filters.pop("company", None)
+		if is_enabled():
+			company = _company
 
 	item = DocType(doctype)
 
@@ -364,10 +370,12 @@ def supplier_query(
 	filters: dict | str | None = None,
 ):
 	"""Link field query for Supplier — filters by allowed_companies when company is provided."""
+	from erpnext.controllers.party_permissions import is_enabled
+
 	if isinstance(filters, str):
 		filters = json.loads(filters)
 
-	company = (filters or {}).pop("company", None)
+	company = (filters or {}).pop("company", None) if is_enabled() else None
 	supplier = DocType("Supplier")
 	search_str = f"%{txt}%"
 	mcond = get_match_cond("Supplier")
@@ -412,10 +420,12 @@ def customer_query(
 	filters: dict | str | None = None,
 ):
 	"""Link field query for Customer — filters by allowed_companies when company is provided."""
+	from erpnext.controllers.party_permissions import is_enabled
+
 	if isinstance(filters, str):
 		filters = json.loads(filters)
 
-	company = (filters or {}).pop("company", None)
+	company = (filters or {}).pop("company", None) if is_enabled() else None
 	customer = DocType("Customer")
 	search_str = f"%{txt}%"
 

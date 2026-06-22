@@ -18,6 +18,11 @@ Enforcement happens at three layers:
 import frappe
 
 
+def is_enabled() -> bool:
+    """Return True when company-wise master filtering is turned on in Accounts Settings."""
+    return bool(frappe.db.get_single_value("Accounts Settings", "enable_company_wise_masters"))
+
+
 def _get_user_companies(user: str) -> list[str]:
     """Return companies the user is restricted to via User Permissions on Company."""
     return frappe.get_all(
@@ -32,9 +37,13 @@ def _company_filter_sql(doctype: str, user: str) -> str:
     Return an SQL fragment that filters `tab{doctype}` rows by allowed_companies.
 
     Returns "" (no restriction) when:
+    - the feature is disabled in Accounts Settings, or
     - the user is System Manager, or
     - the user has no User Permission rows for Company (not company-restricted).
     """
+    if not is_enabled():
+        return ""
+
     if "System Manager" in frappe.get_roles(user):
         return ""
 
@@ -79,6 +88,9 @@ def item_query_conditions(user=None):
 
 
 def party_has_permission(doc, user=None, permission_type=None):
+    if not is_enabled():
+        return True
+
     user = user or frappe.session.user
     if "System Manager" in frappe.get_roles(user):
         return True
@@ -130,6 +142,9 @@ _SALES_DOCTYPES = frozenset(
 
 def validate_party_company(doc, method=None):
     """Throw if the supplier/customer/items are not configured for doc.company."""
+    if not is_enabled():
+        return
+
     if doc.doctype in _PURCHASE_DOCTYPES:
         supplier = doc.get("supplier")
         if supplier and not _allowed_for_company("Supplier", supplier, doc.company):
