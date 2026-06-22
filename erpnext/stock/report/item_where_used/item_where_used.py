@@ -479,18 +479,23 @@ def hide_empty_optional_columns(columns, data):
 
 	fields_with_values = set()
 	for row in data:
-		for fieldname in optional_fields:
-			if field_has_value(row, fieldname):
-				fields_with_values.add(fieldname)
+		for column in columns:
+			fieldname = column["fieldname"]
+			if fieldname in optional_fields and field_has_value(row, column):
+				fields_with_values.add(column["fieldname"])
 
 	return [column for column in columns if column["fieldname"] not in optional_fields - fields_with_values]
 
 
-def field_has_value(row, fieldname):
+def field_has_value(row, column):
+	fieldname = column["fieldname"]
 	if fieldname not in row:
 		return False
 
 	value = row.get(fieldname)
+	if column.get("fieldtype") == "Check":
+		return bool(value)
+
 	return value is not None and value != ""
 
 
