@@ -17,7 +17,7 @@
  "generate_csv": 0,
  "idx": 4,
  "is_standard": "Yes",
- "modified": "2026-06-18 16:37:42.112788",
+ "modified": "2026-06-22 13:38:42.740436",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Trial Balance",
@@ -37,6 +37,6 @@
    "role": "Auditor"
   }
  ],
- "synced_report": 1,
+ "synced_report": 0,
  "timeout": 0
 }

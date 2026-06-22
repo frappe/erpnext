@@ -17,7 +17,7 @@
  "generate_csv": 0,
  "idx": 5,
  "is_standard": "Yes",
- "modified": "2026-06-18 11:53:59.190645",
+ "modified": "2026-06-25 12:03:28.812092",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Receivable",
@@ -34,6 +34,6 @@
    "role": "Accounts User"
   }
  ],
- "synced_report": 1,
+ "synced_report": 0,
  "timeout": 0
 }

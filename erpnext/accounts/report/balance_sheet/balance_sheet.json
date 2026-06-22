@@ -17,7 +17,7 @@
  "generate_csv": 0,
  "idx": 3,
  "is_standard": "Yes",
- "modified": "2026-06-22 13:06:12.602924",
+ "modified": "2026-06-22 13:38:25.236839",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Balance Sheet",
@@ -37,6 +37,6 @@
    "role": "Auditor"
   }
  ],
- "synced_report": 1,
+ "synced_report": 0,
  "timeout": 0
 }
