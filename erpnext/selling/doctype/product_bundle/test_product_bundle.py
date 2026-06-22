@@ -144,6 +144,15 @@ class TestProductBundle(ERPNextTestSuite):
 		self.assertEqual(rows[0].stock_quantity, rows[0].quantity)
 		self.assertEqual(rows[0].stock_uom, rows[0].uom)
 
+	def test_item_where_used_report_hides_false_check_columns(self):
+		from erpnext.stock.report.item_where_used.item_where_used import get_columns
+
+		columns = get_columns([frappe._dict(stock_quantity=0, is_default=0)])
+		fieldnames = [column["fieldname"] for column in columns]
+
+		self.assertIn("stock_quantity", fieldnames)
+		self.assertNotIn("is_default", fieldnames)
+
 	def test_child_cannot_be_active_bundle(self):
 		make_product_bundle(self.parent, ["_Test PB Child A"])
 		outer = make_item("_Test PB Outer", {"is_stock_item": 0, "is_sales_item": 1}).name
