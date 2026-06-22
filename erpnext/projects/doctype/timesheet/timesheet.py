@@ -7,7 +7,7 @@ import json
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder.functions import Concat, Date, Round
+from frappe.query_builder.functions import Coalesce, Concat, Date, Round
 from frappe.utils import flt, get_datetime, getdate
 from frappe.utils.deprecations import deprecated
 
@@ -562,7 +562,7 @@ def get_timesheets_list(doctype, txt, filters, limit_start, limit_page_length=20
 				child_table.activity_type,
 				table.status,
 				child_table.billing_hours,
-				(table.sales_invoice | child_table.sales_invoice).as_("sales_invoice"),
+				Coalesce(table.sales_invoice, child_table.sales_invoice).as_("sales_invoice"),
 				child_table.project,
 			)
 			.orderby(table.end_date)

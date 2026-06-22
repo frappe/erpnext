@@ -7,7 +7,8 @@ import json
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import IfNull, Sum
+from frappe.query_builder import Case
+from frappe.query_builder.functions import Abs, IfNull, Sum
 from frappe.utils import cstr, flt, get_link_to_form, get_time, getdate, nowdate, nowtime
 from frappe.utils.data import DateTimeLikeObject
 
@@ -30,32 +31,32 @@ class PendingRepostingError(frappe.ValidationError):
 
 
 def get_stock_value_from_bin(warehouse=None, item_code=None):
-	values = {}
-	conditions = ""
-	if warehouse:
-		conditions += """ and `tabBin`.warehouse in (
-						select w2.name from `tabWarehouse` w1
-						join `tabWarehouse` w2 on
-						w1.name = %(warehouse)s
-						and w2.lft between w1.lft and w1.rgt
-						) """
-
-		values["warehouse"] = warehouse
-
-	if item_code:
-		conditions += " and `tabBin`.item_code = %(item_code)s"
-
-		values["item_code"] = item_code
+	bin_dt = frappe.qb.DocType("Bin")
+	item = frappe.qb.DocType("Item")
 
 	query = (
-		"""select sum(stock_value) from `tabBin`, `tabItem` where 1 = 1
-		and `tabItem`.name = `tabBin`.item_code and ifnull(`tabItem`.disabled, 0) = 0 %s"""
-		% conditions
+		frappe.qb.from_(bin_dt)
+		.inner_join(item)
+		.on(item.name == bin_dt.item_code)
+		.select(Sum(bin_dt.stock_value))
+		.where((item.disabled == 0) | item.disabled.isnull())
 	)
 
-	stock_value = frappe.db.sql(query, values)
+	if warehouse:
+		w1 = frappe.qb.DocType("Warehouse").as_("w1")
+		w2 = frappe.qb.DocType("Warehouse").as_("w2")
+		descendants = (
+			frappe.qb.from_(w1)
+			.join(w2)
+			.on((w1.name == warehouse) & (w2.lft >= w1.lft) & (w2.lft <= w1.rgt))
+			.select(w2.name)
+		)
+		query = query.where(bin_dt.warehouse.isin(descendants))
 
-	return stock_value
+	if item_code:
+		query = query.where(bin_dt.item_code == item_code)
+
+	return query.run()
 
 
 def get_stock_value_on(
@@ -177,36 +178,28 @@ def get_serial_nos_data(serial_nos):
 
 @frappe.whitelist()
 def get_latest_stock_qty(item_code: str, warehouse: str | None = None):
-	values, condition = [item_code], ""
+	bin_dt = frappe.qb.DocType("Bin")
+	query = frappe.qb.from_(bin_dt).select(Sum(bin_dt.actual_qty)).where(bin_dt.item_code == item_code)
+
 	if warehouse:
 		lft, rgt, is_group = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt", "is_group"])
 
 		if is_group:
-			values.extend([lft, rgt])
-			condition += "and exists (\
-				select name from `tabWarehouse` wh where wh.name = tabBin.warehouse\
-				and wh.lft >= %s and wh.rgt <= %s)"
-
+			wh = frappe.qb.DocType("Warehouse")
+			query = query.where(
+				bin_dt.warehouse.isin(
+					frappe.qb.from_(wh).select(wh.name).where((wh.lft >= lft) & (wh.rgt <= rgt))
+				)
+			)
 		else:
-			values.append(warehouse)
-			condition += " AND warehouse = %s"
+			query = query.where(bin_dt.warehouse == warehouse)
 
-	actual_qty = frappe.db.sql(
-		f"""select sum(actual_qty) from tabBin
-		where item_code=%s {condition}""",
-		values,
-	)[0][0]
-
-	return actual_qty
+	return query.run()[0][0]
 
 
 def get_latest_stock_balance():
 	bin_map = {}
-	for d in frappe.db.sql(
-		"""SELECT item_code, warehouse, stock_value as stock_value
-		FROM tabBin""",
-		as_dict=1,
-	):
+	for d in frappe.get_all("Bin", fields=["item_code", "warehouse", "stock_value"]):
 		bin_map.setdefault(d.warehouse, {}).setdefault(d.item_code, flt(d.stock_value))
 
 	return bin_map
@@ -348,12 +341,9 @@ def get_avg_purchase_rate(serial_nos):
 
 	serial_nos = get_valid_serial_nos(serial_nos)
 	return flt(
-		frappe.db.sql(
-			"""select avg(purchase_rate) from `tabSerial No`
-		where name in (%s)"""
-			% ", ".join(["%s"] * len(serial_nos)),
-			tuple(serial_nos),
-		)[0][0]
+		frappe.get_all(
+			"Serial No", filters={"name": ["in", serial_nos]}, fields=[{"AVG": "purchase_rate", "as": "rate"}]
+		)[0].rate
 	)
 
 
@@ -520,13 +510,19 @@ def add_additional_uom_columns(columns, result, include_uom, conversion_factors)
 
 
 def get_incoming_outgoing_rate_for_cancel(item_code, voucher_type, voucher_no, voucher_detail_no):
-	outgoing_rate = frappe.db.sql(
-		"""SELECT CASE WHEN actual_qty = 0 THEN 0 ELSE abs(stock_value_difference / actual_qty) END
-		FROM `tabStock Ledger Entry`
-		WHERE voucher_type = %s and voucher_no = %s
-			and item_code = %s and voucher_detail_no = %s
-			ORDER BY CREATION DESC limit 1""",
-		(voucher_type, voucher_no, item_code, voucher_detail_no),
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	outgoing_rate = (
+		frappe.qb.from_(sle)
+		.select(Case().when(sle.actual_qty == 0, 0).else_(Abs(sle.stock_value_difference / sle.actual_qty)))
+		.where(
+			(sle.voucher_type == voucher_type)
+			& (sle.voucher_no == voucher_no)
+			& (sle.item_code == item_code)
+			& (sle.voucher_detail_no == voucher_detail_no)
+		)
+		.orderby(sle.creation, order=frappe.qb.desc)
+		.limit(1)
+		.run()
 	)
 
 	outgoing_rate = outgoing_rate[0][0] if outgoing_rate else 0.0

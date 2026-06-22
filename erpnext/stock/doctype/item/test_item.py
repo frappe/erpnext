@@ -76,6 +76,18 @@ class TestItem(ERPNextTestSuite):
 		super().setUp()
 		frappe.flags.attribute_values = None
 
+	def test_merge_rename_runs_duplicate_stock_reco_check(self):
+		# after_rename(merge=True) calls validate_duplicate_item_in_stock_reconciliation, whose query
+		# uses HAVING Count(*) > 1. The raw version referenced the SELECT alias in HAVING, which
+		# Postgres rejects; this exercises the converted query on both engines.
+		make_item("_Test Item Merge Source", {"is_stock_item": 1, "is_purchase_item": 1})
+		make_item("_Test Item Merge Target", {"is_stock_item": 1, "is_purchase_item": 1})
+
+		frappe.rename_doc("Item", "_Test Item Merge Source", "_Test Item Merge Target", merge=True)
+
+		self.assertTrue(frappe.db.exists("Item", "_Test Item Merge Target"))
+		self.assertFalse(frappe.db.exists("Item", "_Test Item Merge Source"))
+
 	def get_item(self, idx):
 		item_code = self.globalTestRecords["Item"][idx].get("item_code")
 		if not frappe.db.exists("Item", item_code):
@@ -739,7 +751,9 @@ class TestItem(ERPNextTestSuite):
 		item_doc = frappe.get_doc("Item", item_code)
 		new_barcode = item_doc.append("barcodes")
 		new_barcode.update(barcode_properties_list[0])
+		frappe.db.savepoint("dup_barcode")
 		self.assertRaises(frappe.UniqueValidationError, item_doc.save)
+		frappe.db.rollback(save_point="dup_barcode")  # preserve transaction in postgres
 
 		# Add invalid barcode - should cause InvalidBarcode
 		item_doc = frappe.get_doc("Item", item_code)
@@ -756,20 +770,27 @@ class TestItem(ERPNextTestSuite):
 
 		now = time.time()
 		one_year_ago = now - 366 * 24 * 60 * 60
+		# posting_date is a calendar date; its midnight unix timestamp (taken in the database
+		# session timezone) can sit up to a day ahead of the precise current instant when the app
+		# timezone is ahead of UTC, so allow a day of slack on the upper bound.
+		one_day = 24 * 60 * 60
 
 		for timestamp, count in data.items():
 			self.assertIsInstance(timestamp, int)
-			self.assertTrue(one_year_ago <= timestamp <= now)
+			self.assertTrue(one_year_ago <= timestamp <= now + one_day)
 			self.assertIsInstance(count, int)
 			self.assertGreaterEqual(count, 0)
 
 	def test_index_creation(self):
 		"check if index is getting created in db"
 
-		indices = frappe.db.sql("show index from tabItem", as_dict=1)
+		# get_column_index is db-agnostic; raw "SHOW INDEX" is MySQL-only and errors on Postgres
 		expected_columns = {"item_code", "item_name", "item_group"}
-		for index in indices:
-			expected_columns.discard(index.get("Column_name"))
+		for column in list(expected_columns):
+			if frappe.db.get_column_index("tabItem", column, unique=False) or frappe.db.get_column_index(
+				"tabItem", column, unique=True
+			):
+				expected_columns.discard(column)
 
 		if expected_columns:
 			self.fail(f"Expected db index on these columns: {', '.join(expected_columns)}")

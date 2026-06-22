@@ -330,6 +330,7 @@ def get_lead_details(
 	out = frappe._dict()
 
 	lead_doc = frappe.get_doc("Lead", lead)
+	lead_doc.check_permission()
 	lead = lead_doc
 
 	out.update(

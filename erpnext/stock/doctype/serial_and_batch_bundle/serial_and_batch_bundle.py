@@ -11,7 +11,7 @@ import frappe.query_builder
 from frappe import _, _dict, bold
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
-from frappe.query_builder.functions import Concat_ws, Max, Sum
+from frappe.query_builder.functions import Concat_ws, Lower, Max, Sum
 from frappe.utils import (
 	cint,
 	cstr,
@@ -3388,7 +3388,8 @@ def get_stock_ledgers_for_serial_nos(kwargs):
 			query.left_join(serial_batch_entry)
 			.on(stock_ledger_entry.serial_and_batch_bundle == serial_batch_entry.parent)
 			.where(
-				serial_batch_entry.serial_no.isin(serial_nos)
+				# Lower() both sides so serial-no matching is case-insensitive on Postgres as on MariaDB
+				Lower(serial_batch_entry.serial_no).isin([sn.lower() for sn in serial_nos])
 				| Concat_ws("", "\n", stock_ledger_entry.serial_no, "\n").regexp(regex_pattern)
 			)
 			.distinct()

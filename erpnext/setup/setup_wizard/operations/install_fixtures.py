@@ -567,6 +567,7 @@ def create_bank_account(args, demo=False):
 			}
 		)
 		try:
+			frappe.db.savepoint("create_bank_account")
 			doc = bank_account.insert()
 
 			if args.get("set_default"):
@@ -583,6 +584,7 @@ def create_bank_account(args, demo=False):
 		except RootNotEditable:
 			frappe.throw(frappe._("Bank account cannot be named as {0}").format(args.get("bank_account")))
 		except frappe.DuplicateEntryError:
+			frappe.db.rollback(save_point="create_bank_account")  # preserve transaction in postgres
 			# bank account same as a CoA entry
 			pass
 

@@ -1191,6 +1191,67 @@ class TestMaterialRequest(ERPNextTestSuite):
 		self.assertEqual(material_request.status, "Transferred")
 		self.assertEqual(material_request.transfer_status, "Completed")
 
+	def test_check_modified_date_detects_concurrent_modification(self):
+		"""check_modified_date must raise when the in-memory doc is stale vs the DB modified
+		timestamp. Covers the converted get_value + get_datetime comparison that replaced the
+		raw MariaDB-only TIMEDIFF (which errors on Postgres); update_status() runs this guard."""
+		from frappe.utils import add_to_date, get_datetime
+
+		mr = make_material_request(qty=10)
+
+		fresh = frappe.get_doc("Material Request", mr.name)
+		# modified matches the DB row -> guard passes.
+		fresh.check_modified_date()
+
+		# Stale in-memory modified -> concurrent-modification guard must fire.
+		fresh.modified = add_to_date(get_datetime(fresh.modified), seconds=-120)
+		with self.assertRaises(frappe.ValidationError) as cm:
+			fresh.check_modified_date()
+		self.assertIn("has been modified", str(cm.exception))
+
+	def test_validate_qty_against_so_blocks_over_request(self):
+		"""validate_qty_against_so must block requesting more than the Sales Order qty, net of
+		already-indented submitted MRs. Covers the converted Sales Order Item and Material Request
+		Item SUM queries. (The guard is currently not wired into validate(), so call it directly.)"""
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		item_code = "_Test Item"
+		so = make_sales_order(item_code=item_code, qty=10)  # submitted -> SO Item stock_qty 10
+
+		def _mr_against_so(qty):
+			mr = frappe.new_doc("Material Request")
+			mr.material_request_type = "Purchase"
+			mr.company = "_Test Company"
+			mr.append(
+				"items",
+				{
+					"item_code": item_code,
+					"qty": qty,
+					"uom": "_Test UOM",
+					"conversion_factor": 1,
+					"schedule_date": today(),
+					"warehouse": "_Test Warehouse - _TC",
+					"sales_order": so.name,
+				},
+			)
+			return mr
+
+		# An already-submitted MR consuming 6 of the SO's 10.
+		mr1 = _mr_against_so(6)
+		mr1.insert()
+		mr1.submit()
+
+		# A new request for 5 more -> already_indented 6 + 5 = 11 > 10 -> must throw.
+		over = _mr_against_so(5)
+		over.insert()
+		with self.assertRaises(frappe.ValidationError) as cm:
+			over.validate_qty_against_so()
+		self.assertIn("maximum", str(cm.exception))
+
+		# Exactly within the remaining 4 -> 6 + 4 = 10, not greater -> no throw.
+		over.items[0].qty = 4
+		over.validate_qty_against_so()
+
 
 def get_in_transit_warehouse(company):
 	if not frappe.db.exists("Warehouse Type", "Transit"):

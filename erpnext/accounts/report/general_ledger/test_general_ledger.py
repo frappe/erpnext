@@ -15,6 +15,42 @@ class TestGeneralLedger(ERPNextTestSuite):
 	def setUp(self):
 		self.company = "_Test Company"
 
+	def test_gl_report_runs_with_remarks_length(self):
+		# general_ledger_remarks_length adds `substr(remarks, 1, n) as remarks` to the raw SQL; the
+		# alias must be unquoted to be valid on Postgres (a single-quoted alias is a string literal there).
+		from frappe.utils import today
+
+		frappe.db.set_single_value("Accounts Settings", "general_ledger_remarks_length", 50)
+		self.addCleanup(frappe.db.set_single_value, "Accounts Settings", "general_ledger_remarks_length", 0)
+
+		si = create_sales_invoice(company=self.company)
+		self.addCleanup(self._cancel_and_delete, "Sales Invoice", si.name)
+
+		columns, data = execute(
+			frappe._dict(
+				{
+					"company": self.company,
+					"from_date": today(),
+					"to_date": today(),
+					"group_by": "Group by Voucher (Consolidated)",
+					# required to reach the `substr(remarks, 1, n) as remarks` branch under test
+					"show_remarks": True,
+				}
+			)
+		)
+		self.assertTrue(columns)
+		self.assertTrue(data)
+		self.assertTrue(any("remarks" in row for row in data))
+
+	@staticmethod
+	def _cancel_and_delete(doctype, name):
+		if not frappe.db.exists(doctype, name):
+			return
+		doc = frappe.get_doc(doctype, name)
+		if doc.docstatus == 1:
+			doc.cancel()
+		frappe.delete_doc(doctype, name, force=1)
+
 	def clear_old_entries(self):
 		doctype_list = [
 			"GL Entry",

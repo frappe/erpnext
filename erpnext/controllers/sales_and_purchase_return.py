@@ -7,7 +7,7 @@ import frappe
 from frappe import _, bold
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import DocType
-from frappe.query_builder.functions import Abs
+from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import cint, flt, format_datetime, get_datetime
 
 import erpnext
@@ -86,26 +86,27 @@ def validate_return_against(doc):
 def validate_returned_items(doc):
 	valid_items = frappe._dict()
 
-	select_fields = "item_code, qty, stock_qty, rate, parenttype, conversion_factor, name"
+	select_fields = ["item_code", "qty", "stock_qty", "rate", "parenttype", "conversion_factor", "name"]
 	if doc.doctype != "Purchase Invoice":
-		select_fields += ",serial_no, batch_no"
+		select_fields += ["serial_no", "batch_no"]
 
 	if doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
-		select_fields += ",rejected_qty, received_qty"
+		select_fields += ["rejected_qty", "received_qty"]
 
-	for d in frappe.db.sql(
-		f"""select {select_fields} from `tab{doc.doctype} Item` where parent = %s""",
-		doc.return_against,
-		as_dict=1,
+	for d in frappe.get_all(
+		f"{doc.doctype} Item",
+		filters={"parent": doc.return_against},
+		fields=select_fields,
+		limit_page_length=0,  # all item rows of the reference document are needed (no default 20 cap)
 	):
 		valid_items = get_ref_item_dict(valid_items, d)
 
 	if doc.doctype in ("Delivery Note", "Sales Invoice"):
-		for d in frappe.db.sql(
-			"""select item_code, qty, serial_no, batch_no from `tabPacked Item`
-			where parent = %s""",
-			doc.return_against,
-			as_dict=1,
+		for d in frappe.get_all(
+			"Packed Item",
+			filters={"parent": doc.return_against},
+			fields=["item_code", "qty", "serial_no", "batch_no"],
+			limit_page_length=0,  # all packed-item rows are needed (no default 20 cap)
 		):
 			valid_items = get_ref_item_dict(valid_items, d)
 
@@ -271,29 +272,35 @@ def get_ref_item_dict(valid_items, ref_item_row):
 
 
 def get_already_returned_items(doc):
-	column = "child.item_code, sum(abs(child.qty)) as qty, sum(abs(child.stock_qty)) as stock_qty"
-	if doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
-		column += """, sum(abs(child.rejected_qty) * child.conversion_factor) as rejected_qty,
-			sum(abs(child.received_qty) * child.conversion_factor) as received_qty"""
+	child = DocType(f"{doc.doctype} Item")
+	par = DocType(doc.doctype)
 
 	field = (
 		frappe.scrub(doc.doctype) + "_item"
 		if doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Sales Invoice", "POS Invoice"]
 		else "dn_detail"
 	)
-	data = frappe.db.sql(
-		f"""
-		select {column}, child.{field}
-		from
-			`tab{doc.doctype} Item` child, `tab{doc.doctype}` par
-		where
-			child.parent = par.name and par.docstatus = 1
-			and par.is_return = 1 and par.return_against = %s
-		group by item_code, {field}
-	""",
-		doc.return_against,
-		as_dict=1,
+
+	query = (
+		frappe.qb.from_(child)
+		.inner_join(par)
+		.on(child.parent == par.name)
+		.select(
+			child.item_code,
+			Sum(Abs(child.qty)).as_("qty"),
+			Sum(Abs(child.stock_qty)).as_("stock_qty"),
+			child[field],
+		)
+		.where((par.docstatus == 1) & (par.is_return == 1) & (par.return_against == doc.return_against))
+		.groupby(child.item_code, child[field])
 	)
+	if doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
+		query = query.select(
+			Sum(Abs(child.rejected_qty) * child.conversion_factor).as_("rejected_qty"),
+			Sum(Abs(child.received_qty) * child.conversion_factor).as_("received_qty"),
+		)
+
+	data = query.run(as_dict=1)
 
 	items = {}
 

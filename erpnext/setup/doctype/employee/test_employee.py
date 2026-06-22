@@ -56,7 +56,7 @@ class TestEmployee(ERPNextTestSuite):
 			frappe.qb.from_(Employee)
 			.select(Employee.name)
 			.where(Criterion.all(build_qb_match_conditions("Employee")))
-			.orderby(Employee.Name)
+			.orderby(Employee.name)
 		).run(pluck=Employee.name)
 		employee_list = frappe.db.get_list("Employee", pluck="name", order_by="name")
 

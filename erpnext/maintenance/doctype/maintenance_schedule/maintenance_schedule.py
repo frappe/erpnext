@@ -185,9 +185,7 @@ class MaintenanceSchedule(TransactionBase):
 		else:
 			holiday_list = frappe.get_cached_value("Company", self.company, "default_holiday_list")
 
-		holidays = frappe.db.sql_list(
-			"""select holiday_date from `tabHoliday` where parent=%s""", holiday_list
-		)
+		holidays = frappe.get_all("Holiday", filters={"parent": holiday_list}, pluck="holiday_date")
 
 		if not validated and holidays:
 			# max iterations = len(holidays)
@@ -235,16 +233,22 @@ class MaintenanceSchedule(TransactionBase):
 				throw(_("Start date should be less than end date for Item {0}").format(d.item_code))
 
 	def validate_sales_order(self):
+		ms = frappe.qb.DocType("Maintenance Schedule")
+		msi = frappe.qb.DocType("Maintenance Schedule Item")
 		for d in self.get("items"):
 			if d.sales_order:
-				chk = frappe.db.sql(
-					"""select ms.name from `tabMaintenance Schedule` ms,
-					`tabMaintenance Schedule Item` msi where msi.parent=ms.name and
-					msi.sales_order=%s and ms.docstatus=1""",
-					d.sales_order,
+				# filter the parent schedule's docstatus (matches the original ms.docstatus = 1)
+				chk = (
+					frappe.qb.from_(ms)
+					.inner_join(msi)
+					.on(msi.parent == ms.name)
+					.select(ms.name)
+					.where((msi.sales_order == d.sales_order) & (ms.docstatus == 1))
+					.limit(1)
+					.run(pluck=True)
 				)
 				if chk:
-					throw(_("Maintenance Schedule {0} exists against {1}").format(chk[0][0], d.sales_order))
+					throw(_("Maintenance Schedule {0} exists against {1}").format(chk[0], d.sales_order))
 
 	def validate_items_table_change(self):
 		doc_before_save = self.get_doc_before_save()

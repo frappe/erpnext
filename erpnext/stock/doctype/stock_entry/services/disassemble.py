@@ -2,7 +2,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Max, Min, NullIf, Sum
 from frappe.utils import flt
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -348,12 +348,40 @@ class DisassembleStockEntry(BaseStockEntry):
 				.run(as_dict=True)
 			)
 
+		# Aggregating across all Manufacture entries of the work order, one row per item_code.
+		# The non-grouped columns are constant per item_code in practice (an item plays one role with
+		# one uom/warehouse across the WO's manufacture entries); Max() keeps the GROUP BY valid on
+		# postgres while returning the value MySQL picked arbitrarily, preserving the one-row-per-item
+		# shape the disassembly expects.
 		return (
-			query.select(Sum(SED.qty).as_("qty"), Sum(SED.transfer_qty).as_("transfer_qty"), *common_fields)
+			query.select(
+				Sum(SED.qty).as_("qty"),
+				Sum(SED.transfer_qty).as_("transfer_qty"),
+				SED.item_code,
+				Max(SED.item_name).as_("item_name"),
+				Max(SED.description).as_("description"),
+				Max(SED.stock_uom).as_("stock_uom"),
+				Max(SED.uom).as_("uom"),
+				# qty-weighted average so consolidating an item across manufacture entries at different
+				# valuation rates values the summed qty correctly (Max would bias the rate high).
+				# Manufacture rows always carry positive qty, so NullIf only guards a theoretical /0.
+				(Sum(SED.basic_rate * SED.qty) / NullIf(Sum(SED.qty), 0)).as_("basic_rate"),
+				Max(SED.conversion_factor).as_("conversion_factor"),
+				Max(SED.is_finished_item).as_("is_finished_item"),
+				Max(SED.secondary_item_type).as_("secondary_item_type"),
+				Max(SED.is_legacy_scrap_item).as_("is_legacy_scrap_item"),
+				Max(SED.bom_secondary_item).as_("bom_secondary_item"),
+				Max(SED.batch_no).as_("batch_no"),
+				Max(SED.serial_no).as_("serial_no"),
+				Max(SED.use_serial_batch_fields).as_("use_serial_batch_fields"),
+				Max(SED.s_warehouse).as_("s_warehouse"),
+				Max(SED.t_warehouse).as_("t_warehouse"),
+				Max(SED.bom_no).as_("bom_no"),
+			)
 			.where(SE.purpose == "Manufacture")
 			.where(SE.work_order == self.doc.work_order)
 			.groupby(SED.item_code)
-			.orderby(SED.idx)
+			.orderby(Min(SED.idx))
 			.run(as_dict=True)
 		)
 
