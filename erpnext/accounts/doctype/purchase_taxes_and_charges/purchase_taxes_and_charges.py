@@ -34,6 +34,7 @@ class PurchaseTaxesandCharges(Document):
 		cost_center: DF.Link | None
 		description: DF.SmallText
 		dont_recompute_tax: DF.Check
+		gross_up_inclusive: DF.Check
 		included_in_paid_amount: DF.Check
 		included_in_print_rate: DF.Check
 		is_tax_withholding_account: DF.Check
