@@ -13,6 +13,7 @@
   "naming_series",
   "supplier_type",
   "supplier_name",
+  "alias",
   "gender",
   "column_break0",
   "supplier_group",
@@ -100,6 +101,13 @@
    "oldfieldname": "supplier_name",
    "oldfieldtype": "Data",
    "reqd": 1
+  },
+  {
+   "fieldname": "alias",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "Alias",
+   "unique": 1
   },
   {
    "fieldname": "country",
@@ -522,7 +530,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-05-29 16:52:59.441272",
+ "modified": "2026-06-22 12:23:09.241125",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
@@ -582,7 +590,7 @@
  ],
  "quick_entry": 1,
  "row_format": "Dynamic",
- "search_fields": "supplier_group",
+ "search_fields": "supplier_group, alias",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "ASC",
