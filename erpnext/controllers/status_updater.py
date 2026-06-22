@@ -285,6 +285,42 @@ class StatusUpdater(Document):
 						elif item[args["target_ref_field"]]:
 							self.check_overflow_with_allowance(item, args)
 
+<<<<<<< HEAD
+=======
+	def fetch_items_with_pending_qty(self, args, item_field, items):
+		doctype = frappe.qb.DocType(args["target_dt"])
+		item_field_col = doctype[item_field]
+		target_ref_field = doctype[args["target_ref_field"]]
+		target_field = doctype[args["target_field"]]
+
+		is_qty_check = "qty" in args["target_ref_field"]
+
+		query = (
+			frappe.qb.from_(doctype)
+			.select(
+				doctype.name,
+				item_field_col.as_("item_code"),
+				target_ref_field,
+				target_field,
+				doctype.parenttype,
+				doctype.parent,
+			)
+			.where(target_ref_field < target_field)
+			.where(doctype.name.isin(items))
+			.where(doctype.docstatus == 1)
+		)
+
+		if is_qty_check:
+			item_table = frappe.qb.DocType("Item")
+			query = (
+				query.join(item_table)
+				.on(item_table.name == item_field_col)
+				.where(item_table.is_stock_item == 1)
+			)
+
+		return query.run(as_dict=True)
+
+>>>>>>> 553b55b2f0 (fix: skip qty over-allowance check for non-stock items only)
 	def check_overflow_with_allowance(self, item, args):
 		"""
 		Checks if there is overflow condering a relaxation allowance
