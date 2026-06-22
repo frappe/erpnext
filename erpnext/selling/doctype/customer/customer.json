@@ -12,6 +12,11 @@
  "field_order": [
   "basic_info",
   "naming_series",
+<<<<<<< HEAD
+=======
+  "customer_name",
+  "alias",
+>>>>>>> 5e16d41387 (feat: party aliases)
   "customer_type",
   "customer_name",
   "gender",
@@ -633,7 +638,38 @@
   {
    "fieldname": "supplier_numbers_section",
    "fieldtype": "Section Break",
+<<<<<<< HEAD
    "label": "Supplier Numbers"
+=======
+   "label": "Defaults"
+  },
+  {
+   "fieldname": "column_break_yvyu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_accounts_column",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "supplier_numbers_column",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_nrvh",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "credit_limit_column",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "alias",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "Alias",
+   "unique": 1
+>>>>>>> 5e16d41387 (feat: party aliases)
   }
  ],
  "icon": "fa fa-user",
@@ -647,7 +683,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-05-29 16:52:59.441272",
+ "modified": "2026-06-22 12:23:19.196991",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
@@ -726,7 +762,7 @@
  ],
  "quick_entry": 1,
  "row_format": "Dynamic",
- "search_fields": "customer_group,territory, mobile_no,primary_address",
+ "search_fields": "customer_group,territory, mobile_no,primary_address, alias",
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
