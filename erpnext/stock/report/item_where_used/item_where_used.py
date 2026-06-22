@@ -10,16 +10,16 @@ REFERENCES_SECTION = "References"
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
-	columns = get_columns()
+	data = []
 
-	if not filters.get("item"):
-		return columns, []
+	if filters.get("item"):
+		data = get_data(filters)
 
-	return columns, get_data(filters)
+	return get_columns(data), data
 
 
-def get_columns():
-	return [
+def get_columns(data=None):
+	columns = [
 		{
 			"fieldname": "section",
 			"label": _("Section"),
@@ -50,12 +50,6 @@ def get_columns():
 			"label": _("Related Item"),
 			"fieldtype": "Link",
 			"options": "Item",
-			"width": 180,
-		},
-		{
-			"fieldname": "matched_field",
-			"label": _("Matched Field"),
-			"fieldtype": "Data",
 			"width": 180,
 		},
 		{
@@ -122,6 +116,8 @@ def get_columns():
 			"width": 160,
 		},
 	]
+
+	return hide_empty_optional_columns(columns, data or [])
 
 
 def get_data(filters):
@@ -283,7 +279,13 @@ def get_product_bundle_component_rows(item):
 					row_index=row.idx,
 					quantity=row.qty,
 					uom=row.uom,
+<<<<<<< HEAD
 					is_active=0 if bundle.disabled else 1,
+=======
+					stock_quantity=row.qty,
+					stock_uom=row.uom,
+					is_active=bundle.is_active,
+>>>>>>> a218b8db8c (fix: submittable product bundle issues)
 					disabled=bundle.disabled,
 				)
 			)
@@ -471,6 +473,29 @@ def get_product_bundle_map(bundle_names):
 
 def build_row(**kwargs):
 	return frappe._dict(kwargs)
+
+
+def hide_empty_optional_columns(columns, data):
+	optional_fields = {"stock_quantity", "stock_uom", "company", "is_default", "details"}
+
+	if not data:
+		return columns
+
+	fields_with_values = set()
+	for row in data:
+		for fieldname in optional_fields:
+			if field_has_value(row, fieldname):
+				fields_with_values.add(fieldname)
+
+	return [column for column in columns if column["fieldname"] not in optional_fields - fields_with_values]
+
+
+def field_has_value(row, fieldname):
+	if fieldname not in row:
+		return False
+
+	value = row.get(fieldname)
+	return value is not None and value != ""
 
 
 def get_unique_names(names):
