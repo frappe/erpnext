@@ -3,7 +3,7 @@
 
 frappe.ui.form.on("Buying Settings", {
 	refresh(frm) {
-		if (!frm.naming_controller) frm.naming_controller = new erpnext.NamingSeriesController(frm);
+		if (!frm.naming_controller) frm.naming_controller = new frappe.ui.NamingSeriesController(frm);
 
 		const display = frm.doc.supp_master_name === "Naming Series";
 		frm.set_df_property("naming_series_details", "hidden", !display);
