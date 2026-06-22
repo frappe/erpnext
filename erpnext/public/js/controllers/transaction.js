@@ -1866,9 +1866,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.toggle_base_currency_fields(company_currency);
 		this.change_form_labels(company_currency);
 		this.change_grid_labels(company_currency);
-		if (this.frm.doc.currency == company_currency) {
-			this.toggle_base_currency_fields(company_currency);
-		}
 		this.frm.refresh_fields();
 	}
 
@@ -2138,6 +2135,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	toggle_item_grid_columns() {
 		// toggle columns
 		var item_grid = this.frm.fields_dict["items"].grid;
+		var me = this;
 
 		var show =
 			cint(this.frm.doc.discount_amount) ||
@@ -2149,8 +2147,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			if (frappe.meta.get_docfield(item_grid.doctype, fname)) item_grid.set_column_disp(fname, show);
 		});
 
+		var show_base = show && me.frm.doc.currency != me.get_company_currency();
 		$.each(["base_net_rate", "base_net_amount"], function (i, fname) {
-			if (frappe.meta.get_docfield(item_grid.doctype, fname)) item_grid.set_column_disp(fname, show);
+			if (frappe.meta.get_docfield(item_grid.doctype, fname))
+				item_grid.set_column_disp(fname, show_base);
 		});
 	}
 
