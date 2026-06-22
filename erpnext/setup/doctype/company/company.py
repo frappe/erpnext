@@ -667,9 +667,6 @@ class Company(NestedSet):
 
 			self.db_set("default_income_account", income_account)
 
-		if self.update_default_account and not self.default_payable_account:
-			self.db_set("default_payable_account", self.default_payable_account)
-
 		if self.update_default_account and not self.write_off_account:
 			write_off_acct = frappe.db.get_value(
 				"Account", {"account_name": _("Write Off"), "company": self.name, "is_group": 0}

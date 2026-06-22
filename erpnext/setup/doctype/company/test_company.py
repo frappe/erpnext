@@ -234,6 +234,22 @@ class TestCompany(ERPNextTestSuite):
 		after = get_all_transactions_annual_history(company).get(key, 0)
 		self.assertEqual(after - before, 2)
 
+	def test_cleared_default_account_is_not_refilled_on_save(self):
+		company = frappe.get_doc("Company", "_Test Company")
+		original_account = company.exchange_gain_loss_account
+		self.assertTrue(original_account)
+
+		company.exchange_gain_loss_account = ""
+		company.save()
+		self.addCleanup(
+			lambda: frappe.db.set_value(
+				"Company", "_Test Company", "exchange_gain_loss_account", original_account
+			)
+		)
+
+		company.reload()
+		self.assertFalse(company.exchange_gain_loss_account)
+
 	def test_demo_data(self):
 		from erpnext.setup.demo import clear_demo_data, setup_demo_data
 
