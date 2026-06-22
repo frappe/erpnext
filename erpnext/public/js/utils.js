@@ -188,11 +188,19 @@ $.extend(erpnext.utils, {
 					]),
 					"blue"
 				);
+				var info = company_wise_info[0];
+				var is_advance = info.balance_label !== "Total Unpaid";
+				var indicator_label =
+					info.balance_label === "Total Advance Paid"
+						? __("Total Advance Paid: {0}", [format_currency(info.balance_amount, info.currency)])
+						: info.balance_label === "Total Advance Received"
+						? __("Total Advance Received: {0}", [
+								format_currency(info.balance_amount, info.currency),
+						  ])
+						: __("Total Unpaid: {0}", [format_currency(info.balance_amount, info.currency)]);
 				frm.dashboard.add_indicator(
-					__("Total Unpaid: {0}", [
-						format_currency(company_wise_info[0].total_unpaid, company_wise_info[0].currency),
-					]),
-					company_wise_info[0].total_unpaid ? "orange" : "green"
+					indicator_label,
+					is_advance ? "green" : info.balance_amount ? "orange" : "green"
 				);
 
 				if (company_wise_info[0].loyalty_points) {
@@ -235,7 +243,14 @@ $.extend(erpnext.utils, {
 		frm.dashboard.stats_area_row.addClass("flex");
 		frm.dashboard.stats_area_row.css("flex-wrap", "wrap");
 
-		var color = info.total_unpaid ? "orange" : "green";
+		var is_advance = info.balance_label !== "Total Unpaid";
+		var color = is_advance ? "green" : info.balance_amount ? "orange" : "green";
+		var balance_label_text =
+			info.balance_label === "Total Advance Paid"
+				? __("Total Advance Paid")
+				: info.balance_label === "Total Advance Received"
+				? __("Total Advance Received")
+				: __("Total Unpaid");
 
 		var indicator = $(
 			'<div class="flex-column col-xs-6">' +
@@ -249,8 +264,10 @@ $.extend(erpnext.utils, {
 				'<div class="badge-link small" style="margin-bottom:10px">' +
 				'<span class="indicator ' +
 				color +
-				'">Total Unpaid: ' +
-				format_currency(info.total_unpaid, info.currency) +
+				'">' +
+				balance_label_text +
+				": " +
+				format_currency(info.balance_amount, info.currency) +
 				"</span></div>" +
 				"</div>"
 		).appendTo(frm.dashboard.stats_area_row);
