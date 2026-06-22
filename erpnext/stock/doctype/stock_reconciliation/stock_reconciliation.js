@@ -18,11 +18,13 @@ frappe.ui.form.on("Stock Reconciliation", {
 
 		// end of life
 		frm.set_query("item_code", "items", function (doc, cdt, cdn) {
+			const filters = { is_stock_item: 1 };
+			if (frappe.sys_defaults.enable_company_wise_masters) {
+				filters.company = frm.doc.company;
+			}
 			return {
 				query: "erpnext.controllers.queries.item_query",
-				filters: {
-					is_stock_item: 1,
-				},
+				filters: filters,
 			};
 		});
 		frm.set_query("batch_no", "items", function (doc, cdt, cdn) {

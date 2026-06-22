@@ -338,6 +338,14 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 			};
 		});
 
+		if (frappe.sys_defaults.enable_company_wise_masters) {
+			me.frm.set_query("party", "accounts", function (doc, cdt, cdn) {
+				const row = locals[cdt][cdn];
+				if (row.party_type === "Customer") return erpnext.queries.customer(me.frm.doc);
+				if (row.party_type === "Supplier") return erpnext.queries.supplier(me.frm.doc);
+			});
+		}
+
 		me.frm.set_query("reference_name", "accounts", function (doc, cdt, cdn) {
 			var jvd = frappe.get_doc(cdt, cdn);
 

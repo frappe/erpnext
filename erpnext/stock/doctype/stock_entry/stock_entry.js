@@ -1197,7 +1197,11 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 		};
 
 		this.frm.fields_dict.items.grid.get_field("item_code").get_query = function () {
-			return erpnext.queries.item({ is_stock_item: 1 });
+			const filters = { is_stock_item: 1 };
+			if (frappe.sys_defaults.enable_company_wise_masters) {
+				filters.company = me.frm.doc.company;
+			}
+			return erpnext.queries.item(filters);
 		};
 
 		this.frm.set_query("subcontracting_order", function () {

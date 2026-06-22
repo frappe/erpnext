@@ -247,3 +247,15 @@ erpnext.queries.setup_warehouse_query = function (frm) {
 		return filters;
 	});
 };
+
+// Payment Entry: party link filtered by company based on party_type
+frappe.ui.form.on("Payment Entry", {
+	setup: function (frm) {
+		if (!frappe.sys_defaults.enable_company_wise_masters) return;
+		frm.set_query("party", function () {
+			var party_type = frm.doc.party_type;
+			if (party_type === "Customer") return erpnext.queries.customer(frm.doc);
+			if (party_type === "Supplier") return erpnext.queries.supplier(frm.doc);
+		});
+	},
+});

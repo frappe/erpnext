@@ -15,6 +15,15 @@ frappe.ui.form.on("Blanket Order", {
 
 		frm.add_fetch("customer", "customer_name", "customer_name");
 		frm.add_fetch("supplier", "supplier_name", "supplier_name");
+
+		frm.set_query("customer", () => erpnext.queries.customer(frm.doc));
+		frm.set_query("supplier", () => erpnext.queries.supplier(frm.doc));
+		frm.set_query("item_code", "items", function () {
+			return {
+				query: "erpnext.controllers.queries.item_query",
+				filters: { company: frm.doc.company, has_variants: 0 },
+			};
+		});
 	},
 
 	refresh: function (frm) {

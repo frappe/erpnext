@@ -47,11 +47,13 @@ frappe.ui.form.on("Work Order", {
 
 		// Set query for FG Item
 		frm.set_query("production_item", function () {
+			const filters = { is_stock_item: 1 };
+			if (frappe.sys_defaults.enable_company_wise_masters) {
+				filters.company = frm.doc.company;
+			}
 			return {
 				query: "erpnext.controllers.queries.item_query",
-				filters: {
-					is_stock_item: 1,
-				},
+				filters: filters,
 			};
 		});
 

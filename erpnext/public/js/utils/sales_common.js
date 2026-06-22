@@ -79,9 +79,13 @@ erpnext.sales_common = {
 						if (me.frm.doc.doctype == "Quotation" && me.frm.doc.quotation_to == "Customer") {
 							customer = me.frm.doc.party_name;
 						}
+						const filters = { is_sales_item: 1, customer: customer, has_variants: 0 };
+						if (frappe.sys_defaults.enable_company_wise_masters) {
+							filters.company = me.frm.doc.company;
+						}
 						return {
 							query: "erpnext.controllers.queries.item_query",
-							filters: { is_sales_item: 1, customer: customer, has_variants: 0 },
+							filters: filters,
 						};
 					});
 				}

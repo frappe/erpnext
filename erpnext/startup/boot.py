@@ -27,6 +27,10 @@ def boot_session(bootinfo):
 		bootinfo.sysdefaults.enable_company_wise_masters = cint(
 			frappe.get_single_value("Accounts Settings", "enable_company_wise_masters")
 		)
+		if bootinfo.sysdefaults.enable_company_wise_masters:
+			# Expose the full doctype config so client JS can auto-register set_query
+			# for every covered form without hard-coding doctype names.
+			bootinfo.company_wise_masters_config = frappe.get_hooks("company_wise_masters_config") or []
 
 		bootinfo.sysdefaults.quotation_valid_till = cint(
 			frappe.db.get_single_value("CRM Settings", "default_valid_till")
