@@ -1,4 +1,5 @@
 import frappe
+from frappe.query_builder.functions import Lower
 
 
 def set_default_role(doc, method):
@@ -87,7 +88,17 @@ def create_party_contact(doctype, fullname, user, party_name):
 
 def party_exists(doctype, user):
 	# check if contact exists against party and if it is linked to the doctype
-	contact_name = frappe.db.get_value("Contact", {"email_id": user})
+	# Match email_id case-insensitively so portal access resolves the Contact on Postgres the same
+	# way MariaDB does (its default collation is case-insensitive).
+	_contact = frappe.qb.DocType("Contact")
+	_rows = (
+		frappe.qb.from_(_contact)
+		.select(_contact.name)
+		.where(Lower(_contact.email_id) == (user or "").lower())
+		.limit(1)
+		.run()
+	)
+	contact_name = _rows[0][0] if _rows else None
 	if contact_name:
 		contact = frappe.get_doc("Contact", contact_name)
 		doctypes = [d.link_doctype for d in contact.links]
