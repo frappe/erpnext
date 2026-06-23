@@ -2,34 +2,6 @@ import json
 
 import frappe
 from frappe import _
-<<<<<<< HEAD
-from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
-
-
-@frappe.whitelist()
-def create_custom_fields_for_frappe_crm():
-	frappe.only_for("System Manager")
-	custom_fields = {
-		"Quotation": [
-			{
-				"fieldname": "crm_deal",
-				"fieldtype": "Data",
-				"label": "Frappe CRM Deal",
-				"insert_after": "party_name",
-			}
-		],
-		"Customer": [
-			{
-				"fieldname": "crm_deal",
-				"fieldtype": "Data",
-				"label": "Frappe CRM Deal",
-				"insert_after": "prospect_name",
-			}
-		],
-	}
-	create_custom_fields(custom_fields, ignore_validate=True)
-=======
->>>>>>> 0ab812c3ec (feat(crm_settings): enable frappe crm data synchronization (#56268))
 
 
 @frappe.whitelist()
@@ -165,13 +137,9 @@ CUSTOMER_ALLOWED_FIELDS = {
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
 def create_customer(customer_data=None):
-=======
-def create_customer(customer_data: dict | None = None):
 	validate_frappe_crm_sync()
 
->>>>>>> 0ab812c3ec (feat(crm_settings): enable frappe crm data synchronization (#56268))
 	if not customer_data:
 		customer_data = frappe.form_dict
 
