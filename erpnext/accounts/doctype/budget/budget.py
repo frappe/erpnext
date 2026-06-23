@@ -162,9 +162,9 @@ class Budget(Document):
 			frappe.throw(_("Account {0} does not belong to company {1}").format(self.account, self.company))
 		elif account_details.report_type != "Profit and Loss":
 			frappe.throw(
-				_("Budget cannot be assigned against {0}, as it's not an Income or Expense account").format(
-					self.account
-				)
+				_(
+					"Budget cannot be assigned against {0}, as its Root Type is not of Income or Expense"
+				).format(self.account)
 			)
 
 	def set_null_value(self):
