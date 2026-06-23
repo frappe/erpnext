@@ -178,14 +178,17 @@ class calculate_taxes_and_totals:
 			for d in get_applied_pricing_rules(item.pricing_rules):
 				pricing_rule = frappe.get_cached_doc("Pricing Rule", d)
 
-				if not pricing_rule.margin_type or not pricing_rule.margin_rate_or_amount:
+				if not (
+					pricing_rule.margin_type
+					and pricing_rule.margin_rate_or_amount
+					and (
+						pricing_rule.margin_type == "Percentage" or pricing_rule.currency == self.doc.currency
+					)
+				):
 					continue
 
-				if pricing_rule.margin_type == "Percentage" or (
-					pricing_rule.margin_type == "Amount" and pricing_rule.currency == self.doc.currency
-				):
-					item.margin_type = pricing_rule.margin_type
-					item.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
+				item.margin_type = pricing_rule.margin_type
+				item.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
 
 		item.rate_with_margin = get_rate_with_margin(item)
 		if item.discount_percentage > 0:
@@ -214,9 +217,9 @@ class calculate_taxes_and_totals:
 			remove_discount(item)
 			return
 
-		item.discount_amount = flt(item.price_list_rate - item.rate, item.precision("discount_amount"))
-		item.discount_percentage = 0
 		item.rate_with_margin = item.price_list_rate
+		item.discount_amount = flt(item.rate_with_margin - item.rate, item.precision("discount_amount"))
+		item.discount_percentage = 0
 		remove_margin(item)
 
 	def calculate_item_values(self):

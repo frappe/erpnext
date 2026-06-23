@@ -542,11 +542,11 @@ def update_child_item_rate_and_discount(
 		)
 		child_item.rate_with_margin = child_item.rate
 	else:
-		child_item.discount_percentage = 0
-		child_item.discount_amount = flt(child_item.price_list_rate) - flt(child_item.rate)
 		child_item.margin_type = ""
 		child_item.margin_rate_or_amount = 0
 		child_item.rate_with_margin = child_item.price_list_rate
+		child_item.discount_percentage = 0
+		child_item.discount_amount = flt(child_item.rate_with_margin) - flt(child_item.rate)
 
 
 def update_child_item_uom_and_weight(child_item, new_data) -> None:

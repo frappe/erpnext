@@ -518,7 +518,7 @@ class TransactionBase(StatusUpdater):
 				flt(item_obj.rate_with_margin) * flt(item_obj.discount_percentage) / 100
 			)
 
-		if item_obj.discount_amount and item_obj.discount_amount > 0:
+		if item_obj.discount_amount:
 			item_rate = flt(
 				(item_obj.rate_with_margin) - (item_obj.discount_amount), item_obj.precision("rate")
 			)
