@@ -1122,16 +1122,22 @@ def insert_item_price(ctx: ItemDetailsCtx):
 		or getdate()
 	)
 
-	item_prices = frappe.get_all(
-		"Item Price",
-		filters={
-			"item_code": ctx.item_code,
-			"price_list": ctx.price_list,
-			"currency": ctx.currency,
-			"uom": ctx.stock_uom,
-		},
-		fields=["name", "price_list_rate", "valid_from", "valid_upto"],
-		order_by="valid_from desc, creation desc",
+	ip = frappe.qb.DocType("Item Price")
+	item_prices = (
+		frappe.qb.from_(ip)
+		.select(ip.name, ip.price_list_rate, ip.valid_from, ip.valid_upto)
+		.where(
+			(ip.item_code == ctx.item_code)
+			& (ip.price_list == ctx.price_list)
+			& (ip.currency == ctx.currency)
+			& (ip.uom == ctx.stock_uom)
+		)
+		# IfNull so a NULL valid_from sorts last under DESC on both engines: MariaDB already sorts
+		# NULL last for DESC, but Postgres defaults to NULLS FIRST, which would otherwise win the
+		# first-match pick below.
+		.orderby(IfNull(ip.valid_from, "1900-01-01"), order=frappe.qb.desc)
+		.orderby(ip.creation, order=frappe.qb.desc)
+		.run(as_dict=True)
 	)
 	item_price = next(
 		(
