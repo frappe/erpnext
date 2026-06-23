@@ -71,6 +71,8 @@ before_uninstall = "erpnext.setup.install.before_uninstall"
 after_app_install = "erpnext.setup.install.after_app_install"
 after_app_uninstall = "erpnext.setup.install.after_app_uninstall"
 
+before_migrate = "erpnext.setup.utils.validate_payments_compatibility"
+
 boot_session = "erpnext.startup.boot.boot_session"
 notification_config = "erpnext.startup.notifications.get_notification_config"
 get_help_messages = "erpnext.utilities.activation.get_help_messages"

@@ -1,6 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from importlib import import_module
+
 import frappe
 from frappe import _
 from frappe.utils import add_days, flt, get_datetime_str, nowdate
@@ -222,3 +224,20 @@ def identity(x, *args, **kwargs):
 	Use like this: `from erpnext.setup.utils import identity as _`
 	"""
 	return x
+
+
+def validate_payments_compatibility():
+	"""Ensure Payments app is compatible before site migration."""
+
+	if "payments" not in frappe.get_installed_apps():
+		return
+
+	try:
+		payments_utils = import_module("payments.utils.utils")
+	except Exception:
+		frappe.throw(_("Unable to load Payments utilities.\n\n") + frappe.get_traceback())
+
+	if not hasattr(payments_utils, "make_payments_erpnext_custom_fields"):
+		frappe.throw(
+			_("Incompatible Payments app version detected. Please update the Payments app before migration.")
+		)

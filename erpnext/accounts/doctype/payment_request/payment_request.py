@@ -222,23 +222,10 @@ class PaymentRequest(Document):
 		if not self.is_a_subscription:
 			return
 
-		if not self.get("payment_gateway"):
-			return
-
 		amount = 0
 		for subscription_plan in self.subscription_plans:
-			payment_account = frappe.db.get_value(
-				"Subscription Plan", subscription_plan.plan, "payment_account"
-			)
-			if payment_account != self.payment_account:
-				frappe.throw(
-					_(
-						"The payment account in plan {0} is different from the payment account in this payment request"
-					).format(subscription_plan.name)
-				)
-
+			self.validate_plan_payment_account(subscription_plan)
 			rate = get_plan_rate(subscription_plan.plan, quantity=subscription_plan.qty)
-
 			amount += rate
 
 		if amount != self.grand_total:
@@ -246,6 +233,18 @@ class PaymentRequest(Document):
 				_(
 					"The amount of {0} set in this payment request is different from the calculated amount of all payment plans: {1}. Make sure this is correct before submitting the document."
 				).format(self.grand_total, amount)
+			)
+
+	def validate_plan_payment_account(self, subscription_plan):
+		if not self.get("payment_gateway"):
+			return
+
+		payment_account = frappe.db.get_value("Subscription Plan", subscription_plan.plan, "payment_account")
+		if payment_account and payment_account != self.payment_account:
+			frappe.throw(
+				_(
+					"The payment account in plan {0} is different from the payment account in this payment request"
+				).format(subscription_plan.name)
 			)
 
 	def before_submit(self):
