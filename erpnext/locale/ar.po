@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-06-21 10:42+0000\n"
-"PO-Revision-Date: 2026-06-21 19:01\n"
+"PO-Revision-Date: 2026-06-23 19:26\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Arabic\n"
 "MIME-Version: 1.0\n"
@@ -21009,7 +21009,7 @@ msgstr "للتشغيل"
 
 #: banking/src/pages/BankStatementImporter.tsx:172
 msgid "For PDF statements, we auto-detect the tables on each page. You can then confirm each detected table, map its columns, and exclude anything that is not transactions (e.g. ads or summaries). Password-protected PDFs are supported - the password is saved on the bank account and reused."
-msgstr ""
+msgstr "بالنسبة لبيانات PDF، نقوم بالكشف التلقائي عن الجداول في كل صفحة. يمكنك بعد ذلك تأكيد كل جدول تم اكتشافه، وتعيين أعمدته، واستبعاد أي شيء لا يمثل معاملات (مثل الإعلانات أو الملخصات). يتم دعم ملفات PDF المحمية بكلمة مرور - يتم حفظ كلمة المرور في الحساب البنكي وإعادة استخدامها."
 
 #. Label of the for_price_list (Link) field in DocType 'Pricing Rule'
 #. Label of the for_price_list (Link) field in DocType 'Promotional Scheme
