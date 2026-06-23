@@ -8,6 +8,7 @@ from frappe.contacts.doctype.contact.contact import get_default_contact
 from frappe.email.inbox import link_communication_to_document
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder.functions import Lower
 
 
 @frappe.whitelist()
@@ -117,7 +118,17 @@ def make_lead_from_communication(communication: str, ignore_communication_links:
 	doc = frappe.get_doc("Communication", communication)
 	lead_name = None
 	if doc.sender:
-		lead_name = frappe.db.get_value("Lead", {"email_id": doc.sender})
+		# Match email_id case-insensitively so Postgres reuses an existing Lead like MariaDB does
+		# (whose default collation is case-insensitive) instead of creating a duplicate.
+		_lead = frappe.qb.DocType("Lead")
+		_rows = (
+			frappe.qb.from_(_lead)
+			.select(_lead.name)
+			.where(Lower(_lead.email_id) == (doc.sender or "").lower())
+			.limit(1)
+			.run()
+		)
+		lead_name = _rows[0][0] if _rows else None
 	if not lead_name and doc.phone_no:
 		lead_name = frappe.db.get_value("Lead", {"mobile_no": doc.phone_no})
 	if not lead_name:
