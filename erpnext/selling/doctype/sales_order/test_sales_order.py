@@ -1481,12 +1481,11 @@ class TestSalesOrder(ERPNextTestSuite):
 
 	def test_create_so_with_margin(self):
 		so = make_sales_order(item_code="_Test Item", qty=1, do_not_submit=True)
-		# Rate is zeroed out so margin/discount drives the final rate. If a non-zero rate is present
-		# and conflicts with margin/discount, the new logic prioritizes rate and resets margin/discount.
-		so.items[0].rate = 0
 		so.items[0].price_list_rate = price_list_rate = 100
 		so.items[0].margin_type = "Percentage"
 		so.items[0].margin_rate_or_amount = 25
+		# set rate to zero, so that it is recalculated on save
+		so.items[0].rate = 0
 		so.save()
 
 		new_so = frappe.copy_doc(so)

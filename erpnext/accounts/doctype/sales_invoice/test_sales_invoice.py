@@ -2151,14 +2151,13 @@ class TestSalesInvoice(ERPNextTestSuite):
 		si = create_sales_invoice(item_code="_Test Item", qty=1, do_not_submit=True)
 		price_list_rate = flt(100) * flt(si.plc_conversion_rate)
 
-		# Rate is zeroed out so margin/discount drives the final rate. If a non-zero rate is present
-		# and conflicts with margin/discount, the new logic prioritizes rate and resets margin/discount.
-		si.items[0].rate = 0
 		si.items[0].price_list_rate = price_list_rate
 		si.items[0].margin_type = "Percentage"
 		si.items[0].margin_rate_or_amount = 25
 		si.items[0].discount_amount = 0.0
 		si.items[0].discount_percentage = 0.0
+		# set rate to zero, so that it is recalculated on save
+		si.items[0].rate = 0
 		si.save()
 		self.assertEqual(si.get("items")[0].rate, flt((price_list_rate * 25) / 100 + price_list_rate))
 

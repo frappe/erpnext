@@ -470,8 +470,7 @@ class TestQuotation(ERPNextTestSuite):
 		test_record.items[0].price_list_rate = 1500
 		test_record.items[0].margin_type = "Percentage"
 		test_record.items[0].margin_rate_or_amount = 18.75
-		# Rate is zeroed out so margin/discount drives the final rate. If a non-zero rate is present
-		# and conflicts with margin/discount, the new logic prioritizes rate and resets margin/discount.
+		# set rate to zero, so that it is recalculated on save
 		test_record.items[0].rate = 0
 
 		quotation = frappe.copy_doc(test_record)
