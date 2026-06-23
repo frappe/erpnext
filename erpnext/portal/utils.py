@@ -9,7 +9,17 @@ def set_default_role(doc, method):
 
 	roles = frappe.get_roles(doc.name)
 
-	contact_name = frappe.get_value("Contact", dict(email_id=doc.email))
+	# Match email_id case-insensitively (like party_exists) so the role is granted on Postgres the
+	# same way MariaDB does (its default collation is case-insensitive).
+	_contact = frappe.qb.DocType("Contact")
+	_rows = (
+		frappe.qb.from_(_contact)
+		.select(_contact.name)
+		.where(Lower(_contact.email_id) == (doc.email or "").lower())
+		.limit(1)
+		.run()
+	)
+	contact_name = _rows[0][0] if _rows else None
 	if contact_name:
 		contact = frappe.get_doc("Contact", contact_name)
 		for link in contact.links:
