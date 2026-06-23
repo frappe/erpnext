@@ -2,6 +2,25 @@ import json
 
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+from frappe.query_builder.functions import Lower
+
+
+def _ci_match(doctype, fieldname, value):
+	"""Return the docname whose free-text ``fieldname`` equals ``value`` ignoring case, else None.
+
+	MariaDB matches such Data fields case-insensitively via its default collation; Postgres does
+	not, so a plain dict-filter dedup lookup misses on Postgres and creates a duplicate record.
+	Lower() both sides keeps the same match set on both engines (MariaDB output unchanged).
+	"""
+	dt = frappe.qb.DocType(doctype)
+	rows = (
+		frappe.qb.from_(dt)
+		.select(dt.name)
+		.where(Lower(dt[fieldname]) == (value or "").lower())
+		.limit(1)
+		.run()
+	)
+	return rows[0][0] if rows else None
 
 
 @frappe.whitelist()
@@ -43,7 +62,7 @@ def create_prospect_against_crm_deal():
 	prospect.annual_revenue = doc.annual_revenue
 
 	try:
-		prospect_name = frappe.db.get_value("Prospect", {"company_name": prospect.company_name})
+		prospect_name = _ci_match("Prospect", "company_name", prospect.company_name)
 		if not prospect_name:
 			prospect.insert()
 			prospect_name = prospect.name
@@ -134,7 +153,7 @@ def link_doc(doc, link_doctype, link_docname):
 
 
 def contact_exists(email, mobile_no):
-	email_exist = frappe.db.exists("Contact Email", {"email_id": email})
+	email_exist = _ci_match("Contact Email", "email_id", email)
 	mobile_exist = frappe.db.exists("Contact Phone", {"phone": mobile_no})
 
 	doctype = "Contact Email" if email_exist else "Contact Phone"
@@ -164,7 +183,7 @@ def create_customer(customer_data: dict | None = None):
 		customer_data = frappe.form_dict
 
 	try:
-		customer_name = frappe.db.exists("Customer", {"customer_name": customer_data.get("customer_name")})
+		customer_name = _ci_match("Customer", "customer_name", customer_data.get("customer_name"))
 		if not customer_name:
 			customer = frappe.new_doc("Customer")
 			for field in CUSTOMER_ALLOWED_FIELDS:
