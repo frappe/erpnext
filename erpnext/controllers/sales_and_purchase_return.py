@@ -7,7 +7,7 @@ import frappe
 from frappe import _, bold
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import DocType
-from frappe.query_builder.functions import Abs, Sum
+from frappe.query_builder.functions import Abs, NullIf, Sum
 from frappe.utils import cint, flt, format_datetime, get_datetime
 
 import erpnext
@@ -766,7 +766,9 @@ def get_rate_for_return(
 		select_field = "incoming_rate"
 	else:
 		StockLedgerEntry = frappe.qb.DocType("Stock Ledger Entry")
-		select_field = Abs(StockLedgerEntry.stock_value_difference / StockLedgerEntry.actual_qty)
+		# NullIf so a zero-qty SLE (valuation-only repost) yields NULL instead of aborting on Postgres;
+		# MariaDB already returns NULL for x/0, so its value is unchanged.
+		select_field = Abs(StockLedgerEntry.stock_value_difference / NullIf(StockLedgerEntry.actual_qty, 0))
 
 	item_details = frappe.get_cached_value("Item", item_code, ["has_batch_no", "has_expiry_date"], as_dict=1)
 	set_zero_rate_for_expired_batch = frappe.db.get_single_value(
