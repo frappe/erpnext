@@ -115,7 +115,14 @@ class TaxRule(Document):
 		)
 
 		for field, value in filters.items():
-			query = query.where(IfNull(TaxRule[field], "") == cstr(value))
+			# Free-text address fields (billing/shipping city/state/county/zipcode) match
+			# case-insensitively on MariaDB but not Postgres; Lower() both sides for Data keys so the
+			# conflict detector finds the same overlapping rules on both engines (Link keys stay exact).
+			meta_field = frappe.get_meta("Tax Rule").get_field(field)
+			if meta_field and meta_field.fieldtype == "Data":
+				query = query.where(Lower(IfNull(TaxRule[field], "")) == cstr(value).lower())
+			else:
+				query = query.where(IfNull(TaxRule[field], "") == cstr(value))
 
 		if self.from_date and self.to_date:
 			query = query.where(
