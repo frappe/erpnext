@@ -233,7 +233,10 @@ class ProductionPlanReport:
 			fields=[
 				"item_code",
 				{"MIN": "schedule_date", "as": "arrival_date"},
-				"qty as arrival_qty",
+				# qty is not in the GROUP BY, so it must be aggregated to be valid on postgres; sum the
+				# on-order qty per item+warehouse (the meaningful "arriving" figure) instead of MariaDB's
+				# arbitrary single-row pick.
+				{"SUM": "qty", "as": "arrival_qty"},
 				"warehouse",
 			],
 			filters={

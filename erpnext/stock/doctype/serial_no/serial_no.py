@@ -101,11 +101,10 @@ class SerialNo(StockController):
 			self.maintenance_status = "Under Warranty"
 
 	def on_trash(self):
-		sl_entries = frappe.db.sql(
-			"""select serial_no from `tabStock Ledger Entry`
-			where serial_no like %s and item_code=%s and is_cancelled=0""",
-			("%%%s%%" % self.name, self.item_code),
-			as_dict=True,
+		sl_entries = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"serial_no": ["like", f"%{self.name}%"], "item_code": self.item_code, "is_cancelled": 0},
+			fields=["serial_no"],
 		)
 
 		# Find the exact match
@@ -172,13 +171,14 @@ def clean_serial_no_string(serial_no: str) -> str:
 
 
 def update_maintenance_status():
-	serial_nos = frappe.db.sql(
-		"""select name from `tabSerial No` where (amc_expiry_date<%s or
-		warranty_expiry_date<%s) and maintenance_status not in ('Out of Warranty', 'Out of AMC')""",
-		(nowdate(), nowdate()),
+	serial_nos = frappe.get_all(
+		"Serial No",
+		filters={"maintenance_status": ["not in", ["Out of Warranty", "Out of AMC"]]},
+		or_filters=[["amc_expiry_date", "<", nowdate()], ["warranty_expiry_date", "<", nowdate()]],
+		pluck="name",
 	)
 	for serial_no in serial_nos:
-		doc = frappe.get_doc("Serial No", serial_no[0])
+		doc = frappe.get_doc("Serial No", serial_no)
 		doc.set_maintenance_status()
 		frappe.db.set_value("Serial No", doc.name, "maintenance_status", doc.maintenance_status)
 

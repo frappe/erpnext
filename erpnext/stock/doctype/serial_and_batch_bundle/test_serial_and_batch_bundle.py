@@ -80,6 +80,31 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 
 		self.assertFalse(bundle_doc.name.startswith("SABB-"))
 
+	def test_get_stock_ledgers_for_serial_nos_is_case_insensitive(self):
+		# get_stock_ledgers_for_serial_nos matches Serial and Batch Entry.serial_no with isin(), which is
+		# case-sensitive on Postgres -- a differently-cased serial no would miss entries that MariaDB
+		# (case-insensitive collation) matches. Lower() both sides keeps MariaDB unchanged and makes
+		# Postgres match too.
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+			get_stock_ledgers_for_serial_nos,
+		)
+
+		item_code = "Test SBB Case-insensitive Serial Item"
+		make_item(
+			item_code,
+			{"has_serial_no": 1, "serial_no_series": "TESTCISER-.#####", "is_stock_item": 1},
+		)
+		pr = make_purchase_receipt(item_code=item_code, warehouse="_Test Warehouse - _TC", qty=1, rate=100)
+		bundle = pr.items[0].serial_and_batch_bundle
+		serial_no = get_serial_nos_from_bundle(bundle)[0]
+
+		# query with a lowercased serial no; the stored Serial and Batch Entry value is uppercase
+		rows = get_stock_ledgers_for_serial_nos(
+			frappe._dict({"item_code": item_code, "serial_nos": [serial_no.lower()]})
+		)
+		self.assertTrue(any(row.serial_and_batch_bundle == bundle for row in rows))
+
 	def test_inward_outward_serial_valuation(self):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
@@ -1329,6 +1354,15 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 
 		# Stock queue should have the returned stock: [[5, 100]]
 		self.assertEqual(json.loads(return_sle.stock_queue), [[5, 100]])
+
+	def test_get_picked_batches_runs(self):
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_picked_batches
+
+		# Sum(qty) is selected with bare batch_no/warehouse; without a GROUP BY this
+		# raises a GroupingError on Postgres (and collapses to one arbitrary row on
+		# MariaDB). It must run and return a per-(batch, warehouse) mapping on both.
+		result = get_picked_batches(frappe._dict())
+		self.assertIsInstance(result, dict)
 
 
 def get_batch_from_bundle(bundle):

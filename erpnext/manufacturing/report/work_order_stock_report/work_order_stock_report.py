@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import IfNull
+from frappe.query_builder.functions import IfNull, Max, Sum
 from frappe.utils import cint
 
 
@@ -40,7 +40,16 @@ def get_item_list(wo_list, filters):
 					)
 					.select(
 						bom_item.item_code.as_("item_code"),
-						IfNull(bin.actual_qty * bom.quantity / bom_item.stock_qty, 0).as_("build_qty"),
+						# Aggregate so the query stays one row per item_code and is Postgres
+						# GROUP-BY-valid. A BOM may list the same item on several lines; adding the
+						# qty columns to GROUP BY would split the row and change the row count on
+						# MariaDB. actual_qty (single warehouse) and bom.quantity (single BOM) are
+						# pinned to one value, so Max() returns that value; the per-unit requirement
+						# is the TOTAL of this item across its lines, so stock_qty is summed. For the
+						# common single-line item this equals the prior expression exactly.
+						IfNull(Max(bin.actual_qty) * Max(bom.quantity) / Sum(bom_item.stock_qty), 0).as_(
+							"build_qty"
+						),
 					)
 					.where(
 						(bom.name == bom_item.parent)

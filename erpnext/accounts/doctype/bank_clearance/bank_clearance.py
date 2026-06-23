@@ -7,7 +7,7 @@ from frappe import _, msgprint
 from frappe.model.document import Document
 from frappe.query_builder import Case
 from frappe.query_builder.custom import ConstantColumn
-from frappe.query_builder.functions import Coalesce, Sum
+from frappe.query_builder.functions import Coalesce, Max, Sum
 from frappe.utils import cint, flt, fmt_money, getdate
 from pypika import Order
 
@@ -195,14 +195,17 @@ def get_payment_entries_for_bank_clearance(
 		.select(
 			ConstantColumn("Journal Entry").as_("payment_document"),
 			journal_entry.name.as_("payment_entry"),
-			journal_entry.cheque_no.as_("cheque_number"),
-			journal_entry.cheque_date,
+			# non-grouped columns are constant per grouped JE name / account (against_account is
+			# arbitrary per group on MySQL) -> Max() keeps the GROUP BY valid on postgres with the
+			# same value MySQL picked.
+			Max(journal_entry.cheque_no).as_("cheque_number"),
+			Max(journal_entry.cheque_date).as_("cheque_date"),
 			Sum(journal_entry_account.debit_in_account_currency).as_("debit"),
 			Sum(journal_entry_account.credit_in_account_currency).as_("credit"),
-			journal_entry.posting_date,
-			journal_entry_account.against_account,
-			journal_entry.clearance_date,
-			journal_entry_account.account_currency,
+			Max(journal_entry.posting_date).as_("posting_date"),
+			Max(journal_entry_account.against_account).as_("against_account"),
+			Max(journal_entry.clearance_date).as_("clearance_date"),
+			Max(journal_entry_account.account_currency).as_("account_currency"),
 		)
 		.where(
 			(journal_entry_account.account == account)
@@ -215,12 +218,13 @@ def get_payment_entries_for_bank_clearance(
 
 	if not include_reconciled_entries:
 		journal_entry_query = journal_entry_query.where(
-			(journal_entry.clearance_date.isnull()) | (journal_entry.clearance_date == "0000-00-00")
+			(journal_entry.clearance_date.isnull())
+			| (journal_entry.clearance_date == ("0000-00-00" if frappe.db.db_type != "postgres" else None))
 		)
 
 	journal_entries = (
 		journal_entry_query.groupby(journal_entry_account.account, journal_entry.name)
-		.orderby(journal_entry.posting_date)
+		.orderby(Max(journal_entry.posting_date))
 		.orderby(journal_entry.name, order=Order.desc)
 	).run(as_dict=True)
 
@@ -290,7 +294,8 @@ def get_payment_entries_for_bank_clearance(
 
 	if not include_reconciled_entries:
 		payment_entry_query = payment_entry_query.where(
-			(pe.clearance_date.isnull()) | (pe.clearance_date == "0000-00-00")
+			(pe.clearance_date.isnull())
+			| (pe.clearance_date == ("0000-00-00" if frappe.db.db_type != "postgres" else None))
 		)
 
 	payment_entries = (payment_entry_query.orderby(pe.posting_date).orderby(pe.name, order=Order.desc)).run(
@@ -327,7 +332,8 @@ def get_payment_entries_for_bank_clearance(
 
 	if not include_reconciled_entries:
 		paid_purchase_invoices_query = paid_purchase_invoices_query.where(
-			(pi.clearance_date.isnull()) | (pi.clearance_date == "0000-00-00")
+			(pi.clearance_date.isnull())
+			| (pi.clearance_date == ("0000-00-00" if frappe.db.db_type != "postgres" else None))
 		)
 
 	paid_purchase_invoices = (
@@ -367,7 +373,8 @@ def get_payment_entries_for_bank_clearance(
 
 		if not include_reconciled_entries:
 			pos_sales_invoices_query = pos_sales_invoices_query.where(
-				(si_payment.clearance_date.isnull()) | (si_payment.clearance_date == "0000-00-00")
+				(si_payment.clearance_date.isnull())
+				| (si_payment.clearance_date == ("0000-00-00" if frappe.db.db_type != "postgres" else None))
 			)
 
 		pos_sales_invoices = (

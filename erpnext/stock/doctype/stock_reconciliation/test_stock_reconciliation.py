@@ -1841,6 +1841,46 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 
 		self.assertEqual(frappe.get_value("Serial No", serial_no, "status"), "Delivered")
 
+	def test_get_items_for_stock_reco_from_bin(self):
+		"""get_items_for_stock_reco Bin branch (comma-join -> inner_join, ifnull(disabled) ->
+		disabled==0|isnull, warehouse-subtree EXISTS -> isin) must surface a stocked item."""
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
+			get_items_for_stock_reco,
+		)
+
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item, target=warehouse, qty=5, basic_rate=100)
+
+		returned = {
+			(d["item_code"], d["warehouse"]) for d in get_items_for_stock_reco(warehouse, "_Test Company")
+		}
+		self.assertIn((item, warehouse), returned)
+
+	def test_get_items_for_stock_reco_from_item_default(self):
+		"""get_items_for_stock_reco Item Default branch (EXISTS -> isin, dropped `group by i.name` —
+		sound because Item Default is one-per-(item, company)) must surface an item via its
+		default_warehouse even without stock."""
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
+			get_items_for_stock_reco,
+		)
+
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"item_defaults": [{"company": "_Test Company", "default_warehouse": warehouse}],
+			}
+		).name
+
+		returned = {
+			(d["item_code"], d["warehouse"]) for d in get_items_for_stock_reco(warehouse, "_Test Company")
+		}
+		self.assertIn((item, warehouse), returned)
+
 
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)

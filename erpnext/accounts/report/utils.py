@@ -146,7 +146,6 @@ def get_appropriate_company(filters):
 	return company
 
 
-@frappe.whitelist()
 def get_invoiced_item_gross_margin(
 	sales_invoice: str | None = None,
 	item_code: str | None = None,

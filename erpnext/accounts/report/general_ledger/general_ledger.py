@@ -164,7 +164,8 @@ def get_gl_entries(filters, accounting_dimensions):
 
 	if filters.get("show_remarks"):
 		if remarks_length := frappe.get_single_value("Accounts Settings", "general_ledger_remarks_length"):
-			select_fields += f",substr(remarks, 1, {remarks_length}) as 'remarks'"
+			# bare alias, not 'remarks' — Postgres treats a single-quoted alias as a string literal
+			select_fields += f",substr(remarks, 1, {remarks_length}) as remarks"
 		else:
 			select_fields += """,remarks"""
 

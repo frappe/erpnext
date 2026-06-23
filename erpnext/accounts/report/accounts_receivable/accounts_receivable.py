@@ -7,7 +7,7 @@ from collections import OrderedDict
 import frappe
 from frappe import _, qb, query_builder, scrub
 from frappe.query_builder import Criterion
-from frappe.query_builder.functions import Date, Max, Substring, Sum
+from frappe.query_builder.functions import Date, Substring, Sum
 from frappe.utils import cint, cstr, flt, getdate, nowdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -691,13 +691,11 @@ class ReceivablePayableReport:
 			.inner_join(jea)
 			.on(jea.parent == je.name)
 			.select(
-				# Sum() below makes this an implicit aggregate (no GROUP BY); the non-aggregated columns
-				# are arbitrary per the single group on MySQL -> Max() keeps it valid on postgres.
-				Max(jea.reference_name).as_("invoice_no"),
-				Max(jea.party).as_("party"),
-				Max(jea.party_type).as_("party_type"),
-				Max(je.posting_date).as_("future_date"),
-				Max(je.cheque_no).as_("future_ref"),
+				jea.reference_name.as_("invoice_no"),
+				jea.party,
+				jea.party_type,
+				je.posting_date.as_("future_date"),
+				je.cheque_no.as_("future_ref"),
 			)
 			.where(
 				(je.docstatus < 2)
@@ -726,6 +724,14 @@ class ReceivablePayableReport:
 		query = query.select(
 			future_amount.as_("future_amount"),
 			future_amount_in_base_currency.as_("future_amount_in_base_currency"),
+		)
+		# One row per (future-payment JE, invoice, party): group by the JE name (primary key, so the
+		# JE-level posting_date/cheque_no are deterministic) plus the per-reference dimensions, summing
+		# amounts across JE Account rows that hit the same invoice. Without this GROUP BY the implicit
+		# single-group aggregate collapsed every future JE payment into one row keyed by an arbitrary
+		# invoice, mis-allocating the whole sum.
+		query = query.groupby(
+			je.name, jea.reference_name, jea.party, jea.party_type, je.posting_date, je.cheque_no
 		)
 		# use the aggregate expression in HAVING; postgres can't reference a SELECT alias there
 		query = query.having(future_amount > 0)

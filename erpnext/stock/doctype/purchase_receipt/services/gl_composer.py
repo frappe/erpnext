@@ -362,6 +362,12 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 	def _make_tax_gl_entries(self, gl_entries: list, via_landed_cost_voucher: bool = False) -> None:
 		doc = self.doc
 		negative_expense_to_be_booked = sum([flt(d.item_tax_amount) for d in doc.get("items")])
+
+		# Amount of each valuation charge actually capitalized into stock/asset valuation, keyed by
+		# tax row name. This is what must be credited to each tax account - a non-stock item's share
+		# of a spread-across-all-items charge is not capitalized, so it is excluded here.
+		capitalized_valuation_tax = doc.get_capitalized_valuation_tax()
+
 		valuation_tax = {}
 		for tax in doc.get("taxes"):
 			if tax.category in ("Valuation", "Valuation and Total") and flt(
@@ -373,10 +379,8 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 							tax.idx, _(tax.category)
 						)
 					)
-				valuation_tax.setdefault(tax.name, 0)
-				valuation_tax[tax.name] += (tax.add_deduct_tax == "Add" and 1 or -1) * flt(
-					tax.base_tax_amount_after_discount_amount
-				)
+
+				valuation_tax[tax.name] = capitalized_valuation_tax.get(tax.name, 0.0)
 
 		if negative_expense_to_be_booked and valuation_tax:
 			against_accounts = ", ".join([d.account for d in gl_entries if flt(d.debit) > 0])

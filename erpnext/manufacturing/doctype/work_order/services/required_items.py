@@ -191,17 +191,25 @@ class RequiredItemsService:
 			frappe.qb.from_(ste)
 			.inner_join(ste_child)
 			.on(ste_child.parent == ste.name)
-			# original_item is arbitrary per grouped item_code on MySQL -> Max() keeps the GROUP BY valid
-			# on postgres while returning the same value (it is only used as a dict key fallback below)
+			# original_item becomes the output dict key below, so it must stay coherent per row: the
+			# same item_code can be transferred both for itself (original_item NULL) and as a substitute
+			# for another required item (original_item set). Max() over a single item_code group could
+			# pick the substitute's original_item and misattribute the item's own transfer to it. Group
+			# by (item_code, original_item) so each pair sums separately, then accumulate into the keyed
+			# dict (two distinct rows can resolve to the same key, e.g. A's own transfer and B-for-A).
 			.select(
 				ste_child.item_code,
-				fn.Max(ste_child.original_item).as_("original_item"),
+				ste_child.original_item,
 				fn.Sum(ste_child.transfer_qty).as_("qty"),
 			)
 			.where(self._material_transfer_filter(ste, is_return))
-			.groupby(ste_child.item_code)
+			.groupby(ste_child.item_code, ste_child.original_item)
 		)
-		return frappe._dict({d.original_item or d.item_code: d.qty for d in (query.run(as_dict=1) or [])})
+		qty_by_item = frappe._dict()
+		for d in query.run(as_dict=1) or []:
+			key = d.original_item or d.item_code
+			qty_by_item[key] = (qty_by_item.get(key) or 0.0) + flt(d.qty)
+		return qty_by_item
 
 	def _material_transfer_filter(self, ste, is_return):
 		return (

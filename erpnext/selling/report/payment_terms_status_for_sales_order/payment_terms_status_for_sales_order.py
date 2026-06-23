@@ -4,7 +4,8 @@
 import frappe
 from frappe import _, qb, query_builder
 from frappe.query_builder import Criterion
-from frappe.query_builder.functions import Max
+from frappe.query_builder.functions import Max, Sum
+from frappe.utils import flt
 from frappe.utils.dateutils import getdate
 
 
@@ -230,18 +231,46 @@ def get_so_with_invoices(filters):
 			.inner_join(soi)
 			.on(soi.name == sii.so_detail)
 			.select(
-				# grouped by the invoice (sii.parent); sales_order is arbitrary per invoice on MySQL and
-				# base_grand_total is constant per invoice -> Max() keeps the GROUP BY postgres-valid.
-				Max(sii.sales_order).as_("sales_order"),
+				# One row per (invoice, sales_order). An invoice can bill several Sales Orders; grouping
+				# by the invoice alone and taking Max(sales_order) credited the whole invoice to one
+				# arbitrary order and starved the rest. sales_order/invoice are GROUP BY keys and
+				# base_grand_total is constant per invoice; the grand total is split across the orders
+				# below in proportion to each order's net line amount on this invoice.
+				sii.sales_order.as_("sales_order"),
 				sii.parent.as_("invoice"),
-				Max(si.base_grand_total).as_("invoice_amount"),
+				Sum(sii.base_net_amount).as_("order_net_amount"),
+				Max(si.base_grand_total).as_("invoice_grand_total"),
 			)
 			.where((sii.sales_order.isin([x.name for x in sorders])) & (si.docstatus == 1))
-			.groupby(sii.parent)
+			.groupby(sii.parent, sii.sales_order)
 		)
 		invoices = query_inv.run(as_dict=True)
+		allocate_invoice_amount_across_orders(invoices)
 
 	return sorders, invoices
+
+
+def allocate_invoice_amount_across_orders(invoices):
+	"""Split each invoice's grand total across the Sales Orders it bills, proportional to each order's net
+	line amount. A single-order invoice keeps the full grand total (ratio 1). The last order (sorted, so
+	both engines agree) absorbs the rounding residual, so the shares always sum back to the grand total."""
+	rows_by_invoice = {}
+	for row in invoices:
+		rows_by_invoice.setdefault(row.invoice, []).append(row)
+
+	for rows in rows_by_invoice.values():
+		rows.sort(key=lambda r: r.sales_order)
+		total_net = sum(flt(r.order_net_amount) for r in rows)
+		grand_total = flt(rows[0].invoice_grand_total)
+		if not total_net:
+			for r in rows:
+				r.invoice_amount = grand_total / len(rows)
+			continue
+		allocated = 0.0
+		for r in rows[:-1]:
+			r.invoice_amount = grand_total * flt(r.order_net_amount) / total_net
+			allocated += r.invoice_amount
+		rows[-1].invoice_amount = grand_total - allocated
 
 
 def set_payment_terms_statuses(sales_orders, invoices, filters):

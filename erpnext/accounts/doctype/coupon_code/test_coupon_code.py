@@ -173,3 +173,66 @@ class TestCouponCode(ERPNextTestSuite):
 
 		# Clean up
 		coupon.delete()
+
+	def test_validate_coupon_code_rejections(self):
+		from frappe.utils import add_days, nowdate
+
+		from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
+
+		pricing_rule = frappe.db.get_value("Pricing Rule", {"title": "_Test Pricing Rule for _Test Item"})
+
+		def make_coupon(name, **kwargs):
+			frappe.delete_doc_if_exists("Coupon Code", name)
+			return frappe.get_doc(
+				{
+					"doctype": "Coupon Code",
+					"coupon_name": name,
+					"coupon_code": name,
+					"coupon_type": "Promotional",
+					"pricing_rule": pricing_rule,
+					**kwargs,
+				}
+			).insert(ignore_permissions=True)
+
+		with self.subTest("validity not yet started"):
+			make_coupon("_Test Coupon Future", valid_from=add_days(nowdate(), 5))
+			self.assertRaises(frappe.ValidationError, validate_coupon_code, "_Test Coupon Future")
+
+		with self.subTest("validity expired"):
+			make_coupon("_Test Coupon Expired", valid_upto=add_days(nowdate(), -5))
+			self.assertRaises(frappe.ValidationError, validate_coupon_code, "_Test Coupon Expired")
+
+		with self.subTest("maximum use exhausted"):
+			make_coupon("_Test Coupon Exhausted", maximum_use=2, used=2)
+			self.assertRaises(frappe.ValidationError, validate_coupon_code, "_Test Coupon Exhausted")
+
+		with self.subTest("valid coupon passes"):
+			make_coupon("_Test Coupon Valid", maximum_use=5, used=1, valid_upto=add_days(nowdate(), 5))
+			validate_coupon_code("_Test Coupon Valid")  # no raise
+
+	def test_update_coupon_code_count_cancel_and_exhaust(self):
+		from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
+
+		pricing_rule = frappe.db.get_value("Pricing Rule", {"title": "_Test Pricing Rule for _Test Item"})
+		frappe.delete_doc_if_exists("Coupon Code", "_Test Coupon Count")
+		frappe.get_doc(
+			{
+				"doctype": "Coupon Code",
+				"coupon_name": "_Test Coupon Count",
+				"coupon_code": "_Test Coupon Count",
+				"coupon_type": "Promotional",
+				"pricing_rule": pricing_rule,
+				"maximum_use": 2,
+				"used": 1,
+			}
+		).insert(ignore_permissions=True)
+
+		# cancelling a transaction releases one use
+		update_coupon_code_count("_Test Coupon Count", "cancelled")
+		self.assertEqual(frappe.db.get_value("Coupon Code", "_Test Coupon Count", "used"), 0)
+
+		# using up to the maximum is allowed, beyond it is rejected
+		update_coupon_code_count("_Test Coupon Count", "used")
+		update_coupon_code_count("_Test Coupon Count", "used")
+		self.assertEqual(frappe.db.get_value("Coupon Code", "_Test Coupon Count", "used"), 2)
+		self.assertRaises(frappe.ValidationError, update_coupon_code_count, "_Test Coupon Count", "used")

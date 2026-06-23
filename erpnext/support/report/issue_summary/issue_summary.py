@@ -6,6 +6,7 @@ import json
 
 import frappe
 from frappe import _, scrub
+from frappe.query_builder.functions import Avg
 from frappe.utils import flt
 
 
@@ -264,21 +265,20 @@ class IssueSummary:
 						self.issue_summary_data[entry][metric] /= flt(assignment_map.get(entry))
 
 			else:
-				data = frappe.db.sql(
-					f"""
-					SELECT
-						{field}, AVG(first_response_time) as avg_frt,
-						AVG(avg_response_time) as avg_resp_time,
-						AVG(total_hold_time) as avg_hold_time,
-						AVG(resolution_time) as avg_resolution_time,
-						AVG(user_resolution_time) as avg_user_resolution_time
-					FROM `tabIssue`
-					WHERE
-						name IN %(issues)s
-					GROUP BY {field}
-				""",
-					{"issues": issues},
-					as_dict=1,
+				issue = frappe.qb.DocType("Issue")
+				data = (
+					frappe.qb.from_(issue)
+					.select(
+						issue[field],
+						Avg(issue.first_response_time).as_("avg_frt"),
+						Avg(issue.avg_response_time).as_("avg_resp_time"),
+						Avg(issue.total_hold_time).as_("avg_hold_time"),
+						Avg(issue.resolution_time).as_("avg_resolution_time"),
+						Avg(issue.user_resolution_time).as_("avg_user_resolution_time"),
+					)
+					.where(issue.name.isin(issues))
+					.groupby(issue[field])
+					.run(as_dict=1)
 				)
 
 				for entry in data:

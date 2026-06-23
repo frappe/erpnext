@@ -54,7 +54,7 @@
   },
   {
    "fieldname": "commission_rate",
-   "fieldtype": "Data",
+   "fieldtype": "Percent",
    "label": "Commission Rate",
    "print_hide": 1
   },
@@ -145,7 +145,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2024-03-27 13:10:37.891377",
+ "modified": "2026-06-21 12:52:33.742603",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Sales Person",

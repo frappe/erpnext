@@ -55,15 +55,19 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 			("Sales - TPC", 400.0, 0.0),
 		)
 
-		pcv_gle = frappe.db.sql(
-			"""
-			select account, debit, credit from `tabGL Entry` where voucher_no=%s order by account
-		""",
-			(pcv.name),
-		)
+		pcv_gle = [
+			tuple(row)
+			for row in frappe.get_all(
+				"GL Entry",
+				filters={"voucher_no": pcv.name},
+				fields=["account", "debit", "credit"],
+				order_by="account",
+				as_list=True,
+			)
+		]
 		pcv.reload()
 		self.assertEqual(pcv.gle_processing_status, "Completed")
-		self.assertEqual(pcv_gle, expected_gle)
+		self.assertEqual(tuple(pcv_gle), expected_gle)
 
 	def test_cost_center_wise_posting(self):
 		surplus_account = create_account()
@@ -106,14 +110,16 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 			("Sales - TPC", 200.0, 0.0, cost_center2),
 		)
 
-		pcv_gle = frappe.db.sql(
-			"""
-			select account, debit, credit, cost_center
-			from `tabGL Entry` where voucher_no=%s
-			order by account, cost_center
-		""",
-			(pcv.name),
-		)
+		pcv_gle = [
+			tuple(row)
+			for row in frappe.get_all(
+				"GL Entry",
+				filters={"voucher_no": pcv.name},
+				fields=["account", "debit", "credit", "cost_center"],
+				order_by="account, cost_center",
+				as_list=True,
+			)
+		]
 
 		self.assertSequenceEqual(pcv_gle, expected_gle)
 
@@ -166,16 +172,19 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 			("Sales - TPC", 400.0, 0.0, jv.finance_book),
 		)
 
-		pcv_gle = frappe.db.sql(
-			"""
-			select account, debit, credit, finance_book
-			from `tabGL Entry` where voucher_no=%s
-			order by account, finance_book
-		""",
-			(pcv.name),
-		)
+		pcv_gle = [
+			tuple(row)
+			for row in frappe.get_all(
+				"GL Entry",
+				filters={"voucher_no": pcv.name},
+				fields=["account", "debit", "credit", "finance_book"],
+				order_by="account, finance_book",
+				as_list=True,
+			)
+		]
 
-		self.assertSequenceEqual(pcv_gle, expected_gle)
+		# compare order-independently: postgres and MariaDB order NULL finance_book differently
+		self.assertSequenceEqual(sorted(pcv_gle, key=str), sorted(expected_gle, key=str))
 
 	def test_gl_entries_restrictions(self):
 		cost_center = create_cost_center("Test Cost Center 1")
@@ -358,14 +367,10 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 			posting_date="2022-01-01",
 		)
 
-		totals_after_cancel = frappe.db.sql(
-			"""
-				select sum(debit) as total_debit, sum(credit) as total_credit
-				from `tabGL Entry`
-				where voucher_type=%s and voucher_no=%s and is_cancelled=0
-			""",
-			("Journal Entry", jv.name),
-			as_dict=True,
+		totals_after_cancel = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Journal Entry", "voucher_no": jv.name, "is_cancelled": 0},
+			fields=[{"SUM": "debit", "as": "total_debit"}, {"SUM": "credit", "as": "total_credit"}],
 		)[0]
 
 		self.assertEqual(totals_after_cancel.total_debit, totals_after_cancel.total_credit)

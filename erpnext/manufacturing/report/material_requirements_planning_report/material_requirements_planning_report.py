@@ -1219,7 +1219,7 @@ def get_item_lead_time(item_code, type_of_material):
 			.when(
 				(doctype.manufacturing_time_in_mins.isnull() | (doctype.manufacturing_time_in_mins <= 0)), 0
 			)
-			.else_(1440 / doctype.manufacturing_time_in_mins + doctype.buffer_time)
+			.else_(1440.0 / doctype.manufacturing_time_in_mins + doctype.buffer_time)
 			.as_("lead_time")
 		)
 	else:

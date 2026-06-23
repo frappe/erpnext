@@ -74,6 +74,14 @@ fi
 if [ "$DB" == "postgres" ];then
     echo "travis" | psql -h 127.0.0.1 -p 5432 -c "CREATE DATABASE test_frappe" -U postgres;
     echo "travis" | psql -h 127.0.0.1 -p 5432 -c "CREATE USER test_frappe WITH PASSWORD 'test_frappe'" -U postgres;
+    # CI databases are disposable, so trade durability for speed: postgres fsyncs on every commit
+    # by default, which dominates a commit-heavy test suite. These are all reload-time settings
+    # (no restart needed). MariaDB CI is unaffected (DB != postgres).
+    echo "travis" | psql -h 127.0.0.1 -p 5432 -U postgres \
+        -c "ALTER SYSTEM SET synchronous_commit = 'off'" \
+        -c "ALTER SYSTEM SET fsync = 'off'" \
+        -c "ALTER SYSTEM SET full_page_writes = 'off'" \
+        -c "SELECT pg_reload_conf()";
 fi
 
 

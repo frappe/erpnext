@@ -116,9 +116,12 @@ def _subitems_query(company, bom_no, include_non_stock_items, parent_qty, planne
 
 def _subitem_columns(bom_item, bom, item, item_default, item_uom, parent_qty, planned_qty):
 	qty = IfNull(parent_qty * Sum(bom_item.stock_qty / IfNull(bom.quantity, 1)) * planned_qty, 0).as_("qty")
-	# only item_code is grouped; the rest are functionally dependent on the grouped item (item
-	# attributes) or arbitrary per BOM Item on MySQL -> Max() keeps the GROUP BY valid on postgres
-	# while returning the same value MySQL picked.
+	# only item_code is grouped; the remaining item-attribute columns are functionally dependent on it,
+	# so Max() returns their single value on both engines. is_phantom_item is the exception: the same
+	# item_code can sit on a phantom line and a real-RM line in one BOM, and get_subitems() drops any
+	# row whose is_phantom_item is truthy. Max() would let a single phantom line mask the real material
+	# and silently drop it; Min() instead treats the item as phantom only when EVERY line is phantom, so
+	# a real raw material is never lost. Deterministic and identical on MariaDB and Postgres.
 	return [
 		bom_item.item_code,
 		Max(item.default_material_request_type).as_("default_material_request_type"),
@@ -136,7 +139,7 @@ def _subitem_columns(bom_item, bom, item, item_default, item_uom, parent_qty, pl
 		Max(item_uom.conversion_factor).as_("conversion_factor"),
 		Max(bom.item).as_("main_bom_item"),
 		Max(bom.name).as_("main_bom"),
-		Max(bom_item.is_phantom_item).as_("is_phantom_item"),
+		Min(bom_item.is_phantom_item).as_("is_phantom_item"),
 	]
 
 

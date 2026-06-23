@@ -111,6 +111,9 @@ def get_data(filters, conditions):
 		elif filters.get("group_by") == "Supplier":
 			sel_col = "t1.supplier"
 
+		# first column of the multi-column group_by = the based-on key the detail queries equate against
+		based_on_key = conditions["group_by"].split(",")[0].strip()
+
 		if filters.get("based_on") in ["Customer", "Supplier"]:
 			inc = 3
 		elif filters.get("based_on") in ["Item"]:
@@ -160,7 +163,7 @@ def get_data(filters, conditions):
 					posting_date,
 					"%s",
 					"%s",
-					conditions["group_by"],
+					based_on_key,
 					"%s",
 					conditions.get("addl_tables_relational_cond"),
 					cond,
@@ -177,6 +180,7 @@ def get_data(filters, conditions):
 					""" select t4.default_currency AS currency , {} , {} from `tab{}` t1, `tab{} Item` t2 {}
 							where t2.parent = t1.name and t1.company = {} and {} between {} and {}
 							and t1.docstatus = 1 and {} = {} and {} = {} {} {}
+							group by t4.default_currency, {}
 						""".format(
 						sel_col,
 						conditions["period_wise_select"],
@@ -189,10 +193,11 @@ def get_data(filters, conditions):
 						"%s",
 						sel_col,
 						"%s",
-						conditions["group_by"],
+						based_on_key,
 						"%s",
 						conditions.get("addl_tables_relational_cond"),
 						cond,
+						sel_col,
 					),
 					(filters.get("company"), year_start_date, year_end_date, row[i][0], data1[d][0]),
 					as_list=1,
@@ -307,8 +312,8 @@ def get_period_wise_columns(bet_dates, period, pwc):
 
 
 def get_period_wise_query(bet_dates, trans_date, query_details):
-	query_details += """SUM(IF(t1.{trans_date} BETWEEN '{sd}' AND '{ed}', t2.stock_qty, NULL)),
-					SUM(IF(t1.{trans_date} BETWEEN '{sd}' AND '{ed}', t2.base_net_amount, NULL)),
+	query_details += """SUM(CASE WHEN t1.{trans_date} BETWEEN '{sd}' AND '{ed}' THEN t2.stock_qty ELSE NULL END),
+					SUM(CASE WHEN t1.{trans_date} BETWEEN '{sd}' AND '{ed}' THEN t2.base_net_amount ELSE NULL END),
 				""".format(
 		trans_date=trans_date,
 		sd=bet_dates[0],
@@ -364,7 +369,10 @@ def based_wise_columns_query(based_on, trans):
 	# based_on_cols, based_on_select, based_on_group_by, addl_tables
 	if based_on == "Item":
 		based_on_details["based_on_cols"] = ["Item:Link/Item:120", "Item Name:Data:120"]
-		based_on_details["based_on_select"] = "t2.item_code, t2.item_name,"
+		# item_name is an editable per-line field, not functionally dependent on item_code, so it
+		# is aggregated (one row per item_code) rather than added to GROUP BY (which would split
+		# the row and change the MariaDB row count). See get_data's group-by query.
+		based_on_details["based_on_select"] = "t2.item_code, Max(t2.item_name) as item_name,"
 		based_on_details["based_on_group_by"] = "t2.item_code"
 		based_on_details["addl_tables"] = ""
 
@@ -381,14 +389,20 @@ def based_wise_columns_query(based_on, trans):
 				"Party Name:Data:120",
 				"Territory:Link/Territory:120",
 			]
-			based_on_details["based_on_select"] = "t1.party_name, t1.customer_name, t1.territory,"
+			based_on_details[
+				"based_on_select"
+			] = "t1.party_name, Max(t1.customer_name) as customer_name, Max(t1.territory) as territory,"
 		else:
 			based_on_details["based_on_cols"] = [
 				"Customer:Link/Customer:120",
 				"Customer Name:Data:120",
 				"Territory:Link/Territory:120",
 			]
-			based_on_details["based_on_select"] = "t1.customer, t1.customer_name, t1.territory,"
+			based_on_details[
+				"based_on_select"
+			] = "t1.customer, Max(t1.customer_name) as customer_name, Max(t1.territory) as territory,"
+		# territory (and customer_name) are not functionally dependent on the customer key, so they
+		# are aggregated rather than grouped — one row per customer, matching the prior MariaDB output.
 		based_on_details["based_on_group_by"] = "t1.party_name" if trans == "Quotation" else "t1.customer"
 		based_on_details["addl_tables"] = ""
 
@@ -404,8 +418,14 @@ def based_wise_columns_query(based_on, trans):
 			"Supplier Name:Data:120",
 			"Supplier Group:Link/Supplier Group:140",
 		]
-		based_on_details["based_on_select"] = "t1.supplier, t1.supplier_name, t3.supplier_group,"
-		based_on_details["based_on_group_by"] = "t1.supplier"
+		# supplier_name is a stored per-transaction field (not functionally dependent on supplier), so
+		# it is aggregated to keep one row per supplier — matching the prior MariaDB output, which grouped
+		# by t1.supplier only. supplier_group comes from the joined master and is FD on supplier, so it
+		# stays in GROUP BY (postgres-valid, no row split).
+		based_on_details[
+			"based_on_select"
+		] = "t1.supplier, Max(t1.supplier_name) as supplier_name, t3.supplier_group,"
+		based_on_details["based_on_group_by"] = "t1.supplier, t3.supplier_group"
 		based_on_details["addl_tables"] = ",`tabSupplier` t3"
 		based_on_details["addl_tables_relational_cond"] = " and t1.supplier = t3.name"
 
@@ -437,6 +457,7 @@ def based_wise_columns_query(based_on, trans):
 			frappe.throw(_("Project-wise data is not available for Quotation"))
 
 	based_on_details["based_on_select"] += "t4.default_currency as currency,"
+	based_on_details["based_on_group_by"] += ", t4.default_currency"
 	based_on_details["based_on_cols"].append("Currency:Link/Currency:120")
 	based_on_details["addl_tables"] += ", `tabCompany` t4"
 	based_on_details["addl_tables_relational_cond"] = (

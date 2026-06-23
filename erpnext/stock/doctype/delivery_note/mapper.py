@@ -132,7 +132,8 @@ def make_sales_invoice(
 		{
 			"Delivery Note": {
 				"doctype": "Sales Invoice",
-				"field_map": {"is_return": "is_return"},
+				# commission_rate is no_copy (so it isn't carried on Duplicate), map it explicitly here
+				"field_map": {"is_return": "is_return", "commission_rate": "commission_rate"},
 				"validation": {"docstatus": ["=", 1]},
 			},
 			"Delivery Note Item": {

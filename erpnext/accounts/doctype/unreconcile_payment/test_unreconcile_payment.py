@@ -424,7 +424,7 @@ class TestUnreconcilePayment(ERPNextTestSuite, AccountsTestMixin):
 		self.disable_advance_as_liability()
 
 	def test_07_adv_from_so_to_invoice(self):
-		frappe.db.set_value("Company", self.company, "book_advance_payments_in_separate_party_account", True)
+		frappe.db.set_value("Company", self.company, "book_advance_payments_in_separate_party_account", 1)
 		frappe.db.set_value(
 			"Company", self.company, "default_advance_received_account", "Advance Received - _TC"
 		)

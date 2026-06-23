@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Sum
 
 
 def execute(filters=None):
@@ -50,19 +51,28 @@ def get_columns():
 
 
 def get_project_details():
-	return frappe.db.sql(
-		""" select name, project_name, status, company, customer, estimated_costing,
-		expected_start_date, expected_end_date from tabProject where docstatus < 2""",
-		as_dict=1,
+	return frappe.get_all(
+		"Project",
+		filters={"docstatus": ["<", 2]},
+		fields=[
+			"name",
+			"project_name",
+			"status",
+			"company",
+			"customer",
+			"estimated_costing",
+			"expected_start_date",
+			"expected_end_date",
+		],
 	)
 
 
 def get_purchased_items_cost():
-	pr_items = frappe.db.sql(
-		"""select project, sum(base_net_amount) as amount
-		from `tabPurchase Receipt Item` where ifnull(project, '') != ''
-		and docstatus = 1 group by project""",
-		as_dict=1,
+	pr_items = frappe.get_all(
+		"Purchase Receipt Item",
+		filters={"project": ["is", "set"], "docstatus": 1},
+		fields=["project", {"SUM": "base_net_amount", "as": "amount"}],
+		group_by="project",
 	)
 
 	pr_item_map = {}
@@ -73,12 +83,20 @@ def get_purchased_items_cost():
 
 
 def get_issued_items_cost():
-	se_items = frappe.db.sql(
-		"""select se.project, sum(se_item.amount) as amount
-		from `tabStock Entry` se, `tabStock Entry Detail` se_item
-		where se.name = se_item.parent and se.docstatus = 1 and ifnull(se_item.t_warehouse, '') = ''
-		and se.project != '' group by se.project""",
-		as_dict=1,
+	se = frappe.qb.DocType("Stock Entry")
+	se_item = frappe.qb.DocType("Stock Entry Detail")
+	se_items = (
+		frappe.qb.from_(se)
+		.inner_join(se_item)
+		.on(se.name == se_item.parent)
+		.select(se.project, Sum(se_item.amount).as_("amount"))
+		.where(
+			(se.docstatus == 1)
+			& (se_item.t_warehouse.isnull() | (se_item.t_warehouse == ""))
+			& (se.project != "")
+		)
+		.groupby(se.project)
+		.run(as_dict=1)
 	)
 
 	se_item_map = {}
@@ -89,21 +107,28 @@ def get_issued_items_cost():
 
 
 def get_delivered_items_cost():
-	dn_items = frappe.db.sql(
-		"""select dn.project, sum(dn_item.base_net_amount) as amount
-		from `tabDelivery Note` dn, `tabDelivery Note Item` dn_item
-		where dn.name = dn_item.parent and dn.docstatus = 1 and ifnull(dn.project, '') != ''
-		group by dn.project""",
-		as_dict=1,
+	dn = frappe.qb.DocType("Delivery Note")
+	dn_item = frappe.qb.DocType("Delivery Note Item")
+	dn_items = (
+		frappe.qb.from_(dn)
+		.inner_join(dn_item)
+		.on(dn.name == dn_item.parent)
+		.select(dn.project, Sum(dn_item.base_net_amount).as_("amount"))
+		.where((dn.docstatus == 1) & (dn.project != ""))
+		.groupby(dn.project)
+		.run(as_dict=1)
 	)
 
-	si_items = frappe.db.sql(
-		"""select si.project, sum(si_item.base_net_amount) as amount
-		from `tabSales Invoice` si, `tabSales Invoice Item` si_item
-		where si.name = si_item.parent and si.docstatus = 1 and si.update_stock = 1
-		and si.is_pos = 1 and ifnull(si.project, '') != ''
-		group by si.project""",
-		as_dict=1,
+	si = frappe.qb.DocType("Sales Invoice")
+	si_item = frappe.qb.DocType("Sales Invoice Item")
+	si_items = (
+		frappe.qb.from_(si)
+		.inner_join(si_item)
+		.on(si.name == si_item.parent)
+		.select(si.project, Sum(si_item.base_net_amount).as_("amount"))
+		.where((si.docstatus == 1) & (si.update_stock == 1) & (si.is_pos == 1) & (si.project != ""))
+		.groupby(si.project)
+		.run(as_dict=1)
 	)
 
 	dn_item_map = {}

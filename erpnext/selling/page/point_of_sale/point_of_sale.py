@@ -5,7 +5,7 @@
 import json
 
 import frappe
-from frappe.query_builder import DocType, Order
+from frappe.query_builder import Criterion, DocType, Order
 from frappe.utils import cint, get_datetime
 from frappe.utils.nestedset import get_root_of
 
@@ -155,50 +155,55 @@ def get_items(
 	if not frappe.db.exists("Item Group", item_group):
 		item_group = get_root_of("Item Group")
 
-	condition = get_conditions(search_term)
-	condition += get_item_group_condition(pos_profile)
-
 	lft, rgt = frappe.db.get_value("Item Group", item_group, ["lft", "rgt"])
 
-	bin_join_selection, bin_join_condition = "", ""
-	if hide_unavailable_items:
-		bin_join_selection = "LEFT JOIN `tabBin` bin ON bin.item_code = item.name"
-		bin_join_condition = "AND (item.is_stock_item = 0 OR (item.is_stock_item = 1 AND bin.warehouse = %(warehouse)s AND bin.actual_qty > 0))"
+	item = frappe.qb.DocType("Item")
+	item_group_dt = frappe.qb.DocType("Item Group")
 
-	items_data = frappe.db.sql(
-		"""
-		SELECT
-			item.name AS item_code,
+	item_group_subquery = (
+		frappe.qb.from_(item_group_dt)
+		.select(item_group_dt.name)
+		.where((item_group_dt.lft >= lft) & (item_group_dt.rgt <= rgt))
+	)
+
+	query = (
+		frappe.qb.from_(item)
+		.select(
+			item.name.as_("item_code"),
 			item.item_name,
 			item.description,
 			item.stock_uom,
-			item.image AS item_image,
+			item.image.as_("item_image"),
 			item.is_stock_item,
-			item.sales_uom
-		FROM
-			`tabItem` item {bin_join_selection}
-		WHERE
-			item.disabled = 0
-			AND item.has_variants = 0
-			AND item.is_sales_item = 1
-			AND item.is_fixed_asset = 0
-			AND item.item_group in (SELECT name FROM `tabItem Group` WHERE lft >= {lft} AND rgt <= {rgt})
-			AND {condition}
-			{bin_join_condition}
-		ORDER BY
-			item.name asc
-		LIMIT
-			{page_length} offset {start}""".format(
-			start=cint(start),
-			page_length=cint(page_length),
-			lft=cint(lft),
-			rgt=cint(rgt),
-			condition=condition,
-			bin_join_selection=bin_join_selection,
-			bin_join_condition=bin_join_condition,
-		),
-		{"warehouse": warehouse},
-		as_dict=1,
+			item.sales_uom,
+		)
+		.where(
+			(item.disabled == 0)
+			& (item.has_variants == 0)
+			& (item.is_sales_item == 1)
+			& (item.is_fixed_asset == 0)
+			& (item.item_group.isin(item_group_subquery))
+			& get_conditions(search_term, item)
+		)
+	)
+
+	item_group_condition = get_item_group_condition(pos_profile, item)
+	if item_group_condition is not None:
+		query = query.where(item_group_condition)
+
+	if hide_unavailable_items:
+		bin_dt = frappe.qb.DocType("Bin")
+		query = (
+			query.left_join(bin_dt)
+			.on(bin_dt.item_code == item.name)
+			.where(
+				(item.is_stock_item == 0)
+				| ((item.is_stock_item == 1) & (bin_dt.warehouse == warehouse) & (bin_dt.actual_qty > 0))
+			)
+		)
+
+	items_data = (
+		query.orderby(item.name, order=Order.asc).limit(cint(page_length)).offset(cint(start)).run(as_dict=1)
 	)
 
 	# return (empty) list if there are no results
@@ -269,56 +274,63 @@ def search_for_serial_or_batch_or_barcode_number(search_value: str) -> dict[str,
 	return scan_barcode(search_value)
 
 
-def get_conditions(search_term):
-	condition = "("
-	condition += """item.name like {search_term}
-		or item.item_name like {search_term}""".format(search_term=frappe.db.escape("%" + search_term + "%"))
-	condition += add_search_fields_condition(search_term)
-	condition += ")"
+def get_conditions(search_term, item=None):
+	if item is None:
+		item = frappe.qb.DocType("Item")
 
-	return condition
+	pattern = f"%{search_term}%"
+	conditions = [item.name.like(pattern), item.item_name.like(pattern)]
+	conditions += add_search_fields_condition(search_term, item)
+
+	return Criterion.any(conditions)
 
 
-def add_search_fields_condition(search_term):
-	condition = ""
+def add_search_fields_condition(search_term, item=None):
+	if item is None:
+		item = frappe.qb.DocType("Item")
+
+	pattern = f"%{search_term}%"
+	conditions = []
 	search_fields = frappe.get_all("POS Search Fields", fields=["fieldname"])
-	if search_fields:
-		for field in search_fields:
-			if not field.get("fieldname"):
-				continue
-			condition += " or item.`{}` like {}".format(
-				field["fieldname"], frappe.db.escape("%" + search_term + "%")
-			)
-	return condition
+	for field in search_fields:
+		if not field.get("fieldname"):
+			continue
+		conditions.append(item[field["fieldname"]].like(pattern))
+
+	return conditions
 
 
-def get_item_group_condition(pos_profile):
-	cond = "and 1=1"
+def get_item_group_condition(pos_profile, item=None):
+	if item is None:
+		item = frappe.qb.DocType("Item")
+
 	item_groups = get_item_groups(pos_profile)
 	if item_groups:
-		cond = "and item.item_group in (%s)" % (", ".join(["%s"] * len(item_groups)))
+		return item.item_group.isin(item_groups)
 
-	return cond % tuple(item_groups)
+	return None
 
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def item_group_query(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
-	item_groups = []
-	cond = "1=1"
 	pos_profile = filters.get("pos_profile")
 
+	item_filters = [["name", "like", f"%{txt}%"]]
 	if pos_profile:
 		item_groups = get_item_groups(pos_profile)
-
 		if item_groups:
-			cond = "name in (%s)" % (", ".join(["%s"] * len(item_groups)))
-			cond = cond % tuple(item_groups)
+			item_filters.append(["name", "in", item_groups])
 
-	return frappe.db.sql(
-		f""" select distinct name from `tabItem Group`
-			where {cond} and (name like %(txt)s) limit {page_len} offset {start}""",
-		{"txt": "%%%s%%" % txt},
+	return frappe.get_all(
+		"Item Group",
+		filters=item_filters,
+		fields=["name"],
+		distinct=True,
+		order_by="",  # original raw SQL had no ORDER BY; suppress the injected default (creation desc on MariaDB)
+		limit_start=start,
+		limit_page_length=page_len,
+		as_list=True,
 	)
 
 

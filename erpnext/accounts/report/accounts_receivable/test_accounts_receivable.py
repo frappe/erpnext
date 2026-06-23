@@ -699,6 +699,61 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 				[row.invoiced, row.paid, row.outstanding, row.remaining_balance, row.future_amount],
 			)
 
+	def test_future_payments_from_journal_entry(self):
+		# A single future-dated Journal Entry paying two different invoices must surface as one
+		# future-payment row PER invoice, not collapse the whole sum onto one arbitrary invoice
+		# (regression: the implicit single-group aggregate filed all future JE payments under one key).
+		si_a = self.create_sales_invoice(no_payment_schedule=True)
+		si_b = self.create_sales_invoice(no_payment_schedule=True)
+
+		je = frappe.get_doc(
+			{
+				"doctype": "Journal Entry",
+				"voucher_type": "Journal Entry",
+				"company": self.company,
+				"posting_date": add_days(today(), 1),
+				"accounts": [
+					{
+						"account": self.debit_to,
+						"party_type": "Customer",
+						"party": self.customer,
+						"reference_type": "Sales Invoice",
+						"reference_name": si_a.name,
+						"credit_in_account_currency": 50,
+						"credit": 50,
+					},
+					{
+						"account": self.debit_to,
+						"party_type": "Customer",
+						"party": self.customer,
+						"reference_type": "Sales Invoice",
+						"reference_name": si_b.name,
+						"credit_in_account_currency": 50,
+						"credit": 50,
+					},
+					{"account": self.cash, "debit_in_account_currency": 100, "debit": 100},
+				],
+			}
+		)
+		je.insert().submit()
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"show_future_payments": True,
+		}
+		report = execute(filters)[1]
+		rows_a = [row for row in report if row.voucher_no == si_a.name]
+		rows_b = [row for row in report if row.voucher_no == si_b.name]
+
+		# exactly one report row per invoice, each keeping its own future payment; the bug collapsed
+		# both into a single row and allocated the whole 100 to one arbitrary invoice
+		self.assertEqual(len(rows_a), 1)
+		self.assertEqual(len(rows_b), 1)
+		self.assertEqual(rows_a[0].future_amount, 50.0)
+		self.assertEqual(rows_b[0].future_amount, 50.0)
+
 	def test_sales_person(self):
 		sales_person = frappe.get_doc(
 			{"doctype": "Sales Person", "sales_person_name": "John Clark", "enabled": True}

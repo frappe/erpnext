@@ -113,6 +113,8 @@ def add_bank_accounts(response: str | dict, bank: str | dict, company: str):
 
 		if not existing_bank_account:
 			try:
+				# savepoint so a failed insert doesn't poison the transaction on postgres
+				frappe.db.savepoint("plaid_bank_account")
 				gl_account = frappe.get_doc(
 					{
 						"doctype": "Account",
@@ -142,12 +144,14 @@ def add_bank_accounts(response: str | dict, bank: str | dict, company: str):
 
 				result.append(new_account.name)
 			except frappe.UniqueValidationError:
+				frappe.db.rollback(save_point="plaid_bank_account")  # preserve transaction in postgres
 				frappe.msgprint(
 					_("Bank account {0} already exists and could not be created again").format(
 						account["name"]
 					)
 				)
 			except Exception:
+				frappe.db.rollback(save_point="plaid_bank_account")  # preserve transaction in postgres
 				frappe.log_error("Plaid Link Error")
 				frappe.throw(
 					_("There was an error creating Bank Account while linking with Plaid."),

@@ -245,7 +245,12 @@ def make_delivery_note(
 		sre_details = get_sre_reserved_qty_details_for_voucher("Sales Order", source_name)
 
 	mapper = {
-		"Sales Order": {"doctype": "Delivery Note", "validation": {"docstatus": ["=", 1]}},
+		"Sales Order": {
+			"doctype": "Delivery Note",
+			"validation": {"docstatus": ["=", 1]},
+			# commission_rate is no_copy (so it isn't carried on Duplicate), map it explicitly here
+			"field_map": {"commission_rate": "commission_rate"},
+		},
 		"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "reset_value": True},
 		"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
 	}
@@ -558,6 +563,8 @@ def make_sales_invoice(
 				"doctype": "Sales Invoice",
 				"field_map": {
 					"party_account_currency": "party_account_currency",
+					# commission_rate is no_copy (so it isn't carried on Duplicate), map it explicitly here
+					"commission_rate": "commission_rate",
 				},
 				"field_no_map": ["payment_terms_template"],
 				"validation": {"docstatus": ["=", 1]},

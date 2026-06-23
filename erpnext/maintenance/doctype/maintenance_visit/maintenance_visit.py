@@ -143,9 +143,22 @@ class MaintenanceVisit(TransactionBase):
 						elif self.completion_status == "Partially Completed":
 							status = "Work In Progress"
 					else:
-						nm = frappe.db.sql(
-							"select t1.name, t1.mntc_date, t2.service_person, t2.work_done from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent = t1.name and t1.completion_status = 'Partially Completed' and t2.prevdoc_docname = %s and t1.name!=%s and t1.docstatus = 1 order by t1.name desc limit 1",
-							(d.prevdoc_docname, self.name),
+						mv = frappe.qb.DocType("Maintenance Visit")
+						mvp = frappe.qb.DocType("Maintenance Visit Purpose")
+						nm = (
+							frappe.qb.from_(mv)
+							.inner_join(mvp)
+							.on(mvp.parent == mv.name)
+							.select(mv.name, mv.mntc_date, mvp.service_person, mvp.work_done)
+							.where(
+								(mv.completion_status == "Partially Completed")
+								& (mvp.prevdoc_docname == d.prevdoc_docname)
+								& (mv.name != self.name)
+								& (mv.docstatus == 1)
+							)
+							.orderby(mv.name, order=frappe.qb.desc)
+							.limit(1)
+							.run()
 						)
 
 						if nm:
@@ -180,14 +193,27 @@ class MaintenanceVisit(TransactionBase):
 				# check_for_doctype = d.prevdoc_doctype
 
 		if check_for_docname:
-			check = frappe.db.sql(
-				"select t1.name from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2 where t2.parent = t1.name and t1.name!=%s and t2.prevdoc_docname=%s and t1.docstatus = 1 and (t1.mntc_date > %s or (t1.mntc_date = %s and t1.mntc_time > %s))",
-				(self.name, check_for_docname, self.mntc_date, self.mntc_date, self.mntc_time),
+			mv = frappe.qb.DocType("Maintenance Visit")
+			mvp = frappe.qb.DocType("Maintenance Visit Purpose")
+			check = (
+				frappe.qb.from_(mv)
+				.inner_join(mvp)
+				.on(mvp.parent == mv.name)
+				.select(mv.name)
+				.where(
+					(mv.name != self.name)
+					& (mvp.prevdoc_docname == check_for_docname)
+					& (mv.docstatus == 1)
+					& (
+						(mv.mntc_date > self.mntc_date)
+						| ((mv.mntc_date == self.mntc_date) & (mv.mntc_time > self.mntc_time))
+					)
+				)
+				.run(pluck=True)
 			)
 
 			if check:
-				check_lst = [x[0] for x in check]
-				check_lst = ",".join(check_lst)
+				check_lst = ",".join(check)
 				frappe.throw(
 					_("Cancel Material Visits {0} before cancelling this Maintenance Visit").format(check_lst)
 				)

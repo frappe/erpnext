@@ -978,9 +978,7 @@ class StockReconciliation(StockController):
 
 		if not self.expense_account:
 			frappe.throw(_("Please enter Expense Account"))
-		elif self.purpose == "Opening Stock" or not frappe.db.sql(
-			"""select name from `tabStock Ledger Entry` limit 1"""
-		):
+		elif self.purpose == "Opening Stock" or not frappe.db.get_all("Stock Ledger Entry", limit=1):
 			if frappe.db.get_value("Account", self.expense_account, "report_type") == "Profit and Loss":
 				frappe.throw(
 					_(
@@ -1108,43 +1106,59 @@ def get_item_and_warehouses(item_code, warehouse):
 
 def get_items_for_stock_reco(warehouse, company):
 	lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
-	items = frappe.db.sql(
-		f"""
-		select
-			i.name as item_code, i.item_name, bin.warehouse as warehouse, i.has_serial_no, i.has_batch_no
-		from
-			`tabBin` bin, `tabItem` i
-		where
-			i.name = bin.item_code
-			and IFNULL(i.disabled, 0) = 0
-			and i.is_stock_item = 1
-			and i.has_variants = 0
-			and exists(
-				select name from `tabWarehouse` where lft >= {lft} and rgt <= {rgt} and name = bin.warehouse and is_group = 0
-			)
-	""",
-		as_dict=1,
+
+	item = frappe.qb.DocType("Item")
+	bin_dt = frappe.qb.DocType("Bin")
+	wh = frappe.qb.DocType("Warehouse")
+	item_default = frappe.qb.DocType("Item Default")
+
+	warehouses_in_tree = (
+		frappe.qb.from_(wh).select(wh.name).where((wh.lft >= lft) & (wh.rgt <= rgt) & (wh.is_group == 0))
 	)
 
-	items += frappe.db.sql(
-		"""
-		select
-			i.name as item_code, i.item_name, id.default_warehouse as warehouse, i.has_serial_no, i.has_batch_no
-		from
-			`tabItem` i, `tabItem Default` id
-		where
-			i.name = id.parent
-			and exists(
-				select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=id.default_warehouse and is_group = 0
-			)
-			and i.is_stock_item = 1
-			and i.has_variants = 0
-			and IFNULL(i.disabled, 0) = 0
-			and id.company = %s
-		group by i.name
-	""",
-		(lft, rgt, company),
-		as_dict=1,
+	items = (
+		frappe.qb.from_(bin_dt)
+		.inner_join(item)
+		.on(item.name == bin_dt.item_code)
+		.select(
+			item.name.as_("item_code"),
+			item.item_name,
+			bin_dt.warehouse.as_("warehouse"),
+			item.has_serial_no,
+			item.has_batch_no,
+		)
+		.where(
+			((item.disabled == 0) | item.disabled.isnull())
+			& (item.is_stock_item == 1)
+			& (item.has_variants == 0)
+			& bin_dt.warehouse.isin(warehouses_in_tree)
+		)
+		.run(as_dict=1)
+	)
+
+	# Item Default holds at most one row per (item, company) -- enforced at the app layer by
+	# Item.validate_item_defaults ("Cannot set multiple Item Defaults for a company"), though not by a
+	# DB-level unique constraint -- so the company filter already yields one row per item and the
+	# original `group by i.name` (an arbitrary-row collapse) is a no-op for valid data.
+	items += (
+		frappe.qb.from_(item)
+		.inner_join(item_default)
+		.on(item.name == item_default.parent)
+		.select(
+			item.name.as_("item_code"),
+			item.item_name,
+			item_default.default_warehouse.as_("warehouse"),
+			item.has_serial_no,
+			item.has_batch_no,
+		)
+		.where(
+			item_default.default_warehouse.isin(warehouses_in_tree)
+			& (item.is_stock_item == 1)
+			& (item.has_variants == 0)
+			& ((item.disabled == 0) | item.disabled.isnull())
+			& (item_default.company == company)
+		)
+		.run(as_dict=1)
 	)
 
 	# remove duplicates

@@ -347,14 +347,17 @@ def get_account_columns(invoice_list, include_payments):
 
 	if invoice_list:
 		# frappe drops ORDER BY for distinct queries on postgres (db_query), so sort in python to keep
-		# the generated account-column order deterministic and identical on both backends.
+		# the generated account-column order deterministic and identical on both backends. casefold
+		# reproduces MariaDB's case-insensitive collation order (the original raw SQL ORDER BY); plain
+		# sorted() would be case-sensitive and reorder columns vs the pre-effort MariaDB output.
 		income_accounts = sorted(
 			frappe.get_all(
 				"Sales Invoice Item",
 				filters={"docstatus": 1, "parent": ["in", [inv.name for inv in invoice_list]]},
 				pluck="income_account",
 				distinct=True,
-			)
+			),
+			key=str.casefold,
 		)
 
 		sales_taxes_query = get_taxes_query(invoice_list, "Sales Taxes and Charges", "Sales Invoice")
@@ -377,7 +380,8 @@ def get_account_columns(invoice_list, include_payments):
 				},
 				pluck="unrealized_profit_loss_account",
 				distinct=True,
-			)
+			),
+			key=str.casefold,
 		)
 
 	for account in income_accounts:

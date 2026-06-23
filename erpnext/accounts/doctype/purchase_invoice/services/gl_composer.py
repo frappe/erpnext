@@ -395,10 +395,14 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 			):
 				# Post reverse entry for Stock-Received-But-Not-Billed if booked in Purchase Receipt
 				if item.purchase_receipt and valuation_tax_accounts:
-					negative_expense_booked_in_pr = frappe.db.sql(
-						"""select name from `tabGL Entry`
-							where voucher_type='Purchase Receipt' and voucher_no=%s and account in %s""",
-						(item.purchase_receipt, valuation_tax_accounts),
+					negative_expense_booked_in_pr = frappe.get_all(
+						"GL Entry",
+						filters={
+							"voucher_type": "Purchase Receipt",
+							"voucher_no": item.purchase_receipt,
+							"account": ["in", valuation_tax_accounts],
+						},
+						pluck="name",
 					)
 
 					(
@@ -586,6 +590,10 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 		tax_service = TaxService(doc)
 		valuation_tax = {}
 
+		# Amount of each valuation charge actually capitalized into stock/asset valuation, keyed by
+		# tax row name - a non-stock item's share of a spread-across-all-items charge is excluded.
+		capitalized_valuation_tax = doc.get_capitalized_valuation_tax()
+
 		for tax in doc.get("taxes"):
 			amount, base_amount = tax_service.get_tax_amounts(tax, None)
 			if tax.category in ("Total", "Valuation and Total") and flt(base_amount):
@@ -620,8 +628,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 							tax.idx, _(tax.category)
 						)
 					)
-				valuation_tax.setdefault(tax.name, 0)
-				valuation_tax[tax.name] += (tax.add_deduct_tax == "Add" and 1 or -1) * flt(base_amount)
+				valuation_tax[tax.name] = capitalized_valuation_tax.get(tax.name, 0.0)
 
 		if doc.is_opening == "No" and doc.negative_expense_to_be_booked and valuation_tax:
 			total_valuation_amount = sum(valuation_tax.values())

@@ -193,10 +193,18 @@ frappe.ui.form.on("Item", {
 				__("View")
 			);
 
-			frm.toggle_display(
-				["opening_stock"],
-				frappe.model.can_create("Stock Entry") && frappe.model.can_write("Stock Entry")
-			);
+			const can_create_stock_entry =
+				frappe.model.can_create("Stock Entry") && frappe.model.can_write("Stock Entry");
+
+			const has_existing_stock = frm.doc.__onload && frm.doc.__onload.stock_exists ? 1 : 0;
+
+			if (can_create_stock_entry && !has_existing_stock) {
+				frm.add_custom_button(
+					__("Set Opening Stock"),
+					() => erpnext.item.show_opening_stock_dialog(frm),
+					__("Actions")
+				);
+			}
 		}
 
 		if (frm.doc.is_fixed_asset) {
@@ -871,6 +879,143 @@ $.extend(erpnext.item, {
 					frappe.set_route("Form", "Item Price", $(this).data("name"));
 				});
 			},
+		});
+	},
+
+	show_opening_stock_dialog: function (frm) {
+		const has_serial = cint(frm.doc.has_serial_no);
+		const has_batch = cint(frm.doc.has_batch_no);
+
+		if (has_serial || has_batch) {
+			const default_company = frappe.defaults.get_default("company");
+			const row = (frm.doc.item_defaults || []).find((d) => d.company === default_company);
+			const default_warehouse = (row && row.default_warehouse) || "";
+
+			frappe.route_options = {
+				purpose: "Opening Stock",
+				company: default_company,
+			};
+
+			frappe.new_doc("Stock Reconciliation", null, (doc) => {
+				const child = doc.items[0];
+				frappe.model.set_value(child.doctype, child.name, "item_code", frm.doc.name);
+				if (default_warehouse) {
+					frappe.model.set_value(child.doctype, child.name, "warehouse", default_warehouse);
+				}
+			});
+			return;
+		}
+
+		const companies = (frm.doc.item_defaults || []).map((d) => d.company).filter(Boolean);
+
+		if (!companies.length) {
+			frappe.msgprint({
+				title: __("No Company Found"),
+				message: __(
+					"Please add at least one row in Item Defaults with a Company before setting opening stock."
+				),
+				indicator: "orange",
+			});
+			return;
+		}
+
+		const get_warehouse_for_company = (company) => {
+			const row = (frm.doc.item_defaults || []).find((d) => d.company === company);
+			return (row && row.default_warehouse) || "";
+		};
+
+		const fields = [
+			{
+				label: __("Company"),
+				fieldname: "company",
+				fieldtype: "Select",
+				options: companies.join("\n"),
+				default: companies[0],
+				reqd: 1,
+				onchange: function () {
+					const warehouse = get_warehouse_for_company(dialog.get_value("company"));
+					dialog.set_value("warehouse", warehouse);
+					dialog.set_df_property(
+						"warehouse",
+						"description",
+						warehouse
+							? __("Default warehouse from Item Defaults.")
+							: __(
+									"No default warehouse set for this company. Entry will use Stock Settings default."
+							  )
+					);
+				},
+			},
+			{
+				label: __("Default Warehouse"),
+				fieldname: "warehouse",
+				fieldtype: "Data",
+				read_only: 1,
+				description: __("Default warehouse from Item Defaults."),
+			},
+			{ fieldtype: "Column Break" },
+			{
+				label: __("Opening Stock"),
+				fieldname: "qty",
+				fieldtype: "Float",
+				default: frm.doc.opening_stock || 1,
+				reqd: 1,
+			},
+			{
+				label: __("Valuation Rate"),
+				fieldname: "valuation_rate",
+				fieldtype: "Currency",
+				default: frm.doc.valuation_rate || 0,
+				description: __("Leave as 0 to allow zero valuation rate."),
+			},
+		];
+
+		const dialog = new frappe.ui.Dialog({
+			title: __("Add Opening Stock"),
+			fields: fields,
+			primary_action_label: __("Save"),
+			primary_action: function (values) {
+				frappe.call({
+					method: "erpnext.stock.doctype.item.item.make_opening_stock_entry",
+					args: {
+						item_code: frm.doc.name,
+						company: values.company,
+						qty: values.qty,
+						valuation_rate: values.valuation_rate || 0,
+						warehouse: values.warehouse || null,
+					},
+					freeze: true,
+					freeze_message: __("Creating Opening Stock Entry..."),
+					callback: function (r) {
+						if (!r.exc && r.message) {
+							dialog.hide();
+							frm.reload_doc();
+						}
+					},
+				});
+			},
+		});
+
+		dialog.set_value("warehouse", get_warehouse_for_company(companies[0]));
+		dialog.show();
+		dialog.add_custom_action(__("Edit Full Form"), function () {
+			const default_company = frappe.defaults.get_default("company");
+			const row = (frm.doc.item_defaults || []).find((d) => d.company === default_company);
+
+			frappe.route_options = {
+				purpose: "Opening Stock",
+				company: default_company,
+			};
+
+			frappe.new_doc("Stock Reconciliation", null, (doc) => {
+				const child = doc.items[0];
+				frappe.model.set_value(child.doctype, child.name, "item_code", frm.doc.name);
+				if (row && row.default_warehouse) {
+					frappe.model.set_value(child.doctype, child.name, "warehouse", row.default_warehouse);
+				}
+			});
+
+			dialog.hide();
 		});
 	},
 

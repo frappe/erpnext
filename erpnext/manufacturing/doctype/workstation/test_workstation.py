@@ -110,6 +110,16 @@ class TestWorkstation(ERPNextTestSuite):
 		self.assertEqual(bom_doc.operations[0].hour_rate, 250)
 		self.assertEqual(bom_doc.operations[1].hour_rate, 250)
 
+		# update_bom_operation() (run on w1.save()) must write the new rate directly onto the
+		# Routing's BOM Operation rows. This is the converted query's own effect (not the BOM
+		# update_cost above) and is what silently skipped on Postgres when parenttype was 'routing'.
+		routing_op_rate = frappe.db.get_value(
+			"BOM Operation",
+			{"parent": routing_doc.name, "parenttype": "Routing", "workstation": "_Test Workstation A"},
+			"hour_rate",
+		)
+		self.assertEqual(routing_op_rate, 250)
+
 
 def make_workstation(*args, **kwargs):
 	args = args if args else kwargs

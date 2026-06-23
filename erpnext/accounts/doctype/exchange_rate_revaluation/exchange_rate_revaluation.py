@@ -626,6 +626,8 @@ def get_account_details(
 	party: str | None = None,
 	rounding_loss_allowance: float = 0.0,
 ):
+	frappe.has_permission("Account", doc=account, throw=True)
+
 	if not (company and posting_date):
 		frappe.throw(_("Company and Posting Date is mandatory"))
 

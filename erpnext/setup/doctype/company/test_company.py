@@ -4,6 +4,7 @@ import json
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import IfNull
 from frappe.utils import random_string
 
 from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import (
@@ -100,7 +101,7 @@ class TestCompany(ERPNextTestSuite):
 	def test_basic_tree(self, records=None):
 		self.load_test_records("Company")
 		min_lft = 1
-		max_rgt = frappe.db.sql("select max(rgt) from `tabCompany`")[0][0]
+		max_rgt = frappe.get_all("Company", fields=[{"MAX": "rgt", "as": "max_rgt"}])[0].max_rgt
 
 		if not records:
 			records = self.globalTestRecords["Company"][2:]
@@ -162,10 +163,12 @@ class TestCompany(ERPNextTestSuite):
 		def get_no_of_children(companies, no_of_children):
 			children = []
 			for company in companies:
-				children += frappe.db.sql_list(
-					"""select name from `tabCompany`
-				where ifnull(parent_company, '')=%s""",
-					company or "",
+				company_dt = frappe.qb.DocType("Company")
+				children += (
+					frappe.qb.from_(company_dt)
+					.select(company_dt.name)
+					.where(IfNull(company_dt.parent_company, "") == (company or ""))
+					.run(pluck=True)
 				)
 
 			if len(children):
@@ -187,6 +190,49 @@ class TestCompany(ERPNextTestSuite):
 		child_company.parent_company = "_Test Company 4"
 		child_company.save()
 		self.test_basic_tree()
+
+	def test_get_children_root_includes_empty_string_parent(self):
+		"""get_children at the root mirrors the original ifnull(parent_company,"")="": the converted
+		`["is", "not set"]` filter expands to `parent_company IS NULL OR parent_company = ''`, so a
+		company whose parent_company is '' (MariaDB keeps '') is still listed as a root. Guards against
+		narrowing this to an IS NULL-only check."""
+		from erpnext.setup.doctype.company.company import get_children
+
+		company = "_Test Company"
+		cd = frappe.qb.DocType("Company")
+		original = frappe.db.get_value("Company", company, "parent_company")
+		# force '' (not NULL) at the SQL layer, bypassing frappe's empty -> NULL doc coercion
+		frappe.qb.update(cd).set(cd.parent_company, "").where(cd.name == company).run()
+		self.addCleanup(
+			lambda: frappe.qb.update(cd).set(cd.parent_company, original).where(cd.name == company).run()
+		)
+
+		roots = {row.value for row in get_children("Company", parent="")}
+		self.assertIn(company, roots)
+
+	def test_annual_transaction_history_merges_dates_across_doctypes(self):
+		"""get_all_transactions_annual_history aggregates each DocType separately, then merges the
+		per-date counts. Two transactions of different DocTypes sharing a transaction_date must land
+		in one date bucket with the summed count (the UNION GROUP BY -> Counter-merge conversion)."""
+		from frappe.utils import add_days, get_timestamp, nowdate
+
+		from erpnext.selling.doctype.quotation.test_quotation import make_quotation
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.setup.doctype.company.company import get_all_transactions_annual_history
+
+		company = "_Test Company"
+		txn_date = add_days(nowdate(), -30)
+		key = get_timestamp(txn_date)
+
+		before = get_all_transactions_annual_history(company).get(key, 0)
+
+		quotation = make_quotation(company=company, transaction_date=txn_date, do_not_submit=True)
+		self.addCleanup(frappe.delete_doc, "Quotation", quotation.name, force=True)
+		sales_order = make_sales_order(company=company, transaction_date=txn_date, do_not_submit=True)
+		self.addCleanup(frappe.delete_doc, "Sales Order", sales_order.name, force=True)
+
+		after = get_all_transactions_annual_history(company).get(key, 0)
+		self.assertEqual(after - before, 2)
 
 	def test_demo_data(self):
 		from erpnext.setup.demo import clear_demo_data, setup_demo_data

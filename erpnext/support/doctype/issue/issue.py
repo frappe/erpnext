@@ -225,7 +225,6 @@ def set_multiple_status(names: str, status: str):
 @frappe.whitelist()
 def set_status(name: str, status: str):
 	frappe.has_permission("Issue", "write", name, throw=True)
-
 	frappe.db.set_value("Issue", name, "status", status)
 
 
@@ -266,7 +265,7 @@ def has_website_permission(doc, ptype, user, verbose=False):
 
 def update_issue(contact, method):
 	"""Called when Contact is deleted"""
-	frappe.db.sql("""UPDATE `tabIssue` set contact='' where contact=%s""", contact.name)
+	frappe.db.set_value("Issue", {"contact": contact.name}, "contact", "")
 
 
 @frappe.whitelist()

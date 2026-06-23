@@ -19,6 +19,7 @@
   "stock_uom",
   "expiry_date",
   "use_batchwise_valuation",
+  "allow_negative_stock_for_batch",
   "disabled",
   "source",
   "column_break_9",
@@ -199,6 +200,14 @@
   {
    "fieldname": "column_break_xrll",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, the system will allow negative stock entries for this batch, overriding the 'Allow negative stock for Batch' setting in Stock Settings. This may lead to incorrect valuation rates, so it is recommended to avoid using this option.",
+   "fieldname": "allow_negative_stock_for_batch",
+   "fieldtype": "Check",
+   "label": "Allow Negative Stock for Batch",
+   "no_copy": 1
   }
  ],
  "icon": "fa fa-archive",
@@ -206,7 +215,7 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 5,
- "modified": "2026-06-16 16:01:26.556324",
+ "modified": "2026-06-17 16:01:26.556324",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",

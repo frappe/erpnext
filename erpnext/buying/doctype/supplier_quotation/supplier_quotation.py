@@ -243,11 +243,16 @@ def get_list_context(context=None):
 
 
 def set_expired_status():
+	# Only submitted quotations past their validity should be expired
 	frappe.db.set_value(
 		"Supplier Quotation",
-		filters={"status": ["not in", ["Cancelled", "Stopped"]], "valid_till": ["<", nowdate()]},
-		fieldname="status",
-		value="Expired",
+		{
+			"docstatus": 1,
+			"status": ["not in", ["Cancelled", "Stopped"]],
+			"valid_till": ["<", nowdate()],
+		},
+		"status",
+		"Expired",
 		update_modified=True,
 	)
 

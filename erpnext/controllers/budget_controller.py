@@ -3,7 +3,7 @@ from collections import OrderedDict
 import frappe
 from frappe import _, qb
 from frappe.query_builder import Criterion
-from frappe.query_builder.functions import IfNull, Sum
+from frappe.query_builder.functions import IfNull, Max, Sum
 from frappe.utils import fmt_money
 
 from erpnext.accounts.doctype.budget.budget import BudgetError, get_accumulated_monthly_budget
@@ -260,7 +260,11 @@ class BudgetValidation:
 				qb.from_(mr)
 				.inner_join(mri)
 				.on(mr.name == mri.parent)
-				.select((Sum(IfNull(mri.stock_qty, 0) - IfNull(mri.ordered_qty, 0)) * mri.rate).as_("amount"))
+				# rate is outside the Sum (no GROUP BY -> implicit aggregate); Max() keeps it valid on
+				# postgres and matches MySQL's arbitrary single-rate choice for this aggregate.
+				.select(
+					(Sum(IfNull(mri.stock_qty, 0) - IfNull(mri.ordered_qty, 0)) * Max(mri.rate)).as_("amount")
+				)
 				.where(Criterion.all(conditions))
 				.run(as_dict=True)
 			):

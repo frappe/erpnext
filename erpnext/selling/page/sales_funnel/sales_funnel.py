@@ -5,6 +5,7 @@ from itertools import groupby
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Count, Date
 from frappe.utils import flt
 
 from erpnext.accounts.report.utils import convert
@@ -22,33 +23,47 @@ def validate_filters(from_date, to_date, company):
 def get_funnel_data(from_date: str, to_date: str, company: str):
 	validate_filters(from_date, to_date, company)
 
-	active_leads = frappe.db.sql(
-		"""select count(*) from `tabLead`
-		where (date(`creation`) between %s and %s)
-		and company=%s""",
-		(from_date, to_date, company),
+	lead = frappe.qb.DocType("Lead")
+	active_leads = (
+		frappe.qb.from_(lead)
+		.select(Count("*"))
+		.where(Date(lead.creation).between(from_date, to_date) & (lead.company == company))
+		.run()
 	)[0][0]
 
-	opportunities = frappe.db.sql(
-		"""select count(*) from `tabOpportunity`
-		where (date(`creation`) between %s and %s)
-		and opportunity_from='Lead' and company=%s""",
-		(from_date, to_date, company),
+	opportunity = frappe.qb.DocType("Opportunity")
+	opportunities = (
+		frappe.qb.from_(opportunity)
+		.select(Count("*"))
+		.where(
+			Date(opportunity.creation).between(from_date, to_date)
+			& (opportunity.opportunity_from == "Lead")
+			& (opportunity.company == company)
+		)
+		.run()
 	)[0][0]
 
-	quotations = frappe.db.sql(
-		"""select count(*) from `tabQuotation`
-		where docstatus = 1 and (date(`creation`) between %s and %s)
-		and (opportunity!="" or quotation_to="Lead") and company=%s""",
-		(from_date, to_date, company),
+	quotation = frappe.qb.DocType("Quotation")
+	quotations = (
+		frappe.qb.from_(quotation)
+		.select(Count("*"))
+		.where(
+			(quotation.docstatus == 1)
+			& Date(quotation.creation).between(from_date, to_date)
+			& ((quotation.opportunity != "") | (quotation.quotation_to == "Lead"))
+			& (quotation.company == company)
+		)
+		.run()
 	)[0][0]
 
-	converted = frappe.db.sql(
-		"""select count(*) from `tabCustomer`
-		JOIN `tabLead` ON `tabLead`.name = `tabCustomer`.lead_name
-		WHERE (date(`tabCustomer`.creation) between %s and %s)
-		and `tabLead`.company=%s""",
-		(from_date, to_date, company),
+	customer = frappe.qb.DocType("Customer")
+	converted = (
+		frappe.qb.from_(customer)
+		.inner_join(lead)
+		.on(lead.name == customer.lead_name)
+		.select(Count("*"))
+		.where(Date(customer.creation).between(from_date, to_date) & (lead.company == company))
+		.run()
 	)[0][0]
 
 	return [

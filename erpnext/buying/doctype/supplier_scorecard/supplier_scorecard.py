@@ -60,25 +60,20 @@ class SupplierScorecard(Document):
 			self.save()
 
 	def validate_standings(self):
-		# Check that there are no overlapping scores and check that there are no missing scores
-		score = 0
-		for c1 in self.standings:
-			for c2 in self.standings:
-				if c1 != c2:
-					if c1.max_grade > c2.min_grade and c1.min_grade < c2.max_grade:
-						throw(
-							_("Overlap in scoring between {0} and {1}").format(
-								c1.standing_name, c2.standing_name
-							)
-						)
-				if c2.min_grade == score:
-					score = c2.max_grade
-		if score < 100:
-			throw(
-				_(
-					"Unable to find score starting at {0}. You need to have standing scores covering 0 to 100"
-				).format(score)
-			)
+		# Standings must form a continuous chain of bands covering 0 to 100 with no gaps or overlaps
+		expected_min = 0
+		for standing in sorted(self.standings, key=lambda s: s.min_grade or 0):
+			if standing.min_grade >= standing.max_grade:
+				throw(
+					_("Standing {0} must have a minimum grade lower than its maximum grade").format(
+						standing.standing_name
+					)
+				)
+			if standing.min_grade != expected_min:
+				throw(_("Standing scores must be continuous and cover 0 to 100 without gaps or overlaps"))
+			expected_min = standing.max_grade
+		if expected_min < 100:
+			throw(_("Standing scores must cover the full range from 0 to 100"))
 
 	def validate_criteria_weights(self):
 		weight = 0
@@ -119,22 +114,29 @@ class SupplierScorecard(Document):
 			self.supplier_score = 100
 
 	def update_standing(self):
-		# Get the setup document
-
+		highest_grade = max((s.max_grade for s in self.standings if s.max_grade), default=0)
 		for standing in self.standings:
-			if (not standing.min_grade or (standing.min_grade <= self.supplier_score)) and (
-				not standing.max_grade or (standing.max_grade > self.supplier_score)
-			):
-				self.status = standing.standing_name
-				self.indicator_color = standing.standing_color
-				self.notify_supplier = standing.notify_supplier
-				self.notify_employee = standing.notify_employee
-				self.employee_link = standing.employee_link
+			if self.score_within_standing(standing, highest_grade):
+				self.apply_standing(standing)
 
-				# Update supplier standing info
-				for fieldname in ("prevent_pos", "prevent_rfqs", "warn_rfqs", "warn_pos"):
-					self.set(fieldname, standing.get(fieldname))
-					frappe.db.set_value("Supplier", self.supplier, fieldname, self.get(fieldname))
+	def score_within_standing(self, standing, highest_grade):
+		score = self.supplier_score
+		above_min = not standing.min_grade or standing.min_grade <= score
+		if standing.max_grade and standing.max_grade == highest_grade:
+			# Top band is inclusive of its upper bound so a perfect score still maps to a standing
+			return above_min and score <= standing.max_grade
+		return above_min and (not standing.max_grade or standing.max_grade > score)
+
+	def apply_standing(self, standing):
+		self.status = standing.standing_name
+		self.indicator_color = standing.standing_color
+		self.notify_supplier = standing.notify_supplier
+		self.notify_employee = standing.notify_employee
+		self.employee_link = standing.employee_link
+
+		for fieldname in ("prevent_pos", "prevent_rfqs", "warn_rfqs", "warn_pos"):
+			self.set(fieldname, standing.get(fieldname))
+			frappe.db.set_value("Supplier", self.supplier, fieldname, self.get(fieldname))
 
 
 @frappe.whitelist()

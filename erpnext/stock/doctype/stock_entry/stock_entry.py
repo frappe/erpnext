@@ -1623,29 +1623,42 @@ def get_remaining_operating_cost(work_order=None, bom_no=None):
 def get_used_alternative_items(
 	subcontract_order=None, subcontract_order_field="subcontracting_order", work_order=None
 ):
-	cond = ""
+	ste = frappe.qb.DocType("Stock Entry")
+	sted = frappe.qb.DocType("Stock Entry Detail")
+
+	query = (
+		frappe.qb.from_(ste)
+		.inner_join(sted)
+		.on(sted.parent == ste.name)
+		.select(
+			sted.original_item,
+			sted.uom,
+			sted.conversion_factor,
+			sted.item_code,
+			sted.item_name,
+			sted.stock_uom,
+			sted.description,
+		)
+		.where((ste.docstatus == 1) & (sted.original_item != sted.item_code))
+	)
 
 	if subcontract_order:
-		cond = f"and ste.purpose = 'Send to Subcontractor' and ste.{subcontract_order_field} = '{subcontract_order}'"
+		# subcontract_order_field is interpolated as a column identifier; restrict it to the two known
+		# Stock Entry link fields so an unexpected value can't reference an arbitrary column.
+		if subcontract_order_field not in ("subcontracting_order", "subcontracting_inward_order"):
+			frappe.throw(_("Invalid subcontract order field: {0}").format(subcontract_order_field))
+		query = query.where(
+			(ste.purpose == "Send to Subcontractor") & (ste[subcontract_order_field] == subcontract_order)
+		)
 	elif work_order:
-		cond = f"and ste.purpose = 'Material Transfer for Manufacture' and ste.work_order = '{work_order}'"
-
-	if not cond:
+		query = query.where(
+			(ste.purpose == "Material Transfer for Manufacture") & (ste.work_order == work_order)
+		)
+	else:
 		return {}
 
 	used_alternative_items = {}
-	data = frappe.db.sql(
-		f""" select sted.original_item, sted.uom, sted.conversion_factor,
-			sted.item_code, sted.item_name, sted.conversion_factor,sted.stock_uom, sted.description
-		from
-			`tabStock Entry` ste, `tabStock Entry Detail` sted
-		where
-			sted.parent = ste.name and ste.docstatus = 1 and sted.original_item !=  sted.item_code
-			{cond} """,
-		as_dict=1,
-	)
-
-	for d in data:
+	for d in query.run(as_dict=1):
 		used_alternative_items[d.original_item] = d
 
 	return used_alternative_items
