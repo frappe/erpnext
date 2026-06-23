@@ -12,11 +12,8 @@
  "field_order": [
   "naming_series",
   "supplier_name",
-<<<<<<< HEAD
-  "alias",
-=======
   "supplier_type",
->>>>>>> 820c0caf88 (fix: supplier master form cleanup)
+  "alias",
   "gender",
   "column_break0",
   "supplier_group",
@@ -63,16 +60,12 @@
   "allow_purchase_invoice_creation_without_purchase_receipt",
   "column_break_54",
   "disabled",
-<<<<<<< HEAD
-=======
   "is_frozen",
   "block_supplier_section",
   "on_hold",
   "hold_type",
   "release_date",
->>>>>>> 820c0caf88 (fix: supplier master form cleanup)
   "rfq_and_purchase_order_settings_section",
-  "is_frozen",
   "warn_rfqs",
   "prevent_rfqs",
   "column_break_oxjw",
@@ -395,12 +388,8 @@
    "description": "Reselect, if the chosen contact is edited after save",
    "fieldname": "supplier_primary_contact",
    "fieldtype": "Link",
-<<<<<<< HEAD
-   "label": "Supplier Primary Contact",
-   "no_copy": 1,
-=======
    "label": "Primary Contact",
->>>>>>> 820c0caf88 (fix: supplier master form cleanup)
+   "no_copy": 1,
    "options": "Contact"
   },
   {
@@ -414,38 +403,22 @@
    "fetch_from": "supplier_primary_contact.email_id",
    "fieldname": "email_id",
    "fieldtype": "Read Only",
-<<<<<<< HEAD
-   "label": "Email Id",
+   "label": "Email ID",
    "no_copy": 1
-  },
-  {
-   "fieldname": "column_break_44",
-   "fieldtype": "Column Break"
-=======
-   "label": "Email ID"
->>>>>>> 820c0caf88 (fix: supplier master form cleanup)
   },
   {
    "fieldname": "primary_address",
    "fieldtype": "Text Editor",
-<<<<<<< HEAD
-   "label": "Primary Address",
-   "no_copy": 1,
-=======
    "label": "Primary Address Preview",
->>>>>>> 820c0caf88 (fix: supplier master form cleanup)
+   "no_copy": 1,
    "read_only": 1
   },
   {
    "description": "Reselect, if the chosen address is edited after save",
    "fieldname": "supplier_primary_address",
    "fieldtype": "Link",
-<<<<<<< HEAD
-   "label": "Supplier Primary Address",
-   "no_copy": 1,
-=======
    "label": "Primary Address",
->>>>>>> 820c0caf88 (fix: supplier master form cleanup)
+   "no_copy": 1,
    "options": "Address"
   },
   {
@@ -588,11 +561,7 @@
    "link_fieldname": "party"
   }
  ],
-<<<<<<< HEAD
  "modified": "2026-06-22 12:23:09.241125",
-=======
- "modified": "2026-05-29 13:03:41.864602",
->>>>>>> 820c0caf88 (fix: supplier master form cleanup)
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
