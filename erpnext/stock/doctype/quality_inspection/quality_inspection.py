@@ -413,16 +413,22 @@ def item_query(doctype: Any, txt: str | None, searchfield: Any, start: int, page
 				]
 			)
 
-		return frappe.get_query(
+		query = frappe.get_query(
 			reference_doctype,
 			fields=["items.item_code, items.item_name"],
 			filters=my_filters,
 			offset=start,
 			limit=page_len,
-			order_by="items.item_code",
 			ignore_permissions=False,
 			distinct=True,
-		).run()
+		)
+		# frappe's db_query drops ORDER BY for a distinct query on Postgres, which (with offset/limit)
+		# changes both the order and the page contents vs MariaDB. Appending the order to the built
+		# query instead keeps it -- item_code is in the DISTINCT select, so it is valid on Postgres.
+		items_field = frappe.get_meta(reference_doctype).get_field("items")
+		if items_field:
+			query = query.orderby(frappe.qb.DocType(items_field.options).item_code)
+		return query.run()
 
 
 @frappe.whitelist()
