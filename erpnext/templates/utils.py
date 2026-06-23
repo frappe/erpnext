@@ -29,7 +29,17 @@ def send_message(sender: str, message: str, subject: str = "Website Query"):
 	customer = get_customer_from_contact_email(sender)
 
 	if not customer:
-		lead = frappe.db.get_value("Lead", dict(email_id=sender))
+		# Match email_id case-insensitively so Postgres reuses an existing Lead like MariaDB does
+		# (its default collation is case-insensitive) instead of creating a duplicate from contact-us.
+		_lead = frappe.qb.DocType("Lead")
+		_rows = (
+			frappe.qb.from_(_lead)
+			.select(_lead.name)
+			.where(Lower(_lead.email_id) == (sender or "").lower())
+			.limit(1)
+			.run()
+		)
+		lead = _rows[0][0] if _rows else None
 		if not lead:
 			new_lead = frappe.get_doc(
 				doctype="Lead", email_id=sender, lead_name=sender.split("@")[0].title()
