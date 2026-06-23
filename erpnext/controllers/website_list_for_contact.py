@@ -7,7 +7,7 @@ import json
 import frappe
 from frappe import _
 from frappe.modules.utils import get_module_app
-from frappe.utils import flt, has_common
+from frappe.utils import cint, flt, has_common
 from frappe.utils.user import is_website_user
 
 

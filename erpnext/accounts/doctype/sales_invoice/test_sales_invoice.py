@@ -1049,6 +1049,21 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(pos_return.get("payments")[0].amount, -500)
 		self.assertEqual(pos_return.get("payments")[1].amount, -500)
 
+	def test_non_pos_return_clears_payment_rows(self):
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
+
+		si = create_sales_invoice(do_not_save=True)
+		si.append("payments", {"mode_of_payment": "Cash", "amount": 100})
+		si.insert()
+		si.submit()
+
+		si_return = make_sales_return(si.name)
+		si_return.insert()
+
+		self.assertEqual(si_return.is_pos, 0)
+		self.assertEqual(si_return.get("payments"), [])
+		self.assertEqual(si_return.paid_amount, 0)
+
 	def test_pos_change_amount(self):
 		make_pos_profile(
 			company="_Test Company with perpetual inventory",
