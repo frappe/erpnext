@@ -7,8 +7,8 @@ that static analysis can catch reliably with a low false-positive rate.
 
 It deliberately does NOT try to catch the *semantic* divergences (loose GROUP BY,
 case-sensitive ==/IN, NULL ordering, ORDER BY ... LIMIT 1 tiebreakers, integer-division
-intent, savepoint discipline) — those genuinely need the test suite. Run the full suite
-on a Postgres site for those.
+intent, division by a possibly-zero divisor, savepoint discipline) — those genuinely need
+the test suite or a human/Greptile reviewer. Run the full suite on a Postgres site for those.
 
 Escape hatch: put `# pg-ok` anywhere on the offending statement's line span (e.g. on a
 `SHOW INDEX` query that lives inside an `if frappe.db.db_type == "mariadb":` branch).
