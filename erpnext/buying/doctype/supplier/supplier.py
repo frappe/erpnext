@@ -39,6 +39,7 @@ class Supplier(TransactionBase):
 		from erpnext.utilities.doctype.portal_user.portal_user import PortalUser
 
 		accounts: DF.Table[PartyAccount]
+		alias: DF.Data | None
 		allow_purchase_invoice_creation_without_purchase_order: DF.Check
 		allow_purchase_invoice_creation_without_purchase_receipt: DF.Check
 		companies: DF.Table[AllowedToTransactWith]
@@ -50,7 +51,7 @@ class Supplier(TransactionBase):
 		disabled: DF.Check
 		email_id: DF.ReadOnly | None
 		gender: DF.Link | None
-		hold_type: DF.Literal["", "All", "Invoices", "Payments"]
+		hold_type: DF.Literal["All", "Invoices", "Payments"]
 		image: DF.AttachImage | None
 		is_frozen: DF.Check
 		is_internal_supplier: DF.Check
@@ -88,7 +89,6 @@ class Supplier(TransactionBase):
 
 	def before_save(self):
 		if not self.on_hold:
-			self.hold_type = ""
 			self.release_date = ""
 		elif self.on_hold and not self.hold_type:
 			self.hold_type = "All"

@@ -231,6 +231,8 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				args: {
 					company: me.frm.doc.company,
 					account_list: frappe.flags.round_off_applicable_accounts,
+					// pass the doc so regional overrides can inspect it
+					doc: me.frm.doc,
 				},
 				callback(r) {
 					if (r.message) {

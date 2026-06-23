@@ -159,9 +159,9 @@ class Budget(Document):
 			frappe.throw(_("Account {0} does not belong to company {1}").format(self.account, self.company))
 		elif account_details.report_type != "Profit and Loss":
 			frappe.throw(
-				_("Budget cannot be assigned against {0}, as it's not an Income or Expense account").format(
-					self.account
-				)
+				_(
+					"Budget cannot be assigned against {0}, as its Root Type is not of Income or Expense"
+				).format(self.account)
 			)
 
 	def set_null_value(self):
@@ -355,8 +355,8 @@ class Budget(Document):
 		if self.should_regenerate_budget_distribution():
 			return
 
-		total_amount = sum(d.amount for d in self.budget_distribution)
-		total_percent = sum(d.percent for d in self.budget_distribution)
+		total_amount = sum(flt(d.amount) for d in self.budget_distribution)
+		total_percent = sum(flt(d.percent) for d in self.budget_distribution)
 
 		if flt(abs(total_amount - self.budget_amount), 2) > 0.10:
 			frappe.throw(

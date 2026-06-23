@@ -445,6 +445,8 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 		doc.pricing_rules = []
 		doc.return_against = source.name
 		doc.set_warehouse = ""
+		if doctype == "Sales Invoice":
+			doc.is_debit_note = 0
 		if doctype == "Sales Invoice" or doctype == "POS Invoice":
 			doc.is_pos = source.is_pos
 

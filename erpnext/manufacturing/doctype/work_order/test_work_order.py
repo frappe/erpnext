@@ -1463,6 +1463,68 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(work_order.required_items[0].transferred_qty, 1)
 		self.assertEqual(work_order.required_items[1].transferred_qty, 2)
 
+	def test_material_transferred_min_fraction_on_partial_pick_list(self):
+		"""Pick-list flow (fg_completed_qty = 0): 'Material Transferred for Manufacturing'
+		must reflect the least-transferred required item (the bottleneck), instead of being
+		marked fully transferred prematurely when only some materials are transferred.
+		"""
+		work_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=5000.0
+		)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TC", qty=10, basic_rate=1000.0
+		)
+
+		required_qty = {row.item_code: flt(row.required_qty) for row in work_order.required_items}
+
+		# pick-list transfer: For Quantity = 0
+		transfer_entry = frappe.get_doc(
+			make_stock_entry(work_order.name, "Material Transfer for Manufacture", 0)
+		)
+		self.assertEqual(transfer_entry.fg_completed_qty, 0.0)
+
+		for item in transfer_entry.items:
+			full_qty = required_qty[item.item_code]
+			item.qty = full_qty if item.item_code == "_Test Item" else full_qty / 2
+			item.transfer_qty = item.qty
+		transfer_entry.submit()
+
+		work_order.reload()
+		transferred_qty = {row.item_code: flt(row.transferred_qty) for row in work_order.required_items}
+		self.assertEqual(transferred_qty["_Test Item"], required_qty["_Test Item"])
+		self.assertEqual(
+			transferred_qty["_Test Item Home Desktop 100"],
+			required_qty["_Test Item Home Desktop 100"] / 2,
+		)
+		# bottleneck fraction = 0.5 -> 0.5 * qty(2) = 1.0
+		self.assertEqual(work_order.material_transferred_for_manufacturing, 1.0)
+
+	def test_material_transferred_full_via_pick_list_flow(self):
+		"""Pick-list flow with every required item fully transferred marks the work order
+		as fully transferred (min fraction = 1.0)."""
+		work_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=5000.0
+		)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TC", qty=10, basic_rate=1000.0
+		)
+
+		required_qty = {row.item_code: flt(row.required_qty) for row in work_order.required_items}
+
+		transfer_entry = frappe.get_doc(
+			make_stock_entry(work_order.name, "Material Transfer for Manufacture", 0)
+		)
+		self.assertEqual(transfer_entry.fg_completed_qty, 0.0)
+		for item in transfer_entry.items:
+			item.qty = required_qty[item.item_code]
+			item.transfer_qty = item.qty
+		transfer_entry.submit()
+
+		work_order.reload()
+		self.assertEqual(work_order.material_transferred_for_manufacturing, 2.0)
+
 	def test_backflushed_batch_raw_materials_based_on_transferred(self):
 		frappe.db.set_single_value(
 			"Manufacturing Settings",
