@@ -9,7 +9,7 @@ from frappe import _
 from frappe.contacts.doctype.address.address import get_default_address
 from frappe.model.document import Document
 from frappe.query_builder import DocType
-from frappe.query_builder.functions import IfNull
+from frappe.query_builder.functions import IfNull, Lower
 from frappe.utils import cstr
 from frappe.utils.nestedset import get_root_of
 
@@ -212,7 +212,15 @@ def get_tax_template(posting_date, args):
 				IfNull(TaxRule[key], "").isin(get_group_ancestors(doctype, get_parents, value))
 			)
 		else:
-			query = query.where(IfNull(TaxRule[key], "").isin(["", value or ""]))
+			# The remaining keys are the free-text address fields (billing/shipping
+			# city/state/county/zipcode). MariaDB matches them case-insensitively but Postgres does
+			# not, so Lower() both sides for Data keys to keep the rule matching the same on both
+			# engines. Any non-Data key keeps its exact-case comparison.
+			meta_field = frappe.get_meta("Tax Rule").get_field(key)
+			if meta_field and meta_field.fieldtype == "Data":
+				query = query.where(Lower(IfNull(TaxRule[key], "")).isin(["", (value or "").lower()]))
+			else:
+				query = query.where(IfNull(TaxRule[key], "").isin(["", value or ""]))
 
 	tax_rule = query.run(as_dict=True)
 
