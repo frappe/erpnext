@@ -10,7 +10,7 @@ import frappe
 from frappe import _, bold, scrub
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import Order
-from frappe.query_builder.functions import Lower, Sum
+from frappe.query_builder.functions import Lower, NullIf, Sum
 from frappe.utils import (
 	cint,
 	flt,
@@ -1975,7 +1975,7 @@ def get_valuation_rate(
 		table = frappe.qb.DocType("Stock Ledger Entry")
 		query = (
 			frappe.qb.from_(table)
-			.select(Sum(table.stock_value_difference) / Sum(table.actual_qty))
+			.select(Sum(table.stock_value_difference) / NullIf(Sum(table.actual_qty), 0))
 			.where(
 				(table.item_code == item_code)
 				& (table.warehouse == warehouse)
