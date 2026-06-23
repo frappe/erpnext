@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-06-21 10:42+0000\n"
-"PO-Revision-Date: 2026-06-21 19:03\n"
+"PO-Revision-Date: 2026-06-23 19:26\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Croatian\n"
 "MIME-Version: 1.0\n"
@@ -25,7 +25,12 @@ msgid "\n"
 "\t\t\tIf it is not possible to make an adjustment entry, please enable 'Allow Negative Stock for Batch' in the batch {0} or in the Stock Settings to proceed.\n"
 "\t\t\tHowever, enabling this setting may lead to negative stock in the system.\n"
 "\t\t\tSo please ensure the stock levels are adjusted as soon as possible to maintain the correct valuation rate."
-msgstr ""
+msgstr "\n"
+"\t\t\tŠarža {0} artikla {1} ima negativne zalihe u skladištu {2}{3}.\n"
+"\t\t\tDodaj količinu zaliha od {4} da biste nastavili s ovim unosom.\n"
+"\t\t\tAko nije moguće izvršiti unos prilagođavanja, omogućite 'Dozvoli Negativne Zalihe za Šaržu' za Šaržu {0} ili u Postavkama Zaliha da biste nastavili.\n"
+"\t\t\tMeđutim, omogućavanje ove postavke može dovesti do negativnih zaliha u ssustavu.\n"
+"\t\t\tStoga, molimo vas da osigurate da se razina zaliha što prije prilagode kako bi se održala ispravna stopa vrednovanja."
 
 #. Label of the column_break_32 (Column Break) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -1067,7 +1072,7 @@ msgstr "Otpremnica se može kreirati samo za nacrt Dostavnice."
 
 #: erpnext/accounts/services/gl_validator.py:123
 msgid "A Period Closing Voucher is already submitted and an Opening Entry can no longer be created. {0} to learn more."
-msgstr ""
+msgstr "Verifikat Zatvaranje Razdoblja je već podnesen i početni unos se više ne može kreirati. {0} za više informacija."
 
 #. Description of a DocType
 #: erpnext/stock/doctype/price_list/price_list.json
@@ -2732,7 +2737,7 @@ msgstr "Dodaj više zadataka"
 
 #: erpnext/stock/doctype/item/item.js:974
 msgid "Add Opening Stock"
-msgstr ""
+msgstr "Dodaj Početne Zalihe"
 
 #. Label of the add_deduct_tax (Select) field in DocType 'Advance Taxes and
 #. Charges'
@@ -4024,7 +4029,7 @@ msgstr "Automatski Dodjeli Predujam (FIFO)"
 #. 'Purchase Taxes and Charges'
 #: erpnext/accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 msgid "Allocate Full Amount to Stock Items"
-msgstr ""
+msgstr "Dodijeli Puni Iznos Artiklima Zaliha"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:919
 msgid "Allocate Payment Amount"
@@ -4603,7 +4608,7 @@ msgstr "Također se ne možete vratiti na FIFO nakon što ste za ovu stavku post
 
 #: erpnext/stock/report/stock_balance/stock_balance.py:644
 msgid "Alt UOM"
-msgstr ""
+msgstr "Alternativna Jedinica"
 
 #: erpnext/manufacturing/doctype/bom/bom.js:291
 #: erpnext/manufacturing/doctype/work_order/work_order.js:158
@@ -7295,7 +7300,7 @@ msgstr "Količinsko Stanje"
 
 #: erpnext/stock/report/stock_balance/stock_balance.py:635
 msgid "Balance Qty (Alt UOM)"
-msgstr ""
+msgstr "Količinsko Stanja (Alternativna Jedinica)"
 
 #: erpnext/stock/page/warehouse_capacity_summary/warehouse_capacity_summary.js:71
 msgid "Balance Qty (Stock)"
@@ -13772,7 +13777,7 @@ msgstr "Kreiranje Naloga Knjiženja u toku..."
 
 #: erpnext/stock/doctype/item/item.js:988
 msgid "Creating Opening Stock Entry..."
-msgstr ""
+msgstr "Kreiranje Početnog Unosa Zaliha..."
 
 #: erpnext/stock/doctype/packing_slip/packing_slip.js:42
 msgid "Creating Packing Slip ..."
@@ -16099,7 +16104,7 @@ msgstr "Standard Predlošci PDV-a za prodaju, nabavu i artikle su kreirani."
 #: erpnext/stock/doctype/item/item.js:942
 #: erpnext/stock/doctype/item/item.js:954
 msgid "Default warehouse from Item Defaults."
-msgstr ""
+msgstr "Standard Skladište iz Standard Postavki Artikala."
 
 #. Description of the 'Time Between Operations (Mins)' (Int) field in DocType
 #. 'Manufacturing Settings'
@@ -16285,7 +16290,7 @@ msgstr "Izbriši Transakcije"
 
 #: erpnext/setup/doctype/company/company.js:254
 msgid "Delete all the Transactions for {0}"
-msgstr ""
+msgstr "Izbriši sve transakcije za {0}"
 
 #. Label of a Link in the ERPNext Settings Workspace
 #: erpnext/setup/workspace/erpnext_settings/erpnext_settings.json
@@ -19569,7 +19574,7 @@ msgstr "Prekomjerna Demontaža"
 
 #: erpnext/stock/doctype/stock_entry/services/material_transfer.py:243
 msgid "Excess Material Transfer"
-msgstr ""
+msgstr "Prijenos Dodatnog Materijala"
 
 #: erpnext/manufacturing/report/work_order_consumed_materials/work_order_consumed_materials.js:55
 msgid "Excess Materials Consumed"
@@ -23440,7 +23445,7 @@ msgstr "Ako je označeno, odabrana količina neće biti automatski ispunjena pri
 #. DocType 'Purchase Taxes and Charges'
 #: erpnext/accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 msgid "If checked, the entire amount (e.g. Freight) is allocated to the valuation of stock & asset items only. If unchecked, the amount is distributed across all items and the portion belonging to non-stock items is not added to valuation."
-msgstr ""
+msgstr "Ako je odabrano, cijeli iznos (npr. Vozarina) se dodjeljuje samo za stopu vrijednovanja zaliha i imovine. Ako nije odabrano, iznos se raspoređuje na sve artikle, a dio koji pripada artiklima koje nisu na zalihama se ne dodaje stopi vrijednovanja."
 
 #. Description of the 'Considered In Paid Amount' (Check) field in DocType
 #. 'Purchase Taxes and Charges'
@@ -23615,7 +23620,7 @@ msgstr "Ako je omogućeno, sustav će dopustiti negativne unose zaliha za šarž
 #. 'Batch'
 #: erpnext/stock/doctype/batch/batch.json
 msgid "If enabled, the system will allow negative stock entries for this batch, overriding the 'Allow negative stock for Batch' setting in Stock Settings. This may lead to incorrect valuation rates, so it is recommended to avoid using this option."
-msgstr ""
+msgstr "Ako je omogućeno, sustav će dopustiti unos negativnih zaliha za ovu šaržu, poništavajući postavku 'Dopusti negativne zalihe za Šaržu' u Postavkama Zaliha. To može dovesti do netočnih stopa vrednovanja, stoga se preporučuje izbjegavanje korištenja ove opcije."
 
 #. Description of the 'Allow UOM with conversion rate defined in Item' (Check)
 #. field in DocType 'Stock Settings'
@@ -25516,7 +25521,7 @@ msgstr "Nevažeći upit pretraživanja"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1649
 msgid "Invalid subcontract order field: {0}"
-msgstr ""
+msgstr "Nevažeći nalog podizvođača: {0}"
 
 #: erpnext/accounts/report/inactive_sales_items/inactive_sales_items.py:99
 msgid "Invalid value {0} for 'Based On'"
@@ -28866,7 +28871,7 @@ msgstr "Odsustvo Isplaćeno?"
 
 #: erpnext/stock/doctype/item/item.js:969
 msgid "Leave as 0 to allow zero valuation rate."
-msgstr ""
+msgstr "Ostavite kao 0 kako biste omogućili nultu stopu vrednovanja."
 
 #. Description of the 'Success Redirect URL' (Data) field in DocType
 #. 'Appointment Booking Settings'
@@ -32343,7 +32348,7 @@ msgstr "Bez Odgovora"
 
 #: erpnext/stock/doctype/item/item.js:913
 msgid "No Company Found"
-msgstr ""
+msgstr "Nije pronađenaTvrtka"
 
 #: erpnext/accounts/doctype/sales_invoice/mapper.py:115
 msgid "No Customer found for Inter Company Transactions which represents company {0}"
@@ -32534,7 +32539,7 @@ msgstr "Nema podataka. Čini se da ste otpremili praznu datoteku"
 
 #: erpnext/stock/doctype/item/item.js:943
 msgid "No default warehouse set for this company. Entry will use Stock Settings default."
-msgstr ""
+msgstr "Za ovu tvrtku nije postavljeno standard skladište. Unos će koristiti standard postavke zaliha."
 
 #: erpnext/templates/generators/bom.html:85
 msgid "No description given"
@@ -32820,7 +32825,7 @@ msgstr "Nisu pronađeni vaučeri za ovu transakciju"
 
 #: erpnext/stock/doctype/item/item.py:1734
 msgid "No warehouse found for company {0}. Please set a Default Warehouse in Item Defaults or Stock Settings."
-msgstr ""
+msgstr "Nije pronađeno skladište za {0}. Postavi Standard Skladište u Postavkama Artikala ili Postavkama Zaliha."
 
 #: erpnext/accounts/doctype/sales_invoice/mapper.py:163
 msgid "No {0} found for Inter Company Transactions."
@@ -33564,7 +33569,7 @@ msgstr "Dozvoljene su samo vrijednosti između [0,1). Kao {0,00, 0,04, 0,09, ...
 #. 'Repost Item Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Only works for Purchase Receipt, Purchase Invoice and Stock Entry"
-msgstr ""
+msgstr "Radi samo za Račun Nabave, Fakturu Nabave i Unos Zaliha"
 
 #: erpnext/accounts/doctype/unreconcile_payment/unreconcile_payment.py:43
 msgid "Only {0} are supported"
@@ -33857,24 +33862,24 @@ msgstr "Početna Zaliha"
 
 #: erpnext/stock/doctype/item/item.py:1588
 msgid "Opening Stock can only be set for stock items."
-msgstr ""
+msgstr "Početne zalihe mogu se postaviti samo za artikle na zalihi."
 
 #: erpnext/stock/doctype/item/item.py:1595
 msgid "Opening Stock cannot be created as stock transactions already exist for item {0}."
-msgstr ""
+msgstr "Početne zalihe se ne mogu kreirati jer već postoje transakcije zaliha za artikal {0}."
 
 #: erpnext/stock/doctype/item/item.py:1591
 msgid "Opening Stock for serialised or batch items must be set via the Stock Reconciliation form."
-msgstr ""
+msgstr "Početne zalihe za serijske ili šaržne artikle mora se postaviti putem Usklađivanje Zaliha."
 
 #: erpnext/stock/doctype/item/item.py:356
 msgid "Opening Stock reconciliation created with zero valuation rate: {0}"
-msgstr ""
+msgstr "Početno Usklađivanje Zaliha kreirano sa nultom stopom vrednovanja: {0}"
 
 #: erpnext/stock/doctype/item/item.py:364
 #: erpnext/stock/doctype/item/item.py:1637
 msgid "Opening Stock reconciliation created: {0}"
-msgstr ""
+msgstr "Početno Usklađivanje Zaliha kreirano: {0}"
 
 #. Label of the opening_time (Time) field in DocType 'Issue'
 #: erpnext/support/doctype/issue/issue.json
@@ -33892,7 +33897,7 @@ msgstr "Otvaranje & Zatvaranje"
 
 #: erpnext/stock/doctype/item/item.py:199
 msgid "Opening stock creation has been queued and will be created in the background. Please check the Stock Reconciliation after some time."
-msgstr ""
+msgstr "Kreiranje početnih zaliha je stavljeno u red čekanja i bit će kreirano u pozadini. Molimo provjerite usklađivanje zaliha nakon nekog vremena."
 
 #. Label of the operating_component (Link) field in DocType 'Workstation Cost'
 #. Label of the operating_component (Data) field in DocType 'Landed Cost Taxes
@@ -35646,7 +35651,7 @@ msgstr "Djelomično Rezervisano"
 #. Option for the 'Status' (Select) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 msgid "Partially Transferred"
-msgstr ""
+msgstr "Djelomično Preneseno"
 
 #. Option for the 'Status' (Select) field in DocType 'Stock Reservation Entry'
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.json
@@ -37722,7 +37727,7 @@ msgstr "Dodaj barem jednu seriju imenovanja."
 
 #: erpnext/stock/doctype/item/item.js:914
 msgid "Please add at least one row in Item Defaults with a Company before setting opening stock."
-msgstr ""
+msgstr "Dodaj barem jedan red u Postavke Artikala sa tvrtkom prije postavljanja početnih zaliha."
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:663
 msgid "Please add atleast one Serial No / Batch No"
@@ -38128,7 +38133,7 @@ msgstr "Potvrdi da datoteka koju koristite ima kolonu 'Nadređeni Račun' u zagl
 
 #: erpnext/setup/doctype/company/company.js:234
 msgid "Please make sure you really want to delete all the transactions for {0}. Your master data will remain as it is. This action cannot be undone."
-msgstr ""
+msgstr "Da li zaista želiš izbrisati sve transakcije za {0}. Vaši glavni podaci će ostati onakvi kakvi jesu. Ova radnja se ne može poništiti."
 
 #: erpnext/stock/doctype/item/item.js:1025
 msgid "Please mention 'Weight UOM' along with Weight."
@@ -38648,7 +38653,7 @@ msgstr "Postavi Centar Troškova za Imovinu ili postavite Centar Troškova Amort
 #: erpnext/stock/doctype/item/item.py:339
 #: erpnext/stock/doctype/item/item.py:1621
 msgid "Please set a Temporary Opening account for company {0} to create an Opening Stock reconciliation."
-msgstr ""
+msgstr "Postavi Privremeni Početni Račun za {0} kako biste kreirali početno usklađivanje zaliha."
 
 #: erpnext/projects/doctype/project/project.py:806
 msgid "Please set a default Holiday List for Company {0}"
@@ -43157,7 +43162,7 @@ msgstr "Dostignut je Najviši Nivo"
 
 #: erpnext/accounts/services/gl_validator.py:127
 msgid "Read the docs"
-msgstr ""
+msgstr "Pročitaj dokumentaciju"
 
 #. Label of the reading_1 (Data) field in DocType 'Quality Inspection Reading'
 #: erpnext/stock/doctype/quality_inspection_reading/quality_inspection_reading.json
@@ -43270,7 +43275,7 @@ msgstr "Preračunaj Nabavnu/Prodajnu Cijenu"
 #. Item Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Recalculate Valuation Rate"
-msgstr ""
+msgstr "Ponovo izračunaj Stopu Vrednovanja"
 
 #. Option for the 'Status' (Select) field in DocType 'Asset'
 #. Option for the 'Purpose' (Select) field in DocType 'Asset Movement'
@@ -46051,7 +46056,7 @@ msgstr "Red #{0}: Ne može se prenijeti više od potrebne količine {1} za artik
 
 #: erpnext/stock/doctype/stock_entry/services/material_transfer.py:233
 msgid "Row #{0}: Cannot transfer {1} {2} of Item {3}. Maximum transferable quantity is {4} {2}."
-msgstr ""
+msgstr "Red #{0}: Ne može se prenijeti {1} {2} artikal {3}. Najveća prenosiva količina je {4} {2}."
 
 #: erpnext/selling/doctype/product_bundle/product_bundle.py:138
 msgid "Row #{0}: Child Item should not be a Product Bundle. Please remove Item {1} and Save"
@@ -47742,7 +47747,7 @@ msgstr "Prodajni Nalog {0} već postoji naspram Nabavnog Naloga Klijenta {1}. Da
 
 #: erpnext/projects/doctype/project/project.py:256
 msgid "Sales Order {0} is already linked to Project {1}, skipping the link."
-msgstr ""
+msgstr "Prodajni Nalog {0} je već povezan s projektom {1}, preskoči poveznicu."
 
 #: erpnext/selling/doctype/sales_order/mapper.py:883
 #: erpnext/selling/doctype/sales_order/mapper.py:896
@@ -50038,7 +50043,7 @@ msgstr "Postavi Novi Datum Izdavanja"
 
 #: erpnext/stock/doctype/item/item.js:203
 msgid "Set Opening Stock"
-msgstr ""
+msgstr "Postavi Početne Zalihe"
 
 #. Label of the set_op_cost_and_secondary_items_from_sub_assemblies (Check)
 #. field in DocType 'Manufacturing Settings'
@@ -50732,7 +50737,7 @@ msgstr "Prikažite ukupnu vrijednost iz Podružnica"
 
 #: erpnext/stock/report/stock_balance/stock_balance.js:115
 msgid "Show Alternate UOM Balance"
-msgstr ""
+msgstr "Prikaži Saldo Alternativne Jedinice"
 
 #: erpnext/accounts/report/general_ledger/general_ledger.js:199
 msgid "Show Cancelled Entries"
@@ -59685,7 +59690,7 @@ msgstr "Nedostaje Stopa Vrednovanja"
 
 #: erpnext/stock/doctype/item/item.py:1604
 msgid "Valuation Rate cannot be negative."
-msgstr ""
+msgstr "Stopa Vrednovanja ne može biti negativna."
 
 #: erpnext/stock/stock_ledger.py:2037
 msgid "Valuation Rate for the Item {0}, is required to do accounting entries for {1} {2}."
@@ -62094,7 +62099,7 @@ msgstr "frankfurter.dev"
 #. Exchange Settings'
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
 msgid "frankfurter.dev - v2"
-msgstr ""
+msgstr "frankfurter.dev - v2"
 
 #: erpnext/templates/form_grid/item_grid.html:66
 #: erpnext/templates/form_grid/item_grid.html:80
