@@ -8,6 +8,7 @@ import frappe
 from frappe import _
 from frappe.desk.form.assign_to import add as add_assignment
 from frappe.model.document import Document
+from frappe.query_builder.functions import Lower
 from frappe.share import add_docshare
 from frappe.utils import get_url, getdate, now
 from frappe.utils.verified_command import get_signed_params
@@ -35,20 +36,29 @@ class Appointment(Document):
 	# end: auto-generated types
 
 	def find_lead_by_email(self):
-		lead_list = frappe.get_list(
-			"Lead", filters={"email_id": self.customer_email}, ignore_permissions=True
+		# Match email_id case-insensitively so Postgres finds the Lead like MariaDB does (its default
+		# collation is case-insensitive) instead of leaving the appointment unlinked.
+		lead = frappe.qb.DocType("Lead")
+		rows = (
+			frappe.qb.from_(lead)
+			.select(lead.name)
+			.where(Lower(lead.email_id) == (self.customer_email or "").lower())
+			.limit(1)
+			.run()
 		)
-		if lead_list:
-			return lead_list[0].name
-		return None
+		return rows[0][0] if rows else None
 
 	def find_customer_by_email(self):
-		customer_list = frappe.get_list(
-			"Customer", filters={"email_id": self.customer_email}, ignore_permissions=True
+		# Match email_id case-insensitively so Postgres links the existing Customer like MariaDB does.
+		customer = frappe.qb.DocType("Customer")
+		rows = (
+			frappe.qb.from_(customer)
+			.select(customer.name)
+			.where(Lower(customer.email_id) == (self.customer_email or "").lower())
+			.limit(1)
+			.run()
 		)
-		if customer_list:
-			return customer_list[0].name
-		return None
+		return rows[0][0] if rows else None
 
 	def before_insert(self):
 		number_of_appointments_in_same_slot = frappe.db.count(
