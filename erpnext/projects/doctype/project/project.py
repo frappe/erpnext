@@ -486,6 +486,8 @@ def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20, o
 			else:
 				filters.append([doctype, "name", "like", "%" + txt + "%"])
 
+	# No distinct=True: it never dedupes here (single table, fields="*" carries PK `name`) but makes
+	# frappe drop ORDER BY on Postgres, leaving the portal list unordered there.
 	return frappe.get_list(
 		doctype,
 		fields="*",
@@ -495,7 +497,6 @@ def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20, o
 		limit_page_length=limit_page_length,
 		order_by=order_by,
 		ignore_permissions=ignore_permissions,
-		distinct=True,
 	)
 
 
