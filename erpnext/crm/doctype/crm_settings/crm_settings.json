@@ -20,7 +20,11 @@
   "section_break_13",
   "carry_forward_communication_and_comments",
   "column_break_junk",
-  "update_timestamp_on_new_communication"
+  "update_timestamp_on_new_communication",
+  "frappe_crm_section",
+  "enable_frappe_crm_data_synchronization",
+  "column_break_jbzj",
+  "allowed_users"
  ],
  "fields": [
   {
@@ -105,6 +109,30 @@
    "fieldname": "enable_opportunity_creation_from_contact_us",
    "fieldtype": "Check",
    "label": "Enable Opportunity Creation from Contact Us"
+  },
+  {
+   "fieldname": "frappe_crm_section",
+   "fieldtype": "Section Break",
+   "label": "Frappe CRM"
+  },
+  {
+   "fieldname": "column_break_jbzj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.enable_frappe_crm_data_synchronization === 1;",
+   "fieldname": "allowed_users",
+   "fieldtype": "Table MultiSelect",
+   "label": "Allowed Users",
+   "options": "Frappe CRM Allowed User",
+   "permlevel": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_frappe_crm_data_synchronization",
+   "fieldtype": "Check",
+   "label": "Enable Frappe CRM Data Synchronization",
+   "permlevel": 1
   }
  ],
  "grid_page_length": 50,
@@ -112,7 +140,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-06-11 23:09:49.750381",
+ "modified": "2026-06-22 01:26:13.474915",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM Settings",
@@ -144,6 +172,16 @@
    "print": 1,
    "read": 1,
    "role": "Sales Master Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "permlevel": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
    "share": 1,
    "write": 1
   }
