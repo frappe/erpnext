@@ -24,15 +24,25 @@ frappe.ui.form.on("Opening Invoice Creation Tool", {
 				setTimeout(
 					() => {
 						frm.doc.import_in_progress = false;
-						frm.clear_table("invoices");
-						frm.refresh_fields();
 						frm.page.clear_indicator();
 						frm.dashboard.hide_progress();
 
-						if (frm.doc.invoice_type == "Sales") {
-							frappe.msgprint(__("Opening Sales Invoices have been created."));
+						if (!data.errors) {
+							frm.clear_table("invoices");
+							frm.refresh_fields();
+							if (frm.doc.invoice_type == "Sales") {
+								frappe.show_alert({
+									message: __("Opening Sales Invoices have been created."),
+									indicator: "green",
+								});
+							} else {
+								frappe.show_alert({
+									message: __("Opening Purchase Invoices have been created."),
+									indicator: "green",
+								});
+							}
 						} else {
-							frappe.msgprint(__("Opening Purchase Invoices have been created."));
+							frm.refresh_fields();
 						}
 					},
 					1500,
