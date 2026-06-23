@@ -355,7 +355,6 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	get_item_taxable_base(item, tax) {
 		// Mirror of the server get_item_taxable_base: a custom charge_type's resolver
 		// overrides the base value; otherwise the net amount.
-		const resolver = erpnext.taxes_and_totals_base_resolvers[tax.charge_type];
 		const resolver = erpnext.taxable_base_resolvers[tax.charge_type];
 		if (resolver) return flt(resolver(this, item, tax));
 		return flt(item.net_amount);
