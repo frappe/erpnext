@@ -613,23 +613,14 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2024-06-02 06:22:18.864822",
-=======
  "modified": "2025-06-17 12:05:52.441645",
->>>>>>> 67f96c66e4 (fix: add missing margin related fields)
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation Item",
  "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
-<<<<<<< HEAD
  "sort_field": "modified",
-=======
- "row_format": "Dynamic",
- "sort_field": "creation",
->>>>>>> 67f96c66e4 (fix: add missing margin related fields)
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
