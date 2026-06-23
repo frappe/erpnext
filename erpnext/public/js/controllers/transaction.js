@@ -24,19 +24,17 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			]);
 
 			if (item.price_list_rate && !item.blanket_order_rate) {
-				const margin_amount = item.margin_type
-					? item.margin_type === "Percentage"
+				const rate_with_margin =
+					item.margin_type === "Percentage"
 						? flt(
-								item.price_list_rate * (item.margin_rate_or_amount / 100),
-								precision("margin_rate_or_amount", item)
+								item.price_list_rate +
+									item.price_list_rate * (item.margin_rate_or_amount / 100),
+								precision("rate_with_margin", item)
 						  )
-						: item.margin_rate_or_amount
-					: 0;
-
-				const rate_with_margin = flt(
-					item.price_list_rate + margin_amount,
-					precision("rate_with_margin", item)
-				);
+						: flt(
+								item.price_list_rate + item.margin_rate_or_amount,
+								precision("rate_with_margin", item)
+						  );
 
 				const calc_rate = item.discount_percentage
 					? flt(rate_with_margin * (1 - item.discount_percentage / 100.0), precision("rate", item))
@@ -46,28 +44,28 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					if (item.rate > item.price_list_rate && has_margin_field) {
 						// if rate is greater than price_list_rate, set margin
 						// or set discount
-						item.discount_amount = 0;
-						item.discount_percentage = 0;
 						item.margin_type = "Amount";
 						item.margin_rate_or_amount = flt(
 							item.rate - item.price_list_rate,
 							precision("margin_rate_or_amount", item)
 						);
 						item.rate_with_margin = item.rate;
-					} else {
+						item.discount_amount = 0;
 						item.discount_percentage = 0;
-						item.discount_amount = flt(item.price_list_rate) - flt(item.rate);
+					} else {
 						item.margin_type = "";
 						item.margin_rate_or_amount = 0;
 						item.rate_with_margin = item.price_list_rate;
+						item.discount_amount = flt(item.rate_with_margin) - flt(item.rate);
+						item.discount_percentage = 0;
 					}
 				}
 			} else {
-				item.discount_amount = 0;
-				item.discount_percentage = 0.0;
 				item.margin_type = "";
 				item.margin_rate_or_amount = 0;
 				item.rate_with_margin = 0;
+				item.discount_amount = 0;
+				item.discount_percentage = 0.0;
 			}
 			item.base_rate_with_margin = flt(
 				item.rate_with_margin * flt(frm.doc.conversion_rate),
