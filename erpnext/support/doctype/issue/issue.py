@@ -12,7 +12,7 @@ from frappe.email.inbox import link_communication_to_document
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Interval
-from frappe.query_builder.functions import Now
+from frappe.query_builder.functions import Lower, Now
 from frappe.utils import date_diff, get_datetime, now_datetime, time_diff_in_seconds
 from frappe.utils.user import is_website_user
 
@@ -82,11 +82,29 @@ class Issue(Document):
 
 		email_id = email.utils.parseaddr(email_id)[1]
 		if email_id:
+			# Match email_id case-insensitively so Postgres links the Lead/Contact like MariaDB does
+			# (its default collation is case-insensitive) rather than missing on a casing difference.
 			if not self.lead:
-				self.lead = frappe.db.get_value("Lead", {"email_id": email_id})
+				lead = frappe.qb.DocType("Lead")
+				rows = (
+					frappe.qb.from_(lead)
+					.select(lead.name)
+					.where(Lower(lead.email_id) == email_id.lower())
+					.limit(1)
+					.run()
+				)
+				self.lead = rows[0][0] if rows else None
 
 			if not self.contact and not self.customer:
-				self.contact = frappe.db.get_value("Contact", {"email_id": email_id})
+				contact = frappe.qb.DocType("Contact")
+				rows = (
+					frappe.qb.from_(contact)
+					.select(contact.name)
+					.where(Lower(contact.email_id) == email_id.lower())
+					.limit(1)
+					.run()
+				)
+				self.contact = rows[0][0] if rows else None
 
 				if self.contact:
 					contact = frappe.get_doc("Contact", self.contact)
