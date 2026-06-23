@@ -4,7 +4,6 @@
 import frappe
 from frappe import _
 from frappe.query_builder import Case
-from frappe.query_builder.functions import NullIf
 
 
 def execute(filters: dict | None = None):
@@ -301,12 +300,9 @@ class ReportData:
 				(
 					(
 						stock_entry_detail.qty
-						/ NullIf(
-							Case()
-							.when(stock_entry.fg_completed_qty > 0, stock_entry.fg_completed_qty)
-							.else_(sabb_data.qty),
-							0,
-						)
+						/ Case()
+						.when(stock_entry.fg_completed_qty > 0, stock_entry.fg_completed_qty)
+						.else_(sabb_data.qty)
 					)
 					* sabb_data.qty
 				).as_("qty"),

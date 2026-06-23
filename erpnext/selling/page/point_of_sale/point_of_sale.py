@@ -6,7 +6,6 @@ import json
 
 import frappe
 from frappe.query_builder import Criterion, DocType, Order
-from frappe.query_builder.functions import Coalesce
 from frappe.utils import cint, get_datetime
 from frappe.utils.nestedset import get_root_of
 
@@ -232,10 +231,7 @@ def get_items(
 			.where(ItemPrice.selling == 1)
 			.where((ItemPrice.valid_from <= current_date) | (ItemPrice.valid_from.isnull()))
 			.where((ItemPrice.valid_upto >= current_date) | (ItemPrice.valid_upto.isnull()))
-			# Coalesce so a NULL valid_from (open-ended base price) sorts last under DESC on both
-			# engines: MariaDB already sorts NULL last for DESC, Postgres defaults to NULLS FIRST, which
-			# would otherwise make the base price win the positional pick over a dated override.
-			.orderby(Coalesce(ItemPrice.valid_from, "1900-01-01"), order=Order.desc)
+			.orderby(ItemPrice.valid_from, order=Order.desc)
 		).run(as_dict=True)
 
 		stock_uom_price = next((d for d in item_prices if d.get("uom") == item.stock_uom), {})
