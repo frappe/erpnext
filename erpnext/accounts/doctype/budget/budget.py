@@ -86,7 +86,6 @@ class Budget(Document):
 				DuplicateBudgetError,
 			)
 
-<<<<<<< HEAD
 	def validate_accounts(self):
 		account_list = []
 		for d in self.get("accounts"):
@@ -104,34 +103,14 @@ class Budget(Document):
 				elif account_details.report_type != "Profit and Loss":
 					frappe.throw(
 						_(
-							"Budget cannot be assigned against {0}, as it's not an Income or Expense account"
-						).format(d.account)
+							"Budget cannot be assigned against {0}, as its Root Type is not of Income or Expense"
+						).format(self.account)
 					)
 
 				if d.account in account_list:
 					frappe.throw(_("Account {0} has been entered multiple times").format(d.account))
 				else:
 					account_list.append(d.account)
-=======
-	def validate_account(self):
-		if not self.account:
-			frappe.throw(_("Account is mandatory"))
-
-		account_details = frappe.get_cached_value(
-			"Account", self.account, ["is_group", "company", "report_type"], as_dict=1
-		)
-
-		if account_details.is_group:
-			frappe.throw(_("Budget cannot be assigned against Group Account {0}").format(self.account))
-		elif account_details.company != self.company:
-			frappe.throw(_("Account {0} does not belong to company {1}").format(self.account, self.company))
-		elif account_details.report_type != "Profit and Loss":
-			frappe.throw(
-				_(
-					"Budget cannot be assigned against {0}, as its Root Type is not of Income or Expense"
-				).format(self.account)
-			)
->>>>>>> b356dbd59e (fix(budget): ambiguous error message for budget assignment validation (#56390))
 
 	def set_null_value(self):
 		if self.budget_against == "Cost Center":
