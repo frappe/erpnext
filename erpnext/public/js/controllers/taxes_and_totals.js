@@ -10,28 +10,30 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 	apply_pricing_rule_on_item(item) {
 		let effective_item_rate = item.price_list_rate;
-		let item_rate = item.rate;
 		if (["Sales Order", "Quotation"].includes(item.parenttype) && item.blanket_order_rate) {
 			effective_item_rate = item.blanket_order_rate;
 		}
-		if (item.margin_type == "Percentage") {
-			item.rate_with_margin =
-				flt(effective_item_rate) + flt(effective_item_rate) * (flt(item.margin_rate_or_amount) / 100);
-		} else {
-			item.rate_with_margin = flt(effective_item_rate) + flt(item.margin_rate_or_amount);
-		}
-		item.base_rate_with_margin = flt(item.rate_with_margin) * flt(this.frm.doc.conversion_rate);
 
-		item_rate = flt(item.rate_with_margin, precision("rate", item));
+		let rate_with_margin;
+		if (item.margin_type == "Percentage") {
+			rate_with_margin = effective_item_rate * (1 + item.margin_rate_or_amount / 100);
+		} else {
+			rate_with_margin = effective_item_rate + item.margin_rate_or_amount;
+		}
+		item.rate_with_margin = flt(rate_with_margin, precision("rate_with_margin", item));
 
 		if (item.discount_percentage) {
-			item.discount_amount = (flt(item.rate_with_margin) * flt(item.discount_percentage)) / 100;
+			item.discount_amount = flt(
+				(item.rate_with_margin * item.discount_percentage) / 100,
+				precision("discount_amount", item)
+			);
 		}
 
+		let item_rate = item.rate_with_margin;
 		if (item.discount_amount) {
-			item_rate = flt(item.rate_with_margin - item.discount_amount, precision("rate", item));
+			item_rate = item.rate_with_margin - item.discount_amount;
 		}
-
+		item_rate = flt(item_rate, precision("rate", item));
 		frappe.model.set_value(item.doctype, item.name, "rate", item_rate);
 	}
 

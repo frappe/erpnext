@@ -13,7 +13,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		frappe.flags.hide_serial_batch_dialog = true;
 		frappe.ui.form.on(this.frm.doctype + " Item", "rate", function (frm, cdt, cdn) {
 			var item = frappe.get_doc(cdt, cdn);
-			var has_margin_field = frappe.meta.has_field(cdt, "margin_type");
 
 			frappe.model.round_floats_in(item, [
 				"rate",
@@ -24,24 +23,19 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			]);
 
 			if (item.price_list_rate && !item.blanket_order_rate) {
-				const rate_with_margin =
-					item.margin_type === "Percentage"
-						? flt(
-								item.price_list_rate +
-									item.price_list_rate * (item.margin_rate_or_amount / 100),
-								precision("rate_with_margin", item)
-						  )
-						: flt(
-								item.price_list_rate + item.margin_rate_or_amount,
-								precision("rate_with_margin", item)
-						  );
+				const rate_with_margin = get_rate_with_margin(item);
 
-				const calc_rate = item.discount_percentage
-					? flt(rate_with_margin * (1 - item.discount_percentage / 100.0), precision("rate", item))
-					: flt(rate_with_margin - item.discount_amount, precision("rate", item));
+				if (item.discount_percentage) {
+					item.discount_amount = flt(
+						(rate_with_margin * item.discount_percentage) / 100.0,
+						precision("discount_amount", item)
+					);
+				}
 
-				if (calc_rate !== item.rate) {
-					if (item.rate > item.price_list_rate && has_margin_field) {
+				const calculated_rate = flt(rate_with_margin - item.discount_amount, precision("rate", item));
+
+				if (calculated_rate !== item.rate) {
+					if (item.rate > item.price_list_rate) {
 						// if rate is greater than price_list_rate, set margin
 						// or set discount
 						item.margin_type = "Amount";
@@ -56,8 +50,11 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						item.margin_type = "";
 						item.margin_rate_or_amount = 0;
 						item.rate_with_margin = item.price_list_rate;
-						item.discount_amount = flt(item.rate_with_margin) - flt(item.rate);
 						item.discount_percentage = 0;
+						item.discount_amount = flt(
+							item.rate_with_margin - item.rate,
+							precision("discount_amount", item)
+						);
 					}
 				}
 			} else {
@@ -67,11 +64,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				item.discount_amount = 0;
 				item.discount_percentage = 0.0;
 			}
-			item.base_rate_with_margin = flt(
-				item.rate_with_margin * flt(frm.doc.conversion_rate),
-				precision("base_rate_with_margin", item)
-			);
-
+			this.set_in_company_currency(item, ["rate_with_margin"]);
 			cur_frm.cscript.set_gross_profit(item);
 			cur_frm.cscript.calculate_taxes_and_totals();
 			cur_frm.cscript.calculate_stock_uom_rate(frm, cdt, cdn);
@@ -3466,3 +3459,13 @@ erpnext.set_unit_price_items_note = (frm) => {
 		);
 	}
 };
+
+function get_rate_with_margin(item) {
+	if (!item.margin_type) return item.price_list_rate;
+
+	if (item.margin_type === "Percentage") {
+		return flt(item.price_list_rate * (1 + item.margin_rate_or_amount / 100), precision("rate", item));
+	}
+
+	return flt(item.price_list_rate + item.margin_rate_or_amount, precision("rate", item));
+}
