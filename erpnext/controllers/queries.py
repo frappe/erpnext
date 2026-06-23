@@ -1201,3 +1201,62 @@ def get_warehouse_address(doctype: str, txt: str, searchfield: str, start: int, 
 		.limit(page_len)
 	)
 	return query.run(as_list=1)
+
+
+@frappe.whitelist()
+def get_draft_linked_docs(source_doctype: str, source_name: str, target_doctype: str) -> list[dict]:
+	"""
+	Return draft (docstatus=0) documents of *target_doctype* that were created
+	from *source_name*.  The lookup walks every child-table Link field in the
+	target DocType that points back to *source_doctype*, so it works generically
+	for any SO→DN / SO→SI / PO→PR / PO→PI / DN→SI … relationship.
+
+	Returns an empty list (never raises) when the target DocType doesn't exist
+	or the caller has no permission — this is intentional because the JS side
+	infers the DocType name from the mapper method string and may get it wrong
+	for edge cases (e.g. plural method names like make_work_orders).
+	"""
+	if not frappe.has_permission(target_doctype):
+		return []
+
+	try:
+		target_meta = frappe.get_meta(target_doctype)
+	except frappe.DoesNotExistError:
+		return []
+
+	draft_names: set[str] = set()
+
+	for table_df in target_meta.get_table_fields():
+		try:
+			child_meta = frappe.get_meta(table_df.options)
+		except frappe.DoesNotExistError:
+			continue
+
+		for child_df in child_meta.fields:
+			filters = None
+
+			if child_df.fieldtype == "Link" and child_df.options == source_doctype:
+				# Direct link — e.g. Delivery Note Item.against_sales_order → Sales Order
+				filters = {child_df.fieldname: source_name}
+
+			elif child_df.fieldtype == "Dynamic Link":
+				# Polymorphic link — e.g. Payment Entry Reference.reference_name
+				# whose doctype is stored in the field named by child_df.options
+				# (e.g. reference_doctype).
+				doctype_field = child_df.options
+				filters = {doctype_field: source_doctype, child_df.fieldname: source_name}
+
+			if not filters:
+				continue
+
+			parents = frappe.get_all(
+				table_df.options,
+				filters=filters,
+				pluck="parent",
+				distinct=True,
+			)
+			for parent in parents:
+				if frappe.db.get_value(target_doctype, parent, "docstatus") == 0:
+					draft_names.add(parent)
+
+	return [{"name": n} for n in sorted(draft_names)]

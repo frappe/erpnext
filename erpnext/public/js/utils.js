@@ -989,6 +989,77 @@ erpnext.utils.update_child_items = function (opts) {
 	dialog.show();
 };
 
+// ---------------------------------------------------------------------------
+// Global draft-document guard for frappe.model.open_mapped_doc
+//
+// Intercepts every "Create → <DocType>" action in ERPNext.  When a draft of
+// the target DocType that was already created from the same source document is
+// found, a dismissible confirmation dialog is shown before the form opens.
+//
+// Target DocType is inferred from the mapper method name:
+//   "…mapper.make_delivery_note"   → "Delivery Note"
+//   "…mapper.create_pick_list"     → "Pick List"
+// If inference fails or no link field is found the call passes through silently.
+// ---------------------------------------------------------------------------
+(function () {
+	const _orig = frappe.model.open_mapped_doc;
+
+	frappe.model.open_mapped_doc = function (opts) {
+		const frm = opts.frm;
+		if (!frm || !frm.doc || !frm.doc.name) {
+			return _orig.call(frappe.model, opts);
+		}
+
+		// Derive target DocType from the mapper method name.
+		// Supports both "make_*" and "create_*" prefixes.
+		const match = (opts.method || "").match(/\.(make|create)_([a-z0-9_]+)$/i);
+		if (!match) {
+			return _orig.call(frappe.model, opts);
+		}
+
+		const target_doctype = frappe.model.unscrub(match[2]);
+
+		frappe.call({
+			method: "erpnext.controllers.queries.get_draft_linked_docs",
+			args: {
+				source_doctype: frm.doc.doctype,
+				source_name: frm.doc.name,
+				target_doctype,
+			},
+			callback(r) {
+				const drafts = (r.message || []).map((d) => d.name);
+
+				if (!drafts.length) {
+					_orig.call(frappe.model, opts);
+					return;
+				}
+
+				const slug = frappe.router.slug(target_doctype);
+				const links = drafts
+					.map(
+						(n) =>
+							`<a href="/app/${slug}/${encodeURIComponent(n)}" target="_blank">${frappe.utils.escape_html(n)}</a>`
+					)
+					.join(", ");
+
+				frappe.confirm(
+					__(
+						"There {0} already {1} draft {2}(s) for this {3}: {4}.<br><br>Do you still want to create a new one?",
+						[
+							drafts.length === 1 ? __("is") : __("are"),
+							drafts.length,
+							__(target_doctype),
+							__(frm.doc.doctype),
+							links,
+						]
+					),
+					() => _orig.call(frappe.model, opts)
+				);
+			},
+		});
+	};
+})();
+
 erpnext.utils.map_current_doc = function (opts) {
 	function _map() {
 		if ($.isArray(cur_frm.doc.items) && cur_frm.doc.items.length > 0) {

@@ -2849,12 +2849,61 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	make_mapped_payment_entry(args) {
 		var me = this;
 		args = args || { dt: this.frm.doc.doctype, dn: this.frm.doc.name };
-		return frappe.call({
-			method: me.get_method_for_payment(),
-			args: args,
-			callback: function (r) {
-				var doclist = frappe.model.sync(r.message);
-				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+
+		const do_create = () => {
+			frappe.call({
+				method: me.get_method_for_payment(),
+				args: args,
+				callback: function (r) {
+					var doclist = frappe.model.sync(r.message);
+					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+				},
+			});
+		};
+
+		// When the payment will be a Journal Entry, skip the PE draft check.
+		const via_je =
+			me.frm.doc.__onload && me.frm.doc.__onload.make_payment_via_journal_entry;
+		if (via_je) {
+			do_create();
+			return;
+		}
+
+		frappe.call({
+			method: "erpnext.controllers.queries.get_draft_linked_docs",
+			args: {
+				source_doctype: me.frm.doc.doctype,
+				source_name: me.frm.doc.name,
+				target_doctype: "Payment Entry",
+			},
+			callback(r) {
+				const drafts = (r.message || []).map((d) => d.name);
+				if (!drafts.length) {
+					do_create();
+					return;
+				}
+
+				const slug = frappe.router.slug("Payment Entry");
+				const links = drafts
+					.map(
+						(n) =>
+							`<a href="/app/${slug}/${encodeURIComponent(n)}" target="_blank">${frappe.utils.escape_html(n)}</a>`
+					)
+					.join(", ");
+
+				frappe.confirm(
+					__(
+						"There {0} already {1} draft {2}(s) for this {3}: {4}.<br><br>Do you still want to create a new one?",
+						[
+							drafts.length === 1 ? __("is") : __("are"),
+							drafts.length,
+							__("Payment Entry"),
+							__(me.frm.doc.doctype),
+							links,
+						]
+					),
+					do_create
+				);
 			},
 		});
 	}
