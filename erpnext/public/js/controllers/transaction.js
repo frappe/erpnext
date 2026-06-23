@@ -35,9 +35,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				const calculated_rate = flt(rate_with_margin - item.discount_amount, precision("rate", item));
 
 				if (calculated_rate !== item.rate) {
+					// if rate is greater than price_list_rate, set margin
+					// otherwise, set discount
 					if (item.rate > item.price_list_rate) {
-						// if rate is greater than price_list_rate, set margin
-						// or set discount
 						item.margin_type = "Amount";
 						item.margin_rate_or_amount = flt(
 							item.rate - item.price_list_rate,
