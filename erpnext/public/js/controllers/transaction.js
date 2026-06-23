@@ -64,7 +64,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				item.discount_amount = 0;
 				item.discount_percentage = 0.0;
 			}
-			this.set_in_company_currency(item, ["rate_with_margin"]);
+			me.set_in_company_currency(item, ["rate_with_margin"]);
 			cur_frm.cscript.set_gross_profit(item);
 			cur_frm.cscript.calculate_taxes_and_totals();
 			cur_frm.cscript.calculate_stock_uom_rate(frm, cdt, cdn);
