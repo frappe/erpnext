@@ -22,7 +22,7 @@
  "name": "Trial Balance (Simple)", 
  "owner": "Administrator", 
  "prepared_report": 0, 
- "query": "select fiscal_year as \"Fiscal Year:Data:80\",\n\tcompany as \"Company:Data:220\",\n\tposting_date as \"Posting Date:Date:100\",\n\taccount as \"Account:Data:380\",\n\tsum(debit) as \"Debit:Currency:140\",\n\tsum(credit) as \"Credit:Currency:140\",\n\tfinance_book as \"Finance Book:Link/Finance Book:140\"\nfrom `tabGL Entry`\nwhere is_cancelled = 0 and company = %(company)s\ngroup by fiscal_year, company, posting_date, account\norder by fiscal_year, company, posting_date, account",
+ "query": "select fiscal_year as \"Fiscal Year:Data:80\",\n\tcompany as \"Company:Data:220\",\n\tposting_date as \"Posting Date:Date:100\",\n\taccount as \"Account:Data:380\",\n\tsum(debit) as \"Debit:Currency:140\",\n\tsum(credit) as \"Credit:Currency:140\",\n\tmax(finance_book) as \"Finance Book:Link/Finance Book:140\"\nfrom `tabGL Entry`\nwhere is_cancelled = 0 and company = %(company)s\ngroup by fiscal_year, company, posting_date, account\norder by fiscal_year, company, posting_date, account",
  "ref_doctype": "GL Entry", 
  "report_name": "Trial Balance (Simple)", 
  "report_type": "Query Report", 
