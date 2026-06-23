@@ -1234,7 +1234,10 @@ def get_item_price(
 			& (ip.price_list == pctx.price_list)
 			& (IfNull(ip.uom, "").isin(["", pctx.uom]))
 		)
-		.orderby(ip.valid_from, order=frappe.qb.desc)
+		# IfNull so a NULL valid_from sorts last under DESC on both engines: MariaDB sorts NULL last
+		# for DESC, but Postgres defaults to NULLS FIRST, which would otherwise make a NULL-valid_from
+		# price win the LIMIT 1 over the most-recent dated price.
+		.orderby(IfNull(ip.valid_from, "1900-01-01"), order=frappe.qb.desc)
 		.orderby(IfNull(ip.batch_no, ""), order=frappe.qb.desc)
 		.orderby(ip.uom, order=frappe.qb.desc)
 		.limit(1)
