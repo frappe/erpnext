@@ -9,7 +9,7 @@ from frappe import _
 from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.model.document import Document
 from frappe.query_builder import DocType, Interval
-from frappe.query_builder.functions import Now
+from frappe.query_builder.functions import Lower, Now
 from frappe.utils import flt, get_fullname
 
 from erpnext.crm.utils import (
@@ -234,7 +234,17 @@ class Opportunity(TransactionBase, CRMNote):
 				self.opportunity_from = "Customer"
 				return
 
-			lead_name = frappe.db.get_value("Lead", {"email_id": self.contact_email})
+			# Match email_id case-insensitively so Postgres finds an existing Lead like MariaDB
+			# (case-insensitive collation) instead of auto-creating a duplicate.
+			_lead = frappe.qb.DocType("Lead")
+			_rows = (
+				frappe.qb.from_(_lead)
+				.select(_lead.name)
+				.where(Lower(_lead.email_id) == (self.contact_email or "").lower())
+				.limit(1)
+				.run()
+			)
+			lead_name = _rows[0][0] if _rows else None
 			if not lead_name:
 				sender_name = get_fullname(self.contact_email)
 				if sender_name == self.contact_email:
