@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-06-21 10:42+0000\n"
-"PO-Revision-Date: 2026-06-21 19:02\n"
+"PO-Revision-Date: 2026-06-23 19:26\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -4293,7 +4293,7 @@ msgstr "Verkauf erlauben"
 #. in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Allow Sales Order creation for expired Quotation"
-msgstr ""
+msgstr "Auftragserstellung für abgelaufene Angebote zulassen"
 
 #. Label of the allow_zero_qty_in_sales_order (Check) field in DocType 'Selling
 #. Settings'
@@ -4409,7 +4409,7 @@ msgstr "Rechnungswährung darf sich von Kontowährung unterscheiden"
 #. 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Allow multiple Sales Orders against a customer's Purchase Order"
-msgstr ""
+msgstr "Mehrere Aufträge (je Kunde) mit derselben Bestellnummer erlauben"
 
 #. Label of the allow_negative_rates_for_items (Check) field in DocType 'Buying
 #. Settings'
@@ -48219,7 +48219,7 @@ msgstr "Einsparungen"
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Sazhen"
-msgstr ""
+msgstr "Saschen"
 
 #. Label of the scan_barcode (Data) field in DocType 'POS Invoice'
 #. Label of the scan_barcode (Data) field in DocType 'Purchase Invoice'
@@ -51463,7 +51463,7 @@ msgstr "Quadratmeile"
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Square Yard"
-msgstr ""
+msgstr "Quadratyard"
 
 #. Label of the stage_name (Data) field in DocType 'Sales Stage'
 #: erpnext/crm/doctype/sales_stage/sales_stage.json
@@ -52544,7 +52544,7 @@ msgstr "Lagerbestände/Konten können nicht eingefroren werden, da die Verarbeit
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Stone"
-msgstr ""
+msgstr "Stone"
 
 #. Label of the stop_reason (Select) field in DocType 'Downtime Entry'
 #: erpnext/manufacturing/doctype/downtime_entry/downtime_entry.json
@@ -59818,7 +59818,7 @@ msgstr "Wert oder Menge"
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Vara"
-msgstr ""
+msgstr "Vara"
 
 #. Label of the variable (Data) field in DocType 'Bank Statement Import Log
 #. Column Map'
@@ -61136,7 +61136,7 @@ msgstr "Einbehalt-Dokumenttyp"
 
 #: banking/src/components/features/Settings/Preferences.tsx:70
 msgid "Within 1 day"
-msgstr ""
+msgstr "Innerhalb eines Tages"
 
 #: banking/src/components/features/Settings/Preferences.tsx:71
 msgid "Within 2 days"
@@ -62090,7 +62090,7 @@ msgstr ""
 #. Exchange Settings'
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
 msgid "frankfurter.dev"
-msgstr ""
+msgstr "frankfurter.dev"
 
 #. Option for the 'Service Provider' (Select) field in DocType 'Currency
 #. Exchange Settings'
