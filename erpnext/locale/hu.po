@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-06-21 10:42+0000\n"
-"PO-Revision-Date: 2026-06-21 19:02\n"
+"PO-Revision-Date: 2026-06-24 19:22\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Hungarian\n"
 "MIME-Version: 1.0\n"
@@ -11865,7 +11865,7 @@ msgstr ""
 #. Label of the items (Table) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Components"
-msgstr ""
+msgstr "Komponensek"
 
 #. Option for the 'Asset Type' (Select) field in DocType 'Asset'
 #: erpnext/assets/doctype/asset/asset.json
@@ -36116,7 +36116,7 @@ msgstr ""
 
 #: banking/src/components/features/ActionLog/ActionLogDialogBody.tsx:408
 msgid "Payment Details"
-msgstr ""
+msgstr "Fizetési részletek"
 
 #. Label of the payment_document (Link) field in DocType 'Bank Clearance
 #. Detail'
@@ -59394,7 +59394,7 @@ msgstr ""
 
 #: erpnext/stock/doctype/item/item_prices.html:86
 msgid "Valid Upto"
-msgstr ""
+msgstr "Valid Upto"
 
 #. Label of the countries (Table) field in DocType 'Shipping Rule'
 #: erpnext/accounts/doctype/shipping_rule/shipping_rule.json
