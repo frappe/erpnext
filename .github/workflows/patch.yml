@@ -65,6 +65,19 @@ jobs:
       - name: Add to Hosts
         run: echo "127.0.0.1 test_site" | sudo tee -a /etc/hosts
 
+      # The v14 baseline backup is a fixed published file — cache it instead of re-downloading
+      # ~100MB from frappe.io every run.
+      - name: Cache erpnext v14 backup
+        id: cache-v14
+        uses: actions/cache@v4
+        with:
+          path: ~/erpnext-v14.sql.gz
+          key: erpnext-v14-sql-gz
+
+      - name: Download erpnext v14 backup
+        if: steps.cache-v14.outputs.cache-hit != 'true'
+        run: wget -O ~/erpnext-v14.sql.gz https://frappe.io/files/erpnext-v14.sql.gz
+
       - name: Cache pip
         uses: actions/cache@v4
         with:
@@ -113,8 +126,7 @@ jobs:
           jq 'del(.install_apps)' ~/frappe-bench/sites/test_site/site_config.json > tmp.json
           mv tmp.json ~/frappe-bench/sites/test_site/site_config.json
 
-          wget https://frappe.io/files/erpnext-v14.sql.gz
-          bench --site test_site --force restore ~/frappe-bench/erpnext-v14.sql.gz
+          bench --site test_site --force restore ~/erpnext-v14.sql.gz
 
           git -C "apps/frappe" remote set-url upstream https://github.com/frappe/frappe.git
           git -C "apps/erpnext" remote set-url upstream https://github.com/frappe/erpnext.git

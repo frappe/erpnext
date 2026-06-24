@@ -72,17 +72,14 @@ def employee_query(
 		.where(Criterion.any(search_conditions))
 		.orderby(
 			Case()
-			.when(
-				Locate(Lower(txt_no_percent), Lower(Employee.name)) > 0,
-				Locate(Lower(txt_no_percent), Lower(Employee.name)),
-			)
+			.when(Locate(txt_no_percent, Employee.name) > 0, Locate(txt_no_percent, Employee.name))
 			.else_(99999)
 		)
 		.orderby(
 			Case()
 			.when(
-				Locate(Lower(txt_no_percent), Lower(Employee.employee_name)) > 0,
-				Locate(Lower(txt_no_percent), Lower(Employee.employee_name)),
+				Locate(txt_no_percent, Employee.employee_name) > 0,
+				Locate(txt_no_percent, Employee.employee_name),
 			)
 			.else_(99999)
 		)
@@ -139,27 +136,16 @@ def lead_query(
 		.where(Lead.status.isnull() | (Lead.status != "Converted"))
 		.where(Criterion.any(search_conditions))
 		.orderby(
+			Case().when(Locate(txt_no_percent, Lead.name) > 0, Locate(txt_no_percent, Lead.name)).else_(99999)
+		)
+		.orderby(
 			Case()
-			.when(
-				Locate(Lower(txt_no_percent), Lower(Lead.name)) > 0,
-				Locate(Lower(txt_no_percent), Lower(Lead.name)),
-			)
+			.when(Locate(txt_no_percent, Lead.lead_name) > 0, Locate(txt_no_percent, Lead.lead_name))
 			.else_(99999)
 		)
 		.orderby(
 			Case()
-			.when(
-				Locate(Lower(txt_no_percent), Lower(Lead.lead_name)) > 0,
-				Locate(Lower(txt_no_percent), Lower(Lead.lead_name)),
-			)
-			.else_(99999)
-		)
-		.orderby(
-			Case()
-			.when(
-				Locate(Lower(txt_no_percent), Lower(Lead.company_name)) > 0,
-				Locate(Lower(txt_no_percent), Lower(Lead.company_name)),
-			)
+			.when(Locate(txt_no_percent, Lead.company_name) > 0, Locate(txt_no_percent, Lead.company_name))
 			.else_(99999)
 		)
 		.orderby(Lead.idx, order=Order.desc)
@@ -397,12 +383,7 @@ def bom(
 		.where(BOM.is_active == 1)
 		.where(BOM[searchfield].like(f"%{txt}%"))
 		.orderby(
-			Case()
-			.when(
-				Locate(Lower(txt_no_percent), Lower(BOM.name)) > 0,
-				Locate(Lower(txt_no_percent), Lower(BOM.name)),
-			)
-			.else_(99999)
+			Case().when(Locate(txt_no_percent, BOM.name) > 0, Locate(txt_no_percent, BOM.name)).else_(99999)
 		)
 		.orderby(BOM.idx, order=Order.desc)
 		.orderby(BOM.name)

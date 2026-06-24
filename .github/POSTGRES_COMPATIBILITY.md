@@ -31,9 +31,12 @@ Flag a changed query that uses any of these:
 
 - **Loose `GROUP BY`** — selecting/ordering a column that is neither in `GROUP BY` nor wrapped
   in an aggregate. MariaDB tolerates it; PostgreSQL errors (`must appear in the GROUP BY
-  clause or be used in an aggregate function`). Fix: add it to `GROUP BY` **if it is
-  functionally dependent on the group key**, otherwise wrap it in `Max()`/`Min()`. **See §3 —
-  the row-count trap — before suggesting "add it to GROUP BY".**
+  clause or be used in an aggregate function`). This **also covers an aggregate (`Sum`/`Count`/…)
+  selected alongside bare columns with NO `.groupby()` at all** — MariaDB silently collapses
+  every row into one arbitrary-valued row (often a *wrong-output* bug there too), PostgreSQL
+  errors. Fix: add the bare column to `GROUP BY` **if it is functionally dependent on the group
+  key**, otherwise wrap it in `Max()`/`Min()`. **See §3 — the row-count trap — before suggesting
+  "add it to GROUP BY".**
 - **MySQL-only functions** — `TIMESTAMP(date,time)`, `TIMEDIFF`, `STR_TO_DATE`, `DATE_FORMAT`,
   `DATE_ADD/SUB`, `GROUP_CONCAT`, `PERIOD_DIFF`, SQL `IF(cond,a,b)`. Use the portable
   `frappe.query_builder.functions` equivalents (`CombineDatetime`, `DateDiff`, `Case`,
@@ -47,12 +50,34 @@ Flag a changed query that uses any of these:
   unquoted (or double-quoted) alias.
 - **`varchar | varchar`** (bitwise OR misused as a coalesce) — errors on PostgreSQL. Use
   `Coalesce(...)`.
-- **Capital-cased identifiers** used as column/field names in `get_value(dt, dn, "Status")` and
-  similar — PostgreSQL folds unquoted identifiers to lower case; a stored column named
-  `status` won't match `"Status"`. Use the exact stored case.
+- **Capital-cased identifiers** used as column/field names in `get_value(dt, dn, "Status")`,
+  `get_all(dt, fields=["Account"])`, and similar — PostgreSQL quotes the identifier and matches
+  it case-sensitively; a stored column named `status`/`account` won't match `"Status"`/`"Account"`
+  (`column "Account" does not exist`). Use the exact stored (lower-case) fieldname.
 - **Boolean passed where an integer column is expected** — `frappe.db.set_value(dt, dn,
-  check_field, True)` emits `SET col = true`, which PostgreSQL rejects on a `smallint`
-  (`DatatypeMismatch`). Pass `1`/`0`.
+  check_field, True)`, `doc.db_set(field, False)`, or `frappe.qb.update(dt).set(check_field, True)`
+  emit `SET col = true`, which PostgreSQL rejects on a `smallint`/`Check` column
+  (`column is of type smallint but expression is of type boolean`). Pass `1`/`0`.
+- **`.like()`/`.ilike()` (or raw `LIKE`) on a NON-text column** — `idx`, `docstatus`, a date, etc.
+  frappe maps `.like()` → `ILIKE`, and PostgreSQL has no `bigint ILIKE text` operator (`operator
+  does not exist: bigint ~~* unknown`). Cast the column to text first — **`Cast_(col, "varchar")`**,
+  not `Cast(col, "char")` (see below). MariaDB coerces the int implicitly, so the cast is a no-op there.
+- **`CAST(… AS CHAR)` / `Cast(x, "char")`** — on PostgreSQL bare `CHAR` is `character(1)`, so
+  `CAST(12 AS CHAR)` → `'1'` (silently truncates multi-digit values); MariaDB gives the full string.
+  Use `VARCHAR` / `Cast_(x, "varchar")`.
+- **`.rlike()` / raw `RLIKE`** — frappe rewrites `REGEXP` → `~*` on PostgreSQL but does **not**
+  translate `RLIKE` (no such PostgreSQL operator). Use `.regexp()` (or `.like()` for a simple prefix).
+- **`IfNull`/`Coalesce` of a typed column with a different-typed literal** — `IfNull(asset.disposal_date, 0)`
+  renders `COALESCE("disposal_date", 0)`, coalescing a **DATE** with an **integer**. PostgreSQL requires
+  `COALESCE` args to share a type (`DatatypeMismatch: COALESCE types date and integer cannot be matched`);
+  MariaDB's `IFNULL` is permissive. The common shape is `IfNull(date_col, 0) != 0 / == 0` as a presence test —
+  replace with `date_col.isnotnull()` / `date_col.isnull()` (identical, and valid on both). Otherwise coalesce
+  to a **same-type** default (`Coalesce(date_col, '1900-01-01')`, `Coalesce(text_col, '')`).
+- **Division by a possibly-zero divisor** — `Sum(a) / Sum(b)`, `x / col`, etc. where the
+  divisor can be `0`/empty. MariaDB returns `NULL` for division by zero; PostgreSQL raises
+  `division by zero` and aborts the query. Wrap the divisor in `NullIf(divisor, 0)` — that
+  yields `NULL` on both engines, matching MariaDB's value. (Only the *literal* `/ 0` is a parse
+  constant; the trap is a divisor that is an aggregate or column the data can drive to zero.)
 
 ---
 
@@ -75,8 +100,11 @@ These don't error, so a one-engine CI stays green. Flag them:
 - **`ORDER BY … LIMIT 1` with no unique tiebreaker** — when rows tie on the ordered column the
   two engines may pick different rows. Add a `creation`/`name` tiebreaker **only if it does not
   change MariaDB's current pick** (see §4).
-- **Integer division** — `COUNT(...) / COUNT(...) * 100` truncates to `0` on PostgreSQL
-  (integer/integer) but is decimal on MariaDB. Multiply by `100.0` first.
+- **Integer division** — `int / int` truncates on PostgreSQL but is decimal on MariaDB, e.g.
+  `COUNT(...) / COUNT(...) * 100` → `0`, or `manufacturing_time_in_mins / 1440` flooring a
+  lead-time to whole days. Force float: multiply by `100.0`, or make a literal a float
+  (`/ 1440` → `/ 1440.0`), or cast an operand. (Only SQL-level `/` on integer **columns/literals**
+  — Python `/` is already float.)
 - **`DISTINCT` list ordering** — `frappe.get_all(distinct=True, order_by=…)` /
   `SELECT DISTINCT … ORDER BY`: frappe's `db_query` **silently drops `ORDER BY` for distinct
   queries on PostgreSQL**, so the result is unordered there. Sort in Python instead — and use
@@ -119,9 +147,12 @@ scope for a portability fix.
 These are auto-handled by the framework and are **not** breaks:
 
 - **`.like()` / `["like", …]`** already renders as `ILIKE` on PostgreSQL — not a
-  case-sensitivity bug.
+  case-sensitivity bug. *(Exception: `.like()` on a **non-text** column — `idx`, `docstatus` —
+  is a hard break, `bigint ILIKE`; see §1.)*
 - **Raw `ifnull(...)`** inside `frappe.db.sql()` is rewritten to `coalesce(...)` on all engines.
-- **Backticks**, **`LOCATE`**, **`REGEXP`** in raw SQL are auto-translated on PostgreSQL.
+- **Backticks**, **`LOCATE`**, **`REGEXP`** / **`.regexp()`** in raw SQL are auto-translated on
+  PostgreSQL (`REGEXP` → `~*`). **But `RLIKE` / `.rlike()` is NOT translated** — that one is a
+  hard break (see §1).
 - **An `ORDER BY … LIMIT 1` tie where the two engines already agree**, or where adding a
   tiebreaker would *change* MariaDB's current pick — leave it; "fixing" it would either change
   MariaDB or has no observable effect.

@@ -1,79 +1,45 @@
 name: Server (Postgres)
 
 on:
-  repository_dispatch:
-    types: [frappe-framework-change]
+  schedule:
+    # 03:00 AM IST daily (21:30 UTC the previous day)
+    - cron: "30 21 * * *"
   pull_request:
-    # 'labeled' is required so adding the 'postgres' label to an open PR triggers this run
-    # (the job itself is gated on that label below)
+    # 'labeled' so adding the 'postgres' label to an already-open PR re-triggers the run.
     types: [opened, reopened, synchronize, labeled]
     paths-ignore:
       - '**.js'
-      - '**.css'
-      - '**.svg'
       - '**.md'
       - '**.html'
       - 'crowdin.yml'
       - '.coderabbit.yml'
       - '.mergify.yml'
-  schedule:
-    # Run everday at midnight UTC / 5:30 IST
-    - cron: "0 0 * * *"
   workflow_dispatch:
-    inputs:
-      user:
-        description: 'Frappe Framework repository user (add your username for forks)'
-        required: true
-        default: 'frappe'
-        type: string
-      branch:
-        description: 'Frappe Framework branch'
-        default: 'develop'
-        required: false
-        type: string
-
-permissions:
-  contents: read
 
 concurrency:
   group: server-postgres-develop-${{ github.event_name }}-${{ github.event.number || github.event_name == 'workflow_dispatch' && github.run_id || '' }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
+# Postgres CI stays on GitHub-hosted (free, full-speed VM per shard) but follows the same fan-out
+# we built for MariaDB: build the bench + reinstall ONCE in the setup job, bake the PostgreSQL
+# PGDATA into the artifact, and have 4 test shards start Postgres on that datadir — no per-shard
+# clone/build/reinstall/restore. Python is pinned so the venv transplants between VMs.
+env:
+  TZ: 'Asia/Kolkata'
+  NODE_ENV: "production"
+  PYTHON_VERSION: '3.14'
+
 jobs:
-  test:
-    # Opt-in on PRs: only runs when the PR carries the 'postgres' label. Scheduled / manual /
-    # framework-dispatch runs always execute (no PR labels to gate on).
-    if: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'postgres') }}
+  setup:
+    name: Build & reinstall (setup)
     runs-on: ubuntu-latest
-    timeout-minutes: 60
-    env:
-      TZ: 'Asia/Kolkata'
-      NODE_ENV: "production"
-      WITH_COVERAGE: ${{ github.event_name != 'pull_request' }}
-
-    strategy:
-      fail-fast: false
-
-      matrix:
-        container: [1, 2, 3, 4]
-
-    # Distinct from the MariaDB job's "Python Unit Tests" so its check contexts do NOT collide with
-    # the required "Python Unit Tests (1..4)" status checks -- this keeps Postgres non-required for now.
-    name: Postgres Unit Tests
-
-    services:
-      postgres:
-        image: postgres:13.3
-        env:
-          POSTGRES_PASSWORD: travis
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
+    # Runs on the daily schedule (and workflow_dispatch). On PRs it runs ONLY when the PR carries
+    # the 'postgres' label — the test job needs setup, so it's skipped too when this is.
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'postgres')
+    timeout-minutes: 40
     steps:
       - name: Clone
         uses: actions/checkout@v6
@@ -81,7 +47,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.14'
+          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Check for valid Python & Merge Conflicts
         run: |
@@ -100,98 +66,124 @@ jobs:
       - name: Add to Hosts
         run: echo "127.0.0.1 test_site" | sudo tee -a /etc/hosts
 
-      - name: Cache pip
+      - name: Cache deps (uv/pip/npm/yarn)
         uses: actions/cache@v4
         with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/*requirements.txt', '**/pyproject.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-            ${{ runner.os }}-
+          path: |
+            ~/.cache/uv
+            ~/.cache/pip
+            ~/.npm
+            ~/.cache/yarn
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/*requirements.txt', '**/pyproject.toml', '**/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-deps-
 
-      - name: Cache node modules
+      # Warm-bench cache (the big one): install.sh saves the built base bench — frappe + env +
+      # node_modules + assets — here as frappe-bench-base-*.tar.zst. Later runs restore it and only
+      # fast-forward to the live develop SHA + rebuild the delta, so the bench BUILD is near-free and
+      # only the test_site reinstall (per-run DB, uncacheable) stays slow — matching the self-hosted
+      # box. The first run after a deps change populates it; every run after that is fast.
+      - name: Cache warm bench (base build)
         uses: actions/cache@v4
+        with:
+          path: ~/bench-cache
+          key: ${{ runner.os }}-warmbench-v2-${{ hashFiles('**/*requirements.txt', '**/pyproject.toml', '**/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-warmbench-v2-
+
+      # Postgres runs in-runner on a PGDATA OUTSIDE the bench (install.sh wipes ~/frappe-bench);
+      # after the reinstall it's moved into the bench so it ships in the artifact.
+      - name: Start DB
+        run: bash ${GITHUB_WORKSPACE}/.github/helper/start-db.sh
         env:
-          cache-name: cache-node-modules
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
-
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-
-      - uses: actions/cache@v4
-        id: yarn-cache
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-
-      - name: Cache wkhtmltopdf
-        uses: actions/cache@v4
-        with:
-          path: /tmp/wkhtmltox.deb
-          key: wkhtmltox-0.12.6.1-2-jammy-amd64
+          DB: postgres
+          CI_DB_DATADIR: /home/runner/pgdata
 
       - name: Install
         run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
         env:
           DB: postgres
           TYPE: server
-          FRAPPE_USER: ${{ github.event.inputs.user }}
-          FRAPPE_BRANCH: ${{ github.event.client_payload.sha || github.event.inputs.branch }}
+          FRAPPE_BRANCH: develop
+          BENCH_CACHE_DIR: /home/runner/bench-cache
+
+      - name: Stop DB and stage datadir
+        run: |
+          PG_BIN=$(ls -d /usr/lib/postgresql/*/bin | sort -V | tail -1)
+          "$PG_BIN/pg_ctl" -D /home/runner/pgdata -m fast -w stop || true
+          mv /home/runner/pgdata /home/runner/frappe-bench/pgdata
+
+      - name: Package bench for test shards
+        run: |
+          cp "${GITHUB_WORKSPACE}/.github/helper/hydrate.sh" /home/runner/frappe-bench/hydrate.sh
+          cp "${GITHUB_WORKSPACE}/.github/helper/start-db.sh" /home/runner/frappe-bench/start-db.sh
+          tar czpf "${GITHUB_WORKSPACE}/bench.tar.gz" -C /home/runner \
+            --exclude='.git' --exclude='node_modules' frappe-bench
+          ls -lh "${GITHUB_WORKSPACE}/bench.tar.gz"
+
+      - name: Upload bench artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bench-pg
+          path: bench.tar.gz
+          retention-days: 1
+          compression-level: 0
+
+  test:
+    name: Python Unit Tests (PG)
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        container: [1, 2, 3, 4]
+    steps:
+      - name: Download bench artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: bench-pg
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Add to Hosts
+        run: echo "127.0.0.1 test_site" | sudo tee -a /etc/hosts
+
+      # The bench CLI (frappe-bench) and redis are global/system tools — not in the bench tarball.
+      # The setup runner got them via install.sh; the MariaDB shards get them from the arc5 image.
+      # GitHub-hosted PG shards install them here (cheap vs the build+reinstall that setup did once).
+      - name: Install shard runtime (bench CLI + redis + wkhtmltopdf)
+        run: |
+          pip install frappe-bench
+          command -v redis-server >/dev/null || { sudo apt-get update -qq && sudo apt-get install -y -qq redis-server; }
+          # wkhtmltopdf (patched-qt build) for print-format / PDF tests — same .deb install.sh uses.
+          if ! command -v wkhtmltopdf >/dev/null; then
+            wget -qO /tmp/wkhtmltox.deb https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.jammy_amd64.deb
+            sudo apt-get install -y -qq /tmp/wkhtmltox.deb
+          fi
+
+      - name: Untar bench
+        run: |
+          tar xzpf "${GITHUB_WORKSPACE}/bench.tar.gz" -C /home/runner
+          ls -ld /home/runner/frappe-bench
+
+      - name: Hydrate (start Postgres on the baked datadir)
+        run: bash /home/runner/frappe-bench/hydrate.sh
+        env:
+          DB: postgres
+          DB_HOST: 127.0.0.1
 
       - name: Run Tests
         run: |
           cd ~/frappe-bench/
-          coverage_flag=""
-          if [ "$WITH_COVERAGE" = "true" ]; then coverage_flag="--with-coverage"; fi
+          # print-format / PDF tests are engine-independent (they exercise wkhtmltopdf rendering,
+          # not postgres SQL — the MariaDB CI already covers them). They only fetch the static asset
+          # bundles from http://test_site:8000/assets/..., so a plain static file server over sites/
+          # satisfies wkhtmltopdf without the frappe web server (which never bound on a bare runner).
+          ( cd ~/frappe-bench/sites && nohup python3 -m http.server 8000 --bind 127.0.0.1 > ~/frappe-bench/web.log 2>&1 & )
+          for _ in $(seq 1 15); do (exec 3<>/dev/tcp/127.0.0.1/8000) 2>/dev/null && { exec 3>&- 3<&-; break; }; sleep 1; done
           bench --site test_site run-parallel-tests --lightmode --app erpnext \
-            --total-builds ${{ strategy.job-total }} \
-            --build-number ${{ matrix.container }} \
-            $coverage_flag
+            --total-builds ${{ strategy.job-total }} --build-number ${{ matrix.container }}
         env:
           TYPE: server
-
-
-      - name: Show bench output
-        if: ${{ always() }}
-        run: cat ~/frappe-bench/bench_start.log || true
-
-      - name: Upload coverage data
-        if: ${{ env.WITH_COVERAGE == 'true' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-postgres-${{ matrix.container }}
-          path: /home/runner/frappe-bench/sites/coverage.xml
-
-  coverage:
-    name: Coverage Wrap Up
-    needs: test
-    if: ${{ github.event_name != 'pull_request' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Clone
-        uses: actions/checkout@v6
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          pattern: coverage-postgres-*
-
-      - name: Upload coverage data
-        uses: codecov/codecov-action@v4
-        with:
-          name: Postgres
-          flags: postgres
-          # explicit glob: download-artifact extracts each shard into its own coverage-postgres-N/ dir
-          files: coverage-postgres-*/coverage.xml
-          token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: true
-          verbose: true

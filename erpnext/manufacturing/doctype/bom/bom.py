@@ -9,7 +9,7 @@ import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 from frappe.query_builder import Field
-from frappe.query_builder.functions import Count, IfNull, Max, Min, Sum
+from frappe.query_builder.functions import Count, IfNull, Max, Min, NullIf, Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form, parse_json
 from frappe.website.website_generator import WebsiteGenerator
 
@@ -1124,7 +1124,8 @@ def _get_avg_valuation_rate_from_bins(item_code, company, data):
 		.select(
 			Case()
 			.when(
-				Count(bin_table.name) > 0, IfNull(Sum(bin_table.stock_value) / Sum(bin_table.actual_qty), 0.0)
+				Count(bin_table.name) > 0,
+				IfNull(Sum(bin_table.stock_value) / NullIf(Sum(bin_table.actual_qty), 0), 0.0),
 			)
 			.else_(None)
 			.as_("valuation_rate")

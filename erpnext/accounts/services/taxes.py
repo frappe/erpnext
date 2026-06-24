@@ -177,6 +177,7 @@ class TaxService:
 		return amount, base_amount
 
 
+@frappe.whitelist()
 def get_tax_rate(account_head: str) -> dict:
 	return frappe.get_cached_value("Account", account_head, ["tax_rate", "account_name"], as_dict=True)
 

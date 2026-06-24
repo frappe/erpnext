@@ -491,3 +491,4 @@ erpnext.patches.v16_0.migrate_subscription_generate_invoice_at
 erpnext.patches.v16_0.rename_subscription_billing_period_fields
 erpnext.patches.v16_0.drop_redundant_serial_no_index_from_sabb
 erpnext.patches.v16_0.set_default_close_opportunity_after_days
+execute:frappe.db.set_single_value("Accounts Settings", "pcv_job_timeout", 3600)

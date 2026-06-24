@@ -345,6 +345,9 @@ class RepostItemValuation(Document):
 
 	def _recalculate_valuation_rate(self):
 		doc = frappe.get_doc(self.voucher_type, self.voucher_no)
+		if doc.get("is_internal_supplier"):
+			doc.set_sales_incoming_rate_for_internal_transfer()
+
 		doc.update_valuation_rate()
 		for item in doc.items:
 			item.db_set("valuation_rate", item.valuation_rate)

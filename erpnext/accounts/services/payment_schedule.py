@@ -302,6 +302,7 @@ def linked_order_has_payment_schedule(po_or_so) -> list:
 	return frappe.get_all("Payment Schedule", filters={"parent": po_or_so})
 
 
+@frappe.whitelist()
 def get_payment_terms(
 	terms_template: str,
 	posting_date: DateTimeLikeObject | None = None,

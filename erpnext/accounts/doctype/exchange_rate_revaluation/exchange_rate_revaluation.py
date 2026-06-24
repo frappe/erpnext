@@ -605,7 +605,10 @@ def calculate_exchange_rate_using_last_gle(company, account, party_type, party):
 
 		last_exchange_rate = (
 			qb.from_(gl)
-			.select((gl.debit - gl.credit) / (gl.debit_in_account_currency - gl.credit_in_account_currency))
+			.select(
+				(gl.debit - gl.credit)
+				/ NullIf(gl.debit_in_account_currency - gl.credit_in_account_currency, 0)
+			)
 			.where(
 				(gl.voucher_type == voucher_type) & (gl.voucher_no == voucher_no) & (gl.account == account)
 			)

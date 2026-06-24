@@ -12,8 +12,9 @@ from typing import Any, Union
 import frappe
 from frappe import _
 from frappe.database.operator_map import OPERATOR_MAP
+from frappe.model import numeric_fieldtypes
 from frappe.query_builder import Case
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Cast_, Sum
 from frappe.utils import cstr, date_diff, flt, getdate
 from frappe.utils.xlsxutils import XLSXMetadata, XLSXStyleBuilder
 from pypika.terms import Bracket, LiteralValue
@@ -864,8 +865,15 @@ class FilterExpressionParser:
 		field = getattr(table, field_name, None)
 		operator_fn = OPERATOR_MAP.get(operator.casefold())
 
-		if "like" in operator.casefold() and "%" not in value:
-			value = f"%{value}%"
+		if "like" in operator.casefold():
+			if "%" not in value:
+				value = f"%{value}%"
+			# Postgres has no LIKE/ILIKE operator for non-text columns; MariaDB implicitly casts
+			# the numeric column to text. Cast a numeric/Check Account field to varchar so the
+			# match runs on both engines and reproduces MariaDB's result.
+			meta_field = frappe.get_meta("Account").get_field(field_name)
+			if meta_field and meta_field.fieldtype in numeric_fieldtypes:
+				field = Cast_(field, "varchar")
 
 		return operator_fn(field, value)
 
