@@ -86,6 +86,7 @@
   "period_closing_settings_section",
   "ignore_account_closing_balance",
   "use_legacy_controller_for_pcv",
+  "pcv_job_timeout",
   "column_break_25",
   "reports_tab",
   "remarks_section",
@@ -610,6 +611,13 @@
    "fieldname": "use_legacy_controller_for_pcv",
    "fieldtype": "Check",
    "label": "Use legacy controller for Period Closing Voucher"
+  },
+  {
+   "default": "3600",
+   "description": "Timeout (in seconds) for each background job enqueued by Process Period Closing Voucher",
+   "fieldname": "pcv_job_timeout",
+   "fieldtype": "Int",
+   "label": "PCV Job Timeout (seconds)"
   },
   {
    "description": "Users with this role will be notified if the asset depreciation gets failed",
