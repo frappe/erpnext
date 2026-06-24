@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-06-21 10:42+0000\n"
-"PO-Revision-Date: 2026-06-23 19:26\n"
+"PO-Revision-Date: 2026-06-24 19:23\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -12197,7 +12197,7 @@ msgstr "Konsolidirana Prodajna Faktura"
 #. Name of a report
 #: erpnext/accounts/report/consolidated_trial_balance/consolidated_trial_balance.json
 msgid "Consolidated Trial Balance"
-msgstr "Konsolidovani Bruto Bilans"
+msgstr "Konsolidovani Probni Bilans"
 
 #: erpnext/accounts/report/consolidated_trial_balance/consolidated_trial_balance.py:71
 msgid "Consolidated Trial Balance can be generated for Companies having same root Company."
@@ -12205,7 +12205,7 @@ msgstr "Konsolidovani Bruto Bilans može se generirati za poduzeća koje imaju i
 
 #: erpnext/accounts/report/consolidated_trial_balance/consolidated_trial_balance.py:167
 msgid "Consolidated Trial balance could not be generated as Exchange Rate from {0} to {1} is not available for {2}."
-msgstr "Konsolidovani Bruto Bilans nije mogao biti generisan jer kurs od {0} do {1} nije dostupan za {2}."
+msgstr "Konsolidovani Probni Bilans nije mogao biti generisan jer kurs valute od {0} do {1} nije dostupan za {2}."
 
 #. Option for the 'Lead Type' (Select) field in DocType 'Lead'
 #: erpnext/crm/doctype/lead/lead.json
@@ -58110,7 +58110,7 @@ msgstr "Stablo Procedura"
 #: erpnext/workspace_sidebar/invoicing.json
 #: erpnext/workspace_sidebar/payments.json
 msgid "Trial Balance"
-msgstr "Bruto Stanje"
+msgstr "Probni Bilans"
 
 #. Name of a report
 #: erpnext/accounts/report/trial_balance_simple/trial_balance_simple.json
@@ -58124,7 +58124,7 @@ msgstr "Bruto Stanje (Jednostavno)"
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Trial Balance for Party"
-msgstr "Bruto Stanje Stranke"
+msgstr "Probni Bilans Stranke"
 
 #. Label of the trial_period_end (Date) field in DocType 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
