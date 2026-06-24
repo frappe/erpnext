@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-06-21 10:42+0000\n"
-"PO-Revision-Date: 2026-06-21 19:02\n"
+"PO-Revision-Date: 2026-06-24 19:23\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -12204,15 +12204,15 @@ msgstr "Konsoliderad Försäljning Faktura"
 #. Name of a report
 #: erpnext/accounts/report/consolidated_trial_balance/consolidated_trial_balance.json
 msgid "Consolidated Trial Balance"
-msgstr "Konsoliderat Brutto Saldo"
+msgstr "Konsoliderad Prov Saldo"
 
 #: erpnext/accounts/report/consolidated_trial_balance/consolidated_trial_balance.py:71
 msgid "Consolidated Trial Balance can be generated for Companies having same root Company."
-msgstr "Konsoliderad Brutto Saldo kan skapas för bolag som har samma moderbolag."
+msgstr "Konsoliderad Prov Saldo kan skapas för bolag som har samma moderbolag."
 
 #: erpnext/accounts/report/consolidated_trial_balance/consolidated_trial_balance.py:167
 msgid "Consolidated Trial balance could not be generated as Exchange Rate from {0} to {1} is not available for {2}."
-msgstr "Konsoliderad Brutto Saldo kunde inte skapas eftersom växelkurs från {0} till {1} inte är tillgänglig för {2}."
+msgstr "Konsoliderad Prov Saldo kunde inte skapas eftersom växelkurs från {0} till {1} inte är tillgänglig för {2}."
 
 #. Option for the 'Lead Type' (Select) field in DocType 'Lead'
 #: erpnext/crm/doctype/lead/lead.json
@@ -58117,12 +58117,12 @@ msgstr "Kvalitet Procedur Träd"
 #: erpnext/workspace_sidebar/invoicing.json
 #: erpnext/workspace_sidebar/payments.json
 msgid "Trial Balance"
-msgstr "Brutto Saldo"
+msgstr "Prov Saldo"
 
 #. Name of a report
 #: erpnext/accounts/report/trial_balance_simple/trial_balance_simple.json
 msgid "Trial Balance (Simple)"
-msgstr "Brutto Saldo (Enkel)"
+msgstr "Prov Saldo (Enkel)"
 
 #. Name of a report
 #. Label of a Link in the Financial Reports Workspace
@@ -58131,7 +58131,7 @@ msgstr "Brutto Saldo (Enkel)"
 #: erpnext/accounts/workspace/financial_reports/financial_reports.json
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Trial Balance for Party"
-msgstr "Brutto Saldo för Parti"
+msgstr "Prov Saldo för Parti"
 
 #. Label of the trial_period_end (Date) field in DocType 'Subscription'
 #: erpnext/accounts/doctype/subscription/subscription.json
