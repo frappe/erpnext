@@ -79,6 +79,7 @@
   "acc_frozen_upto",
   "ignore_account_closing_balance",
   "use_legacy_controller_for_pcv",
+  "pcv_job_timeout",
   "column_break_25",
   "frozen_accounts_modifier",
   "tab_break_dpet",
@@ -635,6 +636,7 @@
    "label": "Use Legacy Controller For Period Closing Voucher"
   },
   {
+<<<<<<< HEAD
    "fieldname": "payment_entry_settings",
    "fieldtype": "Section Break",
    "label": "Payment Entry Settings"
@@ -650,6 +652,20 @@
    "fieldname": "show_party_balance",
    "fieldtype": "Check",
    "label": "Show Party Balance"
+=======
+   "default": "3600",
+   "description": "Timeout (in seconds) for each background job enqueued by Process Period Closing Voucher",
+   "fieldname": "pcv_job_timeout",
+   "fieldtype": "Int",
+   "label": "PCV Job Timeout (seconds)"
+  },
+  {
+   "description": "Users with this role will be notified if the asset depreciation gets failed",
+   "fieldname": "role_to_notify_on_depreciation_failure",
+   "fieldtype": "Link",
+   "label": "Role to Notify on Depreciation Failure",
+   "options": "Role"
+>>>>>>> 13b6c4a165 (feat(accounts): add configurable job timeout for Process Period Closing Voucher)
   },
   {
    "default": "30, 60, 90, 120",

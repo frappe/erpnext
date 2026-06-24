@@ -92,6 +92,8 @@ def start_pcv_processing(docname: str):
 		frappe.has_permission("Process Payment Reconciliation", "write", doc=docname, throw=True)
 		frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Running")
 
+		timeout = frappe.db.get_single_value("Accounts Settings", "pcv_job_timeout") or 3600
+
 		ppcvd = qb.DocType("Process Period Closing Voucher Detail")
 		if normal_balances := (
 			qb.from_(ppcvd)
@@ -118,7 +120,7 @@ def start_pcv_processing(docname: str):
 					frappe.enqueue(
 						method="erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.process_individual_date",
 						queue="long",
-						timeout="3600",
+						timeout=timeout,
 						is_async=True,
 						enqueue_after_commit=True,
 						docname=docname,
@@ -244,6 +246,8 @@ def get_gle_for_closing_account(pcv, dimension_balance, dimensions):
 
 @frappe.whitelist()
 def schedule_next_date(docname: str):
+	timeout = frappe.db.get_single_value("Accounts Settings", "pcv_job_timeout") or 3600
+
 	ppcvd = qb.DocType("Process Period Closing Voucher Detail")
 	if to_process := (
 		qb.from_(ppcvd)
@@ -269,7 +273,7 @@ def schedule_next_date(docname: str):
 			frappe.enqueue(
 				method="erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.process_individual_date",
 				queue="long",
-				timeout="3600",
+				timeout=timeout,
 				is_async=True,
 				enqueue_after_commit=True,
 				docname=docname,
@@ -299,7 +303,7 @@ def schedule_next_date(docname: str):
 				frappe.enqueue(
 					method="erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.summarize_and_post_ledger_entries",
 					queue="long",
-					timeout="3600",
+					timeout=timeout,
 					is_async=True,
 					job_name=job_name,
 					enqueue_after_commit=True,
