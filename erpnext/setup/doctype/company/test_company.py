@@ -10,7 +10,11 @@ from frappe.utils import random_string
 from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import (
 	get_charts_for_country,
 )
+from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.setup.doctype.company.company import get_default_company_address
+from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -234,6 +238,44 @@ class TestCompany(ERPNextTestSuite):
 		after = get_all_transactions_annual_history(company).get(key, 0)
 		self.assertEqual(after - before, 2)
 
+	def test_sdbnb_validation_requires_account_when_enabled(self):
+		company = get_test_company()
+
+		company.enable_stock_delivered_but_not_billed = 1
+		company.stock_delivered_but_not_billed = None
+
+		with self.assertRaises(frappe.ValidationError):
+			company.save()
+
+	def test_disable_sdbnb_with_outstanding_delivery_note_fails(self):
+		company = get_test_company()
+
+		item_code = create_stock_item_with_inventory()
+		create_outstanding_delivery_note(item_code)
+
+		company.enable_stock_delivered_but_not_billed = 0
+
+		with self.assertRaises(frappe.ValidationError):
+			company.save()
+
+	def test_cannot_change_sdbnb_account_with_outstanding_delivery_note(self):
+		company = get_test_company()
+
+		item_code = create_stock_item_with_inventory()
+		create_outstanding_delivery_note(item_code)
+
+		new_account = create_account(
+			account_name="Stock Delivered But Not Billed - New",
+			account_type="Stock Delivered But Not Billed",
+			parent_account="Stock Assets - _TSDBNB",
+			company=company.name,
+		)
+
+		company.stock_delivered_but_not_billed = new_account
+
+		with self.assertRaises(frappe.ValidationError):
+			company.save()
+
 	def test_demo_data(self):
 		from erpnext.setup.demo import clear_demo_data, setup_demo_data
 
@@ -297,3 +339,49 @@ def create_test_lead_in_company(company):
 		lead.company = company
 		lead.save()
 	return lead.name
+
+
+def get_test_company():
+	if frappe.db.exists("Company", "_Test SDBNB Company"):
+		return frappe.get_doc("Company", "_Test SDBNB Company")
+
+	return frappe.get_doc(
+		{
+			"doctype": "Company",
+			"company_name": "_Test SDBNB Company",
+			"abbr": "_TSDBNB",
+			"country": "India",
+			"default_currency": "INR",
+			"enable_perpetual_inventory": 1,
+			"enable_stock_delivered_but_not_billed": 1,
+		}
+	).insert()
+
+
+def create_stock_item_with_inventory():
+	item_code = make_item(
+		"SDBNB Test Item",
+		properties={"is_stock_item": 1},
+	).name
+
+	make_stock_entry(
+		item_code=item_code,
+		target="Stores - _TSDBNB",
+		qty=10,
+		basic_rate=100,
+		company="_Test SDBNB Company",
+	)
+
+	return item_code
+
+
+def create_outstanding_delivery_note(item_code):
+	return create_delivery_note(
+		item_code=item_code,
+		qty=5,
+		rate=150,
+		company="_Test SDBNB Company",
+		warehouse="Stores - _TSDBNB",
+		cost_center="Main - _TSDBNB",
+		expense_account="Stock Delivered But Not Billed - _TSDBNB",
+	)

@@ -79,7 +79,8 @@
 		"domain": "Manufacturing",
 		"chart_of_accounts": "Standard",
 		"default_holiday_list": "_Test Holiday List",
-		"enable_perpetual_inventory": 1
+		"enable_perpetual_inventory": 1,
+		"enable_stock_delivered_but_not_billed": 1
 	},
 	{
 		"abbr": "_TC6",
