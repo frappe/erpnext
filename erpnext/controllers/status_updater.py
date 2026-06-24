@@ -275,6 +275,12 @@ class StatusUpdater(Document):
 						item["idx"] = d.idx
 						item["target_ref_field"] = args["target_ref_field"].replace("_", " ")
 
+						# skip qty over-allowance check for non-stock items
+						if "qty" in args.get("target_ref_field", "") and not frappe.get_cached_value(
+							"Item", item["item_code"], "is_stock_item"
+						):
+							continue
+
 						# if not item[args['target_ref_field']]:
 						# 	msgprint(_("Note: System will not check over-delivery and over-booking for Item {0} as quantity or amount is 0").format(item.item_code))
 						if args.get("no_allowance"):
