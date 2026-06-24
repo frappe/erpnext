@@ -321,9 +321,25 @@ class SubcontractingReceipt(SubcontractingController):
 			return
 
 		for item in self.supplied_items:
-			key = (item.reference_name, item.rm_item_code, item.main_item_code)
+			key = self._supplied_item_dimension_key(item)
 			if not item.get("inventory_dimension_bundle") and key in saved:
 				item.inventory_dimension_bundle = saved[key]
+
+	@staticmethod
+	def _supplied_item_dimension_key(item):
+		"""Stable identity of a supplied row across the BOM rebuild.
+
+		The batch / serial identity is part of the key so the same RM consumed against the same
+		finished good across multiple batches keeps a distinct bundle per row instead of collapsing
+		to (and restoring) a single one.
+		"""
+		return (
+			item.reference_name,
+			item.rm_item_code,
+			item.main_item_code,
+			item.get("batch_no"),
+			item.get("serial_no"),
+		)
 
 	def set_supplied_items_expense_account(self):
 		for item in self.supplied_items:
@@ -348,7 +364,7 @@ class SubcontractingReceipt(SubcontractingController):
 		stash the bundle links so they can be restored onto the matching rebuilt rows.
 		"""
 		self._supplied_item_dimension_bundles = {
-			(d.reference_name, d.rm_item_code, d.main_item_code): d.inventory_dimension_bundle
+			self._supplied_item_dimension_key(d): d.inventory_dimension_bundle
 			for d in self.supplied_items
 			if d.get("inventory_dimension_bundle")
 		}

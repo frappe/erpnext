@@ -307,13 +307,18 @@ class InventoryDimensionBundle(Document):
 				).format(frappe.bold(self.total_qty), frappe.bold(row_qty))
 			)
 
-	def set_inventory_dimension_values(self, parent_doc, row, qty_field="qty", warehouse=None):
+	def set_inventory_dimension_values(
+		self, parent_doc, row, qty_field="qty", warehouse=None, item_code=None, type_of_transaction=None
+	):
 		"""Stamp the linked transaction's references onto the bundle and submit it.
 
 		Mirrors ``Serial and Batch Bundle.set_serial_and_batch_values``. Called from the
 		transaction controllers on submit for stock-item rows that carry an inventory
 		dimension bundle. ``warehouse`` is passed for the rejected-qty bundle so it posts against
-		the rejected warehouse; otherwise it is derived from the row.
+		the rejected warehouse; otherwise it is derived from the row. ``item_code`` and
+		``type_of_transaction`` are passed for rows whose stock identity isn't ``row.item_code`` or
+		whose direction the voucher can't infer from the row (e.g. a Subcontracting Receipt's
+		``supplied_items``, which consume ``rm_item_code`` outward from the supplier warehouse).
 		"""
 		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 			combine_datetime,
@@ -323,12 +328,12 @@ class InventoryDimensionBundle(Document):
 		self.voucher_type = parent_doc.doctype
 		self.voucher_no = parent_doc.name
 		self.voucher_detail_no = row.name
-		self.item_code = row.item_code
+		self.item_code = item_code or row.item_code
 		self.company = parent_doc.company
 
 		# The voucher is authoritative for direction (it knows returns, transfers, etc.); overwrite
 		# any direction inferred while the bundle was a manually created draft.
-		self.type_of_transaction = get_type_of_transaction(parent_doc, row)
+		self.type_of_transaction = type_of_transaction or get_type_of_transaction(parent_doc, row)
 
 		if warehouse:
 			self.warehouse = warehouse

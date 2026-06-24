@@ -34,13 +34,15 @@ def execute(filters=None):
 	# Skip entirely when the feature is disabled in Stock Settings.
 	dimension_enabled = is_inventory_dimension_enabled()
 	dimension_filter, dimension_display = ({}, {})
-	dimension_contributions, dimension_bundles = {}, None
+	dimension_contributions, dimension_bundles, dimension_value_map = {}, None, {}
 	if dimension_enabled:
 		dimension_filter, dimension_display = get_dimension_sub_ledger_filter(filters)
 		if dimension_filter:
-			dimension_contributions, dimension_bundles = get_dimension_bundle_contributions(
-				filters, dimension_filter, items
-			)
+			(
+				dimension_contributions,
+				dimension_bundles,
+				dimension_value_map,
+			) = get_dimension_bundle_contributions(filters, dimension_filter, items)
 
 	sl_entries = get_stock_ledger_entries(filters, items, bundles=dimension_bundles)
 	item_details = get_item_details(items, sl_entries, include_uom)
@@ -115,7 +117,9 @@ def execute(filters=None):
 		sle.update(item_detail)
 
 		if dimension_filter:
-			apply_sub_ledger_dimension(sle, dimension_contributions, dimension_display, dimension_running)
+			apply_sub_ledger_dimension(
+				sle, dimension_contributions, dimension_display, dimension_running, dimension_value_map
+			)
 			data.append(sle)
 			if include_uom:
 				conversion_factors.append(item_detail.conversion_factor)
@@ -1003,10 +1007,21 @@ def _apply_dimension_filter(query, entry, source_values):
 def get_dimension_bundle_contributions(filters, source_values, items):
 	"""Net qty each bundle contributes to the filtered dimension, keyed by ``(bundle, warehouse)``.
 
-	Also returns the set of bundles touching the dimension so the SLE query can be restricted to them.
+	Returns ``(contributions, bundles, value_map)``: ``bundles`` is the set of bundles touching the
+	dimension (so the SLE query can be restricted to them); ``value_map`` records, per
+	``(bundle, warehouse)``, the actual filtered dimension value(s) the bundle holds, so each result row
+	shows what it really contributed instead of just the first selected filter value.
 	"""
 	entry = frappe.qb.DocType("Inventory Dimension Entry")
 	bundle = frappe.qb.DocType("Inventory Dimension Bundle")
+
+	# Map each filtered source column to its report column, and pull the source columns so we can show
+	# the real value(s) per row (a multi-value filter must not stamp the first value on every row).
+	source_to_target = {
+		dimension.source_fieldname: dimension.fieldname
+		for dimension in get_inventory_dimensions()
+		if dimension.source_fieldname in source_values
+	}
 
 	query = (
 		frappe.qb.from_(entry)
@@ -1016,6 +1031,7 @@ def get_dimension_bundle_contributions(filters, source_values, items):
 			entry.parent.as_("bundle"),
 			entry.warehouse,
 			entry.qty,
+			*[entry[source] for source in source_to_target],
 		)
 		.where((entry.is_cancelled == 0) & (entry.docstatus == 1))
 	)
@@ -1028,16 +1044,19 @@ def get_dimension_bundle_contributions(filters, source_values, items):
 	if filters.get("company"):
 		query = query.where(bundle.company == filters.get("company"))
 
-	contributions, bundles = {}, set()
+	contributions, bundles, value_map = {}, set(), {}
 	for row in query.run(as_dict=True):
 		bundles.add(row.bundle)
+		key = (row.bundle, row.warehouse)
 		# Inventory Dimension Entry qty is stored signed (negative for outward).
-		signed_qty = flt(row.qty)
-		contributions[(row.bundle, row.warehouse)] = (
-			contributions.get((row.bundle, row.warehouse), 0.0) + signed_qty
-		)
+		contributions[key] = contributions.get(key, 0.0) + flt(row.qty)
 
-	return contributions, bundles
+		bucket = value_map.setdefault(key, {})
+		for source, target in source_to_target.items():
+			if row.get(source):
+				bucket.setdefault(target, set()).add(row.get(source))
+
+	return contributions, bundles, value_map
 
 
 def as_filter_list(value) -> list:
@@ -1121,13 +1140,14 @@ def get_valuation_rate_before(item_code, warehouse, from_date):
 	return flt(rate[0][0]) if rate else 0.0
 
 
-def apply_sub_ledger_dimension(sle, contributions, display_map, running):
+def apply_sub_ledger_dimension(sle, contributions, display_map, running, value_map=None):
 	"""Override an SLE row with the filtered dimension's qty/value and running balance.
 
 	The running balance is tracked per ``(item_code, warehouse)`` so a dimension filter spanning
 	multiple items/warehouses does not produce a meaningless combined balance.
 	"""
-	dim_qty = flt(contributions.get((sle.get("inventory_dimension_bundle"), sle.warehouse), 0.0))
+	key = (sle.get("inventory_dimension_bundle"), sle.warehouse)
+	dim_qty = flt(contributions.get(key, 0.0))
 	valuation_rate = flt(sle.valuation_rate)
 	dim_value = dim_qty * valuation_rate
 
@@ -1142,4 +1162,11 @@ def apply_sub_ledger_dimension(sle, contributions, display_map, running):
 	sle.stock_value = balance["value"]
 	sle.incoming_rate = valuation_rate if dim_qty > 0 else 0
 	sle.in_out_rate = valuation_rate
-	sle.update(display_map)
+
+	# Show the actual filtered value(s) this row's bundle holds; fall back to the filter label
+	# (display_map) only for rows whose bundle did not record a value for the dimension.
+	row_display = dict(display_map)
+	for target, values in (value_map or {}).get(key, {}).items():
+		if values:
+			row_display[target] = ", ".join(sorted(values))
+	sle.update(row_display)

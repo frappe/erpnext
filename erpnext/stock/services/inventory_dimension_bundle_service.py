@@ -12,6 +12,8 @@ qty is split across dimension combinations. The check is gated on ``is_stock_ite
 service / non-stock rows are never asked for dimension values.
 """
 
+import typing
+
 import frappe
 from frappe import _, bold
 from frappe.utils import flt
@@ -31,16 +33,32 @@ class InventoryDimensionBundleService:
 	def get_table_name(self, table_name=None) -> str:
 		return table_name or "items"
 
+	# Tables other than ``items`` whose rows can carry a dimension bundle, with the field overrides
+	# needed to stamp it. A Subcontracting Receipt consumes raw materials through ``supplied_items``,
+	# which name the item/qty/warehouse differently and always move stock *out* of the supplier
+	# warehouse - so the bundle is stamped as an Outward consumption against that warehouse.
+	TABLE_CONFIG: typing.ClassVar[dict] = {
+		"packed_items": {},
+		"supplied_items": {
+			"item_field": "rm_item_code",
+			"qty_field": "consumed_qty",
+			"type_of_transaction": "Outward",
+			"warehouse_attr": "supplier_warehouse",
+		},
+	}
+
 	def get_bundle_tables(self, table_name=None) -> list:
 		"""Item tables that can carry inventory dimension bundles.
 
-		Besides the main ``items`` table, a Product Bundle line's stock moves through ``packed_items``,
-		so a dimension bundle captured on a packed row must be stamped/submitted/cancelled too.
+		Besides the main ``items`` table, a Product Bundle line's stock moves through ``packed_items``
+		and a Subcontracting Receipt's raw material is consumed through ``supplied_items``; a dimension
+		bundle captured on either must be stamped/submitted/cancelled alongside the main rows.
 		"""
 		if table_name:
 			return [table_name]
 
-		return [table for table in ("items", "packed_items") if self.doc.meta.get_field(table)]
+		tables = ["items", *self.TABLE_CONFIG]
+		return [table for table in tables if self.doc.meta.get_field(table)]
 
 	def get_child_doctype(self, table_name) -> str | None:
 		meta_field = self.doc.meta.get_field(table_name)
@@ -103,14 +121,17 @@ class InventoryDimensionBundleService:
 	def set_inventory_dimension_bundle(self, table_name=None, ignore_validate=False):
 		"""On submit, stamp references onto each row's bundle(s) and submit them."""
 		table_name = self.get_table_name(table_name)
+		config = self.TABLE_CONFIG.get(table_name, {})
+		item_field = config.get("item_field", "item_code")
 
 		for row in self.doc.get(table_name):
+			item_code = row.get(item_field)
 			for fieldname, qty_field, warehouse_field in self.BUNDLE_FIELDS:
 				bundle = row.get(fieldname)
 				if not bundle:
 					continue
 
-				if not self.is_stock_item(row.get("item_code")):
+				if not self.is_stock_item(item_code):
 					# A non-stock row must never carry a dimension bundle.
 					row.set(fieldname, None)
 					continue
@@ -120,9 +141,18 @@ class InventoryDimensionBundleService:
 					doc.set_inventory_dimension_values(
 						self.doc,
 						row,
-						qty_field=qty_field,
-						warehouse=row.get(warehouse_field) if warehouse_field else None,
+						qty_field=config.get("qty_field", qty_field),
+						warehouse=self._bundle_warehouse(row, warehouse_field, config),
+						item_code=item_code,
+						type_of_transaction=config.get("type_of_transaction"),
 					)
+
+	def _bundle_warehouse(self, row, warehouse_field, config):
+		"""Warehouse the bundle posts against: a parent attribute (supplied items consume from the
+		supplier warehouse, which the row does not name), else the row's own warehouse field."""
+		if config.get("warehouse_attr"):
+			return self.doc.get(config["warehouse_attr"])
+		return row.get(warehouse_field) if warehouse_field else None
 
 	def cancel_inventory_dimension_bundles(self, table_name=None):
 		"""Cancel the submitted bundles of a voucher being cancelled, then unlink them from its rows.
@@ -186,14 +216,23 @@ class InventoryDimensionBundleService:
 		# stock on either or both legs, and each leg captures its dimensions on its own bundle; checking
 		# them together would falsely flag a row that captured its dimension on the other leg's bundle.
 		for bundle_field, qty_field, _warehouse_field in self.BUNDLE_FIELDS:
-			self._validate_leg(table_name, dimensions, mandatory, bundle_field, qty_field)
+			self._validate_accepted_dim_qty(table_name, dimensions, mandatory, bundle_field, qty_field)
 
-	def _validate_leg(self, table_name, dimensions, mandatory, bundle_field, qty_field):
+	def _validate_accepted_dim_qty(self, table_name, dimensions, mandatory, bundle_field, qty_field):
 		"""Enforce mandatory dimensions for the rows that move stock on one leg (accepted/rejected)."""
+		# Some tables name the item/qty fields differently (supplied items hold the RM in
+		# ``rm_item_code`` and consume ``consumed_qty``); resolve them the same way the stamping does
+		# so the gate is not silently skipped. The per-table qty override is the accepted-leg field;
+		# the rejected leg keeps its own (``rejected_qty``), which such tables simply do not have.
+		config = self.TABLE_CONFIG.get(table_name, {})
+		item_field = config.get("item_field", "item_code")
+		if bundle_field == "inventory_dimension_bundle":
+			qty_field = config.get("qty_field", qty_field)
+
 		rows = [
 			row
 			for row in self.doc.get(table_name)
-			if self.is_stock_item(row.get("item_code")) and flt(row.get(qty_field))
+			if self.is_stock_item(row.get(item_field)) and flt(row.get(qty_field))
 		]
 		if not rows:
 			return
@@ -211,7 +250,7 @@ class InventoryDimensionBundleService:
 				if dimension.get("name") not in covered:
 					frappe.throw(
 						_("Row #{0}: Please set the inventory dimension {1} for item {2}.").format(
-							row.idx, bold(dimension.get("name")), bold(row.get("item_code"))
+							row.idx, bold(dimension.get("name")), bold(row.get(item_field))
 						),
 						title=_("Inventory Dimension Required"),
 					)

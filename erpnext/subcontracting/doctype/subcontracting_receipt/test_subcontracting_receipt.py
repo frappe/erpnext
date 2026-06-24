@@ -2106,6 +2106,8 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		)
 
 		# --- Subcontracting Receipt -------------------------------------------------------------
+		# Stamp a bundle on the received finished good (items) and on the consumed raw material
+		# (supplied_items); both must be submitted and posted to the sub-ledger on receipt submit.
 		scr = make_subcontracting_receipt(sco.name)
 		scr.save()
 
@@ -2113,6 +2115,14 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		received.inventory_dimension_bundle = make_inventory_dimension_bundle(
 			received.item_code, received.warehouse, [{"qty": received.qty, "inv_site": "Site 1"}]
 		)
+
+		supplied = scr.supplied_items[0]
+		supplied.inventory_dimension_bundle = make_inventory_dimension_bundle(
+			supplied.rm_item_code,
+			scr.supplier_warehouse,
+			[{"qty": supplied.consumed_qty, "inv_site": "Site 1"}],
+		)
+
 		scr.submit()
 		scr.reload()
 
@@ -2133,6 +2143,43 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 				},
 			),
 			"Subcontracting Receipt's finished-good SLE did not carry the dimension bundle",
+		)
+
+		# The supplied (consumed RM) bundle is submitted too, and the supplier-warehouse consumption
+		# SLE carries it - so a dimension bundle on supplied_items is no longer left in draft.
+		supplied_bundle = scr.supplied_items[0].inventory_dimension_bundle
+		self.assertTrue(supplied_bundle, "Subcontracting Receipt dropped the supplied item's bundle")
+		self.assertEqual(
+			frappe.db.get_value("Inventory Dimension Bundle", supplied_bundle, "docstatus"),
+			1,
+			"Supplied item's dimension bundle was not submitted on stock posting",
+		)
+		self.assertTrue(
+			frappe.db.exists(
+				"Stock Ledger Entry",
+				{
+					"voucher_type": "Subcontracting Receipt",
+					"voucher_no": scr.name,
+					"inventory_dimension_bundle": supplied_bundle,
+				},
+			),
+			"Supplied item's consumption SLE did not carry the dimension bundle",
+		)
+
+		# Cancelling the receipt cancels both bundles and unlinks them from their rows (so a later
+		# amend does not carry a link to a cancelled document).
+		scr.reload()
+		scr.cancel()
+		for bundle in (receipt_bundle, supplied_bundle):
+			self.assertEqual(
+				frappe.db.get_value("Inventory Dimension Bundle", bundle, "docstatus"),
+				2,
+				"Dimension bundle was not cancelled with its receipt",
+			)
+		scr.reload()
+		self.assertFalse(scr.items[0].inventory_dimension_bundle, "Finished-good bundle was not unlinked")
+		self.assertFalse(
+			scr.supplied_items[0].inventory_dimension_bundle, "Supplied item bundle was not unlinked"
 		)
 
 

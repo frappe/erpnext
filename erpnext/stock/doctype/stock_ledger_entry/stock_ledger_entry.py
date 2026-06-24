@@ -126,6 +126,12 @@ class StockLedgerEntry(Document):
 		if self.is_cancelled or not is_inventory_dimension_enabled():
 			return
 
+		# Skip mandatory enforcement while a patch is backfilling/reposting the ledger: historical SLEs
+		# may predate the dimension or legitimately carry no bundle, and a throw would abort the migrate.
+		# Mirrors the guards in InventoryDimensionBundle.validate_mandatory_dimensions / validate_negative_stock.
+		if frappe.flags.in_patch:
+			return
+
 		if self.inventory_dimension_bundle:
 			self.validate_unique_inventory_dimension_bundle()
 		else:

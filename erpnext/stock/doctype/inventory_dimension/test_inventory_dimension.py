@@ -474,6 +474,23 @@ class TestInventoryDimension(ERPNextTestSuite):
 		# Running balance for Rack 1 ends at 20.
 		self.assertEqual(rows[-1].get("qty_after_transaction"), 20)
 
+		# Filtering on multiple values must show each row's own value, not the first selected one
+		# stamped on every row (the +30 and -10 are Rack 1, the +20 is Rack 2).
+		multi = frappe._dict(
+			company=company,
+			from_date=add_days(today(), -1),
+			to_date=today(),
+			item_code=[item_code],
+			warehouse=[warehouse],
+			rack=["Rack 1", "Rack 2"],
+		)
+		_columns, data = execute(multi)
+		multi_rows = [row for row in data if row.get("item_code") == item_code]
+		self.assertEqual(
+			[(row.get("rack"), row.get("actual_qty")) for row in multi_rows],
+			[("Rack 1", 30), ("Rack 2", 20), ("Rack 1", -10)],
+		)
+
 		# Without a dimension filter, each row still shows its bundle's dimension value in the column.
 		unfiltered = frappe._dict(
 			company=company,
@@ -679,6 +696,33 @@ class TestInventoryDimension(ERPNextTestSuite):
 				"rejected_inventory_dimension_bundle": rejected_bundle,
 			}
 		)
+
+	def test_mandatory_dimension_validation_reads_supplied_item_fields(self):
+		"""The mandatory check resolves the item/qty from the table config, so a Subcontracting
+		Receipt's ``supplied_items`` (RM in ``rm_item_code``, consumed via ``consumed_qty``) are not
+		silently skipped - they are enforced like any other stock-moving row."""
+		item_code = "_Test Item"
+		dimension = create_inventory_dimension(
+			reference_document="Shelf", dimension_name="Shelf", apply_to_all_doctypes=1
+		)
+		dimension.db_set("reqd", 1)
+		clear_dimension_cache()
+
+		warehouse = create_warehouse("Supplied Reqd Warehouse")
+		bundle = make_inventory_dimension_bundle(item_code, warehouse, [{"qty": 5, "shelf": "Shelf 1"}])
+
+		service = InventoryDimensionBundleService(frappe.new_doc("Subcontracting Receipt"))
+
+		def _check(row):
+			service.doc.set("supplied_items", [frappe._dict(idx=1, rm_item_code=item_code, **row)])
+			service.validate_inventory_dimension_bundle("supplied_items")
+
+		# A consumed RM row without a bundle must be caught (previously skipped: item_code was read
+		# from the absent ``item_code`` field, so is_stock_item(None) gated the row out).
+		self.assertRaises(frappe.ValidationError, _check, {"consumed_qty": 5})
+
+		# The same row with a covering bundle passes.
+		_check({"consumed_qty": 5, "inventory_dimension_bundle": bundle})
 
 	def test_service_item_skips_dimension(self):
 		"""Non-stock (service) rows never require a dimension - they are skipped entirely."""
