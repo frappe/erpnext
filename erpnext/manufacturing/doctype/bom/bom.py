@@ -1403,16 +1403,18 @@ def validate_bom_no(item, bom_no):
 
 
 def _bom_contains_item(bom, item):
-	item = item.lower()
+	item_lower = item.lower()
 	for d in bom.items:
-		if d.item_code.lower() == item:
+		if d.item_code.lower() == item_lower:
 			return True
 	for d in bom.secondary_items:
-		if d.item_code.lower() == item:
+		if d.item_code.lower() == item_lower:
 			return True
 
+	# Use the original-cased `item` for the Item lookup: names are case-sensitive on Postgres,
+	# so a lowercased name would miss the record and drop the variant->template BOM match.
 	return (
-		bom.item.lower() == item
+		bom.item.lower() == item_lower
 		or bom.item.lower() == cstr(frappe.db.get_value("Item", item, "variant_of")).lower()
 	)
 
