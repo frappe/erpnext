@@ -437,3 +437,4 @@ erpnext.patches.v16_0.clear_procedures_from_receivable_report
 erpnext.patches.v16_0.migrate_address_contact_custom_fields
 erpnext.patches.v15_0.set_main_item_code_in_material_request_plan_item
 erpnext.patches.v16_0.set_posting_datetime_for_sabb_and_drop_indexes
+execute:frappe.db.set_single_value("Accounts Settings", "pcv_job_timeout", 3600)
