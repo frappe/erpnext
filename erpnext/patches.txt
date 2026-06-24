@@ -483,4 +483,19 @@ erpnext.patches.v16_0.fix_titles
 erpnext.patches.v16_0.set_not_applicable_on_german_item_tax_templates
 erpnext.patches.v16_0.clear_procedures_from_receivable_report
 erpnext.patches.v16_0.migrate_address_contact_custom_fields
+<<<<<<< HEAD
 erpnext.patches.v16_0.drop_redundant_serial_no_index_from_sabb
+=======
+<<<<<<< HEAD
+erpnext.patches.v15_0.set_main_item_code_in_material_request_plan_item
+erpnext.patches.v16_0.set_posting_datetime_for_sabb_and_drop_indexes
+=======
+erpnext.patches.v16_0.rename_secondary_item_type_field
+erpnext.patches.v16_0.submit_existing_product_bundles #1
+erpnext.patches.v16_0.migrate_subscription_generate_invoice_at
+erpnext.patches.v16_0.rename_subscription_billing_period_fields
+erpnext.patches.v16_0.drop_redundant_serial_no_index_from_sabb
+erpnext.patches.v16_0.set_default_close_opportunity_after_days
+execute:frappe.db.set_single_value("Accounts Settings", "pcv_job_timeout", 3600)
+>>>>>>> 3da7eefebb (refactor: patch, display depends on and json changes)
+>>>>>>> c33d7e5d7b (refactor: patch, display depends on and json changes)

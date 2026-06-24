@@ -90,6 +90,15 @@ class AccountsSettings(Document):
 		make_payment_via_journal_entry: DF.Check
 		merge_similar_account_heads: DF.Check
 		over_billing_allowance: DF.Currency
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+		post_change_gl_entries: DF.Check
+=======
+		pcv_job_timeout: DF.Int
+		preview_mode: DF.Check
+>>>>>>> 3da7eefebb (refactor: patch, display depends on and json changes)
+>>>>>>> c33d7e5d7b (refactor: patch, display depends on and json changes)
 		receivable_payable_fetch_method: DF.Literal["Buffered Cursor", "UnBuffered Cursor"]
 		receivable_payable_remarks_length: DF.Int
 		reconciliation_queue_size: DF.Int
