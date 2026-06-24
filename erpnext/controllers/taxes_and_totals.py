@@ -169,7 +169,7 @@ class calculate_taxes_and_totals:
 			return
 
 		if not self.discount_amount_applied:
-			do_not_round_fields = ["valuation_rate", "incoming_rate"]
+			do_not_round_fields = ["valuation_rate", "incoming_rate", "sales_incoming_rate"]
 
 			for item in self.doc.items:
 				self.doc.round_floats_in(item, do_not_round_fields=do_not_round_fields)
