@@ -229,6 +229,9 @@ class Company(NestedSet):
 
 		doc_before_save = self.get_doc_before_save()
 
+		if not (doc_before_save and doc_before_save.stock_delivered_but_not_billed):
+			return
+
 		account_changed = (
 			self.stock_delivered_but_not_billed != doc_before_save.stock_delivered_but_not_billed
 		)
