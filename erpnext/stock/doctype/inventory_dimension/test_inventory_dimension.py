@@ -631,6 +631,55 @@ class TestInventoryDimension(ERPNextTestSuite):
 			4,
 		)
 
+	def test_mandatory_dimension_validates_each_qty_leg(self):
+		"""Mandatory coverage is enforced per leg: the accepted leg uses ``inventory_dimension_bundle``
+		and the rejected leg uses ``rejected_inventory_dimension_bundle``. A row that captured its
+		dimension on the rejected bundle alone must pass, and an uncovered rejected leg must be caught."""
+		item_code = "_Test Item"
+		dimension = create_inventory_dimension(
+			reference_document="Shelf", dimension_name="Shelf", apply_to_all_doctypes=1
+		)
+		dimension.db_set("reqd", 1)
+		clear_dimension_cache()
+
+		warehouse = create_warehouse("Reqd Leg Accepted Warehouse")
+		rejected_warehouse = create_warehouse("Reqd Leg Rejected Warehouse")
+
+		accepted_bundle = make_inventory_dimension_bundle(
+			item_code, warehouse, [{"qty": 10, "shelf": "Shelf 1"}]
+		)
+		rejected_bundle = make_inventory_dimension_bundle(
+			item_code, rejected_warehouse, [{"qty": 4, "shelf": "Shelf 2"}]
+		)
+
+		service = InventoryDimensionBundleService(frappe.new_doc("Purchase Receipt"))
+
+		def _check(row):
+			service.doc.set("items", [frappe._dict(idx=1, item_code=item_code, **row)])
+			service.validate_inventory_dimension_bundle()
+
+		# Rejected-only row (qty=0): the dimension is captured on the rejected bundle, so the row is
+		# fully covered. Previously the check only inspected the accepted bundle and falsely threw.
+		_check({"qty": 0, "rejected_qty": 4, "rejected_inventory_dimension_bundle": rejected_bundle})
+
+		# Both legs move stock but the rejected bundle is missing: the rejected leg must be caught.
+		# Previously the rejected bundle was never fetched, so this gap was silently skipped.
+		self.assertRaises(
+			frappe.ValidationError,
+			_check,
+			{"qty": 10, "rejected_qty": 4, "inventory_dimension_bundle": accepted_bundle},
+		)
+
+		# Both legs covered on their own bundles -> passes.
+		_check(
+			{
+				"qty": 10,
+				"rejected_qty": 4,
+				"inventory_dimension_bundle": accepted_bundle,
+				"rejected_inventory_dimension_bundle": rejected_bundle,
+			}
+		)
+
 	def test_service_item_skips_dimension(self):
 		"""Non-stock (service) rows never require a dimension - they are skipped entirely."""
 		service_item = "Test Service Dimension Item"

@@ -181,16 +181,29 @@ class InventoryDimensionBundleService:
 		if not mandatory:
 			return
 
-		rows = [row for row in self.doc.get(table_name) if self.row_has_dimension_qty(row)]
+		# Validate the accepted leg (qty -> inventory_dimension_bundle) and the rejected leg
+		# (rejected_qty -> rejected_inventory_dimension_bundle) independently. A purchase row can move
+		# stock on either or both legs, and each leg captures its dimensions on its own bundle; checking
+		# them together would falsely flag a row that captured its dimension on the other leg's bundle.
+		for bundle_field, qty_field, _warehouse_field in self.BUNDLE_FIELDS:
+			self._validate_leg(table_name, dimensions, mandatory, bundle_field, qty_field)
+
+	def _validate_leg(self, table_name, dimensions, mandatory, bundle_field, qty_field):
+		"""Enforce mandatory dimensions for the rows that move stock on one leg (accepted/rejected)."""
+		rows = [
+			row
+			for row in self.doc.get(table_name)
+			if self.is_stock_item(row.get("item_code")) and flt(row.get(qty_field))
+		]
 		if not rows:
 			return
 
 		# Batch-fetch every linked bundle's entries up front so the per-row coverage check below
 		# is a dict lookup, not an N+1 query (a 50-line receipt fired 50 queries previously).
-		entries_by_bundle = self._get_entries_by_bundle(rows)
+		entries_by_bundle = self._get_entries_by_bundle(rows, bundle_field)
 
 		for row in rows:
-			covered = self._covered_dimensions(row, dimensions, entries_by_bundle)
+			covered = self._covered_dimensions(row, dimensions, entries_by_bundle, bundle_field)
 			for dimension in mandatory:
 				if not self.dimension_applies_to_row(dimension, row):
 					continue
@@ -203,11 +216,9 @@ class InventoryDimensionBundleService:
 						title=_("Inventory Dimension Required"),
 					)
 
-	def _get_entries_by_bundle(self, rows) -> dict:
+	def _get_entries_by_bundle(self, rows, bundle_field="inventory_dimension_bundle") -> dict:
 		"""All Inventory Dimension Entry rows for the rows' bundles, grouped by bundle, in one query."""
-		bundles = [
-			row.get("inventory_dimension_bundle") for row in rows if row.get("inventory_dimension_bundle")
-		]
+		bundles = [row.get(bundle_field) for row in rows if row.get(bundle_field)]
 		if not bundles:
 			return {}
 
@@ -219,9 +230,11 @@ class InventoryDimensionBundleService:
 
 		return entries_by_bundle
 
-	def _covered_dimensions(self, row, dimensions, entries_by_bundle) -> set:
+	def _covered_dimensions(
+		self, row, dimensions, entries_by_bundle, bundle_field="inventory_dimension_bundle"
+	) -> set:
 		"""Set of dimension names that the row's bundle provides a value for."""
-		bundle = row.get("inventory_dimension_bundle")
+		bundle = row.get(bundle_field)
 		if not bundle:
 			return set()
 

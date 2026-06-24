@@ -2036,10 +2036,9 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		frappe.flags["args"].pop("items", None)
 
 	def test_inventory_dimensions(self):
-		"""
-		The subcontracting controller resets the supplied items table on each save. This test ensures
-		the inventory dimension bundle linked on a supplied item is retained across saves.
-		"""
+		"""Inventory Dimension Bundles attached to a subcontracting RM transfer Stock Entry and to a
+		Subcontracting Receipt are stamped, submitted and posted to the quantity sub-ledger."""
+		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
 		from erpnext.stock.doctype.inventory_dimension.test_inventory_dimension import (
 			create_inventory_dimension,
 			make_inventory_dimension_bundle,
@@ -2049,11 +2048,6 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		# Inventory Dimensions are gated behind a feature flag; enable it for this test only.
 		frappe.flags.enable_inventory_dimension = 1
 		self.addCleanup(frappe.flags.pop, "enable_inventory_dimension", None)
-
-		# Inventory Dimension records are committed via Custom Field DDL, so a sibling test's
-		# mandatory (reqd) dimension can leak in and block this test's bundle-less setup receipts.
-		# Neutralise those flags for this run (rolled back at teardown).
-		reset_inventory_dimension_flags()
 
 		create_inventory_dimension(
 			apply_to_all_doctypes=1,
@@ -2065,26 +2059,81 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		sco = get_subcontracting_order()
 		rm_items = get_rm_items(sco.supplied_items)
-		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		make_stock_transfer_entry(
-			sco_no=sco.name,
-			rm_items=rm_items,
-			itemwise_details=copy.deepcopy(itemwise_details),
+
+		# Inventory Dimension records are committed via Custom Field DDL, so a sibling test's mandatory
+		# (reqd) dimension can leak in and demand a bundle on rows this test does not stamp - notably the
+		# receipt's RM consumption, which flows through ``supplied_items`` and cannot carry a bundle.
+		# Neutralise those flags only now, after the heavy SCO setup (whose commits/rollbacks could
+		# otherwise revert the change), so the neutralisation is live for the stock movements below.
+		reset_inventory_dimension_flags()
+
+		# Stamp a dimension bundle on each RM receipt so its Stock Ledger Entry carries one. This keeps
+		# the receipt valid even if a leaked mandatory dimension survives reset on a shared test runner.
+		for row in rm_items:
+			warehouse = row.get("warehouse") or "_Test Warehouse - _TC"
+			row["inventory_dimension_bundle"] = make_inventory_dimension_bundle(
+				row["item_code"], warehouse, [{"qty": row["qty"], "inv_site": "Site 1"}]
+			)
+		make_stock_in_entry(rm_items=rm_items)
+
+		# --- RM transfer Stock Entry ("Send to Subcontractor") ----------------------------------
+		# Mirrors the UI: build the transfer, attach a dimension bundle to each RM row, then submit.
+		ste = frappe.get_doc(make_rm_stock_entry(sco.name))
+		for row in ste.items:
+			row.inventory_dimension_bundle = make_inventory_dimension_bundle(
+				row.item_code, row.s_warehouse, [{"qty": row.qty, "inv_site": "Site 1"}]
+			)
+		ste.insert()
+		ste.submit()
+		ste.reload()
+
+		source_bundle = ste.items[0].inventory_dimension_bundle
+		self.assertTrue(source_bundle, "RM transfer did not retain its inventory dimension bundle")
+		self.assertEqual(
+			frappe.db.get_value("Inventory Dimension Bundle", source_bundle, "docstatus"),
+			1,
+			"RM transfer bundle was not submitted on stock posting",
 		)
+		# A two-legged transfer posts a bundle on both the source (outward) and target (inward) SLE.
+		sle_bundles = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_type": "Stock Entry", "voucher_no": ste.name, "is_cancelled": 0},
+			pluck="inventory_dimension_bundle",
+		)
+		self.assertTrue(sle_bundles, "RM transfer posted no stock ledger entries")
+		self.assertTrue(
+			all(sle_bundles), "A leg of the RM transfer posted to the ledger without a dimension bundle"
+		)
+
+		# --- Subcontracting Receipt -------------------------------------------------------------
 		scr = make_subcontracting_receipt(sco.name)
 		scr.save()
 
-		supplied = scr.supplied_items[0]
-		warehouse = supplied.get("warehouse") or "_Test Warehouse - _TC"
-		bundle = make_inventory_dimension_bundle(
-			supplied.rm_item_code,
-			warehouse,
-			[{"qty": supplied.required_qty, "inv_site": "Site 1"}],
+		received = scr.items[0]
+		received.inventory_dimension_bundle = make_inventory_dimension_bundle(
+			received.item_code, received.warehouse, [{"qty": received.qty, "inv_site": "Site 1"}]
 		)
-		scr.supplied_items[0].inventory_dimension_bundle = bundle
-		scr.save()
+		scr.submit()
+		scr.reload()
 
-		self.assertEqual(scr.supplied_items[0].inventory_dimension_bundle, bundle)
+		receipt_bundle = scr.items[0].inventory_dimension_bundle
+		self.assertTrue(receipt_bundle, "Subcontracting Receipt did not retain its dimension bundle")
+		self.assertEqual(
+			frappe.db.get_value("Inventory Dimension Bundle", receipt_bundle, "docstatus"),
+			1,
+			"Subcontracting Receipt bundle was not submitted on stock posting",
+		)
+		self.assertTrue(
+			frappe.db.exists(
+				"Stock Ledger Entry",
+				{
+					"voucher_type": "Subcontracting Receipt",
+					"voucher_no": scr.name,
+					"inventory_dimension_bundle": receipt_bundle,
+				},
+			),
+			"Subcontracting Receipt's finished-good SLE did not carry the dimension bundle",
+		)
 
 
 def make_return_subcontracting_receipt(**args):

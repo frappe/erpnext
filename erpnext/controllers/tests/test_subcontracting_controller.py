@@ -1271,12 +1271,25 @@ def make_stock_in_entry(**args):
 	for row in args.rm_items:
 		row = frappe._dict(row)
 
-		doc = make_stock_entry(
-			target=row.warehouse or "_Test Warehouse - _TC",
-			item_code=row.item_code,
-			qty=row.qty or 1,
-			basic_rate=row.rate or 100,
-		)
+		# A row may carry an Inventory Dimension Bundle (mandatory dimensions require one on the
+		# resulting SLE); stamp it before submit, mirroring the serial/batch bundle handling above.
+		if row.inventory_dimension_bundle:
+			doc = make_stock_entry(
+				target=row.warehouse or "_Test Warehouse - _TC",
+				item_code=row.item_code,
+				qty=row.qty or 1,
+				basic_rate=row.rate or 100,
+				do_not_save=True,
+			)
+			doc.items[0].inventory_dimension_bundle = row.inventory_dimension_bundle
+			doc.submit()
+		else:
+			doc = make_stock_entry(
+				target=row.warehouse or "_Test Warehouse - _TC",
+				item_code=row.item_code,
+				qty=row.qty or 1,
+				basic_rate=row.rate or 100,
+			)
 
 		if row.item_code not in items:
 			items.setdefault(
