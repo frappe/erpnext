@@ -51,7 +51,6 @@ frappe.ui.form.on("Inventory Dimension", {
 				"fetch_from_parent",
 				"type_of_transaction",
 				"condition",
-				"mandatory_depends_on",
 				"validate_negative_stock",
 			];
 

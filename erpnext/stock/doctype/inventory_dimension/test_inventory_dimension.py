@@ -246,27 +246,47 @@ class TestInventoryDimension(ERPNextTestSuite):
 		doc.reqd = 0
 		doc.save()
 
-	def test_check_mandatory_depends_on_dimensions(self):
+	def test_check_mandatory_depends_on_backend(self):
 		doc = create_inventory_dimension(
 			reference_document="Pallet",
 			type_of_transaction="Outward",
-			dimension_name="Pallet",
+			dimension_name="Pallet Backend",
 			apply_to_all_doctypes=0,
-			document_type="Stock Entry Detail",
+			document_type="Delivery Note Item",
 		)
 
-		doc.mandatory_depends_on = "t_warehouse"
+		doc.reqd = 0
+		doc.mandatory_depends_on_backend = "doc.qty > 0"
 		doc.save()
 
-		# Mandatory enforcement is now done server-side, so the custom field must NOT carry
-		# the `mandatory_depends_on` expression.
+		# The condition is enforced server-side, the custom field must not carry field-level `reqd`.
 		self.assertFalse(
 			frappe.db.get_value(
-				"Custom Field",
-				{"fieldname": "pallet", "dt": "Stock Entry Detail"},
-				"mandatory_depends_on",
+				"Custom Field", {"fieldname": "pallet_backend", "dt": "Delivery Note Item"}, "reqd"
 			)
 		)
+
+		item_code = "Test Backend Dimension Item"
+		create_item(item_code)
+		warehouse = create_warehouse("Backend Dimension Warehouse")
+
+		dn_doc = create_delivery_note(item_code=item_code, qty=5, warehouse=warehouse, do_not_save=True)
+
+		# qty > 0 -> backend condition is met, so the dimension is mandatory and blocks the save.
+		self.assertRaises(frappe.ValidationError, dn_doc.save)
+
+		if not frappe.db.exists("Pallet", "Pallet Backend Value"):
+			frappe.get_doc({"doctype": "Pallet", "pallet_name": "Pallet Backend Value"}).insert(
+				ignore_permissions=True
+			)
+
+		dn_doc.items[0].pallet_backend = "Pallet Backend Value"
+		dn_doc.save()
+
+		# Reset so the always-true condition does not make the dimension mandatory for
+		# subsequent Delivery Note tests sharing the same test database.
+		doc.mandatory_depends_on_backend = ""
+		doc.save()
 
 	def test_for_purchase_sales_and_stock_transaction(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc

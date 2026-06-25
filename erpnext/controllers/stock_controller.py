@@ -1149,8 +1149,8 @@ class StockController(AccountsController):
 		if self.docstatus >= 2:
 			return
 
-		for table_field in self.meta.get_table_fields():
-			rows = self.get(table_field.fieldname)
+		for table_field in ["items", "packed_items", "supplied_items"]:
+			rows = self.get(table_field)
 			if rows:
 				self.validate_mandatory_dimensions_in_table(rows)
 

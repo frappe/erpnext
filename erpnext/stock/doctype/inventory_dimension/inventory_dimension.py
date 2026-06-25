@@ -35,7 +35,7 @@ class InventoryDimension(Document):
 		document_type: DF.Link | None
 		fetch_from_parent: DF.Literal[None]
 		istable: DF.Check
-		mandatory_depends_on: DF.SmallText | None
+		mandatory_depends_on_backend: DF.SmallText | None
 		reference_document: DF.Link
 		reqd: DF.Check
 		source_fieldname: DF.Data | None
@@ -118,7 +118,6 @@ class InventoryDimension(Document):
 	def reset_value(self):
 		if self.apply_to_all_doctypes:
 			self.type_of_transaction = ""
-			self.mandatory_depends_on = ""
 
 			self.istable = 0
 			for field in ["document_type", "condition"]:
@@ -167,10 +166,10 @@ class InventoryDimension(Document):
 		if label_start_with:
 			label = f"{label_start_with} {self.dimension_name}"
 
-		# Note: `reqd`/`mandatory_depends_on` are intentionally NOT set on the custom fields.
-		# Mandatory enforcement happens on the server side via
-		# StockController.validate_inventory_dimension_mandatory() so that it can be gated
-		# (e.g. skip service rows) and never blocks documents that are being cancelled.
+		# Note: `reqd` is intentionally NOT set on the custom fields. Mandatory enforcement
+		# happens on the server side via StockController.validate_inventory_dimension_mandatory()
+		# so that it can be gated (e.g. skip service rows) and never blocks documents that are
+		# being cancelled.
 		dimension_fields = [
 			dict(
 				fieldname="inventory_dimension",
@@ -377,7 +376,11 @@ def get_document_wise_inventory_dimensions(doctype) -> dict:
 @request_cache
 def get_mandatory_inventory_dimensions(doctype) -> list:
 	"""Return the inventory dimensions applicable to `doctype` (a child doctype such as
-	`Stock Entry Detail`) that are configured as mandatory (`reqd` or `mandatory_depends_on`)."""
+	`Stock Entry Detail`) that need server-side mandatory enforcement.
+
+	A dimension qualifies only if it is configured as mandatory (`reqd`) or has a server-side
+	mandatory condition (`mandatory_depends_on_backend`). Non-mandatory dimensions are never
+	enforced, including the rejected dimension field on purchase rows."""
 	dimensions = frappe.get_all(
 		"Inventory Dimension",
 		fields=[
@@ -385,12 +388,12 @@ def get_mandatory_inventory_dimensions(doctype) -> list:
 			"dimension_name",
 			"source_fieldname",
 			"reqd",
-			"mandatory_depends_on",
+			"mandatory_depends_on_backend",
 		],
 		or_filters={"document_type": doctype, "apply_to_all_doctypes": 1},
 	)
 
-	return [d for d in dimensions if d.reqd or d.mandatory_depends_on]
+	return [d for d in dimensions if d.reqd or d.mandatory_depends_on_backend]
 
 
 def get_mandatory_dimension_fields(doctype, dimension) -> list:
@@ -401,14 +404,9 @@ def get_mandatory_dimension_fields(doctype, dimension) -> list:
 	Mirrors the mandatory logic that used to live on the custom fields in `get_dimension_fields`."""
 	fields = []
 	source_fieldname = dimension.source_fieldname
-
-	def to_condition(expression):
-		# Mirrors Frappe's `mandatory_depends_on` semantics: an `eval:` prefix is a python
-		# expression, otherwise the value is a fieldname that makes the field mandatory when set.
-		expression = expression.strip()
-		if expression.startswith("eval:"):
-			return expression[len("eval:") :]
-		return f"doc.{expression}"
+	# `mandatory_depends_on_backend` is a raw python expression evaluated server-side
+	# (with `doc` and `parent`), so it can be used as a condition directly.
+	backend_condition = (dimension.mandatory_depends_on_backend or "").strip() or None
 
 	# Primary source dimension field
 	if dimension.reqd and doctype == "Stock Entry Detail":
@@ -422,19 +420,23 @@ def get_mandatory_dimension_fields(doctype, dimension) -> list:
 				"doc.parent_detail_docname and parent.doctype in ['Delivery Note', 'Sales Invoice', 'POS Invoice']",
 			)
 		)
-	elif dimension.mandatory_depends_on:
-		fields.append((source_fieldname, to_condition(dimension.mandatory_depends_on)))
 	elif dimension.reqd:
 		fields.append((source_fieldname, None))
+	elif backend_condition:
+		fields.append((source_fieldname, backend_condition))
 
-	# Rejected dimension field (only present on purchase rows)
+	# Rejected dimension field (only present on purchase rows). Enforced only when the dimension
+	# is mandatory for the row AND there is a rejected quantity.
 	if doctype in ["Purchase Invoice Item", "Purchase Receipt Item"]:
-		fields.append((f"rejected_{source_fieldname}", "doc.rejected_qty > 0"))
+		if dimension.reqd:
+			fields.append((f"rejected_{source_fieldname}", "doc.rejected_qty > 0"))
+		elif backend_condition:
+			fields.append((f"rejected_{source_fieldname}", f"({backend_condition}) and doc.rejected_qty > 0"))
 
-	# Target/transfer dimension field used for internal transfers. When the dimension is `reqd`
-	# the field inherits the transfer display condition, otherwise it inherits the custom
-	# `mandatory_depends_on` condition (mirrors the old `add_transfer_field` behaviour).
-	if doctype in [
+	# Target/transfer dimension field used for internal transfers (mirrors the old
+	# `add_transfer_field` behaviour). When the dimension is `reqd` the field inherits the
+	# transfer display condition, otherwise it inherits the server-side mandatory condition.
+	if (dimension.reqd or backend_condition) and doctype in [
 		"Stock Entry Detail",
 		"Sales Invoice Item",
 		"Delivery Note Item",
@@ -454,10 +456,14 @@ def get_mandatory_dimension_fields(doctype, dimension) -> list:
 				"parent.is_internal_customer == 1",
 			)
 
+		# The transfer field only applies to internal transfers, so its mandatory check is always
+		# gated on the display condition; the backend condition narrows it further.
 		if dimension.reqd:
-			fields.append((transfer_fieldname, display_condition))
-		elif dimension.mandatory_depends_on:
-			fields.append((transfer_fieldname, to_condition(dimension.mandatory_depends_on)))
+			transfer_condition = display_condition
+		else:
+			transfer_condition = f"({display_condition}) and ({backend_condition})"
+
+		fields.append((transfer_fieldname, transfer_condition))
 
 	return fields
 
