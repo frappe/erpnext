@@ -1076,6 +1076,8 @@ def _get_operation_sn_batch(work_order, item_code, warehouse, produced=True):
 		frappe.qb.from_(sbe)
 		.select(sbe.serial_no, sbe.batch_no, sbe.qty)
 		.where((sbe.parent.isin(bundles)) & (sbe.is_cancelled == 0))
+		.orderby(sbe.parent)
+		.orderby(sbe.idx)
 	).run(as_dict=True)
 
 	for row in entries:
