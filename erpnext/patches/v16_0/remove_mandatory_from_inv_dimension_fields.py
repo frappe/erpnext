@@ -1,5 +1,7 @@
 import frappe
 
+from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_documents
+
 
 def execute():
 	"""Mandatory inventory dimensions are now enforced on the server side
@@ -7,41 +9,46 @@ def execute():
 	`reqd`/`mandatory_depends_on`. Clear those properties from the related custom fields."""
 	dimensions = frappe.get_all(
 		"Inventory Dimension",
-		fields=["source_fieldname", "target_fieldname"],
+		fields=[
+			"source_fieldname",
+			"reference_document",
+			"document_type",
+			"apply_to_all_doctypes",
+		],
 	)
 
-	fieldnames = set()
 	for dimension in dimensions:
-		for fieldname in [dimension.source_fieldname, dimension.target_fieldname]:
-			if not fieldname:
-				continue
+		if not dimension.source_fieldname or not dimension.reference_document:
+			continue
 
-			fieldnames.update(
-				[
-					fieldname,
-					f"to_{fieldname}",
-					f"from_{fieldname}",
-					f"rejected_{fieldname}",
-				]
-			)
+		# Scope to the exact doctypes where this dimension generated fields so unrelated
+		# mandatory custom fields (same name/target on a different doctype) are never touched.
+		if dimension.apply_to_all_doctypes:
+			doctypes = [d[0] for d in get_inventory_documents()]
+		elif dimension.document_type:
+			doctypes = [dimension.document_type]
+		else:
+			continue
 
-	if not fieldnames:
-		return
+		fieldname = dimension.source_fieldname
+		fieldnames = [fieldname, f"to_{fieldname}", f"from_{fieldname}", f"rejected_{fieldname}"]
 
-	custom_fields = frappe.get_all(
-		"Custom Field",
-		filters={
-			"fieldname": ("in", list(fieldnames)),
-			"fieldtype": "Link",
-		},
-		or_filters={"reqd": 1, "mandatory_depends_on": ("is", "set")},
-		pluck="name",
-	)
-
-	for name in custom_fields:
-		frappe.db.set_value(
+		custom_fields = frappe.get_all(
 			"Custom Field",
-			name,
-			{"reqd": 0, "mandatory_depends_on": ""},
-			update_modified=False,
+			filters={
+				"dt": ("in", doctypes),
+				"fieldname": ("in", fieldnames),
+				"fieldtype": "Link",
+				"options": dimension.reference_document,
+			},
+			or_filters={"reqd": 1, "mandatory_depends_on": ("is", "set")},
+			pluck="name",
 		)
+
+		for name in custom_fields:
+			frappe.db.set_value(
+				"Custom Field",
+				name,
+				{"reqd": 0, "mandatory_depends_on": ""},
+				update_modified=False,
+			)

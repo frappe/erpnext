@@ -1149,41 +1149,43 @@ class StockController(AccountsController):
 		if self.docstatus >= 2:
 			return
 
-		for table_fieldname in ["items", "packed_items", "supplied_items"]:
-			rows = self.get(table_fieldname)
-			if not rows:
+		for table_field in self.meta.get_table_fields():
+			rows = self.get(table_field.fieldname)
+			if rows:
+				self.validate_mandatory_dimensions_in_table(rows)
+
+	def validate_mandatory_dimensions_in_table(self, rows):
+		child_doctype = rows[0].doctype
+		dimensions = get_mandatory_inventory_dimensions(child_doctype)
+		if not dimensions:
+			return
+
+		child_meta = frappe.get_meta(child_doctype)
+		for dimension in dimensions:
+			mandatory_fields = get_mandatory_dimension_fields(child_doctype, dimension)
+			for row in rows:
+				if mandatory_fields and not self.is_service_item_row(row):
+					self.validate_mandatory_dimension_row(row, dimension, mandatory_fields, child_meta)
+
+	def is_service_item_row(self, row) -> bool:
+		item_code = row.get("item_code")
+		return bool(item_code) and not frappe.get_cached_value("Item", item_code, "is_stock_item")
+
+	def validate_mandatory_dimension_row(self, row, dimension, mandatory_fields, child_meta):
+		for fieldname, condition in mandatory_fields:
+			if not child_meta.has_field(fieldname) or row.get(fieldname):
 				continue
 
-			child_doctype = rows[0].doctype
-			dimensions = get_mandatory_inventory_dimensions(child_doctype)
-			if not dimensions:
+			if condition and not frappe.safe_eval(condition, {"doc": row, "parent": self}):
 				continue
 
-			child_meta = frappe.get_meta(child_doctype)
-			for dimension in dimensions:
-				mandatory_fields = get_mandatory_dimension_fields(child_doctype, dimension)
-				if not mandatory_fields:
-					continue
-
-				for row in rows:
-					item_code = row.get("item_code")
-					if item_code and not frappe.get_cached_value("Item", item_code, "is_stock_item"):
-						continue
-
-					for fieldname, condition in mandatory_fields:
-						if not child_meta.has_field(fieldname) or row.get(fieldname):
-							continue
-
-						if condition and not frappe.safe_eval(condition, {"doc": row, "parent": self}):
-							continue
-
-						frappe.throw(
-							_("Row #{0}: {1} is mandatory for the Inventory Dimension {2}.").format(
-								row.idx,
-								bold(_(child_meta.get_label(fieldname))),
-								bold(dimension.name),
-							)
-						)
+			frappe.throw(
+				_("Row #{0}: {1} is mandatory for the Inventory Dimension {2}.").format(
+					row.idx,
+					bold(_(child_meta.get_label(fieldname))),
+					bold(dimension.name),
+				)
+			)
 
 	def update_inventory_dimensions(self, row, sl_dict) -> None:
 		# To handle delivery note and sales invoice

@@ -431,8 +431,10 @@ def get_mandatory_dimension_fields(doctype, dimension) -> list:
 	if doctype in ["Purchase Invoice Item", "Purchase Receipt Item"]:
 		fields.append((f"rejected_{source_fieldname}", "doc.rejected_qty > 0"))
 
-	# Target/transfer dimension field used for internal transfers
-	if dimension.reqd and doctype in [
+	# Target/transfer dimension field used for internal transfers. When the dimension is `reqd`
+	# the field inherits the transfer display condition, otherwise it inherits the custom
+	# `mandatory_depends_on` condition (mirrors the old `add_transfer_field` behaviour).
+	if doctype in [
 		"Stock Entry Detail",
 		"Sales Invoice Item",
 		"Delivery Note Item",
@@ -440,11 +442,22 @@ def get_mandatory_dimension_fields(doctype, dimension) -> list:
 		"Purchase Receipt Item",
 	]:
 		if doctype in ["Purchase Invoice Item", "Purchase Receipt Item"]:
-			fields.append((f"from_{source_fieldname}", "parent.is_internal_supplier == 1"))
+			transfer_fieldname, display_condition = (
+				f"from_{source_fieldname}",
+				"parent.is_internal_supplier == 1",
+			)
 		elif doctype == "Stock Entry Detail":
-			fields.append((f"to_{source_fieldname}", "doc.t_warehouse"))
+			transfer_fieldname, display_condition = f"to_{source_fieldname}", "doc.t_warehouse"
 		else:
-			fields.append((f"to_{source_fieldname}", "parent.is_internal_customer == 1"))
+			transfer_fieldname, display_condition = (
+				f"to_{source_fieldname}",
+				"parent.is_internal_customer == 1",
+			)
+
+		if dimension.reqd:
+			fields.append((transfer_fieldname, display_condition))
+		elif dimension.mandatory_depends_on:
+			fields.append((transfer_fieldname, to_condition(dimension.mandatory_depends_on)))
 
 	return fields
 
