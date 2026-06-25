@@ -83,6 +83,9 @@ class StockReconciliation(StockController):
 		self.set_total_qty_and_amount()
 		self.validate_putaway_capacity()
 		self.validate_inventory_dimension()
+		# Stock Reconciliation overrides validate() without calling super(), so the shared
+		# mandatory inventory dimension check must be invoked explicitly here.
+		self.validate_inventory_dimension_mandatory()
 		self.validate_uom_is_integer("stock_uom", "qty")
 
 		if self._action == "submit":

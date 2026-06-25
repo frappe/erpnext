@@ -292,6 +292,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.validate_putaway_capacity()
 		self.validate_component_and_quantities()
 		self.validate_finished_good_serial_batch_for_work_order()
+		# Stock Entry overrides validate() without calling super(), so the shared mandatory
+		# inventory dimension check must be invoked explicitly here.
+		self.validate_inventory_dimension_mandatory()
 
 		if self.get("purpose") != "Manufacture":
 			# ignore other item wh difference and empty source/target wh
