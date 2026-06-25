@@ -344,7 +344,7 @@ class calculate_taxes_and_totals:
 	def _load_item_tax_rate(self, item_tax_rate):
 		return frappe.parse_json(item_tax_rate) if item_tax_rate else {}
 
-	def get_current_tax_fraction(self, tax, item_tax_map, item=None):
+	def get_current_tax_fraction(self, tax, item_tax_map, item):
 		"""
 		tax = slope * net + intercept.
 		Returns (slope, intercept_per_qty)
@@ -358,7 +358,7 @@ class calculate_taxes_and_totals:
 			if tax_rate == NOT_APPLICABLE_TAX:
 				return tax_slope, tax_intercept
 
-			gross_up = item is not None and cint(getattr(tax, "gross_up_inclusive", 0))
+			gross_up = cint(tax.gross_up_inclusive)
 
 			if tax.charge_type == "On Net Total":
 				if gross_up:
@@ -381,7 +381,7 @@ class calculate_taxes_and_totals:
 			elif tax.charge_type == "On Item Quantity":
 				tax_intercept = flt(tax_rate)
 
-			elif item is not None:
+			else:
 				# Custom charge_type: the rate applies to a resolved (fixed) base,
 				# independent of gross-up. e.g. a tax on MRP included in the printed price.
 				qty = flt(item.qty) or 1
@@ -616,7 +616,7 @@ class calculate_taxes_and_totals:
 			current_tax_amount = item.net_amount * actual / self.doc.net_total if self.doc.net_total else 0.0
 
 		elif tax.charge_type == "On Net Total":
-			if cint(tax.included_in_print_rate) and cint(getattr(tax, "gross_up_inclusive", 0)):
+			if cint(tax.included_in_print_rate) and cint(tax.gross_up_inclusive):
 				# Gross-up: the tax posts on the printed gross.
 				current_net_amount = flt(item.amount)
 				current_tax_amount = (tax_rate / 100.0) * flt(item.amount)

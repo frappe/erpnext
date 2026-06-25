@@ -315,7 +315,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				return [tax_slope, tax_intercept];
 			}
 
-			var gross_up = item && cint(tax.gross_up_inclusive);
+			var gross_up = cint(tax.gross_up_inclusive);
 
 			if (tax.charge_type == "On Net Total") {
 				if (gross_up) {
@@ -335,10 +335,9 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				tax_intercept = (tax_rate / 100.0) * flt(row.grand_total_amount_per_qty);
 			} else if (tax.charge_type == "On Item Quantity") {
 				tax_intercept = flt(tax_rate);
-			} else if (item) {
+			} else {
 				// Custom charge_type: the rate applies to a resolved (fixed) base,
 				// independent of gross-up. e.g. a tax on MRP included in the printed price.
-				// tax_slope here is same as using "On Net Total"
 				const qty = flt(item.qty) || 1;
 				const base = this.get_item_taxable_base(item, tax);
 				tax_intercept = ((tax_rate / 100.0) * base) / qty;
