@@ -49,11 +49,15 @@ erpnext.financial_statements = {
 			// Account column
 			if (columnInfo.isAccount) return false;
 
+			const periodKeys = data._segment_info?.period_keys || [];
+
+			if (!periodKeys.includes(columnInfo.fieldname)) return false;
+
 			if (view === "Growth") {
-				const periodKeys = data._segment_info?.period_keys || [];
 				// First period of new segment
 				if (periodKeys[0] === columnInfo.fieldname) return false;
 			}
+
 			return true;
 		}
 
