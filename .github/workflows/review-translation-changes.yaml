@@ -22,4 +22,4 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: alyf-de/po-review-action@v1.0.0
+      - uses: alyf-de/po-review-action@v1.1.0
