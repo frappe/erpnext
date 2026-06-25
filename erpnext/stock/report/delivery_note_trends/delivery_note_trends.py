@@ -4,6 +4,7 @@
 
 from frappe import _
 
+import erpnext
 from erpnext.controllers.trends import get_columns, get_data
 
 
@@ -45,6 +46,7 @@ def get_chart_data(data, filters):
 		labels.append(row[0])
 		datapoints.append(row[-1])
 
+	company_currency = erpnext.get_company_currency(filters.get("company"))
 	return {
 		"data": {
 			"labels": labels,
@@ -52,4 +54,6 @@ def get_chart_data(data, filters):
 		},
 		"type": "bar",
 		"fieldtype": "Currency",
+		"options": "currency",
+		"currency": company_currency,
 	}
