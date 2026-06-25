@@ -1,9 +1,9 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-
 from frappe import _
 
+import erpnext
 from erpnext.controllers.trends import get_columns, get_data
 
 
@@ -50,7 +50,7 @@ def get_chart_data(data, conditions, filters):
 
 		for i in range(len(row)):
 			datapoints[i] += row[i]
-
+	company_currency = erpnext.get_company_currency(filters.get("company"))
 	return {
 		"data": {
 			"labels": labels,
@@ -59,4 +59,6 @@ def get_chart_data(data, conditions, filters):
 		"type": "line",
 		"lineOptions": {"regionFill": 1},
 		"fieldtype": "Currency",
+		"options": "currency",
+		"currency": company_currency,
 	}

@@ -24,6 +24,7 @@ def get_columns() -> list[dict]:
 			"label": _("Total Landed Cost"),
 			"fieldname": "landed_cost",
 			"fieldtype": "Currency",
+			"options": "currency",
 		},
 		{
 			"label": _("Purchase Voucher Type"),
@@ -49,6 +50,8 @@ def get_columns() -> list[dict]:
 
 
 def get_data(filters) -> list[list]:
+	company_currency = frappe.get_cached_value("Company", filters.company, "default_currency")
+
 	landed_cost_vouchers = get_landed_cost_vouchers(filters) or {}
 	landed_vouchers = list(landed_cost_vouchers.keys())
 	vendor_invoices = {}
@@ -57,7 +60,6 @@ def get_data(filters) -> list[list]:
 
 	data = []
 
-	print(vendor_invoices)
 	for name, vouchers in landed_cost_vouchers.items():
 		res = {
 			"name": name,
@@ -72,6 +74,7 @@ def get_data(filters) -> list[list]:
 						"landed_cost": d.landed_cost,
 						"voucher_type": d.voucher_type,
 						"voucher_no": d.voucher_no,
+						"currency": company_currency,
 					}
 				)
 			else:
@@ -88,7 +91,6 @@ def get_data(filters) -> list[list]:
 
 		if vendor_invoice_list and len(vendor_invoice_list) > len(vouchers):
 			for row in vendor_invoice_list[last_index + 1 :]:
-				print(row)
 				data.append({"vendor_invoice": row})
 
 	return data
