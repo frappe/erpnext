@@ -384,7 +384,6 @@ class calculate_taxes_and_totals:
 			elif item is not None:
 				# Custom charge_type: the rate applies to a resolved (fixed) base,
 				# independent of gross-up. e.g. a tax on MRP included in the printed price.
-				# tax_slope here is same as using "On Net Total"
 				qty = flt(item.qty) or 1
 				base = self.get_item_taxable_base(item, tax)
 				tax_intercept = (tax_rate / 100.0) * base / qty
@@ -668,6 +667,9 @@ class calculate_taxes_and_totals:
 
 		        def gross_base(calc, item, tax):
 		                return item.custom_field_mrp * item.qty
+
+		A resolver may stamp transient attributes on `item`; it can be called more than once
+		per item, so such stamping must be idempotent.
 		"""
 		resolvers = frappe.get_hooks("erpnext_taxable_base_resolvers") or {}
 		path = resolvers.get(tax.charge_type)

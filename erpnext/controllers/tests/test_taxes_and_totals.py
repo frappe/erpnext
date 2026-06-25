@@ -180,6 +180,18 @@ class TestTaxesAndTotals(ERPNextTestSuite):
 		self.assertEqual(so.net_total, 880.0)
 		self.assertEqual(so.grand_total, 1000.0)
 
+	def test_valuation_charge_cannot_be_gross_up_inclusive(self):
+		from erpnext.accounts.services.taxes import validate_inclusive_tax
+
+		tax = frappe._dict(
+			idx=1,
+			charge_type="On Net Total",
+			included_in_print_rate=1,
+			gross_up_inclusive=1,
+			category="Valuation",
+		)
+		self.assertRaises(frappe.ValidationError, validate_inclusive_tax, tax, frappe._dict(taxes=[tax]))
+
 	def test_disabling_rounded_total_resets_base_fields(self):
 		"""Disabling rounded total should also clear base rounded values."""
 		so = make_sales_order(do_not_save=True)
