@@ -395,9 +395,9 @@ class TestQuotation(FrappeTestCase):
 		quotation.save()
 		quotation.submit()
 
-		self.assertEqual(quotation.payment_schedule[0].payment_amount, 8906.00)
+		self.assertEqual(quotation.payment_schedule[0].payment_amount, 500.00)
 		self.assertEqual(quotation.payment_schedule[0].due_date, quotation.transaction_date)
-		self.assertEqual(quotation.payment_schedule[1].payment_amount, 8906.00)
+		self.assertEqual(quotation.payment_schedule[1].payment_amount, 500.00)
 		self.assertEqual(quotation.payment_schedule[1].due_date, add_days(quotation.transaction_date, 30))
 
 		sales_order = make_sales_order(quotation.name)
@@ -417,11 +417,11 @@ class TestQuotation(FrappeTestCase):
 		sales_order.set("taxes", [])
 		sales_order.save()
 
-		self.assertEqual(sales_order.payment_schedule[0].payment_amount, 8906.00)
+		self.assertEqual(sales_order.payment_schedule[0].payment_amount, 500.00)
 		self.assertEqual(
 			getdate(sales_order.payment_schedule[0].due_date), getdate(quotation.transaction_date)
 		)
-		self.assertEqual(sales_order.payment_schedule[1].payment_amount, 8906.00)
+		self.assertEqual(sales_order.payment_schedule[1].payment_amount, 500.00)
 		self.assertEqual(
 			getdate(sales_order.payment_schedule[1].due_date),
 			getdate(add_days(quotation.transaction_date, 30)),
@@ -457,11 +457,23 @@ class TestQuotation(FrappeTestCase):
 
 		rate_with_margin = flt((1500 * 18.75) / 100 + 1500)
 
+<<<<<<< HEAD
 		test_records[0]["items"][0]["price_list_rate"] = 1500
 		test_records[0]["items"][0]["margin_type"] = "Percentage"
 		test_records[0]["items"][0]["margin_rate_or_amount"] = 18.75
 
 		quotation = frappe.copy_doc(test_records[0])
+=======
+		test_record = frappe.copy_doc(self.globalTestRecords["Quotation"][0])
+
+		test_record.items[0].price_list_rate = 1500
+		test_record.items[0].margin_type = "Percentage"
+		test_record.items[0].margin_rate_or_amount = 18.75
+		# set rate to zero, so that it is recalculated on save
+		test_record.items[0].rate = 0
+
+		quotation = frappe.copy_doc(test_record)
+>>>>>>> cb0689bd1e (fix: rewrite item rate calculation (#56315))
 		quotation.transaction_date = nowdate()
 		quotation.valid_till = add_months(quotation.transaction_date, 1)
 		quotation.insert()
