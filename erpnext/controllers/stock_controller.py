@@ -36,6 +36,8 @@ from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.doctype.batch.batch import get_batch_qty
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
 	get_evaluated_inventory_dimension,
+	get_mandatory_dimension_fields,
+	get_mandatory_inventory_dimensions,
 )
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
@@ -64,6 +66,7 @@ class StockController(AccountsController):
 		self.validate_internal_transfer()
 		self.validate_putaway_capacity()
 		self.reset_conversion_factor()
+		self.validate_inventory_dimension_mandatory()
 
 	def on_update(self):
 		super().on_update()
@@ -1139,6 +1142,48 @@ class StockController(AccountsController):
 							item_row["base_amount"] += item.applicable_charges
 
 		return item_account_wise_cost
+
+	def validate_inventory_dimension_mandatory(self):
+		# Mandatory inventory dimensions are enforced here (instead of via field-level `reqd`)
+		# so we can skip service rows and never block a document that is being cancelled.
+		if self.docstatus >= 2:
+			return
+
+		for table_fieldname in ["items", "packed_items", "supplied_items"]:
+			rows = self.get(table_fieldname)
+			if not rows:
+				continue
+
+			child_doctype = rows[0].doctype
+			dimensions = get_mandatory_inventory_dimensions(child_doctype)
+			if not dimensions:
+				continue
+
+			child_meta = frappe.get_meta(child_doctype)
+			for dimension in dimensions:
+				mandatory_fields = get_mandatory_dimension_fields(child_doctype, dimension)
+				if not mandatory_fields:
+					continue
+
+				for row in rows:
+					item_code = row.get("item_code")
+					if item_code and not frappe.get_cached_value("Item", item_code, "is_stock_item"):
+						continue
+
+					for fieldname, condition in mandatory_fields:
+						if not child_meta.has_field(fieldname) or row.get(fieldname):
+							continue
+
+						if condition and not frappe.safe_eval(condition, {"doc": row, "parent": self}):
+							continue
+
+						frappe.throw(
+							_("Row #{0}: {1} is mandatory for the Inventory Dimension {2}.").format(
+								row.idx,
+								bold(_(child_meta.get_label(fieldname))),
+								bold(dimension.name),
+							)
+						)
 
 	def update_inventory_dimensions(self, row, sl_dict) -> None:
 		# To handle delivery note and sales invoice

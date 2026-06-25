@@ -219,11 +219,29 @@ class TestInventoryDimension(ERPNextTestSuite):
 		doc.reqd = 1
 		doc.save()
 
-		self.assertTrue(
+		# Mandatory enforcement is now done server-side, so the custom field must NOT be `reqd`.
+		self.assertFalse(
 			frappe.db.get_value(
-				"Custom Field", {"fieldname": "pallet_75", "dt": "Delivery Note Item", "reqd": 1}, "name"
+				"Custom Field", {"fieldname": "pallet_75", "dt": "Delivery Note Item"}, "reqd"
 			)
 		)
+
+		item_code = "Test Mandatory Dimension Item"
+		create_item(item_code)
+		warehouse = create_warehouse("Mandatory Dimension Warehouse")
+
+		dn_doc = create_delivery_note(item_code=item_code, qty=5, warehouse=warehouse, do_not_save=True)
+
+		# Dimension value missing -> server-side validation should block the document.
+		self.assertRaises(frappe.ValidationError, dn_doc.save)
+
+		if not frappe.db.exists("Pallet", "Pallet 75 Value"):
+			frappe.get_doc({"doctype": "Pallet", "pallet_name": "Pallet 75 Value"}).insert(
+				ignore_permissions=True
+			)
+
+		dn_doc.items[0].pallet_75 = "Pallet 75 Value"
+		dn_doc.save()
 
 		doc.reqd = 0
 		doc.save()
@@ -240,11 +258,13 @@ class TestInventoryDimension(ERPNextTestSuite):
 		doc.mandatory_depends_on = "t_warehouse"
 		doc.save()
 
-		self.assertTrue(
+		# Mandatory enforcement is now done server-side, so the custom field must NOT carry
+		# the `mandatory_depends_on` expression.
+		self.assertFalse(
 			frappe.db.get_value(
 				"Custom Field",
-				{"fieldname": "pallet", "dt": "Stock Entry Detail", "mandatory_depends_on": "t_warehouse"},
-				"name",
+				{"fieldname": "pallet", "dt": "Stock Entry Detail"},
+				"mandatory_depends_on",
 			)
 		)
 
