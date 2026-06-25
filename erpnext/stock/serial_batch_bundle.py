@@ -588,9 +588,15 @@ def get_serial_nos_from_bundle(serial_and_batch_bundle, serial_nos=None):
 def get_serial_or_batch_nos(bundle):
 	# For print format
 
+	if not bundle:
+		return ""
+
 	bundle_data = frappe.get_cached_value(
 		"Serial and Batch Bundle", bundle, ["has_serial_no", "has_batch_no"], as_dict=True
 	)
+
+	if not bundle_data:
+		return bundle
 
 	fields = []
 	if bundle_data.has_serial_no:
