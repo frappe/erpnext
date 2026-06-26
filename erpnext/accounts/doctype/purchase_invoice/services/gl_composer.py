@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, get_link_to_form
 
 import erpnext
@@ -130,6 +131,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
 			get_purchase_document_details,
 		)
+		from erpnext.stock.utils import get_valuation_method
 
 		doc = self.doc
 		tax_service = TaxService(doc)
@@ -329,20 +331,33 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 						self.make_provisional_gl_entry(gl_entries, item)
 
 					if not doc.is_internal_transfer():
-						gl_entries.append(
-							self.get_gl_dict(
-								{
-									"account": expense_account,
-									"against": doc.supplier,
-									"debit": base_amount,
-									"debit_in_transaction_currency": amount,
-									"cost_center": item.cost_center,
-									"project": item.project or doc.project,
-								},
-								account_currency,
-								item=item,
+						handled = False
+						if (
+							item.item_code
+							and item.item_code in stock_items
+							and item.get("purchase_receipt")
+							and not doc.is_return
+							and get_valuation_method(item.item_code, doc.company) == "Standard Cost"
+						):
+							handled = self.make_standard_cost_srbnb_split(
+								gl_entries, item, expense_account, account_currency, base_amount
 							)
-						)
+
+						if not handled:
+							gl_entries.append(
+								self.get_gl_dict(
+									{
+										"account": expense_account,
+										"against": doc.supplier,
+										"debit": base_amount,
+										"debit_in_transaction_currency": amount,
+										"cost_center": item.cost_center,
+										"project": item.project or doc.project,
+									},
+									account_currency,
+									item=item,
+								)
+							)
 
 						# check if the exchange rate has changed
 						if (
@@ -515,6 +530,85 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 				},
 			)
 
+	def make_standard_cost_srbnb_split(
+		self, gl_entries, item, expense_account, account_currency, base_amount
+	):
+		"""For a Standard Cost item billed against a Purchase Receipt, clear SRBNB at the standard
+		value the receipt actually booked and post the (Net Amount - standard) difference to the
+		Purchase Price Variance account. Returns False (caller falls back) if the receipt value
+		can't be resolved."""
+		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import (
+			get_purchase_price_variance_account,
+		)
+
+		doc = self.doc
+		precision = item.precision("base_net_amount")
+		standard_value = flt(self.get_pr_stock_value(item), precision)
+		if not standard_value:
+			return False
+
+		gl_entries.append(
+			self.get_gl_dict(
+				{
+					"account": expense_account,
+					"against": doc.supplier,
+					"debit": standard_value,
+					"debit_in_transaction_currency": flt(standard_value / doc.conversion_rate, precision),
+					"remarks": doc.get("remarks") or _("Accounting Entry for Stock"),
+					"cost_center": item.cost_center,
+					"project": item.project or doc.project,
+				},
+				account_currency,
+				item=item,
+			)
+		)
+
+		variance = flt(base_amount - standard_value, precision)
+		if variance:
+			gl_entries.append(
+				self.get_gl_dict(
+					{
+						"account": get_purchase_price_variance_account(item.item_code, doc.company),
+						"against": doc.supplier,
+						"debit": variance,
+						"debit_in_transaction_currency": flt(variance / doc.conversion_rate, precision),
+						"remarks": doc.get("remarks") or _("Purchase Price Variance"),
+						"cost_center": item.cost_center,
+						"project": item.project or doc.project,
+					},
+					item=item,
+				)
+			)
+
+		return True
+
+	def get_pr_stock_value(self, item):
+		"""Total stock value (at standard) the linked Purchase Receipt booked for this item row."""
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		result = (
+			frappe.qb.from_(sle)
+			.select(Sum(sle.stock_value_difference))
+			.where(
+				(sle.voucher_type == "Purchase Receipt")
+				& (sle.voucher_no == item.purchase_receipt)
+				& (sle.voucher_detail_no == item.pr_detail)
+				& (sle.is_cancelled == 0)
+			)
+		).run()
+		return flt(result[0][0]) if result and result[0][0] else 0.0
+
+	def get_stock_variance_account(self, item):
+		"""For Standard Cost items the purchase-price-vs-standard difference is a Purchase Price
+		Variance; for all other items it keeps the existing behaviour (default expense account)."""
+		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import (
+			get_purchase_price_variance_account,
+		)
+		from erpnext.stock.utils import get_valuation_method
+
+		if item.item_code and get_valuation_method(item.item_code, self.doc.company) == "Standard Cost":
+			return get_purchase_price_variance_account(item.item_code, self.doc.company)
+		return self.doc.get_company_default("default_expense_account")
+
 	def make_stock_adjustment_entry(self, gl_entries, item, voucher_wise_stock_value, account_currency):
 		doc = self.doc
 		net_amt_precision = item.precision("base_net_amount")
@@ -536,7 +630,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 			)
 
 			if flt(stock_amount, net_amt_precision) != flt(warehouse_debit_amount, net_amt_precision):
-				cost_of_goods_sold_account = doc.get_company_default("default_expense_account")
+				cost_of_goods_sold_account = self.get_stock_variance_account(item)
 				stock_adjustment_amt = stock_amount - warehouse_debit_amount
 
 				gl_entries.append(
@@ -561,7 +655,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 			and warehouse_debit_amount
 			!= flt(voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision)
 		):
-			cost_of_goods_sold_account = doc.get_company_default("default_expense_account")
+			cost_of_goods_sold_account = self.get_stock_variance_account(item)
 			stock_amount = flt(voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision)
 			stock_adjustment_amt = warehouse_debit_amount - stock_amount
 

@@ -17,6 +17,7 @@ from frappe.utils import (
 	format_date,
 	get_datetime,
 	get_link_to_form,
+	getdate,
 	now,
 	nowdate,
 	nowtime,
@@ -53,6 +54,46 @@ class SerialNoExistsInFutureTransaction(frappe.ValidationError):
 	pass
 
 
+def validate_standard_cost_posting_date(sl_entries):
+	"""R2: a Standard Cost item's stock transaction cannot be dated before the latest Item
+	Standard Cost effective date. A backdated entry would slip in behind the standard-rate
+	revaluation, making its on-hand snapshot stale and forcing a repost — which Standard Cost
+	deliberately avoids. Enforced here so every stock voucher is covered uniformly."""
+	from erpnext.stock.utils import get_valuation_method
+
+	checked = {}
+	for sle in sl_entries:
+		item_code = sle.get("item_code")
+		company = sle.get("company")
+		posting_date = sle.get("posting_date")
+		if not item_code or not company or not posting_date:
+			continue
+
+		key = (item_code, company)
+		if key not in checked:
+			effective_date = None
+			if get_valuation_method(item_code, company) == "Standard Cost":
+				effective_date = frappe.db.get_value(
+					"Item Standard Cost",
+					{"item_code": item_code, "company": company, "docstatus": 1},
+					"effective_date",
+					order_by="effective_date desc",
+				)
+			checked[key] = effective_date
+
+		effective_date = checked[key]
+		if effective_date and getdate(posting_date) < getdate(effective_date):
+			frappe.throw(
+				_(
+					"Cannot post a Standard Cost item {0} before {1}, the effective date of its latest Standard Valuation Rate."
+				).format(
+					get_link_to_form("Item", item_code),
+					frappe.bold(frappe.format(effective_date, "Date")),
+				),
+				title=_("Backdated Entry Not Allowed"),
+			)
+
+
 def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_voucher=False):
 	"""Create SL entries from SL entry dicts
 
@@ -71,6 +112,8 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 		if cancelled:
 			validate_cancellation(sl_entries)
 			set_as_cancel(sl_entries[0].get("voucher_type"), sl_entries[0].get("voucher_no"))
+		else:
+			validate_standard_cost_posting_date(sl_entries)
 
 		args = get_args_for_future_sle(sl_entries[0])
 		future_sle_exists(args, sl_entries)
@@ -843,6 +886,29 @@ class update_entries_after:
 				indicator="blue",
 			)
 
+	def process_standard_cost(self, sle):
+		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import get_item_standard_rate
+
+		rate = get_item_standard_rate(sle.item_code, self.company, sle.posting_date)
+		if rate is None:
+			frappe.throw(
+				_(
+					"No Standard Valuation Rate found for Item {0} in Company {1} as on {2}. Please create an Item Standard Cost record."
+				).format(bold(sle.item_code), bold(self.company), bold(sle.posting_date))
+			)
+
+		if sle.voucher_type == "Stock Reconciliation" and sle.get("qty_after_transaction") is not None:
+			self.wh_data.qty_after_transaction = flt(sle.qty_after_transaction)
+		else:
+			self.wh_data.qty_after_transaction += flt(sle.actual_qty)
+
+		self.wh_data.valuation_rate = rate
+		self.wh_data.stock_value = flt(self.wh_data.qty_after_transaction) * flt(rate)
+		self.wh_data.stock_queue = [[self.wh_data.qty_after_transaction, rate]]
+
+		if flt(sle.actual_qty) > 0:
+			sle.incoming_rate = rate
+
 	def process_sle(self, sle):
 		# previous sle data for this warehouse
 		key = (sle.item_code, sle.warehouse)
@@ -897,7 +963,11 @@ class update_entries_after:
 				if sle.get(dimension.get("fieldname")):
 					has_dimensions = True
 
-		if sle.serial_and_batch_bundle:
+		if self.valuation_method == "Standard Cost":
+			# Inventory is always carried at the standard rate effective on the posting date;
+			# FIFO/Moving Average/serial-batch valuation is bypassed entirely.
+			self.process_standard_cost(sle)
+		elif sle.serial_and_batch_bundle:
 			self.calculate_valuation_for_serial_batch_bundle(sle)
 		elif sle.serial_no and not self.args.get("sle_id"):
 			# Only run in reposting

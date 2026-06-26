@@ -7,7 +7,7 @@ from datetime import timedelta
 import frappe
 from frappe import _, bold, json, msgprint
 from frappe.query_builder.functions import Sum
-from frappe.utils import add_to_date, cint, cstr, flt, now
+from frappe.utils import add_to_date, cint, cstr, flt, get_link_to_form, now
 from frappe.utils.data import DateTimeLikeObject
 
 import erpnext
@@ -21,7 +21,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_reconciliation_item.stock_reconciliation_item import StockReconciliationItem
-from erpnext.stock.utils import get_incoming_rate, get_stock_balance
+from erpnext.stock.utils import get_incoming_rate, get_stock_balance, get_valuation_method
 
 
 class OpeningEntryAccountError(frappe.ValidationError):
@@ -71,6 +71,7 @@ class StockReconciliation(StockController):
 
 		sbb = SerialBatchBundleService(self)
 
+		self.validate_standard_cost_items()
 		self.validate_items_exist()
 		if not self.expense_account:
 			self.expense_account = frappe.get_cached_value(
@@ -172,6 +173,20 @@ class StockReconciliation(StockController):
 					}
 				)
 
+	def validate_standard_cost_items(self):
+		"""Stock Reconciliation is not allowed for Standard Cost items — their rate is changed
+		only through the Item Standard Cost doctype (which creates the revaluation reco itself)."""
+		if self.flags.via_item_standard_cost:
+			return
+
+		for item in self.items:
+			if item.item_code and is_standard_cost_item(item.item_code, self.company):
+				frappe.throw(
+					_(
+						"Row #{0}: Stock Reconciliation is not allowed for Item {1}, which uses the Standard Cost valuation method. Change its rate through Item Standard Cost instead."
+					).format(item.idx, get_link_to_form("Item", item.item_code))
+				)
+
 	def set_current_serial_and_batch_bundle(self, voucher_detail_no=None, save=False) -> None:
 		"""Set Serial and Batch Bundle for each item"""
 		for item in self.items:
@@ -179,6 +194,10 @@ class StockReconciliation(StockController):
 				continue
 
 			if not item.item_code:
+				continue
+
+			# Standard Cost revaluation recos are pure value changes; no serial/batch bundle needed.
+			if is_standard_cost_item(item.item_code, self.company):
 				continue
 
 			item_details = frappe.get_cached_value(
@@ -429,6 +448,10 @@ class StockReconciliation(StockController):
 	def set_new_serial_and_batch_bundle(self):
 		for item in self.items:
 			if not item.item_code:
+				continue
+
+			# Standard Cost revaluation recos are pure value changes; no serial/batch bundle needed.
+			if is_standard_cost_item(item.item_code, self.company):
 				continue
 
 			if item.use_serial_batch_fields:
@@ -1132,6 +1155,10 @@ class StockReconciliation(StockController):
 			self.queue_action("cancel", timeout=2000)
 		else:
 			self._cancel()
+
+
+def is_standard_cost_item(item_code, company):
+	return get_valuation_method(item_code, company) == "Standard Cost"
 
 
 @frappe.whitelist()
