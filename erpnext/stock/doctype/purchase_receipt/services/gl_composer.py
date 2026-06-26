@@ -67,6 +67,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 				remarks=remarks,
 				against_account=stock_asset_rbnb,
 				account_currency=account_currency,
+				project=item.project,
 				item=item,
 			)
 
@@ -118,6 +119,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 					against_account=stock_asset_account_name,
 					debit_in_account_currency=-1 * flt(outgoing_amount, item.precision("base_net_amount")),
 					account_currency=account_currency,
+					project=item.project,
 					item=item,
 				)
 
@@ -141,6 +143,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 							against_account=doc.supplier,
 							debit_in_account_currency=-1 * discrepancy_caused_by_exchange_rate_difference,
 							account_currency=account_currency,
+							project=item.project,
 							item=item,
 						)
 
@@ -154,6 +157,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 							against_account=doc.supplier,
 							debit_in_account_currency=-1 * discrepancy_caused_by_exchange_rate_difference,
 							account_currency=account_currency,
+							project=item.project,
 							item=item,
 						)
 
@@ -214,6 +218,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 					remarks=remarks,
 					against_account=stock_asset_account_name,
 					account_currency=supplier_warehouse_account_currency,
+					project=item.project,
 					item=item,
 				)
 
