@@ -263,6 +263,12 @@ def repost_future_sle(
 		repost_affected_transaction.update(obj.repost_affected_transaction)
 		update_args_in_repost_item_valuation(doc, index, items_to_be_repost, repost_affected_transaction)
 
+	from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
+		update_stock_reconciliation_difference_after_repost,
+	)
+
+	update_stock_reconciliation_difference_after_repost(items_to_be_repost, repost_affected_transaction)
+
 
 def update_args_in_repost_item_valuation(
 	doc,
