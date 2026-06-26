@@ -288,6 +288,7 @@ class WorkOrder(Document):
 			self.validate_sales_order()
 
 		self.set_default_warehouse()
+		self.set_operation_warehouses()
 		self.validate_warehouse_belongs_to_company()
 		self.check_wip_warehouse_skip()
 		self.calculate_operating_cost()
@@ -974,6 +975,9 @@ class WorkOrder(Document):
 
 	def set_work_order_operations(self):
 		return OperationsService(self).set_work_order_operations()
+
+	def set_operation_warehouses(self):
+		return OperationsService(self).set_operation_warehouses()
 
 	def update_operation_status(self):
 		return OperationsService(self).update_operation_status()

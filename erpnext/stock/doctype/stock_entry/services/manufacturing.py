@@ -1129,12 +1129,15 @@ def _cap_pool_to_qty(pool, qty):
 	return serial_nos, batches
 
 
-def set_previous_operation_serial_batch(parent_doc, row, warehouse, qty):
+def set_previous_operation_serial_batch(parent_doc, row):
 	"""Auto-pull serial nos / batches produced by a previous operation onto a
 	consumption / transfer-out ``row`` of a Stock Entry, filling what is available and
 	leaving any shortfall blank for the user. No-op for ordinary raw materials or when
 	the row already carries serial/batch."""
-	if not parent_doc.get("work_order") or not warehouse or flt(qty) <= 0:
+	warehouse = row.get("s_warehouse")
+	qty = flt(row.get("qty")) * flt(row.get("conversion_factor") or 1)
+
+	if not parent_doc.get("work_order") or not warehouse or qty <= 0:
 		return
 	if row.get("serial_and_batch_bundle") or row.get("serial_no") or row.get("batch_no"):
 		return

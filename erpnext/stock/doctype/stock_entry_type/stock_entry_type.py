@@ -141,9 +141,7 @@ class ManufactureEntry:
 					_dict.qty = calculated_qty
 					self.update_available_serial_batches(_dict, available_serial_batches)
 				elif self.skip_material_transfer:
-					# No material transfer happened, so pull serial/batch that a previous
-					# operation produced for this semi-finished input directly here.
-					set_previous_operation_serial_batch(self.stock_entry, _dict, _dict.s_warehouse, _dict.qty)
+					set_previous_operation_serial_batch(self.stock_entry, _dict)
 
 				self.stock_entry.append("items", _dict)
 

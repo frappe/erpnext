@@ -129,8 +129,7 @@ def make_stock_entry(source_name: str, target_doc: Document | str | None = None)
 				wo_allows_alternate_item
 				and frappe.get_cached_value("Item", item.item_code, "allow_alternative_item")
 			)
-			# Auto-pull serial/batch produced by a previous operation for semi-finished inputs.
-			set_previous_operation_serial_batch(target, item, item.s_warehouse, item.qty)
+			set_previous_operation_serial_batch(target, item)
 
 	doclist = get_mapped_doc(
 		"Job Card",
