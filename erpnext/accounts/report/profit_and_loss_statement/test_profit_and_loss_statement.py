@@ -102,7 +102,8 @@ class TestProfitAndLossStatement(ERPNextTestSuite, AccountsTestMixin):
 		dim_cols = [c for c in columns if c.get("dimension_value")]
 		self.assertTrue(len(dim_cols) > 0)
 
-		income_row = next((r for r in data if r.get("account") == self.income_account), None)
+		income_account = frappe.db.get_value("Company", self.company, "default_income_account")
+		income_row = next((r for r in data if r.get("account") == income_account), None)
 		self.assertIsNotNone(income_row)
 		# non-accumulated: total = sum of all dimension-period values
 		self.assertEqual(income_row["total"], 300.0)
