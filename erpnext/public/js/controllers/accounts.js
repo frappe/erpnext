@@ -23,15 +23,12 @@ erpnext.accounts.taxes = {
 			onload: function (frm) {
 				if (frm.get_field("taxes")) {
 					frm.set_query("account_head", "taxes", function (doc) {
+						let account_type = ["Tax", "Chargeable"];
+
 						if (frm.cscript.tax_table == "Sales Taxes and Charges") {
-							var account_type = ["Tax", "Chargeable", "Expense Account"];
+							account_type.push("Expense Account");
 						} else {
-							var account_type = [
-								"Tax",
-								"Chargeable",
-								"Income Account",
-								"Expenses Included In Valuation",
-							];
+							account_type.push("Income Account", "Expenses Included In Valuation");
 						}
 
 						return {
