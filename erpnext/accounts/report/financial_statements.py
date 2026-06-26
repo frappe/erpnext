@@ -410,11 +410,10 @@ def get_data(
 	company_currency = get_appropriate_currency(company, filters)
 
 	gl_entries_by_account = {}
-	for root in frappe.db.sql(
-		"""select lft, rgt from tabAccount
-			where root_type=%s and ifnull(parent_account, '') = ''""",
-		root_type,
-		as_dict=1,
+	for root in frappe.get_all(
+		"Account",
+		filters={"root_type": root_type, "parent_account": ["is", "not set"]},
+		fields=["lft", "rgt"],
 	):
 		set_gl_entries_by_account(
 			company,
@@ -602,13 +601,23 @@ def add_total_row(out, root_type, balance_must_be, period_list, company_currency
 
 
 def get_accounts(company, root_type):
-	return frappe.db.sql(
-		"""
-		select name, account_number, parent_account, lft, rgt, root_type, report_type, account_name, include_in_gross, account_type, is_group, lft, rgt
-		from `tabAccount`
-		where company=%s and root_type=%s order by lft""",
-		(company, root_type),
-		as_dict=True,
+	return frappe.get_all(
+		"Account",
+		filters={"company": company, "root_type": root_type},
+		fields=[
+			"name",
+			"account_number",
+			"parent_account",
+			"lft",
+			"rgt",
+			"root_type",
+			"report_type",
+			"account_name",
+			"include_in_gross",
+			"account_type",
+			"is_group",
+		],
+		order_by="lft",
 	)
 
 
@@ -758,7 +767,11 @@ def get_accounting_entries(
 			gl_entry.credit_in_account_currency
 			if not group_by_account
 			else Sum(gl_entry.credit_in_account_currency).as_("credit_in_account_currency"),
-			gl_entry.account_currency,
+			# when grouping by account the non-aggregated columns must be aggregated for postgres;
+			# account_currency is constant per account so Max() returns the same value.
+			gl_entry.account_currency
+			if not group_by_account
+			else Max(gl_entry.account_currency).as_("account_currency"),
 		)
 		.where(gl_entry.company == filters.company)
 	)
@@ -780,15 +793,29 @@ def get_accounting_entries(
 	ignore_is_opening = frappe.get_single_value("Accounts Settings", "ignore_is_opening_check_for_reporting")
 
 	if doctype == "GL Entry":
-		query = query.select(gl_entry.posting_date, gl_entry.is_opening, gl_entry.fiscal_year)
+		# aggregate the non-grouped columns when grouping by account (postgres requirement)
+		if group_by_account:
+			query = query.select(
+				Max(gl_entry.posting_date).as_("posting_date"),
+				Max(gl_entry.is_opening).as_("is_opening"),
+				Max(gl_entry.fiscal_year).as_("fiscal_year"),
+			)
+		else:
+			query = query.select(gl_entry.posting_date, gl_entry.is_opening, gl_entry.fiscal_year)
 		query = query.where(gl_entry.is_cancelled == 0)
 		query = query.where(gl_entry.posting_date <= to_date)
-		query = query.force_index("posting_date_company_index")
+		# FORCE INDEX is MySQL-only; postgres has no index hints (its planner uses the index anyway)
+		if frappe.db.db_type != "postgres":
+			query = query.force_index("posting_date_company_index")
 
 		if ignore_opening_entries and not ignore_is_opening:
 			query = query.where(gl_entry.is_opening == "No")
 	else:
-		query = query.select(gl_entry.closing_date.as_("posting_date"))
+		query = query.select(
+			Max(gl_entry.closing_date).as_("posting_date")
+			if group_by_account
+			else gl_entry.closing_date.as_("posting_date")
+		)
 		query = query.where(gl_entry.period_closing_voucher == period_closing_voucher)
 
 	query = apply_additional_conditions(doctype, query, from_date, ignore_closing_entries, filters)
@@ -992,6 +1019,9 @@ def compute_growth_view_data(data, columns):
 	data_copy = copy.deepcopy(data)
 
 	for row_idx in range(len(data_copy)):
+		if not data_copy[row_idx]:
+			continue
+
 		for column_idx in range(1, len(columns)):
 			# No growth comparison across dimension boundaries
 			if columns[column_idx - 1].get("dimension_value") != columns[column_idx].get("dimension_value"):
@@ -1041,11 +1071,19 @@ def compute_margin_view_data(data, columns):
 
 		for column in columns:
 			curr_period = column.get("key")
-			base_value = base_row[curr_period]
-			curr_value = row[curr_period]
 
-			if curr_value is None or base_value <= 0:
+			base_value = base_row.get(curr_period)
+			curr_value = row.get(curr_period)
+
+			if base_value is None or curr_value is None:
 				data[row_idx][curr_period] = None
+				continue
+
+			if base_value == 0:
+				if curr_value == 0:
+					data[row_idx][curr_period] = 0
+				else:
+					data[row_idx][curr_period] = None
 				continue
 
 			margin_percent = round((curr_value / base_value) * 100, 2)

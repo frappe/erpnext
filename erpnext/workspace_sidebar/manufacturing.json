@@ -294,17 +294,6 @@
    "collapsible": 1,
    "indent": 0,
    "keep_closed": 0,
-   "label": "BOM Stock Report",
-   "link_to": "BOM Stock Report",
-   "link_type": "Report",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 1,
-   "collapsible": 1,
-   "indent": 0,
-   "keep_closed": 0,
    "label": "Production Analytics",
    "link_to": "Production Analytics",
    "link_type": "Report",
@@ -437,7 +426,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-02-20 16:45:00.399936",
+ "modified": "2026-05-05 11:01:50.260118",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "module_onboarding": "Manufacturing Onboarding",

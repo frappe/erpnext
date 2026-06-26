@@ -228,7 +228,7 @@ erpnext.accounts.taxes = {
 					on_previous_row_error(tax.row_id == 1 ? "1" : "1 - " + tax.row_id);
 				}
 			} else if (tax.category == "Valuation") {
-				frappe.throw(__("Valuation type charges can not marked as Inclusive"));
+				frappe.throw(__("Valuation type charges cannot be marked as Inclusive"));
 			}
 		}
 	},

@@ -151,13 +151,13 @@
    "label": "Default Advance Account",
    "mandatory_depends_on": "doc.party_type",
    "options": "Account",
-   "reqd": 1
+   "reqd": 0
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-01-08 08:22:14.798085",
+ "modified": "2026-05-16 11:43:12.758685",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Payment Reconciliation",

@@ -35,12 +35,12 @@ def upload_bank_statement():
 
 
 @frappe.whitelist()
-def create_bank_entries(columns: str, data: str, bank_account: str):
+def create_bank_entries(columns: str, data: str | list, bank_account: str):
 	header_map = get_header_mapping(columns, bank_account)
 
 	success = 0
 	errors = 0
-	for d in json.loads(data):
+	for d in frappe.parse_json(data):
 		if all(item is None for item in d) is True:
 			continue
 		fields = {}
@@ -66,7 +66,7 @@ def get_header_mapping(columns, bank_account):
 	mapping = get_bank_mapping(bank_account)
 
 	header_map = {}
-	for column in json.loads(columns):
+	for column in frappe.parse_json(columns):
 		if column["content"] in mapping:
 			header_map.update({mapping[column["content"]]: column["colIndex"]})
 

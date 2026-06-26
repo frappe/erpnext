@@ -1040,11 +1040,11 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		)
 
 		batch1 = get_batch_from_bundle(se1.items[0].serial_and_batch_bundle)
-		self.assertFalse(batch1 == batch)
+		self.assertNotEqual(batch1, batch)
 
 		sr.reload()
 		self.assertTrue(sr.items[0].serial_and_batch_bundle)
-		self.assertTrue(sr.items[0].current_serial_and_batch_bundle)
+		self.assertFalse(sr.items[0].current_serial_and_batch_bundle)
 
 	def test_not_reconcile_all_batch(self):
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
@@ -1418,7 +1418,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		sr.save()
 		self.assertEqual(sr.items[0].current_valuation_rate, 100)
 		self.assertEqual(sr.difference_amount, 100 * -1)
-		self.assertTrue(sr.items[0].qty == 0)
+		self.assertEqual(sr.items[0].qty, 0)
 
 	def test_stock_reco_recalculate_qty_for_backdated_entry(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -1456,7 +1456,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			pluck="name",
 		)
 
-		self.assertTrue(len(stock_ledgers) == 1)
+		self.assertEqual(len(stock_ledgers), 1)
 
 		se = make_stock_entry(
 			item_code=item_code,
@@ -1515,7 +1515,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			"status",
 		)
 
-		self.assertTrue(status == "Active")
+		self.assertEqual(status, "Active")
 
 		sr = create_stock_reconciliation(
 			item_code=serial_item,
@@ -1534,7 +1534,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			"status",
 		)
 
-		self.assertTrue(status == "Active")
+		self.assertEqual(status, "Active")
 
 		se = make_stock_entry(
 			item_code=serial_item,
@@ -1550,7 +1550,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			"status",
 		)
 
-		self.assertFalse(status == "Active")
+		self.assertNotEqual(status, "Active")
 
 		sr.cancel()
 
@@ -1560,7 +1560,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			"status",
 		)
 
-		self.assertFalse(status == "Active")
+		self.assertNotEqual(status, "Active")
 
 	def test_change_valuation_of_batch_using_backdated_stock_reco(self):
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
@@ -1840,6 +1840,46 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		)
 
 		self.assertEqual(frappe.get_value("Serial No", serial_no, "status"), "Delivered")
+
+	def test_get_items_for_stock_reco_from_bin(self):
+		"""get_items_for_stock_reco Bin branch (comma-join -> inner_join, ifnull(disabled) ->
+		disabled==0|isnull, warehouse-subtree EXISTS -> isin) must surface a stocked item."""
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
+			get_items_for_stock_reco,
+		)
+
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item, target=warehouse, qty=5, basic_rate=100)
+
+		returned = {
+			(d["item_code"], d["warehouse"]) for d in get_items_for_stock_reco(warehouse, "_Test Company")
+		}
+		self.assertIn((item, warehouse), returned)
+
+	def test_get_items_for_stock_reco_from_item_default(self):
+		"""get_items_for_stock_reco Item Default branch (EXISTS -> isin, dropped `group by i.name` —
+		sound because Item Default is one-per-(item, company)) must surface an item via its
+		default_warehouse even without stock."""
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
+			get_items_for_stock_reco,
+		)
+
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"item_defaults": [{"company": "_Test Company", "default_warehouse": warehouse}],
+			}
+		).name
+
+		returned = {
+			(d["item_code"], d["warehouse"]) for d in get_items_for_stock_reco(warehouse, "_Test Company")
+		}
+		self.assertIn((item, warehouse), returned)
 
 
 def create_batch_item_with_batch(item_name, batch_id):

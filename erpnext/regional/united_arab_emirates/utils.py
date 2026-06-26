@@ -77,7 +77,7 @@ def get_account_currency(account):
 def get_tax_accounts(company):
 	"""Get the list of tax accounts for a specific company."""
 	tax_accounts_dict = frappe._dict()
-	tax_accounts_list = frappe.get_all("UAE VAT Account", filters={"parent": company}, fields=["Account"])
+	tax_accounts_list = frappe.get_all("UAE VAT Account", filters={"parent": company}, fields=["account"])
 
 	if not tax_accounts_list and not frappe.in_test:
 		frappe.throw(_('Please set Vat Accounts for Company: "{0}" in UAE VAT Settings').format(company))
@@ -140,7 +140,9 @@ def update_totals(vat_tax, base_vat_tax, doc):
 
 	doc.in_words = money_in_words(doc.grand_total, doc.currency)
 	doc.base_in_words = money_in_words(doc.base_grand_total, erpnext.get_company_currency(doc.company))
-	doc.set_payment_schedule()
+	from erpnext.accounts.services.payment_schedule import PaymentScheduleService
+
+	PaymentScheduleService(doc).set_payment_schedule()
 
 
 def make_regional_gl_entries(gl_entries, doc):

@@ -10,6 +10,7 @@ from frappe.utils import add_days, cstr, flt, getdate, nowdate, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.utils import get_balance_on
 from erpnext.controllers.accounts_controller import InvalidQtyError
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
@@ -18,7 +19,7 @@ from erpnext.selling.doctype.sales_order.test_sales_order import (
 	create_dn_against_so,
 	make_sales_order,
 )
-from erpnext.stock.doctype.delivery_note.delivery_note import (
+from erpnext.stock.doctype.delivery_note.mapper import (
 	make_delivery_trip,
 	make_sales_invoice,
 )
@@ -47,6 +48,16 @@ from erpnext.tests.utils import ERPNextTestSuite
 class TestDeliveryNote(ERPNextTestSuite):
 	def setUp(self):
 		self.load_test_records("Stock Entry")
+
+	def get_perpetual_defaults(self):
+		company = frappe.get_doc("Company", "_Test Company with perpetual inventory")
+		self.perpetual_company = company.name
+		self.perpetual_account = company.stock_delivered_but_not_billed
+		self.perpetual_cost_center = company.cost_center
+		self.perpetual_warehouse = f"Stores - {company.abbr}"
+		self.perpetual_expense_account = f"Cost of Goods Sold - {company.abbr}"
+		self.perpetual_income_account = f"Sales - {company.abbr}"
+		self.perpetual_debit_to = f"Debtors - {company.abbr}"
 
 	def test_delivery_note_qty(self):
 		dn = create_delivery_note(qty=0, do_not_save=True)
@@ -190,7 +201,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 			self.assertEqual(cstr(serial_no.get(field)), value)
 
 	def test_delivery_note_return_against_denormalized_serial_no(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 		frappe.flags.ignore_serial_batch_bundle_validation = True
@@ -279,7 +290,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 		returned_serial_nos1 = get_serial_nos_from_bundle(dn1.items[0].serial_and_batch_bundle)
 		for serial_no in returned_serial_nos1:
-			self.assertTrue(serial_no in serial_nos)
+			self.assertIn(serial_no, serial_nos)
 
 		dn2 = make_sales_return(dn.name)
 
@@ -290,8 +301,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 		returned_serial_nos2 = get_serial_nos_from_bundle(dn2.items[0].serial_and_batch_bundle)
 		for serial_no in returned_serial_nos2:
-			self.assertTrue(serial_no in serial_nos)
-			self.assertFalse(serial_no in returned_serial_nos1)
+			self.assertIn(serial_no, serial_nos)
+			self.assertNotIn(serial_no, returned_serial_nos1)
 
 	def test_sales_return_for_non_bundled_items_partial(self):
 		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
@@ -913,12 +924,15 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertTrue(gl_entries)
 
 		stock_value_difference = abs(
-			frappe.db.sql(
-				"""select sum(stock_value_difference)
-			from `tabStock Ledger Entry` where voucher_type='Delivery Note' and voucher_no=%s
-			and warehouse='Stores - TCP1'""",
-				dn.name,
-			)[0][0]
+			frappe.get_all(
+				"Stock Ledger Entry",
+				filters={
+					"voucher_type": "Delivery Note",
+					"voucher_no": dn.name,
+					"warehouse": "Stores - TCP1",
+				},
+				fields=[{"SUM": "stock_value_difference", "as": "svd"}],
+			)[0].svd
 		)
 
 		expected_values = {
@@ -944,7 +958,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		dn.submit()
 
 		update_delivery_note_status(dn.name, "Closed")
-		self.assertEqual(frappe.db.get_value("Delivery Note", dn.name, "Status"), "Closed")
+		self.assertEqual(frappe.db.get_value("Delivery Note", dn.name, "status"), "Closed")
 
 		# Check cancelling closed delivery note
 		dn.load_from_db()
@@ -984,7 +998,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	def test_dn_billing_status_case2(self):
 		# SO -> SI and SO -> DN1, DN2
-		from erpnext.selling.doctype.sales_order.sales_order import (
+		from erpnext.selling.doctype.sales_order.mapper import (
 			make_delivery_note,
 			make_sales_invoice,
 		)
@@ -1026,7 +1040,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"delete_linked_ledger_entries": True})
 	def test_sales_invoice_qty_after_return(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 
 		item = make_item(
 			"Test Sales Invoice Qty After Return",
@@ -1057,8 +1071,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	def test_dn_billing_status_case3(self):
 		# SO -> DN1 -> SI and SO -> SI and SO -> DN2
-		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
-		from erpnext.selling.doctype.sales_order.sales_order import (
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
+		from erpnext.selling.doctype.sales_order.mapper import (
 			make_sales_invoice as make_sales_invoice_from_so,
 		)
 
@@ -1108,8 +1122,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	def test_dn_billing_status_case4(self):
 		# SO -> SI -> DN
-		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_delivery_note
-		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_delivery_note
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
 
 		so = make_sales_order(po_no="12345")
 
@@ -1132,7 +1146,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 	def test_dn_billing_status_case5(self):
 		# SO -> SI(with update stock partial invoice)
 		# SO -> DN
-		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note, make_sales_invoice
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note, make_sales_invoice
 
 		so = make_sales_order(po_no="12345")
 
@@ -1196,7 +1210,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertTrue(gl_entries)
 
 		expected_values = {
-			"Cost of Goods Sold - TCP1": {"cost_center": cost_center},
+			dn.items[0].expense_account: {"cost_center": cost_center},
 			stock_in_hand_account: {"cost_center": cost_center},
 		}
 		for _i, gle in enumerate(gl_entries):
@@ -1225,15 +1239,15 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 		self.assertTrue(gl_entries)
 		expected_values = {
-			"Cost of Goods Sold - TCP1": {"cost_center": cost_center},
+			dn.items[0].expense_account: {"cost_center": cost_center},
 			stock_in_hand_account: {"cost_center": cost_center},
 		}
 		for _i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
 	def test_make_sales_invoice_from_dn_for_returned_qty(self):
-		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice
 
 		so = make_sales_order(qty=2)
 		so.submit()
@@ -1252,7 +1266,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_make_sales_invoice_from_dn_with_returned_qty_duplicate_items(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice
 
 		dn = create_delivery_note(qty=8, do_not_submit=True)
 		dn.append(
@@ -1359,8 +1373,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 		#                 |
 		#                 |---> DN(Partial Sales Return) ---> SI(Credit Note)
 
-		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_delivery_note
-		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_delivery_note
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
 
 		so = make_sales_order(qty=10)
 		si = make_sales_invoice(so.name)
@@ -1372,7 +1386,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(dn.items[0].returned_qty, 0)
 		self.assertEqual(dn.per_billed, 100)
 
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice
 
 		dn1 = create_delivery_note(is_return=1, return_against=dn.name, qty=-3)
 		si1 = make_sales_invoice(dn1.name)
@@ -1529,7 +1543,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		return_dn = make_return_doc(dn.doctype, dn.name)
 		return_dn.save().submit()
 
-		self.assertTrue(return_dn.docstatus == 1)
+		self.assertEqual(return_dn.docstatus, 1)
 
 	def test_reserve_qty_on_sales_return(self):
 		frappe.db.set_single_value("Selling Settings", "dont_reserve_sales_order_qty_on_sales_return", 0)
@@ -1541,7 +1555,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	def reserved_qty_check(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
-		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
 		from erpnext.stock.stock_balance import get_reserved_qty
 
 		dont_reserve_qty = frappe.db.get_single_value(
@@ -1748,7 +1762,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	def test_internal_transfer_for_non_stock_item(self):
 		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
-		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
 
 		item = make_item(properties={"is_stock_item": 0}).name
 		warehouse = "_Test Warehouse - _TC"
@@ -1937,7 +1951,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(sle_data.stock_value_difference, 200.0 * -1)
 
 	def test_sales_return_batch_no_for_batched_item_in_dn(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 
 		item_code = make_item(
 			"Test Batched Item for Sales Return 11",
@@ -1966,7 +1980,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(batch_no, returned_batch_no)
 
 	def test_partial_sales_return_batch_no_for_batched_item_in_dn(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 
 		item_code = make_item(
 			"Test Partial Batched Item for Sales Return 11",
@@ -2013,7 +2027,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(sabb_qty, 2)
 
 	def test_sales_return_serial_no_for_serial_item_in_dn(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 
 		item_code = make_item(
 			"Test Serial Item for Sales Return 11",
@@ -2162,7 +2176,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 			self.assertEqual(sn.warranty_period, 100)
 
 	def test_batch_return_dn(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 
 		item_code = make_item(
 			"Test Batch Return DN Item 1",
@@ -2203,7 +2217,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(stock_value_difference, 100.0 * 5)
 
 	def test_delivery_note_return_valuation_without_use_serial_batch_field(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 
 		batch_item = make_item(
 			"_Test Delivery Note Return Valuation Batch Item",
@@ -2323,7 +2337,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_delivery_note_return_valuation_with_use_serial_batch_field(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 
 		batch_item = make_item(
 			"_Test Delivery Note Return Valuation WITH Batch Item",
@@ -2533,7 +2547,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 				self.assertTrue(row.serial_no)
 
 	def test_delivery_note_return_for_batch_item_with_different_warehouse(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 		batch_item = make_item(
@@ -2603,7 +2617,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 				self.assertEqual(d.incoming_rate, batch_no_valuation[d.batch_no])
 
 	def test_delivery_note_per_billed_after_return(self):
-		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
 
 		so = make_sales_order(qty=2)
 		dn = make_delivery_note(so.name)
@@ -2671,7 +2685,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	def test_sales_return_for_product_bundle(self):
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 		from erpnext.stock.doctype.item.test_item import make_item
 
 		rm_items = []
@@ -2744,7 +2758,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 			doc = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
 			for entry in doc.entries:
 				if entry.serial_no:
-					self.assertTrue(entry.serial_no in serial_batch_map[row.item_code].serial_nos)
+					self.assertIn(entry.serial_no, serial_batch_map[row.item_code].serial_nos)
 					self.assertEqual(
 						entry.incoming_rate,
 						serial_batch_map[row.item_code].serial_no_valuation[entry.serial_no],
@@ -2754,7 +2768,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 				elif entry.batch_no:
 					serial_batch_map[row.item_code].batches[entry.batch_no] += entry.qty
-					self.assertTrue(entry.batch_no in serial_batch_map[row.item_code].batches)
+					self.assertIn(entry.batch_no, serial_batch_map[row.item_code].batches)
 					self.assertEqual(entry.qty, 2.0)
 					self.assertEqual(
 						entry.incoming_rate,
@@ -2770,7 +2784,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 			doc = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
 			for entry in doc.entries:
 				if entry.serial_no:
-					self.assertTrue(entry.serial_no in serial_batch_map[row.item_code].serial_nos)
+					self.assertIn(entry.serial_no, serial_batch_map[row.item_code].serial_nos)
 					self.assertEqual(
 						entry.incoming_rate,
 						serial_batch_map[row.item_code].serial_no_valuation[entry.serial_no],
@@ -2782,7 +2796,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 					serial_batch_map[row.item_code].batches[entry.batch_no] += entry.qty
 					self.assertEqual(serial_batch_map[row.item_code].batches[entry.batch_no], 0.0)
 
-					self.assertTrue(entry.batch_no in serial_batch_map[row.item_code].batches)
+					self.assertIn(entry.batch_no, serial_batch_map[row.item_code].batches)
 
 					self.assertEqual(entry.qty, 3.0)
 					self.assertEqual(
@@ -2865,6 +2879,489 @@ class TestDeliveryNote(ERPNextTestSuite):
 		for entry in sabb.entries:
 			self.assertEqual(entry.incoming_rate, 200)
 
+	def test_sdbnb_gl_entry_on_delivery_note(self):
+		"""Test that DN GL entries use SDBNB account when configured on the company."""
+		self.get_perpetual_defaults()
+		item_code = make_item("SDBNB Test Item", properties={"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=item_code,
+			target=self.perpetual_warehouse,
+			qty=10,
+			basic_rate=100,
+			company=self.perpetual_company,
+		)
+
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=5,
+			rate=150,
+			company=self.perpetual_company,
+			warehouse=self.perpetual_warehouse,
+			cost_center=self.perpetual_cost_center,
+			expense_account=self.perpetual_expense_account,
+		)
+
+		# DN expense_account should be overridden to SDBNB
+		dn.reload()
+		self.assertEqual(dn.items[0].expense_account, self.perpetual_account)
+
+		# Verify DN GL entries use SDBNB account (not COGS)
+		gl_entries = get_gl_entries("Delivery Note", dn.name)
+		self.assertTrue(gl_entries)
+
+		stock_in_hand_account = get_inventory_account(self.perpetual_company)
+		expected_values = {
+			self.perpetual_account: {"debit": True},
+			stock_in_hand_account: {"credit": True},
+		}
+		for gle in gl_entries:
+			self.assertIn(gle.account, expected_values)
+			if expected_values[gle.account].get("debit"):
+				self.assertGreater(gle.debit, 0)
+			if expected_values[gle.account].get("credit"):
+				self.assertGreater(gle.credit, 0)
+
+	def test_sdbnb_reversal_on_sales_invoice(self):
+		"""Test that SI created from DN reverses SDBNB entries (credits SDBNB, debits COGS)."""
+		self.get_perpetual_defaults()
+		item_code = make_item("SDBNB Reversal Test Item", properties={"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=item_code,
+			target=self.perpetual_warehouse,
+			qty=10,
+			basic_rate=100,
+			company=self.perpetual_company,
+		)
+
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=5,
+			rate=150,
+			company=self.perpetual_company,
+			warehouse=self.perpetual_warehouse,
+			cost_center=self.perpetual_cost_center,
+			expense_account=self.perpetual_expense_account,
+		)
+
+		si = make_sales_invoice(dn.name)
+		si.submit()
+
+		# Get the stock value difference from the DN's SLE
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": "Delivery Note",
+				"voucher_no": dn.name,
+				"item_code": item_code,
+				"is_cancelled": 0,
+			},
+			["stock_value_difference", "actual_qty"],
+			as_dict=True,
+		)
+
+		valuation_rate = abs(flt(sle.stock_value_difference) / flt(sle.actual_qty))
+		expected_amount = flt(valuation_rate * 5)  # SI qty = 5
+
+		# SI GL entries should have SDBNB reversal
+		si_gl_entries = get_gl_entries("Sales Invoice", si.name)
+		self.assertTrue(si_gl_entries)
+		self.assertGreater(
+			sum(gle.debit for gle in si_gl_entries if gle.account == self.perpetual_expense_account), 0
+		)
+		sdbnb_credit = sum(gle.credit for gle in si_gl_entries if gle.account == self.perpetual_account)
+		cogs_debit = sum(gle.debit for gle in si_gl_entries if gle.account == self.perpetual_expense_account)
+
+		self.assertEqual(flt(sdbnb_credit, 2), flt(expected_amount, 2))
+		self.assertEqual(flt(cogs_debit, 2), flt(expected_amount, 2))
+
+	def test_sdbnb_partial_billing(self):
+		"""Test SDBNB reversal for partial invoicing - only billed qty should be reversed."""
+		self.get_perpetual_defaults()
+		item_code = make_item("SDBNB Partial Bill Item", properties={"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=item_code,
+			target=self.perpetual_warehouse,
+			qty=10,
+			basic_rate=100,
+			company=self.perpetual_company,
+		)
+
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=10,
+			rate=150,
+			company=self.perpetual_company,
+			warehouse=self.perpetual_warehouse,
+			cost_center=self.perpetual_cost_center,
+			expense_account=self.perpetual_expense_account,
+		)
+
+		# Create SI from DN and reduce qty to 4 (partial billing)
+		si = make_sales_invoice(dn.name)
+		si.items[0].qty = 4
+		si.save()
+		si.submit()
+
+		# Get valuation rate from DN's SLE
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": "Delivery Note",
+				"voucher_no": dn.name,
+				"item_code": item_code,
+				"is_cancelled": 0,
+			},
+			["stock_value_difference", "actual_qty"],
+			as_dict=True,
+		)
+
+		valuation_rate = abs(flt(sle.stock_value_difference) / flt(sle.actual_qty))
+		expected_amount = flt(valuation_rate * 4)  # Only 4 out of 10
+
+		si_gl_entries = get_gl_entries("Sales Invoice", si.name)
+		sdbnb_credit = sum(gle.credit for gle in si_gl_entries if gle.account == self.perpetual_account)
+
+		self.assertEqual(flt(sdbnb_credit, 2), flt(expected_amount, 2))
+
+	def test_sdbnb_disabled_for_sales_return(self):
+		"""Test that sales return DN uses default expense account when disable_sdbnb_in_sr is enabled."""
+		self.get_perpetual_defaults()
+		frappe.db.set_value("Company", self.perpetual_company, "disable_sdbnb_in_sr", 1)
+
+		try:
+			item_code = make_item("SDBNB Return Disable Item", properties={"is_stock_item": 1}).name
+			make_stock_entry(
+				item_code=item_code,
+				target=self.perpetual_warehouse,
+				qty=10,
+				basic_rate=100,
+				company=self.perpetual_company,
+			)
+
+			dn = create_delivery_note(
+				item_code=item_code,
+				qty=5,
+				rate=150,
+				company=self.perpetual_company,
+				warehouse=self.perpetual_warehouse,
+				cost_center=self.perpetual_cost_center,
+				expense_account=self.perpetual_expense_account,
+			)
+
+			# Original DN should use SDBNB
+			dn.reload()
+			self.assertEqual(dn.items[0].expense_account, self.perpetual_account)
+
+			return_dn = create_delivery_note(
+				item_code=item_code,
+				qty=-3,
+				rate=150,
+				company=self.perpetual_company,
+				warehouse=self.perpetual_warehouse,
+				cost_center=self.perpetual_cost_center,
+				expense_account=self.perpetual_expense_account,
+				is_return=1,
+				return_against=dn.name,
+			)
+
+			# Return DN should not use SDBNB (disable_sdbnb_in_sr is on)
+			return_dn.reload()
+			self.assertNotEqual(return_dn.items[0].expense_account, self.perpetual_account)
+		finally:
+			frappe.db.set_value("Company", self.perpetual_company, "disable_sdbnb_in_sr", 0)
+
+	def test_sdbnb_enabled_for_sales_return(self):
+		"""Test that sales return DN uses SDBNB account when disable_sdbnb_in_sr is off."""
+		self.get_perpetual_defaults()
+		item_code = make_item("SDBNB Return Enable Item", properties={"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=item_code,
+			target=self.perpetual_warehouse,
+			qty=10,
+			basic_rate=100,
+			company=self.perpetual_company,
+		)
+
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=5,
+			rate=150,
+			company=self.perpetual_company,
+			warehouse=self.perpetual_warehouse,
+			cost_center=self.perpetual_cost_center,
+			expense_account=self.perpetual_expense_account,
+		)
+
+		return_dn = create_delivery_note(
+			item_code=item_code,
+			qty=-3,
+			rate=150,
+			company=self.perpetual_company,
+			warehouse=self.perpetual_warehouse,
+			cost_center=self.perpetual_cost_center,
+			expense_account=self.perpetual_expense_account,
+			is_return=1,
+			return_against=dn.name,
+		)
+
+		# Return DN should also use SDBNB since disable flag is off by default
+		return_dn.reload()
+		self.assertEqual(return_dn.items[0].expense_account, self.perpetual_account)
+
+	def test_sdbnb_no_reversal_with_update_stock(self):
+		"""Test that SI with update_stock=1 (standalone, no DN link) does NOT create SDBNB GL entries."""
+		self.get_perpetual_defaults()
+		item_code = make_item("SDBNB Update Stock Item", properties={"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=item_code,
+			target=self.perpetual_warehouse,
+			qty=10,
+			basic_rate=100,
+			company=self.perpetual_company,
+		)
+
+		# Create standalone SI with update_stock=1 (no DN link)
+		si = create_sales_invoice(
+			company=self.perpetual_company,
+			currency="INR",
+			debit_to=self.perpetual_debit_to,
+			income_account=self.perpetual_income_account,
+			update_stock=1,
+			item_code=item_code,
+			qty=5,
+			rate=150,
+			warehouse=self.perpetual_warehouse,
+			cost_center=self.perpetual_cost_center,
+			expense_account=self.perpetual_expense_account,
+		)
+
+		# SI GL entries should not have SDBNB account
+		si_gl_entries = get_gl_entries("Sales Invoice", si.name)
+		sdbnb_entries = [gle for gle in si_gl_entries if gle.account == self.perpetual_account]
+		self.assertEqual(len(sdbnb_entries), 0)
+
+	def test_sdbnb_skip_for_dn_against_sales_invoice(self):
+		"""Test that DN items with against_sales_invoice reference skips SDBNB account assignment."""
+		from erpnext.accounts.doctype.sales_invoice.mapper import (
+			make_delivery_note as make_dn_from_si,
+		)
+
+		self.get_perpetual_defaults()
+
+		item_code = make_item("SDBNB Against SI Item", properties={"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=item_code,
+			target=self.perpetual_warehouse,
+			qty=10,
+			basic_rate=100,
+			company=self.perpetual_company,
+		)
+
+		si = create_sales_invoice(
+			company=self.perpetual_company,
+			currency="INR",
+			debit_to=self.perpetual_debit_to,
+			income_account=self.perpetual_income_account,
+			update_stock=0,
+			item_code=item_code,
+			qty=5,
+			rate=150,
+			warehouse=self.perpetual_warehouse,
+			cost_center=self.perpetual_cost_center,
+			expense_account=self.perpetual_expense_account,
+		)
+
+		dn = make_dn_from_si(si.name)
+		self.assertEqual(dn.items[0].expense_account, self.perpetual_expense_account)
+		dn.submit()
+
+		# DN items created from SI have against_sales_invoice set,
+		# so SDBNB should be skipped
+		dn.reload()
+		self.assertEqual(dn.items[0].expense_account, self.perpetual_expense_account)
+
+	def test_sdbnb_non_stock_item_skipped(self):
+		"""Test that non-stock items are not assigned SDBNB account."""
+		self.get_perpetual_defaults()
+		non_stock_item = make_item(
+			"SDBNB Non Stock Item",
+			properties={"is_stock_item": 0},
+		).name
+
+		dn = create_delivery_note(
+			company=self.perpetual_company,
+			item_code=non_stock_item,
+			warehouse=self.perpetual_warehouse,
+			qty=5,
+			rate=150,
+			cost_center=self.perpetual_cost_center,
+			expense_account=self.perpetual_expense_account,
+			do_not_submit=True,
+		)
+
+		# Non-stock item should retain original expense_account, not SDBNB
+		self.assertNotEqual(dn.items[0].expense_account, self.perpetual_account)
+		self.assertEqual(dn.items[0].expense_account, self.perpetual_expense_account)
+
+	def test_sdbnb_reposting_with_fifo(self):
+		"""Test that backdated inward entry triggers reposting and updates SDBNB GL entries (FIFO)."""
+		self.get_perpetual_defaults()
+		item_code = make_item(
+			"SDBNB Repost FIFO Item", properties={"is_stock_item": 1, "valuation_method": "FIFO"}
+		).name
+
+		posting_date = add_days(nowdate(), -1)
+
+		# Inward 10 qty @ 100
+		make_stock_entry(
+			item_code=item_code,
+			target=self.perpetual_warehouse,
+			qty=10,
+			basic_rate=100,
+			company=self.perpetual_company,
+			posting_date=posting_date,
+		)
+
+		# DN 5 qty → FIFO consumes 5 @ 100 → stock_value_diff = -500
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=5,
+			rate=150,
+			company=self.perpetual_company,
+			warehouse=self.perpetual_warehouse,
+			cost_center=self.perpetual_cost_center,
+			expense_account=self.perpetual_expense_account,
+			posting_date=posting_date,
+		)
+
+		# Verify initial DN GL: SDBNB Dr 500, Stock In Hand Cr 500
+		dn_gl = get_gl_entries("Delivery Note", dn.name)
+		sdbnb_debit = sum(gle.debit for gle in dn_gl if gle.account == self.perpetual_account)
+		self.assertEqual(flt(sdbnb_debit, 2), 500.0)
+
+		# SI from DN
+		si = make_sales_invoice(dn.name)
+		si.set_posting_time = 1
+		si.posting_date = posting_date
+		si.submit()
+
+		# Verify initial SI GL: SDBNB Cr 500, COGS Dr 500
+		si_gl = get_gl_entries("Sales Invoice", si.name)
+		sdbnb_credit = sum(gle.credit for gle in si_gl if gle.account == self.perpetual_account)
+		cogs_debit = sum(gle.debit for gle in si_gl if gle.account == self.perpetual_expense_account)
+		self.assertEqual(flt(sdbnb_credit, 2), 500.0)
+		self.assertEqual(flt(cogs_debit, 2), 500.0)
+
+		# Backdated inward: 5 qty @ 50 → FIFO queue becomes [[5,50],[10,100]]
+		# DN now consumes 5@50 from front → stock_value_diff = -250
+		make_stock_entry(
+			item_code=item_code,
+			target=self.perpetual_warehouse,
+			qty=5,
+			basic_rate=50,
+			company=self.perpetual_company,
+			posting_date=add_days(posting_date, -1),
+		)
+
+		# After repost: DN GL should reflect new valuation (250 instead of 500)
+		dn_gl = get_gl_entries("Delivery Note", dn.name)
+		sdbnb_debit = sum(gle.debit for gle in dn_gl if gle.account == self.perpetual_account)
+		self.assertEqual(flt(sdbnb_debit, 2), 250.0)
+
+		# After repost: SI GL should also reflect new valuation
+		si_gl = get_gl_entries("Sales Invoice", si.name)
+		sdbnb_credit = sum(gle.credit for gle in si_gl if gle.account == self.perpetual_account)
+		cogs_debit = sum(gle.debit for gle in si_gl if gle.account == self.perpetual_expense_account)
+		self.assertEqual(flt(sdbnb_credit, 2), 250.0)
+		self.assertEqual(flt(cogs_debit, 2), 250.0)
+
+	def test_sdbnb_reposting_with_moving_average(self):
+		"""Test that backdated inward entry triggers reposting and updates SDBNB GL entries (Moving Average)."""
+		self.get_perpetual_defaults()
+		item_code = make_item(
+			"SDBNB Repost MA Item", properties={"is_stock_item": 1, "valuation_method": "Moving Average"}
+		).name
+
+		posting_date = add_days(nowdate(), -1)
+
+		# Inward 10 qty @ 100 → avg = 100
+		make_stock_entry(
+			item_code=item_code,
+			target=self.perpetual_warehouse,
+			qty=10,
+			basic_rate=100,
+			company=self.perpetual_company,
+			posting_date=posting_date,
+		)
+
+		# DN 5 qty → avg = 100 → stock_value_diff = -500
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=5,
+			rate=150,
+			company=self.perpetual_company,
+			warehouse=self.perpetual_warehouse,
+			cost_center=self.perpetual_cost_center,
+			expense_account=self.perpetual_expense_account,
+			posting_date=posting_date,
+		)
+
+		# Verify initial DN GL: SDBNB Dr 500, Stock In Hand Cr 500
+		dn_gl = get_gl_entries("Delivery Note", dn.name)
+		sdbnb_debit = sum(gle.debit for gle in dn_gl if gle.account == self.perpetual_account)
+		self.assertEqual(flt(sdbnb_debit, 2), 500.0)
+
+		# SI from DN
+		si = make_sales_invoice(dn.name)
+		si.set_posting_time = 1
+		si.posting_date = posting_date
+		si.submit()
+
+		# Verify initial SI GL: SDBNB Cr 500, COGS Dr 500
+		si_gl = get_gl_entries("Sales Invoice", si.name)
+		sdbnb_credit = sum(gle.credit for gle in si_gl if gle.account == self.perpetual_account)
+		cogs_debit = sum(gle.debit for gle in si_gl if gle.account == self.perpetual_expense_account)
+		self.assertEqual(flt(sdbnb_credit, 2), 500.0)
+		self.assertEqual(flt(cogs_debit, 2), 500.0)
+
+		# Backdated inward: 5 qty @ 50
+		# Moving avg becomes: (5*50 + 10*100) / 15 = 1250/15 ≈ 83.33
+		# DN 5 qty → reposted stock_value_diff ≈ -416.67
+		make_stock_entry(
+			item_code=item_code,
+			target=self.perpetual_warehouse,
+			qty=5,
+			basic_rate=50,
+			company=self.perpetual_company,
+			posting_date=add_days(posting_date, -1),
+		)
+
+		# Read actual stock_value_difference from reposted SLE
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": "Delivery Note",
+				"voucher_no": dn.name,
+				"item_code": item_code,
+				"is_cancelled": 0,
+			},
+			"stock_value_difference",
+		)
+		expected_amount = abs(flt(sle, 2))
+
+		# DN GL should reflect new moving average valuation
+		dn_gl = get_gl_entries("Delivery Note", dn.name)
+		sdbnb_debit = sum(gle.debit for gle in dn_gl if gle.account == self.perpetual_account)
+		self.assertEqual(flt(sdbnb_debit, 2), expected_amount)
+		self.assertLess(expected_amount, 500.0)
+
+		# SI GL should also reflect new valuation
+		si_gl = get_gl_entries("Sales Invoice", si.name)
+		sdbnb_credit = sum(gle.credit for gle in si_gl if gle.account == self.perpetual_account)
+		cogs_debit = sum(gle.debit for gle in si_gl if gle.account == self.perpetual_expense_account)
+		self.assertEqual(flt(sdbnb_credit, 2), expected_amount)
+		self.assertEqual(flt(cogs_debit, 2), expected_amount)
+
 	@ERPNextTestSuite.change_settings("Selling Settings", {"validate_selling_price": 1})
 	def test_validate_selling_price(self):
 		item_code = make_item("VSP Item", properties={"is_stock_item": 1}).name
@@ -2881,6 +3378,68 @@ class TestDeliveryNote(ERPNextTestSuite):
 		dn.items[0].incoming_rate = 0
 		dn.items[0].stock_qty = 2
 		dn.save()
+
+	def test_validate_proj_cust_matches_project_customer(self):
+		"""validate_proj_cust must reject a DN whose customer differs from the project's customer,
+		and accept one when the project has no customer (the ifnull(customer,'')='' / `is not set`
+		branch of the converted or_filters)."""
+		mismatch_project = frappe.get_doc(
+			{
+				"doctype": "Project",
+				"project_name": "_Test DN Project Mismatch",
+				"company": "_Test Company",
+				"customer": "_Test Customer 1",
+			}
+		).insert()
+		dn = create_delivery_note(customer="_Test Customer", do_not_save=True)
+		dn.project = mismatch_project.name
+		with self.assertRaises(frappe.ValidationError) as cm:
+			dn.insert()
+		self.assertIn("does not belong to project", str(cm.exception))
+
+		# A project with no customer must pass via the empty-string/NULL or_filters branch.
+		open_project = frappe.get_doc(
+			{
+				"doctype": "Project",
+				"project_name": "_Test DN Project No Customer",
+				"company": "_Test Company",
+			}
+		).insert()
+		self.assertFalse(open_project.customer)
+		dn2 = create_delivery_note(customer="_Test Customer", do_not_save=True)
+		dn2.project = open_project.name
+		dn2.insert()  # must not raise
+		self.assertTrue(dn2.name)
+
+	def test_check_next_docstatus_blocks_cancel_with_submitted_invoice(self):
+		"""check_next_docstatus must block cancelling a DN once a submitted Sales Invoice draws from
+		it — covers the converted child-table get_all (Sales Invoice Item, docstatus=1)."""
+		dn = create_delivery_note()  # submitted, simple _Test Item
+		si = make_sales_invoice(dn.name)
+		si.insert()
+		si.submit()
+
+		dn.load_from_db()
+		with self.assertRaises(frappe.ValidationError) as cm:
+			dn.cancel()
+		self.assertIn("has already been submitted", str(cm.exception))
+
+	def test_cancel_packing_slips_cancels_submitted_slips(self):
+		"""cancel_packing_slips must cancel the DN's submitted Packing Slips — covers the converted
+		get_all(pluck=name) lookup and the pluck-aware iteration."""
+		from erpnext.stock.doctype.delivery_note.mapper import make_packing_slip
+		from erpnext.stock.doctype.delivery_note.services.packing import PackingService
+
+		dn = create_delivery_note(do_not_submit=True)  # draft, so a Packing Slip can be mapped
+		ps = make_packing_slip(dn.name)
+		ps.save()
+		ps.submit()
+		dn.submit()
+		self.assertEqual(frappe.db.get_value("Packing Slip", ps.name, "docstatus"), 1)
+
+		PackingService(dn).cancel_packing_slips()
+
+		self.assertEqual(frappe.db.get_value("Packing Slip", ps.name, "docstatus"), 2)
 
 
 def create_delivery_note(**args):

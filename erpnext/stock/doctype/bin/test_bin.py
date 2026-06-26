@@ -19,14 +19,16 @@ class TestBin(ERPNextTestSuite):
 		bin1.insert()
 
 		bin2 = frappe.get_doc(doctype="Bin", item_code=item_code, warehouse=warehouse)
+		frappe.db.savepoint("dup_bin")
 		with self.assertRaises(frappe.UniqueValidationError):
 			bin2.insert()
+		frappe.db.rollback(save_point="dup_bin")  # preserve transaction in postgres
 
 		# util method should handle it
 		bin = _create_bin(item_code, warehouse)
 		self.assertEqual(bin.item_code, item_code)
 
 	def test_index_exists(self):
-		indexes = frappe.db.sql("show index from tabBin where Non_unique = 0", as_dict=1)
-		if not any(index.get("Key_name") == "unique_item_warehouse" for index in indexes):
+		# has_index is db-agnostic; raw "SHOW INDEX" is MySQL-only and errors on Postgres
+		if not frappe.db.has_index("tabBin", "unique_item_warehouse"):
 			self.fail("Expected unique index on item-warehouse")

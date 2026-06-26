@@ -65,7 +65,7 @@ erpnext.maintenance.MaintenanceSchedule = class MaintenanceSchedule extends frap
 				__("Sales Order"),
 				function () {
 					erpnext.utils.map_current_doc({
-						method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_schedule",
+						method: "erpnext.selling.doctype.sales_order.mapper.make_maintenance_schedule",
 						source_doctype: "Sales Order",
 						target: me.frm,
 						setters: {

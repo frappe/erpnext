@@ -3,82 +3,29 @@
 
 import frappe
 from frappe import qb
-from frappe.utils import nowdate
+from frappe.query_builder.functions import Count, Sum
+from frappe.utils import add_days, nowdate
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestPaymentLedgerEntry(ERPNextTestSuite):
 	def setUp(self):
 		self.ple = qb.DocType("Payment Ledger Entry")
-		self.create_company()
-		self.create_item()
-		self.create_customer()
-		self.clear_old_entries()
-
-	def create_company(self):
-		company_name = "_Test Payment Ledger"
-		company = None
-		if frappe.db.exists("Company", company_name):
-			company = frappe.get_doc("Company", company_name)
-		else:
-			company = frappe.get_doc(
-				{
-					"doctype": "Company",
-					"company_name": company_name,
-					"country": "India",
-					"default_currency": "INR",
-					"create_chart_of_accounts_based_on": "Standard Template",
-					"chart_of_accounts": "Standard",
-				}
-			)
-			company = company.save()
-
-		self.company = company.name
-		self.cost_center = company.cost_center
-		self.warehouse = "All Warehouses - _PL"
-		self.income_account = "Sales - _PL"
-		self.expense_account = "Cost of Goods Sold - _PL"
-		self.debit_to = "Debtors - _PL"
-		self.creditors = "Creditors - _PL"
-
-		# create bank account
-		if frappe.db.exists("Account", "HDFC - _PL"):
-			self.bank = "HDFC - _PL"
-		else:
-			bank_acc = frappe.get_doc(
-				{
-					"doctype": "Account",
-					"account_name": "HDFC",
-					"parent_account": "Bank Accounts - _PL",
-					"company": self.company,
-				}
-			)
-			bank_acc.save()
-			self.bank = bank_acc.name
-
-	def create_item(self):
-		item_name = "_Test PL Item"
-		item = create_item(
-			item_code=item_name, is_stock_item=0, company=self.company, warehouse=self.warehouse
-		)
-		self.item = item if isinstance(item, str) else item.item_code
-
-	def create_customer(self):
-		name = "_Test PL Customer"
-		if frappe.db.exists("Customer", name):
-			self.customer = name
-		else:
-			customer = frappe.new_doc("Customer")
-			customer.customer_name = name
-			customer.type = "Individual"
-			customer.save()
-			self.customer = customer.name
+		self.company = "_Test Company"
+		self.cost_center = "Main - _TC"
+		self.warehouse = "Stores - _TC"
+		self.income_account = "Sales - _TC"
+		self.expense_account = "Cost of Goods Sold - _TC"
+		self.debit_to = "Debtors - _TC"
+		self.creditors = "Creditors - _TC"
+		self.bank = "Cash - _TC"
+		self.item = "_Test Item"
+		self.customer = "_Test Customer"
 
 	def create_sales_invoice(
 		self, qty=1, rate=100, posting_date=None, do_not_save=False, do_not_submit=False
@@ -90,6 +37,7 @@ class TestPaymentLedgerEntry(ERPNextTestSuite):
 			posting_date = nowdate()
 
 		sinv = create_sales_invoice(
+			posting_date=posting_date,
 			qty=qty,
 			rate=rate,
 			company=self.company,
@@ -149,18 +97,6 @@ class TestPaymentLedgerEntry(ERPNextTestSuite):
 			do_not_submit=do_not_submit,
 		)
 		return so
-
-	def clear_old_entries(self):
-		doctype_list = [
-			"GL Entry",
-			"Payment Ledger Entry",
-			"Sales Invoice",
-			"Purchase Invoice",
-			"Payment Entry",
-			"Journal Entry",
-		]
-		for doctype in doctype_list:
-			qb.from_(qb.DocType(doctype)).delete().where(qb.DocType(doctype).company == self.company).run()
 
 	def create_journal_entry(self, acc1=None, acc2=None, amount=0, posting_date=None, cost_center=None):
 		je = frappe.new_doc("Journal Entry")
@@ -531,3 +467,82 @@ class TestPaymentLedgerEntry(ERPNextTestSuite):
 		# with references removed, deletion should be possible
 		so.delete()
 		self.assertRaises(frappe.DoesNotExistError, frappe.get_doc, so.doctype, so.name)
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"enable_immutable_ledger": 1},
+	)
+	def test_reverse_entries_on_cancel_for_immutable_ledger(self):
+		invoice_posting_date = add_days(nowdate(), -5)
+		gle = qb.DocType("GL Entry")
+		ple = qb.DocType("Payment Ledger Entry")
+
+		si = self.create_sales_invoice(qty=1, rate=100, posting_date=invoice_posting_date)
+
+		gles_before = (
+			qb.from_(gle)
+			.select(
+				Count(gle.name),
+			)
+			.where((gle.voucher_type == si.doctype) & (gle.voucher_no == si.name) & (gle.is_cancelled == 0))
+			.run()[0][0]
+		)
+		ples_before = (
+			qb.from_(ple)
+			.select(
+				Count(ple.name),
+			)
+			.where((ple.voucher_type == si.doctype) & (ple.voucher_no == si.name) & (ple.delinked.eq(0)))
+			.run()[0][0]
+		)
+
+		si.cancel()
+
+		gles_after = (
+			qb.from_(gle)
+			.select(Count(gle.account))
+			.where((gle.voucher_type == si.doctype) & (gle.voucher_no == si.name) & (gle.is_cancelled == 0))
+			.run()[0][0]
+		)
+		self.assertEqual(gles_after, gles_before * 2)
+
+		ples_after = (
+			qb.from_(ple)
+			.select(
+				Count(ple.name),
+			)
+			.where((ple.voucher_type == si.doctype) & (ple.voucher_no == si.name) & (ple.delinked.eq(0)))
+			.run()[0][0]
+		)
+		self.assertEqual(ples_after, ples_before * 2)
+
+		# assert debit/credit are reversed
+		gl_entries = (
+			qb.from_(gle)
+			.select(gle.account, Sum(gle.debit).as_("total_debit"), Sum(gle.credit).as_("total_credit"))
+			.where((gle.voucher_type == si.doctype) & (gle.voucher_no == si.name) & (gle.is_cancelled == 0))
+			.groupby(gle.account)
+			.run(as_dict=True)
+		)
+		for gl in gl_entries:
+			with self.subTest(gl=gl):
+				self.assertEqual(gl.total_debit, gl.total_credit)
+
+		# assert amounts are reversed
+		pl_entries = (
+			qb.from_(ple)
+			.select(ple.account, Sum(ple.amount).as_("total_amount"))
+			.where((ple.voucher_type == si.doctype) & (ple.voucher_no == si.name) & (ple.delinked == 0))
+			.groupby(ple.account)
+			.run(as_dict=True)
+		)
+		for pl in pl_entries:
+			with self.subTest(pl=pl):
+				self.assertEqual(pl.total_amount, 0)
+
+		self.assertFalse(
+			frappe.db.exists(
+				"Payment Ledger Entry",
+				{"voucher_type": si.doctype, "voucher_no": si.name, "delinked": 1},
+			)
+		)

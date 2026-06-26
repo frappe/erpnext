@@ -43,6 +43,7 @@ class AccountingDimension(Document):
 	def validate(self):
 		self.validate_doctype()
 		validate_column_name(self.fieldname)
+		self.validate_fieldname_conflict()
 		self.validate_dimension_defaults()
 
 	def validate_doctype(self):
@@ -73,6 +74,27 @@ class AccountingDimension(Document):
 			message = _("Cannot change Reference Document Type.")
 			message += _("Please create a new Accounting Dimension if required.")
 			frappe.throw(message)
+
+	def validate_fieldname_conflict(self):
+		conflicting_doctypes = []
+		for doctype in get_doctypes_with_dimensions():
+			meta = frappe.get_meta(doctype, cached=False)
+			if any(f.fieldname == self.fieldname for f in meta.get("fields")):
+				conflicting_doctypes.append(doctype)
+
+		if conflicting_doctypes:
+			frappe.msgprint(
+				_(
+					"Fieldname {0} already exists in the following doctypes: {1}. "
+					"A separate dimension field will not be added to these doctypes. "
+					"GL Entries will use the value of the existing field as the dimension value."
+				).format(
+					frappe.bold(self.fieldname),
+					", ".join(frappe.bold(d) for d in conflicting_doctypes),
+				),
+				title=_("Fieldname Conflict"),
+				indicator="orange",
+			)
 
 	def validate_dimension_defaults(self):
 		companies = []
@@ -176,21 +198,9 @@ def add_dimension_to_budget_doctype(df, doc):
 def delete_accounting_dimension(doc):
 	doclist = get_doctypes_with_dimensions()
 
-	frappe.db.sql(
-		"""
-		DELETE FROM `tabCustom Field`
-		WHERE fieldname = {}
-		AND dt IN ({})""".format("%s", ", ".join(["%s"] * len(doclist))),  # nosec
-		tuple([doc.fieldname, *doclist]),
-	)
+	frappe.db.delete("Custom Field", filters={"fieldname": doc.fieldname, "dt": ["in", doclist]})
 
-	frappe.db.sql(
-		"""
-		DELETE FROM `tabProperty Setter`
-		WHERE field_name = {}
-		AND doc_type IN ({})""".format("%s", ", ".join(["%s"] * len(doclist))),  # nosec
-		tuple([doc.fieldname, *doclist]),
-	)
+	frappe.db.delete("Property Setter", filters={"field_name": doc.fieldname, "doc_type": ["in", doclist]})
 
 	budget_against_property = frappe.get_doc("Property Setter", "Budget-budget_against-options")
 	value_list = budget_against_property.value.split("\n")[3:]
@@ -214,7 +224,7 @@ def disable_dimension(doc: str):
 
 
 def toggle_disabling(doc):
-	doc = json.loads(doc)
+	doc = frappe.parse_json(doc)
 
 	if doc.get("disabled"):
 		df = {"read_only": 1}
@@ -251,12 +261,26 @@ def get_accounting_dimensions(as_list=True):
 
 
 def get_checks_for_pl_and_bs_accounts():
-	return frappe.db.sql(
-		"""SELECT p.label, p.disabled, p.fieldname, c.default_dimension, c.company, c.mandatory_for_pl, c.mandatory_for_bs
-			FROM `tabAccounting Dimension`p ,`tabAccounting Dimension Detail` c
-			WHERE p.name = c.parent AND p.disabled = 0""",
-		as_dict=1,
+	AccountingDimension = frappe.qb.DocType("Accounting Dimension")
+	AccountingDimensionDetail = frappe.qb.DocType("Accounting Dimension Detail")
+
+	query = (
+		frappe.qb.from_(AccountingDimension)
+		.join(AccountingDimensionDetail)
+		.on(AccountingDimension.name == AccountingDimensionDetail.parent)
+		.select(
+			AccountingDimension.label,
+			AccountingDimension.disabled,
+			AccountingDimension.fieldname,
+			AccountingDimensionDetail.default_dimension,
+			AccountingDimensionDetail.company,
+			AccountingDimensionDetail.mandatory_for_pl,
+			AccountingDimensionDetail.mandatory_for_bs,
+		)
+		.where(AccountingDimension.disabled == 0)
 	)
+
+	return query.run(as_dict=1)
 
 
 def get_dimension_with_children(doctype, dimensions):

@@ -140,7 +140,14 @@ def execute(filters=None):
 		)
 
 	net_change_in_cash = add_total_row_account(
-		data, data, _("Net Change in Cash"), period_list, company_currency, summary_data, filters
+		data,
+		data,
+		_("Net Change in Cash"),
+		period_list,
+		company_currency,
+		summary_data,
+		filters,
+		add_blank_row=False,
 	)
 
 	if filters.show_opening_and_closing_balance and not is_dimension_grouped(period_list):
@@ -248,7 +255,7 @@ def get_account_type_based_gl_data(company, filters=None):
 	)
 
 	# finance book
-	if filters.get("include_default_book_entries"):
+	if filters.include_default_book_entries:
 		company_fb = frappe.get_cached_value("Company", company, "default_finance_book")
 		query = query.where(
 			(gl.finance_book.isin([cstr(filters.finance_book), cstr(company_fb), ""]))
@@ -292,7 +299,6 @@ def get_account_type_based_gl_data(company, filters=None):
 	result = query.run()
 	return flt(result[0][0]) if result and result[0][0] else 0
 
-
 def get_start_date(period, accumulated_values, company):
 	if not accumulated_values and period.get("from_date"):
 		return period["from_date"]
@@ -304,7 +310,17 @@ def get_start_date(period, accumulated_values, company):
 	return start_date
 
 
-def add_total_row_account(out, data, label, period_list, currency, summary_data, filters, consolidated=False):
+def add_total_row_account(
+	out,
+	data,
+	label,
+	period_list,
+	currency,
+	summary_data,
+	filters,
+	consolidated=False,
+	add_blank_row=True,
+):
 	total_row = {
 		"section_name": "'" + _("{0}").format(label) + "'",
 		"section": "'" + _("{0}").format(label) + "'",
@@ -329,7 +345,9 @@ def add_total_row_account(out, data, label, period_list, currency, summary_data,
 			total_row["total"] += row["total"]
 
 	out.append(total_row)
-	out.append({})
+
+	if add_blank_row:
+		out.append({})
 
 	return total_row
 
@@ -402,11 +420,10 @@ def get_net_income(company, period_list, filters):
 	from_date, to_date = get_opening_range_using_fiscal_year(company, period_list)
 
 	for root_type in ["Income", "Expense"]:
-		for root in frappe.db.sql(
-			"""select lft, rgt from tabAccount
-				where root_type=%s and ifnull(parent_account, '') = ''""",
-			root_type,
-			as_dict=1,
+		for root in frappe.get_all(
+			"Account",
+			filters={"root_type": root_type, "parent_account": ["is", "not set"]},
+			fields=["lft", "rgt"],
 		):
 			set_gl_entries_by_account(
 				company,

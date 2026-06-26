@@ -12,21 +12,10 @@ frappe.ui.form.on("Work Order", {
 		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
 
 		// Set query for warehouses
-		frm.set_query("wip_warehouse", function () {
-			return {
-				filters: {
-					company: frm.doc.company,
-				},
-			};
-		});
-
-		frm.set_query("source_warehouse", function () {
-			return {
-				filters: {
-					company: frm.doc.company,
-				},
-			};
-		});
+		frm.events.set_company_filters(frm, "wip_warehouse");
+		frm.events.set_company_filters(frm, "source_warehouse");
+		frm.events.set_company_filters(frm, "fg_warehouse");
+		frm.events.set_company_filters(frm, "scrap_warehouse");
 
 		frm.set_query("source_warehouse", "required_items", function () {
 			return {
@@ -40,24 +29,6 @@ frappe.ui.form.on("Work Order", {
 			return {
 				filters: {
 					status: ["not in", ["Closed", "On Hold"]],
-				},
-			};
-		});
-
-		frm.set_query("fg_warehouse", function () {
-			return {
-				filters: {
-					company: frm.doc.company,
-					is_group: 0,
-				},
-			};
-		});
-
-		frm.set_query("scrap_warehouse", function () {
-			return {
-				filters: {
-					company: frm.doc.company,
-					is_group: 0,
 				},
 			};
 		});
@@ -116,6 +87,19 @@ frappe.ui.form.on("Work Order", {
 		frm.set_indicator_formatter("operation", function (doc) {
 			return frm.doc.qty == doc.completed_qty ? "green" : "orange";
 		});
+
+		frm.fields_dict["non_stock_items"].grid.set_column_disp_in_list_view("secondary_item_type", false);
+		frm.fields_dict["secondary_items"].grid.set_column_disp_in_list_view("rate", false);
+	},
+
+	set_company_filters(frm, fieldname) {
+		frm.set_query(fieldname, () => {
+			return {
+				filters: {
+					company: frm.doc.company,
+				},
+			};
+		});
 	},
 
 	onload: function (frm) {
@@ -144,6 +128,15 @@ frappe.ui.form.on("Work Order", {
 				},
 			});
 		}
+	},
+
+	onload_post_render(frm) {
+		const label = frm.doc.__onload?.secondary_items_generated
+			? __("Secondary Items (as per Manufacture Entries)")
+			: __("Secondary Items (as per BOM)");
+
+		frm.set_df_property("secondary_items", "label", label);
+		frm.fields_dict["secondary_items"].grid.wrapper?.find("> .control-label").text(label);
 	},
 
 	source_warehouse: function (frm) {
@@ -308,7 +301,7 @@ frappe.ui.form.on("Work Order", {
 
 	create_stock_return_entry: function (frm) {
 		frappe.call({
-			method: "erpnext.manufacturing.doctype.work_order.work_order.make_stock_return_entry",
+			method: "erpnext.manufacturing.doctype.work_order.mapper.make_stock_return_entry",
 			args: {
 				work_order: frm.doc.name,
 			},
@@ -348,7 +341,7 @@ frappe.ui.form.on("Work Order", {
 					{
 						fieldtype: "Data",
 						fieldname: "name",
-						label: __("Operation Id"),
+						label: __("Operation ID"),
 					},
 					{
 						fieldtype: "Float",
@@ -396,7 +389,7 @@ frappe.ui.form.on("Work Order", {
 			function () {
 				const selected_rows = dialog.fields_dict["operations"].grid.get_selected_children();
 				if (selected_rows.length == 0) {
-					frappe.msgprint(__("Please select atleast one operation to create Job Card"));
+					frappe.msgprint(__("Please select at least one operation to create Job Card"));
 					return;
 				}
 				frappe.call({
@@ -425,6 +418,7 @@ frappe.ui.form.on("Work Order", {
 
 				if (pending_qty) {
 					dialog.fields_dict.operations.df.data.push({
+						__checked: 1,
 						name: data.name,
 						operation: data.operation,
 						workstation: data.workstation,
@@ -463,7 +457,7 @@ frappe.ui.form.on("Work Order", {
 					frappe.msgprint(__("Disassemble Qty cannot be less than or equal to <b>0</b>."));
 					return;
 				}
-				return frappe.xcall("erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry", {
+				return frappe.xcall("erpnext.manufacturing.doctype.work_order.mapper.make_stock_entry", {
 					work_order_id: frm.doc.name,
 					purpose: "Disassemble",
 					qty: data.qty,
@@ -766,7 +760,7 @@ erpnext.work_order = {
 			frm.add_custom_button(
 				__("Close"),
 				function () {
-					frappe.confirm(__("Once the Work Order is Closed. It can't be resumed."), () => {
+					frappe.confirm(__("Once the Work Order is Closed, it cannot be resumed."), () => {
 						erpnext.work_order.change_work_order_status(frm, "Closed");
 					});
 				},
@@ -840,7 +834,7 @@ erpnext.work_order = {
 										.show_prompt_for_qty_input(frm, purpose, qty, 1)
 										.then((data) => {
 											return frappe.xcall(
-												"erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry",
+												"erpnext.manufacturing.doctype.work_order.mapper.make_stock_entry",
 												{
 													work_order_id: frm.doc.name,
 													purpose: purpose,
@@ -1128,7 +1122,7 @@ erpnext.work_order = {
 	make_se: function (frm, purpose, qty, is_additional_transfer_entry) {
 		if (qty) {
 			frappe
-				.xcall("erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry", {
+				.xcall("erpnext.manufacturing.doctype.work_order.mapper.make_stock_entry", {
 					work_order_id: frm.doc.name,
 					purpose: purpose,
 					qty: qty,
@@ -1141,14 +1135,11 @@ erpnext.work_order = {
 		} else {
 			this.show_prompt_for_qty_input(frm, purpose)
 				.then((data) => {
-					return frappe.xcall(
-						"erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry",
-						{
-							work_order_id: frm.doc.name,
-							purpose: purpose,
-							qty: data.qty,
-						}
-					);
+					return frappe.xcall("erpnext.manufacturing.doctype.work_order.mapper.make_stock_entry", {
+						work_order_id: frm.doc.name,
+						purpose: purpose,
+						qty: data.qty,
+					});
 				})
 				.then((stock_entry) => {
 					frappe.model.sync(stock_entry);
@@ -1158,17 +1149,24 @@ erpnext.work_order = {
 	},
 
 	create_pick_list: function (frm, purpose = "Material Transfer for Manufacture") {
-		this.show_prompt_for_qty_input(frm, purpose)
-			.then((data) => {
-				return frappe.xcall("erpnext.manufacturing.doctype.work_order.work_order.create_pick_list", {
+		const max = this.get_max_transferable_qty(frm, purpose);
+
+		const get_pick_list = (for_qty) =>
+			frappe
+				.xcall("erpnext.manufacturing.doctype.work_order.mapper.create_pick_list", {
 					source_name: frm.doc.name,
-					for_qty: data.qty,
+					for_qty: for_qty,
+				})
+				.then((pick_list) => {
+					frappe.model.sync(pick_list);
+					frappe.set_route("Form", pick_list.doctype, pick_list.name);
 				});
-			})
-			.then((pick_list) => {
-				frappe.model.sync(pick_list);
-				frappe.set_route("Form", pick_list.doctype, pick_list.name);
-			});
+
+		if (max <= 0) {
+			get_pick_list(frm.doc.qty);
+		} else {
+			this.show_prompt_for_qty_input(frm, purpose).then((data) => get_pick_list(data.qty));
+		}
 	},
 
 	make_consumption_se: function (frm, backflush_raw_materials_based_on) {
@@ -1184,7 +1182,7 @@ erpnext.work_order = {
 		}
 
 		frappe.call({
-			method: "erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry",
+			method: "erpnext.manufacturing.doctype.work_order.mapper.make_stock_entry",
 			args: {
 				work_order_id: frm.doc.name,
 				purpose: "Material Consumption for Manufacture",

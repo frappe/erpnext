@@ -7,6 +7,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.model.naming import set_name_from_naming_options
+from frappe.query_builder.functions import Sum
 from frappe.utils import create_batch, flt, fmt_money, now
 
 import erpnext
@@ -331,10 +332,12 @@ def validate_balance_type(account, adv_adj=False):
 	if not adv_adj and account:
 		balance_must_be = frappe.get_cached_value("Account", account, "balance_must_be")
 		if balance_must_be:
-			balance = frappe.db.sql(
-				"""select sum(debit) - sum(credit)
-				from `tabGL Entry` where is_cancelled = 0 and account = %s""",
-				account,
+			gle = frappe.qb.DocType("GL Entry")
+			balance = (
+				frappe.qb.from_(gle)
+				.select(Sum(gle.debit) - Sum(gle.credit))
+				.where((gle.is_cancelled == 0) & (gle.account == account))
+				.run()
 			)[0][0]
 
 			if (balance_must_be == "Debit" and flt(balance) < 0) or (
@@ -348,44 +351,48 @@ def validate_balance_type(account, adv_adj=False):
 def update_outstanding_amt(
 	account, party_type, party, against_voucher_type, against_voucher, on_cancel=False
 ):
+	gle = frappe.qb.DocType("GL Entry")
+
+	conditions = (
+		(gle.against_voucher_type == against_voucher_type)
+		& (gle.against_voucher == against_voucher)
+		& (gle.voucher_type != "Invoice Discounting")
+	)
 	if party_type and party:
-		party_condition = " and party_type={} and party={}".format(
-			frappe.db.escape(party_type), frappe.db.escape(party)
-		)
-	else:
-		party_condition = ""
+		conditions &= (gle.party_type == party_type) & (gle.party == party)
 
 	if against_voucher_type == "Sales Invoice":
 		party_account = frappe.get_cached_value(against_voucher_type, against_voucher, "debit_to")
-		account_condition = f"and account in ({frappe.db.escape(account)}, {frappe.db.escape(party_account)})"
+		conditions &= gle.account.isin([account, party_account])
 	else:
-		account_condition = f" and account = {frappe.db.escape(account)}"
+		conditions &= gle.account == account
 
 	# get final outstanding amt
 	bal = flt(
-		frappe.db.sql(
-			f"""
-		select sum(debit_in_account_currency) - sum(credit_in_account_currency)
-		from `tabGL Entry`
-		where against_voucher_type=%s and against_voucher=%s
-		and voucher_type != 'Invoice Discounting'
-		{party_condition} {account_condition}""",
-			(against_voucher_type, against_voucher),
-		)[0][0]
+		frappe.qb.from_(gle)
+		.select(Sum(gle.debit_in_account_currency) - Sum(gle.credit_in_account_currency))
+		.where(conditions)
+		.run()[0][0]
 		or 0.0
 	)
 
 	if against_voucher_type == "Purchase Invoice":
 		bal = -bal
 	elif against_voucher_type == "Journal Entry":
+		je_conditions = (
+			(gle.voucher_type == "Journal Entry")
+			& (gle.voucher_no == against_voucher)
+			& (gle.account == account)
+			& (gle.against_voucher.isnull() | (gle.against_voucher == ""))
+		)
+		if party_type and party:
+			je_conditions &= (gle.party_type == party_type) & (gle.party == party)
+
 		against_voucher_amount = flt(
-			frappe.db.sql(
-				f"""
-			select sum(debit_in_account_currency) - sum(credit_in_account_currency)
-			from `tabGL Entry` where voucher_type = 'Journal Entry' and voucher_no = %s
-			and account = %s and (against_voucher is null or against_voucher='') {party_condition}""",
-				(against_voucher, account),
-			)[0][0]
+			frappe.qb.from_(gle)
+			.select(Sum(gle.debit_in_account_currency) - Sum(gle.credit_in_account_currency))
+			.where(je_conditions)
+			.run()[0][0]
 		)
 
 		if not against_voucher_amount:
@@ -480,10 +487,14 @@ def rename_temporarily_named_docs(doctype):
 			oldname = doc.name
 			set_name_from_naming_options(autoname, doc)
 			newname = doc.name
-			frappe.db.sql(
-				f"UPDATE `tab{doctype}` SET name = %s, to_rename = 0, modified = %s where name = %s",
-				(newname, now(), oldname),
-			)
+			dt = frappe.qb.DocType(doctype)
+			(
+				frappe.qb.update(dt)
+				.set(dt.name, newname)
+				.set(dt.to_rename, 0)
+				.set(dt.modified, now())
+				.where(dt.name == oldname)
+			).run()
 
 			for hook_type in ("on_gle_rename", "on_sle_rename"):
 				for hook in frappe.get_hooks(hook_type):

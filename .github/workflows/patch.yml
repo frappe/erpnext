@@ -65,6 +65,19 @@ jobs:
       - name: Add to Hosts
         run: echo "127.0.0.1 test_site" | sudo tee -a /etc/hosts
 
+      # The v14 baseline backup is a fixed published file — cache it instead of re-downloading
+      # ~100MB from frappe.io every run.
+      - name: Cache erpnext v14 backup
+        id: cache-v14
+        uses: actions/cache@v4
+        with:
+          path: ~/erpnext-v14.sql.gz
+          key: erpnext-v14-sql-gz
+
+      - name: Download erpnext v14 backup
+        if: steps.cache-v14.outputs.cache-hit != 'true'
+        run: wget -O ~/erpnext-v14.sql.gz https://frappe.io/files/erpnext-v14.sql.gz
+
       - name: Cache pip
         uses: actions/cache@v4
         with:
@@ -113,12 +126,20 @@ jobs:
           jq 'del(.install_apps)' ~/frappe-bench/sites/test_site/site_config.json > tmp.json
           mv tmp.json ~/frappe-bench/sites/test_site/site_config.json
 
-          wget https://frappe.io/files/erpnext-v14.sql.gz
-          bench --site test_site --force restore ~/frappe-bench/erpnext-v14.sql.gz
+          bench --site test_site --force restore ~/erpnext-v14.sql.gz
 
           git -C "apps/frappe" remote set-url upstream https://github.com/frappe/frappe.git
           git -C "apps/erpnext" remote set-url upstream https://github.com/frappe/erpnext.git
 
+          # Start every bench process except the background workers. If workers run during a
+          # migrate, they pick up the orphan-link cleanup jobs it enqueues and race its schema
+          # changes, which fails with MySQL 1412 "Table definition has changed". Redis and the
+          # other services stay up; the queued jobs simply wait and are harmless here.
+          function start_bench_without_workers() {
+            local procs
+            procs=$(awk -F: '/^[a-z_]+:/ && $1 !~ /worker/ {print $1}' ~/frappe-bench/Procfile)
+            honcho start -f ~/frappe-bench/Procfile $procs &>> ~/frappe-bench/bench_start.log &
+          }
 
           function update_to_version() {
             version=$1
@@ -134,10 +155,11 @@ jobs:
 
             # Resetup env and install apps
             pgrep honcho | xargs kill
+            sleep 10
             rm -rf ~/frappe-bench/env
             bench -v setup env --python python$2
             bench pip install -e ./apps/erpnext
-            bench start &>> ~/frappe-bench/bench_start.log &
+            start_bench_without_workers
 
             bench --site test_site migrate
           }
@@ -154,7 +176,7 @@ jobs:
           rm -rf ~/frappe-bench/env
           bench -v setup env
           bench pip install -e ./apps/erpnext
-          bench start &>> ~/frappe-bench/bench_start.log &
+          start_bench_without_workers
 
           bench --site test_site migrate
 

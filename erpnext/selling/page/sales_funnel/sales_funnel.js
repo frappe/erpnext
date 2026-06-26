@@ -111,7 +111,7 @@ erpnext.SalesFunnel = class SalesFunnel {
 	get_data(btn) {
 		var me = this;
 		if (!this.company) {
-			frappe.throw(__("Please Select a Company."));
+			frappe.throw(__("Please select a company."));
 		}
 
 		const method_map = {

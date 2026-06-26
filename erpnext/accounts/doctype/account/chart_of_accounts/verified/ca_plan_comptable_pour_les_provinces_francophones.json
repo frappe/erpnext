@@ -378,6 +378,9 @@
                 "Passifs de stock": {
                     "Stock re\u00e7u non factur\u00e9": {
                         "account_type": "Stock Received But Not Billed"
+                    },
+                    "Stock livr\u00e9 non factur\u00e9": {
+                        "account_type": "Stock Delivered But Not Billed"
                     }
                 }, 
                 "Provision pour vacances et cong\u00e9s": {}, 

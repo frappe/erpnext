@@ -33,8 +33,6 @@
   "is_created_using_pos",
   "pos_closing_entry",
   "has_subcontracted",
-  "section_break_sgnf",
-  "title",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -232,6 +230,7 @@
   "status",
   "remarks",
   "customer_group",
+  "title",
   "column_break_imbx",
   "is_internal_customer",
   "represents_company",
@@ -716,6 +715,7 @@
   {
    "default": "0",
    "depends_on": "eval:doc.items.every((item) => !item.dn_detail)",
+   "description": "If checked, updates inventory; stock and accounting entries are created together. Leave unchecked if a Delivery Note is created separately.",
    "fieldname": "update_stock",
    "fieldtype": "Check",
    "hide_days": 1,
@@ -723,7 +723,8 @@
    "label": "Update Stock",
    "oldfieldname": "update_stock",
    "oldfieldtype": "Check",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_description_on_click": 1
   },
   {
    "fieldname": "scan_barcode",
@@ -1150,6 +1151,7 @@
    "hide_seconds": 1,
    "label": "Rounding Adjustment",
    "no_copy": 1,
+   "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1162,6 +1164,7 @@
    "label": "Rounded Total",
    "oldfieldname": "rounded_total",
    "oldfieldtype": "Currency",
+   "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1744,6 +1747,7 @@
    "width": "50%"
   },
   {
+   "depends_on": "eval:doc.sales_partner",
    "fetch_from": "sales_partner.commission_rate",
    "fetch_if_empty": 1,
    "fieldname": "commission_rate",
@@ -1751,16 +1755,19 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Commission Rate (%)",
+   "no_copy": 1,
    "oldfieldname": "commission_rate",
    "oldfieldtype": "Currency",
    "print_hide": 1
   },
   {
+   "depends_on": "eval:doc.sales_partner",
    "fieldname": "total_commission",
    "fieldtype": "Currency",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Total Commission",
+   "no_copy": 1,
    "oldfieldname": "total_commission",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
@@ -1917,7 +1924,7 @@
   {
    "default": "0",
    "depends_on": "eval: !doc.is_return",
-   "description": "Issue a debit note with 0 qty against an existing Sales Invoice",
+   "description": "Issue a debit note against an existing Sales Invoice to adjust the rate. The quantity will be retained from the original invoice.",
    "fieldname": "is_debit_note",
    "fieldtype": "Check",
    "label": "Is Rate Adjustment Entry (Debit Note)"
@@ -1967,9 +1974,11 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.sales_partner",
    "fieldname": "amount_eligible_for_commission",
    "fieldtype": "Currency",
    "label": "Amount Eligible for Commission",
+   "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
   },
@@ -2332,10 +2341,6 @@
    "label": "Automation"
   },
   {
-   "fieldname": "section_break_sgnf",
-   "fieldtype": "Section Break"
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "title",
    "fieldtype": "Data",
@@ -2355,7 +2360,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2026-03-30 12:17:16.201016",
+ "modified": "2026-06-21 12:46:13.250145",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

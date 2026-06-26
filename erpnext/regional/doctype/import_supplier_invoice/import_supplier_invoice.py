@@ -85,7 +85,7 @@ class ImportSupplierInvoice(Document):
 			}
 
 			if not invoices_args.get("bill_no", ""):
-				frappe.throw(_("Numero has not set in the XML file"))
+				frappe.throw(_("Numero has not been set in the XML file"))
 
 			supp_dict = get_supplier_details(file_content)
 			invoices_args["destination_code"] = get_destination_code_from_file(file_content)

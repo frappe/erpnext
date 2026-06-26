@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.utils import cint, flt, fmt_money
+from frappe.utils import cint, cstr, flt, fmt_money
 
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
 
@@ -82,12 +82,15 @@ def get_price(item_code, price_list, customer_group, company, qty=1, party=None)
 					or ""
 				)
 
-				uom_conversion_factor = frappe.db.sql(
-					"""select	C.conversion_factor
-					from `tabUOM Conversion Detail` C
-					inner join `tabItem` I on C.parent = I.name and C.uom = I.sales_uom
-					where I.name = %s""",
-					item_code,
+				uom_cd = frappe.qb.DocType("UOM Conversion Detail")
+				item_dt = frappe.qb.DocType("Item")
+				uom_conversion_factor = (
+					frappe.qb.from_(uom_cd)
+					.inner_join(item_dt)
+					.on((uom_cd.parent == item_dt.name) & (uom_cd.uom == item_dt.sales_uom))
+					.select(uom_cd.conversion_factor)
+					.where(item_dt.name == item_code)
+					.run()
 				)
 
 				uom_conversion_factor = uom_conversion_factor[0][0] if uom_conversion_factor else 1
@@ -119,46 +122,25 @@ def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
 		if not attribute_values:
 			continue
 
-		wheres = []
-		query_values = []
-		for attribute_value in attribute_values:
-			wheres.append("( attribute = %s and attribute_value = %s )")
-			query_values += [attribute, attribute_value]
+		iva = frappe.qb.DocType("Item Variant Attribute")
+		item_dt = frappe.qb.DocType("Item")
 
-		attribute_query = " or ".join(wheres)
-
+		item_subquery = frappe.qb.from_(item_dt).select(item_dt.name)
 		if template_item_code:
-			variant_of_query = "AND t2.variant_of = %s"
-			query_values.append(template_item_code)
-		else:
-			variant_of_query = ""
+			item_subquery = item_subquery.where(item_dt.variant_of == template_item_code)
 
-		query = f"""
-			SELECT
-				t1.parent
-			FROM
-				`tabItem Variant Attribute` t1
-			WHERE
-				1 = 1
-				AND (
-					{attribute_query}
-				)
-				AND EXISTS (
-					SELECT
-						1
-					FROM
-						`tabItem` t2
-					WHERE
-						t2.name = t1.parent
-						{variant_of_query}
-				)
-			GROUP BY
-				t1.parent
-			ORDER BY
-				NULL
-		"""
-
-		item_codes = set([r[0] for r in frappe.db.sql(query, query_values)])
+		item_codes = set(
+			frappe.qb.from_(iva)
+			.select(iva.parent)
+			# attribute_value is a varchar column; cast values to str so postgres doesn't choke on
+			# `varchar = numeric` for numeric attributes (stored values are strings on both backends)
+			.where(
+				(iva.attribute == attribute) & (iva.attribute_value.isin([cstr(v) for v in attribute_values]))
+			)
+			.where(iva.parent.isin(item_subquery))
+			.groupby(iva.parent)
+			.run(pluck=True)
+		)
 		items.append(item_codes)
 
 	res = list(set.intersection(*items))

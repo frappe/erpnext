@@ -176,8 +176,7 @@ def get_children(
 	if is_root:
 		parent = ""
 
-	if isinstance(include_disabled, str):
-		include_disabled = json.loads(include_disabled)
+	include_disabled = frappe.parse_json(include_disabled)
 
 	fields = ["name as value", "is_group as expandable"]
 

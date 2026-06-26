@@ -331,9 +331,15 @@ erpnext.sales_common = {
 				if (this.frm.doc.commission_rate > 100) {
 					this.frm.set_value("commission_rate", 100);
 					frappe.throw(
-						`${__(
-							frappe.meta.get_label(this.frm.doc.doctype, "commission_rate", this.frm.doc.name)
-						)} ${__("cannot be greater than 100")}`
+						__("{0} cannot be greater than 100", [
+							__(
+								frappe.meta.get_label(
+									this.frm.doc.doctype,
+									"commission_rate",
+									this.frm.doc.name
+								)
+							),
+						])
 					);
 				}
 

@@ -100,12 +100,12 @@ def get_data(filters=None):
 
 
 @frappe.whitelist()
-def update_batch_qty(selected_batches: str | None = None):
+def update_batch_qty(selected_batches: str | list | None = None):
 	frappe.has_permission("Batch", "write", throw=True, ignore_share_permissions=True)
 	if not selected_batches:
 		return
 
-	selected_batches = json.loads(selected_batches)
+	selected_batches = frappe.parse_json(selected_batches)
 	for row in selected_batches:
 		batch_name = row.get("batch")
 

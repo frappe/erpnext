@@ -345,9 +345,9 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 1,
-   "label": "Supplier-Wise Sales Analytics",
+   "label": "Item Wise Consumption",
    "link_count": 0,
-   "link_to": "Supplier-Wise Sales Analytics",
+   "link_to": "Item Wise Consumption",
    "link_type": "Report",
    "onboard": 1,
    "type": "Link"

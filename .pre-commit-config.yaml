@@ -66,6 +66,18 @@ repos:
       - id: ruff-format
         name: "Run ruff formatter"
 
+  - repo: local
+    hooks:
+      - id: postgres-compat
+        name: "PostgreSQL compatibility (static check)"
+        description: "Flags MySQL-only SQL that breaks on Postgres; the label-gated PG test job is the backstop for semantic divergences."
+        entry: .github/helper/postgres_compat.py
+        language: script
+        files: ^erpnext/.*\.py$
+        # patches/ are historical, version-gated migrations (skipped on fresh Postgres installs);
+        # out of scope for the always-on gate.
+        exclude: ^erpnext/patches/
+
 ci:
     autoupdate_schedule: weekly
     skip: []

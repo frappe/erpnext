@@ -1,6 +1,7 @@
 import frappe
 from frappe import _
 from frappe.email import sendmail_to_system_managers
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -53,20 +54,24 @@ def validate_service_stop_date(doc):
 
 
 def build_conditions(process_type, account, company):
-	conditions = ""
-	deferred_account = (
-		"item.deferred_revenue_account" if process_type == "Income" else "item.deferred_expense_account"
-	)
+	if process_type == "Income":
+		item = frappe.qb.DocType("Sales Invoice Item")
+		parent = frappe.qb.DocType("Sales Invoice")
+		deferred_account = item.deferred_revenue_account
+	else:
+		item = frappe.qb.DocType("Purchase Invoice Item")
+		parent = frappe.qb.DocType("Purchase Invoice")
+		deferred_account = item.deferred_expense_account
 
 	if account:
-		conditions += f"AND {deferred_account}={frappe.db.escape(account)}"
+		return deferred_account == account
 	elif company:
-		conditions += f"AND p.company = {frappe.db.escape(company)}"
+		return parent.company == company
 
-	return conditions
+	return None
 
 
-def convert_deferred_expense_to_expense(deferred_process, start_date=None, end_date=None, conditions=""):
+def convert_deferred_expense_to_expense(deferred_process, start_date=None, end_date=None, conditions=None):
 	# book the expense/income on the last day, but it will be trigger on the 1st of month at 12:00 AM
 
 	if not start_date:
@@ -75,17 +80,25 @@ def convert_deferred_expense_to_expense(deferred_process, start_date=None, end_d
 		end_date = add_days(today(), -1)
 
 	# check for the purchase invoice for which GL entries has to be done
-	invoices = frappe.db.sql_list(
-		f"""
-		select distinct item.parent
-		from `tabPurchase Invoice Item` item, `tabPurchase Invoice` p
-		where item.service_start_date<=%s and item.service_end_date>=%s
-		and item.enable_deferred_expense = 1 and item.parent=p.name
-		and item.docstatus = 1 and ifnull(item.amount, 0) > 0
-		{conditions}
-	""",
-		(end_date, start_date),
-	)  # nosec
+	item = frappe.qb.DocType("Purchase Invoice Item")
+	parent = frappe.qb.DocType("Purchase Invoice")
+	query = (
+		frappe.qb.from_(item)
+		.inner_join(parent)
+		.on(item.parent == parent.name)
+		.select(item.parent)
+		.distinct()
+		.where(
+			(item.service_start_date <= end_date)
+			& (item.service_end_date >= start_date)
+			& (item.enable_deferred_expense == 1)
+			& (item.docstatus == 1)
+			& (IfNull(item.amount, 0) > 0)
+		)
+	)
+	if conditions is not None:
+		query = query.where(conditions)
+	invoices = query.run(pluck=True)
 
 	# For each invoice, book deferred expense
 	for invoice in invoices:
@@ -96,7 +109,7 @@ def convert_deferred_expense_to_expense(deferred_process, start_date=None, end_d
 		send_mail(deferred_process)
 
 
-def convert_deferred_revenue_to_income(deferred_process, start_date=None, end_date=None, conditions=""):
+def convert_deferred_revenue_to_income(deferred_process, start_date=None, end_date=None, conditions=None):
 	# book the expense/income on the last day, but it will be trigger on the 1st of month at 12:00 AM
 
 	if not start_date:
@@ -105,17 +118,25 @@ def convert_deferred_revenue_to_income(deferred_process, start_date=None, end_da
 		end_date = add_days(today(), -1)
 
 	# check for the sales invoice for which GL entries has to be done
-	invoices = frappe.db.sql_list(
-		f"""
-		select distinct item.parent
-		from `tabSales Invoice Item` item, `tabSales Invoice` p
-		where item.service_start_date<=%s and item.service_end_date>=%s
-		and item.enable_deferred_revenue = 1 and item.parent=p.name
-		and item.docstatus = 1 and ifnull(item.amount, 0) > 0
-		{conditions}
-	""",
-		(end_date, start_date),
-	)  # nosec
+	item = frappe.qb.DocType("Sales Invoice Item")
+	parent = frappe.qb.DocType("Sales Invoice")
+	query = (
+		frappe.qb.from_(item)
+		.inner_join(parent)
+		.on(item.parent == parent.name)
+		.select(item.parent)
+		.distinct()
+		.where(
+			(item.service_start_date <= end_date)
+			& (item.service_end_date >= start_date)
+			& (item.enable_deferred_revenue == 1)
+			& (item.docstatus == 1)
+			& (IfNull(item.amount, 0) > 0)
+		)
+	)
+	if conditions is not None:
+		query = query.where(conditions)
+	invoices = query.run(pluck=True)
 
 	for invoice in invoices:
 		doc = frappe.get_doc("Sales Invoice", invoice)
@@ -136,26 +157,39 @@ def get_booking_dates(doc, item, posting_date=None, prev_posting_date=None):
 	)
 
 	if not prev_posting_date:
-		prev_gl_entry = frappe.db.sql(
-			"""
-			select name, posting_date from `tabGL Entry` where company=%s and account=%s and
-			voucher_type=%s and voucher_no=%s and voucher_detail_no=%s
-			and is_cancelled = 0
-			order by posting_date desc limit 1
-		""",
-			(doc.company, item.get(deferred_account), doc.doctype, doc.name, item.name),
-			as_dict=True,
+		prev_gl_entry = frappe.get_all(
+			"GL Entry",
+			filters={
+				"company": doc.company,
+				"account": item.get(deferred_account),
+				"voucher_type": doc.doctype,
+				"voucher_no": doc.name,
+				"voucher_detail_no": item.name,
+				"is_cancelled": 0,
+			},
+			fields=["name", "posting_date"],
+			order_by="posting_date desc",
+			limit=1,
 		)
 
-		prev_gl_via_je = frappe.db.sql(
-			"""
-			SELECT p.name, p.posting_date FROM `tabJournal Entry` p, `tabJournal Entry Account` c
-			WHERE p.name = c.parent and p.company=%s and c.account=%s
-			and c.reference_type=%s and c.reference_name=%s
-			and c.reference_detail_no=%s and c.docstatus < 2 order by posting_date desc limit 1
-		""",
-			(doc.company, item.get(deferred_account), doc.doctype, doc.name, item.name),
-			as_dict=True,
+		je = frappe.qb.DocType("Journal Entry")
+		jea = frappe.qb.DocType("Journal Entry Account")
+		prev_gl_via_je = (
+			frappe.qb.from_(je)
+			.inner_join(jea)
+			.on(je.name == jea.parent)
+			.select(je.name, je.posting_date)
+			.where(
+				(je.company == doc.company)
+				& (jea.account == item.get(deferred_account))
+				& (jea.reference_type == doc.doctype)
+				& (jea.reference_name == doc.name)
+				& (jea.reference_detail_no == item.name)
+				& (jea.docstatus < 2)
+			)
+			.orderby(je.posting_date, order=frappe.qb.desc)
+			.limit(1)
+			.run(as_dict=True)
 		)
 
 		if prev_gl_via_je:
@@ -277,26 +311,47 @@ def get_already_booked_amount(doc, item):
 		total_credit_debit, total_credit_debit_currency = "credit", "credit_in_account_currency"
 		deferred_account = "deferred_expense_account"
 
-	gl_entries_details = frappe.db.sql(
-		"""
-		select sum({}) as total_credit, sum({}) as total_credit_in_account_currency, voucher_detail_no
-		from `tabGL Entry` where company=%s and account=%s and voucher_type=%s and voucher_no=%s and voucher_detail_no=%s
-		and is_cancelled = 0
-		group by voucher_detail_no
-	""".format(total_credit_debit, total_credit_debit_currency),
-		(doc.company, item.get(deferred_account), doc.doctype, doc.name, item.name),
-		as_dict=True,
+	gle = frappe.qb.DocType("GL Entry")
+	gl_entries_details = (
+		frappe.qb.from_(gle)
+		.select(
+			Sum(gle[total_credit_debit]).as_("total_credit"),
+			Sum(gle[total_credit_debit_currency]).as_("total_credit_in_account_currency"),
+			gle.voucher_detail_no,
+		)
+		.where(
+			(gle.company == doc.company)
+			& (gle.account == item.get(deferred_account))
+			& (gle.voucher_type == doc.doctype)
+			& (gle.voucher_no == doc.name)
+			& (gle.voucher_detail_no == item.name)
+			& (gle.is_cancelled == 0)
+		)
+		.groupby(gle.voucher_detail_no)
+		.run(as_dict=True)
 	)
 
-	journal_entry_details = frappe.db.sql(
-		"""
-		SELECT sum(c.{}) as total_credit, sum(c.{}) as total_credit_in_account_currency, reference_detail_no
-		FROM `tabJournal Entry` p , `tabJournal Entry Account` c WHERE p.name = c.parent and
-		p.company = %s and c.account=%s and c.reference_type=%s and c.reference_name=%s and c.reference_detail_no=%s
-		and p.docstatus < 2 group by reference_detail_no
-	""".format(total_credit_debit, total_credit_debit_currency),
-		(doc.company, item.get(deferred_account), doc.doctype, doc.name, item.name),
-		as_dict=True,
+	je = frappe.qb.DocType("Journal Entry")
+	jea = frappe.qb.DocType("Journal Entry Account")
+	journal_entry_details = (
+		frappe.qb.from_(je)
+		.inner_join(jea)
+		.on(je.name == jea.parent)
+		.select(
+			Sum(jea[total_credit_debit]).as_("total_credit"),
+			Sum(jea[total_credit_debit_currency]).as_("total_credit_in_account_currency"),
+			jea.reference_detail_no,
+		)
+		.where(
+			(je.company == doc.company)
+			& (jea.account == item.get(deferred_account))
+			& (jea.reference_type == doc.doctype)
+			& (jea.reference_name == doc.name)
+			& (jea.reference_detail_no == item.name)
+			& (je.docstatus < 2)
+		)
+		.groupby(jea.reference_detail_no)
+		.run(as_dict=True)
 	)
 
 	already_booked_amount = gl_entries_details[0].total_credit if gl_entries_details else 0

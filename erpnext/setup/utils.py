@@ -100,7 +100,7 @@ def get_exchange_rate(
 	if entries:
 		return flt(entries[0].exchange_rate)
 
-	if frappe.get_cached_value("Currency Exchange Settings", "Currency Exchange Settings", "disabled"):
+	if frappe.get_single_value("Currency Exchange Settings", "disabled"):
 		return 0.00
 
 	pegged_currencies = {}

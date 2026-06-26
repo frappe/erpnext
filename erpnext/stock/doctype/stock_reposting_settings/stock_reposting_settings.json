@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "allow_rename": 1,
  "beta": 1,
  "creation": "2021-10-01 10:56:30.814787",
@@ -13,6 +14,8 @@
   "end_time",
   "limits_dont_apply_on",
   "item_based_reposting",
+  "column_break_mavd",
+  "do_not_fetch_incoming_rate_from_serial_no",
   "section_break_dxuf",
   "enable_parallel_reposting",
   "no_of_parallel_reposting",
@@ -99,13 +102,23 @@
    "fieldname": "enable_separate_reposting_for_gl",
    "fieldtype": "Check",
    "label": "Enable Separate Reposting for GL"
+  },
+  {
+   "fieldname": "column_break_mavd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "For legacy serial nos, do not fetch incoming rate from serial no and calculate it based on the inward transaction",
+   "fieldname": "do_not_fetch_incoming_rate_from_serial_no",
+   "fieldtype": "Check",
+   "label": "Do not fetch incoming rate from Serial No"
   }
  ],
- "hide_toolbar": 0,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-03-16 13:28:20.978007",
+ "modified": "2026-05-15 12:59:34.392491",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reposting Settings",

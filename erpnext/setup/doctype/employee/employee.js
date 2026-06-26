@@ -44,7 +44,7 @@ frappe.ui.form.on("Employee", {
 	},
 
 	refresh: function (frm) {
-		frm.fields_dict.date_of_birth.datepicker.update({ maxDate: new Date() });
+		frm.fields_dict.date_of_birth.datepicker?.update({ maxDate: new Date() });
 
 		if (!frm.is_new() && !frm.doc.user_id) {
 			frm.add_custom_button(__("Create User"), () => {

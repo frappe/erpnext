@@ -36,8 +36,8 @@ class ProcessPeriodClosingVoucher(Document):
 		parent_pcv: DF.Link
 		status: DF.Literal["Queued", "Running", "Paused", "Completed", "Cancelled"]
 		z_opening_balances: DF.Table[ProcessPeriodClosingVoucherDetail]
-
 	# end: auto-generated types
+
 	def on_discard(self):
 		self.db_set("status", "Cancelled")
 
@@ -72,8 +72,8 @@ class ProcessPeriodClosingVoucher(Document):
 		pcv = frappe.get_doc("Period Closing Voucher", self.parent_pcv)
 		if pcv.is_first_period_closing_voucher():
 			gl = qb.DocType("GL Entry")
-			min = qb.from_(gl).select(Min(gl.posting_date)).where(gl.company.eq(pcv.company)).run()[0][0]
-			max = qb.from_(gl).select(Max(gl.posting_date)).where(gl.company.eq(pcv.company)).run()[0][0]
+			min = qb.from_(gl).select(Min(gl.posting_date)).run()[0][0]
+			max = qb.from_(gl).select(Max(gl.posting_date)).run()[0][0]
 
 			dates = self.get_dates(get_datetime(min), get_datetime(max))
 			for x in dates:
@@ -92,13 +92,20 @@ class ProcessPeriodClosingVoucher(Document):
 @frappe.whitelist()
 def start_pcv_processing(docname: str):
 	if frappe.db.get_value("Process Period Closing Voucher", docname, "status") in ["Queued", "Running"]:
+		frappe.has_permission("Process Payment Reconciliation", "write", doc=docname, throw=True)
 		frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Running")
-		if normal_balances := frappe.db.get_all(
-			"Process Period Closing Voucher Detail",
-			filters={"parent": docname, "status": "Queued"},
-			fields=["processing_date", "report_type", "parentfield"],
-			order_by="parentfield, idx, processing_date",
-			limit=4,
+
+		timeout = frappe.db.get_single_value("Accounts Settings", "pcv_job_timeout") or 3600
+
+		ppcvd = qb.DocType("Process Period Closing Voucher Detail")
+		if normal_balances := (
+			qb.from_(ppcvd)
+			.select(ppcvd.processing_date, ppcvd.report_type, ppcvd.parentfield)
+			.where(ppcvd.parent.eq(docname) & ppcvd.status.eq("Queued"))
+			.orderby(ppcvd.parentfield, ppcvd.idx, ppcvd.processing_date)
+			.limit(4)
+			.for_update(skip_locked=True)
+			.run(as_dict=True)
 		):
 			if not is_scheduler_inactive():
 				for x in normal_balances:
@@ -116,7 +123,7 @@ def start_pcv_processing(docname: str):
 					frappe.enqueue(
 						method="erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.process_individual_date",
 						queue="long",
-						timeout="3600",
+						timeout=timeout,
 						is_async=True,
 						enqueue_after_commit=True,
 						docname=docname,
@@ -133,9 +140,10 @@ def pause_pcv_processing(docname: str):
 	ppcv = qb.DocType("Process Period Closing Voucher")
 	qb.update(ppcv).set(ppcv.status, "Paused").where(ppcv.name.eq(docname)).run()
 
+	# If a date is stuck in 'Running' state, this will allow it to procced.
 	if queued_dates := frappe.db.get_all(
 		"Process Period Closing Voucher Detail",
-		filters={"parent": docname, "status": "Queued"},
+		filters={"parent": docname, "status": ["in", ["Queued", "Running"]]},
 		pluck="name",
 	):
 		ppcvd = qb.DocType("Process Period Closing Voucher Detail")
@@ -169,6 +177,9 @@ def resume_pcv_processing(docname: str):
 		ppcvd = qb.DocType("Process Period Closing Voucher Detail")
 		qb.update(ppcvd).set(ppcvd.status, "Queued").where(ppcvd.name.isin(paused_dates)).run()
 		start_pcv_processing(docname)
+	else:
+		# If a parent doc is stuck in 'Running' state, will allow it to proceed.
+		schedule_next_date(docname)
 
 
 def update_default_dimensions(dimension_fields, gl_entry, dimension_values):
@@ -238,12 +249,17 @@ def get_gle_for_closing_account(pcv, dimension_balance, dimensions):
 
 @frappe.whitelist()
 def schedule_next_date(docname: str):
-	if to_process := frappe.db.get_all(
-		"Process Period Closing Voucher Detail",
-		filters={"parent": docname, "status": "Queued"},
-		fields=["processing_date", "report_type", "parentfield"],
-		order_by="parentfield, idx, processing_date",
-		limit=1,
+	timeout = frappe.db.get_single_value("Accounts Settings", "pcv_job_timeout") or 3600
+
+	ppcvd = qb.DocType("Process Period Closing Voucher Detail")
+	if to_process := (
+		qb.from_(ppcvd)
+		.select(ppcvd.processing_date, ppcvd.report_type, ppcvd.parentfield)
+		.where(ppcvd.parent.eq(docname) & ppcvd.status.eq("Queued"))
+		.orderby(ppcvd.parentfield, ppcvd.idx, ppcvd.processing_date)
+		.limit(1)
+		.for_update(skip_locked=True)
+		.run(as_dict=True)
 	):
 		if not is_scheduler_inactive():
 			frappe.db.set_value(
@@ -260,7 +276,7 @@ def schedule_next_date(docname: str):
 			frappe.enqueue(
 				method="erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.process_individual_date",
 				queue="long",
-				timeout="3600",
+				timeout=timeout,
 				is_async=True,
 				enqueue_after_commit=True,
 				docname=docname,
@@ -281,7 +297,21 @@ def schedule_next_date(docname: str):
 		)
 		# Ensure both normal and opening balances are processed for all dates
 		if total_no_of_dates == completed:
-			summarize_and_post_ledger_entries(docname)
+			from erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation import (
+				is_job_running,
+			)
+
+			job_name = f"summarize_{docname}"
+			if not is_job_running(job_name):
+				frappe.enqueue(
+					method="erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.summarize_and_post_ledger_entries",
+					queue="long",
+					timeout=timeout,
+					is_async=True,
+					job_name=job_name,
+					enqueue_after_commit=True,
+					docname=docname,
+				)
 
 
 def make_dict_json_compliant(dimension_wise_balance) -> dict:
@@ -527,7 +557,8 @@ def process_individual_date(docname: str, date, report_type, parentfield):
 		Sum(gle.credit).as_("credit"),
 		Sum(gle.debit_in_account_currency).as_("debit_in_account_currency"),
 		Sum(gle.credit_in_account_currency).as_("credit_in_account_currency"),
-		gle.account_currency,
+		# account_currency is constant per grouped account -> Max() keeps the GROUP BY postgres-valid
+		Max(gle.account_currency).as_("account_currency"),
 	).where(
 		(gle.company.eq(company))
 		& (gle.is_cancelled.eq(0))
@@ -537,6 +568,9 @@ def process_individual_date(docname: str, date, report_type, parentfield):
 
 	if parentfield == "z_opening_balances":
 		query = query.where(gle.is_opening.eq("Yes"))
+	else:
+		# Keep balances aligned with legacy PCV logic (non-opening transactions only)
+		query = query.where(gle.is_opening.eq("No"))
 
 	query = query.groupby(gle.account)
 	for dim in dimensions:

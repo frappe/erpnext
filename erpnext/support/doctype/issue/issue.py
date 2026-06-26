@@ -119,8 +119,9 @@ class Issue(Document):
 
 	@frappe.whitelist()
 	def split_issue(self, subject: str, communication_id: str):
-		# Bug: Pressing enter doesn't send subject
 		from copy import deepcopy
+
+		self.check_permission("write")
 
 		replicated_issue = deepcopy(self)
 		replicated_issue.subject = subject
@@ -216,13 +217,14 @@ def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20, ord
 
 
 @frappe.whitelist()
-def set_multiple_status(names: str, status: str):
-	for name in json.loads(names):
-		frappe.db.set_value("Issue", name, "status", status)
+def set_multiple_status(names: str | list, status: str):
+	for name in frappe.parse_json(names):
+		set_status(name, status)
 
 
 @frappe.whitelist()
 def set_status(name: str, status: str):
+	frappe.has_permission("Issue", "write", name, throw=True)
 	frappe.db.set_value("Issue", name, "status", status)
 
 
@@ -263,7 +265,7 @@ def has_website_permission(doc, ptype, user, verbose=False):
 
 def update_issue(contact, method):
 	"""Called when Contact is deleted"""
-	frappe.db.sql("""UPDATE `tabIssue` set contact='' where contact=%s""", contact.name)
+	frappe.db.set_value("Issue", {"contact": contact.name}, "contact", "")
 
 
 @frappe.whitelist()
@@ -284,7 +286,7 @@ def make_issue_from_communication(communication: str, ignore_communication_links
 			"raised_by": doc.sender or "",
 			"raised_by_phone": doc.phone_no or "",
 		}
-	).insert(ignore_permissions=True)
+	).insert()
 
 	link_communication_to_document(doc, "Issue", issue.name, ignore_communication_links)
 

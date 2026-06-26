@@ -49,24 +49,22 @@ class AuthorizationRule(Document):
 	# end: auto-generated types
 
 	def check_duplicate_entry(self):
-		exists = frappe.db.sql(
-			"""select name, docstatus from `tabAuthorization Rule`
-			where transaction = %s and based_on = %s and system_user = %s
-			and system_role = %s and approving_user = %s and approving_role = %s
-			and to_emp =%s and to_designation=%s and name != %s""",
-			(
-				self.transaction,
-				self.based_on,
-				cstr(self.system_user),
-				cstr(self.system_role),
-				cstr(self.approving_user),
-				cstr(self.approving_role),
-				cstr(self.to_emp),
-				cstr(self.to_designation),
-				self.name,
-			),
+		exists = frappe.get_all(
+			"Authorization Rule",
+			filters={
+				"transaction": self.transaction,
+				"based_on": self.based_on,
+				"system_user": cstr(self.system_user),
+				"system_role": cstr(self.system_role),
+				"approving_user": cstr(self.approving_user),
+				"approving_role": cstr(self.approving_role),
+				"to_emp": cstr(self.to_emp),
+				"to_designation": cstr(self.to_designation),
+				"name": ["!=", self.name],
+			},
+			pluck="name",
 		)
-		auth_exists = exists and exists[0][0] or ""
+		auth_exists = exists[0] if exists else ""
 		if auth_exists:
 			frappe.throw(_("Duplicate Entry. Please check Authorization Rule {0}").format(auth_exists))
 

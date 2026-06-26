@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import cint, cstr, flt, get_link_to_form, get_number_format_info
+from frappe.utils import cint, flt, get_link_to_form, get_number_format_info
 
 from erpnext.stock.doctype.quality_inspection_template.quality_inspection_template import (
 	get_template_details,
@@ -215,14 +215,13 @@ class QualityInspection(Document):
 
 		if self.reference_type == "Job Card":
 			if self.reference_name:
-				frappe.db.sql(
-					f"""
-					UPDATE `tab{self.reference_type}`
-					SET quality_inspection = %s, modified = %s
-					WHERE name = %s and production_item = %s
-				""",
-					(quality_inspection, self.modified, self.reference_name, self.item_code),
-				)
+				ref = frappe.qb.DocType(self.reference_type)
+				(
+					frappe.qb.update(ref)
+					.set(ref.quality_inspection, quality_inspection)
+					.set(ref.modified, self.modified)
+					.where((ref.name == self.reference_name) & (ref.production_item == self.item_code))
+				).run()
 
 		else:
 			doctype = self.reference_type + " Item"
@@ -414,16 +413,22 @@ def item_query(doctype: Any, txt: str | None, searchfield: Any, start: int, page
 				]
 			)
 
-		return frappe.get_query(
+		query = frappe.get_query(
 			reference_doctype,
 			fields=["items.item_code, items.item_name"],
 			filters=my_filters,
 			offset=start,
 			limit=page_len,
-			order_by="items.item_code",
 			ignore_permissions=False,
 			distinct=True,
-		).run()
+		)
+		# frappe's db_query drops ORDER BY for a distinct query on Postgres, which (with offset/limit)
+		# changes both the order and the page contents vs MariaDB. Appending the order to the built
+		# query instead keeps it -- item_code is in the DISTINCT select, so it is valid on Postgres.
+		items_field = frappe.get_meta(reference_doctype).get_field("items")
+		if items_field:
+			query = query.orderby(frappe.qb.DocType(items_field.options).item_code)
+		return query.run()
 
 
 @frappe.whitelist()

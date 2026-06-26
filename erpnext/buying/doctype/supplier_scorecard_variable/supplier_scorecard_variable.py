@@ -7,8 +7,8 @@ import sys
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder.functions import Sum
-from frappe.utils import getdate
+from frappe.query_builder.functions import DateDiff, Sum
+from frappe.utils import flt, getdate
 
 
 class VariablePathNotFound(frappe.ValidationError):
@@ -43,11 +43,11 @@ class SupplierScorecardVariable(Document):
 
 				import_string_path(self.path)
 			except AttributeError:
-				frappe.throw(_("Could not find path for " + self.path), VariablePathNotFound)
+				frappe.throw(_("Could not find path for {0}").format(self.path), VariablePathNotFound)
 
 		else:
 			if not hasattr(sys.modules[__name__], self.path):
-				frappe.throw(_("Could not find path for " + self.path), VariablePathNotFound)
+				frappe.throw(_("Could not find path for {0}").format(self.path), VariablePathNotFound)
 
 
 def get_total_workdays(scorecard):
@@ -58,53 +58,48 @@ def get_total_workdays(scorecard):
 
 def get_item_workdays(scorecard):
 	"""Gets the number of days in this period"""
-	supplier = frappe.get_doc("Supplier", scorecard.supplier)
-	total_item_days = frappe.db.sql(
-		"""
-			SELECT
-				SUM(DATEDIFF( %(end_date)s, po_item.schedule_date) * (po_item.qty))
-			FROM
-				`tabPurchase Order Item` po_item,
-				`tabPurchase Order` po
-			WHERE
-				po.supplier = %(supplier)s
-				AND po_item.received_qty < po_item.qty
-				AND po_item.schedule_date BETWEEN %(start_date)s AND %(end_date)s
-				AND po_item.parent = po.name""",
-		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
-		as_dict=0,
-	)[0][0]
 
-	if not total_item_days:
-		total_item_days = 0
+	from frappe.query_builder.functions import Sum
+
+	PO = frappe.qb.DocType("Purchase Order")
+	PO_Item = frappe.qb.DocType("Purchase Order Item")
+
+	query = (
+		frappe.qb.from_(PO_Item)
+		.join(PO)
+		.on(PO_Item.parent == PO.name)
+		.select(Sum(DateDiff(scorecard.end_date, PO_Item.schedule_date) * (PO_Item.qty)))
+		.where(PO.supplier == scorecard.supplier)
+		.where(PO_Item.received_qty < PO_Item.qty)
+		.where(PO_Item.schedule_date[scorecard.start_date : scorecard.end_date])  # Équivalent du BETWEEN
+	)
+
+	result = query.run(as_list=True)
+	total_item_days = result[0][0] if result and result[0][0] is not None else 0
 	return total_item_days
 
 
 def get_total_cost_of_shipments(scorecard):
 	"""Gets the total cost of all shipments in the period (based on Purchase Orders)"""
-	supplier = frappe.get_doc("Supplier", scorecard.supplier)
 
-	# Look up all PO Items with delivery dates between our dates
-	data = frappe.db.sql(
-		"""
-			SELECT
-				SUM(po_item.base_amount)
-			FROM
-				`tabPurchase Order Item` po_item,
-				`tabPurchase Order` po
-			WHERE
-				po.supplier = %(supplier)s
-				AND po_item.schedule_date BETWEEN %(start_date)s AND %(end_date)s
-				AND po_item.docstatus = 1
-				AND po_item.parent = po.name""",
-		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
-		as_dict=0,
-	)[0][0]
+	from frappe.query_builder.functions import Sum
 
-	if data:
-		return data
-	else:
-		return 0
+	PO = frappe.qb.DocType("Purchase Order")
+	PO_Item = frappe.qb.DocType("Purchase Order Item")
+
+	query = (
+		frappe.qb.from_(PO_Item)
+		.join(PO)
+		.on(PO_Item.parent == PO.name)
+		.select(Sum(PO_Item.base_amount))
+		.where(PO.supplier == scorecard.supplier)
+		.where(PO_Item.schedule_date[scorecard.start_date : scorecard.end_date])  # Syntaxe BETWEEN
+		.where(PO_Item.docstatus == 1)
+	)
+
+	result = query.run(as_list=True)
+	total_cost = result[0][0] if result and result[0][0] is not None else 0
+	return total_cost
 
 
 def get_cost_of_delayed_shipments(scorecard):
@@ -114,115 +109,109 @@ def get_cost_of_delayed_shipments(scorecard):
 
 def get_cost_of_on_time_shipments(scorecard):
 	"""Gets the total cost of all on_time shipments in the period (based on Purchase Receipts)"""
-	supplier = frappe.get_doc("Supplier", scorecard.supplier)
 
-	# Look up all PO Items with delivery dates between our dates
+	from frappe.query_builder.functions import Sum
 
-	total_delivered_on_time_costs = frappe.db.sql(
-		"""
-			SELECT
-				SUM(pr_item.base_amount)
-			FROM
-				`tabPurchase Order Item` po_item,
-				`tabPurchase Receipt Item` pr_item,
-				`tabPurchase Order` po,
-				`tabPurchase Receipt` pr
-			WHERE
-				po.supplier = %(supplier)s
-				AND po_item.schedule_date BETWEEN %(start_date)s AND %(end_date)s
-				AND po_item.schedule_date >= pr.posting_date
-				AND pr_item.docstatus = 1
-				AND pr_item.purchase_order_item = po_item.name
-				AND po_item.parent = po.name
-				AND pr_item.parent = pr.name""",
-		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
-		as_dict=0,
-	)[0][0]
+	PO = frappe.qb.DocType("Purchase Order")
+	PO_Item = frappe.qb.DocType("Purchase Order Item")
+	PR = frappe.qb.DocType("Purchase Receipt")
+	PR_Item = frappe.qb.DocType("Purchase Receipt Item")
 
-	if total_delivered_on_time_costs:
-		return total_delivered_on_time_costs
-	else:
-		return 0
+	query = (
+		frappe.qb.from_(PR_Item)
+		.join(PR)
+		.on(PR_Item.parent == PR.name)
+		.join(PO_Item)
+		.on(PR_Item.purchase_order_item == PO_Item.name)
+		.join(PO)
+		.on(PO_Item.parent == PO.name)
+		.select(Sum(PR_Item.base_amount))
+		.where(PO.supplier == scorecard.supplier)
+		.where(PO_Item.schedule_date[scorecard.start_date : scorecard.end_date])
+		.where(PO_Item.schedule_date >= PR.posting_date)
+		.where(PR_Item.docstatus == 1)
+	)
+
+	result = query.run(as_list=True)
+	total_costs = result[0][0] if result and result[0][0] is not None else 0
+	return total_costs
 
 
 def get_total_days_late(scorecard):
 	"""Gets the number of item days late in the period (based on Purchase Receipts vs POs)"""
-	supplier = frappe.get_doc("Supplier", scorecard.supplier)
-	total_delivered_late_days = frappe.db.sql(
-		"""
-			SELECT
-				SUM(DATEDIFF(pr.posting_date,po_item.schedule_date)* pr_item.qty)
-			FROM
-				`tabPurchase Order Item` po_item,
-				`tabPurchase Receipt Item` pr_item,
-				`tabPurchase Order` po,
-				`tabPurchase Receipt` pr
-			WHERE
-				po.supplier = %(supplier)s
-				AND po_item.schedule_date BETWEEN %(start_date)s AND %(end_date)s
-				AND po_item.schedule_date < pr.posting_date
-				AND pr_item.docstatus = 1
-				AND pr_item.purchase_order_item = po_item.name
-				AND po_item.parent = po.name
-				AND pr_item.parent = pr.name""",
-		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
-		as_dict=0,
-	)[0][0]
-	if not total_delivered_late_days:
-		total_delivered_late_days = 0
 
-	total_missed_late_days = frappe.db.sql(
-		"""
-			SELECT
-				SUM(DATEDIFF( %(end_date)s, po_item.schedule_date) * (po_item.qty - po_item.received_qty))
-			FROM
-				`tabPurchase Order Item` po_item,
-				`tabPurchase Order` po
-			WHERE
-				po.supplier = %(supplier)s
-				AND po_item.received_qty < po_item.qty
-				AND po_item.schedule_date BETWEEN %(start_date)s AND %(end_date)s
-				AND po_item.parent = po.name""",
-		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
-		as_dict=0,
-	)[0][0]
+	PO = frappe.qb.DocType("Purchase Order")
+	PO_Item = frappe.qb.DocType("Purchase Order Item")
+	PR = frappe.qb.DocType("Purchase Receipt")
+	PR_Item = frappe.qb.DocType("Purchase Receipt Item")
 
-	if not total_missed_late_days:
-		total_missed_late_days = 0
+	query_delivered = (
+		frappe.qb.from_(PR_Item)
+		.join(PR)
+		.on(PR_Item.parent == PR.name)
+		.join(PO_Item)
+		.on(PR_Item.purchase_order_item == PO_Item.name)
+		.join(PO)
+		.on(PO_Item.parent == PO.name)
+		.select(Sum(DateDiff(PR.posting_date, PO_Item.schedule_date) * PR_Item.qty))
+		.where(PO.supplier == scorecard.supplier)
+		.where(PO_Item.schedule_date[scorecard.start_date : scorecard.end_date])
+		.where(PO_Item.schedule_date < PR.posting_date)
+		.where(PR_Item.docstatus == 1)
+	)
+
+	res_delivered = query_delivered.run(as_list=True)
+	total_delivered_late_days = (
+		res_delivered[0][0] if res_delivered and res_delivered[0][0] is not None else 0
+	)
+
+	query_missed = (
+		frappe.qb.from_(PO_Item)
+		.join(PO)
+		.on(PO_Item.parent == PO.name)
+		.select(
+			Sum(DateDiff(scorecard.end_date, PO_Item.schedule_date) * (PO_Item.qty - PO_Item.received_qty))
+		)
+		.where(PO.supplier == scorecard.supplier)
+		.where(PO_Item.received_qty < PO_Item.qty)
+		.where(PO_Item.schedule_date[scorecard.start_date : scorecard.end_date])
+	)
+
+	res_missed = query_missed.run(as_list=True)
+	total_missed_late_days = res_missed[0][0] if res_missed and res_missed[0][0] is not None else 0
+
 	return total_missed_late_days + total_delivered_late_days
 
 
 def get_on_time_shipments(scorecard):
-	"""Gets the number of late shipments (counting each item) in the period (based on Purchase Receipts vs POs)"""
+	"""Counts PO lines (scheduled in the period) fully received on or before their schedule date.
 
-	supplier = frappe.get_doc("Supplier", scorecard.supplier)
+	Counting in PO-line units keeps this consistent with get_total_shipments so that
+	get_late_shipments (total - on time) stays non-negative even for split deliveries.
+	"""
 
-	# Look up all PO Items with delivery dates between our dates
-	total_items_delivered_on_time = frappe.db.sql(
-		"""
-			SELECT
-				COUNT(pr_item.qty)
-			FROM
-				`tabPurchase Order Item` po_item,
-				`tabPurchase Receipt Item` pr_item,
-				`tabPurchase Order` po,
-				`tabPurchase Receipt` pr
-			WHERE
-				po.supplier = %(supplier)s
-				AND po_item.schedule_date BETWEEN %(start_date)s AND %(end_date)s
-				AND po_item.schedule_date <= pr.posting_date
-				AND po_item.qty = pr_item.qty
-				AND pr_item.docstatus = 1
-				AND pr_item.purchase_order_item = po_item.name
-				AND po_item.parent = po.name
-				AND pr_item.parent = pr.name""",
-		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
-		as_dict=0,
-	)[0][0]
+	PO = frappe.qb.DocType("Purchase Order")
+	PO_Item = frappe.qb.DocType("Purchase Order Item")
+	PR = frappe.qb.DocType("Purchase Receipt")
+	PR_Item = frappe.qb.DocType("Purchase Receipt Item")
 
-	if not total_items_delivered_on_time:
-		total_items_delivered_on_time = 0
-	return total_items_delivered_on_time
+	rows = (
+		frappe.qb.from_(PR_Item)
+		.join(PR)
+		.on(PR_Item.parent == PR.name)
+		.join(PO_Item)
+		.on(PR_Item.purchase_order_item == PO_Item.name)
+		.join(PO)
+		.on(PO_Item.parent == PO.name)
+		.select(PO_Item.name, PO_Item.qty, Sum(PR_Item.qty).as_("received_on_time"))
+		.where(PO.supplier == scorecard.supplier)
+		.where(PO_Item.schedule_date[scorecard.start_date : scorecard.end_date])
+		.where(PO_Item.schedule_date >= PR.posting_date)
+		.where(PR_Item.docstatus == 1)
+		.groupby(PO_Item.name, PO_Item.qty)
+	).run(as_dict=True)
+
+	return sum(1 for row in rows if flt(row.received_on_time) >= flt(row.qty))
 
 
 def get_late_shipments(scorecard):
@@ -232,210 +221,154 @@ def get_late_shipments(scorecard):
 
 def get_total_received(scorecard):
 	"""Gets the total number of received shipments in the period (based on Purchase Receipts)"""
-	supplier = frappe.get_doc("Supplier", scorecard.supplier)
+	pr = frappe.qb.DocType("Purchase Receipt")
+	pr_item = frappe.qb.DocType("Purchase Receipt Item")
 
-	# Look up all PO Items with delivery dates between our dates
-	data = frappe.db.sql(
-		"""
-			SELECT
-				COUNT(pr_item.base_amount)
-			FROM
-				`tabPurchase Receipt Item` pr_item,
-				`tabPurchase Receipt` pr
-			WHERE
-				pr.supplier = %(supplier)s
-				AND pr.posting_date BETWEEN %(start_date)s AND %(end_date)s
-				AND pr_item.docstatus = 1
-				AND pr_item.parent = pr.name""",
-		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
-		as_dict=0,
-	)[0][0]
+	query = (
+		frappe.qb.from_(pr)
+		.join(pr_item)
+		.on(pr_item.parent == pr.name)
+		.select(frappe.qb.fn.Count(pr_item.base_amount))
+		.where(pr.supplier == scorecard.supplier)
+		.where(pr.posting_date[scorecard.start_date : scorecard.end_date])
+		.where(pr_item.docstatus == 1)
+	)
 
-	if not data:
-		data = 0
-	return data
+	result = query.run()
+	return result[0][0] if result and result[0][0] else 0
 
 
 def get_total_received_amount(scorecard):
 	"""Gets the total amount (in company currency) received in the period (based on Purchase Receipts)"""
-	supplier = frappe.get_doc("Supplier", scorecard.supplier)
+	pr = frappe.qb.DocType("Purchase Receipt")
+	pr_item = frappe.qb.DocType("Purchase Receipt Item")
 
-	# Look up all PO Items with delivery dates between our dates
-	data = frappe.db.sql(
-		"""
-			SELECT
-				SUM(pr_item.received_qty * pr_item.base_rate)
-			FROM
-				`tabPurchase Receipt Item` pr_item,
-				`tabPurchase Receipt` pr
-			WHERE
-				pr.supplier = %(supplier)s
-				AND pr.posting_date BETWEEN %(start_date)s AND %(end_date)s
-				AND pr_item.docstatus = 1
-				AND pr_item.parent = pr.name""",
-		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
-		as_dict=0,
-	)[0][0]
+	query = (
+		frappe.qb.from_(pr)
+		.join(pr_item)
+		.on(pr_item.parent == pr.name)
+		.select(frappe.qb.fn.Sum(pr_item.received_qty * pr_item.base_rate))
+		.where(pr.supplier == scorecard.supplier)
+		.where(pr.posting_date[scorecard.start_date : scorecard.end_date])
+		.where(pr_item.docstatus == 1)
+	)
 
-	if not data:
-		data = 0
-	return data
+	result = query.run()
+	return frappe.utils.flt(result[0][0]) if result else 0.0
 
 
 def get_total_received_items(scorecard):
 	"""Gets the total number of received shipments in the period (based on Purchase Receipts)"""
-	supplier = frappe.get_doc("Supplier", scorecard.supplier)
+	pr = frappe.qb.DocType("Purchase Receipt")
+	pr_item = frappe.qb.DocType("Purchase Receipt Item")
 
-	# Look up all PO Items with delivery dates between our dates
-	data = frappe.db.sql(
-		"""
-			SELECT
-				SUM(pr_item.received_qty)
-			FROM
-				`tabPurchase Receipt Item` pr_item,
-				`tabPurchase Receipt` pr
-			WHERE
-				pr.supplier = %(supplier)s
-				AND pr.posting_date BETWEEN %(start_date)s AND %(end_date)s
-				AND pr_item.docstatus = 1
-				AND pr_item.parent = pr.name""",
-		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
-		as_dict=0,
-	)[0][0]
+	query = (
+		frappe.qb.from_(pr)
+		.join(pr_item)
+		.on(pr_item.parent == pr.name)
+		.select(frappe.qb.fn.Sum(pr_item.received_qty))
+		.where(pr.supplier == scorecard.supplier)
+		.where(pr.posting_date[scorecard.start_date : scorecard.end_date])
+		.where(pr_item.docstatus == 1)
+	)
 
-	if not data:
-		data = 0
-	return data
+	result = query.run()
+	return frappe.utils.flt(result[0][0]) if result else 0.0
 
 
 def get_total_rejected_amount(scorecard):
 	"""Gets the total amount (in company currency) rejected in the period (based on Purchase Receipts)"""
-	supplier = frappe.get_doc("Supplier", scorecard.supplier)
+	pr = frappe.qb.DocType("Purchase Receipt")
+	pr_item = frappe.qb.DocType("Purchase Receipt Item")
 
-	# Look up all PO Items with delivery dates between our dates
-	data = frappe.db.sql(
-		"""
-			SELECT
-				SUM(pr_item.rejected_qty * pr_item.base_rate)
-			FROM
-				`tabPurchase Receipt Item` pr_item,
-				`tabPurchase Receipt` pr
-			WHERE
-				pr.supplier = %(supplier)s
-				AND pr.posting_date BETWEEN %(start_date)s AND %(end_date)s
-				AND pr_item.docstatus = 1
-				AND pr_item.parent = pr.name""",
-		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
-		as_dict=0,
-	)[0][0]
+	query = (
+		frappe.qb.from_(pr)
+		.join(pr_item)
+		.on(pr_item.parent == pr.name)
+		.select(frappe.qb.fn.Sum(pr_item.rejected_qty * pr_item.base_rate))
+		.where(pr.supplier == scorecard.supplier)
+		.where(pr.posting_date[scorecard.start_date : scorecard.end_date])
+		.where(pr_item.docstatus == 1)
+	)
 
-	if not data:
-		data = 0
-	return data
+	result = query.run()
+	return frappe.utils.flt(result[0][0]) if result else 0.0
 
 
 def get_total_rejected_items(scorecard):
 	"""Gets the total number of rejected items in the period (based on Purchase Receipts)"""
-	supplier = frappe.get_doc("Supplier", scorecard.supplier)
+	pr = frappe.qb.DocType("Purchase Receipt")
+	pr_item = frappe.qb.DocType("Purchase Receipt Item")
 
-	# Look up all PO Items with delivery dates between our dates
-	data = frappe.db.sql(
-		"""
-			SELECT
-				SUM(pr_item.rejected_qty)
-			FROM
-				`tabPurchase Receipt Item` pr_item,
-				`tabPurchase Receipt` pr
-			WHERE
-				pr.supplier = %(supplier)s
-				AND pr.posting_date BETWEEN %(start_date)s AND %(end_date)s
-				AND pr_item.docstatus = 1
-				AND pr_item.parent = pr.name""",
-		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
-		as_dict=0,
-	)[0][0]
+	query = (
+		frappe.qb.from_(pr)
+		.join(pr_item)
+		.on(pr_item.parent == pr.name)
+		.select(frappe.qb.fn.Sum(pr_item.rejected_qty))
+		.where(pr.supplier == scorecard.supplier)
+		.where(pr.posting_date[scorecard.start_date : scorecard.end_date])
+		.where(pr_item.docstatus == 1)
+	)
 
-	if not data:
-		data = 0
-	return data
+	result = query.run()
+	return frappe.utils.flt(result[0][0]) if result else 0.0
 
 
 def get_total_accepted_amount(scorecard):
 	"""Gets the total amount (in company currency) accepted in the period (based on Purchase Receipts)"""
-	supplier = frappe.get_doc("Supplier", scorecard.supplier)
+	pr = frappe.qb.DocType("Purchase Receipt")
+	pr_item = frappe.qb.DocType("Purchase Receipt Item")
 
-	# Look up all PO Items with delivery dates between our dates
-	data = frappe.db.sql(
-		"""
-			SELECT
-				SUM(pr_item.qty * pr_item.base_rate)
-			FROM
-				`tabPurchase Receipt Item` pr_item,
-				`tabPurchase Receipt` pr
-			WHERE
-				pr.supplier = %(supplier)s
-				AND pr.posting_date BETWEEN %(start_date)s AND %(end_date)s
-				AND pr_item.docstatus = 1
-				AND pr_item.parent = pr.name""",
-		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
-		as_dict=0,
-	)[0][0]
+	query = (
+		frappe.qb.from_(pr)
+		.join(pr_item)
+		.on(pr_item.parent == pr.name)
+		.select(frappe.qb.fn.Sum(pr_item.qty * pr_item.base_rate))
+		.where(pr.supplier == scorecard.supplier)
+		.where(pr.posting_date[scorecard.start_date : scorecard.end_date])
+		.where(pr_item.docstatus == 1)
+	)
 
-	if not data:
-		data = 0
-	return data
+	result = query.run()
+	return frappe.utils.flt(result[0][0]) if result else 0.0
 
 
 def get_total_accepted_items(scorecard):
 	"""Gets the total number of rejected items in the period (based on Purchase Receipts)"""
-	supplier = frappe.get_doc("Supplier", scorecard.supplier)
+	pr = frappe.qb.DocType("Purchase Receipt")
+	pr_item = frappe.qb.DocType("Purchase Receipt Item")
 
-	# Look up all PO Items with delivery dates between our dates
-	data = frappe.db.sql(
-		"""
-			SELECT
-				SUM(pr_item.qty)
-			FROM
-				`tabPurchase Receipt Item` pr_item,
-				`tabPurchase Receipt` pr
-			WHERE
-				pr.supplier = %(supplier)s
-				AND pr.posting_date BETWEEN %(start_date)s AND %(end_date)s
-				AND pr_item.docstatus = 1
-				AND pr_item.parent = pr.name""",
-		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
-		as_dict=0,
-	)[0][0]
+	query = (
+		frappe.qb.from_(pr)
+		.join(pr_item)
+		.on(pr_item.parent == pr.name)
+		.select(frappe.qb.fn.Sum(pr_item.qty))
+		.where(pr.supplier == scorecard.supplier)
+		.where(pr.posting_date[scorecard.start_date : scorecard.end_date])
+		.where(pr_item.docstatus == 1)
+	)
 
-	if not data:
-		data = 0
-	return data
+	result = query.run()
+	return frappe.utils.flt(result[0][0]) if result else 0.0
 
 
 def get_total_shipments(scorecard):
 	"""Gets the total number of ordered shipments to arrive in the period (based on Purchase Receipts)"""
-	supplier = frappe.get_doc("Supplier", scorecard.supplier)
+	po = frappe.qb.DocType("Purchase Order")
+	po_item = frappe.qb.DocType("Purchase Order Item")
 
-	# Look up all PO Items with delivery dates between our dates
-	data = frappe.db.sql(
-		"""
-			SELECT
-				COUNT(po_item.base_amount)
-			FROM
-				`tabPurchase Order Item` po_item,
-				`tabPurchase Order` po
-			WHERE
-				po.supplier = %(supplier)s
-				AND po_item.schedule_date BETWEEN %(start_date)s AND %(end_date)s
-				AND po_item.docstatus = 1
-				AND po_item.parent = po.name""",
-		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
-		as_dict=0,
-	)[0][0]
+	query = (
+		frappe.qb.from_(po)
+		.join(po_item)
+		.on(po_item.parent == po.name)
+		.select(frappe.qb.fn.Count(po_item.base_amount))
+		.where(po.supplier == scorecard.supplier)
+		.where(po_item.schedule_date[scorecard.start_date : scorecard.end_date])
+		.where(po_item.docstatus == 1)
+	)
 
-	if not data:
-		data = 0
-	return data
+	result = query.run()
+	return frappe.utils.cint(result[0][0]) if result else 0
 
 
 def get_ordered_qty(scorecard):
@@ -474,152 +407,133 @@ def get_invoiced_qty(scorecard):
 
 def get_rfq_total_number(scorecard):
 	"""Gets the total number of RFQs sent to supplier"""
-	supplier = frappe.get_doc("Supplier", scorecard.supplier)
+	rfq = frappe.qb.DocType("Request for Quotation")
+	rfq_item = frappe.qb.DocType("Request for Quotation Item")
+	rfq_sup = frappe.qb.DocType("Request for Quotation Supplier")
 
-	# Look up all PO Items with delivery dates between our dates
-	data = frappe.db.sql(
-		"""
-			SELECT
-				COUNT(rfq.name) as total_rfqs
-			FROM
-				`tabRequest for Quotation Item` rfq_item,
-				`tabRequest for Quotation Supplier` rfq_sup,
-				`tabRequest for Quotation` rfq
-			WHERE
-				rfq_sup.supplier = %(supplier)s
-				AND rfq.transaction_date BETWEEN %(start_date)s AND %(end_date)s
-				AND rfq_item.docstatus = 1
-				AND rfq_item.parent = rfq.name
-				AND rfq_sup.parent = rfq.name""",
-		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
-		as_dict=0,
-	)[0][0]
+	query = (
+		frappe.qb.from_(rfq)
+		.join(rfq_item)
+		.on(rfq_item.parent == rfq.name)
+		.join(rfq_sup)
+		.on(rfq_sup.parent == rfq.name)
+		.select(frappe.qb.fn.Count(rfq.name))
+		.where(rfq_sup.supplier == scorecard.supplier)
+		.where(rfq.transaction_date[scorecard.start_date : scorecard.end_date])
+		.where(rfq_item.docstatus == 1)
+	)
 
-	if not data:
-		data = 0
-	return data
+	result = query.run()
+	return frappe.utils.cint(result[0][0]) if result else 0
 
 
 def get_rfq_total_items(scorecard):
 	"""Gets the total number of RFQ items sent to supplier"""
-	supplier = frappe.get_doc("Supplier", scorecard.supplier)
+	rfq = frappe.qb.DocType("Request for Quotation")
+	rfq_item = frappe.qb.DocType("Request for Quotation Item")
+	rfq_sup = frappe.qb.DocType("Request for Quotation Supplier")
 
-	# Look up all PO Items with delivery dates between our dates
-	data = frappe.db.sql(
-		"""
-			SELECT
-				COUNT(rfq_item.name) as total_rfqs
-			FROM
-				`tabRequest for Quotation Item` rfq_item,
-				`tabRequest for Quotation Supplier` rfq_sup,
-				`tabRequest for Quotation` rfq
-			WHERE
-				rfq_sup.supplier = %(supplier)s
-				AND rfq.transaction_date BETWEEN %(start_date)s AND %(end_date)s
-				AND rfq_item.docstatus = 1
-				AND rfq_item.parent = rfq.name
-				AND rfq_sup.parent = rfq.name""",
-		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
-		as_dict=0,
-	)[0][0]
-	if not data:
-		data = 0
-	return data
+	query = (
+		frappe.qb.from_(rfq)
+		.join(rfq_item)
+		.on(rfq_item.parent == rfq.name)
+		.join(rfq_sup)
+		.on(rfq_sup.parent == rfq.name)
+		.select(frappe.qb.fn.Count(rfq_item.name))
+		.where(rfq_sup.supplier == scorecard.supplier)
+		.where(rfq.transaction_date[scorecard.start_date : scorecard.end_date])
+		.where(rfq_item.docstatus == 1)
+	)
+
+	result = query.run()
+	return frappe.utils.cint(result[0][0]) if result else 0
 
 
 def get_sq_total_number(scorecard):
 	"""Gets the total number of RFQ items sent to supplier"""
-	supplier = frappe.get_doc("Supplier", scorecard.supplier)
+	rfq = frappe.qb.DocType("Request for Quotation")
+	rfq_item = frappe.qb.DocType("Request for Quotation Item")
+	rfq_sup = frappe.qb.DocType("Request for Quotation Supplier")
+	sq = frappe.qb.DocType("Supplier Quotation")
+	sq_item = frappe.qb.DocType("Supplier Quotation Item")
 
-	# Look up all PO Items with delivery dates between our dates
-	data = frappe.db.sql(
-		"""
-			SELECT
-				COUNT(sq.name) as total_sqs
-			FROM
-				`tabRequest for Quotation Item` rfq_item,
-				`tabSupplier Quotation Item` sq_item,
-				`tabRequest for Quotation Supplier` rfq_sup,
-				`tabRequest for Quotation` rfq,
-				`tabSupplier Quotation` sq
-			WHERE
-				rfq_sup.supplier = %(supplier)s
-				AND rfq.transaction_date BETWEEN %(start_date)s AND %(end_date)s
-				AND sq_item.request_for_quotation_item = rfq_item.name
-				AND sq_item.docstatus = 1
-				AND rfq_item.docstatus = 1
-				AND sq.supplier = %(supplier)s
-				AND sq_item.parent = sq.name
-				AND rfq_item.parent = rfq.name
-				AND rfq_sup.parent = rfq.name""",
-		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
-		as_dict=0,
-	)[0][0]
-	if not data:
-		data = 0
-	return data
+	query = (
+		frappe.qb.from_(rfq)
+		.join(rfq_item)
+		.on(rfq_item.parent == rfq.name)
+		.join(rfq_sup)
+		.on(rfq_sup.parent == rfq.name)
+		.join(sq_item)
+		.on(sq_item.request_for_quotation_item == rfq_item.name)
+		.join(sq)
+		.on(sq_item.parent == sq.name)
+		.select(frappe.qb.fn.Count(sq.name))
+		.where(rfq_sup.supplier == scorecard.supplier)
+		.where(sq.supplier == scorecard.supplier)
+		.where(rfq.transaction_date[scorecard.start_date : scorecard.end_date])
+		.where(rfq_item.docstatus == 1)
+		.where(sq_item.docstatus == 1)
+	)
+
+	result = query.run()
+	return frappe.utils.cint(result[0][0]) if result else 0
 
 
 def get_sq_total_items(scorecard):
 	"""Gets the total number of RFQ items sent to supplier"""
-	supplier = frappe.get_doc("Supplier", scorecard.supplier)
+	rfq = frappe.qb.DocType("Request for Quotation")
+	rfq_item = frappe.qb.DocType("Request for Quotation Item")
+	rfq_sup = frappe.qb.DocType("Request for Quotation Supplier")
+	sq = frappe.qb.DocType("Supplier Quotation")
+	sq_item = frappe.qb.DocType("Supplier Quotation Item")
 
-	# Look up all PO Items with delivery dates between our dates
-	data = frappe.db.sql(
-		"""
-			SELECT
-				COUNT(sq_item.name) as total_sqs
-			FROM
-				`tabRequest for Quotation Item` rfq_item,
-				`tabSupplier Quotation Item` sq_item,
-				`tabSupplier Quotation` sq,
-				`tabRequest for Quotation Supplier` rfq_sup,
-				`tabRequest for Quotation` rfq
-			WHERE
-				rfq_sup.supplier = %(supplier)s
-				AND rfq.transaction_date BETWEEN %(start_date)s AND %(end_date)s
-				AND sq_item.request_for_quotation_item = rfq_item.name
-				AND sq_item.docstatus = 1
-				AND sq.supplier = %(supplier)s
-				AND sq_item.parent = sq.name
-				AND rfq_item.docstatus = 1
-				AND rfq_item.parent = rfq.name
-				AND rfq_sup.parent = rfq.name""",
-		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
-		as_dict=0,
-	)[0][0]
-	if not data:
-		data = 0
-	return data
+	query = (
+		frappe.qb.from_(rfq)
+		.join(rfq_item)
+		.on(rfq_item.parent == rfq.name)
+		.join(rfq_sup)
+		.on(rfq_sup.parent == rfq.name)
+		.join(sq_item)
+		.on(sq_item.request_for_quotation_item == rfq_item.name)
+		.join(sq)
+		.on(sq_item.parent == sq.name)
+		.select(frappe.qb.fn.Count(sq_item.name))
+		.where(rfq_sup.supplier == scorecard.supplier)
+		.where(sq.supplier == scorecard.supplier)
+		.where(rfq.transaction_date[scorecard.start_date : scorecard.end_date])
+		.where(rfq_item.docstatus == 1)
+		.where(sq_item.docstatus == 1)
+	)
+
+	result = query.run()
+	return frappe.utils.cint(result[0][0]) if result else 0
 
 
 def get_rfq_response_days(scorecard):
 	"""Gets the total number of days it has taken a supplier to respond to rfqs in the period"""
-	supplier = frappe.get_doc("Supplier", scorecard.supplier)
-	total_sq_days = frappe.db.sql(
-		"""
-			SELECT
-				SUM(DATEDIFF(sq.transaction_date, rfq.transaction_date))
-			FROM
-				`tabRequest for Quotation Item` rfq_item,
-				`tabSupplier Quotation Item` sq_item,
-				`tabSupplier Quotation` sq,
-				`tabRequest for Quotation Supplier` rfq_sup,
-				`tabRequest for Quotation` rfq
-			WHERE
-				rfq_sup.supplier = %(supplier)s
-				AND rfq.transaction_date BETWEEN %(start_date)s AND %(end_date)s
-				AND sq_item.request_for_quotation_item = rfq_item.name
-				AND sq_item.docstatus = 1
-				AND sq.supplier = %(supplier)s
-				AND sq_item.parent = sq.name
-				AND rfq_item.docstatus = 1
-				AND rfq_item.parent = rfq.name
-				AND rfq_sup.parent = rfq.name""",
-		{"supplier": supplier.name, "start_date": scorecard.start_date, "end_date": scorecard.end_date},
-		as_dict=0,
-	)[0][0]
-	if not total_sq_days:
-		total_sq_days = 0
+	rfq = frappe.qb.DocType("Request for Quotation")
+	rfq_item = frappe.qb.DocType("Request for Quotation Item")
+	rfq_sup = frappe.qb.DocType("Request for Quotation Supplier")
+	sq = frappe.qb.DocType("Supplier Quotation")
+	sq_item = frappe.qb.DocType("Supplier Quotation Item")
 
-	return total_sq_days
+	query = (
+		frappe.qb.from_(rfq)
+		.join(rfq_item)
+		.on(rfq_item.parent == rfq.name)
+		.join(rfq_sup)
+		.on(rfq_sup.parent == rfq.name)
+		.join(sq_item)
+		.on(sq_item.request_for_quotation_item == rfq_item.name)
+		.join(sq)
+		.on(sq_item.parent == sq.name)
+		.select(frappe.qb.fn.Sum(DateDiff(sq.transaction_date, rfq.transaction_date)))
+		.where(rfq_sup.supplier == scorecard.supplier)
+		.where(sq.supplier == scorecard.supplier)
+		.where(rfq.transaction_date[scorecard.start_date : scorecard.end_date])
+		.where(rfq_item.docstatus == 1)
+		.where(sq_item.docstatus == 1)
+	)
+
+	result = query.run()
+	return frappe.utils.cint(result[0][0]) if result else 0

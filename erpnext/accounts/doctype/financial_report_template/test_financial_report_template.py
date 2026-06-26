@@ -9,6 +9,14 @@ from erpnext.tests.utils import ERPNextTestSuite
 class FinancialReportTemplateTestCase(ERPNextTestSuite):
 	"""Utility class with common setup and helper methods for all test classes"""
 
+	def cancel_docs(self, docs):
+		"""Cancel submitted docs in reverse creation order to avoid dependency issues."""
+		for doc in reversed(docs):
+			if doc:
+				doc.reload()
+				if doc.docstatus == 1:
+					doc.cancel()
+
 	def setUp(self):
 		"""Set up test data"""
 		self.create_test_template()

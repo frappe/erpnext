@@ -19,7 +19,7 @@
   "col_break2",
   "is_finished_item",
   "is_legacy_scrap_item",
-  "type",
+  "secondary_item_type",
   "quality_inspection",
   "subcontracted_item",
   "against_fg",
@@ -559,7 +559,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:!doc.is_legacy_scrap_item && !doc.type",
+   "depends_on": "eval:!doc.is_legacy_scrap_item && !doc.secondary_item_type",
    "fieldname": "is_finished_item",
    "fieldtype": "Check",
    "label": "Is Finished Item",
@@ -653,7 +653,7 @@
   },
   {
    "depends_on": "eval:parent.purpose == \"Manufacture\" && doc.t_warehouse && !doc.is_finished_item && !doc.is_legacy_scrap_item",
-   "fieldname": "type",
+   "fieldname": "secondary_item_type",
    "fieldtype": "Select",
    "label": "Type",
    "options": "\nCo-Product\nBy-Product\nScrap\nAdditional Finished Good"
@@ -679,7 +679,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-27 11:40:38.294196",
+ "modified": "2026-06-01 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

@@ -1,11 +1,13 @@
 frappe.listview_settings["Stock Entry"] = {
 	add_fields: [
-		"`tabStock Entry`.`from_warehouse`",
-		"`tabStock Entry`.`to_warehouse`",
-		"`tabStock Entry`.`purpose`",
-		"`tabStock Entry`.`work_order`",
-		"`tabStock Entry`.`bom_no`",
-		"`tabStock Entry`.`is_return`",
+		"from_warehouse",
+		"to_warehouse",
+		"purpose",
+		"work_order",
+		"bom_no",
+		"is_return",
+		"add_to_transit",
+		"per_transferred",
 	],
 	get_indicator: function (doc) {
 		if (doc.is_return === 1 && doc.purpose === "Material Transfer for Manufacture") {
@@ -16,6 +18,17 @@ frappe.listview_settings["Stock Entry"] = {
 			];
 		} else if (doc.docstatus === 0) {
 			return [__("Draft"), "red", "docstatus,=,0"];
+		} else if (
+			doc.docstatus === 1 &&
+			doc.add_to_transit === 1 &&
+			doc.purpose === "Material Transfer" &&
+			doc.per_transferred < 100
+		) {
+			return [
+				__("In Transit"),
+				"yellow",
+				"docstatus,=,1|add_to_transit,=,1|purpose,=,Material Transfer|per_transferred,<,100",
+			];
 		} else if (doc.purpose === "Send to Warehouse" && doc.per_transferred < 100) {
 			// not delivered & overdue
 			return [__("Goods In Transit"), "grey", "per_transferred,<,100"];

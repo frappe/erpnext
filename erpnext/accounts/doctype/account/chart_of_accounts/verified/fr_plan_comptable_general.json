@@ -805,6 +805,9 @@
                     },
                     "account_type": "Stock Received But Not Billed"
                 },
+                "Stock livr\u00e9 non factur\u00e9": {
+                    "account_type": "Stock Delivered But Not Billed"
+                },
                 "account_type": "Payable"
             },
             "41-Clients et comptes rattach\u00e9s (PASSIF)": {

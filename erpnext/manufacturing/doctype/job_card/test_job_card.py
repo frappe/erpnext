@@ -12,10 +12,12 @@ from erpnext.manufacturing.doctype.job_card.job_card import (
 	JobCardOverTransferError,
 	OperationMismatchError,
 	OverlapError,
+)
+from erpnext.manufacturing.doctype.job_card.mapper import (
 	make_corrective_job_card,
 	make_material_request,
 )
-from erpnext.manufacturing.doctype.job_card.job_card import (
+from erpnext.manufacturing.doctype.job_card.mapper import (
 	make_stock_entry as make_stock_entry_from_jc,
 )
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
@@ -194,6 +196,28 @@ class TestJobCard(ERPNextTestSuite):
 				"Work Order Operation", job_card.operation_id, "completed_qty"
 			)
 			self.assertEqual(completed_qty, job_card.for_quantity)
+
+	def test_job_card_cannot_be_submitted_while_on_hold(self):
+		# Regression for #55756: a paused (On Hold) job card must not be submittable, otherwise
+		# the document gets locked in the On Hold state with Resume/Complete no longer available.
+		job_card = frappe.get_all(
+			"Job Card",
+			filters={"work_order": self.work_order.name},
+			fields=["name", "for_quantity"],
+		)[0]
+
+		doc = frappe.get_doc("Job Card", job_card.name)
+		doc.append(
+			"time_logs",
+			{
+				"from_time": "2024-01-01 08:00:00",
+				"to_time": "2024-01-01 09:00:00",
+				"time_in_mins": 60,
+				"completed_qty": job_card.for_quantity,
+			},
+		)
+		doc.is_paused = 1
+		self.assertRaises(frappe.ValidationError, doc.submit)
 
 	def test_job_card_overlap(self):
 		wo2 = make_wo_order_test_record(item="_Test FG Item 2", qty=2)
@@ -552,7 +576,7 @@ class TestJobCard(ERPNextTestSuite):
 		corrective_job_card.submit()
 		wo.reload()
 
-		from erpnext.manufacturing.doctype.work_order.work_order import (
+		from erpnext.manufacturing.doctype.work_order.mapper import (
 			make_stock_entry as make_stock_entry_for_wo,
 		)
 
@@ -623,7 +647,7 @@ class TestJobCard(ERPNextTestSuite):
 		assertStatus("Cancelled")
 
 	def test_job_card_material_request_and_bom_details(self):
-		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
+		from erpnext.stock.doctype.material_request.mapper import make_stock_entry
 
 		create_bom_with_multiple_operations()
 		work_order = make_wo_with_transfer_against_jc()
@@ -647,7 +671,7 @@ class TestJobCard(ERPNextTestSuite):
 			setup_bom,
 			setup_operations,
 		)
-		from erpnext.manufacturing.doctype.work_order.work_order import (
+		from erpnext.manufacturing.doctype.work_order.mapper import (
 			make_stock_entry as make_stock_entry_for_wo,
 		)
 		from erpnext.stock.doctype.item.test_item import make_item
@@ -721,6 +745,7 @@ class TestJobCard(ERPNextTestSuite):
 			)
 
 		jc.time_logs[0].completed_qty = 8
+		jc.pending_qty = 0.0
 		jc.save()
 		jc.submit()
 
@@ -787,10 +812,10 @@ class TestJobCard(ERPNextTestSuite):
 			setup_bom,
 			setup_operations,
 		)
-		from erpnext.manufacturing.doctype.work_order.work_order import make_job_card
-		from erpnext.manufacturing.doctype.work_order.work_order import (
+		from erpnext.manufacturing.doctype.work_order.mapper import (
 			make_stock_entry as make_stock_entry_for_wo,
 		)
+		from erpnext.manufacturing.doctype.work_order.work_order import make_job_card
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
@@ -912,7 +937,7 @@ class TestJobCard(ERPNextTestSuite):
 					"qty": 1,
 					"process_loss_per": 10,
 					"cost_allocation_per": 5,
-					"type": "Scrap",
+					"secondary_item_type": "Scrap",
 				},
 			)
 			if submit:
@@ -995,7 +1020,8 @@ class TestJobCard(ERPNextTestSuite):
 			},
 		)
 		job_card.append(
-			"secondary_items", {"item_code": scrap_extra.name, "stock_qty": 5, "type": "Co-Product"}
+			"secondary_items",
+			{"item_code": scrap_extra.name, "stock_qty": 5, "secondary_item_type": "Co-Product"},
 		)
 		job_card.submit()
 
@@ -1014,7 +1040,7 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(manufacturing_entry.items[2].qty, 9)
 		self.assertEqual(flt(manufacturing_entry.items[2].basic_rate, 3), 5.556)
 		self.assertEqual(manufacturing_entry.items[3].item_code, scrap_extra.name)
-		self.assertEqual(manufacturing_entry.items[3].type, "Co-Product")
+		self.assertEqual(manufacturing_entry.items[3].secondary_item_type, "Co-Product")
 		self.assertEqual(manufacturing_entry.items[3].qty, 5)
 		self.assertEqual(manufacturing_entry.items[3].basic_rate, 0)
 
@@ -1059,7 +1085,9 @@ class TestJobCard(ERPNextTestSuite):
 			)
 
 		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
-		job_card.append("secondary_items", {"item_code": "_Test Item", "stock_qty": 2, "type": "Scrap"})
+		job_card.append(
+			"secondary_items", {"item_code": "_Test Item", "stock_qty": 2, "secondary_item_type": "Scrap"}
+		)
 		job_card.append(
 			"time_logs",
 			{
@@ -1071,7 +1099,7 @@ class TestJobCard(ERPNextTestSuite):
 		job_card.save()
 		job_card.submit()
 
-		from erpnext.manufacturing.doctype.work_order.work_order import (
+		from erpnext.manufacturing.doctype.work_order.mapper import (
 			make_stock_entry as make_stock_entry_for_wo,
 		)
 
@@ -1080,6 +1108,243 @@ class TestJobCard(ERPNextTestSuite):
 
 		self.assertEqual(s.items[3].item_code, "_Test Item")
 		self.assertEqual(s.items[3].transfer_qty, 2)
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"overproduction_percentage_for_work_order": 100}
+	)
+	def test_operating_cost_with_overproduction(self):
+		from erpnext.manufacturing.doctype.routing.test_routing import (
+			create_routing,
+			setup_bom,
+			setup_operations,
+		)
+		from erpnext.manufacturing.doctype.work_order.mapper import (
+			make_stock_entry as make_stock_entry_for_wo,
+		)
+		from erpnext.manufacturing.doctype.work_order.work_order import make_job_card
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		workstation = make_workstation(
+			workstation_name="Test Workstation for Overproduction", hour_rate_rent=10, hour_rate_labour=10
+		)
+		operations = [
+			{"operation": "Test Operation 1", "workstation": workstation.name, "time_in_mins": 30},
+			{"operation": "Test Operation 2", "workstation": workstation.name, "time_in_mins": 30},
+		]
+		warehouse = create_warehouse("Test Warehouse for Overproduction")
+		setup_operations(operations)
+
+		fg = make_item("Test FG for Overproduction", {"stock_uom": "Nos", "is_stock_item": 1})
+		rm = make_item("Test RM for Overproduction", {"stock_uom": "Nos", "is_stock_item": 1})
+
+		routing_doc = create_routing(routing_name="Testing Route", operations=operations)
+		bom_doc = setup_bom(
+			item_code=fg.name,
+			routing=routing_doc.name,
+			raw_materials=[rm.name],
+			source_warehouse=warehouse,
+		)
+
+		for row in bom_doc.items:
+			make_stock_entry(
+				item_code=row.item_code,
+				target=row.source_warehouse,
+				qty=100,
+				basic_rate=100,
+			)
+
+		wo_doc = make_wo_order_test_record(
+			production_item=fg.name,
+			bom_no=bom_doc.name,
+			qty=10,
+			skip_transfer=1,
+			source_warehouse=warehouse,
+		)
+
+		first_operation = frappe.get_all(
+			"Job Card",
+			filters={"work_order": wo_doc.name, "sequence_id": 1},
+			fields=["name"],
+			order_by="sequence_id",
+			limit=1,
+		)[0].name
+
+		jc = frappe.get_doc("Job Card", first_operation)
+		from_time = add_to_date(now(), days=1)
+		for _ in jc.scheduled_time_logs:
+			jc.append(
+				"time_logs",
+				{
+					"from_time": from_time,
+					"to_time": add_to_date(from_time, days=1),
+					"completed_qty": 4,
+				},
+			)
+		jc.for_quantity = 4
+		jc.save()
+		jc.submit()
+
+		second_operation = frappe.get_all(
+			"Job Card",
+			filters={"work_order": wo_doc.name, "sequence_id": 2},
+			fields=["name"],
+			order_by="sequence_id",
+			limit=1,
+		)[0].name
+
+		jc = frappe.get_doc("Job Card", second_operation)
+		from_time = add_to_date(now(), days=2)
+		for _ in jc.scheduled_time_logs:
+			jc.append(
+				"time_logs",
+				{
+					"from_time": from_time,
+					"to_time": add_to_date(from_time, days=2),
+					"completed_qty": 4,
+				},
+			)
+		jc.for_quantity = 4
+		jc.save()
+		jc.submit()
+
+		s = frappe.get_doc(make_stock_entry_for_wo(wo_doc.name, "Manufacture", 6))  # overproduction
+		s.submit()
+
+		self.assertEqual(s.additional_costs[0].amount, 240)
+		self.assertEqual(s.additional_costs[1].amount, 240)
+		self.assertEqual(s.additional_costs[2].amount, 480)
+		self.assertEqual(s.additional_costs[3].amount, 480)
+
+		make_job_card(
+			wo_doc.name,
+			[
+				{
+					"name": wo_doc.operations[0].name,
+					"operation": "Test Operation 1",
+					"qty": 2,
+					"pending_qty": 2,
+				}
+			],
+		)
+
+		job_card = frappe.get_last_doc("Job Card", {"work_order": wo_doc.name})
+		from_time = add_to_date(now(), days=4)
+		job_card.append(
+			"time_logs",
+			{
+				"from_time": from_time,
+				"to_time": add_to_date(from_time, days=1),
+				"completed_qty": 2,
+			},
+		)
+		job_card.for_quantity = 2
+		job_card.save()
+		job_card.submit()
+
+		make_job_card(
+			wo_doc.name,
+			[
+				{
+					"name": wo_doc.operations[1].name,
+					"operation": "Test Operation 2",
+					"qty": 2,
+					"pending_qty": 2,
+				}
+			],
+		)
+
+		job_card = frappe.get_last_doc("Job Card", {"work_order": wo_doc.name})
+		from_time = add_to_date(now(), days=5)
+		job_card.append(
+			"time_logs",
+			{
+				"from_time": from_time,
+				"to_time": add_to_date(from_time, days=2),
+				"completed_qty": 2,
+			},
+		)
+		job_card.for_quantity = 2
+		job_card.save()
+		job_card.submit()
+
+		s2 = frappe.get_doc(make_stock_entry_for_wo(wo_doc.name, "Manufacture", 1))
+		s2.submit()
+
+		self.assertEqual(s2.additional_costs[0].amount, 120)
+		self.assertEqual(s2.additional_costs[1].amount, 120)
+		self.assertEqual(s2.additional_costs[2].amount, 240)
+		self.assertEqual(s2.additional_costs[3].amount, 240)
+
+		make_job_card(
+			wo_doc.name,
+			[
+				{
+					"name": wo_doc.operations[0].name,
+					"operation": "Test Operation 1",
+					"qty": 2,
+					"pending_qty": 2,
+				}
+			],
+		)
+
+		job_card = frappe.get_last_doc("Job Card", {"work_order": wo_doc.name})
+		from_time = add_to_date(now(), days=7)
+		job_card.append(
+			"time_logs",
+			{
+				"from_time": from_time,
+				"to_time": add_to_date(from_time, days=1),
+				"completed_qty": 2,
+			},
+		)
+		job_card.for_quantity = 2
+		job_card.save()
+		job_card.submit()
+
+		make_job_card(
+			wo_doc.name,
+			[
+				{
+					"name": wo_doc.operations[1].name,
+					"operation": "Test Operation 2",
+					"qty": 2,
+					"pending_qty": 2,
+				}
+			],
+		)
+
+		job_card = frappe.get_last_doc("Job Card", {"work_order": wo_doc.name})
+		from_time = add_to_date(now(), days=8)
+		job_card.append(
+			"time_logs",
+			{
+				"from_time": from_time,
+				"to_time": add_to_date(from_time, days=2),
+				"completed_qty": 2,
+			},
+		)
+		job_card.for_quantity = 2
+		job_card.save()
+		job_card.submit()
+
+		s = frappe.get_doc(make_stock_entry_for_wo(wo_doc.name, "Manufacture", 2))
+		s.submit()
+
+		self.assertEqual(s.additional_costs[0].amount, 240)
+		self.assertEqual(s.additional_costs[1].amount, 240)
+		self.assertEqual(s.additional_costs[2].amount, 480)
+		self.assertEqual(s.additional_costs[3].amount, 480)
+
+		s2.cancel()
+
+		s = frappe.get_doc(make_stock_entry_for_wo(wo_doc.name, "Manufacture", 3))
+		s.submit()
+
+		self.assertEqual(s.additional_costs[0].amount, 240)
+		self.assertEqual(s.additional_costs[1].amount, 240)
+		self.assertEqual(s.additional_costs[2].amount, 480)
+		self.assertEqual(s.additional_costs[3].amount, 480)
 
 
 def create_bom_with_multiple_operations():

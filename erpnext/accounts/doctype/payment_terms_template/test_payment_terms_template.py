@@ -2,7 +2,9 @@
 # See license.txt
 
 import frappe
+from frappe.utils import add_days, getdate
 
+from erpnext.controllers.accounts_controller import get_payment_term_details
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -54,6 +56,52 @@ class TestPaymentTermsTemplate(ERPNextTestSuite):
 		)
 
 		self.assertRaises(frappe.ValidationError, template.insert)
+
+	def test_no_discount_date_without_discount(self):
+		posting_date = "2026-05-29"
+		term = frappe._dict(
+			{
+				"payment_term": "_Test No Discount Term",
+				"invoice_portion": 100.0,
+				"due_date_based_on": "Day(s) after invoice date",
+				"credit_days": 0,
+				"credit_months": 0,
+				"discount_type": "Percentage",
+				"discount": 0,
+				"discount_validity_based_on": "Day(s) after invoice date",
+				"discount_validity": 0,
+			}
+		)
+
+		details = get_payment_term_details(
+			term, posting_date=posting_date, grand_total=100, base_grand_total=100
+		)
+
+		self.assertEqual(getdate(details.due_date), getdate(posting_date))
+		self.assertIsNone(details.discount_date)
+
+	def test_discount_date_generated_with_discount(self):
+		posting_date = "2026-05-29"
+		term = frappe._dict(
+			{
+				"payment_term": "_Test Discount Term",
+				"invoice_portion": 100.0,
+				"due_date_based_on": "Day(s) after invoice date",
+				"credit_days": 30,
+				"credit_months": 0,
+				"discount_type": "Percentage",
+				"discount": 5,
+				"discount_validity_based_on": "Day(s) after invoice date",
+				"discount_validity": 10,
+			}
+		)
+
+		details = get_payment_term_details(
+			term, posting_date=posting_date, grand_total=100, base_grand_total=100
+		)
+
+		self.assertEqual(getdate(details.due_date), getdate(add_days(posting_date, 30)))
+		self.assertEqual(getdate(details.discount_date), getdate(add_days(posting_date, 10)))
 
 	def test_duplicate_terms(self):
 		template = frappe.get_doc(

@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "creation": "2016-04-18 07:38:26.314642",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -53,6 +54,7 @@
    "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "Source Warehouse",
+   "link_filters": "[[\"Warehouse\",\"disabled\",\"=\",0],[\"Warehouse\",\"is_group\",\"=\",0]]",
    "options": "Warehouse",
    "read_only_depends_on": "eval:parent.subcontracting_inward_order && doc.is_customer_provided_item"
   },
@@ -207,7 +209,7 @@
  "grid_page_length": 50,
  "istable": 1,
  "links": [],
- "modified": "2025-12-02 11:16:05.081613",
+ "modified": "2026-05-12 12:05:16.687866",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order Item",

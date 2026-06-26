@@ -48,9 +48,18 @@ class DeprecatedSerialNoValuation:
 		if not posting_datetime and self.sle.posting_date:
 			posting_datetime = get_combine_datetime(self.sle.posting_date, self.sle.posting_time)
 
+		do_not_fetch_rate = frappe.db.get_single_value(
+			"Stock Reposting Settings", "do_not_fetch_incoming_rate_from_serial_no"
+		)
+
 		for serial_no in serial_nos:
 			sn_details = frappe.db.get_value("Serial No", serial_no, ["purchase_rate", "company"], as_dict=1)
-			if sn_details and sn_details.purchase_rate and sn_details.company == self.sle.company:
+			if (
+				sn_details
+				and sn_details.purchase_rate
+				and sn_details.company == self.sle.company
+				and (not frappe.flags.through_repost_item_valuation or not do_not_fetch_rate)
+			):
 				self.serial_no_incoming_rate[serial_no] += flt(sn_details.purchase_rate)
 				incoming_values += self.serial_no_incoming_rate[serial_no]
 				continue
@@ -123,6 +132,24 @@ class DeprecatedBatchNoValuation:
 					sle.creation < self.sle.creation
 				)
 
+		conditions = (
+			(sle.item_code == self.sle.item_code)
+			& (sle.warehouse == self.sle.warehouse)
+			& (sle.batch_no.isin(self.batchwise_valuation_batches))
+			& (sle.batch_no.isnotnull())
+			& (sle.is_cancelled == 0)
+		)
+		if timestamp_condition:
+			conditions &= timestamp_condition
+		if self.sle.name:
+			conditions &= sle.name != self.sle.name
+
+		# Lock the scanned SLE rows so a concurrent stock posting can't change them mid-valuation.
+		# MariaDB carries the lock on the grouped query; postgres rejects FOR UPDATE with GROUP BY, so
+		# lock the same rows in a separate plain SELECT first (held for the transaction).
+		if frappe.db.db_type == "postgres":
+			frappe.qb.from_(sle).select(sle.name).where(conditions).for_update().run()
+
 		query = (
 			frappe.qb.from_(sle)
 			.select(
@@ -130,22 +157,11 @@ class DeprecatedBatchNoValuation:
 				Sum(sle.stock_value_difference).as_("batch_value"),
 				Sum(sle.actual_qty).as_("batch_qty"),
 			)
-			.where(
-				(sle.item_code == self.sle.item_code)
-				& (sle.warehouse == self.sle.warehouse)
-				& (sle.batch_no.isin(self.batchwise_valuation_batches))
-				& (sle.batch_no.isnotnull())
-				& (sle.is_cancelled == 0)
-			)
-			.for_update()
+			.where(conditions)
 			.groupby(sle.batch_no)
 		)
-
-		if timestamp_condition:
-			query = query.where(timestamp_condition)
-
-		if self.sle.name:
-			query = query.where(sle.name != self.sle.name)
+		if frappe.db.db_type != "postgres":
+			query = query.for_update()
 
 		return query.run(as_dict=True)
 
@@ -242,6 +258,24 @@ class DeprecatedBatchNoValuation:
 				sle.creation < self.sle.creation
 			)
 
+		conditions = (
+			(sle.item_code == self.sle.item_code)
+			& (sle.warehouse == self.sle.warehouse)
+			& (sle.batch_no.isnotnull())
+			& (sle.is_cancelled == 0)
+			& (sle.batch_no.isin(self.non_batchwise_valuation_batches))
+			& timestamp_condition
+		)
+		if self.sle.name:
+			conditions &= sle.name != self.sle.name
+
+		# Lock the scanned SLE rows so a concurrent stock posting can't change them mid-valuation.
+		# MariaDB carries the lock on the grouped query; postgres rejects FOR UPDATE with GROUP BY, so
+		# lock the same SLE rows in a separate plain SELECT first. The batch.use_batchwise_valuation
+		# refinement below only narrows the set, so locking without the join is a safe superset.
+		if frappe.db.db_type == "postgres":
+			frappe.qb.from_(sle).select(sle.name).where(conditions).for_update().run()
+
 		query = (
 			frappe.qb.from_(sle)
 			.inner_join(batch)
@@ -251,20 +285,9 @@ class DeprecatedBatchNoValuation:
 				Sum(sle.actual_qty).as_("batch_qty"),
 				Sum(sle.stock_value_difference).as_("batch_value"),
 			)
-			.where(
-				(sle.item_code == self.sle.item_code)
-				& (sle.warehouse == self.sle.warehouse)
-				& (sle.batch_no.isnotnull())
-				& (sle.is_cancelled == 0)
-				& (sle.batch_no.isin(self.non_batchwise_valuation_batches))
-			)
-			.for_update()
-			.where(timestamp_condition)
+			.where(conditions)
 			.groupby(sle.batch_no)
 		)
-
-		if self.sle.name:
-			query = query.where(sle.name != self.sle.name)
 
 		# Moving Average items with no Use Batch wise Valuation but want to use batch wise valuation
 		moving_avg_item_non_batch_value = False
@@ -274,6 +297,9 @@ class DeprecatedBatchNoValuation:
 			):
 				query = query.where(batch.use_batchwise_valuation == 0)
 				moving_avg_item_non_batch_value = True
+
+		if frappe.db.db_type != "postgres":
+			query = query.for_update()
 
 		batch_data = query.run(as_dict=True)
 		for d in batch_data:
@@ -362,6 +388,35 @@ class DeprecatedBatchNoValuation:
 				bundle.creation < self.sle.creation
 			)
 
+		conditions = (
+			(bundle.item_code == self.sle.item_code)
+			& (bundle.warehouse == self.sle.warehouse)
+			& (bundle_child.batch_no.isnotnull())
+			& (bundle.is_cancelled == 0)
+			& (bundle.docstatus == 1)
+			& (bundle.type_of_transaction.isin(["Inward", "Outward"]))
+			& (bundle_child.batch_no.isin(self.non_batchwise_valuation_batches))
+			& timestamp_condition
+		)
+		if self.sle.serial_and_batch_bundle:
+			conditions &= bundle.name != self.sle.serial_and_batch_bundle
+		conditions &= bundle.voucher_type != "Pick List"
+
+		# Lock the scanned bundle rows so a concurrent stock posting can't change them mid-valuation.
+		# MariaDB carries the lock on the grouped query; postgres rejects FOR UPDATE with GROUP BY, so
+		# lock the same rows in a separate plain SELECT first (the batch.use_batchwise_valuation
+		# refinement below only narrows the set, so omitting that join is a safe superset).
+		if frappe.db.db_type == "postgres":
+			(
+				frappe.qb.from_(bundle)
+				.inner_join(bundle_child)
+				.on(bundle.name == bundle_child.parent)
+				.select(bundle_child.name)
+				.where(conditions)
+				.for_update()
+				.run()
+			)
+
 		query = (
 			frappe.qb.from_(bundle)
 			.inner_join(bundle_child)
@@ -373,24 +428,9 @@ class DeprecatedBatchNoValuation:
 				Sum(bundle_child.qty).as_("batch_qty"),
 				Sum(bundle_child.stock_value_difference).as_("batch_value"),
 			)
-			.where(
-				(bundle.item_code == self.sle.item_code)
-				& (bundle.warehouse == self.sle.warehouse)
-				& (bundle_child.batch_no.isnotnull())
-				& (bundle.is_cancelled == 0)
-				& (bundle.docstatus == 1)
-				& (bundle.type_of_transaction.isin(["Inward", "Outward"]))
-				& (bundle_child.batch_no.isin(self.non_batchwise_valuation_batches))
-			)
-			.for_update()
-			.where(timestamp_condition)
+			.where(conditions)
 			.groupby(bundle_child.batch_no)
 		)
-
-		if self.sle.serial_and_batch_bundle:
-			query = query.where(bundle.name != self.sle.serial_and_batch_bundle)
-
-		query = query.where(bundle.voucher_type != "Pick List")
 
 		# Moving Average items with no Use Batch wise Valuation but want to use batch wise valuation
 		moving_avg_item_non_batch_value = False
@@ -400,6 +440,9 @@ class DeprecatedBatchNoValuation:
 			):
 				query = query.where(batch.use_batchwise_valuation == 0)
 				moving_avg_item_non_batch_value = True
+
+		if frappe.db.db_type != "postgres":
+			query = query.for_update()
 
 		batch_data = query.run(as_dict=True)
 		for d in batch_data:

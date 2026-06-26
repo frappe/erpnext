@@ -78,7 +78,7 @@ class TestGetItemDetail(ERPNextTestSuite):
 
 		so = make_sales_order(item_code=item.item_code, qty=2, rate=75)
 
-		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
 
 		dn = make_delivery_note(so.name)
 

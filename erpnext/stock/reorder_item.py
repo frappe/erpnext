@@ -24,14 +24,9 @@ def reorder_item():
 def _reorder_item():
 	material_requests = {"Purchase": {}, "Transfer": {}, "Material Issue": {}, "Manufacture": {}}
 	warehouse_company = frappe._dict(
-		frappe.db.sql(
-			"""select name, company from `tabWarehouse`
-		where disabled=0"""
-		)
+		frappe.get_all("Warehouse", filters={"disabled": 0}, fields=["name", "company"], as_list=True)
 	)
-	default_company = (
-		erpnext.get_default_company() or frappe.db.sql("""select name from tabCompany limit 1""")[0][0]
-	)
+	default_company = erpnext.get_default_company() or frappe.db.get_value("Company", {}, "name")
 
 	items_to_consider = get_items_for_reorder()
 
@@ -110,6 +105,16 @@ def _reorder_item():
 		return create_material_request(material_requests)
 
 
+def _item_is_alive(item_table):
+	# An item counts as alive when end_of_life is unset, in the future, or the MariaDB zero-date
+	# '0000-00-00'. On postgres '0000-00-00' is an invalid date literal and a "not set" end_of_life
+	# is NULL (already covered by IS NULL), so add the zero-date term on MariaDB only.
+	alive = item_table.end_of_life.isnull() | (item_table.end_of_life > nowdate())
+	if frappe.db.db_type != "postgres":
+		alive |= item_table.end_of_life == "0000-00-00"
+	return alive
+
+
 def get_items_for_reorder() -> dict[str, list]:
 	reorder_table = frappe.qb.DocType("Item Reorder")
 	item_table = frappe.qb.DocType("Item")
@@ -135,15 +140,7 @@ def get_items_for_reorder() -> dict[str, list]:
 			item_table.has_variants,
 			item_table.lead_time_days,
 		)
-		.where(
-			(item_table.disabled == 0)
-			& (item_table.is_stock_item == 1)
-			& (
-				(item_table.end_of_life.isnull())
-				| (item_table.end_of_life > nowdate())
-				| (item_table.end_of_life == "0000-00-00")
-			)
-		)
+		.where((item_table.disabled == 0) & (item_table.is_stock_item == 1) & _item_is_alive(item_table))
 	)
 
 	data = query.run(as_dict=True)
@@ -168,11 +165,7 @@ def get_reorder_levels_for_variants(itemwise_reorder):
 		.where(
 			(item_table.disabled == 0)
 			& (item_table.is_stock_item == 1)
-			& (
-				(item_table.end_of_life.isnull())
-				| (item_table.end_of_life > nowdate())
-				| (item_table.end_of_life == "0000-00-00")
-			)
+			& _item_is_alive(item_table)
 			& (item_table.variant_of.notnull())
 		)
 	)
@@ -189,13 +182,11 @@ def get_item_warehouse_projected_qty(items_to_consider):
 	item_warehouse_projected_qty = {}
 	items_to_consider = list(items_to_consider.keys())
 
-	for item_code, warehouse, projected_qty in frappe.db.sql(
-		"""select item_code, warehouse, projected_qty
-		from tabBin where item_code in ({})
-			and (warehouse != '' and warehouse is not null)""".format(
-			", ".join(["%s"] * len(items_to_consider))
-		),
-		items_to_consider,
+	for item_code, warehouse, projected_qty in frappe.get_all(
+		"Bin",
+		filters={"item_code": ["in", items_to_consider], "warehouse": ["is", "set"]},
+		fields=["item_code", "warehouse", "projected_qty"],
+		as_list=True,
 	):
 		if item_code not in item_warehouse_projected_qty:
 			item_warehouse_projected_qty.setdefault(item_code, {})

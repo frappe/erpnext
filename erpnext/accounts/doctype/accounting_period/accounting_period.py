@@ -46,22 +46,18 @@ class AccountingPeriod(Document):
 		self.name = " - ".join([self.period_name, company_abbr])
 
 	def validate_overlap(self):
-		existing_accounting_period = frappe.db.sql(
-			"""select name from `tabAccounting Period`
-			where (
-				(%(start_date)s between start_date and end_date)
-				or (%(end_date)s between start_date and end_date)
-				or (start_date between %(start_date)s and %(end_date)s)
-				or (end_date between %(start_date)s and %(end_date)s)
-			) and name!=%(name)s and company=%(company)s""",
-			{
-				"start_date": self.start_date,
-				"end_date": self.end_date,
-				"name": self.name,
-				"company": self.company,
-			},
-			as_dict=True,
+		AccountingPeriod = frappe.qb.DocType("Accounting Period")
+
+		query = (
+			frappe.qb.from_(AccountingPeriod)
+			.select(AccountingPeriod.name)
+			.where(AccountingPeriod.start_date <= self.end_date)
+			.where(AccountingPeriod.end_date >= self.start_date)
+			.where(AccountingPeriod.name != self.name)
+			.where(AccountingPeriod.company == self.company)
 		)
+
+		existing_accounting_period = query.run(as_dict=True)
 
 		if len(existing_accounting_period) > 0:
 			frappe.throw(

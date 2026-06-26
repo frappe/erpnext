@@ -55,17 +55,10 @@ class SupplierScorecardCriteria(Document):
 
 @frappe.whitelist()
 def get_criteria_list():
-	criteria = frappe.db.sql(
-		"""
-		SELECT
-			scs.name
-		FROM
-			`tabSupplier Scorecard Criteria` scs""",
-		{},
-		as_dict=1,
-	)
-
-	return criteria
+	"""
+	Get the list of criteria
+	"""
+	return frappe.get_list("Supplier Scorecard Criteria", fields=["name"])
 
 
 def get_variables(criteria_name):
@@ -80,22 +73,16 @@ def _get_variables(criteria):
 	mylist = re.finditer(regex, criteria.formula, re.MULTILINE | re.DOTALL)
 	for _dummy1, match in enumerate(mylist):
 		for _dummy2 in range(0, len(match.groups())):
-			try:
-				var = frappe.db.sql(
-					"""
-					SELECT
-						scv.variable_label, scv.description, scv.param_name, scv.path
-					FROM
-						`tabSupplier Scorecard Variable` scv
-					WHERE
-						param_name=%(param)s""",
-					{"param": match.group(1)},
-					as_dict=1,
-				)[0]
-				my_variables.append(var)
-			except Exception:
-				frappe.throw(
-					_("Unable to find variable:") + " " + str(match.group(1)), InvalidFormulaVariable
-				)
+			param_name = match.group(1)
+
+			variables = frappe.get_all(
+				"Supplier Scorecard Variable",
+				fields=["variable_label", "description", "param_name", "path"],
+				filters={"param_name": param_name},
+				limit=1,
+			)
+			if not variables:
+				frappe.throw(_("Unable to find variable: {0}").format(param_name), InvalidFormulaVariable)
+			my_variables.append(variables[0])
 
 	return my_variables

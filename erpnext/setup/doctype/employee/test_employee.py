@@ -28,10 +28,10 @@ class TestEmployee(ERPNextTestSuite):
 		employee = make_employee("test_emp_user_creation@company.com", company="_Test Company")
 		employee_doc = frappe.get_doc("Employee", employee)
 		user = employee_doc.user_id
-		self.assertTrue("Employee" in frappe.get_roles(user))
+		self.assertIn("Employee", frappe.get_roles(user))
 		employee_doc.user_id = ""
 		employee_doc.save()
-		self.assertTrue("Employee" not in frappe.get_roles(user))
+		self.assertNotIn("Employee", frappe.get_roles(user))
 
 	def test_employee_user_permission(self):
 		employee1 = make_employee(
@@ -56,7 +56,7 @@ class TestEmployee(ERPNextTestSuite):
 			frappe.qb.from_(Employee)
 			.select(Employee.name)
 			.where(Criterion.all(build_qb_match_conditions("Employee")))
-			.orderby(Employee.Name)
+			.orderby(Employee.name)
 		).run(pluck=Employee.name)
 		employee_list = frappe.db.get_list("Employee", pluck="name", order_by="name")
 

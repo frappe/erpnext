@@ -386,8 +386,54 @@ class TestBatch(ERPNextTestSuite):
 
 		self.assertEqual(get_batch_qty("batch a", "_Test Warehouse - _TC"), 90)
 
+	def test_get_batch_no_search_returns_batches(self):
+		"""The batch-number picker must run on every engine.
+
+		Both query builders group by Stock Ledger Entry / Serial-and-Batch-Entry
+		columns while selecting un-aggregated Batch-master columns; PostgreSQL only
+		accepts that when the Batch primary key is in the GROUP BY, so the picker
+		errors there without it.
+		"""
+		from erpnext.controllers.queries import (
+			get_batch_no,
+			get_batches_from_serial_and_batch_bundle,
+			get_batches_from_stock_ledger_entries,
+		)
+
+		self.make_batch_item("ITEM-BATCH-PICKER")
+		self.make_new_batch_and_entry("ITEM-BATCH-PICKER", "batch picker a", "_Test Warehouse - _TC")
+		self.make_new_batch_and_entry("ITEM-BATCH-PICKER", "batch picker b", "_Test Warehouse - _TC")
+
+		searchfields = frappe.get_meta("Batch").get_search_fields()
+		filters = {"item_code": "ITEM-BATCH-PICKER", "warehouse": "_Test Warehouse - _TC"}
+
+		# Exercise both query builders directly so each GROUP BY is covered regardless
+		# of which path holds the data: PostgreSQL validates the GROUP BY even when no
+		# rows match, so a missing Batch primary key raises GroupingError here.
+		get_batches_from_stock_ledger_entries(searchfields, "", filters)
+		get_batches_from_serial_and_batch_bundle(searchfields, "", filters)
+
+		result = get_batch_no(
+			doctype="Batch",
+			txt="",
+			searchfield="name",
+			start=0,
+			page_len=20,
+			filters=filters,
+		)
+		returned = {row[0] for row in result}
+		self.assertIn("batch picker a", returned)
+		self.assertIn("batch picker b", returned)
+
+		# These batches have no manufacturing/expiry date. MariaDB CONCAT('MFG-', NULL)
+		# is NULL, but Postgres CONCAT drops the NULL and would surface a bare "MFG-"/
+		# "EXP-"; the null-guarded select must keep both engines free of that artifact.
+		flat = [value for row in result for value in row]
+		self.assertNotIn("MFG-", flat)
+		self.assertNotIn("EXP-", flat)
+
 	def test_ignore_reserved_qty(self):
-		from erpnext.selling.doctype.sales_order.sales_order import create_pick_list
+		from erpnext.selling.doctype.sales_order.mapper import create_pick_list
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 		batch_item_name = "Reserve Batch Item"
@@ -498,6 +544,24 @@ class TestBatch(ERPNextTestSuite):
 		if not use_naming_series:
 			frappe.set_value("Stock Settings", "Stock Settings", "use_naming_series", 0)
 
+	def test_naming_series_prefix_is_not_rendered_as_jinja(self):
+		from frappe.model.naming import InvalidNamingSeriesError
+
+		stock_settings = frappe.get_single("Stock Settings")
+		use_naming_series = cint(stock_settings.use_naming_series)
+		original_prefix = stock_settings.naming_series_prefix
+
+		frappe.set_value("Stock Settings", "Stock Settings", "use_naming_series", 1)
+		frappe.set_value("Stock Settings", "Stock Settings", "naming_series_prefix", "{{ 7*7 }}")
+
+		try:
+			self.assertRaises(
+				InvalidNamingSeriesError, self.make_new_batch, "_Test Stock Item For Batch SSTI"
+			)
+		finally:
+			frappe.set_value("Stock Settings", "Stock Settings", "naming_series_prefix", original_prefix)
+			frappe.set_value("Stock Settings", "Stock Settings", "use_naming_series", use_naming_series)
+
 	def make_new_batch(self, item_name=None, batch_id=None, do_not_insert=0):
 		batch = frappe.new_doc("Batch")
 		item = self.make_batch_item(item_name)
@@ -543,6 +607,7 @@ class TestBatch(ERPNextTestSuite):
 				"plc_conversion_rate": 1,
 				"customer": "_Test Customer",
 				"name": None,
+				"qty": 1,
 			}
 		)
 

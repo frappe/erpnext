@@ -191,11 +191,29 @@ class Analytics:
 			self.get_sales_transactions_based_on_project()
 			self.get_rows()
 
+	def _get_permitted_parent_names(self):
+		return frappe.qb.get_query(
+			table=self.filters.doc_type,
+			fields=["name"],
+			filters={
+				"docstatus": 1,
+				"company": ["in", self.filters.company],
+				self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
+			},
+			ignore_permissions=False,
+		).run(pluck="name")
+
 	def get_sales_transactions_based_on_order_type(self):
 		if self.filters["value_quantity"] == "Value":
 			value_field = "base_net_total"
 		else:
 			value_field = "total_qty"
+
+		permitted_names = self._get_permitted_parent_names()
+		if not permitted_names:
+			self.entries = []
+			self.get_teams()
+			return
 
 		doctype = DocType(self.filters.doc_type)
 
@@ -206,12 +224,7 @@ class Analytics:
 				doctype[self.date_field],
 				doctype[value_field].as_("value_field"),
 			)
-			.where(
-				(doctype.docstatus == 1)
-				& (doctype.company.isin(self.filters.company))
-				& (doctype[self.date_field].between(self.filters.from_date, self.filters.to_date))
-				& (IfNull(doctype.order_type, "") != "")
-			)
+			.where((doctype.name.isin(permitted_names)) & (IfNull(doctype.order_type, "") != ""))
 			.orderby(doctype.order_type)
 		).run(as_dict=True)
 
@@ -250,9 +263,12 @@ class Analytics:
 		if self.filters.doc_type in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
 			filters.update({"is_opening": "No"})
 
-		self.entries = frappe.get_all(
-			self.filters.doc_type, fields=[entity, entity_name, value_field, self.date_field], filters=filters
-		)
+		self.entries = frappe.qb.get_query(
+			table=self.filters.doc_type,
+			fields=[entity, entity_name, value_field, self.date_field],
+			filters=filters,
+			ignore_permissions=False,
+		).run(as_dict=True)
 
 		self.entity_names = {}
 		for d in self.entries:
@@ -263,6 +279,12 @@ class Analytics:
 			value_field = "base_net_amount"
 		else:
 			value_field = "stock_qty"
+
+		permitted_names = self._get_permitted_parent_names()
+		if not permitted_names:
+			self.entries = []
+			self.entity_names = {}
+			return
 
 		doctype = DocType(self.filters.doc_type)
 		doctype_item = DocType(f"{self.filters.doc_type} Item")
@@ -278,11 +300,7 @@ class Analytics:
 				doctype_item[value_field].as_("value_field"),
 				doctype[self.date_field],
 			)
-			.where(
-				(doctype_item.docstatus == 1)
-				& (doctype.company.isin(self.filters.company))
-				& (doctype[self.date_field].between(self.filters.from_date, self.filters.to_date))
-			)
+			.where((doctype_item.docstatus == 1) & (doctype.name.isin(permitted_names)))
 		).run(as_dict=True)
 
 		self.entity_names = {}
@@ -312,11 +330,12 @@ class Analytics:
 		if self.filters.doc_type in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
 			filters.update({"is_opening": "No"})
 
-		self.entries = frappe.get_all(
-			self.filters.doc_type,
+		self.entries = frappe.qb.get_query(
+			table=self.filters.doc_type,
 			fields=[entity_field, value_field, self.date_field],
 			filters=filters,
-		)
+			ignore_permissions=False,
+		).run(as_dict=True)
 		self.get_groups()
 
 	def get_sales_transactions_based_on_item_group(self):
@@ -324,6 +343,12 @@ class Analytics:
 			value_field = "base_net_amount"
 		else:
 			value_field = "qty"
+
+		permitted_names = self._get_permitted_parent_names()
+		if not permitted_names:
+			self.entries = []
+			self.get_groups()
+			return
 
 		doctype = DocType(self.filters.doc_type)
 		doctype_item = DocType(f"{self.filters.doc_type} Item")
@@ -337,11 +362,7 @@ class Analytics:
 				doctype_item[value_field].as_("value_field"),
 				doctype[self.date_field],
 			)
-			.where(
-				(doctype_item.docstatus == 1)
-				& (doctype.company.isin(self.filters.company))
-				& (doctype[self.date_field].between(self.filters.from_date, self.filters.to_date))
-			)
+			.where((doctype_item.docstatus == 1) & (doctype.name.isin(permitted_names)))
 		).run(as_dict=True)
 
 		self.get_groups()
@@ -367,9 +388,12 @@ class Analytics:
 		if self.filters.doc_type in ["Sales Invoice", "Purchase Invoice", "Payment Entry"]:
 			filters.update({"is_opening": "No"})
 
-		self.entries = frappe.get_all(
-			self.filters.doc_type, fields=[entity, value_field, self.date_field], filters=filters
-		)
+		self.entries = frappe.qb.get_query(
+			table=self.filters.doc_type,
+			fields=[entity, value_field, self.date_field],
+			filters=filters,
+			ignore_permissions=False,
+		).run(as_dict=True)
 
 	def get_rows(self):
 		self.data = []
@@ -473,21 +497,23 @@ class Analytics:
 				break
 
 	def get_groups(self):
-		if self.filters.tree_type == "Territory":
-			parent = "parent_territory"
-		if self.filters.tree_type == "Customer Group":
-			parent = "parent_customer_group"
-		if self.filters.tree_type == "Item Group":
-			parent = "parent_item_group"
-		if self.filters.tree_type == "Supplier Group":
-			parent = "parent_supplier_group"
+		parent_field_map = {
+			"Territory": "parent_territory",
+			"Customer Group": "parent_customer_group",
+			"Item Group": "parent_item_group",
+			"Supplier Group": "parent_supplier_group",
+		}
+		if self.filters.tree_type not in parent_field_map:
+			frappe.throw(_("Invalid Tree Type {0}").format(self.filters.tree_type))
+
+		parent = parent_field_map[self.filters.tree_type]
 
 		self.depth_map = frappe._dict()
 
-		self.group_entries = frappe.db.sql(
-			f"""select name, lft, rgt , {parent} as parent
-			from `tab{self.filters.tree_type}` order by lft""",
-			as_dict=1,
+		self.group_entries = frappe.get_all(
+			self.filters.tree_type,
+			fields=["name", "lft", "rgt", f"{parent} as parent"],
+			order_by="lft",
 		)
 
 		for d in self.group_entries:
@@ -499,13 +525,27 @@ class Analytics:
 	def get_teams(self):
 		self.depth_map = frappe._dict()
 
-		self.group_entries = frappe.db.sql(
-			f""" select * from (select "Order Types" as name, 0 as lft,
-			2 as rgt, '' as parent union select distinct order_type as name, 1 as lft, 1 as rgt, "Order Types" as parent
-			from `tab{self.filters.doc_type}` where ifnull(order_type, '') != '') as b order by lft, name
-		""",
-			as_dict=1,
+		if not frappe.db.exists("DocType", self.filters.doc_type):
+			frappe.throw(_("Invalid Document Type {0}").format(self.filters.doc_type))
+
+		# frappe drops ORDER BY for distinct queries on postgres (db_query), so a SQL order_by="order_type"
+		# would be a no-op there and the leaf rows would come back unordered. Sort in python with casefold
+		# to keep the report's order-type row order deterministic, case-insensitive (matching MariaDB's
+		# collation), and identical on both engines.
+		order_types = sorted(
+			frappe.get_all(
+				self.filters.doc_type,
+				filters={"order_type": ["is", "set"]},
+				pluck="order_type",
+				distinct=True,
+			),
+			key=str.casefold,
 		)
+
+		self.group_entries = [frappe._dict(name="Order Types", lft=0, rgt=2, parent="")]
+		self.group_entries += [
+			frappe._dict(name=order_type, lft=1, rgt=1, parent="Order Types") for order_type in order_types
+		]
 
 		for d in self.group_entries:
 			if d.parent:
@@ -515,7 +555,7 @@ class Analytics:
 
 	def get_supplier_parent_child_map(self):
 		self.parent_child_map = frappe._dict(
-			frappe.db.sql(""" select name, supplier_group from `tabSupplier`""")
+			frappe.get_all("Supplier", fields=["name", "supplier_group"], as_list=True)
 		)
 
 	def get_chart_data(self):

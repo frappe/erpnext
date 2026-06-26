@@ -7,6 +7,7 @@ from frappe.utils import today
 from erpnext.accounts.doctype.finance_book.test_finance_book import create_finance_book
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.accounts.general_ledger import make_reverse_gl_entries
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -17,7 +18,6 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		frappe.db.set_single_value("Accounts Settings", "use_legacy_controller_for_pcv", 1)
 
 	def test_closing_entry(self):
-		company = create_company()
 		cost_center = create_cost_center("Test Cost Center 1")
 
 		jv1 = make_journal_entry(
@@ -26,10 +26,10 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 			account1="Cash - TPC",
 			account2="Sales - TPC",
 			cost_center=cost_center,
-			company=company,
+			company="Test PCV Company",
 			save=False,
 		)
-		jv1.company = company
+		jv1.company = "Test PCV Company"
 		jv1.save()
 		jv1.submit()
 
@@ -39,10 +39,10 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 			account1="Cost of Goods Sold - TPC",
 			account2="Cash - TPC",
 			cost_center=cost_center,
-			company=company,
+			company="Test PCV Company",
 			save=False,
 		)
-		jv2.company = company
+		jv2.company = "Test PCV Company"
 		jv2.save()
 		jv2.submit()
 
@@ -55,25 +55,28 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 			("Sales - TPC", 400.0, 0.0),
 		)
 
-		pcv_gle = frappe.db.sql(
-			"""
-			select account, debit, credit from `tabGL Entry` where voucher_no=%s order by account
-		""",
-			(pcv.name),
-		)
+		pcv_gle = [
+			tuple(row)
+			for row in frappe.get_all(
+				"GL Entry",
+				filters={"voucher_no": pcv.name},
+				fields=["account", "debit", "credit"],
+				order_by="account",
+				as_list=True,
+			)
+		]
 		pcv.reload()
 		self.assertEqual(pcv.gle_processing_status, "Completed")
-		self.assertEqual(pcv_gle, expected_gle)
+		self.assertEqual(tuple(pcv_gle), expected_gle)
 
 	def test_cost_center_wise_posting(self):
-		company = create_company()
 		surplus_account = create_account()
 
 		cost_center1 = create_cost_center("Main")
 		cost_center2 = create_cost_center("Western Branch")
 
 		create_sales_invoice(
-			company=company,
+			company="Test PCV Company",
 			cost_center=cost_center1,
 			income_account="Sales - TPC",
 			expense_account="Cost of Goods Sold - TPC",
@@ -84,7 +87,7 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 			posting_date="2021-03-15",
 		)
 		create_sales_invoice(
-			company=company,
+			company="Test PCV Company",
 			cost_center=cost_center2,
 			income_account="Sales - TPC",
 			expense_account="Cost of Goods Sold - TPC",
@@ -107,14 +110,16 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 			("Sales - TPC", 200.0, 0.0, cost_center2),
 		)
 
-		pcv_gle = frappe.db.sql(
-			"""
-			select account, debit, credit, cost_center
-			from `tabGL Entry` where voucher_no=%s
-			order by account, cost_center
-		""",
-			(pcv.name),
-		)
+		pcv_gle = [
+			tuple(row)
+			for row in frappe.get_all(
+				"GL Entry",
+				filters={"voucher_no": pcv.name},
+				fields=["account", "debit", "credit", "cost_center"],
+				order_by="account, cost_center",
+				as_list=True,
+			)
+		]
 
 		self.assertSequenceEqual(pcv_gle, expected_gle)
 
@@ -129,12 +134,11 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		)
 
 	def test_period_closing_with_finance_book_entries(self):
-		company = create_company()
 		surplus_account = create_account()
 		cost_center = create_cost_center("Test Cost Center 1")
 
 		create_sales_invoice(
-			company=company,
+			company="Test PCV Company",
 			income_account="Sales - TPC",
 			expense_account="Cost of Goods Sold - TPC",
 			cost_center=cost_center,
@@ -151,9 +155,9 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 			amount=400,
 			cost_center=cost_center,
 			posting_date="2021-03-15",
-			company=company,
+			company="Test PCV Company",
 		)
-		jv.company = company
+		jv.company = "Test PCV Company"
 		jv.finance_book = create_finance_book().name
 		jv.save()
 		jv.submit()
@@ -168,19 +172,21 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 			("Sales - TPC", 400.0, 0.0, jv.finance_book),
 		)
 
-		pcv_gle = frappe.db.sql(
-			"""
-			select account, debit, credit, finance_book
-			from `tabGL Entry` where voucher_no=%s
-			order by account, finance_book
-		""",
-			(pcv.name),
-		)
+		pcv_gle = [
+			tuple(row)
+			for row in frappe.get_all(
+				"GL Entry",
+				filters={"voucher_no": pcv.name},
+				fields=["account", "debit", "credit", "finance_book"],
+				order_by="account, finance_book",
+				as_list=True,
+			)
+		]
 
-		self.assertSequenceEqual(pcv_gle, expected_gle)
+		# compare order-independently: postgres and MariaDB order NULL finance_book differently
+		self.assertSequenceEqual(sorted(pcv_gle, key=str), sorted(expected_gle, key=str))
 
 	def test_gl_entries_restrictions(self):
-		company = create_company()
 		cost_center = create_cost_center("Test Cost Center 1")
 
 		self.make_period_closing_voucher(posting_date="2021-03-31")
@@ -191,16 +197,15 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 			account1="Cash - TPC",
 			account2="Sales - TPC",
 			cost_center=cost_center,
-			company=company,
+			company="Test PCV Company",
 			save=False,
 		)
-		jv1.company = company
+		jv1.company = "Test PCV Company"
 		jv1.save()
 
 		self.assertRaises(frappe.ValidationError, jv1.submit)
 
 	def test_closing_balance_with_dimensions_and_test_reposting_entry(self):
-		company = create_company()
 		cost_center1 = create_cost_center("Test Cost Center 1")
 		cost_center2 = create_cost_center("Test Cost Center 2")
 
@@ -210,10 +215,10 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 			account1="Cash - TPC",
 			account2="Sales - TPC",
 			cost_center=cost_center1,
-			company=company,
+			company="Test PCV Company",
 			save=False,
 		)
-		jv1.company = company
+		jv1.company = "Test PCV Company"
 		jv1.save()
 		jv1.submit()
 
@@ -223,10 +228,10 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 			account1="Cash - TPC",
 			account2="Sales - TPC",
 			cost_center=cost_center2,
-			company=company,
+			company="Test PCV Company",
 			save=False,
 		)
-		jv2.company = company
+		jv2.company = "Test PCV Company"
 		jv2.save()
 		jv2.submit()
 
@@ -253,11 +258,11 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 			account1="Cash - TPC",
 			account2="Sales - TPC",
 			cost_center=cost_center2,
-			company=company,
+			company="Test PCV Company",
 			save=False,
 		)
 
-		jv3.company = company
+		jv3.company = "Test PCV Company"
 		jv3.save()
 		jv3.submit()
 
@@ -292,12 +297,12 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		self.assertEqual(cc2_closing_balance.credit, 500)
 		self.assertEqual(cc2_closing_balance.credit_in_account_currency, 500)
 
-		warehouse = frappe.db.get_value("Warehouse", {"company": company}, "name")
+		warehouse = frappe.db.get_value("Warehouse", {"company": "Test PCV Company"}, "name")
 
 		repost_doc = frappe.get_doc(
 			{
 				"doctype": "Repost Item Valuation",
-				"company": company,
+				"company": "Test PCV Company",
 				"posting_date": "2020-03-15",
 				"based_on": "Item and Warehouse",
 				"item_code": "Test Item 1",
@@ -398,18 +403,42 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 
 		return pcv
 
-
-def create_company():
-	company = frappe.get_doc(
-		{
-			"doctype": "Company",
-			"company_name": "Test PCV Company",
-			"country": "United States",
-			"default_currency": "USD",
-		}
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"enable_immutable_ledger": 1},
 	)
-	company.insert(ignore_if_duplicate=True)
-	return company.name
+	def test_immutable_ledger_reverse_entry_uses_passed_posting_date_after_pcv(self):
+		cost_center = create_cost_center("Test Cost Center 1")
+
+		jv = make_journal_entry(
+			posting_date="2021-03-15",
+			amount=400,
+			account1="Cash - TPC",
+			account2="Sales - TPC",
+			cost_center=cost_center,
+			company="Test PCV Company",
+			save=False,
+		)
+		jv.company = "Test PCV Company"
+		jv.save()
+		jv.submit()
+
+		self.make_period_closing_voucher(posting_date="2021-03-31")
+
+		# Passed posting_date is after PCV end date, so cancellation should not fail.
+		make_reverse_gl_entries(
+			voucher_type="Journal Entry",
+			voucher_no=jv.name,
+			posting_date="2022-01-01",
+		)
+
+		totals_after_cancel = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Journal Entry", "voucher_no": jv.name, "is_cancelled": 0},
+			fields=[{"SUM": "debit", "as": "total_debit"}, {"SUM": "credit", "as": "total_credit"}],
+		)[0]
+
+		self.assertEqual(totals_after_cancel.total_debit, totals_after_cancel.total_credit)
 
 
 def create_account():

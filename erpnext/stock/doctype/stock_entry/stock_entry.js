@@ -9,6 +9,8 @@ frappe.ui.form.on("Stock Entry", {
 	setup: function (frm) {
 		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
 
+		frm.trigger("toggle_enable_for_stock_uom_qty");
+
 		frm.set_indicator_formatter("item_code", function (doc) {
 			if (!doc.s_warehouse) {
 				return "blue";
@@ -214,10 +216,11 @@ frappe.ui.form.on("Stock Entry", {
 		}
 
 		let quality_inspection_field = frm.get_docfield("items", "quality_inspection");
+		const incoming_purposes = ["Manufacture", "Material Receipt"];
 		quality_inspection_field.get_route_options_for_new_doc = function (row) {
 			if (frm.is_new()) return {};
 			return {
-				inspection_type: "Incoming",
+				inspection_type: incoming_purposes.includes(frm.doc.purpose) ? "Incoming" : "Outgoing",
 				reference_type: frm.doc.doctype,
 				reference_name: frm.doc.name,
 				child_row_reference: row.doc.name,
@@ -272,6 +275,20 @@ frappe.ui.form.on("Stock Entry", {
 			method: "set_items_for_stock_in",
 			callback: function () {
 				refresh_field("items");
+			},
+		});
+	},
+
+	toggle_enable_for_stock_uom_qty: function (frm) {
+		frappe.call({
+			method: "erpnext.stock.doctype.stock_settings.stock_settings.get_enable_stock_uom_editing",
+			callback: (r) => {
+				if (r.message) {
+					frm.fields_dict["items"].grid.toggle_enable(
+						"transfer_qty",
+						r.message.allow_to_edit_stock_uom_qty_for_stock_entry
+					);
+				}
 			},
 		});
 	},
@@ -384,7 +401,7 @@ frappe.ui.form.on("Stock Entry", {
 							async (data) => {
 								if (frm.doc.work_order) {
 									let stock_entry = await frappe.xcall(
-										"erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry",
+										"erpnext.manufacturing.doctype.work_order.mapper.make_stock_entry",
 										{
 											work_order_id: frm.doc.work_order,
 											purpose: "Disassemble",
@@ -424,7 +441,7 @@ frappe.ui.form.on("Stock Entry", {
 				__("Purchase Invoice"),
 				function () {
 					erpnext.utils.map_current_doc({
-						method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_stock_entry",
+						method: "erpnext.accounts.doctype.purchase_invoice.mapper.make_stock_entry",
 						source_doctype: "Purchase Invoice",
 						target: frm,
 						date_field: "posting_date",
@@ -449,7 +466,7 @@ frappe.ui.form.on("Stock Entry", {
 					];
 					const depends_on_condition = "eval:doc.material_request_type==='Customer Provided'";
 					const d = erpnext.utils.map_current_doc({
-						method: "erpnext.stock.doctype.material_request.material_request.make_stock_entry",
+						method: "erpnext.stock.doctype.material_request.mapper.make_stock_entry",
 						source_doctype: "Material Request",
 						target: frm,
 						date_field: "schedule_date",
@@ -496,7 +513,7 @@ frappe.ui.form.on("Stock Entry", {
 				__("Expired Batches"),
 				function () {
 					frappe.call({
-						method: "erpnext.stock.doctype.stock_entry.stock_entry.get_expired_batch_items",
+						method: "erpnext.stock.doctype.stock_entry.stock_entry_handler.serial_batch.get_expired_batch_items",
 						freeze: true,
 						callback: function (r) {
 							if (!r.exc && r.message) {
@@ -670,7 +687,7 @@ frappe.ui.form.on("Stock Entry", {
 
 	make_retention_stock_entry: function (frm) {
 		frappe.call({
-			method: "erpnext.stock.doctype.stock_entry.stock_entry.move_sample_to_retention_warehouse",
+			method: "erpnext.stock.doctype.stock_entry.stock_entry_handler.manufacturing.move_sample_to_retention_warehouse",
 			args: {
 				company: frm.doc.company,
 				items: frm.doc.items,
@@ -939,7 +956,7 @@ frappe.ui.form.on("Stock Entry", {
 		if (frm.doc.purchase_order) {
 			frm.set_value("subcontracting_order", "");
 			erpnext.utils.map_current_doc({
-				method: "erpnext.stock.doctype.stock_entry.stock_entry.get_items_from_subcontract_order",
+				method: "erpnext.stock.doctype.stock_entry.stock_entry_handler.subcontracting.get_items_from_subcontract_order",
 				source_name: frm.doc.purchase_order,
 				target_doc: frm,
 				freeze: true,
@@ -951,7 +968,7 @@ frappe.ui.form.on("Stock Entry", {
 		if (frm.doc.subcontracting_order) {
 			frm.set_value("purchase_order", "");
 			erpnext.utils.map_current_doc({
-				method: "erpnext.stock.doctype.stock_entry.stock_entry.get_items_from_subcontract_order",
+				method: "erpnext.stock.doctype.stock_entry.stock_entry_handler.subcontracting.get_items_from_subcontract_order",
 				source_name: frm.doc.subcontracting_order,
 				target_doc: frm,
 				freeze: true,
@@ -1014,6 +1031,21 @@ frappe.ui.form.on("Stock Entry Detail", {
 
 	conversion_factor(frm, cdt, cdn) {
 		frm.events.set_basic_rate(frm, cdt, cdn);
+	},
+
+	transfer_qty(frm, cdt, cdn) {
+		let item = locals[cdt][cdn];
+		let old_conversion_factor = item.conversion_factor;
+		let conversion_factor = 1.0;
+		if (flt(item.qty) && flt(item.transfer_qty)) {
+			conversion_factor = flt(item.transfer_qty) / flt(item.qty);
+		}
+
+		if (old_conversion_factor !== conversion_factor) {
+			item.conversion_factor = conversion_factor;
+			refresh_field("conversion_factor", item.name, item.parentfield);
+			frm.events.set_basic_rate(frm, cdt, cdn);
+		}
 	},
 
 	s_warehouse(frm, cdt, cdn) {
@@ -1150,7 +1182,7 @@ var validate_sample_quantity = function (frm, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (d.sample_quantity && d.transfer_qty && frm.doc.purpose == "Material Receipt") {
 		frappe.call({
-			method: "erpnext.stock.doctype.stock_entry.stock_entry.validate_sample_quantity",
+			method: "erpnext.stock.doctype.stock_entry.stock_entry_handler.manufacturing.validate_sample_quantity",
 			args: {
 				batch_no: d.batch_no,
 				item_code: d.item_code,
@@ -1199,16 +1231,6 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 		this.frm.fields_dict.items.grid.get_field("item_code").get_query = function () {
 			return erpnext.queries.item({ is_stock_item: 1 });
 		};
-
-		this.frm.set_query("purchase_order", function () {
-			return {
-				filters: {
-					docstatus: 1,
-					is_old_subcontracting_flow: 1,
-					company: me.frm.doc.company,
-				},
-			};
-		});
 
 		this.frm.set_query("subcontracting_order", function () {
 			return {

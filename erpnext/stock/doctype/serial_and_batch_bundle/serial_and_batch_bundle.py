@@ -11,7 +11,7 @@ import frappe.query_builder
 from frappe import _, _dict, bold
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
-from frappe.query_builder.functions import Concat_ws, Sum
+from frappe.query_builder.functions import Concat_ws, Max, Sum
 from frappe.utils import (
 	cint,
 	cstr,
@@ -1581,7 +1581,7 @@ class SerialandBatchBundle(Document):
 	def throw_negative_batch(self, batch_no, available_qty, precision, posting_datetime=None):
 		from erpnext.stock.stock_ledger import NegativeStockError
 
-		if frappe.db.get_single_value("Stock Settings", "allow_negative_stock_for_batch"):
+		if allow_negative_stock_for_batch(batch_no):
 			return
 
 		date_msg = ""
@@ -1592,7 +1592,7 @@ class SerialandBatchBundle(Document):
 			"""
 			The Batch {0} of an item {1} has negative stock in the warehouse {2}{3}.
 			Please add a stock quantity of {4} to proceed with this entry.
-			If it is not possible to make an adjustment entry, please enable 'Allow Negative Stock for Batch' in Stock Settings to proceed.
+			If it is not possible to make an adjustment entry, please enable 'Allow Negative Stock for Batch' in the batch {0} or in the Stock Settings to proceed.
 			However, enabling this setting may lead to negative stock in the system.
 			So please ensure the stock levels are adjusted as soon as possible to maintain the correct valuation rate."""
 		).format(
@@ -2202,6 +2202,19 @@ def combine_datetime(date, time=None):
 	return get_combine_datetime(date, time)
 
 
+def allow_negative_stock_for_batch(batch_no):
+	"""Return whether negative stock is allowed for the given batch.
+
+	The batch-level setting takes priority: if `allow_negative_stock_for_batch`
+	is enabled on the Batch, negative stock is allowed regardless of Stock Settings.
+	Otherwise, fall back to the `allow_negative_stock_for_batch` Stock Setting.
+	"""
+	if batch_no and frappe.db.get_value("Batch", batch_no, "allow_negative_stock_for_batch"):
+		return True
+
+	return bool(frappe.db.get_single_value("Stock Settings", "allow_negative_stock_for_batch"))
+
+
 def get_batch(item_code):
 	from erpnext.stock.doctype.batch.batch import make_batch
 
@@ -2243,7 +2256,16 @@ def get_type_of_transaction(parent_doc, child_row):
 
 
 def update_serial_batch_no_ledgers(bundle, entries, child_row, parent_doc, warehouse=None) -> object:
+	frappe.has_permission("Serial and Batch Bundle", "write", throw=True)
 	doc = frappe.get_doc("Serial and Batch Bundle", bundle)
+
+	if doc.docstatus == 1:
+		doc.throw_error_message(
+			_("Serial and Batch Bundle {0} is submitted and its entries cannot be modified.").format(
+				frappe.bold(bundle)
+			)
+		)
+
 	doc.voucher_detail_no = child_row.name
 	doc.posting_datetime = combine_datetime(parent_doc.get("posting_date"), parent_doc.get("posting_time"))
 
@@ -2266,25 +2288,6 @@ def update_serial_batch_no_ledgers(bundle, entries, child_row, parent_doc, wareh
 	frappe.msgprint(_("Serial and Batch Bundle updated"), alert=True)
 
 	return doc
-
-
-@frappe.whitelist()
-def update_serial_or_batch(bundle_id: str, serial_no: str | None = None, batch_no: str | None = None):
-	if batch_no and not serial_no:
-		if qty := frappe.db.get_value(
-			"Serial and Batch Entry", {"parent": bundle_id, "batch_no": batch_no}, "qty"
-		):
-			frappe.db.set_value(
-				"Serial and Batch Entry", {"parent": bundle_id, "batch_no": batch_no}, "qty", qty + 1
-			)
-			return
-
-	doc = frappe.get_cached_doc("Serial and Batch Bundle", bundle_id)
-	if not serial_no and not batch_no:
-		return
-
-	doc.append("entries", {"serial_no": serial_no, "batch_no": batch_no, "qty": 1})
-	doc.save(ignore_permissions=True)
 
 
 def get_serial_and_batch_ledger(**kwargs):
@@ -2429,6 +2432,8 @@ def get_serial_nos_based_on_filters(filters, fields, order_by, kwargs):
 	if kwargs.based_on == "LIFO":
 		query = query.orderby(order_by_column, order=frappe.query_builder.Order.desc)
 	else:
+		if order_by == "amc_expiry_date":
+			query = query.orderby(order_by_column.isnull(), order=frappe.query_builder.Order.desc)
 		query = query.orderby(order_by_column)
 
 	for key, value in filters.items():
@@ -3077,7 +3082,7 @@ def get_available_batches(kwargs):
 			batch_ledger.batch_no,
 			batch_ledger.warehouse,
 			Sum(batch_ledger.qty).as_("qty"),
-			batch_table.expiry_date,
+			Max(batch_table.expiry_date).as_("expiry_date"),
 		)
 		.where(batch_table.disabled == 0)
 		.where(stock_ledger_entry.is_cancelled == 0)
@@ -3117,12 +3122,13 @@ def get_available_batches(kwargs):
 		else:
 			query = query.where(batch_ledger.batch_no == kwargs.batch_no)
 
+	# order by aggregates (one row per batch_no+warehouse); raw columns aren't valid under GROUP BY on postgres
 	if kwargs.based_on == "LIFO":
-		query = query.orderby(batch_table.creation, order=frappe.qb.desc)
+		query = query.orderby(Max(batch_table.creation), order=frappe.qb.desc)
 	elif kwargs.based_on == "Expiry":
-		query = query.orderby(batch_table.expiry_date)
+		query = query.orderby(Max(batch_table.expiry_date))
 	else:
-		query = query.orderby(batch_table.creation)
+		query = query.orderby(Max(batch_table.creation))
 
 	if kwargs.get("ignore_voucher_nos"):
 		query = query.where(stock_ledger_entry.voucher_no.notin(kwargs.get("ignore_voucher_nos")))
@@ -3194,6 +3200,7 @@ def get_picked_batches(kwargs) -> dict[str, dict]:
 			& (table.voucher_type == "Pick List")
 			& (table.voucher_no.isnotnull())
 		)
+		.groupby(child_table.batch_no, child_table.warehouse)
 	)
 
 	if kwargs.get("company"):
@@ -3339,6 +3346,10 @@ def get_stock_ledgers_for_serial_nos(kwargs):
 			stock_ledger_entry.actual_qty,
 			stock_ledger_entry.serial_no,
 			stock_ledger_entry.serial_and_batch_bundle,
+			# creation is the ORDER BY tiebreaker; postgres requires ORDER BY columns to be in the
+			# select list when the query is DISTINCT (added below for serial-no filters). It is unique
+			# per SLE so it doesn't change the distinct row set (serial_and_batch_bundle already is).
+			stock_ledger_entry.creation,
 		)
 		.where(stock_ledger_entry.is_cancelled == 0)
 		.orderby(stock_ledger_entry.posting_datetime)
@@ -3405,10 +3416,10 @@ def get_stock_ledgers_batches(kwargs):
 		.on(stock_ledger_entry.batch_no == batch_table.name)
 		.select(
 			stock_ledger_entry.warehouse,
-			stock_ledger_entry.item_code,
+			Max(stock_ledger_entry.item_code).as_("item_code"),
 			Sum(stock_ledger_entry.actual_qty).as_("qty"),
 			stock_ledger_entry.batch_no,
-			batch_table.expiry_date,
+			Max(batch_table.expiry_date).as_("expiry_date"),
 		)
 		.where((stock_ledger_entry.is_cancelled == 0) & (stock_ledger_entry.batch_no.isnotnull()))
 		.groupby(stock_ledger_entry.batch_no, stock_ledger_entry.warehouse)
@@ -3444,12 +3455,13 @@ def get_stock_ledgers_batches(kwargs):
 	if kwargs.get("ignore_voucher_nos"):
 		query = query.where(stock_ledger_entry.voucher_no.notin(kwargs.get("ignore_voucher_nos")))
 
+	# order by aggregates (one row per batch_no+warehouse); raw columns aren't valid under GROUP BY on postgres
 	if kwargs.based_on == "LIFO":
-		query = query.orderby(batch_table.creation, order=frappe.qb.desc)
+		query = query.orderby(Max(batch_table.creation), order=frappe.qb.desc)
 	elif kwargs.based_on == "Expiry":
-		query = query.orderby(batch_table.expiry_date)
+		query = query.orderby(Max(batch_table.expiry_date))
 	else:
-		query = query.orderby(batch_table.creation)
+		query = query.orderby(Max(batch_table.creation))
 
 	data = query.run(as_dict=True)
 	batches = {}

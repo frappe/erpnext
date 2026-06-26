@@ -145,11 +145,7 @@ class Bin(Document):
 		# reserved qty
 
 		subcontract_order = frappe.qb.DocType(subcontract_doctype)
-		supplied_item = frappe.qb.DocType(
-			"Purchase Order Item Supplied"
-			if subcontract_doctype == "Purchase Order"
-			else "Subcontracting Order Supplied Item"
-		)
+		supplied_item = frappe.qb.DocType("Subcontracting Order Supplied Item")
 
 		conditions = (
 			(supplied_item.rm_item_code == self.item_code)
@@ -157,11 +153,7 @@ class Bin(Document):
 			& (subcontract_order.per_received < 100)
 			& (supplied_item.reserve_warehouse == self.warehouse)
 			& (
-				(
-					(subcontract_order.is_old_subcontracting_flow == 1)
-					& (subcontract_order.status != "Closed")
-					& (subcontract_order.docstatus == 1)
-				)
+				((subcontract_order.status != "Closed") & (subcontract_order.docstatus == 1))
 				if subcontract_doctype == "Purchase Order"
 				else (subcontract_order.docstatus == 1)
 			)
@@ -193,7 +185,6 @@ class Bin(Document):
 				(
 					(Coalesce(se.purchase_order, "") != "")
 					& (subcontract_order.name == se.purchase_order)
-					& (subcontract_order.is_old_subcontracting_flow == 1)
 					& (subcontract_order.status != "Closed")
 				)
 				if subcontract_doctype == "Purchase Order"
@@ -264,8 +255,9 @@ def update_qty(bin_name, args):
 	# actual qty is already updated by processing current voucher
 	actual_qty = bin_details.actual_qty or 0.0
 
-	# actual qty is not up to date in case of backdated transaction
-	if future_sle_exists(args):
+	# actual qty is not up to date in case of backdated transactions
+	# or when cancellations are the most recent SLE
+	if future_sle_exists(args) or args.get("is_cancelled"):
 		actual_qty = get_actual_qty(args.get("item_code"), args.get("warehouse"))
 
 	ordered_qty = flt(bin_details.ordered_qty) + flt(args.get("ordered_qty"))

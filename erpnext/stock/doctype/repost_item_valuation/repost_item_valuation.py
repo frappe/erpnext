@@ -15,13 +15,14 @@ from frappe.utils.user import get_users_with_role
 from rq.timeouts import JobTimeoutException
 
 import erpnext
-from erpnext.accounts.general_ledger import validate_accounting_period
+from erpnext.accounts.services.gl_validator import validate_accounting_period
 from erpnext.accounts.utils import get_future_stock_vouchers, repost_gle_for_stock_vouchers
 from erpnext.stock.stock_ledger import (
 	get_affected_transactions,
 	get_items_to_be_repost,
 	repost_future_sle,
 )
+from erpnext.stock.utils import get_combine_datetime
 
 RecoverableErrors = (JobTimeoutException, QueryDeadlockError, QueryTimeoutError)
 
@@ -47,6 +48,7 @@ class RepostItemValuation(Document):
 		items_to_be_repost: DF.Code | None
 		posting_date: DF.Date
 		posting_time: DF.Time | None
+		recalculate_valuation_rate: DF.Check
 		recreate_stock_ledgers: DF.Check
 		repost_only_accounting_ledgers: DF.Check
 		reposting_data_file: DF.Attach | None
@@ -320,28 +322,35 @@ class RepostItemValuation(Document):
 		if self.based_on != "Item and Warehouse":
 			return
 
-		filters = {
-			"item_code": self.item_code,
-			"warehouse": self.warehouse,
-			"name": self.name,
-			"posting_date": self.posting_date,
-			"posting_time": self.posting_time,
-		}
+		riv = frappe.qb.DocType("Repost Item Valuation")
+		(
+			frappe.qb.update(riv)
+			.set(riv.status, "Skipped")
+			.where(
+				(riv.item_code == self.item_code)
+				& (riv.warehouse == self.warehouse)
+				& (riv.name != self.name)
+				# CombineDatetime on the column is portable (TIMESTAMP() is MySQL-only) and keeps the
+				# original NULL semantics (rows with NULL posting_time stay excluded); the RHS is this
+				# doc's own (always-set) posting datetime, computed in Python.
+				& (
+					CombineDatetime(riv.posting_date, riv.posting_time)
+					> get_combine_datetime(self.posting_date, self.posting_time)
+				)
+				& (riv.docstatus == 1)
+				& (riv.status == "Queued")
+				& (riv.based_on == "Item and Warehouse")
+			)
+		).run()
 
-		frappe.db.sql(
-			"""
-			update `tabRepost Item Valuation`
-			set status = 'Skipped'
-			WHERE item_code = %(item_code)s
-				and warehouse = %(warehouse)s
-				and name != %(name)s
-				and TIMESTAMP(posting_date, posting_time) > TIMESTAMP(%(posting_date)s, %(posting_time)s)
-				and docstatus = 1
-				and status = 'Queued'
-				and based_on = 'Item and Warehouse'
-				""",
-			filters,
-		)
+	def _recalculate_valuation_rate(self):
+		doc = frappe.get_doc(self.voucher_type, self.voucher_no)
+		if doc.get("is_internal_supplier"):
+			doc.set_sales_incoming_rate_for_internal_transfer()
+
+		doc.update_valuation_rate()
+		for item in doc.items:
+			item.db_set("valuation_rate", item.valuation_rate)
 
 	def recreate_stock_ledger_entries(self):
 		"""Recreate Stock Ledger Entries for the transaction."""
@@ -355,8 +364,8 @@ class RepostItemValuation(Document):
 
 
 @frappe.whitelist()
-def bulk_restart_reposting(names: str):
-	names = json.loads(names)
+def bulk_restart_reposting(names: str | list):
+	names = frappe.parse_json(names)
 	for name in names:
 		doc = frappe.get_doc("Repost Item Valuation", name)
 		if doc.status != "Failed":
@@ -383,6 +392,12 @@ def repost(doc):
 		doc.set_status("In Progress")
 		if not frappe.in_test:
 			frappe.db.commit()
+
+		if (
+			doc.voucher_type in ["Purchase Receipt", "Purchase Invoice", "Stock Entry"]
+			and doc.recalculate_valuation_rate
+		):
+			doc._recalculate_valuation_rate()
 
 		if doc.recreate_stock_ledgers:
 			doc.recreate_stock_ledger_entries()
@@ -493,6 +508,11 @@ def repost_gl_entries(doc):
 	repost_affected_transaction = get_affected_transactions(doc)
 
 	transactions = directly_dependent_transactions + list(repost_affected_transaction)
+
+	# handle stock delivered but not billed ledger entries
+	if frappe.get_cached_value("Company", doc.company, "stock_delivered_but_not_billed"):
+		_update_post_delivery_billed_vouchers(transactions)
+
 	enable_separate_reposting_for_gl = frappe.db.get_single_value(
 		"Stock Reposting Settings", "enable_separate_reposting_for_gl"
 	)
@@ -546,6 +566,44 @@ def _get_directly_dependent_vouchers(doc):
 		company=doc.company,
 	)
 	return affected_vouchers
+
+
+def _update_post_delivery_billed_vouchers(transactions: list) -> None:
+	"""
+	Fetch the delivery notes from dependant transactions,
+	and repost the Sales Invoice vouchers created post delivery note.
+	To match the Stock Delivered But Not Billed ledger entries.
+	"""
+	dn_vouchers = set()
+
+	for voucher_type, voucher_no in transactions:
+		if voucher_type == "Delivery Note":
+			dn_vouchers.add(voucher_no)
+
+	if not dn_vouchers:
+		return
+
+	sii = DocType("Sales Invoice Item")
+	si = DocType("Sales Invoice")
+	dni = DocType("Delivery Note Item")
+
+	query = (
+		frappe.qb.from_(sii)
+		.inner_join(si)
+		.on(si.name == sii.parent)
+		.left_join(dni)
+		.on(dni.name == sii.dn_detail)
+		.select(sii.parenttype, sii.parent)
+		.where((sii.delivery_note.isin(dn_vouchers) | dni.parent.isin(dn_vouchers)) & (si.docstatus == 1))
+		.groupby(sii.parenttype, sii.parent)
+	)
+
+	result = query.run(as_dict=True)
+
+	si_vouchers = {(d.parenttype, d.parent) for d in result}
+	existing = set(transactions)
+
+	transactions.extend(list(si_vouchers - existing))
 
 
 def notify_error_to_stock_managers(doc, traceback):

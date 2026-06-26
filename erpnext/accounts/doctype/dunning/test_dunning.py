@@ -8,7 +8,7 @@ from frappe.utils import add_days, nowdate, today
 
 from erpnext import get_default_cost_center
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
+from erpnext.accounts.doctype.sales_invoice.mapper import (
 	create_dunning as create_dunning_from_sales_invoice,
 )
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
@@ -73,7 +73,7 @@ class TestDunning(ERPNextTestSuite):
 		dunning = create_dunning_from_sales_invoice(si1.name)
 		dunning.overdue_payments = []
 
-		method = "erpnext.accounts.doctype.sales_invoice.sales_invoice.create_dunning"
+		method = "erpnext.accounts.doctype.sales_invoice.mapper.create_dunning"
 		updated_dunning = mapper.map_docs(method, json.dumps([si1.name, si2.name]), dunning)
 
 		self.assertEqual(len(updated_dunning.overdue_payments), 2)

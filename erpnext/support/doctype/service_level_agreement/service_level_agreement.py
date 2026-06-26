@@ -197,7 +197,7 @@ class ServiceLevelAgreement(Document):
 		)
 
 		if self.document_type not in valid_document_types:
-			frappe.throw(msg=_("Please select valid document type."), title=_("Invalid Document Type"))
+			frappe.throw(msg=_("Please select a valid document type."), title=_("Invalid Document Type"))
 
 	def validate_status_field(self):
 		meta = frappe.get_meta(self.document_type)

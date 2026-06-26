@@ -68,7 +68,6 @@ after_install = "erpnext.setup.install.after_install"
 boot_session = "erpnext.startup.boot.boot_session"
 notification_config = "erpnext.startup.notifications.get_notification_config"
 get_help_messages = "erpnext.utilities.activation.get_help_messages"
-leaderboards = "erpnext.startup.leaderboard.get_leaderboards"
 filters_config = "erpnext.startup.filters.get_filters_config"
 additional_print_settings = "erpnext.controllers.print_settings.get_print_settings"
 
@@ -215,6 +214,7 @@ website_route_rules = [
 	},
 	{"from_route": "/project", "to_route": "Project"},
 	{"from_route": "/tasks", "to_route": "Task"},
+	{"from_route": "/banking/<path:app_path>", "to_route": "banking"},
 ]
 
 standard_navbar_items = [
@@ -340,6 +340,14 @@ period_closing_doctypes = [
 	"Subcontracting Receipt",
 ]
 
+pre_submit_validation_doctypes = [
+	"Sales Invoice",
+	"Purchase Invoice",
+	"Delivery Note",
+	"Purchase Receipt",
+	"Sales Order",
+]
+
 doc_events = {
 	"*": {
 		"validate": [
@@ -349,6 +357,9 @@ doc_events = {
 	},
 	tuple(period_closing_doctypes): {
 		"validate": "erpnext.accounts.doctype.accounting_period.accounting_period.validate_accounting_period_on_doc_save",
+	},
+	tuple(pre_submit_validation_doctypes): {
+		"validate": "erpnext.accounts.utils.pre_submit_validation",
 	},
 	"Stock Entry": {
 		"on_submit": "erpnext.stock.doctype.material_request.material_request.update_completed_and_requested_qty",
@@ -372,6 +383,9 @@ doc_events = {
 	"Event": {
 		"after_insert": "erpnext.crm.utils.link_events_with_prospect",
 	},
+	"Contact Us Settings": {
+		"on_update": "erpnext.crm.utils.disable_opportunity_creation_on_contact_us_disabled",
+	},
 	"Sales Invoice": {
 		"on_submit": [
 			"erpnext.regional.italy.utils.sales_invoice_on_submit",
@@ -385,7 +399,7 @@ doc_events = {
 		"validate": [
 			"erpnext.regional.united_arab_emirates.utils.update_grand_total_for_rcm",
 			"erpnext.regional.united_arab_emirates.utils.validate_returns",
-		]
+		],
 	},
 	"Payment Entry": {
 		"on_trash": "erpnext.regional.check_deletion_permission",
@@ -456,6 +470,7 @@ scheduler_events = {
 		"erpnext.projects.doctype.project.project.project_status_update_reminder",
 		"erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.automatic_synchronization",
 		"erpnext.utilities.doctype.video.video.update_youtube_data",
+		"erpnext.accounts.doctype.bank_transaction_rule.bank_transaction_rule.scheduler_run_rule_evaluation",
 	],
 	"daily": [],
 	"daily_long": [],
@@ -581,6 +596,7 @@ accounting_dimension_doctypes = [
 	"Account Closing Balance",
 	"Supplier Quotation",
 	"Supplier Quotation Item",
+	"Request for Quotation Item",
 	"Payment Reconciliation",
 	"Payment Reconciliation Allocation",
 	"Payment Request",
@@ -695,6 +711,10 @@ default_log_clearing_doctypes = {
 }
 
 export_python_type_annotations = True
+
+# Send non-GET requests for ERPNext's endpoints as native `application/json`
+# bodies instead of form-encoded, per-key JSON-stringified values.
+use_json_request_body = True
 
 fields_for_group_similar_items = ["qty", "amount"]
 

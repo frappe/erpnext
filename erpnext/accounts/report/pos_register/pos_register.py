@@ -4,6 +4,8 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder import Case
+from frappe.query_builder.functions import IfNull
 
 from erpnext.accounts.report.sales_register.sales_register import get_mode_of_payments
 
@@ -46,39 +48,46 @@ def execute(filters=None):
 
 
 def get_pos_entries(filters, group_by_field):
-	conditions = get_conditions(filters)
-	order_by = "p.posting_date"
-	select_mop_field, from_sales_invoice_payment, group_by_mop_condition = "", "", ""
-	if group_by_field == "mode_of_payment":
-		select_mop_field = (
-			", sip.mode_of_payment, sip.base_amount - IF(sip.type='Cash', p.change_amount, 0) as paid_amount"
+	p = frappe.qb.DocType("POS Invoice")
+	query = (
+		frappe.qb.from_(p)
+		.select(
+			p.posting_date,
+			p.name.as_("pos_invoice"),
+			p.pos_profile,
+			p.company,
+			p.owner,
+			p.customer,
+			p.is_return,
+			p.base_grand_total.as_("grand_total"),
 		)
-		from_sales_invoice_payment = ", `tabSales Invoice Payment` sip"
-		group_by_mop_condition = "sip.parent = p.name AND ifnull(sip.base_amount - IF(sip.type='Cash', p.change_amount, 0), 0) != 0 AND"
-		order_by += ", sip.mode_of_payment"
-
-	elif group_by_field:
-		order_by += f", p.{group_by_field}"
-		select_mop_field = ", p.base_paid_amount - p.change_amount  as paid_amount "
-
-	# nosemgrep
-	return frappe.db.sql(
-		f"""
-		SELECT
-			p.posting_date, p.name as pos_invoice, p.pos_profile, p.company,
-			p.owner, p.customer, p.is_return, p.base_grand_total as grand_total {select_mop_field}
-		FROM
-			`tabPOS Invoice` p {from_sales_invoice_payment}
-		WHERE
-			p.docstatus = 1 and
-			{group_by_mop_condition}
-			{conditions}
-		ORDER BY
-			{order_by}
-		""",
-		filters,
-		as_dict=1,
+		.where(p.docstatus == 1)
 	)
+
+	for condition in get_conditions(filters, p):
+		query = query.where(condition)
+
+	if group_by_field == "mode_of_payment":
+		sip = frappe.qb.DocType("Sales Invoice Payment")
+		paid_amount = sip.base_amount - Case().when(sip.type == "Cash", p.change_amount).else_(0)
+		query = (
+			query.inner_join(sip)
+			.on(sip.parent == p.name)
+			.select(sip.mode_of_payment, paid_amount.as_("paid_amount"))
+			.where(IfNull(paid_amount, 0) != 0)
+			.orderby(p.posting_date)
+			.orderby(sip.mode_of_payment)
+		)
+	elif group_by_field:
+		query = (
+			query.select((p.base_paid_amount - p.change_amount).as_("paid_amount"))
+			.orderby(p.posting_date)
+			.orderby(p[group_by_field])
+		)
+	else:
+		query = query.orderby(p.posting_date)
+
+	return query.run(as_dict=1)
 
 
 def concat_mode_of_payments(pos_entries):
@@ -127,27 +136,34 @@ def validate_filters(filters):
 		frappe.throw(_("Can not filter based on Payment Method, if grouped by Payment Method"))
 
 
-def get_conditions(filters):
-	conditions = "company = %(company)s AND posting_date >= %(from_date)s AND posting_date <= %(to_date)s"
+def get_conditions(filters, p):
+	conditions = [
+		p.company == filters.get("company"),
+		p.posting_date >= filters.get("from_date"),
+		p.posting_date <= filters.get("to_date"),
+	]
 
 	if filters.get("pos_profile"):
-		conditions += " AND pos_profile = %(pos_profile)s"
+		conditions.append(p.pos_profile == filters.get("pos_profile"))
 
 	if filters.get("owner"):
-		conditions += " AND owner = %(owner)s"
+		conditions.append(p.owner == filters.get("owner"))
 
 	if filters.get("customer"):
-		conditions += " AND customer = %(customer)s"
+		conditions.append(p.customer == filters.get("customer"))
 
 	if filters.get("is_return"):
-		conditions += " AND is_return = %(is_return)s"
+		conditions.append(p.is_return == filters.get("is_return"))
 
 	if filters.get("mode_of_payment"):
-		conditions += """
-			AND EXISTS(
-					SELECT name FROM `tabSales Invoice Payment` sip
-					WHERE parent=p.name AND ifnull(sip.mode_of_payment, '') = %(mode_of_payment)s
-				)"""
+		sip = frappe.qb.DocType("Sales Invoice Payment")
+		conditions.append(
+			p.name.isin(
+				frappe.qb.from_(sip)
+				.select(sip.parent)
+				.where(IfNull(sip.mode_of_payment, "") == filters.get("mode_of_payment"))
+			)
+		)
 
 	return conditions
 

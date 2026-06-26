@@ -693,6 +693,7 @@ frappe.ui.form.on("Production Plan Sub Assembly Item", {
 				callback: function (r) {
 					if (r.message && r.message.length) {
 						frappe.model.set_value(cdt, cdn, "actual_qty", r.message[0].actual_qty);
+						frappe.model.set_value(cdt, cdn, "projected_qty", r.message[0].projected_qty);
 					}
 				},
 			});

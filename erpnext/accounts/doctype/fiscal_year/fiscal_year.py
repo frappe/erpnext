@@ -72,10 +72,8 @@ class FiscalYear(Document):
 
 		if existing_fiscal_years:
 			for existing in existing_fiscal_years:
-				company_for_existing = frappe.db.sql_list(
-					"""select company from `tabFiscal Year Company`
-					where parent=%s""",
-					existing.name,
+				company_for_existing = frappe.get_all(
+					"Fiscal Year Company", filters={"parent": existing.name}, pluck="company"
 				)
 
 				overlap = False

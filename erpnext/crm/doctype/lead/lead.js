@@ -88,14 +88,14 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 
 	make_customer() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.crm.doctype.lead.lead.make_customer",
+			method: "erpnext.crm.doctype.lead.mapper.make_customer",
 			frm: this.frm,
 		});
 	}
 
 	make_quotation() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.crm.doctype.lead.lead.make_quotation",
+			method: "erpnext.crm.doctype.lead.mapper.make_quotation",
 			frm: this.frm,
 		});
 	}
@@ -171,7 +171,7 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 						callback: function (r) {
 							if (!r.exc) {
 								frappe.model.open_mapped_doc({
-									method: "erpnext.crm.doctype.lead.lead.make_opportunity",
+									method: "erpnext.crm.doctype.lead.mapper.make_opportunity",
 									frm: frm,
 								});
 							}
@@ -184,7 +184,7 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 			d.show();
 		} else {
 			frappe.model.open_mapped_doc({
-				method: "erpnext.crm.doctype.lead.lead.make_opportunity",
+				method: "erpnext.crm.doctype.lead.mapper.make_opportunity",
 				frm: frm,
 			});
 		}

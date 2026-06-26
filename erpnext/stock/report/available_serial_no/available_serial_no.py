@@ -73,7 +73,7 @@ def update_available_serial_nos(available_serial_nos, sle):
 	sle.serial_no = "\n".join(serial_nos) if serial_nos else ""
 	if key not in available_serial_nos:
 		available_serial_nos.setdefault(key, serial_nos)
-		sle.balance_serial_no = "\n".join(serial_nos)
+		sle.balance_serial_no = "\n".join(serial_nos) if serial_nos else ""
 		return
 
 	existing_serial_no = available_serial_nos[key]

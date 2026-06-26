@@ -54,7 +54,7 @@ class TestItemPrice(ERPNextTestSuite):
 		doc_fields = frappe.copy_doc(self.globalTestRecords["Item Price"][1]).__dict__.keys()
 
 		for test_field in test_fields_existance:
-			self.assertTrue(test_field in doc_fields)
+			self.assertIn(test_field, doc_fields)
 
 	def test_dates_validation_error(self):
 		doc = frappe.copy_doc(self.globalTestRecords["Item Price"][1])

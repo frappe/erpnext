@@ -1,14 +1,16 @@
 {
  "actions": [],
- "creation": "2013-02-22 01:28:00",
+ "creation": "2026-05-05 11:19:24.699669",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "parent_item",
   "item_code",
+  "product_bundle",
   "item_name",
   "delivered_by_supplier",
+  "reserve_stock",
   "column_break_5",
   "description",
   "section_break_6",
@@ -65,6 +67,16 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.product_bundle",
+   "description": "Product Bundle version this row was packed from",
+   "fieldname": "product_bundle",
+   "fieldtype": "Link",
+   "label": "Product Bundle",
+   "no_copy": 1,
+   "options": "Product Bundle",
+   "read_only": 1
+  },
+  {
    "fieldname": "item_name",
    "fieldtype": "Data",
    "label": "Item Name",
@@ -94,6 +106,7 @@
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "label": "From Warehouse",
+   "mandatory_depends_on": "eval:doc.reserve_stock",
    "oldfieldname": "warehouse",
    "oldfieldtype": "Link",
    "options": "Warehouse"
@@ -309,13 +322,23 @@
    "non_negative": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:parent.reserve_stock",
+   "fieldname": "reserve_stock",
+   "fieldtype": "Check",
+   "label": "Reserve Stock",
+   "no_copy": 1,
+   "print_hide": 1,
+   "report_hide": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-27 14:12:53.236906",
+ "modified": "2026-06-08 15:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packed Item",
