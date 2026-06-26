@@ -328,7 +328,7 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 		from erpnext.accounts.report.balance_sheet.balance_sheet import execute
 		from erpnext.accounts.report.financial_statements import build_period_list
 
-		company = create_company()
+		company = "Test PCV Company"
 		cc1 = create_cost_center("Test Cost Center 1")
 		cc2 = create_cost_center("Test Cost Center 2")
 

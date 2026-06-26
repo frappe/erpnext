@@ -299,6 +299,7 @@ def get_account_type_based_gl_data(company, filters=None):
 	result = query.run()
 	return flt(result[0][0]) if result and result[0][0] else 0
 
+
 def get_start_date(period, accumulated_values, company):
 	if not accumulated_values and period.get("from_date"):
 		return period["from_date"]
