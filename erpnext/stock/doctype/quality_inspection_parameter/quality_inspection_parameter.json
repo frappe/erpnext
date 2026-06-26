@@ -35,11 +35,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2021-02-19 20:33:30.657406",
-=======
  "modified": "2026-06-19 10:55:00.000000",
->>>>>>> adfef48a65 (fix: allow rename for Quality Inspection Parameter)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Quality Inspection Parameter",
