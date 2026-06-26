@@ -1049,6 +1049,21 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(pos_return.get("payments")[0].amount, -500)
 		self.assertEqual(pos_return.get("payments")[1].amount, -500)
 
+	def test_non_pos_return_clears_payment_rows(self):
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
+
+		si = create_sales_invoice(do_not_save=True)
+		si.append("payments", {"mode_of_payment": "Cash", "amount": 100})
+		si.insert()
+		si.submit()
+
+		si_return = make_sales_return(si.name)
+		si_return.insert()
+
+		self.assertEqual(si_return.is_pos, 0)
+		self.assertEqual(si_return.get("payments"), [])
+		self.assertEqual(si_return.paid_amount, 0)
+
 	def test_pos_change_amount(self):
 		make_pos_profile(
 			company="_Test Company with perpetual inventory",
@@ -2689,6 +2704,95 @@ class TestSalesInvoice(FrappeTestCase):
 
 		self.assertEqual(target_doc.company, "_Test Company 1")
 		self.assertEqual(target_doc.supplier, "_Test Internal Supplier")
+
+	def test_restrict_inter_company_pi_when_sales_invoice_qty_fully_consumed(self):
+		item_code_1 = "_Test IC Item 1"
+		item_code_2 = "_Test IC Item 2"
+
+		create_item(item_code_1, is_stock_item=1)
+		create_item(item_code_2, is_stock_item=1)
+
+		si = create_sales_invoice(
+			company="Wind Power LLC",
+			customer="_Test Internal Customer",
+			item_code=item_code_1,
+			debit_to="Debtors - WP",
+			warehouse="Stores - WP",
+			income_account="Sales - WP",
+			expense_account="Cost of Goods Sold - WP",
+			cost_center="Main - WP",
+			currency="USD",
+			qty=3,
+			do_not_save=1,
+		)
+		si.selling_price_list = "_Test Price List Rest of the World"
+		si.append(
+			"items",
+			{
+				"item_code": item_code_2,
+				"item_name": item_code_2,
+				"description": item_code_2,
+				"warehouse": "Stores - WP",
+				"qty": 2,
+				"uom": "Nos",
+				"stock_uom": "Nos",
+				"rate": 100,
+				"price_list_rate": 100,
+				"income_account": "Sales - WP",
+				"expense_account": "Cost of Goods Sold - WP",
+				"cost_center": "Main - WP",
+				"conversion_factor": 1,
+			},
+		)
+
+		si.submit()
+
+		target_doc = make_inter_company_transaction("Sales Invoice", si.name)
+
+		for item in target_doc.items:
+			item.update(
+				{
+					"expense_account": "Cost of Goods Sold - _TC1",
+					"cost_center": "Main - _TC1",
+				}
+			)
+
+		target_doc.submit()
+		self.assertEqual(len(target_doc.items), 2)
+		self.assertEqual([item.qty for item in target_doc.items], [3, 2])
+		with self.assertRaisesRegex(
+			frappe.ValidationError,
+			"already been fully invoiced",
+		):
+			make_inter_company_transaction("Sales Invoice", si.name)
+
+	def test_inter_company_transaction_does_not_inherit_party_fields(self):
+		"""
+		Party-derived fields on SI (from Customer) must not leak into the mapped PI.
+		"""
+		si = create_sales_invoice(
+			company="Wind Power LLC",
+			customer="_Test Internal Customer",
+			debit_to="Debtors - WP",
+			warehouse="Stores - WP",
+			income_account="Sales - WP",
+			expense_account="Cost of Goods Sold - WP",
+			cost_center="Main - WP",
+			currency="USD",
+			do_not_save=1,
+		)
+		si.selling_price_list = "_Test Price List Rest of the World"
+		si.tax_category = "_Test Tax Category 1"
+		si.language = "ar"
+		si.payment_terms_template = "_Test Payment Term Template"
+		si.submit()
+
+		pi = make_inter_company_transaction("Sales Invoice", si.name)
+
+		supplier = frappe.get_doc("Supplier", "_Test Internal Supplier")
+		self.assertEqual(pi.tax_category or None, supplier.tax_category or None)
+		self.assertEqual(pi.language or None, supplier.language or None)
+		self.assertEqual(pi.payment_terms_template or None, supplier.payment_terms or None)
 
 	def test_inter_company_transaction_without_default_warehouse(self):
 		"Check mapping (expense account) of inter company SI to PI in absence of default warehouse."

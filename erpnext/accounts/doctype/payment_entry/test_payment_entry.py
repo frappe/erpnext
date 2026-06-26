@@ -537,6 +537,8 @@ class TestPaymentEntry(FrappeTestCase):
 		si.submit()
 
 		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank - _TC", bank_amount=4700)
+		pe.source_exchange_rate = 50
+		pe.set_amounts()
 		pe.reference_no = si.name
 		pe.reference_date = nowdate()
 
@@ -612,6 +614,8 @@ class TestPaymentEntry(FrappeTestCase):
 		pe = get_payment_entry(
 			"Sales Invoice", si.name, party_amount=20, bank_account="_Test Bank - _TC", bank_amount=900
 		)
+		pe.source_exchange_rate = 50
+		pe.set_amounts()
 		pe.reference_no = "1"
 		pe.reference_date = "2016-01-01"
 
@@ -1113,6 +1117,27 @@ class TestPaymentEntry(FrappeTestCase):
 		)
 
 		self.assertEqual(gl_entries, expected_gl_entries)
+
+	def test_payment_entry_with_inclusive_tax(self):
+		# inclusive tax built server-side: base_tax_amount is None until apply_taxes()
+		payment_entry = create_payment_entry(paid_amount=1180)
+		payment_entry.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"rate": 18,
+				"included_in_paid_amount": 1,
+				"add_deduct_tax": "Add",
+				"description": "Service Tax",
+			},
+		)
+		payment_entry.save()
+		payment_entry.submit()
+
+		# 1180 incl 18% => 1000 base + 180 tax
+		self.assertEqual(flt(payment_entry.total_taxes_and_charges, 2), 180.0)
+		self.assertEqual(flt(payment_entry.unallocated_amount, 2), 1000.0)
 
 	def test_payment_entry_against_onhold_purchase_invoice(self):
 		pi = make_purchase_invoice()

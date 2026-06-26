@@ -7,6 +7,7 @@ import json
 
 import frappe
 from frappe import _
+from frappe.query_builder import Case
 from frappe.utils import cstr, flt
 
 from erpnext.utilities.product import get_item_codes_by_attributes
@@ -127,6 +128,53 @@ def validate_is_incremental(numeric_attribute, attribute, value, item):
 			InvalidItemAttributeValueError,
 			title=_("Invalid Attribute"),
 		)
+
+
+def get_attribute_value_renames(item_attribute):
+	"""Return old to new attribute value mappings for renamed Item Attribute Value rows."""
+	if item_attribute.numeric_values:
+		return {}
+
+	db_value = item_attribute.get_doc_before_save()
+	if not db_value:
+		return {}
+
+	old_values = {d.name: d.attribute_value for d in db_value.item_attribute_values}
+	renames = {}
+
+	for row in item_attribute.item_attribute_values:
+		if row.name in old_values and old_values[row.name] != row.attribute_value:
+			renames[old_values[row.name]] = row.attribute_value
+
+	return renames
+
+
+def update_variant_attribute_values(item_attribute):
+	"""Propagate renamed Item Attribute Values to Item Variant Attribute on variant items."""
+	value_map = get_attribute_value_renames(item_attribute)
+	if not value_map:
+		return
+
+	item_variant_table = frappe.qb.DocType("Item Variant Attribute")
+	item_table = frappe.qb.DocType("Item")
+	attribute_value = item_variant_table.attribute_value
+	attribute_value_case = Case()
+
+	for old_value, new_value in value_map.items():
+		attribute_value_case = attribute_value_case.when(attribute_value == old_value, new_value)
+
+	(
+		frappe.qb.update(item_variant_table)
+		.join(item_table)
+		.on(item_table.name == item_variant_table.parent)
+		.set(attribute_value, attribute_value_case.else_(attribute_value))
+		.where(item_table.variant_of.isnotnull())
+		.where(item_table.variant_of != "")
+		.where(item_variant_table.attribute == item_attribute.name)
+		.where(attribute_value.isin(list(value_map)))
+	).run()
+
+	frappe.flags.attribute_values = None
 
 
 def validate_item_attribute_value(attributes_list, attribute, attribute_value, item, from_variant=True):

@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import datetime
 from collections import OrderedDict, defaultdict
 
 import frappe
@@ -10,7 +11,7 @@ from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
 from frappe.query_builder.functions import CurDate, Sum
 from frappe.utils import cint, flt, get_link_to_form
-from frappe.utils.data import add_days
+from frappe.utils.data import DateTimeLikeObject, add_days
 
 
 class UnableToSelectBatchError(frappe.ValidationError):
@@ -94,6 +95,7 @@ class Batch(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		allow_negative_stock_for_batch: DF.Check
 		batch_id: DF.Data
 		batch_qty: DF.Float
 		description: DF.SmallText | None
@@ -232,17 +234,18 @@ class Batch(Document):
 
 @frappe.whitelist()
 def get_batch_qty(
-	batch_no=None,
-	warehouse=None,
-	item_code=None,
-	creation=None,
-	posting_date=None,
-	posting_time=None,
-	ignore_voucher_nos=None,
-	for_stock_levels=False,
-	consider_negative_batches=False,
-	do_not_check_future_batches=False,
-	ignore_reserved_stock=False,
+	batch_no: str | None = None,
+	warehouse: str | None = None,
+	item_code: str | None = None,
+	creation: DateTimeLikeObject | None = None,
+	posting_datetime: DateTimeLikeObject | None = None,
+	posting_date: DateTimeLikeObject | None = None,
+	posting_time: datetime.timedelta | None = None,
+	ignore_voucher_nos: list | None = None,
+	for_stock_levels: bool = False,
+	consider_negative_batches: bool = False,
+	do_not_check_future_batches: bool = False,
+	ignore_reserved_stock: bool = False,
 ):
 	"""Returns batch actual qty if warehouse is passed,
 	        or returns dict of qty by warehouse if warehouse is None
@@ -255,6 +258,7 @@ def get_batch_qty(
 	:param for_stock_levels: True consider expired batches"""
 
 	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+		combine_datetime,
 		get_auto_batch_nos,
 	)
 
@@ -264,8 +268,6 @@ def get_batch_qty(
 			"item_code": item_code,
 			"warehouse": warehouse,
 			"creation": creation,
-			"posting_date": posting_date,
-			"posting_time": posting_time,
 			"batch_no": batch_no,
 			"based_on": frappe.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
 			"ignore_voucher_nos": ignore_voucher_nos,
@@ -275,6 +277,10 @@ def get_batch_qty(
 			"ignore_reserved_stock": ignore_reserved_stock,
 		}
 	)
+
+	kwargs["posting_datetime"] = posting_datetime
+	if not kwargs.get("posting_datetime") and posting_date:
+		kwargs["posting_datetime"] = combine_datetime(posting_date, posting_time)
 
 	batches = get_auto_batch_nos(kwargs)
 
@@ -357,6 +363,7 @@ def make_batch_bundle(
 ):
 	from frappe.utils import nowtime, today
 
+	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import combine_datetime
 	from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
 	return (
@@ -364,8 +371,7 @@ def make_batch_bundle(
 			{
 				"item_code": item_code,
 				"warehouse": warehouse,
-				"posting_date": today(),
-				"posting_time": nowtime(),
+				"posting_datetime": combine_datetime(today(), nowtime()),
 				"voucher_type": "Stock Entry",
 				"qty": qty,
 				"type_of_transaction": type_of_transaction,
@@ -476,8 +482,12 @@ def get_pos_reserved_batch_qty(filters):
 
 def get_available_batches(kwargs):
 	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+		combine_datetime,
 		get_auto_batch_nos,
 	)
+
+	if kwargs.get("posting_date"):
+		kwargs["posting_datetime"] = combine_datetime(kwargs.get("posting_date"), kwargs.get("posting_time"))
 
 	batchwise_qty = OrderedDict()
 

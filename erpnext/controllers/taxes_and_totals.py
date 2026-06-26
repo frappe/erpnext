@@ -38,7 +38,9 @@ class calculate_taxes_and_totals:
 
 		self._items = self.filter_rows() if self.doc.doctype == "Quotation" else self.doc.get("items")
 
-		get_round_off_applicable_accounts(self.doc.company, frappe.flags.round_off_applicable_accounts)
+		get_round_off_applicable_accounts(
+			self.doc.company, frappe.flags.round_off_applicable_accounts, self.doc
+		)
 		self.calculate()
 
 	def filter_rows(self):
@@ -183,7 +185,7 @@ class calculate_taxes_and_totals:
 			return
 
 		if not self.discount_amount_applied:
-			do_not_round_fields = ["valuation_rate", "incoming_rate"]
+			do_not_round_fields = ["valuation_rate", "incoming_rate", "sales_incoming_rate"]
 
 			for item in self.doc.items:
 				self.doc.round_floats_in(item, do_not_round_fields=do_not_round_fields)
@@ -1128,14 +1130,14 @@ def get_itemised_tax_breakup_html(doc):
 
 
 @frappe.whitelist()
-def get_round_off_applicable_accounts(company, account_list):
+def get_round_off_applicable_accounts(company, account_list, doc=None):
 	# required to set correct region
 	with temporary_flag("company", company):
-		return get_regional_round_off_accounts(company, account_list)
+		return get_regional_round_off_accounts(company, account_list, doc)
 
 
 @erpnext.allow_regional
-def get_regional_round_off_accounts(company, account_list):
+def get_regional_round_off_accounts(company, account_list, doc=None):
 	pass
 
 

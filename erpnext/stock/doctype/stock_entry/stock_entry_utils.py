@@ -8,6 +8,7 @@ import frappe
 from frappe.utils import cint, flt
 
 import erpnext
+from erpnext.stock.utils import get_combine_datetime
 
 if TYPE_CHECKING:
 	from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
@@ -140,6 +141,10 @@ def make_stock_entry(**args):
 		elif args.batches:
 			batches = args.batches
 
+		posting_datetime = None
+		if args.posting_date and args.posting_time:
+			posting_datetime = get_combine_datetime(args.posting_date, args.posting_time)
+
 		bundle_id = (
 			SerialBatchCreation(
 				{
@@ -151,8 +156,7 @@ def make_stock_entry(**args):
 					"serial_nos": args.serial_no,
 					"type_of_transaction": "Outward" if args.source else "Inward",
 					"company": s.company,
-					"posting_date": s.posting_date,
-					"posting_time": s.posting_time,
+					"posting_datetime": posting_datetime,
 					"rate": args.rate or args.basic_rate,
 					"do_not_submit": True,
 				}

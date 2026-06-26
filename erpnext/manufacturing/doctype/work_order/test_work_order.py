@@ -1461,6 +1461,68 @@ class TestWorkOrder(FrappeTestCase):
 		self.assertEqual(work_order.required_items[0].transferred_qty, 1)
 		self.assertEqual(work_order.required_items[1].transferred_qty, 2)
 
+	def test_material_transferred_min_fraction_on_partial_pick_list(self):
+		"""Pick-list flow (fg_completed_qty = 0): 'Material Transferred for Manufacturing'
+		must reflect the least-transferred required item (the bottleneck), instead of being
+		marked fully transferred prematurely when only some materials are transferred.
+		"""
+		work_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=5000.0
+		)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TC", qty=10, basic_rate=1000.0
+		)
+
+		required_qty = {row.item_code: flt(row.required_qty) for row in work_order.required_items}
+
+		# pick-list transfer: For Quantity = 0
+		transfer_entry = frappe.get_doc(
+			make_stock_entry(work_order.name, "Material Transfer for Manufacture", 0)
+		)
+		self.assertEqual(transfer_entry.fg_completed_qty, 0.0)
+
+		for item in transfer_entry.items:
+			full_qty = required_qty[item.item_code]
+			item.qty = full_qty if item.item_code == "_Test Item" else full_qty / 2
+			item.transfer_qty = item.qty
+		transfer_entry.submit()
+
+		work_order.reload()
+		transferred_qty = {row.item_code: flt(row.transferred_qty) for row in work_order.required_items}
+		self.assertEqual(transferred_qty["_Test Item"], required_qty["_Test Item"])
+		self.assertEqual(
+			transferred_qty["_Test Item Home Desktop 100"],
+			required_qty["_Test Item Home Desktop 100"] / 2,
+		)
+		# bottleneck fraction = 0.5 -> 0.5 * qty(2) = 1.0
+		self.assertEqual(work_order.material_transferred_for_manufacturing, 1.0)
+
+	def test_material_transferred_full_via_pick_list_flow(self):
+		"""Pick-list flow with every required item fully transferred marks the work order
+		as fully transferred (min fraction = 1.0)."""
+		work_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=5000.0
+		)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TC", qty=10, basic_rate=1000.0
+		)
+
+		required_qty = {row.item_code: flt(row.required_qty) for row in work_order.required_items}
+
+		transfer_entry = frappe.get_doc(
+			make_stock_entry(work_order.name, "Material Transfer for Manufacture", 0)
+		)
+		self.assertEqual(transfer_entry.fg_completed_qty, 0.0)
+		for item in transfer_entry.items:
+			item.qty = required_qty[item.item_code]
+			item.transfer_qty = item.qty
+		transfer_entry.submit()
+
+		work_order.reload()
+		self.assertEqual(work_order.material_transferred_for_manufacturing, 2.0)
+
 	def test_backflushed_batch_raw_materials_based_on_transferred(self):
 		frappe.db.set_single_value(
 			"Manufacturing Settings",
@@ -3630,6 +3692,58 @@ class TestWorkOrder(FrappeTestCase):
 		bin1_at_completion = get_bin(rm_item_code, "_Test Warehouse - _TC")
 
 		self.assertEqual(bin1_at_completion.reserved_qty_for_production, 0)
+
+	@change_settings(
+		"Manufacturing Settings",
+		{"allow_editing_of_items_and_quantities_in_work_order": 1},
+	)
+	def test_manufacture_se_fetches_edited_qty_from_work_order(self):
+		"""When a raw material qty is edited on the Work Order, the Manufacture Stock Entry
+		must consume the edited quantity (scaled to fg_completed_qty) from the Work Order,
+		not the original BOM quantity."""
+		warehouse = "_Test Warehouse - _TC"
+		wo_order = make_wo_order_test_record(
+			item="_Test FG Item", qty=10, skip_transfer=1, source_warehouse=warehouse
+		)
+
+		# edit a required item's qty
+		wo_order.required_items[0].db_set("required_qty", flt(wo_order.required_items[0].required_qty) + 7)
+		wo_order.reload()
+		edited_row = wo_order.required_items[0]
+
+		fg_qty = 5
+		se = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", fg_qty))
+		se_qty = {row.item_code: row.qty for row in se.items if row.s_warehouse}
+
+		precision = frappe.get_precision("Stock Entry Detail", "qty")
+		expected = flt(edited_row.required_qty / wo_order.qty * fg_qty, precision)
+		self.assertEqual(flt(se_qty.get(edited_row.item_code)), expected)
+
+	@change_settings(
+		"Manufacturing Settings",
+		{"allow_editing_of_items_and_quantities_in_work_order": 1},
+	)
+	def test_manufacture_se_fetches_item_not_in_bom_from_work_order(self):
+		"""A raw material that is present on the Work Order but not on the BOM must still be
+		fetched into the Manufacture Stock Entry, proving items are sourced from the Work
+		Order's required_items rather than re-derived from the BOM."""
+		extra_item = make_item(
+			"_Test WO Extra Raw Material", {"is_stock_item": 1, "valuation_rate": 100}
+		).name
+		warehouse = "_Test Warehouse - _TC"
+		wo_order = make_wo_order_test_record(
+			item="_Test FG Item", qty=10, skip_transfer=1, source_warehouse=warehouse
+		)
+
+		original_item = wo_order.required_items[0].item_code
+		wo_order.required_items[0].db_set("item_code", extra_item)
+		wo_order.reload()
+
+		se = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 5))
+		se_items = [row.item_code for row in se.items if row.s_warehouse]
+
+		self.assertIn(extra_item, se_items)
+		self.assertNotIn(original_item, se_items)
 
 
 def make_stock_in_entries_and_get_batches(rm_item, source_warehouse, wip_warehouse):

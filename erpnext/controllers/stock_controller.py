@@ -26,6 +26,7 @@ from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
 	get_evaluated_inventory_dimension,
 )
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	combine_datetime,
 	get_type_of_transaction,
 )
 from erpnext.stock.stock_ledger import get_items_to_be_repost
@@ -282,8 +283,7 @@ class StockController(AccountsController):
 			):
 				bundle_details = {
 					"item_code": row.get("rm_item_code") or row.item_code,
-					"posting_date": self.posting_date,
-					"posting_time": self.posting_time,
+					"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
 					"voucher_type": self.doctype,
 					"voucher_no": self.name,
 					"voucher_detail_no": row.name,
@@ -1694,7 +1694,7 @@ def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str
 
 	inspection_fieldname = inspection_fieldname_map.get(doctype)
 	if inspection_fieldname is None:
-		return []
+		return items if doctype == "Stock Entry" else []
 
 	allow_after_transaction = cint(docstatus) == 1 and frappe.get_single_value(
 		"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"

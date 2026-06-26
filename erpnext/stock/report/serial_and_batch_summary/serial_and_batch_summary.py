@@ -19,7 +19,7 @@ def get_data(filters):
 		"Serial and Batch Bundle",
 		fields=[
 			"`tabSerial and Batch Bundle`.`voucher_type`",
-			"`tabSerial and Batch Bundle`.`posting_date`",
+			"`tabSerial and Batch Bundle`.`posting_datetime` as posting_date",
 			"`tabSerial and Batch Bundle`.`name`",
 			"`tabSerial and Batch Bundle`.`company`",
 			"`tabSerial and Batch Bundle`.`voucher_no`",
@@ -33,7 +33,7 @@ def get_data(filters):
 			"`tabSerial and Batch Entry`.`qty`",
 		],
 		filters=filter_conditions,
-		order_by="posting_date",
+		order_by="posting_datetime",
 	)
 
 
@@ -54,7 +54,7 @@ def get_filter_conditions(filters):
 		filter_conditions.append(
 			[
 				"Serial and Batch Bundle",
-				"posting_date",
+				"posting_datetime",
 				"between",
 				[filters.get("from_date"), filters.get("to_date")],
 			]

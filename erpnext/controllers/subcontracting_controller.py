@@ -13,6 +13,7 @@ from frappe.utils import cint, flt, get_link_to_form
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.batch.batch import get_batch_qty
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	combine_datetime,
 	get_auto_batch_nos,
 	get_available_serial_nos,
 	get_voucher_wise_serial_batch_from_bundle,
@@ -570,8 +571,7 @@ class SubcontractingController(StockController):
 					"qty": qty,
 					"serial_nos": serial_nos,
 					"batches": batches,
-					"posting_date": self.posting_date,
-					"posting_time": self.posting_time,
+					"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
 					"voucher_type": "Subcontracting Receipt",
 					"do_not_submit": True,
 					"type_of_transaction": "Outward" if qty > 0 else "Inward",

@@ -207,7 +207,8 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				"method": "erpnext.controllers.taxes_and_totals.get_round_off_applicable_accounts",
 				"args": {
 					"company": me.frm.doc.company,
-					"account_list": frappe.flags.round_off_applicable_accounts
+					"account_list": frappe.flags.round_off_applicable_accounts,
+					"doc": me.frm.doc,
 				},
 				callback(r) {
 					if (r.message) {

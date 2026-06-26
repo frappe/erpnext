@@ -11,6 +11,7 @@ from frappe.query_builder.functions import Abs, Count
 from frappe.utils import cint, date_diff, flt, get_datetime
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 from erpnext.stock.valuation import round_off_if_near_zero
 
 Filters = frappe._dict
@@ -305,6 +306,11 @@ class FIFOSlots:
 		# prepare single sle voucher detail lookup
 		self.prepare_stock_reco_voucher_wise_count()
 
+		if stock_ledger_entries is None:
+			# nested queries invalidate the streaming cursor below,
+			# so batchwise valuation flags must be resolved beforehand
+			self._prefetch_batchwise_valuations()
+
 		with frappe.db.unbuffered_cursor():
 			if stock_ledger_entries is None:
 				stock_ledger_entries = self._get_stock_ledger_entries()
@@ -352,7 +358,7 @@ class FIFOSlots:
 		if row.voucher_type != "Stock Reconciliation":
 			return
 
-		if not row.batch_no or row.serial_no or row.serial_and_batch_bundle:
+		if row.has_serial_no and (not row.batch_no or row.serial_no or row.serial_and_batch_bundle):
 			if row.voucher_detail_no in self.stock_reco_voucher_wise_count:
 				# Legacy reconciliation with a single SLE has qty_after_transaction and
 				# stock_value_difference without an outward entry, so reset the queue first.
@@ -422,11 +428,37 @@ class FIFOSlots:
 
 	def _get_batchwise_valuation(self, batch_no: str):
 		if batch_no not in self.batchwise_valuation_by_batch:
+			# only reachable when stock ledger entries are passed in directly;
+			# the streaming path prefetches all flags before iteration
 			self.batchwise_valuation_by_batch[batch_no] = frappe.db.get_value(
 				"Batch", batch_no, "use_batchwise_valuation"
 			)
 
 		return self.batchwise_valuation_by_batch[batch_no]
+
+	def _prefetch_batchwise_valuations(self) -> None:
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		batch = frappe.qb.DocType("Batch")
+		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
+
+		query = (
+			frappe.qb.from_(sle)
+			.left_join(batch)
+			.on(sle.batch_no == batch.name)
+			.select(sle.batch_no, batch.use_batchwise_valuation)
+			.distinct()
+			.where(
+				(sle.batch_no.isnotnull())
+				& (sle.company == self.filters.get("company"))
+				& (sle.posting_datetime <= to_date)
+				& (sle.is_cancelled != 1)
+			)
+		)
+
+		query = self._apply_filter(query, sle, "item_code")
+
+		for batch_no, use_batchwise_valuation in query.run():
+			self.batchwise_valuation_by_batch[batch_no] = use_batchwise_valuation
 
 	def _init_key_stores(self, row: dict) -> tuple:
 		"Initialise keys and FIFO Queue."
@@ -936,9 +968,7 @@ class FIFOSlots:
 			)
 		)
 
-		for field in ["item_code"]:
-			if self.filters.get(field):
-				query = query.where(sle[field] == self.filters.get(field))
+		query = self._apply_filter(query, sle, "item_code")
 
 		if self.filters.get("warehouse"):
 			query = self._get_warehouse_conditions(sle, query)
@@ -985,9 +1015,7 @@ class FIFOSlots:
 				)
 			)
 
-			for field in ["item_code"]:
-				if self.filters.get(field):
-					query = query.where(sle[field] == self.filters.get(field))
+			query = self._apply_filter(query, sle, "item_code")
 
 			if self.filters.get("warehouse"):
 				query = self._get_warehouse_conditions(sle, query)
@@ -1020,27 +1048,25 @@ class FIFOSlots:
 			"has_batch_no",
 		)
 
-		if self.filters.get("item_code"):
-			item = item.where(item_table.item_code == self.filters.get("item_code"))
+		item = self._apply_filter(item, item_table, "item_code")
 
 		if self.filters.get("brand"):
 			item = item.where(item_table.brand == self.filters.get("brand"))
 
 		return item
 
+	def _apply_filter(self, query, table, fieldname: str):
+		filter_value = self.filters.get(fieldname)
+		if not filter_value:
+			return query
+
+		if isinstance(filter_value, list | tuple | set):
+			return query.where(table[fieldname].isin(filter_value))
+
+		return query.where(table[fieldname] == filter_value)
+
 	def _get_warehouse_conditions(self, sle, sle_query) -> str:
-		warehouse = frappe.qb.DocType("Warehouse")
-		lft, rgt = frappe.db.get_value("Warehouse", self.filters.get("warehouse"), ["lft", "rgt"])
-
-		warehouse_results = (
-			frappe.qb.from_(warehouse)
-			.select("name")
-			.where((warehouse.lft >= lft) & (warehouse.rgt <= rgt))
-			.run()
-		)
-		warehouse_results = [x[0] for x in warehouse_results]
-
-		return sle_query.where(sle.warehouse.isin(warehouse_results))
+		return apply_warehouse_filter(sle_query, sle, self.filters)
 
 	def prepare_stock_reco_voucher_wise_count(self):
 		self.stock_reco_voucher_wise_count = frappe._dict()
@@ -1057,6 +1083,7 @@ class FIFOSlots:
 				(doctype.voucher_type == "Stock Reconciliation")
 				& (doctype.docstatus < 2)
 				& (doctype.is_cancelled == 0)
+				& (item.has_serial_no == 1)
 			)
 			.groupby(doctype.voucher_detail_no)
 		)
