@@ -1291,13 +1291,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 		var set_party_account = function (set_pricing) {
 			if (["Sales Invoice", "Purchase Invoice"].includes(me.frm.doc.doctype)) {
-				if (me.frm.doc.doctype == "Sales Invoice") {
-					var party_type = "Customer";
-					var party_account_field = "debit_to";
-				} else {
-					var party_type = "Supplier";
-					var party_account_field = "credit_to";
-				}
+				let party_type = me.frm.doc.doctype == "Sales Invoice" ? "Customer" : "Supplier";
+				let party_account_field = me.frm.doc.doctype == "Sales Invoice" ? "debit_to" : "credit_to";
 
 				var party = me.frm.doc[frappe.model.scrub(party_type)];
 				if (
@@ -2071,7 +2066,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 
 		if (this.frm.doc.operations && this.frm.doc.operations.length > 0) {
-			var item_grid = this.frm.fields_dict["operations"].grid;
+			let item_grid = this.frm.fields_dict["operations"].grid;
 			$.each(["base_operating_cost", "base_hour_rate"], function (i, fname) {
 				if (frappe.meta.get_docfield(item_grid.doctype, fname))
 					item_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
@@ -2079,7 +2074,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 
 		if (this.frm.doc.secondary_items && this.frm.doc.secondary_items.length > 0) {
-			var item_grid = this.frm.fields_dict["secondary_items"].grid;
+			let item_grid = this.frm.fields_dict["secondary_items"].grid;
 			$.each(["base_rate", "base_amount"], function (i, fname) {
 				if (frappe.meta.get_docfield(item_grid.doctype, fname))
 					item_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
@@ -2470,7 +2465,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				row_to_modify[key] = pr_row[key];
 			}
 
-			if (this.frm.doc.hasOwnProperty("is_pos") && this.frm.doc.is_pos) {
+			if (Object.prototype.hasOwnProperty.call(this.frm.doc, "is_pos") && this.frm.doc.is_pos) {
 				let r = await frappe.db.get_value("POS Profile", this.frm.doc.pos_profile, "cost_center");
 				if (r.message.cost_center) {
 					row_to_modify["cost_center"] = r.message.cost_center;
@@ -2735,7 +2730,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						$.each(me.frm.doc.items || [], function (i, item) {
 							if (
 								item.name &&
-								r.message.hasOwnProperty(item.name) &&
+								Object.prototype.hasOwnProperty.call(r.message, item.name) &&
 								r.message[item.name].item_tax_template
 							) {
 								item.item_tax_template = r.message[item.name].item_tax_template;
