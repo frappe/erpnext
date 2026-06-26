@@ -862,7 +862,9 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		if(["Sales Invoice", "POS Invoice", "Purchase Invoice"].includes(this.frm.doc.doctype)) {
 			let grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
 			let base_grand_total = this.frm.doc.base_rounded_total || this.frm.doc.base_grand_total;
+			let total_amount_to_pay;
 
+<<<<<<< HEAD
 			if(this.frm.doc.party_account_currency == this.frm.doc.currency) {
 				var total_amount_to_pay = flt((grand_total - this.frm.doc.total_advance
 					- this.frm.doc.write_off_amount), precision("grand_total"));
@@ -870,6 +872,18 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				var total_amount_to_pay = flt(
 					(flt(base_grand_total, precision("base_grand_total"))
 						- this.frm.doc.total_advance - this.frm.doc.base_write_off_amount),
+=======
+			if (this.frm.doc.party_account_currency == this.frm.doc.currency) {
+				total_amount_to_pay = flt(
+					grand_total - this.frm.doc.total_advance - this.frm.doc.write_off_amount,
+					precision("grand_total")
+				);
+			} else {
+				total_amount_to_pay = flt(
+					flt(base_grand_total, precision("base_grand_total")) -
+						this.frm.doc.total_advance -
+						this.frm.doc.base_write_off_amount,
+>>>>>>> 485e9041de (chore: removing `controllers` from pre-commit eslint hooks exclude list (#56575))
 					precision("base_grand_total")
 				);
 			}
@@ -901,13 +915,15 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	async set_total_amount_to_default_mop() {
 		let grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
 		let base_grand_total = this.frm.doc.base_rounded_total || this.frm.doc.base_grand_total;
+		let total_amount_to_pay;
 
 		if (this.frm.doc.party_account_currency == this.frm.doc.currency) {
-			var total_amount_to_pay = flt(
+			total_amount_to_pay = flt(
 				grand_total - this.frm.doc.total_advance - this.frm.doc.write_off_amount,
 				precision("grand_total")
 			);
 		} else {
+<<<<<<< HEAD
 			var total_amount_to_pay = flt(
 				(
 					flt(
@@ -916,6 +932,12 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 					)
 					- this.frm.doc.total_advance - this.frm.doc.base_write_off_amount
 				),
+=======
+			total_amount_to_pay = flt(
+				flt(base_grand_total, precision("base_grand_total")) -
+					this.frm.doc.total_advance -
+					this.frm.doc.base_write_off_amount,
+>>>>>>> 485e9041de (chore: removing `controllers` from pre-commit eslint hooks exclude list (#56575))
 				precision("base_grand_total")
 			);
 		}

@@ -16,6 +16,7 @@ erpnext.accounts.taxes = {
 					}
 				});
 			},
+<<<<<<< HEAD
 			onload: function(frm) {
 				if(frm.get_field("taxes")) {
 					frm.set_query("account_head", "taxes", function(doc) {
@@ -23,6 +24,17 @@ erpnext.accounts.taxes = {
 							var account_type = ["Tax", "Chargeable", "Expense Account"];
 						} else {
 							var account_type = ["Tax", "Chargeable", "Income Account", "Expenses Included In Valuation"];
+=======
+			onload: function (frm) {
+				if (frm.get_field("taxes")) {
+					frm.set_query("account_head", "taxes", function (doc) {
+						let account_type = ["Tax", "Chargeable"];
+
+						if (frm.cscript.tax_table == "Sales Taxes and Charges") {
+							account_type.push("Expense Account");
+						} else {
+							account_type.push("Income Account", "Expenses Included In Valuation");
+>>>>>>> 485e9041de (chore: removing `controllers` from pre-commit eslint hooks exclude list (#56575))
 						}
 
 						return {
