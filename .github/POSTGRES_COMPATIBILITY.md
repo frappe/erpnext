@@ -170,6 +170,32 @@ These are auto-handled by the framework and are **not** breaks:
 
 ---
 
+## 6. Raw SQL → ORM conversions — verify behaviour-identical
+
+When a PR rewrites a raw `frappe.db.sql`/`sql_list` to the ORM (`get_all`/`get_value`/`db.delete`/
+`db.count`/`db.exists`/`set_value`/`frappe.qb`), the raw query was already valid on both engines —
+so the only risk is a **behaviour change** (it breaks on *both* engines, or returns a different
+result). These pass the static checker and a one-engine green run; only running the converted
+test/path catches them. Flag a conversion that:
+
+- **Passes an aggregate as a string field** — `get_value(dt, filters, "sum(x)")` /
+  `get_all(fields=["sum(x)"])` raise *"SQL functions are not allowed as strings in SELECT"*. The
+  portable forms are the **uppercase** dict `get_all(fields=[{"SUM": "x"}])` or `frappe.qb` +
+  `Sum`/`Max`. (`{"sum": …}` lower-case is read as a child-table query and also fails.)
+- **Mutates a `get_all(as_list=True)` result** — that returns a **tuple** (raw
+  `frappe.db.sql(as_list=1)` returns a list), so `.sort()`/`.append()` raise `'tuple' object has
+  no attribute …`. Use `sorted(...)`/`list(...)`. (`pluck=` returns a list.)
+- **Orphans or re-shapes the consumer** — collapsing `rows = sql(...); assertTrue(rows)` into
+  `assertTrue(exists(...))` is a `NameError` if `rows` is read later; swapping `as_dict` for
+  positional (or vice-versa) without updating the reader breaks it. The result must be consumed
+  exactly as before.
+
+Note: not every raw query *should* convert — dynamic table/field identifiers, caller-built
+`WHERE`/`ORDER BY` fragments, CTEs + window functions, hot `UPDATE` paths, and DB-catalog
+introspection (`pg_index`/`SHOW INDEX`) genuinely need raw SQL; leave them.
+
+---
+
 ## How to review
 
 For every changed query: does it (a) use a construct from §1 (would error on PostgreSQL), or
