@@ -94,7 +94,7 @@ class RepostItemValuation(Document):
 		self.validate_recreate_stock_ledgers()
 
 	def set_default_posting_time(self):
-		if not self.posting_time:
+		if self.posting_time is None:
 			self.posting_time = nowtime()
 
 		if not self.posting_date:
