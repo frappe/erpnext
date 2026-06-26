@@ -1,0 +1,66 @@
+{
+ "actions": [],
+ "creation": "2026-06-19 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "attribute",
+  "variable_name",
+  "value_type",
+  "value",
+  "uom"
+ ],
+ "fields": [
+  {
+   "columns": 3,
+   "fieldname": "attribute",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Attribute",
+   "options": "Product Configuration Attribute",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "attribute.variable_name",
+   "fieldname": "variable_name",
+   "fieldtype": "Data",
+   "label": "Variable Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "attribute.value_type",
+   "fieldname": "value_type",
+   "fieldtype": "Data",
+   "label": "Value Type",
+   "read_only": 1
+  },
+  {
+   "columns": 4,
+   "fieldname": "value",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Value"
+  },
+  {
+   "columns": 2,
+   "fetch_from": "attribute.uom",
+   "fieldname": "uom",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "UOM",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-06-19 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Product Configuration Attribute Value",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

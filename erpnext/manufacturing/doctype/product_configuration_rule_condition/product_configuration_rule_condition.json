@@ -1,0 +1,60 @@
+{
+ "actions": [],
+ "creation": "2026-06-19 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "attribute",
+  "variable_name",
+  "operator",
+  "value"
+ ],
+ "fields": [
+  {
+   "columns": 3,
+   "fieldname": "attribute",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Attribute",
+   "options": "Product Configuration Attribute",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "attribute.variable_name",
+   "fieldname": "variable_name",
+   "fieldtype": "Data",
+   "label": "Variable Name",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "default": "==",
+   "fieldname": "operator",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Operator",
+   "options": "==\n!=\n>\n>=\n<\n<=\nin\nnot in",
+   "reqd": 1
+  },
+  {
+   "columns": 4,
+   "fieldname": "value",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Value",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-06-19 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Product Configuration Rule Condition",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,107 @@
+{
+ "actions": [],
+ "autoname": "field:attribute_name",
+ "creation": "2026-06-19 00:00:00.000000",
+ "description": "A generic input attribute used to configure products (e.g. Width, Material).",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "attribute_name",
+  "variable_name",
+  "value_type",
+  "uom",
+  "column_break_main",
+  "default_value",
+  "select_options",
+  "disabled",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "attribute_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Attribute Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "description": "Token used to reference this attribute inside formulas. Auto-derived from the name.",
+   "fieldname": "variable_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Variable Name",
+   "unique": 1
+  },
+  {
+   "default": "Float",
+   "fieldname": "value_type",
+   "fieldtype": "Select",
+   "label": "Value Type",
+   "options": "Float\nInt\nData\nSelect\nCheck\nCurrency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "Unit of Measure",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "column_break_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_value",
+   "fieldtype": "Data",
+   "label": "Default Value"
+  },
+  {
+   "depends_on": "eval:doc.value_type == \"Select\"",
+   "description": "One option per line.",
+   "fieldname": "select_options",
+   "fieldtype": "Small Text",
+   "label": "Select Options"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  }
+ ],
+ "links": [],
+ "modified": "2026-06-19 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Product Configuration Attribute",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing User"
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

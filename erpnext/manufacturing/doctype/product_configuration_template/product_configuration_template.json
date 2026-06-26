@@ -1,0 +1,98 @@
+{
+ "actions": [],
+ "autoname": "field:template_name",
+ "creation": "2026-06-19 00:00:00.000000",
+ "description": "Defines a configurable product type: the attributes it accepts and the derived variables used by its rules.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "template_name",
+  "configurable_item",
+  "column_break_main",
+  "enabled",
+  "attributes_section",
+  "attributes",
+  "variables_section",
+  "variables"
+ ],
+ "fields": [
+  {
+   "fieldname": "template_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Template Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "description": "Optional finished item this template configures. Used by future BOM generation.",
+   "fieldname": "configurable_item",
+   "fieldtype": "Link",
+   "label": "Configurable Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "column_break_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
+  },
+  {
+   "fieldname": "attributes_section",
+   "fieldtype": "Section Break",
+   "label": "Attributes"
+  },
+  {
+   "fieldname": "attributes",
+   "fieldtype": "Table",
+   "label": "Attributes",
+   "options": "Product Configuration Template Attribute",
+   "reqd": 1
+  },
+  {
+   "description": "Named formulas computed before rules run, available to rule formulas (e.g. area = width * height).",
+   "fieldname": "variables_section",
+   "fieldtype": "Section Break",
+   "label": "Derived Variables"
+  },
+  {
+   "fieldname": "variables",
+   "fieldtype": "Table",
+   "label": "Variables",
+   "options": "Product Configuration Template Variable"
+  }
+ ],
+ "links": [],
+ "modified": "2026-06-19 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Product Configuration Template",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing User"
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

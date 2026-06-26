@@ -1,0 +1,135 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-06-19 00:00:00.000000",
+ "description": "Maps a condition over attributes to the components it requires.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "rule_name",
+  "template",
+  "column_break_main",
+  "priority",
+  "active",
+  "logic_section",
+  "condition_logic",
+  "condition_expression",
+  "conditions_section",
+  "conditions",
+  "outputs_section",
+  "outputs"
+ ],
+ "fields": [
+  {
+   "fieldname": "rule_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Rule Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "template",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Template",
+   "options": "Product Configuration Template",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Lower numbers run first. Used only to order evaluation; all matching rules apply.",
+   "fieldname": "priority",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Priority"
+  },
+  {
+   "default": "1",
+   "fieldname": "active",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Active"
+  },
+  {
+   "fieldname": "logic_section",
+   "fieldtype": "Section Break",
+   "label": "Matching"
+  },
+  {
+   "default": "All conditions",
+   "fieldname": "condition_logic",
+   "fieldtype": "Select",
+   "label": "Condition Logic",
+   "options": "All conditions\nAny condition\nExpression",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.condition_logic == \"Expression\"",
+   "description": "Boolean formula over attributes/variables, e.g. width > 1000 and material == \"Wood\".",
+   "fieldname": "condition_expression",
+   "fieldtype": "Small Text",
+   "label": "Condition Expression"
+  },
+  {
+   "depends_on": "eval:doc.condition_logic != \"Expression\"",
+   "fieldname": "conditions_section",
+   "fieldtype": "Section Break",
+   "label": "Conditions"
+  },
+  {
+   "depends_on": "eval:doc.condition_logic != \"Expression\"",
+   "fieldname": "conditions",
+   "fieldtype": "Table",
+   "label": "Conditions",
+   "options": "Product Configuration Rule Condition"
+  },
+  {
+   "fieldname": "outputs_section",
+   "fieldtype": "Section Break",
+   "label": "Outputs"
+  },
+  {
+   "fieldname": "outputs",
+   "fieldtype": "Table",
+   "label": "Outputs",
+   "options": "Product Configuration Rule Output",
+   "reqd": 1
+  }
+ ],
+ "links": [],
+ "modified": "2026-06-19 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Product Configuration Rule",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing User"
+  }
+ ],
+ "show_title_field_in_link": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "rule_name",
+ "track_changes": 1
+}
