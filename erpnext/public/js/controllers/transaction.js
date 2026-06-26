@@ -1007,18 +1007,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 		var set_party_account = function(set_pricing) {
 			if (["Sales Invoice", "Purchase Invoice"].includes(me.frm.doc.doctype)) {
-<<<<<<< HEAD
-				if(me.frm.doc.doctype=="Sales Invoice") {
-					var party_type = "Customer";
-					var party_account_field = 'debit_to';
-				} else {
-					var party_type = "Supplier";
-					var party_account_field = 'credit_to';
-				}
-=======
 				let party_type = me.frm.doc.doctype == "Sales Invoice" ? "Customer" : "Supplier";
 				let party_account_field = me.frm.doc.doctype == "Sales Invoice" ? "debit_to" : "credit_to";
->>>>>>> 485e9041de (chore: removing `controllers` from pre-commit eslint hooks exclude list (#56575))
 
 				var party = me.frm.doc[frappe.model.scrub(party_type)];
 				if(party && me.frm.doc.company && (!me.frm.doc.__onload?.load_after_mapping || !me.frm.doc[party_account_field])) {
@@ -1432,7 +1422,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			let first_row = this.frm.doc.items[0];
 			if (!first_row) {
 				return false
-			};
+			}
 
 			let mapped_rows = mappped_fields.filter(d => first_row[d])
 
@@ -1601,36 +1591,23 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.toggle_item_grid_columns(company_currency);
 
 		if (this.frm.doc.operations && this.frm.doc.operations.length > 0) {
-<<<<<<< HEAD
 			this.frm.set_currency_labels(["operating_cost", "hour_rate"], this.frm.doc.currency, "operations");
 			this.frm.set_currency_labels(["base_operating_cost", "base_hour_rate"], company_currency, "operations");
 
-			var item_grid = this.frm.fields_dict["operations"].grid;
+			let item_grid = this.frm.fields_dict["operations"].grid;
 			$.each(["base_operating_cost", "base_hour_rate"], function(i, fname) {
 				if(frappe.meta.get_docfield(item_grid.doctype, fname))
-=======
-			let item_grid = this.frm.fields_dict["operations"].grid;
-			$.each(["base_operating_cost", "base_hour_rate"], function (i, fname) {
-				if (frappe.meta.get_docfield(item_grid.doctype, fname))
->>>>>>> 485e9041de (chore: removing `controllers` from pre-commit eslint hooks exclude list (#56575))
 					item_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
 			});
 		}
 
-<<<<<<< HEAD
 		if (this.frm.doc.scrap_items && this.frm.doc.scrap_items.length > 0) {
 			this.frm.set_currency_labels(["rate", "amount"], this.frm.doc.currency, "scrap_items");
 			this.frm.set_currency_labels(["base_rate", "base_amount"], company_currency, "scrap_items");
 
-			var item_grid = this.frm.fields_dict["scrap_items"].grid;
+			let item_grid = this.frm.fields_dict["scrap_items"].grid;
 			$.each(["base_rate", "base_amount"], function(i, fname) {
 				if(frappe.meta.get_docfield(item_grid.doctype, fname))
-=======
-		if (this.frm.doc.secondary_items && this.frm.doc.secondary_items.length > 0) {
-			let item_grid = this.frm.fields_dict["secondary_items"].grid;
-			$.each(["base_rate", "base_amount"], function (i, fname) {
-				if (frappe.meta.get_docfield(item_grid.doctype, fname))
->>>>>>> 485e9041de (chore: removing `controllers` from pre-commit eslint hooks exclude list (#56575))
 					item_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
 			});
 		}
@@ -2255,17 +2232,12 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				},
 				callback: function(r) {
 					if (!r.exc) {
-<<<<<<< HEAD
-						$.each(me.frm.doc.items || [], function(i, item) {
-							if (item.name && r.message.hasOwnProperty(item.name) && r.message[item.name].item_tax_template) {
-=======
 						$.each(me.frm.doc.items || [], function (i, item) {
 							if (
 								item.name &&
 								Object.prototype.hasOwnProperty.call(r.message, item.name) &&
 								r.message[item.name].item_tax_template
 							) {
->>>>>>> 485e9041de (chore: removing `controllers` from pre-commit eslint hooks exclude list (#56575))
 								item.item_tax_template = r.message[item.name].item_tax_template;
 								item.item_tax_rate = r.message[item.name].item_tax_rate;
 								me.add_taxes_from_item_tax_template(item.item_tax_rate);
