@@ -1329,6 +1329,11 @@ class update_entries_after:
 		Update outgoing rate in Stock Entry, Delivery Note, Sales Invoice and Sales Return
 		In case of Stock Entry, also calculate FG Item rate and total incoming/outgoing amount
 		"""
+		if sle.voucher_type == "Stock Reconciliation":
+			if flt(sle.actual_qty) <= 0 and not self.args.get("sle_id"):
+				self.update_rate_on_stock_reconciliation(sle)
+			return
+
 		if sle.actual_qty and sle.voucher_detail_no:
 			outgoing_rate = abs(flt(sle.stock_value_difference)) / abs(sle.actual_qty)
 
@@ -1340,8 +1345,6 @@ class update_entries_after:
 				self.update_rate_on_purchase_receipt(sle, outgoing_rate)
 			elif flt(sle.actual_qty) < 0 and sle.voucher_type == "Subcontracting Receipt":
 				self.update_rate_on_subcontracting_receipt(sle, outgoing_rate)
-		elif sle.voucher_type == "Stock Reconciliation":
-			self.update_rate_on_stock_reconciliation(sle)
 
 	def update_rate_on_stock_entry(self, sle, outgoing_rate):
 		frappe.db.set_value("Stock Entry Detail", sle.voucher_detail_no, "basic_rate", outgoing_rate)
@@ -1435,6 +1438,7 @@ class update_entries_after:
 			d.db_update()
 
 	def update_rate_on_stock_reconciliation(self, sle):
+<<<<<<< HEAD
 		if not sle.serial_no and not sle.batch_no:
 			sr = frappe.get_doc("Stock Reconciliation", sle.voucher_no, for_update=True)
 
@@ -1466,6 +1470,15 @@ class update_entries_after:
 
 			for item in sr.items:
 				item.db_update()
+=======
+		# Refresh the reconciliation's difference amount and per-row current qty/rate from the reposted
+		# ledger so the document keeps matching the GL entries. Handles serialized, batched and
+		# non-serialized items uniformly (the document method reads the current bundle for serial/batch
+		# rows and the pre-reconciliation ledger balance for non-serial rows).
+		frappe.get_lazy_doc(
+			"Stock Reconciliation", sle.voucher_no, for_update=True
+		).recalculate_difference_amount_from_ledger()
+>>>>>>> c7ef42ef98 (fix: sync Stock Reconciliation difference amount with GL after reposting (#56574))
 
 	def get_incoming_value_for_serial_nos(self, sle, serial_nos):
 		# get rate from serial nos within same company
