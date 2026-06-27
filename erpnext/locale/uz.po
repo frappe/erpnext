@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-06-21 10:42+0000\n"
-"PO-Revision-Date: 2026-06-24 19:24\n"
+"PO-Revision-Date: 2026-06-27 20:02\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Uzbek\n"
 "MIME-Version: 1.0\n"
@@ -25,7 +25,12 @@ msgid "\n"
 "\t\t\tIf it is not possible to make an adjustment entry, please enable 'Allow Negative Stock for Batch' in the batch {0} or in the Stock Settings to proceed.\n"
 "\t\t\tHowever, enabling this setting may lead to negative stock in the system.\n"
 "\t\t\tSo please ensure the stock levels are adjusted as soon as possible to maintain the correct valuation rate."
-msgstr ""
+msgstr "\n"
+" {1} mahsulotining {0} partiyasi omborda salbiy zaxiraga ega {2}{3}.\n"
+"\t\t\tUshbu yozuvni davom ettirish uchun iltimos, {4} miqdorida zaxira miqdorini qo'shing.\n"
+"\t\t\tAgar sozlash yozuvini kiritishning iloji bo'lmasa, iltimos, {0} partiyasida yoki Stok sozlamalarida \"Partiya uchun salbiy zaxiraga ruxsat berish\" ni yoqing.\n"
+"\t\t\tBiroq, ushbu sozlamani yoqish tizimda salbiy zaxiraga olib kelishi mumkin.\n"
+"\t\t\tShuning uchun, to'g'ri baholash stavkasini saqlab qolish uchun aksiyalar darajasini iloji boricha tezroq sozlang."
 
 #. Label of the column_break_32 (Column Break) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -34,62 +39,62 @@ msgstr ""
 
 #: erpnext/selling/doctype/quotation/quotation.js:82
 msgid " Address"
-msgstr ""
+msgstr " Manzil"
 
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:611
 msgid " Amount"
-msgstr ""
+msgstr " Miqdori"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:114
 msgid " BOM"
-msgstr ""
+msgstr " BOM"
 
 #. Label of the default_wip_warehouse (Link) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid " Default Work In Progress Warehouse "
-msgstr ""
+msgstr " Standart bajarilayotgan ish ombori "
 
 #. Label of the istable (Check) field in DocType 'Inventory Dimension'
 #: erpnext/stock/doctype/inventory_dimension/inventory_dimension.json
 msgid " Is Child Table"
-msgstr ""
+msgstr " Bola jadvali"
 
 #. Label of the is_subcontracted (Check) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 msgid " Is Subcontracted"
-msgstr ""
+msgstr " Subpudratchi hisoblanadi"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:196
 msgid " Item"
-msgstr ""
+msgstr " Mahsulot"
 
 #: erpnext/accounts/report/customer_ledger_summary/customer_ledger_summary.py:151
 #: erpnext/selling/report/sales_analytics/sales_analytics.py:128
 msgid " Name"
-msgstr ""
+msgstr " Ism"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:144
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:185
 msgid " Phantom Item"
-msgstr ""
+msgstr " Xayoliy buyum"
 
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:602
 msgid " Rate"
-msgstr ""
+msgstr " Narx"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:122
 msgid " Raw Material"
-msgstr ""
+msgstr " Xom ashyo"
 
 #. Label of the skip_material_transfer (Check) field in DocType 'BOM Operation'
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
 msgid " Skip Material Transfer"
-msgstr ""
+msgstr " Materiallarni uzatishni o'tkazib yuborish"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:133
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:174
 msgid " Sub Assembly"
-msgstr ""
+msgstr " Sub yig'ish"
 
 #: erpnext/projects/doctype/project_update/project_update.py:140
 msgid " Summary"
@@ -166,32 +171,32 @@ msgstr ""
 #: erpnext/manufacturing/doctype/bom/bom.js:1022
 #, python-format
 msgid "% Finished Item Quantity"
-msgstr ""
+msgstr "Tayyor mahsulot miqdori %"
 
 #. Label of the per_installed (Percent) field in DocType 'Delivery Note'
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 msgid "% Installed"
-msgstr ""
+msgstr "O'rnatilgan %"
 
 #: erpnext/stock/page/warehouse_capacity_summary/warehouse_capacity_summary.js:70
 #: erpnext/stock/page/warehouse_capacity_summary/warehouse_capacity_summary_header.html:16
 msgid "% Occupied"
-msgstr ""
+msgstr "% Band bo'lgan"
 
 #: erpnext/accounts/report/item_wise_purchase_register/item_wise_purchase_register.py:283
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:337
 msgid "% Of Grand Total"
-msgstr ""
+msgstr "Umumiy jami foiz"
 
 #. Label of the per_ordered (Percent) field in DocType 'Material Request'
 #: erpnext/stock/doctype/material_request/material_request.json
 msgid "% Ordered"
-msgstr ""
+msgstr "Buyurtma qilingan %"
 
 #. Label of the per_picked (Percent) field in DocType 'Sales Order'
 #: erpnext/selling/doctype/sales_order/sales_order.json
 msgid "% Picked"
-msgstr ""
+msgstr "Tanlangan %"
 
 #. Label of the process_loss_percentage (Percent) field in DocType 'BOM'
 #. Label of the process_loss_percentage (Percent) field in DocType 'Stock
@@ -202,30 +207,30 @@ msgstr ""
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 msgid "% Process Loss"
-msgstr ""
+msgstr "Jarayon yo'qotishining foizi"
 
 #. Label of the per_produced (Percent) field in DocType 'Subcontracting Inward
 #. Order'
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 msgid "% Produced"
-msgstr ""
+msgstr "Ishlab chiqarilgan %"
 
 #. Label of the progress (Percent) field in DocType 'Task'
 #: erpnext/projects/doctype/task/task.json
 msgid "% Progress"
-msgstr ""
+msgstr "% Jarayon"
 
 #. Label of the per_raw_material_received (Percent) field in DocType
 #. 'Subcontracting Inward Order'
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 msgid "% Raw Material Received"
-msgstr ""
+msgstr "Xom ashyo % Qabul qilingan"
 
 #. Label of the per_raw_material_returned (Percent) field in DocType
 #. 'Subcontracting Inward Order'
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 msgid "% Raw Material Returned"
-msgstr ""
+msgstr "Qaytarilgan xomashyo %"
 
 #. Label of the per_received (Percent) field in DocType 'Purchase Order'
 #. Label of the per_received (Percent) field in DocType 'Material Request'
@@ -234,7 +239,7 @@ msgstr ""
 #: erpnext/stock/doctype/material_request/material_request.json
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgid "% Received"
-msgstr ""
+msgstr "Olingan foiz"
 
 #. Label of the per_returned (Percent) field in DocType 'Delivery Note'
 #. Label of the per_returned (Percent) field in DocType 'Purchase Receipt'
@@ -247,186 +252,186 @@ msgstr ""
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "% Returned"
-msgstr ""
+msgstr "Qaytarilgan foiz"
 
 #. Description of the '% Amount Billed' (Percent) field in DocType 'Sales
 #. Order'
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #, python-format
 msgid "% of materials billed against this Sales Order"
-msgstr ""
+msgstr "Ushbu Sotuv Buyurtmasiga binoan hisoblangan materiallarning foizi"
 
 #. Description of the '% Delivered' (Percent) field in DocType 'Pick List'
 #: erpnext/stock/doctype/pick_list/pick_list.json
 #, python-format
 msgid "% of materials delivered against this Pick List"
-msgstr ""
+msgstr "Ushbu Tanlov Ro'yxatiga muvofiq yetkazib berilgan materiallarning foizi"
 
 #. Description of the '%  Delivered' (Percent) field in DocType 'Sales Order'
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #, python-format
 msgid "% of materials delivered against this Sales Order"
-msgstr ""
+msgstr "Ushbu Savdo Buyurtmasiga muvofiq yetkazib berilgan materiallarning foizi"
 
 #: erpnext/controllers/accounts_controller.py:1299
 msgid "'Account' in the Accounting section of Customer {0}"
-msgstr ""
+msgstr "Mijoz {0} ning Buxgalteriya hisobi bo'limidagi 'Hisob'"
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:304
 msgid "'Allow Multiple Sales Orders Against a Customer's Purchase Order'"
-msgstr ""
+msgstr "\"Mijozning xarid buyurtmasiga qarshi bir nechta savdo buyurtmalariga ruxsat berish\""
 
 #: erpnext/controllers/trends.py:62
 msgid "'Based On' and 'Group By' can not be same"
-msgstr ""
+msgstr "\"Asoslangan\" va \"Guruhlash\" bir xil bo'lishi mumkin emas"
 
 #: erpnext/selling/report/inactive_customers/inactive_customers.py:23
 msgid "'Days Since Last Order' must be greater than or equal to zero"
-msgstr ""
+msgstr "\"Oxirgi buyurtmadan keyingi kunlar\" noldan katta yoki teng bo'lishi kerak"
 
 #: erpnext/controllers/accounts_controller.py:1304
 msgid "'Default {0} Account' in Company {1}"
-msgstr ""
+msgstr "Kompaniya {1} da 'Standart {0} Hisob'"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:893
 msgid "'Entries' cannot be empty"
-msgstr ""
+msgstr "\"Yozuvlar\" bo'sh bo'lishi mumkin emas"
 
 #: erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py:24
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:127
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:322
 msgid "'From Date' is required"
-msgstr ""
+msgstr "\"Boshlanish sanasi\" shart"
 
 #: erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py:18
 msgid "'From Date' must be after 'To Date'"
-msgstr ""
+msgstr "\"Sanagacha\" dan keyin \"Boshlang'ich sana\" bo'lishi kerak"
 
 #: erpnext/stock/doctype/item/item.py:466
 msgid "'Has Serial No' can not be 'Yes' for non-stock item"
-msgstr ""
+msgstr "\"Seriya raqami bor\" so'zi omborda bo'lmagan mahsulot uchun \"Ha\" bo'la olmaydi"
 
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.py:145
 msgid "'Inspection Required before Delivery' has disabled for the item {0}, no need to create the QI"
-msgstr ""
+msgstr "{0}mahsuloti uchun \"Yetkazib berishdan oldin tekshirish talab qilinadi\" funksiyasi o'chirib qo'yilgan, QI yaratish shart emas"
 
 #: erpnext/stock/doctype/quality_inspection/quality_inspection.py:136
 msgid "'Inspection Required before Purchase' has disabled for the item {0}, no need to create the QI"
-msgstr ""
+msgstr "{0}mahsuloti uchun \"Sotib olishdan oldin tekshirish talab qilinadi\" funksiyasi o'chirib qo'yilgan, QI yaratish shart emas"
 
 #: erpnext/stock/report/stock_ledger/stock_ledger.py:684
 #: erpnext/stock/report/stock_ledger/stock_ledger.py:725
 #: erpnext/stock/report/stock_ledger/stock_ledger.py:830
 msgid "'Opening'"
-msgstr ""
+msgstr "\"Ochilish\""
 
 #: erpnext/stock/report/batch_item_expiry_status/batch_item_expiry_status.py:27
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:129
 #: erpnext/stock/report/stock_analytics/stock_analytics.py:328
 msgid "'To Date' is required"
-msgstr ""
+msgstr "\"Sanaga qadar\" talab qilinadi"
 
 #: erpnext/stock/doctype/packing_slip/packing_slip.py:95
 msgid "'To Package No.' cannot be less than 'From Package No.'"
-msgstr ""
+msgstr "“Paket raqamiga” “Paket raqamidan” dan kichik boʻlmasligi kerak."
 
 #: erpnext/controllers/sales_and_purchase_return.py:80
 msgid "'Update Stock' can not be checked because items are not delivered via {0}"
-msgstr ""
+msgstr "\"Omborni yangilash\" katagiga belgi qo'yib bo'lmaydi, chunki mahsulotlar {0} orqali yetkazib berilmaydi."
 
 #: erpnext/accounts/doctype/sales_invoice/services/fixed_assets.py:46
 msgid "'Update Stock' cannot be checked for fixed asset sale"
-msgstr ""
+msgstr "Asosiy vositalarni sotish uchun \"Omborni yangilash\" ni tekshirib bo'lmaydi"
 
 #: erpnext/accounts/doctype/bank_account/bank_account.py:79
 msgid "'{0}' account is already used by {1}. Use another account."
-msgstr ""
+msgstr "'{0}' hisobi allaqachon {1}tomonidan ishlatilmoqda. Boshqa hisobdan foydalaning."
 
 #: erpnext/accounts/doctype/pos_settings/pos_settings.py:44
 msgid "'{0}' has been already added."
-msgstr ""
+msgstr "'{0}' allaqachon qo'shilgan."
 
 #: erpnext/setup/doctype/company/company.py:315
 #: erpnext/setup/doctype/company/company.py:326
 msgid "'{0}' should be in company currency {1}."
-msgstr ""
+msgstr "'{0}' kompaniya valyutasida bo'lishi kerak {1}."
 
 #: erpnext/stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:174
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:203
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:106
 msgid "(A) Qty After Transaction"
-msgstr ""
+msgstr "(A) Tranzaksiyadan keyingi miqdor"
 
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:208
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:111
 msgid "(B) Expected Qty After Transaction"
-msgstr ""
+msgstr "(B) Tranzaksiyadan keyin kutilgan miqdor"
 
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:223
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:126
 msgid "(C) Total Qty in Queue"
-msgstr ""
+msgstr "(C) Navbatdagi umumiy miqdor"
 
 #: erpnext/stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:184
 msgid "(C) Total qty in queue"
-msgstr ""
+msgstr "(C) Navbatdagi umumiy miqdor"
 
 #: erpnext/stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:194
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:233
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:136
 msgid "(D) Balance Stock Value"
-msgstr ""
+msgstr "(D) Aktsiyalarning balans qiymati"
 
 #. Description of the 'Capacity' (Int) field in DocType 'Item Lead Time'
 #: erpnext/stock/doctype/item_lead_time/item_lead_time.json
 msgid "(Daily Yield * No of Units Produced) / 100"
-msgstr ""
+msgstr "(Kundalik hosildorlik * Ishlab chiqarilgan birliklar soni) / 100"
 
 #: erpnext/stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:199
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:238
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:141
 msgid "(E) Balance Stock Value in Queue"
-msgstr ""
+msgstr "(E) Navbatdagi qoldiq aksiya qiymati"
 
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:248
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:151
 msgid "(F) Change in Stock Value"
-msgstr ""
+msgstr "(F) Aksiya qiymatining o'zgarishi"
 
 #: erpnext/manufacturing/report/exponential_smoothing_forecasting/exponential_smoothing_forecasting.py:192
 msgid "(Forecast)"
-msgstr ""
+msgstr "(Prognoz)"
 
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:253
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:156
 msgid "(G) Sum of Change in Stock Value"
-msgstr ""
+msgstr "(G) Aksiya qiymatidagi o'zgarish yig'indisi"
 
 #. Description of the 'Daily Yield (%)' (Percent) field in DocType 'Item Lead
 #. Time'
 #: erpnext/stock/doctype/item_lead_time/item_lead_time.json
 msgid "(Good Units Produced / Total Units Produced) × 100"
-msgstr ""
+msgstr "(Yaxshi ishlab chiqarilgan birliklar / Jami ishlab chiqarilgan birliklar) × 100"
 
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:263
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:166
 msgid "(H) Change in Stock Value (FIFO Queue)"
-msgstr ""
+msgstr "(H) Aksiya qiymatining o'zgarishi (FIFO navbati)"
 
 #: erpnext/stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:209
 msgid "(H) Valuation Rate"
-msgstr ""
+msgstr "(H) Baholash darajasi"
 
 #. Description of the 'Actual Operating Cost' (Currency) field in DocType 'Work
 #. Order Operation'
 #: erpnext/manufacturing/doctype/work_order_operation/work_order_operation.json
 msgid "(Hour Rate / 60) * Actual Operation Time"
-msgstr ""
+msgstr "(Soatlik tezlik / 60) * Haqiqiy ish vaqti"
 
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:273
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:176
 msgid "(I) Valuation Rate"
-msgstr ""
+msgstr "(I) Baholash darajasi"
 
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:278
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:181
@@ -756,42 +761,42 @@ msgstr ""
 #. Content of the 'html_19' (HTML) field in DocType 'Cheque Print Template'
 #: erpnext/accounts/doctype/cheque_print_template/cheque_print_template.json
 msgid "<label class=\"control-label\" style=\"margin-bottom: 0px;\">Amount In Words</label>"
-msgstr ""
+msgstr "<label class=\"control-label\" style=\"margin-bottom: 0px;\">So'z bilan miqdor</label>"
 
 #. Content of the 'Date Settings' (HTML) field in DocType 'Cheque Print
 #. Template'
 #: erpnext/accounts/doctype/cheque_print_template/cheque_print_template.json
 msgid "<label class=\"control-label\" style=\"margin-bottom: 0px;\">Date Settings</label>"
-msgstr ""
+msgstr "<label class=\"control-label\" style=\"margin-bottom: 0px;\">Sana sozlamalari</label>"
 
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.py:126
 msgid "<li>Clearance date must be after cheque date for row(s): {0}</li>"
-msgstr ""
+msgstr "<li>Quyidagi qator(lar) uchun to'lov sanasi chek sanasidan keyin bo'lishi kerak: {0}</li>"
 
 #: erpnext/accounts/services/billing_validation.py:139
 msgid "<li>Item {0} in row(s) {1} billed more than {2}</li>"
-msgstr ""
+msgstr "<li>Qator(lar)dagi {0} element {1} dan ortiq to'lov amalga oshirildi {2}</li>"
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:427
 msgid "<li>Packed Item {0}: Required {1}, Available {2}</li>"
-msgstr ""
+msgstr "<li>Qadoqlangan mahsulot {0}: Majburiy {1}, Mavjud {2}</li>"
 
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.py:121
 msgid "<li>Payment document required for row(s): {0}</li>"
-msgstr ""
+msgstr "<li>Qator(lar) uchun to'lov hujjati talab qilinadi: {0}</li>"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:165
 #: erpnext/utilities/bulk_transaction.py:37
 msgid "<li>{}</li>"
-msgstr ""
+msgstr "<li>{}</li>"
 
 #: erpnext/accounts/services/billing_validation.py:136
 msgid "<p>Cannot overbill for the following Items:</p>"
-msgstr ""
+msgstr "<p>Quyidagi mahsulotlar uchun ortiqcha to'lov amalga oshirib bo'lmaydi:</p>"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:159
 msgid "<p>Following {0}s doesn't belong to Company {1} :</p>"
-msgstr ""
+msgstr "<p> {0}ga amal qilayotganlar {1} kompaniyasiga tegishli emas:</p>"
 
 #. Content of the 'html_llwp' (HTML) field in DocType 'Request for Quotation'
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.json
@@ -819,19 +824,19 @@ msgstr ""
 
 #: erpnext/accounts/doctype/bank_clearance/bank_clearance.py:119
 msgid "<p>Please correct the following row(s):</p><ul>"
-msgstr ""
+msgstr "<p>Quyidagi qator(lar)ni to'g'rilang:</p><ul>"
 
 #: erpnext/controllers/buying_controller.py:124
 msgid "<p>Posting Date {0} cannot be before Purchase Order date for the following:</p><ul>"
-msgstr ""
+msgstr "<p>Joylashtirish sanasi {0} quyidagilar uchun Buyurtma sanasidan oldin bo'lishi mumkin emas:</p><ul>"
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.js:134
 msgid "<p>Price List Rate has not been set as editable in Selling Settings. In this scenario, setting <strong>Update Price List Based On</strong> to <strong>Price List Rate</strong> will prevent auto-updation of Item Price.</p>Are you sure you want to continue?"
-msgstr ""
+msgstr "<p>Narxlar ro'yxati narxi Sotish sozlamalarida tahrirlanadigan qilib o'rnatilmagan. Ushbu stsenariyda, <strong>Narxlar ro'yxatini</strong> asosida yangilash ni <strong>Narxlar ro'yxati narxi</strong> ga o'rnatish mahsulot narxining avtomatik yangilanishini oldini oladi.</p>Davom etishni xohlaysizmi?"
 
 #: erpnext/accounts/services/billing_validation.py:150
 msgid "<p>To allow over-billing, please set allowance in Accounts Settings.</p>"
-msgstr ""
+msgstr "<p>Ortiqcha to'lovga ruxsat berish uchun, iltimos, Hisob sozlamalarida ruxsatnomani o'rnating.</p>"
 
 #. Content of the 'Message Examples' (HTML) field in DocType 'Payment Gateway
 #. Account'
@@ -842,7 +847,12 @@ msgid "<pre><h5>Message Example</h5>\n\n"
 "&lt;p&gt; We don't want you to be spending time running around in order to pay for your Bill.<br>After all, life is beautiful and the time you have in hand should be spent to enjoy it!<br>So here are our little ways to help you get more time for life! &lt;/p&gt;\n\n"
 "&lt;a href=\"{{ payment_url }}\"&gt; click here to pay &lt;/a&gt;\n\n"
 "</pre>\n"
-msgstr ""
+msgstr "<pre><h5>Xabar namunasi</h5>\n\n"
+"&lt;p&gt; {{ doc.company }}xizmatidan foydalanganingiz uchun tashakkur! Umid qilamizki, sizga xizmat yoqmoqda.&lt;/p&gt;\n\n"
+"&lt;p&gt; Iltimos, ilova qilingan E hisob-kitob hisobotini toping. Qarz summasi {{ doc.grand_total }}.&lt;/p&gt;\n\n"
+"&lt;p&gt; Biz sizning hisob-kitoblaringizni to'lash uchun yugurib vaqt sarflashingizni istamaymiz.<br>Axir, hayot go'zal va qo'lingizdagi vaqtni undan zavqlanishga sarflashingiz kerak!<br>Shunday qilib, sizga hayot uchun ko'proq vaqt ajratishga yordam beradigan kichik usullarimiz! &lt;/p&gt;\n\n"
+"&lt;a href=\"{{ payment_url }}\"&gt; to'lovni amalga oshirish uchun shu yerni bosing &lt;/a&gt;\n\n"
+"</pre>\n"
 
 #. Content of the 'Message Examples' (HTML) field in DocType 'Payment Request'
 #: erpnext/accounts/doctype/payment_request/payment_request.json
@@ -851,12 +861,16 @@ msgid "<pre><h5>Message Example</h5>\n\n"
 "&lt;p&gt;Requesting payment for {{ doc.doctype }}, {{ doc.name }} for {{ doc.grand_total }}.&lt;/p&gt;\n\n"
 "&lt;a href=\"{{ payment_url }}\"&gt; click here to pay &lt;/a&gt;\n\n"
 "</pre>\n"
-msgstr ""
+msgstr "<pre><h5>Xabar namunasi</h5>\n\n"
+"&lt;p&gt;Hurmatli {{ doc.contact_person }},&lt;/p&gt;\n\n"
+"&lt;p&gt; {{ doc.doctype }}, {{ doc.name }} uchun {{ doc.grand_total }}to'lov so'ralmoqda.&lt;/p&gt;\n\n"
+"&lt;a href=\"{{ payment_url }}\"&gt; to'lovni amalga oshirish uchun shu yerni bosing &lt;/a&gt;\n\n"
+"</pre>\n"
 
 #. Header text in the Stock Workspace
 #: erpnext/stock/workspace/stock/stock.json
 msgid "<span class=\"h4\"><b>Masters &amp; Reports</b></span>"
-msgstr ""
+msgstr "<span class=\"h4\"><b>Magistrlar &amp; Hisobotlar</b></span>"
 
 #. Header text in the Invoicing Workspace
 #. Header text in the Assets Workspace
@@ -882,7 +896,7 @@ msgstr ""
 #. Header text in the Subcontracting Workspace
 #: erpnext/subcontracting/workspace/subcontracting/subcontracting.json
 msgid "<span class=\"h4\"><b>Subcontracting Inward and Outward</b></span>"
-msgstr ""
+msgstr "<span class=\"h4\"><b>Ichki va tashqi subpudratchilik</b></span>"
 
 #. Header text in the ERPNext Settings Workspace
 #: erpnext/setup/workspace/erpnext_settings/erpnext_settings.json
@@ -893,7 +907,13 @@ msgid "<span class=\"h4\"><b>Your Shortcuts\n"
 "\t\t\n"
 "\t\t\t\n"
 "\t\t</b></span>"
-msgstr ""
+msgstr "<span class=\"h4\"><b>Sizning yorliqlaringiz\n"
+"\t\t\t\n"
+"\t\t\n"
+"\t\t\t\n"
+"\t\t\n"
+"\t\t\t\n"
+"\t\t</b></span>"
 
 #. Header text in the Manufacturing Workspace
 #. Header text in the Home Workspace
@@ -904,11 +924,11 @@ msgstr ""
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:1300
 msgid "<strong>Grand Total:</strong> {0}"
-msgstr ""
+msgstr "<strong>Umumiy jami:</strong> {0}"
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:1301
 msgid "<strong>Outstanding Amount:</strong> {0}"
-msgstr ""
+msgstr "<strong>Qoldiq summa:</strong> {0}"
 
 #. Content of the 'html_19' (HTML) field in DocType 'Inventory Dimension'
 #: erpnext/stock/doctype/inventory_dimension/inventory_dimension.json
@@ -938,225 +958,250 @@ msgid "<table class=\"table table-bordered table-condensed\">\n"
 "</tr>\n\n"
 "</tbody>\n"
 "</table>\n\n\n\n\n\n\n"
-msgstr ""
+msgstr "<table class=\"table table-bordered table-condensed\">\n"
+"<thead>\n"
+"  <tr>\n"
+"         <th class=\"table-sr\" style=\"width: 50%;\">Bola hujjati</th>\n"
+"         <th class=\"table-sr\" style=\"width: 50%;\">Bola hujjati</th>\n"
+"   </tr>\n"
+"</thead>\n"
+"<tbody>\n"
+"<tr>\n"
+"         <td>\n"
+"                  <p> Ota-hujjat maydoniga kirish uchun parent.fieldname faylidan va qo'shimcha jadval hujjat maydoniga kirish uchun doc.fieldname faylidan foydalaning </p>\n\n"
+"         </td>\n"
+"         <td>\n"
+"                    <p>Hujjat maydoniga kirish uchun doc.fieldname faylidan foydalaning </p>\n"
+"         </td>\n"
+"</tr>\n"
+"<tr>\n"
+"        <td>\n"
+"                   <p><b>Misol: </b> parent.doctype == \"Aksiya yozuvi\" va doc.item_code == \"Sinov\" </p>\n\n"
+"        </td>\n"
+"         <td>\n"
+"                   <p><b>Misol: </b> doc.doctype == \"Omborga kirish\" va doc.purpose == \"Ishlab chiqarish\"</p>    \n"
+"          </td>\n"
+"</tr>\n\n"
+"</tbody>\n"
+"</table>\n\n\n\n\n\n\n"
 
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:213
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:116
 msgid "A - B"
-msgstr ""
+msgstr "A - B"
 
 #: erpnext/stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:189
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:228
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:131
 msgid "A - C"
-msgstr ""
+msgstr "A - C"
 
 #: erpnext/selling/doctype/customer/customer.py:355
 msgid "A Customer Group exists with same name please change the Customer name or rename the Customer Group"
-msgstr ""
+msgstr "Xuddi shu nomdagi mijozlar guruhi mavjud, iltimos, mijoz nomini o'zgartiring yoki mijozlar guruhining nomini o'zgartiring."
 
 #: erpnext/manufacturing/doctype/workstation/workstation.js:73
 msgid "A Holiday List can be added to exclude counting these days for the Workstation."
-msgstr ""
+msgstr "Ish stantsiyasi uchun bu kunlarni sanashni istisno qilish uchun bayramlar ro'yxatini qo'shish mumkin."
 
 #: erpnext/crm/doctype/lead/lead.py:140
 msgid "A Lead requires either a person's name or an organization's name"
-msgstr ""
+msgstr "Potensial mijozlar uchun shaxsning ismi yoki tashkilot nomi kerak bo'ladi"
 
 #: erpnext/stock/doctype/packing_slip/packing_slip.py:84
 msgid "A Packing Slip can only be created for Draft Delivery Note."
-msgstr ""
+msgstr "Qadoqlash varag'i faqat qoralama yetkazib berish eslatmasi uchun tuzilishi mumkin."
 
 #: erpnext/accounts/services/gl_validator.py:123
 msgid "A Period Closing Voucher is already submitted and an Opening Entry can no longer be created. {0} to learn more."
-msgstr ""
+msgstr "Davrni yakunlash vaucheri allaqachon topshirilgan va endi ochilish yozuvini yaratib bo'lmaydi. Batafsil ma'lumot olish uchun {0} ni bosing."
 
 #. Description of a DocType
 #: erpnext/stock/doctype/price_list/price_list.json
 msgid "A Price List is a collection of Item Prices either Selling, Buying, or both"
-msgstr ""
+msgstr "Narxlar ro'yxati - bu sotish, sotib olish yoki ikkalasi ham bo'lgan mahsulot narxlarining to'plamidir"
 
 #. Description of a DocType
 #: erpnext/stock/doctype/item/item.json
 msgid "A Product or a Service that is bought, sold or kept in stock."
-msgstr ""
+msgstr "Sotib olinadigan, sotiladigan yoki omborda saqlanadigan mahsulot yoki xizmat."
 
 #: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:572
 msgid "A Reconciliation Job {0} is running for the same filters. Cannot reconcile now"
-msgstr ""
+msgstr "Xuddi shu filtrlar uchun {0} yarashtirish vazifasi ishlayapti. Hozir yarashtirib bo'lmaydi"
 
 #: erpnext/accounts/doctype/journal_entry/mapper.py:228
 msgid "A Reverse Journal Entry {0} already exists for this Journal Entry."
-msgstr ""
+msgstr "Ushbu jurnal yozuvi uchun teskari jurnal yozuvi {0} allaqachon mavjud."
 
 #. Description of a DocType
 #: erpnext/accounts/doctype/shipping_rule_condition/shipping_rule_condition.json
 msgid "A condition for a Shipping Rule"
-msgstr ""
+msgstr "Yuk tashish qoidasi uchun shart"
 
 #. Description of the 'Send To Primary Contact' (Check) field in DocType
 #. 'Process Statement Of Accounts'
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgid "A customer must have primary contact email."
-msgstr ""
+msgstr "Mijozning asosiy aloqa elektron pochta manzili bo'lishi kerak."
 
 #. Description of the 'Disabled' (Check) field in DocType 'Product Bundle'
 #: erpnext/selling/doctype/product_bundle/product_bundle.json
 msgid "A disabled Product Bundle cannot be selected in transactions."
-msgstr ""
+msgstr "Tranzaksiyalarda o'chirilgan Mahsulot To'plamini tanlab bo'lmaydi."
 
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.py:59
 msgid "A driver must be set to submit."
-msgstr ""
+msgstr "Drayverni yuborish uchun sozlash kerak."
 
 #. Description of a DocType
 #: erpnext/stock/doctype/warehouse/warehouse.json
 msgid "A logical Warehouse against which stock entries are made."
-msgstr ""
+msgstr "Ombor yozuvlari kiritiladigan mantiqiy ombor."
 
 #: erpnext/stock/serial_batch_bundle.py:1489
 msgid "A naming series conflict occurred while creating serial numbers. Please change the naming series for the item {0}."
-msgstr ""
+msgstr "Seriya raqamlarini yaratishda nomlash seriyasi bilan bog'liq ziddiyat yuzaga keldi. Iltimos, {0} elementining nomlash seriyasini o'zgartiring."
 
 #: erpnext/templates/emails/confirm_appointment.html:2
 msgid "A new appointment has been created for you with {0}"
-msgstr ""
+msgstr "Siz uchun {0} bilan yangi uchrashuv yaratildi"
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:3
 msgid "A new fiscal year has been automatically created."
-msgstr ""
+msgstr "Yangi moliyaviy yil avtomatik ravishda yaratildi."
 
 #. Description of the 'Inspection Required before Delivery' (Check) field in
 #. DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "A quality inspection must be completed before generating a Delivery Note for this item."
-msgstr ""
+msgstr "Ushbu mahsulot uchun yetkazib berish eslatmasini tuzishdan oldin sifat tekshiruvi o'tkazilishi kerak."
 
 #. Description of the 'Inspection Required before Purchase' (Check) field in
 #. DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "A quality inspection must be completed before generating a Purchase Receipt for this item."
-msgstr ""
+msgstr "Ushbu mahsulot uchun xarid kvitansiyasini yaratishdan oldin sifat tekshiruvi o'tkazilishi kerak."
 
 #: erpnext/accounts/doctype/sales_taxes_and_charges_template/sales_taxes_and_charges_template.py:99
 msgid "A template with tax category {0} already exists. Only one template is allowed with each tax category"
-msgstr ""
+msgstr "Soliq toifasi {0} bo'lgan shablon allaqachon mavjud. Har bir soliq toifasi bilan faqat bitta shablonga ruxsat beriladi."
 
 #. Description of a DocType
 #: erpnext/setup/doctype/sales_partner/sales_partner.json
 msgid "A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission."
-msgstr ""
+msgstr "Kompaniya mahsulotlarini komissiya evaziga sotadigan uchinchi tomon distribyutori / diler / komissiya agenti / filiali / sotuvchisi."
 
 #. Option for the 'Blood Group' (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "A+"
-msgstr ""
+msgstr "A+"
 
 #. Option for the 'Blood Group' (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "A-"
-msgstr ""
+msgstr "A-"
 
 #. Option for the 'Blood Group' (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "AB+"
-msgstr ""
+msgstr "AB+"
 
 #. Option for the 'Blood Group' (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "AB-"
-msgstr ""
+msgstr "AB-"
 
 #. Option for the 'Invoice Series' (Select) field in DocType 'Import Supplier
 #. Invoice'
 #: erpnext/regional/doctype/import_supplier_invoice/import_supplier_invoice.json
 msgid "ACC-PINV-.YYYY.-"
-msgstr ""
+msgstr "ACC-PINV-.YYYY.-"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.js:88
 msgid "ALL records will be deleted (entire DocType cleared)"
-msgstr ""
+msgstr "BARCHA yozuvlar o'chiriladi (butun DocType tozalanadi)"
 
 #: erpnext/stock/report/serial_no_and_batch_traceability/serial_no_and_batch_traceability.py:552
 msgid "AMC Expiry (Serial)"
-msgstr ""
+msgstr "AMC amal qilish muddati (seriya raqami)"
 
 #. Label of the amc_expiry_date (Date) field in DocType 'Serial No'
 #. Label of the amc_expiry_date (Date) field in DocType 'Warranty Claim'
 #: erpnext/stock/doctype/serial_no/serial_no.json
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "AMC Expiry Date"
-msgstr ""
+msgstr "AMC amal qilish muddati"
 
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "AP Summary"
-msgstr ""
+msgstr "AP xulosasi"
 
 #. Label of the api_details_section (Section Break) field in DocType 'Currency
 #. Exchange Settings'
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
 msgid "API Details"
-msgstr ""
+msgstr "API tafsilotlari"
 
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "AR Summary"
-msgstr ""
+msgstr "AR xulosasi"
 
 #. Label of the awb_number (Data) field in DocType 'Shipment'
 #: erpnext/stock/doctype/shipment/shipment.json
 msgid "AWB Number"
-msgstr ""
+msgstr "AWB raqami"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Abampere"
-msgstr ""
+msgstr "Abamper"
 
 #. Label of the abbr (Data) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Abbr"
-msgstr ""
+msgstr "Abbr"
 
 #. Label of the abbr (Data) field in DocType 'Item Attribute Value'
 #: erpnext/stock/doctype/item_attribute_value/item_attribute_value.json
 msgid "Abbreviation"
-msgstr ""
+msgstr "Qisqartirish"
 
 #: erpnext/setup/doctype/company/company.py:249
 msgid "Abbreviation already used for another company"
-msgstr ""
+msgstr "Boshqa kompaniya uchun allaqachon ishlatilgan qisqartma"
 
 #: erpnext/setup/doctype/company/company.py:246
 msgid "Abbreviation is mandatory"
-msgstr ""
+msgstr "Qisqartirish majburiydir"
 
 #: erpnext/stock/doctype/item_attribute/item_attribute.py:112
 msgid "Abbreviation: {0} must appear only once"
-msgstr ""
+msgstr "Qisqartirish: {0} faqat bir marta paydo bo'lishi kerak"
 
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1289
 msgid "Above"
-msgstr ""
+msgstr "Yuqorida"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:116
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:364
 msgid "Above 120 Days"
-msgstr ""
+msgstr "120 kundan yuqori"
 
 #. Name of a role
 #: erpnext/setup/doctype/department/department.json
 msgid "Academics User"
-msgstr ""
+msgstr "Akademik foydalanuvchi"
 
 #: banking/src/components/features/Settings/KeyboardShortcuts.tsx:38
 msgid "Accept Matching Rule"
-msgstr ""
+msgstr "Moslashtirish qoidasini qabul qilish"
 
 #: banking/src/components/features/Settings/KeyboardShortcuts.tsx:39
 msgid "Accept the rule for the selected transaction"
-msgstr ""
+msgstr "Tanlangan tranzaksiya uchun qoidani qabul qiling"
 
 #. Label of the acceptance_formula (Code) field in DocType 'Item Quality
 #. Inspection Parameter'
@@ -1165,7 +1210,7 @@ msgstr ""
 #: erpnext/stock/doctype/item_quality_inspection_parameter/item_quality_inspection_parameter.json
 #: erpnext/stock/doctype/quality_inspection_reading/quality_inspection_reading.json
 msgid "Acceptance Criteria Formula"
-msgstr ""
+msgstr "Qabul qilish mezonlari formulasi"
 
 #. Label of the value (Data) field in DocType 'Item Quality Inspection
 #. Parameter'
@@ -1173,27 +1218,27 @@ msgstr ""
 #: erpnext/stock/doctype/item_quality_inspection_parameter/item_quality_inspection_parameter.json
 #: erpnext/stock/doctype/quality_inspection_reading/quality_inspection_reading.json
 msgid "Acceptance Criteria Value"
-msgstr ""
+msgstr "Qabul qilish mezonlari qiymati"
 
 #. Label of the qty (Float) field in DocType 'Purchase Invoice Item'
 #. Label of the qty (Float) field in DocType 'Subcontracting Receipt Item'
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Accepted Qty"
-msgstr ""
+msgstr "Qabul qilingan miqdor"
 
 #. Label of the stock_qty (Float) field in DocType 'Purchase Invoice Item'
 #. Label of the stock_qty (Float) field in DocType 'Purchase Receipt Item'
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Accepted Qty in Stock UOM"
-msgstr ""
+msgstr "Qabul qilingan miqdor UOM omborida"
 
 #. Label of the qty (Float) field in DocType 'Purchase Receipt Item'
 #: erpnext/public/js/controllers/transaction.js:2873
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Accepted Quantity"
-msgstr ""
+msgstr "Qabul qilingan miqdor"
 
 #. Label of the warehouse (Link) field in DocType 'Purchase Invoice Item'
 #. Label of the set_warehouse (Link) field in DocType 'Purchase Receipt'
@@ -1206,39 +1251,39 @@ msgstr ""
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Accepted Warehouse"
-msgstr ""
+msgstr "Qabul qilingan ombor"
 
 #: banking/src/components/features/BankReconciliation/TransferModalContent.tsx:485
 msgid "Accepting the suggestion will reconcile both transactions."
-msgstr ""
+msgstr "Taklifni qabul qilish ikkala tranzaksiyani ham yarashtiradi."
 
 #. Label of the access_key (Data) field in DocType 'Currency Exchange Settings'
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
 msgid "Access Key"
-msgstr ""
+msgstr "Kirish kaliti"
 
 #: erpnext/accounts/doctype/currency_exchange_settings/currency_exchange_settings.py:48
 msgid "Access Key is required for Service Provider: {0}"
-msgstr ""
+msgstr "Xizmat ko'rsatuvchi provayder uchun kirish kaliti talab qilinadi: {0}"
 
 #. Description of the 'Common Code' (Data) field in DocType 'UOM'
 #: erpnext/setup/doctype/uom/uom.json
 msgid "According to CEFACT/ICG/2010/IC013 or CEFACT/ICG/2010/IC010"
-msgstr ""
+msgstr "CEFACT/ICG/2010/IC013 yoki CEFACT/ICG/2010/IC010 ga muvofiq"
 
 #: erpnext/stock/doctype/stock_entry/services/manufacturing.py:903
 msgid "According to the BOM {0}, the Item '{1}' is missing in the stock entry."
-msgstr ""
+msgstr "BOM {0}ma'lumotlariga ko'ra, '{1}' bandi ombor yozuvida yo'q."
 
 #. Description of the 'Customer Numbers' (Table) field in DocType 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "Account / customer numbers assigned to your companies by this supplier (for reconciliation on their statements)"
-msgstr ""
+msgstr "Ushbu yetkazib beruvchi tomonidan sizning kompaniyalaringizga berilgan hisob/mijoz raqamlari (ularning hisobotlarini solishtirish uchun)"
 
 #. Name of a report
 #: erpnext/accounts/report/account_balance/account_balance.json
 msgid "Account Balance"
-msgstr ""
+msgstr "Hisob balansi"
 
 #. Label of the account_category (Link) field in DocType 'Account'
 #. Name of a DocType
@@ -1248,18 +1293,18 @@ msgstr ""
 #: erpnext/accounts/doctype/account_category/account_category.json
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "Account Category"
-msgstr ""
+msgstr "Hisob toifasi"
 
 #. Label of the account_category_name (Data) field in DocType 'Account
 #. Category'
 #: erpnext/accounts/doctype/account_category/account_category.json
 msgid "Account Category Name"
-msgstr ""
+msgstr "Hisob toifasi nomi"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/account_closing_balance/account_closing_balance.json
 msgid "Account Closing Balance"
-msgstr ""
+msgstr "Hisobni yopish balansi"
 
 #. Label of the account_currency (Link) field in DocType 'Account Closing
 #. Balance'
@@ -1292,32 +1337,32 @@ msgstr ""
 #: erpnext/accounts/doctype/unreconcile_payment_entries/unreconcile_payment_entries.json
 #: erpnext/stock/doctype/landed_cost_taxes_and_charges/landed_cost_taxes_and_charges.json
 msgid "Account Currency"
-msgstr ""
+msgstr "Hisob valyutasi"
 
 #. Label of the paid_from_account_currency (Link) field in DocType 'Payment
 #. Entry'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
 msgid "Account Currency (From)"
-msgstr ""
+msgstr "Hisob valyutasi (dan)"
 
 #. Label of the paid_to_account_currency (Link) field in DocType 'Payment
 #. Entry'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
 msgid "Account Currency (To)"
-msgstr ""
+msgstr "Hisob valyutasi (tomonidan)"
 
 #. Option for the 'Data Source' (Select) field in DocType 'Financial Report
 #. Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Account Data"
-msgstr ""
+msgstr "Hisob ma'lumotlari"
 
 #: erpnext/accounts/report/balance_sheet/balance_sheet.js:20
 #: erpnext/accounts/report/cash_flow/cash_flow.js:29
 #: erpnext/accounts/report/custom_financial_statement/custom_financial_statement.js:21
 #: erpnext/accounts/report/profit_and_loss_statement/profit_and_loss_statement.js:20
 msgid "Account Detail Level"
-msgstr ""
+msgstr "Hisob tafsilotlari darajasi"
 
 #. Label of the account_details_section (Section Break) field in DocType 'Bank
 #. Account'
@@ -1329,7 +1374,7 @@ msgstr ""
 #: erpnext/accounts/doctype/gl_entry/gl_entry.json
 #: erpnext/accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Account Details"
-msgstr ""
+msgstr "Hisob tafsilotlari"
 
 #. Label of the account_head (Link) field in DocType 'Advance Taxes and
 #. Charges'
@@ -1342,17 +1387,17 @@ msgstr ""
 #: erpnext/accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 #: erpnext/accounts/doctype/sales_taxes_and_charges/sales_taxes_and_charges.json
 msgid "Account Head"
-msgstr ""
+msgstr "Hisob boshlig'i"
 
 #. Label of the account_manager (Link) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
 msgid "Account Manager"
-msgstr ""
+msgstr "Buyurtmachilar bilan ishlash bo'yicha menejer"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:754
 #: erpnext/controllers/accounts_controller.py:1308
 msgid "Account Missing"
-msgstr ""
+msgstr "Hisob yo'q"
 
 #. Label of the account_name (Data) field in DocType 'Account'
 #. Label of the account_name (Data) field in DocType 'Bank Account'
@@ -1366,11 +1411,11 @@ msgstr ""
 #: erpnext/accounts/report/financial_statements.py:705
 #: erpnext/accounts/report/trial_balance/trial_balance.py:498
 msgid "Account Name"
-msgstr ""
+msgstr "Hisob nomi"
 
 #: erpnext/accounts/doctype/account/account.py:377
 msgid "Account Not Found"
-msgstr ""
+msgstr "Hisob topilmadi"
 
 #. Label of the account_number (Data) field in DocType 'Account'
 #: erpnext/accounts/doctype/account/account.json
@@ -1379,31 +1424,31 @@ msgstr ""
 #: erpnext/accounts/report/financial_statements.py:712
 #: erpnext/accounts/report/trial_balance/trial_balance.py:505
 msgid "Account Number"
-msgstr ""
+msgstr "Hisob raqami"
 
 #: erpnext/accounts/doctype/account/account.py:363
 msgid "Account Number {0} already used in account {1}"
-msgstr ""
+msgstr "{0} hisob raqami {1} hisobida allaqachon ishlatilgan"
 
 #. Label of the account_opening_balance (Currency) field in DocType 'Bank
 #. Reconciliation Tool'
 #: erpnext/accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.json
 msgid "Account Opening Balance"
-msgstr ""
+msgstr "Hisobni ochish qoldig'i"
 
 #. Label of the paid_from (Link) field in DocType 'Payment Entry'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
 msgid "Account Paid From"
-msgstr ""
+msgstr "Hisob to'langan joy"
 
 #. Label of the paid_to (Link) field in DocType 'Payment Entry'
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
 msgid "Account Paid To"
-msgstr ""
+msgstr "Hisobga to'langan"
 
 #: erpnext/accounts/doctype/cheque_print_template/cheque_print_template.py:120
 msgid "Account Pay Only"
-msgstr ""
+msgstr "Faqat hisob to'lovi"
 
 #. Label of the account_subtype (Link) field in DocType 'Bank Account'
 #. Label of the account_subtype (Data) field in DocType 'Bank Account Subtype'
@@ -1721,12 +1766,12 @@ msgstr ""
 #. Name of a DocType
 #: erpnext/accounts/doctype/accounting_dimension_detail/accounting_dimension_detail.json
 msgid "Accounting Dimension Detail"
-msgstr ""
+msgstr "Buxgalteriya o'lchovi tafsilotlari"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/accounting_dimension_filter/accounting_dimension_filter.json
 msgid "Accounting Dimension Filter"
-msgstr ""
+msgstr "Buxgalteriya o'lchamlari filtri"
 
 #. Label of the accounting_dimensions_section (Section Break) field in DocType
 #. 'Advance Taxes and Charges'
@@ -1862,7 +1907,7 @@ msgstr ""
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_supplied_item/subcontracting_receipt_supplied_item.json
 msgid "Accounting Dimensions"
-msgstr ""
+msgstr "Buxgalteriya o'lchamlari"
 
 #. Label of the accounting_dimensions_section (Section Break) field in DocType
 #. 'Purchase Invoice'
@@ -1877,39 +1922,39 @@ msgstr ""
 #: erpnext/buying/doctype/purchase_order_item/purchase_order_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Accounting Dimensions "
-msgstr ""
+msgstr "Buxgalteriya o'lchamlari "
 
 #. Label of the accounting_dimensions_section (Section Break) field in DocType
 #. 'Payment Reconciliation'
 #: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.json
 msgid "Accounting Dimensions Filter"
-msgstr ""
+msgstr "Buxgalteriya o'lchamlari filtri"
 
 #. Label of the accounts (Table) field in DocType 'Journal Entry'
 #. Label of the accounts (Table) field in DocType 'Journal Entry Template'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
 #: erpnext/accounts/doctype/journal_entry_template/journal_entry_template.json
 msgid "Accounting Entries"
-msgstr ""
+msgstr "Buxgalteriya yozuvlari"
 
 #: erpnext/assets/doctype/asset/asset.py:947
 #: erpnext/assets/doctype/asset/asset.py:962
 #: erpnext/assets/doctype/asset_capitalization/services/gl_composer.py:154
 msgid "Accounting Entry for Asset"
-msgstr ""
+msgstr "Aktivlar uchun buxgalteriya yozuvi"
 
 #: erpnext/stock/doctype/stock_entry/services/gl_composer.py:137
 #: erpnext/stock/doctype/stock_entry/services/gl_composer.py:155
 msgid "Accounting Entry for LCV in Stock Entry {0}"
-msgstr ""
+msgstr "Ombor yozuvidagi LCV uchun buxgalteriya yozuvi {0}"
 
 #: erpnext/subcontracting/doctype/subcontracting_receipt/services/gl_composer.py:225
 msgid "Accounting Entry for Landed Cost Voucher for SCR {0}"
-msgstr ""
+msgstr "SCR uchun qo'ndirilgan xarajatlar vaucheri uchun buxgalteriya yozuvi {0}"
 
 #: erpnext/stock/doctype/purchase_receipt/services/provisional_accounting.py:38
 msgid "Accounting Entry for Service"
-msgstr ""
+msgstr "Xizmat ko'rsatish uchun buxgalteriya yozuvi"
 
 #: erpnext/accounts/doctype/purchase_invoice/services/gl_composer.py:203
 #: erpnext/accounts/doctype/purchase_invoice/services/gl_composer.py:224
@@ -1927,15 +1972,15 @@ msgstr ""
 #: erpnext/stock/services/base_stock_gl_composer.py:80
 #: erpnext/subcontracting/doctype/subcontracting_receipt/services/gl_composer.py:67
 msgid "Accounting Entry for Stock"
-msgstr ""
+msgstr "Aksiyalar uchun buxgalteriya yozuvi"
 
 #: erpnext/stock/doctype/purchase_receipt/services/gl_composer.py:269
 msgid "Accounting Entry for {0}"
-msgstr ""
+msgstr "{0} uchun buxgalteriya yozuvi"
 
 #: erpnext/accounts/services/party_validation.py:98
 msgid "Accounting Entry for {0}: {1} can only be made in currency: {2}"
-msgstr ""
+msgstr "{0}uchun buxgalteriya yozuvi: {1} faqat quyidagi valyutada amalga oshirilishi mumkin: {2}"
 
 #: erpnext/accounts/doctype/invoice_discounting/invoice_discounting.js:193
 #: erpnext/assets/doctype/asset/asset.js:185
@@ -1946,17 +1991,17 @@ msgstr ""
 #: erpnext/selling/doctype/customer/customer.js:173
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:51
 msgid "Accounting Ledger"
-msgstr ""
+msgstr "Buxgalteriya hisobi daftari"
 
 #. Label of a Card Break in the Invoicing Workspace
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 msgid "Accounting Masters"
-msgstr ""
+msgstr "Buxgalteriya hisobi magistrlari"
 
 #. Title of the Module Onboarding 'Accounting Onboarding'
 #: erpnext/accounts/module_onboarding/accounting_onboarding/accounting_onboarding.json
 msgid "Accounting Onboarding"
-msgstr ""
+msgstr "Buxgalteriya hisobi bo'yicha onboarding"
 
 #. Name of a DocType
 #. Label of a Link in the Invoicing Workspace
@@ -1965,17 +2010,17 @@ msgstr ""
 #: erpnext/accounts/workspace/invoicing/invoicing.json
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "Accounting Period"
-msgstr ""
+msgstr "Hisobot davri"
 
 #: erpnext/accounts/doctype/accounting_period/accounting_period.py:64
 msgid "Accounting Period overlaps with {0}"
-msgstr ""
+msgstr "Hisob-kitob davri {0} bilan mos keladi"
 
 #. Description of the 'Accounts Frozen Till Date' (Date) field in DocType
 #. 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Accounting entries are frozen up to this date. Only users with the specified role can create or modify entries before this date."
-msgstr ""
+msgstr "Buxgalteriya yozuvlari shu sanagacha muzlatilgan. Faqat belgilangan rolga ega foydalanuvchilargina shu sanadan oldin yozuvlarni yaratishi yoki o'zgartirishi mumkin."
 
 #. Label of the applicable_on_account (Link) field in DocType 'Applicable On
 #. Account'
@@ -2006,7 +2051,7 @@ msgstr ""
 #: erpnext/setup/doctype/supplier_group/supplier_group.json
 #: erpnext/setup/install.py:393
 msgid "Accounts"
-msgstr ""
+msgstr "Hisoblar"
 
 #. Label of the closing_settings_tab (Tab Break) field in DocType 'Accounts
 #. Settings'
@@ -2014,21 +2059,21 @@ msgstr ""
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 #: erpnext/setup/doctype/company/company.json
 msgid "Accounts Closing"
-msgstr ""
+msgstr "Hisoblarni yopish"
 
 #. Label of the accounts_frozen_till_date (Date) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Accounts Frozen Till Date"
-msgstr ""
+msgstr "Hisoblar shu kungacha muzlatilgan"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:186
 msgid "Accounts Included in Report"
-msgstr ""
+msgstr "Hisobotga kiritilgan hisoblar"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:160
 #: erpnext/accounts/doctype/financial_report_template/financial_report_template.js:185
 msgid "Accounts Missing from Report"
-msgstr ""
+msgstr "Hisobotda yo'q hisoblar"
 
 #. Option for the 'Write Off Based On' (Select) field in DocType 'Journal
 #. Entry'
@@ -2044,13 +2089,13 @@ msgstr ""
 #: erpnext/workspace_sidebar/invoicing.json
 #: erpnext/workspace_sidebar/payments.json
 msgid "Accounts Payable"
-msgstr ""
+msgstr "Ta'minotchilar bilan hisob-kitob"
 
 #. Name of a report
 #: erpnext/accounts/report/accounts_payable/accounts_payable.js:177
 #: erpnext/accounts/report/accounts_payable_summary/accounts_payable_summary.json
 msgid "Accounts Payable Summary"
-msgstr ""
+msgstr "Kreditorlik qarzlari haqida qisqacha ma'lumot"
 
 #. Option for the 'Write Off Based On' (Select) field in DocType 'Journal
 #. Entry'
@@ -2069,43 +2114,43 @@ msgstr ""
 #: erpnext/workspace_sidebar/invoicing.json
 #: erpnext/workspace_sidebar/payments.json
 msgid "Accounts Receivable"
-msgstr ""
+msgstr "Kutilgan tushim"
 
 #. Label of the accounts_receivable_payable_tuning_section (Section Break)
 #. field in DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Accounts Receivable / Payable Tuning"
-msgstr ""
+msgstr "Debitorlik/Kreditorlik qarzlarini sozlash"
 
 #. Label of the receivable_payable_remarks_length (Int) field in DocType
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Accounts Receivable / Payable remarks length"
-msgstr ""
+msgstr "Debitorlik / Kreditorlik qarzlari bo'yicha eslatma uzunligi"
 
 #. Label of the accounts_receivable_credit (Link) field in DocType 'Invoice
 #. Discounting'
 #: erpnext/accounts/doctype/invoice_discounting/invoice_discounting.json
 msgid "Accounts Receivable Credit Account"
-msgstr ""
+msgstr "Debitorlik qarzlari kredit hisobi"
 
 #. Label of the accounts_receivable_discounted (Link) field in DocType 'Invoice
 #. Discounting'
 #: erpnext/accounts/doctype/invoice_discounting/invoice_discounting.json
 msgid "Accounts Receivable Discounted Account"
-msgstr ""
+msgstr "Debitorlik qarzlari diskontlangan hisob"
 
 #. Name of a report
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.js:204
 #: erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.json
 msgid "Accounts Receivable Summary"
-msgstr ""
+msgstr "Debitorlik qarzlari haqida qisqacha ma'lumot"
 
 #. Label of the accounts_receivable_unpaid (Link) field in DocType 'Invoice
 #. Discounting'
 #: erpnext/accounts/doctype/invoice_discounting/invoice_discounting.json
 msgid "Accounts Receivable Unpaid Account"
-msgstr ""
+msgstr "Debitorlik qarzlari To'lanmagan hisobvaraq"
 
 #. Name of a DocType
 #. Label of a Link in the Invoicing Workspace
@@ -2117,28 +2162,28 @@ msgstr ""
 #: erpnext/workspace_sidebar/accounts_setup.json
 #: erpnext/workspace_sidebar/erpnext_settings.json
 msgid "Accounts Settings"
-msgstr ""
+msgstr "Hisob sozlamalari"
 
 #. Label of a Desktop Icon
 #. Title of a Workspace Sidebar
 #: erpnext/desktop_icon/accounts_setup.json
 #: erpnext/workspace_sidebar/accounts_setup.json
 msgid "Accounts Setup"
-msgstr ""
+msgstr "Hisoblarni sozlash"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:1010
 msgid "Accounts table cannot be blank."
-msgstr ""
+msgstr "Hisoblar jadvali bo'sh bo'lishi mumkin emas."
 
 #. Label of the merge_accounts (Table) field in DocType 'Ledger Merge'
 #: erpnext/accounts/doctype/ledger_merge/ledger_merge.json
 msgid "Accounts to Merge"
-msgstr ""
+msgstr "Birlashtiriladigan hisoblar"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:162
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:270
 msgid "Accrued Expenses"
-msgstr ""
+msgstr "Hisoblangan xarajatlar"
 
 #. Option for the 'Account Type' (Select) field in DocType 'Account'
 #: erpnext/accounts/doctype/account/account.json
@@ -2146,7 +2191,7 @@ msgstr ""
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:117
 #: erpnext/accounts/report/account_balance/account_balance.js:37
 msgid "Accumulated Depreciation"
-msgstr ""
+msgstr "Yig'ilgan amortizatsiya"
 
 #. Label of the accumulated_depreciation_account (Link) field in DocType 'Asset
 #. Category Account'
@@ -2155,7 +2200,7 @@ msgstr ""
 #: erpnext/assets/doctype/asset_category_account/asset_category_account.json
 #: erpnext/setup/doctype/company/company.json
 msgid "Accumulated Depreciation Account"
-msgstr ""
+msgstr "Yig'ilgan amortizatsiya hisobi"
 
 #. Label of the accumulated_depreciation_amount (Currency) field in DocType
 #. 'Depreciation Schedule'
@@ -2163,48 +2208,48 @@ msgstr ""
 #: erpnext/assets/doctype/asset/asset.js:380
 #: erpnext/assets/doctype/depreciation_schedule/depreciation_schedule.json
 msgid "Accumulated Depreciation Amount"
-msgstr ""
+msgstr "Yig'ilgan amortizatsiya miqdori"
 
 #: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:876
 #: erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:894
 msgid "Accumulated Depreciation as on"
-msgstr ""
+msgstr "Yig'ilgan amortizatsiya"
 
 #: erpnext/accounts/doctype/budget/budget.py:533
 msgid "Accumulated Monthly"
-msgstr ""
+msgstr "Yig'ilgan oylik"
 
 #: erpnext/controllers/budget_controller.py:429
 msgid "Accumulated Monthly Budget for Account {0} against {1} {2} is {3}. It will be collectively ({4}) exceeded by {5}"
-msgstr ""
+msgstr "{0} hisobi uchun to'plangan oylik byudjet {1} {2} ga nisbatan {3}ga teng. Bu umumiy ({4}) {5} ga oshib ketadi."
 
 #: erpnext/controllers/budget_controller.py:331
 msgid "Accumulated Monthly Budget for Account {0} against {1}: {2} is {3}. It will be exceeded by {4}"
-msgstr ""
+msgstr "{0} hisobi uchun to'plangan oylik byudjet {1}ga nisbatan: {2} {3}ga teng. U {4} ga oshib ketadi."
 
 #: erpnext/accounts/report/balance_sheet/balance_sheet.js:39
 #: erpnext/accounts/report/gross_and_net_profit_report/gross_and_net_profit_report.js:12
 #: erpnext/accounts/report/profit_and_loss_statement/profit_and_loss_statement.js:40
 msgid "Accumulated Values"
-msgstr ""
+msgstr "To'plangan qiymatlar"
 
 #: erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.js:125
 msgid "Accumulated Values in Group Company"
-msgstr ""
+msgstr "Guruh kompaniyasida to'plangan qiymatlar"
 
 #: erpnext/selling/report/sales_partner_target_variance_based_on_item_group/item_group_wise_sales_target_variance.py:111
 msgid "Achieved ({})"
-msgstr ""
+msgstr "Erishildi ({})"
 
 #. Label of the acquisition_date (Date) field in DocType 'Vehicle'
 #: erpnext/setup/doctype/vehicle/vehicle.json
 msgid "Acquisition Date"
-msgstr ""
+msgstr "Sotib olingan sana"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Acre"
-msgstr ""
+msgstr "Akr"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -2524,105 +2569,105 @@ msgstr ""
 #: erpnext/projects/doctype/project/project.json
 #: erpnext/projects/doctype/task/task.json
 msgid "Actual Start Date (via Timesheet)"
-msgstr ""
+msgstr "Haqiqiy boshlanish sanasi (vaqtinchalik jadval orqali)"
 
 #. Label of the actual_start_time (Datetime) field in DocType 'Work Order
 #. Operation'
 #: erpnext/manufacturing/doctype/work_order_operation/work_order_operation.json
 msgid "Actual Start Time"
-msgstr ""
+msgstr "Haqiqiy boshlanish vaqti"
 
 #. Label of the timing_detail (Tab Break) field in DocType 'Job Card'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 msgid "Actual Time"
-msgstr ""
+msgstr "Haqiqiy vaqt"
 
 #. Label of the section_break_9 (Section Break) field in DocType 'Work Order
 #. Operation'
 #: erpnext/manufacturing/doctype/work_order_operation/work_order_operation.json
 msgid "Actual Time and Cost"
-msgstr ""
+msgstr "Haqiqiy vaqt va xarajat"
 
 #. Label of the actual_time (Float) field in DocType 'Project'
 #. Label of the actual_time (Float) field in DocType 'Task'
 #: erpnext/projects/doctype/project/project.json
 #: erpnext/projects/doctype/task/task.json
 msgid "Actual Time in Hours (via Timesheet)"
-msgstr ""
+msgstr "Haqiqiy vaqt soatlarda (vaqtinchalik jadval orqali)"
 
 #: erpnext/stock/page/stock_balance/stock_balance.js:55
 msgid "Actual qty in stock"
-msgstr ""
+msgstr "Ombordagi haqiqiy miqdor"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:1529
 #: erpnext/public/js/controllers/accounts.js:197
 msgid "Actual type tax cannot be included in Item rate in row {0}"
-msgstr ""
+msgstr "Haqiqiy turdagi soliq {0} qatoridagi mahsulot stavkasiga kiritilishi mumkin emas"
 
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.py:1022
 msgid "Ad-hoc Qty"
-msgstr ""
+msgstr "Vaqtinchalik Miqdor"
 
 #: erpnext/stock/doctype/price_list/price_list.js:8
 msgid "Add / Edit Prices"
-msgstr ""
+msgstr "Narxlarni qo'shish / tahrirlash"
 
 #: erpnext/accounts/report/general_ledger/general_ledger.js:214
 msgid "Add Columns in Transaction Currency"
-msgstr ""
+msgstr "Tranzaksiya valyutasiga ustunlar qo'shish"
 
 #. Label of the add_corrective_operation_cost_in_finished_good_valuation
 #. (Check) field in DocType 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Add Corrective Operation Cost in Finished Good Valuation"
-msgstr ""
+msgstr "Tayyor mahsulotni baholashda tuzatish operatsiyasi narxini qo'shing"
 
 #: erpnext/public/js/event.js:24
 msgid "Add Customers"
-msgstr ""
+msgstr "Mijozlar qo'shish"
 
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:93
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:442
 msgid "Add Discount"
-msgstr ""
+msgstr "Chegirma qo'shish"
 
 #: erpnext/public/js/event.js:40
 msgid "Add Employees"
-msgstr ""
+msgstr "Xodimlarni qo'shish"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:256
 #: erpnext/selling/doctype/sales_order/sales_order.js:278
 #: erpnext/stock/dashboard/item_dashboard.js:216
 msgid "Add Item"
-msgstr ""
+msgstr "Element qo'shish"
 
 #: erpnext/public/js/utils/item_selector.js:20
 #: erpnext/public/js/utils/item_selector.js:35
 msgid "Add Items"
-msgstr ""
+msgstr "Elementlar qo'shish"
 
 #: erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.py:56
 msgid "Add Items in the Purpose Table"
-msgstr ""
+msgstr "Maqsadlar jadvaliga elementlarni qo'shish"
 
 #: erpnext/crm/doctype/lead/lead.js:84
 msgid "Add Lead to Prospect"
-msgstr ""
+msgstr "Potensial mijozlarga potentsial mijozlarni qo'shish"
 
 #: erpnext/public/js/event.js:16
 msgid "Add Leads"
-msgstr ""
+msgstr "Mijozlarni qo'shish"
 
 #. Label of the add_local_holidays (Section Break) field in DocType 'Holiday
 #. List'
 #: erpnext/setup/doctype/holiday_list/holiday_list.json
 msgid "Add Local Holidays"
-msgstr ""
+msgstr "Mahalliy bayramlarni qo'shish"
 
 #. Label of the add_manually (Check) field in DocType 'Repost Payment Ledger'
 #: erpnext/accounts/doctype/repost_payment_ledger/repost_payment_ledger.json
 msgid "Add Manually"
-msgstr ""
+msgstr "Qo'lda qo'shish"
 
 #: erpnext/projects/doctype/task/task_tree.js:42
 msgid "Add Multiple"
@@ -2630,37 +2675,37 @@ msgstr ""
 
 #: erpnext/projects/doctype/task/task_tree.js:49
 msgid "Add Multiple Tasks"
-msgstr ""
+msgstr "Bir nechta vazifalarni qo'shish"
 
 #: erpnext/stock/doctype/item/item.js:974
 msgid "Add Opening Stock"
-msgstr ""
+msgstr "Ochilish aktsiyalarini qo'shish"
 
 #. Label of the add_deduct_tax (Select) field in DocType 'Advance Taxes and
 #. Charges'
 #: erpnext/accounts/doctype/advance_taxes_and_charges/advance_taxes_and_charges.json
 msgid "Add Or Deduct"
-msgstr ""
+msgstr "Qo'shish yoki ayirish"
 
 #: erpnext/selling/page/point_of_sale/pos_item_cart.js:280
 msgid "Add Order Discount"
-msgstr ""
+msgstr "Buyurtma chegirmasini qo'shish"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:281
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:416
 msgid "Add Phantom Item"
-msgstr ""
+msgstr "Xayoliy elementni qo'shish"
 
 #. Label of the add_quote (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
 msgid "Add Quote"
-msgstr ""
+msgstr "Narx qo'shish"
 
 #. Label of the add_raw_materials (Button) field in DocType 'BOM Operation'
 #: erpnext/manufacturing/doctype/bom/bom.js:1050
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
 msgid "Add Raw Materials"
-msgstr ""
+msgstr "Xom ashyo qo'shish"
 
 #: banking/src/components/features/BankReconciliation/BankEntryModalContent.tsx:711
 #: banking/src/components/features/BankReconciliation/RecordPaymentModalContent.tsx:1260
@@ -2671,21 +2716,21 @@ msgstr ""
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:227
 #: banking/src/components/features/Settings/MatchingRules.tsx:30
 msgid "Add Rule"
-msgstr ""
+msgstr "Qoida qo'shish"
 
 #: erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.js:82
 msgid "Add Safety Stock"
-msgstr ""
+msgstr "Xavfsizlik zaxirasini qo'shish"
 
 #: erpnext/public/js/event.js:48
 msgid "Add Sales Partners"
-msgstr ""
+msgstr "Savdo hamkorlarini qo'shish"
 
 #. Label of the add_schedule (Button) field in DocType 'Sales Order Item'
 #: erpnext/selling/doctype/sales_order/sales_order.js:687
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 msgid "Add Schedule"
-msgstr ""
+msgstr "Jadval qo'shish"
 
 #. Label of the add_serial_batch_bundle (Button) field in DocType
 #. 'Subcontracting Receipt Item'
@@ -2694,7 +2739,7 @@ msgstr ""
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_supplied_item/subcontracting_receipt_supplied_item.json
 msgid "Add Serial / Batch Bundle"
-msgstr ""
+msgstr "Seriyali / ommaviy to'plamni qo'shish"
 
 #. Label of the add_serial_batch_bundle (Button) field in DocType 'Purchase
 #. Invoice Item'
@@ -2709,7 +2754,7 @@ msgstr ""
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 #: erpnext/stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
 msgid "Add Serial / Batch No"
-msgstr ""
+msgstr "Seriya/partiya raqamini qo'shish"
 
 #. Label of the add_serial_batch_for_rejected_qty (Button) field in DocType
 #. 'Purchase Receipt Item'
@@ -2718,74 +2763,74 @@ msgstr ""
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Add Serial / Batch No (Rejected Qty)"
-msgstr ""
+msgstr "Seriya raqamini qo'shish / Partiya raqami (Rad etilgan miqdor)"
 
 #: erpnext/public/js/utils/naming_series.js:26
 msgid "Add Series Prefix"
-msgstr ""
+msgstr "Seriya prefiksini qo'shish"
 
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:200
 msgid "Add Stock"
-msgstr ""
+msgstr "Aksiya qo'shish"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:281
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:416
 msgid "Add Sub Assembly"
-msgstr ""
+msgstr "Sub yig'ishni qo'shish"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:517
 #: erpnext/public/js/event.js:32
 msgid "Add Suppliers"
-msgstr ""
+msgstr "Yetkazib beruvchilarni qo'shish"
 
 #: erpnext/utilities/activation.py:126
 msgid "Add Timesheets"
-msgstr ""
+msgstr "Vaqt jadvallarini qo'shish"
 
 #. Label of the add_weekly_holidays (Section Break) field in DocType 'Holiday
 #. List'
 #: erpnext/setup/doctype/holiday_list/holiday_list.json
 msgid "Add Weekly Holidays"
-msgstr ""
+msgstr "Haftalik ta'tillarni qo'shish"
 
 #: erpnext/public/js/utils/crm_activities.js:144
 msgid "Add a Note"
-msgstr ""
+msgstr "Izoh qo'shish"
 
 #: banking/src/components/features/BankReconciliation/RecordPaymentModalContent.tsx:879
 msgid "Add a charge to the payment entry with the difference amount"
-msgstr ""
+msgstr "To'lov yozuviga farq miqdori bilan to'lov qo'shing"
 
 #: banking/src/components/features/BankReconciliation/RecordPaymentModalContent.tsx:863
 msgid "Add a charge to the payment entry with the unallocated amount"
-msgstr ""
+msgstr "To'lov yozuviga ajratilmagan summa bilan to'lov qo'shing"
 
 #: banking/src/components/features/BankReconciliation/BankEntryModalContent.tsx:800
 msgid "Add a row with the difference amount"
-msgstr ""
+msgstr "Farq miqdori bilan qator qo'shing"
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:579
 msgid "Add all accounts that you want to split the transaction into."
-msgstr ""
+msgstr "Tranzaksiyani ajratmoqchi bo'lgan barcha hisoblarni qo'shing."
 
 #: erpnext/www/book_appointment/index.html:42
 msgid "Add details"
-msgstr ""
+msgstr "Tafsilotlarni qo'shish"
 
 #: erpnext/stock/doctype/pick_list/mapper.py:23
 #: erpnext/stock/doctype/pick_list/pick_list.js:89
 msgid "Add items in the Item Locations table"
-msgstr ""
+msgstr "Elementlar joylashuvi jadvaliga elementlar qo'shing"
 
 #. Label of the add_deduct_tax (Select) field in DocType 'Purchase Taxes and
 #. Charges'
 #: erpnext/accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 msgid "Add or Deduct"
-msgstr ""
+msgstr "Qo'shish yoki ayirish"
 
 #: erpnext/utilities/activation.py:116
 msgid "Add the rest of your organization as your users. You can also add invite Customers to your portal by adding them from Contacts"
-msgstr ""
+msgstr "Tashkilotingizning qolgan qismini foydalanuvchilaringiz sifatida qo'shing. Shuningdek, mijozlarni Kontaktlar ro'yxatidan qo'shish orqali portalingizga taklifnoma qo'shishingiz mumkin."
 
 #. Label of the get_weekly_off_dates (Button) field in DocType 'Holiday List'
 #. Label of the get_local_holidays (Button) field in DocType 'Holiday List'
@@ -3276,33 +3321,33 @@ msgstr ""
 #: erpnext/accounts/doctype/purchase_invoice_advance/purchase_invoice_advance.json
 #: erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py:165
 msgid "Advance Amount"
-msgstr ""
+msgstr "Avans miqdori"
 
 #. Label of the advance_paid (Currency) field in DocType 'Sales Order'
 #: erpnext/selling/doctype/sales_order/sales_order.json
 msgid "Advance Paid"
-msgstr ""
+msgstr "Avans to'langan"
 
 #. Label of the advance_paid (Currency) field in DocType 'Purchase Order'
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 msgid "Advance Paid (Company Currency)"
-msgstr ""
+msgstr "Avans to'langan (Kompaniya valyutasi)"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order_list.js:75
 #: erpnext/selling/doctype/sales_order/sales_order_list.js:122
 msgid "Advance Payment"
-msgstr ""
+msgstr "Oldindan to'lov"
 
 #. Option for the 'Reconciliation Takes Effect On' (Select) field in DocType
 #. 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Advance Payment Date"
-msgstr ""
+msgstr "Oldindan to'lov sanasi"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/advance_payment_ledger_entry/advance_payment_ledger_entry.json
 msgid "Advance Payment Ledger Entry"
-msgstr ""
+msgstr "Avans to'lovlari daftariga yozuv"
 
 #. Label of the advance_payment_status (Select) field in DocType 'Purchase
 #. Order'
@@ -3310,7 +3355,7 @@ msgstr ""
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 #: erpnext/selling/doctype/sales_order/sales_order.json
 msgid "Advance Payment Status"
-msgstr ""
+msgstr "Oldindan to'lov holati"
 
 #. Label of the advances_section (Section Break) field in DocType 'POS Invoice'
 #. Label of the advances_section (Section Break) field in DocType 'Purchase
@@ -3325,14 +3370,14 @@ msgstr ""
 #: erpnext/controllers/accounts_controller.py:280
 #: erpnext/setup/doctype/company/company.json
 msgid "Advance Payments"
-msgstr ""
+msgstr "Oldindan to'lovlar"
 
 #. Name of a DocType
 #. Label of the taxes (Table) field in DocType 'Payment Entry'
 #: erpnext/accounts/doctype/advance_taxes_and_charges/advance_taxes_and_charges.json
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
 msgid "Advance Taxes and Charges"
-msgstr ""
+msgstr "Avans soliqlari va to'lovlari"
 
 #. Label of the advance_voucher_no (Dynamic Link) field in DocType 'Journal
 #. Entry Account'
@@ -3341,7 +3386,7 @@ msgstr ""
 #: erpnext/accounts/doctype/journal_entry_account/journal_entry_account.json
 #: erpnext/accounts/doctype/payment_entry_reference/payment_entry_reference.json
 msgid "Advance Voucher No"
-msgstr ""
+msgstr "Avans vaucheri raqami"
 
 #. Label of the advance_voucher_type (Link) field in DocType 'Journal Entry
 #. Account'
@@ -3350,21 +3395,21 @@ msgstr ""
 #: erpnext/accounts/doctype/journal_entry_account/journal_entry_account.json
 #: erpnext/accounts/doctype/payment_entry_reference/payment_entry_reference.json
 msgid "Advance Voucher Type"
-msgstr ""
+msgstr "Avans vaucheri turi"
 
 #. Label of the advance_amount (Currency) field in DocType 'Sales Invoice
 #. Advance'
 #: erpnext/accounts/doctype/sales_invoice_advance/sales_invoice_advance.json
 msgid "Advance amount"
-msgstr ""
+msgstr "Avans miqdori"
 
 #: erpnext/controllers/taxes_and_totals.py:983
 msgid "Advance amount cannot be greater than {0} {1}"
-msgstr ""
+msgstr "Avans summasi {0} {1} dan oshmasligi kerak"
 
 #: erpnext/accounts/doctype/journal_entry/services/reference_validator.py:172
 msgid "Advance paid against {0} {1} cannot be greater than Grand Total {2}"
-msgstr ""
+msgstr "{0} {1} ga nisbatan to'langan avans summasi umumiy summadan {2} katta bo'lmasligi kerak"
 
 #. Description of the 'Only Include Allocated Payments' (Check) field in
 #. DocType 'Purchase Invoice'
@@ -3373,19 +3418,19 @@ msgstr ""
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Advance payments allocated against orders will only be fetched"
-msgstr ""
+msgstr "Buyurtmalar bo'yicha ajratilgan avans to'lovlari faqat olinadi"
 
 #. Label of the advanced_features_tab (Tab Break) field in DocType 'Selling
 #. Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Advanced Features"
-msgstr ""
+msgstr "Kengaytirilgan xususiyatlar"
 
 #. Label of the advanced_filtering (Check) field in DocType 'Financial Report
 #. Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
 msgid "Advanced Filtering"
-msgstr ""
+msgstr "Kengaytirilgan filtrlash"
 
 #. Label of the advances (Table) field in DocType 'POS Invoice'
 #. Label of the advances (Table) field in DocType 'Purchase Invoice'
@@ -3394,29 +3439,29 @@ msgstr ""
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Advances"
-msgstr ""
+msgstr "Avanslar"
 
 #: erpnext/setup/setup_wizard/data/marketing_source.txt:3
 msgid "Advertisement"
-msgstr ""
+msgstr "Reklama"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:2
 msgid "Advertising"
-msgstr ""
+msgstr "Reklama"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:3
 msgid "Aerospace"
-msgstr ""
+msgstr "Aerokosmik"
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.js:79
 msgid "After save, please refresh the page to apply the changes."
-msgstr ""
+msgstr "Saqlagandan so'ng, o'zgarishlarni qo'llash uchun sahifani yangilang."
 
 #. Label of the against (Text) field in DocType 'GL Entry'
 #: erpnext/accounts/doctype/gl_entry/gl_entry.json
 #: erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.html:20
 msgid "Against"
-msgstr ""
+msgstr "Qarshi"
 
 #. Label of the against_account (Data) field in DocType 'Bank Clearance Detail'
 #. Label of the against_account (Text) field in DocType 'Journal Entry Account'
@@ -3429,7 +3474,7 @@ msgstr ""
 #: erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py:95
 #: erpnext/accounts/report/general_ledger/general_ledger.py:773
 msgid "Against Account"
-msgstr ""
+msgstr "Hisobga qarshi"
 
 #. Label of the against_blanket_order (Check) field in DocType 'Purchase Order
 #. Item'
@@ -3440,33 +3485,33 @@ msgstr ""
 #: erpnext/selling/doctype/quotation_item/quotation_item.json
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
 msgid "Against Blanket Order"
-msgstr ""
+msgstr "Adyol tartibiga qarshi"
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:838
 msgid "Against Customer Order {0}"
-msgstr ""
+msgstr "Mijoz buyurtmasiga qarshi {0}"
 
 #. Label of the dn_detail (Data) field in DocType 'Delivery Note Item'
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 msgid "Against Delivery Note Item"
-msgstr ""
+msgstr "Yetkazib berish to'g'risidagi eslatma buyumiga qarshi"
 
 #. Label of the prevdoc_docname (Dynamic Link) field in DocType 'Quotation
 #. Item'
 #: erpnext/selling/doctype/quotation_item/quotation_item.json
 msgid "Against Docname"
-msgstr ""
+msgstr "Docnamega qarshi"
 
 #. Label of the prevdoc_doctype (Link) field in DocType 'Quotation Item'
 #: erpnext/selling/doctype/quotation_item/quotation_item.json
 msgid "Against Doctype"
-msgstr ""
+msgstr "Doctypega qarshi"
 
 #. Label of the prevdoc_detail_docname (Data) field in DocType 'Installation
 #. Note Item'
 #: erpnext/selling/doctype/installation_note_item/installation_note_item.json
 msgid "Against Document Detail No"
-msgstr ""
+msgstr "Hujjat tafsilotlari raqamiga qarshi"
 
 #. Label of the prevdoc_docname (Dynamic Link) field in DocType 'Maintenance
 #. Visit Purpose'
@@ -3475,18 +3520,18 @@ msgstr ""
 #: erpnext/maintenance/doctype/maintenance_visit_purpose/maintenance_visit_purpose.json
 #: erpnext/selling/doctype/installation_note_item/installation_note_item.json
 msgid "Against Document No"
-msgstr ""
+msgstr "Hujjat raqamiga qarshi"
 
 #. Label of the against_expense_account (Small Text) field in DocType 'Purchase
 #. Invoice'
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 msgid "Against Expense Account"
-msgstr ""
+msgstr "Xarajatlar hisobiga qarshi"
 
 #. Label of the against_fg (Link) field in DocType 'Stock Entry Detail'
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgid "Against Finished Good"
-msgstr ""
+msgstr "Yaxshi yakunlanganga qarshi"
 
 #. Label of the against_income_account (Small Text) field in DocType 'POS
 #. Invoice'
@@ -3495,61 +3540,61 @@ msgstr ""
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.json
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Against Income Account"
-msgstr ""
+msgstr "Daromad hisobiga qarshi"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:590
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:798
 msgid "Against Journal Entry {0} does not have any unmatched {1} entry"
-msgstr ""
+msgstr "Jurnal yozuviga qarshi {0} da mos kelmaydigan {1} yozuvi yo'q"
 
 #: erpnext/accounts/doctype/gl_entry/gl_entry.py:400
 msgid "Against Journal Entry {0} is already adjusted against some other voucher"
-msgstr ""
+msgstr "Jurnal yozuviga qarshi {0} allaqachon boshqa vaucherlarga nisbatan moslashtirilgan"
 
 #. Label of the against_pick_list (Link) field in DocType 'Sales Invoice Item'
 #. Label of the against_pick_list (Link) field in DocType 'Delivery Note Item'
 #: erpnext/accounts/doctype/sales_invoice_item/sales_invoice_item.json
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 msgid "Against Pick List"
-msgstr ""
+msgstr "Tanlov ro'yxatiga qarshi"
 
 #. Label of the against_sales_invoice (Link) field in DocType 'Delivery Note
 #. Item'
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 msgid "Against Sales Invoice"
-msgstr ""
+msgstr "Savdo schyot-fakturasiga qarshi"
 
 #. Label of the si_detail (Data) field in DocType 'Delivery Note Item'
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 msgid "Against Sales Invoice Item"
-msgstr ""
+msgstr "Savdo fakturasiga qarshi"
 
 #. Label of the against_sales_order (Link) field in DocType 'Delivery Note
 #. Item'
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 msgid "Against Sales Order"
-msgstr ""
+msgstr "Savdo buyurtmasiga qarshi"
 
 #. Label of the so_detail (Data) field in DocType 'Delivery Note Item'
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 msgid "Against Sales Order Item"
-msgstr ""
+msgstr "Savdo buyurtmasi buyumiga qarshi"
 
 #. Label of the against_stock_entry (Link) field in DocType 'Stock Entry
 #. Detail'
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgid "Against Stock Entry"
-msgstr ""
+msgstr "Aksiyalarga kirishga qarshi"
 
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:336
 msgid "Against Supplier Invoice {0}"
-msgstr ""
+msgstr "Yetkazib beruvchiga qarshi hisob-faktura {0}"
 
 #. Label of the against_voucher (Dynamic Link) field in DocType 'GL Entry'
 #: erpnext/accounts/doctype/gl_entry/gl_entry.json
 #: erpnext/accounts/report/general_ledger/general_ledger.py:806
 msgid "Against Voucher"
-msgstr ""
+msgstr "Vaucherga qarshi"
 
 #. Label of the against_voucher_no (Dynamic Link) field in DocType 'Advance
 #. Payment Ledger Entry'
@@ -3561,7 +3606,7 @@ msgstr ""
 #: erpnext/accounts/report/payment_ledger/payment_ledger.js:71
 #: erpnext/accounts/report/payment_ledger/payment_ledger.py:192
 msgid "Against Voucher No"
-msgstr ""
+msgstr "Vaucher raqamiga qarshi"
 
 #. Label of the against_voucher_type (Link) field in DocType 'Advance Payment
 #. Ledger Entry'
@@ -3574,25 +3619,25 @@ msgstr ""
 #: erpnext/accounts/report/general_ledger/general_ledger.py:804
 #: erpnext/accounts/report/payment_ledger/payment_ledger.py:183
 msgid "Against Voucher Type"
-msgstr ""
+msgstr "Vaucher turiga qarshi"
 
 #: erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:113
 #: erpnext/manufacturing/report/work_order_summary/work_order_summary.js:60
 #: erpnext/manufacturing/report/work_order_summary/work_order_summary.py:259
 #: erpnext/stock/report/warehouse_wise_item_balance_age_and_value/warehouse_wise_item_balance_age_and_value.py:102
 msgid "Age"
-msgstr ""
+msgstr "Yosh"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:154
 #: erpnext/accounts/report/accounts_payable/accounts_payable.html:138
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.html:139
 #: erpnext/accounts/report/accounts_receivable/accounts_receivable.py:1223
 msgid "Age (Days)"
-msgstr ""
+msgstr "Yoshi (kunlar)"
 
 #: erpnext/stock/report/stock_ageing/stock_ageing.py:267
 msgid "Age ({0})"
-msgstr ""
+msgstr "Yosh ({0})"
 
 #. Label of the ageing_based_on (Select) field in DocType 'Process Statement Of
 #. Accounts'
@@ -3604,7 +3649,7 @@ msgstr ""
 #: erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.html:119
 #: erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.js:21
 msgid "Ageing Based On"
-msgstr ""
+msgstr "Qarish asosida"
 
 #: erpnext/accounts/report/accounts_payable/accounts_payable.js:80
 #: erpnext/accounts/report/accounts_payable_summary/accounts_payable_summary.js:35
@@ -3922,21 +3967,21 @@ msgstr ""
 #. 'Purchase Taxes and Charges'
 #: erpnext/accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 msgid "Allocate Full Amount to Stock Items"
-msgstr ""
+msgstr "To'liq miqdorni ombordagi narsalarga ajrating"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:919
 msgid "Allocate Payment Amount"
-msgstr ""
+msgstr "To'lov miqdorini ajratish"
 
 #. Label of the allocate_payment_based_on_payment_terms (Check) field in
 #. DocType 'Payment Terms Template'
 #: erpnext/accounts/doctype/payment_terms_template/payment_terms_template.json
 msgid "Allocate Payment Based On Payment Terms"
-msgstr ""
+msgstr "To'lov shartlari asosida to'lovni taqsimlang"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:1719
 msgid "Allocate Payment Request"
-msgstr ""
+msgstr "To'lov so'rovini ajratish"
 
 #. Label of the allocated_amount (Currency) field in DocType 'Payment Entry
 #. Reference'
@@ -3949,7 +3994,7 @@ msgstr ""
 #: erpnext/accounts/doctype/payment_entry_reference/payment_entry_reference.json
 #: erpnext/accounts/doctype/process_payment_reconciliation_log/process_payment_reconciliation_log.json
 msgid "Allocated"
-msgstr ""
+msgstr "Ajratilgan"
 
 #. Label of the allocated_amount (Currency) field in DocType 'Bank Transaction'
 #. Label of the allocated_amount (Currency) field in DocType 'Bank Transaction
@@ -3972,37 +4017,37 @@ msgstr ""
 #: erpnext/accounts/report/gross_profit/gross_profit.py:409
 #: erpnext/public/js/utils/unreconcile.js:87
 msgid "Allocated Amount"
-msgstr ""
+msgstr "Ajratilgan miqdor"
 
 #. Label of the sec_break2 (Section Break) field in DocType 'Payment
 #. Reconciliation'
 #: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.json
 msgid "Allocated Entries"
-msgstr ""
+msgstr "Ajratilgan yozuvlar"
 
 #: erpnext/public/js/templates/crm_activities.html:49
 msgid "Allocated To:"
-msgstr ""
+msgstr "Ajratilgan:"
 
 #. Label of the allocated_amount (Currency) field in DocType 'Sales Invoice
 #. Advance'
 #: erpnext/accounts/doctype/sales_invoice_advance/sales_invoice_advance.json
 msgid "Allocated amount"
-msgstr ""
+msgstr "Ajratilgan miqdor"
 
 #: erpnext/accounts/utils.py:665
 msgid "Allocated amount cannot be greater than unadjusted amount"
-msgstr ""
+msgstr "Ajratilgan summa sozlanmagan summadan katta bo'lmasligi kerak"
 
 #: erpnext/accounts/utils.py:663
 msgid "Allocated amount cannot be negative"
-msgstr ""
+msgstr "Ajratilgan miqdor manfiy bo'lishi mumkin emas"
 
 #. Label of the allocation (Table) field in DocType 'Payment Reconciliation'
 #: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.js:282
 #: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.json
 msgid "Allocation"
-msgstr ""
+msgstr "Ajratish"
 
 #. Label of the allocations (Table) field in DocType 'Process Payment
 #. Reconciliation Log'
@@ -4013,11 +4058,11 @@ msgstr ""
 #: erpnext/accounts/doctype/unreconcile_payment/unreconcile_payment.json
 #: erpnext/public/js/utils/unreconcile.js:104
 msgid "Allocations"
-msgstr ""
+msgstr "Ajratmalar"
 
 #: erpnext/manufacturing/report/production_planning_report/production_planning_report.py:430
 msgid "Allotted Qty"
-msgstr ""
+msgstr "Ajratilgan miqdor"
 
 #. Label of the allow_account_creation_against_child_company (Check) field in
 #. DocType 'Company'
@@ -4025,7 +4070,7 @@ msgstr ""
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:68
 #: erpnext/setup/doctype/company/company.json
 msgid "Allow Account Creation Against Child Company"
-msgstr ""
+msgstr "Bolalar kompaniyasiga qarshi hisob yaratishga ruxsat berish"
 
 #. Label of the allow_alternative_item (Check) field in DocType 'BOM'
 #. Label of the allow_alternative_item (Check) field in DocType 'BOM Item'
@@ -4044,59 +4089,59 @@ msgstr ""
 #: erpnext/stock/doctype/item/item.json
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgid "Allow Alternative Item"
-msgstr ""
+msgstr "Muqobil elementga ruxsat berish"
 
 #: erpnext/stock/doctype/item_alternative/item_alternative.py:68
 msgid "Allow Alternative Item must be checked on Item {}"
-msgstr ""
+msgstr "{} elementida muqobil elementga ruxsat berish katagiga belgi qo'yilishi kerak"
 
 #. Label of the material_consumption (Check) field in DocType 'Manufacturing
 #. Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Allow Continuous Material Consumption"
-msgstr ""
+msgstr "Doimiy material iste'moliga ruxsat bering"
 
 #. Label of the allow_editing_of_items_and_quantities_in_work_order (Check)
 #. field in DocType 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Allow Editing of Items and Quantities in Work Order"
-msgstr ""
+msgstr "Ish buyurtmasidagi elementlar va miqdorlarni tahrirlashga ruxsat berish"
 
 #. Label of the job_card_excess_transfer (Check) field in DocType
 #. 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Allow Excess Material Transfer"
-msgstr ""
+msgstr "Ortiqcha material o'tkazilishiga ruxsat bering"
 
 #. Label of the allow_pegged_currencies_exchange_rates (Check) field in DocType
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Allow Implicit Pegged Currency Conversion"
-msgstr ""
+msgstr "Yashirin valyuta konversiyasiga ruxsat berish"
 
 #. Label of the allow_in_returns (Check) field in DocType 'POS Payment Method'
 #: erpnext/accounts/doctype/pos_payment_method/pos_payment_method.json
 msgid "Allow In Returns"
-msgstr ""
+msgstr "Qaytarishlarga ruxsat berish"
 
 #: erpnext/controllers/selling_controller.py:873
 msgid "Allow Item to Be Added Multiple Times in a Transaction"
-msgstr ""
+msgstr "Bitimga bir nechta marta element qo'shishga ruxsat bering"
 
 #. Label of the allow_multiple_items (Check) field in DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Allow Item to be added multiple times in a transaction"
-msgstr ""
+msgstr "Bitimga elementni bir necha marta qo'shishga ruxsat bering"
 
 #. Label of the allow_lead_duplication_based_on_emails (Check) field in DocType
 #. 'CRM Settings'
 #: erpnext/crm/doctype/crm_settings/crm_settings.json
 msgid "Allow Lead Duplication based on Emails"
-msgstr ""
+msgstr "Elektron pochta xabarlari asosida mijozlarning nusxalarini ko'paytirishga ruxsat berish"
 
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.js:9
 msgid "Allow Multiple Material Consumption"
-msgstr ""
+msgstr "Bir nechta material iste'moliga ruxsat bering"
 
 #. Label of the allow_negative_stock (Check) field in DocType 'Item'
 #. Label of the allow_negative_stock (Check) field in DocType 'Repost Item
@@ -4106,136 +4151,136 @@ msgstr ""
 #: erpnext/stock/doctype/stock_settings/stock_settings.py:225
 #: erpnext/stock/doctype/stock_settings/stock_settings.py:237
 msgid "Allow Negative Stock"
-msgstr ""
+msgstr "Salbiy aktsiyalarga ruxsat bering"
 
 #. Label of the allow_negative_stock_for_batch (Check) field in DocType 'Batch'
 #: erpnext/stock/doctype/batch/batch.json
 msgid "Allow Negative Stock for Batch"
-msgstr ""
+msgstr "Partiya uchun salbiy zaxiraga ruxsat bering"
 
 #. Label of the allow_or_restrict (Select) field in DocType 'Accounting
 #. Dimension Filter'
 #: erpnext/accounts/doctype/accounting_dimension_filter/accounting_dimension_filter.json
 msgid "Allow Or Restrict Dimension"
-msgstr ""
+msgstr "Hajmga ruxsat berish yoki cheklash"
 
 #. Label of the allow_overtime (Check) field in DocType 'Manufacturing
 #. Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Allow Overtime"
-msgstr ""
+msgstr "Qo'shimcha vaqtga ruxsat berish"
 
 #. Label of the allow_partial_payment (Check) field in DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Allow Partial Payment"
-msgstr ""
+msgstr "Qisman to'lovga ruxsat berish"
 
 #. Label of the allow_production_on_holidays (Check) field in DocType
 #. 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Allow Production on Holidays"
-msgstr ""
+msgstr "Bayram kunlari ishlab chiqarishga ruxsat bering"
 
 #. Label of the is_purchase_item (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Allow Purchase"
-msgstr ""
+msgstr "Xaridga ruxsat berish"
 
 #. Label of the allow_zero_qty_in_purchase_order (Check) field in DocType
 #. 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Allow Purchase Order with Zero Quantity"
-msgstr ""
+msgstr "Nol miqdoridagi xarid buyurtmasiga ruxsat bering"
 
 #. Label of the allow_zero_qty_in_quotation (Check) field in DocType 'Selling
 #. Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Allow Quotation with zero quantity"
-msgstr ""
+msgstr "Nol miqdori bilan kotirovkaga ruxsat bering"
 
 #. Label of the allow_rename_attribute_value (Check) field in DocType 'Item
 #. Variant Settings'
 #: erpnext/controllers/item_variant.py:211
 #: erpnext/stock/doctype/item_variant_settings/item_variant_settings.json
 msgid "Allow Rename Attribute Value"
-msgstr ""
+msgstr "Atribut qiymatini qayta nomlashga ruxsat berish"
 
 #. Label of the allow_zero_qty_in_request_for_quotation (Check) field in
 #. DocType 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Allow Request for Quotation with Zero Quantity"
-msgstr ""
+msgstr "Nol miqdori bilan kotirovka so'roviga ruxsat bering"
 
 #. Label of the allow_resetting_service_level_agreement (Check) field in
 #. DocType 'Support Settings'
 #: erpnext/support/doctype/support_settings/support_settings.json
 msgid "Allow Resetting Service Level Agreement"
-msgstr ""
+msgstr "Xizmat ko'rsatish darajasi shartnomasini qayta tiklashga ruxsat berish"
 
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.py:785
 msgid "Allow Resetting Service Level Agreement from Support Settings."
-msgstr ""
+msgstr "Qo'llab-quvvatlash sozlamalaridan Xizmat ko'rsatish darajasi shartnomasini qayta o'rnatishga ruxsat bering."
 
 #. Label of the is_sales_item (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Allow Sales"
-msgstr ""
+msgstr "Savdoga ruxsat berish"
 
 #. Label of the allow_sales_order_creation_for_expired_quotation (Check) field
 #. in DocType 'Selling Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Allow Sales Order creation for expired Quotation"
-msgstr ""
+msgstr "Muddati o'tgan kotirovka uchun savdo buyurtmasini yaratishga ruxsat bering"
 
 #. Label of the allow_zero_qty_in_sales_order (Check) field in DocType 'Selling
 #. Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Allow Sales Order with zero quantity"
-msgstr ""
+msgstr "Nol miqdorli savdo buyurtmasiga ruxsat bering"
 
 #. Label of the allow_stale (Check) field in DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Allow Stale Exchange Rates"
-msgstr ""
+msgstr "Eskirgan valyuta kurslariga ruxsat bering"
 
 #. Label of the allow_zero_qty_in_supplier_quotation (Check) field in DocType
 #. 'Buying Settings'
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "Allow Supplier Quotation with Zero Quantity"
-msgstr ""
+msgstr "Yetkazib beruvchining kotirovkasini nol miqdori bilan qabul qiling"
 
 #. Label of the allow_uom_with_conversion_rate_defined_in_item (Check) field in
 #. DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Allow UOM with conversion rate defined in Item"
-msgstr ""
+msgstr "Elementda belgilangan konversiya darajasi bilan UOMga ruxsat bering"
 
 #. Label of the allow_discount_change (Check) field in DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Allow User to Edit Discount"
-msgstr ""
+msgstr "Foydalanuvchiga chegirmalarni tahrirlashga ruxsat berish"
 
 #. Label of the allow_rate_change (Check) field in DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Allow User to Edit Rate"
-msgstr ""
+msgstr "Foydalanuvchiga narxni tahrirlashga ruxsat berish"
 
 #. Label of the allow_warehouse_change (Check) field in DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Allow User to Edit Warehouse"
-msgstr ""
+msgstr "Foydalanuvchiga omborni tahrirlashga ruxsat berish"
 
 #. Label of the allow_different_uom (Check) field in DocType 'Item Variant
 #. Settings'
 #: erpnext/stock/doctype/item_variant_settings/item_variant_settings.json
 msgid "Allow Variant UOM to be different from Template UOM"
-msgstr ""
+msgstr "Variant UOM ga Template UOM dan farq qilishiga ruxsat bering"
 
 #. Label of the allow_zero_rate (Check) field in DocType 'Repost Item
 #. Valuation'
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Allow Zero Rate"
-msgstr ""
+msgstr "Nol stavkaga ruxsat berish"
 
 #. Label of the allow_zero_valuation_rate (Check) field in DocType 'POS Invoice
 #. Item'
@@ -4259,7 +4304,7 @@ msgstr ""
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 #: erpnext/stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
 msgid "Allow Zero Valuation Rate"
-msgstr ""
+msgstr "Nolinchi baholash stavkasiga ruxsat bering"
 
 #. Label of the allow_delivery_of_overproduced_qty (Check) field in DocType
 #. 'Selling Settings'
@@ -4543,7 +4588,7 @@ msgstr ""
 #. Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
 msgid "Always Ask"
-msgstr ""
+msgstr "Doim so'rang"
 
 #. Label of the amount (Currency) field in DocType 'Advance Payment Ledger
 #. Entry'
@@ -4750,11 +4795,11 @@ msgstr ""
 #: erpnext/templates/form_grid/stock_entry_grid.html:11
 #: erpnext/templates/pages/order.html:103 erpnext/templates/pages/rfq.html:46
 msgid "Amount"
-msgstr ""
+msgstr "Miqdori"
 
 #: erpnext/regional/report/uae_vat_201/uae_vat_201.py:35
 msgid "Amount (AED)"
-msgstr ""
+msgstr "Miqdor (AED)"
 
 #. Label of the base_amount (Currency) field in DocType 'Advance Payment Ledger
 #. Entry'
@@ -4799,23 +4844,23 @@ msgstr ""
 #: erpnext/stock/doctype/landed_cost_vendor_invoice/landed_cost_vendor_invoice.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Amount (Company Currency)"
-msgstr ""
+msgstr "Miqdor (Kompaniya valyutasi)"
 
 #: erpnext/selling/report/sales_order_analysis/sales_order_analysis.py:325
 msgid "Amount Delivered"
-msgstr ""
+msgstr "Yetkazib berilgan miqdor"
 
 #. Label of the amount_difference (Currency) field in DocType 'Stock
 #. Reconciliation Item'
 #: erpnext/stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
 msgid "Amount Difference"
-msgstr ""
+msgstr "Miqdor farqi"
 
 #. Label of the amount_difference_with_purchase_invoice (Currency) field in
 #. DocType 'Purchase Receipt Item'
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Amount Difference with Purchase Invoice"
-msgstr ""
+msgstr "Xarid fakturasi bilan miqdor farqi"
 
 #. Label of the amount_eligible_for_commission (Currency) field in DocType 'POS
 #. Invoice'
@@ -4830,68 +4875,68 @@ msgstr ""
 #: erpnext/selling/doctype/sales_order/sales_order.json
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 msgid "Amount Eligible for Commission"
-msgstr ""
+msgstr "Komissiya uchun maqbul miqdor"
 
 #. Label of the amount_in_figure (Column Break) field in DocType 'Cheque Print
 #. Template'
 #: erpnext/accounts/doctype/cheque_print_template/cheque_print_template.json
 msgid "Amount In Figure"
-msgstr ""
+msgstr "Rasmdagi miqdor"
 
 #. Option for the 'Detected Amount Format' (Select) field in DocType 'Bank
 #. Statement Import Log'
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.json
 msgid "Amount column has \"CR\"/\"DR\" values"
-msgstr ""
+msgstr "Miqdor ustunida \"CR\"/\"DR\" qiymatlari mavjud"
 
 #. Option for the 'Detected Amount Format' (Select) field in DocType 'Bank
 #. Statement Import Log'
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.json
 msgid "Amount column has positive/negative values"
-msgstr ""
+msgstr "Miqdor ustunida musbat/manfiy qiymatlar mavjud"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:896
 msgid "Amount does not match the selected transaction"
-msgstr ""
+msgstr "Miqdor tanlangan tranzaksiyaga mos kelmayapti"
 
 #. Label of the amount_in_account_currency (Currency) field in DocType 'Payment
 #. Ledger Entry'
 #: erpnext/accounts/doctype/payment_ledger_entry/payment_ledger_entry.json
 #: erpnext/accounts/report/payment_ledger/payment_ledger.py:212
 msgid "Amount in Account Currency"
-msgstr ""
+msgstr "Hisob valyutasidagi miqdor"
 
 #. Description of the 'Outstanding Amount' (Currency) field in DocType 'Payment
 #. Request'
 #: erpnext/accounts/doctype/payment_request/payment_request.json
 msgid "Amount in party's bank account currency"
-msgstr ""
+msgstr "Tomonning bank hisobvarag'i valyutasidagi miqdor"
 
 #. Description of the 'Amount' (Currency) field in DocType 'Payment Request'
 #: erpnext/accounts/doctype/payment_request/payment_request.json
 msgid "Amount in transaction currency"
-msgstr ""
+msgstr "Tranzaksiya valyutasidagi summa"
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:74
 msgid "Amount in {0}"
-msgstr ""
+msgstr "{0} dagi miqdor"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:896
 msgid "Amount matches the selected transaction"
-msgstr ""
+msgstr "Summa tanlangan tranzaksiyaga mos keladi"
 
 #: erpnext/buying/report/purchase_order_analysis/purchase_order_analysis.py:191
 #: erpnext/selling/report/sales_order_analysis/sales_order_analysis.py:220
 msgid "Amount to Bill"
-msgstr ""
+msgstr "Hisob-faktura summasi"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1255
 msgid "Amount {0} {1} adjusted against {2} {3}"
-msgstr ""
+msgstr "{0} {1} miqdori {2} {3} ga nisbatan tuzatilgan"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1266
 msgid "Amount {0} {1} as adjustment to {2}"
-msgstr ""
+msgstr "{0} {1} miqdori {2} ga o'zgartirish sifatida"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1230
 msgid "Amount {0} {1} transferred from {2} to {3}"
@@ -4899,97 +4944,97 @@ msgstr ""
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:1236
 msgid "Amount {0} {1} {2} {3}"
-msgstr ""
+msgstr "Miqdor {0} {1} {2} {3}"
 
 #. Label of the amounts_section (Section Break) field in DocType 'GL Entry'
 #: erpnext/accounts/doctype/gl_entry/gl_entry.json
 msgid "Amounts"
-msgstr ""
+msgstr "Miqdorlar"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Ampere"
-msgstr ""
+msgstr "Amper"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Ampere-Hour"
-msgstr ""
+msgstr "Amper-soat"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Ampere-Minute"
-msgstr ""
+msgstr "Amper-Minut"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
 msgid "Ampere-Second"
-msgstr ""
+msgstr "Amper-soniya"
 
 #: erpnext/controllers/trends.py:288 erpnext/controllers/trends.py:300
 #: erpnext/controllers/trends.py:309
 msgid "Amt"
-msgstr ""
+msgstr "Miqdori"
 
 #. Description of a DocType
 #: erpnext/setup/doctype/item_group/item_group.json
 msgid "An Item Group is a way to classify items based on types."
-msgstr ""
+msgstr "Elementlar guruhi - bu elementlarni turlarga qarab tasniflash usuli."
 
 #. Description of the 'Notify by email on creation of automatic Material
 #. Request' (Check) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "An email will be sent to notify the User with the role 'Purchase Manager' when an automatic Material Request is created."
-msgstr ""
+msgstr "Avtomatik Materiallar So'rovi yaratilganda, \"Xarid menejeri\" roli bilan foydalanuvchiga xabar berish uchun elektron pochta xabari yuboriladi."
 
 #: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:613
 msgid "An error has been appeared while reposting item valuation via {0}"
-msgstr ""
+msgstr "{0} orqali element bahosini qayta joylashtirishda xatolik yuz berdi"
 
 #: erpnext/public/js/controllers/buying.js:378
 #: erpnext/public/js/utils/sales_common.js:489
 msgid "An error occurred during the update process"
-msgstr ""
+msgstr "Yangilash jarayonida xatolik yuz berdi"
 
 #: erpnext/stock/reorder_item.py:368
 msgid "An error occurred for certain Items while creating Material Requests based on Re-order level. Please rectify these issues :"
-msgstr ""
+msgstr "Qayta buyurtma berish darajasiga asoslangan materiallar so'rovlarini yaratishda ayrim elementlar uchun xatolik yuz berdi. Iltimos, ushbu muammolarni hal qiling:"
 
 #: erpnext/buying/report/supplier_quotation_comparison/supplier_quotation_comparison.html:124
 msgid "Analysis Chart"
-msgstr ""
+msgstr "Tahlil jadvali"
 
 #: erpnext/setup/setup_wizard/data/designation.txt:4
 msgid "Analyst"
-msgstr ""
+msgstr "Tahlilchi"
 
 #. Label of the analytics_section (Section Break) field in DocType 'Accounts
 #. Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Analytical Accounting"
-msgstr ""
+msgstr "Analitik buxgalteriya hisobi"
 
 #: erpnext/public/js/utils.js:184
 msgid "Annual Billing: {0}"
-msgstr ""
+msgstr "Yillik hisob-kitob: {0}"
 
 #: erpnext/controllers/budget_controller.py:453
 msgid "Annual Budget for Account {0} against {1} {2} is {3}. It will be collectively ({4}) exceeded by {5}"
-msgstr ""
+msgstr "{0} hisobining yillik byudjeti {1} {2} ga nisbatan {3}ni tashkil qiladi. U umumiy hisobda ({4}) {5} ga oshirib yuboriladi."
 
 #: erpnext/controllers/budget_controller.py:318
 msgid "Annual Budget for Account {0} against {1}: {2} is {3}. It will be exceeded by {4}"
-msgstr ""
+msgstr "{0} hisobining yillik byudjeti {1}ga nisbatan: {2} {3}ga teng. U {4} ga oshib ketadi."
 
 #. Label of the expense_year_to_date (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
 msgid "Annual Expenses"
-msgstr ""
+msgstr "Yillik xarajatlar"
 
 #. Label of the income_year_to_date (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
 msgid "Annual Income"
-msgstr ""
+msgstr "Yillik daromad"
 
 #. Label of the annual_revenue (Currency) field in DocType 'Lead'
 #. Label of the annual_revenue (Currency) field in DocType 'Opportunity'
@@ -4998,41 +5043,41 @@ msgstr ""
 #: erpnext/crm/doctype/opportunity/opportunity.json
 #: erpnext/crm/doctype/prospect/prospect.json
 msgid "Annual Revenue"
-msgstr ""
+msgstr "Yillik daromad"
 
 #: erpnext/accounts/doctype/budget/budget.py:145
 msgid "Another Budget record '{0}' already exists against {1} '{2}' and account '{3}' with overlapping fiscal years."
-msgstr ""
+msgstr "Moliyaviy yillar bir-birining ustiga chiqqan holda {1} '{2}' va '{3}' hisobiga nisbatan yana bir '{0}' byudjet yozuvi allaqachon mavjud."
 
 #: erpnext/accounts/doctype/cost_center_allocation/cost_center_allocation.py:107
 msgid "Another Cost Center Allocation record {0} applicable from {1}, hence this allocation will be applicable upto {2}"
-msgstr ""
+msgstr "Boshqa Xarajatlar Markazi Taqsimot yozuvi {0} {1}dan boshlab amal qiladi, shuning uchun bu taqsimot {2} gacha amal qiladi."
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:1044
 msgid "Another Payment Request is already processed"
-msgstr ""
+msgstr "Boshqa to'lov so'rovi allaqachon ko'rib chiqilgan"
 
 #: erpnext/setup/doctype/sales_person/sales_person.py:123
 msgid "Another Sales Person {0} exists with the same Employee id"
-msgstr ""
+msgstr "Xuddi shu xodim identifikatoriga ega bo'lgan boshqa savdo xodimi {0} mavjud"
 
 #. Option for the 'Transaction Type' (Select) field in DocType 'Bank
 #. Transaction Rule'
 #: erpnext/accounts/doctype/bank_transaction_rule/bank_transaction_rule.json
 msgid "Any"
-msgstr ""
+msgstr "Har qanday"
 
 #: banking/src/components/features/BankReconciliation/Rules/RuleForm.tsx:49
 msgid "Any debit transaction with the keyword 'Bank Fee'."
-msgstr ""
+msgstr "\"Bank komissiyasi\" kalit so'zi bilan har qanday debet operatsiyasi."
 
 #: erpnext/stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:37
 msgid "Any one of following filters required: warehouse, Item Code, Item Group"
-msgstr ""
+msgstr "Quyidagi filtrlardan istalgan biri talab qilinadi: ombor, mahsulot kodi, mahsulot guruhi"
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:6
 msgid "Apparel & Accessories"
-msgstr ""
+msgstr "Kiyim-kechak va aksessuarlar"
 
 #. Label of the applicable_charges (Currency) field in DocType 'Landed Cost
 #. Item'
@@ -5041,7 +5086,7 @@ msgstr ""
 #: erpnext/stock/doctype/landed_cost_item/landed_cost_item.json
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.json
 msgid "Applicable Charges"
-msgstr ""
+msgstr "Amaldagi to'lovlar"
 
 #. Label of the dimensions (Table) field in DocType 'Accounting Dimension
 #. Filter'
