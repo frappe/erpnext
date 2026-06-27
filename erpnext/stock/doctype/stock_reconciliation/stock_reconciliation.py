@@ -1038,7 +1038,7 @@ class StockReconciliation(StockController):
 			update_modified=False,
 		)
 
-	def get_current_qty_from_ledger(self, row: StockReconciliationItem):
+	def get_current_qty_from_ledger(self, row):
 		"""Current (pre-reconciliation) qty for a row, recomputed from the ledger after reposting.
 
 		Serial/batch rows cannot have backdated qty changes inserted before a future reconciliation
