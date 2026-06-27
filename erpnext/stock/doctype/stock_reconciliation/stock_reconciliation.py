@@ -5,12 +5,7 @@
 import frappe
 from frappe import _, bold, json, msgprint
 from frappe.query_builder.functions import Sum
-<<<<<<< HEAD
 from frappe.utils import add_to_date, cint, cstr, flt, get_datetime, now
-=======
-from frappe.utils import add_to_date, cint, cstr, flt, now
-from frappe.utils.data import DateTimeLikeObject
->>>>>>> c7ef42ef98 (fix: sync Stock Reconciliation difference amount with GL after reposting (#56574))
 
 import erpnext
 from erpnext.accounts.utils import get_company_default
