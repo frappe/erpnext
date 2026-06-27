@@ -1438,39 +1438,6 @@ class update_entries_after:
 			d.db_update()
 
 	def update_rate_on_stock_reconciliation(self, sle):
-<<<<<<< HEAD
-		if not sle.serial_no and not sle.batch_no:
-			sr = frappe.get_doc("Stock Reconciliation", sle.voucher_no, for_update=True)
-
-			for item in sr.items:
-				# Skip for Serial and Batch Items
-				if item.name != sle.voucher_detail_no or item.serial_no or item.batch_no:
-					continue
-
-				previous_sle = get_previous_sle(
-					{
-						"item_code": item.item_code,
-						"warehouse": item.warehouse,
-						"posting_date": sr.posting_date,
-						"posting_time": sr.posting_time,
-						"sle": sle.name,
-					}
-				)
-
-				item.current_qty = previous_sle.get("qty_after_transaction") or 0.0
-				item.current_valuation_rate = previous_sle.get("valuation_rate") or 0.0
-				item.current_amount = flt(item.current_qty) * flt(item.current_valuation_rate)
-
-				item.amount = flt(item.qty) * flt(item.valuation_rate)
-				item.quantity_difference = item.qty - item.current_qty
-				item.amount_difference = item.amount - item.current_amount
-			else:
-				sr.difference_amount = sum([item.amount_difference for item in sr.items])
-			sr.db_update()
-
-			for item in sr.items:
-				item.db_update()
-=======
 		# Refresh the reconciliation's difference amount and per-row current qty/rate from the reposted
 		# ledger so the document keeps matching the GL entries. Handles serialized, batched and
 		# non-serialized items uniformly (the document method reads the current bundle for serial/batch
@@ -1478,7 +1445,6 @@ class update_entries_after:
 		frappe.get_lazy_doc(
 			"Stock Reconciliation", sle.voucher_no, for_update=True
 		).recalculate_difference_amount_from_ledger()
->>>>>>> c7ef42ef98 (fix: sync Stock Reconciliation difference amount with GL after reposting (#56574))
 
 	def get_incoming_value_for_serial_nos(self, sle, serial_nos):
 		# get rate from serial nos within same company
