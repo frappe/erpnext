@@ -130,6 +130,7 @@
    "fieldtype": "Data",
    "in_global_search": 1,
    "label": "Alias",
+   "no_copy": 1,
    "unique": 1
   },
   {
@@ -682,17 +683,6 @@
   {
    "fieldname": "credit_limit_column",
    "fieldtype": "Column Break"
-<<<<<<< HEAD
-=======
-  },
-  {
-   "fieldname": "alias",
-   "fieldtype": "Data",
-   "in_global_search": 1,
-   "label": "Alias",
-   "no_copy": 1,
-   "unique": 1
->>>>>>> 057af21cd8 (fix: party aliases should be no copy)
   }
  ],
  "icon": "fa fa-user",
