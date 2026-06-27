@@ -1337,48 +1337,6 @@ def get_row_stock_value_difference(voucher_type: str, voucher_no: str, voucher_d
 	return flt(result[0][0]) if result and result[0][0] else 0.0
 
 
-def update_stock_reconciliation_difference_after_repost(
-	items_to_be_repost: list | None, affected_transactions: set | None = None
-):
-	"""Sync every reconciliation touched by a repost so its Difference Amount matches the GL entries.
-
-	Called once at the end of reposting. Recomputing for a reconciliation whose figures did not
-	actually change is idempotent, so the (over-approximated) discovery is safe.
-	"""
-	reco_names = set()
-
-	# Reconciliations on the item/warehouse pairs being reposted directly.
-	items = list({d.get("item_code") for d in items_to_be_repost or [] if d.get("item_code")})
-	warehouses = list({d.get("warehouse") for d in items_to_be_repost or [] if d.get("warehouse")})
-
-	if items and warehouses:
-		reco_names.update(
-			frappe.get_all(
-				"Stock Ledger Entry",
-				filters={
-					"voucher_type": "Stock Reconciliation",
-					"is_cancelled": 0,
-					"item_code": ("in", items),
-					"warehouse": ("in", warehouses),
-				},
-				distinct=True,
-				pluck="voucher_no",
-			)
-		)
-
-	# Dependent reconciliations rebuilt for other item/warehouse pairs are tracked here, not in
-	# items_to_be_repost, so include them or their difference_amount would stay stale.
-	for voucher_type, voucher_no in affected_transactions or []:
-		if voucher_type == "Stock Reconciliation":
-			reco_names.add(voucher_no)
-
-	for name in reco_names:
-		if frappe.db.get_value("Stock Reconciliation", name, "docstatus") != 1:
-			continue
-
-		frappe.get_doc("Stock Reconciliation", name).recalculate_difference_amount_from_ledger()
-
-
 @frappe.whitelist()
 def get_stock_balance_for(
 	item_code: str,
