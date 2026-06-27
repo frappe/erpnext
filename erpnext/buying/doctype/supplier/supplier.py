@@ -13,6 +13,7 @@ from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_
 
 from erpnext.accounts.party import (
 	get_dashboard_info,
+	validate_internal_party_companies,
 	validate_party_accounts,
 	validate_party_currency_before_merging,
 )
@@ -144,6 +145,7 @@ class Supplier(TransactionBase):
 
 		validate_party_accounts(self)
 		self.validate_internal_supplier()
+		validate_internal_party_companies(self)
 		self.add_role_for_user()
 		self.validate_currency_for_receivable_payable_and_advance_account()
 

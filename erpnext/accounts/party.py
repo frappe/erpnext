@@ -586,6 +586,19 @@ def validate_party_gle_currency(party_type, party, company, party_account_curren
 		)
 
 
+def validate_internal_party_companies(doc):
+	if not doc.get("represents_company"):
+		return
+
+	for row in doc.get("companies"):
+		if row.company == doc.represents_company:
+			frappe.throw(
+				_(
+					"Row #{0}: Company {1} cannot be added in 'Allowed To Transact With' as it is the company this {2} represents."
+				).format(row.idx, frappe.bold(row.company), doc.doctype)
+			)
+
+
 def validate_party_accounts(doc):
 	from erpnext.controllers.accounts_controller import validate_account_head
 

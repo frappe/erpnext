@@ -21,6 +21,7 @@ from frappe.utils.user import get_users_with_role
 
 from erpnext.accounts.party import (
 	get_dashboard_info,
+	validate_internal_party_companies,
 	validate_party_accounts,
 	validate_party_currency_before_merging,
 )
@@ -184,6 +185,7 @@ class Customer(TransactionBase):
 		self.check_customer_group_change()
 		self.validate_default_bank_account()
 		self.validate_internal_customer()
+		validate_internal_party_companies(self)
 		self.add_role_for_user()
 		self.validate_currency_for_receivable_payable_and_advance_account()
 
