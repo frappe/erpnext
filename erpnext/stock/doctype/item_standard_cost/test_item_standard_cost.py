@@ -199,3 +199,97 @@ class TestItemStandardCost(ERPNextTestSuite):
 		item.reload()
 		item.valuation_method = "FIFO"
 		self.assertRaises(frappe.ValidationError, item.save)
+
+	def test_serialized_item_not_allowed(self):
+		# Standard Cost cannot maintain per-serial ledgers, so the Item-level guard must block it.
+		self.assertRaises(
+			frappe.ValidationError,
+			make_item,
+			properties={
+				"valuation_method": "Standard Cost",
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "SC-SER-.####",
+			},
+		)
+
+	def test_batched_item_not_allowed(self):
+		self.assertRaises(
+			frappe.ValidationError,
+			make_item,
+			properties={
+				"valuation_method": "Standard Cost",
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "SC-BATCH-.####",
+			},
+		)
+
+	def test_standard_rate_cache_invalidated_after_submit(self):
+		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import get_item_standard_rate
+
+		item = create_standard_cost_item()
+
+		# Read (and request-cache) the rate before any Item Standard Cost exists.
+		self.assertIsNone(get_item_standard_rate(item.name, TEST_COMPANY))
+
+		create_item_standard_cost(item.name, rate=100)
+
+		# The submit must have invalidated the cache, so this reads the freshly submitted rate.
+		self.assertEqual(flt(get_item_standard_rate(item.name, TEST_COMPANY)), 100)
+
+	def test_pr_stock_value_excludes_rejected_warehouse(self):
+		# Accepted and rejected stock for one receipt row share voucher_detail_no. The standard-cost
+		# SRBNB split must clear only the accepted warehouse's value, not accepted + rejected.
+		from erpnext.accounts.doctype.purchase_invoice.services.gl_composer import (
+			PurchaseInvoiceGLComposer,
+		)
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		item = create_standard_cost_item()
+		create_item_standard_cost(item.name, rate=100, company=PI_COMPANY)
+
+		rejected_warehouse = create_warehouse("_Test SC Rejected Warehouse", company=PI_COMPANY)
+
+		# Receive 10 accepted + 2 rejected at a billed rate of 150; both SLEs value at the standard 100.
+		pr = make_purchase_receipt(
+			item_code=item.name,
+			company=PI_COMPANY,
+			warehouse=PI_STORES,
+			qty=10,
+			rejected_qty=2,
+			rejected_warehouse=rejected_warehouse,
+			rate=150,
+		)
+
+		mock_item = frappe._dict(purchase_receipt=pr.name, pr_detail=pr.items[0].name)
+		# Method body uses only `item`, so it can be called unbound.
+		value = PurchaseInvoiceGLComposer.get_pr_stock_value(None, mock_item)
+
+		# Accepted only (10 * 100), not accepted + rejected (12 * 100).
+		self.assertEqual(flt(value), 1000)
+
+	def test_revaluation_posted_after_same_day_movement(self):
+		# A movement earlier on the effective date must not end up after the revaluation, otherwise the
+		# reco would backdate the current quantity ahead of it.
+		item = create_standard_cost_item()
+		create_item_standard_cost(item.name, rate=100, effective_date=add_days(today(), -2))
+
+		se = make_stock_entry(
+			item_code=item.name, target=TEST_WAREHOUSE, qty=10, basic_rate=100, posting_date=today()
+		)
+
+		isc = create_item_standard_cost(item.name, rate=150, effective_date=today())
+
+		reco_time = frappe.db.get_value("Stock Reconciliation", isc.revaluation_entry, "posting_time")
+		se_time = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": se.name, "is_cancelled": 0}, "posting_time"
+		)
+		self.assertGreaterEqual(str(reco_time), str(se_time))
+
+		stock_value = frappe.db.get_value(
+			"Bin", {"item_code": item.name, "warehouse": TEST_WAREHOUSE}, "stock_value"
+		)
+		self.assertEqual(flt(stock_value), 1500)

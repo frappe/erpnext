@@ -5,7 +5,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.functions import Max
-from frappe.utils import flt, get_link_to_form, getdate, today
+from frappe.utils import flt, get_datetime, get_link_to_form, getdate, nowtime, today
 from frappe.utils.caching import request_cache
 
 from erpnext.stock.utils import get_valuation_method
@@ -35,8 +35,21 @@ class ItemStandardCost(Document):
 		self.validate_rate()
 
 	def validate_item(self):
-		if not frappe.get_cached_value("Item", self.item_code, "is_stock_item"):
+		item = frappe.get_cached_value(
+			"Item", self.item_code, ["is_stock_item", "has_serial_no", "has_batch_no"], as_dict=True
+		)
+		if not item.is_stock_item:
 			frappe.throw(_("{0} is not a stock item.").format(frappe.bold(self.item_code)))
+
+		if item.has_serial_no or item.has_batch_no:
+			# Standard Cost revaluation is a pure value change posted via a qty-only Stock
+			# Reconciliation; it cannot maintain per-serial/per-batch ledgers, so it is not supported
+			# for serialized or batched items.
+			frappe.throw(
+				_("Standard Cost valuation is not supported for serialized or batched Item {0}.").format(
+					get_link_to_form("Item", self.item_code)
+				)
+			)
 
 		if get_valuation_method(self.item_code, self.company) != "Standard Cost":
 			frappe.throw(
@@ -87,6 +100,10 @@ class ItemStandardCost(Document):
 			)
 
 	def on_submit(self):
+		# This record is now the effective rate. Drop any request-cached lookup that may have read the
+		# previous (or missing) rate earlier in the request, so the revaluation below — and anything
+		# else in this request — reads the newly submitted rate.
+		clear_item_standard_rate_cache()
 		self.create_revaluation_entry()
 
 	def before_cancel(self):
@@ -107,6 +124,7 @@ class ItemStandardCost(Document):
 		reco.company = self.company
 		reco.purpose = "Stock Reconciliation"
 		reco.posting_date = self.effective_date
+		reco.posting_time = self.get_revaluation_posting_time()
 		reco.set_posting_time = 1
 		for row in balances:
 			reco.append(
@@ -124,6 +142,32 @@ class ItemStandardCost(Document):
 		reco.submit()
 
 		self.db_set("revaluation_entry", reco.name)
+
+	def get_revaluation_posting_time(self):
+		"""Post the revaluation after the day's last stock movement.
+
+		The reconciliation asserts the current on-hand quantity (Bin.actual_qty). If it were posted
+		before later same-day movements, it would backdate that quantity ahead of them and corrupt the
+		qty/value timeline. Using the time of the last SLE on the effective date (the reconciliation
+		sorts after it on creation) keeps the snapshot at the correct point; if there is no movement
+		that day, the current time is safe since no later movement can exist."""
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		result = (
+			frappe.qb.from_(sle)
+			.select(Max(sle.posting_datetime))
+			.where(
+				(sle.item_code == self.item_code)
+				& (sle.company == self.company)
+				& (sle.is_cancelled == 0)
+				& (sle.posting_date == getdate(self.effective_date))
+			)
+		).run()
+
+		last_datetime = result[0][0] if result and result[0][0] else None
+		# Keep microsecond precision: posting_datetime is compared at microsecond granularity, so a
+		# truncated time would sort the reco before a same-second movement. Matching the exact time
+		# lets the later creation order the reco after it.
+		return get_datetime(last_datetime).strftime("%H:%M:%S.%f") if last_datetime else nowtime()
 
 	def get_warehouse_wise_balance(self):
 		bin_table = frappe.qb.DocType("Bin")
@@ -197,6 +241,14 @@ def get_item_standard_rate(item_code, company, posting_date=None):
 	)
 
 	return flt(rate[0]) if rate else None
+
+
+def clear_item_standard_rate_cache():
+	"""Drop the request-cached results of `get_item_standard_rate` so reads after a new Item Standard
+	Cost is submitted see the fresh rate instead of a value cached earlier in the same request."""
+	cache = getattr(frappe.local, "request_cache", None)
+	if cache:
+		cache.pop(get_item_standard_rate.__wrapped__, None)
 
 
 def get_purchase_price_variance_account(item_code, company):

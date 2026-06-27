@@ -196,14 +196,12 @@ class StockReconciliation(StockController):
 			if not item.item_code:
 				continue
 
-			# Standard Cost revaluation recos are pure value changes; no serial/batch bundle needed.
-			if is_standard_cost_item(item.item_code, self.company):
-				continue
-
 			item_details = frappe.get_cached_value(
 				"Item", item.item_code, ["has_serial_no", "has_batch_no"], as_dict=1
 			)
 
+			# Non-serial/non-batch items (including Standard Cost items, which cannot be serialized or
+			# batched) need no bundle. Standard Cost revaluation recos are pure value changes.
 			if not (item_details.has_serial_no or item_details.has_batch_no):
 				continue
 

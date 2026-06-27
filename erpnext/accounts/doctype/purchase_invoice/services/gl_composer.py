@@ -583,7 +583,18 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 		return True
 
 	def get_pr_stock_value(self, item):
-		"""Total stock value (at standard) the linked Purchase Receipt booked for this item row."""
+		"""Stock value (at standard) the linked Purchase Receipt booked into its accepted warehouse
+		for this item row.
+
+		Accepted and rejected stock for the same receipt row share `voucher_detail_no`, so the
+		warehouse filter is required: without it the accepted warehouse's SRBNB would be cleared at
+		accepted + rejected value and post the wrong Purchase Price Variance amount. The accepted
+		warehouse is read from the receipt row itself (not the invoice row, which may be unset on a
+		non-stock invoice)."""
+		accepted_warehouse = frappe.db.get_value("Purchase Receipt Item", item.pr_detail, "warehouse")
+		if not accepted_warehouse:
+			return 0.0
+
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		result = (
 			frappe.qb.from_(sle)
@@ -592,6 +603,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 				(sle.voucher_type == "Purchase Receipt")
 				& (sle.voucher_no == item.purchase_receipt)
 				& (sle.voucher_detail_no == item.pr_detail)
+				& (sle.warehouse == accepted_warehouse)
 				& (sle.is_cancelled == 0)
 			)
 		).run()
