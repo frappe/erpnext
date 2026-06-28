@@ -734,13 +734,7 @@ class PurchaseReceipt(BuyingController):
 				divisional_loss -= rejected_item_cost
 
 			if divisional_loss:
-				loss_account = (
-					self.get_company_default("default_expense_account", ignore_validation=True)
-					or stock_asset_rbnb
-				)
-
-				if self.is_return and item.expense_account and item.expense_account != stock_asset_rbnb:
-					loss_account = item.expense_account
+				loss_account = self.get_divisional_loss_account(item, stock_asset_rbnb)
 
 				cost_center = item.cost_center or frappe.get_cached_value(
 					"Company", self.company, "cost_center"
@@ -864,6 +858,29 @@ class PurchaseReceipt(BuyingController):
 				+ ": \n"
 				+ "\n".join(warehouse_with_no_account)
 			)
+
+	def get_divisional_loss_account(self, item, stock_asset_rbnb):
+		"""Account that absorbs the difference between the document value and the value actually
+		booked into stock. For a Standard Cost item this difference is a purchase price variance
+		(receipt rate vs standard rate), so it goes to the Purchase Price Variance account; for all
+		other items it keeps the existing behaviour (default expense account, or the item's expense
+		account on a return)."""
+		from erpnext.stock.utils import get_valuation_method
+
+		if item.item_code and get_valuation_method(item.item_code, self.company) == "Standard Cost":
+			from erpnext.stock.doctype.item_standard_cost.item_standard_cost import (
+				get_purchase_price_variance_account,
+			)
+
+			return get_purchase_price_variance_account(item.item_code, self.company)
+
+		loss_account = (
+			self.get_company_default("default_expense_account", ignore_validation=True) or stock_asset_rbnb
+		)
+		if self.is_return and item.expense_account and item.expense_account != stock_asset_rbnb:
+			loss_account = item.expense_account
+
+		return loss_account
 
 	def add_provisional_gl_entry(
 		self, item, gl_entries, posting_date, provisional_account, reverse=0, item_amount=None
