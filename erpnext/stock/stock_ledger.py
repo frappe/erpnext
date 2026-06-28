@@ -71,25 +71,31 @@ def validate_standard_cost_posting_date(sl_entries):
 
 		key = (item_code, company)
 		if key not in checked:
-			effective_date = None
+			latest_isc = None
 			if get_valuation_method(item_code, company) == "Standard Cost":
-				effective_date = frappe.db.get_value(
+				latest_isc = frappe.db.get_value(
 					"Item Standard Cost",
 					{"item_code": item_code, "company": company, "docstatus": 1},
-					"effective_date",
+					["name", "effective_date"],
 					order_by="effective_date desc",
+					as_dict=True,
 				)
-			checked[key] = effective_date
+			checked[key] = latest_isc
 
-		effective_date = checked[key]
-		if effective_date and getdate(posting_date) < getdate(effective_date):
+		latest_isc = checked[key]
+		if latest_isc and getdate(posting_date) < getdate(latest_isc.effective_date):
+			effective_date = frappe.bold(frappe.format(latest_isc.effective_date, "Date"))
 			frappe.throw(
 				_(
-					"Cannot post a Standard Cost item {0} before {1}, the effective date of its latest Standard Valuation Rate."
+					"Cannot post Standard Cost item {0} on {1}: it is before {2}, the effective date of its latest Standard Valuation Rate {3}."
 				).format(
 					get_link_to_form("Item", item_code),
-					frappe.bold(frappe.format(effective_date, "Date")),
-				),
+					frappe.bold(frappe.format(posting_date, "Date")),
+					effective_date,
+					get_link_to_form("Item Standard Cost", latest_isc.name),
+				)
+				+ "<br><br>"
+				+ _("Post this entry on or after {0}.").format(effective_date),
 				title=_("Backdated Entry Not Allowed"),
 			)
 
@@ -2135,21 +2141,50 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 		detail = next_stock_reco_detail[0]
 		datetime_limit_condition = get_datetime_limit_condition(detail)
 
-	frappe.db.sql(  # nosemgrep
-		f"""
-		update `tabStock Ledger Entry`
-		set qty_after_transaction = qty_after_transaction + {qty_shift}
-		where
-			item_code = %(item_code)s
-			and warehouse = %(warehouse)s
-			and is_cancelled = 0
-			and (
-				posting_datetime > %(posting_datetime)s
-			)
-			{datetime_limit_condition}
-		""",
-		args,
-	)
+	if get_valuation_method(args.get("item_code"), args.get("company")) == "Standard Cost":
+		# Standard Cost inventory is always carried at the standard rate, so a backdated entry only
+		# shifts future balances — no full repost is needed. Update qty and value in place:
+		# stock_value = qty_after_transaction * standard rate, which is constant across this range
+		# (a rate change posts a reconciliation that bounds it). stock_value_difference is unchanged
+		# because every future balance shifts by the same amount.
+		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import get_item_standard_rate
+
+		standard_rate = flt(
+			get_item_standard_rate(args.get("item_code"), args.get("company"), args.get("posting_date"))
+		)
+
+		frappe.db.sql(  # nosemgrep
+			f"""
+			update `tabStock Ledger Entry`
+			set stock_value = (qty_after_transaction + {qty_shift}) * {standard_rate},
+				qty_after_transaction = qty_after_transaction + {qty_shift}
+			where
+				item_code = %(item_code)s
+				and warehouse = %(warehouse)s
+				and is_cancelled = 0
+				and (
+					posting_datetime > %(posting_datetime)s
+				)
+				{datetime_limit_condition}
+			""",
+			args,
+		)
+	else:
+		frappe.db.sql(  # nosemgrep
+			f"""
+			update `tabStock Ledger Entry`
+			set qty_after_transaction = qty_after_transaction + {qty_shift}
+			where
+				item_code = %(item_code)s
+				and warehouse = %(warehouse)s
+				and is_cancelled = 0
+				and (
+					posting_datetime > %(posting_datetime)s
+				)
+				{datetime_limit_condition}
+			""",
+			args,
+		)
 
 	validate_negative_qty_in_future_sle(args, allow_negative_stock)
 

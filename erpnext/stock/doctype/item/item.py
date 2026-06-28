@@ -1065,15 +1065,6 @@ class Item(Document):
 		"""Once stock exists, an item's valuation method cannot be switched to or from Standard
 		Cost — either change would leave existing stock valued on a basis the ledger never
 		recorded."""
-		if self.valuation_method == "Standard Cost" and (self.has_serial_no or self.has_batch_no):
-			# Standard Cost is revalued through a qty-only Stock Reconciliation, which cannot maintain
-			# per-serial/per-batch ledgers.
-			frappe.throw(
-				_("Standard Cost valuation is not supported for serialized or batched Item {0}.").format(
-					frappe.bold(self.name)
-				)
-			)
-
 		if not self.is_standard_cost_valuation_change():
 			return
 

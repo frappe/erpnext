@@ -196,12 +196,16 @@ class StockReconciliation(StockController):
 			if not item.item_code:
 				continue
 
+			# Standard Cost revaluation recos are pure value changes: qty is unchanged and the SLE is
+			# revalued at the standard rate, so no serial/batch bundle is created (see update_stock_ledger,
+			# which routes these rows through the single revaluation SLE path).
+			if is_standard_cost_item(item.item_code, self.company):
+				continue
+
 			item_details = frappe.get_cached_value(
 				"Item", item.item_code, ["has_serial_no", "has_batch_no"], as_dict=1
 			)
 
-			# Non-serial/non-batch items (including Standard Cost items, which cannot be serialized or
-			# batched) need no bundle. Standard Cost revaluation recos are pure value changes.
 			if not (item_details.has_serial_no or item_details.has_batch_no):
 				continue
 
@@ -572,7 +576,9 @@ class StockReconciliation(StockController):
 				if item.valuation_rate is None:
 					item.valuation_rate = item_dict.get("rate")
 
-				if item_dict.get("serial_nos"):
+				# Standard Cost items are revalued by rate only; don't pull serial nos onto the row, or a
+				# serial/batch bundle would be built for what must stay a pure value-change SLE.
+				if item_dict.get("serial_nos") and not is_standard_cost_item(item.item_code, self.company):
 					item.current_serial_no = item_dict.get("serial_nos")
 					if self.purpose == "Stock Reconciliation" and not item.serial_no and item.qty:
 						item.serial_no = item.current_serial_no
@@ -788,7 +794,12 @@ class StockReconciliation(StockController):
 				"Item", row.item_code, ["has_serial_no", "has_batch_no"], as_dict=1
 			)
 
-			if item.has_serial_no or item.has_batch_no:
+			# A Standard Cost item is revalued by rate alone (qty unchanged, valuation from the standard
+			# rate), so even a serialized/batched one is posted through the single revaluation SLE path
+			# without a serial/batch bundle, the same as a non-serial item.
+			if (item.has_serial_no or item.has_batch_no) and not is_standard_cost_item(
+				row.item_code, self.company
+			):
 				self.get_sle_for_serialized_items(row, sl_entries)
 			else:
 				if row.serial_and_batch_bundle:

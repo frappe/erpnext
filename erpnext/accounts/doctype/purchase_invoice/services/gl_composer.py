@@ -583,16 +583,21 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 		return True
 
 	def get_pr_stock_value(self, item):
-		"""Stock value (at standard) the linked Purchase Receipt booked into its accepted warehouse
-		for this item row.
+		"""Stock value (at standard) the linked Purchase Receipt booked for the quantity this invoice
+		row is billing.
 
 		Accepted and rejected stock for the same receipt row share `voucher_detail_no`, so the
 		warehouse filter is required: without it the accepted warehouse's SRBNB would be cleared at
 		accepted + rejected value and post the wrong Purchase Price Variance amount. The accepted
 		warehouse is read from the receipt row itself (not the invoice row, which may be unset on a
-		non-stock invoice)."""
-		accepted_warehouse = frappe.db.get_value("Purchase Receipt Item", item.pr_detail, "warehouse")
-		if not accepted_warehouse:
+		non-stock invoice).
+
+		The receipt's full accepted value is pro-rated to the invoiced quantity, so a partial bill
+		clears SRBNB (and posts PPV) for only the units it covers, not the whole receipt row."""
+		pr_detail = frappe.db.get_value(
+			"Purchase Receipt Item", item.pr_detail, ["warehouse", "stock_qty"], as_dict=True
+		)
+		if not pr_detail or not pr_detail.warehouse:
 			return 0.0
 
 		sle = frappe.qb.DocType("Stock Ledger Entry")
@@ -603,11 +608,16 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 				(sle.voucher_type == "Purchase Receipt")
 				& (sle.voucher_no == item.purchase_receipt)
 				& (sle.voucher_detail_no == item.pr_detail)
-				& (sle.warehouse == accepted_warehouse)
+				& (sle.warehouse == pr_detail.warehouse)
 				& (sle.is_cancelled == 0)
 			)
 		).run()
-		return flt(result[0][0]) if result and result[0][0] else 0.0
+		accepted_value = flt(result[0][0]) if result and result[0][0] else 0.0
+		if not accepted_value or not flt(pr_detail.stock_qty):
+			return accepted_value
+
+		# Pro-rate to the quantity being billed by this invoice row (handles partial billing).
+		return accepted_value * flt(item.stock_qty) / flt(pr_detail.stock_qty)
 
 	def get_stock_variance_account(self, item):
 		"""For Standard Cost items the purchase-price-vs-standard difference is a Purchase Price

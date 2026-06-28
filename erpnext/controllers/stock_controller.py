@@ -820,6 +820,8 @@ def create_item_wise_repost_entries(
 ):
 	"""Using a voucher create repost item valuation records for all item-warehouse pairs."""
 
+	from erpnext.stock.utils import get_valuation_method
+
 	stock_ledger_entries = get_items_to_be_repost(voucher_type, voucher_no)
 
 	distinct_item_warehouses = set()
@@ -830,6 +832,11 @@ def create_item_wise_repost_entries(
 		if item_wh in distinct_item_warehouses:
 			continue
 		distinct_item_warehouses.add(item_wh)
+
+		# Standard Cost items don't need a full repost: a backdated entry only shifts future balances
+		# (qty and value at the standard rate), which is done in place by update_qty_in_future_sle.
+		if get_valuation_method(sle.item_code) == "Standard Cost":
+			continue
 
 		repost_entry = frappe.new_doc("Repost Item Valuation")
 		repost_entry.based_on = "Item and Warehouse"

@@ -35,21 +35,8 @@ class ItemStandardCost(Document):
 		self.validate_rate()
 
 	def validate_item(self):
-		item = frappe.get_cached_value(
-			"Item", self.item_code, ["is_stock_item", "has_serial_no", "has_batch_no"], as_dict=True
-		)
-		if not item.is_stock_item:
+		if not frappe.get_cached_value("Item", self.item_code, "is_stock_item"):
 			frappe.throw(_("{0} is not a stock item.").format(frappe.bold(self.item_code)))
-
-		if item.has_serial_no or item.has_batch_no:
-			# Standard Cost revaluation is a pure value change posted via a qty-only Stock
-			# Reconciliation; it cannot maintain per-serial/per-batch ledgers, so it is not supported
-			# for serialized or batched items.
-			frappe.throw(
-				_("Standard Cost valuation is not supported for serialized or batched Item {0}.").format(
-					get_link_to_form("Item", self.item_code)
-				)
-			)
 
 		if get_valuation_method(self.item_code, self.company) != "Standard Cost":
 			frappe.throw(
@@ -271,3 +258,42 @@ def get_purchase_price_variance_account(item_code, company):
 		)
 
 	return account
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_standard_cost_items(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict | None
+):
+	"""Link-field query for Item Standard Cost: only items whose effective valuation method is
+	'Standard Cost' — i.e. the item is explicitly Standard Cost, or it has no valuation method of its
+	own and the applicable default (Company, else Stock Settings) is Standard Cost. This mirrors
+	get_valuation_method, so every shown item also passes validate_item."""
+	company = (filters or {}).get("company")
+	if company:
+		default_method = frappe.get_cached_value("Company", company, "valuation_method")
+	else:
+		default_method = frappe.db.get_single_value("Stock Settings", "valuation_method")
+
+	if default_method == "Standard Cost":
+		# Items with no method of their own inherit the Standard Cost default.
+		valuation_condition = "and ifnull(item.valuation_method, '') in ('', 'Standard Cost')"
+	else:
+		valuation_condition = "and item.valuation_method = 'Standard Cost'"
+
+	return frappe.db.sql(  # nosemgrep
+		f"""
+		select item.name, item.item_name
+		from `tabItem` item
+		where item.is_stock_item = 1
+			and item.disabled = 0
+			and item.has_variants = 0
+			{valuation_condition}
+			and ({searchfield} like %(txt)s or item.item_name like %(txt)s)
+		order by
+			(case when item.name like %(txt)s then 0 else 1 end),
+			item.name
+		limit %(page_len)s offset %(start)s
+		""",
+		{"txt": f"%{txt}%", "start": start, "page_len": page_len},
+	)
