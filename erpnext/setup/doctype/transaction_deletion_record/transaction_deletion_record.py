@@ -702,8 +702,6 @@ class TransactionDeletionRecord(Document):
 					"Dynamic Link", filters={"link_name": ("in", leads)}, pluck="parent"
 				)
 				if addresses:
-					addresses = ["%s" % frappe.db.escape(addr) for addr in addresses]
-
 					address = qb.DocType("Address")
 					dl1 = qb.DocType("Dynamic Link")
 					dl2 = qb.DocType("Dynamic Link")
