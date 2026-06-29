@@ -141,7 +141,8 @@ class BankTransaction(Document):
 
 		gl_bank_account = frappe.db.get_value("Bank Account", self.bank_account, "account")
 		payment_entry_docs = [(pe.payment_document, pe.payment_entry) for pe in self.payment_entries]
-		self.validate_over_allocation(gl_bank_account, payment_entry_docs)
+		if payment_entry_docs:
+			self.validate_over_allocation(gl_bank_account, payment_entry_docs)
 		self.delink_old_payment_entries()
 		self.allocate_payment_entries(gl_bank_account)
 		self.set_status()
