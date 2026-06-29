@@ -185,7 +185,13 @@ def create_reposting_entries(rows: str | list, company: str):
 	entries = []
 
 	item_wh = frappe._dict()
-	vouchers = [row.get("voucher_no") for row in rows]
+	vouchers = [
+		row.get("voucher_no")
+		for row in rows
+		if row.get("voucher_type") not in ["Purchase Receipt", "Purchase Invoice"]
+	]
+	repost_based_on_transaction(rows, company, entries)
+
 	sles = get_stock_ledgers(vouchers)
 	for sle in sles:
 		key = (sle.item_code, sle.warehouse)
@@ -218,3 +224,39 @@ def create_reposting_entries(rows: str | list, company: str):
 	if entries:
 		entries = ", ".join(entries)
 		frappe.msgprint(_("Reposting entries created: {0}").format(entries))
+
+
+def repost_based_on_transaction(rows, company=None, entries=None):
+	if entries is None:
+		entries = []
+
+	duplicate_vouchers = set()
+	for row in rows:
+		if (
+			row.get("voucher_type") == "Purchase Invoice"
+			and frappe.get_cached_value("Purchase Invoice", row.get("voucher_no"), "update_stock") == 0
+		):
+			continue
+
+		if row.get("voucher_type") in ["Purchase Receipt", "Purchase Invoice"]:
+			voucher_key = (row.get("voucher_type"), row.get("voucher_no"))
+			if voucher_key in duplicate_vouchers:
+				continue
+
+			duplicate_vouchers.add(voucher_key)
+			doc = frappe.get_doc(
+				{
+					"doctype": "Repost Item Valuation",
+					"based_on": "Transaction",
+					"status": "Queued",
+					"voucher_type": row.get("voucher_type"),
+					"voucher_no": row.get("voucher_no"),
+					"posting_date": row.get("posting_date"),
+					"posting_time": row.get("posting_time"),
+					"company": company,
+					"allow_nagative_stock": 1,
+					"recalculate_valuation_rate": 1,
+				}
+			).submit()
+
+			entries.append(get_link_to_form("Repost Item Valuation", doc.name))
