@@ -2033,36 +2033,44 @@ def get_valuation_rate(
 
 def update_qty_in_future_sle(args, allow_negative_stock=False):
 	"""Recalculate Qty after Transaction in future SLEs based on current SLE."""
-	datetime_limit_condition = ""
 	qty_shift = args.actual_qty
 
-	args["posting_datetime"] = get_combine_datetime(args["posting_date"], args["posting_time"])
+	posting_datetime = get_combine_datetime(args["posting_date"], args["posting_time"])
+	args["posting_datetime"] = posting_datetime
 
 	# find difference/shift in qty caused by stock reconciliation
 	if args.voucher_type == "Stock Reconciliation":
 		qty_shift = get_stock_reco_qty_shift(args)
 
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+
+	# SLEs are ordered by (posting_datetime, creation). "Future" therefore means strictly after the
+	# current entry in that tuple order: a later posting_datetime, or the same posting_datetime with a
+	# later creation. Comparing posting_datetime alone would skip same-timestamp entries created after
+	# this one (e.g. the same item repeated in a voucher, or another voucher posted in the same second).
+	future_condition = sle.posting_datetime > posting_datetime
+	if args.get("creation"):
+		future_condition = future_condition | (
+			(sle.posting_datetime == posting_datetime) & (sle.creation > args.get("creation"))
+		)
+
+	query = (
+		frappe.qb.update(sle)
+		.set(sle.qty_after_transaction, sle.qty_after_transaction + qty_shift)
+		.where(
+			(sle.item_code == args.get("item_code"))
+			& (sle.warehouse == args.get("warehouse"))
+			& (sle.is_cancelled == 0)
+			& future_condition
+		)
+	)
+
 	# find the next nearest stock reco so that we only recalculate SLEs till that point
 	next_stock_reco_detail = get_next_stock_reco(args)
 	if next_stock_reco_detail:
-		detail = next_stock_reco_detail[0]
-		datetime_limit_condition = get_datetime_limit_condition(detail)
+		query = query.where(get_datetime_limit_condition(sle, next_stock_reco_detail[0]))
 
-	frappe.db.sql(  # nosemgrep
-		f"""
-		update `tabStock Ledger Entry`
-		set qty_after_transaction = qty_after_transaction + {qty_shift}
-		where
-			item_code = %(item_code)s
-			and warehouse = %(warehouse)s
-			and is_cancelled = 0
-			and (
-				posting_datetime > %(posting_datetime)s
-			)
-			{datetime_limit_condition}
-		""",
-		args,
-	)
+	query.run()
 
 	validate_negative_qty_in_future_sle(args, allow_negative_stock)
 
@@ -2097,6 +2105,22 @@ def get_stock_reco_qty_shift(args):
 	return stock_reco_qty_shift
 
 
+def get_next_reco_datetime_condition(sle, kwargs):
+	"""Match stock recos that come strictly after the current entry in (posting_datetime, creation)
+	order. Using posting_datetime alone (>=) could pick a reco sharing this exact timestamp but created
+	earlier — i.e. one that actually precedes this entry — and wrongly truncate the qty-shift range."""
+	current_datetime = get_combine_datetime(kwargs.get("posting_date"), kwargs.get("posting_time"))
+
+	creation = kwargs.get("creation")
+	if not creation:
+		# No creation tiebreaker available; fall back to the posting_datetime-only bound.
+		return sle.posting_datetime >= current_datetime
+
+	return (sle.posting_datetime > current_datetime) | (
+		(sle.posting_datetime == current_datetime) & (sle.creation > creation)
+	)
+
+
 def get_next_stock_reco(kwargs):
 	"""Returns next nearest stock reconciliaton's details."""
 
@@ -2122,10 +2146,7 @@ def get_next_stock_reco(kwargs):
 			& (sle.voucher_type == "Stock Reconciliation")
 			& (sle.voucher_no != kwargs.get("voucher_no"))
 			& (sle.is_cancelled == 0)
-			& (
-				sle.posting_datetime
-				>= get_combine_datetime(kwargs.get("posting_date"), kwargs.get("posting_time"))
-			)
+			& get_next_reco_datetime_condition(sle, kwargs)
 		)
 		.orderby(sle.posting_datetime)
 		.orderby(sle.creation)
@@ -2138,17 +2159,12 @@ def get_next_stock_reco(kwargs):
 	return query.run(as_dict=True)
 
 
-def get_datetime_limit_condition(detail):
+def get_datetime_limit_condition(sle, detail):
 	posting_datetime = get_combine_datetime(detail.posting_date, detail.posting_time)
 
-	return f"""
-		and
-		(posting_datetime < '{posting_datetime}'
-			or (
-				posting_datetime = '{posting_datetime}'
-				and creation < '{detail.creation}'
-			)
-		)"""
+	return (sle.posting_datetime < posting_datetime) | (
+		(sle.posting_datetime == posting_datetime) & (sle.creation < detail.creation)
+	)
 
 
 def validate_negative_qty_in_future_sle(args, allow_negative_stock=False):
