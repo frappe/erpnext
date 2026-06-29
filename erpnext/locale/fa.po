@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-06-28 10:20+0000\n"
-"PO-Revision-Date: 2026-06-28 20:02\n"
+"PO-Revision-Date: 2026-06-29 20:08\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -8580,7 +8580,7 @@ msgstr "مسدود کردن فاکتور"
 #. 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
 msgid "Block Supplier"
-msgstr "بلاک کردن تامین کننده"
+msgstr "مسدود کردن تامین کننده"
 
 #. Description of the 'Is Frozen' (Check) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
@@ -48647,7 +48647,7 @@ msgstr "انتخاب آدرس اعزام "
 
 #: erpnext/manufacturing/doctype/job_card/job_card.js:705
 msgid "Select Employees"
-msgstr "کارکنان را انتخاب کنید"
+msgstr "انتخاب کارکنان"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.js:174
 #: erpnext/selling/doctype/sales_order/sales_order.js:862
