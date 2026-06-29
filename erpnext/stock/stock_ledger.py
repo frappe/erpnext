@@ -2126,20 +2126,36 @@ def get_valuation_rate(
 
 def update_qty_in_future_sle(args, allow_negative_stock=False):
 	"""Recalculate Qty after Transaction in future SLEs based on current SLE."""
-	datetime_limit_condition = ""
 	qty_shift = args.actual_qty
 
-	args["posting_datetime"] = get_combine_datetime(args["posting_date"], args["posting_time"])
+	posting_datetime = get_combine_datetime(args["posting_date"], args["posting_time"])
+	args["posting_datetime"] = posting_datetime
 
 	# find difference/shift in qty caused by stock reconciliation
 	if args.voucher_type == "Stock Reconciliation":
 		qty_shift = get_stock_reco_qty_shift(args)
 
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+
+	future_condition = sle.posting_datetime > posting_datetime
+	if args.get("creation") and not args.get("is_cancelled"):
+		future_condition = future_condition | (
+			(sle.posting_datetime == posting_datetime) & (sle.creation > args.get("creation"))
+		)
+
+	query = frappe.qb.update(sle).where(
+		(sle.item_code == args.get("item_code"))
+		& (sle.warehouse == args.get("warehouse"))
+		& (sle.is_cancelled == 0)
+		& future_condition
+	)
+
 	# find the next nearest stock reco so that we only recalculate SLEs till that point
 	next_stock_reco_detail = get_next_stock_reco(args)
 	if next_stock_reco_detail:
-		detail = next_stock_reco_detail[0]
-		datetime_limit_condition = get_datetime_limit_condition(detail)
+		query = query.where(get_datetime_limit_condition(sle, next_stock_reco_detail[0]))
+
+	new_qty = sle.qty_after_transaction + qty_shift
 
 	if get_valuation_method(args.get("item_code"), args.get("company")) == "Standard Cost":
 		# Standard Cost inventory is always carried at the standard rate, so a backdated entry only
@@ -2153,38 +2169,13 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 			get_item_standard_rate(args.get("item_code"), args.get("company"), args.get("posting_date"))
 		)
 
-		frappe.db.sql(  # nosemgrep
-			f"""
-			update `tabStock Ledger Entry`
-			set stock_value = (qty_after_transaction + {qty_shift}) * {standard_rate},
-				qty_after_transaction = qty_after_transaction + {qty_shift}
-			where
-				item_code = %(item_code)s
-				and warehouse = %(warehouse)s
-				and is_cancelled = 0
-				and (
-					posting_datetime > %(posting_datetime)s
-				)
-				{datetime_limit_condition}
-			""",
-			args,
-		)
-	else:
-		frappe.db.sql(  # nosemgrep
-			f"""
-			update `tabStock Ledger Entry`
-			set qty_after_transaction = qty_after_transaction + {qty_shift}
-			where
-				item_code = %(item_code)s
-				and warehouse = %(warehouse)s
-				and is_cancelled = 0
-				and (
-					posting_datetime > %(posting_datetime)s
-				)
-				{datetime_limit_condition}
-			""",
-			args,
-		)
+		# Set stock_value before qty_after_transaction: MariaDB evaluates SET left-to-right with the
+		# already-updated values, so stock_value must be computed while qty still holds its pre-shift
+		# value. (Postgres uses pre-update values throughout, so the result is the same either way.)
+		query = query.set(sle.stock_value, new_qty * standard_rate)
+
+	query = query.set(sle.qty_after_transaction, new_qty)
+	query.run()
 
 	validate_negative_qty_in_future_sle(args, allow_negative_stock)
 
@@ -2219,6 +2210,17 @@ def get_stock_reco_qty_shift(args):
 	return stock_reco_qty_shift
 
 
+def get_next_reco_datetime_condition(sle, kwargs):
+	current_datetime = get_combine_datetime(kwargs.get("posting_date"), kwargs.get("posting_time"))
+
+	if kwargs.get("is_cancelled"):
+		return sle.posting_datetime >= current_datetime
+
+	return (sle.posting_datetime > current_datetime) | (
+		(sle.posting_datetime == current_datetime) & (sle.creation > kwargs.get("creation"))
+	)
+
+
 def get_next_stock_reco(kwargs):
 	"""Returns next nearest stock reconciliaton's details."""
 
@@ -2244,10 +2246,7 @@ def get_next_stock_reco(kwargs):
 			& (sle.voucher_type == "Stock Reconciliation")
 			& (sle.voucher_no != kwargs.get("voucher_no"))
 			& (sle.is_cancelled == 0)
-			& (
-				sle.posting_datetime
-				>= get_combine_datetime(kwargs.get("posting_date"), kwargs.get("posting_time"))
-			)
+			& get_next_reco_datetime_condition(sle, kwargs)
 		)
 		.orderby(sle.posting_datetime)
 		.orderby(sle.creation)
@@ -2260,17 +2259,12 @@ def get_next_stock_reco(kwargs):
 	return query.run(as_dict=True)
 
 
-def get_datetime_limit_condition(detail):
+def get_datetime_limit_condition(sle, detail):
 	posting_datetime = get_combine_datetime(detail.posting_date, detail.posting_time)
 
-	return f"""
-		and
-		(posting_datetime < '{posting_datetime}'
-			or (
-				posting_datetime = '{posting_datetime}'
-				and creation < '{detail.creation}'
-			)
-		)"""
+	return (sle.posting_datetime < posting_datetime) | (
+		(sle.posting_datetime == posting_datetime) & (sle.creation < detail.creation)
+	)
 
 
 def validate_negative_qty_in_future_sle(args, allow_negative_stock=False):
