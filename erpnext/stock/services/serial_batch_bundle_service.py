@@ -176,6 +176,9 @@ class SerialBatchBundleService:
 			parent_details = self.get_parent_details_for_packed_items()
 
 		for row in self.doc.get(table_name):
+			if not self.is_serial_batch_item(row.get("rm_item_code") or row.item_code):
+				continue
+
 			if (
 				not via_landed_cost_voucher
 				and row.serial_and_batch_bundle
