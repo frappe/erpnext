@@ -135,7 +135,11 @@ status_map = {
 		],
 		[
 			"Partially Ordered",
+<<<<<<< HEAD
 			"eval:self.status != 'Stopped' and self.per_ordered < 100 and self.per_ordered > 0 and self.docstatus == 1 and self.material_request_type != 'Material Transfer'",
+=======
+			"eval:self.status != 'Stopped' and self.per_ordered < 100 and self.per_ordered > 0 and self.per_received < 100 and self.docstatus == 1 and self.material_request_type not in ['Material Transfer', 'Customer Provided']",
+>>>>>>> a3c5ef6aa3 (fix: set mr status to received when per_received is 100 even if per_ordered < 100)
 		],
 	],
 	"POS Opening Entry": [
