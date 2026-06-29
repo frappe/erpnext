@@ -10,13 +10,13 @@ from erpnext.stock.report.stock_and_account_value_comparison.stock_and_account_v
 	create_reposting_entries,
 	execute,
 )
-from erpnext.tests.utils import ERPNextTestSuite
+from frappe.tests.utils import FrappeTestCase
 
 PI_COMPANY = "_Test Company with perpetual inventory"
 PI_STORES = "Stores - TCP1"
 
 
-class TestStockAndAccountValueComparison(ERPNextTestSuite):
+class TestStockAndAccountValueComparison(FrappeTestCase):
 	def test_purchase_voucher_reposted_transaction_based(self):
 		# A Purchase Receipt whose GL entries are missing must surface in the report and, when reposted
 		# from it, be reposted Transaction-based (so its own GL is regenerated) rather than the slower
