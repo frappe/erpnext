@@ -292,10 +292,11 @@ class StatusUpdater(Document):
 					frappe.throw(_("For an item {0}, quantity must be a negative number").format(d.item_code))
 
 				if (
-					not selling_negative_rate_allowed and self.doctype in ["Sales Invoice", "Delivery Note"]
+					not selling_negative_rate_allowed
+					and self.doctype in ["Sales Order", "Sales Invoice", "Delivery Note"]
 				) or (
 					not buying_negative_rate_allowed
-					and self.doctype in ["Purchase Invoice", "Purchase Receipt"]
+					and self.doctype in ["Purchase Order", "Purchase Invoice", "Purchase Receipt"]
 				):
 					if hasattr(d, "item_code") and hasattr(d, "rate") and flt(d.rate) < 0:
 						frappe.throw(

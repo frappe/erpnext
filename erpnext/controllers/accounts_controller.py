@@ -259,7 +259,11 @@ class AccountsController(TransactionBase):
 			self.calculate_taxes_and_totals()
 
 			if not self.meta.get_field("is_return") or not self.is_return:
-				self.validate_value("base_grand_total", ">=", 0)
+				settings_doctype = (
+					"Selling Settings" if self.meta.has_field("customer") else "Buying Settings"
+				)
+				if not frappe.get_single_value(settings_doctype, "allow_negative_rates_for_items"):
+					self.validate_value("base_grand_total", ">=", 0)
 
 			validate_return(self)
 
