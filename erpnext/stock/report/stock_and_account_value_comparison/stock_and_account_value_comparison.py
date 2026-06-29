@@ -174,7 +174,7 @@ def get_columns(filters):
 
 
 @frappe.whitelist()
-def create_reposting_entries(rows, company):
+def create_reposting_entries(rows: str | list, company: str):
 	if isinstance(rows, str):
 		rows = parse_json(rows)
 
