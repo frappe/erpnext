@@ -92,7 +92,7 @@ class ProcessPeriodClosingVoucher(Document):
 @frappe.whitelist()
 def start_pcv_processing(docname: str):
 	if frappe.db.get_value("Process Period Closing Voucher", docname, "status") in ["Queued", "Running"]:
-		frappe.has_permission("Process Payment Reconciliation", "write", doc=docname, throw=True)
+		frappe.has_permission("Process Period Closing Voucher", "write", doc=docname, throw=True)
 		frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Running")
 
 		timeout = frappe.db.get_single_value("Accounts Settings", "pcv_job_timeout") or 3600
