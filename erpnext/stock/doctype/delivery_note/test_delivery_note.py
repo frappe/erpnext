@@ -50,7 +50,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.load_test_records("Stock Entry")
 
 	def get_perpetual_defaults(self):
-		company = frappe.get_doc("Company", "_Test Company with perpetual inventory")
+		company = frappe.get_doc("Company", "_Test SDBNB Company")
 		self.perpetual_company = company.name
 		self.perpetual_account = company.stock_delivered_but_not_billed
 		self.perpetual_cost_center = company.cost_center
