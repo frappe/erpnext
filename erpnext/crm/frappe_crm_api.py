@@ -1,5 +1,6 @@
 import json
 
+import click
 import frappe
 from frappe import _
 
@@ -188,3 +189,25 @@ def validate_frappe_crm_sync():
 
 def is_crm_installed():
 	return "crm" in frappe.get_installed_apps()
+
+
+def remove_allowed_users_on_crm_install():
+	CRMSettings = frappe.get_single("CRM Settings")
+
+	if not CRMSettings.enable_frappe_crm_data_synchronization:
+		return
+
+	CRMSettings.allowed_users = []
+	CRMSettings.save()
+	click.secho("Removed Allowed Users from CRM Settings.")
+
+
+def disable_frappe_crm_data_synchronization_on_crm_uninstall():
+	CRMSettings = frappe.get_single("CRM Settings")
+
+	if not CRMSettings.enable_frappe_crm_data_synchronization:
+		return
+
+	CRMSettings.enable_frappe_crm_data_synchronization = 0
+	CRMSettings.save()
+	click.secho("Enable Frappe CRM Data Synchronization on CRM Settings has been disabled.")
