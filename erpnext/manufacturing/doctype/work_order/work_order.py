@@ -1963,10 +1963,18 @@ class WorkOrder(Document):
 			# Reserve the final product for the sales order.
 			item_details = self.get_so_details()
 
+<<<<<<< HEAD
 		for item in item_details:
 			qty_to_reserve = flt(item.stock_qty) - flt(item.stock_reserved_qty + item.delivered_qty)
 			if qty_to_reserve <= 0:
 				continue
+=======
+	def refresh_material_transferred_for_manufacturing(self):
+		return RequiredItemsService(self).refresh_material_transferred_for_manufacturing()
+
+	def update_returned_qty(self):
+		return RequiredItemsService(self).update_returned_qty()
+>>>>>>> d072909451 (fix: recompute transferred qty before deciding work order status)
 
 			warehouse = item.warehouse
 			if (
