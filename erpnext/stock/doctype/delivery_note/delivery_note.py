@@ -9,6 +9,7 @@ from frappe import _
 from frappe.contacts.doctype.address.address import get_company_address
 from frappe.contacts.doctype.contact.contact import get_default_contact
 from frappe.desk.notifications import clear_doctype_notifications
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.query_builder import DocType
@@ -813,7 +814,9 @@ def get_returned_qty_map(delivery_note):
 
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, target_doc=None, args=None):
+def make_sales_invoice(
+	source_name: str, target_doc: Document | str | None = None, args: dict | str | None = None
+):
 	if args is None:
 		args = {}
 	if isinstance(args, str):
@@ -919,7 +922,12 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 		frappe.get_single_value("Accounts Settings", "automatically_fetch_payment_terms")
 	)
 
-	if not doc.is_return:
+	if doc.is_return:
+		# A credit note made from a return Delivery Note should roll back the billed
+		# amount on the linked Sales Order too, so that per_billed stays consistent with
+		# per_delivered (which the return already reset).
+		doc.update_billed_amount_in_sales_order = True
+	else:
 		so, doctype, fieldname = doc.get_order_details()
 		if (
 			doc.linked_order_has_payment_terms(so, fieldname, doctype)
