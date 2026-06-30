@@ -510,7 +510,7 @@ def repost_gl_entries(doc):
 	transactions = directly_dependent_transactions + list(repost_affected_transaction)
 
 	# handle stock delivered but not billed ledger entries
-	if frappe.get_cached_value("Company", doc.company, "stock_delivered_but_not_billed"):
+	if frappe.get_cached_value("Company", doc.company, "enable_stock_delivered_but_not_billed"):
 		_update_post_delivery_billed_vouchers(transactions)
 
 	enable_separate_reposting_for_gl = frappe.db.get_single_value(

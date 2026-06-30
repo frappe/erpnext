@@ -131,6 +131,7 @@
   "stock_adjustment_account",
   "default_purchase_price_variance_account",
   "stock_received_but_not_billed",
+  "enable_stock_delivered_but_not_billed",
   "stock_delivered_but_not_billed",
   "disable_sdbnb_in_sr",
   "default_provisional_account",
@@ -994,18 +995,28 @@
   },
   {
    "default": "0",
+   "depends_on": "enable_stock_delivered_but_not_billed",
    "fieldname": "disable_sdbnb_in_sr",
    "fieldtype": "Check",
    "label": "Disable Stock Delivered But Not Billed in Sales Return",
    "no_copy": 1
   },
   {
+   "depends_on": "enable_stock_delivered_but_not_billed",
    "fieldname": "stock_delivered_but_not_billed",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Stock Delivered But Not Billed",
+   "mandatory_depends_on": "enable_stock_delivered_but_not_billed",
    "no_copy": 1,
    "options": "Account"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, the value of goods delivered before invoicing will be recorded in the Stock Delivered But Not Billed account.",
+   "fieldname": "enable_stock_delivered_but_not_billed",
+   "fieldtype": "Check",
+   "label": "Enable Stock Delivered But Not Billed"
   }
  ],
  "grid_page_length": 50,
@@ -1014,7 +1025,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2026-06-26 10:05:00.000000",
+ "modified": "2026-06-30 10:05:00.000000",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

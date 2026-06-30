@@ -426,6 +426,7 @@ class DeliveryNote(SellingController):
 				"stock_delivered_but_not_billed",
 				"disable_sdbnb_in_sr",
 				"default_expense_account",
+				"enable_stock_delivered_but_not_billed",
 			],
 			as_dict=True,
 		)
@@ -433,7 +434,7 @@ class DeliveryNote(SellingController):
 		sdbnb_account = company_values.stock_delivered_but_not_billed
 		disable_sdbnb_in_sr = company_values.disable_sdbnb_in_sr
 		default_expense_account = company_values.default_expense_account
-
+		is_enabled_sdbnb = company_values.enable_stock_delivered_but_not_billed
 		for item in self.items:
 			if item.get("against_sales_invoice"):
 				if sdbnb_account and item.expense_account == sdbnb_account:
@@ -447,14 +448,16 @@ class DeliveryNote(SellingController):
 				# Only stock items
 				if is_stock_item and not item.get("is_fixed_asset") and not item.get("is_subcontracted"):
 					# Sales Return handling
-					if self.is_return and disable_sdbnb_in_sr:
+					if self.is_return and disable_sdbnb_in_sr and sdbnb_account and is_enabled_sdbnb:
 						if default_expense_account and (
 							not item.expense_account or item.expense_account == sdbnb_account
 						):
 							item.expense_account = default_expense_account
 
-					elif sdbnb_account:
+					elif sdbnb_account and is_enabled_sdbnb:
 						item.expense_account = sdbnb_account
+					elif sdbnb_account and item.expense_account == sdbnb_account:
+						item.expense_account = default_expense_account
 			if not item.expense_account and default_expense_account:
 				item.expense_account = default_expense_account
 
