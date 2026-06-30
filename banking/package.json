@@ -39,7 +39,7 @@
     "react-hook-form": "^7.75.0",
     "react-hotkeys-hook": "^5.3.2",
     "react-markdown": "^10.1.0",
-    "react-router": "^7.15.0",
+    "react-router": "^7.15.1",
     "react-router-dom": "^7.15.0",
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
