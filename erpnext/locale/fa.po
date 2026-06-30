@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-06-28 10:20+0000\n"
-"PO-Revision-Date: 2026-06-29 20:08\n"
+"PO-Revision-Date: 2026-06-30 20:44\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -61884,7 +61884,7 @@ msgstr "تراز صفر"
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:353
 msgid "Zero Balance Journal: {0}"
-msgstr ""
+msgstr "دفتر تراز صفر: {0}"
 
 #: erpnext/regional/report/uae_vat_201/uae_vat_201.py:78
 msgid "Zero Rated"
@@ -62008,7 +62008,7 @@ msgstr "fieldname"
 
 #: erpnext/setup/doctype/item_group/item_group.py:49
 msgid "for tax category {0}"
-msgstr ""
+msgstr "برای دسته بندی مالیاتی {0}"
 
 #. Option for the 'Service Provider' (Select) field in DocType 'Currency
 #. Exchange Settings'
@@ -62375,7 +62375,7 @@ msgstr ""
 
 #: erpnext/public/js/utils/sales_common.js:336
 msgid "{0} cannot be greater than 100"
-msgstr ""
+msgstr "{0} نمی‌تواند بزرگتر از ۱۰۰ باشد"
 
 #: erpnext/accounts/doctype/cost_center_allocation/cost_center_allocation.py:136
 msgid "{0} cannot be used as a Main Cost Center because it has been used as child in Cost Center Allocation {1}"
@@ -62444,7 +62444,7 @@ msgstr "{0} با موفقیت ارسال شد"
 
 #: erpnext/controllers/buying_controller.py:289
 msgid "{0} has submitted assets linked to it. You need to cancel the assets to create purchase return."
-msgstr ""
+msgstr "{0} دارایی‌های مرتبط با آن را ارسال کرده است. برای ایجاد بازگشت خرید، باید دارایی‌ها را لغو کنید."
 
 #: erpnext/projects/doctype/project/project_dashboard.html:15
 msgid "{0} hours"
@@ -62456,7 +62456,7 @@ msgstr "{0} در ردیف {1}"
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:66
 msgid "{0} is a child company."
-msgstr ""
+msgstr "{0} یک شرکت فرزند است."
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:465
 msgid "{0} is a child table and will be deleted automatically with its parent"
@@ -62539,7 +62539,7 @@ msgstr "{0} در {1} فعال نیست"
 
 #: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:649
 msgid "{0} is not running. Cannot trigger events for this document"
-msgstr ""
+msgstr "{0} در حال اجرا نیست. نمی‌توان رویدادها را برای این سند فعال کرد"
 
 #: erpnext/stock/doctype/material_request/material_request.py:478
 msgid "{0} is not the default supplier for any items."
@@ -62547,7 +62547,7 @@ msgstr "{0} تامین کننده پیش‌فرض هیچ موردی نیست."
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:2686
 msgid "{0} is on hold until {1}"
-msgstr ""
+msgstr "{0} تا زمان {1} در حالت انتظار است"
 
 #: erpnext/accounts/doctype/pos_opening_entry/pos_opening_entry.py:68
 msgid "{0} is open. Close the POS or cancel the existing POS Opening Entry to create a new POS Opening Entry."
@@ -62722,11 +62722,11 @@ msgstr ""
 #: erpnext/accounts/doctype/party_link/party_link.py:53
 #: erpnext/accounts/doctype/party_link/party_link.py:63
 msgid "{0} {1} is already linked with another {2}"
-msgstr ""
+msgstr "{0} {1} از قبل به {2} دیگری لینک شده است"
 
 #: erpnext/accounts/doctype/party_link/party_link.py:40
 msgid "{0} {1} is already linked with {2} {3}"
-msgstr ""
+msgstr "{0} {1} از قبل به {2} {3} لینک شده است"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:711
 msgid "{0} {1} is associated with {2}, but Party Account is {3}"
@@ -62767,7 +62767,7 @@ msgstr "{0} {1} فعال نیست"
 
 #: erpnext/accounts/doctype/bank_transaction/bank_transaction.py:452
 msgid "{0} {1} is not affecting bank account {2}"
-msgstr ""
+msgstr "{0} {1} تاثیری بر حساب بانکی {2} ندارد"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:688
 msgid "{0} {1} is not associated with {2} {3}"
