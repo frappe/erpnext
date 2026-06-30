@@ -2,7 +2,6 @@ import { useAtomValue } from "jotai"
 import { MissingFiltersBanner } from "./MissingFiltersBanner"
 import { bankRecDateAtom, SelectedBank, selectedBankAccountAtom } from "./bankRecAtoms"
 import { useCurrentCompany } from "@/hooks/useCurrentCompany"
-import { Paragraph } from "@/components/ui/typography"
 import type { ColumnDef } from "@tanstack/react-table"
 import { useCallback, useMemo, useState } from "react"
 import { useFrappeGetCall, useFrappePostCall, useSWRConfig } from "frappe-react-sdk"
@@ -209,9 +208,9 @@ const BankClearanceSummaryView = () => {
     return <div className="space-y-4 py-2">
 
         <div>
-            <Paragraph className="text-p-sm">
+            <span className="text-p-sm">
                 <MarkdownRenderer content={content} />
-            </Paragraph>
+            </span>
         </div>
 
         {error && <ErrorBanner error={error} />}

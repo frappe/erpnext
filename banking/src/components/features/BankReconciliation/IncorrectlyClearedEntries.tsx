@@ -2,7 +2,6 @@ import { useAtomValue } from "jotai"
 import { MissingFiltersBanner } from "./MissingFiltersBanner"
 import { bankRecDateAtom, selectedBankAccountAtom } from "./bankRecAtoms"
 import { useCurrentCompany } from "@/hooks/useCurrentCompany"
-import { Paragraph } from "@/components/ui/typography"
 import type { ColumnDef } from "@tanstack/react-table"
 import { useCallback, useMemo } from "react"
 import { useFrappeGetCall, useFrappePostCall } from "frappe-react-sdk"
@@ -185,7 +184,7 @@ const IncorrectlyClearedEntriesView = () => {
     return <div className="space-y-4 py-2">
 
         <div>
-            <Paragraph className="text-p-sm">
+            <span className="text-p-sm">
                 <MarkdownRenderer content={content} />
                 <br />
                 {data && data.message.result.length > 0 && <span>
@@ -193,7 +192,7 @@ const IncorrectlyClearedEntriesView = () => {
                     <br />
                     {_("You can reset the clearing dates of these entries here.")}
                 </span>}
-            </Paragraph>
+            </span>
         </div>
 
         {error && <ErrorBanner error={error} />}

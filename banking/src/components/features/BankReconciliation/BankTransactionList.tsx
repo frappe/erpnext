@@ -1,7 +1,6 @@
 import { useAtomValue, useSetAtom } from "jotai"
 import { MissingFiltersBanner } from "./MissingFiltersBanner"
 import { bankRecDateAtom, bankRecUnreconcileModalAtom, selectedBankAccountAtom } from "./bankRecAtoms"
-import { Paragraph } from "@/components/ui/typography"
 import { formatDate } from "@/lib/date"
 import { ListView, type ListViewColumnMeta } from "@/components/ui/list-view"
 import { formatCurrency, getCurrencyFormatInfo } from "@/lib/numbers"
@@ -249,9 +248,9 @@ const BankTransactionListView = () => {
     return <div className="space-y-2 py-2">
 
         <div className="flex gap-2 justify-between items-center">
-            <Paragraph className="text-sm">
+            <span className="text-p-sm">
                 <MarkdownRenderer content={content} />
-            </Paragraph>
+            </span>
 
             <Button size='md' variant='subtle' asChild>
                 <Link to="/statement-importer">
