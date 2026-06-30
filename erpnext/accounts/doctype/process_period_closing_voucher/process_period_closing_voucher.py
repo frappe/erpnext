@@ -424,6 +424,7 @@ def get_closing_account_closing_entry(closing_account_gle, pcv):
 
 def summarize_and_post_ledger_entries(docname):
 	# P&L accounts
+	frappe.db.auto_commit_on_many_writes = 1
 	pl_accounts_reverse_gle, closing_account_gle = get_gl_entries(docname)
 	gl_entries = pl_accounts_reverse_gle + closing_account_gle
 	from erpnext.accounts.general_ledger import make_gl_entries
