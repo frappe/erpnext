@@ -1303,6 +1303,47 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", sle2.name, "qty_after_transaction"), 35)
 		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", sle1.name, "qty_after_transaction"), 10)
 
+	def test_cancel_first_of_two_same_timestamp_entries(self):
+		# Two receipts of the same item+warehouse at the exact same posting timestamp: balances 10 -> 20.
+		# Cancelling the first must leave the second standing alone on a zero base (qty 10), not
+		# double-decremented. The same-timestamp sibling is corrected by the cancellation reprocessing,
+		# so update_qty_in_future_sle must not shift it again.
+		item = make_item().name
+		warehouse = "_Test Warehouse - _TC"
+
+		receipt1 = make_purchase_receipt(
+			item_code=item,
+			warehouse=warehouse,
+			qty=10,
+			rate=10,
+			posting_date="2026-06-01",
+			posting_time="10:00:00",
+		)
+		time.sleep(1)
+		receipt2 = make_purchase_receipt(
+			item_code=item,
+			warehouse=warehouse,
+			qty=10,
+			rate=10,
+			posting_date="2026-06-01",
+			posting_time="10:00:00",  # identical timestamp, later creation
+		)
+
+		def qty_after(voucher):
+			return frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": voucher.name, "is_cancelled": 0},
+				"qty_after_transaction",
+			)
+
+		self.assertEqual(qty_after(receipt1), 10)
+		self.assertEqual(qty_after(receipt2), 20)
+
+		receipt1.cancel()
+
+		# receipt2 now sits on a zero base -> 10 (not 0 from a double shift, nor a negative-stock error).
+		self.assertEqual(qty_after(receipt2), 10)
+
 	def test_get_next_stock_reco_respects_creation_order(self):
 		# A stock reco sharing the exact posting timestamp of the current entry must only count as the
 		# "next" reco when it was created after that entry. A reco created before it actually precedes
