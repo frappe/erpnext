@@ -2057,8 +2057,11 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 	# current entry in that tuple order: a later posting_datetime, or the same posting_datetime with a
 	# later creation. Comparing posting_datetime alone would skip same-timestamp entries created after
 	# this one (e.g. the same item repeated in a voucher, or another voucher posted in the same second).
+	# On cancellation `args` is a freshly inserted reversal entry, so its `creation` is the cancel time
+	# (not the original entry's position) and same-timestamp siblings are already recomputed by the
+	# cancelled path in update_entries_after; applying the tiebreaker here would double-shift them.
 	future_condition = sle.posting_datetime > posting_datetime
-	if args.get("creation"):
+	if args.get("creation") and not args.get("is_cancelled"):
 		future_condition = future_condition | (
 			(sle.posting_datetime == posting_datetime) & (sle.creation > args.get("creation"))
 		)
