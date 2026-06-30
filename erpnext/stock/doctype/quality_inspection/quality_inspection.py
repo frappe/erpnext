@@ -8,6 +8,10 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, cstr, flt, get_link_to_form, get_number_format_info
 
+from erpnext.controllers.stock_controller import (
+	QI_INCOMING_PURPOSES,
+	QI_OUTGOING_PURPOSES,
+)
 from erpnext.stock.doctype.quality_inspection_template.quality_inspection_template import (
 	get_template_details,
 )
@@ -385,13 +389,43 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 			["items.quality_inspection", "is", "not set"],
 		]
 
+		require_distinct_warehouse = False
+
 		if reference_doctype == "Stock Entry":
+			purpose = frappe.get_cached_value("Stock Entry", filters.get("reference_name"), "purpose")
 			my_filters.extend(
 				[
 					"and",
-					["items.t_warehouse", "is", "not set"],
+					["items.type", "is", "not set"],
+					"and",
+					["items.is_legacy_scrap_item", "=", 0],
 				]
 			)
+			if purpose == "Manufacture":
+				my_filters.extend(
+					[
+						"and",
+						["items.is_finished_item", "=", 1],
+					]
+				)
+			elif purpose in QI_INCOMING_PURPOSES:
+				my_filters.extend(
+					[
+						"and",
+						["items.t_warehouse", "is", "set"],
+					]
+				)
+			elif purpose in QI_OUTGOING_PURPOSES:
+				my_filters.extend(
+					[
+						"and",
+						["items.s_warehouse", "is", "set"],
+					]
+				)
+				require_distinct_warehouse = True
+			else:
+				# purpose requires no quality inspection
+				return []
 		elif filters.get("inspection_type") != "In Process":
 			my_filters.extend(
 				[
@@ -412,7 +446,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 				]
 			)
 
-		return frappe.get_query(
+		query = frappe.get_query(
 			reference_doctype,
 			fields=["items.item_code, items.item_name"],
 			filters=my_filters,
@@ -421,7 +455,15 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 			order_by="items.item_code",
 			ignore_permissions=False,
 			distinct=True,
-		).run()
+		)
+		if require_distinct_warehouse:
+			# The cross-column guard (s_warehouse != t_warehouse) can't be expressed in frappe's
+			# filter-list syntax, so it is appended as a raw query-builder condition. This relies on
+			# the "items.s_warehouse" filter above having already LEFT-JOINed the child table, so
+			# child.t_warehouse references that same joined table.
+			child = frappe.qb.DocType(frappe.get_meta(reference_doctype).get_field("items").options)
+			query = query.where(child.t_warehouse.isnull() | (child.s_warehouse != child.t_warehouse))
+		return query.run()
 
 
 @frappe.whitelist()
