@@ -754,7 +754,21 @@ frappe.ui.form.on("Payment Entry", {
 		frm.set_paid_amount_based_on_received_amount = true;
 		let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
 
-		if (frm.doc.paid_amount && frm.doc.source_exchange_rate) {
+		if (frm.events.has_allocated_references(frm) && frm.doc.payment_type == "Receive") {
+			// For a Receive against references, the party amount (`paid_amount`) is fixed by
+			// the reference allocations, so only re-value it at the new rate. Equalizing
+			// `base_received_amount` to `base_paid_amount` (the default sync below) would wipe a
+			// legitimate Exchange Gain/Loss whenever the rate is re-fetched, e.g. when the
+			// Posting Date is changed. This mirrors the server's set_amounts_in_company_currency.
+			frm.set_value(
+				"base_paid_amount",
+				flt(
+					flt(frm.doc.paid_amount) * flt(frm.doc.source_exchange_rate),
+					precision("base_paid_amount")
+				)
+			);
+			frm.events.set_total_allocated_amount(frm);
+		} else if (frm.doc.paid_amount && frm.doc.source_exchange_rate) {
 			frm.set_value("base_paid_amount", flt(frm.doc.paid_amount) * flt(frm.doc.source_exchange_rate));
 			frm.set_value("base_received_amount", frm.doc.base_paid_amount);
 
@@ -781,10 +795,33 @@ frappe.ui.form.on("Payment Entry", {
 		frm.set_df_property("source_exchange_rate", "read_only", erpnext.stale_rate_allowed() ? 0 : 1);
 	},
 
+	has_allocated_references: function (frm) {
+		// True when a cross-currency payment is settled against references, in which case the
+		// party amount is driven by the allocations rather than mirroring the other side.
+		return (
+			frm.doc.paid_from_account_currency != frm.doc.paid_to_account_currency &&
+			(frm.doc.references || []).some((row) => flt(row.allocated_amount))
+		);
+	},
+
 	target_exchange_rate: function (frm) {
 		let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
 
-		if (frm.doc.received_amount && frm.doc.target_exchange_rate) {
+		if (frm.events.has_allocated_references(frm) && frm.doc.payment_type == "Pay") {
+			// For a Pay against references, the party amount (`received_amount`) is fixed by
+			// the reference allocations, so only re-value it at the new rate. Equalizing
+			// `base_paid_amount` to `base_received_amount` (the default sync below) would wipe a
+			// legitimate Exchange Gain/Loss whenever the rate is re-fetched, e.g. when the
+			// Posting Date is changed. This mirrors the server's set_amounts_in_company_currency.
+			frm.set_value(
+				"base_received_amount",
+				flt(
+					flt(frm.doc.received_amount) * flt(frm.doc.target_exchange_rate),
+					precision("base_received_amount")
+				)
+			);
+			frm.events.set_total_allocated_amount(frm);
+		} else if (frm.doc.received_amount && frm.doc.target_exchange_rate) {
 			frm.set_value(
 				"base_received_amount",
 				flt(frm.doc.received_amount) * flt(frm.doc.target_exchange_rate)
