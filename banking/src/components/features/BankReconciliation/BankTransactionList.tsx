@@ -23,6 +23,7 @@ import { useCallback, useMemo, useState } from "react"
 import { Link } from "react-router"
 import { Empty, EmptyTitle, EmptyHeader, EmptyMedia, EmptyDescription, EmptyContent } from "@/components/ui/empty"
 import { InputGroup, InputGroupAddon } from "@/components/ui/input-group"
+import MarkdownRenderer from "@/components/ui/markdown"
 
 const BankTransactions = () => {
     const selectedBank = useAtomValue(selectedBankAccountAtom)
@@ -243,13 +244,13 @@ const BankTransactionListView = () => {
 
     }, [data, search, amountFilter, typeFilter, status])
 
+    const content = _("Below is a list of all bank transactions imported in the system for the bank account {0} between {1} and {2}.", [`<strong>${bankAccount?.account_name}</strong>`, `<strong>${formattedFromDate}</strong>`, `<strong>${formattedToDate}</strong>`])
+
     return <div className="space-y-2 py-2">
 
         <div className="flex gap-2 justify-between items-center">
             <Paragraph className="text-sm">
-                <span dangerouslySetInnerHTML={{
-                    __html: _("Below is a list of all bank transactions imported in the system for the bank account {0} between {1} and {2}.", [`<strong>${bankAccount?.account_name}</strong>`, `<strong>${formattedFromDate}</strong>`, `<strong>${formattedToDate}</strong>`])
-                }} />
+                <MarkdownRenderer content={content} />
             </Paragraph>
 
             <Button size='md' variant='subtle' asChild>

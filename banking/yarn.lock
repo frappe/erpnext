@@ -3413,6 +3413,11 @@ rolldown@1.0.3:
     "@rolldown/binding-win32-arm64-msvc" "1.0.3"
     "@rolldown/binding-win32-x64-msvc" "1.0.3"
 
+safe-expr-eval@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/safe-expr-eval/-/safe-expr-eval-1.0.4.tgz#3694739b3eb42b906417b94a5e6a74f3c21041b5"
+  integrity sha512-p6ILL9oYItu8Dqm7atFCq3JXW/S1AcZDXQMHRhkRIGpF96SIwEpzogjVNM87mCg+6rfz3Q//rwn1zH2EW2TQ/Q==
+
 scheduler@^0.27.0:
   version "0.27.0"
   resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.27.0.tgz#0c4ef82d67d1e5c1e359e8fc76d3a87f045fe5bd"

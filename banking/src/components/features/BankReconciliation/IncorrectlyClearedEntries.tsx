@@ -18,6 +18,7 @@ import { PartyPopper } from "lucide-react"
 import ErrorBanner from "@/components/ui/error-banner"
 import _ from "@/lib/translate"
 import { Empty, EmptyTitle, EmptyDescription, EmptyMedia, EmptyHeader } from "@/components/ui/empty"
+import MarkdownRenderer from "@/components/ui/markdown"
 
 const IncorrectlyClearedEntries = () => {
     const companyID = useCurrentCompany()
@@ -177,18 +178,18 @@ const IncorrectlyClearedEntriesView = () => {
         [accountCurrency, onClearClick],
     )
 
+    const content = _("This report shows all entries in the system where the <strong>clearance date is before the posting date</strong> which is incorrect.")
+
+    const entriesContent = _("Entries below have a posting date after {0} but the clearance date is before {1}.", [`<strong>${formattedToDate}</strong>`, `<strong>${formattedToDate}</strong>`])
+
     return <div className="space-y-4 py-2">
 
         <div>
-            <Paragraph className="text-sm">
-                <span dangerouslySetInnerHTML={{
-                    __html: _("This report shows all entries in the system where the <strong>clearance date is before the posting date</strong> which is incorrect.")
-                }} />
+            <Paragraph className="text-p-sm">
+                <MarkdownRenderer content={content} />
                 <br />
                 {data && data.message.result.length > 0 && <span>
-                    <span dangerouslySetInnerHTML={{
-                        __html: _("Entries below have a posting date after {0} but the clearance date is before {1}.", [`<strong>${formattedToDate}</strong>`, `<strong>${formattedToDate}</strong>`])
-                    }} />
+                    <MarkdownRenderer content={entriesContent} />
                     <br />
                     {_("You can reset the clearing dates of these entries here.")}
                 </span>}

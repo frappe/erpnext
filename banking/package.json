@@ -43,6 +43,7 @@
     "react-router-dom": "^7.15.0",
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
+    "safe-expr-eval": "^1.0.4",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.3.0",

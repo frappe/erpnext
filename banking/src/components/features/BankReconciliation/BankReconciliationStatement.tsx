@@ -19,6 +19,7 @@ import _ from "@/lib/translate"
 import { toast } from "sonner"
 import { useCopyToClipboard } from "usehooks-ts"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
+import MarkdownRenderer from "@/components/ui/markdown"
 
 const BankReconciliationStatement = () => {
     const bankAccount = useAtomValue(selectedBankAccountAtom)
@@ -189,13 +190,13 @@ const BankReconciliationStatementView = () => {
         return data.message.result.filter((row: BankClearanceSummaryEntry) => Boolean(row.payment_entry))
     }, [data])
 
+    const content = _("Below is a list of all entries posted against the bank account {0} which have not been cleared till {1}.", [`<strong>${bankAccount?.account}</strong>`, `<strong>${formatDate(dates.toDate)}</strong>`])
+
     return <div className="space-y-4 py-2">
 
         <div>
-            <Paragraph className="text-sm">
-                <span dangerouslySetInnerHTML={{
-                    __html: _("Below is a list of all entries posted against the bank account {0} which have not been cleared till {1}.", [`<strong>${bankAccount?.account}</strong>`, `<strong>${formatDate(dates.toDate)}</strong>`])
-                }} />
+            <Paragraph className="text-p-sm">
+                <MarkdownRenderer content={content} />
             </Paragraph>
         </div>
 

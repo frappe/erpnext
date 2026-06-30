@@ -26,6 +26,7 @@ import { Form } from "@/components/ui/form"
 import { useForm } from "react-hook-form"
 import { DateField } from "@/components/ui/form-elements"
 import { Empty, EmptyMedia, EmptyHeader, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
+import MarkdownRenderer from "@/components/ui/markdown"
 
 const BankClearanceSummary = () => {
     const bankAccount = useAtomValue(selectedBankAccountAtom)
@@ -203,13 +204,13 @@ const BankClearanceSummaryView = () => {
         [accountCurrency, bankAccount, companyID, mutate, onCopy],
     )
 
+    const content = _("Below is a list of all accounting entries posted against the bank account {0} between {1} and {2}.", [`<strong>${bankAccount?.account}</strong>`, `<strong>${formattedFromDate}</strong>`, `<strong>${formattedToDate}</strong>`])
+
     return <div className="space-y-4 py-2">
 
         <div>
-            <Paragraph className="text-sm">
-                <span dangerouslySetInnerHTML={{
-                    __html: _("Below is a list of all accounting entries posted against the bank account {0} between {1} and {2}.", [`<strong>${bankAccount?.account}</strong>`, `<strong>${formattedFromDate}</strong>`, `<strong>${formattedToDate}</strong>`])
-                }} />
+            <Paragraph className="text-p-sm">
+                <MarkdownRenderer content={content} />
             </Paragraph>
         </div>
 

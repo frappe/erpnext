@@ -9,6 +9,24 @@ from frappe.model.document import Document
 
 from erpnext.accounts.doctype.bank_transaction.bank_transaction import BankTransaction
 
+PLAIN_NUMBER_PATTERN = re.compile(r"^-?\d+(\.\d+)?$")
+
+
+def validate_amount_formula(formula: str) -> None:
+	if not formula:
+		return
+
+	if PLAIN_NUMBER_PATTERN.match(formula.strip()):
+		return
+
+	try:
+		result = frappe.safe_eval(formula, eval_globals=None, eval_locals={"transaction_amount": 1})
+	except Exception:
+		frappe.throw(_("Invalid debit/credit formula: {0}").format(formula))
+
+	if not isinstance(result, (int | float)):
+		frappe.throw(_("Invalid debit/credit formula: {0}").format(formula))
+
 
 class BankTransactionRule(Document):
 	# begin: auto-generated types
@@ -86,6 +104,11 @@ class BankTransactionRule(Document):
 							frappe.throw(
 								_("The last account row must not have any debit or credit amounts set.")
 							)
+					else:
+						if account.debit:
+							validate_amount_formula(account.debit)
+						if account.credit:
+							validate_amount_formula(account.credit)
 
 		# Validate regex
 		for rule in self.description_rules:
