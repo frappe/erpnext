@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-06-28 10:20+0000\n"
-"PO-Revision-Date: 2026-06-29 20:08\n"
+"PO-Revision-Date: 2026-06-30 20:44\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -9319,7 +9319,7 @@ msgstr "Beräkna Uppskatade Ankomst Tider"
 #. Settings'
 #: erpnext/selling/doctype/selling_settings/selling_settings.json
 msgid "Calculate Product Bundle price based on child Item's rates"
-msgstr "Beräkna Artikel Paket pris baserat på priser för underordnade artiklar"
+msgstr "Beräkna Artikel Paket pris baserat på priser för paket artiklar"
 
 #. Description of the 'Hidden Line (Internal Use Only)' (Check) field in
 #. DocType 'Financial Report Row'
@@ -19193,9 +19193,9 @@ msgid "Enabling this will do the following:\n"
 msgstr "Om du aktiverar detta kommer följande att hända:\n"
 "<ul style=\"padding-left:16px\">\n"
 "<li>Pris Kolumn i alla Artikel Paket tabeller redigerbar.</li>\n"
-"<li>Beräkna priser för alla <a href=\"/desk/product-bundle\" rel=\"noopener noreferrer\">artikel paket</a> i Artikel tabell, baserat på priser för dess underordnade artiklar, som anges i Artikel Paket tabell. </li>\n"
+"<li>Beräkna priser för alla <a href=\"/desk/product-bundle\" rel=\"noopener noreferrer\">Artikel Paket</a> i Artikel tabell, baserat på priser för paket artiklar, som anges i Artikel Paket tabell. </li>\n"
 "</ul>\n"
-"Observera: Om detta är aktiverat kommer uppdatering av pris för artikel paket i artikel tabell inte att ändra dess pris. Det kommer att återställas till det pris som baseras på dess underordnade artiklar när dokumentet sparas."
+"Observera: Om detta är aktiverat kommer uppdatering av pris för artikel paket i artikel tabell inte att ändra deras pris. Det kommer att återställas till pris som baseras på paket artiklar när dokument sparas."
 
 #. Label of the encashment_date (Date) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -33834,7 +33834,7 @@ msgstr "Öppning Faktura Verktyg"
 #: erpnext/accounts/doctype/purchase_invoice/services/gl_composer.py:832
 #: erpnext/accounts/doctype/sales_invoice/services/gl_composer.py:642
 msgid "Opening Invoice has rounding adjustment of {0}.<br><br> '{1}' account is required to post these values. Please set it in Company: {2}.<br><br> Or, '{3}' can be enabled to not post any rounding adjustment."
-msgstr "Öppning Fakturan har avrundning justering på {0}.<br><br> '{1}' konto erfordras för att bokföra dessa värden. Ange det i Bolag: {2}.<br><br> Eller så kan '{3}' aktiveras för att inte bokföra någon avrundning justering."
+msgstr "Öppning Faktura har avrundning justering på {0}.<br><br> '{1}' konto erfordras för att bokföra dessa värden. Ange det i Bolag: {2}.<br><br> Eller så kan '{3}' aktiveras för att inte bokföra någon avrundning justering."
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool_dashboard.html:8
 msgid "Opening Invoices"
