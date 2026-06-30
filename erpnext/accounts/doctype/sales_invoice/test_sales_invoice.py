@@ -1576,14 +1576,14 @@ class TestSalesInvoice(ERPNextTestSuite):
 		frappe.db.set_single_value("POS Settings", "post_change_gl_entries", 1)
 
 	def test_stock_delivered_but_not_billed_gl_on_invoice(self):
-		company = "_Test Company with perpetual inventory"
+		company = "_Test SDBNB Company"
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		make_purchase_receipt(
 			company=company,
 			item_code="_Test FG Item",
-			warehouse="Stores - TCP1",
-			cost_center="Main - TCP1",
+			warehouse="Stores - _TSDBNB",
+			cost_center="Main - _TSDBNB",
 			qty=5,
 			rate=100,
 		)
@@ -1591,13 +1591,13 @@ class TestSalesInvoice(ERPNextTestSuite):
 		dn = create_delivery_note(
 			company=company,
 			item_code="_Test FG Item",
-			warehouse="Stores - TCP1",
-			cost_center="Main - TCP1",
+			warehouse="Stores - _TSDBNB",
+			cost_center="Main - _TSDBNB",
 			qty=2,
 			rate=300,
 		)
 		# A perpetual-inventory Delivery Note books the cost to the SDBNB account
-		self.assertEqual(dn.items[0].expense_account, "Stock Delivered But Not Billed - TCP1")
+		self.assertEqual(dn.items[0].expense_account, "Stock Delivered But Not Billed - _TSDBNB")
 
 		si = make_sales_invoice(dn.name)
 		si.insert()
@@ -1609,9 +1609,9 @@ class TestSalesInvoice(ERPNextTestSuite):
 			fields=["account", "debit", "credit"],
 		)
 		sdbnb_credit = sum(
-			row.credit for row in gl_entries if row.account == "Stock Delivered But Not Billed - TCP1"
+			row.credit for row in gl_entries if row.account == "Stock Delivered But Not Billed - _TSDBNB"
 		)
-		cogs_debit = sum(row.debit for row in gl_entries if row.account == "Cost of Goods Sold - TCP1")
+		cogs_debit = sum(row.debit for row in gl_entries if row.account == "Cost of Goods Sold - _TSDBNB")
 
 		# Billing reverses SDBNB and recognises the cost in COGS for an equal amount
 		self.assertTrue(sdbnb_credit > 0)
