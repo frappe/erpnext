@@ -46,6 +46,42 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 )
 from erpnext.stock.stock_ledger import get_items_to_be_repost
 
+# Purposes whose inward (t_warehouse) row is inspected.
+QI_INCOMING_PURPOSES = (
+	"Material Receipt",
+	"Repack",
+	"Receive from Customer",
+	"Subcontracting Return",
+)
+
+# Purposes whose outgoing (s_warehouse) row is inspected. This is an explicit
+# allow-list rather than "everything that isn't incoming" so a new purpose can't
+# silently start requiring a QI. Material Consumption for Manufacture is left out
+# on purpose: an inspection_required BOM inspects the manufactured output (handled
+# by the "Manufacture" finished-good rule), not each consumed raw material.
+# Keep this in sync with erpnext.stock.qi_* helpers in transaction.js.
+QI_OUTGOING_PURPOSES = (
+	"Material Issue",
+	"Material Transfer",
+	"Material Transfer for Manufacture",
+	"Send to Subcontractor",
+	"Subcontracting Delivery",
+	"Disassemble",
+)
+
+
+def stock_entry_row_requires_inspection(purpose, row):
+	"""Check if this Stock Entry row need a Quality Inspection."""
+	if row.get("type") or row.get("is_legacy_scrap_item"):
+		return False
+	if purpose == "Manufacture":
+		return bool(row.is_finished_item)
+	if purpose in QI_INCOMING_PURPOSES:
+		return bool(row.t_warehouse)
+	if purpose in QI_OUTGOING_PURPOSES:
+		return bool(row.s_warehouse and row.s_warehouse != row.t_warehouse)
+	return False
+
 
 class StockController(AccountsController):
 	def validate(self):
@@ -1477,8 +1513,8 @@ class StockController(AccountsController):
 				"Item", row.item_code, inspection_required_fieldname
 			):
 				qi_required = True
-			elif self.doctype == "Stock Entry" and row.t_warehouse:
-				qi_required = True  # inward stock needs inspection
+			elif self.doctype == "Stock Entry":
+				qi_required = stock_entry_row_requires_inspection(self.purpose, row)
 
 			if row.get("type") or row.get("is_legacy_scrap_item"):
 				continue
