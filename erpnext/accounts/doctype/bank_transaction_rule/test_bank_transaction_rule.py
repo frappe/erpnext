@@ -259,6 +259,8 @@ class TestBankTransactionRule(ERPNextTestSuite, AccountsTestMixin):
 			"__import__('os')",
 			"eval('1+1')",
 			"open('/etc/passwd')",
+			"transaction_amount ** 2",
+			"transaction_amount // 2",
 		]
 		for formula in malicious_formulas:
 			with self.subTest(formula=formula):
