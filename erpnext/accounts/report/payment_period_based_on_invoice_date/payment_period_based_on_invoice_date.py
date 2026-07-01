@@ -21,6 +21,8 @@ def execute(filters=None):
 	entries = get_entries(filters)
 	invoice_details = get_invoice_posting_date_map(filters)
 
+	report = ReceivablePayableReport(filters)
+
 	data = []
 	for d in entries:
 		invoice = invoice_details.get(d.against_voucher_no) or frappe._dict()
@@ -29,7 +31,9 @@ def execute(filters=None):
 		d.update({"range1": 0, "range2": 0, "range3": 0, "range4": 0, "outstanding": payment_amount})
 
 		if d.against_voucher_no:
-			ReceivablePayableReport(filters).get_ageing_data(invoice.posting_date, d)
+			# age the payment by how long after the invoice it was made (payment date - invoice date)
+			report.age_as_on = getdate(d.posting_date)
+			report.get_ageing_data(invoice.posting_date, d)
 
 		row = [
 			d.voucher_type,
