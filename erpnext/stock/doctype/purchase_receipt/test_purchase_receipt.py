@@ -2385,7 +2385,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertTrue(return_pi.docstatus == 1)
 
 	def test_disable_last_purchase_rate(self):
-		from erpnext.stock.get_item_details import ItemDetailsCtx, get_item_details
+		from erpnext.stock.get_item_details import get_item_details
 
 		item = make_item(
 			"_Test Disable Last Purchase Rate",
@@ -2400,7 +2400,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			item_code=item.name,
 		)
 
-		ctx = ItemDetailsCtx(pr.items[0].as_dict())
+		ctx = frappe._dict(pr.items[0].as_dict())
 		ctx.update(
 			{
 				"supplier": pr.supplier,

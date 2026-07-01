@@ -67,12 +67,15 @@ from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 from erpnext.stock.get_item_details import (
+<<<<<<< HEAD
 	NOT_APPLICABLE_TAX,
 	ItemDetailsCtx,
 	_get_item_tax_template,
 	_get_item_tax_template_from_item_group,
 	get_bin_details,
 	get_conversion_factor,
+=======
+>>>>>>> e6f8f8f7e9 (refactor: use frappe._dict in importers of ItemDetailsCtx)
 	get_item_details,
 	get_item_tax_map,
 	get_item_warehouse_,
@@ -1087,7 +1090,7 @@ class AccountsController(TransactionBase):
 
 			for item in self.get("items"):
 				if item.get("item_code"):
-					ctx: ItemDetailsCtx = ItemDetailsCtx(parent_dict.copy())
+					ctx: frappe._dict = frappe._dict(parent_dict.copy())
 					ctx.update(item.as_dict())
 
 					ctx.update(

@@ -42,7 +42,6 @@ from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	OpeningEntryAccountError,
 )
 from erpnext.stock.get_item_details import (
-	ItemDetailsCtx,
 	get_barcode_data,
 	get_bin_details,
 	get_conversion_factor,
@@ -2577,8 +2576,34 @@ class StockEntry(StockController, SubcontractingInwardController):
 		return reserved_work_orders
 
 	@frappe.whitelist()
+<<<<<<< HEAD
 	def get_item_details(self, args: ItemDetailsCtx = None, for_update=False):
 		item = frappe.qb.DocType("Item")
+=======
+	def get_item_details(self, args: frappe._dict | None = None, for_update: bool = False):
+		item = self._fetch_item_data(args)
+		item_group_defaults = get_item_group_defaults(item.name, self.company)
+		brand_defaults = get_brand_defaults(item.name, self.company)
+
+		ret = self._build_item_ret(args, item, item_group_defaults, brand_defaults, for_update)
+		self._apply_account_defaults(ret)
+
+		args["posting_date"] = self.posting_date
+		args["posting_time"] = self.posting_time
+		ret.update(get_warehouse_details(args) if args.get("warehouse") else {})
+
+		if self.purpose == "Send to Subcontractor":
+			self._resolve_subcontract_item(args, ret)
+
+		barcode_data = get_barcode_data(item_code=item.name)
+		if barcode_data and len(barcode_data.get(item.name)) == 1:
+			ret["barcode"] = barcode_data.get(item.name)[0]
+
+		return ret
+
+	def _fetch_item_data(self, args):
+		item_dt = frappe.qb.DocType("Item")
+>>>>>>> e6f8f8f7e9 (refactor: use frappe._dict in importers of ItemDetailsCtx)
 		item_default = frappe.qb.DocType("Item Default")
 
 		query = (

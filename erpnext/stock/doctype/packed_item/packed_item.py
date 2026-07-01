@@ -11,7 +11,7 @@ import frappe.defaults
 from frappe.model.document import Document
 from frappe.utils import flt
 
-from erpnext.stock.get_item_details import ItemDetailsCtx, get_item_details, get_price_list_rate
+from erpnext.stock.get_item_details import get_item_details, get_price_list_rate
 
 
 class PackedItem(Document):
@@ -286,7 +286,7 @@ def update_packed_item_price_data(pi_row, item_data, doc):
 		return
 
 	item_doc = frappe.get_cached_doc("Item", pi_row.item_code)
-	ctx = ItemDetailsCtx(pi_row.as_dict().copy())
+	ctx = frappe._dict(pi_row.as_dict().copy())
 	ctx.update(
 		{
 			"company": doc.get("company"),
@@ -378,7 +378,33 @@ def on_doctype_update():
 def get_items_from_product_bundle(row):
 	row, items = ItemDetailsCtx(json.loads(row)), []
 
+<<<<<<< HEAD
 	bundled_items = get_product_bundle_items(row["item_code"])
+=======
+	``row.product_bundle`` selects a specific version by document name (the buying
+	dialog passes this); ``row.item_code`` is the legacy contract, resolving the
+	parent item's active version.
+	"""
+	from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
+
+	row, items = frappe._dict(frappe.parse_json(row)), []
+
+	if bundle_name := row.get("product_bundle"):
+		frappe.has_permission("Product Bundle", "read", bundle_name, throw=True)
+		bundle = frappe.db.get_value("Product Bundle", bundle_name, ["docstatus", "disabled"], as_dict=True)
+		if not bundle or bundle.docstatus != 1:
+			frappe.throw(_("Product Bundle {0} is not submitted").format(frappe.bold(bundle_name)))
+		if bundle.disabled:
+			frappe.throw(
+				_("Product Bundle {0} is disabled and cannot be used in transactions.").format(
+					frappe.bold(bundle_name)
+				)
+			)
+	elif bundle_name := get_active_product_bundle(row.get("item_code")):
+		frappe.has_permission("Product Bundle", "read", bundle_name, throw=True)
+
+	bundled_items = get_product_bundle_items_by_name(bundle_name) if bundle_name else []
+>>>>>>> e6f8f8f7e9 (refactor: use frappe._dict in importers of ItemDetailsCtx)
 	for item in bundled_items:
 		row.update(
 			{

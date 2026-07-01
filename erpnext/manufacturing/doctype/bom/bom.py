@@ -18,7 +18,7 @@ from frappe.website.website_generator import WebsiteGenerator
 import erpnext
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.item.item import get_item_details
-from erpnext.stock.get_item_details import ItemDetailsCtx, get_conversion_factor, get_price_list_rate
+from erpnext.stock.get_item_details import get_conversion_factor, get_price_list_rate
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -1335,6 +1335,35 @@ def get_bom_item_rate(args, bom_doc):
 	return flt(rate)
 
 
+<<<<<<< HEAD
+=======
+def _get_price_list_item_rate(args, bom_doc):
+	if not bom_doc.buying_price_list:
+		frappe.throw(_("Please select Price List"))
+
+	ctx = frappe._dict(
+		{
+			"doctype": "BOM",
+			"price_list": bom_doc.buying_price_list,
+			"qty": args.get("qty") or 1,
+			"uom": args.get("uom") or args.get("stock_uom"),
+			"stock_uom": args.get("stock_uom"),
+			"transaction_type": "buying",
+			"company": bom_doc.company,
+			"currency": bom_doc.currency,
+			"conversion_rate": 1,  # Passed conversion rate as 1 purposefully, as conversion rate is applied at the end of the function
+			"conversion_factor": args.get("conversion_factor") or 1,
+			"plc_conversion_rate": 1,
+			"ignore_party": True,
+			"ignore_conversion_rate": True,
+		}
+	)
+	item_doc = frappe.get_cached_doc("Item", args.get("item_code"))
+	price_list_data = get_price_list_rate(ctx, item_doc)
+	return price_list_data.price_list_rate
+
+
+>>>>>>> e6f8f8f7e9 (refactor: use frappe._dict in importers of ItemDetailsCtx)
 def get_valuation_rate(data):
 	"""
 	1) Get average valuation rate from all warehouses
