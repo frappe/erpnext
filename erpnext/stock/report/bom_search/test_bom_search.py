@@ -17,7 +17,10 @@ class TestBomSearch(ERPNextTestSuite):
 		raw_material = "_Test Item"
 		finished_good = "_Test FG Item"
 
-		bom = frappe.get_doc(doctype="BOM", item=finished_good, company="_Test Company", currency="INR")
+		# is_default=0 so the test doesn't replace the fixture default BOM for the item
+		bom = frappe.get_doc(
+			doctype="BOM", item=finished_good, company="_Test Company", currency="INR", is_default=0
+		)
 		bom.append("items", {"item_code": raw_material, "qty": 1})
 		bom.insert()
 		bom.submit()
@@ -32,9 +35,15 @@ class TestBomSearch(ERPNextTestSuite):
 		finished_good = "_Test FG Item 2"
 
 		# top-level BOM uses the sub-assembly (it does NOT list the raw material directly).
-		# the bootstrap sub-assembly BOM is in USD, so match its currency.
+		# the bootstrap sub-assembly BOM is in USD, so match its currency; is_default=0 so the
+		# test doesn't replace the fixture default BOM for the finished good.
 		top_bom = frappe.get_doc(
-			doctype="BOM", item=finished_good, company="_Test Company", currency="USD", conversion_rate=1
+			doctype="BOM",
+			item=finished_good,
+			company="_Test Company",
+			currency="USD",
+			conversion_rate=1,
+			is_default=0,
 		)
 		top_bom.append("items", {"item_code": sub_assembly, "qty": 1})
 		top_bom.insert()
