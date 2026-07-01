@@ -829,7 +829,9 @@ def compute_final_transactions(transaction_rows: list, date_format: str, amount_
 
 		if amount_format == 'Amount column has "CR"/"DR" values':
 			amount = transaction_row.get("amount")
-			float_amount = get_float_amount(amount)
+
+			# If the amount column has CR/DR in it - we should remove any signs (negative or positive) from the amount
+			float_amount = abs(get_float_amount(amount) or 0)
 			if "cr" in amount.lower():
 				return 0, float_amount
 			else:
