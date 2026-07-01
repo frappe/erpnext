@@ -12,6 +12,7 @@ from frappe.model.utils import get_fetch_values
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import add_days, add_months, cint, cstr, flt, get_link_to_form, getdate, parse_json
 
+import erpnext
 from erpnext import get_company_currency
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import (
 	get_pricing_rule_for_item,
@@ -518,10 +519,21 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 			args.name, args.conversion_rate, item.name, out.conversion_factor
 		)
 
+	expense_account_field = "default_expense_account"
+	if (
+		item.is_stock_item
+		and erpnext.is_perpetual_inventory_enabled(args.company)
+		and (
+			args.doctype == "Purchase Receipt"
+			or (args.doctype == "Purchase Invoice" and args.get("update_stock"))
+		)
+	):
+		expense_account_field = "stock_received_but_not_billed"
+
 	# if default specified in item is for another company, fetch from company
 	for d in [
 		["Account", "income_account", "default_income_account"],
-		["Account", "expense_account", "default_expense_account"],
+		["Account", "expense_account", expense_account_field],
 		["Cost Center", "cost_center", "cost_center"],
 		["Warehouse", "warehouse", ""],
 	]:
