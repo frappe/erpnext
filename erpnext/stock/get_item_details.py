@@ -805,12 +805,16 @@ def get_item_tax_info(doc, tax_category, item_codes, item_rates=None, item_tax_t
 @frappe.whitelist()
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
 <<<<<<< HEAD
+<<<<<<< HEAD
 def get_item_tax_template(ctx, item=None, out: ItemDetails | None = None):
 =======
 def get_item_tax_template(
 	ctx: ItemDetailsCtx, item: Document | None = None, out: frappe._dict | None = None
 ):
 >>>>>>> 6eeadbdbef (fix: keep normalize_ctx_input's ctx annotation on Python 3.14)
+=======
+def get_item_tax_template(ctx: ItemDetailsCtx, item: Document | None = None, out: frappe._dict | None = None):
+>>>>>>> 8271b29e42 (style: apply ruff formatter)
 	"""
 	Determines item_tax template from item or parent item groups.
 
@@ -1277,9 +1281,7 @@ def _get_stock_uom_rate(rate: float, ctx: frappe._dict):
 	return rate / ctx.conversion_factor if ctx.conversion_factor else rate
 
 
-def get_item_price(
-	pctx: frappe._dict, item_code, ignore_party=False, force_batch_no=False
-) -> list[dict]:
+def get_item_price(pctx: frappe._dict, item_code, ignore_party=False, force_batch_no=False) -> list[dict]:
 	"""
 	Get name, price_list_rate from Item Price based on conditions
 	        Check if the desired qty is within the increment of the packing list.
