@@ -856,34 +856,40 @@ $.extend(erpnext.item, {
 			return Math.abs(Math.round(steps) - steps) <= 1e-6;
 		}
 
-		// Block variant creation if ANY value is invalid. Checks both the committed
-		// pills and any text still sitting in the input box (typed but not selected),
-		// so garbage like "00A" can never slip through to creation.
+		// Block variant creation if anything is wrong: an invalid committed pill, or
+		// text typed but not added as a pill (which get_selected_attributes would
+		// otherwise drop silently). The user must fix each before creation proceeds.
 		function validate_selected_attributes() {
-			let invalid = [];
+			let errors = [];
 			frm.doc.attributes.forEach((row) => {
 				if (row.disabled) return;
 				let field = me.multiple_variant_dialog.get_field(frappe.scrub(row.attribute));
 				if (!field) return;
 
+				let attribute = frappe.utils.escape_html(row.attribute);
 				let spec = attr_val_fields[row.attribute];
-				let values = (field.get_value() || []).slice();
-				let pending = (field.$input?.val() || "").trim();
-				if (pending) values.push(pending);
 
-				let bad = [...new Set(values.filter((v) => !is_valid_attribute_value(spec, v)))];
-				if (bad.length) {
-					invalid.push(`<b>${frappe.utils.escape_html(row.attribute)}</b>: ${bad.join(", ")}`);
+				let invalid = [
+					...new Set((field.get_value() || []).filter((v) => !is_valid_attribute_value(spec, v))),
+				];
+				if (invalid.length) {
+					let values = invalid.map(frappe.utils.escape_html).join(", ");
+					errors.push(__("{0}: remove invalid value(s) {1}", [attribute, values]));
+				}
+
+				let pending = (field.$input?.val() || "").trim();
+				if (pending) {
+					let value = frappe.utils.escape_html(pending);
+					errors.push(
+						__("{0}: select the typed value {1} from the list or clear it", [attribute, value])
+					);
 				}
 			});
 
-			if (invalid.length) {
+			if (errors.length) {
 				frappe.throw({
 					title: __("Invalid Attribute Values"),
-					message:
-						__("Please remove the following invalid values before creating variants:") +
-						"<br><br>" +
-						invalid.join("<br>"),
+					message: errors.join("<br>"),
 					indicator: "red",
 				});
 			}
