@@ -15,8 +15,6 @@ def execute(filters=None):
 
 	columns = get_columns(filters)
 
-	filters.get("date")
-
 	data = []
 
 	if not filters.get("shareholder"):
@@ -24,7 +22,7 @@ def execute(filters=None):
 	else:
 		share_type, no_of_shares, rate, amount = 1, 2, 3, 4
 
-		all_shares = get_all_shares(filters.get("shareholder"))
+		all_shares = get_all_shares(filters.get("shareholder"), filters.get("date"))
 		for share_entry in all_shares:
 			row = False
 			for datum in data:
@@ -63,5 +61,28 @@ def get_columns(filters):
 	return columns
 
 
-def get_all_shares(shareholder):
-	return frappe.get_doc("Shareholder", shareholder).share_balance
+def get_all_shares(shareholder, date):
+	"""Share movements for the shareholder up to (and including) `date`, signed by direction:
+	shares received are positive, shares transferred/sold out are negative."""
+	transfers = frappe.get_all(
+		"Share Transfer",
+		filters={"docstatus": 1, "date": ("<=", date)},
+		fields=["share_type", "no_of_shares", "rate", "amount", "from_shareholder", "to_shareholder"],
+		order_by="date",
+	)
+
+	shares = []
+	for transfer in transfers:
+		if transfer.to_shareholder == shareholder:
+			shares.append(transfer)
+		elif transfer.from_shareholder == shareholder:
+			shares.append(
+				frappe._dict(
+					share_type=transfer.share_type,
+					no_of_shares=-transfer.no_of_shares,
+					rate=transfer.rate,
+					amount=-transfer.amount,
+				)
+			)
+
+	return shares
