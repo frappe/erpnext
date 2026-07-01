@@ -334,11 +334,37 @@ class FIFOSlots:
 			for row in stock_ledger_entries:
 				self._process_stock_ledger_entry(row, bundle_wise_serial_nos, bundle_wise_batch_nos)
 
+		self._recompute_moving_average_slots()
+
 		if not self.filters.get("show_warehouse_wise_stock"):
 			# (Item 1, WH 1), (Item 1, WH 2) => (Item 1)
 			self.item_details = self._aggregate_details_by_item(self.item_details)
 
 		return self.item_details
+
+	def _recompute_moving_average_slots(self) -> None:
+		from erpnext.stock.utils import get_valuation_method
+
+		company = self.filters.get("company")
+		valuation_method_by_item = {}
+
+		for item_dict in self.item_details.values():
+			if item_dict.get("has_serial_no") or item_dict.get("has_batch_no"):
+				continue
+
+			details = item_dict["details"]
+			item_code = details.name
+
+			if item_code not in valuation_method_by_item:
+				valuation_method_by_item[item_code] = get_valuation_method(item_code, company)
+
+			if valuation_method_by_item[item_code] != "Moving Average":
+				continue
+
+			rate = flt(details.valuation_rate)
+			for slot in item_dict["fifo_queue"]:
+				if is_qty_slot(slot):
+					slot[FIFO_VALUE_INDEX] = flt(slot[FIFO_QTY_INDEX] * rate)
 
 	def _get_bundle_wise_details(self, stock_ledger_entries: list | None) -> tuple[dict, dict]:
 		if stock_ledger_entries is not None:
