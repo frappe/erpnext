@@ -130,6 +130,7 @@
   "column_break_32",
   "stock_adjustment_account",
   "default_purchase_price_variance_account",
+  "default_manufacturing_variance_account",
   "stock_received_but_not_billed",
   "stock_delivered_but_not_billed",
   "disable_sdbnb_in_sr",
@@ -499,7 +500,18 @@
    "ignore_user_permissions": 1,
    "label": "Default Purchase Price Variance Account",
    "no_copy": 1,
-   "options": "Account"
+   "options": "Account",
+   "show_description_on_click": 1
+  },
+  {
+   "description": "For Standard Cost items: the Manufacture/Repack consumed cost vs standard rate difference is booked here.",
+   "fieldname": "default_manufacturing_variance_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Default Manufacturing Variance Account",
+   "no_copy": 1,
+   "options": "Account",
+   "show_description_on_click": 1
   },
   {
    "fieldname": "column_break_32",
@@ -1014,7 +1026,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2026-06-26 10:05:00.000000",
+ "modified": "2026-07-01 11:48:07.853494",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

@@ -260,6 +260,29 @@ def get_purchase_price_variance_account(item_code, company):
 	return account
 
 
+def get_manufacturing_variance_account(item_code, company):
+	"""Resolve the Manufacturing Variance account for a Standard Cost item: the per-company Item Default
+	override if set, otherwise the Company default. During Manufacture/Repack this account absorbs the
+	difference between the consumed (raw material + additional) cost and the finished good's standard rate."""
+	account = frappe.db.get_value(
+		"Item Default",
+		{"parent": item_code, "company": company},
+		"manufacturing_variance_account",
+	)
+
+	if not account:
+		account = frappe.get_cached_value("Company", company, "default_manufacturing_variance_account")
+
+	if not account:
+		frappe.throw(
+			_(
+				"Please set a Manufacturing Variance Account for Item {0} or a Default Manufacturing Variance Account in Company {1}."
+			).format(get_link_to_form("Item", item_code), frappe.bold(company))
+		)
+
+	return account
+
+
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_standard_cost_items(
