@@ -644,7 +644,7 @@ def make_reverse_gl_entries(
 		is_opening = any(d.get("is_opening") == "Yes" for d in gl_entries)
 
 		if immutable_ledger_enabled:
-			validation_date = frappe.form_dict.get("posting_date") or getdate()
+			validation_date = posting_date or frappe.form_dict.get("posting_date") or getdate()
 		else:
 			validation_date = posting_date if posting_date else gl_entries[0]["posting_date"]
 
@@ -717,7 +717,7 @@ def make_reverse_gl_entries(
 
 			if immutable_ledger_enabled:
 				new_gle["is_cancelled"] = 0
-				new_gle["posting_date"] = frappe.form_dict.get("posting_date") or getdate()
+				new_gle["posting_date"] = posting_date or frappe.form_dict.get("posting_date") or getdate()
 			elif posting_date:
 				new_gle["posting_date"] = posting_date
 
