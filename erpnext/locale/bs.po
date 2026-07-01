@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-06-28 10:20+0000\n"
-"PO-Revision-Date: 2026-06-30 20:44\n"
+"PO-Revision-Date: 2026-07-01 20:39\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -34232,7 +34232,7 @@ msgstr "Optimiziraj Rutu"
 
 #: erpnext/stock/doctype/delivery_trip/delivery_trip.js:128
 msgid "Optimizing route"
-msgstr "Optimizacija putanje"
+msgstr "Optimizacija rute"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1029
 msgid "Optional. Select a specific manufacture entry to reverse."
@@ -38608,7 +38608,7 @@ msgstr "Postavi Račun Osnovne Imovine u Kategoriju Imovine {0}"
 
 #: erpnext/accounts/doctype/purchase_invoice/services/expense_account.py:151
 msgid "Please set Fixed Asset Account in {0} against {1}."
-msgstr "Postavi Račun Usnovnih Sredstava u {0} na {1}."
+msgstr "Postavi Račun Osnovnih Sredstava u {0} na {1}."
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:296
 msgid "Please set Parent Row No for item {0}"
@@ -40523,7 +40523,7 @@ msgstr "Bilans Uspjeha"
 
 #: erpnext/accounts/report/profit_and_loss_statement/profit_and_loss_statement.py:215
 msgid "Profit and Loss Statement requires {0} to be synced to DuckDB"
-msgstr "Bilansa Uspjeeha zahtijeva da se {0} sinhronizira s DuckDB-om"
+msgstr "Bilansa Uspjeha zahtijeva da se {0} sinhronizira s DuckDB-om"
 
 #. Label of the heading_cppb (Heading) field in DocType 'Bisect Accounting
 #. Statements'
