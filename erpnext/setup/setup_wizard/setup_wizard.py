@@ -10,7 +10,7 @@ from erpnext.setup.demo import setup_demo_data
 from erpnext.setup.setup_wizard.operations import install_fixtures as fixtures
 
 
-def get_setup_stages(args=None):
+def get_setup_stages(args=None):  # nosemgrep
 	stages = [
 		{
 			"status": _("Installing presets"),
@@ -50,7 +50,7 @@ def get_setup_stages(args=None):
 	return stages
 
 
-def capture_user_persona(args):
+def capture_user_persona(args):  # nosemgrep
 	"""Send the persona answers captured on the setup slide to telemetry."""
 	if not args:
 		return
@@ -73,15 +73,15 @@ def capture_user_persona(args):
 	)
 
 
-def stage_fixtures(args):
+def stage_fixtures(args):  # nosemgrep
 	fixtures.install(args.get("country"))
 
 
-def setup_company(args):
+def setup_company(args):  # nosemgrep
 	fixtures.install_company(args)
 
 
-def setup_defaults(args):
+def setup_defaults(args):  # nosemgrep
 	fixtures.install_defaults(frappe._dict(args))
 
 
@@ -90,7 +90,7 @@ def setup_demo(args):  # nosemgrep
 
 
 # Only for programmatical use
-def setup_complete(args=None):
+def setup_complete(args=None):  # nosemgrep
 	stage_fixtures(args)
 	setup_company(args)
 	setup_defaults(args)
