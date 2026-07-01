@@ -122,7 +122,7 @@ def get_default_company_bank_account(company, party_type, party, ignore_permissi
 		default_company_bank_account = (
 			default_company_bank_account
 			if default_company_bank_account
-			and frappe.get_cached_doc("Bank Account", default_company_bank_account).has_permission()
+			and frappe.get_cached_doc("Bank Account", default_company_bank_account).has_permission("select")
 			else None
 		)
 

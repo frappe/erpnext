@@ -430,12 +430,22 @@ def get_party_account(
 	Will first search in party (Customer / Supplier) record, if not found,
 	will search in group (Customer Group / Supplier Group),
 	finally will return default."""
+
+	def account_perm_check(account):
+		ptype = "select" if frappe.only_has_select_perm("Account") else "read"
+		if frappe.has_permission("Account", ptype, account):
+			return
+
+		# Using custom message to prevent data leak in case of `apply_strict_permission` is enabled.
+		frappe.throw(
+			_("User don't have permissions to select/read this account."), exc=frappe.PermissionError
+		)
+
 	if not party_type:
 		frappe.throw(_("Party Type is mandatory"))
 	if not company:
 		frappe.throw(_("Please select a Company"))
 
-	account, advance_account = None, None
 	if not party and party_type in ["Customer", "Supplier"]:
 		default_account_name = (
 			"default_receivable_account" if party_type == "Customer" else "default_payable_account"
@@ -475,19 +485,19 @@ def get_party_account(
 			default_account_name = "default_" + account_type.lower() + "_account"
 			account = frappe.get_cached_value("Company", company, default_account_name)
 
-	if include_advance and party_type in ["Customer", "Supplier", "Student"]:
+	if account:
+		account_perm_check(account)
+
+	if include_advance and party and party_type in ["Customer", "Supplier", "Student"]:
 		advance_account = get_party_advance_account(party_type, party, company)
 
-	account = account if account and frappe.get_cached_doc("Account", account).has_permission() else None
-	advance_account = (
-		advance_account
-		if include_advance
-		and advance_account
-		and frappe.get_cached_doc("Account", advance_account).has_permission()
-		else None
-	)
+		if advance_account:
+			account_perm_check(advance_account)
+			return [account, advance_account]
 
-	return account if not include_advance else [account, advance_account]
+		return [account]
+
+	return account
 
 
 def get_party_advance_account(party_type, party, company):

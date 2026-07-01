@@ -2424,8 +2424,8 @@ def get_party_details(company: str, party_type: str, party: str, date: str, cost
 	if not frappe.db.exists(party_type, party):
 		frappe.throw(_("{0} {1} does not exist").format(_(party_type), party))
 
-	party_doc = frappe.get_cached_doc(party_type, party)
-	party_doc.check_permission()
+	ptype = "select" if frappe.only_has_select_perm(party_type) else "read"
+	frappe.has_permission(party_type, ptype, party, throw=True)
 
 	party_account = get_party_account(party_type, party, company)
 	account_currency = get_account_currency(party_account)
