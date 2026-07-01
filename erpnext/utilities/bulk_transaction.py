@@ -15,7 +15,7 @@ def transaction_processing(
 
 	deserialized_data = frappe.parse_json(data)
 
-	args = frappe._dict(frappe.parse_json(args))
+	args = frappe._dict(frappe.parse_json(args) or {})
 
 	skipped_records = [d for d in deserialized_data if d.get("status") in ("On Hold", "Closed")]
 

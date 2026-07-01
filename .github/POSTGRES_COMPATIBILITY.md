@@ -45,7 +45,9 @@ Flag a changed query that uses any of these:
 - **`HAVING` referencing a `SELECT` alias** — PostgreSQL rejects output-column aliases in
   `HAVING` (regardless of whether the query has a `GROUP BY`; MariaDB allows them). Repeat the
   underlying expression in `HAVING`, or move a non-aggregate predicate into `WHERE`.
-- **`SELECT DISTINCT … ORDER BY <expr not in the select list>`** — add the expr to the select.
+- **`SELECT DISTINCT … ORDER BY <expr not in the select list>`** — add the expr to the select
+  **only if it is single-valued per distinct row**; otherwise it grows the `DISTINCT` key and the
+  MariaDB row count (see §3) — drop the SQL `ORDER BY` and sort in Python instead.
 - **Single-quoted column alias** `AS 'x'` — PostgreSQL reads `'x'` as a string literal. Use an
   unquoted (or double-quoted) alias.
 - **`varchar | varchar`** (bitwise OR misused as a coalesce) — errors on PostgreSQL. Use
@@ -119,7 +121,7 @@ These don't error, so a one-engine CI stays green. Flag them:
 
 ---
 
-## 3. The `GROUP BY` row-count trap (the single most important rule)
+## 3. The row-count trap — `GROUP BY` **and** `DISTINCT` (the single most important rule)
 
 When making a loose `GROUP BY` PostgreSQL-valid, **do not add a non-functionally-dependent
 column to the `GROUP BY` just to satisfy PostgreSQL** — that turns one group row into N and
@@ -139,6 +141,14 @@ Conversely, do **not** suggest changing a `Max()`/`Min()`-wrapped column to `Sum
 versa) to make a number "more correct" — that changes the MariaDB value. The wrap reproduces
 MariaDB's prior one-value-per-group output; a different aggregate is a product change, out of
 scope for a portability fix.
+
+**The same trap applies to `SELECT DISTINCT`.** To satisfy PostgreSQL's "an `ORDER BY` expr must
+appear in the select list under `DISTINCT`" rule, **do not blindly add the ordered column to the
+select** — if it is not single-valued per existing distinct row, the `DISTINCT` key grows and
+MariaDB returns **more rows** (a regression), exactly as adding a non-FD column to `GROUP BY` does.
+Add it only when it is functionally dependent on the existing select columns; otherwise drop the
+SQL `ORDER BY` and **sort in Python** (`key=str.casefold`, per §2) so the distinct row set is
+unchanged.
 
 ---
 
@@ -167,17 +177,44 @@ These are auto-handled by the framework and are **not** breaks:
   frappe#40075). Such a handler must wrap the fallible insert in `frappe.db.savepoint(name)` +
   `rollback(save_point=name)` — unless it re-`throw`s with no DB call before the throw, or the
   insert uses `ignore_if_duplicate=True` / `autoname="hash"` (→ `ON CONFLICT DO NOTHING`).
+- **Recover the txn with a *scoped* savepoint, not a full `frappe.db.rollback()`, if any prior work
+  must survive.** A full rollback un-poisons the txn but also discards every row the handler committed
+  *before* the failure — which MariaDB kept (it has no statement-abort), so it's a **silent MariaDB
+  regression**. **"The background job / whitelist entrypoint owns the txn" does NOT make a full rollback
+  safe** if it did multiple inserts in a loop first — it drops the partial results MariaDB retained. A
+  full rollback is safe only when it (a) immediately re-`throw`s/`raise`s (MariaDB rolls back anyway),
+  (b) has nothing successful before it (a single op), or (c) the batch is genuinely meant to be
+  **atomic** (a partial result is an invalid state → rollback + mark *Failed* is correct). Otherwise use
+  a **per-iteration / per-record savepoint** — and keep the function's success/`None` return contract:
+  do **not** return the doc when the savepoint was rolled back.
+
+---
+
+## 6. Refactors and raw-SQL→ORM conversions are not automatically 1:1
+
+A commit labeled a **refactor** or a **raw-`frappe.db.sql` → `frappe.qb`/ORM conversion** is meant
+to preserve behaviour — but it easily doesn't, and the change passes the static checker and a
+one-engine green run. **Diff the `WHERE`/predicate, the `JOIN`/`ON` conditions, and the resulting
+row set — not just the `SELECT` shape.** A conversion that silently widens or narrows the filter
+changes the rows touched on **both** engines and is a regression hiding under a "refactor" label.
+
+Real example: an `UPDATE` whose bound was `posting_datetime > X` gained an
+`OR (posting_datetime == X AND creation > args.creation)` branch during a "`sql` → `qb` refactor",
+widening the rows updated on both engines. Even when such a change is a deliberate bug-fix it must
+be called out and tested — it is **not** the no-op the refactor label implies. Confirm the
+converted query touches exactly the same rows with the same values MariaDB produced before.
 
 ---
 
 ## How to review
 
-For every changed query: does it (a) use a construct from §1 (would error on PostgreSQL), or
-(b) match a divergence in §2/§3 (different result across engines)? If so, comment with the
+For every changed query: does it (a) use a construct from §1 (would error on PostgreSQL),
+(b) match a divergence in §2/§3 (different result across engines), or (c) change the row set under
+a refactor/conversion label (§6)? If so, comment with the
 portable fix and confirm it leaves **MariaDB output unchanged**. Skip the §4 false positives.
 Prefer a comment that names the rule (e.g. "loose GROUP BY — Max()-wrap, don't add to GROUP BY:
 splits the row count") so the fix is unambiguous.
 
 The static pre-commit checker (`.github/helper/postgres_compat.py`) catches the *mechanical*
-§1 breaks; the **semantic** §2/§3 divergences are exactly what a reviewer (and this guide) must
-cover, because no static check can see them.
+§1 breaks; the **semantic** §2/§3 divergences and the §6 refactor/conversion row-set changes are
+exactly what a reviewer (and this guide) must cover, because no static check can see them.

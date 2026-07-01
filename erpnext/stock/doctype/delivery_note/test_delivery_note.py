@@ -2640,6 +2640,92 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(dn.per_returned, 100)
 		self.assertEqual(returned.status, "Return")
 
+	def _assert_credit_note_from_return_dn_resets_per_billed(self, so, dn):
+		"""Given a fully billed Sales Order and a submitted Delivery Note that delivers it,
+		a credit note made from the return of that Delivery Note must reset per_billed to 0
+		while leaving the delivery quantities exactly as the return already set them."""
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		so.load_from_db()
+		self.assertEqual(so.per_delivered, 100)
+		self.assertEqual(so.per_billed, 100)
+
+		return_dn = make_sales_return(dn.name)
+		return_dn.insert()
+		return_dn.submit()
+
+		# the return reverses the delivery quantities
+		so.load_from_db()
+		self.assertEqual(so.per_delivered, 0)
+		self.assertEqual(so.items[0].delivered_qty, 0)
+
+		credit_note = make_sales_invoice(return_dn.name)
+		self.assertTrue(credit_note.is_return)
+		self.assertTrue(credit_note.update_billed_amount_in_sales_order)
+		# A Delivery Note-linked invoice can't update stock (validate_delivery_note), so the
+		# credit note only rolls back billing and never re-reverses the delivery quantities.
+		self.assertFalse(credit_note.update_stock)
+		credit_note.insert()
+		credit_note.submit()
+
+		# per_billed is reset, and the delivery state stays exactly as the return left it
+		so.load_from_db()
+		self.assertEqual(so.per_billed, 0)
+		self.assertEqual(so.per_delivered, 0)
+		self.assertEqual(so.items[0].delivered_qty, 0)
+		self.assertEqual(so.items[0].returned_qty, 0)
+
+		# Cancelling the credit note should restore the billed amount on the Sales Order.
+		credit_note.cancel()
+		so.load_from_db()
+		self.assertEqual(so.per_billed, 100)
+
+	def test_sales_order_per_billed_after_credit_note_from_return_dn(self):
+		# Reported flow: SO -> SI (from SO) -> DN (from SI) -> return DN -> credit note.
+		# The DN carries si_detail in this path.
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_delivery_note
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		so = make_sales_order(qty=2)
+
+		si = make_si_from_so(so.name)
+		si.insert()
+		si.submit()
+
+		dn = make_delivery_note(si.name)
+		dn.insert()
+		dn.submit()
+
+		self._assert_credit_note_from_return_dn_resets_per_billed(so, dn)
+
+	def test_sales_order_per_billed_after_credit_note_from_so_derived_dn(self):
+		# SO billed and delivered separately (SO -> SI, SO -> DN), then return DN -> credit note.
+		# SO per_billed rolls back via the status_updater in update_prevdoc_status.
+		from erpnext.selling.doctype.sales_order.mapper import (
+			make_delivery_note as make_dn_from_so,
+		)
+		from erpnext.selling.doctype.sales_order.mapper import (
+			make_sales_invoice as make_si_from_so,
+		)
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		so = make_sales_order(qty=2)
+
+		si = make_si_from_so(so.name)
+		si.insert()
+		si.submit()
+
+		dn = make_dn_from_so(so.name)
+		dn.insert()
+		dn.submit()
+
+		self.assertIsNone(dn.items[0].si_detail)
+
+		self._assert_credit_note_from_return_dn_resets_per_billed(so, dn)
+
 	def test_packed_item_serial_no_status(self):
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 		from erpnext.stock.doctype.item.test_item import make_item

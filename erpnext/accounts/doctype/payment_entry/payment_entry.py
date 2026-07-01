@@ -514,10 +514,12 @@ class PaymentEntry(AccountsController):
 				invoice_names.add((ref.reference_doctype, ref.reference_name))
 
 		for doctype, name in invoice_names:
+			frappe.db.savepoint("subscription_update")
 			try:
 				doc = frappe.get_doc(doctype, name)
 				doc.refresh_subscription_status()
 			except Exception:
+				frappe.db.rollback(save_point="subscription_update")
 				frappe.log_error(_("Failed to update subscription status for {0} {1}").format(doctype, name))
 
 	def set_missing_values(self):
@@ -2793,6 +2795,9 @@ def get_open_payment_requests_for_references(references=None):
 		.where(PR.docstatus == 1)
 		.where(PR.outstanding_amount > 0)  # to avoid old PRs with 0 outstanding amount
 		.orderby(Coalesce(PR.transaction_date, PR.creation), order=frappe.qb.asc)
+		# unique tiebreaker so PRs sharing a transaction_date allocate in the same order on both engines
+		.orderby(PR.creation, order=frappe.qb.asc)
+		.orderby(PR.name, order=frappe.qb.asc)
 	).run(as_dict=True)
 
 	if not response:

@@ -1,6 +1,34 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+// Keep these in sync with QI_INCOMING_PURPOSES / QI_OUTGOING_PURPOSES /
+// stock_entry_row_requires_inspection in stock/services/quality_inspection_service.py.
+erpnext.stock = erpnext.stock || {};
+erpnext.stock.qi_incoming_purposes = [
+	"Material Receipt",
+	"Repack",
+	"Receive from Customer",
+	"Subcontracting Return",
+];
+erpnext.stock.qi_outgoing_purposes = [
+	"Material Issue",
+	"Material Transfer",
+	"Material Transfer for Manufacture",
+	"Send to Subcontractor",
+	"Subcontracting Delivery",
+	"Disassemble",
+];
+erpnext.stock.is_incoming_qi_purpose = (purpose) =>
+	purpose === "Manufacture" || erpnext.stock.qi_incoming_purposes.includes(purpose);
+erpnext.stock.row_requires_quality_inspection = (purpose, row) => {
+	if (row.secondary_item_type || row.is_legacy_scrap_item) return false;
+	if (purpose === "Manufacture") return !!row.is_finished_item;
+	if (erpnext.stock.qi_incoming_purposes.includes(purpose)) return !!row.t_warehouse;
+	if (erpnext.stock.qi_outgoing_purposes.includes(purpose))
+		return !!row.s_warehouse && row.s_warehouse !== row.t_warehouse;
+	return false;
+};
+
 erpnext.TransactionController = class TransactionController extends erpnext.taxes_and_totals {
 	setup() {
 		super.setup();
@@ -423,13 +451,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			);
 		}
 
-		const incoming_doctypes = ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"];
-		const incoming_purposes = ["Manufacture", "Material Receipt"];
-		const inspection_type =
-			incoming_doctypes.includes(this.frm.doc.doctype) ||
-			(this.frm.doc.doctype === "Stock Entry" && incoming_purposes.includes(this.frm.doc.purpose))
-				? "Incoming"
-				: "Outgoing";
+		const inspection_type = this.quality_inspection_type();
 
 		let quality_inspection_field = this.frm.get_docfield("items", "quality_inspection");
 		quality_inspection_field.get_route_options_for_new_doc = function (row) {
@@ -2978,13 +3000,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		];
 
 		const me = this;
-		const incoming_doctypes = ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"];
-		const incoming_purposes = ["Manufacture", "Material Receipt"];
-		const inspection_type =
-			incoming_doctypes.includes(this.frm.doc.doctype) ||
-			(this.frm.doc.doctype === "Stock Entry" && incoming_purposes.includes(this.frm.doc.purpose))
-				? "Incoming"
-				: "Outgoing";
+		const inspection_type = this.quality_inspection_type();
 		const dialog = new frappe.ui.Dialog({
 			title: __("Select Items for Quality Inspection"),
 			size: "extra-large",
@@ -3076,14 +3092,23 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		});
 	}
 
+	quality_inspection_type() {
+		const incoming_doctypes = ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"];
+		const is_incoming =
+			incoming_doctypes.includes(this.frm.doc.doctype) ||
+			(this.frm.doc.doctype === "Stock Entry" &&
+				erpnext.stock.is_incoming_qi_purpose(this.frm.doc.purpose));
+		return is_incoming ? "Incoming" : "Outgoing";
+	}
+
 	has_inspection_required(item) {
-		if (this.frm.doc.doctype === "Stock Entry" && this.frm.doc.purpose == "Manufacture") {
-			if (item.is_finished_item && !item.quality_inspection) {
-				return true;
-			}
-		} else if (!item.quality_inspection) {
+		if (item.quality_inspection) {
+			return false;
+		}
+		if (this.frm.doc.doctype !== "Stock Entry") {
 			return true;
 		}
+		return erpnext.stock.row_requires_quality_inspection(this.frm.doc.purpose, item);
 	}
 
 	get_method_for_payment() {

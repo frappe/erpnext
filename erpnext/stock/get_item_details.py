@@ -1271,6 +1271,10 @@ def get_item_price(
 			& (IfNull(ip.valid_upto, "2500-12-31") >= pctx.transaction_date)
 		)
 
+	# Final unique tiebreaker: rows tied on every sort key above (same valid_from/batch/uom/party)
+	# would otherwise be picked arbitrarily -- MariaDB and Postgres can differ. Pin the pick.
+	query = query.orderby(ip.name, order=frappe.qb.desc)
+
 	return query.run(as_dict=True)
 
 

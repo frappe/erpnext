@@ -105,6 +105,11 @@ jobs:
           FRAPPE_BRANCH: develop
           BENCH_CACHE_DIR: /home/runner/bench-cache
 
+      - name: Warm up test data
+        run: |
+          cd ~/frappe-bench/
+          bench --site test_site run-tests --lightmode --module erpnext.tests.bootstrap_test_data
+
       - name: Stop DB and stage datadir
         run: |
           PG_BIN=$(ls -d /usr/lib/postgresql/*/bin | sort -V | tail -1)
@@ -132,7 +137,7 @@ jobs:
           compression-level: 0
 
   test:
-    name: Python Unit Tests (PG)
+    name: Python Unit Tests
     needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 60

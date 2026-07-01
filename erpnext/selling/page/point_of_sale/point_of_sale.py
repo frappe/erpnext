@@ -464,6 +464,9 @@ def set_customer_info(fieldname: str, customer: str, value: str = ""):
 					& (DynamicLink.link_doctype == "Customer")
 				)
 				.orderby(Contact.is_primary_contact, order=Order.desc)
+				# tiebreaker: contacts tie on is_primary_contact (the common no-primary case) ->
+				# pick the same one on MariaDB and Postgres
+				.orderby(DynamicLink.parent, order=Order.asc)
 			)
 
 			contacts = query.run(pluck=DynamicLink.parent)

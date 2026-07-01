@@ -171,7 +171,12 @@ def make_sales_invoice(
 		frappe.get_single_value("Accounts Settings", "automatically_fetch_payment_terms")
 	)
 
-	if not doc.is_return:
+	if doc.is_return:
+		# A credit note made from a return Delivery Note should roll back the billed
+		# amount on the linked Sales Order too, so that per_billed stays consistent with
+		# per_delivered (which the return already reset).
+		doc.update_billed_amount_in_sales_order = True
+	else:
 		from erpnext.accounts.services.payment_schedule import PaymentScheduleService
 
 		ps = PaymentScheduleService(doc)

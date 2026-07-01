@@ -304,6 +304,7 @@ def create_reposting_entries(rows: str | list, item_code: str | None = None, war
 	for row in rows:
 		row = frappe._dict(row)
 
+		frappe.db.savepoint("repost_invariant_check")
 		try:
 			doc = frappe.get_doc(
 				{
@@ -320,6 +321,7 @@ def create_reposting_entries(rows: str | list, item_code: str | None = None, war
 
 			entries.append(get_link_to_form("Repost Item Valuation", doc.name))
 		except frappe.DuplicateEntryError:
+			frappe.db.rollback(save_point="repost_invariant_check")
 			continue
 
 	if entries:

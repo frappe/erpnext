@@ -69,6 +69,7 @@ def add_institution(token: str, response: str | dict):
 			)
 			bank.insert()
 		except Exception:
+			frappe.db.rollback()
 			frappe.log_error("Plaid Link Error")
 	else:
 		bank = frappe.get_doc("Bank", response["institution"]["name"])
@@ -154,6 +155,7 @@ def add_bank_accounts(response: str | dict, bank: str | dict, company: str):
 				)
 
 		else:
+			frappe.db.savepoint("plaid_update_account")
 			try:
 				existing_account = frappe.get_doc("Bank Account", existing_bank_account)
 				existing_account.update(
@@ -169,6 +171,7 @@ def add_bank_accounts(response: str | dict, bank: str | dict, company: str):
 				existing_account.save()
 				result.append(existing_bank_account)
 			except Exception:
+				frappe.db.rollback(save_point="plaid_update_account")
 				frappe.log_error("Plaid Link Error")
 				frappe.throw(
 					_("There was an error updating Bank Account {0} while linking with Plaid.").format(
@@ -212,7 +215,14 @@ def sync_transactions(bank, bank_account):
 		result = []
 		if transactions:
 			for transaction in reversed(transactions):
-				result += new_bank_transaction(transaction)
+				# per-transaction savepoint: a failed insert/submit must not discard the Bank
+				# Transactions already synced this run (MariaDB keeps them) nor poison the txn on Postgres
+				frappe.db.savepoint("plaid_sync_txn")
+				try:
+					result += new_bank_transaction(transaction)
+				except Exception:
+					frappe.db.rollback(save_point="plaid_sync_txn")
+					raise
 
 		if result:
 			last_transaction_date = frappe.db.get_value("Bank Transaction", result.pop(), "date")

@@ -326,7 +326,8 @@ def update_packed_item_with_pick_list_info(main_item_row, pi_row):
 		},
 		["warehouse", "batch_no", "serial_no"],
 		as_dict=True,
-		order_by="qty desc",
+		# name tiebreaker: split pick-list rows can tie on qty -> pick the same warehouse/batch/serial on both engines
+		order_by="qty desc, name asc",
 	)
 
 	if not pl_row:

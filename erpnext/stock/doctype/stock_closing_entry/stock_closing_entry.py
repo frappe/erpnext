@@ -152,6 +152,7 @@ def prepare_closing_stock_balance(name):
 		doc.create_stock_closing_balance_entries()
 		doc.db_set("status", "Completed")
 	except Exception:
+		frappe.db.rollback()
 		doc.db_set("status", "Failed")
 		doc.log_error(title="Stock Closing Entry Failed")
 

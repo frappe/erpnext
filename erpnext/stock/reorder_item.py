@@ -216,6 +216,7 @@ def create_material_request(material_requests):
 	company_wise_mr = frappe._dict({})
 	for request_type in material_requests:
 		for company in material_requests[request_type]:
+			frappe.db.savepoint("reorder_mr")
 			try:
 				items = material_requests[request_type][company]
 				if not items:
@@ -287,8 +288,9 @@ def create_material_request(material_requests):
 				company_wise_mr.setdefault(company, []).append(mr)
 
 			except Exception as exception:
+				frappe.db.rollback(save_point="reorder_mr")
 				exceptions_list.append(exception)
-				mr.log_error("Unable to create material request")
+				frappe.log_error(title="Unable to create material request")
 
 	if company_wise_mr:
 		if getattr(frappe.local, "reorder_email_notify", None) is None:
