@@ -205,10 +205,14 @@ def remove_standard_fields(out: ItemDetailsCtx):
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 def get_rate_locked_source_row(ctx: ItemDetailsCtx, doc) -> frappe._dict | None:
 	"""Return the persisted source-document row a mapped target row is locked to.
 =======
 def set_valuation_rate(out: ItemDetailsCtx, ctx: ItemDetailsCtx):
+=======
+def set_valuation_rate(out: ItemDetailsCtx | dict, ctx: ItemDetailsCtx):
+>>>>>>> f26cb793b1 (fix: restore | dict + normalization on non-decorated helpers)
 	from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
 >>>>>>> 6eeadbdbef (fix: keep normalize_ctx_input's ctx annotation on Python 3.14)
 
@@ -1270,7 +1274,7 @@ def _get_stock_uom_rate(rate: float, ctx: ItemDetailsCtx):
 
 
 def get_item_price(
-	pctx: ItemDetailsCtx, item_code, ignore_party=False, force_batch_no=False
+	pctx: ItemDetailsCtx | dict, item_code, ignore_party=False, force_batch_no=False
 ) -> list[dict]:
 	"""
 	Get name, price_list_rate from Item Price based on conditions
@@ -1279,6 +1283,7 @@ def get_item_price(
 	        optional fields transaction_date, customer, supplier
 	:param item_code: str, Item Doctype field item_code
 	"""
+	pctx: ItemDetailsCtx = frappe._dict(pctx)
 
 	ip = frappe.qb.DocType("Item Price")
 	query = (
@@ -1836,7 +1841,7 @@ def get_serial_no(_args, serial_nos=None, sales_order=None):
 	return serial_nos
 
 
-def update_party_blanket_order(ctx: ItemDetailsCtx, out: ItemDetailsCtx):
+def update_party_blanket_order(ctx: ItemDetailsCtx, out: ItemDetailsCtx | dict):
 	if out["against_blanket_order"]:
 		blanket_order_details = get_blanket_order_details(ctx)
 		if blanket_order_details:
