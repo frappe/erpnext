@@ -362,10 +362,13 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 
 		frappe.db.set_value("Company", "Test PCV Company", "accounts_frozen_till_date", "2021-12-31")
 
-		make_reverse_gl_entries(
-			voucher_type="Journal Entry",
-			voucher_no=jv.name,
-		)
+		try:
+			make_reverse_gl_entries(
+				voucher_type="Journal Entry",
+				voucher_no=jv.name,
+			)
+		finally:
+			frappe.db.set_value("Company", "Test PCV Company", "accounts_frozen_till_date", None)
 
 		totals_after_cancel = frappe.get_all(
 			"GL Entry",
