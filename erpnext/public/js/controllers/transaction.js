@@ -2037,7 +2037,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			frappe.call({
 				method: "erpnext.stock.get_item_details.get_batch_based_item_price",
 				args: {
-					pctx: params,
+					ctx: params,
 					item_code: row.item_code,
 				},
 				callback: function (r) {
