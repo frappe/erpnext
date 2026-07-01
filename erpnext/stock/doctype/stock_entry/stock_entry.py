@@ -3420,7 +3420,86 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		self.set_gl_entries_for_landed_cost_voucher(gl_entries, inventory_account_map)
 
+		if self.purpose in ("Repack", "Manufacture"):
+			self.set_gl_entries_for_manufacturing_variance(gl_entries)
+
 		return process_gl_map(gl_entries, from_repost=frappe.flags.through_repost_item_valuation)
+
+	def set_gl_entries_for_manufacturing_variance(self, gl_entries):
+		"""For Standard Cost finished goods produced via Manufacture/Repack, stock is booked at the item's
+		standard rate, while the entry consumes raw-material (plus additional/landed) cost. The difference
+		is a manufacturing variance and is reclassified from the finished good's expense account to the
+		Manufacturing Variance account (mirrors Purchase Price Variance on a Purchase Receipt)."""
+		finished_goods = [d for d in self.get("items") if self.is_standard_cost_finished_good(d)]
+		if not finished_goods:
+			return
+
+		precision = self.get_debit_field_precision()
+		sle_map = self.get_stock_ledger_details()
+
+		for d in finished_goods:
+			variance = self.get_finished_good_variance(d, sle_map, precision)
+			if variance:
+				self.append_manufacturing_variance_pair(gl_entries, d, variance)
+
+	def is_standard_cost_finished_good(self, item):
+		from erpnext.stock.utils import get_valuation_method
+
+		return bool(
+			item.is_finished_item
+			and item.t_warehouse
+			and get_valuation_method(item.item_code, self.company) == "Standard Cost"
+		)
+
+	def get_finished_good_variance(self, item, sle_map, precision):
+		"""Manufacturing variance for a Standard Cost finished good: the gap between the full computed
+		incoming cost (raw-material share + additional cost + LCV, i.e. ``amount``) and the standard value
+		actually booked into stock. Positive = consumed more than standard (unfavorable)."""
+		# Value actually booked into stock for this finished good = qty * standard rate.
+		standard_value = sum(
+			flt(sle.stock_value_difference) for sle in sle_map.get(item.name, []) if flt(sle.actual_qty) > 0
+		)
+
+		return flt(flt(item.amount) - standard_value, precision)
+
+	def append_manufacturing_variance_pair(self, gl_entries, item, variance):
+		"""Reclassify ``variance`` from the finished good's expense account to its Manufacturing Variance
+		account, restoring the expense account to the value it would carry without Standard Cost."""
+		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import (
+			get_manufacturing_variance_account,
+		)
+
+		variance_account = get_manufacturing_variance_account(item.item_code, self.company)
+		cost_center = item.cost_center or frappe.get_cached_value("Company", self.company, "cost_center")
+		remarks = self.get("remarks") or _("Manufacturing Variance for {0}").format(item.item_code)
+		project = item.project or self.get("project")
+
+		gl_entries.append(
+			self.get_gl_dict(
+				{
+					"account": variance_account,
+					"against": item.expense_account,
+					"cost_center": cost_center,
+					"remarks": remarks,
+					"debit": variance,
+					"project": project,
+				},
+				item=item,
+			)
+		)
+		gl_entries.append(
+			self.get_gl_dict(
+				{
+					"account": item.expense_account,
+					"against": variance_account,
+					"cost_center": cost_center,
+					"remarks": remarks,
+					"debit": -1 * variance,
+					"project": project,
+				},
+				item=item,
+			)
+		)
 
 	def set_gl_entries_for_landed_cost_voucher(self, gl_entries, inventory_account_map):
 		from erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher import (

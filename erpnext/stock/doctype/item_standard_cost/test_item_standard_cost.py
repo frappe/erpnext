@@ -58,10 +58,34 @@ def ensure_ppv_account(company):
 	return account
 
 
+def ensure_mfg_variance_account(company):
+	"""Ensure `company` has a Default Manufacturing Variance Account so Manufacture/Repack entries of
+	Standard Cost finished goods can book the consumed-cost-vs-standard difference."""
+	account = frappe.get_cached_value("Company", company, "default_manufacturing_variance_account")
+	if account:
+		return account
+
+	from erpnext.accounts.doctype.account.test_account import create_account
+
+	# Place it under the same group as the company's default expense account.
+	expense_account = frappe.get_cached_value("Company", company, "default_expense_account")
+	parent_account = frappe.db.get_value("Account", expense_account, "parent_account")
+	account = create_account(
+		account_name="Manufacturing Variance",
+		account_type="Expense Account",
+		parent_account=parent_account,
+		company=company,
+		account_currency=frappe.get_cached_value("Company", company, "default_currency"),
+	)
+	frappe.db.set_value("Company", company, "default_manufacturing_variance_account", account)
+	return account
+
+
 class TestItemStandardCost(ERPNextTestSuite):
 	def setUp(self):
 		ensure_ppv_account(TEST_COMPANY)
 		ensure_ppv_account(PI_COMPANY)
+		ensure_mfg_variance_account(PI_COMPANY)
 
 	def test_only_for_standard_cost_items(self):
 		item = make_item(properties={"valuation_method": "FIFO", "is_stock_item": 1})
@@ -246,9 +270,11 @@ class TestItemStandardCost(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, se.submit)
 
-	def test_manufacturing_variance_books_to_stock_adjustment(self):
+	def test_manufacturing_variance_books_to_variance_account(self):
 		# RM standard 50, FG standard 200. Consuming 5 RM (250) to produce 1 FG (200) leaves a
-		# 50 manufacturing variance, which must land in the company's Stock Adjustment account.
+		# 50 (unfavorable) manufacturing variance, which must land in the company's Manufacturing
+		# Variance account, not the generic Stock Adjustment account.
+		mfg_variance = ensure_mfg_variance_account(PI_COMPANY)
 		rm = create_standard_cost_item()
 		fg = create_standard_cost_item()
 		create_item_standard_cost(rm.name, rate=50, company=PI_COMPANY)
@@ -275,12 +301,94 @@ class TestItemStandardCost(ERPNextTestSuite):
 		self.assertEqual(flt(fg_sle.valuation_rate), 200)
 		self.assertEqual(flt(fg_sle.stock_value_difference), 200)
 
+		def gl_net(account):
+			return flt(
+				frappe.db.sql(
+					"select sum(debit - credit) from `tabGL Entry` where voucher_no=%s and account=%s",
+					(se.name, account),
+				)[0][0]
+			)
+
+		# The 50 variance is reclassified to the Manufacturing Variance account...
+		self.assertEqual(gl_net(mfg_variance), 50)
+		# ...leaving the generic Stock Adjustment account untouched.
 		stock_adj = frappe.get_cached_value("Company", PI_COMPANY, "stock_adjustment_account")
-		net = frappe.db.sql(
-			"select sum(debit - credit) from `tabGL Entry` where voucher_no=%s and account=%s",
-			(se.name, stock_adj),
-		)[0][0]
-		self.assertEqual(flt(net), 50)
+		self.assertEqual(gl_net(stock_adj), 0)
+
+	def test_manufacturing_variance_includes_additional_costs(self):
+		# The variance is (full consumed cost - standard value), where consumed cost includes prorated
+		# additional costs. RM 5 x 50 = 250 plus a 30 additional cost = 280 consumed to make 1 FG valued
+		# at its standard 200 -> variance must be 280 - 200 = 80 (not 50).
+		mfg_variance = ensure_mfg_variance_account(PI_COMPANY)
+		additional_cost_account = "Expenses Included In Valuation - TCP1"
+		rm = create_standard_cost_item()
+		fg = create_standard_cost_item()
+		create_item_standard_cost(rm.name, rate=50, company=PI_COMPANY)
+		create_item_standard_cost(fg.name, rate=200, company=PI_COMPANY)
+
+		make_stock_entry(item_code=rm.name, to_warehouse=PI_STORES, company=PI_COMPANY, qty=10, basic_rate=50)
+
+		se = frappe.new_doc("Stock Entry")
+		se.purpose = "Repack"
+		se.stock_entry_type = "Repack"
+		se.company = PI_COMPANY
+		se.append("items", {"item_code": rm.name, "s_warehouse": PI_STORES, "qty": 5})
+		se.append("items", {"item_code": fg.name, "t_warehouse": PI_FG, "qty": 1, "is_finished_item": 1})
+		se.append(
+			"additional_costs",
+			{"expense_account": additional_cost_account, "description": "Freight", "amount": 30},
+		)
+		se.insert()
+		se.submit()
+
+		# FG is still valued at its own standard, regardless of the extra consumed cost.
+		fg_sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": se.name, "item_code": fg.name, "is_cancelled": 0},
+			["valuation_rate", "stock_value_difference"],
+			as_dict=True,
+		)
+		self.assertEqual(flt(fg_sle.valuation_rate), 200)
+		self.assertEqual(flt(fg_sle.stock_value_difference), 200)
+
+		def gl_net(account):
+			return flt(
+				frappe.db.sql(
+					"select sum(debit - credit) from `tabGL Entry` where voucher_no=%s and account=%s",
+					(se.name, account),
+				)[0][0]
+			)
+
+		# Raw material (250) + additional cost (30) - standard value (200) = 80 to Manufacturing Variance.
+		self.assertEqual(gl_net(mfg_variance), 80)
+		# The additional cost is credited out of its source account (it flowed into the variance).
+		self.assertEqual(gl_net(additional_cost_account), -30)
+
+	def test_manufacturing_variance_account_required(self):
+		# Without a Manufacturing Variance account, submitting a Standard Cost Manufacture/Repack must fail.
+		previous = frappe.get_cached_value("Company", PI_COMPANY, "default_manufacturing_variance_account")
+		frappe.db.set_value("Company", PI_COMPANY, "default_manufacturing_variance_account", None)
+		frappe.clear_cache(doctype="Company")
+		try:
+			rm = create_standard_cost_item()
+			fg = create_standard_cost_item()
+			create_item_standard_cost(rm.name, rate=50, company=PI_COMPANY)
+			create_item_standard_cost(fg.name, rate=200, company=PI_COMPANY)
+			make_stock_entry(
+				item_code=rm.name, to_warehouse=PI_STORES, company=PI_COMPANY, qty=10, basic_rate=50
+			)
+
+			se = frappe.new_doc("Stock Entry")
+			se.purpose = "Repack"
+			se.stock_entry_type = "Repack"
+			se.company = PI_COMPANY
+			se.append("items", {"item_code": rm.name, "s_warehouse": PI_STORES, "qty": 5})
+			se.append("items", {"item_code": fg.name, "t_warehouse": PI_FG, "qty": 1, "is_finished_item": 1})
+			se.insert()
+			self.assertRaises(frappe.ValidationError, se.submit)
+		finally:
+			frappe.db.set_value("Company", PI_COMPANY, "default_manufacturing_variance_account", previous)
+			frappe.clear_cache(doctype="Company")
 
 	def test_valuation_method_change_blocked_with_stock(self):
 		item = create_standard_cost_item()

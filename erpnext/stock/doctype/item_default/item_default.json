@@ -24,6 +24,7 @@
   "expenses_added_to_stock_account",
   "expenses_added_to_stock_contra_account",
   "purchase_price_variance_account",
+  "manufacturing_variance_account",
   "selling_defaults",
   "selling_cost_center",
   "column_break_12",
@@ -225,6 +226,15 @@
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Purchase Price Variance Account",
+   "options": "Account",
+   "show_description_on_click": 1
+  },
+  {
+   "description": "For Standard Cost items: the Manufacture/Repack consumed cost vs standard rate difference is booked here. Falls back to the Company's Default Manufacturing Variance Account.",
+   "fieldname": "manufacturing_variance_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Manufacturing Variance Account",
    "options": "Account",
    "show_description_on_click": 1
   },
