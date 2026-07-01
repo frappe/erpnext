@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-06-28 10:20+0000\n"
-"PO-Revision-Date: 2026-06-30 20:44\n"
+"PO-Revision-Date: 2026-07-01 20:39\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -8227,7 +8227,7 @@ msgstr "Saldo Historik per Parti"
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:183
 #: erpnext/stock/report/stock_ledger_variance/stock_ledger_variance.py:86
 msgid "Batchwise Valuation"
-msgstr "Partivis Värdering"
+msgstr "Partibaserad Värdering"
 
 #. Label of the section_break_3 (Section Break) field in DocType 'Stock
 #. Reconciliation Item'
@@ -15680,7 +15680,7 @@ msgstr "Avdraget från"
 #. Deduction Certificate'
 #: erpnext/regional/doctype/lower_deduction_certificate/lower_deduction_certificate.json
 msgid "Deductee Details"
-msgstr "Avdragsberättigad Detaljer"
+msgstr "Avdragstagare Detaljer"
 
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/taxes.json
@@ -17908,7 +17908,7 @@ msgstr "Uppdatera inte Varianter vid Spara"
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Do not use Batch-wise Valuation"
-msgstr "Använd inte Partivis Värdering"
+msgstr "Använd inte Partibaserad Värdering"
 
 #: erpnext/assets/doctype/asset/asset.js:957
 msgid "Do you really want to restore this scrapped asset?"
@@ -59194,7 +59194,7 @@ msgstr "Använd <strong>Python</strong> filter för att hämta Konton"
 #. Label of the use_batchwise_valuation (Check) field in DocType 'Batch'
 #: erpnext/stock/doctype/batch/batch.json
 msgid "Use Batch-wise Valuation"
-msgstr "Använd Partivis Värdering"
+msgstr "Använd Partibaserad Värdering"
 
 #. Label of the use_csv_sniffer (Check) field in DocType 'Bank Statement
 #. Import'
@@ -60825,7 +60825,7 @@ msgstr "Garanti Utgång (Serienummer)"
 #: erpnext/stock/doctype/serial_no/serial_no.json
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
 msgid "Warranty Expiry Date"
-msgstr "Garanti Utgångsdatum"
+msgstr "Garanti Utgång Datum"
 
 #. Label of the warranty_period (Int) field in DocType 'Serial No'
 #: erpnext/stock/doctype/serial_no/serial_no.json
