@@ -820,7 +820,7 @@ def get_columns(filters):
 	return columns
 
 
-def execute_synced_report(filters):
+def execute_snapshot_report(filters):
 	from frappe.database.duckdb.database import get_latest_sync
 
 	if conn := get_latest_sync("GL Entry"):
