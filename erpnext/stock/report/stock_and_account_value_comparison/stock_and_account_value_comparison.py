@@ -33,6 +33,11 @@ def get_data(report_filters):
 		"posting_date": ("<=", report_filters.as_on_date),
 	}
 
+	# Optional lower bound: lets callers (e.g. the weekly auto-repost job) scope the scan to the current
+	# fiscal year in the query itself instead of loading every voucher ever posted and filtering later.
+	if report_filters.get("from_date"):
+		filters["posting_date"] = ("between", [report_filters.from_date, report_filters.as_on_date])
+
 	get_currency_precision() or 2
 	stock_ledger_entries = get_stock_ledger_data(report_filters, filters)
 	voucher_wise_gl_data = get_gl_data(report_filters, filters)
@@ -214,3 +219,49 @@ def create_reposting_entries(rows, company):
 	if entries:
 		entries = ", ".join(entries)
 		frappe.msgprint(_("Reposting entries created: {0}").format(entries))
+<<<<<<< HEAD
+=======
+
+
+def repost_based_on_transaction(rows, company=None, entries=None):
+	if entries is None:
+		entries = []
+
+	duplicate_vouchers = set()
+	for row in rows:
+		if (
+			row.get("voucher_type") == "Purchase Invoice"
+			and frappe.get_cached_value("Purchase Invoice", row.get("voucher_no"), "update_stock") == 0
+		):
+			continue
+
+		if row.get("voucher_type") in ["Purchase Receipt", "Purchase Invoice"]:
+			voucher_key = (row.get("voucher_type"), row.get("voucher_no"))
+			if voucher_key in duplicate_vouchers:
+				continue
+
+			duplicate_vouchers.add(voucher_key)
+			# Isolate each submit in a savepoint: an already-queued repost raises DuplicateEntryError, and on
+			# PostgreSQL a failed insert aborts the whole transaction, killing the rest of the loop (and the
+			# silent weekly job). Rolling back to the savepoint keeps prior/next reposts intact.
+			frappe.db.savepoint("repost_based_on_transaction")
+			try:
+				doc = frappe.get_doc(
+					{
+						"doctype": "Repost Item Valuation",
+						"based_on": "Transaction",
+						"status": "Queued",
+						"voucher_type": row.get("voucher_type"),
+						"voucher_no": row.get("voucher_no"),
+						"posting_date": row.get("posting_date"),
+						"posting_time": row.get("posting_time"),
+						"company": company,
+						"allow_nagative_stock": 1,
+						"recalculate_valuation_rate": 1,
+					}
+				).submit()
+
+				entries.append(get_link_to_form("Repost Item Valuation", doc.name))
+			except frappe.DuplicateEntryError:
+				frappe.db.rollback(save_point="repost_based_on_transaction")
+>>>>>>> adae0bd732 (feat: weekly auto-repost of incorrect stock valuation entries (#56637))
