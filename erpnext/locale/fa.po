@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-06-28 10:20+0000\n"
-"PO-Revision-Date: 2026-06-30 20:44\n"
+"PO-Revision-Date: 2026-07-01 20:39\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -14218,7 +14218,7 @@ msgstr "آدرس فعلی"
 #. Label of the current_accommodation_type (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Current Address Is"
-msgstr "آدرس فعلی است"
+msgstr "آدرس فعلی"
 
 #. Label of the current_amount (Currency) field in DocType 'Stock
 #. Reconciliation Item'
@@ -17767,7 +17767,7 @@ msgstr "سود سهام پرداخت شده"
 #. Option for the 'Marital Status' (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Divorced"
-msgstr "جدا شده"
+msgstr "طلاق گرفته"
 
 #. Option for the 'Status' (Select) field in DocType 'Lead'
 #: erpnext/crm/doctype/lead/lead.json
@@ -30241,7 +30241,7 @@ msgstr "متخصص بازاریابی"
 #. Option for the 'Marital Status' (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Married"
-msgstr "متاهل"
+msgstr "متأهل"
 
 #: erpnext/setup/setup_wizard/data/marketing_source.txt:7
 msgid "Mass Mailing"
@@ -34688,7 +34688,7 @@ msgstr ""
 #. Option for the 'Current Address Is' (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Owned"
-msgstr "مالکیت"
+msgstr "ملکی"
 
 #: erpnext/accounts/report/sales_payment_summary/sales_payment_summary.js:29
 #: erpnext/accounts/report/sales_payment_summary/sales_payment_summary.py:24
@@ -37162,7 +37162,7 @@ msgstr "آدرس دائمی"
 #. 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Permanent Address Is"
-msgstr "آدرس دائمی است"
+msgstr "آدرس دائمی"
 
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.py:73
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.py:77
@@ -44208,7 +44208,7 @@ msgstr "اجاره"
 #. Option for the 'Current Address Is' (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Rented"
-msgstr "اجاره شده"
+msgstr "استیجاری"
 
 #. Label of the reorder_level (Float) field in DocType 'Material Request Item'
 #: erpnext/stock/doctype/material_request_item/material_request_item.json
@@ -50940,7 +50940,7 @@ msgstr ""
 #. Option for the 'Marital Status' (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Single"
-msgstr "تنها"
+msgstr "مجرد"
 
 #. Option for the 'Bank Entry Type' (Select) field in DocType 'Bank Transaction
 #. Rule'
@@ -60982,7 +60982,7 @@ msgstr "هنگام تهیه فاکتور خرید از سفارش خرید، ب�
 #. Option for the 'Marital Status' (Select) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Widowed"
-msgstr "بیوه"
+msgstr "همسر فوت شده"
 
 #. Label of the width (Float) field in DocType 'Shipment Parcel'
 #. Label of the width (Float) field in DocType 'Shipment Parcel Template'
