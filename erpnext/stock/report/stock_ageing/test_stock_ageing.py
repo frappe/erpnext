@@ -1,6 +1,8 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 
 from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots, format_report_data, get_average_age
@@ -62,6 +64,74 @@ class TestStockAgeing(ERPNextTestSuite):
 		self.assertEqual(queue[0][0], 20.0)
 		data = format_report_data(self.filters, slots, self.filters["to_date"])
 		self.assertEqual(data[0][8], 40.0)  # valuating for stock value between age 0-30
+
+	def test_moving_average_value_ties_to_stock_balance(self):
+		"""For Moving Average items the queue value is re-derived as qty * rate so the
+		report's stock value ties to Stock Balance, instead of stranding a residual
+		from FIFO-by-qty consumption vs blended outgoing value."""
+		sle = [
+			frappe._dict(
+				name="MA Item",
+				actual_qty=10,
+				qty_after_transaction=10,
+				stock_value_difference=1000,
+				valuation_rate=100,
+				warehouse="WH 1",
+				posting_date="2021-12-01",
+				voucher_type="Stock Entry",
+				voucher_no="001",
+				has_serial_no=False,
+				serial_no=None,
+			),
+			frappe._dict(
+				name="MA Item",
+				actual_qty=10,
+				qty_after_transaction=20,
+				stock_value_difference=2000,
+				valuation_rate=150,
+				warehouse="WH 1",
+				posting_date="2021-12-02",
+				voucher_type="Stock Entry",
+				voucher_no="002",
+				has_serial_no=False,
+				serial_no=None,
+			),
+			frappe._dict(
+				name="MA Item",
+				actual_qty=(-10),
+				qty_after_transaction=10,
+				stock_value_difference=(-1500),
+				valuation_rate=150,
+				warehouse="WH 1",
+				posting_date="2021-12-03",
+				voucher_type="Stock Entry",
+				voucher_no="003",
+				has_serial_no=False,
+				serial_no=None,
+			),
+			frappe._dict(
+				name="MA Item",
+				actual_qty=(-5),
+				qty_after_transaction=5,
+				stock_value_difference=(-750),
+				valuation_rate=150,
+				warehouse="WH 1",
+				posting_date="2021-12-04",
+				voucher_type="Stock Entry",
+				voucher_no="004",
+				has_serial_no=False,
+				serial_no=None,
+			),
+		]
+
+		with patch("erpnext.stock.utils.get_valuation_method", return_value="Moving Average"):
+			slots = FIFOSlots(self.filters, sle).generate()
+
+		queue = slots["MA Item"]["fifo_queue"]
+		total_value = sum(slot[2] for slot in queue)
+
+		# Stock Balance bal_val = qty_after_transaction * valuation_rate = 5 * 150
+		self.assertEqual(total_value, 750.0)
 
 	def test_insufficient_balance(self):
 		"Reference: Case 3 in stock_ageing_fifo_logic.md (same wh)"
