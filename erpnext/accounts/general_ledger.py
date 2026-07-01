@@ -640,13 +640,15 @@ def make_reverse_gl_entries(
 			partial_cancel=partial_cancel,
 		)
 		validate_accounting_period(gl_entries)
-		check_freezing_date(gl_entries[0]["posting_date"], gl_entries[0]["company"], adv_adj)
 
 		is_opening = any(d.get("is_opening") == "Yes" for d in gl_entries)
 
-		# For reverse entries, use the posting_date parameter if provided and valid
-		# Otherwise fall back to original posting_date
-		validation_date = posting_date if posting_date else gl_entries[0]["posting_date"]
+		if immutable_ledger_enabled:
+			validation_date = frappe.form_dict.get("posting_date") or getdate()
+		else:
+			validation_date = posting_date if posting_date else gl_entries[0]["posting_date"]
+
+		check_freezing_date(validation_date, gl_entries[0]["company"], adv_adj)
 		validate_against_pcv(is_opening, validation_date, gl_entries[0]["company"])
 
 		if partial_cancel:

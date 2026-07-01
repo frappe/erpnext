@@ -360,11 +360,11 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 
 		self.make_period_closing_voucher(posting_date="2021-03-31")
 
-		# Passed posting_date is after PCV end date, so cancellation should not fail.
+		frappe.db.set_value("Company", "Test PCV Company", "accounts_frozen_till_date", "2021-12-31")
+
 		make_reverse_gl_entries(
 			voucher_type="Journal Entry",
 			voucher_no=jv.name,
-			posting_date="2022-01-01",
 		)
 
 		totals_after_cancel = frappe.get_all(
