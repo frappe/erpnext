@@ -133,12 +133,8 @@ frappe.ui.form.on("Process Payment Reconciliation", {
 				},
 				callback: (r) => {
 					if (!r.exc && r.message) {
-						if (typeof r.message === "string") {
-							frm.set_value("receivable_payable_account", r.message);
-						} else if (Array.isArray(r.message)) {
-							frm.set_value("receivable_payable_account", r.message[0]);
-							frm.set_value("default_advance_account", r.message[1]);
-						}
+						frm.set_value("receivable_payable_account", r.message[0]);
+						frm.set_value("default_advance_account", r.message[1]);
 					}
 					frm.refresh();
 				},
