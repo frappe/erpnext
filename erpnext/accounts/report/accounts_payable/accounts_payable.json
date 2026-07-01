@@ -17,7 +17,7 @@
  "generate_csv": 0,
  "idx": 3,
  "is_standard": "Yes",
- "modified": "2026-06-25 12:03:36.559152",
+ "modified": "2026-07-01 13:37:41.185347",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Payable",
@@ -40,6 +40,6 @@
    "role": "Auditor"
   }
  ],
- "synced_report": 0,
+ "snapshot_report": 0,
  "timeout": 0
 }
