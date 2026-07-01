@@ -1490,6 +1490,9 @@ class StockController(AccountsController):
 			"remarks": remarks,
 		}
 
+		if project:
+			gl_entry.update({"project": project})
+
 		if voucher_detail_no:
 			gl_entry.update({"voucher_detail_no": voucher_detail_no})
 

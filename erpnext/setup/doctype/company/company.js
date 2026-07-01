@@ -208,7 +208,7 @@ frappe.ui.form.on("Company", {
 								reqd: 1,
 								description: __(
 									"Please make sure you really want to delete all the transactions for {0}. Your master data will remain as it is. This action cannot be undone.",
-									[frappe.utils.bold(frm.doc.name)]
+									[frappe.utils.escape_html(frm.doc.name).bold()]
 								),
 							},
 							function (data) {
@@ -228,7 +228,9 @@ frappe.ui.form.on("Company", {
 									},
 								});
 							},
-							__("Delete all the Transactions for {0}", [frappe.utils.bold(frm.doc.name)]),
+							__("Delete all the Transactions for {0}", [
+								frappe.utils.escape_html(frm.doc.name).bold(),
+							]),
 							__("Delete")
 						);
 						d.get_primary_btn().addClass("btn-danger");
