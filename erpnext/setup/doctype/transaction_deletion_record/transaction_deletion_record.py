@@ -318,11 +318,22 @@ class TransactionDeletionRecord(Document):
 		Returns:
 		        list: List of child table DocType names (Table field options)
 		"""
-		return frappe.get_all(
+		child_tables = frappe.get_all(
 			"DocField",
 			filters={"parent": doctype_name, "fieldtype": ["in", ["Table", "Table MultiSelect"]]},
 			pluck="options",
 		)
+
+		if not child_tables:
+			return []
+
+		child_tables = frappe.get_all(
+			"DocType",
+			filters={"name": ["in", child_tables], "is_virtual": 0},
+			pluck="name",
+		)
+
+		return child_tables
 
 	def _get_to_delete_row_infos(self, doctype_name, company_field=None, company=None):
 		"""Get child tables and document count for a To Delete list row

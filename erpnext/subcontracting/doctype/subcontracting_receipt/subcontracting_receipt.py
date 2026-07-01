@@ -162,6 +162,12 @@ class SubcontractingReceipt(SubcontractingController):
 		self.set_supplied_items_cost_center()
 		self.set_supplied_items_inventory_dimensions()
 
+		# SubcontractingController.validate() does not call super() for Subcontracting Receipt, so
+		# the shared mandatory inventory dimension check must be invoked explicitly here. It runs
+		# last so auto-populated supplied-item dimensions (set_supplied_items_inventory_dimensions)
+		# are already in place.
+		self.validate_inventory_dimension_mandatory()
+
 	def on_submit(self):
 		self.validate_closed_subcontracting_order()
 		self.validate_bom_required_qty()

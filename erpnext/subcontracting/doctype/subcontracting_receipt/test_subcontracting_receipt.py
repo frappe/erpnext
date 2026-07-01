@@ -2045,15 +2045,12 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			create_inventory_dimension,
 		)
 
-		inventory_dimension = create_inventory_dimension(
+		create_inventory_dimension(
 			apply_to_all_doctypes=1,
 			dimension_name="Inv Site",
 			reference_document="Inv Site",
 			document_type="Inv Site",
 		)
-
-		inventory_dimension.reqd = 1
-		inventory_dimension.save()
 
 		set_backflush_based_on("BOM")
 
@@ -2073,9 +2070,6 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr.save()
 
 		self.assertEqual(scr.supplied_items[0].inv_site, "Site 1")
-
-		inventory_dimension.reqd = 0
-		inventory_dimension.save()
 
 
 def make_return_subcontracting_receipt(**args):

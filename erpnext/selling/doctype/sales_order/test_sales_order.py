@@ -1473,6 +1473,8 @@ class TestSalesOrder(ERPNextTestSuite):
 		so.items[0].price_list_rate = price_list_rate = 100
 		so.items[0].margin_type = "Percentage"
 		so.items[0].margin_rate_or_amount = 25
+		# set rate to zero, so that it is recalculated on save
+		so.items[0].rate = 0
 		so.save()
 
 		new_so = frappe.copy_doc(so)

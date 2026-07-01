@@ -27,7 +27,7 @@
   "condition",
   "conditional_mandatory_section",
   "reqd",
-  "mandatory_depends_on",
+  "mandatory_depends_on_backend",
   "conditional_rule_examples_section",
   "html_19"
  ],
@@ -152,13 +152,6 @@
    "label": "Conditional Rule Examples"
   },
   {
-   "depends_on": "eval:!doc.apply_to_all_doctypes",
-   "description": "To apply condition on parent field use parent.field_name and to apply condition on child table use doc.field_name. Here field_name could be based on the actual column name of the respective field.",
-   "fieldname": "mandatory_depends_on",
-   "fieldtype": "Small Text",
-   "label": "Mandatory Depends On"
-  },
-  {
    "fieldname": "conditional_mandatory_section",
    "fieldtype": "Section Break",
    "label": "Mandatory Section"
@@ -168,6 +161,13 @@
    "fieldname": "reqd",
    "fieldtype": "Check",
    "label": "Mandatory"
+  },
+  {
+   "depends_on": "eval:!doc.reqd",
+   "description": "Python expression evaluated on the server. Use doc.fieldname for the row and parent.fieldname for the parent document. When it evaluates to true the dimension becomes mandatory. Example: doc.t_warehouse and doc.qty > 0",
+   "fieldname": "mandatory_depends_on_backend",
+   "fieldtype": "Small Text",
+   "label": "Mandatory Depends On (Backend)"
   },
   {
    "fieldname": "column_break_niy2u",
@@ -182,7 +182,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-08 10:10:16.884388",
+ "modified": "2026-06-25 11:30:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Inventory Dimension",

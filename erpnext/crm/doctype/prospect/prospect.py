@@ -136,7 +136,7 @@ def make_opportunity(source_name, target_doc=None):
 
 @frappe.whitelist()
 def get_opportunities(prospect):
-	return frappe.get_all(
+	return frappe.get_list(
 		"Opportunity",
 		filters={"opportunity_from": "Prospect", "party_name": prospect},
 		fields=[

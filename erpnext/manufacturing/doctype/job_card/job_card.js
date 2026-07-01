@@ -694,10 +694,11 @@ frappe.ui.form.on("Job Card", {
 		// ── Wire up button click handlers ─────────────────────────────────
 		if (show_start) {
 			wrapper.find(".jcd-btn-start").on("click", () => {
-				const from_time = frappe.datetime.now_datetime();
 				const has_no_employee = !frm.doc.employee || !frm.doc.employee.length;
 
 				if (has_no_employee) {
+					// Capture the start time only when the employee dialog is submitted, not on click,
+					// so the time spent selecting the operator is not counted as worked time.
 					frappe.prompt(
 						{
 							fieldtype: "Table MultiSelect",
@@ -707,11 +708,11 @@ frappe.ui.form.on("Job Card", {
 							reqd: 1,
 							filters: { status: "Active" },
 						},
-						(d) => frm.events.start_timer(frm, from_time, d.employees),
+						(d) => frm.events.start_timer(frm, frappe.datetime.now_datetime(), d.employees),
 						__("Assign Job to Employee")
 					);
 				} else {
-					frm.events.start_timer(frm, from_time, frm.doc.employee);
+					frm.events.start_timer(frm, frappe.datetime.now_datetime(), frm.doc.employee);
 				}
 			});
 		}

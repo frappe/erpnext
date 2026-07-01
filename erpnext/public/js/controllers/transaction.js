@@ -13,39 +13,58 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		frappe.flags.hide_serial_batch_dialog = true;
 		frappe.ui.form.on(this.frm.doctype + " Item", "rate", function (frm, cdt, cdn) {
 			var item = frappe.get_doc(cdt, cdn);
-			var has_margin_field = frappe.meta.has_field(cdt, "margin_type");
 
-			frappe.model.round_floats_in(item, ["rate", "price_list_rate"]);
+			frappe.model.round_floats_in(item, [
+				"rate",
+				"price_list_rate",
+				"margin_rate_or_amount",
+				"discount_amount",
+				"discount_percentage",
+			]);
 
 			if (item.price_list_rate && !item.blanket_order_rate) {
-				if (item.rate > item.price_list_rate && has_margin_field) {
+				const rate_with_margin = get_rate_with_margin(item);
+
+				if (item.discount_percentage) {
+					item.discount_amount = flt(
+						(rate_with_margin * item.discount_percentage) / 100.0,
+						precision("discount_amount", item)
+					);
+				}
+
+				const calculated_rate = flt(rate_with_margin - item.discount_amount, precision("rate", item));
+
+				if (calculated_rate !== item.rate) {
 					// if rate is greater than price_list_rate, set margin
-					// or set discount
-					item.discount_percentage = 0;
-					item.margin_type = "Amount";
-					item.margin_rate_or_amount = flt(
-						item.rate - item.price_list_rate,
-						precision("margin_rate_or_amount", item)
-					);
-					item.rate_with_margin = item.rate;
-				} else {
-					item.discount_percentage = flt(
-						(1 - item.rate / item.price_list_rate) * 100.0,
-						precision("discount_percentage", item)
-					);
-					item.discount_amount = flt(item.price_list_rate) - flt(item.rate);
-					item.margin_type = "";
-					item.margin_rate_or_amount = 0;
-					item.rate_with_margin = 0;
+					// otherwise, set discount
+					if (item.rate > item.price_list_rate) {
+						item.margin_type = "Amount";
+						item.margin_rate_or_amount = flt(
+							item.rate - item.price_list_rate,
+							precision("margin_rate_or_amount", item)
+						);
+						item.rate_with_margin = item.rate;
+						item.discount_amount = 0;
+						item.discount_percentage = 0;
+					} else {
+						item.margin_type = "";
+						item.margin_rate_or_amount = 0;
+						item.rate_with_margin = item.price_list_rate;
+						item.discount_percentage = 0;
+						item.discount_amount = flt(
+							item.rate_with_margin - item.rate,
+							precision("discount_amount", item)
+						);
+					}
 				}
 			} else {
-				item.discount_percentage = 0.0;
 				item.margin_type = "";
 				item.margin_rate_or_amount = 0;
 				item.rate_with_margin = 0;
+				item.discount_amount = 0;
+				item.discount_percentage = 0.0;
 			}
-			item.base_rate_with_margin = item.rate_with_margin * flt(frm.doc.conversion_rate);
-
+			me.set_in_company_currency(item, ["rate_with_margin"]);
 			cur_frm.cscript.set_gross_profit(item);
 			cur_frm.cscript.calculate_taxes_and_totals();
 			cur_frm.cscript.calculate_stock_uom_rate(frm, cdt, cdn);
@@ -1254,13 +1273,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 		var set_party_account = function (set_pricing) {
 			if (["Sales Invoice", "Purchase Invoice"].includes(me.frm.doc.doctype)) {
-				if (me.frm.doc.doctype == "Sales Invoice") {
-					var party_type = "Customer";
-					var party_account_field = "debit_to";
-				} else {
-					var party_type = "Supplier";
-					var party_account_field = "credit_to";
-				}
+				let party_type = me.frm.doc.doctype == "Sales Invoice" ? "Customer" : "Supplier";
+				let party_account_field = me.frm.doc.doctype == "Sales Invoice" ? "debit_to" : "credit_to";
 
 				var party = me.frm.doc[frappe.model.scrub(party_type)];
 				if (
@@ -1967,7 +1981,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 
 		if (this.frm.doc.operations && this.frm.doc.operations.length > 0) {
-			var item_grid = this.frm.fields_dict["operations"].grid;
+			let item_grid = this.frm.fields_dict["operations"].grid;
 			$.each(["base_operating_cost", "base_hour_rate"], function (i, fname) {
 				if (frappe.meta.get_docfield(item_grid.doctype, fname))
 					item_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
@@ -1975,7 +1989,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 
 		if (this.frm.doc.secondary_items && this.frm.doc.secondary_items.length > 0) {
-			var item_grid = this.frm.fields_dict["secondary_items"].grid;
+			let item_grid = this.frm.fields_dict["secondary_items"].grid;
 			$.each(["base_rate", "base_amount"], function (i, fname) {
 				if (frappe.meta.get_docfield(item_grid.doctype, fname))
 					item_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
@@ -2372,7 +2386,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				row_to_modify[key] = pr_row[key];
 			}
 
-			if (this.frm.doc.hasOwnProperty("is_pos") && this.frm.doc.is_pos) {
+			if (Object.prototype.hasOwnProperty.call(this.frm.doc, "is_pos") && this.frm.doc.is_pos) {
 				let r = await frappe.db.get_value("POS Profile", this.frm.doc.pos_profile, "cost_center");
 				if (r.message.cost_center) {
 					row_to_modify["cost_center"] = r.message.cost_center;
@@ -2639,7 +2653,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						$.each(me.frm.doc.items || [], function (i, item) {
 							if (
 								item.name &&
-								r.message.hasOwnProperty(item.name) &&
+								Object.prototype.hasOwnProperty.call(r.message, item.name) &&
 								r.message[item.name].item_tax_template
 							) {
 								item.item_tax_template = r.message[item.name].item_tax_template;
@@ -3363,3 +3377,13 @@ erpnext.set_unit_price_items_note = (frm) => {
 		);
 	}
 };
+
+function get_rate_with_margin(item) {
+	if (!item.margin_type) return item.price_list_rate;
+
+	if (item.margin_type === "Percentage") {
+		return flt(item.price_list_rate * (1 + item.margin_rate_or_amount / 100), precision("rate", item));
+	}
+
+	return flt(item.price_list_rate + item.margin_rate_or_amount, precision("rate", item));
+}

@@ -100,6 +100,9 @@ class AssetCapitalization(StockController):
 		self.set_asset_values()
 		self.calculate_totals()
 		self.set_title()
+		# Asset Capitalization overrides validate() without calling super(), so the shared
+		# mandatory inventory dimension check must be invoked explicitly here.
+		self.validate_inventory_dimension_mandatory()
 
 	def on_update(self):
 		if self.stock_items:
