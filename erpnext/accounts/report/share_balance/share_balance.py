@@ -22,7 +22,7 @@ def execute(filters=None):
 	else:
 		share_type, no_of_shares, rate, amount = 1, 2, 3, 4
 
-		all_shares = get_all_shares(filters.get("shareholder"), filters.get("date"))
+		all_shares = get_all_shares(filters.get("shareholder"), filters.get("date"), filters.get("company"))
 		for share_entry in all_shares:
 			row = False
 			for datum in data:
@@ -61,15 +61,34 @@ def get_columns(filters):
 	return columns
 
 
-def get_all_shares(shareholder, date):
+def get_all_shares(shareholder, date, company=None):
 	"""Share movements for the shareholder up to (and including) `date`, signed by direction:
-	shares received are positive, shares transferred/sold out are negative."""
-	transfers = frappe.get_all(
-		"Share Transfer",
-		filters={"docstatus": 1, "date": ("<=", date)},
-		fields=["share_type", "no_of_shares", "rate", "amount", "from_shareholder", "to_shareholder"],
-		order_by="date",
+	shares received are positive, shares transferred/sold out are negative.
+
+	The shareholder and company predicates are pushed into the query so only the
+	relevant transfers are fetched instead of scanning the whole table."""
+	share_transfer = frappe.qb.DocType("Share Transfer")
+	query = (
+		frappe.qb.from_(share_transfer)
+		.select(
+			share_transfer.share_type,
+			share_transfer.no_of_shares,
+			share_transfer.rate,
+			share_transfer.amount,
+			share_transfer.from_shareholder,
+			share_transfer.to_shareholder,
+		)
+		.where((share_transfer.docstatus == 1) & (share_transfer.date <= date))
+		.where(
+			(share_transfer.to_shareholder == shareholder) | (share_transfer.from_shareholder == shareholder)
+		)
+		.orderby(share_transfer.date)
 	)
+
+	if company:
+		query = query.where(share_transfer.company == company)
+
+	transfers = query.run(as_dict=True)
 
 	shares = []
 	for transfer in transfers:

@@ -42,6 +42,30 @@ class TestShareBalanceReport(ERPNextTestSuite):
 		self.assertEqual(row[3], 10)  # average rate
 		self.assertEqual(row[4], 1000)  # amount = 100 * 10
 
+	def test_company_filter_scopes_transfers(self):
+		# the transfer is booked under `_Test Company`
+		create_share_transfer(
+			transfer_type="Issue",
+			to_shareholder=self.shareholder,
+			share_type=self.share_type,
+			from_no=1,
+			to_no=100,
+			no_of_shares=100,
+			rate=10,
+			date="2026-06-01",
+		)
+
+		# matching company: the holding shows up
+		self.assertEqual(self.get_row(date="2026-06-05")[2], 100)
+
+		# a different company must not surface this shareholder's transfer
+		other_company_data = execute(
+			frappe._dict(
+				{"date": "2026-06-05", "company": "_Test Company 1", "shareholder": self.shareholder}
+			)
+		)[1]
+		self.assertEqual(other_company_data, [])
+
 	def test_balance_increases_on_second_issue(self):
 		create_share_transfer(
 			transfer_type="Issue",
