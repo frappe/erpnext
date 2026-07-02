@@ -705,7 +705,7 @@ def make_reverse_gl_entries(
 		else:
 			validation_date = posting_date if posting_date else gl_entries[0]["posting_date"]
 
-		check_freezing_date(validation_date, gl_entries[0]["company"], adv_adj)
+		check_freezing_date(validation_date, adv_adj)
 		validate_against_pcv(is_opening, validation_date, gl_entries[0]["company"])
 
 		if partial_cancel:
