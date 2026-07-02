@@ -130,7 +130,7 @@ class TestExchangeRateRevaluation(AccountsTestMixin, FrappeTestCase):
 		err = err.save().submit()
 
 		# Create JV for ERR
-		self.assertTrue(err.check_journal_entry_condition())
+		self.assertTrue(err.check_journal_and_reversal())
 		err_journals = err.make_jv_entries()
 		je = frappe.get_doc("Journal Entry", err_journals.get("zero_balance_jv"))
 		je = je.submit()
@@ -213,7 +213,7 @@ class TestExchangeRateRevaluation(AccountsTestMixin, FrappeTestCase):
 		err = err.save().submit()
 
 		# Create JV for ERR
-		self.assertTrue(err.check_journal_entry_condition())
+		self.assertTrue(err.check_journal_and_reversal())
 		err_journals = err.make_jv_entries()
 		je = frappe.get_doc("Journal Entry", err_journals.get("zero_balance_jv"))
 		je = je.submit()
