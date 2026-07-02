@@ -697,10 +697,6 @@ def make_reverse_gl_entries(
 			partial_cancel=partial_cancel,
 		)
 		validate_accounting_period(gl_entries)
-<<<<<<< HEAD
-		check_freezing_date(gl_entries[0]["posting_date"], adv_adj)
-=======
->>>>>>> cab1b129c0 (fix: validate reverse GL entries on current date under immutable ledger (#56709))
 
 		is_opening = any(d.get("is_opening") == "Yes" for d in gl_entries)
 
