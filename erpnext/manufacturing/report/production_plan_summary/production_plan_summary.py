@@ -42,7 +42,9 @@ def get_production_plan_item_details(filters, data, order_details):
 
 		order_qty = row.planned_qty
 		total_produced_qty = 0.0
-		pending_qty = 0.0
+		# default to the full planned qty so a plan without any work order still
+		# reports everything as pending rather than a misleading zero
+		pending_qty = flt(order_qty)
 		for work_order in work_orders:
 			produced_qty = flt(order_details.get((work_order, row.item_code), {}).get("produced_qty", 0))
 			pending_qty = flt(order_qty) - produced_qty
