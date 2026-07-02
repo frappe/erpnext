@@ -497,7 +497,7 @@
    "options": "Account"
   },
   {
-<<<<<<< HEAD
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "expenses_included_in_valuation",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -506,9 +506,7 @@
    "options": "Account"
   },
   {
-=======
    "depends_on": "eval:!doc.__islocal",
->>>>>>> 9cea43b006 (fix(company): ignore user permissions for link fields having link to `Account` and `Cost Center` (#56748))
    "fieldname": "accumulated_depreciation_account",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -910,11 +908,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2025-11-16 16:51:27.624096",
-=======
  "modified": "2026-07-02 07:21:21.794533",
->>>>>>> 9cea43b006 (fix(company): ignore user permissions for link fields having link to `Account` and `Cost Center` (#56748))
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
