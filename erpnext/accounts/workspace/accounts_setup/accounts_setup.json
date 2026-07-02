@@ -1,11 +1,33 @@
 {
  "app": "erpnext",
- "creation": "2026-01-23 14:36:51.659571",
+ "charts": [],
+ "content": "[]",
+ "creation": "2026-06-14 12:44:31.994274",
+ "custom_blocks": [],
  "docstatus": 0,
- "doctype": "Workspace Sidebar",
- "header_icon": "database",
- "idx": 1,
- "items": [
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "database",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Accounts Setup",
+ "link_type": "DocType",
+ "links": [],
+ "modified": "2026-06-14 13:43:50.138704",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "module_onboarding": "Accounting Onboarding",
+ "name": "Accounts Setup",
+ "number_cards": [],
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 55.0,
+ "shortcuts": [],
+ "sidebar_items": [
   {
    "child": 0,
    "collapsible": 1,
@@ -301,12 +323,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-06-12 14:50:50.262533",
- "modified_by": "Administrator",
- "module": "Accounts",
- "module_onboarding": "Accounting Onboarding",
- "name": "Accounts Setup",
- "owner": "Administrator",
  "standard": 1,
- "title": "Accounts Setup"
+ "title": "Accounts Setup",
+ "type": "Workspace"
 }
