@@ -85,6 +85,37 @@ class TestRouting(ERPNextTestSuite):
 		self.assertEqual(bom_doc.operations[0].time_in_mins, 30)
 		self.assertEqual(bom_doc.operations[1].time_in_mins, 20)
 
+	def test_get_routing_survives_zero_conversion_rate(self):
+		# A foreign-currency BOM with no exchange-rate record leaves conversion_rate at 0.
+		# get_routing() divides the operation hour rate by it and used to raise
+		# ZeroDivisionError; it must now fall back to a rate of 1.
+		operations = [
+			{
+				"operation": "Test Operation A",
+				"workstation": "_Test Workstation A",
+				"hour_rate_rent": 300,
+				"hour_rate_labour": 750,
+				"time_in_mins": 30,
+			},
+		]
+		setup_operations(operations)
+		routing_doc = create_routing(
+			routing_name="Zero Rate Route",
+			operations=[
+				{"operation": "Test Operation A", "workstation": "_Test Workstation A", "time_in_mins": 30}
+			],
+		)
+
+		bom = frappe.new_doc("BOM")
+		bom.routing = routing_doc.name
+		bom.conversion_rate = 0
+
+		bom.get_routing()  # must not raise ZeroDivisionError
+
+		self.assertTrue(bom.operations)
+		# with the 0 rate falling back to 1, the hour rate is carried over unchanged
+		self.assertEqual(bom.operations[0].hour_rate, routing_doc.operations[0].hour_rate)
+
 
 def setup_operations(rows):
 	from erpnext.manufacturing.doctype.operation.test_operation import make_operation

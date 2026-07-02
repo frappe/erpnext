@@ -498,7 +498,11 @@ class BOM(WebsiteGenerator):
 			order_by="sequence_id, idx",
 		):
 			child = self.append("operations", row)
-			child.hour_rate = flt(row.hour_rate / self.conversion_rate, child.precision("hour_rate"))
+			# guard against a 0/unset conversion rate (e.g. a foreign-currency BOM with no
+			# exchange-rate record), mirroring the fallback used elsewhere in this file
+			child.hour_rate = flt(
+				row.hour_rate / (flt(self.conversion_rate) or 1), child.precision("hour_rate")
+			)
 
 	@staticmethod
 	def _get_routing_fields():
