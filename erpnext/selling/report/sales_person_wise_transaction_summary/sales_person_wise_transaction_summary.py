@@ -226,12 +226,14 @@ def get_entries(filters):
 			st.sales_person.isin(frappe.qb.from_(sp).select(sp.name).where((sp.lft >= lft) & (sp.rgt <= rgt)))
 		)
 
-	items = get_items(filters)
-	if items:
+	# only resolve items when an item_group/brand filter is set; otherwise get_items
+	# would return every item in the system and add a huge IN() clause on each run
+	if filters.get("item_group") or filters.get("brand"):
+		items = get_items(filters)
+		if not items:
+			# the item_group/brand filter matched nothing -> no rows
+			return []
 		query = query.where(dt_item.item_code.isin([d[0] for d in items]))
-	elif filters.get("item_group") or filters.get("brand"):
-		# item_group/brand filter matched nothing -> no rows
-		return []
 
 	query = query.orderby(st.sales_person).orderby(dt.name, order=frappe.qb.desc)
 
