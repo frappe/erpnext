@@ -90,7 +90,7 @@ class ExchangeRateRevaluation(Document):
 		)
 
 	def on_cancel(self):
-		self.ignore_linked_doctypes = "GL Entry"
+		self.ignore_linked_doctypes = ["GL Entry", "Payment Ledger Entry"]
 
 	@frappe.whitelist()
 	def check_journal_entry_condition(self):
