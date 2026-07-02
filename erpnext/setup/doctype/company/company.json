@@ -1012,11 +1012,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2026-04-17 17:11:46.586135",
-=======
  "modified": "2026-07-02 07:21:21.794533",
->>>>>>> 9cea43b006 (fix(company): ignore user permissions for link fields having link to `Account` and `Cost Center` (#56748))
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
