@@ -1,11 +1,32 @@
 {
  "app": "erpnext",
- "creation": "2025-11-10 16:08:50.904116",
+ "charts": [],
+ "content": "[]",
+ "creation": "2026-06-14 14:08:36.817393",
+ "custom_blocks": [],
  "docstatus": 0,
- "doctype": "Workspace Sidebar",
- "header_icon": "accounting",
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "accounting",
  "idx": 0,
- "items": [
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Subscriptions",
+ "link_type": "DocType",
+ "links": [],
+ "modified": "2026-06-14 14:08:36.999272",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Subscriptions",
+ "number_cards": [],
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 56.0,
+ "shortcuts": [],
+ "sidebar_items": [
   {
    "child": 0,
    "collapsible": 1,
@@ -15,6 +36,7 @@
    "label": "Subscription",
    "link_to": "Subscription",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -27,6 +49,7 @@
    "label": "Subscription Plan",
    "link_to": "Subscription Plan",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -39,6 +62,7 @@
    "label": "Subscription Settings",
    "link_to": "Subscription Settings",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -50,6 +74,7 @@
    "keep_closed": 1,
    "label": "Setup",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Section Break"
   },
@@ -61,6 +86,7 @@
    "label": "Customer",
    "link_to": "Customer",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -72,6 +98,7 @@
    "label": "Supplier",
    "link_to": "Supplier",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -83,15 +110,12 @@
    "label": "Item",
    "link_to": "Item",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   }
  ],
- "modified": "2026-01-10 00:06:13.048591",
- "modified_by": "Administrator",
- "module": "Accounts",
- "name": "Subscription",
- "owner": "Administrator",
  "standard": 1,
- "title": "Subscription"
+ "title": "Subscriptions",
+ "type": "Workspace"
 }
