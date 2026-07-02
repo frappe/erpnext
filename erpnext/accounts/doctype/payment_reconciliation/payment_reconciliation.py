@@ -75,7 +75,10 @@ class PaymentReconciliation(Document):
 		self.accounting_dimension_filter_conditions = []
 		self.ple_posting_date_filter = []
 		self.dimensions = get_dimensions(with_cost_center_and_project=True)[0]
-		self.user_permissions = get_user_permissions(frappe.session.user)
+
+	@property
+	def user_permissions(self):
+		return get_user_permissions(frappe.session.user)
 
 	def load_from_db(self):
 		# 'modified' attribute is required for `run_doc_method` to work properly.
