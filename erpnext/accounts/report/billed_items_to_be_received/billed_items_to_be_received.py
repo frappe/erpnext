@@ -31,7 +31,7 @@ def get_report_filters(report_filters):
 	]
 
 	if report_filters.get("purchase_invoice"):
-		filters.append(["Purchase Invoice", "per_received", "in", [report_filters.get("purchase_invoice")]])
+		filters.append(["Purchase Invoice", "name", "=", report_filters.get("purchase_invoice")])
 
 	return filters
 
