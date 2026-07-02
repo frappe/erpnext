@@ -3,7 +3,6 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, get_link_to_form
 
 import erpnext
@@ -131,7 +130,6 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
 			get_purchase_document_details,
 		)
-		from erpnext.stock.utils import get_valuation_method
 
 		doc = self.doc
 		tax_service = TaxService(doc)
@@ -331,33 +329,25 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 						self.make_provisional_gl_entry(gl_entries, item)
 
 					if not doc.is_internal_transfer():
-						handled = False
-						if (
-							item.item_code
-							and item.item_code in stock_items
-							and item.get("purchase_receipt")
-							and not doc.is_return
-							and get_valuation_method(item.item_code, doc.company) == "Standard Cost"
-						):
-							handled = self.make_standard_cost_srbnb_split(
-								gl_entries, item, expense_account, account_currency, base_amount
+						# When Update Stock is disabled, this invoice has no stock impact: the linked
+						# Purchase Receipt already booked the stock (at standard) and the Purchase Price
+						# Variance. Here we only clear "Stock Received But Not Billed" at the full billed
+						# amount against the supplier - booking PPV again would double count it and leave
+						# SRBNB partially uncleared.
+						gl_entries.append(
+							self.get_gl_dict(
+								{
+									"account": expense_account,
+									"against": doc.supplier,
+									"debit": base_amount,
+									"debit_in_transaction_currency": amount,
+									"cost_center": item.cost_center,
+									"project": item.project or doc.project,
+								},
+								account_currency,
+								item=item,
 							)
-
-						if not handled:
-							gl_entries.append(
-								self.get_gl_dict(
-									{
-										"account": expense_account,
-										"against": doc.supplier,
-										"debit": base_amount,
-										"debit_in_transaction_currency": amount,
-										"cost_center": item.cost_center,
-										"project": item.project or doc.project,
-									},
-									account_currency,
-									item=item,
-								)
-							)
+						)
 
 						# check if the exchange rate has changed
 						if (
@@ -529,95 +519,6 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 					"purchase_amount": purchase_amount,
 				},
 			)
-
-	def make_standard_cost_srbnb_split(
-		self, gl_entries, item, expense_account, account_currency, base_amount
-	):
-		"""For a Standard Cost item billed against a Purchase Receipt, clear SRBNB at the standard
-		value the receipt actually booked and post the (Net Amount - standard) difference to the
-		Purchase Price Variance account. Returns False (caller falls back) if the receipt value
-		can't be resolved."""
-		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import (
-			get_purchase_price_variance_account,
-		)
-
-		doc = self.doc
-		precision = item.precision("base_net_amount")
-		standard_value = flt(self.get_pr_stock_value(item), precision)
-		if not standard_value:
-			return False
-
-		gl_entries.append(
-			self.get_gl_dict(
-				{
-					"account": expense_account,
-					"against": doc.supplier,
-					"debit": standard_value,
-					"debit_in_transaction_currency": flt(standard_value / doc.conversion_rate, precision),
-					"remarks": doc.get("remarks") or _("Accounting Entry for Stock"),
-					"cost_center": item.cost_center,
-					"project": item.project or doc.project,
-				},
-				account_currency,
-				item=item,
-			)
-		)
-
-		variance = flt(base_amount - standard_value, precision)
-		if variance:
-			gl_entries.append(
-				self.get_gl_dict(
-					{
-						"account": get_purchase_price_variance_account(item.item_code, doc.company),
-						"against": doc.supplier,
-						"debit": variance,
-						"debit_in_transaction_currency": flt(variance / doc.conversion_rate, precision),
-						"remarks": doc.get("remarks") or _("Purchase Price Variance"),
-						"cost_center": item.cost_center,
-						"project": item.project or doc.project,
-					},
-					item=item,
-				)
-			)
-
-		return True
-
-	def get_pr_stock_value(self, item):
-		"""Stock value (at standard) the linked Purchase Receipt booked for the quantity this invoice
-		row is billing.
-
-		Accepted and rejected stock for the same receipt row share `voucher_detail_no`, so the
-		warehouse filter is required: without it the accepted warehouse's SRBNB would be cleared at
-		accepted + rejected value and post the wrong Purchase Price Variance amount. The accepted
-		warehouse is read from the receipt row itself (not the invoice row, which may be unset on a
-		non-stock invoice).
-
-		The receipt's full accepted value is pro-rated to the invoiced quantity, so a partial bill
-		clears SRBNB (and posts PPV) for only the units it covers, not the whole receipt row."""
-		pr_detail = frappe.db.get_value(
-			"Purchase Receipt Item", item.pr_detail, ["warehouse", "stock_qty"], as_dict=True
-		)
-		if not pr_detail or not pr_detail.warehouse:
-			return 0.0
-
-		sle = frappe.qb.DocType("Stock Ledger Entry")
-		result = (
-			frappe.qb.from_(sle)
-			.select(Sum(sle.stock_value_difference))
-			.where(
-				(sle.voucher_type == "Purchase Receipt")
-				& (sle.voucher_no == item.purchase_receipt)
-				& (sle.voucher_detail_no == item.pr_detail)
-				& (sle.warehouse == pr_detail.warehouse)
-				& (sle.is_cancelled == 0)
-			)
-		).run()
-		accepted_value = flt(result[0][0]) if result and result[0][0] else 0.0
-		if not accepted_value or not flt(pr_detail.stock_qty):
-			return accepted_value
-
-		# Pro-rate to the quantity being billed by this invoice row (handles partial billing).
-		return accepted_value * flt(item.stock_qty) / flt(pr_detail.stock_qty)
 
 	def get_stock_variance_account(self, item):
 		"""For Standard Cost items the purchase-price-vs-standard difference is a Purchase Price

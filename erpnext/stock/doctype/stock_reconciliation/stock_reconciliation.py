@@ -114,11 +114,72 @@ class StockReconciliation(StockController):
 					)
 
 	def on_submit(self):
+		self.set_standard_cost_from_reconciliation()
 		self.make_bundle_for_current_qty()
 		self.make_bundle_using_old_serial_batch_fields()
 		self.update_stock_ledger()
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
+
+	def set_standard_cost_from_reconciliation(self):
+		if self.flags.via_item_standard_cost:
+			return
+
+		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import (
+			get_item_standard_rate,
+			has_item_standard_cost,
+		)
+
+		created = set()
+		for item in self.items:
+			if not item.item_code or item.item_code in created:
+				continue
+			if not is_standard_cost_item(item.item_code, self.company) or not flt(item.valuation_rate):
+				continue
+
+			if has_item_standard_cost(item.item_code, self.company):
+				standard_rate = get_item_standard_rate(item.item_code, self.company, self.posting_date)
+				precision = item.precision("valuation_rate")
+				if flt(item.valuation_rate, precision) == flt(standard_rate, precision):
+					# Rate unchanged: a plain quantity adjustment, valued at the existing standard rate.
+					continue
+
+			isc = frappe.new_doc("Item Standard Cost")
+			isc.item_code = item.item_code
+			isc.company = self.company
+			isc.effective_date = self.posting_date
+			isc.standard_rate = item.valuation_rate
+			isc.revaluation_entry = self.name
+			isc.insert()
+			isc.submit()
+			created.add(item.item_code)
+
+	def cancel_created_item_standard_cost(self):
+		if self.flags.via_item_standard_cost:
+			return
+
+		records = frappe.get_all(
+			"Item Standard Cost",
+			filters={
+				"revaluation_entry": self.name,
+				"docstatus": 1,
+				"creation": [">", self.creation],
+			},
+			fields=["name", "item_code", "company"],
+		)
+		for record in records:
+			isc = frappe.get_doc("Item Standard Cost", record.name)
+
+			# This runs after make_sle_on_cancel has already marked this reco's SLEs is_cancelled=1, so
+			# the only remaining activity on/after the effective date is genuine later stock (receipts,
+			# issues) valued at this standard rate. Skip those — cancelling would corrupt their valuation.
+			# Checking on-hand Bin qty instead would falsely skip a plain rate change, whose on-hand qty
+			# reverts on cancellation, silently leaving the standard rate out of sync with every SLE.
+			if isc.has_stock_activity_on_or_after_effective_date():
+				continue
+
+			isc.flags.from_source_reconciliation = True
+			isc.cancel()
 
 	def on_cancel(self):
 		self.validate_reserved_stock()
@@ -127,11 +188,14 @@ class StockReconciliation(StockController):
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
 			"Serial and Batch Bundle",
+			"Item Standard Cost",
 		)
+
 		self.make_sle_on_cancel()
 		self.make_gl_entries_on_cancel()
 		self.repost_future_sle_and_gle()
 		self.delete_auto_created_batches()
+		self.cancel_created_item_standard_cost()
 
 	def make_bundle_for_current_qty(self):
 		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
@@ -174,18 +238,44 @@ class StockReconciliation(StockController):
 				)
 
 	def validate_standard_cost_items(self):
-		"""Stock Reconciliation is not allowed for Standard Cost items — their rate is changed
-		only through the Item Standard Cost doctype (which creates the revaluation reco itself)."""
+		"""Validate the Standard Cost rows of the reconciliation.
+
+		For a Standard Cost item the valuation rate is owned by Item Standard Cost, so a reconciliation
+		is primarily a quantity adjustment (the value difference is booked to Stock Adjustment at the
+		standard rate). Two things it may do with the rate, handled on submit:
+		- opening entry (no Item Standard Cost yet): the entered rate sets the item's standard cost
+		  (set_standard_cost_for_opening_items);
+		- rate change (rate differs from the current standard): a new Item Standard Cost is created,
+		  which revalues on-hand stock (apply_standard_cost_rate_changes).
+
+		Here we only guard the inputs: an opening row needs a positive rate, and because a standard cost
+		is company-wide, all rows for the same item must carry the same rate."""
 		if self.flags.via_item_standard_cost:
 			return
 
+		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import has_item_standard_cost
+
+		rates = {}
 		for item in self.items:
-			if item.item_code and is_standard_cost_item(item.item_code, self.company):
+			if not item.item_code or not is_standard_cost_item(item.item_code, self.company):
+				continue
+
+			if not has_item_standard_cost(item.item_code, self.company) and flt(item.valuation_rate) <= 0:
+				# Opening entry with no standard cost yet: there is no rate to value the stock at.
 				frappe.throw(
 					_(
-						"Row #{0}: Stock Reconciliation is not allowed for Item {1}, which uses the Standard Cost valuation method. Change its rate through Item Standard Cost instead."
+						"Row #{0}: Enter a Valuation Rate for Item {1} to set up its opening Standard Cost."
 					).format(item.idx, get_link_to_form("Item", item.item_code))
 				)
+
+			if flt(item.valuation_rate):
+				rate = flt(item.valuation_rate, item.precision("valuation_rate"))
+				if rates.setdefault(item.item_code, rate) != rate:
+					frappe.throw(
+						_(
+							"Row #{0}: Valuation Rate for Item {1} must be the same across all rows, as it is the item's company-wide Standard Cost."
+						).format(item.idx, get_link_to_form("Item", item.item_code))
+					)
 
 	def set_current_serial_and_batch_bundle(self, voucher_detail_no=None, save=False) -> None:
 		"""Set Serial and Batch Bundle for each item"""
@@ -196,9 +286,9 @@ class StockReconciliation(StockController):
 			if not item.item_code:
 				continue
 
-			# Standard Cost revaluation recos are pure value changes: qty is unchanged and the SLE is
-			# revalued at the standard rate, so no serial/batch bundle is created (see update_stock_ledger,
-			# which routes these rows through the single revaluation SLE path).
+			# A Standard Cost item is valued at the standard rate regardless of serial/batch, so no
+			# serial/batch bundle is created; update_stock_ledger routes these rows through the single
+			# SLE path (qty may change, valuation always comes from the standard rate).
 			if is_standard_cost_item(item.item_code, self.company):
 				continue
 
@@ -452,7 +542,7 @@ class StockReconciliation(StockController):
 			if not item.item_code:
 				continue
 
-			# Standard Cost revaluation recos are pure value changes; no serial/batch bundle needed.
+			# Standard Cost items are valued at the standard rate; no serial/batch bundle needed.
 			if is_standard_cost_item(item.item_code, self.company):
 				continue
 
@@ -576,8 +666,8 @@ class StockReconciliation(StockController):
 				if item.valuation_rate is None:
 					item.valuation_rate = item_dict.get("rate")
 
-				# Standard Cost items are revalued by rate only; don't pull serial nos onto the row, or a
-				# serial/batch bundle would be built for what must stay a pure value-change SLE.
+				# Standard Cost items are valued at the standard rate; don't pull serial nos onto the row,
+				# or a serial/batch bundle would be built for what stays a single standard-rate SLE.
 				if item_dict.get("serial_nos") and not is_standard_cost_item(item.item_code, self.company):
 					item.current_serial_no = item_dict.get("serial_nos")
 					if self.purpose == "Stock Reconciliation" and not item.serial_no and item.qty:
@@ -794,9 +884,9 @@ class StockReconciliation(StockController):
 				"Item", row.item_code, ["has_serial_no", "has_batch_no"], as_dict=1
 			)
 
-			# A Standard Cost item is revalued by rate alone (qty unchanged, valuation from the standard
-			# rate), so even a serialized/batched one is posted through the single revaluation SLE path
-			# without a serial/batch bundle, the same as a non-serial item.
+			# A Standard Cost item is always valued at the standard rate (qty may change, the rate does
+			# not), so even a serialized/batched one is posted through the single SLE path without a
+			# serial/batch bundle, the same as a non-serial item.
 			if (item.has_serial_no or item.has_batch_no) and not is_standard_cost_item(
 				row.item_code, self.company
 			):
@@ -1459,6 +1549,18 @@ def get_stock_balance_for(
 					}
 				)
 			)
+
+	# For a Standard Cost item with no on-hand stock to derive a rate from (an opening entry, or an
+	# empty warehouse), default the rate to the standard rate effective on the posting date so the form
+	# shows it. When stock already exists, the balance rate is already the standard rate, so it is left
+	# alone - overriding it with the (possibly just-changed) standard rate would hide a real value change
+	# from remove_items_with_no_change.
+	if not rate and company and is_standard_cost_item(item_code, company):
+		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import get_item_standard_rate
+
+		standard_rate = get_item_standard_rate(item_code, company, posting_date)
+		if standard_rate is not None:
+			rate = standard_rate
 
 	return {
 		"qty": qty,

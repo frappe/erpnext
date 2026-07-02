@@ -91,12 +91,74 @@ class ItemStandardCost(Document):
 		# previous (or missing) rate earlier in the request, so the revaluation below — and anything
 		# else in this request — reads the newly submitted rate.
 		clear_item_standard_rate_cache()
+
+		# When a Stock Reconciliation captured this rate (opening entry or rate change), it has set
+		# revaluation_entry to itself and performs the revaluation. Don't spawn another one.
+		if self.revaluation_entry:
+			return
+
 		self.create_revaluation_entry()
 
 	def before_cancel(self):
-		frappe.throw(
-			_("Item Standard Cost cannot be cancelled. Submit a new record to change the standard rate.")
+		self.validate_no_stock_activity_on_or_after_effective_date()
+
+	def has_stock_activity_on_or_after_effective_date(self):
+		"""Is there any live stock transaction for this item on or after the effective date, other than
+		the revaluation Stock Reconciliation this record created? Such transactions are valued at this
+		standard rate, so this record cannot be safely cancelled while they exist."""
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		query = (
+			frappe.qb.from_(sle)
+			.select(sle.name)
+			.where(
+				(sle.item_code == self.item_code)
+				& (sle.company == self.company)
+				& (sle.is_cancelled == 0)
+				# posting_datetime (indexed) is preferred over posting_date; get_datetime on the date gives
+				# the start of the effective date, so this matches everything on or after it.
+				& (sle.posting_datetime >= get_datetime(self.effective_date))
+			)
+			.limit(1)
 		)
+
+		# The revaluation reco this record created posts on the effective date; exclude it, it is
+		# reversed together with this document in on_cancel.
+		if self.revaluation_entry:
+			query = query.where(sle.voucher_no != self.revaluation_entry)
+
+		return bool(query.run())
+
+	def validate_no_stock_activity_on_or_after_effective_date(self):
+		"""A submitted Item Standard Cost can be cancelled only when no stock transaction exists for the
+		item on or after its effective date, other than the revaluation Stock Reconciliation it created.
+		Later transactions are valued at this standard rate, so cancelling it would corrupt their
+		valuation and force a repost."""
+		if self.has_stock_activity_on_or_after_effective_date():
+			frappe.throw(
+				_(
+					"Item Standard Cost cannot be cancelled because stock transactions exist for Item {0} on or after the Effective Date {1}. Cancel those transactions first."
+				).format(
+					get_link_to_form("Item", self.item_code),
+					frappe.bold(frappe.format(self.effective_date, "Date")),
+				)
+			)
+
+	def on_cancel(self):
+		# Drop the cached standard rate first: this record is now cancelled, so the revaluation reversal
+		# below (and anything else in this request) must re-read the previous effective rate, not this one.
+		clear_item_standard_rate_cache()
+
+		# Set when this cancellation was triggered by the source reconciliation itself (it is already
+		# cancelling); reversing revaluation_entry would loop back into that same reconciliation.
+		if self.flags.from_source_reconciliation:
+			return
+
+		# Reverse the revaluation this record created.
+		if self.revaluation_entry:
+			reco = frappe.get_doc("Stock Reconciliation", self.revaluation_entry)
+			if reco.docstatus == 1:
+				reco.flags.via_item_standard_cost = True
+				reco.cancel()
 
 	def create_revaluation_entry(self):
 		"""Revalue on-hand stock to the new standard rate via a Stock Reconciliation.
@@ -228,6 +290,18 @@ def get_item_standard_rate(item_code, company, posting_date=None):
 	)
 
 	return flt(rate[0]) if rate else None
+
+
+def has_item_standard_cost(item_code, company):
+	"""True if a submitted Item Standard Cost exists for the item in the company (any effective date).
+	Used to tell an opening Stock Reconciliation (no standard rate yet, rate is editable) apart from a
+	later one (standard rate owned by Item Standard Cost, only quantity may be adjusted)."""
+	return bool(
+		frappe.db.exists(
+			"Item Standard Cost",
+			{"item_code": item_code, "company": company, "docstatus": 1},
+		)
+	)
 
 
 def clear_item_standard_rate_cache():
