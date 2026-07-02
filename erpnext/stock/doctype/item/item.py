@@ -225,11 +225,7 @@ class Item(Document):
 		self.validate_item_defaults()
 		self.validate_auto_reorder_enabled_in_stock_settings()
 		self.cant_change()
-<<<<<<< HEAD
-=======
 		self.validate_serialized_change_with_bundle()
-		self.validate_standard_cost_change()
->>>>>>> 0e8ae7548d (fix: block serialized to non-serialized item change when SABB exists (#56773))
 		self.validate_item_tax_net_rate_range()
 
 		if not self.is_new():
