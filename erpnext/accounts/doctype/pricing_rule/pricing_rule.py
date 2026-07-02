@@ -489,6 +489,18 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 				else:
 					get_product_discount_rule(pricing_rule, item_details, args, doc)
 
+		# apply margin if apply_multiple_pricing_rules is set
+		margin_percentage = item_details.pop("margin_percentage", 0)
+		margin_amount = item_details.pop("margin_amount", 0)
+
+		if margin_percentage and not margin_amount:
+			item_details.margin_type = "Percentage"
+			item_details.margin_rate_or_amount = margin_percentage
+		elif margin_amount or margin_percentage:
+			price_list_rate = item_details.get("price_list_rate") or args.get("price_list_rate", 0)
+			item_details.margin_type = "Amount"
+			item_details.margin_rate_or_amount = margin_amount + (margin_percentage / 100) * price_list_rate
+
 		if not item_details.get("has_margin"):
 			item_details.margin_type = None
 			item_details.margin_rate_or_amount = 0.0
@@ -554,16 +566,19 @@ def get_pricing_rule_details(args, pricing_rule):
 def apply_price_discount_rule(pricing_rule, item_details, args):
 	item_details.pricing_rule_for = pricing_rule.rate_or_discount
 
-	if (pricing_rule.margin_type in ["Amount", "Percentage"] and pricing_rule.currency == args.currency) or (
-		pricing_rule.margin_type == "Percentage"
+	if (
+		pricing_rule.margin_type
+		and pricing_rule.margin_rate_or_amount
+		and (pricing_rule.margin_type == "Percentage" or pricing_rule.currency == args.currency)
 	):
-		item_details.margin_type = pricing_rule.margin_type
 		item_details.has_margin = True
 
-		if pricing_rule.apply_multiple_pricing_rules and item_details.margin_rate_or_amount is not None:
-			item_details.margin_rate_or_amount += pricing_rule.margin_rate_or_amount
+		if pricing_rule.apply_multiple_pricing_rules:
+			key = "margin_amount" if pricing_rule.margin_type == "Amount" else "margin_percentage"
+			item_details[key] = flt(item_details.get(key)) + flt(pricing_rule.margin_rate_or_amount)
 		else:
 			item_details.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
+			item_details.margin_type = pricing_rule.margin_type
 
 	if pricing_rule.rate_or_discount == "Rate":
 		pricing_rule_rate = 0.0

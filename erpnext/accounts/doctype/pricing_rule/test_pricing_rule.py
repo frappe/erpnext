@@ -651,6 +651,81 @@ class TestPricingRule(ERPNextTestSuite):
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 1")
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 2")
 
+	def test_multiple_pricing_rules_with_margin(self):
+		# Case 1: percentage margins accumulate and remain Percentage
+		percentage_rule = make_pricing_rule(
+			selling=1,
+			margin_type="Percentage",
+			margin_rate_or_amount=10,
+			apply_multiple_pricing_rules=1,
+			priority=1,
+			title="_Test Margin Rule 1",
+		)
+		second_rule = make_pricing_rule(
+			selling=1,
+			margin_type="Percentage",
+			margin_rate_or_amount=5,
+			apply_multiple_pricing_rules=1,
+			priority=2,
+			title="_Test Margin Rule 2",
+		)
+
+		si = create_sales_invoice(qty=1, price_list_rate=1000, do_not_submit=True)
+
+		item = si.items[0]
+		self.assertEqual(item.margin_type, "Percentage")
+		self.assertEqual(item.margin_rate_or_amount, 15)
+		self.assertEqual(item.rate_with_margin, 1150)
+		self.assertEqual(item.rate, 1150)
+		si.delete()
+
+		second_rule.delete()
+
+		# Case 2: mixed margin types accumulate as Amount on the price list rate
+		second_rule = make_pricing_rule(
+			selling=1,
+			margin_type="Amount",
+			margin_rate_or_amount=50,
+			apply_multiple_pricing_rules=1,
+			priority=2,
+			title="_Test Margin Rule 2",
+		)
+
+		si = create_sales_invoice(qty=1, price_list_rate=1000, do_not_submit=True)
+
+		item = si.items[0]
+		self.assertEqual(item.margin_type, "Amount")
+		self.assertEqual(item.margin_rate_or_amount, 150)
+		self.assertEqual(item.rate_with_margin, 1150)
+		self.assertEqual(item.rate, 1150)
+		si.delete()
+
+		second_rule.delete()
+
+		# Case 3: percentage margin applies on the price list rate
+		# overridden by a Rate pricing rule
+		second_rule = make_pricing_rule(
+			selling=1,
+			rate_or_discount="Rate",
+			rate=200,
+			apply_multiple_pricing_rules=1,
+			priority=2,
+			title="_Test Margin Rule 2",
+		)
+
+		si = create_sales_invoice(qty=1, do_not_submit=True)
+
+		item = si.items[0]
+		self.assertEqual(item.price_list_rate, 200)
+		self.assertEqual(item.margin_type, "Percentage")
+		self.assertEqual(item.margin_rate_or_amount, 10)
+		self.assertEqual(item.rate_with_margin, 220)
+		self.assertEqual(item.rate, 220)
+		si.delete()
+
+		second_rule.delete()
+		percentage_rule.delete()
+
 	def test_item_price_with_pricing_rule(self):
 		item = make_item("Water Flask")
 		make_item_price("Water Flask", "_Test Price List", 100)
