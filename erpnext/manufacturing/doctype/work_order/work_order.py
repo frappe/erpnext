@@ -649,6 +649,12 @@ class WorkOrder(Document):
 
 	def update_status(self, status=None):
 		"""Update status of work order if unknown"""
+		if self.docstatus == 1:
+			# Refresh material_transferred_for_manufacturing before deciding status so pick-list-
+			# driven transfers (where this qty is derived from item transfers, not fg_completed_qty)
+			# are reflected immediately, instead of only after the next status update call.
+			self.refresh_material_transferred_for_manufacturing()
+
 		if self.status != "Closed":
 			if status not in ["Stopped", "Closed"]:
 				status = self.get_status(status)
@@ -1672,6 +1678,31 @@ class WorkOrder(Document):
 		if self.skip_transfer:
 			return
 
+		transferred_items = self._material_transfer_qty_by_item(is_return=0)
+
+		row_wise_serial_batch = frappe._dict({})
+		if self.reserve_stock:
+			row_wise_serial_batch = get_row_wise_serial_batch(self.name)
+
+		for row in self.required_items:
+			transferred_qty = transferred_items.get(row.item_code) or 0.0
+			row.db_set("transferred_qty", transferred_qty, update_modified=False)
+			if self.reserve_stock:
+				self.update_qty_in_stock_reservation(row, transferred_qty, row_wise_serial_batch)
+
+		self.recompute_material_transferred_for_manufacturing(transferred_items)
+
+	def refresh_material_transferred_for_manufacturing(self):
+		"""Recompute material_transferred_for_manufacturing only, without touching per-row
+		transferred_qty or stock reservations. Used to get a status decision (Not Started vs
+		In Process) based on fresh data, ahead of the fuller update_required_items() pass.
+		"""
+		if self.skip_transfer:
+			return
+		transferred_items = self._material_transfer_qty_by_item(is_return=0)
+		self.recompute_material_transferred_for_manufacturing(transferred_items)
+
+	def _material_transfer_qty_by_item(self, is_return):
 		ste = frappe.qb.DocType("Stock Entry")
 		ste_child = frappe.qb.DocType("Stock Entry Detail")
 
@@ -1688,25 +1719,13 @@ class WorkOrder(Document):
 				(ste.docstatus == 1)
 				& (ste.work_order == self.name)
 				& (ste.purpose == "Material Transfer for Manufacture")
-				& (ste.is_return == 0)
+				& (ste.is_return == is_return)
 			)
 			.groupby(ste_child.item_code)
 		)
 
 		data = query.run(as_dict=1) or []
-		transferred_items = frappe._dict({d.original_item or d.item_code: d.qty for d in data})
-
-		row_wise_serial_batch = frappe._dict({})
-		if self.reserve_stock:
-			row_wise_serial_batch = get_row_wise_serial_batch(self.name)
-
-		for row in self.required_items:
-			transferred_qty = transferred_items.get(row.item_code) or 0.0
-			row.db_set("transferred_qty", transferred_qty, update_modified=False)
-			if self.reserve_stock:
-				self.update_qty_in_stock_reservation(row, transferred_qty, row_wise_serial_batch)
-
-		self.recompute_material_transferred_for_manufacturing(transferred_items)
+		return frappe._dict({d.original_item or d.item_code: d.qty for d in data})
 
 	def recompute_material_transferred_for_manufacturing(self, transferred_items):
 		"""Set material_transferred_for_manufacturing based on actual item-level transfers, not fg_completed_qty."""
@@ -1777,29 +1796,7 @@ class WorkOrder(Document):
 				doc.update_reserved_stock_in_bin()
 
 	def update_returned_qty(self):
-		ste = frappe.qb.DocType("Stock Entry")
-		ste_child = frappe.qb.DocType("Stock Entry Detail")
-
-		query = (
-			frappe.qb.from_(ste)
-			.inner_join(ste_child)
-			.on(ste_child.parent == ste.name)
-			.select(
-				ste_child.item_code,
-				ste_child.original_item,
-				fn.Sum(ste_child.transfer_qty).as_("qty"),
-			)
-			.where(
-				(ste.docstatus == 1)
-				& (ste.work_order == self.name)
-				& (ste.purpose == "Material Transfer for Manufacture")
-				& (ste.is_return == 1)
-			)
-			.groupby(ste_child.item_code)
-		)
-
-		data = query.run(as_dict=1) or []
-		returned_dict = frappe._dict({d.original_item or d.item_code: d.qty for d in data})
+		returned_dict = self._material_transfer_qty_by_item(is_return=1)
 
 		for row in self.required_items:
 			row.db_set("returned_qty", (returned_dict.get(row.item_code) or 0.0), update_modified=False)
