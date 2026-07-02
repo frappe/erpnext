@@ -1472,7 +1472,7 @@ class TestStockAgeing(ERPNextTestSuite):
 		queue = slots["Enclosure Item"]["fifo_queue"]
 
 		self.assertEqual(slots["Enclosure Item"]["total_qty"], 35.0)
-		self.assertEqual(queue[0][:3], ["QI-06448", None, -10.0])
+		self.assertEqual(queue[0], ["QI-06448", None, -10.0, "2021-12-01", -100.0])
 		self.assertEqual(queue[1], [45.0, "2021-12-05", 1051.65])
 
 	def test_batchwise_valuation_stock_reconciliation_with_bundle(self):
