@@ -379,7 +379,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 
 		self.make_period_closing_voucher(posting_date="2021-03-31")
 
-		frappe.db.set_value("Company", "Test PCV Company", "accounts_frozen_till_date", "2021-12-31")
+		frappe.db.set_value("Company", "Test PCV Company", "acc_frozen_upto", "2021-12-31")
 
 		try:
 			make_reverse_gl_entries(
@@ -387,7 +387,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 				voucher_no=jv.name,
 			)
 		finally:
-			frappe.db.set_value("Company", "Test PCV Company", "accounts_frozen_till_date", None)
+			frappe.db.set_value("Company", "Test PCV Company", "acc_frozen_upto", None)
 
 		totals_after_cancel = frappe.db.sql(
 			"""
