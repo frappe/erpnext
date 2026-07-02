@@ -141,6 +141,26 @@ class AccountsController(TransactionBase):
 			if self.doctype in relevant_docs:
 				self.set_payment_schedule()
 
+	def before_insert(self):
+		self.clear_clearance_date_on_amend()
+
+	def clear_clearance_date_on_amend(self):
+		"""Drop the bank reconciliation clearance date copied over while amending.
+
+		The framework copies `no_copy` fields when amending, so a reconciled
+		voucher would carry a stale clearance date into its amendment even though
+		the linked bank transaction gets unreconciled on cancellation.
+		"""
+		if not self.get("amended_from"):
+			return
+
+		if self.meta.has_field("clearance_date"):
+			self.clearance_date = None
+
+		for payment in self.get("payments") or []:
+			if payment.meta.has_field("clearance_date"):
+				payment.clearance_date = None
+
 	def remove_bundle_for_non_stock_invoices(self):
 		has_sabb = False
 		if self.doctype in ("Sales Invoice", "Purchase Invoice") and not self.update_stock:
