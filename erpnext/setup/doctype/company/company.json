@@ -353,33 +353,48 @@
    "options": "Account"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "round_off_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Round Off Account",
+   "no_copy": 1,
    "options": "Account"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "round_off_cost_center",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Round Off Cost Center",
+   "no_copy": 1,
    "options": "Cost Center"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "write_off_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Write Off Account",
+   "no_copy": 1,
    "options": "Account"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "exchange_gain_loss_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Exchange Gain / Loss Account",
+   "no_copy": 1,
    "options": "Account"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "unrealized_exchange_gain_loss_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Unrealized Exchange Gain/Loss Account",
+   "no_copy": 1,
    "options": "Account"
   },
   {
@@ -526,15 +541,19 @@
    "options": "Account"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "accumulated_depreciation_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Accumulated Depreciation Account",
    "no_copy": 1,
    "options": "Account"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "depreciation_expense_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Depreciation Expense Account",
    "no_copy": 1,
    "options": "Account"
@@ -549,29 +568,39 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "disposal_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Gain/Loss Account on Asset Disposal",
    "no_copy": 1,
    "options": "Account"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "depreciation_cost_center",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Asset Depreciation Cost Center",
    "no_copy": 1,
    "options": "Cost Center"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "capital_work_in_progress_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Capital Work In Progress Account",
+   "no_copy": 1,
    "options": "Account"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "asset_received_but_not_billed",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Asset Received But Not Billed",
+   "no_copy": 1,
    "options": "Account"
   },
   {
@@ -703,15 +732,21 @@
    "options": "Warehouse"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "unrealized_profit_loss_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Unrealized Profit / Loss Account",
+   "no_copy": 1,
    "options": "Account"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "default_discount_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Default Payment Discount Account",
+   "no_copy": 1,
    "options": "Account"
   },
   {
@@ -753,8 +788,10 @@
    "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/advance-in-separate-party-account",
    "fieldname": "default_advance_received_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Default Advance Received Account",
    "mandatory_depends_on": "book_advance_payments_as_liability",
+   "no_copy": 1,
    "options": "Account"
   },
   {
@@ -763,8 +800,10 @@
    "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/advance-in-separate-party-account",
    "fieldname": "default_advance_paid_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Default Advance Paid Account",
    "mandatory_depends_on": "book_advance_payments_as_liability",
+   "no_copy": 1,
    "options": "Account"
   },
   {
@@ -844,9 +883,12 @@
    "options": "Account"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "round_off_for_opening",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Round Off for Opening",
+   "no_copy": 1,
    "options": "Account"
   },
   {
@@ -1026,7 +1068,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2026-07-01 11:48:07.853494",
+ "modified": "2026-07-02 07:21:21.794533",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
