@@ -1044,57 +1044,6 @@ class TestItem(ERPNextTestSuite):
 			msg="Different Variant UOM should not be allowed when `allow_different_uom` is disabled.",
 		)
 
-<<<<<<< HEAD
-=======
-	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
-	def test_opening_stock_for_serial_batch(self):
-		items = {
-			"Test Opening Stock for Serial No": {
-				"has_serial_no": 1,
-				"opening_stock": 5,
-				"serial_no_series": "SN-TOPN-.####",
-				"valuation_rate": 100,
-			},
-			"Test Opening Stock for Batch No": {
-				"has_batch_no": 1,
-				"opening_stock": 5,
-				"batch_number_series": "BCH-TOPN-.####",
-				"valuation_rate": 100,
-				"create_new_batch": 1,
-			},
-			"Test Opening Stock for Serial and Batch No": {
-				"has_serial_no": 1,
-				"has_batch_no": 1,
-				"opening_stock": 5,
-				"batch_number_series": "SN-BCH-TOPN-.####",
-				"serial_no_series": "BCH-SN-TOPN-.####",
-				"valuation_rate": 100,
-				"create_new_batch": 1,
-			},
-		}
-
-		for item_code, properties in items.items():
-			make_item(item_code, properties)
-
-			stock_entry_bundle = frappe.db.get_value(
-				"Stock Entry Detail", {"docstatus": 1, "item_code": item_code}, "serial_and_batch_bundle"
-			)
-			self.assertFalse(stock_entry_bundle)
-
-			serial_and_batch_bundle = frappe.db.get_value(
-				"Stock Ledger Entry",
-				{
-					"voucher_type": "Stock Reconciliation",
-					"is_cancelled": 0,
-					"item_code": item_code,
-				},
-				"serial_and_batch_bundle",
-			)
-			self.assertTrue(serial_and_batch_bundle)
-
-			sabb_qty = frappe.db.get_value("Serial and Batch Bundle", serial_and_batch_bundle, "total_qty")
-			self.assertEqual(abs(sabb_qty), properties["opening_stock"])
-
 	def test_cannot_unset_serialized_while_bundle_exists(self):
 		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 			make_serial_batch_bundle,
@@ -1136,7 +1085,6 @@ class TestItem(ERPNextTestSuite):
 		doc.save()
 		self.assertEqual(frappe.db.get_value("Item", item, "has_serial_no"), 0)
 
->>>>>>> 0e8ae7548d (fix: block serialized to non-serialized item change when SABB exists (#56773))
 
 def set_item_variant_settings(fields):
 	doc = frappe.get_doc("Item Variant Settings")
