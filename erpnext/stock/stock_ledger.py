@@ -870,10 +870,16 @@ class update_entries_after:
 		if (
 			sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"]
 			and sle.voucher_detail_no
-			and sle.actual_qty < 0
 			and is_internal_transfer(sle)
 		):
-			sle.outgoing_rate = get_incoming_rate_for_inter_company_transfer(sle)
+			# Anchor both legs of an internal-transfer PR/PI to the DN/SI incoming_rate;
+			# otherwise an inward SLE that inherits a stale PR.valuation_rate leaks the
+			# gap to COGS via divisional_loss.
+			rate = get_incoming_rate_for_inter_company_transfer(sle)
+			if sle.actual_qty < 0:
+				sle.outgoing_rate = rate
+			elif rate:
+				sle.incoming_rate = rate
 
 		dimensions = get_inventory_dimensions()
 		has_dimensions = False
@@ -2426,7 +2432,16 @@ def get_incoming_rate_for_inter_company_transfer(sle) -> float:
 	if lcv_amount:
 		lcv_rate = flt(lcv_amount / abs(sle.actual_qty))
 
-	return rate + lcv_rate
+	charges_rate = 0.0
+	if flt(sle.actual_qty) > 0:
+		charge_fields = ["item_tax_amount", "rm_supp_cost"]
+		charges = frappe.db.get_value(
+			f"{sle.voucher_type} Item", sle.voucher_detail_no, charge_fields, as_dict=True
+		)
+		if charges:
+			charges_rate = flt(sum(flt(charges.get(f)) for f in charge_fields)) / abs(sle.actual_qty)
+
+	return rate + lcv_rate + charges_rate
 
 
 def is_internal_transfer(sle):
