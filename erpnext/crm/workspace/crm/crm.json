@@ -13,7 +13,7 @@
  "doctype": "Workspace",
  "for_user": "",
  "hide_custom": 0,
- "icon": "crm",
+ "icon": "handshake",
  "idx": 0,
  "is_hidden": 0,
  "label": "CRM",
@@ -421,7 +421,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-06-14 13:44:08.297053",
+ "modified": "2026-07-03 13:44:08.297053",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",
@@ -471,7 +471,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "chart",
+   "icon": "chart-column",
    "indent": 0,
    "keep_closed": 0,
    "label": "Home",
@@ -510,7 +510,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "customer",
+   "icon": "user",
    "indent": 0,
    "keep_closed": 0,
    "label": "Customer",
@@ -644,7 +644,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "getting-started",
+   "icon": "rocket",
    "indent": 1,
    "keep_closed": 1,
    "label": "Maintenance",
@@ -776,7 +776,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "sell",
+   "icon": "store",
    "indent": 1,
    "keep_closed": 1,
    "label": "Campaign",

@@ -6,7 +6,7 @@ frappe.ui.form.on("Accounting Dimension Filter", {
 		let help_content = `<table class="table table-bordered" style="background-color: var(--scrollbar-track-color);">
 				<tr><td>
 					<p>
-						<i class="fa fa-hand-right"></i>
+						<svg class="icon icon-sm"><use href="#icon-info"></use></svg>
 						{{__('Note: On checking Is Mandatory the accounting dimension will become mandatory against that specific account for all accounting transactions')}}
 					</p>
 				</td></tr>

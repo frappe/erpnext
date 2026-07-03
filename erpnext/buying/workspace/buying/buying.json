@@ -13,7 +13,7 @@
  "doctype": "Workspace",
  "for_user": "",
  "hide_custom": 0,
- "icon": "buying",
+ "icon": "shopping-cart",
  "idx": 0,
  "is_hidden": 0,
  "label": "Buying",
@@ -501,7 +501,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-06-14 13:43:50.509039",
+ "modified": "2026-07-03 13:43:50.509039",
  "modified_by": "Administrator",
  "module": "Buying",
  "module_onboarding": "Buying Onboarding",
@@ -532,7 +532,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "home",
+   "icon": "house",
    "indent": 0,
    "keep_closed": 0,
    "label": "Home",
@@ -545,7 +545,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "chart",
+   "icon": "chart-column",
    "indent": 0,
    "keep_closed": 0,
    "label": "Dashboard",
@@ -610,7 +610,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "liabilities",
+   "icon": "scale",
    "indent": 0,
    "keep_closed": 0,
    "label": "Purchase Invoice",

@@ -13,7 +13,7 @@
  "doctype": "Workspace",
  "for_user": "",
  "hide_custom": 0,
- "icon": "quality",
+ "icon": "shield-check",
  "idx": 0,
  "is_hidden": 0,
  "label": "Quality",
@@ -161,7 +161,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-06-14 13:44:07.920643",
+ "modified": "2026-07-03 13:44:07.920643",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality",
@@ -178,7 +178,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "home",
+   "icon": "house",
    "indent": 0,
    "keep_closed": 0,
    "label": "Home",
@@ -217,7 +217,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "review",
+   "icon": "star",
    "indent": 0,
    "keep_closed": 0,
    "label": "Quality Review",

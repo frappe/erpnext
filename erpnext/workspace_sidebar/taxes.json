@@ -34,7 +34,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "stock",
+   "icon": "package",
    "indent": 0,
    "keep_closed": 0,
    "label": "Item Tax Template",
@@ -148,7 +148,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-02-22 18:36:08.105306",
+ "modified": "2026-07-03 18:36:08.105306",
  "modified_by": "Administrator",
  "module": "Accounts",
  "module_onboarding": "Accounting Onboarding",

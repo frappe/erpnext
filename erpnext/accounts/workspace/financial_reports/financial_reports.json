@@ -266,7 +266,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-06-14 13:44:08.095321",
+ "modified": "2026-07-03 13:44:08.095321",
  "modified_by": "Administrator",
  "module": "Accounts",
  "module_onboarding": "Accounting Onboarding",
@@ -284,7 +284,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "accounting",
+   "icon": "wallet",
    "indent": 1,
    "keep_closed": 0,
    "label": "Financial Reports",
