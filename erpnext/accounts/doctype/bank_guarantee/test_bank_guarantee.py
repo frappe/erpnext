@@ -67,10 +67,6 @@ class TestBankGuarantee(ERPNextTestSuite):
 		self.assertEqual(details.customer, so.customer)
 		self.assertEqual(flt(details.grand_total), flt(so.grand_total))
 
-	def test_end_date_before_start_date_is_not_validated(self):
-		# SUSPECTED BUG: validate() never checks that end_date >= start_date, so a
-		# guarantee that expires before it starts saves cleanly. Locking the current
-		# (wrong) behaviour so a future fix that adds the check trips this test.
+	def test_end_date_before_start_date_is_rejected(self):
 		doc = self.make_bg(start_date="2026-06-30", end_date="2026-06-01")
-		doc.insert()
-		self.assertTrue(frappe.db.exists("Bank Guarantee", doc.name))
+		self.assertRaises(frappe.ValidationError, doc.insert)

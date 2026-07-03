@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import getdate
 
 
 class BankGuarantee(Document):
@@ -45,6 +46,9 @@ class BankGuarantee(Document):
 	def validate(self):
 		if not (self.customer or self.supplier):
 			frappe.throw(_("Select the customer or supplier."))
+
+		if self.end_date and getdate(self.end_date) < getdate(self.start_date):
+			frappe.throw(_("End Date cannot be before Start Date."))
 
 	def on_submit(self):
 		if not self.bank_guarantee_number:
