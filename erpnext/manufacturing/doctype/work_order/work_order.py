@@ -1070,7 +1070,7 @@ def get_bom_operations(doctype: str, txt: str, searchfield: str, start: int, pag
 	return frappe.get_all("BOM Operation", filters=filters, fields=["operation"], as_list=1)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def set_work_order_ops(name: str):
 	po = frappe.get_doc("Work Order", name)
 	po.set_work_order_operations()

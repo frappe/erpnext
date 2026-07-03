@@ -840,7 +840,7 @@ def set_delivery_date(items: list, sales_order: str) -> None:
 			item.schedule_date = delivery_by_bundle.get(item.product_bundle)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_work_orders(items: str | dict, sales_order: str, company: str, project: str | None = None):
 	"""Make Work Orders against the given Sales Order for the given `items`"""
 	items = frappe.parse_json(items).get("items")

@@ -511,7 +511,7 @@ def get_material_requests_based_on_supplier(
 	return material_requests
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def raise_work_orders(material_request: str, company: str):
 	mr = frappe.get_doc("Material Request", material_request)
 	errors = []

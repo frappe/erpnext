@@ -185,7 +185,7 @@ def refresh_scorecards():
 			frappe.get_doc("Supplier Scorecard", sc_name).save()
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_all_scorecards(docname: str):
 	sc = frappe.get_doc("Supplier Scorecard", docname)
 	supplier = frappe.get_doc("Supplier", sc.supplier)

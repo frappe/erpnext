@@ -628,7 +628,7 @@ def allow_to_make_project_update(project, time, frequency):
 		return True
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_duplicate_project(prev_doc: str | dict, project_name: str):
 	"""Create duplicate project based on the old project"""
 	import json
@@ -779,7 +779,7 @@ def create_kanban_board_if_not_exists(project: str):
 	return True
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def set_project_status(project: str, status: str):
 	"""
 	set status for project and all related tasks

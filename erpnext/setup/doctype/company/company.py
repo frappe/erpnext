@@ -1007,7 +1007,7 @@ def get_children(doctype: str, parent: str | None = None, company: str | None = 
 	)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def add_node():
 	from frappe.desk.treeview import make_tree_args
 
@@ -1118,7 +1118,7 @@ def get_billing_shipping_address(
 	return {"primary_address": primary_address, "shipping_address": shipping_address}
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_transaction_deletion_request(company: str):
 	frappe.only_for("System Manager")
 

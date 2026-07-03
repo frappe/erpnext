@@ -34,7 +34,7 @@ def upload_bank_statement():
 	return {"columns": columns, "data": data}
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_bank_entries(columns: str, data: str | list, bank_account: str):
 	header_map = get_header_mapping(columns, bank_account)
 

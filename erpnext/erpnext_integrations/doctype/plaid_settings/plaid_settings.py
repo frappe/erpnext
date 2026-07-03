@@ -50,7 +50,7 @@ def get_plaid_configuration():
 	return "disabled"
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def add_institution(token: str, response: str | dict):
 	response = frappe.parse_json(response)
 
@@ -79,7 +79,7 @@ def add_institution(token: str, response: str | dict):
 	return bank
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def add_bank_accounts(response: str | dict, bank: str | dict, company: str):
 	response = frappe.parse_json(response)
 	bank = frappe.parse_json(bank)

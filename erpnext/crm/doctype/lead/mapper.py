@@ -110,7 +110,7 @@ def make_quotation(source_name: str, target_doc: str | Document | None = None):
 	return target_doc
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_lead_from_communication(communication: str, ignore_communication_links: bool = False):
 	"""raise a issue from email"""
 

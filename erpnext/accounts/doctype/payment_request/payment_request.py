@@ -718,7 +718,7 @@ class PaymentRequest(Document):
 				row_number += TO_SKIP_NEW_ROW
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_payment_request(**args):
 	"""Make payment request"""
 
