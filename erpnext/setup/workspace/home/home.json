@@ -8,7 +8,7 @@
  "doctype": "Workspace",
  "for_user": "",
  "hide_custom": 0,
- "icon": "home",
+ "icon": "house",
  "idx": 0,
  "is_hidden": 0,
  "label": "Home",
@@ -452,7 +452,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-07-01 14:22:16.927245",
+ "modified": "2026-07-03 14:22:16.927245",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Home",

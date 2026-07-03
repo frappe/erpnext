@@ -118,7 +118,6 @@ erpnext.setup.slides_settings = [
 		// Organization
 		name: "organization",
 		title: __("Setup your organization"),
-		icon: "fa fa-building",
 		fields: [
 			{
 				fieldname: "company_name",

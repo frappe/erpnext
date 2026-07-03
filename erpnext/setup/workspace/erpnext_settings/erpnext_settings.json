@@ -8,7 +8,7 @@
  "doctype": "Workspace",
  "for_user": "",
  "hide_custom": 0,
- "icon": "setting",
+ "icon": "sliders-horizontal",
  "idx": 0,
  "is_hidden": 0,
  "label": "ERPNext Settings",
@@ -69,7 +69,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-06-14 13:43:50.429297",
+ "modified": "2026-07-03 13:43:50.429297",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "ERPNext Settings",
@@ -97,7 +97,7 @@
    "type": "DocType"
   },
   {
-   "icon": "accounting",
+   "icon": "wallet",
    "label": "Accounts Settings",
    "link_to": "Accounts Settings",
    "type": "DocType"
@@ -110,19 +110,19 @@
    "type": "DocType"
   },
   {
-   "icon": "stock",
+   "icon": "package",
    "label": "Stock Settings",
    "link_to": "Stock Settings",
    "type": "DocType"
   },
   {
-   "icon": "sell",
+   "icon": "store",
    "label": "Selling Settings",
    "link_to": "Selling Settings",
    "type": "DocType"
   },
   {
-   "icon": "buying",
+   "icon": "shopping-cart",
    "label": "Buying Settings",
    "link_to": "Buying Settings",
    "type": "DocType"
@@ -158,7 +158,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "accounting",
+   "icon": "wallet",
    "indent": 0,
    "keep_closed": 0,
    "label": "Accounts Settings",
@@ -184,7 +184,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "sell",
+   "icon": "store",
    "indent": 0,
    "keep_closed": 0,
    "label": "Selling Settings",
@@ -197,7 +197,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "buying",
+   "icon": "shopping-cart",
    "indent": 0,
    "keep_closed": 0,
    "label": "Buying Settings",
@@ -210,7 +210,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "stock",
+   "icon": "package",
    "indent": 0,
    "keep_closed": 0,
    "label": "Stock Settings",
@@ -236,7 +236,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "projects",
+   "icon": "folder-kanban",
    "indent": 0,
    "keep_closed": 0,
    "label": "Projects Settings",
@@ -249,7 +249,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "crm",
+   "icon": "handshake",
    "indent": 0,
    "keep_closed": 0,
    "label": "CRM Settings",
@@ -262,7 +262,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "support",
+   "icon": "headset",
    "indent": 0,
    "keep_closed": 0,
    "label": "Support Settings",
@@ -275,7 +275,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "getting-started",
+   "icon": "rocket",
    "indent": 1,
    "keep_closed": 1,
    "label": "Other Settings",
