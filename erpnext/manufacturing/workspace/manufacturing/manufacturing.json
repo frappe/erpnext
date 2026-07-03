@@ -13,7 +13,7 @@
  "doctype": "Workspace",
  "for_user": "",
  "hide_custom": 0,
- "icon": "organization",
+ "icon": "building-2",
  "idx": 1,
  "is_hidden": 0,
  "label": "Manufacturing",
@@ -432,7 +432,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-06-14 13:44:07.420267",
+ "modified": "2026-07-03 13:44:07.420267",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "module_onboarding": "Manufacturing Onboarding",
@@ -463,7 +463,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "home",
+   "icon": "house",
    "indent": 0,
    "keep_closed": 0,
    "label": "Home",
@@ -476,7 +476,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "chart",
+   "icon": "chart-column",
    "indent": 0,
    "keep_closed": 0,
    "label": "Dashboard",
@@ -528,7 +528,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "stock",
+   "icon": "package",
    "indent": 0,
    "keep_closed": 0,
    "label": "Stock Entry",
@@ -541,7 +541,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "getting-started",
+   "icon": "rocket",
    "indent": 1,
    "keep_closed": 1,
    "label": "Material Planning",
@@ -627,7 +627,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "tool",
+   "icon": "wrench",
    "indent": 1,
    "keep_closed": 1,
    "label": "Tools",

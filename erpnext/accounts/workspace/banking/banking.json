@@ -15,7 +15,7 @@
  "label": "Banking",
  "link_type": "DocType",
  "links": [],
- "modified": "2026-06-14 13:43:50.924019",
+ "modified": "2026-07-03 13:43:50.924019",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Banking",
@@ -43,7 +43,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "tool",
+   "icon": "wrench",
    "indent": 0,
    "keep_closed": 0,
    "label": "Bank Reconciliation",

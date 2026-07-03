@@ -18,7 +18,7 @@
 					<address>
 						{% if address.partner_address %}<p itemprop="address">{{ address.partner_address }}</p>{% endif %}
 						{% if address.phone %}<p itemprop="telephone">{{ address.phone }}</p>{% endif %}
-						{% if address.email %}<p itemprop="email"><span class="fa fa-envelope"></span> {{ address.email }}</p>{% endif %}
+						{% if address.email %}<p itemprop="email"><svg class="icon icon-xs"><use href="#icon-mail"></use></svg> {{ address.email }}</p>{% endif %}
 					</address>
 				{% endfor %}
 			{% endif %}

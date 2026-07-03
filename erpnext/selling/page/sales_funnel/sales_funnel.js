@@ -57,7 +57,7 @@ erpnext.SalesFunnel = class SalesFunnel {
 					function () {
 						me.get_data();
 					},
-					"fa fa-refresh"
+					"refresh-cw"
 				),
 			});
 
