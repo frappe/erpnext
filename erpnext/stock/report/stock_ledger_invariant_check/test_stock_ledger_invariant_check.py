@@ -4,12 +4,12 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.report.stock_ledger_invariant_check.stock_ledger_invariant_check import execute
 
 WAREHOUSE = "Stores - _TC"
 COMPANY = "_Test Company"
-ITEM = "_Test Item"
 
 
 class TestStockLedgerInvariantCheck(FrappeTestCase):
@@ -19,11 +19,12 @@ class TestStockLedgerInvariantCheck(FrappeTestCase):
 		return execute(filters)[1]
 
 	def make_movements(self) -> str:
-		frappe.db.set_value("Item", ITEM, "valuation_method", "FIFO")
-		make_stock_entry(item_code=ITEM, to_warehouse=WAREHOUSE, qty=10, rate=100, posting_date="2026-06-01")
-		make_stock_entry(item_code=ITEM, to_warehouse=WAREHOUSE, qty=5, rate=120, posting_date="2026-06-02")
-		make_stock_entry(item_code=ITEM, from_warehouse=WAREHOUSE, qty=4, rate=0, posting_date="2026-06-03")
-		return ITEM
+		# fresh item per test: db is only rolled back at class teardown on v15
+		item = make_item(properties={"valuation_method": "FIFO"}).name
+		make_stock_entry(item_code=item, to_warehouse=WAREHOUSE, qty=10, rate=100, posting_date="2026-06-01")
+		make_stock_entry(item_code=item, to_warehouse=WAREHOUSE, qty=5, rate=120, posting_date="2026-06-02")
+		make_stock_entry(item_code=item, from_warehouse=WAREHOUSE, qty=4, rate=0, posting_date="2026-06-03")
+		return item
 
 	def test_diagnostic_rows_have_no_discrepancy(self):
 		item = self.make_movements()
@@ -60,8 +61,6 @@ class TestStockLedgerInvariantCheck(FrappeTestCase):
 		self.assertEqual(data[-1].name, sle.name)
 
 	def test_batch_item_skips_fifo_queue_checks(self):
-		from erpnext.stock.doctype.item.test_item import make_item
-
 		item = make_item(
 			properties={"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "SLIC-BAT-.####"}
 		).name
