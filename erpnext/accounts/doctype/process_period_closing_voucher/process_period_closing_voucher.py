@@ -97,7 +97,7 @@ def start_pcv_processing(docname: str):
 		ppcvd = qb.DocType("Process Period Closing Voucher Detail")
 		if normal_balances := (
 			qb.from_(ppcvd)
-			.select(ppcvd.processing_date, ppcvd.report_type, ppcvd.parentfield)
+			.select(ppcvd.name, ppcvd.processing_date, ppcvd.report_type, ppcvd.parentfield)
 			.where(ppcvd.parent.eq(docname) & ppcvd.status.eq("Queued"))
 			.orderby(ppcvd.parentfield, ppcvd.idx, ppcvd.processing_date)
 			.limit(4)
@@ -108,12 +108,7 @@ def start_pcv_processing(docname: str):
 				for x in normal_balances:
 					frappe.db.set_value(
 						"Process Period Closing Voucher Detail",
-						{
-							"processing_date": x.processing_date,
-							"parent": docname,
-							"report_type": x.report_type,
-							"parentfield": x.parentfield,
-						},
+						x.name,
 						"status",
 						"Running",
 					)
@@ -124,10 +119,12 @@ def start_pcv_processing(docname: str):
 						is_async=True,
 						enqueue_after_commit=True,
 						docname=docname,
+						row_name=x.name,
 						date=x.processing_date,
 						report_type=x.report_type,
 						parentfield=x.parentfield,
 					)
+				frappe.db.commit()
 		else:
 			frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Completed")
 
@@ -251,7 +248,7 @@ def schedule_next_date(docname: str):
 	ppcvd = qb.DocType("Process Period Closing Voucher Detail")
 	if to_process := (
 		qb.from_(ppcvd)
-		.select(ppcvd.processing_date, ppcvd.report_type, ppcvd.parentfield)
+		.select(ppcvd.name, ppcvd.processing_date, ppcvd.report_type, ppcvd.parentfield)
 		.where(ppcvd.parent.eq(docname) & ppcvd.status.eq("Queued"))
 		.orderby(ppcvd.parentfield, ppcvd.idx, ppcvd.processing_date)
 		.limit(1)
@@ -261,15 +258,11 @@ def schedule_next_date(docname: str):
 		if not is_scheduler_inactive():
 			frappe.db.set_value(
 				"Process Period Closing Voucher Detail",
-				{
-					"processing_date": to_process[0].processing_date,
-					"parent": docname,
-					"report_type": to_process[0].report_type,
-					"parentfield": to_process[0].parentfield,
-				},
+				to_process[0].name,
 				"status",
 				"Running",
 			)
+			frappe.db.commit()
 			frappe.enqueue(
 				method="erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.process_individual_date",
 				queue="long",
@@ -277,6 +270,7 @@ def schedule_next_date(docname: str):
 				is_async=True,
 				enqueue_after_commit=True,
 				docname=docname,
+				row_name=to_process[0].name,
 				date=to_process[0].processing_date,
 				report_type=to_process[0].report_type,
 				parentfield=to_process[0].parentfield,
@@ -441,6 +435,8 @@ def summarize_and_post_ledger_entries(docname):
 
 	make_closing_entries(closing_entries, pcv.name, pcv.company, pcv.period_end_date)
 
+	frappe.db.commit()
+
 	frappe.db.set_value("Period Closing Voucher", pcv.name, "gle_processing_status", "Completed")
 	frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Completed")
 
@@ -526,10 +522,10 @@ def build_dimension_wise_balance_dict(gl_entries):
 	return dimension_balances
 
 
-def process_individual_date(docname: str, date, report_type, parentfield):
+def process_individual_date(docname: str, row_name, date, report_type, parentfield):
 	current_date_status = frappe.db.get_value(
 		"Process Period Closing Voucher Detail",
-		{"processing_date": date, "report_type": report_type, "parentfield": parentfield},
+		row_name,
 		"status",
 	)
 	if current_date_status != "Running":
@@ -576,17 +572,18 @@ def process_individual_date(docname: str, date, report_type, parentfield):
 	# save results
 	frappe.db.set_value(
 		"Process Period Closing Voucher Detail",
-		{"processing_date": date, "parent": docname, "report_type": report_type, "parentfield": parentfield},
+		row_name,
 		"closing_balance",
 		frappe.json.dumps(res),
 	)
 
 	frappe.db.set_value(
 		"Process Period Closing Voucher Detail",
-		{"processing_date": date, "parent": docname, "report_type": report_type, "parentfield": parentfield},
+		row_name,
 		"status",
 		"Completed",
 	)
+	frappe.db.commit()
 
 	# chain call
 	schedule_next_date(docname)
