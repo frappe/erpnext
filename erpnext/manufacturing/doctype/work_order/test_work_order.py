@@ -1545,6 +1545,100 @@ class TestWorkOrder(FrappeTestCase):
 		work_order.reload()
 		self.assertEqual(work_order.material_transferred_for_manufacturing, 2.0)
 
+<<<<<<< HEAD
+=======
+	def test_work_order_material_request_and_bom_details(self):
+		from erpnext.stock.doctype.material_request.material_request import (
+			make_stock_entry as mr_to_stock_entry,
+		)
+
+		work_order = make_wo_order_test_record(
+			planned_start_date=now(), qty=2, source_warehouse="Stores - _TC"
+		)
+
+		mr = make_material_request(work_order.name)
+		mr.schedule_date = today()
+		for item in mr.items:
+			item.schedule_date = today()
+		mr.submit()
+		self.assertEqual(mr.work_order, work_order.name)
+
+		ste = mr_to_stock_entry(mr.name)
+		self.assertEqual(ste.purpose, "Material Transfer for Manufacture")
+		self.assertEqual(ste.work_order, work_order.name)
+		self.assertEqual(ste.from_bom, 1.0)
+		self.assertEqual(ste.bom_no, work_order.bom_no)
+		self.assertEqual(ste.fg_completed_qty, 0.0)
+
+	def test_status_in_process_when_only_one_required_item_transferred_via_material_request(self):
+		"""Same bottleneck scenario as the Pick List flow, but the intermediate document is a
+		Material Request created directly from the Work Order: min-fraction keeps
+		material_transferred_for_manufacturing at 0, but the work order must still move to
+		In Process because material is already in WIP.
+		"""
+		from erpnext.stock.doctype.material_request.material_request import (
+			make_stock_entry as mr_to_stock_entry,
+		)
+
+		work_order = make_wo_order_test_record(
+			planned_start_date=now(), qty=2, source_warehouse="Stores - _TC"
+		)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item", target="Stores - _TC", qty=10, basic_rate=5000.0
+		)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item Home Desktop 100", target="Stores - _TC", qty=10, basic_rate=1000.0
+		)
+
+		mr = make_material_request(work_order.name)
+		mr.schedule_date = today()
+		# request only _Test Item; the other required item is left off this material request
+		mr.items = [item for item in mr.items if item.item_code == "_Test Item"]
+		for item in mr.items:
+			item.schedule_date = today()
+		mr.submit()
+
+		stock_entry = frappe.get_doc(mr_to_stock_entry(mr.name))
+		self.assertEqual(stock_entry.fg_completed_qty, 0.0)
+		stock_entry.submit()
+
+		work_order.reload()
+		self.assertEqual(work_order.material_transferred_for_manufacturing, 0.0)
+		self.assertEqual(work_order.status, "In Process")
+
+	def test_status_in_process_when_only_one_required_item_transferred_via_pick_list(self):
+		"""Stock Entry created from a Pick List that picked only one of the required items:
+		min-fraction keeps material_transferred_for_manufacturing at 0, but the work order must
+		still move to In Process because material is already in WIP."""
+		from erpnext.manufacturing.doctype.work_order.work_order import create_pick_list
+		from erpnext.stock.doctype.pick_list.pick_list import create_stock_entry
+
+		work_order = make_wo_order_test_record(
+			planned_start_date=now(), qty=2, source_warehouse="Stores - _TC"
+		)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item", target="Stores - _TC", qty=10, basic_rate=5000.0
+		)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item Home Desktop 100", target="Stores - _TC", qty=10, basic_rate=1000.0
+		)
+
+		pick_list = create_pick_list(work_order.name, for_qty=work_order.qty)
+		# pick only _Test Item; the other required item is left out of this pick list
+		pick_list.pick_manually = 1
+		pick_list.locations = [loc for loc in pick_list.locations if loc.item_code == "_Test Item"]
+		pick_list.save()
+		pick_list.submit()
+
+		stock_entry = frappe.get_doc(create_stock_entry(frappe.as_json(pick_list.as_dict())))
+		self.assertEqual(stock_entry.fg_completed_qty, 0.0)
+		stock_entry.submit()
+
+		work_order.reload()
+		self.assertEqual(work_order.material_transferred_for_manufacturing, 0.0)
+		self.assertEqual(work_order.status, "In Process")
+
+>>>>>>> dd264506db (test(manufacturing): add test to validate the work order status on partial pick-list transfer)
 	def test_backflushed_batch_raw_materials_based_on_transferred(self):
 		frappe.db.set_single_value(
 			"Manufacturing Settings",
