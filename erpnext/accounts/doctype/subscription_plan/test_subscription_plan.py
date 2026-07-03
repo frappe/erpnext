@@ -46,12 +46,10 @@ class TestSubscriptionPlan(ERPNextTestSuite):
 		rate = get_plan_rate(plan.name, start_date="2026-01-01", end_date="2026-03-31")
 		self.assertEqual(rate, 300)
 
-	def test_monthly_rate_across_year_boundary_underbills(self):
-		# SUSPECTED BUG: no_of_months uses relativedelta(end, start).months, which drops
-		# the years component, so a 14-month span (Jan 2026 to Feb 2027) that should bill
-		# 1400 (14 x 100) is billed as only 200 (2 months). Locking the current (wrong)
-		# value so a fix trips this test; the correct expectation is 1400.
+	def test_monthly_rate_across_year_boundary(self):
+		# a 14-month span (Jan 2026 to Feb 2027) bills all 14 months, not just the
+		# 2-month remainder that relativedelta.months alone would give
 		plan = self.make_plan(price_determination="Monthly Rate", cost=100)
 		plan.insert()
 		rate = get_plan_rate(plan.name, start_date="2026-01-01", end_date="2027-02-28")
-		self.assertEqual(rate, 200)
+		self.assertEqual(rate, 1400)
