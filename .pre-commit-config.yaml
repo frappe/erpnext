@@ -76,6 +76,13 @@ repos:
         # patches/ are historical, version-gated migrations (skipped on fresh Postgres installs);
         # out of scope for the always-on gate.
         exclude: ^erpnext/patches/
+      - id: semgrep
+        name: "Semgrep"
+        entry: .github/helper/semgrep_precommit.py
+        language: python
+        additional_dependencies: ["semgrep==1.168.0", "cryptography==46.0.3"]
+        pass_filenames: false
+        files: \.(js|py)$
 
 ci:
     autoupdate_schedule: weekly

@@ -8,9 +8,11 @@ from frappe.utils.telemetry import capture
 
 from erpnext.setup.demo import setup_demo_data
 from erpnext.setup.setup_wizard.operations import install_fixtures as fixtures
+from erpnext.setup.setup_wizard.operations.starter_data import create_starter_data, has_starter_data
 
 
 def get_setup_stages(args=None):  # nosemgrep
+	args = frappe._dict(args or {})
 	stages = [
 		{
 			"status": _("Installing presets"),
@@ -29,14 +31,32 @@ def get_setup_stages(args=None):  # nosemgrep
 				{"fn": setup_defaults, "args": args, "fail_msg": _("Failed to setup defaults")},
 			],
 		},
+	]
+
+	if has_starter_data(args):
+		stages.append(
+			{
+				"status": _("Creating starter records"),
+				"fail_msg": _("Failed to create starter records"),
+				"tasks": [
+					{
+						"fn": setup_starter_data,
+						"args": args,
+						"fail_msg": _("Failed to create starter records"),
+					}
+				],
+			}
+		)
+
+	stages.append(
 		{
 			"status": _("Personalizing your setup"),
 			"fail_msg": _("Failed to personalize your setup"),
 			"tasks": [
 				{"fn": capture_user_persona, "args": args, "fail_msg": _("Failed to personalize your setup")}
 			],
-		},
-	]
+		}
+	)
 
 	if args.get("setup_demo"):
 		stages.append(
@@ -85,12 +105,19 @@ def setup_defaults(args):  # nosemgrep
 	fixtures.install_defaults(frappe._dict(args))
 
 
+def setup_starter_data(args):  # nosemgrep
+	create_starter_data(frappe._dict(args))
+
+
 def setup_demo(args):  # nosemgrep
 	setup_demo_data(args.get("company_name"))
 
 
 # Only for programmatical use
 def setup_complete(args=None):  # nosemgrep
+	args = frappe._dict(args or {})
 	stage_fixtures(args)
 	setup_company(args)
 	setup_defaults(args)
+	if has_starter_data(args):
+		setup_starter_data(args)
