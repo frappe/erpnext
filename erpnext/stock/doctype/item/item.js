@@ -668,6 +668,13 @@ $.extend(erpnext.item, {
 
 	render_item_prices: function (frm) {
 		if (frm.doc.__islocal) return;
+
+		if (!frappe.model.can_read("Item Price")) {
+			frm.toggle_display("prices_html", false);
+			return;
+		}
+		frm.toggle_display("prices_html", true);
+
 		const requested_item = frm.doc.name;
 		const container = frm.fields_dict["prices_html"].$wrapper;
 
