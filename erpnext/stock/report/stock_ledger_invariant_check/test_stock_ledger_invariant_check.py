@@ -5,14 +5,14 @@ import frappe
 
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.report.stock_ledger_invariant_check.stock_ledger_invariant_check import execute
-from erpnext.tests.utils import ERPNextTestSuite
+from erpnext.tests.utils import FrappeTestCase
 
 WAREHOUSE = "Stores - _TC"
 COMPANY = "_Test Company"
 ITEM = "_Test Item"
 
 
-class TestStockLedgerInvariantCheck(ERPNextTestSuite):
+class TestStockLedgerInvariantCheck(FrappeTestCase):
 	def run_report(self, **extra):
 		filters = frappe._dict({"company": COMPANY, "warehouse": WAREHOUSE})
 		filters.update(extra)
