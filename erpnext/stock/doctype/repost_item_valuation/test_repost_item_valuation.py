@@ -2,7 +2,7 @@
 # See license.txt
 
 
-from unittest.mock import MagicMock, call
+from unittest.mock import MagicMock, call, patch
 
 import frappe
 from frappe.utils import add_days, add_to_date, now, nowdate, today
@@ -13,6 +13,7 @@ from erpnext.controllers.stock_controller import create_item_wise_repost_entries
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import (
+	execute_reposting_entry,
 	in_configured_timeslot,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -123,6 +124,47 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 		for riv in rivs:
 			self.assertEqual(riv.company, "_Test Company with perpetual inventory")
 			self.assertEqual(riv.warehouse, "Stores - TCP1")
+
+	def test_execute_reposting_entry_skips_closed_accounting_period(self):
+		company = "_Test Company with perpetual inventory"
+		stock_entry = make_stock_entry(
+			company=company,
+			qty=1,
+			rate=10,
+			target="Stores - TCP1",
+		)
+
+		riv = frappe.get_doc(
+			doctype="Repost Item Valuation",
+			based_on="Transaction",
+			voucher_type=stock_entry.doctype,
+			voucher_no=stock_entry.name,
+			posting_date=stock_entry.posting_date,
+			posting_time=stock_entry.posting_time,
+		)
+		riv.flags.dont_run_in_test = True
+		riv.submit()
+
+		accounting_period = frappe.get_doc(
+			{
+				"doctype": "Accounting Period",
+				"company": company,
+				"period_name": f"_Test RIV Closed Period {frappe.generate_hash(length=5)}",
+				"start_date": stock_entry.posting_date,
+				"end_date": stock_entry.posting_date,
+				"closed_documents": [{"document_type": stock_entry.doctype, "closed": 1}],
+			}
+		)
+		accounting_period.insert()
+
+		with patch("erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.repost") as repost_mock:
+			execute_reposting_entry(riv.name)
+
+		repost_mock.assert_not_called()
+		riv.reload()
+		self.assertEqual(riv.status, "Skipped")
+		self.assertIn("Skipped reposting because the Accounting Period is closed.", riv.error_log)
+		self.assertIn("closed Accounting Period", riv.error_log)
 
 	def test_deduplication(self):
 		def _assert_status(doc, status):

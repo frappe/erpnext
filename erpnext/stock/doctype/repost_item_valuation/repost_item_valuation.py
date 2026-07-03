@@ -15,6 +15,7 @@ from frappe.utils.user import get_users_with_role
 from rq.timeouts import JobTimeoutException
 
 import erpnext
+from erpnext.accounts.doctype.accounting_period.accounting_period import ClosedAccountingPeriod
 from erpnext.accounts.services.gl_validator import validate_accounting_period
 from erpnext.accounts.utils import get_future_stock_vouchers, repost_gle_for_stock_vouchers
 from erpnext.stock.stock_ledger import (
@@ -145,18 +146,7 @@ class RepostItemValuation(Document):
 			frappe.throw(_(msg))
 
 		# Accounting Period
-		if self.voucher_type:
-			validate_accounting_period(
-				[
-					frappe._dict(
-						{
-							"posting_date": self.posting_date,
-							"company": self.company,
-							"voucher_type": self.voucher_type,
-						}
-					)
-				]
-			)
+		self.validate_accounting_period_for_repost()
 
 		# Stock Closing Balance
 		closing_stock = self.get_closing_stock_balance()
@@ -168,6 +158,22 @@ class RepostItemValuation(Document):
 					name, to_date
 				)
 			)
+
+	def validate_accounting_period_for_repost(self):
+		if not self.voucher_type:
+			return
+
+		validate_accounting_period(
+			[
+				frappe._dict(
+					{
+						"posting_date": self.posting_date,
+						"company": self.company,
+						"voucher_type": self.voucher_type,
+					}
+				)
+			]
+		)
 
 	def reset_recreate_stock_ledgers(self):
 		if self.recreate_stock_ledgers and self.based_on != "Transaction":
@@ -410,6 +416,10 @@ def repost(doc):
 		doc.set_status("Completed")
 		doc.db_set("reposting_data_file", None)
 		remove_attached_file(doc.name)
+
+	except ClosedAccountingPeriod as e:
+		frappe.db.rollback()
+		mark_reposting_as_skipped_for_closed_accounting_period(doc, e)
 
 	except Exception as e:
 		if frappe.in_test:
@@ -711,8 +721,41 @@ def execute_reposting_entry(name):
 		return
 
 	if doc.status in ("Queued", "In Progress"):
+		if skip_reposting_if_accounting_period_closed(doc):
+			return
+
 		repost(doc)
 		doc.deduplicate_similar_repost()
+
+
+def skip_reposting_if_accounting_period_closed(doc):
+	try:
+		doc.validate_accounting_period_for_repost()
+	except ClosedAccountingPeriod as e:
+		mark_reposting_as_skipped_for_closed_accounting_period(doc, e)
+		return True
+
+	return False
+
+
+def mark_reposting_as_skipped_for_closed_accounting_period(doc, error):
+	message = frappe.message_log.pop() if frappe.message_log else str(error)
+	if isinstance(message, dict):
+		message = message.get("message")
+
+	message = message or str(error)
+	message = _("Skipped reposting because the Accounting Period is closed.") + "<br>" + message
+
+	frappe.db.set_value(
+		doc.doctype,
+		doc.name,
+		{
+			"error_log": message,
+			"status": "Skipped",
+		},
+	)
+	doc.error_log = message
+	doc.status = "Skipped"
 
 
 def get_repost_item_valuation_entries():
