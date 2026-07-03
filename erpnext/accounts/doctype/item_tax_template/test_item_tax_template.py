@@ -54,9 +54,6 @@ class TestItemTaxTemplate(ERPNextTestSuite):
 		doc.insert()
 		self.assertEqual(doc.taxes[0].tax_rate, 0)
 
-	def test_negative_tax_rate_is_accepted(self):
-		# SUSPECTED BUG: validate never bounds tax_rate, so a negative (or >100) rate
-		# saves silently. Locking the current (wrong) behaviour.
+	def test_negative_tax_rate_is_rejected(self):
 		doc = self.make_template([(TAX_ACCOUNT, -5, 0)])
-		doc.insert()
-		self.assertEqual(doc.taxes[0].tax_rate, -5)
+		self.assertRaises(frappe.ValidationError, doc.insert)

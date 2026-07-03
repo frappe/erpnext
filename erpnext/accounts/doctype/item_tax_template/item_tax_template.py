@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import flt
 
 
 class ItemTaxTemplate(Document):
@@ -29,6 +30,12 @@ class ItemTaxTemplate(Document):
 	def validate(self):
 		self.set_zero_rate_for_not_applicable_tax()
 		self.validate_tax_accounts()
+		self.validate_tax_rates()
+
+	def validate_tax_rates(self):
+		for row in self.get("taxes"):
+			if flt(row.tax_rate) < 0:
+				frappe.throw(_("Row {0}: Tax Rate cannot be negative").format(row.idx))
 
 	def set_zero_rate_for_not_applicable_tax(self):
 		"""Ensure tax_rate is 0 for any row marked as not applicable."""
