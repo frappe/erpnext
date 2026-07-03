@@ -220,6 +220,11 @@ frappe.query_reports["General Ledger"] = {
 			fieldtype: "Check",
 		},
 		{
+			fieldname: "show_reference_voucher",
+			label: __("Show Reference Voucher"),
+			fieldtype: "Check",
+		},
+		{
 			fieldname: "ignore_err",
 			label: __("Ignore Exchange Rate Revaluation and Gain / Loss Journals"),
 			fieldtype: "Check",

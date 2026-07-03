@@ -396,6 +396,23 @@ def set_bill_no(gl_entries):
 		gl["bill_no"] = inv_details.get(gl.get("against_voucher"), "")
 
 
+def set_reference_voucher(gl_entries, filters):
+	if not filters.get("show_reference_voucher"):
+		return
+
+	voucher_map = {}
+	for gle in gl_entries:
+		against = gle.get("against_voucher")
+		if against and against != gle.get("voucher_no"):
+			refs = voucher_map.setdefault(gle.get("voucher_no"), [])
+			if against not in refs:
+				refs.append(against)
+
+	for gle in gl_entries:
+		refs = voucher_map.get(gle.get("voucher_no"))
+		gle["reference_voucher"] = ", ".join(refs) if refs else ""
+
+
 def get_translated_labels_for_totals():
 	def wrap_in_quotes(label):
 		return f"'{label}'"
@@ -418,6 +435,8 @@ def get_data_with_opening_closing(filters, account_details, accounting_dimension
 	data = []
 
 	set_bill_no(gl_entries)
+
+	set_reference_voucher(gl_entries, filters)
 
 	gle_map = initialize_gle_map(gl_entries, filters)
 
@@ -813,6 +832,16 @@ def get_columns(filters):
 			{"label": _("Supplier Invoice No"), "fieldname": "bill_no", "fieldtype": "Data", "width": 100},
 		]
 	)
+
+	if filters.get("show_reference_voucher"):
+		columns.append(
+			{
+				"label": _("Reference Voucher"),
+				"fieldname": "reference_voucher",
+				"fieldtype": "Data",
+				"width": 180,
+			}
+		)
 
 	if filters.get("show_remarks"):
 		columns.extend([{"label": _("Remarks"), "fieldname": "remarks", "width": 400}])
