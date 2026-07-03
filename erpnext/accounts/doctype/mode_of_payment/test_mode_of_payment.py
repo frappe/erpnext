@@ -40,19 +40,15 @@ class TestModeofPayment(ERPNextTestSuite):
 		doc = self.make_mop(accounts=[(COMPANY, "Cash - _TC"), (COMPANY, "Debtors - _TC")])
 		self.assertRaises(frappe.ValidationError, doc.insert)
 
-	def test_disabling_mode_referenced_by_pos_profile_is_not_blocked(self):
-		# SUSPECTED BUG: validate_pos_mode_of_payment queries "Sales Invoice Payment"
-		# rows with parenttype "POS Profile", but a POS Profile's payments are stored
-		# as "POS Payment Method" rows. The filter never matches, so the guard is dead
-		# and a mode still referenced by a POS Profile disables without complaint.
-		# Locking the current (wrong) behaviour so a fix to the guard trips this test.
+	def test_disabling_mode_referenced_by_pos_profile_throws(self):
+		# the guard reads the POS Profile's "POS Payment Method" rows, so a mode still
+		# referenced by a POS Profile cannot be disabled
 		from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 
 		make_pos_profile()  # its payments row references the "Cash" mode of payment
 		cash = frappe.get_doc("Mode of Payment", "Cash")
 		cash.enabled = 0
-		cash.save()
-		self.assertEqual(frappe.db.get_value("Mode of Payment", "Cash", "enabled"), 0)
+		self.assertRaises(frappe.ValidationError, cash.save)
 
 	def test_disabling_unreferenced_mode_succeeds(self):
 		doc = self.make_mop(accounts=[(COMPANY, "Cash - _TC")], enabled=0)
