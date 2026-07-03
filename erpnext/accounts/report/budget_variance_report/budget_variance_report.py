@@ -315,21 +315,28 @@ def get_columns(filters):
 	for year in fiscal_year:
 		for from_date, to_date in get_period_date_ranges(filters["period"], year[0]):
 			if filters["period"] == "Yearly":
-				labels = [
-					_("Budget") + " " + str(year[0]),
-					_("Actual") + " " + str(year[0]),
-					_("Variance") + " " + str(year[0]),
+				label_period_pairs = [
+					(_("Budget") + " " + str(year[0]), "budget"),
+					(_("Actual") + " " + str(year[0]), "actual"),
+					(_("Variance") + " " + str(year[0]), "variance"),
 				]
-				for label in labels:
+				for label, period_type in label_period_pairs:
 					columns.append(
-						{"label": label, "fieldtype": "Float", "fieldname": frappe.scrub(label), "width": 150}
+						{
+							"label": label,
+							"fieldtype": "Float",
+							"fieldname": frappe.scrub(label),
+							"width": 150,
+							"period_type": period_type,
+						}
 					)
 			else:
-				for label in [
-					_("Budget") + " (%s)" + " " + str(year[0]),
-					_("Actual") + " (%s)" + " " + str(year[0]),
-					_("Variance") + " (%s)" + " " + str(year[0]),
-				]:
+				label_period_pairs = [
+					(_("Budget") + " (%s)" + " " + str(year[0]), "budget"),
+					(_("Actual") + " (%s)" + " " + str(year[0]), "actual"),
+					(_("Variance") + " (%s)" + " " + str(year[0]), "variance"),
+				]
+				for label, period_type in label_period_pairs:
 					if group_months:
 						label = label % (
 							formatdate(from_date, format_string="MMM")
@@ -340,13 +347,25 @@ def get_columns(filters):
 						label = label % formatdate(from_date, format_string="MMM")
 
 					columns.append(
-						{"label": label, "fieldtype": "Float", "fieldname": frappe.scrub(label), "width": 150}
+						{
+							"label": label,
+							"fieldtype": "Float",
+							"fieldname": frappe.scrub(label),
+							"width": 150,
+							"period_type": period_type,
+						}
 					)
 
 	if filters["period"] != "Yearly":
 		for label in [_("Total Budget"), _("Total Actual"), _("Total Variance")]:
 			columns.append(
-				{"label": label, "fieldtype": "Float", "fieldname": frappe.scrub(label), "width": 150}
+				{
+					"label": label,
+					"fieldtype": "Float",
+					"fieldname": frappe.scrub(label),
+					"width": 150,
+					"period_type": "total",
+				}
 			)
 
 		return columns
@@ -414,37 +433,23 @@ def build_comparison_chart_data(filters, columns, data):
 	if not data:
 		return None
 
-	budget_fields = []
-	actual_fields = []
+	budget_columns = [col for col in columns if col.get("period_type") == "budget"]
+	actual_columns = [col for col in columns if col.get("period_type") == "actual"]
 
-	for col in columns:
-		fieldname = col.get("fieldname")
-		if not fieldname:
-			continue
-
-		if fieldname.startswith("budget_"):
-			budget_fields.append(fieldname)
-		elif fieldname.startswith("actual_"):
-			actual_fields.append(fieldname)
-
-	if not budget_fields or not actual_fields:
+	if not budget_columns or not actual_columns:
 		return None
 
-	labels = [
-		col["label"].replace("Budget", "").strip()
-		for col in columns
-		if col.get("fieldname", "").startswith("budget_")
-	]
+	labels = [col["label"].replace("Budget", "").strip() for col in budget_columns]
 
-	budget_values = [0] * len(budget_fields)
-	actual_values = [0] * len(actual_fields)
+	budget_values = [0] * len(budget_columns)
+	actual_values = [0] * len(actual_columns)
 
 	for row in data:
-		for i, field in enumerate(budget_fields):
-			budget_values[i] += flt(row.get(field))
+		for i, col in enumerate(budget_columns):
+			budget_values[i] += flt(row.get(col["fieldname"]))
 
-		for i, field in enumerate(actual_fields):
-			actual_values[i] += flt(row.get(field))
+		for i, col in enumerate(actual_columns):
+			actual_values[i] += flt(row.get(col["fieldname"]))
 
 	return {
 		"data": {

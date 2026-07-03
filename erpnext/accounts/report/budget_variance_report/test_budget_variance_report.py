@@ -19,7 +19,7 @@ class TestBudgetVarianceReport(ERPNextTestSuite):
 	def setUp(self):
 		self.fy = get_fiscal_year(nowdate())[0]
 
-	def run_report(self, **extra):
+	def run_report(self, return_full=False, **extra):
 		filters = frappe._dict(
 			{
 				"company": "_Test Company",
@@ -30,7 +30,8 @@ class TestBudgetVarianceReport(ERPNextTestSuite):
 				**extra,
 			}
 		)
-		return execute(filters)[1]
+		result = execute(filters)
+		return result if return_full else result[1]
 
 	def report_row(self, data, dimension, account=ACCOUNT):
 		row = next(
@@ -115,3 +116,66 @@ class TestBudgetVarianceReport(ERPNextTestSuite):
 		# a dimension without any budget produces no report rows
 		data = self.run_report(budget_against_filter=["_Test Write Off Cost Center - _TC"])
 		self.assertEqual(data, [])
+
+	def test_chart_data_actual_aligned_with_correct_period(self):
+		# guards against the chart plotting an actual amount under the previous
+		# period's label instead of the period the transaction was actually posted in
+		set_total_expense_zero(nowdate(), "cost_center")
+		make_budget(
+			budget_against="Cost Center", cost_center=COST_CENTER, budget_amount=120000, submit_budget=1
+		)
+		make_journal_entry(ACCOUNT, "_Test Bank - _TC", 50000, cost_center=COST_CENTER, submit=True)
+
+		_columns, data, _, chart_data = self.run_report(period="Monthly", return_full=True)
+		self.assertIsNotNone(chart_data)
+
+		month_label = frappe.utils.formatdate(nowdate(), "MMM")
+		target_label = f"({month_label}) {self.fy}"
+
+		labels = chart_data["data"]["labels"]
+
+		self.assertIn(target_label, labels)
+		idx = labels.index(target_label)
+
+		actual_values = next(
+			d["values"] for d in chart_data["data"]["datasets"] if d["name"] == frappe._("Actual Expense")
+		)
+
+		self.assertEqual(len(labels), len(actual_values))
+
+		# the journal entry's amount must land under its own posting month
+		self.assertEqual(actual_values[idx], 50000)
+
+		# and must not leak into any neighbouring period (the original bug)
+		for i, value in enumerate(actual_values):
+			if i != idx:
+				self.assertEqual(value, 0)
+
+	def test_chart_data_excludes_totals(self):
+		# guards against "Total Budget"/"Total Actual" columns being swept into the
+		# chart's period datasets, which would double-count against the real periods
+		set_total_expense_zero(nowdate(), "cost_center")
+		make_budget(
+			budget_against="Cost Center", cost_center=COST_CENTER, budget_amount=120000, submit_budget=1
+		)
+		make_journal_entry(ACCOUNT, "_Test Bank - _TC", 50000, cost_center=COST_CENTER, submit=True)
+
+		_columns, data, _, chart_data = self.run_report(period="Monthly", return_full=True)
+		self.assertIsNotNone(chart_data)
+
+		labels = chart_data["data"]["labels"]
+
+		# exactly 12 monthly periods should be charted, not 12 + the 3 Total columns
+		self.assertEqual(len(labels), 12)
+
+		row = self.report_row(data, COST_CENTER)
+
+		budget_values = next(
+			d["values"] for d in chart_data["data"]["datasets"] if d["name"] == frappe._("Budget")
+		)
+
+		self.assertEqual(len(budget_values), 12)
+
+		# sum of the charted monthly budgets should equal the row's total_budget,
+		# not 2x it (which would happen if the Total column were also summed in)
+		self.assertEqual(sum(budget_values), row["total_budget"])
