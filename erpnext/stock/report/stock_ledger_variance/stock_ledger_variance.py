@@ -297,3 +297,5 @@ def has_difference(row, float_precision, currency_precision, difference_in, valu
 		return True
 	elif difference_in not in ["Qty", "Value", "Valuation"] and (qty_diff or value_diff or valuation_diff):
 		return True
+
+	return False

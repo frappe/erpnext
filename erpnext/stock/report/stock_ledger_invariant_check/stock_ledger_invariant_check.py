@@ -128,6 +128,7 @@ def add_fifo_fields(sle, prev_sle):
 	sle.fifo_valuation_diff = (
 		sle.valuation_rate - sle.fifo_valuation_rate if sle.fifo_valuation_rate else None
 	)
+	# prev row may not maintain a queue; H and H - F stay blank across the gap
 	if prev_sle and prev_sle.fifo_stock_value is not None:
 		sle.fifo_stock_diff = sle.fifo_stock_value - prev_sle.fifo_stock_value
 		sle.fifo_difference_diff = sle.fifo_stock_diff - sle.stock_value_difference
