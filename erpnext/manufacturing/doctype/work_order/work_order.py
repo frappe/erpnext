@@ -266,6 +266,7 @@ class WorkOrder(Document):
 			self.validate_sales_order()
 
 		self.set_default_warehouse()
+		self.set_operation_warehouses()
 		self.validate_warehouse_belongs_to_company()
 		self.check_wip_warehouse_skip()
 		self.calculate_operating_cost()
@@ -1410,6 +1411,23 @@ class WorkOrder(Document):
 
 		self.set("operations", operations)
 		self.calculate_time()
+		self.set_operation_warehouses()
+
+	def set_operation_warehouses(self):
+		if not self.track_semi_finished_goods or not self.operations:
+			return
+
+		operations = self.operations
+		last_idx = len(operations) - 1
+		for idx, op in enumerate(operations):
+			if not op.source_warehouse:
+				op.source_warehouse = self.source_warehouse
+
+			if not op.fg_warehouse:
+				op.fg_warehouse = self.fg_warehouse if idx == last_idx else self.source_warehouse
+
+			if not op.wip_warehouse:
+				op.wip_warehouse = self.wip_warehouse
 
 	def calculate_time(self):
 		for d in self.get("operations"):
