@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-06-28 10:20+0000\n"
-"PO-Revision-Date: 2026-07-01 20:39\n"
+"PO-Revision-Date: 2026-07-03 21:32\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -5054,7 +5054,7 @@ msgstr "Fel uppstod under uppdatering process"
 
 #: erpnext/stock/reorder_item.py:368
 msgid "An error occurred for certain Items while creating Material Requests based on Re-order level. Please rectify these issues :"
-msgstr "Fel uppstod för vissa artiklar när Material Begäran skapades baserat på beställning nivå. Vänligen åtgärda dessa problem:"
+msgstr "Fel uppstod för vissa artiklar när Material Begäran skapades baserat på återbeställning nivå. Vänligen åtgärda dessa problem:"
 
 #: erpnext/buying/report/supplier_quotation_comparison/supplier_quotation_comparison.html:124
 msgid "Analysis Chart"
@@ -6451,7 +6451,7 @@ msgstr "Automatiskt Skapad"
 #. Request'
 #: erpnext/stock/doctype/material_request/material_request.json
 msgid "Auto Created (Reorder)"
-msgstr "Skapas automatiskt (ombeställning)"
+msgstr "Skapas automatiskt (återbeställning)"
 
 #. Label of the auto_created_serial_and_batch_bundle (Check) field in DocType
 #. 'Stock Ledger Entry'
@@ -6569,7 +6569,7 @@ msgstr "Automatiskt avstämning av Parti i Bank Transaktioner"
 #. Label of the reorder_section (Section Break) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Auto re-order"
-msgstr "Automatisk Ombeställning"
+msgstr "Automatisk Återbeställning"
 
 #. Label of the auto_reconcile_payments (Check) field in DocType 'Accounts
 #. Settings'
@@ -8221,7 +8221,7 @@ msgstr "Parti {0} av Artikel {1} är Inaktiverad."
 #: erpnext/stock/workspace/stock/stock.json
 #: erpnext/workspace_sidebar/stock.json
 msgid "Batch-Wise Balance History"
-msgstr "Saldo Historik per Parti"
+msgstr "Partibaserad Saldo Historik"
 
 #: erpnext/stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:164
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:183
@@ -9814,7 +9814,7 @@ msgstr "Kan inte demontera {0} mot Lager Post {1}. Endast {2} tillgängliga för
 
 #: erpnext/setup/doctype/company/company.py:233
 msgid "Cannot enable Item-wise Inventory Account, as there are existing Stock Ledger Entries for the company {0} with Warehouse-wise Inventory Account. Please cancel the stock transactions first and try again."
-msgstr "Kan inte aktivera Lager Konto per Lager, eftersom det redan finns befintliga Lager Register Poster för {0} med Lager Konto per Lager. Avbryt lager transaktioner först och försök igen."
+msgstr "Kan inte aktivera Artikelbaserad Lager Konto, eftersom det redan finns befintliga Lager Register Poster för {0} med Lagerbaserad Lager Konto. Avbryt lager transaktioner först och försök igen."
 
 #: erpnext/crm/doctype/crm_settings/crm_settings.py:43
 msgid "Cannot enable Opportunity creation from Contact Us because the Contact Us form is disabled."
@@ -10213,7 +10213,7 @@ msgstr "Kategori Detaljer"
 
 #: erpnext/assets/dashboard_fixtures.py:93
 msgid "Category-wise Asset Value"
-msgstr "Tillgång Värde per Kategori"
+msgstr "Kategoribaserad Tillgång Värde"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.py:289
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.py:140
@@ -15118,7 +15118,7 @@ msgstr "Kund eller Artikel"
 
 #: erpnext/setup/doctype/authorization_rule/authorization_rule.py:93
 msgid "Customer required for 'Customerwise Discount'"
-msgstr "Kund erfordras för \"Kund Rabatt\""
+msgstr "Kund erfordras för \"Kundbaserad Rabatt\""
 
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:885
 #: erpnext/selling/doctype/sales_order/sales_order.py:392
@@ -15171,7 +15171,7 @@ msgstr "Kundens Leverantör"
 #. Name of a report
 #: erpnext/selling/report/customer_wise_item_price/customer_wise_item_price.json
 msgid "Customer-wise Item Price"
-msgstr "Artikel Pris per Kund"
+msgstr "Kundbaserad Artikel Pris"
 
 #: erpnext/crm/report/lost_opportunity/lost_opportunity.py:43
 msgid "Customer/Lead Name"
@@ -15206,7 +15206,7 @@ msgstr "Kunder inte valda."
 #. Option for the 'Based On' (Select) field in DocType 'Authorization Rule'
 #: erpnext/setup/doctype/authorization_rule/authorization_rule.json
 msgid "Customerwise Discount"
-msgstr "Rabatt per Kund"
+msgstr "Kundbaserad Rabatt"
 
 #. Name of a DocType
 #. Label of the customs_tariff_number (Link) field in DocType 'Item'
@@ -17168,7 +17168,7 @@ msgstr "Dimension Namn"
 #. Name of a report
 #: erpnext/accounts/report/dimension_wise_accounts_balance_report/dimension_wise_accounts_balance_report.json
 msgid "Dimension-wise Accounts Balance Report"
-msgstr "Bokföring Saldo Rapport per Dimension"
+msgstr "Dimension baserad Bokföring Saldo Rapport"
 
 #. Label of the dimensions_section (Section Break) field in DocType 'GL Entry'
 #: erpnext/accounts/doctype/gl_entry/gl_entry.json
@@ -17872,7 +17872,7 @@ msgstr "Utvidga Ej"
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.py:129
 msgid "Do Not Use Batchwise Valuation"
-msgstr "Använd inte Parti baserad Värdering"
+msgstr "Använd inte Partibaserad Värdering"
 
 #. Label of the do_not_fetch_incoming_rate_from_serial_no (Check) field in
 #. DocType 'Stock Reposting Settings'
@@ -18890,7 +18890,7 @@ msgstr "Aktivera Automatisk E-post"
 
 #: erpnext/stock/doctype/item/item.py:1171
 msgid "Enable Auto Re-Order"
-msgstr "Aktivera Automatisk Ombeställning"
+msgstr "Aktivera Automatisk Återbeställning"
 
 #. Label of the enable_party_matching (Check) field in DocType 'Accounts
 #. Settings'
@@ -18969,7 +18969,7 @@ msgstr "Aktivera Oförenderlig Bokföring"
 #. 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Enable Item-wise Inventory Account"
-msgstr "Aktivera Lager Konto per Artikel"
+msgstr "Aktivera Artikelbaserad Lager Konto"
 
 #. Label of the enable_loyalty_point_program (Check) field in DocType 'Accounts
 #. Settings'
@@ -21056,7 +21056,7 @@ msgstr "Följ Kalender Månader"
 
 #: erpnext/templates/emails/reorder_item.html:1
 msgid "Following Material Requests have been raised automatically based on Item's re-order level"
-msgstr "Följande Material Begäran skapades automatiskt baserat på Artikel beställning nivå"
+msgstr "Följande Material Begäran skapades automatiskt baserat på Artikel återbeställning nivå"
 
 #: erpnext/selling/doctype/customer/mapper.py:173
 msgid "Following fields are mandatory to create address:"
@@ -23792,7 +23792,7 @@ msgstr "Om artikel handlas som Noll Värdering Pris i denna post, aktivera 'Till
 #. Request Item'
 #: erpnext/stock/doctype/material_request_item/material_request_item.json
 msgid "If the reorder check is set at the Group warehouse level, the available quantity becomes the sum of the projected quantities of all its child warehouses."
-msgstr "Om ombeställning kontroll är angiven på grupp lager nivå blir tillgänglig kvantitet summa av planerad kvantitet för alla underordnade lager."
+msgstr "Om återbeställning kontroll är angiven på grupp lager nivå blir tillgänglig kvantitet summa av planerad kvantitet för alla underordnade lager."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1286
 msgid "If the selected BOM has Operations mentioned in it, the system will fetch all Operations from BOM, these values can be changed."
@@ -24688,7 +24688,7 @@ msgstr "Felaktig Parti Förbrukad"
 
 #: erpnext/stock/doctype/item/item.py:602
 msgid "Incorrect Check in (group) Warehouse for Reorder"
-msgstr "Felaktig vald (grupp) Lager för Ombeställning"
+msgstr "Felaktig vald (grupp) Lager för Återbeställning"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:148
 msgid "Incorrect Company"
@@ -27177,7 +27177,7 @@ msgstr "Artikel Grupp inte angiven i Artikel Inställningar för Artikel {0}"
 #. Option for the 'Based On' (Select) field in DocType 'Authorization Rule'
 #: erpnext/setup/doctype/authorization_rule/authorization_rule.json
 msgid "Item Group wise Discount"
-msgstr "Rabatt per Artikel Grupp"
+msgstr "Artikel Grupp baserad Rabatt"
 
 #. Label of the item_groups (Table) field in DocType 'POS Profile'
 #: erpnext/accounts/doctype/pos_profile/pos_profile.json
@@ -27519,7 +27519,7 @@ msgstr "Artikel Referens"
 #: erpnext/stock/doctype/item_reorder/item_reorder.json
 #: erpnext/stock/doctype/material_request_item/material_request_item.json
 msgid "Item Reorder"
-msgstr "Artikel Ombeställning"
+msgstr "Artikel Återbeställning"
 
 #. Label of the item_row (Data) field in DocType 'Item Wise Tax Detail'
 #: erpnext/accounts/doctype/item_wise_tax_detail/item_wise_tax_detail.json
@@ -27730,12 +27730,12 @@ msgstr "Var Används Artikel"
 #: erpnext/stock/report/item_wise_consumption/item_wise_consumption.json
 #: erpnext/workspace_sidebar/buying.json
 msgid "Item Wise Consumption"
-msgstr "Artikelvis Förbrukning"
+msgstr "Artikelbaserad Förbrukning"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/item_wise_tax_detail/item_wise_tax_detail.json
 msgid "Item Wise Tax Detail"
-msgstr "Moms Detalj per Artikel"
+msgstr "Artikelbaserad Moms Detalj"
 
 #. Label of the item_wise_tax_details (Table) field in DocType 'POS Invoice'
 #. Label of the item_wise_tax_details (Table) field in DocType 'Purchase
@@ -27759,11 +27759,11 @@ msgstr "Moms Detalj per Artikel"
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Item Wise Tax Details"
-msgstr "Artikel Moms Detaljer"
+msgstr "Artikelbaserade Moms Detaljer"
 
 #: erpnext/controllers/taxes_and_totals.py:562
 msgid "Item Wise Tax Details do not match with Taxes and Charges at the following rows:"
-msgstr "Artikel Moms Detaljer stämmer inte överens med Moms och Avgifter på följande rader:"
+msgstr "Artikelbaserade Moms Detaljer stämmer inte med Moms och Avgifter på följande rader:"
 
 #. Label of the section_break_rrrx (Section Break) field in DocType 'Sales
 #. Forecast'
@@ -27967,7 +27967,7 @@ msgstr "Artikel {0}: {1} Kvantitet producerad ."
 #. Name of a report
 #: erpnext/stock/report/item_wise_price_list_rate/item_wise_price_list_rate.json
 msgid "Item-wise Price List Rate"
-msgstr "Prislista Pris per Artikel"
+msgstr "Artikelbaserad Prislista Pris "
 
 #. Name of a report
 #. Label of a Link in the Buying Workspace
@@ -27976,14 +27976,14 @@ msgstr "Prislista Pris per Artikel"
 #: erpnext/buying/workspace/buying/buying.json
 #: erpnext/workspace_sidebar/buying.json
 msgid "Item-wise Purchase History"
-msgstr "Inköp Historik per Artikel"
+msgstr "Artikelbaserad Inköp Historik"
 
 #. Name of a report
 #. Label of a Workspace Sidebar Item
 #: erpnext/accounts/report/item_wise_purchase_register/item_wise_purchase_register.json
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Item-wise Purchase Register"
-msgstr "Inköp Register per Artikel"
+msgstr "Artikelbaserad Inköp Register"
 
 #. Name of a report
 #. Label of a Link in the Selling Workspace
@@ -27992,19 +27992,19 @@ msgstr "Inköp Register per Artikel"
 #: erpnext/selling/workspace/selling/selling.json
 #: erpnext/workspace_sidebar/selling.json
 msgid "Item-wise Sales History"
-msgstr "Försäljning Historik per Artikel"
+msgstr "Artikelbaserad Försäljning Historik"
 
 #. Name of a report
 #. Label of a Workspace Sidebar Item
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.json
 #: erpnext/workspace_sidebar/selling.json
 msgid "Item-wise Sales Register"
-msgstr "Försäljning Register per Artikel"
+msgstr "Artikelbaserad Försäljning Register"
 
 #. Label of a Workspace Sidebar Item
 #: erpnext/workspace_sidebar/financial_reports.json
 msgid "Item-wise sales Register"
-msgstr "Försäljning Register per Artikel"
+msgstr "Artikelbaserad Försäljning Register"
 
 #: erpnext/stock/get_item_details.py:769
 msgid "Item/Item Code required to get Item Tax Template."
@@ -28111,7 +28111,7 @@ msgstr "Artikel {0} saknas i Artikel Register."
 #. Option for the 'Based On' (Select) field in DocType 'Authorization Rule'
 #: erpnext/setup/doctype/authorization_rule/authorization_rule.json
 msgid "Itemwise Discount"
-msgstr "Rabatt per Artikel"
+msgstr "Artikelbaserad Rabatt"
 
 #. Name of a report
 #. Label of a Link in the Stock Workspace
@@ -28120,7 +28120,7 @@ msgstr "Rabatt per Artikel"
 #: erpnext/stock/workspace/stock/stock.json
 #: erpnext/workspace_sidebar/stock.json
 msgid "Itemwise Recommended Reorder Level"
-msgstr "Rekommenderad Ombeställning Nivå per Artikel"
+msgstr "Artikelbaserad Rekommenderad Återbeställning Nivå"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: erpnext/stock/doctype/item_barcode/item_barcode.json
@@ -40686,16 +40686,16 @@ msgstr "Projekt kommer att vara tillgänglig på hemsida till dessa Användare"
 #: erpnext/projects/workspace/projects/projects.json
 #: erpnext/workspace_sidebar/projects.json
 msgid "Project wise Stock Tracking"
-msgstr "Lager Spårning per Projekt"
+msgstr "Projektbaserad Lager Spårning"
 
 #. Name of a report
 #: erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.json
 msgid "Project wise Stock Tracking "
-msgstr "Lager Spårning per Projekt"
+msgstr "Projektbaserad Lager Spårning "
 
 #: erpnext/controllers/trends.py:457
 msgid "Project-wise data is not available for Quotation"
-msgstr "Data per Projekt finns inte tillgängligt för Försäljning Offert"
+msgstr "Projektbaserad data är inte tillgängligt för Försäljning Offert"
 
 #. Label of the projected_on_hand (Float) field in DocType 'Material Request
 #. Item'
@@ -41821,7 +41821,7 @@ msgstr "Kvantitet att Producera"
 
 #: erpnext/manufacturing/report/quality_inspection_summary/quality_inspection_summary.py:56
 msgid "Qty Wise Chart"
-msgstr "Kvantitet Diagram"
+msgstr "Kvantitetbaserad Diagram"
 
 #. Label of the section_break_6 (Section Break) field in DocType 'Asset
 #. Capitalization Service Item'
@@ -42669,7 +42669,7 @@ msgstr "Inköp Offerter är inte tillåtna för {0} på grund av Resultat Kort v
 #. Label of the auto_indent (Check) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Raise Material Request when stock reaches re-order level"
-msgstr "Skapa Material Begäran när Lager når ombeställning nivå"
+msgstr "Skapa Material Begäran när Lager når återbeställning nivå"
 
 #. Label of the complaint_raised_by (Data) field in DocType 'Warranty Claim'
 #: erpnext/support/doctype/warranty_claim/warranty_claim.json
@@ -43168,12 +43168,12 @@ msgstr "Återöppna"
 #. Label of the warehouse_reorder_level (Float) field in DocType 'Item Reorder'
 #: erpnext/stock/doctype/item_reorder/item_reorder.json
 msgid "Re-order Level"
-msgstr "Ombeställning Nivå"
+msgstr "Återbeställning Nivå"
 
 #. Label of the warehouse_reorder_qty (Float) field in DocType 'Item Reorder'
 #: erpnext/stock/doctype/item_reorder/item_reorder.json
 msgid "Re-order Qty"
-msgstr "Ombeställning Kvantitet"
+msgstr "Återbeställning Kvantitet"
 
 #: erpnext/accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.py:227
 msgid "Reached Root"
@@ -44313,18 +44313,18 @@ msgstr "Hyrd"
 #: erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py:64
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.py:213
 msgid "Reorder Level"
-msgstr "Ombeställning Nivå"
+msgstr "Återbeställning Nivå"
 
 #. Label of the reorder_qty (Float) field in DocType 'Material Request Item'
 #: erpnext/stock/doctype/material_request_item/material_request_item.json
 #: erpnext/stock/report/stock_projected_qty/stock_projected_qty.py:220
 msgid "Reorder Qty"
-msgstr "Ombeställning Kvantitet"
+msgstr "Återbeställning Kvantitet"
 
 #. Label of the reorder_levels (Table) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
 msgid "Reorder level based on Warehouse"
-msgstr "Ombeställning Nivå Baserad på Lager"
+msgstr "Återbeställning Nivå Baserad på Lager"
 
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry'
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry Type'
@@ -46411,7 +46411,7 @@ msgstr "Rad #{0}: Välj Underenhet Lager"
 
 #: erpnext/stock/doctype/item/item.py:590
 msgid "Row #{0}: Please set reorder quantity"
-msgstr "Rad # {0}: Ange Ombeställning Kvantitet"
+msgstr "Rad #{0}: Ange Återbeställning Kvantitet"
 
 #: erpnext/controllers/accounts_controller.py:522
 msgid "Row #{0}: Please update deferred revenue/expense account in item row or default account in company master"
@@ -48044,7 +48044,7 @@ msgstr "Säljare Mål"
 #: erpnext/selling/workspace/selling/selling.json
 #: erpnext/workspace_sidebar/selling.json
 msgid "Sales Person-wise Transaction Summary"
-msgstr "Transaktion Översikt per Säljare"
+msgstr "Säljarebaserad Transaktion Översikt"
 
 #. Label of a Workspace Sidebar Item
 #: erpnext/selling/page/sales_funnel/sales_funnel.js:50
@@ -49993,7 +49993,7 @@ msgstr "Ange Total Summa till Standard Betalning Metod"
 #. 'Territory'
 #: erpnext/setup/doctype/territory/territory.json
 msgid "Set Item Group-wise budgets on this Territory. You can also include seasonality by setting the Distribution."
-msgstr "Ange Budget per Artikel Grupp för detta Distrikt. Man kan även inkludera säsongvariationer genom att ange Fördelning."
+msgstr "Ange Artikel Grupp baserad Budget för detta Distrikt. Inkludera även säsongvariationer genom att ange Fördelning."
 
 #. Label of the set_landed_cost_based_on_purchase_invoice_rate (Check) field in
 #. DocType 'Buying Settings'
@@ -50726,7 +50726,7 @@ msgstr "Visa Kumulativ Belopp"
 
 #: erpnext/stock/report/stock_balance/stock_balance.js:143
 msgid "Show Dimension Wise Stock"
-msgstr "Visa Lager per Dimension"
+msgstr "Visa Dimensionbaserad Lager"
 
 #: erpnext/stock/report/stock_qty_vs_serial_no_count/stock_qty_vs_serial_no_count.js:29
 msgid "Show Disabled Items"
@@ -50863,7 +50863,7 @@ msgstr "Visa Varianter"
 
 #: erpnext/stock/report/stock_ageing/stock_ageing.js:64
 msgid "Show Warehouse-wise Stock"
-msgstr "Visa Lager Värde per Lager"
+msgstr "Visa Lagerbaserad Lager Värde"
 
 #: erpnext/manufacturing/report/bom_stock_analysis/bom_stock_analysis.js:26
 msgid "Show availability of exploded items"
@@ -55085,7 +55085,7 @@ msgstr "Distrikt Mål"
 #. Name of a report
 #: erpnext/selling/report/territory_wise_sales/territory_wise_sales.json
 msgid "Territory-wise Sales"
-msgstr "Försäljning per Distrikt"
+msgstr "Distriktbaserad Försäljning"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -55656,7 +55656,7 @@ msgstr "{0} innehåller Enhet Pris Artiklar."
 
 #: erpnext/stock/doctype/item/item.py:491
 msgid "The {0} prefix '{1}' already exists. Please change the Serial No Series, otherwise you will get a Duplicate Entry error."
-msgstr "Prefix {0} '{1}' finns redan. Ändra serienummer, annars blir det dubblett post."
+msgstr "Prefix {0} '{1}' finns redan. Ändra serie nummer, annars blir det Dubbel Post."
 
 #: erpnext/stock/doctype/material_request/material_request.py:572
 msgid "The {0} {1} created successfully"
@@ -60435,7 +60435,7 @@ msgstr "Verifikat {0} är övertilldelad av {1}"
 #. Name of a report
 #: erpnext/accounts/report/voucher_wise_balance/voucher_wise_balance.json
 msgid "Voucher-wise Balance"
-msgstr "Saldo per Verifikat"
+msgstr "Verifikatbaserad Saldo"
 
 #. Label of the vouchers (Table) field in DocType 'Repost Accounting Ledger'
 #. Label of the selected_vouchers_section (Section Break) field in DocType
@@ -60563,7 +60563,7 @@ msgstr "Lager Typ"
 #: erpnext/stock/workspace/stock/stock.json
 #: erpnext/workspace_sidebar/stock.json
 msgid "Warehouse Wise Stock Balance"
-msgstr "Lager Saldo per Lager"
+msgstr "Lagerbaserad Lager Saldo"
 
 #. Label of the warehouse_and_reference (Section Break) field in DocType
 #. 'Request for Quotation Item'
@@ -60616,7 +60616,7 @@ msgstr "Lager erfodras för Lager Artikel {0}"
 #. Name of a report
 #: erpnext/stock/report/warehouse_wise_item_balance_age_and_value/warehouse_wise_item_balance_age_and_value.json
 msgid "Warehouse wise Item Balance Age and Value"
-msgstr "Artikel Saldo Ålder och Värde per Lager"
+msgstr "Lagerbaserad Artikel Saldo, Ålder och Värde"
 
 #: erpnext/stock/doctype/warehouse/warehouse.py:95
 msgid "Warehouse {0} can not be deleted as quantity exists for Item {1}"
@@ -61926,7 +61926,7 @@ msgstr "Du har inte utfört några avstämningar i denna sessionen ännu."
 
 #: erpnext/stock/doctype/item/item.py:1170
 msgid "You have to enable auto re-order in Stock Settings to maintain re-order levels."
-msgstr "Du måste aktivera automatisk ombeställning i lager inställningar för att behålla ombeställning nivåer."
+msgstr "Du måste aktivera automatisk återbeställning i Lager Inställningar för att behålla återbeställning nivåer."
 
 #: erpnext/selling/page/point_of_sale/pos_controller.js:272
 msgid "You have unsaved changes. Do you want to save the invoice?"
@@ -62020,7 +62020,7 @@ msgstr "Zip Fil"
 
 #: erpnext/stock/reorder_item.py:364
 msgid "[Important] [ERPNext] Auto Reorder Errors"
-msgstr "[Viktigt] [System] Automatisk Ombeställning Fel"
+msgstr "[Viktigt] [System] Automatisk Återbeställning Fel"
 
 #: erpnext/controllers/status_updater.py:306
 msgid "`Allow Negative rates for Items`"
