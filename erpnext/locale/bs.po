@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-06-28 10:20+0000\n"
-"PO-Revision-Date: 2026-07-01 20:39\n"
+"PO-Revision-Date: 2026-07-03 21:32\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -8214,7 +8214,7 @@ msgstr "Šarža {0} artikla {1} je onemogućena."
 #: erpnext/stock/workspace/stock/stock.json
 #: erpnext/workspace_sidebar/stock.json
 msgid "Batch-Wise Balance History"
-msgstr "Istorija Stanja na osnovu Šarže"
+msgstr "Historija Stanja na osnovu Šarže"
 
 #: erpnext/stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:164
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:183
@@ -18764,7 +18764,7 @@ msgstr "Obuka Personala"
 #. Name of a DocType
 #: erpnext/setup/doctype/employee_external_work_history/employee_external_work_history.json
 msgid "Employee External Work History"
-msgstr "Eksterna radna istorija Personala"
+msgstr "Eksterna Radna Historija Personala"
 
 #. Label of the employee_group (Link) field in DocType 'Communication Medium
 #. Timeslot'
@@ -18786,7 +18786,7 @@ msgstr "ID Personala"
 #. Name of a DocType
 #: erpnext/setup/doctype/employee_internal_work_history/employee_internal_work_history.json
 msgid "Employee Internal Work History"
-msgstr "Interna radna istorija Personala"
+msgstr "Eksterna Radna Historija Personala"
 
 #. Label of the employee_name (Data) field in DocType 'Activity Cost'
 #. Label of the employee_name (Data) field in DocType 'Timesheet'
@@ -20111,7 +20111,7 @@ msgstr "Prošireni Bankovni Izvod"
 #. Label of the external_work_history (Table) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "External Work History"
-msgstr "Eksterna Radna Istorija"
+msgstr "Eksterna RadnaHstorija"
 
 #: erpnext/manufacturing/report/work_order_consumed_materials/work_order_consumed_materials.py:148
 msgid "Extra Consumed Qty"
@@ -20288,7 +20288,7 @@ msgstr "Greška: {0}"
 #. Label of the family_background (Small Text) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Family Background"
-msgstr "Porodična Istorija"
+msgstr "Porodična Historija"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -23173,7 +23173,7 @@ msgstr "Što je veći broj, veći je prioritet"
 #. Label of the history_in_company (Section Break) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "History In Company"
-msgstr "Istorija u Poduzeću"
+msgstr "Historija u Poduzeću"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.js:314
 #: erpnext/selling/doctype/sales_order/sales_order.js:1033
@@ -25234,7 +25234,7 @@ msgstr "Interni Prenosi"
 #. Label of the internal_work_history (Table) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Internal Work History"
-msgstr "Interna Radna Istorija"
+msgstr "Interna Radna Historija"
 
 #. Description of the 'Customer Details' (Text) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
@@ -27986,7 +27986,7 @@ msgstr "Nabavni Registar po Artiklu"
 #: erpnext/selling/workspace/selling/selling.json
 #: erpnext/workspace_sidebar/selling.json
 msgid "Item-wise Sales History"
-msgstr "Istorija Prodaje po Artiklu"
+msgstr "Historija Prodaje po Artiklu"
 
 #. Name of a report
 #. Label of a Workspace Sidebar Item
@@ -47609,7 +47609,7 @@ msgstr "Prodajna Faktura {0} mora se izbrisati prije otkazivanja ovog Prodajnog 
 #. Label of the sales_monthly_history (Small Text) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Sales Monthly History"
-msgstr "Mjesečna Istorija Prodaje"
+msgstr "Mjesečna Historija Prodaje"
 
 #: erpnext/selling/page/sales_funnel/sales_funnel.js:153
 msgid "Sales Opportunities by Campaign"
@@ -57913,7 +57913,7 @@ msgstr "Transakcije"
 #. Label of the transactions_annual_history (Code) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Transactions Annual History"
-msgstr "Godišnja Istorija Transakcije"
+msgstr "Godišnja Historija Transakcije"
 
 #: erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js:117
 msgid "Transactions against the Company already exist! Chart of Accounts can only be imported for a Company with no transactions."
