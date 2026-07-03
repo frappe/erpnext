@@ -1,0 +1,204 @@
+{
+ "allowed_users": [
+  {
+   "user": "Administrator"
+  },
+  {
+   "user": "Guest"
+  },
+  {
+   "user": "accounts@test.com"
+  },
+  {
+   "user": "ankush@erpnext.com"
+  },
+  {
+   "user": "faris@erpnext.com"
+  },
+  {
+   "user": "mention_test_user@example.com"
+  },
+  {
+   "user": "project@frappe.io"
+  },
+  {
+   "user": "rushabh@erpnext.com"
+  },
+  {
+   "user": "saqib@erpnext.com"
+  },
+  {
+   "user": "soham@frappe.io"
+  },
+  {
+   "user": "sohamengineer123@gmail.com"
+  },
+  {
+   "user": "sohamkulkarns9@gmail.com"
+  },
+  {
+   "user": "sydel@frappe.io"
+  },
+  {
+   "user": "test'5@example.com"
+  },
+  {
+   "user": "test1@example.com"
+  },
+  {
+   "user": "test2@example.com"
+  },
+  {
+   "user": "test3@example.com"
+  },
+  {
+   "user": "test4@example.com"
+  },
+  {
+   "user": "test@example.com"
+  },
+  {
+   "user": "test@portal.com"
+  },
+  {
+   "user": "testpassword@example.com"
+  },
+  {
+   "user": "testperm@example.com"
+  },
+  {
+   "user": "web@web.com"
+  }
+ ],
+ "app": "erpnext",
+ "charts": [],
+ "content": "[]",
+ "creation": "2026-06-11 11:51:21.789012",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "building-2",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Organization",
+ "link_type": "DocType",
+ "links": [],
+ "modified": "2026-07-03 00:45:57.595188",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "module_onboarding": "Organization Onboarding",
+ "name": "Organization",
+ "number_cards": [],
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 46.0,
+ "shortcuts": [],
+ "sidebar_items": [
+  {
+   "child": 0,
+   "collapsible": 1,
+   "default_workspace": 1,
+   "icon": "building-2",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Company",
+   "link_to": "Company",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "default_workspace": 0,
+   "icon": "book-text",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Letter Head",
+   "link_to": "Letter Head",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "default_workspace": 0,
+   "icon": "file-user",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Department",
+   "link_to": "Department",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "default_workspace": 0,
+   "icon": "book-user",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Branch",
+   "link_to": "Branch",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "default_workspace": 0,
+   "icon": "users",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "User",
+   "link_to": "User",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "default_workspace": 0,
+   "icon": "user-round-check",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Role Permissions",
+   "link_to": "permission-manager",
+   "link_type": "Page",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "default_workspace": 0,
+   "icon": "mail",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Email Account",
+   "link_to": "Email Account",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  }
+ ],
+ "standard": 1,
+ "title": "Organization",
+ "type": "Workspace"
+}

@@ -16,9 +16,15 @@
 			{% if addresses %}
 				{% for address in addresses %}
 					<address>
+<<<<<<< HEAD
 						{% if address.partner_address %}<p itemprop="address">{{ address.partner_address | e }}</p>{% endif %}
 						{% if address.phone %}<p itemprop="telephone">{{ address.phone | e }}</p>{% endif %}
 						{% if address.email %}<p itemprop="email"><span class="fa fa-envelope"></span> {{ address.email | e }}</p>{% endif %}
+=======
+						{% if address.partner_address %}<p itemprop="address">{{ address.partner_address }}</p>{% endif %}
+						{% if address.phone %}<p itemprop="telephone">{{ address.phone }}</p>{% endif %}
+						{% if address.email %}<p itemprop="email"><svg class="icon icon-xs"><use href="#icon-mail"></use></svg> {{ address.email }}</p>{% endif %}
+>>>>>>> dc09362 (fix: replace all old icons (#56864))
 					</address>
 				{% endfor %}
 			{% endif %}

@@ -8,7 +8,7 @@
  "doctype": "Workspace",
  "for_user": "",
  "hide_custom": 0,
- "icon": "home",
+ "icon": "house",
  "idx": 0,
  "is_hidden": 0,
  "label": "Home",
@@ -233,7 +233,11 @@
    "type": "Link"
   }
  ],
+<<<<<<< HEAD
  "modified": "2025-07-02 14:12:28.407612",
+=======
+ "modified": "2026-07-03 14:22:16.927245",
+>>>>>>> dc09362 (fix: replace all old icons (#56864))
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Home",

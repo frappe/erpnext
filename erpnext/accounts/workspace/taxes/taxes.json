@@ -1,11 +1,33 @@
 {
  "app": "erpnext",
- "creation": "2025-11-12 15:03:06.180114",
+ "charts": [],
+ "content": "[]",
+ "creation": "2026-06-11 11:51:22.649582",
+ "custom_blocks": [],
  "docstatus": 0,
- "doctype": "Workspace Sidebar",
- "header_icon": "money-coins-1",
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "coins",
  "idx": 0,
- "items": [
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Taxes",
+ "link_type": "DocType",
+ "links": [],
+ "modified": "2026-07-03 13:43:50.894825",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "module_onboarding": "Accounting Onboarding",
+ "name": "Taxes",
+ "number_cards": [],
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 48.0,
+ "shortcuts": [],
+ "sidebar_items": [
   {
    "child": 0,
    "collapsible": 1,
@@ -16,6 +38,7 @@
    "link_to": "Sales Taxes and Charges Template",
    "link_type": "DocType",
    "navigate_to_tab": "",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -28,6 +51,7 @@
    "label": "Purchase Tax Template",
    "link_to": "Purchase Taxes and Charges Template",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -40,6 +64,7 @@
    "label": "Item Tax Template",
    "link_to": "Item Tax Template",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -51,6 +76,7 @@
    "keep_closed": 1,
    "label": "Setup",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Section Break"
   },
@@ -63,6 +89,7 @@
    "label": "Tax Category",
    "link_to": "Tax Category",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -75,6 +102,7 @@
    "label": "Tax Rule",
    "link_to": "Tax Rule",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -87,6 +115,7 @@
    "label": "Tax Withholding Category",
    "link_to": "Tax Withholding Category",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -98,6 +127,7 @@
    "label": "Tax Withholding Group",
    "link_to": "Tax Withholding Group",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -110,6 +140,7 @@
    "label": "Deduction Certificate",
    "link_to": "Lower Deduction Certificate",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -122,6 +153,7 @@
    "label": "Reports",
    "link_to": "",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Section Break"
   },
@@ -133,6 +165,7 @@
    "label": "TDS Computation Summary",
    "link_to": "TDS Computation Summary",
    "link_type": "Report",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -144,16 +177,12 @@
    "label": "Tax Withholding Details",
    "link_to": "Tax Withholding Details",
    "link_type": "Report",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   }
  ],
- "modified": "2026-07-03 18:36:08.105306",
- "modified_by": "Administrator",
- "module": "Accounts",
- "module_onboarding": "Accounting Onboarding",
- "name": "Taxes",
- "owner": "Administrator",
  "standard": 1,
- "title": "Taxes"
+ "title": "Taxes",
+ "type": "Workspace"
 }

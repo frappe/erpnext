@@ -1,11 +1,33 @@
 {
  "app": "erpnext",
- "creation": "2026-01-23 11:36:55.020705",
+ "charts": [],
+ "content": "[]",
+ "creation": "2026-06-11 11:51:21.886461",
+ "custom_blocks": [],
  "docstatus": 0,
- "doctype": "Workspace Sidebar",
- "header_icon": "receipt-text",
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "receipt-text",
  "idx": 0,
- "items": [
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Payments",
+ "link_type": "DocType",
+ "links": [],
+ "modified": "2026-07-03 13:43:50.184761",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "module_onboarding": "Accounting Onboarding",
+ "name": "Payments",
+ "number_cards": [],
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 47.0,
+ "shortcuts": [],
+ "sidebar_items": [
   {
    "child": 0,
    "collapsible": 1,
@@ -15,6 +37,7 @@
    "label": "Dashboard",
    "link_to": "Payments",
    "link_type": "Dashboard",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -26,6 +49,7 @@
    "keep_closed": 0,
    "label": "Payments",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Section Break"
   },
@@ -37,6 +61,7 @@
    "label": "Payment Entry",
    "link_to": "Payment Entry",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -48,6 +73,7 @@
    "label": "Journal Entry",
    "link_to": "Journal Entry",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -59,6 +85,7 @@
    "label": "Payment Request",
    "link_to": "Payment Request",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -70,6 +97,7 @@
    "label": "Payment Order",
    "link_to": "Payment Order",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -81,6 +109,7 @@
    "label": "Payment Reconciliation",
    "link_to": "Payment Reconciliation",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -92,6 +121,7 @@
    "label": "Unreconcile Payment",
    "link_to": "Unreconcile Payment",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -103,6 +133,7 @@
    "label": "Process Payment Reconciliation",
    "link_to": "Process Payment Reconciliation",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -114,6 +145,7 @@
    "label": "Repost Accounting Ledger",
    "link_to": "Repost Accounting Ledger",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -125,6 +157,7 @@
    "label": "Repost Payment Ledger",
    "link_to": "Repost Payment Ledger",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -136,6 +169,7 @@
    "keep_closed": 1,
    "label": "Reports",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Section Break"
   },
@@ -147,6 +181,7 @@
    "label": "Accounts Receivable",
    "link_to": "Accounts Receivable",
    "link_type": "Report",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -158,6 +193,7 @@
    "label": "Accounts Payable",
    "link_to": "Accounts Payable",
    "link_type": "Report",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -169,6 +205,7 @@
    "label": "General Ledger",
    "link_to": "General Ledger",
    "link_type": "Report",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -180,6 +217,7 @@
    "label": "Trial Balance",
    "link_to": "Trial Balance",
    "link_type": "Report",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -191,16 +229,12 @@
    "label": "Financial Reports",
    "link_to": "Financial Reports",
    "link_type": "Workspace",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   }
  ],
- "modified": "2026-07-03 16:38:05.061694",
- "modified_by": "Administrator",
- "module": "Accounts",
- "module_onboarding": "Accounting Onboarding",
- "name": "Payments",
- "owner": "Administrator",
  "standard": 1,
- "title": "Payments"
+ "title": "Payments",
+ "type": "Workspace"
 }

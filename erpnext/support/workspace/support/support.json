@@ -8,7 +8,7 @@
  "doctype": "Workspace",
  "for_user": "",
  "hide_custom": 0,
- "icon": "support",
+ "icon": "headset",
  "idx": 0,
  "is_hidden": 0,
  "label": "Support",
@@ -172,7 +172,11 @@
    "type": "Link"
   }
  ],
+<<<<<<< HEAD
  "modified": "2026-01-02 17:45:04.203273",
+=======
+ "modified": "2026-07-03 13:44:07.764547",
+>>>>>>> dc09362 (fix: replace all old icons (#56864))
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Support",
@@ -184,7 +188,183 @@
  "restrict_to_domain": "",
  "roles": [],
  "sequence_id": 12.0,
+<<<<<<< HEAD
  "shortcuts": [],
+=======
+ "shortcuts": [
+  {
+   "color": "Yellow",
+   "format": "{} Assigned",
+   "label": "Issue",
+   "link_to": "Issue",
+   "stats_filter": "{\n    \"_assign\": [\"like\", '%' + frappe.session.user + '%'],\n    \"status\": \"Open\"\n}",
+   "type": "DocType"
+  },
+  {
+   "label": "Maintenance Visit",
+   "link_to": "Maintenance Visit",
+   "type": "DocType"
+  },
+  {
+   "label": "Service Level Agreement",
+   "link_to": "Service Level Agreement",
+   "type": "DocType"
+  }
+ ],
+ "sidebar_items": [
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "house",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Home",
+   "link_to": "Support",
+   "link_type": "Workspace",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "file-question-mark",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Issue",
+   "link_to": "Issue",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "calendar-days",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Maintenance Schedule",
+   "link_to": "Maintenance Schedule",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "calendar-check-2",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Maintenance Visit",
+   "link_to": "Maintenance Visit",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "grid-2x2-check",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Warranty Claim",
+   "link_to": "Warranty Claim",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "database",
+   "indent": 1,
+   "keep_closed": 1,
+   "label": "Setup",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Section Break"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Issue Type",
+   "link_to": "Issue Type",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Issue Priority",
+   "link_to": "Issue Priority",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Service Level Agreement",
+   "link_to": "Service Level Agreement",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "notepad-text",
+   "indent": 1,
+   "keep_closed": 1,
+   "label": "Reports",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Section Break"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "First Response Time for Issues",
+   "link_to": "First Response Time for Issues",
+   "link_type": "Report",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "settings",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Settings",
+   "link_to": "Support Settings",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  }
+ ],
+ "standard": 1,
+>>>>>>> dc09362 (fix: replace all old icons (#56864))
  "title": "Support",
  "type": "Workspace"
 }

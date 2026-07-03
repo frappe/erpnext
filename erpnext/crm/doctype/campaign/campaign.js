@@ -17,7 +17,7 @@ frappe.ui.form.on("Campaign", {
 					frappe.route_options = { utm_source: "Campaign", utm_campaign: frm.doc.name };
 					frappe.set_route("List", "Lead");
 				},
-				"fa fa-list",
+				null,
 				true
 			);
 		}

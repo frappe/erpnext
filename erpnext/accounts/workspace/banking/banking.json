@@ -1,11 +1,32 @@
 {
  "app": "erpnext",
- "creation": "2025-11-12 14:55:28.092635",
+ "charts": [],
+ "content": "[]",
+ "creation": "2026-06-11 11:51:22.767176",
+ "custom_blocks": [],
  "docstatus": 0,
- "doctype": "Workspace Sidebar",
- "header_icon": "circle-dollar-sign",
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "circle-dollar-sign",
  "idx": 0,
- "items": [
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Banking",
+ "link_type": "DocType",
+ "links": [],
+ "modified": "2026-07-03 13:43:50.924019",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Banking",
+ "number_cards": [],
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 49.0,
+ "shortcuts": [],
+ "sidebar_items": [
   {
    "child": 0,
    "collapsible": 1,
@@ -15,6 +36,7 @@
    "label": "Bank Clearance",
    "link_to": "Bank Clearance",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -27,6 +49,7 @@
    "label": "Bank Reconciliation",
    "link_to": "Bank Reconciliation Tool",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -39,6 +62,7 @@
    "label": "Reconciliation Statement",
    "link_to": "Bank Reconciliation Statement",
    "link_type": "Report",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -51,6 +75,7 @@
    "label": "Unreconcile Payment",
    "link_to": "Unreconcile Payment",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -63,6 +88,7 @@
    "label": "Process Payment Reconciliation",
    "link_to": "Process Payment Reconciliation",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -74,6 +100,7 @@
    "keep_closed": 1,
    "label": "Setup",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Section Break"
   },
@@ -86,6 +113,7 @@
    "label": "Bank",
    "link_to": "Bank",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -98,6 +126,7 @@
    "label": "Bank Account",
    "link_to": "Bank Account",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -109,6 +138,7 @@
    "label": "Bank Account Type",
    "link_to": "Bank Account Type",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -120,6 +150,7 @@
    "label": "Bank Account Subtype",
    "link_to": "Bank Account Subtype",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -131,6 +162,7 @@
    "label": "Bank Guarantee",
    "link_to": "Bank Guarantee",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -143,6 +175,7 @@
    "label": "Plaid Settings",
    "link_to": "Plaid Settings",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -154,6 +187,7 @@
    "keep_closed": 1,
    "label": "Dunning",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Section Break"
   },
@@ -165,6 +199,7 @@
    "label": "Dunning",
    "link_to": "Dunning",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -176,15 +211,12 @@
    "label": "Dunning Type",
    "link_to": "Dunning Type",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   }
  ],
- "modified": "2026-07-03 00:06:13.017457",
- "modified_by": "Administrator",
- "module": "Accounts",
- "name": "Banking",
- "owner": "Administrator",
  "standard": 1,
- "title": "Banking"
+ "title": "Banking",
+ "type": "Workspace"
 }

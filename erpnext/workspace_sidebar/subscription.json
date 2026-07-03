@@ -2,10 +2,35 @@
  "app": "erpnext",
  "creation": "2025-11-10 16:08:50.904116",
  "docstatus": 0,
+<<<<<<< HEAD:erpnext/workspace_sidebar/subscription.json
  "doctype": "Workspace Sidebar",
  "header_icon": "accounting",
  "idx": 0,
  "items": [
+=======
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "wallet",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Subscriptions",
+ "link_type": "DocType",
+ "links": [],
+ "modified": "2026-07-03 14:08:36.999272",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Subscriptions",
+ "number_cards": [],
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 56.0,
+ "shortcuts": [],
+ "sidebar_items": [
+>>>>>>> dc09362 (fix: replace all old icons (#56864)):erpnext/accounts/workspace/subscriptions/subscriptions.json
   {
    "child": 0,
    "collapsible": 1,
