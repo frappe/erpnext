@@ -1204,7 +1204,11 @@ class update_entries_after:
 			self.wh_data.stock_queue = json.loads(stock_queue[0]) if stock_queue else []
 
 		self.wh_data.stock_value = round_off_if_near_zero(self.wh_data.stock_value + doc.total_amount)
-		self.wh_data.qty_after_transaction += flt(doc.total_qty, self.flt_precision)
+		# Replay the immutable qty recorded on the SLE at submission, not the bundle's recomputed
+		# total_qty. A valuation repost must never rewrite physical quantities; if the bundle's child
+		# rows were edited after submission, doc.total_qty would silently corrupt qty_after_transaction
+		# (and every downstream balance). sle.actual_qty is the frozen movement for this entry.
+		self.wh_data.qty_after_transaction += flt(sle.actual_qty, self.flt_precision)
 		if flt(self.wh_data.qty_after_transaction, self.flt_precision):
 			self.wh_data.valuation_rate = flt(self.wh_data.stock_value, self.flt_precision) / flt(
 				self.wh_data.qty_after_transaction, self.flt_precision
