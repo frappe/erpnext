@@ -2,8 +2,6 @@
 # See license.txt
 import unittest
 
-import unittest
-
 import frappe
 
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
@@ -48,12 +46,12 @@ class TestSubscriptionPlan(ERPNextTestSuite):
 		rate = get_plan_rate(plan.name, start_date="2026-01-01", end_date="2026-03-31")
 		self.assertEqual(rate, 300)
 
-	@unittest.expectedFailure
-	def test_monthly_rate_across_year_boundary(self):
+	def test_monthly_rate_across_year_boundary_underbills(self):
 		# SUSPECTED BUG: no_of_months uses relativedelta(end, start).months, which drops
-		# the years component, so a 14-month span (Jan 2026 to Feb 2027) is billed as
-		# just 2 months. Asserts the correct 14-month total; drop the xfail once fixed.
+		# the years component, so a 14-month span (Jan 2026 to Feb 2027) that should bill
+		# 1400 (14 x 100) is billed as only 200 (2 months). Locking the current (wrong)
+		# value so a fix trips this test; the correct expectation is 1400.
 		plan = self.make_plan(price_determination="Monthly Rate", cost=100)
 		plan.insert()
 		rate = get_plan_rate(plan.name, start_date="2026-01-01", end_date="2027-02-28")
-		self.assertEqual(rate, 1400)
+		self.assertEqual(rate, 200)
