@@ -1414,12 +1414,6 @@ class WorkOrder(Document):
 		self.set_operation_warehouses()
 
 	def set_operation_warehouses(self):
-		"""For semi-finished goods tracking, default each operation's warehouses from the Work
-		Order and chain them: the first operation pulls from the WO source warehouse and every
-		later operation pulls from the previous operation's output; intermediate outputs go to the
-		WIP warehouse while the final operation outputs to the WO finished goods warehouse.
-
-		Only empty fields are filled, so values configured on the BOM/operation are preserved."""
 		if not self.track_semi_finished_goods or not self.operations:
 			return
 
