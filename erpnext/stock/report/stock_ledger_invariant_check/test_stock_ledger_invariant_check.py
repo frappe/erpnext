@@ -51,13 +51,6 @@ class TestStockLedgerInvariantCheck(ERPNextTestSuite):
 		sle = frappe.get_last_doc(
 			"Stock Ledger Entry", {"item_code": item, "warehouse": WAREHOUSE, "is_cancelled": 0}
 		)
-		self.addCleanup(
-			frappe.db.set_value,
-			"Stock Ledger Entry",
-			sle.name,
-			"qty_after_transaction",
-			sle.qty_after_transaction,
-		)
 		frappe.db.set_value(
 			"Stock Ledger Entry", sle.name, "qty_after_transaction", sle.qty_after_transaction + 5
 		)
