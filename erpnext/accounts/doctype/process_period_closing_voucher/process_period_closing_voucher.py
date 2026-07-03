@@ -125,7 +125,7 @@ def initialize_parallel_threads(docname: str):
 			# keep transaction on PPCV and PPCVD short
 			# prevents concurrency errors - REPEATABLE READ
 			if not frappe.in_test:
-				frappe.db.commit()
+				frappe.db.commit()  # nosemgrep
 	else:
 		frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Completed")
 
@@ -273,7 +273,7 @@ def schedule_next_date(docname: str):
 			# keep transaction on PPCV and PPCVD short
 			# prevents concurrency errors - REPEATABLE READ
 			if not frappe.in_test:
-				frappe.db.commit()
+				frappe.db.commit()  # nosemgrep
 
 			frappe.enqueue(
 				method="erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.process_individual_date",
@@ -450,7 +450,7 @@ def summarize_and_post_ledger_entries(docname):
 	# keep transaction on PPCV and PPCVD short
 	# prevents concurrency errors - REPEATABLE READ
 	if not frappe.in_test:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	frappe.db.set_value("Period Closing Voucher", pcv.name, "gle_processing_status", "Completed")
 	frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Completed")
@@ -600,7 +600,7 @@ def process_individual_date(docname: str, row_name, date, report_type, parentfie
 	)
 	# commit heavy computation before touching PPCV or PPCVD
 	if not frappe.in_test:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 	# chain call
 	schedule_next_date(docname)
