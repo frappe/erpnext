@@ -1520,6 +1520,47 @@ class TestPricingRule(ERPNextTestSuite):
 		debit_note.delete()
 		pi.cancel()
 
+	def test_qty_rule_applies_on_price_list_fetch_without_stock_qty(self):
+		from erpnext.stock.get_item_details import apply_price_list
+
+		item = make_item(
+			properties={
+				"item_code": "_Test Item Stock Qty Backfill",
+				"stock_uom": "Nos",
+				"uoms": [dict(uom="Box", conversion_factor=10)],
+			}
+		)
+		make_item_price(item.name, "_Test Price List", 100)
+		make_pricing_rule(
+			selling=1,
+			min_qty=10,
+			discount_percentage=10,
+			item_code=item.name,
+			title="_Test Stock Qty Backfill Rule",
+		)
+
+		# fetch-path payload without stock_qty/conversion_factor: 2 Box = 20 Nos >= min_qty 10
+		children = apply_price_list(
+			frappe._dict(
+				doctype="Sales Invoice",
+				company="_Test Company",
+				customer="_Test Customer",
+				selling_price_list="_Test Price List",
+				currency="INR",
+				conversion_rate=1,
+				items=[
+					{
+						"doctype": "Sales Invoice Item",
+						"item_code": item.name,
+						"qty": 2,
+						"uom": "Box",
+					}
+				],
+			)
+		)["children"]
+
+		self.assertEqual(children[0].get("discount_percentage"), 10)
+
 
 def make_pricing_rule(**args):
 	args = frappe._dict(args)

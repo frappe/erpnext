@@ -512,6 +512,14 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 
 
 def update_args_for_pricing_rule(args):
+	if args.qty:
+		from erpnext.stock.get_item_details import get_conversion_factor
+
+		args.conversion_factor = flt(args.conversion_factor) or get_conversion_factor(
+			args.item_code, args.uom
+		).get("conversion_factor")
+		args.stock_qty = flt(args.qty) * args.conversion_factor
+
 	if not (args.item_group and args.brand):
 		item = frappe.get_cached_value("Item", args.item_code, ("item_group", "brand"))
 		if not item:
