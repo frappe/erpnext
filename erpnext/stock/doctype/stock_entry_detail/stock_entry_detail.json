@@ -345,7 +345,6 @@
    "print_hide": 1
   },
   {
-   "default": ":Company",
    "depends_on": "eval:cint(erpnext.is_perpetual_inventory_enabled(parent.company))",
    "fieldname": "cost_center",
    "fieldtype": "Link",
@@ -679,7 +678,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-06-30 12:18:34.132425",
+ "modified": "2026-07-03 12:11:53.714931",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",
