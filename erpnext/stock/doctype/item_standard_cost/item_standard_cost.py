@@ -33,6 +33,25 @@ class ItemStandardCost(Document):
 		self.validate_item()
 		self.validate_effective_date()
 		self.validate_rate()
+		self.warn_backdated_transactions_will_be_blocked()
+
+	def warn_backdated_transactions_will_be_blocked(self):
+		# Heads-up while creating (R2 enforces it later on every stock voucher): once this rate is
+		# effective, the item's stock transactions cannot be dated before the effective date.
+		if not self.is_new():
+			return
+		frappe.msgprint(
+			_(
+				"Once this Standard Cost is submitted, stock transactions for Item {0} in {1} cannot be posted with a date before the Effective Date {2}. Post any backdated entries before submitting."
+			).format(
+				get_link_to_form("Item", self.item_code),
+				frappe.bold(self.company),
+				frappe.bold(frappe.format(self.effective_date, "Date")),
+			),
+			title=_("Backdated Entries Will Be Blocked"),
+			indicator="orange",
+			alert=True,
+		)
 
 	def validate_item(self):
 		if not frappe.get_cached_value("Item", self.item_code, "is_stock_item"):

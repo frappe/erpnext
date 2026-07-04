@@ -13,4 +13,33 @@ frappe.ui.form.on("Item Standard Cost", {
 			};
 		});
 	},
+
+	refresh(frm) {
+		frm.trigger("show_backdated_block_warning");
+	},
+
+	item_code(frm) {
+		frm.trigger("show_backdated_block_warning");
+	},
+
+	effective_date(frm) {
+		frm.trigger("show_backdated_block_warning");
+	},
+
+	show_backdated_block_warning(frm) {
+		if (frm.doc.docstatus !== 0 || !frm.doc.item_code || !frm.doc.effective_date) {
+			frm.set_intro("");
+			return;
+		}
+		frm.set_intro(
+			__(
+				"On submission, stock transactions for Item {0} cannot be posted with a date before {1} — backdated entries will be blocked.",
+				[
+					frappe.utils.escape_html(frm.doc.item_code).bold(),
+					frappe.datetime.str_to_user(frm.doc.effective_date).bold(),
+				]
+			),
+			"yellow"
+		);
+	},
 });
