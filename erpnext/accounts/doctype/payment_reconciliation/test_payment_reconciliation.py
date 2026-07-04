@@ -48,6 +48,7 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		sinv = create_sales_invoice(
 			qty=qty,
 			rate=rate,
+			posting_date=posting_date,
 			company=self.company,
 			customer=self.customer,
 			item_code=self.item,
@@ -2414,14 +2415,34 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 	def test_cr_note_split_across_invoices_floating_point_precision(self):
 		"""Regression: when a credit note is split across multiple invoices, floating-point
 		arithmetic (150 - 8.45 - 90.72 = 50.83000000000001) must not cause reconcile() to fail.
+
+		The test environment rounds INR totals to whole rupees (smallest_currency_fraction_value=0),
+		so the invoices are created with round-number totals (100, 200, 100) and then partially paid
+		down to the decimal outstanding amounts (8.45, 90.72, 72.57) via payment entries.
 		"""
-		# Create invoices on different posting dates so the sort-by-date order is deterministic:
-		# 8.45 first, 90.72 second, 72.57 third.  This produces the chain:
-		#   150 - 8.45 = 141.55  →  141.55 - 90.72 = 50.83000000000001  (float imprecision)
+		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+
+		# Create invoices on different posting dates to control sort-order in Payment Reconciliation
+		# (invoices are sorted by posting_date ascending, so si_a is processed first).
+		# Processing order 8.45 → 90.72 → 72.57 produces the float chain:
+		#   150 - 8.45 = 141.55  →  141.55 - 90.72 = 50.83000000000001
 		# The last allocation row will therefore carry allocated_amount = 50.83000000000001.
-		si_a = self.create_sales_invoice(qty=1, rate=8.45, posting_date=add_days(nowdate(), -2))
-		si_b = self.create_sales_invoice(qty=1, rate=90.72, posting_date=add_days(nowdate(), -1))
-		si_c = self.create_sales_invoice(qty=1, rate=72.57, posting_date=nowdate())
+		si_a = self.create_sales_invoice(qty=1, rate=100, posting_date=add_days(nowdate(), -2))
+		si_b = self.create_sales_invoice(qty=1, rate=200, posting_date=add_days(nowdate(), -1))
+		si_c = self.create_sales_invoice(qty=1, rate=100, posting_date=nowdate())
+
+		# Partially pay each invoice so the remaining outstanding is a clean decimal value.
+		# INR rounds the invoice total to a whole rupee, so we achieve decimal outstandings
+		# by subtracting a decimal-valued payment from the integer total:
+		#   100 - 91.55 = 8.45
+		#   200 - 109.28 = 90.72
+		#   100 - 27.43 = 72.57
+		for si, partial_paid in ((si_a, 91.55), (si_b, 109.28), (si_c, 27.43)):
+			pe = get_payment_entry(si.doctype, si.name)
+			pe.paid_amount = partial_paid
+			pe.received_amount = partial_paid
+			pe.references[0].allocated_amount = partial_paid
+			pe.save().submit()
 
 		cr_note = self.create_sales_invoice(
 			qty=-1, rate=150, posting_date=nowdate(), do_not_save=True, do_not_submit=True
