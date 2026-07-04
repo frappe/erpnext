@@ -4,7 +4,6 @@
 
 from frappe import _
 
-import erpnext
 from erpnext.controllers.trends import get_columns, get_data
 
 
@@ -15,12 +14,12 @@ def execute(filters=None):
 	conditions = get_columns(filters, "Purchase Receipt")
 	data = get_data(filters, conditions)
 
-	chart_data = get_chart_data(data, filters)
+	chart_data = get_chart_data(data, conditions, filters)
 
 	return conditions["columns"], data, None, chart_data
 
 
-def get_chart_data(data, filters):
+def get_chart_data(data, conditions, filters):
 	def wrap_in_quotes(label):
 		return f"'{label}'"
 
@@ -45,7 +44,6 @@ def get_chart_data(data, filters):
 
 		labels.append(row[0])
 		datapoints.append(row[-1])
-	company_currency = erpnext.get_company_currency(filters.get("company"))
 
 	return {
 		"data": {
@@ -56,5 +54,5 @@ def get_chart_data(data, filters):
 		"colors": ["#5e64ff"],
 		"fieldtype": "Currency",
 		"options": "currency",
-		"currency": company_currency,
+		"currency": conditions.get("company_currency"),
 	}

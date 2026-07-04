@@ -43,6 +43,9 @@ def get_columns(filters, trans):
 		"addl_tables": based_on_details["addl_tables"],
 		"addl_tables_relational_cond": based_on_details.get("addl_tables_relational_cond", ""),
 	}
+	conditions["company_currency"] = (
+		erpnext.get_company_currency(filters.get("company")) if filters.get("company") else None
+	)
 
 	return conditions
 
@@ -207,7 +210,7 @@ def get_data(filters, conditions):
 
 				data.append(des)
 
-		total_row = calculate_total_row(data1, conditions["columns"], filters.get("company"))
+		total_row = calculate_total_row(data1, conditions["columns"], conditions.get("company_currency"))
 		data.append(total_row)
 	else:
 		data = frappe.db.sql(
@@ -232,13 +235,13 @@ def get_data(filters, conditions):
 			as_list=1,
 		)
 
-		total_row = calculate_total_row(data, conditions["columns"], filters.get("company"))
+		total_row = calculate_total_row(data, conditions["columns"], conditions.get("company_currency"))
 		data.append(total_row)
 
 	return data
 
 
-def calculate_total_row(data, columns, company=None):
+def calculate_total_row(data, columns, company_currency=None):
 	def wrap_in_quotes(label):
 		return f"'{label}'"
 
@@ -247,7 +250,7 @@ def calculate_total_row(data, columns, company=None):
 	for i, col in enumerate(columns):
 		if "Float" in col or "Currency/currency" in col:
 			total_values[i] = 0
-		if col.split(":")[0] == "Currency":
+		if "Link/Currency" in col:
 			currency_col_idx = i
 
 	for row in data:
@@ -259,7 +262,7 @@ def calculate_total_row(data, columns, company=None):
 		total_row.append(total_values.get(i, None))
 
 	if currency_col_idx is not None:
-		total_row[currency_col_idx] = company and erpnext.get_company_currency(company)
+		total_row[currency_col_idx] = company_currency
 
 	return total_row
 
