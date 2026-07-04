@@ -5,6 +5,11 @@ from frappe.utils import cstr, now, today
 from pypika import functions
 
 
+def disable_opportunity_creation_on_contact_us_disabled(doc, method):
+	if doc.is_disabled:
+		frappe.db.set_single_value("CRM Settings", "enable_opportunity_creation_from_contact_us", 0)
+
+
 def update_lead_phone_numbers(contact, method):
 	if contact.phone_nos:
 		contact_lead = contact.get_link_for("Lead")

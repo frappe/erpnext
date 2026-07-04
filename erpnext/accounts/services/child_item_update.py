@@ -5,7 +5,7 @@
 
 import frappe
 from frappe import _
-from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied
+from frappe.model.workflow import get_workflow_name
 from frappe.utils import flt, get_link_to_form, getdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
@@ -30,7 +30,7 @@ class ChildItemUpdater:
 		self._ordered_items: dict | None = None
 		self._purchased_items: dict | None = None
 
-	def update(self, trans_items: str) -> None:
+	def update(self, trans_items: str | list) -> None:
 		"""Process item additions, edits, and deletions from trans_items JSON."""
 		from erpnext.buying.doctype.supplier_quotation.supplier_quotation import get_purchased_items
 		from erpnext.selling.doctype.quotation.mapper import get_ordered_items
@@ -207,7 +207,7 @@ class ChildItemUpdater:
 		except frappe.PermissionError:
 			actions = {"create": "add", "write": "update"}
 			frappe.throw(
-				_("You do not have permissions to {} items in a {}.").format(
+				_("You do not have permissions to {0} items in a {1}.").format(
 					actions[perm_type], self.parent_doctype
 				),
 				title=_("Insufficient Permissions"),
@@ -222,17 +222,14 @@ class ChildItemUpdater:
 		current_state = self.parent.get(workflow_doc.workflow_state_field)
 		roles = frappe.get_roles()
 
-		transitions = [
-			t.as_dict()
-			for t in workflow_doc.transitions
-			if t.next_state == current_state
-			and t.allowed in roles
-			and is_transition_condition_satisfied(t, self.parent)
-		]
+		allowed = any(
+			state.state == current_state and (not state.allow_edit or state.allow_edit in roles)
+			for state in workflow_doc.states
+		)
 
-		if not transitions:
+		if not allowed:
 			frappe.throw(
-				_("You are not allowed to update as per the conditions set in {} Workflow.").format(
+				_("You are not allowed to update as per the conditions set in {0} Workflow.").format(
 					get_link_to_form("Workflow", workflow)
 				),
 				title=_("Insufficient Permissions"),
@@ -515,7 +512,7 @@ def update_child_item_rate_and_discount(
 		rate_unchanged = flt(child_item.get("rate")) == flt(new_data.get("rate"))
 
 	if not rate_unchanged and not child_item.get("qty") and allow_zero_qty:
-		frappe.throw(_("Rate of '{}' items cannot be changed").format(frappe.bold(_("Unit Price"))))
+		frappe.throw(_("Rate of '{0}' items cannot be changed").format(frappe.bold(_("Unit Price"))))
 
 	row_rate = flt(new_data.get("rate"), rate_precision)
 
@@ -537,6 +534,7 @@ def update_child_item_rate_and_discount(
 
 	if flt(child_item.rate) > flt(child_item.price_list_rate):
 		child_item.discount_percentage = 0
+		child_item.discount_amount = 0
 		child_item.margin_type = "Amount"
 		child_item.margin_rate_or_amount = flt(
 			child_item.rate - child_item.price_list_rate,
@@ -544,14 +542,11 @@ def update_child_item_rate_and_discount(
 		)
 		child_item.rate_with_margin = child_item.rate
 	else:
-		child_item.discount_percentage = flt(
-			(1 - flt(child_item.rate) / flt(child_item.price_list_rate)) * 100.0,
-			child_item.precision("discount_percentage"),
-		)
-		child_item.discount_amount = flt(child_item.price_list_rate) - flt(child_item.rate)
 		child_item.margin_type = ""
 		child_item.margin_rate_or_amount = 0
-		child_item.rate_with_margin = 0
+		child_item.rate_with_margin = child_item.price_list_rate
+		child_item.discount_percentage = 0
+		child_item.discount_amount = flt(child_item.rate_with_margin) - flt(child_item.rate)
 
 
 def update_child_item_uom_and_weight(child_item, new_data) -> None:

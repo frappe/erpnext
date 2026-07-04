@@ -46,17 +46,17 @@ from erpnext.manufacturing.doctype.work_order.services.operations import (
 from erpnext.manufacturing.doctype.work_order.services.required_items import (
 	RequiredItemsService,
 )
-from erpnext.manufacturing.doctype.work_order.services.status import (
-	StatusService,
-)
-from erpnext.manufacturing.doctype.work_order.services.stock_reservation import (
-	StockReservationService,
+from erpnext.manufacturing.doctype.work_order.services.reservation import (
+	WorkOrderStockReservation,
 	cancel_stock_reservation_entries,
 	get_consumed_qty,
 	get_reserved_qty_for_production,
 	get_row_wise_serial_batch,
 	get_sre_details,
 	make_stock_reservation_entries,
+)
+from erpnext.manufacturing.doctype.work_order.services.status import (
+	StatusService,
 )
 from erpnext.stock.doctype.batch.batch import make_batch
 from erpnext.stock.doctype.item.item import validate_end_of_life
@@ -288,6 +288,7 @@ class WorkOrder(Document):
 			self.validate_sales_order()
 
 		self.set_default_warehouse()
+		self.set_operation_warehouses()
 		self.validate_warehouse_belongs_to_company()
 		self.check_wip_warehouse_skip()
 		self.calculate_operating_cost()
@@ -297,8 +298,8 @@ class WorkOrder(Document):
 		self.status = self.get_status()
 		self.validate_workstation_type()
 		self.reset_use_multi_level_bom()
-		StockReservationService(self).set_reserve_stock()
-		StockReservationService(self).validate_fg_warehouse_for_reservation()
+		WorkOrderStockReservation(self).set_reserve_stock()
+		WorkOrderStockReservation(self).validate_fg_warehouse_for_reservation()
 		self.validate_dates()
 
 		if self.source_warehouse:
@@ -311,7 +312,7 @@ class WorkOrder(Document):
 		):
 			self.set_required_items(reset_only_qty=len(self.get("required_items")))
 
-		StockReservationService(self).enable_auto_reserve_stock()
+		WorkOrderStockReservation(self).enable_auto_reserve_stock()
 		self.validate_operations_sequence()
 		self.validate_subcontracting_inward_order()
 
@@ -589,11 +590,7 @@ class WorkOrder(Document):
 		if flt(allowed_qty - actual_qty, precision) < 0:
 			frappe.throw(
 				_(
-					"""Additional Transferred Qty {0}
-					cannot be greater than {1}.
-					To fix this, increase the percentage value
-					of the field 'Transfer Extra Raw Materials to WIP'
-					in Manufacturing Settings."""
+					"Additional Transferred Qty {0} cannot be greater than {1}. To fix this, increase the percentage value of the field 'Transfer Extra Raw Materials to WIP' in Manufacturing Settings."
 				).format(actual_qty, allowed_qty),
 			)
 
@@ -625,7 +622,7 @@ class WorkOrder(Document):
 		self.create_job_card_from_wo()
 
 		if self.reserve_stock:
-			StockReservationService(self).update_stock_reservation()
+			WorkOrderStockReservation(self).update_stock_reservation()
 
 		self.update_subcontracting_inward_order_received_items()
 
@@ -649,7 +646,7 @@ class WorkOrder(Document):
 		self.update_reserved_qty_for_production()
 
 		if self.reserve_stock:
-			StockReservationService(self).update_stock_reservation()
+			WorkOrderStockReservation(self).update_stock_reservation()
 
 		self.update_subcontracting_inward_order_received_items()
 
@@ -743,7 +740,7 @@ class WorkOrder(Document):
 		batch_auto_creation = frappe.get_cached_value("Item", self.production_item, "create_new_batch")
 		if not batch_auto_creation:
 			frappe.msgprint(
-				_("Batch not created for item {} since it does not have a batch series.").format(
+				_("Batch not created for item {0} since it does not have a batch series.").format(
 					frappe.bold(self.production_item)
 				),
 				alert=True,
@@ -843,21 +840,22 @@ class WorkOrder(Document):
 			frappe.throw(_("Stopped Work Order cannot be cancelled, Unstop it first to cancel"))
 
 		# Check whether any stock entry exists against this Work Order
-		stock_entry = frappe.db.sql(
-			"""select name from `tabStock Entry`
-			where work_order = %s and docstatus = 1""",
-			self.name,
+		stock_entry = frappe.get_all(
+			"Stock Entry",
+			filters={"work_order": self.name, "docstatus": 1},
+			pluck="name",
+			limit=1,
 		)
 		if stock_entry:
 			frappe.throw(
 				_("Cannot cancel because submitted Stock Entry {0} exists").format(
-					frappe.utils.get_link_to_form("Stock Entry", stock_entry[0][0])
+					frappe.utils.get_link_to_form("Stock Entry", stock_entry[0])
 				)
 			)
 
 	def validate_production_item(self):
 		if frappe.get_cached_value("Item", self.production_item, "has_variants"):
-			frappe.throw(_("Work Order cannot be raised against a Item Template"), ItemHasVariantError)
+			frappe.throw(_("Work Order cannot be raised against an Item Template"), ItemHasVariantError)
 
 		if self.production_item:
 			validate_end_of_life(self.production_item)
@@ -942,14 +940,20 @@ class WorkOrder(Document):
 
 	@frappe.whitelist()
 	def make_bom(self):
-		data = frappe.db.sql(
-			""" select sed.item_code, sed.qty, sed.s_warehouse
-			from `tabStock Entry Detail` sed, `tabStock Entry` se
-			where se.name = sed.parent and se.purpose = 'Manufacture'
-			and (sed.t_warehouse is null or sed.t_warehouse = '') and se.docstatus = 1
-			and se.work_order = %s""",
-			(self.name),
-			as_dict=1,
+		sed = frappe.qb.DocType("Stock Entry Detail")
+		se = frappe.qb.DocType("Stock Entry")
+		data = (
+			frappe.qb.from_(sed)
+			.inner_join(se)
+			.on(se.name == sed.parent)
+			.select(sed.item_code, sed.qty, sed.s_warehouse)
+			.where(
+				(se.purpose == "Manufacture")
+				& (sed.t_warehouse.isnull() | (sed.t_warehouse == ""))
+				& (se.docstatus == 1)
+				& (se.work_order == self.name)
+			)
+			.run(as_dict=1)
 		)
 
 		bom = frappe.new_doc("BOM")
@@ -971,6 +975,9 @@ class WorkOrder(Document):
 
 	def set_work_order_operations(self):
 		return OperationsService(self).set_work_order_operations()
+
+	def set_operation_warehouses(self):
+		return OperationsService(self).set_operation_warehouses()
 
 	def update_operation_status(self):
 		return OperationsService(self).update_operation_status()
@@ -999,6 +1006,9 @@ class WorkOrder(Document):
 
 	def update_transferred_qty_for_required_items(self):
 		return RequiredItemsService(self).update_transferred_qty_for_required_items()
+
+	def refresh_material_transferred_for_manufacturing(self):
+		return RequiredItemsService(self).refresh_material_transferred_for_manufacturing()
 
 	def update_returned_qty(self):
 		return RequiredItemsService(self).update_returned_qty()
@@ -1064,7 +1074,7 @@ def get_bom_operations(doctype: str, txt: str, searchfield: str, start: int, pag
 	return frappe.get_all("BOM Operation", filters=filters, fields=["operation"], as_list=1)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def set_work_order_ops(name: str):
 	po = frappe.get_doc("Work Order", name)
 	po.set_work_order_operations()

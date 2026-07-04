@@ -179,12 +179,31 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 						: "Inter Company Purchase Invoice";
 
 				me.frm.add_custom_button(
-					button_label,
+					__(button_label),
 					function () {
 						me.make_inter_company_invoice();
 					},
 					__("Create")
 				);
+
+				frappe.call({
+					method: "erpnext.accounts.doctype.sales_invoice.mapper.get_received_items",
+					args: {
+						reference_name: me.frm.doc.name,
+						doctype: "Purchase Invoice",
+						reference_fieldname: "sales_invoice_item",
+					},
+					callback: function (r) {
+						if (r.exc) return;
+						const received_items = r.message || {};
+						const has_pending_qty = me.frm.doc.items.some(
+							(item) => flt(item.qty) - flt(received_items[item.name] || 0) > 0
+						);
+						if (!has_pending_qty) {
+							me.frm.remove_custom_button(__(button_label), __("Create"));
+						}
+					},
+				});
 			}
 		}
 
@@ -417,7 +436,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 				if (!me.frm.doc.customer) {
 					frappe.throw({
 						title: __("Mandatory"),
-						message: __("Please Select a Customer"),
+						message: __("Please select a Customer"),
 					});
 				}
 				erpnext.utils.map_current_doc({
@@ -567,6 +586,8 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 	set_dynamic_labels() {
 		super.set_dynamic_labels();
 		this.frm.events.hide_fields(this.frm);
+		const hide_update_stock = cint(this.frm.doc.is_debit_note) || cint(this.frm.doc.has_subcontracted);
+		this.frm.set_df_property("update_stock", "hidden", hide_update_stock);
 	}
 
 	items_on_form_rendered() {
@@ -1155,13 +1176,20 @@ frappe.ui.form.on("Sales Invoice", {
 		);
 	},
 
+	is_debit_note: function (frm) {
+		if (frm.doc.is_debit_note) {
+			frm.set_value("update_stock", 0);
+		}
+		// visibility handled by set_dynamic_labels()
+		frm.cscript.set_dynamic_labels();
+	},
+
 	refresh: function (frm) {
 		if (frm.doc.is_debit_note) {
 			frm.set_df_property("return_against", "label", __("Adjustment Against"));
 		}
 
 		frm.set_df_property("update_stock", "read_only", frm.doc.has_subcontracted);
-		frm.toggle_display("update_stock", !frm.doc.has_subcontracted);
 	},
 });
 

@@ -12,11 +12,17 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 	def setUp(self):
-		self.create_company()
-		self.create_customer()
-		self.create_item()
-		self.create_usd_receivable_account()
-		self.clear_old_entries()
+		self.company = "_Test Company"
+		self.company_abbr = "_TC"
+		self.customer = "_Test Customer"
+		self.item = "_Test Item"
+		self.cost_center = "Main - _TC"
+		self.warehouse = "Stores - _TC"
+		self.income_account = "Sales - _TC"
+		self.expense_account = "Cost of Goods Sold - _TC"
+		self.debit_to = "Debtors - _TC"
+		self.cash = "Cash - _TC"
+		self.debtors_usd = "_Test Receivable USD - _TC"
 
 	def create_sales_invoice(self, no_payment_schedule=False, do_not_submit=False, **args):
 		frappe.set_user("Administrator")
@@ -562,6 +568,119 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		report = execute(filters)
 		self.assertEqual(report[1], [])
 
+	def pay_invoice_via_journal_entry(self, si, amount):
+		je = frappe.new_doc("Journal Entry")
+		je.company = self.company
+		je.posting_date = today()
+		je.append(
+			"accounts",
+			{
+				"account": self.cash,
+				"debit": amount,
+				"debit_in_account_currency": amount,
+				"cost_center": self.cost_center,
+			},
+		)
+		je.append(
+			"accounts",
+			{
+				"account": self.debit_to,
+				"party_type": "Customer",
+				"party": self.customer,
+				"credit": amount,
+				"credit_in_account_currency": amount,
+				"reference_type": "Sales Invoice",
+				"reference_name": si.name,
+				"cost_center": self.cost_center,
+			},
+		)
+		return je.save().submit()
+
+	def ar_rows(self):
+		filters = {"company": self.company, "report_date": today(), "range": "30, 60, 90, 120"}
+		return execute(filters)[1]
+
+	def test_invoice_partially_paid_via_journal_entry(self):
+		si = self.create_sales_invoice(no_payment_schedule=True)  # outstanding 100
+		self.pay_invoice_via_journal_entry(si, 40)
+
+		row = next(row for row in self.ar_rows() if row.voucher_no == si.name)
+		self.assertEqual(row.paid, 40)
+		self.assertEqual(row.outstanding, 60)
+
+	def test_invoice_fully_paid_via_journal_entry(self):
+		si = self.create_sales_invoice(no_payment_schedule=True)  # outstanding 100
+		self.pay_invoice_via_journal_entry(si, 100)
+
+		# a fully settled invoice drops out of the receivable report
+		self.assertEqual([row for row in self.ar_rows() if row.voucher_no == si.name], [])
+
+	def test_credit_note_via_journal_entry_shows_negative_outstanding(self):
+		je = frappe.new_doc("Journal Entry")
+		je.company = self.company
+		je.voucher_type = "Credit Note"
+		je.posting_date = today()
+		je.append(
+			"accounts",
+			{
+				"account": self.income_account,
+				"debit": 100,
+				"debit_in_account_currency": 100,
+				"cost_center": self.cost_center,
+			},
+		)
+		je.append(
+			"accounts",
+			{
+				"account": self.debit_to,
+				"party_type": "Customer",
+				"party": self.customer,
+				"credit": 100,
+				"credit_in_account_currency": 100,
+				"cost_center": self.cost_center,
+			},
+		)
+		je = je.save().submit()
+
+		row = next(row for row in self.ar_rows() if row.voucher_no == je.name)
+		self.assertEqual(row.outstanding, -100)
+
+	def test_show_remarks_includes_invoice_remark(self):
+		si = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
+		si.remarks = "AR test remark"
+		si.save().submit()
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"show_remarks": 1,
+		}
+		row = next(row for row in execute(filters)[1] if row.voucher_no == si.name)
+		self.assertIn("AR test remark", row.remarks or "")
+
+	def test_show_delivery_notes_links_delivery_note(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		make_stock_entry(item_code=self.item, qty=5, to_warehouse=self.warehouse, basic_rate=100)
+		dn = create_delivery_note(
+			customer=self.customer, item=self.item, warehouse=self.warehouse, cost_center=self.cost_center
+		)
+		si = make_sales_invoice(dn.name)
+		si.insert()
+		si.submit()
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"show_delivery_notes": 1,
+		}
+		row = next(row for row in execute(filters)[1] if row.voucher_no == si.name)
+		self.assertIn(dn.name, row.delivery_notes or "")
+
 	def test_group_by_party(self):
 		si1 = self.create_sales_invoice(do_not_submit=True)
 		si1.posting_date = add_days(today(), -1)
@@ -692,6 +811,61 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 				expected_data[idx],
 				[row.invoiced, row.paid, row.outstanding, row.remaining_balance, row.future_amount],
 			)
+
+	def test_future_payments_from_journal_entry(self):
+		# A single future-dated Journal Entry paying two different invoices must surface as one
+		# future-payment row PER invoice, not collapse the whole sum onto one arbitrary invoice
+		# (regression: the implicit single-group aggregate filed all future JE payments under one key).
+		si_a = self.create_sales_invoice(no_payment_schedule=True)
+		si_b = self.create_sales_invoice(no_payment_schedule=True)
+
+		je = frappe.get_doc(
+			{
+				"doctype": "Journal Entry",
+				"voucher_type": "Journal Entry",
+				"company": self.company,
+				"posting_date": add_days(today(), 1),
+				"accounts": [
+					{
+						"account": self.debit_to,
+						"party_type": "Customer",
+						"party": self.customer,
+						"reference_type": "Sales Invoice",
+						"reference_name": si_a.name,
+						"credit_in_account_currency": 50,
+						"credit": 50,
+					},
+					{
+						"account": self.debit_to,
+						"party_type": "Customer",
+						"party": self.customer,
+						"reference_type": "Sales Invoice",
+						"reference_name": si_b.name,
+						"credit_in_account_currency": 50,
+						"credit": 50,
+					},
+					{"account": self.cash, "debit_in_account_currency": 100, "debit": 100},
+				],
+			}
+		)
+		je.insert().submit()
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"show_future_payments": True,
+		}
+		report = execute(filters)[1]
+		rows_a = [row for row in report if row.voucher_no == si_a.name]
+		rows_b = [row for row in report if row.voucher_no == si_b.name]
+
+		# exactly one report row per invoice, each keeping its own future payment; the bug collapsed
+		# both into a single row and allocated the whole 100 to one arbitrary invoice
+		self.assertEqual(len(rows_a), 1)
+		self.assertEqual(len(rows_b), 1)
+		self.assertEqual(rows_a[0].future_amount, 50.0)
+		self.assertEqual(rows_b[0].future_amount, 50.0)
 
 	def test_sales_person(self):
 		sales_person = frappe.get_doc(
@@ -1243,3 +1417,44 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual(len(report[1]), 1)
 		row = report[1][0]
 		self.assertEqual([si.name, project.name, 60], [row.voucher_no, row.project, row.outstanding])
+
+	def test_accounts_receivable_respects_user_permissions(self):
+		# Party is a dynamic link on Payment Ledger Entry, so user permissions on Customer
+		# must be applied explicitly. The report should only show permitted customers.
+		original_customer = self.customer
+		second_customer = "_Test Customer 1"
+
+		# create_customer overrides self.customer, so build the restricted invoice first
+		self.customer = second_customer
+		self.create_sales_invoice(no_payment_schedule=True)
+
+		self.customer = original_customer
+		allowed_invoice = self.create_sales_invoice(no_payment_schedule=True)
+
+		test_user = "test_ar_user_permission@example.com"
+		if not frappe.db.exists("User", test_user):
+			user = frappe.new_doc("User")
+			user.email = test_user
+			user.first_name = "AR Perm"
+			user.append("roles", {"role": "Accounts User"})
+			user.save()
+
+		frappe.permissions.add_user_permission("Customer", original_customer, test_user)
+
+		filters = {
+			"company": self.company,
+			"party_type": "Customer",
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+		}
+
+		frappe.set_user(test_user)
+		try:
+			report = execute(filters)
+		finally:
+			frappe.set_user("Administrator")
+
+		parties = {row.party for row in report[1]}
+		self.assertIn(original_customer, parties)
+		self.assertNotIn(second_customer, parties)
+		self.assertEqual(allowed_invoice.customer, original_customer)

@@ -200,106 +200,11 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		set_purchase_references(target)
 
 	def update_details(source_doc, target_doc, source_parent):
-		def _validate_address_link(address, link_doctype, link_name):
-			return frappe.db.get_value(
-				"Dynamic Link",
-				{
-					"parent": address,
-					"parenttype": "Address",
-					"link_doctype": link_doctype,
-					"link_name": link_name,
-				},
-				"parent",
-			)
-
 		target_doc.inter_company_invoice_reference = source_doc.name
 		if target_doc.doctype in ["Purchase Invoice", "Purchase Order"]:
-			currency = frappe.db.get_value("Supplier", details.get("party"), "default_currency")
-			target_doc.company = details.get("company")
-			target_doc.supplier = details.get("party")
-			target_doc.is_internal_supplier = 1
-			target_doc.ignore_pricing_rule = 1
-			target_doc.buying_price_list = source_doc.selling_price_list
-
-			# Invert Addresses
-			if source_doc.company_address and _validate_address_link(
-				source_doc.company_address, "Supplier", details.get("party")
-			):
-				update_address(target_doc, "supplier_address", "address_display", source_doc.company_address)
-			if source_doc.dispatch_address_name and _validate_address_link(
-				source_doc.dispatch_address_name, "Company", details.get("company")
-			):
-				update_address(
-					target_doc,
-					"dispatch_address",
-					"dispatch_address_display",
-					source_doc.dispatch_address_name,
-				)
-			if source_doc.shipping_address_name and _validate_address_link(
-				source_doc.shipping_address_name, "Company", details.get("company")
-			):
-				update_address(
-					target_doc,
-					"shipping_address",
-					"shipping_address_display",
-					source_doc.shipping_address_name,
-				)
-			if source_doc.customer_address and _validate_address_link(
-				source_doc.customer_address, "Company", details.get("company")
-			):
-				update_address(
-					target_doc, "billing_address", "billing_address_display", source_doc.customer_address
-				)
-
-			if currency:
-				target_doc.currency = currency
-
-			update_taxes(
-				target_doc,
-				party=target_doc.supplier,
-				party_type="Supplier",
-				company=target_doc.company,
-				doctype=target_doc.doctype,
-				party_address=target_doc.supplier_address,
-				company_address=target_doc.shipping_address,
-			)
-
+			_apply_purchase_party_details(target_doc, source_doc, details)
 		else:
-			currency = frappe.db.get_value("Customer", details.get("party"), "default_currency")
-			target_doc.company = details.get("company")
-			target_doc.customer = details.get("party")
-			target_doc.selling_price_list = source_doc.buying_price_list
-
-			if source_doc.supplier_address and _validate_address_link(
-				source_doc.supplier_address, "Company", details.get("company")
-			):
-				update_address(
-					target_doc, "company_address", "company_address_display", source_doc.supplier_address
-				)
-			if source_doc.shipping_address and _validate_address_link(
-				source_doc.shipping_address, "Customer", details.get("party")
-			):
-				update_address(
-					target_doc, "shipping_address_name", "shipping_address", source_doc.shipping_address
-				)
-			if source_doc.shipping_address and _validate_address_link(
-				source_doc.shipping_address, "Customer", details.get("party")
-			):
-				update_address(target_doc, "customer_address", "address_display", source_doc.shipping_address)
-
-			if currency:
-				target_doc.currency = currency
-
-			update_taxes(
-				target_doc,
-				party=target_doc.customer,
-				party_type="Customer",
-				company=target_doc.company,
-				doctype=target_doc.doctype,
-				party_address=target_doc.customer_address,
-				company_address=target_doc.company_address,
-				shipping_address_name=target_doc.shipping_address_name,
-			)
+			_apply_sales_party_details(target_doc, source_doc, details)
 
 	def update_item(source, target, source_parent):
 		target.qty = flt(source.qty) - received_items.get(source.name, 0.0)
@@ -327,7 +232,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			"rate": "rate",
 		},
 		"postprocess": update_item,
-		"condition": lambda doc: doc.qty > 0,
+		"condition": lambda doc: doc.qty - received_items.get(doc.name, 0.0) > 0,
 	}
 
 	if doctype in ["Sales Invoice", "Sales Order"]:
@@ -367,11 +272,110 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		target_doc,
 		set_missing_values,
 	)
+	if not doclist.get("items"):
+		frappe.throw(
+			_(
+				"Cannot create Intercompany {0}. All items in the source {1} have already been fully invoiced. "
+				"Please check the existing linked {2}s."
+			).format(target_doctype, doctype, target_doctype)
+		)
 
 	return doclist
 
 
-def get_received_items(reference_name, doctype, reference_fieldname):
+def _get_linked_address(address, link_doctype, link_name):
+	return frappe.db.get_value(
+		"Dynamic Link",
+		{
+			"parent": address,
+			"parenttype": "Address",
+			"link_doctype": link_doctype,
+			"link_name": link_name,
+		},
+		"parent",
+	)
+
+
+def _apply_purchase_party_details(target_doc, source_doc, details):
+	currency = frappe.db.get_value("Supplier", details.get("party"), "default_currency")
+	target_doc.company = details.get("company")
+	target_doc.supplier = details.get("party")
+	target_doc.is_internal_supplier = 1
+	target_doc.ignore_pricing_rule = 1
+	target_doc.buying_price_list = source_doc.selling_price_list
+
+	# Invert Addresses
+	if source_doc.company_address and _get_linked_address(
+		source_doc.company_address, "Supplier", details.get("party")
+	):
+		update_address(target_doc, "supplier_address", "address_display", source_doc.company_address)
+	if source_doc.dispatch_address_name and _get_linked_address(
+		source_doc.dispatch_address_name, "Company", details.get("company")
+	):
+		update_address(
+			target_doc, "dispatch_address", "dispatch_address_display", source_doc.dispatch_address_name
+		)
+	if source_doc.shipping_address_name and _get_linked_address(
+		source_doc.shipping_address_name, "Company", details.get("company")
+	):
+		update_address(
+			target_doc, "shipping_address", "shipping_address_display", source_doc.shipping_address_name
+		)
+	if source_doc.customer_address and _get_linked_address(
+		source_doc.customer_address, "Company", details.get("company")
+	):
+		update_address(target_doc, "billing_address", "billing_address_display", source_doc.customer_address)
+
+	if currency:
+		target_doc.currency = currency
+
+	update_taxes(
+		target_doc,
+		party=target_doc.supplier,
+		party_type="Supplier",
+		company=target_doc.company,
+		doctype=target_doc.doctype,
+		party_address=target_doc.supplier_address,
+		company_address=target_doc.shipping_address,
+	)
+
+
+def _apply_sales_party_details(target_doc, source_doc, details):
+	currency = frappe.db.get_value("Customer", details.get("party"), "default_currency")
+	target_doc.company = details.get("company")
+	target_doc.customer = details.get("party")
+	target_doc.selling_price_list = source_doc.buying_price_list
+
+	if source_doc.supplier_address and _get_linked_address(
+		source_doc.supplier_address, "Company", details.get("company")
+	):
+		update_address(target_doc, "company_address", "company_address_display", source_doc.supplier_address)
+	if source_doc.shipping_address and _get_linked_address(
+		source_doc.shipping_address, "Customer", details.get("party")
+	):
+		update_address(target_doc, "shipping_address_name", "shipping_address", source_doc.shipping_address)
+	if source_doc.shipping_address and _get_linked_address(
+		source_doc.shipping_address, "Customer", details.get("party")
+	):
+		update_address(target_doc, "customer_address", "address_display", source_doc.shipping_address)
+
+	if currency:
+		target_doc.currency = currency
+
+	update_taxes(
+		target_doc,
+		party=target_doc.customer,
+		party_type="Customer",
+		company=target_doc.company,
+		doctype=target_doc.doctype,
+		party_address=target_doc.customer_address,
+		company_address=target_doc.company_address,
+		shipping_address_name=target_doc.shipping_address_name,
+	)
+
+
+@frappe.whitelist()
+def get_received_items(reference_name: str, doctype: str, reference_fieldname: str):
 	reference_field = "inter_company_invoice_reference"
 	if doctype == "Purchase Order":
 		reference_field = "inter_company_order_reference"
@@ -384,20 +388,19 @@ def get_received_items(reference_name, doctype, reference_fieldname):
 	target_doctypes = frappe.get_all(
 		doctype,
 		filters=filters,
-		as_list=True,
+		pluck="name",
 	)
-
+	received_items_map = {}
 	if target_doctypes:
-		target_doctypes = list(target_doctypes[0])
-
-	received_items_map = frappe._dict(
-		frappe.get_all(
+		received_items_data = frappe.get_all(
 			doctype + " Item",
 			filters={"parent": ("in", target_doctypes)},
 			fields=[reference_fieldname, "qty"],
-			as_list=1,
 		)
-	)
+		for item in received_items_data:
+			key = item.get(reference_fieldname)
+			if key:
+				received_items_map[key] = received_items_map.get(key, 0.0) + flt(item.qty)
 
 	return received_items_map
 

@@ -341,8 +341,7 @@ def apply_pricing_rule(args: str | dict, doc: str | dict | Document | None = Non
 	}
 	"""
 
-	if isinstance(args, str):
-		args = json.loads(args)
+	args = frappe.parse_json(args)
 
 	args = frappe._dict(args)
 
@@ -397,8 +396,7 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 		get_product_discount_rule,
 	)
 
-	if isinstance(doc, str):
-		doc = json.loads(doc)
+	doc = frappe.parse_json(doc)
 
 	if doc:
 		doc = frappe.get_doc(doc)
@@ -628,9 +626,7 @@ def remove_pricing_rule_for_item(
 		get_pricing_rule_items,
 	)
 
-	if isinstance(item_details, str):
-		item_details = json.loads(item_details)
-		item_details = frappe._dict(item_details)
+	item_details = frappe._dict(frappe.parse_json(item_details))
 
 	for d in get_applied_pricing_rules(pricing_rules):
 		if not d or not frappe.db.exists("Pricing Rule", d):
@@ -671,8 +667,7 @@ def remove_pricing_rule_for_item(
 
 @frappe.whitelist()
 def remove_pricing_rules(item_list: str | list):
-	if isinstance(item_list, str):
-		item_list = json.loads(item_list)
+	item_list = frappe.parse_json(item_list)
 
 	out = []
 	for item in item_list:

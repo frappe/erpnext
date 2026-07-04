@@ -6,9 +6,8 @@ import json
 
 import frappe
 from frappe import _
-from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.document import Document
-from frappe.utils import cint, cstr, flt
+from frappe.utils import cint, flt
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	unlink_inter_company_doc,
@@ -16,6 +15,9 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	validate_inter_company_party,
 )
 from erpnext.accounts.party import get_party_account_currency
+from erpnext.buying.doctype.purchase_order.services.drop_ship import DropShipService
+from erpnext.buying.doctype.purchase_order.services.status import StatusService
+from erpnext.buying.doctype.purchase_order.services.subcontracting import SubcontractingService
 from erpnext.buying.utils import validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.controllers.status_updater import get_allowance_for
@@ -24,13 +26,6 @@ from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
 )
 from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.stock.stock_balance import get_ordered_qty, update_bin_qty
-from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
-	get_subcontracting_boms_for_finished_goods,
-)
-
-from .mapper import (
-	make_subcontracting_order,
-)
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -214,7 +209,7 @@ class PurchaseOrder(BuyingController):
 		self.validate_minimum_order_qty()
 		validate_against_blanket_order(self)
 
-		self.validate_fg_item_for_subcontracting()
+		SubcontractingService(self).validate_fg_item_for_subcontracting()
 
 		if not self.advance_payment_status:
 			self.advance_payment_status = "Not Initiated"
@@ -322,35 +317,6 @@ class PurchaseOrder(BuyingController):
 					).format(item_code, qty, itemwise_min_order_qty.get(item_code))
 				)
 
-	def validate_fg_item_for_subcontracting(self):
-		if self.is_subcontracted:
-			for item in self.items:
-				if not item.fg_item:
-					frappe.throw(
-						_("Row #{0}: Finished Good Item is not specified for service item {1}").format(
-							item.idx, item.item_code
-						)
-					)
-				else:
-					if not frappe.get_value("Item", item.fg_item, "is_sub_contracted_item"):
-						frappe.throw(
-							_("Row #{0}: Finished Good Item {1} must be a sub-contracted item").format(
-								item.idx, item.fg_item
-							)
-						)
-					elif not item.bom and not frappe.get_value("Item", item.fg_item, "default_bom"):
-						frappe.throw(
-							_("Row #{0}: Default BOM not found for FG Item {1}").format(
-								item.idx, item.fg_item
-							)
-						)
-				if not item.fg_item_qty:
-					frappe.throw(_("Row #{0}: Finished Good Item Qty can not be zero").format(item.idx))
-		else:
-			for item in self.items:
-				item.set("fg_item", None)
-				item.set("fg_item_qty", 0)
-
 	def get_schedule_dates(self):
 		for d in self.get("items"):
 			if d.material_request_item and not d.schedule_date:
@@ -399,24 +365,8 @@ class PurchaseOrder(BuyingController):
 		for item_code, warehouse in item_wh_list:
 			update_bin_qty(item_code, warehouse, {"ordered_qty": get_ordered_qty(item_code, warehouse)})
 
-	def check_modified_date(self):
-		modified_in_db = frappe.db.get_value("Purchase Order", self.name, "modified")
-
-		if modified_in_db and cstr(modified_in_db) != cstr(self.modified):
-			frappe.msgprint(
-				_("{0} {1} has been modified. Please refresh.").format(self.doctype, self.name),
-				raise_exception=True,
-			)
-
 	def update_status(self, status):
-		self.check_modified_date()
-		self.set_status(update=True, status=status)
-		self.update_requested_qty()
-		self.update_ordered_qty()
-		self.update_subcontracting_order_status()
-		self.update_blanket_order()
-		self.notify_update()
-		clear_doctype_notifications(self)
+		StatusService(self).update_status(status)
 
 	def on_submit(self):
 		super().on_submit()
@@ -442,7 +392,7 @@ class PurchaseOrder(BuyingController):
 
 		update_linked_doc(self.doctype, self.name, self.inter_company_order_reference)
 
-		self.auto_create_subcontracting_order()
+		SubcontractingService(self).auto_create_subcontracting_order()
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
@@ -461,8 +411,9 @@ class PurchaseOrder(BuyingController):
 		if self.is_against_pp():
 			self.update_status_updater_if_from_pp()
 
-		if self.has_drop_ship_item():
-			self.set_received_qty_to_zero_for_drop_ship_items()
+		drop_ship_service = DropShipService(self)
+		if drop_ship_service.has_drop_ship_item():
+			drop_ship_service.set_received_qty_to_zero_for_drop_ship_items()
 			self.update_receiving_percentage()
 
 		self.check_for_on_hold_or_closed_status("Material Request", "material_request")
@@ -522,87 +473,9 @@ class PurchaseOrder(BuyingController):
 			}
 		)
 
-	def update_delivered_qty_in_sales_order(self):
-		"""Update delivered qty in Sales Order for drop ship"""
-		sales_orders_to_update = []
-		for item in self.items:
-			if item.sales_order and item.delivered_by_supplier == 1:
-				if item.sales_order not in sales_orders_to_update:
-					sales_orders_to_update.append(item.sales_order)
-
-		for so_name in sales_orders_to_update:
-			so = frappe.get_lazy_doc("Sales Order", so_name)
-			so.update_delivery_status()
-			so.set_status(update=True)
-			so.notify_update()
-
-	def set_received_qty_to_zero_for_drop_ship_items(self):
-		for item in self.items:
-			if item.delivered_by_supplier:
-				item.db_set("received_qty", 0)
-
-	def has_drop_ship_item(self):
-		return any(d.delivered_by_supplier for d in self.items)
-
 	@frappe.whitelist()
 	def update_dropship_received_qty(self, data: list[dict]):
-		if not data:
-			frappe.throw(_("Please select at least one item to update delivered quantity."))
-
-		for d in data:
-			item = next((item for item in self.items if item.name == d.get("name")), None)
-
-			if not item:
-				frappe.throw(
-					_("Item with name {0} not found in the Purchase Order").format(frappe.bold(d.get("name")))
-				)
-
-			if not item.delivered_by_supplier:
-				frappe.throw(
-					_(
-						"Item {0} is not a drop ship item. Only drop ship items can have Delivered Qty updated."
-					).format(frappe.bold(item.item_code))
-				)
-
-			if not item.has_permlevel_access_to("received_qty", permission_type="write"):
-				frappe.throw(
-					_("You don't have permission to update Received Qty DocField for item {0}").format(
-						frappe.bold(item.item_code)
-					)
-				)
-
-			if not d.get("qty_change"):
-				frappe.throw(
-					_(
-						"Item {0} has no changes in delivered quantity. Please unselect the row if you do not wish to update its quantity."
-					).format(frappe.bold(item.item_code))
-				)
-
-			if d.get("qty_change") < 0 and abs(d.get("qty_change")) > item.received_qty:
-				frappe.throw(
-					_("Delivered Qty cannot be reduced by more than {0} for item {1}").format(
-						item.received_qty, frappe.bold(item.item_code)
-					)
-				)
-
-			if d.get("qty_change") > 0 and item.received_qty + d.get("qty_change") > item.qty:
-				frappe.throw(
-					_("Delivered Qty cannot be increased by more than {0} for item {1}").format(
-						item.qty - item.received_qty, frappe.bold(item.item_code)
-					)
-				)
-
-			qty_change = item.received_qty + d.get("qty_change")
-			item.db_set("received_qty", qty_change, update_modified=True)
-			self.add_comment(
-				"Label",
-				_("updated delivered quantity for item {0} to {1}").format(
-					frappe.bold(item.item_code), frappe.bold(qty_change)
-				),
-			)
-		self.update_receiving_percentage()
-		self.set_status(update=True)
-		self.update_delivered_qty_in_sales_order()
+		DropShipService(self).update_dropship_received_qty(data)
 
 	def is_against_so(self):
 		return any(d.sales_order for d in self.items if d.sales_order)
@@ -611,44 +484,13 @@ class PurchaseOrder(BuyingController):
 		return any(d.production_plan for d in self.items if d.production_plan)
 
 	def update_receiving_percentage(self):
-		total_qty, received_qty = 0.0, 0.0
-		for item in self.items:
-			received_qty += min(item.received_qty, item.qty)
-			total_qty += item.qty
-		if total_qty and received_qty:
-			self.db_set("per_received", flt(received_qty / total_qty) * 100, update_modified=False)
-		else:
-			self.db_set("per_received", 0, update_modified=False)
+		StatusService(self).update_receiving_percentage()
 
 	def set_service_items_for_finished_goods(self):
-		if not self.is_subcontracted:
-			return
-
-		finished_goods_without_service_item = {
-			d.fg_item for d in self.items if (not d.item_code and d.fg_item)
-		}
-
-		if subcontracting_boms := get_subcontracting_boms_for_finished_goods(
-			finished_goods_without_service_item
-		):
-			for item in self.items:
-				if not item.item_code and item.fg_item in subcontracting_boms:
-					subcontracting_bom = subcontracting_boms[item.fg_item]
-
-					item.item_code = subcontracting_bom.service_item
-					item.qty = flt(item.fg_item_qty) * flt(subcontracting_bom.conversion_factor)
-					item.uom = subcontracting_bom.service_item_uom
+		SubcontractingService(self).set_service_items_for_finished_goods()
 
 	def can_update_items(self) -> bool:
-		result = True
-
-		if self.is_subcontracted:
-			if frappe.db.exists(
-				"Subcontracting Order", {"purchase_order": self.name, "docstatus": ["!=", 2]}
-			):
-				result = False
-
-		return result
+		return SubcontractingService(self).can_update_items()
 
 	def has_pending_receivable_qty(self) -> bool:
 		"""Return True if any non-drop-ship item can still be received,
@@ -687,22 +529,6 @@ class PurchaseOrder(BuyingController):
 				"Sales Order Item", sales_order_item, "ordered_qty", prev_ordered_qty - qty_in_stock_uom
 			)
 
-	def auto_create_subcontracting_order(self):
-		if self.is_subcontracted:
-			if frappe.db.get_single_value("Buying Settings", "auto_create_subcontracting_order"):
-				make_subcontracting_order(self.name, save=True, notify=True)
-
-	def update_subcontracting_order_status(self):
-		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
-			update_subcontracting_order_status as update_sco_status,
-		)
-
-		if self.is_subcontracted:
-			sco = frappe.db.get_value("Subcontracting Order", {"purchase_order": self.name, "docstatus": 1})
-
-			if sco:
-				update_sco_status(sco, "Closed" if self.status == "Closed" else None)
-
 
 @frappe.request_cache
 def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=1.0):
@@ -723,11 +549,11 @@ def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=
 
 
 @frappe.whitelist()
-def close_or_unclose_purchase_orders(names: str, status: str):
+def close_or_unclose_purchase_orders(names: str | list, status: str):
 	if not frappe.has_permission("Purchase Order", "write"):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
-	names = json.loads(names)
+	names = frappe.parse_json(names)
 	for name in names:
 		po = frappe.get_lazy_doc("Purchase Order", name)
 		if po.docstatus == 1:
@@ -764,4 +590,4 @@ def get_list_context(context=None):
 def update_status(status: str, name: str):
 	po = frappe.get_lazy_doc("Purchase Order", name, check_permission="submit")
 	po.update_status(status)
-	po.update_delivered_qty_in_sales_order()
+	DropShipService(po).update_delivered_qty_in_sales_order()

@@ -353,7 +353,7 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 					frappe.set_route("Form", doc.doctype, doc.name);
 				} else {
 					frappe.msgprint(
-						__("Purchase Receipt doesn't have any Item for which Retain Sample is enabled.")
+						__("Purchase Receipt does not have any Item for which Retain Sample is enabled.")
 					);
 				}
 			},

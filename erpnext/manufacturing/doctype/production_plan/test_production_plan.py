@@ -2322,6 +2322,213 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual(len(reserved_entries), 0)
 		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
 
+	def test_no_stock_reservation_via_purchase_receipt_when_reserve_stock_disabled(self):
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+		from erpnext.stock.doctype.material_request.mapper import make_purchase_order
+
+		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 1)
+		frappe.db.set_single_value("Stock Settings", "auto_reserve_stock", 0)
+
+		bom_tree = {"FG For SR No Auto Reserve": {"RM For SR No Auto Reserve": {}}}
+		parent_bom = create_nested_bom(bom_tree, prefix="")
+
+		warehouse = "_Test Warehouse - _TC"
+
+		# reserve_stock is deliberately left unset (defaults to 0): this is what happens when
+		# "Auto Reserve Stock" is off and nobody ticks "Reserve Stock" on the Production Plan by hand.
+		plan = create_production_plan(
+			item_code=parent_bom.item,
+			planned_qty=5,
+			ignore_existing_ordered_qty=1,
+			do_not_submit=1,
+			warehouse=warehouse,
+			for_warehouse=warehouse,
+		)
+		plan.get_sub_assembly_items()
+		plan.set("mr_items", [])
+		for d in get_items_for_material_requests(plan.as_dict()):
+			plan.append("mr_items", d)
+		plan.save()
+
+		self.assertEqual(plan.reserve_stock, 0)
+		plan.submit()
+
+		plan.submit_material_request = 1
+		plan.make_material_request()
+
+		material_requests = frappe.get_all(
+			"Material Request", filters={"production_plan": plan.name}, pluck="name"
+		)
+		self.assertGreater(len(material_requests), 0)
+
+		for mr_name in list(set(material_requests)):
+			po = make_purchase_order(mr_name)
+			po.supplier = "_Test Supplier"
+			po.submit()
+
+			pr = make_purchase_receipt(po.name)
+			pr.submit()
+
+		sre = StockReservation(plan)
+		reserved_entries = sre.get_reserved_entries("Production Plan", plan.name)
+		self.assertEqual(len(reserved_entries), 0)
+
+		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
+
+	def test_stock_reservation_ignores_production_plans_with_reserve_stock_off_on_shared_purchase_order(self):
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 1)
+		frappe.db.set_single_value("Stock Settings", "auto_reserve_stock", 0)
+
+		warehouse = "_Test Warehouse - _TC"
+
+		bom_reserve = create_nested_bom({"FG SR Mixed Reserve": {"RM SR Mixed Reserve": {}}}, prefix="")
+		bom_skip = create_nested_bom({"FG SR Mixed Skip": {"RM SR Mixed Skip": {}}}, prefix="")
+
+		def make_submitted_plan(item_code, reserve_stock):
+			plan = create_production_plan(
+				item_code=item_code,
+				planned_qty=5,
+				ignore_existing_ordered_qty=1,
+				do_not_submit=1,
+				warehouse=warehouse,
+				for_warehouse=warehouse,
+				reserve_stock=reserve_stock,
+			)
+			plan.get_sub_assembly_items()
+			plan.set("mr_items", [])
+			for d in get_items_for_material_requests(plan.as_dict()):
+				plan.append("mr_items", d)
+			plan.save()
+			plan.submit()
+			plan.submit_material_request = 1
+			plan.make_material_request()
+			return plan
+
+		plan_reserve = make_submitted_plan(bom_reserve.item, reserve_stock=1)
+		plan_skip = make_submitted_plan(bom_skip.item, reserve_stock=0)
+
+		self.assertEqual(plan_reserve.reserve_stock, 1)
+		self.assertEqual(plan_skip.reserve_stock, 0)
+
+		mr_reserve = frappe.get_all(
+			"Material Request", filters={"production_plan": plan_reserve.name}, pluck="name"
+		)[0]
+		mr_skip = frappe.get_all(
+			"Material Request", filters={"production_plan": plan_skip.name}, pluck="name"
+		)[0]
+
+		# One Purchase Order pulling rows from both Material Requests, so the Purchase Receipt made
+		# from it has both a reservable and a non-reservable Production Plan reference in `doc.items`.
+		po = frappe.new_doc("Purchase Order")
+		po.supplier = "_Test Supplier"
+		po.company = plan_reserve.company
+		po.schedule_date = nowdate()
+
+		for mr_name in (mr_reserve, mr_skip):
+			mr = frappe.get_doc("Material Request", mr_name)
+			for item in mr.items:
+				po.append(
+					"items",
+					{
+						"item_code": item.item_code,
+						"qty": item.qty,
+						"rate": 100,
+						"schedule_date": nowdate(),
+						"warehouse": warehouse,
+						"material_request": mr.name,
+						"material_request_item": item.name,
+					},
+				)
+
+		po.submit()
+
+		pr = make_purchase_receipt(po.name)
+		pr.submit()
+
+		reserved_for_plan_reserve = StockReservation(plan_reserve).get_reserved_entries(
+			"Production Plan", plan_reserve.name
+		)
+		reserved_for_plan_skip = StockReservation(plan_skip).get_reserved_entries(
+			"Production Plan", plan_skip.name
+		)
+
+		self.assertGreater(len(reserved_for_plan_reserve), 0)
+		self.assertEqual(len(reserved_for_plan_skip), 0)
+
+		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
+
+	def test_stock_reservation_restored_on_work_order_cancel(self):
+		# Spec #5 (cancellation path): when a Work Order created from a Production Plan is cancelled,
+		# the reservation that was transferred PP -> WO must flow back to the still-open Production
+		# Plan, not silently vanish.
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 1)
+		try:
+			bom_tree = {
+				"FG For SR Cancel": {"Sub Assembly For SR Cancel 1": {"Raw Material For SR Cancel 1": {}}}
+			}
+			parent_bom = create_nested_bom(bom_tree, prefix="")
+			warehouse = "_Test Warehouse - _TC"
+
+			# Plenty of stock so the Production Plan reserves everything directly on submit.
+			for item_code in ["Sub Assembly For SR Cancel 1", "Raw Material For SR Cancel 1"]:
+				make_stock_entry(item_code=item_code, target=warehouse, qty=20, basic_rate=100)
+
+			plan = create_production_plan(
+				item_code=parent_bom.item,
+				planned_qty=10,
+				skip_available_sub_assembly_item=1,
+				ignore_existing_ordered_qty=1,
+				do_not_submit=1,
+				warehouse=warehouse,
+				sub_assembly_warehouse=warehouse,
+				for_warehouse=warehouse,
+				reserve_stock=1,
+			)
+			plan.get_sub_assembly_items()
+			plan.set("mr_items", [])
+			for d in get_items_for_material_requests(plan.as_dict()):
+				plan.append("mr_items", d)
+			plan.save()
+			plan.submit()
+
+			def pp_reserved():
+				return sum(
+					r.reserved_qty
+					for r in StockReservation(plan).get_reserved_entries("Production Plan", plan.name)
+				)
+
+			reserved_before = pp_reserved()
+			self.assertGreater(reserved_before, 0, "Production Plan should reserve stock on submit")
+
+			plan.make_work_order()
+			work_orders = frappe.get_all("Work Order", filters={"production_plan": plan.name}, pluck="name")
+			work_orders = list(set(work_orders))
+			for wo_name in work_orders:
+				wo_doc = frappe.get_doc("Work Order", wo_name)
+				wo_doc.source_warehouse = warehouse
+				wo_doc.wip_warehouse = warehouse
+				wo_doc.fg_warehouse = warehouse
+				wo_doc.submit()
+
+			# After all Work Orders are submitted the reservation has fully transferred off the plan.
+			self.assertEqual(pp_reserved(), 0, "Reservation should transfer PP -> WO on submit")
+
+			# Cancelling the Work Orders must return the reservation to the Production Plan.
+			for wo_name in work_orders:
+				frappe.get_doc("Work Order", wo_name).cancel()
+
+			self.assertEqual(
+				pp_reserved(), reserved_before, "Cancelling the Work Order must restore the PP reservation"
+			)
+		finally:
+			frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
+
 	def test_stock_reservation_of_serial_nos_against_production_plan(self):
 		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
@@ -2793,6 +3000,104 @@ class TestProductionPlan(ERPNextTestSuite):
 			f"Expected RM qty=2 (1 per FG via shared phantom BOM), got {rm_total_qty}. "
 			"The phantom BOM was not re-exploded for the second po_item.",
 		)
+
+	def test_sub_assembly_rm_query_keeps_bom_no_phantom_pair_coherent(self):
+		"""bom_no and is_phantom_item must stay paired to the same BOM Item line.
+
+		When a component is listed more than once in a sub-assembly BOM pointing at different
+		sub-BOMs (one phantom, one not), grouping only by (item_code, stock_uom) collapsed both
+		lines into one row, and the independent Max() per column could pair the phantom flag of
+		one line with the bom_no of the other. The consumer keys on (item_code, bom_no) and
+		recurses on is_phantom_item, so an incoherent pair recurses into the wrong sub-BOM.
+		Grouping also by (bom_no, is_phantom_item) yields one coherent row per distinct sub-BOM.
+		"""
+		from erpnext.manufacturing.doctype.production_plan.services.sub_assembly_queries import (
+			_sub_assembly_rm_query,
+		)
+
+		rm_phantom = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		rm_normal = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		component = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+
+		# Phantom sub-BOM first (smaller auto-name); non-phantom second (larger name) -> the name
+		# the old Max(bom_no) would pick, while Max(is_phantom_item)=1 came from the phantom line.
+		phantom_bom = make_bom(item=component, raw_materials=[rm_phantom], do_not_save=True)
+		phantom_bom.is_phantom_bom = 1
+		phantom_bom.save()
+		phantom_bom.submit()
+		normal_bom = make_bom(item=component, raw_materials=[rm_normal])
+
+		# Sub-assembly BOM lists `component` twice, once via each sub-BOM.
+		sa_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		sa_bom = make_bom(item=sa_item, raw_materials=[component], do_not_save=True)
+		sa_bom.items[0].bom_no = phantom_bom.name
+		component_doc = frappe.get_doc("Item", component)
+		sa_bom.append(
+			"items",
+			{
+				"item_code": component,
+				"qty": 1,
+				"uom": component_doc.stock_uom,
+				"stock_uom": component_doc.stock_uom,
+				"bom_no": normal_bom.name,
+			},
+		)
+		sa_bom.save()
+		sa_bom.submit()
+
+		rows = _sub_assembly_rm_query(
+			company="_Test Company", bom_no=sa_bom.name, include_non_stock_items=1, planned_qty=1
+		)
+		by_bom_no = {row.bom_no: row for row in rows if row.item_code == component}
+
+		# One coherent row per distinct sub-BOM, each carrying its own phantom flag.
+		self.assertIn(phantom_bom.name, by_bom_no)
+		self.assertIn(normal_bom.name, by_bom_no)
+		self.assertEqual(by_bom_no[phantom_bom.name].is_phantom_item, 1)
+		self.assertEqual(by_bom_no[normal_bom.name].is_phantom_item, 0)
+
+	def test_subitems_query_keeps_real_rm_listed_alongside_phantom(self):
+		"""bom_explosion._subitems_query groups BOM lines by item_code, and get_subitems() drops any
+		grouped row whose is_phantom_item is truthy. When one item_code is listed in a BOM both as a
+		phantom sub-assembly and as a plain raw material, Max(is_phantom_item)=1 made get_subitems
+		silently drop the real material. Min(is_phantom_item) keeps it (phantom only when every line
+		is phantom) and is deterministic on MariaDB and Postgres.
+		"""
+		from erpnext.manufacturing.doctype.production_plan.services.bom_explosion import _subitems_query
+
+		component = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		rm_phantom = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+
+		phantom_bom = make_bom(item=component, raw_materials=[rm_phantom], do_not_save=True)
+		phantom_bom.is_phantom_bom = 1
+		phantom_bom.save()
+		phantom_bom.submit()
+		# the phantom BOM is auto-set as the component's default; clear it so the second component line
+		# stays a plain (non-phantom) raw material instead of inheriting the phantom BOM as its bom_no.
+		frappe.db.set_value("Item", component, "default_bom", "")
+		frappe.clear_document_cache("Item", component)
+
+		fg_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		parent = make_bom(item=fg_item, raw_materials=[component], do_not_save=True)
+		parent.items[0].bom_no = phantom_bom.name  # phantom line -> is_phantom_item = 1
+		component_doc = frappe.get_doc("Item", component)
+		parent.append(
+			"items",
+			{
+				"item_code": component,
+				"qty": 1,
+				"uom": component_doc.stock_uom,
+				"stock_uom": component_doc.stock_uom,
+			},
+		)  # plain raw-material line (no bom_no) -> is_phantom_item = 0
+		parent.save()
+		parent.submit()
+
+		rows = _subitems_query("_Test Company", parent.name, 1, 1, 1)
+		component_rows = [r for r in rows if r.item_code == component]
+		self.assertEqual(len(component_rows), 1)
+		# Min() keeps the real material; the old Max() returned 1 and get_subitems dropped it.
+		self.assertEqual(component_rows[0].is_phantom_item, 0)
 
 
 def create_production_plan(**args):

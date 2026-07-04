@@ -86,6 +86,10 @@ def make_material_request(source_name: str, target_doc: Document | str | None = 
 
 @frappe.whitelist()
 def make_stock_entry(source_name: str, target_doc: Document | str | None = None):
+	from erpnext.stock.doctype.stock_entry.services.manufacturing import (
+		set_previous_operation_serial_batch,
+	)
+
 	def update_item(source, target, source_parent):
 		target.t_warehouse = source_parent.wip_warehouse
 
@@ -125,6 +129,7 @@ def make_stock_entry(source_name: str, target_doc: Document | str | None = None)
 				wo_allows_alternate_item
 				and frappe.get_cached_value("Item", item.item_code, "allow_alternative_item")
 			)
+			set_previous_operation_serial_batch(target, item)
 
 	doclist = get_mapped_doc(
 		"Job Card",

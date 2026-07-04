@@ -1365,7 +1365,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						primary_action: function () {
 							var data = { items: d.fields_dict.items.grid.get_selected_children() };
 							if (!data.items.length) {
-								frappe.throw(__("Please select atleast one item to continue"));
+								frappe.throw(__("Please select at least one item to continue"));
 							}
 							me.frm.call({
 								method: "make_work_orders",
@@ -1753,7 +1753,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 				let selected_items = dialog.fields_dict.items_for_po.grid.get_selected_children();
 				if (selected_items.length == 0) {
 					frappe.throw({
-						message: "Please select Items from the Table",
+						message: __("Please select Items from the Table"),
 						title: __("Items Required"),
 						indicator: "blue",
 					});

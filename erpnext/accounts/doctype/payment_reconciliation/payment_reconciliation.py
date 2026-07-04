@@ -6,8 +6,10 @@ import frappe
 from frappe import _, msgprint, qb
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
+from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
 from frappe.query_builder import Case, Criterion
 from frappe.query_builder.custom import ConstantColumn
+from frappe.query_builder.functions import IfNull
 from frappe.utils import flt, fmt_money, get_link_to_form, getdate, nowdate, today
 
 import erpnext
@@ -73,6 +75,7 @@ class PaymentReconciliation(Document):
 		self.accounting_dimension_filter_conditions = []
 		self.ple_posting_date_filter = []
 		self.dimensions = get_dimensions(with_cost_center_and_project=True)[0]
+		self.user_permissions = get_user_permissions(frappe.session.user)
 
 	def load_from_db(self):
 		# 'modified' attribute is required for `run_doc_method` to work properly.
@@ -153,6 +156,22 @@ class PaymentReconciliation(Document):
 
 		self.add_payment_entries(non_reconciled_payments)
 
+	def get_permitted_dimension_values(self, document_type, reference_doctype):
+		return get_allowed_docs_for_doctype(self.user_permissions.get(document_type, []), reference_doctype)
+
+	def validate_permitted_dimension_value(self, document_type, value, allowed):
+		if value and allowed and value not in allowed:
+			frappe.throw(
+				_("You do not have enough permission to access {0}: {1}").format(_(document_type), value),
+				frappe.PermissionError,
+			)
+
+	def get_user_permission_dimension_condition(self, field, allowed):
+		value_condition = field.isin(allowed)
+		if frappe.get_system_settings("apply_strict_user_permissions"):
+			return value_condition
+		return (IfNull(field, "") == "") | value_condition
+
 	def get_payment_entries(self):
 		party_account = [self.receivable_payable_account]
 
@@ -176,8 +195,13 @@ class PaymentReconciliation(Document):
 		dimensions = {}
 		for x in self.dimensions:
 			dimension = x.fieldname
-			if self.get(dimension):
-				dimensions.update({dimension: self.get(dimension)})
+			allowed = self.get_permitted_dimension_values(x.document_type, "Payment Entry")
+			if value := self.get(dimension):
+				self.validate_permitted_dimension_value(x.document_type, value, allowed)
+				dimensions[dimension] = value
+			elif allowed:
+				dimensions[dimension] = allowed
+
 		condition.update({"accounting_dimensions": dimensions})
 
 		payment_entries = get_advance_payment_entries_for_regional(
@@ -201,8 +225,12 @@ class PaymentReconciliation(Document):
 		# Dimension filters
 		for x in self.dimensions:
 			dimension = x.fieldname
-			if self.get(dimension):
-				conditions.append(jea[dimension] == self.get(dimension))
+			allowed = self.get_permitted_dimension_values(x.document_type, "Journal Entry Account")
+			if value := self.get(dimension):
+				self.validate_permitted_dimension_value(x.document_type, value, allowed)
+				conditions.append(jea[dimension] == value)
+			elif allowed:
+				conditions.append(self.get_user_permission_dimension_condition(jea[dimension], allowed))
 
 		if self.payment_name:
 			conditions.append(je.name.like(f"%%{self.payment_name}%%"))
@@ -748,8 +776,15 @@ class PaymentReconciliation(Document):
 		ple = qb.DocType("Payment Ledger Entry")
 		for x in self.dimensions:
 			dimension = x.fieldname
-			if self.get(dimension) and frappe.db.has_column("Payment Ledger Entry", dimension):
-				self.accounting_dimension_filter_conditions.append(ple[dimension] == self.get(dimension))
+			if frappe.db.has_column("Payment Ledger Entry", dimension):
+				allowed = self.get_permitted_dimension_values(x.document_type, "Payment Ledger Entry")
+				if value := self.get(dimension):
+					self.validate_permitted_dimension_value(x.document_type, value, allowed)
+					self.accounting_dimension_filter_conditions.append(ple[dimension] == value)
+				elif allowed:
+					self.accounting_dimension_filter_conditions.append(
+						self.get_user_permission_dimension_condition(ple[dimension], allowed)
+					)
 
 	def build_qb_filter_conditions(self, get_invoices=False, get_return_invoices=False):
 		self.common_filter_conditions.clear()

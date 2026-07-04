@@ -98,7 +98,7 @@ class StockClosingEntry(Document):
 		enqueue(prepare_closing_stock_balance, name=self.name, queue="long", timeout=1500)
 		frappe.msgprint(
 			_(
-				"Stock Closing Entry {0} has been queued for processing, system will take sometime to complete it."
+				"Stock Closing Entry {0} has been queued for processing, the system will take some time to complete it."
 			).format(self.name)
 		)
 
@@ -152,6 +152,7 @@ def prepare_closing_stock_balance(name):
 		doc.create_stock_closing_balance_entries()
 		doc.db_set("status", "Completed")
 	except Exception:
+		frappe.db.rollback()
 		doc.db_set("status", "Failed")
 		doc.log_error(title="Stock Closing Entry Failed")
 
@@ -267,7 +268,7 @@ class StockClosing:
 				],
 				filters={
 					"company": self.company,
-					"closing_stock_balance": self.last_closing_balance.name,
+					"stock_closing_entry": self.last_closing_balance.name,
 				},
 			)
 

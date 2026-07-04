@@ -92,7 +92,10 @@ class ProcessPeriodClosingVoucher(Document):
 @frappe.whitelist()
 def start_pcv_processing(docname: str):
 	if frappe.db.get_value("Process Period Closing Voucher", docname, "status") in ["Queued", "Running"]:
+		frappe.has_permission("Process Period Closing Voucher", "write", doc=docname, throw=True)
 		frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Running")
+
+		timeout = frappe.db.get_single_value("Accounts Settings", "pcv_job_timeout") or 3600
 
 		ppcvd = qb.DocType("Process Period Closing Voucher Detail")
 		if normal_balances := (
@@ -120,7 +123,7 @@ def start_pcv_processing(docname: str):
 					frappe.enqueue(
 						method="erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.process_individual_date",
 						queue="long",
-						timeout="3600",
+						timeout=timeout,
 						is_async=True,
 						enqueue_after_commit=True,
 						docname=docname,
@@ -246,6 +249,8 @@ def get_gle_for_closing_account(pcv, dimension_balance, dimensions):
 
 @frappe.whitelist()
 def schedule_next_date(docname: str):
+	timeout = frappe.db.get_single_value("Accounts Settings", "pcv_job_timeout") or 3600
+
 	ppcvd = qb.DocType("Process Period Closing Voucher Detail")
 	if to_process := (
 		qb.from_(ppcvd)
@@ -271,7 +276,7 @@ def schedule_next_date(docname: str):
 			frappe.enqueue(
 				method="erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.process_individual_date",
 				queue="long",
-				timeout="3600",
+				timeout=timeout,
 				is_async=True,
 				enqueue_after_commit=True,
 				docname=docname,
@@ -301,7 +306,7 @@ def schedule_next_date(docname: str):
 				frappe.enqueue(
 					method="erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.summarize_and_post_ledger_entries",
 					queue="long",
-					timeout="3600",
+					timeout=timeout,
 					is_async=True,
 					job_name=job_name,
 					enqueue_after_commit=True,
@@ -552,7 +557,8 @@ def process_individual_date(docname: str, date, report_type, parentfield):
 		Sum(gle.credit).as_("credit"),
 		Sum(gle.debit_in_account_currency).as_("debit_in_account_currency"),
 		Sum(gle.credit_in_account_currency).as_("credit_in_account_currency"),
-		gle.account_currency,
+		# account_currency is constant per grouped account -> Max() keeps the GROUP BY postgres-valid
+		Max(gle.account_currency).as_("account_currency"),
 	).where(
 		(gle.company.eq(company))
 		& (gle.is_cancelled.eq(0))

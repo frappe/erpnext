@@ -11,11 +11,12 @@ from erpnext import get_company_currency
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
+from erpnext.accounts.doctype.bank_account.bank_account import get_party_bank_account
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	get_payment_entry,
 )
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
-from erpnext.accounts.party import get_party_account, get_party_bank_account
+from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_account_currency, get_advance_payment_doctypes, get_currency_precision
 from erpnext.utilities import payment_app_import_guard
 
@@ -628,11 +629,9 @@ class PaymentRequest(Document):
 
 	def check_if_payment_entry_exists(self):
 		if self.status == "Paid":
-			if frappe.get_all(
+			if frappe.db.exists(
 				"Payment Entry Reference",
-				filters={"reference_name": self.reference_name, "docstatus": ["<", 2]},
-				fields=["parent"],
-				limit=1,
+				{"reference_name": self.reference_name, "docstatus": ["<", 2]},
 			):
 				frappe.throw(_("Payment Entry already exists"), title=_("Error"))
 
@@ -719,7 +718,7 @@ class PaymentRequest(Document):
 				row_number += TO_SKIP_NEW_ROW
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_payment_request(**args):
 	"""Make payment request"""
 
@@ -741,7 +740,7 @@ def make_payment_request(**args):
 
 	# Schedule-based PRs are allowed only if no Payment Entry exists for this document.
 	# Any existing Payment Entry forces legacy (amount-based) flow.
-	selected_payment_schedules = json.loads(args.get("schedules")) if args.get("schedules") else []
+	selected_payment_schedules = frappe.parse_json(args.get("schedules")) if args.get("schedules") else []
 
 	# Backend guard:
 	# If any Payment Entry exists, schedule-based PRs are not allowed.
@@ -932,7 +931,7 @@ def apply_payment_references(pr, payment_reference):
 
 
 def set_payment_references(payment_schedules):
-	payment_schedules = json.loads(payment_schedules) if payment_schedules else []
+	payment_schedules = frappe.parse_json(payment_schedules) if payment_schedules else []
 	payment_reference = []
 
 	for row in payment_schedules:
@@ -1211,10 +1210,11 @@ def get_dummy_message(doc):
 @frappe.whitelist()
 def get_subscription_details(reference_doctype: str, reference_name: str):
 	if reference_doctype == "Sales Invoice":
-		subscriptions = frappe.db.sql(
-			"""SELECT parent as sub_name FROM `tabSubscription Invoice` WHERE invoice=%s""",
-			reference_name,
-			as_dict=1,
+		subscriptions = frappe.get_all(
+			"Subscription Invoice",
+			filters={"invoice": reference_name},
+			fields=["parent as sub_name"],
+			order_by="",  # match the original query (no ORDER BY); avoid get_all's default sort
 		)
 		subscription_plans = []
 		for subscription in subscriptions:

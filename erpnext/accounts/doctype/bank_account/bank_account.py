@@ -188,7 +188,7 @@ def get_closing_balance_as_per_statement(bank_account: str, date: str):
 	return {"balance": 0, "date": None}
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def set_closing_balance_as_per_statement(bank_account: str, date: str | datetime.date, balance: float):
 	"""
 	Set the closing balance as per statement for a bank account and date

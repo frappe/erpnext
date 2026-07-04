@@ -7,6 +7,8 @@ from frappe import _
 from frappe.contacts.doctype.contact.contact import get_contact_with_phone_number
 from frappe.core.doctype.dynamic_link.dynamic_link import deduplicate_dynamic_links
 from frappe.model.document import Document
+from frappe.query_builder import Case
+from frappe.query_builder.functions import Sum
 
 from erpnext.crm.doctype.lead.lead import get_lead_with_phone_number
 from erpnext.crm.doctype.utils import get_scheduled_employees_for_popup, strip_number
@@ -125,7 +127,7 @@ class CallLog(Document):
 			self.employee_user_id = employees[0].get("user_id")
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def add_call_summary_and_call_type(call_log: str, summary: str, call_type: str):
 	doc = frappe.get_doc("Call Log", call_log)
 	doc.type_of_call = call_type
@@ -161,6 +163,7 @@ def link_existing_conversations(doc, state):
 		return
 	if doc.doctype != "Contact":
 		return
+	frappe.db.savepoint("link_call_logs")
 	try:
 		numbers = [d.phone for d in doc.phone_nos]
 
@@ -168,22 +171,22 @@ def link_existing_conversations(doc, state):
 			number = strip_number(number)
 			if not number:
 				continue
-			logs = frappe.db.sql_list(
-				"""
-				SELECT cl.name FROM `tabCall Log` cl
-				LEFT JOIN `tabDynamic Link` dl
-				ON cl.name = dl.parent
-				WHERE (cl.`from` like %(phone_number)s or cl.`to` like %(phone_number)s)
-				GROUP BY cl.name
-				HAVING SUM(
-					CASE
-						WHEN dl.link_doctype = %(doctype)s AND dl.link_name = %(docname)s
-						THEN 1
-						ELSE 0
-					END
-				)=0
-				""",
-				dict(phone_number=f"%{number}", docname=doc.name, doctype=doc.doctype),
+			cl = frappe.qb.DocType("Call Log")
+			dl = frappe.qb.DocType("Dynamic Link")
+			logs = (
+				frappe.qb.from_(cl)
+				.left_join(dl)
+				.on(cl.name == dl.parent)
+				.select(cl.name)
+				.where(cl["from"].like(f"%{number}") | cl["to"].like(f"%{number}"))
+				.groupby(cl.name)
+				.having(
+					Sum(
+						Case().when((dl.link_doctype == doc.doctype) & (dl.link_name == doc.name), 1).else_(0)
+					)
+					== 0
+				)
+				.run(pluck=True)
 			)
 			if logs:
 				for log in logs:
@@ -194,6 +197,7 @@ def link_existing_conversations(doc, state):
 				if not frappe.in_test:
 					frappe.db.commit()
 	except Exception:
+		frappe.db.rollback(save_point="link_call_logs")
 		frappe.log_error(title=_("Error during caller information update"))
 
 

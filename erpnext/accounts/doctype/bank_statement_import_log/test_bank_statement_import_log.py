@@ -26,9 +26,9 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestBankStatementImportLog(ERPNextTestSuite, AccountsTestMixin):
 	def setUp(self):
-		self.create_company()
-		self.create_customer()
-		self.clear_old_entries()
+		self.company = "_Test Company"
+		self.customer = "_Test Customer"
+		self.bank = "HDFC - _TC"
 		bank_dt = qb.DocType("Bank")
 		qb.from_(bank_dt).delete().where(bank_dt.name == "HDFC").run()
 		self.create_bank_account()

@@ -234,7 +234,7 @@ class Account(NestedSet):
 			if not frappe.db.get_value(
 				"Account", {"account_name": self.account_name, "company": ancestors[0]}, "name"
 			):
-				frappe.throw(_("Please add the account to root level Company - {}").format(ancestors[0]))
+				frappe.throw(_("Please add the account to root level Company - {0}").format(ancestors[0]))
 		elif self.parent_account:
 			descendants = get_descendants_of("Company", self.company)
 			if not descendants:
@@ -592,9 +592,11 @@ def update_account_number(
 @frappe.whitelist()
 def merge_account(old: str, new: str):
 	_ensure_idle_system()
-	# Validate properties before merging
 	new_account = frappe.get_cached_doc("Account", new)
 	old_account = frappe.get_cached_doc("Account", old)
+
+	new_account.check_permission("write")
+	old_account.check_permission("write")
 
 	if not new_account:
 		throw(_("Account {0} does not exist").format(new))
@@ -669,7 +671,7 @@ def _ensure_idle_system():
 	if last_gl_update > add_to_date(None, minutes=-5):
 		frappe.throw(
 			_(
-				"Last GL Entry update was done {}. This operation is not allowed while system is actively being used. Please wait for 5 minutes before retrying."
+				"Last GL Entry update was done {0}. This operation is not allowed while system is actively being used. Please wait for 5 minutes before retrying."
 			).format(pretty_date(last_gl_update)),
 			title=_("System In Use"),
 		)

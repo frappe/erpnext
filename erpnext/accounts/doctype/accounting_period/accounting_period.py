@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import getdate, nowdate
 
 
 class OverlapError(frappe.ValidationError):
@@ -36,7 +37,19 @@ class AccountingPeriod(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_dates()
 		self.validate_overlap()
+
+	def validate_dates(self):
+		if getdate(self.start_date) > getdate(self.end_date):
+			frappe.throw(_("Start Date cannot be after End Date"))
+
+		if getdate(self.end_date) > getdate(nowdate()):
+			frappe.throw(
+				_(
+					"Accounting Period cannot be created for a future date. End Date {0} is after today."
+				).format(frappe.bold(frappe.format(self.end_date, "Date")))
+			)
 
 	def before_insert(self):
 		self.bootstrap_doctypes_for_closing()

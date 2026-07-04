@@ -17,6 +17,7 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_items_for_material_requests,
 	get_sales_orders,
 )
+from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle, make_packing_list
@@ -25,7 +26,7 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 	get_sre_reserved_qty_details_for_voucher,
 	get_ssb_bundle_for_voucher,
 )
-from erpnext.stock.get_item_details import ItemDetailsCtx, get_bin_details, get_price_list_rate
+from erpnext.stock.get_item_details import get_bin_details, get_price_list_rate
 
 
 def get_requested_item_qty(sales_order: str) -> dict:
@@ -71,8 +72,15 @@ def make_material_request(source_name: str, target_doc: str | Document | None = 
 			"Sales Order Item", {"name": so_item.parent_detail_docname}, ["delivered_qty"]
 		)
 
-		bundle_item_qty = frappe.db.get_value(
-			"Product Bundle Item", {"parent": so_item.parent_item, "item_code": so_item.item_code}, ["qty"]
+		bundle_name = get_active_product_bundle(so_item.parent_item)
+		bundle_item_qty = (
+			frappe.db.get_value(
+				"Product Bundle Item",
+				{"parent": bundle_name, "item_code": so_item.item_code},
+				["qty"],
+			)
+			if bundle_name
+			else None
 		)
 
 		return flt(
@@ -97,7 +105,7 @@ def make_material_request(source_name: str, target_doc: str | Document | None = 
 			target.item_code, target.warehouse, source_parent.company, True
 		).get("actual_qty", 0)
 
-		ctx = ItemDetailsCtx(target.as_dict().copy())
+		ctx = frappe._dict(target.as_dict().copy())
 		ctx.update(
 			{
 				"company": source_parent.get("company"),
@@ -133,9 +141,7 @@ def make_material_request(source_name: str, target_doc: str | Document | None = 
 					"delivery_date": "schedule_date",
 					"bom_no": "bom_no",
 				},
-				"condition": lambda item: not frappe.db.exists(
-					"Product Bundle", {"name": item.item_code, "disabled": 0}
-				)
+				"condition": lambda item: not is_product_bundle(item.item_code)
 				and get_remaining_qty(item) > 0,
 				"postprocess": update_item,
 			},
@@ -239,7 +245,12 @@ def make_delivery_note(
 		sre_details = get_sre_reserved_qty_details_for_voucher("Sales Order", source_name)
 
 	mapper = {
-		"Sales Order": {"doctype": "Delivery Note", "validation": {"docstatus": ["=", 1]}},
+		"Sales Order": {
+			"doctype": "Delivery Note",
+			"validation": {"docstatus": ["=", 1]},
+			# commission_rate is no_copy (so it isn't carried on Duplicate), map it explicitly here
+			"field_map": {"commission_rate": "commission_rate"},
+		},
 		"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "reset_value": True},
 		"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
 	}
@@ -370,12 +381,27 @@ def make_delivery_note(
 				dn_item.qty = flt(sre.reserved_qty) / flt(dn_item.get("conversion_factor", 1))
 				dn_item.warehouse = sre.warehouse
 
-				if (
-					not use_serial_batch_fields
-					and sre.reservation_based_on == "Serial and Batch"
-					and (sre.has_serial_no or sre.has_batch_no)
-				):
-					dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher([sre]).name
+				if sre.reservation_based_on == "Serial and Batch" and (sre.has_serial_no or sre.has_batch_no):
+					if use_serial_batch_fields:
+						# Carry the reserved serial/batch in the row fields. A single field can't hold
+						# multiple batches, so fall back to a bundle in that case.
+						dn_item.use_serial_batch_fields = 1
+						sb_entries = frappe.get_all(
+							"Serial and Batch Entry",
+							filters={"parent": sre.name},
+							fields=["serial_no", "batch_no"],
+						)
+						serial_nos = [d.serial_no for d in sb_entries if d.serial_no]
+						batch_nos = list({d.batch_no for d in sb_entries if d.batch_no})
+						if serial_nos:
+							dn_item.serial_no = "\n".join(serial_nos)
+						if len(batch_nos) == 1:
+							dn_item.batch_no = batch_nos[0]
+						elif len(batch_nos) > 1:
+							dn_item.use_serial_batch_fields = 0
+							dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher([sre]).name
+					else:
+						dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher([sre]).name
 
 				target_doc.append("items", dn_item)
 			# Correct rows index.
@@ -404,8 +430,7 @@ def make_sales_invoice(
 ):
 	if args is None:
 		args = {}
-	if isinstance(args, str):
-		args = json.loads(args)
+	args = frappe.parse_json(args)
 
 	# 0 qty is accepted, as the qty is uncertain for some items
 	has_unit_price_items = frappe.db.get_value("Sales Order", source_name, "has_unit_price_items")
@@ -537,6 +562,8 @@ def make_sales_invoice(
 				"doctype": "Sales Invoice",
 				"field_map": {
 					"party_account_currency": "party_account_currency",
+					# commission_rate is no_copy (so it isn't carried on Duplicate), map it explicitly here
+					"commission_rate": "commission_rate",
 				},
 				"field_no_map": ["payment_terms_template"],
 				"validation": {"docstatus": ["=", 1]},
@@ -647,8 +674,7 @@ def make_purchase_order(
 	if not selected_items:
 		return
 
-	if isinstance(selected_items, str):
-		selected_items = json.loads(selected_items)
+	selected_items = frappe.parse_json(selected_items)
 
 	def set_missing_values(source, target):
 		target.supplier = supplier
@@ -769,7 +795,7 @@ def make_purchase_order(
 						["parent", "sales_order"],
 						["uom", "uom"],
 						["conversion_factor", "conversion_factor"],
-						["parent_item", "product_bundle"],
+						["product_bundle", "product_bundle"],
 						["rate", "rate"],
 					],
 					"field_no_map": [
@@ -798,23 +824,26 @@ def make_purchase_order(
 
 
 def set_delivery_date(items: list, sales_order: str) -> None:
+	# `product_bundle` now holds the Product Bundle *version*, so match the Purchase
+	# Order rows to their originating Sales Order rows by that version.
 	delivery_dates = frappe.get_all(
-		"Sales Order Item", filters={"parent": sales_order}, fields=["delivery_date", "item_code"]
+		"Sales Order Item", filters={"parent": sales_order}, fields=["delivery_date", "product_bundle"]
 	)
 
-	delivery_by_item = frappe._dict()
+	delivery_by_bundle = frappe._dict()
 	for date in delivery_dates:
-		delivery_by_item[date.item_code] = date.delivery_date
+		if date.product_bundle:
+			delivery_by_bundle[date.product_bundle] = date.delivery_date
 
 	for item in items:
 		if item.product_bundle:
-			item.schedule_date = delivery_by_item[item.product_bundle]
+			item.schedule_date = delivery_by_bundle.get(item.product_bundle)
 
 
-@frappe.whitelist()
-def make_work_orders(items: str, sales_order: str, company: str, project: str | None = None):
+@frappe.whitelist(methods=["POST"])
+def make_work_orders(items: str | dict, sales_order: str, company: str, project: str | None = None):
 	"""Make Work Orders against the given Sales Order for the given `items`"""
-	items = json.loads(items).get("items")
+	items = frappe.parse_json(items).get("items")
 	out = []
 
 	for i in items:
@@ -881,8 +910,7 @@ def make_raw_material_request(
 	if not frappe.has_permission("Sales Order", "write"):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
-	if isinstance(items, str):
-		items = frappe._dict(json.loads(items))
+	items = frappe._dict(frappe.parse_json(items))
 
 	for item in items.get("items"):
 		item["include_exploded_items"] = items.get("include_exploded_items")
@@ -1058,7 +1086,7 @@ def get_mapped_subcontracting_inward_order(
 		target_doc.populate_items_table()
 
 	if target_doc and isinstance(target_doc, str):
-		target_doc = json.loads(target_doc)
+		target_doc = frappe.parse_json(target_doc)
 		for key in ["service_items", "items", "received_items"]:
 			if key in target_doc:
 				del target_doc[key]

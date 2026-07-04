@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import CurDate, DateDiff
 from frappe.utils import cint
 
 
@@ -97,19 +98,32 @@ def get_sales_details(filters):
 	if filters["based_on"] not in ("Sales Order", "Sales Invoice"):
 		frappe.throw(_("Invalid value {0} for 'Based On'").format(filters["based_on"]))
 
-	date_field = "s.transaction_date" if filters["based_on"] == "Sales Order" else "s.posting_date"
+	parent = frappe.qb.DocType(filters["based_on"])
+	child_doctype = "Sales Order Item" if filters["based_on"] == "Sales Order" else "Sales Invoice Item"
+	child = frappe.qb.DocType(child_doctype)
 
-	sales_data = frappe.db.sql(
-		"""
-		select s.territory, s.customer, si.item_group, si.item_code, si.qty, {date_field} as last_order_date,
-		DATEDIFF(CURRENT_DATE, {date_field}) as days_since_last_order
-		from `tab{doctype}` s, `tab{doctype} Item` si
-		where s.name = si.parent and s.docstatus = 1
-		order by days_since_last_order """.format(  # nosec
-			date_field=date_field, doctype=filters["based_on"]
-		),
-		as_dict=1,
-	)
+	date_col = parent.transaction_date if filters["based_on"] == "Sales Order" else parent.posting_date
+
+	# DateDiff is cross-database (DATEDIFF on MariaDB, date subtraction on postgres); CurDate()
+	# renders the bare CURRENT_DATE keyword. Yields the integer number of days.
+	days_since_last_order = DateDiff(CurDate(), date_col)
+
+	sales_data = (
+		frappe.qb.from_(parent)
+		.inner_join(child)
+		.on(parent.name == child.parent)
+		.select(
+			parent.territory,
+			parent.customer,
+			child.item_group,
+			child.item_code,
+			child.qty,
+			date_col.as_("last_order_date"),
+			days_since_last_order.as_("days_since_last_order"),
+		)
+		.where(parent.docstatus == 1)
+		.orderby(days_since_last_order)
+	).run(as_dict=True)
 
 	for d in sales_data:
 		item_details_map.setdefault((d.territory, d.item_code), d)

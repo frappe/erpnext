@@ -89,7 +89,7 @@
  "icon": "icon-legal",
  "idx": 1,
  "links": [],
- "modified": "2026-04-29 22:51:49.285298",
+ "modified": "2026-06-06 16:35:34.394675",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Terms and Conditions",
@@ -135,7 +135,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Accounts User",
+   "role": "Accounts Manager",
    "share": 1,
    "write": 1
   },
@@ -152,6 +152,15 @@
    "read": 1,
    "role": "HR Manager",
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1
   }
  ],
  "quick_entry": 1,

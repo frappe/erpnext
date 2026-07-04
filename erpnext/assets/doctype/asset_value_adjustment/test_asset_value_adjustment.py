@@ -94,11 +94,12 @@ class TestAssetValueAdjustment(ERPNextTestSuite):
 			("_Test Fixed Asset - _TC", 0.0, 4625.29),
 		)
 
-		gle = frappe.db.sql(
-			"""select account, debit, credit from `tabGL Entry`
-			where voucher_type='Journal Entry' and voucher_no = %s
-			order by account""",
-			adj_doc.journal_entry,
+		gle = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Journal Entry", "voucher_no": adj_doc.journal_entry},
+			fields=["account", "debit", "credit"],
+			order_by="account",
+			as_list=True,
 		)
 
 		self.assertSequenceEqual(gle, expected_gle)
@@ -184,11 +185,12 @@ class TestAssetValueAdjustment(ERPNextTestSuite):
 			("_Test Fixed Asset - _TC", 0.0, 5175.29),
 		)
 
-		gle = frappe.db.sql(
-			"""select account, debit, credit from `tabGL Entry`
-			where voucher_type='Journal Entry' and voucher_no = %s
-			order by account""",
-			adj_doc.journal_entry,
+		gle = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Journal Entry", "voucher_no": adj_doc.journal_entry},
+			fields=["account", "debit", "credit"],
+			order_by="account",
+			as_list=True,
 		)
 
 		self.assertSequenceEqual(gle, expected_gle)

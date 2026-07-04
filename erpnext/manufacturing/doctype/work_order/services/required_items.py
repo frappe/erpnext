@@ -14,11 +14,12 @@ from pypika import functions as fn
 
 from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 from erpnext.manufacturing.doctype.work_order.mapper import check_if_scrap_warehouse_mandatory
-from erpnext.manufacturing.doctype.work_order.services.stock_reservation import (
-	StockReservationService,
+from erpnext.manufacturing.doctype.work_order.services.reservation import (
+	WorkOrderStockReservation,
 	get_consumed_qty,
 	get_row_wise_serial_batch,
 )
+from erpnext.manufacturing.doctype.work_order.services.status import StatusService
 from erpnext.stock.utils import get_bin, get_latest_stock_qty
 
 
@@ -44,7 +45,7 @@ class RequiredItemsService:
 			# update in bin
 			self.update_reserved_qty_for_production()
 
-		StockReservationService(self.doc).validate_reserved_qty()
+		WorkOrderStockReservation(self.doc).validate_reserved_qty()
 
 	def update_reserved_qty_for_production(self, items=None):
 		"""update reserved_qty_for_production in bins"""
@@ -142,9 +143,51 @@ class RequiredItemsService:
 			transferred_qty = transferred_items.get(row.item_code) or 0.0
 			row.db_set("transferred_qty", transferred_qty, update_modified=False)
 			if self.doc.reserve_stock:
-				StockReservationService(self.doc).update_qty_in_stock_reservation(
+				WorkOrderStockReservation(self.doc).update_qty_in_stock_reservation(
 					row, transferred_qty, row_wise_serial_batch
 				)
+
+		self.recompute_material_transferred_for_manufacturing(transferred_items)
+
+	def refresh_material_transferred_for_manufacturing(self):
+		"""Recompute material_transferred_for_manufacturing only, without touching per-row
+		transferred_qty or stock reservations. Used to get a status decision (Not Started vs
+		In Process) based on fresh data, ahead of the fuller update_required_items() pass.
+		"""
+		if self.doc.skip_transfer:
+			return
+		transferred_items = self._material_transfer_qty_by_item(is_return=0)
+		self.recompute_material_transferred_for_manufacturing(transferred_items)
+
+	def recompute_material_transferred_for_manufacturing(self, transferred_items):
+		"""Set material_transferred_for_manufacturing based on actual item-level transfers, not fg_completed_qty."""
+		# When fg_completed_qty > 0 (direct stock entries, excess transfer), preserve the
+		# SUM(fg_completed_qty) approach so excess-transfer tracking works correctly.
+		sum_fg_completed_qty = StatusService(self.doc).get_transferred_or_manufactured_qty(
+			"Material Transfer for Manufacture", "material_transferred_for_manufacturing"
+		)
+		if sum_fg_completed_qty:
+			self.doc.db_set("material_transferred_for_manufacturing", sum_fg_completed_qty)
+			return
+
+		# Pick list flow sets fg_completed_qty=0; use min-fraction of actual item transfers
+		# so partial availability does not prematurely mark the work order as fully transferred.
+		required_by_item = {}
+		for row in self.doc.required_items:
+			if not row.include_item_in_manufacturing or flt(row.required_qty) <= 0:
+				continue
+			required_by_item[row.item_code] = required_by_item.get(row.item_code, 0.0) + flt(row.required_qty)
+
+		if not required_by_item:
+			return
+
+		min_fraction = min(
+			flt(transferred_items.get(item_code) or 0) / required_qty
+			for item_code, required_qty in required_by_item.items()
+		)
+		min_fraction = min(min_fraction, 1.0)
+		material_transferred = min_fraction * flt(self.doc.qty)
+		self.doc.db_set("material_transferred_for_manufacturing", material_transferred)
 
 	def update_returned_qty(self):
 		returned_dict = self._material_transfer_qty_by_item(is_return=1)
@@ -158,11 +201,25 @@ class RequiredItemsService:
 			frappe.qb.from_(ste)
 			.inner_join(ste_child)
 			.on(ste_child.parent == ste.name)
-			.select(ste_child.item_code, ste_child.original_item, fn.Sum(ste_child.transfer_qty).as_("qty"))
+			# original_item becomes the output dict key below, so it must stay coherent per row: the
+			# same item_code can be transferred both for itself (original_item NULL) and as a substitute
+			# for another required item (original_item set). Max() over a single item_code group could
+			# pick the substitute's original_item and misattribute the item's own transfer to it. Group
+			# by (item_code, original_item) so each pair sums separately, then accumulate into the keyed
+			# dict (two distinct rows can resolve to the same key, e.g. A's own transfer and B-for-A).
+			.select(
+				ste_child.item_code,
+				ste_child.original_item,
+				fn.Sum(ste_child.transfer_qty).as_("qty"),
+			)
 			.where(self._material_transfer_filter(ste, is_return))
-			.groupby(ste_child.item_code)
+			.groupby(ste_child.item_code, ste_child.original_item)
 		)
-		return frappe._dict({d.original_item or d.item_code: d.qty for d in (query.run(as_dict=1) or [])})
+		qty_by_item = frappe._dict()
+		for d in query.run(as_dict=1) or []:
+			key = d.original_item or d.item_code
+			qty_by_item[key] = (qty_by_item.get(key) or 0.0) + flt(d.qty)
+		return qty_by_item
 
 	def _material_transfer_filter(self, ste, is_return):
 		return (
@@ -189,7 +246,7 @@ class RequiredItemsService:
 				continue
 
 			warehouse = wip_warehouse or item.source_warehouse
-			StockReservationService(self.doc).update_consumed_qty_in_stock_reservation(
+			WorkOrderStockReservation(self.doc).update_consumed_qty_in_stock_reservation(
 				item, consumed_qty, warehouse
 			)
 

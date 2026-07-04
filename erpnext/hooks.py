@@ -8,7 +8,7 @@ app_email = "hello@frappe.io"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 app_logo_url = "/assets/erpnext/images/erpnext-logo.svg"
-app_home = "/desk"
+app_home = "/desk/home"
 
 add_to_apps_screen = [
 	{
@@ -383,6 +383,9 @@ doc_events = {
 	"Event": {
 		"after_insert": "erpnext.crm.utils.link_events_with_prospect",
 	},
+	"Contact Us Settings": {
+		"on_update": "erpnext.crm.utils.disable_opportunity_creation_on_contact_us_disabled",
+	},
 	"Sales Invoice": {
 		"on_submit": [
 			"erpnext.regional.italy.utils.sales_invoice_on_submit",
@@ -396,7 +399,7 @@ doc_events = {
 		"validate": [
 			"erpnext.regional.united_arab_emirates.utils.update_grand_total_for_rcm",
 			"erpnext.regional.united_arab_emirates.utils.validate_returns",
-		]
+		],
 	},
 	"Payment Entry": {
 		"on_trash": "erpnext.regional.check_deletion_permission",
@@ -504,6 +507,7 @@ scheduler_events = {
 	],
 	"weekly": [
 		"erpnext.accounts.utils.auto_create_exchange_rate_revaluation_weekly",
+		"erpnext.stock.doctype.stock_reposting_settings.stock_reposting_settings.repost_incorrect_valuation_entries",
 	],
 	"monthly_long": [
 		"erpnext.accounts.deferred_revenue.process_deferred_accounting",
@@ -593,6 +597,7 @@ accounting_dimension_doctypes = [
 	"Account Closing Balance",
 	"Supplier Quotation",
 	"Supplier Quotation Item",
+	"Request for Quotation Item",
 	"Payment Reconciliation",
 	"Payment Reconciliation Allocation",
 	"Payment Request",
@@ -707,6 +712,10 @@ default_log_clearing_doctypes = {
 }
 
 export_python_type_annotations = True
+
+# Send non-GET requests for ERPNext's endpoints as native `application/json`
+# bodies instead of form-encoded, per-key JSON-stringified values.
+use_json_request_body = True
 
 fields_for_group_similar_items = ["qty", "amount"]
 

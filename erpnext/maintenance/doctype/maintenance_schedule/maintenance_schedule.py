@@ -185,9 +185,7 @@ class MaintenanceSchedule(TransactionBase):
 		else:
 			holiday_list = frappe.get_cached_value("Company", self.company, "default_holiday_list")
 
-		holidays = frappe.db.sql_list(
-			"""select holiday_date from `tabHoliday` where parent=%s""", holiday_list
-		)
+		holidays = frappe.get_all("Holiday", filters={"parent": holiday_list}, pluck="holiday_date")
 
 		if not validated and holidays:
 			# max iterations = len(holidays)
@@ -235,16 +233,22 @@ class MaintenanceSchedule(TransactionBase):
 				throw(_("Start date should be less than end date for Item {0}").format(d.item_code))
 
 	def validate_sales_order(self):
+		ms = frappe.qb.DocType("Maintenance Schedule")
+		msi = frappe.qb.DocType("Maintenance Schedule Item")
 		for d in self.get("items"):
 			if d.sales_order:
-				chk = frappe.db.sql(
-					"""select ms.name from `tabMaintenance Schedule` ms,
-					`tabMaintenance Schedule Item` msi where msi.parent=ms.name and
-					msi.sales_order=%s and ms.docstatus=1""",
-					d.sales_order,
+				# filter the parent schedule's docstatus (matches the original ms.docstatus = 1)
+				chk = (
+					frappe.qb.from_(ms)
+					.inner_join(msi)
+					.on(msi.parent == ms.name)
+					.select(ms.name)
+					.where((msi.sales_order == d.sales_order) & (ms.docstatus == 1))
+					.limit(1)
+					.run(pluck=True)
 				)
 				if chk:
-					throw(_("Maintenance Schedule {0} exists against {1}").format(chk[0][0], d.sales_order))
+					throw(_("Maintenance Schedule {0} exists against {1}").format(chk[0], d.sales_order))
 
 	def validate_items_table_change(self):
 		doc_before_save = self.get_doc_before_save()
@@ -290,10 +294,11 @@ class MaintenanceSchedule(TransactionBase):
 
 		for row in voucher_nos:
 			if row.voucher_type != "Maintenance Schedule":
-				msg = f"""Serial and Batch Bundle {row.name}
-					should have voucher type as 'Maintenance Schedule'"""
-
-				frappe.throw(_(msg))
+				frappe.throw(
+					_(
+						"Serial and Batch Bundle {0} should have voucher type as 'Maintenance Schedule'"
+					).format(row.name)
+				)
 
 	def on_update(self):
 		self.db_set("status", "Draft")
@@ -328,14 +333,14 @@ class MaintenanceSchedule(TransactionBase):
 				amc_start_date
 			):
 				throw(
-					_("Serial No {0} is under warranty upto {1}").format(
+					_("Serial No {0} is under warranty until {1}").format(
 						serial_no, sr_details.warranty_expiry_date
 					)
 				)
 
 			if sr_details.amc_expiry_date and getdate(sr_details.amc_expiry_date) >= getdate(amc_start_date):
 				throw(
-					_("Serial No {0} is under maintenance contract upto {1}").format(
+					_("Serial No {0} is under maintenance contract until {1}").format(
 						serial_no, sr_details.amc_expiry_date
 					)
 				)

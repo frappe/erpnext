@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.custom import ConstantColumn
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Max, Sum
 from frappe.utils import cint, create_batch, flt
 
 from erpnext import get_default_cost_center
@@ -116,7 +116,7 @@ def get_account_balance(bank_account: str, till_date: str | date, company: str):
 	return flt(balance_as_per_system) - flt(total_debit) + flt(total_credit) + amounts_not_reflected_in_system
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def update_bank_transaction(
 	bank_transaction_name: str, reference_number: str, party_type: str | None = None, party: str | None = None
 ):
@@ -146,7 +146,7 @@ def update_bank_transaction(
 	)[0]
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_journal_entry_bts(
 	bank_transaction_name: str,
 	reference_number: str | None = None,
@@ -305,7 +305,7 @@ def create_journal_entry_bts(
 	return reconcile_vouchers(bank_transaction_name, vouchers, is_new_voucher=True)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_payment_entry_bts(
 	bank_transaction_name: str,
 	reference_number: str | None = None,
@@ -500,7 +500,7 @@ def create_bulk_internal_transfer(bank_transaction_names: list[str | int], bank_
 	return output
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_internal_transfer(
 	bank_transaction_name: str | int,
 	posting_date: str | date,
@@ -518,6 +518,7 @@ def create_internal_transfer(
 	"""
 
 	bank_transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
+	bank_transaction.check_permission("write")
 
 	bank_account = frappe.get_cached_value("Bank Account", bank_transaction.bank_account, "account")
 	company = frappe.get_cached_value("Account", bank_account, "company")
@@ -778,7 +779,6 @@ def create_bulk_payment_entry_and_reconcile(
 	"""
 	Create a payment entry and reconcile it with the bank transaction
 	"""
-
 	output = []
 
 	for bank_transaction_name in bank_transaction_names:
@@ -1057,10 +1057,10 @@ def get_auto_reconcile_message(partially_reconciled, reconciled):
 	return alert_message, indicator
 
 
-@frappe.whitelist()
-def reconcile_vouchers(bank_transaction_name: str | int, vouchers: str, is_new_voucher: bool = False):
+@frappe.whitelist(methods=["POST"])
+def reconcile_vouchers(bank_transaction_name: str | int, vouchers: str | list, is_new_voucher: bool = False):
 	# updated clear date of all the vouchers based on the bank transaction
-	vouchers = json.loads(vouchers)
+	vouchers = frappe.parse_json(vouchers)
 	transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
 	transaction.add_payment_entries(vouchers, is_new_voucher)
 	transaction.validate_duplicate_references()
@@ -1410,12 +1410,14 @@ def get_je_matching_query(
 			Sum(getattr(jea, amount_field)).as_("paid_amount"),
 			ConstantColumn("Journal Entry").as_("doctype"),
 			je.name,
-			je.cheque_no.as_("reference_no"),
-			je.cheque_date.as_("reference_date"),
-			je.pay_to_recd_from.as_("party"),
-			jea.party_type,
-			je.posting_date,
-			jea.account_currency.as_("currency"),
+			# non-grouped columns are constant per grouped JE name (party_type/currency come from the
+			# single bank-account line) -> Max() keeps the GROUP BY valid on postgres with the same value
+			Max(je.cheque_no).as_("reference_no"),
+			Max(je.cheque_date).as_("reference_date"),
+			Max(je.pay_to_recd_from).as_("party"),
+			Max(jea.party_type).as_("party_type"),
+			Max(je.posting_date).as_("posting_date"),
+			Max(jea.account_currency).as_("currency"),
 		)
 		.where(je.docstatus == 1)
 		.where(je.voucher_type != "Opening Entry")
@@ -1423,7 +1425,7 @@ def get_je_matching_query(
 		.where(jea.account == common_filters.bank_account)
 		.where(filter_by_date)
 		.groupby(je.name)
-		.orderby(je.cheque_date if cint(filter_by_reference_date) else je.posting_date)
+		.orderby(Max(je.cheque_date) if cint(filter_by_reference_date) else Max(je.posting_date))
 	)
 
 	if frappe.flags.auto_reconcile_vouchers is True:

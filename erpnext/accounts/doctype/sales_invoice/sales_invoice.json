@@ -715,6 +715,7 @@
   {
    "default": "0",
    "depends_on": "eval:doc.items.every((item) => !item.dn_detail)",
+   "description": "If checked, updates inventory; stock and accounting entries are created together. Leave unchecked if a Delivery Note is created separately.",
    "fieldname": "update_stock",
    "fieldtype": "Check",
    "hide_days": 1,
@@ -722,7 +723,8 @@
    "label": "Update Stock",
    "oldfieldname": "update_stock",
    "oldfieldtype": "Check",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_description_on_click": 1
   },
   {
    "fieldname": "scan_barcode",
@@ -1745,6 +1747,7 @@
    "width": "50%"
   },
   {
+   "depends_on": "eval:doc.sales_partner",
    "fetch_from": "sales_partner.commission_rate",
    "fetch_if_empty": 1,
    "fieldname": "commission_rate",
@@ -1752,16 +1755,19 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Commission Rate (%)",
+   "no_copy": 1,
    "oldfieldname": "commission_rate",
    "oldfieldtype": "Currency",
    "print_hide": 1
   },
   {
+   "depends_on": "eval:doc.sales_partner",
    "fieldname": "total_commission",
    "fieldtype": "Currency",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Total Commission",
+   "no_copy": 1,
    "oldfieldname": "total_commission",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
@@ -1968,9 +1974,11 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.sales_partner",
    "fieldname": "amount_eligible_for_commission",
    "fieldtype": "Currency",
    "label": "Amount Eligible for Commission",
+   "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
   },
@@ -2352,7 +2360,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2026-05-28 12:15:12.486443",
+ "modified": "2026-06-21 12:46:13.250145",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

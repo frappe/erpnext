@@ -176,7 +176,7 @@ def get_events(start: DateTimeLikeObject, end: DateTimeLikeObject, filters: str 
 	:param filters: Filters (JSON).
 	"""
 	if filters:
-		filters = json.loads(filters)
+		filters = frappe.parse_json(filters)
 	else:
 		filters = []
 

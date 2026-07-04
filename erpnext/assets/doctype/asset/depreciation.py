@@ -24,7 +24,7 @@ import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
-from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
+from erpnext.accounts.doctype.journal_entry.mapper import make_reverse_journal_entry
 from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
@@ -96,7 +96,9 @@ def get_depreciable_assets_data(date):
 		.where(a.status.isin(["Submitted", "Partially Depreciated"]))
 		.where(ds.journal_entry.isnull())
 		.where(ds.schedule_date <= date)
-		.groupby(ads.name)
+		# a.name/a.creation are constant per ads.name; include them so postgres accepts the
+		# SELECT and ORDER BY (one row per Asset Depreciation Schedule either way)
+		.groupby(ads.name, a.name, a.creation)
 		.orderby(a.creation, order=Order.desc)
 	)
 
@@ -185,6 +187,7 @@ def make_depreciation_entry(
 	for d in depr_schedule_doc.get("depreciation_schedule")[
 		(sch_start_idx or 0) : (sch_end_idx or len(depr_schedule_doc.get("depreciation_schedule")))
 	]:
+		frappe.db.savepoint("depr_entry")
 		try:
 			_make_journal_entry_for_depreciation(
 				depr_schedule_doc,
@@ -200,6 +203,7 @@ def make_depreciation_entry(
 				accounting_dimensions,
 			)
 		except Exception as e:
+			frappe.db.rollback(save_point="depr_entry")
 			depr_posting_error = e
 
 	asset.reload()

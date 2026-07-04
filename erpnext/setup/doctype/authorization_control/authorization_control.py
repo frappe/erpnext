@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _, session
+from frappe.query_builder.functions import Coalesce
 from frappe.utils import comma_or, cstr, flt, has_common
 
 from erpnext.utilities.transaction_base import TransactionBase
@@ -41,7 +42,7 @@ class AuthorizationControl(TransactionBase):
 				app_dtl = frappe.db.sql(
 					"""select approving_user, approving_role from `tabAuthorization Rule`
 					where transaction = {} and (value = {} or value > {}) and docstatus != 2
-					and based_on = {} and ifnull(company,'') = '' {}""".format(
+					and based_on = {} and coalesce(company,'') = '' {}""".format(
 						"%s", "%s", "%s", "%s", condition
 					),
 					(doctype_name, flt(max_amount), total, based_on),
@@ -77,7 +78,7 @@ class AuthorizationControl(TransactionBase):
 				itemwise_exists = frappe.db.sql(
 					"""select value from `tabAuthorization Rule`
 					where transaction = {} and value <= {} and based_on = {}
-					and ifnull(company,'') = ''	and docstatus != 2 {} {}""".format(
+					and coalesce(company,'') = ''	and docstatus != 2 {} {}""".format(
 						"%s", "%s", "%s", cond, add_cond1
 					),
 					(doctype_name, total, based_on),
@@ -90,7 +91,7 @@ class AuthorizationControl(TransactionBase):
 				chk = 0
 		if chk == 1:
 			if based_on in ["Itemwise Discount", "Item Group wise Discount"]:
-				add_cond2 += " and ifnull(master_name,'') = ''"
+				add_cond2 += " and coalesce(master_name,'') = ''"
 
 			appr = frappe.db.sql(
 				"""select value from `tabAuthorization Rule`
@@ -103,7 +104,7 @@ class AuthorizationControl(TransactionBase):
 				appr = frappe.db.sql(
 					"""select value from `tabAuthorization Rule`
 					where transaction = {} and value <= {} and based_on = {}
-					and ifnull(company,'') = '' and docstatus != 2 {} {}""".format(
+					and coalesce(company,'') = '' and docstatus != 2 {} {}""".format(
 						"%s", "%s", "%s", cond, add_cond2
 					),
 					(doctype_name, total, based_on),
@@ -124,7 +125,7 @@ class AuthorizationControl(TransactionBase):
 				frappe.db.escape(r) for r in frappe.get_roles()
 			)
 		else:
-			add_cond += " and ifnull(system_user,'') = '' and ifnull(system_role,'') = ''"
+			add_cond += " and coalesce(system_user,'') = '' and coalesce(system_role,'') = ''"
 
 		if based_on == "Grand Total":
 			auth_value = total
@@ -175,15 +176,22 @@ class AuthorizationControl(TransactionBase):
 			"Item Group wise Discount",
 		]
 
+		auth_rule = frappe.qb.DocType("Authorization Rule")
+
 		# Check for authorization set for individual user
 		based_on = [
 			x[0]
-			for x in frappe.db.sql(
-				"""select distinct based_on from `tabAuthorization Rule`
-			where transaction = %s and system_user = %s
-			and (company = %s or ifnull(company,'')='') and docstatus != 2""",
-				(doctype_name, session["user"], company),
-			)
+			for x in (
+				frappe.qb.from_(auth_rule)
+				.select(auth_rule.based_on)
+				.distinct()
+				.where(
+					(auth_rule.transaction == doctype_name)
+					& (auth_rule.system_user == session["user"])
+					& ((auth_rule.company == company) | (Coalesce(auth_rule.company, "") == ""))
+					& (auth_rule.docstatus != 2)
+				)
+			).run()
 		]
 
 		for d in based_on:
@@ -200,20 +208,17 @@ class AuthorizationControl(TransactionBase):
 		# Check for authorization set on particular roles
 		based_on = [
 			x[0]
-			for x in frappe.db.sql(
-				"""select based_on
-			from `tabAuthorization Rule`
-			where transaction = {} and system_role IN ({}) and based_on IN ({})
-			and (company = {} or ifnull(company,'')='')
-			and docstatus != 2
-		""".format(
-					"%s",
-					", ".join(frappe.db.escape(r) for r in frappe.get_roles()),
-					", ".join(frappe.db.escape(b) for b in final_based_on),
-					"%s",
-				),
-				(doctype_name, company),
-			)
+			for x in (
+				frappe.qb.from_(auth_rule)
+				.select(auth_rule.based_on)
+				.where(
+					(auth_rule.transaction == doctype_name)
+					& auth_rule.system_role.isin(frappe.get_roles())
+					& auth_rule.based_on.isin(final_based_on)
+					& ((auth_rule.company == company) | (Coalesce(auth_rule.company, "") == ""))
+					& (auth_rule.docstatus != 2)
+				)
+			).run()
 		]
 
 		for d in based_on:
@@ -232,23 +237,38 @@ class AuthorizationControl(TransactionBase):
 			self.bifurcate_based_on_type(doctype_name, total, av_dis, g, doc_obj, 0, company)
 
 	def get_value_based_rule(self, doctype_name, employee, total_claimed_amount, company):
+		auth_rule = frappe.qb.DocType("Authorization Rule")
+		emp = frappe.qb.DocType("Employee")
+
+		def emp_designation():
+			# fresh subquery per use to avoid sharing a pypika builder across queries
+			return frappe.qb.from_(emp).select(emp.designation).where(emp.name == employee)
+
 		val_lst = []
-		val = frappe.db.sql(
-			"""select value from `tabAuthorization Rule`
-			where transaction=%s and (to_emp=%s or
-				to_designation IN (select designation from `tabEmployee` where name=%s))
-			and ifnull(value,0)< %s and company = %s and docstatus!=2""",
-			(doctype_name, employee, employee, total_claimed_amount, company),
-		)
+		val = (
+			frappe.qb.from_(auth_rule)
+			.select(auth_rule.value)
+			.where(
+				(auth_rule.transaction == doctype_name)
+				& ((auth_rule.to_emp == employee) | auth_rule.to_designation.isin(emp_designation()))
+				& (Coalesce(auth_rule.value, 0) < total_claimed_amount)
+				& (auth_rule.company == company)
+				& (auth_rule.docstatus != 2)
+			)
+		).run()
 
 		if not val:
-			val = frappe.db.sql(
-				"""select value from `tabAuthorization Rule`
-				where transaction=%s and (to_emp=%s or
-					to_designation IN (select designation from `tabEmployee` where name=%s))
-				and ifnull(value,0)< %s and ifnull(company,'') = '' and docstatus!=2""",
-				(doctype_name, employee, employee, total_claimed_amount),
-			)
+			val = (
+				frappe.qb.from_(auth_rule)
+				.select(auth_rule.value)
+				.where(
+					(auth_rule.transaction == doctype_name)
+					& ((auth_rule.to_emp == employee) | auth_rule.to_designation.isin(emp_designation()))
+					& (Coalesce(auth_rule.value, 0) < total_claimed_amount)
+					& (Coalesce(auth_rule.company, "") == "")
+					& (auth_rule.docstatus != 2)
+				)
+			).run()
 
 		if val:
 			val_lst = [y[0] for y in val]
@@ -256,25 +276,41 @@ class AuthorizationControl(TransactionBase):
 			val_lst.append(0)
 
 		max_val = max(val_lst)
-		rule = frappe.db.sql(
-			"""select name, to_emp, to_designation, approving_role, approving_user
-			from `tabAuthorization Rule`
-			where transaction=%s and company = %s
-			and (to_emp=%s or to_designation IN (select designation from `tabEmployee` where name=%s))
-			and ifnull(value,0)= %s and docstatus!=2""",
-			(doctype_name, company, employee, employee, flt(max_val)),
-			as_dict=1,
-		)
+		rule = (
+			frappe.qb.from_(auth_rule)
+			.select(
+				auth_rule.name,
+				auth_rule.to_emp,
+				auth_rule.to_designation,
+				auth_rule.approving_role,
+				auth_rule.approving_user,
+			)
+			.where(
+				(auth_rule.transaction == doctype_name)
+				& (auth_rule.company == company)
+				& ((auth_rule.to_emp == employee) | auth_rule.to_designation.isin(emp_designation()))
+				& (Coalesce(auth_rule.value, 0) == flt(max_val))
+				& (auth_rule.docstatus != 2)
+			)
+		).run(as_dict=1)
 
 		if not rule:
-			rule = frappe.db.sql(
-				"""select name, to_emp, to_designation, approving_role, approving_user
-				from `tabAuthorization Rule`
-				where transaction=%s and ifnull(company,'') = ''
-				and (to_emp=%s or to_designation IN (select designation from `tabEmployee` where name=%s))
-				and ifnull(value,0)= %s and docstatus!=2""",
-				(doctype_name, employee, employee, flt(max_val)),
-				as_dict=1,
-			)
+			rule = (
+				frappe.qb.from_(auth_rule)
+				.select(
+					auth_rule.name,
+					auth_rule.to_emp,
+					auth_rule.to_designation,
+					auth_rule.approving_role,
+					auth_rule.approving_user,
+				)
+				.where(
+					(auth_rule.transaction == doctype_name)
+					& (Coalesce(auth_rule.company, "") == "")
+					& ((auth_rule.to_emp == employee) | auth_rule.to_designation.isin(emp_designation()))
+					& (Coalesce(auth_rule.value, 0) == flt(max_val))
+					& (auth_rule.docstatus != 2)
+				)
+			).run(as_dict=1)
 
 		return rule

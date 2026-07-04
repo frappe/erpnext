@@ -18,6 +18,7 @@
    "in_list_view": 1,
    "label": "Start Date",
    "read_only": 1,
+   "reqd": 1,
    "search_index": 1
   },
   {
@@ -25,26 +26,29 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "End Date",
-   "read_only": 1
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Amount"
+   "label": "Amount",
+   "reqd": 1
   },
   {
    "fieldname": "percent",
    "fieldtype": "Percent",
    "in_list_view": 1,
-   "label": "Percent"
+   "label": "Percent",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-11-03 13:18:28.398198",
+ "modified": "2026-06-18 11:23:17.669733",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Budget Distribution",

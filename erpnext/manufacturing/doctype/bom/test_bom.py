@@ -97,10 +97,10 @@ class TestBOM(ERPNextTestSuite):
 		update_cost_in_all_boms_in_test()
 
 		# check if new valuation rate updated in all BOMs
-		for d in frappe.db.sql(
-			"""select base_rate from `tabBOM Item`
-			where item_code='_Test Item 2' and docstatus=1 and parenttype='BOM'""",
-			as_dict=1,
+		for d in frappe.get_all(
+			"BOM Item",
+			filters={"item_code": "_Test Item 2", "docstatus": 1, "parenttype": "BOM"},
+			fields=["base_rate"],
 		):
 			self.assertEqual(d.base_rate, rm_base_rate + 10)
 
@@ -443,6 +443,30 @@ class TestBOM(ERPNextTestSuite):
 		bom_doc = create_bom_with_process_loss_item(fg_item_whole, bom_item, process_loss_percentage=20)
 		#  Items with whole UOMs can't be PL Items
 		self.assertRaises(frappe.ValidationError, bom_doc.submit)
+
+	@timeout
+	def test_fg_item_not_allowed_in_secondary_items(self):
+		fg_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+
+		bom_doc = frappe.new_doc("BOM")
+		bom_doc.item = fg_item
+		bom_doc.quantity = 1
+		bom_doc.company = "_Test Company"
+		bom_doc.currency = "INR"
+		bom_doc.append("items", {"item_code": rm_item, "qty": 1, "rate": 100.0})
+		bom_doc.append(
+			"secondary_items",
+			{
+				"item_code": fg_item,
+				"secondary_item_type": "Additional Finished Good",
+				"qty": 1,
+				"cost_allocation_per": 10,
+			},
+		)
+
+		# FG item of the BOM cannot also be a secondary item
+		self.assertRaises(frappe.ValidationError, bom_doc.save)
 
 	@timeout
 	def test_bom_item_query(self):
@@ -857,12 +881,13 @@ def reset_item_valuation_rate(item_code, warehouse_list=None, qty=None, rate=Non
 		warehouse_list = [warehouse_list]
 
 	if not warehouse_list:
-		warehouse_list = frappe.db.sql_list(
-			"""
-			select warehouse from `tabBin`
-			where item_code=%s and actual_qty > 0
-		""",
-			item_code,
+		# Reconcile every warehouse the item has a non-zero balance in -- including
+		# negative balances left by other tests. `get_valuation_rate` averages
+		# Sum(stock_value)/Sum(actual_qty) across all bins, so a leftover negative
+		# balance in one warehouse can cancel the reset qty elsewhere and make the
+		# average collapse to 0, which is a source of flaky BOM-cost failures.
+		warehouse_list = frappe.get_all(
+			"Bin", filters={"item_code": item_code, "actual_qty": ["!=", 0]}, pluck="warehouse"
 		)
 
 		if not warehouse_list:

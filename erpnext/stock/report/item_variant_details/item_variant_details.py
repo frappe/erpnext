@@ -22,7 +22,7 @@ def get_data(item):
 	)
 
 	if not variant_results:
-		frappe.msgprint(_("There aren't any item variants for the selected item"))
+		frappe.msgprint(_("There are no item variants for the selected item"))
 		return []
 	else:
 		variant_list = [variant["name"] for variant in variant_results]

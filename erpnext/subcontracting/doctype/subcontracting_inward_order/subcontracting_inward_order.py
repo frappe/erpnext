@@ -224,7 +224,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 			if not any([rm.is_customer_provided_item for rm in raw_materials]):
 				frappe.throw(
 					_(
-						"Atleast one raw material for Finished Good Item {0} should be customer provided."
+						"At least one raw material for Finished Good Item {0} should be customer provided."
 					).format(frappe.bold(item.item_code))
 				)
 
@@ -557,9 +557,18 @@ class SubcontractingInwardOrder(SubcontractingController):
 			return stock_entry.as_dict()
 
 
-@frappe.whitelist()
-def update_subcontracting_inward_order_status(scio: str | Document, status: str | None = None):
+def set_subcontracting_inward_order_status(scio: str | Document, status: str | None = None):
 	if isinstance(scio, str):
 		scio = frappe.get_doc("Subcontracting Inward Order", scio)
 
 	scio.update_status(status)
+
+
+@frappe.whitelist()
+def update_subcontracting_inward_order_status(scio: str | Document, status: str | None = None):
+	"""Whitelisted boundary for direct API/UI calls — enforces write permission, then delegates."""
+	if isinstance(scio, str):
+		scio = frappe.get_doc("Subcontracting Inward Order", scio)
+
+	scio.check_permission("write")
+	set_subcontracting_inward_order_status(scio, status)

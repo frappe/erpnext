@@ -14,11 +14,11 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestSetUp(ERPNextTestSuite):
 	def setUp(self):
-		frappe.db.sql("delete from `tabService Level Agreement`")
-		frappe.db.sql("delete from `tabService Level Priority`")
-		frappe.db.sql("delete from `tabSLA Fulfilled On Status`")
-		frappe.db.sql("delete from `tabPause SLA On Status`")
-		frappe.db.sql("delete from `tabService Day`")
+		frappe.db.delete("Service Level Agreement")
+		frappe.db.delete("Service Level Priority")
+		frappe.db.delete("SLA Fulfilled On Status")
+		frappe.db.delete("Pause SLA On Status")
+		frappe.db.delete("Service Day")
 		frappe.db.set_single_value("Support Settings", "track_service_level_agreement", 1)
 		create_service_level_agreements_for_issues()
 
@@ -523,6 +523,38 @@ class TestFirstResponseTime(TestSetUp):
 			get_datetime("06-25-2021 20:00"), get_datetime("06-27-2021 11:00")
 		)
 		self.assertEqual(issue.first_response_time, 1.0)
+
+	def _get_no_perm_user(self):
+		email = "test_no_issue_perm@example.com"
+		if not frappe.db.exists("User", email):
+			user = frappe.new_doc("User")
+			user.email = email
+			user.first_name = "No Perm"
+			user.send_welcome_email = 0
+			user.insert(ignore_permissions=True)
+		return email
+
+	def test_set_status_requires_write_permission(self):
+		from erpnext.support.doctype.issue.issue import set_status
+
+		issue = frappe.new_doc("Issue")
+		issue.subject = "_Test Permission Issue"
+		issue.insert(ignore_permissions=True)
+		frappe.set_user(self._get_no_perm_user())
+		self.assertRaises(frappe.PermissionError, set_status, issue.name, "Closed")
+		frappe.set_user("Administrator")
+
+	def test_set_multiple_status_requires_write_permission(self):
+		import json
+
+		from erpnext.support.doctype.issue.issue import set_multiple_status
+
+		issue = frappe.new_doc("Issue")
+		issue.subject = "_Test Permission Issue"
+		issue.insert(ignore_permissions=True)
+		frappe.set_user(self._get_no_perm_user())
+		self.assertRaises(frappe.PermissionError, set_multiple_status, json.dumps([issue.name]), "Closed")
+		frappe.set_user("Administrator")
 
 
 def create_issue_and_communication(issue_creation, first_responded_on):

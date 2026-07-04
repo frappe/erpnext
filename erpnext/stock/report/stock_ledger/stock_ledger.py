@@ -822,6 +822,8 @@ def get_opening_balance_for_inv_dimension(filters, inv_dimension_wise_value):
 		else:
 			query = query.where(sl_doctype[key] == value)
 
+	query = query.groupby(sl_doctype.item_code, sl_doctype.warehouse)
+
 	opening_data = query.run(as_dict=True)
 
 	if opening_data:

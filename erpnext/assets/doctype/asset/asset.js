@@ -93,6 +93,11 @@ frappe.ui.form.on("Asset", {
 		frappe.ui.form.trigger("Asset", "asset_type");
 		frm.toggle_display("next_depreciation_date", frm.doc.docstatus < 1);
 
+		if (frm.doc.docstatus < 1 && frm.doc.calculate_depreciation && frm.doc.is_fully_depreciated) {
+			// Is Fully Depreciated is read-only while depreciation is calculated, so keep it unchecked
+			frm.set_value("is_fully_depreciated", 0);
+		}
+
 		let has_create_buttons = false;
 		if (frm.doc.docstatus == 1) {
 			if (["Submitted", "Partially Depreciated"].includes(frm.doc.status)) {
@@ -727,6 +732,10 @@ frappe.ui.form.on("Asset", {
 
 	calculate_depreciation: function (frm) {
 		frm.toggle_reqd("finance_books", frm.doc.calculate_depreciation);
+		if (frm.doc.calculate_depreciation && frm.doc.is_fully_depreciated) {
+			// Is Fully Depreciated is read-only while depreciation is calculated, so keep it unchecked
+			frm.set_value("is_fully_depreciated", 0);
+		}
 		if (frm.doc.item_code && frm.doc.calculate_depreciation && frm.doc.net_purchase_amount) {
 			frm.trigger("set_finance_book");
 		} else {

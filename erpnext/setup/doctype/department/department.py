@@ -77,8 +77,7 @@ def get_children(
 	is_root: bool = False,
 	include_disabled: str | dict | None = None,
 ):
-	if isinstance(include_disabled, str):
-		include_disabled = json.loads(include_disabled)
+	include_disabled = frappe.parse_json(include_disabled)
 	fields = ["name as value", "is_group as expandable"]
 	filters = {}
 
@@ -96,7 +95,7 @@ def get_children(
 	return frappe.get_all("Department", fields=fields, filters=filters, order_by="name")
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def add_node():
 	from frappe.desk.treeview import make_tree_args
 

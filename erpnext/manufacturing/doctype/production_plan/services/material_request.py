@@ -159,8 +159,7 @@ def get_items_for_material_requests(
 
 
 def _normalize_mr_doc(doc):
-	if isinstance(doc, str):
-		doc = frappe._dict(json.loads(doc))
+	doc = frappe._dict(frappe.parse_json(doc))
 	return doc
 
 

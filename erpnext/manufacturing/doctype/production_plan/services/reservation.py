@@ -116,17 +116,57 @@ def _sub_assembly_reserved_filter(table, child, item_code, warehouse):
 	)
 
 
+class ProductionPlanStockReservation:
+	"""Reservation lifecycle for a Production Plan.
+
+	A Production Plan reserves stock for two of its child tables: the sub-assembly
+	items it will manufacture and the raw materials of its material-request rows
+	(see ``_RESERVATION_TABLES``). On submit the rows are reserved; on cancel the
+	reservations are released.
+
+	The reserved-qty *query* helpers in this module
+	(``get_reserved_qty_for_production_plan`` etc.) are read-only and answer "how
+	much is reserved?" for bins and reports, so they stay module-level functions
+	rather than methods, mirroring the engine's own query helpers.
+	"""
+
+	def __init__(self, doc):
+		self.doc = doc
+
+	def reserve(self, items: str | list | None = None, table_name: str | None = None, notify: bool = False):
+		"""Reserve (docstatus 1) or release (docstatus 2) stock for the plan's tables."""
+		if items and isinstance(items, str):
+			items = parse_json(items)
+
+		for child_table_name, kwargs in _RESERVATION_TABLES.items():
+			if table_name and table_name != child_table_name:
+				continue
+			self._reserve_or_cancel_plan_table(items, kwargs)
+
+		self.doc.reload()
+
+	def _reserve_or_cancel_plan_table(self, items, kwargs):
+		sre = StockReservation(self.doc, items=items, kwargs=kwargs)
+		if self.doc.docstatus == 1:
+			if sre.make_stock_reservation_entries():
+				frappe.msgprint(_("Stock Reservation Entries Created"), alert=True)
+		elif self.doc.docstatus == 2:
+			sre.cancel_stock_reservation_entries()
+
+	def cancel(self, sre_list: str | list | None = None):
+		"""Cancel specific (or all) Stock Reservation Entries held by the plan."""
+		StockReservation(self.doc).cancel_stock_reservation_entries(sre_list)
+		self.doc.reload()
+
+
 @frappe.whitelist()
 def make_stock_reservation_entries(
 	doc: str | Document, items: str | list | None = None, table_name: str | None = None, notify: bool = False
 ):
 	"""Whitelisted entry point: verify Production Plan write access, then reserve stock."""
-	if isinstance(doc, str):
-		doc = parse_json(doc)
-		doc = frappe.get_doc("Production Plan", doc.get("name"))
-
+	doc = _load_production_plan(doc)
 	frappe.has_permission("Production Plan", "write", doc=doc, throw=True)
-	reserve_stock_for_production_plan(doc, items=items, table_name=table_name, notify=notify)
+	ProductionPlanStockReservation(doc).reserve(items=items, table_name=table_name, notify=notify)
 
 
 def reserve_stock_for_production_plan(
@@ -134,35 +174,19 @@ def reserve_stock_for_production_plan(
 ):
 	"""Reserve stock for a Production Plan. Internal: no permission check (also called
 	from the Production Plan submit/cancel lifecycle)."""
-	if items and isinstance(items, str):
-		items = parse_json(items)
-
-	for child_table_name, kwargs in _RESERVATION_TABLES.items():
-		if table_name and table_name != child_table_name:
-			continue
-		_reserve_or_cancel_plan_table(doc, items, kwargs)
-
-	doc.reload()
-
-
-def _reserve_or_cancel_plan_table(doc, items, kwargs):
-	sre = StockReservation(doc, items=items, kwargs=kwargs)
-	if doc.docstatus == 1:
-		if sre.make_stock_reservation_entries():
-			frappe.msgprint(_("Stock Reservation Entries Created"), alert=True)
-	elif doc.docstatus == 2:
-		sre.cancel_stock_reservation_entries()
+	ProductionPlanStockReservation(doc).reserve(items=items, table_name=table_name, notify=notify)
 
 
 @frappe.whitelist()
 def cancel_stock_reservation_entries(doc: str | Document, sre_list: str | list):
 	"""Whitelisted entry point: verify Production Plan write access, then cancel reservations."""
+	doc = _load_production_plan(doc)
+	frappe.has_permission("Production Plan", "write", doc=doc, throw=True)
+	ProductionPlanStockReservation(doc).cancel(sre_list)
+
+
+def _load_production_plan(doc: str | Document) -> Document:
 	if isinstance(doc, str):
 		doc = parse_json(doc)
 		doc = frappe.get_doc("Production Plan", doc.get("name"))
-
-	frappe.has_permission("Production Plan", "write", doc=doc, throw=True)
-	sre = StockReservation(doc)
-	sre.cancel_stock_reservation_entries(sre_list)
-
-	doc.reload()
+	return doc

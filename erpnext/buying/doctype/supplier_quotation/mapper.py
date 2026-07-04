@@ -15,8 +15,7 @@ def make_purchase_order(
 ):
 	if args is None:
 		args = {}
-	if isinstance(args, str):
-		args = json.loads(args)
+	args = frappe.parse_json(args)
 
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")

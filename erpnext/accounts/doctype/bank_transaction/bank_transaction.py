@@ -5,6 +5,8 @@ import frappe
 from frappe import _
 from frappe.model.docstatus import DocStatus
 from frappe.model.document import Document
+from frappe.query_builder import Tuple
+from frappe.query_builder.functions import Abs, Max, Sum
 from frappe.utils import flt, getdate
 
 
@@ -374,6 +376,7 @@ def unreconcile_transaction(transaction_name: str | int):
 	Else, cancel the individual entries
 	"""
 	transaction = frappe.get_doc("Bank Transaction", transaction_name)
+	transaction.check_permission("write")
 
 	vouchers_to_cancel = []
 
@@ -394,13 +397,14 @@ def unreconcile_transaction(transaction_name: str | int):
 		frappe.get_doc(voucher["doctype"], voucher["name"]).cancel()
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def unreconcile_transaction_entry(bank_transaction_id: str | int, voucher_type: str, voucher_id: str | int):
 	"""
 	Removes a single payment entry from a bank transaction - for example only undoing one voucher instead of undoing the entire transaction
 	"""
 
 	bank_transaction = frappe.get_doc("Bank Transaction", bank_transaction_id)
+	bank_transaction.check_permission("write")
 
 	# Find the voucher in the bank transaction and depending on the action, either remove it or cancel the voucher
 	for entry in bank_transaction.payment_entries:
@@ -436,7 +440,7 @@ def get_clearance_details(transaction, payment_entry, bt_allocations, gl_entries
 
 		if bt_bank_account != gl_bank_account:
 			frappe.throw(
-				_("Bank Account {} in Bank Transaction {} is not matching with Bank Account {}").format(
+				_("Bank Account {0} in Bank Transaction {1} is not matching with Bank Account {2}").format(
 					bt_bank_account, payment_entry.payment_entry, gl_bank_account
 				)
 			)
@@ -445,7 +449,7 @@ def get_clearance_details(transaction, payment_entry, bt_allocations, gl_entries
 
 	if gl_bank_account not in gl_entries:
 		frappe.throw(
-			_("{} {} is not affecting bank account {}").format(
+			_("{0} {1} is not affecting bank account {2}").format(
 				payment_entry.payment_document, payment_entry.payment_entry, gl_bank_account
 			)
 		)
@@ -453,7 +457,7 @@ def get_clearance_details(transaction, payment_entry, bt_allocations, gl_entries
 	allocable_amount = gl_entries.pop(gl_bank_account) or 0
 	if allocable_amount <= 0.0:
 		frappe.throw(
-			_("Invalid amount in accounting entries of {} {} for Account {}: {}").format(
+			_("Invalid amount in accounting entries of {0} {1} for Account {2}: {3}").format(
 				payment_entry.payment_document, payment_entry.payment_entry, gl_bank_account, allocable_amount
 			)
 		)
@@ -476,30 +480,28 @@ def get_clearance_details(transaction, payment_entry, bt_allocations, gl_entries
 
 
 def get_related_bank_gl_entries(docs):
-	# nosemgrep: frappe-semgrep-rules.rules.frappe-using-db-sql
 	if not docs:
 		return {}
 
-	result = frappe.db.sql(
-		"""
-        SELECT
-            gle.voucher_type AS doctype,
-            gle.voucher_no AS docname,
-            gle.account AS gl_account,
-            SUM(ABS(gle.credit_in_account_currency - gle.debit_in_account_currency)) AS amount
-        FROM
-            `tabGL Entry` gle
-        LEFT JOIN
-            `tabAccount` ac ON ac.name = gle.account
-        WHERE
-            ac.account_type = 'Bank'
-            AND (gle.voucher_type, gle.voucher_no) IN %(docs)s
-            AND gle.is_cancelled = 0
-        GROUP BY
-            gle.voucher_type, gle.voucher_no, gle.account
-        """,
-		{"docs": docs},
-		as_dict=True,
+	gle = frappe.qb.DocType("GL Entry")
+	ac = frappe.qb.DocType("Account")
+	result = (
+		frappe.qb.from_(gle)
+		.left_join(ac)
+		.on(ac.name == gle.account)
+		.select(
+			gle.voucher_type.as_("doctype"),
+			gle.voucher_no.as_("docname"),
+			gle.account.as_("gl_account"),
+			Sum(Abs(gle.credit_in_account_currency - gle.debit_in_account_currency)).as_("amount"),
+		)
+		.where(
+			(ac.account_type == "Bank")
+			& Tuple(gle.voucher_type, gle.voucher_no).isin([Tuple(vt, vn) for vt, vn in docs])
+			& (gle.is_cancelled == 0)
+		)
+		.groupby(gle.voucher_type, gle.voucher_no, gle.account)
+		.run(as_dict=True)
 	)
 
 	entries = {}
@@ -521,31 +523,32 @@ def get_total_allocated_amount(docs):
 	if not docs:
 		return {}
 
-	# nosemgrep: frappe-semgrep-rules.rules.frappe-using-db-sql
-	result = frappe.db.sql(
-		"""
-		SELECT total, latest_date, gl_account, payment_document, payment_entry FROM (
-			SELECT
-				ROW_NUMBER() OVER w AS rownum,
-				SUM(btp.allocated_amount) OVER(PARTITION BY ba.account, btp.payment_document, btp.payment_entry) AS total,
-				FIRST_VALUE(bt.date) OVER w AS latest_date,
-				ba.account AS gl_account,
-				btp.payment_document,
-				btp.payment_entry
-			FROM
-				`tabBank Transaction Payments` btp
-			LEFT JOIN `tabBank Transaction` bt ON bt.name=btp.parent
-			LEFT JOIN `tabBank Account` ba ON ba.name=bt.bank_account
-			WHERE
-				(btp.payment_document, btp.payment_entry) IN %(docs)s
-				AND bt.docstatus = 1
-			WINDOW w AS (PARTITION BY ba.account, btp.payment_document, btp.payment_entry ORDER BY bt.date DESC)
-		) temp
-		WHERE
-			rownum = 1
-		""",
-		dict(docs=docs),
-		as_dict=True,
+	# The original window query (ROW_NUMBER/FIRST_VALUE + rownum = 1) just collapses to one
+	# row per (account, payment_document, payment_entry) with the partition's allocation total
+	# and most recent transaction date — i.e. a plain GROUP BY with SUM and MAX.
+	btp = frappe.qb.DocType("Bank Transaction Payments")
+	bt = frappe.qb.DocType("Bank Transaction")
+	ba = frappe.qb.DocType("Bank Account")
+
+	result = (
+		frappe.qb.from_(btp)
+		.left_join(bt)
+		.on(bt.name == btp.parent)
+		.left_join(ba)
+		.on(ba.name == bt.bank_account)
+		.select(
+			Sum(btp.allocated_amount).as_("total"),
+			Max(bt.date).as_("latest_date"),
+			ba.account.as_("gl_account"),
+			btp.payment_document,
+			btp.payment_entry,
+		)
+		.where(
+			Tuple(btp.payment_document, btp.payment_entry).isin([Tuple(pd, pe) for pd, pe in docs])
+			& (bt.docstatus == 1)
+		)
+		.groupby(ba.account, btp.payment_document, btp.payment_entry)
+		.run(as_dict=True)
 	)
 
 	payment_allocation_details = {}

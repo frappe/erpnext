@@ -15,6 +15,7 @@ from frappe.utils import flt
 
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_due_date
 from erpnext.controllers.accounts_controller import get_taxes_and_charges, merge_taxes
+from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle
 
 
 def get_invoiced_qty_map(delivery_note: str) -> dict:
@@ -65,8 +66,7 @@ def make_sales_invoice(
 
 	if args is None:
 		args = {}
-	if isinstance(args, str):
-		args = json.loads(args)
+	args = frappe.parse_json(args)
 
 	doc = frappe.get_doc("Delivery Note", source_name)
 
@@ -79,7 +79,7 @@ def make_sales_invoice(
 		target.run_method("set_po_nos")
 
 		if len(target.get("items")) == 0:
-			frappe.throw(_("All these items have already been Invoiced/Returned"))
+			frappe.throw(_("All these items have already been invoiced/returned"))
 
 		if args and args.get("merge_taxes"):
 			merge_taxes(source, target)
@@ -131,7 +131,8 @@ def make_sales_invoice(
 		{
 			"Delivery Note": {
 				"doctype": "Sales Invoice",
-				"field_map": {"is_return": "is_return"},
+				# commission_rate is no_copy (so it isn't carried on Duplicate), map it explicitly here
+				"field_map": {"is_return": "is_return", "commission_rate": "commission_rate"},
 				"validation": {"docstatus": ["=", 1]},
 			},
 			"Delivery Note Item": {
@@ -170,7 +171,12 @@ def make_sales_invoice(
 		frappe.get_single_value("Accounts Settings", "automatically_fetch_payment_terms")
 	)
 
-	if not doc.is_return:
+	if doc.is_return:
+		# A credit note made from a return Delivery Note should roll back the billed
+		# amount on the linked Sales Order too, so that per_billed stays consistent with
+		# per_delivered (which the return already reset).
+		doc.update_billed_amount_in_sales_order = True
+	else:
 		from erpnext.accounts.services.payment_schedule import PaymentScheduleService
 
 		ps = PaymentScheduleService(doc)
@@ -287,8 +293,7 @@ def make_packing_slip(source_name: str, target_doc: str | Document | None = None
 				},
 				"postprocess": update_item,
 				"condition": lambda item: (
-					not frappe.db.exists("Product Bundle", {"new_item_code": item.item_code, "disabled": 0})
-					and flt(item.packed_qty) < flt(item.qty)
+					not is_product_bundle(item.item_code) and flt(item.packed_qty) < flt(item.qty)
 				),
 			},
 			"Packed Item": {

@@ -80,6 +80,8 @@ class TestUtils(ERPNextTestSuite):
 		purchase_invoice.submit()
 
 		payment_entry = get_payment_entry(purchase_invoice.doctype, purchase_invoice.name)
+		payment_entry.target_exchange_rate = 82.32
+		payment_entry.set_amounts()
 		payment_entry.paid_amount = 15725
 		payment_entry.deductions = []
 		payment_entry.save()

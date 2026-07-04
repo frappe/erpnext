@@ -279,7 +279,7 @@ frappe.ui.form.on("Customer", {
 					error: function () {
 						dialog.hide();
 						frappe.msgprint({
-							message: __("Linking to Supplier Failed. Please try again."),
+							message: __("Linking to Supplier failed. Please try again."),
 							title: __("Linking Failed"),
 							indicator: "red",
 						});

@@ -1,0 +1,1059 @@
+<style>
+	.mes-page {
+		padding: 12px 16px 24px;
+	}
+	.mes-page .mes-filters {
+		padding: 4px 0 12px;
+		margin: 0;
+	}
+	.mes-page .mes-filters .form-column {
+		padding-left: 0;
+	}
+
+	/* Summary strip — single horizontal line of facts, Espresso density */
+	.mes-summary {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 8px 18px;
+		padding: 12px 16px;
+		background: var(--fg-color);
+		border: 1px solid var(--border-color);
+		border-radius: var(--border-radius);
+		margin-bottom: 14px;
+		font-size: 15px;
+		color: var(--text-color);
+	}
+	.mes-summary .mes-summary-key {
+		font-weight: 600;
+		font-size: 16px;
+	}
+	.mes-summary .mes-summary-stat {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+	}
+	.mes-summary .mes-summary-stat b {
+		font-weight: 600;
+	}
+	.mes-summary .mes-summary-dot {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		flex-shrink: 0;
+		display: inline-block;
+	}
+	.mes-summary .mes-summary-dot.green { background: var(--green-500, #38a169); }
+	.mes-summary .mes-summary-dot.orange { background: var(--orange-500, #d97706); }
+	.mes-summary .mes-summary-dot.blue { background: var(--blue-500, #2490ef); }
+	.mes-summary .mes-summary-stat .text-muted {
+		color: var(--text-muted);
+		font-weight: 400;
+	}
+	.mes-summary .mes-summary-divider {
+		width: 1px;
+		height: 14px;
+		background: var(--border-color);
+	}
+
+	/* Active jobs row — full-width grid; materials sit directly under each card */
+	.mes-active-row { margin: 0 -6px 16px; }
+	.mes-active-row > [class*="col-"] { padding: 0 6px; margin-bottom: 12px; }
+	.mes-slot-wrap { display: flex; flex-direction: column; gap: 0; }
+
+	/* Fuse the job card and its collapsible panels (Materials, Work Instructions) into one
+	   continuous card: square the touching corners and drop the duplicated border/shadow so the
+	   whole stack reads as a single section (each panel stays collapsible). The order in the DOM
+	   is: card → Materials → Work Instructions (any of the panels may be absent). */
+	.mes-job:has(+ .mes-materials-inline),
+	.mes-job:has(+ .mes-instructions-inline),
+	.mes-materials-inline:has(+ .mes-instructions-inline) {
+		border-bottom-left-radius: 0;
+		border-bottom-right-radius: 0;
+		border-bottom: none;
+		box-shadow: none;
+	}
+	.mes-job + .mes-materials-inline,
+	.mes-job + .mes-instructions-inline,
+	.mes-materials-inline + .mes-instructions-inline {
+		border-top-left-radius: 0;
+		border-top-right-radius: 0;
+		margin-top: 0;
+	}
+
+	/* Active job card — denser than before */
+	/* Keyboard focus highlight for arrow-key navigation in the operator view. */
+	[data-sf-focusable].sf-focused { box-shadow: 0 0 0 2px var(--primary); border-radius: var(--border-radius); outline: none; }
+	.mes-job {
+		border: 1px solid var(--border-color);
+		background: var(--fg-color);
+		border-radius: var(--border-radius);
+		padding: 14px 16px;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+	}
+	.mes-job-meta {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		flex-wrap: wrap;
+		min-width: 0;
+	}
+	.mes-job-id {
+		color: var(--text-muted);
+		font-size: 14px;
+		/* Match the indicator-pill's fixed 20px height so the Job Card id sits vertically
+		   centered against the status pill in the meta row (otherwise the pill reads higher). */
+		line-height: 20px;
+	}
+	/* Status/QC pills read as a secondary badge after the Job Card id — one notch smaller than
+	   the desk default (--text-sm: 13px). */
+	.mes-job-meta .indicator-pill {
+		font-size: 12px;
+	}
+	.mes-job-timer {
+		font-variant-numeric: tabular-nums;
+		font-size: 24px;
+		font-weight: 500;
+		color: var(--text-color);
+		letter-spacing: -0.01em;
+		line-height: 1;
+		white-space: nowrap;
+	}
+	.mes-job-timer .colon { color: var(--text-light); margin: 0 2px; }
+
+	/* Desktop: body + controls inline on one row. Tablet: stacked (default below 992px). */
+	.mes-job-main {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		flex: 1;
+		min-width: 0;
+	}
+	.mes-job-controls {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		flex-shrink: 0;
+	}
+	.mes-job-controls .mes-job-timer { display: block; }
+	@media (min-width: 992px) {
+		.mes-job-main { flex-direction: row; align-items: center; gap: 16px; }
+		.mes-job-controls .mes-job-timer { display: block; font-size: 24px; }
+		.mes-job-main .mes-job-body { flex: 1; min-width: 0; margin-bottom: 0; }
+	}
+
+	/* Two-slot layout (.col-md-6): timer sits top-right in the header; the controls row holds
+	   only the buttons, vertically centered against the body so the image, title, sub-line and
+	   the buttons all share one horizontal line. */
+	@media (min-width: 992px) {
+		.col-md-6 .mes-job-controls { flex-direction: column; align-items: flex-end; gap: 8px; }
+		.col-md-6 .mes-job-controls .mes-job-timer { text-align: right; font-size: 20px; }
+		.col-md-6 .mes-job-actions { gap: 10px; margin-top: 10px; }
+		.col-md-6 .mes-job-actions .btn { flex: 0 0 auto; min-width: 110px; white-space: nowrap; }
+	}
+
+	.mes-job-body {
+		display: flex;
+		gap: 12px;
+		align-items: stretch;
+		margin-bottom: 0;
+	}
+	.mes-job-image {
+		width: 66px;
+		height: 66px;
+		aspect-ratio: 1 / 1;
+		align-self: center;
+		flex-shrink: 0;
+		border-radius: var(--border-radius);
+		overflow: hidden;
+		background: var(--bg-color);
+		border: 1px solid var(--border-color);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.mes-job-image img { width: 100%; height: 100%; object-fit: cover; }
+	.mes-job-image-fallback {
+		font-size: 14px;
+		font-weight: 600;
+		color: var(--text-muted);
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
+	}
+	.mes-job-info { flex: 1; min-width: 0; }
+	.mes-job-info .mes-job-meta { margin-bottom: 2px; }
+	.mes-job-title {
+		font-size: 17px;
+		font-weight: 600;
+		color: var(--text-color);
+		line-height: 1.25;
+		margin-bottom: 2px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.mes-job-sub {
+		font-size: 14px;
+		color: var(--text-muted);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.mes-job-actions {
+		display: flex;
+		gap: 10px;
+		margin-top: 0;
+	}
+	.mes-job-actions .btn {
+		flex: 1;
+		font-size: 15px;
+		padding: 8px 12px;
+	}
+	.mes-job-actions .btn-block { flex: 1 1 100%; }
+	@media (min-width: 992px) {
+		.mes-job-actions .btn { flex: 0 0 auto; min-width: 100px; }
+	}
+
+	/* ── Mobile & tablet (below the 992px desktop breakpoint) ──────────────────
+	   Roomier, touch-friendly tweaks. The desktop layout (all min-width: 992px
+	   rules above) is intentionally left untouched. */
+	@media (max-width: 991px) {
+		/* Summary: drop the vertical dividers — the colored status dots already
+		   separate the stats — and let them wrap cleanly. */
+		.mes-summary {
+			gap: 6px 14px;
+			padding: 12px 14px;
+			font-size: 14px;
+		}
+		.mes-summary .mes-summary-divider { display: none; }
+
+		/* Job card: a touch tighter, with a slightly smaller header timer. */
+		.mes-job { padding: 14px; }
+
+		/* Action buttons fill the card width and split evenly — easy to tap. */
+		.mes-job-actions { flex: 1; }
+		.mes-job-actions .btn { padding: 11px 12px; }
+
+		/* Show the full operation · qty · work-order line instead of truncating it. */
+		.mes-job-sub { white-space: normal; }
+
+		/* Materials summary: let the Transfer Materials button drop to its own
+		   full-width line rather than crowding the title on narrow screens. */
+		.mes-materials-summary-row { flex-wrap: wrap; }
+		.mes-materials-summary-btn { flex: 1 1 100%; margin-top: 6px; }
+	}
+
+	/* Materials side panel */
+	.mes-materials {
+		border: 1px solid var(--border-color);
+		background: var(--fg-color);
+		border-radius: var(--border-radius);
+		padding: 12px 14px;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+	}
+	.mes-materials-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: 8px;
+		margin-bottom: 10px;
+		padding-bottom: 8px;
+		border-bottom: 1px solid var(--border-color);
+	}
+	.mes-materials-title {
+		font-size: 15px;
+		font-weight: 600;
+		color: var(--text-color);
+	}
+	.mes-materials-sub {
+		font-size: 13px;
+		color: var(--text-muted);
+		text-align: right;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.mes-material-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 10px;
+		padding: 7px 0;
+		border-bottom: 1px solid var(--border-color);
+		font-size: 14px;
+	}
+	.mes-material-row:last-of-type { border-bottom: none; }
+	.mes-material-name {
+		min-width: 0;
+		flex: 1;
+	}
+	.mes-material-name-text {
+		color: var(--text-color);
+		font-weight: 500;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.mes-material-name-sub {
+		color: var(--text-muted);
+		font-size: 13px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.mes-material-qty {
+		text-align: right;
+		font-variant-numeric: tabular-nums;
+		color: var(--text-color);
+		white-space: nowrap;
+	}
+	.mes-material-qty-sub {
+		color: var(--text-muted);
+		font-size: 13px;
+	}
+	.mes-material-status {
+		flex-shrink: 0;
+		font-size: 12px;
+	}
+	.mes-materials-footer {
+		margin-top: 10px;
+		padding-top: 8px;
+		border-top: 1px solid var(--border-color);
+	}
+	.mes-materials-empty {
+		font-size: 14px;
+		color: var(--text-muted);
+		padding: 20px 8px;
+		text-align: center;
+	}
+
+	/* Section heading style — Espresso */
+	.mes-section { margin-bottom: 16px; }
+	.mes-section-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		margin-bottom: 8px;
+		font-size: 15px;
+		font-weight: 600;
+		color: var(--text-color);
+	}
+	.mes-section-header .text-muted {
+		color: var(--text-muted);
+		font-weight: 400;
+		font-size: 14px;
+	}
+
+	/* Frappe UI-style list card: wraps a section with header (title + subtitle) and bordered body rows */
+	.mes-list-card {
+		background: var(--fg-color);
+		border: 1px solid var(--border-color);
+		border-radius: 8px;
+		margin-bottom: 14px;
+		overflow: hidden;
+	}
+	.mes-list-card-header {
+		padding: 14px 18px;
+		border-bottom: 1px solid var(--border-color);
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 16px;
+	}
+	.mes-list-card-title {
+		font-size: 16px;
+		font-weight: 600;
+		color: var(--text-color);
+		line-height: 1.3;
+	}
+	.mes-list-card-subtitle {
+		font-size: 14px;
+		color: var(--text-muted);
+		margin-top: 2px;
+	}
+	.mes-list-card-body { /* rows control their own padding */ }
+	.mes-list-empty {
+		padding: 32px 18px;
+		text-align: center;
+		color: var(--text-muted);
+		font-size: 15px;
+	}
+
+	/* List rows for queue, sessions, ready-to-submit — tabular spread across the row.
+	   Used inside .mes-list-card-body, so no per-row border/radius — just a subtle separator. */
+	.mes-row {
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		padding: 11px 18px;
+		background: var(--fg-color);
+		border-bottom: 1px solid var(--border-color);
+		font-size: 15px;
+		transition: background-color 0.1s ease;
+	}
+	.mes-row:last-child { border-bottom: none; }
+	.mes-row:hover { background: var(--bg-color); }
+	.mes-row-status { flex: 0 0 150px; display: flex; align-items: center; gap: 6px; }
+	.mes-row-status .indicator-pill { white-space: nowrap; }
+	.mes-row-id { flex: 0 0 120px; color: var(--text-muted); font-size: 14px; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.mes-row-id a { color: var(--text-muted); }
+	/* Item cell: thumbnail + name on one line, so it lines up with the status/id row. */
+	.mes-row-item { flex: 1 1 0; min-width: 0; display: flex; align-items: center; gap: 10px; }
+	.mes-row-image {
+		width: 32px;
+		height: 32px;
+		flex-shrink: 0;
+		border-radius: var(--border-radius);
+		overflow: hidden;
+		background: var(--bg-color);
+		border: 1px solid var(--border-color);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.mes-row-image img { width: 100%; height: 100%; object-fit: cover; }
+	.mes-row-image-fallback {
+		font-size: 11px;
+		font-weight: 600;
+		color: var(--text-muted);
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+	}
+	.mes-row-title {
+		flex: 1;
+		min-width: 0;
+		color: var(--text-color);
+		font-weight: 500;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	/* Operation as its own column (was previously stacked under the item name). */
+	.mes-row-operation {
+		flex: 0 0 140px;
+		color: var(--text-muted);
+		font-size: 14px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.mes-row-qty {
+		flex: 0 0 110px;
+		text-align: right;
+		font-variant-numeric: tabular-nums;
+		color: var(--text-color);
+		white-space: nowrap;
+	}
+	.mes-row-qty-sub { color: var(--text-muted); font-size: 13px; }
+	/* UOM sits inline with the qty number (e.g. "30 Nos") so the cell stays single-line
+	   and vertically centers with the rest of the row. */
+	.mes-row-qty-uom { color: var(--text-muted); font-size: 13px; margin-left: 2px; }
+	.mes-row-info {
+		flex: 0 0 140px;
+		text-align: right;
+		font-size: 14px;
+		color: var(--text-muted);
+		white-space: nowrap;
+	}
+	.mes-row-info--ready { color: var(--text-color); }
+	.mes-row-info--warn { color: var(--orange-500, #d97706); }
+	.mes-row-action { flex: 0 0 auto; text-align: right; }
+	.mes-row-action .btn { font-size: 14px; padding: 5px 12px; min-width: 96px; white-space: nowrap; }
+
+	@media (max-width: 768px) {
+		.mes-row { flex-wrap: wrap; gap: 8px; }
+		.mes-row-id, .mes-row-info, .mes-row-operation { flex-basis: auto; }
+		.mes-row-item { flex-basis: 100%; order: 99; }
+	}
+
+	.mes-empty-row {
+		padding: 14px;
+		text-align: center;
+		color: var(--text-muted);
+		border: 1px dashed var(--border-color);
+		border-radius: var(--border-radius);
+		font-size: 14px;
+	}
+
+	/* Next Up "promoted" variant — compact horizontal row, no dead timer space */
+	.mes-job--next-up {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		height: auto;
+		gap: 14px;
+		padding: 14px 16px;
+	}
+	.mes-job--next-up .mes-job-info { flex: 1; min-width: 0; }
+	.mes-job--next-up .mes-job-meta { margin-bottom: 4px; }
+	.mes-job--next-up .mes-job-next-action { flex-shrink: 0; }
+	.mes-job--next-up .mes-job-next-action .btn {
+		font-size: 15px;
+		padding: 9px 20px;
+		min-width: 130px;
+	}
+
+	/* Inline collapsible materials section under each active card */
+	.mes-materials-inline {
+		border: 1px solid var(--border-color);
+		border-radius: var(--border-radius);
+		background: var(--fg-color);
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+	}
+	/* Collapsible is class-driven (.is-open), not a native <details> — native <summary>
+	   toggling proved unreliable (flex <summary> broke close on WebKit; a second desync
+	   needed two clicks). A plain div + JS toggle is single-click and keeps the icon in sync. */
+	.mes-materials-summary {
+		padding: 10px 16px;
+		cursor: pointer;
+		font-size: 14px;
+		font-weight: 600;
+		color: var(--text-color);
+		user-select: none;
+	}
+	.mes-materials-summary-row {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+	.mes-materials-summary-row > .mes-materials-summary-left { flex: 1; min-width: 0; }
+	.mes-materials-summary-btn {
+		font-size: 13px;
+		padding: 5px 12px;
+		min-width: 100px;
+	}
+	/* Frappe disclosure icon — points down when collapsed, flips up when expanded.
+	   pointer-events:none lets a click on the icon fall through to the summary header
+	   (clicking the SVG directly otherwise swallows the first click on WebKit/macOS). */
+	.mes-materials-toggle {
+		display: inline-flex;
+		align-items: center;
+		color: var(--text-muted);
+		transition: transform 0.2s ease;
+		pointer-events: none;
+	}
+	.mes-materials-toggle .icon { width: 14px; height: 14px; }
+	.mes-materials-inline.is-open .mes-materials-toggle { transform: rotate(180deg); }
+	/* Body is hidden when collapsed, revealed when .is-open. */
+	.mes-materials-inline .mes-materials-body { display: none; }
+	.mes-materials-inline.is-open .mes-materials-body {
+		display: block;
+		padding: 4px 14px 12px;
+		border-top: 1px solid var(--border-color);
+	}
+	.mes-materials-inline .mes-materials-summary-left {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+	.mes-materials-inline .mes-materials-count {
+		color: var(--text-muted);
+		font-weight: 400;
+	}
+	.mes-materials-inline .mes-materials-status-dots {
+		display: flex;
+		gap: 3px;
+		margin-left: 4px;
+	}
+	.mes-materials-inline .mes-materials-status-dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+	}
+	.mes-materials-inline .mes-materials-status-dot.green { background: var(--green-500, #38a169); }
+	.mes-materials-inline .mes-materials-status-dot.yellow { background: var(--yellow-500, #d97706); }
+	.mes-materials-inline .mes-materials-status-dot.red { background: var(--red-500, #e53e3e); }
+
+	/* Inline collapsible Work Instructions panel — same disclosure pattern as Materials.
+	   Sits directly under the job card (after Materials) and fuses into the card stack (see the
+	   fusion rules above) so the operator reads step-by-step guidance without leaving the view. */
+	.mes-instructions-inline {
+		border: 1px solid var(--border-color);
+		border-radius: var(--border-radius);
+		background: var(--fg-color);
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+	}
+	.mes-instructions-summary {
+		padding: 10px 16px;
+		cursor: pointer;
+		font-size: 14px;
+		font-weight: 600;
+		color: var(--text-color);
+		user-select: none;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+	.mes-instructions-toggle {
+		display: inline-flex;
+		align-items: center;
+		color: var(--text-muted);
+		transition: transform 0.2s ease;
+		pointer-events: none;
+	}
+	.mes-instructions-toggle .icon { width: 14px; height: 14px; }
+	.mes-instructions-inline.is-open .mes-instructions-toggle { transform: rotate(180deg); }
+	.mes-instructions-inline .mes-instructions-body { display: none; }
+	.mes-instructions-inline.is-open .mes-instructions-body {
+		display: block;
+		padding: 10px 16px 14px;
+		border-top: 1px solid var(--border-color);
+		font-size: 14px;
+		color: var(--text-color);
+		line-height: 1.5;
+	}
+	/* Rich Work Instructions content (sanitized HTML from the Operation): keep images in-bounds
+	   and give lists/headings sensible spacing inside the panel. */
+	.mes-instructions-body img { max-width: 100%; height: auto; border-radius: var(--border-radius); }
+	.mes-instructions-body p:last-child { margin-bottom: 0; }
+	.mes-instructions-desc {
+		color: var(--text-muted);
+		white-space: pre-wrap;
+		margin-bottom: 8px;
+	}
+	.mes-instructions-desc:last-child { margin-bottom: 0; }
+
+	/* QC reading rows inside the inline Quality Check dialog */
+	.mes-qc-row {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		padding: 10px 0;
+		border-bottom: 1px solid var(--border-color);
+	}
+	.mes-qc-row:last-child { border-bottom: none; }
+	.mes-qc-spec { flex: 1; min-width: 0; }
+	.mes-qc-spec-name { font-weight: 500; color: var(--text-color); }
+	.mes-qc-spec-sub { font-size: 13px; color: var(--text-muted); }
+	.mes-qc-controls { flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
+	.mes-qc-controls input.form-control { width: 120px; }
+	.mes-qc-passfail { display: inline-flex; border: 1px solid var(--border-color); border-radius: var(--border-radius); overflow: hidden; }
+	.mes-qc-passfail button {
+		border: none;
+		background: var(--fg-color);
+		padding: 6px 14px;
+		font-size: 14px;
+		cursor: pointer;
+		color: var(--text-muted);
+	}
+	.mes-qc-passfail button.active.pass { background: var(--green-500, #38a169); color: #fff; }
+	.mes-qc-passfail button.active.fail { background: var(--red-500, #e53e3e); color: #fff; }
+</style>
+
+<!-- Summary strip -->
+<div class="mes-summary">
+	<span class="mes-summary-key">{{ mode === 'work_order' ? work_order : workstation }}</span>
+	<span class="mes-summary-divider"></span>
+	<span class="mes-summary-stat">
+		<span class="mes-summary-dot blue"></span>
+		<b>{{ summary.active_count }}{% if (mode === 'workstation' && summary.capacity > 1) { %}<span class="text-muted">/{{ summary.capacity }}</span>{% } %}</b> {{ __("Active") }}
+	</span>
+	<span class="mes-summary-divider"></span>
+	<span class="mes-summary-stat">
+		<span class="mes-summary-dot orange"></span>
+		<b>{{ summary.queue_count }}</b> {{ mode === 'work_order' ? __("Pending") : __("In Queue") }}
+	</span>
+	<span class="mes-summary-divider"></span>
+	<span class="mes-summary-stat">
+		<span class="mes-summary-dot green"></span>
+		<b>{{ summary.completed_count }}</b> {{ __("Completed") }}
+	</span>
+	{% if (mode === 'workstation' && oee) { %}
+		<span class="mes-summary-divider"></span>
+		<span class="mes-summary-stat">
+			<b>OEE {{ oee.oee !== null && oee.oee !== undefined ? oee.oee + '%' : '–' }}</b>
+			<span class="text-muted">
+				· {{ oee.availability !== null && oee.availability !== undefined ? 'A ' + oee.availability : 'A –' }} · P {{ oee.performance }} · Q {{ oee.quality }}
+			</span>
+		</span>
+	{% } %}
+</div>
+
+<!-- Main work area: each slot stacks its card + inline collapsible Materials -->
+{% if (slots.length > 0) { %}
+	<div class="row mes-active-row">
+		{% slots.forEach((slot) => { %}
+			<div class="{{ slots.length === 1 ? 'col-sm-12' : 'col-md-6' }}">
+				<div class="mes-slot-wrap">
+					{% if (slot && slot._is_next_up) { %}
+							<div class="mes-job mes-job--next-up" data-sf-focusable data-kind="job">
+								<div class="mes-job-image">
+									{% if (slot.item_image) { %}
+										<img src="{{ slot.item_image }}" alt="">
+									{% } else { %}
+										<span class="mes-job-image-fallback">{{ frappe.get_abbr(slot.finished_good || slot.production_item, 2) }}</span>
+									{% } %}
+								</div>
+								<div class="mes-job-info">
+									<div class="mes-job-title">{{ slot.finished_good || slot.production_item }}</div>
+									<div class="mes-job-meta">
+										{% if (slot.is_subcontracted) { %}
+											<span class="indicator-pill no-indicator-dot purple">{{ __("Subcontract") }}</span>
+										{% } %}
+										<a class="mes-job-id" href="/app/job-card/{{ slot.name }}">{{ slot.name }}</a>
+									</div>
+									<div class="mes-job-sub">
+										{{ slot.operation }} · {{ format_number(slot.for_quantity, null, 0) }} {{ slot.fg_uom || '' }}
+										{% if (slot.work_order) { %} · {{ slot.work_order }}{% } %}
+									</div>
+								</div>
+								<div class="mes-job-next-action">
+									{% if (slot._materials_ready) { %}
+										<button class="btn btn-primary mes-btn-start" data-job-card="{{ slot.name }}">
+											{{ __("Start Job") }} &rarr;
+										</button>
+									{% } else { %}
+										<button class="btn btn-default mes-btn-transfer" data-job-card="{{ slot.name }}">
+											{{ __("Transfer Materials") }}
+										</button>
+									{% } %}
+								</div>
+							</div>
+						{% } else if (slot) { %}
+							<div class="mes-job" data-sf-focusable data-kind="job">
+								<div class="mes-job-main">
+									<div class="mes-job-body">
+										<div class="mes-job-image">
+											{% if (slot.item_image) { %}
+												<img src="{{ slot.item_image }}" alt="">
+											{% } else { %}
+												<span class="mes-job-image-fallback">{{ frappe.get_abbr(slot.finished_good || slot.production_item, 2) }}</span>
+											{% } %}
+										</div>
+										<div class="mes-job-info">
+											<div class="mes-job-title">{{ slot.finished_good || slot.production_item }}</div>
+											<div class="mes-job-meta">
+												<a class="mes-job-id" href="/app/job-card/{{ slot.name }}">{{ slot.name }}</a>
+												<span class="indicator-pill no-indicator-dot {{ slot.status_colour }}">{{ __(slot.status) }}</span>
+												{% if (slot.is_subcontracted) { %}
+													<span class="indicator-pill no-indicator-dot purple">{{ __("Subcontract") }}</span>
+												{% } %}
+												{% if (slot.qc && slot.qc.status === 'Accepted') { %}
+													<span class="indicator-pill no-indicator-dot green">{{ __("QC Passed") }}</span>
+												{% } else if (slot.qc && slot.qc.status === 'Rejected') { %}
+													<span class="indicator-pill no-indicator-dot red">{{ __("QC Rejected") }}</span>
+												{% } else if (slot.qc && slot.qc.required) { %}
+													<span class="indicator-pill no-indicator-dot orange mes-qc-pill" data-job-card="{{ slot.name }}" style="cursor: pointer;" title="{{ __("Run quality check") }}">{{ __("QC Required") }}</span>
+												{% } else if (slot.qc && slot.qc.has_checklist) { %}
+													<span class="indicator-pill no-indicator-dot blue mes-qc-pill" data-job-card="{{ slot.name }}" style="cursor: pointer;" title="{{ __("Run quality check") }}">{{ __("QC Available") }}</span>
+												{% } %}
+											</div>
+											<div class="mes-job-sub">
+												{{ slot.operation }} · {{ format_number(slot.total_completed_qty, null, 0) }}/{{ format_number(slot.for_quantity, null, 0) }} {{ slot.fg_uom || '' }}
+												{% if (slot.work_order) { %} · <a href="/app/work-order/{{ slot.work_order }}">{{ slot.work_order }}</a>{% } %}
+											</div>
+										</div>
+									</div>
+									<div class="mes-job-controls">
+										<div class="mes-job-timer" data-job-card="{{ slot.name }}">
+											<span class="h">00</span><span class="colon">:</span><span class="m">00</span><span class="colon">:</span><span class="s">00</span>
+										</div>
+										<div class="mes-job-actions">
+											{% if (slot.is_paused) { %}
+												<button class="btn btn-primary btn-block mes-btn-resume" data-job-card="{{ slot.name }}">
+													{{ __("Resume Job") }}
+												</button>
+											{% } else { %}
+												<button class="btn btn-default mes-btn-pause" data-job-card="{{ slot.name }}">
+													{{ __("Pause") }}
+												</button>
+												<button class="btn btn-primary mes-btn-end-session" data-job-card="{{ slot.name }}" data-qty="{{ slot.for_quantity }}">
+													{{ __("End Session") }}
+												</button>
+											{% } %}
+										</div>
+									</div>
+								</div>
+							</div>
+					{% } else { %}
+						<div class="mes-empty-row" style="padding: 32px 16px;">
+							{{ __("Slot available — start a job from the queue.") }}
+						</div>
+					{% } %}
+
+					{% if (slot && slot.materials && slot.materials.length > 0) { %}
+						{% var ready_n = slot.materials.filter((x) => x.status === 'ready').length; %}
+						{% var avail_n = slot.materials.filter((x) => x.status === 'available').length; %}
+						{% var short_n = slot.materials.filter((x) => x.status === 'short').length; %}
+						<div class="mes-materials-inline{{ short_n > 0 || avail_n > 0 ? ' is-open' : '' }}" data-job-card="{{ slot.name }}">
+							<div class="mes-materials-summary">
+								<span class="mes-materials-summary-row">
+									<span class="mes-materials-summary-left">
+										<span class="mes-materials-toggle">{{ frappe.utils.icon("es-line-down", "sm") }}</span>
+										<span>{{ __("Materials") }}</span>
+										<span class="mes-materials-count">{{ slot.materials.length }}</span>
+										<span class="mes-materials-status-dots">
+											{% if (ready_n > 0) { %}<span class="mes-materials-status-dot green" title="{{ ready_n }} ready"></span>{% } %}
+											{% if (avail_n > 0) { %}<span class="mes-materials-status-dot yellow" title="{{ avail_n }} available"></span>{% } %}
+											{% if (short_n > 0) { %}<span class="mes-materials-status-dot red" title="{{ short_n }} short"></span>{% } %}
+										</span>
+									</span>
+									{% if (slot.make_material_request && !slot._is_next_up) { %}
+										<button class="btn btn-default btn-sm mes-btn-transfer mes-materials-summary-btn" data-job-card="{{ slot.name }}" onclick="event.stopPropagation()">
+											{{ __("Transfer Materials") }}
+										</button>
+									{% } %}
+								</span>
+							</div>
+							<div class="mes-materials-body">
+								{% slot.materials.forEach((m) => { %}
+									{% var color = m.status === 'ready' ? 'green' : (m.status === 'available' ? 'yellow' : 'red'); %}
+									{% var label = m.status === 'ready' ? __('Ready') : (m.status === 'available' ? __('Available') : __('Short')); %}
+									<div class="mes-material-row">
+										<div class="mes-material-name">
+											<div class="mes-material-name-text">{{ m.item_name }}</div>
+											<div class="mes-material-name-sub">{{ m.item_code }}{% if (m.source_warehouse) { %} · {{ m.source_warehouse }}{% } %}</div>
+										</div>
+										<div class="mes-material-qty">
+											<div>{{ format_number(m.transferred_qty, null, 2) }} / {{ format_number(m.required_qty, null, 2) }} {{ m.uom }}</div>
+											{% if (m.status !== 'ready') { %}
+												<div class="mes-material-qty-sub">{{ __("In source") }}: {{ format_number(m.on_hand_qty, null, 2) }}</div>
+											{% } %}
+										</div>
+										<span class="mes-material-status indicator-pill no-indicator-dot {{ color }}">{{ label }}</span>
+									</div>
+								{% }); %}
+							</div>
+						</div>
+					{% } %}
+
+					{% if (slot && slot.instructions) { %}
+						<div class="mes-instructions-inline" data-job-card="{{ slot.name }}">
+							<div class="mes-instructions-summary">
+								<span class="mes-instructions-toggle">{{ frappe.utils.icon("es-line-down", "sm") }}</span>
+								<span>{{ __("Work Instructions") }}</span>
+							</div>
+							<div class="mes-instructions-body">
+								{% if (slot.instructions.description) { %}
+									<!-- plain-text Operation.description — escaped (microtemplate output is raw) -->
+									<div class="mes-instructions-desc">{{ frappe.utils.escape_html(slot.instructions.description) }}</div>
+								{% } %}
+								{% if (slot.instructions.work_instruction) { %}
+									<!-- work_instruction is a Text Editor field, bleach-sanitized server-side -> render as HTML -->
+									<div class="mes-instructions-rich">{%= slot.instructions.work_instruction %}</div>
+								{% } %}
+							</div>
+						</div>
+					{% } %}
+				</div>
+			</div>
+		{% }); %}
+	</div>
+{% } else if (!(completed && completed.length) && !(pending_submission && pending_submission.length) && !(to_manufacture && to_manufacture.length) && !(queue && queue.length) && !(today_sessions && today_sessions.length)) { %}
+	<div class="mes-empty-row" style="padding: 32px 16px;">
+		{{ __("No active jobs and the queue is empty.") }}
+	</div>
+{% } %}
+
+<!-- Ready to Submit -->
+{% if (pending_submission && pending_submission.length > 0) { %}
+	<div class="mes-list-card">
+		<div class="mes-list-card-header">
+			<div>
+				<div class="mes-list-card-title">{{ __("Ready to Submit") }}</div>
+				<div class="mes-list-card-subtitle">
+					{{ pending_submission.length === 1 ? __("1 draft job card awaiting submission") : __("{0} draft job cards awaiting submission", [pending_submission.length]) }}
+				</div>
+			</div>
+		</div>
+		<div class="mes-list-card-body">
+		{% pending_submission.forEach((jc) => { %}
+			<div class="mes-row" data-sf-focusable data-kind="job">
+				<div class="mes-row-status">
+					<span class="indicator-pill no-indicator-dot green">{{ __("Qty Done") }}</span>
+				</div>
+				<div class="mes-row-item">
+					<div class="mes-row-image">
+						{% if (jc.item_image) { %}<img src="{{ jc.item_image }}" alt="">{% } else { %}<span class="mes-row-image-fallback">{{ frappe.get_abbr(jc.finished_good || jc.production_item, 2) }}</span>{% } %}
+					</div>
+					<div class="mes-row-title">{{ jc.finished_good || jc.production_item }}</div>
+				</div>
+				<div class="mes-row-operation">{{ jc.operation }}</div>
+				<div class="mes-row-id"><a href="/app/job-card/{{ jc.name }}">{{ jc.name }}</a></div>
+				<div class="mes-row-qty">
+					{{ format_number(jc.total_completed_qty, null, 0) }} / {{ format_number(jc.for_quantity, null, 0) }}
+					<span class="mes-row-qty-uom">{{ jc.fg_uom || '' }}</span>
+				</div>
+				<div class="mes-row-info"></div>
+				<div class="mes-row-action">
+					<button class="btn btn-default btn-sm mes-btn-submit" data-job-card="{{ jc.name }}">
+						{{ __("Submit") }}
+					</button>
+				</div>
+			</div>
+		{% }); %}
+		</div>
+	</div>
+{% } %}
+
+<!-- To Manufacture — submitted, qty done, finished goods not yet booked (Manufacture entry pending) -->
+{% if (to_manufacture && to_manufacture.length > 0) { %}
+	<div class="mes-list-card">
+		<div class="mes-list-card-header">
+			<div>
+				<div class="mes-list-card-title">{{ __("To Manufacture") }}</div>
+				<div class="mes-list-card-subtitle">
+					{{ to_manufacture.length === 1 ? __("1 job card awaiting Manufacture entry") : __("{0} job cards awaiting Manufacture entry", [to_manufacture.length]) }}
+				</div>
+			</div>
+		</div>
+		<div class="mes-list-card-body">
+		{% to_manufacture.forEach((jc) => { %}
+			<div class="mes-row" data-sf-focusable data-kind="job">
+				<div class="mes-row-status">
+					<span class="indicator-pill no-indicator-dot purple">{{ __("To Manufacture") }}</span>
+				</div>
+				<div class="mes-row-item">
+					<div class="mes-row-image">
+						{% if (jc.item_image) { %}<img src="{{ jc.item_image }}" alt="">{% } else { %}<span class="mes-row-image-fallback">{{ frappe.get_abbr(jc.finished_good || jc.production_item, 2) }}</span>{% } %}
+					</div>
+					<div class="mes-row-title">{{ jc.finished_good || jc.production_item }}</div>
+				</div>
+				<div class="mes-row-operation">{{ jc.operation }}</div>
+				<div class="mes-row-id"><a href="/app/job-card/{{ jc.name }}">{{ jc.name }}</a></div>
+				<div class="mes-row-qty">
+					{{ format_number(jc.total_completed_qty, null, 0) }} / {{ format_number(jc.for_quantity, null, 0) }}
+					<span class="mes-row-qty-uom">{{ jc.fg_uom || '' }}</span>
+				</div>
+				<div class="mes-row-info"></div>
+				<div class="mes-row-action">
+					<button class="btn btn-default btn-sm mes-btn-make-entry" data-job-card="{{ jc.name }}">
+						{{ __("Make Stock Entry") }}
+					</button>
+				</div>
+			</div>
+		{% }); %}
+		</div>
+	</div>
+{% } %}
+
+<!-- Up Next — only when there's something to queue -->
+{% if (queue.length > 0) { %}
+<div class="mes-list-card">
+	<div class="mes-list-card-header">
+		<div>
+			<div class="mes-list-card-title">{{ __("Up Next") }}</div>
+			<div class="mes-list-card-subtitle">
+				{{ queue.length === 1 ? __("1 pending job card") : __("{0} pending job cards", [queue.length]) }}
+			</div>
+		</div>
+	</div>
+		<div class="mes-list-card-body">
+		{% queue.forEach((jc) => { %}
+			<div class="mes-row" data-sf-focusable data-kind="job">
+				<div class="mes-row-status">
+					<span class="indicator-pill no-indicator-dot {{ jc.status_colour }}">{{ __(jc.status) }}</span>
+					{% if (jc.is_subcontracted) { %}<span class="indicator-pill no-indicator-dot purple">{{ __("Sub") }}</span>{% } %}
+				</div>
+				<div class="mes-row-item">
+					<div class="mes-row-image">
+						{% if (jc.item_image) { %}<img src="{{ jc.item_image }}" alt="">{% } else { %}<span class="mes-row-image-fallback">{{ frappe.get_abbr(jc.finished_good || jc.production_item, 2) }}</span>{% } %}
+					</div>
+					<div class="mes-row-title">{{ jc.finished_good || jc.production_item }}</div>
+				</div>
+				<div class="mes-row-operation">{{ jc.operation }}</div>
+				<div class="mes-row-id"><a href="/app/job-card/{{ jc.name }}">{{ jc.name }}</a></div>
+				<div class="mes-row-qty">
+					{{ format_number(jc.for_quantity, null, 0) }}
+					<span class="mes-row-qty-uom">{{ jc.fg_uom || '' }}</span>
+				</div>
+				<div class="mes-row-info {{ jc._materials_ready ? 'mes-row-info--ready' : 'mes-row-info--warn' }}">
+					{{ jc._materials_ready ? __("Materials Ready") : __("Awaiting Transfer") }}
+				</div>
+				<div class="mes-row-action">
+					{% if (jc._materials_ready) { %}
+						<button class="btn btn-default btn-sm mes-btn-start" data-job-card="{{ jc.name }}">
+							{{ __("Start") }}
+						</button>
+					{% } else { %}
+						<button class="btn btn-default btn-sm mes-btn-transfer" data-job-card="{{ jc.name }}">
+							{{ __("Transfer") }}
+						</button>
+					{% } %}
+				</div>
+			</div>
+		{% }); %}
+		</div>
+</div>
+{% } %}
+
+<!-- Completed Operations — submitted job cards for this work order, in operation sequence -->
+{% if (completed && completed.length > 0) { %}
+	<div class="mes-list-card">
+		<div class="mes-list-card-header">
+			<div>
+				<div class="mes-list-card-title">{{ __("Completed Operations") }}</div>
+				<div class="mes-list-card-subtitle">
+					{{ completed.length === 1 ? __("1 completed job card") : __("{0} completed job cards", [completed.length]) }}
+				</div>
+			</div>
+		</div>
+		<div class="mes-list-card-body">
+		{% completed.forEach((jc) => { %}
+			<div class="mes-row" data-sf-focusable data-kind="job">
+				<div class="mes-row-status">
+					<span class="indicator-pill no-indicator-dot {{ jc.status_colour }}">{{ __(jc.status) }}</span>
+					{% if (jc.is_subcontracted) { %}<span class="indicator-pill no-indicator-dot purple">{{ __("Sub") }}</span>{% } %}
+				</div>
+				<div class="mes-row-item">
+					<div class="mes-row-image">
+						{% if (jc.item_image) { %}<img src="{{ jc.item_image }}" alt="">{% } else { %}<span class="mes-row-image-fallback">{{ frappe.get_abbr(jc.finished_good || jc.production_item, 2) }}</span>{% } %}
+					</div>
+					<div class="mes-row-title">{{ jc.finished_good || jc.production_item }}</div>
+				</div>
+				<div class="mes-row-operation">{{ jc.operation }}</div>
+				<div class="mes-row-id"><a href="/app/job-card/{{ jc.name }}">{{ jc.name }}</a></div>
+				<div class="mes-row-qty">
+					{{ format_number(jc.total_completed_qty, null, 0) }} / {{ format_number(jc.for_quantity, null, 0) }}
+					<span class="mes-row-qty-uom">{{ jc.fg_uom || '' }}</span>
+				</div>
+				<div class="mes-row-info"></div>
+				<div class="mes-row-action"></div>
+			</div>
+		{% }); %}
+		</div>
+	</div>
+{% } %}
+
+<!-- Today's Sessions -->
+{% if (today_sessions && today_sessions.length > 0) { %}
+	<div class="mes-list-card">
+		<div class="mes-list-card-header">
+			<div>
+				<div class="mes-list-card-title">{{ __("Today's Sessions") }}</div>
+				<div class="mes-list-card-subtitle">
+					{{ today_sessions.length === 1 ? __("1 submitted today") : __("{0} submitted today", [today_sessions.length]) }}
+				</div>
+			</div>
+		</div>
+		<div class="mes-list-card-body">
+		{% today_sessions.forEach((s) => { %}
+			{% var mins = cint(s.total_time_in_mins); var hh = Math.floor(mins / 60); var mm = mins % 60; var dur = mins ? (hh ? hh + 'h ' : '') + mm + 'm' : '—'; %}
+			<div class="mes-row" data-sf-focusable data-kind="job">
+				<div class="mes-row-status">
+					<span class="indicator-pill no-indicator-dot {{ s.status_colour }}">{{ __(s.status) }}</span>
+				</div>
+				<div class="mes-row-item">
+					<div class="mes-row-image">
+						{% if (s.item_image) { %}<img src="{{ s.item_image }}" alt="">{% } else { %}<span class="mes-row-image-fallback">{{ frappe.get_abbr(s.finished_good || s.production_item, 2) }}</span>{% } %}
+					</div>
+					<div class="mes-row-title">{{ s.finished_good || s.production_item }}</div>
+				</div>
+				<div class="mes-row-operation">{{ s.operation }}</div>
+				<div class="mes-row-id"><a href="/app/job-card/{{ s.name }}">{{ s.name }}</a></div>
+				<div class="mes-row-qty">
+					{{ format_number(s.total_completed_qty, null, 0) }} / {{ format_number(s.for_quantity, null, 0) }}
+					{% if (cint(s.process_loss_qty) > 0) { %}<div class="mes-row-qty-sub">{{ __("Loss") }}: {{ format_number(s.process_loss_qty, null, 0) }}</div>{% } %}
+				</div>
+				<div class="mes-row-info">{{ __("Duration") }}: {{ dur }}</div>
+				<div class="mes-row-action"></div>
+			</div>
+		{% }); %}
+		</div>
+	</div>
+{% } %}

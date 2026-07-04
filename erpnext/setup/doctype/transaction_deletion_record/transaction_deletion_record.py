@@ -318,11 +318,22 @@ class TransactionDeletionRecord(Document):
 		Returns:
 		        list: List of child table DocType names (Table field options)
 		"""
-		return frappe.get_all(
+		child_tables = frappe.get_all(
 			"DocField",
 			filters={"parent": doctype_name, "fieldtype": ["in", ["Table", "Table MultiSelect"]]},
 			pluck="options",
 		)
+
+		if not child_tables:
+			return []
+
+		child_tables = frappe.get_all(
+			"DocType",
+			filters={"name": ["in", child_tables], "is_virtual": 0},
+			pluck="name",
+		)
+
+		return child_tables
 
 	def _get_to_delete_row_infos(self, doctype_name, company_field=None, company=None):
 		"""Get child tables and document count for a To Delete list row
@@ -635,13 +646,15 @@ class TransactionDeletionRecord(Document):
 	def validate_doc_status(self):
 		if self.status != "Running":
 			frappe.throw(
-				_("{0} is not running. Cannot trigger events for this Document").format(
+				_("{0} is not running. Cannot trigger events for this document").format(
 					get_link_to_form("Transaction Deletion Record", self.name)
 				)
 			)
 
 	@frappe.whitelist()
 	def start_deletion_tasks(self):
+		self.check_permission("write")
+
 		# This method is the entry point for the chain of events that follow
 		self.db_set("status", "Running")
 		self._set_deletion_cache()
@@ -667,11 +680,9 @@ class TransactionDeletionRecord(Document):
 				self.enqueue_task(task="Delete Leads and Addresses")
 				return
 
-			frappe.db.sql(
-				"""delete from `tabBin` where warehouse in
-					(select name from tabWarehouse where company=%s)""",
-				self.company,
-			)
+			warehouses = frappe.get_all("Warehouse", filters={"company": self.company}, pluck="name")
+			if warehouses:
+				frappe.db.delete("Bin", {"warehouse": ["in", warehouses]})
 			self.db_set("delete_bin_data_status", "Completed")
 		self.enqueue_task(task="Delete Leads and Addresses")
 
@@ -691,8 +702,6 @@ class TransactionDeletionRecord(Document):
 					"Dynamic Link", filters={"link_name": ("in", leads)}, pluck="parent"
 				)
 				if addresses:
-					addresses = ["%s" % frappe.db.escape(addr) for addr in addresses]
-
 					address = qb.DocType("Address")
 					dl1 = qb.DocType("Dynamic Link")
 					dl2 = qb.DocType("Dynamic Link")

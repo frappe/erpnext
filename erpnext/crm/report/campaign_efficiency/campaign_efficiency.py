@@ -4,7 +4,8 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.query_builder.functions import Sum
+from frappe.utils import add_days, flt
 
 
 def execute(filters=None):
@@ -30,17 +31,15 @@ def get_columns(based_on):
 
 def get_lead_data(filters, based_on):
 	based_on_field = frappe.scrub(based_on)
-	conditions = get_filter_conditions(filters)
 
-	lead_details = frappe.db.sql(
-		f"""
-		select {based_on_field}, name
-		from `tabLead`
-		where {based_on_field} is not null and {based_on_field} != '' {conditions}
-	""",
-		filters,
-		as_dict=1,
-	)
+	lead_filters = [[based_on_field, "is", "set"]]
+	if filters.from_date:
+		lead_filters.append(["creation", ">=", filters.from_date])
+	if filters.to_date:
+		# date(creation) <= to_date, i.e. anything created before the next day
+		lead_filters.append(["creation", "<", add_days(filters.to_date, 1)])
+
+	lead_details = frappe.get_all("Lead", filters=lead_filters, fields=[based_on_field, "name"])
 
 	lead_map = frappe._dict()
 	for d in lead_details:
@@ -64,52 +63,36 @@ def get_lead_data(filters, based_on):
 	return data
 
 
-def get_filter_conditions(filters):
-	conditions = ""
-	if filters.from_date:
-		conditions += " and date(creation) >= %(from_date)s"
-	if filters.to_date:
-		conditions += " and date(creation) <= %(to_date)s"
-
-	return conditions
-
-
 def get_lead_quotation_count(leads):
-	return frappe.db.sql(
-		"""select count(name) from `tabQuotation`
-		where quotation_to = 'Lead' and party_name in (%s)"""
-		% ", ".join(["%s"] * len(leads)),
-		tuple(leads),
-	)[0][0]  # nosec
+	return frappe.db.count("Quotation", {"quotation_to": "Lead", "party_name": ["in", leads]})
 
 
 def get_lead_opp_count(leads):
-	return frappe.db.sql(
-		"""select count(name) from `tabOpportunity`
-	where opportunity_from = 'Lead' and party_name in (%s)"""
-		% ", ".join(["%s"] * len(leads)),
-		tuple(leads),
-	)[0][0]
+	return frappe.db.count("Opportunity", {"opportunity_from": "Lead", "party_name": ["in", leads]})
 
 
 def get_quotation_ordered_count(leads):
-	return frappe.db.sql(
-		"""select count(name)
-		from `tabQuotation` where status = 'Ordered' and quotation_to = 'Lead'
-		and party_name in (%s)"""
-		% ", ".join(["%s"] * len(leads)),
-		tuple(leads),
-	)[0][0]
+	return frappe.db.count(
+		"Quotation", {"status": "Ordered", "quotation_to": "Lead", "party_name": ["in", leads]}
+	)
 
 
 def get_order_amount(leads):
-	return frappe.db.sql(
-		"""select sum(base_net_amount)
-		from `tabSales Order Item`
-		where prevdoc_docname in (
-			select name from `tabQuotation` where status = 'Ordered'
-			and quotation_to = 'Lead' and party_name in (%s)
-		)"""
-		% ", ".join(["%s"] * len(leads)),
-		tuple(leads),
+	so_item = frappe.qb.DocType("Sales Order Item")
+	quotation = frappe.qb.DocType("Quotation")
+	return (
+		frappe.qb.from_(so_item)
+		.select(Sum(so_item.base_net_amount))
+		.where(
+			so_item.prevdoc_docname.isin(
+				frappe.qb.from_(quotation)
+				.select(quotation.name)
+				.where(
+					(quotation.status == "Ordered")
+					& (quotation.quotation_to == "Lead")
+					& quotation.party_name.isin(leads)
+				)
+			)
+		)
+		.run()
 	)[0][0]

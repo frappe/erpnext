@@ -3,13 +3,14 @@
 
 
 import frappe
-from frappe import _, qb, throw
+from frappe import _, throw
 from frappe.model.document import Document
-from frappe.query_builder.functions import Sum
 from frappe.utils import cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate
 
 import erpnext
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
+from erpnext.accounts.doctype.purchase_invoice.services.billing_status import BillingStatusService
+from erpnext.accounts.doctype.purchase_invoice.services.expense_account import ExpenseAccountService
 from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import (
 	validate_docs_for_deferred_accounting,
 	validate_docs_for_voucher_types,
@@ -30,14 +31,14 @@ from erpnext.accounts.general_ledger import (
 	merge_similar_entries,
 )
 from erpnext.accounts.party import get_due_date, get_party_account
-from erpnext.accounts.utils import get_account_currency, get_fiscal_year, update_voucher_outstanding
-from erpnext.assets.doctype.asset.asset import is_cwip_accounting_enabled
-from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
-from erpnext.controllers.accounts_controller import validate_account_head
-from erpnext.controllers.buying_controller import BuyingController
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
-	update_billed_amount_based_on_po,
+from erpnext.accounts.utils import (
+	get_account_currency,
+	get_fiscal_year,
+	refresh_subscription_status,
+	update_voucher_outstanding,
 )
+from erpnext.assets.doctype.asset.asset import is_cwip_accounting_enabled
+from erpnext.controllers.buying_controller import BuyingController
 
 
 class WarehouseMissingError(frappe.ValidationError):
@@ -284,9 +285,10 @@ class PurchaseInvoice(BuyingController):
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
-		self.set_expense_account(for_validate=True)
-		self.validate_expense_account()
-		self.set_against_expense_account()
+		expense_account_service = ExpenseAccountService(self)
+		expense_account_service.set_expense_account(for_validate=True)
+		expense_account_service.validate_expense_account()
+		expense_account_service.set_against_expense_account()
 		self.validate_write_off_account()
 		self.validate_write_off_cost_center()
 
@@ -446,166 +448,10 @@ class PurchaseInvoice(BuyingController):
 				frappe.msgprint(_("Item Code required at Row No {0}").format(d.idx), raise_exception=True)
 
 	def set_expense_account(self, for_validate=False):
-		auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
-
-		if auto_accounting_for_stock:
-			stock_not_billed_account = self.get_company_default("stock_received_but_not_billed")
-			stock_items = self.get_stock_items()
-
-		self.asset_received_but_not_billed = None
-
-		inventory_account_map = {}
-		if self.update_stock:
-			self.validate_item_code()
-			self.validate_warehouse(for_validate)
-			if auto_accounting_for_stock:
-				inventory_account_map = self.get_inventory_account_map()
-
-		for item in self.get("items"):
-			# in case of auto inventory accounting,
-			# expense account is always "Stock Received But Not Billed" for a stock item
-			# except opening entry, drop-ship entry and fixed asset items
-			if (
-				auto_accounting_for_stock
-				and item.item_code in stock_items
-				and self.is_opening == "No"
-				and not item.is_fixed_asset
-				and (
-					not item.po_detail
-					or not frappe.db.get_value("Purchase Order Item", item.po_detail, "delivered_by_supplier")
-				)
-			):
-				if self.update_stock and item.warehouse and (not item.from_warehouse):
-					_inv_dict = self.get_inventory_account_dict(item, inventory_account_map)
-
-					if for_validate and item.expense_account and item.expense_account != _inv_dict["account"]:
-						msg = _(
-							"Row {0}: Expense Head changed to {1} because account {2} is not linked to warehouse {3} or it is not the default inventory account"
-						).format(
-							item.idx,
-							frappe.bold(_inv_dict["account"]),
-							frappe.bold(item.expense_account),
-							frappe.bold(item.warehouse),
-						)
-						frappe.msgprint(msg, title=_("Expense Head Changed"))
-					item.expense_account = _inv_dict["account"]
-				else:
-					# check if 'Stock Received But Not Billed' account is credited in Purchase receipt or not
-					if item.purchase_receipt:
-						negative_expense_booked_in_pr = frappe.db.sql(
-							"""select name from `tabGL Entry`
-							where voucher_type='Purchase Receipt' and voucher_no=%s and account = %s""",
-							(item.purchase_receipt, stock_not_billed_account),
-						)
-
-						if negative_expense_booked_in_pr:
-							if (
-								for_validate
-								and item.expense_account
-								and item.expense_account != stock_not_billed_account
-							):
-								msg = _(
-									"Row {0}: Expense Head changed to {1} because expense is booked against this account in Purchase Receipt {2}"
-								).format(
-									item.idx,
-									frappe.bold(stock_not_billed_account),
-									frappe.bold(item.purchase_receipt),
-								)
-								frappe.msgprint(msg, title=_("Expense Head Changed"))
-
-							item.expense_account = stock_not_billed_account
-					else:
-						# If no purchase receipt present then book expense in 'Stock Received But Not Billed'
-						# This is done in cases when Purchase Invoice is created before Purchase Receipt
-						if (
-							for_validate
-							and item.expense_account
-							and item.expense_account != stock_not_billed_account
-						):
-							msg = _(
-								"Row {0}: Expense Head changed to {1} as no Purchase Receipt is created against Item {2}."
-							).format(
-								item.idx, frappe.bold(stock_not_billed_account), frappe.bold(item.item_code)
-							)
-							msg += "<br>"
-							msg += _(
-								"This is done to handle accounting for cases when Purchase Receipt is created after Purchase Invoice"
-							)
-							frappe.msgprint(msg, title=_("Expense Head Changed"))
-
-						item.expense_account = stock_not_billed_account
-			elif item.is_fixed_asset:
-				account = None
-				if not item.pr_detail and item.po_detail:
-					receipt_item = frappe.get_cached_value(
-						"Purchase Receipt Item",
-						{
-							"purchase_order": item.purchase_order,
-							"purchase_order_item": item.po_detail,
-							"docstatus": 1,
-						},
-						["name", "parent"],
-						as_dict=1,
-					)
-					if receipt_item:
-						item.pr_detail = receipt_item.name
-						item.purchase_receipt = receipt_item.parent
-
-				if item.pr_detail:
-					if not self.asset_received_but_not_billed:
-						self.asset_received_but_not_billed = self.get_company_default(
-							"asset_received_but_not_billed"
-						)
-
-					# check if 'Asset Received But Not Billed' account is credited in Purchase receipt or not
-					arbnb_booked_in_pr = frappe.db.get_value(
-						"GL Entry",
-						{
-							"voucher_type": "Purchase Receipt",
-							"voucher_no": item.purchase_receipt,
-							"account": self.asset_received_but_not_billed,
-						},
-						"name",
-					)
-					if arbnb_booked_in_pr:
-						account = self.asset_received_but_not_billed
-
-				if not account:
-					account_type = (
-						"capital_work_in_progress_account"
-						if is_cwip_accounting_enabled(item.asset_category)
-						else "fixed_asset_account"
-					)
-					account = get_asset_category_account(
-						account_type, item=item.item_code, company=self.company
-					)
-					if not account:
-						form_link = get_link_to_form("Asset Category", item.asset_category)
-						throw(
-							_("Please set Fixed Asset Account in {} against {}.").format(
-								form_link, self.company
-							),
-							title=_("Missing Account"),
-						)
-				item.expense_account = account
-			elif not item.expense_account and for_validate:
-				throw(_("Expense account is mandatory for item {0}").format(item.item_code or item.item_name))
-
-	def validate_expense_account(self):
-		for item in self.get("items"):
-			validate_account_head(item.idx, item.expense_account, self.company, _("Expense"))
-
-	def set_against_expense_account(self, force=False):
-		against_accounts = []
-		for item in self.get("items"):
-			if item.expense_account and (item.expense_account not in against_accounts):
-				against_accounts.append(item.expense_account)
-
-		self.against_expense_account = ",".join(against_accounts)
+		ExpenseAccountService(self).set_expense_account(for_validate)
 
 	def force_set_against_expense_account(self):
-		self.set_against_expense_account()
-		frappe.db.set_value(self.doctype, self.name, "against_expense_account", self.against_expense_account)
+		ExpenseAccountService(self).force_set_against_expense_account()
 
 	def po_required(self):
 		if (
@@ -617,7 +463,7 @@ class PurchaseInvoice(BuyingController):
 		):
 			for d in self.get("items"):
 				if not d.purchase_order:
-					msg = _("Purchase Order Required for item {}").format(frappe.bold(d.item_code))
+					msg = _("Purchase Order Required for item {0}").format(frappe.bold(d.item_code))
 					msg += "<br><br>"
 					msg += _(
 						"To submit the invoice without purchase order please set {0} as {1} in {2}"
@@ -639,7 +485,7 @@ class PurchaseInvoice(BuyingController):
 
 			for d in self.get("items"):
 				if not d.purchase_receipt and d.item_code in stock_and_asset_items:
-					msg = _("Purchase Receipt Required for item {}").format(frappe.bold(d.item_code))
+					msg = _("Purchase Receipt Required for item {0}").format(frappe.bold(d.item_code))
 					msg += "<br><br>"
 					msg += _(
 						"To submit the invoice without purchase receipt please set {0} as {1} in {2}"
@@ -678,16 +524,11 @@ class PurchaseInvoice(BuyingController):
 	def check_prev_docstatus(self):
 		for d in self.get("items"):
 			if d.purchase_order:
-				submitted = frappe.db.sql(
-					"select name from `tabPurchase Order` where docstatus = 1 and name = %s", d.purchase_order
-				)
+				submitted = frappe.db.exists("Purchase Order", {"docstatus": 1, "name": d.purchase_order})
 				if not submitted:
 					frappe.throw(_("Purchase Order {0} is not submitted").format(d.purchase_order))
 			if d.purchase_receipt:
-				submitted = frappe.db.sql(
-					"select name from `tabPurchase Receipt` where docstatus = 1 and name = %s",
-					d.purchase_receipt,
-				)
+				submitted = frappe.db.exists("Purchase Receipt", {"docstatus": 1, "name": d.purchase_receipt})
 				if not submitted:
 					frappe.throw(_("Purchase Receipt {0} is not submitted").format(d.purchase_receipt))
 
@@ -756,7 +597,7 @@ class PurchaseInvoice(BuyingController):
 	def validate_for_repost(self):
 		self.validate_write_off_account()
 		self.validate_write_off_cost_center()
-		self.validate_expense_account()
+		ExpenseAccountService(self).validate_expense_account()
 		validate_docs_for_voucher_types(["Purchase Invoice"])
 		validate_docs_for_deferred_accounting([], [self.name])
 
@@ -785,7 +626,7 @@ class PurchaseInvoice(BuyingController):
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Receipt")
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
 
-		self.update_billing_status_in_pr()
+		BillingStatusService(self).update_billing_status_in_pr()
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
@@ -807,6 +648,9 @@ class PurchaseInvoice(BuyingController):
 
 		self.process_common_party_accounting()
 
+		if self.is_return:
+			self.refresh_subscription_status()
+
 	def on_update_after_submit(self):
 		fields_to_check = [
 			"cash_bank_account",
@@ -819,6 +663,10 @@ class PurchaseInvoice(BuyingController):
 		if self.needs_repost:
 			self.validate_for_repost()
 			self.repost_accounting_entries()
+
+	def refresh_subscription_status(self):
+		if self.get("subscription"):
+			refresh_subscription_status(self.subscription)
 
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		update_outstanding = "No" if (cint(self.is_paid) or self.write_off_account) else "Yes"
@@ -836,31 +684,9 @@ class PurchaseInvoice(BuyingController):
 				self.make_exchange_gain_loss_journal()
 		elif self.docstatus == 2:
 			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
-			self.cancel_provisional_entries()
+			BillingStatusService(self).cancel_provisional_entries()
 
 		self.update_supplier_outstanding(update_outstanding)
-
-	def cancel_provisional_entries(self):
-		rows = set()
-		purchase_receipts = set()
-		for d in self.items:
-			if d.purchase_receipt:
-				purchase_receipts.add(d.purchase_receipt)
-				rows.add(d.name)
-
-		if rows:
-			# cancel gl entries
-			gle = qb.DocType("GL Entry")
-			gle_update_query = (
-				qb.update(gle)
-				.set(gle.is_cancelled, 1)
-				.where(
-					(gle.voucher_type == "Purchase Receipt")
-					& (gle.voucher_no.isin(purchase_receipts))
-					& (gle.voucher_detail_no.isin(rows))
-				)
-			)
-			gle_update_query.run()
 
 	def update_supplier_outstanding(self, update_outstanding):
 		if update_outstanding == "No":
@@ -911,7 +737,7 @@ class PurchaseInvoice(BuyingController):
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Receipt")
 			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
 
-		self.update_billing_status_in_pr()
+		BillingStatusService(self).update_billing_status_in_pr()
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
@@ -944,6 +770,8 @@ class PurchaseInvoice(BuyingController):
 			"Tax Withholding Entry",
 		)
 
+		self.refresh_subscription_status()
+
 	def update_project(self):
 		projects = frappe._dict()
 		for d in self.items:
@@ -968,86 +796,26 @@ class PurchaseInvoice(BuyingController):
 			if cint(frappe.get_single_value("Accounts Settings", "check_supplier_invoice_uniqueness")):
 				fiscal_year = get_fiscal_year(self.posting_date, company=self.company, as_dict=True)
 
-				pi = frappe.db.sql(
-					"""select name from `tabPurchase Invoice`
-					where
-						bill_no = %(bill_no)s
-						and supplier = %(supplier)s
-						and name != %(name)s
-						and docstatus < 2
-						and posting_date between %(year_start_date)s and %(year_end_date)s""",
-					{
+				pi = frappe.get_all(
+					"Purchase Invoice",
+					filters={
 						"bill_no": self.bill_no,
 						"supplier": self.supplier,
-						"name": self.name,
-						"year_start_date": fiscal_year.year_start_date,
-						"year_end_date": fiscal_year.year_end_date,
+						"name": ["!=", self.name],
+						"docstatus": ["<", 2],
+						"posting_date": ["between", [fiscal_year.year_start_date, fiscal_year.year_end_date]],
 					},
+					pluck="name",
 				)
 
 				if pi:
-					pi = pi[0][0]
+					pi = pi[0]
 
 					frappe.throw(
 						_("Supplier Invoice No exists in Purchase Invoice {0}").format(
 							get_link_to_form("Purchase Invoice", pi)
 						)
 					)
-
-	def update_billing_status_in_pr(self, update_modified=True):
-		if self.is_return and not self.update_billed_amount_in_purchase_receipt:
-			return
-
-		updated_pr = []
-		po_details = []
-
-		pr_details_billed_amt = self.get_pr_details_billed_amt()
-
-		for d in self.get("items"):
-			if d.pr_detail:
-				frappe.db.set_value(
-					"Purchase Receipt Item",
-					d.pr_detail,
-					"billed_amt",
-					flt(pr_details_billed_amt.get(d.pr_detail)),
-					update_modified=update_modified,
-				)
-				updated_pr.append(d.purchase_receipt)
-			elif d.po_detail:
-				po_details.append(d.po_detail)
-
-		if po_details:
-			updated_pr += update_billed_amount_based_on_po(po_details, update_modified)
-
-		adjust_incoming_rate = frappe.db.get_single_value(
-			"Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate"
-		)
-
-		for pr in set(updated_pr):
-			from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billing_percentage
-
-			pr_doc = frappe.get_lazy_doc("Purchase Receipt", pr)
-			update_billing_percentage(
-				pr_doc, update_modified=update_modified, adjust_incoming_rate=adjust_incoming_rate
-			)
-
-	def get_pr_details_billed_amt(self):
-		# Get billed amount based on purchase receipt item reference (pr_detail) in purchase invoice
-
-		pr_details_billed_amt = {}
-		pr_details = [d.get("pr_detail") for d in self.get("items") if d.get("pr_detail")]
-		if pr_details:
-			doctype = frappe.qb.DocType("Purchase Invoice Item")
-			query = (
-				frappe.qb.from_(doctype)
-				.select(doctype.pr_detail, Sum(doctype.amount))
-				.where(doctype.pr_detail.isin(pr_details) & doctype.docstatus == 1)
-				.groupby(doctype.pr_detail)
-			)
-
-			pr_details_billed_amt = frappe._dict(query.run(as_list=1))
-
-		return pr_details_billed_amt
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.due_date = None
@@ -1161,9 +929,9 @@ def make_regional_gl_entries(gl_entries, doc):
 
 @frappe.whitelist()
 def change_release_date(name: str, release_date: str | None = None):
-	if frappe.db.exists("Purchase Invoice", name):
-		pi = frappe.get_lazy_doc("Purchase Invoice", name)
-		pi.db_set("release_date", release_date)
+	pi = frappe.get_lazy_doc("Purchase Invoice", name)
+	pi.check_permission()
+	pi.db_set("release_date", release_date)
 
 
 @frappe.whitelist()

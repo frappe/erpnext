@@ -15,11 +15,11 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestExchangeRateRevaluation(ERPNextTestSuite, AccountsTestMixin):
 	def setUp(self):
-		self.create_company()
-		self.create_usd_receivable_account()
-		self.create_item()
-		self.create_customer()
-		self.clear_old_entries()
+		self.company = "_Test Company"
+		self.item = "_Test Item"
+		self.customer = "_Test Customer"
+		self.cost_center = "Main - _TC"
+		self.debtors_usd = "_Test Receivable USD - _TC"
 		self.set_system_and_company_settings()
 
 	def set_system_and_company_settings(self):

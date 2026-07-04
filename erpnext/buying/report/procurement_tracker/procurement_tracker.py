@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Max
 from frappe.utils import flt
 
 
@@ -282,29 +283,33 @@ def get_po_entries(filters):
 		frappe.qb.from_(parent)
 		.from_(child)
 		.select(
-			child.name,
-			child.parent,
-			child.cost_center,
-			child.project,
-			child.warehouse,
-			child.material_request,
+			Max(child.name).as_("name"),
+			Max(child.parent).as_("parent"),
+			Max(child.cost_center).as_("cost_center"),
+			Max(child.project).as_("project"),
+			Max(child.warehouse).as_("warehouse"),
+			Max(child.material_request).as_("material_request"),
 			child.material_request_item,
-			child.item_code,
-			child.stock_uom,
-			child.qty,
-			child.amount,
-			child.base_amount,
-			child.schedule_date,
-			parent.transaction_date,
-			parent.supplier,
-			parent.status,
-			parent.owner,
+			Max(child.item_code).as_("item_code"),
+			Max(child.stock_uom).as_("stock_uom"),
+			Max(child.qty).as_("qty"),
+			Max(child.amount).as_("amount"),
+			Max(child.base_amount).as_("base_amount"),
+			Max(child.schedule_date).as_("schedule_date"),
+			Max(parent.transaction_date).as_("transaction_date"),
+			Max(parent.supplier).as_("supplier"),
+			Max(parent.status).as_("status"),
+			Max(parent.owner).as_("owner"),
 		)
 		.where(
 			(parent.docstatus == 1)
 			& (parent.name == child.parent)
 			& (parent.status.notin(("Closed", "Completed", "Cancelled")))
 		)
+		# Group only by the PO and material_request_item (the pre-effort key) and aggregate the rest
+		# with Max(): postgres requires every non-grouped column to be aggregated, and this keeps one
+		# row per (PO, material_request_item) — matching the prior MariaDB row count. Adding the PO
+		# Item PK to the GROUP BY would split a multi-line PO into one row per line.
 		.groupby(parent.name, child.material_request_item)
 	)
 	query = apply_filters_on_query(filters, parent, child, query)

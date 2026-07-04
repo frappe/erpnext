@@ -73,7 +73,10 @@ class PeriodClosingVoucher(AccountsController):
 		if not previous_fiscal_year:
 			return
 
-		previous_fiscal_year_start_date = previous_fiscal_year[0][1]
+		# get_fiscal_year() returns a single (name, start_date, end_date) tuple, so the start date
+		# is [1]; the old [0][1] read the 2nd char of the name ('T'), which MariaDB silently
+		# coerced to NULL but postgres rejects as an invalid date.
+		previous_fiscal_year_start_date = previous_fiscal_year[1]
 		previous_fiscal_year_closed = frappe.db.exists(
 			"Period Closing Voucher",
 			{
@@ -287,40 +290,43 @@ class PeriodClosingVoucher(AccountsController):
 		self.accounting_dimension_fields = default_dimensions + get_accounting_dimensions()
 
 	def get_gl_entries_for_current_period(self, report_type, only_opening_entries=False, as_iterator=False):
-		date_condition = ""
-		if only_opening_entries:
-			date_condition = "is_opening = 'Yes'"
-		else:
-			date_condition = f"posting_date BETWEEN '{self.period_start_date}' AND '{self.period_end_date}' and is_opening = 'No'"
+		gle = frappe.qb.DocType("GL Entry")
+		account = frappe.qb.DocType("Account")
 
-		# nosemgrep
-		return frappe.db.sql(
-			"""
-			SELECT
-				name,
-				posting_date,
-				account,
-				account_currency,
-				debit_in_account_currency,
-				credit_in_account_currency,
-				debit,
-				credit,
-				{}
-			FROM `tabGL Entry`
-			WHERE
-				{}
-				AND company = %s
-				AND voucher_type != 'Period Closing Voucher'
-				AND EXISTS(SELECT name FROM `tabAccount` WHERE name = account AND report_type = %s)
-				AND is_cancelled = 0
-			""".format(
-				", ".join(self.accounting_dimension_fields),
-				date_condition,
-			),
-			(self.company, report_type),
-			as_dict=1,
-			as_iterator=as_iterator,
+		fields = [
+			gle.name,
+			gle.posting_date,
+			gle.account,
+			gle.account_currency,
+			gle.debit_in_account_currency,
+			gle.credit_in_account_currency,
+			gle.debit,
+			gle.credit,
+		]
+		fields += [gle[dimension] for dimension in self.accounting_dimension_fields]
+
+		query = (
+			frappe.qb.from_(gle)
+			.select(*fields)
+			.where(
+				(gle.company == self.company)
+				& (gle.voucher_type != "Period Closing Voucher")
+				& (gle.is_cancelled == 0)
+				& gle.account.isin(
+					frappe.qb.from_(account).select(account.name).where(account.report_type == report_type)
+				)
+			)
 		)
+
+		if only_opening_entries:
+			query = query.where(gle.is_opening == "Yes")
+		else:
+			query = query.where(
+				gle.posting_date.between(self.period_start_date, self.period_end_date)
+				& (gle.is_opening == "No")
+			)
+
+		return query.run(as_dict=1, as_iterator=as_iterator)
 
 	def set_account_balance_dict(self, gle, acc_bal_dict):
 		key = self.get_key(gle)

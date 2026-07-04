@@ -277,19 +277,27 @@ def update_qty(bin_name, args):
 		- flt(bin_details.reserved_qty_for_production_plan)
 	)
 
-	frappe.db.set_value(
-		"Bin",
-		bin_name,
-		{
-			"actual_qty": actual_qty,
-			"ordered_qty": ordered_qty,
-			"reserved_qty": reserved_qty,
-			"indented_qty": indented_qty,
-			"planned_qty": planned_qty,
-			"projected_qty": projected_qty,
-		},
-		update_modified=True,
-	)
+	bin_values = {
+		"actual_qty": actual_qty,
+		"ordered_qty": ordered_qty,
+		"reserved_qty": reserved_qty,
+		"indented_qty": indented_qty,
+		"planned_qty": planned_qty,
+		"projected_qty": projected_qty,
+	}
+
+	# Standard Cost items are not reposted on backdated entries, so the Bin's stock value is not
+	# refreshed by a repost. Keep it in step with the balance at the standard rate.
+	from erpnext.stock.utils import get_valuation_method
+
+	if get_valuation_method(args.get("item_code")) == "Standard Cost":
+		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import get_item_standard_rate
+
+		bin_values["stock_value"] = flt(actual_qty) * flt(
+			get_item_standard_rate(args.get("item_code"), args.get("company"))
+		)
+
+	frappe.db.set_value("Bin", bin_name, bin_values, update_modified=True)
 
 
 def get_actual_qty(item_code, warehouse):

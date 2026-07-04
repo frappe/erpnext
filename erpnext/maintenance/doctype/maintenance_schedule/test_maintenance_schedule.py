@@ -168,6 +168,51 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 		ms.save()
 		self.assertEqual(len(ms.schedules), 2)
 
+	def test_validate_sales_order_duplicate_throws(self):
+		# validate_sales_order joins Maintenance Schedule + its item filtering the PARENT schedule's
+		# docstatus=1; a second schedule against a Sales Order already used by a submitted schedule
+		# must be rejected.
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		so = make_sales_order()
+		first = make_maintenance_schedule(sales_order=so.name)
+		self.assertEqual(first.items[0].sales_order, so.name)
+		first.submit()
+
+		self.assertRaises(frappe.ValidationError, make_maintenance_schedule, sales_order=so.name)
+
+	def test_validate_schedule_date_skips_holiday(self):
+		# validate_schedule_date_for_holiday_list reads the holiday list via the converted
+		# get_all("Holiday", {"parent": <list>}, pluck="holiday_date") and shifts a schedule date
+		# that lands on a holiday back by a day; a non-holiday date is returned unchanged.
+		from frappe.utils import getdate
+
+		from erpnext.setup.doctype.holiday_list.test_holiday_list import make_holiday_list
+
+		holiday = add_days(today(), 5)
+		hl = make_holiday_list(
+			"_Test MS Holidays " + frappe.generate_hash("", 6),
+			from_date=today(),
+			to_date=add_days(today(), 10),
+			holiday_dates=[{"holiday_date": holiday, "description": "Test Holiday"}],
+		)
+
+		ms = make_maintenance_schedule()
+		# a Sales Person with no linked employee routes to the company-default-holiday-list branch
+		sp = frappe.get_doc(
+			{"doctype": "Sales Person", "sales_person_name": "_Test MS SP " + frappe.generate_hash("", 5)}
+		).insert(ignore_permissions=True)
+		frappe.db.set_value("Company", ms.company, "default_holiday_list", hl.name)
+
+		# a date on the holiday is shifted back one day...
+		shifted = ms.validate_schedule_date_for_holiday_list(getdate(holiday), sp.name)
+		self.assertEqual(getdate(shifted), getdate(add_days(holiday, -1)))
+
+		# ...a non-holiday date is returned unchanged
+		non_holiday = add_days(today(), 7)
+		unchanged = ms.validate_schedule_date_for_holiday_list(getdate(non_holiday), sp.name)
+		self.assertEqual(getdate(unchanged), getdate(non_holiday))
+
 
 def make_serial_item_with_serial(self, item_code):
 	serial_item_doc = create_item(item_code, is_stock_item=1)
@@ -202,6 +247,7 @@ def make_maintenance_schedule(**args):
 			"no_of_visits": 4,
 			"serial_no": args.get("serial_no"),
 			"sales_person": "Sales Team",
+			"sales_order": args.get("sales_order"),
 		},
 	)
 	ms.insert(ignore_permissions=True)

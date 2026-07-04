@@ -13,6 +13,7 @@ from erpnext.stock.doctype.pick_list.mapper import (
 	create_delivery,
 	create_delivery_note,
 	create_dn_for_pick_lists,
+	create_stock_entry,
 )
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
@@ -1221,6 +1222,64 @@ class TestPickList(ERPNextTestSuite):
 		pl.reload()
 		self.assertEqual(pl.status, "Cancelled")
 
+	def test_pick_list_partial_transfer_status(self):
+		"""Partial Stock Entries from a Pick List should track transferred_qty and drive the
+		Partially Transferred / Completed status, and allow further transfers for the remainder."""
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		source_warehouse = "_Test Warehouse - _TC"
+		target_warehouse = create_warehouse("_Test Transfer Target Warehouse")
+		make_stock_entry(item=item, to_warehouse=source_warehouse, qty=10)
+
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": "_Test Company",
+				"purpose": "Material Transfer",
+				"pick_manually": 1,
+				"locations": [
+					{
+						"item_code": item,
+						"qty": 10,
+						"stock_qty": 10,
+						"conversion_factor": 1,
+						"warehouse": source_warehouse,
+						"picked_qty": 10,
+					}
+				],
+			}
+		)
+		pick_list.submit()
+		self.assertEqual(pick_list.status, "Open")
+
+		# Transfer 4 of the 10 picked units.
+		se1 = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
+		self.assertEqual(se1.items[0].qty, 10)
+		se1.items[0].qty = 4
+		se1.items[0].t_warehouse = target_warehouse
+		se1.submit()
+
+		pick_list.reload()
+		self.assertEqual(pick_list.locations[0].transferred_qty, 4)
+		self.assertEqual(pick_list.status, "Partially Transferred")
+
+		# The next Stock Entry should only offer the remaining 6 units.
+		se2 = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
+		self.assertEqual(se2.items[0].qty, 6)
+		se2.items[0].t_warehouse = target_warehouse
+		se2.submit()
+
+		pick_list.reload()
+		self.assertEqual(pick_list.locations[0].transferred_qty, 10)
+		self.assertEqual(pick_list.status, "Completed")
+
+		# Cancelling the last entry rolls transferred_qty and status back.
+		se2.cancel()
+		pick_list.reload()
+		self.assertEqual(pick_list.locations[0].transferred_qty, 4)
+		self.assertEqual(pick_list.status, "Partially Transferred")
+
 	def test_pick_list_validation(self):
 		warehouse = "_Test Warehouse - _TC"
 		item = make_item("Test Non Serialized Pick List Item", properties={"is_stock_item": 1}).name
@@ -1964,3 +2023,23 @@ class TestPickList(ERPNextTestSuite):
 				item_codes = [item.item_code for item in doc.items]
 				self.assertIn(item1, item_codes)
 				self.assertIn(item2, item_codes)
+
+	def test_get_pick_list_query_postgres_valid(self):
+		"""get_pick_list_query selects Sales Order.customer (a joined-table column) under
+		GROUP BY Pick List.name. Postgres rejects that bare column (PK functional dependency does
+		not cross tables), so the link query raised GroupingError. customer is pinned to one value
+		by the filter, so adding it to the GROUP BY is identical on MariaDB and valid on Postgres."""
+		from erpnext.stock.doctype.pick_list.pick_list import get_pick_list_query
+
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item().name
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=100, basic_rate=100)
+		so = make_sales_order(item_code=item, qty=5, rate=100)
+		pl = create_pick_list(so.name)
+		pl.submit()
+
+		# must run without raising on either engine (GroupingError on Postgres before the fix)
+		result = get_pick_list_query(
+			"Pick List", "", "name", 0, 20, {"company": so.company, "customer": so.customer}
+		)
+		self.assertIn(pl.name, [row["name"] for row in result])

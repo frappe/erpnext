@@ -28,7 +28,6 @@ from erpnext.manufacturing.doctype.bom.bom import (
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.get_item_details import (
-	ItemDetailsCtx,
 	get_barcode_data,
 	get_bin_details,
 	get_conversion_factor,
@@ -37,20 +36,20 @@ from erpnext.stock.get_item_details import (
 from erpnext.stock.stock_ledger import get_previous_sle, get_valuation_rate
 from erpnext.stock.utils import get_incoming_rate
 
-from .stock_entry_handler.disassemble import DisassembleStockEntry
-from .stock_entry_handler.manufacturing import (
+from .services.disassemble import DisassembleStockEntry
+from .services.manufacturing import (
 	ManufactureStockEntry,
 	MaterialConsumptionForManufactureStockEntry,
 	RepackStockEntry,
 )
-from .stock_entry_handler.material_receipt_issue import MaterialIssueStockEntry, MaterialReceiptStockEntry
-from .stock_entry_handler.material_transfer import (
+from .services.material_receipt_issue import MaterialIssueStockEntry, MaterialReceiptStockEntry
+from .services.material_transfer import (
 	MaterialRequestStockEntry,
 	MaterialTransferForManufactureStockEntry,
 	MaterialTransferStockEntry,
 )
-from .stock_entry_handler.serial_batch import StockEntrySABB
-from .stock_entry_handler.subcontracting import SendToSubcontractorStockEntry
+from .services.serial_batch import StockEntrySABB
+from .services.subcontracting import SendToSubcontractorStockEntry
 
 
 class FinishedGoodError(frappe.ValidationError):
@@ -165,6 +164,15 @@ class StockEntry(StockController, SubcontractingInwardController):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self._configure_purpose_class()
+		self.status_updater = [
+			{
+				"source_dt": "Stock Entry Detail",
+				"target_dt": "Pick List Item",
+				"join_field": "pick_list_item",
+				"target_field": "transferred_qty",
+				"source_field": "transfer_qty",
+			}
+		]
 
 		if self.subcontracting_inward_order:
 			self.subcontract_data = frappe._dict(
@@ -293,6 +301,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 			else:
 				self.validate_job_card_fg_item()
 
+		# Disassembly rows are fully derived from the source manufacture entry / work order;
+		# verify the posted stock quantities have not been tampered with (raw-material minting).
+		# Must run after set_transfer_qty() so row.transfer_qty reflects qty * conversion_factor.
+		if self.purpose == "Disassemble" and self.purpose_cls:
+			self.purpose_cls(self).validate_disassembly_quantities()
+
 		self.validate_batch()
 		self.validate_inspection()
 		self.validate_fg_completed_qty()
@@ -321,6 +335,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.make_bundle_using_old_serial_batch_fields()
 		self.adjust_stock_reservation_entries_for_return()
 		self.update_stock_reservation_entries()
+		# Release the Work Order's own reservation for items being sent to the subcontractor
+		# before the negative-stock guard runs in update_stock_ledger().
+		self.update_wo_reservation_for_subcontracting()
 		self.update_stock_ledger()
 		self.make_stock_reserve_for_wip_and_fg()
 		self.reserve_stock_for_subcontracting()
@@ -341,6 +358,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.delink_asset_repair_sabb()
 		self.validate_closed_subcontracting_order()
 		self.update_subcontracting_order_status()
+		self.update_pick_list_status()
 		self.cancel_stock_reserve_for_wip_and_fg()
 
 		if self.work_order and self.purpose == "Material Consumption for Manufacture":
@@ -362,6 +380,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.update_quality_inspection()
 		self.adjust_stock_reservation_entries_for_return()
 		self.update_stock_reservation_entries()
+		# Recompute (now excludes this cancelled entry) so the freed reservation is restored.
+		self.update_wo_reservation_for_subcontracting()
 		self.delete_auto_created_batches()
 		self.delete_linked_stock_entry()
 		super().on_cancel_subcontracting_inward()
@@ -393,12 +413,11 @@ class StockEntry(StockController, SubcontractingInwardController):
 			if row.job_card_item or not row.s_warehouse:
 				continue
 
-			msg = f"""Row #{row.idx}: The job card item reference
-				is missing. Kindly create the stock entry
-				from the job card. If you have added the row manually
-				then you won't be able to add job card item reference."""
-
-			frappe.throw(_(msg))
+			frappe.throw(
+				_(
+					"Row #{0}: The job card item reference is missing. Kindly create the stock entry from the job card. If you have added the row manually then you won't be able to add job card item reference."
+				).format(row.idx)
+			)
 
 	def validate_work_order_status(self):
 		pro_doc = frappe.get_doc("Work Order", self.work_order)
@@ -439,7 +458,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		for project in projects:
 			project_doc = frappe.get_doc("Project", project)
 			project_doc.set_consumed_material_cost()
-			project_doc.save()
+			project_doc.save(ignore_permissions=True)
 
 	def validate_item(self):
 		for item in self.get("items"):
@@ -543,6 +562,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 		for d in self.get("items"):
 			if d.s_warehouse or d.set_basic_rate_manually:
 				continue
+
+			# Zero-qty secondary items carry no inventory value; skip rate calculation
+			if d.secondary_item_type and flt(d.transfer_qty) == 0:
+				d.basic_rate = 0.0
+				d.basic_amount = 0.0
+				continue
+
 			self._set_incoming_item_rate(d, outgoing_items_cost, raise_error_if_no_rate, zero_valuation_items)
 
 		if zero_valuation_items:
@@ -564,7 +590,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 			cost_allocation_per = frappe.get_value(
 				"BOM Secondary Item", d.bom_secondary_item, "cost_allocation_per"
 			)
-			d.basic_rate = (outgoing_items_cost * (cost_allocation_per / 100)) / d.transfer_qty
+			# Only recalculate when cost is actually allocated; otherwise preserve the
+			# user-entered rate (or fall through to get_valuation_rate below)
+			if cost_allocation_per and flt(d.transfer_qty):
+				d.basic_rate = (outgoing_items_cost * (cost_allocation_per / 100)) / d.transfer_qty
 
 		if not d.basic_rate and not d.allow_zero_valuation_rate:
 			d.basic_rate = get_valuation_rate(
@@ -864,7 +893,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		if not finished_items:
 			frappe.throw(
-				msg=_("There must be atleast 1 Finished Good in this Stock Entry").format(self.name),
+				msg=_("There must be at least 1 Finished Good in this Stock Entry").format(self.name),
 				title=_("Missing Finished Good"),
 				exc=FinishedGoodError,
 			)
@@ -887,7 +916,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			# No work order could mean independent Manufacture entry, if so skip validation
 			if self.work_order and self.fg_completed_qty > allowed_qty:
 				frappe.throw(
-					_("For quantity {0} should not be greater than allowed quantity {1}").format(
+					_("Quantity {0} should not be greater than allowed quantity {1}").format(
 						flt(self.fg_completed_qty), allowed_qty
 					)
 				)
@@ -1050,8 +1079,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 		return getattr(self, "_wo_doc", None)
 
 	def make_stock_reserve_for_wip_and_fg(self):
-		from erpnext.manufacturing.doctype.work_order.services.stock_reservation import (
-			StockReservationService,
+		from erpnext.manufacturing.doctype.work_order.services.reservation import (
+			WorkOrderStockReservation,
 		)
 
 		if self.is_stock_reserve_for_work_order():
@@ -1065,7 +1094,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			):
 				return
 
-			StockReservationService(pro_doc).set_reserved_qty_for_wip_and_fg(self)
+			WorkOrderStockReservation(pro_doc).set_reserved_qty_for_wip_and_fg(self)
 
 	def reserve_stock_for_subcontracting(self):
 		if self.purpose == "Send to Subcontractor" and frappe.get_value(
@@ -1092,8 +1121,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 			)
 
 	def cancel_stock_reserve_for_wip_and_fg(self):
-		from erpnext.manufacturing.doctype.work_order.services.stock_reservation import (
-			StockReservationService,
+		from erpnext.manufacturing.doctype.work_order.services.reservation import (
+			WorkOrderStockReservation,
 		)
 
 		if self.is_stock_reserve_for_work_order():
@@ -1105,7 +1134,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			):
 				return
 
-			StockReservationService(pro_doc).cancel_reserved_qty_for_wip_and_fg(self)
+			WorkOrderStockReservation(pro_doc).cancel_reserved_qty_for_wip_and_fg(self)
 
 	def is_stock_reserve_for_work_order(self):
 		if (
@@ -1117,8 +1146,59 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		return False
 
+	def update_wo_reservation_for_subcontracting(self):
+		# A "Send to Subcontractor" entry never keeps its `work_order` (validate clears it for this
+		# purpose), so the owning Work Order is derived from the Subcontracting Order / Purchase Order
+		# that raised the transfer. Each such Work Order that reserves stock gets its reservation for
+		# the sent items released, so the negative-stock guard stops blocking the consumption.
+		from erpnext.manufacturing.doctype.work_order.services.reservation import (
+			WorkOrderStockReservation,
+		)
+
+		if self.purpose != "Send to Subcontractor":
+			return
+
+		for wo_name in self.get_reserved_work_orders_for_subcontracting():
+			pro_doc = frappe.get_doc("Work Order", wo_name)
+			WorkOrderStockReservation(pro_doc).release_reserved_qty_for_subcontract_transfer()
+
+	def get_reserved_work_orders_for_subcontracting(self):
+		job_cards = set()
+		if self.subcontracting_order:
+			job_cards.update(
+				frappe.get_all(
+					"Subcontracting Order Item",
+					filters={"parent": self.subcontracting_order},
+					pluck="job_card",
+				)
+			)
+		if self.purchase_order:
+			job_cards.update(
+				frappe.get_all(
+					"Purchase Order Item", filters={"parent": self.purchase_order}, pluck="job_card"
+				)
+			)
+
+		job_cards = {jc for jc in job_cards if jc}
+		if not job_cards:
+			return []
+
+		work_orders = frappe.get_all(
+			"Job Card", filters={"name": ["in", list(job_cards)]}, pluck="work_order"
+		)
+
+		reserved_work_orders = []
+		for work_order in set(work_orders):
+			if not work_order:
+				continue
+
+			if frappe.get_cached_value("Work Order", work_order, "reserve_stock"):
+				reserved_work_orders.append(work_order)
+
+		return reserved_work_orders
+
 	@frappe.whitelist()
-	def get_item_details(self, args: ItemDetailsCtx | None = None, for_update: bool = False):
+	def get_item_details(self, args: frappe._dict | None = None, for_update: bool = False):
 		item = self._fetch_item_data(args)
 		item_group_defaults = get_item_group_defaults(item.name, self.company)
 		brand_defaults = get_brand_defaults(item.name, self.company)
@@ -1301,7 +1381,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 					self.process_loss_qty = flt(process_loss_qty, precision)
 
 					frappe.msgprint(
-						_("The Process Loss Qty has reset as per job cards Process Loss Qty"), alert=True
+						_("The Process Loss Qty has been reset as per the job card's Process Loss Qty"),
+						alert=True,
 					)
 
 		if not self.process_loss_percentage and not self.process_loss_qty:
@@ -1403,13 +1484,18 @@ class StockEntry(StockController, SubcontractingInwardController):
 	def update_subcontracting_order_status(self):
 		if self.subcontracting_order and self.purpose in ["Send to Subcontractor", "Material Transfer"]:
 			from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
-				update_subcontracting_order_status,
+				set_subcontracting_order_status,
 			)
 
-			update_subcontracting_order_status(self.subcontracting_order)
+			# Trusted submit/cancel flow — a Stock operation must not require Subcontracting Order
+			# write permission, so use the no-check internal helper (not the whitelisted boundary).
+			set_subcontracting_order_status(self.subcontracting_order)
 
 	def update_pick_list_status(self):
 		from erpnext.stock.doctype.pick_list.pick_list import update_pick_list_status
+
+		if self.pick_list:
+			self.update_qty()
 
 		update_pick_list_status(self.pick_list)
 
@@ -1549,29 +1635,42 @@ def get_remaining_operating_cost(work_order=None, bom_no=None):
 def get_used_alternative_items(
 	subcontract_order=None, subcontract_order_field="subcontracting_order", work_order=None
 ):
-	cond = ""
+	ste = frappe.qb.DocType("Stock Entry")
+	sted = frappe.qb.DocType("Stock Entry Detail")
+
+	query = (
+		frappe.qb.from_(ste)
+		.inner_join(sted)
+		.on(sted.parent == ste.name)
+		.select(
+			sted.original_item,
+			sted.uom,
+			sted.conversion_factor,
+			sted.item_code,
+			sted.item_name,
+			sted.stock_uom,
+			sted.description,
+		)
+		.where((ste.docstatus == 1) & (sted.original_item != sted.item_code))
+	)
 
 	if subcontract_order:
-		cond = f"and ste.purpose = 'Send to Subcontractor' and ste.{subcontract_order_field} = '{subcontract_order}'"
+		# subcontract_order_field is interpolated as a column identifier; restrict it to the two known
+		# Stock Entry link fields so an unexpected value can't reference an arbitrary column.
+		if subcontract_order_field not in ("subcontracting_order", "subcontracting_inward_order"):
+			frappe.throw(_("Invalid subcontract order field: {0}").format(subcontract_order_field))
+		query = query.where(
+			(ste.purpose == "Send to Subcontractor") & (ste[subcontract_order_field] == subcontract_order)
+		)
 	elif work_order:
-		cond = f"and ste.purpose = 'Material Transfer for Manufacture' and ste.work_order = '{work_order}'"
-
-	if not cond:
+		query = query.where(
+			(ste.purpose == "Material Transfer for Manufacture") & (ste.work_order == work_order)
+		)
+	else:
 		return {}
 
 	used_alternative_items = {}
-	data = frappe.db.sql(
-		f""" select sted.original_item, sted.uom, sted.conversion_factor,
-			sted.item_code, sted.item_name, sted.conversion_factor,sted.stock_uom, sted.description
-		from
-			`tabStock Entry` ste, `tabStock Entry Detail` sted
-		where
-			sted.parent = ste.name and ste.docstatus = 1 and sted.original_item !=  sted.item_code
-			{cond} """,
-		as_dict=1,
-	)
-
-	for d in data:
+	for d in query.run(as_dict=1):
 		used_alternative_items[d.original_item] = d
 
 	return used_alternative_items
@@ -1596,8 +1695,7 @@ def get_uom_details(item_code: str, uom: str, qty: float | None):
 
 @frappe.whitelist()
 def get_warehouse_details(args: str | dict):
-	if isinstance(args, str):
-		args = json.loads(args)
+	args = frappe.parse_json(args)
 
 	args = frappe._dict(args)
 

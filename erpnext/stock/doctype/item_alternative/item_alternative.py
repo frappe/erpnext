@@ -7,6 +7,7 @@ from typing import Any
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import cint
 
 
 class ItemAlternative(Document):
@@ -32,7 +33,7 @@ class ItemAlternative(Document):
 
 	def has_alternative_item(self):
 		if self.item_code and not frappe.db.get_value("Item", self.item_code, "allow_alternative_item"):
-			frappe.throw(_("Not allow to set alternative item for the item {0}").format(self.item_code))
+			frappe.throw(_("Cannot set alternative item for the item {0}").format(self.item_code))
 
 	def validate_alternative_item(self):
 		if self.item_code == self.alternative_item_code:
@@ -64,7 +65,7 @@ class ItemAlternative(Document):
 					indicator="Orange",
 				)
 
-		alternate_item_check_msg = _("Allow Alternative Item must be checked on Item {}")
+		alternate_item_check_msg = _("Allow Alternative Item must be checked on Item {0}")
 
 		if not item_data.allow_alternative_item:
 			frappe.throw(alternate_item_check_msg.format(self.item_code))
@@ -80,19 +81,30 @@ class ItemAlternative(Document):
 				"name": ("!=", self.name),
 			},
 		):
-			frappe.throw(_("Already record exists for the item {0}").format(self.item_code))
+			frappe.throw(_("Record already exists for the item {0}").format(self.item_code))
 
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_alternative_items(doctype: Any, txt: str, searchfield: Any, start: int, page_len: int, filters: dict):
-	return frappe.db.sql(
-		f""" (select alternative_item_code from `tabItem Alternative`
-			where item_code = %(item_code)s and alternative_item_code like %(txt)s)
-		union
-			(select item_code from `tabItem Alternative`
-			where alternative_item_code = %(item_code)s and item_code like %(txt)s
-			and two_way = 1) limit {page_len} offset {start}
-		""",
-		{"item_code": filters.get("item_code"), "txt": "%" + txt + "%"},
+	item_code = filters.get("item_code")
+	search = f"%{txt}%"
+	# each leg has distinct values (validate_duplicate), so start+page_len rows per leg suffice
+	limit = cint(start) + cint(page_len)
+
+	alternatives = frappe.get_all(
+		"Item Alternative",
+		filters={"item_code": item_code, "alternative_item_code": ["like", search]},
+		pluck="alternative_item_code",
+		limit=limit,
 	)
+	alternatives += frappe.get_all(
+		"Item Alternative",
+		filters={"alternative_item_code": item_code, "item_code": ["like", search], "two_way": 1},
+		pluck="item_code",
+		limit=limit,
+	)
+
+	# union (dedupe, preserve order) + paginate
+	unique_items = list(dict.fromkeys(alternatives))
+	return [[item] for item in unique_items[start : start + page_len]]

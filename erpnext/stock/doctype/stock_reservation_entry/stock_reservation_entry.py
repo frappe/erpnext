@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder import Case
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Max, Min, Sum
 from frappe.utils import cint, flt, nowdate, nowtime, parse_json
 
 from erpnext.stock.utils import get_or_make_bin, get_stock_balance
@@ -138,7 +138,7 @@ class StockReservationEntry(Document):
 
 			frappe.throw(
 				_(
-					"Cannot cancel Stock Reservation Entry {0}, as it has used in the work order {1}. Please cancel the work order first or unreserved the stock"
+					"Cannot cancel Stock Reservation Entry {0}, as it has been used in the work order {1}. Please cancel the work order first or unreserve the stock"
 				).format(
 					", ".join([frappe.bold(entry.name) for entry in entries]),
 					", ".join([frappe.bold(wo.name) for wo in work_orders]),
@@ -261,7 +261,7 @@ class StockReservationEntry(Document):
 		if cint(frappe.db.get_value("UOM", self.stock_uom, "must_be_whole_number", cache=True)):
 			if cint(self.reserved_qty) != flt(self.reserved_qty, self.precision("reserved_qty")):
 				msg = _(
-					"Reserved Qty ({0}) cannot be a fraction. To allow this, disable '{1}' in UOM {3}."
+					"Reserved Qty ({0}) cannot be a fraction. To allow this, disable '{1}' in UOM {2}."
 				).format(
 					flt(self.reserved_qty, self.precision("reserved_qty")),
 					frappe.bold(_("Must be Whole Number")),
@@ -427,7 +427,7 @@ class StockReservationEntry(Document):
 								entry.db_update()
 						else:
 							msg = _(
-								"Row #{0}: Qty should be less than or equal to Available Qty to Reserve (Actual Qty - Reserved Qty) {1} for Iem {2} against Batch {3} in Warehouse {4}."
+								"Row #{0}: Qty should be less than or equal to Available Qty to Reserve (Actual Qty - Reserved Qty) {1} for Item {2} against Batch {3} in Warehouse {4}."
 							).format(
 								entry.idx,
 								frappe.bold(available_qty_to_reserve),
@@ -623,19 +623,19 @@ class StockReservationEntry(Document):
 
 		if qty_to_be_reserved > allowed_qty:
 			actual_qty = get_stock_balance(self.item_code, self.warehouse)
-			msg = """
-				Cannot reserve more than Allowed Qty {} {} for Item {} against {} {}.<br /><br />
-				The <b>Allowed Qty</b> is calculated as follows:<br />
-				<ul>
-					<li>Actual Qty [Available Qty at Warehouse] = {}</li>
-					<li>Reserved Stock [Ignore current SRE] = {}</li>
-					<li>Available Qty To Reserve [Actual Qty - Reserved Stock] = {}</li>
-					<li>Voucher Qty [Voucher Item Qty] = {}</li>
-					<li>Delivered Qty [Qty delivered against the Voucher Item] = {}</li>
-					<li>Total Reserved Qty [Qty reserved against the Voucher Item] = {}</li>
-					<li>Allowed Qty [Minimum of (Available Qty To Reserve, (Voucher Qty - Delivered Qty - Total Reserved Qty))] = {}</li>
-				</ul>
-			""".format(
+			msg = _(
+				"Cannot reserve more than Allowed Qty {0} {1} for Item {2} against {3} {4}.<br /><br />"
+				"The <b>Allowed Qty</b> is calculated as follows:<br />"
+				"<ul>"
+				"<li>Actual Qty [Available Qty at Warehouse] = {5}</li>"
+				"<li>Reserved Stock [Ignore current SRE] = {6}</li>"
+				"<li>Available Qty To Reserve [Actual Qty - Reserved Stock] = {7}</li>"
+				"<li>Voucher Qty [Voucher Item Qty] = {8}</li>"
+				"<li>Delivered Qty [Qty delivered against the Voucher Item] = {9}</li>"
+				"<li>Total Reserved Qty [Qty reserved against the Voucher Item] = {10}</li>"
+				"<li>Allowed Qty [Minimum of (Available Qty To Reserve, (Voucher Qty - Delivered Qty - Total Reserved Qty))] = {11}</li>"
+				"</ul>"
+			).format(
 				frappe.bold(allowed_qty),
 				self.stock_uom,
 				frappe.bold(self.item_code),
@@ -706,20 +706,28 @@ def get_available_qty_to_reserve(
 
 	if available_qty:
 		sre = frappe.qb.DocType("Stock Reservation Entry")
+		conditions = (
+			(sre.docstatus == 1)
+			& (sre.item_code == item_code)
+			& (sre.warehouse == warehouse)
+			& (sre.delivered_qty < sre.reserved_qty)
+		)
+		if ignore_sre:
+			conditions &= sre.name != ignore_sre
+
+		# Lock the rows being aggregated so a concurrent reservation can't change them mid-transaction.
+		# MariaDB carries the lock on the aggregate query itself; postgres rejects FOR UPDATE with an
+		# aggregate, so on postgres lock the same rows in a separate plain SELECT first (held for the txn).
+		if frappe.db.db_type == "postgres":
+			frappe.qb.from_(sre).select(sre.name).where(conditions).for_update().run()
+
 		query = (
 			frappe.qb.from_(sre)
 			.select(Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty))
-			.where(
-				(sre.docstatus == 1)
-				& (sre.item_code == item_code)
-				& (sre.warehouse == warehouse)
-				& (sre.delivered_qty < sre.reserved_qty)
-			)
-			.for_update()
+			.where(conditions)
 		)
-
-		if ignore_sre:
-			query = query.where(sre.name != ignore_sre)
+		if frappe.db.db_type != "postgres":
+			query = query.for_update()
 
 		reserved_qty = query.run()[0][0] or 0.0
 
@@ -870,14 +878,16 @@ def get_sre_reserved_warehouses_for_voucher(
 	query = (
 		frappe.qb.from_(sre)
 		.select(sre.warehouse)
-		.distinct()
 		.where(
 			(sre.docstatus == 1)
 			& (sre.voucher_type == voucher_type)
 			& (sre.voucher_no == voucher_no)
 			& (sre.delivered_qty < sre.reserved_qty)
 		)
-		.orderby(sre.creation)
+		# distinct warehouses, earliest reservation first (postgres can't ORDER BY a
+		# non-selected column under SELECT DISTINCT, so group + Min instead)
+		.groupby(sre.warehouse)
+		.orderby(Min(sre.creation))
 	)
 
 	if voucher_detail_no:
@@ -984,7 +994,8 @@ def get_sre_reserved_batch_nos_details(item_code: str, warehouse: str, batch_nos
 			& (sre.reservation_based_on == "Serial and Batch")
 		)
 		.groupby(sb_entry.batch_no)
-		.orderby(sb_entry.creation)
+		# result is collapsed into a dict below, so ordering is irrelevant; dropping the (non-grouped)
+		# ORDER BY creation keeps the GROUP BY valid on postgres.
 	)
 
 	if batch_nos:
@@ -1526,10 +1537,12 @@ class StockReservation:
 			.inner_join(child_doctype)
 			.on(doctype.name == child_doctype.parent)
 			.select(
-				doctype.name.as_("voucher_no"),
+				# grouped by the child PK (name), so child columns are valid on postgres via functional
+				# dependency; the parent (doctype) columns aren't, so Max() them -- constant per child row.
+				Max(doctype.name).as_("voucher_no"),
 				child_doctype.name.as_("voucher_detail_no"),
 				child_doctype[item_code_fieldname].as_("item_code"),
-				doctype.company,
+				Max(doctype.company).as_("company"),
 				child_doctype.stock_uom,
 			)
 			.where((doctype.docstatus == 1) & (doctype[field].isin(docnames)))
@@ -1539,9 +1552,9 @@ class StockReservation:
 		if to_doctype == "Work Order":
 			query = query.select(
 				child_doctype.source_warehouse,
-				doctype.wip_warehouse,
-				doctype.skip_transfer,
-				doctype.from_wip_warehouse,
+				Max(doctype.wip_warehouse).as_("wip_warehouse"),
+				Max(doctype.skip_transfer).as_("skip_transfer"),
+				Max(doctype.from_wip_warehouse).as_("from_wip_warehouse"),
 				child_doctype.required_qty,
 				(child_doctype.required_qty - child_doctype.transferred_qty).as_("qty"),
 				child_doctype.stock_reserved_qty,
@@ -1587,7 +1600,7 @@ def create_stock_reservation_entries_for_so_items(
 ):
 	"""Creates Stock Reservation Entries for Sales Order Items."""
 
-	from erpnext.selling.doctype.sales_order.sales_order import get_unreserved_qty
+	from erpnext.selling.doctype.sales_order.services.reservation import get_unreserved_qty
 
 	if not from_voucher_type and (
 		sales_order.get("_action") == "submit"

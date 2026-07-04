@@ -87,6 +87,12 @@ class StatusService:
 
 	def update_status(self, status=None):
 		"""Update status of work order if unknown"""
+		if self.doc.docstatus == 1:
+			# Refresh material_transferred_for_manufacturing before deciding status so pick-list-
+			# driven transfers (where this qty is derived from item transfers, not fg_completed_qty)
+			# are reflected immediately, instead of only after the next status update call.
+			self.doc.refresh_material_transferred_for_manufacturing()
+
 		if self.doc.status != "Closed":
 			if status not in ["Stopped", "Closed"]:
 				status = self.get_status(status)
@@ -126,7 +132,9 @@ class StatusService:
 
 		status = (
 			"In Process"
-			if flt(self.doc.material_transferred_for_manufacturing) > 0 or self.doc.skip_transfer
+			if flt(self.doc.material_transferred_for_manufacturing) > 0
+			or self.doc.skip_transfer
+			or self._has_transferred_material()
 			else "Not Started"
 		)
 		precision = frappe.get_precision("Work Order", "produced_qty")
@@ -134,6 +142,26 @@ class StatusService:
 		if flt(total_qty, precision) >= flt(self.doc.qty, precision):
 			status = "Completed"
 		return status
+
+	def _has_transferred_material(self):
+		"""True if any raw material was transferred against this work order via a pick list
+		(these leave material_transferred_for_manufacturing at 0 via the min-fraction rule)."""
+		ste = frappe.qb.DocType("Stock Entry")
+		ste_child = frappe.qb.DocType("Stock Entry Detail")
+		qty = (
+			frappe.qb.from_(ste)
+			.inner_join(ste_child)
+			.on(ste_child.parent == ste.name)
+			.select(Sum(ste_child.transfer_qty))
+			.where(
+				(ste.work_order == self.doc.name)
+				& (ste.docstatus == 1)
+				& (ste.purpose == "Material Transfer for Manufacture")
+				& (ste.is_return == 0)
+				& (ste.pick_list.isnotnull())
+			)
+		).run()[0][0]
+		return flt(qty) > 0
 
 	def _is_partial_skip_transfer(self):
 		return bool(
