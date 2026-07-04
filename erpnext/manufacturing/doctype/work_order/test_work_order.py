@@ -687,7 +687,7 @@ class TestWorkOrder(FrappeTestCase):
 		ste = make_stock_entry(wo_order.name, "Material Transfer for Manufacture", wo_order.qty)
 		self.assertEqual(ste.get("items")[0].get("cost_center"), "_Test Cost Center - _TC")
 
-	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 0})
+	@change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 0})
 	def test_cost_center_for_manufacture_falls_back_to_item_group_default(self):
 		# "_Test Item Group" is master data with buying_cost_center already set to
 		# "_Test Cost Center 2 - _TC" for "_Test Company"; only the FG item and its
