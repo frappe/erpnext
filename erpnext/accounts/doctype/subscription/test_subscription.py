@@ -71,6 +71,23 @@ class TestSubscription(ERPNextTestSuite):
 		self.assertEqual(getdate(subscription.next_billing_period_start), getdate("2018-02-01"))
 		self.assertEqual(getdate(subscription.next_billing_period_end), getdate("2018-02-28"))
 
+	def test_late_posting_date_does_not_skip_next_billing_cycle(self):
+		subscription = create_subscription(
+			start_date=add_months(nowdate(), -1),
+			generate_invoice_at="Postpaid (bill at period end)",
+		)
+		self.assertEqual(len(subscription.invoices), 1)
+
+		invoice = subscription.invoices[-1]
+		frappe.db.set_value(subscription.invoice_document_type, invoice.name, "posting_date", nowdate())
+
+		subscription.reload()
+		self.assertFalse(
+			subscription.is_current_invoice_generated(
+				subscription.next_billing_period_start, subscription.next_billing_period_end
+			)
+		)
+
 	def test_status_goes_back_to_active_after_invoice_is_paid(self):
 		subscription = create_subscription(
 			start_date="2018-01-01", generate_invoice_at="Prepaid (bill at period start)"
