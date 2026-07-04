@@ -687,6 +687,28 @@ class TestWorkOrder(FrappeTestCase):
 		ste = make_stock_entry(wo_order.name, "Material Transfer for Manufacture", wo_order.qty)
 		self.assertEqual(ste.get("items")[0].get("cost_center"), "_Test Cost Center - _TC")
 
+	@change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 0})
+	def test_cost_center_for_manufacture_falls_back_to_item_group_default(self):
+		# "_Test Item Group" is master data with buying_cost_center already set to
+		# "_Test Cost Center 2 - _TC" for "_Test Company"; only the FG item and its
+		# BOM need to be created, since no existing item in that group has one.
+		fg_item = make_item(
+			"_Test FG Item For Item Group Cost Center",
+			{"is_stock_item": 1, "item_group": "_Test Item Group", "include_item_in_manufacturing": 1},
+		)
+
+		if not frappe.db.exists("BOM", {"item": fg_item.name, "is_active": 1, "is_default": 1}):
+			make_bom(item=fg_item.name, raw_materials=["_Test Item"])
+
+		wo_order = make_wo_order_test_record(
+			production_item=fg_item.name, skip_transfer=1, source_warehouse="_Test Warehouse - _TC"
+		)
+		ste = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", wo_order.qty))
+		ste.insert()
+
+		fg_row = next(d for d in ste.items if d.is_finished_item)
+		self.assertEqual(fg_row.cost_center, "_Test Cost Center 2 - _TC")
+
 	def test_operation_time_with_batch_size(self):
 		fg_item = "Test Batch Size Item For BOM"
 		rm1 = "Test Batch Size Item RM 1 For BOM"
