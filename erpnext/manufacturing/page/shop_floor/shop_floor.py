@@ -527,18 +527,19 @@ def _fetch_job_cards(filters, mode):
 		if mode == "work_order"
 		else "expected_start_date, expected_end_date"
 	)
-	jc_data = frappe.get_all(
+	# Drafts are the operator's working set; submitted "To Manufacture" cards are also kept so
+	# the station shows what still needs a Manufacture Stock Entry (its own section, client-side).
+	# This must be part of the query, not a post-filter: a busy workstation's history would
+	# otherwise fill the row limit with old submitted cards and hide the active drafts.
+	or_filters = [["docstatus", "=", 0], ["status", "=", "To Manufacture"]] if mode == "workstation" else None
+	return frappe.get_all(
 		"Job Card",
 		fields=JOB_CARD_FIELDS,
 		filters=filters,
+		or_filters=or_filters,
 		order_by=order_by,
 		limit=50,
 	)
-	if mode == "workstation":
-		# Drafts are the operator's working set; submitted "To Manufacture" cards are also kept so
-		# the station shows what still needs a Manufacture Stock Entry (its own section, client-side).
-		jc_data = [row for row in jc_data if row.docstatus == 0 or row.status == "To Manufacture"]
-	return jc_data
 
 
 def _enrich_job_cards(jc_data):
@@ -800,7 +801,7 @@ def _build_oee(scheduled_min, actual_run_min, ideal_min, completed_jcs) -> dict:
 	total_loss = sum(flt(j.process_loss_qty) for j in completed_jcs)
 	availability = min(actual_run_min / scheduled_min, 1.0) if scheduled_min > 0 else None
 	performance = min(ideal_min / actual_run_min, 1.0) if actual_run_min > 0 else 0.0
-	quality = (total_completed - total_loss) / total_completed if total_completed > 0 else 1.0
+	quality = max(total_completed - total_loss, 0.0) / total_completed if total_completed > 0 else 1.0
 	# OEE requires all three factors; without a schedule, Availability is unknown.
 	oee_val = round(availability * performance * quality * 100, 1) if availability is not None else None
 	return {
