@@ -445,6 +445,30 @@ class TestBOM(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, bom_doc.submit)
 
 	@timeout
+	def test_fg_item_not_allowed_in_secondary_items(self):
+		fg_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+
+		bom_doc = frappe.new_doc("BOM")
+		bom_doc.item = fg_item
+		bom_doc.quantity = 1
+		bom_doc.company = "_Test Company"
+		bom_doc.currency = "INR"
+		bom_doc.append("items", {"item_code": rm_item, "qty": 1, "rate": 100.0})
+		bom_doc.append(
+			"secondary_items",
+			{
+				"item_code": fg_item,
+				"secondary_item_type": "Additional Finished Good",
+				"qty": 1,
+				"cost_allocation_per": 10,
+			},
+		)
+
+		# FG item of the BOM cannot also be a secondary item
+		self.assertRaises(frappe.ValidationError, bom_doc.save)
+
+	@timeout
 	def test_bom_item_query(self):
 		query = partial(
 			item_query,

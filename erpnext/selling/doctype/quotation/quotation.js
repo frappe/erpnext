@@ -16,7 +16,7 @@ frappe.ui.form.on("Quotation", {
 			frm.set_query("quotation_to", function () {
 				return {
 					filters: {
-						name: ["in", ["Customer", "Lead", "Prospect"]],
+						name: ["in", ["Customer", "Lead", "Prospect", "CRM Deal"]],
 					},
 				};
 			});

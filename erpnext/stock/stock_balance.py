@@ -284,7 +284,7 @@ def set_stock_balance_as_per_serial_no(
 	if not posting_time:
 		posting_time = nowtime()
 
-	condition = " and item.name='%s'" % item_code.replace("'", "'") if item_code else ""
+	condition = " and item.name=%s" % frappe.db.escape(item_code, percent=False) if item_code else ""
 
 	bin = frappe.db.sql(
 		"""select bin.item_code, bin.warehouse, bin.actual_qty, item.stock_uom

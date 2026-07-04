@@ -11,7 +11,6 @@ from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
 
 import erpnext
 from erpnext.accounts.utils import get_account_currency
-from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -163,9 +162,14 @@ class SubcontractingReceipt(SubcontractingController):
 		self.set_supplied_items_cost_center()
 		self.set_supplied_items_inventory_dimensions()
 
+		# SubcontractingController.validate() does not call super() for Subcontracting Receipt, so
+		# the shared mandatory inventory dimension check must be invoked explicitly here. It runs
+		# last so auto-populated supplied-item dimensions (set_supplied_items_inventory_dimensions)
+		# are already in place.
+		self.validate_inventory_dimension_mandatory()
+
 	def on_submit(self):
 		self.validate_closed_subcontracting_order()
-		self.validate_available_qty_for_consumption()
 		self.validate_bom_required_qty()
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
@@ -215,9 +219,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.create_raw_materials_supplied_or_received()
 
 	def validate_closed_subcontracting_order(self):
-		for item in self.items:
-			if item.subcontracting_order:
-				check_on_hold_or_closed_status("Subcontracting Order", item.subcontracting_order)
+		self.check_for_on_hold_or_closed_status("Subcontracting Order", "subcontracting_order")
 
 	def update_job_card(self):
 		for row in self.get("items"):
@@ -602,32 +604,6 @@ class SubcontractingReceipt(SubcontractingController):
 				frappe.throw(
 					_("Row #{0}: Accepted Warehouse and Rejected Warehouse cannot be same").format(item.idx)
 				)
-
-	def validate_available_qty_for_consumption(self):
-		if (
-			frappe.db.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on")
-			== "BOM"
-		):
-			return
-
-		for item in self.get("supplied_items"):
-			precision = item.precision("consumed_qty")
-			if (
-				item.available_qty_for_consumption
-				and flt(item.available_qty_for_consumption, precision) - flt(item.consumed_qty, precision) < 0
-			):
-				msg = _(
-					"""Row {0}: Consumed Qty {1} {2} must be less than or equal to Available Qty For Consumption
-					{3} {4} in Consumed Items Table."""
-				).format(
-					item.idx,
-					flt(item.consumed_qty, precision),
-					item.stock_uom,
-					flt(item.available_qty_for_consumption, precision),
-					item.stock_uom,
-				)
-
-				frappe.throw(msg)
 
 	def validate_bom_required_qty(self):
 		if (

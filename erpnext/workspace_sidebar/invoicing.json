@@ -218,7 +218,7 @@
    "collapsible": 1,
    "indent": 0,
    "keep_closed": 0,
-   "label": "Payment Reconciliaition",
+   "label": "Payment Reconciliation",
    "link_to": "Payment Reconciliation",
    "link_type": "DocType",
    "show_arrow": 0,
@@ -325,7 +325,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-02-23 19:50:17.815817",
+ "modified": "2026-06-03 19:50:17.815817",
  "modified_by": "Administrator",
  "module": "Accounts",
  "module_onboarding": "Accounting Onboarding",

@@ -743,7 +743,14 @@ class SubcontractingInwardController:
 					"name": ["in", list(data.keys())],
 					"docstatus": 1,
 				},
-				fields=["rate", "name", "required_qty", "received_qty"],
+				fields=[
+					"rate",
+					"name",
+					"required_qty",
+					"received_qty",
+					"returned_qty",
+					"consumed_qty",
+				],
 			)
 
 			doc_updates = {}
@@ -751,13 +758,17 @@ class SubcontractingInwardController:
 				current_qty = flt(data[d.name].transfer_qty) * (1 if self._action == "submit" else -1)
 				current_rate = flt(data[d.name].rate)
 
-				# Calculate weighted average rate
-				old_total = d.rate * d.received_qty
+				# Weighted average rate must be computed on the on-hand balance
+				balance_qty = d.received_qty - d.returned_qty - d.consumed_qty
+				old_total = d.rate * balance_qty
 				current_total = current_rate * current_qty
 
+				new_balance_qty = balance_qty + current_qty
 				d.received_qty = d.received_qty + current_qty
 				d.rate = (
-					flt((old_total + current_total) / d.received_qty, precision) if d.received_qty else 0.0
+					flt((old_total + current_total) / new_balance_qty, precision)
+					if new_balance_qty > 0
+					else 0.0
 				)
 
 				if not d.required_qty and not d.received_qty:
@@ -1119,10 +1130,10 @@ class SubcontractingInwardController:
 	def update_inward_order_status(self):
 		if self.subcontracting_inward_order:
 			from erpnext.subcontracting.doctype.subcontracting_inward_order.subcontracting_inward_order import (
-				update_subcontracting_inward_order_status,
+				set_subcontracting_inward_order_status,
 			)
 
-			update_subcontracting_inward_order_status(self.subcontracting_inward_order)
+			set_subcontracting_inward_order_status(self.subcontracting_inward_order)
 
 
 @frappe.whitelist()

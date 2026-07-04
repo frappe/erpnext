@@ -29,6 +29,7 @@ class Driver(Document):
 		naming_series: DF.Literal["HR-DRI-.YYYY.-"]
 		status: DF.Literal["Active", "Suspended", "Left"]
 		transporter: DF.Link | None
+		user: DF.Link | None
 	# end: auto-generated types
 
 	def validate(self):

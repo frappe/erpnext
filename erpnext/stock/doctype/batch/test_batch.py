@@ -498,6 +498,24 @@ class TestBatch(ERPNextTestSuite):
 		if not use_naming_series:
 			frappe.set_value("Stock Settings", "Stock Settings", "use_naming_series", 0)
 
+	def test_naming_series_prefix_is_not_rendered_as_jinja(self):
+		from frappe.model.naming import InvalidNamingSeriesError
+
+		stock_settings = frappe.get_single("Stock Settings")
+		use_naming_series = cint(stock_settings.use_naming_series)
+		original_prefix = stock_settings.naming_series_prefix
+
+		frappe.set_value("Stock Settings", "Stock Settings", "use_naming_series", 1)
+		frappe.set_value("Stock Settings", "Stock Settings", "naming_series_prefix", "{{ 7*7 }}")
+
+		try:
+			self.assertRaises(
+				InvalidNamingSeriesError, self.make_new_batch, "_Test Stock Item For Batch SSTI"
+			)
+		finally:
+			frappe.set_value("Stock Settings", "Stock Settings", "naming_series_prefix", original_prefix)
+			frappe.set_value("Stock Settings", "Stock Settings", "use_naming_series", use_naming_series)
+
 	def make_new_batch(self, item_name=None, batch_id=None, do_not_insert=0):
 		batch = frappe.new_doc("Batch")
 		item = self.make_batch_item(item_name)

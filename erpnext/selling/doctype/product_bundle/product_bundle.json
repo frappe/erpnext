@@ -26,6 +26,7 @@
    "fieldtype": "Link",
    "in_global_search": 1,
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Parent Item",
    "no_copy": 1,
    "oldfieldname": "new_item_code",
@@ -65,9 +66,12 @@
   },
   {
    "default": "0",
+   "description": "A disabled Product Bundle cannot be selected in transactions.",
    "fieldname": "disabled",
    "fieldtype": "Check",
-   "label": "Disabled"
+   "in_standard_filter": 1,
+   "label": "Disabled",
+   "no_copy": 1
   },
   {
    "fieldname": "column_break_eonk",
@@ -77,7 +81,7 @@
  "icon": "fa fa-sitemap",
  "idx": 1,
  "links": [],
- "modified": "2024-03-27 13:10:19.599302",
+ "modified": "2026-06-10 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Product Bundle",
@@ -113,6 +117,7 @@
    "write": 1
   }
  ],
+ "search_fields": "new_item_code,description",
  "sort_field": "creation",
  "sort_order": "ASC",
  "states": []

@@ -11,7 +11,7 @@ from frappe.contacts.doctype.address.address import get_default_address
 from frappe.contacts.doctype.contact.contact import get_default_contact
 from frappe.email.inbox import link_communication_to_document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import comma_and, get_link_to_form, has_gravatar, validate_email_address
+from frappe.utils import comma_and, get_link_to_form, validate_email_address
 
 from erpnext.accounts.party import set_taxes
 from erpnext.controllers.selling_controller import SellingController
@@ -174,9 +174,6 @@ class Lead(SellingController, CRMNote):
 
 			if self.email_id == self.lead_owner:
 				frappe.throw(_("Lead Owner cannot be same as the Lead Email Address"))
-
-			if self.is_new() or not self.image:
-				self.image = has_gravatar(self.email_id)
 
 	def link_to_contact(self):
 		# update contact links
@@ -451,6 +448,7 @@ def get_lead_details(lead, posting_date=None, company=None, doctype=None):
 	out = frappe._dict()
 
 	lead_doc = frappe.get_doc("Lead", lead)
+	lead_doc.check_permission()
 	lead = lead_doc
 
 	out.update(
@@ -481,7 +479,7 @@ def get_lead_details(lead, posting_date=None, company=None, doctype=None):
 
 
 @frappe.whitelist()
-def make_lead_from_communication(communication, ignore_communication_links=False):
+def make_lead_from_communication(communication: str, ignore_communication_links: bool = False):
 	"""raise a issue from email"""
 
 	doc = frappe.get_doc("Communication", communication)
@@ -500,7 +498,6 @@ def make_lead_from_communication(communication, ignore_communication_links=False
 			}
 		)
 		lead.flags.ignore_mandatory = True
-		lead.flags.ignore_permissions = True
 		lead.insert()
 
 		lead_name = lead.name
@@ -533,7 +530,7 @@ def get_lead_with_phone_number(number):
 def add_lead_to_prospect(lead, prospect):
 	prospect = frappe.get_doc("Prospect", prospect)
 	prospect.append("leads", {"lead": lead})
-	prospect.save(ignore_permissions=True)
+	prospect.save()
 
 	carry_forward_communication_and_comments = frappe.db.get_single_value(
 		"CRM Settings", "carry_forward_communication_and_comments"

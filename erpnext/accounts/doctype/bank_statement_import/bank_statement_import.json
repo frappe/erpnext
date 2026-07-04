@@ -1,7 +1,6 @@
 {
  "actions": [],
  "autoname": "format:Bank Statement Import on {creation}",
- "beta": 1,
  "creation": "2019-08-04 14:16:08.318714",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -226,7 +225,7 @@
  ],
  "hide_toolbar": 1,
  "links": [],
- "modified": "2025-06-11 02:23:22.159961",
+ "modified": "2026-05-30 20:51:10.353723",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Statement Import",

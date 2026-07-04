@@ -178,14 +178,9 @@ erpnext.buying = {
 					callback: (r) => {
 						if (!r.message) return;
 
-						if (!this.frm.doc.billing_address) {
-							this.frm.set_value("billing_address", r.message.primary_address || "");
-						}
+						this.frm.set_value("billing_address", r.message.primary_address || "");
 
-						if (
-							frappe.meta.has_field(this.frm.doc.doctype, "shipping_address") &&
-							!this.frm.doc.shipping_address
-						) {
+						if (frappe.meta.has_field(this.frm.doc.doctype, "shipping_address")) {
 							this.frm.set_value("shipping_address", r.message.shipping_address || "");
 						}
 					},
@@ -616,6 +611,9 @@ erpnext.buying.get_items_from_product_bundle = function (frm) {
 				fieldname: "product_bundle",
 				options: "Product Bundle",
 				reqd: 1,
+				get_query: () => {
+					return { filters: { disabled: 0 } };
+				},
 			},
 			{
 				fieldtype: "Currency",

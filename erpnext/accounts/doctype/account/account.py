@@ -518,6 +518,7 @@ def get_account_autoname(account_number, account_name, company):
 def update_account_number(name, account_name, account_number=None, from_descendant=False):
 	_ensure_idle_system()
 	account = frappe.get_cached_doc("Account", name)
+	account.check_permission("write")
 	if not account:
 		return
 
@@ -579,9 +580,11 @@ def update_account_number(name, account_name, account_number=None, from_descenda
 @frappe.whitelist()
 def merge_account(old, new):
 	_ensure_idle_system()
-	# Validate properties before merging
 	new_account = frappe.get_cached_doc("Account", new)
 	old_account = frappe.get_cached_doc("Account", old)
+
+	new_account.check_permission("write")
+	old_account.check_permission("write")
 
 	if not new_account:
 		throw(_("Account {0} does not exist").format(new))

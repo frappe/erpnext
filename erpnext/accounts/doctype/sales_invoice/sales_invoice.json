@@ -33,8 +33,6 @@
   "is_created_using_pos",
   "pos_closing_entry",
   "has_subcontracted",
-  "section_break_qllv",
-  "title",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -234,6 +232,7 @@
   "status",
   "remarks",
   "customer_group",
+  "title",
   "column_break_imbx",
   "is_internal_customer",
   "represents_company",
@@ -718,6 +717,7 @@
   {
    "default": "0",
    "depends_on": "eval:doc.items.every((item) => !item.dn_detail)",
+   "description": "If checked, updates inventory; stock and accounting entries are created together. Leave unchecked if a Delivery Note is created separately.",
    "fieldname": "update_stock",
    "fieldtype": "Check",
    "hide_days": 1,
@@ -725,7 +725,8 @@
    "label": "Update Stock",
    "oldfieldname": "update_stock",
    "oldfieldtype": "Check",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_description_on_click": 1
   },
   {
    "fieldname": "scan_barcode",
@@ -2344,10 +2345,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "section_break_qllv",
-   "fieldtype": "Section Break"
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "title",
    "fieldtype": "Data",
@@ -2367,7 +2364,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2026-05-21 17:31:11.190958",
+ "modified": "2026-05-28 12:15:12.486443",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

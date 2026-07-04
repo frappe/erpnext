@@ -68,6 +68,31 @@ frappe.ui.form.on("Supplier", {
 		});
 
 		frm.make_methods = {
+			"Purchase Order": () =>
+				frappe.model.with_doctype("Purchase Order", function () {
+					const po = frappe.model.get_new_doc("Purchase Order");
+					po.supplier = frm.doc.name;
+					frappe.set_route("Form", "Purchase Order", po.name);
+				}),
+			"Purchase Invoice": () =>
+				frappe.model.with_doctype("Purchase Invoice", function () {
+					const pi = frappe.model.get_new_doc("Purchase Invoice");
+					pi.supplier = frm.doc.name;
+					frappe.set_route("Form", "Purchase Invoice", pi.name);
+				}),
+			"Request for Quotation": () =>
+				frappe.model.with_doctype("Request for Quotation", function () {
+					const rfq = frappe.model.get_new_doc("Request for Quotation");
+					const row = frappe.model.add_child(rfq, "suppliers");
+					row.supplier = frm.doc.name;
+					frappe.set_route("Form", "Request for Quotation", rfq.name);
+				}),
+			"Supplier Quotation": () =>
+				frappe.model.with_doctype("Supplier Quotation", function () {
+					const sq = frappe.model.get_new_doc("Supplier Quotation");
+					sq.supplier = frm.doc.name;
+					frappe.set_route("Form", "Supplier Quotation", sq.name);
+				}),
 			"Bank Account": () => erpnext.utils.make_bank_account(frm.doc.doctype, frm.doc.name),
 			"Pricing Rule": () => frm.trigger("make_pricing_rule"),
 		};
@@ -116,6 +141,20 @@ frappe.ui.form.on("Supplier", {
 				},
 				__("View")
 			);
+
+			for (const doctype in frm.make_methods) {
+				frm.add_custom_button(__(doctype), frm.make_methods[doctype], __("Create"));
+			}
+
+			if (frm.doc.supplier_group) {
+				frm.add_custom_button(
+					__("Get Supplier Group Details"),
+					function () {
+						frm.trigger("get_supplier_group_details");
+					},
+					__("Actions")
+				);
+			}
 
 			if (
 				cint(frappe.defaults.get_default("enable_common_party_accounting")) &&
@@ -173,6 +212,8 @@ frappe.ui.form.on("Supplier", {
 			frm.toggle_reqd("represents_company", true);
 		} else {
 			frm.toggle_reqd("represents_company", false);
+			frm.set_value("represents_company", "");
+			frm.set_value("companies", []);
 		}
 	},
 	show_party_link_dialog: function (frm) {

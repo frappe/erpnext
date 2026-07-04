@@ -11,6 +11,7 @@ from frappe.contacts.address_and_contact import (
 	delete_contact_and_address,
 	load_address_and_contact,
 )
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
 from frappe.model.utils.rename_doc import update_linked_doctypes
@@ -49,6 +50,7 @@ class Customer(TransactionBase):
 
 		account_manager: DF.Link | None
 		accounts: DF.Table[PartyAccount]
+		alias: DF.Data | None
 		companies: DF.Table[AllowedToTransactWith]
 		credit_limits: DF.Table[CustomerCreditLimit]
 		customer_details: DF.Text | None
@@ -443,7 +445,7 @@ class Customer(TransactionBase):
 
 
 @frappe.whitelist()
-def make_quotation(source_name, target_doc=None):
+def make_quotation(source_name: str, target_doc: str | Document | None = None) -> Document:
 	def set_missing_values(source, target):
 		_set_missing_values(source, target)
 
@@ -456,9 +458,6 @@ def make_quotation(source_name, target_doc=None):
 	)
 
 	target_doc.quotation_to = "Customer"
-	target_doc.run_method("set_missing_values")
-	target_doc.run_method("set_other_charges")
-	target_doc.run_method("calculate_taxes_and_totals")
 
 	price_list, currency = frappe.db.get_value(
 		"Customer", {"name": source_name}, ["default_price_list", "default_currency"]
@@ -467,6 +466,10 @@ def make_quotation(source_name, target_doc=None):
 		target_doc.selling_price_list = price_list
 	if currency:
 		target_doc.currency = currency
+
+	target_doc.run_method("set_missing_values")
+	target_doc.run_method("set_other_charges")
+	target_doc.run_method("calculate_taxes_and_totals")
 
 	return target_doc
 

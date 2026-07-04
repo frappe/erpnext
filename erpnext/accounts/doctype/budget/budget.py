@@ -159,9 +159,9 @@ class Budget(Document):
 			frappe.throw(_("Account {0} does not belong to company {1}").format(self.account, self.company))
 		elif account_details.report_type != "Profit and Loss":
 			frappe.throw(
-				_("Budget cannot be assigned against {0}, as it's not an Income or Expense account").format(
-					self.account
-				)
+				_(
+					"Budget cannot be assigned against {0}, as its Root Type is not of Income or Expense"
+				).format(self.account)
 			)
 
 	def set_null_value(self):
@@ -355,8 +355,8 @@ class Budget(Document):
 		if self.should_regenerate_budget_distribution():
 			return
 
-		total_amount = sum(d.amount for d in self.budget_distribution)
-		total_percent = sum(d.percent for d in self.budget_distribution)
+		total_amount = sum(flt(d.amount) for d in self.budget_distribution)
+		total_percent = sum(flt(d.percent) for d in self.budget_distribution)
 
 		if flt(abs(total_amount - self.budget_amount), 2) > 0.10:
 			frappe.throw(
@@ -707,18 +707,20 @@ def get_ordered_amount(params):
 
 
 def get_other_condition(params, for_doc):
-	condition = f"expense_account = '{params.expense_account}'"
+	condition = f"expense_account = {frappe.db.escape(params.expense_account)}"
 	budget_against_field = params.get("budget_against_field")
 
 	if budget_against_field and params.get(budget_against_field):
-		condition += f" and child.{budget_against_field} = '{params.get(budget_against_field)}'"
+		condition += (
+			f" and child.{budget_against_field} = {frappe.db.escape(params.get(budget_against_field))}"
+		)
 
 	date_field = "schedule_date" if for_doc == "Material Request" else "transaction_date"
 
 	start_date = frappe.get_cached_value("Fiscal Year", params.from_fiscal_year, "year_start_date")
 	end_date = frappe.get_cached_value("Fiscal Year", params.to_fiscal_year, "year_end_date")
 
-	condition += f" and parent.{date_field} between '{start_date}' and '{end_date}'"
+	condition += f" and parent.{date_field} between {frappe.db.escape(str(start_date))} and {frappe.db.escape(str(end_date))}"
 
 	return condition
 

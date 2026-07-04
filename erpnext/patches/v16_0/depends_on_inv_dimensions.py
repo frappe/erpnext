@@ -9,7 +9,6 @@ def get_inventory_dimensions():
 			"source_fieldname",
 			"reference_document as doctype",
 			"reqd",
-			"mandatory_depends_on",
 		],
 		order_by="creation",
 		distinct=True,
@@ -85,5 +84,5 @@ def execute():
 				"Custom Field",
 				{"fieldname": fieldname, "dt": dimension.doctype},
 				"mandatory_depends_on",
-				display_depends_on if dimension.reqd else dimension.mandatory_depends_on,
+				display_depends_on if dimension.reqd else "",
 			)

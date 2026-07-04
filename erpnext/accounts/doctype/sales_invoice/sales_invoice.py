@@ -28,9 +28,15 @@ from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger 
 )
 from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import SalesTaxWithholding
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
-from erpnext.accounts.party import get_due_date, get_party_account, get_party_details
+from erpnext.accounts.party import (
+	CROSS_PARTY_FIELD_NO_MAP,
+	get_due_date,
+	get_party_account,
+	get_party_details,
+)
 from erpnext.accounts.utils import (
 	get_account_currency,
+	refresh_subscription_status,
 	update_voucher_outstanding,
 )
 from erpnext.assets.doctype.asset.asset import split_asset
@@ -370,6 +376,8 @@ class SalesInvoice(SellingController):
 				if row.billing_amount:
 					row.billing_amount = -abs(row.billing_amount)
 
+		self.validate_update_stock_for_pick_list_reference()
+		self.set_serial_and_batch_bundle_from_pick_list()
 		self.update_packing_list()
 		self.set_billing_hours_and_amount()
 		self.update_timesheet_billing_for_project()
@@ -388,6 +396,18 @@ class SalesInvoice(SellingController):
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		self.validate_subcontracted_sales_order()
 		self.validate_scio_self_rm_qty()
+
+	def validate_update_stock_for_pick_list_reference(self):
+		if self.update_stock or self.is_return:
+			return
+
+		for row in self.items:
+			if row.get("against_pick_list"):
+				frappe.throw(
+					_(
+						"Row {0}: Update Stock must be checked for item {1} because it is against Pick List {2}."
+					).format(row.idx, frappe.bold(row.item_code), frappe.bold(row.against_pick_list))
+				)
 
 	def validate_accounts(self):
 		self.validate_write_off_account()
@@ -440,8 +460,8 @@ class SalesInvoice(SellingController):
 			validate_account_head(item.idx, item.income_account, self.company, _("Income"))
 
 	def before_save(self):
-		self.set_account_for_mode_of_payment()
 		self.set_paid_amount()
+		self.set_account_for_mode_of_payment()
 
 	def before_submit(self):
 		self.add_remarks()
@@ -491,6 +511,7 @@ class SalesInvoice(SellingController):
 
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
+			self.update_pick_list_status()
 
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
@@ -614,6 +635,7 @@ class SalesInvoice(SellingController):
 		if self.update_stock == 1:
 			self.update_stock_reservation_entries()
 			self.repost_future_sle_and_gle()
+			self.update_pick_list_status()
 
 		self.db_set("status", "Cancelled")
 
@@ -665,26 +687,41 @@ class SalesInvoice(SellingController):
 		if not cint(self.update_stock):
 			return
 
-		self.status_updater.append(
-			{
-				"source_dt": "Sales Invoice Item",
-				"target_dt": "Sales Order Item",
-				"target_parent_dt": "Sales Order",
-				"target_parent_field": "per_delivered",
-				"target_field": "delivered_qty",
-				"target_ref_field": "qty",
-				"source_field": "qty",
-				"join_field": "so_detail",
-				"percent_join_field": "sales_order",
-				"status_field": "delivery_status",
-				"keyword": "Delivered",
-				"second_source_dt": "Delivery Note Item",
-				"second_source_field": "qty",
-				"second_join_field": "so_detail",
-				"overflow_type": "delivery",
-				"extra_cond": """ and exists(select name from `tabSales Invoice`
-				where name=`tabSales Invoice Item`.parent and update_stock = 1)""",
-			}
+		self.status_updater.extend(
+			[
+				{
+					"source_dt": "Sales Invoice Item",
+					"target_dt": "Sales Order Item",
+					"target_parent_dt": "Sales Order",
+					"target_parent_field": "per_delivered",
+					"target_field": "delivered_qty",
+					"target_ref_field": "qty",
+					"source_field": "qty",
+					"join_field": "so_detail",
+					"percent_join_field": "sales_order",
+					"status_field": "delivery_status",
+					"keyword": "Delivered",
+					"second_source_dt": "Delivery Note Item",
+					"second_source_field": "qty",
+					"second_join_field": "so_detail",
+					"overflow_type": "delivery",
+					"extra_cond": """ and exists(select name from `tabSales Invoice`
+					where name=`tabSales Invoice Item`.parent and update_stock = 1)""",
+				},
+				{
+					"source_dt": "Sales Invoice Item",
+					"target_dt": "Pick List Item",
+					"join_field": "pick_list_item",
+					"target_field": "delivered_qty",
+					"target_parent_dt": "Pick List",
+					"target_parent_field": "per_delivered",
+					"target_ref_field": "picked_qty",
+					"source_field": "stock_qty",
+					"percent_join_field": "against_pick_list",
+					"status_field": "delivery_status",
+					"keyword": "Delivered",
+				},
+			]
 		)
 
 		if not cint(self.is_return):
@@ -777,6 +814,10 @@ class SalesInvoice(SellingController):
 				"set_default_payment": pos.get("set_grand_total_to_default_mop", 1),
 			}
 
+	def refresh_subscription_status(self):
+		if self.get("subscription"):
+			refresh_subscription_status(self.subscription)
+
 	@frappe.whitelist()
 	def reset_mode_of_payments(self):
 		if self.pos_profile:
@@ -859,6 +900,13 @@ class SalesInvoice(SellingController):
 	def set_paid_amount(self):
 		paid_amount = 0.0
 		base_paid_amount = 0.0
+
+		if not cint(self.is_pos) and self.is_return:
+			self.set("payments", [])
+			self.paid_amount = paid_amount
+			self.base_paid_amount = base_paid_amount
+			return
+
 		for data in self.payments:
 			data.base_amount = flt(data.amount * self.conversion_rate, self.precision("base_paid_amount"))
 			paid_amount += data.amount
@@ -2024,15 +2072,24 @@ class SalesInvoice(SellingController):
 	def update_billing_status_in_dn(self, update_modified=True):
 		if self.is_return and not self.update_billed_amount_in_delivery_note:
 			return
+
 		updated_delivery_notes = []
+
+		SalesInvoiceItem = frappe.qb.DocType("Sales Invoice Item")
+		from frappe.query_builder.functions import Coalesce, Sum
+
 		for d in self.get("items"):
 			if d.dn_detail:
-				billed_amt = frappe.db.sql(
-					"""select sum(amount) from `tabSales Invoice Item`
-					where dn_detail=%s and docstatus=1""",
-					d.dn_detail,
+				query = (
+					frappe.qb.from_(SalesInvoiceItem)
+					.select(Coalesce(Sum(SalesInvoiceItem.amount), 0))
+					.where(SalesInvoiceItem.dn_detail == d.dn_detail)
+					.where(SalesInvoiceItem.docstatus == 1)
 				)
-				billed_amt = billed_amt and billed_amt[0][0] or 0
+
+				res = query.run()
+				billed_amt = res[0][0] if res else 0
+
 				frappe.db.set_value(
 					"Delivery Note Item",
 					d.dn_detail,
@@ -2743,7 +2800,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			"rate": "rate",
 		},
 		"postprocess": update_item,
-		"condition": lambda doc: doc.qty > 0,
+		"condition": lambda doc: doc.qty - received_items.get(doc.name, 0.0) > 0,
 	}
 
 	if doctype in ["Sales Invoice", "Sales Order"]:
@@ -2776,7 +2833,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 				"doctype": target_doctype,
 				"postprocess": update_details,
 				"set_target_warehouse": "set_from_warehouse",
-				"field_no_map": ["taxes_and_charges", "set_warehouse", "shipping_address", "cost_center"],
+				"field_no_map": [*CROSS_PARTY_FIELD_NO_MAP, "set_warehouse", "cost_center"],
 			},
 			doctype + " Item": item_field_map,
 		},
@@ -2784,10 +2841,19 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		set_missing_values,
 	)
 
+	if not doclist.get("items"):
+		frappe.throw(
+			_(
+				"Cannot create Intercompany {0}. All items in the source {1} have already been fully invoiced. "
+				"Please check the existing linked {2}s."
+			).format(target_doctype, doctype, target_doctype)
+		)
+
 	return doclist
 
 
-def get_received_items(reference_name, doctype, reference_fieldname):
+@frappe.whitelist()
+def get_received_items(reference_name: str, doctype: str, reference_fieldname: str):
 	reference_field = "inter_company_invoice_reference"
 	if doctype == "Purchase Order":
 		reference_field = "inter_company_order_reference"
@@ -2800,20 +2866,19 @@ def get_received_items(reference_name, doctype, reference_fieldname):
 	target_doctypes = frappe.get_all(
 		doctype,
 		filters=filters,
-		as_list=True,
+		pluck="name",
 	)
-
+	received_items_map = {}
 	if target_doctypes:
-		target_doctypes = list(target_doctypes[0])
-
-	received_items_map = frappe._dict(
-		frappe.get_all(
+		received_items_data = frappe.get_all(
 			doctype + " Item",
 			filters={"parent": ("in", target_doctypes)},
 			fields=[reference_fieldname, "qty"],
-			as_list=1,
 		)
-	)
+		for item in received_items_data:
+			key = item.get(reference_fieldname)
+			if key:
+				received_items_map[key] = received_items_map.get(key, 0.0) + flt(item.qty)
 
 	return received_items_map
 
@@ -3036,14 +3101,21 @@ def update_multi_mode_option(doc, pos_profile):
 
 
 def get_all_mode_of_payments(doc):
-	return frappe.db.sql(
-		"""
-		select mpa.default_account, mpa.parent, mp.type as type
-		from `tabMode of Payment Account` mpa,`tabMode of Payment` mp
-		where mpa.parent = mp.name and mpa.company = %(company)s and mp.enabled = 1""",
-		{"company": doc.company},
-		as_dict=1,
+	ModeOfPaymentAccount = frappe.qb.DocType("Mode of Payment Account")
+	ModeOfPayment = frappe.qb.DocType("Mode of Payment")
+
+	query = (
+		frappe.qb.from_(ModeOfPaymentAccount)
+		.join(ModeOfPayment)
+		.on(ModeOfPaymentAccount.parent == ModeOfPayment.name)
+		.select(
+			ModeOfPaymentAccount.default_account, ModeOfPaymentAccount.parent, ModeOfPayment.type.as_("type")
+		)
+		.where(ModeOfPaymentAccount.company == doc.company)
+		.where(ModeOfPayment.enabled == 1)
 	)
+
+	return query.run(as_dict=1)
 
 
 def get_mode_of_payments_info(mode_of_payments, company):

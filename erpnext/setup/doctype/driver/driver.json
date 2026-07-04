@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
@@ -129,10 +130,11 @@
  ],
  "icon": "fa fa-user",
  "links": [],
- "modified": "2026-03-26 14:45:09.568829",
+ "modified": "2026-06-16 16:04:12.762960",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Driver",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -157,6 +159,18 @@
    "read": 1,
    "report": 1,
    "role": "Delivery Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
    "share": 1,
    "write": 1
   }

@@ -29,6 +29,7 @@ def get_columns(filters):
 			"fieldname": "item_code",
 			"options": "Item",
 			"width": 120,
+			"sticky": True,
 		},
 		{"label": _("Item Name"), "fieldtype": "Data", "fieldname": "item_name", "width": 140},
 		{

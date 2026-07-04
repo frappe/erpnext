@@ -5,10 +5,6 @@ import random
 
 import frappe
 
-from erpnext.manufacturing.doctype.bom_creator.bom_creator import (
-	add_item,
-	add_sub_assembly,
-)
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -38,8 +34,7 @@ class TestBOMCreator(ERPNextTestSuite):
 			conversion_rate=1,
 		)
 
-		add_sub_assembly(
-			parent=doc.name,
+		doc.add_sub_assembly(
 			fg_item=final_product,
 			fg_reference_id=doc.name,
 			bom_item={
@@ -93,8 +88,7 @@ class TestBOMCreator(ERPNextTestSuite):
 			conversion_rate=1,
 		)
 
-		add_item(
-			parent=doc.name,
+		doc.add_item(
 			fg_item=final_product,
 			fg_reference_id=doc.name,
 			item_code="Pedal Assembly",
@@ -137,8 +131,7 @@ class TestBOMCreator(ERPNextTestSuite):
 			conversion_rate=1,
 		)
 
-		add_item(
-			parent=doc.name,
+		doc.add_item(
 			fg_item=final_product,
 			fg_reference_id=doc.name,
 			item_code="Pedal Assembly",
@@ -148,9 +141,8 @@ class TestBOMCreator(ERPNextTestSuite):
 		doc.reload()
 		self.assertEqual(doc.items[0].is_expandable, 0)
 
-		add_sub_assembly(
+		doc.add_sub_assembly(
 			convert_to_sub_assembly=1,
-			parent=doc.name,
 			fg_item=final_product,
 			fg_reference_id=doc.items[0].name,
 			bom_item={
@@ -205,8 +197,7 @@ class TestBOMCreator(ERPNextTestSuite):
 			conversion_rate=1,
 		)
 
-		add_item(
-			parent=doc.name,
+		doc.add_item(
 			fg_item=final_product,
 			fg_reference_id=doc.name,
 			item_code="Pedal Assembly",
@@ -216,9 +207,8 @@ class TestBOMCreator(ERPNextTestSuite):
 		doc.reload()
 		self.assertEqual(doc.items[0].is_expandable, 0)
 
-		add_sub_assembly(
+		doc.add_sub_assembly(
 			convert_to_sub_assembly=1,
-			parent=doc.name,
 			fg_item=final_product,
 			fg_reference_id=doc.items[0].name,
 			bom_item={
@@ -250,6 +240,43 @@ class TestBOMCreator(ERPNextTestSuite):
 		doc.create_boms()
 		data = frappe.get_all("BOM", filters={"bom_creator": doc.name, "docstatus": 1})
 		self.assertEqual(len(data), 2)
+
+	def test_edit_and_delete_reject_unknown_item(self):
+		final_product = "Bicycle"
+		make_item(
+			final_product,
+			{
+				"item_group": "Raw Material",
+				"stock_uom": "Nos",
+			},
+		)
+
+		doc = make_bom_creator(
+			name="Bicycle BOM Guarded",
+			company="_Test Company",
+			item_code=final_product,
+			qty=1,
+			rm_cosy_as_per="Valuation Rate",
+			currency="INR",
+			plc_conversion_rate=1,
+			conversion_rate=1,
+		)
+
+		# Editing a row that does not belong to this BOM Creator must be rejected.
+		self.assertRaises(
+			frappe.ValidationError,
+			doc.edit_bom_creator,
+			docname="non-existent-row",
+			data={"qty": 5},
+		)
+
+		# Deleting a row that does not belong to this BOM Creator must be rejected.
+		self.assertRaises(
+			frappe.ValidationError,
+			doc.delete_node,
+			fg_item=final_product,
+			docname="non-existent-row",
+		)
 
 
 def create_items():

@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import comma_and, flt, get_link_to_form
 
@@ -549,9 +550,18 @@ class SubcontractingInwardOrder(SubcontractingController):
 			return stock_entry.as_dict()
 
 
-@frappe.whitelist()
-def update_subcontracting_inward_order_status(scio, status=None):
+def set_subcontracting_inward_order_status(scio: str | Document, status: str | None = None):
 	if isinstance(scio, str):
 		scio = frappe.get_doc("Subcontracting Inward Order", scio)
 
 	scio.update_status(status)
+
+
+@frappe.whitelist()
+def update_subcontracting_inward_order_status(scio: str | Document, status: str | None = None):
+	"""Whitelisted boundary for direct API/UI calls — enforces write permission, then delegates."""
+	if isinstance(scio, str):
+		scio = frappe.get_doc("Subcontracting Inward Order", scio)
+
+	scio.check_permission("write")
+	set_subcontracting_inward_order_status(scio, status)

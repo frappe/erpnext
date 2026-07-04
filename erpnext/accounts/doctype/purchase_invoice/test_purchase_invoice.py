@@ -2928,6 +2928,24 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		# Test 4 - Since this PI is overbilled by 130% and only 120% is allowed, it will fail
 		self.assertRaises(frappe.ValidationError, pi.submit)
 
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 0})
+	def test_non_stock_item_over_billing_against_po_is_blocked(self):
+		service_item = create_item(
+			"_Test Service Item Non Stock PI",
+			is_stock_item=0,
+			is_purchase_item=1,
+		).name
+
+		po = create_purchase_order(item_code=service_item, qty=5, rate=100, do_not_save=False)
+		po.submit()
+
+		pi = make_pi_from_po(po.name)
+		pi.items[0].qty = 10  # overbill by 100 %
+		pi.save()
+
+		with self.assertRaises(frappe.ValidationError):
+			pi.submit()
+
 	def test_discount_percentage_not_set_when_amount_is_manually_set(self):
 		pi = make_purchase_invoice(do_not_save=True)
 		discount_amount = 7
@@ -2961,6 +2979,60 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 		pr = make_purchase_receipt_from_pi(pi.name)
 		self.assertFalse(pr.items)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"enable_common_party_accounting": True})
+	def test_purchase_invoice_return_common_party_je_has_no_negative_amounts(self):
+		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
+			make_customer,
+		)
+		from erpnext.accounts.doctype.party_link.party_link import create_party_link
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		customer = make_customer(customer="_Test Common Party Return PI")
+		supplier = create_supplier(supplier_name="_Test Common Party Return PI").name
+		# Supplier must be secondary so get_common_party_link finds it via the PI's party_type
+		party_link = create_party_link("Customer", customer, supplier)
+
+		pi = make_purchase_invoice(supplier=supplier, parent_cost_center="_Test Cost Center - _TC")
+
+		return_pi = make_return_doc(pi.doctype, pi.name)
+		return_pi.submit()
+
+		# JE for the return should credit the supplier (secondary/reconciliation) account
+		# and debit the customer (primary) account — all positive amounts
+		jv_accounts = frappe.get_all(
+			"Journal Entry Account",
+			filters={"reference_type": return_pi.doctype, "reference_name": return_pi.name, "docstatus": 1},
+			fields=["debit_in_account_currency", "credit_in_account_currency", "account"],
+		)
+
+		self.assertTrue(jv_accounts, "Expected a Journal Entry for the return invoice")
+		for row in jv_accounts:
+			self.assertGreaterEqual(
+				row.debit_in_account_currency,
+				0,
+				f"Negative debit on account {row.account}",
+			)
+			self.assertGreaterEqual(
+				row.credit_in_account_currency,
+				0,
+				f"Negative credit on account {row.account}",
+			)
+
+		# Supplier (secondary) account must be credited, not debited
+		supplier_row = next(r for r in jv_accounts if r.account == pi.credit_to)
+		self.assertGreater(supplier_row.credit_in_account_currency, 0)
+		self.assertEqual(supplier_row.debit_in_account_currency, 0)
+
+		party_link.delete()
+
+	def test_purchase_invoice_cancellation_post_account_freezing_date(self):
+		pi = make_purchase_invoice()
+		frappe.db.set_value("Company", "_Test Company", "accounts_frozen_till_date", add_days(getdate(), 1))
+		try:
+			self.assertRaises(frappe.ValidationError, pi.cancel)
+		finally:
+			frappe.db.set_value("Company", "_Test Company", "accounts_frozen_till_date", None)
 
 
 def set_advance_flag(company, flag, default_account):

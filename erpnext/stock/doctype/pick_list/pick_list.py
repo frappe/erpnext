@@ -17,6 +17,9 @@ from frappe.utils.nestedset import get_descendants_of
 from erpnext.selling.doctype.sales_order.sales_order import (
 	make_delivery_note as create_delivery_note_from_sales_order,
 )
+from erpnext.selling.doctype.sales_order.sales_order import (
+	make_sales_invoice as create_sales_invoice_from_sales_order,
+)
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	get_auto_batch_nos,
 )
@@ -1284,11 +1287,17 @@ def get_available_item_locations_for_other_item(
 
 @frappe.whitelist()
 def create_delivery_note(source_name, target_doc=None):
+	return create_delivery(source_name, target_doc, "Delivery Note")
+
+
+@frappe.whitelist()
+def create_delivery(source_name, target_doc=None, target=None):
 	pick_list = frappe.get_doc("Pick List", source_name)
+	target = target or (frappe.flags.args or {}).get("target") or "Delivery Note"
 	validate_item_locations(pick_list)
 	sales_dict = dict()
 	sales_orders = []
-	delivery_notes = []
+	documents = []
 	for location in pick_list.locations:
 		if location.sales_order:
 			sales_orders.append(
@@ -1318,39 +1327,45 @@ def create_delivery_note(source_name, target_doc=None):
 		sales_dict[key] = {row.sales_order for row in rows}
 
 	if sales_dict:
-		delivery_notes.extend(create_dn_with_so(sales_dict, pick_list))
+		documents.extend(create_delivery_with_so(sales_dict, pick_list, target))
 
 	if not all(item.sales_order for item in pick_list.locations):
-		delivery_notes.append(create_dn_wo_so(pick_list))
+		documents.append(create_delivery_wo_so(pick_list, target, target_doc))
 
-	if len(delivery_notes) == 1:
-		return delivery_notes[0]
+	if len(documents) == 1:
+		return documents[0]
 	else:
 		from frappe.utils import comma_and
 
-		doc_list = [get_link_to_form("Delivery Note", p.name) for p in delivery_notes]
+		doc_list = [get_link_to_form(target, p.name) for p in documents]
 		frappe.msgprint(_("{0} created").format(comma_and(doc_list)))
 
 
 def create_dn_wo_so(pick_list, delivery_note=None):
-	if not delivery_note:
-		delivery_note = frappe.new_doc("Delivery Note")
+	return create_delivery_wo_so(pick_list, "Delivery Note", delivery_note)
 
-	delivery_note.company = pick_list.company
+
+def create_delivery_wo_so(pick_list, target, target_doc=None):
+	if not target_doc:
+		target_doc = frappe.new_doc(target)
+
+	target_doc.company = pick_list.company
 
 	item_table_mapper_without_so = {
-		"doctype": "Delivery Note Item",
+		"doctype": f"{target} Item",
 		"field_map": {
 			"rate": "rate",
 			"name": "name",
 			"parent": "",
 		},
 	}
-	map_pl_locations(pick_list, item_table_mapper_without_so, delivery_note)
-	delivery_note.flags.ignore_mandatory = True
-	delivery_note.save()
+	map_pl_locations(pick_list, item_table_mapper_without_so, target_doc)
+	target_doc.flags.ignore_mandatory = True
+	if target == "Sales Invoice":
+		target_doc.update_stock = 1
+	target_doc.save()
 
-	return delivery_note
+	return target_doc
 
 
 @frappe.whitelist()
@@ -1379,36 +1394,53 @@ def create_dn_for_pick_lists(source_name, target_doc=None, kwargs=None):
 				pluck="name",
 			)
 
-	delivery_note = create_dn_from_so(pick_list, sales_orders, delivery_note=target_doc, kwargs=kwargs)
+	delivery_note = create_delivery_from_so(
+		pick_list, sales_orders, "Delivery Note", target_doc=target_doc, kwargs=kwargs
+	)
 
 	if not sales_order_arg and not all(item.sales_order for item in pick_list.locations):
 		if isinstance(delivery_note, str):
 			delivery_note = frappe.get_doc(frappe.parse_json(delivery_note))
 
-		delivery_note = create_dn_wo_so(pick_list, delivery_note)
+		delivery_note = create_delivery_wo_so(pick_list, "Delivery Note", delivery_note)
 
 	return delivery_note
 
 
 def create_dn_with_so(sales_dict, pick_list):
-	"""Create Delivery Note for each customer (based on SO) in a Pick List."""
-	delivery_notes = []
+	return create_delivery_with_so(sales_dict, pick_list, "Delivery Note")
+
+
+def create_delivery_with_so(sales_dict, pick_list, target):
+	"""Create target document for each customer (based on SO) in a Pick List."""
+	documents = []
 
 	for key in sales_dict:
-		delivery_note = create_dn_from_so(pick_list, sales_dict[key], None)
-		if delivery_note:
-			delivery_note.flags.ignore_mandatory = True
+		document = create_delivery_from_so(pick_list, sales_dict[key], target)
+		if document:
+			document.flags.ignore_mandatory = True
 			# updates packed_items on save
 			# save as multiple customers are possible
-			delivery_note.save()
-			delivery_notes.append(delivery_note)
+			if target == "Sales Invoice":
+				document.update_stock = 1
+			document.save()
+			documents.append(document)
 
-	return delivery_notes
+	return documents
 
 
 def create_dn_from_so(pick_list, sales_order_list, delivery_note=None, kwargs=None):
+	return create_delivery_from_so(
+		pick_list, sales_order_list, "Delivery Note", target_doc=delivery_note, kwargs=kwargs
+	)
+
+
+def create_delivery_from_so(pick_list, sales_order_list, target, target_doc=None, kwargs=None):
 	if not sales_order_list:
-		return delivery_note
+		return target_doc
+
+	if kwargs is None:
+		kwargs = {}
 
 	def select_item(d):
 		filtered_items = kwargs.get("filtered_children", [])
@@ -1416,11 +1448,11 @@ def create_dn_from_so(pick_list, sales_order_list, delivery_note=None, kwargs=No
 		return child_filter
 
 	item_table_mapper = {
-		"doctype": "Delivery Note Item",
+		"doctype": f"{target} Item",
 		"field_map": {
 			"rate": "rate",
 			"name": "so_detail",
-			"parent": "against_sales_order",
+			"parent": "against_sales_order" if target == "Delivery Note" else "sales_order",
 		},
 		"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty)
 		and doc.delivered_by_supplier != 1
@@ -1429,20 +1461,22 @@ def create_dn_from_so(pick_list, sales_order_list, delivery_note=None, kwargs=No
 
 	kwargs = {"skip_item_mapping": True, "ignore_pricing_rule": pick_list.ignore_pricing_rule}
 
-	delivery_note = create_delivery_note_from_sales_order(
-		next(iter(sales_order_list)), delivery_note, kwargs=kwargs
+	target_doc = (
+		create_delivery_note_from_sales_order(next(iter(sales_order_list)), target_doc, kwargs=kwargs)
+		if target == "Delivery Note"
+		else create_sales_invoice_from_sales_order(next(iter(sales_order_list)), target_doc, args=kwargs)
 	)
 
-	if not delivery_note:
+	if not target_doc:
 		return
 
 	for so in sales_order_list:
-		map_pl_locations(pick_list, item_table_mapper, delivery_note, so)
+		map_pl_locations(pick_list, item_table_mapper, target_doc, so)
 
-	return delivery_note
+	return target_doc
 
 
-def map_pl_locations(pick_list, item_mapper, delivery_note, sales_order=None):
+def map_pl_locations(pick_list, item_mapper, target_doc, sales_order=None):
 	for location in pick_list.locations:
 		if location.sales_order != sales_order or location.product_bundle_item:
 			continue
@@ -1454,36 +1488,44 @@ def map_pl_locations(pick_list, item_mapper, delivery_note, sales_order=None):
 
 		source_doc = sales_order_item or location
 
-		dn_item = map_child_doc(source_doc, delivery_note, item_mapper)
+		child_item = map_child_doc(source_doc, target_doc, item_mapper)
 
-		if dn_item:
-			dn_item.against_pick_list = pick_list.name
-			dn_item.pick_list_item = location.name
-			dn_item.warehouse = location.warehouse
-			dn_item.qty = flt(location.picked_qty - location.delivered_qty) / (
-				flt(dn_item.conversion_factor) or 1
+		if child_item:
+			child_item.against_pick_list = pick_list.name
+			child_item.pick_list_item = location.name
+			child_item.warehouse = location.warehouse
+			child_item.qty = flt(location.picked_qty - location.delivered_qty) / (
+				flt(child_item.conversion_factor) or 1
 			)
-			dn_item.batch_no = location.batch_no
-			dn_item.serial_no = location.serial_no
-			dn_item.use_serial_batch_fields = location.use_serial_batch_fields
+			child_item.batch_no = location.batch_no
+			child_item.serial_no = location.serial_no
+			child_item.use_serial_batch_fields = location.use_serial_batch_fields
 
-			update_delivery_note_item(source_doc, dn_item, delivery_note)
+			if not child_item.qty:
+				target_doc.items.remove(child_item)
+				continue
 
-	add_product_bundles_to_delivery_note(pick_list, delivery_note, item_mapper, sales_order)
-	set_delivery_note_missing_values(delivery_note)
+			update_child_item(source_doc, child_item, target_doc)
 
-	delivery_note.company = pick_list.company
+	add_product_bundles_to_target(pick_list, target_doc, item_mapper, sales_order)
+	set_target_missing_values(target_doc)
+
+	target_doc.company = pick_list.company
 	if sales_order:
-		delivery_note.customer = frappe.get_value("Sales Order", sales_order, "customer")
+		target_doc.customer = frappe.get_value("Sales Order", sales_order, "customer")
 
 
 def add_product_bundles_to_delivery_note(
 	pick_list: "PickList", delivery_note, item_mapper, sales_order=None
 ) -> None:
-	"""Add product bundles found in pick list to delivery note.
+	return add_product_bundles_to_target(pick_list, delivery_note, item_mapper, sales_order)
+
+
+def add_product_bundles_to_target(pick_list, target_doc, item_mapper, sales_order=None) -> None:
+	"""Add product bundles found in pick list to target document.
 
 	When mapping pick list items, the bundle item itself isn't part of the
-	locations. Dynamically fetch and add parent bundle item into DN."""
+	locations. Dynamically fetch and add parent bundle item into target document."""
 	product_bundles = pick_list._get_product_bundles()
 	product_bundle_qty_map = pick_list._get_product_bundle_qty_map(product_bundles.values())
 
@@ -1492,13 +1534,13 @@ def add_product_bundles_to_delivery_note(
 		if sales_order and sales_order_item.parent != sales_order:
 			continue
 
-		dn_bundle_item = map_child_doc(sales_order_item, delivery_note, item_mapper)
-		dn_bundle_item.qty = pick_list._compute_picked_qty_for_bundle(
+		target_bundle_item = map_child_doc(sales_order_item, target_doc, item_mapper)
+		target_bundle_item.qty = pick_list._compute_picked_qty_for_bundle(
 			so_row, product_bundle_qty_map[value.item_code]
 		)
-		dn_bundle_item.pick_list_item = value.pick_list_item
-		dn_bundle_item.against_pick_list = pick_list.name
-		update_delivery_note_item(sales_order_item, dn_bundle_item, delivery_note)
+		target_bundle_item.pick_list_item = value.pick_list_item
+		target_bundle_item.against_pick_list = pick_list.name
+		update_child_item(sales_order_item, target_bundle_item, target_doc)
 
 
 @frappe.whitelist()
@@ -1572,12 +1614,16 @@ def get_actual_qty(item_code, warehouse):
 
 
 def update_delivery_note_item(source, target, delivery_note):
-	cost_center = frappe.db.get_value("Project", delivery_note.project, "cost_center")
+	return update_child_item(source, target, delivery_note)
+
+
+def update_child_item(source, target, target_doc):
+	cost_center = frappe.db.get_value("Project", target_doc.project, "cost_center")
 	if not cost_center:
-		cost_center = get_cost_center(source.item_code, "Item", delivery_note.company)
+		cost_center = get_cost_center(source.item_code, "Item", target_doc.company)
 
 	if not cost_center:
-		cost_center = get_cost_center(source.item_group, "Item Group", delivery_note.company)
+		cost_center = get_cost_center(source.item_group, "Item Group", target_doc.company)
 
 	target.cost_center = cost_center
 
@@ -1592,6 +1638,10 @@ def get_cost_center(for_item, from_doctype, company):
 
 
 def set_delivery_note_missing_values(target):
+	return set_target_missing_values(target)
+
+
+def set_target_missing_values(target):
 	target.run_method("set_missing_values")
 	target.run_method("set_po_nos")
 	target.run_method("calculate_taxes_and_totals")
@@ -1609,7 +1659,7 @@ def update_stock_entry_based_on_work_order(pick_list, stock_entry):
 	stock_entry.from_bom = 1
 	stock_entry.bom_no = work_order.bom_no
 	stock_entry.use_multi_level_bom = work_order.use_multi_level_bom
-	stock_entry.fg_completed_qty = pick_list.for_qty
+	stock_entry.fg_completed_qty = 0
 	if work_order.bom_no:
 		stock_entry.inspection_required = frappe.db.get_value("BOM", work_order.bom_no, "inspection_required")
 

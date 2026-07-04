@@ -14,7 +14,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 class TestGeneralLedger(ERPNextTestSuite):
 	def setUp(self):
 		self.company = "_Test Company"
-		self.clear_old_entries()
 
 	def clear_old_entries(self):
 		doctype_list = [

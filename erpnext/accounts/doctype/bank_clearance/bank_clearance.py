@@ -91,6 +91,7 @@ class BankClearance(Document):
 
 	@frappe.whitelist()
 	def update_clearance_date(self):
+		self.check_permission("write")
 		invalid_document = []
 		invalid_cheque_date = []
 		entries_to_update = []

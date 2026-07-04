@@ -591,6 +591,25 @@ frappe.ui.form.on("Purchase Invoice", {
 			};
 		});
 
+		frm.set_query("write_off_account", function (doc) {
+			return {
+				filters: {
+					report_type: "Profit and Loss",
+					is_group: 0,
+					company: doc.company,
+				},
+			};
+		});
+
+		frm.set_query("write_off_cost_center", function (doc) {
+			return {
+				filters: {
+					is_group: 0,
+					company: doc.company,
+				},
+			};
+		});
+
 		frm.fields_dict["items"].grid.get_field("deferred_expense_account").get_query = function (doc) {
 			return {
 				filters: {

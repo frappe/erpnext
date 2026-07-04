@@ -134,6 +134,7 @@ jobs:
 
             # Resetup env and install apps
             pgrep honcho | xargs kill
+            sleep 10
             rm -rf ~/frappe-bench/env
             bench -v setup env --python python$2
             bench pip install -e ./apps/erpnext

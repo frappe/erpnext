@@ -6,7 +6,7 @@ from frappe.utils import today
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.report.stock_balance.stock_balance import execute
+from erpnext.stock.report.stock_balance.stock_balance import execute, get_stock_ageing_data
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -166,3 +166,66 @@ class TestStockBalance(ERPNextTestSuite):
 		rows = stock_balance(self.filters.update({"show_variant_attributes": 1, "item_code": [variant.name]}))
 		self.assertPartialDictEq(attributes, rows[0])
 		self.assertInvariants(rows)
+
+	def test_alt_uom_balance_single_uom(self):
+		"""Alt UOM columns show correct name and converted qty for an item with one alternate UOM."""
+		self.item.append("uoms", {"conversion_factor": 12, "uom": "Box"})
+		self.item.save()
+
+		self.generate_stock_ledger(self.item.name, [_dict(qty=24, rate=10)])
+
+		rows = stock_balance(self.filters.update({"show_alt_uom_balance": 1}))
+		self.assertEqual(len(rows), 1)
+		self.assertEqual(rows[0].get("alt_uom"), "Box")
+		self.assertAlmostEqual(rows[0].get("alt_uom_bal_qty"), 2.0)  # 24 / 12
+
+	def test_alt_uom_balance_no_alternate_uom(self):
+		"""Alt UOM columns are not added when no items in the report have alt UOMs."""
+		self.generate_stock_ledger(self.item.name, [_dict(qty=5, rate=10)])
+
+		columns, _ = execute(self.filters.update({"show_alt_uom_balance": 1}))
+		col_fieldnames = [c.get("fieldname") for c in columns if isinstance(c, dict)]
+		self.assertNotIn("alt_uom", col_fieldnames)
+		self.assertNotIn("alt_uom_bal_qty", col_fieldnames)
+
+	def test_alt_uom_balance_filter_disabled(self):
+		"""No alt UOM columns are injected when show_alt_uom_balance is not set."""
+		self.item.append("uoms", {"conversion_factor": 12, "uom": "Box"})
+		self.item.save()
+
+		self.generate_stock_ledger(self.item.name, [_dict(qty=24, rate=10)])
+
+		columns, _ = execute(self.filters)
+		col_fieldnames = [c.get("fieldname") for c in columns if isinstance(c, dict)]
+		self.assertNotIn("alt_uom", col_fieldnames)
+		self.assertNotIn("alt_uom_bal_qty", col_fieldnames)
+
+	def test_alt_uom_balance_uses_first_alternate_uom(self):
+		"""When an item has multiple alt UOMs, only the first (lowest idx) is shown."""
+		frappe.get_doc({"doctype": "UOM", "uom_name": "Carton"}).insert(ignore_if_duplicate=True)
+		self.item.append("uoms", {"conversion_factor": 12, "uom": "Box"})
+		self.item.append("uoms", {"conversion_factor": 144, "uom": "Carton"})
+		self.item.save()
+
+		self.generate_stock_ledger(self.item.name, [_dict(qty=144, rate=10)])
+
+		rows = stock_balance(self.filters.update({"show_alt_uom_balance": 1}))
+		self.assertEqual(len(rows), 1)
+		self.assertEqual(rows[0].get("alt_uom"), "Box")
+		self.assertAlmostEqual(rows[0].get("alt_uom_bal_qty"), 12.0)  # 144 / 12, not 144 / 144
+
+	def test_stock_ageing_data_accepts_batchwise_valuation_slots(self):
+		fifo_queue = [
+			["SA-BATCH-NEWER", 1, 2.0, "2021-12-05", 20.0],
+			["SA-BATCH-OLDER", 1, 3.0, "2021-12-01", 30.0],
+		]
+
+		stock_ageing_data = get_stock_ageing_data(fifo_queue, "2021-12-10")
+
+		self.assertEqual(stock_ageing_data["average_age"], 7.4)
+		self.assertEqual(stock_ageing_data["earliest_age"], 9)
+		self.assertEqual(stock_ageing_data["latest_age"], 5)
+		self.assertEqual(
+			stock_ageing_data["fifo_queue"],
+			[[3.0, "2021-12-01", 30.0], [2.0, "2021-12-05", 20.0]],
+		)

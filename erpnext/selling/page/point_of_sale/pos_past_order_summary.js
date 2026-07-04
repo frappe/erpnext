@@ -82,15 +82,19 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 		return `<div class="left-section">
 					<div class="customer-section">
-						<div class="customer-name">${doc.customer_name}</div>
-						${is_customer_naming_by_customer_name ? `<div class="customer-code">${doc.customer}</div>` : ""}
-						<div class="customer-email">${this.customer_email}</div>
+						<div class="customer-name">${frappe.utils.escape_html(doc.customer_name)}</div>
+						${
+							is_customer_naming_by_customer_name
+								? `<div class="customer-code">${frappe.utils.escape_html(doc.customer)}</div>`
+								: ""
+						}
+						<div class="customer-email">${frappe.utils.escape_html(this.customer_email)}</div>
 					</div>
-					<div class="cashier">${__("Sold by")}: ${doc.owner}</div>
+					<div class="cashier">${__("Sold by")}: ${frappe.utils.escape_html(doc.owner)}</div>
 				</div>
 				<div class="right-section">
 					<div class="paid-amount">${format_currency(doc.paid_amount, doc.currency)}</div>
-					<div class="invoice-name">${doc.name}</div>
+					<div class="invoice-name">${frappe.utils.escape_html(doc.name)}</div>
 					<span class="indicator-pill whitespace-nowrap ${indicator_color}"><span>${__(doc.status)}</span></span>
 				</div>`;
 	}
@@ -100,8 +104,8 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 		return `<div class="item-row-wrapper">
 				<div class="item-row-data">
-					<div class="item-name">${item_data.item_name}</div>
-					<div class="item-qty">${item_data.qty || 0} ${item_data.uom}</div>
+					<div class="item-name">${frappe.utils.escape_html(item_data.item_name)}</div>
+					<div class="item-qty">${item_data.qty || 0} ${frappe.utils.escape_html(item_data.uom)}</div>
 					<div class="item-rate-disc">${get_rate_discount_html()}</div>
 				</div>
 
@@ -166,7 +170,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 			.map((t) => {
 				return `
 				<div class="tax-row">
-					<div class="tax-label">${t.description}</div>
+					<div class="tax-label">${frappe.utils.escape_html(t.description)}</div>
 					<div class="tax-value">${format_currency(t.tax_amount_after_discount_amount, doc.currency)}</div>
 				</div>
 			`;
@@ -185,7 +189,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 	get_payment_html(doc, payment) {
 		return `<div class="summary-row-wrapper payments">
-					<div>${__(payment.mode_of_payment)}</div>
+					<div>${frappe.utils.escape_html(__(payment.mode_of_payment))}</div>
 					<div>${format_currency(payment.amount, doc.currency)}</div>
 				</div>`;
 	}

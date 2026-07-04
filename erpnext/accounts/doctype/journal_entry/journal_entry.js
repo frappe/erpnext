@@ -71,7 +71,7 @@ frappe.ui.form.on("Journal Entry", {
 
 	refresh: function (frm) {
 		if (frm.doc.reversal_of && (frm.is_new() || frm.doc.docstatus == 0)) {
-			frm.set_read_only();
+			erpnext.journal_entry.lock_reversal_entry(frm);
 		}
 
 		erpnext.toggle_naming_series();
@@ -433,15 +433,17 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 
 	accounts_add(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
-		row.exchange_rate = 1;
-		$.each(doc.accounts, function (i, d) {
-			if (d.account && d.party && d.party_type) {
-				row.account = d.account;
-				row.party = d.party;
-				row.party_type = d.party_type;
-				row.exchange_rate = d.exchange_rate;
-			}
-		});
+		if (!row.exchange_rate) row.exchange_rate = 1;
+		if (!row.account) {
+			$.each(doc.accounts, function (i, d) {
+				if (d.account && d.party && d.party_type) {
+					row.account = d.account;
+					row.party = d.party;
+					row.party_type = d.party_type;
+					row.exchange_rate = d.exchange_rate;
+				}
+			});
+		}
 
 		// set difference
 		if (doc.difference) {
@@ -560,6 +562,13 @@ $.extend(erpnext.journal_entry, {
 				frm.doc.multi_currency ? label + " in Account Currency" : label
 			);
 		});
+	},
+
+	lock_reversal_entry: function (frm) {
+		frm.fields
+			.filter((field) => field.has_input)
+			.forEach((field) => frm.set_df_property(field.df.fieldname, "read_only", 1));
+		frm.set_df_property("accounts", "read_only", 1);
 	},
 
 	set_debit_credit_in_company_currency: function (frm, cdt, cdn) {

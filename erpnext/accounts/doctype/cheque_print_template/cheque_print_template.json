@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "autoname": "field:bank_name",
  "creation": "2016-05-04 14:35:00.402544",
  "doctype": "DocType",
@@ -294,7 +295,7 @@
  ],
  "links": [],
  "max_attachments": 1,
- "modified": "2024-03-27 13:06:44.654989",
+ "modified": "2026-06-08 12:10:35.829531",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cheque Print Template",
@@ -325,18 +326,16 @@
    "write": 1
   },
   {
-   "create": 1,
-   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
    "role": "Accounts User",
-   "share": 1,
-   "write": 1
+   "share": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []

@@ -71,6 +71,10 @@
   "has_batch_no",
   "column_break_18",
   "batch_size",
+  "additional_costs_section",
+  "non_stock_items",
+  "secondary_items_section",
+  "secondary_items",
   "reference_section",
   "project",
   "subcontracting_inward_order",
@@ -703,6 +707,30 @@
    "fieldname": "production_item_info_section",
    "fieldtype": "Section Break",
    "label": "Production Item Info"
+  },
+  {
+   "fieldname": "additional_costs_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "non_stock_items",
+   "fieldtype": "Table",
+   "is_virtual": 1,
+   "label": "Additional Costs (as per BOM)",
+   "options": "Work Order Additional Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "secondary_items_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "secondary_items",
+   "fieldtype": "Table",
+   "is_virtual": 1,
+   "label": "Secondary Items (as per BOM)",
+   "options": "Work Order Additional Item",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -711,7 +739,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-19 12:20:38.102403",
+ "modified": "2026-06-03 21:35:34.175667",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",

@@ -17,7 +17,7 @@ class JobCardItem(Document):
 		allow_alternative_item: DF.Check
 		consumed_qty: DF.Float
 		description: DF.Text | None
-		item_code: DF.Link | None
+		item_code: DF.Link
 		item_group: DF.Link | None
 		item_name: DF.Data | None
 		parent: DF.Data

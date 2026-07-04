@@ -367,7 +367,9 @@ def get_default_address(out, name):
 
 
 @frappe.whitelist()
-def get_contact_display(contact):
+def get_contact_display(contact: str):
+	frappe.has_permission("Contact", "read", doc=contact, throw=True)
+
 	contact_info = frappe.db.get_value(
 		"Contact", contact, ["first_name", "last_name", "phone", "mobile_no"], as_dict=1
 	)
@@ -405,6 +407,7 @@ def sanitize_address(address):
 @frappe.whitelist()
 def notify_customers(delivery_trip):
 	delivery_trip = frappe.get_doc("Delivery Trip", delivery_trip)
+	delivery_trip.check_permission()
 
 	context = delivery_trip.as_dict()
 
@@ -468,7 +471,9 @@ def get_attachments(delivery_stop):
 
 
 @frappe.whitelist()
-def get_driver_email(driver):
+def get_driver_email(driver: str):
+	frappe.has_permission("Driver", "read", doc=driver, throw=True)
+
 	employee = frappe.db.get_value("Driver", driver, "employee")
 	email = frappe.db.get_value("Employee", employee, "prefered_email")
 	return {"email": email}

@@ -215,6 +215,7 @@ website_route_rules = [
 	},
 	{"from_route": "/project", "to_route": "Project"},
 	{"from_route": "/tasks", "to_route": "Task"},
+	{"from_route": "/banking/<path:app_path>", "to_route": "banking"},
 ]
 
 standard_navbar_items = [
@@ -372,6 +373,9 @@ doc_events = {
 	"Event": {
 		"after_insert": "erpnext.crm.utils.link_events_with_prospect",
 	},
+	"Contact Us Settings": {
+		"on_update": "erpnext.crm.utils.disable_opportunity_creation_on_contact_us_disabled",
+	},
 	"Sales Invoice": {
 		"on_submit": [
 			"erpnext.regional.italy.utils.sales_invoice_on_submit",
@@ -385,7 +389,7 @@ doc_events = {
 		"validate": [
 			"erpnext.regional.united_arab_emirates.utils.update_grand_total_for_rcm",
 			"erpnext.regional.united_arab_emirates.utils.validate_returns",
-		]
+		],
 	},
 	"Payment Entry": {
 		"on_trash": "erpnext.regional.check_deletion_permission",
@@ -448,6 +452,7 @@ scheduler_events = {
 		"erpnext.projects.doctype.project.project.project_status_update_reminder",
 		"erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.automatic_synchronization",
 		"erpnext.utilities.doctype.video.video.update_youtube_data",
+		"erpnext.accounts.doctype.bank_transaction_rule.bank_transaction_rule.scheduler_run_rule_evaluation",
 	],
 	"daily": [],
 	"daily_long": [],
