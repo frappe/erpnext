@@ -712,12 +712,18 @@ class Subscription(Document):
 			_current_start_date = self.get_current_invoice_start(add_days(self.next_billing_period_end, 1))
 			_current_end_date = self.get_current_invoice_end(_current_start_date)
 
-		if self.current_invoice and getdate(_current_start_date) <= getdate(
-			self.current_invoice.posting_date
-		) <= getdate(_current_end_date):
-			return True
-
-		return False
+		return bool(
+			frappe.db.exists(
+				self.invoice_document_type,
+				{
+					"subscription": self.name,
+					"docstatus": ("<", 2),
+					"is_return": 0,
+					"from_date": _current_start_date,
+					"to_date": _current_end_date,
+				},
+			)
+		)
 
 	@property
 	def current_invoice(self) -> Document | None:
