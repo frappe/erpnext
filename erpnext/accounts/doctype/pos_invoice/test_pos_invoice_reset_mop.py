@@ -5,8 +5,6 @@
 # AttributeError: 'POSInvoice' object has no attribute 'is_created_using_pos'
 # when calling reset_mode_of_payments on a draft POS Invoice.
 
-import frappe
-
 from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import (
 	POSInvoiceTestMixin,
 	create_pos_invoice,
