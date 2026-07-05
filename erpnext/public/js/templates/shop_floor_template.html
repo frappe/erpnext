@@ -104,7 +104,7 @@
 	.mes-job-id {
 		color: var(--text-muted);
 		font-size: 14px;
-		/* Match the indicator-pill's fixed 20px height so the Job Card id sits vertically
+		/* Match the fixed 20px height of the indicator pill so the Job Card id sits vertically
 		   centered against the status pill in the meta row (otherwise the pill reads higher). */
 		line-height: 20px;
 	}
@@ -389,7 +389,7 @@
 	.mes-row {
 		display: flex;
 		align-items: center;
-		gap: 16px;
+		gap: 12px;
 		padding: 11px 18px;
 		background: var(--fg-color);
 		border-bottom: 1px solid var(--border-color);
@@ -400,14 +400,23 @@
 	.mes-row:hover { background: var(--bg-color); }
 	.mes-row-status { flex: 0 0 150px; display: flex; align-items: center; gap: 6px; }
 	.mes-row-status .indicator-pill { white-space: nowrap; }
-	.mes-row-id { flex: 0 0 120px; color: var(--text-muted); font-size: 14px; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.mes-row-id { flex: 0 0 110px; color: var(--text-muted); font-size: 14px; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.mes-row-id a { color: var(--text-muted); }
 	/* Item cell: thumbnail + name on one line, so it lines up with the status/id row. */
 	.mes-row-item { flex: 1 1 0; min-width: 0; display: flex; align-items: center; gap: 10px; }
+	/* One fixed box for every list row thumbnail (Up Next, Completed Operations, session
+	   lists) — image and initials fallback are locked to the same 32x32 so the rows always
+	   line up regardless of the intrinsic image size. NOTE: never use single quotes or
+	   double curly braces in the text parts of this template — the microtemplate compiler
+	   cannot escape them. */
 	.mes-row-image {
 		width: 32px;
 		height: 32px;
-		flex-shrink: 0;
+		min-width: 32px;
+		max-width: 32px;
+		min-height: 32px;
+		max-height: 32px;
+		flex: 0 0 32px;
 		border-radius: var(--border-radius);
 		overflow: hidden;
 		background: var(--bg-color);
@@ -416,8 +425,13 @@
 		align-items: center;
 		justify-content: center;
 	}
-	.mes-row-image img { width: 100%; height: 100%; object-fit: cover; }
+	.mes-row-image img { width: 32px; height: 32px; object-fit: cover; display: block; }
 	.mes-row-image-fallback {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		font-size: 11px;
 		font-weight: 600;
 		color: var(--text-muted);
@@ -435,7 +449,7 @@
 	}
 	/* Operation as its own column (was previously stacked under the item name). */
 	.mes-row-operation {
-		flex: 0 0 140px;
+		flex: 0 0 110px;
 		color: var(--text-muted);
 		font-size: 14px;
 		overflow: hidden;
@@ -454,7 +468,7 @@
 	   and vertically centers with the rest of the row. */
 	.mes-row-qty-uom { color: var(--text-muted); font-size: 13px; margin-left: 2px; }
 	.mes-row-info {
-		flex: 0 0 140px;
+		flex: 0 0 120px;
 		text-align: right;
 		font-size: 14px;
 		color: var(--text-muted);
@@ -462,7 +476,9 @@
 	}
 	.mes-row-info--ready { color: var(--text-color); }
 	.mes-row-info--warn { color: var(--orange-500, #d97706); }
-	.mes-row-action { flex: 0 0 auto; text-align: right; }
+	/* Fixed column widths so rows align across sections (Up Next, Completed Operations,
+	   session lists) even when a row has no info text or action button. */
+	.mes-row-action { flex: 0 0 150px; text-align: right; }
 	.mes-row-action .btn { font-size: 14px; padding: 5px 12px; min-width: 96px; white-space: nowrap; }
 
 	@media (max-width: 768px) {
@@ -871,7 +887,7 @@
 					<div class="mes-row-image">
 						{% if (jc.item_image) { %}<img src="{{ jc.item_image }}" alt="">{% } else { %}<span class="mes-row-image-fallback">{{ frappe.get_abbr(jc.finished_good || jc.production_item, 2) }}</span>{% } %}
 					</div>
-					<div class="mes-row-title">{{ jc.finished_good || jc.production_item }}</div>
+					<div class="mes-row-title" title="{{ jc.finished_good || jc.production_item }}">{{ jc.finished_good || jc.production_item }}</div>
 				</div>
 				<div class="mes-row-operation">{{ jc.operation }}</div>
 				<div class="mes-row-id"><a href="/app/job-card/{{ jc.name }}">{{ jc.name }}</a></div>
@@ -912,7 +928,7 @@
 					<div class="mes-row-image">
 						{% if (jc.item_image) { %}<img src="{{ jc.item_image }}" alt="">{% } else { %}<span class="mes-row-image-fallback">{{ frappe.get_abbr(jc.finished_good || jc.production_item, 2) }}</span>{% } %}
 					</div>
-					<div class="mes-row-title">{{ jc.finished_good || jc.production_item }}</div>
+					<div class="mes-row-title" title="{{ jc.finished_good || jc.production_item }}">{{ jc.finished_good || jc.production_item }}</div>
 				</div>
 				<div class="mes-row-operation">{{ jc.operation }}</div>
 				<div class="mes-row-id"><a href="/app/job-card/{{ jc.name }}">{{ jc.name }}</a></div>
@@ -932,7 +948,7 @@
 	</div>
 {% } %}
 
-<!-- Up Next — only when there's something to queue -->
+<!-- Up Next — only when the queue has pending job cards -->
 {% if (queue.length > 0) { %}
 <div class="mes-list-card">
 	<div class="mes-list-card-header">
@@ -954,7 +970,7 @@
 					<div class="mes-row-image">
 						{% if (jc.item_image) { %}<img src="{{ jc.item_image }}" alt="">{% } else { %}<span class="mes-row-image-fallback">{{ frappe.get_abbr(jc.finished_good || jc.production_item, 2) }}</span>{% } %}
 					</div>
-					<div class="mes-row-title">{{ jc.finished_good || jc.production_item }}</div>
+					<div class="mes-row-title" title="{{ jc.finished_good || jc.production_item }}">{{ jc.finished_good || jc.production_item }}</div>
 				</div>
 				<div class="mes-row-operation">{{ jc.operation }}</div>
 				<div class="mes-row-id"><a href="/app/job-card/{{ jc.name }}">{{ jc.name }}</a></div>
@@ -1004,7 +1020,7 @@
 					<div class="mes-row-image">
 						{% if (jc.item_image) { %}<img src="{{ jc.item_image }}" alt="">{% } else { %}<span class="mes-row-image-fallback">{{ frappe.get_abbr(jc.finished_good || jc.production_item, 2) }}</span>{% } %}
 					</div>
-					<div class="mes-row-title">{{ jc.finished_good || jc.production_item }}</div>
+					<div class="mes-row-title" title="{{ jc.finished_good || jc.production_item }}">{{ jc.finished_good || jc.production_item }}</div>
 				</div>
 				<div class="mes-row-operation">{{ jc.operation }}</div>
 				<div class="mes-row-id"><a href="/app/job-card/{{ jc.name }}">{{ jc.name }}</a></div>
@@ -1020,7 +1036,7 @@
 	</div>
 {% } %}
 
-<!-- Today's Sessions -->
+<!-- Sessions recorded today -->
 {% if (today_sessions && today_sessions.length > 0) { %}
 	<div class="mes-list-card">
 		<div class="mes-list-card-header">
@@ -1042,7 +1058,7 @@
 					<div class="mes-row-image">
 						{% if (s.item_image) { %}<img src="{{ s.item_image }}" alt="">{% } else { %}<span class="mes-row-image-fallback">{{ frappe.get_abbr(s.finished_good || s.production_item, 2) }}</span>{% } %}
 					</div>
-					<div class="mes-row-title">{{ s.finished_good || s.production_item }}</div>
+					<div class="mes-row-title" title="{{ s.finished_good || s.production_item }}">{{ s.finished_good || s.production_item }}</div>
 				</div>
 				<div class="mes-row-operation">{{ s.operation }}</div>
 				<div class="mes-row-id"><a href="/app/job-card/{{ s.name }}">{{ s.name }}</a></div>

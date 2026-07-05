@@ -1,7 +1,7 @@
 // Shop Floor — an immersive, keyboard-first operator/manager interface.
 //
 // Two experiences share one app shell (see get_shop_floor_context on the server):
-//   • manager  — a paginated board of work orders bucketed In Progress / Pending / Completed.
+//   • manager  — a paginated board of work orders bucketed Pending / In Progress and Completed.
 //                Drilling into a work order opens its job cards in the operator pane.
 //   • operator — a focused workstation/work-order view to start, pause, complete and submit jobs.
 //
@@ -21,8 +21,7 @@ const JC_STATUS_COLORS = {
 };
 
 const MANAGER_BUCKETS = [
-	{ key: "in_progress", label: __("In Progress"), dot: "orange" },
-	{ key: "pending", label: __("Pending"), dot: "blue" },
+	{ key: "open", label: __("Pending / In Progress"), dot: "orange" },
 	{ key: "completed", label: __("Completed"), dot: "green" },
 ];
 
@@ -43,7 +42,7 @@ class ShopFloor {
 
 		// View state.
 		this.view = "operator"; // overwritten once context loads
-		this.active_bucket = "in_progress";
+		this.active_bucket = "open";
 		this.with_job_cards_only = true; // board default: hide WOs that have no job cards
 		this.buckets = {}; // key -> { rows, total, start, loaded }
 		this.selected_wo = null;
@@ -79,6 +78,7 @@ class ShopFloor {
 					<div class="sf-topbar-left"></div>
 					<div class="sf-topbar-center"></div>
 					<div class="sf-topbar-right">
+						<button class="btn btn-default btn-sm sf-btn-theme"></button>
 						<button class="btn btn-default btn-sm sf-btn-home" title="${__("Home")}">
 							${frappe.utils.icon("home", "sm")}
 						</button>
@@ -111,6 +111,29 @@ class ShopFloor {
 		this.wrapper.find(".sf-btn-refresh").on("click", () => this.refresh());
 		this.wrapper.find(".sf-btn-scan").on("click", () => this.open_scanner());
 		this.wrapper.find(".sf-btn-help").on("click", () => this.show_help());
+		this.wrapper.find(".sf-btn-theme").on("click", () => this.toggle_theme());
+		this.update_theme_button();
+	}
+
+	// Kiosk-friendly light/dark switch: flips the standard desk theme and persists it on the
+	// User (same as the Ctrl+Shift+G switcher), so the choice survives reloads and follows the
+	// operator's login on any device.
+	toggle_theme() {
+		const next = frappe.ui.get_current_theme() === "dark" ? "light" : "dark";
+		document.documentElement.setAttribute("data-theme-mode", next);
+		frappe.ui.set_theme(next);
+		frappe.xcall("frappe.core.doctype.user.user.switch_theme", {
+			theme: next.charAt(0).toUpperCase() + next.slice(1),
+		});
+		this.update_theme_button();
+	}
+
+	update_theme_button() {
+		const dark = frappe.ui.get_current_theme() === "dark";
+		this.wrapper
+			.find(".sf-btn-theme")
+			.html(dark ? "☀" : "☾")
+			.attr("title", dark ? __("Switch to Light Theme") : __("Switch to Dark Theme"));
 	}
 
 	render_shell_controls() {
@@ -1249,8 +1272,7 @@ class ShopFloor {
 				return;
 			case "1":
 			case "2":
-			case "3":
-				if (this.view === "manager") {
+				if (this.view === "manager" && MANAGER_BUCKETS[cint(e.key) - 1]) {
 					this.switch_bucket(MANAGER_BUCKETS[cint(e.key) - 1].key);
 					e.preventDefault();
 				}
@@ -1369,7 +1391,7 @@ class ShopFloor {
 			["r", __("Refresh")],
 			["b", __("Scan job card")],
 			["g then m / o", __("Switch Board / Operator view")],
-			["1 / 2 / 3", __("Switch board tab")],
+			["1 / 2", __("Switch board tab")],
 			["↑ / ↓  or  j / k", __("Move selection")],
 			["Enter", __("Open work order / run primary action")],
 			["Esc", __("Close detail / blur search")],
@@ -1547,6 +1569,7 @@ class ShopFloor {
 			.sf-toggle { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-muted); white-space: nowrap; cursor: pointer; margin: 0; user-select: none; }
 			.sf-toggle input { cursor: pointer; width: 15px; height: 15px; margin: 0; }
 			.sf-topbar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+			.sf-btn-theme { font-size: 15px; line-height: 1; min-width: 30px; }
 			.sf-title { font-size: 18px; font-weight: 700; color: var(--text-color); }
 
 			.sf-view-toggle { display: inline-flex; border: 1px solid var(--border-color); border-radius: var(--border-radius); overflow: hidden; }
@@ -1609,8 +1632,17 @@ class ShopFloor {
 				outline: none;
 			}
 			.sf-wo-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.08); transform: translateY(-1px); }
-			.sf-wo-card.sf-selected { border-color: var(--primary); }
-			.sf-wo-card.sf-focused { box-shadow: 0 0 0 2px var(--primary); }
+			[data-theme="dark"] .sf-wo-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.45); }
+			/* --primary is a fixed near-black (#171717) that the dark theme never remaps, so a ring
+			   drawn with it disappears on dark cards. Light theme keeps the dark ring; dark theme
+			   needs an accent colour — a light-gray ring on gray cards is still too subtle. */
+			.sf-wo-card.sf-selected { border-color: var(--primary-color, var(--primary)); }
+			.sf-wo-card.sf-focused { box-shadow: 0 0 0 2px var(--primary-color, var(--primary)); }
+			[data-theme="dark"] .sf-wo-card.sf-selected { border-color: var(--blue-500, #2490ef); }
+			[data-theme="dark"] .sf-wo-card.sf-focused {
+				box-shadow: 0 0 0 3px var(--blue-500, #2490ef);
+				border-color: transparent;
+			}
 			.sf-wo-top { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
 			.sf-wo-image { width: 66px; height: 66px; aspect-ratio: 1 / 1; align-self: center; border-radius: 12px; overflow: hidden; background: var(--bg-color); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 			.sf-wo-image img { width: 100%; height: 100%; object-fit: cover; }
@@ -1635,6 +1667,7 @@ class ShopFloor {
 			.sf-wo-progress-label { display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
 			.sf-wo-progress-count { font-weight: 600; color: var(--text-color); font-variant-numeric: tabular-nums; }
 			.sf-progress { display: flex; height: 10px; border-radius: 6px; background: var(--gray-300, #d1d5db); overflow: hidden; }
+			[data-theme="dark"] .sf-progress { background: var(--gray-700, #374151); }
 			.sf-progress-seg { height: 100%; transition: width 0.3s ease; }
 			.sf-seg-done { background: var(--green-400, #9ae6b4); }
 			.sf-seg-wip { background: var(--orange-400, #fbd38d); }

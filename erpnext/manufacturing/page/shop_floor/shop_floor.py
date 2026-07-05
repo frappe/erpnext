@@ -3,6 +3,7 @@ from frappe import _
 from frappe.query_builder import Order
 from frappe.query_builder.functions import Count, Date
 from frappe.utils import cint, flt, get_datetime, getdate, now_datetime, time_diff_in_seconds
+from pypika.terms import ExistsCriterion
 
 from erpnext.manufacturing.doctype.workstation.workstation import (
 	get_status_color,
@@ -59,10 +60,11 @@ TODAY_SESSION_FIELDS = [
 # operator view. System Manager is included so admins always see the full picture.
 MANAGER_ROLES = {"Shop Floor Manager", "Manufacturing Manager", "System Manager"}
 
-# Maps the three manager buckets to the underlying Work Order statuses.
+# Maps the manager buckets to the underlying Work Order statuses. "open" spans pending AND
+# in-progress: starting a job card flips the Work Order to In Process, and separate tabs made
+# it jump tabs on the next refresh — the operator would lose the card they were working on.
 WORK_ORDER_STATUS_GROUPS = {
-	"in_progress": ["In Process"],
-	"pending": ["Not Started", "Submitted", "Stock Reserved", "Stock Partially Reserved"],
+	"open": ["In Process", "Not Started", "Submitted", "Stock Reserved", "Stock Partially Reserved"],
 	"completed": ["Completed"],
 }
 
@@ -300,7 +302,7 @@ def get_work_orders(
 	search: str | None = None,
 	with_job_cards_only: bool | int = 0,
 ):
-	"""Paginated Work Orders for one manager bucket (in_progress / pending / completed),
+	"""Paginated Work Orders for one manager bucket (open / completed),
 	each decorated with a job-card status breakdown for the card's progress chip.
 
 	When `with_job_cards_only` is set, only Work Orders that have at least one (non-cancelled)
@@ -308,8 +310,7 @@ def get_work_orders(
 	"""
 	frappe.has_permission("Work Order", "read", throw=True)
 
-	statuses = WORK_ORDER_STATUS_GROUPS.get(status_group)
-	if not statuses:
+	if status_group not in WORK_ORDER_STATUS_GROUPS:
 		frappe.throw(_("Invalid status group: {0}").format(status_group))
 
 	start = cint(start)
@@ -320,7 +321,7 @@ def get_work_orders(
 	order = Order.desc if status_group == "completed" else Order.asc
 
 	wo = frappe.qb.DocType("Work Order")
-	query = _apply_work_order_filters(frappe.qb.from_(wo), wo, statuses, search, with_job_cards_only)
+	query = _apply_work_order_filters(frappe.qb.from_(wo), wo, status_group, search, with_job_cards_only)
 	work_orders = (
 		query.select(*[wo[field] for field in WORK_ORDER_FIELDS])
 		.orderby(wo.planned_start_date, order=order)
@@ -328,7 +329,7 @@ def get_work_orders(
 		.offset(start)
 	).run(as_dict=True)
 
-	total = _count_work_orders(statuses, search, with_job_cards_only)
+	total = _count_work_orders(status_group, search, with_job_cards_only)
 
 	_enrich_work_orders(work_orders)
 
@@ -340,9 +341,29 @@ def get_work_orders(
 	}
 
 
-def _apply_work_order_filters(query, wo, statuses, search, with_job_cards_only):
+def _has_job_cards_criterion(wo, docstatus):
+	jc = frappe.qb.DocType("Job Card")
+	return ExistsCriterion(
+		frappe.qb.from_(jc).select(jc.name).where((jc.work_order == wo.name) & (jc.docstatus == docstatus))
+	)
+
+
+def _bucket_criterion(wo, status_group):
+	"""The floor is done with a Work Order once every job card is submitted, even though the
+	Work Order stays "In Process" until the finished goods are received. Such operationally
+	complete orders belong on the Completed tab — not stranded under Pending / In Progress."""
+	open_statuses = WORK_ORDER_STATUS_GROUPS["open"]
+	all_job_cards_done = _has_job_cards_criterion(wo, 1) & _has_job_cards_criterion(wo, 0).negate()
+	if status_group == "completed":
+		return (wo.status == "Completed") | (wo.status.isin(open_statuses) & all_job_cards_done)
+	return wo.status.isin(open_statuses) & (
+		_has_job_cards_criterion(wo, 1).negate() | _has_job_cards_criterion(wo, 0)
+	)
+
+
+def _apply_work_order_filters(query, wo, status_group, search, with_job_cards_only):
 	"""Shared WHERE clauses for the board's row + count queries (bucket, search, job-card toggle)."""
-	query = query.where((wo.docstatus == 1) & (wo.status.isin(statuses)))
+	query = query.where((wo.docstatus == 1) & _bucket_criterion(wo, status_group))
 	if search:
 		like = f"%{search}%"
 		query = query.where(wo.name.like(like) | wo.production_item.like(like) | wo.item_name.like(like))
@@ -353,10 +374,10 @@ def _apply_work_order_filters(query, wo, statuses, search, with_job_cards_only):
 	return query
 
 
-def _count_work_orders(statuses: list[str], search: str | None, with_job_cards_only: int = 0) -> int:
+def _count_work_orders(status_group: str, search: str | None, with_job_cards_only: int = 0) -> int:
 	"""Total Work Orders in a bucket (drives pagination), honouring the same filters as the rows."""
 	wo = frappe.qb.DocType("Work Order")
-	query = _apply_work_order_filters(frappe.qb.from_(wo), wo, statuses, search, with_job_cards_only)
+	query = _apply_work_order_filters(frappe.qb.from_(wo), wo, status_group, search, with_job_cards_only)
 	return cint(query.select(Count("*")).run()[0][0])
 
 
