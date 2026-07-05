@@ -92,6 +92,7 @@ class AccountsSettings(Document):
 		over_billing_allowance: DF.Currency
 		pcv_job_timeout: DF.Int
 		preview_mode: DF.Check
+		psoa_customer_threshold: DF.Int
 		receivable_payable_fetch_method: DF.Literal["Buffered Cursor", "UnBuffered Cursor"]
 		receivable_payable_remarks_length: DF.Int
 		reconciliation_queue_size: DF.Int

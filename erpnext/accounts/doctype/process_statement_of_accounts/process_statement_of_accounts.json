@@ -62,6 +62,7 @@
   "subject",
   "column_break_28",
   "cc_to",
+  "statement_attachment",
   "section_break_30",
   "body",
   "help_text"
@@ -422,10 +423,16 @@
    "fieldname": "show_opening_entries",
    "fieldtype": "Check",
    "label": "Show Opening Entries"
+  },
+  {
+   "fieldname": "statement_attachment",
+   "fieldtype": "Attach",
+   "label": "Statement Attachment",
+   "read_only": 1
   }
  ],
  "links": [],
- "modified": "2026-06-01 15:37:07.660442",
+ "modified": "2026-07-08 11:56:46.317025",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",

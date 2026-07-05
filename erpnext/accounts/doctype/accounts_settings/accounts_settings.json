@@ -112,6 +112,8 @@
   "create_pr_in_draft_status",
   "budget_section",
   "use_legacy_budget_controller",
+  "process_statement_of_accounts_section",
+  "psoa_customer_threshold",
   "document_naming_tab",
   "transaction_naming_html"
  ],
@@ -757,6 +759,19 @@
    "description": "Changing the account in any transaction of the DocTypes listed below will trigger a repost. To prevent reposting, remove the relevant DocType from the list.",
    "fieldname": "column_break_mfor",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "process_statement_of_accounts_section",
+   "fieldtype": "Section Break",
+   "label": "Process Statement of Accounts"
+  },
+  {
+   "default": "10",
+   "description": "Maximum customers to process immediately. Larger requests are processed in the background.",
+   "fieldname": "psoa_customer_threshold",
+   "fieldtype": "Int",
+   "label": "PSOA Customer Threshold",
+   "non_negative": 1
   }
  ],
  "grid_page_length": 50,
@@ -765,7 +780,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-06-24 12:59:41.868865",
+ "modified": "2026-07-05 20:06:18.022564",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

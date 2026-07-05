@@ -7,43 +7,124 @@ frappe.ui.form.on("Process Statement Of Accounts", {
 		frappe.set_route("Form", "Customize Form");
 	},
 	refresh: function (frm) {
-		if (!frm.doc.__islocal) {
-			frm.add_custom_button(__("Send Emails"), function () {
+		if (frm.doc.__islocal) return;
+
+		frm.add_custom_button(
+			__("Send Emails"),
+			function () {
 				if (frm.is_dirty()) frappe.throw(__("Please save before proceeding."));
-				frappe.call({
-					method: "erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.send_emails",
-					args: {
-						document_name: frm.doc.name,
-					},
-					callback: function (r) {
-						if (r && r.message) {
-							frappe.show_alert({ message: __("Emails queued"), indicator: "blue" });
-						} else {
-							frappe.msgprint(__("No records for these settings."));
-						}
-					},
-				});
-			});
-			frm.add_custom_button(__("Download"), function () {
-				if (frm.is_dirty()) frappe.throw(__("Please save before proceeding."));
-				let url = frappe.urllib.get_full_url(
-					"/api/method/erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.download_statements?" +
-						"document_name=" +
-						encodeURIComponent(frm.doc.name)
+				if (!frm.doc.customers || !frm.doc.customers.length) {
+					frappe.msgprint(__("No customers found for this document."));
+					return;
+				}
+
+				frappe.confirm(
+					__("Send statement emails to {0} customer(s)?", [frm.doc.customers.length]),
+					function () {
+						frappe.call({
+							method: "erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.queue_send_emails",
+							args: { document_name: frm.doc.name },
+							freeze: true,
+							freeze_message: __("Queuing emails..."),
+							callback: function (r) {
+								if (r.message) {
+									frappe.show_alert({ message: r.message, indicator: "blue" });
+								} else {
+									frappe.msgprint(__("No records found for these settings."));
+								}
+							},
+							error: function () {
+								frappe.msgprint(__("Failed to queue email generation. Please try again."));
+							},
+						});
+					}
 				);
-				$.ajax({
-					url: url,
-					type: "GET",
-					success: function (result) {
-						if (jQuery.isEmptyObject(result)) {
-							frappe.msgprint(__("No records for these settings."));
-						} else {
-							window.location = url;
-						}
-					},
-				});
-			});
-		}
+			},
+			__("Actions")
+		);
+
+		frm.add_custom_button(
+			__("Download"),
+			function () {
+				if (frm.is_dirty()) frappe.throw(__("Please save before proceeding."));
+				if (!frm.doc.customers || !frm.doc.customers.length) {
+					frappe.msgprint(__("No customers found for this document."));
+					return;
+				}
+
+				frappe.confirm(
+					__("Download statement for {0} customer(s)?", [frm.doc.customers.length]),
+					function () {
+						const customerCount = frm.doc.customers.length;
+
+						frappe.db
+							.get_single_value("Accounts Settings", "psoa_customer_threshold")
+							.then((psoa_customer_threshold) => {
+								if (customerCount <= psoa_customer_threshold) {
+									let url = frappe.urllib.get_full_url(
+										"/api/method/erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.download_statements?" +
+											"document_name=" +
+											encodeURIComponent(frm.doc.name)
+									);
+									$.ajax({
+										url: url,
+										type: "GET",
+										success: function (result) {
+											if (jQuery.isEmptyObject(result)) {
+												frappe.msgprint(__("No records found for these filters."));
+											} else {
+												window.location = url;
+											}
+										},
+										error: function (jqXHR) {
+											let message = __(
+												"Failed to download statement. Please try again."
+											);
+											try {
+												const parsed = JSON.parse(jqXHR.responseText);
+												if (parsed && parsed._server_messages) {
+													const server_messages = JSON.parse(
+														parsed._server_messages
+													);
+													if (server_messages.length) {
+														message =
+															JSON.parse(server_messages[0]).message || message;
+													}
+												}
+											} catch (e) {
+												// fall back to default message
+											}
+											frappe.msgprint(message);
+										},
+									});
+									return;
+								}
+
+								frappe.call({
+									method: "erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.queue_statement_download",
+									args: { document_name: frm.doc.name },
+									freeze: true,
+									freeze_message: __("Queuing statement generation..."),
+									callback: function (r) {
+										if (r.message) {
+											frappe.show_alert({ message: r.message, indicator: "blue" });
+										}
+									},
+									error: function () {
+										frappe.msgprint(
+											__("Failed to queue statement generation. Please try again.")
+										);
+									},
+								});
+							})
+							.catch(function () {
+								frappe.msgprint(__("Failed to fetch customer threshold setting."));
+							});
+					}
+				);
+			},
+			__("Actions")
+		);
 	},
 	onload: function (frm) {
 		frm.set_query("currency", function () {

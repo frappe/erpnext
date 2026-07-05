@@ -7,7 +7,8 @@ import copy
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import add_days, add_months, format_date, getdate, today
+from frappe.utils import add_days, add_months, format_date, getdate, now_datetime, today
+from frappe.utils.background_jobs import is_job_enqueued
 from frappe.utils.jinja import validate_template
 from frappe.utils.pdf import get_pdf
 from frappe.www.printview import get_print_style
@@ -78,6 +79,7 @@ class ProcessStatementOfAccounts(Document):
 		show_opening_entries: DF.Check
 		show_remarks: DF.Check
 		start_date: DF.Date | None
+		statement_attachment: DF.Attach | None
 		subject: DF.Data | None
 		terms_and_conditions: DF.Link | None
 		territory: DF.Link | None
@@ -524,61 +526,237 @@ def download_statements(document_name: str):
 
 
 @frappe.whitelist()
-def send_emails(document_name: str, from_scheduler: bool = False, posting_date: str | None = None):
+def queue_statement_download(document_name: str):
+	doc = frappe.get_doc("Process Statement Of Accounts", document_name)
+	doc.check_permission("read")
+
+	job_id = f"download_statement_of_accounts_{document_name}"
+	if is_job_enqueued(job_id):
+		return _("A statement generation job is already queued for this document.")
+
+	frappe.enqueue(
+		generate_statement_download,
+		queue="long",
+		document_name=document_name,
+		user=frappe.session.user,
+		enqueue_after_commit=True,
+		job_id=job_id,
+		deduplicate=True,
+	)
+
+	return _(
+		"Statement generation has been queued. You'll be notified when it's ready, and the PDF will be available in the Statement Attachment field."
+	)
+
+
+def generate_statement_download(document_name: str, user: str | None = None):
+	doc = frappe.get_doc("Process Statement Of Accounts", document_name)
+	report = get_report_pdf(doc)
+	if not report:
+		if user:
+			_notify_user(
+				user,
+				doc,
+				subject=_("Statement generation failed. Please try again or contact support."),
+			)
+		return
+
+	if doc.statement_attachment:
+		old_file = frappe.db.get_value(
+			"File",
+			{
+				"file_url": doc.statement_attachment,
+				"attached_to_doctype": doc.doctype,
+				"attached_to_name": doc.name,
+			},
+			"name",
+		)
+
+		if old_file:
+			frappe.delete_doc("File", old_file, ignore_permissions=True, delete_permanently=True, force=True)
+
+	file = frappe.get_doc(
+		{
+			"doctype": "File",
+			"file_name": get_pdf_filename(doc.name),
+			"attached_to_doctype": doc.doctype,
+			"attached_to_name": doc.name,
+			"content": report,
+			"is_private": 1,
+		}
+	).insert(ignore_permissions=True)
+
+	doc.db_set("statement_attachment", file.file_url)
+
+	if user:
+		_notify_user(
+			user,
+			doc,
+			subject=_("Statement of Accounts PDF is ready. Check the Statement Attachment field."),
+			link=doc.get_url(),
+		)
+
+
+def _notify_user(user: str, doc, subject: str, email_content: str | None = None, link: str | None = None):
+	notification = {
+		"doctype": "Notification Log",
+		"subject": subject,
+		"for_user": user,
+		"type": "Alert",
+		"document_type": doc.doctype,
+		"document_name": doc.name,
+	}
+	if email_content:
+		notification["email_content"] = email_content
+	if link:
+		notification["link"] = link
+
+	frappe.get_doc(notification).insert(ignore_permissions=True)
+
+
+def get_send_emails_job_id(document_name: str) -> str:
+	return f"send_statement_of_accounts_emails_{document_name}"
+
+
+@frappe.whitelist()
+def queue_send_emails(document_name: str):
 	doc = frappe.get_doc("Process Statement Of Accounts", document_name)
 	doc.check_permission()
-	report = get_report_pdf(doc, consolidated=False)
 
-	if report:
-		for customer, report_pdf in report.items():
-			context = get_context(customer, doc)
-			filename = frappe.render_template(doc.pdf_name, context)
-			attachments = [{"fname": filename + ".pdf", "fcontent": report_pdf}]
+	job_id = get_send_emails_job_id(document_name)
+	if is_job_enqueued(job_id):
+		return _("An email generation job is already queued or running for this document.")
 
-			recipients, cc = get_recipients_and_cc(customer, doc)
-			if not recipients:
-				continue
+	psoa_customer_threshold = frappe.db.get_single_value("Accounts Settings", "psoa_customer_threshold")
+	queue = "short" if len(doc.customers) <= psoa_customer_threshold else "long"
 
-			subject = frappe.render_template(doc.subject, context)
-			message = frappe.render_template(doc.body, context)
+	frappe.enqueue(
+		send_emails,
+		queue=queue,
+		document_name=document_name,
+		user=frappe.session.user,
+		enqueue_after_commit=True,
+		job_id=job_id,
+		deduplicate=True,
+	)
 
-			if doc.sender:
-				sender_email = frappe.db.get_value("Email Account", doc.sender, "email_id")
-			else:
-				sender_email = frappe.session.user
+	return _("Email generation has been queued and will be processed in the background.")
 
-			frappe.enqueue(
-				queue="short",
-				method=frappe.sendmail,
+
+def send_emails(
+	document_name: str,
+	from_scheduler: bool = False,
+	posting_date: str | None = None,
+	user: str | None = None,
+):
+	doc = frappe.get_doc("Process Statement Of Accounts", document_name)
+	doc.check_permission()
+
+	# In scheduler context there is no interactive session user to notify.
+	# Fall back to the document owner so failures are actually seen by someone
+	# responsible for this PSOA setup.
+	notify_user = user if (user and not from_scheduler) else (doc.owner or user)
+
+	try:
+		report = get_report_pdf(doc, consolidated=False)
+	except Exception:
+		frappe.log_error(
+			title=f"Failed to generate statement PDFs for {document_name}",
+			message=frappe.get_traceback(),
+		)
+		if notify_user:
+			_notify_user(
+				notify_user,
+				doc,
+				subject=_(
+					"Statement of Accounts email generation failed. Please try again or contact support."
+				),
+			)
+		return False
+
+	if not report:
+		return False
+
+	failed_customers = []
+	skipped_customers = []
+
+	for customer, report_pdf in report.items():
+		context = get_context(customer, doc)
+		filename = frappe.render_template(  # nosemgrep: frappe-semgrep-rules.rules.security.frappe-ssti
+			doc.pdf_name, context
+		)
+		recipients, cc = get_recipients_and_cc(customer, doc)
+		if not recipients:
+			# No recipient configured — this customer was NOT sent a statement,
+			# so the cycle is not actually complete for them.
+			skipped_customers.append(customer)
+			continue
+
+		sender_email = (
+			frappe.db.get_value("Email Account", doc.sender, "email_id")
+			if doc.sender
+			else frappe.session.user
+		)
+		try:
+			frappe.sendmail(
 				recipients=recipients,
 				sender=sender_email,
 				cc=cc,
-				subject=subject,
-				message=message,
+				subject=frappe.render_template(  # nosemgrep: frappe-semgrep-rules.rules.security.frappe-ssti
+					doc.subject, context
+				),
+				message=frappe.render_template(  # nosemgrep: frappe-semgrep-rules.rules.security.frappe-ssti
+					doc.body, context
+				),
 				now=True,
 				reference_doctype="Process Statement Of Accounts",
 				reference_name=document_name,
-				attachments=attachments,
+				attachments=[{"fname": filename + ".pdf", "fcontent": report_pdf}],
 				expose_recipients="header",
 			)
+		except Exception:
+			frappe.log_error(
+				title=f"Failed to send statement email to {customer} for {document_name}",
+				message=frappe.get_traceback(),
+			)
+			failed_customers.append(customer)
+			continue
 
-		if doc.enable_auto_email and from_scheduler:
-			new_to_date = getdate(posting_date or today())
-			if doc.frequency in ("Daily", "Weekly", "Biweekly"):
-				frequency = {"Daily": 1, "Weekly": 7, "Biweekly": 14}
-				new_to_date = add_days(new_to_date, frequency[doc.frequency])
-			else:
-				new_to_date = add_months(new_to_date, 1 if doc.frequency == "Monthly" else 3)
-			new_from_date = add_months(new_to_date, -1 * doc.filter_duration)
-			doc.add_comment("Comment", "Emails sent on: " + frappe.utils.format_datetime(frappe.utils.now()))
-			if doc.report == "General Ledger":
-				frappe.db.set_value(doc.doctype, doc.name, "to_date", new_to_date)
-				frappe.db.set_value(doc.doctype, doc.name, "from_date", new_from_date)
-			else:
-				frappe.db.set_value(doc.doctype, doc.name, "posting_date", new_to_date)
-		return True
-	else:
-		return False
+	all_incomplete = failed_customers + skipped_customers
+
+	if all_incomplete and notify_user:
+		_notify_user(
+			notify_user,
+			doc,
+			subject=_(
+				"Statement emails were not sent to {0} customer(s). Check the error log for details."
+			).format(len(all_incomplete)),
+		)
+
+	# Only roll the schedule forward once every intended customer has actually
+	# received their statement — otherwise skipped/failed customers get silently
+	# dropped from the next cycle instead of being retried.
+	if doc.enable_auto_email and from_scheduler and not all_incomplete:
+		new_to_date = getdate(posting_date or today())
+		if doc.frequency in ("Daily", "Weekly", "Biweekly"):
+			frequency = {"Daily": 1, "Weekly": 7, "Biweekly": 14}
+			new_to_date = add_days(new_to_date, frequency[doc.frequency])
+		else:
+			new_to_date = add_months(new_to_date, 1 if doc.frequency == "Monthly" else 3)
+		new_from_date = add_months(new_to_date, -1 * doc.filter_duration)
+		doc.add_comment("Comment", "Emails sent on: " + frappe.utils.format_datetime(frappe.utils.now()))
+		if doc.report == "General Ledger":
+			frappe.db.set_value(doc.doctype, doc.name, "to_date", new_to_date)
+			frappe.db.set_value(doc.doctype, doc.name, "from_date", new_from_date)
+		else:
+			frappe.db.set_value(doc.doctype, doc.name, "posting_date", new_to_date)
+
+	return not all_incomplete
+
+
+def get_pdf_filename(psoa_name):
+	timestamp = now_datetime().strftime("%Y%m%d_%H%M%S")
+	return f"Statement_of_Accounts_{psoa_name}_{timestamp}.pdf"
 
 
 @frappe.whitelist()
@@ -590,5 +768,19 @@ def send_auto_email():
 		or_filters={"to_date": today(), "posting_date": today()},
 	)
 	for entry in selected:
-		send_emails(entry.name, from_scheduler=True)
+		job_id = get_send_emails_job_id(entry.name)
+		if is_job_enqueued(job_id):
+			continue
+
+		frappe.enqueue(
+			send_emails,
+			queue="long",
+			document_name=entry.name,
+			user=None,  # send_emails resolves this to the doc owner for scheduler runs
+			from_scheduler=True,
+			posting_date=today(),
+			enqueue_after_commit=True,
+			job_id=job_id,
+			deduplicate=True,
+		)
 	return True
