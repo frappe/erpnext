@@ -17,25 +17,19 @@ frappe.query_reports["Trial Balance"] = {
 				}
 				// Update the Fiscal Year to the one applicable for the selected
 				// company, since companies can be on different fiscal years.
-				frappe.call({
-					method: "erpnext.accounts.utils.get_fiscal_year",
-					args: {
-						date: frappe.datetime.get_today(),
-						company: company,
-					},
-					callback: function (r) {
-						// Ignore a stale response from a previous company if the
-						// user has since switched to a different company.
-						if (r.message && query_report.get_values().company === company) {
-							var fy = r.message;
-							frappe.query_report.set_filter_value({
-								fiscal_year: fy[0],
-								from_date: fy[1],
-								to_date: fy[2],
-							});
-						}
-					},
-				});
+				var fy = erpnext.utils.get_fiscal_year(
+					frappe.datetime.get_today(),
+					true,
+					false,
+					company
+				);
+				if (fy) {
+					frappe.query_report.set_filter_value({
+						fiscal_year: fy[0],
+						from_date: fy[1],
+						to_date: fy[2],
+					});
+				}
 			},
 		},
 		{

@@ -514,7 +514,7 @@ $.extend(erpnext.utils, {
 		});
 	},
 
-	get_fiscal_year: function (date, with_dates = false, raise_on_missing = true) {
+	get_fiscal_year: function (date, with_dates = false, raise_on_missing = true, company = null) {
 		if (!frappe.boot.setup_complete) {
 			return;
 		}
@@ -525,18 +525,22 @@ $.extend(erpnext.utils, {
 
 		let fiscal_year = "";
 		if (
+			// boot.current_fiscal_year is system-wide, so it can only be used
+			// when a specific company is not requested.
+			!company &&
 			frappe.boot.current_fiscal_year &&
 			date >= frappe.boot.current_fiscal_year[1] &&
 			date <= frappe.boot.current_fiscal_year[2]
 		) {
 			if (with_dates) fiscal_year = frappe.boot.current_fiscal_year;
 			else fiscal_year = frappe.boot.current_fiscal_year[0];
-		} else if (today != date) {
+		} else if (company || today != date) {
 			frappe.call({
 				method: "erpnext.accounts.utils.get_fiscal_year",
 				type: "GET", // make it cacheable
 				args: {
 					date: date,
+					company: company,
 					raise_on_missing: raise_on_missing,
 				},
 				async: false,
