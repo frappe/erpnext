@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Max, Sum
-from frappe.utils import add_days, cstr, flt, formatdate, getdate
+from frappe.utils import add_days, cstr, flt, getdate
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -63,21 +63,13 @@ def validate_filters(filters):
 	if filters.from_date > filters.to_date:
 		frappe.throw(_("From Date cannot be greater than To Date"))
 
+	# Clamp the dates to the Fiscal Year silently. These can momentarily fall
+	# outside the year while the Company/Fiscal Year filters are being switched,
+	# and a blocking popup on every such change is just noise.
 	if (filters.from_date < filters.year_start_date) or (filters.from_date > filters.year_end_date):
-		frappe.msgprint(
-			_("From Date should be within the Fiscal Year. Assuming From Date = {0}").format(
-				formatdate(filters.year_start_date)
-			)
-		)
-
 		filters.from_date = filters.year_start_date
 
 	if (filters.to_date < filters.year_start_date) or (filters.to_date > filters.year_end_date):
-		frappe.msgprint(
-			_("To Date should be within the Fiscal Year. Assuming To Date = {0}").format(
-				formatdate(filters.year_end_date)
-			)
-		)
 		filters.to_date = filters.year_end_date
 
 
