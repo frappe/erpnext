@@ -898,7 +898,11 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
+<<<<<<< HEAD
  "modified": "2026-03-17 20:39:05.218344",
+=======
+ "modified": "2026-07-05 23:24:45.734144",
+>>>>>>> 54da9fc27a (fix: update modified timestamp in item.json)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
