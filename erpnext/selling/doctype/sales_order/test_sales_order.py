@@ -261,14 +261,18 @@ class TestSalesOrder(ERPNextTestSuite):
 		so_rate = 95.0
 		document_date_rate = 80.0
 
+		# Set up a USD -> INR exchange rate as on today, restoring/removing it
+		# afterwards so other tests are not affected.
 		exchange_name = frappe.db.get_value(
 			"Currency Exchange",
 			{"from_currency": "USD", "to_currency": "INR", "date": nowdate(), "for_selling": 1},
 		)
+		original_rate = None
 		if exchange_name:
+			original_rate = frappe.db.get_value("Currency Exchange", exchange_name, "exchange_rate")
 			frappe.db.set_value("Currency Exchange", exchange_name, "exchange_rate", document_date_rate)
 		else:
-			frappe.get_doc(
+			exchange_name = frappe.get_doc(
 				{
 					"doctype": "Currency Exchange",
 					"from_currency": "USD",
@@ -278,19 +282,25 @@ class TestSalesOrder(ERPNextTestSuite):
 					"for_selling": 1,
 					"for_buying": 1,
 				}
-			).insert()
+			).insert().name
 
-		so = make_sales_order(currency="USD", do_not_save=True)
-		so.conversion_rate = so_rate
-		so.plc_conversion_rate = so_rate
-		so.insert()
-		so.submit()
-		self.assertEqual(flt(so.conversion_rate), so_rate)
+		try:
+			so = make_sales_order(currency="USD", do_not_save=True)
+			so.conversion_rate = so_rate
+			so.plc_conversion_rate = so_rate
+			so.insert()
+			so.submit()
+			self.assertEqual(flt(so.conversion_rate), so_rate)
 
-		# Sales Invoice / Delivery Note ignore the Sales Order rate and fetch the
-		# exchange rate as on their own document date.
-		self.assertEqual(flt(make_sales_invoice(so.name).conversion_rate), document_date_rate)
-		self.assertEqual(flt(make_delivery_note(so.name).conversion_rate), document_date_rate)
+			# Sales Invoice / Delivery Note ignore the Sales Order rate and fetch
+			# the exchange rate as on their own document date.
+			self.assertEqual(flt(make_sales_invoice(so.name).conversion_rate), document_date_rate)
+			self.assertEqual(flt(make_delivery_note(so.name).conversion_rate), document_date_rate)
+		finally:
+			if original_rate is not None:
+				frappe.db.set_value("Currency Exchange", exchange_name, "exchange_rate", original_rate)
+			else:
+				frappe.delete_doc("Currency Exchange", exchange_name, force=True)
 
 	def test_so_billed_amount_against_return_entry(self):
 		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
