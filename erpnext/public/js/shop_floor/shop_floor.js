@@ -80,10 +80,10 @@ class ShopFloor {
 					<div class="sf-topbar-right">
 						<button class="btn btn-default btn-sm sf-btn-theme"></button>
 						<button class="btn btn-default btn-sm sf-btn-home" title="${__("Home")}">
-							${frappe.utils.icon("home", "sm")}
+							${frappe.utils.icon("house", "sm")}
 						</button>
 						<button class="btn btn-default btn-sm sf-btn-refresh" title="${__("Refresh")} (r)">
-							${frappe.utils.icon("refresh", "sm")}
+							${frappe.utils.icon("refresh-cw", "sm")}
 						</button>
 						<button class="btn btn-default btn-sm sf-btn-scan" title="${__("Scan Job Card")} (b)">
 							${frappe.utils.icon("scan", "sm")}
@@ -100,6 +100,9 @@ class ShopFloor {
 		`);
 
 		this.app = this.wrapper.find(".sf-app");
+		this.brand_icon = `<img class="sf-brand-icon" src="/assets/erpnext/images/erpnext-logo.svg" alt="${__(
+			"ERPNext"
+		)}">`;
 		this.topbar_left = this.wrapper.find(".sf-topbar-left");
 		this.topbar_center = this.wrapper.find(".sf-topbar-center");
 		this.body = this.wrapper.find(".sf-body");
@@ -154,7 +157,7 @@ class ShopFloor {
 
 		if (this.view === "manager") {
 			this.topbar_left.html(`
-				<span class="sf-title">${__("Shop Floor")}</span>
+				<span class="sf-title">${this.brand_icon}${__("Shop Floor")}</span>
 				${toggle}
 				<div class="sf-tabs">
 					${MANAGER_BUCKETS.map(
@@ -191,7 +194,9 @@ class ShopFloor {
 				this.toggle_job_cards_only(e.target.checked);
 			});
 		} else {
-			this.topbar_left.html(`<span class="sf-title">${__("Shop Floor")}</span>${toggle}`);
+			this.topbar_left.html(
+				`<span class="sf-title">${this.brand_icon}${__("Shop Floor")}</span>${toggle}`
+			);
 			this.build_operator_filters();
 		}
 
@@ -466,9 +471,17 @@ class ShopFloor {
 				this.workstation = workstation;
 				this.work_order = work_order;
 				this.compute_state();
+				this.dedupe_today_sessions();
 				this.render_operator($container);
 			},
 		});
+	}
+
+	// A job card already shown under Completed Operations shouldn't repeat in
+	// Today's Sessions — keep it in Completed Operations only.
+	dedupe_today_sessions() {
+		const shown = new Set((this.completed || []).map((jc) => jc.name));
+		this.today_sessions = (this.today_sessions || []).filter((s) => !shown.has(s.name));
 	}
 
 	// Re-fetch whichever operator content is currently on screen (used after every action).
@@ -1570,7 +1583,8 @@ class ShopFloor {
 			.sf-toggle input { cursor: pointer; width: 15px; height: 15px; margin: 0; }
 			.sf-topbar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 			.sf-btn-theme { font-size: 15px; line-height: 1; min-width: 30px; }
-			.sf-title { font-size: 18px; font-weight: 700; color: var(--text-color); }
+			.sf-title { font-size: 18px; font-weight: 700; color: var(--text-color); display: inline-flex; align-items: center; gap: 8px; }
+			.sf-title .sf-brand-icon { flex-shrink: 0; width: 22px; height: 22px; border-radius: 5px; }
 
 			.sf-view-toggle { display: inline-flex; border: 1px solid var(--border-color); border-radius: var(--border-radius); overflow: hidden; }
 			.sf-view-btn { border: none; background: var(--fg-color); padding: 5px 12px; font-size: 13px; color: var(--text-muted); cursor: pointer; }
@@ -1584,6 +1598,7 @@ class ShopFloor {
 				font-size: 14px; color: var(--text-muted); cursor: pointer;
 			}
 			.sf-tab:hover { background: var(--bg-color); }
+			.sf-tab:focus, .sf-tab:focus-visible { outline: none; box-shadow: none; }
 			.sf-tab.active { background: var(--control-bg); color: var(--text-color); font-weight: 600; }
 			.sf-tab-count { font-variant-numeric: tabular-nums; color: var(--text-muted); }
 			.sf-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
@@ -1637,10 +1652,10 @@ class ShopFloor {
 			   drawn with it disappears on dark cards. Light theme keeps the dark ring; dark theme
 			   needs an accent colour — a light-gray ring on gray cards is still too subtle. */
 			.sf-wo-card.sf-selected { border-color: var(--primary-color, var(--primary)); }
-			.sf-wo-card.sf-focused { box-shadow: 0 0 0 2px var(--primary-color, var(--primary)); }
+			.sf-wo-card.sf-focused { box-shadow: 0 0 0 1px var(--primary-color, var(--primary)); }
 			[data-theme="dark"] .sf-wo-card.sf-selected { border-color: var(--blue-500, #2490ef); }
 			[data-theme="dark"] .sf-wo-card.sf-focused {
-				box-shadow: 0 0 0 3px var(--blue-500, #2490ef);
+				box-shadow: 0 0 0 1px var(--blue-500, #2490ef);
 				border-color: transparent;
 			}
 			.sf-wo-top { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
@@ -1666,7 +1681,7 @@ class ShopFloor {
 			.sf-wo-progress-block { margin-bottom: 12px; }
 			.sf-wo-progress-label { display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
 			.sf-wo-progress-count { font-weight: 600; color: var(--text-color); font-variant-numeric: tabular-nums; }
-			.sf-progress { display: flex; height: 10px; border-radius: 6px; background: var(--gray-300, #d1d5db); overflow: hidden; }
+			.sf-progress { display: flex; height: 10px; border-radius: 6px; background: var(--gray-200, #d1d5db); overflow: hidden; }
 			[data-theme="dark"] .sf-progress { background: var(--gray-700, #374151); }
 			.sf-progress-seg { height: 100%; transition: width 0.3s ease; }
 			.sf-seg-done { background: var(--green-400, #9ae6b4); }

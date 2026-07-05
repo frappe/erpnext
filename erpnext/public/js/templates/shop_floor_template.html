@@ -83,7 +83,11 @@
 
 	/* Active job card — denser than before */
 	/* Keyboard focus highlight for arrow-key navigation in the operator view. */
-	[data-sf-focusable].sf-focused { box-shadow: 0 0 0 2px var(--primary); border-radius: var(--border-radius); outline: none; }
+	[data-sf-focusable].sf-focused {
+		box-shadow: 0 0 0 1px var(--primary-color, var(--primary)); border-radius: var(--border-radius); outline: none;
+		border: 1px solid var(--border-color);
+		border-radius: 12px;
+	}
 	.mes-job {
 		border: 1px solid var(--border-color);
 		background: var(--fg-color);
