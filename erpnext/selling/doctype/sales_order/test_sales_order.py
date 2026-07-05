@@ -272,17 +272,21 @@ class TestSalesOrder(ERPNextTestSuite):
 			original_rate = frappe.db.get_value("Currency Exchange", exchange_name, "exchange_rate")
 			frappe.db.set_value("Currency Exchange", exchange_name, "exchange_rate", document_date_rate)
 		else:
-			exchange_name = frappe.get_doc(
-				{
-					"doctype": "Currency Exchange",
-					"from_currency": "USD",
-					"to_currency": "INR",
-					"date": nowdate(),
-					"exchange_rate": document_date_rate,
-					"for_selling": 1,
-					"for_buying": 1,
-				}
-			).insert().name
+			exchange_name = (
+				frappe.get_doc(
+					{
+						"doctype": "Currency Exchange",
+						"from_currency": "USD",
+						"to_currency": "INR",
+						"date": nowdate(),
+						"exchange_rate": document_date_rate,
+						"for_selling": 1,
+						"for_buying": 1,
+					}
+				)
+				.insert()
+				.name
+			)
 
 		try:
 			so = make_sales_order(currency="USD", do_not_save=True)
