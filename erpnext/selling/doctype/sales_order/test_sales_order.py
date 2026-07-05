@@ -255,6 +255,43 @@ class TestSalesOrder(ERPNextTestSuite):
 		si1 = make_sales_invoice(so.name)
 		self.assertEqual(len(si1.get("items")), 0)
 
+	def test_document_date_exchange_rate(self):
+		# The exchange rate as on the target document's own date, deliberately
+		# different from the rate stored on the Sales Order.
+		so_rate = 95.0
+		document_date_rate = 80.0
+
+		exchange_name = frappe.db.get_value(
+			"Currency Exchange",
+			{"from_currency": "USD", "to_currency": "INR", "date": nowdate(), "for_selling": 1},
+		)
+		if exchange_name:
+			frappe.db.set_value("Currency Exchange", exchange_name, "exchange_rate", document_date_rate)
+		else:
+			frappe.get_doc(
+				{
+					"doctype": "Currency Exchange",
+					"from_currency": "USD",
+					"to_currency": "INR",
+					"date": nowdate(),
+					"exchange_rate": document_date_rate,
+					"for_selling": 1,
+					"for_buying": 1,
+				}
+			).insert()
+
+		so = make_sales_order(currency="USD", do_not_save=True)
+		so.conversion_rate = so_rate
+		so.plc_conversion_rate = so_rate
+		so.insert()
+		so.submit()
+		self.assertEqual(flt(so.conversion_rate), so_rate)
+
+		# Sales Invoice / Delivery Note ignore the Sales Order rate and fetch the
+		# exchange rate as on their own document date.
+		self.assertEqual(flt(make_sales_invoice(so.name).conversion_rate), document_date_rate)
+		self.assertEqual(flt(make_delivery_note(so.name).conversion_rate), document_date_rate)
+
 	def test_so_billed_amount_against_return_entry(self):
 		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
 

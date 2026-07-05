@@ -75,6 +75,11 @@ def make_sales_invoice(
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
 
 	def set_missing_values(source, target):
+		# Always fetch the exchange rate as on the Invoice date instead of
+		# carrying it over from the Delivery Note (the Invoice may be raised much
+		# later, or multiple Delivery Notes with different rates may be merged).
+		target.conversion_rate = 0.0
+		target.plc_conversion_rate = 0.0
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 

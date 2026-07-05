@@ -272,6 +272,12 @@ def make_delivery_note(
 			# Skip pricing rule when the dn is creating from the pick list
 			target.ignore_pricing_rule = 1
 
+		# Always fetch the exchange rate as on the Delivery Note date instead of
+		# carrying it over from the Sales Order (the Delivery Note may be raised
+		# later, or multiple Sales Orders with different rates may be merged).
+		target.conversion_rate = 0.0
+		target.plc_conversion_rate = 0.0
+
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
@@ -454,6 +460,11 @@ def make_sales_invoice(
 
 	def set_missing_values(source, target):
 		target.flags.ignore_permissions = True
+		# Always fetch the exchange rate as on the Invoice date instead of
+		# carrying it over from the Sales Order (the Invoice may be raised much
+		# later, or multiple Sales Orders with different rates may be merged).
+		target.conversion_rate = 0.0
+		target.plc_conversion_rate = 0.0
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
