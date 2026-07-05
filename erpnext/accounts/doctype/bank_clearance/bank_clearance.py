@@ -97,6 +97,12 @@ class BankClearance(Document):
 		entries_to_update = []
 		no_change_entries = []
 
+		def normalize_clearance_date(date_value):
+			"""Normalize clearance date - treat None, empty string, and '0000-00-00' as None"""
+			if date_value in (None, "", "0000-00-00"):
+				return None
+			return getdate(date_value)
+
 		def validate_entry(d):
 			is_valid = True
 			if not d.payment_document:
@@ -138,65 +144,71 @@ class BankClearance(Document):
 
 		for d in entries_to_update:
 			if d.payment_document == "Sales Invoice":
-				old_clearance_date = frappe.db.get_value(
+				# Get ALL matching payment rows, not just the first one
+				existing_payments = frappe.db.get_all(
 					"Sales Invoice Payment",
-					{
+					filters={
 						"parent": d.payment_entry,
 						"account": self.account,
 						"amount": [">", 0],
 					},
-					"clearance_date",
+					fields=["clearance_date"],
+					pluck="clearance_date",
 				)
-				if d.clearance_date or old_clearance_date:
-					# Compare: None vs value = different, value vs None = different, both values = use getdate
-					if (d.clearance_date is None and old_clearance_date is not None) or \
-					   (d.clearance_date is not None and old_clearance_date is None) or \
-					   (d.clearance_date and old_clearance_date and getdate(d.clearance_date) != getdate(old_clearance_date)):
-						frappe.db.set_value(
-							"Sales Invoice Payment",
-							{"parent": d.payment_entry, "account": self.get("account"), "amount": [">", 0]},
-							"clearance_date",
-							d.clearance_date,
-						)
-						sales_invoice = frappe.get_lazy_doc("Sales Invoice", d.payment_entry)
-						sales_invoice.add_comment(
-							"Comment",
-							_("Clearance date changed from {0} to {1} via Bank Clearance Tool").format(
-								old_clearance_date, d.clearance_date
-							),
-						)
-					else:
-						no_change_entries.append(d.payment_entry)
+
+				# Normalize the target date
+				target_date = normalize_clearance_date(d.clearance_date)
+
+				# Check if ALL existing rows already have the target date
+				all_rows_match = all(
+					normalize_clearance_date(old_date) == target_date for old_date in existing_payments
+				)
+
+				if not all_rows_match:
+					# At least one row needs updating
+					old_clearance_date = existing_payments[0] if existing_payments else None
+
+					frappe.db.set_value(
+						"Sales Invoice Payment",
+						{"parent": d.payment_entry, "account": self.get("account"), "amount": [">", 0]},
+						"clearance_date",
+						d.clearance_date,
+					)
+					sales_invoice = frappe.get_lazy_doc("Sales Invoice", d.payment_entry)
+					sales_invoice.add_comment(
+						"Comment",
+						_("Clearance date changed from {0} to {1} via Bank Clearance Tool").format(
+							old_clearance_date, d.clearance_date
+						),
+					)
 				else:
-					# Both clearance dates are None - no change needed
 					no_change_entries.append(d.payment_entry)
 
 			else:
 				payment_entry = frappe.get_lazy_doc(d.payment_document, d.payment_entry)
-				old_clearance_date = payment_entry.clearance_date
 
-				if d.clearance_date or old_clearance_date:
-					# Compare: None vs value = different, value vs None = different, both values = use getdate
-					if (d.clearance_date is None and old_clearance_date is not None) or \
-					   (d.clearance_date is not None and old_clearance_date is None) or \
-					   (d.clearance_date and old_clearance_date and getdate(d.clearance_date) != getdate(old_clearance_date)):
-						# using db_set to trigger notification
-						payment_entry.db_set("clearance_date", d.clearance_date)
+				# Normalize dates for comparison
+				old_date = normalize_clearance_date(payment_entry.clearance_date)
+				target_date = normalize_clearance_date(d.clearance_date)
 
-						payment_entry.add_comment(
-							"Comment",
-							_("Clearance date changed from {0} to {1} via Bank Clearance Tool").format(
-								old_clearance_date, d.clearance_date
-							),
-						)
-					else:
-						no_change_entries.append(d.payment_entry)
+				if old_date != target_date:
+					# Dates are different - proceed with update
+					old_clearance_date = payment_entry.clearance_date
+
+					# using db_set to trigger notification
+					payment_entry.db_set("clearance_date", d.clearance_date)
+
+					payment_entry.add_comment(
+						"Comment",
+						_("Clearance date changed from {0} to {1} via Bank Clearance Tool").format(
+							old_clearance_date, d.clearance_date
+						),
+					)
 				else:
-					# Both clearance dates are None - no change needed
 					no_change_entries.append(d.payment_entry)
 
 		self.get_payment_entries()
-		
+
 		if no_change_entries:
 			if len(no_change_entries) == len(entries_to_update):
 				msgprint(_("No changes made. Clearance date already set to the specified date."))
