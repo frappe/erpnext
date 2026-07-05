@@ -24,7 +24,9 @@ frappe.query_reports["Trial Balance"] = {
 						company: company,
 					},
 					callback: function (r) {
-						if (r.message) {
+						// Ignore a stale response from a previous company if the
+						// user has since switched to a different company.
+						if (r.message && query_report.get_values().company === company) {
 							var fy = r.message;
 							frappe.query_report.set_filter_value({
 								fiscal_year: fy[0],
