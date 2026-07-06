@@ -39,7 +39,7 @@
 					"is_group": 1,
 					"root_type": "Asset",
 					"account_type": "Bank",
-					"Cash in Bank - BPI Mandaluyong": {
+					"Cash in Bank - Checking Account": {
 						"account_number": "1201",
 						"is_group": 0,
 						"root_type": "Asset",
@@ -110,30 +110,6 @@
 						"account_number": "1511",
 						"is_group": 0,
 						"root_type": "Asset"
-					},
-					"Direct Labor": {
-						"account_number": "1520",
-						"is_group": 1,
-						"root_type": "Asset",
-						"account_type": "Capital Work in Progress",
-						"Direct Labor": {
-							"account_number": "1521",
-							"is_group": 0,
-							"root_type": "Asset",
-							"account_type": "Capital Work in Progress"
-						}
-					},
-					"Factory Overhead": {
-						"account_number": "1530",
-						"is_group": 1,
-						"root_type": "Asset",
-						"account_type": "Capital Work in Progress",
-						"Factory Overhead": {
-							"account_number": "1531",
-							"is_group": 0,
-							"root_type": "Asset",
-							"account_type": "Capital Work in Progress"
-						}
 					}
 				},
 				"Finished Goods": {
