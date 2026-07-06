@@ -1,78 +1,4 @@
 {
- "allowed_users": [
-  {
-   "user": "Administrator"
-  },
-  {
-   "user": "Guest"
-  },
-  {
-   "user": "accounts@test.com"
-  },
-  {
-   "user": "ankush@erpnext.com"
-  },
-  {
-   "user": "faris@erpnext.com"
-  },
-  {
-   "user": "mention_test_user@example.com"
-  },
-  {
-   "user": "project@frappe.io"
-  },
-  {
-   "user": "rushabh@erpnext.com"
-  },
-  {
-   "user": "saqib@erpnext.com"
-  },
-  {
-   "user": "soham@frappe.io"
-  },
-  {
-   "user": "sohamengineer123@gmail.com"
-  },
-  {
-   "user": "sohamkulkarns9@gmail.com"
-  },
-  {
-   "user": "stock@xyz.com"
-  },
-  {
-   "user": "sydel@frappe.io"
-  },
-  {
-   "user": "test'5@example.com"
-  },
-  {
-   "user": "test1@example.com"
-  },
-  {
-   "user": "test2@example.com"
-  },
-  {
-   "user": "test3@example.com"
-  },
-  {
-   "user": "test4@example.com"
-  },
-  {
-   "user": "test@example.com"
-  },
-  {
-   "user": "test@portal.com"
-  },
-  {
-   "user": "testpassword@example.com"
-  },
-  {
-   "user": "testperm@example.com"
-  },
-  {
-   "user": "web@web.com"
-  }
- ],
  "app": "erpnext",
  "charts": [
   {
@@ -165,6 +91,16 @@
    "label": "Pricing Rule",
    "link_count": 0,
    "link_to": "Pricing Rule",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Item Standard Cost",
+   "link_count": 0,
+   "link_to": "Item Standard Cost",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -863,7 +799,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-07-03 12:11:34.739020",
+ "modified": "2026-07-05 12:08:07.187999",
  "modified_by": "Administrator",
  "module": "Stock",
  "module_onboarding": "Stock Onboarding",
@@ -1212,6 +1148,19 @@
    "link_to": "Serial and Batch Bundle",
    "link_type": "DocType",
    "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 1,
+   "collapsible": 1,
+   "default_workspace": 0,
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Item Standard Cost",
+   "link_to": "Item Standard Cost",
+   "link_type": "DocType",
+   "open_in_new_tab": 1,
    "show_arrow": 0,
    "type": "Link"
   },
