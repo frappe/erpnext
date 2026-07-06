@@ -100,8 +100,6 @@ class StockBalanceReport:
 			self.filters["show_warehouse_wise_stock"] = True
 			item_wise_fifo_queue = FIFOSlots(self.filters, self.sle_entries).generate()
 
-		_func = itemgetter(1)
-
 		del self.sle_entries
 
 		sre_details = self.get_sre_reserved_qty_details()
@@ -126,16 +124,7 @@ class StockBalanceReport:
 
 				stock_ageing_data = {"average_age": 0, "earliest_age": 0, "latest_age": 0}
 				if opening_fifo_queue:
-					fifo_queue = sorted(filter(_func, opening_fifo_queue), key=_func)
-					fifo_queue = normalize_fifo_queue(fifo_queue)
-					if not fifo_queue:
-						continue
-
-					to_date = self.to_date
-					stock_ageing_data["average_age"] = get_average_age(fifo_queue, to_date)
-					stock_ageing_data["earliest_age"] = date_diff(to_date, fifo_queue[0][1])
-					stock_ageing_data["latest_age"] = date_diff(to_date, fifo_queue[-1][1])
-					stock_ageing_data["fifo_queue"] = fifo_queue
+					stock_ageing_data.update(get_stock_ageing_data(opening_fifo_queue, self.to_date))
 
 				report_data.update(stock_ageing_data)
 
@@ -692,6 +681,21 @@ class StockBalanceReport:
 			row[1] = getdate(row[1])
 
 		return opening_fifo_queue
+
+
+def get_stock_ageing_data(fifo_queue: list, to_date: str) -> dict:
+	stock_ageing_data = {"average_age": 0, "earliest_age": 0, "latest_age": 0}
+	fifo_queue = sorted(filter(itemgetter(1), normalize_fifo_queue(fifo_queue)), key=itemgetter(1))
+
+	if not fifo_queue:
+		return stock_ageing_data
+
+	stock_ageing_data["average_age"] = get_average_age(fifo_queue, to_date)
+	stock_ageing_data["earliest_age"] = date_diff(to_date, fifo_queue[0][1])
+	stock_ageing_data["latest_age"] = date_diff(to_date, fifo_queue[-1][1])
+	stock_ageing_data["fifo_queue"] = fifo_queue
+
+	return stock_ageing_data
 
 
 def filter_items_with_no_transactions(

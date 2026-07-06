@@ -103,8 +103,8 @@ class Budget(Document):
 				elif account_details.report_type != "Profit and Loss":
 					frappe.throw(
 						_(
-							"Budget cannot be assigned against {0}, as it's not an Income or Expense account"
-						).format(d.account)
+							"Budget cannot be assigned against {0}, as its Root Type is not of Income or Expense"
+						).format(self.account)
 					)
 
 				if d.account in account_list:

@@ -2924,6 +2924,24 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		# Test 4 - Since this PI is overbilled by 130% and only 120% is allowed, it will fail
 		self.assertRaises(frappe.ValidationError, pi.submit)
 
+	@change_settings("Accounts Settings", {"over_billing_allowance": 0})
+	def test_non_stock_item_over_billing_against_po_is_blocked(self):
+		service_item = create_item(
+			"_Test Service Item Non Stock PI",
+			is_stock_item=0,
+			is_purchase_item=1,
+		).name
+
+		po = create_purchase_order(item_code=service_item, qty=5, rate=100, do_not_save=False)
+		po.submit()
+
+		pi = make_pi_from_po(po.name)
+		pi.items[0].qty = 10  # overbill by 100 %
+		pi.save()
+
+		with self.assertRaises(frappe.ValidationError):
+			pi.submit()
+
 	def test_discount_percentage_not_set_when_amount_is_manually_set(self):
 		pi = make_purchase_invoice(do_not_save=True)
 		discount_amount = 7
@@ -2935,8 +2953,6 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		pi.save()
 		self.assertEqual(pi.discount_amount, discount_amount)
 
-<<<<<<< HEAD
-=======
 	def test_returned_item_purchase_receipt(self):
 		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
 			make_purchase_receipt as make_purchase_receipt_from_pi,
@@ -2960,7 +2976,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		pr = make_purchase_receipt_from_pi(pi.name)
 		self.assertFalse(pr.items)
 
-	@ERPNextTestSuite.change_settings("Accounts Settings", {"enable_common_party_accounting": True})
+	@change_settings("Accounts Settings", {"enable_common_party_accounting": True})
 	def test_purchase_invoice_return_common_party_je_has_no_negative_amounts(self):
 		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
 			make_customer,
@@ -3014,7 +3030,6 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		finally:
 			frappe.db.set_value("Company", "_Test Company", "accounts_frozen_till_date", None)
 
->>>>>>> f4b827cb3d (fix: honor account freezing date when cancelling vouchers)
 
 def set_advance_flag(company, flag, default_account):
 	frappe.db.set_value(

@@ -226,7 +226,6 @@ def set_multiple_status(names, status):
 @frappe.whitelist()
 def set_status(name, status):
 	frappe.has_permission("Issue", "write", name, throw=True)
-
 	frappe.db.set_value("Issue", name, "status", status)
 
 
