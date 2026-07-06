@@ -315,27 +315,74 @@ class StockController(AccountsController):
 			validate_warehouse_company(w, self.company)
 
 	def update_billing_percentage(self, update_modified=True):
-		target_ref_field = "amount"
+		args = {
+			"target_dt": self.doctype + " Item",
+			"target_parent_dt": self.doctype,
+			"target_parent_field": "per_billed",
+			"target_ref_field": "amount",
+			"target_field": "billed_amt",
+			"name": self.name,
+		}
+
 		if self.doctype == "Delivery Note":
-			total_amount = total_returned = 0
-			for item in self.items:
-				total_amount += flt(item.amount)
-				total_returned += flt(item.returned_qty * item.rate)
+			# Bill by amount, falling back to qty when the invoiced amount is short (e.g. rate drop).
+			args["billing_percentage"] = self.get_delivery_note_billing_percentage()
 
-			if total_returned < total_amount:
-				target_ref_field = {"SUB": ["amount", {"MUL": ["returned_qty", "rate"]}], "as": "ref_amount"}
+		self._update_percent_field(args, update_modified)
 
-		self._update_percent_field(
-			{
-				"target_dt": self.doctype + " Item",
-				"target_parent_dt": self.doctype,
-				"target_parent_field": "per_billed",
-				"target_ref_field": target_ref_field,
-				"target_field": "billed_amt",
-				"name": self.name,
-			},
-			update_modified,
+	def get_delivery_note_billing_percentage(self):
+		invoiced_qty_map = self.get_invoiced_qty_map()
+
+		# Read fresh values; billed_amt is set on the rows just before this runs.
+		items = frappe.get_all(
+			"Delivery Note Item",
+			filters={"parent": self.name, "parenttype": "Delivery Note"},
+			fields=["name", "qty", "returned_qty", "rate", "amount", "billed_amt"],
 		)
+		total_amount = sum(flt(item.amount) for item in items)
+		total_returned = sum(flt(item.returned_qty) * flt(item.rate) for item in items)
+		# Preserve the original amount basis once the entire Delivery Note is returned.
+		use_original_amount = total_returned >= total_amount
+
+		total_ref = total_billed = 0.0
+		for item in items:
+			net_amount = abs(
+				flt(item.amount)
+				if use_original_amount
+				else flt(item.amount) - flt(item.returned_qty) * flt(item.rate)
+			)
+			if not net_amount:
+				continue
+
+			# Amount basis, capped at the delivery amount (mirrors _update_percent_field).
+			amount_billed = min(abs(flt(item.billed_amt)), net_amount)
+
+			# Qty basis: only raises billing when the amount is short; SO/SI-linked rows have
+			# no invoiced qty here, so the amount basis wins via max() below.
+			net_qty = flt(item.qty) - flt(item.returned_qty)
+			invoiced_qty = flt(invoiced_qty_map.get(item.name, 0))
+			qty_billed = net_amount * min(invoiced_qty / net_qty, 1) if net_qty else 0
+
+			total_ref += net_amount
+			total_billed += max(amount_billed, qty_billed)
+
+		return round(total_billed / total_ref * 100, 6) if total_ref else 0
+
+	def get_invoiced_qty_map(self):
+		from erpnext.stock.doctype.delivery_note.services.billing_status import (
+			get_invoiced_qty_against_dn,
+			get_invoiced_qty_based_on_so,
+		)
+
+		# Direct Delivery Note -> Sales Invoice billing
+		qty_map = get_invoiced_qty_against_dn(delivery_note=self.name)
+
+		# Sales Order -> Delivery Note -> Sales Invoice-from-SO billing: attribute qty via
+		# so_detail using the same FIFO distribution as update_billed_amount_based_on_so.
+		for so_detail in {item.so_detail for item in self.items if item.so_detail}:
+			qty_map.update(get_invoiced_qty_based_on_so(so_detail))
+
+		return qty_map
 
 	def validate_inspection(self):
 		from erpnext.stock.services.quality_inspection_service import QualityInspectionService

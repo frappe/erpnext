@@ -2706,6 +2706,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 		returned = frappe.get_doc("Delivery Note", dn_return.name)
 		returned.update_prevdoc_status()
 		dn.load_from_db()
+		dn.update_billing_percentage(update_modified=False)
+		dn.load_from_db()
 		self.assertEqual(dn.per_billed, 100)
 		self.assertEqual(dn.per_returned, 100)
 		self.assertEqual(returned.status, "Return")
