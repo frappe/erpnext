@@ -172,9 +172,8 @@ class BankClearance(Document):
 					normalized_dates = [normalize_clearance_date(d) for d in existing_payments]
 					unique_old_dates = list(set(normalized_dates))
 					if len(unique_old_dates) > 1:
-						non_null_dates = [d for d in unique_old_dates if d]
-						old_dates_str = ", ".join(str(d) for d in sorted(non_null_dates))
-						old_clearance_date = f"multiple dates ({old_dates_str})" if old_dates_str else None
+						date_strs = [str(d) if d else "None" for d in sorted(unique_old_dates, key=lambda x: (x is None, x))]
+						old_clearance_date = f"multiple dates ({', '.join(date_strs)})"
 					else:
 						old_clearance_date = unique_old_dates[0] if unique_old_dates else None
 
