@@ -169,7 +169,12 @@ class BankClearance(Document):
 
 				if not all_rows_match:
 					# At least one row needs updating
-					old_clearance_date = existing_payments[0] if existing_payments else None
+					unique_old_dates = list(set(existing_payments))
+					if len(unique_old_dates) > 1:
+						old_dates_str = ", ".join(str(d) for d in sorted(unique_old_dates) if d)
+						old_clearance_date = f"multiple dates ({old_dates_str})" if old_dates_str else None
+					else:
+						old_clearance_date = unique_old_dates[0] if unique_old_dates else None
 
 					frappe.db.set_value(
 						"Sales Invoice Payment",
