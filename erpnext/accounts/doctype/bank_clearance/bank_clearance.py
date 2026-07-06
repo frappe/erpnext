@@ -109,7 +109,10 @@ class BankClearance(Document):
 				invalid_document.append(str(d.idx))
 				is_valid = False
 
-			if d.clearance_date and d.cheque_date and getdate(d.clearance_date) < getdate(d.cheque_date):
+			clearance_date = normalize_clearance_date(d.clearance_date)
+			cheque_date = normalize_clearance_date(d.cheque_date)
+
+			if clearance_date and cheque_date and clearance_date < cheque_date:
 				invalid_cheque_date.append(str(d.idx))
 				is_valid = False
 
