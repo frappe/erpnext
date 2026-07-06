@@ -171,7 +171,8 @@ class BankClearance(Document):
 					# At least one row needs updating
 					unique_old_dates = list(set(existing_payments))
 					if len(unique_old_dates) > 1:
-						old_dates_str = ", ".join(str(d) for d in sorted(unique_old_dates) if d)
+						non_null_dates = [d for d in unique_old_dates if d]
+						old_dates_str = ", ".join(str(d) for d in sorted(non_null_dates))
 						old_clearance_date = f"multiple dates ({old_dates_str})" if old_dates_str else None
 					else:
 						old_clearance_date = unique_old_dates[0] if unique_old_dates else None
