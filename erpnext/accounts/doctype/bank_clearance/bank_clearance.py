@@ -169,7 +169,8 @@ class BankClearance(Document):
 
 				if not all_rows_match:
 					# At least one row needs updating
-					unique_old_dates = list(set(existing_payments))
+					normalized_dates = [normalize_clearance_date(d) for d in existing_payments]
+					unique_old_dates = list(set(normalized_dates))
 					if len(unique_old_dates) > 1:
 						non_null_dates = [d for d in unique_old_dates if d]
 						old_dates_str = ", ".join(str(d) for d in sorted(non_null_dates))
