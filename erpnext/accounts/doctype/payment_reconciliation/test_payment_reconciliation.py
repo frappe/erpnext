@@ -2111,7 +2111,7 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		pr.reconcile()
 
 		si.reload()
-		self.assertEqual(si.status, "Partly Paid")
+		self.assertEqual(si.status, "Overdue")
 		# check PR tool output post reconciliation
 		self.assertEqual(len(pr.get("invoices")), 1)
 		self.assertEqual(pr.get("invoices")[0].get("outstanding_amount"), 120)
