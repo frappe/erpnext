@@ -6,7 +6,7 @@ from frappe import _
 from frappe.utils import cstr, flt
 from frappe.utils.file_manager import remove_file
 
-from erpnext.controllers.taxes_and_totals import get_itemised_tax
+from erpnext.controllers.taxes_and_totals import set_item_wise_tax_rate
 from erpnext.regional.italy import state_codes
 from erpnext.stock.utils import get_default_stock_uom
 
@@ -18,16 +18,11 @@ def update_itemised_tax_data(doc):
 	if doc.doctype == "Purchase Invoice":
 		return
 
-	itemised_tax = get_itemised_tax(doc)
+	set_item_wise_tax_rate(doc)
 
-	for row in doc.items:
-		tax_rate = 0.0
-		if itemised_tax.get(row.item_code):
-			tax_rate = sum([tax.get("tax_rate", 0) for d, tax in itemised_tax.get(row.item_code).items()])
-
-		row.tax_rate = flt(tax_rate, row.precision("tax_rate"))
-		row.tax_amount = flt((row.net_amount * tax_rate) / 100, row.precision("net_amount"))
-		row.total_amount = flt((row.net_amount + row.tax_amount), row.precision("total_amount"))
+	for item in doc.items:
+		item.tax_amount = flt((item.net_amount * item.tax_rate) / 100, item.precision("net_amount"))
+		item.total_amount = flt((item.net_amount + item.tax_amount), item.precision("total_amount"))
 
 
 @frappe.whitelist()

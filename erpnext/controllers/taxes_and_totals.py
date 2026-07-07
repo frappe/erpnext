@@ -1250,7 +1250,8 @@ def get_itemised_tax_breakup_header(item_doctype, tax_accounts):
 def get_itemised_tax_breakup_data(doc):
 	itemised_tax = get_itemised_tax(doc)
 	itemised_tax_data = []
-	for item_code, taxes in itemised_tax.items():
+	for item, taxes in itemised_tax.items():
+		item_code = item.item_code or item.item_name
 		taxable_amount = next(iter(taxes.values())).get("taxable_amount")
 		itemised_tax_data.append(frappe._dict({"item": item_code, "taxable_amount": taxable_amount, **taxes}))
 
@@ -1258,8 +1259,12 @@ def get_itemised_tax_breakup_data(doc):
 
 
 def get_itemised_tax(doc, with_tax_account=False):
+	"""
+	Itemised tax keyed by the item line object - one entry per item line.
+	"""
 	itemised_tax = {}
 	precision = doc.precision("tax_amount", "taxes")
+	conversion_rate = doc.conversion_rate or 1
 
 	for row in doc.get("_item_wise_tax_details"):
 		item = row.get("item")
@@ -1267,11 +1272,10 @@ def get_itemised_tax(doc, with_tax_account=False):
 		if not item or not tax:
 			continue
 
-		item_code = item.item_code or item.item_name
 		if getattr(tax, "category", None) and tax.category == "Valuation":
 			continue
 
-		tax_info = itemised_tax.setdefault(item_code, frappe._dict()).setdefault(
+		tax_info = itemised_tax.setdefault(item, frappe._dict()).setdefault(
 			tax.description,
 			frappe._dict(
 				{
@@ -1283,13 +1287,35 @@ def get_itemised_tax(doc, with_tax_account=False):
 		)
 
 		tax_info.tax_amount += flt(row.amount, precision)
-		conversion_rate = doc.conversion_rate or 1
 		tax_info.taxable_amount += flt(row.taxable_amount / conversion_rate, precision)
 
 		if with_tax_account:
 			tax_info.tax_account = tax.account_head
 
 	return itemised_tax
+
+
+def set_item_wise_tax_rate(doc):
+	"""Set each item line's total applicable tax rate on the item object.
+
+	Sums the rates of the line's taxes from ``_item_wise_tax_details`` (skipping valuation
+	taxes) directly onto ``item.tax_rate``. Regional callers (e.g. Italy, UAE) then derive
+	``tax_amount``/``total_amount`` from it.
+	"""
+	for item in doc.get("items") or []:
+		item.tax_rate = 0.0
+
+	for row in doc.get("_item_wise_tax_details") or []:
+		item = row.get("item")
+		tax = row.get("tax")
+		if not item or not tax:
+			continue
+		if getattr(tax, "category", None) and tax.category == "Valuation":
+			continue
+		item.tax_rate += flt(row.rate)
+
+	for item in doc.get("items") or []:
+		item.tax_rate = flt(item.tax_rate, item.precision("tax_rate"))
 
 
 def get_rounded_tax_amount(itemised_tax, precision):

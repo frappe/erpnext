@@ -1,6 +1,7 @@
 import frappe
 from frappe.utils import flt
 
+from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 from erpnext.tests.utils import ERPNextTestSuite, change_settings
 
 
@@ -534,3 +535,121 @@ class TestTaxesAndTotals(ERPNextTestSuite):
 		]
 
 		self.assertEqual(actual_values, expected_values)
+
+	def _append_item_with_tax_template(self, item_tax_template):
+		self.doc.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"qty": 1,
+				"rate": 100,
+				"income_account": "Sales - _TC",
+				"expense_account": "Cost of Goods Sold - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"item_tax_template": item_tax_template,
+			},
+		)
+
+	@staticmethod
+	def _make_item_tax_template(title, taxes):
+		return frappe.get_doc(
+			{
+				"doctype": "Item Tax Template",
+				"title": title,
+				"company": "_Test Company",
+				"taxes": [{"tax_type": account, "tax_rate": rate} for account, rate in taxes.items()],
+			}
+		).insert(ignore_if_duplicate=True)
+
+	def _append_net_total_tax(self, account_head, description):
+		self.doc.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": account_head,
+				"cost_center": "_Test Cost Center - _TC",
+				"description": description,
+				"rate": 0,
+			},
+		)
+
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_itemised_tax_breakup_splits_same_item_by_rate(self):
+		"""The same item on two lines at different rates for the SAME tax account must
+		produce two breakup rows, each with its own rate and a matching amount - not one
+		merged row showing the first rate against the summed amount."""
+		vat = "_Test Account VAT - _TC"
+		self.doc.items[0].item_tax_template = self._make_item_tax_template(
+			"_Test VAT 10% Template", {vat: 10}
+		).name
+		self._append_item_with_tax_template(
+			self._make_item_tax_template("_Test VAT 5% Template", {vat: 5}).name
+		)
+		self._append_net_total_tax(vat, "VAT")
+
+		self.doc.save()
+
+		breakup = get_itemised_tax_breakup_data(self.doc)
+
+		self.assertEqual(len(breakup), 2)
+		for row in breakup:
+			self.assertEqual(row["item"], "_Test Item")
+			self.assertEqual(row["taxable_amount"], 100.0)
+
+		rows_by_rate = {row["VAT"]["tax_rate"]: row for row in breakup}
+		self.assertEqual(set(rows_by_rate), {10.0, 5.0})
+		self.assertEqual(rows_by_rate[10.0]["VAT"]["tax_amount"], 10.0)
+		self.assertEqual(rows_by_rate[5.0]["VAT"]["tax_amount"], 5.0)
+
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_itemised_tax_breakup_keeps_row_per_line_at_same_rate(self):
+		"""The breakup is row-wise: the same item on two lines at the same rate stays two
+		rows (one per line), each self-consistent."""
+		vat = "_Test Account VAT - _TC"
+		template = self._make_item_tax_template("_Test VAT 10% Template", {vat: 10})
+		self.doc.items[0].item_tax_template = template.name
+		self._append_item_with_tax_template(template.name)
+		self._append_net_total_tax(vat, "VAT")
+
+		self.doc.save()
+
+		breakup = get_itemised_tax_breakup_data(self.doc)
+
+		self.assertEqual(len(breakup), 2)
+		for row in breakup:
+			self.assertEqual(row["item"], "_Test Item")
+			self.assertEqual(row["taxable_amount"], 100.0)
+			self.assertEqual(row["VAT"]["tax_rate"], 10.0)
+			self.assertEqual(row["VAT"]["tax_amount"], 10.0)
+
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_itemised_tax_breakup_splits_when_only_one_tax_differs(self):
+		"""When an item carries several taxes and only ONE differs in rate across lines
+		(the rest identical), the lines still render as separate rows."""
+		vat = "_Test Account VAT - _TC"
+		service_tax = "_Test Account Service Tax - _TC"
+		# VAT identical (10) on both lines; only Service Tax differs (14 vs 7)
+		self.doc.items[0].item_tax_template = self._make_item_tax_template(
+			"_Test VAT 10 ST 14 Template", {vat: 10, service_tax: 14}
+		).name
+		self._append_item_with_tax_template(
+			self._make_item_tax_template("_Test VAT 10 ST 7 Template", {vat: 10, service_tax: 7}).name
+		)
+		self._append_net_total_tax(vat, "VAT")
+		self._append_net_total_tax(service_tax, "Service Tax")
+
+		self.doc.save()
+
+		breakup = get_itemised_tax_breakup_data(self.doc)
+
+		self.assertEqual(len(breakup), 2)
+		rows_by_st_rate = {row["Service Tax"]["tax_rate"]: row for row in breakup}
+		self.assertEqual(set(rows_by_st_rate), {14.0, 7.0})
+
+		for st_rate, st_amount in ((14.0, 14.0), (7.0, 7.0)):
+			row = rows_by_st_rate[st_rate]
+			self.assertEqual(row["item"], "_Test Item")
+			self.assertEqual(row["taxable_amount"], 100.0)
+			self.assertEqual(row["VAT"]["tax_rate"], 10.0)
+			self.assertEqual(row["VAT"]["tax_amount"], 10.0)
+			self.assertEqual(row["Service Tax"]["tax_amount"], st_amount)

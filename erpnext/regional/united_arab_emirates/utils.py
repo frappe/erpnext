@@ -3,7 +3,7 @@ from frappe import _
 from frappe.utils import flt, money_in_words, round_based_on_smallest_currency_fraction
 
 import erpnext
-from erpnext.controllers.taxes_and_totals import get_itemised_tax
+from erpnext.controllers.taxes_and_totals import set_item_wise_tax_rate
 
 
 def update_itemised_tax_data(doc):
@@ -13,8 +13,6 @@ def update_itemised_tax_data(doc):
 	meta = frappe.get_meta(doc.items[0].doctype)
 	if not meta.has_field("tax_rate"):
 		return
-
-	itemised_tax = get_itemised_tax(doc)
 
 	def determine_if_export(doc):
 		if doc.doctype != "Sales Invoice":
@@ -39,22 +37,14 @@ def update_itemised_tax_data(doc):
 
 	is_export = determine_if_export(doc)
 
-	for row in doc.items:
-		tax_rate, tax_amount = 0.0, 0.0
-		# dont even bother checking in item tax template as it contains both input and output accounts - double the tax rate
-		item_code = row.item_code or row.item_name
-		if itemised_tax.get(item_code):
-			for tax in itemised_tax.get(item_code).values():
-				_tax_rate = flt(tax.get("tax_rate", 0), row.precision("tax_rate"))
-				tax_amount += flt((row.net_amount * _tax_rate) / 100, row.precision("tax_amount"))
-				tax_rate += _tax_rate
+	set_item_wise_tax_rate(doc)
 
-		if not tax_rate or row.get("is_zero_rated"):
-			row.is_zero_rated = is_export or frappe.get_cached_value("Item", row.item_code, "is_zero_rated")
+	for item in doc.items:
+		if not item.tax_rate or item.get("is_zero_rated"):
+			item.is_zero_rated = is_export or frappe.get_cached_value("Item", item.item_code, "is_zero_rated")
 
-		row.tax_rate = flt(tax_rate, row.precision("tax_rate"))
-		row.tax_amount = flt(tax_amount, row.precision("tax_amount"))
-		row.total_amount = flt((row.net_amount + row.tax_amount), row.precision("total_amount"))
+		item.tax_amount = flt((item.net_amount * item.tax_rate) / 100, item.precision("tax_amount"))
+		item.total_amount = flt((item.net_amount + item.tax_amount), item.precision("total_amount"))
 
 
 def get_account_currency(account):
