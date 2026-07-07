@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-07-05 10:19+0000\n"
-"PO-Revision-Date: 2026-07-05 21:32\n"
+"PO-Revision-Date: 2026-07-07 21:21\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -2924,7 +2924,7 @@ msgstr "هزینه اضافی در هر تعداد"
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Additional Costs"
-msgstr "هزینه های اضافی"
+msgstr "هزینه‌های اضافی"
 
 #. Label of the non_stock_items (Table) field in DocType 'Work Order'
 #: erpnext/manufacturing/doctype/work_order/work_order.json
@@ -3303,7 +3303,7 @@ msgstr "معاون اداری"
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:107
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:173
 msgid "Administrative Expenses"
-msgstr "هزینه های اداری"
+msgstr "هزینه‌های اداری"
 
 #: erpnext/setup/setup_wizard/data/designation.txt:3
 msgid "Administrative Officer"
@@ -3379,7 +3379,7 @@ msgstr "پیش‌پرداخت"
 #: erpnext/accounts/doctype/advance_taxes_and_charges/advance_taxes_and_charges.json
 #: erpnext/accounts/doctype/payment_entry/payment_entry.json
 msgid "Advance Taxes and Charges"
-msgstr "پیش‌پرداخت مالیات و هزینه ها"
+msgstr "پیش‌پرداخت مالیات و هزینه‌ها"
 
 #. Label of the advance_voucher_no (Dynamic Link) field in DocType 'Journal
 #. Entry Account'
@@ -5040,7 +5040,7 @@ msgstr ""
 #. Label of the expense_year_to_date (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
 msgid "Annual Expenses"
-msgstr "هزینه های سالانه"
+msgstr "هزینه‌های سالانه"
 
 #. Label of the income_year_to_date (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
@@ -5097,7 +5097,7 @@ msgstr "پوشاک و لوازم جانبی"
 #: erpnext/stock/doctype/landed_cost_item/landed_cost_item.json
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.json
 msgid "Applicable Charges"
-msgstr "هزینه های قابل اجرا"
+msgstr "هزینه‌های قابل اجرا"
 
 #. Label of the dimensions (Table) field in DocType 'Accounting Dimension
 #. Filter'
@@ -5192,7 +5192,7 @@ msgstr "قابل اجرا در سفارش خرید"
 #. 'Budget'
 #: erpnext/accounts/doctype/budget/budget.json
 msgid "Applicable on booking actual expenses"
-msgstr "قابل اجرا در رزرو هزینه های واقعی"
+msgstr "قابل اجرا در رزرو هزینه‌های واقعی"
 
 #. Description of the 'Allow Partial Payment' (Check) field in DocType 'POS
 #. Profile'
@@ -7086,7 +7086,7 @@ msgstr "آیتم ثانویه BOM"
 #. Item'
 #: erpnext/manufacturing/doctype/job_card_secondary_item/job_card_secondary_item.json
 msgid "BOM Secondary Item Reference"
-msgstr ""
+msgstr "مرجع آیتم‌های ثانویه BOM"
 
 #. Name of a report
 #: erpnext/manufacturing/report/bom_stock_analysis/bom_stock_analysis.json
@@ -7521,7 +7521,7 @@ msgstr "تراز بانک"
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:224
 #: erpnext/accounts/doctype/invoice_discounting/invoice_discounting.json
 msgid "Bank Charges"
-msgstr "هزینه های بانکی"
+msgstr "هزینه‌های بانکی"
 
 #. Label of the bank_charges_account (Link) field in DocType 'Invoice
 #. Discounting'
@@ -7858,7 +7858,7 @@ msgstr "مبلغ تغییر پایه (ارز شرکت)"
 #. Label of the base_cost (Currency) field in DocType 'BOM Secondary Item'
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 msgid "Base Cost (Company Currency)"
-msgstr ""
+msgstr "بهای پایه (واحد پول شرکت)"
 
 #. Label of the base_cost_per_unit (Float) field in DocType 'BOM Operation'
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
@@ -9612,7 +9612,7 @@ msgstr "تاریخ لغو"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1592
 msgid "Cancelled Job Card cannot be processed."
-msgstr ""
+msgstr "کارت کار لغو شده قابل پردازش نیست."
 
 #: erpnext/accounts/doctype/pos_opening_entry/pos_opening_entry.py:76
 msgid "Cannot Assign Cashier"
@@ -10392,7 +10392,7 @@ msgstr "قابل شارژ"
 #. Label of the charges (Currency) field in DocType 'Bank Guarantee'
 #: erpnext/accounts/doctype/bank_guarantee/bank_guarantee.json
 msgid "Charges Incurred"
-msgstr "هزینه های متحمل شده"
+msgstr "هزینه‌های متحمل شده"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js:24
 msgid "Charges are updated in Purchase Receipt against each item"
@@ -10400,7 +10400,7 @@ msgstr "هزینه‌ها در رسید خرید برای هر آیتم به‌�
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js:18
 msgid "Charges will be distributed proportionately based on item qty or amount, as per your selection"
-msgstr "هزینه ها بر اساس مقدار یا مبلغ آیتم، بر اساس انتخاب شما، به تناسب توزیع می‌شود"
+msgstr "هزینه‌ها بر اساس مقدار یا مبلغ آیتم، بر اساس انتخاب شما، به تناسب توزیع می‌شود"
 
 #. Label of the chart_of_accounts (Select) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -12827,7 +12827,7 @@ msgstr "لوازم آرایشی"
 #: erpnext/accounts/doctype/subscription_plan/subscription_plan.json
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 msgid "Cost"
-msgstr "هزینه"
+msgstr "بها"
 
 #. Label of the cost_allocation (Currency) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
@@ -12838,7 +12838,7 @@ msgstr ""
 #. Item'
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 msgid "Cost Allocation %"
-msgstr ""
+msgstr "تخصیص بها %"
 
 #. Label of the cost_allocation__process_loss_section (Section Break) field in
 #. DocType 'BOM'
@@ -13120,7 +13120,7 @@ msgstr "هزینه هر واحد"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:474
 msgid "Cost allocation between finished goods and secondary items should equal 100%"
-msgstr ""
+msgstr "تخصیص بها بین کالاهای نهایی و آیتم‌های ثانویه باید برابر با ۱۰۰٪ باشد"
 
 #. Title of an incoterm
 #: erpnext/setup/doctype/incoterm/incoterms.csv:8
@@ -17246,7 +17246,7 @@ msgstr "هزینه مستقیم"
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:86
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:146
 msgid "Direct Expenses"
-msgstr "هزینه های مستقیم"
+msgstr "هزینه‌های مستقیم"
 
 #. Option for the 'Account Type' (Select) field in DocType 'Account'
 #: erpnext/accounts/doctype/account/account.json
@@ -17846,13 +17846,13 @@ msgstr "واحد متمایز یک آیتم"
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Distribute Additional Costs Based On "
-msgstr "توزیع هزینه های اضافی بر اساس "
+msgstr "توزیع هزینه‌های اضافی بر اساس "
 
 #. Label of the distribute_charges_based_on (Select) field in DocType 'Landed
 #. Cost Voucher'
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.json
 msgid "Distribute Charges Based On"
-msgstr "توزیع هزینه ها بر اساس"
+msgstr "توزیع هزینه‌ها بر اساس"
 
 #. Label of the distribute_equally (Check) field in DocType 'Budget'
 #: erpnext/accounts/doctype/budget/budget.json
@@ -18996,7 +18996,7 @@ msgstr "فعال کردن حسابداری طرف مشترک"
 #: erpnext/accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 #: erpnext/stock/doctype/item/item.json
 msgid "Enable Deferred Expense"
-msgstr "فعال کردن هزینه های معوق"
+msgstr "فعال کردن هزینه‌های معوق"
 
 #. Label of the enable_deferred_revenue (Check) field in DocType 'POS Invoice
 #. Item'
@@ -20419,7 +20419,7 @@ msgstr ""
 #. Account'
 #: erpnext/accounts/doctype/journal_entry_account/journal_entry_account.json
 msgid "Fees"
-msgstr "هزینه ها"
+msgstr "هزینه‌ها"
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:396
 msgid "Fetch Based On"
@@ -20437,7 +20437,7 @@ msgstr "واکشی آیتم‌ها از انبار"
 
 #: erpnext/crm/doctype/opportunity/opportunity.js:117
 msgid "Fetch Latest Exchange Rate"
-msgstr ""
+msgstr "واکشی آخرین نرخ ارز"
 
 #: erpnext/accounts/doctype/dunning/dunning.js:61
 msgid "Fetch Overdue Payments"
@@ -22256,7 +22256,7 @@ msgstr "ایجاد پیش‌نمایش"
 #. Schedule'
 #: erpnext/manufacturing/doctype/master_production_schedule/master_production_schedule.json
 msgid "Get Actual Demand"
-msgstr ""
+msgstr "دریافت تقاضای واقعی"
 
 #. Label of the get_advances (Button) field in DocType 'Purchase Invoice'
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
@@ -24969,7 +24969,7 @@ msgstr "هزینه غیر مستقیم"
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:106
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:172
 msgid "Indirect Expenses"
-msgstr "هزینه های غیر مستقیم"
+msgstr "هزینه‌های غیر مستقیم"
 
 #. Option for the 'Account Type' (Select) field in DocType 'Account'
 #: erpnext/accounts/doctype/account/account.json
@@ -25699,7 +25699,7 @@ msgstr "پرسمان جستجوی نامعتبر"
 
 #: erpnext/manufacturing/page/shop_floor/shop_floor.py:313
 msgid "Invalid status group: {0}"
-msgstr ""
+msgstr "گروه با وضعیت نامعتبر: {0}"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1661
 msgid "Invalid subcontract order field: {0}"
@@ -26276,7 +26276,7 @@ msgstr "تامین کننده داخلی است"
 #. Label of the is_legacy (Check) field in DocType 'BOM Secondary Item'
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
 msgid "Is Legacy"
-msgstr ""
+msgstr "قدیمی است"
 
 #. Label of the is_legacy_scrap_item (Check) field in DocType 'Stock Entry
 #. Detail'
@@ -27363,7 +27363,7 @@ msgstr "اطلاعات آیتم"
 #: erpnext/stock/doctype/item_lead_time/item_lead_time.json
 #: erpnext/workspace_sidebar/manufacturing.json
 msgid "Item Lead Time"
-msgstr ""
+msgstr "زمان سرنخ آیتم"
 
 #. Label of the locations (Table) field in DocType 'Pick List'
 #: erpnext/stock/doctype/pick_list/pick_list.json
@@ -28348,7 +28348,7 @@ msgstr "آیتم کارت کار"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:927
 msgid "Job Card On Hold"
-msgstr ""
+msgstr "کارت کار در حالت تعلیق"
 
 #. Name of a DocType
 #: erpnext/manufacturing/doctype/job_card_operation/job_card_operation.json
@@ -28404,7 +28404,7 @@ msgstr ""
 
 #: erpnext/manufacturing/page/shop_floor/shop_floor.py:186
 msgid "Job Card {0} not found"
-msgstr ""
+msgstr "کارت کار {0} یافت نشد"
 
 #: erpnext/public/js/shop_floor/shop_floor.js:1426
 msgid "Job Card {0} was not found."
@@ -29194,7 +29194,7 @@ msgstr ""
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:115
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:195
 msgid "Legal Expenses"
-msgstr "هزینه های قانونی"
+msgstr "هزینه‌های قانونی"
 
 #: erpnext/regional/report/uae_vat_201/uae_vat_201.py:32
 msgid "Legend"
@@ -30066,7 +30066,7 @@ msgstr ""
 #. Description of the 'With Operations' (Check) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Manage cost of operations"
-msgstr "مدیریت هزینه عملیات"
+msgstr "مدیریت بهای عملیات"
 
 #. Description of the 'Enable tracking sales commissions' (Check) field in
 #. DocType 'Selling Settings'
@@ -30217,7 +30217,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 #: erpnext/manufacturing/report/process_loss_report/process_loss_report.py:90
 msgid "Manufactured Qty"
-msgstr "تعداد تولید شده"
+msgstr "مقدار تولید شده"
 
 #. Label of the manufacturer (Link) field in DocType 'Purchase Invoice Item'
 #. Label of the manufacturer (Link) field in DocType 'Purchase Order Item'
@@ -30547,7 +30547,7 @@ msgstr "بازار یابی"
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:116
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:196
 msgid "Marketing Expenses"
-msgstr "هزینه های بازاریابی"
+msgstr "هزینه‌های بازاریابی"
 
 #: erpnext/setup/setup_wizard/data/designation.txt:23
 msgid "Marketing Specialist"
@@ -31510,7 +31510,7 @@ msgstr ""
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:120
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:229
 msgid "Miscellaneous Expenses"
-msgstr "هزینه های متفرقه"
+msgstr "هزینه‌های متفرقه"
 
 #: erpnext/controllers/buying_controller.py:729
 msgid "Mismatch"
@@ -32430,7 +32430,7 @@ msgstr "نرخ ارز جدید"
 #. Label of the expenses_booked (Check) field in DocType 'Email Digest'
 #: erpnext/setup/doctype/email_digest/email_digest.json
 msgid "New Expenses"
-msgstr "هزینه های جدید"
+msgstr "هزینه‌های جدید"
 
 #: erpnext/accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:1
 msgid "New Fiscal Year - {0}"
@@ -32685,7 +32685,7 @@ msgstr "هیچ سفارش خریدی ایجاد نشد"
 
 #: erpnext/manufacturing/page/shop_floor/shop_floor.py:242
 msgid "No Quality Inspection Template is configured for this operation."
-msgstr ""
+msgstr "هیچ الگوی بازرسی کیفیتی برای این عملیات پیکربندی نشده است."
 
 #: erpnext/public/js/utils/unreconcile.js:147
 msgid "No Selection"
@@ -33287,7 +33287,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1821
 msgid "Not permitted to read Job Card"
-msgstr ""
+msgstr "خواندن کارت کار مجاز نیست"
 
 #: erpnext/manufacturing/doctype/bom_update_log/bom_update_log_list.js:21
 msgid "Note: Automatic log deletion only applies to logs of type <i>Update Cost</i>"
@@ -33574,7 +33574,7 @@ msgstr "تجهیزات اداری"
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:124
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:201
 msgid "Office Maintenance Expenses"
-msgstr "هزینه های نگهداری دفتر"
+msgstr "هزینه‌های نگهداری دفتر"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:125
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:205
@@ -34210,7 +34210,7 @@ msgstr ""
 #: erpnext/manufacturing/doctype/workstation_cost/workstation_cost.json
 #: erpnext/manufacturing/report/cost_of_poor_quality_report/cost_of_poor_quality_report.py:130
 msgid "Operating Cost"
-msgstr "هزینه های عملیاتی"
+msgstr "هزینه‌های عملیاتی"
 
 #. Label of the base_operating_cost (Currency) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
@@ -34235,7 +34235,7 @@ msgstr "هزینه عملیاتی (ارز شرکت)"
 #. Label of the over_heads (Tab Break) field in DocType 'Workstation'
 #: erpnext/manufacturing/doctype/workstation/workstation.json
 msgid "Operating Costs"
-msgstr "هزینه های عملیاتی"
+msgstr "هزینه‌های عملیاتی"
 
 #. Label of the section_break_auzm (Section Break) field in DocType
 #. 'Workstation'
@@ -34362,7 +34362,7 @@ msgstr "اپراتور"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:209
 msgid "Operator Dashboard"
-msgstr ""
+msgstr "داشبورد اپراتور"
 
 #: erpnext/crm/report/campaign_efficiency/campaign_efficiency.py:22
 #: erpnext/crm/report/lead_owner_efficiency/lead_owner_efficiency.py:27
@@ -37248,7 +37248,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/job_card/job_card.js:62
 msgid "Pending Quantity cannot be less than 0"
-msgstr ""
+msgstr "مقدار در انتظار نمی‌تواند کمتر از ۰ باشد"
 
 #. Option for the 'Status' (Select) field in DocType 'Task'
 #. Option in a Select field in the tasks Web Form
@@ -37284,7 +37284,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1599
 msgid "Pending quantity cannot be negative."
-msgstr ""
+msgstr "مقدار در انتظار نمی‌تواند منفی باشد."
 
 #: erpnext/setup/setup_wizard/data/industry_type.txt:36
 msgid "Pension Funds"
@@ -39009,7 +39009,7 @@ msgstr "لطفاً یک شناسه ایمیل برای سرنخ {0} تنظیم �
 
 #: erpnext/regional/italy/utils.py:283
 msgid "Please set at least one row in the Taxes and Charges Table"
-msgstr "لطفاً حداقل یک ردیف در جدول مالیات ها و هزینه ها تنظیم کنید"
+msgstr "لطفاً حداقل یک ردیف در جدول مالیات ها و هزینه‌ها تنظیم کنید"
 
 #: erpnext/regional/italy/utils.py:247
 msgid "Please set both the Tax ID and Fiscal Code on Company {0}"
@@ -39279,7 +39279,7 @@ msgstr ""
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:126
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:206
 msgid "Postal Expenses"
-msgstr "هزینه های پستی"
+msgstr "هزینه‌های پستی"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:900
 msgid "Posted On"
@@ -40546,7 +40546,7 @@ msgstr "تعداد تولید / دریافت شده"
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_item/subcontracting_inward_order_item.json
 #: erpnext/subcontracting/doctype/subcontracting_inward_order_secondary_item/subcontracting_inward_order_secondary_item.json
 msgid "Produced Qty"
-msgstr "تعداد تولید شده"
+msgstr "مقدار تولید شده"
 
 #. Label of a chart in the Manufacturing Workspace
 #. Label of the produced_qty (Float) field in DocType 'Sales Order Item'
@@ -41851,7 +41851,7 @@ msgstr "دسته بندی مالیات تکلیفی خرید"
 #: erpnext/buying/doctype/supplier_quotation/supplier_quotation.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Purchase Taxes and Charges"
-msgstr "مالیات و هزینه های خرید"
+msgstr "مالیات و هزینه‌های خرید"
 
 #. Label of the purchase_taxes_and_charges_template (Link) field in DocType
 #. 'Payment Entry'
@@ -46587,7 +46587,7 @@ msgstr "ردیف #{0}: آیتم کالای تمام شده برای آیتم خ�
 
 #: erpnext/manufacturing/doctype/bom/bom.py:371
 msgid "Row #{0}: Finished Good Item {1} cannot be added in the Secondary Items table."
-msgstr ""
+msgstr "ردیف #{0}: آیتم کالای تمام‌شده {1} را نمی‌توان به جدول آیتم‌های ثانویه اضافه کرد."
 
 #: erpnext/buying/doctype/purchase_order/services/subcontracting.py:28
 #: erpnext/selling/doctype/sales_order/services/subcontracting.py:27
@@ -47814,7 +47814,7 @@ msgstr "پیش‌فرض‌های فروش"
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:130
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:217
 msgid "Sales Expenses"
-msgstr "هزینه های فروش"
+msgstr "هزینه‌های فروش"
 
 #. Label of the sales_forecast (Link) field in DocType 'Master Production
 #. Schedule'
@@ -48539,7 +48539,7 @@ msgstr "مالیات و عوارض فروش"
 #: erpnext/selling/workspace/selling/selling.json
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 msgid "Sales Taxes and Charges Template"
-msgstr "الگوی مالیات و هزینه های فروش"
+msgstr "الگوی مالیات و هزینه‌های فروش"
 
 #. Label of the section_break2 (Section Break) field in DocType 'POS Invoice'
 #. Label of the sales_team (Table) field in DocType 'POS Invoice'
@@ -48997,21 +48997,21 @@ msgstr "آیتم‌های ثانویه"
 #: erpnext/manufacturing/doctype/work_order/work_order.js:136
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 msgid "Secondary Items (as per BOM)"
-msgstr ""
+msgstr "آیتم‌های ثانویه (طبق BOM)"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:135
 msgid "Secondary Items (as per Manufacture Entries)"
-msgstr ""
+msgstr "آیتم‌های ثانویه (طبق ثبت‌های تولید)"
 
 #. Label of the secondary_items_cost (Currency) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Secondary Items Cost"
-msgstr ""
+msgstr "بهای آیتم‌های ثانویه"
 
 #. Label of the base_secondary_items_cost (Currency) field in DocType 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Secondary Items Cost (Company Currency)"
-msgstr ""
+msgstr "بهای آیتم‌های ثانویه (واحد پول شرکت)"
 
 #. Label of the secondary_items_cost_per_qty (Currency) field in DocType
 #. 'Subcontracting Receipt Item'
@@ -51933,7 +51933,7 @@ msgstr "شرح استاندارد"
 
 #: erpnext/regional/report/uae_vat_201/uae_vat_201.py:128
 msgid "Standard Rated Expenses"
-msgstr "هزینه های رتبه‌بندی استاندارد"
+msgstr "هزینه‌های رتبه‌بندی استاندارد"
 
 #: erpnext/setup/setup_wizard/operations/defaults_setup.py:70
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:493
@@ -52391,7 +52391,7 @@ msgstr "ثبت موجودی {0} ایجاد شد"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1645
 msgid "Stock Entry {0} has been created"
-msgstr ""
+msgstr "ثبت موجودی {0} ایجاد شده است"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:997
 msgid "Stock Entry {0} is not submitted"
@@ -55212,7 +55212,7 @@ msgstr "مالیات و هزینه‌های اضافه شده"
 #: erpnext/buying/doctype/supplier_quotation/supplier_quotation.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Taxes and Charges Added (Company Currency)"
-msgstr "مالیات ها و هزینه های اضافه شده (ارز شرکت)"
+msgstr "مالیات ها و هزینه‌های اضافه شده (ارز شرکت)"
 
 #. Label of the other_charges_calculation (Text Editor) field in DocType 'POS
 #. Invoice'
@@ -55257,7 +55257,7 @@ msgstr "محاسبه مالیات و عوارض"
 #: erpnext/buying/doctype/supplier_quotation/supplier_quotation.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Taxes and Charges Deducted"
-msgstr "مالیات ها و هزینه های کسر شده"
+msgstr "مالیات ها و هزینه‌های کسر شده"
 
 #. Label of the base_taxes_and_charges_deducted (Currency) field in DocType
 #. 'Purchase Invoice'
@@ -55272,7 +55272,7 @@ msgstr "مالیات ها و هزینه های کسر شده"
 #: erpnext/buying/doctype/supplier_quotation/supplier_quotation.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Taxes and Charges Deducted (Company Currency)"
-msgstr "مالیات ها و هزینه های کسر شده (ارز شرکت)"
+msgstr "مالیات ها و هزینه‌های کسر شده (ارز شرکت)"
 
 #: erpnext/stock/doctype/item/item.py:422
 msgid "Taxes row #{0}: {1} cannot be smaller than {2}"
@@ -55310,7 +55310,7 @@ msgstr "مخابرات"
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:131
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:218
 msgid "Telephone Expenses"
-msgstr "هزینه های تلفن"
+msgstr "هزینه‌های تلفن"
 
 #. Name of a DocType
 #: erpnext/telephony/doctype/telephony_call_type/telephony_call_type.json
@@ -55934,7 +55934,7 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/workstation/workstation.py:526
 msgid "The job card {0} is in {1} state and you cannot complete it."
-msgstr ""
+msgstr "کارت کار {0} در وضعیت {1} است و شما نمی‌توانید آن را تکمیل کنید."
 
 #: erpnext/manufacturing/doctype/workstation/workstation.py:520
 msgid "The job card {0} is in {1} state and you cannot start it again."
@@ -55972,11 +55972,11 @@ msgstr ""
 
 #: erpnext/manufacturing/doctype/operation/operation.py:44
 msgid "The operation {0} cannot be added multiple times"
-msgstr ""
+msgstr "عملیات {0} را نمی‌توان چندین بار اضافه کرد"
 
 #: erpnext/manufacturing/doctype/operation/operation.py:49
 msgid "The operation {0} cannot be its own sub-operation"
-msgstr ""
+msgstr "عملیات {0} نمی‌تواند زیرعملیات خودش باشد"
 
 #: erpnext/accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:107
 msgid "The original invoice should be consolidated before or along with the return invoice."
@@ -57041,7 +57041,7 @@ msgstr "تا تاریخ فاکتور"
 #: erpnext/public/js/templates/shop_floor_template.html:899
 #: erpnext/public/js/templates/shop_floor_template.html:909
 msgid "To Manufacture"
-msgstr ""
+msgstr "برای تولید"
 
 #. Label of the to_no (Int) field in DocType 'Share Balance'
 #. Label of the to_no (Int) field in DocType 'Share Transfer'
@@ -57382,7 +57382,7 @@ msgstr "کل واقعی"
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Total Additional Costs"
-msgstr "مجموع هزینه های اضافی"
+msgstr "مجموع هزینه‌های اضافی"
 
 #. Label of the total_advance (Currency) field in DocType 'POS Invoice'
 #. Label of the total_advance (Currency) field in DocType 'Purchase Invoice'
@@ -57458,7 +57458,7 @@ msgstr "مبلغ کل به حروف"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:267
 msgid "Total Applicable Charges in Purchase Receipt Items table must be same as Total Taxes and Charges"
-msgstr "مجموع هزینه های قابل اعمال در جدول آیتم‌های رسید خرید باید با کل مالیات ها و هزینه ها یکسان باشد"
+msgstr "مجموع هزینه‌های قابل اعمال در جدول آیتم‌های رسید خرید باید با کل مالیات ها و هزینه‌ها یکسان باشد"
 
 #: erpnext/accounts/report/balance_sheet/balance_sheet.py:226
 msgid "Total Asset"
@@ -57816,7 +57816,7 @@ msgstr "ارزش کل سفارش"
 
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:628
 msgid "Total Other Charges"
-msgstr "مجموع سایر هزینه ها"
+msgstr "مجموع سایر هزینه‌ها"
 
 #: erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py:62
 msgid "Total Outgoing"
@@ -57872,7 +57872,7 @@ msgstr "تعداد کل برنامه‌ریزی شده"
 #. Label of the total_produced_qty (Float) field in DocType 'Production Plan'
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
 msgid "Total Produced Qty"
-msgstr "مجموع تعداد تولید شده"
+msgstr "مجموع مقدار تولید شده"
 
 #. Label of the total_projected_qty (Float) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -58054,7 +58054,7 @@ msgstr "کل مالیات‌ها و عوارض"
 #: erpnext/stock/doctype/delivery_note/delivery_note.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Total Taxes and Charges (Company Currency)"
-msgstr "کل مالیات ها و هزینه ها (ارز شرکت)"
+msgstr "کل مالیات ها و هزینه‌ها (ارز شرکت)"
 
 #: erpnext/manufacturing/report/cost_of_poor_quality_report/cost_of_poor_quality_report.py:136
 msgid "Total Time (in Mins)"
@@ -60026,7 +60026,7 @@ msgstr "اگر کاربران بخواهند نرخ ورودی (تنظیم با 
 #. 'BOM'
 #: erpnext/manufacturing/doctype/bom/bom.json
 msgid "Users can make manufacture entry against Job Cards"
-msgstr ""
+msgstr "کاربران می‌توانند ثبت تولید را در مقابل کارت‌های کار انجام دهند"
 
 #. Description of the 'Portal Users' (Tab Break) field in DocType 'Customer'
 #: erpnext/selling/doctype/customer/customer.json
@@ -60058,7 +60058,7 @@ msgstr "استفاده از موجودی منفی، ارزش گذاری FIFO / �
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:133
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:220
 msgid "Utility Expenses"
-msgstr "هزینه های آب و برق"
+msgstr "هزینه‌های آب و برق"
 
 #. Label of the vat_accounts (Table) field in DocType 'South Africa VAT
 #. Settings'
@@ -60078,7 +60078,7 @@ msgstr "گزارش حسابرسی مالیات بر ارزش افزوده"
 #: erpnext/regional/report/uae_vat_201/uae_vat_201.html:47
 #: erpnext/regional/report/uae_vat_201/uae_vat_201.py:124
 msgid "VAT on Expenses and All Other Inputs"
-msgstr "مالیات بر ارزش افزوده هزینه ها و سایر ورودی ها"
+msgstr "مالیات بر ارزش افزوده هزینه‌ها و سایر ورودی ها"
 
 #: erpnext/regional/report/uae_vat_201/uae_vat_201.html:15
 #: erpnext/regional/report/uae_vat_201/uae_vat_201.py:58
@@ -61824,7 +61824,7 @@ msgstr "در جریان تولید"
 #: erpnext/manufacturing/doctype/operation/operation.json
 #: erpnext/public/js/templates/shop_floor_template.html:829
 msgid "Work Instructions"
-msgstr ""
+msgstr "دستورالعمل‌های کاری"
 
 #. Option for the 'Transfer Material Against' (Select) field in DocType 'BOM'
 #. Label of the work_order (Link) field in DocType 'Job Card'
@@ -61878,7 +61878,7 @@ msgstr "دستور کار / سفارش خرید قرارداد فرعی"
 #. Name of a DocType
 #: erpnext/manufacturing/doctype/work_order_additional_item/work_order_additional_item.json
 msgid "Work Order Additional Item"
-msgstr ""
+msgstr "آیتم اضافی سفارش کار"
 
 #: erpnext/manufacturing/dashboard_fixtures.py:93
 msgid "Work Order Analysis"
@@ -61966,7 +61966,7 @@ msgstr "دستور کار {0} ایجاد شد"
 
 #: erpnext/stock/doctype/stock_entry/services/disassemble.py:194
 msgid "Work Order {0} has no produced qty"
-msgstr ""
+msgstr "دستور کار {0} مقدار تولید شده ندارد"
 
 #: erpnext/stock/doctype/stock_entry/services/stock_entry_base.py:35
 msgid "Work Order {0} must be submitted"
@@ -62410,7 +62410,7 @@ msgstr "شما نمی‌توانید هر دو تنظیمات '{0}' و '{1}' ر�
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:1447
 msgid "You cannot make any changes to Job Card since Work Order is closed."
-msgstr ""
+msgstr "از آنجایی که دستور کار بسته شده است، نمی‌توانید هیچ تغییری در کارت کار ایجاد کنید."
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:167
 msgid "You cannot outward the following {0} as they are either Delivered, Inactive or located in a different warehouse."
