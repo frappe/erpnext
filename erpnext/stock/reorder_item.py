@@ -190,6 +190,7 @@ def get_item_warehouse_projected_qty(items_to_consider):
 	item_warehouse_projected_qty = {}
 	items_to_consider = list(items_to_consider.keys())
 
+<<<<<<< HEAD
 	for item_code, warehouse, projected_qty in frappe.db.sql(
 		"""select item_code, warehouse, projected_qty
 		from tabBin where item_code in ({})
@@ -197,6 +198,17 @@ def get_item_warehouse_projected_qty(items_to_consider):
 			", ".join(["%s"] * len(items_to_consider))
 		),
 		items_to_consider,
+=======
+	warehouse_parent_map = frappe._dict(
+		frappe.get_all("Warehouse", fields=["name", "parent_warehouse"], as_list=True)
+	)
+
+	for item_code, warehouse, projected_qty in frappe.get_all(
+		"Bin",
+		filters={"item_code": ["in", items_to_consider], "warehouse": ["is", "set"]},
+		fields=["item_code", "warehouse", "projected_qty"],
+		as_list=True,
+>>>>>>> 6beb3d2509 (perf: avoid per-row Warehouse doc fetches in auto reorder job)
 	):
 		if item_code not in item_warehouse_projected_qty:
 			item_warehouse_projected_qty.setdefault(item_code, {})
@@ -204,16 +216,14 @@ def get_item_warehouse_projected_qty(items_to_consider):
 		if warehouse not in item_warehouse_projected_qty.get(item_code):
 			item_warehouse_projected_qty[item_code][warehouse] = flt(projected_qty)
 
-		warehouse_doc = frappe.get_doc("Warehouse", warehouse)
+		parent_warehouse = warehouse_parent_map.get(warehouse)
 
-		while warehouse_doc.parent_warehouse:
-			if not item_warehouse_projected_qty.get(item_code, {}).get(warehouse_doc.parent_warehouse):
-				item_warehouse_projected_qty.setdefault(item_code, {})[warehouse_doc.parent_warehouse] = flt(
-					projected_qty
-				)
+		while parent_warehouse:
+			if not item_warehouse_projected_qty.get(item_code, {}).get(parent_warehouse):
+				item_warehouse_projected_qty.setdefault(item_code, {})[parent_warehouse] = flt(projected_qty)
 			else:
-				item_warehouse_projected_qty[item_code][warehouse_doc.parent_warehouse] += flt(projected_qty)
-			warehouse_doc = frappe.get_doc("Warehouse", warehouse_doc.parent_warehouse)
+				item_warehouse_projected_qty[item_code][parent_warehouse] += flt(projected_qty)
+			parent_warehouse = warehouse_parent_map.get(parent_warehouse)
 
 	return item_warehouse_projected_qty
 
