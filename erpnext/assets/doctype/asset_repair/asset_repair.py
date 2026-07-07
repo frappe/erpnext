@@ -293,8 +293,8 @@ class AssetRepair(AccountsController):
 		if not stock_item.serial_and_batch_bundle and frappe.get_cached_value(
 			"Item", stock_item.item_code, "has_serial_no"
 		):
-			msg = f"Serial No Bundle is mandatory for Item {stock_item.item_code}"
-			frappe.throw(_(msg), title=_("Missing Serial No Bundle"))
+			msg = _("Serial No Bundle is mandatory for Item {0}").format(stock_item.item_code)
+			frappe.throw(msg, title=_("Missing Serial No Bundle"))
 
 		if stock_item.serial_and_batch_bundle:
 			values_to_update = {

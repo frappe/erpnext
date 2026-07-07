@@ -7,8 +7,8 @@ that static analysis can catch reliably with a low false-positive rate.
 
 It deliberately does NOT try to catch the *semantic* divergences (loose GROUP BY,
 case-sensitive ==/IN, NULL ordering, ORDER BY ... LIMIT 1 tiebreakers, integer-division
-intent, savepoint discipline) — those genuinely need the test suite. Run the full suite
-on a Postgres site for those.
+intent, division by a possibly-zero divisor, savepoint discipline) — those genuinely need
+the test suite or a human/Greptile reviewer. Run the full suite on a Postgres site for those.
 
 Escape hatch: put `# pg-ok` anywhere on the offending statement's line span (e.g. on a
 `SHOW INDEX` query that lives inside an `if frappe.db.db_type == "mariadb":` branch).
@@ -62,6 +62,10 @@ SQL_PATTERNS: list[tuple[re.Pattern, str]] = [
 	 "single-quoted column alias breaks on Postgres -> use a bare or double-quoted alias"),
 	(re.compile(r"\bif\s*\(", re.I),
 	 "SQL IF() is MySQL-only -> use CASE WHEN ... THEN ... ELSE ... END (frappe.qb.Case())"),
+	(re.compile(r"\brlike\b", re.I),
+	 "RLIKE is MySQL-only -> frappe rewrites REGEXP->~* on Postgres but NOT RLIKE; use REGEXP / .regexp() / ~"),
+	(re.compile(r"\bcast\s*\(.+?\bas\s+char\b", re.I | re.S),  # .+? spans nested parens, e.g. CAST(ABS(x) AS CHAR)
+	 "CAST(... AS CHAR) is character(1) on Postgres and truncates -> CAST AS VARCHAR (frappe Cast_(x, 'varchar'))"),
 ]
 
 # UPDATE ... JOIN: both keywords in the same SQL string.
@@ -70,6 +74,15 @@ UPDATE_JOIN = (re.compile(r"\bupdate\b", re.I), re.compile(r"\bjoin\b", re.I))
 MYSQL_RESULT_KEYS = {"Column_name", "Key_name", "Seq_in_index", "Non_unique", "Index_type"}
 
 SET_BOOL_FUNCS = {"set_value", "db_set"}
+
+# query-builder cast helpers: pypika Cast / frappe Cast_. A "char" target type is character(1)
+# on Postgres (truncates); "varchar" is the full-length cast.
+CAST_FUNCS = {"Cast", "Cast_"}
+
+# frappe.get_all / get_list: frappe's db_query SILENTLY drops ORDER BY for `distinct` queries on
+# Postgres (the ORDER BY column must appear in the SELECT-DISTINCT list), so `distinct=True` together
+# with a literal `order_by` is a no-op on PG and the result comes back unordered.
+DISTINCT_ORDER_FUNCS = {"get_all", "get_list"}
 
 
 def _docstring_ids(tree: ast.AST) -> set[int]:
@@ -153,6 +166,37 @@ class Visitor(ast.NodeVisitor):
 				a = node.args[value_idx]
 				if isinstance(a, ast.Constant) and isinstance(a.value, bool):
 					self._flag(node, f"{name}(..., {a.value}) sets an int/Check column with a bool -> pass 1/0 (Postgres rejects bool->smallint)")
+
+		# frappe.get_all/get_list(..., distinct=True, order_by="<col>") -> ORDER BY is silently dropped
+		# for distinct queries on Postgres, so the result is unordered there. Sort in python instead
+		# (e.g. sorted(frappe.get_all(..., distinct=True), key=str.casefold)). An empty order_by="" (the
+		# explicit "suppress the injected default" idiom) and a dynamic/variable order_by are not flagged.
+		if name in DISTINCT_ORDER_FUNCS:
+			has_distinct = any(
+				kw.arg == "distinct" and isinstance(kw.value, ast.Constant) and kw.value.value
+				for kw in node.keywords
+			)
+			order_kw = next((kw for kw in node.keywords if kw.arg == "order_by"), None)
+			has_literal_order = (
+				order_kw is not None
+				and isinstance(order_kw.value, ast.Constant)
+				and isinstance(order_kw.value.value, str)
+				and order_kw.value.value.strip()
+			)
+			if has_distinct and has_literal_order:
+				self._flag(node, f"{name}(distinct=True, order_by=...) -> frappe drops ORDER BY for distinct queries on Postgres; sort in python instead, e.g. sorted(..., key=str.casefold)")
+
+		# query-builder .rlike(...): pypika emits the MySQL-only RLIKE operator, which frappe does
+		# NOT translate for Postgres (it rewrites only REGEXP -> ~*).
+		if name == "rlike":
+			self._flag(node, ".rlike() emits MySQL-only RLIKE (not translated on Postgres) -> use .regexp() (rewritten to ~*) or .like()")
+
+		# Cast(col, "char") / Cast_(col, "char"): on Postgres a bare CHAR is character(1) and truncates
+		# (e.g. CAST(12 AS CHAR) -> '1'); use "varchar" for a full-length string cast.
+		if name in CAST_FUNCS:
+			for arg in (*node.args, *(kw.value for kw in node.keywords)):
+				if isinstance(arg, ast.Constant) and isinstance(arg.value, str) and arg.value.strip().lower() == "char":
+					self._flag(node, f"{name}(..., 'char') is character(1) on Postgres and truncates -> use 'varchar'")
 
 		self.generic_visit(node)
 

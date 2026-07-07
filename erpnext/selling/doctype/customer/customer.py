@@ -55,6 +55,7 @@ class Customer(TransactionBase):
 
 		account_manager: DF.Link | None
 		accounts: DF.Table[PartyAccount]
+		alias: DF.Data | None
 		companies: DF.Table[AllowedToTransactWith]
 		credit_limits: DF.Table[CustomerCreditLimit]
 		customer_details: DF.Text | None
@@ -128,15 +129,17 @@ class Customer(TransactionBase):
 			Customer = frappe.qb.DocType("Customer")
 
 			if frappe.db.db_type == "postgres":
-				# Postgres: extract the TRAILING digits (e.g. "Customer - 3" -> "3") and cast to int.
-				# A non-numeric trailing token (e.g. "Customer - Foo") strips to an empty string, which
-				# NULLIF turns into NULL: MAX() then skips it and COALESCE floors to 0, matching
-				# MariaDB's CAST(... AS UNSIGNED) -> 0. (pypika's Substring is start/length, not a
-				# regex, so it can't be used here; UNSIGNED also doesn't exist on postgres, and a raw
-				# CAST of a non-numeric token to INTEGER would raise instead of yielding NULL.)
+				# Mirror MariaDB's CAST(SUBSTRING_INDEX(name, ' ', -1) AS UNSIGNED): take the last
+				# whitespace-delimited token, then its LEADING digits, and cast to int. So "X - 3" -> 3,
+				# "X - 3a" -> 3, "X - 1.5" -> 1, matching MariaDB exactly. A non-numeric token (e.g.
+				# "X - Foo") strips to '' which NULLIF turns into NULL: MAX() skips it and COALESCE floors
+				# to 0, matching MariaDB's CAST(... AS UNSIGNED) -> 0. (pypika's Substring is start/length,
+				# not a regex; UNSIGNED doesn't exist on postgres, and a raw CAST of a non-numeric token to
+				# INTEGER would raise instead of yielding NULL.)
 				regexp_replace = CustomFunction("regexp_replace", ["source", "pattern", "replacement"])
 				nullif = CustomFunction("NULLIF", ["expr", "value"])
-				extracted_part = nullif(regexp_replace(Customer.name, r"^.*?(\d*)$", r"\1"), "")
+				last_token = regexp_replace(Customer.name, r"^.*\s", "")
+				extracted_part = nullif(regexp_replace(last_token, r"^(\d*).*$", r"\1"), "")
 				casted_part = Cast(extracted_part, "INTEGER")
 			else:
 				# MariaDB/MySQL: keep existing behavior.
@@ -155,7 +158,7 @@ class Customer(TransactionBase):
 			new_customer_name = f"{self.customer_name} - {cstr(count)}"
 
 			msgprint(
-				_("Changed customer name to '{}' as '{}' already exists.").format(
+				_("Changed customer name to '{0}' as '{1}' already exists.").format(
 					new_customer_name, self.customer_name
 				),
 				title=_("Note"),
@@ -193,7 +196,7 @@ class Customer(TransactionBase):
 			if sum(member.allocated_percentage or 0 for member in self.sales_team) != 100:
 				frappe.throw(_("Total contribution percentage should be equal to 100"))
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def get_customer_group_details(self):
 		doc = frappe.get_doc("Customer Group", self.customer_group)
 		self.accounts = []
@@ -353,7 +356,7 @@ class Customer(TransactionBase):
 		if frappe.db.exists("Customer Group", self.name):
 			frappe.throw(
 				_(
-					"A Customer Group exists with same name please change the Customer name or rename the Customer Group"
+					"A Customer Group exists with the same name. Please change the Customer name or rename the Customer Group"
 				),
 				frappe.NameError,
 			)
@@ -403,7 +406,7 @@ class Customer(TransactionBase):
 			if flt(limit.credit_limit) < outstanding_amt:
 				frappe.throw(
 					_(
-						"""New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0}"""
+						"""New credit limit is less than current outstanding amount for the customer. Credit limit has to be at least {0}"""
 					).format(outstanding_amt)
 				)
 
@@ -437,7 +440,7 @@ class Customer(TransactionBase):
 			self.loyalty_program = loyalty_program[0]
 		else:
 			frappe.msgprint(
-				_("Multiple Loyalty Programs found for Customer {}. Please select manually.").format(
+				_("Multiple Loyalty Programs found for Customer {0}. Please select manually.").format(
 					frappe.bold(self.customer_name)
 				)
 			)
@@ -556,8 +559,7 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 def send_emails(
 	customer: str, customer_outstanding: float, credit_limit: float, credit_controller_users_list: str | list
 ):
-	if isinstance(credit_controller_users_list, str):
-		credit_controller_users_list = json.loads(credit_controller_users_list)
+	credit_controller_users_list = frappe.parse_json(credit_controller_users_list)
 	subject = _("Credit limit reached for customer {0}").format(customer)
 	message = _("Credit limit has been crossed for customer {0} ({1}/{2})").format(
 		customer, customer_outstanding, credit_limit

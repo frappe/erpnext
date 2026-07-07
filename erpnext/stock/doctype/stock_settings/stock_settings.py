@@ -189,7 +189,7 @@ class StockSettings(Document):
 			if sle:
 				frappe.throw(
 					_(
-						"Can't change the valuation method, as there are transactions against some items which do not have its own valuation method"
+						"Can't change the valuation method, as there are transactions against some items which do not have their own valuation method"
 					)
 				)
 
@@ -247,7 +247,7 @@ class StockSettings(Document):
 
 				if has_reserved_stock:
 					frappe.throw(
-						_("As there are reserved stock, you cannot disable {0}.").format(
+						_("As there is reserved stock, you cannot disable {0}.").format(
 							frappe.bold(_("Stock Reservation"))
 						)
 					)

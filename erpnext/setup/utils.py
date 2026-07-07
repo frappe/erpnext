@@ -95,7 +95,11 @@ def get_exchange_rate(
 
 	# cksgb 19/09/2016: get last entry in Currency Exchange with from_currency and to_currency.
 	entries = frappe.get_all(
-		"Currency Exchange", fields=["exchange_rate"], filters=filters, order_by="date desc", limit=1
+		"Currency Exchange",
+		fields=["exchange_rate"],
+		filters=filters,
+		order_by="date desc, name desc",
+		limit=1,
 	)
 	if entries:
 		return flt(entries[0].exchange_rate)

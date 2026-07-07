@@ -308,4 +308,4 @@ def add_role_for_portal_user(portal_user, role):
 		return
 
 	user_doc.add_roles(role)
-	frappe.msgprint(_("Added {1} Role to User {0}.").format(frappe.bold(user_doc.name), role), alert=True)
+	frappe.msgprint(_("Added {1} role to user {0}.").format(frappe.bold(user_doc.name), role), alert=True)

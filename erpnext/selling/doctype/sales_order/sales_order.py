@@ -711,11 +711,11 @@ def is_enable_cutoff_date_on_bulk_delivery_note_creation():
 
 
 @frappe.whitelist()
-def close_or_unclose_sales_orders(names: str, status: str):
+def close_or_unclose_sales_orders(names: str | list, status: str):
 	if not frappe.has_permission("Sales Order", "write"):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
-	names = json.loads(names)
+	names = frappe.parse_json(names)
 	for name in names:
 		so = frappe.get_lazy_doc("Sales Order", name)
 		if so.docstatus == 1:

@@ -6,7 +6,7 @@ from typing import Literal
 import frappe
 from frappe import _
 from frappe.model.docstatus import DocStatus
-from frappe.query_builder.functions import Coalesce, Count, Round, Sum
+from frappe.query_builder.functions import Coalesce, Count, NullIf, Round, Sum
 from frappe.utils.data import get_timespan_date_range
 
 
@@ -86,7 +86,7 @@ def get_data(company: str, from_date: str, to_date: str, group_by: Literal["Lost
 			# `* 100.0` before dividing: count/count is integer division on Postgres (truncates to 0)
 			Round((Count(q.name).distinct() * 100.0 / total_quotations), 2),
 			Sum(q.base_net_total),
-			Round((Sum(q.base_net_total) / total_value * 100), 2),
+			Round((Sum(q.base_net_total) / NullIf(total_value, 0) * 100), 2),
 		)
 		.left_join(dimension)
 		.on(dimension.parent == q.name)

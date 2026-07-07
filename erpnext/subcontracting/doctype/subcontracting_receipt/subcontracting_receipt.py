@@ -143,7 +143,7 @@ class SubcontractingReceipt(SubcontractingController):
 			self.validate_inspection()
 
 		if getdate(self.posting_date) > getdate(nowdate()):
-			frappe.throw(_("Posting Date cannot be future date"))
+			frappe.throw(_("Posting Date cannot be a future date"))
 
 		super().validate()
 

@@ -223,5 +223,17 @@
 		"doctype": "Company",
 		"chart_of_accounts": "Standard",
 		"create_chart_of_accounts_based_on": "Standard Template"
+	},
+	{
+		"abbr": "_TSDBNB",
+		"company_name": "_Test SDBNB Company",
+		"country": "India",
+		"default_currency": "INR",
+		"doctype": "Company",
+		"domain": "Manufacturing",
+		"chart_of_accounts": "Standard",
+		"default_holiday_list": "_Test Holiday List",
+		"enable_perpetual_inventory": 1,
+		"enable_stock_delivered_but_not_billed": 1
 	}
 ]

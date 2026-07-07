@@ -66,8 +66,7 @@ def make_sales_invoice(
 
 	if args is None:
 		args = {}
-	if isinstance(args, str):
-		args = json.loads(args)
+	args = frappe.parse_json(args)
 
 	doc = frappe.get_doc("Delivery Note", source_name)
 
@@ -80,7 +79,7 @@ def make_sales_invoice(
 		target.run_method("set_po_nos")
 
 		if len(target.get("items")) == 0:
-			frappe.throw(_("All these items have already been Invoiced/Returned"))
+			frappe.throw(_("All these items have already been invoiced/returned"))
 
 		if args and args.get("merge_taxes"):
 			merge_taxes(source, target)
@@ -132,7 +131,8 @@ def make_sales_invoice(
 		{
 			"Delivery Note": {
 				"doctype": "Sales Invoice",
-				"field_map": {"is_return": "is_return"},
+				# commission_rate is no_copy (so it isn't carried on Duplicate), map it explicitly here
+				"field_map": {"is_return": "is_return", "commission_rate": "commission_rate"},
 				"validation": {"docstatus": ["=", 1]},
 			},
 			"Delivery Note Item": {
@@ -171,7 +171,12 @@ def make_sales_invoice(
 		frappe.get_single_value("Accounts Settings", "automatically_fetch_payment_terms")
 	)
 
-	if not doc.is_return:
+	if doc.is_return:
+		# A credit note made from a return Delivery Note should roll back the billed
+		# amount on the linked Sales Order too, so that per_billed stays consistent with
+		# per_delivered (which the return already reset).
+		doc.update_billed_amount_in_sales_order = True
+	else:
 		from erpnext.accounts.services.payment_schedule import PaymentScheduleService
 
 		ps = PaymentScheduleService(doc)

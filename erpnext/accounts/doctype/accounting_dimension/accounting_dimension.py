@@ -224,7 +224,7 @@ def disable_dimension(doc: str):
 
 
 def toggle_disabling(doc):
-	doc = json.loads(doc)
+	doc = frappe.parse_json(doc)
 
 	if doc.get("disabled"):
 		df = {"read_only": 1}

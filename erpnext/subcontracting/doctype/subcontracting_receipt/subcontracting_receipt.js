@@ -143,7 +143,7 @@ frappe.ui.form.on("Subcontracting Receipt", {
 					if (!frm.doc.supplier) {
 						frappe.throw({
 							title: __("Mandatory"),
-							message: __("Please Select a Supplier"),
+							message: __("Please select a supplier"),
 						});
 					}
 

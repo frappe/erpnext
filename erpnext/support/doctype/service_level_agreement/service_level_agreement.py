@@ -197,7 +197,7 @@ class ServiceLevelAgreement(Document):
 		)
 
 		if self.document_type not in valid_document_types:
-			frappe.throw(msg=_("Please select valid document type."), title=_("Invalid Document Type"))
+			frappe.throw(msg=_("Please select a valid document type."), title=_("Invalid Document Type"))
 
 	def validate_status_field(self):
 		meta = frappe.get_meta(self.document_type)
@@ -779,7 +779,7 @@ def get_response_and_resolution_duration(doc):
 	return priority
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def reset_service_level_agreement(doctype: str, docname: str, reason: str, user: str):
 	if not frappe.db.get_single_value("Support Settings", "allow_resetting_service_level_agreement"):
 		frappe.throw(_("Allow Resetting Service Level Agreement from Support Settings."))

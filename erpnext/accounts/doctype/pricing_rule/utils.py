@@ -152,7 +152,7 @@ def _get_pricing_rules(apply_on, args, values):
 			and {child_doc}.parent = `tabPricing Rule`.name
 			and `tabPricing Rule`.disable = 0 and
 			`tabPricing Rule`.{transaction_type} = 1 {warehouse_cond} {conditions}
-		order by `tabPricing Rule`.priority desc,
+		order by coalesce(`tabPricing Rule`.priority, '') desc,
 			`tabPricing Rule`.name desc""".format(
 				child_doc=child_doc,
 				apply_on_field=apply_on_field,
@@ -343,7 +343,7 @@ def filter_pricing_rules(args, pricing_rules, doc=None):
 	if len(pricing_rules) > 1 and not args.for_shopping_cart:
 		frappe.throw(
 			_(
-				"Multiple Price Rules exists with same criteria, please resolve conflict by assigning priority. Price Rules: {0}"
+				"Multiple Price Rules exist with same criteria, please resolve conflict by assigning priority. Price Rules: {0}"
 			).format("\n".join(d.name for d in pricing_rules)),
 			MultiplePricingRuleConflict,
 		)
@@ -636,7 +636,7 @@ def remove_free_item(doc):
 def get_applied_pricing_rules(pricing_rules):
 	if pricing_rules:
 		if pricing_rules.startswith("["):
-			return json.loads(pricing_rules)
+			return frappe.parse_json(pricing_rules)
 		else:
 			return pricing_rules.split(",")
 
@@ -756,21 +756,16 @@ def validate_coupon_code(coupon_name):
 
 def update_coupon_code_count(coupon_name, transaction_type):
 	coupon = frappe.get_doc("Coupon Code", coupon_name)
-	if coupon:
-		if transaction_type == "used":
-			if not coupon.maximum_use:
-				coupon.used = coupon.used + 1
-				coupon.save(ignore_permissions=True)
-			elif coupon.used < coupon.maximum_use:
-				coupon.used = coupon.used + 1
-				coupon.save(ignore_permissions=True)
-			else:
-				frappe.throw(
-					_("{0} Coupon used are {1}. Allowed quantity is exhausted").format(
-						coupon.coupon_code, coupon.used
-					)
+	if transaction_type == "used":
+		if coupon.maximum_use and coupon.used >= coupon.maximum_use:
+			frappe.throw(
+				_("{0} Coupon used are {1}. Allowed quantity is exhausted").format(
+					coupon.coupon_code, coupon.used
 				)
-		elif transaction_type == "cancelled":
-			if coupon.used > 0:
-				coupon.used = coupon.used - 1
-				coupon.save(ignore_permissions=True)
+			)
+		coupon.used = coupon.used + 1
+		coupon.save(ignore_permissions=True)
+	elif transaction_type == "cancelled":
+		if coupon.used > 0:
+			coupon.used = coupon.used - 1
+			coupon.save(ignore_permissions=True)

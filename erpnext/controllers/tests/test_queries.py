@@ -93,6 +93,34 @@ class TestQueries(ERPNextTestSuite):
 		query = add_default_params(queries.get_purchase_invoices, "Purchase Invoice")
 		self.assertIsInstance(query(txt="", filters={}), list | tuple)
 
+	def test_get_filtered_child_rows_query(self):
+		# idx is an integer column. Searching child rows by it must run on Postgres
+		# (a bare LIKE rejects "bigint ILIKE text") AND cast to a full-length string:
+		# CAST(idx AS CHAR) is character(1) on Postgres, so a two-digit idx like 11
+		# would render as "1" and be missed. Build a Sales Order with >10 rows and
+		# search for row 11 to lock both behaviours.
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		frappe.db.set_single_value("Selling Settings", "allow_multiple_items", 1)
+		so = make_sales_order(
+			item_list=[
+				{"item_code": "_Test Item", "qty": 1, "rate": 100, "warehouse": "_Test Warehouse - _TC"}
+				for _ in range(11)
+			],
+			do_not_submit=True,
+		)
+
+		rows = queries.get_filtered_child_rows(
+			"Sales Order Item",
+			txt="#11",
+			searchfield="name",
+			start=0,
+			page_len=20,
+			filters={"parent": so.name},
+		)
+		# row label is "#<idx>, <item_code>"; row 11 must be present
+		self.assertTrue(any(str(label).startswith("#11,") for _name, label in rows))
+
 	def test_default_uoms(self):
 		self.assertGreaterEqual(frappe.db.count("UOM", {"enabled": 1}), 10)
 

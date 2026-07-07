@@ -8,7 +8,19 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestProjectTemplate(ERPNextTestSuite):
-	pass
+	def test_dependency_task_must_be_in_template(self):
+		dependency = create_task("_Test PT Dependency", is_template=1)
+		dependent = create_task("_Test PT Dependent", is_template=1, depends_on=dependency.name)
+
+		template = frappe.get_doc(doctype="Project Template", name="_Test PT Missing Dependency")
+		template.append("tasks", {"task": dependent.name})
+		# the dependency task is not in the template's task list
+		self.assertRaises(frappe.ValidationError, template.insert)
+
+		# adding the dependency task makes the template valid
+		template.append("tasks", {"task": dependency.name})
+		template.insert()
+		self.assertTrue(frappe.db.exists("Project Template", template.name))
 
 
 def make_project_template(project_template_name, project_tasks=None):

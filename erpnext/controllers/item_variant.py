@@ -45,8 +45,7 @@ def get_variant(
 	if item_template.variant_based_on == "Manufacturer" and manufacturer:
 		return make_variant_based_on_manufacturer(item_template, manufacturer, manufacturer_part_no)
 
-	if isinstance(args, str):
-		args = json.loads(args)
+	args = frappe.parse_json(args)
 
 	attribute_args = {k: v for k, v in args.items() if k != "use_template_image"}
 	if not attribute_args:
@@ -258,8 +257,7 @@ def find_variant(template, args, variant_item_code=None):
 @frappe.whitelist()
 def create_variant(item: str, args: dict | str, use_template_image: bool = False):
 	use_template_image = frappe.parse_json(use_template_image)
-	if isinstance(args, str):
-		args = json.loads(args)
+	args = frappe.parse_json(args)
 
 	template = frappe.get_doc("Item", item)
 	variant = frappe.new_doc("Item")
@@ -286,10 +284,7 @@ def create_variant(item: str, args: dict | str, use_template_image: bool = False
 def enqueue_multiple_variant_creation(item: str, args: dict | str, use_template_image: bool = False):
 	use_template_image = frappe.parse_json(use_template_image)
 	# There can be innumerable attribute combinations, enqueue
-	if isinstance(args, str):
-		variants = json.loads(args)
-	else:
-		variants = args
+	variants = frappe.parse_json(args)
 	variants = {key: values for key, values in variants.items() if values}
 	if not variants:
 		frappe.throw(_("Please select at least one attribute value"))
@@ -315,8 +310,7 @@ def enqueue_multiple_variant_creation(item: str, args: dict | str, use_template_
 
 def create_multiple_variants(item, args, use_template_image=False):
 	count = 0
-	if isinstance(args, str):
-		args = json.loads(args)
+	args = frappe.parse_json(args)
 	args = {key: values for key, values in args.items() if values}
 
 	template_item = frappe.get_doc("Item", item)
@@ -483,7 +477,7 @@ def make_variant_item_code(template_item_code, template_item_name, variant):
 @frappe.whitelist()
 def create_variant_doc_for_quick_entry(template: str, args: dict | str):
 	variant_based_on = frappe.db.get_value("Item", template, "variant_based_on")
-	args = json.loads(args)
+	args = frappe.parse_json(args)
 	if variant_based_on == "Manufacturer":
 		variant = get_variant(template, **args)
 	else:

@@ -38,7 +38,148 @@ class StockEntryGLComposer(BaseStockGLComposer):
 
 		self._append_lcv_gl_entries(gl_entries, inventory_account_map)
 
+		if doc.purpose in ("Repack", "Manufacture"):
+			self._append_manufacturing_variance_gl_entries(gl_entries, inventory_account_map)
+		elif doc.purpose == "Material Receipt":
+			self._append_receipt_variance_gl_entries(gl_entries)
+
 		return process_gl_map(gl_entries, from_repost=frappe.flags.through_repost_item_valuation)
+
+	def _append_manufacturing_variance_gl_entries(
+		self, gl_entries: list, inventory_account_map: dict
+	) -> None:
+		"""For Standard Cost finished goods produced via Manufacture/Repack, stock is booked at the item's
+		standard rate, while the entry consumes raw-material (plus additional/landed) cost. The difference
+		is a manufacturing variance and is reclassified from the finished good's expense account to the
+		Manufacturing Variance account (mirrors Purchase Price Variance on a Purchase Receipt)."""
+		precision = self.get_debit_field_precision()
+		# Reuse the SLE map the base composer already fetched in compose() to avoid a second identical query.
+		sle_map = self._sle_map
+
+		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import (
+			get_manufacturing_variance_account,
+		)
+
+		for d in self.doc.get("items"):
+			variance = self._get_finished_good_variance(d, sle_map, precision)
+			if variance:
+				account = get_manufacturing_variance_account(d.item_code, self.doc.company)
+				remarks = self.doc.get("remarks") or _("Manufacturing Variance for {0}").format(d.item_code)
+				self._append_standard_cost_variance_pair(
+					gl_entries, d, variance, account, remarks, inventory_account_map
+				)
+
+	def _append_receipt_variance_gl_entries(self, gl_entries: list) -> None:
+		"""For a Standard Cost item received via Material Receipt, stock is booked at the item's standard
+		rate while the row may carry a manually-set basic rate plus additional/landed cost. The gap
+		between that intended cost and the standard value is a purchase price variance, reclassified from
+		the item's expense account to the Purchase Price Variance account."""
+		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import (
+			get_purchase_price_variance_account,
+		)
+
+		precision = self.get_debit_field_precision()
+		sle_map = self._sle_map
+
+		for d in self.doc.get("items"):
+			variance = self._get_receipt_variance(d, sle_map, precision)
+			if variance:
+				account = get_purchase_price_variance_account(d.item_code, self.doc.company)
+				remarks = self.doc.get("remarks") or _("Purchase Price Variance for {0}").format(d.item_code)
+				self._append_standard_cost_variance_pair(gl_entries, d, variance, account, remarks)
+
+	def _get_receipt_variance(self, item, sle_map, precision) -> float:
+		"""Purchase price variance for a Standard Cost item on a Material Receipt: the gap between the full
+		computed incoming cost (basic amount + additional cost + LCV, i.e. ``amount``) and the standard
+		value booked into stock. 0 for anything that is not a plain Standard Cost receipt row."""
+		from erpnext.stock.utils import get_valuation_method
+
+		if not item.t_warehouse or item.s_warehouse:
+			return 0.0
+
+		if (
+			item.get("is_finished_item")
+			or item.get("secondary_item_type")
+			or item.get("is_legacy_scrap_item")
+		):
+			return 0.0
+
+		if get_valuation_method(item.item_code, self.doc.company) != "Standard Cost":
+			return 0.0
+
+		standard_value = sum(
+			flt(sle.stock_value_difference) for sle in sle_map.get(item.name, []) if flt(sle.actual_qty) > 0
+		)
+
+		return flt(flt(item.amount) - standard_value, precision)
+
+	def _get_finished_good_variance(self, item, sle_map, precision) -> float:
+		"""Manufacturing variance for a Standard Cost finished good: the gap between the full computed
+		incoming cost (raw-material share + additional cost + LCV, i.e. ``amount``) and the standard value
+		actually booked into stock. Positive = consumed more than standard (unfavorable). 0 for anything
+		that is not a Standard Cost finished good."""
+		from erpnext.stock.utils import get_valuation_method
+
+		if not item.is_finished_item or not item.t_warehouse:
+			return 0.0
+
+		if get_valuation_method(item.item_code, self.doc.company) != "Standard Cost":
+			return 0.0
+
+		# Value actually booked into stock for this finished good = qty * standard rate.
+		standard_value = sum(
+			flt(sle.stock_value_difference) for sle in sle_map.get(item.name, []) if flt(sle.actual_qty) > 0
+		)
+
+		return flt(flt(item.amount) - standard_value, precision)
+
+	def _append_standard_cost_variance_pair(
+		self,
+		gl_entries: list,
+		item,
+		variance: float,
+		variance_account: str,
+		remarks: str,
+		inventory_account_map: dict | None = None,
+	) -> None:
+		"""Reclassify ``variance`` from the item's expense account to the given variance account,
+		restoring the expense account to the value it would carry without Standard Cost."""
+		doc = self.doc
+		cost_center = item.cost_center or frappe.get_cached_value("Company", doc.company, "cost_center")
+		project = item.project or doc.get("project")
+
+		inventory_account = None
+		if inventory_account_map:
+			inventory_account = doc.get_inventory_account_dict(item, inventory_account_map, "t_warehouse")[
+				"account"
+			]
+
+		gl_entries.append(
+			self.get_gl_dict(
+				{
+					"account": variance_account,
+					"against": item.expense_account,
+					"cost_center": cost_center,
+					"remarks": remarks,
+					"debit": variance,
+					"project": project,
+				},
+				item=item,
+			)
+		)
+		gl_entries.append(
+			self.get_gl_dict(
+				{
+					"account": item.expense_account,
+					"against": inventory_account or variance_account,
+					"cost_center": cost_center,
+					"remarks": remarks,
+					"debit": -1 * variance,
+					"project": project,
+				},
+				item=item,
+			)
+		)
 
 	def _build_additional_cost_per_item_account(
 		self, total_basic_amount: float, divide_based_on: float
@@ -64,6 +205,11 @@ class StockEntryGLComposer(BaseStockGLComposer):
 				entry["base_amount"] += flt(t.base_amount * multiply_based_on) / divide_based_on
 
 		return item_account_wise_additional_cost
+
+	def get_valuation_method(self, item_code: str) -> str:
+		from erpnext.stock.utils import get_valuation_method
+
+		return get_valuation_method(item_code, self.doc.company)
 
 	def _append_additional_cost_gl_entries(
 		self, gl_entries: list, item_account_wise_additional_cost: dict
@@ -93,18 +239,33 @@ class StockEntryGLComposer(BaseStockGLComposer):
 					)
 				)
 
-				gl_entries.append(
-					self.get_gl_dict(
-						{
-							"account": d.expense_account,
-							"against": account,
-							"cost_center": d.cost_center,
-							"remarks": doc.get("remarks") or _("Accounting Entry for Stock"),
-							"credit": -1 * amount["base_amount"],
-						},
-						item=d,
+				if self.get_valuation_method(d.item_code) == "Standard Cost":
+					gl_entries.append(
+						self.get_gl_dict(
+							{
+								"account": d.expense_account,
+								"against": account,
+								"cost_center": d.cost_center,
+								"remarks": doc.get("remarks") or _("Accounting Entry for Stock"),
+								"debit": flt(amount["base_amount"]),
+							},
+							item=d,
+						)
 					)
-				)
+
+				else:
+					gl_entries.append(
+						self.get_gl_dict(
+							{
+								"account": d.expense_account,
+								"against": account,
+								"cost_center": d.cost_center,
+								"remarks": doc.get("remarks") or _("Accounting Entry for Stock"),
+								"credit": -1 * flt(amount["base_amount"]),
+							},
+							item=d,
+						)
+					)
 
 	def _append_lcv_gl_entries(self, gl_entries: list, inventory_account_map: dict) -> None:
 		doc = self.doc

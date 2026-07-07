@@ -422,6 +422,37 @@ class TestTimesheet(ERPNextTestSuite):
 		self.assertIsNotNone(row, "billed timesheet not returned by portal list")
 		self.assertEqual(row.sales_invoice, si.name)
 
+	def test_get_activity_cost_falls_back_to_activity_type(self):
+		from erpnext.projects.doctype.timesheet.timesheet import get_activity_cost
+
+		update_activity_type("_Test Activity Type")
+		# no employee-specific Activity Cost row, so the Activity Type rates are used
+		rate = get_activity_cost(employee=None, activity_type="_Test Activity Type")
+		self.assertEqual(rate["billing_rate"], 50.0)
+		self.assertEqual(rate["costing_rate"], 20.0)
+
+		# an unknown activity type yields an empty dict, not an error
+		self.assertEqual(get_activity_cost(activity_type="__Nonexistent Activity__"), {})
+
+	def test_billing_helpers_for_timesheet_detail(self):
+		from erpnext.projects.doctype.timesheet.timesheet import (
+			get_timesheet_data,
+			get_timesheet_detail_rate,
+		)
+
+		employee = make_employee("_test_timesheet_billing_helpers@example.com", company="_Test Company")
+		timesheet = make_timesheet(employee, is_billable=1, simulate=True)
+		detail = timesheet.time_logs[0]
+
+		# 2 billable hours at a billing rate of 50
+		data = get_timesheet_data(timesheet.name, project="")
+		self.assertEqual(data["billing_hours"], 2)
+		self.assertEqual(data["billing_amount"], 100)
+
+		# same currency on both sides, so the rate is the raw billing amount
+		rate = get_timesheet_detail_rate(detail.name, timesheet.currency)
+		self.assertEqual(rate, detail.billing_amount)
+
 	@staticmethod
 	def _delete_if_exists(doctype, name):
 		if frappe.db.exists(doctype, name):

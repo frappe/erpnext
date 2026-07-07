@@ -73,7 +73,7 @@ class ExchangeRateRevaluation(Document):
 
 	def validate_mandatory(self):
 		if not (self.company and self.posting_date):
-			frappe.throw(_("Please select Company and Posting Date to getting entries"))
+			frappe.throw(_("Please select Company and Posting Date to get entries"))
 
 	def before_submit(self):
 		self.remove_accounts_without_gain_loss()
@@ -350,12 +350,14 @@ class ExchangeRateRevaluation(Document):
 		zero_balance_jv = self.make_jv_for_zero_balance()
 		if zero_balance_jv:
 			frappe.msgprint(
-				f"Zero Balance Journal: {get_link_to_form('Journal Entry', zero_balance_jv.name)}"
+				_("Zero Balance Journal: {0}").format(get_link_to_form("Journal Entry", zero_balance_jv.name))
 			)
 
 		revaluation_jv = self.make_jv_for_revaluation()
 		if revaluation_jv:
-			frappe.msgprint(f"Revaluation Journal: {get_link_to_form('Journal Entry', revaluation_jv.name)}")
+			frappe.msgprint(
+				_("Revaluation Journal: {0}").format(get_link_to_form("Journal Entry", revaluation_jv.name))
+			)
 
 		return {
 			"revaluation_jv": revaluation_jv.name if revaluation_jv else None,
@@ -599,17 +601,22 @@ def calculate_exchange_rate_using_last_gle(company, account, party_type, party):
 			.select(gl.voucher_type, gl.voucher_no)
 			.where(Criterion.all(conditions))
 			.orderby(gl.posting_date, order=Order.desc)
+			.orderby(gl.name, order=Order.desc)
 			.limit(1)
 			.run()[0]
 		)
 
 		last_exchange_rate = (
 			qb.from_(gl)
-			.select((gl.debit - gl.credit) / (gl.debit_in_account_currency - gl.credit_in_account_currency))
+			.select(
+				(gl.debit - gl.credit)
+				/ NullIf(gl.debit_in_account_currency - gl.credit_in_account_currency, 0)
+			)
 			.where(
 				(gl.voucher_type == voucher_type) & (gl.voucher_no == voucher_no) & (gl.account == account)
 			)
 			.orderby(gl.posting_date, order=Order.desc)
+			.orderby(gl.name, order=Order.desc)
 			.limit(1)
 			.run()[0][0]
 		)

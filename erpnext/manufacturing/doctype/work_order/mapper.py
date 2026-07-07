@@ -148,8 +148,7 @@ def _new_work_order(item, bom_no, company, item_details, use_multi_level_bom):
 
 
 def add_variant_item(variant_items, wo_doc, bom_no, table_name="items"):
-	if isinstance(variant_items, str):
-		variant_items = json.loads(variant_items)
+	variant_items = frappe.parse_json(variant_items)
 
 	for item in variant_items:
 		_add_variant_row(item, wo_doc, bom_no, table_name)
@@ -289,8 +288,7 @@ def _set_stock_entry_warehouses(stock_entry, work_order, purpose, target_warehou
 def make_job_card(work_order: str, operations: str | list, parent_bom: str | None = None):
 	frappe.has_permission("Job Card", "create", throw=True)
 
-	if isinstance(operations, str):
-		operations = json.loads(operations)
+	operations = frappe.parse_json(operations)
 
 	work_order = frappe.get_doc("Work Order", work_order)
 	for row in operations:
@@ -378,7 +376,7 @@ def validate_operation_data(row):
 
 	if flt(row.get("qty")) > flt(row.get("pending_qty")):
 		frappe.throw(
-			_("For operation {0}: Quantity ({1}) can not be greater than pending quantity({2})").format(
+			_("For operation {0}: Quantity ({1}) can not be greater than pending quantity ({2})").format(
 				frappe.bold(row.get("operation")),
 				frappe.bold(row.get("qty")),
 				frappe.bold(row.get("pending_qty")),
@@ -469,10 +467,10 @@ def get_work_order_operation_data(work_order, operation, workstation):
 
 
 @frappe.whitelist()
-def create_pick_list(source_name: str, target_doc: str | None = None, for_qty: float | None = None):
+def create_pick_list(source_name: str, target_doc: str | dict | None = None, for_qty: float | None = None):
 	frappe.has_permission("Pick List", "create", throw=True)
 
-	for_qty = for_qty or json.loads(target_doc).get("for_qty")
+	for_qty = for_qty or frappe.parse_json(target_doc).get("for_qty")
 	max_finished_goods_qty = frappe.db.get_value("Work Order", source_name, "qty")
 	postprocess = partial(
 		_set_pick_list_item_qty, for_qty=for_qty, max_finished_goods_qty=max_finished_goods_qty

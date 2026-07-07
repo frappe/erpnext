@@ -56,10 +56,10 @@ def validate_filters(filters):
 			frappe.throw(_("{0} is mandatory").format(_(f)))
 
 	if not frappe.db.exists("Fiscal Year", filters.get("fiscal_year")):
-		frappe.throw(_("Fiscal Year {0} Does Not Exist").format(filters.get("fiscal_year")))
+		frappe.throw(_("Fiscal Year {0} does not exist").format(filters.get("fiscal_year")))
 
 	if filters.get("based_on") == filters.get("group_by"):
-		frappe.throw(_("'Based On' and 'Group By' can not be same"))
+		frappe.throw(_("'Based On' and 'Group By' can not be the same"))
 
 	if filters.get("period_based_on") and filters.period_based_on not in ["bill_date", "posting_date"]:
 		frappe.throw(
@@ -202,6 +202,9 @@ def get_data(filters, conditions):
 					(filters.get("company"), year_start_date, year_end_date, row[i][0], data1[d][0]),
 					as_list=1,
 				)
+
+				if not row1:
+					continue
 
 				des[ind] = row[i][0]
 				des[ind - 1] = row1[0][0]
@@ -369,8 +372,11 @@ def based_wise_columns_query(based_on, trans):
 	# based_on_cols, based_on_select, based_on_group_by, addl_tables
 	if based_on == "Item":
 		based_on_details["based_on_cols"] = ["Item:Link/Item:120", "Item Name:Data:120"]
-		based_on_details["based_on_select"] = "t2.item_code, t2.item_name,"
-		based_on_details["based_on_group_by"] = "t2.item_code, t2.item_name"
+		# item_name is an editable per-line field, not functionally dependent on item_code, so it
+		# is aggregated (one row per item_code) rather than added to GROUP BY (which would split
+		# the row and change the MariaDB row count). See get_data's group-by query.
+		based_on_details["based_on_select"] = "t2.item_code, Max(t2.item_name) as item_name,"
+		based_on_details["based_on_group_by"] = "t2.item_code"
 		based_on_details["addl_tables"] = ""
 
 	elif based_on == "Item Group":
@@ -386,19 +392,21 @@ def based_wise_columns_query(based_on, trans):
 				"Party Name:Data:120",
 				"Territory:Link/Territory:120",
 			]
-			based_on_details["based_on_select"] = "t1.party_name, t1.customer_name, t1.territory,"
+			based_on_details[
+				"based_on_select"
+			] = "t1.party_name, Max(t1.customer_name) as customer_name, Max(t1.territory) as territory,"
 		else:
 			based_on_details["based_on_cols"] = [
 				"Customer:Link/Customer:120",
 				"Customer Name:Data:120",
 				"Territory:Link/Territory:120",
 			]
-			based_on_details["based_on_select"] = "t1.customer, t1.customer_name, t1.territory,"
-		based_on_details["based_on_group_by"] = (
-			"t1.party_name, t1.customer_name, t1.territory"
-			if trans == "Quotation"
-			else "t1.customer, t1.customer_name, t1.territory"
-		)
+			based_on_details[
+				"based_on_select"
+			] = "t1.customer, Max(t1.customer_name) as customer_name, Max(t1.territory) as territory,"
+		# territory (and customer_name) are not functionally dependent on the customer key, so they
+		# are aggregated rather than grouped — one row per customer, matching the prior MariaDB output.
+		based_on_details["based_on_group_by"] = "t1.party_name" if trans == "Quotation" else "t1.customer"
 		based_on_details["addl_tables"] = ""
 
 	elif based_on == "Customer Group":
@@ -413,8 +421,14 @@ def based_wise_columns_query(based_on, trans):
 			"Supplier Name:Data:120",
 			"Supplier Group:Link/Supplier Group:140",
 		]
-		based_on_details["based_on_select"] = "t1.supplier, t1.supplier_name, t3.supplier_group,"
-		based_on_details["based_on_group_by"] = "t1.supplier, t1.supplier_name, t3.supplier_group"
+		# supplier_name is a stored per-transaction field (not functionally dependent on supplier), so
+		# it is aggregated to keep one row per supplier — matching the prior MariaDB output, which grouped
+		# by t1.supplier only. supplier_group comes from the joined master and is FD on supplier, so it
+		# stays in GROUP BY (postgres-valid, no row split).
+		based_on_details[
+			"based_on_select"
+		] = "t1.supplier, Max(t1.supplier_name) as supplier_name, t3.supplier_group,"
+		based_on_details["based_on_group_by"] = "t1.supplier, t3.supplier_group"
 		based_on_details["addl_tables"] = ",`tabSupplier` t3"
 		based_on_details["addl_tables_relational_cond"] = " and t1.supplier = t3.name"
 

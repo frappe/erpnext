@@ -700,6 +700,160 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertIsNone(data[1].buying_rate)
 		self.assertEqual(data[1]["gross_profit_%"], 20)
 
+	def create_rate_adjustment_debit_note(self, against_invoice, adjustment_rate, item_code=None):
+		"""Create a rate adjustment debit note with no stock movement."""
+		dn = self.create_sales_invoice(qty=1, rate=adjustment_rate, do_not_save=True, do_not_submit=True)
+		if item_code:
+			dn.items[0].item_code = item_code
+			dn.items[0].item_name = item_code
+		dn.is_debit_note = 1
+		dn.return_against = against_invoice.name
+		dn.items[0].allow_zero_valuation_rate = 1
+		return dn.save().submit()
+
+	def test_debit_note_has_zero_buying_amount_and_full_gross_profit(self):
+		"""
+		Rate adjustment debit note (is_debit_note=1) should show buying_amount=0
+		since there is no stock movement. Gross profit equals the adjustment amount
+		and gross profit % equals 100%.
+		"""
+		make_stock_entry(
+			company=self.company,
+			item_code=self.item,
+			target=self.warehouse,
+			qty=1,
+			basic_rate=100,
+		)
+
+		sinv = self.create_sales_invoice(qty=1, rate=200, do_not_submit=True)
+		sinv.update_stock = 1
+		sinv = sinv.save().submit()
+
+		debit_note = self.create_rate_adjustment_debit_note(sinv, adjustment_rate=20)
+
+		filters = frappe._dict(
+			company=self.company,
+			from_date=nowdate(),
+			to_date=nowdate(),
+			group_by="Invoice",
+		)
+
+		columns, data = execute(filters=filters)
+
+		dn_item_rows = [
+			x for x in data if x.get("parent_invoice") == debit_note.name and x.get("indent") == 1.0
+		]
+		self.assertEqual(len(dn_item_rows), 1)
+
+		dn_row = dn_item_rows[0]
+		self.assertEqual(dn_row.buying_amount, 0.0)
+		self.assertEqual(dn_row.selling_amount, 20.0)
+		self.assertEqual(dn_row.gross_profit, 20.0)
+		self.assertEqual(dn_row["gross_profit_%"], 100.0)
+
+	def test_original_invoice_unaffected_by_rate_adjustment_debit_note(self):
+		"""
+		The original invoice's GP should be derived solely from its own selling
+		amount and COGS — the rate adjustment debit note must not alter it.
+		"""
+		make_stock_entry(
+			company=self.company,
+			item_code=self.item,
+			target=self.warehouse,
+			qty=1,
+			basic_rate=100,
+		)
+
+		sinv = self.create_sales_invoice(qty=1, rate=200, do_not_submit=True)
+		sinv.update_stock = 1
+		sinv = sinv.save().submit()
+
+		self.create_rate_adjustment_debit_note(sinv, adjustment_rate=20)
+
+		filters = frappe._dict(
+			company=self.company,
+			from_date=nowdate(),
+			to_date=nowdate(),
+			group_by="Invoice",
+		)
+
+		columns, data = execute(filters=filters)
+
+		sinv_item_rows = [x for x in data if x.get("parent_invoice") == sinv.name and x.get("indent") == 1.0]
+		self.assertEqual(len(sinv_item_rows), 1)
+
+		sinv_row = sinv_item_rows[0]
+		self.assertEqual(sinv_row.selling_amount, 200.0)
+		self.assertEqual(sinv_row.buying_amount, 100.0)
+		self.assertEqual(sinv_row.gross_profit, 100.0)
+		self.assertEqual(sinv_row["gross_profit_%"], 50.0)
+
+	def test_debit_note_qty_not_inflated_in_grouped_report(self):
+		"""
+		When grouped by Item Code, the debit note (qty=0) must not inflate
+		the group's qty or buying_amount. The selling amount and average
+		selling rate correctly reflect the rate adjustment.
+		"""
+		item = create_item("_Test Rate Adjustment Debit Note Item")
+
+		make_stock_entry(
+			company=self.company,
+			item_code=item.item_code,
+			target=self.warehouse,
+			qty=1,
+			basic_rate=100,
+		)
+
+		sinv = create_sales_invoice(
+			qty=1,
+			rate=200,
+			company=self.company,
+			customer=self.customer,
+			item_code=item.item_code,
+			item_name=item.item_code,
+			cost_center=self.cost_center,
+			warehouse=self.warehouse,
+			debit_to=self.debit_to,
+			parent_cost_center=self.cost_center,
+			update_stock=1,
+			currency="INR",
+			income_account=self.income_account,
+			expense_account=self.expense_account,
+		)
+
+		self.create_rate_adjustment_debit_note(sinv, adjustment_rate=20, item_code=item.item_code)
+
+		filters = frappe._dict(
+			company=self.company,
+			from_date=nowdate(),
+			to_date=nowdate(),
+			group_by="Item Code",
+		)
+
+		columns, data = execute(filters=filters)
+
+		# group_by="Item Code" column order:
+		# [item_code, item_name, brand, description, qty, base_rate,
+		#  buying_rate, base_amount, buying_amount, gross_profit, gross_profit_percent, currency]
+		item_row = next((row for row in data if row[0] == item.item_code), None)
+		self.assertIsNotNone(item_row)
+
+		qty, base_rate, buying_amount, base_amount, gross_profit, gp_percent = (
+			item_row[4],
+			item_row[5],
+			item_row[8],
+			item_row[7],
+			item_row[9],
+			item_row[10],
+		)
+
+		self.assertEqual(qty, 1.0)  # debit note adds qty=0, not inflated
+		self.assertEqual(buying_amount, 100.0)  # only original invoice COGS
+		self.assertEqual(base_amount, 220.0)  # 200 (original) + 20 (adjustment)
+		self.assertEqual(base_rate, 220.0)  # avg selling rate = 220/1
+		self.assertEqual(gross_profit, 120.0)  # 220 - 100
+		self.assertAlmostEqual(gp_percent, 54.545, places=2)  # 120/220 * 100
+
 
 def make_sales_person(sales_person_name="_Test Sales Person"):
 	if not frappe.db.exists("Sales Person", {"sales_person_name": sales_person_name}):

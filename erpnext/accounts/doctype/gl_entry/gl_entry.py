@@ -471,6 +471,25 @@ def on_doctype_update():
 	frappe.db.add_index("GL Entry", ["posting_date", "company"])
 	frappe.db.add_index("GL Entry", ["party_type", "party"])
 
+	if frappe.db.db_type == "postgres":
+		# Postgres-only partial/covering indexes for the financial reports (General Ledger, Trial
+		# Balance, Balance Sheet, P&L), which always filter `is_cancelled = 0` and scope by company.
+		# `where`/`include` are no-ops on MariaDB and its optimizer ignores these anyway, so they are
+		# added only on postgres to avoid dead write overhead on this insert-hot table.
+		frappe.db.add_index(
+			"GL Entry",
+			["company", "posting_date", "account"],
+			index_name="gle_active_detail",
+			where="is_cancelled = 0",
+		)
+		frappe.db.add_index(
+			"GL Entry",
+			["company", "account", "posting_date"],
+			index_name="gle_active_cover",
+			where="is_cancelled = 0",
+			include=["debit", "credit"],
+		)
+
 
 def rename_gle_sle_docs():
 	for doctype in ["GL Entry", "Stock Ledger Entry"]:

@@ -8,7 +8,12 @@ import frappe
 from frappe.tests import change_settings
 from frappe.utils import add_days, today
 
+from erpnext.buying.doctype.request_for_quotation.mapper import make_supplier_quotation_from_rfq
+from erpnext.buying.doctype.request_for_quotation.test_request_for_quotation import (
+	make_request_for_quotation,
+)
 from erpnext.buying.doctype.supplier_quotation.mapper import make_purchase_order
+from erpnext.buying.doctype.supplier_quotation.supplier_quotation import set_expired_status
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -16,6 +21,56 @@ from erpnext.tests.utils import ERPNextTestSuite
 class TestPurchaseOrder(ERPNextTestSuite):
 	def setUp(self):
 		self.load_test_records("Supplier Quotation")
+
+	def test_valid_till_before_transaction_date_rejected(self):
+		rfq = make_request_for_quotation()
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier=rfq.suppliers[0].supplier)
+		sq.transaction_date = today()
+		sq.valid_till = add_days(today(), -1)
+		self.assertRaises(frappe.ValidationError, sq.insert)
+
+	def test_set_expired_status_expires_only_submitted_past_quotations(self):
+		rfq = make_request_for_quotation()
+
+		expired = make_supplier_quotation_from_rfq(rfq.name, for_supplier=rfq.suppliers[0].supplier)
+		expired.transaction_date = add_days(today(), -10)
+		expired.valid_till = add_days(today(), -2)
+		expired.insert()
+		expired.submit()
+
+		valid = make_supplier_quotation_from_rfq(rfq.name, for_supplier=rfq.suppliers[1].supplier)
+		valid.valid_till = add_days(today(), 10)
+		valid.insert()
+		valid.submit()
+
+		# A past-validity draft must not be expired - "Expired" applies to submitted quotations only
+		draft = make_supplier_quotation_from_rfq(rfq.name, for_supplier=rfq.suppliers[0].supplier)
+		draft.transaction_date = add_days(today(), -10)
+		draft.valid_till = add_days(today(), -2)
+		draft.insert()
+
+		set_expired_status()
+
+		self.assertEqual(frappe.db.get_value("Supplier Quotation", expired.name, "status"), "Expired")
+		self.assertEqual(frappe.db.get_value("Supplier Quotation", valid.name, "status"), "Submitted")
+		self.assertEqual(frappe.db.get_value("Supplier Quotation", draft.name, "status"), "Draft")
+
+	def test_submit_and_cancel_updates_rfq_quote_status(self):
+		rfq = make_request_for_quotation()
+		supplier_row = rfq.suppliers[0]
+
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier=supplier_row.supplier)
+		sq.submit()
+		self.assertEqual(
+			frappe.db.get_value("Request for Quotation Supplier", supplier_row.name, "quote_status"),
+			"Received",
+		)
+
+		sq.cancel()
+		self.assertEqual(
+			frappe.db.get_value("Request for Quotation Supplier", supplier_row.name, "quote_status"),
+			"Pending",
+		)
 
 	def test_update_child_supplier_quotation_add_item(self):
 		sq = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])

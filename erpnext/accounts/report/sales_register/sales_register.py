@@ -141,17 +141,31 @@ def _execute(filters, additional_table_columns=None):
 
 		# total tax, grand total, outstanding amount & rounded total
 
+		outstanding_precision = (
+			get_field_precision(
+				frappe.get_meta("Sales Invoice").get_field("outstanding_amount"),
+				currency=company_currency,
+			)
+			or 2
+		)
 		row.update(
 			{
 				"tax_total": total_tax,
 				"grand_total": inv.base_grand_total,
 				"rounded_total": inv.base_rounded_total,
-				"outstanding_amount": inv.outstanding_amount,
 			}
 		)
 
 		if inv.doctype == "Sales Invoice":
-			row.update({"debit": inv.base_grand_total, "credit": 0.0})
+			row.update(
+				{
+					"debit": inv.base_grand_total,
+					"credit": 0.0,
+					"outstanding_amount": flt(
+						(inv.outstanding_amount * (inv.conversion_rate or 1)), outstanding_precision
+					),
+				}
+			)
 		else:
 			row.update({"debit": 0.0, "credit": inv.base_grand_total})
 		data.append(row)
@@ -347,14 +361,17 @@ def get_account_columns(invoice_list, include_payments):
 
 	if invoice_list:
 		# frappe drops ORDER BY for distinct queries on postgres (db_query), so sort in python to keep
-		# the generated account-column order deterministic and identical on both backends.
+		# the generated account-column order deterministic and identical on both backends. casefold
+		# reproduces MariaDB's case-insensitive collation order (the original raw SQL ORDER BY); plain
+		# sorted() would be case-sensitive and reorder columns vs the pre-effort MariaDB output.
 		income_accounts = sorted(
 			frappe.get_all(
 				"Sales Invoice Item",
 				filters={"docstatus": 1, "parent": ["in", [inv.name for inv in invoice_list]]},
 				pluck="income_account",
 				distinct=True,
-			)
+			),
+			key=str.casefold,
 		)
 
 		sales_taxes_query = get_taxes_query(invoice_list, "Sales Taxes and Charges", "Sales Invoice")
@@ -377,7 +394,8 @@ def get_account_columns(invoice_list, include_payments):
 				},
 				pluck="unrealized_profit_loss_account",
 				distinct=True,
-			)
+			),
+			key=str.casefold,
 		)
 
 	for account in income_accounts:
@@ -444,6 +462,7 @@ def get_invoices(filters, additional_query_columns):
 			si.is_internal_customer,
 			si.represents_company,
 			si.company,
+			si.conversion_rate,
 		)
 		.where(si.docstatus == 1)
 	)

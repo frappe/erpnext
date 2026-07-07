@@ -341,6 +341,83 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			self.assertEqual(expected_values[gle.account][1], gle.debit)
 			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
+	def test_full_actual_charge_capitalized_on_stock_items_only(self):
+		"""On a stock-updating Purchase Invoice, an actual valuation charge (e.g. Freight) with
+		"Allocate Full Amount to Stock Items" checked is fully capitalized onto stock/asset items
+		only. For 2 stock items + 1 service item (each net 100) and a 30 freight charge, the charge
+		is distributed over the 200 stock net only (15 per stock item) and the entire 30 is
+		capitalized; nothing is lost to the non-stock item."""
+		from erpnext.stock import get_warehouse_account_map
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
+
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+
+		stock_item1 = make_item(properties={"is_stock_item": 1}).name
+		stock_item2 = make_item(properties={"is_stock_item": 1}).name
+		service_item = make_item(properties={"is_stock_item": 0}).name
+
+		pi = frappe.new_doc("Purchase Invoice")
+		pi.company = company
+		pi.supplier = "_Test Supplier"
+		pi.currency = "INR"
+		pi.update_stock = 1
+		pi.credit_to = "Creditors - TCP1"
+		# Order matters: stock, service, stock (service item in the middle)
+		for code in (stock_item1, service_item, stock_item2):
+			pi.append(
+				"items",
+				{
+					"item_code": code,
+					"qty": 1,
+					"rate": 100,
+					"warehouse": warehouse,
+					"cost_center": "Main - TCP1",
+					"expense_account": "Cost of Goods Sold - TCP1",
+				},
+			)
+
+		pi.append(
+			"taxes",
+			{
+				"charge_type": "Actual",
+				"account_head": "_Test Account Shipping Charges - TCP1",
+				"category": "Valuation and Total",
+				"cost_center": "Main - TCP1",
+				"description": "Freight",
+				"tax_amount": 30,
+				# Default behavior: allocate the full amount to stock/asset items only
+				"allocate_full_amount_to_stock_items": 1,
+			},
+		)
+
+		pi.insert()
+
+		# 30 freight / 200 stock net = 15 per stock item. The service item carries nothing.
+		self.assertAlmostEqual(pi.items[0].item_tax_amount, 15.0, places=2)
+		self.assertAlmostEqual(pi.items[1].item_tax_amount, 0.0, places=2)
+		self.assertAlmostEqual(pi.items[2].item_tax_amount, 15.0, places=2)
+
+		pi.submit()
+
+		gl_entries = get_gl_entries("Purchase Invoice", pi.name, skip_cancelled=True, as_dict=True)
+		# Sum per account - the same account can appear in multiple GL rows (e.g. the stock account
+		# is debited once per item), so aggregate rather than keeping only the last row.
+		gl_map = {}
+		for row in gl_entries:
+			acc = gl_map.setdefault(row.account, {"debit": 0.0, "credit": 0.0})
+			acc["debit"] += row.debit
+			acc["credit"] += row.credit
+
+		warehouse_account = get_warehouse_account_map(company)
+		stock_account = warehouse_account[warehouse]["account"]
+
+		# Stock asset = 200 (goods) + 30 (the entire freight charge)
+		self.assertAlmostEqual(gl_map[stock_account]["debit"], 230.0, places=2)
+		# The whole freight charge (30) is capitalized
+		self.assertAlmostEqual(gl_map["_Test Account Shipping Charges - TCP1"]["credit"], 30.0, places=2)
+
 	@ERPNextTestSuite.change_settings(
 		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
 	)
@@ -2968,6 +3045,24 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 		# Test 4 - Since this PI is overbilled by 130% and only 120% is allowed, it will fail
 		self.assertRaises(frappe.ValidationError, pi.submit)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 0})
+	def test_non_stock_item_over_billing_against_po_is_blocked(self):
+		service_item = create_item(
+			"_Test Service Item Non Stock PI",
+			is_stock_item=0,
+			is_purchase_item=1,
+		).name
+
+		po = create_purchase_order(item_code=service_item, qty=5, rate=100, do_not_save=False)
+		po.submit()
+
+		pi = make_pi_from_po(po.name)
+		pi.items[0].qty = 10  # overbill by 100 %
+		pi.save()
+
+		with self.assertRaises(frappe.ValidationError):
+			pi.submit()
 
 	def test_discount_percentage_not_set_when_amount_is_manually_set(self):
 		pi = make_purchase_invoice(do_not_save=True)

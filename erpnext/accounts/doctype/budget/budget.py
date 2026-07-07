@@ -162,9 +162,9 @@ class Budget(Document):
 			frappe.throw(_("Account {0} does not belong to company {1}").format(self.account, self.company))
 		elif account_details.report_type != "Profit and Loss":
 			frappe.throw(
-				_("Budget cannot be assigned against {0}, as it's not an Income or Expense account").format(
-					self.account
-				)
+				_(
+					"Budget cannot be assigned against {0}, as its Root Type is not of Income or Expense"
+				).format(self.account)
 			)
 
 	def set_null_value(self):
@@ -878,7 +878,7 @@ def get_fiscal_year_date_range(from_fiscal_year, to_fiscal_year):
 	return from_year.year_start_date, to_year.year_end_date
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def revise_budget(budget_name: str):
 	old_budget = frappe.get_doc("Budget", budget_name)
 

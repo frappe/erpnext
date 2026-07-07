@@ -582,7 +582,12 @@ def prepare_data(accounts, start_date, end_date, balance_must_be, companies, com
 				total += flt(row[company])
 
 		row["has_value"] = has_value
-		row["total"] = total
+		# when accumulating into the group company, that company's column already consolidates its
+		# descendants, so summing every company column would double-count; use the group total directly.
+		if filters.get("accumulated_in_group_company"):
+			row["total"] = flt(row.get(filters.company, 0.0), 3)
+		else:
+			row["total"] = total
 
 		data.append(row)
 

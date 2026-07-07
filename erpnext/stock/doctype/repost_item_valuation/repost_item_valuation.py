@@ -94,7 +94,7 @@ class RepostItemValuation(Document):
 		self.validate_recreate_stock_ledgers()
 
 	def set_default_posting_time(self):
-		if not self.posting_time:
+		if self.posting_time is None:
 			self.posting_time = nowtime()
 
 		if not self.posting_date:
@@ -209,7 +209,7 @@ class RepostItemValuation(Document):
 			):
 				frappe.msgprint(_("Caution: This might alter frozen accounts."))
 				return
-			frappe.throw(_("You cannot repost item valuation before {}").format(acc_frozen_till_date))
+			frappe.throw(_("You cannot repost item valuation before {0}").format(acc_frozen_till_date))
 
 	def reset_field_values(self):
 		if self.based_on == "Transaction":
@@ -345,6 +345,9 @@ class RepostItemValuation(Document):
 
 	def _recalculate_valuation_rate(self):
 		doc = frappe.get_doc(self.voucher_type, self.voucher_no)
+		if doc.get("is_internal_supplier"):
+			doc.set_sales_incoming_rate_for_internal_transfer()
+
 		doc.update_valuation_rate()
 		for item in doc.items:
 			item.db_set("valuation_rate", item.valuation_rate)
@@ -361,8 +364,8 @@ class RepostItemValuation(Document):
 
 
 @frappe.whitelist()
-def bulk_restart_reposting(names: str):
-	names = json.loads(names)
+def bulk_restart_reposting(names: str | list):
+	names = frappe.parse_json(names)
 	for name in names:
 		doc = frappe.get_doc("Repost Item Valuation", name)
 		if doc.status != "Failed":
@@ -422,10 +425,10 @@ def repost(doc):
 		if isinstance(message, dict):
 			message = message.get("message")
 
-		status = "Failed"
-		# If failed because of timeout, set status to In Progress
-		if traceback and ("timeout" in traceback.lower() or "Deadlock found" in traceback):
-			status = "In Progress"
+		# Recoverable errors (deadlock, lock/query timeout, job timeout) re-queue as In Progress.
+		# Classify by type: the old traceback string-match only knew MariaDB's "Deadlock found" and
+		# missed Postgres deadlocks ("deadlock detected"), failing them permanently.
+		status = "In Progress" if isinstance(e, RecoverableErrors) else "Failed"
 
 		if traceback:
 			message += "<br><br>" + "<b>Traceback:</b> <br>" + traceback
@@ -444,7 +447,8 @@ def repost(doc):
 				"Email Account", {"default_outgoing": 1, "enable_outgoing": 1}, "name"
 			)
 
-			if outgoing_email_account and not isinstance(e, RecoverableErrors):
+			# status == "Failed" already implies e is not recoverable, so no need to re-check here.
+			if outgoing_email_account:
 				notify_error_to_stock_managers(doc, message)
 				doc.set_status("Failed")
 	finally:
@@ -507,7 +511,7 @@ def repost_gl_entries(doc):
 	transactions = directly_dependent_transactions + list(repost_affected_transaction)
 
 	# handle stock delivered but not billed ledger entries
-	if frappe.get_cached_value("Company", doc.company, "stock_delivered_but_not_billed"):
+	if frappe.get_cached_value("Company", doc.company, "enable_stock_delivered_but_not_billed"):
 		_update_post_delivery_billed_vouchers(transactions)
 
 	enable_separate_reposting_for_gl = frappe.db.get_single_value(
@@ -776,6 +780,7 @@ def make_reposting_for_accounting_ledgers(transactions, company, repost_doc):
 		if reposting_map.get((voucher_type, voucher_no)):
 			continue
 
+		frappe.db.savepoint("repost_accounting_ledger")
 		try:
 			new_repost_doc = frappe.new_doc("Repost Item Valuation")
 			new_repost_doc.company = company
@@ -786,7 +791,7 @@ def make_reposting_for_accounting_ledgers(transactions, company, repost_doc):
 			new_repost_doc.flags.ignore_permissions = True
 			new_repost_doc.submit()
 		except Exception:
-			pass
+			frappe.db.rollback(save_point="repost_accounting_ledger")
 
 
 def get_existing_reposting_only_gl_entries(reposting_reference):

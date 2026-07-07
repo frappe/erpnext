@@ -34,6 +34,8 @@
   "default_provisional_account",
   "purchase_expense_account",
   "purchase_expense_contra_account",
+  "purchase_price_variance_account",
+  "manufacturing_variance_account",
   "selling_defaults",
   "column_break_sales",
   "vf_selling_cost_center",
@@ -186,6 +188,22 @@
    "fieldname": "purchase_expense_contra_account",
    "fieldtype": "Link",
    "label": "Purchase Expense Contra Account",
+   "options": "Account",
+   "show_description_on_click": 1
+  },
+  {
+   "description": "For Standard Cost items: the purchase price vs standard rate difference is booked here. Falls back to the Company's Default Purchase Price Variance Account.",
+   "fieldname": "purchase_price_variance_account",
+   "fieldtype": "Link",
+   "label": "Purchase Price Variance Account",
+   "options": "Account",
+   "show_description_on_click": 1
+  },
+  {
+   "description": "For Standard Cost items: the Manufacture/Repack consumed cost vs standard rate difference is booked here. Falls back to the Company's Default Manufacturing Variance Account.",
+   "fieldname": "manufacturing_variance_account",
+   "fieldtype": "Link",
+   "label": "Manufacturing Variance Account",
    "options": "Account",
    "show_description_on_click": 1
   },
@@ -356,7 +374,7 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2026-06-03 17:25:35.982082",
+ "modified": "2026-07-01 11:48:07.853494",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Default",

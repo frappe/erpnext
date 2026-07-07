@@ -718,7 +718,7 @@ class PaymentRequest(Document):
 				row_number += TO_SKIP_NEW_ROW
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_payment_request(**args):
 	"""Make payment request"""
 
@@ -740,7 +740,7 @@ def make_payment_request(**args):
 
 	# Schedule-based PRs are allowed only if no Payment Entry exists for this document.
 	# Any existing Payment Entry forces legacy (amount-based) flow.
-	selected_payment_schedules = json.loads(args.get("schedules")) if args.get("schedules") else []
+	selected_payment_schedules = frappe.parse_json(args.get("schedules")) if args.get("schedules") else []
 
 	# Backend guard:
 	# If any Payment Entry exists, schedule-based PRs are not allowed.
@@ -931,7 +931,7 @@ def apply_payment_references(pr, payment_reference):
 
 
 def set_payment_references(payment_schedules):
-	payment_schedules = json.loads(payment_schedules) if payment_schedules else []
+	payment_schedules = frappe.parse_json(payment_schedules) if payment_schedules else []
 	payment_reference = []
 
 	for row in payment_schedules:

@@ -297,7 +297,7 @@ class SellingController(StockController):
 			throw(
 				_(
 					"""Row #{0}: Selling rate for item {1} is lower than its {2}.
-					Selling {3} should be atleast {4}.<br><br>Alternatively,
+					Selling {3} should be at least {4}.<br><br>Alternatively,
 					you can disable '{5}' in {6} to bypass
 					this validation."""
 				).format(
@@ -869,7 +869,7 @@ class SellingController(StockController):
 
 			duplicate_items_msg = _("Item {0} entered multiple times.").format(frappe.bold(d.item_code))
 			duplicate_items_msg += "<br><br>"
-			duplicate_items_msg += _("Please enable {} in {} to allow same item in multiple rows").format(
+			duplicate_items_msg += _("Please enable {0} in {1} to allow same item in multiple rows").format(
 				frappe.bold(_("Allow Item to Be Added Multiple Times in a Transaction")),
 				get_link_to_form("Selling Settings", "Selling Settings"),
 			)
@@ -898,7 +898,7 @@ class SellingController(StockController):
 
 		if not self.get("is_internal_customer") and any(d.get("target_warehouse") for d in items):
 			msg = _("Target Warehouse is set for some items but the customer is not an internal customer.")
-			msg += " " + _("This {} will be treated as material transfer.").format(_(self.doctype))
+			msg += " " + _("This {0} will be treated as material transfer.").format(_(self.doctype))
 			frappe.msgprint(msg, title="Internal Transfer", alert=True)
 
 	def validate_items(self):

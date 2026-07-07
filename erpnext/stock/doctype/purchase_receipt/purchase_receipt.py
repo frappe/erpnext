@@ -260,7 +260,7 @@ class PurchaseReceipt(BuyingController):
 		self.check_for_on_hold_or_closed_status("Purchase Order", "purchase_order")
 
 		if getdate(self.posting_date) > getdate(nowdate()):
-			throw(_("Posting Date cannot be future date"))
+			throw(_("Posting Date cannot be a future date"))
 
 		self.get_current_stock()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
@@ -329,14 +329,18 @@ class PurchaseReceipt(BuyingController):
 				)
 
 				if qi.reference_type != self.doctype or qi.reference_name != self.name:
-					msg = f"""Row #{item.idx}: Please select a valid Quality Inspection with Reference Type
-						{frappe.bold(self.doctype)} and Reference Name {frappe.bold(self.name)}."""
-					frappe.throw(_(msg))
+					frappe.throw(
+						_(
+							"Row #{0}: Please select a valid Quality Inspection with Reference Type {1} and Reference Name {2}."
+						).format(item.idx, frappe.bold(self.doctype), frappe.bold(self.name))
+					)
 
 				if qi.item_code != item.item_code:
-					msg = f"""Row #{item.idx}: Please select a valid Quality Inspection with Item Code
-						{frappe.bold(item.item_code)}."""
-					frappe.throw(_(msg))
+					frappe.throw(
+						_("Row #{0}: Please select a valid Quality Inspection with Item Code {1}.").format(
+							item.idx, frappe.bold(item.item_code)
+						)
+					)
 
 	def get_already_received_qty(self, po, po_detail):
 		qty = frappe.get_all(
@@ -383,7 +387,7 @@ class PurchaseReceipt(BuyingController):
 		self.update_received_qty_if_from_pp()
 
 	def update_received_qty_if_from_pp(self):
-		from frappe.query_builder.functions import Coalesce, Sum
+		from frappe.query_builder.functions import Coalesce, NullIf, Sum
 
 		items_from_po = [item.purchase_order_item for item in self.items if item.purchase_order_item]
 		if items_from_po:
@@ -404,7 +408,9 @@ class PurchaseReceipt(BuyingController):
 					frappe.qb.from_(table)
 					.select(
 						table.production_plan_sub_assembly_item,
-						Sum(table.received_qty / (table.qty / table.fg_item_qty)).as_("received_qty"),
+						Sum(table.received_qty / NullIf(table.qty / NullIf(table.fg_item_qty, 0), 0)).as_(
+							"received_qty"
+						),
 					)
 					.where(table.production_plan_sub_assembly_item.isin(result))
 					.groupby(table.production_plan_sub_assembly_item)

@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_rename": 1,
  "autoname": "field:parameter",
  "creation": "2020-12-28 17:06:00.254129",
  "doctype": "DocType",
@@ -34,7 +35,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-27 13:10:28.861722",
+ "modified": "2026-06-19 10:55:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Quality Inspection Parameter",

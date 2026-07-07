@@ -15,6 +15,7 @@
    "label": "Budget",
    "link_to": "Budget",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -27,18 +28,20 @@
    "label": "Cost Center",
    "link_to": "Cost Center",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "accounting",
+   "icon": "wallet",
    "indent": 0,
    "keep_closed": 0,
    "label": "Accounting Dimension",
    "link_to": "Accounting Dimension",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -51,6 +54,7 @@
    "label": "Cost Center Allocation",
    "link_to": "Cost Center Allocation",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -63,15 +67,16 @@
    "label": "Budget Variance",
    "link_to": "Budget Variance Report",
    "link_type": "Report",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   }
  ],
- "modified": "2026-01-10 00:06:13.032297",
+ "modified": "2026-07-03 00:06:13.032297",
  "modified_by": "Administrator",
  "module": "Accounts",
- "name": "Budget",
+ "name": "Budgeting",
  "owner": "Administrator",
  "standard": 1,
- "title": "Budget"
+ "title": "Budgeting"
 }

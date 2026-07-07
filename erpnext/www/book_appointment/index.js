@@ -234,7 +234,7 @@ async function submit() {
 			if (response.message.status == "Unverified") {
 				frappe.show_alert(__("Please check your email to confirm the appointment"));
 			} else {
-				frappe.show_alert(__("Appointment Created Successfully"));
+				frappe.show_alert(__("Appointment created successfully"));
 			}
 			setTimeout(() => {
 				let redirect_url = "/";
@@ -245,7 +245,7 @@ async function submit() {
 			}, 5000);
 		},
 		error: (err) => {
-			frappe.show_alert(__("Something went wrong please try again"));
+			frappe.show_alert(__("Something went wrong, please try again"));
 			button.disabled = false;
 		},
 	});

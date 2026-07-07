@@ -101,7 +101,7 @@ def get_available_slots_between(query_start_time, query_end_time, settings):
 
 
 @frappe.whitelist(allow_guest=True)
-def create_appointment(date: str, time: str, tz: str, contact: str):
+def create_appointment(date: str, time: str, tz: str, contact: str | dict):
 	handle_appointment_booking_disabled()
 	format_string = "%Y-%m-%d %H:%M:%S"
 	scheduled_time = datetime.datetime.strptime(date + " " + time, format_string)
@@ -112,7 +112,7 @@ def create_appointment(date: str, time: str, tz: str, contact: str):
 	# Create a appointment document from form
 	appointment = frappe.new_doc("Appointment")
 	appointment.scheduled_time = scheduled_time
-	contact = json.loads(contact)
+	contact = frappe.parse_json(contact)
 	appointment.customer_name = contact.get("name", None)
 	appointment.customer_phone_number = contact.get("number", None)
 	appointment.customer_skype = contact.get("skype", None)

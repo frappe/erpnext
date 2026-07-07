@@ -124,12 +124,12 @@ def check_on_hold_or_closed_status(doctype, docname) -> None:
 
 
 @frappe.whitelist()
-def get_linked_material_requests(items: str):
+def get_linked_material_requests(items: str | list):
 	"""
 	Retrieve Material Requests linked to a list of items.
 	"""
 
-	items = json.loads(items)
+	items = frappe.parse_json(items)
 	mr_list = []
 
 	mr = frappe.qb.DocType("Material Request")

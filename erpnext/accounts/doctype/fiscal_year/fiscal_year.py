@@ -107,6 +107,9 @@ def auto_create_fiscal_year():
 	)
 
 	for d in fiscal_year:
+		# savepoint so a duplicate-year INSERT (Fiscal Year autoname=field:year) that aborts the
+		# statement doesn't poison the whole scheduler transaction on Postgres and kill the next iteration
+		frappe.db.savepoint("auto_create_fiscal_year")
 		try:
 			current_fy = frappe.get_doc("Fiscal Year", d[0])
 
@@ -127,7 +130,7 @@ def auto_create_fiscal_year():
 
 			new_fy.insert(ignore_permissions=True)
 		except frappe.NameError:
-			pass
+			frappe.db.rollback(save_point="auto_create_fiscal_year")
 
 
 def get_from_and_to_date(fiscal_year):

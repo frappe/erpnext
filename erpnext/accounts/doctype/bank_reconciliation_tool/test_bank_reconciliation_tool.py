@@ -8,6 +8,7 @@ from frappe.utils import add_days, today
 
 from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import (
 	auto_reconcile_vouchers,
+	get_auto_reconcile_message,
 	get_bank_transactions,
 )
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
@@ -97,3 +98,40 @@ class TestBankReconciliationTool(ERPNextTestSuite, AccountsTestMixin):
 		# assert API output post reconciliation
 		transactions = get_bank_transactions(self.bank_account, from_date, to_date)
 		self.assertEqual(len(transactions), 0)
+
+	def make_bank_transaction(self, date, deposit=100):
+		return (
+			frappe.get_doc(
+				{
+					"doctype": "Bank Transaction",
+					"date": date,
+					"deposit": deposit,
+					"bank_account": self.bank_account,
+					"currency": "INR",
+				}
+			)
+			.save()
+			.submit()
+		)
+
+	def test_get_bank_transactions_excludes_dates_after_to_date(self):
+		self.make_bank_transaction(date=today())
+		names = [t.name for t in get_bank_transactions(self.bank_account, to_date=add_days(today(), -1))]
+		self.assertEqual(names, [])
+
+	def test_auto_reconcile_message_for_no_matches(self):
+		message, indicator = get_auto_reconcile_message([], [])
+		self.assertEqual(indicator, "blue")
+		self.assertIn("No matches", message)
+
+	def test_auto_reconcile_message_counts_and_pluralizes(self):
+		# reconciled count is reported and the indicator turns green
+		message, indicator = get_auto_reconcile_message([], ["t1", "t2"])
+		self.assertEqual(indicator, "green")
+		self.assertIn("2 Transaction(s) Reconciled", message)
+
+		# partially-reconciled label is singular for one, plural for many
+		singular, _ = get_auto_reconcile_message(["p1"], [])
+		self.assertIn("1 Transaction Partially Reconciled", singular)
+		plural, _ = get_auto_reconcile_message(["p1", "p2"], [])
+		self.assertIn("2 Transactions Partially Reconciled", plural)

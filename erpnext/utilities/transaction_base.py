@@ -513,17 +513,14 @@ class TransactionBase(StatusUpdater):
 		item_obj.base_rate_with_margin = flt(item_obj.rate_with_margin) * flt(self.conversion_rate)
 		item_rate = flt(item_obj.rate_with_margin, item_obj.precision("rate"))
 
-		if item_obj.discount_percentage and not item_obj.discount_amount:
+		if item_obj.discount_percentage:
 			item_obj.discount_amount = (
 				flt(item_obj.rate_with_margin) * flt(item_obj.discount_percentage) / 100
 			)
 
-		if item_obj.discount_amount and item_obj.discount_amount > 0:
+		if item_obj.discount_amount:
 			item_rate = flt(
 				(item_obj.rate_with_margin) - (item_obj.discount_amount), item_obj.precision("rate")
-			)
-			item_obj.discount_percentage = (
-				100 * flt(item_obj.discount_amount) / flt(item_obj.rate_with_margin)
 			)
 
 		item_obj.rate = item_rate

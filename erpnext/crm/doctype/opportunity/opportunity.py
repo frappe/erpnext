@@ -389,9 +389,9 @@ def get_item_details(item_code: str):
 	}
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def set_multiple_status(names: str | list[str], status: str):
-	names = json.loads(names)
+	names = frappe.parse_json(names)
 	for name in names:
 		opp = frappe.get_doc("Opportunity", name)
 		opp.status = status
@@ -399,8 +399,8 @@ def set_multiple_status(names: str | list[str], status: str):
 
 
 def auto_close_opportunity():
-	"""auto close the `Replied` Opportunities after 7 days"""
-	auto_close_after_days = frappe.db.get_single_value("CRM Settings", "close_opportunity_after_days") or 15
+	"""Auto close `Replied` Opportunities inactive for the days configured in CRM Settings."""
+	auto_close_after_days = frappe.db.get_single_value("CRM Settings", "close_opportunity_after_days")
 
 	table = frappe.qb.DocType("Opportunity")
 	opportunities = (

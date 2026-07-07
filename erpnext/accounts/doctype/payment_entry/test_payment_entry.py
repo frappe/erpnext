@@ -246,6 +246,62 @@ class TestPaymentEntry(ERPNextTestSuite):
 		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", pi.name, "outstanding_amount"))
 		self.assertEqual(outstanding_amount, 0)
 
+	def test_pay_multiple_purchase_invoices_in_one_entry(self):
+		pi1 = make_purchase_invoice()  # outstanding 250
+		pi2 = make_purchase_invoice()  # outstanding 250
+
+		pe = get_payment_entry("Purchase Invoice", pi1.name, bank_account="_Test Cash - _TC")
+		pe.append(
+			"references",
+			{
+				"reference_doctype": "Purchase Invoice",
+				"reference_name": pi2.name,
+				"total_amount": pi2.grand_total,
+				"outstanding_amount": pi2.outstanding_amount,
+				"allocated_amount": pi2.outstanding_amount,
+			},
+		)
+		pe.paid_amount = pe.received_amount = (
+			pe.references[0].allocated_amount + pe.references[1].allocated_amount
+		)
+		pe.insert()
+		pe.submit()
+
+		self.assertEqual(pe.total_allocated_amount, 500)
+		self.assertEqual(frappe.db.get_value("Purchase Invoice", pi1.name, "outstanding_amount"), 0)
+		self.assertEqual(frappe.db.get_value("Purchase Invoice", pi2.name, "outstanding_amount"), 0)
+
+	def test_unallocated_amount_on_overpaid_purchase_payment(self):
+		pi = make_purchase_invoice()  # outstanding 250
+
+		pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Cash - _TC")
+		pe.paid_amount = pe.references[0].allocated_amount + 200  # overpay -> 200 advance
+		pe.received_amount = pe.paid_amount
+		pe.insert()
+		pe.submit()
+
+		self.assertEqual(pe.docstatus, 1)
+		self.assertEqual(pe.unallocated_amount, 200)
+
+		# end-to-end: submitting posts a balanced GL for the full paid amount (250
+		# settling the invoice + 200 advance)
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": pe.name, "is_cancelled": 0},
+			fields=["debit", "credit"],
+		)
+		self.assertTrue(gl_entries, "Submitted payment produced no GL entries")
+		self.assertEqual(flt(sum(e.debit for e in gl_entries)), flt(sum(e.credit for e in gl_entries)))
+		self.assertEqual(flt(sum(e.debit for e in gl_entries)), 450)
+
+	def test_overallocation_against_purchase_invoice_throws(self):
+		pi = make_purchase_invoice()  # outstanding 250
+
+		pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Cash - _TC")
+		pe.references[0].allocated_amount += 100  # 350 > 250 outstanding
+		pe.paid_amount = pe.received_amount = pe.references[0].allocated_amount
+		self.assertRaises(frappe.ValidationError, pe.insert)
+
 	def test_payment_against_sales_invoice_to_check_status(self):
 		si = create_sales_invoice(
 			customer="_Test Customer USD",
@@ -2317,3 +2373,65 @@ def create_customer(name="_Test Customer 2 USD", currency="USD"):
 		customer.save()
 		customer = customer.name
 	return customer
+
+
+class TestPaymentEntryValidation(ERPNextTestSuite):
+	"""Field-level validations invoked on the document directly, covering branches the
+	integration suite above doesn't reach (no GL / reconciliation setup needed)."""
+
+	def make_pe(self, **fields):
+		doc = frappe.new_doc("Payment Entry")
+		doc.update(fields)
+		return doc
+
+	def test_payment_type_must_be_a_known_value(self):
+		self.assertRaises(frappe.ValidationError, self.make_pe(payment_type="Foo").validate_payment_type)
+		self.make_pe(payment_type="Receive").validate_payment_type()  # valid value passes
+
+	def test_nonexistent_party_is_rejected(self):
+		doc = self.make_pe(party_type="Customer", party="__No Such Customer__")
+		self.assertRaises(frappe.ValidationError, doc.validate_party_details)
+
+	def test_amount_and_exchange_rate_fields_are_mandatory(self):
+		# every field but target_exchange_rate is set, so that missing one raises
+		doc = self.make_pe(
+			paid_amount=100, received_amount=100, source_exchange_rate=1, target_exchange_rate=0
+		)
+		self.assertRaises(frappe.ValidationError, doc.validate_mandatory)
+
+	def test_received_amount_cannot_exceed_paid_in_same_currency(self):
+		doc = self.make_pe(
+			paid_from_account_currency="INR",
+			paid_to_account_currency="INR",
+			paid_amount=100,
+			received_amount=150,
+		)
+		self.assertRaises(frappe.ValidationError, doc.validate_received_amount)
+		# received <= paid is fine
+		doc.received_amount = 50
+		doc.validate_received_amount()
+
+	def test_duplicate_reference_rows_are_rejected(self):
+		doc = self.make_pe()
+		for _ in range(2):
+			doc.append(
+				"references",
+				{"reference_doctype": "Sales Invoice", "reference_name": "SI-X", "allocated_amount": 100},
+			)
+		self.assertRaises(frappe.ValidationError, doc.validate_duplicate_entry)
+
+	def test_receive_from_customer_against_negative_outstanding_is_rejected(self):
+		doc = self.make_pe(party_type="Customer", payment_type="Receive")
+		doc.append(
+			"references",
+			{"reference_doctype": "Sales Invoice", "reference_name": "SI-Y", "allocated_amount": -100},
+		)
+		self.assertRaises(frappe.ValidationError, doc.validate_payment_type_with_outstanding)
+
+	def test_bank_transaction_requires_a_reference_number(self):
+		doc = self.make_pe(payment_type="Pay", paid_from="_Test Bank - _TC")
+		self.assertRaises(frappe.ValidationError, doc.validate_transaction_reference)
+		# supplying the reference details clears the requirement
+		doc.reference_no = "TXN-1"
+		doc.reference_date = "2026-06-15"
+		doc.validate_transaction_reference()

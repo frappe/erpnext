@@ -288,6 +288,7 @@ class WorkOrder(Document):
 			self.validate_sales_order()
 
 		self.set_default_warehouse()
+		self.set_operation_warehouses()
 		self.validate_warehouse_belongs_to_company()
 		self.check_wip_warehouse_skip()
 		self.calculate_operating_cost()
@@ -589,11 +590,7 @@ class WorkOrder(Document):
 		if flt(allowed_qty - actual_qty, precision) < 0:
 			frappe.throw(
 				_(
-					"""Additional Transferred Qty {0}
-					cannot be greater than {1}.
-					To fix this, increase the percentage value
-					of the field 'Transfer Extra Raw Materials to WIP'
-					in Manufacturing Settings."""
+					"Additional Transferred Qty {0} cannot be greater than {1}. To fix this, increase the percentage value of the field 'Transfer Extra Raw Materials to WIP' in Manufacturing Settings."
 				).format(actual_qty, allowed_qty),
 			)
 
@@ -743,7 +740,7 @@ class WorkOrder(Document):
 		batch_auto_creation = frappe.get_cached_value("Item", self.production_item, "create_new_batch")
 		if not batch_auto_creation:
 			frappe.msgprint(
-				_("Batch not created for item {} since it does not have a batch series.").format(
+				_("Batch not created for item {0} since it does not have a batch series.").format(
 					frappe.bold(self.production_item)
 				),
 				alert=True,
@@ -858,7 +855,7 @@ class WorkOrder(Document):
 
 	def validate_production_item(self):
 		if frappe.get_cached_value("Item", self.production_item, "has_variants"):
-			frappe.throw(_("Work Order cannot be raised against a Item Template"), ItemHasVariantError)
+			frappe.throw(_("Work Order cannot be raised against an Item Template"), ItemHasVariantError)
 
 		if self.production_item:
 			validate_end_of_life(self.production_item)
@@ -979,6 +976,9 @@ class WorkOrder(Document):
 	def set_work_order_operations(self):
 		return OperationsService(self).set_work_order_operations()
 
+	def set_operation_warehouses(self):
+		return OperationsService(self).set_operation_warehouses()
+
 	def update_operation_status(self):
 		return OperationsService(self).update_operation_status()
 
@@ -1006,6 +1006,9 @@ class WorkOrder(Document):
 
 	def update_transferred_qty_for_required_items(self):
 		return RequiredItemsService(self).update_transferred_qty_for_required_items()
+
+	def refresh_material_transferred_for_manufacturing(self):
+		return RequiredItemsService(self).refresh_material_transferred_for_manufacturing()
 
 	def update_returned_qty(self):
 		return RequiredItemsService(self).update_returned_qty()
@@ -1071,7 +1074,7 @@ def get_bom_operations(doctype: str, txt: str, searchfield: str, start: int, pag
 	return frappe.get_all("BOM Operation", filters=filters, fields=["operation"], as_list=1)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def set_work_order_ops(name: str):
 	po = frappe.get_doc("Work Order", name)
 	po.set_work_order_operations()

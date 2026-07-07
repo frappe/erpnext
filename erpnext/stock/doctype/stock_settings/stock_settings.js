@@ -14,7 +14,7 @@ frappe.ui.form.on("Stock Settings", {
 		frm.set_query("default_warehouse", filters);
 		frm.set_query("sample_retention_warehouse", filters);
 
-		if (!frm.naming_controller) frm.naming_controller = new erpnext.NamingSeriesController(frm);
+		if (!frm.naming_controller) frm.naming_controller = new frappe.ui.NamingSeriesController(frm);
 		const item_display = frm.doc.item_naming_by === "Naming Series";
 		const serial_and_batch_naming_display =
 			frm.doc.set_serial_and_batch_bundle_naming_based_on_naming_series;
@@ -90,7 +90,7 @@ frappe.ui.form.on("Stock Settings", {
 		if (!frm.doc.disable_serial_no_and_batch_selector && frm.doc.use_serial_batch_fields) {
 			frm.set_value("disable_serial_no_and_batch_selector", 1);
 			frappe.msgprint(
-				__("Serial No and Batch Selector cannot be use when Use Serial / Batch Fields is enabled.")
+				__("Serial No and Batch Selector cannot be used when Use Serial / Batch Fields is enabled.")
 			);
 		}
 	},

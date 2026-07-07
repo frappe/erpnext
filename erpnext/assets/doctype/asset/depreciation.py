@@ -187,6 +187,7 @@ def make_depreciation_entry(
 	for d in depr_schedule_doc.get("depreciation_schedule")[
 		(sch_start_idx or 0) : (sch_end_idx or len(depr_schedule_doc.get("depreciation_schedule")))
 	]:
+		frappe.db.savepoint("depr_entry")
 		try:
 			_make_journal_entry_for_depreciation(
 				depr_schedule_doc,
@@ -202,6 +203,7 @@ def make_depreciation_entry(
 				accounting_dimensions,
 			)
 		except Exception as e:
+			frappe.db.rollback(save_point="depr_entry")
 			depr_posting_error = e
 
 	asset.reload()

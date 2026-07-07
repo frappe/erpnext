@@ -5,7 +5,7 @@
 import json
 
 import frappe
-from frappe.utils import flt
+from frappe.utils import flt, nowdate
 
 from erpnext.accounts.party import get_due_date
 from erpnext.exceptions import PartyDisabled, PartyFrozen
@@ -14,18 +14,75 @@ from erpnext.selling.doctype.customer.customer import (
 	get_customer_outstanding,
 )
 from erpnext.selling.doctype.customer.mapper import (
+	make_quotation,
 	parse_full_name,
 )
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestCustomer(ERPNextTestSuite):
+	def test_quotation_from_customer_uses_actual_exchange_rate(self):
+		company = "_Test Company"
+		company_currency = frappe.get_cached_value("Company", company, "default_currency")
+		foreign_currency = "USD" if company_currency != "USD" else "EUR"
+
+		frappe.defaults.set_user_default("company", company)
+		self.addCleanup(frappe.defaults.clear_user_default, "company")
+
+		# Seed a deterministic rate so the test does not depend on the live exchange-rate API.
+		rate = 83.0
+		exchange = frappe.get_doc(
+			{
+				"doctype": "Currency Exchange",
+				"date": nowdate(),
+				"from_currency": foreign_currency,
+				"to_currency": company_currency,
+				"exchange_rate": rate,
+				"for_selling": 1,
+				"for_buying": 1,
+			}
+		).insert(ignore_if_duplicate=True)
+		self.addCleanup(frappe.delete_doc, "Currency Exchange", exchange.name, force=1)
+
+		customer = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "_Test Customer FX Quotation",
+				"customer_type": "Company",
+				"default_currency": foreign_currency,
+			}
+		).insert()
+		self.addCleanup(frappe.delete_doc, "Customer", customer.name, force=1)
+
+		quotation = make_quotation(customer.name)
+
+		self.assertEqual(quotation.currency, foreign_currency)
+		self.assertNotEqual(flt(quotation.conversion_rate), 1.0)
+		self.assertNotEqual(flt(quotation.conversion_rate), 0.0)
+		self.assertEqual(flt(quotation.conversion_rate), rate)
+
 	def test_get_customer_name_dedupes_with_numeric_suffix(self):
-		# When a customer name already exists, get_customer_name appends "- <max trailing number + 1>".
-		# The Postgres branch extracts the trailing digits with regexp_replace/NULLIF/CAST (pypika's
-		# Substring cannot do regex extraction); this exercises that path on both engines.
+		# When a customer name already exists, get_customer_name appends "- <max suffix + 1>". The
+		# Postgres branch extracts the suffix with regexp_replace/NULLIF/CAST (pypika's Substring cannot
+		# do regex extraction); this exercises that path on both engines.
 		base = "_Test PG Dedup Customer"
 		for nm in (base, f"{base} - 3"):
+			if not frappe.db.exists("Customer", nm):
+				frappe.get_doc(
+					{"doctype": "Customer", "customer_name": nm, "customer_type": "Individual"}
+				).insert()
+			self.addCleanup(frappe.delete_doc, "Customer", nm, force=1)
+
+		doc = frappe.get_doc({"doctype": "Customer", "customer_name": base, "customer_type": "Individual"})
+		self.assertEqual(doc.get_customer_name(), f"{base} - 4")
+
+	def test_get_customer_name_dedupe_handles_mixed_suffix(self):
+		# The suffix extractor must read the LEADING digits of the last whitespace-token, like MariaDB's
+		# CAST(SUBSTRING_INDEX(name, ' ', -1) AS UNSIGNED): "<base> - 3a" -> 3, so the next name is
+		# "<base> - 4". The earlier Postgres regex read pure-trailing digits, yielding 0 for "3a" and
+		# diverging from MariaDB (which would have produced "<base> - 1"). Asserts engine parity.
+		base = "_Test PG Dedup Mixed"
+		for nm in (base, f"{base} - 3a"):
 			if not frappe.db.exists("Customer", nm):
 				frappe.get_doc(
 					{"doctype": "Customer", "customer_name": nm, "customer_type": "Individual"}

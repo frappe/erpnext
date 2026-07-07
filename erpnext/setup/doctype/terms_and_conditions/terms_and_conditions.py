@@ -37,8 +37,7 @@ class TermsandConditions(Document):
 
 @frappe.whitelist()
 def get_terms_and_conditions(template_name: str, doc: str | dict):
-	if isinstance(doc, str):
-		doc = json.loads(doc)
+	doc = frappe.parse_json(doc)
 
 	terms_and_conditions = frappe.get_doc("Terms and Conditions", template_name)
 

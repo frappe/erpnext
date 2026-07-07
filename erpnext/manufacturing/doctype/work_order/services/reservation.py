@@ -183,7 +183,7 @@ class WorkOrderStockReservation:
 			if details := sre_details.get(item.name):
 				if details.reserved_qty < details.consumed_qty:
 					frappe.throw(
-						_("Consumed Qty cannot be greater than Reserved Qty for item {0}").format(
+						_("Consumed Qty {0} cannot be greater than Reserved Qty {1} for item {2}").format(
 							details.consumed_qty, details.reserved_qty, item.item_code
 						)
 					)

@@ -3,8 +3,6 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Lower
-from frappe.utils import cstr
 
 
 def execute(filters=None):
@@ -65,9 +63,6 @@ def append_filters(query, report_filters, operations, job_card):
 		if report_filters.get(field):
 			if field == "serial_no":
 				query = query.where(job_card[field].like(f"%{report_filters.get(field)}%"))
-			elif field == "batch_no":
-				# Lower() both sides: exact match stays case-insensitive on Postgres as it is on MariaDB
-				query = query.where(Lower(job_card[field]) == cstr(report_filters.get(field)).lower())
 			elif field == "operation":
 				query = query.where(job_card[field].isin(operations))
 			else:
@@ -124,6 +119,12 @@ def get_columns(filters):
 			"fieldname": "workstation",
 			"options": "Workstation",
 			"width": "100",
+		},
+		{
+			"label": _("Hour Rate"),
+			"fieldtype": "Currency",
+			"fieldname": "hour_rate",
+			"width": "120",
 		},
 		{
 			"label": _("Operating Cost"),

@@ -2,6 +2,8 @@
 # For license information, please see license.txt
 
 
+from collections import defaultdict
+
 import frappe
 from frappe import _
 
@@ -14,29 +16,47 @@ def execute(filters=None):
 
 
 def get_data(filters, data):
-	get_exploded_items(filters.bom, data)
+	children_map = fetch_exploded_bom_items(filters.bom)
+	build_exploded_rows(filters.bom, children_map, data)
 
 
-def get_exploded_items(bom, data, indent=0, qty=1):
-	exploded_items = frappe.get_all(
-		"BOM Item",
-		filters={"parent": bom},
-		fields=[
-			"qty",
-			"bom_no",
-			"qty",
-			"item_code",
-			"item_name",
-			"description",
-			"uom",
-			"idx",
-			"is_phantom_item",
-		],
-		order_by="idx ASC",
+def fetch_exploded_bom_items(root_bom):
+	"""Every BOM Item in the exploded tree of `root_bom`, grouped by its parent BOM, in one
+	recursive CTE -- replaces a query-per-node walk with a single query. UNION keeps it cycle-safe
+	and fetches each sub-BOM's items only once even when it is reused across the tree."""
+	bom_item = frappe.qb.DocType("BOM Item")
+	tree = frappe.qb.Table("exploded_bom")
+	fields = [
+		bom_item.parent,
+		bom_item.qty,
+		bom_item.bom_no,
+		bom_item.item_code,
+		bom_item.item_name,
+		bom_item.description,
+		bom_item.uom,
+		bom_item.idx,
+		bom_item.is_phantom_item,
+	]
+	seed = frappe.qb.from_(bom_item).select(*fields).where(bom_item.parent == root_bom)
+	recursion = (
+		frappe.qb.from_(bom_item)
+		.join(tree)
+		.on(bom_item.parent == tree.bom_no)
+		.select(*fields)
+		.where(tree.bom_no != "")
 	)
+	rows = (
+		frappe.qb.with_(seed + recursion, "exploded_bom", recursive=True).from_(tree).select(tree.star)
+	).run(as_dict=True)
 
-	for item in exploded_items:
-		item["indent"] = indent
+	children_map = defaultdict(list)
+	for row in rows:
+		children_map[row.parent].append(row)
+	return children_map
+
+
+def build_exploded_rows(bom, children_map, data, indent=0, qty=1):
+	for item in sorted(children_map.get(bom, []), key=lambda row: row.idx):
 		data.append(
 			{
 				"item_code": item.item_code,
@@ -51,7 +71,7 @@ def get_exploded_items(bom, data, indent=0, qty=1):
 			}
 		)
 		if item.bom_no:
-			get_exploded_items(item.bom_no, data, indent=indent + 1, qty=item.qty)
+			build_exploded_rows(item.bom_no, children_map, data, indent + 1, item.qty)
 
 
 def get_columns():

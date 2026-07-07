@@ -29,7 +29,7 @@ frappe.ui.form.on("Journal Entry", {
 
 	refresh(frm) {
 		if (frm.doc.reversal_of && (frm.is_new() || frm.doc.docstatus == 0)) {
-			frm.set_read_only();
+			erpnext.journal_entry.lock_reversal_entry(frm);
 		}
 
 		erpnext.toggle_naming_series();
@@ -230,6 +230,13 @@ Object.assign(erpnext.journal_entry, {
 		if (!frm.doc.amended_from) {
 			frm.set_value("posting_date", frm.doc.posting_date || frappe.datetime.get_today());
 		}
+	},
+
+	lock_reversal_entry(frm) {
+		frm.fields
+			.filter((field) => field.has_input)
+			.forEach((field) => frm.set_df_property(field.df.fieldname, "read_only", 1));
+		frm.set_df_property("accounts", "read_only", 1);
 	},
 
 	add_custom_buttons(frm) {

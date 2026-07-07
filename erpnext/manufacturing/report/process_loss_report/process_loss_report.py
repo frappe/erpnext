@@ -50,11 +50,11 @@ def get_data(filters: Filters) -> Data:
 		.groupby(se.work_order)
 	)
 
-	if "item" in filters:
-		query.where(wo.production_item == filters.item)
+	if filters.get("item"):
+		query = query.where(wo.production_item == filters.item)
 
-	if "work_order" in filters:
-		query.where(wo.name == filters.work_order)
+	if filters.get("work_order"):
+		query = query.where(wo.name == filters.work_order)
 
 	data = query.run(as_dict=True)
 

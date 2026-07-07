@@ -64,6 +64,21 @@ def get_tasks(project, start=0, search=None, item_status=None):
 	return list(filter(lambda x: not x.parent_task, tasks))
 
 
+@frappe.whitelist()
+def get_task_html(project: str, start: int = 0, item_status: str | None = None):
+	return frappe.render_template(
+		"erpnext/templates/includes/projects/project_tasks.html",
+		{
+			"doc": {
+				"name": project,
+				"project_name": project,
+				"tasks": get_tasks(project, start, item_status=item_status),
+			}
+		},
+		is_path=True,
+	)
+
+
 def get_timesheets(project, start=0, search=None):
 	filters = {"project": project}
 	if search:
@@ -87,6 +102,15 @@ def get_timesheets(project, start=0, search=None):
 		if len(info):
 			timesheet.update(info[0])
 	return timesheets
+
+
+@frappe.whitelist()
+def get_timesheet_html(project: str, start: int = 0):
+	return frappe.render_template(
+		"erpnext/templates/includes/projects/project_timesheets.html",
+		{"doc": {"timesheets": get_timesheets(project, start)}},
+		is_path=True,
+	)
 
 
 def get_attachments(project):

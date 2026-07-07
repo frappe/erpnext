@@ -53,7 +53,7 @@ class BillingValidationService:
 
 		if is_overbilling_allowed and total_overbilled_amt > 0.1:
 			frappe.msgprint(
-				_("Overbilling of {} ignored because you have {} role.").format(
+				_("Overbilling of {0} ignored because you have {1} role.").format(
 					total_overbilled_amt, role_allowed_to_overbill
 				),
 				indicator="orange",
@@ -148,4 +148,4 @@ class BillingValidationService:
 			+ "</ul>"
 		)
 		message += _("<p>To allow over-billing, please set allowance in Accounts Settings.</p>")
-		frappe.throw(_(message))
+		frappe.throw(message)

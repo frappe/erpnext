@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _, msgprint
+from frappe.model.meta import get_field_precision
 from frappe.query_builder import Case
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Sum
@@ -127,17 +128,32 @@ def _execute(filters=None, additional_table_columns=None):
 				row.update({frappe.scrub(tax_acc): tax_amount})
 
 		# total tax, grand total, rounded total & outstanding amount
+
+		outstanding_precision = (
+			get_field_precision(
+				frappe.get_meta("Purchase Invoice").get_field("outstanding_amount"),
+				currency=company_currency,
+			)
+			or 2
+		)
 		row.update(
 			{
 				"total_tax": total_tax,
 				"grand_total": inv.base_grand_total,
 				"rounded_total": inv.base_rounded_total,
-				"outstanding_amount": inv.outstanding_amount,
 			}
 		)
 
 		if inv.doctype == "Purchase Invoice":
-			row.update({"debit": inv.base_grand_total, "credit": 0.0})
+			row.update(
+				{
+					"debit": inv.base_grand_total,
+					"credit": 0.0,
+					"outstanding_amount": flt(
+						(inv.outstanding_amount * (inv.conversion_rate or 1)), outstanding_precision
+					),
+				}
+			)
 		else:
 			row.update({"debit": 0.0, "credit": inv.base_grand_total})
 		data.append(row)
@@ -309,17 +325,22 @@ def get_account_columns(invoice_list, include_payments):
 	unrealized_profit_loss_account_columns = []
 
 	if invoice_list:
-		expense_accounts = frappe.get_all(
-			"Purchase Invoice Item",
-			filters={
-				"docstatus": 1,
-				"expense_account": ["is", "set"],
-				"parenttype": "Purchase Invoice",
-				"parent": ["in", [inv.name for inv in invoice_list]],
-			},
-			pluck="expense_account",
-			distinct=True,
-			order_by="expense_account",
+		# frappe drops ORDER BY for distinct queries on postgres (db_query), so sort in python with
+		# casefold to keep the generated account-column order deterministic and identical on both
+		# backends, matching MariaDB's case-insensitive collation (the original ORDER BY).
+		expense_accounts = sorted(
+			frappe.get_all(
+				"Purchase Invoice Item",
+				filters={
+					"docstatus": 1,
+					"expense_account": ["is", "set"],
+					"parenttype": "Purchase Invoice",
+					"parent": ["in", [inv.name for inv in invoice_list]],
+				},
+				pluck="expense_account",
+				distinct=True,
+			),
+			key=str.casefold,
 		)
 
 		purchase_taxes_query = get_taxes_query(invoice_list, "Purchase Taxes and Charges", "Purchase Invoice")
@@ -331,16 +352,18 @@ def get_account_columns(invoice_list, include_payments):
 			advance_tax_accounts = advance_taxes_query.run(as_dict=True, pluck="account_head")
 			tax_accounts = set(tax_accounts + advance_tax_accounts)
 
-		unrealized_profit_loss_accounts = frappe.get_all(
-			"Purchase Invoice",
-			filters={
-				"docstatus": 1,
-				"name": ["in", [inv.name for inv in invoice_list]],
-				"unrealized_profit_loss_account": ["is", "set"],
-			},
-			pluck="unrealized_profit_loss_account",
-			distinct=True,
-			order_by="unrealized_profit_loss_account",
+		unrealized_profit_loss_accounts = sorted(
+			frappe.get_all(
+				"Purchase Invoice",
+				filters={
+					"docstatus": 1,
+					"name": ["in", [inv.name for inv in invoice_list]],
+					"unrealized_profit_loss_account": ["is", "set"],
+				},
+				pluck="unrealized_profit_loss_account",
+				distinct=True,
+			),
+			key=str.casefold,
 		)
 
 	for account in expense_accounts:
@@ -403,6 +426,7 @@ def get_invoices(filters, additional_query_columns):
 			pi.base_rounded_total,
 			pi.outstanding_amount,
 			pi.mode_of_payment,
+			pi.conversion_rate,
 		)
 		.where(pi.docstatus == 1)
 	)

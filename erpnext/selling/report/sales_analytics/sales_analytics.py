@@ -528,12 +528,18 @@ class Analytics:
 		if not frappe.db.exists("DocType", self.filters.doc_type):
 			frappe.throw(_("Invalid Document Type {0}").format(self.filters.doc_type))
 
-		order_types = frappe.get_all(
-			self.filters.doc_type,
-			filters={"order_type": ["is", "set"]},
-			pluck="order_type",
-			distinct=True,
-			order_by="order_type",
+		# frappe drops ORDER BY for distinct queries on postgres (db_query), so a SQL order_by="order_type"
+		# would be a no-op there and the leaf rows would come back unordered. Sort in python with casefold
+		# to keep the report's order-type row order deterministic, case-insensitive (matching MariaDB's
+		# collation), and identical on both engines.
+		order_types = sorted(
+			frappe.get_all(
+				self.filters.doc_type,
+				filters={"order_type": ["is", "set"]},
+				pluck="order_type",
+				distinct=True,
+			),
+			key=str.casefold,
 		)
 
 		self.group_entries = [frappe._dict(name="Order Types", lft=0, rgt=2, parent="")]

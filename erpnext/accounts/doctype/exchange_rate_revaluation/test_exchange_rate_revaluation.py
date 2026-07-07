@@ -298,3 +298,65 @@ class TestExchangeRateRevaluation(ERPNextTestSuite, AccountsTestMixin):
 
 		for key, _val in expected_data.items():
 			self.assertEqual(expected_data.get(key), account_details.get(key))
+
+
+class TestExchangeRateRevaluationValidation(ERPNextTestSuite):
+	"""Validation and gain/loss calculation paths, exercised on the document directly
+	so they don't need the multi-currency GL setup the integration tests above build."""
+
+	def setUp(self):
+		frappe.set_user("Administrator")
+		self.company = "_Test Company"
+
+	def _revaluation_with_rows(self, rows, rounding_loss_allowance=0.05):
+		doc = frappe.new_doc("Exchange Rate Revaluation")
+		doc.company = self.company
+		doc.posting_date = today()
+		doc.rounding_loss_allowance = rounding_loss_allowance
+		for row in rows:
+			doc.append("accounts", row)
+		return doc
+
+	def test_rounding_loss_allowance_must_be_between_0_and_1(self):
+		for bad in (-0.1, 1, 1.5):
+			doc = self._revaluation_with_rows([], rounding_loss_allowance=bad)
+			self.assertRaises(frappe.ValidationError, doc.validate)
+		# values inside [0, 1) are accepted, at the lower bound and mid-range
+		for good in (0.0, 0.5):
+			self._revaluation_with_rows([], rounding_loss_allowance=good).validate()
+
+	def test_gain_loss_computed_and_split_by_zero_balance(self):
+		doc = self._revaluation_with_rows(
+			[
+				# open (unbooked) row: base balance moved 1000 -> 1100, a 100 gain
+				{"zero_balance": 0, "balance_in_base_currency": 1000, "new_balance_in_base_currency": 1100},
+				# already-settled (zero_balance) row carries a booked loss of 40
+				{"zero_balance": 1, "gain_loss": -40},
+			]
+		)
+		doc.validate()
+
+		# gain_loss is derived only for open rows; the zero-balance row keeps its value
+		self.assertEqual(doc.accounts[0].gain_loss, 100)
+		self.assertEqual(doc.gain_loss_unbooked, 100)
+		self.assertEqual(doc.gain_loss_booked, -40)
+		self.assertEqual(doc.total_gain_loss, 60)
+
+	def test_before_submit_drops_rows_without_gain_loss(self):
+		doc = self._revaluation_with_rows(
+			[
+				{"zero_balance": 0, "balance_in_base_currency": 1000, "new_balance_in_base_currency": 1100},
+				{"zero_balance": 0, "balance_in_base_currency": 500, "new_balance_in_base_currency": 500},
+			]
+		)
+		doc.validate()  # second row nets to a 0 gain_loss
+		doc.remove_accounts_without_gain_loss()
+		self.assertEqual(len(doc.accounts), 1)
+		self.assertEqual(doc.accounts[0].gain_loss, 100)
+
+	def test_before_submit_requires_at_least_one_gain_loss_row(self):
+		doc = self._revaluation_with_rows(
+			[{"zero_balance": 0, "balance_in_base_currency": 500, "new_balance_in_base_currency": 500}]
+		)
+		doc.validate()
+		self.assertRaises(frappe.ValidationError, doc.remove_accounts_without_gain_loss)

@@ -436,7 +436,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 				if (!me.frm.doc.customer) {
 					frappe.throw({
 						title: __("Mandatory"),
-						message: __("Please Select a Customer"),
+						message: __("Please select a Customer"),
 					});
 				}
 				erpnext.utils.map_current_doc({

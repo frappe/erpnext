@@ -935,6 +935,15 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 		if party_type == "Supplier":
 			info["total_unpaid"] = -1 * info["total_unpaid"]
 
+		if info["total_unpaid"] < 0:
+			info["balance_label"] = (
+				"Total Advance Paid" if party_type == "Supplier" else "Total Advance Received"
+			)
+			info["balance_amount"] = abs(info["total_unpaid"])
+		else:
+			info["balance_label"] = "Total Unpaid"
+			info["balance_amount"] = info["total_unpaid"]
+
 		company_wise_info.append(info)
 
 	return company_wise_info
