@@ -116,6 +116,7 @@ class AccountsSettings(Document):
 		show_balance_in_coa: DF.Check
 		show_inclusive_tax_in_print: DF.Check
 		show_payment_schedule_in_print: DF.Check
+		show_taxes_and_charges_breakup: DF.Check
 		show_taxes_as_table_in_print: DF.Check
 		stale_days: DF.Int
 		submit_journal_entries: DF.Check
@@ -162,6 +163,10 @@ class AccountsSettings(Document):
 
 		if old_doc.enable_subscription != self.enable_subscription:
 			toggle_subscription_sections(not self.enable_subscription)
+			clear_cache = True
+
+		if old_doc.show_taxes_and_charges_breakup != self.show_taxes_and_charges_breakup:
+			toggle_taxes_and_charges_breakup(not self.show_taxes_and_charges_breakup)
 			clear_cache = True
 
 		if clear_cache:
@@ -253,6 +258,13 @@ def toggle_subscription_sections(hide):
 	subscription_doctypes = frappe.get_hooks("subscription_doctypes")
 	for doctype in subscription_doctypes:
 		create_property_setter_for_hiding_field(doctype, "subscription_section", hide)
+
+
+def toggle_taxes_and_charges_breakup(hide):
+	# other_charges_calculation is a view-only virtual field (the itemised tax breakup); it is
+	# hidden by default and only shown/computed when "Show Taxes and Charges Breakup" is on.
+	for doctype in TAX_BREAKUP_DOCTYPES:
+		create_property_setter_for_hiding_field(doctype, "other_charges_calculation", hide)
 
 
 def create_property_setter_for_hiding_field(doctype, field_name, hide):

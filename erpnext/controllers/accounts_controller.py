@@ -105,6 +105,9 @@ class AccountsController(TransactionBase):
 		if self.doctype not in TAX_BREAKUP_DOCTYPES:
 			return
 
+		if not frappe.db.get_single_value("Accounts Settings", "show_taxes_and_charges_breakup"):
+			return ""
+
 		from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_html
 
 		return get_itemised_tax_breakup_html(self) or ""

@@ -45,6 +45,7 @@
   "show_inclusive_tax_in_print",
   "show_taxes_as_table_in_print",
   "show_payment_schedule_in_print",
+  "show_taxes_and_charges_breakup",
   "item_price_settings_section",
   "maintain_same_internal_transaction_rate",
   "fetch_valuation_rate_for_internal_transaction",
@@ -187,6 +188,12 @@
    "fieldname": "show_payment_schedule_in_print",
    "fieldtype": "Check",
    "label": "Show Payment Schedule in print"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_taxes_and_charges_breakup",
+   "fieldtype": "Check",
+   "label": "Show Taxes and Charges Breakup"
   },
   {
    "fieldname": "currency_exchange_section",
@@ -765,7 +772,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-06-24 12:59:41.868865",
+ "modified": "2026-07-07 18:11:35.012011",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
