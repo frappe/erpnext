@@ -1260,7 +1260,10 @@ def get_itemised_tax_breakup_data(doc):
 
 def get_itemised_tax(doc, with_tax_account=False):
 	"""
-	Itemised tax keyed by the item line object - one entry per item line.
+	Itemised tax grouped per physical item line: ``{item_row_object: {tax_description: {...}}}``.
+
+	Keyed by the item ROW OBJECT (not item_code) on purpose: the same item on several lines -
+	e.g. at different rates via different Item Tax Templates.
 	"""
 	itemised_tax = {}
 	precision = doc.precision("tax_amount", "taxes")
@@ -1298,24 +1301,20 @@ def get_itemised_tax(doc, with_tax_account=False):
 def set_item_wise_tax_rate(doc):
 	"""Set each item line's total applicable tax rate on the item object.
 
-	Sums the rates of the line's taxes from ``_item_wise_tax_details`` (skipping valuation
-	taxes) directly onto ``item.tax_rate``. Regional callers (e.g. Italy, UAE) then derive
+	Sums each line's per-tax rates (from ``get_itemised_tax``) onto ``item.tax_rate``.
+	``get_itemised_tax`` groups by tax, so a tax account that appears on more than one detail
+	row (e.g. across multiple charge rows) contributes its rate once - not once per row -
+	preserving the previous regional behaviour. Valuation taxes are excluded (they are already
+	skipped by ``get_itemised_tax``). Regional callers (Italy, UAE) derive
 	``tax_amount``/``total_amount`` from it.
 	"""
+	itemised_tax = get_itemised_tax(doc)
 	for item in doc.get("items") or []:
-		item.tax_rate = 0.0
-
-	for row in doc.get("_item_wise_tax_details") or []:
-		item = row.get("item")
-		tax = row.get("tax")
-		if not item or not tax:
-			continue
-		if getattr(tax, "category", None) and tax.category == "Valuation":
-			continue
-		item.tax_rate += flt(row.rate)
-
-	for item in doc.get("items") or []:
-		item.tax_rate = flt(item.tax_rate, item.precision("tax_rate"))
+		taxes = itemised_tax.get(item) or {}
+		item.tax_rate = flt(
+			sum(tax.get("tax_rate", 0) for tax in taxes.values()),
+			item.precision("tax_rate"),
+		)
 
 
 def get_rounded_tax_amount(itemised_tax, precision):

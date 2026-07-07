@@ -1,7 +1,7 @@
 import frappe
 from frappe.utils import flt
 
-from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
+from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data, set_item_wise_tax_rate
 from erpnext.tests.utils import ERPNextTestSuite, change_settings
 
 
@@ -653,3 +653,33 @@ class TestTaxesAndTotals(ERPNextTestSuite):
 			self.assertEqual(row["VAT"]["tax_rate"], 10.0)
 			self.assertEqual(row["VAT"]["tax_amount"], 10.0)
 			self.assertEqual(row["Service Tax"]["tax_amount"], st_amount)
+
+	def test_set_item_wise_tax_rate(self):
+		"""set_item_wise_tax_rate sums each line's tax rates onto item.tax_rate and
+		overwrites any stale value (used by the Italy/UAE regional callers)."""
+		self._append_net_total_tax("_Test Account VAT - _TC", "VAT")
+		self.doc.taxes[0].rate = 10
+		self._append_net_total_tax("_Test Account Service Tax - _TC", "Service Tax")
+		self.doc.taxes[1].rate = 5
+		self.doc.save()
+
+		# a stale value that must be recomputed (reset), not accumulated onto
+		self.doc.items[0].tax_rate = 999
+
+		set_item_wise_tax_rate(self.doc)
+
+		self.assertEqual(self.doc.items[0].tax_rate, 15.0)
+
+	def test_set_item_wise_tax_rate_counts_each_tax_once(self):
+		"""The same tax account on more than one charge row must contribute its rate once
+		(set once per tax), not once per _item_wise_tax_details row."""
+		self._append_net_total_tax("_Test Account VAT - _TC", "VAT")
+		self.doc.taxes[0].rate = 5
+		self._append_net_total_tax("_Test Account VAT - _TC", "VAT")
+		self.doc.taxes[1].rate = 5
+		self.doc.save()
+
+		set_item_wise_tax_rate(self.doc)
+
+		# 5 (counted once), not 5 + 5
+		self.assertEqual(self.doc.items[0].tax_rate, 5.0)
