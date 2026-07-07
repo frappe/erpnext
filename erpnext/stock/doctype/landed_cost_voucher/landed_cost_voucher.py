@@ -579,23 +579,60 @@ def get_item_account_wise_lcv_entries(doc):
 	if doc.doctype == "Stock Entry":
 		row_fieldname = "stock_entry_item"
 
+	lcv_names = [lcv.parent for lcv in landed_cost_vouchers]
+
+	distribute_based_on = {
+		d.name: d.distribute_charges_based_on
+		for d in frappe.get_all(
+			"Landed Cost Voucher",
+			filters={"name": ["in", lcv_names]},
+			fields=["name", "distribute_charges_based_on"],
+		)
+	}
+
+	items_by_lcv = {}
+	for item in frappe.get_all(
+		"Landed Cost Item",
+		filters={"parent": ["in", lcv_names]},
+		fields=[
+			"parent",
+			"item_code",
+			"receipt_document",
+			"purchase_receipt_item",
+			"stock_entry_item",
+			"qty",
+			"amount",
+			"applicable_charges",
+		],
+	):
+		items_by_lcv.setdefault(item.parent, []).append(item)
+
+	taxes_by_lcv = {}
+	for tax in frappe.get_all(
+		"Landed Cost Taxes and Charges",
+		filters={"parent": ["in", lcv_names]},
+		fields=["parent", "expense_account", "exchange_rate", "amount", "base_amount"],
+	):
+		taxes_by_lcv.setdefault(tax.parent, []).append(tax)
+
 	for lcv in landed_cost_vouchers:
-		landed_cost_voucher_doc = frappe.get_doc("Landed Cost Voucher", lcv.parent)
+		lcv_items = items_by_lcv.get(lcv.parent, [])
+		lcv_taxes = taxes_by_lcv.get(lcv.parent, [])
 
 		based_on_field = "applicable_charges"
 		# Use amount field for total item cost for manually cost distributed LCVs
-		if landed_cost_voucher_doc.distribute_charges_based_on != "Distribute Manually":
-			based_on_field = frappe.scrub(landed_cost_voucher_doc.distribute_charges_based_on)
+		if distribute_based_on.get(lcv.parent) != "Distribute Manually":
+			based_on_field = frappe.scrub(distribute_based_on.get(lcv.parent))
 
 		total_item_cost = 0
 
 		if based_on_field:
-			for item in landed_cost_voucher_doc.items:
+			for item in lcv_items:
 				total_item_cost += item.get(based_on_field)
 
-		for item in landed_cost_voucher_doc.items:
+		for item in lcv_items:
 			if item.receipt_document == doc.name:
-				for account in landed_cost_voucher_doc.taxes:
+				for account in lcv_taxes:
 					exchange_rate = account.exchange_rate or 1
 					item_account_wise_cost.setdefault((item.item_code, item.get(row_fieldname)), {})
 					item_account_wise_cost[(item.item_code, item.get(row_fieldname))].setdefault(

@@ -165,11 +165,39 @@ class SubcontractingInwardOrder(SubcontractingController):
 	def populate_items_table(self):
 		items = []
 
+		fg_items = [si.fg_item for si in self.service_items if si.fg_item]
+		so_item_names = [si.sales_order_item for si in self.service_items if si.fg_item]
+
+		item_map = {
+			d.name: d
+			for d in frappe.get_all(
+				"Item",
+				filters={"name": ["in", fg_items]},
+				fields=["name", "item_name", "description", "stock_uom", "default_bom"],
+			)
+		}
+		so_item_map = {
+			d.name: d
+			for d in frappe.get_all(
+				"Sales Order Item",
+				filters={"name": ["in", so_item_names]},
+				fields=["name", "stock_qty", "subcontracted_qty", "fg_item_qty", "delivery_date"],
+			)
+		}
+		scbom_map = {}
+		for d in frappe.get_all(
+			"Subcontracting BOM",
+			filters={"finished_good": ["in", fg_items], "is_active": 1},
+			fields=["finished_good", "finished_good_bom"],
+			order_by="creation",
+		):
+			scbom_map.setdefault(d.finished_good, d.finished_good_bom)
+
 		for si in self.service_items:
 			if si.fg_item:
-				item = frappe.get_doc("Item", si.fg_item)
+				item = item_map[si.fg_item]
 
-				so_item = frappe.get_doc("Sales Order Item", si.sales_order_item)
+				so_item = so_item_map[si.sales_order_item]
 				available_qty = so_item.stock_qty - so_item.subcontracted_qty
 
 				if available_qty == 0:
@@ -182,22 +210,13 @@ class SubcontractingInwardOrder(SubcontractingController):
 				)
 				si.amount = available_qty * si.rate
 
-				bom = (
-					frappe.db.get_value(
-						"Subcontracting BOM",
-						{"finished_good": item.name, "is_active": 1},
-						"finished_good_bom",
-					)
-					or item.default_bom
-				)
+				bom = scbom_map.get(item.name) or item.default_bom
 
 				items.append(
 					{
 						"item_code": item.name,
 						"item_name": item.item_name,
-						"expected_delivery_date": frappe.get_cached_value(
-							"Sales Order Item", si.sales_order_item, "delivery_date"
-						),
+						"expected_delivery_date": so_item.delivery_date,
 						"description": item.description,
 						"qty": si.fg_item_qty,
 						"subcontracting_conversion_factor": conversion_factor,

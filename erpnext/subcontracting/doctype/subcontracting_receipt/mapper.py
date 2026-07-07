@@ -147,24 +147,41 @@ def make_purchase_receipt(
 def add_po_items_to_pr(scr_doc, target_doc):
 	fg_items = {(item.item_code, item.purchase_order): item.qty for item in scr_doc.items}
 
-	for (item_code, po_name), fg_qty in fg_items.items():
-		po_doc = frappe.get_doc("Purchase Order", po_name)
-		for item in po_doc.items:
-			if item.fg_item != item_code:
-				continue
+	po_items = frappe.get_all(
+		"Purchase Order Item",
+		filters={"parent": ("in", {po_name for _, po_name in fg_items})},
+		fields=[
+			"name",
+			"parent",
+			"item_code",
+			"item_name",
+			"description",
+			"rate",
+			"warehouse",
+			"fg_item",
+			"fg_item_qty",
+			"stock_qty",
+			"received_qty",
+		],
+	)
 
-			qty = (item.stock_qty - item.received_qty) * fg_qty / item.fg_item_qty
-			if qty:
-				target_doc.append(
-					"items",
-					{
-						"item_code": item.item_code,
-						"item_name": item.item_name,
-						"description": item.description,
-						"qty": qty,
-						"rate": item.rate,
-						"warehouse": item.warehouse,
-						"purchase_order": item.parent,
-						"purchase_order_item": item.name,
-					},
-				)
+	for item in po_items:
+		fg_qty = fg_items.get((item.fg_item, item.parent))
+		if fg_qty is None:
+			continue
+
+		qty = (item.stock_qty - item.received_qty) * fg_qty / item.fg_item_qty
+		if qty:
+			target_doc.append(
+				"items",
+				{
+					"item_code": item.item_code,
+					"item_name": item.item_name,
+					"description": item.description,
+					"qty": qty,
+					"rate": item.rate,
+					"warehouse": item.warehouse,
+					"purchase_order": item.parent,
+					"purchase_order_item": item.name,
+				},
+			)

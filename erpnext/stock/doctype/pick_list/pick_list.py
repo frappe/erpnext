@@ -250,15 +250,21 @@ class PickList(TransactionBase):
 		so_list = set(location.sales_order for location in self.locations if location.sales_order)
 
 		if so_list:
-			for so in so_list:
-				so_doc = frappe.get_doc("Sales Order", so)
-				for item in so_doc.items:
-					if item.stock_reserved_qty > 0:
-						frappe.throw(
-							_(
-								"Cannot create a pick list for Sales Order {0} because it has reserved stock. Please unreserve the stock in order to create a pick list."
-							).format(frappe.bold(so))
-						)
+			reserved_so = {
+				row.parent
+				for row in frappe.get_all(
+					"Sales Order Item",
+					filters={"parent": ["in", list(so_list)], "stock_reserved_qty": [">", 0]},
+					fields=["parent"],
+				)
+			}
+			for so in sorted(so_list):
+				if so in reserved_so:
+					frappe.throw(
+						_(
+							"Cannot create a pick list for Sales Order {0} because it has reserved stock. Please unreserve the stock in order to create a pick list."
+						).format(frappe.bold(so))
+					)
 
 	def validate_picked_items(self):
 		for item in self.locations:
@@ -887,11 +893,35 @@ class PickList(TransactionBase):
 		return product_bundles
 
 	def _get_product_bundle_qty_map(self, bundles) -> dict[str, dict[str, float]]:
-		product_bundle_qty_map = {}
-		for data in bundles:
-			bundle = frappe.get_doc("Product Bundle", get_active_product_bundle(data.item_code))
-			product_bundle_qty_map[data.item_code] = {item.item_code: item.qty for item in bundle.items}
-		return product_bundle_qty_map
+		item_codes = [data.item_code for data in bundles]
+		if not item_codes:
+			return {}
+
+		# Resolve the active bundle for every parent item in one query (mirrors get_active_product_bundle)
+		bundle_by_item = {
+			b.new_item_code: b.name
+			for b in frappe.get_all(
+				"Product Bundle",
+				filters={
+					"new_item_code": ["in", item_codes],
+					"is_active": 1,
+					"docstatus": 1,
+					"disabled": 0,
+				},
+				fields=["name", "new_item_code"],
+			)
+		}
+
+		# Fetch all component rows across those bundles in one query
+		qty_by_parent = {}
+		for row in frappe.get_all(
+			"Product Bundle Item",
+			filters={"parent": ["in", list(bundle_by_item.values())]},
+			fields=["parent", "item_code", "qty"],
+		):
+			qty_by_parent.setdefault(row.parent, {})[row.item_code] = row.qty
+
+		return {data.item_code: qty_by_parent.get(bundle_by_item.get(data.item_code), {}) for data in bundles}
 
 	def _compute_picked_qty_for_bundle(self, bundle_row, bundle_items) -> int:
 		"""Compute how many full bundles can be created from picked items."""

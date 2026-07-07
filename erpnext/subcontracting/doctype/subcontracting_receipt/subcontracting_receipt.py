@@ -379,7 +379,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		for item in list(self.items):
 			if item.bom:
-				bom = frappe.get_doc("BOM", item.bom)
+				bom = frappe.get_cached_doc("BOM", item.bom)
 				for secondary_item in bom.secondary_items:
 					per_unit = secondary_item.stock_qty / bom.quantity
 					received_qty = flt(item.received_qty * per_unit, item.precision("received_qty"))

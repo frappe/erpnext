@@ -199,7 +199,7 @@ class SubcontractingOrder(SubcontractingController):
 
 	def calculate_supplied_items_qty_and_amount(self):
 		for item in self.get("items"):
-			bom = frappe.get_doc("BOM", item.bom)
+			bom = frappe.get_cached_doc("BOM", item.bom)
 			rm_cost = sum(flt(rm_item.amount) for rm_item in bom.items)
 			item.rm_cost_per_qty = flt(rm_cost / flt(bom.quantity), item.precision("rm_cost_per_qty"))
 
@@ -238,15 +238,49 @@ class SubcontractingOrder(SubcontractingController):
 	def populate_items_table(self):
 		items = []
 
+		fg_items = [si.fg_item for si in self.service_items if si.fg_item]
+		po_item_names = [si.purchase_order_item for si in self.service_items if si.fg_item]
+
+		item_map = {
+			d.name: d
+			for d in frappe.get_all(
+				"Item",
+				filters={"name": ["in", fg_items]},
+				fields=["name", "item_name", "description", "stock_uom", "default_bom"],
+			)
+		}
+		po_item_map = {
+			d.name: d
+			for d in frappe.get_all(
+				"Purchase Order Item",
+				filters={"name": ["in", po_item_names]},
+				fields=[
+					"name",
+					"qty",
+					"subcontracted_qty",
+					"fg_item_qty",
+					"production_plan_sub_assembly_item",
+				],
+			)
+		}
+		scbom_map = {}
+		for d in frappe.get_all(
+			"Subcontracting BOM",
+			filters={"finished_good": ["in", fg_items], "is_active": 1},
+			fields=["finished_good", "finished_good_bom"],
+			order_by="creation",
+		):
+			scbom_map.setdefault(d.finished_good, d.finished_good_bom)
+
 		for si in self.service_items:
 			if si.fg_item:
-				item = frappe.get_doc("Item", si.fg_item)
+				item = item_map[si.fg_item]
 
-				qty, subcontracted_qty, fg_item_qty, production_plan_sub_assembly_item = frappe.db.get_value(
-					"Purchase Order Item",
-					si.purchase_order_item,
-					["qty", "subcontracted_qty", "fg_item_qty", "production_plan_sub_assembly_item"],
-				)
+				po_item = po_item_map[si.purchase_order_item]
+				qty = po_item.qty
+				subcontracted_qty = po_item.subcontracted_qty
+				fg_item_qty = po_item.fg_item_qty
+				production_plan_sub_assembly_item = po_item.production_plan_sub_assembly_item
 				available_qty = flt(qty) - flt(subcontracted_qty)
 
 				if available_qty == 0:
@@ -259,14 +293,7 @@ class SubcontractingOrder(SubcontractingController):
 				)
 				si.amount = available_qty * si.rate
 
-				bom = (
-					frappe.db.get_value(
-						"Subcontracting BOM",
-						{"finished_good": item.name, "is_active": 1},
-						"finished_good_bom",
-					)
-					or item.default_bom
-				)
+				bom = scbom_map.get(item.name) or item.default_bom
 
 				items.append(
 					{
