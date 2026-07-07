@@ -1,6 +1,7 @@
 import frappe
 from frappe.utils import flt
 
+from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_html
 from erpnext.tests.utils import ERPNextTestSuite, change_settings
 
 
@@ -534,3 +535,43 @@ class TestTaxesAndTotals(ERPNextTestSuite):
 		]
 
 		self.assertEqual(actual_values, expected_values)
+
+	def _append_vat(self):
+		self.doc.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account VAT - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "VAT",
+				"rate": 10,
+			},
+		)
+
+	def test_other_charges_calculation_hidden_by_default(self):
+		"""By default ("Show Taxes and Charges Breakup" off) the breakup is neither shown nor
+		computed - the property short-circuits to '' without rendering."""
+		self.assertFalse(frappe.db.get_single_value("Accounts Settings", "show_taxes_and_charges_breakup"))
+
+		self._append_vat()
+		self.doc.save()
+
+		self.assertEqual(self.doc.other_charges_calculation, "")
+
+	@change_settings("Accounts Settings", {"show_taxes_and_charges_breakup": 1})
+	def test_other_charges_calculation_resolves_from_persisted_table(self):
+		"""When enabled, the virtual field is recomputed on read from the persisted
+		item_wise_tax_details table, so it resolves on a freshly loaded doc (no
+		_item_wise_tax_details)."""
+		self._append_vat()
+		self.doc.save()
+
+		reloaded = frappe.get_doc("Sales Invoice", self.doc.name)
+		# freshly loaded doc has the persisted child table but no in-memory _item_wise_tax_details
+		self.assertTrue(reloaded.get("item_wise_tax_details"))
+		self.assertFalse(reloaded.get("_item_wise_tax_details"))
+
+		html = reloaded.other_charges_calculation
+		self.assertEqual(html, get_itemised_tax_breakup_html(reloaded))
+		self.assertIn("_Test Item", html)
+		self.assertIn("VAT", html)
