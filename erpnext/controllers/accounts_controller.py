@@ -95,6 +95,20 @@ class AccountsController(TransactionBase):
 
 		return self.__company_currency
 
+	@property
+	def other_charges_calculation(self):
+		# View-only virtual field: the itemised tax breakup HTML.
+		# Hidden by default and neither shown nor
+		# computed unless "Show Taxes and Charges Breakup" is enabled in Accounts Settings.
+		from erpnext.accounts.doctype.accounts_settings.accounts_settings import TAX_BREAKUP_DOCTYPES
+
+		if self.doctype not in TAX_BREAKUP_DOCTYPES:
+			return
+
+		from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_html
+
+		return get_itemised_tax_breakup_html(self) or ""
+
 	def onload(self):
 		self.set_onload(
 			"make_payment_via_journal_entry",

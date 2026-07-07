@@ -37,6 +37,19 @@ BUYING_DOCTYPES = [
 	"Purchase Receipt Item",
 ]
 
+# Doctypes carrying the `other_charges_calculation` (itemised tax breakup) field.
+TAX_BREAKUP_DOCTYPES = [
+	"Quotation",
+	"Sales Order",
+	"Sales Invoice",
+	"POS Invoice",
+	"Delivery Note",
+	"Supplier Quotation",
+	"Purchase Order",
+	"Purchase Invoice",
+	"Purchase Receipt",
+]
+
 
 class AccountsSettings(Document):
 	# begin: auto-generated types

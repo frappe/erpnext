@@ -73,7 +73,7 @@ class calculate_taxes_and_totals:
 			self.calculate_total_advance()
 
 		if self.doc.meta.get_field("other_charges_calculation"):
-			self.set_item_wise_tax_breakup()
+			self.set_regional_item_tax_details()
 
 	def _calculate(self):
 		self.validate_conversion_rate()
@@ -1135,8 +1135,12 @@ class calculate_taxes_and_totals:
 
 			self.calculate_outstanding_amount()
 
-	def set_item_wise_tax_breakup(self):
-		self.doc.other_charges_calculation = get_itemised_tax_breakup_html(self.doc)
+	def set_regional_item_tax_details(self):
+		# other_charges_calculation is a view-only virtual field resolved on read (see the
+		# AccountsController.other_charges_calculation property). During calculate we only run
+		# the regional per-item tax hook (Italy/UAE set item.tax_rate/tax_amount/total_amount).
+		with temporary_flag("company", self.doc.company):
+			update_itemised_tax_data(self.doc)
 
 	def set_total_amount_to_default_mop(self, total_amount_to_pay):
 		total_paid_amount = 0
@@ -1208,7 +1212,6 @@ def get_itemised_tax_breakup_html(doc):
 		headers = get_itemised_tax_breakup_header(doc.doctype + " Item", tax_accounts)
 		itemised_tax_data = get_itemised_tax_breakup_data(doc)
 		get_rounded_tax_amount(itemised_tax_data, doc.precision("tax_amount", "taxes"))
-		update_itemised_tax_data(doc)
 
 	return frappe.render_template(
 		"templates/includes/itemised_tax_breakup.html",
@@ -1248,7 +1251,36 @@ def get_itemised_tax_breakup_header(item_doctype, tax_accounts):
 
 @erpnext.allow_regional
 def get_itemised_tax_breakup_data(doc):
-	itemised_tax = get_itemised_tax(doc)
+	# Read from the persisted `item_wise_tax_details` child table.
+	item_map = {item.name: item for item in doc.get("items") or []}
+	tax_map = {tax.name: tax for tax in doc.get("taxes") or []}
+	precision = doc.precision("tax_amount", "taxes")
+	conversion_rate = doc.conversion_rate or 1
+
+	itemised_tax = {}
+	for row in doc.get("item_wise_tax_details") or []:
+		item = item_map.get(row.item_row)
+		tax = tax_map.get(row.tax_row)
+		if not item or not tax:
+			continue
+		if getattr(tax, "category", None) and tax.category == "Valuation":
+			continue
+
+		item_code = item.item_code or item.item_name
+		tax_info = itemised_tax.setdefault(item_code, frappe._dict()).setdefault(
+			tax.description,
+			frappe._dict(
+				{
+					"tax_amount": 0.0,
+					"taxable_amount": 0.0,
+					"tax_rate": row.rate,
+				}
+			),
+		)
+
+		tax_info.tax_amount += flt(row.amount, precision)
+		tax_info.taxable_amount += flt(row.taxable_amount / conversion_rate, precision)
+
 	itemised_tax_data = []
 	for item_code, taxes in itemised_tax.items():
 		taxable_amount = next(iter(taxes.values())).get("taxable_amount")
