@@ -174,6 +174,29 @@ class WorkOrder(Document):
 			self.set_required_items(reset_only_qty=len(self.get("required_items")))
 
 		self.validate_operations_sequence()
+<<<<<<< HEAD
+=======
+		self.validate_subcontracting_inward_order()
+
+	def validate_dates(self):
+		if self.planned_start_date and self.planned_end_date:
+			if get_datetime(self.planned_end_date) < get_datetime(self.planned_start_date):
+				frappe.throw(_("Planned End Date cannot be before Planned Start Date"))
+
+		if self.actual_start_date and self.actual_end_date:
+			if self.actual_end_date < self.actual_start_date:
+				frappe.throw(_("Actual End Date cannot be before Actual Start Date"))
+
+	def before_save(self):
+		self.set_skip_transfer_for_operations()
+
+	def set_skip_transfer_for_operations(self):
+		if not self.track_semi_finished_goods:
+			return
+
+		for op in self.operations:
+			op.skip_material_transfer = self.skip_transfer
+>>>>>>> 2ec780cb35 (fix: validate planned end date is not before planned start date in work order)
 
 	def validate_operations_sequence(self):
 		if all([not op.sequence_id for op in self.operations]):
