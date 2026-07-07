@@ -489,3 +489,4 @@ erpnext.patches.v16_0.remove_mandatory_from_inv_dimension_fields
 erpnext.patches.v15_0.backfill_sla_link_filters_on_custom_field
 erpnext.patches.v15_0.backfill_sla_link_filters_on_docfield
 erpnext.patches.v16_0.crm_settings_handle_allowed_users_for_frappe_crm
+erpnext.patches.v16_0.backfill_pick_list_transferred_qty
