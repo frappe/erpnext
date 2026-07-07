@@ -90,7 +90,6 @@ class DeliveryNote(SellingController):
 		named_place: DF.Data | None
 		naming_series: DF.Literal["MAT-DN-.YYYY.-", "MAT-DN-RET-.YYYY.-"]
 		net_total: DF.Currency
-		other_charges_calculation: DF.TextEditor | None
 		packed_items: DF.Table[PackedItem]
 		per_billed: DF.Percent
 		per_installed: DF.Percent

@@ -777,6 +777,8 @@
   {
    "fieldname": "other_charges_calculation",
    "fieldtype": "Text Editor",
+   "hidden": 1,
+   "is_virtual": 1,
    "label": "Taxes and Charges Calculation",
    "no_copy": 1,
    "oldfieldtype": "HTML",
@@ -1642,7 +1644,7 @@
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-21 12:46:13.250145",
+ "modified": "2026-07-07 18:16:16.321599",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",

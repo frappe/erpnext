@@ -966,8 +966,10 @@
   {
    "fieldname": "other_charges_calculation",
    "fieldtype": "Text Editor",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
+   "is_virtual": 1,
    "label": "Taxes and Charges Calculation",
    "no_copy": 1,
    "oldfieldtype": "HTML",
@@ -2360,7 +2362,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2026-06-21 12:46:13.250145",
+ "modified": "2026-07-07 18:16:16.036207",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
