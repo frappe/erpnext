@@ -30,7 +30,7 @@ class TermsandConditions(Document):
 
 	def validate(self):
 		if self.terms:
-			validate_template(self.terms)
+			validate_template(self.terms, restrict_globals=True)
 		if not cint(self.buying) and not cint(self.selling) and not cint(self.hr) and not cint(self.disabled):
 			throw(_("At least one of the Applicable Modules should be selected"))
 
@@ -40,7 +40,7 @@ def get_terms_and_conditions(template_name, doc):
 	if isinstance(doc, str):
 		doc = json.loads(doc)
 
-	terms_and_conditions = frappe.get_doc("Terms and Conditions", template_name)
+	terms = frappe.get_cached_value("Terms and Conditions", template_name, "terms")
 
-	if terms_and_conditions.terms:
-		return frappe.render_template(terms_and_conditions.terms, doc)
+	if terms:
+		return frappe.render_template(terms, doc, restrict_globals=True)
