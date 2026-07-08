@@ -29,9 +29,8 @@ erpnext.stock.row_requires_quality_inspection = (purpose, row) => {
 	return false;
 };
 
+// This breakup is DESK-RENDER-ONLY: the field is a virtual read-only Text Editor.
 erpnext.item_tax_breakup = {
-	// Data: [{description, rate, amount}, ...] for one item row (child name === cdn), in
-	// transaction currency. Same-description charge rows merge; Valuation taxes are skipped.
 	get_breakup: function (frm, cdn) {
 		const doc = frm && frm.doc;
 		const details = (doc && doc.item_wise_tax_details) || [];
@@ -52,17 +51,17 @@ erpnext.item_tax_breakup = {
 			if (!tax) continue;
 			if (tax.category && tax.category === "Valuation") continue;
 
-			let cell = cells[tax.description];
+			let cell = cells[d.tax_row];
 			if (!cell) {
 				cell = { description: tax.description, rate: flt(d.rate), amount: 0 };
-				cells[tax.description] = cell;
-				order.push(tax.description);
+				cells[d.tax_row] = cell;
+				order.push(d.tax_row);
 			}
-			// persisted amount is in base/company currency -> divide for transaction currency
-			cell.amount += flt(d.amount) / conversion_rate;
+			const prec = precision("tax_amount", tax);
+			cell.amount += flt(flt(d.amount, prec) / conversion_rate, prec);
 		}
 
-		return order.map((desc) => cells[desc]);
+		return order.map((tax_row) => cells[tax_row]);
 	},
 
 	get_template: function (breakup, currency) {
