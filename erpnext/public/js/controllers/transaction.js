@@ -93,13 +93,18 @@ erpnext.item_tax_breakup = {
 	},
 
 	render_row: function (frm, cdt, cdn) {
-		// nothing to compute if the row or the tax-detail data isn't there yet (unsaved row,
 		if (!frm || !frm.doc || !locals[cdt] || !locals[cdt][cdn]) return;
-		if (!(frm.doc.item_wise_tax_details || []).length) return;
 
-		const breakup = erpnext.item_tax_breakup.get_breakup(frm, cdn);
-		const html = erpnext.item_tax_breakup.get_template(breakup, frm.doc.currency);
-		frappe.model.set_value(cdt, cdn, "item_tax_breakup", html);
+		// On a new or dirty form `item_wise_tax_details` is stale
+		// (or absent) and would not match the current items/taxes, so show nothing until the doc
+		// is saved and clean.
+		let html = "";
+		if (!frm.is_new() && !frm.is_dirty() && (frm.doc.item_wise_tax_details || []).length) {
+			const breakup = erpnext.item_tax_breakup.get_breakup(frm, cdn);
+			html = erpnext.item_tax_breakup.get_template(breakup, frm.doc.currency);
+		}
+		// skip_dirty_trigger=true: this is a view-only virtual field; setting it must never mark
+		frappe.model.set_value(cdt, cdn, "item_tax_breakup", html, null, true);
 	},
 };
 
