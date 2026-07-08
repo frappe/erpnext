@@ -311,7 +311,7 @@ class ServiceLevelAgreement(Document):
 				self.reset_field_properties(existing_field, "Custom Field", field)
 
 	def reset_field_properties(self, field, field_dt, sla_field):
-		field = frappe.get_doc(field_dt, {"fieldname": field.fieldname})
+		field = frappe.get_doc(field_dt, field.name)
 		field.label = sla_field.get("label")
 		field.fieldname = sla_field.get("fieldname")
 		field.fieldtype = sla_field.get("fieldtype")
