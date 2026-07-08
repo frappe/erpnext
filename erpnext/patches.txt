@@ -497,4 +497,3 @@ erpnext.patches.v16_0.create_shop_floor_roles
 erpnext.patches.v15_0.backfill_sla_link_filters_on_custom_field
 erpnext.patches.v15_0.backfill_sla_link_filters_on_docfield
 erpnext.patches.v16_0.show_taxes_and_charges_breakup_for_existing_installs
-

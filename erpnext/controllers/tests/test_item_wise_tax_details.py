@@ -1,7 +1,16 @@
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import flt
 
-from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_html
+from erpnext.accounts.doctype.accounts_settings.accounts_settings import (
+	TAX_BREAKUP_DOCTYPES,
+	toggle_taxes_and_charges_breakup,
+)
+from erpnext.controllers.taxes_and_totals import (
+	get_itemised_tax_breakup_data,
+	get_itemised_tax_breakup_html,
+)
 from erpnext.tests.utils import ERPNextTestSuite, change_settings
 
 
@@ -548,11 +557,10 @@ class TestTaxesAndTotals(ERPNextTestSuite):
 			},
 		)
 
+	@change_settings("Accounts Settings", {"show_taxes_and_charges_breakup": 0})
 	def test_other_charges_calculation_hidden_by_default(self):
-		"""By default ("Show Taxes and Charges Breakup" off) the breakup is neither shown nor
+		"""When "Show Taxes and Charges Breakup" is off the breakup is neither shown nor
 		computed - the property short-circuits to '' without rendering."""
-		self.assertFalse(frappe.db.get_single_value("Accounts Settings", "show_taxes_and_charges_breakup"))
-
 		self._append_vat()
 		self.doc.save()
 
@@ -575,3 +583,86 @@ class TestTaxesAndTotals(ERPNextTestSuite):
 		self.assertEqual(html, get_itemised_tax_breakup_html(reloaded))
 		self.assertIn("_Test Item", html)
 		self.assertIn("VAT", html)
+
+	@change_settings("Accounts Settings", {"show_taxes_and_charges_breakup": 1})
+	def test_breakup_taxable_amount_is_in_transaction_currency(self):
+		"""taxable_amount is persisted in company currency; the breakup reader divides by
+		conversion_rate so it displays in the transaction currency (100, not 5000)."""
+		self.doc.currency = "USD"
+		self.doc.conversion_rate = 50
+		self.doc.debit_to = "_Test Receivable USD - _TC"
+		self._append_vat()
+		self.doc.save()
+
+		reloaded = frappe.get_doc("Sales Invoice", self.doc.name)
+		data = get_itemised_tax_breakup_data(reloaded)
+
+		self.assertEqual(data[0]["item"], "_Test Item")
+		self.assertEqual(flt(data[0]["taxable_amount"]), 100.0)
+
+	def test_toggle_creates_hide_property_setters(self):
+		"""Toggling the setting hides/shows other_charges_calculation across all breakup doctypes."""
+
+		def is_hidden(doctype):
+			return frappe.db.get_value(
+				"Property Setter",
+				{"doc_type": doctype, "field_name": "other_charges_calculation", "property": "hidden"},
+				"value",
+			)
+
+		toggle_taxes_and_charges_breakup(hide=True)
+		for doctype in TAX_BREAKUP_DOCTYPES:
+			self.assertEqual(is_hidden(doctype), "1")
+
+		toggle_taxes_and_charges_breakup(hide=False)
+		for doctype in TAX_BREAKUP_DOCTYPES:
+			self.assertEqual(is_hidden(doctype), "0")
+
+	@change_settings("Accounts Settings", {"show_taxes_and_charges_breakup": 1})
+	def test_breakup_resolves_for_purchase_invoice(self):
+		"""The virtual field works on purchase-side doctypes too, not only Sales Invoice."""
+		pi = frappe.get_doc(
+			{
+				"doctype": "Purchase Invoice",
+				"supplier": "_Test Supplier",
+				"company": "_Test Company",
+				"currency": "INR",
+				"conversion_rate": 1,
+				"items": [
+					{
+						"item_code": "_Test Item",
+						"qty": 1,
+						"rate": 100,
+						"expense_account": "_Test Account Cost for Goods Sold - _TC",
+						"cost_center": "_Test Cost Center - _TC",
+					}
+				],
+				"taxes": [
+					{
+						"charge_type": "On Net Total",
+						"account_head": "_Test Account VAT - _TC",
+						"cost_center": "_Test Cost Center - _TC",
+						"description": "VAT",
+						"rate": 10,
+						"category": "Total",
+						"add_deduct_tax": "Add",
+					}
+				],
+			}
+		)
+		pi.save()
+
+		reloaded = frappe.get_doc("Purchase Invoice", pi.name)
+		html = reloaded.other_charges_calculation
+		self.assertIn("_Test Item", html)
+		self.assertIn("VAT", html)
+
+	def test_regional_item_tax_hook_runs_during_calculate(self):
+		"""The Italy/UAE per-item tax hook (update_itemised_tax_data) must still fire during
+		calculate after the move out of the breakup-render path."""
+		self._append_vat()
+
+		with patch("erpnext.controllers.taxes_and_totals.update_itemised_tax_data") as mocked_hook:
+			self.doc.save()
+
+		mocked_hook.assert_called_once_with(self.doc)

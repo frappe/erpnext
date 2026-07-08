@@ -1290,6 +1290,8 @@ def get_itemised_tax_breakup_data(doc):
 
 
 def get_itemised_tax(doc, with_tax_account=False):
+	# Reads transient `_item_wise_tax_details` (calculate-time only); empty on a reloaded doc.
+	# Use `get_itemised_tax_breakup_data` for the persisted, reload-safe breakup.
 	itemised_tax = {}
 	precision = doc.precision("tax_amount", "taxes")
 
