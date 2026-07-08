@@ -2185,12 +2185,11 @@ def get_reference_serial_and_batch_bundle(child_row):
 def add_serial_batch_ledgers(
 	entries: list | str,
 	child_row: PurchaseReceiptItem | dict | str,
-	doc: Document | str,
+	doc: Document | dict | str,
 	warehouse: str | None = None,
 	do_not_save: bool = False,
 ):
-	if isinstance(child_row, str):
-		child_row = frappe._dict(parse_json(child_row))
+	child_row = parse_json(child_row)
 
 	if isinstance(entries, str):
 		entries = parse_json(entries)
