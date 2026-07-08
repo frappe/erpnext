@@ -24,19 +24,6 @@ from erpnext.accounts.report.utils import convert_to_presentation_currency, get_
 from erpnext.accounts.utils import get_fiscal_year, get_zero_cutoff
 
 
-def get_report_date_range(filters: frappe._dict) -> tuple[datetime.date, datetime.date]:
-	"""
-	Resolve `from_date`, `to_date` from filters, including validation.
-	"""
-	if filters.filter_based_on == "Fiscal Year":
-		fy_data = get_fiscal_year_data(filters.from_fiscal_year, filters.to_fiscal_year)
-		validate_fiscal_year(fy_data, filters.from_fiscal_year, filters.to_fiscal_year)
-		return getdate(fy_data.year_start_date), getdate(fy_data.year_end_date)
-
-	validate_dates(filters.period_start_date, filters.period_end_date)
-	return getdate(filters.period_start_date), getdate(filters.period_end_date)
-
-
 def get_dimension_values(filters: frappe._dict) -> tuple[str | None, list]:
 	"""
 	Return (fieldname, [dimension_values]) for the chosen grouping dimension.
@@ -84,37 +71,18 @@ def get_dimension_period_list(filters: frappe._dict) -> list[dict]:
 	"""
 	Return a period_list-shaped axis = cross-product of (dimension_value * time period).
 
-	Example:
+	Each cell is a `get_period_list` bucket plus dimension keys, e.g.:
 
 	```
-	[
-	    {
-	        "dimension_field": "cost_center",
-	        "dimension_value": "Center - ATD",
-	        "from_date": datetime.date(2026, 4, 1),
-	        "from_date_fiscal_year_start_date": datetime.date(2026, 4, 1),
-	        "key": "center___atd_mar_2027",
-	        "label": "Center - ATD - 2026-2027",
-	        "period": "mar_2027",
-	        "to_date": datetime.date(2027, 3, 31),
-	        "to_date_fiscal_year": "2026-2027",
-	        "year_end_date": datetime.date(2027, 3, 31),
-	        "year_start_date": datetime.date(2026, 4, 1),
-	    },
-	    {
+	{
 	        "dimension_field": "cost_center",
 	        "dimension_value": "Main - ATD",
-	        "from_date": datetime.date(2026, 4, 1),
-	        "from_date_fiscal_year_start_date": datetime.date(2026, 4, 1),
 	        "key": "main___atd_mar_2027",
 	        "label": "Main - ATD - 2026-2027",
 	        "period": "mar_2027",
-	        "to_date": datetime.date(2027, 3, 31),
-	        "to_date_fiscal_year": "2026-2027",
-	        "year_end_date": datetime.date(2027, 3, 31),
-	        "year_start_date": datetime.date(2026, 4, 1),
-	    },
-	]
+	        ...
+	}
+
 	```
 	"""
 	fieldname, dimensions = get_dimension_values(filters)
@@ -243,39 +211,17 @@ def get_period_list(
 ):
 	"""
 	Generate a list of time buckets between the provided from/to fiscal year or date range,
-	based on the periodicity.
-
-	- Periodicity can be: Yearly, Half-Yearly, Quarterly, Monthly
-
-	Example output:
-
-	```
-	[
-	    {
-	        from_date: datetime.date(2026, 4, 1),
-	        to_date: datetime.date(2027, 3, 31),
-	        to_date_fiscal_year: "2026-2027",
-	        from_date_fiscal_year_start_date: datetime.date(2026, 4, 1),
-	        key: "mar_2027",
-	        label: "2026-2027",
-	        year_start_date: datetime.date(2026, 4, 1),
-	        year_end_date: datetime.date(2027, 3, 31),
-	    },
-	]
-	```
+	based on the periodicity (Yearly, Half-Yearly, Quarterly, Monthly).
 	"""
 
-	year_start_date, year_end_date = get_report_date_range(
-		frappe._dict(
-			{
-				"filter_based_on": filter_based_on,
-				"from_fiscal_year": from_fiscal_year,
-				"to_fiscal_year": to_fiscal_year,
-				"period_start_date": period_start_date,
-				"period_end_date": period_end_date,
-			}
-		)
-	)
+	# Resolve the report's overall date range (with validation).
+	if filter_based_on == "Fiscal Year":
+		fy_data = get_fiscal_year_data(from_fiscal_year, to_fiscal_year)
+		validate_fiscal_year(fy_data, from_fiscal_year, to_fiscal_year)
+		year_start_date, year_end_date = getdate(fy_data.year_start_date), getdate(fy_data.year_end_date)
+	else:
+		validate_dates(period_start_date, period_end_date)
+		year_start_date, year_end_date = getdate(period_start_date), getdate(period_end_date)
 
 	months_to_add = {"Yearly": 12, "Half-Yearly": 6, "Quarterly": 3, "Monthly": 1}[periodicity]
 
@@ -507,7 +453,6 @@ def accumulate_values_into_parents(accounts, accounts_by_name, period_list):
 
 def prepare_data(accounts, balance_must_be, period_list, company_currency, accumulated_values):
 	data = []
-	precision = 3
 	year_start_date = period_list[0]["year_start_date"].strftime("%Y-%m-%d")
 	year_end_date = period_list[-1]["year_end_date"].strftime("%Y-%m-%d")
 	total_keys = get_period_keys_for_total(period_list, accumulated_values)
@@ -539,14 +484,14 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency, accum
 				# change sign based on Debit or Credit, since calculation is done using (debit - credit)
 				d[period.key] *= -1
 
-			row[period.key] = flt(d.get(period.key, 0), precision)
+			row[period.key] = flt(d.get(period.key, 0), 3)
 
 			if abs(row[period.key]) >= get_zero_cutoff(company_currency):
 				# ignore zero values
 				has_value = True
 
 		row["has_value"] = has_value
-		row["total"] = flt(sum(row.get(k, 0) for k in total_keys), precision)
+		row["total"] = flt(sum(row.get(k, 0) for k in total_keys), 3)
 		data.append(row)
 
 	return data
