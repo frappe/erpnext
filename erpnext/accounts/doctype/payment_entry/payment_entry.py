@@ -514,10 +514,12 @@ class PaymentEntry(AccountsController):
 				invoice_names.add((ref.reference_doctype, ref.reference_name))
 
 		for doctype, name in invoice_names:
+			frappe.db.savepoint("subscription_update")
 			try:
 				doc = frappe.get_doc(doctype, name)
 				doc.refresh_subscription_status()
 			except Exception:
+				frappe.db.rollback(save_point="subscription_update")
 				frappe.log_error(_("Failed to update subscription status for {0} {1}").format(doctype, name))
 
 	def set_missing_values(self):
@@ -2422,6 +2424,9 @@ def get_party_details(company: str, party_type: str, party: str, date: str, cost
 	if not frappe.db.exists(party_type, party):
 		frappe.throw(_("{0} {1} does not exist").format(_(party_type), party))
 
+	ptype = "select" if frappe.only_has_select_perm(party_type) else "read"
+	frappe.has_permission(party_type, ptype, party, throw=True)
+
 	party_account = get_party_account(party_type, party, company)
 	account_currency = get_account_currency(party_account)
 	_party_name = "title" if party_type == "Shareholder" else party_type.lower() + "_name"
@@ -2429,7 +2434,7 @@ def get_party_details(company: str, party_type: str, party: str, date: str, cost
 
 	if party_type in ["Customer", "Supplier"]:
 		party_bank_account = get_party_bank_account(party_type, party)
-		bank_account = get_default_company_bank_account(company, party_type, party)
+		bank_account = get_default_company_bank_account(company, party_type, party, ignore_permissions=False)
 
 	return {
 		"party_account": party_account,
@@ -2793,6 +2798,9 @@ def get_open_payment_requests_for_references(references=None):
 		.where(PR.docstatus == 1)
 		.where(PR.outstanding_amount > 0)  # to avoid old PRs with 0 outstanding amount
 		.orderby(Coalesce(PR.transaction_date, PR.creation), order=frappe.qb.asc)
+		# unique tiebreaker so PRs sharing a transaction_date allocate in the same order on both engines
+		.orderby(PR.creation, order=frappe.qb.asc)
+		.orderby(PR.name, order=frappe.qb.asc)
 	).run(as_dict=True)
 
 	if not response:

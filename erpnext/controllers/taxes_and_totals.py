@@ -21,7 +21,6 @@ from erpnext.controllers.accounts_controller import (
 from erpnext.deprecation_dumpster import deprecated
 from erpnext.stock.get_item_details import (
 	NOT_APPLICABLE_TAX,
-	ItemDetailsCtx,
 	_get_item_tax_template,
 	get_item_tax_map,
 )
@@ -99,7 +98,7 @@ class calculate_taxes_and_totals:
 		for item in self.doc.items:
 			if item.item_code and item.get("item_tax_template"):
 				item_doc = frappe.get_cached_doc("Item", item.item_code)
-				ctx = ItemDetailsCtx(
+				ctx = frappe._dict(
 					{
 						"net_rate": item.net_rate or item.rate,
 						"base_net_rate": item.base_net_rate or item.base_rate,

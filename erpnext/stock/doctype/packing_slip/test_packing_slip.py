@@ -3,6 +3,7 @@
 
 
 import frappe
+from frappe.utils import cint
 
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 from erpnext.stock.doctype.delivery_note.mapper import make_packing_slip
@@ -117,3 +118,36 @@ def create_items():
 		items.append(make_item(properties=properties).name)
 
 	return items
+
+
+class TestPackingSlipValidation(ERPNextTestSuite):
+	"""Package-number and item validations, exercised on the document directly so no
+	Delivery Note fixture is needed (the integration test above covers the full pack)."""
+
+	def make_slip(self, **fields):
+		doc = frappe.new_doc("Packing Slip")
+		doc.update(fields)
+		return doc
+
+	def test_from_package_no_must_be_positive(self):
+		self.assertRaises(frappe.ValidationError, self.make_slip(from_case_no=0).validate_case_nos)
+
+	def test_to_package_no_cannot_be_less_than_from(self):
+		doc = self.make_slip(from_case_no=5, to_case_no=3)
+		self.assertRaises(frappe.ValidationError, doc.validate_case_nos)
+
+	def test_to_package_no_defaults_to_from(self):
+		doc = self.make_slip(from_case_no=3)
+		doc.validate_case_nos()
+		self.assertEqual(cint(doc.to_case_no), 3)
+
+	def test_item_qty_must_be_greater_than_zero(self):
+		doc = self.make_slip()
+		doc.append("items", {"item_code": "_Test Item", "qty": 0, "dn_detail": "dummy"})
+		self.assertRaises(frappe.ValidationError, doc.validate_items)
+
+	def test_item_requires_a_source_reference(self):
+		doc = self.make_slip()
+		# positive qty but neither a Delivery Note Item nor a Packed Item reference
+		doc.append("items", {"item_code": "_Test Item", "qty": 1})
+		self.assertRaises(frappe.ValidationError, doc.validate_items)

@@ -285,9 +285,6 @@ def create_stock_entry(pick_list: str | dict):
 	pick_list = frappe.get_doc(frappe.parse_json(pick_list))
 	validate_item_locations(pick_list)
 
-	if stock_entry_exists(pick_list.get("name")):
-		return frappe.msgprint(_("Stock Entry has been already created against this Pick List"))
-
 	stock_entry = frappe.new_doc("Stock Entry")
 	stock_entry.pick_list = pick_list.get("name")
 	stock_entry.purpose = pick_list.get("purpose")
@@ -300,6 +297,9 @@ def create_stock_entry(pick_list: str | dict):
 		stock_entry = update_stock_entry_based_on_material_request(pick_list, stock_entry)
 	else:
 		stock_entry = update_stock_entry_items_with_no_reference(pick_list, stock_entry)
+
+	if not stock_entry.get("items"):
+		return frappe.msgprint(_("All picked items have already been transferred against this Pick List"))
 
 	stock_entry.set_missing_values()
 
@@ -366,6 +366,8 @@ def update_stock_entry_based_on_work_order(pick_list, stock_entry):
 	stock_entry.project = work_order.project
 
 	for location in pick_list.locations:
+		if get_pending_transfer_stock_qty(location) <= 0:
+			continue
 		item = frappe._dict()
 		update_common_item_properties(item, location)
 		item.t_warehouse = wip_warehouse
@@ -377,6 +379,8 @@ def update_stock_entry_based_on_work_order(pick_list, stock_entry):
 
 def update_stock_entry_based_on_material_request(pick_list, stock_entry):
 	for location in pick_list.locations:
+		if get_pending_transfer_stock_qty(location) <= 0:
+			continue
 		target_warehouse = None
 		if location.material_request_item:
 			target_warehouse = frappe.get_value(
@@ -392,6 +396,8 @@ def update_stock_entry_based_on_material_request(pick_list, stock_entry):
 
 def update_stock_entry_items_with_no_reference(pick_list, stock_entry):
 	for location in pick_list.locations:
+		if get_pending_transfer_stock_qty(location) <= 0:
+			continue
 		item = frappe._dict()
 		update_common_item_properties(item, location)
 
@@ -400,11 +406,18 @@ def update_stock_entry_items_with_no_reference(pick_list, stock_entry):
 	return stock_entry
 
 
+def get_pending_transfer_stock_qty(location):
+	"""Stock qty of this pick list row still to be moved into a Stock Entry."""
+	return flt(location.picked_qty) - flt(location.transferred_qty)
+
+
 def update_common_item_properties(item, location):
+	pending_stock_qty = get_pending_transfer_stock_qty(location)
 	item.item_code = location.item_code
+	item.item_name = location.item_name
 	item.s_warehouse = location.warehouse
-	item.transfer_qty = location.picked_qty
-	item.qty = flt(location.picked_qty / (location.conversion_factor or 1), location.precision("qty"))
+	item.transfer_qty = pending_stock_qty
+	item.qty = flt(pending_stock_qty / (location.conversion_factor or 1), location.precision("qty"))
 	item.uom = location.uom
 	item.conversion_factor = location.conversion_factor
 	item.stock_uom = location.stock_uom
@@ -412,3 +425,4 @@ def update_common_item_properties(item, location):
 	item.serial_no = location.serial_no
 	item.batch_no = location.batch_no
 	item.material_request_item = location.material_request_item
+	item.pick_list_item = location.name

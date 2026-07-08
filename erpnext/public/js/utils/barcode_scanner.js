@@ -491,7 +491,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 
 			const clear_btn = `
 				<a class="btn-clear-last-scanned-warehouse" title="${__("Clear Last Scanned Warehouse")}">
-					${frappe.utils.icon("close", "xs", "es-icon")}
+					${frappe.utils.icon("x", "xs")}
 				</a>
 			`;
 

@@ -746,11 +746,11 @@ class TestMaterialRequest(ERPNextTestSuite):
 		mr = frappe.get_doc("Material Request", mr.name)
 		mr.submit()
 		completed_qty = mr.items[0].ordered_qty
-		requested_qty = frappe.db.sql(
-			"""select indented_qty from `tabBin` where \
-			item_code= %s and warehouse= %s """,
-			(mr.items[0].item_code, mr.items[0].warehouse),
-		)[0][0]
+		requested_qty = frappe.db.get_value(
+			"Bin",
+			{"item_code": mr.items[0].item_code, "warehouse": mr.items[0].warehouse},
+			"indented_qty",
+		)
 
 		prod_order = raise_work_orders(mr.name, mr.company)
 		po = frappe.get_doc("Work Order", prod_order[0])
@@ -760,11 +760,11 @@ class TestMaterialRequest(ERPNextTestSuite):
 		mr = frappe.get_doc("Material Request", mr.name)
 		self.assertEqual(completed_qty + po.qty, mr.items[0].ordered_qty)
 
-		new_requested_qty = frappe.db.sql(
-			"""select indented_qty from `tabBin` where \
-			item_code= %s and warehouse= %s """,
-			(mr.items[0].item_code, mr.items[0].warehouse),
-		)[0][0]
+		new_requested_qty = frappe.db.get_value(
+			"Bin",
+			{"item_code": mr.items[0].item_code, "warehouse": mr.items[0].warehouse},
+			"indented_qty",
+		)
 
 		self.assertEqual(requested_qty - po.qty, new_requested_qty)
 
@@ -773,11 +773,11 @@ class TestMaterialRequest(ERPNextTestSuite):
 		mr = frappe.get_doc("Material Request", mr.name)
 		self.assertEqual(completed_qty, mr.items[0].ordered_qty)
 
-		new_requested_qty = frappe.db.sql(
-			"""select indented_qty from `tabBin` where \
-			item_code= %s and warehouse= %s """,
-			(mr.items[0].item_code, mr.items[0].warehouse),
-		)[0][0]
+		new_requested_qty = frappe.db.get_value(
+			"Bin",
+			{"item_code": mr.items[0].item_code, "warehouse": mr.items[0].warehouse},
+			"indented_qty",
+		)
 		self.assertEqual(requested_qty, new_requested_qty)
 
 	def test_requested_qty_multi_uom(self):

@@ -203,6 +203,9 @@ def get_data(filters, conditions):
 					as_list=1,
 				)
 
+				if not row1:
+					continue
+
 				des[ind] = row[i][0]
 				des[ind - 1] = row1[0][0]
 

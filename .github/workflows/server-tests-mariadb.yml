@@ -107,6 +107,13 @@ jobs:
           SKIP_SYSTEM_SETUP: "1"
           SKIP_WKHTMLTOX_SETUP: "1"
 
+      - name: Warm up test data
+        run: |
+          su -m "${ERPNEXT_CI_USER:-frappe}" -s /bin/bash <<'EOF'
+          cd ~/frappe-bench/
+          bench --site test_site run-tests --lightmode --module erpnext.tests.bootstrap_test_data
+          EOF
+
       # Clean shutdown (consistent InnoDB datadir), then stage it inside the bench for packaging.
       - name: Stop DB and stage datadir
         run: |

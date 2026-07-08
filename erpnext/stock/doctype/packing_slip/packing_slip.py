@@ -80,15 +80,13 @@ class PackingSlip(StatusUpdater):
 		"""Raises an exception if the `Delivery Note` status is not Draft"""
 
 		if cint(frappe.db.get_value("Delivery Note", self.delivery_note, "docstatus")) != 0:
-			frappe.throw(
-				_("A Packing Slip can only be created for Draft Delivery Note.").format(self.delivery_note)
-			)
+			frappe.throw(_("A Packing Slip can only be created for a Draft Delivery Note."))
 
 	def validate_case_nos(self):
 		"""Validate if case nos overlap. If they do, recommend next case no."""
 
 		if cint(self.from_case_no) <= 0:
-			frappe.throw(_("The 'From Package No.' field must neither be empty nor it's value less than 1."))
+			frappe.throw(_("The 'From Package No.' field must not be empty or have a value less than 1."))
 		elif not self.to_case_no:
 			self.to_case_no = self.from_case_no
 		elif cint(self.to_case_no) < cint(self.from_case_no):

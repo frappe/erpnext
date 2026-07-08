@@ -127,7 +127,7 @@ class CallLog(Document):
 			self.employee_user_id = employees[0].get("user_id")
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def add_call_summary_and_call_type(call_log: str, summary: str, call_type: str):
 	doc = frappe.get_doc("Call Log", call_log)
 	doc.type_of_call = call_type
@@ -163,6 +163,7 @@ def link_existing_conversations(doc, state):
 		return
 	if doc.doctype != "Contact":
 		return
+	frappe.db.savepoint("link_call_logs")
 	try:
 		numbers = [d.phone for d in doc.phone_nos]
 
@@ -196,6 +197,7 @@ def link_existing_conversations(doc, state):
 				if not frappe.in_test:
 					frappe.db.commit()
 	except Exception:
+		frappe.db.rollback(save_point="link_call_logs")
 		frappe.log_error(title=_("Error during caller information update"))
 
 

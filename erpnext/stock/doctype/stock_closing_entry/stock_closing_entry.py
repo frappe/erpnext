@@ -59,11 +59,10 @@ class StockClosingEntry(Document):
 			.where(
 				(table.docstatus == 1)
 				& (table.company == self.company)
-				& (
-					(table.from_date.between(self.from_date, self.to_date))
-					| (table.to_date.between(self.from_date, self.to_date))
-					| ((self.from_date >= table.from_date) & (table.from_date >= self.to_date))
-				)
+				# two date ranges overlap when each starts on or before the other ends;
+				# this also catches one range being fully contained within the other
+				& (table.from_date <= self.to_date)
+				& (table.to_date >= self.from_date)
 			)
 		)
 
@@ -98,7 +97,7 @@ class StockClosingEntry(Document):
 		enqueue(prepare_closing_stock_balance, name=self.name, queue="long", timeout=1500)
 		frappe.msgprint(
 			_(
-				"Stock Closing Entry {0} has been queued for processing, system will take sometime to complete it."
+				"Stock Closing Entry {0} has been queued for processing, the system will take some time to complete it."
 			).format(self.name)
 		)
 
@@ -152,6 +151,7 @@ def prepare_closing_stock_balance(name):
 		doc.create_stock_closing_balance_entries()
 		doc.db_set("status", "Completed")
 	except Exception:
+		frappe.db.rollback()
 		doc.db_set("status", "Failed")
 		doc.log_error(title="Stock Closing Entry Failed")
 

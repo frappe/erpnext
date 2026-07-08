@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _, msgprint
+from frappe.model.meta import get_field_precision
 from frappe.query_builder import Case
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Sum
@@ -127,17 +128,32 @@ def _execute(filters=None, additional_table_columns=None):
 				row.update({frappe.scrub(tax_acc): tax_amount})
 
 		# total tax, grand total, rounded total & outstanding amount
+
+		outstanding_precision = (
+			get_field_precision(
+				frappe.get_meta("Purchase Invoice").get_field("outstanding_amount"),
+				currency=company_currency,
+			)
+			or 2
+		)
 		row.update(
 			{
 				"total_tax": total_tax,
 				"grand_total": inv.base_grand_total,
 				"rounded_total": inv.base_rounded_total,
-				"outstanding_amount": inv.outstanding_amount,
 			}
 		)
 
 		if inv.doctype == "Purchase Invoice":
-			row.update({"debit": inv.base_grand_total, "credit": 0.0})
+			row.update(
+				{
+					"debit": inv.base_grand_total,
+					"credit": 0.0,
+					"outstanding_amount": flt(
+						(inv.outstanding_amount * (inv.conversion_rate or 1)), outstanding_precision
+					),
+				}
+			)
 		else:
 			row.update({"debit": 0.0, "credit": inv.base_grand_total})
 		data.append(row)
@@ -410,6 +426,7 @@ def get_invoices(filters, additional_query_columns):
 			pi.base_rounded_total,
 			pi.outstanding_amount,
 			pi.mode_of_payment,
+			pi.conversion_rate,
 		)
 		.where(pi.docstatus == 1)
 	)

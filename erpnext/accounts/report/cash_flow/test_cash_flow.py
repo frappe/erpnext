@@ -60,16 +60,9 @@ class TestCashFlow(ERPNextTestSuite):
 
 	def test_cash_purchase_of_asset_is_investing_outflow(self):
 		"""Buying a fixed asset for cash is an investing outflow that reduces net change in cash."""
-		from erpnext.accounts.doctype.account.test_account import create_account
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 
-		create_account(
-			account_name="_Test Cash Flow Asset",
-			company=self.company,
-			parent_account="Fixed Assets - _TC",
-			account_type="Fixed Asset",
-		)
-		asset_account = "_Test Cash Flow Asset - _TC"
+		asset_account = "Office Equipment - _TC"
 
 		before = self.net_change_in_cash()
 		# debit the fixed asset, credit cash -> cash goes out

@@ -33,9 +33,11 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 
 		self.make_item_gl_entries(gl_entries)
 
-		disable_sdbnb_in_sr = frappe.get_cached_value("Company", doc.company, "disable_sdbnb_in_sr")
+		disable_sdbnb_in_sr, is_sdbnb_enabled = frappe.get_cached_value(
+			"Company", doc.company, ["disable_sdbnb_in_sr", "enable_stock_delivered_but_not_billed"]
+		)
 
-		if not (doc.is_return and disable_sdbnb_in_sr):
+		if is_sdbnb_enabled and not (doc.is_return and disable_sdbnb_in_sr):
 			self.stock_delivered_but_not_billed_gl_entries(gl_entries)
 
 		self.make_precision_loss_gl_entry(gl_entries)

@@ -129,8 +129,10 @@ class LandedCostVoucher(Document):
 				d.receipt_document_type, d.receipt_document, ["docstatus", "company"]
 			)
 			if docstatus != 1:
-				msg = f"Row {d.idx}: {d.receipt_document_type} {frappe.bold(d.receipt_document)} must be submitted"
-				frappe.throw(_(msg), title=_("Invalid Document"))
+				msg = _("Row {0}: {1} {2} must be submitted").format(
+					d.idx, d.receipt_document_type, frappe.bold(d.receipt_document)
+				)
+				frappe.throw(msg, title=_("Invalid Document"))
 
 			if company != self.company:
 				frappe.throw(
@@ -244,7 +246,7 @@ class LandedCostVoucher(Document):
 		if not total:
 			frappe.throw(
 				_(
-					"Total {0} for all items is zero, may be you should change 'Distribute Charges Based On'"
+					"Total {0} for all items is zero, maybe you should change 'Distribute Charges Based On'"
 				).format(based_on)
 			)
 
@@ -375,8 +377,8 @@ class LandedCostVoucher(Document):
 				if not docs or total_asset_qty < item.qty:
 					frappe.throw(
 						_(
-							"For item <b>{0}</b>, only <b>{1}</b> asset have been created or linked to <b>{2}</b>. "
-							"Please create or link <b>{3}</b> more asset with the respective document."
+							"For item <b>{0}</b>, only <b>{1}</b> assets have been created or linked to <b>{2}</b>. "
+							"Please create or link <b>{3}</b> more assets with the respective document."
 						).format(
 							item.item_code, total_asset_qty, item.receipt_document, item.qty - total_asset_qty
 						)

@@ -1531,11 +1531,11 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		(via the standard item lookup the form uses) without going through
 		the Sales Order → Purchase Order mapping pipeline.
 		"""
-		from erpnext.stock.get_item_details import ItemDetailsCtx, get_item_details
+		from erpnext.stock.get_item_details import get_item_details
 
 		item = make_item("_Test Drop Ship From Master", {"is_stock_item": 1, "delivered_by_supplier": 1})
 
-		ctx = ItemDetailsCtx(
+		ctx = frappe._dict(
 			{
 				"item_code": item.item_code,
 				"doctype": "Purchase Order",

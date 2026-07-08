@@ -297,14 +297,10 @@ if [ "$DB" == "postgres" ];then
     echo "travis" | psql -h 127.0.0.1 -p 5432 -c "CREATE DATABASE test_frappe" -U postgres;
     echo "travis" | psql -h 127.0.0.1 -p 5432 -c "CREATE USER test_frappe WITH PASSWORD 'test_frappe'" -U postgres;
 
-    # Disposable CI DB: durability off for speed (postgres fsyncs every commit by default, which
-    # dominates a commit-heavy suite). All reloadable, no restart. The postgres workflow runs a
-    # service-container DB and never calls start-db.sh, so the flags must be applied here.
-    echo "travis" | psql -h 127.0.0.1 -p 5432 -U postgres \
-        -c "ALTER SYSTEM SET synchronous_commit = 'off'" \
-        -c "ALTER SYSTEM SET fsync = 'off'" \
-        -c "ALTER SYSTEM SET full_page_writes = 'off'" \
-        -c "SELECT pg_reload_conf()";
+    # Durability-off for speed (no fsync/synchronous_commit/full_page_writes) is applied by
+    # start-db.sh's postgres `-o` flags on every start — setup job AND each test shard — so it is
+    # NOT repeated here. The postgres workflow runs in-runner via start-db.sh, not a service
+    # container.
 fi
 
 cd ~/frappe-bench || exit

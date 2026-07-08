@@ -91,7 +91,7 @@ class SendToSubcontractorStockEntry(BaseStockEntry):
 				child_row.db_set(self.doc.subcontract_data.rm_detail_field, order_rm_detail)
 			elif not child_row.allow_alternative_item:
 				frappe.throw(
-					_("Row {0}# Item {1} not found in 'Raw Materials Supplied' table in {2} {3}").format(
+					_("Row #{0}: Item {1} not found in 'Raw Materials Supplied' table in {2} {3}").format(
 						child_row.idx,
 						item_code,
 						self.doc.subcontract_data.order_doctype,

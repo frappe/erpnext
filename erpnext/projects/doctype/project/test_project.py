@@ -49,7 +49,7 @@ class TestProject(ERPNextTestSuite):
 
 	def test_project_with_template_having_no_parent_and_depend_tasks(self):
 		project_name = "Test Project with Template - No Parent and Dependend Tasks"
-		frappe.db.sql(""" delete from tabTask where project = %s """, project_name)
+		frappe.db.delete("Task", {"project": project_name})
 		frappe.delete_doc("Project", project_name)
 
 		task1 = task_exists("Test Template Task with No Parent and Dependency")
@@ -82,7 +82,7 @@ class TestProject(ERPNextTestSuite):
 		if frappe.db.get_value("Project", {"project_name": project_name}, "name"):
 			project_name = frappe.db.get_value("Project", {"project_name": project_name}, "name")
 
-		frappe.db.sql(""" delete from tabTask where project = %s """, project_name)
+		frappe.db.delete("Task", {"project": project_name})
 		frappe.delete_doc("Project", project_name)
 
 		task1 = task_exists("Test Template Task Parent")
@@ -137,7 +137,7 @@ class TestProject(ERPNextTestSuite):
 
 	def test_project_template_having_dependent_tasks(self):
 		project_name = "Test Project with Template - Dependent Tasks"
-		frappe.db.sql(""" delete from tabTask where project = %s  """, project_name)
+		frappe.db.delete("Task", {"project": project_name})
 		frappe.delete_doc("Project", project_name)
 
 		task1 = task_exists("Test Template Task for Dependency")
@@ -252,7 +252,7 @@ class TestProject(ERPNextTestSuite):
 
 	def test_project_having_no_tasks_complete(self):
 		project_name = "Test Project - No Tasks Completion"
-		frappe.db.sql(""" delete from tabTask where project = %s """, project_name)
+		frappe.db.delete("Task", {"project": project_name})
 		frappe.delete_doc("Project", project_name)
 
 		project = frappe.get_doc(

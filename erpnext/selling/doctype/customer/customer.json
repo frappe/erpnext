@@ -681,6 +681,7 @@
    "fieldtype": "Data",
    "in_global_search": 1,
    "label": "Alias",
+   "no_copy": 1,
    "unique": 1
   }
  ],
@@ -695,7 +696,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-06-22 12:23:19.196991",
+ "modified": "2026-06-27 16:12:10.457900",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

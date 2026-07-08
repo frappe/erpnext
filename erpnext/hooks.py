@@ -8,7 +8,7 @@ app_email = "hello@frappe.io"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 app_logo_url = "/assets/erpnext/images/erpnext-logo.svg"
-app_home = "/desk"
+app_home = "/desk/home"
 
 add_to_apps_screen = [
 	{
@@ -507,6 +507,7 @@ scheduler_events = {
 	],
 	"weekly": [
 		"erpnext.accounts.utils.auto_create_exchange_rate_revaluation_weekly",
+		"erpnext.stock.doctype.stock_reposting_settings.stock_reposting_settings.repost_incorrect_valuation_entries",
 	],
 	"monthly_long": [
 		"erpnext.accounts.deferred_revenue.process_deferred_accounting",

@@ -500,7 +500,7 @@ def get_target_item_details(item_code: str | None = None, company: str | None = 
 	item_group_defaults = get_item_group_defaults(item.name, company)
 	brand_defaults = get_brand_defaults(item.name, company)
 	out.cost_center = get_default_cost_center(
-		ItemDetailsCtx({"item_code": item.name, "company": company}),
+		frappe._dict({"item_code": item.name, "company": company}),
 		item_defaults,
 		item_group_defaults,
 		brand_defaults,

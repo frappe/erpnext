@@ -19,7 +19,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	get_batch_from_bundle,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.get_item_details import ItemDetailsCtx, get_item_details
+from erpnext.stock.get_item_details import get_item_details
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -595,7 +595,7 @@ class TestBatch(ERPNextTestSuite):
 		company = "_Test Company with perpetual inventory"
 		currency = frappe.get_cached_value("Company", company, "default_currency")
 
-		ctx = ItemDetailsCtx(
+		ctx = frappe._dict(
 			{
 				"item_code": "_Test Batch Price Item",
 				"company": company,

@@ -132,6 +132,10 @@ class Asset(AccountsController):
 		self.validate_gross_and_purchase_amount()
 		self.validate_finance_books()
 
+		if self.calculate_depreciation:
+			# Is Fully Depreciated is only applicable to manually entered existing assets
+			self.is_fully_depreciated = 0
+
 	def before_save(self):
 		self.total_asset_cost = self.net_purchase_amount + self.additional_asset_cost
 		self.status = self.get_status()

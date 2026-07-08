@@ -228,7 +228,7 @@ def _make_customer(source_name, ignore_permissions=False):
 
 
 def create_customer_from_lead(lead_name, ignore_permissions=False):
-	from erpnext.crm.doctype.lead.lead import _make_customer
+	from erpnext.crm.doctype.lead.mapper import _make_customer
 
 	customer = _make_customer(lead_name, ignore_permissions=ignore_permissions)
 	customer.flags.ignore_permissions = ignore_permissions

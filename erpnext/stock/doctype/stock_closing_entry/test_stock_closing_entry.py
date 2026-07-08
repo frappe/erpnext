@@ -1,6 +1,8 @@
 # Copyright (c) 2024, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import add_days, today
 
@@ -57,3 +59,45 @@ class TestStockClosingEntry(ERPNextTestSuite):
 		).submit()
 		self.last_closing_entry = entry.name
 		return entry
+
+
+class TestStockClosingEntryDuplicate(ERPNextTestSuite):
+	"""validate_duplicate blocks a second submitted closing entry whose date range
+	overlaps an existing one for the same scope (company + warehouse/item filters)."""
+
+	def make_closing(self, from_date, to_date, **fields):
+		doc = frappe.new_doc("Stock Closing Entry")
+		doc.company = COMPANY
+		doc.from_date = from_date
+		doc.to_date = to_date
+		doc.update(fields)
+		return doc
+
+	def submit_closing(self, doc):
+		# the closing-balance build is enqueued on submit; skip it here
+		with patch("erpnext.stock.doctype.stock_closing_entry.stock_closing_entry.enqueue"):
+			doc.submit()
+		return doc
+
+	def test_overlapping_range_is_rejected(self):
+		self.submit_closing(self.make_closing("2026-01-01", "2026-03-31"))
+		overlap = self.make_closing("2026-02-01", "2026-04-30")
+		self.assertRaises(frappe.ValidationError, overlap.insert)
+
+	def test_fully_contained_range_is_rejected(self):
+		# a range entirely inside an existing entry's range is still a duplicate
+		self.submit_closing(self.make_closing("2026-01-01", "2026-12-31"))
+		contained = self.make_closing("2026-03-01", "2026-03-31")
+		self.assertRaises(frappe.ValidationError, contained.insert)
+
+	def test_enclosing_range_is_rejected(self):
+		# and so is a range that fully encloses an existing entry's range
+		self.submit_closing(self.make_closing("2026-03-01", "2026-03-31"))
+		enclosing = self.make_closing("2026-01-01", "2026-12-31")
+		self.assertRaises(frappe.ValidationError, enclosing.insert)
+
+	def test_non_overlapping_range_is_allowed(self):
+		self.submit_closing(self.make_closing("2026-01-01", "2026-03-31"))
+		later = self.make_closing("2026-04-01", "2026-06-30")
+		later.insert()  # would raise if validate_duplicate wrongly flagged it as overlapping
+		self.assertTrue(frappe.db.exists("Stock Closing Entry", later.name))

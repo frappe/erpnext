@@ -232,9 +232,11 @@ def make_subcontracting_order(
 			target_doc.save()
 
 			if submit and frappe.has_permission(target_doc.doctype, "submit", target_doc):
+				frappe.db.savepoint("submit_subcontracting_order")
 				try:
 					target_doc.submit()
 				except Exception as e:
+					frappe.db.rollback(save_point="submit_subcontracting_order")
 					target_doc.add_comment("Comment", _("Submit Action Failed") + "<br><br>" + str(e))
 
 			if notify:

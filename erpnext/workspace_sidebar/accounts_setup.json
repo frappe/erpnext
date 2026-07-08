@@ -14,6 +14,7 @@
    "keep_closed": 0,
    "label": "Setup",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Section Break"
   },
@@ -25,6 +26,7 @@
    "label": "Chart of Accounts",
    "link_to": "Account",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -36,6 +38,7 @@
    "label": "Chart of Cost Centers",
    "link_to": "Cost Center",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -47,6 +50,7 @@
    "label": "Account Category",
    "link_to": "Account Category",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -58,6 +62,7 @@
    "label": "Accounting Dimension",
    "link_to": "Accounting Dimension",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -69,6 +74,7 @@
    "label": "Currency",
    "link_to": "Currency",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -80,6 +86,7 @@
    "label": "Currency Exchange",
    "link_to": "Currency Exchange",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -91,6 +98,7 @@
    "label": "Finance Book",
    "link_to": "Finance Book",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -102,6 +110,7 @@
    "label": "Mode of Payment",
    "link_to": "Mode of Payment",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -113,6 +122,7 @@
    "label": "Payment Term",
    "link_to": "Payment Term",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -124,6 +134,7 @@
    "label": "Journal Entry Template",
    "link_to": "Journal Entry Template",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -135,6 +146,7 @@
    "label": "Terms and Conditions",
    "link_to": "Terms and Conditions",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -146,6 +158,7 @@
    "label": "Company",
    "link_to": "Company",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -157,6 +170,7 @@
    "label": "Fiscal Year",
    "link_to": "Fiscal Year",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -168,6 +182,7 @@
    "label": "Sales Taxes",
    "link_to": "Sales Taxes and Charges Template",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -179,6 +194,7 @@
    "keep_closed": 0,
    "label": "Opening & Closing",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Section Break"
   },
@@ -191,6 +207,7 @@
    "label": "COA Importer",
    "link_to": "Chart of Accounts Importer",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -203,6 +220,7 @@
    "label": "Opening Invoice Tool",
    "link_to": "Opening Invoice Creation Tool",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -215,6 +233,7 @@
    "label": "Accounting Period",
    "link_to": "Accounting Period",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -227,6 +246,7 @@
    "label": "FX Revaluation",
    "link_to": "Exchange Rate Revaluation",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -239,6 +259,7 @@
    "label": "Period Closing Voucher",
    "link_to": "Period Closing Voucher",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -250,6 +271,7 @@
    "keep_closed": 0,
    "label": "Settings",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Section Break"
   },
@@ -262,6 +284,7 @@
    "label": "Accounts Settings",
    "link_to": "Accounts Settings",
    "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   },
@@ -273,22 +296,12 @@
    "label": "Currency Exchange Settings",
    "link_to": "Currency Exchange Settings",
    "link_type": "DocType",
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 1,
-   "collapsible": 1,
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Repost Accounting Ledger Settings",
-   "link_to": "Repost Accounting Ledger Settings",
-   "link_type": "DocType",
+   "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
   }
  ],
- "modified": "2026-02-23 22:20:51.043478",
+ "modified": "2026-06-12 14:50:50.262533",
  "modified_by": "Administrator",
  "module": "Accounts",
  "module_onboarding": "Accounting Onboarding",

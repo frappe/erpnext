@@ -833,10 +833,17 @@ class PaymentReconciliation(Document):
 
 
 def reconcile_dr_cr_note(dr_cr_notes, company, active_dimensions=None):
+	allocated_amount_precision = get_field_precision(
+		frappe.get_meta("Payment Reconciliation Allocation").get_field("allocated_amount")
+	)
 	for inv in dr_cr_notes:
 		if (
-			abs(frappe.db.get_value(inv.voucher_type, inv.voucher_no, "outstanding_amount"))
-			< inv.allocated_amount
+			flt(
+				abs(frappe.db.get_value(inv.voucher_type, inv.voucher_no, "outstanding_amount"))
+				- inv.allocated_amount,
+				allocated_amount_precision,
+			)
+			< 0
 		):
 			frappe.throw(
 				_("{0} has been modified after you pulled it. Please pull it again.").format(inv.voucher_type)

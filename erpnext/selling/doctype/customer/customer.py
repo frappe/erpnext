@@ -196,7 +196,7 @@ class Customer(TransactionBase):
 			if sum(member.allocated_percentage or 0 for member in self.sales_team) != 100:
 				frappe.throw(_("Total contribution percentage should be equal to 100"))
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def get_customer_group_details(self):
 		doc = frappe.get_doc("Customer Group", self.customer_group)
 		self.accounts = []

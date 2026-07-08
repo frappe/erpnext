@@ -63,6 +63,13 @@ class PurchaseReceiptStockReservation:
 			return
 
 		production_plan_references = self.get_production_plan_references()
+		if not production_plan_references:
+			return
+
+		reservable_plans = self.get_reservable_production_plans(production_plan_references)
+		if not reservable_plans:
+			return
+
 		production_plan_items = []
 		doc.reload()
 
@@ -70,6 +77,9 @@ class PurchaseReceiptStockReservation:
 		for row in doc.items:
 			if row.material_request_item and row.material_request_item in production_plan_references:
 				_ref = production_plan_references[row.material_request_item]
+				if _ref.production_plan not in reservable_plans:
+					continue
+
 				docnames.append(_ref.production_plan)
 				row.update(
 					{
@@ -94,6 +104,25 @@ class PurchaseReceiptStockReservation:
 			sre.transfer_reservation_entries_to(
 				docnames, from_doctype="Production Plan", to_doctype="Work Order"
 			)
+
+	def get_reservable_production_plans(self, production_plan_references: frappe._dict) -> set:
+		"""Production Plans that opted into stock reservation (``reserve_stock``).
+
+		A Production Plan only gets this flag set if "Auto Reserve Stock" was enabled in
+		Stock Settings when it was created, or the user ticked "Reserve Stock" manually.
+		Without this check, a Purchase Receipt would auto-reserve stock for every
+		Production Plan whenever "Enable Stock Reservation" is on, ignoring both of those.
+		"""
+		plan_names = {ref.production_plan for ref in production_plan_references.values()}
+		return {
+			p.name
+			for p in frappe.get_all(
+				"Production Plan",
+				filters={"name": ["in", list(plan_names)]},
+				fields=["name", "reserve_stock"],
+			)
+			if p.reserve_stock
+		}
 
 	def get_production_plan_references(self) -> frappe._dict:
 		production_plan_references = frappe._dict()

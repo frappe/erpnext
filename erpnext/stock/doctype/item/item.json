@@ -384,7 +384,7 @@
    "fieldname": "valuation_method",
    "fieldtype": "Select",
    "label": "Valuation Method",
-   "options": "\nFIFO\nMoving Average\nLIFO"
+   "options": "\nFIFO\nMoving Average\nLIFO\nStandard Cost"
   },
   {
    "depends_on": "is_stock_item",
@@ -1090,7 +1090,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2026-05-27 10:18:46.862670",
+ "modified": "2026-06-26 10:05:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

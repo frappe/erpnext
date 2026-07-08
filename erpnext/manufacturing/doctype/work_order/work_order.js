@@ -203,6 +203,15 @@ frappe.ui.form.on("Work Order", {
 			}
 		}
 
+		let pending_ops = frm.doc?.operations?.filter((op) => op.completed_qty < frm.doc.qty);
+		// Jump to the operator Shop Floor view, pre-filtered to this work order.
+		if (frm.doc.docstatus === 1 && frm.doc.status !== "Closed" && pending_ops && pending_ops.length > 0) {
+			frm.add_custom_button(__("Operator Dashboard"), () => {
+				frappe.route_options = { work_order: frm.doc.name };
+				frappe.set_route("shop-floor");
+			});
+		}
+
 		if (frm.doc.status == "Completed") {
 			if (frm.doc.__onload.backflush_raw_materials_based_on == "Material Transferred for Manufacture") {
 				frm.add_custom_button(

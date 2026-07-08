@@ -18,12 +18,17 @@ def stock_balance(filters):
 class TestStockBalance(ERPNextTestSuite):
 	# ----------- utils
 
+	# `_Test Item` is a committed bootstrap item that starts at zero stock in `Stores - _TC`,
+	# so transacting here keeps exact qty/value assertions deterministic.
+	test_warehouse = "Stores - _TC"
+
 	def setUp(self):
-		self.item = make_item()
+		self.item = frappe.get_doc("Item", "_Test Item")
 		self.filters = _dict(
 			{
 				"company": "_Test Company",
 				"item_code": [self.item.name],
+				"warehouse": self.test_warehouse,
 				"from_date": "2020-01-01",
 				"to_date": str(today()),
 			}
@@ -36,7 +41,7 @@ class TestStockBalance(ERPNextTestSuite):
 	def generate_stock_ledger(self, item_code: str, movements):
 		for movement in map(_dict, movements):
 			if "to_warehouse" not in movement:
-				movement.to_warehouse = "_Test Warehouse - _TC"
+				movement.to_warehouse = self.test_warehouse
 			make_stock_entry(item_code=item_code, **movement)
 
 	def assertInvariants(self, rows):
@@ -100,7 +105,7 @@ class TestStockBalance(ERPNextTestSuite):
 			self.item.name,
 			[
 				_dict(qty=5, rate=10),
-				_dict(qty=5, from_warehouse="_Test Warehouse - _TC", to_warehouse=None),
+				_dict(qty=5, from_warehouse=self.test_warehouse, to_warehouse=None),
 			],
 		)
 
@@ -153,8 +158,11 @@ class TestStockBalance(ERPNextTestSuite):
 		self.assertInvariants(rows)
 
 	def test_item_group(self):
+		self.generate_stock_ledger(self.item.name, [_dict(qty=5, rate=10)])
+
 		self.filters.pop("item_code", None)
 		rows = stock_balance(self.filters.update({"item_group": self.item.item_group}))
+		self.assertTrue(rows)
 		self.assertTrue(all(r.item_group == self.item.item_group for r in rows))
 
 	def test_child_warehouse_balances(self):
@@ -172,12 +180,8 @@ class TestStockBalance(ERPNextTestSuite):
 	def test_show_item_attr(self):
 		from erpnext.controllers.item_variant import create_variant
 
-		self.item.has_variants = True
-		self.item.append("attributes", {"attribute": "Test Size"})
-		self.item.save()
-
 		attributes = {"Test Size": "Large"}
-		variant = create_variant(self.item.name, attributes)
+		variant = create_variant("_Test Variant Item", attributes)
 		variant.save()
 
 		self.generate_stock_ledger(variant.name, [_dict(qty=5, rate=10)])
@@ -185,12 +189,18 @@ class TestStockBalance(ERPNextTestSuite):
 		self.assertPartialDictEq(attributes, rows[0])
 		self.assertInvariants(rows)
 
+	def make_alt_uom_item(self, uoms=None):
+		"""Fresh item with a controlled UOM table; `_Test Item` already carries an alternate
+		UOM, which would shadow the "first alternate" assertions in these tests."""
+		item = make_item(uoms=uoms)
+		self.filters.update({"item_code": [item.name]})
+		return item
+
 	def test_alt_uom_balance_single_uom(self):
 		"""Alt UOM columns show correct name and converted qty for an item with one alternate UOM."""
-		self.item.append("uoms", {"conversion_factor": 12, "uom": "Box"})
-		self.item.save()
+		item = self.make_alt_uom_item(uoms=[{"conversion_factor": 12, "uom": "Box"}])
 
-		self.generate_stock_ledger(self.item.name, [_dict(qty=24, rate=10)])
+		self.generate_stock_ledger(item.name, [_dict(qty=24, rate=10)])
 
 		rows = stock_balance(self.filters.update({"show_alt_uom_balance": 1}))
 		self.assertEqual(len(rows), 1)
@@ -199,7 +209,8 @@ class TestStockBalance(ERPNextTestSuite):
 
 	def test_alt_uom_balance_no_alternate_uom(self):
 		"""Alt UOM columns are not added when no items in the report have alt UOMs."""
-		self.generate_stock_ledger(self.item.name, [_dict(qty=5, rate=10)])
+		item = self.make_alt_uom_item()
+		self.generate_stock_ledger(item.name, [_dict(qty=5, rate=10)])
 
 		columns, _ = execute(self.filters.update({"show_alt_uom_balance": 1}))
 		col_fieldnames = [c.get("fieldname") for c in columns if isinstance(c, dict)]
@@ -208,10 +219,9 @@ class TestStockBalance(ERPNextTestSuite):
 
 	def test_alt_uom_balance_filter_disabled(self):
 		"""No alt UOM columns are injected when show_alt_uom_balance is not set."""
-		self.item.append("uoms", {"conversion_factor": 12, "uom": "Box"})
-		self.item.save()
+		item = self.make_alt_uom_item(uoms=[{"conversion_factor": 12, "uom": "Box"}])
 
-		self.generate_stock_ledger(self.item.name, [_dict(qty=24, rate=10)])
+		self.generate_stock_ledger(item.name, [_dict(qty=24, rate=10)])
 
 		columns, _ = execute(self.filters)
 		col_fieldnames = [c.get("fieldname") for c in columns if isinstance(c, dict)]
@@ -221,11 +231,14 @@ class TestStockBalance(ERPNextTestSuite):
 	def test_alt_uom_balance_uses_first_alternate_uom(self):
 		"""When an item has multiple alt UOMs, only the first (lowest idx) is shown."""
 		frappe.get_doc({"doctype": "UOM", "uom_name": "Carton"}).insert(ignore_if_duplicate=True)
-		self.item.append("uoms", {"conversion_factor": 12, "uom": "Box"})
-		self.item.append("uoms", {"conversion_factor": 144, "uom": "Carton"})
-		self.item.save()
+		item = self.make_alt_uom_item(
+			uoms=[
+				{"conversion_factor": 12, "uom": "Box"},
+				{"conversion_factor": 144, "uom": "Carton"},
+			]
+		)
 
-		self.generate_stock_ledger(self.item.name, [_dict(qty=144, rate=10)])
+		self.generate_stock_ledger(item.name, [_dict(qty=144, rate=10)])
 
 		rows = stock_balance(self.filters.update({"show_alt_uom_balance": 1}))
 		self.assertEqual(len(rows), 1)

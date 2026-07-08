@@ -117,7 +117,7 @@ class Issue(Document):
 		communication.flags.ignore_mandatory = True
 		communication.save()
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def split_issue(self, subject: str, communication_id: str):
 		from copy import deepcopy
 
@@ -273,7 +273,7 @@ def make_task(source_name: str, target_doc: str | Document | None = None):
 	return get_mapped_doc("Issue", source_name, {"Issue": {"doctype": "Task"}}, target_doc)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_issue_from_communication(communication: str, ignore_communication_links: bool = False):
 	"""raise a issue from email"""
 

@@ -562,7 +562,12 @@ class GrossProfitGenerator:
 								row.base_amount = packed_item.base_amount
 
 			# get buying amount
-			if row.item_code in product_bundles:
+			if row.is_debit_note:
+				# Rate adjustment debit notes have no stock movement, so buying amount is zero
+				if not grouped_by_invoice:
+					row.qty = 0
+				row.buying_amount = 0
+			elif row.item_code in product_bundles:
 				row.buying_amount = flt(
 					self.get_buying_amount_from_product_bundle(row, product_bundles[row.item_code]),
 					self.currency_precision,
@@ -895,7 +900,11 @@ class GrossProfitGenerator:
 		if row.cost_center:
 			query = query.where(purchase_invoice_item.cost_center == row.cost_center)
 
-		query = query.orderby(purchase_invoice.posting_date, order=frappe.qb.desc).limit(1)
+		query = (
+			query.orderby(purchase_invoice.posting_date, order=frappe.qb.desc)
+			.orderby(purchase_invoice.name, order=frappe.qb.desc)
+			.limit(1)
+		)
 		last_purchase_rate = query.run()
 
 		return flt(last_purchase_rate[0][0]) if last_purchase_rate else 0
@@ -956,6 +965,7 @@ class GrossProfitGenerator:
 			SalesInvoice.customer_group,
 			SalesInvoice.customer_name,
 			SalesInvoice.territory,
+			SalesInvoice.is_debit_note,
 			SalesInvoiceItem.item_code,
 			SalesInvoice.base_net_total.as_("invoice_base_net_total"),
 			SalesInvoiceItem.item_name,
@@ -1136,6 +1146,7 @@ class GrossProfitGenerator:
 				"posting_time": row.posting_time,
 				"project": row.project,
 				"update_stock": row.update_stock,
+				"is_debit_note": row.is_debit_note,
 				"customer": row.customer,
 				"customer_group": row.customer_group,
 				"customer_name": row.customer_name,
@@ -1174,6 +1185,7 @@ class GrossProfitGenerator:
 				"description": item.description,
 				"warehouse": item.warehouse or row.warehouse,
 				"update_stock": row.update_stock,
+				"is_debit_note": row.is_debit_note,
 				"item_group": "",
 				"brand": "",
 				"dn_detail": row.dn_detail,

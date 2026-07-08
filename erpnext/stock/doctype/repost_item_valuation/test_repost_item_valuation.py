@@ -220,6 +220,39 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 			sorted(frappe.parse_json(frappe.as_json(set([("a", "b"), ("c", "d")])))),
 		)
 
+	def test_recoverable_error_requeues_instead_of_failing(self):
+		# A recoverable DB error (e.g. Postgres deadlock -> QueryDeadlockError) must re-queue the
+		# repost as "In Progress"; a non-recoverable error still fails. Regression: the old check
+		# string-matched MariaDB's "Deadlock found" and missed Postgres deadlocks ("deadlock detected").
+		from unittest.mock import patch
+
+		from frappe.exceptions import QueryDeadlockError
+
+		from erpnext.stock.doctype.repost_item_valuation import repost_item_valuation as riv
+
+		orig_max_writes = frappe.db.MAX_WRITES_PER_TRANSACTION
+		self.addCleanup(setattr, frappe.db, "MAX_WRITES_PER_TRANSACTION", orig_max_writes)
+
+		def status_after(error):
+			doc = frappe.new_doc("Repost Item Valuation")
+			doc.name = "test-recoverable-riv"
+			doc.set_status = doc.log_error = doc.db_set = MagicMock()
+			captured = {}
+			with (
+				patch.object(frappe, "in_test", False),
+				patch.object(frappe.db, "exists", return_value=True),
+				patch.object(frappe.db, "commit"),
+				patch.object(frappe.db, "rollback"),
+				patch.object(frappe.db, "set_value", side_effect=lambda *a, **k: captured.update(a[2])),
+				patch.object(riv, "repost_sl_entries", side_effect=error),
+				patch.object(frappe, "get_cached_value", return_value=None),
+			):
+				riv.repost(doc)
+			return captured.get("status")
+
+		self.assertEqual(status_after(QueryDeadlockError("deadlock detected")), "In Progress")
+		self.assertEqual(status_after(ValueError("boom")), "Failed")
+
 	def test_gl_repost_progress(self):
 		from erpnext.accounts import utils
 

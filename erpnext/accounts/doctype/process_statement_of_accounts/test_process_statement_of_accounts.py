@@ -113,3 +113,38 @@ def create_process_soa(**args):
 	process_soa.update(soa_dict)
 	process_soa.save()
 	return process_soa
+
+
+class TestProcessStatementOfAccountsValidation(ERPNextTestSuite):
+	"""validate() fills in default subject/body/pdf templates and enforces the
+	basic constraints. Exercised on the document directly (no email/PDF flow)."""
+
+	def make_soa(self, report="Accounts Receivable", with_customer=True, **overrides):
+		doc = frappe.new_doc("Process Statement Of Accounts")
+		doc.report = report
+		doc.company = "_Test Company"
+		if with_customer:
+			doc.append("customers", {"customer": "_Test Customer"})
+		doc.update(overrides)
+		return doc
+
+	def test_customers_are_required(self):
+		self.assertRaises(frappe.ValidationError, self.make_soa(with_customer=False).validate)
+
+	def test_general_ledger_body_uses_a_date_range(self):
+		doc = self.make_soa(report="General Ledger")
+		doc.validate()
+		self.assertIn("from {{ doc.from_date }} to {{ doc.to_date }}", doc.body)
+		# subject and pdf name are also defaulted
+		self.assertTrue(doc.subject)
+		self.assertTrue(doc.pdf_name)
+
+	def test_receivable_body_uses_the_posting_date(self):
+		doc = self.make_soa(report="Accounts Receivable")
+		doc.validate()
+		self.assertIn("until {{ doc.posting_date }}", doc.body)
+
+	def test_account_must_belong_to_company(self):
+		other = frappe.db.get_value("Account", {"company": "_Test Company 1", "is_group": 0}, "name")
+		self.assertTrue(other, "need an account in _Test Company 1")
+		self.assertRaises(frappe.ValidationError, self.make_soa(account=other).validate)

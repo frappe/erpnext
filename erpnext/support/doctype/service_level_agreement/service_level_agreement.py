@@ -779,7 +779,7 @@ def get_response_and_resolution_duration(doc):
 	return priority
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def reset_service_level_agreement(doctype: str, docname: str, reason: str, user: str):
 	if not frappe.db.get_single_value("Support Settings", "allow_resetting_service_level_agreement"):
 		frappe.throw(_("Allow Resetting Service Level Agreement from Support Settings."))

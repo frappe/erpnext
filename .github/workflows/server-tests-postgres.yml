@@ -105,10 +105,19 @@ jobs:
           FRAPPE_BRANCH: develop
           BENCH_CACHE_DIR: /home/runner/bench-cache
 
+      - name: Warm up test data
+        run: |
+          cd ~/frappe-bench/
+          bench --site test_site run-tests --lightmode --module erpnext.tests.bootstrap_test_data
+
       - name: Stop DB and stage datadir
         run: |
           PG_BIN=$(ls -d /usr/lib/postgresql/*/bin | sort -V | tail -1)
-          "$PG_BIN/pg_ctl" -D /home/runner/pgdata -m fast -w stop || true
+          # Clean shutdown so the baked datadir is consistent. Do NOT swallow a failed stop with
+          # `|| true`: moving and tarring a still-running cluster ships a torn datadir the shards
+          # cannot crash-recover (full_page_writes is off). Fail the job instead — mirrors the
+          # MariaDB sister's "don't bake a dirty datadir" guard.
+          "$PG_BIN/pg_ctl" -D /home/runner/pgdata -m fast -w stop
           mv /home/runner/pgdata /home/runner/frappe-bench/pgdata
 
       - name: Package bench for test shards
@@ -128,7 +137,7 @@ jobs:
           compression-level: 0
 
   test:
-    name: Python Unit Tests (PG)
+    name: Python Unit Tests
     needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 60

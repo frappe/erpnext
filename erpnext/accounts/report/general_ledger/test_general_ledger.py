@@ -64,16 +64,12 @@ class TestGeneralLedger(ERPNextTestSuite):
 			qb.from_(qb.DocType(doctype)).delete().where(qb.DocType(doctype).company == self.company).run()
 
 	def test_opening_total_and_closing_balances(self):
-		from erpnext.accounts.doctype.account.test_account import create_account
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 
 		self.clear_old_entries()
-		account = create_account(
-			account_name="_Test GL Account", company=self.company, parent_account="Current Assets - _TC"
-		)
-		offset = create_account(
-			account_name="_Test GL Offset", company=self.company, parent_account="Current Assets - _TC"
-		)
+		# reuse bootstrap non-party accounts; clear_old_entries() leaves them clean of GL
+		account = "_Test Account Cost for Goods Sold - _TC"
+		offset = "_Test Bank - _TC"
 		make_journal_entry(account, offset, 1000, posting_date=add_days(today(), -60), submit=True)  # opening
 		make_journal_entry(account, offset, 200, posting_date=today(), submit=True)  # in period
 
@@ -87,19 +83,13 @@ class TestGeneralLedger(ERPNextTestSuite):
 		self.assertEqual(labelled["'Closing (Opening + Total)'"]["debit"], 1200)
 
 	def test_categorize_by_account_subtotals(self):
-		from erpnext.accounts.doctype.account.test_account import create_account
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 
 		self.clear_old_entries()
-		account_a = create_account(
-			account_name="_Test GL Account A", company=self.company, parent_account="Current Assets - _TC"
-		)
-		account_b = create_account(
-			account_name="_Test GL Account B", company=self.company, parent_account="Current Assets - _TC"
-		)
-		offset = create_account(
-			account_name="_Test GL Offset", company=self.company, parent_account="Current Assets - _TC"
-		)
+		# reuse bootstrap non-party accounts; clear_old_entries() leaves them clean of GL
+		account_a = "_Test Account Cost for Goods Sold - _TC"
+		account_b = "_Test Bank - _TC"
+		offset = "_Test Cash - _TC"
 		make_journal_entry(account_a, offset, 300, posting_date=today(), submit=True)
 		make_journal_entry(account_b, offset, 400, posting_date=today(), submit=True)
 

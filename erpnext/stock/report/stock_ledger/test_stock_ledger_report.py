@@ -4,12 +4,11 @@
 import frappe
 from frappe.utils import add_days, today
 
-from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.report.stock_ledger.stock_ledger import execute
 from erpnext.tests.utils import ERPNextTestSuite
 
-WAREHOUSE = "_Test Warehouse - _TC"
+WAREHOUSE = "Stores - _TC"
 
 
 class TestStockLedgerReport(ERPNextTestSuite):
@@ -17,7 +16,8 @@ class TestStockLedgerReport(ERPNextTestSuite):
 
 	A shared `make_movements`/`run` pair keeps each test small without persisting
 	any data: movements are created per test and rolled back, while the report runs
-	read-only.
+	read-only. Tests reuse bootstrap items and transact in `Stores - _TC`, which
+	starts clean (zero balance) for these items.
 	"""
 
 	def make_movements(self, item_code, movements):
@@ -35,7 +35,7 @@ class TestStockLedgerReport(ERPNextTestSuite):
 		return list(execute(filters)[1])
 
 	def test_in_out_quantities_and_running_balance(self):
-		item = make_item().name
+		item = "_Test Item"
 		self.make_movements(
 			item,
 			[
@@ -54,7 +54,7 @@ class TestStockLedgerReport(ERPNextTestSuite):
 		self.assertEqual(issue["qty_after_transaction"], 6)
 
 	def test_opening_balance_reflects_movements_before_from_date(self):
-		item = make_item().name
+		item = "_Test Item"
 		self.make_movements(
 			item,
 			[
@@ -79,8 +79,8 @@ class TestStockLedgerReport(ERPNextTestSuite):
 		self.assertEqual(issue["qty_after_transaction"], 6)
 
 	def test_filters_to_requested_item_only(self):
-		item_a = make_item().name
-		item_b = make_item().name
+		item_a = "_Test Item"
+		item_b = "_Test Item 2"
 		self.make_movements(item_a, [{"qty": 5, "to_warehouse": WAREHOUSE, "basic_rate": 100}])
 		self.make_movements(item_b, [{"qty": 7, "to_warehouse": WAREHOUSE, "basic_rate": 100}])
 

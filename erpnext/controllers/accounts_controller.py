@@ -47,7 +47,6 @@ from erpnext.controllers.sales_and_purchase_return import validate_return
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
 from erpnext.stock.get_item_details import (
-	ItemDetailsCtx,
 	get_item_details,
 )
 from erpnext.utilities.regional import temporary_flag
@@ -782,7 +781,7 @@ class AccountsController(TransactionBase):
 
 			for item in self.get("items"):
 				if item.get("item_code"):
-					ctx: ItemDetailsCtx = ItemDetailsCtx(parent_dict.copy())
+					ctx: frappe._dict = frappe._dict(parent_dict.copy())
 					ctx.update(item.as_dict())
 
 					ctx.update(
@@ -1725,7 +1724,7 @@ def get_missing_company_details(doctype: str, docname: str):
 	}
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def update_company_master_and_address(current_doctype: str, name: str, company: str, details: dict | str):
 	from frappe.utils import validate_email_address
 

@@ -397,7 +397,7 @@ def unreconcile_transaction(transaction_name: str | int):
 		frappe.get_doc(voucher["doctype"], voucher["name"]).cancel()
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def unreconcile_transaction_entry(bank_transaction_id: str | int, voucher_type: str, voucher_id: str | int):
 	"""
 	Removes a single payment entry from a bank transaction - for example only undoing one voucher instead of undoing the entire transaction

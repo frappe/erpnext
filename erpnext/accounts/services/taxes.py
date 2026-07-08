@@ -12,7 +12,6 @@ from frappe.utils import cint, flt, parse_json
 import erpnext
 from erpnext.stock.get_item_details import (
 	NOT_APPLICABLE_TAX,
-	ItemDetailsCtx,
 	_get_item_tax_template,
 	_get_item_tax_template_from_item_group,
 	get_item_tax_map,
@@ -350,7 +349,7 @@ def set_balance_in_account_currency(
 
 
 def set_child_tax_template_and_map(item, child_item, parent_doc) -> None:
-	ctx = ItemDetailsCtx(
+	ctx = frappe._dict(
 		{
 			"item_code": item.item_code,
 			"posting_date": parent_doc.transaction_date,

@@ -288,6 +288,7 @@ class WorkOrder(Document):
 			self.validate_sales_order()
 
 		self.set_default_warehouse()
+		self.set_operation_warehouses()
 		self.validate_warehouse_belongs_to_company()
 		self.check_wip_warehouse_skip()
 		self.calculate_operating_cost()
@@ -975,6 +976,9 @@ class WorkOrder(Document):
 	def set_work_order_operations(self):
 		return OperationsService(self).set_work_order_operations()
 
+	def set_operation_warehouses(self):
+		return OperationsService(self).set_operation_warehouses()
+
 	def update_operation_status(self):
 		return OperationsService(self).update_operation_status()
 
@@ -1002,6 +1006,9 @@ class WorkOrder(Document):
 
 	def update_transferred_qty_for_required_items(self):
 		return RequiredItemsService(self).update_transferred_qty_for_required_items()
+
+	def refresh_material_transferred_for_manufacturing(self):
+		return RequiredItemsService(self).refresh_material_transferred_for_manufacturing()
 
 	def update_returned_qty(self):
 		return RequiredItemsService(self).update_returned_qty()
@@ -1067,7 +1074,7 @@ def get_bom_operations(doctype: str, txt: str, searchfield: str, start: int, pag
 	return frappe.get_all("BOM Operation", filters=filters, fields=["operation"], as_list=1)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def set_work_order_ops(name: str):
 	po = frappe.get_doc("Work Order", name)
 	po.set_work_order_operations()

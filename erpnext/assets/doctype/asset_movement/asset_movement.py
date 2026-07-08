@@ -139,6 +139,7 @@ class AssetMovement(Document):
 			.select(asm_item.target_location, asm_item.to_employee)
 			.where((asm_item.asset == asset) & (asm.company == self.company) & (asm.docstatus == 1))
 			.orderby(asm.transaction_date, order=frappe.qb.desc)
+			.orderby(asm.name, order=frappe.qb.desc)
 			.limit(1)
 			.run()
 		)

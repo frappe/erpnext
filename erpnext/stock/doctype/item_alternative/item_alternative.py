@@ -33,7 +33,7 @@ class ItemAlternative(Document):
 
 	def has_alternative_item(self):
 		if self.item_code and not frappe.db.get_value("Item", self.item_code, "allow_alternative_item"):
-			frappe.throw(_("Not allow to set alternative item for the item {0}").format(self.item_code))
+			frappe.throw(_("Cannot set alternative item for the item {0}").format(self.item_code))
 
 	def validate_alternative_item(self):
 		if self.item_code == self.alternative_item_code:
@@ -65,7 +65,7 @@ class ItemAlternative(Document):
 					indicator="Orange",
 				)
 
-		alternate_item_check_msg = _("Allow Alternative Item must be checked on Item {}")
+		alternate_item_check_msg = _("Allow Alternative Item must be checked on Item {0}")
 
 		if not item_data.allow_alternative_item:
 			frappe.throw(alternate_item_check_msg.format(self.item_code))
@@ -81,7 +81,7 @@ class ItemAlternative(Document):
 				"name": ("!=", self.name),
 			},
 		):
-			frappe.throw(_("Already record exists for the item {0}").format(self.item_code))
+			frappe.throw(_("Record already exists for the item {0}").format(self.item_code))
 
 
 @frappe.whitelist()

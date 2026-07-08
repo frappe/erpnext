@@ -505,7 +505,7 @@ class FIFOSlots:
 			self._add_serial_fifo_slots(row, fifo_queue, serial_nos)
 		elif batch_nos and row.get("has_batch_no"):
 			self._add_batch_fifo_slots(row, fifo_queue, batch_nos)
-		elif fifo_queue and flt(fifo_queue[0][FIFO_QTY_INDEX]) <= 0:
+		elif fifo_queue and is_qty_slot(fifo_queue[0]) and flt(fifo_queue[0][FIFO_QTY_INDEX]) <= 0:
 			self._add_to_negative_fifo_head(row, fifo_queue)
 		else:
 			fifo_queue.append([flt(row.actual_qty), row.posting_date, flt(row.stock_value_difference)])

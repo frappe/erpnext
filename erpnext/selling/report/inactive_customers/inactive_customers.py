@@ -86,6 +86,7 @@ def get_last_sales_amt(customer, doctype):
 		.select(sales_doctype.base_net_total)
 		.where((sales_doctype.customer == customer) & (sales_doctype.docstatus == 1))
 		.orderby(date_col, order=frappe.qb.desc)
+		.orderby(sales_doctype.name, order=frappe.qb.desc)
 		.limit(1)
 	).run()
 

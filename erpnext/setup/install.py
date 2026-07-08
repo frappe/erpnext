@@ -21,6 +21,8 @@ def after_install():
 	if not frappe.db.exists("Role", "Analytics"):
 		frappe.get_doc({"doctype": "Role", "role_name": "Analytics"}).insert()
 
+	create_shop_floor_roles()
+
 	set_single_defaults()
 	setup_repost_defaults()
 	create_print_setting_custom_fields()
@@ -48,6 +50,15 @@ def make_default_operations():
 			doc = frappe.get_doc({"doctype": "Operation", "name": operation})
 			doc.flags.ignore_mandatory = True
 			doc.insert(ignore_permissions=True)
+
+
+def create_shop_floor_roles():
+	"""Roles that drive the Shop Floor page's two experiences (manager board vs operator view)."""
+	for role_name in ("Shop Floor Manager", "Shop Floor User"):
+		if not frappe.db.exists("Role", role_name):
+			frappe.get_doc({"doctype": "Role", "role_name": role_name, "desk_access": 1}).insert(
+				ignore_permissions=True
+			)
 
 
 def set_single_defaults():

@@ -17,7 +17,7 @@
  "generate_csv": 0,
  "idx": 2,
  "is_standard": "Yes",
- "modified": "2026-06-22 13:38:15.898375",
+ "modified": "2026-07-01 13:36:14.934965",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Profit and Loss Statement",
@@ -37,6 +37,6 @@
    "role": "Auditor"
   }
  ],
- "synced_report": 0,
+ "snapshot_report": 0,
  "timeout": 0
 }

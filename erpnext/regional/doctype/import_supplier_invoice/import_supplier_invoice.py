@@ -95,20 +95,31 @@ class ImportSupplierInvoice(Document):
 
 			supplier_name = create_supplier(self.supplier_group, supp_dict)
 			create_address(supplier_name, supp_dict)
-			pi_name = create_purchase_invoice(supplier_name, file_name, invoices_args, self.name)
-
 			self.file_count += 1
-			if pi_name:
-				self.purchase_invoices_count += 1
 
-				file_doc = frappe.new_doc("File")
-				file_doc.file_name = file_name
-				file_doc.attached_to_doctype = "Purchase Invoice"
-				file_doc.attached_to_name = pi_name
-				file_doc.content = encoded_content
-				file_doc.decode = False
-				file_doc.is_private = False
-				file_doc.insert(ignore_permissions=True)
+			frappe.db.savepoint("import_invoice")
+			try:
+				pi_name = create_purchase_invoice(supplier_name, file_name, invoices_args, self.name)
+			except Exception:
+				frappe.db.rollback(save_point="import_invoice")
+				frappe.log_error(
+					"Unable to create Purchase Invoice",
+					reference_doctype=self.doctype,
+					reference_name=self.name,
+				)
+				self.db_set("status", "Error", commit=True)
+				continue
+
+			self.purchase_invoices_count += 1
+
+			file_doc = frappe.new_doc("File")
+			file_doc.file_name = file_name
+			file_doc.attached_to_doctype = "Purchase Invoice"
+			file_doc.attached_to_name = pi_name
+			file_doc.content = encoded_content
+			file_doc.decode = False
+			file_doc.is_private = False
+			file_doc.insert(ignore_permissions=True)
 
 	def prepare_items_for_invoice(self, file_content, invoices_args):
 		qty = 1
@@ -374,41 +385,36 @@ def create_purchase_invoice(supplier_name, file_name, args, name):
 		}
 	)
 
-	try:
-		pi.set_missing_values()
-		pi.insert(ignore_mandatory=True)
+	pi.set_missing_values()
+	pi.insert(ignore_mandatory=True)
 
-		# if discount exists in file, apply any discount on grand total
-		if args.total_discount > 0:
-			pi.apply_discount_on = "Grand Total"
-			pi.discount_amount = args.total_discount
-			pi.save()
-		# adjust payment amount to match with grand total calculated
-		calc_total = 0
-		adj = 0
-		for term in args.terms:
-			calc_total += flt(term["payment_amount"])
-		if flt(calc_total - flt(pi.grand_total)) != 0:
-			adj = calc_total - flt(pi.grand_total)
-		pi.payment_schedule = []
-		for term in args.terms:
-			pi.append(
-				"payment_schedule",
-				{
-					"mode_of_payment_code": term["mode_of_payment_code"],
-					"bank_account_iban": term["bank_account_iban"],
-					"due_date": term["due_date"],
-					"payment_amount": flt(term["payment_amount"]) - adj,
-				},
-			)
-			adj = 0
-		pi.imported_grand_total = calc_total
+	# if discount exists in file, apply any discount on grand total
+	if args.total_discount > 0:
+		pi.apply_discount_on = "Grand Total"
+		pi.discount_amount = args.total_discount
 		pi.save()
-		return pi.name
-	except Exception:
-		frappe.db.set_value("Import Supplier Invoice", name, "status", "Error")
-		pi.log_error("Unable to create Puchase Invoice")
-		return None
+	# adjust payment amount to match with grand total calculated
+	calc_total = 0
+	adj = 0
+	for term in args.terms:
+		calc_total += flt(term["payment_amount"])
+	if flt(calc_total - flt(pi.grand_total)) != 0:
+		adj = calc_total - flt(pi.grand_total)
+	pi.payment_schedule = []
+	for term in args.terms:
+		pi.append(
+			"payment_schedule",
+			{
+				"mode_of_payment_code": term["mode_of_payment_code"],
+				"bank_account_iban": term["bank_account_iban"],
+				"due_date": term["due_date"],
+				"payment_amount": flt(term["payment_amount"]) - adj,
+			},
+		)
+		adj = 0
+	pi.imported_grand_total = calc_total
+	pi.save()
+	return pi.name
 
 
 def get_country(code):

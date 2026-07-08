@@ -1422,10 +1422,10 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		# Party is a dynamic link on Payment Ledger Entry, so user permissions on Customer
 		# must be applied explicitly. The report should only show permitted customers.
 		original_customer = self.customer
-		second_customer = "_Test AR Perm Customer"
+		second_customer = "_Test Customer 1"
 
 		# create_customer overrides self.customer, so build the restricted invoice first
-		self.create_customer(customer_name=second_customer)
+		self.customer = second_customer
 		self.create_sales_invoice(no_payment_schedule=True)
 
 		self.customer = original_customer

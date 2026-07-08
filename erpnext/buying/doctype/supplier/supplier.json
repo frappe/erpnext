@@ -547,6 +547,7 @@
    "fieldtype": "Data",
    "in_global_search": 1,
    "label": "Alias",
+   "no_copy": 1,
    "unique": 1
   }
  ],
@@ -561,7 +562,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-06-22 12:23:09.241125",
+ "modified": "2026-06-27 16:12:33.190257",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

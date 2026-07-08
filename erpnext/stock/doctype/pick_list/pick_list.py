@@ -71,7 +71,9 @@ class PickList(TransactionBase):
 		purpose: DF.Literal["Material Transfer for Manufacture", "Material Transfer", "Delivery"]
 		scan_barcode: DF.Data | None
 		scan_mode: DF.Check
-		status: DF.Literal["Draft", "Open", "Partly Delivered", "Completed", "Cancelled"]
+		status: DF.Literal[
+			"Draft", "Open", "Partly Delivered", "Partially Transferred", "Completed", "Cancelled"
+		]
 		work_order: DF.Link | None
 	# end: auto-generated types
 
@@ -232,7 +234,7 @@ class PickList(TransactionBase):
 				and frappe.db.get_value("Sales Order", location.sales_order, "per_picked", cache=True) == 100
 			):
 				frappe.throw(
-					_("Row #{}: item {} has been picked already.").format(location.idx, location.item_code)
+					_("Row #{0}: item {1} has been picked already.").format(location.idx, location.item_code)
 				)
 
 	def before_submit(self):
@@ -416,6 +418,34 @@ class PickList(TransactionBase):
 			return False
 
 		return stock_entry_exists(self.name)
+
+	def get_transfer_status(self):
+		"""Return the pick list's transfer progress based on how much of the picked qty has been
+		moved into submitted Stock Entries (tracked on Pick List Item.transferred_qty).
+
+		Only applies to purposes that move stock via Stock Entry; the Delivery purpose is tracked
+		via delivery_status instead. Returns "Completed", "Partially Transferred" or None."""
+		if self.purpose == "Delivery":
+			return None
+
+		total_picked = sum(flt(row.picked_qty) for row in self.locations)
+		if not total_picked:
+			return None
+
+		total_transferred = sum(flt(row.transferred_qty) for row in self.locations)
+		if total_transferred <= 0:
+			return None
+
+		if total_transferred >= total_picked:
+			return "Completed"
+
+		return "Partially Transferred"
+
+	def is_fully_transferred(self):
+		return self.get_transfer_status() == "Completed"
+
+	def is_partially_transferred(self):
+		return self.get_transfer_status() == "Partially Transferred"
 
 	def update_reference_qty(self):
 		packed_items = []
@@ -647,7 +677,7 @@ class PickList(TransactionBase):
 				continue
 
 			if not item.item_code:
-				frappe.throw(f"Row #{item.idx}: Item Code is Mandatory")
+				frappe.throw(_("Row #{0}: Item Code is Mandatory").format(item.idx))
 			if not cint(
 				frappe.get_cached_value("Item", item.item_code, "is_stock_item")
 			) and not get_active_product_bundle(item.item_code):
@@ -922,10 +952,22 @@ def get_picked_items_qty(items, contains_packed_items=False) -> list[dict]:
 	)
 
 	# Lock the picked-qty rows so a concurrent pick can't change them mid-transaction. MariaDB carries
-	# the lock on the grouped query; postgres rejects FOR UPDATE with GROUP BY, so lock the same rows
-	# in a separate plain SELECT first (held for the transaction).
+	# the lock on the grouped query (its gap locks also block rows other in-flight picks are about to
+	# submit); postgres has no gap locks, so first serialize on the referenced SO/packed item rows
+	# (they always exist), then lock the matching picked rows in a separate plain SELECT.
 	if frappe.db.db_type == "postgres":
-		frappe.qb.from_(pi_item).select(pi_item.name).where(conditions).for_update().run()
+		parent = frappe.qb.DocType("Packed Item" if contains_packed_items else "Sales Order Item")
+		(
+			frappe.qb.from_(parent)
+			.select(parent.name)
+			.where(parent.name.isin(items))
+			.orderby(parent.name)
+			.for_update()
+			.run()
+		)
+		frappe.qb.from_(pi_item).select(pi_item.name).where(conditions).orderby(
+			pi_item.name
+		).for_update().run()
 	else:
 		query = query.for_update()
 

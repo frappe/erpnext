@@ -143,7 +143,7 @@ class Item(Document):
 		taxes: DF.Table[ItemTax]
 		total_projected_qty: DF.Float
 		uoms: DF.Table[UOMConversionDetail]
-		valuation_method: DF.Literal["", "FIFO", "Moving Average", "LIFO"]
+		valuation_method: DF.Literal["", "FIFO", "Moving Average", "LIFO", "Standard Cost"]
 		valuation_rate: DF.Currency
 		variant_based_on: DF.Literal["Item Attribute", "Manufacturer"]
 		variant_of: DF.Link | None
@@ -239,6 +239,8 @@ class Item(Document):
 		self.validate_item_defaults()
 		self.validate_auto_reorder_enabled_in_stock_settings()
 		self.cant_change()
+		self.validate_serialized_change_with_bundle()
+		self.validate_standard_cost_change()
 		self.validate_item_tax_net_rate_range()
 
 		if not self.is_new():
@@ -463,7 +465,7 @@ class Item(Document):
 
 	def validate_item_type(self):
 		if self.has_serial_no == 1 and self.is_stock_item == 0 and not self.is_fixed_asset:
-			frappe.throw(_("'Has Serial No' can not be 'Yes' for non-stock item"))
+			frappe.throw(_("'Has Serial No' cannot be 'Yes' for non-stock item"))
 
 		if self.has_serial_no == 0 and self.serial_no_series:
 			self.serial_no_series = None
@@ -1060,6 +1062,30 @@ class Item(Document):
 			for d in self.attributes:
 				d.variant_of = self.variant_of
 
+	def validate_standard_cost_change(self):
+		"""Once stock exists, an item's valuation method cannot be switched to or from Standard
+		Cost — either change would leave existing stock valued on a basis the ledger never
+		recorded."""
+		if not self.is_standard_cost_valuation_change():
+			return
+
+		if self.stock_ledger_created():
+			frappe.throw(
+				_(
+					"Valuation Method cannot be changed to or from 'Standard Cost' for {0} because stock transactions already exist for it."
+				).format(frappe.bold(self.name))
+			)
+
+	def is_standard_cost_valuation_change(self):
+		"""True if this save switches the valuation method into or out of Standard Cost."""
+		if self.is_new() or not self.has_value_changed("valuation_method"):
+			return False
+
+		previous = self.get_doc_before_save()
+		was_standard = previous and previous.valuation_method == "Standard Cost"
+		is_standard = self.valuation_method == "Standard Cost"
+		return bool(was_standard or is_standard)
+
 	def cant_change(self):
 		if self.is_new():
 			return
@@ -1104,6 +1130,25 @@ class Item(Document):
 				)
 
 			frappe.throw(msg, title=_("Linked with submitted documents"))
+
+	def validate_serialized_change_with_bundle(self):
+		"""Block turning a serialized item non-serialized while any Serial and Batch Bundle still exists
+		for it. Such bundles carry the item's serial numbers; the user must delete or cancel them first."""
+		if self.is_new() or self.has_serial_no or not self._doc_before_save:
+			return
+
+		# Only relevant when the item was serialized before and is now being unset.
+		if not self._doc_before_save.has_serial_no:
+			return
+
+		# Draft (docstatus 0) or submitted (docstatus 1) bundles block the change; cancelled ones don't.
+		if frappe.db.count("Serial and Batch Bundle", {"item_code": self.name, "docstatus": ("<", 2)}):
+			frappe.throw(
+				_(
+					"Cannot change Item {0} from serialized to non-serialized because a Serial and Batch Bundle exists for it. Please delete or cancel the Serial and Batch Bundle first."
+				).format(frappe.bold(self.name)),
+				title=_("Serial and Batch Bundle Exists"),
+			)
 
 	def _get_linked_submitted_documents(self, changed_fields: list[str]) -> dict[str, str] | None:
 		linked_doctypes = [
@@ -1347,7 +1392,8 @@ def get_purchase_voucher_details(doctype, item_code, document_name=None):
 		query = query.select(parent_doc.transaction_date)
 		query = query.orderby(parent_doc.transaction_date, parent_doc.name, order=Order.desc)
 
-	return query.run(as_dict=1)
+	# only the latest ([0]) row is ever used, so fetch just that instead of every purchase of the item
+	return query.limit(1).run(as_dict=1)
 
 
 def check_stock_uom_with_bin(item, stock_uom):
@@ -1508,7 +1554,9 @@ def validate_item_default_company_links(item_defaults: list[ItemDefault]) -> Non
 				company = frappe.db.get_value(doctype, item_default.get(field), "company", cache=True)
 				if company and company != item_default.company:
 					frappe.throw(
-						_("Row #{}: {} {} doesn't belong to Company {}. Please select valid {}.").format(
+						_(
+							"Row #{0}: {1} {2} does not belong to Company {3}. Please select valid {4}."
+						).format(
 							item_default.idx,
 							doctype,
 							frappe.bold(item_default.get(field)),
@@ -1735,3 +1783,13 @@ def get_default_warehouse_for_opening_stock(item, company: str, warehouse: str |
 			"No warehouse found for company {0}. Please set a Default Warehouse in Item Defaults or Stock Settings."
 		).format(frappe.bold(company))
 	)
+
+
+def on_doctype_update():
+	if frappe.db.db_type == "postgres":
+		# The Item link-search (erpnext.controllers.queries.item_query) filters
+		# `item_code/item_name LIKE '%txt%'` -- a leading-wildcard LIKE no btree can serve. pg_trgm
+		# GIN indexes accelerate it. Item is read-heavy/write-light master data, so GIN maintenance
+		# cost is negligible. Postgres-only (`using` is a no-op on MariaDB, which has its own FULLTEXT).
+		frappe.db.add_index("Item", ["item_code"], using="gin_trgm")
+		frappe.db.add_index("Item", ["item_name"], using="gin_trgm")

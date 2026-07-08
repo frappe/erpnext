@@ -20,12 +20,12 @@ from frappe.query_builder.functions import (
 	Substring,
 	Sum,
 )
-from frappe.utils import nowdate, today, unique
+from frappe.utils import cint, nowdate, today, unique
 from pypika import Order
 
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
-from erpnext.stock.get_item_details import ItemDetailsCtx, _get_item_tax_template
+from erpnext.stock.get_item_details import _get_item_tax_template
 from erpnext.stock.utils import get_combine_datetime
 from erpnext.utilities.query import get_filter_conditions_qb
 
@@ -808,7 +808,11 @@ def get_filtered_dimensions(
 		query_filters.append(["company", "=", filters.get("company")])
 
 	for field in searchfields:
-		or_filters.append([field, "LIKE", "%%%s%%" % txt])
+		df = meta.get_field(field)
+		if df and df.fieldtype != "Check":
+			or_filters.append([field, "LIKE", "%%%s%%" % txt])
+		else:
+			or_filters.append([field, "=", cint(txt)])
 		fields.append(field)
 
 	if dimension_filters:
@@ -1056,7 +1060,7 @@ def get_tax_template(doctype: str, txt: str, searchfield: str, start: int, page_
 		valid_from = filters.get("valid_from")
 		valid_from = valid_from[1] if isinstance(valid_from, list) else valid_from
 
-		ctx = ItemDetailsCtx(
+		ctx = frappe._dict(
 			{
 				"item_code": filters.get("item_code"),
 				"posting_date": valid_from,

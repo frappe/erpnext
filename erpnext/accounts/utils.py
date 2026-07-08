@@ -13,6 +13,7 @@ from frappe.desk.reportview import build_match_conditions
 from frappe.model.meta import get_field_precision
 from frappe.model.naming import determine_consecutive_week_number
 from frappe.query_builder import AliasedQuery, Case, Criterion, Field, Table
+from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Count, IfNull, Max, Min, Round, Sum
 from frappe.query_builder.utils import DocType
 from frappe.utils import (
@@ -1791,9 +1792,10 @@ def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, f
 	# transaction can't modify them mid-flight (the original DISTINCT ... FOR UPDATE did this).
 	# MariaDB carries the lock on the grouped query below; postgres rejects FOR UPDATE alongside
 	# GROUP BY, so lock the matching rows in a separate pass first -- the row locks are held until
-	# the surrounding transaction ends, giving the same protection.
+	# the surrounding transaction ends, giving the same protection. Select a constant, not the
+	# name: a deep backdated repost can match millions of rows and only the locks are needed.
 	if frappe.db.db_type == "postgres":
-		frappe.qb.from_(SLE).select(SLE.name).where(conditions).for_update().run()
+		frappe.qb.from_(SLE).select(ConstantColumn(1)).where(conditions).for_update().run()
 
 	# distinct vouchers in chronological order; expressed as GROUP BY + Min() so it's valid on
 	# postgres (SELECT DISTINCT can't ORDER BY non-selected cols, and FOR UPDATE is invalid with both).
