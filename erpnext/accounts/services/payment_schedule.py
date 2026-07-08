@@ -204,6 +204,9 @@ class PaymentScheduleService:
 			if not schedule.invoice_portion:
 				payment_schedule["payment_amount"] = schedule.payment_amount
 
+			if not payment_schedule["due_date"]:
+				payment_schedule["due_date"] = posting_date
+
 			doc.append("payment_schedule", payment_schedule)
 
 	def set_due_date(self) -> None:
@@ -223,6 +226,14 @@ class PaymentScheduleService:
 			if not flt(d.discount):
 				d.discount_date = None
 			d.validate_from_to_dates("discount_date", "due_date")
+			if not d.due_date:
+				# Due Date isn't known upfront on a Sales Order since it is derived from
+				# the eventual Sales Invoice's posting date. It stays mandatory elsewhere.
+				if doc.doctype != "Sales Order":
+					frappe.throw(
+						_("Row {0}: Due Date is mandatory in the Payment Schedule table").format(d.idx)
+					)
+				continue
 			if doc.doctype in ["Sales Order", "Quotation"] and getdate(d.due_date) < getdate(
 				doc.transaction_date
 			):

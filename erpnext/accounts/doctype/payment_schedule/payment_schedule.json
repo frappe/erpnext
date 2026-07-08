@@ -58,7 +58,7 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Due Date",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.parenttype != 'Sales Order'"
   },
   {
    "columns": 2,
@@ -220,7 +220,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-07-31 08:38:25.820701",
+ "modified": "2026-07-08 13:27:18.808006",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Schedule",
