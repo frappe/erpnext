@@ -33,8 +33,8 @@ erpnext.stock.row_requires_quality_inspection = (purpose, row) => {
 erpnext.item_tax_breakup = {
 	get_breakup: function (frm, cdn) {
 		const doc = frm && frm.doc;
-		const details = (doc && doc.item_wise_tax_details) || [];
-		if (!details.length) return [];
+		const item_wise_tax_details = (doc && doc.item_wise_tax_details) || [];
+		if (!item_wise_tax_details.length) return [];
 
 		const conversion_rate = flt(doc.conversion_rate) || 1;
 
@@ -42,26 +42,23 @@ erpnext.item_tax_breakup = {
 		const tax_map = {};
 		(doc.taxes || []).forEach((t) => (tax_map[t.name] = t));
 
-		const order = [];
-		const cells = {};
-		for (const d of details) {
+		// one breakup row per tax row (one detail row per item x tax)
+		const breakup = [];
+		for (const d of item_wise_tax_details) {
 			if (d.item_row !== cdn) continue;
 
 			const tax = tax_map[d.tax_row];
-			if (!tax) continue;
-			if (tax.category && tax.category === "Valuation") continue;
+			if (!tax || tax.category === "Valuation") continue;
 
-			let cell = cells[d.tax_row];
-			if (!cell) {
-				cell = { description: tax.description, rate: flt(d.rate), amount: 0 };
-				cells[d.tax_row] = cell;
-				order.push(d.tax_row);
-			}
 			const prec = precision("tax_amount", tax);
-			cell.amount += flt(flt(d.amount, prec) / conversion_rate, prec);
+			breakup.push({
+				description: tax.description,
+				rate: flt(d.rate),
+				amount: flt(flt(d.amount, prec) / conversion_rate, prec),
+			});
 		}
 
-		return order.map((tax_row) => cells[tax_row]);
+		return breakup;
 	},
 
 	get_template: function (breakup, currency) {
