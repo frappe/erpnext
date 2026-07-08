@@ -149,7 +149,7 @@ class TestServiceLevelAgreement(ERPNextTestSuite):
 		self.assertEqual(lead_sla.name, default_sla.name)
 
 		# check SLA custom fields created for leads
-		sla_fields = get_service_level_agreement_fields()
+		sla_fields = get_service_level_agreement_fields(doctype)
 
 		for field in sla_fields:
 			self.assertTrue(
@@ -173,7 +173,7 @@ class TestServiceLevelAgreement(ERPNextTestSuite):
 		self.assertEqual(sla.name, default_sla.name)
 
 		# check SLA docfields created
-		sla_fields = get_service_level_agreement_fields()
+		sla_fields = get_service_level_agreement_fields(doctype.name)
 
 		for field in sla_fields:
 			self.assertTrue(
