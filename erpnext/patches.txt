@@ -485,11 +485,6 @@ erpnext.patches.v16_0.clear_procedures_from_receivable_report
 erpnext.patches.v16_0.migrate_address_contact_custom_fields
 erpnext.patches.v16_0.drop_redundant_serial_no_index_from_sabb
 execute:frappe.db.set_single_value("Accounts Settings", "pcv_job_timeout", 3600)
-<<<<<<< HEAD
 erpnext.patches.v16_0.remove_mandatory_from_inv_dimension_fields
-=======
-erpnext.patches.v16_0.backfill_pick_list_transferred_qty
-erpnext.patches.v16_0.create_shop_floor_roles
 erpnext.patches.v15_0.backfill_sla_link_filters_on_custom_field
 erpnext.patches.v15_0.backfill_sla_link_filters_on_docfield
->>>>>>> c12e3fba5e (feat(sla): filter service level agreement link by document type (#56954))
