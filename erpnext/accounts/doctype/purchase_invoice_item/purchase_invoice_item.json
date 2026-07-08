@@ -65,6 +65,8 @@
   "item_tax_amount",
   "landed_cost_voucher_amount",
   "rm_supp_cost",
+  "item_tax_breakup_section",
+  "item_tax_breakup",
   "warehouse_section",
   "warehouse",
   "add_serial_batch_bundle",
@@ -427,6 +429,21 @@
    "label": "Weight UOM",
    "options": "UOM",
    "print_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "item_tax_breakup_section",
+   "fieldtype": "Section Break",
+   "label": "Item Tax Breakup"
+  },
+  {
+   "fieldname": "item_tax_breakup",
+   "fieldtype": "Text Editor",
+   "is_virtual": 1,
+   "label": "Item Tax Breakup",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "depends_on": "eval:parent.update_stock",
@@ -1010,7 +1027,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-06-08 21:00:00.000000",
+ "modified": "2026-07-08 14:11:58.678512",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

@@ -29,6 +29,80 @@ erpnext.stock.row_requires_quality_inspection = (purpose, row) => {
 	return false;
 };
 
+erpnext.item_tax_breakup = {
+	// Data: [{description, rate, amount}, ...] for one item row (child name === cdn), in
+	// transaction currency. Same-description charge rows merge; Valuation taxes are skipped.
+	get_breakup: function (frm, cdn) {
+		const doc = frm && frm.doc;
+		const details = (doc && doc.item_wise_tax_details) || [];
+		if (!details.length) return [];
+
+		const conversion_rate = flt(doc.conversion_rate) || 1;
+
+		// tax_row (name) -> tax row, from the parent's taxes table
+		const tax_map = {};
+		(doc.taxes || []).forEach((t) => (tax_map[t.name] = t));
+
+		const order = [];
+		const cells = {};
+		for (const d of details) {
+			if (d.item_row !== cdn) continue;
+
+			const tax = tax_map[d.tax_row];
+			if (!tax) continue;
+			if (tax.category && tax.category === "Valuation") continue;
+
+			let cell = cells[tax.description];
+			if (!cell) {
+				cell = { description: tax.description, rate: flt(d.rate), amount: 0 };
+				cells[tax.description] = cell;
+				order.push(tax.description);
+			}
+			// persisted amount is in base/company currency -> divide for transaction currency
+			cell.amount += flt(d.amount) / conversion_rate;
+		}
+
+		return order.map((desc) => cells[desc]);
+	},
+
+	get_template: function (breakup, currency) {
+		if (!breakup || !breakup.length) return "";
+
+		const rows = breakup
+			.map(
+				(row) => `<tr>
+					<td>${frappe.utils.escape_html(row.description || "")}</td>
+					<td class="text-right">${row.rate}%</td>
+					<td class="text-right">${format_currency(row.amount, currency)}</td>
+				</tr>`
+			)
+			.join("");
+
+		return `<div class="tax-break-up" style="overflow-x: auto;">
+			<table class="table table-bordered table-hover">
+				<thead>
+					<tr>
+						<th class="text-left">${__("Tax")}</th>
+						<th class="text-right">${__("Rate")}</th>
+						<th class="text-right">${__("Amount")}</th>
+					</tr>
+				</thead>
+				<tbody>${rows}</tbody>
+			</table>
+		</div>`;
+	},
+
+	render_row: function (frm, cdt, cdn) {
+		// nothing to compute if the row or the tax-detail data isn't there yet (unsaved row,
+		if (!frm || !frm.doc || !locals[cdt] || !locals[cdt][cdn]) return;
+		if (!(frm.doc.item_wise_tax_details || []).length) return;
+
+		const breakup = erpnext.item_tax_breakup.get_breakup(frm, cdn);
+		const html = erpnext.item_tax_breakup.get_template(breakup, frm.doc.currency);
+		frappe.model.set_value(cdt, cdn, "item_tax_breakup", html);
+	},
+};
+
 erpnext.TransactionController = class TransactionController extends erpnext.taxes_and_totals {
 	setup() {
 		super.setup();
@@ -188,6 +262,11 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		});
 
 		frappe.ui.form.on(this.frm.doctype + " Item", {
+			form_render: function (frm, cdt, cdn) {
+				// fires only when an item row's detail form is opened (row expand)
+				erpnext.item_tax_breakup.render_row(frm, cdt, cdn);
+			},
+
 			items_add: function (frm, cdt, cdn) {
 				var item = frappe.get_doc(cdt, cdn);
 				if (!item.warehouse && frm.doc.set_warehouse) {

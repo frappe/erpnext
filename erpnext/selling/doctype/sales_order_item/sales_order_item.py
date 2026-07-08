@@ -48,6 +48,7 @@ class SalesOrderItem(Document):
 		gross_profit: DF.Currency
 		image: DF.Attach | None
 		is_free_item: DF.Check
+		is_product_bundle: DF.Check
 		is_stock_item: DF.Check
 		item_code: DF.Link
 		item_group: DF.Link | None
@@ -71,6 +72,7 @@ class SalesOrderItem(Document):
 		price_list_rate: DF.Currency
 		pricing_rules: DF.SmallText | None
 		produced_qty: DF.Float
+		product_bundle: DF.Link | None
 		production_plan_qty: DF.Float
 		project: DF.Link | None
 		projected_qty: DF.Float

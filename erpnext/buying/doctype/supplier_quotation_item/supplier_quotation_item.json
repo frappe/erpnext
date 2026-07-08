@@ -53,6 +53,8 @@
   "column_break_27",
   "base_net_rate",
   "base_net_amount",
+  "item_tax_breakup_section",
+  "item_tax_breakup",
   "item_weight_details",
   "weight_per_unit",
   "total_weight",
@@ -340,6 +342,21 @@
   },
   {
    "collapsible": 1,
+   "fieldname": "item_tax_breakup_section",
+   "fieldtype": "Section Break",
+   "label": "Item Tax Breakup"
+  },
+  {
+   "fieldname": "item_tax_breakup",
+   "fieldtype": "Text Editor",
+   "is_virtual": 1,
+   "label": "Item Tax Breakup",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
    "fieldname": "item_weight_details",
    "fieldtype": "Section Break",
    "label": "Item Weight Details"
@@ -613,7 +630,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-06-17 12:05:52.441645",
+ "modified": "2026-07-08 14:11:58.853102",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation Item",

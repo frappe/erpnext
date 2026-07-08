@@ -50,6 +50,7 @@ class POSInvoiceItem(SalesInvoiceItem):
 		income_account: DF.Link
 		is_fixed_asset: DF.Check
 		is_free_item: DF.Check
+		is_product_bundle: DF.Check
 		item_code: DF.Link | None
 		item_group: DF.Link | None
 		item_name: DF.Data
@@ -66,6 +67,7 @@ class POSInvoiceItem(SalesInvoiceItem):
 		pos_invoice_item: DF.Data | None
 		price_list_rate: DF.Currency
 		pricing_rules: DF.SmallText | None
+		product_bundle: DF.Link | None
 		project: DF.Link | None
 		qty: DF.Float
 		quality_inspection: DF.Link | None

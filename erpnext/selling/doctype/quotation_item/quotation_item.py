@@ -39,6 +39,7 @@ class QuotationItem(Document):
 		image: DF.Attach | None
 		is_alternative: DF.Check
 		is_free_item: DF.Check
+		is_product_bundle: DF.Check
 		item_code: DF.Link | None
 		item_group: DF.Link | None
 		item_name: DF.Data
@@ -57,6 +58,7 @@ class QuotationItem(Document):
 		prevdoc_doctype: DF.Link | None
 		price_list_rate: DF.Currency
 		pricing_rules: DF.SmallText | None
+		product_bundle: DF.Link | None
 		projected_qty: DF.Float
 		qty: DF.Float
 		rate: DF.Currency
