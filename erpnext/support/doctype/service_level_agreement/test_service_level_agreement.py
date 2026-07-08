@@ -2,11 +2,8 @@
 # See license.txt
 
 import datetime
-<<<<<<< HEAD
-import unittest
-=======
 import json
->>>>>>> c12e3fba5e (feat(sla): filter service level agreement link by document type (#56954))
+import unittest
 
 import frappe
 from frappe.utils import flt
