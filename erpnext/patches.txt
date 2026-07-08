@@ -438,3 +438,10 @@ erpnext.patches.v16_0.migrate_address_contact_custom_fields
 erpnext.patches.v15_0.set_main_item_code_in_material_request_plan_item
 erpnext.patches.v16_0.set_posting_datetime_for_sabb_and_drop_indexes
 execute:frappe.db.set_single_value("Accounts Settings", "pcv_job_timeout", 3600)
+<<<<<<< HEAD
+=======
+erpnext.patches.v16_0.backfill_pick_list_transferred_qty
+erpnext.patches.v16_0.create_shop_floor_roles
+erpnext.patches.v15_0.backfill_sla_link_filters_on_custom_field
+erpnext.patches.v15_0.backfill_sla_link_filters_on_docfield
+>>>>>>> c12e3fba5e (feat(sla): filter service level agreement link by document type (#56954))
