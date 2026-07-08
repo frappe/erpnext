@@ -31,18 +31,16 @@ erpnext.stock.row_requires_quality_inspection = (purpose, row) => {
 
 // This breakup is DESK-RENDER-ONLY: the field is a virtual read-only Text Editor.
 erpnext.item_tax_breakup = {
-	get_breakup: function (frm, cdn) {
-		const doc = frm && frm.doc;
-		const item_wise_tax_details = (doc && doc.item_wise_tax_details) || [];
-		if (!item_wise_tax_details.length) return [];
+	compute_breakup: function (item_wise_tax_details, taxes, cdn, conversion_rate) {
+		if (!(item_wise_tax_details || []).length) return [];
 
-		const conversion_rate = flt(doc.conversion_rate) || 1;
+		conversion_rate = flt(conversion_rate) || 1;
 
-		// tax_row (name) -> tax row, from the parent's taxes table
 		const tax_map = {};
-		(doc.taxes || []).forEach((t) => (tax_map[t.name] = t));
+		(taxes || []).forEach((t) => (tax_map[t.name] = t));
 
-		// one row per tax account (not description) so distinct taxes never collapse
+		// Grouped by tax account, not description, so distinct accounts sharing a description
+		// stay separate.
 		const account_wise_breakup = {};
 		for (const d of item_wise_tax_details) {
 			if (d.item_row !== cdn) continue;
@@ -60,6 +58,18 @@ erpnext.item_tax_breakup = {
 		}
 
 		return Object.values(account_wise_breakup);
+	},
+
+	get_breakup: function (frm, cdn) {
+		const doc = frm && frm.doc;
+		if (!doc) return [];
+
+		return erpnext.item_tax_breakup.compute_breakup(
+			doc.item_wise_tax_details,
+			doc.taxes,
+			cdn,
+			doc.conversion_rate
+		);
 	},
 
 	get_template: function (breakup, currency) {
@@ -92,15 +102,13 @@ erpnext.item_tax_breakup = {
 	render_row: function (frm, cdt, cdn) {
 		if (!frm || !frm.doc || !locals[cdt] || !locals[cdt][cdn]) return;
 
-		// On a new or dirty form `item_wise_tax_details` is stale
-		// (or absent) and would not match the current items/taxes, so show nothing until the doc
-		// is saved and clean.
+		// item_wise_tax_details is stale/absent while new or dirty, so render only when saved & clean.
 		let html = "";
 		if (!frm.is_new() && !frm.is_dirty() && (frm.doc.item_wise_tax_details || []).length) {
 			const breakup = erpnext.item_tax_breakup.get_breakup(frm, cdn);
 			html = erpnext.item_tax_breakup.get_template(breakup, frm.doc.currency);
 		}
-		// skip_dirty_trigger=true: this is a view-only virtual field; setting it must never mark
+		// skip_dirty_trigger=true: a view-only field must never mark the form dirty.
 		frappe.model.set_value(cdt, cdn, "item_tax_breakup", html, null, true);
 	},
 };
