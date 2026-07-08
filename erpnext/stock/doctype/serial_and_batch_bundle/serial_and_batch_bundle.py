@@ -2153,8 +2153,7 @@ def get_reference_serial_and_batch_bundle(child_row):
 
 @frappe.whitelist()
 def add_serial_batch_ledgers(entries, child_row, doc, warehouse, do_not_save=False) -> object:
-	if isinstance(child_row, str):
-		child_row = frappe._dict(parse_json(child_row))
+	child_row = parse_json(child_row)
 
 	if isinstance(entries, str):
 		entries = parse_json(entries)
