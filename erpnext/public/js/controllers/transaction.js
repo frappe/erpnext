@@ -42,23 +42,24 @@ erpnext.item_tax_breakup = {
 		const tax_map = {};
 		(doc.taxes || []).forEach((t) => (tax_map[t.name] = t));
 
-		// one breakup row per tax row (one detail row per item x tax)
-		const breakup = [];
+		// one row per tax account (not description) so distinct taxes never collapse
+		const account_wise_breakup = {};
 		for (const d of item_wise_tax_details) {
 			if (d.item_row !== cdn) continue;
 
 			const tax = tax_map[d.tax_row];
 			if (!tax || tax.category === "Valuation") continue;
 
+			let row = account_wise_breakup[tax.account_head];
+			if (!row) {
+				row = { description: tax.description, rate: flt(d.rate), amount: 0 };
+				account_wise_breakup[tax.account_head] = row;
+			}
 			const prec = precision("tax_amount", tax);
-			breakup.push({
-				description: tax.description,
-				rate: flt(d.rate),
-				amount: flt(flt(d.amount, prec) / conversion_rate, prec),
-			});
+			row.amount += flt(flt(d.amount, prec) / conversion_rate, prec);
 		}
 
-		return breakup;
+		return Object.values(account_wise_breakup);
 	},
 
 	get_template: function (breakup, currency) {
