@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-07-05 10:19+0000\n"
-"PO-Revision-Date: 2026-07-07 21:21\n"
+"PO-Revision-Date: 2026-07-08 21:28\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -36410,7 +36410,7 @@ msgstr "مکث کنید"
 
 #: erpnext/public/js/shop_floor/shop_floor.js:1377
 msgid "Pause / Resume job"
-msgstr ""
+msgstr "مکث / از سرگیری کار"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.js:662
 msgid "Pause Job"
@@ -42369,7 +42369,7 @@ msgstr "حل و فصل اقدام کیفیت"
 
 #: erpnext/public/js/shop_floor/shop_floor.js:957
 msgid "Quality Check"
-msgstr ""
+msgstr "بررسی کیفیت"
 
 #. Name of a DocType
 #. Option for the 'Document Type' (Select) field in DocType 'Quality Meeting
@@ -47620,7 +47620,7 @@ msgstr "اجرای موازی کارت کارها در یک ایستگاه کا�
 #: erpnext/public/js/templates/shop_floor_template.html:741
 #: erpnext/public/js/templates/shop_floor_template.html:743
 msgid "Run quality check"
-msgstr ""
+msgstr "اجرای بررسی کیفیت"
 
 #: banking/src/components/features/Settings/Rules/RuleList.tsx:125
 msgid "Run rules automatically"
@@ -48652,7 +48652,7 @@ msgstr "تصویب شده"
 
 #: erpnext/public/js/shop_floor/shop_floor.js:884
 msgid "Save & Continue"
-msgstr ""
+msgstr "ذخیره و ادامه"
 
 #. Option for the 'Action on New Invoice' (Select) field in DocType 'POS
 #. Profile'
@@ -48666,7 +48666,7 @@ msgstr ""
 
 #: erpnext/public/js/shop_floor/shop_floor.js:845
 msgid "Saving job card..."
-msgstr ""
+msgstr "ذخیره کارت کار..."
 
 #: erpnext/templates/includes/order/order_taxes.html:34
 #: erpnext/templates/includes/order/order_taxes.html:85
@@ -48713,7 +48713,7 @@ msgstr "اسکن شماره دسته"
 #: erpnext/public/js/shop_floor/shop_floor.js:88
 #: erpnext/public/js/shop_floor/shop_floor.js:1396
 msgid "Scan Job Card"
-msgstr ""
+msgstr "اسکن کارت کار"
 
 #. Label of the scan_mode (Check) field in DocType 'Pick List'
 #. Label of the scan_mode (Check) field in DocType 'Stock Reconciliation'
@@ -48732,7 +48732,7 @@ msgstr "اسکن بارکد برای آیتم {0}"
 
 #: erpnext/public/js/shop_floor/shop_floor.js:1370
 msgid "Scan job card"
-msgstr ""
+msgstr "اسکن کارت کار"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.js:111
 msgid "Scan mode enabled, existing quantity will not be fetched."
@@ -48740,7 +48740,7 @@ msgstr "حالت اسکن فعال است، مقدار موجود واکشی ن�
 
 #: erpnext/public/js/shop_floor/shop_floor.js:1399
 msgid "Scan or enter Job Card"
-msgstr ""
+msgstr "کارت کار را اسکن یا وارد کنید"
 
 #. Label of the scanned_cheque (Attach) field in DocType 'Cheque Print
 #. Template'
@@ -48952,15 +48952,15 @@ msgstr "جستجوی تراکنش‌ها"
 
 #: erpnext/stock/doctype/item/item.js:1095
 msgid "Search values..."
-msgstr ""
+msgstr "جستجوی مقادیر..."
 
 #: erpnext/public/js/shop_floor/shop_floor.js:1368
 msgid "Search work orders"
-msgstr ""
+msgstr "جستجوی دستور کارها"
 
 #: erpnext/public/js/shop_floor/shop_floor.js:150
 msgid "Search work orders…"
-msgstr ""
+msgstr "جستجوی دستور کارها…"
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -49308,7 +49308,7 @@ msgstr "یک شرکت را انتخاب کنید"
 
 #: erpnext/public/js/shop_floor/shop_floor.js:421
 msgid "Select a machine or work order to begin"
-msgstr ""
+msgstr "یک ماشین یا دستور کار را برای شروع انتخاب کنید"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:396
 msgid "Select a transaction to match and reconcile with vouchers"
@@ -49370,7 +49370,7 @@ msgstr ""
 
 #: erpnext/accounts/report/accounts_payable/accounts_payable.js:230
 msgid "Select one or more Purchase Invoice rows"
-msgstr ""
+msgstr "یک یا چند ردیف فاکتور خرید را انتخاب کنید"
 
 #: banking/src/components/features/BankReconciliation/BankEntryModalContent.tsx:581
 #: banking/src/components/features/BankReconciliation/RecordPaymentModalContent.tsx:699
@@ -49425,7 +49425,7 @@ msgstr ""
 
 #: erpnext/public/js/setup_wizard.js:89
 msgid "Select the modules that you plan to implement"
-msgstr ""
+msgstr "ماژول‌هایی را که قصد پیاده‌سازی آنها را دارید انتخاب کنید"
 
 #: erpnext/manufacturing/doctype/bom/bom.js:1007
 msgid "Select the raw materials (Items) required to manufacture the Item"
@@ -51100,7 +51100,7 @@ msgstr "سبد خرید"
 
 #: erpnext/public/js/templates/shop_floor_template.html:806
 msgid "Short"
-msgstr ""
+msgstr "کوتاه"
 
 #. Label of the short_name (Data) field in DocType 'Manufacturer'
 #: erpnext/stock/doctype/manufacturer/manufacturer.json
@@ -51396,7 +51396,7 @@ msgstr "نمایش {0}"
 
 #: erpnext/public/js/shop_floor/shop_floor.js:311
 msgid "Showing all {0}"
-msgstr ""
+msgstr "نمایش همه {0}"
 
 #. Description of the 'Work Instructions' (Text Editor) field in DocType
 #. 'Operation'
