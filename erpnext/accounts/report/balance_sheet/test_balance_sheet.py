@@ -161,16 +161,24 @@ class TestBalanceSheet(ERPNextTestSuite):
 			accumulated_values=True,
 			group_by_dimension="Cost Center",
 		)
-		self.assertTrue(is_dimension_grouped(build_period_list(filters)))
+		period_list = build_period_list(filters)
+		self.assertTrue(is_dimension_grouped(period_list))
+
+		def key_for(cost_center):
+			return next(p.key for p in period_list if p.dimension_value == cost_center)
 
 		columns, data, *_ = execute(filters)
 
-		dim_cols = [c for c in columns if c.get("dimension_value")]
-		self.assertTrue(len(dim_cols) > 0)
+		# each dimension group starts with exactly one flagged column (UI boundary marker)
+		first_flags = [c["dimension_value"] for c in columns if c.get("is_first_in_dimension")]
+		self.assertEqual(len(first_flags), len(set(first_flags)))
+		self.assertLessEqual({cc1, cc2.name}, set(first_flags))
 
-		name_and_total = {r["account_name"]: r["total"] for r in data if "total" in r and "account_name" in r}
-		self.assertIn("BS Dim Test Bank", name_and_total)
-		self.assertEqual(name_and_total["BS Dim Test Bank"], 800)
+		bank_row = next((r for r in data if r.get("account_name") == "BS Dim Test Bank"), None)
+		self.assertIsNotNone(bank_row)
+		self.assertEqual(bank_row[key_for(cc1)], 300)
+		self.assertEqual(bank_row[key_for(cc2.name)], 500)
+		self.assertEqual(bank_row["total"], 800)
 
 
 def make_journal_entry(rows):

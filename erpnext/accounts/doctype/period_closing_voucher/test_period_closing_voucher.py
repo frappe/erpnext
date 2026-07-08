@@ -360,7 +360,11 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 			group_by_dimension="Cost Center",
 		)
 
-		period_keys = [p.key for p in build_period_list(report_filters)]
+		period_list = build_period_list(report_filters)
+		period_keys = [p.key for p in period_list]
+
+		def key_for(cost_center):
+			return next(p.key for p in period_list if p.dimension_value == cost_center)
 
 		def figures(data):
 			return {
@@ -377,8 +381,10 @@ class TestPeriodClosingVoucher(ERPNextTestSuite):
 			gl_figures = figures(execute(report_filters)[1])
 
 		self.assertEqual(acb_figures, gl_figures)
-		# guard against a degenerate all-zero match
-		self.assertTrue([v for acc in acb_figures.values() for v in acc.values() if v])
+
+		# the fast path must carry per-dimension opening balances, not aggregates or zeros
+		self.assertEqual(acb_figures["Cash"][key_for(cc1)], 400)
+		self.assertEqual(acb_figures["Cash"][key_for(cc2)], 200)
 
 	def make_period_closing_voucher(self, posting_date, submit=True):
 		surplus_account = create_account()

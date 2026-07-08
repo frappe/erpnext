@@ -95,17 +95,42 @@ class TestProfitAndLossStatement(ERPNextTestSuite, AccountsTestMixin):
 		filters = self.get_report_filters()
 		filters.group_by_dimension = "Cost Center"
 
-		self.assertTrue(is_dimension_grouped(build_period_list(filters)))
+		period_list = build_period_list(filters)
+		self.assertTrue(is_dimension_grouped(period_list))
+
+		posting_date = getdate()
+
+		def key_for(cost_center):
+			return next(
+				p.key
+				for p in period_list
+				if p.dimension_value == cost_center and p.from_date <= posting_date <= p.to_date
+			)
 
 		columns, data, *_ = execute(filters)
-
-		dim_cols = [c for c in columns if c.get("dimension_value")]
-		self.assertTrue(len(dim_cols) > 0)
+		self.assertLessEqual({self.cost_center, second_cc}, {c.get("dimension_value") for c in columns})
 
 		income_account = frappe.db.get_value("Company", self.company, "default_income_account")
 		income_row = next((r for r in data if r.get("account") == income_account), None)
 		self.assertIsNotNone(income_row)
+
+		cc1_key, cc2_key = key_for(self.cost_center), key_for(second_cc)
+		self.assertEqual(income_row[cc1_key], 100)
+		self.assertEqual(income_row[cc2_key], 200)
+
+		# no leakage into other dimension or period columns
+		for period in period_list:
+			if period.key not in (cc1_key, cc2_key):
+				self.assertEqual(income_row[period.key], 0)
+
 		# non-accumulated: total = sum of all dimension-period values
+		self.assertEqual(income_row["total"], 300.0)
+
+		# accumulated: total must take each dimension's last running balance once,
+		# not sum every accumulated column
+		filters.accumulated_values = True
+		data = execute(filters)[1]
+		income_row = next(r for r in data if r.get("account") == income_account)
 		self.assertEqual(income_row["total"], 300.0)
 
 	def test_profit_and_loss_output_and_summary(self):
