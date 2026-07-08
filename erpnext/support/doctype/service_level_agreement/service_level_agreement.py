@@ -276,6 +276,7 @@ class ServiceLevelAgreement(Document):
 						"hidden": field.get("hidden"),
 						"description": field.get("description"),
 						"default": field.get("default"),
+						"link_filters": field.get("link_filters"),
 					}
 				).insert(ignore_permissions=True)
 			else:
