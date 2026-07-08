@@ -596,10 +596,10 @@ class TestTaxesAndTotals(ERPNextTestSuite):
 			self.assertEqual(row["item"], "_Test Item")
 			self.assertEqual(row["taxable_amount"], 100.0)
 
-		rows_by_rate = {row["VAT"]["tax_rate"]: row for row in breakup}
+		rows_by_rate = {row[vat]["tax_rate"]: row for row in breakup}
 		self.assertEqual(set(rows_by_rate), {10.0, 5.0})
-		self.assertEqual(rows_by_rate[10.0]["VAT"]["tax_amount"], 10.0)
-		self.assertEqual(rows_by_rate[5.0]["VAT"]["tax_amount"], 5.0)
+		self.assertEqual(rows_by_rate[10.0][vat]["tax_amount"], 10.0)
+		self.assertEqual(rows_by_rate[5.0][vat]["tax_amount"], 5.0)
 
 	@change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_itemised_tax_breakup_keeps_row_per_line_at_same_rate(self):
@@ -619,8 +619,8 @@ class TestTaxesAndTotals(ERPNextTestSuite):
 		for row in breakup:
 			self.assertEqual(row["item"], "_Test Item")
 			self.assertEqual(row["taxable_amount"], 100.0)
-			self.assertEqual(row["VAT"]["tax_rate"], 10.0)
-			self.assertEqual(row["VAT"]["tax_amount"], 10.0)
+			self.assertEqual(row[vat]["tax_rate"], 10.0)
+			self.assertEqual(row[vat]["tax_amount"], 10.0)
 
 	@change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_itemised_tax_breakup_splits_when_only_one_tax_differs(self):
@@ -643,16 +643,34 @@ class TestTaxesAndTotals(ERPNextTestSuite):
 		breakup = get_itemised_tax_breakup_data(self.doc)
 
 		self.assertEqual(len(breakup), 2)
-		rows_by_st_rate = {row["Service Tax"]["tax_rate"]: row for row in breakup}
+		rows_by_st_rate = {row[service_tax]["tax_rate"]: row for row in breakup}
 		self.assertEqual(set(rows_by_st_rate), {14.0, 7.0})
 
 		for st_rate, st_amount in ((14.0, 14.0), (7.0, 7.0)):
 			row = rows_by_st_rate[st_rate]
 			self.assertEqual(row["item"], "_Test Item")
 			self.assertEqual(row["taxable_amount"], 100.0)
-			self.assertEqual(row["VAT"]["tax_rate"], 10.0)
-			self.assertEqual(row["VAT"]["tax_amount"], 10.0)
-			self.assertEqual(row["Service Tax"]["tax_amount"], st_amount)
+			self.assertEqual(row[vat]["tax_rate"], 10.0)
+			self.assertEqual(row[vat]["tax_amount"], 10.0)
+			self.assertEqual(row[service_tax]["tax_amount"], st_amount)
+
+	def test_itemised_tax_breakup_splits_same_description_different_accounts(self):
+		"""Two tax rows sharing a DESCRIPTION but on different accounts must stay separate cells
+		(keyed by account), not collapse into one showing the first rate against the summed amount."""
+		vat = "_Test Account VAT - _TC"
+		service_tax = "_Test Account Service Tax - _TC"
+		self._append_net_total_tax(vat, "VAT")
+		self.doc.taxes[0].rate = 10
+		self._append_net_total_tax(service_tax, "VAT")  # same description, different account
+		self.doc.taxes[1].rate = 5
+		self.doc.save()
+
+		row = get_itemised_tax_breakup_data(self.doc)[0]
+		self.assertEqual(row["taxable_amount"], 100.0)  # not doubled
+		self.assertEqual(row[vat]["tax_rate"], 10.0)
+		self.assertEqual(row[vat]["tax_amount"], 10.0)
+		self.assertEqual(row[service_tax]["tax_rate"], 5.0)
+		self.assertEqual(row[service_tax]["tax_amount"], 5.0)
 
 	def test_set_item_wise_tax_rate(self):
 		"""set_item_wise_tax_rate sums each line's tax rates onto item.tax_rate and

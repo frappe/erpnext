@@ -1196,16 +1196,16 @@ def get_itemised_tax_breakup_html(doc):
 	if not doc.taxes:
 		return
 
-	# get headers
-	tax_accounts = []
-	for tax in doc.taxes:
-		if getattr(tax, "category", None) and tax.category == "Valuation":
-			continue
-		if tax.description not in tax_accounts:
-			tax_accounts.append(tax.description)
+	# one column per tax account, labelled by description
+	labels = {
+		tax.account_head: tax.description
+		for tax in doc.taxes
+		if getattr(tax, "category", None) != "Valuation"
+	}
+	tax_accounts = list(labels)
 
 	with temporary_flag("company", doc.company):
-		headers = get_itemised_tax_breakup_header(doc.doctype + " Item", tax_accounts)
+		headers = get_itemised_tax_breakup_header(doc.doctype + " Item", list(labels.values()))
 		itemised_tax_data = get_itemised_tax_breakup_data(doc)
 		get_rounded_tax_amount(itemised_tax_data, doc.precision("tax_amount", "taxes"))
 		update_itemised_tax_data(doc)
@@ -1259,11 +1259,9 @@ def get_itemised_tax_breakup_data(doc):
 
 
 def get_itemised_tax(doc, with_tax_account=False):
-	"""
-	Itemised tax grouped per physical item line: ``{item_row_object: {tax_description: {...}}}``.
+	"""Itemised tax per item line: ``{item_row_object: {tax_account: {description, rate, amount}}}``.
 
-	Keyed by the item ROW OBJECT (not item_code) on purpose: the same item on several lines -
-	e.g. at different rates via different Item Tax Templates.
+	Keyed by item row object and tax account (not description) so distinct taxes never collapse.
 	"""
 	itemised_tax = {}
 	precision = doc.precision("tax_amount", "taxes")
@@ -1279,9 +1277,10 @@ def get_itemised_tax(doc, with_tax_account=False):
 			continue
 
 		tax_info = itemised_tax.setdefault(item, frappe._dict()).setdefault(
-			tax.description,
+			tax.account_head,
 			frappe._dict(
 				{
+					"description": tax.description,
 					"tax_amount": 0.0,
 					"taxable_amount": 0.0,
 					"tax_rate": row.rate,
