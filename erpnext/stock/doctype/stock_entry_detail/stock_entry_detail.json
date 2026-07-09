@@ -72,6 +72,7 @@
   "col_break6",
   "material_request",
   "material_request_item",
+  "pick_list_item",
   "original_item",
   "reference_section",
   "against_stock_entry",
@@ -424,6 +425,16 @@
    "read_only": 1
   },
   {
+   "fieldname": "pick_list_item",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Pick List Item",
+   "no_copy": 1,
+   "options": "Pick List Item",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "fieldname": "original_item",
    "fieldtype": "Link",
    "hidden": 1,
@@ -678,7 +689,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-07-03 12:11:53.714931",
+ "modified": "2026-07-06 18:17:18.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",
