@@ -42,5 +42,12 @@ def get_terms_and_conditions(template_name, doc):
 
 	terms = frappe.get_cached_value("Terms and Conditions", template_name, "terms")
 
-	if terms:
+	if not terms:
+		return
+
+	try:
+		from frappe.utils.safe_exec import render_safe_globals
+
 		return frappe.render_template(terms, doc, restrict_globals=True)
+	except ImportError:
+		return frappe.render_template(terms, doc)
