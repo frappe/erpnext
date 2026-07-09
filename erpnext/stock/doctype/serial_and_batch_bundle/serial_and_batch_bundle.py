@@ -2092,20 +2092,14 @@ def get_reference_serial_and_batch_bundle(child_row):
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
-def add_serial_batch_ledgers(entries, child_row, doc, warehouse, do_not_save=False) -> object:
-	if isinstance(child_row, str):
-		child_row = frappe._dict(parse_json(child_row))
-=======
 def add_serial_batch_ledgers(
 	entries: list | str,
-	child_row: PurchaseReceiptItem | dict | str,
+	child_row: dict | str,
 	doc: Document | dict | str,
 	warehouse: str | None = None,
 	do_not_save: bool = False,
 ):
 	child_row = parse_json(child_row)
->>>>>>> 8b3caeb578 (fix(stock): pick list serial batch posting date (#56957))
 
 	if isinstance(entries, str):
 		entries = parse_json(entries)
