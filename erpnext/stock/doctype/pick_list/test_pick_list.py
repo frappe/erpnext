@@ -1222,6 +1222,7 @@ class TestPickList(ERPNextTestSuite):
 		pl.reload()
 		self.assertEqual(pl.status, "Cancelled")
 
+<<<<<<< HEAD
 	def test_pick_list_partial_transfer_status(self):
 		"""Partial Stock Entries from a Pick List should track transferred_qty and drive the
 		Partially Transferred / Completed status, and allow further transfers for the remainder."""
@@ -1279,6 +1280,46 @@ class TestPickList(ERPNextTestSuite):
 		pick_list.reload()
 		self.assertEqual(pick_list.locations[0].transferred_qty, 4)
 		self.assertEqual(pick_list.status, "Partially Transferred")
+=======
+	def test_create_second_delivery_note_with_fully_delivered_location(self):
+		# When one pick list item is fully delivered by the first Delivery Note
+		# and another item is still pending, creating a second Delivery Note from
+		# the Pick List must not create a zero-qty row for the delivered item.
+		warehouse = "_Test Warehouse - _TC"
+		item_a = make_item(properties={"is_stock_item": 1}).name
+		item_b = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item=item_a, to_warehouse=warehouse, qty=20)
+		make_stock_entry(item=item_b, to_warehouse=warehouse, qty=20)
+
+		so = make_sales_order(
+			item_list=[
+				{"item_code": item_a, "warehouse": warehouse, "qty": 10, "rate": 100},
+				{"item_code": item_b, "warehouse": warehouse, "qty": 5, "rate": 100},
+			]
+		)
+
+		pl = create_pick_list(so.name)
+		pl.save().submit()
+
+		# First Delivery Note: fully deliver item_a, drop item_b.
+		dn1 = create_delivery_note(pl.name)
+		for row in list(dn1.items):
+			if row.item_code == item_b:
+				dn1.remove(row)
+		dn1.save().submit()
+
+		pl.reload()
+		delivered = {loc.item_code: loc.delivered_qty for loc in pl.locations}
+		self.assertEqual(delivered[item_a], 10)
+		self.assertEqual(delivered[item_b], 0)
+
+		# Second Delivery Note for the remaining item must succeed and must not
+		# include a zero-qty row for the already delivered item_a.
+		dn2 = create_delivery_note(pl.name)
+		self.assertEqual(len(dn2.items), 1)
+		self.assertEqual(dn2.items[0].item_code, item_b)
+		self.assertEqual(dn2.items[0].qty, 5)
+>>>>>>> 53af4d53ef (fix: partial delivery note against pick list (#56985))
 
 	def test_pick_list_validation(self):
 		warehouse = "_Test Warehouse - _TC"
