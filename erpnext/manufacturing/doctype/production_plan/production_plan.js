@@ -640,6 +640,21 @@ frappe.ui.form.on("Material Request Plan Item", {
 	},
 });
 
+frappe.ui.form.on("Production Plan Material Request", {
+	material_request(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		if (!row.material_request) {
+			frappe.model.set_value(cdt, cdn, "material_request_date", "");
+			return;
+		}
+		frappe.db.get_value("Material Request", row.material_request, "transaction_date").then(({ message }) => {
+			if (message) {
+				frappe.model.set_value(cdt, cdn, "material_request_date", message.transaction_date);
+			}
+		});
+	},
+});
+
 frappe.ui.form.on("Production Plan Sales Order", {
 	sales_order(frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
