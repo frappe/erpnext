@@ -1397,15 +1397,16 @@ class TestDepreciationBasics(AssetSetup):
 		matched and stamped with the Journal Entry. Comparing at exact float
 		equality left the link NULL, so the scheduler treated the row as unposted
 		and created a duplicate Journal Entry on every run. Regression test for
-		AssetService.update_journal_entry_link_on_depr_schedule()."""
+		JournalEntry.update_journal_entry_link_on_depr_schedule()."""
 		from unittest.mock import MagicMock, patch
 
-		from erpnext.accounts.doctype.journal_entry.services import asset_service as asset_service_module
-		from erpnext.accounts.doctype.journal_entry.services.asset_service import AssetService
+		from erpnext.accounts.doctype.journal_entry import journal_entry as journal_entry_module
 
 		posting_date = getdate("2021-06-01")
-		je = frappe._dict(name="JE-DEPR-TEST", finance_book=None, posting_date=posting_date)
-		service = AssetService(je)
+		je = frappe.new_doc("Journal Entry")
+		je.name = "JE-DEPR-TEST"
+		je.finance_book = None
+		je.posting_date = posting_date
 
 		# JE debit is stored at company currency precision (2 dp)...
 		je_row = MagicMock()
@@ -1422,10 +1423,10 @@ class TestDepreciationBasics(AssetSetup):
 		asset = frappe._dict(name="ASSET-TEST")
 
 		with (
-			patch.object(asset_service_module, "get_depr_schedule", return_value=[schedule_row]),
+			patch.object(journal_entry_module, "get_depr_schedule", return_value=[schedule_row]),
 			patch.object(frappe.db, "set_value") as mock_set_value,
 		):
-			service.update_journal_entry_link_on_depr_schedule(asset, je_row)
+			je.update_journal_entry_link_on_depr_schedule(asset, je_row)
 
 		mock_set_value.assert_called_once_with(
 			"Depreciation Schedule", "DS-ROW-1", "journal_entry", "JE-DEPR-TEST"
