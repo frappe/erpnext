@@ -5,11 +5,10 @@ import frappe
 
 
 def execute():
-	uom_conversion_data = json.loads(
-		open(
-			frappe.get_app_path("erpnext", "setup", "setup_wizard", "data", "uom_conversion_data.json")
-		).read()
-	)
+	with open(
+		frappe.get_app_path("erpnext", "setup", "setup_wizard", "data", "uom_conversion_data.json")
+	) as f:
+		uom_conversion_data = json.loads(f.read())
 
 	category_uoms = defaultdict(set)
 	for row in uom_conversion_data:
@@ -34,4 +33,4 @@ def execute():
 			if not existing or existing == category:
 				continue
 
-			frappe.rename_doc("UOM Category", existing, category, force=True, show_alert=False)
+			frappe.rename_doc("UOM Category", existing, category, merge=True, force=True, show_alert=False)
