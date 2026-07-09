@@ -40,14 +40,10 @@ def get_terms_and_conditions(template_name, doc):
 	if isinstance(doc, str):
 		doc = json.loads(doc)
 
-	terms = frappe.get_cached_value("Terms and Conditions", template_name, "terms")
+	tnc = frappe.get_cached_doc("Terms and Conditions", template_name)
+	tnc.check_permission()
 
-	if not terms:
+	if not tnc.terms:
 		return
 
-	try:
-		from frappe.utils.safe_exec import render_safe_globals
-
-		return frappe.render_template(terms, doc, restrict_globals=True)
-	except ImportError:
-		return frappe.render_template(terms, doc)
+	return frappe.render_template(tnc.terms, doc, restrict_globals=1)
