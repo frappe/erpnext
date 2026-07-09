@@ -406,7 +406,11 @@ class WorkOrder(Document):
 		elif self.docstatus == 1:
 			if status not in ["Closed", "Stopped"]:
 				status = "Not Started"
-				if flt(self.material_transferred_for_manufacturing) > 0 or self.skip_transfer:
+				if (
+					flt(self.material_transferred_for_manufacturing) > 0
+					or self.skip_transfer
+					or self.has_transferred_material()
+				):
 					status = "In Process"
 
 				precision = frappe.get_precision("Work Order", "produced_qty")
@@ -424,6 +428,26 @@ class WorkOrder(Document):
 			status = "In Process"
 
 		return status
+
+	def has_transferred_material(self):
+		"""True if any raw material was transferred against this work order via a pick list
+		(these leave material_transferred_for_manufacturing at 0 via the min-fraction rule)."""
+		ste = frappe.qb.DocType("Stock Entry")
+		ste_child = frappe.qb.DocType("Stock Entry Detail")
+		qty = (
+			frappe.qb.from_(ste)
+			.inner_join(ste_child)
+			.on(ste_child.parent == ste.name)
+			.select(Sum(ste_child.transfer_qty))
+			.where(
+				(ste.work_order == self.name)
+				& (ste.docstatus == 1)
+				& (ste.purpose == "Material Transfer for Manufacture")
+				& (ste.is_return == 0)
+				& (ste.pick_list.isnotnull())
+			)
+		).run()[0][0]
+		return flt(qty) > 0
 
 	def update_work_order_qty(self):
 		"""Update **Manufactured Qty** and **Material Transferred for Qty** in Work Order
