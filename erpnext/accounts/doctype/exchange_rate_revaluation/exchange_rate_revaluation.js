@@ -136,7 +136,7 @@ frappe.ui.form.on("Exchange Rate Revaluation Account", {
 var get_account_details = function (frm, cdt, cdn) {
 	var row = frappe.get_doc(cdt, cdn);
 	if (!frm.doc.company || !frm.doc.posting_date) {
-		frappe.throw(__("Please select Company and Posting Date to getting entries"));
+		frappe.throw(__("Please select Company and Posting Date to get entries"));
 	}
 	frappe.call({
 		method: "erpnext.accounts.doctype.exchange_rate_revaluation.exchange_rate_revaluation.get_account_details",

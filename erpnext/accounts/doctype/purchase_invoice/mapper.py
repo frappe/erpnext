@@ -50,8 +50,7 @@ def make_purchase_receipt(
 ):
 	if args is None:
 		args = {}
-	if isinstance(args, str):
-		args = json.loads(args)
+	args = frappe.parse_json(args)
 
 	def post_parent_process(source_parent, target_parent):
 		remove_items_with_zero_qty(target_parent)

@@ -1,7 +1,7 @@
 import datetime
 
 import frappe
-from frappe.utils import add_days, add_months, nowdate
+from frappe.utils import add_days, add_months, flt, nowdate
 
 from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -399,3 +399,78 @@ class TestPaymentTermsStatusForSalesOrder(ERPNextTestSuite):
 		# Only the first term should be pulled
 		self.assertEqual(len(data), 1)
 		self.assertEqual(data, expected_value)
+
+	def test_invoice_billing_multiple_orders_splits_proportionally(self):
+		"""An invoice that bills several Sales Orders must contribute to each, in proportion to each
+		order's net line amount. Grouping by the invoice alone and taking Max(sales_order) credited the
+		whole invoice to one arbitrary order and starved the rest. get_so_with_invoices now returns one
+		row per (invoice, sales_order) with the grand total split proportionally; the split is identical
+		on MariaDB and Postgres."""
+		from erpnext.selling.report.payment_terms_status_for_sales_order.payment_terms_status_for_sales_order import (
+			get_so_with_invoices,
+		)
+
+		self.create_payment_terms_template()
+		item = create_item(item_code="_Test PT Split Item", is_stock_item=0)
+
+		def make_so():
+			so = make_sales_order(
+				transaction_date="2021-06-15",
+				delivery_date=add_days("2021-06-15", 30),
+				item=item.item_code,
+				qty=10,
+				rate=100,
+				do_not_save=True,
+			)
+			so.po_no = ""
+			so.taxes_and_charges = ""
+			so.taxes = ""
+			so.payment_terms_template = self.template.name
+			so.save()
+			so.submit()
+			return so
+
+		so_a = make_so()
+		so_b = make_so()
+		so_c = make_so()
+
+		# one invoice billing all three orders, partially (so each stays in a billable status)
+		sinv = make_sales_invoice(so_a.name)
+		sinv.taxes_and_charges = ""
+		sinv.taxes = ""
+		sinv.items[0].qty = 6  # so_a: 600 net
+		for so, qty in ((so_b, 4), (so_c, 5)):  # so_b: 400, so_c: 500
+			sinv.append(
+				"items",
+				{
+					"item_code": item.item_code,
+					"qty": qty,
+					"rate": 100,
+					"sales_order": so.name,
+					"so_detail": so.items[0].name,
+				},
+			)
+		sinv.insert()
+		sinv.submit()
+
+		filters = frappe._dict(
+			{
+				"company": "_Test Company",
+				"period_start_date": "2021-06-01",
+				"period_end_date": "2021-06-30",
+				"item": item.item_code,
+			}
+		)
+		sorders, invoices = get_so_with_invoices(filters)
+		rows = {r.sales_order: r for r in invoices if r.invoice == sinv.name}
+
+		# each order gets its share (old Max(sales_order) collapsed the invoice onto one), and the shares
+		# always sum back to the grand total (the last order absorbs any rounding residual)
+		self.assertAlmostEqual(rows[so_a.name].invoice_amount, 600.0, places=2)
+		self.assertAlmostEqual(rows[so_b.name].invoice_amount, 400.0, places=2)
+		self.assertAlmostEqual(rows[so_c.name].invoice_amount, 500.0, places=2)
+		self.assertAlmostEqual(
+			sum(rows[so.name].invoice_amount for so in (so_a, so_b, so_c)),
+			flt(sinv.base_grand_total),
+			places=2,
+		)

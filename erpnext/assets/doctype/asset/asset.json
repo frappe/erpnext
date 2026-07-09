@@ -450,10 +450,11 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:(doc.asset_type == \"Existing Asset\" && !doc.calculate_depreciation) || doc.calculate_depreciation",
    "fieldname": "is_fully_depreciated",
    "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Is Fully Depreciated"
+   "label": "Is Fully Depreciated",
+   "read_only_depends_on": "eval:doc.calculate_depreciation"
   },
   {
    "depends_on": "eval:doc.docstatus > 0",

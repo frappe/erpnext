@@ -150,6 +150,9 @@ def add_gl_entry(
 		"remarks": remarks,
 	}
 
+	if project:
+		gl_entry["project"] = project
+
 	if voucher_detail_no:
 		gl_entry["voucher_detail_no"] = voucher_detail_no
 

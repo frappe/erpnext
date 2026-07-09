@@ -47,7 +47,7 @@ class SalesPartnerSummaryReport:
 			frappe.throw(_("Please select the document type first."))
 
 		if self.filters.get("doctype") not in SALES_TRANSACTION_DOCTYPES:
-			frappe.throw(_("DocType can be one of them {0}").format(comma_or(SALES_TRANSACTION_DOCTYPES)))
+			frappe.throw(_("DocType can be one of {0}").format(comma_or(SALES_TRANSACTION_DOCTYPES)))
 
 		if not self.filters.get("company"):
 			frappe.throw(_("Please select a company."))

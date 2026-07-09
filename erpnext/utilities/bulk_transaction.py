@@ -13,13 +13,9 @@ def transaction_processing(
 	frappe.has_permission(from_doctype, "read", throw=True)
 	frappe.has_permission(to_doctype, "create", throw=True)
 
-	if isinstance(data, str):
-		deserialized_data = json.loads(data)
-	else:
-		deserialized_data = data
+	deserialized_data = frappe.parse_json(data)
 
-	if isinstance(args, str):
-		args = frappe._dict(json.loads(args))
+	args = frappe._dict(frappe.parse_json(args) or {})
 
 	skipped_records = [d for d in deserialized_data if d.get("status") in ("On Hold", "Closed")]
 
@@ -34,7 +30,7 @@ def transaction_processing(
 
 		skipped_msg += (
 			"<br><br><ul>"
-			+ "".join(_("<li>{}</li>").format(frappe.bold(row.get("name"))) for row in skipped_records)
+			+ "".join(_("<li>{0}</li>").format(frappe.bold(row.get("name"))) for row in skipped_records)
 			+ "</ul>"
 		)
 

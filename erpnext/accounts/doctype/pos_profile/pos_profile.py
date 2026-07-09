@@ -118,14 +118,21 @@ class POSProfile(Document):
 
 	def validate_default_profile(self):
 		for row in self.applicable_for_users:
-			res = frappe.db.sql(
-				"""select pf.name
-				from
-					`tabPOS Profile User` pfu, `tabPOS Profile` pf
-				where
-					pf.name = pfu.parent and pfu.user = %s and pf.name != %s and pf.company = %s
-					and pfu.default=1 and pf.disabled = 0""",
-				(row.user, self.name, self.company),
+			pfu = frappe.qb.DocType("POS Profile User")
+			pf = frappe.qb.DocType("POS Profile")
+			res = (
+				frappe.qb.from_(pfu)
+				.inner_join(pf)
+				.on(pf.name == pfu.parent)
+				.select(pf.name)
+				.where(
+					(pfu.user == row.user)
+					& (pf.name != self.name)
+					& (pf.company == self.company)
+					& (pfu.default == 1)
+					& (pf.disabled == 0)
+				)
+				.run()
 			)
 
 			if row.default and res:
@@ -195,9 +202,9 @@ class POSProfile(Document):
 
 		if invalid_modes:
 			if invalid_modes == 1:
-				msg = _("Please set default Cash or Bank account in Mode of Payment {}")
+				msg = _("Please set default Cash or Bank account in Mode of Payment {0}")
 			else:
-				msg = _("Please set default Cash or Bank account in Mode of Payments {}")
+				msg = _("Please set default Cash or Bank account in Mode of Payments {0}")
 			frappe.throw(msg.format(", ".join(invalid_modes)), title=_("Missing Account"))
 
 	def on_update(self):
@@ -235,15 +242,18 @@ def get_item_groups(pos_profile):
 		for data in pos_profile.get("item_groups"):
 			item_groups.extend(
 				[
-					"%s" % frappe.db.escape(d.name)
+					d.name
 					for d in get_child_nodes("Item Group", data.item_group)
 					if not permitted_item_groups or d.name in permitted_item_groups
 				]
 			)
 
 	if not item_groups and permitted_item_groups:
-		item_groups = ["%s" % frappe.db.escape(d) for d in permitted_item_groups]
+		item_groups = list(permitted_item_groups)
 
+	# Return raw Item Group names; the callers parameterize them via the query builder
+	# (item_group.isin(...)) / frappe.get_all, which escapes them once. Pre-escaping here would
+	# double-escape (item_group IN ('''X''')) and match nothing.
 	return list(set(item_groups))
 
 
@@ -265,10 +275,11 @@ def get_permitted_nodes(group_type):
 
 def get_child_nodes(group_type, root):
 	lft, rgt = frappe.db.get_value(group_type, root, ["lft", "rgt"])
-	return frappe.db.sql(
-		f""" Select name, lft, rgt from `tab{group_type}` where
-			lft >= {lft} and rgt <= {rgt} order by lft""",
-		as_dict=1,
+	return frappe.get_all(
+		group_type,
+		filters={"lft": [">=", lft], "rgt": ["<=", rgt]},
+		fields=["name", "lft", "rgt"],
+		order_by="lft",
 	)
 
 
@@ -278,40 +289,33 @@ def pos_profile_query(doctype: str, txt: str, searchfield: str, start: int, page
 	user = frappe.session["user"]
 	company = filters.get("company") or frappe.defaults.get_user_default("company")
 
-	args = {
-		"user": user,
-		"start": start,
-		"company": company,
-		"page_len": page_len,
-		"txt": "%%%s%%" % txt,
-	}
+	pf = frappe.qb.DocType("POS Profile")
+	pfu = frappe.qb.DocType("POS Profile User")
 
-	pos_profile = frappe.db.sql(
-		"""select pf.name
-		from
-			`tabPOS Profile` pf, `tabPOS Profile User` pfu
-		where
-			pfu.parent = pf.name and pfu.user = %(user)s and pf.company = %(company)s
-			and (pf.name like %(txt)s)
-			and pf.disabled = 0 limit %(page_len)s offset %(start)s""",
-		args,
+	pos_profile = (
+		frappe.qb.from_(pf)
+		.inner_join(pfu)
+		.on(pfu.parent == pf.name)
+		.select(pf.name)
+		.where((pfu.user == user) & (pf.company == company) & pf.name.like(f"%{txt}%") & (pf.disabled == 0))
+		.limit(page_len)
+		.offset(start)
+		.run()
 	)
 
 	if not pos_profile:
-		del args["user"]
-
-		pos_profile = frappe.db.sql(
-			"""select pf.name
-			from
-				`tabPOS Profile` pf left join `tabPOS Profile User` pfu
-			on
-				pf.name = pfu.parent
-			where
-				ifnull(pfu.user, '') = ''
-				and pf.company = %(company)s
-				and pf.name like %(txt)s
-				and pf.disabled = 0""",
-			args,
+		pos_profile = (
+			frappe.qb.from_(pf)
+			.left_join(pfu)
+			.on(pf.name == pfu.parent)
+			.select(pf.name)
+			.where(
+				(pfu.user.isnull() | (pfu.user == ""))
+				& (pf.company == company)
+				& pf.name.like(f"%{txt}%")
+				& (pf.disabled == 0)
+			)
+			.run()
 		)
 
 	return pos_profile

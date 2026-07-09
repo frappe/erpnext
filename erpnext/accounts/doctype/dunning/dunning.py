@@ -85,7 +85,7 @@ class Dunning(AccountsController):
 			if invoice_currency != self.currency:
 				frappe.throw(
 					_(
-						"The currency of invoice {} ({}) is different from the currency of this dunning ({})."
+						"The currency of invoice {0} ({1}) is different from the currency of this dunning ({2})."
 					).format(
 						frappe.get_desk_link(
 							"Sales Invoice",
@@ -248,8 +248,7 @@ def get_dunning_letter_text(dunning_type: str, doc: str | dict, language: str | 
 	DOCTYPE = "Dunning Letter Text"
 	FIELDS = ["body_text", "closing_text", "language"]
 
-	if isinstance(doc, str):
-		doc = json.loads(doc)
+	doc = frappe.parse_json(doc)
 
 	if not language:
 		language = doc.get("language")

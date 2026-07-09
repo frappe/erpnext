@@ -590,16 +590,14 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 									me.frm.doc.items[i].qty = my_qty;
 
 									frappe.msgprint(
-										"Assigning " +
-											d.mr_name +
-											" to " +
-											d.item_code +
-											" (row " +
-											me.frm.doc.items[i].idx +
-											")"
+										__("Assigning {0} to {1} (row {2})", [
+											d.mr_name,
+											d.item_code,
+											me.frm.doc.items[i].idx,
+										])
 									);
 									if (qty > 0) {
-										frappe.msgprint("Splitting " + qty + " units of " + d.item_code);
+										frappe.msgprint(__("Splitting {0} units of {1}", [qty, d.item_code]));
 										var new_row = frappe.model.add_child(
 											me.frm.doc,
 											me.frm.doc.items[i].doctype,

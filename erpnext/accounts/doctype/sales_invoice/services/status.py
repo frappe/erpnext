@@ -21,44 +21,51 @@ class StatusService:
 				doc.status = "Draft"
 			return
 
-		outstanding_amount = flt(doc.outstanding_amount, doc.precision("outstanding_amount"))
-		total = get_total_in_party_account_currency(doc)
-
 		if not status:
 			if doc.docstatus == 2:
 				status = "Cancelled"
 			elif doc.docstatus == 1:
-				if doc.is_internal_transfer():
-					doc.status = "Internal Transfer"
-				elif is_overdue(doc, total):
-					doc.status = "Overdue"
-				elif 0 < outstanding_amount < total:
-					doc.status = "Partly Paid"
-				elif outstanding_amount > 0 and getdate(doc.due_date) >= getdate():
-					doc.status = "Unpaid"
-				elif doc.is_return == 0 and frappe.db.get_value(
-					"Sales Invoice", {"is_return": 1, "return_against": doc.name, "docstatus": 1}
-				):
-					doc.status = "Credit Note Issued"
-				elif doc.is_return == 1:
-					doc.status = "Return"
-				elif outstanding_amount <= 0:
-					doc.status = "Paid"
-				else:
-					doc.status = "Submitted"
-
-				if (
-					doc.status in ("Unpaid", "Partly Paid", "Overdue")
-					and doc.is_discounted
-					and get_discounting_status(doc.name) == "Disbursed"
-				):
-					doc.status += " and Discounted"
-
+				doc.status = self._get_submitted_status()
 			else:
 				doc.status = "Draft"
 
 		if update:
 			doc.db_set("status", doc.status, update_modified=update_modified)
+
+	def _get_submitted_status(self) -> str:
+		"""Status of a submitted invoice, with the invoice-discounting suffix applied."""
+		doc = self.doc
+		outstanding_amount = flt(doc.outstanding_amount, doc.precision("outstanding_amount"))
+		total = get_total_in_party_account_currency(doc)
+
+		status = self._get_payment_status(outstanding_amount, total)
+		if (
+			status in ("Unpaid", "Partly Paid", "Overdue")
+			and doc.is_discounted
+			and get_discounting_status(doc.name) == "Disbursed"
+		):
+			status += " and Discounted"
+		return status
+
+	def _get_payment_status(self, outstanding_amount: float, total: float) -> str:
+		doc = self.doc
+		if doc.is_internal_transfer():
+			return "Internal Transfer"
+		if is_overdue(doc, total):
+			return "Overdue"
+		if 0 < outstanding_amount < total:
+			return "Partly Paid"
+		if outstanding_amount > 0 and getdate(doc.due_date) >= getdate():
+			return "Unpaid"
+		if doc.is_return == 0 and frappe.db.get_value(
+			"Sales Invoice", {"is_return": 1, "return_against": doc.name, "docstatus": 1}
+		):
+			return "Credit Note Issued"
+		if doc.is_return == 1:
+			return "Return"
+		if outstanding_amount <= 0:
+			return "Paid"
+		return "Submitted"
 
 	def set_indicator(self) -> None:
 		doc = self.doc

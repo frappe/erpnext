@@ -173,6 +173,20 @@ frappe.query_reports["Accounts Payable"] = {
 		return value;
 	},
 
+	get_datatable_options(options) {
+		return Object.assign(options, {
+			checkboxColumn: true,
+			events: {
+				onCheckRow: () => erpnext.accounts.toggle_create_pe_primary_action(frappe.query_report),
+			},
+		});
+	},
+
+	after_refresh: function (report) {
+		report.datatable?.rowmanager?.checkAll(false);
+		report.page.clear_primary_action();
+	},
+
 	onload: function (report) {
 		report.page.add_inner_button(__("Accounts Payable Summary"), function () {
 			var filters = report.get_values();
@@ -183,6 +197,149 @@ frappe.query_reports["Accounts Payable"] = {
 			report.set_filter_value("range", frappe.boot.sysdefaults.default_ageing_range);
 		}
 	},
+};
+
+frappe.provide("erpnext.accounts");
+
+erpnext.accounts.toggle_create_pe_primary_action = function (report) {
+	if (!report || !report.datatable || !frappe.model.can_create("Payment Entry")) return;
+
+	const has_purchase_invoice = report.datatable.rowmanager
+		.getCheckedRows()
+		.some((i) => report.datatable.datamanager.data[i]?.voucher_type === "Purchase Invoice");
+
+	if (has_purchase_invoice) {
+		report.page.set_primary_action(__("Create Payment Entries"), () =>
+			erpnext.accounts.create_payment_entries_from_payable_report(report)
+		);
+	} else {
+		report.page.clear_primary_action();
+	}
+};
+
+erpnext.accounts.create_payment_entries_from_payable_report = function (report) {
+	const datatable = report.datatable;
+	if (!datatable) return;
+
+	const rows = datatable.rowmanager
+		.getCheckedRows()
+		.map((i) => datatable.datamanager.data[i])
+		.filter((r) => r && r.voucher_type === "Purchase Invoice" && r.voucher_no);
+
+	if (!rows.length) {
+		frappe.msgprint(__("Select one or more Purchase Invoice rows"));
+		return;
+	}
+
+	// build per-(supplier, party_account) summary to match backend grouping key
+	const supplierMap = {};
+	for (const r of rows) {
+		const key = `${r.party}||${r.party_account}`;
+		if (!supplierMap[key]) {
+			supplierMap[key] = {
+				supplier: r.party,
+				party_account: r.party_account,
+				count: 0,
+				outstanding: 0,
+			};
+		}
+		supplierMap[key].count += 1;
+		supplierMap[key].outstanding += r.outstanding || 0;
+	}
+
+	const overviewFields = [
+		{
+			fieldtype: "Data",
+			fieldname: "supplier",
+			label: __("Supplier"),
+			read_only: 1,
+			in_list_view: 1,
+			width: 150,
+		},
+		{
+			fieldtype: "Data",
+			fieldname: "party_account",
+			label: __("Payable Account"),
+			read_only: 1,
+			in_list_view: 1,
+			width: 130,
+		},
+		{
+			fieldtype: "Int",
+			fieldname: "invoices",
+			label: __("Invoices"),
+			read_only: 1,
+			in_list_view: 1,
+			width: 70,
+		},
+		{
+			fieldtype: "Float",
+			fieldname: "payable_amount",
+			label: __("Payable Amount"),
+			read_only: 1,
+			in_list_view: 1,
+		},
+	];
+
+	const dialog = new frappe.ui.Dialog({
+		title: __("Create Payment Entries"),
+		fields: [
+			{
+				fieldname: "supplier_overview",
+				fieldtype: "Table",
+				label: __("Supplier Overview"),
+				cannot_add_rows: true,
+				cannot_delete_rows: true,
+				fields: overviewFields,
+				data: Object.values(supplierMap).map((d) => ({
+					supplier: d.supplier,
+					party_account: d.party_account,
+					invoices: d.count,
+					payable_amount: d.outstanding,
+				})),
+			},
+		],
+		primary_action_label: __("Create"),
+		secondary_action_label: __("Cancel"),
+		secondary_action() {
+			dialog.hide();
+			report.datatable.rowmanager.checkAll(false);
+		},
+		primary_action() {
+			dialog.hide();
+
+			const groupedKeys = new Set(
+				Object.values(supplierMap)
+					.filter((d) => d.count > 1)
+					.map((d) => `${d.supplier}||${d.party_account}`)
+			);
+
+			const grouped_invoices = [];
+			const ungrouped_invoices = [];
+			for (const r of rows) {
+				const payload = {
+					voucher_no: r.voucher_no,
+					supplier: r.party,
+					party_account: r.party_account,
+				};
+				(groupedKeys.has(`${r.party}||${r.party_account}`)
+					? grouped_invoices
+					: ungrouped_invoices
+				).push(payload);
+			}
+
+			const clearSelection = () => report.datatable.rowmanager.checkAll(false);
+
+			frappe
+				.call({
+					method: "erpnext.accounts.bulk_payment.create_payment_entries",
+					args: { grouped_invoices, ungrouped_invoices },
+				})
+				.then(clearSelection)
+				.catch(clearSelection);
+		},
+	});
+	dialog.show();
 };
 
 erpnext.utils.add_dimensions("Accounts Payable", 10);

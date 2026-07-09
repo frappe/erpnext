@@ -332,7 +332,12 @@ class TestPaymentRequest(ERPNextTestSuite):
 			return_doc=1,
 		)
 
-		pe = pr.set_as_paid()
+		pe = pr.create_payment_entry(submit=False)
+		pe.source_exchange_rate = 50
+		pe.target_exchange_rate = 50
+		pe.set_amounts()
+		pe.insert(ignore_permissions=True)
+		pe.submit()
 
 		expected_gle = dict(
 			(d[0], d)
@@ -342,12 +347,11 @@ class TestPaymentRequest(ERPNextTestSuite):
 			]
 		)
 
-		gl_entries = frappe.db.sql(
-			"""select account, debit, credit, against_voucher
-			from `tabGL Entry` where voucher_type='Payment Entry' and voucher_no=%s
-			order by account asc""",
-			pe.name,
-			as_dict=1,
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Payment Entry", "voucher_no": pe.name},
+			fields=["account", "debit", "credit", "against_voucher"],
+			order_by="account asc",
 		)
 
 		self.assertTrue(gl_entries)
@@ -418,7 +422,12 @@ class TestPaymentRequest(ERPNextTestSuite):
 		pr = make_payment_request(dt=po_doc.doctype, dn=po_doc.name, recipient_id="nabin@erpnext.com")
 		pr = frappe.get_doc(pr).save().submit()
 
-		pe = pr.create_payment_entry()
+		pe = pr.create_payment_entry(submit=False)
+		pe.target_exchange_rate = 80
+		pe.paid_amount = 800
+		pe.set_amounts()
+		pe.insert(ignore_permissions=True)
+		pe.submit()
 		self.assertEqual(pe.base_paid_amount, 800)
 		self.assertEqual(pe.paid_amount, 800)
 		self.assertEqual(pe.base_received_amount, 800)

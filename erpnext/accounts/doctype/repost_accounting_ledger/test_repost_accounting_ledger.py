@@ -69,6 +69,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 			qb.from_(gl)
 			.select(gl.voucher_no, Sum(gl.debit).as_("debit"), Sum(gl.credit).as_("credit"))
 			.where((gl.voucher_no == si.name) & (gl.is_cancelled == 0))
+			.groupby(gl.voucher_no)
 			.run()
 		)
 
@@ -82,6 +83,7 @@ class TestRepostAccountingLedger(ERPNextTestSuite):
 			qb.from_(gl)
 			.select(gl.voucher_no, Sum(gl.debit).as_("debit"), Sum(gl.credit).as_("credit"))
 			.where((gl.voucher_no == si.name) & (gl.is_cancelled == 0))
+			.groupby(gl.voucher_no)
 			.run()
 		)
 

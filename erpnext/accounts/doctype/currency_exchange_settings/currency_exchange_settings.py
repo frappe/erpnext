@@ -90,7 +90,7 @@ class CurrencyExchangeSettings(Document):
 		try:
 			response = requests.get(api_url, params=params)
 		except requests.exceptions.RequestException as e:
-			frappe.throw("Error: " + str(e))
+			frappe.throw(_("Error: {0}").format(str(e)))
 
 		response.raise_for_status()
 		value = response.json()

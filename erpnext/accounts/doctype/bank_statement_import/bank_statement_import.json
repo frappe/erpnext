@@ -221,12 +221,12 @@
    "default": "0",
    "fieldname": "import_mt940_fromat",
    "fieldtype": "Check",
-   "label": "Import MT940 Fromat"
+   "label": "Import MT940 Format"
   }
  ],
  "hide_toolbar": 1,
  "links": [],
- "modified": "2026-05-31 00:41:11.251215",
+ "modified": "2026-06-19 14:18:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Statement Import",

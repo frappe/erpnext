@@ -94,11 +94,12 @@ class AssetService:
 	def update_journal_entry_link_on_depr_schedule(self, asset, je_row) -> None:
 		"""Stamp this entry onto the matching (date + amount) depreciation schedule row."""
 		depr_schedule = get_depr_schedule(asset.name, "Active", self.doc.finance_book)
+		precision = je_row.precision("debit")
 		for d in depr_schedule or []:
 			if (
 				d.schedule_date == self.doc.posting_date
 				and not d.journal_entry
-				and d.depreciation_amount == flt(je_row.debit)
+				and flt(d.depreciation_amount, precision) == flt(je_row.debit, precision)
 			):
 				frappe.db.set_value("Depreciation Schedule", d.name, "journal_entry", self.doc.name)
 

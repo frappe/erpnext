@@ -12,6 +12,7 @@ from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError
 from erpnext.manufacturing.doctype.job_card.mapper import make_stock_entry as make_stock_entry_from_jc
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.manufacturing.doctype.work_order.mapper import (
+	make_material_request,
 	make_stock_entry,
 	make_stock_return_entry,
 )
@@ -691,6 +692,28 @@ class TestWorkOrder(ERPNextTestSuite):
 		ste.save()
 		self.assertEqual(ste.get("items")[0].get("cost_center"), "_Test Cost Center - _TC")
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 0})
+	def test_cost_center_for_manufacture_falls_back_to_item_group_default(self):
+		# "_Test Item Group" is master data with buying_cost_center already set to
+		# "_Test Cost Center 2 - _TC" for "_Test Company"; only the FG item and its
+		# BOM need to be created, since no existing item in that group has one.
+		fg_item = make_item(
+			"_Test FG Item For Item Group Cost Center",
+			{"is_stock_item": 1, "item_group": "_Test Item Group", "include_item_in_manufacturing": 1},
+		)
+
+		if not frappe.db.exists("BOM", {"item": fg_item.name, "is_active": 1, "is_default": 1}):
+			make_bom(item=fg_item.name, raw_materials=["_Test Item"])
+
+		wo_order = make_wo_order_test_record(
+			production_item=fg_item.name, skip_transfer=1, source_warehouse="_Test Warehouse - _TC"
+		)
+		ste = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", wo_order.qty))
+		ste.insert()
+
+		fg_row = next(d for d in ste.items if d.is_finished_item)
+		self.assertEqual(fg_row.cost_center, "_Test Cost Center 2 - _TC")
+
 	def test_operation_time_with_batch_size(self):
 		fg_item = "Test Batch Size Item For BOM"
 		rm1 = "Test Batch Size Item RM 1 For BOM"
@@ -1048,7 +1071,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		job_cards = frappe.get_all(
 			"Job Card Time Log",
 			fields=["parent as name", "docstatus"],
-			order_by="creation asc",
+			order_by="creation asc",  # pg-ok: dropped under distinct on PG — set is just iterated to cancel, order irrelevant
 			distinct=True,
 		)
 
@@ -1465,6 +1488,155 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(work_order.material_transferred_for_manufacturing, 1)
 		self.assertEqual(work_order.required_items[0].transferred_qty, 1)
 		self.assertEqual(work_order.required_items[1].transferred_qty, 2)
+
+	def test_material_transferred_min_fraction_on_partial_pick_list(self):
+		"""Pick-list flow (fg_completed_qty = 0): 'Material Transferred for Manufacturing'
+		must reflect the least-transferred required item (the bottleneck), instead of being
+		marked fully transferred prematurely when only some materials are transferred.
+		"""
+		work_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=5000.0
+		)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TC", qty=10, basic_rate=1000.0
+		)
+
+		required_qty = {row.item_code: flt(row.required_qty) for row in work_order.required_items}
+
+		# pick-list transfer: For Quantity = 0
+		transfer_entry = frappe.get_doc(
+			make_stock_entry(work_order.name, "Material Transfer for Manufacture", 0)
+		)
+		self.assertEqual(transfer_entry.fg_completed_qty, 0.0)
+
+		for item in transfer_entry.items:
+			full_qty = required_qty[item.item_code]
+			item.qty = full_qty if item.item_code == "_Test Item" else full_qty / 2
+			item.transfer_qty = item.qty
+		transfer_entry.submit()
+
+		work_order.reload()
+		transferred_qty = {row.item_code: flt(row.transferred_qty) for row in work_order.required_items}
+		self.assertEqual(transferred_qty["_Test Item"], required_qty["_Test Item"])
+		self.assertEqual(
+			transferred_qty["_Test Item Home Desktop 100"],
+			required_qty["_Test Item Home Desktop 100"] / 2,
+		)
+		# bottleneck fraction = 0.5 -> 0.5 * qty(2) = 1.0
+		self.assertEqual(work_order.material_transferred_for_manufacturing, 1.0)
+
+	def test_material_transferred_full_via_pick_list_flow(self):
+		"""Pick-list flow with every required item fully transferred marks the work order
+		as fully transferred (min fraction = 1.0)."""
+		work_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=5000.0
+		)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TC", qty=10, basic_rate=1000.0
+		)
+
+		required_qty = {row.item_code: flt(row.required_qty) for row in work_order.required_items}
+
+		transfer_entry = frappe.get_doc(
+			make_stock_entry(work_order.name, "Material Transfer for Manufacture", 0)
+		)
+		self.assertEqual(transfer_entry.fg_completed_qty, 0.0)
+		for item in transfer_entry.items:
+			item.qty = required_qty[item.item_code]
+			item.transfer_qty = item.qty
+		transfer_entry.submit()
+
+		work_order.reload()
+		self.assertEqual(work_order.material_transferred_for_manufacturing, 2.0)
+
+	def test_status_in_process_when_only_one_required_item_transferred(self):
+		"""Stock Entry created from a Pick List that picked only one of the required items:
+		min-fraction keeps material_transferred_for_manufacturing at 0, but the work order must
+		still move to In Process because material is already in WIP."""
+		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list
+		from erpnext.stock.doctype.pick_list.mapper import create_stock_entry
+
+		work_order = make_wo_order_test_record(
+			planned_start_date=now(), qty=2, source_warehouse="Stores - _TC"
+		)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item", target="Stores - _TC", qty=10, basic_rate=5000.0
+		)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item Home Desktop 100", target="Stores - _TC", qty=10, basic_rate=1000.0
+		)
+
+		pick_list = create_pick_list(work_order.name, for_qty=work_order.qty)
+		# pick only _Test Item; the other required item is left out of this pick list
+		pick_list.pick_manually = 1
+		pick_list.locations = [loc for loc in pick_list.locations if loc.item_code == "_Test Item"]
+		pick_list.save()
+		pick_list.submit()
+
+		stock_entry = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
+		self.assertEqual(stock_entry.fg_completed_qty, 0.0)
+		stock_entry.submit()
+
+		work_order.reload()
+		self.assertEqual(work_order.material_transferred_for_manufacturing, 0.0)
+		self.assertEqual(work_order.status, "In Process")
+
+	def test_work_order_material_request_and_bom_details(self):
+		from erpnext.stock.doctype.material_request.mapper import make_stock_entry as mr_to_stock_entry
+
+		work_order = make_wo_order_test_record(
+			planned_start_date=now(), qty=2, source_warehouse="Stores - _TC"
+		)
+
+		mr = make_material_request(work_order.name)
+		mr.schedule_date = today()
+		for item in mr.items:
+			item.schedule_date = today()
+		mr.submit()
+		self.assertEqual(mr.work_order, work_order.name)
+
+		ste = mr_to_stock_entry(mr.name)
+		self.assertEqual(ste.purpose, "Material Transfer for Manufacture")
+		self.assertEqual(ste.work_order, work_order.name)
+		self.assertEqual(ste.from_bom, 1.0)
+		self.assertEqual(ste.bom_no, work_order.bom_no)
+		self.assertEqual(ste.fg_completed_qty, 0.0)
+
+	def test_status_in_process_when_only_one_required_item_transferred_via_material_request(self):
+		"""Same bottleneck scenario as the Pick List flow, but the intermediate document is a
+		Material Request created directly from the Work Order: min-fraction keeps
+		material_transferred_for_manufacturing at 0, but the work order must still move to
+		In Process because material is already in WIP.
+		"""
+		from erpnext.stock.doctype.material_request.mapper import make_stock_entry as mr_to_stock_entry
+
+		work_order = make_wo_order_test_record(
+			planned_start_date=now(), qty=2, source_warehouse="Stores - _TC"
+		)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item", target="Stores - _TC", qty=10, basic_rate=5000.0
+		)
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item Home Desktop 100", target="Stores - _TC", qty=10, basic_rate=1000.0
+		)
+
+		mr = make_material_request(work_order.name)
+		mr.schedule_date = today()
+		# request only _Test Item; the other required item is left off this material request
+		mr.items = [item for item in mr.items if item.item_code == "_Test Item"]
+		for item in mr.items:
+			item.schedule_date = today()
+		mr.submit()
+
+		stock_entry = frappe.get_doc(mr_to_stock_entry(mr.name))
+		self.assertEqual(stock_entry.fg_completed_qty, 0.0)
+		stock_entry.submit()
+
+		work_order.reload()
+		self.assertEqual(work_order.material_transferred_for_manufacturing, 0.0)
+		self.assertEqual(work_order.status, "In Process")
 
 	def test_backflushed_batch_raw_materials_based_on_transferred(self):
 		frappe.db.set_single_value(
@@ -4753,6 +4925,57 @@ class TestWorkOrder(ERPNextTestSuite):
 		# generated qty (3.0 for 8 units) differs from the BOM-scaled qty (7.5 for 20 units)
 		self.assertEqual(flt(row.qty, 6), 3.0)
 
+	def test_transferred_qty_not_misattributed_between_item_and_its_substitute(self):
+		"""When one item is transferred both for itself and as a substitute for another required item,
+		each transfer must be credited to the right required item.
+
+		_material_transfer_qty_by_item grouped Stock Entry Detail by item_code only and picked
+		Max(original_item); for item B transferred once for itself (original_item NULL) and once as a
+		substitute for A (original_item=A), Max picked A and credited B's whole transfer to A, leaving
+		B at 0. Grouping by (item_code, original_item) and accumulating into the keyed dict attributes
+		each transfer correctly, deterministically on MariaDB and Postgres.
+		"""
+		from erpnext.manufacturing.doctype.work_order.services.required_items import RequiredItemsService
+
+		source_warehouse = "Stores - _TC"
+		fg_item = make_item("Test WO SelfSub FG", {"is_stock_item": 1}).name
+		item_a = make_item("Test WO SelfSub RM A", {"is_stock_item": 1, "allow_alternative_item": 1}).name
+		item_b = make_item("Test WO SelfSub RM B", {"is_stock_item": 1, "allow_alternative_item": 1}).name
+
+		# B is a registered alternative for A
+		if not frappe.db.exists("Item Alternative", {"item_code": item_a, "alternative_item_code": item_b}):
+			frappe.get_doc(
+				{
+					"doctype": "Item Alternative",
+					"item_code": item_a,
+					"alternative_item_code": item_b,
+					"two_way": 1,
+				}
+			).insert()
+
+		# stock B generously (covers B-for-A plus B-for-itself)
+		for item, qty in ((item_a, 50), (item_b, 100)):
+			test_stock_entry.make_stock_entry(
+				item_code=item, target=source_warehouse, qty=qty, basic_rate=100
+			)
+
+		make_bom(item=fg_item, source_warehouse=source_warehouse, raw_materials=[item_a, item_b])
+		wo = make_wo_order_test_record(item=fg_item, qty=10, source_warehouse=source_warehouse)
+
+		transfer = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 10))
+		transfer.save()
+		# substitute B for the A line; the existing B line stays as B's own transfer
+		for d in transfer.items:
+			if d.item_code == item_a:
+				d.item_code = item_b
+				d.original_item = item_a
+		transfer.submit()
+
+		qty_by_item = RequiredItemsService(wo)._material_transfer_qty_by_item(is_return=0)
+		# B transferred as a substitute for A -> credited to A; B transferred for itself -> credited to B.
+		self.assertEqual(flt(qty_by_item.get(item_a)), 10.0)
+		self.assertEqual(flt(qty_by_item.get(item_b)), 10.0)
+
 
 def get_reserved_entries(voucher_no, warehouse=None):
 	doctype = frappe.qb.DocType("Stock Reservation Entry")
@@ -5136,11 +5359,8 @@ def update_job_card(job_card, jc_qty=None, days=None):
 
 def get_secondary_item_details(bom_no):
 	secondary_items = {}
-	for item in frappe.db.sql(
-		"""select item_code, stock_qty from `tabBOM Secondary Item`
-		where parent = %s""",
-		bom_no,
-		as_dict=1,
+	for item in frappe.get_all(
+		"BOM Secondary Item", filters={"parent": bom_no}, fields=["item_code", "stock_qty"]
 	):
 		secondary_items[item.item_code] = item.stock_qty
 

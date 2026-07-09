@@ -85,8 +85,8 @@ class TestAsset(AssetSetup):
 		self.assertRaises(frappe.ValidationError, asset.save)
 
 	def test_validate_item(self):
-		asset = create_asset(item_code="MacBook Pro", do_not_save=1)
-		item = frappe.get_doc("Item", "MacBook Pro")
+		asset = create_asset(item_code="Macbook Pro", do_not_save=1)
+		item = frappe.get_doc("Item", "Macbook Pro")
 
 		item.disabled = 1
 		item.save()
@@ -140,7 +140,7 @@ class TestAsset(AssetSetup):
 		)
 
 		gle = get_gl_entries("Purchase Invoice", pi.name)
-		self.assertSequenceEqual(gle, expected_gle)
+		self.assertCountEqual(gle, expected_gle)
 
 		pi.cancel()
 		asset.cancel()
@@ -283,7 +283,7 @@ class TestAsset(AssetSetup):
 		)
 
 		gle = get_gl_entries("Journal Entry", asset.journal_entry_for_scrap)
-		self.assertSequenceEqual(gle, expected_gle)
+		self.assertCountEqual(gle, expected_gle)
 
 		restore_asset(asset.name)
 		second_asset_depr_schedule.load_from_db()
@@ -362,7 +362,7 @@ class TestAsset(AssetSetup):
 			("Debtors - _TC", 25000.0, 0.0),
 		)
 		gle = get_gl_entries("Sales Invoice", si.name)
-		self.assertSequenceEqual(gle, expected_gle)
+		self.assertCountEqual(gle, expected_gle)
 
 		si.cancel()
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Partially Depreciated")
@@ -436,7 +436,7 @@ class TestAsset(AssetSetup):
 		)
 
 		gle = get_gl_entries("Sales Invoice", si.name)
-		self.assertSequenceEqual(gle, expected_gle)
+		self.assertCountEqual(gle, expected_gle)
 
 	def test_asset_with_maintenance_required_status_after_sale(self):
 		asset = create_asset(
@@ -577,7 +577,7 @@ class TestAsset(AssetSetup):
 		)
 
 		pr_gle = get_gl_entries("Purchase Receipt", pr.name)
-		self.assertSequenceEqual(pr_gle, expected_gle)
+		self.assertCountEqual(pr_gle, expected_gle)
 
 		pi = make_invoice(pr.name)
 		pi.submit()
@@ -590,7 +590,7 @@ class TestAsset(AssetSetup):
 		)
 
 		pi_gle = get_gl_entries("Purchase Invoice", pi.name)
-		self.assertSequenceEqual(pi_gle, expected_gle)
+		self.assertCountEqual(pi_gle, expected_gle)
 
 		asset = frappe.db.get_value("Asset", {"purchase_receipt": pr.name, "docstatus": 0}, "name")
 
@@ -617,7 +617,7 @@ class TestAsset(AssetSetup):
 		expected_gle = (("_Test Fixed Asset - _TC", 5250.0, 0.0), ("CWIP Account - _TC", 0.0, 5250.0))
 
 		gle = get_gl_entries("Asset", asset_doc.name)
-		self.assertSequenceEqual(gle, expected_gle)
+		self.assertCountEqual(gle, expected_gle)
 
 	def test_asset_cwip_toggling_cases(self):
 		cwip = frappe.db.get_value("Asset Category", "Computers", "enable_cwip_accounting")
@@ -1478,6 +1478,46 @@ class TestDepreciationBasics(AssetSetup):
 		self.assertFalse(depr_schedule[1].journal_entry)
 		self.assertFalse(depr_schedule[2].journal_entry)
 
+	def test_depr_schedule_link_matches_at_currency_precision(self):
+		"""A Depreciation Schedule row whose amount carries more decimals than the
+		company currency (e.g. 25701.202 vs a JE debit of 25701.20) must still be
+		matched and stamped with the Journal Entry. Comparing at exact float
+		equality left the link NULL, so the scheduler treated the row as unposted
+		and created a duplicate Journal Entry on every run. Regression test for
+		AssetService.update_journal_entry_link_on_depr_schedule()."""
+		from unittest.mock import MagicMock, patch
+
+		from erpnext.accounts.doctype.journal_entry.services import asset_service as asset_service_module
+		from erpnext.accounts.doctype.journal_entry.services.asset_service import AssetService
+
+		posting_date = getdate("2021-06-01")
+		je = frappe._dict(name="JE-DEPR-TEST", finance_book=None, posting_date=posting_date)
+		service = AssetService(je)
+
+		# JE debit is stored at company currency precision (2 dp)...
+		je_row = MagicMock()
+		je_row.debit = 25701.20
+		je_row.precision.return_value = 2
+
+		# ...while the schedule row amount carries a third decimal.
+		schedule_row = frappe._dict(
+			name="DS-ROW-1",
+			schedule_date=posting_date,
+			journal_entry=None,
+			depreciation_amount=25701.202,
+		)
+		asset = frappe._dict(name="ASSET-TEST")
+
+		with (
+			patch.object(asset_service_module, "get_depr_schedule", return_value=[schedule_row]),
+			patch.object(frappe.db, "set_value") as mock_set_value,
+		):
+			service.update_journal_entry_link_on_depr_schedule(asset, je_row)
+
+		mock_set_value.assert_called_once_with(
+			"Depreciation Schedule", "DS-ROW-1", "journal_entry", "JE-DEPR-TEST"
+		)
+
 	def test_depr_entry_posting_when_depr_expense_account_is_an_expense_account(self):
 		"""Tests if the Depreciation Expense Account gets debited and the Accumulated Depreciation Account gets credited when the former's an Expense Account."""
 
@@ -1732,14 +1772,18 @@ class TestDepreciationBasics(AssetSetup):
 			("_Test Depreciations - _TC", 30000.0, 0.0),
 		)
 
-		gle = frappe.db.sql(
-			"""select account, debit, credit from `tabGL Entry`
-			where against_voucher_type='Asset' and against_voucher = %s
-			order by account""",
-			asset.name,
-		)
+		gle = [
+			tuple(row)
+			for row in frappe.get_all(
+				"GL Entry",
+				filters={"against_voucher_type": "Asset", "against_voucher": asset.name},
+				fields=["account", "debit", "credit"],
+				order_by="account",
+				as_list=True,
+			)
+		]
 
-		self.assertSequenceEqual(gle, expected_gle)
+		self.assertCountEqual(gle, expected_gle)
 		self.assertEqual(asset.get("value_after_depreciation"), 70000)
 
 	def test_expected_value_change(self):

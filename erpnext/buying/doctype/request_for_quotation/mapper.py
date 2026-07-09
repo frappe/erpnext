@@ -43,6 +43,7 @@ def make_supplier_quotation_from_rfq(
 					"name": "request_for_quotation_item",
 					"parent": "request_for_quotation",
 					"project_name": "project",
+					"cost_center": "cost_center",
 				},
 			},
 		},
@@ -54,10 +55,9 @@ def make_supplier_quotation_from_rfq(
 
 
 # This method is used to make supplier quotation from supplier's portal.
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_supplier_quotation(doc: str | Document | dict):
-	if isinstance(doc, str):
-		doc = json.loads(doc)
+	doc = frappe.parse_json(doc)
 
 	if frappe.session.user not in frappe.get_all(
 		"Portal User", {"parent": doc.get("supplier")}, pluck="user"
@@ -110,6 +110,7 @@ def create_rfq_items(sq_doc, supplier, data):
 		"material_request_item",
 		"stock_qty",
 		"uom",
+		"cost_center",
 	]:
 		args[field] = data.get(field)
 
@@ -176,6 +177,7 @@ def get_item_from_material_requests_based_on_supplier(
 						["name", "material_request_item"],
 						["parent", "material_request"],
 						["uom", "uom"],
+						["cost_center", "cost_center"],
 					],
 				},
 			},

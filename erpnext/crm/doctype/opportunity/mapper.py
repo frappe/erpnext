@@ -124,7 +124,7 @@ def make_supplier_quotation(source_name: str, target_doc: str | Document | None 
 	return doclist
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_opportunity_from_communication(
 	communication: str, company: str, ignore_communication_links: bool = False
 ):

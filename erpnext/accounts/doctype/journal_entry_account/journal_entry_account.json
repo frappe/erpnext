@@ -44,6 +44,7 @@
   {
    "bold": 1,
    "columns": 4,
+   "fetch_from": "bank_account.account",
    "fieldname": "account",
    "fieldtype": "Link",
    "in_global_search": 1,

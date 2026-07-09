@@ -4,7 +4,7 @@
 """Sub-assembly resolution helpers for Production Plan."""
 
 import frappe
-from frappe.query_builder.functions import IfNull, Sum
+from frappe.query_builder.functions import IfNull, Max, Sum
 from frappe.utils import flt
 
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
@@ -179,29 +179,35 @@ def _sub_assembly_rm_query(company, bom_no, include_non_stock_items, planned_qty
 		.on((item.name == item_uom.parent) & (item_uom.uom == item.purchase_uom))
 		.select(*_sub_assembly_rm_columns(bei, bom, item, item_default, item_uom, planned_qty))
 		.where(_sub_assembly_rm_filter(bei, bom, item, bom_no, include_non_stock_items))
-		.groupby(bei.item_code, bei.stock_uom)
+		.groupby(bei.item_code, bei.stock_uom, bei.bom_no, bei.is_phantom_item)
 	).run(as_dict=True)
 
 
 def _sub_assembly_rm_columns(bei, bom, item, item_default, item_uom, planned_qty):
+	# Grouped by item_code/stock_uom plus bom_no/is_phantom_item: those two MUST come from the same
+	# BOM Item row -- the consumer keys on (item_code, bom_no) and recurses on is_phantom_item, so an
+	# independent Max() per column could pair a bom_no from one line with is_phantom_item from another
+	# and recurse into the wrong sub-BOM. Grouping them keeps the pair coherent and the GROUP BY valid
+	# on postgres. The remaining columns are functionally dependent on the grouped item; Max() returns
+	# their single value on both engines.
 	return [
 		(IfNull(Sum(bei.stock_qty / IfNull(bom.quantity, 1)), 0) * planned_qty).as_("qty"),
-		item.item_name,
-		item.name.as_("item_code"),
-		bei.description,
+		Max(item.item_name).as_("item_name"),
+		Max(item.name).as_("item_code"),
+		Max(bei.description).as_("description"),
 		bei.stock_uom,
 		bei.is_phantom_item,
 		bei.bom_no,
-		item.min_order_qty,
-		bei.source_warehouse,
-		item.default_material_request_type,
-		item.min_order_qty,
-		item_default.default_warehouse,
-		item.purchase_uom,
-		item_uom.conversion_factor,
-		item.safety_stock,
-		bom.item.as_("main_bom_item"),
-		bom.name.as_("main_bom"),
+		Max(item.min_order_qty).as_("min_order_qty"),
+		Max(bei.source_warehouse).as_("source_warehouse"),
+		Max(item.default_material_request_type).as_("default_material_request_type"),
+		Max(item.min_order_qty).as_("min_order_qty"),
+		Max(item_default.default_warehouse).as_("default_warehouse"),
+		Max(item.purchase_uom).as_("purchase_uom"),
+		Max(item_uom.conversion_factor).as_("conversion_factor"),
+		Max(item.safety_stock).as_("safety_stock"),
+		Max(bom.item).as_("main_bom_item"),
+		Max(bom.name).as_("main_bom"),
 	]
 
 

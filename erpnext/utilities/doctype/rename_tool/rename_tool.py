@@ -29,9 +29,8 @@ class RenameTool(Document):
 @frappe.whitelist()
 @deprecated
 def get_doctypes():
-	return frappe.db.sql_list(
-		"""select name from tabDocType
-		where allow_rename=1 and module!='Core' order by name"""
+	return frappe.get_all(
+		"DocType", filters={"allow_rename": 1, "module": ["!=", "Core"]}, order_by="name", pluck="name"
 	)
 
 

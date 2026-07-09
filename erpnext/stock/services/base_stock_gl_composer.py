@@ -28,7 +28,7 @@ class BaseStockGLComposer(BaseGLComposer):
 		if not inventory_account_map:
 			inventory_account_map = doc.get_inventory_account_map()
 
-		sle_map = doc.get_stock_ledger_details()
+		sle_map = self._sle_map = doc.get_stock_ledger_details()
 		voucher_details = self.get_voucher_details(default_expense_account, default_cost_center, sle_map)
 
 		gl_list = []

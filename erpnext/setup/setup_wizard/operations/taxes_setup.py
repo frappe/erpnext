@@ -11,7 +11,7 @@ from frappe import _
 
 def setup_taxes_and_charges(company_name: str, country: str):
 	if not frappe.db.exists("Company", company_name):
-		frappe.throw(_("Company {} does not exist yet. Taxes setup aborted.").format(company_name))
+		frappe.throw(_("Company {0} does not exist yet. Taxes setup aborted.").format(company_name))
 
 	file_path = os.path.join(os.path.dirname(__file__), "..", "data", "country_wise_tax.json")
 	with open(file_path) as json_file:
@@ -120,6 +120,7 @@ def from_detailed_data(company_name, data):
 def update_regional_tax_settings(country, company):
 	path = frappe.get_app_path("erpnext", "regional", frappe.scrub(country))
 	if os.path.exists(path.encode("utf-8")):
+		frappe.db.savepoint("regional_tax_settings")
 		try:
 			module_name = f"erpnext.regional.{frappe.scrub(country)}.setup.update_regional_tax_settings"
 			frappe.get_attr(module_name)(country, company)
@@ -127,6 +128,7 @@ def update_regional_tax_settings(country, company):
 			pass
 		except Exception:
 			# Log error and ignore if failed to setup regional tax settings
+			frappe.db.rollback(save_point="regional_tax_settings")
 			frappe.log_error("Unable to setup regional tax settings")
 
 

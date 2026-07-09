@@ -55,10 +55,13 @@ class ExpenseAccountService:
 				else:
 					# check if 'Stock Received But Not Billed' account is credited in Purchase receipt or not
 					if item.purchase_receipt:
-						negative_expense_booked_in_pr = frappe.db.sql(
-							"""select name from `tabGL Entry`
-							where voucher_type='Purchase Receipt' and voucher_no=%s and account = %s""",
-							(item.purchase_receipt, stock_not_billed_account),
+						negative_expense_booked_in_pr = frappe.db.exists(
+							"GL Entry",
+							{
+								"voucher_type": "Purchase Receipt",
+								"voucher_no": item.purchase_receipt,
+								"account": stock_not_billed_account,
+							},
 						)
 
 						if negative_expense_booked_in_pr:
@@ -145,7 +148,7 @@ class ExpenseAccountService:
 					if not account:
 						form_link = get_link_to_form("Asset Category", item.asset_category)
 						throw(
-							_("Please set Fixed Asset Account in {} against {}.").format(
+							_("Please set Fixed Asset Account in {0} against {1}.").format(
 								form_link, doc.company
 							),
 							title=_("Missing Account"),

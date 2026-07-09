@@ -224,7 +224,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 			if not any([rm.is_customer_provided_item for rm in raw_materials]):
 				frappe.throw(
 					_(
-						"Atleast one raw material for Finished Good Item {0} should be customer provided."
+						"At least one raw material for Finished Good Item {0} should be customer provided."
 					).format(frappe.bold(item.item_code))
 				)
 

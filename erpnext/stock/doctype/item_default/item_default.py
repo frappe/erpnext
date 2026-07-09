@@ -28,6 +28,7 @@ class ItemDefault(Document):
 		expense_account: DF.Link | None
 		income_account: DF.Link | None
 		inventory_account_currency: DF.Link | None
+		manufacturing_variance_account: DF.Link | None
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data

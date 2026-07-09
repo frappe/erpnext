@@ -7,6 +7,7 @@ from unittest.mock import patch
 import frappe
 import frappe.permissions
 from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.query_builder.functions import Sum
 from frappe.tests import change_settings
 from frappe.utils import add_days, flt, getdate, nowdate, today
 
@@ -907,10 +908,12 @@ class TestSalesOrder(ERPNextTestSuite):
 			item_doc.save()
 		else:
 			# update valid from
-			frappe.db.sql(
-				"""UPDATE `tabItem Tax` set valid_from = CURRENT_DATE
-				where parent = %(item)s and item_tax_template = %(tax)s""",
-				{"item": item, "tax": tax_template},
+			frappe.db.set_value(
+				"Item Tax",
+				{"parent": item, "item_tax_template": tax_template},
+				"valid_from",
+				today(),
+				update_modified=False,
 			)
 
 		so = make_sales_order(item_code=item, qty=1, do_not_save=1)
@@ -960,10 +963,12 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(so.taxes[1].total, 480)
 
 		# teardown
-		frappe.db.sql(
-			"""UPDATE `tabItem Tax` set valid_from = NULL
-			where parent = %(item)s and item_tax_template = %(tax)s""",
-			{"item": item, "tax": tax_template},
+		frappe.db.set_value(
+			"Item Tax",
+			{"parent": item, "item_tax_template": tax_template},
+			"valid_from",
+			None,
+			update_modified=False,
 		)
 		so.cancel()
 		so.delete()
@@ -1484,6 +1489,8 @@ class TestSalesOrder(ERPNextTestSuite):
 		so.items[0].price_list_rate = price_list_rate = 100
 		so.items[0].margin_type = "Percentage"
 		so.items[0].margin_rate_or_amount = 25
+		# set rate to zero, so that it is recalculated on save
+		so.items[0].rate = 0
 		so.save()
 
 		new_so = frappe.copy_doc(so)
@@ -1557,10 +1564,12 @@ class TestSalesOrder(ERPNextTestSuite):
 
 		# Check if Work Orders were raised
 		for item in so_item_name:
-			wo_qty = frappe.db.sql(
-				"select sum(qty) from `tabWork Order` where sales_order=%s and sales_order_item=%s",
-				(so.name, item),
-			)
+			wo = frappe.qb.DocType("Work Order")
+			wo_qty = (
+				frappe.qb.from_(wo)
+				.select(Sum(wo.qty))
+				.where((wo.sales_order == so.name) & (wo.sales_order_item == item))
+			).run()
 			self.assertEqual(wo_qty[0][0], so_item_name.get(item))
 
 	def test_advance_payment_entry_unlink_against_sales_order(self):
@@ -1740,9 +1749,7 @@ class TestSalesOrder(ERPNextTestSuite):
 		mr_dict["include_exploded_items"] = 0
 		mr_dict["ignore_existing_ordered_qty"] = 1
 		make_raw_material_request(mr_dict, so.company, so.name)
-		mr = frappe.db.sql(
-			"""select name from `tabMaterial Request` ORDER BY creation DESC LIMIT 1""", as_dict=1
-		)[0]
+		mr = frappe.get_all("Material Request", fields=["name"], order_by="creation desc", limit=1)[0]
 		mr_doc = frappe.get_doc("Material Request", mr.get("name"))
 		self.assertEqual(mr_doc.items[0].sales_order, so.name)
 
@@ -2957,6 +2964,129 @@ class TestSalesOrder(ERPNextTestSuite):
 
 		self.assertEqual(serial_nos, serial_nos_in_bundle)
 		self.assertEqual(batch_nos, batches_in_bundle)
+
+	def test_sales_team_contribution_follows_grant_commission(self):
+		"""Sales-person allocation tracks the grant-commission-eligible amount, not the gross total.
+
+		The Item "Grant Commission" flag includes an item in both Sales Partner and Sales Person
+		commission, so each sales person's allocated_amount is a share of
+		amount_eligible_for_commission rather than net_total.
+		"""
+		frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
+		frappe.db.set_value("Item", "_Test FG Item", "grant_commission", 0)
+		try:
+			so = make_sales_order(
+				do_not_save=True,
+				item_list=[
+					{"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC", "qty": 10, "rate": 100},
+					{
+						"item_code": "_Test FG Item",
+						"warehouse": "_Test Warehouse - _TC",
+						"qty": 10,
+						"rate": 100,
+					},
+				],
+			)
+			so.append(
+				"sales_team",
+				{"sales_person": "_Test Sales Person 1", "allocated_percentage": 60, "commission_rate": 10},
+			)
+			so.append(
+				"sales_team",
+				{"sales_person": "_Test Sales Person 2", "allocated_percentage": 40, "commission_rate": 0},
+			)
+			so.save()
+
+			self.assertEqual(so.net_total, 2000)
+			self.assertEqual(so.amount_eligible_for_commission, 1000)  # only the grant_commission item
+
+			first, second = so.sales_team
+			# allocation follows the eligible amount (1000), not net_total (2000)
+			self.assertEqual(first.allocated_amount, 600)
+			self.assertEqual(first.incentives, 60)  # 600 * 10%
+			self.assertEqual(second.allocated_amount, 400)
+			self.assertEqual(second.incentives, 0)
+		finally:
+			# grant_commission defaults to 1 for both items; restore
+			frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
+			frappe.db.set_value("Item", "_Test FG Item", "grant_commission", 1)
+
+	def test_sales_team_allocated_percentage_must_total_100(self):
+		with self.subTest("partial allocation is rejected"):
+			so = make_sales_order(do_not_save=True)
+			so.append("sales_team", {"sales_person": "_Test Sales Person 1", "allocated_percentage": 60})
+			self.assertRaises(frappe.ValidationError, so.save)
+
+		with self.subTest("allocation totalling 100 is accepted"):
+			so = make_sales_order(do_not_save=True)
+			so.append("sales_team", {"sales_person": "_Test Sales Person 1", "allocated_percentage": 60})
+			so.append("sales_team", {"sales_person": "_Test Sales Person 2", "allocated_percentage": 40})
+			so.save()
+			self.assertEqual(sum(d.allocated_percentage for d in so.sales_team), 100)
+
+	def test_sales_team_disabled_sales_person_rejected(self):
+		frappe.db.set_value("Sales Person", "_Test Sales Person 2", "enabled", 0)
+		try:
+			so = make_sales_order(do_not_save=True)
+			so.append("sales_team", {"sales_person": "_Test Sales Person 2", "allocated_percentage": 100})
+			self.assertRaises(frappe.ValidationError, so.save)
+		finally:
+			frappe.db.set_value("Sales Person", "_Test Sales Person 2", "enabled", 1)
+
+	def test_sales_partner_commission(self):
+		"""Sales Partner commission: total_commission = amount_eligible_for_commission * rate / 100."""
+		frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
+		try:
+			so = make_sales_order(qty=10, rate=100, do_not_save=True)
+			so.sales_partner = "_Test Sales Partner India - 1"
+			so.commission_rate = 7
+			so.save()
+
+			self.assertEqual(so.amount_eligible_for_commission, 1000)
+			self.assertEqual(so.total_commission, 70)  # 1000 * 7%
+
+			with self.subTest("commission rate above 100 is rejected"):
+				so.commission_rate = 101
+				self.assertRaises(frappe.ValidationError, so.save)
+		finally:
+			frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
+
+	def test_commission_fields_not_copied_on_duplicate(self):
+		"""Commission rate/amount fields are no_copy; only the sales partner carries to a copy."""
+		frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
+		try:
+			so = make_sales_order(qty=10, rate=100, do_not_save=True)
+			so.sales_partner = "_Test Sales Partner India - 1"
+			so.commission_rate = 7
+			so.save()
+			self.assertEqual(so.total_commission, 70)
+
+			# ignore_no_copy=False mirrors UI "Duplicate"/amend, which honour no_copy
+			duplicate = frappe.copy_doc(so, ignore_no_copy=False)
+			self.assertEqual(duplicate.sales_partner, "_Test Sales Partner India - 1")
+			self.assertFalse(duplicate.commission_rate)
+			self.assertFalse(duplicate.total_commission)
+			self.assertFalse(duplicate.amount_eligible_for_commission)
+		finally:
+			frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
+
+	def test_commission_rate_carried_through_mapper(self):
+		"""commission_rate is no_copy, but Make Delivery Note / Sales Invoice still carries it."""
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note, make_sales_invoice
+
+		original = frappe.db.get_value("Item", "_Test Item", "grant_commission")
+		frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
+		try:
+			so = make_sales_order(qty=10, rate=100, do_not_save=True)
+			so.sales_partner = "_Test Sales Partner India - 1"
+			so.commission_rate = 7
+			so.submit()
+
+			# carried to the mapped (unsaved) documents even though the field is no_copy
+			self.assertEqual(make_delivery_note(so.name).commission_rate, 7)
+			self.assertEqual(make_sales_invoice(so.name).commission_rate, 7)
+		finally:
+			frappe.db.set_value("Item", "_Test Item", "grant_commission", original)
 
 
 def compare_payment_schedules(doc, doc1, doc2):

@@ -9,6 +9,8 @@ import "./utils/serial_no_batch_selector";
 import "./payment/payments";
 import "./templates/visual_plant_floor_template.html";
 import "./plant_floor_visual/visual_plant";
+import "./templates/shop_floor_template.html";
+import "./shop_floor/shop_floor";
 import "./controllers/taxes_and_totals";
 import "./controllers/transaction";
 import "./templates/item_selector.html";
@@ -37,6 +39,5 @@ import "./utils/demo.js";
 import "./financial_statements.js";
 import "./sales_trends_filters.js";
 import "./purchase_trends_filters.js";
-import "./utils/naming_series.js";
 
 // import { sum } from 'frappe/public/utils/util.js'

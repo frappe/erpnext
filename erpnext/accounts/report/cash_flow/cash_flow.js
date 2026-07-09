@@ -18,6 +18,13 @@ frappe.query_reports[CF_REPORT_NAME]["filters"].splice(8, 1);
 
 frappe.query_reports[CF_REPORT_NAME]["filters"].push(
 	{
+		fieldname: "group_by_dimension",
+		label: __("Group by Dimension"),
+		fieldtype: "Select",
+		options: erpnext.financial_statements.get_accounting_dimension_options(),
+		depends_on: "eval: !doc.report_template",
+	},
+	{
 		fieldname: "report_template",
 		label: __("Report Template"),
 		fieldtype: "Link",
@@ -42,6 +49,7 @@ frappe.query_reports[CF_REPORT_NAME]["filters"].push(
 		fieldname: "show_opening_and_closing_balance",
 		label: __("Show Opening and Closing Balance"),
 		fieldtype: "Check",
+		depends_on: "eval:!doc.group_by_dimension",
 	}
 );
 

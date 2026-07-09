@@ -191,6 +191,67 @@ class TestStockAgeing(ERPNextTestSuite):
 		self.assertEqual(queue[0][0], 20.0)
 		self.assertEqual(queue[1][0], 20.0)
 
+	def test_non_serial_stock_reco_decrease_preserves_ageing(self):
+		"""
+		Non-serial stock reconciliation should adjust FIFO by the balance delta.
+		Decreasing stock consumes old slots; increasing stock adds only the new qty.
+		"""
+
+		def make_sle(
+			posting_date,
+			voucher_type,
+			voucher_no,
+			actual_qty,
+			qty_after,
+			voucher_detail_no=None,
+			stock_value_difference=None,
+		):
+			stock_value_difference = actual_qty if stock_value_difference is None else stock_value_difference
+
+			return frappe._dict(
+				name="Flask Item",
+				item_name="Flask Item",
+				description="Flask Item",
+				item_group=None,
+				brand=None,
+				stock_uom="Nos",
+				actual_qty=actual_qty,
+				qty_after_transaction=qty_after,
+				stock_value_difference=stock_value_difference,
+				valuation_rate=1,
+				warehouse="WH 1",
+				posting_date=posting_date,
+				voucher_type=voucher_type,
+				voucher_no=voucher_no,
+				voucher_detail_no=voucher_detail_no,
+				has_serial_no=False,
+				has_batch_no=False,
+				serial_no=None,
+				batch_no=None,
+				serial_and_batch_bundle=None,
+			)
+
+		filters = frappe._dict(company="_Test Company", to_date="2026-02-15", ranges=["30", "60", "90"])
+		sle = [
+			make_sle("2025-11-30", "Stock Entry", "001", 100, 100),
+			make_sle("2025-12-31", "Stock Reconciliation", "002", 0, 60, "SRI-DECREASE", -40),
+			make_sle("2026-01-31", "Stock Reconciliation", "003", 0, 90, "SRI-INCREASE", 30),
+		]
+
+		fifo_slots = FIFOSlots(filters, sle)
+
+		def prepare_stock_reco_voucher_wise_count():
+			fifo_slots.stock_reco_voucher_wise_count = frappe._dict({"SRI-DECREASE": 100, "SRI-INCREASE": 60})
+
+		fifo_slots.prepare_stock_reco_voucher_wise_count = prepare_stock_reco_voucher_wise_count
+
+		slots = fifo_slots.generate()
+		queue = slots["Flask Item"]["fifo_queue"]
+		report_data = format_report_data(filters, slots, filters.to_date)
+
+		self.assertEqual(queue, [[60.0, "2025-11-30", 60.0], [30.0, "2026-01-31", 30.0]])
+		self.assertEqual(report_data[0][7:15], [30.0, 30.0, 0.0, 0.0, 60.0, 60.0, 0.0, 0.0])
+
 	def test_sequential_stock_reco_same_warehouse(self):
 		"""
 		Test back to back stock recos (same warehouse).
@@ -1372,6 +1433,47 @@ class TestStockAgeing(ERPNextTestSuite):
 		self.assertEqual(item_result["qty_after_transaction"], item_result["total_qty"])
 		self.assertEqual(item_result["total_qty"], -4.0)
 		self.assertEqual(item_result["fifo_queue"], [[batch_no, 1, -4.0, "2021-11-10", -40.0]])
+
+	def test_untagged_receipt_with_negative_batch_head(self):
+		"""An incoming SLE without batch details must not treat a negative
+		batch slot at the queue head as a qty slot (TypeError: str += float)."""
+		sle = [
+			frappe._dict(
+				name="Enclosure Item",
+				actual_qty=-10,
+				qty_after_transaction=-10,
+				stock_value_difference=-100,
+				warehouse="WH 1",
+				posting_date="2021-12-01",
+				voucher_type="Stock Entry",
+				voucher_no="001",
+				has_serial_no=False,
+				has_batch_no=True,
+				serial_no=None,
+				batch_no="QI-06448",
+			),
+			frappe._dict(
+				name="Enclosure Item",
+				actual_qty=45,
+				qty_after_transaction=35,
+				stock_value_difference=1051.65,
+				warehouse="WH 1",
+				posting_date="2021-12-05",
+				voucher_type="Purchase Receipt",
+				voucher_no="002",
+				has_serial_no=False,
+				serial_no=None,
+				batch_no=None,
+				serial_and_batch_bundle="SABB-00001294",
+			),
+		]
+
+		slots = FIFOSlots(self.filters, sle).generate()
+		queue = slots["Enclosure Item"]["fifo_queue"]
+
+		self.assertEqual(slots["Enclosure Item"]["total_qty"], 35.0)
+		self.assertEqual(queue[0], ["QI-06448", None, -10.0, "2021-12-01", -100.0])
+		self.assertEqual(queue[1], [45.0, "2021-12-05", 1051.65])
 
 	def test_batchwise_valuation_stock_reconciliation_with_bundle(self):
 		from frappe.utils import add_days, getdate, nowdate

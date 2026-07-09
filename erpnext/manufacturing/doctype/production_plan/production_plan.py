@@ -102,6 +102,7 @@ class ProductionPlan(Document):
 		posting_date: DF.Date
 		prod_plan_references: DF.Table[ProductionPlanItemReference]
 		project: DF.Link | None
+		raw_material_group_warehouse: DF.Link | None
 		reserve_stock: DF.Check
 		sales_order_status: DF.Literal["", "To Deliver and Bill", "To Bill", "To Deliver"]
 		sales_orders: DF.Table[ProductionPlanSalesOrder]
@@ -144,7 +145,29 @@ class ProductionPlan(Document):
 		validate_uom_is_integer(self, "stock_uom", "planned_qty")
 		self.validate_sales_orders()
 		self.validate_material_request_type()
+		self.validate_raw_material_group_warehouse()
 		self.enable_auto_reserve_stock()
+
+	def validate_raw_material_group_warehouse(self):
+		if not self.raw_material_group_warehouse:
+			return
+
+		group = frappe.db.get_value(
+			"Warehouse", self.raw_material_group_warehouse, ["lft", "rgt", "is_group"], as_dict=True
+		)
+		if not group.is_group:
+			frappe.throw(
+				_("{0} must be a group warehouse.").format(frappe.bold(_("Raw Material Group Warehouse")))
+			)
+
+		if self.for_warehouse:
+			child = frappe.db.get_value("Warehouse", self.for_warehouse, ["lft", "rgt"], as_dict=True)
+			if not (group.lft <= child.lft and child.rgt <= group.rgt):
+				frappe.throw(
+					_("For Warehouse {0} must be a child of the group warehouse {1}.").format(
+						frappe.bold(self.for_warehouse), frappe.bold(self.raw_material_group_warehouse)
+					)
+				)
 
 	def enable_auto_reserve_stock(self):
 		if self.is_new() and frappe.db.get_single_value("Stock Settings", "auto_reserve_stock"):
@@ -466,3 +489,26 @@ class ProductionPlan(Document):
 
 	def all_items_completed(self):
 		return SubAssemblyService(self).all_items_completed()
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_child_warehouses(
+	doctype: str | None, txt: str, searchfield: str | None, start: int, page_len: int, filters: dict
+):
+	"Leaf warehouses under the given group warehouse, for the For Warehouse link query."
+	bounds = frappe.db.get_value("Warehouse", filters.get("group_warehouse"), ["lft", "rgt"], as_dict=True)
+	if not bounds:
+		return []
+
+	wh = frappe.qb.DocType("Warehouse")
+	query = (
+		frappe.qb.from_(wh)
+		.select(wh.name)
+		.where((wh.is_group == 0) & (wh.lft >= bounds.lft) & (wh.rgt <= bounds.rgt))
+	)
+	if filters.get("company"):
+		query = query.where(wh.company == filters.get("company"))
+	if txt:
+		query = query.where(wh[searchfield].like(f"%{txt}%"))
+	return query.limit(page_len).offset(start).run()
