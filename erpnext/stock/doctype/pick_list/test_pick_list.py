@@ -1222,7 +1222,6 @@ class TestPickList(ERPNextTestSuite):
 		pl.reload()
 		self.assertEqual(pl.status, "Cancelled")
 
-<<<<<<< HEAD
 	def test_pick_list_partial_transfer_status(self):
 		"""Partial Stock Entries from a Pick List should track transferred_qty and drive the
 		Partially Transferred / Completed status, and allow further transfers for the remainder."""
@@ -1280,7 +1279,7 @@ class TestPickList(ERPNextTestSuite):
 		pick_list.reload()
 		self.assertEqual(pick_list.locations[0].transferred_qty, 4)
 		self.assertEqual(pick_list.status, "Partially Transferred")
-=======
+
 	def test_create_second_delivery_note_with_fully_delivered_location(self):
 		# When one pick list item is fully delivered by the first Delivery Note
 		# and another item is still pending, creating a second Delivery Note from
@@ -1319,7 +1318,6 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(len(dn2.items), 1)
 		self.assertEqual(dn2.items[0].item_code, item_b)
 		self.assertEqual(dn2.items[0].qty, 5)
->>>>>>> 53af4d53ef (fix: partial delivery note against pick list (#56985))
 
 	def test_pick_list_validation(self):
 		warehouse = "_Test Warehouse - _TC"
