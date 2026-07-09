@@ -192,22 +192,28 @@ def is_crm_installed():
 
 
 def remove_allowed_users_on_crm_install():
-	CRMSettings = frappe.get_single("CRM Settings")
+	try:
+		CRMSettings = frappe.get_single("CRM Settings")
 
-	if not CRMSettings.enable_frappe_crm_data_synchronization:
-		return
+		if not CRMSettings.enable_frappe_crm_data_synchronization:
+			return
 
-	CRMSettings.allowed_users = []
-	CRMSettings.save()
-	click.secho("Removed Allowed Users from CRM Settings.")
+		CRMSettings.allowed_users = []
+		CRMSettings.save()
+		click.secho("Removed 'Allowed Users' from CRM Settings.")
+	except Exception:
+		click.secho("'Allowed Users' from CRM Settings couldn't be cleared.")
 
 
 def disable_frappe_crm_data_synchronization_on_crm_uninstall():
-	CRMSettings = frappe.get_single("CRM Settings")
+	try:
+		CRMSettings = frappe.get_single("CRM Settings")
 
-	if not CRMSettings.enable_frappe_crm_data_synchronization:
-		return
+		if not CRMSettings.enable_frappe_crm_data_synchronization:
+			return
 
-	CRMSettings.enable_frappe_crm_data_synchronization = 0
-	CRMSettings.save()
-	click.secho("Enable Frappe CRM Data Synchronization on CRM Settings has been disabled.")
+		CRMSettings.enable_frappe_crm_data_synchronization = 0
+		CRMSettings.save()
+		click.secho("'Enable Frappe CRM Data Synchronization' on CRM Settings has been disabled.")
+	except Exception:
+		click.secho("'Enable Frappe CRM Data Synchronization' on CRM Settings could not be disabled.")
