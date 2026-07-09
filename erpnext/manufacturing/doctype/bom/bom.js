@@ -586,7 +586,11 @@ frappe.ui.form.on("BOM", {
 	},
 
 	routing(frm) {
-		if (frm.doc.routing && frm.doc.with_operations && !frm.doc.operations.length) {
+		// Refetch operations whenever the routing is (re)selected, so that
+		// changing the routing - e.g. on a new BOM version copied from another
+		// BOM - replaces the operations with those of the newly selected routing
+		// instead of keeping the old ones.
+		if (frm.doc.routing && frm.doc.with_operations) {
 			frappe.call({
 				doc: frm.doc,
 				method: "get_routing",
