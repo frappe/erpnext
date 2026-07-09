@@ -79,6 +79,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Outstanding Amount",
+   "options": "Company:company:default_currency",
    "reqd": 1
   },
   {
@@ -115,7 +116,11 @@
  ],
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2022-03-21 19:31:45.382656",
+=======
+ "modified": "2026-07-02 15:17:11.938499",
+>>>>>>> 38da3fc76e (fix: display outstanding amount using company default currency (#56785))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Opening Invoice Creation Tool Item",
