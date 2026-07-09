@@ -34,6 +34,7 @@ from erpnext.manufacturing.doctype.work_order.mapper import (
 	get_template_rm_item,
 	get_work_order_operation_data,
 	make_job_card,
+	make_material_request,
 	make_stock_entry,
 	make_stock_return_entry,
 	make_work_order,
