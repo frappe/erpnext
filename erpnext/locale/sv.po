@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-07-05 10:19+0000\n"
-"PO-Revision-Date: 2026-07-06 21:26\n"
+"PO-Revision-Date: 2026-07-09 21:42\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -34582,12 +34582,12 @@ msgstr "Möjlighet Källa"
 #. Label of a Workspace Sidebar Item
 #: erpnext/crm/workspace/crm/crm.json erpnext/workspace_sidebar/crm.json
 msgid "Opportunity Summary by Sales Stage"
-msgstr "Möjlighet Översikt efter Försäljning Fas"
+msgstr "Möjlighet Översikt efter Försäljning Steg"
 
 #. Name of a report
 #: erpnext/crm/report/opportunity_summary_by_sales_stage/opportunity_summary_by_sales_stage.json
 msgid "Opportunity Summary by Sales Stage "
-msgstr "Möjlighet Översikt efter Försäljning Fas "
+msgstr "Möjlighet Översikt efter Försäljning Steg "
 
 #. Label of the opportunity_type (Link) field in DocType 'Opportunity'
 #. Name of a DocType
@@ -37880,7 +37880,7 @@ msgstr "Pint, Liquid (US)"
 
 #: erpnext/crm/report/sales_pipeline_analytics/sales_pipeline_analytics.js:8
 msgid "Pipeline By"
-msgstr "Tratt Efter"
+msgstr "Process Efter"
 
 #. Label of the place_of_issue (Data) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -48541,11 +48541,11 @@ msgstr "Försäljning"
 #: erpnext/crm/report/sales_pipeline_analytics/sales_pipeline_analytics.json
 #: erpnext/crm/workspace/crm/crm.json erpnext/workspace_sidebar/crm.json
 msgid "Sales Pipeline Analytics"
-msgstr "Försäljning Statistik"
+msgstr "Försäljning Process Statistik"
 
 #: erpnext/selling/page/sales_funnel/sales_funnel.js:157
 msgid "Sales Pipeline by Stage"
-msgstr "Försäljning efter Fas"
+msgstr "Försäljning Process efter Steg"
 
 #: erpnext/stock/report/item_prices/item_prices.py:58
 msgid "Sales Price List"
@@ -48578,7 +48578,7 @@ msgstr "Försäljning Retur"
 #: erpnext/crm/report/sales_pipeline_analytics/sales_pipeline_analytics.py:69
 #: erpnext/crm/workspace/crm/crm.json erpnext/workspace_sidebar/crm.json
 msgid "Sales Stage"
-msgstr "Försäljning Fas"
+msgstr "Försäljning Steg"
 
 #: erpnext/accounts/doctype/pos_closing_entry/closing_voucher_details.html:8
 msgid "Sales Summary"
@@ -52005,7 +52005,7 @@ msgstr "Kvadratyard"
 #. Label of the stage_name (Data) field in DocType 'Sales Stage'
 #: erpnext/crm/doctype/sales_stage/sales_stage.json
 msgid "Stage Name"
-msgstr "Fas Namn"
+msgstr "Försäljning Steg Namn"
 
 #. Label of the stale_days (Int) field in DocType 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
@@ -56228,11 +56228,11 @@ msgstr "System kommer att skapa Försäljning Faktura eller Kassa Faktura från 
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:1239
 msgid "The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Reconciliation and revert to the Draft stage"
-msgstr "Uppgift är i kö som bakgrund jobb. Om det finns problem med behandling i bakgrund kommer system att lägga till kommentar om fel i denna Lager Inventering och återgå till Utkast status."
+msgstr "Uppgift är i kö som bakgrund jobb. Om det finns problem med behandling i bakgrund kommer system att lägga till kommentar om fel i denna Lager Inventering och återgå till Utkast steg"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:1250
 msgid "The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Reconciliation and revert to the Submitted stage"
-msgstr "Uppgift är i kö som ett bakgrund jobb. Om det finns några problem med bearbetning i bakgrund kommer system att lägga till kommentar om fel på denna Lager Inventering och återgå till Godkänd status"
+msgstr "Uppgift är i kö som ett bakgrund jobb. Om det finns några problem med bearbetning i bakgrund kommer system att lägga till kommentar om fel på denna Lager Inventering och återgå till Godkänd steg"
 
 #: erpnext/stock/doctype/material_request/material_request.py:352
 msgid "The total Issue / Transfer quantity {0} in Material Request {1} cannot be greater than allowed requested quantity {2} for Item {3}"
