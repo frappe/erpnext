@@ -260,11 +260,7 @@ execute:frappe.rename_doc("Report", "TDS Payable Monthly", "Tax Withholding Deta
 erpnext.patches.v14_0.update_proprietorship_to_individual
 erpnext.patches.v15_0.rename_subcontracting_fields
 erpnext.patches.v15_0.unset_incorrect_additional_discount_percentage
-<<<<<<< HEAD
-erpnext.patches.v16_0.create_company_custom_fields
 erpnext.patches.v16_0.convert_commission_rate_to_percent
-=======
->>>>>>> 14efd14384 (fix(patch): moved create_company_custom_fields from `pre_model_sync` to `post_model_sync` (backport #56962) (#56965))
 
 [post_model_sync]
 erpnext.patches.v15_0.rename_gross_purchase_amount_to_net_purchase_amount
