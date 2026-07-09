@@ -220,6 +220,8 @@ class SubcontractingReceiptGLComposer(BaseStockGLComposer):
 		if not landed_cost_entries:
 			return
 
+		from erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher import get_landed_cost_gl_item
+
 		for item in doc.items:
 			if item.landed_cost_voucher_amount and landed_cost_entries:
 				remarks = _("Accounting Entry for Landed Cost Voucher for SCR {0}").format(doc.name)
@@ -245,7 +247,7 @@ class SubcontractingReceiptGLComposer(BaseStockGLComposer):
 							credit_in_account_currency=flt(amount["amount"]),
 							account_currency=account_currency,
 							project=item.project,
-							item=item,
+							item=get_landed_cost_gl_item(item, amount),
 						)
 
 						account_currency = get_account_currency(item.expense_account)

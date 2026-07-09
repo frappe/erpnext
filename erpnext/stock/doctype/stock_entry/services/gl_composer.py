@@ -268,6 +268,8 @@ class StockEntryGLComposer(BaseStockGLComposer):
 					)
 
 	def _append_lcv_gl_entries(self, gl_entries: list, inventory_account_map: dict) -> None:
+		from erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher import get_landed_cost_gl_item
+
 		doc = self.doc
 		landed_cost_entries = doc.get_item_account_wise_lcv_entries()
 		if not landed_cost_entries:
@@ -300,7 +302,7 @@ class StockEntryGLComposer(BaseStockGLComposer):
 								"account_currency": account_currency,
 								"project": item.project,
 							},
-							item=item,
+							item=get_landed_cost_gl_item(item, amount),
 						)
 					)
 
@@ -318,6 +320,6 @@ class StockEntryGLComposer(BaseStockGLComposer):
 								"account_currency": account_currency,
 								"project": item.project,
 							},
-							item=item,
+							item=get_landed_cost_gl_item(item, amount),
 						)
 					)

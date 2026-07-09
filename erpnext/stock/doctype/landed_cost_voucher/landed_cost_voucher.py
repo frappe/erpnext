@@ -14,6 +14,7 @@ from frappe.utils import cint, flt
 
 import erpnext
 from erpnext import is_perpetual_inventory_enabled
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
@@ -551,6 +552,21 @@ def set_landed_cost_voucher_amount(doc):
 			d.db_set("cost_center", lc_voucher_data[0][1])
 
 
+def get_landed_cost_gl_item(item, landed_cost_entry):
+	dimension_values = {
+		dimension: value
+		for dimension, value in landed_cost_entry.items()
+		if dimension not in ("amount", "base_amount") and value
+	}
+
+	if not dimension_values:
+		return item
+
+	merged_item = frappe._dict(item.as_dict())
+	merged_item.update(dimension_values)
+	return merged_item
+
+
 def has_landed_cost_amount(doc):
 	for row in doc.items:
 		if row.get("landed_cost_voucher_amount"):
@@ -574,6 +590,7 @@ def get_item_account_wise_lcv_entries(doc):
 		return
 
 	item_account_wise_cost = {}
+	dimensions = get_accounting_dimensions()
 
 	row_fieldname = "purchase_receipt_item"
 	if doc.doctype == "Stock Entry":
@@ -595,16 +612,21 @@ def get_item_account_wise_lcv_entries(doc):
 
 		for item in landed_cost_voucher_doc.items:
 			if item.receipt_document == doc.name:
+				account_map = item_account_wise_cost.setdefault((item.item_code, item.get(row_fieldname)), {})
+
 				for account in landed_cost_voucher_doc.taxes:
 					exchange_rate = account.exchange_rate or 1
-					item_account_wise_cost.setdefault((item.item_code, item.get(row_fieldname)), {})
-					item_account_wise_cost[(item.item_code, item.get(row_fieldname))].setdefault(
-						account.expense_account, {"amount": 0.0, "base_amount": 0.0}
-					)
+					item_row = account_map.get(account.expense_account)
 
-					item_row = item_account_wise_cost[(item.item_code, item.get(row_fieldname))][
-						account.expense_account
-					]
+					if item_row is None:
+						item_row = account_map[account.expense_account] = {
+							"amount": 0.0,
+							"base_amount": 0.0,
+						}
+						for dimension in dimensions:
+							dimension_value = account.get(dimension) or item.get(dimension)
+							if dimension_value:
+								item_row[dimension] = dimension_value
 
 					if total_item_cost > 0:
 						item_row["amount"] += account.amount * item.get(based_on_field) / total_item_cost

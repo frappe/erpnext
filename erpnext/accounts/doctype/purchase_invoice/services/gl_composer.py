@@ -130,6 +130,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
 			get_purchase_document_details,
 		)
+		from erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher import get_landed_cost_gl_item
 
 		doc = self.doc
 		tax_service = TaxService(doc)
@@ -286,7 +287,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 											"credit_in_transaction_currency": item.net_amount,
 											"project": item.project or doc.project,
 										},
-										item=item,
+										item=get_landed_cost_gl_item(item, base_amount),
 									)
 								)
 

@@ -40,6 +40,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
 			get_purchase_document_details,
 		)
+		from erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher import get_landed_cost_gl_item
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import get_stock_value_difference
 
 		doc = self.doc
@@ -188,7 +189,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 							credit_in_account_currency=flt(amount["amount"]),
 							account_currency=account_currency,
 							project=item.project,
-							item=item,
+							item=get_landed_cost_gl_item(item, amount),
 						)
 
 		def make_amount_difference_entry(item):
