@@ -493,6 +493,100 @@ class TestItem(ERPNextTestSuite):
 			"Large",
 		)
 
+	def test_rename_attribute_abbr_updates_variant_item_code(self):
+		frappe.delete_doc_if_exists("Item", "_Test Variant Item-L", force=1)
+		frappe.delete_doc_if_exists("Item", "_Test Variant Item-LRG", force=1)
+
+		variant = create_variant("_Test Variant Item", {"Test Size": "Large"})
+		variant.save()
+
+		attribute = frappe.get_doc("Item Attribute", "Test Size")
+		for row in attribute.item_attribute_values:
+			if row.attribute_value == "Large":
+				row.abbr = "LRG"
+				break
+
+		def restore_test_size_abbr():
+			doc = frappe.get_doc("Item Attribute", "Test Size")
+			for row in doc.item_attribute_values:
+				if row.attribute_value == "Large":
+					row.abbr = "L"
+					break
+			frappe.flags.attribute_values = None
+			doc.save()
+
+		self.addCleanup(restore_test_size_abbr)
+		self.addCleanup(lambda: frappe.delete_doc_if_exists("Item", "_Test Variant Item-LRG", force=1))
+
+		frappe.flags.attribute_values = None
+		attribute.save()
+
+		self.assertFalse(frappe.db.exists("Item", "_Test Variant Item-L"))
+		self.assertTrue(frappe.db.exists("Item", "_Test Variant Item-LRG"))
+		self.assertEqual(
+			frappe.db.get_value("Item", "_Test Variant Item-LRG", "item_name"),
+			"_Test Variant Item-LRG",
+		)
+
+	def test_rename_attribute_abbr_updates_variant_item_name_from_template_name(self):
+		# item_name can be derived from the template's item_name, which may differ from its
+		# item_code (e.g. a friendly display name vs. a SKU-style code). The variant's item_name
+		# must follow the abbreviation rename the same way item_code does.
+		frappe.delete_doc_if_exists("Item", "_Test Variant Item Diff-L", force=1)
+		frappe.delete_doc_if_exists("Item", "_Test Variant Item Diff-LRG", force=1)
+		frappe.delete_doc_if_exists("Item", "_Test Variant Item Diff", force=1)
+
+		template = frappe.get_doc("Item", "_Test Variant Item").as_dict()
+		template = frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": "_Test Variant Item Diff",
+				"item_name": "Test Variant Friendly Name",
+				"item_group": template.item_group,
+				"stock_uom": template.stock_uom,
+				"has_variants": 1,
+				"attributes": [{"attribute": "Test Size"}],
+			}
+		)
+		template.insert()
+		self.addCleanup(lambda: frappe.delete_doc_if_exists("Item", "_Test Variant Item Diff", force=1))
+
+		variant = create_variant("_Test Variant Item Diff", {"Test Size": "Large"})
+		variant.save()
+		self.assertEqual(variant.item_code, "_Test Variant Item Diff-L")
+		self.assertEqual(variant.item_name, "Test Variant Friendly Name-L")
+
+		# even a manually customized item_name (unrelated to the auto-generated pattern) must be
+		# rebuilt on abbreviation rename, since item_code and item_name are meant to stay in lockstep.
+		frappe.db.set_value("Item", variant.name, "item_name", "Custom Friendly Large Shirt Name")
+
+		attribute = frappe.get_doc("Item Attribute", "Test Size")
+		for row in attribute.item_attribute_values:
+			if row.attribute_value == "Large":
+				row.abbr = "LRG"
+				break
+
+		def restore_test_size_abbr():
+			doc = frappe.get_doc("Item Attribute", "Test Size")
+			for row in doc.item_attribute_values:
+				if row.attribute_value == "Large":
+					row.abbr = "L"
+					break
+			frappe.flags.attribute_values = None
+			doc.save()
+
+		self.addCleanup(restore_test_size_abbr)
+		self.addCleanup(lambda: frappe.delete_doc_if_exists("Item", "_Test Variant Item Diff-LRG", force=1))
+
+		frappe.flags.attribute_values = None
+		attribute.save()
+
+		self.assertFalse(frappe.db.exists("Item", "_Test Variant Item Diff-L"))
+		self.assertEqual(
+			frappe.db.get_value("Item", "_Test Variant Item Diff-LRG", "item_name"),
+			"Test Variant Friendly Name-LRG",
+		)
+
 	def test_make_item_variant(self):
 		frappe.delete_doc_if_exists("Item", "_Test Variant Item-L", force=1)
 
@@ -1043,6 +1137,47 @@ class TestItem(ERPNextTestSuite):
 			"must be same as in Template" in str(ve.exception),
 			msg="Different Variant UOM should not be allowed when `allow_different_uom` is disabled.",
 		)
+
+	def test_cannot_unset_serialized_while_bundle_exists(self):
+		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+			make_serial_batch_bundle,
+		)
+
+		item = make_item(
+			properties={"has_serial_no": 1, "is_stock_item": 1, "serial_no_series": "TSN-UNSET-.####"}
+		).name
+
+		serial_no = f"{item}-SN-01"
+		frappe.get_doc(
+			{"doctype": "Serial No", "serial_no": serial_no, "item_code": item, "company": "_Test Company"}
+		).insert()
+
+		# A draft (unsubmitted) Serial and Batch Bundle for the item must block the change.
+		bundle = make_serial_batch_bundle(
+			{
+				"item_code": item,
+				"warehouse": "_Test Warehouse - _TC",
+				"company": "_Test Company",
+				"qty": 1,
+				"rate": 100,
+				"voucher_type": "Stock Entry",
+				"serial_nos": [serial_no],
+				"type_of_transaction": "Inward",
+				"do_not_submit": True,
+				"ignore_sabb_validation": True,
+			}
+		)
+
+		doc = frappe.get_doc("Item", item)
+		doc.has_serial_no = 0
+		self.assertRaises(frappe.ValidationError, doc.save)
+
+		# Once the bundle is removed, the item can be made non-serialized.
+		frappe.delete_doc("Serial and Batch Bundle", bundle.name, force=True)
+		doc = frappe.get_doc("Item", item)
+		doc.has_serial_no = 0
+		doc.save()
+		self.assertEqual(frappe.db.get_value("Item", item, "has_serial_no"), 0)
 
 
 def set_item_variant_settings(fields):

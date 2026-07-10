@@ -179,14 +179,20 @@ def get_columns(filters):
 
 
 @frappe.whitelist()
-def create_reposting_entries(rows, company):
+def create_reposting_entries(rows: str | list, company: str):
 	if isinstance(rows, str):
 		rows = parse_json(rows)
 
 	entries = []
 
 	item_wh = frappe._dict()
-	vouchers = [row.get("voucher_no") for row in rows]
+	vouchers = [
+		row.get("voucher_no")
+		for row in rows
+		if row.get("voucher_type") not in ["Purchase Receipt", "Purchase Invoice"]
+	]
+	repost_based_on_transaction(rows, company, entries)
+
 	sles = get_stock_ledgers(vouchers)
 	for sle in sles:
 		key = (sle.item_code, sle.warehouse)
