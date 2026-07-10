@@ -355,7 +355,7 @@ def update_stock_entry_based_on_job_card(pick_list, stock_entry, job_card):
 	job_card = frappe.db.get_value(
 		"Job Card",
 		job_card,
-		["name", "work_order", "bom_no", "for_quantity", "transferred_qty", "wip_warehouse"],
+		["name", "work_order", "bom_no", "semi_fg_bom", "for_quantity", "transferred_qty", "wip_warehouse"],
 		as_dict=True,
 	)
 
@@ -363,9 +363,11 @@ def update_stock_entry_based_on_job_card(pick_list, stock_entry, job_card):
 	stock_entry.job_card = job_card.name
 	stock_entry.work_order = job_card.work_order
 	stock_entry.from_bom = 1
-	stock_entry.bom_no = job_card.bom_no
+	stock_entry.bom_no = job_card.semi_fg_bom or job_card.bom_no
 	stock_entry.fg_completed_qty = max(flt(job_card.for_quantity) - flt(job_card.transferred_qty), 0)
 	stock_entry.to_warehouse = job_card.wip_warehouse
+
+	job_card_items = get_job_card_items_by_material_request_item(pick_list)
 
 	for location in pick_list.locations:
 		if get_pending_transfer_stock_qty(location) <= 0:
@@ -373,13 +375,27 @@ def update_stock_entry_based_on_job_card(pick_list, stock_entry, job_card):
 		item = frappe._dict()
 		update_common_item_properties(item, location)
 		item.t_warehouse = job_card.wip_warehouse
-		if location.material_request_item:
-			item.job_card_item = frappe.db.get_value(
-				"Material Request Item", location.material_request_item, "job_card_item"
-			)
+		item.job_card_item = job_card_items.get(location.material_request_item)
 		stock_entry.append("items", item)
 
 	return stock_entry
+
+
+def get_job_card_items_by_material_request_item(pick_list):
+	material_request_items = [
+		location.material_request_item for location in pick_list.locations if location.material_request_item
+	]
+	if not material_request_items:
+		return {}
+
+	return dict(
+		frappe.get_all(
+			"Material Request Item",
+			filters={"name": ["in", material_request_items]},
+			fields=["name", "job_card_item"],
+			as_list=True,
+		)
+	)
 
 
 def update_stock_entry_based_on_work_order(pick_list, stock_entry):
