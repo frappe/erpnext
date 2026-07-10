@@ -676,8 +676,9 @@ frappe.ui.form.on("Production Plan Material Request", {
 			frappe.model.set_value(cdt, cdn, "material_request_date", "");
 			return;
 		}
-		frappe.db.get_value("Material Request", row.material_request, "transaction_date").then(({ message }) => {
-			if (message) {
+		const selected = row.material_request;
+		frappe.db.get_value("Material Request", selected, "transaction_date").then(({ message }) => {
+			if (message && locals[cdt][cdn].material_request === selected) {
 				frappe.model.set_value(cdt, cdn, "material_request_date", message.transaction_date);
 			}
 		});
