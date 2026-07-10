@@ -7,13 +7,8 @@ from frappe import _, qb
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import Criterion, Order
-<<<<<<< HEAD
 from frappe.query_builder.functions import NullIf, Sum
-from frappe.utils import flt, get_link_to_form
-=======
-from frappe.query_builder.functions import Max, NullIf, Sum
 from frappe.utils import flt, get_link_to_form, nowdate
->>>>>>> a0b14c0607 (refactor: reversal capability on exchange rate revaluation)
 
 import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_balance_on
@@ -619,7 +614,7 @@ class ExchangeRateRevaluation(Document):
 			.run(pluck="name")
 		)
 		if journals:
-			from erpnext.accounts.doctype.journal_entry.mapper import make_reverse_journal_entry
+			from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
 
 			for x in journals:
 				reversal = make_reverse_journal_entry(x)
