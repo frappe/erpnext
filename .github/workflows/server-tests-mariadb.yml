@@ -99,8 +99,8 @@ jobs:
         env:
           DB: mariadb
           TYPE: server
-          FRAPPE_USER: ${{ github.event.inputs.user }}
-          FRAPPE_BRANCH: ${{ github.event.client_payload.sha || github.event.inputs.branch }}
+          FRAPPE_USER: ruthra-kumar
+          FRAPPE_BRANCH: debug_ci
           DB_HOST: 127.0.0.1
           DB_USER_HOST: '%'
           WKHTMLTOX_DEB: /tmp/wkhtmltox.deb

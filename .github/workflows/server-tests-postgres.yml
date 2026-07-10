@@ -102,7 +102,8 @@ jobs:
         env:
           DB: postgres
           TYPE: server
-          FRAPPE_BRANCH: develop
+          FRAPPE_USER: ruthra-kumar
+          FRAPPE_BRANCH: debug_ci
           BENCH_CACHE_DIR: /home/runner/bench-cache
 
       - name: Warm up test data
