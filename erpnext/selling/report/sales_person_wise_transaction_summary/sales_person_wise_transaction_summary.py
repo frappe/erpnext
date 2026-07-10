@@ -183,8 +183,6 @@ def get_entries(filters):
 		.as_("contribution_amt")
 	)
 
-	# Only pass valid document-field filters to get_query; report-specific keys such as
-	# doc_type / sales_person / item_group are handled separately below.
 	doc_filters = {"docstatus": 1}
 	for field in ["company", "customer", "territory"]:
 		if filters.get(field):
@@ -198,7 +196,7 @@ def get_entries(filters):
 		doc_filters[date_field] = ["<=", filters.get("to_date")]
 
 	query = (
-		frappe.get_query(dt, filters={k: v for k, v in filters.items() if k != "doc_type"}, ignore_permissions=False)
+		frappe.get_query(dt, filters=doc_filters, ignore_permissions=False)
 		.join(dt_item)
 		.on(dt.name == dt_item.parent)
 		.join(st)
@@ -226,12 +224,9 @@ def get_entries(filters):
 			st.sales_person.isin(frappe.qb.from_(sp).select(sp.name).where((sp.lft >= lft) & (sp.rgt <= rgt)))
 		)
 
-	# only resolve items when an item_group/brand filter is set; otherwise get_items
-	# would return every item in the system and add a huge IN() clause on each run
 	if filters.get("item_group") or filters.get("brand"):
 		items = get_items(filters)
 		if not items:
-			# the item_group/brand filter matched nothing -> no rows
 			return []
 		query = query.where(dt_item.item_code.isin([d[0] for d in items]))
 
