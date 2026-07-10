@@ -260,7 +260,6 @@ execute:frappe.rename_doc("Report", "TDS Payable Monthly", "Tax Withholding Deta
 erpnext.patches.v14_0.update_proprietorship_to_individual
 erpnext.patches.v15_0.rename_subcontracting_fields
 erpnext.patches.v15_0.unset_incorrect_additional_discount_percentage
-erpnext.patches.v16_0.create_company_custom_fields
 
 [post_model_sync]
 erpnext.patches.v15_0.rename_gross_purchase_amount_to_net_purchase_amount
@@ -439,6 +438,7 @@ erpnext.patches.v16_0.set_reporting_currency
 erpnext.patches.v16_0.set_posting_datetime_for_sabb_and_drop_indexes
 erpnext.patches.v16_0.update_serial_no_reference_name
 erpnext.patches.v16_0.update_account_categories_for_existing_accounts
+erpnext.patches.v16_0.create_company_custom_fields
 erpnext.patches.v16_0.rename_subcontracted_quantity
 erpnext.patches.v16_0.add_new_stock_entry_types
 erpnext.patches.v15_0.set_asset_status_if_not_already_set
@@ -486,3 +486,7 @@ erpnext.patches.v16_0.migrate_address_contact_custom_fields
 erpnext.patches.v16_0.drop_redundant_serial_no_index_from_sabb
 execute:frappe.db.set_single_value("Accounts Settings", "pcv_job_timeout", 3600)
 erpnext.patches.v16_0.remove_mandatory_from_inv_dimension_fields
+erpnext.patches.v15_0.backfill_sla_link_filters_on_custom_field
+erpnext.patches.v15_0.backfill_sla_link_filters_on_docfield
+erpnext.patches.v16_0.crm_settings_handle_allowed_users_for_frappe_crm
+erpnext.patches.v16_0.backfill_pick_list_transferred_qty
