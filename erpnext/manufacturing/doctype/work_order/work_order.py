@@ -157,6 +157,7 @@ class WorkOrder(Document):
 		self.check_wip_warehouse_skip()
 		self.calculate_operating_cost()
 		self.validate_qty()
+		self.validate_dates()
 		self.validate_transfer_against()
 		self.validate_operations()
 		self.status = self.get_status()
@@ -174,6 +175,11 @@ class WorkOrder(Document):
 			self.set_required_items(reset_only_qty=len(self.get("required_items")))
 
 		self.validate_operations_sequence()
+
+	def validate_dates(self):
+		if self.planned_start_date and self.planned_end_date:
+			if get_datetime(self.planned_end_date) < get_datetime(self.planned_start_date):
+				frappe.throw(_("Planned End Date cannot be before Planned Start Date"))
 
 	def validate_operations_sequence(self):
 		if all([not op.sequence_id for op in self.operations]):
