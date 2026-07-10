@@ -183,13 +183,8 @@ def get_entries(filters):
 		.as_("contribution_amt")
 	)
 
-	# Only pass fields that exist on the DocType to avoid permission / field-not-found errors.
-	# Report-level keys (doc_type, from_date, to_date, sales_person, item_group, brand,
-	# show_return_entries) are applied as explicit WHERE clauses below.
-	doctype_filters = {k: v for k, v in filters.items() if k in ("company", "customer", "territory")}
-
 	query = (
-		frappe.get_query(dt, filters=doctype_filters, ignore_permissions=False)
+		frappe.get_query(dt, filters={k: v for k, v in filters.items() if k != "doc_type"}, ignore_permissions=False)
 		.join(dt_item)
 		.on(dt.name == dt_item.parent)
 		.join(st)
@@ -210,27 +205,6 @@ def get_entries(filters):
 		.where(st.parenttype == doc_type)
 		.where(dt.docstatus == 1)
 	)
-
-	if filters.get("from_date"):
-		query = query.where(dt[date_field] >= filters["from_date"])
-	if filters.get("to_date"):
-		query = query.where(dt[date_field] <= filters["to_date"])
-
-	if filters.get("sales_person"):
-		lft, rgt = frappe.get_value("Sales Person", filters["sales_person"], ["lft", "rgt"])
-		sp = frappe.qb.DocType("Sales Person")
-		query = query.where(
-			st.sales_person.isin(
-				frappe.qb.from_(sp).select(sp.name).where((sp.lft >= lft) & (sp.rgt <= rgt))
-			)
-		)
-
-	if filters.get("item_group") or filters.get("brand"):
-		items = get_items(filters)
-		if items:
-			query = query.where(dt_item.item_code.isin([item[0] for item in items]))
-		else:
-			query = query.where(dt_item.item_code.isin([""]))
 
 	query = query.orderby(st.sales_person).orderby(dt.name, order=frappe.qb.desc)
 
