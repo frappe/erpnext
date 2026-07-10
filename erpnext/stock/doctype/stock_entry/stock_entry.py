@@ -528,11 +528,7 @@ class StockEntry(StockController):
 		self.validate_closed_subcontracting_order()
 		self.update_subcontract_order_supplied_items()
 		self.update_subcontracting_order_status()
-<<<<<<< HEAD
-=======
 		self.update_pick_list_status()
-		self.cancel_stock_reserve_for_wip_and_fg()
->>>>>>> af495ed253 (feat(stock): support partial transfer from pick list)
 
 		if self.work_order and self.purpose == "Material Consumption for Manufacture":
 			self.validate_work_order_status()
