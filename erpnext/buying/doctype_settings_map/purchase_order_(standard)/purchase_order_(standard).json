@@ -1,0 +1,68 @@
+{
+ "applies_to_doctype": "Purchase Order",
+ "creation": "2026-07-03 14:19:38.781743",
+ "docstatus": 0,
+ "doctype": "DocType Settings Map",
+ "idx": 0,
+ "is_active": 1,
+ "is_standard": 1,
+ "mappings": [
+  {
+   "setting_field": "allow_to_edit_stock_uom_qty_for_purchase",
+   "settings_doctype": "Stock Settings"
+  },
+  {
+   "setting_field": "over_delivery_receipt_allowance",
+   "settings_doctype": "Stock Settings"
+  },
+  {
+   "setting_field": "role_allowed_to_over_deliver_receive",
+   "settings_doctype": "Stock Settings"
+  },
+  {
+   "setting_field": "maintain_same_rate",
+   "settings_doctype": "Buying Settings"
+  },
+  {
+   "setting_field": "maintain_same_rate_action",
+   "settings_doctype": "Buying Settings"
+  },
+  {
+   "setting_field": "role_to_override_stop_action",
+   "settings_doctype": "Buying Settings"
+  },
+  {
+   "setting_field": "over_order_allowance",
+   "settings_doctype": "Buying Settings"
+  },
+  {
+   "setting_field": "allow_negative_rates_for_items",
+   "settings_doctype": "Buying Settings"
+  },
+  {
+   "setting_field": "allow_multiple_items",
+   "settings_doctype": "Buying Settings"
+  },
+  {
+   "setting_field": "disable_last_purchase_rate",
+   "settings_doctype": "Buying Settings"
+  },
+  {
+   "setting_field": "allow_zero_qty_in_purchase_order",
+   "settings_doctype": "Buying Settings"
+  },
+  {
+   "setting_field": "unlink_advance_payment_on_cancelation_of_order",
+   "settings_doctype": "Accounts Settings"
+  },
+  {
+   "setting_field": "auto_reserve_stock",
+   "settings_doctype": "Stock Settings"
+  }
+ ],
+ "modified": "2026-07-10 11:26:20.217643",
+ "modified_by": "Administrator",
+ "module": "Buying",
+ "name": "Purchase Order (Standard)",
+ "owner": "Administrator"
+}
