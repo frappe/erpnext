@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import today
 
 from erpnext.stock.doctype.item.test_item import make_item
@@ -10,7 +11,6 @@ from erpnext.stock.report.stock_and_account_value_comparison.stock_and_account_v
 	create_reposting_entries,
 	execute,
 )
-from frappe.tests.utils import FrappeTestCase
 
 PI_COMPANY = "_Test Company with perpetual inventory"
 PI_STORES = "Stores - TCP1"
