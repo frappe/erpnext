@@ -120,9 +120,9 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.enable_frappe_crm_data_synchronization === 1;",
    "fieldname": "allowed_users",
    "fieldtype": "Table MultiSelect",
+   "hidden": 1,
    "label": "Allowed Users",
    "options": "Frappe CRM Allowed User",
    "permlevel": 1
@@ -140,7 +140,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-06-22 01:26:13.474915",
+ "modified": "2026-07-01 01:09:16.461470",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM Settings",

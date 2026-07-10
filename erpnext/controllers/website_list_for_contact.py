@@ -181,9 +181,10 @@ def rfq_transaction_list(parties_doctype, doctype, parties, limit_start, limit_p
 	party = frappe.qb.DocType(parties_doctype)
 	data = (
 		frappe.qb.from_(party)
-		.select(party.parent.as_("name"), party.supplier)
+		# creation must be selected: Postgres requires SELECT DISTINCT order-by exprs in the select list
+		.select(party.parent.as_("name"), party.supplier, party.creation)
 		.distinct()
-		.where((party.supplier == party[0]) & (party.docstatus == 1))
+		.where((party.supplier == parties[0]) & (party.docstatus == 1))
 		.orderby(party.creation, order=frappe.qb.desc)
 		.limit(limit_page_length)
 		.offset(limit_start)
