@@ -137,7 +137,7 @@ def get_charts_for_country(country: str, with_standard: bool = False):
 
 	def _get_chart_name(content):
 		if content:
-			content = json.loads(content)
+			content = frappe.parse_json(content)
 			if (
 				content and content.get("disabled", "No") == "No"
 			) or frappe.local.flags.allow_unverified_charts:

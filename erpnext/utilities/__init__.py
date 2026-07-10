@@ -10,11 +10,15 @@ from erpnext.utilities.activation import get_level
 
 
 def update_doctypes():
-	for d in frappe.db.sql(
-		"""select df.parent, df.fieldname
-		from tabDocField df, tabDocType dt where df.fieldname
-		like "%description%" and df.parent = dt.name and dt.istable = 1""",
-		as_dict=1,
+	df = frappe.qb.DocType("DocField")
+	dt_table = frappe.qb.DocType("DocType")
+	for d in (
+		frappe.qb.from_(df)
+		.inner_join(dt_table)
+		.on(df.parent == dt_table.name)
+		.select(df.parent, df.fieldname)
+		.where(df.fieldname.like("%description%") & (dt_table.istable == 1))
+		.run(as_dict=1)
 	):
 		dt = frappe.get_doc("DocType", d.parent)
 
@@ -31,8 +35,8 @@ def get_site_info(site_info):
 	domain = None
 
 	if not company:
-		company = frappe.db.sql("select name from `tabCompany` order by creation asc")
-		company = company[0][0] if company else None
+		company = frappe.get_all("Company", order_by="creation asc", pluck="name")
+		company = company[0] if company else None
 
 	if company:
 		domain = frappe.get_cached_value("Company", cstr(company), "domain")
@@ -44,7 +48,7 @@ def get_site_info(site_info):
 def payment_app_import_guard():
 	marketplace_link = '<a href="https://frappecloud.com/marketplace/apps/payments">Marketplace</a>'
 	github_link = '<a href="https://github.com/frappe/payments/">GitHub</a>'
-	msg = _("payments app is not installed. Please install it from {} or {}").format(
+	msg = _("payments app is not installed. Please install it from {0} or {1}").format(
 		marketplace_link, github_link
 	)
 	try:

@@ -260,7 +260,7 @@ class PurchaseReceipt(BuyingController):
 		self.check_for_on_hold_or_closed_status("Purchase Order", "purchase_order")
 
 		if getdate(self.posting_date) > getdate(nowdate()):
-			throw(_("Posting Date cannot be future date"))
+			throw(_("Posting Date cannot be a future date"))
 
 		self.get_current_stock()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
@@ -329,24 +329,31 @@ class PurchaseReceipt(BuyingController):
 				)
 
 				if qi.reference_type != self.doctype or qi.reference_name != self.name:
-					msg = f"""Row #{item.idx}: Please select a valid Quality Inspection with Reference Type
-						{frappe.bold(self.doctype)} and Reference Name {frappe.bold(self.name)}."""
-					frappe.throw(_(msg))
+					frappe.throw(
+						_(
+							"Row #{0}: Please select a valid Quality Inspection with Reference Type {1} and Reference Name {2}."
+						).format(item.idx, frappe.bold(self.doctype), frappe.bold(self.name))
+					)
 
 				if qi.item_code != item.item_code:
-					msg = f"""Row #{item.idx}: Please select a valid Quality Inspection with Item Code
-						{frappe.bold(item.item_code)}."""
-					frappe.throw(_(msg))
+					frappe.throw(
+						_("Row #{0}: Please select a valid Quality Inspection with Item Code {1}.").format(
+							item.idx, frappe.bold(item.item_code)
+						)
+					)
 
 	def get_already_received_qty(self, po, po_detail):
-		qty = frappe.db.sql(
-			"""select sum(qty) from `tabPurchase Receipt Item`
-			where purchase_order_item = %s and docstatus = 1
-			and purchase_order=%s
-			and parent != %s""",
-			(po_detail, po, self.name),
+		qty = frappe.get_all(
+			"Purchase Receipt Item",
+			filters={
+				"purchase_order_item": po_detail,
+				"docstatus": 1,
+				"purchase_order": po,
+				"parent": ["!=", self.name],
+			},
+			fields=[{"SUM": "qty", "as": "qty"}],
 		)
-		return qty and flt(qty[0][0]) or 0.0
+		return flt(qty[0].qty) if qty and qty[0].qty else 0.0
 
 	def get_po_qty_and_warehouse(self, po_detail):
 		po_qty, po_warehouse = frappe.db.get_value("Purchase Order Item", po_detail, ["qty", "warehouse"])
@@ -380,7 +387,7 @@ class PurchaseReceipt(BuyingController):
 		self.update_received_qty_if_from_pp()
 
 	def update_received_qty_if_from_pp(self):
-		from frappe.query_builder.functions import Coalesce, Sum
+		from frappe.query_builder.functions import Coalesce, NullIf, Sum
 
 		items_from_po = [item.purchase_order_item for item in self.items if item.purchase_order_item]
 		if items_from_po:
@@ -401,7 +408,9 @@ class PurchaseReceipt(BuyingController):
 					frappe.qb.from_(table)
 					.select(
 						table.production_plan_sub_assembly_item,
-						Sum(table.received_qty / (table.qty / table.fg_item_qty)).as_("received_qty"),
+						Sum(table.received_qty / NullIf(table.qty / NullIf(table.fg_item_qty, 0), 0)).as_(
+							"received_qty"
+						),
 					)
 					.where(table.production_plan_sub_assembly_item.isin(result))
 					.groupby(table.production_plan_sub_assembly_item)
@@ -415,25 +424,27 @@ class PurchaseReceipt(BuyingController):
 					)
 
 	def check_next_docstatus(self):
-		submit_rv = frappe.db.sql(
-			"""select t1.name
-			from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2
-			where t1.name = t2.parent and t2.purchase_receipt = %s and t1.docstatus = 1""",
-			(self.name),
+		submit_rv = frappe.get_all(
+			"Purchase Invoice Item",
+			filters={"purchase_receipt": self.name, "docstatus": 1},
+			fields=["parent"],
+			as_list=True,
+			limit=1,
 		)
 		if submit_rv:
-			frappe.throw(_("Purchase Invoice {0} is already submitted").format(self.submit_rv[0][0]))
+			frappe.throw(_("Purchase Invoice {0} is already submitted").format(submit_rv[0][0]))
 
 	def on_cancel(self):
 		super().on_cancel()
 
 		self.check_for_on_hold_or_closed_status("Purchase Order", "purchase_order")
 		# Check if Purchase Invoice has been submitted against current Purchase Order
-		submitted = frappe.db.sql(
-			"""select t1.name
-			from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2
-			where t1.name = t2.parent and t2.purchase_receipt = %s and t1.docstatus = 1""",
-			self.name,
+		submitted = frappe.get_all(
+			"Purchase Invoice Item",
+			filters={"purchase_receipt": self.name, "docstatus": 1},
+			fields=["parent"],
+			as_list=True,
+			limit=1,
 		)
 		if submitted:
 			frappe.throw(_("Purchase Invoice {0} is already submitted").format(submitted[0][0]))

@@ -28,6 +28,7 @@
    "fieldtype": "Link",
    "in_global_search": 1,
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Parent Item",
    "no_copy": 1,
    "oldfieldname": "new_item_code",
@@ -145,6 +146,7 @@
    "write": 1
   }
  ],
+ "search_fields": "new_item_code,description",
  "sort_field": "creation",
  "sort_order": "ASC",
  "states": []

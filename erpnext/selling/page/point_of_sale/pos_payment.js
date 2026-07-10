@@ -278,7 +278,7 @@ erpnext.PointOfSale.Payment = class {
 			) {
 				const message = items.length
 					? __("You cannot submit the order without payment.")
-					: __("You cannot submit empty order.");
+					: __("You cannot submit an empty order.");
 				frappe.show_alert({ message, indicator: "orange" });
 				frappe.utils.play_sound("error");
 				return;
@@ -592,7 +592,7 @@ erpnext.PointOfSale.Payment = class {
 				flt(loyalty_points) * flt(conversion_factor),
 				precision("loyalty_amount", doc)
 			);
-			description = __("You can redeem upto {0}.", [format_currency(max_redeemable_amount)]);
+			description = __("You can redeem up to {0}.", [format_currency(max_redeemable_amount)]);
 			read_only = false;
 		}
 

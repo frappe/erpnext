@@ -140,7 +140,7 @@ class Lead(SellingController, CRMNote):
 				frappe.throw(_("A Lead requires either a person's name or an organization's name"))
 			elif self.company_name:
 				self.lead_name = self.company_name
-			else:
+			elif self.email_id:
 				self.lead_name = self.email_id.split("@")[0]
 
 	def set_title(self):
@@ -197,17 +197,17 @@ class Lead(SellingController, CRMNote):
 			lead_row.db_update()
 
 	def remove_link_from_prospect(self):
-		prospects = self.get_linked_prospects()
+		linked_prospects = self.get_linked_prospects()
 
-		for d in prospects:
-			prospect = frappe.get_doc("Prospect", d.parent)
+		for linked_prospect in linked_prospects:
+			prospect = frappe.get_doc("Prospect", linked_prospect.parent)
 			if len(prospect.get("leads")) == 1:
 				prospect.delete(ignore_permissions=True)
 			else:
 				to_remove = None
-				for d in prospect.get("leads"):
-					if d.lead == self.name:
-						to_remove = d
+				for lead in prospect.get("leads"):
+					if lead.lead == self.name:
+						to_remove = lead
 
 				if to_remove:
 					prospect.remove(to_remove)
@@ -330,6 +330,7 @@ def get_lead_details(
 	out = frappe._dict()
 
 	lead_doc = frappe.get_doc("Lead", lead)
+	lead_doc.check_permission()
 	lead = lead_doc
 
 	out.update(
@@ -379,7 +380,7 @@ def get_lead_with_phone_number(number):
 	return lead
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def add_lead_to_prospect(lead: str, prospect: str):
 	prospect = frappe.get_doc("Prospect", prospect)
 	prospect.append("leads", {"lead": lead})

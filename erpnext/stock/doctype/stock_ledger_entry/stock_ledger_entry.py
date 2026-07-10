@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.core.doctype.role.role import get_users
 from frappe.model.document import Document
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Max, Sum
 from frappe.utils import add_days, cint, flt, formatdate, get_datetime, getdate
 
 from erpnext.accounts.utils import get_fiscal_year
@@ -234,11 +234,20 @@ class StockLedgerEntry(Document):
 			self.throw_error_message(f"Item {self.item_code} must be a stock Item")
 
 		if item_detail.has_serial_no or item_detail.has_batch_no:
-			if not self.serial_and_batch_bundle:
+			if not self.serial_and_batch_bundle and not self.is_standard_cost_revaluation():
 				self.throw_error_message(f"Serial No / Batch No are mandatory for Item {self.item_code}")
 
 		if self.serial_and_batch_bundle and not item_detail.has_serial_no and not item_detail.has_batch_no:
 			self.throw_error_message(f"Serial No and Batch No are not allowed for Item {self.item_code}")
+
+	def is_standard_cost_revaluation(self):
+		"""A Standard Cost item is revalued through a Stock Reconciliation that changes the rate only
+		(qty unchanged); it carries no serial/batch bundle, so the bundle requirement is bypassed."""
+		from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import is_standard_cost_item
+
+		return self.voucher_type == "Stock Reconciliation" and is_standard_cost_item(
+			self.item_code, self.company
+		)
 
 	def throw_error_message(self, message, exception=frappe.ValidationError):
 		frappe.throw(_(message), exception)
@@ -311,13 +320,17 @@ class StockLedgerEntry(Document):
 		if authorized_role:
 			authorized_users = get_users(authorized_role)
 			if authorized_users and frappe.session.user not in authorized_users:
-				last_transaction_time = frappe.db.sql(
-					"""
-					select MAX(timestamp(posting_date, posting_time)) as posting_time
-					from `tabStock Ledger Entry`
-					where docstatus = 1 and is_cancelled = 0 and item_code = %s
-					and warehouse = %s""",
-					(self.item_code, self.warehouse),
+				sle = frappe.qb.DocType("Stock Ledger Entry")
+				last_transaction_time = (
+					frappe.qb.from_(sle)
+					.select(Max(sle.posting_datetime))
+					.where(
+						(sle.docstatus == 1)
+						& (sle.is_cancelled == 0)
+						& (sle.item_code == self.item_code)
+						& (sle.warehouse == self.warehouse)
+					)
+					.run()
 				)[0][0]
 
 				cur_doc_posting_datetime = "{} {}".format(
@@ -338,7 +351,7 @@ class StockLedgerEntry(Document):
 						"You are not authorized to make/edit Stock Transactions for Item {0} under warehouse {1} before this time."
 					).format(frappe.bold(self.item_code), frappe.bold(self.warehouse))
 
-					msg += "<br><br>" + _("Please contact any of the following users to {} this transaction.")
+					msg += "<br><br>" + _("Please contact any of the following users for this transaction.")
 					msg += "<br>" + "<br>".join(authorized_users)
 					frappe.throw(msg, BackDatedStockTransaction, title=_("Backdated Stock Entry"))
 
@@ -351,3 +364,15 @@ class StockLedgerEntry(Document):
 def on_doctype_update():
 	frappe.db.add_index("Stock Ledger Entry", ["voucher_no", "voucher_type"])
 	frappe.db.add_index("Stock Ledger Entry", ["item_code", "warehouse", "posting_datetime", "creation"])
+
+	if frappe.db.db_type == "postgres":
+		# Postgres-only partial index for date-range stock reports (Stock Ledger / Stock Balance)
+		# that scan across all items: they filter `is_cancelled = 0` and sort by posting_datetime.
+		# The existing item_code-leading composite can't serve an all-items date scan. `where` is a
+		# no-op on MariaDB, so this is added only on postgres.
+		frappe.db.add_index(
+			"Stock Ledger Entry",
+			["company", "posting_datetime", "creation"],
+			index_name="sle_active_posting",
+			where="is_cancelled = 0",
+		)

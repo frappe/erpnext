@@ -16,6 +16,7 @@ class BankAccountBalance(Document):
 
 		balance: DF.Currency
 		bank_account: DF.Link
+		company: DF.Link | None
 		date: DF.Date
 	# end: auto-generated types
 

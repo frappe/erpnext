@@ -120,7 +120,7 @@ class StockSettings(Document):
 		if not doc_before_save:
 			return
 
-		if not frappe.get_all("Serial and Batch Bundle", filters={"docstatus": 1}, limit=1, pluck="name"):
+		if not frappe.db.exists("Serial and Batch Bundle", {"docstatus": 1}):
 			return
 
 		if doc_before_save.do_not_use_batchwise_valuation and not self.do_not_use_batchwise_valuation:
@@ -142,7 +142,7 @@ class StockSettings(Document):
 			doc_before_save.enable_serial_and_batch_no_for_item
 			and not self.enable_serial_and_batch_no_for_item
 		):
-			if frappe.get_all("Serial and Batch Bundle", filters={"docstatus": 1}, limit=1, pluck="name"):
+			if frappe.db.exists("Serial and Batch Bundle", {"docstatus": 1}):
 				frappe.throw(
 					_(
 						"Cannot disable Serial and Batch No for Item, as there are existing records for serial / batch."
@@ -170,17 +170,26 @@ class StockSettings(Document):
 		if previous_valuation_method and previous_valuation_method != self.valuation_method:
 			# check if there are any stock ledger entries against items
 			# which does not have it's own valuation method
-			sle = frappe.db.sql(
-				"""select name from `tabStock Ledger Entry` sle
-				where exists(select name from tabItem
-					where name=sle.item_code and (valuation_method is null or valuation_method='')) limit 1
-			"""
+			sle_dt = frappe.qb.DocType("Stock Ledger Entry")
+			item = frappe.qb.DocType("Item")
+			sle = (
+				frappe.qb.from_(sle_dt)
+				.select(sle_dt.name)
+				.where(
+					sle_dt.item_code.isin(
+						frappe.qb.from_(item)
+						.select(item.name)
+						.where(item.valuation_method.isnull() | (item.valuation_method == ""))
+					)
+				)
+				.limit(1)
+				.run()
 			)
 
 			if sle:
 				frappe.throw(
 					_(
-						"Can't change the valuation method, as there are transactions against some items which do not have its own valuation method"
+						"Can't change the valuation method, as there are transactions against some items which do not have their own valuation method"
 					)
 				)
 
@@ -238,7 +247,7 @@ class StockSettings(Document):
 
 				if has_reserved_stock:
 					frappe.throw(
-						_("As there are reserved stock, you cannot disable {0}.").format(
+						_("As there is reserved stock, you cannot disable {0}.").format(
 							frappe.bold(_("Stock Reservation"))
 						)
 					)

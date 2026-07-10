@@ -421,7 +421,7 @@ def check_portal_enabled(reference_doctype):
 	if not frappe.db.get_value("Portal Menu Item", {"reference_doctype": reference_doctype}, "enabled"):
 		frappe.throw(
 			_(
-				"The Access to Request for Quotation From Portal is Disabled. To Allow Access, Enable it in Portal Settings."
+				"Access to Request for Quotation from the portal is disabled. To allow access, enable it in Portal Settings."
 			)
 		)
 

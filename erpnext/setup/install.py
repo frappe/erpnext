@@ -21,6 +21,8 @@ def after_install():
 	if not frappe.db.exists("Role", "Analytics"):
 		frappe.get_doc({"doctype": "Role", "role_name": "Analytics"}).insert()
 
+	create_shop_floor_roles()
+
 	set_single_defaults()
 	setup_repost_defaults()
 	create_print_setting_custom_fields()
@@ -50,6 +52,15 @@ def make_default_operations():
 			doc.insert(ignore_permissions=True)
 
 
+def create_shop_floor_roles():
+	"""Roles that drive the Shop Floor page's two experiences (manager board vs operator view)."""
+	for role_name in ("Shop Floor Manager", "Shop Floor User"):
+		if not frappe.db.exists("Role", role_name):
+			frappe.get_doc({"doctype": "Role", "role_name": role_name, "desk_access": 1}).insert(
+				ignore_permissions=True
+			)
+
+
 def set_single_defaults():
 	for dt in (
 		"Accounts Settings",
@@ -58,10 +69,8 @@ def set_single_defaults():
 		"Selling Settings",
 		"Stock Settings",
 	):
-		default_values = frappe.db.sql(
-			"""select fieldname, `default` from `tabDocField`
-			where parent=%s""",
-			dt,
+		default_values = frappe.get_all(
+			"DocField", filters={"parent": dt}, fields=["fieldname", "default"], as_list=True
 		)
 		if default_values:
 			try:
@@ -408,3 +417,19 @@ DEFAULT_ROLE_PROFILES = {
 		"Purchase Manager",
 	],
 }
+
+
+def after_app_install(app_name=None):
+	if app_name == "crm":
+		from erpnext.crm.frappe_crm_api import remove_allowed_users_on_crm_install
+
+		remove_allowed_users_on_crm_install()
+
+
+def after_app_uninstall(app_name=None):
+	if app_name == "crm":
+		from erpnext.crm.frappe_crm_api import disable_frappe_crm_data_synchronization_on_crm_uninstall
+
+		disable_frappe_crm_data_synchronization_on_crm_uninstall()
+
+		frappe.db.commit()  # nosemgrep

@@ -462,6 +462,7 @@ class BootStrapTestData:
 				"new_password": "Eastern_43A1W",
 				"roles": [
 					{"doctype": "Has Role", "parentfield": "roles", "role": "_Test Role"},
+					{"doctype": "Has Role", "parentfield": "roles", "role": "Accounts User"},
 					{"doctype": "Has Role", "parentfield": "roles", "role": "System Manager"},
 				],
 			},
@@ -2544,7 +2545,7 @@ class BootStrapTestData:
 				"doctype": "Workstation",
 				"name": "_Test Workstation 1",
 				"workstation_name": "_Test Workstation 1",
-				"warehouse": "_Test warehouse - _TC",
+				"warehouse": "_Test Warehouse - _TC",
 				"hour_rate_labour": 25,
 				"hour_rate_electricity": 25,
 				"hour_rate_consumable": 25,

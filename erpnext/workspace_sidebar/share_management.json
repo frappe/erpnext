@@ -9,7 +9,7 @@
   {
    "child": 1,
    "collapsible": 1,
-   "icon": "customer",
+   "icon": "user",
    "indent": 0,
    "keep_closed": 0,
    "label": "Shareholder",
@@ -55,7 +55,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-01-10 00:06:13.040767",
+ "modified": "2026-07-03 00:06:13.040767",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Share Management",

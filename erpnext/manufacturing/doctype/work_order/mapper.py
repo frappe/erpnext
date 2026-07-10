@@ -56,11 +56,12 @@ def _item_master_details(item):
 
 
 def _item_is_alive(item_table):
-	return (
-		item_table.end_of_life.isnull()
-		| (item_table.end_of_life == "0000-00-00")
-		| (item_table.end_of_life > nowdate())
-	)
+	# "not set" end_of_life is NULL on postgres (the MariaDB zero-date '0000-00-00' is an invalid
+	# date constant there), so only add the zero-date term on MariaDB.
+	is_alive = item_table.end_of_life.isnull() | (item_table.end_of_life > nowdate())
+	if frappe.db.db_type != "postgres":
+		is_alive |= item_table.end_of_life == "0000-00-00"
+	return is_alive
 
 
 def _default_bom_for_item(item, project):
@@ -147,8 +148,7 @@ def _new_work_order(item, bom_no, company, item_details, use_multi_level_bom):
 
 
 def add_variant_item(variant_items, wo_doc, bom_no, table_name="items"):
-	if isinstance(variant_items, str):
-		variant_items = json.loads(variant_items)
+	variant_items = frappe.parse_json(variant_items)
 
 	for item in variant_items:
 		_add_variant_row(item, wo_doc, bom_no, table_name)
@@ -288,8 +288,7 @@ def _set_stock_entry_warehouses(stock_entry, work_order, purpose, target_warehou
 def make_job_card(work_order: str, operations: str | list, parent_bom: str | None = None):
 	frappe.has_permission("Job Card", "create", throw=True)
 
-	if isinstance(operations, str):
-		operations = json.loads(operations)
+	operations = frappe.parse_json(operations)
 
 	work_order = frappe.get_doc("Work Order", work_order)
 	for row in operations:
@@ -377,7 +376,7 @@ def validate_operation_data(row):
 
 	if flt(row.get("qty")) > flt(row.get("pending_qty")):
 		frappe.throw(
-			_("For operation {0}: Quantity ({1}) can not be greater than pending quantity({2})").format(
+			_("For operation {0}: Quantity ({1}) can not be greater than pending quantity ({2})").format(
 				frappe.bold(row.get("operation")),
 				frappe.bold(row.get("qty")),
 				frappe.bold(row.get("pending_qty")),
@@ -468,10 +467,10 @@ def get_work_order_operation_data(work_order, operation, workstation):
 
 
 @frappe.whitelist()
-def create_pick_list(source_name: str, target_doc: str | None = None, for_qty: float | None = None):
+def create_pick_list(source_name: str, target_doc: str | dict | None = None, for_qty: float | None = None):
 	frappe.has_permission("Pick List", "create", throw=True)
 
-	for_qty = for_qty or json.loads(target_doc).get("for_qty")
+	for_qty = for_qty or frappe.parse_json(target_doc).get("for_qty")
 	max_finished_goods_qty = frappe.db.get_value("Work Order", source_name, "qty")
 	postprocess = partial(
 		_set_pick_list_item_qty, for_qty=for_qty, max_finished_goods_qty=max_finished_goods_qty
@@ -517,8 +516,43 @@ def _set_pick_list_item_qty(source, target, source_parent, for_qty, max_finished
 
 
 @frappe.whitelist()
+def make_material_request(source_name: str, target_doc: str | dict | None = None):
+	frappe.has_permission("Material Request", "create", throw=True)
+
+	doc = get_mapped_doc("Work Order", source_name, _material_request_mapping(), target_doc)
+	doc.material_request_type = "Material Transfer"
+	return doc
+
+
+def _material_request_mapping():
+	return {
+		"Work Order": {
+			"doctype": "Material Request",
+			"validation": {"docstatus": ["=", 1]},
+			"field_map": {"name": "work_order"},
+		},
+		"Work Order Item": {
+			"doctype": "Material Request Item",
+			"field_map": [
+				("required_qty", "qty"),
+				("stock_uom", "uom"),
+				("source_warehouse", "from_warehouse"),
+			],
+			"postprocess": _set_material_request_item,
+			"condition": lambda doc: abs(doc.transferred_qty) < abs(doc.required_qty),
+		},
+	}
+
+
+def _set_material_request_item(source, target, source_parent):
+	target.warehouse = source_parent.wip_warehouse
+	target.qty = flt(source.required_qty) - flt(source.transferred_qty)
+	target.schedule_date = nowdate()
+
+
+@frappe.whitelist()
 def make_stock_return_entry(work_order: str):
-	from erpnext.stock.doctype.stock_entry.stock_entry_handler.manufacturing import (
+	from erpnext.stock.doctype.stock_entry.services.manufacturing import (
 		ManufactureStockEntry,
 	)
 

@@ -211,7 +211,7 @@ class SubcontractingController(StockController):
 						)
 					if bom_item != item.item_code:
 						frappe.throw(
-							_("Row {0}: Please select an valid BOM for Item {1}.").format(
+							_("Row {0}: Please select a valid BOM for Item {1}.").format(
 								item.idx, item.item_name
 							)
 						)
@@ -1053,8 +1053,10 @@ class SubcontractingController(StockController):
 			link = get_link_to_form(
 				self.subcontract_data.order_doctype, row.get(self.subcontract_data.order_field)
 			)
-			msg = f'The Batch No {frappe.bold(row.get("batch_no"))} has not supplied against the {self.subcontract_data.order_doctype} {link}'
-			frappe.throw(_(msg), title=_("Incorrect Batch Consumed"))
+			msg = _("The Batch No {0} has not been supplied against the {1} {2}").format(
+				frappe.bold(row.get("batch_no")), self.subcontract_data.order_doctype, link
+			)
+			frappe.throw(msg, title=_("Incorrect Batch Consumed"))
 
 	def __validate_serial_no(self, row, key):
 		if row.get("serial_and_batch_bundle") and self.__transferred_items.get(key).get("serial_no"):
@@ -1066,8 +1068,10 @@ class SubcontractingController(StockController):
 				link = get_link_to_form(
 					self.subcontract_data.order_doctype, row.get(self.subcontract_data.order_field)
 				)
-				msg = f"The Serial Nos {incorrect_sn} has not supplied against the {self.subcontract_data.order_doctype} {link}"
-				frappe.throw(_(msg), title=_("Incorrect Serial Number Consumed"))
+				msg = _("The Serial Nos {0} have not been supplied against the {1} {2}").format(
+					incorrect_sn, self.subcontract_data.order_doctype, link
+				)
+				frappe.throw(msg, title=_("Incorrect Serial Number Consumed"))
 
 	def __validate_supplied_or_received_items(self):
 		if self.doctype not in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:

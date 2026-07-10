@@ -170,6 +170,7 @@
    "ignore_user_permissions": 1,
    "in_standard_filter": 1,
    "label": "Variant Of",
+   "link_filters": "[[\"Item\",\"has_variants\",\"=\",1]]",
    "options": "Item",
    "read_only": 1,
    "search_index": 1,
@@ -255,8 +256,6 @@
   },
   {
    "bold": 1,
-   "depends_on": "eval:(doc.__islocal&&doc.is_stock_item && !doc.has_serial_no && !doc.has_batch_no)",
-   "description": "Used to create an opening Stock Entry with the Valuation Rate when the item is saved",
    "fieldname": "opening_stock",
    "fieldtype": "Float",
    "hidden": 1,
@@ -386,7 +385,7 @@
    "fieldname": "valuation_method",
    "fieldtype": "Select",
    "label": "Valuation Method",
-   "options": "\nFIFO\nMoving Average\nLIFO"
+   "options": "\nFIFO\nMoving Average\nLIFO\nStandard Cost"
   },
   {
    "depends_on": "is_stock_item",
@@ -1092,7 +1091,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2026-05-27 10:18:46.862670",
+ "modified": "2026-07-05 23:24:45.734144",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

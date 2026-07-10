@@ -173,9 +173,9 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 		if days <= 0:
 			frappe.throw(
 				_(
-					"""Error: This asset already has {0} depreciation periods booked.
-					The `depreciation start` date must be at least {1} periods after the `available for use` date.
-					Please correct the dates accordingly."""
+					"Error: This asset already has {0} depreciation periods booked. "
+					"The `depreciation start` date must be at least {1} periods after the `available for use` date. "
+					"Please correct the dates accordingly."
 				).format(
 					self.asset_doc.opening_number_of_booked_depreciations,
 					self.asset_doc.opening_number_of_booked_depreciations,

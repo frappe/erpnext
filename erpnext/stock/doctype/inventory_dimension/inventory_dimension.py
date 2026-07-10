@@ -409,7 +409,7 @@ def get_inventory_dimensions():
 			"validate_negative_stock",
 			"name as dimension_name",
 		],
-		order_by="creation",
+		order_by="creation",  # pg-ok: dropped under distinct on PG — config-list iteration order only, not data
 		distinct=True,
 	)
 

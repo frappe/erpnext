@@ -58,6 +58,7 @@ class StockEntryDetail(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+		pick_list_item: DF.Link | None
 		po_detail: DF.Data | None
 		project: DF.Link | None
 		putaway_rule: DF.Link | None
@@ -100,7 +101,7 @@ class StockEntryDetail(Document):
 	def validate_and_update_item_details(self, item_details, company, purpose):
 		if flt(self.qty) and flt(self.qty) < 0:
 			frappe.throw(
-				_("Row {0}: The item {1}, quantity must be positive number").format(
+				_("Row {0}: The item {1}, quantity must be a positive number").format(
 					self.idx, bold(self.item_code)
 				)
 			)
@@ -153,7 +154,7 @@ class StockEntryDetail(Document):
 		if is_opening == "Yes" and acc_details.report_type == "Profit and Loss":
 			frappe.throw(
 				_(
-					"Difference Account must be a Asset/Liability type account "
+					"Difference Account must be an Asset/Liability type account "
 					"(Temporary Opening), since this Stock Entry is an Opening Entry"
 				),
 				OpeningEntryAccountError,

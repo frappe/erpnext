@@ -50,14 +50,12 @@ class PackingService:
 
 	def cancel_packing_slips(self) -> None:
 		"""Cancel submitted packing slips related to this delivery note"""
-		res = frappe.db.sql(
-			"""SELECT name FROM `tabPacking Slip` WHERE delivery_note = %s
-			AND docstatus = 1""",
-			self.doc.name,
+		res = frappe.get_all(
+			"Packing Slip", filters={"delivery_note": self.doc.name, "docstatus": 1}, pluck="name"
 		)
 
 		if res:
 			for r in res:
-				ps = frappe.get_doc("Packing Slip", r[0])
+				ps = frappe.get_doc("Packing Slip", r)
 				ps.cancel()
 			frappe.msgprint(_("Packing Slip(s) cancelled"))

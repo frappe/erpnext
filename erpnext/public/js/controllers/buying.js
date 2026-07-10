@@ -552,10 +552,10 @@ erpnext.buying.link_to_mrs = function (frm) {
 						item.qty = my_qty;
 
 						frappe.msgprint(
-							"Assigning " + d.mr_name + " to " + d.item_code + " (row " + item.idx + ")"
+							__("Assigning {0} to {1} (row {2})", [d.mr_name, d.item_code, item.idx])
 						);
 						if (qty > 0) {
-							frappe.msgprint("Splitting " + qty + " units of " + d.item_code);
+							frappe.msgprint(__("Splitting {0} units of {1}", [qty, d.item_code]));
 							var newrow = frappe.model.add_child(frm.doc, item.doctype, "items");
 							item_length++;
 

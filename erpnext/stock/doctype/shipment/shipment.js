@@ -439,9 +439,10 @@ frappe.ui.form.on("Shipment Delivery Note", {
 			let row_index = row.idx - 1;
 			if (validate_duplicate(frm, "shipment_delivery_note", row.delivery_note, row_index)) {
 				frappe.throw(
-					__("You have entered a duplicate Delivery Note on Row") +
-						` ${row.idx}. ` +
-						__("Please rectify and try again.")
+					__(
+						"You have entered a duplicate Delivery Note on row {0}. Please rectify and try again.",
+						[row.idx]
+					)
 				);
 			}
 		}

@@ -31,10 +31,10 @@ def get_supplier():
 
 def check_supplier_has_docname_access(supplier):
 	status = True
-	if frappe.form_dict.name not in frappe.db.sql_list(
-		"""select parent from `tabRequest for Quotation Supplier`
-		where supplier = %s""",
-		(supplier,),
+	if frappe.form_dict.name not in frappe.get_all(
+		"Request for Quotation Supplier",
+		filters={"supplier": supplier},
+		pluck="parent",
 	):
 		status = False
 	return status
@@ -59,15 +59,17 @@ def update_supplier_details(context):
 
 
 def get_link_quotation(supplier, rfq):
-	quotation = frappe.db.sql(
-		""" select distinct `tabSupplier Quotation Item`.parent as name,
-		`tabSupplier Quotation`.status, `tabSupplier Quotation`.transaction_date from
-		`tabSupplier Quotation Item`, `tabSupplier Quotation` where `tabSupplier Quotation`.docstatus < 2 and
-		`tabSupplier Quotation Item`.request_for_quotation =%(name)s and
-		`tabSupplier Quotation Item`.parent = `tabSupplier Quotation`.name and
-		`tabSupplier Quotation`.supplier = %(supplier)s order by `tabSupplier Quotation`.creation desc""",
-		{"name": rfq, "supplier": supplier},
-		as_dict=1,
+	sqi = frappe.qb.DocType("Supplier Quotation Item")
+	sq = frappe.qb.DocType("Supplier Quotation")
+	quotation = (
+		frappe.qb.from_(sqi)
+		.inner_join(sq)
+		.on(sqi.parent == sq.name)
+		.select(sqi.parent.as_("name"), sq.status, sq.transaction_date, sq.creation)
+		.distinct()
+		.where((sq.docstatus < 2) & (sqi.request_for_quotation == rfq) & (sq.supplier == supplier))
+		.orderby(sq.creation, order=frappe.qb.desc)
+		.run(as_dict=1)
 	)
 
 	for data in quotation:

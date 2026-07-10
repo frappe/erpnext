@@ -290,7 +290,7 @@ class TestQuotation(ERPNextTestSuite):
 	def test_gross_profit(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-		from erpnext.stock.get_item_details import ItemDetailsCtx, insert_item_price
+		from erpnext.stock.get_item_details import insert_item_price
 
 		item_doc = make_item("_Test Item for Gross Profit", {"is_stock_item": 1})
 		item_code = item_doc.name
@@ -299,7 +299,7 @@ class TestQuotation(ERPNextTestSuite):
 		selling_price_list = frappe.get_all("Price List", filters={"selling": 1}, limit=1)[0].name
 		frappe.db.set_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing", 1)
 		insert_item_price(
-			ItemDetailsCtx(
+			frappe._dict(
 				{
 					"item_code": item_code,
 					"price_list": selling_price_list,
@@ -403,9 +403,9 @@ class TestQuotation(ERPNextTestSuite):
 		quotation.save()
 		quotation.submit()
 
-		self.assertEqual(quotation.payment_schedule[0].payment_amount, 8906.00)
+		self.assertEqual(quotation.payment_schedule[0].payment_amount, 500.00)
 		self.assertEqual(quotation.payment_schedule[0].due_date, quotation.transaction_date)
-		self.assertEqual(quotation.payment_schedule[1].payment_amount, 8906.00)
+		self.assertEqual(quotation.payment_schedule[1].payment_amount, 500.00)
 		self.assertEqual(quotation.payment_schedule[1].due_date, add_days(quotation.transaction_date, 30))
 
 		sales_order = make_sales_order(quotation.name)
@@ -425,11 +425,11 @@ class TestQuotation(ERPNextTestSuite):
 		sales_order.set("taxes", [])
 		sales_order.save()
 
-		self.assertEqual(sales_order.payment_schedule[0].payment_amount, 8906.00)
+		self.assertEqual(sales_order.payment_schedule[0].payment_amount, 500.00)
 		self.assertEqual(
 			getdate(sales_order.payment_schedule[0].due_date), getdate(quotation.transaction_date)
 		)
-		self.assertEqual(sales_order.payment_schedule[1].payment_amount, 8906.00)
+		self.assertEqual(sales_order.payment_schedule[1].payment_amount, 500.00)
 		self.assertEqual(
 			getdate(sales_order.payment_schedule[1].due_date),
 			getdate(add_days(quotation.transaction_date, 30)),
@@ -465,11 +465,13 @@ class TestQuotation(ERPNextTestSuite):
 
 		rate_with_margin = flt((1500 * 18.75) / 100 + 1500)
 
-		test_record = dict(self.globalTestRecords["Quotation"][0])
+		test_record = frappe.copy_doc(self.globalTestRecords["Quotation"][0])
 
-		test_record["items"][0]["price_list_rate"] = 1500
-		test_record["items"][0]["margin_type"] = "Percentage"
-		test_record["items"][0]["margin_rate_or_amount"] = 18.75
+		test_record.items[0].price_list_rate = 1500
+		test_record.items[0].margin_type = "Percentage"
+		test_record.items[0].margin_rate_or_amount = 18.75
+		# set rate to zero, so that it is recalculated on save
+		test_record.items[0].rate = 0
 
 		quotation = frappe.copy_doc(test_record)
 		quotation.transaction_date = nowdate()

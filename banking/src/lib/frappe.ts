@@ -33,6 +33,16 @@ export const getErrorMessages = (error?: FrappeError | null): ParsedErrorMessage
         }
     })
 
+    // @ts-expect-error - some errors have _error_message
+    if (error?._error_message) {
+        eMessages.push({
+            // @ts-expect-error - some errors have _error_message
+            message: error?._error_message,
+            title: "Error",
+            indicator: "red"
+        })
+    }
+
     if (eMessages.length === 0) {
         // Get the message from the exception by removing the exc_type
         const indexOfFirstColon = error?.exception?.indexOf(':')

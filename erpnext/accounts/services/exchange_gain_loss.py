@@ -141,7 +141,7 @@ def make_exchange_gain_loss_journal(
 					.where(
 						(je.docstatus == 1)
 						& (je.name.isin(parents))
-						& (je.voucher_type == "Exchange Gain or Loss")
+						& (je.voucher_type == "Exchange Gain Or Loss")
 					)
 					.run()
 				)

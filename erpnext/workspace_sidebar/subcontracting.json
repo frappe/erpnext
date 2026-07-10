@@ -9,7 +9,7 @@
   {
    "child": 0,
    "collapsible": 1,
-   "icon": "home",
+   "icon": "house",
    "indent": 0,
    "keep_closed": 0,
    "label": "Home",
@@ -230,7 +230,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-04-06 20:22:17.130321",
+ "modified": "2026-07-03 20:22:17.130321",
  "modified_by": "Administrator",
  "module": "Buying",
  "module_onboarding": "Subcontracting Onboarding",

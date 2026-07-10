@@ -9,8 +9,7 @@ import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 from frappe.query_builder import Case
-from frappe.query_builder.custom import GROUP_CONCAT
-from frappe.query_builder.functions import Coalesce, Locate, Replace, Sum
+from frappe.query_builder.functions import Coalesce, GroupConcat, Locate, Lower, Max, Replace, Sum
 from frappe.utils import cint, floor, flt, get_link_to_form
 from frappe.utils.nestedset import get_descendants_of
 
@@ -72,7 +71,9 @@ class PickList(TransactionBase):
 		purpose: DF.Literal["Material Transfer for Manufacture", "Material Transfer", "Delivery"]
 		scan_barcode: DF.Data | None
 		scan_mode: DF.Check
-		status: DF.Literal["Draft", "Open", "Partly Delivered", "Completed", "Cancelled"]
+		status: DF.Literal[
+			"Draft", "Open", "Partly Delivered", "Partially Transferred", "Completed", "Cancelled"
+		]
 		work_order: DF.Link | None
 	# end: auto-generated types
 
@@ -233,7 +234,7 @@ class PickList(TransactionBase):
 				and frappe.db.get_value("Sales Order", location.sales_order, "per_picked", cache=True) == 100
 			):
 				frappe.throw(
-					_("Row #{}: item {} has been picked already.").format(location.idx, location.item_code)
+					_("Row #{0}: item {1} has been picked already.").format(location.idx, location.item_code)
 				)
 
 	def before_submit(self):
@@ -417,6 +418,34 @@ class PickList(TransactionBase):
 			return False
 
 		return stock_entry_exists(self.name)
+
+	def get_transfer_status(self):
+		"""Return the pick list's transfer progress based on how much of the picked qty has been
+		moved into submitted Stock Entries (tracked on Pick List Item.transferred_qty).
+
+		Only applies to purposes that move stock via Stock Entry; the Delivery purpose is tracked
+		via delivery_status instead. Returns "Completed", "Partially Transferred" or None."""
+		if self.purpose == "Delivery":
+			return None
+
+		total_picked = sum(flt(row.picked_qty) for row in self.locations)
+		if not total_picked:
+			return None
+
+		total_transferred = sum(flt(row.transferred_qty) for row in self.locations)
+		if total_transferred <= 0:
+			return None
+
+		if total_transferred >= total_picked:
+			return "Completed"
+
+		return "Partially Transferred"
+
+	def is_fully_transferred(self):
+		return self.get_transfer_status() == "Completed"
+
+	def is_partially_transferred(self):
+		return self.get_transfer_status() == "Partially Transferred"
 
 	def update_reference_qty(self):
 		packed_items = []
@@ -648,7 +677,7 @@ class PickList(TransactionBase):
 				continue
 
 			if not item.item_code:
-				frappe.throw(f"Row #{item.idx}: Item Code is Mandatory")
+				frappe.throw(_("Row #{0}: Item Code is Mandatory").format(item.idx))
 			if not cint(
 				frappe.get_cached_value("Item", item.item_code, "is_stock_item")
 			) and not get_active_product_bundle(item.item_code):
@@ -903,30 +932,44 @@ def update_pick_list_status(pick_list):
 def get_picked_items_qty(items, contains_packed_items=False) -> list[dict]:
 	pi_item = frappe.qb.DocType("Pick List Item")
 
+	group_field = pi_item.product_bundle_item if contains_packed_items else pi_item.sales_order_item
+	conditions = (pi_item.docstatus == 1) & group_field.isin(items)
+
 	query = (
 		frappe.qb.from_(pi_item)
 		.select(
-			pi_item.sales_order_item,
-			pi_item.product_bundle_item,
-			pi_item.item_code,
+			# only one of sales_order_item / product_bundle_item is grouped per branch below; Max()
+			# the rest so postgres accepts the query (each is constant within its group)
+			Max(pi_item.sales_order_item).as_("sales_order_item"),
+			Max(pi_item.product_bundle_item).as_("product_bundle_item"),
+			Max(pi_item.item_code).as_("item_code"),
 			pi_item.sales_order,
 			Sum(pi_item.stock_qty).as_("stock_qty"),
 			Sum(pi_item.picked_qty).as_("picked_qty"),
 		)
-		.where(pi_item.docstatus == 1)
-		.for_update()
+		.where(conditions)
+		.groupby(group_field, pi_item.sales_order)
 	)
 
-	if contains_packed_items:
-		query = query.groupby(
-			pi_item.product_bundle_item,
-			pi_item.sales_order,
-		).where(pi_item.product_bundle_item.isin(items))
+	# Lock the picked-qty rows so a concurrent pick can't change them mid-transaction. MariaDB carries
+	# the lock on the grouped query (its gap locks also block rows other in-flight picks are about to
+	# submit); postgres has no gap locks, so first serialize on the referenced SO/packed item rows
+	# (they always exist), then lock the matching picked rows in a separate plain SELECT.
+	if frappe.db.db_type == "postgres":
+		parent = frappe.qb.DocType("Packed Item" if contains_packed_items else "Sales Order Item")
+		(
+			frappe.qb.from_(parent)
+			.select(parent.name)
+			.where(parent.name.isin(items))
+			.orderby(parent.name)
+			.for_update()
+			.run()
+		)
+		frappe.qb.from_(pi_item).select(pi_item.name).where(conditions).orderby(
+			pi_item.name
+		).for_update().run()
 	else:
-		query = query.groupby(
-			pi_item.sales_order_item,
-			pi_item.sales_order,
-		).where(pi_item.sales_order_item.isin(items))
+		query = query.for_update()
 
 	return query.run(as_dict=True)
 
@@ -1300,7 +1343,11 @@ def get_pending_work_orders(
 			& (wo.company == filters.get("company"))
 			& (wo.name.like(f"%{txt}%"))
 		)
-		.orderby(Case().when(Locate(txt, wo.name) > 0, Locate(txt, wo.name)).else_(99999))
+		.orderby(
+			Case()
+			.when(Locate(Lower(txt), Lower(wo.name)) > 0, Locate(Lower(txt), Lower(wo.name)))
+			.else_(99999)
+		)
 		.orderby(wo.name)
 		.limit(cint(page_length))
 		.offset(start)
@@ -1365,13 +1412,16 @@ def get_pick_list_query(doctype: Any, txt: str, searchfield: Any, start: int, pa
 		.select(
 			PICK_LIST.name,
 			SALES_ORDER.customer,
-			Replace(GROUP_CONCAT(PICK_LIST_ITEM.sales_order).distinct(), ",", "<br>").as_("sales_order"),
+			Replace(GroupConcat(PICK_LIST_ITEM.sales_order).distinct(), ",", "<br>").as_("sales_order"),
 		)
 		.where(PICK_LIST.docstatus == 1)
 		.where(PICK_LIST.status.isin(["Open", "Partly Delivered"]))
 		.where(PICK_LIST.company == filters.get("company"))
 		.where(SALES_ORDER.customer == filters.get("customer"))
-		.groupby(PICK_LIST.name)
+		# customer is from the joined Sales Order, not Pick List's PK, so Postgres rejects it as a bare
+		# select under GROUP BY pick_list.name; it is pinned to one value by the filter above, so adding
+		# it to the GROUP BY is valid on Postgres and identical on MariaDB.
+		.groupby(PICK_LIST.name, SALES_ORDER.customer)
 	)
 
 	if filters.get("sales_order"):

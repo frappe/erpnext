@@ -32,4 +32,6 @@ class PartySpecificItem(Document):
 			},
 		)
 		if exists:
-			frappe.throw(_("This item filter has already been applied for the {0}").format(self.party_type))
+			frappe.throw(
+				_("This item filter has already been applied for the {0}").format(_(self.party_type))
+			)

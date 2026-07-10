@@ -5,6 +5,8 @@ import json
 
 import frappe
 from frappe import _, bold
+from frappe.query_builder import Criterion
+from frappe.query_builder.functions import Count
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
 
 import erpnext
@@ -279,11 +281,7 @@ class StockController(AccountsController):
 	def make_gl_entries_on_cancel(self, from_repost=False):
 		if not from_repost:
 			cancel_exchange_gain_loss_journal(frappe._dict(doctype=self.doctype, name=self.name))
-		if frappe.db.sql(
-			"""select name from `tabGL Entry` where voucher_type=%s
-			and voucher_no=%s""",
-			(self.doctype, self.name),
-		):
+		if frappe.db.exists("GL Entry", {"voucher_type": self.doctype, "voucher_no": self.name}):
 			self.make_gl_entries()
 
 	def validate_warehouse(self):
@@ -627,12 +625,11 @@ def repost_required_for_queue(doc: StockController) -> bool:
 def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str | list[dict]):
 	from erpnext.stock.services.quality_inspection_service import INSPECTION_FIELDNAME_MAP
 
-	if isinstance(items, str):
-		items = json.loads(items)
+	items = frappe.parse_json(items)
 
 	inspection_fieldname = INSPECTION_FIELDNAME_MAP.get(doctype)
 	if inspection_fieldname is None:
-		return []
+		return items if doctype == "Stock Entry" else []
 
 	allow_after_transaction = cint(docstatus) == 1 and frappe.get_single_value(
 		"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"
@@ -656,12 +653,11 @@ def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str
 	return [item for item in items if item.get("item_code") in inspection_required_items]
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_quality_inspections(
 	company: str, doctype: str, docname: str, items: str | list, inspection_type: str
 ):
-	if isinstance(items, str):
-		items = json.loads(items)
+	items = frappe.parse_json(items)
 
 	inspections = []
 	for item in items:
@@ -725,20 +721,18 @@ def future_sle_exists(args, sl_entries=None):
 
 	args["posting_datetime"] = get_combine_datetime(args["posting_date"], args["posting_time"])
 
-	data = frappe.db.sql(
-		"""
-		select item_code, warehouse, count(name) as total_row
-		from `tabStock Ledger Entry`
-		where
-			({})
-			and posting_datetime >= %(posting_datetime)s
-			and voucher_no != %(voucher_no)s
-			and is_cancelled = 0
-		GROUP BY
-			item_code, warehouse
-		""".format(" or ".join(or_conditions)),
-		args,
-		as_dict=1,
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	data = (
+		frappe.qb.from_(sle)
+		.select(sle.item_code, sle.warehouse, Count(sle.name).as_("total_row"))
+		.where(
+			Criterion.any(or_conditions)
+			& (sle.posting_datetime >= args["posting_datetime"])
+			& (sle.voucher_no != args["voucher_no"])
+			& (sle.is_cancelled == 0)
+		)
+		.groupby(sle.item_code, sle.warehouse)
+		.run(as_dict=1)
 	)
 
 	for d in data:
@@ -792,12 +786,10 @@ def get_conditions_to_validate_future_sle(sl_entries):
 
 		warehouse_items_map[entry.warehouse].add(entry.item_code)
 
+	sle = frappe.qb.DocType("Stock Ledger Entry")
 	or_conditions = []
 	for warehouse, items in warehouse_items_map.items():
-		or_conditions.append(
-			f"""warehouse = {frappe.db.escape(warehouse)}
-				and item_code in ({", ".join(frappe.db.escape(item) for item in items)})"""
-		)
+		or_conditions.append((sle.warehouse == warehouse) & sle.item_code.isin(list(items)))
 
 	return or_conditions
 
@@ -828,6 +820,8 @@ def create_item_wise_repost_entries(
 ):
 	"""Using a voucher create repost item valuation records for all item-warehouse pairs."""
 
+	from erpnext.stock.utils import get_valuation_method
+
 	stock_ledger_entries = get_items_to_be_repost(voucher_type, voucher_no)
 
 	distinct_item_warehouses = set()
@@ -838,6 +832,11 @@ def create_item_wise_repost_entries(
 		if item_wh in distinct_item_warehouses:
 			continue
 		distinct_item_warehouses.add(item_wh)
+
+		# Standard Cost items don't need a full repost: a backdated entry only shifts future balances
+		# (qty and value at the standard rate), which is done in place by update_qty_in_future_sle.
+		if get_valuation_method(sle.item_code) == "Standard Cost":
+			continue
 
 		repost_entry = frappe.new_doc("Repost Item Valuation")
 		repost_entry.based_on = "Item and Warehouse"

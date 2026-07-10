@@ -77,7 +77,7 @@ class BOMUpdateLog(Document):
 
 	def validate_same_bom(self):
 		if cstr(self.current_bom) == cstr(self.new_bom):
-			frappe.throw(_("Current BOM and New BOM can not be same"))
+			frappe.throw(_("Current BOM and New BOM cannot be the same"))
 
 	def validate_bom_items(self):
 		current_bom_item = frappe.db.get_value("BOM", self.current_bom, "item")

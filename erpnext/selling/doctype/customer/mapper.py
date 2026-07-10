@@ -21,9 +21,6 @@ def make_quotation(source_name: str, target_doc: str | Document | None = None):
 	)
 
 	target_doc.quotation_to = "Customer"
-	target_doc.run_method("set_missing_values")
-	target_doc.run_method("set_other_charges")
-	target_doc.run_method("calculate_taxes_and_totals")
 
 	price_list, currency = frappe.db.get_value(
 		"Customer", {"name": source_name}, ["default_price_list", "default_currency"]
@@ -32,6 +29,10 @@ def make_quotation(source_name: str, target_doc: str | Document | None = None):
 		target_doc.selling_price_list = price_list
 	if currency:
 		target_doc.currency = currency
+
+	target_doc.run_method("set_missing_values")
+	target_doc.run_method("set_other_charges")
+	target_doc.run_method("calculate_taxes_and_totals")
 
 	return target_doc
 
@@ -172,7 +173,7 @@ def make_address(args, is_primary_address=1, is_shipping_address=1):
 	if reqd_fields:
 		msg = _("Following fields are mandatory to create address:")
 		frappe.throw(
-			"{} <br><br> <ul>{}</ul>".format(msg, "\n".join(reqd_fields)),
+			msg + " <br><br> <ul>{}</ul>".format("\n".join(reqd_fields)),
 			title=_("Missing Values Required"),
 		)
 

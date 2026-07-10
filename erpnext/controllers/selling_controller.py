@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _, bold, throw
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, get_link_to_form, nowtime
 
 from erpnext.accounts.party import render_address
@@ -296,7 +297,7 @@ class SellingController(StockController):
 			throw(
 				_(
 					"""Row #{0}: Selling rate for item {1} is lower than its {2}.
-					Selling {3} should be atleast {4}.<br><br>Alternatively,
+					Selling {3} should be at least {4}.<br><br>Alternatively,
 					you can disable '{5}' in {6} to bypass
 					this validation."""
 				).format(
@@ -439,22 +440,34 @@ class SellingController(StockController):
 			product_bundle_items[item_code] = item_code in items_with_product_bundle
 
 	def get_already_delivered_qty(self, current_docname, so, so_detail):
-		delivered_via_dn = frappe.db.sql(
-			"""select sum(qty) from `tabDelivery Note Item`
-			where so_detail = %s and docstatus = 1
-			and against_sales_order = %s
-			and parent != %s""",
-			(so_detail, so, current_docname),
+		dn_item = frappe.qb.DocType("Delivery Note Item")
+		delivered_via_dn = (
+			frappe.qb.from_(dn_item)
+			.select(Sum(dn_item.qty))
+			.where(
+				(dn_item.so_detail == so_detail)
+				& (dn_item.docstatus == 1)
+				& (dn_item.against_sales_order == so)
+				& (dn_item.parent != current_docname)
+			)
+			.run()
 		)
 
-		delivered_via_si = frappe.db.sql(
-			"""select sum(si_item.qty)
-			from `tabSales Invoice Item` si_item, `tabSales Invoice` si
-			where si_item.parent = si.name and si.update_stock = 1
-			and si_item.so_detail = %s and si.docstatus = 1
-			and si_item.sales_order = %s
-			and si.name != %s""",
-			(so_detail, so, current_docname),
+		si = frappe.qb.DocType("Sales Invoice")
+		si_item = frappe.qb.DocType("Sales Invoice Item")
+		delivered_via_si = (
+			frappe.qb.from_(si_item)
+			.inner_join(si)
+			.on(si_item.parent == si.name)
+			.select(Sum(si_item.qty))
+			.where(
+				(si.update_stock == 1)
+				& (si_item.so_detail == so_detail)
+				& (si.docstatus == 1)
+				& (si_item.sales_order == so)
+				& (si.name != current_docname)
+			)
+			.run()
 		)
 
 		total_delivered_qty = (flt(delivered_via_dn[0][0]) if delivered_via_dn else 0) + (
@@ -464,14 +477,11 @@ class SellingController(StockController):
 		return total_delivered_qty
 
 	def get_so_qty_and_warehouse(self, so_detail):
-		so_item = frappe.db.sql(
-			"""select qty, warehouse from `tabSales Order Item`
-			where name = %s and docstatus = 1""",
-			so_detail,
-			as_dict=1,
+		so_item = frappe.db.get_value(
+			"Sales Order Item", {"name": so_detail, "docstatus": 1}, ["qty", "warehouse"], as_dict=True
 		)
-		so_qty = so_item and flt(so_item[0]["qty"]) or 0.0
-		so_warehouse = so_item and so_item[0]["warehouse"] or ""
+		so_qty = flt(so_item.qty) if so_item else 0.0
+		so_warehouse = (so_item.warehouse if so_item else "") or ""
 		return so_qty, so_warehouse
 
 	def check_sales_order_on_hold_or_close(self, ref_fieldname):
@@ -859,7 +869,7 @@ class SellingController(StockController):
 
 			duplicate_items_msg = _("Item {0} entered multiple times.").format(frappe.bold(d.item_code))
 			duplicate_items_msg += "<br><br>"
-			duplicate_items_msg += _("Please enable {} in {} to allow same item in multiple rows").format(
+			duplicate_items_msg += _("Please enable {0} in {1} to allow same item in multiple rows").format(
 				frappe.bold(_("Allow Item to Be Added Multiple Times in a Transaction")),
 				get_link_to_form("Selling Settings", "Selling Settings"),
 			)
@@ -888,7 +898,7 @@ class SellingController(StockController):
 
 		if not self.get("is_internal_customer") and any(d.get("target_warehouse") for d in items):
 			msg = _("Target Warehouse is set for some items but the customer is not an internal customer.")
-			msg += " " + _("This {} will be treated as material transfer.").format(_(self.doctype))
+			msg += " " + _("This {0} will be treated as material transfer.").format(_(self.doctype))
 			frappe.msgprint(msg, title="Internal Transfer", alert=True)
 
 	def validate_items(self):

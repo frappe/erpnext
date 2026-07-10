@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder import CustomFunction
+from frappe.query_builder.functions import CurDate, DateDiff
 from frappe.utils import cint
 
 
@@ -102,11 +102,11 @@ def get_sales_details(filters):
 	child_doctype = "Sales Order Item" if filters["based_on"] == "Sales Order" else "Sales Invoice Item"
 	child = frappe.qb.DocType(child_doctype)
 
-	date_diff = CustomFunction("DATEDIFF", ["d1", "d2"])
-	current_date = CustomFunction("CURRENT_DATE", [])
-
 	date_col = parent.transaction_date if filters["based_on"] == "Sales Order" else parent.posting_date
-	days_since_last_order = date_diff(current_date(), date_col)
+
+	# DateDiff is cross-database (DATEDIFF on MariaDB, date subtraction on postgres); CurDate()
+	# renders the bare CURRENT_DATE keyword. Yields the integer number of days.
+	days_since_last_order = DateDiff(CurDate(), date_col)
 
 	sales_data = (
 		frappe.qb.from_(parent)

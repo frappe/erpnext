@@ -746,11 +746,11 @@ class TestMaterialRequest(ERPNextTestSuite):
 		mr = frappe.get_doc("Material Request", mr.name)
 		mr.submit()
 		completed_qty = mr.items[0].ordered_qty
-		requested_qty = frappe.db.sql(
-			"""select indented_qty from `tabBin` where \
-			item_code= %s and warehouse= %s """,
-			(mr.items[0].item_code, mr.items[0].warehouse),
-		)[0][0]
+		requested_qty = frappe.db.get_value(
+			"Bin",
+			{"item_code": mr.items[0].item_code, "warehouse": mr.items[0].warehouse},
+			"indented_qty",
+		)
 
 		prod_order = raise_work_orders(mr.name, mr.company)
 		po = frappe.get_doc("Work Order", prod_order[0])
@@ -760,11 +760,11 @@ class TestMaterialRequest(ERPNextTestSuite):
 		mr = frappe.get_doc("Material Request", mr.name)
 		self.assertEqual(completed_qty + po.qty, mr.items[0].ordered_qty)
 
-		new_requested_qty = frappe.db.sql(
-			"""select indented_qty from `tabBin` where \
-			item_code= %s and warehouse= %s """,
-			(mr.items[0].item_code, mr.items[0].warehouse),
-		)[0][0]
+		new_requested_qty = frappe.db.get_value(
+			"Bin",
+			{"item_code": mr.items[0].item_code, "warehouse": mr.items[0].warehouse},
+			"indented_qty",
+		)
 
 		self.assertEqual(requested_qty - po.qty, new_requested_qty)
 
@@ -773,11 +773,11 @@ class TestMaterialRequest(ERPNextTestSuite):
 		mr = frappe.get_doc("Material Request", mr.name)
 		self.assertEqual(completed_qty, mr.items[0].ordered_qty)
 
-		new_requested_qty = frappe.db.sql(
-			"""select indented_qty from `tabBin` where \
-			item_code= %s and warehouse= %s """,
-			(mr.items[0].item_code, mr.items[0].warehouse),
-		)[0][0]
+		new_requested_qty = frappe.db.get_value(
+			"Bin",
+			{"item_code": mr.items[0].item_code, "warehouse": mr.items[0].warehouse},
+			"indented_qty",
+		)
 		self.assertEqual(requested_qty, new_requested_qty)
 
 	def test_requested_qty_multi_uom(self):
@@ -1144,6 +1144,151 @@ class TestMaterialRequest(ERPNextTestSuite):
 		self.assertIsNone(se.to_warehouse)
 		se.save()
 		se.submit()
+
+	def test_mr_status_for_mixed_direct_and_transit_transfer(self):
+		material_request = make_material_request(
+			material_request_type="Material Transfer",
+			item_code="_Test Item Home Desktop 100",
+			qty=5,
+		)
+
+		in_transit_wh = get_in_transit_warehouse(material_request.company)
+
+		# Make stock available
+		self._insert_stock_entry(20.0, 20.0)
+
+		# Direct Transfer for 3 Qty
+		direct_transfer = make_stock_entry(material_request.name)
+		direct_transfer.items[0].update(
+			{
+				"qty": 3,
+				"transfer_qty": 3,
+				"s_warehouse": "_Test Warehouse 1 - _TC",
+			}
+		)
+		direct_transfer.save()
+		direct_transfer.submit()
+
+		# In Transit Transfer for remaining 2 Qty
+		transit_transfer = make_in_transit_stock_entry(material_request.name, in_transit_wh)
+		transit_transfer.items[0].update(
+			{
+				"qty": 2,
+				"s_warehouse": "_Test Warehouse 1 - _TC",
+			}
+		)
+		transit_transfer.save()
+		transit_transfer.submit()
+
+		# Complete End Transit
+		end_transit = make_stock_in_entry(transit_transfer.name)
+		end_transit.save()
+		end_transit.submit()
+
+		material_request.reload()
+
+		self.assertEqual(material_request.per_ordered, 100)
+		self.assertEqual(material_request.status, "Transferred")
+		self.assertEqual(material_request.transfer_status, "Completed")
+
+	def test_check_modified_date_detects_concurrent_modification(self):
+		"""check_modified_date must raise when the in-memory doc is stale vs the DB modified
+		timestamp. Covers the converted get_value + get_datetime comparison that replaced the
+		raw MariaDB-only TIMEDIFF (which errors on Postgres); update_status() runs this guard."""
+		from frappe.utils import add_to_date, get_datetime
+
+		mr = make_material_request(qty=10)
+
+		fresh = frappe.get_doc("Material Request", mr.name)
+		# modified matches the DB row -> guard passes.
+		fresh.check_modified_date()
+
+		# Stale in-memory modified -> concurrent-modification guard must fire.
+		fresh.modified = add_to_date(get_datetime(fresh.modified), seconds=-120)
+		with self.assertRaises(frappe.ValidationError) as cm:
+			fresh.check_modified_date()
+		self.assertIn("has been modified", str(cm.exception))
+
+	def test_validate_qty_against_so_blocks_over_request(self):
+		"""validate_qty_against_so must block requesting more than the Sales Order qty, net of
+		already-indented submitted MRs. Covers the converted Sales Order Item and Material Request
+		Item SUM queries. (The guard is currently not wired into validate(), so call it directly.)"""
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		item_code = "_Test Item"
+		so = make_sales_order(item_code=item_code, qty=10)  # submitted -> SO Item stock_qty 10
+
+		def _mr_against_so(qty):
+			mr = frappe.new_doc("Material Request")
+			mr.material_request_type = "Purchase"
+			mr.company = "_Test Company"
+			mr.append(
+				"items",
+				{
+					"item_code": item_code,
+					"qty": qty,
+					"uom": "_Test UOM",
+					"conversion_factor": 1,
+					"schedule_date": today(),
+					"warehouse": "_Test Warehouse - _TC",
+					"sales_order": so.name,
+				},
+			)
+			return mr
+
+		# An already-submitted MR consuming 6 of the SO's 10.
+		mr1 = _mr_against_so(6)
+		mr1.insert()
+		mr1.submit()
+
+		# A new request for 5 more -> already_indented 6 + 5 = 11 > 10 -> must throw.
+		over = _mr_against_so(5)
+		over.insert()
+		with self.assertRaises(frappe.ValidationError) as cm:
+			over.validate_qty_against_so()
+		self.assertIn("maximum", str(cm.exception))
+
+		# Exactly within the remaining 4 -> 6 + 4 = 10, not greater -> no throw.
+		over.items[0].qty = 4
+		over.validate_qty_against_so()
+
+	def test_get_material_requests_based_on_supplier(self):
+		"""The supplier-based Material Request picker must run on every engine.
+
+		It deduplicated requests with SELECT DISTINCT while ordering by an item
+		column that is not in the select list; PostgreSQL rejects that, so the
+		picker has to group and order by an aggregate instead.
+		"""
+		from erpnext.stock.doctype.material_request.material_request import (
+			get_material_requests_based_on_supplier,
+		)
+
+		item = create_item("_Test MR Default Supplier Item")
+		item.set("item_defaults", [])
+		item.append(
+			"item_defaults",
+			{
+				"company": "_Test Company",
+				"default_warehouse": "_Test Warehouse - _TC",
+				"default_supplier": "_Test Supplier",
+			},
+		)
+		item.save()
+
+		mr1 = make_material_request(item_code=item.name, qty=5)
+		mr2 = make_material_request(item_code=item.name, qty=7)
+
+		result = get_material_requests_based_on_supplier(
+			doctype="Material Request",
+			txt="",
+			searchfield="name",
+			start=0,
+			page_len=20,
+			filters={"supplier": "_Test Supplier", "company": "_Test Company"},
+		)
+		returned = {row["name"] for row in result}
+		self.assertIn(mr1.name, returned)
+		self.assertIn(mr2.name, returned)
 
 
 def get_in_transit_warehouse(company):
