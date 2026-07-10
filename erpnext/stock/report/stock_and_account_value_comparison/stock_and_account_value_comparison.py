@@ -219,8 +219,6 @@ def create_reposting_entries(rows, company):
 	if entries:
 		entries = ", ".join(entries)
 		frappe.msgprint(_("Reposting entries created: {0}").format(entries))
-<<<<<<< HEAD
-=======
 
 
 def repost_based_on_transaction(rows, company=None, entries=None):
@@ -264,4 +262,3 @@ def repost_based_on_transaction(rows, company=None, entries=None):
 				entries.append(get_link_to_form("Repost Item Valuation", doc.name))
 			except frappe.DuplicateEntryError:
 				frappe.db.rollback(save_point="repost_based_on_transaction")
->>>>>>> adae0bd732 (feat: weekly auto-repost of incorrect stock valuation entries (#56637))
