@@ -427,6 +427,12 @@ def get_returned_qty_map_for_row(return_against, party, row_name, doctype):
 	return data[0]
 
 
+def get_return_qty_and_stock_qty(source_doc, returned_qty_map):
+	stock_qty = -1 * flt(source_doc.stock_qty - (returned_qty_map.get("stock_qty") or 0))
+	qty = flt(stock_qty / (flt(source_doc.conversion_factor) or 1), source_doc.precision("qty"))
+	return qty, stock_qty
+
+
 def make_return_doc(doctype: str, source_name: str, target_doc=None, return_against_rejected_qty=False):
 	from frappe.model.mapper import get_mapped_doc
 
@@ -545,7 +551,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			target_doc.qty = -1 * flt(source_doc.qty - (wh_map.qty or 0))
 
 			if hasattr(target_doc, "stock_qty") and not return_against_rejected_qty:
-				target_doc.stock_qty = -1 * flt(source_doc.stock_qty - (flt(wh_map.stock_qty) or 0))
+				target_doc.qty, target_doc.stock_qty = get_return_qty_and_stock_qty(source_doc, wh_map)
 
 			if doctype == "Subcontracting Receipt":
 				target_doc.subcontracting_order = source_doc.subcontracting_order
@@ -583,9 +589,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			target_doc.rejected_qty = -1 * flt(
 				source_doc.rejected_qty - (returned_qty_map.get("rejected_qty") or 0)
 			)
-			target_doc.qty = -1 * flt(source_doc.qty - (returned_qty_map.get("qty") or 0))
-
-			target_doc.stock_qty = -1 * flt(source_doc.stock_qty - (returned_qty_map.get("stock_qty") or 0))
+			target_doc.qty, target_doc.stock_qty = get_return_qty_and_stock_qty(source_doc, returned_qty_map)
 			target_doc.purchase_order = source_doc.purchase_order
 			target_doc.purchase_receipt = source_doc.purchase_receipt
 			target_doc.rejected_warehouse = source_doc.rejected_warehouse
@@ -599,8 +603,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			returned_qty_map = get_returned_qty_map_for_row(
 				source_parent.name, source_parent.customer, source_doc.name, doctype
 			)
-			target_doc.qty = -1 * flt(source_doc.qty - (returned_qty_map.get("qty") or 0))
-			target_doc.stock_qty = -1 * flt(source_doc.stock_qty - (returned_qty_map.get("stock_qty") or 0))
+			target_doc.qty, target_doc.stock_qty = get_return_qty_and_stock_qty(source_doc, returned_qty_map)
 
 			target_doc.against_sales_order = source_doc.against_sales_order
 			target_doc.against_sales_invoice = source_doc.against_sales_invoice
@@ -614,8 +617,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			returned_qty_map = get_returned_qty_map_for_row(
 				source_parent.name, source_parent.customer, source_doc.name, doctype
 			)
-			target_doc.qty = -1 * flt(source_doc.qty - (returned_qty_map.get("qty") or 0))
-			target_doc.stock_qty = -1 * flt(source_doc.stock_qty - (returned_qty_map.get("stock_qty") or 0))
+			target_doc.qty, target_doc.stock_qty = get_return_qty_and_stock_qty(source_doc, returned_qty_map)
 
 			target_doc.sales_order = source_doc.sales_order
 			target_doc.delivery_note = source_doc.delivery_note
@@ -735,7 +737,20 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 		set_missing_values,
 	)
 
+	remove_fully_returned_items(doclist)
+
 	return doclist
+
+
+def remove_fully_returned_items(doclist):
+	items = []
+	for d in doclist.get("items") or []:
+		if flt(d.get("qty")) == 0 and flt(d.get("stock_qty")) == 0:
+			continue
+		d.idx = len(items) + 1
+		items.append(d)
+
+	doclist.set("items", items)
 
 
 def get_rate_for_return(

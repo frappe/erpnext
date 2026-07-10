@@ -1406,6 +1406,98 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(dn2.items[0].returned_qty, 0)
 		self.assertEqual(dn2.per_billed, 100)
 
+	def _make_box_uom_delivery_note(self, box_qty=3, conversion_factor=12):
+		item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name
+		item_doc = frappe.get_doc("Item", item)
+		if not any(u.uom == "Box" for u in item_doc.uoms):
+			item_doc.append("uoms", {"uom": "Box", "conversion_factor": conversion_factor})
+			item_doc.save()
+
+		make_stock_entry(item_code=item, to_warehouse="_Test Warehouse - _TC", qty=1000, rate=50)
+
+		dn = frappe.new_doc("Delivery Note")
+		dn.company = "_Test Company"
+		dn.customer = "_Test Customer"
+		dn.append(
+			"items",
+			{
+				"item_code": item,
+				"qty": box_qty,
+				"uom": "Box",
+				"conversion_factor": conversion_factor,
+				"warehouse": "_Test Warehouse - _TC",
+				"rate": 600,
+			},
+		)
+		dn.insert()
+		dn.submit()
+		return item, dn
+
+	def test_sales_return_qty_prefill_across_multiple_returns(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		item, dn = self._make_box_uom_delivery_note(box_qty=3)
+
+		first_return = make_return_doc("Delivery Note", dn.name)
+		self.assertEqual(first_return.items[0].qty, -3)
+		self.assertEqual(first_return.items[0].stock_qty, -36)
+
+		first_return.items[0].qty = -1
+		first_return.insert()
+		first_return.submit()
+
+		second_return = make_return_doc("Delivery Note", dn.name)
+		self.assertEqual(second_return.items[0].stock_qty, -24)
+		self.assertEqual(second_return.items[0].qty, -2)
+
+	def test_return_qty_is_derived_from_stock_qty(self):
+		from erpnext.controllers.sales_and_purchase_return import get_return_qty_and_stock_qty
+
+		item, dn = self._make_box_uom_delivery_note(box_qty=3)
+		source_doc = dn.items[0]
+
+		qty, stock_qty = get_return_qty_and_stock_qty(source_doc, frappe._dict({"stock_qty": 11}))
+
+		self.assertEqual(stock_qty, -25)
+		self.assertEqual(qty, flt(-25 / 12, source_doc.precision("qty")))
+
+	def test_fully_returned_items_excluded_from_return(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		item_a = make_item(properties={"is_stock_item": 1}).name
+		item_b = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item_a, to_warehouse="_Test Warehouse - _TC", qty=100, rate=50)
+		make_stock_entry(item_code=item_b, to_warehouse="_Test Warehouse - _TC", qty=100, rate=50)
+
+		dn = create_delivery_note(item_code=item_a, qty=5, do_not_save=True)
+		dn.append(
+			"items",
+			{
+				"item_code": item_b,
+				"qty": 5,
+				"warehouse": "_Test Warehouse - _TC",
+				"rate": 100,
+				"conversion_factor": 1.0,
+				"expense_account": "Cost of Goods Sold - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+			},
+		)
+		dn.insert()
+		dn.submit()
+
+		# fully return item_a, partially return item_b
+		first_return = make_return_doc("Delivery Note", dn.name)
+		first_return.items[0].qty = -5
+		first_return.items[1].qty = -2
+		first_return.insert()
+		first_return.submit()
+
+		second_return = make_return_doc("Delivery Note", dn.name)
+		returned_items = [d.item_code for d in second_return.items]
+		self.assertNotIn(item_a, returned_items)
+		self.assertIn(item_b, returned_items)
+		self.assertEqual(len(second_return.items), 1)
+
 	def test_internal_transfer_with_valuation_only(self):
 		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
 

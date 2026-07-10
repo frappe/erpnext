@@ -689,6 +689,30 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		return_pr.cancel()
 		pr.cancel()
 
+	def test_purchase_return_qty_prefill_derived_from_stock_qty(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		item_code = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name
+		item = frappe.get_doc("Item", item_code)
+		if not any(u.uom == "Box" for u in item.uoms):
+			item.append("uoms", {"uom": "Box", "conversion_factor": 12})
+			item.save()
+
+		pr = make_purchase_receipt(item_code=item_code, qty=3, uom="Box", conversion_factor=12)
+
+		first_return = make_return_doc("Purchase Receipt", pr.name)
+		self.assertEqual(first_return.items[0].qty, -3)
+		self.assertEqual(first_return.items[0].stock_qty, -36)
+
+		first_return.items[0].qty = -1
+		first_return.items[0].received_qty = -1
+		first_return.insert()
+		first_return.submit()
+
+		second_return = make_return_doc("Purchase Receipt", pr.name)
+		self.assertEqual(second_return.items[0].stock_qty, -24)
+		self.assertEqual(second_return.items[0].qty, -2)
+
 	def test_closed_purchase_receipt(self):
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 			update_purchase_receipt_status,
