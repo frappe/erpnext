@@ -11,9 +11,9 @@
   "column_break_main",
   "priority",
   "active",
+  "summary",
   "logic_section",
   "condition_logic",
-  "condition_expression",
   "conditions_section",
   "conditions",
   "outputs_section",
@@ -28,6 +28,7 @@
    "reqd": 1
   },
   {
+   "description": "The template whose configurations this rule applies to.",
    "fieldname": "template",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -56,33 +57,33 @@
    "label": "Active"
   },
   {
+   "description": "Auto-generated one-line reading of this rule.",
+   "fieldname": "summary",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Summary",
+   "read_only": 1
+  },
+  {
    "fieldname": "logic_section",
    "fieldtype": "Section Break",
    "label": "Matching"
   },
   {
    "default": "All conditions",
+   "description": "All conditions: every row below must match. Any condition: one matching row is enough. With no rows the rule always applies.",
    "fieldname": "condition_logic",
    "fieldtype": "Select",
    "label": "Condition Logic",
-   "options": "All conditions\nAny condition\nExpression",
+   "options": "All conditions\nAny condition",
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.condition_logic == \"Expression\"",
-   "description": "Boolean formula over attributes/variables, e.g. width > 1000 and material == \"Wood\".",
-   "fieldname": "condition_expression",
-   "fieldtype": "Small Text",
-   "label": "Condition Expression"
-  },
-  {
-   "depends_on": "eval:doc.condition_logic != \"Expression\"",
    "fieldname": "conditions_section",
    "fieldtype": "Section Break",
    "label": "Conditions"
   },
   {
-   "depends_on": "eval:doc.condition_logic != \"Expression\"",
    "fieldname": "conditions",
    "fieldtype": "Table",
    "label": "Conditions",
@@ -94,6 +95,7 @@
    "label": "Outputs"
   },
   {
+   "description": "Components added to the configuration when this rule matches.",
    "fieldname": "outputs",
    "fieldtype": "Table",
    "label": "Outputs",

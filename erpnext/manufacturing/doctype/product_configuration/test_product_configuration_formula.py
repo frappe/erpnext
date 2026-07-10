@@ -1,3 +1,4 @@
+import frappe
 from frappe.tests import IntegrationTestCase
 
 from erpnext.manufacturing.doctype.product_configuration.formula import build_context, evaluate
@@ -20,6 +21,13 @@ class TestProductConfigurationFormula(IntegrationTestCase):
 		context = build_context({"width": 2.0, "height": 3.0}, variables)
 		self.assertEqual(context["area"], 6.0)
 		self.assertEqual(context["panels"], 3)
+
+	def test_unknown_variable_in_derived_formula_raises(self):
+		variables = [{"variable_name": "area", "formula": "width * heigth"}]
+		with self.assertRaises(frappe.ValidationError) as caught:
+			build_context({"width": 2.0}, variables)
+		self.assertIn("area", str(caught.exception))
+		self.assertIn("heigth", str(caught.exception))
 
 	def test_bad_formula_returns_error(self):
 		result = evaluate("width *", {"width": 1})

@@ -12,6 +12,7 @@
  "fields": [
   {
    "columns": 3,
+   "description": "Name rules can use in their formulas, e.g. area. Letters, digits and underscores only.",
    "fieldname": "variable_name",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -20,7 +21,7 @@
   },
   {
    "columns": 5,
-   "description": "Spreadsheet-style formula over attributes and earlier variables, e.g. width * height.",
+   "description": "Spreadsheet-style formula over attributes and earlier variables, e.g. width * height. Available functions: IF, AND, OR, NOT, MIN, MAX, SUM, ABS, ROUND, ROUNDUP, ROUNDDOWN, CEILING, FLOOR, INT, MOD, SQRT, POWER.",
    "fieldname": "formula",
    "fieldtype": "Small Text",
    "in_list_view": 1,

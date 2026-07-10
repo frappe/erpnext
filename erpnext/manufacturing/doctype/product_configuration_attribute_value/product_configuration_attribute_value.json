@@ -37,6 +37,7 @@
   },
   {
    "columns": 4,
+   "description": "The chosen value, e.g. 1200 or Wood. For Yes/No attributes use 1 or 0.",
    "fieldname": "value",
    "fieldtype": "Data",
    "in_list_view": 1,

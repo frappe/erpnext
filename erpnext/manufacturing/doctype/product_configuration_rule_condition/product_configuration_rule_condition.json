@@ -30,6 +30,7 @@
   {
    "columns": 2,
    "default": "==",
+   "description": "How to compare the attribute with Value. in and not in check against a comma-separated list.",
    "fieldname": "operator",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -39,6 +40,7 @@
   },
   {
    "columns": 4,
+   "description": "Value to compare with, e.g. 1000 or Wood. For in / not in, separate options with commas: Wood, Aluminium.",
    "fieldname": "value",
    "fieldtype": "Data",
    "in_list_view": 1,

@@ -49,6 +49,7 @@
   },
   {
    "columns": 2,
+   "description": "The rule that added this component.",
    "fieldname": "source_rule",
    "fieldtype": "Data",
    "label": "Source Rule",

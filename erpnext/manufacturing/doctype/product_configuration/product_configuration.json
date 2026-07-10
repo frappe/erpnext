@@ -11,6 +11,7 @@
   "template",
   "column_break_main",
   "status",
+  "bom",
   "inputs_section",
   "attribute_values",
   "components_section",
@@ -26,11 +27,13 @@
    "reqd": 1
   },
   {
+   "description": "Auto-filled from the template name. Edit for a custom name.",
    "fieldname": "title",
    "fieldtype": "Data",
    "label": "Title"
   },
   {
+   "description": "The product definition to configure. Its attributes load below when selected.",
    "fieldname": "template",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -45,12 +48,22 @@
   },
   {
    "default": "Draft",
+   "description": "Draft until you Calculate; BOM Created once the BOM has been generated.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Draft\nCalculated",
+   "options": "Draft\nCalculated\nBOM Created",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.bom",
+   "description": "Draft BOM created from the components below.",
+   "fieldname": "bom",
+   "fieldtype": "Link",
+   "label": "BOM",
+   "options": "BOM",
    "read_only": 1
   },
   {
@@ -59,6 +72,7 @@
    "label": "Inputs"
   },
   {
+   "description": "One row per attribute, e.g. Width 1200. Fill the values, then click Calculate.",
    "fieldname": "attribute_values",
    "fieldtype": "Table",
    "label": "Attribute Values",
@@ -70,6 +84,7 @@
    "label": "Calculated Components"
   },
   {
+   "description": "Result of applying the template's rules to the values above.",
    "fieldname": "components",
    "fieldtype": "Table",
    "label": "Components",

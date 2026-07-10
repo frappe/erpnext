@@ -40,22 +40,26 @@
   },
   {
    "default": "0",
+   "description": "Must be filled in before the configuration can be calculated.",
    "fieldname": "mandatory",
    "fieldtype": "Check",
    "in_list_view": 1,
    "label": "Mandatory"
   },
   {
+   "description": "Pre-filled value for this template, e.g. 1000. Overrides the attribute's own default.",
    "fieldname": "default_value",
    "fieldtype": "Data",
    "label": "Default Value"
   },
   {
+   "description": "Lowest allowed value for numeric attributes. Leave 0 for no limit.",
    "fieldname": "min_value",
    "fieldtype": "Float",
    "label": "Min Value"
   },
   {
+   "description": "Highest allowed value for numeric attributes. Leave 0 for no limit.",
    "fieldname": "max_value",
    "fieldtype": "Float",
    "label": "Max Value"

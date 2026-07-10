@@ -25,7 +25,7 @@
    "unique": 1
   },
   {
-   "description": "Optional finished item this template configures. Used by future BOM generation.",
+   "description": "Finished item this template configures. Create BOM on a configuration builds the BOM for this item.",
    "fieldname": "configurable_item",
    "fieldtype": "Link",
    "label": "Configurable Item",
@@ -47,6 +47,7 @@
    "label": "Attributes"
   },
   {
+   "description": "The inputs asked for when configuring, e.g. Width, Height, Material.",
    "fieldname": "attributes",
    "fieldtype": "Table",
    "label": "Attributes",
@@ -54,15 +55,16 @@
    "reqd": 1
   },
   {
-   "description": "Named formulas computed before rules run, available to rule formulas (e.g. area = width * height).",
+   "collapsible": 1,
+   "description": "Optional. Named formulas computed from the attributes before rules run, so rules can reuse them. Example: a variable area with formula width * height lets a rule use CEILING(area / 2).",
    "fieldname": "variables_section",
    "fieldtype": "Section Break",
-   "label": "Derived Variables"
+   "label": "Advanced (optional)"
   },
   {
    "fieldname": "variables",
    "fieldtype": "Table",
-   "label": "Variables",
+   "label": "Derived Variables",
    "options": "Product Configuration Template Variable"
   }
  ],

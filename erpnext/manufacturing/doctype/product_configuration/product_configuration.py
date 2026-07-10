@@ -5,7 +5,11 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, flt
 
+import erpnext
 from erpnext.manufacturing.doctype.product_configuration.formula import build_context, evaluate
+from erpnext.manufacturing.doctype.product_configuration_template.product_configuration_template import (
+	attribute_masters,
+)
 
 TEMPLATE_DOCTYPE = "Product Configuration Template"
 RULE_DOCTYPE = "Product Configuration Rule"
@@ -22,6 +26,10 @@ COMPARATORS = {
 
 
 class ProductConfiguration(Document):
+	def validate(self):
+		if not self.title:
+			self.title = self.template
+
 	@frappe.whitelist()
 	def fetch_template_attributes(self) -> int:
 		self.set("attribute_values", [])
@@ -31,6 +39,8 @@ class ProductConfiguration(Document):
 
 	@frappe.whitelist()
 	def calculate_components(self) -> dict:
+		self.validate_mandatory_values()
+		self.validate_value_limits()
 		context = self.formula_context()
 		self.set("components", [])
 		for component in apply_rules(self.template, context):
@@ -38,11 +48,57 @@ class ProductConfiguration(Document):
 		self.status = "Calculated"
 		return {"components": len(self.components)}
 
+	@frappe.whitelist()
+	def create_bom(self) -> str:
+		item = frappe.db.get_value(TEMPLATE_DOCTYPE, self.template, "configurable_item")
+		if not item:
+			frappe.throw(_("Set Configurable Item on template {0} to create a BOM").format(self.template))
+		if not self.components:
+			frappe.throw(_("Calculate the components before creating a BOM"))
+
+		bom = frappe.new_doc("BOM")
+		bom.item = item
+		bom.company = erpnext.get_default_company() or frappe.db.get_value(
+			"Item Default", {"parent": item, "parenttype": "Item"}, "company"
+		)
+		for component in self.components:
+			bom.append(
+				"items",
+				{"item_code": component.component_item, "qty": component.qty, "uom": component.uom},
+			)
+		bom.insert()
+
+		self.bom = bom.name
+		self.status = "BOM Created"
+		self.save()
+		return bom.name
+
+	def validate_mandatory_values(self):
+		values = {row.attribute: row.value for row in self.attribute_values}
+		missing = [
+			row.attribute
+			for row in self.template_attributes()
+			if row.mandatory and values.get(row.attribute) in (None, "")
+		]
+		if missing:
+			frappe.throw(_("Fill values for the mandatory attributes: {0}").format(", ".join(missing)))
+
+	def validate_value_limits(self):
+		limits = {row.attribute: row for row in self.template_attributes()}
+		masters = attribute_masters([row.attribute for row in self.attribute_values])
+		problems = []
+		for row in self.attribute_values:
+			problem = value_problem(row, limits.get(row.attribute), masters.get(row.attribute))
+			if problem:
+				problems.append(problem)
+		if problems:
+			frappe.throw(_("Fix these values before calculating: {0}").format("; ".join(problems)))
+
 	def template_attributes(self) -> list:
 		return frappe.get_all(
 			"Product Configuration Template Attribute",
 			filters={"parent": self.template, "parenttype": TEMPLATE_DOCTYPE},
-			fields=["attribute", "default_value"],
+			fields=["attribute", "default_value", "mandatory", "min_value", "max_value"],
 			order_by="idx asc",
 		)
 
@@ -53,6 +109,34 @@ class ProductConfiguration(Document):
 			if row.variable_name
 		}
 		return build_context(values, template_variables(self.template))
+
+
+def value_problem(row, limits, master) -> str | None:
+	if row.value in (None, "") or not master:
+		return None
+	if master.value_type == "Select":
+		return select_problem(row, master)
+	if master.value_type in NUMERIC_VALUE_TYPES:
+		return range_problem(row, limits)
+	return None
+
+
+def select_problem(row, master) -> str | None:
+	options = [option.strip() for option in (master.select_options or "").splitlines() if option.strip()]
+	if options and row.value not in options:
+		return _("{0} must be one of {1}").format(row.attribute, ", ".join(options))
+	return None
+
+
+def range_problem(row, limits) -> str | None:
+	if not limits:
+		return None
+	value = flt(row.value)
+	if limits.min_value and value < limits.min_value:
+		return _("{0} must be at least {1}").format(row.attribute, limits.min_value)
+	if limits.max_value and value > limits.max_value:
+		return _("{0} must be at most {1}").format(row.attribute, limits.max_value)
+	return None
 
 
 def cast_value(value, value_type):
@@ -88,7 +172,7 @@ def apply_rules(template: str, context: dict) -> list:
 	rules = frappe.get_all(
 		RULE_DOCTYPE,
 		filters={"template": template, "active": 1},
-		fields=["name", "condition_logic", "condition_expression"],
+		fields=["name", "condition_logic"],
 		order_by="priority asc, creation asc",
 	)
 	if not rules:
@@ -125,10 +209,6 @@ def group_by_parent(rows: list) -> dict:
 
 
 def rule_matches(rule, conditions: list, context: dict) -> bool:
-	if rule.condition_logic == "Expression":
-		result = evaluate(rule.condition_expression, context)
-		return bool(result["value"]) if result["ok"] else False
-
 	checks = [condition_holds(condition, context) for condition in conditions]
 	if not checks:
 		return True

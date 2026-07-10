@@ -31,10 +31,12 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Variable Name",
+   "read_only": 1,
    "unique": 1
   },
   {
    "default": "Float",
+   "description": "How the value is entered: a number (Float, Int, Currency), free text (Data), a choice list (Select), or yes/no (Check).",
    "fieldname": "value_type",
    "fieldtype": "Select",
    "label": "Value Type",
@@ -42,6 +44,7 @@
    "reqd": 1
   },
   {
+   "description": "Shown next to the value when configuring, e.g. Meter for Width.",
    "fieldname": "uom",
    "fieldtype": "Link",
    "label": "Unit of Measure",
@@ -52,6 +55,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Pre-filled when configuring, e.g. 1000. A template can override it per product.",
    "fieldname": "default_value",
    "fieldtype": "Data",
    "label": "Default Value"
@@ -70,6 +74,7 @@
    "label": "Disabled"
   },
   {
+   "description": "Help text shown under the field in the Configure dialog.",
    "fieldname": "description",
    "fieldtype": "Small Text",
    "label": "Description"

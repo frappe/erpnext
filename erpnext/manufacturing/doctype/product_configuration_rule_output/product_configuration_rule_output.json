@@ -29,7 +29,7 @@
   },
   {
    "columns": 5,
-   "description": "Spreadsheet-style formula for the required quantity, e.g. CEILING(area / 2).",
+   "description": "Spreadsheet-style formula for the required quantity, e.g. CEILING(area / 2). If the result is 0 or less the component is skipped. Available functions: IF, AND, OR, NOT, MIN, MAX, SUM, ABS, ROUND, ROUNDUP, ROUNDDOWN, CEILING, FLOOR, INT, MOD, SQRT, POWER.",
    "fieldname": "quantity_formula",
    "fieldtype": "Small Text",
    "in_list_view": 1,

@@ -1,6 +1,7 @@
 import math
 
 import frappe
+from frappe import _
 
 
 def _excel_if(condition, true_value, false_value):
@@ -65,5 +66,11 @@ def build_context(values: dict, variables: list | None = None) -> dict:
 	context.update(values)
 	for variable in variables or []:
 		result = evaluate(variable.get("formula"), context)
-		context[variable.get("variable_name")] = result["value"] if result["ok"] else 0
+		if not result["ok"]:
+			frappe.throw(
+				_("Formula for variable {0} failed: {1}").format(
+					variable.get("variable_name"), result["error"]
+				)
+			)
+		context[variable.get("variable_name")] = result["value"]
 	return context

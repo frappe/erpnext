@@ -9,12 +9,19 @@ from erpnext.manufacturing.doctype.product_configuration.product_configuration i
 class ProductConfigurationRule(Document):
 	def validate(self):
 		self.validate_formulas()
+		self.summary = self.build_summary()
+
+	def build_summary(self) -> str:
+		outputs = ", ".join(f"{output.quantity_formula} x {output.component_item}" for output in self.outputs)
+		if not self.conditions:
+			return _("Always: add {0}").format(outputs)
+
+		joiner = _(" and ") if self.condition_logic == "All conditions" else _(" or ")
+		conditions = joiner.join(f"{row.attribute} {row.operator} {row.value}" for row in self.conditions)
+		return _("If {0}: add {1}").format(conditions, outputs)
 
 	def validate_formulas(self):
 		context = build_dummy_context(self.template)
-
-		if self.condition_logic == "Expression":
-			self.assert_valid_formula(self.condition_expression, context, _("Condition expression"))
 
 		for output in self.outputs:
 			self.assert_valid_formula(
