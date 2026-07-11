@@ -140,7 +140,7 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Competes In (Stacking Group)",
-   "options": "Default",
+   "options": "Default\nSeasonal\nLoyalty",
    "reqd": 1
   },
   {

@@ -544,3 +544,103 @@ class TestPricingSchemeCoupons(ERPNextTestSuite):
 		coupon.save()
 		reissued = frappe.get_doc({"doctype": "Coupon", "code": "SAVE10", "campaign": campaign.name}).insert()
 		self.assertEqual(reissued.code, "SAVE10", "code reusable once previous is disabled")
+
+
+class TestPricingSchemeAuthoring(ERPNextTestSuite):
+	"""Overlap detection, scope counting, and preview — the form's server APIs."""
+
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		make_scope_masters()
+		frappe.db.commit()  # nosemgrep — masters must survive per-test rollback
+
+	def detect(self, doc):
+		from erpnext.accounts.services.pricing.pricing_overlaps import detect_overlaps
+
+		return detect_overlaps(doc)
+
+	def test_conflict_same_group_same_priority(self):
+		existing = make_scheme(
+			title="Existing", trigger=[group_row(PARENT_GROUP)], tiers=[tier(1, 0, value=5)]
+		)
+		draft = make_scheme(title="Draft", trigger=[item_row(ITEM_A)], tiers=[tier(1, 0, value=8)])
+
+		overlaps = self.detect(draft)
+		self.assertEqual(
+			[(o["scheme"], o["severity"]) for o in overlaps],
+			[(existing.name, "conflict")],
+			"item inside the group subtree at equal priority must conflict",
+		)
+
+	def test_shadowed_and_wins_by_priority(self):
+		make_scheme(title="High", trigger=[group_row(PARENT_GROUP)], tiers=[tier(1, 0, value=5)], priority=5)
+		low = make_scheme(
+			title="Low", trigger=[group_row(PARENT_GROUP)], tiers=[tier(1, 0, value=8)], priority=2
+		)
+
+		self.assertEqual([o["severity"] for o in self.detect(low)], ["shadowed"])
+
+		low.priority = 9
+		self.assertEqual([o["severity"] for o in self.detect(low)], ["wins"])
+
+	def test_different_group_stacks(self):
+		make_scheme(title="Base", trigger=[group_row(PARENT_GROUP)], tiers=[tier(1, 0, value=5)])
+		other = make_scheme(
+			title="Seasonal",
+			trigger=[group_row(PARENT_GROUP)],
+			tiers=[tier(1, 0, value=3)],
+			stacking_group="Seasonal",
+		)
+		self.assertEqual([o["severity"] for o in self.detect(other)], ["stacks"])
+
+	def test_disjoint_windows_do_not_overlap(self):
+		from frappe.utils import add_days, nowdate
+
+		make_scheme(
+			title="Past",
+			trigger=[group_row(PARENT_GROUP)],
+			tiers=[tier(1, 0, value=5)],
+			valid_from=add_days(nowdate(), -30),
+			valid_upto=add_days(nowdate(), -10),
+		)
+		current = make_scheme(
+			title="Current",
+			trigger=[group_row(PARENT_GROUP)],
+			tiers=[tier(1, 0, value=8)],
+			valid_from=nowdate(),
+		)
+		self.assertFalse(self.detect(current))
+
+	def test_brand_group_cross_intersection(self):
+		make_scheme(title="Groups", trigger=[group_row(PARENT_GROUP)], tiers=[tier(1, 0, value=5)])
+		branded = make_scheme(
+			title="Branded", trigger=[brand_row(BRAND)], tiers=[tier(1, 0, value=8)], priority=3
+		)
+		# ITEM_A carries the brand and lives in the group subtree -> intersect
+		self.assertTrue(self.detect(branded))
+
+	def test_count_scope_items(self):
+		from erpnext.accounts.services.pricing.pricing_overlaps import count_scope_items
+
+		scheme = make_scheme(
+			trigger=[group_row(PARENT_GROUP), item_row(ITEM_B, exclude=1)],
+			tiers=[tier(1, 0, value=5)],
+		)
+		# subtree holds ITEM_A and ITEM_B; B excluded
+		self.assertEqual(count_scope_items(scheme), 1)
+
+	def test_preview_pricing_returns_rates_and_trace(self):
+		from erpnext.accounts.services.pricing.pricing_preview import preview_pricing
+
+		scheme = make_scheme(trigger=[group_row(PARENT_GROUP)], tiers=[tier(20, 50, value=8)])
+		result = preview_pricing(
+			company="_Test Company",
+			customer="_Test Customer",
+			items=[{"item_code": ITEM_A, "qty": 24, "rate": 100}],
+		)
+
+		self.assertEqual(result["lines"][0]["final_rate"], 92)
+		self.assertEqual(result["lines"][0]["schemes"], [scheme.name])
+		matched = [t for t in result["trace"] if t["status"] == "matched"]
+		self.assertEqual([t["scheme"] for t in matched], [scheme.name])

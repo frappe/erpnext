@@ -48,7 +48,7 @@ class PricingScheme(Document):
 		period_window: DF.Literal["Validity Period", "Rolling N Days"]
 		price_list: DF.Link | None
 		priority: DF.Int
-		stacking_group: DF.Literal["Default"]
+		stacking_group: DF.Literal["Default", "Seasonal", "Loyalty"]
 		tiers: DF.Table[PricingSchemeTier]
 		title: DF.Data
 		transaction_type: DF.Literal["Selling", "Buying"]
