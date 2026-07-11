@@ -365,6 +365,15 @@ pre_submit_validation_doctypes = [
 	"Sales Order",
 ]
 
+pricing_scheme_origination_doctypes = [
+	"Sales Order",
+	"Delivery Note",
+	"Sales Invoice",
+	"Purchase Order",
+	"Purchase Receipt",
+	"Purchase Invoice",
+]
+
 doc_events = {
 	"*": {
 		"validate": [
@@ -410,15 +419,13 @@ doc_events = {
 	"Sales Invoice": {
 		"on_submit": [
 			"erpnext.regional.italy.utils.sales_invoice_on_submit",
-			"erpnext.accounts.services.pricing.pricing_ledger.record_applications",
 		],
 		"on_cancel": [
 			"erpnext.regional.italy.utils.sales_invoice_on_cancel",
-			"erpnext.accounts.services.pricing.pricing_ledger.cancel_applications",
 		],
 		"on_trash": "erpnext.regional.check_deletion_permission",
 	},
-	"Sales Order": {
+	tuple(pricing_scheme_origination_doctypes): {
 		"on_submit": "erpnext.accounts.services.pricing.pricing_ledger.record_applications",
 		"on_cancel": "erpnext.accounts.services.pricing.pricing_ledger.cancel_applications",
 	},

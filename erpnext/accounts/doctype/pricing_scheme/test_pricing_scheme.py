@@ -216,7 +216,7 @@ def make_scheme(**kwargs):
 			"title": kwargs.pop("title", "Test Scheme"),
 			"effect_type": kwargs.pop("effect_type", "Discount Percentage"),
 			"company": kwargs.pop("company", "_Test Company"),
-			"transaction_type": "Selling",
+			"transaction_type": kwargs.pop("transaction_type", "Selling"),
 			"stacking_group": kwargs.pop("stacking_group", "Default"),
 			"priority": kwargs.pop("priority", 1),
 			"aggregation": kwargs.pop("aggregation", "Per Line"),
@@ -422,6 +422,29 @@ class TestPricingSchemeApplier(ERPNextTestSuite):
 			frappe.get_all("Pricing Scheme Application", filters={"voucher_no": so.name, "is_cancelled": 0})
 		)
 
+	def test_buying_scheme_on_purchase_order(self):
+		scheme = make_scheme(
+			transaction_type="Buying",
+			trigger=[group_row(PARENT_GROUP)],
+			party=[party_row("Supplier", "_Test Supplier")],
+			tiers=[tier(1, 0, value=10)],
+		)
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		po = create_purchase_order(item_code=ITEM_A, qty=10, rate=100, do_not_submit=True)
+		self.assertEqual(po.items[0].rate, 90)
+		self.assertEqual(po.items[0].scheme_discount_amount, 10)
+
+		po.submit()
+		rows = frappe.get_all(
+			"Pricing Scheme Application",
+			filters={"voucher_no": po.name, "is_cancelled": 0},
+			fields=["scheme", "party", "qty"],
+		)
+		self.assertEqual(len(rows), 1)
+		self.assertEqual(rows[0].scheme, scheme.name)
+		self.assertEqual(rows[0].party, "_Test Supplier")
+
 	def test_legacy_mode_is_fully_dormant(self):
 		frappe.db.set_single_value("Accounts Settings", "pricing_engine", "Legacy")
 		frappe.clear_document_cache("Accounts Settings", "Accounts Settings")
@@ -564,13 +587,34 @@ class TestPricingSchemeAuthoring(ERPNextTestSuite):
 		existing = make_scheme(
 			title="Existing", trigger=[group_row(PARENT_GROUP)], tiers=[tier(1, 0, value=5)]
 		)
-		draft = make_scheme(title="Draft", trigger=[item_row(ITEM_A)], tiers=[tier(1, 0, value=8)])
+		draft = frappe.get_doc(
+			{
+				"doctype": "Pricing Scheme",
+				"title": "Draft",
+				"effect_type": "Discount Percentage",
+				"transaction_type": "Selling",
+				"stacking_group": "Default",
+				"priority": 1,
+				"trigger_scope": [item_row(ITEM_A)],
+				"tiers": [tier(1, 0, value=8)],
+			}
+		)
 
 		overlaps = self.detect(draft)
 		self.assertEqual(
 			[(o["scheme"], o["severity"]) for o in overlaps],
 			[(existing.name, "conflict")],
 			"item inside the group subtree at equal priority must conflict",
+		)
+
+	def test_conflicting_scheme_blocked_at_save(self):
+		make_scheme(title="Existing", trigger=[group_row(PARENT_GROUP)], tiers=[tier(1, 0, value=5)])
+		self.assertRaises(
+			frappe.ValidationError,
+			make_scheme,
+			title="Clashing",
+			trigger=[item_row(ITEM_A)],
+			tiers=[tier(1, 0, value=8)],
 		)
 
 	def test_shadowed_and_wins_by_priority(self):

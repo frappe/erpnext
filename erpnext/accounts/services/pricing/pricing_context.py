@@ -110,12 +110,16 @@ def _build_line(row, doc) -> LineContext:
 
 def is_inherited_row(row) -> bool:
 	"""A line mapped from an upstream document inherits its pricing (chain stability)."""
-	return bool(
-		row.get("so_detail")
-		or row.get("dn_detail")
-		or row.get("sales_order_item")
-		or row.get("delivery_note_item")
+	upstream_fields = (
+		"so_detail",
+		"dn_detail",
+		"sales_order_item",
+		"delivery_note_item",
+		"purchase_order_item",
+		"po_detail",
+		"pr_detail",
 	)
+	return any(row.get(field) for field in upstream_fields)
 
 
 def _get_transaction_type(doc) -> str:

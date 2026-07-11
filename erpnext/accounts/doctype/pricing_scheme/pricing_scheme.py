@@ -64,6 +64,7 @@ class PricingScheme(Document):
 		self.validate_tiers()
 		self.validate_period()
 		self.validate_condition()
+		self.validate_no_conflicting_schemes()
 
 	def validate_dates(self) -> None:
 		self.validate_from_to_dates("valid_from", "valid_upto")
@@ -118,6 +119,23 @@ class PricingScheme(Document):
 			)
 		if self.period_window == "Rolling N Days" and not self.period_days:
 			frappe.throw(_("Per Period schemes with a rolling window need Period Days."))
+
+	def validate_no_conflicting_schemes(self) -> None:
+		"""Spec section 7.3: same stacking group + same priority + intersecting
+		scope and validity must be resolved at authoring, never at data entry."""
+		if self.disabled:
+			return
+		from erpnext.accounts.services.pricing.pricing_overlaps import detect_overlaps
+
+		conflicts = [o for o in detect_overlaps(self) if o["severity"] == "conflict"]
+		if conflicts:
+			names = ", ".join(f"{o['scheme']} ({o['title']})" for o in conflicts)
+			frappe.throw(
+				_(
+					"This scheme conflicts with {0}: same stacking group and priority over an intersecting scope. Set a different Priority or Stacking Group."
+				).format(names),
+				title=_("Conflicting Pricing Scheme"),
+			)
 
 	def validate_condition(self) -> None:
 		if not self.condition:

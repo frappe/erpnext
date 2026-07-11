@@ -13,6 +13,8 @@ from erpnext.accounts.services.pricing.pricing_effects import (
 from erpnext.accounts.services.pricing.pricing_engine import PricingEngine, PricingResult
 
 SELLING_DOCTYPES = ("Quotation", "Sales Order", "Delivery Note", "Sales Invoice")
+BUYING_DOCTYPES = ("Supplier Quotation", "Purchase Order", "Purchase Receipt", "Purchase Invoice")
+TRANSACTION_DOCTYPES = SELLING_DOCTYPES + BUYING_DOCTYPES
 
 
 class EffectApplier:
@@ -143,6 +145,7 @@ class EffectApplier:
 				"pricing_scheme_source_line": effect.source_line_key,
 				"warehouse": self._default_warehouse(effect),
 				"delivery_date": self.doc.get("delivery_date"),
+				"schedule_date": self.doc.get("schedule_date"),
 			},
 		)
 
@@ -172,7 +175,7 @@ def apply_pricing_schemes(doc) -> None:
 
 
 def should_apply(doc) -> bool:
-	if doc.doctype not in SELLING_DOCTYPES or doc.get("is_return"):
+	if doc.doctype not in TRANSACTION_DOCTYPES or doc.get("is_return"):
 		return False
 	if doc.get("ignore_pricing_rule"):
 		return False
