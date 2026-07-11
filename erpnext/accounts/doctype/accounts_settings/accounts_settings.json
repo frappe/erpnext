@@ -53,6 +53,7 @@
   "column_break_feyo",
   "maintain_same_rate_action",
   "role_to_override_stop_action",
+  "discount_composition",
   "currency_exchange_section",
   "allow_stale",
   "allow_pegged_currencies_exchange_rates",
@@ -577,6 +578,14 @@
    "fieldtype": "Link",
    "label": "Role allowed to override stop action",
    "options": "Role"
+  },
+  {
+   "default": "Compound",
+   "description": "How multiple percentage discounts from different stacking groups combine on one line. Compound: 10% then 5% = 14.5% off. Additive: 10% + 5% = 15% off the base price (legacy behavior).",
+   "fieldname": "discount_composition",
+   "fieldtype": "Select",
+   "label": "Discount Composition",
+   "options": "Compound\nAdditive"
   },
   {
    "default": "1",

@@ -1,0 +1,122 @@
+{
+ "actions": [],
+ "creation": "2026-07-11 10:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "min_qty",
+  "max_qty",
+  "min_amount",
+  "max_amount",
+  "value",
+  "margin_type",
+  "free_item_section",
+  "free_item",
+  "free_qty",
+  "free_item_uom",
+  "free_item_rate",
+  "recurrence_qty",
+  "round_down_recurrence"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "min_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Min Qty (Stock UOM)",
+   "non_negative": 1
+  },
+  {
+   "default": "0",
+   "description": "0 = no upper bound. Bands are half-open: min ≤ basis < max.",
+   "fieldname": "max_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Max Qty (Stock UOM)",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "min_amount",
+   "fieldtype": "Currency",
+   "label": "Min Amount (Base Currency)",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "max_amount",
+   "fieldtype": "Currency",
+   "label": "Max Amount (Base Currency)",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "value",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Value",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "margin_type",
+   "fieldtype": "Select",
+   "label": "Margin Type",
+   "options": "\nPercentage\nAmount"
+  },
+  {
+   "fieldname": "free_item_section",
+   "fieldtype": "Section Break",
+   "label": "Free Item"
+  },
+  {
+   "description": "Leave blank to give the trigger item itself for free.",
+   "fieldname": "free_item",
+   "fieldtype": "Link",
+   "label": "Free Item",
+   "options": "Item"
+  },
+  {
+   "default": "0",
+   "fieldname": "free_qty",
+   "fieldtype": "Float",
+   "label": "Free Qty",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "free_item_uom",
+   "fieldtype": "Link",
+   "label": "Free Item UOM",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "free_item_rate",
+   "fieldtype": "Currency",
+   "label": "Free Item Rate",
+   "non_negative": 1
+  },
+  {
+   "default": "0",
+   "description": "Give Free Qty per every N qty of the trigger basis. 0 = once per matched tier.",
+   "fieldname": "recurrence_qty",
+   "fieldtype": "Float",
+   "label": "Per Every N Qty",
+   "non_negative": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "round_down_recurrence",
+   "fieldtype": "Check",
+   "label": "Round Down Recurrence"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-07-11 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Pricing Scheme Tier",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

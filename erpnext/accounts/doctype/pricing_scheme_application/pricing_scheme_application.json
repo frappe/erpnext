@@ -1,0 +1,181 @@
+{
+ "actions": [],
+ "creation": "2026-07-11 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "scheme",
+  "tier_idx",
+  "company",
+  "posting_date",
+  "column_break_main",
+  "voucher_type",
+  "voucher_no",
+  "voucher_detail_no",
+  "party_section",
+  "party_type",
+  "party",
+  "column_break_party",
+  "item_code",
+  "amounts_section",
+  "qty",
+  "free_item_qty",
+  "column_break_amounts",
+  "discount_amount",
+  "is_cancelled"
+ ],
+ "fields": [
+  {
+   "fieldname": "scheme",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Pricing Scheme",
+   "options": "Pricing Scheme",
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "tier_idx",
+   "fieldtype": "Int",
+   "label": "Tier Row",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Link",
+   "label": "Voucher Type",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Voucher No",
+   "options": "voucher_type",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "voucher_detail_no",
+   "fieldtype": "Data",
+   "label": "Voucher Detail No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "party_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "party_type",
+   "fieldtype": "Link",
+   "label": "Party Type",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "label": "Party",
+   "options": "party_type",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_party",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item Code",
+   "options": "Item",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "amounts_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "label": "Qty (Stock UOM)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "free_item_qty",
+   "fieldtype": "Float",
+   "label": "Free Item Qty",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_amounts",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "discount_amount",
+   "fieldtype": "Currency",
+   "label": "Discount Amount (Base Currency)",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_cancelled",
+   "fieldtype": "Check",
+   "label": "Is Cancelled",
+   "read_only": 1
+  }
+ ],
+ "in_create": 1,
+ "links": [],
+ "modified": "2026-07-11 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Pricing Scheme Application",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

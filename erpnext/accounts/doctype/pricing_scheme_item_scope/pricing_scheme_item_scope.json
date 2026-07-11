@@ -1,0 +1,58 @@
+{
+ "actions": [],
+ "creation": "2026-07-11 10:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "scope_type",
+  "value",
+  "uom",
+  "exclude"
+ ],
+ "fields": [
+  {
+   "default": "Item Group",
+   "fieldname": "scope_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Scope Type",
+   "options": "Item Group\nItem\nBrand\nAll Items",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.scope_type != 'All Items'",
+   "fieldname": "value",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Value",
+   "options": "scope_type",
+   "search_index": 1
+  },
+  {
+   "depends_on": "eval:doc.scope_type == 'Item'",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "UOM",
+   "options": "UOM"
+  },
+  {
+   "default": "0",
+   "fieldname": "exclude",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Exclude"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-07-11 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Pricing Scheme Item Scope",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

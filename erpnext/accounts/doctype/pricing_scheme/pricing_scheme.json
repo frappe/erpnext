@@ -1,0 +1,340 @@
+{
+ "actions": [],
+ "autoname": "format:PRS-{#####}",
+ "creation": "2026-07-11 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "scheme_section",
+  "title",
+  "effect_type",
+  "transaction_type",
+  "company",
+  "currency",
+  "column_break_main",
+  "valid_from",
+  "valid_upto",
+  "price_list",
+  "warehouse",
+  "apply_discount_on",
+  "disabled",
+  "composition_section",
+  "stacking_group",
+  "column_break_composition",
+  "priority",
+  "applies_to_section",
+  "trigger_scope",
+  "benefit_section",
+  "benefit_scope",
+  "party_section",
+  "party_scope",
+  "tiers_section",
+  "tiers",
+  "conditions_tab",
+  "basis_section",
+  "aggregation",
+  "column_break_basis",
+  "period_window",
+  "period_days",
+  "caps_section",
+  "cap_total_applications",
+  "column_break_caps",
+  "cap_total_discount_amount",
+  "coupon_section",
+  "coupon_required",
+  "advanced_section",
+  "condition"
+ ],
+ "fields": [
+  {
+   "fieldname": "scheme_section",
+   "fieldtype": "Section Break",
+   "label": "Scheme"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Title",
+   "reqd": 1
+  },
+  {
+   "fieldname": "effect_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Effect",
+   "options": "Rate\nDiscount Percentage\nDiscount Amount\nMargin\nFree Item\nHeader Discount",
+   "reqd": 1
+  },
+  {
+   "default": "Selling",
+   "fieldname": "transaction_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Applies On",
+   "options": "Selling\nBuying",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "column_break_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "valid_from",
+   "fieldtype": "Datetime",
+   "label": "Valid From"
+  },
+  {
+   "fieldname": "valid_upto",
+   "fieldtype": "Datetime",
+   "label": "Valid Upto"
+  },
+  {
+   "fieldname": "price_list",
+   "fieldtype": "Link",
+   "label": "Price List",
+   "options": "Price List"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "default": "Grand Total",
+   "depends_on": "eval:doc.effect_type == 'Header Discount'",
+   "fieldname": "apply_discount_on",
+   "fieldtype": "Select",
+   "label": "Apply Discount On",
+   "options": "Grand Total\nNet Total"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
+  },
+  {
+   "fieldname": "composition_section",
+   "fieldtype": "Section Break",
+   "label": "Composition"
+  },
+  {
+   "default": "Default",
+   "description": "Schemes in the same group compete — highest priority wins. Schemes in different groups apply together.",
+   "fieldname": "stacking_group",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Competes In (Stacking Group)",
+   "options": "Default",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_composition",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "priority",
+   "fieldtype": "Int",
+   "label": "Priority",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "applies_to_section",
+   "fieldtype": "Section Break",
+   "label": "Applies To"
+  },
+  {
+   "fieldname": "trigger_scope",
+   "fieldtype": "Table",
+   "label": "Trigger Scope",
+   "options": "Pricing Scheme Item Scope",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "benefit_section",
+   "fieldtype": "Section Break",
+   "label": "Apply Benefit to Different Items"
+  },
+  {
+   "description": "Empty = benefit applies to the trigger items themselves.",
+   "fieldname": "benefit_scope",
+   "fieldtype": "Table",
+   "label": "Benefit Scope",
+   "options": "Pricing Scheme Item Scope"
+  },
+  {
+   "fieldname": "party_section",
+   "fieldtype": "Section Break",
+   "label": "Customers / Suppliers"
+  },
+  {
+   "description": "Empty = applies to everyone.",
+   "fieldname": "party_scope",
+   "fieldtype": "Table",
+   "label": "Party Scope",
+   "options": "Pricing Scheme Party Scope"
+  },
+  {
+   "fieldname": "tiers_section",
+   "fieldtype": "Section Break",
+   "label": "Tiers"
+  },
+  {
+   "fieldname": "tiers",
+   "fieldtype": "Table",
+   "label": "Tiers",
+   "options": "Pricing Scheme Tier",
+   "reqd": 1
+  },
+  {
+   "fieldname": "conditions_tab",
+   "fieldtype": "Tab Break",
+   "label": "Conditions & Caps"
+  },
+  {
+   "fieldname": "basis_section",
+   "fieldtype": "Section Break",
+   "label": "Tier Basis"
+  },
+  {
+   "default": "Per Line",
+   "description": "Per Document sums qty/amount across all trigger-scope lines. Per Period also accrues from past applications.",
+   "fieldname": "aggregation",
+   "fieldtype": "Select",
+   "label": "Aggregation",
+   "options": "Per Line\nPer Document\nPer Period",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_basis",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Validity Period",
+   "depends_on": "eval:doc.aggregation == 'Per Period'",
+   "fieldname": "period_window",
+   "fieldtype": "Select",
+   "label": "Period Window",
+   "options": "Validity Period\nRolling N Days"
+  },
+  {
+   "depends_on": "eval:doc.aggregation == 'Per Period' && doc.period_window == 'Rolling N Days'",
+   "fieldname": "period_days",
+   "fieldtype": "Int",
+   "label": "Period Days",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "caps_section",
+   "fieldtype": "Section Break",
+   "label": "Caps"
+  },
+  {
+   "description": "0 = uncapped. Checked against the application ledger.",
+   "fieldname": "cap_total_applications",
+   "fieldtype": "Int",
+   "label": "Cap: Total Applications",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "column_break_caps",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cap_total_discount_amount",
+   "fieldtype": "Currency",
+   "label": "Cap: Total Discount Amount",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "coupon_section",
+   "fieldtype": "Section Break",
+   "label": "Coupon"
+  },
+  {
+   "default": "0",
+   "fieldname": "coupon_required",
+   "fieldtype": "Check",
+   "label": "Coupon Required"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "advanced_section",
+   "fieldtype": "Section Break",
+   "label": "Advanced"
+  },
+  {
+   "description": "Python expression evaluated against the document. Errors are logged and traced, never swallowed.",
+   "fieldname": "condition",
+   "fieldtype": "Code",
+   "label": "Condition",
+   "options": "Python"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-07-11 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Pricing Scheme",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1
+  }
+ ],
+ "show_title_field_in_link": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "title",
+ "track_changes": 1
+}
