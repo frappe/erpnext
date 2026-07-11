@@ -8,8 +8,8 @@ from frappe import _, qb
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import Criterion, Order
-from frappe.query_builder.functions import NullIf, Sum
-from frappe.utils import flt, get_link_to_form
+from frappe.query_builder.functions import Max, NullIf, Sum
+from frappe.utils import flt, get_link_to_form, nowdate
 
 import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_balance_on
@@ -73,7 +73,7 @@ class ExchangeRateRevaluation(Document):
 
 	def validate_mandatory(self):
 		if not (self.company and self.posting_date):
-			frappe.throw(_("Please select Company and Posting Date to getting entries"))
+			frappe.throw(_("Please select Company and Posting Date to get entries"))
 
 	def before_submit(self):
 		self.remove_accounts_without_gain_loss()
@@ -91,25 +91,31 @@ class ExchangeRateRevaluation(Document):
 		)
 
 	def on_cancel(self):
-		self.ignore_linked_doctypes = "GL Entry"
+		self.ignore_linked_doctypes = ["GL Entry", "Payment Ledger Entry"]
 
 	@frappe.whitelist()
-	def check_journal_entry_condition(self):
+	def check_journal_and_reversal(self):
 		exchange_gain_loss_account = self.get_for_unrealized_gain_loss_account()
 
+		journals_posted = False
+		reversals_posted = False
+
+		je = qb.DocType("Journal Entry")
 		jea = qb.DocType("Journal Entry Account")
 		journals = (
-			qb.from_(jea)
-			.select(jea.parent)
+			qb.from_(je)
+			.join(jea)
+			.on(je.name == jea.parent)
+			.select(je.name)
 			.distinct()
 			.where(
 				(jea.reference_type == "Exchange Rate Revaluation")
 				& (jea.reference_name == self.name)
 				& (jea.docstatus == 1)
+				& (je.reversal_of.isnull())  # omit journals that have reversals
 			)
-			.run()
+			.run(pluck="name")
 		)
-
 		if journals:
 			gle = qb.DocType("GL Entry")
 			total_amt = (
@@ -124,12 +130,31 @@ class ExchangeRateRevaluation(Document):
 				.run()
 			)
 
-			if total_amt and total_amt[0][0] != self.total_gain_loss:
-				return True
+			if total_amt and total_amt[0][0] == self.total_gain_loss:
+				journals_posted = True
 			else:
-				return False
+				journals_posted = False
 
-		return True
+		# reverse journals
+		reverse_journals = (
+			qb.from_(je)
+			.join(jea)
+			.on(je.name == jea.parent)
+			.select(je.name)
+			.where(
+				(jea.reference_type == "Exchange Rate Revaluation")
+				& (jea.reference_name == self.name)
+				& (jea.docstatus == 1)
+				& (je.reversal_of.notnull())
+			)
+			.run(pluck="name")
+		)
+		if reverse_journals:
+			reversals_posted = True
+		else:
+			reversals_posted = False
+
+		return {"journals_posted": journals_posted, "reversals_posted": reversals_posted}
 
 	def fetch_and_calculate_accounts_data(self):
 		accounts = self.get_accounts_data()
@@ -188,11 +213,17 @@ class ExchangeRateRevaluation(Document):
 				accounts = [x[0] for x in res]
 
 			if accounts:
-				having_clause = (qb.Field("balance") != qb.Field("balance_in_account_currency")) & (
-					(qb.Field("balance_in_account_currency") != 0) | (qb.Field("balance") != 0)
-				)
-
 				gle = qb.DocType("GL Entry")
+
+				# balance expressions reused in both SELECT and HAVING; postgres can't reference a
+				# SELECT alias inside HAVING, so the aggregate expression must be repeated there.
+				balance = Sum(gle.debit) - Sum(gle.credit)
+				balance_in_account_currency = Sum(gle.debit_in_account_currency) - Sum(
+					gle.credit_in_account_currency
+				)
+				having_clause = (balance != balance_in_account_currency) & (
+					(balance_in_account_currency != 0) | (balance != 0)
+				)
 
 				# conditions
 				conditions = []
@@ -209,17 +240,15 @@ class ExchangeRateRevaluation(Document):
 					qb.from_(gle)
 					.select(
 						gle.account,
-						gle.party_type,
-						gle.party,
-						gle.account_currency,
-						(Sum(gle.debit_in_account_currency) - Sum(gle.credit_in_account_currency)).as_(
-							"balance_in_account_currency"
-						),
-						(Sum(gle.debit) - Sum(gle.credit)).as_("balance"),
-						(Sum(gle.debit) - Sum(gle.credit) == 0)
-						^ (Sum(gle.debit_in_account_currency) - Sum(gle.credit_in_account_currency) == 0).as_(
-							"zero_balance"
-						),
+						# grouped by NullIf(party_type/party, ""); the bare columns + account_currency are
+						# constant per group -> Max() keeps the GROUP BY valid on postgres with the same value.
+						Max(gle.party_type).as_("party_type"),
+						Max(gle.party).as_("party"),
+						Max(gle.account_currency).as_("account_currency"),
+						balance_in_account_currency.as_("balance_in_account_currency"),
+						balance.as_("balance"),
+						# zero_balance is recomputed in Python below (after rounding), so the SQL value is
+						# unused -- dropped (it used MySQL's XOR operator, which postgres lacks).
 					)
 					.where(Criterion.all(conditions))
 					.groupby(gle.account, NullIf(gle.party_type, ""), NullIf(gle.party, ""))
@@ -343,15 +372,18 @@ class ExchangeRateRevaluation(Document):
 
 	@frappe.whitelist()
 	def make_jv_entries(self):
+		frappe.has_permission("Journal Entry", "write", throw=True)
 		zero_balance_jv = self.make_jv_for_zero_balance()
 		if zero_balance_jv:
 			frappe.msgprint(
-				f"Zero Balance Journal: {get_link_to_form('Journal Entry', zero_balance_jv.name)}"
+				_("Zero Balance Journal: {0}").format(get_link_to_form("Journal Entry", zero_balance_jv.name))
 			)
 
 		revaluation_jv = self.make_jv_for_revaluation()
 		if revaluation_jv:
-			frappe.msgprint(f"Revaluation Journal: {get_link_to_form('Journal Entry', revaluation_jv.name)}")
+			frappe.msgprint(
+				_("Revaluation Journal: {0}").format(get_link_to_form("Journal Entry", revaluation_jv.name))
+			)
 
 		return {
 			"revaluation_jv": revaluation_jv.name if revaluation_jv else None,
@@ -569,6 +601,38 @@ class ExchangeRateRevaluation(Document):
 		journal_entry.save()
 		return journal_entry
 
+	@frappe.whitelist()
+	def make_reverse_journal(self):
+		frappe.has_permission("Journal Entry", "write", throw=True)
+		je = qb.DocType("Journal Entry")
+		jea = qb.DocType("Journal Entry Account")
+		journals = (
+			qb.from_(je)
+			.join(jea)
+			.on(je.name == jea.parent)
+			.select(je.name)
+			.distinct()
+			.where(
+				(jea.reference_type == "Exchange Rate Revaluation")
+				& (jea.reference_name == self.name)
+				& (jea.docstatus == 1)
+				& (je.reversal_of.isnull())  # omit journals that have reversals
+			)
+			.run(pluck="name")
+		)
+		if journals:
+			from erpnext.accounts.doctype.journal_entry.mapper import make_reverse_journal_entry
+
+			for x in journals:
+				reversal = make_reverse_journal_entry(x)
+				reversal.posting_date = nowdate()
+				reversal.submit()
+				frappe.msgprint(
+					_("Revaluation journal for {0} has been created: {1}").format(
+						frappe.bold(x), get_link_to_form("Journal Entry", reversal.name)
+					)
+				)
+
 
 def calculate_exchange_rate_using_last_gle(company, account, party_type, party):
 	"""
@@ -595,17 +659,22 @@ def calculate_exchange_rate_using_last_gle(company, account, party_type, party):
 			.select(gl.voucher_type, gl.voucher_no)
 			.where(Criterion.all(conditions))
 			.orderby(gl.posting_date, order=Order.desc)
+			.orderby(gl.name, order=Order.desc)
 			.limit(1)
 			.run()[0]
 		)
 
 		last_exchange_rate = (
 			qb.from_(gl)
-			.select((gl.debit - gl.credit) / (gl.debit_in_account_currency - gl.credit_in_account_currency))
+			.select(
+				(gl.debit - gl.credit)
+				/ NullIf(gl.debit_in_account_currency - gl.credit_in_account_currency, 0)
+			)
 			.where(
 				(gl.voucher_type == voucher_type) & (gl.voucher_no == voucher_no) & (gl.account == account)
 			)
 			.orderby(gl.posting_date, order=Order.desc)
+			.orderby(gl.name, order=Order.desc)
 			.limit(1)
 			.run()[0][0]
 		)
@@ -622,6 +691,8 @@ def get_account_details(
 	party: str | None = None,
 	rounding_loss_allowance: float = 0.0,
 ):
+	frappe.has_permission("Account", doc=account, throw=True)
+
 	if not (company and posting_date):
 		frappe.throw(_("Company and Posting Date is mandatory"))
 

@@ -11,11 +11,12 @@ from erpnext import get_company_currency
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
+from erpnext.accounts.doctype.bank_account.bank_account import get_party_bank_account
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	get_payment_entry,
 )
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
-from erpnext.accounts.party import get_party_account, get_party_bank_account
+from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_account_currency, get_advance_payment_doctypes, get_currency_precision
 from erpnext.utilities import payment_app_import_guard
 
@@ -34,6 +35,27 @@ def _get_payment_gateway_controller(*args, **kwargs):
 		from payments.utils import get_payment_gateway_controller
 
 	return get_payment_gateway_controller(*args, **kwargs)
+
+
+def _is_v2_gateway(payment_gateway):
+	"""Check if a payment gateway implements the new PaymentController interface.
+
+	Delegates to payments.utils.is_v2_gateway() which centralizes the v2 detection logic.
+	Returns False if payments app is not installed, doesn't have v2 support, or if
+	any error occurs during detection (to prevent submission failures).
+	"""
+	try:
+		with payment_app_import_guard():
+			from payments.utils import is_v2_gateway
+		return is_v2_gateway(payment_gateway)
+	except frappe.ValidationError:
+		# payments app not installed - fall back to v1
+		return False
+	except Exception as e:
+		# Catch-all for any other errors (database errors, misconfigured gateways, etc.)
+		# to prevent submission failures - fall back to v1 flow
+		frappe.logger().warning(f"Error detecting v2 gateway for '{payment_gateway}': {e}", exc_info=True)
+		return False
 
 
 class PaymentRequest(Document):
@@ -227,17 +249,159 @@ class PaymentRequest(Document):
 		elif self.payment_request_type == "Inward":
 			self.status = "Requested"
 
-		if self.payment_request_type == "Inward":
-			if self.payment_channel == "Phone":
+		if self.payment_request_type == "Inward" and self.payment_gateway:
+			if _is_v2_gateway(self.payment_gateway):
+				# New PaymentController flow (v2 gateways)
+				self._process_v2_gateway()
+			elif self.payment_channel == "Phone":
+				# Legacy v1 phone payment - phone payments do not generate email/link
+				# communications as the payment is initiated directly via phone channel
 				self.request_phone_payment()
+				return
 			else:
+				# Legacy v1 URL payment
 				self.set_payment_request_url()
-				if not (self.mute_email or self.flags.mute_email):
-					self.send_email()
-					self.make_communication_entry()
+
+			if not (self.mute_email or self.flags.mute_email):
+				self.send_email()
+				self.make_communication_entry()
 
 	def on_submit(self):
 		self.update_reference_advance_payment_status()
+
+	def _process_v2_gateway(self):
+		"""Process payment using the new PaymentController interface (v2 gateways)."""
+		tx_data = self.get_tx_data()
+		with payment_app_import_guard():
+			from payments.controllers import PaymentController
+
+			try:
+				_controller, psl_name = PaymentController.initiate(tx_data, self.payment_gateway)
+			except Exception as e:
+				# Log full exception for debugging, show generic message to user
+				frappe.log_error(
+					title=_("Payment Initialization Failed"),
+					message=f"Gateway: {self.payment_gateway}, Error: {e}\n{frappe.get_traceback()}",
+				)
+				frappe.throw(
+					_("Failed to initiate payment with {0}. Please try again or contact support.").format(
+						self.payment_gateway
+					),
+					title=_("Payment Initialization Failed"),
+				)
+			if not psl_name:
+				frappe.throw(
+					_("Payment gateway {0} failed to create a payment session").format(self.payment_gateway),
+					title=_("Payment Initialization Failed"),
+				)
+			self.payment_url = PaymentController.get_payment_url(psl_name)
+			# Store PSL reference for debugging and reconciliation
+			# (payment_session_log field added by payments app as custom field)
+			if hasattr(self, "payment_session_log"):
+				self.payment_session_log = psl_name
+
+	def get_tx_data(self):
+		"""Prepare standardized transaction data for PaymentController.
+
+		This method creates the tx_data dict expected by PaymentController.initiate().
+		Must match the TxData dataclass fields from payments.types.
+
+		Note on reference fields:
+		    reference_doctype/reference_docname point to this Payment Request (the wrapper),
+		    not the underlying business document (Sales Invoice, etc.). This is intentional
+		    because Payment Request handles callbacks, reconciliation, and status updates.
+		    The business document reference is available via self.reference_doctype/reference_name.
+		"""
+		payer_contact, payer_address = self._get_party_contact_and_address()
+
+		return frappe._dict(
+			{
+				"amount": self.get_request_amount(),
+				"currency": self.currency,
+				"reference_doctype": self.doctype,
+				"reference_docname": self.name,
+				"payer_contact": payer_contact,
+				"payer_address": payer_address,
+				"loyalty_points": None,
+				"discount_amount": None,
+			}
+		)
+
+	def _get_party_contact_and_address(self):
+		"""Get primary contact and address for the party, with only payment-relevant fields.
+
+		Returns minimal data needed for payment processing to avoid exposing
+		unnecessary PII to the payment gateway layer.
+		"""
+		if not (self.party_type and self.party):
+			return {}, {}
+
+		# Map party type to field names for primary contact/address
+		field_map = {
+			"Customer": ("customer_primary_contact", "customer_primary_address"),
+			"Supplier": ("supplier_primary_contact", "supplier_primary_address"),
+		}
+		if self.party_type not in field_map:
+			return {}, {}
+
+		contact_field, address_field = field_map[self.party_type]
+
+		# Fetch only the primary contact/address names from party (single query)
+		party_data = frappe.get_value(
+			self.party_type, self.party, [contact_field, address_field], as_dict=True
+		)
+		if not party_data:
+			return {}, {}
+
+		payer_contact = self._get_contact_fields(party_data.get(contact_field))
+		payer_address = self._get_address_fields(party_data.get(address_field))
+
+		return payer_contact, payer_address
+
+	def _get_contact_fields(self, contact_name):
+		"""Extract payment-relevant fields from a Contact."""
+		if not contact_name:
+			return {}
+
+		contact = frappe.get_value(
+			"Contact",
+			contact_name,
+			["first_name", "last_name", "email_id", "phone", "mobile_no"],
+			as_dict=True,
+		)
+		if not contact:
+			return {}
+
+		return {
+			"first_name": contact.first_name or "",
+			"last_name": contact.last_name or "",
+			"email_id": contact.email_id or "",
+			"email": contact.email_id or "",  # Alias for gateway compatibility
+			"phone": contact.phone or contact.mobile_no or "",
+		}
+
+	def _get_address_fields(self, address_name):
+		"""Extract payment-relevant fields from an Address."""
+		if not address_name:
+			return {}
+
+		address = frappe.get_value(
+			"Address",
+			address_name,
+			["address_line1", "address_line2", "city", "state", "pincode", "country"],
+			as_dict=True,
+		)
+		if not address:
+			return {}
+
+		return {
+			"address_line1": address.address_line1 or "",
+			"address_line2": address.address_line2 or "",
+			"city": address.city or "",
+			"state": address.state or "",
+			"pincode": address.pincode or "",
+			"country": address.country or "",
+		}
 
 	def request_phone_payment(self):
 		controller = _get_payment_gateway_controller(self.payment_gateway)
@@ -280,7 +444,7 @@ class PaymentRequest(Document):
 		self.update_reference_advance_payment_status()
 
 	def make_invoice(self):
-		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
 
 		si = make_sales_invoice(self.reference_name, ignore_permissions=True)
 		si.allocate_advances_automatically = True
@@ -378,15 +542,14 @@ class PaymentRequest(Document):
 			bank_amount=bank_amount,
 			created_from_payment_request=True,
 		)
+		payment_entry.set_missing_ref_details(force=True)
 
 		payment_entry.update(
 			{
 				"mode_of_payment": self.mode_of_payment,
 				"reference_no": self.name,  # to prevent validation error
 				"reference_date": nowdate(),
-				"remarks": "Payment Entry against {} {} via Payment Request {}".format(
-					self.reference_doctype, self.reference_name, self.name
-				),
+				"remarks": f"Payment Entry against {self.reference_doctype} {self.reference_name} via Payment Request {self.name}",
 			}
 		)
 
@@ -467,11 +630,9 @@ class PaymentRequest(Document):
 
 	def check_if_payment_entry_exists(self):
 		if self.status == "Paid":
-			if frappe.get_all(
+			if frappe.db.exists(
 				"Payment Entry Reference",
-				filters={"reference_name": self.reference_name, "docstatus": ["<", 2]},
-				fields=["parent"],
-				limit=1,
+				{"reference_name": self.reference_name, "docstatus": ["<", 2]},
 			):
 				frappe.throw(_("Payment Entry already exists"), title=_("Error"))
 
@@ -558,7 +719,7 @@ class PaymentRequest(Document):
 				row_number += TO_SKIP_NEW_ROW
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_payment_request(**args):
 	"""Make payment request"""
 
@@ -580,7 +741,7 @@ def make_payment_request(**args):
 
 	# Schedule-based PRs are allowed only if no Payment Entry exists for this document.
 	# Any existing Payment Entry forces legacy (amount-based) flow.
-	selected_payment_schedules = json.loads(args.get("schedules")) if args.get("schedules") else []
+	selected_payment_schedules = frappe.parse_json(args.get("schedules")) if args.get("schedules") else []
 
 	# Backend guard:
 	# If any Payment Entry exists, schedule-based PRs are not allowed.
@@ -771,7 +932,7 @@ def apply_payment_references(pr, payment_reference):
 
 
 def set_payment_references(payment_schedules):
-	payment_schedules = json.loads(payment_schedules) if payment_schedules else []
+	payment_schedules = frappe.parse_json(payment_schedules) if payment_schedules else []
 	payment_reference = []
 
 	for row in payment_schedules:
@@ -1050,10 +1211,11 @@ def get_dummy_message(doc):
 @frappe.whitelist()
 def get_subscription_details(reference_doctype: str, reference_name: str):
 	if reference_doctype == "Sales Invoice":
-		subscriptions = frappe.db.sql(
-			"""SELECT parent as sub_name FROM `tabSubscription Invoice` WHERE invoice=%s""",
-			reference_name,
-			as_dict=1,
+		subscriptions = frappe.get_all(
+			"Subscription Invoice",
+			filters={"invoice": reference_name},
+			fields=["parent as sub_name"],
+			order_by="",  # match the original query (no ORDER BY); avoid get_all's default sort
 		)
 		subscription_plans = []
 		for subscription in subscriptions:
@@ -1132,11 +1294,16 @@ def get_open_payment_requests_query(
 	)
 
 	return [
-		(
-			pr.name,
-			_("<strong>Grand Total:</strong> {0}").format(pr.grand_total),
-			_("<strong>Outstanding Amount:</strong> {0}").format(pr.outstanding_amount),
-		)
+		{
+			"value": pr.name,
+			"description": ", ".join(
+				[
+					_("<strong>Grand Total:</strong> {0}").format(pr.grand_total),
+					_("<strong>Outstanding Amount:</strong> {0}").format(pr.outstanding_amount),
+				]
+			),
+			"description_html": True,
+		}
 		for pr in open_payment_requests
 	]
 

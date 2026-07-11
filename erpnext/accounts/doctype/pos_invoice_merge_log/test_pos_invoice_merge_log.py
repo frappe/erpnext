@@ -59,7 +59,7 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 		pos_inv3.load_from_db()
 		self.assertTrue(frappe.db.exists("Sales Invoice", pos_inv3.consolidated_invoice))
 
-		self.assertFalse(pos_inv.consolidated_invoice == pos_inv3.consolidated_invoice)
+		self.assertNotEqual(pos_inv.consolidated_invoice, pos_inv3.consolidated_invoice)
 
 	def test_consolidated_credit_note_creation(self):
 		pos_inv = create_pos_invoice(rate=300, do_not_submit=1)
@@ -454,12 +454,12 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 		pos_inv2.load_from_db()
 		self.assertTrue(frappe.db.exists("Sales Invoice", pos_inv2.consolidated_invoice))
 
-		self.assertFalse(pos_inv.consolidated_invoice == pos_inv3.consolidated_invoice)
+		self.assertNotEqual(pos_inv.consolidated_invoice, pos_inv3.consolidated_invoice)
 
 		pos_inv3.load_from_db()
 		self.assertTrue(frappe.db.exists("Sales Invoice", pos_inv3.consolidated_invoice))
 
-		self.assertTrue(pos_inv2.consolidated_invoice == pos_inv3.consolidated_invoice)
+		self.assertEqual(pos_inv2.consolidated_invoice, pos_inv3.consolidated_invoice)
 
 	def test_company_in_pos_invoice_merge_log(self):
 		"""

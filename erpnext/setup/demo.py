@@ -11,8 +11,8 @@ from frappe.utils import add_days, get_url_to_form, getdate
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
-from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
+from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
 from erpnext.setup.setup_wizard.operations.install_fixtures import create_bank_account
 
 

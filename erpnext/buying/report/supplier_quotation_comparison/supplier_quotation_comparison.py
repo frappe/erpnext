@@ -296,6 +296,7 @@ def get_message():
 
 @frappe.whitelist()
 def set_default_supplier(item_code: str, supplier: str, company: str):
+	frappe.has_permission("Item", "write", doc=item_code, throw=True)
 	frappe.db.set_value(
 		"Item Default",
 		{"parent": item_code, "company": company},

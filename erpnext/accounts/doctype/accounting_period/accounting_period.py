@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import getdate, nowdate
 
 
 class OverlapError(frappe.ValidationError):
@@ -36,7 +37,19 @@ class AccountingPeriod(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_dates()
 		self.validate_overlap()
+
+	def validate_dates(self):
+		if getdate(self.start_date) > getdate(self.end_date):
+			frappe.throw(_("Start Date cannot be after End Date"))
+
+		if getdate(self.end_date) > getdate(nowdate()):
+			frappe.throw(
+				_(
+					"Accounting Period cannot be created for a future date. End Date {0} is after today."
+				).format(frappe.bold(frappe.format(self.end_date, "Date")))
+			)
 
 	def before_insert(self):
 		self.bootstrap_doctypes_for_closing()
@@ -46,22 +59,18 @@ class AccountingPeriod(Document):
 		self.name = " - ".join([self.period_name, company_abbr])
 
 	def validate_overlap(self):
-		existing_accounting_period = frappe.db.sql(
-			"""select name from `tabAccounting Period`
-			where (
-				(%(start_date)s between start_date and end_date)
-				or (%(end_date)s between start_date and end_date)
-				or (start_date between %(start_date)s and %(end_date)s)
-				or (end_date between %(start_date)s and %(end_date)s)
-			) and name!=%(name)s and company=%(company)s""",
-			{
-				"start_date": self.start_date,
-				"end_date": self.end_date,
-				"name": self.name,
-				"company": self.company,
-			},
-			as_dict=True,
+		AccountingPeriod = frappe.qb.DocType("Accounting Period")
+
+		query = (
+			frappe.qb.from_(AccountingPeriod)
+			.select(AccountingPeriod.name)
+			.where(AccountingPeriod.start_date <= self.end_date)
+			.where(AccountingPeriod.end_date >= self.start_date)
+			.where(AccountingPeriod.name != self.name)
+			.where(AccountingPeriod.company == self.company)
 		)
+
+		existing_accounting_period = query.run(as_dict=True)
 
 		if len(existing_accounting_period) > 0:
 			frappe.throw(

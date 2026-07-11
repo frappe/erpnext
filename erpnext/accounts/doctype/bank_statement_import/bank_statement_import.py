@@ -290,7 +290,7 @@ def update_mapping_db(bank, template_options):
 	for d in bank.bank_transaction_mapping:
 		d.delete()
 
-	for d in json.loads(template_options)["column_to_field_map"].items():
+	for d in frappe.parse_json(template_options)["column_to_field_map"].items():
 		bank.append("bank_transaction_mapping", {"bank_transaction_field": d[1], "file_field": d[0]})
 
 	bank.save()

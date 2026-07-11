@@ -8,7 +8,7 @@ frappe.ui.form.on("Loyalty Program", {
 		var help_content = `<table class="table table-bordered" style="background-color: var(--scrollbar-track-color);">
 				<tr><td>
 					<h4>
-						<i class="fa fa-hand-right"></i>
+						<svg class="icon icon-sm"><use href="#icon-info"></use></svg>
 						${__("Notes")}
 					</h4>
 					<ul>
@@ -36,7 +36,7 @@ frappe.ui.form.on("Loyalty Program", {
 							)}
 						</li>
 						<li>
-							${__("One customer can be part of only single Loyalty Program.")}
+							${__("One customer can be part of only a single Loyalty Program.")}
 						</li>
 					</ul>
 				</td></tr>
@@ -62,7 +62,7 @@ frappe.ui.form.on("Loyalty Program", {
 	refresh: function (frm) {
 		if (frm.doc.loyalty_program_type === "Single Tier Program" && frm.doc.collection_rules.length > 1) {
 			frappe.throw(
-				__("Please select the Multiple Tier Program type for more than one collection rules.")
+				__("Please select the Multiple Tier Program type for more than one collection rule.")
 			);
 		}
 	},

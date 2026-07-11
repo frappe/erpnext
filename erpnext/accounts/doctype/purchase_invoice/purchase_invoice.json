@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:39",
@@ -27,8 +28,6 @@
   "update_billed_amount_in_purchase_receipt",
   "apply_tds",
   "amended_from",
-  "section_break_ecfi",
-  "title",
   "supplier_invoice_details",
   "bill_no",
   "column_break_15",
@@ -201,12 +200,12 @@
   "hold_comment",
   "additional_info_section",
   "is_internal_supplier",
+  "title",
   "represents_company",
   "supplier_group",
   "sender",
   "column_break_147",
   "inter_company_invoice_reference",
-  "is_old_subcontracting_flow",
   "remarks",
   "connections_tab"
  ],
@@ -615,10 +614,12 @@
   {
    "default": "0",
    "depends_on": "eval:doc.items.every((item) => !item.pr_detail)",
+   "description": "If checked, updates inventory; stock and accounting entries are created together. Leave unchecked if a Purchase Receipt is created separately.",
    "fieldname": "update_stock",
    "fieldtype": "Check",
    "label": "Update Stock",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_description_on_click": 1
   },
   {
    "fieldname": "scan_barcode",
@@ -1457,14 +1458,6 @@
    "options": "Subscription"
   },
   {
-   "default": "0",
-   "fieldname": "is_old_subcontracting_flow",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Is Old Subcontracting Flow",
-   "read_only": 1
-  },
-  {
    "fieldname": "payments_tab",
    "fieldtype": "Tab Break",
    "label": "Payments"
@@ -1692,10 +1685,6 @@
    "fieldname": "automation_section",
    "fieldtype": "Section Break",
    "label": "Automation"
-  },
-  {
-   "fieldname": "section_break_ecfi",
-   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
@@ -1703,7 +1692,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-30 12:16:40.157755",
+ "modified": "2026-06-13 18:36:46.704623",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

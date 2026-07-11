@@ -137,7 +137,7 @@ frappe.ui.form.on("Project", {
 			freeze_message: __("Updating Costing and Billing fields against this Project..."),
 			callback: function (r) {
 				if (r && !r.exc) {
-					frappe.msgprint(__("Costing and Billing fields has been updated"));
+					frappe.msgprint(__("Costing and Billing fields have been updated"));
 					frm.refresh();
 				}
 			},
@@ -222,6 +222,9 @@ function open_form(frm, doctype, child_doctype, parentfield) {
 		new_child_doc.parenttype = doctype;
 		new_doc[parentfield] = [new_child_doc];
 		new_doc.project = frm.doc.name;
+		if (frm.doc.company) {
+			new_doc.company = frm.doc.company;
+		}
 
 		frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
 	});

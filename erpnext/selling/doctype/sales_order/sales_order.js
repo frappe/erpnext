@@ -27,7 +27,7 @@ frappe.ui.form.on("Sales Order", {
 			let color;
 			if (!doc.qty && frm.doc.has_unit_price_items) {
 				color = "yellow";
-			} else if (doc.stock_qty <= doc.actual_qty) {
+			} else if (doc.stock_qty - doc.delivered_qty <= doc.actual_qty) {
 				color = "green";
 			} else {
 				color = "orange";
@@ -123,22 +123,12 @@ frappe.ui.form.on("Sales Order", {
 					() => frm.events.cancel_stock_reservation_entries(frm),
 					__("Stock Reservation")
 				);
-			}
 
-			if (!frm.doc.is_subcontracted) {
-				frm.doc.items.forEach((item) => {
-					if (
-						flt(item.stock_reserved_qty) > 0 &&
-						frappe.model.can_read("Stock Reservation Entry")
-					) {
-						frm.add_custom_button(
-							__("Reserved Stock"),
-							() => frm.events.show_reserved_stock(frm),
-							__("Stock Reservation")
-						);
-						return;
-					}
-				});
+				frm.add_custom_button(
+					__("Reserved Stock"),
+					() => frm.events.show_reserved_stock(frm),
+					__("Stock Reservation")
+				);
 			}
 		}
 
@@ -189,7 +179,7 @@ frappe.ui.form.on("Sales Order", {
 			__("Purchase Order"),
 			() => {
 				erpnext.utils.map_current_doc({
-					method: "erpnext.buying.doctype.purchase_order.purchase_order.make_inter_company_sales_order",
+					method: "erpnext.buying.doctype.purchase_order.mapper.make_inter_company_sales_order",
 					source_doctype: "Purchase Order",
 					target: frm,
 					setters: [
@@ -266,7 +256,10 @@ frappe.ui.form.on("Sales Order", {
 					default: frm.doc.set_warehouse,
 					get_query: () => {
 						return {
-							filters: [["Warehouse", "is_group", "!=", 1]],
+							filters: [
+								["Warehouse", "is_group", "!=", 1],
+								["Warehouse", "company", "=", frm.doc.company],
+							],
 						};
 					},
 					onchange: () => {
@@ -320,6 +313,7 @@ frappe.ui.form.on("Sales Order", {
 										item_code: item.item_code,
 										warehouse: dialog.get_value("set_warehouse") || item.warehouse,
 										qty_to_reserve: Math.max(unreserved_qty, 0),
+										is_packed_item: 0,
 									});
 									dialog.fields_dict.items.grid.refresh();
 									dialog.set_value("add_item", undefined);
@@ -340,9 +334,8 @@ frappe.ui.form.on("Sales Order", {
 					fields: [
 						{
 							fieldname: "sales_order_item",
-							fieldtype: "Link",
-							label: __("Sales Order Item"),
-							options: "Sales Order Item",
+							fieldtype: "Data",
+							label: __("Item"),
 							reqd: 1,
 							in_list_view: 1,
 							get_query: () => {
@@ -386,9 +379,13 @@ frappe.ui.form.on("Sales Order", {
 							options: "Warehouse",
 							reqd: 1,
 							in_list_view: 1,
+							read_only_depends_on: "eval:doc.is_packed_item",
 							get_query: () => {
 								return {
-									filters: [["Warehouse", "is_group", "!=", 1]],
+									filters: [
+										["Warehouse", "is_group", "!=", 1],
+										["Warehouse", "company", "=", frm.doc.company],
+									],
 								};
 							},
 						},
@@ -398,6 +395,12 @@ frappe.ui.form.on("Sales Order", {
 							label: __("Qty"),
 							reqd: 1,
 							in_list_view: 1,
+						},
+						{
+							fieldname: "is_packed_item",
+							fieldtype: "Check",
+							label: __("Is Packed Item"),
+							hidden: 1,
 						},
 					],
 				},
@@ -445,13 +448,40 @@ frappe.ui.form.on("Sales Order", {
 						item_code: item.item_code,
 						warehouse: item.warehouse,
 						qty_to_reserve: unreserved_qty,
+						is_packed_item: 0,
 					});
 				}
 			}
 		});
 
-		dialog.fields_dict.items.grid.refresh();
-		dialog.show();
+		frappe.call({
+			doc: frm.doc,
+			method: "has_unreserved_stock",
+			args: {
+				table_name: "packed_items",
+			},
+			callback: (r) => {
+				if (r.message) {
+					frm.doc.packed_items.forEach((item) => {
+						if (item.reserve_stock && r.message[item.name]) {
+							const unreserved_qty = r.message[item.name];
+							if (unreserved_qty > 0) {
+								dialog.fields_dict.items.df.data.push({
+									__checked: 1,
+									sales_order_item: item.name,
+									item_code: item.item_code,
+									warehouse: item.warehouse,
+									qty_to_reserve: unreserved_qty,
+									is_packed_item: 1,
+								});
+							}
+						}
+					});
+				}
+				dialog.fields_dict.items.grid.refresh();
+				dialog.show();
+			},
+		});
 	},
 
 	cancel_stock_reservation_entries(frm) {
@@ -793,6 +823,14 @@ frappe.ui.form.on("Sales Order", {
 			args: {
 				service_item: service_item,
 			},
+		});
+	},
+
+	reserve_stock(frm) {
+		["items", "packed_items"].forEach((table) => {
+			(frm.doc[table] || []).forEach((row) => {
+				frappe.model.set_value(row.doctype, row.name, "reserve_stock", frm.doc.reserve_stock);
+			});
 		});
 	},
 });
@@ -1162,11 +1200,13 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 				}
 				// payment request
 				if (flt(doc.per_billed) < 100 + frappe.boot.sysdefaults.over_billing_allowance) {
-					this.frm.add_custom_button(
-						__("Payment Request"),
-						() => this.make_payment_request_with_schedule(),
-						__("Create")
-					);
+					if (frappe.boot.user.in_create.includes("Payment Request")) {
+						this.frm.add_custom_button(
+							__("Payment Request"),
+							() => this.make_payment_request_with_schedule(),
+							__("Create")
+						);
+					}
 
 					if (frappe.model.can_create("Payment Entry")) {
 						this.frm.add_custom_button(
@@ -1189,7 +1229,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 				__("Quotation"),
 				function () {
 					let d = erpnext.utils.map_current_doc({
-						method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
+						method: "erpnext.selling.doctype.quotation.mapper.make_sales_order",
 						source_doctype: "Quotation",
 						target: me.frm,
 						setters: [
@@ -1238,7 +1278,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 	create_pick_list() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.selling.doctype.sales_order.sales_order.create_pick_list",
+			method: "erpnext.selling.doctype.sales_order.mapper.create_pick_list",
 			frm: this.frm,
 		});
 	}
@@ -1325,10 +1365,10 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						primary_action: function () {
 							var data = { items: d.fields_dict.items.grid.get_selected_children() };
 							if (!data.items.length) {
-								frappe.throw(__("Please select atleast one item to continue"));
+								frappe.throw(__("Please select at least one item to continue"));
 							}
 							me.frm.call({
-								method: "make_work_orders",
+								method: "erpnext.selling.doctype.sales_order.mapper.make_work_orders",
 								args: {
 									items: data,
 									company: me.frm.doc.company,
@@ -1366,7 +1406,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 	make_production_plan() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.selling.doctype.sales_order.sales_order.make_production_plan",
+			method: "erpnext.selling.doctype.sales_order.mapper.make_production_plan",
 			frm: this.frm,
 		});
 	}
@@ -1381,7 +1421,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 	make_material_request() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.selling.doctype.sales_order.sales_order.make_material_request",
+			method: "erpnext.selling.doctype.sales_order.mapper.make_material_request",
 			frm: this.frm,
 		});
 	}
@@ -1479,7 +1519,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 			primary_action: function () {
 				var data = d.get_values();
 				me.frm.call({
-					method: "erpnext.selling.doctype.sales_order.sales_order.make_raw_material_request",
+					method: "erpnext.selling.doctype.sales_order.mapper.make_raw_material_request",
 					args: {
 						items: data,
 						company: me.frm.doc.company,
@@ -1574,7 +1614,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 	make_delivery_note(delivery_dates, for_reserved_stock = false) {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
+			method: "erpnext.selling.doctype.sales_order.mapper.make_delivery_note",
 			frm: this.frm,
 			args: {
 				delivery_dates,
@@ -1587,35 +1627,35 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 	make_sales_invoice() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.selling.doctype.sales_order.sales_order.make_sales_invoice",
+			method: "erpnext.selling.doctype.sales_order.mapper.make_sales_invoice",
 			frm: this.frm,
 		});
 	}
 
 	make_maintenance_schedule() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_schedule",
+			method: "erpnext.selling.doctype.sales_order.mapper.make_maintenance_schedule",
 			frm: this.frm,
 		});
 	}
 
 	make_project() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.selling.doctype.sales_order.sales_order.make_project",
+			method: "erpnext.selling.doctype.sales_order.mapper.make_project",
 			frm: this.frm,
 		});
 	}
 
 	make_inter_company_order() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.selling.doctype.sales_order.sales_order.make_inter_company_purchase_order",
+			method: "erpnext.selling.doctype.sales_order.mapper.make_inter_company_purchase_order",
 			frm: this.frm,
 		});
 	}
 
 	make_maintenance_visit() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_visit",
+			method: "erpnext.selling.doctype.sales_order.mapper.make_maintenance_visit",
 			frm: this.frm,
 		});
 	}
@@ -1713,7 +1753,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 				let selected_items = dialog.fields_dict.items_for_po.grid.get_selected_children();
 				if (selected_items.length == 0) {
 					frappe.throw({
-						message: "Please select Items from the Table",
+						message: __("Please select Items from the Table"),
 						title: __("Items Required"),
 						indicator: "blue",
 					});
@@ -1729,7 +1769,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 				dialog.hide();
 				return frappe.call({
-					method: "erpnext.selling.doctype.sales_order.sales_order.make_purchase_order",
+					method: "erpnext.selling.doctype.sales_order.mapper.make_purchase_order",
 					freeze_message: __("Creating Purchase Order ..."),
 					args: {
 						source_name: me.frm.doc.name,
@@ -1849,7 +1889,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 	make_subcontracting_inward_order() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.selling.doctype.sales_order.sales_order.make_subcontracting_inward_order",
+			method: "erpnext.selling.doctype.sales_order.mapper.make_subcontracting_inward_order",
 			frm: this.frm,
 			freeze_message: __("Creating Subcontracting Inward Order ..."),
 		});

@@ -1,0 +1,851 @@
+{
+	"name": "Philippines",
+	"country": "Philippines",
+	"tree": {
+		"Asset": {
+			"account_number": "1000",
+			"is_group": 1,
+			"root_type": "Asset",
+			"Current Assets": {
+				"account_number": "1001",
+				"is_group": 1,
+				"root_type": "Asset",
+				"Cash": {
+					"account_number": "1100",
+					"is_group": 1,
+					"root_type": "Asset",
+					"account_type": "Cash",
+					"Cash on Hand": {
+						"account_number": "1101",
+						"is_group": 0,
+						"root_type": "Asset",
+						"account_type": "Cash"
+					},
+					"Petty Cash Fund": {
+						"account_number": "1200",
+						"is_group": 1,
+						"root_type": "Asset",
+						"account_type": "Cash",
+						"Petty Cash Fund": {
+							"account_number": "1201",
+							"is_group": 0,
+							"root_type": "Asset",
+							"account_type": "Cash"
+						}
+					}
+				},
+				"Bank Accounts": {
+					"account_number": "1102",
+					"is_group": 1,
+					"root_type": "Asset",
+					"account_type": "Bank"
+				},
+				"Advances to Officers & Employees": {
+					"account_number": "1290",
+					"is_group": 1,
+					"root_type": "Asset",
+					"Advances to Officers & Employees": {
+						"account_number": "1291",
+						"is_group": 0,
+						"root_type": "Asset"
+					}
+				},
+				"Accounts Receivable Trade": {
+					"account_number": "1300",
+					"is_group": 1,
+					"root_type": "Asset",
+					"Accounts Receivable - Trade": {
+						"account_number": "1301",
+						"is_group": 0,
+						"root_type": "Asset",
+						"account_type": "Receivable"
+					}
+				},
+				"Accounts Receivable - Affiliates": {
+					"account_number": "1310",
+					"is_group": 1,
+					"root_type": "Asset",
+					"Due from Company": {
+						"account_number": "1311",
+						"is_group": 0,
+						"root_type": "Asset"
+					}
+				},
+				"Accounts Receivable - Others": {
+					"account_number": "1400",
+					"is_group": 1,
+					"root_type": "Asset",
+					"Accounts Receivable - Others": {
+						"account_number": "1401",
+						"is_group": 0,
+						"root_type": "Asset"
+					}
+				},
+				"Parts, Materials and Supplies": {
+					"account_number": "1500",
+					"is_group": 1,
+					"root_type": "Asset",
+					"Parts, Materials and Supplies": {
+						"account_number": "1501",
+						"is_group": 0,
+						"root_type": "Asset"
+					},
+					"Raw Materials - Demo": {
+						"account_number": "1502",
+						"is_group": 0,
+						"root_type": "Asset"
+					}
+				},
+				"Project in Progress": {
+					"account_number": "1510",
+					"is_group": 1,
+					"root_type": "Asset",
+					"Project in Progress": {
+						"account_number": "1511",
+						"is_group": 0,
+						"root_type": "Asset"
+					},
+					"Factory Overhead Variance": {
+						"account_number": "1512",
+						"is_group": 0,
+						"root_type": "Asset"
+					}
+				},
+				"Finished Goods": {
+					"account_number": "1520",
+					"is_group": 1,
+					"root_type": "Asset",
+					"Finished Goods Inventory": {
+						"account_number": "1531",
+						"is_group": 0,
+						"root_type": "Asset",
+						"account_type": "Stock"
+					},
+					"Inventory in Transit": {
+						"account_number": "1532",
+						"is_group": 0,
+						"root_type": "Asset",
+						"account_type": "Stock Adjustment"
+					}
+				},
+				"Prepayments": {
+					"account_number": "1600",
+					"is_group": 1,
+					"root_type": "Asset",
+					"Prepaid Insurance & Bonds": {
+						"account_number": "1601",
+						"is_group": 0,
+						"root_type": "Asset"
+					},
+					"Prepaid Rent": {
+						"account_number": "1602",
+						"is_group": 0,
+						"root_type": "Asset"
+					}
+				},
+				"VAT Input Tax": {
+					"account_number": "1610",
+					"is_group": 1,
+					"root_type": "Asset",
+					"VAT Input Tax - Goods": {
+						"account_number": "1611",
+						"is_group": 0,
+						"root_type": "Asset",
+						"account_type": "Tax"
+					}
+				}
+			},
+			"Non - Current Assets": {
+				"account_number": "1002",
+				"is_group": 1,
+				"root_type": "Asset",
+				"Property, Plants And Equipments": {
+					"account_number": "1700",
+					"is_group": 1,
+					"root_type": "Asset",
+					"Land": {
+						"account_number": "1701",
+						"is_group": 0,
+						"root_type": "Asset",
+						"account_type": "Fixed Asset"
+					},
+					"Buildings & Improvements": {
+						"account_number": "1702",
+						"is_group": 0,
+						"root_type": "Asset",
+						"account_type": "Fixed Asset"
+					},
+					"Delivery & Trans Equipment": {
+						"account_number": "1703",
+						"is_group": 0,
+						"root_type": "Asset",
+						"account_type": "Fixed Asset"
+					},
+					"Furniture & Fixtures": {
+						"account_number": "1704",
+						"is_group": 0,
+						"root_type": "Asset",
+						"account_type": "Fixed Asset"
+					},
+					"Machinery & Equipment": {
+						"account_number": "1705",
+						"is_group": 0,
+						"root_type": "Asset",
+						"account_type": "Fixed Asset"
+					}
+				},
+				"Accum Depr. - Property, Plants and Equipment": {
+					"account_number": "1800",
+					"is_group": 1,
+					"root_type": "Asset",
+					"Accumulated Dep Bdgs & Improv": {
+						"account_number": "1801",
+						"is_group": 0,
+						"root_type": "Asset",
+						"account_type": "Accumulated Depreciation"
+					},
+					"Accumulated Dep Delivery & Trans": {
+						"account_number": "1802",
+						"is_group": 0,
+						"root_type": "Asset",
+						"account_type": "Accumulated Depreciation"
+					},
+					"Accumulated Dep Furniture & Fixture": {
+						"account_number": "1803",
+						"is_group": 0,
+						"root_type": "Asset",
+						"account_type": "Accumulated Depreciation"
+					},
+					"Accumulated Depreciation - Machinery & Equipment": {
+						"account_number": "1804",
+						"is_group": 0,
+						"root_type": "Asset",
+						"account_type": "Accumulated Depreciation"
+					}
+				}
+			},
+			"Other Assets": {
+				"account_number": "1003",
+				"is_group": 1,
+				"root_type": "Asset",
+				"Advances To Supplier": {
+					"account_number": "1900",
+					"is_group": 1,
+					"root_type": "Asset",
+					"Advances To Supplier": {
+						"account_number": "1901",
+						"is_group": 0,
+						"root_type": "Asset"
+					}
+				},
+				"Miscellaneous Deposits": {
+					"account_number": "1910",
+					"is_group": 1,
+					"root_type": "Asset",
+					"Miscellaneous Deposits": {
+						"account_number": "1911",
+						"is_group": 0,
+						"root_type": "Asset"
+					}
+				},
+				"Retirement Fund": {
+					"account_number": "1920",
+					"is_group": 1,
+					"root_type": "Asset",
+					"Retirement Fund": {
+						"account_number": "1921",
+						"is_group": 0,
+						"root_type": "Asset"
+					}
+				},
+				"Investment": {
+					"account_number": "1930",
+					"is_group": 1,
+					"root_type": "Asset",
+					"Investment": {
+						"account_number": "1931",
+						"is_group": 0,
+						"root_type": "Asset"
+					}
+				},
+				"System Development": {
+					"account_number": "1940",
+					"is_group": 1,
+					"root_type": "Asset",
+					"System Development": {
+						"account_number": "1941",
+						"is_group": 0,
+						"root_type": "Asset"
+					}
+				}
+			}
+		},
+		"Liability": {
+			"account_number": "2000",
+			"is_group": 1,
+			"root_type": "Liability",
+			"Current Liabilities": {
+				"account_number": "2001",
+				"is_group": 1,
+				"root_type": "Liability",
+				"Accounts Payable Trade": {
+					"account_number": "2100",
+					"is_group": 1,
+					"root_type": "Liability",
+					"Accounts Payable - Trade": {
+						"account_number": "2101",
+						"is_group": 0,
+						"root_type": "Liability",
+						"account_type": "Payable"
+					}
+				},
+				"Accounts Payable Others": {
+					"account_number": "2110",
+					"is_group": 1,
+					"root_type": "Liability",
+					"Accounts Payable - Payroll": {
+						"account_number": "2111",
+						"is_group": 0,
+						"root_type": "Liability"
+					}
+				},
+				"VAT Output Tax": {
+					"account_number": "2200",
+					"is_group": 1,
+					"root_type": "Liability",
+					"VAT Output Tax": {
+						"account_number": "2201",
+						"is_group": 0,
+						"root_type": "Liability",
+						"account_type": "Tax"
+					}
+				},
+				"Withholding Taxes Payable Wages": {
+					"account_number": "2210",
+					"is_group": 1,
+					"root_type": "Liability",
+					"Withholding Taxes Payable Wages": {
+						"account_number": "2211",
+						"is_group": 0,
+						"root_type": "Liability",
+						"account_type": "Tax"
+					}
+				},
+				"Withholding Taxes Payable Expanded": {
+					"account_number": "2220",
+					"is_group": 1,
+					"root_type": "Liability",
+					"Withholding Taxes Payable Expanded": {
+						"account_number": "2221",
+						"is_group": 0,
+						"root_type": "Liability",
+						"account_type": "Tax"
+					}
+				},
+				"Accruals And Other Current Payables": {
+					"account_number": "2300",
+					"is_group": 1,
+					"root_type": "Liability",
+					"Stock Received But Not Billed": {
+						"account_number": "2301",
+						"is_group": 0,
+						"root_type": "Liability",
+						"account_type": "Stock Received But Not Billed"
+					}
+				},
+				"Payable to Government and Other Institutions": {
+					"account_number": "2400",
+					"is_group": 1,
+					"root_type": "Liability",
+					"SSS Premium Payable": {
+						"account_number": "2401",
+						"is_group": 0,
+						"root_type": "Liability"
+					},
+					"SSS Salary Loan Payable": {
+						"account_number": "2402",
+						"is_group": 0,
+						"root_type": "Liability"
+					},
+					"PhilHealth Premium": {
+						"account_number": "2403",
+						"is_group": 0,
+						"root_type": "Liability"
+					},
+					"Pag-ibig Loan Payable": {
+						"account_number": "2404",
+						"is_group": 0,
+						"root_type": "Liability"
+					},
+					"Coop Loans": {
+						"account_number": "2405",
+						"is_group": 0,
+						"root_type": "Liability"
+					},
+					"Coop Contributions": {
+						"account_number": "2406",
+						"is_group": 0,
+						"root_type": "Liability"
+					},
+					"Canteen": {
+						"account_number": "2407",
+						"is_group": 0,
+						"root_type": "Liability"
+					},
+					"AUB Loan Payable": {
+						"account_number": "2408",
+						"is_group": 0,
+						"root_type": "Liability"
+					},
+					"HSBC Loan Payable": {
+						"account_number": "2409",
+						"is_group": 0,
+						"root_type": "Liability"
+					}
+				},
+				"Customer Deposits": {
+					"account_number": "2500",
+					"is_group": 0,
+					"root_type": "Liability",
+					"account_type": "Payable"
+				}
+			},
+			"Non Current Liabilities": {
+				"account_number": "2002",
+				"is_group": 1,
+				"root_type": "Liability",
+				"Due To Associated Company": {
+					"account_number": "2600",
+					"is_group": 1,
+					"root_type": "Liability",
+					"Due To Associated Company": {
+						"account_number": "2601",
+						"is_group": 0,
+						"root_type": "Liability"
+					}
+				},
+				"Deferred Income": {
+					"account_number": "2700",
+					"is_group": 1,
+					"root_type": "Liability",
+					"Deferred Income": {
+						"account_number": "2701",
+						"is_group": 0,
+						"root_type": "Liability"
+					}
+				},
+				"Notes Payable": {
+					"account_number": "2800",
+					"is_group": 1,
+					"root_type": "Liability",
+					"Notes Payable": {
+						"account_number": "2801",
+						"is_group": 0,
+						"root_type": "Liability"
+					}
+				},
+				"Dividends Payable": {
+					"account_number": "2900",
+					"is_group": 0,
+					"root_type": "Liability"
+				}
+			}
+		},
+		"Equity": {
+			"account_number": "3000",
+			"is_group": 1,
+			"root_type": "Equity",
+			"STOCKHOLDER'S EQUITY": {
+				"account_number": "3001",
+				"is_group": 1,
+				"root_type": "Equity",
+				"Capital Stocks": {
+					"account_number": "3100",
+					"is_group": 1,
+					"root_type": "Equity",
+					"Capital Stocks": {
+						"account_number": "3101",
+						"is_group": 0,
+						"root_type": "Equity"
+					}
+				},
+				"Subscription Receivable": {
+					"account_number": "3200",
+					"is_group": 1,
+					"root_type": "Equity",
+					"Subscription Receivable": {
+						"account_number": "3201",
+						"is_group": 0,
+						"root_type": "Equity"
+					}
+				},
+				"Retained Earnings": {
+					"account_number": "3300",
+					"is_group": 1,
+					"root_type": "Equity",
+					"Retained Earnings": {
+						"account_number": "3301",
+						"is_group": 0,
+						"root_type": "Equity"
+					}
+				},
+				"Current Year (Profit/Loss)": {
+					"account_number": "3400",
+					"is_group": 0,
+					"root_type": "Equity"
+				},
+				"Drawings": {
+					"account_number": "3500",
+					"is_group": 1,
+					"root_type": "Equity",
+					"Drawings": {
+						"account_number": "3501",
+						"is_group": 0,
+						"root_type": "Equity"
+					}
+				}
+			}
+		},
+		"Income": {
+			"account_number": "4000",
+			"is_group": 1,
+			"root_type": "Income",
+			"Gross Sales": {
+				"account_number": "4100",
+				"is_group": 1,
+				"root_type": "Income",
+				"Sales": {
+					"account_number": "4101",
+					"is_group": 0,
+					"root_type": "Income"
+				}
+			},
+			"Sales Adjustment": {
+				"account_number": "4200",
+				"is_group": 1,
+				"root_type": "Income",
+				"Sales Return And Allowance": {
+					"account_number": "4201",
+					"is_group": 0,
+					"root_type": "Income"
+				}
+			},
+			"Sales Discount": {
+				"account_number": "4300",
+				"is_group": 1,
+				"root_type": "Income",
+				"Sales Discount": {
+					"account_number": "4301",
+					"is_group": 0,
+					"root_type": "Income"
+				}
+			},
+			"Other Income": {
+				"account_number": "6000",
+				"is_group": 1,
+				"root_type": "Income",
+				"Interest Income Bank": {
+					"account_number": "6010",
+					"is_group": 1,
+					"root_type": "Income",
+					"Interest Income Bank": {
+						"account_number": "6011",
+						"is_group": 0,
+						"root_type": "Income"
+					}
+				},
+				"Dividend Income": {
+					"account_number": "6020",
+					"is_group": 1,
+					"root_type": "Income",
+					"Dividend Income": {
+						"account_number": "6021",
+						"is_group": 0,
+						"root_type": "Income"
+					}
+				}
+			}
+		},
+		"Expense": {
+			"account_number": "5000",
+			"is_group": 1,
+			"root_type": "Expense",
+			"Cost of Goods Sold": {
+				"account_number": "5001",
+				"is_group": 1,
+				"root_type": "Expense",
+				"Cost of Goods Sold": {
+					"account_number": "5010",
+					"is_group": 0,
+					"root_type": "Expense",
+					"account_type": "Cost of Goods Sold"
+				}
+			},
+			"Operating Expenses": {
+				"account_number": "5100",
+				"is_group": 1,
+				"root_type": "Expense",
+				"Salaries, Wages": {
+					"account_number": "5101",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"13th Month Pay & Bonus": {
+					"account_number": "5102",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Overtime & Night Diff": {
+					"account_number": "5103",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Incentive/Performance Bonus": {
+					"account_number": "5104",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Employees Benefits": {
+					"account_number": "5105",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Advertising & Promotions": {
+					"account_number": "5106",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Amortization of Leasehold Improvement": {
+					"account_number": "5107",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Amortization of Pre-Operating": {
+					"account_number": "5108",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Amortization of System Development": {
+					"account_number": "5109",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Audit & Legal Fee": {
+					"account_number": "5110",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Bad Debts Expenses": {
+					"account_number": "5111",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Client Service & Maintenance": {
+					"account_number": "5112",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Commission Expenses": {
+					"account_number": "5113",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Communications": {
+					"account_number": "5114",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Contractual Services": {
+					"account_number": "5115",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Depreciation Expenses": {
+					"account_number": "5116",
+					"is_group": 0,
+					"root_type": "Expense",
+					"account_type": "Depreciation"
+				},
+				"Donation & Contribution": {
+					"account_number": "5117",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Dues & Subscription": {
+					"account_number": "5118",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Employee Med/Dental/Hosp Expenses": {
+					"account_number": "5119",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Employee Uniforms": {
+					"account_number": "5120",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Equipage": {
+					"account_number": "5121",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Expenses for Reclassification": {
+					"account_number": "5122",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Gas & Oil": {
+					"account_number": "5123",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Insurance Expenses": {
+					"account_number": "5124",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Light & Water": {
+					"account_number": "5125",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Local/Overseas Travel": {
+					"account_number": "5126",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Meals & Transportation Expenses": {
+					"account_number": "5127",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Meeting & Conferences": {
+					"account_number": "5128",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Miscellaneous Expenses": {
+					"account_number": "5129",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Mockup Expenses": {
+					"account_number": "5130",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Obsolescence Expenses": {
+					"account_number": "5131",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Other Support Cost": {
+					"account_number": "5132",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Pag-ibig Contribution": {
+					"account_number": "5133",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Performance Bonds": {
+					"account_number": "5134",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Pre Employment Expenses": {
+					"account_number": "5135",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Professional Fees": {
+					"account_number": "5136",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Recruitment & Employment": {
+					"account_number": "5137",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Rent Expenses": {
+					"account_number": "5138",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Rent Expenses Others": {
+					"account_number": "5139",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Repairs & Maintenance": {
+					"account_number": "5140",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Representation Expenses": {
+					"account_number": "5141",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Research & Development": {
+					"account_number": "5142",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Security Expenses": {
+					"account_number": "5143",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Shared Services Fee": {
+					"account_number": "5144",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"SSS/Medicare/EC Contributions": {
+					"account_number": "5145",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Stationery & Supplies": {
+					"account_number": "5146",
+					"is_group": 0,
+					"root_type": "Expense"
+				},
+				"Taxes & Licenses": {
+					"account_number": "5147",
+					"is_group": 0,
+					"root_type": "Expense",
+					"account_type": "Tax"
+				},
+				"Training & Seminar": {
+					"account_number": "5148",
+					"is_group": 0,
+					"root_type": "Expense"
+				}
+			},
+			"Stock Adjustment": {
+				"account_number": "5200",
+				"is_group": 0,
+				"root_type": "Expense",
+				"account_type": "Stock Adjustment"
+			},
+			"Round Off": {
+				"account_number": "5300",
+				"is_group": 0,
+				"root_type": "Expense",
+				"account_type": "Round Off"
+			},
+			"Expenses Included In Valuation": {
+				"account_number": "5400",
+				"is_group": 0,
+				"root_type": "Expense",
+				"account_type": "Expenses Included In Valuation"
+			}
+		}
+	}
+}

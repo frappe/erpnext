@@ -111,7 +111,7 @@ class BOMConfigurator {
 				this.frm?.doc.docstatus === 0
 					? [
 							{
-								label: __(frappe.utils.icon("edit", "sm") + " BOM"),
+								label: __(frappe.utils.icon("pencil", "sm") + " BOM"),
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];
 									view.events.edit_bom(node, view);
@@ -119,7 +119,7 @@ class BOMConfigurator {
 								btnClass: "hidden-xs",
 							},
 							{
-								label: __(frappe.utils.icon("add", "sm") + " Raw Material"),
+								label: __(frappe.utils.icon("plus", "sm") + " Raw Material"),
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];
 									view.events.add_item(node, view);
@@ -130,7 +130,7 @@ class BOMConfigurator {
 								btnClass: "hidden-xs",
 							},
 							{
-								label: __(frappe.utils.icon("add", "sm") + " Sub Assembly"),
+								label: __(frappe.utils.icon("plus", "sm") + " Sub Assembly"),
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];
 									view.events.add_sub_assembly(node, view);
@@ -141,7 +141,7 @@ class BOMConfigurator {
 								btnClass: "hidden-xs",
 							},
 							{
-								label: __(frappe.utils.icon("add", "sm") + " Phantom Item"),
+								label: __(frappe.utils.icon("plus", "sm") + " Phantom Item"),
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];
 									view.events.add_sub_assembly(node, view, true);
@@ -240,9 +240,9 @@ class BOMConfigurator {
 				}
 
 				frappe.call({
-					method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.add_item",
+					method: "add_item",
+					doc: this.frm.doc,
 					args: {
-						parent: node.data.parent_id,
 						fg_item: node.data.value,
 						item_code: data.item_code,
 						fg_reference_id: node.data.name || this.frm.doc.name,
@@ -295,9 +295,9 @@ class BOMConfigurator {
 			}
 
 			frappe.call({
-				method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.add_sub_assembly",
+				method: "add_sub_assembly",
+				doc: this.frm.doc,
 				args: {
-					parent: node.data.parent_id,
 					fg_item: node.data.value,
 					fg_reference_id: node.data.name || this.frm.doc.name,
 					bom_item: bom_item,
@@ -442,9 +442,9 @@ class BOMConfigurator {
 			}
 
 			frappe.call({
-				method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.add_sub_assembly",
+				method: "add_sub_assembly",
+				doc: this.frm.doc,
 				args: {
-					parent: node.data.parent_id,
 					fg_item: node.data.value,
 					bom_item: bom_item,
 					fg_reference_id: node.data.name || this.frm.doc.name,
@@ -479,9 +479,9 @@ class BOMConfigurator {
 	delete_node(node, view) {
 		frappe.confirm(__("Are you sure you want to delete this Item?"), () => {
 			frappe.call({
-				method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.delete_node",
+				method: "delete_node",
+				doc: this.frm.doc,
 				args: {
-					parent: node.data.parent_id,
 					fg_item: node.data.value,
 					doctype: node.data.doctype,
 					docname: node.data.name,
@@ -501,16 +501,14 @@ class BOMConfigurator {
 		this.frm.edit_bom_dialog = frappe.prompt(
 			fields,
 			(data) => {
-				let doctype = node.data.doctype || this.frm.doc.doctype;
 				let docname = node.data.name || this.frm.doc.name;
 
 				frappe.call({
-					method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.edit_bom_creator",
+					method: "edit_bom_creator",
+					doc: me.frm.doc,
 					args: {
-						doctype: doctype,
 						docname: docname,
 						data: data,
-						parent: node.data.parent_id || this.frm.doc.name,
 					},
 					callback: (r) => {
 						for (let key in data) {
@@ -540,6 +538,13 @@ class BOMConfigurator {
 	}
 
 	load_tree(response, node) {
+		// delete_node returns an empty response when nothing was removed; just
+		// refresh the node and bail out so we don't read undefined fields below.
+		if (!response?.message?.items) {
+			frappe.views.trees["BOM Configurator"].tree.load_children(node);
+			return;
+		}
+
 		let item_row = "";
 		let parent_dom = "";
 		let total_amount = response.message.raw_material_cost;

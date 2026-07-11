@@ -7,6 +7,7 @@
 
 import frappe
 from frappe import _dict
+from frappe.utils import add_days, nowdate, random_string
 
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import make_item
@@ -16,6 +17,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	get_serial_nos_from_bundle,
 )
 from erpnext.stock.doctype.serial_no.serial_no import *
+from erpnext.stock.doctype.serial_no.serial_no import update_maintenance_status
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
@@ -330,6 +332,129 @@ class TestSerialNo(ERPNextTestSuite):
 		)
 
 		self.assertEqual(non_expired_serials, [])
+
+	def test_update_maintenance_status_expires_past_warranty(self):
+		"""update_maintenance_status() must pick up the past-warranty Serial No via or_filters and flip it Out of Warranty."""
+		item_code = "_Test Serialized Item"
+		past_date = add_days(nowdate(), -10)
+		future_date = add_days(nowdate(), 10)
+
+		# Serial No whose warranty has lapsed; force maintenance_status back to a
+		# value that passes the `not in [Out of Warranty, Out of AMC]` filter so the
+		# cron job is the thing that actually transitions it.
+		expired_sr = frappe.get_doc(
+			{
+				"doctype": "Serial No",
+				"item_code": item_code,
+				"serial_no": "_TCWARREXP" + random_string(6),
+				"company": "_Test Company",
+				"warranty_expiry_date": past_date,
+			}
+		).insert()
+		frappe.db.set_value("Serial No", expired_sr.name, "maintenance_status", "Under Warranty")
+		self.assertEqual(
+			frappe.db.get_value("Serial No", expired_sr.name, "maintenance_status"), "Under Warranty"
+		)
+
+		# Serial No whose warranty is still valid; it must stay Under Warranty.
+		active_sr = frappe.get_doc(
+			{
+				"doctype": "Serial No",
+				"item_code": item_code,
+				"serial_no": "_TCWARRACT" + random_string(6),
+				"company": "_Test Company",
+				"warranty_expiry_date": future_date,
+			}
+		).insert()
+		self.assertEqual(
+			frappe.db.get_value("Serial No", active_sr.name, "maintenance_status"), "Under Warranty"
+		)
+
+		update_maintenance_status()
+
+		# The lapsed Serial No was selected by the or_filters and re-evaluated.
+		self.assertEqual(
+			frappe.db.get_value("Serial No", expired_sr.name, "maintenance_status"), "Out of Warranty"
+		)
+		# The in-warranty Serial No keeps its correct Under Warranty status.
+		self.assertEqual(
+			frappe.db.get_value("Serial No", active_sr.name, "maintenance_status"), "Under Warranty"
+		)
+
+	def test_update_maintenance_status_excludes_out_of_amc(self):
+		"""The `not in [Out of Warranty, Out of AMC]` filter must skip rows already pinned to
+		those statuses, even when they match the expiry or_filters, while rows in any other
+		status ARE re-evaluated. The contrast makes the `not in` clause load-bearing."""
+		item_code = "_Test Serialized Item"
+		past_date = add_days(nowdate(), -10)
+		future_date = add_days(nowdate(), 10)
+
+		# Excluded row: matches or_filters (amc lapsed) AND is pinned to "Out of AMC", so the
+		# `not in` filter must skip it. Its warranty is in the FUTURE, so if the filter were
+		# broken and the row were re-evaluated, set_maintenance_status() would flip it to
+		# "Under Warranty" (the last cascade branch to match). Staying "Out of AMC" proves it.
+		excluded_sr = frappe.get_doc(
+			{
+				"doctype": "Serial No",
+				"item_code": item_code,
+				"serial_no": "_TCAMCEXCL" + random_string(6),
+				"company": "_Test Company",
+				"amc_expiry_date": past_date,
+				"warranty_expiry_date": future_date,
+			}
+		).insert()
+		frappe.db.set_value("Serial No", excluded_sr.name, "maintenance_status", "Out of AMC")
+
+		# Negative control: same lapsed amc date, but a status NOT in the excluded list, so it
+		# must be picked up and re-evaluated to "Out of AMC". This proves update_maintenance_status()
+		# actually processes candidates — i.e. the exclusion above is meaningful, not a no-op.
+		candidate_sr = frappe.get_doc(
+			{
+				"doctype": "Serial No",
+				"item_code": item_code,
+				"serial_no": "_TCAMCCAND" + random_string(6),
+				"company": "_Test Company",
+				"amc_expiry_date": past_date,
+			}
+		).insert()
+		frappe.db.set_value("Serial No", candidate_sr.name, "maintenance_status", "Under AMC")
+
+		update_maintenance_status()
+
+		# Excluded by the `not in` filter -> pinned status left untouched.
+		self.assertEqual(
+			frappe.db.get_value("Serial No", excluded_sr.name, "maintenance_status"), "Out of AMC"
+		)
+		# Not excluded -> re-evaluated; lapsed amc -> "Out of AMC".
+		self.assertEqual(
+			frappe.db.get_value("Serial No", candidate_sr.name, "maintenance_status"), "Out of AMC"
+		)
+
+	def test_update_maintenance_status_includes_null_status(self):
+		"""Converting the raw `maintenance_status not in (...)` to a get_all filter changes NULL
+		handling: frappe wraps the clause as `ifnull(maintenance_status, '') not in (...)`, so a
+		NULL-status row that matches the expiry or_filters is now re-evaluated (consistently on
+		MariaDB and Postgres). Pin that contract."""
+		item_code = "_Test Serialized Item"
+		past_date = add_days(nowdate(), -10)
+
+		null_sr = frappe.get_doc(
+			{
+				"doctype": "Serial No",
+				"item_code": item_code,
+				"serial_no": "_TCAMCNULL" + random_string(6),
+				"company": "_Test Company",
+				"amc_expiry_date": past_date,
+			}
+		).insert()
+		# Force a NULL maintenance_status while a lapsed amc date keeps the row in or_filters.
+		frappe.db.set_value("Serial No", null_sr.name, "maintenance_status", None)
+		self.assertIsNone(frappe.db.get_value("Serial No", null_sr.name, "maintenance_status"))
+
+		update_maintenance_status()
+
+		# Picked up (NULL -> '' -> not in the excluded list) and re-evaluated: lapsed amc -> "Out of AMC".
+		self.assertEqual(frappe.db.get_value("Serial No", null_sr.name, "maintenance_status"), "Out of AMC")
 
 
 def get_auto_serial_nos(kwargs):

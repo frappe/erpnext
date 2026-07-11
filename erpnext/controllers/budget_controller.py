@@ -260,7 +260,11 @@ class BudgetValidation:
 				qb.from_(mr)
 				.inner_join(mri)
 				.on(mr.name == mri.parent)
-				.select((Sum(IfNull(mri.stock_qty, 0) - IfNull(mri.ordered_qty, 0)) * mri.rate).as_("amount"))
+				.select(
+					Sum((IfNull(mri.stock_qty, 0) - IfNull(mri.ordered_qty, 0)) * IfNull(mri.rate, 0)).as_(
+						"amount"
+					)
+				)
 				.where(Criterion.all(conditions))
 				.run(as_dict=True)
 			):

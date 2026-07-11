@@ -278,7 +278,7 @@ erpnext.PointOfSale.Payment = class {
 			) {
 				const message = items.length
 					? __("You cannot submit the order without payment.")
-					: __("You cannot submit empty order.");
+					: __("You cannot submit an empty order.");
 				frappe.show_alert({ message, indicator: "orange" });
 				frappe.utils.play_sound("error");
 				return;
@@ -519,7 +519,7 @@ erpnext.PointOfSale.Payment = class {
 					return `
 					<div class="payment-mode-wrapper">
 						<div class="mode-of-payment" data-mode="${mode}" data-payment-type="${payment_type}">
-							${p.mode_of_payment}
+							${frappe.utils.escape_html(p.mode_of_payment)}
 							<div class="${mode}-amount pay-amount">${amount}</div>
 							<div class="${mode} mode-of-payment-control"></div>
 						</div>
@@ -592,7 +592,7 @@ erpnext.PointOfSale.Payment = class {
 				flt(loyalty_points) * flt(conversion_factor),
 				precision("loyalty_amount", doc)
 			);
-			description = __("You can redeem upto {0}.", [format_currency(max_redeemable_amount)]);
+			description = __("You can redeem up to {0}.", [format_currency(max_redeemable_amount)]);
 			read_only = false;
 		}
 
@@ -603,7 +603,7 @@ erpnext.PointOfSale.Payment = class {
 				<div class="mode-of-payment loyalty-card" data-mode="loyalty-amount" data-payment-type="loyalty-amount">
 					Redeem Loyalty Points
 					<div class="loyalty-amount-amount pay-amount">${amount}</div>
-					<div class="loyalty-amount-name">${loyalty_program}</div>
+					<div class="loyalty-amount-name">${frappe.utils.escape_html(loyalty_program)}</div>
 					<div class="loyalty-amount mode-of-payment-control"></div>
 				</div>
 			</div>`

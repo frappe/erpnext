@@ -27,6 +27,15 @@ frappe.listview_settings["Sales Invoice"] = {
 			"Partly Paid": "yellow",
 			"Internal Transfer": "darkgrey",
 		};
+
+		if (doc.status === "Credit Note Issued" && flt(doc.outstanding_amount) === 0) {
+			return [
+				__("Settled with Credit Note"),
+				"green",
+				`status,=,Credit Note Issued|outstanding_amount,=,0`,
+			];
+		}
+
 		return [__(doc.status), status_colors[doc.status], "status,=," + doc.status];
 	},
 	right_column: "grand_total",

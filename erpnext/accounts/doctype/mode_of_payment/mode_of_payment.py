@@ -52,15 +52,14 @@ class ModeofPayment(Document):
 
 	def validate_pos_mode_of_payment(self):
 		if not self.enabled:
-			pos_profiles = frappe.db.sql(
-				"""SELECT sip.parent FROM `tabSales Invoice Payment` sip
-				WHERE sip.parenttype = 'POS Profile' and sip.mode_of_payment = %s""",
-				(self.name),
+			pos_profiles = frappe.get_all(
+				"Sales Invoice Payment",
+				filters={"parenttype": "POS Profile", "mode_of_payment": self.name},
+				pluck="parent",
 			)
-			pos_profiles = list(map(lambda x: x[0], pos_profiles))
 
 			if pos_profiles:
 				message = _(
-					"POS Profile {} contains Mode of Payment {}. Please remove them to disable this mode."
+					"POS Profile {0} contains Mode of Payment {1}. Please remove them to disable this mode."
 				).format(frappe.bold(", ".join(pos_profiles)), frappe.bold(str(self.name)))
 				frappe.throw(message, title=_("Not Allowed"))

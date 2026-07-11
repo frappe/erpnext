@@ -71,7 +71,9 @@ def get_data(filters):
 			po_item.name,
 		)
 		.where((po_item.parent == po.name) & (po.status.notin(("Stopped", "On Hold"))) & (po.docstatus == 1))
-		.groupby(po_item.name)
+		# the selected po.* columns need the Purchase Order PK grouped on postgres; po.name is 1:1
+		# with the grouped po_item.name, so groups are unchanged.
+		.groupby(po_item.name, po.name)
 		.orderby(po.transaction_date)
 	)
 

@@ -46,7 +46,7 @@ frappe.ui.form.on("Asset", {
 		frm.make_methods = {
 			"Asset Movement": () => {
 				frappe.call({
-					method: "erpnext.assets.doctype.asset.asset.make_asset_movement",
+					method: "erpnext.assets.doctype.asset.mapper.make_asset_movement",
 					freeze: true,
 					args: {
 						assets: [{ name: frm.doc.name }],
@@ -92,6 +92,11 @@ frappe.ui.form.on("Asset", {
 
 		frappe.ui.form.trigger("Asset", "asset_type");
 		frm.toggle_display("next_depreciation_date", frm.doc.docstatus < 1);
+
+		if (frm.doc.docstatus < 1 && frm.doc.calculate_depreciation && frm.doc.is_fully_depreciated) {
+			// Is Fully Depreciated is read-only while depreciation is calculated, so keep it unchecked
+			frm.set_value("is_fully_depreciated", 0);
+		}
 
 		let has_create_buttons = false;
 		if (frm.doc.docstatus == 1) {
@@ -333,7 +338,7 @@ frappe.ui.form.on("Asset", {
 
 	make_journal_entry: function (frm) {
 		frappe.call({
-			method: "erpnext.assets.doctype.asset.asset.make_journal_entry",
+			method: "erpnext.assets.doctype.asset.mapper.make_journal_entry",
 			args: {
 				asset_name: frm.doc.name,
 			},
@@ -551,7 +556,9 @@ frappe.ui.form.on("Asset", {
 	asset_type: function (frm) {
 		if (frm.doc.docstatus == 0) {
 			if (frm.doc.asset_type == "Composite Asset") {
-				frm.set_value("net_purchase_amount", 0);
+				if (!frm.doc.net_purchase_amount) {
+					frm.set_value("net_purchase_amount", 0);
+				}
 			} else {
 				frm.set_df_property("net_purchase_amount", "read_only", 0);
 			}
@@ -568,7 +575,7 @@ frappe.ui.form.on("Asset", {
 				asset_category: frm.doc.asset_category,
 				company: frm.doc.company,
 			},
-			method: "erpnext.assets.doctype.asset.asset.create_asset_maintenance",
+			method: "erpnext.assets.doctype.asset.mapper.create_asset_maintenance",
 			callback: function (r) {
 				var doclist = frappe.model.sync(r.message);
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
@@ -583,7 +590,7 @@ frappe.ui.form.on("Asset", {
 				asset: frm.doc.name,
 				asset_name: frm.doc.asset_name,
 			},
-			method: "erpnext.assets.doctype.asset.asset.create_asset_repair",
+			method: "erpnext.assets.doctype.asset.mapper.create_asset_repair",
 			callback: function (r) {
 				var doclist = frappe.model.sync(r.message);
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
@@ -599,7 +606,7 @@ frappe.ui.form.on("Asset", {
 				asset_name: frm.doc.asset_name,
 				item_code: frm.doc.item_code,
 			},
-			method: "erpnext.assets.doctype.asset.asset.create_asset_capitalization",
+			method: "erpnext.assets.doctype.asset.mapper.create_asset_capitalization",
 			callback: function (r) {
 				var doclist = frappe.model.sync(r.message);
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
@@ -610,7 +617,7 @@ frappe.ui.form.on("Asset", {
 	sell_asset: function (frm) {
 		const make_sales_invoice = (sell_qty) => {
 			frappe.call({
-				method: "erpnext.assets.doctype.asset.asset.make_sales_invoice",
+				method: "erpnext.assets.doctype.asset.mapper.make_sales_invoice",
 				args: {
 					asset: frm.doc.name,
 					item_code: frm.doc.item_code,
@@ -694,7 +701,7 @@ frappe.ui.form.on("Asset", {
 					asset_name: frm.doc.name,
 					split_qty: cint(dialog_data.split_qty),
 				},
-				method: "erpnext.assets.doctype.asset.asset.split_asset",
+				method: "erpnext.assets.doctype.asset.mapper.split_asset",
 				callback: function (r) {
 					let doclist = frappe.model.sync(r.message);
 					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
@@ -714,7 +721,7 @@ frappe.ui.form.on("Asset", {
 				asset_category: frm.doc.asset_category,
 				company: frm.doc.company,
 			},
-			method: "erpnext.assets.doctype.asset.asset.create_asset_value_adjustment",
+			method: "erpnext.assets.doctype.asset.mapper.create_asset_value_adjustment",
 			freeze: 1,
 			callback: function (r) {
 				var doclist = frappe.model.sync(r.message);
@@ -725,6 +732,10 @@ frappe.ui.form.on("Asset", {
 
 	calculate_depreciation: function (frm) {
 		frm.toggle_reqd("finance_books", frm.doc.calculate_depreciation);
+		if (frm.doc.calculate_depreciation && frm.doc.is_fully_depreciated) {
+			// Is Fully Depreciated is read-only while depreciation is calculated, so keep it unchecked
+			frm.set_value("is_fully_depreciated", 0);
+		}
 		if (frm.doc.item_code && frm.doc.calculate_depreciation && frm.doc.net_purchase_amount) {
 			frm.trigger("set_finance_book");
 		} else {
@@ -965,7 +976,7 @@ erpnext.asset.restore_asset = function (frm) {
 
 erpnext.asset.transfer_asset = function (frm) {
 	frappe.call({
-		method: "erpnext.assets.doctype.asset.asset.make_asset_movement",
+		method: "erpnext.assets.doctype.asset.mapper.make_asset_movement",
 		freeze: true,
 		args: {
 			assets: [{ name: frm.doc.name }],

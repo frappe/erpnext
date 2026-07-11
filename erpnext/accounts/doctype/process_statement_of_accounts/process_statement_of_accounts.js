@@ -17,9 +17,9 @@ frappe.ui.form.on("Process Statement Of Accounts", {
 					},
 					callback: function (r) {
 						if (r && r.message) {
-							frappe.show_alert({ message: __("Emails Queued"), indicator: "blue" });
+							frappe.show_alert({ message: __("Emails queued"), indicator: "blue" });
 						} else {
-							frappe.msgprint(__("No Records for these settings."));
+							frappe.msgprint(__("No records for these settings."));
 						}
 					},
 				});
@@ -36,7 +36,7 @@ frappe.ui.form.on("Process Statement Of Accounts", {
 					type: "GET",
 					success: function (result) {
 						if (jQuery.isEmptyObject(result)) {
-							frappe.msgprint(__("No Records for these settings."));
+							frappe.msgprint(__("No records for these settings."));
 						} else {
 							window.location = url;
 						}
@@ -161,13 +161,13 @@ frappe.ui.form.on("Process Statement Of Accounts", {
 							}
 							frm.refresh_field("customers");
 						} else {
-							frappe.throw(__("No Customers found with selected options."));
+							frappe.throw(__("No customers found with selected options."));
 						}
 					}
 				},
 			});
 		} else {
-			frappe.throw("Enter " + frm.doc.customer_collection + " name.");
+			frappe.throw(__("Enter {0} name.", [frm.doc.customer_collection]));
 		}
 	},
 });

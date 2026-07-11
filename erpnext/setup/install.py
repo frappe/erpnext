@@ -21,10 +21,13 @@ def after_install():
 	if not frappe.db.exists("Role", "Analytics"):
 		frappe.get_doc({"doctype": "Role", "role_name": "Analytics"}).insert()
 
+	create_shop_floor_roles()
+
 	set_single_defaults()
 	setup_repost_defaults()
 	create_print_setting_custom_fields()
 	create_marketing_campaign_custom_fields()
+	create_address_and_contact_custom_fields()
 	create_custom_company_links()
 	add_all_roles_to("Administrator")
 	create_default_success_action()
@@ -37,7 +40,6 @@ def after_install():
 	make_default_operations()
 	update_pegged_currencies()
 	set_default_print_formats()
-	create_letter_head()
 	toggle_hidden_fields()
 	frappe.db.commit()
 
@@ -50,6 +52,15 @@ def make_default_operations():
 			doc.insert(ignore_permissions=True)
 
 
+def create_shop_floor_roles():
+	"""Roles that drive the Shop Floor page's two experiences (manager board vs operator view)."""
+	for role_name in ("Shop Floor Manager", "Shop Floor User"):
+		if not frappe.db.exists("Role", role_name):
+			frappe.get_doc({"doctype": "Role", "role_name": role_name, "desk_access": 1}).insert(
+				ignore_permissions=True
+			)
+
+
 def set_single_defaults():
 	for dt in (
 		"Accounts Settings",
@@ -58,10 +69,8 @@ def set_single_defaults():
 		"Selling Settings",
 		"Stock Settings",
 	):
-		default_values = frappe.db.sql(
-			"""select fieldname, `default` from `tabDocField`
-			where parent=%s""",
-			dt,
+		default_values = frappe.get_all(
+			"DocField", filters={"parent": dt}, fields=["fieldname", "default"], as_list=True
 		)
 		if default_values:
 			try:
@@ -86,14 +95,7 @@ def setup_repost_defaults():
 def setup_currency_exchange():
 	ces = frappe.get_single("Currency Exchange Settings")
 	try:
-		ces.set("result_key", [])
-		ces.set("req_params", [])
-
-		ces.api_endpoint = "https://api.frankfurter.dev/v1/{transaction_date}"
-		ces.append("result_key", {"key": "rates"})
-		ces.append("result_key", {"key": "{to_currency}"})
-		ces.append("req_params", {"key": "base", "value": "{from_currency}"})
-		ces.append("req_params", {"key": "symbols", "value": "{to_currency}"})
+		ces.service_provider = "frankfurter.dev - v2"
 		ces.save()
 	except frappe.ValidationError:
 		pass
@@ -141,6 +143,37 @@ def create_marketing_campaign_custom_fields():
 					"insert_after": "campaign_description",
 				},
 			]
+		}
+	)
+
+
+def create_address_and_contact_custom_fields():
+	create_custom_fields(
+		{
+			"Address": [
+				{
+					"label": _("Tax Category"),
+					"fieldname": "tax_category",
+					"fieldtype": "Link",
+					"options": "Tax Category",
+					"insert_after": "fax",
+				},
+				{
+					"label": _("Is Your Company Address"),
+					"fieldname": "is_your_company_address",
+					"fieldtype": "Check",
+					"default": "0",
+					"insert_after": "linked_with",
+				},
+			],
+			"Contact": [
+				{
+					"label": _("Is Billing Contact"),
+					"fieldname": "is_billing_contact",
+					"fieldtype": "Check",
+					"insert_after": "is_primary_contact",
+				},
+			],
 		}
 	)
 
@@ -342,30 +375,6 @@ def set_default_print_formats():
 		)
 
 
-def create_letter_head():
-	base_path = frappe.get_app_path("erpnext", "accounts", "letterhead")
-
-	letterheads = {
-		"Company Letterhead": "company_letterhead.html",
-		"Company Letterhead - Grey": "company_letterhead_grey.html",
-	}
-
-	for name, filename in letterheads.items():
-		if not frappe.db.exists("Letter Head", name):
-			content = frappe.read_file(os.path.join(base_path, filename))
-			doc = frappe.get_doc(
-				{
-					"doctype": "Letter Head",
-					"letter_head_name": name,
-					"source": "HTML",
-					"content": content,
-					"is_default": 1 if name == "Company Letterhead - Grey" else 0,
-					"letter_head_for": "Report",
-				}
-			)
-			doc.insert(ignore_permissions=True)
-
-
 def toggle_hidden_fields():
 	from erpnext.accounts.doctype.accounts_settings.accounts_settings import (
 		toggle_accounting_dimension_sections,
@@ -408,3 +417,19 @@ DEFAULT_ROLE_PROFILES = {
 		"Purchase Manager",
 	],
 }
+
+
+def after_app_install(app_name=None):
+	if app_name == "crm":
+		from erpnext.crm.frappe_crm_api import remove_allowed_users_on_crm_install
+
+		remove_allowed_users_on_crm_install()
+
+
+def after_app_uninstall(app_name=None):
+	if app_name == "crm":
+		from erpnext.crm.frappe_crm_api import disable_frappe_crm_data_synchronization_on_crm_uninstall
+
+		disable_frappe_crm_data_synchronization_on_crm_uninstall()
+
+		frappe.db.commit()  # nosemgrep

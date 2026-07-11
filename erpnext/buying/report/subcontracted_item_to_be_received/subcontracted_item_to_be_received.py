@@ -22,7 +22,6 @@ def get_columns(filters):
 			"label": _("Subcontract Order"),
 			"fieldtype": "Link",
 			"fieldname": "subcontract_order",
-			"options": filters.order_type,
 			"width": 150,
 		},
 		{"label": _("Date"), "fieldtype": "Date", "fieldname": "date", "hidden": 1, "width": 150},
@@ -59,7 +58,7 @@ def get_columns(filters):
 def get_data(data, filters):
 	orders = get_subcontract_orders(filters)
 	orders_name = [order.name for order in orders]
-	subcontracted_items = get_subcontract_order_supplied_item(filters.order_type, orders_name)
+	subcontracted_items = get_subcontract_order_supplied_item("Subcontracting Order", orders_name)
 	for item in subcontracted_items:
 		for order in orders:
 			if order.name == item.parent and item.received_qty < item.qty:
@@ -84,11 +83,8 @@ def get_subcontract_orders(filters):
 		["docstatus", "=", 1],
 	]
 
-	if filters.order_type == "Purchase Order":
-		record_filters.append(["is_old_subcontracting_flow", "=", 1])
-
 	return frappe.get_all(
-		filters.order_type, filters=record_filters, fields=["name", "transaction_date", "supplier"]
+		"Subcontracting Order", filters=record_filters, fields=["name", "transaction_date", "supplier"]
 	)
 
 

@@ -12,10 +12,10 @@ from frappe.contacts.address_and_contact import (
 	load_address_and_contact,
 )
 from frappe.model.document import Document
-from frappe.model.mapper import get_mapped_doc
 from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
 from frappe.model.utils.rename_doc import update_linked_doctypes
-from frappe.query_builder import Field, functions
+from frappe.query_builder import CustomFunction, Field, functions
+from frappe.query_builder.functions import Cast, Coalesce, Max
 from frappe.utils import cint, cstr, flt, get_formatted_email, today
 from frappe.utils.user import get_users_with_role
 
@@ -26,6 +26,11 @@ from erpnext.accounts.party import (
 )
 from erpnext.controllers.website_list_for_contact import add_role_for_portal_user
 from erpnext.utilities.transaction_base import TransactionBase
+
+from .mapper import (
+	make_address,
+	make_contact,
+)
 
 
 class Customer(TransactionBase):
@@ -50,6 +55,7 @@ class Customer(TransactionBase):
 
 		account_manager: DF.Link | None
 		accounts: DF.Table[PartyAccount]
+		alias: DF.Data | None
 		companies: DF.Table[AllowedToTransactWith]
 		credit_limits: DF.Table[CustomerCreditLimit]
 		customer_details: DF.Text | None
@@ -120,42 +126,39 @@ class Customer(TransactionBase):
 		self.customer_name = self.customer_name.strip()
 		if frappe.db.get_value("Customer", self.customer_name) and not frappe.flags.in_import:
 			name_prefix = f"{self.customer_name} - %"
+			Customer = frappe.qb.DocType("Customer")
 
 			if frappe.db.db_type == "postgres":
-				# Postgres: extract trailing digits (e.g. "Customer - 3") and cast to int.
-				# NOTE: PostgreSQL is strict about types; MySQL's UNSIGNED cast does not exist.
-				count = frappe.db.sql(
-					"""
-					SELECT COALESCE(
-						MAX(CAST(SUBSTRING(name FROM '\\d+$') AS INTEGER)),
-						0
-					)
-					FROM tabCustomer
-					WHERE name LIKE %(name_prefix)s
-					""",
-					{"name_prefix": name_prefix},
-					as_list=1,
-				)[0][0]
+				# Mirror MariaDB's CAST(SUBSTRING_INDEX(name, ' ', -1) AS UNSIGNED): take the last
+				# whitespace-delimited token, then its LEADING digits, and cast to int. So "X - 3" -> 3,
+				# "X - 3a" -> 3, "X - 1.5" -> 1, matching MariaDB exactly. A non-numeric token (e.g.
+				# "X - Foo") strips to '' which NULLIF turns into NULL: MAX() skips it and COALESCE floors
+				# to 0, matching MariaDB's CAST(... AS UNSIGNED) -> 0. (pypika's Substring is start/length,
+				# not a regex; UNSIGNED doesn't exist on postgres, and a raw CAST of a non-numeric token to
+				# INTEGER would raise instead of yielding NULL.)
+				regexp_replace = CustomFunction("regexp_replace", ["source", "pattern", "replacement"])
+				nullif = CustomFunction("NULLIF", ["expr", "value"])
+				last_token = regexp_replace(Customer.name, r"^.*\s", "")
+				extracted_part = nullif(regexp_replace(last_token, r"^(\d*).*$", r"\1"), "")
+				casted_part = Cast(extracted_part, "INTEGER")
 			else:
 				# MariaDB/MySQL: keep existing behavior.
-				count = frappe.db.sql(
-					"""
-					SELECT COALESCE(
-						MAX(CAST(SUBSTRING_INDEX(name, ' ', -1) AS UNSIGNED)),
-						0
-					)
-					FROM tabCustomer
-					WHERE name LIKE %(name_prefix)s
-					""",
-					{"name_prefix": name_prefix},
-					as_list=1,
-				)[0][0]
+				SubstringIndex = CustomFunction("SUBSTRING_INDEX", ["str", "delim", "count"])
+				extracted_part = SubstringIndex(Customer.name, " ", -1)
+				casted_part = Cast(extracted_part, "UNSIGNED")
+
+			query = (
+				frappe.qb.from_(Customer)
+				.select(Coalesce(Max(casted_part), 0))
+				.where(Customer.name.like(name_prefix))
+			)
+			count = query.run()[0][0]
 			count = cint(count) + 1
 
 			new_customer_name = f"{self.customer_name} - {cstr(count)}"
 
 			msgprint(
-				_("Changed customer name to '{}' as '{}' already exists.").format(
+				_("Changed customer name to '{0}' as '{1}' already exists.").format(
 					new_customer_name, self.customer_name
 				),
 				title=_("Note"),
@@ -193,7 +196,7 @@ class Customer(TransactionBase):
 			if sum(member.allocated_percentage or 0 for member in self.sales_team) != 100:
 				frappe.throw(_("Total contribution percentage should be equal to 100"))
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def get_customer_group_details(self):
 		doc = frappe.get_doc("Customer Group", self.customer_group)
 		self.accounts = []
@@ -353,7 +356,7 @@ class Customer(TransactionBase):
 		if frappe.db.exists("Customer Group", self.name):
 			frappe.throw(
 				_(
-					"A Customer Group exists with same name please change the Customer name or rename the Customer Group"
+					"A Customer Group exists with the same name. Please change the Customer name or rename the Customer Group"
 				),
 				frappe.NameError,
 			)
@@ -403,7 +406,7 @@ class Customer(TransactionBase):
 			if flt(limit.credit_limit) < outstanding_amt:
 				frappe.throw(
 					_(
-						"""New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0}"""
+						"""New credit limit is less than current outstanding amount for the customer. Credit limit has to be at least {0}"""
 					).format(outstanding_amt)
 				)
 
@@ -415,7 +418,7 @@ class Customer(TransactionBase):
 
 		delete_contact_and_address("Customer", self.name)
 		if self.lead_name:
-			frappe.db.sql("update `tabLead` set status='Interested' where name=%s", self.lead_name)
+			frappe.db.set_value("Lead", self.lead_name, "status", "Interested")
 
 	def before_rename(self, olddn, newdn, merge=False):
 		if merge:
@@ -437,121 +440,17 @@ class Customer(TransactionBase):
 			self.loyalty_program = loyalty_program[0]
 		else:
 			frappe.msgprint(
-				_("Multiple Loyalty Programs found for Customer {}. Please select manually.").format(
+				_("Multiple Loyalty Programs found for Customer {0}. Please select manually.").format(
 					frappe.bold(self.customer_name)
 				)
 			)
 
+	def get_notification_email(self):
+		"""Hook to return the target email address for notifications."""
+		if self.account_manager:
+			return frappe.db.get_value("User", self.account_manager, "email")
 
-@frappe.whitelist()
-def make_quotation(source_name: str, target_doc: str | Document | None = None):
-	def set_missing_values(source, target):
-		_set_missing_values(source, target)
-
-	target_doc = get_mapped_doc(
-		"Customer",
-		source_name,
-		{"Customer": {"doctype": "Quotation", "field_map": {"name": "party_name"}}},
-		target_doc,
-		set_missing_values,
-	)
-
-	target_doc.quotation_to = "Customer"
-	target_doc.run_method("set_missing_values")
-	target_doc.run_method("set_other_charges")
-	target_doc.run_method("calculate_taxes_and_totals")
-
-	price_list, currency = frappe.db.get_value(
-		"Customer", {"name": source_name}, ["default_price_list", "default_currency"]
-	)
-	if price_list:
-		target_doc.selling_price_list = price_list
-	if currency:
-		target_doc.currency = currency
-
-	return target_doc
-
-
-@frappe.whitelist()
-def make_opportunity(source_name: str, target_doc: str | Document | None = None):
-	def set_missing_values(source, target):
-		_set_missing_values(source, target)
-
-	target_doc = get_mapped_doc(
-		"Customer",
-		source_name,
-		{
-			"Customer": {
-				"doctype": "Opportunity",
-				"field_map": {
-					"name": "party_name",
-					"doctype": "opportunity_from",
-				},
-			}
-		},
-		target_doc,
-		set_missing_values,
-	)
-
-	return target_doc
-
-
-@frappe.whitelist()
-def make_payment_entry(source_name: str, target_doc: str | Document | None = None):
-	def set_missing_values(source, target):
-		_set_missing_values(source, target)
-
-	target_doc = get_mapped_doc(
-		"Customer",
-		source_name,
-		{
-			"Customer": {
-				"doctype": "Payment Entry",
-				"field_map": {
-					"name": "party",
-				},
-			}
-		},
-		target_doc,
-		set_missing_values,
-	)
-	target_doc.party_type = "Customer"
-	target_doc.party_name = target_doc.party
-
-	return target_doc
-
-
-def _set_missing_values(source, target):
-	address = frappe.get_all(
-		"Dynamic Link",
-		{
-			"link_doctype": source.doctype,
-			"link_name": source.name,
-			"parenttype": "Address",
-		},
-		["parent"],
-		limit=1,
-	)
-
-	contact = frappe.get_all(
-		"Dynamic Link",
-		{
-			"link_doctype": source.doctype,
-			"link_name": source.name,
-			"parenttype": "Contact",
-		},
-		["parent"],
-		limit=1,
-	)
-
-	if address:
-		target.customer_address = address[0].parent
-
-	if contact:
-		target.contact_person = contact[0].parent
-		target.contact_display, target.contact_email, target.contact_mobile = frappe.get_value(
-			"Contact", contact[0].parent, ["full_name", "email_id", "mobile_no"]
-		)
+		return None
 
 
 @frappe.whitelist()
@@ -660,8 +559,7 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 def send_emails(
 	customer: str, customer_outstanding: float, credit_limit: float, credit_controller_users_list: str | list
 ):
-	if isinstance(credit_controller_users_list, str):
-		credit_controller_users_list = json.loads(credit_controller_users_list)
+	credit_controller_users_list = frappe.parse_json(credit_controller_users_list)
 	subject = _("Credit limit reached for customer {0}").format(customer)
 	message = _("Credit limit has been crossed for customer {0} ({1}/{2})").format(
 		customer, customer_outstanding, credit_limit
@@ -670,85 +568,97 @@ def send_emails(
 
 
 def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=False, cost_center=None):
-	# Outstanding based on GL Entries
-	cond = ""
+	from frappe.query_builder import Criterion
+	from frappe.query_builder.functions import Coalesce, IfNull, Sum
+
+	GLEntry = frappe.qb.DocType("GL Entry")
+	gle_query = (
+		frappe.qb.from_(GLEntry)
+		.select(Sum(GLEntry.debit) - Sum(GLEntry.credit))
+		.where(GLEntry.party_type == "Customer")
+		.where(GLEntry.party == customer)
+		.where(GLEntry.company == company)
+		.where(GLEntry.is_cancelled == 0)
+	)
+
 	if cost_center:
 		lft, rgt = frappe.get_cached_value("Cost Center", cost_center, ["lft", "rgt"])
+		CostCenter = frappe.qb.DocType("Cost Center")
+		cost_center_subquery = (
+			frappe.qb.from_(CostCenter)
+			.select(CostCenter.name)
+			.where(CostCenter.lft >= lft)
+			.where(CostCenter.rgt <= rgt)
+		)
+		gle_query = gle_query.where(GLEntry.cost_center.isin(cost_center_subquery))
 
-		cond = f""" and cost_center in (select name from `tabCost Center` where
-			lft >= {lft} and rgt <= {rgt})"""
+	gle_res = gle_query.run()
+	outstanding_based_on_gle = flt(gle_res[0][0]) if gle_res and gle_res[0][0] is not None else 0.0
 
-	outstanding_based_on_gle = frappe.db.sql(
-		f"""
-		select sum(debit) - sum(credit)
-		from `tabGL Entry` where party_type = 'Customer'
-		and is_cancelled = 0 and party = %s
-		and company=%s {cond}""",
-		(customer, company),
-	)
-
-	outstanding_based_on_gle = flt(outstanding_based_on_gle[0][0]) if outstanding_based_on_gle else 0
-
-	# Outstanding based on Sales Order
-	outstanding_based_on_so = 0
-
-	# if credit limit check is bypassed at sales order level,
-	# we should not consider outstanding Sales Orders, when customer credit balance report is run
+	outstanding_based_on_so = 0.0
 	if not ignore_outstanding_sales_order:
-		outstanding_based_on_so = frappe.db.sql(
-			"""
-			select sum(base_grand_total*(100 - per_billed)/100)
-			from `tabSales Order`
-			where customer=%s and docstatus = 1 and company=%s
-			and per_billed < 100 and status != 'Closed'""",
-			(customer, company),
+		SalesOrder = frappe.qb.DocType("Sales Order")
+		so_query = (
+			frappe.qb.from_(SalesOrder)
+			.select(Sum(SalesOrder.base_grand_total * (100 - SalesOrder.per_billed) / 100))
+			.where(SalesOrder.customer == customer)
+			.where(SalesOrder.company == company)
+			.where(SalesOrder.docstatus == 1)
+			.where(SalesOrder.per_billed < 100)
+			.where(SalesOrder.status != "Closed")
 		)
+		so_res = so_query.run()
+		outstanding_based_on_so = flt(so_res[0][0]) if so_res and so_res[0][0] is not None else 0.0
 
-		outstanding_based_on_so = flt(outstanding_based_on_so[0][0]) if outstanding_based_on_so else 0
+	DeliveryNote = frappe.qb.DocType("Delivery Note")
+	DeliveryNoteItem = frappe.qb.DocType("Delivery Note Item")
+	SalesInvoiceItem = frappe.qb.DocType("Sales Invoice Item")
 
-	# Outstanding based on Delivery Note, which are not created against Sales Order
-	outstanding_based_on_dn = 0
-
-	unmarked_delivery_note_items = frappe.db.sql(
-		"""select
-			dn_item.name, dn_item.amount, dn.base_net_total, dn.base_grand_total
-		from `tabDelivery Note` dn, `tabDelivery Note Item` dn_item
-		where
-			dn.name = dn_item.parent
-			and dn.customer=%s and dn.company=%s
-			and dn.docstatus = 1 and dn.status not in ('Closed', 'Stopped')
-			and ifnull(dn_item.against_sales_order, '') = ''
-			and ifnull(dn_item.against_sales_invoice, '') = ''
-		""",
-		(customer, company),
-		as_dict=True,
+	si_subquery = (
+		frappe.qb.from_(SalesInvoiceItem)
+		.select(SalesInvoiceItem.dn_detail, Sum(SalesInvoiceItem.amount).as_("billed_amount"))
+		.where(SalesInvoiceItem.docstatus == 1)
+		.groupby(SalesInvoiceItem.dn_detail)
 	)
 
-	if not unmarked_delivery_note_items:
-		return outstanding_based_on_gle + outstanding_based_on_so
-
-	si_amounts = frappe.db.sql(
-		"""
-		SELECT
-			dn_detail, sum(amount) from `tabSales Invoice Item`
-		WHERE
-			docstatus = 1
-			and dn_detail in ({})
-		GROUP BY dn_detail""".format(
-			", ".join(frappe.db.escape(dn_item.name) for dn_item in unmarked_delivery_note_items)
+	dn_query = (
+		frappe.qb.from_(DeliveryNote)
+		.join(DeliveryNoteItem)
+		.on(DeliveryNote.name == DeliveryNoteItem.parent)
+		.left_join(si_subquery)
+		.on(DeliveryNoteItem.name == si_subquery.dn_detail)
+		.select(
+			Sum(
+				(
+					(DeliveryNoteItem.amount - IfNull(si_subquery.billed_amount, 0.0))
+					/ DeliveryNote.base_net_total
+				)
+				* DeliveryNote.base_grand_total
+			)
+		)
+		.where(DeliveryNote.customer == customer)
+		.where(DeliveryNote.company == company)
+		.where(DeliveryNote.docstatus == 1)
+		.where(DeliveryNote.base_net_total > 0)
+		.where(DeliveryNote.status.notin(["Closed", "Stopped"]))
+		.where(DeliveryNoteItem.amount > IfNull(si_subquery.billed_amount, 0.0))
+		.where(
+			Criterion.any(
+				[DeliveryNoteItem.against_sales_order.isnull(), DeliveryNoteItem.against_sales_order == ""]
+			)
+		)
+		.where(
+			Criterion.any(
+				[
+					DeliveryNoteItem.against_sales_invoice.isnull(),
+					DeliveryNoteItem.against_sales_invoice == "",
+				]
+			)
 		)
 	)
 
-	si_amounts = {si_item[0]: si_item[1] for si_item in si_amounts}
-
-	for dn_item in unmarked_delivery_note_items:
-		dn_amount = flt(dn_item.amount)
-		si_amount = flt(si_amounts.get(dn_item.name))
-
-		if dn_amount > si_amount and dn_item.base_net_total:
-			outstanding_based_on_dn += (
-				(dn_amount - si_amount) / dn_item.base_net_total
-			) * dn_item.base_grand_total
+	dn_res = dn_query.run()
+	outstanding_based_on_dn = flt(dn_res[0][0]) if dn_res and dn_res[0][0] is not None else 0.0
 
 	return outstanding_based_on_gle + outstanding_based_on_so + outstanding_based_on_dn
 
@@ -781,90 +691,6 @@ def get_credit_limit(customer, company):
 	return flt(credit_limit)
 
 
-def make_contact(args, is_primary_contact=1):
-	values = {
-		"doctype": "Contact",
-		"is_primary_contact": is_primary_contact,
-		"links": [{"link_doctype": args.get("doctype"), "link_name": args.get("name")}],
-	}
-
-	party_type = args.customer_type if args.doctype == "Customer" else args.supplier_type
-	party_name_key = "customer_name" if args.doctype == "Customer" else "supplier_name"
-
-	if party_type == "Individual":
-		first, middle, last = parse_full_name(args.get(party_name_key))
-		values.update(
-			{
-				"first_name": first,
-				"middle_name": middle,
-				"last_name": last,
-			}
-		)
-	else:
-		values.update(
-			{
-				"company_name": args.get(party_name_key),
-			}
-		)
-
-	contact = frappe.get_doc(values)
-
-	if args.get("email_id"):
-		contact.add_email(args.get("email_id"), is_primary=True)
-	if args.get("mobile_no"):
-		contact.add_phone(args.get("mobile_no"), is_primary_mobile_no=True)
-	if args.get("first_name"):
-		contact.first_name = args.get("first_name")
-	if args.get("last_name"):
-		contact.last_name = args.get("last_name")
-
-	if flags := args.get("flags"):
-		contact.insert(ignore_permissions=flags.get("ignore_permissions"))
-	else:
-		contact.insert()
-
-	return contact
-
-
-def make_address(args, is_primary_address=1, is_shipping_address=1):
-	reqd_fields = []
-	for field in ["city", "country"]:
-		if not args.get(field):
-			reqd_fields.append("<li>" + field.title() + "</li>")
-
-	if reqd_fields:
-		msg = _("Following fields are mandatory to create address:")
-		frappe.throw(
-			"{} <br><br> <ul>{}</ul>".format(msg, "\n".join(reqd_fields)),
-			title=_("Missing Values Required"),
-		)
-
-	party_name_key = "customer_name" if args.doctype == "Customer" else "supplier_name"
-
-	address = frappe.get_doc(
-		{
-			"doctype": "Address",
-			"address_title": args.get(party_name_key),
-			"address_line1": args.get("address_line1"),
-			"address_line2": args.get("address_line2"),
-			"city": args.get("city"),
-			"state": args.get("state"),
-			"pincode": args.get("pincode"),
-			"country": args.get("country"),
-			"is_primary_address": is_primary_address,
-			"is_shipping_address": is_shipping_address,
-			"links": [{"link_doctype": args.get("doctype"), "link_name": args.get("name")}],
-		}
-	)
-
-	if flags := args.get("flags"):
-		address.insert(ignore_permissions=flags.get("ignore_permissions"))
-	else:
-		address.insert()
-
-	return address
-
-
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_customer_primary(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
@@ -889,13 +715,3 @@ def get_customer_primary(doctype: str, txt: str, searchfield: str, start: int, p
 		query = query.select(type_doctype.email_id)
 
 	return query.run()
-
-
-def parse_full_name(full_name: str) -> tuple[str, str | None, str | None]:
-	"""Parse full name into first name, middle name and last name"""
-	names = full_name.split()
-	first_name = names[0]
-	middle_name = " ".join(names[1:-1]) if len(names) > 2 else None
-	last_name = names[-1] if len(names) > 1 else None
-
-	return first_name, middle_name, last_name

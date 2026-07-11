@@ -17,6 +17,7 @@ frappe.ui.form.on("Budget", {
 				filters: {
 					is_group: 0,
 					company: frm.doc.company,
+					root_type: ["in", ["Income", "Expense"]],
 				},
 			};
 		});
@@ -134,6 +135,9 @@ function set_total_budget_amount(frm) {
 
 function toggle_distribution_fields(frm) {
 	const grid = frm.fields_dict.budget_distribution.grid;
+
+	frm.set_df_property("budget_distribution", "cannot_add_rows", true);
+	frm.set_df_property("budget_distribution", "cannot_delete_rows", true);
 
 	["amount", "percent"].forEach((field) => {
 		grid.update_docfield_property(field, "read_only", frm.doc.distribute_equally);

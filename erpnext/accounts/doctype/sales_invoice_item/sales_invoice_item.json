@@ -10,6 +10,8 @@
   "barcode",
   "has_item_scanned",
   "item_code",
+  "is_product_bundle",
+  "product_bundle",
   "col_break1",
   "item_name",
   "customer_item_code",
@@ -104,6 +106,7 @@
   "sales_order",
   "so_detail",
   "sales_invoice_item",
+  "pick_list_item",
   "column_break_74",
   "delivery_note",
   "dn_detail",
@@ -112,6 +115,7 @@
   "pos_invoice",
   "pos_invoice_item",
   "scio_detail",
+  "against_pick_list",
   "internal_transfer_section",
   "purchase_order",
   "column_break_92",
@@ -141,6 +145,23 @@
    "oldfieldtype": "Link",
    "options": "Item",
    "search_index": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_product_bundle",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Product Bundle",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.is_product_bundle",
+   "fieldname": "product_bundle",
+   "fieldtype": "Link",
+   "label": "Product Bundle",
+   "options": "Product Bundle",
+   "read_only_depends_on": "eval:doc.so_detail || doc.dn_detail"
   },
   {
    "fieldname": "col_break1",
@@ -855,8 +876,8 @@
    "fieldtype": "Currency",
    "label": "Rate of Stock UOM",
    "no_copy": 1,
-   "print_hide": 1,
    "options": "currency",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -947,7 +968,8 @@
    "fieldtype": "Currency",
    "label": "Distributed Discount Amount",
    "options": "currency",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "available_quantity_section",
@@ -1010,13 +1032,30 @@
    "label": "Consider for Tax Withholding",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "against_pick_list",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Against Pick List",
+   "no_copy": 1,
+   "options": "Pick List",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pick_list_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Pick List Item",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-24 14:37:16.853941",
+ "modified": "2026-06-08 20:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

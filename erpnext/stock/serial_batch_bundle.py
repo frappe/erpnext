@@ -821,6 +821,15 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 				"Serial and Batch Bundle", self.sle.serial_and_batch_bundle, "total_amount"
 			)
 		else:
+			# Serialize concurrent valuations of this (item, warehouse) on postgres. MariaDB's
+			# grouped FOR UPDATE + gap locks do this via the history reads below; postgres has no
+			# gap locks, and row-locking the whole history writes a lock marker on every tuple --
+			# a txn-scoped advisory lock (released at commit/rollback) serializes without either.
+			if frappe.db.db_type == "postgres":
+				frappe.db.transaction_advisory_lock(
+					("batch-valuation", self.sle.item_code, self.sle.warehouse)
+				)
+
 			entries = self.get_batch_stock_before_date()
 			self.stock_value_change = 0.0
 			self.batch_avg_rate = defaultdict(float)
@@ -851,6 +860,27 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 					child.creation < self.sle.creation
 				)
 
+		conditions = (
+			(child.item_code == self.sle.item_code)
+			& (child.warehouse == self.sle.warehouse)
+			& (child.batch_no.isin(self.batchwise_valuation_batches))
+			& (child.docstatus == 1)
+			& (child.type_of_transaction.isin(["Inward", "Outward"]))
+		)
+
+		# Important to exclude the current voucher detail no / voucher no to calculate the correct stock value difference
+		if self.sle.voucher_detail_no:
+			conditions &= child.voucher_detail_no != self.sle.voucher_detail_no
+		elif self.sle.voucher_no:
+			conditions &= child.voucher_no != self.sle.voucher_no
+
+		conditions &= child.voucher_type != "Pick List"
+		if timestamp_condition:
+			conditions &= timestamp_condition
+
+		# MariaDB carries a row lock on the grouped query below; on postgres the caller
+		# (calculate_avg_rate) serializes via a txn-scoped advisory lock on (item, warehouse)
+		# instead of row-locking the whole history (FOR UPDATE is invalid with GROUP BY there).
 		query = (
 			frappe.qb.from_(child)
 			.select(
@@ -858,26 +888,11 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 				Sum(child.stock_value_difference).as_("incoming_rate"),
 				Sum(child.qty).as_("qty"),
 			)
-			.where(
-				(child.item_code == self.sle.item_code)
-				& (child.warehouse == self.sle.warehouse)
-				& (child.batch_no.isin(self.batchwise_valuation_batches))
-				& (child.docstatus == 1)
-				& (child.type_of_transaction.isin(["Inward", "Outward"]))
-			)
-			.for_update()
+			.where(conditions)
 			.groupby(child.batch_no)
 		)
-
-		# Important to exclude the current voucher detail no / voucher no to calculate the correct stock value difference
-		if self.sle.voucher_detail_no:
-			query = query.where(child.voucher_detail_no != self.sle.voucher_detail_no)
-		elif self.sle.voucher_no:
-			query = query.where(child.voucher_no != self.sle.voucher_no)
-
-		query = query.where(child.voucher_type != "Pick List")
-		if timestamp_condition:
-			query = query.where(timestamp_condition)
+		if frappe.db.db_type != "postgres":
+			query = query.for_update()
 
 		return query.run(as_dict=True)
 
@@ -1070,6 +1085,12 @@ class SerialBatchCreation:
 		self.__dict__.update(item_details)
 
 	def set_other_details(self):
+		from erpnext.stock.utils import get_combine_datetime
+
+		if not self.get("posting_datetime"):
+			if self.get("posting_date") and self.get("posting_time"):
+				self.posting_datetime = get_combine_datetime(self.posting_date, self.posting_time)
+
 		if not self.get("posting_datetime"):
 			self.posting_datetime = now()
 			self.__dict__["posting_datetime"] = self.posting_datetime
@@ -1216,7 +1237,9 @@ class SerialBatchCreation:
 			required_qty = flt(abs(self.actual_qty), precision)
 
 			if required_qty - total_qty > 0:
-				msg = f"For the item {bold(doc.item_code)}, the Available qty {bold(total_qty)} is less than the Required Qty {bold(required_qty)} in the warehouse {bold(doc.warehouse)}. Please add sufficient qty in the warehouse."
+				msg = _(
+					"For the item {0}, the Available qty {1} is less than the Required Qty {2} in the warehouse {3}. Please add sufficient qty in the warehouse."
+				).format(bold(doc.item_code), bold(total_qty), bold(required_qty), bold(doc.warehouse))
 				frappe.throw(msg, title=_("Insufficient Stock"))
 
 	def set_auto_serial_batch_entries_for_outward(self):
@@ -1325,6 +1348,15 @@ class SerialBatchCreation:
 	def set_serial_batch_entries(self, doc):
 		incoming_rate = self.get("incoming_rate")
 
+		standard_rate = self.get_standard_cost_rate()
+		if standard_rate is not None:
+			# Standard Cost values every serial/batch at the same rate, so the bundle entries
+			# must carry the standard rate (not the document/billed rate) to stay consistent
+			# with the standard-valued Stock Ledger Entry.
+			incoming_rate = standard_rate
+			self.serial_nos_valuation = None
+			self.batches_valuation = None
+
 		precision = frappe.get_precision("Serial and Batch Entry", "qty")
 		if self.get("serial_nos"):
 			serial_no_wise_batch = frappe._dict({})
@@ -1360,6 +1392,25 @@ class SerialBatchCreation:
 						"incoming_rate": incoming_rate,
 					},
 				)
+
+	def get_standard_cost_rate(self):
+		"""Return the standard valuation rate for the item if its valuation method is
+		Standard Cost, else None — used to value bundle entries at standard."""
+		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import get_item_standard_rate
+		from erpnext.stock.utils import get_valuation_method
+
+		company = self.get("company")
+		if not company and self.get("warehouse"):
+			company = frappe.get_cached_value("Warehouse", self.warehouse, "company")
+
+		if not company or get_valuation_method(self.item_code, company) != "Standard Cost":
+			return None
+
+		posting_date = self.get("posting_date")
+		if not posting_date and self.get("posting_datetime"):
+			posting_date = getdate(self.posting_datetime)
+
+		return get_item_standard_rate(self.item_code, company, posting_date)
 
 	def create_batch(self):
 		from erpnext.stock.doctype.batch.batch import make_batch
@@ -1516,7 +1567,7 @@ def update_batch_qty(voucher_type, voucher_no, docstatus, via_landed_cost_vouche
 		return
 
 	precision = frappe.get_precision("Batch", "batch_qty")
-	for batch, qty in batches.items():
+	for batch, qty in sorted(batches.items()):
 		current_qty = get_batch_current_qty(batch)
 		current_qty += flt(qty, precision) * (-1 if docstatus == 2 else 1)
 

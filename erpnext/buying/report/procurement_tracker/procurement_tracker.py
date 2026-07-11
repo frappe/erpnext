@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Min
 from frappe.utils import flt
 
 
@@ -278,6 +279,21 @@ def get_po_entries(filters):
 	parent = frappe.qb.DocType("Purchase Order")
 	child = frappe.qb.DocType("Purchase Order Item")
 
+	# one coherent representative line per (PO, material_request_item): per-column Max() over the
+	# old GROUP BY could stitch values from different PO lines into a row that never existed
+	representative_lines = (
+		frappe.qb.from_(parent)
+		.from_(child)
+		.select(Min(child.name))
+		.where(
+			(parent.docstatus == 1)
+			& (parent.name == child.parent)
+			& (parent.status.notin(("Closed", "Completed", "Cancelled")))
+		)
+		.groupby(child.parent, child.material_request_item)
+	)
+	representative_lines = apply_filters_on_query(filters, parent, child, representative_lines)
+
 	query = (
 		frappe.qb.from_(parent)
 		.from_(child)
@@ -300,13 +316,7 @@ def get_po_entries(filters):
 			parent.status,
 			parent.owner,
 		)
-		.where(
-			(parent.docstatus == 1)
-			& (parent.name == child.parent)
-			& (parent.status.notin(("Closed", "Completed", "Cancelled")))
-		)
-		.groupby(parent.name, child.material_request_item)
+		.where((parent.name == child.parent) & (child.name.isin(representative_lines)))
 	)
-	query = apply_filters_on_query(filters, parent, child, query)
 
 	return query.run(as_dict=True)

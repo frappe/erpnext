@@ -1,7 +1,7 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "allow_rename": 1,
- "beta": 1,
  "creation": "2019-12-04 04:59:08.003664",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -107,7 +107,7 @@
    "link_fieldname": "dunning_type"
   }
  ],
- "modified": "2024-03-27 13:08:19.584112",
+ "modified": "2026-05-30 23:18:20.740726",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Dunning Type",
@@ -151,6 +151,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

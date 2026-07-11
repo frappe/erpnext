@@ -70,7 +70,7 @@ class POSInvoiceMergeLog(Document):
 		for d in self.pos_invoices:
 			if d.customer != self.customer:
 				frappe.throw(
-					_("Row #{}: POS Invoice {} is not against customer {}").format(
+					_("Row #{0}: POS Invoice {1} is not against customer {2}").format(
 						d.idx, d.pos_invoice, self.customer
 					)
 				)
@@ -85,11 +85,11 @@ class POSInvoiceMergeLog(Document):
 			bold_status = frappe.bold(status)
 			if docstatus != 1:
 				frappe.throw(
-					_("Row #{}: POS Invoice {} is not submitted yet").format(d.idx, bold_pos_invoice)
+					_("Row #{0}: POS Invoice {1} is not submitted yet").format(d.idx, bold_pos_invoice)
 				)
 			if status == "Consolidated":
 				frappe.throw(
-					_("Row #{}: POS Invoice {} has been {}").format(d.idx, bold_pos_invoice, bold_status)
+					_("Row #{0}: POS Invoice {1} has been {2}").format(d.idx, bold_pos_invoice, bold_status)
 				)
 			if (
 				is_return
@@ -101,14 +101,14 @@ class POSInvoiceMergeLog(Document):
 				if return_against_status != "Consolidated":
 					# if return entry is not getting merged in the current pos closing and if it is not consolidated
 					msg = _(
-						"Row #{}: The original Invoice {} of return invoice {} is not consolidated."
+						"Row #{0}: The original Invoice {1} of return invoice {2} is not consolidated."
 					).format(d.idx, bold_return_against, bold_pos_invoice)
 					msg += " "
 					msg += _(
 						"The original invoice should be consolidated before or along with the return invoice."
 					)
 					msg += "<br><br>"
-					msg += _("You can add the original invoice {} manually to proceed.").format(
+					msg += _("You can add the original invoice {0} manually to proceed.").format(
 						bold_return_against
 					)
 					frappe.throw(msg)
@@ -330,7 +330,7 @@ class POSInvoiceMergeLog(Document):
 
 			if not dimension_value and (dimension.mandatory_for_pl or dimension.mandatory_for_bs):
 				frappe.throw(
-					_("Please set Accounting Dimension {} in {}").format(
+					_("Please set Accounting Dimension {0} in {1}").format(
 						frappe.bold(dimension.label),
 						frappe.get_desk_link("POS Profile", invoice.pos_profile),
 					)

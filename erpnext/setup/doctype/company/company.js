@@ -69,6 +69,22 @@ frappe.ui.form.on("Company", {
 				},
 			};
 		});
+
+		frm.set_query("default_letter_head", function () {
+			return {
+				filters: {
+					letter_head_for: "DocType",
+				},
+			};
+		});
+
+		frm.set_query("default_letter_head_report", function () {
+			return {
+				filters: {
+					letter_head_for: "Report",
+				},
+			};
+		});
 	},
 
 	company_name: function (frm) {
@@ -214,12 +230,13 @@ frappe.ui.form.on("Company", {
 								label: __("Please enter the company name to confirm"),
 								reqd: 1,
 								description: __(
-									"Please make sure you really want to delete all the transactions for this company. Your master data will remain as it is. This action cannot be undone."
+									"Please make sure you really want to delete all the transactions for {0}. Your master data will remain as it is. This action cannot be undone.",
+									[frappe.utils.bold(frm.doc.name)]
 								),
 							},
 							function (data) {
 								if (data.company_name !== frm.doc.name) {
-									frappe.msgprint(__("Company name not same"));
+									frappe.msgprint(__("Company name does not match"));
 									return;
 								}
 								frappe.call({
@@ -234,7 +251,7 @@ frappe.ui.form.on("Company", {
 									},
 								});
 							},
-							__("Delete all the Transactions for this Company"),
+							__("Delete all the Transactions for {0}", [frappe.utils.bold(frm.doc.name)]),
 							__("Delete")
 						);
 						d.get_primary_btn().addClass("btn-danger");
@@ -319,6 +336,10 @@ erpnext.company.setup_queries = function (frm) {
 				[
 					"stock_received_but_not_billed",
 					{ root_type: "Liability", account_type: "Stock Received But Not Billed" },
+				],
+				[
+					"stock_delivered_but_not_billed",
+					{ root_type: "Asset", account_type: "Stock Delivered But Not Billed" },
 				],
 				[
 					"service_received_but_not_billed",

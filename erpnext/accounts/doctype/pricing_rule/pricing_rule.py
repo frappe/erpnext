@@ -156,6 +156,24 @@ class PricingRule(Document):
 			if len(values) != len(set(values)):
 				frappe.throw(_("Duplicate {0} found in the table").format(self.apply_on))
 
+			if self.apply_on == "Item Code":
+				self.validate_template_with_variant(values)
+
+	def validate_template_with_variant(self, item_codes):
+		# throws if a template and its variant both exist in one rule
+		variants = frappe.get_all(
+			"Item",
+			filters={"name": ("in", item_codes), "variant_of": ("in", item_codes)},
+			fields=["name", "variant_of"],
+		)
+		if variants:
+			variant = variants[0]
+			frappe.throw(
+				_("Variant {0} and its template {1} cannot both be added to the same Pricing Rule").format(
+					frappe.bold(variant.name), frappe.bold(variant.variant_of)
+				)
+			)
+
 	def validate_mandatory(self):
 		if self.has_priority and not self.priority:
 			throw(_("Priority is mandatory"), frappe.MandatoryError, _("Please Set Priority"))
@@ -341,8 +359,7 @@ def apply_pricing_rule(args: str | dict, doc: str | dict | Document | None = Non
 	}
 	"""
 
-	if isinstance(args, str):
-		args = json.loads(args)
+	args = frappe.parse_json(args)
 
 	args = frappe._dict(args)
 
@@ -397,8 +414,7 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 		get_product_discount_rule,
 	)
 
-	if isinstance(doc, str):
-		doc = json.loads(doc)
+	doc = frappe.parse_json(doc)
 
 	if doc:
 		doc = frappe.get_doc(doc)
@@ -628,9 +644,7 @@ def remove_pricing_rule_for_item(
 		get_pricing_rule_items,
 	)
 
-	if isinstance(item_details, str):
-		item_details = json.loads(item_details)
-		item_details = frappe._dict(item_details)
+	item_details = frappe._dict(frappe.parse_json(item_details))
 
 	for d in get_applied_pricing_rules(pricing_rules):
 		if not d or not frappe.db.exists("Pricing Rule", d):
@@ -671,8 +685,7 @@ def remove_pricing_rule_for_item(
 
 @frappe.whitelist()
 def remove_pricing_rules(item_list: str | list):
-	if isinstance(item_list, str):
-		item_list = json.loads(item_list)
+	item_list = frappe.parse_json(item_list)
 
 	out = []
 	for item in item_list:

@@ -7,7 +7,7 @@ import json
 import frappe
 from frappe import _
 from frappe.modules.utils import get_module_app
-from frappe.utils import flt, has_common
+from frappe.utils import cint, flt, has_common
 from frappe.utils.user import is_website_user
 
 
@@ -17,9 +17,12 @@ def get_list_context(context=None):
 		"currency": frappe.db.get_default("currency"),
 		"currency_symbols": json.dumps(
 			dict(
-				frappe.db.sql(
-					"""select name, symbol
-			from tabCurrency where enabled=1"""
+				frappe.get_all(
+					"Currency",
+					filters={"enabled": 1},
+					fields=["name", "symbol"],
+					as_list=True,
+					limit_page_length=0,  # all enabled currencies are needed for the symbol map
 				)
 			)
 		),
@@ -178,13 +181,17 @@ def get_list_for_transactions(
 
 
 def rfq_transaction_list(parties_doctype, doctype, parties, limit_start, limit_page_length):
-	data = frappe.db.sql(
-		"""select distinct parent as name, supplier from `tab{doctype}`
-			where supplier = '{supplier}' and docstatus=1  order by creation desc limit {start}, {len}""".format(
-			doctype=parties_doctype, supplier=parties[0], start=limit_start, len=limit_page_length
-		),
-		as_dict=1,
-	)
+	party = frappe.qb.DocType(parties_doctype)
+	data = (
+		frappe.qb.from_(party)
+		# creation must be selected: Postgres requires SELECT DISTINCT order-by exprs in the select list
+		.select(party.parent.as_("name"), party.supplier, party.creation)
+		.distinct()
+		.where((party.supplier == parties[0]) & (party.docstatus == 1))
+		.orderby(party.creation, order=frappe.qb.desc)
+		.limit(limit_page_length)
+		.offset(limit_start)
+	).run(as_dict=True)
 
 	return post_process(doctype, data)
 
@@ -301,4 +308,4 @@ def add_role_for_portal_user(portal_user, role):
 		return
 
 	user_doc.add_roles(role)
-	frappe.msgprint(_("Added {1} Role to User {0}.").format(frappe.bold(user_doc.name), role), alert=True)
+	frappe.msgprint(_("Added {1} role to user {0}.").format(frappe.bold(user_doc.name), role), alert=True)

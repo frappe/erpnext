@@ -1,50 +1,25 @@
 import json
 
+import click
 import frappe
-from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
-
-
-@frappe.whitelist()
-def create_custom_fields_for_frappe_crm():
-	frappe.only_for("System Manager")
-	custom_fields = {
-		"Quotation": [
-			{
-				"fieldname": "crm_deal",
-				"fieldtype": "Data",
-				"label": "Frappe CRM Deal",
-				"insert_after": "party_name",
-			}
-		],
-		"Customer": [
-			{
-				"fieldname": "crm_deal",
-				"fieldtype": "Data",
-				"label": "Frappe CRM Deal",
-				"insert_after": "prospect_name",
-			}
-		],
-	}
-	create_custom_fields(custom_fields, ignore_validate=True)
+from frappe import _
 
 
 @frappe.whitelist()
 def create_prospect_against_crm_deal():
+	validate_frappe_crm_sync()
+
 	doc = frappe.form_dict
-	prospect = frappe.get_doc(
-		{
-			"doctype": "Prospect",
-			"company_name": doc.organization or doc.lead_name,
-			"no_of_employees": doc.no_of_employees,
-			"prospect_owner": doc.deal_owner,
-			"company": doc.erpnext_company,
-			"crm_deal": doc.crm_deal,
-			"territory": doc.territory,
-			"industry": doc.industry,
-			"website": doc.website,
-			"annual_revenue": doc.annual_revenue,
-		}
-	)
+	prospect = frappe.new_doc("Prospect")
+	prospect.company_name = doc.organization or doc.lead_name
+	prospect.no_of_employees = doc.no_of_employees
+	prospect.prospect_owner = doc.deal_owner
+	prospect.company = doc.erpnext_company
+	prospect.crm_deal = doc.crm_deal
+	prospect.territory = doc.territory
+	prospect.industry = doc.industry
+	prospect.website = doc.website
+	prospect.annual_revenue = doc.annual_revenue
 
 	try:
 		prospect_name = frappe.db.get_value("Prospect", {"company_name": prospect.company_name})
@@ -52,6 +27,7 @@ def create_prospect_against_crm_deal():
 			prospect.insert()
 			prospect_name = prospect.name
 	except Exception:
+		frappe.db.rollback()
 		frappe.log_error(
 			frappe.get_traceback(),
 			f"Error while creating prospect against CRM Deal: {frappe.form_dict.get('crm_deal_id')}",
@@ -59,7 +35,7 @@ def create_prospect_against_crm_deal():
 		pass
 
 	if doc.contacts and len(doc.contacts):
-		create_contacts(json.loads(doc.contacts), prospect.company_name, "Prospect", prospect_name)
+		create_contacts(frappe.parse_json(doc.contacts), prospect.company_name, "Prospect", prospect_name)
 
 	create_address("Prospect", prospect_name, doc.address)
 	frappe.response["message"] = prospect_name
@@ -95,8 +71,8 @@ def create_contacts(contacts, organization=None, link_doctype=None, link_docname
 def create_address(doctype, docname, address):
 	if not address:
 		return
-	if isinstance(address, str):
-		address = json.loads(address)
+	address = frappe.parse_json(address)
+	frappe.db.savepoint("crm_create_address")
 	try:
 		_address = frappe.db.exists("Address", address.get("name"))
 		if not _address:
@@ -124,6 +100,7 @@ def create_address(doctype, docname, address):
 			address.save(ignore_permissions=True)
 			return address.name
 	except Exception:
+		frappe.db.rollback(save_point="crm_create_address")
 		frappe.log_error(frappe.get_traceback(), f"Error while creating address for {docname}")
 
 
@@ -150,23 +127,107 @@ def contact_exists(email, mobile_no):
 	return False
 
 
+CUSTOMER_ALLOWED_FIELDS = {
+	"customer_name",
+	"customer_group",
+	"customer_type",
+	"territory",
+	"default_currency",
+	"industry",
+	"website",
+	"crm_deal",
+}
+
+
 @frappe.whitelist()
 def create_customer(customer_data: dict | None = None):
+	validate_frappe_crm_sync()
+
 	if not customer_data:
 		customer_data = frappe.form_dict
 
 	try:
 		customer_name = frappe.db.exists("Customer", {"customer_name": customer_data.get("customer_name")})
 		if not customer_name:
-			customer = frappe.get_doc({"doctype": "Customer", **customer_data}).insert(
-				ignore_permissions=True
-			)
-			customer_name = customer.name
+			customer = frappe.new_doc("Customer")
+			for field in CUSTOMER_ALLOWED_FIELDS:
+				if customer_data.get(field) is not None:
+					customer.set(field, customer_data.get(field))
 
-		contacts = json.loads(customer_data.get("contacts"))
+			# If CRM is installed on the site, User Permission cannot be ignored while saving Customer Records.
+			customer.insert(ignore_permissions=not is_crm_installed())
+			customer_name = customer.name
+	except Exception:
+		frappe.db.rollback()
+		frappe.log_error(frappe.get_traceback(), "Error while creating customer against Frappe CRM Deal")
+		return
+
+	# Link contacts/address under a savepoint so a failure here does NOT discard the Customer just
+	# created (a full rollback would; MariaDB kept it pre-migration). Linking is best-effort.
+	frappe.db.savepoint("crm_customer_links")
+	try:
+		contacts = frappe.parse_json(customer_data.get("contacts"))
 		create_contacts(contacts, customer_name, "Customer", customer_name)
 		create_address("Customer", customer_name, customer_data.get("address"))
-		return customer_name
 	except Exception:
-		frappe.log_error(frappe.get_traceback(), "Error while creating customer against Frappe CRM Deal")
-		pass
+		frappe.db.rollback(save_point="crm_customer_links")
+		frappe.log_error(frappe.get_traceback(), "Error while linking contacts/address to new Customer")
+		# keep the Customer, but preserve the pre-existing contract of returning None on a linking failure
+		# so CRM callers still see the failure signal
+		return
+
+	return customer_name
+
+
+def validate_frappe_crm_sync():
+	CRMSettings = frappe.get_single("CRM Settings")
+	if not CRMSettings.enable_frappe_crm_data_synchronization:
+		frappe.throw(
+			_("Frappe CRM data synchronization is not enabled on ERPNext. Contact System Manager of ERPNext.")
+		)
+
+	# Skip allowed_users validation if CRM is installed on the site.
+	if is_crm_installed():
+		return
+
+	allowed_users = [d.user for d in CRMSettings.allowed_users]
+
+	if frappe.session.user not in allowed_users:
+		frappe.throw(
+			_(
+				"User not allowed to synchronize data from Frappe CRM on ERPNext. Contact System Manager of ERPNext."
+			),
+			exc=frappe.PermissionError,
+		)
+
+
+def is_crm_installed():
+	return "crm" in frappe.get_installed_apps()
+
+
+def remove_allowed_users_on_crm_install():
+	try:
+		CRMSettings = frappe.get_single("CRM Settings")
+
+		if not CRMSettings.enable_frappe_crm_data_synchronization:
+			return
+
+		CRMSettings.allowed_users = []
+		CRMSettings.save()
+		click.secho("Removed 'Allowed Users' from CRM Settings.")
+	except Exception:
+		click.secho("'Allowed Users' from CRM Settings couldn't be cleared.")
+
+
+def disable_frappe_crm_data_synchronization_on_crm_uninstall():
+	try:
+		CRMSettings = frappe.get_single("CRM Settings")
+
+		if not CRMSettings.enable_frappe_crm_data_synchronization:
+			return
+
+		CRMSettings.enable_frappe_crm_data_synchronization = 0
+		CRMSettings.save()
+		click.secho("'Enable Frappe CRM Data Synchronization' on CRM Settings has been disabled.")
+	except Exception:
+		click.secho("'Enable Frappe CRM Data Synchronization' on CRM Settings could not be disabled.")

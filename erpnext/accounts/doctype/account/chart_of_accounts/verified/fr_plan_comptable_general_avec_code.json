@@ -1520,6 +1520,9 @@
                         "account_number": "4088"
                     },
                     "account_number": "408"
+                },
+                "Stock livr\u00e9 non factur\u00e9": {
+                    "account_type": "Stock Delivered But Not Billed"
                 }
             },
             "41-Clients et comptes rattach\u00e9s (PASSIF)": {

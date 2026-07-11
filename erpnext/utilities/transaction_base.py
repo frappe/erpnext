@@ -343,7 +343,6 @@ class TransactionBase(StatusUpdater):
 					"item_tax_template": item.get("item_tax_template"),
 					"child_doctype": item.get("doctype"),
 					"child_docname": item.get("name"),
-					"is_old_subcontracting_flow": self.get("is_old_subcontracting_flow"),
 				}
 			),
 			self,
@@ -430,7 +429,12 @@ class TransactionBase(StatusUpdater):
 
 				found = [x for x in self.taxes if x.account_head == tax_head]
 				if not found:
-					self.append("taxes", {"charge_type": "On Net Total", "account_head": tax_head, "rate": 0})
+					child_doctype = self.get_table_field_doctype("taxes")
+					child = frappe.new_doc(child_doctype, parent_doc=self, parentfield="taxes")
+					child.charge_type = "On Net Total"
+					child.account_head = tax_head
+					child.rate = 0
+					self.append("taxes", child)
 
 	def set_rate_based_on_price_list(self, item_obj: object, item_details: dict) -> None:
 		if item_obj.price_list_rate and item_obj.discount_percentage:
@@ -509,17 +513,14 @@ class TransactionBase(StatusUpdater):
 		item_obj.base_rate_with_margin = flt(item_obj.rate_with_margin) * flt(self.conversion_rate)
 		item_rate = flt(item_obj.rate_with_margin, item_obj.precision("rate"))
 
-		if item_obj.discount_percentage and not item_obj.discount_amount:
+		if item_obj.discount_percentage:
 			item_obj.discount_amount = (
 				flt(item_obj.rate_with_margin) * flt(item_obj.discount_percentage) / 100
 			)
 
-		if item_obj.discount_amount and item_obj.discount_amount > 0:
+		if item_obj.discount_amount:
 			item_rate = flt(
 				(item_obj.rate_with_margin) - (item_obj.discount_amount), item_obj.precision("rate")
-			)
-			item_obj.discount_percentage = (
-				100 * flt(item_obj.discount_amount) / flt(item_obj.rate_with_margin)
 			)
 
 		item_obj.rate = item_rate
@@ -574,23 +575,20 @@ class TransactionBase(StatusUpdater):
 			"is_internal_customer": self.is_internal_customer,
 		}
 		# TODO: test method call impact on document
-		apply_price_list(cts=args, as_doc=True, doc=self)
+		apply_price_list(ctx=args, as_doc=True, doc=self)
 
 
 def delete_events(ref_type, ref_name):
+	event = frappe.qb.DocType("Event")
+	participant = frappe.qb.DocType("Event Participants")
 	events = (
-		frappe.db.sql_list(
-			""" SELECT
-			distinct `tabEvent`.name
-		from
-			`tabEvent`, `tabEvent Participants`
-		where
-			`tabEvent`.name = `tabEvent Participants`.parent
-			and `tabEvent Participants`.reference_doctype = %s
-			and `tabEvent Participants`.reference_docname = %s
-		""",
-			(ref_type, ref_name),
-		)
+		frappe.qb.from_(event)
+		.inner_join(participant)
+		.on(event.name == participant.parent)
+		.select(event.name)
+		.distinct()
+		.where((participant.reference_doctype == ref_type) & (participant.reference_docname == ref_name))
+		.run(pluck="name")
 		or []
 	)
 

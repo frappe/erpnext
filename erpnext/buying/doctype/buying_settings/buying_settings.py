@@ -34,6 +34,7 @@ class BuyingSettings(Document):
 		fixed_email: DF.Link | None
 		maintain_same_rate: DF.Check
 		maintain_same_rate_action: DF.Literal["Stop", "Warn"]
+		over_order_allowance: DF.Float
 		over_transfer_allowance: DF.Float
 		po_required: DF.Literal["No", "Yes"]
 		pr_required: DF.Literal["No", "Yes"]

@@ -145,6 +145,14 @@ class VisualPlantFloor {
 		});
 
 		$(template).appendTo(this.wrapper.find(".plant-floor-container"));
+
+		this.wrapper.find(".workstation-image").on("click", (e) => {
+			let workstation_name = $(e.currentTarget)
+				.closest(".workstation-wrapper")
+				.attr("data-workstation");
+			frappe.route_options = { workstation: workstation_name };
+			frappe.set_route("shop-floor");
+		});
 	}
 
 	prepare_menu() {

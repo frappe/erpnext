@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "allow_copy": 1,
  "autoname": "MAT-SRE-.YYYY.-.#####",
  "creation": "2023-06-06 15:20:48.016846",
@@ -152,7 +153,6 @@
    "width": "150px"
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "reserved_qty",
    "fieldtype": "Float",
    "in_filter": 1,
@@ -163,7 +163,7 @@
    "oldfieldname": "actual_qty",
    "oldfieldtype": "Currency",
    "print_width": "150px",
-   "read_only_depends_on": "eval: ((doc.reservation_based_on == \"Serial and Batch\") || (doc.from_voucher_type == \"Pick List\") || (doc.delivered_qty > 0))",
+   "read_only": 1,
    "width": "150px"
   },
   {
@@ -342,7 +342,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-19 10:17:28.695394",
+ "modified": "2026-05-05 11:46:28.992976",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reservation Entry",

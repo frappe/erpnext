@@ -58,6 +58,7 @@ class AccountsSettings(Document):
 		auto_reconciliation_job_trigger: DF.Int
 		automatically_fetch_payment_terms: DF.Check
 		automatically_process_deferred_accounting_entry: DF.Check
+		automatically_run_rules_on_unreconciled_transactions: DF.Check
 		book_asset_depreciation_entry_automatically: DF.Check
 		book_deferred_entries_based_on: DF.Literal["Days", "Months"]
 		book_deferred_entries_via_journal_entry: DF.Check
@@ -89,7 +90,9 @@ class AccountsSettings(Document):
 		make_payment_via_journal_entry: DF.Check
 		merge_similar_account_heads: DF.Check
 		over_billing_allowance: DF.Currency
-		receivable_payable_fetch_method: DF.Literal["Buffered Cursor", "UnBuffered Cursor", "Raw SQL"]
+		pcv_job_timeout: DF.Int
+		preview_mode: DF.Check
+		receivable_payable_fetch_method: DF.Literal["Buffered Cursor", "UnBuffered Cursor"]
 		receivable_payable_remarks_length: DF.Int
 		reconciliation_queue_size: DF.Int
 		repost_allowed_types: DF.Table[RepostAllowedTypes]
@@ -103,6 +106,7 @@ class AccountsSettings(Document):
 		show_taxes_as_table_in_print: DF.Check
 		stale_days: DF.Int
 		submit_journal_entries: DF.Check
+		transfer_match_days: DF.Int
 		unlink_advance_payment_on_cancelation_of_order: DF.Check
 		unlink_payment_on_cancellation_of_invoice: DF.Check
 		use_legacy_budget_controller: DF.Check
@@ -208,13 +212,6 @@ class AccountsSettings(Document):
 		doctypes += get_child_docs(doctypes)
 
 		set_allow_on_submit_for_dimension_fields(doctypes)
-
-	@frappe.whitelist()
-	def drop_ar_sql_procedures(self):
-		from erpnext.accounts.report.accounts_receivable.accounts_receivable import InitSQLProceduresForAR
-
-		frappe.db.sql(f"drop procedure if exists {InitSQLProceduresForAR.init_procedure_name}")
-		frappe.db.sql(f"drop procedure if exists {InitSQLProceduresForAR.allocate_procedure_name}")
 
 
 def toggle_accounting_dimension_sections(hide):

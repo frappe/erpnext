@@ -62,7 +62,7 @@ class StockEntryType(Document):
 			"Subcontracting Delivery",
 			"Subcontracting Return",
 		]:
-			frappe.throw(f"Stock Entry Type {self.name} cannot be set as standard")
+			frappe.throw(_("Stock Entry Type {0} cannot be set as standard").format(self.name))
 
 
 class ManufactureEntry:
@@ -105,6 +105,10 @@ class ManufactureEntry:
 				)
 
 	def add_raw_materials(self):
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import (
+			set_previous_operation_serial_batch,
+		)
+
 		if self.job_card:
 			item_dict = {}
 			if not item_dict:
@@ -123,12 +127,11 @@ class ManufactureEntry:
 				available_serial_batches = self.get_transferred_serial_batches()
 
 			for item_code, _dict in item_dict.items():
-				_dict.from_warehouse = self.source_wh.get(item_code) or self.wip_warehouse
-				_dict.to_warehouse = ""
+				_dict.s_warehouse = self.source_wh.get(item_code) or self.wip_warehouse
+				_dict.t_warehouse = ""
+				_dict.item_code = item_code
 
-				if backflush_based_on != "BOM" and not frappe.db.get_value(
-					"Job Card", self.job_card, "skip_material_transfer"
-				):
+				if backflush_based_on != "BOM" and not self.skip_material_transfer:
 					calculated_qty = flt(_dict.transferred_qty) - flt(_dict.consumed_qty)
 					if calculated_qty < 0:
 						frappe.throw(
@@ -137,8 +140,10 @@ class ManufactureEntry:
 
 					_dict.qty = calculated_qty
 					self.update_available_serial_batches(_dict, available_serial_batches)
+				elif self.skip_material_transfer:
+					set_previous_operation_serial_batch(self.stock_entry, _dict)
 
-			self.stock_entry.add_to_stock_entry_detail(item_dict)
+				self.stock_entry.append("items", _dict)
 
 	def parse_available_serial_batches(self, item_dict, available_serial_batches):
 		key = (item_dict.item_code, item_dict.from_warehouse)
@@ -309,8 +314,8 @@ class ManufactureEntry:
 		item = get_item_defaults(self.production_item, self.company)
 
 		args = {
-			"to_warehouse": self.fg_warehouse,
-			"from_warehouse": "",
+			"t_warehouse": self.fg_warehouse,
+			"s_warehouse": "",
 			"qty": self.for_quantity - self.process_loss_qty,
 			"item_name": item.item_name,
 			"description": item.description,
@@ -318,6 +323,7 @@ class ManufactureEntry:
 			"expense_account": item.get("expense_account"),
 			"cost_center": item.get("buying_cost_center"),
 			"is_finished_item": 1,
+			"item_code": self.production_item,
 		}
 
-		self.stock_entry.add_to_stock_entry_detail({self.production_item: args}, bom_no=self.bom_no)
+		self.stock_entry.append("items", args)

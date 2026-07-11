@@ -7,7 +7,7 @@ from frappe import _, qb
 from frappe.query_builder import Criterion
 
 from erpnext import get_default_company
-from erpnext.accounts.party import get_party_details
+from erpnext.accounts.party import _get_party_details
 
 
 def execute(filters=None):
@@ -62,7 +62,7 @@ def fetch_item_prices(
 	or_conditions = []
 	if items:
 		and_conditions.append(ip.item_code.isin([x.item_code for x in items]))
-		and_conditions.append(ip.selling.eq(True))
+		and_conditions.append(ip.selling.eq(1))
 
 		or_conditions.append(ip.customer.isnull())
 		or_conditions.append(ip.price_list.isnull())
@@ -125,7 +125,7 @@ def get_data(filters=None):
 
 
 def get_customer_details(filters):
-	customer_details = get_party_details(party=filters.get("customer"), party_type="Customer")
+	customer_details = _get_party_details(party=filters.get("customer"), party_type="Customer")
 	customer_details.update(
 		{"company": get_default_company(), "price_list": customer_details.get("selling_price_list")}
 	)

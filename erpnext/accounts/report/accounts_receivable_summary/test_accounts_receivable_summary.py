@@ -11,10 +11,11 @@ from erpnext.tests.utils import ERPNextTestSuite
 class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 	def setUp(self):
 		self.maxDiff = None
-		self.create_company()
-		self.create_customer()
-		self.create_item()
-		self.clear_old_entries()
+		self.company = "_Test Company"
+		self.customer = "_Test Customer"
+		self.item = "_Test Item"
+		self.debit_to = "Debtors - _TC"
+		self.cost_center = "Main - _TC"
 
 	def test_01_receivable_summary_output(self):
 		"""
