@@ -73,7 +73,9 @@ class PickList(TransactionBase):
 		purpose: DF.Literal["Material Transfer for Manufacture", "Material Transfer", "Delivery"]
 		scan_barcode: DF.Data | None
 		scan_mode: DF.Check
-		status: DF.Literal["Draft", "Open", "Partly Delivered", "Completed", "Cancelled"]
+		status: DF.Literal[
+			"Draft", "Open", "Partly Delivered", "Partially Transferred", "Completed", "Cancelled"
+		]
 		work_order: DF.Link | None
 	# end: auto-generated types
 
@@ -418,6 +420,34 @@ class PickList(TransactionBase):
 			return False
 
 		return stock_entry_exists(self.name)
+
+	def get_transfer_status(self):
+		"""Return the pick list's transfer progress based on how much of the picked qty has been
+		moved into submitted Stock Entries (tracked on Pick List Item.transferred_qty).
+
+		Only applies to purposes that move stock via Stock Entry; the Delivery purpose is tracked
+		via delivery_status instead. Returns "Completed", "Partially Transferred" or None."""
+		if self.purpose == "Delivery":
+			return None
+
+		total_picked = sum(flt(row.picked_qty) for row in self.locations)
+		if not total_picked:
+			return None
+
+		total_transferred = sum(flt(row.transferred_qty) for row in self.locations)
+		if total_transferred <= 0:
+			return None
+
+		if total_transferred >= total_picked:
+			return "Completed"
+
+		return "Partially Transferred"
+
+	def is_fully_transferred(self):
+		return self.get_transfer_status() == "Completed"
+
+	def is_partially_transferred(self):
+		return self.get_transfer_status() == "Partially Transferred"
 
 	def update_reference_qty(self):
 		packed_items = []
@@ -1481,6 +1511,9 @@ def map_pl_locations(pick_list, item_mapper, target_doc, sales_order=None):
 		if location.sales_order != sales_order or location.product_bundle_item:
 			continue
 
+		if flt(location.picked_qty) - flt(location.delivered_qty) <= 0:
+			continue
+
 		if location.sales_order_item:
 			sales_order_item = frappe.get_doc("Sales Order Item", location.sales_order_item)
 		else:
@@ -1544,12 +1577,9 @@ def add_product_bundles_to_target(pick_list, target_doc, item_mapper, sales_orde
 
 
 @frappe.whitelist()
-def create_stock_entry(pick_list):
-	pick_list = frappe.get_doc(json.loads(pick_list))
+def create_stock_entry(pick_list: str | dict):
+	pick_list = frappe.get_doc(frappe.parse_json(pick_list))
 	validate_item_locations(pick_list)
-
-	if stock_entry_exists(pick_list.get("name")):
-		return frappe.msgprint(_("Stock Entry has been already created against this Pick List"))
 
 	stock_entry = frappe.new_doc("Stock Entry")
 	stock_entry.pick_list = pick_list.get("name")
@@ -1563,6 +1593,9 @@ def create_stock_entry(pick_list):
 		stock_entry = update_stock_entry_based_on_material_request(pick_list, stock_entry)
 	else:
 		stock_entry = update_stock_entry_items_with_no_reference(pick_list, stock_entry)
+
+	if not stock_entry.get("items"):
+		return frappe.msgprint(_("All picked items have already been transferred against this Pick List"))
 
 	stock_entry.set_missing_values()
 
@@ -1659,7 +1692,7 @@ def update_stock_entry_based_on_work_order(pick_list, stock_entry):
 	stock_entry.from_bom = 1
 	stock_entry.bom_no = work_order.bom_no
 	stock_entry.use_multi_level_bom = work_order.use_multi_level_bom
-	stock_entry.fg_completed_qty = pick_list.for_qty
+	stock_entry.fg_completed_qty = 0
 	if work_order.bom_no:
 		stock_entry.inspection_required = frappe.db.get_value("BOM", work_order.bom_no, "inspection_required")
 
@@ -1673,6 +1706,8 @@ def update_stock_entry_based_on_work_order(pick_list, stock_entry):
 	stock_entry.project = work_order.project
 
 	for location in pick_list.locations:
+		if get_pending_transfer_stock_qty(location) <= 0:
+			continue
 		item = frappe._dict()
 		update_common_item_properties(item, location)
 		item.t_warehouse = wip_warehouse
@@ -1684,6 +1719,8 @@ def update_stock_entry_based_on_work_order(pick_list, stock_entry):
 
 def update_stock_entry_based_on_material_request(pick_list, stock_entry):
 	for location in pick_list.locations:
+		if get_pending_transfer_stock_qty(location) <= 0:
+			continue
 		target_warehouse = None
 		if location.material_request_item:
 			target_warehouse = frappe.get_value(
@@ -1699,6 +1736,8 @@ def update_stock_entry_based_on_material_request(pick_list, stock_entry):
 
 def update_stock_entry_items_with_no_reference(pick_list, stock_entry):
 	for location in pick_list.locations:
+		if get_pending_transfer_stock_qty(location) <= 0:
+			continue
 		item = frappe._dict()
 		update_common_item_properties(item, location)
 
@@ -1707,11 +1746,18 @@ def update_stock_entry_items_with_no_reference(pick_list, stock_entry):
 	return stock_entry
 
 
+def get_pending_transfer_stock_qty(location):
+	"""Stock qty of this pick list row still to be moved into a Stock Entry."""
+	return flt(location.picked_qty) - flt(location.transferred_qty)
+
+
 def update_common_item_properties(item, location):
+	pending_stock_qty = get_pending_transfer_stock_qty(location)
 	item.item_code = location.item_code
+	item.item_name = location.item_name
 	item.s_warehouse = location.warehouse
-	item.transfer_qty = location.picked_qty
-	item.qty = flt(location.picked_qty / (location.conversion_factor or 1), location.precision("qty"))
+	item.transfer_qty = pending_stock_qty
+	item.qty = flt(pending_stock_qty / (location.conversion_factor or 1), location.precision("qty"))
 	item.uom = location.uom
 	item.conversion_factor = location.conversion_factor
 	item.stock_uom = location.stock_uom
@@ -1719,6 +1765,7 @@ def update_common_item_properties(item, location):
 	item.serial_no = location.serial_no
 	item.batch_no = location.batch_no
 	item.material_request_item = location.material_request_item
+	item.pick_list_item = location.name
 
 
 def get_rejected_warehouses():

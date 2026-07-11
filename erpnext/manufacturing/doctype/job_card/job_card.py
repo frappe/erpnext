@@ -123,6 +123,7 @@ class JobCard(Document):
 		status: DF.Literal[
 			"Open",
 			"Work In Progress",
+			"Partially Transferred",
 			"Material Transferred",
 			"On Hold",
 			"Submitted",
@@ -1168,6 +1169,8 @@ class JobCard(Document):
 
 			frappe.db.set_value("Job Card Item", row.job_card_item, "transferred_qty", flt(transferred_qty))
 
+		self.set_status(update_status=True)
+
 	def set_transferred_qty(self, update_status=False):
 		from frappe.query_builder.functions import Sum
 
@@ -1229,7 +1232,22 @@ class JobCard(Document):
 			self.status = "Work In Progress"
 
 		if not self.track_semi_finished_goods and self.docstatus < 2:
-			if flt(self.for_quantity) <= flt(self.transferred_qty):
+			if self.items:
+				item_data = frappe.get_all(
+					"Job Card Item",
+					filters={"parent": self.name},
+					fields=["transferred_qty", "required_qty"],
+				)
+				all_transferred = item_data and all(
+					flt(d.transferred_qty) >= flt(d.required_qty) for d in item_data
+				)
+				any_transferred = any(flt(d.transferred_qty) > 0 for d in item_data)
+
+				if all_transferred:
+					self.status = "Material Transferred"
+				elif any_transferred:
+					self.status = "Partially Transferred"
+			elif flt(self.for_quantity) <= flt(self.transferred_qty):
 				self.status = "Material Transferred"
 
 			if self.time_logs:
@@ -1702,7 +1720,7 @@ def make_material_request(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_stock_entry(source_name, target_doc=None):
+def make_stock_entry(source_name: str, target_doc: Document | str | None = None):
 	def update_item(source, target, source_parent):
 		target.t_warehouse = source_parent.wip_warehouse
 
@@ -1734,6 +1752,8 @@ def make_stock_entry(source_name, target_doc=None):
 		target.set_missing_values()
 		target.set_stock_entry_type()
 
+		from erpnext.stock.doctype.stock_entry.stock_entry import set_previous_operation_serial_batch
+
 		wo_allows_alternate_item = frappe.db.get_value(
 			"Work Order", target.work_order, "allow_alternative_item"
 		)
@@ -1742,6 +1762,7 @@ def make_stock_entry(source_name, target_doc=None):
 				wo_allows_alternate_item
 				and frappe.get_cached_value("Item", item.item_code, "allow_alternative_item")
 			)
+			set_previous_operation_serial_batch(target, item)
 
 	doclist = get_mapped_doc(
 		"Job Card",
@@ -1774,12 +1795,13 @@ def time_diff_in_minutes(string_ed_date, string_st_date):
 
 
 @frappe.whitelist()
-def get_job_details(start, end, filters=None):
+def get_job_details(start: str, end: str, filters: str | None = None):
 	events = []
 
 	event_color = {
 		"Completed": "#cdf5a6",
 		"Material Transferred": "#ffdd9e",
+		"Partially Transferred": "#ffe5b4",
 		"Work In Progress": "#D3D3D3",
 	}
 

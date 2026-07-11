@@ -259,7 +259,6 @@
   },
   {
    "default": "0",
-   "depends_on": "eval: doc.purpose === \"Manufacture\"",
    "fieldname": "inspection_required",
    "fieldtype": "Check",
    "label": "Inspection Required"
@@ -769,7 +768,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-03-04 19:03:23.426082",
+ "modified": "2026-06-11 18:23:12.340065",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

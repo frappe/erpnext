@@ -266,6 +266,7 @@ class WorkOrder(Document):
 			self.validate_sales_order()
 
 		self.set_default_warehouse()
+		self.set_operation_warehouses()
 		self.validate_warehouse_belongs_to_company()
 		self.check_wip_warehouse_skip()
 		self.calculate_operating_cost()
@@ -294,6 +295,10 @@ class WorkOrder(Document):
 		self.validate_subcontracting_inward_order()
 
 	def validate_dates(self):
+		if self.planned_start_date and self.planned_end_date:
+			if get_datetime(self.planned_end_date) < get_datetime(self.planned_start_date):
+				frappe.throw(_("Planned End Date cannot be before Planned Start Date"))
+
 		if self.actual_start_date and self.actual_end_date:
 			if self.actual_end_date < self.actual_start_date:
 				frappe.throw(_("Actual End Date cannot be before Actual Start Date"))
@@ -649,6 +654,12 @@ class WorkOrder(Document):
 
 	def update_status(self, status=None):
 		"""Update status of work order if unknown"""
+		if self.docstatus == 1:
+			# Refresh material_transferred_for_manufacturing before deciding status so pick-list-
+			# driven transfers (where this qty is derived from item transfers, not fg_completed_qty)
+			# are reflected immediately, instead of only after the next status update call.
+			self.refresh_material_transferred_for_manufacturing()
+
 		if self.status != "Closed":
 			if status not in ["Stopped", "Closed"]:
 				status = self.get_status(status)
@@ -670,7 +681,11 @@ class WorkOrder(Document):
 		elif self.docstatus == 1:
 			if status not in ["Closed", "Stopped"]:
 				status = "Not Started"
-				if flt(self.material_transferred_for_manufacturing) > 0 or self.skip_transfer:
+				if (
+					flt(self.material_transferred_for_manufacturing) > 0
+					or self.skip_transfer
+					or self._has_transferred_material()
+				):
 					status = "In Process"
 
 				precision = frappe.get_precision("Work Order", "produced_qty")
@@ -703,6 +718,57 @@ class WorkOrder(Document):
 					break
 
 		return status
+
+	def _has_transferred_material(self):
+		"""True if any raw material transferred against this work order via a pick list or a
+		material request is still, net of returns, in WIP (these leave
+		material_transferred_for_manufacturing at 0 via the min-fraction rule)."""
+		ste = frappe.qb.DocType("Stock Entry")
+		ste_child = frappe.qb.DocType("Stock Entry Detail")
+		mr_ste = frappe.qb.DocType("Stock Entry")
+		mr_child = frappe.qb.DocType("Stock Entry Detail")
+		# Stock Entry only carries `material_request` at the child-row level, so a Stock
+		# Entry is "MR-sourced" if *any* of its rows link back to a Material Request against
+		# this work order; the join to mr_ste keeps this scoped to this work order's entries
+		# instead of scanning every Material-Request-linked row in the system.
+		mr_sourced_stock_entries = (
+			frappe.qb.from_(mr_child)
+			.inner_join(mr_ste)
+			.on(mr_ste.name == mr_child.parent)
+			.select(mr_child.parent)
+			.where(
+				(mr_child.material_request.isnotnull())
+				& (mr_ste.work_order == self.name)
+				& (mr_ste.docstatus == 1)
+				& (mr_ste.purpose == "Material Transfer for Manufacture")
+			)
+		)
+		common_filters = (
+			(ste.work_order == self.name)
+			& (ste.docstatus == 1)
+			& (ste.purpose == "Material Transfer for Manufacture")
+		)
+		transferred_qty = (
+			frappe.qb.from_(ste)
+			.inner_join(ste_child)
+			.on(ste_child.parent == ste.name)
+			.select(Sum(ste_child.transfer_qty))
+			.where(
+				common_filters
+				& (ste.is_return == 0)
+				& (ste.pick_list.isnotnull() | ste.name.isin(mr_sourced_stock_entries))
+			)
+		).run()[0][0]
+		# Returns don't carry their own pick_list/material_request reference, so net every
+		# return against this work order to correctly clear WIP after a full return.
+		returned_qty = (
+			frappe.qb.from_(ste)
+			.inner_join(ste_child)
+			.on(ste_child.parent == ste.name)
+			.select(Sum(ste_child.transfer_qty))
+			.where(common_filters & (ste.is_return == 1))
+		).run()[0][0]
+		return flt(transferred_qty) - flt(returned_qty) > 0
 
 	def update_work_order_qty(self):
 		"""Update **Manufactured Qty** and **Material Transferred for Qty** in Work Order
@@ -1404,6 +1470,23 @@ class WorkOrder(Document):
 
 		self.set("operations", operations)
 		self.calculate_time()
+		self.set_operation_warehouses()
+
+	def set_operation_warehouses(self):
+		if not self.track_semi_finished_goods or not self.operations:
+			return
+
+		operations = self.operations
+		last_idx = len(operations) - 1
+		for idx, op in enumerate(operations):
+			if not op.source_warehouse:
+				op.source_warehouse = self.source_warehouse
+
+			if not op.fg_warehouse:
+				op.fg_warehouse = self.fg_warehouse if idx == last_idx else self.source_warehouse
+
+			if not op.wip_warehouse:
+				op.wip_warehouse = self.wip_warehouse
 
 	def calculate_time(self):
 		for d in self.get("operations"):
@@ -1672,6 +1755,31 @@ class WorkOrder(Document):
 		if self.skip_transfer:
 			return
 
+		transferred_items = self._material_transfer_qty_by_item(is_return=0)
+
+		row_wise_serial_batch = frappe._dict({})
+		if self.reserve_stock:
+			row_wise_serial_batch = get_row_wise_serial_batch(self.name)
+
+		for row in self.required_items:
+			transferred_qty = transferred_items.get(row.item_code) or 0.0
+			row.db_set("transferred_qty", transferred_qty, update_modified=False)
+			if self.reserve_stock:
+				self.update_qty_in_stock_reservation(row, transferred_qty, row_wise_serial_batch)
+
+		self.recompute_material_transferred_for_manufacturing(transferred_items)
+
+	def refresh_material_transferred_for_manufacturing(self):
+		"""Recompute material_transferred_for_manufacturing only, without touching per-row
+		transferred_qty or stock reservations. Used to get a status decision (Not Started vs
+		In Process) based on fresh data, ahead of the fuller update_required_items() pass.
+		"""
+		if self.skip_transfer:
+			return
+		transferred_items = self._material_transfer_qty_by_item(is_return=0)
+		self.recompute_material_transferred_for_manufacturing(transferred_items)
+
+	def _material_transfer_qty_by_item(self, is_return):
 		ste = frappe.qb.DocType("Stock Entry")
 		ste_child = frappe.qb.DocType("Stock Entry Detail")
 
@@ -1688,23 +1796,43 @@ class WorkOrder(Document):
 				(ste.docstatus == 1)
 				& (ste.work_order == self.name)
 				& (ste.purpose == "Material Transfer for Manufacture")
-				& (ste.is_return == 0)
+				& (ste.is_return == is_return)
 			)
 			.groupby(ste_child.item_code)
 		)
 
 		data = query.run(as_dict=1) or []
-		transferred_items = frappe._dict({d.original_item or d.item_code: d.qty for d in data})
+		return frappe._dict({d.original_item or d.item_code: d.qty for d in data})
 
-		row_wise_serial_batch = frappe._dict({})
-		if self.reserve_stock:
-			row_wise_serial_batch = get_row_wise_serial_batch(self.name)
+	def recompute_material_transferred_for_manufacturing(self, transferred_items):
+		"""Set material_transferred_for_manufacturing based on actual item-level transfers, not fg_completed_qty."""
+		# When fg_completed_qty > 0 (direct stock entries, excess transfer), preserve the
+		# SUM(fg_completed_qty) approach so excess-transfer tracking works correctly.
+		sum_fg_completed_qty = self.get_transferred_or_manufactured_qty(
+			"Material Transfer for Manufacture", "material_transferred_for_manufacturing"
+		)
+		if sum_fg_completed_qty:
+			self.db_set("material_transferred_for_manufacturing", sum_fg_completed_qty)
+			return
 
+		# Pick list flow sets fg_completed_qty=0; use min-fraction of actual item transfers
+		# so partial availability does not prematurely mark the work order as fully transferred.
+		required_by_item = {}
 		for row in self.required_items:
-			transferred_qty = transferred_items.get(row.item_code) or 0.0
-			row.db_set("transferred_qty", transferred_qty, update_modified=False)
-			if self.reserve_stock:
-				self.update_qty_in_stock_reservation(row, transferred_qty, row_wise_serial_batch)
+			if not row.include_item_in_manufacturing or flt(row.required_qty) <= 0:
+				continue
+			required_by_item[row.item_code] = required_by_item.get(row.item_code, 0.0) + flt(row.required_qty)
+
+		if not required_by_item:
+			return
+
+		min_fraction = min(
+			flt(transferred_items.get(item_code) or 0) / required_qty
+			for item_code, required_qty in required_by_item.items()
+		)
+		min_fraction = min(min_fraction, 1.0)
+		material_transferred = min_fraction * flt(self.qty)
+		self.db_set("material_transferred_for_manufacturing", material_transferred)
 
 	def update_qty_in_stock_reservation(self, row, transferred_qty, row_wise_serial_batch):
 		if names := frappe.get_all(
@@ -1745,29 +1873,7 @@ class WorkOrder(Document):
 				doc.update_reserved_stock_in_bin()
 
 	def update_returned_qty(self):
-		ste = frappe.qb.DocType("Stock Entry")
-		ste_child = frappe.qb.DocType("Stock Entry Detail")
-
-		query = (
-			frappe.qb.from_(ste)
-			.inner_join(ste_child)
-			.on(ste_child.parent == ste.name)
-			.select(
-				ste_child.item_code,
-				ste_child.original_item,
-				fn.Sum(ste_child.transfer_qty).as_("qty"),
-			)
-			.where(
-				(ste.docstatus == 1)
-				& (ste.work_order == self.name)
-				& (ste.purpose == "Material Transfer for Manufacture")
-				& (ste.is_return == 1)
-			)
-			.groupby(ste_child.item_code)
-		)
-
-		data = query.run(as_dict=1) or []
-		returned_dict = frappe._dict({d.original_item or d.item_code: d.qty for d in data})
+		returned_dict = self._material_transfer_qty_by_item(is_return=1)
 
 		for row in self.required_items:
 			row.db_set("returned_qty", (returned_dict.get(row.item_code) or 0.0), update_modified=False)
@@ -2965,6 +3071,40 @@ def get_reserved_qty_for_production(
 		query = query.where(wo.production_plan.isin(non_completed_production_plans))
 
 	return query.run()[0][0] or 0.0
+
+
+@frappe.whitelist()
+def make_material_request(source_name: str, target_doc: str | dict | None = None):
+	frappe.has_permission("Material Request", "create", throw=True)
+
+	doc = get_mapped_doc("Work Order", source_name, _material_request_mapping(), target_doc)
+	doc.material_request_type = "Material Transfer"
+	return doc
+
+
+def _material_request_mapping():
+	return {
+		"Work Order": {
+			"doctype": "Material Request",
+			"validation": {"docstatus": ["=", 1]},
+			"field_map": {"name": "work_order"},
+		},
+		"Work Order Item": {
+			"doctype": "Material Request Item",
+			"field_map": [
+				("stock_uom", "uom"),
+				("source_warehouse", "from_warehouse"),
+			],
+			"postprocess": _set_material_request_item,
+			"condition": lambda doc: abs(doc.transferred_qty) < abs(doc.required_qty),
+		},
+	}
+
+
+def _set_material_request_item(source, target, source_parent):
+	target.warehouse = source_parent.wip_warehouse
+	target.qty = flt(source.required_qty) - flt(source.transferred_qty)
+	target.schedule_date = nowdate()
 
 
 @frappe.whitelist()

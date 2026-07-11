@@ -143,7 +143,7 @@ status_map = {
 		],
 		[
 			"Partially Ordered",
-			"eval:self.status != 'Stopped' and self.per_ordered < 100 and self.per_ordered > 0 and self.docstatus == 1 and self.material_request_type not in ['Material Transfer', 'Customer Provided']",
+			"eval:self.status != 'Stopped' and self.per_ordered < 100 and self.per_ordered > 0 and self.per_received < 100 and self.docstatus == 1 and self.material_request_type not in ['Material Transfer', 'Customer Provided']",
 		],
 	],
 	"POS Opening Entry": [
@@ -166,7 +166,8 @@ status_map = {
 	"Pick List": [
 		["Draft", None],
 		["Open", "eval:self.docstatus == 1"],
-		["Completed", "stock_entry_exists"],
+		["Completed", "is_fully_transferred"],
+		["Partially Transferred", "is_partially_transferred"],
 		[
 			"Partly Delivered",
 			"eval:self.purpose == 'Delivery' and self.delivery_status == 'Partly Delivered'",
@@ -186,7 +187,8 @@ class StatusUpdater(Document):
 	"""
 
 	def on_discard(self):
-		self.db_set("status", "Cancelled")
+		if self.meta.has_field("status"):
+			self.db_set("status", "Cancelled")
 
 	def update_prevdoc_status(self):
 		self.update_qty()
@@ -382,15 +384,17 @@ class StatusUpdater(Document):
 
 	def fetch_items_with_pending_qty(self, args, item_field, items):
 		doctype = frappe.qb.DocType(args["target_dt"])
-		item_field = doctype[item_field]
+		item_field_col = doctype[item_field]
 		target_ref_field = doctype[args["target_ref_field"]]
 		target_field = doctype[args["target_field"]]
 
-		return (
+		is_qty_check = "qty" in args["target_ref_field"]
+
+		query = (
 			frappe.qb.from_(doctype)
 			.select(
 				doctype.name,
-				item_field.as_("item_code"),
+				item_field_col.as_("item_code"),
 				target_ref_field,
 				target_field,
 				doctype.parenttype,
@@ -399,8 +403,17 @@ class StatusUpdater(Document):
 			.where(target_ref_field < target_field)
 			.where(doctype.name.isin(items))
 			.where(doctype.docstatus == 1)
-			.run(as_dict=True)
 		)
+
+		if is_qty_check:
+			item_table = frappe.qb.DocType("Item")
+			query = (
+				query.join(item_table)
+				.on(item_table.name == item_field_col)
+				.where(item_table.is_stock_item == 1)
+			)
+
+		return query.run(as_dict=True)
 
 	def check_overflow_with_allowance(self, item, args):
 		"""

@@ -14,7 +14,7 @@ frappe.ui.form.on("Stock Settings", {
 		frm.set_query("default_warehouse", filters);
 		frm.set_query("sample_retention_warehouse", filters);
 
-		if (!frm.naming_controller) frm.naming_controller = new erpnext.NamingSeriesController(frm);
+		if (!frm.naming_controller) frm.naming_controller = new frappe.ui.NamingSeriesController(frm);
 		const item_display = frm.doc.item_naming_by === "Naming Series";
 		const serial_and_batch_naming_display =
 			frm.doc.set_serial_and_batch_bundle_naming_based_on_naming_series;

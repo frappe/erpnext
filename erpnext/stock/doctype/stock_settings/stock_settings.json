@@ -21,6 +21,7 @@
   "stock_uom",
   "allow_to_edit_stock_uom_qty_for_sales",
   "allow_to_edit_stock_uom_qty_for_purchase",
+  "allow_to_edit_stock_uom_qty_for_stock_entry",
   "allow_uom_with_conversion_rate_defined_in_item",
   "warehouse_defaults_section",
   "default_warehouse",
@@ -406,6 +407,13 @@
   },
   {
    "default": "0",
+   "documentation_url": "https://docs.frappe.io/erpnext/stock-settings#why-to-edit-stock-qty-qty-as-per-stock-uom",
+   "fieldname": "allow_to_edit_stock_uom_qty_for_stock_entry",
+   "fieldtype": "Check",
+   "label": "Allow to edit stock UOM qty for Stock Entry"
+  },
+  {
+   "default": "0",
    "depends_on": "eval: doc.enable_stock_reservation",
    "description": "Stock will be reserved on submission of <b>Purchase Receipt</b> created against Material Request for Sales Order.",
    "fieldname": "auto_reserve_stock_for_sales_order_on_purchase",
@@ -594,7 +602,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-06-03 12:38:02.202183",
+ "modified": "2026-06-13 12:38:02.202183",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

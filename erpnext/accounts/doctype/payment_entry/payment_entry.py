@@ -1206,9 +1206,9 @@ class PaymentEntry(AccountsController):
 				continue
 
 			if tax.add_deduct_tax == "Add":
-				included_taxes += tax.base_tax_amount
+				included_taxes += flt(tax.base_tax_amount)
 			else:
-				included_taxes -= tax.base_tax_amount
+				included_taxes -= flt(tax.base_tax_amount)
 
 		return included_taxes
 
@@ -1312,7 +1312,13 @@ class PaymentEntry(AccountsController):
 		self.add_deductions_gl_entries(gl_entries)
 		self.add_tax_gl_entries(gl_entries)
 		add_regional_gl_entries(gl_entries, self)
+		self.set_transaction_currency_and_rate_in_gl_map(gl_entries)
 		return gl_entries
+
+	def set_transaction_currency_and_rate_in_gl_map(self, gl_entries):
+		for gle in gl_entries:
+			gle.setdefault("transaction_currency", self.transaction_currency)
+			gle.setdefault("transaction_exchange_rate", self.transaction_exchange_rate)
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		gl_entries = self.build_gl_map()
@@ -2706,6 +2712,9 @@ def get_party_details(company, party_type, party, date, cost_center=None):
 	if not frappe.db.exists(party_type, party):
 		frappe.throw(_("{0} {1} does not exist").format(_(party_type), party))
 
+	ptype = "select" if frappe.only_has_select_perm(party_type) else "read"
+	frappe.has_permission(party_type, ptype, party, throw=True)
+
 	party_account = get_party_account(party_type, party, company)
 	account_currency = get_account_currency(party_account)
 	_party_name = "title" if party_type == "Shareholder" else party_type.lower() + "_name"
@@ -2713,7 +2722,7 @@ def get_party_details(company, party_type, party, date, cost_center=None):
 
 	if party_type in ["Customer", "Supplier"]:
 		party_bank_account = get_party_bank_account(party_type, party)
-		bank_account = get_default_company_bank_account(company, party_type, party)
+		bank_account = get_default_company_bank_account(company, party_type, party, ignore_permissions=False)
 
 	return {
 		"party_account": party_account,
@@ -3034,7 +3043,7 @@ def get_payment_entry(
 				pe, doc, discount_amount, base_total_discount_loss, party_account_currency
 			)
 
-		pe.set_exchange_rate(ref_doc=doc)
+		pe.set_exchange_rate()
 		pe.set_amounts()
 
 	# If PE is created from PR directly, then no need to find open PRs for the references

@@ -133,6 +133,17 @@ class OpeningInvoiceCreationTool(Document):
 			if not row.get(scrub(d)):
 				frappe.throw(mandatory_error_msg.format(row.idx, d, self.invoice_type))
 
+		self.validate_temporary_opening_account(row)
+
+	def validate_temporary_opening_account(self, row):
+		account_type = frappe.get_cached_value("Account", row.temporary_opening_account, "account_type")
+		if account_type != "Temporary":
+			frappe.throw(
+				_("Row #{0}: {1} account is not of type {2}").format(
+					row.idx, row.temporary_opening_account, "Temporary"
+				)
+			)
+
 	def get_invoices(self):
 		invoices = []
 		for row in self.invoices:
@@ -203,6 +214,7 @@ class OpeningInvoiceCreationTool(Document):
 					"description": row.item_name or "Opening Invoice Item",
 					income_expense_account_field: row.temporary_opening_account,
 					"cost_center": cost_center,
+					"project": row.get("project") or self.get("project"),
 				}
 			)
 

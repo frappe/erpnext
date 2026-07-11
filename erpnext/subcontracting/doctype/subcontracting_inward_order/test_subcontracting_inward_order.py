@@ -88,6 +88,46 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		self.assertEqual(received_item.received_qty, 5)
 		self.assertEqual(received_item.rate, 10)
 
+	def test_customer_provided_item_rate_with_return_between_receipts(self):
+		"""Weight the average rate on the on-hand balance, not gross received_qty.
+
+		Receive 10 @ 100, return 5, receive 6 @ 130:
+		    balance-weighted (correct) = (5 * 100 + 6 * 130) / 11 = 116.36
+		    gross-weighted   (wrong)   = (10 * 100 + 6 * 130) / 16 = 111.25
+		"""
+		so, scio = create_so_scio()
+		rm_item = "Basic RM"
+
+		def receive(qty, rate):
+			rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+			rm_in.items = [item for item in rm_in.items if item.item_code == rm_item]
+			rm_in.items[0].qty = qty
+			rm_in.items[0].transfer_qty = qty
+			rm_in.items[0].basic_rate = rate
+			rm_in.submit()
+			scio.reload()
+
+		# Receipt 1: 10 @ 100
+		receive(10, 100)
+		received_item = next(item for item in scio.received_items if item.rm_item_code == rm_item)
+		self.assertEqual(received_item.rate, 100)
+
+		# Return 5 to the customer
+		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
+		rm_return.items = [item for item in rm_return.items if item.item_code == rm_item]
+		rm_return.items[0].qty = 5
+		rm_return.items[0].transfer_qty = 5
+		rm_return.submit()
+		scio.reload()
+
+		received_item = next(item for item in scio.received_items if item.rm_item_code == rm_item)
+		self.assertEqual(received_item.returned_qty, 5)
+
+		# Receipt 2: 6 @ 130 — must weight against the balance of 5, not gross 10
+		receive(6, 130)
+		received_item = next(item for item in scio.received_items if item.rm_item_code == rm_item)
+		self.assertAlmostEqual(received_item.rate, (5 * 100 + 6 * 130) / 11, places=2)
+
 	def test_add_extra_customer_provided_item(self):
 		so, scio = create_so_scio()
 

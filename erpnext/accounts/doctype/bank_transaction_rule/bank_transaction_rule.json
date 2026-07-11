@@ -1,0 +1,194 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:rule_name",
+ "creation": "2026-04-11 20:23:16.159855",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "rule_name",
+  "transaction_type",
+  "priority",
+  "min_amount",
+  "max_amount",
+  "column_break_zcez",
+  "rule_description",
+  "company",
+  "section_break_licn",
+  "description_rules",
+  "action_section",
+  "classify_as",
+  "account",
+  "bank_entry_type",
+  "column_break_jdyr",
+  "party_type",
+  "party",
+  "section_break_zdro",
+  "accounts"
+ ],
+ "fields": [
+  {
+   "fieldname": "rule_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Rule Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "Any",
+   "fieldname": "transaction_type",
+   "fieldtype": "Select",
+   "label": "Transaction Type",
+   "options": "Any\nWithdrawal\nDeposit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "min_amount",
+   "fieldtype": "Currency",
+   "label": "Min Amount",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "max_amount",
+   "fieldtype": "Currency",
+   "label": "Max Amount",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "column_break_zcez",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "rule_description",
+   "fieldtype": "Small Text",
+   "label": "Rule Description"
+  },
+  {
+   "fieldname": "section_break_licn",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "description_rules",
+   "fieldtype": "Table",
+   "label": "Description Rules",
+   "options": "Bank Transaction Rule Description Conditions",
+   "reqd": 1
+  },
+  {
+   "fieldname": "action_section",
+   "fieldtype": "Section Break",
+   "label": "Action"
+  },
+  {
+   "fieldname": "classify_as",
+   "fieldtype": "Select",
+   "label": "Classify As",
+   "options": "Bank Entry\nPayment Entry\nTransfer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "label": "Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_jdyr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "party_type",
+   "fieldtype": "Link",
+   "label": "Party Type",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "label": "Party",
+   "options": "party_type"
+  },
+  {
+   "fieldname": "priority",
+   "fieldtype": "Int",
+   "label": "Priority",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bank_entry_type",
+   "fieldtype": "Select",
+   "label": "Bank Entry Type",
+   "options": "Single Account\nMultiple Accounts"
+  },
+  {
+   "fieldname": "section_break_zdro",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "accounts",
+   "fieldtype": "Table",
+   "label": "Accounts",
+   "options": "Bank Transaction Rule Accounts"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-04-11 21:36:26.754667",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Bank Transaction Rule",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

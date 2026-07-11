@@ -9,11 +9,10 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestAccountsPayable(ERPNextTestSuite, AccountsTestMixin):
 	def setUp(self):
-		self.create_company()
-		self.create_customer()
-		self.create_item()
-		self.create_supplier(currency="USD", supplier_name="Test Supplier2")
-		self.create_usd_payable_account()
+		self.company = "_Test Company"
+		self.item = "_Test Item"
+		self.supplier = "_Test Supplier 2"
+		self.creditors_usd = "_Test Payable USD - _TC"
 
 	def test_accounts_payable_for_foreign_currency_supplier(self):
 		pi = self.create_purchase_invoice(do_not_submit=True)

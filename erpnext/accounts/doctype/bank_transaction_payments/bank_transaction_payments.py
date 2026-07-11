@@ -21,6 +21,7 @@ class BankTransactionPayments(Document):
 		parenttype: DF.Data
 		payment_document: DF.Link
 		payment_entry: DF.DynamicLink
+		reconciliation_type: DF.Literal["Matched", "Voucher Created"]
 	# end: auto-generated types
 
 	pass

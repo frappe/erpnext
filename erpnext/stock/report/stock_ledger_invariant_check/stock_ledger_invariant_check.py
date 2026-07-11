@@ -20,6 +20,7 @@ SLE_FIELDS = (
 	"outgoing_rate",
 	"stock_queue",
 	"batch_no",
+	"serial_no",
 	"stock_value",
 	"stock_value_difference",
 	"valuation_rate",
@@ -52,16 +53,16 @@ def add_invariant_check_fields(sles, filters):
 	balance_qty = 0.0
 	balance_stock_value = 0.0
 
-	incorrect_idx = 0
-	precision = frappe.get_precision("Stock Ledger Entry", "actual_qty")
+	incorrect_idx = None
+	float_precision = cint(frappe.db.get_single_value("System Settings", "float_precision")) or 3
+	currency_precision = (
+		cint(frappe.db.get_single_value("System Settings", "currency_precision")) or float_precision
+	)
 	for idx, sle in enumerate(sles):
-		queue = json.loads(sle.stock_queue) if sle.stock_queue else []
-
-		fifo_qty = 0.0
-		fifo_value = 0.0
-		for qty, rate in queue:
-			fifo_qty += qty
-			fifo_value += qty * rate
+		if sle.batch_no:
+			sle.use_batchwise_valuation = frappe.db.get_value(
+				"Batch", sle.batch_no, "use_batchwise_valuation", cache=True
+			)
 
 		if sle.actual_qty < 0:
 			sle.consumption_rate = sle.stock_value_difference / sle.actual_qty
@@ -77,57 +78,67 @@ def add_invariant_check_fields(sles, filters):
 			if balance_qty is None:
 				balance_qty = sle.qty_after_transaction
 
-		sle.fifo_queue_qty = fifo_qty
-		sle.fifo_stock_value = fifo_value
-		sle.fifo_valuation_rate = fifo_value / fifo_qty if fifo_qty else None
 		sle.balance_value_by_qty = (
 			sle.stock_value / sle.qty_after_transaction if sle.qty_after_transaction else None
 		)
 		sle.expected_qty_after_transaction = balance_qty
 		sle.stock_value_from_diff = balance_stock_value
 
-		# set difference fields
 		sle.difference_in_qty = sle.qty_after_transaction - sle.expected_qty_after_transaction
-		sle.fifo_qty_diff = sle.qty_after_transaction - fifo_qty
-		sle.fifo_value_diff = sle.stock_value - fifo_value
-		sle.fifo_valuation_diff = (
-			sle.valuation_rate - sle.fifo_valuation_rate if sle.fifo_valuation_rate else None
-		)
 		sle.valuation_diff = (
 			sle.valuation_rate - sle.balance_value_by_qty if sle.balance_value_by_qty else None
 		)
 		sle.diff_value_diff = sle.stock_value_from_diff - sle.stock_value
 
-		if not incorrect_idx and filters.get("show_incorrect_entries"):
-			if is_sle_has_correct_data(sle, precision):
-				continue
-			else:
-				incorrect_idx = idx
+		if maintains_fifo_queue(sle):
+			add_fifo_fields(sle, sles[idx - 1] if idx else None)
 
-		if idx > 0:
-			sle.fifo_stock_diff = sle.fifo_stock_value - sles[idx - 1].fifo_stock_value
-			sle.fifo_difference_diff = sle.fifo_stock_diff - sle.stock_value_difference
-
-		if sle.batch_no:
-			sle.use_batchwise_valuation = frappe.db.get_value(
-				"Batch", sle.batch_no, "use_batchwise_valuation", cache=True
-			)
+		if incorrect_idx is None and not is_sle_has_correct_data(sle, float_precision, currency_precision):
+			incorrect_idx = idx
 
 	if filters.get("show_incorrect_entries"):
-		if incorrect_idx > 0:
-			sles = sles[cint(incorrect_idx) - 1 :]
-
-		return []
+		if incorrect_idx is None:
+			return []
+		return sles[max(incorrect_idx - 1, 0) :]
 
 	return sles
 
 
-def is_sle_has_correct_data(sle, precision):
-	if flt(sle.difference_in_qty, precision) != 0.0 or flt(sle.diff_value_diff, precision) != 0:
-		print(flt(sle.difference_in_qty, precision), flt(sle.diff_value_diff, precision))
-		return False
+def maintains_fifo_queue(sle):
+	# no queue is maintained for serialized/batchwise-valued stock
+	return not (
+		sle.serial_and_batch_bundle or sle.serial_no or (sle.batch_no and sle.use_batchwise_valuation)
+	)
 
-	return True
+
+def add_fifo_fields(sle, prev_sle):
+	queue = json.loads(sle.stock_queue) if sle.stock_queue else []
+
+	fifo_qty = 0.0
+	fifo_value = 0.0
+	for qty, rate in queue:
+		fifo_qty += qty
+		fifo_value += qty * rate
+
+	sle.fifo_queue_qty = fifo_qty
+	sle.fifo_stock_value = fifo_value
+	sle.fifo_valuation_rate = fifo_value / fifo_qty if fifo_qty else None
+	sle.fifo_qty_diff = sle.qty_after_transaction - fifo_qty
+	sle.fifo_value_diff = sle.stock_value - fifo_value
+	sle.fifo_valuation_diff = (
+		sle.valuation_rate - sle.fifo_valuation_rate if sle.fifo_valuation_rate else None
+	)
+	# prev row may not maintain a queue; H and H - F stay blank across the gap
+	if prev_sle and prev_sle.fifo_stock_value is not None:
+		sle.fifo_stock_diff = sle.fifo_stock_value - prev_sle.fifo_stock_value
+		sle.fifo_difference_diff = sle.fifo_stock_diff - sle.stock_value_difference
+
+
+def is_sle_has_correct_data(sle, float_precision, currency_precision):
+	return (
+		flt(sle.difference_in_qty, float_precision) == 0.0
+		and flt(sle.diff_value_diff, currency_precision) == 0.0
+	)
 
 
 def get_columns():

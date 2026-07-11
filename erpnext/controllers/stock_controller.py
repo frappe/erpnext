@@ -22,12 +22,22 @@ from erpnext.controllers.sales_and_purchase_return import (
 	filter_serial_batches,
 	make_serial_batch_bundle_for_return,
 )
+
+# Re-exported for backward compatibility; canonical home is erpnext.exceptions.
+from erpnext.exceptions import (
+	BatchExpiredError,
+	QualityInspectionNotSubmittedError,
+	QualityInspectionRejectedError,
+	QualityInspectionRequiredError,
+)
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.doctype.batch.batch import get_batch_qty
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
 	get_evaluated_inventory_dimension,
+	get_mandatory_dimension_fields,
+	get_mandatory_inventory_dimensions,
 )
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
@@ -36,21 +46,41 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 )
 from erpnext.stock.stock_ledger import get_items_to_be_repost
 
+# Purposes whose inward (t_warehouse) row is inspected.
+QI_INCOMING_PURPOSES = (
+	"Material Receipt",
+	"Repack",
+	"Receive from Customer",
+	"Subcontracting Return",
+)
 
-class QualityInspectionRequiredError(frappe.ValidationError):
-	pass
+# Purposes whose outgoing (s_warehouse) row is inspected. This is an explicit
+# allow-list rather than "everything that isn't incoming" so a new purpose can't
+# silently start requiring a QI. Material Consumption for Manufacture is left out
+# on purpose: an inspection_required BOM inspects the manufactured output (handled
+# by the "Manufacture" finished-good rule), not each consumed raw material.
+# Keep this in sync with erpnext.stock.qi_* helpers in transaction.js.
+QI_OUTGOING_PURPOSES = (
+	"Material Issue",
+	"Material Transfer",
+	"Material Transfer for Manufacture",
+	"Send to Subcontractor",
+	"Subcontracting Delivery",
+	"Disassemble",
+)
 
 
-class QualityInspectionRejectedError(frappe.ValidationError):
-	pass
-
-
-class QualityInspectionNotSubmittedError(frappe.ValidationError):
-	pass
-
-
-class BatchExpiredError(frappe.ValidationError):
-	pass
+def stock_entry_row_requires_inspection(purpose, row):
+	"""Check if this Stock Entry row need a Quality Inspection."""
+	if row.get("type") or row.get("is_legacy_scrap_item"):
+		return False
+	if purpose == "Manufacture":
+		return bool(row.is_finished_item)
+	if purpose in QI_INCOMING_PURPOSES:
+		return bool(row.t_warehouse)
+	if purpose in QI_OUTGOING_PURPOSES:
+		return bool(row.s_warehouse and row.s_warehouse != row.t_warehouse)
+	return False
 
 
 class StockController(AccountsController):
@@ -72,6 +102,7 @@ class StockController(AccountsController):
 		self.validate_internal_transfer()
 		self.validate_putaway_capacity()
 		self.reset_conversion_factor()
+		self.validate_inventory_dimension_mandatory()
 
 	def on_update(self):
 		super().on_update()
@@ -356,6 +387,10 @@ class StockController(AccountsController):
 			parent_details = self.get_parent_details_for_packed_items()
 
 		for row in self.get(table_name):
+			item_code = row.get("rm_item_code") or row.get("item_code")
+			if not item_code or not self.is_serial_batch_item(item_code):
+				continue
+
 			if (
 				not via_landed_cost_voucher
 				and row.serial_and_batch_bundle
@@ -1148,6 +1183,50 @@ class StockController(AccountsController):
 
 		return item_account_wise_cost
 
+	def validate_inventory_dimension_mandatory(self):
+		# Mandatory inventory dimensions are enforced here (instead of via field-level `reqd`)
+		# so we can skip service rows and never block a document that is being cancelled.
+		if self.docstatus >= 2:
+			return
+
+		for table_field in ["items", "packed_items", "supplied_items"]:
+			rows = self.get(table_field)
+			if rows:
+				self.validate_mandatory_dimensions_in_table(rows)
+
+	def validate_mandatory_dimensions_in_table(self, rows):
+		child_doctype = rows[0].doctype
+		dimensions = get_mandatory_inventory_dimensions(child_doctype)
+		if not dimensions:
+			return
+
+		child_meta = frappe.get_meta(child_doctype)
+		for dimension in dimensions:
+			mandatory_fields = get_mandatory_dimension_fields(child_doctype, dimension)
+			for row in rows:
+				if mandatory_fields and not self.is_service_item_row(row):
+					self.validate_mandatory_dimension_row(row, dimension, mandatory_fields, child_meta)
+
+	def is_service_item_row(self, row) -> bool:
+		item_code = row.get("item_code")
+		return bool(item_code) and not frappe.get_cached_value("Item", item_code, "is_stock_item")
+
+	def validate_mandatory_dimension_row(self, row, dimension, mandatory_fields, child_meta):
+		for fieldname, condition in mandatory_fields:
+			if not child_meta.has_field(fieldname) or row.get(fieldname):
+				continue
+
+			if condition and not frappe.safe_eval(condition, {"doc": row, "parent": self}):
+				continue
+
+			frappe.throw(
+				_("Row #{0}: {1} is mandatory for the Inventory Dimension {2}.").format(
+					row.idx,
+					bold(_(child_meta.get_label(fieldname))),
+					bold(dimension.name),
+				)
+			)
+
 	def update_inventory_dimensions(self, row, sl_dict) -> None:
 		# To handle delivery note and sales invoice
 		if row.get("item_row"):
@@ -1438,8 +1517,8 @@ class StockController(AccountsController):
 				"Item", row.item_code, inspection_required_fieldname
 			):
 				qi_required = True
-			elif self.doctype == "Stock Entry" and row.t_warehouse:
-				qi_required = True  # inward stock needs inspection
+			elif self.doctype == "Stock Entry":
+				qi_required = stock_entry_row_requires_inspection(self.purpose, row)
 
 			if row.get("type") or row.get("is_legacy_scrap_item"):
 				continue
@@ -1799,6 +1878,9 @@ class StockController(AccountsController):
 			"against": against_account,
 			"remarks": remarks,
 		}
+
+		if project:
+			gl_entry.update({"project": project})
 
 		if voucher_detail_no:
 			gl_entry.update({"voucher_detail_no": voucher_detail_no})
@@ -2163,7 +2245,7 @@ def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str
 
 	inspection_fieldname = inspection_fieldname_map.get(doctype)
 	if inspection_fieldname is None:
-		return []
+		return items if doctype == "Stock Entry" else []
 
 	allow_after_transaction = cint(docstatus) == 1 and frappe.get_single_value(
 		"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"

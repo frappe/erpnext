@@ -336,6 +336,62 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 			bin_after_cancel_sco.reserved_qty_for_sub_contract, bin_before_sco.reserved_qty_for_sub_contract
 		)
 
+	def test_send_to_subcontractor_ste_submit_without_sco_write_permission(self):
+		"""A Stock-only user (can submit Stock Entries but has no Subcontracting Order write) must be
+		able to submit and cancel a 'Send to Subcontractor' Stock Entry. The SCO status update on the
+		on_submit/on_cancel path goes through the no-permission-check internal helper, not the
+		whitelisted API boundary.
+
+		Regression: the permission hardening put check_permission('write') on the shared status
+		function, so a Stock Manager (no SCO write) hit PermissionError submitting/cancelling the
+		Stock Entry. The suite otherwise runs as Administrator and never caught it."""
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item", qty=10, basic_rate=100)
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "_Test FG Item",
+				"fg_item_qty": 10,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+
+		rm_items = [
+			{
+				"item_code": "_Test FG Item",
+				"rm_item_code": "_Test Item",
+				"item_name": "_Test Item",
+				"qty": 10,
+				"warehouse": "_Test Warehouse - _TC",
+				"rate": 100,
+				"amount": 1000,
+				"stock_uom": "Nos",
+			},
+		]
+		ste = frappe.get_doc(make_rm_stock_entry(sco.name, rm_items))
+		ste.to_warehouse = "_Test Warehouse 1 - _TC"
+		ste.save()
+
+		stock_user = create_user("test_sco_stock_only@example.com", "Stock Manager")
+		self.assertFalse(
+			frappe.has_permission("Subcontracting Order", "write", user=stock_user.name),
+			"Precondition: the Stock-only user must not have Subcontracting Order write permission.",
+		)
+
+		frappe.set_user(stock_user.name)
+		try:
+			ste.reload()
+			ste.submit()  # must not raise PermissionError on the SCO status update
+			ste.reload()
+			ste.cancel()  # same on the cancel path
+		finally:
+			frappe.set_user("Administrator")
+
 	def test_exploded_items(self):
 		item_code = "_Test Subcontracted FG Item 11"
 		make_subcontracted_item(item_code=item_code)

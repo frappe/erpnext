@@ -614,7 +614,7 @@ class SalesOrder(SellingController):
 
 	def update_subcontracting_order_status(self):
 		from erpnext.subcontracting.doctype.subcontracting_inward_order.subcontracting_inward_order import (
-			update_subcontracting_inward_order_status as update_scio_status,
+			set_subcontracting_inward_order_status as update_scio_status,
 		)
 
 		if self.is_subcontracted:

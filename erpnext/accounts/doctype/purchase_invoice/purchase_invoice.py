@@ -1433,6 +1433,10 @@ class PurchaseInvoice(BuyingController):
 		# tax table gl entries
 		valuation_tax = {}
 
+		# Amount of each valuation charge actually capitalized into stock/asset valuation, keyed by
+		# tax row name - a non-stock item's share of a spread-across-all-items charge is excluded.
+		capitalized_valuation_tax = self.get_capitalized_valuation_tax()
+
 		for tax in self.get("taxes"):
 			amount, base_amount = self.get_tax_amounts(tax, None)
 			if tax.category in ("Total", "Valuation and Total") and flt(base_amount):
@@ -1469,8 +1473,7 @@ class PurchaseInvoice(BuyingController):
 							tax.idx, _(tax.category)
 						)
 					)
-				valuation_tax.setdefault(tax.name, 0)
-				valuation_tax[tax.name] += (tax.add_deduct_tax == "Add" and 1 or -1) * flt(base_amount)
+				valuation_tax[tax.name] = capitalized_valuation_tax.get(tax.name, 0.0)
 
 		if self.is_opening == "No" and self.negative_expense_to_be_booked and valuation_tax:
 			# credit valuation tax amount in "Expenses Included In Valuation"

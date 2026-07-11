@@ -1,36 +1,14 @@
 import json
 
+import click
 import frappe
 from frappe import _
-from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
-
-
-@frappe.whitelist()
-def create_custom_fields_for_frappe_crm():
-	frappe.only_for("System Manager")
-	custom_fields = {
-		"Quotation": [
-			{
-				"fieldname": "crm_deal",
-				"fieldtype": "Data",
-				"label": "Frappe CRM Deal",
-				"insert_after": "party_name",
-			}
-		],
-		"Customer": [
-			{
-				"fieldname": "crm_deal",
-				"fieldtype": "Data",
-				"label": "Frappe CRM Deal",
-				"insert_after": "prospect_name",
-			}
-		],
-	}
-	create_custom_fields(custom_fields, ignore_validate=True)
 
 
 @frappe.whitelist()
 def create_prospect_against_crm_deal():
+	validate_frappe_crm_sync()
+
 	doc = frappe.form_dict
 	prospect = frappe.new_doc("Prospect")
 	prospect.company_name = doc.organization or doc.lead_name
@@ -161,6 +139,8 @@ CUSTOMER_ALLOWED_FIELDS = {
 
 @frappe.whitelist()
 def create_customer(customer_data=None):
+	validate_frappe_crm_sync()
+
 	if not customer_data:
 		customer_data = frappe.form_dict
 
@@ -171,7 +151,9 @@ def create_customer(customer_data=None):
 			for field in CUSTOMER_ALLOWED_FIELDS:
 				if customer_data.get(field) is not None:
 					customer.set(field, customer_data.get(field))
-			customer.insert(ignore_permissions=True)
+
+			# If CRM is installed on the site, User Permission cannot be ignored while saving Customer Records.
+			customer.insert(ignore_permissions=not is_crm_installed())
 			customer_name = customer.name
 
 		contacts = json.loads(customer_data.get("contacts"))
@@ -181,3 +163,57 @@ def create_customer(customer_data=None):
 	except Exception:
 		frappe.log_error(frappe.get_traceback(), "Error while creating customer against Frappe CRM Deal")
 		pass
+
+
+def validate_frappe_crm_sync():
+	CRMSettings = frappe.get_single("CRM Settings")
+	if not CRMSettings.enable_frappe_crm_data_synchronization:
+		frappe.throw(
+			_("Frappe CRM data synchronization is not enabled on ERPNext. Contact System Manager of ERPNext.")
+		)
+
+	# Skip allowed_users validation if CRM is installed on the site.
+	if is_crm_installed():
+		return
+
+	allowed_users = [d.user for d in CRMSettings.allowed_users]
+
+	if frappe.session.user not in allowed_users:
+		frappe.throw(
+			_(
+				"User not allowed to synchronize data from Frappe CRM on ERPNext. Contact System Manager of ERPNext."
+			),
+			exc=frappe.PermissionError,
+		)
+
+
+def is_crm_installed():
+	return "crm" in frappe.get_installed_apps()
+
+
+def remove_allowed_users_on_crm_install():
+	try:
+		CRMSettings = frappe.get_single("CRM Settings")
+
+		if not CRMSettings.enable_frappe_crm_data_synchronization:
+			return
+
+		CRMSettings.allowed_users = []
+		CRMSettings.save()
+		click.secho("Removed 'Allowed Users' from CRM Settings.")
+	except Exception:
+		click.secho("'Allowed Users' from CRM Settings couldn't be cleared.")
+
+
+def disable_frappe_crm_data_synchronization_on_crm_uninstall():
+	try:
+		CRMSettings = frappe.get_single("CRM Settings")
+
+		if not CRMSettings.enable_frappe_crm_data_synchronization:
+			return
+
+		CRMSettings.enable_frappe_crm_data_synchronization = 0
+		CRMSettings.save()
+		click.secho("'Enable Frappe CRM Data Synchronization' on CRM Settings has been disabled.")
+	except Exception:
+		click.secho("'Enable Frappe CRM Data Synchronization' on CRM Settings could not be disabled.")
