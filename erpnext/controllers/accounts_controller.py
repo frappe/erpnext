@@ -11,7 +11,7 @@ from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.workflow import get_workflow_name
 from frappe.query_builder import Criterion, DocType
 from frappe.query_builder.custom import ConstantColumn
-from frappe.query_builder.functions import Abs, Sum
+from frappe.query_builder.functions import Abs, IfNull, Sum
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -3511,8 +3511,18 @@ def get_common_query(
 				common_filter_conditions.append(payment_entry.cost_center == condition["cost_center"])
 
 			if condition.get("accounting_dimensions"):
+				apply_strict_user_permissions = frappe.get_system_settings("apply_strict_user_permissions")
 				for field, val in condition.get("accounting_dimensions").items():
-					common_filter_conditions.append(payment_entry[field] == val)
+					if isinstance(val, list | tuple | set):
+						value_condition = payment_entry[field].isin(val)
+						if apply_strict_user_permissions:
+							common_filter_conditions.append(value_condition)
+						else:
+							common_filter_conditions.append(
+								(IfNull(payment_entry[field], "") == "") | value_condition
+							)
+					else:
+						common_filter_conditions.append(payment_entry[field] == val)
 
 			if condition.get("minimum_payment_amount"):
 				common_filter_conditions.append(
