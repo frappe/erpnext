@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.utils import add_days, nowdate
+from frappe.utils import add_days, flt, nowdate
 
 from erpnext.accounts.services.pricing.pricing_context import LineContext, PricingContext
 from erpnext.accounts.services.pricing.pricing_effects import (
@@ -290,3 +290,143 @@ def _line(
 		price_list_rate=100.0,
 		base_amount=qty * 100.0,
 	)
+
+
+class TestPricingSchemeApplier(ERPNextTestSuite):
+	"""End-to-end: engine + applier on real selling documents, invariants included."""
+
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		make_scope_masters()
+		frappe.db.commit()  # nosemgrep — masters must survive per-test rollback
+
+	def setUp(self):
+		frappe.db.set_single_value("Accounts Settings", "pricing_engine", "Pricing Scheme")
+		frappe.clear_document_cache("Accounts Settings", "Accounts Settings")
+
+	def tearDown(self):
+		super().tearDown()
+		frappe.clear_document_cache("Accounts Settings", "Accounts Settings")
+
+	def make_sales_order(self, qty: float = 24, item: str = ITEM_A, do_not_submit: bool = True):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		return make_sales_order(item=item, qty=qty, price_list_rate=100, do_not_submit=do_not_submit)
+
+	def test_discount_applied_and_idempotent(self):
+		make_scheme(trigger=[group_row(PARENT_GROUP)], tiers=[tier(20, 50, value=8)])
+		so = self.make_sales_order(qty=24)
+
+		self.assertEqual(so.items[0].rate, 92)
+		self.assertEqual(so.items[0].scheme_discount_amount, 8)
+
+		so.save()  # invariant 1: idempotency — apply twice == once
+		self.assertEqual(so.items[0].rate, 92)
+		self.assertEqual(so.items[0].scheme_discount_amount, 8)
+
+	def test_reversibility_restores_baseline(self):
+		scheme = make_scheme(trigger=[group_row(PARENT_GROUP)], tiers=[tier(1, 0, value=10)])
+		so = self.make_sales_order()
+		self.assertEqual(so.items[0].rate, 90)
+
+		scheme.disabled = 1
+		scheme.save()
+		so.save()  # invariant 2: reversibility — removal == baseline
+
+		self.assertEqual(so.items[0].rate, 100)
+		self.assertEqual(so.items[0].scheme_discount_amount, 0)
+
+	def test_manual_discount_composes_and_survives(self):
+		make_scheme(trigger=[group_row(PARENT_GROUP)], tiers=[tier(1, 0, value=10)])
+		so = self.make_sales_order(do_not_submit=True)
+		so.items[0].discount_percentage = 20  # user-owned
+		so.save()
+
+		# baseline 100 -> manual 20% -> 80 -> scheme 10% -> 72
+		self.assertEqual(so.items[0].rate, 72)
+		self.assertEqual(so.items[0].discount_percentage, 20, "user field never touched")
+
+	def test_untouched_lines_keep_manual_rates(self):
+		make_scheme(trigger=[item_row(ITEM_A)], tiers=[tier(1, 0, value=10)])
+		so = self.make_sales_order(item=ITEM_C)  # out of scope
+		so.items[0].rate = 77  # negotiated by hand, no price_list_rate sync
+		so.items[0].price_list_rate = 0
+		so.save()
+
+		self.assertEqual(so.items[0].rate, 77, "engine must not clobber untouched lines")
+
+	def test_free_item_row_reconciled(self):
+		make_scheme(
+			effect_type="Free Item",
+			trigger=[group_row(PARENT_GROUP)],
+			tiers=[tier(min_qty=12, free_qty=1, recurrence_qty=12)],
+			aggregation="Per Document",
+		)
+		so = self.make_sales_order(qty=24)
+		free_rows = [d for d in so.items if d.is_free_item]
+		self.assertEqual([(d.item_code, d.qty, d.rate) for d in free_rows], [(ITEM_A, 2.0, 0.0)])
+
+		so.items[0].qty = 12  # drop a dozen -> free qty must follow
+		so.save()
+		free_rows = [d for d in so.items if d.is_free_item]
+		self.assertEqual([d.qty for d in free_rows], [1.0])
+
+		so.items[0].qty = 5  # below tier -> free row removed
+		so.save()
+		self.assertFalse([d for d in so.items if d.is_free_item])
+
+	def test_chain_stability_so_to_delivery_note(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
+
+		scheme = make_scheme(trigger=[group_row(PARENT_GROUP)], tiers=[tier(1, 0, value=10)])
+		so = self.make_sales_order(do_not_submit=False)
+		self.assertEqual(so.items[0].rate, 90)
+
+		# scheme changes after the order is placed
+		scheme.tiers[0].value = 50
+		scheme.save()
+
+		dn = make_delivery_note(so.name)
+		dn.flags.ignore_mandatory = True  # site-local custom fields are not under test
+		dn.save()  # invariant 3: chain stability — DN bills what SO agreed
+		self.assertEqual(dn.items[0].rate, 90)
+		self.assertEqual(dn.items[0].scheme_discount_amount, 10)
+
+	def test_line_level_ignore_flag(self):
+		make_scheme(trigger=[group_row(PARENT_GROUP)], tiers=[tier(1, 0, value=10)])
+		so = self.make_sales_order(do_not_submit=True)
+		so.items[0].ignore_pricing_scheme = 1
+		so.save()
+
+		self.assertEqual(so.items[0].rate, 100)
+		self.assertEqual(so.items[0].scheme_discount_amount, 0)
+
+	def test_ledger_written_on_submit_and_cancelled(self):
+		scheme = make_scheme(trigger=[group_row(PARENT_GROUP)], tiers=[tier(1, 0, value=10)])
+		so = self.make_sales_order(qty=24, do_not_submit=False)
+
+		rows = frappe.get_all(
+			"Pricing Scheme Application",
+			filters={"voucher_no": so.name, "is_cancelled": 0},
+			fields=["scheme", "qty", "discount_amount", "party"],
+		)
+		self.assertEqual(len(rows), 1)
+		self.assertEqual(rows[0].scheme, scheme.name)
+		self.assertEqual(rows[0].qty, 24)
+		self.assertEqual(rows[0].discount_amount, 240)  # 10/unit * 24
+		self.assertEqual(rows[0].party, so.customer)
+
+		so.cancel()
+		self.assertFalse(
+			frappe.get_all("Pricing Scheme Application", filters={"voucher_no": so.name, "is_cancelled": 0})
+		)
+
+	def test_legacy_mode_is_fully_dormant(self):
+		frappe.db.set_single_value("Accounts Settings", "pricing_engine", "Legacy")
+		frappe.clear_document_cache("Accounts Settings", "Accounts Settings")
+		make_scheme(trigger=[group_row(PARENT_GROUP)], tiers=[tier(1, 0, value=10)])
+		so = self.make_sales_order()
+
+		self.assertEqual(so.items[0].rate, 100)
+		self.assertEqual(flt(so.items[0].scheme_discount_amount), 0)

@@ -195,10 +195,15 @@ class calculate_taxes_and_totals:
 				item.rate_with_margin * item.discount_percentage / 100.0, item.precision("discount_amount")
 			)
 
-		calculated_rate = flt(item.rate_with_margin - item.discount_amount, item.precision("rate"))
+		# scheme_discount_amount is engine-owned (Pricing Scheme); 0 under the legacy engine
+		calculated_rate = flt(
+			item.rate_with_margin - item.discount_amount - flt(item.get("scheme_discount_amount")),
+			item.precision("rate"),
+		)
 
-		# if rate is 0 or pricing rules are applicable, calculated rate is preferred
-		if has_pricing_rules or not item.rate:
+		# if rate is 0, pricing rules apply, or the line is engine-managed
+		# (Pricing Scheme), the calculated rate is preferred over item.rate
+		if has_pricing_rules or not item.rate or flt(item.get("scheme_discount_amount")):
 			item.rate = calculated_rate
 			return
 

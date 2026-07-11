@@ -13,6 +13,10 @@
   "customer_item_code",
   "col_break1",
   "is_free_item",
+  "ignore_pricing_scheme",
+  "scheme_discount_amount",
+  "pricing_scheme",
+  "pricing_scheme_source_line",
   "is_alternative",
   "has_alternative_item",
   "section_break_5",
@@ -422,6 +426,36 @@
    "fieldtype": "Check",
    "label": "Is Free Item",
    "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "ignore_pricing_scheme",
+   "fieldtype": "Check",
+   "default": "0",
+   "label": "Ignore Pricing Scheme",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "scheme_discount_amount",
+   "fieldtype": "Currency",
+   "label": "Scheme Discount Amount",
+   "options": "currency",
+   "read_only": 1,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "pricing_scheme",
+   "fieldtype": "Link",
+   "label": "Pricing Scheme",
+   "options": "Pricing Scheme",
+   "read_only": 1,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "pricing_scheme_source_line",
+   "fieldtype": "Data",
+   "label": "Pricing Scheme Source Line",
+   "hidden": 1,
    "read_only": 1
   },
   {

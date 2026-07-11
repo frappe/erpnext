@@ -53,6 +53,7 @@
   "column_break_feyo",
   "maintain_same_rate_action",
   "role_to_override_stop_action",
+  "pricing_engine",
   "discount_composition",
   "currency_exchange_section",
   "allow_stale",
@@ -578,6 +579,14 @@
    "fieldtype": "Link",
    "label": "Role allowed to override stop action",
    "options": "Role"
+  },
+  {
+   "default": "Legacy",
+   "description": "Pricing Scheme runs the new resolution engine on selling transactions. Legacy keeps Pricing Rule behavior.",
+   "fieldname": "pricing_engine",
+   "fieldtype": "Select",
+   "label": "Pricing Engine",
+   "options": "Legacy\nPricing Scheme"
   },
   {
    "default": "Compound",

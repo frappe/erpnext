@@ -34,6 +34,7 @@ from erpnext.accounts.services.pricing.pricing_trace import PricingTrace
 class PricingResult:
 	effects: list[PricingEffect] = field(default_factory=list)
 	trace: PricingTrace = field(default_factory=PricingTrace)
+	composition: str = "Compound"
 
 	def effects_for_line(self, line_key: str) -> list[PricingEffect]:
 		return [e for e in self.effects if getattr(e, "line_key", None) == line_key]
@@ -56,7 +57,7 @@ class PricingEngine:
 		for match in resolve_winners(matches, self.trace):
 			effects.extend(self._compute_effects(match))
 			self.trace.matched(match.scheme.name, tier_idx=match.tier.idx)
-		return PricingResult(effects=effects, trace=self.trace)
+		return PricingResult(effects=effects, trace=self.trace, composition=self.context.composition)
 
 	def _match_scheme(self, scheme) -> list[SchemeMatch]:
 		if not self._passes_gates(scheme):

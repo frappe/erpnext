@@ -85,7 +85,8 @@ def get_discount_composition() -> str:
 
 def _build_line(row, doc) -> LineContext:
 	item = frappe.get_cached_value("Item", row.item_code, ("item_group", "brand", "variant_of"), as_dict=True)
-	stock_qty = flt(row.get("stock_qty")) or flt(row.get("qty")) * (flt(row.get("conversion_factor")) or 1.0)
+	# row.stock_qty is stale mid-validate after a qty edit — always derive
+	stock_qty = flt(row.get("qty")) * (flt(row.get("conversion_factor")) or 1.0)
 	base_amount = (
 		flt(row.get("price_list_rate")) * flt(row.get("qty")) * (flt(doc.get("conversion_rate")) or 1.0)
 	)
@@ -102,12 +103,12 @@ def _build_line(row, doc) -> LineContext:
 		base_amount=base_amount,
 		warehouse=row.get("warehouse"),
 		is_free_item=bool(row.get("is_free_item")),
-		inherited=_is_inherited(row),
+		inherited=is_inherited_row(row),
 		ignore_pricing_scheme=bool(row.get("ignore_pricing_scheme")),
 	)
 
 
-def _is_inherited(row) -> bool:
+def is_inherited_row(row) -> bool:
 	"""A line mapped from an upstream document inherits its pricing (chain stability)."""
 	return bool(
 		row.get("so_detail")

@@ -307,6 +307,10 @@ class AccountsController(TransactionBase):
 		if self.doctype != "Material Request" and not self.ignore_pricing_rule:
 			apply_pricing_rule_on_transaction(self)
 
+		from erpnext.accounts.services.pricing.pricing_applier import apply_pricing_schemes
+
+		apply_pricing_schemes(self)
+
 		self.set_total_in_words()
 		self.set_default_letter_head()
 		self.validate_company_in_accounting_dimension()

@@ -410,11 +410,17 @@ doc_events = {
 	"Sales Invoice": {
 		"on_submit": [
 			"erpnext.regional.italy.utils.sales_invoice_on_submit",
+			"erpnext.accounts.services.pricing.pricing_ledger.record_applications",
 		],
 		"on_cancel": [
 			"erpnext.regional.italy.utils.sales_invoice_on_cancel",
+			"erpnext.accounts.services.pricing.pricing_ledger.cancel_applications",
 		],
 		"on_trash": "erpnext.regional.check_deletion_permission",
+	},
+	"Sales Order": {
+		"on_submit": "erpnext.accounts.services.pricing.pricing_ledger.record_applications",
+		"on_cancel": "erpnext.accounts.services.pricing.pricing_ledger.cancel_applications",
 	},
 	"Purchase Invoice": {
 		"validate": [
