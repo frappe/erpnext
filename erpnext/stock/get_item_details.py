@@ -1515,23 +1515,15 @@ def apply_price_list(args, as_doc=False, doc=None):
 		return {"parent": parent, "children": children}
 
 
-<<<<<<< HEAD
 def apply_price_list_on_item(args, doc=None):
 	item_doc = frappe.db.get_value("Item", args.item_code, ["name", "variant_of"], as_dict=1)
 	item_details = get_price_list_rate(args, item_doc)
+
+	args.conversion_factor = flt(args.conversion_factor) or get_conversion_factor(
+		args.item_code, args.uom
+	).get("conversion_factor", 1)
+	args.stock_qty = flt(args.qty) * flt(args.conversion_factor)
 	item_details.update(get_pricing_rule_for_item(args, doc=doc))
-=======
-def apply_price_list_on_item(ctx, doc=None):
-	item_doc = frappe.get_cached_doc("Item", ctx.item_code)
-	item_details = get_price_list_rate(ctx, item_doc)
-
-	ctx.conversion_factor = flt(ctx.conversion_factor) or get_conversion_factor(ctx.item_code, ctx.uom).get(
-		"conversion_factor", 1
-	)
-	ctx.stock_qty = flt(ctx.qty) * flt(ctx.conversion_factor)
-
-	item_details.update(get_pricing_rule_for_item(ctx, doc=doc))
->>>>>>> 199eeff22c (fix: map stock_qty in apply_price_list_on_item (#56869))
 
 	return item_details
 
