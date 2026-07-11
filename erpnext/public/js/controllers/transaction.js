@@ -568,9 +568,18 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							read_only: 1,
 						},
 						{
+							fieldtype: "Link",
+							fieldname: "currency",
+							label: __("Currency"),
+							options: "Currency",
+							hidden: 1,
+							read_only: 1,
+						},
+						{
 							fieldtype: "Currency",
 							fieldname: "payment_amount",
 							label: __("Amount"),
+							options: "currency",
 							in_list_view: 1,
 							read_only: 1,
 						},

@@ -942,6 +942,7 @@ def set_payment_references(payment_schedules):
 				"description": row.get("description"),
 				"due_date": row.get("due_date"),
 				"amount": row.get("payment_amount"),
+				"currency": row.get("currency"),
 			}
 		)
 
@@ -1334,7 +1335,11 @@ def get_available_payment_schedules(reference_doctype: str, reference_name: str)
 	existing_refs = get_existing_payment_references(reference_name)
 	existing_ids = {r["payment_schedule"] for r in existing_refs if r.get("payment_schedule")}
 
-	return [r for r in ref_doc.payment_schedule if r.name not in existing_ids]
+	schedules = [r for r in ref_doc.payment_schedule if r.name not in existing_ids]
+	currency = ref_doc.get("currency")
+	for schedule in schedules:
+		schedule.currency = currency
+	return schedules
 
 
 def get_existing_payment_references(reference_name):
