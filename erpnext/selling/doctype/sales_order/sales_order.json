@@ -1768,11 +1768,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2026-06-21 12:46:13.250145",
-=======
  "modified": "2026-06-24 12:00:00.000000",
->>>>>>> 62fed1d562 (feat: explain FIFO allocation of fixed Discount Amount on Sales Order (#56436))
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
