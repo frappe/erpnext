@@ -40,6 +40,7 @@ class PricingScheme(Document):
 		coupon_required: DF.Check
 		currency: DF.Link | None
 		disabled: DF.Check
+		legacy_pricing_rule: DF.Data | None
 		effect_type: DF.Literal[
 			"Rate", "Discount Percentage", "Discount Amount", "Margin", "Free Item", "Header Discount"
 		]

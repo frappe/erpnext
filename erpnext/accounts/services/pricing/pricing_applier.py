@@ -68,14 +68,7 @@ class EffectApplier:
 		return True
 
 	def _baseline_rate(self, item) -> float:
-		"""Price list rate after user-owned discounts — engine effects never feed back."""
-		if flt(item.price_list_rate):
-			if flt(item.discount_percentage):
-				# discount_amount is the framework-derived mirror of the percentage
-				return flt(item.price_list_rate) * (1 - flt(item.discount_percentage) / 100)
-			return flt(item.price_list_rate) - flt(item.discount_amount)
-		# no catalog rate: the current rate plus prior engine discount is already post-manual
-		return flt(item.rate) + flt(item.get("scheme_discount_amount"))
+		return baseline_rate(item)
 
 	def _reconcile_free_items(self) -> bool:
 		desired = {
@@ -184,3 +177,14 @@ def should_apply(doc) -> bool:
 
 def is_pricing_scheme_engine_enabled() -> bool:
 	return frappe.get_cached_value("Accounts Settings", None, "pricing_engine") == "Pricing Scheme"
+
+
+def baseline_rate(item) -> float:
+	"""Price list rate after user-owned discounts — engine effects never feed back."""
+	if flt(item.price_list_rate):
+		if flt(item.discount_percentage):
+			# discount_amount is the framework-derived mirror of the percentage
+			return flt(item.price_list_rate) * (1 - flt(item.discount_percentage) / 100)
+		return flt(item.price_list_rate) - flt(item.discount_amount)
+	# no catalog rate: the current rate plus prior engine discount is already post-manual
+	return flt(item.rate) + flt(item.get("scheme_discount_amount"))

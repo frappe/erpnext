@@ -688,3 +688,131 @@ class TestPricingSchemeAuthoring(ERPNextTestSuite):
 		self.assertEqual(result["lines"][0]["schemes"], [scheme.name])
 		matched = [t for t in result["trace"] if t["status"] == "matched"]
 		self.assertEqual([t["scheme"] for t in matched], [scheme.name])
+
+
+class TestPricingSchemeMigration(ERPNextTestSuite):
+	"""Legacy Pricing Rule conversion and retrospective replay."""
+
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		make_scope_masters()
+		frappe.db.commit()  # nosemgrep — masters must survive per-test rollback
+
+	def convert(self, dry_run: int = 0):
+		from erpnext.accounts.services.pricing.pricing_migration import convert_legacy_pricing_rules
+
+		return convert_legacy_pricing_rules(dry_run=dry_run)
+
+	def entry_for(self, report: dict, rule_name: str) -> dict:
+		return next(e for e in report["converted"] if e["rule"] == rule_name)
+
+	def test_convert_percentage_rule_faithfully(self):
+		rule = make_legacy_rule(applicable_for="Customer", customer="_Test Customer", priority="3", min_qty=5)
+		entry = self.entry_for(self.convert(), rule.name)
+
+		scheme = frappe.get_doc("Pricing Scheme", entry["schemes"][0])
+		self.assertEqual(scheme.effect_type, "Discount Percentage")
+		self.assertEqual(scheme.legacy_pricing_rule, rule.name)
+		self.assertEqual(scheme.priority, 3)
+		self.assertEqual(
+			[(r.scope_type, r.value) for r in scheme.trigger_scope], [("Item Group", PARENT_GROUP)]
+		)
+		self.assertEqual(
+			[(r.party_type, r.value) for r in scheme.party_scope], [("Customer", "_Test Customer")]
+		)
+		self.assertEqual((scheme.tiers[0].min_qty, scheme.tiers[0].value), (5, 10))
+		self.assertEqual(entry["classification"], "clean")
+
+		second = self.convert()
+		self.assertIn(rule.name, second["skipped"], "conversion must be idempotent")
+
+	def test_convert_free_item_rule(self):
+		rule = make_legacy_rule(
+			price_or_product_discount="Product",
+			rate_or_discount=None,
+			same_item=1,
+			free_qty=1,
+			is_recursive=1,
+			recurse_for=12,
+			min_qty=12,
+		)
+		entry = self.entry_for(self.convert(), rule.name)
+
+		scheme = frappe.get_doc("Pricing Scheme", entry["schemes"][0])
+		self.assertEqual(scheme.effect_type, "Free Item")
+		tier = scheme.tiers[0]
+		self.assertFalse(tier.free_item, "same_item converts to blank free_item")
+		self.assertEqual((tier.free_qty, tier.recurrence_qty), (1, 12))
+
+	def test_stacked_rules_get_distinct_groups_and_additive_mode(self):
+		rule_a = make_legacy_rule(title="Stack A", apply_multiple_pricing_rules=1)
+		rule_b = make_legacy_rule(title="Stack B", apply_multiple_pricing_rules=1, trigger_group=OTHER_GROUP)
+		report = self.convert()
+
+		group_a = frappe.get_doc(
+			"Pricing Scheme", self.entry_for(report, rule_a.name)["schemes"][0]
+		).stacking_group
+		group_b = frappe.get_doc(
+			"Pricing Scheme", self.entry_for(report, rule_b.name)["schemes"][0]
+		).stacking_group
+		self.assertNotEqual(group_a, group_b, "stacked rules land in distinct groups")
+		self.assertTrue(group_a.startswith("Legacy Stack"))
+
+		self.assertEqual(report["composition"], "Additive")
+		self.assertEqual(frappe.db.get_single_value("Accounts Settings", "discount_composition"), "Additive")
+		self.assertEqual(self.entry_for(report, rule_a.name)["classification"], "behavior change")
+
+	def test_margin_and_discount_split_into_two_schemes(self):
+		rule = make_legacy_rule(margin_type="Percentage", margin_rate_or_amount=2)
+		entry = self.entry_for(self.convert(), rule.name)
+
+		self.assertEqual(len(entry["schemes"]), 2)
+		effects = {frappe.get_cached_value("Pricing Scheme", s, "effect_type") for s in entry["schemes"]}
+		self.assertEqual(effects, {"Discount Percentage", "Margin"})
+
+	def test_conflicting_conversion_inserted_disabled(self):
+		make_legacy_rule(title="First")
+		rule_b = make_legacy_rule(title="Second")  # same scope, same priority — legacy allowed this
+		report = self.convert()
+
+		entry = self.entry_for(report, rule_b.name)
+		self.assertEqual(entry["classification"], "needs review")
+		scheme = frappe.get_doc("Pricing Scheme", entry["schemes"][0])
+		self.assertEqual(scheme.disabled, 1, "conflicting conversion lands disabled for review")
+
+	def test_replay_reports_rate_delta(self):
+		frappe.db.set_single_value("Accounts Settings", "pricing_engine", "Legacy")
+		frappe.clear_document_cache("Accounts Settings", "Accounts Settings")
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		so = make_sales_order(item=ITEM_A, qty=10, price_list_rate=100)
+		make_scheme(trigger=[group_row(PARENT_GROUP)], tiers=[tier(1, 0, value=10)])
+
+		from erpnext.accounts.services.pricing.pricing_migration import replay_recent_documents
+
+		report = replay_recent_documents(days=2, limit=200)
+		ours = [d for d in report["diffs"] if d["voucher_no"] == so.name]
+		self.assertEqual(len(ours), 1)
+		self.assertEqual((ours[0]["old_rate"], ours[0]["new_rate"]), (100, 90))
+		self.assertEqual(ours[0]["delta"], -100.0)
+
+
+def make_legacy_rule(**kwargs):
+	trigger_group = kwargs.pop("trigger_group", PARENT_GROUP)
+	doc = frappe.get_doc(
+		{
+			"doctype": "Pricing Rule",
+			"title": kwargs.pop("title", "Legacy Rule"),
+			"apply_on": "Item Group",
+			"item_groups": [{"item_group": trigger_group}],
+			"selling": 1,
+			"price_or_product_discount": kwargs.pop("price_or_product_discount", "Price"),
+			"rate_or_discount": kwargs.pop("rate_or_discount", "Discount Percentage"),
+			"discount_percentage": kwargs.pop("discount_percentage", 10),
+			"currency": "INR",
+			"company": "_Test Company",
+			**kwargs,
+		}
+	)
+	return doc.insert(ignore_permissions=True)

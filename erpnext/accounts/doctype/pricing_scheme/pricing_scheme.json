@@ -43,7 +43,8 @@
   "coupon_section",
   "coupon_required",
   "advanced_section",
-  "condition"
+  "condition",
+  "legacy_pricing_rule"
  ],
  "fields": [
   {
@@ -286,6 +287,16 @@
    "fieldtype": "Code",
    "label": "Condition",
    "options": "Python"
+  },
+  {
+   "fieldname": "legacy_pricing_rule",
+   "fieldtype": "Data",
+   "label": "Legacy Pricing Rule",
+   "hidden": 1,
+   "read_only": 1,
+   "no_copy": 1,
+   "search_index": 1,
+   "description": "Provenance: the Pricing Rule this scheme was converted from."
   }
  ],
  "grid_page_length": 50,
