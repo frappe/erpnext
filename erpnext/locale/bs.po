@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-07-05 10:19+0000\n"
-"PO-Revision-Date: 2026-07-08 21:28\n"
+"PO-Revision-Date: 2026-07-09 21:42\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -2487,7 +2487,7 @@ msgstr "Trošak Aktivnosti postoji za {0} u odnosu na vrstu aktivnosti - {1}"
 
 #: erpnext/projects/doctype/activity_type/activity_type.js:10
 msgid "Activity Cost per Employee"
-msgstr "Trošak aktivnosti po personalu"
+msgstr "Trošak Aktivnosti po Osoblju"
 
 #. Label of the activity_type (Link) field in DocType 'Sales Invoice Timesheet'
 #. Label of the activity_type (Link) field in DocType 'Activity Cost'
@@ -2724,7 +2724,7 @@ msgstr "Dodaj popust"
 
 #: erpnext/public/js/event.js:40
 msgid "Add Employees"
-msgstr "Dodaj Personal"
+msgstr "Dodaj Osoblje"
 
 #: erpnext/public/js/bom_configurator/bom_configurator.bundle.js:256
 #: erpnext/selling/doctype/sales_order/sales_order.js:278
@@ -3896,7 +3896,7 @@ msgstr "Svi odjeli"
 #. Option for the 'Send To' (Select) field in DocType 'SMS Center'
 #: erpnext/selling/doctype/sms_center/sms_center.json
 msgid "All Employee (Active)"
-msgstr "Sav Personal (Aktivni)"
+msgstr "Sve Osoblje (Aktivno)"
 
 #: erpnext/setup/doctype/item_group/item_group.py:35
 #: erpnext/setup/doctype/item_group/item_group.py:36
@@ -3934,7 +3934,7 @@ msgstr "Kontakt svih prodajnih partnera"
 #. Option for the 'Send To' (Select) field in DocType 'SMS Center'
 #: erpnext/selling/doctype/sms_center/sms_center.json
 msgid "All Sales Person"
-msgstr "Sav Prodajni Personal"
+msgstr "Sve Prodajno Osoblje"
 
 #. Description of a DocType
 #: erpnext/setup/doctype/sales_person/sales_person.json
@@ -5212,7 +5212,7 @@ msgstr "Primjenjivo na (Pozicija)"
 #. Label of the to_emp (Link) field in DocType 'Authorization Rule'
 #: erpnext/setup/doctype/authorization_rule/authorization_rule.json
 msgid "Applicable To (Employee)"
-msgstr "Primjenjivo na (Personal)"
+msgstr "Primjenjivo na (Osoblje)"
 
 #. Label of the system_role (Link) field in DocType 'Authorization Rule'
 #: erpnext/setup/doctype/authorization_rule/authorization_rule.json
@@ -6227,7 +6227,7 @@ msgstr "Imovina {assets_link} kreirana za {item_code}"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.js:712
 msgid "Assign Job to Employee"
-msgstr "Dodijeli Posao Personalu"
+msgstr "Dodijeli Posao Osoblju"
 
 #. Label of the assign_to_name (Read Only) field in DocType 'Asset Maintenance
 #. Task'
@@ -9715,7 +9715,7 @@ msgstr "Nije moguće spojiti"
 
 #: erpnext/setup/doctype/employee/employee.py:292
 msgid "Cannot Relieve Employee"
-msgstr "Nije moguće razriješiti Personal"
+msgstr "Nije moguće Razriješiti Osoblje"
 
 #: erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.py:71
 msgid "Cannot Resubmit Ledger entries for vouchers in Closed fiscal year."
@@ -11917,7 +11917,7 @@ msgstr "Poduzeće imovine {0} i nabavni dokument {1} ne odgovara."
 
 #: erpnext/setup/doctype/employee/employee.py:164
 msgid "Company or Personal Email is mandatory when 'Create User Automatically' is enabled"
-msgstr "E-mail poduzeća ili lični e-mail je obavezan kada je omogućena opcija \"Automatski Kreiraj Korisnika\""
+msgstr "E-mail poduzeća ili lični e-mail je obavezan kada je omogućena opcija \"Automatski Izradi Osoblje\""
 
 #. Description of the 'Registration Details' (Code) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -13477,15 +13477,15 @@ msgstr "Kreiraj Dostavni Put"
 
 #: erpnext/utilities/activation.py:139
 msgid "Create Employee"
-msgstr "Kreiraj Personal"
+msgstr "Izradi Osoblje"
 
 #: erpnext/utilities/activation.py:137
 msgid "Create Employee Records"
-msgstr "Kreiraj Personalni Registar"
+msgstr "Izradi Registar Osoblja"
 
 #: erpnext/utilities/activation.py:138
 msgid "Create Employee records."
-msgstr "Kreiraj Personalni Registar"
+msgstr "Izradi Registar Osoblja."
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Create Existing Asset'
@@ -13902,7 +13902,7 @@ msgstr "Kreirano {0} tablica bodova za {1} između:"
 #. 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Creates a User account for this employee using the Preferred, Company, or Personal email."
-msgstr "Kreira korisnički račun za personal koristeći preferiranu, poduzeća ili ličnu e-poštu."
+msgstr "Izradi korisnički račun za Osoblje koristeći Preferiranu, Poduzeća ili Ličnu adresu e-pošte."
 
 #. Description of the 'Create Grouped Asset' (Check) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -18895,44 +18895,44 @@ msgstr "Hitni Telefon"
 #: erpnext/stock/doctype/serial_no/serial_no.json
 #: erpnext/telephony/doctype/call_log/call_log.json
 msgid "Employee"
-msgstr "Personal"
+msgstr "Osoblje"
 
 #. Label of the employee_link (Link) field in DocType 'Supplier Scorecard
 #. Scoring Standing'
 #: erpnext/buying/doctype/supplier_scorecard_scoring_standing/supplier_scorecard_scoring_standing.json
 msgid "Employee "
-msgstr "Personal "
+msgstr "Osoblje "
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
 #. Account'
 #: erpnext/accounts/doctype/journal_entry_account/journal_entry_account.json
 msgid "Employee Advance"
-msgstr "Predujam Personala"
+msgstr "Predujam Osoblja"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:26
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:37
 msgid "Employee Advances"
-msgstr "Predujam Personala"
+msgstr "Predujam Osoblja"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:188
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:327
 msgid "Employee Benefits Obligation"
-msgstr "Obaveza Beneficija Personala"
+msgstr "Obaveza Pogodnosti Osoblja"
 
 #. Label of the employee_detail (Section Break) field in DocType 'Timesheet'
 #: erpnext/projects/doctype/timesheet/timesheet.json
 msgid "Employee Detail"
-msgstr "Detalji Personala"
+msgstr "Detalji Osoblja"
 
 #. Name of a DocType
 #: erpnext/setup/doctype/employee_education/employee_education.json
 msgid "Employee Education"
-msgstr "Obuka Personala"
+msgstr "Obuka Osoblja"
 
 #. Name of a DocType
 #: erpnext/setup/doctype/employee_external_work_history/employee_external_work_history.json
 msgid "Employee External Work History"
-msgstr "Eksterna Radna Historija Personala"
+msgstr "Vanjska Radna Historija Osoblja"
 
 #. Label of the employee_group (Link) field in DocType 'Communication Medium
 #. Timeslot'
@@ -18940,12 +18940,12 @@ msgstr "Eksterna Radna Historija Personala"
 #: erpnext/communication/doctype/communication_medium_timeslot/communication_medium_timeslot.json
 #: erpnext/setup/doctype/employee_group/employee_group.json
 msgid "Employee Group"
-msgstr "Grupa Personala"
+msgstr "Grupa Osoblja"
 
 #. Name of a DocType
 #: erpnext/setup/doctype/employee_group_table/employee_group_table.json
 msgid "Employee Group Table"
-msgstr "Tabela Grupe Personala"
+msgstr "Tabela Grupe Osoblja"
 
 #: erpnext/projects/report/timesheet_billing_summary/timesheet_billing_summary.py:33
 msgid "Employee ID"
@@ -18954,7 +18954,7 @@ msgstr "ID Personala"
 #. Name of a DocType
 #: erpnext/setup/doctype/employee_internal_work_history/employee_internal_work_history.json
 msgid "Employee Internal Work History"
-msgstr "Eksterna Radna Historija Personala"
+msgstr "Unutarnja Radna Historija Osoblja"
 
 #. Label of the employee_name (Data) field in DocType 'Activity Cost'
 #. Label of the employee_name (Data) field in DocType 'Timesheet'
@@ -18965,50 +18965,50 @@ msgstr "Eksterna Radna Historija Personala"
 #: erpnext/projects/report/timesheet_billing_summary/timesheet_billing_summary.py:53
 #: erpnext/setup/doctype/employee_group_table/employee_group_table.json
 msgid "Employee Name"
-msgstr "Ime Personala"
+msgstr "Ime Osoblja"
 
 #. Label of the employee_number (Data) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Employee Number"
-msgstr "Broj Personala"
+msgstr "Broj Osoblja"
 
 #. Label of the employee_user_id (Link) field in DocType 'Call Log'
 #: erpnext/telephony/doctype/call_log/call_log.json
 msgid "Employee User Id"
-msgstr "Korisnički ID Personala"
+msgstr "Korisnički ID Osoblja"
 
 #: erpnext/setup/doctype/employee/employee.py:333
 msgid "Employee cannot report to himself."
-msgstr "Personal ne može da izvještava sam sebe."
+msgstr "Osoblje ne može da izvještava samo sebe."
 
 #: erpnext/setup/doctype/employee/employee.py:583
 msgid "Employee is required"
-msgstr "Potreban je Personal"
+msgstr "Osoblje je obavezno"
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:109
 msgid "Employee is required while issuing Asset {0}"
-msgstr "Personal je obavezan prilikom izdavanja Imovine {0}"
+msgstr "Osoblje je obavezno prilikom izdavanja Imovine {0}"
 
 #: erpnext/setup/doctype/employee/employee.py:440
 msgid "Employee {0} already has a linked user"
-msgstr "Personal {0} već ima povezanog korisnika"
+msgstr "Osoblje {0} već ima povezanog korisnika"
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:92
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:113
 msgid "Employee {0} does not belong to the company {1}"
-msgstr "Personal {0} ne pripada {1}"
+msgstr "Osoblje {0} ne pripada {1}"
 
 #: erpnext/manufacturing/doctype/job_card/job_card.py:411
 msgid "Employee {0} is currently working on another workstation. Please assign another employee."
-msgstr "{0} trenutno radi na drugoj radnoj stanici. Dodijeli drugi personal."
+msgstr "{0} trenutno radi na drugoj radnoj stanici. Dodijeli drugo osoblje."
 
 #: erpnext/setup/doctype/employee/employee.py:608
 msgid "Employee {0} not found"
-msgstr "Personal {0} nije pronađen"
+msgstr "Osoblje {0} nije pronađeno"
 
 #: erpnext/public/js/shop_floor/shop_floor.js:684
 msgid "Employees"
-msgstr "Personal"
+msgstr "Osoblje"
 
 #: erpnext/stock/doctype/batch/batch_list.js:16
 msgid "Empty"
@@ -21779,11 +21779,11 @@ msgstr "Od Datuma Dospijeća"
 #. Label of the from_employee (Link) field in DocType 'Asset Movement Item'
 #: erpnext/assets/doctype/asset_movement_item/asset_movement_item.json
 msgid "From Employee"
-msgstr "Od Personala"
+msgstr "Od Osoblja"
 
 #: erpnext/assets/doctype/asset_movement/asset_movement.py:98
 msgid "From Employee is required while issuing Asset {0}"
-msgstr "Personal je obavezan prilikom izdavanja Imovine {0}"
+msgstr "Osoblje je obavezano prilikom izdavanja Imovine {0}"
 
 #. Label of the from_external_ecomm_platform (Check) field in DocType 'Coupon
 #. Code'
@@ -23088,7 +23088,7 @@ msgstr "Hand"
 
 #: erpnext/accounts/report/accounts_payable/accounts_payable.js:161
 msgid "Handle Employee Advances"
-msgstr "Rukovanje Predujmom Personala"
+msgstr "Rukovanje Predujmom Osoblja"
 
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:228
 msgid "Hardware"
@@ -24169,7 +24169,7 @@ msgstr "Zanemari Šablon Standard Uslova Plaćanja"
 #. Settings'
 #: erpnext/projects/doctype/projects_settings/projects_settings.json
 msgid "Ignore Employee Time Overlap"
-msgstr "Zanemari preklapanje vremena Personala"
+msgstr "Zanemari preklapanje vremena Osoblja"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.js:145
 msgid "Ignore Empty Stock"
@@ -24303,7 +24303,7 @@ msgstr "Uvoz Podataka"
 
 #: erpnext/setup/doctype/employee/employee_list.js:16
 msgid "Import Employees"
-msgstr "Uvoz Personala"
+msgstr "Uvezi Osoblje"
 
 #: erpnext/edi/doctype/code_list/code_list.js:7
 #: erpnext/edi/doctype/code_list/code_list_list.js:3
@@ -32013,7 +32013,7 @@ msgstr "N/A"
 #. Person'
 #: erpnext/setup/doctype/sales_person/sales_person.json
 msgid "Name and Employee ID"
-msgstr "Ime i Personalni ID"
+msgstr "Ime i ID Osoblja"
 
 #. Label of the name_of_beneficiary (Data) field in DocType 'Bank Guarantee'
 #: erpnext/accounts/doctype/bank_guarantee/bank_guarantee.json
@@ -32922,7 +32922,7 @@ msgstr "Nije pronađena e-pošta za {0} {1}"
 
 #: erpnext/telephony/doctype/call_log/call_log.py:119
 msgid "No employee was scheduled for call popup"
-msgstr "Personal nije zakazao poziv"
+msgstr "Osoblje nije zakazalo poziv"
 
 #: banking/src/components/features/BankReconciliation/BankClearanceSummary.tsx:235
 #: banking/src/components/features/BankReconciliation/BankReconciliationStatement.tsx:225
@@ -32993,7 +32993,7 @@ msgstr "Broj Dokumenata"
 #: erpnext/crm/doctype/lead/lead.json
 #: erpnext/crm/doctype/opportunity/opportunity.json
 msgid "No of Employees"
-msgstr "Personalni Broj"
+msgstr "Broj Osoblja"
 
 #: erpnext/crm/report/lead_conversion_time/lead_conversion_time.py:62
 msgid "No of Interactions"
@@ -33210,7 +33210,7 @@ msgstr "Nije pronađen {0} za transakcije među poduzećima."
 #. Label of the no_of_employees (Select) field in DocType 'Prospect'
 #: erpnext/crm/doctype/prospect/prospect.json
 msgid "No. of Employees"
-msgstr "Personalni Broj"
+msgstr "Broj Osoblja"
 
 #: erpnext/manufacturing/doctype/workstation/workstation.js:63
 msgid "No. of parallel job cards which can be allowed on this workstation. Example: 2 would mean this workstation can process production for two Work Orders at a time."
@@ -33477,7 +33477,7 @@ msgstr "Obavijesti klijente putem e-pošte"
 #: erpnext/buying/doctype/supplier_scorecard/supplier_scorecard.json
 #: erpnext/buying/doctype/supplier_scorecard_scoring_standing/supplier_scorecard_scoring_standing.json
 msgid "Notify Employee"
-msgstr "Obavijesti Personal"
+msgstr "Obavijesti Osoblje"
 
 #. Label of the notify_employee (Check) field in DocType 'Supplier Scorecard
 #. Standing'
@@ -37674,7 +37674,7 @@ msgstr "Lični Detalji"
 #. Label of the personal_email (Data) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
 msgid "Personal Email"
-msgstr "Liöna e-pošta"
+msgstr "Lična adresa e-pošte"
 
 #: erpnext/setup/setup_wizard/setup_wizard.py:33
 msgid "Personalizing your setup"
@@ -37874,7 +37874,7 @@ msgstr "Quart Liquid (US)"
 
 #: erpnext/crm/report/sales_pipeline_analytics/sales_pipeline_analytics.js:8
 msgid "Pipeline By"
-msgstr "Lijevak prema"
+msgstr "Proces Prema"
 
 #. Label of the place_of_issue (Data) field in DocType 'Employee'
 #: erpnext/setup/doctype/employee/employee.json
@@ -38347,7 +38347,7 @@ msgstr "Unesi Datum Dostave"
 
 #: erpnext/setup/doctype/sales_person/sales_person_tree.js:9
 msgid "Please enter Employee Id of this sales person"
-msgstr "Unesi Personal Id ovog Prodavača"
+msgstr "Unesi Osobni ID ovog Prodavača"
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:1103
 msgid "Please enter Expense Account"
@@ -48526,7 +48526,7 @@ msgstr "Sažetak Transakcije Prodaje po Prodavaču"
 #: erpnext/selling/page/sales_funnel/sales_funnel.js:50
 #: erpnext/workspace_sidebar/crm.json
 msgid "Sales Pipeline"
-msgstr "Prodajni Cjevovod"
+msgstr "Prodajni Proces"
 
 #. Name of a report
 #. Label of a Link in the CRM Workspace
@@ -48534,11 +48534,11 @@ msgstr "Prodajni Cjevovod"
 #: erpnext/crm/report/sales_pipeline_analytics/sales_pipeline_analytics.json
 #: erpnext/crm/workspace/crm/crm.json erpnext/workspace_sidebar/crm.json
 msgid "Sales Pipeline Analytics"
-msgstr "Analiza Prodaje"
+msgstr "Analiza Procesa Prodaje"
 
 #: erpnext/selling/page/sales_funnel/sales_funnel.js:157
 msgid "Sales Pipeline by Stage"
-msgstr "Prodaja po Fazama"
+msgstr "Proces Prodaje po Fazama"
 
 #: erpnext/stock/report/item_prices/item_prices.py:58
 msgid "Sales Price List"
@@ -49230,7 +49230,7 @@ msgstr "Odaberite Klijente po"
 
 #: erpnext/setup/doctype/employee/employee.js:244
 msgid "Select Date of Birth. This will validate Employees age and prevent hiring of under-age staff."
-msgstr "Navedi Datum Rođenja. Ovo će potvrditi dob personala i spriječiti zapošljavanje maloljetnih osoba."
+msgstr "Navedi Datum Rođenja. Ovo će potvrditi dob Osoblja i spriječiti zapošljavanje maloljetnih osoba."
 
 #: erpnext/setup/doctype/employee/employee.js:251
 msgid "Select Date of joining. It will have impact on the first salary calculation, Leave allocation on pro-rata bases."
@@ -49256,7 +49256,7 @@ msgstr "Odaberi Otpremnu Adresu "
 
 #: erpnext/manufacturing/doctype/job_card/job_card.js:705
 msgid "Select Employees"
-msgstr "Navedi Personal"
+msgstr "Odaberi Osoblje"
 
 #: erpnext/buying/doctype/purchase_order/purchase_order.js:174
 #: erpnext/selling/doctype/sales_order/sales_order.js:862
@@ -49378,7 +49378,7 @@ msgstr "Odaberi Poduzeće"
 
 #: erpnext/setup/doctype/employee/employee.js:239
 msgid "Select a Company this Employee belongs to."
-msgstr "Navedi Poduzeće kojoj ovaj personal pripada."
+msgstr "Odaberi Poduzeće kojoj ovo Osoblje pripada."
 
 #: erpnext/buying/doctype/supplier/supplier.js:221
 msgid "Select a Customer"
@@ -50788,7 +50788,7 @@ msgstr "Postavljanje Tipa Računa pomaže pri odabiru Računa u transakcijama."
 
 #: erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py:129
 msgid "Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}"
-msgstr "Postavljanje Događaja na {0}, budući da Personal vezan za ispod navedene Prodavače nema Korisnički ID{1}"
+msgstr "Postavljanje Događaja na {0}, budući da Osoblje vezano za ispod navedene Prodavače nema Korisnički ID {1}"
 
 #: erpnext/stock/doctype/pick_list/pick_list.js:98
 msgid "Setting Item Locations..."
@@ -55984,7 +55984,7 @@ msgstr "Sljedeći izbrisani atributi postoje u varijantama, ali ne i u šablonu.
 
 #: erpnext/setup/doctype/employee/employee.py:286
 msgid "The following employees are currently still reporting to {0}:"
-msgstr "Sljedeći personal još uvijek podnose izvještaj {0}:"
+msgstr "Sljedeće Osoblje još uvijek podnosi izvještaj {0}:"
 
 #: erpnext/accounts/doctype/promotional_scheme/promotional_scheme.py:185
 msgid "The following invalid Pricing Rules are deleted:{0}"
@@ -57117,7 +57117,7 @@ msgstr "Do Datuma isteka roka"
 #. Label of the to_employee (Link) field in DocType 'Asset Movement Item'
 #: erpnext/assets/doctype/asset_movement_item/asset_movement_item.json
 msgid "To Employee"
-msgstr "Za Personal"
+msgstr "Za Osoblje"
 
 #. Label of the to_fiscal_year (Link) field in DocType 'Budget'
 #: erpnext/accounts/doctype/budget/budget.json
@@ -60113,11 +60113,11 @@ msgstr "Korisnik {0} je onemogućen. Odaberi važećeg korisnika/blagajnika"
 
 #: erpnext/setup/doctype/employee/employee.py:365
 msgid "User {0}: Removed Employee Self Service role as there is no mapped employee."
-msgstr "Korisnik {0}: Uklonjena uloga samoposluživanja zaposlenika jer nema mapiranog zaposlenika."
+msgstr "Korisnik {0}: Uklonjena uloga samoposluživanja Osoblja jer nema mapiranog Osoblja."
 
 #: erpnext/setup/doctype/employee/employee.py:360
 msgid "User {0}: Removed Employee role as there is no mapped employee."
-msgstr "Korisnik {0}: Uklonjena uloga personala jer nema mapiranog personala."
+msgstr "Korisnik {0}: Uklonjena uloga Osoblja jer nema mapiranog Osoblja."
 
 #. Description of the 'Set Landed Cost Based on Purchase Invoice Rate' (Check)
 #. field in DocType 'Buying Settings'

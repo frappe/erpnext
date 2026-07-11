@@ -54,6 +54,10 @@ frappe.ui.form.on("Item", {
 		}
 	},
 
+	allow_negative_stock(frm) {
+		erpnext.utils.confirm_negative_stock(frm);
+	},
+
 	setup: function (frm) {
 		frm.add_fetch("attribute", "numeric_values", "numeric_values");
 		frm.add_fetch("attribute", "from_range", "from_range");

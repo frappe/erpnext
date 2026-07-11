@@ -1423,6 +1423,23 @@ class StockEntry(StockController, SubcontractingInwardController):
 		used_alternative_items = get_used_alternative_items(
 			subcontract_order_field=self.subcontract_data.order_field, work_order=self.work_order
 		)
+
+		skip_transfer, from_wip_warehouse = (
+			frappe.get_value("Work Order", self.work_order, ["skip_transfer", "from_wip_warehouse"])
+			if self.work_order
+			else [None, None]
+		)
+		wo_item_source_warehouses = {}
+		if skip_transfer and not from_wip_warehouse:
+			for d in frappe.get_all(
+				"Work Order Item",
+				filters={"parent": self.work_order},
+				fields=["item_code", "source_warehouse"],
+			):
+				# default ordering is creation desc; keep the first (most recent) row per
+				# item_code to match the limit-1 behaviour of the get_value call this replaces
+				wo_item_source_warehouses.setdefault(d.item_code, d.source_warehouse)
+
 		for item in item_dict.values():
 			# if source warehouse presents in BOM set from_warehouse as bom source_warehouse
 			if item["allow_alternative_item"]:
@@ -1430,18 +1447,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 					"Work Order", self.work_order, "allow_alternative_item"
 				)
 
-			skip_transfer, from_wip_warehouse = (
-				frappe.get_value("Work Order", self.work_order, ["skip_transfer", "from_wip_warehouse"])
-				if self.work_order
-				else [None, None]
-			)
-
 			item.from_warehouse = (
-				frappe.get_value(
-					"Work Order Item",
-					{"parent": self.work_order, "item_code": item.item_code},
-					"source_warehouse",
-				)
+				wo_item_source_warehouses.get(item.item_code)
 				if skip_transfer and not from_wip_warehouse
 				else self.from_warehouse or item.source_warehouse or item.default_warehouse
 			)

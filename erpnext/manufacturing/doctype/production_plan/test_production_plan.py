@@ -1592,6 +1592,104 @@ class TestProductionPlan(ERPNextTestSuite):
 		for row in plan.mr_items:
 			self.assertFalse(row.from_warehouse)
 
+	def _setup_group_rm_warehouse(self):
+		"""FG + RM with a group raw-material warehouse (C1, C2) partially stocked (3 + 4)."""
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		group_warehouse = "_Test Warehouse Group - _TC"
+		child_1 = "_Test Warehouse Group-C1 - _TC"
+		child_2 = "_Test Warehouse Group-C2 - _TC"
+
+		fg_item = "Test PP Group FG"
+		rm_item = "Test PP Group RM"
+		create_item(rm_item, valuation_rate=100)
+		create_item(fg_item, valuation_rate=100)
+		if not frappe.db.get_value("BOM", {"item": fg_item, "is_active": 1}):
+			create_nested_bom({fg_item: {rm_item: {}}}, prefix="")
+
+		make_stock_entry(item_code=rm_item, qty=3, rate=100, target=child_1)
+		make_stock_entry(item_code=rm_item, qty=4, rate=100, target=child_2)
+
+		return frappe._dict(
+			group_warehouse=group_warehouse,
+			children={child_1, child_2},
+			for_wh=child_1,  # a leaf inside the group, used as For Warehouse
+			fg_item=fg_item,
+			rm_item=rm_item,
+		)
+
+	def test_group_raw_material_warehouse_aggregates_child_stock(self):
+		"Combined child stock (3 + 4) is used as projected qty; material targets For Warehouse."
+		data = self._setup_group_rm_warehouse()
+
+		plan = create_production_plan(
+			item_code=data.fg_item,
+			planned_qty=10,
+			for_warehouse=data.for_wh,
+			raw_material_group_warehouse=data.group_warehouse,
+			do_not_save=1,
+			skip_getting_mr_items=1,
+		)
+		mr_items = get_items_for_material_requests(plan.as_dict())
+
+		rm_rows = [d for d in mr_items if d.get("item_code") == data.rm_item]
+		self.assertEqual(len(rm_rows), 1)
+		# projected qty reflects the sum across both child warehouses, not a single child
+		self.assertEqual(flt(rm_rows[0].get("projected_qty")), 7.0)
+		# the group is only an availability scope; the row targets For Warehouse
+		self.assertEqual(rm_rows[0].get("warehouse"), data.for_wh)
+
+	def test_group_raw_material_warehouse_transfers_from_child_warehouses(self):
+		"Material is transferred only from actual child warehouses, never the group node."
+		data = self._setup_group_rm_warehouse()
+
+		plan = create_production_plan(
+			item_code=data.fg_item,
+			planned_qty=10,
+			ignore_existing_ordered_qty=1,
+			for_warehouse=data.for_wh,
+			raw_material_group_warehouse=data.group_warehouse,
+			do_not_save=1,
+			skip_getting_mr_items=1,
+		)
+		mr_items = get_items_for_material_requests(
+			plan.as_dict(), warehouses=[{"warehouse": data.group_warehouse}]
+		)
+
+		transfer_rows = [d for d in mr_items if d.get("material_request_type") == "Material Transfer"]
+		self.assertTrue(transfer_rows)
+		for row in transfer_rows:
+			self.assertIn(row.get("from_warehouse"), data.children)
+		for row in mr_items:
+			# a group warehouse must never be a Material Request target
+			self.assertNotEqual(row.get("warehouse"), data.group_warehouse)
+
+	def test_for_warehouse_must_be_child_of_group(self):
+		"A For Warehouse outside the chosen group warehouse is rejected on save."
+		data = self._setup_group_rm_warehouse()
+
+		plan = create_production_plan(
+			item_code=data.fg_item,
+			planned_qty=10,
+			for_warehouse="_Test Warehouse - _TC",  # outside the group
+			raw_material_group_warehouse=data.group_warehouse,
+			do_not_save=1,
+			skip_getting_mr_items=1,
+		)
+		self.assertRaises(frappe.ValidationError, plan.save)
+
+	def test_for_warehouse_required_with_group_when_getting_raw_materials(self):
+		"A group warehouse without a For Warehouse is rejected when raw materials are fetched."
+		data = self._setup_group_rm_warehouse()
+
+		plan = create_production_plan(
+			item_code=data.fg_item,
+			planned_qty=10,
+			raw_material_group_warehouse=data.group_warehouse,
+			skip_getting_mr_items=1,
+		)
+		self.assertRaises(frappe.ValidationError, get_items_for_material_requests, plan.as_dict())
+
 	def test_skip_available_qty_for_sub_assembly_items(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 
@@ -3122,6 +3220,7 @@ def create_production_plan(**args):
 			"sub_assembly_warehouse": args.sub_assembly_warehouse,
 			"reserve_stock": args.reserve_stock or 0,
 			"for_warehouse": args.for_warehouse or None,
+			"raw_material_group_warehouse": args.raw_material_group_warehouse or None,
 		}
 	)
 

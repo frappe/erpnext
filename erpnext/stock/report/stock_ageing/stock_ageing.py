@@ -289,6 +289,7 @@ class FIFOSlots:
 		self.serial_no_details = {}
 		self.batch_no_details = {}
 		self.batchwise_valuation_by_batch = {}
+		self.valuation_method_by_item = {}
 		self.filters = filters
 		self.sle = sle
 
@@ -310,8 +311,9 @@ class FIFOSlots:
 
 		if stock_ledger_entries is None:
 			# streaming path: nested queries invalidate the streaming cursor below,
-			# so batchwise valuation flags must be resolved beforehand
+			# so batchwise valuation flags and item valuation methods must be resolved beforehand
 			self._prefetch_batchwise_valuations()
+			self._prefetch_valuation_methods()
 
 			if frappe.db.db_type == "postgres":
 				# postgres server-side cursors can't run nested queries mid-iteration; _get_stock_ledger_entries
@@ -334,11 +336,27 @@ class FIFOSlots:
 			for row in stock_ledger_entries:
 				self._process_stock_ledger_entry(row, bundle_wise_serial_nos, bundle_wise_batch_nos)
 
+		self._recompute_moving_average_slots()
+
 		if not self.filters.get("show_warehouse_wise_stock"):
 			# (Item 1, WH 1), (Item 1, WH 2) => (Item 1)
 			self.item_details = self._aggregate_details_by_item(self.item_details)
 
 		return self.item_details
+
+	def _recompute_moving_average_slots(self) -> None:
+		for item_dict in self.item_details.values():
+			if item_dict.get("has_serial_no") or item_dict.get("has_batch_no"):
+				continue
+
+			details = item_dict["details"]
+			if self._get_item_valuation_method(details.name) != "Moving Average":
+				continue
+
+			rate = flt(details.valuation_rate)
+			for slot in item_dict["fifo_queue"]:
+				if is_qty_slot(slot):
+					slot[FIFO_VALUE_INDEX] = flt(slot[FIFO_QTY_INDEX] * rate)
 
 	def _get_bundle_wise_details(self, stock_ledger_entries: list | None) -> tuple[dict, dict]:
 		if stock_ledger_entries is not None:
@@ -360,7 +378,10 @@ class FIFOSlots:
 		if row.actual_qty > 0:
 			self._compute_incoming_stock(row, fifo_queue, transferred_item_key, serial_nos, batch_nos)
 		else:
-			self._compute_outgoing_stock(row, fifo_queue, transferred_item_key, serial_nos, batch_nos)
+			from_end = self._get_item_valuation_method(row.name) == "LIFO"
+			self._compute_outgoing_stock(
+				row, fifo_queue, transferred_item_key, serial_nos, batch_nos, from_end
+			)
 
 		self._update_balances(row, key)
 		self._trim_serial_fifo_queue(row, key, fifo_queue)
@@ -472,6 +493,45 @@ class FIFOSlots:
 
 		for batch_no, use_batchwise_valuation in query.run():
 			self.batchwise_valuation_by_batch[batch_no] = use_batchwise_valuation
+
+	def _get_item_valuation_method(self, item_code: str) -> str:
+		from erpnext.stock.utils import get_valuation_method
+
+		if item_code not in self.valuation_method_by_item:
+			# only reachable when stock ledger entries are passed in directly;
+			# the streaming path prefetches all methods before iteration
+			self.valuation_method_by_item[item_code] = get_valuation_method(
+				item_code, self.filters.get("company")
+			)
+
+		return self.valuation_method_by_item[item_code]
+
+	def _prefetch_valuation_methods(self) -> None:
+		from erpnext.stock.utils import get_valuation_method
+
+		company = self.filters.get("company")
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		item = frappe.qb.DocType("Item")
+		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
+
+		query = (
+			frappe.qb.from_(sle)
+			.inner_join(item)
+			.on(sle.item_code == item.name)
+			.select(item.name, item.valuation_method)
+			.distinct()
+			.where((sle.company == company) & (sle.posting_datetime <= to_date) & (sle.is_cancelled != 1))
+		)
+		query = self._apply_filter(query, sle, "item_code")
+
+		# items with no item-level method share the company/settings default; resolve it once
+		default_method = None
+		for item_code, valuation_method in query.run():
+			if not valuation_method:
+				if default_method is None:
+					default_method = get_valuation_method(item_code, company)
+				valuation_method = default_method
+			self.valuation_method_by_item[item_code] = valuation_method
 
 	def _init_key_stores(self, row: dict) -> tuple:
 		"Initialise keys and FIFO Queue."
@@ -589,7 +649,13 @@ class FIFOSlots:
 		fifo_queue[0][FIFO_VALUE_INDEX] += flt(row.stock_value_difference)
 
 	def _compute_outgoing_stock(
-		self, row: dict, fifo_queue: list, transfer_key: tuple, serial_nos: list, batch_nos: list
+		self,
+		row: dict,
+		fifo_queue: list,
+		transfer_key: tuple,
+		serial_nos: list,
+		batch_nos: list,
+		from_end: bool = False,
 	):
 		"Update FIFO Queue on outward stock."
 		if serial_nos:
@@ -597,7 +663,7 @@ class FIFOSlots:
 		elif batch_nos:
 			self._consume_batch_fifo_slots(row, fifo_queue, transfer_key, batch_nos)
 		else:
-			self._consume_fifo_slots(row, fifo_queue, transfer_key)
+			self._consume_fifo_slots(row, fifo_queue, transfer_key, from_end)
 
 	def _consume_serial_fifo_slots(self, fifo_queue: list, serial_nos: list) -> None:
 		fifo_queue[:] = [slot for slot in fifo_queue if slot[FIFO_QTY_INDEX] not in serial_nos]
@@ -674,19 +740,23 @@ class FIFOSlots:
 		)
 		self.transferred_item_details[transfer_key].append([qty, row.posting_date, stock_value_difference])
 
-	def _consume_fifo_slots(self, row: dict, fifo_queue: list, transfer_key: tuple) -> None:
+	def _consume_fifo_slots(
+		self, row: dict, fifo_queue: list, transfer_key: tuple, from_end: bool = False
+	) -> None:
+		# LIFO consumes the most recent inward first, so pop from the tail instead of the head.
+		index = -1 if from_end else 0
 		qty_to_pop = abs(row.actual_qty)
 		stock_value = abs(row.stock_value_difference)
 
 		while qty_to_pop:
-			slot = fifo_queue[0] if fifo_queue else [0, None, 0]
+			slot = fifo_queue[index] if fifo_queue else [0, None, 0]
 			slot_qty = flt(slot[FIFO_QTY_INDEX])
 			slot_value = flt(slot[FIFO_VALUE_INDEX])
 
 			if 0 < slot_qty <= qty_to_pop:
 				qty_to_pop -= slot_qty
 				stock_value -= slot_value
-				self.transferred_item_details[transfer_key].append(fifo_queue.pop(0))
+				self.transferred_item_details[transfer_key].append(fifo_queue.pop(index))
 			elif not fifo_queue:
 				fifo_queue.append([-(qty_to_pop), row.posting_date, -(stock_value)])
 				self.transferred_item_details[transfer_key].append(

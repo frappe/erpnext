@@ -665,6 +665,48 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(ste.from_bom, 1.0)
 		self.assertEqual(ste.bom_no, work_order.bom_no)
 
+	def test_job_card_material_transfer_via_pick_list(self):
+		from erpnext.stock.doctype.material_request.mapper import create_pick_list
+		from erpnext.stock.doctype.pick_list.mapper import (
+			create_stock_entry as create_stock_entry_from_pick_list,
+		)
+
+		create_bom_with_multiple_operations()
+		work_order = make_wo_with_transfer_against_jc()
+
+		for item in work_order.required_items:
+			make_stock_entry(
+				item_code=item.item_code,
+				target=item.source_warehouse,
+				qty=item.required_qty * 2,
+				basic_rate=100,
+			)
+
+		job_card_name = frappe.db.get_value("Job Card", {"work_order": work_order.name}, "name")
+		job_card = frappe.get_doc("Job Card", job_card_name)
+
+		mr = make_material_request(job_card_name)
+		mr.schedule_date = today()
+		mr.submit()
+
+		pick_list = create_pick_list(mr.name)
+		pick_list.submit()
+
+		ste = frappe.get_doc(create_stock_entry_from_pick_list(pick_list.as_dict()))
+		self.assertEqual(ste.purpose, "Material Transfer for Manufacture")
+		self.assertEqual(ste.job_card, job_card_name)
+		self.assertEqual(ste.work_order, work_order.name)
+		self.assertEqual(ste.fg_completed_qty, job_card.for_quantity)
+		for row in ste.items:
+			self.assertEqual(row.t_warehouse, job_card.wip_warehouse)
+			self.assertTrue(row.job_card_item)
+
+		ste.insert()
+		ste.submit()
+
+		job_card.reload()
+		self.assertEqual(job_card.transferred_qty, job_card.for_quantity)
+
 	def test_job_card_proccess_qty_and_completed_qty(self):
 		from erpnext.manufacturing.doctype.routing.test_routing import (
 			create_routing,

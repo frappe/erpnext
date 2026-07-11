@@ -518,7 +518,7 @@ frappe.ui.form.on("Stock Entry", {
 				__("Expired Batches"),
 				function () {
 					frappe.call({
-						method: "erpnext.stock.doctype.stock_entry.stock_entry_handler.serial_batch.get_expired_batch_items",
+						method: "erpnext.stock.doctype.stock_entry.services.serial_batch.get_expired_batch_items",
 						freeze: true,
 						callback: function (r) {
 							if (!r.exc && r.message) {
@@ -692,7 +692,7 @@ frappe.ui.form.on("Stock Entry", {
 
 	make_retention_stock_entry: function (frm) {
 		frappe.call({
-			method: "erpnext.stock.doctype.stock_entry.stock_entry_handler.manufacturing.move_sample_to_retention_warehouse",
+			method: "erpnext.stock.doctype.stock_entry.services.manufacturing.move_sample_to_retention_warehouse",
 			args: {
 				company: frm.doc.company,
 				items: frm.doc.items,
@@ -961,7 +961,7 @@ frappe.ui.form.on("Stock Entry", {
 		if (frm.doc.purchase_order) {
 			frm.set_value("subcontracting_order", "");
 			erpnext.utils.map_current_doc({
-				method: "erpnext.stock.doctype.stock_entry.stock_entry_handler.subcontracting.get_items_from_subcontract_order",
+				method: "erpnext.stock.doctype.stock_entry.services.subcontracting.get_items_from_subcontract_order",
 				source_name: frm.doc.purchase_order,
 				target_doc: frm,
 				freeze: true,
@@ -973,7 +973,7 @@ frappe.ui.form.on("Stock Entry", {
 		if (frm.doc.subcontracting_order) {
 			frm.set_value("purchase_order", "");
 			erpnext.utils.map_current_doc({
-				method: "erpnext.stock.doctype.stock_entry.stock_entry_handler.subcontracting.get_items_from_subcontract_order",
+				method: "erpnext.stock.doctype.stock_entry.services.subcontracting.get_items_from_subcontract_order",
 				source_name: frm.doc.subcontracting_order,
 				target_doc: frm,
 				freeze: true,
@@ -1187,7 +1187,7 @@ var validate_sample_quantity = function (frm, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (d.sample_quantity && d.transfer_qty && frm.doc.purpose == "Material Receipt") {
 		frappe.call({
-			method: "erpnext.stock.doctype.stock_entry.stock_entry_handler.manufacturing.validate_sample_quantity",
+			method: "erpnext.stock.doctype.stock_entry.services.manufacturing.validate_sample_quantity",
 			args: {
 				batch_no: d.batch_no,
 				item_code: d.item_code,
