@@ -1518,6 +1518,11 @@ def apply_price_list(args, as_doc=False, doc=None):
 def apply_price_list_on_item(args, doc=None):
 	item_doc = frappe.db.get_value("Item", args.item_code, ["name", "variant_of"], as_dict=1)
 	item_details = get_price_list_rate(args, item_doc)
+
+	args.conversion_factor = flt(args.conversion_factor) or get_conversion_factor(
+		args.item_code, args.uom
+	).get("conversion_factor", 1)
+	args.stock_qty = flt(args.qty) * flt(args.conversion_factor)
 	item_details.update(get_pricing_rule_for_item(args, doc=doc))
 
 	return item_details
