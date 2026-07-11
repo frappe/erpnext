@@ -166,6 +166,7 @@ def get_open_todos(ref_doctype, ref_docname):
 			"allocated_to",
 			"date",
 		],
+		order_by="date asc",
 	)
 
 
@@ -190,6 +191,7 @@ def get_open_events(ref_doctype, ref_docname):
 			& (event_link.reference_docname == ref_docname)
 			& (event.status == "Open")
 		)
+		.orderby(event.starts_on)
 	)
 	data = query.run(as_dict=True)
 
