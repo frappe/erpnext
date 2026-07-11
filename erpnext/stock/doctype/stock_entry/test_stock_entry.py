@@ -40,19 +40,12 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 def get_sle(**args):
-	condition, values = "", []
-	for key, value in args.items():
-		condition += " and " if condition else " where "
-		condition += f"`{key}`=%s"
-		values.append(value)
-
-	return frappe.db.sql(
-		# posting_datetime is the precomputed date+time column; MySQL-only timestamp(date,time) errors on Postgres
-		"""select * from `tabStock Ledger Entry` %s
-		order by posting_datetime desc, creation desc limit 1"""
-		% condition,
-		values,
-		as_dict=1,
+	return frappe.get_all(
+		"Stock Ledger Entry",
+		filters=args,
+		fields=["*"],
+		order_by="posting_datetime desc, creation desc",
+		limit=1,
 	)
 
 
@@ -269,20 +262,10 @@ class TestStockEntry(ERPNextTestSuite):
 		mr.cancel()
 
 		self.assertTrue(
-			frappe.db.sql(
-				"""select * from `tabStock Ledger Entry`
-			where voucher_type='Stock Entry' and voucher_no=%s""",
-				mr.name,
-			)
+			frappe.db.exists("Stock Ledger Entry", {"voucher_type": "Stock Entry", "voucher_no": mr.name})
 		)
 
-		self.assertTrue(
-			frappe.db.sql(
-				"""select * from `tabGL Entry`
-			where voucher_type='Stock Entry' and voucher_no=%s""",
-				mr.name,
-			)
-		)
+		self.assertTrue(frappe.db.exists("GL Entry", {"voucher_type": "Stock Entry", "voucher_no": mr.name}))
 
 	def test_material_issue_gl_entry(self):
 		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
@@ -361,12 +344,7 @@ class TestStockEntry(ERPNextTestSuite):
 		if source_warehouse_account == target_warehouse_account:
 			# no gl entry as both source and target warehouse has linked to same account.
 			self.assertFalse(
-				frappe.db.sql(
-					"""select * from `tabGL Entry`
-				where voucher_type='Stock Entry' and voucher_no=%s""",
-					mtn.name,
-					as_dict=1,
-				)
+				frappe.db.exists("GL Entry", {"voucher_type": "Stock Entry", "voucher_no": mtn.name})
 			)
 
 		else:
@@ -460,14 +438,9 @@ class TestStockEntry(ERPNextTestSuite):
 			],
 		)
 
-		gl_entries = frappe.db.sql(
-			"""select account, debit, credit
-			from `tabGL Entry` where voucher_type='Stock Entry' and voucher_no=%s
-			order by account desc""",
-			repack.name,
-			as_dict=1,
+		self.assertFalse(
+			frappe.db.exists("GL Entry", {"voucher_type": "Stock Entry", "voucher_no": repack.name})
 		)
-		self.assertFalse(gl_entries)
 
 	def test_repack_with_additional_costs(self):
 		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
@@ -601,15 +574,15 @@ class TestStockEntry(ERPNextTestSuite):
 		expected_sle.sort(key=lambda x: x[1])
 
 		# check stock ledger entries
-		sle = frappe.db.sql(
-			"""select item_code, warehouse, actual_qty
-			from `tabStock Ledger Entry` where voucher_type = %s
-			and voucher_no = %s order by item_code, warehouse, actual_qty""",
-			(voucher_type, voucher_no),
-			as_list=1,
+		sle = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_type": voucher_type, "voucher_no": voucher_no},
+			fields=["item_code", "warehouse", "actual_qty"],
+			order_by="item_code, warehouse, actual_qty",
+			as_list=True,
 		)
 		self.assertTrue(sle)
-		sle.sort(key=lambda x: x[1])
+		sle = sorted(sle, key=lambda x: x[1])
 
 		for i, sle_value in enumerate(sle):
 			self.assertEqual(expected_sle[i][0], sle_value[0])
@@ -619,16 +592,16 @@ class TestStockEntry(ERPNextTestSuite):
 	def check_gl_entries(self, voucher_type, voucher_no, expected_gl_entries):
 		expected_gl_entries.sort(key=lambda x: x[0])
 
-		gl_entries = frappe.db.sql(
-			"""select account, debit, credit
-			from `tabGL Entry` where voucher_type=%s and voucher_no=%s
-			order by account asc, debit asc""",
-			(voucher_type, voucher_no),
-			as_list=1,
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": voucher_type, "voucher_no": voucher_no},
+			fields=["account", "debit", "credit"],
+			order_by="account asc, debit asc",
+			as_list=True,
 		)
 
 		self.assertTrue(gl_entries)
-		gl_entries.sort(key=lambda x: x[0])
+		gl_entries = sorted(gl_entries, key=lambda x: x[0])
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_gl_entries[i][0], gle[0])
 			self.assertEqual(expected_gl_entries[i][1], gle[1])
@@ -1183,16 +1156,21 @@ class TestStockEntry(ERPNextTestSuite):
 		# stock the source warehouse for transfer / issue purposes
 		make_stock_entry(item_code=item_code, target=s_wh, qty=100, basic_rate=100)
 
-		# purpose -> warehouses for the moved row; inward (with target) requires QI
+		# purpose -> warehouses for the moved row and the direction QI is required on:
+		# Material Receipt inspects the inward row, Transfer/Issue inspect the outgoing row.
 		purposes = {
-			"Material Receipt": {"to_warehouse": t_wh},
-			"Material Transfer": {"from_warehouse": s_wh, "to_warehouse": t_wh},
-			"Material Issue": {"from_warehouse": s_wh},
+			"Material Receipt": {"warehouses": {"to_warehouse": t_wh}, "inspection_type": "Incoming"},
+			"Material Transfer": {
+				"warehouses": {"from_warehouse": s_wh, "to_warehouse": t_wh},
+				"inspection_type": "Outgoing",
+			},
+			"Material Issue": {"warehouses": {"from_warehouse": s_wh}, "inspection_type": "Outgoing"},
 		}
 
-		for purpose, warehouses in purposes.items():
+		for purpose, config in purposes.items():
 			with self.subTest(purpose=purpose):
-				needs_qi = "to_warehouse" in warehouses
+				warehouses = config["warehouses"]
+				inspection_type = config["inspection_type"]
 
 				se = make_stock_entry(
 					item_code=item_code,
@@ -1208,13 +1186,7 @@ class TestStockEntry(ERPNextTestSuite):
 				allowed = check_item_quality_inspection("Stock Entry", 0, se.as_dict().get("items"))
 				self.assertTrue(any(row.get("item_code") == item_code for row in allowed))
 
-				if not needs_qi:
-					# outward-only entry: QI is not enforced
-					se.submit()
-					self.assertEqual(se.docstatus, 1)
-					continue
-
-				# inward entry without QI must block submission
+				# entry without QI must block submission
 				self.assertRaises(QualityInspectionRequiredError, se.submit)
 
 				# a rejected QI must also block submission
@@ -1231,13 +1203,13 @@ class TestStockEntry(ERPNextTestSuite):
 					reference_type="Stock Entry",
 					reference_name=se_rej.name,
 					item_code=item_code,
-					inspection_type="Incoming",
+					inspection_type=inspection_type,
 					status="Rejected",
 				)
 				se_rej.reload()
 				self.assertRaises(QualityInspectionRejectedError, se_rej.submit)
 
-				# a submitted, accepted QI links itself to the inward row; submission then succeeds
+				# a submitted, accepted QI links itself to the inspected row; submission then succeeds
 				se_ok = make_stock_entry(
 					item_code=item_code,
 					qty=5,
@@ -1251,7 +1223,7 @@ class TestStockEntry(ERPNextTestSuite):
 					reference_type="Stock Entry",
 					reference_name=se_ok.name,
 					item_code=item_code,
-					inspection_type="Incoming",
+					inspection_type=inspection_type,
 					status="Accepted",
 				)
 				se_ok.reload()
@@ -1434,15 +1406,15 @@ class TestStockEntry(ERPNextTestSuite):
 				row.s_warehouse = source_warehouse
 		mfg.submit()
 
-		# disassemble with inspection required -> the component rows need a QI
+		# disassemble with inspection required -> the consumed (outgoing) rows need a QI
 		dis = frappe.get_doc(make_wo_stock_entry(wo.name, "Disassemble", 1))
 		dis.inspection_required = 1
 		dis.insert()
 		self.assertRaises(QualityInspectionRequiredError, dis.submit)
 
-		# a rejected QI on any disassembled component row must also block submission
+		# a rejected QI on any consumed (outgoing) row must also block submission
 		qis = []
-		for item_code in {row.item_code for row in dis.items if row.t_warehouse}:
+		for item_code in {row.item_code for row in dis.items if row.s_warehouse}:
 			qis.append(
 				create_quality_inspection(
 					reference_type="Stock Entry",
@@ -2839,6 +2811,44 @@ class TestStockEntry(ERPNextTestSuite):
 
 		frappe.get_doc(_make_stock_entry(work_order.name, "Material Consumption for Manufacture", 5)).submit()
 		frappe.get_doc(_make_stock_entry(work_order.name, "Manufacture", 5)).submit()
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{"material_consumption": 1, "backflush_raw_materials_based_on": "BOM"},
+	)
+	def test_qi_not_required_for_material_consumption_for_manufacture(self):
+		"""An inspection_required BOM inspects the finished good (the Manufacture rule),
+		not each consumed raw material, so Material Consumption for Manufacture (whose
+		rows are outgoing only) must still submit without a Quality Inspection."""
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as _make_stock_entry
+		from erpnext.manufacturing.doctype.work_order.work_order import make_work_order
+
+		fg_item = make_item("_Test QI Consumption FG", properties={"is_stock_item": 1}).name
+		rm_item = make_item("_Test QI Consumption RM", properties={"is_stock_item": 1}).name
+		warehouse = "Stores - WP"
+
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], do_not_submit=True)
+		bom.inspection_required = 1
+		bom.submit()
+
+		se = make_stock_entry(item_code=rm_item, target=warehouse, qty=5, rate=10, purpose="Material Receipt")
+
+		work_order = make_work_order(bom.name, fg_item, 5)
+		work_order.company = se.company
+		work_order.skip_transfer = 1
+		work_order.source_warehouse = warehouse
+		work_order.fg_warehouse = warehouse
+		work_order.submit()
+
+		consumption = frappe.get_doc(
+			_make_stock_entry(work_order.name, "Material Consumption for Manufacture", 5)
+		)
+		# the mapper copies inspection_required from the BOM ...
+		self.assertEqual(consumption.inspection_required, 1)
+		# ... but the consumed rows are outgoing-only, so no QI is required and submit succeeds
+		consumption.submit()
+		self.assertEqual(consumption.docstatus, 1)
 
 	def test_qi_creation_with_naming_rule_company_condition(self):
 		"""

@@ -40,7 +40,7 @@ frappe.ui.form.on("Pricing Rule", {
 		var help_content = `<table class="table table-bordered" style="background-color: var(--scrollbar-track-color);">
 				<tr><td>
 					<h4>
-						<i class="fa fa-hand-right"></i>
+						<svg class="icon icon-sm"><use href="#icon-info"></use></svg>
 						${__("Notes")}
 					</h4>
 					<ul>
@@ -63,7 +63,7 @@ frappe.ui.form.on("Pricing Rule", {
 					</ul>
 				</td></tr>
 				<tr><td>
-					<h4><i class="fa fa-question-sign"></i>
+					<h4><svg class="icon icon-sm"><use href="#icon-circle-question-mark"></use></svg>
 						${__("How Pricing Rule is applied?")}
 					</h4>
 					<ol>

@@ -58,6 +58,50 @@ class TestBOM(ERPNextTestSuite):
 		self.assertEqual(len(get_bom_items(bom=get_default_bom(), company="_Test Company")), 3)
 
 	@timeout
+	def test_get_items_keeps_bom_no_phantom_pair_coherent(self):
+		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		for phantom_first in (True, False):
+			rm_phantom = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+			rm_normal = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+			component = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+
+			# phantom sub-BOM created first -> smaller auto-name; the non-phantom one gets the
+			# larger name, which is exactly what an independent Max(bom_no) would wrongly pick
+			phantom_bom = make_bom(item=component, raw_materials=[rm_phantom], do_not_save=True)
+			phantom_bom.is_phantom_bom = 1
+			phantom_bom.save()
+			phantom_bom.submit()
+			normal_bom = make_bom(item=component, raw_materials=[rm_normal])
+
+			fg_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+			first_bom, second_bom = (
+				(phantom_bom.name, normal_bom.name) if phantom_first else (normal_bom.name, phantom_bom.name)
+			)
+			parent = make_bom(item=fg_item, raw_materials=[component], do_not_save=True)
+			parent.items[0].bom_no = first_bom
+			component_doc = frappe.get_doc("Item", component)
+			parent.append(
+				"items",
+				{
+					"item_code": component,
+					"qty": 1,
+					"uom": component_doc.stock_uom,
+					"stock_uom": component_doc.stock_uom,
+					"bom_no": second_bom,
+				},
+			)
+			parent.save()
+			parent.submit()
+
+			items_dict = get_bom_items_as_dict(parent.name, "_Test Company", qty=1, fetch_exploded=0)
+			self.assertIn(rm_phantom, items_dict)
+			self.assertIn(component, items_dict)
+			self.assertEqual(flt(items_dict[component].qty), 1.0)
+			self.assertNotIn(rm_normal, items_dict)
+
+	@timeout
 	def test_default_bom(self):
 		def _get_default_bom_in_item():
 			return cstr(frappe.db.get_value("Item", "_Test FG Item 2", "default_bom"))
@@ -97,10 +141,10 @@ class TestBOM(ERPNextTestSuite):
 		update_cost_in_all_boms_in_test()
 
 		# check if new valuation rate updated in all BOMs
-		for d in frappe.db.sql(
-			"""select base_rate from `tabBOM Item`
-			where item_code='_Test Item 2' and docstatus=1 and parenttype='BOM'""",
-			as_dict=1,
+		for d in frappe.get_all(
+			"BOM Item",
+			filters={"item_code": "_Test Item 2", "docstatus": 1, "parenttype": "BOM"},
+			fields=["base_rate"],
 		):
 			self.assertEqual(d.base_rate, rm_base_rate + 10)
 
@@ -881,12 +925,13 @@ def reset_item_valuation_rate(item_code, warehouse_list=None, qty=None, rate=Non
 		warehouse_list = [warehouse_list]
 
 	if not warehouse_list:
-		warehouse_list = frappe.db.sql_list(
-			"""
-			select warehouse from `tabBin`
-			where item_code=%s and actual_qty > 0
-		""",
-			item_code,
+		# Reconcile every warehouse the item has a non-zero balance in -- including
+		# negative balances left by other tests. `get_valuation_rate` averages
+		# Sum(stock_value)/Sum(actual_qty) across all bins, so a leftover negative
+		# balance in one warehouse can cancel the reset qty elsewhere and make the
+		# average collapse to 0, which is a source of flaky BOM-cost failures.
+		warehouse_list = frappe.get_all(
+			"Bin", filters={"item_code": item_code, "actual_qty": ["!=", 0]}, pluck="warehouse"
 		)
 
 		if not warehouse_list:

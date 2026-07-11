@@ -22,17 +22,27 @@ frappe.ui.form.on("Exchange Rate Revaluation", {
 	refresh: function (frm) {
 		if (frm.doc.docstatus == 1) {
 			frappe.call({
-				method: "check_journal_entry_condition",
+				method: "check_journal_and_reversal",
 				doc: frm.doc,
 				callback: function (r) {
 					if (r.message) {
-						frm.add_custom_button(
-							__("Journal Entries"),
-							function () {
-								return frm.events.make_jv(frm);
-							},
-							__("Create")
-						);
+						if (!r.message.journals_posted) {
+							frm.add_custom_button(
+								__("Journal Entries"),
+								function () {
+									return frm.events.make_jv(frm);
+								},
+								__("Create")
+							);
+						} else if (!r.message.reversals_posted) {
+							frm.add_custom_button(
+								__("Reversal Journal Entries"),
+								function () {
+									return frm.events.make_reverse_journal(frm);
+								},
+								__("Create")
+							);
+						}
 					}
 				},
 			});
@@ -100,6 +110,14 @@ frappe.ui.form.on("Exchange Rate Revaluation", {
 			},
 		});
 	},
+	make_reverse_journal: function (frm) {
+		frappe.call({
+			method: "make_reverse_journal",
+			doc: frm.doc,
+			freeze: true,
+			freeze_message: __("Reversing Journals..."),
+		});
+	},
 });
 
 frappe.ui.form.on("Exchange Rate Revaluation Account", {
@@ -136,7 +154,7 @@ frappe.ui.form.on("Exchange Rate Revaluation Account", {
 var get_account_details = function (frm, cdt, cdn) {
 	var row = frappe.get_doc(cdt, cdn);
 	if (!frm.doc.company || !frm.doc.posting_date) {
-		frappe.throw(__("Please select Company and Posting Date to getting entries"));
+		frappe.throw(__("Please select Company and Posting Date to get entries"));
 	}
 	frappe.call({
 		method: "erpnext.accounts.doctype.exchange_rate_revaluation.exchange_rate_revaluation.get_account_details",

@@ -79,7 +79,7 @@ def get_bom_diff(bom1: str, bom2: str):
 	frappe.has_permission("BOM", "read", throw=True)
 	if bom1 == bom2:
 		frappe.throw(
-			_("BOM 1 {0} and BOM 2 {1} should not be same").format(frappe.bold(bom1), frappe.bold(bom2))
+			_("BOM 1 {0} and BOM 2 {1} should not be the same").format(frappe.bold(bom1), frappe.bold(bom2))
 		)
 
 	doc1 = frappe.get_doc("BOM", bom1)

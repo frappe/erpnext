@@ -54,41 +54,90 @@ class TestAccountsPayable(ERPNextTestSuite, AccountsTestMixin):
 			pi = pi.submit()
 		return pi
 
+	def test_invoice_partially_paid_via_journal_entry(self):
+		pi = self.create_purchase_invoice()  # outstanding 300
+
+		je = frappe.new_doc("Journal Entry")
+		je.company = self.company
+		je.posting_date = today()
+		je.append(
+			"accounts",
+			{
+				"account": "Creditors - _TC",
+				"party_type": "Supplier",
+				"party": self.supplier,
+				"debit": 120,
+				"debit_in_account_currency": 120,
+				"reference_type": "Purchase Invoice",
+				"reference_name": pi.name,
+				"cost_center": "Main - _TC",
+			},
+		)
+		je.append(
+			"accounts",
+			{
+				"account": "Cash - _TC",
+				"credit": 120,
+				"credit_in_account_currency": 120,
+				"cost_center": "Main - _TC",
+			},
+		)
+		je.save().submit()
+
+		filters = {
+			"company": self.company,
+			"party_type": "Supplier",
+			"party": [self.supplier],
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+		}
+		row = next(row for row in execute(filters)[1] if row.voucher_no == pi.name)
+		self.assertEqual(row.paid, 120)
+		self.assertEqual(row.outstanding, 180)
+
+	def test_show_remarks_includes_invoice_remark(self):
+		pi = self.create_purchase_invoice(do_not_submit=True)
+		pi.remarks = "AP test remark"
+		pi.save().submit()
+
+		filters = {
+			"company": self.company,
+			"party_type": "Supplier",
+			"party": [self.supplier],
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"show_remarks": 1,
+		}
+		row = next(row for row in execute(filters)[1] if row.voucher_no == pi.name)
+		self.assertIn("AP test remark", row.remarks or "")
+
+	def test_group_by_supplier_totals(self):
+		self.create_purchase_invoice()  # outstanding 300
+
+		filters = {
+			"company": self.company,
+			"party_type": "Supplier",
+			"party": [self.supplier],
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"group_by_party": True,
+		}
+		report = execute(filters)[1]
+
+		# a per-supplier subtotal row plus a grand total row
+		party_subtotal = next(
+			row for row in report if row.get("party") == self.supplier and not row.get("voucher_no")
+		)
+		grand_total = next(row for row in report if row.get("party") == "Total")
+		self.assertEqual(party_subtotal.get("invoiced"), 300)
+		self.assertEqual(grand_total.get("outstanding"), 300)
+
 	def test_payment_terms_template_filters(self):
 		from erpnext.controllers.accounts_controller import get_payment_terms
 
-		payment_term1 = frappe.get_doc(
-			{"doctype": "Payment Term", "payment_term_name": "_Test 50% on 15 Days"}
-		).insert()
-		payment_term2 = frappe.get_doc(
-			{"doctype": "Payment Term", "payment_term_name": "_Test 50% on 30 Days"}
-		).insert()
-
-		template = frappe.get_doc(
-			{
-				"doctype": "Payment Terms Template",
-				"template_name": "_Test 50-50",
-				"terms": [
-					{
-						"doctype": "Payment Terms Template Detail",
-						"due_date_based_on": "Day(s) after invoice date",
-						"payment_term": payment_term1.name,
-						"description": "_Test 50-50",
-						"invoice_portion": 50,
-						"credit_days": 15,
-					},
-					{
-						"doctype": "Payment Terms Template Detail",
-						"due_date_based_on": "Day(s) after invoice date",
-						"payment_term": payment_term2.name,
-						"description": "_Test 50-50",
-						"invoice_portion": 50,
-						"credit_days": 30,
-					},
-				],
-			}
-		)
-		template.insert()
+		template = frappe.get_doc("Payment Terms Template", "_Test Payment Term Template")
+		first_term = frappe.get_doc("Payment Term", template.terms[0].payment_term)
+		expected_payment_term = first_term.description or first_term.name
 
 		filters = {
 			"company": self.company,
@@ -115,12 +164,10 @@ class TestAccountsPayable(ERPNextTestSuite, AccountsTestMixin):
 		row = report[1][0]
 
 		self.assertEqual(len(report[1]), 2)
-		self.assertEqual([pi.name, payment_term1.payment_term_name], [row.voucher_no, row.payment_term])
+		self.assertEqual([pi.name, expected_payment_term], [row.voucher_no, row.payment_term])
 
 	def test_project_filter(self):
-		project = frappe.get_doc(
-			{"doctype": "Project", "project_name": "_Test AP Project", "company": self.company}
-		).insert()
+		project = frappe.get_doc("Project", {"project_name": "_Test Project"})
 
 		pi = self.create_purchase_invoice(do_not_submit=True)
 		pi.project = project.name
@@ -149,9 +196,7 @@ class TestAccountsPayable(ERPNextTestSuite, AccountsTestMixin):
 			"range": "30, 60, 90, 120",
 		}
 
-		project = frappe.get_doc(
-			{"doctype": "Project", "project_name": "_Test AP Project Output", "company": self.company}
-		).insert()
+		project = frappe.get_doc("Project", {"project_name": "_Test Project"})
 
 		pi = self.create_purchase_invoice(do_not_submit=True)
 		pi.project = project.name

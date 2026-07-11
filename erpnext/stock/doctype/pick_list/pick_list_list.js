@@ -7,6 +7,7 @@ frappe.listview_settings["Pick List"] = {
 			Draft: "red",
 			Open: "orange",
 			"Partly Delivered": "orange",
+			"Partially Transferred": "yellow",
 			Completed: "green",
 			Cancelled: "red",
 		};

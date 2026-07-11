@@ -202,9 +202,9 @@ class POSProfile(Document):
 
 		if invalid_modes:
 			if invalid_modes == 1:
-				msg = _("Please set default Cash or Bank account in Mode of Payment {}")
+				msg = _("Please set default Cash or Bank account in Mode of Payment {0}")
 			else:
-				msg = _("Please set default Cash or Bank account in Mode of Payments {}")
+				msg = _("Please set default Cash or Bank account in Mode of Payments {0}")
 			frappe.throw(msg.format(", ".join(invalid_modes)), title=_("Missing Account"))
 
 	def on_update(self):

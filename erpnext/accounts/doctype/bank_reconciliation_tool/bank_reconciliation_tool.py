@@ -116,7 +116,7 @@ def get_account_balance(bank_account: str, till_date: str | date, company: str):
 	return flt(balance_as_per_system) - flt(total_debit) + flt(total_credit) + amounts_not_reflected_in_system
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def update_bank_transaction(
 	bank_transaction_name: str, reference_number: str, party_type: str | None = None, party: str | None = None
 ):
@@ -146,7 +146,7 @@ def update_bank_transaction(
 	)[0]
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_journal_entry_bts(
 	bank_transaction_name: str,
 	reference_number: str | None = None,
@@ -305,7 +305,7 @@ def create_journal_entry_bts(
 	return reconcile_vouchers(bank_transaction_name, vouchers, is_new_voucher=True)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_payment_entry_bts(
 	bank_transaction_name: str,
 	reference_number: str | None = None,
@@ -500,7 +500,7 @@ def create_bulk_internal_transfer(bank_transaction_names: list[str | int], bank_
 	return output
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_internal_transfer(
 	bank_transaction_name: str | int,
 	posting_date: str | date,
@@ -1057,10 +1057,10 @@ def get_auto_reconcile_message(partially_reconciled, reconciled):
 	return alert_message, indicator
 
 
-@frappe.whitelist()
-def reconcile_vouchers(bank_transaction_name: str | int, vouchers: str, is_new_voucher: bool = False):
+@frappe.whitelist(methods=["POST"])
+def reconcile_vouchers(bank_transaction_name: str | int, vouchers: str | list, is_new_voucher: bool = False):
 	# updated clear date of all the vouchers based on the bank transaction
-	vouchers = json.loads(vouchers)
+	vouchers = frappe.parse_json(vouchers)
 	transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
 	transaction.add_payment_entries(vouchers, is_new_voucher)
 	transaction.validate_duplicate_references()

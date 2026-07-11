@@ -401,22 +401,34 @@ class DeliveryNote(SellingController):
 				frappe.throw(_("Warehouse required for stock Item {0}").format(d["item_code"]))
 
 	def update_current_stock(self):
-		if self.get("_action") and self._action != "update_after_submit":
-			for d in self.get("items"):
-				d.actual_qty = frappe.db.get_value(
-					"Bin", {"item_code": d.item_code, "warehouse": d.warehouse}, "actual_qty"
-				)
+		if not (self.get("_action") and self._action != "update_after_submit"):
+			return
 
-			for d in self.get("packed_items"):
-				bin_qty = frappe.db.get_value(
-					"Bin",
-					{"item_code": d.item_code, "warehouse": d.warehouse},
-					["actual_qty", "projected_qty"],
-					as_dict=True,
-				)
-				if bin_qty:
-					d.actual_qty = flt(bin_qty.actual_qty)
-					d.projected_qty = flt(bin_qty.projected_qty)
+		warehouse_item_codes = {}
+		for d in self.get("items") + self.get("packed_items"):
+			warehouse_item_codes.setdefault(d.warehouse, set()).add(d.item_code)
+
+		if not warehouse_item_codes:
+			return
+
+		bin_map = {}
+		for warehouse, item_codes in warehouse_item_codes.items():
+			for b in frappe.get_all(
+				"Bin",
+				filters={"item_code": ["in", item_codes], "warehouse": warehouse},
+				fields=["item_code", "actual_qty", "projected_qty"],
+			):
+				bin_map[(b.item_code, warehouse)] = b
+
+		for d in self.get("items"):
+			bin_data = bin_map.get((d.item_code, d.warehouse))
+			d.actual_qty = bin_data.actual_qty if bin_data else None
+
+		for d in self.get("packed_items"):
+			bin_data = bin_map.get((d.item_code, d.warehouse))
+			if bin_data:
+				d.actual_qty = flt(bin_data.actual_qty)
+				d.projected_qty = flt(bin_data.projected_qty)
 
 	def validate_expense_account(self):
 		company_values = frappe.get_cached_value(
@@ -426,6 +438,7 @@ class DeliveryNote(SellingController):
 				"stock_delivered_but_not_billed",
 				"disable_sdbnb_in_sr",
 				"default_expense_account",
+				"enable_stock_delivered_but_not_billed",
 			],
 			as_dict=True,
 		)
@@ -433,7 +446,7 @@ class DeliveryNote(SellingController):
 		sdbnb_account = company_values.stock_delivered_but_not_billed
 		disable_sdbnb_in_sr = company_values.disable_sdbnb_in_sr
 		default_expense_account = company_values.default_expense_account
-
+		is_enabled_sdbnb = company_values.enable_stock_delivered_but_not_billed
 		for item in self.items:
 			if item.get("against_sales_invoice"):
 				if sdbnb_account and item.expense_account == sdbnb_account:
@@ -447,14 +460,16 @@ class DeliveryNote(SellingController):
 				# Only stock items
 				if is_stock_item and not item.get("is_fixed_asset") and not item.get("is_subcontracted"):
 					# Sales Return handling
-					if self.is_return and disable_sdbnb_in_sr:
+					if self.is_return and disable_sdbnb_in_sr and sdbnb_account and is_enabled_sdbnb:
 						if default_expense_account and (
 							not item.expense_account or item.expense_account == sdbnb_account
 						):
 							item.expense_account = default_expense_account
 
-					elif sdbnb_account:
+					elif sdbnb_account and is_enabled_sdbnb:
 						item.expense_account = sdbnb_account
+					elif sdbnb_account and item.expense_account == sdbnb_account:
+						item.expense_account = default_expense_account
 			if not item.expense_account and default_expense_account:
 				item.expense_account = default_expense_account
 

@@ -9,14 +9,14 @@ import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 from frappe.query_builder import Field
-from frappe.query_builder.functions import Count, IfNull, Max, Min, Sum
+from frappe.query_builder.functions import Count, IfNull, Max, Min, NullIf, Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form, parse_json
 from frappe.website.website_generator import WebsiteGenerator
 
 import erpnext
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.item.item import get_item_details
-from erpnext.stock.get_item_details import ItemDetailsCtx, get_conversion_factor, get_price_list_rate
+from erpnext.stock.get_item_details import get_conversion_factor, get_price_list_rate
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -585,7 +585,7 @@ class BOM(WebsiteGenerator):
 		if isinstance(kwargs, str):
 			import json
 
-			kwargs = json.loads(kwargs)
+			kwargs = frappe.parse_json(kwargs)
 
 		return kwargs
 
@@ -739,7 +739,7 @@ class BOM(WebsiteGenerator):
 				)
 			)
 
-	def check_recursion(self, bom_list=None):
+	def check_recursion(self):
 		"""Check whether recursion occurs in any bom"""
 		bom_list = self.traverse_tree()
 		child_items = frappe.get_all(
@@ -861,21 +861,30 @@ class BOM(WebsiteGenerator):
 
 		self.append("items", row)
 
-	def traverse_tree(self, bom_list=None):
-		count = 0
-		if not bom_list:
-			bom_list = []
+	def traverse_tree(self):
+		"""Return this BOM and every descendant BOM. The whole sub-tree is fetched in one recursive
+		CTE (frappe.qb) instead of a query-per-node walk; the only caller (check_recursion) uses the
+		result purely as a membership set. Portable across postgres and mariadb 10.2+."""
+		bom_item = frappe.qb.DocType("BOM Item")
+		tree = frappe.qb.Table("bom_tree")
 
-		if self.name not in bom_list:
-			bom_list.append(self.name)
+		seed = (
+			frappe.qb.from_(bom_item)
+			.select(bom_item.bom_no.as_("bom"))
+			.where((bom_item.parent == self.name) & (bom_item.bom_no != "") & (bom_item.parenttype == "BOM"))
+		)
+		recursion = (
+			frappe.qb.from_(bom_item)
+			.join(tree)
+			.on(bom_item.parent == tree.bom)
+			.select(bom_item.bom_no)
+			.where((bom_item.bom_no != "") & (bom_item.parenttype == "BOM"))
+		)
+		descendants = (
+			frappe.qb.with_(seed + recursion, "bom_tree", recursive=True).from_(tree).select(tree.bom)
+		).run(pluck=True)
 
-		while count < len(bom_list):
-			for child_bom in _get_bom_children(bom_list[count]):
-				if child_bom not in bom_list:
-					bom_list.append(child_bom)
-			count += 1
-		bom_list.reverse()
-		return bom_list
+		return [self.name, *descendants]
 
 	def company_currency(self):
 		return erpnext.get_company_currency(self.company)
@@ -967,7 +976,9 @@ class BOM(WebsiteGenerator):
 			frappe.throw(_("Process Loss Percentage cannot be greater than 100"))
 
 		if process_loss_qty and must_be_whole_number and process_loss_qty % 1 != 0:
-			msg = f"Item: {frappe.bold(item_code)} with Stock UOM: {frappe.bold(uom)} can't have fractional process loss qty as UOM {frappe.bold(uom)} is a whole Number."
+			msg = _(
+				"Item: {0} with Stock UOM: {1} cannot have fractional process loss qty as UOM {2} is a whole number."
+			).format(frappe.bold(item_code), frappe.bold(uom), frappe.bold(uom))
 			frappe.throw(msg, title=_("Invalid Process Loss Configuration"))
 
 	def has_scrap_items(self):
@@ -1070,7 +1081,7 @@ def _get_price_list_item_rate(args, bom_doc):
 	if not bom_doc.buying_price_list:
 		frappe.throw(_("Please select Price List"))
 
-	ctx = ItemDetailsCtx(
+	ctx = frappe._dict(
 		{
 			"doctype": "BOM",
 			"price_list": bom_doc.buying_price_list,
@@ -1124,7 +1135,8 @@ def _get_avg_valuation_rate_from_bins(item_code, company, data):
 		.select(
 			Case()
 			.when(
-				Count(bin_table.name) > 0, IfNull(Sum(bin_table.stock_value) / Sum(bin_table.actual_qty), 0.0)
+				Count(bin_table.name) > 0,
+				IfNull(Sum(bin_table.stock_value) / NullIf(Sum(bin_table.actual_qty), 0), 0.0),
 			)
 			.else_(None)
 			.as_("valuation_rate")
@@ -1307,8 +1319,12 @@ def _add_secondary_item_columns(query, t, stock_item_condition):
 
 
 def _add_normal_item_columns(query, t, amount_col, stock_item_condition, track_semi_finished_goods):
-	# non-grouped columns are constant per grouped item_code (+operation/operation_row_id) -> Max()
-	# keeps the GROUP BY valid on postgres while returning the value MySQL picked arbitrarily.
+	# Grouped also by bom_no/is_phantom_item: the pair MUST come from the same BOM Item row --
+	# _add_bom_item_to_dict recurses into bom_no when is_phantom_item is set, so independent Max()
+	# per column could pair one line's phantom flag with another line's bom_no and explode the
+	# wrong sub-BOM (same fix as sub_assembly_queries). The remaining non-grouped columns are
+	# constant per grouped item_code (+operation/operation_row_id) -> Max() keeps the GROUP BY
+	# valid on postgres while returning the value MySQL picked arbitrarily.
 	# NOTE: base_rate is aliased "rate" below and is what callers receive; bom_item.rate was selected
 	# under the same alias and silently shadowed (last value wins in the dict), so it is dropped here
 	# -- output is unchanged.
@@ -1323,14 +1339,15 @@ def _add_normal_item_columns(query, t, amount_col, stock_item_condition, track_s
 		Max(t.bom_item.description).as_("description"),
 		Max(t.bom_item.base_rate).as_("rate"),
 		Max(t.bom_item.operation_row_id).as_("operation_row_id"),
-		Max(t.bom_item.is_phantom_item).as_("is_phantom_item"),
-		Max(t.bom_item.bom_no).as_("bom_no"),
+		t.bom_item.is_phantom_item,
+		t.bom_item.bom_no,
 	).where(stock_item_condition | (t.bom_item.is_phantom_item == 1))
 
 	if track_semi_finished_goods:
 		group_by = [t.bom_item.item_code, t.bom_item.operation_row_id, t.item_doc.stock_uom]
 	else:
 		group_by = [t.bom_item.item_code, t.item_doc.stock_uom, t.bom_item.operation]
+	group_by += [t.bom_item.bom_no, t.bom_item.is_phantom_item]
 
 	return query, group_by
 
@@ -1370,13 +1387,29 @@ def _merge_phantom_bom_items(item_dict, item, company, opts):
 
 
 def _set_default_accounts_for_items(item_dict, company):
+	fields = [
+		["Account", "expense_account", "stock_adjustment_account"],
+		["Cost Center", "cost_center", "cost_center"],
+		["Warehouse", "default_warehouse", ""],
+	]
+
+	company_of = {}
+	for d in fields:
+		names = {item_details.get(d[1]) for item_details in item_dict.values() if item_details.get(d[1])}
+		company_of[d[0]] = (
+			{
+				r.name: r.company
+				for r in frappe.get_all(
+					d[0], filters={"name": ("in", list(names))}, fields=["name", "company"]
+				)
+			}
+			if names
+			else {}
+		)
+
 	for item, item_details in item_dict.items():
-		for d in [
-			["Account", "expense_account", "stock_adjustment_account"],
-			["Cost Center", "cost_center", "cost_center"],
-			["Warehouse", "default_warehouse", ""],
-		]:
-			company_in_record = frappe.db.get_value(d[0], item_details.get(d[1]), "company")
+		for d in fields:
+			company_in_record = company_of[d[0]].get(item_details.get(d[1]))
 			if not item_details.get(d[1]) or (company_in_record and company != company_in_record):
 				item_dict[item][d[1]] = frappe.get_cached_value("Company", company, d[2]) if d[2] else None
 

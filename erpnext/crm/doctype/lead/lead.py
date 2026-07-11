@@ -380,7 +380,7 @@ def get_lead_with_phone_number(number):
 	return lead
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def add_lead_to_prospect(lead: str, prospect: str):
 	prospect = frappe.get_doc("Prospect", prospect)
 	prospect.append("leads", {"lead": lead})

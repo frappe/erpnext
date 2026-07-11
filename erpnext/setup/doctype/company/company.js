@@ -236,7 +236,7 @@ frappe.ui.form.on("Company", {
 							},
 							function (data) {
 								if (data.company_name !== frm.doc.name) {
-									frappe.msgprint(__("Company name not same"));
+									frappe.msgprint(__("Company name does not match"));
 									return;
 								}
 								frappe.call({
@@ -339,7 +339,7 @@ erpnext.company.setup_queries = function (frm) {
 				],
 				[
 					"stock_delivered_but_not_billed",
-					{ root_type: "Liability", account_type: "Stock Delivered But Not Billed" },
+					{ root_type: "Asset", account_type: "Stock Delivered But Not Billed" },
 				],
 				[
 					"service_received_but_not_billed",

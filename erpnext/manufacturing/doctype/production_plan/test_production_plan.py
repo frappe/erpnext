@@ -1592,6 +1592,104 @@ class TestProductionPlan(ERPNextTestSuite):
 		for row in plan.mr_items:
 			self.assertFalse(row.from_warehouse)
 
+	def _setup_group_rm_warehouse(self):
+		"""FG + RM with a group raw-material warehouse (C1, C2) partially stocked (3 + 4)."""
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		group_warehouse = "_Test Warehouse Group - _TC"
+		child_1 = "_Test Warehouse Group-C1 - _TC"
+		child_2 = "_Test Warehouse Group-C2 - _TC"
+
+		fg_item = "Test PP Group FG"
+		rm_item = "Test PP Group RM"
+		create_item(rm_item, valuation_rate=100)
+		create_item(fg_item, valuation_rate=100)
+		if not frappe.db.get_value("BOM", {"item": fg_item, "is_active": 1}):
+			create_nested_bom({fg_item: {rm_item: {}}}, prefix="")
+
+		make_stock_entry(item_code=rm_item, qty=3, rate=100, target=child_1)
+		make_stock_entry(item_code=rm_item, qty=4, rate=100, target=child_2)
+
+		return frappe._dict(
+			group_warehouse=group_warehouse,
+			children={child_1, child_2},
+			for_wh=child_1,  # a leaf inside the group, used as For Warehouse
+			fg_item=fg_item,
+			rm_item=rm_item,
+		)
+
+	def test_group_raw_material_warehouse_aggregates_child_stock(self):
+		"Combined child stock (3 + 4) is used as projected qty; material targets For Warehouse."
+		data = self._setup_group_rm_warehouse()
+
+		plan = create_production_plan(
+			item_code=data.fg_item,
+			planned_qty=10,
+			for_warehouse=data.for_wh,
+			raw_material_group_warehouse=data.group_warehouse,
+			do_not_save=1,
+			skip_getting_mr_items=1,
+		)
+		mr_items = get_items_for_material_requests(plan.as_dict())
+
+		rm_rows = [d for d in mr_items if d.get("item_code") == data.rm_item]
+		self.assertEqual(len(rm_rows), 1)
+		# projected qty reflects the sum across both child warehouses, not a single child
+		self.assertEqual(flt(rm_rows[0].get("projected_qty")), 7.0)
+		# the group is only an availability scope; the row targets For Warehouse
+		self.assertEqual(rm_rows[0].get("warehouse"), data.for_wh)
+
+	def test_group_raw_material_warehouse_transfers_from_child_warehouses(self):
+		"Material is transferred only from actual child warehouses, never the group node."
+		data = self._setup_group_rm_warehouse()
+
+		plan = create_production_plan(
+			item_code=data.fg_item,
+			planned_qty=10,
+			ignore_existing_ordered_qty=1,
+			for_warehouse=data.for_wh,
+			raw_material_group_warehouse=data.group_warehouse,
+			do_not_save=1,
+			skip_getting_mr_items=1,
+		)
+		mr_items = get_items_for_material_requests(
+			plan.as_dict(), warehouses=[{"warehouse": data.group_warehouse}]
+		)
+
+		transfer_rows = [d for d in mr_items if d.get("material_request_type") == "Material Transfer"]
+		self.assertTrue(transfer_rows)
+		for row in transfer_rows:
+			self.assertIn(row.get("from_warehouse"), data.children)
+		for row in mr_items:
+			# a group warehouse must never be a Material Request target
+			self.assertNotEqual(row.get("warehouse"), data.group_warehouse)
+
+	def test_for_warehouse_must_be_child_of_group(self):
+		"A For Warehouse outside the chosen group warehouse is rejected on save."
+		data = self._setup_group_rm_warehouse()
+
+		plan = create_production_plan(
+			item_code=data.fg_item,
+			planned_qty=10,
+			for_warehouse="_Test Warehouse - _TC",  # outside the group
+			raw_material_group_warehouse=data.group_warehouse,
+			do_not_save=1,
+			skip_getting_mr_items=1,
+		)
+		self.assertRaises(frappe.ValidationError, plan.save)
+
+	def test_for_warehouse_required_with_group_when_getting_raw_materials(self):
+		"A group warehouse without a For Warehouse is rejected when raw materials are fetched."
+		data = self._setup_group_rm_warehouse()
+
+		plan = create_production_plan(
+			item_code=data.fg_item,
+			planned_qty=10,
+			raw_material_group_warehouse=data.group_warehouse,
+			skip_getting_mr_items=1,
+		)
+		self.assertRaises(frappe.ValidationError, get_items_for_material_requests, plan.as_dict())
+
 	def test_skip_available_qty_for_sub_assembly_items(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 
@@ -2322,6 +2420,145 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual(len(reserved_entries), 0)
 		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
 
+	def test_no_stock_reservation_via_purchase_receipt_when_reserve_stock_disabled(self):
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+		from erpnext.stock.doctype.material_request.mapper import make_purchase_order
+
+		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 1)
+		frappe.db.set_single_value("Stock Settings", "auto_reserve_stock", 0)
+
+		bom_tree = {"FG For SR No Auto Reserve": {"RM For SR No Auto Reserve": {}}}
+		parent_bom = create_nested_bom(bom_tree, prefix="")
+
+		warehouse = "_Test Warehouse - _TC"
+
+		# reserve_stock is deliberately left unset (defaults to 0): this is what happens when
+		# "Auto Reserve Stock" is off and nobody ticks "Reserve Stock" on the Production Plan by hand.
+		plan = create_production_plan(
+			item_code=parent_bom.item,
+			planned_qty=5,
+			ignore_existing_ordered_qty=1,
+			do_not_submit=1,
+			warehouse=warehouse,
+			for_warehouse=warehouse,
+		)
+		plan.get_sub_assembly_items()
+		plan.set("mr_items", [])
+		for d in get_items_for_material_requests(plan.as_dict()):
+			plan.append("mr_items", d)
+		plan.save()
+
+		self.assertEqual(plan.reserve_stock, 0)
+		plan.submit()
+
+		plan.submit_material_request = 1
+		plan.make_material_request()
+
+		material_requests = frappe.get_all(
+			"Material Request", filters={"production_plan": plan.name}, pluck="name"
+		)
+		self.assertGreater(len(material_requests), 0)
+
+		for mr_name in list(set(material_requests)):
+			po = make_purchase_order(mr_name)
+			po.supplier = "_Test Supplier"
+			po.submit()
+
+			pr = make_purchase_receipt(po.name)
+			pr.submit()
+
+		sre = StockReservation(plan)
+		reserved_entries = sre.get_reserved_entries("Production Plan", plan.name)
+		self.assertEqual(len(reserved_entries), 0)
+
+		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
+
+	def test_stock_reservation_ignores_production_plans_with_reserve_stock_off_on_shared_purchase_order(self):
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 1)
+		frappe.db.set_single_value("Stock Settings", "auto_reserve_stock", 0)
+
+		warehouse = "_Test Warehouse - _TC"
+
+		bom_reserve = create_nested_bom({"FG SR Mixed Reserve": {"RM SR Mixed Reserve": {}}}, prefix="")
+		bom_skip = create_nested_bom({"FG SR Mixed Skip": {"RM SR Mixed Skip": {}}}, prefix="")
+
+		def make_submitted_plan(item_code, reserve_stock):
+			plan = create_production_plan(
+				item_code=item_code,
+				planned_qty=5,
+				ignore_existing_ordered_qty=1,
+				do_not_submit=1,
+				warehouse=warehouse,
+				for_warehouse=warehouse,
+				reserve_stock=reserve_stock,
+			)
+			plan.get_sub_assembly_items()
+			plan.set("mr_items", [])
+			for d in get_items_for_material_requests(plan.as_dict()):
+				plan.append("mr_items", d)
+			plan.save()
+			plan.submit()
+			plan.submit_material_request = 1
+			plan.make_material_request()
+			return plan
+
+		plan_reserve = make_submitted_plan(bom_reserve.item, reserve_stock=1)
+		plan_skip = make_submitted_plan(bom_skip.item, reserve_stock=0)
+
+		self.assertEqual(plan_reserve.reserve_stock, 1)
+		self.assertEqual(plan_skip.reserve_stock, 0)
+
+		mr_reserve = frappe.get_all(
+			"Material Request", filters={"production_plan": plan_reserve.name}, pluck="name"
+		)[0]
+		mr_skip = frappe.get_all(
+			"Material Request", filters={"production_plan": plan_skip.name}, pluck="name"
+		)[0]
+
+		# One Purchase Order pulling rows from both Material Requests, so the Purchase Receipt made
+		# from it has both a reservable and a non-reservable Production Plan reference in `doc.items`.
+		po = frappe.new_doc("Purchase Order")
+		po.supplier = "_Test Supplier"
+		po.company = plan_reserve.company
+		po.schedule_date = nowdate()
+
+		for mr_name in (mr_reserve, mr_skip):
+			mr = frappe.get_doc("Material Request", mr_name)
+			for item in mr.items:
+				po.append(
+					"items",
+					{
+						"item_code": item.item_code,
+						"qty": item.qty,
+						"rate": 100,
+						"schedule_date": nowdate(),
+						"warehouse": warehouse,
+						"material_request": mr.name,
+						"material_request_item": item.name,
+					},
+				)
+
+		po.submit()
+
+		pr = make_purchase_receipt(po.name)
+		pr.submit()
+
+		reserved_for_plan_reserve = StockReservation(plan_reserve).get_reserved_entries(
+			"Production Plan", plan_reserve.name
+		)
+		reserved_for_plan_skip = StockReservation(plan_skip).get_reserved_entries(
+			"Production Plan", plan_skip.name
+		)
+
+		self.assertGreater(len(reserved_for_plan_reserve), 0)
+		self.assertEqual(len(reserved_for_plan_skip), 0)
+
+		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
+
 	def test_stock_reservation_restored_on_work_order_cancel(self):
 		# Spec #5 (cancellation path): when a Work Order created from a Production Plan is cancelled,
 		# the reservation that was transferred PP -> WO must flow back to the still-open Production
@@ -2983,6 +3220,7 @@ def create_production_plan(**args):
 			"sub_assembly_warehouse": args.sub_assembly_warehouse,
 			"reserve_stock": args.reserve_stock or 0,
 			"for_warehouse": args.for_warehouse or None,
+			"raw_material_group_warehouse": args.raw_material_group_warehouse or None,
 		}
 	)
 

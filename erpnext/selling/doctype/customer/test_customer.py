@@ -5,7 +5,7 @@
 import json
 
 import frappe
-from frappe.utils import flt
+from frappe.utils import flt, nowdate
 
 from erpnext.accounts.party import get_due_date
 from erpnext.exceptions import PartyDisabled, PartyFrozen
@@ -14,12 +14,53 @@ from erpnext.selling.doctype.customer.customer import (
 	get_customer_outstanding,
 )
 from erpnext.selling.doctype.customer.mapper import (
+	make_quotation,
 	parse_full_name,
 )
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestCustomer(ERPNextTestSuite):
+	def test_quotation_from_customer_uses_actual_exchange_rate(self):
+		company = "_Test Company"
+		company_currency = frappe.get_cached_value("Company", company, "default_currency")
+		foreign_currency = "USD" if company_currency != "USD" else "EUR"
+
+		frappe.defaults.set_user_default("company", company)
+		self.addCleanup(frappe.defaults.clear_user_default, "company")
+
+		# Seed a deterministic rate so the test does not depend on the live exchange-rate API.
+		rate = 83.0
+		exchange = frappe.get_doc(
+			{
+				"doctype": "Currency Exchange",
+				"date": nowdate(),
+				"from_currency": foreign_currency,
+				"to_currency": company_currency,
+				"exchange_rate": rate,
+				"for_selling": 1,
+				"for_buying": 1,
+			}
+		).insert(ignore_if_duplicate=True)
+		self.addCleanup(frappe.delete_doc, "Currency Exchange", exchange.name, force=1)
+
+		customer = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "_Test Customer FX Quotation",
+				"customer_type": "Company",
+				"default_currency": foreign_currency,
+			}
+		).insert()
+		self.addCleanup(frappe.delete_doc, "Customer", customer.name, force=1)
+
+		quotation = make_quotation(customer.name)
+
+		self.assertEqual(quotation.currency, foreign_currency)
+		self.assertNotEqual(flt(quotation.conversion_rate), 1.0)
+		self.assertNotEqual(flt(quotation.conversion_rate), 0.0)
+		self.assertEqual(flt(quotation.conversion_rate), rate)
+
 	def test_get_customer_name_dedupes_with_numeric_suffix(self):
 		# When a customer name already exists, get_customer_name appends "- <max suffix + 1>". The
 		# Postgres branch extracts the suffix with regexp_replace/NULLIF/CAST (pypika's Substring cannot

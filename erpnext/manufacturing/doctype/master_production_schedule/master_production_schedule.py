@@ -453,7 +453,7 @@ def get_item_lead_time(item_code):
 	query = (
 		frappe.qb.from_(doctype)
 		.select(
-			((doctype.manufacturing_time_in_mins / 1440) + doctype.purchase_time + doctype.buffer_time).as_(
+			((doctype.manufacturing_time_in_mins / 1440.0) + doctype.purchase_time + doctype.buffer_time).as_(
 				"cumulative_lead_time"
 			)
 		)

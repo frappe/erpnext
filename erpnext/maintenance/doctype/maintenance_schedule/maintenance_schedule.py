@@ -294,10 +294,11 @@ class MaintenanceSchedule(TransactionBase):
 
 		for row in voucher_nos:
 			if row.voucher_type != "Maintenance Schedule":
-				msg = f"""Serial and Batch Bundle {row.name}
-					should have voucher type as 'Maintenance Schedule'"""
-
-				frappe.throw(_(msg))
+				frappe.throw(
+					_(
+						"Serial and Batch Bundle {0} should have voucher type as 'Maintenance Schedule'"
+					).format(row.name)
+				)
 
 	def on_update(self):
 		self.db_set("status", "Draft")
@@ -332,14 +333,14 @@ class MaintenanceSchedule(TransactionBase):
 				amc_start_date
 			):
 				throw(
-					_("Serial No {0} is under warranty upto {1}").format(
+					_("Serial No {0} is under warranty until {1}").format(
 						serial_no, sr_details.warranty_expiry_date
 					)
 				)
 
 			if sr_details.amc_expiry_date and getdate(sr_details.amc_expiry_date) >= getdate(amc_start_date):
 				throw(
-					_("Serial No {0} is under maintenance contract upto {1}").format(
+					_("Serial No {0} is under maintenance contract until {1}").format(
 						serial_no, sr_details.amc_expiry_date
 					)
 				)

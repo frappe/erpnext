@@ -15,6 +15,7 @@ from erpnext.stock.serial_batch_bundle import (
 	get_empty_batches_based_work_order,
 	get_serial_nos_from_bundle,
 )
+from erpnext.stock.utils import get_combine_datetime
 
 from .serial_batch import create_serial_and_batch_bundle
 from .stock_entry_base import BaseStockEntry
@@ -124,7 +125,8 @@ class BaseManufactureStockEntry(BaseStockEntry):
 					self.doc.process_loss_qty = flt(process_loss_qty, precision)
 
 					frappe.msgprint(
-						_("The Process Loss Qty has reset as per job cards Process Loss Qty"), alert=True
+						_("The Process Loss Qty has been reset as per the Job Card's Process Loss Qty"),
+						alert=True,
 					)
 
 		if not self.doc.process_loss_percentage and not self.doc.process_loss_qty:
@@ -1031,6 +1033,140 @@ def get_secondary_items_from_job_card(work_order, jc_name=None):
 	return secondary_items.run(as_dict=1)
 
 
+def get_previous_operation_output_sn_batch(work_order, item_code, warehouse):
+	"""Serial nos / batches that an earlier operation produced for ``item_code`` (a
+	semi-finished good) and are still available in ``warehouse`` -- i.e. produced by a
+	prior operation's Manufacture entry minus whatever later entries already pulled out
+	of that warehouse. Returns an empty result for ordinary raw materials."""
+	result = frappe._dict(serial_nos=[], batches=defaultdict(float))
+	if not (work_order and item_code and warehouse):
+		return result
+
+	# Only items that are the output (finished_good) of some operation qualify.
+	if not frappe.db.exists("Work Order Operation", {"parent": work_order, "finished_good": item_code}):
+		return result
+
+	item_details = frappe.get_cached_value("Item", item_code, ["has_serial_no", "has_batch_no"], as_dict=1)
+	if not item_details or not (item_details.has_serial_no or item_details.has_batch_no):
+		return result
+
+	produced = _get_operation_sn_batch(work_order, item_code, warehouse, produced=True)
+	consumed = _get_operation_sn_batch(work_order, item_code, warehouse, produced=False)
+
+	for serial_no in produced.serial_nos:
+		if serial_no not in consumed.serial_nos:
+			result.serial_nos.append(serial_no)
+
+	for batch_no, qty in produced.batches.items():
+		available = flt(qty) - flt(consumed.batches.get(batch_no))
+		if available > 0:
+			result.batches[batch_no] = available
+
+	return result
+
+
+def _get_operation_sn_batch(work_order, item_code, warehouse, produced=True):
+	bundles = _get_operation_bundles(work_order, item_code, warehouse, produced)
+	result = frappe._dict(serial_nos=[], batches=defaultdict(float))
+	if not bundles:
+		return result
+
+	sbe = frappe.qb.DocType("Serial and Batch Entry")
+	entries = (
+		frappe.qb.from_(sbe)
+		.select(sbe.serial_no, sbe.batch_no, sbe.qty)
+		.where((sbe.parent.isin(bundles)) & (sbe.is_cancelled == 0))
+		.orderby(sbe.parent)
+		.orderby(sbe.idx)
+	).run(as_dict=True)
+
+	for row in entries:
+		if row.serial_no:
+			result.serial_nos.append(row.serial_no)
+		if row.batch_no:
+			result.batches[row.batch_no] += abs(flt(row.qty))
+
+	return result
+
+
+def _get_operation_bundles(work_order, item_code, warehouse, produced):
+	se = frappe.qb.DocType("Stock Entry")
+	sed = frappe.qb.DocType("Stock Entry Detail")
+	warehouse_field = sed.t_warehouse if produced else sed.s_warehouse
+
+	query = (
+		frappe.qb.from_(se)
+		.inner_join(sed)
+		.on(sed.parent == se.name)
+		.select(sed.serial_and_batch_bundle)
+		.where(
+			(se.work_order == work_order)
+			& (se.docstatus == 1)
+			& (sed.item_code == item_code)
+			& (warehouse_field == warehouse)
+			& (sed.serial_and_batch_bundle.isnotnull())
+		)
+	)
+	if produced:
+		query = query.where((se.purpose == "Manufacture") & (sed.is_finished_item == 1))
+
+	return [row[0] for row in query.run()]
+
+
+def _cap_pool_to_qty(pool, qty):
+	"""Trim the available serial/batch pool to at most ``qty`` (fill what's available)."""
+	serial_nos, batches = [], frappe._dict()
+	if pool.serial_nos:
+		serial_nos = pool.serial_nos[: cint(qty)]
+	elif pool.batches:
+		remaining = flt(qty)
+		for batch_no, batch_qty in pool.batches.items():
+			if remaining <= 0:
+				break
+			use = min(flt(batch_qty), remaining)
+			batches[batch_no] = use
+			remaining -= use
+	return serial_nos, batches
+
+
+def set_previous_operation_serial_batch(parent_doc, row):
+	"""Auto-pull serial nos / batches produced by a previous operation onto a
+	consumption / transfer-out ``row`` of a Stock Entry, filling what is available and
+	leaving any shortfall blank for the user. No-op for ordinary raw materials or when
+	the row already carries serial/batch."""
+	warehouse = row.get("s_warehouse")
+	qty = flt(row.get("qty")) * flt(row.get("conversion_factor") or 1)
+
+	if not parent_doc.get("work_order") or not warehouse or qty <= 0:
+		return
+	if row.get("serial_and_batch_bundle") or row.get("serial_no") or row.get("batch_no"):
+		return
+
+	pool = get_previous_operation_output_sn_batch(parent_doc.work_order, row.item_code, warehouse)
+	serial_nos, batches = _cap_pool_to_qty(pool, qty)
+	if not serial_nos and not batches:
+		return
+
+	bundle = SerialBatchCreation(
+		{
+			"item_code": row.item_code,
+			"warehouse": warehouse,
+			"posting_datetime": get_combine_datetime(parent_doc.posting_date, parent_doc.posting_time),
+			"voucher_type": "Stock Entry",
+			"company": parent_doc.company,
+			"type_of_transaction": "Outward",
+			"qty": flt(qty),
+			"serial_nos": serial_nos,
+			"batches": batches,
+			"do_not_submit": True,
+		}
+	).make_serial_and_batch_bundle()
+
+	if bundle and bundle.get("name"):
+		row.serial_and_batch_bundle = bundle.name
+		row.use_serial_batch_fields = 0
+
+
 def ceil_qty_if_uom_has_whole_number(qty, stock_uom):
 	if cint(frappe.get_cached_value("UOM", stock_uom, "must_be_whole_number")):
 		qty = ceil(qty)
@@ -1040,8 +1176,7 @@ def ceil_qty_if_uom_has_whole_number(qty, stock_uom):
 
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company: str, items: str | list):
-	if isinstance(items, str):
-		items = json.loads(items)
+	items = frappe.parse_json(items)
 
 	retention_warehouse = frappe.get_single_value("Stock Settings", "sample_retention_warehouse")
 	stock_entry = frappe.new_doc("Stock Entry")

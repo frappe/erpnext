@@ -149,6 +149,16 @@ class RequiredItemsService:
 
 		self.recompute_material_transferred_for_manufacturing(transferred_items)
 
+	def refresh_material_transferred_for_manufacturing(self):
+		"""Recompute material_transferred_for_manufacturing only, without touching per-row
+		transferred_qty or stock reservations. Used to get a status decision (Not Started vs
+		In Process) based on fresh data, ahead of the fuller update_required_items() pass.
+		"""
+		if self.doc.skip_transfer:
+			return
+		transferred_items = self._material_transfer_qty_by_item(is_return=0)
+		self.recompute_material_transferred_for_manufacturing(transferred_items)
+
 	def recompute_material_transferred_for_manufacturing(self, transferred_items):
 		"""Set material_transferred_for_manufacturing based on actual item-level transfers, not fg_completed_qty."""
 		# When fg_completed_qty > 0 (direct stock entries, excess transfer), preserve the

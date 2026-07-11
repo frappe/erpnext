@@ -199,6 +199,10 @@ frappe.ui.form.on("Stock Entry", {
 	},
 
 	setup_quality_inspection: function (frm) {
+		frm.get_docfield("items", "quality_inspection").depends_on = (row) =>
+			frm.doc.inspection_required &&
+			erpnext.stock.row_requires_quality_inspection(frm.doc.purpose, row);
+
 		if (!frm.doc.inspection_required) {
 			return;
 		}
@@ -216,11 +220,12 @@ frappe.ui.form.on("Stock Entry", {
 		}
 
 		let quality_inspection_field = frm.get_docfield("items", "quality_inspection");
-		const incoming_purposes = ["Manufacture", "Material Receipt"];
 		quality_inspection_field.get_route_options_for_new_doc = function (row) {
 			if (frm.is_new()) return {};
 			return {
-				inspection_type: incoming_purposes.includes(frm.doc.purpose) ? "Incoming" : "Outgoing",
+				inspection_type: erpnext.stock.is_incoming_qi_purpose(frm.doc.purpose)
+					? "Incoming"
+					: "Outgoing",
 				reference_type: frm.doc.doctype,
 				reference_name: frm.doc.name,
 				child_row_reference: row.doc.name,
@@ -513,7 +518,7 @@ frappe.ui.form.on("Stock Entry", {
 				__("Expired Batches"),
 				function () {
 					frappe.call({
-						method: "erpnext.stock.doctype.stock_entry.stock_entry_handler.serial_batch.get_expired_batch_items",
+						method: "erpnext.stock.doctype.stock_entry.services.serial_batch.get_expired_batch_items",
 						freeze: true,
 						callback: function (r) {
 							if (!r.exc && r.message) {
@@ -687,7 +692,7 @@ frappe.ui.form.on("Stock Entry", {
 
 	make_retention_stock_entry: function (frm) {
 		frappe.call({
-			method: "erpnext.stock.doctype.stock_entry.stock_entry_handler.manufacturing.move_sample_to_retention_warehouse",
+			method: "erpnext.stock.doctype.stock_entry.services.manufacturing.move_sample_to_retention_warehouse",
 			args: {
 				company: frm.doc.company,
 				items: frm.doc.items,
@@ -956,7 +961,7 @@ frappe.ui.form.on("Stock Entry", {
 		if (frm.doc.purchase_order) {
 			frm.set_value("subcontracting_order", "");
 			erpnext.utils.map_current_doc({
-				method: "erpnext.stock.doctype.stock_entry.stock_entry_handler.subcontracting.get_items_from_subcontract_order",
+				method: "erpnext.stock.doctype.stock_entry.services.subcontracting.get_items_from_subcontract_order",
 				source_name: frm.doc.purchase_order,
 				target_doc: frm,
 				freeze: true,
@@ -968,7 +973,7 @@ frappe.ui.form.on("Stock Entry", {
 		if (frm.doc.subcontracting_order) {
 			frm.set_value("purchase_order", "");
 			erpnext.utils.map_current_doc({
-				method: "erpnext.stock.doctype.stock_entry.stock_entry_handler.subcontracting.get_items_from_subcontract_order",
+				method: "erpnext.stock.doctype.stock_entry.services.subcontracting.get_items_from_subcontract_order",
 				source_name: frm.doc.subcontracting_order,
 				target_doc: frm,
 				freeze: true,
@@ -1182,7 +1187,7 @@ var validate_sample_quantity = function (frm, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (d.sample_quantity && d.transfer_qty && frm.doc.purpose == "Material Receipt") {
 		frappe.call({
-			method: "erpnext.stock.doctype.stock_entry.stock_entry_handler.manufacturing.validate_sample_quantity",
+			method: "erpnext.stock.doctype.stock_entry.services.manufacturing.validate_sample_quantity",
 			args: {
 				batch_no: d.batch_no,
 				item_code: d.item_code,

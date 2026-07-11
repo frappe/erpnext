@@ -201,9 +201,9 @@ def get_linked_advances(company, docname):
 
 
 @frappe.whitelist()
-def create_unreconcile_doc_for_selection(selections: str | None = None):
+def create_unreconcile_doc_for_selection(selections: str | list | None = None):
 	if selections:
-		selections = json.loads(selections)
+		selections = frappe.parse_json(selections)
 		# assuming each row is a unique voucher
 		for row in selections:
 			unrecon = frappe.new_doc("Unreconcile Payment")

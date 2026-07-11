@@ -169,6 +169,29 @@ class OperationsService:
 
 		self.doc.set("operations", operations)
 		self.calculate_time()
+		self.set_operation_warehouses()
+
+	def set_operation_warehouses(self):
+		"""For semi-finished goods tracking, default each operation's warehouses from the Work
+		Order and chain them: the first operation pulls from the WO source warehouse and every
+		later operation pulls from the previous operation's output; intermediate outputs go to the
+		WIP warehouse while the final operation outputs to the WO finished goods warehouse.
+
+		Only empty fields are filled, so values configured on the BOM/operation are preserved."""
+		if not self.doc.track_semi_finished_goods or not self.doc.operations:
+			return
+
+		operations = self.doc.operations
+		last_idx = len(operations) - 1
+		for idx, op in enumerate(operations):
+			if not op.source_warehouse:
+				op.source_warehouse = self.doc.source_warehouse
+
+			if not op.fg_warehouse:
+				op.fg_warehouse = self.doc.fg_warehouse if idx == last_idx else self.doc.source_warehouse
+
+			if not op.wip_warehouse:
+				op.wip_warehouse = self.doc.wip_warehouse
 
 	def _collect_bom_operations(self):
 		operations = []

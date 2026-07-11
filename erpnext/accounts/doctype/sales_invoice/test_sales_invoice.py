@@ -1576,14 +1576,14 @@ class TestSalesInvoice(ERPNextTestSuite):
 		frappe.db.set_single_value("POS Settings", "post_change_gl_entries", 1)
 
 	def test_stock_delivered_but_not_billed_gl_on_invoice(self):
-		company = "_Test Company with perpetual inventory"
+		company = "_Test SDBNB Company"
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		make_purchase_receipt(
 			company=company,
 			item_code="_Test FG Item",
-			warehouse="Stores - TCP1",
-			cost_center="Main - TCP1",
+			warehouse="Stores - _TSDBNB",
+			cost_center="Main - _TSDBNB",
 			qty=5,
 			rate=100,
 		)
@@ -1591,13 +1591,13 @@ class TestSalesInvoice(ERPNextTestSuite):
 		dn = create_delivery_note(
 			company=company,
 			item_code="_Test FG Item",
-			warehouse="Stores - TCP1",
-			cost_center="Main - TCP1",
+			warehouse="Stores - _TSDBNB",
+			cost_center="Main - _TSDBNB",
 			qty=2,
 			rate=300,
 		)
 		# A perpetual-inventory Delivery Note books the cost to the SDBNB account
-		self.assertEqual(dn.items[0].expense_account, "Stock Delivered But Not Billed - TCP1")
+		self.assertEqual(dn.items[0].expense_account, "Stock Delivered But Not Billed - _TSDBNB")
 
 		si = make_sales_invoice(dn.name)
 		si.insert()
@@ -1609,9 +1609,9 @@ class TestSalesInvoice(ERPNextTestSuite):
 			fields=["account", "debit", "credit"],
 		)
 		sdbnb_credit = sum(
-			row.credit for row in gl_entries if row.account == "Stock Delivered But Not Billed - TCP1"
+			row.credit for row in gl_entries if row.account == "Stock Delivered But Not Billed - _TSDBNB"
 		)
-		cogs_debit = sum(row.debit for row in gl_entries if row.account == "Cost of Goods Sold - TCP1")
+		cogs_debit = sum(row.debit for row in gl_entries if row.account == "Cost of Goods Sold - _TSDBNB")
 
 		# Billing reverses SDBNB and recognises the cost in COGS for an equal amount
 		self.assertTrue(sdbnb_credit > 0)
@@ -2321,11 +2321,14 @@ class TestSalesInvoice(ERPNextTestSuite):
 	def test_create_so_with_margin(self):
 		si = create_sales_invoice(item_code="_Test Item", qty=1, do_not_submit=True)
 		price_list_rate = flt(100) * flt(si.plc_conversion_rate)
+
 		si.items[0].price_list_rate = price_list_rate
 		si.items[0].margin_type = "Percentage"
 		si.items[0].margin_rate_or_amount = 25
 		si.items[0].discount_amount = 0.0
 		si.items[0].discount_percentage = 0.0
+		# set rate to zero, so that it is recalculated on save
+		si.items[0].rate = 0
 		si.save()
 		self.assertEqual(si.get("items")[0].rate, flt((price_list_rate * 25) / 100 + price_list_rate))
 
@@ -4125,6 +4128,51 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		self.assertIn("cannot overbill", str(err.exception).lower())
 		dn.cancel()
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 0})
+	def test_non_stock_item_over_billing_against_so_is_blocked(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		service_item = create_item(
+			"_Test Service Item Non Stock SI",
+			is_stock_item=0,
+		).name
+
+		so = make_sales_order(item_code=service_item, qty=5, rate=100)
+		so.submit()
+
+		si = make_si_from_so(so.name)
+		si.items[0].qty = 10  # overbill by 100 %
+		si.save()
+
+		with self.assertRaises(frappe.ValidationError):
+			si.submit()
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 0})
+	def test_non_stock_item_over_billing_against_so_from_quotation_is_blocked(self):
+		from erpnext.selling.doctype.quotation.mapper import make_sales_order as make_so_from_quotation
+		from erpnext.selling.doctype.quotation.test_quotation import make_quotation
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
+
+		service_item = create_item(
+			"_Test Service Item Non Stock SI Quot",
+			is_stock_item=0,
+		).name
+
+		quotation = make_quotation(item_code=service_item, qty=5, rate=100)
+
+		so = make_so_from_quotation(quotation.name)
+		so.delivery_date = frappe.utils.add_days(frappe.utils.today(), 7)
+		so.insert()
+		so.submit()
+
+		si = make_si_from_so(so.name)
+		si.items[0].qty = 10  # overbill by 100 %
+		si.save()
+
+		with self.assertRaises(frappe.ValidationError):
+			si.submit()
 
 	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",

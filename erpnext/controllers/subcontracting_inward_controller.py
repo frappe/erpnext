@@ -78,7 +78,7 @@ class SubcontractingInwardController:
 			):
 				frappe.throw(
 					_(
-						"Row #{0}: Item {1} mismatch. Changing of item code is not permitted, add another row instead."
+						"Row #{0}: Item {1} mismatch. Changing the item code is not permitted, add another row instead."
 					).format(item.idx, get_link_to_form("Item", item.item_code))
 				)
 
@@ -126,7 +126,7 @@ class SubcontractingInwardController:
 				or frappe.get_cached_value("Subcontracting Inward Order Item", item.scio_detail, "item_code")
 			):
 				frappe.throw(
-					_("Row #{0}: Item {1} mismatch. Changing of item code is not permitted.").format(
+					_("Row #{0}: Item {1} mismatch. Changing the item code is not permitted.").format(
 						item.idx, get_link_to_form("Item", item.item_code)
 					)
 				)
@@ -441,7 +441,7 @@ class SubcontractingInwardController:
 				):
 					frappe.throw(
 						_(
-							"Row #{0}: Batch No(s) {1} is not a part of the linked Subcontracting Inward Order. Please select valid Batch No(s)."
+							"Row #{0}: Batch No(s) {1} are not a part of the linked Subcontracting Inward Order. Please select valid Batch No(s)."
 						).format(
 							item.idx,
 							", ".join([get_link_to_form("Batch No", bn) for bn in incorrect_batch_nos]),

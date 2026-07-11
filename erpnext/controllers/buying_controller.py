@@ -129,7 +129,7 @@ class BuyingController(SubcontractingController):
 			msg += f"<li>{po} ({date})</li>"
 		msg += "</ul>"
 
-		frappe.throw(_(msg))
+		frappe.throw(msg)
 
 	def create_package_for_transfer(self) -> None:
 		"""Create serial and batch package for Sourece Warehouse in case of inter transfer."""
@@ -287,7 +287,7 @@ class BuyingController(SubcontractingController):
 		if self.is_return and len(not_cancelled_asset):
 			frappe.throw(
 				_(
-					"{} has submitted assets linked to it. You need to cancel the assets to create purchase return."
+					"{0} has submitted assets linked to it. You need to cancel the assets to create purchase return."
 				).format(self.return_against),
 				title=_("Not Allowed"),
 			)
@@ -738,7 +738,7 @@ class BuyingController(SubcontractingController):
 				frappe.throw(
 					_("Row #{idx}: {field_label} can not be negative for item {item_code}.").format(
 						idx=item_row["idx"],
-						field_label=frappe.get_meta(item_row.doctype).get_label(fieldname),
+						field_label=_(frappe.get_meta(item_row.doctype).get_label(fieldname)),
 						item_code=frappe.bold(item_row["item_code"]),
 					)
 				)

@@ -144,12 +144,8 @@ class DeprecatedBatchNoValuation:
 		if self.sle.name:
 			conditions &= sle.name != self.sle.name
 
-		# Lock the scanned SLE rows so a concurrent stock posting can't change them mid-valuation.
-		# MariaDB carries the lock on the grouped query; postgres rejects FOR UPDATE with GROUP BY, so
-		# lock the same rows in a separate plain SELECT first (held for the transaction).
-		if frappe.db.db_type == "postgres":
-			frappe.qb.from_(sle).select(sle.name).where(conditions).for_update().run()
-
+		# MariaDB carries a row lock on the grouped query below; on postgres the caller
+		# (calculate_avg_rate) serializes via a txn-scoped advisory lock on (item, warehouse).
 		query = (
 			frappe.qb.from_(sle)
 			.select(
@@ -269,13 +265,8 @@ class DeprecatedBatchNoValuation:
 		if self.sle.name:
 			conditions &= sle.name != self.sle.name
 
-		# Lock the scanned SLE rows so a concurrent stock posting can't change them mid-valuation.
-		# MariaDB carries the lock on the grouped query; postgres rejects FOR UPDATE with GROUP BY, so
-		# lock the same SLE rows in a separate plain SELECT first. The batch.use_batchwise_valuation
-		# refinement below only narrows the set, so locking without the join is a safe superset.
-		if frappe.db.db_type == "postgres":
-			frappe.qb.from_(sle).select(sle.name).where(conditions).for_update().run()
-
+		# MariaDB carries a row lock on the grouped query below; on postgres the caller
+		# (calculate_avg_rate) serializes via a txn-scoped advisory lock on (item, warehouse).
 		query = (
 			frappe.qb.from_(sle)
 			.inner_join(batch)
@@ -402,21 +393,8 @@ class DeprecatedBatchNoValuation:
 			conditions &= bundle.name != self.sle.serial_and_batch_bundle
 		conditions &= bundle.voucher_type != "Pick List"
 
-		# Lock the scanned bundle rows so a concurrent stock posting can't change them mid-valuation.
-		# MariaDB carries the lock on the grouped query; postgres rejects FOR UPDATE with GROUP BY, so
-		# lock the same rows in a separate plain SELECT first (the batch.use_batchwise_valuation
-		# refinement below only narrows the set, so omitting that join is a safe superset).
-		if frappe.db.db_type == "postgres":
-			(
-				frappe.qb.from_(bundle)
-				.inner_join(bundle_child)
-				.on(bundle.name == bundle_child.parent)
-				.select(bundle_child.name)
-				.where(conditions)
-				.for_update()
-				.run()
-			)
-
+		# MariaDB carries a row lock on the grouped query below; on postgres the caller
+		# (calculate_avg_rate) serializes via a txn-scoped advisory lock on (item, warehouse).
 		query = (
 			frappe.qb.from_(bundle)
 			.inner_join(bundle_child)

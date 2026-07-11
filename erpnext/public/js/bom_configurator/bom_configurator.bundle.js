@@ -111,7 +111,7 @@ class BOMConfigurator {
 				this.frm?.doc.docstatus === 0
 					? [
 							{
-								label: __(frappe.utils.icon("edit", "sm") + " BOM"),
+								label: __(frappe.utils.icon("pencil", "sm") + " BOM"),
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];
 									view.events.edit_bom(node, view);
@@ -119,7 +119,7 @@ class BOMConfigurator {
 								btnClass: "hidden-xs",
 							},
 							{
-								label: __(frappe.utils.icon("add", "sm") + " Raw Material"),
+								label: __(frappe.utils.icon("plus", "sm") + " Raw Material"),
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];
 									view.events.add_item(node, view);
@@ -130,7 +130,7 @@ class BOMConfigurator {
 								btnClass: "hidden-xs",
 							},
 							{
-								label: __(frappe.utils.icon("add", "sm") + " Sub Assembly"),
+								label: __(frappe.utils.icon("plus", "sm") + " Sub Assembly"),
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];
 									view.events.add_sub_assembly(node, view);
@@ -141,7 +141,7 @@ class BOMConfigurator {
 								btnClass: "hidden-xs",
 							},
 							{
-								label: __(frappe.utils.icon("add", "sm") + " Phantom Item"),
+								label: __(frappe.utils.icon("plus", "sm") + " Phantom Item"),
 								click: function (node) {
 									let view = frappe.views.trees["BOM Configurator"];
 									view.events.add_sub_assembly(node, view, true);

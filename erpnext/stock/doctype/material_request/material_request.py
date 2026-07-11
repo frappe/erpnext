@@ -350,7 +350,7 @@ class MaterialRequest(BuyingController):
 						if d.ordered_qty and flt(d.ordered_qty, precision) > flt(allowed_qty, precision):
 							frappe.throw(
 								_(
-									"The total Issue / Transfer quantity {0} in Material Request {1}  cannot be greater than allowed requested quantity {2} for Item {3}"
+									"The total Issue / Transfer quantity {0} in Material Request {1} cannot be greater than allowed requested quantity {2} for Item {3}"
 								).format(d.ordered_qty, d.parent, allowed_qty, d.item_code)
 							)
 
@@ -511,7 +511,7 @@ def get_material_requests_based_on_supplier(
 	return material_requests
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def raise_work_orders(material_request: str, company: str):
 	mr = frappe.get_doc("Material Request", material_request)
 	errors = []
@@ -576,7 +576,7 @@ def raise_work_orders(material_request: str, company: str):
 
 	if errors:
 		frappe.throw(
-			_("Work Order cannot be created for following reason: <br> {0}").format(new_line_sep(errors))
+			_("Work Order cannot be created for the following reason: <br> {0}").format(new_line_sep(errors))
 		)
 
 	return work_orders

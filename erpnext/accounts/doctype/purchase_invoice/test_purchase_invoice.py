@@ -3046,6 +3046,24 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		# Test 4 - Since this PI is overbilled by 130% and only 120% is allowed, it will fail
 		self.assertRaises(frappe.ValidationError, pi.submit)
 
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 0})
+	def test_non_stock_item_over_billing_against_po_is_blocked(self):
+		service_item = create_item(
+			"_Test Service Item Non Stock PI",
+			is_stock_item=0,
+			is_purchase_item=1,
+		).name
+
+		po = create_purchase_order(item_code=service_item, qty=5, rate=100, do_not_save=False)
+		po.submit()
+
+		pi = make_pi_from_po(po.name)
+		pi.items[0].qty = 10  # overbill by 100 %
+		pi.save()
+
+		with self.assertRaises(frappe.ValidationError):
+			pi.submit()
+
 	def test_discount_percentage_not_set_when_amount_is_manually_set(self):
 		pi = make_purchase_invoice(do_not_save=True)
 		discount_amount = 7

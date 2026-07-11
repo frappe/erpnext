@@ -118,9 +118,9 @@ class ProductBundle(Document):
 
 		if len(invoice_links):
 			frappe.throw(
-				"This Product Bundle is linked with {}. You will have to cancel these documents in order to delete this Product Bundle".format(
-					", ".join(invoice_links)
-				),
+				_(
+					"This Product Bundle is linked with {0}. You will have to cancel these documents in order to delete this Product Bundle"
+				).format(", ".join(invoice_links)),
 				title=_("Not Allowed"),
 			)
 

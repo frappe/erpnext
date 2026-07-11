@@ -497,7 +497,7 @@ def get_activity_cost(
 
 
 @frappe.whitelist()
-def get_events(start: str, end: str, filters: str | None = None):
+def get_events(start: str, end: str, filters: str | list | dict | None = None):
 	"""Returns events for Gantt / Calendar view rendering.
 	:param start: Start date-time.
 	:param end: End date-time.
@@ -505,7 +505,7 @@ def get_events(start: str, end: str, filters: str | None = None):
 	"""
 	from erpnext.utilities.query import get_event_conditions_qb
 
-	filters = json.loads(filters) if filters else {}
+	filters = frappe.parse_json(filters) if filters else {}
 
 	tsd = frappe.qb.DocType("Timesheet Detail")
 	ts = frappe.qb.DocType("Timesheet")

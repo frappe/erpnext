@@ -6,7 +6,7 @@ import copy
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Coalesce, Max, Sum
+from frappe.query_builder.functions import Coalesce, Max, Min, Sum
 from frappe.utils import cint, date_diff, flt, getdate
 
 
@@ -47,7 +47,7 @@ def get_data(filters):
 			# non-grouped columns are constant per grouped mr.name / item_code -> Max() keeps the
 			# GROUP BY valid on postgres while returning the same value MySQL picked.
 			Max(mr.transaction_date).as_("date"),
-			Max(mr_item.schedule_date).as_("required_date"),
+			Min(mr_item.schedule_date).as_("required_date"),
 			mr_item.item_code.as_("item_code"),
 			Sum(Coalesce(mr_item.qty, 0)).as_("qty"),
 			Sum(Coalesce(mr_item.stock_qty, 0)).as_("stock_qty"),

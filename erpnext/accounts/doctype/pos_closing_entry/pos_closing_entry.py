@@ -121,13 +121,13 @@ class POSClosingEntry(StatusUpdater):
 				continue
 			if pos_invoice.pos_profile != self.pos_profile:
 				invalid_row.setdefault("msg", []).append(
-					_("POS Profile doesn't match {}").format(frappe.bold(self.pos_profile))
+					_("POS Profile doesn't match {0}").format(frappe.bold(self.pos_profile))
 				)
 			if pos_invoice.docstatus != 1:
 				invalid_row.setdefault("msg", []).append(_("POS Invoice is not submitted"))
 			if pos_invoice.owner != self.user:
 				invalid_row.setdefault("msg", []).append(
-					_("POS Invoice isn't created by user {}").format(frappe.bold(self.owner))
+					_("POS Invoice isn't created by user {0}").format(frappe.bold(self.owner))
 				)
 
 			if invalid_row.get("msg"):
@@ -139,7 +139,7 @@ class POSClosingEntry(StatusUpdater):
 		error_list = []
 		for row in invalid_rows:
 			for msg in row.get("msg"):
-				error_list.append(_("Row #{}: {}").format(row.get("idx"), msg))
+				error_list.append(_("Row #{0}: {1}").format(row.get("idx"), msg))
 
 		frappe.throw(error_list, title=_("Invalid POS Invoices"), as_list=True)
 
@@ -186,13 +186,13 @@ class POSClosingEntry(StatusUpdater):
 				invalid_row.setdefault("msg", []).append(_("Sales Invoice is not created using POS"))
 			if sales_invoice.pos_profile != self.pos_profile:
 				invalid_row.setdefault("msg", []).append(
-					_("POS Profile doesn't match {}").format(frappe.bold(self.pos_profile))
+					_("POS Profile doesn't match {0}").format(frappe.bold(self.pos_profile))
 				)
 			if sales_invoice.docstatus != 1:
 				invalid_row.setdefault("msg", []).append(_("Sales Invoice is not submitted"))
 			if sales_invoice.owner != self.user:
 				invalid_row.setdefault("msg", []).append(
-					_("Sales Invoice isn't created by user {}").format(frappe.bold(self.owner))
+					_("Sales Invoice isn't created by user {0}").format(frappe.bold(self.owner))
 				)
 
 			if invalid_row.get("msg"):
@@ -204,7 +204,7 @@ class POSClosingEntry(StatusUpdater):
 		error_list = []
 		for row in invalid_rows:
 			for msg in row.get("msg"):
-				error_list.append(_("Row #{}: {}").format(row.get("idx"), msg))
+				error_list.append(_("Row #{0}: {1}").format(row.get("idx"), msg))
 
 		frappe.throw(error_list, title=_("Invalid Sales Invoices"), as_list=True)
 

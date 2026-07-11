@@ -20,12 +20,12 @@ from frappe.query_builder.functions import (
 	Substring,
 	Sum,
 )
-from frappe.utils import nowdate, today, unique
+from frappe.utils import cint, nowdate, today, unique
 from pypika import Order
 
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
-from erpnext.stock.get_item_details import ItemDetailsCtx, _get_item_tax_template
+from erpnext.stock.get_item_details import _get_item_tax_template
 from erpnext.stock.utils import get_combine_datetime
 from erpnext.utilities.query import get_filter_conditions_qb
 
@@ -72,17 +72,14 @@ def employee_query(
 		.where(Criterion.any(search_conditions))
 		.orderby(
 			Case()
-			.when(
-				Locate(Lower(txt_no_percent), Lower(Employee.name)) > 0,
-				Locate(Lower(txt_no_percent), Lower(Employee.name)),
-			)
+			.when(Locate(txt_no_percent, Employee.name) > 0, Locate(txt_no_percent, Employee.name))
 			.else_(99999)
 		)
 		.orderby(
 			Case()
 			.when(
-				Locate(Lower(txt_no_percent), Lower(Employee.employee_name)) > 0,
-				Locate(Lower(txt_no_percent), Lower(Employee.employee_name)),
+				Locate(txt_no_percent, Employee.employee_name) > 0,
+				Locate(txt_no_percent, Employee.employee_name),
 			)
 			.else_(99999)
 		)
@@ -139,27 +136,16 @@ def lead_query(
 		.where(Lead.status.isnull() | (Lead.status != "Converted"))
 		.where(Criterion.any(search_conditions))
 		.orderby(
+			Case().when(Locate(txt_no_percent, Lead.name) > 0, Locate(txt_no_percent, Lead.name)).else_(99999)
+		)
+		.orderby(
 			Case()
-			.when(
-				Locate(Lower(txt_no_percent), Lower(Lead.name)) > 0,
-				Locate(Lower(txt_no_percent), Lower(Lead.name)),
-			)
+			.when(Locate(txt_no_percent, Lead.lead_name) > 0, Locate(txt_no_percent, Lead.lead_name))
 			.else_(99999)
 		)
 		.orderby(
 			Case()
-			.when(
-				Locate(Lower(txt_no_percent), Lower(Lead.lead_name)) > 0,
-				Locate(Lower(txt_no_percent), Lower(Lead.lead_name)),
-			)
-			.else_(99999)
-		)
-		.orderby(
-			Case()
-			.when(
-				Locate(Lower(txt_no_percent), Lower(Lead.company_name)) > 0,
-				Locate(Lower(txt_no_percent), Lower(Lead.company_name)),
-			)
+			.when(Locate(txt_no_percent, Lead.company_name) > 0, Locate(txt_no_percent, Lead.company_name))
 			.else_(99999)
 		)
 		.orderby(Lead.idx, order=Order.desc)
@@ -227,8 +213,7 @@ def item_query(
 	"""
 	doctype = "Item"
 
-	if isinstance(filters, str):
-		filters = json.loads(filters)
+	filters = frappe.parse_json(filters)
 
 	if filters and isinstance(filters, dict):
 		if filters.get("customer") or filters.get("supplier"):
@@ -397,12 +382,7 @@ def bom(
 		.where(BOM.is_active == 1)
 		.where(BOM[searchfield].like(f"%{txt}%"))
 		.orderby(
-			Case()
-			.when(
-				Locate(Lower(txt_no_percent), Lower(BOM.name)) > 0,
-				Locate(Lower(txt_no_percent), Lower(BOM.name)),
-			)
-			.else_(99999)
+			Case().when(Locate(txt_no_percent, BOM.name) > 0, Locate(txt_no_percent, BOM.name)).else_(99999)
 		)
 		.orderby(BOM.idx, order=Order.desc)
 		.orderby(BOM.name)
@@ -828,7 +808,11 @@ def get_filtered_dimensions(
 		query_filters.append(["company", "=", filters.get("company")])
 
 	for field in searchfields:
-		or_filters.append([field, "LIKE", "%%%s%%" % txt])
+		df = meta.get_field(field)
+		if df and df.fieldtype != "Check":
+			or_filters.append([field, "LIKE", "%%%s%%" % txt])
+		else:
+			or_filters.append([field, "=", cint(txt)])
 		fields.append(field)
 
 	if dimension_filters:
@@ -1076,7 +1060,7 @@ def get_tax_template(doctype: str, txt: str, searchfield: str, start: int, page_
 		valid_from = filters.get("valid_from")
 		valid_from = valid_from[1] if isinstance(valid_from, list) else valid_from
 
-		ctx = ItemDetailsCtx(
+		ctx = frappe._dict(
 			{
 				"item_code": filters.get("item_code"),
 				"posting_date": valid_from,

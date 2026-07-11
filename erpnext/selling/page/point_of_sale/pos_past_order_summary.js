@@ -201,7 +201,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 				frappe.msgprint({
 					title: __("Invalid Return"),
 					indicator: "orange",
-					message: __("All the items have been already returned."),
+					message: __("All the items have already been returned."),
 				});
 				return;
 			}

@@ -17,6 +17,9 @@ def get_data(
 	sort_order: str = "desc",
 ):
 	"""Return data to render the item dashboard"""
+	if not frappe.has_permission("Bin", "read"):
+		return []
+
 	filters = []
 	if item_code:
 		filters.append(["item_code", "=", item_code])
@@ -44,7 +47,10 @@ def get_data(
 		if build_match_conditions("Warehouse", user=frappe.session.user):
 			filters.append(["warehouse", "in", [w.name for w in frappe.get_list("Warehouse")]])
 	except frappe.PermissionError:
-		# user does not have access on warehouse
+		# user does not have access on warehouse; build_match_conditions already queued a
+		# "Not permitted" message via frappe.throw before this was caught, drop it so the
+		# client doesn't show a spurious error for a request that's failing gracefully here
+		frappe.clear_last_message()
 		return []
 
 	items = frappe.db.get_all(

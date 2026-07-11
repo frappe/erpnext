@@ -463,7 +463,7 @@ class PurchaseInvoice(BuyingController):
 		):
 			for d in self.get("items"):
 				if not d.purchase_order:
-					msg = _("Purchase Order Required for item {}").format(frappe.bold(d.item_code))
+					msg = _("Purchase Order Required for item {0}").format(frappe.bold(d.item_code))
 					msg += "<br><br>"
 					msg += _(
 						"To submit the invoice without purchase order please set {0} as {1} in {2}"
@@ -485,7 +485,7 @@ class PurchaseInvoice(BuyingController):
 
 			for d in self.get("items"):
 				if not d.purchase_receipt and d.item_code in stock_and_asset_items:
-					msg = _("Purchase Receipt Required for item {}").format(frappe.bold(d.item_code))
+					msg = _("Purchase Receipt Required for item {0}").format(frappe.bold(d.item_code))
 					msg += "<br><br>"
 					msg += _(
 						"To submit the invoice without purchase receipt please set {0} as {1} in {2}"

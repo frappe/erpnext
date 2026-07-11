@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.utils import add_days, today
+from frappe.utils import add_days, getdate, now_datetime, today
 
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.tests.utils import ERPNextTestSuite
@@ -116,3 +116,38 @@ def create_email_digest(**args):
 		doc.insert()
 
 	return doc
+
+
+class TestEmailDigestDates(ERPNextTestSuite):
+	"""The digest's reporting windows are pure date math driven by the frequency."""
+
+	def make_digest(self, frequency, from_date="2026-06-15"):
+		doc = frappe.new_doc("Email Digest")
+		doc.frequency = frequency
+		doc.from_date = getdate(from_date)
+		doc.to_date = getdate(from_date)
+		return doc
+
+	def test_set_dates_daily_looks_back_one_day(self):
+		doc = self.make_digest("Daily")
+		doc.set_dates()
+		self.assertEqual(doc.past_from_date, getdate("2026-06-14"))
+		self.assertEqual(doc.past_to_date, getdate("2026-06-14"))
+
+	def test_set_dates_weekly_looks_back_one_week(self):
+		doc = self.make_digest("Weekly")
+		doc.set_dates()
+		self.assertEqual(doc.past_from_date, getdate("2026-06-08"))
+		self.assertEqual(doc.past_to_date, getdate("2026-06-14"))
+
+	def test_set_dates_monthly_looks_back_one_month(self):
+		doc = self.make_digest("Monthly")
+		doc.set_dates()
+		self.assertEqual(doc.past_from_date, getdate("2026-05-15"))
+		self.assertEqual(doc.past_to_date, getdate("2026-06-14"))
+
+	def test_weekly_window_is_the_previous_monday_to_sunday(self):
+		from_date, to_date = self.make_digest("Weekly").get_from_to_date()
+		self.assertEqual(from_date.weekday(), 0)  # Monday
+		self.assertEqual((to_date - from_date).days, 6)  # through Sunday
+		self.assertLess(to_date, now_datetime().date())  # entirely in the past

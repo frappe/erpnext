@@ -13,6 +13,10 @@ from frappe.utils import cint, flt, get_link_to_form, get_number_format_info
 from erpnext.stock.doctype.quality_inspection_template.quality_inspection_template import (
 	get_template_details,
 )
+from erpnext.stock.services.quality_inspection_service import (
+	QI_INCOMING_PURPOSES,
+	QI_OUTGOING_PURPOSES,
+)
 
 
 class QualityInspection(Document):
@@ -134,7 +138,7 @@ class QualityInspection(Document):
 		):
 			frappe.throw(
 				_(
-					"'Inspection Required before Purchase' has disabled for the item {0}, no need to create the QI"
+					"'Inspection Required before Purchase' is disabled for the item {0}, no need to create the QI"
 				).format(get_link_to_form("Item", self.item_code))
 			)
 
@@ -143,7 +147,7 @@ class QualityInspection(Document):
 		):
 			frappe.throw(
 				_(
-					"'Inspection Required before Delivery' has disabled for the item {0}, no need to create the QI"
+					"'Inspection Required before Delivery' is disabled for the item {0}, no need to create the QI"
 				).format(get_link_to_form("Item", self.item_code))
 			)
 
@@ -386,13 +390,43 @@ def item_query(doctype: Any, txt: str | None, searchfield: Any, start: int, page
 			["items.quality_inspection", "is", "not set"],
 		]
 
+		require_distinct_warehouse = False
+
 		if reference_doctype == "Stock Entry":
+			purpose = frappe.get_cached_value("Stock Entry", filters.get("reference_name"), "purpose")
 			my_filters.extend(
 				[
 					"and",
-					["items.t_warehouse", "is", "not set"],
+					["items.secondary_item_type", "is", "not set"],
+					"and",
+					["items.is_legacy_scrap_item", "=", 0],
 				]
 			)
+			if purpose == "Manufacture":
+				my_filters.extend(
+					[
+						"and",
+						["items.is_finished_item", "=", 1],
+					]
+				)
+			elif purpose in QI_INCOMING_PURPOSES:
+				my_filters.extend(
+					[
+						"and",
+						["items.t_warehouse", "is", "set"],
+					]
+				)
+			elif purpose in QI_OUTGOING_PURPOSES:
+				my_filters.extend(
+					[
+						"and",
+						["items.s_warehouse", "is", "set"],
+					]
+				)
+				require_distinct_warehouse = True
+			else:
+				# purpose requires no quality inspection
+				return []
 		elif filters.get("inspection_type") != "In Process":
 			my_filters.extend(
 				[
@@ -413,16 +447,25 @@ def item_query(doctype: Any, txt: str | None, searchfield: Any, start: int, page
 				]
 			)
 
-		return frappe.get_query(
+		query = frappe.get_query(
 			reference_doctype,
 			fields=["items.item_code, items.item_name"],
 			filters=my_filters,
 			offset=start,
 			limit=page_len,
-			order_by="items.item_code",
 			ignore_permissions=False,
 			distinct=True,
-		).run()
+		)
+		# frappe's db_query drops ORDER BY for a distinct query on Postgres, which (with offset/limit)
+		# changes both the order and the page contents vs MariaDB. Appending the order to the built
+		# query instead keeps it -- item_code is in the DISTINCT select, so it is valid on Postgres.
+		items_field = frappe.get_meta(reference_doctype).get_field("items")
+		if items_field:
+			child = frappe.qb.DocType(items_field.options)
+			if require_distinct_warehouse:
+				query = query.where(child.t_warehouse.isnull() | (child.s_warehouse != child.t_warehouse))
+			query = query.orderby(child.item_code)
+		return query.run()
 
 
 @frappe.whitelist()

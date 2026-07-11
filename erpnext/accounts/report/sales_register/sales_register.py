@@ -141,17 +141,31 @@ def _execute(filters, additional_table_columns=None):
 
 		# total tax, grand total, outstanding amount & rounded total
 
+		outstanding_precision = (
+			get_field_precision(
+				frappe.get_meta("Sales Invoice").get_field("outstanding_amount"),
+				currency=company_currency,
+			)
+			or 2
+		)
 		row.update(
 			{
 				"tax_total": total_tax,
 				"grand_total": inv.base_grand_total,
 				"rounded_total": inv.base_rounded_total,
-				"outstanding_amount": inv.outstanding_amount,
 			}
 		)
 
 		if inv.doctype == "Sales Invoice":
-			row.update({"debit": inv.base_grand_total, "credit": 0.0})
+			row.update(
+				{
+					"debit": inv.base_grand_total,
+					"credit": 0.0,
+					"outstanding_amount": flt(
+						(inv.outstanding_amount * (inv.conversion_rate or 1)), outstanding_precision
+					),
+				}
+			)
 		else:
 			row.update({"debit": 0.0, "credit": inv.base_grand_total})
 		data.append(row)
@@ -448,6 +462,7 @@ def get_invoices(filters, additional_query_columns):
 			si.is_internal_customer,
 			si.represents_company,
 			si.company,
+			si.conversion_rate,
 		)
 		.where(si.docstatus == 1)
 	)

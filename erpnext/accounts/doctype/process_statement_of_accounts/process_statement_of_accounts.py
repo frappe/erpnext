@@ -156,17 +156,17 @@ class ProcessStatementOfAccounts(Document):
 		)
 
 		if invalid_values:
-			msg = _("<p>Following {0}s doesn't belong to Company {1} :</p>").format(
+			msg = _("<p>Following {0}s do not belong to Company {1}:</p>").format(
 				doctype, frappe.bold(self.company)
 			)
 
 			msg += (
 				"<ul>"
-				+ "".join(_("<li>{}</li>").format(frappe.bold(row)) for row in invalid_values)
+				+ "".join(_("<li>{0}</li>").format(frappe.bold(row)) for row in invalid_values)
 				+ "</ul>"
 			)
 
-			frappe.throw(_(msg))
+			frappe.throw(msg)
 
 
 def get_report_pdf(doc, consolidated=True):

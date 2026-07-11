@@ -16,7 +16,7 @@ def validate_filters(from_date, to_date, company):
 		frappe.throw(_("To Date must be greater than From Date"))
 
 	if not company:
-		frappe.throw(_("Please Select a Company"))
+		frappe.throw(_("Please select a Company"))
 
 
 @frappe.whitelist()

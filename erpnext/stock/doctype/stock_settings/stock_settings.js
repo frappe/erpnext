@@ -90,31 +90,13 @@ frappe.ui.form.on("Stock Settings", {
 		if (!frm.doc.disable_serial_no_and_batch_selector && frm.doc.use_serial_batch_fields) {
 			frm.set_value("disable_serial_no_and_batch_selector", 1);
 			frappe.msgprint(
-				__("Serial No and Batch Selector cannot be use when Use Serial / Batch Fields is enabled.")
+				__("Serial No and Batch Selector cannot be used when Use Serial / Batch Fields is enabled.")
 			);
 		}
 	},
 
 	allow_negative_stock: function (frm) {
-		if (!frm.doc.allow_negative_stock) {
-			return;
-		}
-
-		let msg = __(
-			"Using negative stock disables FIFO/Moving average valuation when inventory is negative."
-		);
-		msg += " ";
-		msg += __("This is considered dangerous from accounting point of view.");
-		msg += "<br>";
-		msg += __("Do you still want to enable negative inventory?");
-
-		frappe.confirm(
-			msg,
-			() => {},
-			() => {
-				frm.set_value("allow_negative_stock", 0);
-			}
-		);
+		erpnext.utils.confirm_negative_stock(frm);
 	},
 	auto_insert_price_list_rate_if_missing(frm) {
 		if (!frm.doc.auto_insert_price_list_rate_if_missing) return;

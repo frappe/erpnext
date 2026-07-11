@@ -486,6 +486,8 @@ def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20, o
 			else:
 				filters.append([doctype, "name", "like", "%" + txt + "%"])
 
+	# No distinct=True: it never dedupes here (single table, fields="*" carries PK `name`) but makes
+	# frappe drop ORDER BY on Postgres, leaving the portal list unordered there.
 	return frappe.get_list(
 		doctype,
 		fields="*",
@@ -495,7 +497,6 @@ def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20, o
 		limit_page_length=limit_page_length,
 		order_by=order_by,
 		ignore_permissions=ignore_permissions,
-		distinct=True,
 	)
 
 
@@ -627,12 +628,12 @@ def allow_to_make_project_update(project, time, frequency):
 		return True
 
 
-@frappe.whitelist()
-def create_duplicate_project(prev_doc: str, project_name: str):
+@frappe.whitelist(methods=["POST"])
+def create_duplicate_project(prev_doc: str | dict, project_name: str):
 	"""Create duplicate project based on the old project"""
 	import json
 
-	prev_doc = json.loads(prev_doc)
+	prev_doc = frappe.parse_json(prev_doc)
 
 	if project_name == prev_doc.get("name"):
 		frappe.throw(_("Use a name that is different from previous project name"))
@@ -778,7 +779,7 @@ def create_kanban_board_if_not_exists(project: str):
 	return True
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def set_project_status(project: str, status: str):
 	"""
 	set status for project and all related tasks

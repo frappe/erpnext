@@ -189,6 +189,7 @@ def get_filtered_todos(ref_doctype, ref_docname, status: str | tuple[str, str]):
 			"allocated_to",
 			"date",
 		],
+		order_by="date asc",
 	)
 
 
@@ -218,6 +219,7 @@ def get_filtered_events(ref_doctype, ref_docname, open: bool):
 			& (event_link.reference_docname == ref_docname)
 			& (event_status_filter)
 		)
+		.orderby(event.starts_on)
 	)
 	data = query.run(as_dict=True)
 

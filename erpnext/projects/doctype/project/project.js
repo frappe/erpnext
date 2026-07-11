@@ -137,7 +137,7 @@ frappe.ui.form.on("Project", {
 			freeze_message: __("Updating Costing and Billing fields against this Project..."),
 			callback: function (r) {
 				if (r && !r.exc) {
-					frappe.msgprint(__("Costing and Billing fields has been updated"));
+					frappe.msgprint(__("Costing and Billing fields have been updated"));
 					frm.refresh();
 				}
 			},

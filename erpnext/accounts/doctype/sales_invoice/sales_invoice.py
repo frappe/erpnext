@@ -755,7 +755,7 @@ class SalesInvoice(SellingController):
 
 		if account.report_type != "Balance Sheet":
 			msg = (
-				_("Please ensure {} account is a Balance Sheet account.").format(frappe.bold(_("Debit To")))
+				_("Please ensure {0} account is a Balance Sheet account.").format(frappe.bold(_("Debit To")))
 				+ " "
 			)
 			msg += _(
@@ -765,7 +765,7 @@ class SalesInvoice(SellingController):
 
 		if self.customer and account.account_type != "Receivable":
 			msg = (
-				_("Please ensure {} account {} is a Receivable account.").format(
+				_("Please ensure {0} account {1} is a Receivable account.").format(
 					frappe.bold(_("Debit To")), frappe.bold(self.debit_to)
 				)
 				+ " "

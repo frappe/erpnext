@@ -1,9 +1,10 @@
 import frappe
-from frappe.utils import getdate, today
+from frappe.utils import add_days, flt, getdate, today
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.sales_register.sales_register import execute
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
+from erpnext.selling.doctype.customer.test_customer import make_customer
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -249,3 +250,25 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 		}
 		result_output = {k: v for k, v in filtered_output[0].items() if k in expected_result}
 		self.assertDictEqual(result_output, expected_result)
+
+	def test_outstanding_currency_conversion(self):
+		foreign_invoice = create_sales_invoice(
+			customer="_Test Customer",
+			posting_date=add_days(today(), -1),
+			qty=1,
+			rate=100,
+		)
+		foreign_invoice.db_set("currency", "USD")
+		foreign_invoice.db_set("conversion_rate", 80)
+		foreign_invoice.db_set("outstanding_amount", 100.236)
+		make_customer("_Test Customer2")
+		local_invoice = create_sales_invoice(
+			customer="_Test Customer2", currency="INR", conversion_rate=1, qty=1, rate=200
+		)
+		local_invoice.db_set("outstanding_amount", 200.456)
+		columns, data, *_ = execute(frappe._dict({"company": foreign_invoice.company}))
+		outstanding_precision = 2
+
+		data_by_name = {x.get("voucher_no"): x.get("outstanding_amount") for x in data}
+		self.assertEqual(data_by_name.get(foreign_invoice.name), flt((100.236 * 80), outstanding_precision))
+		self.assertEqual(data_by_name.get(local_invoice.name), flt(200.456, outstanding_precision))

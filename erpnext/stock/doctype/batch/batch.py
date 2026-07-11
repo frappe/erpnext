@@ -301,7 +301,7 @@ def get_batches_by_oldest(item_code: str, warehouse: str):
 	return batches_dates
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def split_batch(batch_no: str, item_code: str, warehouse: str, qty: float, new_batch_id: str | None = None):
 	"""Split the batch into a new batch"""
 	batch = frappe.get_doc(doctype="Batch", item=item_code, batch_id=new_batch_id).insert()
@@ -390,7 +390,7 @@ def validate_serial_no_with_batch(serial_nos, item_code):
 
 	serial_no_link = ",".join(get_link_to_form("Serial No", sn) for sn in serial_nos)
 
-	message = "Serial Nos" if len(serial_nos) > 1 else "Serial No"
+	message = _("Serial Nos") if len(serial_nos) > 1 else _("Serial No")
 	frappe.throw(_("There is no batch found against the {0}: {1}").format(message, serial_no_link))
 
 
@@ -404,8 +404,7 @@ def make_batch(kwargs):
 def get_pos_reserved_batch_qty(filters: dict | str):
 	import json
 
-	if isinstance(filters, str):
-		filters = json.loads(filters)
+	filters = frappe.parse_json(filters)
 
 	p = frappe.qb.DocType("POS Invoice").as_("p")
 	item = frappe.qb.DocType("POS Invoice Item").as_("item")

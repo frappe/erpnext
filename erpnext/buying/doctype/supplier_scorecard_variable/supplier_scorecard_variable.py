@@ -43,11 +43,11 @@ class SupplierScorecardVariable(Document):
 
 				import_string_path(self.path)
 			except AttributeError:
-				frappe.throw(_("Could not find path for " + self.path), VariablePathNotFound)
+				frappe.throw(_("Could not find path for {0}").format(self.path), VariablePathNotFound)
 
 		else:
 			if not hasattr(sys.modules[__name__], self.path):
-				frappe.throw(_("Could not find path for " + self.path), VariablePathNotFound)
+				frappe.throw(_("Could not find path for {0}").format(self.path), VariablePathNotFound)
 
 
 def get_total_workdays(scorecard):

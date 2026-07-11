@@ -84,7 +84,7 @@ def get_columns():
 
 
 @frappe.whitelist()
-def irs_1099_print(filters: str):
+def irs_1099_print(filters: str | dict):
 	if not filters:
 		frappe._dict(
 			{
@@ -93,7 +93,7 @@ def irs_1099_print(filters: str):
 			}
 		)
 	else:
-		filters = frappe._dict(json.loads(filters))
+		filters = frappe._dict(frappe.parse_json(filters))
 
 	fiscal_year_doc = get_fiscal_year(fiscal_year=filters.fiscal_year, as_dict=True)
 	fiscal_year = cstr(fiscal_year_doc.year_start_date.year)

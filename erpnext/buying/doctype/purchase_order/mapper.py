@@ -27,8 +27,7 @@ def make_purchase_receipt(
 ):
 	if args is None:
 		args = {}
-	if isinstance(args, str):
-		args = json.loads(args)
+	args = frappe.parse_json(args)
 
 	has_unit_price_items = frappe.db.get_value("Purchase Order", source_name, "has_unit_price_items")
 
@@ -123,8 +122,7 @@ def make_purchase_invoice_from_portal(purchase_order_name: str):
 def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions=False, args=None):
 	if args is None:
 		args = {}
-	if isinstance(args, str):
-		args = json.loads(args)
+	args = frappe.parse_json(args)
 
 	def postprocess(source, target):
 		target.flags.ignore_permissions = ignore_permissions
@@ -234,9 +232,11 @@ def make_subcontracting_order(
 			target_doc.save()
 
 			if submit and frappe.has_permission(target_doc.doctype, "submit", target_doc):
+				frappe.db.savepoint("submit_subcontracting_order")
 				try:
 					target_doc.submit()
 				except Exception as e:
+					frappe.db.rollback(save_point="submit_subcontracting_order")
 					target_doc.add_comment("Comment", _("Submit Action Failed") + "<br><br>" + str(e))
 
 			if notify:
@@ -294,7 +294,7 @@ def get_mapped_subcontracting_order(source_name: str, target_doc: str | Document
 		) or frappe.get_value("Production Plan", target_doc.production_plan, "reserve_stock")
 
 	if target_doc and isinstance(target_doc, str):
-		target_doc = json.loads(target_doc)
+		target_doc = frappe.parse_json(target_doc)
 		for key in ["service_items", "items", "supplied_items"]:
 			if key in target_doc:
 				del target_doc[key]

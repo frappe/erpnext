@@ -2,16 +2,15 @@
 # For license information, please see license.txt
 
 
-from frappe.utils import add_days, nowdate
+from frappe.utils import add_days, flt, nowdate
 
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestProcurementTracker(ERPNextTestSuite):
 	def test_report_executes_and_lists_po(self):
-		# get_po_entries groups by (Purchase Order, material_request_item) and Max()-aggregates the
-		# other child columns; this exercises that GROUP BY so the report stays valid on Postgres
-		# (which rejects selecting non-grouped columns).
+		# get_po_entries returns one representative line per (Purchase Order, material_request_item);
+		# this exercises that query so the report stays valid on Postgres.
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 		from erpnext.buying.report.procurement_tracker.procurement_tracker import execute
 
@@ -22,11 +21,10 @@ class TestProcurementTracker(ERPNextTestSuite):
 		self.assertTrue(columns)
 		self.assertIn(po.name, {row.get("purchase_order") for row in data})
 
-	def test_multi_line_po_stays_one_row(self):
-		# A PO can carry several lines that share the same (blank) material_request_item. get_po_entries
-		# groups by (Purchase Order, material_request_item) and Max()-aggregates the rest, so such a PO
-		# yields ONE row — matching the pre-effort MariaDB output. Adding the Purchase Order Item PK to
-		# the GROUP BY (the regression) splits it into one row per line, changing the MariaDB row count.
+	def test_multi_line_po_stays_one_coherent_row(self):
+		# Lines sharing the same (blank) material_request_item collapse to ONE row, matching the
+		# pre-effort MariaDB row count — and that row must be a real PO line, not a per-column
+		# Max() chimera mixing one line's item_code with another line's qty/amount.
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 		from erpnext.buying.report.procurement_tracker.procurement_tracker import execute
 		from erpnext.stock.doctype.item.test_item import make_item
@@ -50,3 +48,10 @@ class TestProcurementTracker(ERPNextTestSuite):
 
 		po_rows = [row for row in data if row.get("purchase_order") == po.name]
 		self.assertEqual(len(po_rows), 1)
+
+		real_lines = {(d.item_code, flt(d.qty), flt(d.amount)) for d in po.items}
+		row = po_rows[0]
+		self.assertIn(
+			(row.get("item_code"), flt(row.get("quantity")), flt(row.get("purchase_order_amt"))),
+			real_lines,
+		)

@@ -182,6 +182,10 @@ def get_item_warehouse_projected_qty(items_to_consider):
 	item_warehouse_projected_qty = {}
 	items_to_consider = list(items_to_consider.keys())
 
+	warehouse_parent_map = frappe._dict(
+		frappe.get_all("Warehouse", fields=["name", "parent_warehouse"], as_list=True)
+	)
+
 	for item_code, warehouse, projected_qty in frappe.get_all(
 		"Bin",
 		filters={"item_code": ["in", items_to_consider], "warehouse": ["is", "set"]},
@@ -194,16 +198,14 @@ def get_item_warehouse_projected_qty(items_to_consider):
 		if warehouse not in item_warehouse_projected_qty.get(item_code):
 			item_warehouse_projected_qty[item_code][warehouse] = flt(projected_qty)
 
-		warehouse_doc = frappe.get_doc("Warehouse", warehouse)
+		parent_warehouse = warehouse_parent_map.get(warehouse)
 
-		while warehouse_doc.parent_warehouse:
-			if not item_warehouse_projected_qty.get(item_code, {}).get(warehouse_doc.parent_warehouse):
-				item_warehouse_projected_qty.setdefault(item_code, {})[warehouse_doc.parent_warehouse] = flt(
-					projected_qty
-				)
+		while parent_warehouse:
+			if not item_warehouse_projected_qty.get(item_code, {}).get(parent_warehouse):
+				item_warehouse_projected_qty.setdefault(item_code, {})[parent_warehouse] = flt(projected_qty)
 			else:
-				item_warehouse_projected_qty[item_code][warehouse_doc.parent_warehouse] += flt(projected_qty)
-			warehouse_doc = frappe.get_doc("Warehouse", warehouse_doc.parent_warehouse)
+				item_warehouse_projected_qty[item_code][parent_warehouse] += flt(projected_qty)
+			parent_warehouse = warehouse_parent_map.get(parent_warehouse)
 
 	return item_warehouse_projected_qty
 
@@ -216,6 +218,7 @@ def create_material_request(material_requests):
 	company_wise_mr = frappe._dict({})
 	for request_type in material_requests:
 		for company in material_requests[request_type]:
+			frappe.db.savepoint("reorder_mr")
 			try:
 				items = material_requests[request_type][company]
 				if not items:
@@ -287,8 +290,9 @@ def create_material_request(material_requests):
 				company_wise_mr.setdefault(company, []).append(mr)
 
 			except Exception as exception:
+				frappe.db.rollback(save_point="reorder_mr")
 				exceptions_list.append(exception)
-				mr.log_error("Unable to create material request")
+				frappe.log_error(title="Unable to create material request")
 
 	if company_wise_mr:
 		if getattr(frappe.local, "reorder_email_notify", None) is None:

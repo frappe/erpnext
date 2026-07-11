@@ -80,9 +80,11 @@ class Company(NestedSet):
 		default_inventory_account: DF.Link | None
 		default_letter_head: DF.Link | None
 		default_letter_head_report: DF.Link | None
+		default_manufacturing_variance_account: DF.Link | None
 		default_operating_cost_account: DF.Link | None
 		default_payable_account: DF.Link | None
 		default_provisional_account: DF.Link | None
+		default_purchase_price_variance_account: DF.Link | None
 		default_receivable_account: DF.Link | None
 		default_sales_contact: DF.Link | None
 		default_scrap_warehouse: DF.Link | None
@@ -98,6 +100,7 @@ class Company(NestedSet):
 		enable_item_wise_inventory_account: DF.Check
 		enable_perpetual_inventory: DF.Check
 		enable_provisional_accounting_for_non_stock_items: DF.Check
+		enable_stock_delivered_but_not_billed: DF.Check
 		exception_budget_approver_role: DF.Link | None
 		exchange_gain_loss_account: DF.Link | None
 		existing_company: DF.Link | None
@@ -184,6 +187,64 @@ class Company(NestedSet):
 		self.validate_inventory_account_settings()
 		self.cant_change_valuation_method()
 		self.validate_pending_reposts(old_doc)
+		self.validate_sdbnb_configuration()
+
+	def validate_outstanding_sdbnb_transactions(self, account):
+		GLEntry = frappe.qb.DocType("GL Entry")
+		DeliveryNote = frappe.qb.DocType("Delivery Note")
+
+		delivery_notes = (
+			frappe.qb.from_(GLEntry)
+			.join(DeliveryNote)
+			.on((GLEntry.voucher_type == "Delivery Note") & (GLEntry.voucher_no == DeliveryNote.name))
+			.select(DeliveryNote.name)
+			.where(
+				(GLEntry.is_cancelled == 0)
+				& (GLEntry.company == self.name)
+				& (GLEntry.account == account)
+				& (DeliveryNote.per_billed < 100)
+				& (DeliveryNote.docstatus == 1)
+				& (DeliveryNote.status.isin(["To Bill", "Partially Billed"]))
+			)
+			.distinct()
+			.run(pluck=True)
+		)
+
+		if delivery_notes:
+			dn_links = ", ".join(get_link_to_form("Delivery Note", dn) for dn in delivery_notes[:10])
+
+			frappe.throw(
+				_(
+					"Stock Delivered But Not Billed Account cannot be changed or disabled since account {0} contains outstanding Delivery Notes: {1}"
+				).format(
+					bold(account),
+					dn_links,
+				)
+			)
+
+	def validate_sdbnb_configuration(self):
+		if self.get("__islocal"):
+			return
+
+		if self.enable_stock_delivered_but_not_billed and not self.stock_delivered_but_not_billed:
+			frappe.throw(_("Please select Stock Delivered But Not Billed Account"))
+
+		doc_before_save = self.get_doc_before_save()
+
+		if not (doc_before_save and doc_before_save.stock_delivered_but_not_billed):
+			return
+
+		account_changed = (
+			self.stock_delivered_but_not_billed != doc_before_save.stock_delivered_but_not_billed
+		)
+
+		feature_disabled = (
+			doc_before_save.enable_stock_delivered_but_not_billed
+			and not self.enable_stock_delivered_but_not_billed
+		)
+
+		if account_changed or feature_disabled:
+			self.validate_outstanding_sdbnb_transactions(doc_before_save.stock_delivered_but_not_billed)
 
 	def cant_change_valuation_method(self):
 		doc_before_save = self.get_doc_before_save()
@@ -856,6 +917,7 @@ def install_country_fixtures(company, country):
 	except ImportError:
 		pass
 	except Exception:
+		frappe.db.rollback()
 		frappe.log_error("Unable to set country fixtures")
 		frappe.throw(
 			_("Failed to setup defaults for country {0}. Please contact support.").format(
@@ -945,7 +1007,7 @@ def get_children(doctype: str, parent: str | None = None, company: str | None = 
 	)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def add_node():
 	from frappe.desk.treeview import make_tree_args
 
@@ -1056,7 +1118,7 @@ def get_billing_shipping_address(
 	return {"primary_address": primary_address, "shipping_address": shipping_address}
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_transaction_deletion_request(company: str):
 	frappe.only_for("System Manager")
 

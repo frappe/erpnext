@@ -126,13 +126,13 @@ class POSService:
 		doc.update_stock = 0 if dn_flag else cint(pos.get("update_stock"))
 
 	def _apply_pos_item_defaults(self, pos, for_validate: bool) -> None:
-		from erpnext.stock.get_item_details import ItemDetailsCtx, get_pos_profile_item_details_
+		from erpnext.stock.get_item_details import get_pos_profile_item_details_
 
 		for item in self.doc.get("items"):
 			if not item.get("item_code"):
 				continue
 			profile_details = get_pos_profile_item_details_(
-				ItemDetailsCtx(item.as_dict()), pos, pos, update_data=True
+				frappe._dict(item.as_dict()), pos, pos, update_data=True
 			)
 			for fname, val in profile_details.items():
 				if (not for_validate) or (for_validate and not item.get(fname)):
@@ -187,7 +187,7 @@ class POSService:
 			total_amount_in_payments = sum(payment.amount for payment in doc.payments)
 			invoice_total = doc.rounded_total or doc.grand_total
 			if total_amount_in_payments < invoice_total:
-				frappe.throw(_("Total payments amount can't be greater than {}").format(-invoice_total))
+				frappe.throw(_("Total payments amount can't be greater than {0}").format(-invoice_total))
 
 	def validate_pos_paid_amount(self) -> None:
 		doc = self.doc
@@ -273,7 +273,7 @@ class POSService:
 				pluck="pos_closing_entry",
 			)
 			if pos_closing_entry and pos_closing_entry[0]:
-				msg = _("To cancel a {} you need to cancel the POS Closing Entry {}.").format(
+				msg = _("To cancel a {0} you need to cancel the POS Closing Entry {1}.").format(
 					frappe.bold(_("Consolidated Sales Invoice")),
 					get_link_to_form("POS Closing Entry", pos_closing_entry[0]),
 				)
@@ -344,7 +344,9 @@ def update_multi_mode_option(doc, pos_profile) -> None:
 		payment.account = payment_mode.default_account
 		payment.type = payment_mode.type
 
-	mop_refetched = bool(doc.payments) and not doc.is_created_using_pos
+	# is_created_using_pos exists on Sales Invoice but not POS Invoice; use get() so this
+	# shared helper doesn't raise AttributeError when called on a POS Invoice
+	mop_refetched = bool(doc.payments) and not doc.get("is_created_using_pos")
 
 	doc.set("payments", [])
 	invalid_modes = []
@@ -362,9 +364,9 @@ def update_multi_mode_option(doc, pos_profile) -> None:
 
 	if invalid_modes:
 		if invalid_modes == 1:
-			msg = _("Please set default Cash or Bank account in Mode of Payment {}")
+			msg = _("Please set default Cash or Bank account in Mode of Payment {0}")
 		else:
-			msg = _("Please set default Cash or Bank account in Mode of Payments {}")
+			msg = _("Please set default Cash or Bank account in Mode of Payments {0}")
 		frappe.throw(msg.format(", ".join(invalid_modes)), title=_("Missing Account"))
 
 	if mop_refetched:

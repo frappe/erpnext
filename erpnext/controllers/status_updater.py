@@ -144,7 +144,7 @@ status_map = {
 		],
 		[
 			"Partially Ordered",
-			"eval:self.status != 'Stopped' and self.per_ordered < 100 and self.per_ordered > 0 and self.docstatus == 1 and self.material_request_type not in ['Material Transfer', 'Customer Provided']",
+			"eval:self.status != 'Stopped' and self.per_ordered < 100 and self.per_ordered > 0 and self.per_received < 100 and self.docstatus == 1 and self.material_request_type not in ['Material Transfer', 'Customer Provided']",
 		],
 	],
 	"POS Opening Entry": [
@@ -167,7 +167,8 @@ status_map = {
 	"Pick List": [
 		["Draft", None],
 		["Open", "eval:self.docstatus == 1"],
-		["Completed", "stock_entry_exists"],
+		["Completed", "is_fully_transferred"],
+		["Partially Transferred", "is_partially_transferred"],
 		[
 			"Partly Delivered",
 			"eval:self.purpose == 'Delivery' and self.delivery_status == 'Partly Delivered'",
@@ -286,10 +287,10 @@ class StatusUpdater(Document):
 			# get unique transactions to update
 			for d in self.get_all_children():
 				if hasattr(d, "qty") and flt(d.qty) < 0 and not self.get("is_return"):
-					frappe.throw(_("For an item {0}, quantity must be positive number").format(d.item_code))
+					frappe.throw(_("For an item {0}, quantity must be a positive number").format(d.item_code))
 
 				if hasattr(d, "qty") and flt(d.qty) > 0 and self.get("is_return"):
-					frappe.throw(_("For an item {0}, quantity must be negative number").format(d.item_code))
+					frappe.throw(_("For an item {0}, quantity must be a negative number").format(d.item_code))
 
 				if (
 					not selling_negative_rate_allowed and self.doctype in ["Sales Invoice", "Delivery Note"]
@@ -300,7 +301,7 @@ class StatusUpdater(Document):
 					if hasattr(d, "item_code") and hasattr(d, "rate") and flt(d.rate) < 0:
 						frappe.throw(
 							_(
-								"For item {0}, rate must be a positive number. To Allow negative rates, enable {1} in {2}"
+								"For item {0}, rate must be a positive number. To allow negative rates, enable {1} in {2}"
 							).format(
 								frappe.bold(d.item_code),
 								frappe.bold(_("`Allow Negative rates for Items`")),
@@ -384,15 +385,17 @@ class StatusUpdater(Document):
 
 	def fetch_items_with_pending_qty(self, args, item_field, items):
 		doctype = frappe.qb.DocType(args["target_dt"])
-		item_field = doctype[item_field]
+		item_field_col = doctype[item_field]
 		target_ref_field = doctype[args["target_ref_field"]]
 		target_field = doctype[args["target_field"]]
 
-		return (
+		is_qty_check = "qty" in args["target_ref_field"]
+
+		query = (
 			frappe.qb.from_(doctype)
 			.select(
 				doctype.name,
-				item_field.as_("item_code"),
+				item_field_col.as_("item_code"),
 				target_ref_field,
 				target_field,
 				doctype.parenttype,
@@ -401,8 +404,17 @@ class StatusUpdater(Document):
 			.where(target_ref_field < target_field)
 			.where(doctype.name.isin(items))
 			.where(doctype.docstatus == 1)
-			.run(as_dict=True)
 		)
+
+		if is_qty_check:
+			item_table = frappe.qb.DocType("Item")
+			query = (
+				query.join(item_table)
+				.on(item_table.name == item_field_col)
+				.where(item_table.is_stock_item == 1)
+			)
+
+		return query.run(as_dict=True)
 
 	def check_overflow_with_allowance(self, item, args):
 		"""

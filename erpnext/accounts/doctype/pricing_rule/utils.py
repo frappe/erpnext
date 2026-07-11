@@ -152,7 +152,7 @@ def _get_pricing_rules(apply_on, args, values):
 			and {child_doc}.parent = `tabPricing Rule`.name
 			and `tabPricing Rule`.disable = 0 and
 			`tabPricing Rule`.{transaction_type} = 1 {warehouse_cond} {conditions}
-		order by `tabPricing Rule`.priority desc,
+		order by coalesce(`tabPricing Rule`.priority, '') desc,
 			`tabPricing Rule`.name desc""".format(
 				child_doc=child_doc,
 				apply_on_field=apply_on_field,
@@ -343,7 +343,7 @@ def filter_pricing_rules(args, pricing_rules, doc=None):
 	if len(pricing_rules) > 1 and not args.for_shopping_cart:
 		frappe.throw(
 			_(
-				"Multiple Price Rules exists with same criteria, please resolve conflict by assigning priority. Price Rules: {0}"
+				"Multiple Price Rules exist with same criteria, please resolve conflict by assigning priority. Price Rules: {0}"
 			).format("\n".join(d.name for d in pricing_rules)),
 			MultiplePricingRuleConflict,
 		)
@@ -636,7 +636,7 @@ def remove_free_item(doc):
 def get_applied_pricing_rules(pricing_rules):
 	if pricing_rules:
 		if pricing_rules.startswith("["):
-			return json.loads(pricing_rules)
+			return frappe.parse_json(pricing_rules)
 		else:
 			return pricing_rules.split(",")
 
