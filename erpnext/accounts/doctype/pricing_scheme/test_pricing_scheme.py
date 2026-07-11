@@ -430,3 +430,117 @@ class TestPricingSchemeApplier(ERPNextTestSuite):
 
 		self.assertEqual(so.items[0].rate, 100)
 		self.assertEqual(flt(so.items[0].scheme_discount_amount), 0)
+
+
+class TestPricingSchemeCoupons(ERPNextTestSuite):
+	"""Coupon gate, redemption ledger, chain-root uniqueness."""
+
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		make_scope_masters()
+		frappe.db.commit()  # nosemgrep — masters must survive per-test rollback
+
+	def setUp(self):
+		frappe.db.set_single_value("Accounts Settings", "pricing_engine", "Pricing Scheme")
+		frappe.clear_document_cache("Accounts Settings", "Accounts Settings")
+
+	def tearDown(self):
+		super().tearDown()
+		frappe.clear_document_cache("Accounts Settings", "Accounts Settings")
+
+	def make_coupon_setup(self, **campaign_overrides):
+		scheme = make_scheme(
+			trigger=[group_row(PARENT_GROUP)], tiers=[tier(1, 0, value=10)], coupon_required=1
+		)
+		campaign = frappe.get_doc(
+			{
+				"doctype": "Coupon Campaign",
+				"title": "Test Campaign",
+				"pricing_scheme": scheme.name,
+				**campaign_overrides,
+			}
+		).insert()
+		coupon = frappe.get_doc({"doctype": "Coupon", "code": "SAVE10", "campaign": campaign.name}).insert()
+		return scheme, campaign, coupon
+
+	def make_so(self, coupon: str | None = None, do_not_submit: bool = True):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		so = make_sales_order(item=ITEM_A, qty=10, price_list_rate=100, do_not_save=True)
+		so.pricing_coupon = coupon
+		so.insert()
+		if not do_not_submit:
+			so.submit()
+		return so
+
+	def test_coupon_required_scheme_needs_valid_coupon(self):
+		_, _, coupon = self.make_coupon_setup()
+
+		without = self.make_so()
+		self.assertEqual(without.items[0].rate, 100, "no coupon, no discount")
+
+		with_coupon = self.make_so(coupon=coupon.name)
+		self.assertEqual(with_coupon.items[0].rate, 90)
+
+	def test_disabled_coupon_rejected(self):
+		_, _, coupon = self.make_coupon_setup()
+		coupon.status = "Disabled"
+		coupon.save()
+
+		so = self.make_so(coupon=coupon.name)
+		self.assertEqual(so.items[0].rate, 100)
+
+	def test_redemption_written_once_per_chain(self):
+		_, _, coupon = self.make_coupon_setup()
+		so = self.make_so(coupon=coupon.name, do_not_submit=False)
+
+		redemption_name = f"{coupon.name}::{so.name}"
+		self.assertEqual(frappe.db.get_value("Coupon Redemption", redemption_name, "status"), "Redeemed")
+
+		# downstream SI inherits — must not redeem again
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		si = make_sales_invoice(so.name)
+		si.flags.ignore_mandatory = True  # site-local custom fields are not under test
+		si.pricing_coupon = coupon.name
+		si.insert()
+		si.submit()
+
+		redemptions = frappe.get_all("Coupon Redemption", filters={"coupon": coupon.name})
+		self.assertEqual(len(redemptions), 1, "one redemption per SO chain")
+
+	def test_cancel_flips_redemption_status(self):
+		_, _, coupon = self.make_coupon_setup()
+		so = self.make_so(coupon=coupon.name, do_not_submit=False)
+		so.cancel()
+
+		self.assertEqual(
+			frappe.db.get_value("Coupon Redemption", f"{coupon.name}::{so.name}", "status"),
+			"Cancelled",
+		)
+
+	def test_campaign_total_limit_exhausts(self):
+		_, campaign, coupon = self.make_coupon_setup(max_uses_total=1)
+		self.make_so(coupon=coupon.name, do_not_submit=False)
+
+		second = self.make_so(coupon=coupon.name)
+		self.assertEqual(second.items[0].rate, 100, "limit reached, scheme must not apply")
+
+	def test_per_customer_limit(self):
+		_, campaign, coupon = self.make_coupon_setup(max_uses_per_customer=1)
+		self.make_so(coupon=coupon.name, do_not_submit=False)
+
+		second = self.make_so(coupon=coupon.name)
+		self.assertEqual(second.items[0].rate, 100)
+
+	def test_active_code_reuse_blocked_until_disabled(self):
+		scheme, campaign, coupon = self.make_coupon_setup()
+
+		clash = frappe.get_doc({"doctype": "Coupon", "code": "save10", "campaign": campaign.name})
+		self.assertRaises(frappe.ValidationError, clash.insert)
+
+		coupon.status = "Disabled"
+		coupon.save()
+		reissued = frappe.get_doc({"doctype": "Coupon", "code": "SAVE10", "campaign": campaign.name}).insert()
+		self.assertEqual(reissued.code, "SAVE10", "code reusable once previous is disabled")

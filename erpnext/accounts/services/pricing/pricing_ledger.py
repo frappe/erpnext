@@ -6,6 +6,7 @@ from frappe.utils import flt, nowdate
 
 from erpnext.accounts.services.pricing.pricing_applier import should_apply
 from erpnext.accounts.services.pricing.pricing_context import build_pricing_context
+from erpnext.accounts.services.pricing.pricing_coupons import cancel_redemptions, record_redemption
 from erpnext.accounts.services.pricing.pricing_effects import (
 	FreeItemEffect,
 	HeaderDiscount,
@@ -27,12 +28,15 @@ def record_applications(doc, method: str | None = None) -> None:
 	context = build_pricing_context(doc)
 	result = PricingEngine(context, doc=doc).resolve()
 
-	for row in _build_rows(doc, context, result):
+	rows = _build_rows(doc, context, result)
+	for row in rows:
 		entry = frappe.get_doc({"doctype": "Pricing Scheme Application", **row})
 		entry.insert(ignore_permissions=True)
+	_record_coupon_redemption(doc, context, result)
 
 
 def cancel_applications(doc, method: str | None = None) -> None:
+	cancel_redemptions(doc)
 	frappe.db.set_value(
 		"Pricing Scheme Application",
 		{"voucher_type": doc.doctype, "voucher_no": doc.name},
@@ -128,3 +132,13 @@ def _line_by_key(context, key: str | None):
 	if not key:
 		return None
 	return next((line for line in context.lines if line.key == key), None)
+
+
+def _record_coupon_redemption(doc, context, result) -> None:
+	"""One redemption per document when any applied scheme required the coupon."""
+	if not context.coupon_code:
+		return
+	for scheme_name in sorted({e.scheme for e in result.effects}):
+		if frappe.get_cached_value("Pricing Scheme", scheme_name, "coupon_required"):
+			record_redemption(doc, context.coupon_code)
+			return

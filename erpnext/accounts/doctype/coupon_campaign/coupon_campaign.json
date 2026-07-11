@@ -1,0 +1,117 @@
+{
+ "actions": [],
+ "autoname": "format:CPN-CAM-{####}",
+ "creation": "2026-07-11 14:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "pricing_scheme",
+  "disabled",
+  "column_break_main",
+  "valid_from",
+  "valid_upto",
+  "limits_section",
+  "max_uses_total",
+  "column_break_limits",
+  "max_uses_per_customer"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Title",
+   "reqd": 1
+  },
+  {
+   "fieldname": "pricing_scheme",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Pricing Scheme",
+   "options": "Pricing Scheme",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
+  },
+  {
+   "fieldname": "column_break_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "valid_from",
+   "fieldtype": "Date",
+   "label": "Valid From"
+  },
+  {
+   "fieldname": "valid_upto",
+   "fieldtype": "Date",
+   "label": "Valid Upto"
+  },
+  {
+   "fieldname": "limits_section",
+   "fieldtype": "Section Break",
+   "label": "Redemption Limits"
+  },
+  {
+   "description": "0 = unlimited. Counted against the Coupon Redemption ledger.",
+   "fieldname": "max_uses_total",
+   "fieldtype": "Int",
+   "label": "Max Uses (Total)",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "column_break_limits",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "max_uses_per_customer",
+   "fieldtype": "Int",
+   "label": "Max Uses per Customer",
+   "non_negative": 1
+  }
+ ],
+ "links": [],
+ "modified": "2026-07-11 14:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Coupon Campaign",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "show_title_field_in_link": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "title",
+ "track_changes": 1
+}

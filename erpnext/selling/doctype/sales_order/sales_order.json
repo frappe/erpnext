@@ -88,6 +88,7 @@
   "apply_discount_on",
   "base_discount_amount",
   "coupon_code",
+  "pricing_coupon",
   "column_break_50",
   "additional_discount_percentage",
   "discount_amount",
@@ -859,6 +860,14 @@
    "hide_seconds": 1,
    "label": "Coupon Code",
    "options": "Coupon Code"
+  },
+  {
+   "fieldname": "pricing_coupon",
+   "fieldtype": "Link",
+   "label": "Coupon",
+   "options": "Coupon",
+   "no_copy": 1,
+   "print_hide": 1
   },
   {
    "default": "Grand Total",

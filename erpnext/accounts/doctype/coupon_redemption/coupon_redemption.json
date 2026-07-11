@@ -1,0 +1,136 @@
+{
+ "actions": [],
+ "creation": "2026-07-11 14:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "coupon",
+  "campaign",
+  "order_chain_root",
+  "column_break_main",
+  "voucher_type",
+  "voucher_no",
+  "party_section",
+  "party_type",
+  "party",
+  "column_break_party",
+  "posting_date",
+  "status"
+ ],
+ "fields": [
+  {
+   "fieldname": "coupon",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Coupon",
+   "options": "Coupon",
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "coupon.campaign",
+   "fieldname": "campaign",
+   "fieldtype": "Link",
+   "label": "Coupon Campaign",
+   "options": "Coupon Campaign",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "description": "The originating order (or standalone invoice). One redemption per coupon per chain — enforced by the document name.",
+   "fieldname": "order_chain_root",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Order Chain Root",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Link",
+   "label": "Voucher Type",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Dynamic Link",
+   "label": "Voucher No",
+   "options": "voucher_type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "party_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "party_type",
+   "fieldtype": "Link",
+   "label": "Party Type",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "label": "Party",
+   "options": "party_type",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_party",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "read_only": 1
+  },
+  {
+   "default": "Redeemed",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Redeemed\nCancelled",
+   "read_only": 1
+  }
+ ],
+ "in_create": 1,
+ "links": [],
+ "modified": "2026-07-11 14:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Coupon Redemption",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -104,6 +104,7 @@
   "apply_discount_on",
   "base_discount_amount",
   "coupon_code",
+  "pricing_coupon",
   "column_break_51",
   "additional_discount_percentage",
   "discount_amount",
@@ -2128,6 +2129,14 @@
    "fieldtype": "Link",
    "label": "Coupon Code",
    "options": "Coupon Code"
+  },
+  {
+   "fieldname": "pricing_coupon",
+   "fieldtype": "Link",
+   "label": "Coupon",
+   "options": "Coupon",
+   "no_copy": 1,
+   "print_hide": 1
   },
   {
    "default": "1",

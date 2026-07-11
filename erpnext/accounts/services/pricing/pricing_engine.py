@@ -11,6 +11,7 @@ from erpnext.accounts.services.pricing.pricing_candidates import (
 	get_cap_usage,
 )
 from erpnext.accounts.services.pricing.pricing_context import LineContext, PricingContext
+from erpnext.accounts.services.pricing.pricing_coupons import coupon_gate
 from erpnext.accounts.services.pricing.pricing_effects import (
 	AmountDiscount,
 	FreeItemEffect,
@@ -79,6 +80,11 @@ class PricingEngine:
 		if not party_in_scope(self.context, scheme.party_scope):
 			self.trace.rejected(scheme.name, "party not in scope")
 			return False
+		if scheme.coupon_required:
+			ok, reason = coupon_gate(scheme, self.context)
+			if not ok:
+				self.trace.rejected(scheme.name, reason)
+				return False
 		ok, error = evaluate_condition(scheme, self.doc)
 		if error:
 			self.trace.error(scheme.name, f"condition error: {error}")

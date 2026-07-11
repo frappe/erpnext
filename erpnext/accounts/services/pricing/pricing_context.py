@@ -73,7 +73,7 @@ def build_pricing_context(doc) -> PricingContext:
 		sales_partner=doc.get("sales_partner"),
 		campaign=doc.get("campaign"),
 		price_list=doc.get("selling_price_list") or doc.get("buying_price_list"),
-		coupon_code=doc.get("coupon_code"),
+		coupon_code=doc.get("pricing_coupon"),
 		composition=get_discount_composition(),
 		lines=tuple(_build_line(row, doc) for row in doc.get("items") or []),
 	)
