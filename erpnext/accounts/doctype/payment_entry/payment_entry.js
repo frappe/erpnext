@@ -706,6 +706,11 @@ frappe.ui.form.on("Payment Entry", {
 		if (!frm.doc.paid_from_account_currency || !frm.doc.company) return;
 		let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
 
+		// Anchor to the paid_to side (unchanged) so source_exchange_rate can reverse-calculate paid_amount.
+		if (frm.doc.received_amount && frm.doc.target_exchange_rate) {
+			frm._base_for_paid_amount = flt(frm.doc.received_amount) * flt(frm.doc.target_exchange_rate);
+		}
+
 		frm.events.set_current_exchange_rate(
 			frm,
 			"source_exchange_rate",
@@ -717,6 +722,11 @@ frappe.ui.form.on("Payment Entry", {
 	paid_to_account_currency: function (frm) {
 		if (!frm.doc.paid_to_account_currency || !frm.doc.company) return;
 		let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
+
+		// Anchor to the paid_from side (unchanged) so target_exchange_rate can reverse-calculate received_amount.
+		if (frm.doc.paid_amount && frm.doc.source_exchange_rate) {
+			frm._base_for_received_amount = flt(frm.doc.paid_amount) * flt(frm.doc.source_exchange_rate);
+		}
 
 		frm.events.set_current_exchange_rate(
 			frm,
@@ -751,6 +761,17 @@ frappe.ui.form.on("Payment Entry", {
 		let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
 
 		if (frm.doc.paid_amount && frm.doc.source_exchange_rate) {
+			// When paid_from account currency changed, recalculate paid_amount from the saved base
+			// rather than recalculating base from the stale paid_amount.
+			if (frm._base_for_paid_amount) {
+				const base = frm._base_for_paid_amount;
+				frm._base_for_paid_amount = null;
+				frm.set_value("paid_amount", flt(base / frm.doc.source_exchange_rate));
+				frm.set_paid_amount_based_on_received_amount = false;
+				frm.set_df_property("source_exchange_rate", "read_only", erpnext.stale_rate_allowed() ? 0 : 1);
+				return;
+			}
+
 			frm.set_value("base_paid_amount", flt(frm.doc.paid_amount) * flt(frm.doc.source_exchange_rate));
 			frm.set_value("base_received_amount", frm.doc.base_paid_amount);
 
@@ -781,6 +802,19 @@ frappe.ui.form.on("Payment Entry", {
 		let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
 
 		if (frm.doc.received_amount && frm.doc.target_exchange_rate) {
+			// When paid_to account currency changed, recalculate received_amount from the saved base
+			// rather than recalculating base from the stale received_amount.
+			if (frm._base_for_received_amount) {
+				const base = frm._base_for_received_amount;
+				frm._base_for_received_amount = null;
+				frm.set_value("base_paid_amount", base);
+				frm.set_value("base_received_amount", base);
+				frm.set_value("received_amount", flt(base / frm.doc.target_exchange_rate));
+				frm.events.set_total_allocated_amount(frm);
+				frm.set_df_property("target_exchange_rate", "read_only", erpnext.stale_rate_allowed() ? 0 : 1);
+				return;
+			}
+
 			frm.set_value(
 				"base_received_amount",
 				flt(frm.doc.received_amount) * flt(frm.doc.target_exchange_rate)
