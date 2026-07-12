@@ -256,8 +256,6 @@ def start_import(invoices):
 	names = []
 	total = len(invoices)
 	for idx, d in enumerate(invoices):
-<<<<<<< HEAD
-=======
 		# Scope each invoice to a savepoint so a failure only undoes that invoice.
 		# A plain rollback() would discard the whole transaction — including invoices
 		# imported earlier in this batch and the error logs of earlier failures (the
@@ -266,7 +264,6 @@ def start_import(invoices):
 		savepoint = f"opening_invoice_{frappe.generate_hash(length=8)}"
 		frappe.db.savepoint(savepoint)
 		is_last = idx == total - 1
->>>>>>> ad17efe243 (fix(accounts): retain invoice table on opening invoice creation error (#56353))
 		try:
 			invoice_number = None
 			if d.invoice_number:
