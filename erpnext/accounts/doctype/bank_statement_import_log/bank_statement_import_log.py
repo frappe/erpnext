@@ -557,7 +557,7 @@ class BankStatementImportLog(Document):
 			docname=self.name,
 		)
 
-		if self.closing_balance and self.closing_balance > 0 and self.end_date:
+		if self.closing_balance is not None and self.end_date:
 			set_closing_balance_as_per_statement(
 				self.bank_account, frappe.utils.getdate(self.end_date), self.closing_balance
 			)

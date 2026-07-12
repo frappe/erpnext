@@ -295,6 +295,10 @@ class WorkOrder(Document):
 		self.validate_subcontracting_inward_order()
 
 	def validate_dates(self):
+		if self.planned_start_date and self.planned_end_date:
+			if get_datetime(self.planned_end_date) < get_datetime(self.planned_start_date):
+				frappe.throw(_("Planned End Date cannot be before Planned Start Date"))
+
 		if self.actual_start_date and self.actual_end_date:
 			if self.actual_end_date < self.actual_start_date:
 				frappe.throw(_("Actual End Date cannot be before Actual Start Date"))
@@ -677,7 +681,11 @@ class WorkOrder(Document):
 		elif self.docstatus == 1:
 			if status not in ["Closed", "Stopped"]:
 				status = "Not Started"
-				if flt(self.material_transferred_for_manufacturing) > 0 or self.skip_transfer:
+				if (
+					flt(self.material_transferred_for_manufacturing) > 0
+					or self.skip_transfer
+					or self._has_transferred_material()
+				):
 					status = "In Process"
 
 				precision = frappe.get_precision("Work Order", "produced_qty")
@@ -710,6 +718,57 @@ class WorkOrder(Document):
 					break
 
 		return status
+
+	def _has_transferred_material(self):
+		"""True if any raw material transferred against this work order via a pick list or a
+		material request is still, net of returns, in WIP (these leave
+		material_transferred_for_manufacturing at 0 via the min-fraction rule)."""
+		ste = frappe.qb.DocType("Stock Entry")
+		ste_child = frappe.qb.DocType("Stock Entry Detail")
+		mr_ste = frappe.qb.DocType("Stock Entry")
+		mr_child = frappe.qb.DocType("Stock Entry Detail")
+		# Stock Entry only carries `material_request` at the child-row level, so a Stock
+		# Entry is "MR-sourced" if *any* of its rows link back to a Material Request against
+		# this work order; the join to mr_ste keeps this scoped to this work order's entries
+		# instead of scanning every Material-Request-linked row in the system.
+		mr_sourced_stock_entries = (
+			frappe.qb.from_(mr_child)
+			.inner_join(mr_ste)
+			.on(mr_ste.name == mr_child.parent)
+			.select(mr_child.parent)
+			.where(
+				(mr_child.material_request.isnotnull())
+				& (mr_ste.work_order == self.name)
+				& (mr_ste.docstatus == 1)
+				& (mr_ste.purpose == "Material Transfer for Manufacture")
+			)
+		)
+		common_filters = (
+			(ste.work_order == self.name)
+			& (ste.docstatus == 1)
+			& (ste.purpose == "Material Transfer for Manufacture")
+		)
+		transferred_qty = (
+			frappe.qb.from_(ste)
+			.inner_join(ste_child)
+			.on(ste_child.parent == ste.name)
+			.select(Sum(ste_child.transfer_qty))
+			.where(
+				common_filters
+				& (ste.is_return == 0)
+				& (ste.pick_list.isnotnull() | ste.name.isin(mr_sourced_stock_entries))
+			)
+		).run()[0][0]
+		# Returns don't carry their own pick_list/material_request reference, so net every
+		# return against this work order to correctly clear WIP after a full return.
+		returned_qty = (
+			frappe.qb.from_(ste)
+			.inner_join(ste_child)
+			.on(ste_child.parent == ste.name)
+			.select(Sum(ste_child.transfer_qty))
+			.where(common_filters & (ste.is_return == 1))
+		).run()[0][0]
+		return flt(transferred_qty) - flt(returned_qty) > 0
 
 	def update_work_order_qty(self):
 		"""Update **Manufactured Qty** and **Material Transferred for Qty** in Work Order
@@ -3012,6 +3071,40 @@ def get_reserved_qty_for_production(
 		query = query.where(wo.production_plan.isin(non_completed_production_plans))
 
 	return query.run()[0][0] or 0.0
+
+
+@frappe.whitelist()
+def make_material_request(source_name: str, target_doc: str | dict | None = None):
+	frappe.has_permission("Material Request", "create", throw=True)
+
+	doc = get_mapped_doc("Work Order", source_name, _material_request_mapping(), target_doc)
+	doc.material_request_type = "Material Transfer"
+	return doc
+
+
+def _material_request_mapping():
+	return {
+		"Work Order": {
+			"doctype": "Material Request",
+			"validation": {"docstatus": ["=", 1]},
+			"field_map": {"name": "work_order"},
+		},
+		"Work Order Item": {
+			"doctype": "Material Request Item",
+			"field_map": [
+				("stock_uom", "uom"),
+				("source_warehouse", "from_warehouse"),
+			],
+			"postprocess": _set_material_request_item,
+			"condition": lambda doc: abs(doc.transferred_qty) < abs(doc.required_qty),
+		},
+	}
+
+
+def _set_material_request_item(source, target, source_parent):
+	target.warehouse = source_parent.wip_warehouse
+	target.qty = flt(source.required_qty) - flt(source.transferred_qty)
+	target.schedule_date = nowdate()
 
 
 @frappe.whitelist()
