@@ -3,13 +3,14 @@
 
 import frappe
 from frappe import _
+from frappe.model.document import Document
 from frappe.utils import cint, get_datetime
 
 TREE_PARTY_TYPES = ("Customer Group", "Territory", "Supplier Group")
 
 
 @frappe.whitelist()
-def detect_overlaps(scheme: str | dict) -> list[dict]:
+def detect_overlaps(scheme: str | dict | Document) -> list[dict]:
 	"""Classify every active scheme that intersects the given (possibly
 	unsaved) scheme: conflict / shadowed / wins / stacks.
 
@@ -51,7 +52,7 @@ def get_usage(scheme: str) -> dict:
 
 
 @frappe.whitelist()
-def count_scope_items(scheme: str | dict) -> int:
+def count_scope_items(scheme: str | dict | Document) -> int:
 	"""Approximate item count matched by the trigger scope (include rows,
 	deduplicated; excludes subtracted without cross-type dedup)."""
 	doc = _as_scheme_doc(scheme)
