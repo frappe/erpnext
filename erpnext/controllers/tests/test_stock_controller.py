@@ -48,5 +48,8 @@ class TestLedgerPreviewPermission(ERPNextTestSuite):
 			frappe.set_user("Administrator")
 
 		# a permitted user is still able to read the preview
-		result = show_accounting_ledger_preview(company, "Journal Entry", je.name)
-		self.assertTrue(result.get("gl_data"))
+		accounting_ledger_result = show_accounting_ledger_preview(company, "Journal Entry", je.name)
+		self.assertTrue(accounting_ledger_result.get("gl_data"))
+
+		stock_ledger_result = show_stock_ledger_preview(company, "Journal Entry", je.name)
+		self.assertTrue(stock_ledger_result.get("sl_data"))
