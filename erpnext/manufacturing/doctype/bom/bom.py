@@ -1387,13 +1387,29 @@ def _merge_phantom_bom_items(item_dict, item, company, opts):
 
 
 def _set_default_accounts_for_items(item_dict, company):
+	fields = [
+		["Account", "expense_account", "stock_adjustment_account"],
+		["Cost Center", "cost_center", "cost_center"],
+		["Warehouse", "default_warehouse", ""],
+	]
+
+	company_of = {}
+	for d in fields:
+		names = {item_details.get(d[1]) for item_details in item_dict.values() if item_details.get(d[1])}
+		company_of[d[0]] = (
+			{
+				r.name: r.company
+				for r in frappe.get_all(
+					d[0], filters={"name": ("in", list(names))}, fields=["name", "company"]
+				)
+			}
+			if names
+			else {}
+		)
+
 	for item, item_details in item_dict.items():
-		for d in [
-			["Account", "expense_account", "stock_adjustment_account"],
-			["Cost Center", "cost_center", "cost_center"],
-			["Warehouse", "default_warehouse", ""],
-		]:
-			company_in_record = frappe.db.get_value(d[0], item_details.get(d[1]), "company")
+		for d in fields:
+			company_in_record = company_of[d[0]].get(item_details.get(d[1]))
 			if not item_details.get(d[1]) or (company_in_record and company != company_in_record):
 				item_dict[item][d[1]] = frappe.get_cached_value("Company", company, d[2]) if d[2] else None
 

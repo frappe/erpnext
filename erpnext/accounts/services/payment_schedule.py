@@ -293,6 +293,39 @@ class PaymentScheduleService:
 					_("Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total")
 				)
 
+	def validate_all_documents_schedule(self) -> None:
+		if self.doc.doctype in ("Sales Invoice", "Purchase Invoice"):
+			self.validate_invoice_documents_schedule()
+		elif self.doc.doctype in ("Quotation", "Purchase Order", "Sales Order"):
+			self.validate_non_invoice_documents_schedule()
+
+	def validate_invoice_documents_schedule(self) -> None:
+		doc = self.doc
+		if (
+			doc.is_return
+			or (doc.doctype == "Purchase Invoice" and doc.is_paid)
+			or (doc.doctype == "Sales Invoice" and doc.is_pos)
+			or doc.get("is_opening") == "Yes"
+		):
+			doc.payment_terms_template = ""
+			doc.payment_schedule = []
+
+		if doc.is_return:
+			return
+
+		self.validate_payment_schedule_dates()
+		self.set_due_date()
+		self.set_payment_schedule()
+		if not doc.get("ignore_default_payment_terms_template"):
+			self.validate_payment_schedule_amount()
+			doc.validate_due_date()
+		doc.validate_advance_entries()
+
+	def validate_non_invoice_documents_schedule(self) -> None:
+		self.set_payment_schedule()
+		self.validate_payment_schedule_dates()
+		self.validate_payment_schedule_amount()
+
 
 def linked_order_has_payment_terms_template(po_or_so, doctype) -> str | None:
 	return frappe.get_value(doctype, po_or_so, "payment_terms_template")

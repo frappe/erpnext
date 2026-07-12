@@ -17,6 +17,11 @@ class BaseStockGLComposer(BaseGLComposer):
 	entries on top.
 	"""
 
+	#: Whether the item's expense/difference account must be a 'Profit and Loss'
+	#: account. Vouchers that legitimately post the difference to a balance-sheet
+	#: account (stock transfers, deliveries, reconciliations) set this to False.
+	enforce_pl_expense_account = True
+
 	def compose(
 		self,
 		inventory_account_map: dict | None = None,
@@ -160,34 +165,16 @@ class BaseStockGLComposer(BaseGLComposer):
 		return frappe.flags.debit_field_precision
 
 	def get_voucher_details(self, default_expense_account, default_cost_center, sle_map):
-		doc = self.doc
-		if doc.doctype == "Stock Reconciliation":
-			reconciliation_purpose = frappe.db.get_value(doc.doctype, doc.name, "purpose")
-			is_opening = "Yes" if reconciliation_purpose == "Opening Stock" else "No"
-			details = []
-			for voucher_detail_no in sle_map:
-				details.append(
-					frappe._dict(
-						{
-							"name": voucher_detail_no,
-							"expense_account": default_expense_account,
-							"cost_center": default_cost_center,
-							"is_opening": is_opening,
-						}
-					)
-				)
-			return details
-		else:
-			details = doc.get("items")
+		details = self.doc.get("items")
 
-			if default_expense_account or default_cost_center:
-				for d in details:
-					if default_expense_account and not d.get("expense_account"):
-						d.expense_account = default_expense_account
-					if default_cost_center and not d.get("cost_center"):
-						d.cost_center = default_cost_center
+		if default_expense_account or default_cost_center:
+			for d in details:
+				if default_expense_account and not d.get("expense_account"):
+					d.expense_account = default_expense_account
+				if default_cost_center and not d.get("cost_center"):
+					d.cost_center = default_cost_center
 
-			return details
+		return details
 
 	def check_expense_account(self, item):
 		if not item.get("expense_account"):
@@ -204,18 +191,7 @@ class BaseStockGLComposer(BaseGLComposer):
 				frappe.get_cached_value("Account", item.get("expense_account"), "report_type")
 				== "Profit and Loss"
 			)
-			if (
-				self.doc.doctype
-				not in (
-					"Purchase Receipt",
-					"Purchase Invoice",
-					"Stock Reconciliation",
-					"Stock Entry",
-					"Subcontracting Receipt",
-					"Delivery Note",
-				)
-				and not is_expense_account
-			):
+			if self.enforce_pl_expense_account and not is_expense_account:
 				frappe.throw(
 					_("Expense / Difference account ({0}) must be a 'Profit or Loss' account").format(
 						item.get("expense_account")
