@@ -11,7 +11,10 @@ from erpnext.selling.report.inactive_customers.inactive_customers import execute
 
 class TestInactiveCustomers(FrappeTestCase):
 	def setUp(self):
-		self.customer = frappe.get_doc(doctype="Customer", customer_name="_Test Inactive Customer").insert()
+		self.customer = frappe.new_doc("Customer")
+		self.customer.customer_name = "_Test Inactive Customer"
+		self.customer.customer_group = "_Test Customer Group"
+		self.customer.insert()
 		self.last_order_date = add_days(today(), -120)
 		so = make_sales_order(
 			customer=self.customer.name,
