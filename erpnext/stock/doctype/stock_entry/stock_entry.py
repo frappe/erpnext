@@ -1407,7 +1407,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			self.process_loss_qty = flt(
 				(flt(self.fg_completed_qty) * flt(self.process_loss_percentage)) / 100
 			)
-		elif self.process_loss_qty and not self.process_loss_percentage:
+		elif self.process_loss_qty and self.fg_completed_qty:
 			self.process_loss_percentage = flt(
 				(flt(self.process_loss_qty) / flt(self.fg_completed_qty)) * 100
 			)
