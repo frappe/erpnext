@@ -16,7 +16,7 @@ def detect_overlaps(scheme: str | dict) -> list[dict]:
 	Include rows only — excludes are ignored, so results are conservative
 	("possible overlap"). Evidence names the intersecting scope pair.
 	"""
-	doc = frappe.get_doc(frappe.parse_json(scheme)) if isinstance(scheme, str) else scheme
+	doc = _as_scheme_doc(scheme)
 	overlaps = []
 	for other_name in _candidate_names(doc):
 		other = frappe.get_cached_doc("Pricing Scheme", other_name)
@@ -54,13 +54,22 @@ def get_usage(scheme: str) -> dict:
 def count_scope_items(scheme: str | dict) -> int:
 	"""Approximate item count matched by the trigger scope (include rows,
 	deduplicated; excludes subtracted without cross-type dedup)."""
-	doc = frappe.get_doc(frappe.parse_json(scheme)) if isinstance(scheme, str) else scheme
+	doc = _as_scheme_doc(scheme)
 	includes = [
 		row for row in doc.trigger_scope if not row.exclude and row.value or row.scope_type == "All Items"
 	]
 	excludes = [row for row in doc.trigger_scope if row.exclude and row.value]
 	total = _count_items(includes)
 	return max(total - _count_items(excludes), 0)
+
+
+def _as_scheme_doc(scheme):
+	"""Normalize whitelisted input: JSON string, deserialized dict, or Document."""
+	if isinstance(scheme, str):
+		scheme = frappe.parse_json(scheme)
+	if isinstance(scheme, dict):
+		return frappe.get_doc(scheme)
+	return scheme
 
 
 def _candidate_names(doc) -> list[str]:
