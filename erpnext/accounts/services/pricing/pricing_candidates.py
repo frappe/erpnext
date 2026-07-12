@@ -64,10 +64,14 @@ def get_accrued_basis(scheme, context: PricingContext) -> tuple[float, float]:
 
 def get_cap_usage(scheme) -> tuple[int, float]:
 	"""Applications count and discount spend, for cap checks."""
-	rows = frappe.get_all(
-		"Pricing Scheme Application",
-		filters={"scheme": scheme.name, "is_cancelled": 0},
-		fields=["count(name) as applications", "sum(discount_amount) as spend"],
+	from frappe.query_builder.functions import Count, Sum
+
+	app = frappe.qb.DocType("Pricing Scheme Application")
+	rows = (
+		frappe.qb.from_(app)
+		.select(Count(app.name).as_("applications"), Sum(app.discount_amount).as_("spend"))
+		.where((app.scheme == scheme.name) & (app.is_cancelled == 0))
+		.run(as_dict=True)
 	)
 	row = rows[0] if rows else frappe._dict()
 	return int(row.get("applications") or 0), float(row.get("spend") or 0.0)

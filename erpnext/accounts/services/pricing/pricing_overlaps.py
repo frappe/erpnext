@@ -29,14 +29,18 @@ def detect_overlaps(scheme: str | dict | Document) -> list[dict]:
 @frappe.whitelist()
 def get_usage(scheme: str) -> dict:
 	"""Ledger-driven usage stats for the form dashboard."""
-	rows = frappe.get_all(
-		"Pricing Scheme Application",
-		filters={"scheme": scheme, "is_cancelled": 0},
-		fields=[
-			"count(name) as applications",
-			"sum(discount_amount) as discount_given",
-			"sum(free_item_qty) as free_qty",
-		],
+	from frappe.query_builder.functions import Count, Sum
+
+	app = frappe.qb.DocType("Pricing Scheme Application")
+	rows = (
+		frappe.qb.from_(app)
+		.select(
+			Count(app.name).as_("applications"),
+			Sum(app.discount_amount).as_("discount_given"),
+			Sum(app.free_item_qty).as_("free_qty"),
+		)
+		.where((app.scheme == scheme) & (app.is_cancelled == 0))
+		.run(as_dict=True)
 	)
 	row = rows[0] if rows else frappe._dict()
 	caps = frappe.get_cached_value(
