@@ -1415,6 +1415,9 @@ def map_pl_locations(pick_list, item_mapper, delivery_note, sales_order=None):
 		if location.sales_order != sales_order or location.product_bundle_item:
 			continue
 
+		if flt(location.picked_qty) - flt(location.delivered_qty) <= 0:
+			continue
+
 		if location.sales_order_item:
 			sales_order_item = frappe.get_doc("Sales Order Item", location.sales_order_item)
 		else:
