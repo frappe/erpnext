@@ -207,7 +207,7 @@ def get_chart_data(filters, chart_columns, income, expense, net_profit_loss, cur
 	return chart
 
 
-def execute_synced_report(filters):
+def execute_snapshot_report(filters):
 	from frappe.database.duckdb.database import get_latest_sync
 
 	if not (conn := get_latest_sync("GL Entry")):
