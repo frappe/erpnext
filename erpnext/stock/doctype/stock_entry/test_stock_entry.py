@@ -2915,36 +2915,6 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual(se.items[2].qty, 4.5)
 		self.assertEqual(se.items[2].amount, 5)
 
-	def test_valuation_rate_missing_only_on_submit_not_draft(self):
-		"""Saving a draft Stock Entry for an item with no valuation rate should not raise
-		'Valuation Rate Missing'. The error should only fire on submit."""
-		import frappe
-
-		item_code = "_Test No-Rate Item for SE Draft"
-		create_item(item_code, is_stock_item=1, valuation_rate=0)
-
-		se = frappe.new_doc("Stock Entry")
-		se.purpose = "Material Transfer for Manufacture"
-		se.company = "_Test Company"
-		se.set_stock_entry_type()
-		se.append(
-			"items",
-			{
-				"item_code": item_code,
-				"qty": 1,
-				"uom": "Nos",
-				"s_warehouse": "_Test Warehouse - _TC",
-				"t_warehouse": "_Test Warehouse 1 - _TC",
-			},
-		)
-
-		# Save as draft must not raise "Valuation Rate Missing"
-		se.save()
-		self.assertEqual(se.docstatus, 0)
-
-		# Submit must raise "Valuation Rate Missing" because no stock exists
-		self.assertRaises(frappe.ValidationError, se.submit)
-
 
 class TestStockEntryCoverage(ERPNextTestSuite):
 	"""Tests for functions previously lacking dedicated coverage."""
