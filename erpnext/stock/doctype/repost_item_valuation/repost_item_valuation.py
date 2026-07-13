@@ -463,13 +463,31 @@ def accumulate_repost_coverage(row_name, coverage, row_datetime):
 	return acc
 
 
-def is_transaction_repost_covered(row, acc, row_datetime):
-	items = get_items_to_be_repost(row.voucher_type, row.voucher_no)
+def get_repost_items_by_voucher(rows):
+	voucher_nos = {row.voucher_no for row in rows}
+	if not voucher_nos:
+		return {}
+
+	items_by_voucher = {}
+	for sle in frappe.get_all(
+		"Stock Ledger Entry",
+		filters={"voucher_no": ("in", list(voucher_nos))},
+		fields=["voucher_type", "voucher_no", "item_code", "warehouse"],
+		distinct=True,
+	):
+		items_by_voucher.setdefault((sle.voucher_type, sle.voucher_no), set()).add(
+			(sle.item_code, sle.warehouse)
+		)
+
+	return items_by_voucher
+
+
+def is_transaction_repost_covered(items, acc, row_datetime):
 	if not items:
 		return False
 
-	for item in items:
-		covered = acc.get((item.get("item_code"), item.get("warehouse")))
+	for key in items:
+		covered = acc.get(key)
 		if not covered or get_datetime(covered) > get_datetime(row_datetime):
 			return False
 
@@ -480,7 +498,10 @@ def mark_covered_transaction_reposts(source, coverage, affected):
 	source_datetime = get_combine_datetime(source.posting_date, source.posting_time)
 	voucher_nos = {voucher_no for _, voucher_no in affected}
 
-	for row in get_queued_transaction_reposts(source.name, voucher_nos):
+	rows = get_queued_transaction_reposts(source.name, voucher_nos)
+	items_by_voucher = get_repost_items_by_voucher(rows)
+
+	for row in rows:
 		if (row.voucher_type, row.voucher_no) not in affected:
 			continue
 
@@ -489,7 +510,8 @@ def mark_covered_transaction_reposts(source, coverage, affected):
 			continue
 
 		acc = accumulate_repost_coverage(row.name, coverage, row_datetime)
-		if is_transaction_repost_covered(row, acc, row_datetime):
+		items = items_by_voucher.get((row.voucher_type, row.voucher_no))
+		if is_transaction_repost_covered(items, acc, row_datetime):
 			frappe.db.set_value("Repost Item Valuation", row.name, "status", "Skipped")
 			frappe.cache().delete_value(repost_coverage_cache_key(row.name))
 

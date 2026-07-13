@@ -763,10 +763,10 @@ class update_entries_after:
 
 			i += 1
 			item_wh_key = (sle.item_code, sle.warehouse)
-			if item_wh_key not in self.item_wh_first_reposted:
-				self.item_wh_first_reposted[item_wh_key] = sle.posting_datetime or get_combine_datetime(
-					sle.posting_date, sle.posting_time
-				)
+			sle_datetime = sle.posting_datetime or get_combine_datetime(sle.posting_date, sle.posting_time)
+			existing_datetime = self.item_wh_first_reposted.get(item_wh_key)
+			if not existing_datetime or get_datetime(sle_datetime) < get_datetime(existing_datetime):
+				self.item_wh_first_reposted[item_wh_key] = sle_datetime
 			if item_wh_key not in self.prev_sle_dict:
 				self.prev_sle_dict[item_wh_key] = get_previous_sle_of_current_voucher(sle)
 
