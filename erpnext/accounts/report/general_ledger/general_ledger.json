@@ -14,7 +14,7 @@
  "filters": [],
  "idx": 3,
  "is_standard": "Yes",
- "modified": "2026-06-22 13:38:35.057216",
+ "modified": "2026-07-01 13:36:06.682661",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "General Ledger",
@@ -34,6 +34,6 @@
    "role": "Auditor"
   }
  ],
- "synced_report": 0,
+ "snapshot_report": 0,
  "timeout": 0
 }
