@@ -22,7 +22,9 @@
   "column_break_itvd",
   "enable_separate_reposting_for_gl",
   "errors_notification_section",
-  "notify_reposting_error_to_role"
+  "notify_reposting_error_to_role",
+  "auto_reposting_section",
+  "repost_incorrect_valuation_entries"
  ],
  "fields": [
   {
@@ -113,12 +115,24 @@
    "fieldname": "do_not_fetch_incoming_rate_from_serial_no",
    "fieldtype": "Check",
    "label": "Do not fetch incoming rate from Serial No"
+  },
+  {
+   "fieldname": "auto_reposting_section",
+   "fieldtype": "Section Break",
+   "label": "Auto Reposting of Incorrect Valuation"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, a weekly scheduler scans the Stock Ledger Variance for item-warehouses with incorrect valuation in the current financial year and auto-creates Item & Warehouse based reposts to fix them.",
+   "fieldname": "repost_incorrect_valuation_entries",
+   "fieldtype": "Check",
+   "label": "Auto Repost Incorrect Valuation Entries (Weekly)"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-05-15 12:59:34.392491",
+ "modified": "2026-07-01 14:41:51.499245",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reposting Settings",
