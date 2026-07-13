@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
-"POT-Creation-Date: 2026-07-05 10:19+0000\n"
+"POT-Creation-Date: 2026-07-12 10:05+0000\n"
 "PO-Revision-Date: 2026-07-06 11:32+0000\n"
 "Last-Translator: hello@frappe.io\n"
 "Language: ar_SA\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.16.0\n"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1641
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1642
 msgid ""
 "\n"
 "\t\t\tThe Batch {0} of an item {1} has negative stock in the warehouse {2}{3}.\n"
@@ -160,7 +160,7 @@ msgstr ""
 msgid "% Delivered"
 msgstr "% تسليم"
 
-#: erpnext/manufacturing/doctype/bom/bom.js:1022
+#: erpnext/manufacturing/doctype/bom/bom.js:1026
 #, python-format
 msgid "% Finished Item Quantity"
 msgstr "% كمية المنتج النهائي"
@@ -937,11 +937,11 @@ msgstr ""
 msgid "<span class=\"h4\"><b>Your Shortcuts</b></span>"
 msgstr ""
 
-#: erpnext/accounts/doctype/payment_request/payment_request.py:1136
+#: erpnext/accounts/doctype/payment_request/payment_request.py:1137
 msgid "<strong>Grand Total:</strong> {0}"
 msgstr ""
 
-#: erpnext/accounts/doctype/payment_request/payment_request.py:1137
+#: erpnext/accounts/doctype/payment_request/payment_request.py:1138
 msgid "<strong>Outstanding Amount:</strong> {0}"
 msgstr ""
 
@@ -1026,7 +1026,7 @@ msgstr ""
 msgid "A Product or a Service that is bought, sold or kept in stock."
 msgstr ""
 
-#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:570
+#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:601
 msgid "A Reconciliation Job {0} is running for the same filters. Cannot reconcile now"
 msgstr ""
 
@@ -1185,7 +1185,7 @@ msgstr "الاختصار يستخدم بالفعل لشركة أخرى\\n<br>\\n
 msgid "Abbreviation is mandatory"
 msgstr "الاسم المختصر إلزامي"
 
-#: erpnext/stock/doctype/item_attribute/item_attribute.py:115
+#: erpnext/stock/doctype/item_attribute/item_attribute.py:117
 msgid "Abbreviation: {0} must appear only once"
 msgstr "الاختصار: يجب أن يظهر {0} مرة واحدة فقط"
 
@@ -1279,7 +1279,7 @@ msgstr "مفتاح الوصول مطلوب لموفر الخدمة: {0}"
 msgid "According to CEFACT/ICG/2010/IC013 or CEFACT/ICG/2010/IC010"
 msgstr "وفقًا لـ CEFACT/ICG/2010/IC013 أو CEFACT/ICG/2010/IC010"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1269
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1279
 msgid "According to the BOM {0}, the Item '{1}' is missing in the stock entry."
 msgstr "وفقًا لقائمة المواد {0}، فإن العنصر '{1}' مفقود في إدخال المخزون."
 
@@ -1666,7 +1666,7 @@ msgstr "الحساب: <b>{0}</b> عبارة &quot;Capital work&quot; قيد ال
 msgid "Account: {0} can only be updated via Stock Transactions"
 msgstr "الحساب: {0} لا يمكن تحديثه إلا من خلال معاملات المخزون"
 
-#: erpnext/accounts/doctype/payment_entry/payment_entry.py:2743
+#: erpnext/accounts/doctype/payment_entry/payment_entry.py:2746
 msgid "Account: {0} is not permitted under Payment Entry"
 msgstr "الحساب: {0} غير مسموح به بموجب إدخال الدفع"
 
@@ -1904,8 +1904,8 @@ msgstr "القيود المحاسبة"
 msgid "Accounting Entry for Asset"
 msgstr "المدخلات الحسابية للأصول"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2320
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2340
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:2330
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:2350
 msgid "Accounting Entry for LCV in Stock Entry {0}"
 msgstr ""
 
@@ -1929,8 +1929,8 @@ msgstr "القيد المحاسبي للخدمة"
 #: erpnext/controllers/stock_controller.py:768
 #: erpnext/controllers/stock_controller.py:785
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:940
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2265
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2279
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:2275
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:2289
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:753
 msgid "Accounting Entry for Stock"
 msgstr "القيود المحاسبية للمخزون"
@@ -2442,7 +2442,7 @@ msgstr "تاريخ الإنتهاء الفعلي"
 msgid "Actual End Date (via Timesheet)"
 msgstr "تاريخ الإنتهاء الفعلي (عبر ورقة الوقت)"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:300
+#: erpnext/manufacturing/doctype/work_order/work_order.py:304
 msgid "Actual End Date cannot be before Actual Start Date"
 msgstr "تاريخ النهاية الفعلي لا يمكن أن يكون قبل تاريخ البداية الفعلي"
 
@@ -2663,7 +2663,7 @@ msgid "Add Quote"
 msgstr "إضافة  عرض سعر"
 
 #. Label of the add_raw_materials (Button) field in DocType 'BOM Operation'
-#: erpnext/manufacturing/doctype/bom/bom.js:1050
+#: erpnext/manufacturing/doctype/bom/bom.js:1054
 #: erpnext/manufacturing/doctype/bom_operation/bom_operation.json
 msgid "Add Raw Materials"
 msgstr ""
@@ -2772,7 +2772,7 @@ msgid "Add details"
 msgstr ""
 
 #: erpnext/stock/doctype/pick_list/pick_list.js:89
-#: erpnext/stock/doctype/pick_list/pick_list.py:937
+#: erpnext/stock/doctype/pick_list/pick_list.py:967
 msgid "Add items in the Item Locations table"
 msgstr "أضف عناصر في جدول &quot;مواقع العناصر&quot;"
 
@@ -3046,7 +3046,7 @@ msgstr "معلومة اضافية"
 msgid "Additional Information updated successfully."
 msgstr "تم تحديث المعلومات الإضافية بنجاح."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:830
+#: erpnext/manufacturing/doctype/work_order/work_order.js:834
 msgid "Additional Material Transfer"
 msgstr "نقل مواد إضافية"
 
@@ -3069,7 +3069,7 @@ msgstr "تكاليف تشغيل  اضافية"
 msgid "Additional Transferred Qty"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:782
+#: erpnext/manufacturing/doctype/work_order/work_order.py:841
 msgid ""
 "Additional Transferred Qty {0}\n"
 "\t\t\t\t\tcannot be greater than {1}.\n"
@@ -3844,11 +3844,11 @@ msgstr "جميع العناصر مطلوبة مسبقاً"
 msgid "All items have already been Invoiced/Returned"
 msgstr "تم بالفعل تحرير / إرجاع جميع العناصر"
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:1201
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:1213
 msgid "All items have already been received"
 msgstr "تم استلام جميع العناصر مسبقاً"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:3652
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:3662
 msgid "All items have already been transferred for this Work Order."
 msgstr "جميع الإصناف تم نقلها لأمر العمل"
 
@@ -3864,6 +3864,10 @@ msgstr "يجب ربط جميع العناصر بطلب مبيعات أو طلب 
 msgid "All linked Sales Orders must be subcontracted."
 msgstr ""
 
+#: erpnext/stock/doctype/pick_list/pick_list.py:1598
+msgid "All picked items have already been transferred against this Pick List"
+msgstr ""
+
 #. Description of the 'Carry Forward Communication and Comments' (Check) field
 #. in DocType 'CRM Settings'
 #: erpnext/crm/doctype/crm_settings/crm_settings.json
@@ -3874,11 +3878,11 @@ msgstr ""
 msgid "All the items have been already returned."
 msgstr "تم إرجاع جميع العناصر مسبقاً."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1275
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1286
 msgid "All the required items (raw materials) will be fetched from BOM and populated in this table. Here you can also change the Source Warehouse for any item. And during the production, you can track transferred raw materials from this table."
 msgstr ""
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:836
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:848
 msgid "All these items have already been Invoiced/Returned"
 msgstr "تم بالفعل إصدار فاتورة / إرجاع جميع هذه العناصر"
 
@@ -4133,7 +4137,7 @@ msgstr ""
 
 #. Label of the allow_rename_attribute_value (Check) field in DocType 'Item
 #. Variant Settings'
-#: erpnext/controllers/item_variant.py:201
+#: erpnext/controllers/item_variant.py:263
 #: erpnext/stock/doctype/item_variant_settings/item_variant_settings.json
 msgid "Allow Rename Attribute Value"
 msgstr "السماح بميزة إعادة التسمية"
@@ -4150,7 +4154,7 @@ msgstr ""
 msgid "Allow Resetting Service Level Agreement"
 msgstr "السماح بإعادة ضبط اتفاقية مستوى الخدمة"
 
-#: erpnext/support/doctype/service_level_agreement/service_level_agreement.py:785
+#: erpnext/support/doctype/service_level_agreement/service_level_agreement.py:788
 msgid "Allow Resetting Service Level Agreement from Support Settings."
 msgstr "السماح بإعادة ضبط اتفاقية مستوى الخدمة من إعدادات الدعم."
 
@@ -4413,6 +4417,14 @@ msgstr "سمح للاعتماد مع"
 msgid "Allowed Users"
 msgstr ""
 
+#: erpnext/crm/doctype/crm_settings/crm_settings.py:59
+msgid "Allowed Users is not required as Frappe CRM is already installed on the site."
+msgstr ""
+
+#: erpnext/crm/doctype/crm_settings/crm_settings.js:17
+msgid "Allowed Users is required for data synchronization from remote Frappe CRM site."
+msgstr ""
+
 #: erpnext/accounts/doctype/party_link/party_link.py:27
 msgid "Allowed primary roles are 'Customer' and 'Supplier'. Please select one of these roles only."
 msgstr ""
@@ -4456,7 +4468,7 @@ msgstr ""
 msgid "Already Imported"
 msgstr ""
 
-#: erpnext/stock/doctype/pick_list/pick_list.py:1086
+#: erpnext/stock/doctype/pick_list/pick_list.py:1116
 msgid "Already Picked"
 msgstr ""
 
@@ -4905,7 +4917,7 @@ msgstr "حدث خطأ أثناء إعادة نشر تقييم العنصر عب�
 msgid "An error occurred during the update process"
 msgstr "حدث خطأ أثناء عملية التحديث"
 
-#: erpnext/stock/reorder_item.py:378
+#: erpnext/stock/reorder_item.py:380
 msgid "An error occurred for certain Items while creating Material Requests based on Re-order level. Please rectify these issues :"
 msgstr "حدث خطأ في بعض الأصناف أثناء إنشاء طلبات المواد بناءً على مستوى إعادة الطلب. يرجى تصحيح هذه المشكلات:"
 
@@ -4962,7 +4974,7 @@ msgstr "يوجد بالفعل سجل ميزانية آخر '{0}' مقابل {1} 
 msgid "Another Cost Center Allocation record {0} applicable from {1}, hence this allocation will be applicable upto {2}"
 msgstr "سجل تخصيص مركز التكلفة الآخر {0} ينطبق من {1}، وبالتالي سيظل هذا التخصيص ساريًا حتى {2}"
 
-#: erpnext/accounts/doctype/payment_request/payment_request.py:885
+#: erpnext/accounts/doctype/payment_request/payment_request.py:886
 msgid "Another Payment Request is already processed"
 msgstr "تمت معالجة طلب دفع آخر بالفعل"
 
@@ -5169,8 +5181,8 @@ msgstr "تطبيق تخفيض على"
 
 #. Label of the apply_discount_on_rate (Check) field in DocType 'Pricing Rule'
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
-#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:190
-#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:199
+#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:208
+#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:217
 msgid "Apply Discount on Discounted Rate"
 msgstr "تطبيق الخصم على السعر المخفض"
 
@@ -5266,6 +5278,12 @@ msgstr "ينطبق على جميع وثائق الجرد"
 #: erpnext/stock/doctype/inventory_dimension/inventory_dimension.json
 msgid "Apply to Document"
 msgstr "تطبيق على المستند"
+
+#. Description of the 'Additional Discount Amount' (Currency) field in DocType
+#. 'Sales Order'
+#: erpnext/selling/doctype/sales_order/sales_order.json
+msgid "Applying a Discount Amount? When this Sales Order is partially fulfilled through multiple Delivery Notes and Sales Invoices, the Discount Amount is allocated on a FIFO basis. The earlier transactions receive a larger share of the discount. To spread the discount proportionally across item prices, use Additional Discount Percentage instead."
+msgstr ""
 
 #. Name of a DocType
 #. Label of a Workspace Sidebar Item
@@ -5430,11 +5448,11 @@ msgstr "اعتبارًا من التاريخ"
 msgid "As per Stock UOM"
 msgstr "وفقا للأوراق UOM"
 
-#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:189
+#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:207
 msgid "As the field {0} is enabled, the field {1} is mandatory."
 msgstr "نظرًا لتمكين الحقل {0} ، يكون الحقل {1} إلزاميًا."
 
-#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:197
+#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:215
 msgid "As the field {0} is enabled, the value of the field {1} should be more than 1."
 msgstr "أثناء تمكين الحقل {0} ، يجب أن تكون قيمة الحقل {1} أكثر من 1."
 
@@ -6058,15 +6076,15 @@ msgstr "شروط التعيين"
 msgid "Associate"
 msgstr "شريك"
 
-#: erpnext/stock/doctype/pick_list/pick_list.py:138
+#: erpnext/stock/doctype/pick_list/pick_list.py:140
 msgid "At Row #{0}: The picked quantity {1} for the item {2} is greater than available stock {3} for the batch {4} in the warehouse {5}. Please restock the item."
 msgstr "في الصف #{0}: الكمية المختارة {1} للصنف {2} أكبر من المخزون المتاح {3} للدفعة {4} في المستودع {5}. يرجى إعادة تخزين الصنف."
 
-#: erpnext/stock/doctype/pick_list/pick_list.py:163
+#: erpnext/stock/doctype/pick_list/pick_list.py:165
 msgid "At Row #{0}: The picked quantity {1} for the item {2} is greater than available stock {3} in the warehouse {4}."
 msgstr "في الصف #{0}: الكمية المختارة {1} للصنف {2} أكبر من المخزون المتاح {3} في المستودع {4}."
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1486
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1487
 msgid "At Row {0}: In Serial and Batch Bundle {1} must have docstatus as 1 and not 0"
 msgstr "في الصف {0}: في حزمة البيانات التسلسلية والدفعية {1} ، يجب أن تكون حالة المستند 1 وليس 0"
 
@@ -6095,11 +6113,11 @@ msgstr "يلزم وضع واحد نمط واحد للدفع لفاتورة نق�
 msgid "At least one of the Applicable Modules should be selected"
 msgstr "يجب اختيار واحدة على الأقل من الوحدات القابلة للتطبيق"
 
-#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:204
+#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:222
 msgid "At least one of the Selling or Buying must be selected"
 msgstr "يجب اختيار واحد على الأقل من خياري البيع أو الشراء"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:417
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:426
 msgid "At least one raw material item must be present in the stock entry for the type {0}"
 msgstr ""
 
@@ -6107,11 +6125,11 @@ msgstr ""
 msgid "At least one row is required for a financial report template"
 msgstr "يلزم وجود صف واحد على الأقل في نموذج التقرير المالي"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:981
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:991
 msgid "At least one warehouse is mandatory"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:884
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:894
 msgid "At row #{0}: the Difference Account must not be a Stock type account, please change the Account Type for the account {1} or select a different account"
 msgstr ""
 
@@ -6119,11 +6137,11 @@ msgstr ""
 msgid "At row #{0}: the sequence id {1} cannot be less than previous row sequence id {2}"
 msgstr "في الصف # {0}: لا يمكن أن يكون معرف التسلسل {1} أقل من معرف تسلسل الصف السابق {2}"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:895
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:905
 msgid "At row #{0}: you have selected the Difference Account {1}, which is a Cost of Goods Sold type account. Please select a different account"
 msgstr ""
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1234
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1235
 msgid "At row {0}: Batch No is mandatory for Item {1}"
 msgstr "في الصف {0}: رقم الدفعة إلزامي للعنصر {1}"
 
@@ -6131,11 +6149,11 @@ msgstr "في الصف {0}: رقم الدفعة إلزامي للعنصر {1}"
 msgid "At row {0}: Parent Row No cannot be set for item {1}"
 msgstr "في الصف {0}: لا يمكن تعيين رقم الصف الأصل للعنصر {1}"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1219
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1220
 msgid "At row {0}: Qty is mandatory for the batch {1}"
 msgstr "في الصف {0}: الكمية إلزامية للدفعة {1}"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1226
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1227
 msgid "At row {0}: Serial No is mandatory for Item {1}"
 msgstr "في الصف {0}: الرقم التسلسلي إلزامي للعنصر {1}"
 
@@ -6211,7 +6229,7 @@ msgstr ""
 msgid "Attribute table is mandatory"
 msgstr "جدول الخصائص إلزامي"
 
-#: erpnext/stock/doctype/item_attribute/item_attribute.py:110
+#: erpnext/stock/doctype/item_attribute/item_attribute.py:112
 msgid "Attribute value: {0} must appear only once"
 msgstr "قيمة السمة: {0} يجب أن تظهر مرة واحدة فقط"
 
@@ -6324,7 +6342,7 @@ msgstr "جلب الأرقام التسلسلية تلقائيًا"
 msgid "Auto Material Request"
 msgstr "طلب مواد تلقائي"
 
-#: erpnext/stock/reorder_item.py:329
+#: erpnext/stock/reorder_item.py:331
 msgid "Auto Material Requests Generated"
 msgstr "إنشاء طلب مواد تلقائي"
 
@@ -6638,7 +6656,7 @@ msgstr ""
 msgid "Available for use date is required"
 msgstr "مطلوب تاريخ متاح للاستخدام"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1231
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1241
 msgid "Available quantity is {0}, you need {1}"
 msgstr "الكمية المتاحة هي {0} ، تحتاج إلى {1}"
 
@@ -7030,7 +7048,7 @@ msgstr "صنف الموقع الالكتروني بقائمة المواد"
 msgid "BOM Website Operation"
 msgstr "عملية الموقع الالكتروني بقائمة المواد"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2758
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:2768
 msgid "BOM and Finished Good Quantity is mandatory for Disassembly"
 msgstr "يُعدّ كل من قائمة المواد وكمية المنتج النهائي شرطًا أساسيًا لعملية التفكيك."
 
@@ -7948,11 +7966,11 @@ msgstr ""
 msgid "Batch No"
 msgstr "رقم دفعة"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1237
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1238
 msgid "Batch No is mandatory"
 msgstr "رقم الدفعة إلزامي"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:3520
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:3530
 msgid "Batch No {0} does not exists"
 msgstr "رقم الدفعة {0} غير موجود"
 
@@ -7960,7 +7978,7 @@ msgstr "رقم الدفعة {0} غير موجود"
 msgid "Batch No {0} is linked with Item {1} which has serial no. Please scan serial no instead."
 msgstr "رقم الدفعة {0} مرتبط بالعنصر {1} الذي يحمل رقمًا تسلسليًا. يرجى مسح الرقم التسلسلي بدلاً من ذلك."
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:490
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:491
 msgid "Batch No {0} is not present in the original {1} {2}, hence you can't return it against the {1} {2}"
 msgstr "رقم الدفعة {0} غير موجود في الدفعة الأصلية {1} {2}، لذا لا يمكنك إرجاعه مقابل الدفعة {1} {2}"
 
@@ -7975,7 +7993,7 @@ msgstr ""
 msgid "Batch Nos"
 msgstr "أرقام الدفعات"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2059
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2060
 msgid "Batch Nos are created successfully"
 msgstr "تم إنشاء أرقام الدفعات بنجاح"
 
@@ -8029,7 +8047,7 @@ msgstr "دفعة UOM"
 msgid "Batch and Serial No"
 msgstr "رقم الدفعة والرقم التسلسلي"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1009
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1068
 msgid "Batch not created for item {} since it does not have a batch series."
 msgstr "لم يتم إنشاء دفعة للعنصر {} لأنه لا يحتوي على سلسلة دفعات."
 
@@ -8052,12 +8070,12 @@ msgstr "الدفعة {0} والمستودع"
 msgid "Batch {0} is not available in warehouse {1}"
 msgstr "الدفعة {0} غير متوفرة في المستودع {1}"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:3836
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:3846
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py:290
 msgid "Batch {0} of Item {1} has expired."
 msgstr "الدفعة {0} للعنصر {1} انتهت صلاحيتها\\n<br>\\nBatch {0} of Item {1} has expired."
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:3842
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:3852
 msgid "Batch {0} of Item {1} is disabled."
 msgstr "تم تعطيل الدفعة {0} من الصنف {1}."
 
@@ -8342,7 +8360,7 @@ msgstr "حالة الفواتير"
 msgid "Billing Zipcode"
 msgstr "الرمز البريدي للفواتير"
 
-#: erpnext/accounts/party.py:617
+#: erpnext/accounts/party.py:633
 msgid "Billing currency must be equal to either default company's currency or party account currency"
 msgstr "يجب أن تكون عملة الفوترة مساوية لعملة الشركة الافتراضية أو عملة حساب الطرف"
 
@@ -8984,7 +9002,7 @@ msgstr ""
 msgid "Buying and Selling"
 msgstr "البيع والشراء"
 
-#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:219
+#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:237
 msgid "Buying must be checked, if Applicable For is selected as {0}"
 msgstr "يجب أن يتم التحقق الشراء، إذا تم تحديد مطبق للك {0}"
 
@@ -9320,7 +9338,7 @@ msgstr ""
 msgid "Can be approved by {0}"
 msgstr "يمكن الموافقة عليها بواسطة {0}"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2782
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2841
 msgid "Can not close Work Order. Since {0} Job Cards are in Work In Progress state."
 msgstr "لا يمكن إغلاق أمر العمل. لأن {0} بطاقات العمل في حالة \"قيد التنفيذ\"."
 
@@ -9349,7 +9367,7 @@ msgid "Can not filter based on Voucher No, if grouped by Voucher"
 msgstr "لا يمكن الفلتره علي اساس (رقم الأيصال)، إذا تم وضعه في مجموعة على اساس (ايصال)"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:1396
-#: erpnext/accounts/doctype/payment_entry/payment_entry.py:2898
+#: erpnext/accounts/doctype/payment_entry/payment_entry.py:2901
 msgid "Can only make payment against unbilled {0}"
 msgstr "يمكن إجراء دفعة فقط مقابل فاتورة غير مدفوعة {0}"
 
@@ -9463,7 +9481,7 @@ msgstr "لا يمكن إلغاء إدخال حجز المخزون {0}، لأنه
 msgid "Cannot cancel as processing of cancelled documents is pending."
 msgstr "لا يمكن الإلغاء لأن معالجة المستندات الملغاة لا تزال قيد الانتظار."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1187
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1246
 msgid "Cannot cancel because submitted Stock Entry {0} exists"
 msgstr "لا يمكن الإلغاء لان هناك تدوينات مخزون مقدمة {0} موجوده"
 
@@ -9483,7 +9501,7 @@ msgstr ""
 msgid "Cannot cancel this document as it is linked with the submitted asset {asset_link}. Please cancel the asset to continue."
 msgstr "لا يمكن إلغاء هذا المستند لأنه مرتبط بالأصل المُرسَل {asset_link}. يُرجى إلغاء الأصل للمتابعة."
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:659
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:669
 msgid "Cannot cancel transaction for Completed Work Order."
 msgstr "لا يمكن إلغاء المعاملة لأمر العمل المكتمل."
 
@@ -9540,7 +9558,7 @@ msgid "Cannot create Stock Reservation Entries for future dated Purchase Receipt
 msgstr "لا يمكن إنشاء إدخالات حجز المخزون لإيصالات الشراء ذات التواريخ المستقبلية."
 
 #: erpnext/selling/doctype/sales_order/sales_order.py:1905
-#: erpnext/stock/doctype/pick_list/pick_list.py:258
+#: erpnext/stock/doctype/pick_list/pick_list.py:260
 msgid "Cannot create a pick list for Sales Order {0} because it has reserved stock. Please unreserve the stock in order to create a pick list."
 msgstr "لا يمكن إنشاء قائمة اختيار لأمر البيع {0} لأنه يحتوي على مخزون محجوز. يرجى إلغاء حجز المخزون لإنشاء قائمة الاختيار."
 
@@ -9573,7 +9591,7 @@ msgstr "لا يمكن حذف صف الربح/الخسارة في الصرف"
 msgid "Cannot delete Serial No {0}, as it is used in stock transactions"
 msgstr "لا يمكن حذف الرقم التسلسلي {0}، لانه يتم استخدامها في قيود المخزون"
 
-#: erpnext/controllers/accounts_controller.py:3831
+#: erpnext/controllers/accounts_controller.py:3841
 msgid "Cannot delete an item which has been ordered"
 msgstr "لا يمكن حذف عنصر تم طلبه"
 
@@ -9598,11 +9616,11 @@ msgstr "لا يمكن تعطيل الجرد الدائم، لوجود قيود �
 msgid "Cannot disable {0} as it may lead to incorrect stock valuation."
 msgstr ""
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:799
+#: erpnext/manufacturing/doctype/work_order/work_order.py:858
 msgid "Cannot disassemble more than produced quantity."
 msgstr "لا يمكن تفكيك كمية أكبر من الكمية المنتجة."
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1024
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1034
 msgid "Cannot disassemble {0} qty against Stock Entry {1}. Only {2} qty available to disassemble."
 msgstr ""
 
@@ -9610,7 +9628,7 @@ msgstr ""
 msgid "Cannot enable Item-wise Inventory Account, as there are existing Stock Ledger Entries for the company {0} with Warehouse-wise Inventory Account. Please cancel the stock transactions first and try again."
 msgstr "لا يمكن تفعيل حساب المخزون حسب الصنف، لوجود قيود دفترية للمخزون للشركة {0} مع حساب مخزون حسب المستودع. يرجى إلغاء معاملات المخزون أولاً ثم المحاولة مرة أخرى."
 
-#: erpnext/crm/doctype/crm_settings/crm_settings.py:43
+#: erpnext/crm/doctype/crm_settings/crm_settings.py:45
 msgid "Cannot enable Opportunity creation from Contact Us because the Contact Us form is disabled."
 msgstr ""
 
@@ -9631,23 +9649,23 @@ msgstr "لا يمكن العثور على المنتج أو المستودع ب�
 msgid "Cannot find Item with this Barcode"
 msgstr "لا يمكن العثور على عنصر بهذا الرمز الشريطي"
 
-#: erpnext/controllers/accounts_controller.py:3783
+#: erpnext/controllers/accounts_controller.py:3793
 msgid "Cannot find a default warehouse for item {0}. Please set one in the Item Master or in Stock Settings."
 msgstr "تعذر العثور على مستودع افتراضي للصنف {0}. يرجى تحديد مستودع في بيانات الصنف الرئيسية أو في إعدادات المخزون."
 
-#: erpnext/accounts/party.py:1092
+#: erpnext/accounts/party.py:1108
 msgid "Cannot merge {0} '{1}' into '{2}' as both have existing accounting entries in different currencies for company '{3}'."
 msgstr "لا يمكن دمج {0} '{1}' في '{2}' حيث أن لكليهما قيود محاسبية موجودة بعملات مختلفة للشركة '{3}'."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:643
+#: erpnext/manufacturing/doctype/work_order/work_order.py:647
 msgid "Cannot produce more Item {0} than Sales Order quantity {1} {2}"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1561
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1620
 msgid "Cannot produce more item for {0}"
 msgstr "لا يمكن إنتاج المزيد من العناصر لـ {0}"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1565
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1624
 msgid "Cannot produce more than {0} items for {1}"
 msgstr "لا يمكن إنتاج أكثر من {0} عنصرًا لـ {1}"
 
@@ -9655,7 +9673,7 @@ msgstr "لا يمكن إنتاج أكثر من {0} عنصرًا لـ {1}"
 msgid "Cannot receive from customer against negative outstanding"
 msgstr ""
 
-#: erpnext/controllers/accounts_controller.py:3979
+#: erpnext/controllers/accounts_controller.py:3989
 msgid "Cannot reduce quantity than ordered or purchased quantity"
 msgstr "لا يمكن تقليل الكمية عن الكمية المطلوبة أو المشتراة"
 
@@ -9698,11 +9716,11 @@ msgstr "لا يمكن تحديد التخويل على أساس الخصم ل {0
 msgid "Cannot set multiple Item Defaults for a company."
 msgstr "لا يمكن تعيين عدة عناصر افتراضية لأي شركة."
 
-#: erpnext/controllers/accounts_controller.py:3945
+#: erpnext/controllers/accounts_controller.py:3955
 msgid "Cannot set quantity less than delivered quantity."
 msgstr "لا يمكن ضبط كمية أقل من الكمية المسلمة."
 
-#: erpnext/controllers/accounts_controller.py:3946
+#: erpnext/controllers/accounts_controller.py:3956
 msgid "Cannot set quantity less than received quantity."
 msgstr "لا يمكن تعيين كمية أقل من الكمية المستلمة."
 
@@ -9718,7 +9736,7 @@ msgstr ""
 msgid "Cannot submit Job Card {0} while it is On Hold. Please resume and complete the job before submission."
 msgstr ""
 
-#: erpnext/controllers/accounts_controller.py:3973
+#: erpnext/controllers/accounts_controller.py:3983
 msgid "Cannot update rate as item {0} is already ordered or purchased against this quotation"
 msgstr ""
 
@@ -9751,7 +9769,7 @@ msgstr "السعة (وحدة قياس المخزون)"
 msgid "Capacity Planning"
 msgstr "القدرة على التخطيط"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1173
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1232
 msgid "Capacity Planning Error, planned start time can not be same as end time"
 msgstr "خطأ في تخطيط السعة ، لا يمكن أن يكون وقت البدء المخطط له هو نفسه وقت الانتهاء"
 
@@ -10591,7 +10609,7 @@ msgstr "وثيقة مغلقة"
 msgid "Closed Documents"
 msgstr "وثائق مغلقة"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2705
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2764
 msgid "Closed Work Order can not be stopped or Re-opened"
 msgstr "لا يمكن إيقاف أمر العمل المغلق أو إعادة فتحه."
 
@@ -11420,11 +11438,11 @@ msgstr "عرض عنوان الشركة"
 msgid "Company Address Name"
 msgstr "اسم عنوان الشركة"
 
-#: erpnext/controllers/accounts_controller.py:4409
+#: erpnext/controllers/accounts_controller.py:4419
 msgid "Company Address is missing. You don't have permission to create an Address. Please contact your System Manager."
 msgstr ""
 
-#: erpnext/controllers/accounts_controller.py:4397
+#: erpnext/controllers/accounts_controller.py:4407
 msgid "Company Address is missing. You don't have permission to update it. Please contact your System Manager."
 msgstr "عنوان الشركة غير موجود. ليس لديك صلاحية لتحديثه. يرجى الاتصال بمدير النظام."
 
@@ -11689,7 +11707,7 @@ msgstr "المشاريع المنجزة"
 msgid "Completed Qty"
 msgstr "الكمية المكتملة"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1479
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1538
 msgid "Completed Qty cannot be greater than 'Qty to Manufacture'"
 msgstr "لا يمكن أن تكون الكمية المكتملة أكبر من &quot;الكمية إلى التصنيع&quot;"
 
@@ -11886,7 +11904,7 @@ msgstr "ضع في اعتبارك أبعاد المحاسبة"
 msgid "Consider Minimum Order Qty"
 msgstr "يرجى مراعاة الحد الأدنى لكمية الطلب"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1090
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1094
 msgid "Consider Process Loss"
 msgstr "ضع في اعتبارك خسائر العملية"
 
@@ -12081,7 +12099,7 @@ msgstr "تكلفة المواد المستهلكة"
 msgid "Consumed Qty"
 msgstr "تستهلك الكمية"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1881
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1940
 msgid "Consumed Qty cannot be greater than Reserved Qty for item {0}"
 msgstr "لا يمكن أن تتجاوز الكمية المستهلكة الكمية المحجوزة للصنف {0}"
 
@@ -12870,7 +12888,7 @@ msgstr "تكلفة السلع والمواد المسلمة"
 msgid "Cost of Goods Sold"
 msgstr "تكلفة البضاعة المباعة"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:898
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:908
 msgid "Cost of Goods Sold Account in Items Table"
 msgstr ""
 
@@ -12953,7 +12971,7 @@ msgstr "تعذر حذف بيانات العرض التوضيحي"
 msgid "Could not auto create Customer due to the following missing mandatory field(s):"
 msgstr "تعذر إنشاء العميل تلقائيًا بسبب الحقول الإلزامية التالية المفقودة:"
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:656
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:668
 msgid "Could not create Credit Note automatically, please uncheck 'Issue Credit Note' and submit again"
 msgstr "تعذر إنشاء إشعار دائن تلقائيًا ، يُرجى إلغاء تحديد &quot;إشعار ائتمان الإصدار&quot; وإرساله مرة أخرى"
 
@@ -13151,7 +13169,7 @@ msgstr "إنشاء أصول مجمعة"
 msgid "Create Inter Company Journal Entry"
 msgstr "إنشاء Inter Journal Journal Entry"
 
-#: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:55
+#: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:62
 msgid "Create Invoices"
 msgstr "إنشاء الفواتير"
 
@@ -13486,7 +13504,7 @@ msgstr ""
 msgid "Create a variant with the template image."
 msgstr "أنشئ نسخة بديلة باستخدام صورة القالب."
 
-#: erpnext/stock/stock_ledger.py:2033
+#: erpnext/stock/stock_ledger.py:2037
 msgid "Create an incoming stock transaction for the Item."
 msgstr "قم بإنشاء حركة مخزون واردة للصنف."
 
@@ -13565,7 +13583,7 @@ msgstr ""
 msgid "Creating Packing Slip ..."
 msgstr "إنشاء إيصال التعبئة ..."
 
-#: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:61
+#: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:68
 msgid "Creating Purchase Invoices ..."
 msgstr ""
 
@@ -13583,7 +13601,7 @@ msgstr ""
 msgid "Creating Return of Components ..."
 msgstr ""
 
-#: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:59
+#: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:66
 msgid "Creating Sales Invoices ..."
 msgstr ""
 
@@ -13611,7 +13629,7 @@ msgstr ""
 msgid "Creating demo data"
 msgstr ""
 
-#: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:317
+#: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:327
 msgid "Creating {} out of {} {}"
 msgstr "إنشاء {} من {} {}"
 
@@ -13814,7 +13832,7 @@ msgstr "الائتمان مذكرة صادرة"
 msgid "Credit Note will update it's own outstanding amount, even if 'Return Against' is specified."
 msgstr "ستقوم مذكرة الائتمان بتحديث المبلغ المستحق الخاص بها، حتى في حالة تحديد \"الإرجاع مقابل\"."
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:653
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:665
 msgid "Credit Note {0} has been created automatically"
 msgstr "تم إنشاء ملاحظة الائتمان {0} تلقائيًا"
 
@@ -14033,7 +14051,7 @@ msgstr "عملة الحساب الختامي يجب أن تكون {0}"
 msgid "Currency of the price list {0} must be {1} or {2}"
 msgstr "العملة من قائمة الأسعار {0} يجب أن تكون {1} أو {2}"
 
-#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:298
+#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:316
 msgid "Currency should be same as Price List Currency: {0}"
 msgstr "يجب أن تكون العملة مماثلة لعملة قائمة الأسعار: {0}"
 
@@ -14318,7 +14336,7 @@ msgstr "محددات مخصصة"
 #: erpnext/assets/doctype/asset/asset.json
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
 #: erpnext/buying/doctype/supplier/supplier.js:225
-#: erpnext/crm/doctype/contract/contract.json
+#: erpnext/controllers/trends.py:409 erpnext/crm/doctype/contract/contract.json
 #: erpnext/crm/doctype/lead/lead.js:32
 #: erpnext/crm/doctype/opportunity/opportunity.js:99
 #: erpnext/crm/doctype/prospect/prospect.js:8
@@ -14591,6 +14609,7 @@ msgstr "ملاحظات العميل"
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:208
 #: erpnext/accounts/report/sales_register/sales_register.js:27
 #: erpnext/accounts/report/sales_register/sales_register.py:216
+#: erpnext/controllers/trends.py:436
 #: erpnext/crm/doctype/opportunity/opportunity.json
 #: erpnext/crm/doctype/prospect/prospect.json
 #: erpnext/crm/workspace/crm/crm.json
@@ -14703,6 +14722,7 @@ msgstr "رقم محمول العميل"
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:228
 #: erpnext/accounts/report/sales_register/sales_register.py:207
 #: erpnext/buying/doctype/purchase_order/purchase_order.json
+#: erpnext/controllers/trends.py:416
 #: erpnext/crm/doctype/opportunity/opportunity.json
 #: erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.json
 #: erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.json
@@ -15362,11 +15382,11 @@ msgstr "نسبة الدين إلى حقوق الملكية"
 msgid "Debtor Turnover Ratio"
 msgstr "نسبة دوران المدينين"
 
-#: erpnext/accounts/party.py:624
+#: erpnext/accounts/party.py:640
 msgid "Debtor/Creditor"
 msgstr "المدين/الدائن"
 
-#: erpnext/accounts/party.py:627
+#: erpnext/accounts/party.py:643
 msgid "Debtor/Creditor Advance"
 msgstr "سلفة المدين/الدائن"
 
@@ -15493,15 +15513,15 @@ msgstr "الافتراضي BOM"
 msgid "Default BOM ({0}) must be active for this item or its template"
 msgstr "يجب أن تكون قائمة المواد الافتراضية ({0}) نشطة لهذا الصنف أو قوالبه"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2473
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2532
 msgid "Default BOM for {0} not found"
 msgstr "فاتورة المواد ل {0} غير موجودة\\n<br>\\nDefault BOM for {0} not found"
 
-#: erpnext/controllers/accounts_controller.py:4017
+#: erpnext/controllers/accounts_controller.py:4027
 msgid "Default BOM not found for FG Item {0}"
 msgstr "لم يتم العثور على قائمة مكونات افتراضية لعنصر المنتج النهائي {0}"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2470
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2529
 msgid "Default BOM not found for Item {0} and Project {1}"
 msgstr "لم يتم العثور على قائمة المواد الافتراضية للمادة {0} والمشروع {1}"
 
@@ -16821,11 +16841,11 @@ msgstr "الفرق ( المدين -  الدائن )"
 msgid "Difference Account"
 msgstr "حساب الفرق"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:887
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:897
 msgid "Difference Account in Items Table"
 msgstr "حساب الفرق في جدول البنود"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:876
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:886
 msgid "Difference Account must be a Asset/Liability type account (Temporary Opening), since this Stock Entry is an Opening Entry"
 msgstr "يجب أن يكون حساب الفرق حسابًا من نوع الأصول/الخصوم (افتتاح مؤقت)، لأن قيد المخزون هذا هو قيد افتتاحي."
 
@@ -16956,24 +16976,6 @@ msgstr "إيراد مباشر"
 msgid "Direct return is not allowed for Timesheet."
 msgstr "لا يُسمح بالإرجاع المباشر لجدول الدوام."
 
-#. Label of the disabled (Check) field in DocType 'Account'
-#. Label of the disabled (Check) field in DocType 'Accounting Dimension'
-#. Label of the disable (Check) field in DocType 'Pricing Rule'
-#. Label of the disable (Check) field in DocType 'Promotional Scheme'
-#. Label of the disable (Check) field in DocType 'Promotional Scheme Price
-#. Discount'
-#. Label of the disable (Check) field in DocType 'Promotional Scheme Product
-#. Label of the disable (Check) field in DocType 'Putaway Rule'
-#: erpnext/accounts/doctype/account/account.json
-#: erpnext/accounts/doctype/accounting_dimension/accounting_dimension.json
-#: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
-#: erpnext/accounts/doctype/promotional_scheme/promotional_scheme.json
-#: erpnext/accounts/doctype/promotional_scheme_price_discount/promotional_scheme_price_discount.json
-#: erpnext/accounts/doctype/promotional_scheme_product_discount/promotional_scheme_product_discount.json
-#: erpnext/stock/doctype/putaway_rule/putaway_rule.json
-msgid "Disable"
-msgstr ""
-
 #. Label of the disable_capacity_planning (Check) field in DocType
 #. 'Manufacturing Settings'
 #: erpnext/manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
@@ -17088,7 +17090,7 @@ msgstr "يعطل الجلب التلقائي للكمية الموجودة"
 
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry'
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry Type'
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1068
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1072
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:392
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:435
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
@@ -17100,7 +17102,7 @@ msgstr "فكّك"
 msgid "Disassemble Order"
 msgstr "ترتيب التفكيك"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2700
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:2710
 msgid "Disassemble Qty cannot be less than or equal to 0."
 msgstr ""
 
@@ -17303,7 +17305,7 @@ msgstr "لا يمكن أن يتجاوز الخصم 100%."
 msgid "Discount must be less than 100"
 msgstr "يجب أن يكون الخصم أقل من 100"
 
-#: erpnext/accounts/doctype/payment_entry/payment_entry.py:3376
+#: erpnext/accounts/doctype/payment_entry/payment_entry.py:3379
 msgid "Discount of {} applied as per Payment Term"
 msgstr "يتم تطبيق خصم بقيمة {} وفقًا لشروط الدفع."
 
@@ -17886,11 +17888,11 @@ msgstr ""
 msgid "Drop some files here, or click to select files"
 msgstr ""
 
-#: erpnext/accounts/party.py:710
+#: erpnext/accounts/party.py:726
 msgid "Due Date cannot be after {0}"
 msgstr "لا يمكن أن يكون تاريخ الاستحقاق بعد {0}"
 
-#: erpnext/accounts/party.py:686
+#: erpnext/accounts/party.py:702
 msgid "Due Date cannot be before {0}"
 msgstr "لا يمكن أن يكون تاريخ الاستحقاق قبل {0}"
 
@@ -18153,7 +18155,7 @@ msgstr "سعة التحرير"
 msgid "Edit Cart"
 msgstr "تعديل سلة التسوق"
 
-#: erpnext/controllers/item_variant.py:203
+#: erpnext/controllers/item_variant.py:265
 msgid "Edit Not Allowed"
 msgstr "تحرير غير مسموح به"
 
@@ -19115,11 +19117,11 @@ msgstr "أدخل اسم البنك أو المؤسسة المقرضة قبل ا�
 msgid "Enter the opening stock units."
 msgstr "أدخل وحدات المخزون الافتتاحي."
 
-#: erpnext/manufacturing/doctype/bom/bom.js:995
+#: erpnext/manufacturing/doctype/bom/bom.js:999
 msgid "Enter the quantity of the Item that will be manufactured from this Bill of Materials."
 msgstr "أدخل كمية المنتج الذي سيتم تصنيعه من قائمة المواد هذه."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1237
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1248
 msgid "Enter the quantity to manufacture. Raw material Items will be fetched only when this is set."
 msgstr "أدخل الكمية المراد تصنيعها. سيتم جلب المواد الخام فقط عند تحديد هذا الخيار."
 
@@ -19186,7 +19188,7 @@ msgstr "إرج"
 msgid "Error Description"
 msgstr "وصف خاطئ"
 
-#: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:307
+#: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:317
 msgid "Error Occurred"
 msgstr "حدث خطأ"
 
@@ -19300,7 +19302,7 @@ msgstr "مثال: ABCD. #####. إذا تم ضبط المسلسل ولم يتم �
 msgid "Example: If the transaction amount is 200, then this will be calculated as {} = {}"
 msgstr ""
 
-#: erpnext/stock/stock_ledger.py:2315
+#: erpnext/stock/stock_ledger.py:2319
 msgid "Example: Serial No {0} reserved in {1}."
 msgstr "مثال: الرقم التسلسلي {0} محجوز في {1}."
 
@@ -19310,11 +19312,11 @@ msgstr "مثال: الرقم التسلسلي {0} محجوز في {1}."
 msgid "Exception Budget Approver Role"
 msgstr "دور الموافقة على الموازنة الاستثنائية"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1031
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1041
 msgid "Excess Disassembly"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1325
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1335
 msgid "Excess Material Transfer"
 msgstr ""
 
@@ -19767,7 +19769,7 @@ msgstr "النفقات المدرجة في تقييم الأصول"
 msgid "Expenses Included In Valuation"
 msgstr "المصروفات متضمنة في تقييم السعر"
 
-#: erpnext/stock/doctype/pick_list/pick_list.py:310
+#: erpnext/stock/doctype/pick_list/pick_list.py:312
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:518
 msgid "Expired Batches"
 msgstr "دفعات منتهية الصلاحية"
@@ -20373,9 +20375,9 @@ msgstr "تبدأ السنة المالية في"
 msgid "Financial reports will be generated using GL Entry doctypes (should be enabled if Period Closing Voucher is not posted for all years sequentially or missing) "
 msgstr "سيتم إنشاء التقارير المالية باستخدام أنواع مستندات إدخال دفتر الأستاذ العام (يجب تمكينها إذا لم يتم ترحيل قسيمة إغلاق الفترة لجميع السنوات بالتسلسل أو إذا كانت مفقودة). "
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:896
-#: erpnext/manufacturing/doctype/work_order/work_order.js:911
-#: erpnext/manufacturing/doctype/work_order/work_order.js:920
+#: erpnext/manufacturing/doctype/work_order/work_order.js:900
+#: erpnext/manufacturing/doctype/work_order/work_order.js:915
+#: erpnext/manufacturing/doctype/work_order/work_order.js:924
 msgid "Finish"
 msgstr "إنهاء"
 
@@ -20432,15 +20434,15 @@ msgstr "الكمية من المنتج النهائي"
 msgid "Finished Good Item Quantity"
 msgstr "المنتج النهائي الجيد الكمية"
 
-#: erpnext/controllers/accounts_controller.py:4003
+#: erpnext/controllers/accounts_controller.py:4013
 msgid "Finished Good Item is not specified for service item {0}"
 msgstr "لم يتم تحديد المنتج النهائي لعنصر الخدمة {0}"
 
-#: erpnext/controllers/accounts_controller.py:4020
+#: erpnext/controllers/accounts_controller.py:4030
 msgid "Finished Good Item {0} Qty can not be zero"
 msgstr "المنتج النهائي {0} لا يمكن أن تكون الكمية صفرًا"
 
-#: erpnext/controllers/accounts_controller.py:4014
+#: erpnext/controllers/accounts_controller.py:4024
 msgid "Finished Good Item {0} must be a sub-contracted item"
 msgstr "يجب أن يكون المنتج النهائي {0} منتجًا تم التعاقد عليه من الباطن"
 
@@ -20527,11 +20529,11 @@ msgstr "مستودع البضائع الجاهزة"
 msgid "Finished Goods based Operating Cost"
 msgstr "تكلفة التشغيل بناءً على المنتجات النهائية"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2026
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:2036
 msgid "Finished Item {0} does not match with Work Order {1}"
 msgstr "المنتج النهائي {0} لا يتطابق مع أمر العمل {1}"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1048
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1058
 msgid "Finished good quantity being consumed ({0} in stock UOM) must equal the quantity to disassemble ({1}). Do not change the UOM, conversion factor or quantity of the finished good row."
 msgstr ""
 
@@ -20556,7 +20558,7 @@ msgid "First Response Due"
 msgstr "الاستجابة الأولى مطلوبة"
 
 #: erpnext/support/doctype/issue/test_issue.py:239
-#: erpnext/support/doctype/service_level_agreement/service_level_agreement.py:906
+#: erpnext/support/doctype/service_level_agreement/service_level_agreement.py:909
 msgid "First Response SLA Failed by {}"
 msgstr "فشل اتفاقية مستوى الخدمة للاستجابة الأولى بواسطة {}"
 
@@ -20871,7 +20873,7 @@ msgstr "لائحة الأسعار"
 msgid "For Production"
 msgstr "للإنتاج"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:998
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1008
 msgid "For Quantity (Manufactured Qty) is mandatory"
 msgstr "للكمية (الكمية المصنعة) إلزامية\\n<br>\\nFor Quantity (Manufactured Qty) is mandatory"
 
@@ -20909,11 +20911,11 @@ msgstr "لمستودع"
 msgid "For Work Order"
 msgstr "لأمر العمل"
 
-#: erpnext/controllers/status_updater.py:291
+#: erpnext/controllers/status_updater.py:292
 msgid "For an item {0}, quantity must be negative number"
 msgstr "بالنسبة إلى عنصر {0} ، يجب أن تكون الكمية رقمًا سالبًا"
 
-#: erpnext/controllers/status_updater.py:288
+#: erpnext/controllers/status_updater.py:289
 msgid "For an item {0}, quantity must be positive number"
 msgstr "بالنسبة إلى عنصر {0} ، يجب أن تكون الكمية رقمًا موجبًا"
 
@@ -20951,7 +20953,7 @@ msgstr "عن مورد فردي"
 msgid "For item <b>{0}</b>, only <b>{1}</b> asset have been created or linked to <b>{2}</b>. Please create or link <b>{3}</b> more asset with the respective document."
 msgstr ""
 
-#: erpnext/controllers/status_updater.py:301
+#: erpnext/controllers/status_updater.py:302
 msgid "For item {0}, rate must be a positive number. To Allow negative rates, enable {1} in {2}"
 msgstr "بالنسبة للعنصر {0}، يجب أن يكون السعر رقمًا موجبًا. للسماح بالأسعار السالبة، فعّل {1} في {2}"
 
@@ -20965,7 +20967,7 @@ msgstr ""
 msgid "For operation {0} at row {1}, please add raw materials or set a BOM against it."
 msgstr ""
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2852
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2911
 msgid "For operation {0}: Quantity ({1}) can not be greater than pending quantity({2})"
 msgstr "بالنسبة للعملية {0}: لا يمكن أن تكون الكمية ({1}) أكبر من الكمية المعلقة ({2})."
 
@@ -20982,7 +20984,7 @@ msgstr ""
 msgid "For projected and forecast quantities, the system will consider all child warehouses under the selected parent warehouse."
 msgstr "بالنسبة للكميات المتوقعة والمتنبأ بها، سيأخذ النظام في الاعتبار جميع المستودعات الفرعية التابعة للمستودع الرئيسي المحدد."
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2058
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:2068
 msgid "For quantity {0} should not be greater than allowed quantity {1}"
 msgstr "يجب ألا تتجاوز الكمية {0} الكمية المسموح بها {1}"
 
@@ -21006,7 +21008,7 @@ msgstr "بالنسبة إلى الصف {0}: أدخل الكمية المخطط �
 msgid "For service item"
 msgstr "لعنصر الخدمة"
 
-#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:178
+#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:196
 msgid "For the 'Apply Rule On Other' condition the field {0} is mandatory"
 msgstr "بالنسبة لشرط &quot;تطبيق القاعدة على أخرى&quot; ، يكون الحقل {0} إلزاميًا"
 
@@ -21015,7 +21017,7 @@ msgstr "بالنسبة لشرط &quot;تطبيق القاعدة على أخرى&
 msgid "For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes"
 msgstr "لتسهيل الأمر على العملاء، يمكن استخدام هذه الرموز في نماذج الطباعة مثل الفواتير وإشعارات التسليم."
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1258
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1268
 msgid "For the item {0}, the consumed quantity should be {1} according to the BOM {2}."
 msgstr ""
 
@@ -21118,7 +21120,7 @@ msgstr ""
 msgid "Frappe CRM Allowed User"
 msgstr ""
 
-#: erpnext/crm/frappe_crm_api.py:169
+#: erpnext/crm/frappe_crm_api.py:172
 msgid "Frappe CRM data synchronization is not enabled on ERPNext. Contact System Manager of ERPNext."
 msgstr ""
 
@@ -21154,7 +21156,7 @@ msgstr "معدل العناصر المجاني"
 msgid "Free On Board"
 msgstr "مجاناً على متن الطائرة"
 
-#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:283
+#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:301
 msgid "Free item code is not selected"
 msgstr "لم يتم تحديد رمز العنصر المجاني"
 
@@ -21371,7 +21373,7 @@ msgstr "من تاريخ النشر"
 msgid "From Range"
 msgstr "من المدى"
 
-#: erpnext/stock/doctype/item_attribute/item_attribute.py:98
+#: erpnext/stock/doctype/item_attribute/item_attribute.py:100
 msgid "From Range has to be less than To Range"
 msgstr "(من المدى) يجب أن يكون أقل من (إلى المدى)"
 
@@ -22182,7 +22184,7 @@ msgstr "البضائع في العبور"
 msgid "Goods Transferred"
 msgstr "نقل البضائع"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2627
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:2637
 msgid "Goods are already received against the outward entry {0}"
 msgstr "تم استلام البضائع بالفعل مقابل الإدخال الخارجي {0}"
 
@@ -22803,7 +22805,7 @@ msgstr "يساعدك ذلك على توزيع الميزانية/الهدف عل
 msgid "Here are the error logs for the aforementioned failed depreciation entries: {0}"
 msgstr "فيما يلي سجلات الأخطاء الخاصة بإدخالات الإهلاك الفاشلة المذكورة أعلاه: {0}"
 
-#: erpnext/stock/stock_ledger.py:2018
+#: erpnext/stock/stock_ledger.py:2022
 msgid "Here are the options to proceed:"
 msgstr "فيما يلي الخيارات المتاحة للمتابعة:"
 
@@ -23452,15 +23454,15 @@ msgstr ""
 msgid "If no taxes are set, and Taxes and Charges Template is selected, the system will automatically apply the taxes from the chosen template."
 msgstr "إذا لم يتم تحديد أي ضرائب، وتم اختيار نموذج الضرائب والرسوم، فسيقوم النظام تلقائيًا بتطبيق الضرائب من النموذج المختار."
 
-#: erpnext/stock/stock_ledger.py:2028
+#: erpnext/stock/stock_ledger.py:2032
 msgid "If not, you can Cancel / Submit this entry"
 msgstr "وإلا يمكنك إلغاء / إرسال هذا الإدخال"
 
-#: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:194
+#: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:201
 msgid "If party does not exist, create it using the Customer Name field."
 msgstr ""
 
-#: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:195
+#: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:202
 msgid "If party does not exist, create it using the Supplier Name field."
 msgstr ""
 
@@ -23489,7 +23491,7 @@ msgstr ""
 msgid "If set, the system does not use the user's Email or the standard outgoing Email account for sending request for quotations."
 msgstr "في حال تم ضبط هذا الخيار، فإن النظام لا يستخدم بريد المستخدم الإلكتروني أو حساب البريد الإلكتروني الصادر القياسي لإرسال طلبات عروض الأسعار."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1270
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1281
 msgid "If the BOM results in Scrap material, the Scrap Warehouse needs to be selected."
 msgstr "إذا نتج عن قائمة المواد مواد خردة، فيجب تحديد مستودع الخردة."
 
@@ -23498,7 +23500,7 @@ msgstr "إذا نتج عن قائمة المواد مواد خردة، فيجب 
 msgid "If the account is frozen, entries are allowed to restricted users."
 msgstr "إذا الحساب مجمد، يسمح بالدخول إلى المستخدمين المحددين."
 
-#: erpnext/stock/stock_ledger.py:2021
+#: erpnext/stock/stock_ledger.py:2025
 msgid "If the item is transacting as a Zero Valuation Rate item in this entry, please enable 'Allow Zero Valuation Rate' in the {0} Item table."
 msgstr "إذا كان العنصر يتعامل كعنصر سعر تقييم صفري في هذا الإدخال ، فالرجاء تمكين &quot;السماح بمعدل تقييم صفري&quot; في جدول العناصر {0}."
 
@@ -23508,7 +23510,7 @@ msgstr "إذا كان العنصر يتعامل كعنصر سعر تقييم ص�
 msgid "If the reorder check is set at the Group warehouse level, the available quantity becomes the sum of the projected quantities of all its child warehouses."
 msgstr "إذا تم تعيين فحص إعادة الطلب على مستوى مستودع المجموعة، فإن الكمية المتاحة تصبح مجموع الكميات المتوقعة لجميع المستودعات الفرعية التابعة لها."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1289
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1300
 msgid "If the selected BOM has Operations mentioned in it, the system will fetch all Operations from BOM, these values can be changed."
 msgstr "إذا كانت قائمة المواد المحددة تحتوي على عمليات مذكورة فيها، فسيقوم النظام بجلب جميع العمليات من قائمة المواد، ويمكن تغيير هذه القيم."
 
@@ -24398,7 +24400,7 @@ msgstr "تسجيل دخول غير صحيح (مجموعة) إلى مستودع �
 msgid "Incorrect Company"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1265
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1275
 msgid "Incorrect Component Quantity"
 msgstr "كمية المكونات غير صحيحة"
 
@@ -24442,8 +24444,8 @@ msgstr "تقرير غير صحيح عن قيمة المخزون"
 msgid "Incorrect Type of Transaction"
 msgstr "نوع المعاملة غير صحيح"
 
-#: erpnext/stock/doctype/pick_list/pick_list.py:190
-#: erpnext/stock/doctype/pick_list/pick_list.py:214
+#: erpnext/stock/doctype/pick_list/pick_list.py:192
+#: erpnext/stock/doctype/pick_list/pick_list.py:216
 #: erpnext/stock/doctype/stock_settings/stock_settings.py:161
 msgid "Incorrect Warehouse"
 msgstr "مستودع غير صحيح"
@@ -24503,7 +24505,7 @@ msgstr "زيادة في عمر الأصل (بالأشهر)"
 msgid "Increment"
 msgstr "الزيادة"
 
-#: erpnext/stock/doctype/item_attribute/item_attribute.py:101
+#: erpnext/stock/doctype/item_attribute/item_attribute.py:103
 msgid "Increment cannot be 0"
 msgstr "لا يمكن أن تكون الزيادة 0\\n<br>\\nIncrement cannot be 0"
 
@@ -24663,7 +24665,7 @@ msgstr "ملاحظة التثبيت"
 msgid "Installation Note Item"
 msgstr "ملاحظة تثبيت الإغلاق"
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:607
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:619
 msgid "Installation Note {0} has already been submitted"
 msgstr "مذكرة التسليم {0} ارسلت\\n<br>\\nInstallation Note {0} has already been submitted"
 
@@ -24702,25 +24704,25 @@ msgstr "تعليمات"
 msgid "Insufficient Capacity"
 msgstr "سعة غير كافية"
 
-#: erpnext/controllers/accounts_controller.py:3899
-#: erpnext/controllers/accounts_controller.py:3921
-#: erpnext/controllers/accounts_controller.py:4439
-#: erpnext/controllers/accounts_controller.py:4445
-#: erpnext/controllers/accounts_controller.py:4467
+#: erpnext/controllers/accounts_controller.py:3909
+#: erpnext/controllers/accounts_controller.py:3931
+#: erpnext/controllers/accounts_controller.py:4449
+#: erpnext/controllers/accounts_controller.py:4455
+#: erpnext/controllers/accounts_controller.py:4477
 msgid "Insufficient Permissions"
 msgstr "أذونات غير كافية"
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:463
-#: erpnext/stock/doctype/pick_list/pick_list.py:148
-#: erpnext/stock/doctype/pick_list/pick_list.py:166
-#: erpnext/stock/doctype/pick_list/pick_list.py:1093
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1235
-#: erpnext/stock/serial_batch_bundle.py:1225 erpnext/stock/stock_ledger.py:1709
-#: erpnext/stock/stock_ledger.py:2206
+#: erpnext/stock/doctype/pick_list/pick_list.py:150
+#: erpnext/stock/doctype/pick_list/pick_list.py:168
+#: erpnext/stock/doctype/pick_list/pick_list.py:1123
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1245
+#: erpnext/stock/serial_batch_bundle.py:1225 erpnext/stock/stock_ledger.py:1713
+#: erpnext/stock/stock_ledger.py:2210
 msgid "Insufficient Stock"
 msgstr "المالية غير كافية"
 
-#: erpnext/stock/stock_ledger.py:2221
+#: erpnext/stock/stock_ledger.py:2225
 msgid "Insufficient Stock for Batch"
 msgstr "المخزون غير كافٍ للدفعة"
 
@@ -24848,7 +24850,7 @@ msgstr "مصروفات الفائدة"
 msgid "Interest Income"
 msgstr "دخل الفوائد"
 
-#: erpnext/accounts/doctype/payment_entry/payment_entry.py:3010
+#: erpnext/accounts/doctype/payment_entry/payment_entry.py:3013
 msgid "Interest and/or dunning fee"
 msgstr "الفائدة و/أو رسوم المطالبة"
 
@@ -24973,7 +24975,7 @@ msgid "Invalid Accounting Dimension"
 msgstr ""
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:402
-#: erpnext/accounts/doctype/payment_request/payment_request.py:1007
+#: erpnext/accounts/doctype/payment_request/payment_request.py:1008
 msgid "Invalid Allocated Amount"
 msgstr "مبلغ مخصص غير صالح"
 
@@ -25036,12 +25038,12 @@ msgstr ""
 msgid "Invalid Delivery Date"
 msgstr "تاريخ تسليم غير صالح"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1087
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1097
 msgid "Invalid Disassembly Item"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1053
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1102
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1063
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1112
 msgid "Invalid Disassembly Quantity"
 msgstr ""
 
@@ -25139,8 +25141,8 @@ msgstr "تكوين فقدان العملية غير صالح"
 msgid "Invalid Purchase Invoice"
 msgstr "فاتورة شراء غير صالحة"
 
-#: erpnext/controllers/accounts_controller.py:3941
-#: erpnext/controllers/accounts_controller.py:3955
+#: erpnext/controllers/accounts_controller.py:3951
+#: erpnext/controllers/accounts_controller.py:3965
 msgid "Invalid Qty"
 msgstr "كمية غير صالحة"
 
@@ -25169,12 +25171,12 @@ msgstr "جدول غير صالح"
 msgid "Invalid Selling Price"
 msgstr "سعر البيع غير صالح"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2101
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:2111
 msgid "Invalid Serial and Batch Bundle"
 msgstr "رقم تسلسلي وحزمة دفعات غير صالحة"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1352
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1374
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1362
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1384
 msgid "Invalid Source and Target Warehouse"
 msgstr "مصدر ومستودع هدف غير صالحين"
 
@@ -25186,7 +25188,7 @@ msgstr ""
 msgid "Invalid Upload"
 msgstr ""
 
-#: erpnext/controllers/item_variant.py:193
+#: erpnext/controllers/item_variant.py:255
 msgid "Invalid Value"
 msgstr "قيمة غير صالحة"
 
@@ -25199,7 +25201,7 @@ msgstr "مستودع غير صالح"
 msgid "Invalid amount in accounting entries of {} {} for Account {}: {}"
 msgstr "مبلغ غير صالح في القيود المحاسبية لـ {} {} للحساب {}: {}"
 
-#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:312
+#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:330
 msgid "Invalid condition expression"
 msgstr "تعبير شرط غير صالح"
 
@@ -25226,7 +25228,7 @@ msgstr "سبب ضائع غير صالح {0} ، يرجى إنشاء سبب ضائ
 msgid "Invalid naming series (. missing) for {0}"
 msgstr "سلسلة تسمية غير صالحة (. مفقود) لـ {0}"
 
-#: erpnext/accounts/doctype/payment_request/payment_request.py:571
+#: erpnext/accounts/doctype/payment_request/payment_request.py:572
 msgid "Invalid parameter. 'dn' should be of type str"
 msgstr "مُعامل غير صالح. يجب أن يكون نوع 'dn' سلسلة نصية (str)."
 
@@ -26247,8 +26249,9 @@ msgstr "نص مائل للمجاميع الفرعية أو الملاحظات"
 #: erpnext/buying/report/supplier_quotation_comparison/supplier_quotation_comparison.py:204
 #: erpnext/buying/workspace/buying/buying.json
 #: erpnext/controllers/taxes_and_totals.py:1248
+#: erpnext/controllers/trends.py:365
 #: erpnext/manufacturing/doctype/blanket_order/blanket_order.json
-#: erpnext/manufacturing/doctype/bom/bom.js:1088
+#: erpnext/manufacturing/doctype/bom/bom.js:1092
 #: erpnext/manufacturing/doctype/plant_floor/plant_floor.js:109
 #: erpnext/manufacturing/doctype/workstation/workstation_job_card.html:25
 #: erpnext/manufacturing/report/bom_stock_analysis/bom_stock_analysis.py:101
@@ -26767,6 +26770,7 @@ msgstr "بيانات الصنف"
 #: erpnext/buying/report/item_wise_purchase_history/item_wise_purchase_history.js:30
 #: erpnext/buying/report/item_wise_purchase_history/item_wise_purchase_history.py:40
 #: erpnext/buying/workspace/buying/buying.json
+#: erpnext/controllers/trends.py:375
 #: erpnext/crm/doctype/opportunity_item/opportunity_item.json
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.json
 #: erpnext/manufacturing/doctype/bom_creator_item/bom_creator_item.json
@@ -26840,7 +26844,7 @@ msgstr "اسم مجموعة السلعة"
 msgid "Item Group Tree"
 msgstr "شجرة فئات البنود"
 
-#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:525
+#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:543
 msgid "Item Group not mentioned in item master for item {0}"
 msgstr "فئة البند غير مذكورة في ماستر البند لهذا البند {0}"
 
@@ -26994,6 +26998,7 @@ msgstr "مادة المصنع"
 #: erpnext/buying/doctype/supplier_quotation_item/supplier_quotation_item.json
 #: erpnext/buying/report/item_wise_purchase_history/item_wise_purchase_history.py:34
 #: erpnext/buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.py:204
+#: erpnext/controllers/trends.py:366
 #: erpnext/crm/doctype/opportunity_item/opportunity_item.json
 #: erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.js:101
 #: erpnext/maintenance/doctype/maintenance_schedule_detail/maintenance_schedule_detail.json
@@ -27424,7 +27429,7 @@ msgstr "المنتج والمستودع"
 msgid "Item and Warranty Details"
 msgstr "البند والضمان تفاصيل"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:3815
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:3825
 msgid "Item for row {0} does not match Material Request"
 msgstr "عنصر الصف {0} لا يتطابق مع طلب المواد"
 
@@ -27454,11 +27459,11 @@ msgstr "اسم السلعة"
 msgid "Item operation"
 msgstr "عملية الصنف"
 
-#: erpnext/controllers/accounts_controller.py:3995
+#: erpnext/controllers/accounts_controller.py:4005
 msgid "Item qty can not be updated as raw materials are already processed."
 msgstr ""
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1498
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1508
 msgid "Item rate has been updated to zero as Allow Zero Valuation Rate is checked for item {0}"
 msgstr "تم تحديث سعر السلعة إلى الصفر حيث تم تحديد خيار \"السماح بسعر تقييم صفري\" للسلعة {0}"
 
@@ -27570,7 +27575,7 @@ msgstr "العنصر {0} ليس عنصرًا متعاقدًا عليه من ال
 msgid "Item {0} is not a template item."
 msgstr ""
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2539
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:2549
 msgid "Item {0} is not active or end of life has been reached"
 msgstr "البند {0} غير نشط أو تم التوصل إلى نهاية الحياة"
 
@@ -27590,7 +27595,7 @@ msgstr "البند {0} يجب أن يكون عنصر التعاقد الفرعي
 msgid "Item {0} must be a non-stock item"
 msgstr "الصنف {0} يجب ألا يكون صنف مخزن <br>Item {0} must be a non-stock item"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1839
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1849
 msgid "Item {0} not found in 'Raw Materials Supplied' table in {1} {2}"
 msgstr "العنصر {0} غير موجود في جدول \"المواد الخام الموردة\" في {1} {2}"
 
@@ -27700,11 +27705,11 @@ msgstr "اصناف يمكن طلبه"
 msgid "Items and Pricing"
 msgstr "السلع والتسعيرات"
 
-#: erpnext/controllers/accounts_controller.py:4253
+#: erpnext/controllers/accounts_controller.py:4263
 msgid "Items cannot be updated as Subcontracting Inward Order(s) exist against this Subcontracted Sales Order."
 msgstr "لا يمكن تحديث العناصر لوجود أوامر واردة من الباطن مرتبطة بأمر البيع هذا."
 
-#: erpnext/controllers/accounts_controller.py:4246
+#: erpnext/controllers/accounts_controller.py:4256
 msgid "Items cannot be updated as Subcontracting Order is created against the Purchase Order {0}."
 msgstr "لا يمكن تحديث العناصر لأن أمر التعاقد من الباطن يتم إنشاؤه مقابل أمر الشراء {0}."
 
@@ -27716,7 +27721,7 @@ msgstr "عناصر لطلب المواد الخام"
 msgid "Items not found."
 msgstr "لم يتم العثور على العناصر."
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1494
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1504
 msgid "Items rate has been updated to zero as Allow Zero Valuation Rate is checked for the following items: {0}"
 msgstr "تم تحديث سعر الأصناف إلى الصفر حيث تم تحديد خيار \"السماح بسعر تقييم صفري\" للأصناف التالية: {0}"
 
@@ -27934,7 +27939,7 @@ msgstr "اسم العامل"
 msgid "Job Worker Warehouse"
 msgstr "مستودع عامل التوظيف"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2907
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2966
 msgid "Job card {0} created"
 msgstr "تم إنشاء بطاقة العمل {0}"
 
@@ -28694,7 +28699,7 @@ msgstr "رقم الرخصة"
 msgid "License Plate"
 msgstr ""
 
-#: erpnext/controllers/status_updater.py:511
+#: erpnext/controllers/status_updater.py:512
 msgid "Limit Crossed"
 msgstr "الحدود تجاوزت"
 
@@ -29387,8 +29392,8 @@ msgstr "المواد الرئيسية والاختيارية التي تم در�
 #. Label of the make (Data) field in DocType 'Vehicle'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.js:127
 #: erpnext/manufacturing/doctype/job_card/job_card.js:479
-#: erpnext/manufacturing/doctype/work_order/work_order.js:851
-#: erpnext/manufacturing/doctype/work_order/work_order.js:885
+#: erpnext/manufacturing/doctype/work_order/work_order.js:855
+#: erpnext/manufacturing/doctype/work_order/work_order.js:889
 #: erpnext/setup/doctype/vehicle/vehicle.json
 msgid "Make"
 msgstr "سنة الصنع"
@@ -29608,8 +29613,8 @@ msgstr "لا يمكن إنشاء الإدخال اليدوي! قم بتعطيل 
 #: erpnext/stock/doctype/material_request_item/material_request_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1583
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1599
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1593
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1609
 #: erpnext/stock/doctype/stock_entry_type/stock_entry_type.json
 #: erpnext/subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 #: erpnext/subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
@@ -29754,7 +29759,7 @@ msgstr "تاريخ التصنيع"
 msgid "Manufacturing Manager"
 msgstr "مدير التصنيع"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2897
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:2907
 msgid "Manufacturing Quantity is mandatory"
 msgstr "كمية التصنيع إلزامية\\n<br>\\nManufacturing Quantity is mandatory"
 
@@ -29840,13 +29845,6 @@ msgstr "رسم الخرائط {0}..."
 #: erpnext/accounts/doctype/bank_statement_import_log_column_map/bank_statement_import_log_column_map.json
 msgid "Maps To"
 msgstr ""
-
-#. Label of the margin (Section Break) field in DocType 'Pricing Rule'
-#. Label of the margin (Section Break) field in DocType 'Project'
-#: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
-#: erpnext/projects/doctype/project/project.json
-msgid "Margin"
-msgstr "هامش"
 
 #. Label of the margin_money (Currency) field in DocType 'Bank Guarantee'
 #: erpnext/accounts/doctype/bank_guarantee/bank_guarantee.json
@@ -30021,7 +30019,7 @@ msgstr ""
 msgid "Material"
 msgstr "مواد"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:876
+#: erpnext/manufacturing/doctype/work_order/work_order.js:880
 msgid "Material Consumption"
 msgstr "اهلاك المواد"
 
@@ -30029,7 +30027,7 @@ msgstr "اهلاك المواد"
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry Type'
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:114
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1584
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1594
 #: erpnext/stock/doctype/stock_entry_type/stock_entry_type.json
 msgid "Material Consumption for Manufacture"
 msgstr "اهلاك المواد للتصنيع"
@@ -30111,6 +30109,7 @@ msgstr "أستلام مواد"
 #: erpnext/manufacturing/doctype/production_plan_item/production_plan_item.json
 #: erpnext/manufacturing/doctype/production_plan_material_request/production_plan_material_request.json
 #: erpnext/manufacturing/doctype/production_plan_sub_assembly_item/production_plan_sub_assembly_item.json
+#: erpnext/manufacturing/doctype/work_order/work_order.js:816
 #: erpnext/manufacturing/doctype/work_order/work_order.json
 #: erpnext/selling/doctype/sales_order/sales_order.js:1092
 #: erpnext/selling/doctype/sales_order_item/sales_order_item.json
@@ -30404,13 +30403,13 @@ msgstr "الحد الأقصى لعدد العينات"
 msgid "Max Score"
 msgstr "أقصى درجة"
 
-#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:292
+#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:310
 msgid "Max discount allowed for item: {0} is {1}%"
 msgstr "الحد الأقصى للخصم المسموح به لهذا المنتج: {0} هو {1}%"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1052
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1059
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1082
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1056
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1063
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1086
 #: erpnext/stock/doctype/pick_list/pick_list.js:208
 #: erpnext/stock/doctype/stock_entry/stock_entry.js:404
 msgid "Max: {0}"
@@ -30442,11 +30441,11 @@ msgstr "الحد الأقصى لمبلغ الدفع"
 msgid "Maximum Producible Items"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:4428
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:4441
 msgid "Maximum Samples - {0} can be retained for Batch {1} and Item {2}."
 msgstr "الحد الأقصى للعينات - {0} يمكن الاحتفاظ بالدفعة {1} والبند {2}."
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:4419
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:4432
 msgid "Maximum Samples - {0} have already been retained for Batch {1} and Item {2} in Batch {3}."
 msgstr "الحد الأقصى للعينات - {0} تم الاحتفاظ به مسبقا للدفعة {1} و العنصر {2} في الدفعة {3}."
 
@@ -30507,7 +30506,7 @@ msgstr "ميغا جول"
 msgid "Megawatt"
 msgstr "ميغاواط"
 
-#: erpnext/stock/stock_ledger.py:2034
+#: erpnext/stock/stock_ledger.py:2038
 msgid "Mention Valuation Rate in the Item master."
 msgstr "اذكر معدل التقييم في مدير السلعة."
 
@@ -30748,7 +30747,7 @@ msgstr "الحد الأدنى للمبلغ"
 msgid "Min Amt"
 msgstr "مين امت"
 
-#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:228
+#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:246
 msgid "Min Amt can not be greater than Max Amt"
 msgstr "مين آمت لا يمكن أن يكون أكبر من ماكس آمت"
 
@@ -30779,11 +30778,11 @@ msgstr "الحد الأدنى من الكمية"
 msgid "Min Qty (As Per Stock UOM)"
 msgstr "الحد الأدنى للكمية (حسب وحدة قياس المخزون)"
 
-#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:224
+#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:242
 msgid "Min Qty can not be greater than Max Qty"
 msgstr "الكمية الادنى لايمكن ان تكون اكبر من الكمية الاعلى"
 
-#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:238
+#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:256
 msgid "Min Qty should be greater than Recurse Over Qty"
 msgstr "يجب أن تكون الكمية الدنيا أكبر من الكمية المطلوبة للتكرار."
 
@@ -30925,7 +30924,7 @@ msgstr "فلاتر مفقودة"
 msgid "Missing Finance Book"
 msgstr "كتاب التمويل المفقود"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2036
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:2046
 msgid "Missing Finished Good"
 msgstr "مفقود، تم الانتهاء منه، جيد"
 
@@ -30933,7 +30932,7 @@ msgstr "مفقود، تم الانتهاء منه، جيد"
 msgid "Missing Formula"
 msgstr "الصيغة المفقودة"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1272
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1282
 msgid "Missing Item"
 msgstr "العنصر المفقود"
 
@@ -30953,7 +30952,7 @@ msgstr ""
 msgid "Missing Serial No Bundle"
 msgstr "حزمة الأرقام التسلسلية مفقودة"
 
-#: erpnext/stock/doctype/pick_list/pick_list.py:174
+#: erpnext/stock/doctype/pick_list/pick_list.py:176
 msgid "Missing Warehouse"
 msgstr ""
 
@@ -30966,7 +30965,7 @@ msgid "Missing required filter: {0}"
 msgstr "الفلتر المطلوب مفقود: {0}"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1219
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1587
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1646
 msgid "Missing value"
 msgstr "قيمة مفقودة"
 
@@ -31241,7 +31240,7 @@ msgstr ""
 msgid "Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year"
 msgstr "يوجد سنوات مالية متعددة لنفس التاريخ {0}. الرجاء تحديد الشركة لهذه السنة المالية\\n<br>\\nMultiple fiscal years exist for the date {0}. Please set company in Fiscal Year"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2043
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:2053
 msgid "Multiple items cannot be marked as finished item"
 msgstr "لا يمكن وضع علامة \"منتج نهائي\" على عدة عناصر"
 
@@ -31250,7 +31249,7 @@ msgid "Music"
 msgstr "موسيقى"
 
 #. Label of the must_be_whole_number (Check) field in DocType 'UOM'
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1534
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1593
 #: erpnext/setup/doctype/uom/uom.json
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:267
 #: erpnext/utilities/transaction_base.py:631
@@ -31320,7 +31319,7 @@ msgstr "مكان مسمى"
 msgid "Naming Series Prefix"
 msgstr "بادئة سلسلة التسمية"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:95
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:96
 msgid "Naming Series is mandatory"
 msgstr "سلسلة التسمية إلزامية"
 
@@ -31389,7 +31388,7 @@ msgstr "الكمية السلبية غير مسموح بها\\n<br>\\nnegative Q
 msgid "Negative Stock"
 msgstr ""
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1658
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1659
 #: erpnext/stock/serial_batch_bundle.py:1548
 msgid "Negative Stock Error"
 msgstr "خطأ في المخزون السالب"
@@ -32316,15 +32315,15 @@ msgstr ""
 msgid "No record found"
 msgstr "لم يتم العثور على أي سجل"
 
-#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:743
+#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:774
 msgid "No records found in Allocation table"
 msgstr "لم يتم العثور على أي سجلات في جدول التخصيص"
 
-#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:620
+#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:651
 msgid "No records found in the Invoices table"
 msgstr "لم يتم العثور على أي سجلات في جدول الفواتير"
 
-#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:623
+#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:654
 msgid "No records found in the Payments table"
 msgstr "لم يتم العثور على أي سجلات في جدول المدفوعات"
 
@@ -32571,7 +32570,7 @@ msgstr "غير مسموح له بتقديم طلبات شراء"
 msgid "Note: Automatic log deletion only applies to logs of type <i>Update Cost</i>"
 msgstr ""
 
-#: erpnext/accounts/party.py:705
+#: erpnext/accounts/party.py:721
 msgid "Note: Due Date exceeds allowed {0} credit days by {1} day(s)"
 msgstr ""
 
@@ -33081,7 +33080,7 @@ msgstr "يجب أن يكون أحد خياري الإيداع أو السحب ف
 msgid "Only one operation can have 'Is Final Finished Good' checked when 'Track Semi Finished Goods' is enabled."
 msgstr ""
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1598
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1608
 msgid "Only one {0} entry can be created against the Work Order {1}"
 msgstr "لا يمكن إنشاء سوى إدخال واحد {0} مقابل أمر العمل {1}"
 
@@ -33331,7 +33330,7 @@ msgstr "تاريخ الفتح"
 msgid "Opening Entry"
 msgstr "فتح مدخل"
 
-#: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:316
+#: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:326
 msgid "Opening Invoice Creation In Progress"
 msgstr "جاري إنشاء الفاتورة الافتتاحية"
 
@@ -33368,7 +33367,7 @@ msgstr ""
 msgid "Opening Invoices"
 msgstr "فتح الفواتير"
 
-#: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:139
+#: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:146
 msgid "Opening Invoices Summary"
 msgstr "ملخص الفواتير الافتتاحية"
 
@@ -33380,18 +33379,18 @@ msgstr "ملخص الفواتير الافتتاحية"
 msgid "Opening Number of Booked Depreciations"
 msgstr "عدد الإهلاكات المسجلة في بداية الفترة"
 
-#: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:35
-msgid "Opening Purchase Invoices have been created."
-msgstr "تم إنشاء فواتير الشراء الافتتاحية."
+#: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:36
+msgid "Opening Purchase Invoice(s) have been created."
+msgstr ""
 
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:81
 #: erpnext/stock/report/stock_balance/stock_balance.py:529
 msgid "Opening Qty"
 msgstr "الكمية الافتتاحية"
 
-#: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:33
-msgid "Opening Sales Invoices have been created."
-msgstr "تم إنشاء فواتير المبيعات الافتتاحية."
+#: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:35
+msgid "Opening Sales Invoice(s) have been created."
+msgstr ""
 
 #. Label of the opening_stock (Float) field in DocType 'Item'
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Reconciliation'
@@ -33533,7 +33532,7 @@ msgstr "رقم صف العملية"
 msgid "Operation Time"
 msgstr "وقت العملية"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1596
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1655
 msgid "Operation Time must be greater than 0 for Operation {0}"
 msgstr "زمن العملية يجب أن يكون أكبر من 0 للعملية {0}\\n<br>\\nOperation Time must be greater than 0 for Operation {0}"
 
@@ -33743,7 +33742,7 @@ msgstr "تم إنشاء الفرصة {0}"
 msgid "Optimize Route"
 msgstr "تحسين الطريق"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1029
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1033
 msgid "Optional. Select a specific manufacture entry to reverse."
 msgstr ""
 
@@ -34026,7 +34025,7 @@ msgstr "من AMC"
 msgid "Out of Order"
 msgstr "خارج عن السيطرة"
 
-#: erpnext/stock/doctype/pick_list/pick_list.py:635
+#: erpnext/stock/doctype/pick_list/pick_list.py:665
 msgid "Out of Stock"
 msgstr "إنتهى من المخزن"
 
@@ -34180,7 +34179,7 @@ msgstr "بدل الإفراط في الانتقاء (%)"
 msgid "Over Receipt"
 msgstr "إيصال زائد"
 
-#: erpnext/controllers/status_updater.py:516
+#: erpnext/controllers/status_updater.py:517
 msgid "Over Receipt/Delivery of {0} {1} ignored for item {2} because you have {3} role."
 msgstr "تم تجاهل استلام/تسليم {0} {1} للعنصر {2} لأن لديك الدور {3} ."
 
@@ -34197,7 +34196,7 @@ msgstr "بدل التحويل الزائد (%)"
 msgid "Over Withheld"
 msgstr "مبالغ محجوزة"
 
-#: erpnext/controllers/status_updater.py:518
+#: erpnext/controllers/status_updater.py:519
 msgid "Overbilling of {0} {1} ignored for item {2} because you have {3} role."
 msgstr "تم تجاهل الفوترة الزائدة لـ {0} {1} للعنصر {2} لأن لديك الدور {3} ."
 
@@ -34745,7 +34744,7 @@ msgstr "قائمة بمحتويات الشحنة"
 msgid "Packing Slip Item"
 msgstr "مادة كشف التعبئة"
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:623
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:635
 msgid "Packing Slip(s) cancelled"
 msgstr "تم إلغاء قائمة الشحنة"
 
@@ -35167,7 +35166,9 @@ msgid "Partially Reserved"
 msgstr "محجوز جزئياً"
 
 #. Option for the 'Status' (Select) field in DocType 'Job Card'
+#. Option for the 'Status' (Select) field in DocType 'Pick List'
 #: erpnext/manufacturing/doctype/job_card/job_card.json
+#: erpnext/stock/doctype/pick_list/pick_list.json
 msgid "Partially Transferred"
 msgstr ""
 
@@ -35304,6 +35305,7 @@ msgstr "أجزاء في المليون"
 #: erpnext/accounts/report/tax_withholding_details/tax_withholding_details.js:25
 #: erpnext/accounts/report/tds_computation_summary/tds_computation_summary.js:26
 #: erpnext/accounts/report/trial_balance_for_party/trial_balance_for_party.js:57
+#: erpnext/controllers/trends.py:390
 #: erpnext/crm/doctype/appointment/appointment.json
 #: erpnext/crm/doctype/opportunity/opportunity.json
 #: erpnext/crm/report/lost_opportunity/lost_opportunity.js:55
@@ -35424,7 +35426,7 @@ msgstr "عدم توافق الحزب"
 #: erpnext/accounts/doctype/payment_request/payment_request.json
 #: erpnext/accounts/report/general_ledger/general_ledger.js:111
 #: erpnext/accounts/report/general_ledger/general_ledger.py:785
-#: erpnext/crm/doctype/contract/contract.json
+#: erpnext/controllers/trends.py:396 erpnext/crm/doctype/contract/contract.json
 #: erpnext/selling/doctype/party_specific_item/party_specific_item.json
 #: erpnext/selling/report/address_and_contacts/address_and_contacts.js:22
 msgid "Party Name"
@@ -35525,7 +35527,7 @@ msgstr "عنصر خاص بالحزب"
 msgid "Party Type"
 msgstr "نوع الطرف"
 
-#: erpnext/accounts/party.py:834
+#: erpnext/accounts/party.py:850
 msgid "Party Type and Party can only be set for Receivable / Payable account<br><br>{0}"
 msgstr ""
 
@@ -35538,7 +35540,7 @@ msgid "Party Type and Party is required for Receivable / Payable account {0}"
 msgstr "نوع الطرف والطرف مطلوبان لحسابات القبض / الدفع {0}"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:535
-#: erpnext/accounts/party.py:432
+#: erpnext/accounts/party.py:443
 msgid "Party Type is mandatory"
 msgstr "حقل نوع المستفيد إلزامي\\n<br>\\nParty Type is mandatory"
 
@@ -35839,7 +35841,7 @@ msgstr "دفع الاشتراك خصم"
 msgid "Payment Entry Reference"
 msgstr "دفع الدخول المرجعي"
 
-#: erpnext/accounts/doctype/payment_request/payment_request.py:477
+#: erpnext/accounts/doctype/payment_request/payment_request.py:478
 msgid "Payment Entry already exists"
 msgstr "تدوين المدفوعات موجود بالفعل"
 
@@ -35848,7 +35850,7 @@ msgid "Payment Entry has been modified after you pulled it. Please pull it again
 msgstr "تم تعديل تدوين مدفوعات بعد سحبه. يرجى سحبه مرة أخرى."
 
 #: erpnext/accounts/doctype/payment_request/payment_request.py:155
-#: erpnext/accounts/doctype/payment_request/payment_request.py:637
+#: erpnext/accounts/doctype/payment_request/payment_request.py:638
 msgid "Payment Entry is already created"
 msgstr "تدوين المدفوعات تم انشاؤه بالفعل"
 
@@ -36093,11 +36095,11 @@ msgstr "طلب دفع معلق"
 msgid "Payment Request Type"
 msgstr "نوع طلب الدفع"
 
-#: erpnext/accounts/doctype/payment_request/payment_request.py:710
+#: erpnext/accounts/doctype/payment_request/payment_request.py:711
 msgid "Payment Request for {0}"
 msgstr "طلب الدفع ل {0}"
 
-#: erpnext/accounts/doctype/payment_request/payment_request.py:651
+#: erpnext/accounts/doctype/payment_request/payment_request.py:652
 msgid "Payment Request is already created"
 msgstr "تم إنشاء طلب الدفع بالفعل"
 
@@ -36105,7 +36107,7 @@ msgstr "تم إنشاء طلب الدفع بالفعل"
 msgid "Payment Request took too long to respond. Please try requesting for payment again."
 msgstr "استغرق طلب الدفع وقتاً طويلاً للرد. يرجى محاولة طلب الدفع مرة أخرى."
 
-#: erpnext/accounts/doctype/payment_request/payment_request.py:568
+#: erpnext/accounts/doctype/payment_request/payment_request.py:569
 msgid "Payment Requests cannot be created against: {0}"
 msgstr "لا يمكن إنشاء طلبات دفع مقابل: {0}"
 
@@ -36137,7 +36139,7 @@ msgstr "سيتم وضع طلبات الدفع المقدمة من فواتير �
 msgid "Payment Schedule"
 msgstr "جدول الدفع"
 
-#: erpnext/accounts/doctype/payment_request/payment_request.py:590
+#: erpnext/accounts/doctype/payment_request/payment_request.py:591
 msgid "Payment Schedule based Payment Requests cannot be created because a Payment Entry already exists for this document."
 msgstr ""
 
@@ -36841,16 +36843,18 @@ msgstr "رقم الهاتف"
 msgid "Pick List"
 msgstr "قائمة الانتقاء"
 
-#: erpnext/stock/doctype/pick_list/pick_list.py:270
+#: erpnext/stock/doctype/pick_list/pick_list.py:272
 msgid "Pick List Incomplete"
 msgstr "قائمة الاختيارات غير مكتملة"
 
 #. Label of the pick_list_item (Data) field in DocType 'Sales Invoice Item'
 #. Label of the pick_list_item (Data) field in DocType 'Delivery Note Item'
 #. Name of a DocType
+#. Label of the pick_list_item (Link) field in DocType 'Stock Entry Detail'
 #: erpnext/accounts/doctype/sales_invoice_item/sales_invoice_item.json
 #: erpnext/stock/doctype/delivery_note_item/delivery_note_item.json
 #: erpnext/stock/doctype/pick_list_item/pick_list_item.json
+#: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgid "Pick List Item"
 msgstr "اختيار عنصر القائمة"
 
@@ -37062,6 +37066,10 @@ msgstr "مخطط"
 msgid "Planned End Date"
 msgstr "تاريخ الانتهاء المخطط لها"
 
+#: erpnext/manufacturing/doctype/work_order/work_order.py:300
+msgid "Planned End Date cannot be before Planned Start Date"
+msgstr ""
+
 #. Label of the planned_end_time (Datetime) field in DocType 'Work Order
 #. Operation'
 #: erpnext/manufacturing/doctype/work_order_operation/work_order_operation.json
@@ -37159,7 +37167,7 @@ msgstr "أرضيات المصانع"
 msgid "Plants and Machineries"
 msgstr "وحدات التصنيع  والآلات"
 
-#: erpnext/stock/doctype/pick_list/pick_list.py:632
+#: erpnext/stock/doctype/pick_list/pick_list.py:662
 msgid "Please Restock Items and Update the Pick List to continue. To discontinue, cancel the Pick List."
 msgstr "يرجى إعادة تخزين العناصر وتحديث قائمة الاختيار للمتابعة. للتوقف ، قم بإلغاء قائمة الاختيار."
 
@@ -37183,7 +37191,7 @@ msgstr "الرجاء تحديد عميل"
 msgid "Please Select a Supplier"
 msgstr "الرجاء تحديد مورد"
 
-#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:161
+#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:179
 msgid "Please Set Priority"
 msgstr "يرجى تحديد الأولوية"
 
@@ -37215,7 +37223,7 @@ msgstr "يرجى إضافة \"طلب عرض أسعار\" إلى الشريط ا�
 msgid "Please add Root Account for - {0}"
 msgstr "يرجى إضافة حساب الجذر لـ - {0}"
 
-#: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:332
+#: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:343
 msgid "Please add a Temporary Opening account in Chart of Accounts"
 msgstr "الرجاء إضافة حساب فتح مؤقت في مخطط الحسابات"
 
@@ -37227,7 +37235,7 @@ msgstr ""
 msgid "Please add atleast one Serial No / Batch No"
 msgstr "يرجى إضافة رقم تسلسلي واحد على الأقل / رقم دفعة واحد على الأقل"
 
-#: erpnext/crm/doctype/crm_settings/crm_settings.py:51
+#: erpnext/crm/doctype/crm_settings/crm_settings.py:53
 msgid "Please add atleast one user on Allowed Users to allow Data Synchronization from Frappe CRM site."
 msgstr ""
 
@@ -37285,7 +37293,7 @@ msgstr "يرجى التحقق من معالجة المحاسبة المؤجلة 
 msgid "Please check either with operations or FG Based Operating Cost."
 msgstr "يرجى التحقق إما من قسم العمليات أو من قسم تكاليف التشغيل القائمة على المنتجات النهائية."
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:149
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:150
 msgid "Please check the 'Activate Serial and Batch No for Item' checkbox in the {0} to make Serial and Batch Bundle for the item."
 msgstr ""
 
@@ -37370,7 +37378,7 @@ msgstr "يرجى تعطيل سير العمل مؤقتًا لإدخال دفتر
 msgid "Please do not book expense of multiple assets against one single Asset."
 msgstr "يرجى عدم تسجيل مصروفات أصول متعددة مقابل أصل واحد."
 
-#: erpnext/controllers/item_variant.py:291
+#: erpnext/controllers/item_variant.py:353
 msgid "Please do not create more than 500 items at a time"
 msgstr "يرجى عدم إنشاء أكثر من 500 عنصر في وقت واحد"
 
@@ -37382,7 +37390,7 @@ msgstr "يرجى تمكين Applicable على Booking Actual Expenses"
 msgid "Please enable Applicable on Purchase Order and Applicable on Booking Actual Expenses"
 msgstr "يرجى تمكين Applicable على أمر الشراء والتطبيق على المصروفات الفعلية للحجز"
 
-#: erpnext/stock/doctype/pick_list/pick_list.py:321
+#: erpnext/stock/doctype/pick_list/pick_list.py:323
 msgid "Please enable Use Old Serial / Batch Fields to make_bundle"
 msgstr "يرجى تفعيل خيار \"استخدام الحقول التسلسلية/الدفعية القديمة\" لإنشاء الحزمة"
 
@@ -37414,7 +37422,7 @@ msgstr "يرجى التأكد من أن حساب {} هو حساب في المي�
 msgid "Please ensure {} account {} is a Receivable account."
 msgstr "يرجى التأكد من أن حساب {} هو حساب مستحق القبض."
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:862
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:872
 msgid "Please enter <b>Difference Account</b> or set default <b>Stock Adjustment Account</b> for company {0}"
 msgstr "الرجاء إدخال <b>حساب الفرق</b> أو تعيين <b>حساب تسوية المخزون</b> الافتراضي للشركة {0}"
 
@@ -37804,7 +37812,7 @@ msgstr "الرجاء تحديد تاريخ البدء وتاريخ الانته�
 msgid "Please select Stock Asset Account"
 msgstr "الرجاء تحديد حساب أصول الأسهم"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1962
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1972
 msgid "Please select Subcontracting Order instead of Purchase Order {0}"
 msgstr ""
 
@@ -37816,13 +37824,13 @@ msgstr "يرجى تحديد حساب الأرباح/الخسائر غير الم
 msgid "Please select a BOM"
 msgstr "يرجى تحديد بوم"
 
-#: erpnext/accounts/party.py:434
-#: erpnext/stock/doctype/pick_list/pick_list.py:1741
+#: erpnext/accounts/party.py:445
+#: erpnext/stock/doctype/pick_list/pick_list.py:1788
 msgid "Please select a Company"
 msgstr "الرجاء اختيار الشركة"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:268
-#: erpnext/manufacturing/doctype/bom/bom.js:730
+#: erpnext/manufacturing/doctype/bom/bom.js:734
 #: erpnext/manufacturing/doctype/bom/bom.py:279
 #: erpnext/public/js/controllers/accounts.js:274
 #: erpnext/public/js/controllers/transaction.js:3358
@@ -37922,7 +37930,7 @@ msgstr "يرجى اختيار قيمة ل {0} عرض مسعر إلى {1}"
 msgid "Please select an item code before setting the warehouse."
 msgstr "يرجى تحديد رمز المنتج قبل تحديد المستودع."
 
-#: erpnext/controllers/item_variant.py:285
+#: erpnext/controllers/item_variant.py:347
 msgid "Please select at least one attribute value"
 msgstr ""
 
@@ -38038,7 +38046,7 @@ msgid "Please select weekly off day"
 msgstr "الرجاء اختيار يوم العطلة الاسبوعي"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:1219
-#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:616
+#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:647
 msgid "Please select {0} first"
 msgstr "الرجاء تحديد {0} أولا\\n<br>\\nPlease select {0} first"
 
@@ -38344,7 +38352,7 @@ msgstr "يرجى تحديد خاصية واحدة على الأقل في جدو�
 msgid "Please specify either Quantity or Valuation Rate or both"
 msgstr "يرجى تحديد الكمية أو التقييم إما قيم أو كليهما"
 
-#: erpnext/stock/doctype/item_attribute/item_attribute.py:95
+#: erpnext/stock/doctype/item_attribute/item_attribute.py:97
 msgid "Please specify from/to range"
 msgstr "يرجى التحديد من / إلى النطاق\\n<br>\\nPlease specify from/to range"
 
@@ -38649,7 +38657,7 @@ msgstr "تاريخ ووقت النشر"
 msgid "Posting Time"
 msgstr "نشر التوقيت"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2847
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:2857
 msgid "Posting date and posting time is mandatory"
 msgstr "تاريخ النشر و وقت النشر الزامي\\n<br>\\nPosting date and posting time is mandatory"
 
@@ -38734,11 +38742,6 @@ msgstr ""
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:307
 msgid "Preference"
 msgstr "تفضيل"
-
-#: banking/src/components/features/Settings/Preferences.tsx:43
-#: banking/src/components/features/Settings/SettingsDialogContent.tsx:27
-msgid "Preferences"
-msgstr ""
 
 #: banking/src/components/features/Settings/Preferences.tsx:33
 msgid "Preferences updated"
@@ -39397,11 +39400,11 @@ msgstr "أولويات"
 msgid "Priority cannot be lesser than 1."
 msgstr "لا يمكن أن تكون الأولوية أقل من 1."
 
-#: erpnext/support/doctype/service_level_agreement/service_level_agreement.py:764
+#: erpnext/support/doctype/service_level_agreement/service_level_agreement.py:767
 msgid "Priority has been changed to {0}."
 msgstr "تم تغيير الأولوية إلى {0}."
 
-#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:161
+#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:179
 msgid "Priority is mandatory"
 msgstr "الأولوية إلزامية"
 
@@ -40087,7 +40090,7 @@ msgstr "تتبع المشروع الحكيم"
 msgid "Project wise Stock Tracking "
 msgstr "مشروع تتبع حركة الأسهم الحكمة"
 
-#: erpnext/controllers/trends.py:435
+#: erpnext/controllers/trends.py:526
 msgid "Project-wise data is not available for Quotation"
 msgstr "البيانات الخاصة بالمشروع غير متوفرة للعرض المسعر"
 
@@ -40969,7 +40972,7 @@ msgstr "المشتريات"
 msgid "Purpose"
 msgstr "غرض"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:679
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:689
 msgid "Purpose must be one of {0}"
 msgstr "الهدف يجب ان يكون واحد ل {0}\\n<br>\\nPurpose must be one of {0}"
 
@@ -41056,7 +41059,7 @@ msgstr ""
 #: erpnext/controllers/trends.py:282 erpnext/controllers/trends.py:294
 #: erpnext/controllers/trends.py:299
 #: erpnext/crm/doctype/opportunity_item/opportunity_item.json
-#: erpnext/manufacturing/doctype/bom/bom.js:1108
+#: erpnext/manufacturing/doctype/bom/bom.js:1112
 #: erpnext/manufacturing/doctype/bom_creator_item/bom_creator_item.json
 #: erpnext/manufacturing/doctype/bom_item/bom_item.json
 #: erpnext/manufacturing/doctype/bom_secondary_item/bom_secondary_item.json
@@ -41193,7 +41196,7 @@ msgstr "الكمية لكل وحدة"
 msgid "Qty To Manufacture"
 msgstr "الكمية للتصنيع"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1530
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1589
 msgid "Qty To Manufacture ({0}) cannot be a fraction for the UOM {2}. To allow this, disable '{1}' in the UOM {2}."
 msgstr "لا يمكن أن تكون كمية التصنيع ({0}) كسرًا في وحدة القياس {2}. للسماح بذلك، عطّل '{1}' في وحدة القياس {2}."
 
@@ -41247,8 +41250,8 @@ msgstr "الكمية حسب السهم لوحدة قياس السهم"
 msgid "Qty for which recursion isn't applicable."
 msgstr "الكمية التي لا ينطبق عليها التكرار."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1057
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1080
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1061
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1084
 msgid "Qty for {0}"
 msgstr "الكمية ل {0}"
 
@@ -41266,7 +41269,7 @@ msgstr "الكمية المتوفرة في المخزون وحدة القياس"
 msgid "Qty of Finished Goods Item"
 msgstr "الكمية من السلع تامة الصنع"
 
-#: erpnext/stock/doctype/pick_list/pick_list.py:679
+#: erpnext/stock/doctype/pick_list/pick_list.py:709
 msgid "Qty of Finished Goods Item should be greater than 0."
 msgstr "يجب أن تكون كمية المنتج النهائي أكبر من صفر."
 
@@ -41831,7 +41834,7 @@ msgstr ""
 msgid "Quantity must be less than or equal to {0}"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1110
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1114
 #: erpnext/stock/doctype/pick_list/pick_list.js:214
 msgid "Quantity must not be more than {0}"
 msgstr "الكمية يجب ألا تكون أكثر من {0}"
@@ -41851,11 +41854,11 @@ msgstr "الكمية يجب أن تكون أبر من 0\\n<br>\\nQuantity should
 msgid "Quantity to Manufacture"
 msgstr "كمية لتصنيع"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2845
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2904
 msgid "Quantity to Manufacture can not be zero for the operation {0}"
 msgstr "لا يمكن أن تكون الكمية للتصنيع صفراً للتشغيل {0}"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1522
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1581
 msgid "Quantity to Manufacture must be greater than 0."
 msgstr "\"الكمية لتصنيع\" يجب أن تكون أكبر من 0."
 
@@ -42299,7 +42302,7 @@ msgstr "المعدل الذي يتم تحويل العملة إلى عملة ا�
 msgid "Rate at which this tax is applied"
 msgstr "السعر الذي يتم فيه تطبيق هذه الضريبة"
 
-#: erpnext/controllers/accounts_controller.py:4121
+#: erpnext/controllers/accounts_controller.py:4131
 msgid "Rate of '{}' items cannot be changed"
 msgstr "لا يمكن تغيير سعر العناصر '{}'"
 
@@ -42347,7 +42350,7 @@ msgstr "معدل المخزون وحدة القياس"
 msgid "Rate or Discount"
 msgstr "معدل أو خصم"
 
-#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:184
+#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:202
 msgid "Rate or Discount is required for the price discount."
 msgstr "السعر أو الخصم مطلوب لخصم السعر."
 
@@ -42434,7 +42437,7 @@ msgstr "مستودع المواد الخام"
 #. Label of the section_break_8 (Section Break) field in DocType 'Job Card'
 #. Label of the mr_items (Table) field in DocType 'Production Plan'
 #: erpnext/manufacturing/doctype/bom/bom.js:449
-#: erpnext/manufacturing/doctype/bom/bom.js:1081
+#: erpnext/manufacturing/doctype/bom/bom.js:1085
 #: erpnext/manufacturing/doctype/job_card/job_card.json
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
 #: erpnext/manufacturing/doctype/workstation/workstation.js:462
@@ -42463,7 +42466,7 @@ msgstr "المواد الخام المستهلكة"
 msgid "Raw Materials Consumption"
 msgstr "استهلاك المواد الخام"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:420
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:429
 msgid "Raw Materials Missing"
 msgstr ""
 
@@ -43077,11 +43080,11 @@ msgstr "إعادة إنشاء سجلات المخزون"
 msgid "Recurse Every (As Per Transaction UOM)"
 msgstr "كرر كل (حسب وحدة قياس المعاملة)"
 
-#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:240
+#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:258
 msgid "Recurse Over Qty cannot be less than 0"
 msgstr "لا يمكن أن تكون قيمة Recurse Over Qty أقل من 0"
 
-#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:316
+#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:334
 #: erpnext/accounts/doctype/promotional_scheme/promotional_scheme.py:231
 msgid "Recursive Discounts with Mixed condition is not supported by the system"
 msgstr "لا يدعم النظام الخصومات المتكررة ذات الشروط المختلطة"
@@ -43320,7 +43323,7 @@ msgstr "شريك مبيعات الإحالة"
 msgid "Refresh Plaid Link"
 msgstr "تحديث رابط منقوش"
 
-#: erpnext/stock/reorder_item.py:391
+#: erpnext/stock/reorder_item.py:393
 msgid "Regards,"
 msgstr "مع تحياتي،"
 
@@ -43867,7 +43870,7 @@ msgstr ""
 msgid "Reposting Vouchers Progress"
 msgstr ""
 
-#: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:216
+#: erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:222
 #: erpnext/stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:338
 msgid "Reposting entries created: {0}"
 msgstr "إعادة نشر المشاركات التي تم إنشاؤها: {0}"
@@ -44192,7 +44195,7 @@ msgstr "حجز"
 msgid "Reservation Based On"
 msgstr "الحجز مبني على"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:937
+#: erpnext/manufacturing/doctype/work_order/work_order.js:941
 #: erpnext/selling/doctype/sales_order/sales_order.js:107
 #: erpnext/stock/doctype/pick_list/pick_list.js:158
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:180
@@ -44307,14 +44310,14 @@ msgstr "الكمية المحجوزة"
 msgid "Reserved Quantity for Production"
 msgstr "الكمية المحجوزة للإنتاج"
 
-#: erpnext/stock/stock_ledger.py:2321
+#: erpnext/stock/stock_ledger.py:2325
 msgid "Reserved Serial No."
 msgstr "رقم تسلسلي محجوز"
 
 #. Label of the reserved_stock (Float) field in DocType 'Bin'
 #. Name of a report
 #: erpnext/manufacturing/doctype/plant_floor/stock_summary_template.html:24
-#: erpnext/manufacturing/doctype/work_order/work_order.js:953
+#: erpnext/manufacturing/doctype/work_order/work_order.js:957
 #: erpnext/public/js/stock_reservation.js:236
 #: erpnext/selling/doctype/sales_order/sales_order.js:135
 #: erpnext/selling/doctype/sales_order/sales_order.js:465
@@ -44323,13 +44326,13 @@ msgstr "رقم تسلسلي محجوز"
 #: erpnext/stock/doctype/pick_list/pick_list.js:178
 #: erpnext/stock/report/reserved_stock/reserved_stock.json
 #: erpnext/stock/report/stock_balance/stock_balance.py:569
-#: erpnext/stock/stock_ledger.py:2305
+#: erpnext/stock/stock_ledger.py:2309
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:205
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:333
 msgid "Reserved Stock"
 msgstr "المخزون المحجوز"
 
-#: erpnext/stock/stock_ledger.py:2350
+#: erpnext/stock/stock_ledger.py:2354
 msgid "Reserved Stock for Batch"
 msgstr "المخزون المحجوز للدفعة"
 
@@ -45256,7 +45259,7 @@ msgstr "الصف # {0}: لا يمكن أن يكون المعدل أكبر من �
 msgid "Row # {0}: Returned Item {1} does not exist in {2} {3}"
 msgstr "الصف رقم {0}: العنصر الذي تم إرجاعه {1} غير موجود في {2} {3}"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:350
+#: erpnext/manufacturing/doctype/work_order/work_order.py:354
 msgid "Row #1: Sequence ID must be 1 for Operation {0}."
 msgstr "الصف رقم 1: يجب أن يكون معرف التسلسل 1 للعملية {0}."
 
@@ -45356,27 +45359,27 @@ msgstr "الصف #{0}: لا يمكن إلغاء إدخال المخزون هذا
 msgid "Row #{0}: Cannot create entry with different taxable AND withholding document links."
 msgstr "الصف #{0}: لا يمكن إنشاء إدخال بروابط مستندات مختلفة للضرائب والحجز."
 
-#: erpnext/controllers/accounts_controller.py:3824
+#: erpnext/controllers/accounts_controller.py:3834
 msgid "Row #{0}: Cannot delete item {1} which has already been billed."
 msgstr "الصف # {0}: لا يمكن حذف العنصر {1} الذي تم تحرير فاتورة به بالفعل."
 
-#: erpnext/controllers/accounts_controller.py:3798
+#: erpnext/controllers/accounts_controller.py:3808
 msgid "Row #{0}: Cannot delete item {1} which has already been delivered"
 msgstr "الصف # {0}: لا يمكن حذف العنصر {1} الذي تم تسليمه بالفعل"
 
-#: erpnext/controllers/accounts_controller.py:3817
+#: erpnext/controllers/accounts_controller.py:3827
 msgid "Row #{0}: Cannot delete item {1} which has already been received"
 msgstr "الصف # {0}: لا يمكن حذف العنصر {1} الذي تم استلامه بالفعل"
 
-#: erpnext/controllers/accounts_controller.py:3804
+#: erpnext/controllers/accounts_controller.py:3814
 msgid "Row #{0}: Cannot delete item {1} which has work order assigned to it."
 msgstr "الصف # {0}: لا يمكن حذف العنصر {1} الذي تم تعيين ترتيب العمل إليه."
 
-#: erpnext/controllers/accounts_controller.py:3810
+#: erpnext/controllers/accounts_controller.py:3820
 msgid "Row #{0}: Cannot delete item {1} which is already ordered against this Sales Order."
 msgstr "الصف #{0}: لا يمكن حذف العنصر {1} الذي تم طلبه بالفعل مقابل أمر البيع هذا."
 
-#: erpnext/controllers/accounts_controller.py:4131
+#: erpnext/controllers/accounts_controller.py:4141
 msgid "Row #{0}: Cannot set Rate if the billed amount is greater than the amount for Item {1}."
 msgstr "الصف #{0}: لا يمكن تحديد السعر إذا كان المبلغ المطلوب دفعه أكبر من المبلغ الخاص بالعنصر {1}."
 
@@ -45384,7 +45387,7 @@ msgstr "الصف #{0}: لا يمكن تحديد السعر إذا كان الم�
 msgid "Row #{0}: Cannot transfer more than Required Qty {1} for Item {2} against Job Card {3}"
 msgstr "الصف #{0}: لا يمكن نقل أكثر من الكمية المطلوبة {1} للعنصر {2} مقابل بطاقة العمل {3}"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1315
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1325
 msgid "Row #{0}: Cannot transfer {1} {2} of Item {3}. Maximum transferable quantity is {4} {2}."
 msgstr ""
 
@@ -45434,11 +45437,11 @@ msgstr "الصف #{0}: لا يمكن إضافة العنصر المقدم من �
 msgid "Row #{0}: Customer Provided Item {1} cannot be added multiple times in the Subcontracting Inward process."
 msgstr "الصف #{0}: لا يمكن إضافة العنصر المقدم من العميل {1} عدة مرات في عملية التعاقد من الباطن الواردة."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:427
+#: erpnext/manufacturing/doctype/work_order/work_order.py:431
 msgid "Row #{0}: Customer Provided Item {1} cannot be added multiple times."
 msgstr "الصف #{0}: لا يمكن إضافة العنصر المقدم من العميل {1} عدة مرات."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:452
+#: erpnext/manufacturing/doctype/work_order/work_order.py:456
 msgid "Row #{0}: Customer Provided Item {1} does not exist in the Required Items table linked to the Subcontracting Inward Order."
 msgstr "الصف #{0}: العنصر المقدم من العميل {1} غير موجود في جدول العناصر المطلوبة المرتبط بأمر التوريد الداخلي للتعاقد من الباطن."
 
@@ -45446,7 +45449,7 @@ msgstr "الصف #{0}: العنصر المقدم من العميل {1} غير م
 msgid "Row #{0}: Customer Provided Item {1} exceeds quantity available through Subcontracting Inward Order"
 msgstr "الصف #{0}: يتجاوز المنتج المقدم من العميل {1} الكمية المتاحة من خلال طلب الشراء الداخلي للتعاقد من الباطن"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:440
+#: erpnext/manufacturing/doctype/work_order/work_order.py:444
 msgid "Row #{0}: Customer Provided Item {1} has insufficient quantity in the Subcontracting Inward Order. Available quantity is {2}."
 msgstr "الصف #{0}: الكمية المتوفرة من الصنف المقدم من العميل {1} غير كافية في طلب الشراء الداخلي للمقاول من الباطن. الكمية المتاحة هي {2}."
 
@@ -45506,7 +45509,7 @@ msgstr ""
 msgid "Row #{0}: Finished Good Item {1} must be a sub-contracted item"
 msgstr "الصف #{0}: يجب أن يكون المنتج النهائي {1} منتجًا تم التعاقد عليه من الباطن"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:635
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:645
 msgid "Row #{0}: Finished Good must be {1}"
 msgstr "الصف #{0}: يجب أن يكون المنتج النهائي {1}"
 
@@ -45543,7 +45546,7 @@ msgstr "الصف #{0}: حقلا \"من وقت\" و\"إلى وقت\" مطلوبا
 msgid "Row #{0}: Item added"
 msgstr "الصف # {0}: تمت إضافة العنصر"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1893
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1903
 msgid "Row #{0}: Item {1} cannot be transferred more than {2} against {3} {4}"
 msgstr "الصف #{0}: لا يمكن نقل العنصر {1} إلى أكثر من {2} مقابل {3} {4}"
 
@@ -45588,7 +45591,7 @@ msgstr "الصف #{0}: العنصر {1} ليس عنصر خدمة"
 msgid "Row #{0}: Item {1} is not a stock item"
 msgstr "الصف #{0}: العنصر {1} ليس عنصرًا متوفرًا في المخزون"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1083
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1093
 msgid "Row #{0}: Item {1} is not part of the source manufacture entry and cannot be added to this disassembly."
 msgstr ""
 
@@ -45600,7 +45603,7 @@ msgstr "الصف #{0}: العنصر {1} غير متطابق. لا يُسمح ب�
 msgid "Row #{0}: Item {1} mismatch. Changing of item code is not permitted."
 msgstr "الصف #{0}: عدم تطابق العنصر {1} . لا يُسمح بتغيير رمز العنصر."
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1092
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1102
 msgid "Row #{0}: Item {1} quantity ({2} in stock UOM) does not match the quantity derived from the source ({3}). Do not change the UOM, conversion factor or quantity of disassembly rows."
 msgstr ""
 
@@ -45628,7 +45631,7 @@ msgstr "الصف #{0}: الصف {1} فقط متاح للحجز للعنصر {2}"
 msgid "Row #{0}: Opening Accumulated Depreciation must be less than or equal to {1}"
 msgstr "الصف #{0}: يجب أن يكون الاستهلاك المتراكم الافتتاحي أقل من أو يساوي {1}"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1147
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1157
 msgid "Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order {3}. Please update operation status via Job Card {4}."
 msgstr "الصف # {0}: العملية {1} لم تكتمل لـ {2} الكمية من السلع تامة الصنع في أمر العمل {3}. يرجى تحديث حالة التشغيل عبر بطاقة العمل {4}."
 
@@ -45758,7 +45761,7 @@ msgid ""
 "\t\t\t\t\tthis validation."
 msgstr ""
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:356
+#: erpnext/manufacturing/doctype/work_order/work_order.py:360
 msgid "Row #{0}: Sequence ID must be {1} or {2} for Operation {3}."
 msgstr "الصف #{0}: يجب أن يكون معرف التسلسل {1} أو {2} للعملية {3}."
 
@@ -45802,19 +45805,19 @@ msgstr "الصف #{0}: بما أن خيار \"تتبع المنتجات نصف �
 msgid "Row #{0}: Source Warehouse must be same as Customer Warehouse {1} from the linked Subcontracting Inward Order"
 msgstr "الصف #{0}: يجب أن يكون مستودع المصدر هو نفسه مستودع العميل {1} من أمر التوريد الداخلي المرتبط بالتعاقد من الباطن"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:461
+#: erpnext/manufacturing/doctype/work_order/work_order.py:465
 msgid "Row #{0}: Source Warehouse {1} for item {2} cannot be a customer warehouse."
 msgstr "الصف #{0}: لا يمكن أن يكون مستودع المصدر {1} للعنصر {2} مستودع عميل."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:416
+#: erpnext/manufacturing/doctype/work_order/work_order.py:420
 msgid "Row #{0}: Source Warehouse {1} for item {2} must be same as Source Warehouse {3} in the Work Order."
 msgstr "الصف #{0}: يجب أن يكون مستودع المصدر {1} للعنصر {2} هو نفسه مستودع المصدر {3} في أمر العمل."
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1349
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1359
 msgid "Row #{0}: Source and Target Warehouse cannot be the same for Material Transfer"
 msgstr "الصف #{0}: لا يمكن أن يكون مستودع المصدر ومستودع الهدف متطابقين لنقل المواد"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1371
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1381
 msgid "Row #{0}: Source, Target Warehouse and Inventory Dimensions cannot be the exact same for Material Transfer"
 msgstr "الصف #{0}: لا يمكن أن تكون أبعاد المستودع المصدر والمستودع الهدف والمخزون متطابقة تمامًا في عملية نقل المواد."
 
@@ -45846,7 +45849,7 @@ msgstr "الصف #{0}: لا يمكن حجز المخزون في مستودع ا�
 msgid "Row #{0}: Stock is already reserved for the Item {1}."
 msgstr "الصف #{0}: تم حجز المخزون بالفعل للصنف {1}."
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:528
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:540
 msgid "Row #{0}: Stock is reserved for item {1} in warehouse {2}."
 msgstr "الصف #{0}: تم حجز المخزون للصنف {1} في المستودع {2}."
 
@@ -45931,7 +45934,7 @@ msgstr "الصف رقم {0}: {1} مطلوب لإنشاء فواتير الافت
 msgid "Row #{0}: {1} of {2} should be {3}. Please update the {1} or select a different account."
 msgstr "الصف #{0}: {1} من {2} يجب أن يكون {3}. يرجى تحديث {1} أو اختيار حساب آخر."
 
-#: erpnext/controllers/accounts_controller.py:3938
+#: erpnext/controllers/accounts_controller.py:3948
 msgid "Row #{0}:Quantity for Item {1} cannot be zero."
 msgstr ""
 
@@ -46019,7 +46022,7 @@ msgstr "الصف رقم {}: الفاتورة الأصلية {} للفاتورة 
 msgid "Row #{}: You cannot add positive quantities in a return invoice. Please remove item {} to complete the return."
 msgstr "السطر رقم {}: لا يمكنك إضافة كميات موجبة في فاتورة الإرجاع. يرجى حذف العنصر {} لإتمام عملية الإرجاع."
 
-#: erpnext/stock/doctype/pick_list/pick_list.py:237
+#: erpnext/stock/doctype/pick_list/pick_list.py:239
 msgid "Row #{}: item {} has been picked already."
 msgstr "الصف رقم {}: تم اختيار العنصر {} بالفعل."
 
@@ -46044,11 +46047,11 @@ msgstr "رقم الصف {0}: مطلوب تحديد مستودع. يُرجى تح
 msgid "Row {0} : Operation is required against the raw material item {1}"
 msgstr "الصف {0}: العملية مطلوبة مقابل عنصر المادة الخام {1}"
 
-#: erpnext/stock/doctype/pick_list/pick_list.py:267
+#: erpnext/stock/doctype/pick_list/pick_list.py:269
 msgid "Row {0} picked quantity is less than the required quantity, additional {1} {2} required."
 msgstr "الكمية المختارة من الصف {0} أقل من الكمية المطلوبة، يلزم كمية إضافية {1} {2} ."
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1917
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1927
 msgid "Row {0}# Item {1} not found in 'Raw Materials Supplied' table in {2} {3}"
 msgstr "الصف {0}# العنصر {1} غير موجود في جدول \"المواد الخام الموردة\" في {2} {3}"
 
@@ -46072,19 +46075,19 @@ msgstr "الصف {0}:  الدفعة المقدمة مقابل الزبائن ي�
 msgid "Row {0}: Advance against Supplier must be debit"
 msgstr "الصف {0}:المورد المقابل المتقدم يجب أن يكون مدين\\n<br>\\nRow {0}: Advance against Supplier must be debit"
 
-#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:737
+#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:768
 msgid "Row {0}: Allocated amount {1} must be less than or equal to invoice outstanding amount {2}"
 msgstr "الصف {0}: يجب أن يكون المبلغ المخصص {1} أقل من أو يساوي المبلغ المستحق من الفاتورة {2}"
 
-#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:729
+#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:760
 msgid "Row {0}: Allocated amount {1} must be less than or equal to remaining payment amount {2}"
 msgstr "الصف {0}: يجب أن يكون المبلغ المخصص {1} أقل من أو يساوي مبلغ الدفعة المتبقية {2}"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1578
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1588
 msgid "Row {0}: As {1} is enabled, raw materials cannot be added to {2} entry. Use {3} entry to consume raw materials."
 msgstr "الصف {0}: بما أن {1} مُفعّل، فلا يمكن إضافة المواد الخام إلى المدخل {2} . استخدم المدخل {3} لاستهلاك المواد الخام."
 
-#: erpnext/stock/doctype/material_request/material_request.py:854
+#: erpnext/stock/doctype/material_request/material_request.py:869
 msgid "Row {0}: Bill of Materials not found for the Item {1}"
 msgstr "صف {0}: من مواد مشروع القانون لم يتم العثور على هذا البند {1}"
 
@@ -46222,7 +46225,7 @@ msgstr "الصف {0}: لا يمكن أن تكون كمية العنصر {1}أع�
 msgid "Row {0}: Operation time should be greater than 0 for operation {1}"
 msgstr ""
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:585
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:597
 msgid "Row {0}: Packed Qty must be equal to {1} Qty."
 msgstr "الصف {0}: يجب أن تكون الكمية المعبأة مساوية للكمية {1} ."
 
@@ -46290,7 +46293,7 @@ msgstr "الصف {0}: فاتورة الشراء {1} ليس لها أي تأثي�
 msgid "Row {0}: Qty cannot be greater than {1} for the Item {2}."
 msgstr "الصف {0}: لا يمكن أن تكون الكمية أكبر من {1} للعنصر {2}."
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:726
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:736
 msgid "Row {0}: Qty in Stock UOM can not be zero."
 msgstr "الصف {0}: لا يمكن أن تكون الكمية في المخزون بوحدة القياس صفرًا."
 
@@ -46302,7 +46305,7 @@ msgstr "الصف {0}: يجب أن تكون الكمية أكبر من 0."
 msgid "Row {0}: Quantity cannot be negative."
 msgstr "الصف {0}: لا يمكن أن تكون الكمية سالبة."
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1221
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1231
 msgid "Row {0}: Quantity not available for {4} in warehouse {1} at posting time of the entry ({2} {3})"
 msgstr "الصف {0}: الكمية غير متوفرة {4} في المستودع {1} في وقت نشر الإدخال ({2} {3})"
 
@@ -46310,7 +46313,7 @@ msgstr "الصف {0}: الكمية غير متوفرة {4} في المستودع
 msgid "Row {0}: Sales Invoice {1} is already created for {2}"
 msgstr "الصف {0}: تم إنشاء فاتورة المبيعات {1} بالفعل لـ {2}"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:333
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:342
 msgid "Row {0}: Serial/Batch has been reset to values linked with Work Order {1} because the previously selected serial/batch does not belong to this Work Order."
 msgstr ""
 
@@ -46318,7 +46321,7 @@ msgstr ""
 msgid "Row {0}: Shift cannot be changed since the depreciation has already been processed"
 msgstr "الصف {0}: لا يمكن تغيير المناوبة لأن عملية الإهلاك قد تمت بالفعل"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1930
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1940
 msgid "Row {0}: Subcontracted Item is mandatory for the raw material {1}"
 msgstr "الصف {0}: العنصر المتعاقد عليه من الباطن إلزامي للمادة الخام {1}"
 
@@ -46334,7 +46337,7 @@ msgstr "الصف {0}: المهمة {1} لا تنتمي إلى المشروع {2}
 msgid "Row {0}: The entire expense amount for account {1} in {2} has already been allocated."
 msgstr "الصف {0}: تم تخصيص مبلغ المصروفات بالكامل للحساب {1} في {2} بالفعل."
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:772
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:782
 msgid "Row {0}: The item {1}, quantity must be positive number"
 msgstr "الصف {0}: العنصر {1} ، يجب أن تكون الكمية رقمًا موجبًا"
 
@@ -46346,11 +46349,11 @@ msgstr "الصف {0}: الحساب {3} {1} لا ينتمي إلى الشركة {
 msgid "Row {0}: To set {1} periodicity, difference between from and to date must be greater than or equal to {2}"
 msgstr "الصف {0}: لتعيين دورية {1} ، يجب أن يكون الفرق بين تاريخي البداية والنهاية أكبر من أو يساوي {2}"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:3910
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:3920
 msgid "Row {0}: Transferred quantity cannot be greater than the requested quantity."
 msgstr "الصف {0}: لا يمكن أن تكون الكمية المنقولة أكبر من الكمية المطلوبة."
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:720
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:730
 msgid "Row {0}: UOM Conversion Factor is mandatory"
 msgstr "الصف {0}: عامل تحويل UOM إلزامي\\n<br>\\nRow {0}: UOM Conversion Factor is mandatory"
 
@@ -46358,16 +46361,16 @@ msgstr "الصف {0}: عامل تحويل UOM إلزامي\\n<br>\\nRow {0}: UOM
 msgid "Row {0}: Update Stock must be checked for item {1} because it is against Pick List {2}."
 msgstr ""
 
-#: erpnext/stock/doctype/pick_list/pick_list.py:173
+#: erpnext/stock/doctype/pick_list/pick_list.py:175
 msgid "Row {0}: Warehouse is required"
 msgstr ""
 
-#: erpnext/stock/doctype/pick_list/pick_list.py:182
+#: erpnext/stock/doctype/pick_list/pick_list.py:184
 msgid "Row {0}: Warehouse {1} is linked to company {2}. Please select a warehouse belonging to company {3}."
 msgstr ""
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1239
-#: erpnext/manufacturing/doctype/work_order/work_order.py:490
+#: erpnext/manufacturing/doctype/work_order/work_order.py:494
 msgid "Row {0}: Workstation or Workstation Type is mandatory for an operation {1}"
 msgstr "الصف {0}: محطة العمل أو نوع محطة العمل إلزامي للعملية {1}"
 
@@ -46865,7 +46868,7 @@ msgstr "لم يتم إنشاء فاتورة المبيعات بواسطة الم
 msgid "Sales Invoice mode is activated in POS. Please create Sales Invoice instead."
 msgstr "تم تفعيل وضع فاتورة المبيعات في نظام نقاط البيع. يرجى إنشاء فاتورة مبيعات بدلاً من ذلك."
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:598
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:610
 msgid "Sales Invoice {0} has already been submitted"
 msgstr "سبق أن تم ترحيل فاتورة المبيعات {0}"
 
@@ -47078,7 +47081,7 @@ msgstr ""
 msgid "Sales Order {0} is not submitted"
 msgstr "لا يتم اعتماد أمر التوريد {0}\\n<br>\\nSales Order {0} is not submitted"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:566
+#: erpnext/manufacturing/doctype/work_order/work_order.py:570
 msgid "Sales Order {0} is not valid"
 msgstr "أمر البيع {0} غير موجود\\n<br>\\nSales Order {0} is not valid"
 
@@ -47512,7 +47515,7 @@ msgstr "مستودع الاحتفاظ بالعينات"
 msgid "Sample Size"
 msgstr "حجم العينة"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:4410
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:4423
 msgid "Sample quantity {0} cannot be more than received quantity {1}"
 msgstr "كمية العينة {0} لا يمكن أن تكون أكثر من الكمية المستلمة {1}"
 
@@ -48067,7 +48070,7 @@ msgstr ""
 msgid "Select Possible Supplier"
 msgstr "اختار المورد المحتمل"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1116
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1120
 #: erpnext/stock/doctype/pick_list/pick_list.js:224
 msgid "Select Quantity"
 msgstr "إختيار الكمية"
@@ -48231,11 +48234,11 @@ msgstr "حدد الحساب البنكي للتوفيق."
 msgid "Select the Default Workstation where the Operation will be performed. This will be fetched in BOMs and Work Orders."
 msgstr "حدد محطة العمل الافتراضية التي سيتم فيها تنفيذ العملية. سيتم جلب هذه المحطة من قوائم المواد وأوامر العمل."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1225
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1236
 msgid "Select the Item to be manufactured."
 msgstr "حدد المنتج المراد تصنيعه."
 
-#: erpnext/manufacturing/doctype/bom/bom.js:988
+#: erpnext/manufacturing/doctype/bom/bom.js:992
 msgid "Select the Item to be manufactured. The Item name, UoM, Company, and Currency will be fetched automatically."
 msgstr "حدد المنتج المراد تصنيعه. سيتم جلب اسم المنتج ووحدة القياس والشركة والعملة تلقائيًا."
 
@@ -48266,7 +48269,7 @@ msgstr ""
 msgid "Select the modules that you plan to implement"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.js:1007
+#: erpnext/manufacturing/doctype/bom/bom.js:1011
 msgid "Select the raw materials (Items) required to manufacture the Item"
 msgstr "حدد المواد الخام (العناصر) المطلوبة لتصنيع العنصر"
 
@@ -48412,7 +48415,7 @@ msgstr "إعدادات البيع"
 msgid "Selling Setup"
 msgstr ""
 
-#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:214
+#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:232
 msgid "Selling must be checked, if Applicable For is selected as {0}"
 msgstr "يجب أن يتم التحقق البيع، إذا تم تحديد مطبق للك {0}"
 
@@ -48603,7 +48606,7 @@ msgstr ""
 #: erpnext/stock/doctype/packed_item/packed_item.json
 #: erpnext/stock/doctype/pick_list_item/pick_list_item.json
 #: erpnext/stock/doctype/purchase_receipt_item/purchase_receipt_item.json
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:169
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:170
 #: erpnext/stock/doctype/serial_and_batch_entry/serial_and_batch_entry.json
 #: erpnext/stock/doctype/serial_no/serial_no.json
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
@@ -48657,7 +48660,7 @@ msgstr "دفتر الأستاذ ذو الرقم التسلسلي"
 msgid "Serial No Range"
 msgstr "نطاق الأرقام التسلسلية"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2725
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2735
 msgid "Serial No Reserved"
 msgstr "الرقم التسلسلي محجوز"
 
@@ -48713,7 +48716,7 @@ msgstr "لا يمكن استخدام الرقم التسلسلي ومحدد ال
 msgid "Serial No and Batch Traceability"
 msgstr "إمكانية تتبع الرقم التسلسلي والدفعة"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1229
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1230
 msgid "Serial No is mandatory"
 msgstr "الرقم التسلسلي إلزامي"
 
@@ -48742,11 +48745,11 @@ msgstr "الرقم المتسلسل {0} لا ينتمي إلى البند {1}\\n
 msgid "Serial No {0} does not exist"
 msgstr "الرقم المتسلسل {0} غير موجود\\n<br>\\nSerial No {0} does not exist"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:3514
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:3524
 msgid "Serial No {0} does not exists"
 msgstr "الرقم التسلسلي {0} غير موجود"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:378
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:379
 msgid "Serial No {0} is already Delivered. You cannot use them again in Manufacture / Repack entry."
 msgstr "الرقم التسلسلي {0} مُسلّم بالفعل. لا يمكنك استخدامه مرة أخرى في عملية التصنيع/إعادة التعبئة."
 
@@ -48758,7 +48761,7 @@ msgstr "تمت إضافة الرقم التسلسلي {0} بالفعل"
 msgid "Serial No {0} is already assigned to customer {1}. Can only be returned against the customer {1}"
 msgstr "الرقم التسلسلي {0} مُخصص بالفعل للعميل {1}. لا يمكن إرجاعه إلا للعميل {1}."
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:483
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:484
 msgid "Serial No {0} is not present in the {1} {2}, hence you can't return it against the {1} {2}"
 msgstr "الرقم التسلسلي {0} غير موجود في {1} {2}، لذا لا يمكنك إرجاعه إلى {1} {2}"
 
@@ -48782,7 +48785,7 @@ msgstr "الرقم التسلسلي: تم بالفعل معاملة {0} في ف�
 #: erpnext/public/js/utils/serial_no_batch_selector.js:16
 #: erpnext/public/js/utils/serial_no_batch_selector.js:201
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.js:50
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:169
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:170
 msgid "Serial Nos"
 msgstr "الأرقام التسلسلية"
 
@@ -48796,15 +48799,15 @@ msgstr "الأرقام التسلسلية / أرقام الدفعات"
 msgid "Serial Nos / Batches"
 msgstr ""
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2008
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2009
 msgid "Serial Nos are created successfully"
 msgstr "تم إنشاء الأرقام التسلسلية بنجاح"
 
-#: erpnext/stock/stock_ledger.py:2311
+#: erpnext/stock/stock_ledger.py:2315
 msgid "Serial Nos are reserved in Stock Reservation Entries, you need to unreserve them before proceeding."
 msgstr "يتم حجز الأرقام التسلسلية في إدخالات حجز المخزون، لذا عليك إلغاء حجزها قبل المتابعة."
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:384
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:385
 msgid "Serial Nos {0} are already Delivered. You cannot use them again in Manufacture / Repack entry."
 msgstr "تم تسليم الأرقام التسلسلية {0} بالفعل. لا يمكنك استخدامها مرة أخرى في إدخال التصنيع / إعادة التعبئة."
 
@@ -48880,11 +48883,11 @@ msgstr "حزمة التسلسل والدفعة"
 msgid "Serial and Batch Bundle Exists"
 msgstr ""
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2230
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2238
 msgid "Serial and Batch Bundle created"
 msgstr "تم إنشاء حزمة التسلسل والدفعة"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2324
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2334
 msgid "Serial and Batch Bundle updated"
 msgstr "تم تحديث حزمة التسلسل والدفعة"
 
@@ -48896,7 +48899,7 @@ msgstr "تم استخدام حزمة Serial and Batch {0} بالفعل في {1} 
 msgid "Serial and Batch Bundle {0} is not submitted"
 msgstr "لم يتم إرسال حزمة البيانات التسلسلية والدفعية {0}"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2300
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2308
 msgid "Serial and Batch Bundle {0} is submitted and its entries cannot be modified."
 msgstr ""
 
@@ -48920,7 +48923,7 @@ msgstr "إدخال البيانات التسلسلي والدفعي"
 msgid "Serial and Batch No"
 msgstr "الرقم التسلسلي ورقم الدفعة"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:152
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:153
 msgid "Serial and Batch No for Item Disabled"
 msgstr ""
 
@@ -49089,7 +49092,7 @@ msgstr "حالة اتفاقية مستوى الخدمة"
 msgid "Service Level Agreement for {0} {1} already exists."
 msgstr "اتفاقية مستوى الخدمة لـ {0} {1} موجودة بالفعل."
 
-#: erpnext/support/doctype/service_level_agreement/service_level_agreement.py:771
+#: erpnext/support/doctype/service_level_agreement/service_level_agreement.py:774
 msgid "Service Level Agreement has been changed to {0}."
 msgstr "تم تغيير اتفاقية مستوى الخدمة إلى {0}."
 
@@ -49179,7 +49182,7 @@ msgstr "تعيين السلف والتخصيص (FIFO)"
 
 #. Label of the set_basic_rate_manually (Check) field in DocType 'Stock Entry
 #. Detail'
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:400
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:409
 #: erpnext/stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgid "Set Basic Rate Manually"
 msgstr "قم بتعيين السعر الأساسي يدويًا"
@@ -49259,7 +49262,7 @@ msgstr "قم بتعيين رقم الصف الأصل في جدول العناص�
 msgid "Set Posting Date"
 msgstr "حدد تاريخ النشر"
 
-#: erpnext/manufacturing/doctype/bom/bom.js:1034
+#: erpnext/manufacturing/doctype/bom/bom.js:1038
 msgid "Set Process Loss Item Quantity"
 msgstr "تحديد كمية عنصر خسارة العملية"
 
@@ -49385,7 +49388,7 @@ msgstr "حدد اسم الحقل الذي تريد جلب البيانات من�
 msgid "Set incoming rate as zero for expired Batch"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/bom/bom.js:1024
+#: erpnext/manufacturing/doctype/bom/bom.js:1028
 msgid "Set quantity of process loss item:"
 msgstr "حدد كمية عنصر خسارة العملية:"
 
@@ -49401,7 +49404,7 @@ msgstr "تعيين معدل عنصر التجميع الفرعي استنادا 
 msgid "Set targets Item Group-wise for this Sales Person."
 msgstr "تحديد أهداف المجموعة السلعة الحكيم لهذا الشخص المبيعات."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1282
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1293
 msgid "Set the Planned Start Date (an Estimated Date at which you want the Production to begin)"
 msgstr "حدد تاريخ البدء المخطط له (تاريخ تقديري ترغب في أن يبدأ فيه الإنتاج)"
 
@@ -49512,7 +49515,7 @@ msgid "Setting up company"
 msgstr "تأسيس شركة"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1218
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1586
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1645
 msgid "Setting {0} is required"
 msgstr "الإعداد {0} مطلوب"
 
@@ -49724,7 +49727,7 @@ msgstr "نوع الشحنة"
 msgid "Shipment details"
 msgstr "تفاصيل الشحنة"
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:769
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:781
 msgid "Shipments"
 msgstr "شحنات"
 
@@ -50235,7 +50238,7 @@ msgstr ""
 msgid "Simultaneous"
 msgstr "متزامن"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:850
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:860
 msgid "Since there is a process loss of {0} units for the finished good {1}, you should reduce the quantity by {0} units for the finished good {1} in the Items Table."
 msgstr "بما أن هناك خسارة في العملية قدرها {0} وحدة للمنتج النهائي {1}، فيجب عليك تقليل الكمية بمقدار {0} وحدة للمنتج النهائي {1} في جدول العناصر."
 
@@ -50347,7 +50350,7 @@ msgstr "يباع بواسطة"
 msgid "Solvency Ratios"
 msgstr "نسب الملاءة المالية"
 
-#: erpnext/controllers/accounts_controller.py:4389
+#: erpnext/controllers/accounts_controller.py:4399
 msgid "Some required Company details are missing. You don't have permission to update them. Please contact your System Manager."
 msgstr "بعض بيانات الشركة المطلوبة مفقودة. ليس لديك صلاحية لتحديثها. يرجى الاتصال بمدير النظام."
 
@@ -50411,7 +50414,7 @@ msgstr "اسم حقل المصدر"
 msgid "Source Location"
 msgstr "موقع المصدر"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1026
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1030
 msgid "Source Manufacture Entry"
 msgstr ""
 
@@ -50420,11 +50423,11 @@ msgstr ""
 msgid "Source Stock Entry (Manufacture)"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1012
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1022
 msgid "Source Stock Entry {0} belongs to Work Order {1}, not {2}. Please use a manufacture entry from the same Work Order."
 msgstr ""
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2680
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:2690
 msgid "Source Stock Entry {0} has no finished goods quantity"
 msgstr ""
 
@@ -50482,7 +50485,7 @@ msgstr "رابط عنوان مستودع المصدر"
 msgid "Source Warehouse is mandatory for the Item {0}."
 msgstr "يُعد مستودع المصدر إلزاميًا للعنصر {0}."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:375
+#: erpnext/manufacturing/doctype/work_order/work_order.py:379
 msgid "Source Warehouse {0} must be same as Customer Warehouse {1} in the Subcontracting Inward Order."
 msgstr "يجب أن يكون مستودع المصدر {0} هو نفسه مستودع العميل {1} في أمر التوريد الداخلي للتعاقد من الباطن."
 
@@ -50490,7 +50493,7 @@ msgstr "يجب أن يكون مستودع المصدر {0} هو نفسه مست�
 msgid "Source and Target Location cannot be same"
 msgstr "لا يمكن أن يكون المصدر و الموقع الهدف نفسه"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:978
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:988
 msgid "Source and target warehouse cannot be same for row {0}"
 msgstr "المصدر والمستودع المستهدف لا يمكن أن يكون نفس الصف {0}\\n<br>\\nSource and target warehouse cannot be same for row {0}"
 
@@ -50503,9 +50506,9 @@ msgstr "ويجب أن تكون مصدر ومستودع الهدف مختلفة"
 msgid "Source of Funds (Liabilities)"
 msgstr "(مصدر الأموال  (الخصوم"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:945
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:961
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:968
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:955
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:971
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:978
 msgid "Source warehouse is mandatory for row {0}"
 msgstr "مستودع المصدر إلزامي للصف {0}\\n<br>\\nSource warehouse is mandatory for row {0}"
 
@@ -50675,7 +50678,7 @@ msgstr "المصاريف الخاضعة للضريبة القياسية"
 #: erpnext/setup/setup_wizard/operations/defaults_setup.py:70
 #: erpnext/setup/setup_wizard/operations/install_fixtures.py:493
 #: erpnext/stock/doctype/item/item.py:276 erpnext/tests/utils.py:283
-#: erpnext/tests/utils.py:2518
+#: erpnext/tests/utils.py:2519
 msgid "Standard Selling"
 msgstr "البيع القياسية"
 
@@ -51009,7 +51012,7 @@ msgstr "سجل إغلاق المخزون"
 msgid "Stock Details"
 msgstr "تفاصيل المخزون"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1189
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1199
 msgid "Stock Entries already created for Work Order {0}: {1}"
 msgstr ""
 
@@ -51067,10 +51070,6 @@ msgstr "بند إدخال المخزون"
 #: erpnext/stock/doctype/stock_entry_type/stock_entry_type.json
 msgid "Stock Entry Type"
 msgstr "نوع إدخال الأسهم"
-
-#: erpnext/stock/doctype/pick_list/pick_list.py:1552
-msgid "Stock Entry has been already created against this Pick List"
-msgstr "تم إنشاء إدخال الأسهم بالفعل مقابل قائمة الاختيار هذه"
 
 #: erpnext/stock/doctype/batch/batch.js:138
 msgid "Stock Entry {0} created"
@@ -51314,9 +51313,9 @@ msgstr "إعدادات إعادة نشر المخزون"
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:289
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:297
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:303
-#: erpnext/manufacturing/doctype/work_order/work_order.js:939
-#: erpnext/manufacturing/doctype/work_order/work_order.js:948
-#: erpnext/manufacturing/doctype/work_order/work_order.js:955
+#: erpnext/manufacturing/doctype/work_order/work_order.js:943
+#: erpnext/manufacturing/doctype/work_order/work_order.js:952
+#: erpnext/manufacturing/doctype/work_order/work_order.js:959
 #: erpnext/manufacturing/doctype/work_order/work_order_dashboard.py:14
 #: erpnext/public/js/stock_reservation.js:12
 #: erpnext/selling/doctype/sales_order/sales_order.js:109
@@ -51354,7 +51353,7 @@ msgstr "تم إلغاء إدخالات حجز المخزون"
 
 #: erpnext/controllers/subcontracting_inward_controller.py:1037
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:2245
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2353
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2412
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1777
 msgid "Stock Reservation Entries Created"
 msgstr "تم إنشاء قيود حجز المخزون"
@@ -51382,7 +51381,7 @@ msgstr "لا يمكن تحديث إدخال حجز المخزون لأنه تم 
 msgid "Stock Reservation Entry created against a Pick List cannot be updated. If you need to make changes, we recommend canceling the existing entry and creating a new one."
 msgstr "لا يمكن تعديل إدخال حجز المخزون المُنشأ مقابل قائمة الاختيار. إذا كنت ترغب في إجراء تغييرات، فننصحك بإلغاء الإدخال الحالي وإنشاء إدخال جديد."
 
-#: erpnext/stock/doctype/delivery_note/delivery_note.py:538
+#: erpnext/stock/doctype/delivery_note/delivery_note.py:550
 msgid "Stock Reservation Warehouse Mismatch"
 msgstr "عدم تطابق مستودع حجز المخزون"
 
@@ -51720,7 +51719,7 @@ msgstr "حجر"
 msgid "Stop Reason"
 msgstr "توقف السبب"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1177
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1236
 msgid "Stopped Work Order cannot be cancelled, Unstop it first to cancel"
 msgstr "لا يمكن إلغاء طلب العمل المتوقف ، قم بإلغاء إيقافه أولاً للإلغاء"
 
@@ -52314,7 +52313,7 @@ msgstr "إعدادات النجاح"
 msgid "Successful"
 msgstr "ناجح"
 
-#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:578
+#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:609
 msgid "Successfully Reconciled"
 msgstr "تمت التسوية بنجاح\\n<br>\\nSuccessfully Reconciled"
 
@@ -52503,7 +52502,7 @@ msgstr "الموردة الكمية"
 #: erpnext/buying/report/supplier_quotation_comparison/supplier_quotation_comparison.js:51
 #: erpnext/buying/report/supplier_quotation_comparison/supplier_quotation_comparison.py:197
 #: erpnext/buying/workspace/buying/buying.json
-#: erpnext/crm/doctype/contract/contract.json
+#: erpnext/controllers/trends.py:449 erpnext/crm/doctype/contract/contract.json
 #: erpnext/manufacturing/doctype/blanket_order/blanket_order.json
 #: erpnext/manufacturing/doctype/production_plan_sub_assembly_item/production_plan_sub_assembly_item.json
 #: erpnext/public/js/purchase_trends_filters.js:50
@@ -52627,6 +52626,7 @@ msgstr "تفاصيل المورد"
 #: erpnext/buying/doctype/supplier/supplier.json
 #: erpnext/buying/report/item_wise_purchase_history/item_wise_purchase_history.py:107
 #: erpnext/buying/workspace/buying/buying.json
+#: erpnext/controllers/trends.py:457 erpnext/controllers/trends.py:472
 #: erpnext/public/js/purchase_trends_filters.js:51
 #: erpnext/regional/doctype/import_supplier_invoice/import_supplier_invoice.json
 #: erpnext/regional/report/irs_1099/irs_1099.js:26
@@ -52728,6 +52728,7 @@ msgstr "ملخص دفتر الأستاذ"
 #: erpnext/buying/doctype/supplier/supplier.json
 #: erpnext/buying/doctype/supplier_quotation/supplier_quotation.json
 #: erpnext/buying/report/item_wise_purchase_history/item_wise_purchase_history.py:101
+#: erpnext/controllers/trends.py:455
 #: erpnext/manufacturing/doctype/blanket_order/blanket_order.json
 #: erpnext/stock/doctype/purchase_receipt/purchase_receipt.json
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
@@ -53257,7 +53258,7 @@ msgstr "عنوان المستودع المستهدف"
 msgid "Target Warehouse Address Link"
 msgstr "رابط عنوان مستودع تارجت"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:320
+#: erpnext/manufacturing/doctype/work_order/work_order.py:324
 msgid "Target Warehouse Reservation Error"
 msgstr "خطأ في حجز مستودع تارجت"
 
@@ -53265,7 +53266,7 @@ msgstr "خطأ في حجز مستودع تارجت"
 msgid "Target Warehouse for Finished Good must be same as Finished Good Warehouse {1} in Work Order {2} linked to the Subcontracting Inward Order."
 msgstr "يجب أن يكون المستودع المستهدف للمنتج النهائي هو نفسه مستودع المنتج النهائي {1} في أمر العمل {2} المرتبط بأمر التوريد الداخلي للمقاول من الباطن."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:865
+#: erpnext/manufacturing/doctype/work_order/work_order.py:924
 msgid "Target Warehouse is required before Submit"
 msgstr "يلزم وجود مستودع Target قبل الإرسال"
 
@@ -53273,13 +53274,13 @@ msgstr "يلزم وجود مستودع Target قبل الإرسال"
 msgid "Target Warehouse is set for some items but the customer is not an internal customer."
 msgstr "تم إعداد مستودع Target لبعض المنتجات، لكن العميل ليس عميلاً داخلياً."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:391
+#: erpnext/manufacturing/doctype/work_order/work_order.py:395
 msgid "Target Warehouse {0} must be same as Delivery Warehouse {1} in the Subcontracting Inward Order Item."
 msgstr "يجب أن يكون المستودع المستهدف {0} هو نفسه مستودع التسليم {1} في بند أمر التوريد الداخلي للتعاقد من الباطن."
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:951
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:957
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:972
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:961
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:967
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:982
 msgid "Target warehouse is mandatory for row {0}"
 msgstr "المستودع المستهدف إلزامي للصف {0}\\n<br>\\nTarget warehouse is mandatory for row {0}"
 
@@ -54144,7 +54145,8 @@ msgstr "قالب الشروط والأحكام"
 #: erpnext/accounts/report/inactive_sales_items/inactive_sales_items.py:22
 #: erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py:259
 #: erpnext/accounts/report/sales_register/sales_register.py:223
-#: erpnext/crm/doctype/lead/lead.json
+#: erpnext/controllers/trends.py:398 erpnext/controllers/trends.py:422
+#: erpnext/controllers/trends.py:487 erpnext/crm/doctype/lead/lead.json
 #: erpnext/crm/doctype/opportunity/opportunity.json
 #: erpnext/crm/doctype/prospect/prospect.json
 #: erpnext/crm/report/lead_details/lead_details.js:46
@@ -54274,7 +54276,7 @@ msgstr "سيتم إلغاء إدخالات دفتر الأستاذ العام ف
 msgid "The Loyalty Program isn't valid for the selected company"
 msgstr "برنامج الولاء غير صالح للشركة المختارة"
 
-#: erpnext/accounts/doctype/payment_request/payment_request.py:1109
+#: erpnext/accounts/doctype/payment_request/payment_request.py:1110
 msgid "The Payment Request {0} is already paid, cannot process payment twice"
 msgstr "تم دفع طلب الدفع {0} بالفعل، ولا يمكن معالجة الدفع مرتين."
 
@@ -54282,11 +54284,11 @@ msgstr "تم دفع طلب الدفع {0} بالفعل، ولا يمكن معا�
 msgid "The Payment Term at row {0} is possibly a duplicate."
 msgstr "قد يكون مصطلح الدفع في الصف {0} مكررا."
 
-#: erpnext/stock/doctype/pick_list/pick_list.py:345
+#: erpnext/stock/doctype/pick_list/pick_list.py:347
 msgid "The Pick List having Stock Reservation Entries cannot be updated. If you need to make changes, we recommend canceling the existing Stock Reservation Entries before updating the Pick List."
 msgstr "لا يمكن تحديث قائمة الاختيار التي تحتوي على إدخالات حجز المخزون. إذا كنت ترغب في إجراء تغييرات، فننصحك بإلغاء إدخالات حجز المخزون الحالية قبل تحديث قائمة الاختيار."
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:3132
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:3142
 msgid "The Process Loss Qty has reset as per job cards Process Loss Qty"
 msgstr "تمت إعادة ضبط كمية الفاقد في العملية وفقًا لبطاقات العمل."
 
@@ -54294,15 +54296,15 @@ msgstr "تمت إعادة ضبط كمية الفاقد في العملية وف�
 msgid "The Sales Person is linked with {0}"
 msgstr "يرتبط مندوب المبيعات بـ {0}"
 
-#: erpnext/stock/doctype/pick_list/pick_list.py:211
+#: erpnext/stock/doctype/pick_list/pick_list.py:213
 msgid "The Serial No at Row #{0}: {1} is not available in warehouse {2}."
 msgstr "الرقم التسلسلي في الصف #{0}: {1} غير متوفر في المستودع {2}."
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2722
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2732
 msgid "The Serial No {0} is reserved against the {1} {2} and cannot be used for any other transaction."
 msgstr "الرقم التسلسلي {0} محجوز مقابل {1} {2} ولا يمكن استخدامه لأي معاملة أخرى."
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2098
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:2108
 msgid "The Serial and Batch Bundle {0} is not valid for this transaction. The 'Type of Transaction' should be 'Outward' instead of 'Inward' in Serial and Batch Bundle {0}"
 msgstr "حزمة البيانات التسلسلية والدفعية {0} غير صالحة لهذه المعاملة. يجب أن يكون \"نوع المعاملة\" \"خارجي\" بدلاً من \"داخلي\" في حزمة البيانات التسلسلية والدفعية {0}"
 
@@ -54316,7 +54318,7 @@ msgstr "يُعرف إدخال المخزون من نوع &quot;التصنيع&qu
 msgid "The account head under Liability or Equity, in which Profit/Loss will be booked"
 msgstr "رئيس الحساب تحت المسؤولية أو الأسهم، والتي سيتم حجز الربح / الخسارة"
 
-#: erpnext/accounts/doctype/payment_request/payment_request.py:1004
+#: erpnext/accounts/doctype/payment_request/payment_request.py:1005
 msgid "The allocated amount is greater than the outstanding amount of Payment Request {0}"
 msgstr "المبلغ المخصص أكبر من المبلغ المستحق لطلب الدفع {0}"
 
@@ -54370,7 +54372,7 @@ msgstr ""
 msgid "The date of the transaction"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1230
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1241
 msgid "The default BOM for that item will be fetched by the system. You can also change the BOM."
 msgstr "سيقوم النظام بجلب قائمة مكونات المنتج الافتراضية لهذا المنتج. يمكنك أيضاً تغيير قائمة مكونات المنتج."
 
@@ -54440,7 +54442,7 @@ msgstr "لم يتم تقديم فواتير الشراء التالية:"
 msgid "The following assets have failed to automatically post depreciation entries: {0}"
 msgstr "فشلت الأصول التالية في تسجيل قيود الإهلاك تلقائيًا: {0}"
 
-#: erpnext/stock/doctype/pick_list/pick_list.py:309
+#: erpnext/stock/doctype/pick_list/pick_list.py:311
 msgid "The following batches are expired, please restock them: <br> {0}"
 msgstr ""
 
@@ -54460,7 +54462,7 @@ msgstr "لا يزال الموظفون التالي ذكرهم يتبعون حا
 msgid "The following invalid Pricing Rules are deleted:"
 msgstr "تم حذف قواعد التسعير غير الصالحة التالية:"
 
-#: erpnext/accounts/doctype/payment_request/payment_request.py:623
+#: erpnext/accounts/doctype/payment_request/payment_request.py:624
 msgid ""
 "The following payment schedule(s) already exist:\n"
 "{0}"
@@ -54470,7 +54472,7 @@ msgstr ""
 msgid "The following rows are duplicates:"
 msgstr "الصفوف التالية مكررة:"
 
-#: erpnext/stock/doctype/material_request/material_request.py:864
+#: erpnext/stock/doctype/material_request/material_request.py:879
 msgid "The following {0} were created: {1}"
 msgstr "تم إنشاء {0} التالية: {1}"
 
@@ -54638,8 +54640,8 @@ msgstr "كمية البيع أقل من إجمالي كمية الأصل. سيت
 msgid "The seller and the buyer cannot be the same"
 msgstr "البائع والمشتري لا يمكن أن يكون هو نفسه"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:186
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:198
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:187
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:199
 msgid "The serial and batch bundle {0} not linked to {1} {2}"
 msgstr "الحزمة التسلسلية وحزمة الدفعات {0} غير مرتبطة بـ {1} {2}"
 
@@ -54733,19 +54735,19 @@ msgstr "يُسمح للمستخدمين الذين لديهم هذا الدور 
 msgid "The value of {0} differs between Items {1} and {2}"
 msgstr "تختلف قيمة {0} بين العناصر {1} و {2}"
 
-#: erpnext/controllers/item_variant.py:196
+#: erpnext/controllers/item_variant.py:258
 msgid "The value {0} is already assigned to an existing Item {1}."
 msgstr "تم تعيين القيمة {0} بالفعل لعنصر موجود {1}."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1258
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1269
 msgid "The warehouse where you store finished Items before they are shipped."
 msgstr "المستودع الذي يتم فيه تخزين المنتجات النهائية قبل شحنها."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1251
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1262
 msgid "The warehouse where you store your raw materials. Each required item can have a separate source warehouse. Group warehouse also can be selected as source warehouse. On submission of the Work Order, the raw materials will be reserved in these warehouses for production usage."
 msgstr "المستودع الذي تُخزّن فيه المواد الخام. يمكن تخصيص مستودع مصدر منفصل لكل صنف مطلوب. كما يُمكن اختيار مستودع المجموعة كمستودع مصدر. عند تقديم أمر العمل، تُحجز المواد الخام في هذه المستودعات لاستخدامها في الإنتاج."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1263
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1274
 msgid "The warehouse where your Items will be transferred when you begin production. Group Warehouse can also be selected as a Work in Progress warehouse."
 msgstr "المستودع الذي ستُنقل إليه منتجاتك عند بدء الإنتاج. يمكن أيضاً اختيار مستودع المجموعة كمستودع للمنتجات قيد التصنيع."
 
@@ -54765,7 +54767,7 @@ msgstr "يحتوي {0} على عناصر سعر الوحدة."
 msgid "The {0} prefix '{1}' already exists. Please change the Serial No Series, otherwise you will get a Duplicate Entry error."
 msgstr "البادئة {0} '{1}' موجودة بالفعل. يُرجى تغيير رقم التسلسل، وإلا ستظهر لك رسالة خطأ \"إدخال مكرر\"."
 
-#: erpnext/stock/doctype/material_request/material_request.py:870
+#: erpnext/stock/doctype/material_request/material_request.py:885
 msgid "The {0} {1} created successfully"
 msgstr "تم إنشاء {0} {1} بنجاح"
 
@@ -54834,7 +54836,7 @@ msgstr "لا توجد أي خيارات أخرى للعنصر المحدد"
 msgid "There can be multiple tiered collection factor based on the total spent. But the conversion factor for redemption will always be same for all the tier."
 msgstr "قد يكون هناك عدة مستويات لعامل التجميع بناءً على إجمالي الإنفاق. لكن عامل التحويل للاسترداد سيكون دائمًا هو نفسه لجميع المستويات."
 
-#: erpnext/accounts/party.py:595
+#: erpnext/accounts/party.py:611
 msgid "There can only be 1 Account per Company in {0} {1}"
 msgstr "يمكن أن يكون هناك سوى 1 في حساب الشركة في {0} {1}"
 
@@ -54858,7 +54860,7 @@ msgstr "لم يتم العثور على دفعة بالمقابلة مع {0}: {1
 msgid "There is one unreconciled transaction before {0}."
 msgstr ""
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2035
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:2045
 msgid "There must be atleast 1 Finished Good in this Stock Entry"
 msgstr "يجب أن يكون هناك منتج نهائي واحد على الأقل في هذا الإدخال المخزوني."
 
@@ -54970,7 +54972,7 @@ msgstr ""
 msgid "This covers all scorecards tied to this Setup"
 msgstr "وهذا يغطي جميع بطاقات الأداء مرتبطة بهذا الإعداد"
 
-#: erpnext/controllers/status_updater.py:500
+#: erpnext/controllers/status_updater.py:501
 msgid "This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?"
 msgstr "هذه الوثيقة هي على حد كتبها {0} {1} لمادة {4}. وجعل لكم آخر {3} ضد نفسه {2}؟"
 
@@ -55073,7 +55075,7 @@ msgstr "يُعتبر هذا الأمر خطيراً من وجهة نظر الم�
 msgid "This is done to handle accounting for cases when Purchase Receipt is created after Purchase Invoice"
 msgstr "يتم إجراء ذلك للتعامل مع محاسبة الحالات التي يتم فيها إنشاء إيصال الشراء بعد فاتورة الشراء"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1244
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1255
 msgid "This is enabled by default. If you want to plan materials for sub-assemblies of the Item you're manufacturing leave this enabled. If you plan and manufacture the sub-assemblies separately, you can disable this checkbox."
 msgstr "هذا الخيار مُفعّل افتراضيًا. إذا كنت ترغب في تخطيط المواد اللازمة لتجميعات فرعية للمنتج الذي تقوم بتصنيعه، فاترك هذا الخيار مُفعّلًا. أما إذا كنت تخطط وتُصنّع التجميعات الفرعية بشكل منفصل، فيمكنك تعطيل هذا الخيار."
 
@@ -55705,7 +55707,7 @@ msgstr "لمستودع"
 msgid "To Warehouse (Optional)"
 msgstr "إلى مستودع (اختياري)"
 
-#: erpnext/manufacturing/doctype/bom/bom.js:1002
+#: erpnext/manufacturing/doctype/bom/bom.js:1006
 msgid "To add Operations tick the 'With Operations' checkbox."
 msgstr "لإضافة عمليات، حدد خانة الاختيار \"مع العمليات\"."
 
@@ -55713,15 +55715,15 @@ msgstr "لإضافة عمليات، حدد خانة الاختيار \"مع ال
 msgid "To add subcontracted Item's raw materials if include exploded items is disabled."
 msgstr "لإضافة المواد الخام للعنصر المتعاقد عليه من الباطن في حالة تعطيل خيار تضمين العناصر المفككة."
 
-#: erpnext/controllers/status_updater.py:493
+#: erpnext/controllers/status_updater.py:494
 msgid "To allow over billing, update \"Over Billing Allowance\" in Accounts Settings or the Item."
 msgstr "للسماح بزيادة الفواتير ، حدّث &quot;Over Billing Allowance&quot; في إعدادات الحسابات أو العنصر."
 
-#: erpnext/controllers/status_updater.py:487
+#: erpnext/controllers/status_updater.py:488
 msgid "To allow over ordering, update \"Over Order Allowance\" in Buying Settings."
 msgstr ""
 
-#: erpnext/controllers/status_updater.py:489
+#: erpnext/controllers/status_updater.py:490
 msgid "To allow over receipt / delivery, update \"Over Receipt/Delivery Allowance\" in Stock Settings or the Item."
 msgstr "للسماح بوصول الاستلام / التسليم ، قم بتحديث &quot;الإفراط في الاستلام / بدل التسليم&quot; في إعدادات المخزون أو العنصر."
 
@@ -55778,7 +55780,7 @@ msgstr "لإلغاء هذا ، قم بتمكين &quot;{0}&quot; في الشرك
 msgid "To select more than one transaction at a time, press and hold the shift key."
 msgstr ""
 
-#: erpnext/controllers/item_variant.py:199
+#: erpnext/controllers/item_variant.py:261
 msgid "To still proceed with editing this Attribute Value, enable {0} in Item Variant Settings."
 msgstr "للاستمرار في تعديل قيمة السمة هذه ، قم بتمكين {0} في إعدادات متغير العنصر."
 
@@ -55839,6 +55841,26 @@ msgstr "طن-قوة (متري)"
 #: erpnext/accounts/report/trial_balance/trial_balance.html:8
 msgid "Too many columns. Export the report and print it using a spreadsheet application."
 msgstr "عدد الأعمدة كبير جدًا. قم بتصدير التقرير وطباعته باستخدام برنامج جداول البيانات."
+
+#. Label of a Card Break in the Manufacturing Workspace
+#. Label of the tools (Column Break) field in DocType 'Email Digest'
+#. Label of a Card Break in the Stock Workspace
+#. Label of a Workspace Sidebar Item
+#: erpnext/buying/doctype/purchase_order/purchase_order.js:587
+#: erpnext/buying/doctype/purchase_order/purchase_order.js:663
+#: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:61
+#: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:149
+#: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:456
+#: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:465
+#: erpnext/buying/doctype/supplier_quotation/supplier_quotation.js:84
+#: erpnext/buying/report/supplier_quotation_comparison/supplier_quotation_comparison.js:123
+#: erpnext/manufacturing/workspace/manufacturing/manufacturing.json
+#: erpnext/setup/doctype/email_digest/email_digest.json
+#: erpnext/stock/workspace/stock/stock.json
+#: erpnext/workspace_sidebar/manufacturing.json
+#: erpnext/workspace_sidebar/stock.json
+msgid "Tools"
+msgstr ""
 
 #. Name of a UOM
 #: erpnext/setup/setup_wizard/data/uom_data.json
@@ -57108,6 +57130,11 @@ msgstr ""
 msgid "Transferred Qty"
 msgstr "نقل الكمية"
 
+#. Label of the transferred_qty (Float) field in DocType 'Pick List Item'
+#: erpnext/stock/doctype/pick_list_item/pick_list_item.json
+msgid "Transferred Qty (in Stock UOM)"
+msgstr ""
+
 #: erpnext/buying/report/subcontracted_raw_materials_to_be_transferred/subcontracted_raw_materials_to_be_transferred.py:39
 msgid "Transferred Quantity"
 msgstr "الكمية المنقولة"
@@ -57543,7 +57570,7 @@ msgstr ""
 msgid "UOM Name"
 msgstr "اسم وحدة القايس"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:4332
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:4345
 msgid "UOM conversion factor required for UOM: {0} in Item: {1}"
 msgstr "معامل تحويل وحدة القياس المطلوب لوحدة القياس: {0} في العنصر: {1}"
 
@@ -57612,7 +57639,7 @@ msgstr "تعذر العثور على سعر الصرف من {0} إلى {1} لت�
 msgid "Unable to find score starting at {0}. You need to have standing scores covering 0 to 100"
 msgstr "تعذر العثور على النتيجة بدءا من {0}. يجب أن يكون لديك درجات دائمة تغطي 0 إلى 100"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1135
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1194
 msgid "Unable to find the time slot in the next {0} days for the operation {1}. Please increase the 'Capacity Planning For (Days)' in the {2}."
 msgstr "لم يتم العثور على الفترة الزمنية المناسبة للعملية {1}خلال الأيام {0} القادمة. يرجى زيادة \"تخطيط السعة لـ (أيام)\" في {2}."
 
@@ -57718,7 +57745,7 @@ msgstr "وحدة"
 msgid "Unit Of Measure"
 msgstr ""
 
-#: erpnext/controllers/accounts_controller.py:4121
+#: erpnext/controllers/accounts_controller.py:4131
 msgid "Unit Price"
 msgstr "سعر الوحدة"
 
@@ -57879,7 +57906,7 @@ msgstr "إدخالات غير مُطابقة"
 msgid "Unreconciled Transactions"
 msgstr ""
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:946
+#: erpnext/manufacturing/doctype/work_order/work_order.js:950
 #: erpnext/selling/doctype/sales_order/sales_order.js:122
 #: erpnext/stock/doctype/pick_list/pick_list.js:166
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.js:193
@@ -58174,7 +58201,7 @@ msgstr "تحديث حقول التكاليف والفواتير لهذا الم�
 msgid "Updating Variants..."
 msgstr "جارٍ تحديث المتغيرات ..."
 
-#: erpnext/manufacturing/doctype/work_order/work_order.js:1206
+#: erpnext/manufacturing/doctype/work_order/work_order.js:1217
 msgid "Updating Work Order status"
 msgstr "تحديث حالة أمر العمل"
 
@@ -58443,11 +58470,15 @@ msgstr "ملاحظة المستخدم"
 msgid "User Resolution Time"
 msgstr "وقت قرار المستخدم"
 
+#: erpnext/accounts/party.py:439
+msgid "User don't have permissions to select/read this account."
+msgstr ""
+
 #: erpnext/accounts/doctype/pricing_rule/utils.py:596
 msgid "User has not applied rule on the invoice {0}"
 msgstr "لم يطبق المستخدم قاعدة على الفاتورة {0}"
 
-#: erpnext/crm/frappe_crm_api.py:176
+#: erpnext/crm/frappe_crm_api.py:183
 msgid "User not allowed to synchronize data from Frappe CRM on ERPNext. Contact System Manager of ERPNext."
 msgstr ""
 
@@ -58616,7 +58647,7 @@ msgstr "صالح حتى"
 msgid "Valid for Countries"
 msgstr "صالحة للبلدان"
 
-#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:302
+#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:320
 msgid "Valid from and valid upto fields are mandatory for the cumulative"
 msgstr "صالحة من وحقول تصل صالحة إلزامية للتراكمية"
 
@@ -58765,11 +58796,11 @@ msgstr "سعر التقييم"
 msgid "Valuation Rate (In / Out)"
 msgstr "معدل التقييم (داخل / خارج)"
 
-#: erpnext/stock/stock_ledger.py:2037
+#: erpnext/stock/stock_ledger.py:2041
 msgid "Valuation Rate Missing"
 msgstr "معدل التقييم مفقود"
 
-#: erpnext/stock/stock_ledger.py:2015
+#: erpnext/stock/stock_ledger.py:2019
 msgid "Valuation Rate for the Item {0}, is required to do accounting entries for {1} {2}."
 msgstr "معدل التقييم للعنصر {0} ، مطلوب لإجراء إدخالات محاسبية لـ {1} {2}."
 
@@ -58986,6 +59017,10 @@ msgstr "البديل من"
 #: erpnext/stock/doctype/item/item.js:963
 msgid "Variant creation has been queued."
 msgstr "وقد وضعت قائمة الانتظار في قائمة الانتظار."
+
+#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:172
+msgid "Variant {0} and its template {1} cannot both be added to the same Pricing Rule"
+msgstr ""
 
 #. Label of the variants_section (Tab Break) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -59380,7 +59415,7 @@ msgstr ""
 msgid "Voucher No"
 msgstr "رقم السند"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1469
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1470
 msgid "Voucher No is mandatory"
 msgstr "رقم القسيمة إلزامي"
 
@@ -59652,7 +59687,7 @@ msgstr "مستودع {0} لا تنتمي إلى شركة {1}"
 msgid "Warehouse {0} does not exist"
 msgstr "المستودع {0} غير موجود"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:317
+#: erpnext/manufacturing/doctype/work_order/work_order.py:321
 msgid "Warehouse {0} is not allowed for Sales Order {1}, it should be {2}"
 msgstr "لا يُسمح باستخدام المستودع {0} في أمر البيع {1}، بل يجب أن يكون {2}"
 
@@ -59784,7 +59819,7 @@ msgstr "تحذير: {0} أخر # {1} موجود في مدخل المخزن {2}\\
 msgid "Warning: Material Requested Qty is less than Minimum Order Qty"
 msgstr "تحذير : كمية المواد المطلوبة  هي أقل من الحد الأدنى للطلب الكمية"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1571
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1630
 msgid "Warning: Quantity exceeds maximum producible quantity based on quantity of raw materials received through the Subcontracting Inward Order {0}."
 msgstr "تحذير: الكمية تتجاوز الحد الأقصى للكمية القابلة للإنتاج بناءً على كمية المواد الخام المستلمة من خلال أمر التوريد الداخلي للتعاقد من الباطن {0}."
 
@@ -60094,7 +60129,7 @@ msgstr ""
 msgid "When enabled, transactions with this supplier will be blocked based on the Hold Type below"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:397
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:406
 msgid "When there are multiple finished goods ({0}) in a Repack stock entry, the basic rate for all finished goods must be set manually. To set rate manually, enable the checkbox 'Set Basic Rate Manually' in the respective finished good row."
 msgstr ""
 
@@ -60117,6 +60152,10 @@ msgstr "أثناء إنشاء حساب Child Company {0} ، لم يتم العث
 #: erpnext/buying/doctype/buying_settings/buying_settings.json
 msgid "While making Purchase Invoice from Purchase Order, use Exchange Rate on Invoice's transaction date rather than inheriting it from Purchase Order. Only applies for Purchase Invoice."
 msgstr "عند إنشاء فاتورة شراء من أمر شراء، استخدم سعر الصرف في تاريخ معاملة الفاتورة بدلاً من استيراده من أمر الشراء. ينطبق هذا فقط على فواتير الشراء."
+
+#: erpnext/setup/setup_wizard/operations/install_fixtures.py:286
+msgid "White"
+msgstr ""
 
 #: erpnext/public/js/setup_wizard.js:31
 msgid "Who are you setting this up for?"
@@ -60290,7 +60329,7 @@ msgstr "التقدم في العمل"
 #: erpnext/selling/doctype/sales_order/sales_order.js:1056
 #: erpnext/stock/doctype/material_request/material_request.js:216
 #: erpnext/stock/doctype/material_request/material_request.json
-#: erpnext/stock/doctype/material_request/material_request.py:871
+#: erpnext/stock/doctype/material_request/material_request.py:886
 #: erpnext/stock/doctype/pick_list/pick_list.json
 #: erpnext/stock/doctype/serial_no/serial_no.json
 #: erpnext/stock/doctype/stock_entry/stock_entry.json
@@ -60329,7 +60368,7 @@ msgstr "المواد المستهلكة في أمر العمل"
 msgid "Work Order Item"
 msgstr "بند أمر العمل"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1015
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1025
 msgid "Work Order Mismatch"
 msgstr ""
 
@@ -60370,16 +60409,16 @@ msgstr "ملخص أمر العمل"
 msgid "Work Order Summary Report"
 msgstr ""
 
-#: erpnext/stock/doctype/material_request/material_request.py:877
+#: erpnext/stock/doctype/material_request/material_request.py:892
 msgid "Work Order cannot be created for following reason: <br> {0}"
 msgstr "لا يمكن إنشاء أمر العمل للسبب التالي:<br> {0}"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:1515
+#: erpnext/manufacturing/doctype/work_order/work_order.py:1574
 msgid "Work Order cannot be raised against a Item Template"
 msgstr "لا يمكن رفع أمر العمل مقابل قالب العنصر"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2709
-#: erpnext/manufacturing/doctype/work_order/work_order.py:2789
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2768
+#: erpnext/manufacturing/doctype/work_order/work_order.py:2848
 msgid "Work Order has been {0}"
 msgstr "تم عمل الطلب {0}"
 
@@ -60391,16 +60430,16 @@ msgstr "أمر العمل لم يتم إنشاؤه"
 msgid "Work Order {0} created"
 msgstr "تم إنشاء أمر العمل {0}"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2696
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:2706
 msgid "Work Order {0} has no produced qty"
 msgstr ""
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1139
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:1149
 msgid "Work Order {0}: Job Card not found for the operation {1}"
 msgstr "أمر العمل {0}: لم يتم العثور على بطاقة المهمة للعملية {1}"
 
 #: erpnext/manufacturing/report/job_card_summary/job_card_summary.js:56
-#: erpnext/stock/doctype/material_request/material_request.py:865
+#: erpnext/stock/doctype/material_request/material_request.py:880
 msgid "Work Orders"
 msgstr "طلبات العمل"
 
@@ -60425,7 +60464,7 @@ msgstr "التقدم في العمل"
 msgid "Work-in-Progress Warehouse"
 msgstr "مستودع العمل قيد التنفيذ"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:863
+#: erpnext/manufacturing/doctype/work_order/work_order.py:922
 msgid "Work-in-Progress Warehouse is required before Submit"
 msgstr "مستودع أعمال جارية مطلوب قبل التسجيل\\n<br>\\nWork-in-Progress Warehouse is required before Submit"
 
@@ -60720,7 +60759,7 @@ msgstr "تاريخ البدء أو تاريخ الانتهاء العام يتد
 msgid "You are importing data for the code list:"
 msgstr "أنت بصدد استيراد بيانات لقائمة الرموز:"
 
-#: erpnext/controllers/accounts_controller.py:3918
+#: erpnext/controllers/accounts_controller.py:3928
 msgid "You are not allowed to update as per the conditions set in {} Workflow."
 msgstr "غير مسموح لك بالتحديث وفقًا للشروط المحددة في {} سير العمل."
 
@@ -60736,7 +60775,7 @@ msgstr "أنت غير مخول بإجراء/تعديل معاملات المخز
 msgid "You are not authorized to set Frozen value"
 msgstr ".أنت غير مخول لتغيير القيم المجمدة"
 
-#: erpnext/stock/doctype/pick_list/pick_list.py:516
+#: erpnext/stock/doctype/pick_list/pick_list.py:546
 msgid "You are picking more than required quantity for the item {0}. Check if there is any other pick list created for the sales order {1}."
 msgstr "أنت تختار كمية أكبر من الكمية المطلوبة للصنف {0}. تحقق مما إذا كانت هناك أي قائمة اختيار أخرى تم إنشاؤها لطلب البيع {1}."
 
@@ -60801,7 +60840,7 @@ msgstr ""
 msgid "You can't make any changes to Job Card since Work Order is closed."
 msgstr "لا يمكنك إجراء أي تغييرات على بطاقة العمل لأن أمر العمل مغلق."
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:229
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:230
 msgid "You can't process the serial number {0} as it has already been used in the SABB {1}. {2} if you want to inward same serial number multiple times then enabled 'Allow existing Serial No to be Manufactured/Received again' in the {3}"
 msgstr "لا يمكنك معالجة الرقم التسلسلي {0} لأنه مستخدم بالفعل في جهاز SABB {1}. {2} إذا كنت ترغب في إدخال نفس الرقم التسلسلي عدة مرات، فقم بتمكين خيار \"السماح بتصنيع/استلام الرقم التسلسلي الحالي مرة أخرى\" في {3}"
 
@@ -60809,7 +60848,7 @@ msgstr "لا يمكنك معالجة الرقم التسلسلي {0} لأنه م
 msgid "You can't redeem Loyalty Points having more value than the Total Amount."
 msgstr "لا يمكنك استبدال نقاط الولاء التي تزيد قيمتها عن المبلغ الإجمالي."
 
-#: erpnext/manufacturing/doctype/bom/bom.js:776
+#: erpnext/manufacturing/doctype/bom/bom.js:780
 msgid "You cannot change the rate if BOM is mentioned against any Item."
 msgstr "لا يمكنك تغيير السعر إذا تم ذكر قائمة المواد مقابل أي عنصر."
 
@@ -60841,7 +60880,7 @@ msgstr "لا يمكنك تحرير عقدة الجذر."
 msgid "You cannot enable both the settings '{0}' and '{1}'."
 msgstr "لا يمكنك تفعيل كل من الإعدادين '{0}' و '{1}'."
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:167
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:168
 msgid "You cannot outward following {0} as either they are Delivered, Inactive or located in a different warehouse."
 msgstr "لا يمكنك المتابعة الخارجية {0} لأنها إما تم تسليمها أو غير نشطة أو موجودة في مستودع مختلف."
 
@@ -60869,6 +60908,10 @@ msgstr "لا يمكنك تقديم الطلب بدون دفع."
 msgid "You cannot {0} this document because another Period Closing Entry {1} exists after {2}"
 msgstr ""
 
+#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:168
+msgid "You do not have enough permission to access {0}: {1}"
+msgstr ""
+
 #: erpnext/accounts/doctype/bank_statement_import_log/bank_statement_import_log.py:82
 msgid "You do not have permission to import and submit bank transactions"
 msgstr ""
@@ -60878,7 +60921,7 @@ msgstr ""
 msgid "You do not have permission to import bank transactions"
 msgstr ""
 
-#: erpnext/controllers/accounts_controller.py:3896
+#: erpnext/controllers/accounts_controller.py:3906
 msgid "You do not have permissions to {} items in a {}."
 msgstr "ليس لديك أذونات لـ {} من العناصر في {}."
 
@@ -60890,11 +60933,11 @@ msgstr "ليس لديك ما يكفي من نقاط الولاء لاستردا�
 msgid "You don't have enough points to redeem."
 msgstr "ليس لديك ما يكفي من النقاط لاستردادها."
 
-#: erpnext/controllers/accounts_controller.py:4464
+#: erpnext/controllers/accounts_controller.py:4474
 msgid "You don't have permission to create a Company Address. Please contact your System Manager."
 msgstr ""
 
-#: erpnext/controllers/accounts_controller.py:4444
+#: erpnext/controllers/accounts_controller.py:4454
 msgid "You don't have permission to update Company details. Please contact your System Manager."
 msgstr ""
 
@@ -60902,11 +60945,11 @@ msgstr ""
 msgid "You don't have permission to update Received Qty DocField for item {0}"
 msgstr ""
 
-#: erpnext/controllers/accounts_controller.py:4438
+#: erpnext/controllers/accounts_controller.py:4448
 msgid "You don't have permission to update this document. Please contact your System Manager."
 msgstr ""
 
-#: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:303
+#: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:313
 msgid "You had {} errors while creating opening invoices. Check {} for more details"
 msgstr "كان لديك {} من الأخطاء أثناء إنشاء الفواتير الافتتاحية. تحقق من {} لمزيد من التفاصيل"
 
@@ -61010,7 +61053,7 @@ msgstr "رصيد صفري"
 msgid "Zero Rated"
 msgstr "معدل صفري"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:726
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:736
 msgid "Zero quantity"
 msgstr "الكمية صفر"
 
@@ -61028,15 +61071,15 @@ msgstr ""
 msgid "Zip File"
 msgstr "ملف مضغوط"
 
-#: erpnext/stock/reorder_item.py:374
+#: erpnext/stock/reorder_item.py:376
 msgid "[Important] [ERPNext] Auto Reorder Errors"
 msgstr "[هام] [ERPNext] إعادة ترتيب الأخطاء تلقائيًا"
 
-#: erpnext/controllers/status_updater.py:305
+#: erpnext/controllers/status_updater.py:306
 msgid "`Allow Negative rates for Items`"
 msgstr "السماح بأسعار سلبية للعناصر"
 
-#: erpnext/stock/stock_ledger.py:2029
+#: erpnext/stock/stock_ledger.py:2033
 msgid "after"
 msgstr "بعد"
 
@@ -61052,11 +61095,11 @@ msgstr "كما هو موضح"
 msgid "as Title"
 msgstr "كعنوان"
 
-#: erpnext/manufacturing/doctype/bom/bom.js:1026
+#: erpnext/manufacturing/doctype/bom/bom.js:1030
 msgid "as a percentage of finished item quantity"
 msgstr "كنسبة مئوية من كمية المنتج النهائي"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1639
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1640
 msgid "as of {0}"
 msgstr ""
 
@@ -61227,7 +61270,7 @@ msgstr "تطبيق الدفع غير مثبت. يرجى تثبيته من {} أ�
 msgid "per hour"
 msgstr "كل ساعة"
 
-#: erpnext/stock/stock_ledger.py:2030
+#: erpnext/stock/stock_ledger.py:2034
 msgid "performing either one below:"
 msgstr "أداء أحد الخيارين التاليين:"
 
@@ -61303,8 +61346,8 @@ msgstr "تم البيع"
 msgid "subscription is already cancelled."
 msgstr "تم إلغاء الاشتراك بالفعل."
 
-#: erpnext/controllers/status_updater.py:503
-#: erpnext/controllers/status_updater.py:522
+#: erpnext/controllers/status_updater.py:504
+#: erpnext/controllers/status_updater.py:523
 msgid "target_ref_field"
 msgstr "حقل مرجع الهدف"
 
@@ -61379,7 +61422,7 @@ msgstr "{0} '{1}' معطل"
 msgid "{0} '{1}' not in Fiscal Year {2}"
 msgstr "{0} '{1}' ليس في السنة المالية {2}"
 
-#: erpnext/manufacturing/doctype/work_order/work_order.py:749
+#: erpnext/manufacturing/doctype/work_order/work_order.py:808
 msgid "{0} ({1}) cannot be greater than planned quantity ({2}) in Work Order {3}"
 msgstr "{0} ({1}) لا يمكن أن يكون أكبر من الكمية المخطط لها ({2}) في أمر العمل {3}"
 
@@ -61480,7 +61523,7 @@ msgstr "{0} أصول لا يمكن نقلها"
 msgid "{0} can be either {1} or {2}."
 msgstr ""
 
-#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:279
+#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:297
 msgid "{0} can not be negative"
 msgstr "{0} لا يمكن أن يكون سالبا"
 
@@ -61498,7 +61541,7 @@ msgstr "لا يمكن أن تكون قيمة {0} صفرًا"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:921
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:1037
-#: erpnext/stock/doctype/pick_list/pick_list.py:1341
+#: erpnext/stock/doctype/pick_list/pick_list.py:1371
 #: erpnext/subcontracting/doctype/subcontracting_inward_order/subcontracting_inward_order.py:323
 msgid "{0} created"
 msgstr "{0} تم انشاؤه"
@@ -61545,7 +61588,7 @@ msgstr "{0} ل {1}"
 msgid "{0} has Payment Term based allocation enabled. Select a Payment Term for Row #{1} in Payment References section"
 msgstr "تم تفعيل تخصيص الدفعات بناءً على شروط الدفع للصف {0} . حدد شرط دفع للصف #{1} في قسم مراجع الدفع."
 
-#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:805
+#: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py:850
 msgid "{0} has been modified after you pulled it. Please pull it again."
 msgstr "تم تعديل {0} بعد سحبه. يرجى سحبه مرة أخرى."
 
@@ -61604,7 +61647,7 @@ msgstr "{0} إلزامي. ربما لم يتم إنشاء سجل صرف العم
 msgid "{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}."
 msgstr "{0} إلزامي. ربما لم يتم إنشاء سجل سعر صرف العملة ل{1} إلى {2}."
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1863
+#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1864
 msgid "{0} is not a CSV file."
 msgstr ""
 
@@ -61616,7 +61659,7 @@ msgstr "{0} ليس حسابًا مصرفيًا للشركة"
 msgid "{0} is not a group node. Please select a group node as parent cost center"
 msgstr "{0} ليست عقدة مجموعة. يرجى تحديد عقدة المجموعة كمركز تكلفة الأصل"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:778
+#: erpnext/stock/doctype/stock_entry/stock_entry.py:788
 msgid "{0} is not a stock Item"
 msgstr "{0} ليس من نوع المخزون"
 
@@ -61624,7 +61667,7 @@ msgstr "{0} ليس من نوع المخزون"
 msgid "{0} is not a valid Accounting Dimension."
 msgstr ""
 
-#: erpnext/controllers/item_variant.py:189
+#: erpnext/controllers/item_variant.py:251
 msgid "{0} is not a valid Value for Attribute {1} of Item {2}."
 msgstr "{0} ليست قيمة صالحة للسمة {1} للعنصر {2}."
 
@@ -61632,7 +61675,7 @@ msgstr "{0} ليست قيمة صالحة للسمة {1} للعنصر {2}."
 msgid "{0} is not a valid {1} fieldname."
 msgstr ""
 
-#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:168
+#: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:186
 msgid "{0} is not added in the table"
 msgstr "{0} لم تتم إضافته في الجدول"
 
@@ -61648,7 +61691,7 @@ msgstr "{0} لا يعمل. لا يمكن تشغيل الأحداث لهذا ال
 msgid "{0} is not the default supplier for any items."
 msgstr "{0} ليس المورد الافتراضي لأية عناصر."
 
-#: erpnext/accounts/doctype/payment_entry/payment_entry.py:2972
+#: erpnext/accounts/doctype/payment_entry/payment_entry.py:2975
 msgid "{0} is on hold till {1}"
 msgstr "{0} معلق حتى {1}"
 
@@ -61692,7 +61735,7 @@ msgstr "لا يُسمح لـ {0} بالتعامل مع {1}. يُرجى تغيي�
 msgid "{0} not found for item {1}"
 msgstr "{0} لم يتم العثور على العنصر {1}"
 
-#: erpnext/support/doctype/service_level_agreement/service_level_agreement.py:706
+#: erpnext/support/doctype/service_level_agreement/service_level_agreement.py:709
 msgid "{0} parameter is invalid"
 msgstr "{0} المعلمة غير صالحة"
 
@@ -61717,11 +61760,11 @@ msgstr ""
 msgid "{0} units are reserved for Item {1} in Warehouse {2}, please un-reserve the same to {3} the Stock Reconciliation."
 msgstr "تم حجز الوحدات {0} للصنف {1} في المستودع {2}، يرجى إلغاء حجزها لـ {3} في عملية مطابقة المخزون."
 
-#: erpnext/stock/doctype/pick_list/pick_list.py:1090
+#: erpnext/stock/doctype/pick_list/pick_list.py:1120
 msgid "{0} units of Item {1} is not available in any of the warehouses."
 msgstr ""
 
-#: erpnext/stock/doctype/pick_list/pick_list.py:1083
+#: erpnext/stock/doctype/pick_list/pick_list.py:1113
 msgid "{0} units of Item {1} is not available in any of the warehouses. Other Pick Lists exist for this item."
 msgstr ""
 
@@ -61729,16 +61772,16 @@ msgstr ""
 msgid "{0} units of {1} are required in {2} with the inventory dimension: {3} on {4} {5} for {6} to complete the transaction."
 msgstr "يلزم {0} وحدة من {1} في {2} مع بُعد المخزون: {3} على {4} {5} لـ {6} لإكمال المعاملة."
 
-#: erpnext/stock/stock_ledger.py:1682 erpnext/stock/stock_ledger.py:2197
-#: erpnext/stock/stock_ledger.py:2211
+#: erpnext/stock/stock_ledger.py:1686 erpnext/stock/stock_ledger.py:2201
+#: erpnext/stock/stock_ledger.py:2215
 msgid "{0} units of {1} needed in {2} on {3} {4} for {5} to complete this transaction."
 msgstr "{0} وحدات من {1} لازمة ل {2} في {3} {4} ل {5} لإكمال هذه المعاملة."
 
-#: erpnext/stock/stock_ledger.py:2298 erpnext/stock/stock_ledger.py:2343
+#: erpnext/stock/stock_ledger.py:2302 erpnext/stock/stock_ledger.py:2347
 msgid "{0} units of {1} needed in {2} on {3} {4} to complete this transaction."
 msgstr "{0} وحدة من {1} مطلوبة في {2} على {3} {4} لإكمال هذه المعاملة."
 
-#: erpnext/stock/stock_ledger.py:1676
+#: erpnext/stock/stock_ledger.py:1680
 msgid "{0} units of {1} needed in {2} to complete this transaction."
 msgstr "{0} وحدات من  {1} لازمة في {2} لإكمال هذه المعاملة."
 
@@ -61792,7 +61835,7 @@ msgstr "{0} {1} إنشاء"
 msgid "{0} {1} does not exist"
 msgstr "{0} {1} غير موجود\\n<br>\\n{0} {1} does not exist"
 
-#: erpnext/accounts/party.py:575
+#: erpnext/accounts/party.py:591
 msgid "{0} {1} has accounting entries in currency {2} for company {3}. Please select a receivable or payable account with currency {2}."
 msgstr "{0} يحتوي {1} على إدخالات محاسبية بالعملة {2} للشركة {3}. الرجاء تحديد حساب مستحق أو دائن بالعملة {2}."
 
@@ -61843,11 +61886,11 @@ msgstr "{0} {1} تم إلغاؤه لذلك لا يمكن إكمال الإجرا
 msgid "{0} {1} is closed"
 msgstr "{0} {1} مغلقة"
 
-#: erpnext/accounts/party.py:813
+#: erpnext/accounts/party.py:829
 msgid "{0} {1} is disabled"
 msgstr "{0} {1} معطل"
 
-#: erpnext/accounts/party.py:819
+#: erpnext/accounts/party.py:835
 msgid "{0} {1} is frozen"
 msgstr "{0} {1} مجمد"
 
@@ -61855,7 +61898,7 @@ msgstr "{0} {1} مجمد"
 msgid "{0} {1} is fully billed"
 msgstr "{0} {1} قدمت الفواتير بشكل كامل"
 
-#: erpnext/accounts/party.py:823
+#: erpnext/accounts/party.py:839
 msgid "{0} {1} is not active"
 msgstr "{0} {1} غير نشطة"
 
@@ -62025,7 +62068,7 @@ msgstr "{doctype} {name} تم إلغائه أو مغلق."
 msgid "{field_label} is mandatory for sub-contracted {doctype}."
 msgstr ""
 
-#: erpnext/controllers/stock_controller.py:2283
+#: erpnext/controllers/stock_controller.py:2285
 msgid "{item_name}'s Sample Size ({sample_size}) cannot be greater than the Accepted Quantity ({accepted_quantity})"
 msgstr "لا يمكن أن يكون حجم العينة {item_name}({sample_size}) أكبر من الكمية المقبولة ({accepted_quantity})"
 
