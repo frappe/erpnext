@@ -39,7 +39,6 @@ build-backend = "flit_core.buildapi"
 max_module_depth = 1
 skip_namespaces = [
     "erpnext.deprecation_dumpster",
-    "erpnext.assets.dashboard_fixtures",  # https://github.com/frappe/erpnext/issues/44418
 ]
 
 [tool.bench.frappe-dependencies]
