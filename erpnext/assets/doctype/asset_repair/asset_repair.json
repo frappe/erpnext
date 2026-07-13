@@ -140,7 +140,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Asset",
-   "link_filters": "[[\"Asset\",\"status\",\"not in\",[\"Work In Progress\",\"Capitalized\",\"Fully Depreciated\",\"Sold\",\"Scrapped\",\"Cancelled\",null]]]",
+   "link_filters": "[[\"Asset\",\"status\",\"not in\",[\"Work In Progress\",\"Capitalized\",\"Sold\",\"Scrapped\",\"Cancelled\",null]]]",
    "options": "Asset",
    "reqd": 1
   },
@@ -251,7 +251,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-06 15:48:13.862505",
+ "modified": "2026-07-14 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",
