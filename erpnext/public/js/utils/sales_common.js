@@ -284,19 +284,17 @@ erpnext.sales_common = {
 
 			set_actual_qty(doc, cdt, cdn) {
 				let row = locals[cdt][cdn];
-				let sales_doctypes = ["Sales Invoice", "Delivery Note", "Sales Order"];
+				let sales_doctypes = ["Sales Invoice", "Delivery Note", "Sales Order", "Quotation"];
 
 				if (row.item_code && row.warehouse && sales_doctypes.includes(doc.doctype)) {
-					frappe.call({
+					return this.frm.call({
 						method: "erpnext.stock.get_item_details.get_bin_details",
+						child: row,
 						args: {
 							item_code: row.item_code,
 							warehouse: row.warehouse,
-						},
-						callback(r) {
-							if (r.message) {
-								frappe.model.set_value(cdt, cdn, "actual_qty", r.message.actual_qty);
-							}
+							company: doc.company,
+							include_child_warehouses: true,
 						},
 					});
 				}
