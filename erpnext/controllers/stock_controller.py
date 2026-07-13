@@ -2060,6 +2060,7 @@ class StockController(AccountsController):
 def show_accounting_ledger_preview(company, doctype, docname):
 	filters = frappe._dict(company=company, include_dimensions=1)
 	doc = frappe.get_lazy_doc(doctype, docname)
+	doc.check_permission("read")
 	doc.run_method("before_gl_preview")
 
 	gl_columns, gl_data = get_accounting_ledger_preview(doc, filters)
@@ -2073,6 +2074,7 @@ def show_accounting_ledger_preview(company, doctype, docname):
 def show_stock_ledger_preview(company, doctype, docname):
 	filters = frappe._dict(company=company)
 	doc = frappe.get_lazy_doc(doctype, docname)
+	doc.check_permission("read")
 	doc.run_method("before_sl_preview")
 
 	sl_columns, sl_data = get_stock_ledger_preview(doc, filters)
