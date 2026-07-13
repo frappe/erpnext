@@ -1,7 +1,6 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import unittest
-
 from unittest.mock import patch
 
 import frappe
