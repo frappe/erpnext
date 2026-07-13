@@ -84,6 +84,7 @@ class QualityInspection(Document):
 						reading.status = "Accepted"
 
 		if self.readings:
+			self.validate_reading_number_format()
 			self.inspect_and_set_status()
 
 		self.validate_inspection_required()
@@ -280,6 +281,37 @@ class QualityInspection(Document):
 						_("Status set to rejected as there are one or more rejected readings."), alert=True
 					)
 					break
+
+	def validate_reading_number_format(self):
+		"""Reject readings written in a different number format than the user's.
+
+		They would otherwise be misread rather than refused, silently rejecting an
+		inspection whose readings are in fact within the acceptance range."""
+		number_format = get_reading_number_format()
+		decimal_str, comma_str, _precision = get_number_format_info(number_format)
+
+		for reading in self.readings:
+			if not cint(reading.numeric):
+				continue
+
+			for i in range(1, 11):
+				value = reading.get("reading_" + str(i))
+				if value is None or not value.strip():
+					continue
+
+				if not is_valid_number(value, decimal_str, comma_str):
+					frappe.throw(
+						_(
+							"Row #{0}: Reading {1} {2} is not a valid number in the {3} number format. Use {4} as the decimal separator."
+						).format(
+							reading.idx,
+							i,
+							frappe.bold(value),
+							frappe.bold(number_format),
+							frappe.bold(decimal_str),
+						),
+						title=_("Invalid Reading"),
+					)
 
 	def set_status_based_on_acceptance_values(self, reading):
 		if not cint(reading.numeric):
@@ -511,17 +543,56 @@ def make_quality_inspection(source_name: str, target_doc: str | dict | Document 
 	return doc
 
 
+def get_reading_number_format() -> str:
+	"""Number format the user enters readings in.
+
+	User defaults fall back to the global default, so this is the same format the
+	user's desk formats numbers with."""
+	return frappe.defaults.get_user_default("number_format") or "#,###.##"
+
+
+def is_valid_number(num: str, decimal_str: str, comma_str: str) -> bool:
+	num = num.strip().lstrip("+-")
+	integer_part, fraction = num, ""
+
+	if decimal_str:
+		if num.count(decimal_str) > 1:
+			return False
+		integer_part, _, fraction = num.partition(decimal_str)
+
+	if fraction and not fraction.isdigit():
+		return False
+
+	if not integer_part:
+		return bool(fraction)
+
+	if comma_str and comma_str in integer_part:
+		groups = integer_part.split(comma_str)
+		if any(not group.isdigit() for group in groups):
+			return False
+
+		# the group just before the decimal separator is always 3 digits long
+		if not 1 <= len(groups[0]) <= 3 or len(groups[-1]) != 3:
+			return False
+
+		# 3 digits per group, or 2 in the indian format
+		return all(len(group) in (2, 3) for group in groups[1:-1])
+
+	return integer_part.isdigit()
+
+
 def parse_float(num: str) -> float:
 	"""Since reading_# fields are `Data` field they might contain number which
 	is representation in user's prefered number format instead of machine
 	readable format. This function converts them to machine readable format."""
 
-	number_format = frappe.db.get_default("number_format") or "#,###.##"
+	number_format = get_reading_number_format()
 	decimal_str, comma_str, _number_format_precision = get_number_format_info(number_format)
 
-	if decimal_str == "," and comma_str == ".":
-		num = num.replace(",", "#$")
-		num = num.replace(".", ",")
-		num = num.replace("#$", ".")
+	if comma_str:
+		num = num.replace(comma_str, "")
+
+	if decimal_str and decimal_str != ".":
+		num = num.replace(decimal_str, ".")
 
 	return flt(num)
