@@ -7,13 +7,18 @@
  "doctype": "Report", 
  "idx": 2, 
  "is_standard": "Yes", 
- "modified": "2017-02-24 20:12:33.520866", 
+ "modified": "2026-06-22 13:38:42.740436",
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Trial Balance", 
  "owner": "Administrator", 
  "ref_doctype": "GL Entry", 
  "report_name": "Trial Balance", 
+ "doctype_to_sync": [
+  {
+   "doc_type": "GL Entry"
+  }
+ ],
  "report_type": "Script Report",
  "roles": [
   {
@@ -25,5 +30,7 @@
   {
    "role": "Auditor"
   }
- ]
+ ],
+ "synced_report": 0,
+ "timeout": 0
 }
