@@ -9,6 +9,48 @@ from frappe.model.document import Document
 
 from erpnext.accounts.doctype.bank_transaction.bank_transaction import BankTransaction
 
+PLAIN_NUMBER_PATTERN = re.compile(r"^-?\d+(\.\d+)?$")
+# Tokens accepted by safe-expr-eval on the frontend (must stay in sync).
+ALLOWED_FORMULA_TOKEN = re.compile(r"\s+|transaction_amount|\d+(?:\.\d+)?|[+\-*/%^()]")
+PYTHON_ONLY_OPERATORS = ("**", "//")
+
+
+def _is_expr_eval_formula(formula: str) -> bool:
+	position = 0
+	while position < len(formula):
+		match = ALLOWED_FORMULA_TOKEN.match(formula, position)
+		if not match:
+			return False
+		position = match.end()
+
+	return formula.count("(") == formula.count(")")
+
+
+def validate_amount_formula(formula: str) -> None:
+	if not formula:
+		return
+
+	stripped = formula.strip()
+	if PLAIN_NUMBER_PATTERN.match(stripped):
+		return
+
+	if any(operator in stripped for operator in PYTHON_ONLY_OPERATORS):
+		frappe.throw(_("Invalid debit/credit formula: {0}").format(formula))
+
+	if not _is_expr_eval_formula(stripped):
+		frappe.throw(_("Invalid debit/credit formula: {0}").format(formula))
+
+	# expr-eval uses ^ for exponentiation; translate for a smoke-test evaluation only.
+	python_formula = stripped.replace("^", "**")
+
+	try:
+		result = frappe.safe_eval(python_formula, eval_globals=None, eval_locals={"transaction_amount": 1})
+	except Exception:
+		frappe.throw(_("Invalid debit/credit formula: {0}").format(formula))
+
+	if not isinstance(result, (int | float)):
+		frappe.throw(_("Invalid debit/credit formula: {0}").format(formula))
+
 
 class BankTransactionRule(Document):
 	# begin: auto-generated types
@@ -86,6 +128,11 @@ class BankTransactionRule(Document):
 							frappe.throw(
 								_("The last account row must not have any debit or credit amounts set.")
 							)
+					else:
+						if account.debit:
+							validate_amount_formula(account.debit)
+						if account.credit:
+							validate_amount_formula(account.credit)
 
 		# Validate regex
 		for rule in self.description_rules:

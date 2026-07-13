@@ -717,7 +717,7 @@ def make_supplier_quotation(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_stock_entry(source_name, target_doc=None):
+def make_stock_entry(source_name: str, target_doc: str | dict | None = None):
 	def update_item(obj, target, source_parent):
 		qty = (
 			flt(flt(obj.stock_qty) - flt(obj.ordered_qty)) / target.conversion_factor
@@ -753,6 +753,9 @@ def make_stock_entry(source_name, target_doc=None):
 		if source.job_card:
 			target.purpose = "Material Transfer for Manufacture"
 
+		if source.work_order:
+			target.purpose = "Material Transfer for Manufacture"
+
 		if source.material_request_type == "Customer Provided":
 			target.purpose = "Material Receipt"
 
@@ -771,6 +774,18 @@ def make_stock_entry(source_name, target_doc=None):
 				target.bom_no = job_card_details[0].bom_no
 				target.fg_completed_qty = job_card_details[0].for_quantity
 				target.from_bom = 1
+
+		if source.work_order:
+			work_order_details = frappe.db.get_value(
+				"Work Order", source.work_order, ["bom_no", "use_multi_level_bom"], as_dict=True
+			)
+
+			if work_order_details:
+				target.bom_no = work_order_details.bom_no
+				target.use_multi_level_bom = work_order_details.use_multi_level_bom
+				target.from_bom = 1
+				# not fg-qty-driven, mirrors the Pick List -> Stock Entry transfer for this Work Order
+				target.fg_completed_qty = 0
 
 	doclist = get_mapped_doc(
 		"Material Request",

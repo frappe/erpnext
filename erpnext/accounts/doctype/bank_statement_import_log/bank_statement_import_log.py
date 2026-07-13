@@ -557,7 +557,7 @@ class BankStatementImportLog(Document):
 			docname=self.name,
 		)
 
-		if self.closing_balance and self.closing_balance > 0 and self.end_date:
+		if self.closing_balance is not None and self.end_date:
 			set_closing_balance_as_per_statement(
 				self.bank_account, frappe.utils.getdate(self.end_date), self.closing_balance
 			)
@@ -829,7 +829,9 @@ def compute_final_transactions(transaction_rows: list, date_format: str, amount_
 
 		if amount_format == 'Amount column has "CR"/"DR" values':
 			amount = transaction_row.get("amount")
-			float_amount = get_float_amount(amount)
+
+			# If the amount column has CR/DR in it - we should remove any signs (negative or positive) from the amount
+			float_amount = abs(get_float_amount(amount) or 0)
 			if "cr" in amount.lower():
 				return 0, float_amount
 			else:
@@ -932,14 +934,18 @@ def extract_pdf_tables(content: bytes, password: str | None = None) -> list[dict
 	from pypdf import PdfReader
 
 	reader = PdfReader(io.BytesIO(content))
-	if reader.is_encrypted and (not password or not reader.decrypt(password)):
-		frappe.throw(
-			_(
-				"This PDF is password protected. Please set the correct statement password on the"
-				" Bank Account and try again."
-			),
-			title=_("Password Required"),
-		)
+	if reader.is_encrypted:
+		# Try opening the PDF with a password - if no password is provided, try with a blank password
+		if not password:
+			password = ""
+		if not reader.decrypt(password):
+			frappe.throw(
+				_(
+					"This PDF is password protected. Please set the correct statement password on the"
+					" Bank Account and try again."
+				),
+				title=_("Password Required"),
+			)
 
 	text_settings = {"vertical_strategy": "text", "horizontal_strategy": "text"}
 	tables = []
