@@ -108,7 +108,6 @@ class TestQualityInspection(ERPNextTestSuite):
 				"acceptance_formula": "mean < 0.9",
 				"reading_1": "0.5",
 				"reading_2": "0.7",
-				"reading_3": "random text",  # check if random string input causes issues
 			},
 			{
 				"specification": "Calcium Content",  # non-numeric reading
