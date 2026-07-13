@@ -263,6 +263,10 @@ class StockController(AccountsController):
 			parent_details = self.get_parent_details_for_packed_items()
 
 		for row in self.get(table_name):
+			item_code = row.get("rm_item_code") or row.get("item_code")
+			if not item_code or not self.is_serial_batch_item(item_code):
+				continue
+
 			if (
 				not via_landed_cost_voucher
 				and row.serial_and_batch_bundle
@@ -1489,6 +1493,9 @@ class StockController(AccountsController):
 			"against": against_account,
 			"remarks": remarks,
 		}
+
+		if project:
+			gl_entry.update({"project": project})
 
 		if voucher_detail_no:
 			gl_entry.update({"voucher_detail_no": voucher_detail_no})
