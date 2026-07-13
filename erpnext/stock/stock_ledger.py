@@ -306,6 +306,7 @@ def repost_future_sle(
 	resume_item_wh_wise_last_posted_sle = (
 		get_item_wh_wise_last_posted_sle_from_reposting_data(doc, reposting_data) or {}
 	)
+	item_wh_first_reposted = get_item_wh_first_reposted_from_reposting_data(doc, reposting_data) or {}
 	if not items_to_be_repost:
 		return
 
@@ -328,6 +329,7 @@ def repost_future_sle(
 					"repost_doc": doc,
 					"repost_affected_transaction": repost_affected_transaction,
 					"item_wh_wise_last_posted_sle": resume_item_wh_wise_last_posted_sle,
+					"item_wh_first_reposted": item_wh_first_reposted,
 				},
 				allow_negative_stock=allow_negative_stock,
 				via_landed_cost_voucher=via_landed_cost_voucher,
@@ -337,7 +339,14 @@ def repost_future_sle(
 
 		resume_item_wh_wise_last_posted_sle = {}
 		repost_affected_transaction.update(obj.repost_affected_transaction)
-		update_args_in_repost_item_valuation(doc, index, items_to_be_repost, repost_affected_transaction)
+		item_wh_first_reposted = obj.item_wh_first_reposted
+		update_args_in_repost_item_valuation(
+			doc,
+			index,
+			items_to_be_repost,
+			repost_affected_transaction,
+			item_wh_first_reposted=item_wh_first_reposted,
+		)
 
 
 def update_args_in_repost_item_valuation(
@@ -346,10 +355,14 @@ def update_args_in_repost_item_valuation(
 	items_to_be_repost,
 	repost_affected_transaction,
 	item_wh_wise_last_posted_sle=None,
+	item_wh_first_reposted=None,
 ):
 	file_name = ""
 	if not item_wh_wise_last_posted_sle:
 		item_wh_wise_last_posted_sle = {}
+
+	if not item_wh_first_reposted:
+		item_wh_first_reposted = {}
 
 	if doc.reposting_data_file:
 		file_name = get_reposting_file_name(doc.doctype, doc.name)
@@ -360,6 +373,7 @@ def update_args_in_repost_item_valuation(
 			"repost_affected_transaction": repost_affected_transaction,
 			"item_wh_wise_last_posted_sle": {str(k): v for k, v in item_wh_wise_last_posted_sle.items()}
 			or {},
+			"item_wh_first_reposted": {str(k): v for k, v in item_wh_first_reposted.items()},
 		},
 		doc,
 		file_name,
@@ -493,6 +507,16 @@ def get_item_wh_wise_last_posted_sle_from_reposting_data(doc, reposting_data=Non
 		return frappe._dict(reposting_data.item_wh_wise_last_posted_sle)
 
 	return frappe._dict()
+
+
+def get_item_wh_first_reposted_from_reposting_data(doc, reposting_data=None):
+	if not reposting_data and doc and doc.reposting_data_file:
+		reposting_data = get_reposting_data(doc.reposting_data_file)
+
+	if not reposting_data or not reposting_data.get("item_wh_first_reposted"):
+		return {}
+
+	return {frappe.safe_eval(key): value for key, value in reposting_data.item_wh_first_reposted.items()}
 
 
 def get_reposting_data(file_path) -> dict:
@@ -688,6 +712,7 @@ class update_entries_after:
 		self.distinct_sles = set()
 		self.distinct_dependant_item_wh = set()
 		self.prev_sle_dict = frappe._dict({})
+		self.item_wh_first_reposted = dict(self.args.get("item_wh_first_reposted") or {})
 
 	def get_item_wh_wise_last_posted_sle(self):
 		if self.args and self.args.get("item_wh_wise_last_posted_sle"):
@@ -738,6 +763,10 @@ class update_entries_after:
 
 			i += 1
 			item_wh_key = (sle.item_code, sle.warehouse)
+			if item_wh_key not in self.item_wh_first_reposted:
+				self.item_wh_first_reposted[item_wh_key] = sle.posting_datetime or get_combine_datetime(
+					sle.posting_date, sle.posting_time
+				)
 			if item_wh_key not in self.prev_sle_dict:
 				self.prev_sle_dict[item_wh_key] = get_previous_sle_of_current_voucher(sle)
 
@@ -832,6 +861,7 @@ class update_entries_after:
 			self.items_to_be_repost,
 			self.repost_affected_transaction,
 			self.item_wh_wise_last_posted_sle,
+			self.item_wh_first_reposted,
 		)
 
 		if not frappe.in_test:
