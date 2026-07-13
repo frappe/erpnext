@@ -251,6 +251,90 @@ class TestQualityInspection(ERPNextTestSuite):
 		qa.delete()
 		dn.delete()
 
+	def test_non_numeric_reading(self):
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		create_quality_inspection_parameter("Density")
+
+		# text in a numeric reading was read as 0, silently skewing the mean
+		readings = [
+			{"specification": "Density", "min_value": 1.15, "max_value": 1.20, "reading_1": "random text"}
+		]
+		qa = create_quality_inspection(
+			reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
+		)
+
+		self.assertRaises(frappe.ValidationError, qa.save)
+
+		dn.delete()
+
+	@ERPNextTestSuite.change_settings("System Settings", {"number_format": "#.###,##"})
+	def test_reading_in_comma_decimal_number_format(self):
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		create_quality_inspection_parameter("Density")
+
+		readings = [{"specification": "Density", "min_value": 1.15, "max_value": 1.20, "reading_1": "1,15"}]
+		qa = create_quality_inspection(
+			reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
+		)
+		qa.save()
+
+		# 1,15 is 1.15 in this format, which is within the acceptance range
+		self.assertEqual(qa.readings[0].status, "Accepted")
+		self.assertEqual(qa.status, "Accepted")
+
+		qa.delete()
+		dn.delete()
+
+	@ERPNextTestSuite.change_settings("System Settings", {"number_format": "# ###,##"})
+	def test_reading_in_space_grouped_number_format(self):
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		create_quality_inspection_parameter("Density")
+
+		# this format is comma decimal but space grouped, so the separators were not
+		# swapped at all and 1,15 was read as 115 and rejected
+		readings = [{"specification": "Density", "min_value": 1.15, "max_value": 1.20, "reading_1": "1,15"}]
+		qa = create_quality_inspection(
+			reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
+		)
+		qa.save()
+
+		self.assertEqual(qa.readings[0].status, "Accepted")
+		self.assertEqual(qa.status, "Accepted")
+
+		qa.delete()
+		dn.delete()
+
+	@ERPNextTestSuite.change_settings("System Settings", {"number_format": "#.###,##"})
+	def test_reading_in_wrong_decimal_number_format(self):
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		create_quality_inspection_parameter("Density")
+
+		# a dot is the group separator in this format, so 1.15 is not a valid number.
+		# it must be refused, not silently read as 115 and rejected.
+		readings = [{"specification": "Density", "min_value": 1.15, "max_value": 1.20, "reading_1": "1.15"}]
+		qa = create_quality_inspection(
+			reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
+		)
+
+		self.assertRaises(frappe.ValidationError, qa.save)
+
+		dn.delete()
+
+	@ERPNextTestSuite.change_settings("System Settings", {"number_format": "#,###.##"})
+	def test_reading_with_comma_in_dot_decimal_number_format(self):
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		create_quality_inspection_parameter("Density")
+
+		# the reported bug: 1,15 was read as 115 here and silently rejected
+		readings = [{"specification": "Density", "min_value": 1.15, "max_value": 1.20, "reading_1": "1,15"}]
+		qa = create_quality_inspection(
+			reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
+		)
+
+		self.assertRaises(frappe.ValidationError, qa.save)
+
+		dn.delete()
+
 	def test_delete_quality_inspection_linked_with_stock_entry(self):
 		item_code = create_item("_Test Cicuular Dependecy Item with QA").name
 
