@@ -1662,11 +1662,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2026-03-17 20:44:00.221219",
-=======
  "modified": "2026-07-12 23:54:21.263951",
->>>>>>> 6729a53fee (fix: make represents company field in purchase invoice ignore user permissions)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
