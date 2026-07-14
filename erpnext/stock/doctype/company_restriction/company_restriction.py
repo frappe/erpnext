@@ -26,7 +26,7 @@ class CompanyRestriction(Document):
 def get_allowed_companies(user, doctype):
 	from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
 
-	if not frappe.get_single_value("Accounts Settings", "enable_company_wise_masters"):
+	if not frappe.get_single_value("Global Defaults", "enable_company_wise_masters"):
 		return None
 
 	user_permissions = get_user_permissions(user or frappe.session.user)

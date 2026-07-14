@@ -112,8 +112,6 @@
   "create_pr_in_draft_status",
   "budget_section",
   "use_legacy_budget_controller",
-  "company_wise_masters_section",
-  "enable_company_wise_masters",
   "document_naming_tab",
   "transaction_naming_html"
  ],
@@ -747,17 +745,6 @@
    "label": "Preview mode"
   },
   {
-   "fieldname": "company_wise_masters_section",
-   "fieldtype": "Section Break",
-   "label": "Company-wise Masters"
-  },
-  {
-   "fieldname": "enable_company_wise_masters",
-   "fieldtype": "Check",
-   "label": "Enable Company-wise Master Filtering",
-   "description": "When enabled, Supplier, Customer, and Item records can be restricted to specific companies via their <b>Allowed Companies</b> table. Transactions will only show masters configured for the selected company."
-  },
-  {
    "fieldname": "document_naming_tab",
    "fieldtype": "Tab Break",
    "label": "Document Naming"
@@ -778,7 +765,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-07-14 18:00:00.000000",
+ "modified": "2026-06-24 12:59:41.868865",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

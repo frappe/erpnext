@@ -73,7 +73,6 @@ class AccountsSettings(Document):
 		determine_address_tax_category_from: DF.Literal["Billing Address", "Shipping Address"]
 		enable_accounting_dimensions: DF.Check
 		enable_common_party_accounting: DF.Check
-		enable_company_wise_masters: DF.Check
 		enable_discounts_and_margin: DF.Check
 		enable_fuzzy_matching: DF.Check
 		enable_immutable_ledger: DF.Check
