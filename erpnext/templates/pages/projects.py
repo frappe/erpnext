@@ -16,7 +16,7 @@ def get_context(context):
 		project.name, start=0, item_status="open", search=frappe.form_dict.get("search")
 	)
 
-	if project_user and not project_user.hide_timesheets:
+	if project_user and project_user.hide_timesheets:
 		project.timesheets = get_timesheets(project.name, start=0, search=frappe.form_dict.get("search"))
 
 	if project_user and project_user.view_attachments:
@@ -115,13 +115,9 @@ def get_attachments(project):
 
 
 def validate_and_get_project_user(project: str):
-	project_user = frappe.db.get_value(
-		"Project User",
-		{"parent": project, "user": frappe.session.user},
-		["user", "view_attachments", "hide_timesheets"],
-		as_dict=True,
-	)
-	if frappe.session.user != "Administrator" and (not project_user or frappe.session.user == "Guest"):
-		raise frappe.PermissionError
+	project_doc = frappe.get_doc("Project", project)
+	project_doc.check_permission()
+
+	project_user = next((d for d in project_doc.users if d.user == frappe.session.user), None)
 
 	return project_user
