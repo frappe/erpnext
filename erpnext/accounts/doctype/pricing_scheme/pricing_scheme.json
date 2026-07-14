@@ -74,7 +74,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Effect",
+   "label": "Offer Type",
    "options": "Rate\nDiscount Percentage\nDiscount Amount\nMargin\nFree Item\nHeader Discount",
    "reqd": 1
   },
