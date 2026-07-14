@@ -60,6 +60,7 @@ class Item(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		from erpnext.stock.doctype.company_restriction.company_restriction import CompanyRestriction
 		from erpnext.stock.doctype.item_barcode.item_barcode import ItemBarcode
 		from erpnext.stock.doctype.item_customer_detail.item_customer_detail import ItemCustomerDetail
 		from erpnext.stock.doctype.item_default.item_default import ItemDefault
@@ -71,6 +72,7 @@ class Item(Document):
 
 		allow_alternative_item: DF.Check
 		allow_negative_stock: DF.Check
+		allowed_companies: DF.TableMultiSelect[CompanyRestriction]
 		asset_category: DF.Link | None
 		asset_naming_series: DF.Literal[None]
 		attributes: DF.Table[ItemVariantAttribute]

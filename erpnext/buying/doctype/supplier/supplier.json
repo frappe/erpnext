@@ -54,6 +54,8 @@
   "tax_withholding_category",
   "tax_withholding_group",
   "settings_tab",
+  "company_restrictions_section",
+  "allowed_companies",
   "invoice_settings_section",
   "is_transporter",
   "allow_purchase_invoice_creation_without_purchase_order",
@@ -426,6 +428,18 @@
    "label": "Settings"
   },
   {
+   "fieldname": "company_restrictions_section",
+   "fieldtype": "Section Break",
+   "label": "Company Restrictions",
+   "description": "If set, this Supplier is only available for transactions in the listed companies. Leave empty for no restriction."
+  },
+  {
+   "fieldname": "allowed_companies",
+   "fieldtype": "Table MultiSelect",
+   "label": "Allowed Companies",
+   "options": "Company Restriction"
+  },
+  {
    "fieldname": "contact_and_address_tab",
    "fieldtype": "Tab Break",
    "label": "Address & Contact"
@@ -562,7 +576,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-06-27 16:12:33.190257",
+ "modified": "2026-07-14 00:15:00.000000",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

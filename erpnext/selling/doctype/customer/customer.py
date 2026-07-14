@@ -51,11 +51,13 @@ class Customer(TransactionBase):
 		from erpnext.selling.doctype.supplier_number_at_customer.supplier_number_at_customer import (
 			SupplierNumberAtCustomer,
 		)
+		from erpnext.stock.doctype.company_restriction.company_restriction import CompanyRestriction
 		from erpnext.utilities.doctype.portal_user.portal_user import PortalUser
 
 		account_manager: DF.Link | None
 		accounts: DF.Table[PartyAccount]
 		alias: DF.Data | None
+		allowed_companies: DF.TableMultiSelect[CompanyRestriction]
 		companies: DF.Table[AllowedToTransactWith]
 		credit_limits: DF.Table[CustomerCreditLimit]
 		customer_details: DF.Text | None
