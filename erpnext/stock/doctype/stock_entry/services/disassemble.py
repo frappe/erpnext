@@ -361,26 +361,34 @@ class DisassembleStockEntry(BaseStockEntry):
 				Max(SED.item_name).as_("item_name"),
 				Max(SED.description).as_("description"),
 				Max(SED.stock_uom).as_("stock_uom"),
-				Max(SED.uom).as_("uom"),
-				# qty-weighted average so consolidating an item across manufacture entries at different
-				# valuation rates values the summed qty correctly (Max would bias the rate high).
-				# Manufacture rows always carry positive qty, so NullIf only guards a theoretical /0.
+				SED.uom,
 				(Sum(SED.basic_rate * SED.qty) / NullIf(Sum(SED.qty), 0)).as_("basic_rate"),
-				Max(SED.conversion_factor).as_("conversion_factor"),
-				Max(SED.is_finished_item).as_("is_finished_item"),
-				Max(SED.secondary_item_type).as_("secondary_item_type"),
-				Max(SED.is_legacy_scrap_item).as_("is_legacy_scrap_item"),
-				Max(SED.bom_secondary_item).as_("bom_secondary_item"),
+				SED.conversion_factor,
+				SED.is_finished_item,
+				SED.secondary_item_type,
+				SED.is_legacy_scrap_item,
+				SED.bom_secondary_item,
 				Max(SED.batch_no).as_("batch_no"),
 				Max(SED.serial_no).as_("serial_no"),
 				Max(SED.use_serial_batch_fields).as_("use_serial_batch_fields"),
-				Max(SED.s_warehouse).as_("s_warehouse"),
-				Max(SED.t_warehouse).as_("t_warehouse"),
-				Max(SED.bom_no).as_("bom_no"),
+				SED.s_warehouse,
+				SED.t_warehouse,
+				SED.bom_no,
 			)
 			.where(SE.purpose == "Manufacture")
 			.where(SE.work_order == self.doc.work_order)
-			.groupby(SED.item_code)
+			.groupby(
+				SED.item_code,
+				SED.uom,
+				SED.s_warehouse,
+				SED.t_warehouse,
+				SED.bom_no,
+				SED.conversion_factor,
+				SED.is_finished_item,
+				SED.secondary_item_type,
+				SED.is_legacy_scrap_item,
+				SED.bom_secondary_item,
+			)
 			.orderby(Min(SED.idx))
 			.run(as_dict=True)
 		)
