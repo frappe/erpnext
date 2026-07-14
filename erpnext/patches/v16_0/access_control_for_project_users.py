@@ -9,7 +9,7 @@ def execute():
 		frappe.qb.from_(Project)
 		.join(ProjectUser)
 		.on(Project.name == ProjectUser.parent)
-		.select(Project.name, ProjectUser.email)
+		.select(Project.name, ProjectUser.user)
 	)
 
 	proj_user = query.run(as_dict=1)
