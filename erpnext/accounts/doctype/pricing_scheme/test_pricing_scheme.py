@@ -12,6 +12,7 @@ from erpnext.accounts.services.pricing.pricing_effects import (
 	compose_line_rate,
 )
 from erpnext.accounts.services.pricing.pricing_engine import PricingEngine
+from erpnext.accounts.services.pricing.pricing_matching import item_in_scope
 from erpnext.tests.utils import ERPNextTestSuite
 
 PARENT_GROUP = "_PS Parent Group"
@@ -28,7 +29,7 @@ class TestPricingScheme(ERPNextTestSuite):
 	def setUpClass(cls):
 		super().setUpClass()
 		make_scope_masters()
-		frappe.db.commit()  # nosemgrep — masters must survive per-test rollback
+		frappe.db.commit()  # nosemgrep, masters must survive per-test rollback
 
 	def make_context(self, lines: list[LineContext], **overrides) -> PricingContext:
 		defaults = dict(
@@ -184,6 +185,56 @@ class TestPricingScheme(ERPNextTestSuite):
 			tiers=[tier(min_qty=1, value=5)],
 		)
 
+	def test_applies_to_all_items(self):
+		line = frappe._dict(item_code=ITEM_A, variant_of=None, item_group=CHILD_GROUP, brand=None, uom=None)
+		self.assertTrue(item_in_scope(line, [frappe._dict(item_row(ITEM_B, exclude=1))], "All Items"))
+		self.assertFalse(item_in_scope(line, [frappe._dict(item_row(ITEM_A, exclude=1))], "All Items"))
+		self.assertFalse(item_in_scope(line, []), "no scope and no applies_to must never match")
+
+		# legacy All Items rows fold into the flag and are dropped
+		# Loyalty/93 avoids conflicts with real schemes on the test site
+		legacy = make_scheme(
+			title="All Items Legacy",
+			applies_to=None,
+			stacking_group="Loyalty",
+			priority=93,
+			trigger=[{"scope_type": "All Items"}],
+			tiers=[tier(min_qty=1, value=5)],
+		)
+		self.assertEqual(legacy.applies_to, "All Items")
+		self.assertFalse(legacy.trigger_scope)
+
+		# under All Items, valued scope rows must be exclusions
+		self.assertRaises(
+			frappe.ValidationError,
+			make_scheme,
+			title="All Items Include",
+			applies_to="All Items",
+			trigger=[item_row(ITEM_A)],
+			tiers=[tier(min_qty=1, value=5)],
+		)
+
+	def test_condition_validation(self):
+		# fields beyond the sample dry-run context must still be saveable
+		scheme = make_scheme(
+			title="Conditioned",
+			stacking_group="Loyalty",
+			priority=91,
+			condition="customer_group == 'Wholesale' and grand_total > 1000",
+			trigger=[item_row(ITEM_C)],
+			tiers=[tier(min_qty=1, value=5)],
+		)
+		self.assertTrue(scheme.name)
+
+		self.assertRaises(
+			frappe.ValidationError,
+			make_scheme,
+			title="Broken Condition",
+			condition="grand_total >",
+			trigger=[item_row(ITEM_C)],
+			tiers=[tier(min_qty=1, value=5)],
+		)
+
 
 def make_scope_masters() -> None:
 	from erpnext.stock.doctype.item.test_item import make_item
@@ -213,6 +264,7 @@ def make_scheme(**kwargs):
 	doc = frappe.get_doc(
 		{
 			"doctype": "Pricing Scheme",
+			"applies_to": kwargs.pop("applies_to", "Specific Items"),
 			"title": kwargs.pop("title", "Test Scheme"),
 			"effect_type": kwargs.pop("effect_type", "Discount Percentage"),
 			"company": kwargs.pop("company", "_Test Company"),
@@ -299,7 +351,7 @@ class TestPricingSchemeApplier(ERPNextTestSuite):
 	def setUpClass(cls):
 		super().setUpClass()
 		make_scope_masters()
-		frappe.db.commit()  # nosemgrep — masters must survive per-test rollback
+		frappe.db.commit()  # nosemgrep, masters must survive per-test rollback
 
 	def setUp(self):
 		frappe.db.set_single_value("Accounts Settings", "pricing_engine", "Pricing Scheme")
@@ -321,7 +373,7 @@ class TestPricingSchemeApplier(ERPNextTestSuite):
 		self.assertEqual(so.items[0].rate, 92)
 		self.assertEqual(so.items[0].scheme_discount_amount, 8)
 
-		so.save()  # invariant 1: idempotency — apply twice == once
+		so.save()  # invariant 1: idempotency, apply twice == once
 		self.assertEqual(so.items[0].rate, 92)
 		self.assertEqual(so.items[0].scheme_discount_amount, 8)
 
@@ -332,7 +384,7 @@ class TestPricingSchemeApplier(ERPNextTestSuite):
 
 		scheme.disabled = 1
 		scheme.save()
-		so.save()  # invariant 2: reversibility — removal == baseline
+		so.save()  # invariant 2: reversibility, removal == baseline
 
 		self.assertEqual(so.items[0].rate, 100)
 		self.assertEqual(so.items[0].scheme_discount_amount, 0)
@@ -389,7 +441,7 @@ class TestPricingSchemeApplier(ERPNextTestSuite):
 
 		dn = make_delivery_note(so.name)
 		dn.flags.ignore_mandatory = True  # site-local custom fields are not under test
-		dn.save()  # invariant 3: chain stability — DN bills what SO agreed
+		dn.save()  # invariant 3: chain stability, DN bills what SO agreed
 		self.assertEqual(dn.items[0].rate, 90)
 		self.assertEqual(dn.items[0].scheme_discount_amount, 10)
 
@@ -462,7 +514,7 @@ class TestPricingSchemeCoupons(ERPNextTestSuite):
 	def setUpClass(cls):
 		super().setUpClass()
 		make_scope_masters()
-		frappe.db.commit()  # nosemgrep — masters must survive per-test rollback
+		frappe.db.commit()  # nosemgrep, masters must survive per-test rollback
 
 	def setUp(self):
 		frappe.db.set_single_value("Accounts Settings", "pricing_engine", "Pricing Scheme")
@@ -521,7 +573,7 @@ class TestPricingSchemeCoupons(ERPNextTestSuite):
 		redemption_name = f"{coupon.name}::{so.name}"
 		self.assertEqual(frappe.db.get_value("Coupon Redemption", redemption_name, "status"), "Redeemed")
 
-		# downstream SI inherits — must not redeem again
+		# downstream SI inherits, must not redeem again
 		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
 
 		si = make_sales_invoice(so.name)
@@ -570,13 +622,13 @@ class TestPricingSchemeCoupons(ERPNextTestSuite):
 
 
 class TestPricingSchemeAuthoring(ERPNextTestSuite):
-	"""Overlap detection, scope counting, and preview — the form's server APIs."""
+	"""Overlap detection, scope counting, and preview: the form's server APIs."""
 
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()
 		make_scope_masters()
-		frappe.db.commit()  # nosemgrep — masters must survive per-test rollback
+		frappe.db.commit()  # nosemgrep, masters must survive per-test rollback
 
 	def detect(self, doc):
 		from erpnext.accounts.services.pricing.pricing_overlaps import detect_overlaps
@@ -601,7 +653,7 @@ class TestPricingSchemeAuthoring(ERPNextTestSuite):
 			}
 		)
 
-		# the site may hold real schemes (manual testing) — assert on ours only
+		# the site may hold real schemes (manual testing), so assert on ours only
 		severities = {o["scheme"]: o["severity"] for o in self.detect(draft)}
 		self.assertEqual(
 			severities.get(existing.name),
@@ -699,7 +751,7 @@ class TestPricingSchemeMigration(ERPNextTestSuite):
 	def setUpClass(cls):
 		super().setUpClass()
 		make_scope_masters()
-		frappe.db.commit()  # nosemgrep — masters must survive per-test rollback
+		frappe.db.commit()  # nosemgrep, masters must survive per-test rollback
 
 	def convert(self, dry_run: int = 0):
 		from erpnext.accounts.services.pricing.pricing_migration import convert_legacy_pricing_rules
@@ -775,7 +827,7 @@ class TestPricingSchemeMigration(ERPNextTestSuite):
 
 	def test_conflicting_conversion_inserted_disabled(self):
 		make_legacy_rule(title="First")
-		rule_b = make_legacy_rule(title="Second")  # same scope, same priority — legacy allowed this
+		rule_b = make_legacy_rule(title="Second")  # same scope, same priority; legacy allowed this
 		report = self.convert()
 
 		entry = self.entry_for(report, rule_b.name)

@@ -14,7 +14,7 @@ def detect_overlaps(scheme: str | dict | Document) -> list[dict]:
 	"""Classify every active scheme that intersects the given (possibly
 	unsaved) scheme: conflict / shadowed / wins / stacks.
 
-	Include rows only — excludes are ignored, so results are conservative
+	Include rows only; excludes are ignored, so results are conservative
 	("possible overlap"). Evidence names the intersecting scope pair.
 	"""
 	doc = _as_scheme_doc(scheme)
@@ -60,10 +60,9 @@ def count_scope_items(scheme: str | dict | Document) -> int:
 	"""Approximate item count matched by the trigger scope (include rows,
 	deduplicated; excludes subtracted without cross-type dedup)."""
 	doc = _as_scheme_doc(scheme)
-	includes = [
-		row for row in doc.trigger_scope if not row.exclude and row.value or row.scope_type == "All Items"
-	]
-	excludes = [row for row in doc.trigger_scope if row.exclude and row.value]
+	rows = _effective_trigger_rows(doc)
+	includes = [row for row in rows if not row.exclude and row.value or row.scope_type == "All Items"]
+	excludes = [row for row in rows if row.exclude and row.value]
 	total = _count_items(includes)
 	return max(total - _count_items(excludes), 0)
 
@@ -75,6 +74,17 @@ def _as_scheme_doc(scheme):
 	if isinstance(scheme, dict):
 		return frappe.get_doc(scheme)
 	return scheme
+
+
+def _effective_trigger_rows(doc) -> list:
+	"""Trigger rows with applies_to == "All Items" materialized as a virtual
+	include row, so intersection and counting see the full scope."""
+	rows = list(doc.trigger_scope)
+	if doc.get("applies_to") == "All Items" and not any(
+		row.scope_type == "All Items" and not row.exclude for row in rows
+	):
+		rows.append(frappe._dict(scope_type="All Items", value=None, exclude=0))
+	return rows
 
 
 def _candidate_names(doc) -> list[str]:
@@ -94,17 +104,17 @@ def _classify(doc, other) -> dict | None:
 		return None
 	if not _companies_overlap(doc, other):
 		return None
-	if not _item_scopes_intersect(doc.trigger_scope, other.trigger_scope):
+	if not _item_scopes_intersect(_effective_trigger_rows(doc), _effective_trigger_rows(other)):
 		return None
 	if not _party_scopes_intersect(doc.party_scope, other.party_scope):
 		return None
 
-	evidence = _intersection_evidence(doc.trigger_scope, other.trigger_scope)
+	evidence = _intersection_evidence(_effective_trigger_rows(doc), _effective_trigger_rows(other))
 	if doc.stacking_group != other.stacking_group:
-		return _entry(other, "stacks", _("combines — different stacking group ({0})").format(evidence))
+		return _entry(other, "stacks", _("combines, different stacking group ({0})").format(evidence))
 	if cint(doc.priority) == cint(other.priority):
 		return _entry(
-			other, "conflict", _("same group and priority ({0}) — saving will be blocked").format(evidence)
+			other, "conflict", _("same group and priority ({0}), saving will be blocked").format(evidence)
 		)
 	if cint(doc.priority) < cint(other.priority):
 		return _entry(other, "shadowed", _("loses to it on priority for {0}").format(evidence))

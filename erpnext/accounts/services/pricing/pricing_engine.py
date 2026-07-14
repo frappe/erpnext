@@ -65,7 +65,9 @@ class PricingEngine:
 			return []
 
 		trigger_lines = [
-			line for line in self.context.priceable_lines() if item_in_scope(line, scheme.trigger_scope)
+			line
+			for line in self.context.priceable_lines()
+			if item_in_scope(line, scheme.trigger_scope, scheme.get("applies_to"))
 		]
 		if not trigger_lines:
 			self.trace.rejected(scheme.name, "no lines in trigger scope")

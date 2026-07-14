@@ -9,8 +9,12 @@ from erpnext.accounts.services.pricing.pricing_context import LineContext, Prici
 TREE_SCOPES = {"Item Group", "Customer Group", "Territory", "Supplier Group"}
 
 
-def item_in_scope(line: LineContext, scope_rows: list) -> bool:
-	"""OR within a scope type, AND across scope types, then excludes subtract."""
+def item_in_scope(line: LineContext, scope_rows: list, applies_to: str | None = None) -> bool:
+	"""OR within a scope type, AND across scope types, then excludes subtract.
+
+	applies_to == "All Items" matches every line (excludes still subtract);
+	an explicit All Items include row is the legacy equivalent.
+	"""
 	includes: dict[str, list] = {}
 	for row in scope_rows:
 		if row.exclude:
@@ -19,6 +23,8 @@ def item_in_scope(line: LineContext, scope_rows: list) -> bool:
 		else:
 			includes.setdefault(row.scope_type, []).append(row)
 
+	if applies_to == "All Items":
+		return True
 	if not includes:
 		return False
 	return all(any(_scope_row_matches(line, row) for row in rows) for rows in includes.values())

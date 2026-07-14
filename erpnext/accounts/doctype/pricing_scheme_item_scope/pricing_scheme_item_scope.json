@@ -7,6 +7,7 @@
  "field_order": [
   "scope_type",
   "value",
+  "column_break_scope",
   "uom",
   "exclude"
  ],
@@ -17,7 +18,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Scope Type",
-   "options": "Item Group\nItem\nBrand\nAll Items",
+   "options": "Item Group\nItem\nBrand",
    "reqd": 1
   },
   {
@@ -28,6 +29,10 @@
    "label": "Value",
    "options": "scope_type",
    "search_index": 1
+  },
+  {
+   "fieldname": "column_break_scope",
+   "fieldtype": "Column Break"
   },
   {
    "depends_on": "eval:doc.scope_type == 'Item'",

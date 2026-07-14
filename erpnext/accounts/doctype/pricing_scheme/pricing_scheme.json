@@ -1,7 +1,7 @@
 {
  "actions": [],
  "autoname": "format:PRS-{#####}",
- "creation": "2026-07-11 10:00:00.000000",
+ "creation": "2026-07-14 14:16:21.343554",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -17,6 +17,7 @@
   "tiers",
   "applies_to_tab",
   "applies_to_section",
+  "applies_to",
   "trigger_scope",
   "benefit_section",
   "benefit_scope",
@@ -128,14 +129,24 @@
    "label": "Items"
   },
   {
-   "fieldname": "trigger_scope",
-   "fieldtype": "Table",
-   "label": "Trigger Scope",
-   "options": "Pricing Scheme Item Scope",
+   "default": "All Items",
+   "fieldname": "applies_to",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Applies To",
+   "options": "All Items\nSpecific Items",
    "reqd": 1
   },
   {
+   "fieldname": "trigger_scope",
+   "fieldtype": "Table",
+   "label": "Trigger Scope",
+   "mandatory_depends_on": "eval:doc.applies_to == 'Specific Items'",
+   "options": "Pricing Scheme Item Scope"
+  },
+  {
    "collapsible": 1,
+   "depends_on": "eval:doc.effect_type && doc.effect_type != 'Header Discount'",
    "fieldname": "benefit_section",
    "fieldtype": "Section Break",
    "label": "Apply Benefit to Different Items"
@@ -148,6 +159,7 @@
    "options": "Pricing Scheme Item Scope"
   },
   {
+   "collapsible": 1,
    "fieldname": "party_section",
    "fieldtype": "Section Break",
    "label": "Customers / Suppliers"
@@ -167,17 +179,18 @@
   {
    "fieldname": "composition_section",
    "fieldtype": "Section Break",
-   "label": "Composition"
+   "label": "Combining with Other Schemes"
   },
   {
    "default": "Default",
-   "description": "Schemes in the same group compete — highest priority wins. Schemes in different groups apply together.",
+   "description": "Schemes in the same group compete and the highest priority wins. Schemes in different groups apply together.",
    "fieldname": "stacking_group",
    "fieldtype": "Select",
    "in_standard_filter": 1,
-   "label": "Competes In (Stacking Group)",
+   "label": "Stacking Group",
    "options": "Default\nSeasonal\nLoyalty",
-   "reqd": 1
+   "reqd": 1,
+   "show_description_on_click": 1
   },
   {
    "fieldname": "column_break_composition",
@@ -185,10 +198,12 @@
   },
   {
    "default": "1",
+   "description": "Higher priority wins within the stacking group.",
    "fieldname": "priority",
    "fieldtype": "Int",
    "label": "Priority",
-   "non_negative": 1
+   "non_negative": 1,
+   "show_description_on_click": 1
   },
   {
    "fieldname": "validity_section",
@@ -196,28 +211,36 @@
    "label": "Validity & Applicability"
   },
   {
+   "description": "Applies to all companies if blank.",
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "show_description_on_click": 1
   },
   {
+   "description": "Applies in any transaction currency if blank.",
    "fieldname": "currency",
    "fieldtype": "Link",
    "label": "Currency",
-   "options": "Currency"
+   "options": "Currency",
+   "show_description_on_click": 1
   },
   {
+   "description": "Applies with any price list if blank.",
    "fieldname": "price_list",
    "fieldtype": "Link",
    "label": "Price List",
-   "options": "Price List"
+   "options": "Price List",
+   "show_description_on_click": 1
   },
   {
+   "description": "Applies for any warehouse if blank.",
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "label": "Warehouse",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "show_description_on_click": 1
   },
   {
    "fieldname": "column_break_validity",
@@ -239,16 +262,17 @@
    "label": "Conditions & Caps"
   },
   {
+   "description": "Decides which quantity and amount are compared against the tier bands.",
    "fieldname": "basis_section",
    "fieldtype": "Section Break",
-   "label": "Tier Basis"
+   "label": "Tier Evaluation"
   },
   {
    "default": "Per Line",
-   "description": "Per Document sums qty/amount across all trigger-scope lines. Per Period also accrues from past applications.",
+   "description": "Per Line uses each line's own quantity and amount. Per Document sums all matching lines together. Per Period also adds usage accrued from earlier documents.",
    "fieldname": "aggregation",
    "fieldtype": "Select",
-   "label": "Aggregation",
+   "label": "Evaluate Tiers",
    "options": "Per Line\nPer Document\nPer Period",
    "reqd": 1
   },
@@ -259,17 +283,21 @@
   {
    "default": "Validity Period",
    "depends_on": "eval:doc.aggregation == 'Per Period'",
+   "description": "Validity Period accrues between Valid From and Valid Upto. Rolling N Days accrues over the most recent days only.",
    "fieldname": "period_window",
    "fieldtype": "Select",
-   "label": "Period Window",
-   "options": "Validity Period\nRolling N Days"
+   "label": "Accrual Window",
+   "options": "Validity Period\nRolling N Days",
+   "show_description_on_click": 1
   },
   {
    "depends_on": "eval:doc.aggregation == 'Per Period' && doc.period_window == 'Rolling N Days'",
+   "description": "Length of the rolling accrual window in days.",
    "fieldname": "period_days",
    "fieldtype": "Int",
-   "label": "Period Days",
-   "non_negative": 1
+   "label": "Rolling Window (Days)",
+   "non_negative": 1,
+   "show_description_on_click": 1
   },
   {
    "fieldname": "caps_section",
@@ -277,21 +305,24 @@
    "label": "Caps"
   },
   {
-   "description": "0 = uncapped. Checked against the application ledger.",
+   "description": "The scheme stops applying after it has been used on this many documents. Leave at 0 for no limit.",
    "fieldname": "cap_total_applications",
    "fieldtype": "Int",
-   "label": "Cap: Total Applications",
-   "non_negative": 1
+   "label": "Maximum Uses",
+   "non_negative": 1,
+   "show_description_on_click": 1
   },
   {
    "fieldname": "column_break_caps",
    "fieldtype": "Column Break"
   },
   {
+   "description": "The scheme stops applying once the total discount it has given across all documents reaches this amount. Leave at 0 for no limit.",
    "fieldname": "cap_total_discount_amount",
    "fieldtype": "Currency",
-   "label": "Cap: Total Discount Amount",
-   "non_negative": 1
+   "label": "Maximum Total Discount",
+   "non_negative": 1,
+   "show_description_on_click": 1
   },
   {
    "fieldname": "coupon_section",
@@ -300,9 +331,11 @@
   },
   {
    "default": "0",
+   "description": "Applies only when the document carries an active coupon from a campaign linked to this scheme.",
    "fieldname": "coupon_required",
    "fieldtype": "Check",
-   "label": "Coupon Required"
+   "label": "Coupon Required",
+   "show_description_on_click": 1
   },
   {
    "collapsible": 1,
@@ -311,30 +344,32 @@
    "label": "Advanced"
   },
   {
-   "description": "Python expression evaluated against the document. Errors are logged and traced, never swallowed.",
+   "description": "Python expression evaluated against the transaction document. The scheme applies only when it returns a truthy value. Every document field is available by name, and child rows in <code>items</code> are dicts.<br><br>Examples:<br><code>grand_total > 10000</code> applies only to large orders<br><code>customer_group == 'Wholesale'</code> applies to one customer group<br><code>customer in ('Acme', 'Globex')</code> applies to named customers<br><code>total_qty >= 100 and po_no</code> combines checks<br><code>[item for item in items if item.get('qty') > 50]</code> is truthy when some line exceeds 50 units<br><br>Only <code>int</code>, <code>float</code> and <code>round</code> builtins are available. A failing condition is logged and shown in the pricing trace, never swallowed.",
    "fieldname": "condition",
    "fieldtype": "Code",
    "label": "Condition",
-   "options": "Python"
+   "options": "Python",
+   "show_description_on_click": 1
   },
   {
+   "description": "Provenance: the Pricing Rule this scheme was converted from.",
    "fieldname": "legacy_pricing_rule",
    "fieldtype": "Data",
-   "label": "Legacy Pricing Rule",
    "hidden": 1,
-   "read_only": 1,
+   "label": "Legacy Pricing Rule",
    "no_copy": 1,
-   "search_index": 1,
-   "description": "Provenance: the Pricing Rule this scheme was converted from."
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-11 10:00:00.000000",
+ "modified": "2026-07-14 14:52:46.879975",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Pricing Scheme",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -371,6 +406,7 @@
    "share": 1
   }
  ],
+ "row_format": "Dynamic",
  "show_title_field_in_link": 1,
  "sort_field": "creation",
  "sort_order": "DESC",

@@ -31,6 +31,7 @@ class PricingScheme(Document):
 		from erpnext.accounts.doctype.pricing_scheme_tier.pricing_scheme_tier import PricingSchemeTier
 
 		aggregation: DF.Literal["Per Line", "Per Document", "Per Period"]
+		applies_to: DF.Literal["All Items", "Specific Items"]
 		apply_discount_on: DF.Literal["Grand Total", "Net Total"]
 		benefit_scope: DF.Table[PricingSchemeItemScope]
 		cap_total_applications: DF.Int
@@ -40,10 +41,10 @@ class PricingScheme(Document):
 		coupon_required: DF.Check
 		currency: DF.Link | None
 		disabled: DF.Check
-		legacy_pricing_rule: DF.Data | None
 		effect_type: DF.Literal[
 			"Rate", "Discount Percentage", "Discount Amount", "Margin", "Free Item", "Header Discount"
 		]
+		legacy_pricing_rule: DF.Data | None
 		party_scope: DF.Table[PricingSchemePartyScope]
 		period_days: DF.Int
 		period_window: DF.Literal["Validity Period", "Rolling N Days"]
@@ -60,6 +61,7 @@ class PricingScheme(Document):
 	# end: auto-generated types
 
 	def validate(self) -> None:
+		self.normalize_scope()
 		self.validate_dates()
 		self.validate_scope_rows()
 		self.validate_tiers()
@@ -70,9 +72,23 @@ class PricingScheme(Document):
 	def validate_dates(self) -> None:
 		self.validate_from_to_dates("valid_from", "valid_upto")
 
+	def normalize_scope(self) -> None:
+		"""Applies To is authoritative. Documents predating the field infer it
+		from their rows; explicit All Items rows are the legacy representation
+		and are dropped in favor of the flag."""
+		legacy_rows = [row for row in self.trigger_scope if row.scope_type == "All Items"]
+		if not self.applies_to:
+			self.applies_to = "All Items" if legacy_rows else "Specific Items"
+		if self.applies_to == "All Items" and legacy_rows:
+			self.set("trigger_scope", [r for r in self.trigger_scope if r.scope_type != "All Items"])
+			for idx, row in enumerate(self.trigger_scope, start=1):
+				row.idx = idx
+
 	def validate_scope_rows(self) -> None:
-		if not any(not row.exclude for row in self.trigger_scope):
-			frappe.throw(_("Trigger Scope needs at least one include row."))
+		if self.applies_to == "All Items":
+			self.validate_exclusion_only_scope()
+		else:
+			self.validate_specific_scope()
 
 		for table in ("trigger_scope", "benefit_scope"):
 			for row in self.get(table):
@@ -82,6 +98,23 @@ class PricingScheme(Document):
 							row.idx, _(self.meta.get_label(table)), _(row.scope_type)
 						)
 					)
+
+	def validate_exclusion_only_scope(self) -> None:
+		for row in self.trigger_scope:
+			if not row.exclude:
+				frappe.throw(
+					_(
+						"Row {0} in Trigger Scope: the scheme already applies to all items, so scope rows must be exclusions. Check Exclude or set Applies To to Specific Items."
+					).format(row.idx)
+				)
+
+	def validate_specific_scope(self) -> None:
+		if any(row.scope_type == "All Items" for row in self.trigger_scope):
+			frappe.throw(
+				_("All Items rows are not allowed in Trigger Scope. Set Applies To to All Items instead.")
+			)
+		if not any(not row.exclude for row in self.trigger_scope):
+			frappe.throw(_("Trigger Scope needs at least one include row."))
 
 	def validate_tiers(self) -> None:
 		for tier in self.tiers:
@@ -143,13 +176,28 @@ class PricingScheme(Document):
 			return
 		try:
 			frappe.safe_eval(self.condition, eval_locals=_sample_condition_context())
+		except SyntaxError as exc:
+			frappe.throw(_("Condition has a syntax error: {0}").format(exc))
 		except Exception as exc:
-			frappe.throw(_("Condition is invalid: {0}").format(exc))
+			frappe.msgprint(
+				_(
+					"Condition could not be dry-run against a sample document: {0}. It will be evaluated live; if it fails there, the scheme will not apply."
+				).format(exc),
+				indicator="orange",
+			)
+
+
+class _SampleConditionContext(dict):
+	"""Unknown field names resolve to None, so dry-running a condition never
+	raises NameError for fields the sample document does not carry."""
+
+	def __missing__(self, key: str) -> None:
+		return None
 
 
 def _sample_condition_context() -> dict:
 	"""Synthetic document context used to dry-run conditions at save time."""
-	return frappe._dict(
+	return _SampleConditionContext(
 		doctype="Sales Order",
 		company="",
 		customer="",
