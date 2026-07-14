@@ -66,6 +66,9 @@
   "tax_withholding_group",
   "tax_withholding_category",
   "settings_tab",
+  "company_restrictions_section",
+  "allowed_companies",
+  "section_break_ario",
   "so_required",
   "dn_required",
   "column_break_53",
@@ -535,6 +538,20 @@
    "label": "Settings"
   },
   {
+   "description": "If set, this Customer is only available for transactions in the listed companies. Leave empty for no restriction.",
+   "fieldname": "company_restrictions_section",
+   "fieldtype": "Section Break",
+   "label": "Company Restrictions",
+   "depends_on": "eval:cint(frappe.sys_defaults.enable_company_wise_masters)"
+  },
+  {
+   "fieldname": "allowed_companies",
+   "fieldtype": "Table MultiSelect",
+   "label": "Allowed Companies",
+   "options": "Company Restriction",
+   "depends_on": "eval:cint(frappe.sys_defaults.enable_company_wise_masters)"
+  },
+  {
    "collapsible": 1,
    "collapsible_depends_on": "default_sales_partner",
    "fieldname": "sales_team_tab",
@@ -697,6 +714,10 @@
   {
    "fieldname": "credit_limit_column",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_ario",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "user-round",
@@ -710,7 +731,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-09-30 23:24:44.044604",
+ "modified": "2026-10-30 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

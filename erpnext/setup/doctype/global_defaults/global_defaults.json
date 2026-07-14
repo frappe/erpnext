@@ -16,7 +16,8 @@
   "disable_in_words",
   "use_posting_datetime_for_naming_documents",
   "demo_company",
-  "enable_item_search_index"
+  "enable_item_search_index",
+  "enable_company_wise_masters"
  ],
  "fields": [
   {
@@ -98,6 +99,13 @@
    "fieldname": "use_posting_datetime_for_naming_documents",
    "fieldtype": "Check",
    "label": "Use Posting Datetime for Naming Documents"
+  },
+  {
+   "default": "0",
+   "description": "When enabled, Supplier, Customer, and Item records can be restricted to specific companies via their <b>Allowed Companies</b> table. Transactions will only show masters configured for the selected company.",
+   "fieldname": "enable_company_wise_masters",
+   "fieldtype": "Check",
+   "label": "Enable Company-wise Master Filtering"
   }
  ],
  "grid_page_length": 50,
@@ -107,7 +115,7 @@
  "in_create": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-03-16 13:28:20.155574",
+ "modified": "2026-10-30 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Global Defaults",

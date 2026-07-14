@@ -41,6 +41,8 @@
   "over_delivery_receipt_allowance",
   "column_break_wugd",
   "over_billing_allowance",
+  "company_restrictions_section",
+  "allowed_companies",
   "section_break_11",
   "brand",
   "description",
@@ -1104,6 +1106,20 @@
    "fieldname": "item_prices_column",
    "fieldtype": "Column Break",
    "label": "Item Prices"
+  },
+  {
+   "fieldname": "company_restrictions_section",
+   "fieldtype": "Section Break",
+   "label": "Company Restrictions",
+   "description": "If set, this Item is only available for transactions in the listed companies. Leave empty for no restriction.",
+   "depends_on": "eval:cint(frappe.sys_defaults.enable_company_wise_masters)"
+  },
+  {
+   "fieldname": "allowed_companies",
+   "fieldtype": "Table MultiSelect",
+   "label": "Allowed Companies",
+   "options": "Company Restriction",
+   "depends_on": "eval:cint(frappe.sys_defaults.enable_company_wise_masters)"
   }
  ],
  "icon": "package",
@@ -1111,7 +1127,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2026-10-22 12:00:00.000000",
+ "modified": "2026-10-30 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
