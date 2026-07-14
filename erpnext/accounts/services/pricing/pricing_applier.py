@@ -18,7 +18,7 @@ TRANSACTION_DOCTYPES = SELLING_DOCTYPES + BUYING_DOCTYPES
 
 
 class EffectApplier:
-	"""Map a PricingResult onto a document — the only place the engine touches fields.
+	"""Map a PricingResult onto a document: the only place the engine touches fields.
 
 	Invariants (spec section 6.3): always recomputes from baseline (price
 	list rate + user-owned discounts), never from previously applied
@@ -180,7 +180,7 @@ def is_pricing_scheme_engine_enabled() -> bool:
 
 
 def baseline_rate(item) -> float:
-	"""Price list rate after user-owned discounts — engine effects never feed back."""
+	"""Price list rate after user-owned discounts; engine effects never feed back."""
 	if flt(item.price_list_rate):
 		if flt(item.discount_percentage):
 			# discount_amount is the framework-derived mirror of the percentage

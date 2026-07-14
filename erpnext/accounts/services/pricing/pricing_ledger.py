@@ -16,7 +16,7 @@ from erpnext.accounts.services.pricing.pricing_engine import PricingEngine
 
 
 def record_applications(doc, method: str | None = None) -> None:
-	"""hooks entry — write ledger rows at origination submit (spec section 7.4).
+	"""hooks entry: write ledger rows at origination submit (spec section 7.4).
 
 	Only lines the document *originated* accrue; inherited lines were
 	already recorded by their upstream origination. One row per

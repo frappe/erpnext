@@ -12,7 +12,7 @@ def coupon_gate(scheme, context: PricingContext) -> tuple[bool, str | None]:
 
 	Checks that the document carries an active coupon whose campaign
 	links this scheme, within campaign validity, with redemption limits
-	not exhausted — all against the Coupon Redemption ledger.
+	not exhausted, all against the Coupon Redemption ledger.
 	"""
 	if not context.coupon_code:
 		return False, "coupon required but none on document"

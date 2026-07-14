@@ -5,7 +5,7 @@ from frappe.model.document import Document
 
 
 class CouponRedemption(Document):
-	"""One coupon use per order chain — atomic by construction.
+	"""One coupon use per order chain, atomic by construction.
 
 	The document name is ``{coupon}::{order_chain_root}``, so the primary
 	key IS the composite unique constraint: two concurrent submissions of

@@ -23,7 +23,7 @@ class SchemeMatch:
 def resolve_winners(matches: list[SchemeMatch], trace: PricingTrace) -> list[SchemeMatch]:
 	"""Within a stacking group exactly one scheme wins (highest priority);
 	across groups all winners compose. Equal-priority ties are broken
-	deterministically by scheme name — authoring-time validation is meant
+	deterministically by scheme name; authoring-time validation is meant
 	to prevent them; the engine never throws at data entry.
 	"""
 	by_group: dict[str, list[SchemeMatch]] = {}

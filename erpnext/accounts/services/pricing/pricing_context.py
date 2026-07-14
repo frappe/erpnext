@@ -33,7 +33,7 @@ class LineContext:
 
 @dataclass(frozen=True)
 class PricingContext:
-	"""Frozen input to the engine — built once per document, never mutated."""
+	"""Frozen input to the engine, built once per document and never mutated."""
 
 	company: str
 	currency: str
@@ -85,7 +85,7 @@ def get_discount_composition() -> str:
 
 def _build_line(row, doc) -> LineContext:
 	item = frappe.get_cached_value("Item", row.item_code, ("item_group", "brand", "variant_of"), as_dict=True)
-	# row.stock_qty is stale mid-validate after a qty edit — always derive
+	# row.stock_qty is stale mid-validate after a qty edit, so always derive
 	stock_qty = flt(row.get("qty")) * (flt(row.get("conversion_factor")) or 1.0)
 	base_amount = (
 		flt(row.get("price_list_rate")) * flt(row.get("qty")) * (flt(doc.get("conversion_rate")) or 1.0)

@@ -38,7 +38,7 @@
    "search_index": 1
   },
   {
-   "description": "The originating order (or standalone invoice). One redemption per coupon per chain — enforced by the document name.",
+   "description": "The originating order (or standalone invoice). One redemption per coupon per chain, enforced by the document name.",
    "fieldname": "order_chain_root",
    "fieldtype": "Data",
    "in_list_view": 1,

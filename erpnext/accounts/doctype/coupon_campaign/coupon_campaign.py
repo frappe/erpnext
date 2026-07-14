@@ -10,7 +10,7 @@ class CouponCampaign(Document):
 	"""Groups coupon codes for one Pricing Scheme with redemption limits.
 
 	Limits are enforced against the Coupon Redemption ledger at match
-	time (engine gate) — never via a mutable counter.
+	time (engine gate), never via a mutable counter.
 	"""
 
 	# begin: auto-generated types

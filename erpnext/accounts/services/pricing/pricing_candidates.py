@@ -22,7 +22,7 @@ class CandidateRepository:
 	def _fetch_names(self, context: PricingContext) -> list[str]:
 		from frappe.utils import getdate
 
-		# IFNULL(datetime, varchar) compares as string — bounds must be full datetimes
+		# IFNULL(datetime, varchar) compares as string, so bounds must be full datetimes
 		date = getdate(context.transaction_date)
 		day_start, day_end = f"{date} 00:00:00", f"{date} 23:59:59"
 

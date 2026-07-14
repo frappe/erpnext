@@ -14,7 +14,7 @@ class TraceEntry:
 
 @dataclass
 class PricingTrace:
-	"""Why every candidate scheme did or did not apply — the support story."""
+	"""Why every candidate scheme did or did not apply: the support story."""
 
 	entries: list[TraceEntry] = field(default_factory=list)
 

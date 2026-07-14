@@ -65,7 +65,7 @@ def compose_line_rate(
 	conversion_rate: float = 1.0,
 	document_currency: str | None = None,
 ) -> float:
-	"""Fold a line's effects into a final rate — the pure math of section 6.2.
+	"""Fold a line's effects into a final rate: the pure math of section 6.2.
 
 	Pipeline: RateOverride -> Margin -> percentages (compound or additive)
 	-> amount discounts (currency-converted). Free items and header
