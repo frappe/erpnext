@@ -431,13 +431,15 @@
    "fieldname": "company_restrictions_section",
    "fieldtype": "Section Break",
    "label": "Company Restrictions",
-   "description": "If set, this Supplier is only available for transactions in the listed companies. Leave empty for no restriction."
+   "description": "If set, this Supplier is only available for transactions in the listed companies. Leave empty for no restriction.",
+   "depends_on": "eval:frappe.sys_defaults.enable_company_wise_masters"
   },
   {
    "fieldname": "allowed_companies",
    "fieldtype": "Table MultiSelect",
    "label": "Allowed Companies",
-   "options": "Company Restriction"
+   "options": "Company Restriction",
+   "depends_on": "eval:frappe.sys_defaults.enable_company_wise_masters"
   },
   {
    "fieldname": "contact_and_address_tab",
@@ -576,7 +578,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-07-14 00:15:00.000000",
+ "modified": "2026-07-14 18:00:00.000000",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
