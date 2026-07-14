@@ -62,7 +62,7 @@ def has_permission(doc, ptype=None, user=None):
 	return any(company in allowed_companies for company in companies)
 
 
-def validate_allowed_companies(doc, method=None):
+def validate_allowed_companies(doc):
 	if doc.flags.ignore_permissions:
 		return
 

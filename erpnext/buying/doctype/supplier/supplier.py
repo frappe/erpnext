@@ -17,6 +17,7 @@ from erpnext.accounts.party import (
 	validate_party_currency_before_merging,
 )
 from erpnext.controllers.website_list_for_contact import add_role_for_portal_user
+from erpnext.stock.doctype.company_restriction.company_restriction import validate_allowed_companies
 from erpnext.utilities.transaction_base import TransactionBase
 
 
@@ -148,6 +149,7 @@ class Supplier(TransactionBase):
 		self.validate_internal_supplier()
 		self.add_role_for_user()
 		self.validate_currency_for_receivable_payable_and_advance_account()
+		validate_allowed_companies(self)
 
 	@frappe.whitelist()
 	def get_supplier_group_details(self):
