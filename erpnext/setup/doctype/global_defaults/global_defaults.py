@@ -53,7 +53,7 @@ class GlobalDefaults(Document):
 		disable_in_words: DF.Check
 		disable_rounded_total: DF.Check
 		enable_company_wise_masters: DF.Check
-		hide_currency_symbol: DF.Literal["", "No", "Yes"]
+		hide_currency_symbol: DF.Check
 		use_posting_datetime_for_naming_documents: DF.Check
 	# end: auto-generated types
 

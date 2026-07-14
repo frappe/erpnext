@@ -55,12 +55,12 @@
    "reqd": 1
   },
   {
+   "default": "0",
    "description": "Do not show any symbol like $ etc next to currencies.",
    "fieldname": "hide_currency_symbol",
-   "fieldtype": "Select",
+   "fieldtype": "Check",
    "in_list_view": 1,
-   "label": "Hide Currency Symbol",
-   "options": "\nNo\nYes"
+   "label": "Hide Currency Symbol"
   },
   {
    "default": "0",
@@ -121,7 +121,7 @@
  "in_create": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-07-14 15:18:25.829886",
+ "modified": "2026-07-14 18:30:00.000000",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Global Defaults",
