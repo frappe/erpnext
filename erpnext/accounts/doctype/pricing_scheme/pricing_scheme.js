@@ -8,6 +8,11 @@ frappe.ui.form.on("Pricing Scheme", {
 		frm.trigger("update_scope_summary");
 		frm.trigger("render_dashboard");
 
+		if (frm.is_new() && !(frm.doc.tiers || []).length) {
+			frm.add_child("tiers", {});
+			frm.refresh_field("tiers");
+		}
+
 		frm.add_custom_button(__("Test Pricing"), () => open_test_pricing_dialog(frm));
 	},
 
@@ -50,6 +55,35 @@ frappe.ui.form.on("Pricing Scheme", {
 		].forEach((field) => grid.update_docfield_property(field, "hidden", is_free ? 0 : 1));
 		grid.update_docfield_property("margin_type", "hidden", is_margin ? 0 : 1);
 		grid.update_docfield_property("value", "hidden", is_free ? 1 : 0);
+		grid.update_docfield_property(
+			"value",
+			"label",
+			{
+				Rate: __("Rate"),
+				"Discount Percentage": __("Discount %"),
+				"Discount Amount": __("Discount Amount"),
+				Margin: __("Margin Value"),
+				"Header Discount": __("Discount % on Total"),
+			}[frm.doc.effect_type] || __("Value")
+		);
+		frm.set_df_property(
+			"tiers",
+			"description",
+			{
+				Rate: __("One row per quantity slab. Rate replaces the price list rate."),
+				"Discount Percentage": __(
+					"Enter the discount percent in the Discount % column — one row per quantity slab. Leave Min and Max Qty as 0 to always apply."
+				),
+				"Discount Amount": __(
+					"Enter the per-unit discount amount — one row per quantity slab. Leave Min and Max Qty as 0 to always apply."
+				),
+				Margin: __("Margin added over the price list rate — one row per quantity slab."),
+				"Free Item": __(
+					"Free Qty per slab. Leave Free Item blank to give the purchased item itself. 'Per Every N Qty' repeats the freebie per dozen-style schemes."
+				),
+				"Header Discount": __("Discount percent applied on the document total."),
+			}[frm.doc.effect_type] || ""
+		);
 		grid.refresh();
 	},
 
