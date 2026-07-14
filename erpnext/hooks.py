@@ -17,6 +17,7 @@ add_to_apps_screen = [
 		"title": app_title,
 		"route": app_home,
 		"has_permission": "erpnext.check_app_permission",
+		"sequence_id": 1,
 	}
 ]
 
