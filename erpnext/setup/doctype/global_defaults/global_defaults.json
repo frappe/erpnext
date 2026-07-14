@@ -5,16 +5,20 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "defaults_section",
   "default_company",
   "country",
-  "default_distance_unit",
   "column_break_8",
   "default_currency",
+  "default_distance_unit",
+  "demo_company",
+  "general_settings_section",
   "hide_currency_symbol",
   "disable_rounded_total",
   "disable_in_words",
+  "column_break_hnew",
   "use_posting_datetime_for_naming_documents",
-  "demo_company"
+  "enable_company_wise_masters"
  ],
  "fields": [
   {
@@ -27,7 +31,7 @@
   {
    "fieldname": "country",
    "fieldtype": "Link",
-   "label": "Country",
+   "label": "Default Country",
    "options": "Country"
   },
   {
@@ -88,6 +92,27 @@
    "fieldname": "use_posting_datetime_for_naming_documents",
    "fieldtype": "Check",
    "label": "Use Posting Datetime for Naming Documents"
+  },
+  {
+   "default": "0",
+   "description": "When enabled, Supplier, Customer, and Item records can be restricted to specific companies via their <b>Allowed Companies</b> table. Transactions will only show masters configured for the selected company.",
+   "fieldname": "enable_company_wise_masters",
+   "fieldtype": "Check",
+   "label": "Enable Company-wise Master Filtering"
+  },
+  {
+   "fieldname": "defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Defaults"
+  },
+  {
+   "fieldname": "general_settings_section",
+   "fieldtype": "Section Break",
+   "label": "General Settings"
+  },
+  {
+   "fieldname": "column_break_hnew",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
@@ -97,7 +122,7 @@
  "in_create": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-03-16 13:28:20.155574",
+ "modified": "2026-07-14 15:18:25.829886",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Global Defaults",

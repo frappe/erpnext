@@ -17,6 +17,7 @@ keydict = {
 	"account_url": "account_url",
 	"disable_rounded_total": "disable_rounded_total",
 	"disable_in_words": "disable_in_words",
+	"enable_company_wise_masters": "enable_company_wise_masters",
 }
 
 from frappe.model.document import Document
@@ -38,6 +39,7 @@ class GlobalDefaults(Document):
 		demo_company: DF.Link | None
 		disable_in_words: DF.Check
 		disable_rounded_total: DF.Check
+		enable_company_wise_masters: DF.Check
 		hide_currency_symbol: DF.Literal["", "No", "Yes"]
 		use_posting_datetime_for_naming_documents: DF.Check
 	# end: auto-generated types

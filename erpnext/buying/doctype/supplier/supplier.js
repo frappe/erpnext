@@ -3,6 +3,9 @@
 
 frappe.ui.form.on("Supplier", {
 	setup: function (frm) {
+		frm.set_query("allowed_companies", () => ({
+			query: "erpnext.stock.doctype.company_restriction.company_restriction.company_query",
+		}));
 		frm.set_query("default_price_list", { buying: 1 });
 		if (frm.doc.__islocal == 1) {
 			frm.set_value("represents_company", "");

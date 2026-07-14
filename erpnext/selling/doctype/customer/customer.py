@@ -28,6 +28,7 @@ from erpnext.controllers.website_list_for_contact import (
 	add_role_for_portal_user,
 	link_portal_users_to_contacts,
 )
+from erpnext.stock.doctype.company_restriction.company_restriction import validate_allowed_companies
 from erpnext.utilities.transaction_base import TransactionBase
 
 
@@ -49,11 +50,13 @@ class Customer(TransactionBase):
 		from erpnext.selling.doctype.supplier_number_at_customer.supplier_number_at_customer import (
 			SupplierNumberAtCustomer,
 		)
+		from erpnext.stock.doctype.company_restriction.company_restriction import CompanyRestriction
 		from erpnext.utilities.doctype.portal_user.portal_user import PortalUser
 
 		account_manager: DF.Link | None
 		accounts: DF.Table[PartyAccount]
 		alias: DF.Data | None
+		allowed_companies: DF.TableMultiSelect[CompanyRestriction]
 		companies: DF.Table[AllowedToTransactWith]
 		credit_limits: DF.Table[CustomerCreditLimit]
 		customer_details: DF.Text | None
@@ -187,6 +190,7 @@ class Customer(TransactionBase):
 		self.validate_internal_customer()
 		self.add_role_for_user()
 		self.validate_currency_for_receivable_payable_and_advance_account()
+		validate_allowed_companies(self)
 
 		# set loyalty program tier
 		if not self.is_new() and (customer := self.get_doc_before_save()):
