@@ -16,7 +16,7 @@ def get_context(context):
 		project.name, start=0, item_status="open", search=frappe.form_dict.get("search")
 	)
 
-	if project_user and project_user.hide_timesheets:
+	if project_user and not project_user.hide_timesheets:
 		project.timesheets = get_timesheets(project.name, start=0, search=frappe.form_dict.get("search"))
 
 	if project_user and project_user.view_attachments:
