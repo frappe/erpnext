@@ -2373,8 +2373,10 @@ def get_negative_outstanding_invoices(
 	voucher_type = "Sales Invoice" if party_type == "Customer" else "Purchase Invoice"
 	account = "debit_to" if voucher_type == "Sales Invoice" else "credit_to"
 	supplier_condition = ""
+	query_values = {"party": party, "party_account": party_account}
 	if voucher_type == "Purchase Invoice":
-		supplier_condition = f"and (release_date is null or release_date <= '{nowdate()}')"
+		supplier_condition = "and (release_date is null or release_date <= %(today)s)"
+		query_values["today"] = nowdate()
 	if party_account_currency == company_currency:
 		grand_total_field = "base_grand_total"
 		rounded_total_field = "base_rounded_total"
@@ -2392,7 +2394,7 @@ def get_negative_outstanding_invoices(
 		from
 			`tab{voucher_type}`
 		where
-			{party_type} = %s and {party_account} = %s and docstatus = 1 and
+			{party_type} = %(party)s and {party_account} = %(party_account)s and docstatus = 1 and
 			outstanding_amount < 0
 			{supplier_condition}
 			{condition}
@@ -2411,7 +2413,7 @@ def get_negative_outstanding_invoices(
 				"account": account,
 			}
 		),
-		(party, party_account),
+		query_values,
 		as_dict=True,
 	)
 
