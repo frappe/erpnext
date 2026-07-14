@@ -1,21 +1,23 @@
 {
  "actions": [],
  "allow_copy": 1,
- "creation": "2013-05-02 17:53:24",
+ "creation": "2026-07-14 15:11:24.883261",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "defaults_section",
   "default_company",
   "country",
-  "default_distance_unit",
   "column_break_8",
   "default_currency",
+  "default_distance_unit",
+  "demo_company",
+  "general_settings_section",
   "hide_currency_symbol",
   "disable_rounded_total",
   "disable_in_words",
+  "column_break_hnew",
   "use_posting_datetime_for_naming_documents",
-  "demo_company",
-  "company_wise_masters_section",
   "enable_company_wise_masters"
  ],
  "fields": [
@@ -29,7 +31,7 @@
   {
    "fieldname": "country",
    "fieldtype": "Link",
-   "label": "Country",
+   "label": "Default Country",
    "options": "Country"
   },
   {
@@ -92,15 +94,25 @@
    "label": "Use Posting Datetime for Naming Documents"
   },
   {
-   "fieldname": "company_wise_masters_section",
-   "fieldtype": "Section Break",
-   "label": "Company-wise Masters"
-  },
-  {
+   "default": "0",
+   "description": "When enabled, Supplier, Customer, and Item records can be restricted to specific companies via their <b>Allowed Companies</b> table. Transactions will only show masters configured for the selected company.",
    "fieldname": "enable_company_wise_masters",
    "fieldtype": "Check",
-   "label": "Enable Company-wise Master Filtering",
-   "description": "When enabled, Supplier, Customer, and Item records can be restricted to specific companies via their <b>Allowed Companies</b> table. Transactions will only show masters configured for the selected company."
+   "label": "Enable Company-wise Master Filtering"
+  },
+  {
+   "fieldname": "defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Defaults"
+  },
+  {
+   "fieldname": "general_settings_section",
+   "fieldtype": "Section Break",
+   "label": "General Settings"
+  },
+  {
+   "fieldname": "column_break_hnew",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
@@ -109,7 +121,7 @@
  "in_create": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-07-14 20:00:00.000000",
+ "modified": "2026-07-14 15:18:25.829886",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Global Defaults",

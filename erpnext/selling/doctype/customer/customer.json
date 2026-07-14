@@ -520,14 +520,14 @@
    "fieldname": "company_restrictions_section",
    "fieldtype": "Section Break",
    "label": "Company Restrictions",
-   "depends_on": "eval:frappe.sys_defaults.enable_company_wise_masters"
+   "depends_on": "eval:cint(frappe.sys_defaults.enable_company_wise_masters)"
   },
   {
    "fieldname": "allowed_companies",
    "fieldtype": "Table MultiSelect",
    "label": "Allowed Companies",
    "options": "Company Restriction",
-   "depends_on": "eval:frappe.sys_defaults.enable_company_wise_masters"
+   "depends_on": "eval:cint(frappe.sys_defaults.enable_company_wise_masters)"
   },
   {
    "collapsible": 1,
@@ -717,7 +717,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-07-14 18:00:00.000000",
+ "modified": "2026-07-14 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
