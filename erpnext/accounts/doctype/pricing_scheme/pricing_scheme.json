@@ -141,7 +141,7 @@
    "label": "Apply Benefit to Different Items"
   },
   {
-   "description": "Empty = benefit applies to the trigger items themselves.",
+   "description": "Benefit applies to the trigger items themselves if empty.",
    "fieldname": "benefit_scope",
    "fieldtype": "Table",
    "label": "Benefit Scope",
@@ -153,7 +153,7 @@
    "label": "Customers / Suppliers"
   },
   {
-   "description": "Empty = applies to everyone.",
+   "description": "Applies to everyone if empty.",
    "fieldname": "party_scope",
    "fieldtype": "Table",
    "label": "Party Scope",

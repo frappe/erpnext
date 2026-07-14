@@ -104,7 +104,7 @@ frappe.ui.form.on("Pricing Scheme", {
 			set_grid_description(
 				frm,
 				"trigger_scope",
-				__("Empty = scheme never applies. Add at least one include row.")
+				__("Scheme never applies if empty. Add at least one include row.")
 			);
 			return;
 		}
