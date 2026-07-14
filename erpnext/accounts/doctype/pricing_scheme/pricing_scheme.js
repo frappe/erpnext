@@ -5,7 +5,10 @@ frappe.ui.form.on("Pricing Scheme", {
 	refresh(frm) {
 		frm.trigger("setup_grids");
 		frm.trigger("morph_tier_columns");
+		frm.trigger("morph_trigger_scope");
+		frm.trigger("morph_party_section");
 		frm.trigger("update_scope_summary");
+		frm.trigger("render_group_ladder");
 		frm.trigger("render_dashboard");
 
 		if (frm.is_new() && !(frm.doc.tiers || []).length) {
@@ -20,12 +23,44 @@ frappe.ui.form.on("Pricing Scheme", {
 		frm.trigger("morph_tier_columns");
 	},
 
+	transaction_type(frm) {
+		frm.trigger("morph_party_section");
+		frm.trigger("refresh_overlaps");
+		frm.trigger("render_group_ladder");
+	},
+
+	morph_party_section(frm) {
+		set_section_label(
+			frm,
+			"party_section",
+			frm.doc.transaction_type === "Buying" ? __("Suppliers") : __("Customers")
+		);
+	},
+
+	applies_to(frm) {
+		const all_items = frm.doc.applies_to === "All Items";
+		let rows = frm.doc.trigger_scope || [];
+		if (all_items) {
+			rows.forEach((row) => {
+				row.exclude = 1;
+			});
+		} else {
+			frm.doc.trigger_scope = rows.filter((row) => row.scope_type !== "All Items");
+		}
+		frm.refresh_field("trigger_scope");
+		frm.trigger("morph_trigger_scope");
+		frm.trigger("update_scope_summary");
+		frm.trigger("refresh_overlaps");
+	},
+
 	stacking_group(frm) {
 		frm.trigger("refresh_overlaps");
+		frm.trigger("render_group_ladder");
 	},
 
 	priority(frm) {
 		frm.trigger("refresh_overlaps");
+		frm.trigger("render_group_ladder");
 	},
 
 	valid_from(frm) {
@@ -39,22 +74,32 @@ frappe.ui.form.on("Pricing Scheme", {
 	setup_grids(frm) {
 		frm.fields_dict.trigger_scope.grid.set_multiple_add("value");
 		frm.fields_dict.party_scope.grid.set_multiple_add("value");
+		// section heads carry these labels; the grid's own label duplicates them
+		["tiers", "benefit_scope", "party_scope"].forEach((field) =>
+			frm.fields_dict[field].grid.wrapper.find(".control-label").first().hide()
+		);
 	},
 
 	morph_tier_columns(frm) {
-		const is_free = frm.doc.effect_type === "Free Item";
-		const is_margin = frm.doc.effect_type === "Margin";
+		// row-form visibility is depends_on-driven; this shapes the grid columns
 		const grid = frm.fields_dict.tiers.grid;
+		const list_columns = {
+			Margin: ["min_qty", "max_qty", "margin_type", "value"],
+			"Free Item": ["min_qty", "max_qty", "free_item", "free_qty"],
+			"Header Discount": ["min_amount", "max_amount", "value"],
+		}[frm.doc.effect_type] || ["min_qty", "max_qty", "value"];
 		[
+			"min_qty",
+			"max_qty",
+			"min_amount",
+			"max_amount",
+			"value",
+			"margin_type",
 			"free_item",
 			"free_qty",
-			"free_item_uom",
-			"free_item_rate",
-			"recurrence_qty",
-			"round_down_recurrence",
-		].forEach((field) => grid.update_docfield_property(field, "hidden", is_free ? 0 : 1));
-		grid.update_docfield_property("margin_type", "hidden", is_margin ? 0 : 1);
-		grid.update_docfield_property("value", "hidden", is_free ? 1 : 0);
+		].forEach((field) =>
+			grid.update_docfield_property(field, "in_list_view", list_columns.includes(field) ? 1 : 0)
+		);
 		grid.update_docfield_property(
 			"value",
 			"label",
@@ -66,9 +111,9 @@ frappe.ui.form.on("Pricing Scheme", {
 				"Header Discount": __("Discount % on Total"),
 			}[frm.doc.effect_type] || __("Value")
 		);
-		set_grid_label(
+		set_section_label(
 			frm,
-			"tiers",
+			"tiers_section",
 			{
 				Rate: __("Fixed Rate Tiers"),
 				"Discount Percentage": __("Percentage Discount Tiers"),
@@ -76,31 +121,53 @@ frappe.ui.form.on("Pricing Scheme", {
 				Margin: __("Margin Tiers"),
 				"Free Item": __("Free Item Tiers"),
 				"Header Discount": __("Document Total Discount Tiers"),
-			}[frm.doc.effect_type] || __("Tiers")
+			}[frm.doc.effect_type] || __("Offer")
 		);
-		set_grid_help(
+		set_section_description(
 			frm,
-			"tiers",
+			"tiers_section",
 			{
 				Rate: __("One row per quantity slab. Rate replaces the price list rate."),
 				"Discount Percentage": __(
-					"Enter the discount percent in the Discount % column — one row per quantity slab. Leave Min and Max Qty as 0 to always apply."
+					"Enter the discount percent in the Discount % column, one row per quantity slab. Leave Min and Max Qty as 0 to always apply."
 				),
 				"Discount Amount": __(
-					"Enter the per-unit discount amount — one row per quantity slab. Leave Min and Max Qty as 0 to always apply."
+					"Enter the per-unit discount amount, one row per quantity slab. Leave Min and Max Qty as 0 to always apply."
 				),
-				Margin: __("Margin added over the price list rate — one row per quantity slab."),
+				Margin: __("Margin added over the price list rate, one row per quantity slab."),
 				"Free Item": __(
 					"Free Qty per slab. Leave Free Item blank to give the purchased item itself. 'Per Every N Qty' repeats the freebie per dozen-style schemes."
 				),
 				"Header Discount": __("Discount percent applied on the document total."),
 			}[frm.doc.effect_type] || ""
 		);
-		grid.refresh();
+		grid.reset_grid();
+	},
+
+	morph_trigger_scope(frm) {
+		const all_items = get_applies_to(frm.doc) === "All Items";
+		const grid = frm.fields_dict.trigger_scope.grid;
+		grid.update_docfield_property("exclude", "hidden", all_items ? 1 : 0);
+		set_grid_label(frm, "trigger_scope", all_items ? __("Exclusions") : __("Items"));
+		if (!all_items && !(frm.doc.trigger_scope || []).length) {
+			frm.add_child("trigger_scope", {});
+			frm.refresh_field("trigger_scope");
+		}
+		grid.reset_grid();
 	},
 
 	update_scope_summary(frm) {
-		if (!(frm.doc.trigger_scope || []).some((row) => row.value || row.scope_type === "All Items")) {
+		const all_items = get_applies_to(frm.doc) === "All Items";
+		const rows = frm.doc.trigger_scope || [];
+		if (all_items && !rows.some((row) => row.value)) {
+			set_grid_description(
+				frm,
+				"trigger_scope",
+				__("Applies to every item. Add rows to exclude items, groups, or brands.")
+			);
+			return;
+		}
+		if (!all_items && !rows.some((row) => row.value && !row.exclude)) {
 			set_grid_description(
 				frm,
 				"trigger_scope",
@@ -143,13 +210,30 @@ frappe.ui.form.on("Pricing Scheme", {
 				if (usage.cap_total_applications) {
 					const capped = usage.applications >= usage.cap_total_applications;
 					frm.dashboard.add_indicator(
-						__("Cap: {0} / {1}", [usage.applications, usage.cap_total_applications]),
+						__("Used {0} of {1} times", [usage.applications, usage.cap_total_applications]),
 						capped ? "red" : "orange"
 					);
 				}
 			},
 		});
 	},
+
+	render_group_ladder: frappe.utils.debounce((frm) => {
+		if (!frm.doc.stacking_group) return;
+		frappe.db
+			.get_list("Pricing Scheme", {
+				filters: {
+					stacking_group: frm.doc.stacking_group,
+					transaction_type: frm.doc.transaction_type,
+					disabled: 0,
+					name: ["!=", frm.doc.name || ""],
+				},
+				fields: ["name", "title", "priority"],
+				order_by: "priority desc",
+				limit: 20,
+			})
+			.then((schemes) => render_group_ladder(frm, schemes || []));
+	}, 600),
 
 	refresh_overlaps: frappe.utils.debounce((frm) => {
 		frappe.call({
@@ -161,6 +245,15 @@ frappe.ui.form.on("Pricing Scheme", {
 });
 
 frappe.ui.form.on("Pricing Scheme Item Scope", {
+	trigger_scope_add(frm, cdt, cdn) {
+		if (get_applies_to(frm.doc) === "All Items") {
+			frappe.model.set_value(cdt, cdn, "exclude", 1);
+		}
+	},
+	scope_type(frm) {
+		frm.trigger("update_scope_summary");
+		frm.trigger("refresh_overlaps");
+	},
 	value(frm) {
 		frm.trigger("update_scope_summary");
 		frm.trigger("refresh_overlaps");
@@ -180,6 +273,15 @@ frappe.ui.form.on("Pricing Scheme Party Scope", {
 	},
 });
 
+function get_applies_to(doc) {
+	// Documents saved before the applies_to field carried scope in rows only.
+	if (doc.applies_to) return doc.applies_to;
+	const has_all_items_row = (doc.trigger_scope || []).some(
+		(row) => row.scope_type === "All Items" && !row.exclude
+	);
+	return has_all_items_row ? "All Items" : "Specific Items";
+}
+
 function set_grid_label(frm, fieldname, label) {
 	// Grid labels, like descriptions, are only drawn once at creation.
 	const grid = frm.fields_dict[fieldname].grid;
@@ -187,22 +289,31 @@ function set_grid_label(frm, fieldname, label) {
 	grid.wrapper.find(".control-label").first().text(label);
 }
 
-function set_grid_help(frm, fieldname, description) {
-	// Keeps the grid description collapsed behind a help icon beside the
-	// grid label; a click toggles it.
-	const grid = frm.fields_dict[fieldname].grid;
-	grid.df.description = description;
-	const wrapper = $(grid.parent).find(".grid-description").html(description).hide();
-	let icon = grid.wrapper.find(".grid-help-toggle");
-	if (!icon.length) {
-		icon = $(
-			`<a class="grid-help-toggle text-muted" title="${__("Help")}">
-				${frappe.utils.icon("circle-question-mark", "sm")}
-			</a>`
-		).insertAfter(grid.wrapper.find(".control-label").first());
-		icon.on("click", () => wrapper.toggle());
+function set_section_label(frm, fieldname, label) {
+	// Section.refresh() only toggles visibility, so a label set via
+	// frm.set_df_property never reaches the rendered section head. Only the
+	// head's text node is replaced: set_label() would wipe the collapse chevron.
+	const section = frm.fields_dict[fieldname];
+	section.df.label = label;
+	const text_node = section.head.contents().filter((_, node) => node.nodeType === Node.TEXT_NODE)[0];
+	if (text_node) {
+		text_node.nodeValue = label;
+	} else {
+		section.set_label(label);
 	}
-	icon.toggle(Boolean(description));
+}
+
+function set_section_description(frm, fieldname, description) {
+	// Sections render their description only once at creation, and only
+	// when one is set in the schema.
+	const section = frm.fields_dict[fieldname];
+	section.df.description = description;
+	if (!section.description_wrapper) {
+		section.description_wrapper = $('<div class="col-sm-12 form-section-description"></div>').insertAfter(
+			section.head
+		);
+	}
+	section.description_wrapper.html(description).toggle(Boolean(description));
 }
 
 function set_grid_description(frm, fieldname, description) {
@@ -213,13 +324,49 @@ function set_grid_description(frm, fieldname, description) {
 	$(grid.parent).find(".grid-description").html(description).toggle(Boolean(description));
 }
 
+function render_group_ladder(frm, schemes) {
+	const group = frappe.utils.escape_html(frm.doc.stacking_group);
+	if (!schemes.length) {
+		set_section_description(
+			frm,
+			"composition_section",
+			__("No other active {0} schemes in the {1} group.", [__(frm.doc.transaction_type), group])
+		);
+		return;
+	}
+
+	const mine = cint(frm.doc.priority);
+	const lines = schemes.map((scheme) => {
+		const priority = cint(scheme.priority);
+		const link = `<a href="/app/pricing-scheme/${scheme.name}">${frappe.utils.escape_html(
+			scheme.title || scheme.name
+		)}</a>`;
+		const verdict =
+			priority > mine
+				? __("wins over this scheme")
+				: priority < mine
+				? __("loses to this scheme")
+				: __("ties with this scheme and will block saving on overlapping scope");
+		return `<div>${link} (${__("priority {0}", [priority])}) ${verdict}.</div>`;
+	});
+
+	const used = [...new Set(schemes.map((scheme) => cint(scheme.priority)))].sort((a, b) => a - b);
+	lines.push(
+		`<div class="text-muted">${__("Priorities in use in {0}: {1}.", [group, used.join(", ")])}</div>`
+	);
+	set_section_description(frm, "composition_section", lines.join(""));
+}
+
 function render_overlaps(frm, overlaps) {
-	if (!frm.overlap_section) {
+	// the dashboard DOM is rebuilt on form refresh, so a cached section ref can go stale
+	if (!frm.overlap_section || !document.body.contains(frm.overlap_section[0])) {
 		frm.overlap_section = frm.dashboard.add_section("", __("Overlapping Schemes"));
 	}
 	const body = frm.overlap_section;
 	body.empty();
 
+	// set_intro appends a banner per call; clear first so re-renders don't stack them
+	frm.set_intro("");
 	const conflict = overlaps.find((o) => o.severity === "conflict");
 	if (conflict) {
 		frm.set_intro(
@@ -230,8 +377,6 @@ function render_overlaps(frm, overlaps) {
 			]),
 			"red"
 		);
-	} else {
-		frm.set_intro("");
 	}
 
 	if (!overlaps.length) {
@@ -327,7 +472,7 @@ function render_preview(dialog, result) {
 				<td class="text-right">${l.qty}</td>
 				<td class="text-right">${format_currency(l.base_rate)}</td>
 				<td class="text-right"><b>${format_currency(l.final_rate)}</b></td>
-				<td class="small text-muted">${l.schemes.join(", ") || "—"}</td>
+				<td class="small text-muted">${l.schemes.join(", ") || "-"}</td>
 			</tr>`
 		)
 		.join("");
@@ -347,7 +492,7 @@ function render_preview(dialog, result) {
 			const cls = t.status === "matched" ? "text-success" : "text-muted";
 			return `<div class="${cls} small">${icon} ${frappe.utils.escape_html(
 				t.scheme
-			)} — ${frappe.utils.escape_html(t.reason || t.status)}</div>`;
+			)}: ${frappe.utils.escape_html(t.reason || t.status)}</div>`;
 		})
 		.join("");
 

@@ -7,6 +7,7 @@
  "field_order": [
   "party_type",
   "value",
+  "column_break_party",
   "exclude"
  ],
  "fields": [
@@ -27,6 +28,10 @@
    "options": "party_type",
    "reqd": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "column_break_party",
+   "fieldtype": "Column Break"
   },
   {
    "default": "0",

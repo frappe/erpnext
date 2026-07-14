@@ -59,11 +59,12 @@
    "label": "Redemption Limits"
   },
   {
-   "description": "0 = unlimited. Counted against the Coupon Redemption ledger.",
+   "description": "Leave at 0 for no limit. Counted against the Coupon Redemption ledger.",
    "fieldname": "max_uses_total",
    "fieldtype": "Int",
    "label": "Max Uses (Total)",
-   "non_negative": 1
+   "non_negative": 1,
+   "show_description_on_click": 1
   },
   {
    "fieldname": "column_break_limits",

@@ -6,17 +6,23 @@
  "engine": "InnoDB",
  "field_order": [
   "min_qty",
+  "column_break_qty_band",
   "max_qty",
+  "amount_band_section",
   "min_amount",
+  "column_break_amount_band",
   "max_amount",
+  "offer_section",
   "value",
+  "column_break_offer",
   "margin_type",
   "free_item_section",
   "free_item",
   "free_qty",
+  "recurrence_qty",
+  "column_break_free",
   "free_item_uom",
   "free_item_rate",
-  "recurrence_qty",
   "round_down_recurrence"
  ],
  "fields": [
@@ -29,13 +35,23 @@
    "non_negative": 1
   },
   {
+   "fieldname": "column_break_qty_band",
+   "fieldtype": "Column Break"
+  },
+  {
    "default": "0",
-   "description": "0 = no upper bound. Bands are half-open: min ≤ basis < max.",
+   "description": "Leave at 0 for no upper bound. A tier matches from Min up to, but not including, Max.",
    "fieldname": "max_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Max Qty (Stock UOM)",
-   "non_negative": 1
+   "non_negative": 1,
+   "show_description_on_click": 1
+  },
+  {
+   "fieldname": "amount_band_section",
+   "fieldtype": "Section Break",
+   "label": "Amount Band"
   },
   {
    "fieldname": "min_amount",
@@ -44,10 +60,20 @@
    "non_negative": 1
   },
   {
+   "fieldname": "column_break_amount_band",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "max_amount",
    "fieldtype": "Currency",
    "label": "Max Amount (Base Currency)",
    "non_negative": 1
+  },
+  {
+   "depends_on": "eval:parent.effect_type != 'Free Item'",
+   "fieldname": "offer_section",
+   "fieldtype": "Section Break",
+   "label": "Value"
   },
   {
    "fieldname": "value",
@@ -57,12 +83,18 @@
    "non_negative": 1
   },
   {
+   "fieldname": "column_break_offer",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:parent.effect_type == 'Margin'",
    "fieldname": "margin_type",
    "fieldtype": "Select",
    "label": "Margin Type",
    "options": "\nPercentage\nAmount"
   },
   {
+   "depends_on": "eval:parent.effect_type == 'Free Item'",
    "fieldname": "free_item_section",
    "fieldtype": "Section Break",
    "label": "Free Item"
@@ -72,7 +104,8 @@
    "fieldname": "free_item",
    "fieldtype": "Link",
    "label": "Free Item",
-   "options": "Item"
+   "options": "Item",
+   "show_description_on_click": 1
   },
   {
    "default": "0",
@@ -80,6 +113,19 @@
    "fieldtype": "Float",
    "label": "Free Qty",
    "non_negative": 1
+  },
+  {
+   "default": "0",
+   "description": "Give Free Qty per every N qty of the trigger basis. Leave at 0 to give it once per matched tier.",
+   "fieldname": "recurrence_qty",
+   "fieldtype": "Float",
+   "label": "Per Every N Qty",
+   "non_negative": 1,
+   "show_description_on_click": 1
+  },
+  {
+   "fieldname": "column_break_free",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "free_item_uom",
@@ -91,14 +137,6 @@
    "fieldname": "free_item_rate",
    "fieldtype": "Currency",
    "label": "Free Item Rate",
-   "non_negative": 1
-  },
-  {
-   "default": "0",
-   "description": "Give Free Qty per every N qty of the trigger basis. 0 = once per matched tier.",
-   "fieldname": "recurrence_qty",
-   "fieldtype": "Float",
-   "label": "Per Every N Qty",
    "non_negative": 1
   },
   {
