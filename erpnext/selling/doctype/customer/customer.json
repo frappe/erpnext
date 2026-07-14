@@ -4,7 +4,7 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
- "creation": "2013-06-11 14:26:44",
+ "creation": "2026-07-14 12:46:50.256889",
  "description": "Buyer of Goods and Services.",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -65,6 +65,9 @@
   "tax_withholding_group",
   "tax_withholding_category",
   "settings_tab",
+  "company_restrictions_section",
+  "allowed_companies",
+  "section_break_ario",
   "so_required",
   "dn_required",
   "column_break_53",
@@ -513,6 +516,20 @@
    "label": "Settings"
   },
   {
+   "description": "If set, this Customer is only available for transactions in the listed companies. Leave empty for no restriction.",
+   "fieldname": "company_restrictions_section",
+   "fieldtype": "Section Break",
+   "label": "Company Restrictions",
+   "depends_on": "eval:cint(frappe.sys_defaults.enable_company_wise_masters)"
+  },
+  {
+   "fieldname": "allowed_companies",
+   "fieldtype": "Table MultiSelect",
+   "label": "Allowed Companies",
+   "options": "Company Restriction",
+   "depends_on": "eval:cint(frappe.sys_defaults.enable_company_wise_masters)"
+  },
+  {
    "collapsible": 1,
    "collapsible_depends_on": "default_sales_partner",
    "fieldname": "sales_team_tab",
@@ -683,6 +700,10 @@
    "label": "Alias",
    "no_copy": 1,
    "unique": 1
+  },
+  {
+   "fieldname": "section_break_ario",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-user",
@@ -696,7 +717,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-06-27 16:12:10.457900",
+ "modified": "2026-07-14 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

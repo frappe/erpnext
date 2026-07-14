@@ -3,7 +3,7 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:item_code",
- "creation": "2026-02-02 14:41:23.105228",
+ "creation": "2026-07-13 23:00:47.512490",
  "description": "A Product or a Service that is bought, sold or kept in stock.",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -40,6 +40,8 @@
   "over_delivery_receipt_allowance",
   "column_break_wugd",
   "over_billing_allowance",
+  "company_restrictions_section",
+  "allowed_companies",
   "section_break_11",
   "brand",
   "description",
@@ -240,7 +242,6 @@
    "description": "ERPNext will make a stock ledger entry for each transaction of this item. Keep unchecked for non-stock or service items.",
    "fieldname": "is_stock_item",
    "fieldtype": "Check",
-   "in_list_view": 0,
    "label": "Maintain Stock",
    "oldfieldname": "is_stock_item",
    "oldfieldtype": "Select",
@@ -281,9 +282,9 @@
    "description": "Enable if this item is a company asset like machinery or furniture.",
    "fieldname": "is_fixed_asset",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "Is Fixed Asset",
-   "read_only_depends_on": "eval:doc.is_stock_item",
-   "in_list_view": 1
+   "read_only_depends_on": "eval:doc.is_stock_item"
   },
   {
    "allow_in_quick_entry": 1,
@@ -596,7 +597,7 @@
    "oldfieldtype": "Currency"
   },
   {
-   "description": "Minimum stock level to maintain as a buffer. Used to calculate recommended reorder level: Reorder Level = Safety Stock + (Average Daily Consumption × Lead Time).",
+   "description": "Minimum stock level to maintain as a buffer. Used to calculate recommended reorder level: Reorder Level = Safety Stock + (Average Daily Consumption \u00d7 Lead Time).",
    "fieldname": "safety_stock",
    "fieldtype": "Float",
    "label": "Safety Stock",
@@ -699,9 +700,9 @@
    "description": "Allow this item to be used in sales transactions.",
    "fieldname": "is_sales_item",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "Allow Sales",
-   "show_description_on_click": 1,
-   "in_list_view": 1
+   "show_description_on_click": 1
   },
   {
    "fieldname": "column_break3",
@@ -1084,6 +1085,20 @@
    "fieldname": "item_prices_column",
    "fieldtype": "Column Break",
    "label": "Item Prices"
+  },
+  {
+   "fieldname": "company_restrictions_section",
+   "fieldtype": "Section Break",
+   "label": "Company Restrictions",
+   "description": "If set, this Item is only available for transactions in the listed companies. Leave empty for no restriction.",
+   "depends_on": "eval:cint(frappe.sys_defaults.enable_company_wise_masters)"
+  },
+  {
+   "fieldname": "allowed_companies",
+   "fieldtype": "Table MultiSelect",
+   "label": "Allowed Companies",
+   "options": "Company Restriction",
+   "depends_on": "eval:cint(frappe.sys_defaults.enable_company_wise_masters)"
   }
  ],
  "icon": "fa fa-tag",
@@ -1091,7 +1106,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2026-07-05 23:24:45.734144",
+ "modified": "2026-07-14 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

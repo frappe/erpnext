@@ -69,12 +69,15 @@ class AssetRepair(AccountsController):
 		self.check_repair_status()
 
 	def validate_asset(self):
-		if self.asset_doc.status in ("Sold", "Fully Depreciated", "Scrapped"):
+		if self.asset_doc.status in ("Sold", "Scrapped"):
 			frappe.throw(
 				_("Asset {0} is in {1} status and cannot be repaired.").format(
 					get_link_to_form("Asset", self.asset), self.asset_doc.status
 				)
 			)
+		if self.asset_doc.get_status() == "Fully Depreciated":
+			self.capitalize_repair_cost = 0
+			self.increase_in_asset_life = 0
 
 	def validate_dates(self):
 		if self.completion_date and (getdate(self.failure_date) > getdate(self.completion_date)):

@@ -15,7 +15,11 @@ class StockEntryGLComposer(BaseStockGLComposer):
 
 	Extends the base stock GL loop with additional-cost entries (from the
 	``additional_costs`` child table) and landed-cost voucher adjustments.
+	The difference is posted to warehouse/balance-sheet accounts, so P&L
+	enforcement on the expense account is off.
 	"""
+
+	enforce_pl_expense_account = False
 
 	def compose(self, inventory_account_map: dict | None = None) -> list:
 		doc = self.doc

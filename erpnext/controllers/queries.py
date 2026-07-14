@@ -20,7 +20,7 @@ from frappe.query_builder.functions import (
 	Substring,
 	Sum,
 )
-from frappe.utils import cint, nowdate, today, unique
+from frappe.utils import nowdate, today, unique
 from pypika import Order
 
 import erpnext
@@ -809,10 +809,8 @@ def get_filtered_dimensions(
 
 	for field in searchfields:
 		df = meta.get_field(field)
-		if df and df.fieldtype != "Check":
+		if not df or df.fieldtype != "Check":
 			or_filters.append([field, "LIKE", "%%%s%%" % txt])
-		else:
-			or_filters.append([field, "=", cint(txt)])
 		fields.append(field)
 
 	if dimension_filters:
