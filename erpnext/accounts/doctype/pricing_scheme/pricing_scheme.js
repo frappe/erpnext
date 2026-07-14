@@ -66,9 +66,9 @@ frappe.ui.form.on("Pricing Scheme", {
 				"Header Discount": __("Discount % on Total"),
 			}[frm.doc.effect_type] || __("Value")
 		);
-		frm.set_df_property(
+		set_section_label(
+			frm,
 			"tiers_section",
-			"label",
 			{
 				Rate: __("Offer: Fixed Rate"),
 				"Discount Percentage": __("Offer: Percentage Discount"),
@@ -78,9 +78,9 @@ frappe.ui.form.on("Pricing Scheme", {
 				"Header Discount": __("Offer: Discount on Document Total"),
 			}[frm.doc.effect_type] || __("Offer")
 		);
-		frm.set_df_property(
+		set_grid_description(
+			frm,
 			"tiers",
-			"description",
 			{
 				Rate: __("One row per quantity slab. Rate replaces the price list rate."),
 				"Discount Percentage": __(
@@ -101,9 +101,9 @@ frappe.ui.form.on("Pricing Scheme", {
 
 	update_scope_summary(frm) {
 		if (!(frm.doc.trigger_scope || []).some((row) => row.value || row.scope_type === "All Items")) {
-			frm.set_df_property(
+			set_grid_description(
+				frm,
 				"trigger_scope",
-				"description",
 				__("Empty = scheme never applies. Add at least one include row.")
 			);
 			return;
@@ -112,9 +112,9 @@ frappe.ui.form.on("Pricing Scheme", {
 			method: "erpnext.accounts.services.pricing.pricing_overlaps.count_scope_items",
 			args: { scheme: frm.doc },
 			callback: ({ message }) => {
-				frm.set_df_property(
+				set_grid_description(
+					frm,
 					"trigger_scope",
-					"description",
 					__("Matches approximately {0} items (subtree, excludes applied).", [message])
 				);
 			},
@@ -179,6 +179,22 @@ frappe.ui.form.on("Pricing Scheme Party Scope", {
 		frm.trigger("refresh_overlaps");
 	},
 });
+
+function set_section_label(frm, fieldname, label) {
+	// Section.refresh() only toggles visibility, so a label set via
+	// frm.set_df_property never reaches the rendered section head.
+	const section = frm.fields_dict[fieldname];
+	section.df.label = label;
+	section.set_label(label);
+}
+
+function set_grid_description(frm, fieldname, description) {
+	// Grids render their description only once at creation (grid.js make()),
+	// so frm.set_df_property never surfaces a description set later.
+	const grid = frm.fields_dict[fieldname].grid;
+	grid.df.description = description;
+	$(grid.parent).find(".grid-description").html(description).toggle(Boolean(description));
+}
 
 function render_overlaps(frm, overlaps) {
 	if (!frm.overlap_section) {

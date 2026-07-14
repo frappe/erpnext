@@ -5,6 +5,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "overview_tab",
   "scheme_section",
   "title",
   "effect_type",
@@ -14,24 +15,13 @@
   "disabled",
   "tiers_section",
   "tiers",
+  "applies_to_tab",
   "applies_to_section",
   "trigger_scope",
   "benefit_section",
   "benefit_scope",
   "party_section",
   "party_scope",
-  "composition_section",
-  "stacking_group",
-  "column_break_composition",
-  "priority",
-  "validity_section",
-  "company",
-  "currency",
-  "price_list",
-  "warehouse",
-  "column_break_validity",
-  "valid_from",
-  "valid_upto",
   "conditions_tab",
   "basis_section",
   "aggregation",
@@ -46,9 +36,27 @@
   "coupon_required",
   "advanced_section",
   "condition",
+  "settings_tab",
+  "composition_section",
+  "stacking_group",
+  "column_break_composition",
+  "priority",
+  "validity_section",
+  "company",
+  "currency",
+  "price_list",
+  "warehouse",
+  "column_break_validity",
+  "valid_from",
+  "valid_upto",
   "legacy_pricing_rule"
  ],
  "fields": [
+  {
+   "fieldname": "overview_tab",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
   {
    "fieldname": "scheme_section",
    "fieldtype": "Section Break",
@@ -100,8 +108,7 @@
   {
    "fieldname": "tiers_section",
    "fieldtype": "Section Break",
-   "label": "Offer",
-   "description": ""
+   "label": "Offer"
   },
   {
    "fieldname": "tiers",
@@ -111,9 +118,14 @@
    "reqd": 1
   },
   {
+   "fieldname": "applies_to_tab",
+   "fieldtype": "Tab Break",
+   "label": "Applies To"
+  },
+  {
    "fieldname": "applies_to_section",
    "fieldtype": "Section Break",
-   "label": "Applies To"
+   "label": "Items"
   },
   {
    "fieldname": "trigger_scope",
@@ -148,6 +160,11 @@
    "options": "Pricing Scheme Party Scope"
   },
   {
+   "fieldname": "settings_tab",
+   "fieldtype": "Tab Break",
+   "label": "Settings"
+  },
+  {
    "fieldname": "composition_section",
    "fieldtype": "Section Break",
    "label": "Composition"
@@ -176,8 +193,7 @@
   {
    "fieldname": "validity_section",
    "fieldtype": "Section Break",
-   "label": "Validity & Applicability",
-   "collapsible": 1
+   "label": "Validity & Applicability"
   },
   {
    "fieldname": "company",
