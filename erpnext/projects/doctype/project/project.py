@@ -90,8 +90,8 @@ class Project(Document):
 	def validate(self):
 		if not self.is_new():
 			self.copy_from_template()
+			self.control_access_for_project_users()
 		self.send_welcome_email()
-		self.control_access_for_project_users()
 		self.update_costing()
 		self.update_percent_complete()
 		self.validate_from_to_dates("expected_start_date", "expected_end_date")
@@ -240,6 +240,7 @@ class Project(Document):
 	def after_insert(self):
 		self.copy_from_template("after_insert")
 		self.link_with_sales_order()
+		self.control_access_for_project_users()
 
 	def link_with_sales_order(self) -> None:
 		"""Back-link the source Sales Order to this project.
@@ -451,10 +452,14 @@ class Project(Document):
 
 				frappe.share.add_docshare(self.doctype, self.name, user=user)
 
+		current_users = set([d.user for d in self.users])
 		old_doc = self.get_doc_before_save()
 
+		if not old_doc:
+			grant_access_for_project_users(current_users)
+			return
+
 		previous_users = set([d.user for d in old_doc.users])
-		current_users = set([d.user for d in self.users])
 
 		new_users = current_users - previous_users
 		removed_users = previous_users - current_users
