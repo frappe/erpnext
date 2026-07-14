@@ -166,6 +166,23 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 0)
 		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 0)
 
+	def test_duplicate_material_request_item_row_allowed(self):
+		"""Splitting a Material Request Item's qty across multiple PO rows must be
+		allowed, mirroring how Sales Order allows duplicate Quotation Item rows."""
+		mr = make_material_request(qty=10)
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+
+		duplicate_row = po.items[0].as_dict()
+		duplicate_row.qty = 4
+		po.items[0].qty = 6
+
+		po.append("items", duplicate_row)
+		po.save()
+
+		self.assertEqual(len(po.items), 2)
+		self.assertEqual(po.items[0].material_request_item, po.items[1].material_request_item)
+
 	def test_update_remove_child_linked_to_mr(self):
 		"""Test impact on linked PO and MR on deleting/updating row."""
 		mr = make_material_request(qty=10)
