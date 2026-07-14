@@ -67,6 +67,18 @@ frappe.ui.form.on("Pricing Scheme", {
 			}[frm.doc.effect_type] || __("Value")
 		);
 		frm.set_df_property(
+			"tiers_section",
+			"label",
+			{
+				Rate: __("Offer: Fixed Rate"),
+				"Discount Percentage": __("Offer: Percentage Discount"),
+				"Discount Amount": __("Offer: Amount Discount"),
+				Margin: __("Offer: Margin"),
+				"Free Item": __("Offer: Free Items"),
+				"Header Discount": __("Offer: Discount on Document Total"),
+			}[frm.doc.effect_type] || __("Offer")
+		);
+		frm.set_df_property(
 			"tiers",
 			"description",
 			{
