@@ -236,6 +236,7 @@ class AccountsController(TransactionBase):
 			else:
 				from erpnext.accounts.services.deferred_accounting import DeferredAccountingService
 
+				DeferredAccountingService(self).clear_stale_deferred_fields()
 				DeferredAccountingService(self).validate_start_and_end_date()
 
 		from erpnext.accounts.services.internal_transfer import InternalTransferService
