@@ -78,23 +78,17 @@ frappe.ui.form.on("Pricing Scheme", {
 				"Header Discount": __("Offer: Discount on Document Total"),
 			}[frm.doc.effect_type] || __("Offer")
 		);
-		set_grid_description(
+		set_grid_label(
 			frm,
 			"tiers",
 			{
-				Rate: __("One row per quantity slab. Rate replaces the price list rate."),
-				"Discount Percentage": __(
-					"Enter the discount percent in the Discount % column — one row per quantity slab. Leave Min and Max Qty as 0 to always apply."
-				),
-				"Discount Amount": __(
-					"Enter the per-unit discount amount — one row per quantity slab. Leave Min and Max Qty as 0 to always apply."
-				),
-				Margin: __("Margin added over the price list rate — one row per quantity slab."),
-				"Free Item": __(
-					"Free Qty per slab. Leave Free Item blank to give the purchased item itself. 'Per Every N Qty' repeats the freebie per dozen-style schemes."
-				),
-				"Header Discount": __("Discount percent applied on the document total."),
-			}[frm.doc.effect_type] || ""
+				Rate: __("Fixed Rate Tiers"),
+				"Discount Percentage": __("Percentage Discount Tiers"),
+				"Discount Amount": __("Amount Discount Tiers"),
+				Margin: __("Margin Tiers"),
+				"Free Item": __("Free Item Tiers"),
+				"Header Discount": __("Document Total Discount Tiers"),
+			}[frm.doc.effect_type] || __("Tiers")
 		);
 		grid.refresh();
 	},
@@ -186,6 +180,13 @@ function set_section_label(frm, fieldname, label) {
 	const section = frm.fields_dict[fieldname];
 	section.df.label = label;
 	section.set_label(label);
+}
+
+function set_grid_label(frm, fieldname, label) {
+	// Grid labels, like descriptions, are only drawn once at creation.
+	const grid = frm.fields_dict[fieldname].grid;
+	grid.df.label = label;
+	grid.wrapper.find(".control-label").first().text(label);
 }
 
 function set_grid_description(frm, fieldname, description) {
