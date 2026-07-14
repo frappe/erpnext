@@ -48,7 +48,11 @@ def get_permission_query_conditions(user, doctype=None):
 	restriction_rows = (
 		frappe.qb.from_(restriction)
 		.select(restriction.name)
-		.where((restriction.parenttype == doctype) & (restriction.parent == parent.name))
+		.where(
+			(restriction.parenttype == doctype)
+			& (restriction.parentfield == "allowed_companies")
+			& (restriction.parent == parent.name)
+		)
 	)
 	allowed_rows = restriction_rows.where(restriction.company.isin(allowed_companies))
 	return Bracket(ExistsCriterion(allowed_rows) | ExistsCriterion(restriction_rows).negate())
@@ -77,10 +81,11 @@ def validate_allowed_companies(doc):
 	if previous_doc := doc.get_doc_before_save():
 		previous_companies = {row.company for row in previous_doc.get("allowed_companies") or []}
 
-	for row in doc.get("allowed_companies") or []:
-		if row.company not in allowed_companies and row.company not in previous_companies:
+	current_companies = {row.company for row in doc.get("allowed_companies") or []}
+	for company in current_companies.symmetric_difference(previous_companies):
+		if company not in allowed_companies:
 			frappe.throw(
-				_("You are not permitted to add Company {0} to Allowed Companies").format(row.company),
+				_("You are not permitted to add or remove Company {0} in Allowed Companies").format(company),
 				frappe.PermissionError,
 			)
 
@@ -95,9 +100,15 @@ def company_query(
 	page_len: int,
 	filters: dict | str | None = None,
 ):
+	filters = frappe.parse_json(filters) if filters else {}
+	if isinstance(filters, list):
+		filters.append(["Company", "name", "like", f"%{txt}%"])
+	else:
+		filters["name"] = ("like", f"%{txt}%")
+
 	return frappe.get_list(
 		"Company",
-		filters={"name": ("like", f"%{txt}%")},
+		filters=filters,
 		limit_start=start,
 		limit_page_length=page_len,
 		order_by="name",
