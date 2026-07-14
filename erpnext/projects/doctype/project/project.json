@@ -86,7 +86,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "Open\nCompleted\nCancelled",
+   "options": "Open\nOn hold\nCompleted\nCancelled",
    "search_index": 1
   },
   {
@@ -482,7 +482,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
- "modified": "2026-05-22 16:45:50.762759",
+ "modified": "2026-07-14 14:20:50.418911",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
