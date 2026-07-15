@@ -1372,7 +1372,7 @@ class StockController(AccountsController):
 				reservations[key].append(row)
 
 		for (batch_no, warehouse), reserved_qty in outstanding_qty.items():
-			if reserved_qty <= 0:
+			if flt(reserved_qty, 6) <= 0:
 				continue
 
 			batch_qty = get_batch_qty(
