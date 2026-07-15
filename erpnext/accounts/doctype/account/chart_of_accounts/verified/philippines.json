@@ -22,12 +22,12 @@
 						"account_type": "Cash"
 					},
 					"Petty Cash Fund": {
-						"account_number": "1200",
+						"account_number": "1110",
 						"is_group": 1,
 						"root_type": "Asset",
 						"account_type": "Cash",
 						"Petty Cash Fund": {
-							"account_number": "1201",
+							"account_number": "1111",
 							"is_group": 0,
 							"root_type": "Asset",
 							"account_type": "Cash"
@@ -35,10 +35,16 @@
 					}
 				},
 				"Bank Accounts": {
-					"account_number": "1102",
+					"account_number": "1200",
 					"is_group": 1,
 					"root_type": "Asset",
-					"account_type": "Bank"
+					"account_type": "Bank",
+					"Cash in Bank - Checking Account": {
+						"account_number": "1201",
+						"is_group": 0,
+						"root_type": "Asset",
+						"account_type": "Bank"
+					}
 				},
 				"Advances to Officers & Employees": {
 					"account_number": "1290",
@@ -104,25 +110,20 @@
 						"account_number": "1511",
 						"is_group": 0,
 						"root_type": "Asset"
-					},
-					"Factory Overhead Variance": {
-						"account_number": "1512",
-						"is_group": 0,
-						"root_type": "Asset"
 					}
 				},
 				"Finished Goods": {
-					"account_number": "1520",
+					"account_number": "1540",
 					"is_group": 1,
 					"root_type": "Asset",
 					"Finished Goods Inventory": {
-						"account_number": "1531",
+						"account_number": "1541",
 						"is_group": 0,
 						"root_type": "Asset",
 						"account_type": "Stock"
 					},
 					"Inventory in Transit": {
-						"account_number": "1532",
+						"account_number": "1542",
 						"is_group": 0,
 						"root_type": "Asset",
 						"account_type": "Stock Adjustment"
@@ -268,7 +269,7 @@
 						"root_type": "Asset"
 					}
 				},
-				"System Development": {
+				"Intangible Assets": {
 					"account_number": "1940",
 					"is_group": 1,
 					"root_type": "Asset",
@@ -276,6 +277,17 @@
 						"account_number": "1941",
 						"is_group": 0,
 						"root_type": "Asset"
+					}
+				},
+				"Accumulated Amortization - Intangible Assets": {
+					"account_number": "1950",
+					"is_group": 1,
+					"root_type": "Asset",
+					"Accum Amortization - System Development": {
+						"account_number": "1951",
+						"is_group": 0,
+						"root_type": "Asset",
+						"account_type": "Accumulated Depreciation"
 					}
 				}
 			}
@@ -562,6 +574,28 @@
 						"is_group": 0,
 						"root_type": "Income"
 					}
+				},
+				"Exchange Gain": {
+					"account_number": "6030",
+					"is_group": 1,
+					"root_type": "Income",
+					"Exchange Gain - Detail": {
+						"account_number": "6031",
+						"is_group": 0,
+						"root_type": "Income",
+						"account_type": "Indirect Income"
+					}
+				},
+				"Gain on Asset Disposal": {
+					"account_number": "6040",
+					"is_group": 1,
+					"root_type": "Income",
+					"Gain on Asset Disposal - Detail": {
+						"account_number": "6041",
+						"is_group": 0,
+						"root_type": "Income",
+						"account_type": "Indirect Income"
+					}
 				}
 			}
 		},
@@ -574,7 +608,7 @@
 				"is_group": 1,
 				"root_type": "Expense",
 				"Cost of Goods Sold": {
-					"account_number": "5010",
+					"account_number": "5002",
 					"is_group": 0,
 					"root_type": "Expense",
 					"account_type": "Cost of Goods Sold"
@@ -827,20 +861,61 @@
 					"root_type": "Expense"
 				}
 			},
-			"Stock Adjustment": {
+			"Other Expenses": {
 				"account_number": "5200",
+				"is_group": 1,
+				"root_type": "Expense",
+				"Bank Charges": {
+					"account_number": "5201",
+					"is_group": 0,
+					"root_type": "Expense",
+					"account_type": "Indirect Expense"
+				},
+				"Interest Expenses Bank": {
+					"account_number": "5202",
+					"is_group": 0,
+					"root_type": "Expense",
+					"account_type": "Indirect Expense"
+				},
+				"Write Off": {
+					"account_number": "5203",
+					"is_group": 0,
+					"root_type": "Expense",
+					"account_type": "Indirect Expense"
+				},
+				"Exchange Loss": {
+					"account_number": "5204",
+					"is_group": 0,
+					"root_type": "Expense",
+					"account_type": "Indirect Expense"
+				},
+				"Loss on Asset Disposal": {
+					"account_number": "5205",
+					"is_group": 0,
+					"root_type": "Expense",
+					"account_type": "Indirect Expense"
+				}
+			},
+			"Provision For Income Tax": {
+				"account_number": "5300",
+				"is_group": 0,
+				"root_type": "Expense",
+				"account_type": "Tax"
+			},
+			"Stock Adjustment": {
+				"account_number": "5400",
 				"is_group": 0,
 				"root_type": "Expense",
 				"account_type": "Stock Adjustment"
 			},
 			"Round Off": {
-				"account_number": "5300",
+				"account_number": "5500",
 				"is_group": 0,
 				"root_type": "Expense",
 				"account_type": "Round Off"
 			},
 			"Expenses Included In Valuation": {
-				"account_number": "5400",
+				"account_number": "5600",
 				"is_group": 0,
 				"root_type": "Expense",
 				"account_type": "Expenses Included In Valuation"

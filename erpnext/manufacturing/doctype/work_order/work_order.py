@@ -1806,6 +1806,10 @@ class WorkOrder(Document):
 
 	def recompute_material_transferred_for_manufacturing(self, transferred_items):
 		"""Set material_transferred_for_manufacturing based on actual item-level transfers, not fg_completed_qty."""
+		# Job Card transfers use the minimum completed quantity across operations.
+		if self.operations and self.transfer_material_against == "Job Card":
+			return
+
 		# When fg_completed_qty > 0 (direct stock entries, excess transfer), preserve the
 		# SUM(fg_completed_qty) approach so excess-transfer tracking works correctly.
 		sum_fg_completed_qty = self.get_transferred_or_manufactured_qty(

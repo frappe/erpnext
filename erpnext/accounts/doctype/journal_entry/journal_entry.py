@@ -417,11 +417,12 @@ class JournalEntry(AccountsController):
 
 	def update_journal_entry_link_on_depr_schedule(self, asset, je_row):
 		depr_schedule = get_depr_schedule(asset.name, "Active", self.finance_book)
+		precision = je_row.precision("debit")
 		for d in depr_schedule or []:
 			if (
 				d.schedule_date == self.posting_date
 				and not d.journal_entry
-				and d.depreciation_amount == flt(je_row.debit)
+				and flt(d.depreciation_amount, precision) == flt(je_row.debit, precision)
 			):
 				frappe.db.set_value("Depreciation Schedule", d.name, "journal_entry", self.name)
 
