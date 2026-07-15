@@ -169,7 +169,18 @@ class BaseStockGLComposer(BaseGLComposer):
 
 		return frappe.flags.debit_field_precision
 
+	def book_stock_expense_enabled(self):
+		if not hasattr(self, "_book_stock_expense_enabled"):
+			self._book_stock_expense_enabled = cint(
+				frappe.db.get_single_value("Accounts Settings", "book_stock_expense_gl_entries")
+			)
+
+		return self._book_stock_expense_enabled
+
 	def append_expenses_added_to_stock_entries(self, gl_list, voucher_details, sle_map):
+		if not self.book_stock_expense_enabled():
+			return
+
 		precision = self.get_debit_field_precision()
 
 		for item_row in voucher_details:
@@ -186,11 +197,13 @@ class BaseStockGLComposer(BaseGLComposer):
 
 	def append_expenses_added_to_stock_pair(self, gl_list, item_code, amount, item_row):
 		doc = self.doc
-		if not cint(frappe.db.get_single_value("Accounts Settings", "book_stock_expense_gl_entries")):
+		fields = ("expenses_added_to_stock_account", "expenses_added_to_stock_contra_account")
+		details = get_expenses_added_to_stock_accounts(item_code, doc.company)
+
+		if not any(details.get(field) for field in fields):
 			return
 
-		details = get_expenses_added_to_stock_accounts(item_code, doc.company)
-		for field in ("expenses_added_to_stock_account", "expenses_added_to_stock_contra_account"):
+		for field in fields:
 			if not details.get(field):
 				frappe.throw(
 					_("Please set {0} in Company {1} or in the Item Defaults of Item {2}").format(

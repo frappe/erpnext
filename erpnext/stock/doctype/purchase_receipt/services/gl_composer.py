@@ -192,6 +192,9 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 						)
 
 		def make_expenses_added_to_stock_entries(item):
+			if not self.book_stock_expense_enabled():
+				return
+
 			amount = flt(item.landed_cost_voucher_amount, item.precision("base_net_amount"))
 			if amount and not item.is_fixed_asset:
 				self.append_expenses_added_to_stock_pair(gl_entries, item.item_code, amount, item)

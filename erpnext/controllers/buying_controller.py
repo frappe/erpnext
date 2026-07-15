@@ -331,12 +331,17 @@ class BuyingController(SubcontractingController):
 				)
 
 	def get_validated_purchase_expense_details(self, item_code):
+		fields = ("purchase_expense_account", "purchase_expense_contra_account")
 		details = get_purchase_expense_account(item_code, self.company)
 
-		for field in ("purchase_expense_account", "purchase_expense_contra_account"):
+		for field in fields:
 			if not details.get(field):
 				details[field] = frappe.get_cached_value("Company", self.company, field)
 
+		if not any(details.get(field) for field in fields):
+			return None
+
+		for field in fields:
 			if not details.get(field):
 				frappe.throw(
 					_("Please set {0} in Company {1} or in the Item Defaults of Item {2}").format(
@@ -355,6 +360,8 @@ class BuyingController(SubcontractingController):
 
 		for row in self.items:
 			details = self.get_validated_purchase_expense_details(row.item_code)
+			if not details:
+				continue
 
 			amount = flt(row.valuation_rate * row.stock_qty, row.precision("base_amount"))
 			self.add_gl_entry(
