@@ -7,11 +7,17 @@ import sys
 from unittest.mock import MagicMock, patch
 
 import frappe
-from frappe.utils import add_days, nowdate
+from frappe.utils import add_days, flt, nowdate
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
-from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
+from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
+	create_payment_entry,
+	create_payment_terms_template,
+)
+from erpnext.accounts.doctype.payment_request.payment_request import (
+	make_payment_request,
+	update_payment_requests_as_per_pe_references,
+)
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
@@ -1000,6 +1006,44 @@ class TestPaymentRequest(ERPNextTestSuite):
 				return_doc=True,
 				schedules=schedules,
 			)
+
+	def create_data(self):
+		# Reuse the bootstrap "_Test Customer" (Debtors - _TC, INR) so that the
+		# Payment Request's outstanding amount is tracked in company currency.
+		# Fix the SO's conversion_rate so it matches the PE's exchange rate below.
+		so = make_sales_order(customer="_Test Customer", currency="USD", qty=10, rate=100, do_not_save=True)
+		so.conversion_rate = 83
+		so.insert()
+		so.submit()
+
+		pr = make_payment_request(dt="Sales Order", dn=so.name, mute_email=1, return_doc=True)
+
+		# Manually set grand_total for partial payment test scenario
+		pr.grand_total = 100
+		pr.save().submit()
+
+		# Use the same real (non-unity) exchange rate as the Sales Order so the
+		# fix is actually exercised and the outstanding amount reconciles exactly
+		pe = create_payment_entry(paid_amount=100, paid_from="_Test Bank USD - _TC", save=False)
+		pe.source_exchange_rate = 83
+		pe.target_exchange_rate = 83
+		pe.save()
+		pe.submit()
+
+		# Manually add references in Payment Entry
+		references = [frappe._dict({"payment_request": pr.name, "allocated_amount": 100, "parent": pe.name})]
+
+		return pr, pe, references
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"fetch_payment_schedule_in_payment_request": 0})
+	def test_exchange_rate_applied(self):
+		pr, pe, references = self.create_data()
+		update_payment_requests_as_per_pe_references(references, cancel=False)
+		pr.reload()
+
+		# Convert grand_total from USD to INR (base currency) to compare with outstanding_amount(INR)
+		grand_total = pr.grand_total * pe.source_exchange_rate
+		self.assertEqual(flt(pr.outstanding_amount), grand_total - pe.base_paid_amount)
 
 
 class TestPaymentRequestV2Gateway(ERPNextTestSuite):
