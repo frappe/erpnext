@@ -61,7 +61,7 @@ class Project(Document):
 		project_type: DF.Link | None
 		sales_order: DF.Link | None
 		second_email: DF.Time | None
-		status: DF.Literal["Open", "Completed", "Cancelled"]
+		status: DF.Literal["Open", "On hold", "Completed", "Cancelled"]
 		subject: DF.Data | None
 		to_time: DF.Time | None
 		total_billable_amount: DF.Currency
@@ -264,8 +264,8 @@ class Project(Document):
 					pct_complete += row["progress"] * frappe.utils.safe_div(row["task_weight"], weight_sum)
 				self.percent_complete = flt(flt(pct_complete), 2)
 
-		# don't update status if it is cancelled
-		if self.status == "Cancelled":
+		# don't update status if it is manually set to cancelled or on hold
+		if self.status in ("Cancelled", "On hold"):
 			return
 
 		self.status = "Completed" if self.percent_complete == 100 else "Open"
