@@ -17,6 +17,8 @@ const virtual_field_map = {
 	default_provisional_account: "vf_default_provisional_account",
 	purchase_expense_account: "vf_purchase_expense_account",
 	purchase_expense_contra_account: "vf_purchase_expense_contra_account",
+	expenses_added_to_stock_account: "vf_expenses_added_to_stock_account",
+	expenses_added_to_stock_contra_account: "vf_expenses_added_to_stock_contra_account",
 	selling_cost_center: "vf_selling_cost_center",
 	income_account: "vf_income_account",
 	default_cogs_account: "vf_default_cogs_account",
@@ -787,7 +789,13 @@ $.extend(erpnext.item, {
 			};
 		});
 
-		let fields = ["purchase_expense_account", "purchase_expense_contra_account", "default_cogs_account"];
+		let fields = [
+			"purchase_expense_account",
+			"purchase_expense_contra_account",
+			"default_cogs_account",
+			"expenses_added_to_stock_account",
+			"expenses_added_to_stock_contra_account",
+		];
 
 		fields.forEach((field) => {
 			frm.set_query(field, "item_defaults", (doc, cdt, cdn) => {
