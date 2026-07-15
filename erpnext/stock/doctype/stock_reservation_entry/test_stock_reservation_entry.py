@@ -704,11 +704,14 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			"enable_stock_reservation": 1,
 			"auto_reserve_serial_and_batch": 1,
 			"pick_serial_and_batch_based_on": "FIFO",
+			"use_serial_batch_fields": 1,
 		},
 	)
 	def test_batch_shared_across_sales_orders_can_be_delivered(self) -> None:
 		# Regression (#57159): one batch reserved by two Sales Orders. Delivering each order's own
 		# reserved unit must not raise Reserved Batch Conflict — the remainder covers the other order.
+		# The batch is set on the row explicitly as the v16 reserved-stock mapper does not carry
+		# the reserved batch onto the Delivery Note row.
 		item_doc = make_batch_item()
 		create_material_receipt(items={item_doc.name: item_doc}, warehouse=self.warehouse, qty=2)
 
@@ -718,12 +721,11 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			so.create_stock_reservation_entries()
 			orders.append(so)
 
-		self.assertEqual(
-			len(get_reserved_batch_nos(orders[0].name) | get_reserved_batch_nos(orders[1].name)), 1
-		)
+		(batch_no,) = get_reserved_batch_nos(orders[0].name) | get_reserved_batch_nos(orders[1].name)
 
 		for so in orders:
-			dn = make_delivery_note(so.name, kwargs={"for_reserved_stock": 1})
+			dn = make_delivery_note(so.name)
+			dn.items[0].batch_no = batch_no
 			dn.save()
 			dn.submit()
 			self.assertEqual(dn.docstatus, 1)
