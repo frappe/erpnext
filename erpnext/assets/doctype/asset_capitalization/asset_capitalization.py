@@ -560,7 +560,13 @@ def get_consumed_stock_item_details(ctx: ItemDetailsCtx):
 	brand_defaults = get_brand_defaults(item.name, ctx.company)
 	out.cost_center = get_default_cost_center(ctx, item_defaults, item_group_defaults, brand_defaults)
 
-	if ctx.item_code and out.warehouse:
+	if (
+		ctx.item_code
+		and out.warehouse
+		and frappe.has_permission("Item", doc=ctx.item_code)
+		and frappe.has_permission("Warehouse", doc=out.warehouse)
+		and frappe.has_permission("Stock Ledger Entry")
+	):
 		incoming_rate_args = frappe._dict(
 			{
 				"item_code": ctx.item_code,
@@ -588,7 +594,13 @@ def get_consumed_stock_item_details(ctx: ItemDetailsCtx):
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
 def get_warehouse_details(ctx: ItemDetailsCtx) -> frappe._dict:
 	out = frappe._dict()
-	if ctx.warehouse and ctx.item_code:
+	if (
+		ctx.warehouse
+		and ctx.item_code
+		and frappe.has_permission("Item", doc=ctx.item_code)
+		and frappe.has_permission("Warehouse", doc=ctx.warehouse)
+		and frappe.has_permission("Stock Ledger Entry")
+	):
 		out = frappe._dict(
 			{
 				"actual_qty": get_previous_sle(ctx).get("qty_after_transaction") or 0,
