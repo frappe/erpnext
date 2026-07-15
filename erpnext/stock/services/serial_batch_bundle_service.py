@@ -625,8 +625,10 @@ class SerialBatchBundleService:
 				continue
 
 			key = (row.batch_no, row.warehouse)
-			outstanding_qty[key] += flt(row.qty) - flt(row.delivered_qty)
-			reservations[key].append(row)
+			outstanding = flt(row.qty) - flt(row.delivered_qty)
+			outstanding_qty[key] += outstanding
+			if outstanding > 0:
+				reservations[key].append(row)
 
 		for (batch_no, warehouse), reserved_qty in outstanding_qty.items():
 			if reserved_qty <= 0:
