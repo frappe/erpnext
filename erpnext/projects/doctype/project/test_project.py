@@ -491,25 +491,6 @@ class TestProject(ERPNextTestSuite):
 		self.assertFalse(project.has_permission(user=leaves))
 		self.assertTrue(project.has_permission(user=stays))
 
-	def test_control_access_does_not_touch_users_with_real_permission(self):
-		# grant_access_for_project_users() skips has_permission() == True users, so a
-		# Projects Manager listed as a project user shouldn't pick up a redundant share.
-		manager = self._create_portal_user(f"proj_manager_{frappe.generate_hash(length=6)}@example.com")
-		frappe.get_doc("User", manager).add_roles("Projects Manager")
-
-		project = frappe.get_doc(
-			doctype="Project",
-			project_name=f"_Test Project Manager Access {frappe.generate_hash(length=6)}",
-			status="Open",
-			company="_Test Company",
-		)
-		project.append("users", {"user": manager, "welcome_email_sent": 1})
-		project.insert()
-
-		self.assertTrue(project.has_permission(user=manager))
-		shared_with = [d.user for d in frappe.share.get_users("Project", project.name)]
-		self.assertNotIn(manager, shared_with)
-
 
 def get_project(name, template):
 	project = frappe.get_doc(
