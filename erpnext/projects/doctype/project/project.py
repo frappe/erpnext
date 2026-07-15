@@ -447,9 +447,6 @@ class Project(Document):
 
 		def grant_access_for_project_users(new_users):
 			for user in new_users:
-				if frappe.has_permission(self.doctype, doc=self.name, user=user):
-					continue
-
 				frappe.share.add_docshare(self.doctype, self.name, user=user)
 
 		current_users = set([d.user for d in self.users])
