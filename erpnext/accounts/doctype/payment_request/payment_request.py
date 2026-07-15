@@ -1137,6 +1137,9 @@ def update_payment_requests_as_per_pe_references(references=None, cancel=False):
 			"grand_total",
 			"outstanding_amount",
 			"payment_request_type",
+			"company",
+			"currency",
+			"party_account_currency",
 		],
 	)
 
@@ -1150,10 +1153,19 @@ def update_payment_requests_as_per_pe_references(references=None, cancel=False):
 		payment_request = referenced_payment_requests[ref.payment_request]
 		pr_outstanding = payment_request["outstanding_amount"]
 
-		# update outstanding amount
+		# `outstanding_amount` is stored in company currency only when the party account
+		# is maintained in company currency but the transaction itself is in a foreign
+		# currency (see `before_submit`). Only then should the Payment Entry's allocated
+		# amount (in transaction currency) be converted using its exchange rate.
+		allocated_amount = ref.allocated_amount
+		if payment_request["currency"] != payment_request["party_account_currency"] and payment_request[
+			"party_account_currency"
+		] == get_company_currency(payment_request["company"]):
+			exchange_rate = frappe.get_cached_value("Payment Entry", ref.parent, "source_exchange_rate")
+			allocated_amount = ref.allocated_amount * flt(exchange_rate or 1)
+
 		new_outstanding_amount = flt(
-			pr_outstanding + ref.allocated_amount if cancel else pr_outstanding - ref.allocated_amount,
-			precision,
+			pr_outstanding + allocated_amount if cancel else pr_outstanding - allocated_amount, precision
 		)
 
 		# to handle same payment request for the multiple allocations
