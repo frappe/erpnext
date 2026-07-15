@@ -36,7 +36,6 @@ class QualityInspection(UnitReadingsMixin, Document):
 
 		amended_from: DF.Link | None
 		batch_no: DF.Link | None
-		bom_no: DF.Link | None
 		child_row_reference: DF.Data | None
 		company: DF.Link | None
 		description: DF.SmallText | None
@@ -766,18 +765,6 @@ class QualityInspection(UnitReadingsMixin, Document):
 			child.parameter_group = frappe.get_value(
 				"Quality Inspection Parameter", d.specification, "parameter_group"
 			)
-
-	@frappe.whitelist()
-	def get_quality_inspection_template(self):
-		template = ""
-		if self.bom_no:
-			template = frappe.db.get_value("BOM", self.bom_no, "quality_inspection_template")
-
-		if not template:
-			template = frappe.db.get_value("BOM", self.item_code, "quality_inspection_template")
-
-		self.quality_inspection_template = template
-		self.get_item_specification_details()
 
 	def on_update(self):
 		self.update_qc_reference()

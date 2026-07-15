@@ -253,14 +253,5 @@ frappe.ui.form.on("Quality Inspection", {
 		frm.trigger("toggle_batch_and_serial_fields");
 		// a custody row resolves its quantity through the item's row
 		frm.trigger("prefill_decided_quantity_from_lot");
-		if (frm.doc.item_code && !frm.doc.quality_inspection_template) {
-			return frm.call({
-				method: "get_quality_inspection_template",
-				doc: frm.doc,
-				callback: function () {
-					refresh_field(["quality_inspection_template", "readings"]);
-				},
-			});
-		}
 	},
 });

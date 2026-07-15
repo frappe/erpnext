@@ -44,9 +44,6 @@
   "cb0",
   "is_phantom_bom",
   "allow_alternative_item",
-  "quality_inspection_section_break",
-  "column_break_dxp7",
-  "quality_inspection_template",
   "default_warehouse_section",
   "default_source_warehouse",
   "column_break_inep",
@@ -201,12 +198,6 @@
    "fieldname": "set_rate_of_sub_assembly_item_based_on_bom",
    "fieldtype": "Check",
    "label": "Set rate of sub-assembly item based on BOM"
-  },
-  {
-   "fieldname": "quality_inspection_template",
-   "fieldtype": "Link",
-   "label": "Quality Inspection Template",
-   "options": "Quality Inspection Template"
   },
   {
    "collapsible": 1,
@@ -545,16 +536,6 @@
    "fieldname": "more_info_tab",
    "fieldtype": "Tab Break",
    "label": "More Info"
-  },
-  {
-   "fieldname": "column_break_dxp7",
-   "fieldtype": "Column Break"
-  },
-  {
-   "depends_on": "eval:!doc.is_phantom_bom",
-   "fieldname": "quality_inspection_section_break",
-   "fieldtype": "Section Break",
-   "label": "Quality Inspection"
   },
   {
    "fieldname": "production_item_tab",

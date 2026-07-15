@@ -24,7 +24,6 @@
   "column_break1",
   "item_name",
   "description",
-  "bom_no",
   "specification_details",
   "quality_inspection_template",
   "inspection_basis",
@@ -191,13 +190,6 @@
    "label": "Verified By",
    "oldfieldname": "verified_by",
    "oldfieldtype": "Data"
-  },
-  {
-   "fieldname": "bom_no",
-   "fieldtype": "Link",
-   "label": "BOM No",
-   "options": "BOM",
-   "read_only": 1
   },
   {
    "fieldname": "column_break_17",

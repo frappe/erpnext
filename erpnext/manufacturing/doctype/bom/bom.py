@@ -175,7 +175,6 @@ class BOM(WebsiteGenerator):
 		process_loss_percentage: DF.Percent
 		process_loss_qty: DF.Float
 		project: DF.Link | None
-		quality_inspection_template: DF.Link | None
 		quantity: DF.Float
 		raw_material_cost: DF.Currency
 		rm_cost_as_per: DF.Literal["Valuation Rate", "Last Purchase Rate", "Price List"]
