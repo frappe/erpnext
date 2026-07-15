@@ -16,10 +16,6 @@ from erpnext.stock.doctype.quality_inspection.unit_readings import UnitReadingsM
 from erpnext.stock.doctype.quality_inspection_template.quality_inspection_template import (
 	get_template_details,
 )
-from erpnext.stock.services.quality_inspection_service import (
-	QI_INCOMING_PURPOSES,
-	QI_OUTGOING_PURPOSES,
-)
 
 
 class QualityInspection(UnitReadingsMixin, Document):

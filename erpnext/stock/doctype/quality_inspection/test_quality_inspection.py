@@ -494,21 +494,21 @@ class TestQualityInspection(ERPNextTestSuite):
 		self.assertFalse(frappe.db.get_value("Job Card", non_matching_jc, "quality_inspection"))
 
 	def test_qi_job_card_reference_respects_production_item(self):
-		"""A QI referencing a Job Card by name but whose item_code does not match the
-		Job Card's production_item must NOT update that Job Card."""
+		"""A QI referencing a Job Card whose production_item does not match the
+		QI's item_code is refused outright, so the Job Card stays untouched."""
 		create_item("_Test Item")
 		mismatch_item = create_item("_Test Item Mismatch QC " + frappe.utils.random_string(6)).name
 
 		# Job Card produces a different item than the QI's item_code.
 		jc = make_minimal_job_card(production_item=mismatch_item)
 
-		create_quality_inspection(
+		self.assertRaises(
+			frappe.ValidationError,
+			create_quality_inspection,
 			item_code="_Test Item",
 			reference_type="Job Card",
 			reference_name=jc,
 		)
-
-		# name matches but production_item != item_code, so the row is left untouched.
 		self.assertFalse(frappe.db.get_value("Job Card", jc, "quality_inspection"))
 
 
@@ -540,7 +540,7 @@ def create_quality_inspection(**args):
 
 	if not args.readings:
 		create_quality_inspection_parameter("Size")
-		readings = {"specification": "Size", "min_value": 0, "max_value": 10, "reading_1": "5"}
+		readings = {"specification": "Size", "numeric": 1, "min_value": 0, "max_value": 10, "reading_1": "5"}
 		if args.status == "Rejected":
 			readings["reading_1"] = "12"  # status is auto set in child on save
 	else:

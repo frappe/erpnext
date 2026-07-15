@@ -328,7 +328,7 @@
    "options": "Batch"
   },
   {
-   "depends_on": "eval:parent.inspection_required",
+   "depends_on": "eval:parent.inspection_required && doc.t_warehouse",
    "fieldname": "quality_inspection",
    "fieldtype": "Link",
    "label": "Quality Inspection",

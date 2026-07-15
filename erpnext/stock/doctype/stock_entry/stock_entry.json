@@ -271,6 +271,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval: doc.purpose === \"Manufacture\"",
    "fieldname": "inspection_required",
    "fieldtype": "Check",
    "label": "Inspection Required"
