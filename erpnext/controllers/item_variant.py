@@ -336,6 +336,7 @@ def create_variant(item, args, use_template_image=False):
 
 @frappe.whitelist()
 def enqueue_multiple_variant_creation(item, args, use_template_image=False):
+	frappe.has_permission("Item", ptype="create", throw=True)
 	use_template_image = frappe.parse_json(use_template_image)
 	# There can be innumerable attribute combinations, enqueue
 	if isinstance(args, str):
