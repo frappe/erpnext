@@ -24,7 +24,8 @@
 						"account_number": "11530"
 					},
 					"account_number": "115",
-					"is_group": 1
+					"is_group": 1,
+					"account_type": "Bank"
 				},
 				"Trade Receivables": {
 					"Trade Debtors": {
@@ -527,6 +528,13 @@
 						"account_number": "63020"
 					},
 					"account_number": "630",
+					"is_group": 1
+				},
+				"Accrued Manufacturing Expenses": {
+					"Accrued Expenses - Manufacturing": {
+						"account_number": "63510"
+					},
+					"account_number": "635",
 					"is_group": 1
 				},
 				"account_number": "63",
