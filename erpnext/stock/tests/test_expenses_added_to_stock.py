@@ -24,14 +24,27 @@ class TestExpensesAddedToStock(ERPNextTestSuite):
 			parent_account="Expenses - TCP1",
 			company=COMPANY,
 		)
+		self.purchase_expense_account = create_account(
+			account_name="Test Purchase Expense EATS",
+			parent_account="Expenses - TCP1",
+			company=COMPANY,
+		)
+		self.purchase_expense_contra_account = create_account(
+			account_name="Test Purchase Expense Contra EATS",
+			parent_account="Expenses - TCP1",
+			company=COMPANY,
+		)
 		frappe.db.set_value(
 			"Company",
 			COMPANY,
 			{
 				"expenses_added_to_stock_account": self.eats_account,
 				"expenses_added_to_stock_contra_account": self.eats_contra_account,
+				"purchase_expense_account": self.purchase_expense_account,
+				"purchase_expense_contra_account": self.purchase_expense_contra_account,
 			},
 		)
+		frappe.db.set_single_value("Accounts Settings", "book_stock_expense_gl_entries", 1)
 		self.item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
 
 	def get_gl_balances(self, voucher_type, voucher_no):
@@ -118,7 +131,16 @@ class TestExpensesAddedToStock(ERPNextTestSuite):
 		self.assertEqual(debits[self.eats_account], 200)
 		self.assertEqual(credits[self.eats_contra_account], 200)
 
-	def test_no_entries_without_accounts_configured(self):
+	def test_no_entries_when_feature_disabled(self):
+		frappe.db.set_single_value("Accounts Settings", "book_stock_expense_gl_entries", 0)
+
+		se = make_stock_entry(item_code=self.item, to_warehouse=WAREHOUSE, qty=10, rate=100, company=COMPANY)
+
+		_balances, debits, credits = self.get_gl_balances("Stock Entry", se.name)
+		self.assertEqual(debits[self.eats_account], 0)
+		self.assertEqual(credits[self.eats_contra_account], 0)
+
+	def test_missing_accounts_raise_when_feature_enabled(self):
 		frappe.db.set_value(
 			"Company",
 			COMPANY,
@@ -128,17 +150,25 @@ class TestExpensesAddedToStock(ERPNextTestSuite):
 			},
 		)
 
-		se = make_stock_entry(item_code=self.item, to_warehouse=WAREHOUSE, qty=10, rate=100, company=COMPANY)
+		self.assertRaises(
+			frappe.ValidationError,
+			make_stock_entry,
+			item_code=self.item,
+			to_warehouse=WAREHOUSE,
+			qty=10,
+			rate=100,
+			company=COMPANY,
+		)
 
-		_balances, debits, credits = self.get_gl_balances("Stock Entry", se.name)
-		self.assertEqual(debits[self.eats_account], 0)
-		self.assertEqual(credits[self.eats_contra_account], 0)
-
-	def test_no_entries_when_contra_account_is_missing(self):
+	def test_missing_contra_account_raises_when_feature_enabled(self):
 		frappe.db.set_value("Company", COMPANY, "expenses_added_to_stock_contra_account", None)
 
-		se = make_stock_entry(item_code=self.item, to_warehouse=WAREHOUSE, qty=10, rate=100, company=COMPANY)
-
-		_balances, debits, credits = self.get_gl_balances("Stock Entry", se.name)
-		self.assertEqual(debits[self.eats_account], 0)
-		self.assertEqual(credits[self.eats_contra_account], 0)
+		self.assertRaises(
+			frappe.ValidationError,
+			make_stock_entry,
+			item_code=self.item,
+			to_warehouse=WAREHOUSE,
+			qty=10,
+			rate=100,
+			company=COMPANY,
+		)

@@ -5054,6 +5054,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(srbnb_cost, 1000)
 
 	def test_purchase_expense_account(self):
+		frappe.db.set_single_value("Accounts Settings", "book_stock_expense_gl_entries", 1)
 		item = "Test Item with Purchase Expense Account"
 		make_item(item, {"is_stock_item": 1})
 		company = "_Test Company with perpetual inventory"

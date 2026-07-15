@@ -22,6 +22,8 @@
   "allow_multi_currency_invoices_against_single_party_account",
   "confirm_before_resetting_posting_date",
   "preview_mode",
+  "stock_expense_section",
+  "book_stock_expense_gl_entries",
   "analytics_section",
   "enable_discounts_and_margin",
   "enable_accounting_dimensions",
@@ -757,6 +759,18 @@
    "description": "Changing the account in any transaction of the DocTypes listed below will trigger a repost. To prevent reposting, remove the relevant DocType from the list.",
    "fieldname": "column_break_mfor",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "stock_expense_section",
+   "fieldtype": "Section Break",
+   "label": "Stock Expense Accounting"
+  },
+  {
+   "default": "0",
+   "description": "Books Purchase Expense and Expenses Added To Stock account pairs against stock value. On enabling this, the accounts become mandatory in Company or Item Defaults for Purchase Receipt, Purchase Invoice, Stock Entry, Stock Reconciliation and Landed Cost Voucher",
+   "fieldname": "book_stock_expense_gl_entries",
+   "fieldtype": "Check",
+   "label": "Book Stock Expense GL Entries"
   }
  ],
  "grid_page_length": 50,
@@ -765,7 +779,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-06-24 12:59:41.868865",
+ "modified": "2026-07-15 17:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

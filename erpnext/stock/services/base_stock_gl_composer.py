@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import cint, flt
 
 from erpnext.accounts.general_ledger import process_gl_map
 from erpnext.accounts.services.base_gl_composer import BaseGLComposer
@@ -186,9 +186,17 @@ class BaseStockGLComposer(BaseGLComposer):
 
 	def append_expenses_added_to_stock_pair(self, gl_list, item_code, amount, item_row):
 		doc = self.doc
-		details = get_expenses_added_to_stock_accounts(item_code, doc.company)
-		if not details.expenses_added_to_stock_account or not details.expenses_added_to_stock_contra_account:
+		if not cint(frappe.db.get_single_value("Accounts Settings", "book_stock_expense_gl_entries")):
 			return
+
+		details = get_expenses_added_to_stock_accounts(item_code, doc.company)
+		for field in ("expenses_added_to_stock_account", "expenses_added_to_stock_contra_account"):
+			if not details.get(field):
+				frappe.throw(
+					_("Please set {0} in Company {1} or in the Item Defaults of Item {2}").format(
+						frappe.bold(_(frappe.unscrub(field))), doc.company, item_code
+					)
+				)
 
 		cost_center = item_row.get("cost_center") or frappe.get_cached_value(
 			"Company", doc.company, "cost_center"
