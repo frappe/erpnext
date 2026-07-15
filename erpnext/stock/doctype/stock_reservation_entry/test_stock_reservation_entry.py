@@ -704,7 +704,6 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			"enable_stock_reservation": 1,
 			"auto_reserve_serial_and_batch": 1,
 			"pick_serial_and_batch_based_on": "FIFO",
-			"use_serial_batch_fields": 1,
 		},
 	)
 	def test_batch_shared_across_sales_orders_can_be_delivered(self) -> None:
