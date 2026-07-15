@@ -10,6 +10,7 @@ import frappe.utils
 from frappe import _, qb
 from frappe.contacts.doctype.address.address import get_company_address
 from frappe.desk.notifications import clear_doctype_notifications
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.query_builder.functions import Sum
@@ -1147,7 +1148,9 @@ def make_project(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_delivery_note(source_name, target_doc=None, kwargs=None):
+def make_delivery_note(
+	source_name: str, target_doc: str | Document | None = None, kwargs: dict | None = None
+):
 	from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 	from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 		get_sre_details_for_voucher,
@@ -1268,6 +1271,7 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 				update_item(source, target, so)
 
 			so_items = {d.name: d for d in so.items if d.stock_reserved_qty}
+			use_serial_batch_fields = frappe.get_single_value("Stock Settings", "use_serial_batch_fields")
 
 			for sre in sre_list:
 				if not condition(so_items[sre.voucher_detail_no]):
@@ -1292,8 +1296,6 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 
 				dn_item.qty = flt(sre.reserved_qty) / flt(dn_item.get("conversion_factor", 1))
 				dn_item.warehouse = sre.warehouse
-
-				use_serial_batch_fields = frappe.get_single_value("Stock Settings", "use_serial_batch_fields")
 
 				if sre.reservation_based_on == "Serial and Batch" and (sre.has_serial_no or sre.has_batch_no):
 					if use_serial_batch_fields:
