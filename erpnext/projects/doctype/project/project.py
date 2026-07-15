@@ -92,12 +92,8 @@ class Project(Document):
 
 	def validate(self):
 		if not self.is_new():
-<<<<<<< HEAD
 			self.copy_from_template()  # nosemgrep
-=======
-			self.copy_from_template()
 			self.control_access_for_project_users()
->>>>>>> 72b72a81fa (fix(project): improved access control for project users (#56675))
 		self.send_welcome_email()
 		self.update_costing()
 		self.update_percent_complete()
@@ -209,37 +205,10 @@ class Project(Document):
 		self.db_update()
 
 	def after_insert(self):
-<<<<<<< HEAD
 		self.copy_from_template()  # nosemgrep
 		if self.sales_order:
 			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name)
-=======
-		self.copy_from_template("after_insert")
-		self.link_with_sales_order()
 		self.control_access_for_project_users()
-
-	def link_with_sales_order(self) -> None:
-		"""Back-link the source Sales Order to this project.
-
-		The link is set only when the Sales Order is not already tied to another
-		project, so projects created concurrently for the same Sales Order cannot
-		overwrite each other's reference.
-		"""
-		if not self.sales_order:
-			return
-
-		existing_project = frappe.db.get_value("Sales Order", self.sales_order, "project")
-		if existing_project and existing_project != self.name:
-			frappe.msgprint(
-				_("Sales Order {0} is already linked to Project {1}, skipping the link.").format(
-					self.sales_order, existing_project
-				),
-				alert=True,
-			)
-			return
-
-		frappe.db.set_value("Sales Order", self.sales_order, "project", self.name)
->>>>>>> 72b72a81fa (fix(project): improved access control for project users (#56675))
 
 	def on_trash(self):
 		frappe.db.set_value("Sales Order", {"project": self.name}, "project", "")
