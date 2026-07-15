@@ -665,13 +665,6 @@ class ShopFloor {
 			if (name) me.instructions_open[name] = open;
 		});
 
-		// Clicking a "QC Required" / "QC Available" pill runs the inline check ahead of End Session.
-		$container.find(".mes-qc-pill").on("click", function () {
-			const name = $(this).attr("data-job-card");
-			const jc = (me.active_jobs || []).find((j) => j.name === name);
-			if (jc) me.run_quality_check(jc, () => me.reload());
-		});
-
 		$container.find(".mes-btn-start").on("click", function () {
 			me.start_job($(this).attr("data-job-card"));
 		});
@@ -953,14 +946,7 @@ class ShopFloor {
 			const args = get_payload();
 			if (!args) return;
 			me.session_dialog.hide();
-			// Guided QC gate: a job card marked as requiring inspection must pass an inline Quality
-			// Check before it is submitted. Nothing marks one required today (in-process inspection
-			// is not wired to Item Quality Triggers yet); once recorded, finalize the session submit.
-			if (jc.qc && jc.qc.required && jc.qc.status !== "Accepted") {
-				me.run_quality_check(jc, () => finalize_submit(args));
-			} else {
-				finalize_submit(args);
-			}
+			finalize_submit(args);
 		};
 
 		me.session_dialog = new frappe.ui.Dialog({
@@ -973,144 +959,6 @@ class ShopFloor {
 		});
 		me.session_dialog.show();
 		me.bind_enter_submit(me.session_dialog);
-	}
-
-	// ── Inline Quality Check ─────────────────────────────────────────────────────
-	// Fetch the operation's Quality Inspection template and open a guided pass/fail checklist.
-	// `on_pass` runs once the inspection has been recorded (and is not rejected).
-	run_quality_check(jc, on_pass) {
-		const me = this;
-		frappe.call({
-			method: "erpnext.manufacturing.page.shop_floor.shop_floor.get_quality_inspection_checklist",
-			args: { job_card: jc.name },
-			freeze: true,
-			freeze_message: __("Loading quality checklist..."),
-			callback: (r) => {
-				const info = r.message || {};
-				if (!info.template || !(info.parameters || []).length) {
-					// Inspection is required but the operation has no template/parameters to fill —
-					// there is nothing to capture inline. Point the user at the configuration.
-					frappe.msgprint({
-						title: __("Quality Inspection Template Missing"),
-						indicator: "orange",
-						message: __(
-							"This operation requires a Quality Inspection but no template with parameters is configured. Set a Quality Inspection Template on Operation {0} to inspect from the Shop Floor.",
-							[jc.operation || ""]
-						),
-					});
-					return;
-				}
-				me.show_qc_dialog(jc, info, on_pass);
-			},
-		});
-	}
-
-	show_qc_dialog(jc, info, on_pass) {
-		const me = this;
-		const params = info.parameters || [];
-		// Per-row operator input, keyed by row index (avoids escaping issues with parameter names).
-		const state = {}; // idx -> "Accepted" | "Rejected"
-
-		const rows = params
-			.map((p, i) => {
-				const spec = frappe.utils.escape_html(p.specification);
-				let criteria = "";
-				if (p.numeric) {
-					const lo = p.min_value !== null && p.min_value !== undefined ? p.min_value : "−∞";
-					const hi = p.max_value !== null && p.max_value !== undefined ? p.max_value : "∞";
-					criteria = __("Acceptable range: {0} to {1}", [lo, hi]);
-				} else if (p.value) {
-					criteria = __("Expected: {0}", [frappe.utils.escape_html(p.value)]);
-				}
-				const control = p.numeric
-					? `<input type="number" step="any" class="form-control mes-qc-reading" data-idx="${i}" placeholder="${__(
-							"Measured value"
-					  )}">`
-					: `<span class="mes-qc-passfail" data-idx="${i}">
-							<button type="button" class="pass" data-val="Accepted">${__("Pass")}</button>
-							<button type="button" class="fail" data-val="Rejected">${__("Fail")}</button>
-						</span>`;
-				return `<div class="mes-qc-row">
-						<div class="mes-qc-spec">
-							<div class="mes-qc-spec-name">${spec}</div>
-							${criteria ? `<div class="mes-qc-spec-sub">${criteria}</div>` : ""}
-						</div>
-						<div class="mes-qc-controls">${control}</div>
-					</div>`;
-			})
-			.join("");
-
-		const dialog = new frappe.ui.Dialog({
-			title: __("Quality Check"),
-			size: "large",
-			fields: [
-				{
-					fieldtype: "HTML",
-					options: `<div class="mes-qc-intro text-muted" style="margin-bottom: 8px;">${__(
-						"Inspect {0} for job card {1}",
-						[frappe.utils.escape_html(info.item_code || ""), frappe.utils.escape_html(jc.name)]
-					)}</div><div class="mes-qc-list">${rows}</div>`,
-				},
-			],
-			primary_action_label: __("Submit Inspection"),
-			primary_action: () => {
-				const readings = [];
-				let missing = false;
-				params.forEach((p, i) => {
-					if (p.numeric) {
-						const val = dialog.$wrapper.find(`.mes-qc-reading[data-idx="${i}"]`).val();
-						if (val === "" || val === undefined || val === null) missing = true;
-						readings.push({ specification: p.specification, reading_value: val });
-					} else {
-						if (!state[i]) missing = true;
-						readings.push({
-							specification: p.specification,
-							status: state[i],
-							reading_value: "",
-						});
-					}
-				});
-				if (missing) {
-					frappe.msgprint(__("Please complete every check before submitting the inspection."));
-					return;
-				}
-				dialog.hide();
-				frappe.call({
-					method: "erpnext.manufacturing.page.shop_floor.shop_floor.submit_quality_inspection",
-					args: { job_card: jc.name, readings: JSON.stringify(readings) },
-					freeze: true,
-					freeze_message: __("Recording inspection..."),
-					callback: (r) => {
-						const res = r.message || {};
-						if (res.status === "Rejected") {
-							// Don't auto-proceed on a rejected inspection — the server gate may block the
-							// submit anyway (per Stock Settings), and the operator should decide next steps.
-							frappe.msgprint({
-								title: __("Inspection Rejected"),
-								indicator: "red",
-								message: __(
-									"Quality Inspection {0} is Rejected. Resolve the issue or follow your rejection process before submitting the job card.",
-									[res.name || ""]
-								),
-							});
-							me.reload();
-							return;
-						}
-						if (on_pass) on_pass();
-					},
-				});
-			},
-		});
-
-		dialog.show();
-		// Pass/Fail toggles for qualitative parameters.
-		dialog.$wrapper.find(".mes-qc-passfail button").on("click", function () {
-			const $btn = $(this);
-			const $grp = $btn.closest(".mes-qc-passfail");
-			$grp.find("button").removeClass("active");
-			$btn.addClass("active");
-			state[$grp.attr("data-idx")] = $btn.attr("data-val");
-		});
 	}
 
 	prompt_manufacture_entry(jc_name) {

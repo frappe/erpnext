@@ -112,7 +112,7 @@
 		   centered against the status pill in the meta row (otherwise the pill reads higher). */
 		line-height: 20px;
 	}
-	/* Status/QC pills read as a secondary badge after the Job Card id — one notch smaller than
+	/* Status pills read as a secondary badge after the Job Card id — one notch smaller than
 	   the desk default (--text-sm: 13px). */
 	.mes-job-meta .indicator-pill {
 		font-size: 12px;
@@ -638,31 +638,6 @@
 	}
 	.mes-instructions-desc:last-child { margin-bottom: 0; }
 
-	/* QC reading rows inside the inline Quality Check dialog */
-	.mes-qc-row {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		padding: 10px 0;
-		border-bottom: 1px solid var(--border-color);
-	}
-	.mes-qc-row:last-child { border-bottom: none; }
-	.mes-qc-spec { flex: 1; min-width: 0; }
-	.mes-qc-spec-name { font-weight: 500; color: var(--text-color); }
-	.mes-qc-spec-sub { font-size: 13px; color: var(--text-muted); }
-	.mes-qc-controls { flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
-	.mes-qc-controls input.form-control { width: 120px; }
-	.mes-qc-passfail { display: inline-flex; border: 1px solid var(--border-color); border-radius: var(--border-radius); overflow: hidden; }
-	.mes-qc-passfail button {
-		border: none;
-		background: var(--fg-color);
-		padding: 6px 14px;
-		font-size: 14px;
-		cursor: pointer;
-		color: var(--text-muted);
-	}
-	.mes-qc-passfail button.active.pass { background: var(--green-500, #38a169); color: #fff; }
-	.mes-qc-passfail button.active.fail { background: var(--red-500, #e53e3e); color: #fff; }
 </style>
 
 <!-- Summary strip -->
@@ -752,15 +727,6 @@
 												<span class="indicator-pill no-indicator-dot {{ slot.status_colour }}">{{ __(slot.status) }}</span>
 												{% if (slot.is_subcontracted) { %}
 													<span class="indicator-pill no-indicator-dot purple">{{ __("Subcontract") }}</span>
-												{% } %}
-												{% if (slot.qc && slot.qc.status === 'Accepted') { %}
-													<span class="indicator-pill no-indicator-dot green">{{ __("QC Passed") }}</span>
-												{% } else if (slot.qc && slot.qc.status === 'Rejected') { %}
-													<span class="indicator-pill no-indicator-dot red">{{ __("QC Rejected") }}</span>
-												{% } else if (slot.qc && slot.qc.required) { %}
-													<span class="indicator-pill no-indicator-dot orange mes-qc-pill" data-job-card="{{ slot.name }}" style="cursor: pointer;" title="{{ __("Run quality check") }}">{{ __("QC Required") }}</span>
-												{% } else if (slot.qc && slot.qc.has_checklist) { %}
-													<span class="indicator-pill no-indicator-dot blue mes-qc-pill" data-job-card="{{ slot.name }}" style="cursor: pointer;" title="{{ __("Run quality check") }}">{{ __("QC Available") }}</span>
 												{% } %}
 											</div>
 											<div class="mes-job-sub">
