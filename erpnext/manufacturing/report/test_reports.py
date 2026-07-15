@@ -34,7 +34,6 @@ class TestManufacturingReports(ERPNextTestSuite):
 			),
 			("Job Card Summary", {"fiscal_year": "2021-2022"}),
 			("Production Analytics", {"range": "Monthly"}),
-			("Quality Inspection Summary", {}),
 			("Process Loss Report", {}),
 			("Work Order Stock Report", {}),
 			("Work Order Summary", {"fiscal_year": "2021-2022", "age": 0}),

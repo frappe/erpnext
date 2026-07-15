@@ -262,17 +262,6 @@
    "type": "Link"
   },
   {
-   "dependencies": "Quality Inspection",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Quality Inspection Summary",
-   "link_count": 0,
-   "link_to": "Quality Inspection Summary",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
    "dependencies": "Downtime Entry",
    "hidden": 0,
    "is_query_report": 1,
@@ -749,19 +738,6 @@
    "keep_closed": 0,
    "label": "Work Order Summary",
    "link_to": "Work Order Summary",
-   "link_type": "Report",
-   "open_in_new_tab": 0,
-   "show_arrow": 0,
-   "type": "Link"
-  },
-  {
-   "child": 1,
-   "collapsible": 1,
-   "default_workspace": 0,
-   "indent": 0,
-   "keep_closed": 0,
-   "label": "Quality Inspection Summary",
-   "link_to": "Quality Inspection Summary",
    "link_type": "Report",
    "open_in_new_tab": 0,
    "show_arrow": 0,
