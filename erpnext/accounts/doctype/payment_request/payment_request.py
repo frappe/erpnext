@@ -584,6 +584,18 @@ class PaymentRequest(Document):
 
 		return payment_entry
 
+	@frappe.whitelist(methods=["POST"])
+	def resend_payment_email(self):
+		if not (
+			self.docstatus == 1
+			and self.payment_request_type == "Inward"
+			and self.payment_channel != "Phone"
+			and self.status not in ["Initiated", "Paid"]
+		):
+			frappe.throw(_("Payment Link couldn't be sent."))
+
+		self.send_email()
+
 	def send_email(self):
 		"""send email with payment link"""
 		email_args = {
@@ -601,11 +613,14 @@ class PaymentRequest(Document):
 				)
 			],
 		}
+		job_id = f"send_payment_email::{self.name}"
 		enqueue(
 			method=frappe.sendmail,
 			queue="short",
 			timeout=300,
 			is_async=True,
+			job_id=job_id,
+			deduplicate=True,
 			enqueue_after_commit=True,
 			**email_args,
 		)
@@ -1107,11 +1122,6 @@ def get_print_format_list(ref_doctype: str):
 	)
 
 	return {"print_format": print_format_list}
-
-
-@frappe.whitelist()
-def resend_payment_email(docname: str):
-	return frappe.get_doc("Payment Request", docname).send_email()
 
 
 @frappe.whitelist()
