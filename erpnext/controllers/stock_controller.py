@@ -2055,7 +2055,7 @@ class StockController(AccountsController):
 
 
 @frappe.whitelist()
-def show_accounting_ledger_preview(company, doctype, docname):
+def show_accounting_ledger_preview(company: str, doctype: str, docname: str):
 	filters = frappe._dict(company=company, include_dimensions=1)
 	doc = frappe.get_lazy_doc(doctype, docname)
 	doc.check_permission("read")
@@ -2069,7 +2069,7 @@ def show_accounting_ledger_preview(company, doctype, docname):
 
 
 @frappe.whitelist()
-def show_stock_ledger_preview(company, doctype, docname):
+def show_stock_ledger_preview(company: str, doctype: str, docname: str):
 	filters = frappe._dict(company=company)
 	doc = frappe.get_lazy_doc(doctype, docname)
 	doc.check_permission("read")
