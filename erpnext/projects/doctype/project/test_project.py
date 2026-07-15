@@ -227,6 +227,61 @@ class TestProject(FrappeTestCase):
 		project.save()
 		self.assertEqual(project.status, "Completed")
 
+	def _create_portal_user(self, email):
+		"""A user with no Project-related role, so read access can only come from
+		control_access_for_project_users() sharing the doc with them."""
+		if not frappe.db.exists("User", email):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": email,
+					"first_name": "Portal",
+					"send_welcome_email": 0,
+				}
+			).insert(ignore_permissions=True)
+		return email
+
+	def test_new_project_grants_access_to_its_users(self):
+		member = self._create_portal_user(f"new_proj_member_{frappe.generate_hash(length=6)}@example.com")
+
+		project = frappe.get_doc(
+			doctype="Project",
+			project_name=f"_Test New Project Access {frappe.generate_hash(length=6)}",
+			status="Open",
+			company="_Test Company",
+		)
+		project.append("users", {"user": member, "welcome_email_sent": 1})
+		project.insert()  # must not raise
+
+		self.assertTrue(project.has_permission(user=member))
+		shared_with = [d.user for d in frappe.share.get_users("Project", project.name)]
+		self.assertIn(member, shared_with)
+
+	def test_adding_and_removing_project_user_updates_access(self):
+		stays = self._create_portal_user(f"stays_{frappe.generate_hash(length=6)}@example.com")
+		leaves = self._create_portal_user(f"leaves_{frappe.generate_hash(length=6)}@example.com")
+
+		project = frappe.get_doc(
+			doctype="Project",
+			project_name=f"_Test Project User Membership {frappe.generate_hash(length=6)}",
+			status="Open",
+			company="_Test Company",
+		)
+		project.append("users", {"user": stays, "welcome_email_sent": 1})
+		project.insert()
+		self.assertTrue(project.has_permission(user=stays))
+
+		# adding a user on update (not insert) must also grant them access
+		project.append("users", {"user": leaves, "welcome_email_sent": 1})
+		project.save()
+		self.assertTrue(project.has_permission(user=leaves))
+
+		# removing a user must revoke the share that was granted for membership
+		project.users = [d for d in project.users if d.user != leaves]
+		project.save()
+		self.assertFalse(project.has_permission(user=leaves))
+		self.assertTrue(project.has_permission(user=stays))
+
 
 def get_project(name, template):
 	project = frappe.get_doc(
