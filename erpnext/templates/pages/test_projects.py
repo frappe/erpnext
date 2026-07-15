@@ -2,13 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.templates.pages.projects import validate_and_get_project_user
-from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestProjectsPage(ERPNextTestSuite):
+class TestProjectsPage(FrappeTestCase):
 	"""validate_and_get_project_user() gates the /projects portal page. It must raise
 	frappe.PermissionError for a user who can't read the Project, and otherwise return
 	that user's Project User row (or None if they're permitted but not listed as one --
