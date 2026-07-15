@@ -108,7 +108,6 @@ class JobCard(Document):
 		production_item: DF.Link | None
 		project: DF.Link | None
 		quality_inspection: DF.Link | None
-		quality_inspection_template: DF.Link | None
 		remarks: DF.SmallText | None
 		requested_qty: DF.Float
 		scheduled_time_logs: DF.Table[JobCardScheduledTime]

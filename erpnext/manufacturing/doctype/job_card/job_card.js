@@ -480,7 +480,6 @@ frappe.ui.form.on("Job Card", {
 				item_name: frm.doc.item_name,
 				serial_no: frm.doc.serial_no,
 				batch_no: frm.doc.batch_no,
-				quality_inspection_template: frm.doc.quality_inspection_template,
 			};
 		};
 	},

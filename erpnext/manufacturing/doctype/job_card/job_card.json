@@ -50,8 +50,6 @@
   "section_break_8",
   "items",
   "quality_inspection_section",
-  "quality_inspection_template",
-  "column_break_fcmp",
   "quality_inspection",
   "scheduled_time_tab",
   "scheduled_time_section",
@@ -424,13 +422,6 @@
    "read_only": 1
   },
   {
-   "fetch_from": "operation.quality_inspection_template",
-   "fieldname": "quality_inspection_template",
-   "fieldtype": "Link",
-   "label": "Quality Inspection Template",
-   "options": "Quality Inspection Template"
-  },
-  {
    "fieldname": "workstation_type",
    "fieldtype": "Link",
    "label": "Workstation Type",
@@ -505,10 +496,6 @@
    "fieldname": "quality_inspection_section",
    "fieldtype": "Section Break",
    "label": "Quality Inspection"
-  },
-  {
-   "fieldname": "column_break_fcmp",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "finished_good",

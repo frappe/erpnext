@@ -22,7 +22,6 @@ class Operation(Document):
 		create_job_card_based_on_batch_size: DF.Check
 		description: DF.Text | None
 		is_corrective_operation: DF.Check
-		quality_inspection_template: DF.Link | None
 		sub_operations: DF.Table[SubOperation]
 		total_operation_time: DF.Float
 		work_instruction: DF.TextEditor | None

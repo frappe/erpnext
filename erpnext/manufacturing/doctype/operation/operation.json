@@ -13,7 +13,6 @@
   "is_corrective_operation",
   "job_card_section",
   "create_job_card_based_on_batch_size",
-  "quality_inspection_template",
   "column_break_6",
   "batch_size",
   "sub_operations_section",
@@ -102,12 +101,6 @@
    "fieldname": "is_corrective_operation",
    "fieldtype": "Check",
    "label": "Is Corrective Operation"
-  },
-  {
-   "fieldname": "quality_inspection_template",
-   "fieldtype": "Link",
-   "label": "Quality Inspection Template",
-   "options": "Quality Inspection Template"
   }
  ],
  "icon": "fa fa-wrench",
