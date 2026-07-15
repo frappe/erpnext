@@ -619,14 +619,14 @@ class SerialBatchBundleService:
 		own_vouchers = {item.get(field) for item in items for field in reference_fields if item.get(field)}
 
 		outstanding_qty = defaultdict(float)
-		reservations = {}
+		reservations = defaultdict(list)
 		for row in self.get_reserved_batches(batches):
 			if row.voucher_no in own_vouchers:
 				continue
 
 			key = (row.batch_no, row.warehouse)
 			outstanding_qty[key] += flt(row.qty) - flt(row.delivered_qty)
-			reservations.setdefault(key, row)
+			reservations[key].append(row)
 
 		for (batch_no, warehouse), reserved_qty in outstanding_qty.items():
 			if reserved_qty <= 0:
@@ -643,14 +643,18 @@ class SerialBatchBundleService:
 			if flt(batch_qty, 6) >= flt(reserved_qty, 6):
 				continue
 
-			row = reservations[(batch_no, warehouse)]
+			vouchers = ", ".join(
+				f"{frappe.bold(voucher_type)} {frappe.bold(voucher_no)}"
+				for voucher_type, voucher_no in dict.fromkeys(
+					(row.voucher_type, row.voucher_no) for row in reservations[(batch_no, warehouse)]
+				)
+			)
 			frappe.throw(
 				_(
-					"The batch {0} is reserved for {1} {2} in the warehouse {3} and the remaining quantity is not enough to cover the reservation. So, cannot proceed with the {4} {5}."
+					"The batch {0} is reserved for {1} in the warehouse {2} and the remaining quantity is not enough to cover the reservations. So, cannot proceed with the {3} {4}."
 				).format(
 					frappe.bold(batch_no),
-					frappe.bold(row.voucher_type),
-					frappe.bold(row.voucher_no),
+					vouchers,
 					frappe.bold(warehouse),
 					frappe.bold(self.doc.doctype),
 					frappe.bold(self.doc.name),
