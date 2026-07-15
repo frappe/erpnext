@@ -2057,11 +2057,7 @@ class StockController(AccountsController):
 @frappe.whitelist()
 def show_accounting_ledger_preview(company: str, doctype: str, docname: str):
 	filters = frappe._dict(company=company, include_dimensions=1)
-<<<<<<< HEAD
-	doc = frappe.get_lazy_doc(doctype, docname)
-=======
 	doc = frappe.get_doc(doctype, docname)
->>>>>>> 6b23b007a4 (fix: permission issue (backport #57112) (#57142))
 	doc.check_permission("read")
 	doc.run_method("before_gl_preview")
 
@@ -2075,11 +2071,7 @@ def show_accounting_ledger_preview(company: str, doctype: str, docname: str):
 @frappe.whitelist()
 def show_stock_ledger_preview(company: str, doctype: str, docname: str):
 	filters = frappe._dict(company=company)
-<<<<<<< HEAD
-	doc = frappe.get_lazy_doc(doctype, docname)
-=======
 	doc = frappe.get_doc(doctype, docname)
->>>>>>> 6b23b007a4 (fix: permission issue (backport #57112) (#57142))
 	doc.check_permission("read")
 	doc.run_method("before_sl_preview")
 
