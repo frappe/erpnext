@@ -10,7 +10,6 @@ def execute():
 		.join(ProjectUser)
 		.on(Project.name == ProjectUser.parent)
 		.select(Project.name, ProjectUser.user)
-		.where(Project.status != "Cancelled")  # Not considering cancelled Projects.
 	)
 
 	proj_users = query.run(as_dict=1)
