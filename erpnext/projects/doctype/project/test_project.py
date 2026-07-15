@@ -227,33 +227,6 @@ class TestProject(FrappeTestCase):
 		project.save()
 		self.assertEqual(project.status, "Completed")
 
-	def _project_with_tasks(self, method, count):
-		name = f"_Test PercentComplete {frappe.generate_hash(length=8)}"
-		project = frappe.get_doc(
-			{
-				"doctype": "Project",
-				"project_name": name,
-				"status": "Open",
-				"percent_complete_method": method,
-				"company": "_Test Company",
-				"expected_start_date": nowdate(),
-			}
-		).insert()
-		task_names = []
-		for i in range(count):
-			task = frappe.get_doc(
-				{
-					"doctype": "Task",
-					"subject": f"{name} Task {i}",
-					"project": project.name,
-					"status": "Open",
-					"exp_start_date": nowdate(),
-					"exp_end_date": nowdate(),
-				}
-			).insert()
-			task_names.append(task.name)
-		return project, task_names
-
 	def _create_portal_user(self, email):
 		"""A user with no Project-related role, so read access can only come from
 		control_access_for_project_users() sharing the doc with them."""
