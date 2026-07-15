@@ -7,6 +7,21 @@ frappe.ui.form.on("Holiday List", {
 			frm.set_value("total_holidays", frm.doc.holidays.length);
 		}
 
+		if (!frm.is_new()) {
+			frm.add_custom_button(
+				__("Single Assignment"),
+				() => {
+					frappe.model.with_doctype("Holiday List Assignment", () => {
+						const doc = frappe.model.get_new_doc("Holiday List Assignment");
+						doc.holiday_list = frm.doc.name;
+						frappe.set_route("Form", "Holiday List Assignment", doc.name);
+					});
+				},
+				__("Create")
+			);
+			frm.page.set_inner_btn_group_as_primary(__("Create"));
+		}
+
 		frm.call("get_supported_countries").then((r) => {
 			frm.subdivisions_by_country = r.message.subdivisions_by_country;
 			frm.fields_dict.country.set_data(
