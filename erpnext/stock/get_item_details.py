@@ -177,10 +177,9 @@ def update_bin_details(args, out, doc):
 		out.update(get_bin_details(args.item_code, args.get("from_warehouse")))
 
 	elif out.get("warehouse"):
-		company = args.company if (doc and doc.get("doctype") == "Purchase Order") else None
-
-		# calculate company_total_stock only for po
-		bin_details = get_bin_details(args.item_code, out.warehouse, company, include_child_warehouses=True)
+		bin_details = get_bin_details(
+			args.item_code, out.warehouse, args.company, include_child_warehouses=True
+		)
 
 		out.update(bin_details)
 

@@ -7,7 +7,7 @@
  "doctype": "Report", 
  "idx": 2, 
  "is_standard": "Yes", 
- "modified": "2017-02-24 20:12:40.282376", 
+ "modified": "2026-07-01 13:36:14.934965",
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Profit and Loss Statement", 
@@ -15,6 +15,12 @@
  "ref_doctype": "GL Entry", 
  "report_name": "Profit and Loss Statement", 
  "report_type": "Script Report", 
+ "doctype_to_sync": [
+  {
+   "doc_type": "GL Entry"
+  }
+ ],
+ "filters": [],
  "roles": [
   {
    "role": "Accounts User"
@@ -25,5 +31,7 @@
   {
    "role": "Auditor"
   }
- ]
+ ],
+ "snapshot_report": 0,
+ "timeout": 0
 }
