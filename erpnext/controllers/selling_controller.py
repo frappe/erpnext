@@ -956,9 +956,14 @@ class SellingController(StockController):
 
 					qty_can_be_deliver = 0
 					if sre_doc.reservation_based_on == "Serial and Batch":
-						sbb = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
+						# Delivered serial/batch may live in a Serial and Batch Bundle or directly in the
+						# row's serial_no/batch_no fields (use_serial_batch_fields). Read from whichever is
+						# present so this never crashes on a missing bundle.
+						(
+							delivered_serial_nos,
+							delivered_batch_qty,
+						) = get_delivered_serial_batch_for_reservation(item)
 						if sre_doc.has_serial_no:
-							delivered_serial_nos = [d.serial_no for d in sbb.entries]
 							for entry in sre_doc.sb_entries:
 								if entry.serial_no in delivered_serial_nos:
 									entry.delivered_qty = 1  # Qty will always be 0 or 1 for Serial No.
@@ -966,16 +971,16 @@ class SellingController(StockController):
 									qty_can_be_deliver += 1
 									delivered_serial_nos.remove(entry.serial_no)
 						else:
-							delivered_batch_qty = {d.batch_no: -1 * d.qty for d in sbb.entries}
 							for entry in sre_doc.sb_entries:
-								if entry.batch_no in delivered_batch_qty:
+								available_batch_qty = delivered_batch_qty.get(entry.batch_no, 0)
+								if available_batch_qty > 0:
 									delivered_qty = min(
-										(entry.qty - entry.delivered_qty), delivered_batch_qty[entry.batch_no]
+										(entry.qty - entry.delivered_qty), available_batch_qty
 									)
 									entry.delivered_qty += delivered_qty
 									entry.db_update()
 									qty_can_be_deliver += delivered_qty
-									delivered_batch_qty[entry.batch_no] -= delivered_qty
+									delivered_batch_qty[entry.batch_no] = available_batch_qty - delivered_qty
 					else:
 						# `Delivered Qty` should be less than or equal to `Reserved Qty`.
 						qty_can_be_deliver = min(
@@ -1097,6 +1102,34 @@ class SellingController(StockController):
 		pick_lists = {row.against_pick_list for row in self.items if row.against_pick_list}
 		for pick_list in pick_lists:
 			update_pick_list_status(pick_list)
+
+
+def get_delivered_serial_batch_for_reservation(item):
+	"""Serial nos and per-batch qty delivered by a stock row.
+
+	The detail may be stored in a Serial and Batch Bundle or directly in the row's
+	``serial_no``/``batch_no`` fields (``use_serial_batch_fields``). Reading from whichever is
+	present keeps the Stock Reservation Entry delivered-qty update independent of a bundle being
+	created -- delivering reserved serial/batch stock used to crash when the row had no bundle.
+	"""
+	serial_nos, batch_qty = [], {}
+
+	if item.get("serial_and_batch_bundle"):
+		bundle = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
+		for row in bundle.entries:
+			if row.serial_no:
+				serial_nos.append(row.serial_no)
+			if row.batch_no:
+				batch_qty[row.batch_no] = batch_qty.get(row.batch_no, 0) + abs(flt(row.qty))
+	else:
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+		if item.get("serial_no"):
+			serial_nos = get_serial_nos(item.serial_no)
+		if item.get("batch_no"):
+			batch_qty[item.batch_no] = abs(flt(item.get("stock_qty") or item.get("qty")))
+
+	return serial_nos, batch_qty
 
 
 def set_default_income_account_for_item(obj):

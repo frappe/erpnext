@@ -757,6 +757,38 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		dn.save()
 		self.assertRaisesRegex(frappe.ValidationError, "is reserved for", dn.submit)
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
+			"use_serial_batch_fields": 1,
+		},
+	)
+	def test_deliver_batch_reserved_stock_with_serial_batch_fields(self) -> None:
+		# Regression (develop 9c5f9218b5): with use_serial_batch_fields enabled, the reserved-stock
+		# Delivery Note mapper set neither a bundle nor row batch fields on the mapped row, and
+		# delivery crashed with "Serial and Batch Bundle None not found".
+		item_doc = make_batch_item()
+		create_material_receipt(items={item_doc.name: item_doc}, warehouse=self.warehouse, qty=5)
+
+		so = make_sales_order(item_code=item_doc.name, warehouse=self.warehouse, qty=5, rate=100)
+		so.create_stock_reservation_entries()
+		self.assertTrue(has_reserved_stock("Sales Order", so.name))
+
+		dn = make_delivery_note(so.name, kwargs={"for_reserved_stock": 1})
+		self.assertTrue(dn.items[0].batch_no, "mapper should carry the reserved batch in the row fields")
+		dn.save()
+		dn.submit()
+
+		sre = get_stock_reservation_entries_for_voucher(
+			"Sales Order", so.name, fields=["status", "delivered_qty"]
+		)[0]
+		self.assertEqual(sre.status, "Delivered")
+		self.assertEqual(sre.delivered_qty, 5)
+
 
 def create_items() -> dict:
 	items_properties = [

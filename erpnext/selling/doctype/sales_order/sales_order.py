@@ -1295,12 +1295,27 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 
 				use_serial_batch_fields = frappe.get_single_value("Stock Settings", "use_serial_batch_fields")
 
-				if (
-					not use_serial_batch_fields
-					and sre.reservation_based_on == "Serial and Batch"
-					and (sre.has_serial_no or sre.has_batch_no)
-				):
-					dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher(sre)
+				if sre.reservation_based_on == "Serial and Batch" and (sre.has_serial_no or sre.has_batch_no):
+					if use_serial_batch_fields:
+						# Carry the reserved serial/batch in the row fields. A single field can't hold
+						# multiple batches, so fall back to a bundle in that case.
+						dn_item.use_serial_batch_fields = 1
+						sb_entries = frappe.get_all(
+							"Serial and Batch Entry",
+							filters={"parent": sre.name},
+							fields=["serial_no", "batch_no"],
+						)
+						serial_nos = [d.serial_no for d in sb_entries if d.serial_no]
+						batch_nos = list({d.batch_no for d in sb_entries if d.batch_no})
+						if serial_nos:
+							dn_item.serial_no = "\n".join(serial_nos)
+						if len(batch_nos) == 1:
+							dn_item.batch_no = batch_nos[0]
+						elif len(batch_nos) > 1:
+							dn_item.use_serial_batch_fields = 0
+							dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher(sre)
+					else:
+						dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher(sre)
 
 				target_doc.append("items", dn_item)
 			else:
