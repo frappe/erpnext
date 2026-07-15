@@ -216,8 +216,7 @@ def get_quality_inspection_checklist(job_card: str):
 
 @frappe.whitelist()
 def submit_quality_inspection(job_card: str, readings: str | None = None):
-	"""Create + submit an In-Process Quality Inspection for the job card and link it back, so the
-	standard Job Card.validate_inspection() gate passes when the card is submitted.
+	"""Create + submit an In-Process Quality Inspection for the job card and link it back.
 
 	`readings` is a JSON list of {specification, status, reading_value} captured inline. For numeric
 	/ formula parameters the measured value is stored and the Quality Inspection auto-evaluates
@@ -613,19 +612,14 @@ def _get_operation_instructions(operation: str | None) -> dict | None:
 
 
 def _get_job_card_qc(row) -> dict:
-	"""Quality-check state for a job card row: whether an inspection is required before submit,
-	which template to use, and any inspection already linked (name + status + docstatus).
+	"""Quality-check state for a job card row: which template to use and any inspection
+	already linked (name + status + docstatus).
 
-	"Required" mirrors Job Card.validate_inspection() — BOM inspection_required AND the Work Order
-	Operation's quality_inspection_required. When only a template is configured the check is
-	offered but not enforced.
+	Nothing marks an in-process inspection as mandatory yet — Item Quality Triggers
+	govern stock movements, not operations — so a configured template means the check
+	is offered, never enforced.
 	"""
-	required = bool(
-		row.get("bom_no")
-		and frappe.get_cached_value("BOM", row.bom_no, "inspection_required")
-		and row.get("operation_id")
-		and frappe.db.get_value("Work Order Operation", row.operation_id, "quality_inspection_required")
-	)
+	required = False
 
 	template = row.get("quality_inspection_template")
 	if not template and row.get("operation"):

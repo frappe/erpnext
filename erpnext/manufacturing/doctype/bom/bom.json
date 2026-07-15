@@ -45,7 +45,6 @@
   "is_phantom_bom",
   "allow_alternative_item",
   "quality_inspection_section_break",
-  "inspection_required",
   "column_break_dxp7",
   "quality_inspection_template",
   "default_warehouse_section",
@@ -192,12 +191,6 @@
   },
   {
    "default": "0",
-   "fieldname": "inspection_required",
-   "fieldtype": "Check",
-   "label": "Quality Inspection Required"
-  },
-  {
-   "default": "0",
    "fieldname": "allow_alternative_item",
    "fieldtype": "Check",
    "label": "Allow Alternative Item"
@@ -210,7 +203,6 @@
    "label": "Set rate of sub-assembly item based on BOM"
   },
   {
-   "depends_on": "inspection_required",
    "fieldname": "quality_inspection_template",
    "fieldtype": "Link",
    "label": "Quality Inspection Template",

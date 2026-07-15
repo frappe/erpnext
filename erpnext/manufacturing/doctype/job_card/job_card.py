@@ -23,10 +23,6 @@ from frappe.utils import (
 	time_diff_in_hours,
 )
 
-from erpnext.controllers.stock_controller import (
-	QualityInspectionNotSubmittedError,
-	QualityInspectionRejectedError,
-)
 from erpnext.manufacturing.doctype.bom.bom import (
 	add_additional_cost,
 	get_backflush_based_on,
@@ -837,7 +833,6 @@ class JobCard(Document):
 		self.set_process_loss()
 
 	def on_submit(self):
-		self.validate_inspection()
 		self.validate_transfer_qty()
 		self.validate_job_card()
 		self.update_work_order()
@@ -846,49 +841,6 @@ class JobCard(Document):
 	def on_cancel(self):
 		self.update_work_order()
 		self.set_transferred_qty()
-
-	def validate_inspection(self):
-		"""Operation-level quality control for semi-finished goods.
-
-		Driven by the BOM (inspection_required) and the Work Order Operation
-		(quality_inspection_required) — distinct from the stock-level Item
-		Quality Triggers, which govern stock movements rather than operations.
-		"""
-		if not (self.bom_no and self.operation_id):
-			return
-		if not frappe.get_value("BOM", self.bom_no, "inspection_required"):
-			return
-		if not frappe.get_value("Work Order Operation", self.operation_id, "quality_inspection_required"):
-			return
-
-		if not self.quality_inspection:
-			frappe.throw(
-				_(
-					"Quality Inspection is required for the item {0} before completing the job card {1}"
-				).format(get_link_to_form("Item", self.finished_good), bold(self.name))
-			)
-
-		qa_status, docstatus = frappe.get_value(
-			"Quality Inspection", self.quality_inspection, ["status", "docstatus"]
-		)
-		if docstatus != 1:
-			frappe.throw(
-				_("Quality Inspection {0} is not submitted for the item: {1}").format(
-					get_link_to_form("Quality Inspection", self.quality_inspection),
-					get_link_to_form("Item", self.finished_good),
-				),
-				title=_("Inspection Submission"),
-				exc=QualityInspectionNotSubmittedError,
-			)
-		elif qa_status == "Rejected":
-			frappe.throw(
-				_("Quality Inspection {0} is rejected for the item: {1}").format(
-					get_link_to_form("Quality Inspection", self.quality_inspection),
-					get_link_to_form("Item", self.finished_good),
-				),
-				title=_("Inspection Rejected"),
-				exc=QualityInspectionRejectedError,
-			)
 
 	def validate_transfer_qty(self):
 		if self.track_semi_finished_goods and self.skip_material_transfer:

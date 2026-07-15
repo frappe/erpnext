@@ -1134,7 +1134,6 @@ class TestStockEntry(ERPNextTestSuite):
 				row.uom = frappe.db.get_value("Item", secondary_item, "stock_uom")
 				row.stock_uom = frappe.db.get_value("Item", secondary_item, "stock_uom")
 
-		stock_entry.inspection_required = 1
 		stock_entry.save()
 
 		self.assertTrue(
@@ -3049,7 +3048,6 @@ class TestStockEntry(ERPNextTestSuite):
 			target=warehouse,
 			qty=10,
 			basic_rate=100,
-			inspection_required=True,
 			do_not_submit=True,
 		)
 

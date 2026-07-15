@@ -123,7 +123,6 @@ class QualityInspection(UnitReadingsMixin, Document):
 			self.set_status_from_unit_readings()
 
 		self.set_decided_quantity_default()
-		self.validate_inspection_required()
 		self.validate_package_units_carry_no_serials()
 		self.validate_serial_nos()
 		# a sample larger than the stock it describes is wrong on a draft too
@@ -420,11 +419,6 @@ class QualityInspection(UnitReadingsMixin, Document):
 
 		typed = get_reference_row_tracking(child_doctype, self.child_row_reference).get("serial_no")
 		return set(get_serial_nos(typed or ""))
-
-	def validate_inspection_required(self):
-		# Obsolete under the Item Quality Trigger model: Quality Inspection requirement is governed
-		# by triggers on the transaction, not by per-Item flags or a global setting.
-		pass
 
 	def before_submit(self):
 		self.validate_readings_status_mandatory()
@@ -1140,29 +1134,6 @@ def quality_inspection_query(
 		},
 		as_list=1,
 	)
-
-
-@frappe.whitelist()
-def make_quality_inspection(source_name: str, target_doc: str | dict | Document | None = None):
-	def postprocess(source, doc):
-		doc.inspected_by = frappe.session.user
-		doc.get_quality_inspection_template()
-
-	doc = get_mapped_doc(
-		"BOM",
-		source_name,
-		{
-			"BOM": {
-				"doctype": "Quality Inspection",
-				"validation": {"docstatus": ["=", 1]},
-				"field_map": {"name": "bom_no", "item": "item_code", "stock_uom": "uom", "stock_qty": "qty"},
-			}
-		},
-		target_doc,
-		postprocess,
-	)
-
-	return doc
 
 
 def get_reading_number_format() -> NumberFormat:

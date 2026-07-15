@@ -224,8 +224,7 @@ frappe.ui.form.on("Stock Entry", {
 			erpnext.utils.add_quality_control_lot_buttons(frm);
 		}
 
-		// inspection requirements come from the item quality triggers, not the
-		// legacy inspection_required checkbox (which only Manufacture entries show)
+		// inspection requirements come from the item quality triggers
 		if (
 			!frm.is_new() &&
 			frm.doc.docstatus === 0 &&

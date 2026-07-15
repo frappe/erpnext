@@ -277,10 +277,6 @@ def _set_stock_entry_warehouses(stock_entry, work_order, purpose, target_warehou
 		skip = work_order.skip_transfer and not work_order.from_wip_warehouse
 		stock_entry.from_warehouse = work_order.source_warehouse if skip else wip_warehouse
 		stock_entry.to_warehouse = work_order.fg_warehouse
-		if work_order.bom_no:
-			stock_entry.inspection_required = frappe.db.get_value(
-				"BOM", work_order.bom_no, "inspection_required"
-			)
 
 	if purpose == "Disassemble":
 		stock_entry.from_warehouse = work_order.fg_warehouse

@@ -266,16 +266,6 @@ frappe.ui.form.on("BOM", {
 				);
 			}
 
-			if (frm.doc.inspection_required) {
-				frm.add_custom_button(
-					__("Quality Inspection"),
-					function () {
-						frm.trigger("make_quality_inspection");
-					},
-					__("Create")
-				);
-			}
-
 			frm.page.set_inner_btn_group_as_primary(__("Create"));
 		}
 
@@ -547,13 +537,6 @@ frappe.ui.form.on("BOM", {
 		if (has_template_rm && has_template_rm.length) {
 			dialog.fields_dict.items.grid.refresh();
 		}
-	},
-
-	make_quality_inspection(frm) {
-		frappe.model.open_mapped_doc({
-			method: "erpnext.stock.doctype.quality_inspection.quality_inspection.make_quality_inspection",
-			frm: frm,
-		});
 	},
 
 	update_cost(frm, save_doc = false) {

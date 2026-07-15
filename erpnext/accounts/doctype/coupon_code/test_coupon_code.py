@@ -17,7 +17,6 @@ def test_create_test_data():
 				"doctype": "Item",
 				"has_batch_no": 0,
 				"has_serial_no": 0,
-				"inspection_required": 0,
 				"is_stock_item": 1,
 				"opening_stock": 100,
 				"is_sub_contracted_item": 0,

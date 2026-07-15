@@ -423,8 +423,6 @@ def update_stock_entry_based_on_work_order(pick_list, stock_entry):
 	stock_entry.bom_no = work_order.bom_no
 	stock_entry.use_multi_level_bom = work_order.use_multi_level_bom
 	stock_entry.fg_completed_qty = 0
-	if work_order.bom_no:
-		stock_entry.inspection_required = frappe.db.get_value("BOM", work_order.bom_no, "inspection_required")
 
 	is_wip_warehouse_group = frappe.db.get_value("Warehouse", work_order.wip_warehouse, "is_group")
 	if not (is_wip_warehouse_group and work_order.skip_transfer):

@@ -729,25 +729,6 @@ class TestBOM(ERPNextTestSuite):
 		self.assertEqual(int(version.name.split("-")[-1]), 2)
 
 	@timeout
-	def test_clear_inpection_quality(self):
-		bom = frappe.copy_doc(self.globalTestRecords["BOM"][2], ignore_no_copy=True)
-		bom.company = "_Test Company"
-		bom.docstatus = 0
-		bom.is_default = 0
-		bom.quality_inspection_template = "_Test Quality Inspection Template"
-		bom.inspection_required = 1
-		bom.save()
-		bom.reload()
-
-		self.assertEqual(bom.quality_inspection_template, "_Test Quality Inspection Template")
-
-		bom.inspection_required = 0
-		bom.save()
-		bom.reload()
-
-		self.assertEqual(bom.quality_inspection_template, None)
-
-	@timeout
 	def test_bom_pricing_based_on_lpp(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 

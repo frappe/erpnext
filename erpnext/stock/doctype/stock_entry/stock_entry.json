@@ -20,7 +20,6 @@
   "reference_section",
   "add_to_transit",
   "apply_putaway_rule",
-  "inspection_required",
   "column_break_jabv",
   "work_order",
   "subcontracting_order",
@@ -268,13 +267,6 @@
    "fieldtype": "Check",
    "label": "Edit Posting Date and Time",
    "print_hide": 1
-  },
-  {
-   "default": "0",
-   "depends_on": "eval: doc.purpose === \"Manufacture\"",
-   "fieldname": "inspection_required",
-   "fieldtype": "Check",
-   "label": "Inspection Required"
   },
   {
    "default": "0",

@@ -161,7 +161,6 @@ class BOM(WebsiteGenerator):
 		fg_based_operating_cost: DF.Check
 		has_variants: DF.Check
 		image: DF.AttachImage | None
-		inspection_required: DF.Check
 		is_active: DF.Check
 		is_default: DF.Check
 		is_phantom_bom: DF.Check
@@ -311,7 +310,6 @@ class BOM(WebsiteGenerator):
 
 	def _validate_setup(self):
 		self.clear_operations()
-		self.clear_inspection()
 		self.validate_main_item()
 		self.validate_currency()
 		self.set_operation_finished_goods()
@@ -682,10 +680,6 @@ class BOM(WebsiteGenerator):
 
 		if not self.with_operations and self.track_semi_finished_goods:
 			self.track_semi_finished_goods = 0
-
-	def clear_inspection(self):
-		if not self.inspection_required:
-			self.quality_inspection_template = None
 
 	def validate_main_item(self):
 		"""Validate main FG item"""

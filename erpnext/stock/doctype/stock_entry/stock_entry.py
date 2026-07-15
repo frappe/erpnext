@@ -111,7 +111,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 		fg_completed_qty: DF.Float
 		from_bom: DF.Check
 		from_warehouse: DF.Link | None
-		inspection_required: DF.Check
 		is_additional_transfer_entry: DF.Check
 		is_opening: DF.Literal["No", "Yes"]
 		is_return: DF.Check
@@ -1622,19 +1621,18 @@ class StockEntry(StockController, SubcontractingInwardController):
 				item.validate_batch()
 
 	def update_quality_inspection(self):
-		if self.inspection_required:
-			reference_type = reference_name = ""
-			if self.docstatus == 1:
-				reference_name = self.name
-				reference_type = "Stock Entry"
+		reference_type = reference_name = ""
+		if self.docstatus == 1:
+			reference_name = self.name
+			reference_type = "Stock Entry"
 
-			for d in self.items:
-				if d.quality_inspection:
-					frappe.db.set_value(
-						"Quality Inspection",
-						d.quality_inspection,
-						{"reference_type": reference_type, "reference_name": reference_name},
-					)
+		for d in self.items:
+			if d.quality_inspection:
+				frappe.db.set_value(
+					"Quality Inspection",
+					d.quality_inspection,
+					{"reference_type": reference_type, "reference_name": reference_name},
+				)
 
 	def update_subcontracting_order_status(self):
 		if self.subcontracting_order and self.purpose in ["Send to Subcontractor", "Material Transfer"]:

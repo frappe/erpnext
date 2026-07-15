@@ -953,9 +953,9 @@ class ShopFloor {
 			const args = get_payload();
 			if (!args) return;
 			me.session_dialog.hide();
-			// Guided QC gate: a job card that requires inspection must pass an inline Quality Check
-			// before it is submitted (mirrors Job Card.validate_inspection on the server). Once the
-			// inspection is recorded, finalize the session submit.
+			// Guided QC gate: a job card marked as requiring inspection must pass an inline Quality
+			// Check before it is submitted. Nothing marks one required today (in-process inspection
+			// is not wired to Item Quality Triggers yet); once recorded, finalize the session submit.
 			if (jc.qc && jc.qc.required && jc.qc.status !== "Accepted") {
 				me.run_quality_check(jc, () => finalize_submit(args));
 			} else {

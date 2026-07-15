@@ -17,7 +17,6 @@
   "workstation_type",
   "workstation",
   "sequence_id",
-  "quality_inspection_required",
   "section_break_insy",
   "bom_no",
   "finished_good",
@@ -298,12 +297,6 @@
    "fieldtype": "Check",
    "label": "Backflush Materials From WIP Warehouse",
    "read_only": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "quality_inspection_required",
-   "fieldtype": "Check",
-   "label": "Quality Inspection Required"
   },
   {
    "fieldname": "pending_qty",

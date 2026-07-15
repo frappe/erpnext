@@ -30,7 +30,6 @@ def make_stock_entry(
 	purpose: str | None = None,
 	do_not_save: bool = False,
 	do_not_submit: bool = False,
-	inspection_required: bool = False,
 ) -> "StockEntry":
 	...
 
@@ -74,9 +73,6 @@ def make_stock_entry(**args):
 		s.posting_date = args.posting_date
 	if args.posting_time:
 		s.posting_time = args.posting_time
-	if args.inspection_required:
-		s.inspection_required = args.inspection_required
-
 	if not args.posting_date:
 		s.posting_date = today()
 

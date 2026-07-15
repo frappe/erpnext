@@ -3030,7 +3030,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			freeze: true,
 			callback: function (r) {
 				(r.message || []).forEach((item) => {
-					if (me.has_inspection_required(item)) {
+					if (!item.quality_inspection) {
 						let dialog_items = dialog.fields_dict.items;
 						dialog_items.df.data.push({
 							// rows the triggers demand start checked; the rest can be
@@ -3061,16 +3061,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				}
 			},
 		});
-	}
-
-	has_inspection_required(item) {
-		if (this.frm.doc.doctype === "Stock Entry" && this.frm.doc.purpose == "Manufacture") {
-			if (item.is_finished_item && !item.quality_inspection) {
-				return true;
-			}
-		} else if (!item.quality_inspection) {
-			return true;
-		}
 	}
 
 	get_method_for_payment() {
