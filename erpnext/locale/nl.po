@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-07-12 10:05+0000\n"
-"PO-Revision-Date: 2026-07-15 12:45\n"
+"PO-Revision-Date: 2026-07-16 13:11\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Dutch\n"
 "MIME-Version: 1.0\n"
@@ -21522,10 +21522,6 @@ msgstr "Van datum en datum liggen in verschillende fiscale jaar"
 msgid "From Date cannot be greater than To Date"
 msgstr "Vanaf de datum kan niet groter zijn dan tot nu toe"
 
-#: erpnext/selling/report/sales_partner_commission_summary/sales_partner_commission_summary.py:60
-msgid "From Date cannot be greater than To Date."
-msgstr "Vanaf de datum kan niet groter zijn dan tot nu toe."
-
 #: erpnext/crm/report/sales_pipeline_analytics/sales_pipeline_analytics.py:27
 msgid "From Date is mandatory"
 msgstr "De begindatum is verplicht."
@@ -22356,10 +22352,6 @@ msgstr "Aandelen verkrijgen"
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
 msgid "Get Sub Assembly Items"
 msgstr "Onderdelen voor subassemblages verkrijgen"
-
-#: erpnext/buying/doctype/supplier/supplier.js:151
-msgid "Get Supplier Group Details"
-msgstr ""
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:461
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:481
@@ -26491,10 +26483,6 @@ msgstr "Uitgiftedatum"
 msgid "It can take upto few hours for accurate stock values to be visible after merging items."
 msgstr "Het kan enkele uren duren voordat de juiste voorraadwaarden zichtbaar zijn na het samenvoegen van artikelen."
 
-#: erpnext/public/js/controllers/transaction.js:2580
-msgid "It is needed to fetch Item Details."
-msgstr "Het is nodig om Item Details halen."
-
 #: banking/src/components/features/BankReconciliation/BankBalance.tsx:79
 msgid "It takes into account all the transactions that have been posted and subtracts the transactions that have not cleared yet."
 msgstr ""
@@ -27795,10 +27783,6 @@ msgstr "Artikelnaam"
 msgid "Item operation"
 msgstr "Artikelbewerking"
 
-#: erpnext/controllers/accounts_controller.py:4005
-msgid "Item qty can not be updated as raw materials are already processed."
-msgstr "De artikelhoeveelheid kan niet worden bijgewerkt, omdat de grondstoffen al zijn verwerkt."
-
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1508
 msgid "Item rate has been updated to zero as Allow Zero Valuation Rate is checked for item {0}"
 msgstr "De artikelprijs is bijgewerkt naar nul omdat 'Nulwaardering toestaan' is aangevinkt voor artikel {0}"
@@ -27946,10 +27930,6 @@ msgstr "Item {0}: Bestelde aantal {1} kan niet kleiner dan de minimale afname {2
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:573
 msgid "Item {0}: {1} qty produced. "
 msgstr "Artikel {0}: {1} aantal geproduceerd."
-
-#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:1334
-msgid "Item {} does not exist."
-msgstr "Item {} bestaat niet."
 
 #. Name of a report
 #: erpnext/stock/report/item_wise_price_list_rate/item_wise_price_list_rate.json
@@ -29132,10 +29112,6 @@ msgstr "Koppelen mislukt"
 msgid "Linking to Customer Failed. Please try again."
 msgstr "Verbinding met klant mislukt. Probeer het opnieuw."
 
-#: erpnext/selling/doctype/customer/customer.js:280
-msgid "Linking to Supplier Failed. Please try again."
-msgstr "Verbinding met leverancier mislukt. Probeer het opnieuw."
-
 #: erpnext/accounts/report/financial_ratios/financial_ratios.js:55
 #: erpnext/accounts/report/financial_ratios/financial_ratios.py:152
 msgid "Liquidity Ratios"
@@ -30107,10 +30083,6 @@ msgstr "Productiedatum"
 #: erpnext/stock/doctype/stock_entry_type/stock_entry_type.json
 msgid "Manufacturing Manager"
 msgstr "Productie Manager"
-
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2907
-msgid "Manufacturing Quantity is mandatory"
-msgstr "Productie Aantal is verplicht"
 
 #. Label of the manufacturing_section_section (Section Break) field in DocType
 #. 'Sales Order Item'
@@ -31585,17 +31557,9 @@ msgstr ""
 msgid "Multiple Accounts (Journal Template)"
 msgstr ""
 
-#: erpnext/selling/doctype/customer/customer.py:441
-msgid "Multiple Loyalty Programs found for Customer {}. Please select manually."
-msgstr "Er zijn meerdere loyaliteitsprogramma's gevonden voor klant {}. Selecteer handmatig."
-
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1241
 msgid "Multiple POS Opening Entry"
 msgstr "Meerdere POS-openingsinvoer"
-
-#: erpnext/accounts/doctype/pricing_rule/utils.py:348
-msgid "Multiple Price Rules exists with same criteria, please resolve conflict by assigning priority. Price Rules: {0}"
-msgstr "Meerdere Prijs Regels bestaat met dezelfde criteria, dan kunt u conflicten op te lossen door het toekennen van prioriteit. Prijs Regels: {0}"
 
 #. Option for the 'Loyalty Program Type' (Select) field in DocType 'Loyalty
 #. Program'
@@ -32253,10 +32217,6 @@ msgstr "Nieuwe Warehouse Naam"
 #: erpnext/setup/doctype/employee/employee.json
 msgid "New Workplace"
 msgstr "Nieuwe werkplek"
-
-#: erpnext/selling/doctype/customer/customer.py:406
-msgid "New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0}"
-msgstr "New kredietlimiet lager is dan de huidige uitstaande bedrag voor de klant. Kredietlimiet moet minstens zijn {0}"
 
 #. Description of the 'Generate New Invoices Past Due Date' (Check) field in
 #. DocType 'Subscription'
@@ -33378,10 +33338,6 @@ msgstr ""
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 msgid "Once set, this invoice will be on hold till the set date"
 msgstr "Zodra deze factuur is ingesteld, blijft deze in de wacht staan tot de ingestelde datum."
-
-#: erpnext/manufacturing/doctype/work_order/work_order.js:763
-msgid "Once the Work Order is Closed. It can't be resumed."
-msgstr "Zodra een werkorder is afgesloten, kan deze niet meer worden hervat."
 
 #: erpnext/accounts/doctype/loyalty_program/loyalty_program.js:39
 msgid "One customer can be part of only single Loyalty Program."
@@ -34606,10 +34562,6 @@ msgstr "Overig"
 #: erpnext/controllers/status_updater.py:519
 msgid "Overbilling of {0} {1} ignored for item {2} because you have {3} role."
 msgstr "Overfacturering van {0} {1} genegeerd voor item {2} omdat je de rol {3} hebt."
-
-#: erpnext/controllers/accounts_controller.py:2211
-msgid "Overbilling of {} ignored because you have {} role."
-msgstr "Overfacturering van {} wordt genegeerd omdat u de rol {} heeft."
 
 #. Option for the 'Status' (Select) field in DocType 'POS Invoice'
 #. Option for the 'Status' (Select) field in DocType 'Purchase Invoice'
@@ -37654,10 +37606,6 @@ msgstr "Voeg een tijdelijk openstaand account toe in het rekeningschema"
 msgid "Please add an account for the Bank Entry rule."
 msgstr ""
 
-#: erpnext/public/js/utils/serial_no_batch_selector.js:662
-msgid "Please add atleast one Serial No / Batch No"
-msgstr "Voeg ten minste één serienummer/batchnummer toe."
-
 #: erpnext/crm/doctype/crm_settings/crm_settings.py:53
 msgid "Please add atleast one user on Allowed Users to allow Data Synchronization from Frappe CRM site."
 msgstr ""
@@ -37825,10 +37773,6 @@ msgstr "Schakel deze functie alleen in als u de gevolgen ervan begrijpt."
 msgid "Please enable {0} in the {1}."
 msgstr "Schakel {0} in de {1} in."
 
-#: erpnext/controllers/selling_controller.py:857
-msgid "Please enable {} in {} to allow same item in multiple rows"
-msgstr "Schakel {} in {} in om hetzelfde item in meerdere rijen toe te staan."
-
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:381
 msgid "Please ensure that the {0} account is a Balance Sheet account. You can change the parent account to a Balance Sheet account or select a different account."
 msgstr "Zorg ervoor dat de {0} -rekening een balansrekening is. U kunt de hoofdrekening wijzigen in een balansrekening of een andere rekening selecteren."
@@ -37836,14 +37780,6 @@ msgstr "Zorg ervoor dat de {0} -rekening een balansrekening is. U kunt de hoofdr
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:389
 msgid "Please ensure that the {0} account {1} is a Payable account. You can change the account type to Payable or select a different account."
 msgstr "Zorg ervoor dat de {0} rekening {1} een crediteurenrekening is. U kunt het rekeningtype wijzigen naar Crediteuren of een andere rekening selecteren."
-
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1061
-msgid "Please ensure {} account is a Balance Sheet account."
-msgstr "Zorg ervoor dat de {} rekening een balansrekening is."
-
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1071
-msgid "Please ensure {} account {} is a Receivable account."
-msgstr "Zorg ervoor dat rekening {} een debiteurenrekening is."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:872
 msgid "Please enter <b>Difference Account</b> or set default <b>Stock Adjustment Account</b> for company {0}"
@@ -38235,10 +38171,6 @@ msgstr "Selecteer Start- en Einddatum voor Artikel {0}"
 msgid "Please select Stock Asset Account"
 msgstr "Selecteer de rekening voor voorraadactiva."
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1972
-msgid "Please select Subcontracting Order instead of Purchase Order {0}"
-msgstr "Selecteer alstublieft 'Ondercontracteringsopdracht' in plaats van 'Inkoopopdracht' {0}"
-
 #: erpnext/controllers/accounts_controller.py:2852
 msgid "Please select Unrealized Profit / Loss account or add default Unrealized Profit / Loss account account for company {0}"
 msgstr "Selecteer de rekening 'Niet-gerealiseerde winst/verlies' of voeg een standaardrekening voor niet-gerealiseerde winst/verlies toe voor het bedrijf {0}"
@@ -38336,10 +38268,6 @@ msgstr "Selecteer een rij om een herplaatsingsbericht aan te maken."
 #: erpnext/accounts/report/purchase_register/purchase_register.py:36
 msgid "Please select a supplier for fetching payments."
 msgstr "Selecteer een leverancier voor het innen van betalingen."
-
-#: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.py:142
-msgid "Please select a valid Purchase Order that has Service Items."
-msgstr "Selecteer een geldige inkooporder met serviceartikelen."
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.py:139
 msgid "Please select a valid Purchase Order that is configured for Subcontracting."
@@ -38583,10 +38511,6 @@ msgstr "Stel de btw-rekeningen voor het bedrijf in op: \"{0}\" in de btw-instell
 msgid "Please set a Company"
 msgstr "Stel een bedrijf in"
 
-#: erpnext/assets/doctype/asset/asset.py:378
-msgid "Please set a Cost Center for the Asset or set an Asset Depreciation Cost Center for the Company {}"
-msgstr "Stel een kostenplaats in voor het activum of stel een afschrijvingskostenplaats in voor het bedrijf {}"
-
 #: erpnext/projects/doctype/project/project.py:736
 msgid "Please set a default Holiday List for Company {0}"
 msgstr "Stel een standaard vakantielijst in voor bedrijf {0}"
@@ -38627,22 +38551,6 @@ msgstr "Stel zowel het belastingnummer als de fiscale code in voor het bedrijf {
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2475
 msgid "Please set default Cash or Bank account in Mode of Payment {0}"
 msgstr "Stel een standaard Kas- of Bankrekening in bij Betaalwijze {0}"
-
-#: erpnext/accounts/doctype/pos_opening_entry/pos_opening_entry.py:94
-#: erpnext/accounts/doctype/pos_profile/pos_profile.py:197
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3091
-msgid "Please set default Cash or Bank account in Mode of Payment {}"
-msgstr "Stel een standaard contant of bankrekening in in Betalingsmethode {}"
-
-#: erpnext/accounts/doctype/pos_opening_entry/pos_opening_entry.py:96
-#: erpnext/accounts/doctype/pos_profile/pos_profile.py:199
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3093
-msgid "Please set default Cash or Bank account in Mode of Payments {}"
-msgstr "Stel standaard contant geld of bankrekening in in Betalingsmethode {}"
-
-#: erpnext/accounts/utils.py:2528
-msgid "Please set default Exchange Gain/Loss Account in Company {}"
-msgstr "Stel de standaardrekening voor wisselkoerswinsten/-verliezen in bij bedrijf {}."
 
 #: erpnext/assets/doctype/asset_repair/asset_repair.py:386
 msgid "Please set default Expense Account in Company {0}"
@@ -39008,11 +38916,6 @@ msgstr ""
 msgid "Posting Date"
 msgstr "Plaatsingsdatum"
 
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:269
-#: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:143
-msgid "Posting Date cannot be future date"
-msgstr "Posting datum kan niet de toekomst datum"
-
 #. Label of the exchange_gain_loss_posting_date (Select) field in DocType
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
@@ -39081,10 +38984,6 @@ msgstr "Publicatiedatum en -tijd"
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Posting Time"
 msgstr "Plaatsing Time"
-
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2857
-msgid "Posting date and posting time is mandatory"
-msgstr "Plaatsingsdatum en -tijd is verplicht"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:901
 msgid "Posting date does not match the selected transaction"
@@ -41191,10 +41090,6 @@ msgstr "Inkooporders te factureren"
 #: erpnext/setup/doctype/email_digest/email_digest.json
 msgid "Purchase Orders to Receive"
 msgstr "Te ontvangen inkooporders"
-
-#: erpnext/controllers/accounts_controller.py:2043
-msgid "Purchase Orders {0} are un-linked"
-msgstr "Inkooporders {0} zijn niet gekoppeld"
 
 #: erpnext/stock/report/item_prices/item_prices.py:59
 msgid "Purchase Price List"
@@ -43924,10 +43819,6 @@ msgstr "Afgekeurde serie- en batchbundel"
 msgid "Rejected Warehouse"
 msgstr "Afgekeurd magazijn"
 
-#: erpnext/public/js/utils/serial_no_batch_selector.js:670
-msgid "Rejected Warehouse and Accepted Warehouse cannot be same."
-msgstr "Het afgekeurde magazijn en het geaccepteerde magazijn kunnen niet hetzelfde zijn."
-
 #: erpnext/buying/doctype/purchase_order/purchase_order_dashboard.py:23
 #: erpnext/buying/doctype/supplier_quotation/supplier_quotation_dashboard.py:14
 #: erpnext/stock/doctype/delivery_note/delivery_note_dashboard.py:22
@@ -46510,10 +46401,6 @@ msgstr ""
 msgid "Row #{}: Either Party ID or Party Name is required"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:425
-msgid "Row #{}: Finance Book should not be empty since you're using multiple."
-msgstr ""
-
 #: erpnext/accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:92
 msgid "Row #{}: POS Invoice {} has been {}"
 msgstr ""
@@ -46534,20 +46421,12 @@ msgstr ""
 msgid "Row #{}: Please assign task to a member."
 msgstr "Rij #{}: Wijs de taak toe aan een lid."
 
-#: erpnext/assets/doctype/asset/asset.py:417
-msgid "Row #{}: Please use a different Finance Book."
-msgstr ""
-
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:524
 msgid "Row #{}: Serial No {} cannot be returned since it was not transacted in original invoice {}"
 msgstr ""
 
 #: erpnext/accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:103
 msgid "Row #{}: The original Invoice {} of return invoice {} is not consolidated."
-msgstr ""
-
-#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:497
-msgid "Row #{}: You cannot add positive quantities in a return invoice. Please remove item {} to complete the return."
 msgstr ""
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:239
@@ -46563,10 +46442,6 @@ msgstr ""
 msgid "Row #{}: {} {} does not exist."
 msgstr ""
 
-#: erpnext/stock/doctype/item/item.py:1527
-msgid "Row #{}: {} {} doesn't belong to Company {}. Please select valid {}."
-msgstr ""
-
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:440
 msgid "Row No {0}: Warehouse is required. Please set a Default Warehouse for Item {1} and Company {2}"
 msgstr "Rijnummer {0}: Magazijn is vereist. Stel een standaardmagazijn in voor artikel {1} en bedrijf {2}"
@@ -46578,10 +46453,6 @@ msgstr "Rij {0}: bewerking vereist ten opzichte van het artikel met de grondstof
 #: erpnext/stock/doctype/pick_list/pick_list.py:269
 msgid "Row {0} picked quantity is less than the required quantity, additional {1} {2} required."
 msgstr "De hoeveelheid die in rij {0} is verzameld, is kleiner dan de vereiste hoeveelheid; er is een extra hoeveelheid van {1} {2} nodig."
-
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1927
-msgid "Row {0}# Item {1} not found in 'Raw Materials Supplied' table in {2} {3}"
-msgstr ""
 
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:278
 msgid "Row {0}: Accepted Qty and Rejected Qty can't be zero at the same time."
@@ -46793,10 +46664,6 @@ msgstr "Rij {0}: Selecteer een stuklijst voor item {1}."
 msgid "Row {0}: Please select an active BOM for Item {1}."
 msgstr "Rij {0}: Selecteer een actieve stuklijst voor item {1}."
 
-#: erpnext/controllers/subcontracting_controller.py:224
-msgid "Row {0}: Please select an valid BOM for Item {1}."
-msgstr ""
-
 #: erpnext/regional/italy/utils.py:290
 msgid "Row {0}: Please set at Tax Exemption Reason in Sales Taxes and Charges"
 msgstr "Rij {0}: Stel in op Belastingvrijstellingsreden in omzetbelasting en kosten"
@@ -46967,10 +46834,6 @@ msgstr "Rijen met dubbele vervaldatums in andere rijen zijn gevonden: {0}"
 #: erpnext/accounts/doctype/journal_entry/journal_entry.js:148
 msgid "Rows: {0} have 'Payment Entry' as reference_type. This should not be set manually."
 msgstr "Rijen: {0} hebben 'Betalingsinvoer' als referentietype. Dit mag niet handmatig worden ingesteld."
-
-#: erpnext/controllers/accounts_controller.py:302
-msgid "Rows: {0} in {1} section are Invalid. Reference Name should point to a valid Payment Entry or Journal Entry."
-msgstr ""
 
 #. Label of the rule_applied (Check) field in DocType 'Pricing Rule Detail'
 #: erpnext/accounts/doctype/pricing_rule_detail/pricing_rule_detail.json
@@ -49285,10 +49148,6 @@ msgstr "Serienummer {0} behoort niet tot Artikel {1}"
 msgid "Serial No {0} does not exist"
 msgstr "Serienummer {0} bestaat niet"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:3524
-msgid "Serial No {0} does not exists"
-msgstr ""
-
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:379
 msgid "Serial No {0} is already Delivered. You cannot use them again in Manufacture / Repack entry."
 msgstr ""
@@ -51570,10 +51429,6 @@ msgstr "Logboek voor voorraadafsluiting"
 msgid "Stock Details"
 msgstr "Voorraadgegevens"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1199
-msgid "Stock Entries already created for Work Order {0}: {1}"
-msgstr "Reeds aangemaakte voorraadboekingen voor werkorder {0}: {1}"
-
 #. Label of the stock_entry (Link) field in DocType 'Journal Entry'
 #. Label of a Link in the Manufacturing Workspace
 #. Option for the 'Receipt Document Type' (Select) field in DocType 'Landed
@@ -52248,10 +52103,6 @@ msgstr "De voorraad is vrijgegeven voor werkorder {0}."
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:359
 msgid "Stock not available for Item {0} in Warehouse {1}."
 msgstr "Artikel {0} is niet op voorraad in magazijn {1}."
-
-#: erpnext/selling/page/point_of_sale/pos_controller.js:826
-msgid "Stock quantity not enough for Item Code: {0} under warehouse {1}. Available quantity {2} {3}."
-msgstr ""
 
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py:256
 msgid "Stock transactions before {0} are frozen"
@@ -53728,10 +53579,6 @@ msgstr "Doelactiva {0} kunnen niet {1} zijn"
 msgid "Target Asset {0} does not belong to company {1}"
 msgstr "Doelactiva {0} behoren niet tot bedrijf {1}"
 
-#: erpnext/assets/doctype/asset_capitalization/asset_capitalization.py:195
-msgid "Target Asset {0} needs to be composite asset"
-msgstr ""
-
 #. Name of a DocType
 #: erpnext/setup/doctype/target_detail/target_detail.json
 msgid "Target Detail"
@@ -54173,12 +54020,6 @@ msgstr "Totaal belasting"
 #: erpnext/accounts/doctype/tax_rule/tax_rule.json
 msgid "Tax Type"
 msgstr "Belastingsoort"
-
-#. Label of the tax_withholding_tab (Tab Break) field in DocType 'Journal
-#. Entry'
-#: erpnext/accounts/doctype/journal_entry/journal_entry.json
-msgid "Tax Withholding"
-msgstr ""
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/tax_withholding_account/tax_withholding_account.json
@@ -54897,10 +54738,6 @@ msgstr "De betalingstermijn op rij {0} is mogelijk een duplicaat."
 msgid "The Pick List having Stock Reservation Entries cannot be updated. If you need to make changes, we recommend canceling the existing Stock Reservation Entries before updating the Pick List."
 msgstr "De picklijst met voorraadreserveringen kan niet worden bijgewerkt. Als u wijzigingen wilt aanbrengen, raden we u aan de bestaande voorraadreserveringen te annuleren voordat u de picklijst bijwerkt."
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:3142
-msgid "The Process Loss Qty has reset as per job cards Process Loss Qty"
-msgstr ""
-
 #: erpnext/setup/doctype/sales_person/sales_person.py:102
 msgid "The Sales Person is linked with {0}"
 msgstr "De verkoper is verbonden met {0}"
@@ -55270,10 +55107,6 @@ msgstr "De aandelen bestaan al"
 msgid "The shares don't exist with the {0}"
 msgstr "De shares bestaan niet met de {0}"
 
-#: erpnext/stock/stock_ledger.py:824
-msgid "The stock for the item {0} in the {1} warehouse was negative on the {2}. You should create a positive entry {3} before the date {4} and time {5} to post the correct valuation rate. For more details, please read the <a href='https://docs.erpnext.com/docs/user/manual/en/stock-adjustment-cogs-with-negative-stock'>documentation<a>."
-msgstr ""
-
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:740
 msgid "The stock has been reserved for the following Items and Warehouses, un-reserve the same to {0} the Stock Reconciliation: <br /><br /> {1}"
 msgstr "De volgende artikelen en magazijnen zijn gereserveerd. Deblokkeer deze reservering om de voorraadafstemming te voltooien: {0} <br /><br /> {1}"
@@ -55303,10 +55136,6 @@ msgstr "De taak is in de wacht gezet als achtergrondtaak. Als er een probleem is
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:1121
 msgid "The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Reconciliation and revert to the Submitted stage"
 msgstr "De taak is als achtergrondtaak in de wachtrij geplaatst. Als er zich een probleem voordoet tijdens de verwerking op de achtergrond, voegt het systeem een opmerking over de fout toe aan deze voorraadafstemming en keert terug naar de status 'Ingediend'."
-
-#: erpnext/stock/doctype/material_request/material_request.py:349
-msgid "The total Issue / Transfer quantity {0} in Material Request {1}  cannot be greater than allowed requested quantity {2} for Item {3}"
-msgstr ""
 
 #: erpnext/stock/doctype/material_request/material_request.py:356
 msgid "The total Issue / Transfer quantity {0} in Material Request {1} cannot be greater than requested quantity {2} for Item {3}"
@@ -55429,10 +55258,6 @@ msgstr "Er zijn geen plaatsen meer beschikbaar op deze datum."
 msgid "There are no transactions in the system for the selected bank account and dates that match the filters."
 msgstr ""
 
-#: erpnext/stock/doctype/item/item.js:1290
-msgid "There are two options to maintain valuation of stock. FIFO (first in - first out) and Moving Average. To understand this topic in detail please visit <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>Item Valuation, FIFO and Moving Average.</a>"
-msgstr "Er zijn twee opties om de waardering van aandelen te handhaven: FIFO (first in - first out) en het voortschrijdend gemiddelde. Voor een gedetailleerde uitleg van dit onderwerp kunt u terecht op <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>Item Waardering, FIFO en Voortschrijdend gemiddelde.</a>"
-
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:982
 msgid "There are {0} unreconciled transactions before {1}."
 msgstr ""
@@ -55467,10 +55292,6 @@ msgstr "Er is geen batch gevonden voor de {0}: {1}"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:984
 msgid "There is one unreconciled transaction before {0}."
-msgstr ""
-
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2045
-msgid "There must be atleast 1 Finished Good in this Stock Entry"
 msgstr ""
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.py:153
@@ -55873,10 +55694,6 @@ msgstr ""
 #: erpnext/setup/doctype/employee/employee.json
 msgid "This will restrict user access to other employee records"
 msgstr "Dit beperkt de toegang van gebruikers tot andere personeelsdossiers."
-
-#: erpnext/controllers/selling_controller.py:886
-msgid "This {} will be treated as material transfer."
-msgstr ""
 
 #. Option for the 'Under Withheld Reason' (Select) field in DocType 'Tax
 #. Withholding Entry'
@@ -61521,10 +61338,6 @@ msgstr ""
 msgid "You can use {0} to reconcile against {1} later."
 msgstr "Je kunt {0} gebruiken om later af te stemmen met {1}."
 
-#: erpnext/manufacturing/doctype/job_card/job_card.py:1378
-msgid "You can't make any changes to Job Card since Work Order is closed."
-msgstr ""
-
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:230
 msgid "You can't process the serial number {0} as it has already been used in the SABB {1}. {2} if you want to inward same serial number multiple times then enabled 'Allow existing Serial No to be Manufactured/Received again' in the {3}"
 msgstr ""
@@ -61543,10 +61356,6 @@ msgstr "U kunt geen {0} aanmaken binnen de afgesloten boekhoudperiode {1}"
 
 #: erpnext/accounts/general_ledger.py:183
 msgid "You cannot create or cancel any accounting entries with in the closed Accounting Period {0}"
-msgstr ""
-
-#: erpnext/accounts/general_ledger.py:851
-msgid "You cannot create/amend any accounting entries till this date."
 msgstr ""
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:950
@@ -61572,10 +61381,6 @@ msgstr ""
 #: erpnext/selling/page/point_of_sale/pos_payment.js:625
 msgid "You cannot redeem more than {0}."
 msgstr "U kunt niet meer dan {0} inwisselen."
-
-#: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:211
-msgid "You cannot repost item valuation before {}"
-msgstr ""
 
 #: erpnext/accounts/doctype/subscription/subscription.py:757
 msgid "You cannot restart a Subscription that is not cancelled."
@@ -62368,10 +62173,6 @@ msgstr "{0} is niet toegevoegd aan de tabel"
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.py:146
 msgid "{0} is not enabled in {1}"
 msgstr "{0} is niet ingeschakeld in {1}"
-
-#: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:647
-msgid "{0} is not running. Cannot trigger events for this Document"
-msgstr ""
 
 #: erpnext/stock/doctype/material_request/material_request.py:652
 msgid "{0} is not the default supplier for any items."
