@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-07-12 10:05+0000\n"
-"PO-Revision-Date: 2026-07-15 12:59\n"
+"PO-Revision-Date: 2026-07-16 13:13\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -4590,11 +4590,11 @@ msgstr "Tillåtna Användare"
 
 #: erpnext/crm/doctype/crm_settings/crm_settings.py:59
 msgid "Allowed Users is not required as Frappe CRM is already installed on the site."
-msgstr ""
+msgstr "Tillåtna Användare erfordras inte eftersom Säljstöd redan är installerad på webbplatsen."
 
 #: erpnext/crm/doctype/crm_settings/crm_settings.js:17
 msgid "Allowed Users is required for data synchronization from remote Frappe CRM site."
-msgstr ""
+msgstr "Tillåtna Användare efordras för datasynkronisering från extern Säljstöd webbplats."
 
 #: erpnext/accounts/doctype/party_link/party_link.py:27
 msgid "Allowed primary roles are 'Customer' and 'Supplier'. Please select one of these roles only."
@@ -5471,7 +5471,7 @@ msgstr "Tillämpa på Dokument"
 #. 'Sales Order'
 #: erpnext/selling/doctype/sales_order/sales_order.json
 msgid "Applying a Discount Amount? When this Sales Order is partially fulfilled through multiple Delivery Notes and Sales Invoices, the Discount Amount is allocated on a FIFO basis. The earlier transactions receive a larger share of the discount. To spread the discount proportionally across item prices, use Additional Discount Percentage instead."
-msgstr ""
+msgstr "Tillämpning av Rabatt Belopp? När denna kund order delvis levereras via flera Försäljning Följesedlar och Försäljning Fakturor fördelas rabatt belopp enligt FIFO. De tidigare transaktioner tilldelas större rabatt andel. För att fördela rabatt proportionellt över artikel priser ska ”Extra Rabatt Procent” användas istället."
 
 #. Name of a DocType
 #. Label of a Link in the CRM Workspace
@@ -9853,7 +9853,7 @@ msgstr "Kan inte skapa mellan bolag {0}. Alla ursprung artiklar {1} är redan fa
 
 #: erpnext/manufacturing/doctype/production_plan/services/material_request.py:103
 msgid "Cannot create Material Request for item {0} in group warehouse {1}."
-msgstr ""
+msgstr "Kan inte skapa Material Begäran för artikel {0} i grupp lager {1}."
 
 #: erpnext/stock/doctype/purchase_receipt/services/reservation.py:49
 msgid "Cannot create Stock Reservation Entries for future dated Purchase Receipts."
@@ -17338,7 +17338,7 @@ msgstr "Dimension Namn"
 
 #: erpnext/accounts/doctype/financial_report_template/financial_report_engine.py:277
 msgid "Dimension-based grouping is currently unsupported in Custom Financial Report"
-msgstr ""
+msgstr "Dimension baserad gruppering stöds för närvarande inte i Anpassad Bokslut Rapport"
 
 #. Name of a report
 #: erpnext/accounts/report/dimension_wise_accounts_balance_report/dimension_wise_accounts_balance_report.json
@@ -21391,7 +21391,7 @@ msgstr "För Lager"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:167
 msgid "For Warehouse {0} must be a child of the group warehouse {1}."
-msgstr ""
+msgstr "För Lager {0} måste vara underordnad till grupp lager {1}."
 
 #: erpnext/public/js/utils/serial_no_batch_selector.js:136
 msgid "For Work Order"
@@ -22980,7 +22980,7 @@ msgstr "Gruppera efter"
 #: erpnext/accounts/report/cash_flow/cash_flow.js:22
 #: erpnext/accounts/report/profit_and_loss_statement/profit_and_loss_statement.js:13
 msgid "Group by Dimension"
-msgstr ""
+msgstr "Gruppera efter Dimension"
 
 #: erpnext/buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.js:61
 msgid "Group by Material Request"
@@ -33367,7 +33367,7 @@ msgstr "Ej Startad"
 #: erpnext/accounts/doctype/financial_report_template/financial_report_engine.py:276
 #: erpnext/accounts/report/cash_flow/cash_flow.py:161
 msgid "Not Supported"
-msgstr ""
+msgstr "Stöds Ej"
 
 #: erpnext/accounts/report/cash_flow/cash_flow.py:479
 msgid "Not able to find the earliest Fiscal Year for the given company."
@@ -34244,7 +34244,7 @@ msgstr "Öppning Nummer för Bokförda Avskrivningar"
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:36
 msgid "Opening Purchase Invoice(s) have been created."
-msgstr ""
+msgstr "Öppning Inköp Faktura(or) har skapats."
 
 #: erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py:81
 #: erpnext/stock/report/stock_balance/stock_balance.py:533
@@ -34253,7 +34253,7 @@ msgstr "Öppning Kvantitet"
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:35
 msgid "Opening Sales Invoice(s) have been created."
-msgstr ""
+msgstr "Öppning Försäljning Faktura(or) har skapats."
 
 #. Label of the opening_stock (Float) field in DocType 'Item'
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Reconciliation'
@@ -34301,7 +34301,7 @@ msgstr "Öppning & Stängning"
 
 #: erpnext/accounts/report/cash_flow/cash_flow.py:162
 msgid "Opening and Closing balance is not supported for dimension grouped cash flow statement"
-msgstr ""
+msgstr "Öppning och Stängning Saldo stöds inte för dimension grupperad kassaflöde analys"
 
 #: erpnext/stock/doctype/item/item.py:199
 msgid "Opening stock creation has been queued and will be created in the background. Please check the Stock Reconciliation after some time."
@@ -34645,7 +34645,7 @@ msgstr "Optimerar rutt"
 #. 'Production Plan'
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
 msgid "Optional group warehouse. Raw material availability is checked across its child warehouses; material is still received into For Warehouse."
-msgstr ""
+msgstr "Grupplager (valfritt). Råvara tillgänglighet kontrolleras i alla underordnade lager; material tas fortfarande emot i ”For Lager”."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:1042
 msgid "Optional. Select a specific manufacture entry to reverse."
@@ -37339,7 +37339,7 @@ msgstr "Bunden Valuta Detaljer"
 
 #: erpnext/public/js/shop_floor/shop_floor.js:24
 msgid "Pending / In Progress"
-msgstr ""
+msgstr "Väntar / Pågår"
 
 #: erpnext/setup/doctype/email_digest/templates/default.html:93
 msgid "Pending Activities"
@@ -38015,7 +38015,7 @@ msgstr "Planerat Slut Datum"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:324
 msgid "Planned End Date cannot be before Planned Start Date"
-msgstr ""
+msgstr "Planerad Slutdatum kan inte vara före Planerad Startdatum"
 
 #. Label of the planned_end_time (Datetime) field in DocType 'Work Order
 #. Operation'
@@ -43547,7 +43547,7 @@ msgstr "Råmaterial Kostnad per Kvantitet"
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:160
 #: erpnext/manufacturing/doctype/production_plan/services/material_request.py:180
 msgid "Raw Material Group Warehouse"
-msgstr ""
+msgstr "Råmaterial Grupp Lager"
 
 #: erpnext/manufacturing/report/work_order_consumed_materials/work_order_consumed_materials.py:132
 msgid "Raw Material Item"
@@ -46044,7 +46044,7 @@ msgstr "Omvärdering Överskott"
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:631
 msgid "Revaluation journal for {0} has been created: {1}"
-msgstr ""
+msgstr "Omvärdering journal för {0} är skapad: {1}"
 
 #: erpnext/accounts/report/deferred_revenue_and_expense/deferred_revenue_and_expense.js:88
 msgid "Revenue"
@@ -46057,7 +46057,7 @@ msgstr "Intäkt Konto"
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.js:39
 msgid "Reversal Journal Entries"
-msgstr ""
+msgstr "Återföring Journal Poster"
 
 #. Label of the reversal_of (Link) field in DocType 'Journal Entry'
 #: erpnext/accounts/doctype/journal_entry/journal_entry.json
@@ -46066,7 +46066,7 @@ msgstr "Återföring Av"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry_list.js:6
 msgid "Reversal Of Exchange Rate Revaluation"
-msgstr ""
+msgstr "Återföring Av Växelkurs Omvärdering"
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.js:253
 msgid "Reverse Journal Entry"
@@ -46079,7 +46079,7 @@ msgstr "Omvänd Signatur"
 
 #: erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.js:118
 msgid "Reversing Journals..."
-msgstr ""
+msgstr "Återför Journaler..."
 
 #. Label of the review (Link) field in DocType 'Quality Action'
 #. Group in Quality Goal's connections
@@ -54565,11 +54565,11 @@ msgstr "Panel Flik"
 
 #: erpnext/public/js/shop_floor/shop_floor.js:139
 msgid "Switch to Dark Theme"
-msgstr ""
+msgstr "Byt till Mörkt Tema"
 
 #: erpnext/public/js/shop_floor/shop_floor.js:139
 msgid "Switch to Light Theme"
-msgstr ""
+msgstr "Byt till Ljust Tema"
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.js:23
 msgid "Sync Now"
@@ -60177,7 +60177,7 @@ msgstr "Användare Resolution Tid"
 
 #: erpnext/accounts/party.py:441
 msgid "User don't have permissions to select/read this account."
-msgstr ""
+msgstr "Användare har inte behörighet att välja/läsa detta konto."
 
 #: erpnext/accounts/doctype/pricing_rule/utils.py:593
 msgid "User has not applied rule on the invoice {0}"
@@ -60248,7 +60248,7 @@ msgstr "Användare med den här rollen kommer att meddelas om avskrivning av til
 
 #: erpnext/public/js/utils.js:569
 msgid "Using negative stock disables FIFO/Moving average valuation when inventory is negative. This is considered dangerous from accounting point of view.<br>Do you still want to enable negative inventory?"
-msgstr ""
+msgstr "Att använda negativt lager inaktiverar FIFO/MV värdering när lager är negativ. Detta anses vara farligt ur bokföring synpunkt.<br>Vill du fortfarande aktivera negativ lager?"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:133
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:220
@@ -60741,7 +60741,7 @@ msgstr "Variant skapande i kö."
 
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.py:172
 msgid "Variant {0} and its template {1} cannot both be added to the same Pricing Rule"
-msgstr ""
+msgstr "Variant {0} och dess mall {1} kan inte läggas till samma Prissättning Regel"
 
 #. Label of the variants_section (Tab Break) field in DocType 'Item'
 #: erpnext/stock/doctype/item/item.json
@@ -63481,7 +63481,7 @@ msgstr "{0} är öppen. Stäng Kassa eller avbryt befintlig Kassa Öppning Post 
 
 #: erpnext/manufacturing/doctype/production_plan/services/material_request.py:179
 msgid "{0} is required to get raw materials when {1} is set."
-msgstr ""
+msgstr "{0} erfordras för att hämta råmaterial när {1} är angiven."
 
 #: erpnext/manufacturing/doctype/work_order/work_order.js:546
 msgid "{0} items disassembled"
@@ -63513,7 +63513,7 @@ msgstr "{0} jobbkort väntar Produktion post"
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:160
 msgid "{0} must be a group warehouse."
-msgstr ""
+msgstr "{0} måste vara grupp lager."
 
 #: erpnext/controllers/sales_and_purchase_return.py:219
 msgid "{0} must be negative in return document"
