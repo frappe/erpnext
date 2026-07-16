@@ -398,6 +398,33 @@ class TestCustomer(ERPNextTestSuite):
 		self.assertEqual(middle, "Michael")
 		self.assertEqual(last, "Doe")
 
+	def test_portal_user_contact_link(self):
+		user_email = frappe.generate_hash() + "@example.com"
+		user = frappe.new_doc("User")
+		user.email = user_email
+		user.first_name = "Test Portal Customer User"
+		user.send_welcome_email = False
+		user.insert(ignore_permissions=True)
+
+		contact = frappe.new_doc("Contact")
+		contact.first_name = "Test Portal Customer User"
+		contact.add_email(user_email, is_primary=1)
+		contact.links = []
+		contact.insert(ignore_permissions=True)
+
+		customer = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "Test Portal Contact Customer",
+				"customer_type": "Individual",
+			}
+		)
+		customer.append("portal_users", {"user": user.name})
+		customer.insert()
+
+		contact.reload()
+		self.assertTrue(contact.has_link("Customer", customer.name))
+
 
 def get_customer_dict(customer_name):
 	return {
