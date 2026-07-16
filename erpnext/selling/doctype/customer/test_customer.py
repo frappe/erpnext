@@ -29,7 +29,8 @@ class TestCustomer(FrappeTestCase):
 			make_test_records("Item")
 
 	def tearDown(self):
-		set_credit_limit("_Test Customer", "_Test Company", 0)
+		if frappe.db.exists("Customer", "_Test Customer"):
+			set_credit_limit("_Test Customer", "_Test Company", 0)
 
 	def test_get_customer_group_details(self):
 		doc = frappe.new_doc("Customer Group")
