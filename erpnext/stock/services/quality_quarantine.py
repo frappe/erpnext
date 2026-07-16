@@ -198,22 +198,21 @@ def sync_source_document_quality_status(source_doctype, source_name):
 	frappe.db.set_value(source_doctype, source_name, "quality_status", value, update_modified=False)
 
 
-def handle_source_document_cancel(doc, method=None):
-	"""Cascade a source-document cancellation onto its Quality Control Lots.
-
-	An untouched lot (nothing released or rejected yet) is deleted along with the
-	reversed stock. A lot that already released or rejected quantity blocks the
-	cancellation — the Quality Control Release or purchase return must be
-	unwound first, mirroring how ERPNext blocks cancelling documents with
-	downstream submitted documents.
-	"""
-	lots = frappe.get_all(
+def _lots_minted_by(doc):
+	return frappe.get_all(
 		"Quality Control Lot",
 		filters={"source_document_type": doc.doctype, "source_document": doc.name},
 		fields=["name", "accepted_qty", "rejected_qty"],
 	)
 
-	for lot in lots:
+
+def block_cancel_when_lot_decided(doc, method=None):
+	"""A lot that already released or rejected quantity blocks the cancellation —
+	that stock has left quarantine, so reversing the deposit would go negative.
+	Runs before_cancel: the guard must speak before the stock ledger reversal
+	throws its raw negative-stock error.
+	"""
+	for lot in _lots_minted_by(doc):
 		if flt(lot.accepted_qty) or flt(lot.rejected_qty):
 			frappe.throw(
 				_(
@@ -222,6 +221,15 @@ def handle_source_document_cancel(doc, method=None):
 				).format(get_link_to_form("Quality Control Lot", lot.name)),
 				title=_("Quality Control Lot In Use"),
 			)
+
+
+def handle_source_document_cancel(doc, method=None):
+	"""Cascade a source-document cancellation onto its Quality Control Lots.
+
+	An untouched lot (nothing released or rejected yet) is deleted along with the
+	reversed stock; block_cancel_when_lot_decided already refused everything else.
+	"""
+	for lot in _lots_minted_by(doc):
 		frappe.delete_doc("Quality Control Lot", lot.name, ignore_permissions=True)
 
 

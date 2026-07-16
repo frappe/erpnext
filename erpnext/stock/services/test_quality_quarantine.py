@@ -913,6 +913,38 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertFalse(frappe.db.exists("Quality Control Lot", lot))
 		self.assertFalse(frappe.db.get_value("Stock Entry", se.name, "quality_status"))
 
+	def test_cancel_blocked_once_the_lot_released(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+
+		qc = make_qc_warehouse("_Test QC Cancel WH")
+		store = make_warehouse("_Test QC Cancel Store", quality_warehouse=qc)
+
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry", warehouse_role="Inbound", quality_control_mode="Quarantine"
+			),
+		)
+		item.save()
+
+		receipt = make_stock_entry(
+			item_code=item.name, qty=2, to_warehouse=store, purpose="Material Receipt", rate=100
+		)
+		lot = quality_control_lots_for(receipt.name)[0].name
+
+		# acceptance releases the stock out of quarantine; the deposit can no
+		# longer be reversed, so the guard must refuse — with its own message,
+		# not the stock ledger's negative-stock error
+		submit_inspection_for_lot(lot, status="Accepted")
+		self.assertRaisesRegex(frappe.ValidationError, "released or rejected", receipt.cancel)
+
+		# nothing was unwound: the lot survives and the released stock stands
+		self.assertTrue(frappe.db.exists("Quality Control Lot", lot))
+		receipt.reload()
+		self.assertEqual(receipt.docstatus, 1)
+		self.assertEqual(get_qty(item.name, store), 2)
+
 	def test_inspection_acceptance_releases_quarantined_stock(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
 

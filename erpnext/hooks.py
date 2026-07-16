@@ -402,6 +402,7 @@ doc_events = {
 			"erpnext.stock.services.quality_trigger_resolution.validate_inspected_serial_consistency",
 			"erpnext.stock.services.quality_quarantine.create_quality_control_lots",
 		],
+		"before_cancel": "erpnext.stock.services.quality_quarantine.block_cancel_when_lot_decided",
 		"on_cancel": "erpnext.stock.services.quality_quarantine.handle_source_document_cancel",
 	},
 	("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"): {
