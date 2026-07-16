@@ -1168,7 +1168,7 @@ def get_company_default(company: str, fieldname: str, ignore_validation: bool = 
 	if not ignore_validation and not value:
 		throw(
 			_("Please set default {0} in Company {1}").format(
-				_(frappe.get_meta("Company").get_label(fieldname)), company
+				_(frappe.get_meta("Company").get_label(fieldname), context="Company"), company
 			)
 		)
 

@@ -335,7 +335,9 @@ erpnext.sales_common = {
 									this.frm.doc.doctype,
 									"commission_rate",
 									this.frm.doc.name
-								)
+								),
+								null,
+								this.frm.doc.doctype
 							),
 						])
 					);

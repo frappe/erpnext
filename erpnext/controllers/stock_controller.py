@@ -103,7 +103,7 @@ class StockController(AccountsController):
 						_("Row #{0}: Item {1} has zero rate but '{2}' is not enabled.").format(
 							item.idx,
 							frappe.bold(item.item_code),
-							item.meta.get_label("allow_zero_valuation_rate"),
+							_(item.meta.get_label("allow_zero_valuation_rate"), context=item.doctype),
 						),
 						indicator="orange",
 					)

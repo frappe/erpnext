@@ -932,7 +932,9 @@ class WorkOrder(Document):
 			self.transfer_material_against = "Work Order"
 		if not self.transfer_material_against:
 			frappe.throw(
-				_("Setting {0} is required").format(_(self.meta.get_label("transfer_material_against"))),
+				_("Setting {0} is required").format(
+					_(self.meta.get_label("transfer_material_against"), context=self.doctype)
+				),
 				title=_("Missing value"),
 			)
 

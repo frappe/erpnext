@@ -128,7 +128,7 @@ class Task(NestedSet):
 					frappe.throw(
 						_("{0}'s {1} cannot be after {2}'s Expected End Date.").format(
 							frappe.bold(frappe.get_desk_link("Task", self.name)),
-							_(self.meta.get_label(fieldname)),
+							_(self.meta.get_label(fieldname), context=self.doctype),
 							frappe.bold(frappe.get_desk_link("Project", self.project)),
 						),
 						frappe.exceptions.InvalidDates,
