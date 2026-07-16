@@ -156,6 +156,46 @@ class Dunning(AccountsController):
 			"Serial and Batch Bundle",
 		]
 
+	@frappe.whitelist()
+	def get_dunning_letter_text(self):
+		DOCTYPE = "Dunning Letter Text"
+		FIELDS = ["body_text", "closing_text", "language"]
+
+		if not self.dunning_type:
+			return
+
+		filters = {"parent": self.dunning_type, "is_default_language": 1}
+
+		if self.language:
+			filters.pop("is_default_language")
+			filters["language"] = self.language
+
+		letter_text = frappe.db.get_value(DOCTYPE, filters, FIELDS, as_dict=True)
+
+		if not letter_text:
+			msg = (
+				_("Dunning Letter for Dunning Type {0} in language '{1}' not found.").format(
+					frappe.bold(self.dunning_type), frappe.bold(self.language)
+				)
+				if self.language
+				else _("Dunning Letter for Dunning Type {0} not found.").format(
+					frappe.bold(self.dunning_type)
+				)
+			)
+			frappe.msgprint(msg, alert=True, indicator="yellow")
+
+		self.body_text = (
+			frappe.render_template(letter_text.body_text, self.as_dict(), restrict_globals=True)
+			if letter_text
+			else None
+		)
+		self.closing_text = (
+			frappe.render_template(letter_text.closing_text, self.as_dict(), restrict_globals=True)
+			if letter_text
+			else None
+		)
+		self.language = letter_text.language if letter_text else self.language
+
 
 def update_linked_dunnings(doc, previous_outstanding_amount):
 	if (
@@ -234,6 +274,7 @@ def get_linked_dunnings_as_per_state(sales_invoice, state):
 			& (overdue_payment.sales_invoice == sales_invoice)
 		)
 	).run(as_dict=True)
+<<<<<<< HEAD
 
 
 @frappe.whitelist()
@@ -266,3 +307,5 @@ def get_dunning_letter_text(dunning_type: str, doc: str | dict, language: str | 
 		"closing_text": frappe.render_template(letter_text.closing_text, doc),
 		"language": letter_text.language,
 	}
+=======
+>>>>>>> ac68db3fa6 (refactor(dunning): converted `get_dunning_letter_text` to doc method and `restrict_globals` on `render_template` (#57205))
