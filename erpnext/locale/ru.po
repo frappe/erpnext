@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-07-12 10:05+0000\n"
-"PO-Revision-Date: 2026-07-15 12:46\n"
+"PO-Revision-Date: 2026-07-16 13:11\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Russian\n"
 "MIME-Version: 1.0\n"
@@ -1057,7 +1057,7 @@ msgstr "А - В"
 
 #: erpnext/selling/doctype/customer/customer.py:356
 msgid "A Customer Group exists with same name please change the Customer name or rename the Customer Group"
-msgstr "Р“СЂСѓРїРїР° РєР»РёРµРЅС‚РѕРІ СЃ С‚Р°РєРёРј РёРјРµРЅРµРј СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚. РџРѕР¶Р°Р»СѓР№СЃС‚Р°, РёР·РјРµРЅРёС‚Рµ РёРјСЏ РєР»РёРµРЅС‚Р° РёР»Рё РёРјСЏ РіСЂСѓРїРїС‹ РєР»РёРµРЅС‚РѕРІ"
+msgstr "Группа клиентов с таким именем уже существует. Пожалуйста, измените имя клиента или имя группы клиентов"
 
 #: erpnext/manufacturing/doctype/workstation/workstation.js:73
 msgid "A Holiday List can be added to exclude counting these days for the Workstation."
@@ -4030,7 +4030,7 @@ msgstr "Все требуемые элементы (сырье) будут по�
 
 #: erpnext/stock/doctype/delivery_note/delivery_note.py:848
 msgid "All these items have already been Invoiced/Returned"
-msgstr "РќР° РІСЃРµ СЌС‚Рё С‚РѕРІР°СЂС‹ СѓР¶Рµ РІС‹СЃС‚Р°РІР»РµРЅ СЃС‡РµС‚ / РІРѕР·РІСЂР°С‚"
+msgstr ""
 
 #: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.js:100
 #: erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.js:101
@@ -5635,7 +5635,7 @@ msgstr "Поскольку существуют отправленные тра�
 
 #: erpnext/stock/doctype/stock_settings/stock_settings.py:242
 msgid "As there are reserved stock, you cannot disable {0}."
-msgstr "РџРѕСЃРєРѕР»СЊРєСѓ РёРјРµСЋС‚СЃСЏ Р·Р°СЂРµР·РµСЂРІРёСЂРѕРІР°РЅРЅС‹Рµ Р·Р°РїР°СЃС‹, РІС‹ РЅРµ РјРѕР¶РµС‚Рµ РѕС‚РєР»СЋС‡РёС‚СЊ {0}."
+msgstr ""
 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.py:1090
 msgid "As there are sufficient Sub Assembly Items, Work Order is not required for Warehouse {0}."
@@ -5913,7 +5913,7 @@ msgstr "Элемент Движения Актива"
 
 #: erpnext/assets/doctype/asset/asset.py:1187
 msgid "Asset Movement record {0} created"
-msgstr "Р·Р°РїРёСЃСЊ Р”РІРёР¶РµРЅРёРµ Р°РєС‚РёРІРѕРІ {0} СЃРѕР·РґР°РЅРѕ"
+msgstr ""
 
 #. Label of the asset_name (Data) field in DocType 'Asset'
 #. Label of the target_asset_name (Data) field in DocType 'Asset
@@ -6300,7 +6300,7 @@ msgstr "Для шаблона финансового отчета требует
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:991
 msgid "At least one warehouse is mandatory"
-msgstr "РћР±СЏР·Р°С‚РµР»СЊРЅРѕ РЅР°Р»РёС‡РёРµ С…РѕС‚СЏ Р±С‹ РѕРґРЅРѕРіРѕ СЃРєР»Р°РґР°"
+msgstr ""
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:894
 msgid "At row #{0}: the Difference Account must not be a Stock type account, please change the Account Type for the account {1} or select a different account"
@@ -6312,7 +6312,7 @@ msgstr "В строке #{0}: идентификатор последовате�
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:905
 msgid "At row #{0}: you have selected the Difference Account {1}, which is a Cost of Goods Sold type account. Please select a different account"
-msgstr "Р’ СЃС‚СЂРѕРєРµ #{0}: Р’С‹ РІС‹Р±СЂР°Р»Рё СЃС‡РµС‚ СЂР°Р·РЅРёС†С‹ {1}, РєРѕС‚РѕСЂС‹Р№ СЏРІР»СЏРµС‚СЃСЏ СЃС‡РµС‚РѕРј С‚РёРїР° \"РЎРµР±РµСЃС‚РѕРёРјРѕСЃС‚СЊ РїСЂРѕРґР°РЅРЅС‹С… С‚РѕРІР°СЂРѕРІ\". РџРѕР¶Р°Р»СѓР№СЃС‚Р°, РІС‹Р±РµСЂРёС‚Рµ РґСЂСѓРіРѕР№ СЃС‡РµС‚"
+msgstr ""
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1235
 msgid "At row {0}: Batch No is mandatory for Item {1}"
@@ -6332,7 +6332,7 @@ msgstr "В строке {0}: Серийный номер является обя
 
 #: erpnext/controllers/stock_controller.py:716
 msgid "At row {0}: Serial and Batch Bundle {1} has already created. Please remove the values from the serial no or batch no fields."
-msgstr "Р’ СЃС‚СЂРѕРєРµ {0}: РЎРµСЂРёР№РЅС‹Р№ Рё РїР°СЂС‚РёРѕРЅРЅС‹Р№ РєРѕРјРїР»РµРєС‚ {1} СѓР¶Рµ СЃРѕР·РґР°РЅС‹. РџРѕР¶Р°Р»СѓР№СЃС‚Р°, СѓРґР°Р»РёС‚Рµ Р·РЅР°С‡РµРЅРёСЏ РёР· РїРѕР»РµР№ СЃРµСЂРёР№РЅРѕРіРѕ РЅРѕРјРµСЂР° РёР»Рё РЅРѕРјРµСЂР° РїР°СЂС‚РёРё."
+msgstr ""
 
 #: erpnext/manufacturing/doctype/bom_creator/bom_creator.py:123
 msgid "At row {0}: set Parent Row No for item {1}"
@@ -6833,7 +6833,7 @@ msgstr "Доступна дата использования"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1241
 msgid "Available quantity is {0}, you need {1}"
-msgstr "Р”РѕСЃС‚СѓРїРЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ: {0}, РІР°Рј РЅСѓР¶РЅРѕ {1}"
+msgstr ""
 
 #: erpnext/stock/dashboard/item_dashboard.js:251
 msgid "Available {0}"
@@ -6981,7 +6981,7 @@ msgstr "Спецификация 1"
 
 #: erpnext/manufacturing/doctype/bom/bom.py:1823
 msgid "BOM 1 {0} and BOM 2 {1} should not be same"
-msgstr "РЎРїРµС†РёС„РёРєР°С†РёСЏ 1 {0} Рё СЃРїРµС†РёС„РёРєР°С†РёСЏ 2 {1} РЅРµ РґРѕР»Р¶РЅС‹ СЃРѕРІРїР°РґР°С‚СЊ"
+msgstr ""
 
 #: erpnext/manufacturing/page/bom_comparison_tool/bom_comparison_tool.js:38
 msgid "BOM 2"
@@ -8151,7 +8151,7 @@ msgstr "Номер партии обязателен"
 
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:3530
 msgid "Batch No {0} does not exists"
-msgstr "РќРѕРјРµСЂ РїР°СЂС‚РёРё {0} РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚"
+msgstr ""
 
 #: erpnext/stock/utils.py:628
 msgid "Batch No {0} is linked with Item {1} which has serial no. Please scan serial no instead."
@@ -8228,7 +8228,7 @@ msgstr "Номер партии и серийный номер"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:1068
 msgid "Batch not created for item {} since it does not have a batch series."
-msgstr "РџР°СЂС‚РёСЏ РґР»СЏ С‚РѕРІР°СЂР° {} РЅРµ СЃРѕР·РґР°РЅР°, С‚Р°Рє РєР°Рє Сѓ РЅРµРіРѕ РѕС‚СЃСѓС‚СЃС‚РІСѓСЋС‚ СЃРµСЂРёРё РїР°СЂС‚РёР№."
+msgstr ""
 
 #. Description of the 'Automatically Create New Batch' (Check) field in DocType
 #. 'Item'
@@ -8787,7 +8787,7 @@ msgstr "Зарегистрированный основной актив"
 
 #: erpnext/accounts/general_ledger.py:849
 msgid "Books have been closed till the period ending on {0}"
-msgstr "Р—Р°РїРёСЃРё РІ Р±СѓС…РіР°Р»С‚РµСЂРёРё Р·Р°РєСЂС‹С‚С‹ РґРѕ РѕРєРѕРЅС‡Р°РЅРёСЏ РїРµСЂРёРѕРґР°, Р·Р°РєР°РЅС‡РёРІР°СЋС‰РµРіРѕСЃСЏ {0}"
+msgstr ""
 
 #. Option for the 'Type of Transaction' (Select) field in DocType 'Inventory
 #. Dimension'
@@ -9908,7 +9908,7 @@ msgstr "Невозможно установить количество мень�
 
 #: erpnext/controllers/accounts_controller.py:3956
 msgid "Cannot set quantity less than received quantity."
-msgstr "РќРµРІРѕР·РјРѕР¶РЅРѕ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ РєРѕР»РёС‡РµСЃС‚РІРѕ РјРµРЅСЊС€Рµ РїРѕР»СѓС‡РµРЅРЅРѕРіРѕ."
+msgstr ""
 
 #: erpnext/stock/doctype/item_variant_settings/item_variant_settings.py:69
 msgid "Cannot set the field <b>{0}</b> for copying in variants"
@@ -10314,7 +10314,7 @@ msgstr "Измените эту дату вручную, чтобы настро
 
 #: erpnext/selling/doctype/customer/customer.py:159
 msgid "Changed customer name to '{}' as '{}' already exists."
-msgstr "РРјСЏ РєР»РёРµРЅС‚Р° РёР·РјРµРЅРµРЅРѕ РЅР° В«{}В», РїРѕСЃРєРѕР»СЊРєСѓ В«{}В» СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚."
+msgstr ""
 
 #: erpnext/manufacturing/page/bom_comparison_tool/bom_comparison_tool.js:160
 msgid "Changes in {0}"
@@ -11775,11 +11775,11 @@ msgstr "Название поля ссылки на компанию, испол
 
 #: erpnext/setup/doctype/company/company.js:223
 msgid "Company name not same"
-msgstr "РќР°Р·РІР°РЅРёРµ РєРѕРјРїР°РЅРёРё РЅРµ РѕРґРёРЅР°РєРѕРІРѕ"
+msgstr ""
 
 #: erpnext/assets/doctype/asset/asset.py:334
 msgid "Company of asset {0} and purchase document {1} doesn't matches."
-msgstr "РљРѕРјРїР°РЅРёСЏ Р°РєС‚РёРІР° {0} Рё РґРѕРєСѓРјРµРЅС‚ РїРѕРєСѓРїРєРё {1} РЅРµ СЃРѕРІРїР°РґР°СЋС‚."
+msgstr ""
 
 #: erpnext/setup/doctype/employee/employee.py:164
 msgid "Company or Personal Email is mandatory when 'Create User Automatically' is enabled"
@@ -11831,7 +11831,7 @@ msgstr "Компания {} пока не существует. Настройк
 
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:575
 msgid "Company {} does not match with POS Profile Company {}"
-msgstr "РќРµСЃРѕРѕС‚РІРµС‚СЃС‚РІРёРµ РјРµР¶РґСѓ РєРѕРјРїР°РЅРёРµР№ {} Рё РєРѕРјРїР°РЅРёРµР№ РІ РїСЂРѕС„РёР»Рµ POS {}"
+msgstr ""
 
 #. Name of a DocType
 #. Label of the competitor (Link) field in DocType 'Competitor Detail'
@@ -12302,7 +12302,7 @@ msgstr "Потребляемое кол-во"
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:1940
 msgid "Consumed Qty cannot be greater than Reserved Qty for item {0}"
-msgstr "РџРѕС‚СЂРµР±Р»РµРЅРЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ Р±РѕР»СЊС€Рµ Р·Р°СЂРµР·РµСЂРІРёСЂРѕРІР°РЅРЅРѕРіРѕ РєРѕР»РёС‡РµСЃС‚РІР° РґР»СЏ С‚РѕРІР°СЂР° {0}"
+msgstr ""
 
 #. Label of the consumed_quantity (Data) field in DocType 'Asset Repair
 #. Consumed Item'
@@ -13040,11 +13040,11 @@ msgstr "Центр затрат {0} не может быть использов�
 
 #: erpnext/assets/doctype/asset/asset.py:362
 msgid "Cost Center {} doesn't belong to Company {}"
-msgstr "Р¦РµРЅС‚СЂ Р·Р°С‚СЂР°С‚ {} РЅРµ РїСЂРёРЅР°РґР»РµР¶РёС‚ РєРѕРјРїР°РЅРёРё {}"
+msgstr ""
 
 #: erpnext/assets/doctype/asset/asset.py:369
 msgid "Cost Center {} is a group cost center and group cost centers cannot be used in transactions"
-msgstr "Р¦РµРЅС‚СЂ Р·Р°С‚СЂР°С‚ {} вЂ” СЌС‚Рѕ РіСЂСѓРїРїРѕРІРѕР№ С†РµРЅС‚СЂ Р·Р°С‚СЂР°С‚, Р° РіСЂСѓРїРїРѕРІС‹Рµ С†РµРЅС‚СЂС‹ Р·Р°С‚СЂР°С‚ РЅРµ РјРѕРіСѓС‚ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊСЃСЏ РІ С‚СЂР°РЅР·Р°РєС†РёСЏС…"
+msgstr ""
 
 #: erpnext/accounts/report/financial_statements.py:658
 msgid "Cost Center: {0} does not exist"
@@ -17083,7 +17083,7 @@ msgstr "Счет разницы должен быть счетом типа «А
 
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:978
 msgid "Difference Account must be a Asset/Liability type account, since this Stock Reconciliation is an Opening Entry"
-msgstr "Р Р°Р·РЅРёС†Р° Р°РєРєР°СѓРЅС‚ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ С‚РёРї СЃС‡РµС‚Р° Р°РєС‚РёРІРѕРІ / РїР°СЃСЃРёРІРѕРІ, С‚Р°Рє РєР°Рє СЌС‚Рѕ СЃРѕ РџСЂРёРјРёСЂРµРЅРёРµ Р·Р°РїРёСЃСЊ РћС‚РєСЂС‹С‚РёРµ"
+msgstr ""
 
 #. Label of the difference_amount (Currency) field in DocType 'Payment
 #. Reconciliation Allocation'
@@ -17301,7 +17301,7 @@ msgstr ""
 
 #: erpnext/controllers/accounts_controller.py:931
 msgid "Disabled pricing rules since this {} is an internal transfer"
-msgstr "РћС‚РєР»СЋС‡РµРЅС‹ РїСЂР°РІРёР»Р° С†РµРЅРѕРѕР±СЂР°Р·РѕРІР°РЅРёСЏ, С‚Р°Рє РєР°Рє СЌС‚Рѕ {} СЏРІР»СЏРµС‚СЃСЏ РІРЅСѓС‚СЂРµРЅРЅРёРј РїРµСЂРµРІРѕРґРѕРј"
+msgstr ""
 
 #. Description of the 'Disabled' (Check) field in DocType 'Supplier'
 #: erpnext/buying/doctype/supplier/supplier.json
@@ -17310,7 +17310,7 @@ msgstr ""
 
 #: erpnext/controllers/accounts_controller.py:945
 msgid "Disabled tax included prices since this {} is an internal transfer"
-msgstr "Р¦РµРЅС‹ СЃ СѓС‡РµС‚РѕРј РЅР°Р»РѕРіР° РѕС‚РєР»СЋС‡РµРЅС‹, С‚Р°Рє РєР°Рє СЌС‚Рѕ {} РІРЅСѓС‚СЂРµРЅРЅРёР№ РїРµСЂРµРІРѕРґ"
+msgstr ""
 
 #: erpnext/accounts/doctype/sales_taxes_and_charges_template/sales_taxes_and_charges_template.py:79
 msgid "Disabled template must not be default template"
@@ -17557,7 +17557,7 @@ msgstr "Скидка должна быть меньше 100"
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.py:3379
 msgid "Discount of {} applied as per Payment Term"
-msgstr "РЎРєРёРґРєР° {} РїСЂРёРјРµРЅСЏРµС‚СЃСЏ РІ СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРё СЃ РЈСЃР»РѕРІРёСЏРјРё РѕРїР»Р°С‚С‹"
+msgstr ""
 
 #. Label of the section_break_18 (Section Break) field in DocType 'Pricing
 #. Rule'
@@ -18648,7 +18648,7 @@ msgstr "Проверка адреса электронной почты не у�
 #: erpnext/accounts/letterhead/company_letterhead.html:96
 #: erpnext/accounts/letterhead/company_letterhead_grey.html:114
 msgid "Email:"
-msgstr "Р­Р». Р°РґСЂРµСЃ:"
+msgstr ""
 
 #: erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.js:20
 msgid "Emails Queued"
@@ -19500,7 +19500,7 @@ msgstr "Ошибка: для этого актива уже учтено {0} п�
 
 #: erpnext/accounts/doctype/payment_entry/payment_entry.js:980
 msgid "Error: {0} is mandatory field"
-msgstr "РћС€РёР±РєР°: {0} СЏРІР»СЏРµС‚СЃСЏ РѕР±СЏР·Р°С‚РµР»СЊРЅС‹Рј РїРѕР»РµРј"
+msgstr ""
 
 #. Label of the errors_notification_section (Section Break) field in DocType
 #. 'Stock Reposting Settings'
@@ -21143,7 +21143,7 @@ msgstr "Для производства"
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1008
 msgid "For Quantity (Manufactured Qty) is mandatory"
-msgstr "Р”Р»СЏ РљРѕР»РёС‡РµСЃС‚РІРѕ (РР·РіРѕС‚РѕРІРёС‚РµР»СЊ РљРѕР»РёС‡РµСЃС‚РІРѕ) СЏРІР»СЏРµС‚СЃСЏ РѕР±СЏР·Р°С‚РµР»СЊРЅС‹Рј"
+msgstr ""
 
 #. Label of the material_request_planning (Section Break) field in DocType
 #. 'Production Plan'
@@ -21181,11 +21181,11 @@ msgstr "Для заказа на работу"
 
 #: erpnext/controllers/status_updater.py:292
 msgid "For an item {0}, quantity must be negative number"
-msgstr "Р”Р»СЏ СЌР»РµРјРµРЅС‚Р° {0} РєРѕР»РёС‡РµСЃС‚РІРѕ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ РѕС‚СЂРёС†Р°С‚РµР»СЊРЅС‹Рј С‡РёСЃР»РѕРј"
+msgstr ""
 
 #: erpnext/controllers/status_updater.py:289
 msgid "For an item {0}, quantity must be positive number"
-msgstr "Р”Р»СЏ СЌР»РµРјРµРЅС‚Р° {0} РєРѕР»РёС‡РµСЃС‚РІРѕ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ РїРѕР»РѕР¶РёС‚РµР»СЊРЅС‹Рј С‡РёСЃР»РѕРј"
+msgstr ""
 
 #. Description of the 'Income Account' (Link) field in DocType 'Dunning'
 #: erpnext/accounts/doctype/dunning/dunning.json
@@ -21223,7 +21223,7 @@ msgstr "Для товара <b>{0}</b>, только <b>{1}</b> активы б�
 
 #: erpnext/controllers/status_updater.py:302
 msgid "For item {0}, rate must be a positive number. To Allow negative rates, enable {1} in {2}"
-msgstr "Р”Р»СЏ СЌР»РµРјРµРЅС‚Р° {0} СЃС‚Р°РІРєР° РґРѕР»Р¶РЅР° Р±С‹С‚СЊ РїРѕР»РѕР¶РёС‚РµР»СЊРЅС‹Рј С‡РёСЃР»РѕРј. Р§С‚РѕР±С‹ СЂР°Р·СЂРµС€РёС‚СЊ РѕС‚СЂРёС†Р°С‚РµР»СЊРЅС‹Рµ СЃС‚Р°РІРєРё, РІРєР»СЋС‡РёС‚Рµ {1} РІ {2}"
+msgstr ""
 
 #. Description of the 'Do not fetch incoming rate from Serial No' (Check) field
 #. in DocType 'Stock Reposting Settings'
@@ -21237,7 +21237,7 @@ msgstr "Для операции {0} в строке {1} добавьте сыр�
 
 #: erpnext/manufacturing/doctype/work_order/work_order.py:2911
 msgid "For operation {0}: Quantity ({1}) can not be greater than pending quantity({2})"
-msgstr "Р”Р»СЏ РѕРїРµСЂР°С†РёРё {0}: РљРѕР»РёС‡РµСЃС‚РІРѕ ({1}) РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ Р±РѕР»СЊС€Рµ РѕР¶РёРґР°РµРјРѕРіРѕ РєРѕР»РёС‡РµСЃС‚РІР° ({2})"
+msgstr ""
 
 #: erpnext/projects/doctype/project/project.js:208
 msgid "For project - {0}, update your status"
@@ -21254,7 +21254,7 @@ msgstr "Для прогнозируемых и планируемых колич
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:2068
 msgid "For quantity {0} should not be greater than allowed quantity {1}"
-msgstr "Р”Р»СЏ РєРѕР»РёС‡РµСЃС‚РІР° {0} РЅРµ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ Р±РѕР»СЊС€Рµ РґРѕРїСѓСЃС‚РёРјРѕРіРѕ РєРѕР»РёС‡РµСЃС‚РІР° {1}"
+msgstr ""
 
 #. Description of the 'Territory Manager' (Link) field in DocType 'Territory'
 #: erpnext/setup/doctype/territory/territory.json
@@ -21521,10 +21521,6 @@ msgstr "От даты и до даты лежат разные финансов�
 #: erpnext/stock/report/reserved_stock/reserved_stock.py:29
 msgid "From Date cannot be greater than To Date"
 msgstr "С даты не может быть больше, чем к дате"
-
-#: erpnext/selling/report/sales_partner_commission_summary/sales_partner_commission_summary.py:60
-msgid "From Date cannot be greater than To Date."
-msgstr "РЎ РґР°С‚С‹ РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ Р±РѕР»СЊС€Рµ, С‡РµРј Рє РґР°С‚Рµ."
 
 #: erpnext/crm/report/sales_pipeline_analytics/sales_pipeline_analytics.py:27
 msgid "From Date is mandatory"
@@ -22356,10 +22352,6 @@ msgstr "Получить информацию о запасах"
 #: erpnext/manufacturing/doctype/production_plan/production_plan.json
 msgid "Get Sub Assembly Items"
 msgstr "Получить комплектующие изделия"
-
-#: erpnext/buying/doctype/supplier/supplier.js:151
-msgid "Get Supplier Group Details"
-msgstr "РџРѕР»СѓС‡РёС‚СЊ РґР°РЅРЅС‹Рµ Рѕ РіСЂСѓРїРїРµ РїРѕСЃС‚Р°РІС‰РёРєРѕРІ"
 
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:461
 #: erpnext/buying/doctype/request_for_quotation/request_for_quotation.js:481
@@ -26489,10 +26481,6 @@ msgstr "Дата выдачи"
 msgid "It can take upto few hours for accurate stock values to be visible after merging items."
 msgstr "После объединения позиций может потребоваться несколько часов, чтобы увидеть точные значения запасов."
 
-#: erpnext/public/js/controllers/transaction.js:2580
-msgid "It is needed to fetch Item Details."
-msgstr "Р­С‚Рѕ РЅРµРѕР±С…РѕРґРёРјРѕ РґР»СЏ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ РїРѕРґСЂРѕР±РЅРѕСЃС‚РµР№ РїСЂРѕРґСѓРєС‚Р°."
-
 #: banking/src/components/features/BankReconciliation/BankBalance.tsx:79
 msgid "It takes into account all the transactions that have been posted and subtracts the transactions that have not cleared yet."
 msgstr ""
@@ -27793,10 +27781,6 @@ msgstr "Название продукта"
 msgid "Item operation"
 msgstr "Операция с товаром"
 
-#: erpnext/controllers/accounts_controller.py:4005
-msgid "Item qty can not be updated as raw materials are already processed."
-msgstr "РљРѕР»РёС‡РµСЃС‚РІРѕ С‚РѕРІР°СЂР° РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РѕР±РЅРѕРІР»РµРЅРѕ, С‚Р°Рє РєР°Рє СЃС‹СЂСЊРµ СѓР¶Рµ РѕР±СЂР°Р±РѕС‚Р°РЅРѕ."
-
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:1508
 msgid "Item rate has been updated to zero as Allow Zero Valuation Rate is checked for item {0}"
 msgstr "Ставка товара обновлена до нуля, так как для товара {0} установлена опция \"Разрешить нулевую ставку оценки\""
@@ -27944,10 +27928,6 @@ msgstr "Пункт {0}: Заказал Кол-во {1} не может быть 
 #: erpnext/manufacturing/doctype/production_plan/production_plan.js:573
 msgid "Item {0}: {1} qty produced. "
 msgstr "Элемент {0}: произведено {1} кол-во. "
-
-#: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:1334
-msgid "Item {} does not exist."
-msgstr "РўРѕРІР°СЂ {} РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚."
 
 #. Name of a report
 #: erpnext/stock/report/item_wise_price_list_rate/item_wise_price_list_rate.json
@@ -29130,10 +29110,6 @@ msgstr "Сбой связи"
 msgid "Linking to Customer Failed. Please try again."
 msgstr "Связь с клиентом не удалась. Пожалуйста, попробуйте еще раз."
 
-#: erpnext/selling/doctype/customer/customer.js:280
-msgid "Linking to Supplier Failed. Please try again."
-msgstr "РЎСЃС‹Р»РєР° РЅР° РїРѕСЃС‚Р°РІС‰РёРєР° РЅРµ СѓРґР°Р»Р°СЃСЊ. РџРѕРїСЂРѕР±СѓР№С‚Рµ РµС‰Рµ СЂР°Р·."
-
 #: erpnext/accounts/report/financial_ratios/financial_ratios.js:55
 #: erpnext/accounts/report/financial_ratios/financial_ratios.py:152
 msgid "Liquidity Ratios"
@@ -30105,10 +30081,6 @@ msgstr "Дата изготовления"
 #: erpnext/stock/doctype/stock_entry_type/stock_entry_type.json
 msgid "Manufacturing Manager"
 msgstr "Менеджер производства"
-
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2907
-msgid "Manufacturing Quantity is mandatory"
-msgstr "РџСЂРѕРёР·РІРѕРґСЃС‚РІРѕ РљРѕР»РёС‡РµСЃС‚РІРѕ СЏРІР»СЏРµС‚СЃСЏ РѕР±СЏР·Р°С‚РµР»СЊРЅС‹Рј"
 
 #. Label of the manufacturing_section_section (Section Break) field in DocType
 #. 'Sales Order Item'
@@ -31583,17 +31555,9 @@ msgstr ""
 msgid "Multiple Accounts (Journal Template)"
 msgstr ""
 
-#: erpnext/selling/doctype/customer/customer.py:441
-msgid "Multiple Loyalty Programs found for Customer {}. Please select manually."
-msgstr "РќР°Р№РґРµРЅРѕ РЅРµСЃРєРѕР»СЊРєРѕ РїСЂРѕРіСЂР°РјРј Р»РѕСЏР»СЊРЅРѕСЃС‚Рё РґР»СЏ РєР»РёРµРЅС‚Р° {}. Р’С‹Р±РµСЂРёС‚Рµ РІСЂСѓС‡РЅСѓСЋ."
-
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1241
 msgid "Multiple POS Opening Entry"
 msgstr "Несколько записей открытия POS"
-
-#: erpnext/accounts/doctype/pricing_rule/utils.py:348
-msgid "Multiple Price Rules exists with same criteria, please resolve conflict by assigning priority. Price Rules: {0}"
-msgstr "РќРµСЃРєРѕР»СЊРєРѕ Р¦РµРЅР° РџСЂР°РІРёР»Р° СЃСѓС‰РµСЃС‚РІСѓРµС‚ СЃ С‚РµРјРё Р¶Рµ РєСЂРёС‚РµСЂРёСЏРјРё, РїРѕР¶Р°Р»СѓР№СЃС‚Р° СЂР°Р·СЂРµС€РёС‚СЊ РєРѕРЅС„Р»РёРєС‚ РїСѓС‚РµРј РїСЂРёСЃРІРѕРµРЅРёСЏ РїСЂРёРѕСЂРёС‚РµС‚Р°. Р¦РµРЅР° РџСЂР°РІРёР»Р°: {0}"
 
 #. Option for the 'Loyalty Program Type' (Select) field in DocType 'Loyalty
 #. Program'
@@ -32251,10 +32215,6 @@ msgstr "Новое название склада"
 #: erpnext/setup/doctype/employee/employee.json
 msgid "New Workplace"
 msgstr "Новое рабочее место"
-
-#: erpnext/selling/doctype/customer/customer.py:406
-msgid "New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0}"
-msgstr "РќРѕРІС‹Р№ РєСЂРµРґРёС‚РЅС‹Р№ Р»РёРјРёС‚ РјРµРЅСЊС€Рµ С‚РµРєСѓС‰РµР№ СЃСѓРјРјС‹ Р·Р°РґРѕР»Р¶РµРЅРЅРѕСЃС‚Рё РґР»СЏ РєР»РёРµРЅС‚Р°. РљСЂРµРґРёС‚РЅС‹Р№ Р»РёРјРёС‚ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅРѕ РЅРµ РјРµРЅРµРµ {0}"
 
 #. Description of the 'Generate New Invoices Past Due Date' (Check) field in
 #. DocType 'Subscription'
@@ -33376,10 +33336,6 @@ msgstr ""
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.json
 msgid "Once set, this invoice will be on hold till the set date"
 msgstr "После установки этот счет будет приостановлен до установленной даты"
-
-#: erpnext/manufacturing/doctype/work_order/work_order.js:763
-msgid "Once the Work Order is Closed. It can't be resumed."
-msgstr "РџРѕСЃР»Рµ Р·Р°РєСЂС‹С‚РёСЏ Р·Р°РєР°Р·Р° РЅР° СЂР°Р±РѕС‚Сѓ РµРіРѕ РЅРµР»СЊР·СЏ РІРѕР·РѕР±РЅРѕРІРёС‚СЊ."
 
 #: erpnext/accounts/doctype/loyalty_program/loyalty_program.js:39
 msgid "One customer can be part of only single Loyalty Program."
@@ -34604,10 +34560,6 @@ msgstr "Сверху утаено"
 #: erpnext/controllers/status_updater.py:519
 msgid "Overbilling of {0} {1} ignored for item {2} because you have {3} role."
 msgstr "Избыточно выставленная сумма {0} {1} игнорируется для товара {2}, так как у вас есть роль {3}."
-
-#: erpnext/controllers/accounts_controller.py:2211
-msgid "Overbilling of {} ignored because you have {} role."
-msgstr "РР·Р±С‹С‚РѕС‡РЅРѕ РІС‹СЃС‚Р°РІР»РµРЅРЅР°СЏ СЃСѓРјРјР° {} РёРіРЅРѕСЂРёСЂСѓРµС‚СЃСЏ, С‚Р°Рє РєР°Рє Сѓ РІР°СЃ РµСЃС‚СЊ СЂРѕР»СЊ {3}."
 
 #. Option for the 'Status' (Select) field in DocType 'POS Invoice'
 #. Option for the 'Status' (Select) field in DocType 'Purchase Invoice'
@@ -37652,10 +37604,6 @@ msgstr "Пожалуйста, добавьте временный вступит
 msgid "Please add an account for the Bank Entry rule."
 msgstr ""
 
-#: erpnext/public/js/utils/serial_no_batch_selector.js:662
-msgid "Please add atleast one Serial No / Batch No"
-msgstr "РџРѕР¶Р°Р»СѓР№СЃС‚Р°, РґРѕР±Р°РІСЊС‚Рµ С…РѕС‚СЏ Р±С‹ РѕРґРёРЅ СЃРµСЂРёР№РЅС‹Р№ РЅРѕРјРµСЂ/РЅРѕРјРµСЂ РїР°СЂС‚РёРё"
-
 #: erpnext/crm/doctype/crm_settings/crm_settings.py:53
 msgid "Please add atleast one user on Allowed Users to allow Data Synchronization from Frappe CRM site."
 msgstr ""
@@ -37823,10 +37771,6 @@ msgstr "Пожалуйста, включайте эту функцию толь�
 msgid "Please enable {0} in the {1}."
 msgstr "Пожалуйста, включите {0} в {1}."
 
-#: erpnext/controllers/selling_controller.py:857
-msgid "Please enable {} in {} to allow same item in multiple rows"
-msgstr "РџРѕР¶Р°Р»СѓР№СЃС‚Р°, РІРєР»СЋС‡РёС‚Рµ {} РІ {}, С‡С‚РѕР±С‹ СЂР°Р·СЂРµС€РёС‚СЊ РѕРґРёРЅ Рё С‚РѕС‚ Р¶Рµ С‚РѕРІР°СЂ РІ РЅРµСЃРєРѕР»СЊРєРёС… СЃС‚СЂРѕРєР°С…"
-
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:381
 msgid "Please ensure that the {0} account is a Balance Sheet account. You can change the parent account to a Balance Sheet account or select a different account."
 msgstr "Пожалуйста, убедитесь, что счёт {0} является счётом бухгалтерского баланса. Вы можете изменить родительский счёт на счёт бухгалтерского баланса или выбрать другой счёт."
@@ -37834,14 +37778,6 @@ msgstr "Пожалуйста, убедитесь, что счёт {0} являе
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:389
 msgid "Please ensure that the {0} account {1} is a Payable account. You can change the account type to Payable or select a different account."
 msgstr "Пожалуйста, убедитесь, что счёт {0} {1} является счётом кредиторской задолженности. Вы можете изменить тип счёта на кредиторскую задолженность или выбрать другой счёт."
-
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1061
-msgid "Please ensure {} account is a Balance Sheet account."
-msgstr "РџРѕР¶Р°Р»СѓР№СЃС‚Р°, СѓР±РµРґРёС‚РµСЃСЊ, С‡С‚Рѕ СЃС‡С‘С‚ {} СЏРІР»СЏРµС‚СЃСЏ СЃС‡С‘С‚РѕРј Р±СѓС…РіР°Р»С‚РµСЂСЃРєРѕРіРѕ Р±Р°Р»Р°РЅСЃР°."
-
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:1071
-msgid "Please ensure {} account {} is a Receivable account."
-msgstr "РЈР±РµРґРёС‚РµСЃСЊ, С‡С‚Рѕ {} СЃС‡РµС‚ {} СЏРІР»СЏРµС‚СЃСЏ СЃС‡РµС‚РѕРј РґРµР±РёС‚РѕСЂСЃРєРѕР№ Р·Р°РґРѕР»Р¶РµРЅРЅРѕСЃС‚Рё."
 
 #: erpnext/stock/doctype/stock_entry/stock_entry.py:872
 msgid "Please enter <b>Difference Account</b> or set default <b>Stock Adjustment Account</b> for company {0}"
@@ -38233,10 +38169,6 @@ msgstr "Пожалуйста, выберите дату начала и дату
 msgid "Please select Stock Asset Account"
 msgstr "Выберите счёт учёта товарных запасов"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1972
-msgid "Please select Subcontracting Order instead of Purchase Order {0}"
-msgstr "РџРѕР¶Р°Р»СѓР№СЃС‚Р°, РІС‹Р±РµСЂРёС‚Рµ В«Р—Р°РєР°Р· РЅР° СЃСѓР±РїРѕРґСЂСЏРґВ» РІРјРµСЃС‚Рѕ В«Р—Р°РєР°Р· РЅР° Р·Р°РєСѓРїРєСѓВ» {0}"
-
 #: erpnext/controllers/accounts_controller.py:2852
 msgid "Please select Unrealized Profit / Loss account or add default Unrealized Profit / Loss account account for company {0}"
 msgstr "Выберите счет нереализованной прибыли/убытка или добавьте счет нереализованной прибыли/убытка по умолчанию для компании {0}"
@@ -38334,10 +38266,6 @@ msgstr "Пожалуйста, выберите строку для создан�
 #: erpnext/accounts/report/purchase_register/purchase_register.py:36
 msgid "Please select a supplier for fetching payments."
 msgstr "Пожалуйста, выберите поставщика для получения платежей."
-
-#: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.py:142
-msgid "Please select a valid Purchase Order that has Service Items."
-msgstr "РџРѕР¶Р°Р»СѓР№СЃС‚Р°, РІС‹Р±РµСЂРёС‚Рµ РґРµР№СЃС‚РІРёС‚РµР»СЊРЅС‹Р№ Р·Р°РєР°Р· РЅР° РїРѕРєСѓРїРєСѓ, СЃРѕРґРµСЂР¶Р°С‰РёР№ СѓСЃР»СѓРіРё."
 
 #: erpnext/subcontracting/doctype/subcontracting_order/subcontracting_order.py:139
 msgid "Please select a valid Purchase Order that is configured for Subcontracting."
@@ -38581,10 +38509,6 @@ msgstr "Пожалуйста, установите счета НДС для ко
 msgid "Please set a Company"
 msgstr "Укажите компанию"
 
-#: erpnext/assets/doctype/asset/asset.py:378
-msgid "Please set a Cost Center for the Asset or set an Asset Depreciation Cost Center for the Company {}"
-msgstr "РџРѕР¶Р°Р»СѓР№СЃС‚Р°, СѓСЃС‚Р°РЅРѕРІРёС‚Рµ Р¦РµРЅС‚СЂ Р·Р°С‚СЂР°С‚ РґР»СЏ РђРєС‚РёРІР° РёР»Рё СѓСЃС‚Р°РЅРѕРІРёС‚Рµ Р¦РµРЅС‚СЂ Р·Р°С‚СЂР°С‚ РЅР° Р°РјРѕСЂС‚РёР·Р°С†РёСЋ РђРєС‚РёРІР° РґР»СЏ РљРѕРјРїР°РЅРёРё {}"
-
 #: erpnext/projects/doctype/project/project.py:736
 msgid "Please set a default Holiday List for Company {0}"
 msgstr "Пожалуйста, установите список праздников по умолчанию для компании {0}"
@@ -38625,22 +38549,6 @@ msgstr "Пожалуйста, укажите как ИНН, так и Фиска
 #: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:2475
 msgid "Please set default Cash or Bank account in Mode of Payment {0}"
 msgstr "Пожалуйста, установите Cash умолчанию или банковский счет в режим оплаты {0}"
-
-#: erpnext/accounts/doctype/pos_opening_entry/pos_opening_entry.py:94
-#: erpnext/accounts/doctype/pos_profile/pos_profile.py:197
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3091
-msgid "Please set default Cash or Bank account in Mode of Payment {}"
-msgstr "РЈСЃС‚Р°РЅРѕРІРёС‚Рµ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ РЅР°Р»РёС‡РЅС‹Р№ РёР»Рё Р±Р°РЅРєРѕРІСЃРєРёР№ СЃС‡РµС‚ РІ СЂРµР¶РёРјРµ РѕРїР»Р°С‚С‹ {}"
-
-#: erpnext/accounts/doctype/pos_opening_entry/pos_opening_entry.py:96
-#: erpnext/accounts/doctype/pos_profile/pos_profile.py:199
-#: erpnext/accounts/doctype/sales_invoice/sales_invoice.py:3093
-msgid "Please set default Cash or Bank account in Mode of Payments {}"
-msgstr "РЈСЃС‚Р°РЅРѕРІРёС‚Рµ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ РЅР°Р»РёС‡РЅС‹Р№ РёР»Рё Р±Р°РЅРєРѕРІСЃРєРёР№ СЃС‡РµС‚ РІ СЂРµР¶РёРјРµ РѕРїР»Р°С‚С‹ {}"
-
-#: erpnext/accounts/utils.py:2528
-msgid "Please set default Exchange Gain/Loss Account in Company {}"
-msgstr "РџРѕР¶Р°Р»СѓР№СЃС‚Р°, СѓСЃС‚Р°РЅРѕРІРёС‚Рµ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ СЃС‡РµС‚ СѓС‡РµС‚Р° РїСЂРёР±С‹Р»Рё/СѓР±С‹С‚РєР° РѕС‚ РєСѓСЂСЃРѕРІС‹С… СЂР°Р·РЅРёС† РІ РєРѕРјРїР°РЅРёРё {}"
 
 #: erpnext/assets/doctype/asset_repair/asset_repair.py:386
 msgid "Please set default Expense Account in Company {0}"
@@ -39006,11 +38914,6 @@ msgstr "Опубликовано"
 msgid "Posting Date"
 msgstr "Дата публикации"
 
-#: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py:269
-#: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:143
-msgid "Posting Date cannot be future date"
-msgstr "Р”Р°С‚Р° СЂР°Р·РјРµС‰РµРЅРёСЏ РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ Р±СѓРґСѓС‰Р°СЏ РґР°С‚Р°"
-
 #. Label of the exchange_gain_loss_posting_date (Select) field in DocType
 #. 'Accounts Settings'
 #: erpnext/accounts/doctype/accounts_settings/accounts_settings.json
@@ -39079,10 +38982,6 @@ msgstr "Дата и время публикации"
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Posting Time"
 msgstr "Время публикации"
-
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2857
-msgid "Posting date and posting time is mandatory"
-msgstr "Р”Р°С‚Р° РїСѓР±Р»РёРєР°С†РёРё Рё СЂР°Р·РјРµС‰РµРЅРёСЏ РІСЂРµРјСЏ СЏРІР»СЏРµС‚СЃСЏ РѕР±СЏР·Р°С‚РµР»СЊРЅС‹Рј"
 
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:901
 msgid "Posting date does not match the selected transaction"
@@ -41189,10 +41088,6 @@ msgstr "Заказы на закупку для выставления счет�
 #: erpnext/setup/doctype/email_digest/email_digest.json
 msgid "Purchase Orders to Receive"
 msgstr "Заказы на закупку для получения"
-
-#: erpnext/controllers/accounts_controller.py:2043
-msgid "Purchase Orders {0} are un-linked"
-msgstr "Р—Р°РєР°Р·С‹ РЅР° РїРѕРєСѓРїРєСѓ {0} СЂР°Р·СЉРµРґРёРЅРµРЅС‹"
 
 #: erpnext/stock/report/item_prices/item_prices.py:59
 msgid "Purchase Price List"
@@ -43922,10 +43817,6 @@ msgstr "Отклоненный пакет серийных номеров и п�
 msgid "Rejected Warehouse"
 msgstr "Склад брака"
 
-#: erpnext/public/js/utils/serial_no_batch_selector.js:670
-msgid "Rejected Warehouse and Accepted Warehouse cannot be same."
-msgstr "РЎРєР»Р°Рґ РѕС‚РєР»РѕРЅРµРЅРЅС‹С… С‚РѕРІР°СЂРѕРІ Рё СЃРєР»Р°Рґ РїСЂРёРЅСЏС‚С‹С… С‚РѕРІР°СЂРѕРІ РЅРµ РјРѕРіСѓС‚ Р±С‹С‚СЊ РѕРґРЅРёРј Рё С‚РµРј Р¶Рµ."
-
 #: erpnext/buying/doctype/purchase_order/purchase_order_dashboard.py:23
 #: erpnext/buying/doctype/supplier_quotation/supplier_quotation_dashboard.py:14
 #: erpnext/stock/doctype/delivery_note/delivery_note_dashboard.py:22
@@ -46511,10 +46402,6 @@ msgstr ""
 msgid "Row #{}: Either Party ID or Party Name is required"
 msgstr ""
 
-#: erpnext/assets/doctype/asset/asset.py:425
-msgid "Row #{}: Finance Book should not be empty since you're using multiple."
-msgstr "РЎС‚СЂРѕРєР° #{}: Р¤РёРЅР°РЅСЃРѕРІР°СЏ РєРЅРёРіР° РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РїСѓСЃС‚РѕР№, С‚Р°Рє РєР°Рє РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РЅРµСЃРєРѕР»СЊРєРѕ РєРЅРёРі."
-
 #: erpnext/accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:92
 msgid "Row #{}: POS Invoice {} has been {}"
 msgstr ""
@@ -46535,10 +46422,6 @@ msgstr ""
 msgid "Row #{}: Please assign task to a member."
 msgstr "Строка №{}: Назначьте задачу участнику."
 
-#: erpnext/assets/doctype/asset/asset.py:417
-msgid "Row #{}: Please use a different Finance Book."
-msgstr "РЎС‚СЂРѕРєР° #{}: РСЃРїРѕР»СЊР·СѓР№С‚Рµ РґСЂСѓРіСѓСЋ С„РёРЅР°РЅСЃРѕРІСѓСЋ РєРЅРёРіСѓ."
-
 #: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:524
 msgid "Row #{}: Serial No {} cannot be returned since it was not transacted in original invoice {}"
 msgstr ""
@@ -46546,10 +46429,6 @@ msgstr ""
 #: erpnext/accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:103
 msgid "Row #{}: The original Invoice {} of return invoice {} is not consolidated."
 msgstr "Строка #{}: Исходный счёт {} возвратного счёта {} не консолидирован."
-
-#: erpnext/accounts/doctype/pos_invoice/pos_invoice.py:497
-msgid "Row #{}: You cannot add positive quantities in a return invoice. Please remove item {} to complete the return."
-msgstr "РЎС‚СЂРѕРєР° #{}: Р’С‹ РЅРµ РјРѕР¶РµС‚Рµ РґРѕР±Р°РІР»СЏС‚СЊ РїРѕР»РѕР¶РёС‚РµР»СЊРЅС‹Рµ РєРѕР»РёС‡РµСЃС‚РІР° РІ СЃС‡РµС‚-С„Р°РєС‚СѓСЂСѓ РІРѕР·РІСЂР°С‚Р°. РџРѕР¶Р°Р»СѓР№СЃС‚Р°, СѓРґР°Р»РёС‚Рµ СЌР»РµРјРµРЅС‚ {}, С‡С‚РѕР±С‹ Р·Р°РІРµСЂС€РёС‚СЊ РІРѕР·РІСЂР°С‚."
 
 #: erpnext/stock/doctype/pick_list/pick_list.py:239
 msgid "Row #{}: item {} has been picked already."
@@ -46564,10 +46443,6 @@ msgstr ""
 msgid "Row #{}: {} {} does not exist."
 msgstr ""
 
-#: erpnext/stock/doctype/item/item.py:1527
-msgid "Row #{}: {} {} doesn't belong to Company {}. Please select valid {}."
-msgstr "РЎС‚СЂРѕРєР° в„–{}: {} {} РЅРµ РїСЂРёРЅР°РґР»РµР¶РёС‚ РєРѕРјРїР°РЅРёРё {}. Р’С‹Р±РµСЂРёС‚Рµ РґРѕРїСѓСЃС‚РёРјС‹Р№ {}."
-
 #: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py:440
 msgid "Row No {0}: Warehouse is required. Please set a Default Warehouse for Item {1} and Company {2}"
 msgstr "Номер строки {0}: Требуется указать склад. Укажите склад по умолчанию для товара {1} и компании {2}"
@@ -46579,10 +46454,6 @@ msgstr "Строка {0}: требуется операция против эл�
 #: erpnext/stock/doctype/pick_list/pick_list.py:269
 msgid "Row {0} picked quantity is less than the required quantity, additional {1} {2} required."
 msgstr "В строке {0} выбранное количество меньше требуемого, требуется дополнительно {1} {2}."
-
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1927
-msgid "Row {0}# Item {1} not found in 'Raw Materials Supplied' table in {2} {3}"
-msgstr "РЎС‚СЂРѕРєР° {0}# РўРѕРІР°СЂ {1} РЅРµ РЅР°Р№РґРµРЅ РІ С‚Р°Р±Р»РёС†Рµ 'РџРѕСЃС‚Р°РІР»РµРЅРЅРѕРµ СЃС‹СЂСЊРµ' РІ {2} {3}"
 
 #: erpnext/subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:278
 msgid "Row {0}: Accepted Qty and Rejected Qty can't be zero at the same time."
@@ -46794,10 +46665,6 @@ msgstr "Строка {0}: Выберите спецификацию для то�
 msgid "Row {0}: Please select an active BOM for Item {1}."
 msgstr "Строка {0}: Выберите активную спецификацию для товара {1}."
 
-#: erpnext/controllers/subcontracting_controller.py:224
-msgid "Row {0}: Please select an valid BOM for Item {1}."
-msgstr "РЎС‚СЂРѕРєР° {0}: Р’С‹Р±РµСЂРёС‚Рµ РґРµР№СЃС‚РІРёС‚РµР»СЊРЅСѓСЋ СЃРїРµС†РёС„РёРєР°С†РёСЋ РґР»СЏ С‚РѕРІР°СЂР° {1}."
-
 #: erpnext/regional/italy/utils.py:290
 msgid "Row {0}: Please set at Tax Exemption Reason in Sales Taxes and Charges"
 msgstr "Строка {0}: Укажите причину освобождения от уплаты налогов в разделе Налоги и сборы"
@@ -46968,10 +46835,6 @@ msgstr "Были найдены строки с повторяющимися д�
 #: erpnext/accounts/doctype/journal_entry/journal_entry.js:148
 msgid "Rows: {0} have 'Payment Entry' as reference_type. This should not be set manually."
 msgstr "В строках {0} указан тип ссылки 'Платежная операция'. Этот параметр не должен задаваться вручную."
-
-#: erpnext/controllers/accounts_controller.py:302
-msgid "Rows: {0} in {1} section are Invalid. Reference Name should point to a valid Payment Entry or Journal Entry."
-msgstr "РЎС‚СЂРѕРєРё: {0} РІ СЂР°Р·РґРµР»Рµ {1} РЅРµРґРµР№СЃС‚РІРёС‚РµР»СЊРЅС‹. РРјСЏ СЃСЃС‹Р»РєРё РґРѕР»Р¶РЅРѕ СѓРєР°Р·С‹РІР°С‚СЊ РЅР° РґРµР№СЃС‚РІРёС‚РµР»СЊРЅСѓСЋ Р·Р°РїРёСЃСЊ РїР»Р°С‚РµР¶Р° РёР»Рё Р·Р°РїРёСЃСЊ Р¶СѓСЂРЅР°Р»Р°."
 
 #. Label of the rule_applied (Check) field in DocType 'Pricing Rule Detail'
 #: erpnext/accounts/doctype/pricing_rule_detail/pricing_rule_detail.json
@@ -49284,10 +49147,6 @@ msgstr "Серийный номер {0} не принадлежит продук
 msgid "Serial No {0} does not exist"
 msgstr "Серийный номер {0} не существует"
 
-#: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:3524
-msgid "Serial No {0} does not exists"
-msgstr "РЎРµСЂРёР№РЅС‹Р№ РЅРѕРјРµСЂ {0} РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚"
-
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:379
 msgid "Serial No {0} is already Delivered. You cannot use them again in Manufacture / Repack entry."
 msgstr "Серийный номер {0} уже доставлен. Вы не сможете использовать его повторно при изготовлении/переупаковке."
@@ -51569,10 +51428,6 @@ msgstr "Журнал закрытия торгов"
 msgid "Stock Details"
 msgstr "Подробности о запасах"
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:1199
-msgid "Stock Entries already created for Work Order {0}: {1}"
-msgstr "Р—Р°РїРёСЃРё РїРѕ Р·Р°РїР°СЃР°Рј СѓР¶Рµ СЃРѕР·РґР°РЅС‹ РґР»СЏ Р·Р°РєР°Р·Р° РЅР° СЂР°Р±РѕС‚Сѓ {0}: {1}"
-
 #. Label of the stock_entry (Link) field in DocType 'Journal Entry'
 #. Label of a Link in the Manufacturing Workspace
 #. Option for the 'Receipt Document Type' (Select) field in DocType 'Landed
@@ -52247,10 +52102,6 @@ msgstr "Запас не зарезервирован для выполнения
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:359
 msgid "Stock not available for Item {0} in Warehouse {1}."
 msgstr "Нет запаса товара {0} на складе {1}."
-
-#: erpnext/selling/page/point_of_sale/pos_controller.js:826
-msgid "Stock quantity not enough for Item Code: {0} under warehouse {1}. Available quantity {2} {3}."
-msgstr "РљРѕР»РёС‡РµСЃС‚РІРѕ РЅР° СЃРєР»Р°РґРµ РЅРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ РґР»СЏ РљРѕРґ С‚РѕРІР°СЂР°: {0} РЅР° СЃРєР»Р°РґРµ {1}. Р”РѕСЃС‚СѓРїРЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ {2} {3}."
 
 #: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py:256
 msgid "Stock transactions before {0} are frozen"
@@ -53726,10 +53577,6 @@ msgstr "Плановый актив {0} не может быть {1}"
 msgid "Target Asset {0} does not belong to company {1}"
 msgstr "Плановый актив {0} не принадлежит компании {1}"
 
-#: erpnext/assets/doctype/asset_capitalization/asset_capitalization.py:195
-msgid "Target Asset {0} needs to be composite asset"
-msgstr "РџР»Р°РЅРѕРІС‹Р№ Р°РєС‚РёРІ {0} РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ СЃРѕСЃС‚Р°РІРЅС‹Рј Р°РєС‚РёРІРѕРј"
-
 #. Name of a DocType
 #: erpnext/setup/doctype/target_detail/target_detail.json
 msgid "Target Detail"
@@ -54171,12 +54018,6 @@ msgstr "Всего налогов"
 #: erpnext/accounts/doctype/tax_rule/tax_rule.json
 msgid "Tax Type"
 msgstr "Тип налога"
-
-#. Label of the tax_withholding_tab (Tab Break) field in DocType 'Journal
-#. Entry'
-#: erpnext/accounts/doctype/journal_entry/journal_entry.json
-msgid "Tax Withholding"
-msgstr "РЈРґРµСЂР¶Р°РЅРёРµ РЅР°Р»РѕРіР°"
 
 #. Name of a DocType
 #: erpnext/accounts/doctype/tax_withholding_account/tax_withholding_account.json
@@ -54894,10 +54735,6 @@ msgstr "Условие платежа в строке {0}, возможно, я�
 msgid "The Pick List having Stock Reservation Entries cannot be updated. If you need to make changes, we recommend canceling the existing Stock Reservation Entries before updating the Pick List."
 msgstr "Список выбора, имеющий записи резервирования запасов, не может быть обновлен. Если вам необходимо внести изменения, мы рекомендуем отменить существующие записи резервирования запасов перед обновлением списка выбора."
 
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:3142
-msgid "The Process Loss Qty has reset as per job cards Process Loss Qty"
-msgstr "РљРѕР»РёС‡РµСЃС‚РІРѕ РїРѕС‚РµСЂСЊ РІ РїСЂРѕС†РµСЃСЃРµ Р±С‹Р»Рѕ СЃР±СЂРѕС€РµРЅРѕ РІ СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРё СЃ РєРѕР»РёС‡РµСЃС‚РІРѕРј РїРѕС‚РµСЂСЊ РІ РєР°СЂС‚РѕС‡РєР°С… СЂР°Р±РѕС‡РёС… Р·Р°РґР°РЅРёР№"
-
 #: erpnext/setup/doctype/sales_person/sales_person.py:102
 msgid "The Sales Person is linked with {0}"
 msgstr "Продавец связан с  {0}"
@@ -55266,10 +55103,6 @@ msgstr "Акции уже существуют"
 msgid "The shares don't exist with the {0}"
 msgstr "Акций не существует с {0}"
 
-#: erpnext/stock/stock_ledger.py:824
-msgid "The stock for the item {0} in the {1} warehouse was negative on the {2}. You should create a positive entry {3} before the date {4} and time {5} to post the correct valuation rate. For more details, please read the <a href='https://docs.erpnext.com/docs/user/manual/en/stock-adjustment-cogs-with-negative-stock'>documentation<a>."
-msgstr "Р—Р°РїР°СЃ С‚РѕРІР°СЂР° {0} РЅР° СЃРєР»Р°РґРµ {1} Р±С‹Р» РѕС‚СЂРёС†Р°С‚РµР»СЊРЅС‹Рј РЅР° {2}. Р’Р°Рј РЅСѓР¶РЅРѕ СЃРѕР·РґР°С‚СЊ РїРѕР»РѕР¶РёС‚РµР»СЊРЅСѓСЋ Р·Р°РїРёСЃСЊ {3} РґРѕ РґР°С‚С‹ {4} Рё РІСЂРµРјРµРЅРё {5}, С‡С‚РѕР±С‹ РєРѕСЂСЂРµРєС‚РЅРѕ Р·Р°С„РёРєСЃРёСЂРѕРІР°С‚СЊ СЃС‚РѕРёРјРѕСЃС‚СЊ. Р”Р»СЏ РїРѕР»СѓС‡РµРЅРёСЏ РїРѕРґСЂРѕР±РЅРѕР№ РёРЅС„РѕСЂРјР°С†РёРё, РїРѕР¶Р°Р»СѓР№СЃС‚Р°, РїСЂРѕС‡РёС‚Р°Р№С‚Рµ <a href='https://docs.erpnext.com/docs/user/manual/en/stock-adjustment-cogs-with-negative-stock'>РґРѕРєСѓРјРµРЅС‚Р°С†РёСЋ<a>."
-
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:740
 msgid "The stock has been reserved for the following Items and Warehouses, un-reserve the same to {0} the Stock Reconciliation: <br /><br /> {1}"
 msgstr "Запасы зарезервированы для следующих товаров и складов, снимите резерв с {0} сверки запасов: <br /><br /> {1}"
@@ -55299,10 +55132,6 @@ msgstr "Задача была поставлена в качестве фоно�
 #: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py:1121
 msgid "The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Reconciliation and revert to the Submitted stage"
 msgstr "Задача поставлена в очередь как фоновое задание. В случае возникновения проблем при обработке в фоновом режиме система добавит комментарий об ошибке в этой сверке запасов и вернется к этапу «Отправлено»"
-
-#: erpnext/stock/doctype/material_request/material_request.py:349
-msgid "The total Issue / Transfer quantity {0} in Material Request {1}  cannot be greater than allowed requested quantity {2} for Item {3}"
-msgstr "РћР±С‰РµРµ РєРѕР»РёС‡РµСЃС‚РІРѕ РІС‹РїСѓСЃРєР°/РїРµСЂРµРґР°С‡Рё {0} РІ Р·Р°РїСЂРѕСЃРµ РЅР° РјР°С‚РµСЂРёР°Р»С‹ {1}  РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ Р±РѕР»СЊС€Рµ, С‡РµРј РґРѕРїСѓСЃС‚РёРјРѕРµ Р·Р°РїСЂРѕС€РµРЅРЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ {2} РґР»СЏ С‚РѕРІР°СЂР° {3}"
 
 #: erpnext/stock/doctype/material_request/material_request.py:356
 msgid "The total Issue / Transfer quantity {0} in Material Request {1} cannot be greater than requested quantity {2} for Item {3}"
@@ -55425,10 +55254,6 @@ msgstr "Нет доступных слотов на эту дату"
 msgid "There are no transactions in the system for the selected bank account and dates that match the filters."
 msgstr ""
 
-#: erpnext/stock/doctype/item/item.js:1290
-msgid "There are two options to maintain valuation of stock. FIFO (first in - first out) and Moving Average. To understand this topic in detail please visit <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>Item Valuation, FIFO and Moving Average.</a>"
-msgstr "РЎСѓС‰РµСЃС‚РІСѓРµС‚ РґРІР° РІР°СЂРёР°РЅС‚Р° РІРµРґРµРЅРёСЏ РѕС†РµРЅРєРё Р·Р°РїР°СЃРѕРІ. FIFO (РїРµСЂРІС‹Рј РїСЂРёС€РµР» - РїРµСЂРІС‹Рј СѓС€РµР») Рё СЃРєРѕР»СЊР·СЏС‰Р°СЏ СЃСЂРµРґРЅСЏСЏ. Р§С‚РѕР±С‹ РїРѕРґСЂРѕР±РЅРѕ СЂР°Р·РѕР±СЂР°С‚СЊСЃСЏ РІ СЌС‚РѕР№ С‚РµРјРµ, РїРѕСЃРµС‚РёС‚Рµ <a href='https://docs.frappe.io/erpnext/user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average' target='_blank'>РћС†РµРЅРєР° С‚РѕРІР°СЂР°, FIFO Рё СЃРєРѕР»СЊР·СЏС‰Р°СЏ СЃСЂРµРґРЅСЏСЏ.</a>"
-
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:982
 msgid "There are {0} unreconciled transactions before {1}."
 msgstr ""
@@ -55464,10 +55289,6 @@ msgstr "Не найдено ни одной партии для {0}: {1}"
 #: banking/src/components/features/BankReconciliation/MatchAndReconcile.tsx:984
 msgid "There is one unreconciled transaction before {0}."
 msgstr ""
-
-#: erpnext/stock/doctype/stock_entry/stock_entry.py:2045
-msgid "There must be atleast 1 Finished Good in this Stock Entry"
-msgstr "Р’ СЌС‚РѕР№ Р·Р°РїРёСЃРё Рѕ РґРІРёР¶РµРЅРёРё С‚РѕРІР°СЂРѕРІ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ С…РѕС‚СЏ Р±С‹ РѕРґРЅРѕ РіРѕС‚РѕРІРѕРµ РёР·РґРµР»РёРµ"
 
 #: erpnext/erpnext_integrations/doctype/plaid_settings/plaid_settings.py:153
 msgid "There was an error creating Bank Account while linking with Plaid."
@@ -55869,10 +55690,6 @@ msgstr ""
 #: erpnext/setup/doctype/employee/employee.json
 msgid "This will restrict user access to other employee records"
 msgstr "Это ограничит доступ пользователя к записям других сотрудников"
-
-#: erpnext/controllers/selling_controller.py:886
-msgid "This {} will be treated as material transfer."
-msgstr "Р­С‚Рѕ {} Р±СѓРґРµС‚ СЂР°СЃСЃРјР°С‚СЂРёРІР°С‚СЊСЃСЏ РєР°Рє РїРµСЂРµРґР°С‡Р° РјР°С‚РµСЂРёР°Р»Р°."
 
 #. Option for the 'Under Withheld Reason' (Select) field in DocType 'Tax
 #. Withholding Entry'
@@ -61517,10 +61334,6 @@ msgstr ""
 msgid "You can use {0} to reconcile against {1} later."
 msgstr "Вы можете использовать {0} для сверки с {1} позже."
 
-#: erpnext/manufacturing/doctype/job_card/job_card.py:1378
-msgid "You can't make any changes to Job Card since Work Order is closed."
-msgstr "Р’С‹ РЅРµ РјРѕР¶РµС‚Рµ РІРЅРѕСЃРёС‚СЊ РёР·РјРµРЅРµРЅРёСЏ РІ РљР°СЂС‚Сѓ СЂР°Р±РѕС‚С‹, РїРѕСЃРєРѕР»СЊРєСѓ Р—Р°РєР°Р· РЅР° СЂР°Р±РѕС‚Сѓ Р·Р°РєСЂС‹С‚."
-
 #: erpnext/stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:230
 msgid "You can't process the serial number {0} as it has already been used in the SABB {1}. {2} if you want to inward same serial number multiple times then enabled 'Allow existing Serial No to be Manufactured/Received again' in the {3}"
 msgstr "Вы не можете обработать серийный номер {0}, так как он уже использовался в SABB {1}. {2} Если вы хотите ввести один и тот же серийный номер несколько раз, включите «Разрешить повторное изготовление/получение существующего серийного номера» в {3}"
@@ -61540,10 +61353,6 @@ msgstr "Вы не можете создать {0} в течение закрыт
 #: erpnext/accounts/general_ledger.py:183
 msgid "You cannot create or cancel any accounting entries with in the closed Accounting Period {0}"
 msgstr ""
-
-#: erpnext/accounts/general_ledger.py:851
-msgid "You cannot create/amend any accounting entries till this date."
-msgstr "РЎРѕР·РґР°РЅРёРµ Рё РёР·РјРµРЅРµРЅРёРµ Р±СѓС…РіР°Р»С‚РµСЂСЃРєРёС… Р·Р°РїРёСЃРµР№ РЅРµРІРѕР·РјРѕР¶РЅРѕ РґРѕ СѓРєР°Р·Р°РЅРЅРѕР№ РґР°С‚С‹."
 
 #: erpnext/accounts/doctype/journal_entry/journal_entry.py:950
 msgid "You cannot credit and debit same account at the same time"
@@ -61568,10 +61377,6 @@ msgstr "Вы не можете отправлять товары, следующ
 #: erpnext/selling/page/point_of_sale/pos_payment.js:625
 msgid "You cannot redeem more than {0}."
 msgstr "Вы не можете обменять более {0}."
-
-#: erpnext/stock/doctype/repost_item_valuation/repost_item_valuation.py:211
-msgid "You cannot repost item valuation before {}"
-msgstr "РќРµРІРѕР·РјРѕР¶РЅРѕ РїРѕРІС‚РѕСЂРЅРѕ РїСЂРѕРІРµСЃС‚Рё РѕС†РµРЅРєСѓ СЃС‚РѕРёРјРѕСЃС‚Рё С‚РѕРІР°СЂР° РґРѕ {}"
 
 #: erpnext/accounts/doctype/subscription/subscription.py:757
 msgid "You cannot restart a Subscription that is not cancelled."
@@ -62364,10 +62169,6 @@ msgstr "{0} не добавлен в таблицу"
 #: erpnext/support/doctype/service_level_agreement/service_level_agreement.py:146
 msgid "{0} is not enabled in {1}"
 msgstr "{0} не включен в {1}"
-
-#: erpnext/setup/doctype/transaction_deletion_record/transaction_deletion_record.py:647
-msgid "{0} is not running. Cannot trigger events for this Document"
-msgstr "{0} РЅРµ Р·Р°РїСѓС‰РµРЅ. РќРµРІРѕР·РјРѕР¶РЅРѕ Р·Р°РїСѓСЃС‚РёС‚СЊ СЃРѕР±С‹С‚РёСЏ РґР»СЏ СЌС‚РѕРіРѕ РґРѕРєСѓРјРµРЅС‚Р°"
 
 #: erpnext/stock/doctype/material_request/material_request.py:652
 msgid "{0} is not the default supplier for any items."
