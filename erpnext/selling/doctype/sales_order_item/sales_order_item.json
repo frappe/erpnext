@@ -102,6 +102,7 @@
   "column_break_69",
   "work_order_qty",
   "delivered_qty",
+  "proforma_qty",
   "produced_qty",
   "returned_qty",
   "picked_qty",
@@ -701,6 +702,14 @@
    "print_width": "100px",
    "read_only": 1,
    "width": "100px"
+  },
+  {
+   "fieldname": "proforma_qty",
+   "fieldtype": "Float",
+   "label": "Proforma Qty",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "work_order_qty",
