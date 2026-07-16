@@ -1708,7 +1708,13 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 	if (not ignore_existing_ordered_qty or get_parent_warehouse_data) and warehouses:
 		new_mr_items = []
 		for item in mr_items:
-			get_materials_from_other_locations(item, warehouses, new_mr_items, company)
+			get_materials_from_other_locations(
+				item,
+				warehouses,
+				new_mr_items,
+				company,
+				consider_minimum_order_qty=doc.get("consider_minimum_order_qty"),
+			)
 
 		mr_items = new_mr_items
 
@@ -1728,7 +1734,9 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 	return mr_items
 
 
-def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
+def get_materials_from_other_locations(
+	item, warehouses, new_mr_items, company, consider_minimum_order_qty=False
+):
 	from erpnext.stock.doctype.pick_list.pick_list import get_available_item_locations
 
 	stock_uom, purchase_uom = frappe.db.get_value(
@@ -1773,7 +1781,8 @@ def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 
 	precision = frappe.get_precision("Material Request Plan Item", "quantity")
 	if flt(required_qty, precision) > 0:
-		required_qty = required_qty
+		if consider_minimum_order_qty:
+			required_qty = max(required_qty, flt(item.get("min_order_qty")))
 
 		if frappe.db.get_value("UOM", purchase_uom, "must_be_whole_number"):
 			required_qty = ceil(required_qty)
