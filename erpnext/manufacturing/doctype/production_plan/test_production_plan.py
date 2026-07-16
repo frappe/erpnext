@@ -1835,7 +1835,6 @@ class TestProductionPlan(FrappeTestCase):
 		source_warehouse = create_warehouse("MOQ Source Warehouse", company="_Test Company")
 		make_stock_entry(item_code=rm_item, qty=7, rate=100, target=source_warehouse)
 
-		pln.ignore_existing_ordered_qty = 1
 		mr_items = get_items_for_material_requests(
 			pln.as_dict(), warehouses=[{"warehouse": source_warehouse}]
 		)
