@@ -1,0 +1,24 @@
+{
+ "applies_to_doctype": "Blanket Order",
+ "creation": "2026-07-03 12:42:47.785749",
+ "docstatus": 0,
+ "doctype": "DocType Settings Map",
+ "idx": 0,
+ "is_active": 1,
+ "is_standard": 1,
+ "mappings": [
+  {
+   "setting_field": "blanket_order_allowance",
+   "settings_doctype": "Selling Settings"
+  },
+  {
+   "setting_field": "blanket_order_allowance",
+   "settings_doctype": "Buying Settings"
+  }
+ ],
+ "modified": "2026-07-10 11:01:49.066530",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Blanket Order (Standard)",
+ "owner": "Administrator"
+}

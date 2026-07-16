@@ -1,0 +1,24 @@
+{
+ "applies_to_doctype": "Production Plan",
+ "creation": "2026-07-03 16:50:20.815935",
+ "docstatus": 0,
+ "doctype": "DocType Settings Map",
+ "idx": 0,
+ "is_active": 1,
+ "is_standard": 1,
+ "mappings": [
+  {
+   "setting_field": "auto_reserve_stock",
+   "settings_doctype": "Stock Settings"
+  },
+  {
+   "setting_field": "enable_stock_reservation",
+   "settings_doctype": "Stock Settings"
+  }
+ ],
+ "modified": "2026-07-10 11:31:40.252142",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Production Plan (Standard)",
+ "owner": "Administrator"
+}

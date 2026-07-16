@@ -1,0 +1,24 @@
+{
+ "applies_to_doctype": "Party Account",
+ "creation": "2026-07-09 16:13:10.010246",
+ "docstatus": 0,
+ "doctype": "DocType Settings Map",
+ "idx": 0,
+ "is_active": 1,
+ "is_standard": 1,
+ "mappings": [
+  {
+   "setting_field": "enable_common_party_accounting",
+   "settings_doctype": "Accounts Settings"
+  },
+  {
+   "setting_field": "allow_multi_currency_invoices_against_single_party_account",
+   "settings_doctype": "Accounts Settings"
+  }
+ ],
+ "modified": "2026-07-09 16:13:49.623613",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Party Account (Standard)",
+ "owner": "Administrator"
+}

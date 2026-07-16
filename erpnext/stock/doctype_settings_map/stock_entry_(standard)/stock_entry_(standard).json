@@ -1,0 +1,84 @@
+{
+ "applies_to_doctype": "Stock Entry",
+ "creation": "2026-07-03 15:24:54.066975",
+ "docstatus": 0,
+ "doctype": "DocType Settings Map",
+ "idx": 0,
+ "is_active": 1,
+ "is_standard": 1,
+ "mappings": [
+  {
+   "setting_field": "validate_material_transfer_warehouses",
+   "settings_doctype": "Stock Settings"
+  },
+  {
+   "setting_field": "enable_stock_reservation",
+   "settings_doctype": "Stock Settings"
+  },
+  {
+   "setting_field": "material_consumption",
+   "settings_doctype": "Manufacturing Settings"
+  },
+  {
+   "setting_field": "get_rm_cost_from_consumption_entry",
+   "settings_doctype": "Manufacturing Settings"
+  },
+  {
+   "setting_field": "backflush_raw_materials_based_on",
+   "settings_doctype": "Manufacturing Settings"
+  },
+  {
+   "setting_field": "validate_components_quantities_per_bom",
+   "settings_doctype": "Manufacturing Settings"
+  },
+  {
+   "setting_field": "job_card_excess_transfer",
+   "settings_doctype": "Manufacturing Settings"
+  },
+  {
+   "setting_field": "make_serial_no_batch_from_work_order",
+   "settings_doctype": "Manufacturing Settings"
+  },
+  {
+   "setting_field": "overproduction_percentage_for_work_order",
+   "settings_doctype": "Manufacturing Settings"
+  },
+  {
+   "setting_field": "set_op_cost_and_secondary_items_from_sub_assemblies",
+   "settings_doctype": "Manufacturing Settings"
+  },
+  {
+   "setting_field": "transfer_extra_materials_percentage",
+   "settings_doctype": "Manufacturing Settings"
+  },
+  {
+   "setting_field": "backflush_raw_materials_of_subcontract_based_on",
+   "settings_doctype": "Buying Settings"
+  },
+  {
+   "setting_field": "over_transfer_allowance",
+   "settings_doctype": "Buying Settings"
+  },
+  {
+   "setting_field": "auto_create_serial_and_batch_bundle_for_outward",
+   "settings_doctype": "Stock Settings"
+  },
+  {
+   "setting_field": "use_serial_batch_fields",
+   "settings_doctype": "Stock Settings"
+  },
+  {
+   "setting_field": "sample_retention_warehouse",
+   "settings_doctype": "Stock Settings"
+  },
+  {
+   "setting_field": "allow_to_make_quality_inspection_after_purchase_or_delivery",
+   "settings_doctype": "Stock Settings"
+  }
+ ],
+ "modified": "2026-07-10 11:50:38.572083",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Stock Entry (Standard)",
+ "owner": "Administrator"
+}

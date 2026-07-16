@@ -1,0 +1,24 @@
+{
+ "applies_to_doctype": "Subcontracting Inward Order",
+ "creation": "2026-07-03 13:03:04.315296",
+ "docstatus": 0,
+ "doctype": "DocType Settings Map",
+ "idx": 0,
+ "is_active": 1,
+ "is_standard": 1,
+ "mappings": [
+  {
+   "setting_field": "allow_delivery_of_overproduced_qty",
+   "settings_doctype": "Selling Settings"
+  },
+  {
+   "setting_field": "deliver_secondary_items",
+   "settings_doctype": "Selling Settings"
+  }
+ ],
+ "modified": "2026-07-03 13:03:18.132340",
+ "modified_by": "Administrator",
+ "module": "Subcontracting",
+ "name": "Subcontracting Inward Order (Standard)",
+ "owner": "Administrator"
+}

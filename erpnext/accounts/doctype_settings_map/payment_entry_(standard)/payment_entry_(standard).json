@@ -1,0 +1,32 @@
+{
+ "applies_to_doctype": "Payment Entry",
+ "creation": "2026-07-09 15:13:39.598717",
+ "docstatus": 0,
+ "doctype": "DocType Settings Map",
+ "idx": 0,
+ "is_active": 1,
+ "is_standard": 1,
+ "mappings": [
+  {
+   "setting_field": "unlink_payment_on_cancellation_of_invoice",
+   "settings_doctype": "Accounts Settings"
+  },
+  {
+   "setting_field": "book_tax_discount_loss",
+   "settings_doctype": "Accounts Settings"
+  },
+  {
+   "setting_field": "over_billing_allowance",
+   "settings_doctype": "Accounts Settings"
+  },
+  {
+   "setting_field": "merge_similar_account_heads",
+   "settings_doctype": "Accounts Settings"
+  }
+ ],
+ "modified": "2026-07-10 11:26:57.841200",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Payment Entry (Standard)",
+ "owner": "Administrator"
+}

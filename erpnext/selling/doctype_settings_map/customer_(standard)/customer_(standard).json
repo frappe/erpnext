@@ -1,0 +1,28 @@
+{
+ "applies_to_doctype": "Customer",
+ "creation": "2026-06-30 15:23:43.754901",
+ "docstatus": 0,
+ "doctype": "DocType Settings Map",
+ "idx": 0,
+ "is_active": 1,
+ "is_standard": 1,
+ "mappings": [
+  {
+   "setting_field": "customer_group",
+   "settings_doctype": "Selling Settings"
+  },
+  {
+   "setting_field": "territory",
+   "settings_doctype": "Selling Settings"
+  },
+  {
+   "setting_field": "credit_controller",
+   "settings_doctype": "Accounts Settings"
+  }
+ ],
+ "modified": "2026-07-10 11:07:54.014656",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Customer (Standard)",
+ "owner": "Administrator"
+}
