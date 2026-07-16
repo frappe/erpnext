@@ -207,7 +207,9 @@ $.extend(erpnext.queries, {
 			filters: [
 				["Warehouse", "company", "in", ["", cstr(doc.company)]],
 				["Warehouse", "is_group", "=", 0],
-				["Warehouse", "warehouse_type", "=", "Rejected"],
+				// rejected stock belongs in a Rejected-type warehouse, but sites
+				// that don't segregate it may keep using untyped warehouses
+				["Warehouse", "warehouse_type", "in", ["Rejected", ""]],
 			],
 		};
 	},

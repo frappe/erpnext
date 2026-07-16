@@ -108,3 +108,20 @@ class TestWarehouseLinkQuery(ERPNextTestSuite):
 		names = self.run_query(filters={"warehouse_type": ["!=", "Quality"]}, txt="_Test WLQ")
 		self.assertIn(plain, names)
 		self.assertNotIn(qc, names)
+
+	def test_in_filter_with_empty_matches_untyped_warehouses(self):
+		ensure_quality_warehouse_type()
+		if not frappe.db.exists("Warehouse Type", "Rejected"):
+			frappe.get_doc({"doctype": "Warehouse Type", "name": "Rejected"}).insert(ignore_permissions=True)
+		qc = make_warehouse("_Test WLQ Quality", warehouse_type="Quality")
+		rejected = make_warehouse("_Test WLQ Rejected", warehouse_type="Rejected")
+		plain = make_warehouse("_Test WLQ Plain")  # warehouse_type is NULL
+
+		# the rejected_warehouse picker sends in ["Rejected", ""]: the empty
+		# member must match untyped (NULL) warehouses through the IfNull wrap
+		names = self.run_query(
+			filters=[["Warehouse", "warehouse_type", "in", ["Rejected", ""]]], txt="_Test WLQ"
+		)
+		self.assertIn(rejected, names)
+		self.assertIn(plain, names)
+		self.assertNotIn(qc, names)
