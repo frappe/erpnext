@@ -375,6 +375,11 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.update_cost_in_project()
 		self.update_quality_inspection()
 		super().on_submit_subcontracting_inward()
+		self.process_quality_control()
+
+	def before_cancel(self):
+		super().before_cancel()
+		self.validate_quality_control_cancel()
 
 	def on_cancel(self):
 		if self.purpose_cls and hasattr(self.purpose_cls, "on_cancel"):
@@ -410,6 +415,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.delete_auto_created_batches()
 		self.delete_linked_stock_entry()
 		super().on_cancel_subcontracting_inward()
+		self.cancel_quality_control()
 
 	def on_update(self):
 		super().on_update()

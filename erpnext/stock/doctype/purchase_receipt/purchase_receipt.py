@@ -369,6 +369,9 @@ class PurchaseReceipt(BuyingController):
 		return po_qty, po_warehouse
 
 	# on submit
+	def before_submit(self):
+		self.validate_quality_receipt_flows()
+
 	def on_submit(self):
 		super().on_submit()
 
@@ -394,6 +397,8 @@ class PurchaseReceipt(BuyingController):
 		self.set_consumed_qty_in_subcontract_order()
 		PurchaseReceiptStockReservation(self).reserve_stock()
 		self.update_received_qty_if_from_pp()
+		self.process_quality_control()
+		self.update_quality_receipt_flows()
 
 	def update_received_qty_if_from_pp(self):
 		from frappe.query_builder.functions import Coalesce, NullIf, Sum
@@ -454,10 +459,13 @@ class PurchaseReceipt(BuyingController):
 		self.delete_auto_created_batches()
 		self.set_consumed_qty_in_subcontract_order()
 		self.update_received_qty_if_from_pp()
+		self.cancel_quality_control()
+		self.update_quality_receipt_flows("on_cancel")
 
 	def before_cancel(self):
 		super().before_cancel()
 		self.remove_amount_difference_with_purchase_invoice()
+		self.validate_quality_control_cancel()
 
 	def remove_amount_difference_with_purchase_invoice(self):
 		for item in self.items:

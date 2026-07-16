@@ -770,7 +770,10 @@ class QualityInspection(UnitReadingsMixin, Document):
 		self.update_qc_reference()
 
 	def on_submit(self):
+		from erpnext.stock.services.quality_release import process_inspection_result
+
 		self.update_qc_reference()
+		process_inspection_result(self)
 
 	def before_cancel(self):
 		self.protect_received_custody_verdict()
@@ -806,8 +809,11 @@ class QualityInspection(UnitReadingsMixin, Document):
 			)
 
 	def on_cancel(self):
+		from erpnext.stock.services.quality_release import reverse_inspection_result
+
 		self.ignore_linked_doctypes = ("Serial and Batch Bundle",)
 		self.update_qc_reference()
+		reverse_inspection_result(self)
 
 	def on_trash(self):
 		self.update_qc_reference(remove_reference=True)

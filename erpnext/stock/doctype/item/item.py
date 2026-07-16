@@ -31,6 +31,9 @@ from erpnext.controllers.item_variant import (
 	validate_item_variant_attributes,
 )
 from erpnext.stock.doctype.item_default.item_default import ItemDefault
+from erpnext.stock.doctype.item_quality_trigger.item_quality_trigger import (
+	validate_item_quality_triggers,
+)
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 from erpnext.stock.utils import get_valuation_method
 
@@ -244,6 +247,7 @@ class Item(Document):
 		self.validate_serialized_change_with_bundle()
 		self.validate_standard_cost_change()
 		self.validate_item_tax_net_rate_range()
+		validate_item_quality_triggers(self)
 
 		if not self.is_new():
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")

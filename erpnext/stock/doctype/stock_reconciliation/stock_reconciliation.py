@@ -21,6 +21,9 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_reconciliation_item.stock_reconciliation_item import StockReconciliationItem
+from erpnext.stock.services.quality_quarantine import (
+	block_stock_reconciliation_on_quality_warehouse,
+)
 from erpnext.stock.utils import get_incoming_rate, get_stock_balance, get_valuation_method
 
 
@@ -97,6 +100,8 @@ class StockReconciliation(StockController):
 
 		if self._action == "submit":
 			self.validate_reserved_stock()
+
+		block_stock_reconciliation_on_quality_warehouse(self)
 
 	def on_update(self):
 		super().on_update()

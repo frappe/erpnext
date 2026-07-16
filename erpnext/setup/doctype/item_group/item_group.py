@@ -6,6 +6,10 @@ import frappe
 from frappe import _
 from frappe.utils.nestedset import NestedSet, get_root_of
 
+from erpnext.stock.doctype.item_quality_trigger.item_quality_trigger import (
+	validate_item_quality_triggers,
+)
+
 
 class ItemGroup(NestedSet):
 	# begin: auto-generated types
@@ -39,6 +43,7 @@ class ItemGroup(NestedSet):
 				self.parent_item_group = root
 		self.validate_item_group_defaults()
 		self.check_item_tax()
+		validate_item_quality_triggers(self)
 
 	def check_item_tax(self):
 		"""Check whether Tax Rate is not entered twice for same Tax Type"""

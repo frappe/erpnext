@@ -512,6 +512,8 @@ class SalesInvoice(SellingController):
 		if self.is_return:
 			self.refresh_subscription_status()
 
+		self.process_quality_control()
+
 	def before_cancel(self):
 		POSService(self).check_if_created_using_pos_and_pos_closing_entry_generated()
 		POSService(self).check_if_consolidated_invoice()
@@ -520,6 +522,7 @@ class SalesInvoice(SellingController):
 		TimesheetBillingService(self).update_time_sheet(
 			self.return_against if (self.is_return and self.return_against) else None
 		)
+		self.validate_quality_control_cancel()
 
 	def on_cancel(self):
 		check_if_return_invoice_linked_with_payment_entry(self)
@@ -600,6 +603,7 @@ class SalesInvoice(SellingController):
 
 		self.update_billed_qty_in_scio()
 		self.refresh_subscription_status()
+		self.cancel_quality_control()
 
 	def update_status_updater_args(self):
 		if not cint(self.update_stock):

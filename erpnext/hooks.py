@@ -386,45 +386,6 @@ doc_events = {
 		"on_submit": "erpnext.stock.doctype.material_request.material_request.update_completed_and_requested_qty",
 		"on_cancel": "erpnext.stock.doctype.material_request.material_request.update_completed_and_requested_qty",
 	},
-	("Item", "Item Group"): {
-		"validate": "erpnext.stock.doctype.item_quality_trigger.item_quality_trigger.validate_item_quality_triggers",
-	},
-	(
-		"Purchase Receipt",
-		"Purchase Invoice",
-		"Stock Entry",
-		"Subcontracting Receipt",
-		# customer returns bring stock back in and can quarantine it
-		"Delivery Note",
-		"Sales Invoice",
-	): {
-		"on_submit": [
-			"erpnext.stock.services.quality_trigger_resolution.validate_inspected_serial_consistency",
-			"erpnext.stock.services.quality_quarantine.create_quality_control_lots",
-		],
-		"before_cancel": "erpnext.stock.services.quality_quarantine.block_cancel_when_lot_decided",
-		"on_cancel": "erpnext.stock.services.quality_quarantine.handle_source_document_cancel",
-	},
-	("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"): {
-		"before_submit": "erpnext.stock.services.quality_returns.update_lots_for_purchase_return",
-		"on_submit": "erpnext.stock.services.quality_returns.update_lots_for_purchase_return",
-		"on_cancel": "erpnext.stock.services.quality_returns.update_lots_for_purchase_return",
-	},
-	("Purchase Receipt", "Subcontracting Receipt"): {
-		"before_submit": [
-			"erpnext.stock.services.goods_inward.validate_custody_claims",
-			"erpnext.stock.services.goods_inward.update_goods_inward_note_on_receipt",
-		],
-		"on_submit": "erpnext.stock.services.goods_inward.update_goods_inward_note_on_receipt",
-		"on_cancel": "erpnext.stock.services.goods_inward.update_goods_inward_note_on_receipt",
-	},
-	"Stock Reconciliation": {
-		"validate": "erpnext.stock.services.quality_quarantine.block_stock_reconciliation_on_quality_warehouse",
-	},
-	"Quality Inspection": {
-		"on_submit": "erpnext.stock.services.quality_release.process_inspection_result",
-		"on_cancel": "erpnext.stock.services.quality_release.reverse_inspection_result",
-	},
 	"User": {
 		"after_insert": "frappe.contacts.doctype.contact.contact.update_contact",
 		"validate": "erpnext.setup.doctype.employee.employee.validate_employee_role",
@@ -460,14 +421,6 @@ doc_events = {
 			"erpnext.regional.united_arab_emirates.utils.update_grand_total_for_rcm",
 			"erpnext.regional.united_arab_emirates.utils.validate_returns",
 		],
-		# a stock-updating invoice receives like a receipt: it draws from and
-		# books back onto Goods Inward Notes, and must respect their claims
-		"before_submit": [
-			"erpnext.stock.services.goods_inward.validate_custody_claims",
-			"erpnext.stock.services.goods_inward.update_goods_inward_note_on_receipt",
-		],
-		"on_submit": "erpnext.stock.services.goods_inward.update_goods_inward_note_on_receipt",
-		"on_cancel": "erpnext.stock.services.goods_inward.update_goods_inward_note_on_receipt",
 	},
 	"Payment Entry": {
 		"on_trash": "erpnext.regional.check_deletion_permission",

@@ -499,6 +499,11 @@ class DeliveryNote(SellingController):
 		self.update_stock_ledger()
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
+		self.process_quality_control()
+
+	def before_cancel(self):
+		super().before_cancel()
+		self.validate_quality_control_cancel()
 
 	def on_cancel(self):
 		super().on_cancel()
@@ -528,6 +533,7 @@ class DeliveryNote(SellingController):
 		)
 
 		self.delete_auto_created_batches()
+		self.cancel_quality_control()
 
 	def validate_against_stock_reservation_entries(self):
 		"""Validates if Stock Reservation Entries are available for the Sales Order Item reference."""

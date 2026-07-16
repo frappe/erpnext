@@ -406,6 +406,48 @@ class StockController(AccountsController):
 		enforce_inspection_points(self)
 		validate_inspected_serial_consistency(self)
 
+	def process_quality_control(self):
+		"""On submit: inspected serials must agree with the rows, then inbound
+		movements into Quality warehouses mint their Quality Control Lots."""
+		from erpnext.stock.services.quality_quarantine import create_quality_control_lots
+		from erpnext.stock.services.quality_trigger_resolution import (
+			validate_inspected_serial_consistency,
+		)
+
+		validate_inspected_serial_consistency(self)
+		create_quality_control_lots(self)
+
+	def validate_quality_control_cancel(self):
+		"""Before cancel: a lot that already released or rejected stock refuses
+		the cancellation before the stock ledger reversal can go negative."""
+		from erpnext.stock.services.quality_quarantine import block_cancel_when_lot_decided
+
+		block_cancel_when_lot_decided(self)
+
+	def cancel_quality_control(self):
+		"""On cancel: untouched lots leave with the reversed stock."""
+		from erpnext.stock.services.quality_quarantine import handle_source_document_cancel
+
+		handle_source_document_cancel(self)
+
+	def validate_quality_receipt_flows(self):
+		"""Before a receiving document submits: check it against outstanding
+		Goods Inward Note custody and validate the quality side-ledger moves."""
+		from erpnext.stock.services.goods_inward import validate_custody_claims
+
+		validate_custody_claims(self)
+		self.update_quality_receipt_flows("before_submit")
+
+	def update_quality_receipt_flows(self, event="on_submit"):
+		"""Purchase-return allocations against Quality Control Lots and custody
+		claims on Goods Inward Notes follow the receiving document: validated
+		before submit, booked on submit, reversed on cancel."""
+		from erpnext.stock.services.goods_inward import update_goods_inward_note_on_receipt
+		from erpnext.stock.services.quality_returns import update_lots_for_purchase_return
+
+		update_lots_for_purchase_return(self, event)
+		update_goods_inward_note_on_receipt(self, event)
+
 	def update_blanket_order(self):
 		blanket_orders = list(set([d.blanket_order for d in self.items if d.blanket_order]))
 		for blanket_order in blanket_orders:

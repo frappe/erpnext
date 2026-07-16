@@ -620,6 +620,7 @@ class PurchaseInvoice(BuyingController):
 
 	def before_submit(self):
 		self.create_remarks()
+		self.validate_quality_receipt_flows()
 
 	def on_submit(self):
 		super().on_submit()
@@ -667,6 +668,9 @@ class PurchaseInvoice(BuyingController):
 
 		if self.is_return:
 			self.refresh_subscription_status()
+
+		self.process_quality_control()
+		self.update_quality_receipt_flows()
 
 	def on_update_after_submit(self):
 		fields_to_check = [
@@ -733,6 +737,10 @@ class PurchaseInvoice(BuyingController):
 					return 1
 		return 0
 
+	def before_cancel(self):
+		super().before_cancel()
+		self.validate_quality_control_cancel()
+
 	def on_cancel(self):
 		check_if_return_invoice_linked_with_payment_entry(self)
 
@@ -786,6 +794,8 @@ class PurchaseInvoice(BuyingController):
 		)
 
 		self.refresh_subscription_status()
+		self.cancel_quality_control()
+		self.update_quality_receipt_flows("on_cancel")
 
 	def update_project(self):
 		projects = frappe._dict()

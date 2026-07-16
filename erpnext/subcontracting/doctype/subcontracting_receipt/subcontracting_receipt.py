@@ -174,6 +174,9 @@ class SubcontractingReceipt(SubcontractingController):
 		self.set_supplied_items_cost_center()
 		self.set_supplied_items_inventory_dimensions()
 
+	def before_submit(self):
+		self.validate_quality_receipt_flows()
+
 	def on_submit(self):
 		self.validate_closed_subcontracting_order()
 		self.validate_bom_required_qty()
@@ -192,11 +195,17 @@ class SubcontractingReceipt(SubcontractingController):
 		self.update_status()
 		self.auto_create_purchase_receipt()
 		self.update_job_card()
+		self.process_quality_control()
+		self.update_quality_receipt_flows()
 
 	def on_update(self):
 		for table_field in ["items", "supplied_items"]:
 			if self.get(table_field):
 				self.set_serial_and_batch_bundle(table_field)
+
+	def before_cancel(self):
+		super().before_cancel()
+		self.validate_quality_control_cancel()
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
@@ -217,6 +226,8 @@ class SubcontractingReceipt(SubcontractingController):
 		self.update_status()
 		self.delete_auto_created_batches()
 		self.update_job_card()
+		self.cancel_quality_control()
+		self.update_quality_receipt_flows("on_cancel")
 
 	@frappe.whitelist()
 	def reset_raw_materials(self):
