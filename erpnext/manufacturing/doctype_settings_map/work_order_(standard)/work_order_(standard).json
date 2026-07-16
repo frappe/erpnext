@@ -1,0 +1,68 @@
+{
+ "applies_to_doctype": "Work Order",
+ "creation": "2026-07-03 16:50:05.352634",
+ "docstatus": 0,
+ "doctype": "DocType Settings Map",
+ "idx": 0,
+ "is_active": 1,
+ "is_standard": 1,
+ "mappings": [
+  {
+   "setting_field": "auto_reserve_stock",
+   "settings_doctype": "Stock Settings"
+  },
+  {
+   "setting_field": "material_consumption",
+   "settings_doctype": "Manufacturing Settings"
+  },
+  {
+   "setting_field": "get_rm_cost_from_consumption_entry",
+   "settings_doctype": "Manufacturing Settings"
+  },
+  {
+   "setting_field": "backflush_raw_materials_based_on",
+   "settings_doctype": "Manufacturing Settings"
+  },
+  {
+   "setting_field": "allow_editing_of_items_and_quantities_in_work_order",
+   "settings_doctype": "Manufacturing Settings"
+  },
+  {
+   "setting_field": "overproduction_percentage_for_work_order",
+   "settings_doctype": "Manufacturing Settings"
+  },
+  {
+   "setting_field": "transfer_extra_materials_percentage",
+   "settings_doctype": "Manufacturing Settings"
+  },
+  {
+   "setting_field": "validate_components_quantities_per_bom",
+   "settings_doctype": "Manufacturing Settings"
+  },
+  {
+   "setting_field": "disable_capacity_planning",
+   "settings_doctype": "Manufacturing Settings"
+  },
+  {
+   "setting_field": "capacity_planning_for_days",
+   "settings_doctype": "Manufacturing Settings"
+  },
+  {
+   "setting_field": "make_serial_no_batch_from_work_order",
+   "settings_doctype": "Manufacturing Settings"
+  },
+  {
+   "setting_field": "overproduction_percentage_for_sales_order",
+   "settings_doctype": "Manufacturing Settings"
+  },
+  {
+   "setting_field": "enable_stock_reservation",
+   "settings_doctype": "Stock Settings"
+  }
+ ],
+ "modified": "2026-07-10 11:32:58.811771",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Work Order (Standard)",
+ "owner": "Administrator"
+}

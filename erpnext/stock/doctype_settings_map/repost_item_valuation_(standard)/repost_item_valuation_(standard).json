@@ -1,0 +1,48 @@
+{
+ "applies_to_doctype": "Repost Item Valuation",
+ "creation": "2026-07-03 17:49:30.721087",
+ "docstatus": 0,
+ "doctype": "DocType Settings Map",
+ "idx": 0,
+ "is_active": 1,
+ "is_standard": 1,
+ "mappings": [
+  {
+   "setting_field": "limit_reposting_timeslot",
+   "settings_doctype": "Stock Reposting Settings"
+  },
+  {
+   "setting_field": "start_time",
+   "settings_doctype": "Stock Reposting Settings"
+  },
+  {
+   "setting_field": "end_time",
+   "settings_doctype": "Stock Reposting Settings"
+  },
+  {
+   "setting_field": "limits_dont_apply_on",
+   "settings_doctype": "Stock Reposting Settings"
+  },
+  {
+   "setting_field": "item_based_reposting",
+   "settings_doctype": "Stock Reposting Settings"
+  },
+  {
+   "setting_field": "do_not_fetch_incoming_rate_from_serial_no",
+   "settings_doctype": "Stock Reposting Settings"
+  },
+  {
+   "setting_field": "enable_parallel_reposting",
+   "settings_doctype": "Stock Reposting Settings"
+  },
+  {
+   "setting_field": "no_of_parallel_reposting",
+   "settings_doctype": "Stock Reposting Settings"
+  }
+ ],
+ "modified": "2026-07-09 11:45:29.543363",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Repost Item Valuation (Standard)",
+ "owner": "Administrator"
+}

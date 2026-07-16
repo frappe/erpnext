@@ -1,0 +1,28 @@
+{
+ "applies_to_doctype": "BOM",
+ "creation": "2026-07-09 14:48:39.366980",
+ "docstatus": 0,
+ "doctype": "DocType Settings Map",
+ "idx": 0,
+ "is_active": 1,
+ "is_standard": 1,
+ "mappings": [
+  {
+   "setting_field": "backflush_raw_materials_based_on",
+   "settings_doctype": "Manufacturing Settings"
+  },
+  {
+   "setting_field": "update_bom_costs_automatically",
+   "settings_doctype": "Manufacturing Settings"
+  },
+  {
+   "setting_field": "add_corrective_operation_cost_in_finished_good_valuation",
+   "settings_doctype": "Manufacturing Settings"
+  }
+ ],
+ "modified": "2026-07-10 11:47:13.281237",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "BOM (Standard)",
+ "owner": "Administrator"
+}

@@ -1,0 +1,32 @@
+{
+ "applies_to_doctype": "Material Request",
+ "creation": "2026-07-03 14:29:17.088480",
+ "docstatus": 0,
+ "doctype": "DocType Settings Map",
+ "idx": 0,
+ "is_active": 1,
+ "is_standard": 1,
+ "mappings": [
+  {
+   "setting_field": "mr_qty_allowance",
+   "settings_doctype": "Stock Settings"
+  },
+  {
+   "setting_field": "auto_indent",
+   "settings_doctype": "Stock Settings"
+  },
+  {
+   "setting_field": "reorder_email_notify",
+   "settings_doctype": "Stock Settings"
+  },
+  {
+   "setting_field": "over_order_allowance",
+   "settings_doctype": "Buying Settings"
+  }
+ ],
+ "modified": "2026-07-03 17:04:08.541993",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Material Request (Standard)",
+ "owner": "Administrator"
+}

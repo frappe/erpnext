@@ -1,0 +1,20 @@
+{
+ "applies_to_doctype": "Supplier Quotation",
+ "creation": "2026-07-03 17:14:32.891939",
+ "docstatus": 0,
+ "doctype": "DocType Settings Map",
+ "idx": 0,
+ "is_active": 1,
+ "is_standard": 1,
+ "mappings": [
+  {
+   "setting_field": "allow_zero_qty_in_supplier_quotation",
+   "settings_doctype": "Buying Settings"
+  }
+ ],
+ "modified": "2026-07-03 17:14:32.891939",
+ "modified_by": "Administrator",
+ "module": "Buying",
+ "name": "Supplier Quotation (Standard)",
+ "owner": "Administrator"
+}
