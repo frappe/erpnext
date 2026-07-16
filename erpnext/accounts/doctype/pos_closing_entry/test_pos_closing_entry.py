@@ -25,6 +25,14 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		make_stock_entry(target="_Test Warehouse - _TC", qty=2, basic_rate=100)
 		frappe.db.set_single_value("POS Settings", "invoice_type", "POS Invoice")
 
+	def test_failed_pos_closing_entry_can_cancel(self):
+		test_user, pos_profile = init_user_and_profile()
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.status = "Failed"
+
+		closing_entry.before_cancel()
+
 	def test_pos_closing_entry(self):
 		test_user, pos_profile = init_user_and_profile()
 		opening_entry = create_opening_entry(pos_profile, test_user.name)
