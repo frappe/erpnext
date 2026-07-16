@@ -945,6 +945,41 @@ class TestQualityQuarantine(ERPNextTestSuite):
 		self.assertEqual(receipt.docstatus, 1)
 		self.assertEqual(get_qty(item.name, store), 2)
 
+	def test_cancel_succeeds_after_full_unwind(self):
+		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
+
+		qc = make_qc_warehouse("_Test QC Unwind WH")
+		store = make_warehouse("_Test QC Unwind Store", quality_warehouse=qc)
+
+		item = make_item(properties={"is_stock_item": 1})
+		item.append(
+			"quality_triggers",
+			trigger_row(
+				document_type="Stock Entry", warehouse_role="Inbound", quality_control_mode="Quarantine"
+			),
+		)
+		item.save()
+
+		receipt = make_stock_entry(
+			item_code=item.name, qty=2, to_warehouse=store, purpose="Material Receipt", rate=100
+		)
+		lot = quality_control_lots_for(receipt.name)[0].name
+
+		# accept (auto-release), then unwind: cancelling the inspection cascades
+		# to its release and puts the stock back under quarantine
+		inspection = submit_inspection_for_lot(lot, status="Accepted")
+		release = frappe.db.get_value("Stock Entry", {"quality_control_lot": lot, "docstatus": 1}, "name")
+		frappe.get_doc("Quality Inspection", inspection.name).cancel()
+		self.assertEqual(frappe.db.get_value("Stock Entry", release, "docstatus"), 2)
+
+		# the cancelled release and inspection still reference the lot; the
+		# source cancellation must shed those links and delete the lot anyway
+		receipt.reload()
+		receipt.cancel()
+		self.assertFalse(frappe.db.exists("Quality Control Lot", lot))
+		self.assertFalse(frappe.db.get_value("Stock Entry", release, "quality_control_lot"))
+		self.assertFalse(frappe.db.get_value("Quality Inspection", inspection.name, "reference_name"))
+
 	def test_inspection_acceptance_releases_quarantined_stock(self):
 		from erpnext.stock.doctype.item_quality_trigger.test_item_quality_trigger import trigger_row
 

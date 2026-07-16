@@ -230,7 +230,36 @@ def handle_source_document_cancel(doc, method=None):
 	reversed stock; block_cancel_when_lot_decided already refused everything else.
 	"""
 	for lot in _lots_minted_by(doc):
+		_unlink_cancelled_lot_references(lot.name)
 		frappe.delete_doc("Quality Control Lot", lot.name, ignore_permissions=True)
+
+
+def _unlink_cancelled_lot_references(lot_name):
+	"""Shed links to the lot held by cancelled documents so it can be deleted.
+
+	A fully unwound lot may still be referenced by its cancelled Quality Control
+	Releases and inspections — their bookings are already reversed, but frappe
+	refuses to delete a referenced document. Draft references are left alone and
+	block the deletion, exactly like any other dangling draft.
+	"""
+	releases = frappe.get_all(
+		"Stock Entry", filters={"quality_control_lot": lot_name, "docstatus": 2}, pluck="name"
+	)
+	for release in releases:
+		frappe.db.set_value("Stock Entry", release, "quality_control_lot", None, update_modified=False)
+
+	inspections = frappe.get_all(
+		"Quality Inspection",
+		filters={"reference_type": "Quality Control Lot", "reference_name": lot_name, "docstatus": 2},
+		pluck="name",
+	)
+	for inspection in inspections:
+		frappe.db.set_value(
+			"Quality Inspection",
+			inspection,
+			{"reference_type": None, "reference_name": None},
+			update_modified=False,
+		)
 
 
 def block_stock_reconciliation_on_quality_warehouse(doc, method=None):
