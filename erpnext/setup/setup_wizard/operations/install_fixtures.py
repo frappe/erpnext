@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 
 import frappe
+from frappe import N_ as _
 from frappe.desk.doctype.global_search_settings.global_search_settings import (
 	update_global_search_doctypes,
 )
@@ -15,7 +16,6 @@ from frappe.utils import cstr, getdate
 
 from erpnext.accounts.doctype.account.account import RootNotEditable
 from erpnext.regional.address_template.setup import set_up_address_templates
-from erpnext.setup.utils import identity as _
 
 
 def read_lines(filename: str) -> list[str]:
