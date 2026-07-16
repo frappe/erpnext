@@ -115,6 +115,10 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 	from erpnext.controllers.stock_controller import future_sle_exists
 
 	if sl_entries:
+		# Sorted so two vouchers touching the same pairs can't take the gates in opposite order.
+		for pair in sorted({(d.get("item_code"), d.get("warehouse")) for d in sl_entries}):
+			sle_processing_gate(*pair)
+
 		cancelled = sl_entries[0].get("is_cancelled")
 		if cancelled:
 			validate_cancellation(sl_entries)
@@ -283,6 +287,18 @@ def repost_gate(item_code, warehouse):
 		# Tuple key: a colon in item_code/warehouse can't collide two distinct pairs onto one lock.
 		return frappe.db.advisory_lock(("stock_repost", item_code, warehouse), timeout=REPOST_LOCK_TIMEOUT)
 	return nullcontext()
+
+
+def sle_processing_gate(item_code, warehouse):
+	"""Serialize all stock writes for an (item, warehouse) on postgres. MariaDB gets this from the
+	gap locks its previous-SLE locking reads take (which also block, then reveal, concurrent
+	inserts); postgres locking reads never see rows another transaction is inserting, so without
+	this gate two concurrent writers compute from the same stale previous SLE and the loser's Bin
+	write is lost. Txn-scoped and re-entrant; released at commit/rollback. hasattr keeps a frappe
+	predating transaction_advisory_lock on the status quo (serialization-failure retries) instead
+	of breaking every stock submission."""
+	if frappe.db.db_type == "postgres" and hasattr(frappe.db, "transaction_advisory_lock"):
+		frappe.db.transaction_advisory_lock(("stock-sle", item_code, warehouse), timeout=REPOST_LOCK_TIMEOUT)
 
 
 def repost_future_sle(
@@ -593,6 +609,8 @@ class update_entries_after:
 		self.args = frappe._dict(args)
 		if self.args.sle_id:
 			self.args["name"] = self.args.sle_id
+
+		sle_processing_gate(self.item_code, self.args.warehouse)
 
 		self.prev_sle_dict = frappe._dict({})
 		self.company = frappe.get_cached_value("Warehouse", self.args.warehouse, "company")

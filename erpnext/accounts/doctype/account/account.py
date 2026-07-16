@@ -659,8 +659,15 @@ def _ensure_idle_system():
 
 	last_gl_update = None
 	try:
-		# We also lock inserts to GL entry table with for_update here.
-		last_gl_update = frappe.db.get_value("GL Entry", {}, "modified", for_update=True, wait=False)
+		if frappe.db.db_type == "postgres":
+			# The MariaDB branch blocks new GL inserts via the gap lock its for_update read takes;
+			# a postgres row lock never blocks inserts, so take an EXCLUSIVE table lock instead --
+			# writers block until the rename commits, readers don't. NOWAIT mirrors wait=False.
+			frappe.db.sql("LOCK TABLE `tabGL Entry` IN EXCLUSIVE MODE NOWAIT")
+			last_gl_update = frappe.db.get_value("GL Entry", {}, "modified")
+		else:
+			# We also lock inserts to GL entry table with for_update here.
+			last_gl_update = frappe.db.get_value("GL Entry", {}, "modified", for_update=True, wait=False)
 	except frappe.QueryTimeoutError:
 		# wait=False fails immediately if there's an active transaction.
 		last_gl_update = add_to_date(None, seconds=-1)
