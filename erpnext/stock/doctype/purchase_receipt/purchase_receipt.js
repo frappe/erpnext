@@ -419,6 +419,12 @@ cur_frm.fields_dict["items"].grid.get_field("bom").get_query = function (doc, cd
 frappe.provide("erpnext.buying");
 
 frappe.ui.form.on("Purchase Receipt Item", {
+	form_render: function (frm, cdt, cdn) {
+		erpnext.stock.mount_serial_batch_inline_editor(frm, cdt, cdn);
+	},
+	use_serial_batch_fields: function (frm, cdt, cdn) {
+		erpnext.stock.mount_serial_batch_inline_editor(frm, cdt, cdn);
+	},
 	item_code: function (frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
 		frappe.db.get_value("Item", { name: d.item_code }, "sample_quantity", (r) => {
