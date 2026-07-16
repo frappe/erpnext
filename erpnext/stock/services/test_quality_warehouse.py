@@ -42,3 +42,69 @@ class TestQualityWarehouseConfiguration(ERPNextTestSuite):
 		store.reload()
 		store.quality_warehouse = make_warehouse("_Test QW Typed Target", warehouse_type="Quality")
 		store.save()
+
+
+class TestWarehouseLinkQuery(ERPNextTestSuite):
+	"""The default Warehouse link query (standard_queries) hides Quality
+	warehouses unless the caller filters on warehouse types itself."""
+
+	def run_query(self, filters=None, txt=""):
+		from erpnext.controllers.queries import warehouse_link_query
+
+		rows = warehouse_link_query("Warehouse", txt, "name", 0, 20, filters)
+		return {row[0] for row in rows}
+
+	def test_default_pick_hides_quality_warehouses(self):
+		ensure_quality_warehouse_type()
+		qc = make_warehouse("_Test WLQ Quality", warehouse_type="Quality")
+		plain = make_warehouse("_Test WLQ Plain")
+
+		names = self.run_query(txt="_Test WLQ")
+		self.assertIn(plain, names)
+		self.assertNotIn(qc, names)
+
+	def test_explicit_type_filter_offers_quality_warehouses(self):
+		ensure_quality_warehouse_type()
+		qc = make_warehouse("_Test WLQ Quality", warehouse_type="Quality")
+
+		# the routing-target field, release dispatch and quality reports all
+		# ask for the type explicitly — the default exclusion yields to them
+		names = self.run_query(filters={"warehouse_type": "Quality"}, txt="_Test WLQ")
+		self.assertIn(qc, names)
+
+	def test_list_form_filters_are_understood(self):
+		ensure_quality_warehouse_type()
+		qc = make_warehouse("_Test WLQ Quality", warehouse_type="Quality")
+		plain = make_warehouse("_Test WLQ Plain")
+
+		# erpnext.queries.* builders send ["Warehouse", field, op, value] rows
+		names = self.run_query(filters=[["Warehouse", "company", "=", "_Test Company"]], txt="_Test WLQ")
+		self.assertIn(plain, names)
+		self.assertNotIn(qc, names)
+
+		names = self.run_query(filters=[["Warehouse", "warehouse_type", "=", "Quality"]], txt="_Test WLQ")
+		self.assertIn(qc, names)
+
+	def test_not_in_type_filter_keeps_untyped_warehouses(self):
+		ensure_quality_warehouse_type()
+		qc = make_warehouse("_Test WLQ Quality", warehouse_type="Quality")
+		plain = make_warehouse("_Test WLQ Plain")  # warehouse_type is NULL
+
+		# the shared inbound picker sends this exact shape; NOT IN must not
+		# swallow untyped warehouses through SQL NULL semantics
+		names = self.run_query(
+			filters=[["Warehouse", "warehouse_type", "not in", ["Quality", "Rejected"]]],
+			txt="_Test WLQ",
+		)
+		self.assertIn(plain, names)
+		self.assertNotIn(qc, names)
+
+	def test_dict_operator_form_is_understood(self):
+		ensure_quality_warehouse_type()
+		qc = make_warehouse("_Test WLQ Quality", warehouse_type="Quality")
+		plain = make_warehouse("_Test WLQ Plain")
+
+		# the Quality Control Release target picker sends {"warehouse_type": ["!=", "Quality"]}
+		names = self.run_query(filters={"warehouse_type": ["!=", "Quality"]}, txt="_Test WLQ")
+		self.assertIn(plain, names)
+		self.assertNotIn(qc, names)

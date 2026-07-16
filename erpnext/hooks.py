@@ -59,6 +59,10 @@ extend_doctype_class = {"Address": "erpnext.accounts.custom.address.ERPNextAddre
 
 override_whitelisted_methods = {"frappe.www.contact.send_message": "erpnext.templates.utils.send_message"}
 
+# a Quality Control warehouse is never an ordinary pick: the default Warehouse
+# link query hides the type unless a field filters on warehouse types itself
+standard_queries = {"Warehouse": "erpnext.controllers.queries.warehouse_link_query"}
+
 welcome_email = "erpnext.setup.utils.welcome_email"
 
 # setup wizard

@@ -964,11 +964,7 @@ def warehouse_query(doctype: str, txt: str, searchfield: str, start: int, page_l
 	# Should be used when item code is passed in filters.
 	filter_dict = get_doctype_wise_filters(filters)
 
-	warehouse_field = "name"
-	meta = frappe.get_meta("Warehouse")
-	if meta.get("show_title_field_in_link") and meta.get("title_field"):
-		searchfield = meta.get("title_field")
-		warehouse_field = meta.get("title_field")
+	warehouse_field, searchfield = _warehouse_display_field(searchfield)
 
 	wh = frappe.qb.DocType("Warehouse")
 	bin_dt = frappe.qb.DocType("Bin")
@@ -1001,6 +997,89 @@ def warehouse_query(doctype: str, txt: str, searchfield: str, start: int, page_l
 		.offset(start)
 		.run()
 	)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def warehouse_link_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict | list | None = None
+):
+	"""Default link query for Warehouse (wired via standard_queries).
+
+	A Quality Control warehouse is entered by quarantine routing and left by
+	controlled flows, never picked by hand — so every warehouse link hides the
+	type unless the caller filters on warehouse types itself (the routing-target
+	field, the Quality Control Release dispatch, the quality reports).
+	"""
+	filters = _normalize_warehouse_filters(filters)
+	# warehouse_type is NULL on ordinary warehouses, so its conditions must be
+	# applied NULL-safely — pulled out here, IfNull-wrapped below
+	type_conditions, filters = _pop_warehouse_type_conditions(filters)
+
+	warehouse_field, searchfield = _warehouse_display_field(searchfield)
+
+	wh = frappe.qb.DocType("Warehouse")
+	query = (
+		frappe.qb.get_query("Warehouse", fields=[warehouse_field], filters=filters, ignore_permissions=False)
+		.where(wh[searchfield].like(f"%{txt}%"))
+		.orderby(wh[warehouse_field])
+		.limit(page_len)
+		.offset(start)
+	)
+
+	warehouse_type = IfNull(wh.warehouse_type, "")
+	if not type_conditions:
+		query = query.where(warehouse_type != "Quality")
+	for operator, value in type_conditions:
+		operator = (operator or "=").lower()
+		if operator == "=":
+			query = query.where(warehouse_type == value)
+		elif operator == "!=":
+			query = query.where(warehouse_type != value)
+		elif operator == "in":
+			query = query.where(warehouse_type.isin(value))
+		elif operator == "not in":
+			query = query.where(warehouse_type.notin(value))
+		else:
+			frappe.throw(_("Unsupported warehouse_type filter operator: {0}").format(operator))
+
+	return query.run()
+
+
+def _warehouse_display_field(searchfield):
+	"""Display and search on the Warehouse title field when it is shown in links."""
+	meta = frappe.get_meta("Warehouse")
+	if meta.get("show_title_field_in_link") and meta.get("title_field"):
+		return meta.get("title_field"), meta.get("title_field")
+	return "name", searchfield
+
+
+def _normalize_warehouse_filters(filters):
+	# link fields send dicts; erpnext.queries.* builders send
+	# ["Warehouse", field, op, value] rows — strip the doctype element
+	if not filters:
+		return {}
+	if isinstance(filters, dict):
+		return filters
+	return [list(row[1:]) if len(row) == 4 and row[0] == "Warehouse" else list(row) for row in filters]
+
+
+def _pop_warehouse_type_conditions(filters):
+	"""Split warehouse_type conditions off the caller's filters as (operator, value) pairs."""
+	conditions = []
+	if isinstance(filters, dict):
+		value = filters.pop("warehouse_type", None)
+		if value is not None:
+			conditions.append(tuple(value) if isinstance(value, list | tuple) else ("=", value))
+		return conditions, filters
+
+	remaining = []
+	for row in filters:
+		if row and row[0] == "warehouse_type":
+			conditions.append((row[1], row[2]))
+		else:
+			remaining.append(row)
+	return conditions, remaining
 
 
 def get_doctype_wise_filters(filters):
