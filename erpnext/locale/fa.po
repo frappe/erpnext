@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: hello@frappe.io\n"
 "POT-Creation-Date: 2026-07-12 10:05+0000\n"
-"PO-Revision-Date: 2026-07-15 12:59\n"
+"PO-Revision-Date: 2026-07-16 13:14\n"
 "Last-Translator: hello@frappe.io\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -5383,7 +5383,7 @@ msgstr "درخواست برای سند"
 #. 'Sales Order'
 #: erpnext/selling/doctype/sales_order/sales_order.json
 msgid "Applying a Discount Amount? When this Sales Order is partially fulfilled through multiple Delivery Notes and Sales Invoices, the Discount Amount is allocated on a FIFO basis. The earlier transactions receive a larger share of the discount. To spread the discount proportionally across item prices, use Additional Discount Percentage instead."
-msgstr ""
+msgstr "اعمال مبلغ تخفیف؟ وقتی بخشی از این سفارش فروش از طریق چندین یادداشت تحویل و فاکتور فروش انجام می‌شود، مبلغ تخفیف به صورت FIFO تخصیص داده می‌شود. تراکنش‌های اولیه سهم بیشتری از تخفیف را دریافت می‌کنند. برای توزیع متناسب تخفیف بین قیمت آیتم‌ها، به جای آن از درصد تخفیف اضافی استفاده کنید."
 
 #. Name of a DocType
 #. Label of a Link in the CRM Workspace
@@ -12744,7 +12744,7 @@ msgstr "اگر واحد پول سند با واحد پول شرکت یکسان �
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Convert Item description to clean HTML in transactions"
-msgstr ""
+msgstr "تبدیل توضیحات آیتم به HTML تمیز در تراکنش‌ها"
 
 #: erpnext/accounts/doctype/account/account.js:124
 #: erpnext/accounts/doctype/cost_center/cost_center.js:123
@@ -17335,7 +17335,7 @@ msgstr "غیرفعال کردن کل گرد شده"
 #. 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Disable Serial No and Batch selector"
-msgstr ""
+msgstr "غیرفعال کردن انتخابگر شماره سریال و دسته"
 
 #. Label of the disable_sdbnb_in_sr (Check) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
@@ -17789,7 +17789,7 @@ msgstr "تنظیمات ارسال"
 #. DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Display & Data Formatting"
-msgstr ""
+msgstr "نمایش و قالب‌بندی داده‌ها"
 
 #. Label of the display_name (Data) field in DocType 'Financial Report Row'
 #: erpnext/accounts/doctype/financial_report_row/financial_report_row.json
@@ -17946,7 +17946,7 @@ msgstr ""
 #. DocType 'Stock Reposting Settings'
 #: erpnext/stock/doctype/stock_reposting_settings/stock_reposting_settings.json
 msgid "Do not fetch incoming rate from Serial No"
-msgstr ""
+msgstr "نرخ ورودی را از شماره سریال دریافت نکنید"
 
 #. Option for the 'Maps To' (Select) field in DocType 'Bank Statement Import
 #. Log Column Map'
@@ -19074,7 +19074,7 @@ msgstr ""
 #. Label of the enable_perpetual_inventory (Check) field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Enable Perpetual Inventory"
-msgstr "موجودی دائمی را فعال کنید"
+msgstr "فعال کردن موجودی دائمی"
 
 #. Label of the enable_provisional_accounting_for_non_stock_items (Check) field
 #. in DocType 'Company'
@@ -19184,7 +19184,7 @@ msgstr ""
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Enable stock reservation"
-msgstr ""
+msgstr "فعال کردن رزرو موجودی"
 
 #. Description of the 'Has Priority' (Check) field in DocType 'Pricing Rule'
 #: erpnext/accounts/doctype/pricing_rule/pricing_rule.json
@@ -19257,7 +19257,7 @@ msgstr "فعال‌سازی این گزینه تضمین می‌کند که هر
 #. field in DocType 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Enabling this option will allow you to record - <br><br> 1. Advances Received in a <b>Liability Account</b> instead of the <b>Asset Account</b><br><br>2. Advances Paid in an <b>Asset Account</b> instead of the <b> Liability Account</b>"
-msgstr "فعال کردن این گزینه به شما امکان می‌دهد ثبت کنید - <br><br> 1. پیش‌پرداخت‌های دریافت شده در <b>حساب بدهی</b> به جای <b>حساب دارایی</b><br><br>2. پیش‌پرداخت‌های پرداخت شده در <b>حساب دارایی</b> به جای <b> حساب بدهی</b>"
+msgstr "فعال‌سازی این گزینه به شما امکان می‌دهد موارد زیر را ثبت کنید: - <br><br> ۱. پیش‌پرداخت‌های دریافت‌شده در <b>حساب بدهی</b> به‌جای <b>حساب دارایی</b> -<br><br>۲. پیش‌پرداخت‌های پرداخت‌شده در <b>حساب دارایی</b> به‌جای <b> حساب بدهی</b>"
 
 #. Description of the 'Allow multi-currency invoices against single party
 #. account ' (Check) field in DocType 'Accounts Settings'
@@ -21559,7 +21559,7 @@ msgstr "آیتم رایگان در قانون قیمت گذاری تنظیم ن�
 #. Label of the stock_frozen_upto_days (Int) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Freeze stocks older than (days)"
-msgstr ""
+msgstr "منجمد کردن موجودی‌های قدیمی‌تر از (روز)"
 
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:111
 #: erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:190
@@ -32940,7 +32940,7 @@ msgstr "تعداد ماه ها (درآمد)"
 #. Reposting Settings'
 #: erpnext/stock/doctype/stock_reposting_settings/stock_reposting_settings.json
 msgid "No of Parallel Reposting (Per Item)"
-msgstr ""
+msgstr "تعداد بازنشر موازی (به ازای هر آیتم)"
 
 #. Label of the no_of_shares (Int) field in DocType 'Share Balance'
 #. Label of the no_of_shares (Int) field in DocType 'Share Transfer'
@@ -42783,7 +42783,7 @@ msgstr "تفاوت مقدار"
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Quantity Tolerance"
-msgstr ""
+msgstr "تولرانس مقدار"
 
 #. Label of the section_break_19 (Section Break) field in DocType 'Pricing
 #. Rule'
@@ -44044,7 +44044,7 @@ msgstr ""
 #. 'Company'
 #: erpnext/setup/doctype/company/company.json
 msgid "Reconciliation Takes Effect On"
-msgstr "تطبیق تاثیر می گذارد روی"
+msgstr "تطبیق تاثیر می‌گذارد روی"
 
 #. Label of the reconciliation_type (Select) field in DocType 'Bank Transaction
 #. Payments'
@@ -46133,7 +46133,7 @@ msgstr ""
 #. Label of the stock_auth_role (Link) field in DocType 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Role allowed to edit frozen stock"
-msgstr ""
+msgstr "نقش مجاز به ویرایش موجودی منجمد"
 
 #. Label of the role_to_override_stop_action (Link) field in DocType 'Accounts
 #. Settings'
@@ -50796,7 +50796,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Setup Company'
 #: erpnext/setup/onboarding_step/setup_company/setup_company.json
 msgid "Setup Company"
-msgstr ""
+msgstr "راه‌اندازی شرکت"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Setup Email Account'
@@ -51979,7 +51979,7 @@ msgstr "خرید استاندارد"
 #: erpnext/stock/doctype/item/item_dashboard.py:36
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Standard Cost"
-msgstr ""
+msgstr "بهای استاندارد"
 
 #: erpnext/stock/doctype/item_standard_cost/item_standard_cost.py:92
 msgid "Standard Cost can only be set up for {0} in {1} before any stock transaction exists."
@@ -56472,7 +56472,7 @@ msgstr ""
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "This can be enabled at specific Item level as well"
-msgstr ""
+msgstr "این قابلیت را می‌توان در سطح آیتم‌های خاص نیز فعال کرد"
 
 #: banking/src/pages/BankStatementImporter.tsx:190
 msgid "This can contain \"CR\"/\"DR\" values or positive/negative values. You could also have a separate column for CR/DR."
@@ -59136,7 +59136,7 @@ msgstr "ضریب تبدیل UOM در ردیف {0} لازم است"
 #. 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "UOM Defaults"
-msgstr ""
+msgstr "پیش‌فرض‌های UOM"
 
 #. Label of the uom_name (Data) field in DocType 'UOM'
 #: erpnext/setup/doctype/uom/uom.json
@@ -59704,7 +59704,7 @@ msgstr ""
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Update Price List based on"
-msgstr ""
+msgstr "به‌روزرسانی لیست قیمت بر اساس"
 
 #: erpnext/accounts/doctype/cheque_print_template/cheque_print_template.js:11
 msgid "Update Print Format"
@@ -59739,7 +59739,7 @@ msgstr "نوع به‌روزرسانی"
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Update existing Price List Rate"
-msgstr ""
+msgstr "به‌روزرسانی نرخ لیست قیمت موجود"
 
 #. Label of the update_latest_price_in_all_boms (Button) field in DocType 'BOM
 #. Update Tool'
@@ -59926,7 +59926,7 @@ msgstr ""
 #. Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Use Serial / Batch fields"
-msgstr ""
+msgstr "استفاده از فیلدهای سریال/دسته"
 
 #. Label of the use_serial_batch_fields (Check) field in DocType 'POS Invoice
 #. Item'
@@ -60272,7 +60272,7 @@ msgstr "اعتبارسنجی مقادیر و اجزاء در هر BOM"
 #. 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Validate Material Transfer warehouses"
-msgstr ""
+msgstr "اعتبارسنجی انبارهای انتقال مواد"
 
 #. Label of the validate_negative_stock (Check) field in DocType 'Inventory
 #. Dimension'
@@ -61195,7 +61195,7 @@ msgstr "اطلاعات تماس انبار"
 #. 'Stock Settings'
 #: erpnext/stock/doctype/stock_settings/stock_settings.json
 msgid "Warehouse Defaults"
-msgstr ""
+msgstr "پیش‌فرض‌های انبار"
 
 #. Label of the warehouse_detail (Section Break) field in DocType 'Warehouse'
 #: erpnext/stock/doctype/warehouse/warehouse.json
