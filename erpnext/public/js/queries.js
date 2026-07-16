@@ -240,10 +240,16 @@ erpnext.queries.setup_queries = function (frm, options, query_fn) {
 			options: options,
 		});
 		$.each(link_fields, function (i, df) {
+			// rejected stock has its own destination type — the generic
+			// warehouse blanket must not clobber the Rejected-type picker
+			const field_query_fn =
+				options === "Warehouse" && df.fieldname === "rejected_warehouse"
+					? () => erpnext.queries.rejected_warehouse(frm.doc)
+					: query_fn;
 			if (parentfield) {
-				frm.set_query(df.fieldname, parentfield, query_fn);
+				frm.set_query(df.fieldname, parentfield, field_query_fn);
 			} else {
-				frm.set_query(df.fieldname, query_fn);
+				frm.set_query(df.fieldname, field_query_fn);
 			}
 		});
 	};
