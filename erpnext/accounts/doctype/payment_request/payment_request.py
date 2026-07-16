@@ -1336,10 +1336,16 @@ def get_available_payment_schedules(reference_doctype: str, reference_name: str)
 	existing_refs = get_existing_payment_references(reference_name)
 	existing_ids = {r["payment_schedule"] for r in existing_refs if r.get("payment_schedule")}
 
-	schedules = [r for r in ref_doc.payment_schedule if r.name not in existing_ids]
 	currency = ref_doc.get("currency")
-	for schedule in schedules:
-		schedule.currency = currency
+	schedules = []
+	for r in ref_doc.payment_schedule:
+		if r.name in existing_ids:
+			continue
+		# `currency` isn't a field on Payment Schedule, so it must be added to the
+		# dict (not the Document) or the API response serializer strips it
+		schedule = r.as_dict()
+		schedule["currency"] = currency
+		schedules.append(schedule)
 	return schedules
 
 
