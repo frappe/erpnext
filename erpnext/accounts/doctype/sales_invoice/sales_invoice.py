@@ -517,6 +517,7 @@ class SalesInvoice(SellingController):
 			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 			self.check_credit_limit()
+			self.check_overdue_billing_threshold()
 
 		if cint(self.is_pos) != 1 and not self.is_return:
 			self.update_against_document_in_jv()
@@ -777,6 +778,11 @@ class SalesInvoice(SellingController):
 			for pos_invoice in pos_invoices:
 				pos_invoice_doc = frappe.get_doc("POS Invoice", pos_invoice)
 				pos_invoice_doc.cancel()
+
+	def check_overdue_billing_threshold(self):
+		from erpnext.selling.doctype.customer.customer import check_overdue_billing_threshold
+
+		check_overdue_billing_threshold(self.customer, self.company)
 
 	@frappe.whitelist()
 	def set_missing_values(self, for_validate=False):

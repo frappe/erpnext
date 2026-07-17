@@ -5,13 +5,15 @@
 import json
 
 import frappe
-from frappe.utils import flt, nowdate
+from frappe.utils import add_days, flt, getdate, nowdate
 
 from erpnext.accounts.party import get_due_date
 from erpnext.exceptions import PartyDisabled, PartyFrozen
 from erpnext.selling.doctype.customer.customer import (
 	get_credit_limit,
 	get_customer_outstanding,
+	get_customer_overdue_amount,
+	get_overdue_billing_threshold,
 	make_quotation,
 	parse_full_name,
 )
@@ -77,7 +79,11 @@ class TestCustomer(ERPNextTestSuite):
 			"company": "_Test Company",
 			"account": "Creditors - _TC",
 		}
-		test_credit_limits = {"company": "_Test Company", "credit_limit": 350000}
+		test_credit_limits = {
+			"company": "_Test Company",
+			"credit_limit": 350000,
+			"overdue_billing_threshold": 5000,
+		}
 		doc.append("accounts", test_account_details)
 		doc.append("credit_limits", test_credit_limits)
 		doc.insert()
@@ -97,6 +103,7 @@ class TestCustomer(ERPNextTestSuite):
 
 		self.assertEqual(c_doc.credit_limits[0].company, "_Test Company")
 		self.assertEqual(c_doc.credit_limits[0].credit_limit, 350000)
+		self.assertEqual(c_doc.credit_limits[0].overdue_billing_threshold, 5000)
 		c_doc.delete()
 		doc.delete()
 
@@ -352,6 +359,128 @@ class TestCustomer(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, customer.save)
 
+	def test_get_customer_overdue_amount(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		baseline = get_customer_overdue_amount("_Test Customer", "_Test Company")
+
+		# a past-due, unpaid invoice adds its outstanding to the overdue amount
+		create_sales_invoice(qty=1, rate=500, posting_date=add_days(nowdate(), -30))
+		self.assertEqual(get_customer_overdue_amount("_Test Customer", "_Test Company"), baseline + 500)
+
+		# an invoice due today (not yet past due) does not
+		create_sales_invoice(qty=1, rate=700, posting_date=nowdate())
+		self.assertEqual(get_customer_overdue_amount("_Test Customer", "_Test Company"), baseline + 500)
+
+	def test_get_customer_overdue_amount_is_in_company_currency(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		baseline = get_customer_overdue_amount("_Test Customer USD", "_Test Company")
+
+		# 100 USD at a conversion rate of 50 must be counted as 5000 in company currency
+		create_sales_invoice(
+			customer="_Test Customer USD",
+			debit_to="_Test Receivable USD - _TC",
+			currency="USD",
+			conversion_rate=50,
+			qty=1,
+			rate=100,
+			posting_date=add_days(nowdate(), -30),
+		)
+
+		self.assertEqual(get_customer_overdue_amount("_Test Customer USD", "_Test Company"), baseline + 5000)
+
+	def test_get_customer_overdue_amount_follows_payment_terms(self):
+		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		def make_invoice_with_terms():
+			si = create_sales_invoice(
+				qty=1, rate=1200, posting_date=add_days(nowdate(), -60), do_not_save=True
+			)
+			si.append("payment_schedule", {"due_date": add_days(nowdate(), -60), "invoice_portion": 50})
+			si.append("payment_schedule", {"due_date": add_days(nowdate(), 30), "invoice_portion": 50})
+			si.insert()
+			si.submit()
+			return si
+
+		baseline = get_customer_overdue_amount("_Test Customer", "_Test Company")
+
+		# only the term that has fallen due counts, not the whole 1200 balance. The invoice due_date
+		# is the last term (in 30 days), so this is only caught by reading the payment schedule.
+		si = make_invoice_with_terms()
+		self.assertEqual(getdate(si.due_date), getdate(add_days(nowdate(), 30)))
+		self.assertEqual(get_customer_overdue_amount("_Test Customer", "_Test Company"), baseline + 600)
+
+		# paying off the past-due term clears the overdue amount
+		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "_Test Overdue Payment"
+		pe.reference_date = nowdate()
+		pe.paid_amount = pe.received_amount = 600
+		pe.references[0].allocated_amount = 600
+		pe.insert()
+		pe.submit()
+		self.assertEqual(get_customer_overdue_amount("_Test Customer", "_Test Company"), baseline)
+
+	def test_overdue_billing_threshold_on_submit(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		create_sales_invoice(qty=1, rate=1000, posting_date=add_days(nowdate(), -30))
+		overdue = get_customer_overdue_amount("_Test Customer", "_Test Company")
+
+		settings = frappe.get_single("Accounts Settings")
+		settings.enable_overdue_billing_threshold = 1
+		settings.role_allowed_to_bypass_overdue_billing = None
+		settings.save()
+		set_overdue_billing_threshold("_Test Customer", "_Test Company", overdue - 100)
+
+		# overdue is over the threshold and the user has no bypass role -> blocked
+		si = create_sales_invoice(do_not_submit=True)
+		self.assertRaises(frappe.ValidationError, si.submit)
+
+		# a user holding the bypass role can still submit
+		settings.role_allowed_to_bypass_overdue_billing = "Accounts Manager"
+		settings.save()
+		si = create_sales_invoice(do_not_submit=True)
+		si.submit()
+		self.assertEqual(si.docstatus, 1)
+
+		# threshold still crossed, but the feature is off -> never blocked
+		settings.enable_overdue_billing_threshold = 0
+		settings.role_allowed_to_bypass_overdue_billing = None
+		settings.save()
+		si = create_sales_invoice(do_not_submit=True)
+		si.submit()
+		self.assertEqual(si.docstatus, 1)
+
+	def test_overdue_billing_threshold_falls_back_to_customer_group(self):
+		customer_group = frappe.get_cached_value("Customer", "_Test Customer", "customer_group")
+		group = frappe.get_doc("Customer Group", customer_group)
+		group.credit_limits = []
+		group.append("credit_limits", {"company": "_Test Company", "overdue_billing_threshold": 5000})
+		group.save()
+
+		# the customer has no threshold of its own, so the group's applies
+		self.assertEqual(get_overdue_billing_threshold("_Test Customer", "_Test Company"), 5000)
+
+		# a threshold on the customer wins over the group
+		set_overdue_billing_threshold("_Test Customer", "_Test Company", 2000)
+		self.assertEqual(get_overdue_billing_threshold("_Test Customer", "_Test Company"), 2000)
+
+	def test_overdue_threshold_row_without_credit_limit(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		# outstanding must be > 0 so a 0 credit_limit would previously trip the check
+		create_sales_invoice(qty=1, rate=500)
+
+		customer = frappe.get_doc("Customer", "_Test Customer")
+		customer.credit_limits = []
+		customer.append("credit_limits", {"company": "_Test Company", "overdue_billing_threshold": 1000})
+		customer.save()
+
+		self.assertEqual(customer.credit_limits[0].overdue_billing_threshold, 1000)
+		self.assertEqual(flt(customer.credit_limits[0].credit_limit), 0.0)
+
 	def test_customer_payment_terms(self):
 		frappe.db.set_value(
 			"Customer", "_Test Customer With Template", "payment_terms", "_Test Payment Term Template 3"
@@ -449,6 +578,18 @@ def set_credit_limit(customer, company, credit_limit):
 	if not existing_row:
 		customer.append("credit_limits", {"company": company, "credit_limit": credit_limit})
 		customer.credit_limits[-1].db_insert()
+
+
+def set_overdue_billing_threshold(customer, company, threshold):
+	customer = frappe.get_doc("Customer", customer)
+	for d in customer.credit_limits:
+		if d.company == company:
+			d.overdue_billing_threshold = threshold
+			d.db_update()
+			return
+
+	customer.append("credit_limits", {"company": company, "overdue_billing_threshold": threshold})
+	customer.credit_limits[-1].db_insert()
 
 
 def create_internal_customer(customer_name=None, represents_company=None, allowed_to_interact_with=None):
