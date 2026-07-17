@@ -5,7 +5,7 @@
 import json
 
 import frappe
-from frappe.utils import add_days, flt, nowdate
+from frappe.utils import add_days, flt, getdate, nowdate
 
 from erpnext.accounts.party import get_due_date
 from erpnext.exceptions import PartyDisabled, PartyFrozen
@@ -399,6 +399,38 @@ class TestCustomer(ERPNextTestSuite):
 		)
 
 		self.assertEqual(get_customer_overdue_amount("_Test Customer USD", "_Test Company"), baseline + 5000)
+
+	def test_get_customer_overdue_amount_follows_payment_terms(self):
+		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		def make_invoice_with_terms():
+			si = create_sales_invoice(
+				qty=1, rate=1200, posting_date=add_days(nowdate(), -60), do_not_save=True
+			)
+			si.append("payment_schedule", {"due_date": add_days(nowdate(), -60), "invoice_portion": 50})
+			si.append("payment_schedule", {"due_date": add_days(nowdate(), 30), "invoice_portion": 50})
+			si.insert()
+			si.submit()
+			return si
+
+		baseline = get_customer_overdue_amount("_Test Customer", "_Test Company")
+
+		# only the term that has fallen due counts, not the whole 1200 balance. The invoice due_date
+		# is the last term (in 30 days), so this is only caught by reading the payment schedule.
+		si = make_invoice_with_terms()
+		self.assertEqual(getdate(si.due_date), getdate(add_days(nowdate(), 30)))
+		self.assertEqual(get_customer_overdue_amount("_Test Customer", "_Test Company"), baseline + 600)
+
+		# paying off the past-due term clears the overdue amount
+		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "_Test Overdue Payment"
+		pe.reference_date = nowdate()
+		pe.paid_amount = pe.received_amount = 600
+		pe.references[0].allocated_amount = 600
+		pe.insert()
+		pe.submit()
+		self.assertEqual(get_customer_overdue_amount("_Test Customer", "_Test Company"), baseline)
 
 	def test_overdue_billing_threshold_on_submit(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice

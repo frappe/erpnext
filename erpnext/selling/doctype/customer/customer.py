@@ -615,6 +615,20 @@ def check_overdue_billing_threshold(customer: str, company: str) -> None:
 
 
 def get_customer_overdue_amount(customer: str, company: str) -> float:
+	"""Amount the customer owes past its due date, in company currency.
+
+	Follows the same rule as the Overdue invoice status, so a customer is only
+	blocked for what the invoice list already shows as overdue.
+	"""
+	invoices = get_outstanding_invoices_for_customer(customer, company)
+	if not invoices:
+		return 0.0
+
+	payable_amounts = get_past_due_payable_amounts([d.name for d in invoices])
+	return flt(sum(get_overdue_portion(d, payable_amounts.get(d.name)) for d in invoices))
+
+
+def get_outstanding_invoices_for_customer(customer: str, company: str) -> list[frappe._dict]:
 	from frappe.query_builder.functions import Sum
 
 	gl_entry = frappe.qb.DocType("GL Entry")
@@ -623,22 +637,53 @@ def get_customer_overdue_amount(customer: str, company: str) -> float:
 	# debit - credit is always booked in company currency, so this is comparable to the threshold
 	outstanding = Sum(gl_entry.debit) - Sum(gl_entry.credit)
 
-	overdue_invoices = (
+	return (
 		frappe.qb.from_(gl_entry)
 		.inner_join(sales_invoice)
 		.on(sales_invoice.name == gl_entry.against_voucher)
-		.select(outstanding)
+		.select(
+			sales_invoice.name,
+			sales_invoice.due_date,
+			sales_invoice.base_grand_total,
+			outstanding.as_("outstanding"),
+		)
 		.where(gl_entry.party_type == "Customer")
 		.where(gl_entry.party == customer)
 		.where(gl_entry.company == company)
 		.where(gl_entry.is_cancelled == 0)
 		.where(gl_entry.against_voucher_type == "Sales Invoice")
-		.where(sales_invoice.due_date < getdate())
-		.groupby(gl_entry.against_voucher)
+		.groupby(sales_invoice.name, sales_invoice.due_date, sales_invoice.base_grand_total)
 		.having(outstanding > 0)
-	).run()
+	).run(as_dict=True)
 
-	return flt(sum(row[0] for row in overdue_invoices))
+
+def get_past_due_payable_amounts(invoices: list[str]) -> dict[str, float]:
+	from frappe.query_builder.functions import Sum
+
+	payment_schedule = frappe.qb.DocType("Payment Schedule")
+
+	rows = (
+		frappe.qb.from_(payment_schedule)
+		.select(payment_schedule.parent, Sum(payment_schedule.base_payment_amount).as_("payable"))
+		.where(payment_schedule.parenttype == "Sales Invoice")
+		.where(payment_schedule.parent.isin(invoices))
+		.where(payment_schedule.due_date < getdate())
+		.groupby(payment_schedule.parent)
+	).run(as_dict=True)
+
+	return {d.parent: flt(d.payable) for d in rows}
+
+
+def get_overdue_portion(invoice: frappe._dict, payable_amount: float | None) -> float:
+	outstanding = flt(invoice.outstanding)
+
+	# No payable amount means either a schedule-less invoice (POS, opening) or one whose terms are
+	# all still in the future. Both are answered by the invoice due date, which is the last term.
+	if payable_amount is None:
+		return outstanding if invoice.due_date and getdate(invoice.due_date) < getdate() else 0.0
+
+	paid = flt(invoice.base_grand_total) - outstanding
+	return min(max(payable_amount - paid, 0.0), outstanding)
 
 
 def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=False, cost_center=None):
