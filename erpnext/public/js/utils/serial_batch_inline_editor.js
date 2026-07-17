@@ -8,7 +8,8 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		this.wrapper = $(wrapper);
 		this.is_rejected = cint(is_rejected);
 		this.bundle_field = this.is_rejected ? "rejected_serial_and_batch_bundle" : "serial_and_batch_bundle";
-		this.qty_field = this.is_rejected ? "rejected_qty" : "qty";
+		this.config = erpnext.stock.get_sbie_config(frm.doc.doctype, cdt) || {};
+		this.qty_field = this.is_rejected ? "rejected_qty" : this.config.qty_field || "qty";
 		this.start = 0;
 		this.page_length = 10;
 		this.total_count = 0;
@@ -206,6 +207,15 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 							${frappe.utils.icon("ellipsis", "sm")}
 						</button>
 						<div class="dropdown-menu dropdown-menu-right">
+							${
+								this.get_type_of_transaction() === "Outward"
+									? `<a class="dropdown-item sbie-auto-fetch-action">${
+											cint(this.item.has_serial_no)
+												? __("Auto Fetch Serial Nos")
+												: __("Auto Fetch Batch Nos")
+									  }</a>`
+									: ""
+							}
 							<a class="dropdown-item sbie-scan-action">${
 								cint(this.item.has_serial_no) ? __("Scan Serial Nos") : __("Scan Batch Nos")
 							}</a>
@@ -519,6 +529,113 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		this.wrapper.find(".sbie-delete").on("click", () => this.delete_selected());
 		this.wrapper.find(".sbie-scan-action").on("click", () => this.open_scan_dialog());
 		this.wrapper.find(".sbie-range-action").on("click", () => this.open_range_dialog());
+		this.wrapper.find(".sbie-auto-fetch-action").on("click", () => this.open_auto_fetch_dialog());
+	}
+
+	get_type_of_transaction() {
+		let doc = this.frm.doc;
+		if (doc.doctype === "Stock Entry") {
+			return this.row.s_warehouse ? "Outward" : "Inward";
+		}
+
+		let inward =
+			["Purchase Receipt", "Purchase Invoice", "Stock Reconciliation"].includes(doc.doctype) ||
+			this.cdt === "Subcontracting Receipt Item";
+
+		if (doc.is_return) {
+			inward = !inward;
+		}
+
+		return inward ? "Inward" : "Outward";
+	}
+
+	async open_auto_fetch_dialog() {
+		let warehouse = this.row.warehouse || this.row.s_warehouse;
+		if (!warehouse) {
+			frappe.msgprint(__("Please set Warehouse first"));
+			return;
+		}
+
+		let is_serial = cint(this.item.has_serial_no);
+		let based_on = await erpnext.stock.get_pick_serial_batch_based_on();
+
+		let dialog = new frappe.ui.Dialog({
+			title: is_serial ? __("Auto Fetch Serial Nos") : __("Auto Fetch Batch Nos"),
+			fields: [
+				{
+					fieldtype: "Float",
+					fieldname: "qty",
+					label: __("Qty to Fetch"),
+					reqd: 1,
+					default: Math.abs(flt(this.row[this.qty_field])) || null,
+					description: __("Existing entries will be replaced with the fetched entries"),
+				},
+				{
+					fieldtype: "Select",
+					fieldname: "based_on",
+					label: __("Fetch Based On"),
+					options: ["FIFO", "LIFO", "Expiry"],
+					default: based_on,
+				},
+			],
+			primary_action_label: __("Fetch"),
+			primary_action: (values) => {
+				dialog.hide();
+				this.auto_fetch_entries(values.qty, values.based_on, warehouse);
+			},
+		});
+
+		dialog.show();
+	}
+
+	async auto_fetch_entries(qty, based_on, warehouse) {
+		let data = await this.call(
+			"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_auto_data",
+			{
+				item_code: this.row.item_code,
+				warehouse: warehouse,
+				has_serial_no: this.item.has_serial_no,
+				has_batch_no: this.item.has_batch_no,
+				qty: qty,
+				based_on: based_on,
+				posting_date: this.frm.doc.posting_date,
+				posting_time: this.frm.doc.posting_time,
+			}
+		);
+
+		if (!data || !data.length) {
+			frappe.msgprint(
+				__("No stock available for Item {0} in Warehouse {1}", [this.row.item_code, warehouse])
+			);
+			return;
+		}
+
+		this.add_auto_fetched_entries(data);
+	}
+
+	add_auto_fetched_entries(rows) {
+		let p = this.pending;
+		p.delete_all = 1;
+		p.new_entries = [];
+		p.updates = {};
+		p.deleted = [];
+
+		for (const row of rows) {
+			p.new_entries.push({
+				serial_no: row.serial_no || "",
+				batch_no: row.batch_no || "",
+				qty: Math.abs(flt(row.qty)) || 1,
+			});
+		}
+
+		this.start = 0;
+		this.frm.dirty();
+		this.go_to_last_page();
+		frappe.show_alert({
+			message: __("{0} entries fetched", [p.new_entries.length]),
+			indicator: "green",
+		});
+		this.frm.save();
 	}
 
 	open_scan_dialog() {
@@ -562,14 +679,27 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		dialog.show();
 	}
 
+	get_known_identifiers() {
+		let p = this.pending;
+		let known = new Set(p.new_entries.map((d) => d.serial_no || d.batch_no));
+
+		if (!p.delete_all) {
+			let deleted = new Set(p.deleted.map((d) => d.name));
+			for (const d of this.last_entries) {
+				if (!deleted.has(d.name)) {
+					known.add(d.serial_no || d.batch_no);
+				}
+			}
+		}
+
+		return known;
+	}
+
 	add_scanned_value(value) {
 		let p = this.pending;
 
 		if (cint(this.item.has_serial_no)) {
-			let duplicate =
-				p.new_entries.some((d) => d.serial_no === value) ||
-				this.last_entries.some((d) => d.serial_no === value);
-			if (duplicate) {
+			if (this.get_known_identifiers().has(value)) {
 				frappe.show_alert({
 					message: __("Serial No {0} already added", [value]),
 					indicator: "orange",
@@ -628,9 +758,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 
 	add_serial_range(serial_nos) {
 		let p = this.pending;
-		let known = new Set(
-			p.new_entries.map((d) => d.serial_no).concat(this.last_entries.map((d) => d.serial_no))
-		);
+		let known = this.get_known_identifiers();
 
 		let added = 0;
 		for (const serial_no of serial_nos) {
@@ -1010,6 +1138,54 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 	}
 };
 
+erpnext.stock.SBIE_DOCTYPES = [
+	{ parent: "Purchase Receipt", child: "Purchase Receipt Item", table: "items" },
+	{ parent: "Purchase Invoice", child: "Purchase Invoice Item", table: "items" },
+	{ parent: "Sales Invoice", child: "Sales Invoice Item", table: "items" },
+	{ parent: "Sales Invoice", child: "Packed Item", table: "packed_items" },
+	{ parent: "POS Invoice", child: "POS Invoice Item", table: "items" },
+	{ parent: "POS Invoice", child: "Packed Item", table: "packed_items" },
+	{ parent: "Delivery Note", child: "Delivery Note Item", table: "items" },
+	{ parent: "Delivery Note", child: "Packed Item", table: "packed_items" },
+	{ parent: "Stock Entry", child: "Stock Entry Detail", table: "items" },
+	{ parent: "Stock Reconciliation", child: "Stock Reconciliation Item", table: "items" },
+	{ parent: "Subcontracting Receipt", child: "Subcontracting Receipt Item", table: "items" },
+	{
+		parent: "Subcontracting Receipt",
+		child: "Subcontracting Receipt Supplied Item",
+		table: "supplied_items",
+		qty_field: "consumed_qty",
+	},
+	{ parent: "Pick List", child: "Pick List Item", table: "locations" },
+	{
+		parent: "Asset Capitalization",
+		child: "Asset Capitalization Stock Item",
+		table: "stock_items",
+		qty_field: "stock_qty",
+	},
+	{
+		parent: "Asset Repair",
+		child: "Asset Repair Consumed Item",
+		table: "stock_items",
+		qty_field: "consumed_quantity",
+	},
+];
+
+erpnext.stock.get_sbie_config = function (doctype, child_doctype) {
+	return erpnext.stock.SBIE_DOCTYPES.find((d) => d.parent === doctype && d.child === child_doctype);
+};
+
+erpnext.stock.get_sbie_row = function (frm, cdn) {
+	for (let config of erpnext.stock.SBIE_DOCTYPES) {
+		if (config.parent !== frm.doc.doctype) continue;
+
+		let row = (frm.doc[config.table] || []).find((d) => d.name === cdn);
+		if (row) return { row, config };
+	}
+
+	return {};
+};
+
 erpnext.stock.get_sbie_pending_map = function (frm) {
 	let store = (frm._sbie_pending = frm._sbie_pending || {});
 	return (store[frm.doc.name] = store[frm.doc.name] || {});
@@ -1028,7 +1204,7 @@ erpnext.stock.flush_serial_batch_pending = async function (frm) {
 		}
 
 		let [cdn, is_rejected] = key.split("::");
-		let row = (frm.doc.items || []).find((d) => d.name === cdn);
+		let { row, config } = erpnext.stock.get_sbie_row(frm, cdn);
 		if (!row) {
 			delete pending_map[key];
 			continue;
@@ -1062,7 +1238,7 @@ erpnext.stock.flush_serial_batch_pending = async function (frm) {
 		);
 
 		row[bundle_field] = summary.bundle;
-		row[cint(is_rejected) ? "rejected_qty" : "qty"] = summary.total_qty;
+		row[cint(is_rejected) ? "rejected_qty" : config.qty_field || "qty"] = summary.total_qty;
 		if (row.received_qty != null) {
 			row.received_qty = flt(row.qty) + flt(row.rejected_qty);
 		}
@@ -1071,7 +1247,10 @@ erpnext.stock.flush_serial_batch_pending = async function (frm) {
 };
 
 erpnext.stock.mount_serial_batch_inline_editor = async function (frm, cdt, cdn) {
-	let grid_row = frm.fields_dict.items.grid.grid_rows_by_docname[cdn];
+	let config = erpnext.stock.get_sbie_config(frm.doc.doctype, cdt);
+	if (!config || !frm.fields_dict[config.table]) return;
+
+	let grid_row = frm.fields_dict[config.table].grid.grid_rows_by_docname[cdn];
 	let grid_form = grid_row && grid_row.grid_form;
 	if (!grid_form) return;
 
@@ -1121,6 +1300,7 @@ erpnext.stock.mount_serial_batch_inline_editor = async function (frm, cdt, cdn) 
 erpnext.stock.toggle_legacy_bundle_fields = function (grid_form, editor_active) {
 	let legacy_fields = [
 		"add_serial_batch_bundle",
+		"pick_serial_and_batch",
 		"serial_and_batch_bundle",
 		"add_serial_batch_for_rejected_qty",
 		"rejected_serial_and_batch_bundle",
@@ -1146,7 +1326,24 @@ erpnext.stock.setup_serial_batch_pending_flush = function (doctype) {
 	});
 };
 
-erpnext.stock.setup_serial_batch_pending_flush("Purchase Receipt");
+erpnext.stock.setup_inline_serial_batch_editor = function () {
+	new Set(erpnext.stock.SBIE_DOCTYPES.map((d) => d.parent)).forEach((doctype) =>
+		erpnext.stock.setup_serial_batch_pending_flush(doctype)
+	);
+
+	new Set(erpnext.stock.SBIE_DOCTYPES.map((d) => d.child)).forEach((child_doctype) => {
+		frappe.ui.form.on(child_doctype, {
+			form_render(frm, cdt, cdn) {
+				erpnext.stock.mount_serial_batch_inline_editor(frm, cdt, cdn);
+			},
+			use_serial_batch_fields(frm, cdt, cdn) {
+				erpnext.stock.mount_serial_batch_inline_editor(frm, cdt, cdn);
+			},
+		});
+	});
+};
+
+erpnext.stock.setup_inline_serial_batch_editor();
 
 erpnext.stock.is_inline_serial_batch_editor_enabled = async function () {
 	if (erpnext.stock._inline_editor_enabled === undefined) {
@@ -1159,4 +1356,18 @@ erpnext.stock.is_inline_serial_batch_editor_enabled = async function () {
 	}
 
 	return erpnext.stock._inline_editor_enabled;
+};
+
+erpnext.stock.get_pick_serial_batch_based_on = async function () {
+	if (erpnext.stock._pick_serial_batch_based_on === undefined) {
+		let { message } = await frappe.db.get_value(
+			"Stock Settings",
+			"Stock Settings",
+			"pick_serial_and_batch_based_on"
+		);
+		erpnext.stock._pick_serial_batch_based_on =
+			(message && message.pick_serial_and_batch_based_on) || "FIFO";
+	}
+
+	return erpnext.stock._pick_serial_batch_based_on;
 };

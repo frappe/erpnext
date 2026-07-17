@@ -252,6 +252,26 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 		self.assertEqual(summary.total_count, 0)
 		self.assertFalse(frappe.db.exists("Serial and Batch Bundle", bundle))
 
+	def test_create_bundle_for_stock_entry(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
+		se = make_stock_entry(item_code=item, qty=2, to_warehouse="_Test Warehouse - _TC", do_not_submit=True)
+
+		child_row = se.items[0].as_dict()
+		child_row["is_rejected"] = 0
+		summary = upsert_bundle_entries(
+			child_row=json.dumps(child_row, default=str),
+			doc=json.dumps(se.as_dict(), default=str),
+			entries=json.dumps([{"serial_no": f"SN-{frappe.generate_hash(length=8)}"} for _ in range(2)]),
+			deleted=json.dumps([]),
+		)
+
+		bundle = frappe.get_doc("Serial and Batch Bundle", summary.bundle)
+		self.assertEqual(bundle.voucher_type, "Stock Entry")
+		self.assertEqual(bundle.type_of_transaction, "Inward")
+		self.assertEqual(summary.total_qty, 2)
+
 	def test_upsert_requires_entries_for_new_bundle(self):
 		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
 		pr = self.make_draft_pr(item)
