@@ -6,7 +6,10 @@ import json
 import frappe
 from frappe.utils import flt
 
-from erpnext.selling.doctype.proforma_invoice.proforma_invoice import make_proforma_invoice
+from erpnext.selling.doctype.proforma_invoice.proforma_invoice import (
+	get_sales_order_items,
+	make_proforma_invoice,
+)
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -91,6 +94,23 @@ class TestProformaInvoice(ERPNextTestSuite):
 		proforma.reload()
 		self.assertEqual(proforma.status, "Cancelled")
 		self.assertEqual(proforma.proforma_pdf, pdf)
+
+	def test_proformed_totals_exclude_cancelled(self):
+		"""Cumulative issued proforma qty/amount per line, used by the dialog warning."""
+		sales_order = make_sales_order(qty=10)  # rate 100
+		so_detail = sales_order.items[0].name
+
+		first = self.create_proforma(sales_order, [(so_detail, 4)])
+		self.create_proforma(sales_order, [(so_detail, 3)])
+
+		data = get_sales_order_items(sales_order.name)[0]
+		self.assertEqual(flt(data["proformed_qty"]), 7)
+		self.assertEqual(flt(data["proformed_amount"]), 700)
+
+		first.cancel()
+		data = get_sales_order_items(sales_order.name)[0]
+		self.assertEqual(flt(data["proformed_qty"]), 3)
+		self.assertEqual(flt(data["proformed_amount"]), 300)
 
 	def test_feature_toggle_is_enforced(self):
 		sales_order = make_sales_order(qty=10)

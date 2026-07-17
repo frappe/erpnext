@@ -4,6 +4,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder.functions import Sum
 from frappe.utils import flt, now
 from frappe.utils.file_manager import save_file
 
@@ -96,8 +97,9 @@ class ProformaInvoice(Document):
 
 @frappe.whitelist()
 def get_sales_order_items(sales_order: str) -> list[dict]:
-	"""Sales Order lines used to pre-fill the create-proforma dialog."""
+	"""Sales Order lines (with already-proformed totals) to drive the create-proforma dialog."""
 	sales_order_doc = frappe.get_doc("Sales Order", sales_order)
+	proformed = get_proformed_totals(sales_order)
 	return [
 		{
 			"item_code": item.item_code,
@@ -107,9 +109,28 @@ def get_sales_order_items(sales_order: str) -> list[dict]:
 			"qty": flt(item.qty),
 			"rate": flt(item.rate),
 			"amount": flt(item.amount),
+			"proformed_qty": flt(proformed.get(item.name, {}).get("qty")),
+			"proformed_amount": flt(proformed.get(item.name, {}).get("amount")),
 		}
 		for item in sales_order_doc.items
 	]
+
+
+def get_proformed_totals(sales_order: str) -> dict[str, dict]:
+	"""Sum of issued (docstatus = 1) proforma qty and amount per Sales Order Item row."""
+	proformas = frappe.get_all(
+		"Proforma Invoice", filters={"sales_order": sales_order, "docstatus": 1}, pluck="name"
+	)
+	if not proformas:
+		return {}
+	item = frappe.qb.DocType("Proforma Invoice Item")
+	rows = (
+		frappe.qb.from_(item)
+		.select(item.so_detail, Sum(item.qty).as_("qty"), Sum(item.amount).as_("amount"))
+		.where(item.parent.isin(proformas))
+		.groupby(item.so_detail)
+	).run(as_dict=True)
+	return {row.so_detail: {"qty": flt(row.qty), "amount": flt(row.amount)} for row in rows}
 
 
 @frappe.whitelist()

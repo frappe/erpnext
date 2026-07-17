@@ -110,9 +110,11 @@ Object.assign(erpnext.proforma, {
 							in_list_view: 1,
 							onchange: function () {
 								// Keep the read-only Amount in sync while editing qty (Quantity basis).
-								if (!this.doc) return;
-								this.doc.amount = flt(this.doc.qty) * flt(this.doc.rate);
-								this.grid_row?.refresh_field("amount");
+								if (this.doc) {
+									this.doc.amount = flt(this.doc.qty) * flt(this.doc.rate);
+									this.grid_row?.refresh_field("amount");
+								}
+								erpnext.proforma.update_warning(dialog);
 							},
 						},
 						{
@@ -121,18 +123,22 @@ Object.assign(erpnext.proforma, {
 							label: __("Amount"),
 							in_list_view: 1,
 							read_only: 1,
+							onchange: () => this.update_warning(dialog),
 						},
 						{ fieldname: "item_name", fieldtype: "Data", hidden: 1 },
 						{ fieldname: "rate", fieldtype: "Currency", hidden: 1 },
 						{ fieldname: "so_detail", fieldtype: "Data", hidden: 1 },
 					],
 				},
+				{ fieldname: "warning_html", fieldtype: "HTML" },
 			],
 			primary_action_label: __("Create"),
 			primary_action: (values) => this.create(frm, dialog, values),
 		});
 
+		dialog._so_items = so_items;
 		dialog.show();
+		this.update_warning(dialog);
 	},
 
 	// Both Qty and Amount columns stay visible; only the one matching the chosen basis is editable.
@@ -141,6 +147,39 @@ Object.assign(erpnext.proforma, {
 		const grid = dialog.get_field("items").grid;
 		grid.toggle_enable("qty", !by_amount);
 		grid.toggle_enable("amount", by_amount);
+		this.update_warning(dialog);
+	},
+
+	// Non-blocking notice below the table: flag lines whose total proforma qty/amount (this
+	// proforma plus already-issued ones) exceeds the ordered qty/amount for the chosen basis.
+	update_warning(dialog) {
+		const by_amount = dialog.get_value("based_on") === "Amount";
+		const field = by_amount ? "amount" : "qty";
+		const proformed_field = by_amount ? "proformed_amount" : "proformed_qty";
+		const so_item = {};
+		(dialog._so_items || []).forEach((row) => (so_item[row.so_detail] = row));
+
+		const exceeded = [];
+		(dialog.get_value("items") || []).forEach((row) => {
+			const item = so_item[row.so_detail];
+			if (!item) return;
+			const ordered = flt(by_amount ? item.amount : item.qty);
+			const total = flt(item[proformed_field]) + flt(row[field]);
+			if (total > ordered + 0.0001) exceeded.push(item.item_code);
+		});
+
+		const $wrapper = dialog.get_field("warning_html").$wrapper;
+		if (!exceeded.length) {
+			$wrapper.empty();
+			return;
+		}
+		const basis = by_amount ? __("amount") : __("quantity");
+		$wrapper.html(
+			`<div class="text-danger small" style="margin-top: 8px;">${__(
+				"Total proforma {0} (including past proformas) exceeds the ordered {0} for: {1}",
+				[basis, frappe.utils.escape_html(exceeded.join(", "))]
+			)}</div>`
+		);
 	},
 
 	create(frm, dialog, values) {
