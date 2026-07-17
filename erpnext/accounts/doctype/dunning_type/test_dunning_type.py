@@ -1,12 +1,7 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-<<<<<<< HEAD
-# import frappe
-import unittest
-=======
 
 import frappe
->>>>>>> 2325068b19 (test: added tests for `Dunning Type` validation)
 
 from erpnext.tests.utils import ERPNextTestSuite
 
