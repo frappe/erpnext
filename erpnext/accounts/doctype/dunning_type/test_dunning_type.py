@@ -1,17 +1,8 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-<<<<<<< HEAD
-# import frappe
-import unittest
-
-
-class TestDunningType(unittest.TestCase):
-	pass
-=======
 import frappe
-
-from erpnext.tests.utils import ERPNextTestSuite
+from frappe.tests.utils import FrappeTestCase
 
 
 def make_dunning_type(dunning_type, company="_Test Company", **kwargs):
@@ -38,7 +29,7 @@ def make_dunning_type(dunning_type, company="_Test Company", **kwargs):
 	return doc
 
 
-class TestDunningType(ERPNextTestSuite):
+class TestDunningType(FrappeTestCase):
 	def test_income_account_must_belong_to_company(self):
 		doc = make_dunning_type("_Test Dunning Wrong Company Account", income_account="Sales - _TC1")
 		self.assertRaisesRegex(frappe.ValidationError, "doesn't belong to Company", doc.insert)
@@ -206,4 +197,3 @@ class TestDunningType(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Dunning Type", company_1.name, "is_default"), 1)
 		self.assertEqual(frappe.db.get_value("Dunning Type", company_2.name, "is_default"), 1)
->>>>>>> 2325068b19 (test: added tests for `Dunning Type` validation)
