@@ -601,7 +601,7 @@ frappe.ui.form.on("Material Request", {
 							filters: {
 								company: frm.doc.company,
 								is_group: 0,
-								warehouse_type: "Transit",
+								warehouse_type: ["in", ["Transit", ""]],
 							},
 						};
 					},

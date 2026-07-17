@@ -182,9 +182,9 @@ $.extend(erpnext.queries, {
 			filters: [
 				["Warehouse", "company", "in", ["", cstr(doc.company)]],
 				["Warehouse", "is_group", "=", 0],
-				// quarantine is entered by routing and left by release/return, and
-				// rejected stock by its dedicated fields — neither is an ordinary pick
-				["Warehouse", "warehouse_type", "not in", ["Quality", "Rejected"]],
+				// quarantine and transit are entered by routing, rejected stock by
+				// its dedicated fields — none of them is an ordinary inbound pick
+				["Warehouse", "warehouse_type", "not in", ["Quality", "Rejected", "Transit"]],
 			],
 		};
 	},
@@ -194,10 +194,11 @@ $.extend(erpnext.queries, {
 			filters: [
 				["Warehouse", "company", "in", ["", cstr(doc.company)]],
 				["Warehouse", "is_group", "=", 0],
-				// quarantine only leaves through a release or return — but rejected
-				// stock moved to a Rejected warehouse re-enters normal flows there
-				// (scrap, rework, sale as scrap), so outbound picks may offer it
-				["Warehouse", "warehouse_type", "!=", "Quality"],
+				// quarantine only leaves through a release or return, transit through
+				// the end-transit flow — but rejected stock moved to a Rejected
+				// warehouse re-enters normal flows there (scrap, rework, sale as
+				// scrap), so outbound picks may offer it
+				["Warehouse", "warehouse_type", "not in", ["Quality", "Transit"]],
 			],
 		};
 	},

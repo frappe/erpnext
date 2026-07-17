@@ -1006,10 +1006,11 @@ def warehouse_link_query(
 ):
 	"""Default link query for Warehouse (wired via standard_queries).
 
-	A Quality Control warehouse is entered by quarantine routing and left by
-	controlled flows, never picked by hand — so every warehouse link hides the
-	type unless the caller filters on warehouse types itself (the routing-target
-	field, the Quality Control Release dispatch, the quality reports).
+	Quality Control and Transit warehouses are entered by routing (quarantine,
+	the transit flow) and left by controlled flows, never picked by hand — so
+	every warehouse link hides both types unless the caller filters on warehouse
+	types itself (the routing-target and in-transit default fields, the Quality
+	Control Release dispatch, the quality reports).
 	"""
 	filters = _normalize_warehouse_filters(filters)
 	# warehouse_type is NULL on ordinary warehouses, so its conditions must be
@@ -1029,7 +1030,7 @@ def warehouse_link_query(
 
 	warehouse_type = IfNull(wh.warehouse_type, "")
 	if not type_conditions:
-		query = query.where(warehouse_type != "Quality")
+		query = query.where(warehouse_type.notin(["Quality", "Transit"]))
 	for operator, value in type_conditions:
 		operator = (operator or "=").lower()
 		if operator == "=":

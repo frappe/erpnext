@@ -54,14 +54,17 @@ class TestWarehouseLinkQuery(ERPNextTestSuite):
 		rows = warehouse_link_query("Warehouse", txt, "name", 0, 20, filters)
 		return {row[0] for row in rows}
 
-	def test_default_pick_hides_quality_warehouses(self):
+	def test_default_pick_hides_routed_warehouse_types(self):
 		ensure_quality_warehouse_type()
 		qc = make_warehouse("_Test WLQ Quality", warehouse_type="Quality")
+		transit = make_warehouse("_Test WLQ Transit", warehouse_type="Transit")
 		plain = make_warehouse("_Test WLQ Plain")
 
+		# Quality and Transit are entered by routing, never picked by hand
 		names = self.run_query(txt="_Test WLQ")
 		self.assertIn(plain, names)
 		self.assertNotIn(qc, names)
+		self.assertNotIn(transit, names)
 
 	def test_explicit_type_filter_offers_quality_warehouses(self):
 		ensure_quality_warehouse_type()
@@ -123,5 +126,17 @@ class TestWarehouseLinkQuery(ERPNextTestSuite):
 			filters=[["Warehouse", "warehouse_type", "in", ["Rejected", ""]]], txt="_Test WLQ"
 		)
 		self.assertIn(rejected, names)
+		self.assertIn(plain, names)
+		self.assertNotIn(qc, names)
+
+	def test_transit_picker_offers_transit_and_untyped(self):
+		ensure_quality_warehouse_type()
+		transit = make_warehouse("_Test WLQ Transit", warehouse_type="Transit")
+		plain = make_warehouse("_Test WLQ Plain")
+		qc = make_warehouse("_Test WLQ Quality", warehouse_type="Quality")
+
+		# the in-transit default fields and add-to-transit target send this shape
+		names = self.run_query(filters={"warehouse_type": ["in", ["Transit", ""]]}, txt="_Test WLQ")
+		self.assertIn(transit, names)
 		self.assertIn(plain, names)
 		self.assertNotIn(qc, names)
