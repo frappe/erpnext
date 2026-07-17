@@ -515,6 +515,34 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 					)
 				)
 
+	def test_clear_attachment_skips_referenced_data_file(self):
+		riv = frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"based_on": "Item and Warehouse",
+				"company": "_Test Company",
+				"item_code": "_Test Item",
+				"warehouse": "_Test Warehouse - _TC",
+				"posting_date": today(),
+			}
+		).insert(ignore_permissions=True)
+
+		attached = frappe.get_doc(
+			{
+				"doctype": "File",
+				"file_name": "repost_data.json.gz",
+				"content": "test",
+				"attached_to_doctype": riv.doctype,
+				"attached_to_name": riv.name,
+			}
+		).insert(ignore_permissions=True)
+		riv.db_set("reposting_data_file", attached.file_url)
+
+		riv.clear_attachment()
+
+		self.assertFalse(frappe.db.exists("File", attached.name))
+		self.assertIsNone(frappe.db.get_value("Repost Item Valuation", riv.name, "reposting_data_file"))
+
 	@ERPNextTestSuite.change_settings(
 		"Stock Reposting Settings",
 		{"item_based_reposting": 1, "enable_parallel_reposting": 1, "no_of_parallel_reposting": 2},
