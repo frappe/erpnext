@@ -9,11 +9,14 @@ frappe.ui.form.on("Sales Order", {
 		frappe.db.get_single_value("Selling Settings", "enable_proforma_invoice").then((enabled) => {
 			if (!enabled) return;
 
-			frm.add_custom_button(
-				__("Proforma Invoice"),
-				() => erpnext.proforma.open_dialog(frm),
-				__("Create")
-			);
+			// Defer so the button lands after the standard Create options, not before them.
+			setTimeout(() => {
+				frm.add_custom_button(
+					__("Proforma Invoice"),
+					() => erpnext.proforma.open_dialog(frm),
+					__("Create")
+				);
+			}, 0);
 			erpnext.proforma.render_list(frm);
 		});
 	},
@@ -94,7 +97,12 @@ Object.assign(erpnext.proforma, {
 					fieldname: "items",
 					fieldtype: "Table",
 					cannot_add_rows: true,
-					data: so_items.map((row) => ({ ...row })),
+					// Pre-fill the remaining (ordered minus already-proformed) for each basis.
+					data: so_items.map((row) => ({
+						...row,
+						qty: Math.max(0, flt(row.qty) - flt(row.proformed_qty)),
+						amount: Math.max(0, flt(row.amount) - flt(row.proformed_amount)),
+					})),
 					fields: [
 						{
 							fieldname: "item_code",
