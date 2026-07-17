@@ -198,7 +198,8 @@ class ProductionPlan(Document):
 		)
 
 		for row in self.material_requests:
-			row.material_request_date = transaction_dates.get(row.material_request)
+			if not row.material_request_date:
+				row.material_request_date = transaction_dates.get(row.material_request)
 
 	@frappe.whitelist()
 	def validate_sales_orders(self, sales_order: str | None = None):
