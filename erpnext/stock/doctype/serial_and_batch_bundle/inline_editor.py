@@ -9,6 +9,7 @@ from frappe.utils import cint, flt, parse_json
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	create_serial_batch_no_ledgers,
 	get_type_of_transaction,
+	make_batch_nos,
 	make_serial_nos,
 )
 
@@ -104,6 +105,9 @@ def upsert_bundle_entries(
 	bundle_name = child_row.get(bundle_field)
 	if bundle_name and frappe.db.exists("Serial and Batch Bundle", bundle_name):
 		bundle = apply_incremental_changes(bundle_name, child_row, entries, deleted, cint(replace))
+		if not bundle.entries:
+			remove_empty_bundle(bundle, child_row, bundle_field)
+			return frappe._dict({"bundle": None, "total_count": 0, "total_qty": 0})
 	else:
 		if not entries:
 			frappe.throw(_("Please add at least one Serial No or Batch to save"))
@@ -111,10 +115,18 @@ def upsert_bundle_entries(
 		frappe.has_permission(child_row.get("parenttype"), "write", throw=True)
 		if get_type_of_transaction(doc, child_row) == "Inward":
 			make_serial_nos(child_row.item_code, entries)
+			make_batch_nos(child_row.item_code, entries)
 
 		bundle = create_serial_batch_no_ledgers(entries, child_row, doc)
 
 	return get_bundle_summary(bundle.name)
+
+
+def remove_empty_bundle(bundle, child_row, bundle_field):
+	if child_row.get("name") and frappe.db.exists(child_row.get("doctype"), child_row.get("name")):
+		frappe.db.set_value(child_row.get("doctype"), child_row.get("name"), bundle_field, None)
+
+	bundle.delete(ignore_permissions=True)
 
 
 def apply_incremental_changes(bundle_name, child_row, entries, deleted, replace=0):
@@ -143,10 +155,18 @@ def apply_incremental_changes(bundle_name, child_row, entries, deleted, replace=
 
 	for row in entries:
 		if row.get("name") and row["name"] in existing:
-			existing[row["name"]].qty = (flt(row.get("qty")) or 1.0) * sign
+			entry = existing[row["name"]]
+			if row.get("qty") is not None:
+				entry.qty = (flt(row.get("qty")) or 1.0) * sign
+			if row.get("batch_no"):
+				entry.batch_no = row.get("batch_no")
+			if row.get("serial_no"):
+				entry.serial_no = row.get("serial_no")
 
-	if new_rows and bundle.type_of_transaction == "Inward":
-		make_serial_nos(child_row.item_code, new_rows)
+	if entries and bundle.type_of_transaction == "Inward":
+		incoming = [frappe._dict(row) for row in entries]
+		make_serial_nos(child_row.item_code, incoming)
+		make_batch_nos(child_row.item_code, incoming)
 
 	for row in new_rows:
 		bundle.append(
@@ -158,6 +178,9 @@ def apply_incremental_changes(bundle_name, child_row, entries, deleted, replace=
 				"serial_no": row.serial_no,
 			},
 		)
+
+	if not bundle.entries:
+		return bundle
 
 	bundle.save(ignore_permissions=True)
 	return bundle

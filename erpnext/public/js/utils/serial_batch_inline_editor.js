@@ -12,6 +12,9 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		this.start = 0;
 		this.page_length = 10;
 		this.total_count = 0;
+		this.server_total_count = 0;
+		this.server_total_qty = 0;
+		this.last_entries = [];
 		this.make();
 	}
 
@@ -21,6 +24,29 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 
 	get bundle() {
 		return this.row[this.bundle_field];
+	}
+
+	get pending_key() {
+		return `${this.cdn}::${this.is_rejected}`;
+	}
+
+	get pending() {
+		let store = erpnext.stock.get_sbie_pending_map(this.frm);
+		if (!store[this.pending_key]) {
+			store[this.pending_key] = { new_entries: [], updates: {}, deleted: [] };
+		}
+		return store[this.pending_key];
+	}
+
+	has_pending() {
+		let p = this.pending;
+		return Boolean(
+			p.delete_all || p.new_entries.length || p.deleted.length || Object.keys(p.updates).length
+		);
+	}
+
+	clear_pending() {
+		delete erpnext.stock.get_sbie_pending_map(this.frm)[this.pending_key];
 	}
 
 	toggle_section(show) {
@@ -45,8 +71,6 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 
 		this.toggle_section(true);
 		this.render_skeleton();
-		this.make_serial_control();
-		this.make_batch_control();
 		this.load_page();
 	}
 
@@ -97,9 +121,35 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 				}
 				.serial-batch-inline-editor .sbie-table .sbie-qty-input {
 					background-color: var(--fg-color);
-					height: 28px;
 					border: none;
 					box-shadow: none;
+					outline: none;
+				}
+				.serial-batch-inline-editor .sbie-table td.sbie-input-cell,
+				.serial-batch-inline-editor .sbie-table tbody tr:not(.sbie-empty):hover td.sbie-input-cell {
+					padding: 0;
+					background-color: var(--fg-color);
+				}
+				.serial-batch-inline-editor .sbie-table td.sbie-input-cell .frappe-control,
+				.serial-batch-inline-editor .sbie-table td.sbie-input-cell .form-group,
+				.serial-batch-inline-editor .sbie-table td.sbie-input-cell .control-input {
+					margin: 0;
+				}
+				.serial-batch-inline-editor .sbie-table td.sbie-input-cell input {
+					width: 100%;
+					height: 38px;
+					border: none;
+					border-radius: 0;
+					box-shadow: none;
+					outline: none;
+					background-color: var(--fg-color);
+					padding: 0 8px;
+				}
+				.serial-batch-inline-editor .sbie-table input.form-control {
+					background-color: var(--fg-color);
+				}
+				.serial-batch-inline-editor .sbie-table .link-btn {
+					background-color: var(--fg-color);
 				}
 				.serial-batch-inline-editor .sbie-table input[type="checkbox"] {
 					margin: 0;
@@ -125,44 +175,56 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 				}
 			</style>
 			<div class="serial-batch-inline-editor">
-				<div class="sbie-toolbar" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px;">
-					${this.get_toolbar_html()}
-				</div>
 				<div class="sbie-table"></div>
-				<div class="sbie-footer" style="display: flex; gap: 8px; align-items: center; margin-top: 10px;">
-					<button class="btn btn-sm btn-default sbie-prev" style="height: 28px; padding: 2px 10px;">
-						${__("Prev")}</button>
-					<span class="sbie-page-info text-muted small"></span>
-					<button class="btn btn-sm btn-default sbie-next" style="height: 28px; padding: 2px 10px;">
-						${__("Next")}</button>
-					<button class="btn btn-sm btn-danger sbie-delete hidden"
-						style="height: 28px; padding: 2px 10px; white-space: nowrap;">${__("Delete Selected")}</button>
-					<div class="sbie-summary text-muted small" style="margin-left: auto;"></div>
+				<div class="sbie-footer" style="display: flex; gap: 8px; align-items: center; margin-top: 10px; flex-wrap: wrap;">
+					<div style="flex: 1; display: flex; gap: 8px; align-items: center;">
+						<button class="btn btn-sm btn-default sbie-add-row"
+							style="height: 28px; padding: 2px 12px; white-space: nowrap;">${__("Add row")}</button>
+						<button class="btn btn-sm btn-danger sbie-delete hidden"
+							style="height: 28px; padding: 2px 10px; white-space: nowrap;">${__("Delete row")}</button>
+					</div>
+					<div class="sbie-pagination hidden" style="display: flex; gap: 4px; align-items: center;">
+						<button class="btn btn-sm btn-default sbie-first-page" title="${__("First")}"
+							style="height: 28px; padding: 2px 8px;">${frappe.utils.icon("chevron-first")}</button>
+						<button class="btn btn-sm btn-default sbie-prev" style="height: 28px; padding: 2px 8px;">
+							${frappe.utils.icon("chevron-left")}</button>
+						<input class="sbie-page-number" type="text"
+							style="width: 24px; height: 28px; text-align: center; border: none; outline: none;
+								background: transparent; padding: 0;">
+						<span class="text-muted small">${__("of")}</span>
+						<span class="sbie-total-pages text-muted small"></span>
+						<button class="btn btn-sm btn-default sbie-next" style="height: 28px; padding: 2px 8px;">
+							${frappe.utils.icon("chevron-right")}</button>
+						<button class="btn btn-sm btn-default sbie-last-page" title="${__("Last")}"
+							style="height: 28px; padding: 2px 8px;">${frappe.utils.icon("chevron-last")}</button>
+					</div>
+					<div style="flex: 1; display: flex; gap: 8px; align-items: center; justify-content: flex-end;">
+					<div class="sbie-summary text-muted small"></div>
+					<div class="dropdown" style="display: inline-block;">
+						<button type="button" class="btn btn-sm btn-default sbie-menu" data-toggle="dropdown"
+							aria-expanded="false" style="height: 28px; padding: 2px 8px;">
+							${frappe.utils.icon("ellipsis", "sm")}
+						</button>
+						<div class="dropdown-menu dropdown-menu-right">
+							<a class="dropdown-item sbie-scan-action">${
+								cint(this.item.has_serial_no) ? __("Scan Serial Nos") : __("Scan Batch Nos")
+							}</a>
+							${
+								cint(this.item.has_serial_no)
+									? `<a class="dropdown-item sbie-range-action">${__(
+											"Create Serial Nos from Range"
+									  )}</a>`
+									: ""
+							}
+							<a class="dropdown-item sbie-download-csv">${__("Download")}</a>
+							<a class="dropdown-item sbie-upload-csv">${__("Upload")}</a>
+						</div>
+					</div>
+					</div>
 				</div>
 			</div>
 		`);
 		this.bind_events();
-	}
-
-	get_toolbar_html() {
-		let html = "";
-		if (cint(this.item.has_serial_no)) {
-			html += `<div class="sbie-serial-slot" style="width: 220px;"></div>`;
-		}
-		if (cint(this.item.has_batch_no)) {
-			html += `<div class="sbie-batch-slot" style="width: 180px;"></div>`;
-			if (!cint(this.item.has_serial_no)) {
-				html += `<input type="text" class="form-control sbie-qty" data-fieldtype="Float"
-					style="height: 28px; max-width: 90px; text-align: right;" placeholder="${__("Qty")}">`;
-			}
-		}
-		html += `<button class="btn btn-sm btn-default sbie-add" style="height: 28px; padding: 2px 12px;">
-			${__("Add")}</button>`;
-		html += `<button class="btn btn-sm btn-default sbie-upload-csv"
-			style="height: 28px; padding: 2px 12px; white-space: nowrap;">${__("Upload CSV")}</button>`;
-		html += `<button class="btn btn-sm btn-default sbie-download-csv"
-			style="height: 28px; padding: 2px 12px; white-space: nowrap;">${__("Download CSV")}</button>`;
-		return html;
 	}
 
 	get_csv_columns() {
@@ -221,10 +283,9 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 			return;
 		}
 
-		if (this.total_count) {
-			frappe.confirm(
-				__("This will replace the existing {0} entries. Continue?", [this.total_count]),
-				() => this.replace_entries(entries)
+		if (this.server_total_count || this.has_pending()) {
+			frappe.confirm(__("This will replace the existing entries. Continue?"), () =>
+				this.replace_entries(entries)
 			);
 		} else {
 			this.replace_entries(entries);
@@ -232,78 +293,382 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 	}
 
 	async replace_entries(entries) {
+		this.clear_pending();
 		await this.upsert({ entries, replace: 1 });
 		if (this.frm.is_dirty()) {
 			this.frm.save();
 		}
 	}
 
-	make_serial_control() {
-		if (!cint(this.item.has_serial_no)) return;
+	async add_new_row() {
+		if (this.is_rejected && !this.row.rejected_warehouse) {
+			frappe.msgprint(__("Please set Rejected Warehouse first"));
+			return;
+		}
 
-		this.serial_control = frappe.ui.form.make_control({
-			parent: this.wrapper.find(".sbie-serial-slot"),
-			df: {
-				fieldtype: "Link",
-				options: "Serial No",
-				fieldname: "sbie_serial",
-				placeholder: __("Scan / select Serial No"),
-				get_query: () => {
-					return { filters: { item_code: this.row.item_code } };
-				},
-			},
-			render_input: true,
-		});
+		let $pending = this.wrapper.find(".sbie-new-row");
+		if ($pending.length) {
+			this.commit_new_row($pending);
+			if (this.wrapper.find(".sbie-new-row").length) {
+				this.wrapper.find(".sbie-new-row input").first().focus();
+				return;
+			}
+		}
 
-		this.make_control_compact(this.serial_control);
-		this.serial_control.$wrapper.find("input").on("keypress", (e) => {
-			if (e.which === 13) this.add_entries();
-		});
+		let $tbody = this.wrapper.find(".sbie-table tbody");
+		if (!$tbody.length) return;
+
+		this.wrapper.find(".sbie-empty").remove();
+		this.wrapper.find(".sbie-table").css("overflow", "visible");
+		let $tr = $(this.get_new_row_html()).appendTo($tbody);
+		this.make_new_row_controls($tr);
 	}
 
-	make_batch_control() {
-		if (!cint(this.item.has_batch_no)) return;
+	get_new_row_html() {
+		let show_serial = cint(this.item.has_serial_no);
+		let show_batch = cint(this.item.has_batch_no);
+		let qty_cell = show_serial
+			? this.format_float(1)
+			: `<input type="text" class="sbie-new-qty" data-fieldtype="Float"
+				value="${this.format_float(1)}" style="text-align: right;">`;
 
-		this.batch_control = frappe.ui.form.make_control({
-			parent: this.wrapper.find(".sbie-batch-slot"),
-			df: {
-				fieldtype: "Link",
-				options: "Batch",
-				fieldname: "sbie_batch",
-				placeholder: __("Batch No"),
-				get_query: () => {
-					return { filters: { item: this.row.item_code, disabled: 0 } };
-				},
-			},
+		return `<tr class="sbie-new-row">
+			<td style="text-align: center;"><input type="checkbox" class="sbie-check sbie-new-check"></td>
+			<td style="text-align: center;">${this.get_effective_count() + 1}</td>
+			${show_serial ? `<td class="sbie-new-serial sbie-input-cell"></td>` : ""}
+			${show_batch ? `<td class="sbie-new-batch sbie-input-cell"></td>` : ""}
+			<td class="${show_serial ? "" : "sbie-input-cell"}" style="text-align: right;">${qty_cell}</td>
+		</tr>`;
+	}
+
+	make_new_row_controls($tr) {
+		this.new_serial_control = this.make_row_link_control($tr.find(".sbie-new-serial"), {
+			options: "Serial No",
+			fieldname: "sbie_new_serial",
+			placeholder: __("Scan / select Serial No"),
+			get_query: () => ({ filters: { item_code: this.row.item_code } }),
+			onchange: () => this.on_new_serial_change($tr),
+		});
+
+		this.new_batch_control = this.make_row_link_control($tr.find(".sbie-new-batch"), {
+			options: "Batch",
+			fieldname: "sbie_new_batch",
+			placeholder: __("Select Batch No"),
+			get_query: () => ({ filters: { item: this.row.item_code, disabled: 0 } }),
+			onchange: () => this.on_new_batch_change($tr),
+		});
+
+		$tr.find(".sbie-new-check")
+			.on("mousedown", () => $tr.data("cancelled", 1))
+			.on("change", (e) => {
+				$tr.data("cancelled", e.target.checked ? 1 : 0);
+				this.toggle_delete_button();
+			});
+		$tr.find("input").on("keydown", (e) => {
+			if (e.which === 13) this.commit_new_row($tr);
+		});
+		$tr.find(".sbie-new-qty")
+			.on("input", (e) => this.restrict_to_numeric(e))
+			.on("focus", (e) => e.target.select())
+			.on("change", () => this.commit_new_row($tr))
+			.on("blur", () => this.commit_new_row($tr));
+
+		let first_control = this.new_serial_control || this.new_batch_control;
+		first_control && first_control.$wrapper.find("input").focus();
+	}
+
+	make_row_link_control($slot, df) {
+		if (!$slot.length) return null;
+
+		let control = frappe.ui.form.make_control({
+			parent: $slot,
+			df: Object.assign({ fieldtype: "Link" }, df),
 			render_input: true,
 		});
 
-		this.make_control_compact(this.batch_control);
+		this.make_control_compact(control);
+		return control;
 	}
 
 	make_control_compact(control) {
 		let $wrapper = control.$wrapper;
 		$wrapper.find(".control-label, .help-box").hide();
-		$wrapper.find(".form-group").css("margin", "0");
-		$wrapper.find("input").css({ height: "28px", "background-color": "var(--control-bg)" });
-		$wrapper.css("margin", "0");
+		$wrapper.find(".form-group").css({ margin: "0", "min-height": "0" });
+		$wrapper.find("input").css({ "min-height": "0" });
+		$wrapper.css({ margin: "0", "min-height": "0" });
+	}
+
+	on_new_serial_change($tr) {
+		if (!this.new_serial_control || !this.new_serial_control.get_value()) return;
+
+		if (this.new_batch_control && !this.new_batch_control.get_value()) {
+			this.new_batch_control.$wrapper.find("input").focus();
+			return;
+		}
+
+		this.commit_new_row($tr);
+	}
+
+	on_new_batch_change($tr) {
+		if (!this.new_batch_control || !this.new_batch_control.get_value()) return;
+
+		if (this.new_serial_control) {
+			if (this.new_serial_control.get_value()) {
+				this.commit_new_row($tr);
+			}
+			return;
+		}
+
+		let committed = this.commit_new_row($tr);
+		committed &&
+			committed.then(() => {
+				this.wrapper.find(".sbie-qty-input[data-pending-index]").last().focus();
+			});
+	}
+
+	edit_batch_cell($td) {
+		this.edit_link_cell($td, {
+			options: "Batch",
+			field: "batch_no",
+			placeholder: __("Select Batch No"),
+			get_query: () => ({ filters: { item: this.row.item_code, disabled: 0 } }),
+		});
+	}
+
+	edit_serial_cell($td) {
+		this.edit_link_cell($td, {
+			options: "Serial No",
+			field: "serial_no",
+			placeholder: __("Select Serial No"),
+			get_query: () => ({ filters: { item_code: this.row.item_code } }),
+		});
+	}
+
+	edit_link_cell($td, opts) {
+		if ($td.data("editing")) return;
+		$td.data("editing", 1);
+
+		let name = $td.data("name");
+		let current = $td.text().trim();
+		$td.empty().addClass("sbie-input-cell").css("cursor", "default");
+		this.wrapper.find(".sbie-table").css("overflow", "visible");
+
+		let control = this.make_row_link_control($td, {
+			options: opts.options,
+			fieldname: "sbie_edit_link",
+			placeholder: opts.placeholder,
+			get_query: opts.get_query,
+			onchange: () => {
+				let value = control.get_value();
+				if (value && value !== current) {
+					this.update_entry(name, { [opts.field]: value });
+					this.refresh_view();
+				}
+			},
+		});
+
+		control.set_input(current);
+		control.$wrapper.find("input").focus();
+	}
+
+	commit_new_row($tr) {
+		if ($tr.data("committing") || $tr.data("cancelled")) return;
+
+		let serial_no = this.new_serial_control ? this.new_serial_control.get_value() : "";
+		let batch_no = this.new_batch_control ? this.new_batch_control.get_value() : "";
+		if (!serial_no && !batch_no) return;
+
+		let qty = serial_no ? 1 : flt($tr.find(".sbie-new-qty").val()) || 1;
+
+		$tr.data("committing", 1);
+		this.pending.new_entries.push({ serial_no, batch_no, qty });
+		this.frm.dirty();
+		return this.go_to_last_page();
+	}
+
+	update_entry(name, changes) {
+		let updates = this.pending.updates;
+		if (!updates[name]) {
+			let entry = this.last_entries.find((d) => d.name === name) || {};
+			updates[name] = { orig_qty: Math.abs(flt(entry.qty)) };
+		}
+
+		Object.assign(updates[name], changes);
+		this.frm.dirty();
 	}
 
 	bind_events() {
-		this.wrapper.find(".sbie-add").on("click", () => this.add_entries());
+		this.wrapper.find(".sbie-add-row").on("click", () => this.add_new_row());
 		this.wrapper.find(".sbie-upload-csv").on("click", () => this.upload_csv());
 		this.wrapper.find(".sbie-download-csv").on("click", () => this.download_csv());
-		this.wrapper.find(".sbie-qty").on("input", (e) => this.restrict_to_numeric(e));
-		this.wrapper.find(".sbie-qty").on("blur", (e) => this.apply_float_format(e));
-		this.wrapper.find(".sbie-qty").on("focus", (e) => e.target.select());
 		this.wrapper.find(".sbie-prev").on("click", () => this.change_page(-1));
 		this.wrapper.find(".sbie-next").on("click", () => this.change_page(1));
+		this.wrapper.find(".sbie-first-page").on("click", () => this.go_to_page(1));
+		this.wrapper.find(".sbie-last-page").on("click", () => this.go_to_page(this.total_pages));
+		this.wrapper
+			.find(".sbie-page-number")
+			.on("input", (e) => {
+				e.target.value = e.target.value.replace(/[^0-9]/g, "");
+				e.target.style.width = (e.target.value.length + 1) * 8 + "px";
+			})
+			.on("keydown", (e) => {
+				if (e.which === 13) e.target.blur();
+			})
+			.on("blur", (e) => this.go_to_page(e.target.value))
+			.on("focus", (e) => e.target.select());
 		this.wrapper.find(".sbie-delete").on("click", () => this.delete_selected());
+		this.wrapper.find(".sbie-scan-action").on("click", () => this.open_scan_dialog());
+		this.wrapper.find(".sbie-range-action").on("click", () => this.open_range_dialog());
+	}
+
+	open_scan_dialog() {
+		if (this.is_rejected && !this.row.rejected_warehouse) {
+			frappe.msgprint(__("Please set Rejected Warehouse first"));
+			return;
+		}
+
+		let is_serial = cint(this.item.has_serial_no);
+		let scanned_count = 0;
+
+		let dialog = new frappe.ui.Dialog({
+			title: is_serial ? __("Scan Serial Nos") : __("Scan Batch Nos"),
+			fields: [
+				{
+					fieldtype: "Data",
+					fieldname: "scan_value",
+					options: "Barcode",
+					label: is_serial ? __("Scan Serial No") : __("Scan Batch No"),
+					description: __("Missing Serial / Batch Nos will be created on Save"),
+					onchange: () => {
+						let value = (dialog.get_value("scan_value") || "").trim();
+						if (!value) return;
+
+						if (this.add_scanned_value(value)) {
+							scanned_count++;
+						}
+						dialog.fields_dict.scanned_info.$wrapper.html(
+							`<div class="text-muted small">${__("Scanned: {0}", [
+								scanned_count,
+							])} &middot; ${frappe.utils.escape_html(value)}</div>`
+						);
+						dialog.set_value("scan_value", "");
+					},
+				},
+				{ fieldtype: "HTML", fieldname: "scanned_info" },
+			],
+			on_hide: () => this.refresh_view(),
+		});
+
+		dialog.show();
+	}
+
+	add_scanned_value(value) {
+		let p = this.pending;
+
+		if (cint(this.item.has_serial_no)) {
+			let duplicate =
+				p.new_entries.some((d) => d.serial_no === value) ||
+				this.last_entries.some((d) => d.serial_no === value);
+			if (duplicate) {
+				frappe.show_alert({
+					message: __("Serial No {0} already added", [value]),
+					indicator: "orange",
+				});
+				return false;
+			}
+
+			p.new_entries.push({ serial_no: value, batch_no: "", qty: 1 });
+		} else {
+			let existing = p.new_entries.find((d) => d.batch_no === value);
+			if (existing) {
+				existing.qty = flt(existing.qty) + 1;
+			} else {
+				p.new_entries.push({ serial_no: "", batch_no: value, qty: 1 });
+			}
+		}
+
+		this.frm.dirty();
+		this.go_to_last_page();
+		return true;
+	}
+
+	open_range_dialog() {
+		if (this.is_rejected && !this.row.rejected_warehouse) {
+			frappe.msgprint(__("Please set Rejected Warehouse first"));
+			return;
+		}
+
+		let dialog = new frappe.ui.Dialog({
+			title: __("Create Serial Nos from Range"),
+			fields: [
+				{
+					fieldtype: "Data",
+					fieldname: "serial_no_range",
+					label: __("Serial No Range"),
+					reqd: 1,
+					description: __(
+						'"SN-01::10" for "SN-01" to "SN-10". Missing Serial Nos will be created on Save'
+					),
+				},
+			],
+			primary_action_label: __("Add"),
+			primary_action: ({ serial_no_range }) => {
+				let serial_nos = erpnext.stock.utils.get_serial_range(serial_no_range, "::");
+				if (!serial_nos || !serial_nos.length) {
+					frappe.throw(__("Invalid range. Use the format {0}", ["SN-01::10"]));
+				}
+
+				dialog.hide();
+				this.add_serial_range(serial_nos);
+			},
+		});
+
+		dialog.show();
+	}
+
+	add_serial_range(serial_nos) {
+		let p = this.pending;
+		let known = new Set(
+			p.new_entries.map((d) => d.serial_no).concat(this.last_entries.map((d) => d.serial_no))
+		);
+
+		let added = 0;
+		for (const serial_no of serial_nos) {
+			if (known.has(serial_no)) continue;
+			p.new_entries.push({ serial_no: serial_no, batch_no: "", qty: 1 });
+			added++;
+		}
+
+		this.frm.dirty();
+		this.go_to_last_page();
+		frappe.show_alert({
+			message: __("{0} Serial Nos added. They will be saved with the document.", [added]),
+			indicator: "green",
+		});
+	}
+
+	get total_pages() {
+		return Math.ceil(this.get_effective_count() / this.page_length) || 1;
+	}
+
+	go_to_last_page() {
+		this.start = (this.total_pages - 1) * this.page_length;
+		return this.load_page();
 	}
 
 	change_page(direction) {
-		let new_start = this.start + direction * this.page_length;
-		if (new_start < 0 || new_start >= this.total_count) return;
+		let current_page = Math.floor(this.start / this.page_length) + 1;
+		this.go_to_page(current_page + direction);
+	}
+
+	go_to_page(index) {
+		index = Math.min(Math.max(cint(index) || 1, 1), this.total_pages);
+		let new_start = (index - 1) * this.page_length;
+
+		if (new_start === this.start) {
+			this.wrapper.find(".sbie-page-number").val(index);
+			return;
+		}
 
 		this.start = new_start;
 		this.load_page();
@@ -311,34 +676,87 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 
 	async load_page() {
 		if (!this.bundle) {
-			this.render_rows([]);
-			this.update_summary({ total_count: 0, total_qty: 0 });
-			return;
+			this.server_total_count = 0;
+			this.server_total_qty = 0;
+			this.last_entries = [];
+			this._totals_loaded = true;
+		} else if (!this._totals_loaded || this.start < this.server_total_count) {
+			let data = await this.call(
+				"erpnext.stock.doctype.serial_and_batch_bundle.inline_editor.get_bundle_entries",
+				{
+					bundle: this.bundle,
+					start: this.start,
+					page_length: this.page_length,
+				}
+			);
+			this.server_total_count = data.total_count;
+			this.server_total_qty = flt(data.total_qty);
+			this.last_entries = data.entries;
+			this._totals_loaded = true;
+		} else {
+			this.last_entries = [];
 		}
 
-		let data = await this.call(
-			"erpnext.stock.doctype.serial_and_batch_bundle.inline_editor.get_bundle_entries",
-			{
-				bundle: this.bundle,
-				start: this.start,
-				page_length: this.page_length,
-			}
-		);
-
-		this.render_rows(data.entries);
-		this.update_summary(data);
-		this.reconcile_row_qty(data);
+		this.refresh_view();
+		this.reconcile_row_qty();
 	}
 
-	reconcile_row_qty(data) {
-		if (this.frm.doc.docstatus !== 0 || !data.total_count) return;
+	refresh_view() {
+		this.render_rows(this.last_entries);
+		this.update_summary();
+		this.sync_row_qty();
+	}
 
-		if (flt(this.row[this.qty_field]) !== flt(data.total_qty)) {
-			frappe.model.set_value(this.cdt, this.cdn, this.qty_field, data.total_qty);
+	get_effective_count() {
+		let p = this.pending;
+		if (p.delete_all) {
+			return p.new_entries.length;
+		}
+
+		return this.server_total_count + p.new_entries.length - p.deleted.length;
+	}
+
+	get_effective_qty() {
+		let p = this.pending;
+		let qty = p.delete_all ? 0 : this.server_total_qty;
+
+		for (const row of p.new_entries) {
+			qty += flt(row.qty);
+		}
+
+		if (!p.delete_all) {
+			for (const name in p.updates) {
+				const u = p.updates[name];
+				if (u.qty != null) {
+					qty += flt(u.qty) - flt(u.orig_qty);
+				}
+			}
+			for (const d of p.deleted) {
+				qty -= flt(d.qty);
+			}
+		}
+
+		return flt(qty, cint(frappe.boot.sysdefaults && frappe.boot.sysdefaults.float_precision) || 3);
+	}
+
+	sync_row_qty() {
+		if (this.frm.doc.docstatus !== 0 || !this.has_pending()) return;
+
+		let expected = this.get_effective_qty();
+		if (flt(this.row[this.qty_field]) !== expected) {
+			frappe.model.set_value(this.cdt, this.cdn, this.qty_field, expected);
+		}
+	}
+
+	reconcile_row_qty() {
+		if (this.frm.doc.docstatus !== 0 || this.has_pending() || !this.server_total_count) return;
+
+		if (flt(this.row[this.qty_field]) !== this.server_total_qty) {
+			frappe.model.set_value(this.cdt, this.cdn, this.qty_field, this.server_total_qty);
 			frappe.show_alert({
 				message: __(
 					"Qty updated to {0} to match the Serial and Batch Bundle. Please save the document.",
-					[data.total_qty]
+					[this.server_total_qty]
 				),
 				indicator: "orange",
 			});
@@ -346,6 +764,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 	}
 
 	render_rows(entries) {
+		let p = this.pending;
 		let show_batch = cint(this.item.has_batch_no);
 		let show_serial = cint(this.item.has_serial_no);
 		let column_count = 3 + show_serial + show_batch;
@@ -358,42 +777,98 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 			<th style="width: 110px; text-align: right;">${__("Qty")}</th>
 		</tr></thead>`;
 
-		let body = entries
-			.map(
-				(d, i) => `<tr data-name="${d.name}">
-				<td style="text-align: center;"><input type="checkbox" class="sbie-check" data-name="${d.name}"></td>
+		let visible = p.delete_all ? [] : entries.filter((d) => !p.deleted.some((x) => x.name === d.name));
+		let body = visible
+			.map((d, i) => {
+				let update = p.updates[d.name] || {};
+				let qty = update.qty != null ? flt(update.qty) : Math.abs(flt(d.qty));
+				let batch_no = update.batch_no || d.batch_no || "";
+				let serial_no = update.serial_no || d.serial_no || "";
+
+				return `<tr data-name="${d.name}">
+				<td style="text-align: center;">
+					<input type="checkbox" class="sbie-check" data-name="${d.name}" data-qty="${qty}"></td>
 				<td style="text-align: center;">${this.start + i + 1}</td>
-				${show_serial ? `<td>${d.serial_no || ""}</td>` : ""}
-				${show_batch ? `<td>${d.batch_no || ""}</td>` : ""}
-				<td style="text-align: right;">${
-					!d.serial_no && show_batch ? this.get_qty_input(d) : this.format_float(Math.abs(d.qty))
+				${
+					show_serial
+						? `<td class="sbie-serial-cell" data-name="${d.name}" title="${__(
+								"Click to change Serial No"
+						  )}" style="cursor: pointer;">${serial_no}</td>`
+						: ""
+				}
+				${
+					show_batch
+						? `<td class="sbie-batch-cell" data-name="${d.name}" title="${__(
+								"Click to change Batch No"
+						  )}" style="cursor: pointer;">${batch_no}</td>`
+						: ""
+				}
+				<td class="${!d.serial_no && show_batch ? "sbie-input-cell" : ""}" style="text-align: right;">${
+					!d.serial_no && show_batch ? this.get_qty_input(d, qty) : this.format_float(qty)
 				}</td>
-			</tr>`
-			)
+			</tr>`;
+			})
 			.join("");
 
-		if (!entries.length) {
+		let base_count = p.delete_all ? 0 : this.server_total_count - p.deleted.length;
+		let pending_offset = Math.max(0, this.start - (p.delete_all ? 0 : this.server_total_count));
+		let capacity = Math.max(this.page_length - visible.length, 0);
+		body += p.new_entries
+			.slice(pending_offset, pending_offset + capacity)
+			.map((d, i) => {
+				let index = pending_offset + i;
+				return `<tr data-pending-index="${index}">
+				<td style="text-align: center;">
+					<input type="checkbox" class="sbie-check" data-pending-index="${index}"></td>
+				<td style="text-align: center;">${base_count + index + 1}</td>
+				${show_serial ? `<td>${d.serial_no || ""}</td>` : ""}
+				${show_batch ? `<td>${d.batch_no || ""}</td>` : ""}
+				<td class="${!d.serial_no && show_batch ? "sbie-input-cell" : ""}" style="text-align: right;">${
+					!d.serial_no && show_batch
+						? this.get_pending_qty_input(d, index)
+						: this.format_float(d.qty)
+				}</td>
+			</tr>`;
+			})
+			.join("");
+
+		if (!visible.length && !p.new_entries.length) {
 			body = `<tr class="sbie-empty"><td colspan="${column_count}" style="text-align: center;">
-				${__("Scan or type serial / batch numbers above and click Add")}</td></tr>`;
+				${__("Click on 'Add row' to add Serial / Batch entries")}</td></tr>`;
 		}
 
-		this.wrapper.find(".sbie-table").html(`<table>${header}<tbody>${body}</tbody></table>`);
+		this.wrapper
+			.find(".sbie-table")
+			.css("overflow", "")
+			.html(`<table>${header}<tbody>${body}</tbody></table>`);
 
 		this.wrapper.find(".sbie-check-all").on("change", (e) => {
 			this.wrapper.find(".sbie-check").prop("checked", e.target.checked);
 			this.toggle_delete_button();
 		});
-		this.wrapper.find(".sbie-check").on("change", () => this.toggle_delete_button());
+		this.wrapper.find(".sbie-check").on("change", (e) => {
+			if (!e.target.checked) {
+				this.wrapper.find(".sbie-check-all").prop("checked", false);
+			}
+			this.toggle_delete_button();
+		});
+		this.wrapper.find(".sbie-batch-cell").on("click", (e) => this.edit_batch_cell($(e.currentTarget)));
+		this.wrapper.find(".sbie-serial-cell").on("click", (e) => this.edit_serial_cell($(e.currentTarget)));
 		this.wrapper.find(".sbie-qty-input").on("input", (e) => this.restrict_to_numeric(e));
 		this.wrapper.find(".sbie-qty-input").on("blur", (e) => this.apply_float_format(e));
 		this.wrapper.find(".sbie-qty-input").on("change", (e) => this.update_qty(e));
 		this.wrapper.find(".sbie-qty-input").on("focus", (e) => e.target.select());
+		this.toggle_delete_button();
 	}
 
-	get_qty_input(d) {
-		return `<input type="text" class="form-control input-xs sbie-qty-input" data-fieldtype="Float"
-			data-name="${d.name}" value="${this.format_float(Math.abs(d.qty))}"
-			style="width: 90px; display: block; margin-left: auto; text-align: right;">`;
+	get_qty_input(d, qty) {
+		return `<input type="text" class="sbie-qty-input" data-fieldtype="Float"
+			data-name="${d.name}" value="${this.format_float(qty)}" style="text-align: right;">`;
+	}
+
+	get_pending_qty_input(d, index) {
+		return `<input type="text" class="sbie-qty-input" data-fieldtype="Float"
+			data-pending-index="${index}" value="${this.format_float(d.qty)}" style="text-align: right;">`;
 	}
 
 	format_float(value) {
@@ -425,71 +900,81 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 
 	toggle_delete_button() {
 		let checked = this.wrapper.find(".sbie-check:checked").length;
-		this.wrapper.find(".sbie-delete").toggleClass("hidden", !checked);
-	}
-
-	update_summary(data) {
-		this.total_count = data.total_count;
+		let select_all = this.wrapper.find(".sbie-check-all").prop("checked");
 		this.wrapper
-			.find(".sbie-summary")
-			.text(__("Total Qty: {0} ({1} entries)", [data.total_qty, data.total_count]));
+			.find(".sbie-delete")
+			.toggleClass("hidden", !checked)
+			.text(select_all ? __("Delete All") : __("Delete row"));
+	}
 
-		let page_end = Math.min(this.start + this.page_length, data.total_count);
+	update_summary() {
+		this.total_count = this.server_total_count;
+		this.wrapper.find(".sbie-summary").text(__("Total Qty: {0}", [this.get_effective_qty()]));
+
+		let current_page = Math.floor(this.start / this.page_length) + 1;
 		this.wrapper
-			.find(".sbie-page-info")
-			.text(data.total_count ? `${this.start + 1}-${page_end} / ${data.total_count}` : "");
-	}
-
-	add_entries() {
-		let entries = this.collect_new_entries();
-		if (!entries.length) return;
-
-		if (this.is_rejected && !this.row.rejected_warehouse) {
-			frappe.msgprint(__("Please set Rejected Warehouse first"));
-			return;
-		}
-
-		this.upsert({ entries });
-		this.wrapper.find(".sbie-qty").val("");
-		this.serial_control && this.serial_control.set_value("");
-		this.batch_control && this.batch_control.set_value("");
-	}
-
-	collect_new_entries() {
-		let serials = (this.serial_control ? this.serial_control.get_value() || "" : "")
-			.split(/[\n,]/)
-			.map((d) => d.trim())
-			.filter(Boolean);
-		let batch_no = this.batch_control ? this.batch_control.get_value() : "";
-		let qty = flt(this.wrapper.find(".sbie-qty").val()) || 1;
-
-		if (serials.length) {
-			return serials.map((serial_no) => ({ serial_no, batch_no, qty: 1 }));
-		}
-
-		if (batch_no) {
-			return [{ batch_no, qty }];
-		}
-
-		return [];
+			.find(".sbie-pagination")
+			.toggleClass("hidden", this.get_effective_count() <= this.page_length);
+		this.wrapper
+			.find(".sbie-page-number")
+			.val(current_page)
+			.css("width", (String(current_page).length + 1) * 8 + "px");
+		this.wrapper.find(".sbie-total-pages").text(this.total_pages);
 	}
 
 	update_qty(e) {
 		let $input = $(e.target);
-		this.upsert({
-			entries: [{ name: $input.data("name"), qty: flt($input.val()) || 1 }],
-		});
+		let qty = flt($input.val()) || 1;
+
+		if ($input.data("pending-index") != null) {
+			this.pending.new_entries[$input.data("pending-index")].qty = qty;
+		} else {
+			this.update_entry($input.data("name"), { qty: qty });
+		}
+
+		this.update_summary();
+		this.sync_row_qty();
 	}
 
 	delete_selected() {
-		let deleted = this.wrapper
-			.find(".sbie-check:checked")
-			.map((_, el) => $(el).data("name"))
-			.get();
-
-		if (deleted.length) {
-			this.upsert({ deleted });
+		if (this.wrapper.find(".sbie-check-all").prop("checked")) {
+			this.delete_all_entries();
+			return;
 		}
+
+		let p = this.pending;
+		let pending_indexes = [];
+
+		this.wrapper.find(".sbie-check:checked").each((_, el) => {
+			let $el = $(el);
+			if ($el.data("pending-index") != null) {
+				pending_indexes.push($el.data("pending-index"));
+			} else if ($el.data("name")) {
+				let name = $el.data("name");
+				delete p.updates[name];
+				p.deleted.push({ name: name, qty: flt($el.data("qty")) });
+			}
+		});
+
+		p.new_entries = p.new_entries.filter((_, i) => !pending_indexes.includes(i));
+		this.frm.dirty();
+		this.refresh_view();
+	}
+
+	delete_all_entries() {
+		frappe.confirm(
+			__("This will delete all {0} entries. Continue?", [this.get_effective_count()]),
+			() => {
+				let p = this.pending;
+				p.delete_all = 1;
+				p.new_entries = [];
+				p.updates = {};
+				p.deleted = [];
+				this.frm.dirty();
+				this.start = 0;
+				this.refresh_view();
+			}
+		);
 	}
 
 	async upsert({ entries = [], deleted = [], replace = 0 }) {
@@ -509,7 +994,8 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		}
 		await frappe.model.set_value(this.cdt, this.cdn, this.qty_field, summary.total_qty);
 
-		this.load_page();
+		this._totals_loaded = false;
+		await this.load_page();
 	}
 
 	call(method, args) {
@@ -521,6 +1007,66 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 				error: reject,
 			});
 		});
+	}
+};
+
+erpnext.stock.get_sbie_pending_map = function (frm) {
+	let store = (frm._sbie_pending = frm._sbie_pending || {});
+	return (store[frm.doc.name] = store[frm.doc.name] || {});
+};
+
+erpnext.stock.flush_serial_batch_pending = async function (frm) {
+	let pending_map = erpnext.stock.get_sbie_pending_map(frm);
+
+	for (let key of Object.keys(pending_map)) {
+		let p = pending_map[key];
+		let has_changes =
+			p.delete_all || p.new_entries.length || p.deleted.length || Object.keys(p.updates).length;
+		if (!has_changes) {
+			delete pending_map[key];
+			continue;
+		}
+
+		let [cdn, is_rejected] = key.split("::");
+		let row = (frm.doc.items || []).find((d) => d.name === cdn);
+		if (!row) {
+			delete pending_map[key];
+			continue;
+		}
+
+		let bundle_field = cint(is_rejected) ? "rejected_serial_and_batch_bundle" : "serial_and_batch_bundle";
+		if (p.delete_all && !row[bundle_field] && !p.new_entries.length) {
+			delete pending_map[key];
+			continue;
+		}
+
+		let entries = p.new_entries.concat(
+			Object.keys(p.updates).map((name) => {
+				let update = { name: name };
+				if (p.updates[name].qty != null) update.qty = p.updates[name].qty;
+				if (p.updates[name].batch_no) update.batch_no = p.updates[name].batch_no;
+				if (p.updates[name].serial_no) update.serial_no = p.updates[name].serial_no;
+				return update;
+			})
+		);
+
+		let summary = await frappe.xcall(
+			"erpnext.stock.doctype.serial_and_batch_bundle.inline_editor.upsert_bundle_entries",
+			{
+				child_row: Object.assign({}, row, { is_rejected: cint(is_rejected) }),
+				doc: frm.doc,
+				entries: entries,
+				deleted: p.deleted.map((d) => d.name),
+				replace: cint(p.delete_all),
+			}
+		);
+
+		row[bundle_field] = summary.bundle;
+		row[cint(is_rejected) ? "rejected_qty" : "qty"] = summary.total_qty;
+		if (row.received_qty != null) {
+			row.received_qty = flt(row.qty) + flt(row.rejected_qty);
+		}
+		delete pending_map[key];
 	}
 };
 
@@ -540,6 +1086,8 @@ erpnext.stock.mount_serial_batch_inline_editor = async function (frm, cdt, cdn) 
 
 	erpnext.stock.toggle_legacy_bundle_fields(grid_form, show);
 
+	let editors_store = (frm._sbie_editors = frm._sbie_editors || {});
+
 	for (let editor of editors) {
 		let field = grid_form.fields_dict[editor.fieldname];
 		if (!field) continue;
@@ -549,7 +1097,18 @@ erpnext.stock.mount_serial_batch_inline_editor = async function (frm, cdt, cdn) 
 			continue;
 		}
 
-		new erpnext.stock.SerialBatchInlineEditor({
+		let key = `${cdn}::${editor.is_rejected}`;
+		let existing = editors_store[key];
+		if (
+			existing &&
+			existing.wrapper[0] === field.$wrapper[0] &&
+			document.body.contains(field.$wrapper[0]) &&
+			existing.wrapper.find(".serial-batch-inline-editor").length
+		) {
+			continue;
+		}
+
+		editors_store[key] = new erpnext.stock.SerialBatchInlineEditor({
 			frm,
 			cdt,
 			cdn,
@@ -578,6 +1137,16 @@ erpnext.stock.toggle_legacy_bundle_fields = function (grid_form, editor_active) 
 		}
 	}
 };
+
+erpnext.stock.setup_serial_batch_pending_flush = function (doctype) {
+	frappe.ui.form.on(doctype, {
+		validate(frm) {
+			return erpnext.stock.flush_serial_batch_pending(frm);
+		},
+	});
+};
+
+erpnext.stock.setup_serial_batch_pending_flush("Purchase Receipt");
 
 erpnext.stock.is_inline_serial_batch_editor_enabled = async function () {
 	if (erpnext.stock._inline_editor_enabled === undefined) {

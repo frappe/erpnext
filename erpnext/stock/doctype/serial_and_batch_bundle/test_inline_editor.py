@@ -105,6 +105,80 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 		self.assertEqual(summary.total_qty, 8)
 		self.assertEqual(summary.total_count, 1)
 
+	def test_update_serial_no_of_existing_entry(self):
+		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
+		pr = self.make_draft_pr(item, qty=1)
+		old_serial = f"SN-{frappe.generate_hash(length=8)}"
+		new_serial = f"SN-{frappe.generate_hash(length=8)}"
+
+		summary = self.upsert(pr, entries=[{"serial_no": old_serial}])
+		pr.items[0].serial_and_batch_bundle = summary.bundle
+		entry_name = frappe.get_all("Serial and Batch Entry", {"parent": summary.bundle}, pluck="name")[0]
+
+		self.upsert(pr, entries=[{"name": entry_name, "serial_no": new_serial}])
+
+		self.assertEqual(frappe.db.get_value("Serial and Batch Entry", entry_name, "serial_no"), new_serial)
+		self.assertTrue(frappe.db.exists("Serial No", new_serial))
+
+	def test_auto_create_missing_batch_no(self):
+		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
+		pr = self.make_draft_pr(item, qty=5)
+		batch1 = f"BNEW-{frappe.generate_hash(length=8)}"
+		batch2 = f"BNEW-{frappe.generate_hash(length=8)}"
+
+		self.assertFalse(frappe.db.exists("Batch", batch1))
+		summary = self.upsert(pr, entries=[{"batch_no": batch1, "qty": 4}])
+		self.assertTrue(frappe.db.exists("Batch", batch1))
+
+		pr.items[0].serial_and_batch_bundle = summary.bundle
+		summary = self.upsert(pr, entries=[{"batch_no": batch2, "qty": 1}])
+
+		self.assertTrue(frappe.db.exists("Batch", batch2))
+		self.assertEqual(summary.total_qty, 5)
+
+	def test_update_batch_no_of_existing_entry(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TSTBIE-.####",
+			}
+		).name
+		pr = self.make_draft_pr(item, qty=5)
+		batch1 = frappe.get_doc(doctype="Batch", item=item).insert()
+		batch2 = frappe.get_doc(doctype="Batch", item=item).insert()
+
+		summary = self.upsert(pr, entries=[{"batch_no": batch1.name, "qty": 5}])
+		pr.items[0].serial_and_batch_bundle = summary.bundle
+
+		entry_name = frappe.get_all("Serial and Batch Entry", {"parent": summary.bundle}, pluck="name")[0]
+		self.upsert(pr, entries=[{"name": entry_name, "batch_no": batch2.name}])
+
+		entry = frappe.db.get_value("Serial and Batch Entry", entry_name, ["batch_no", "qty"], as_dict=1)
+		self.assertEqual(entry.batch_no, batch2.name)
+		self.assertEqual(entry.qty, 5)
+
+	def test_delete_all_entries_removes_bundle(self):
+		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
+		pr = self.make_draft_pr(item)
+		serials = [f"SN-{frappe.generate_hash(length=8)}" for _ in range(2)]
+
+		summary = self.upsert(pr, entries=[{"serial_no": d} for d in serials])
+		bundle = summary.bundle
+		pr.items[0].serial_and_batch_bundle = bundle
+		pr.items[0].db_set("serial_and_batch_bundle", bundle)
+
+		to_delete = frappe.get_all("Serial and Batch Entry", {"parent": bundle}, pluck="name")
+		summary = self.upsert(pr, deleted=to_delete)
+
+		self.assertFalse(summary.bundle)
+		self.assertEqual(summary.total_count, 0)
+		self.assertFalse(frappe.db.exists("Serial and Batch Bundle", bundle))
+		self.assertFalse(
+			frappe.db.get_value("Purchase Receipt Item", pr.items[0].name, "serial_and_batch_bundle")
+		)
+
 	def test_pagination(self):
 		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
 		pr = self.make_draft_pr(item, qty=5)
@@ -162,6 +236,21 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 		self.assertEqual(summary.total_count, 3)
 		remaining = frappe.get_all("Serial and Batch Entry", {"parent": summary.bundle}, pluck="serial_no")
 		self.assertEqual(sorted(remaining), sorted(new_serials))
+
+	def test_replace_with_no_entries_removes_bundle(self):
+		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
+		pr = self.make_draft_pr(item)
+		serials = [f"SN-{frappe.generate_hash(length=8)}" for _ in range(2)]
+
+		summary = self.upsert(pr, entries=[{"serial_no": d} for d in serials])
+		bundle = summary.bundle
+		pr.items[0].serial_and_batch_bundle = bundle
+
+		summary = self.upsert(pr, entries=[], replace=1)
+
+		self.assertFalse(summary.bundle)
+		self.assertEqual(summary.total_count, 0)
+		self.assertFalse(frappe.db.exists("Serial and Batch Bundle", bundle))
 
 	def test_upsert_requires_entries_for_new_bundle(self):
 		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
