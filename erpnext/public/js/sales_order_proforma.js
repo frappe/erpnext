@@ -232,6 +232,8 @@ Object.assign(erpnext.proforma, {
 					message: __("Proforma Invoice {0} created", [r.message]),
 					indicator: "green",
 				});
+				// Open the Proforma tab once the reloaded form has rendered the list.
+				frm._activate_proforma_tab = true;
 				frm.reload_doc();
 			},
 		});
@@ -254,7 +256,12 @@ Object.assign(erpnext.proforma, {
 			empty_message: __("No proforma invoices yet."),
 			// Show the Proforma tab only once at least one proforma exists for this order.
 			after_render() {
-				erpnext.proforma.toggle_tab(frm, (this._all_data || []).length > 0);
+				const has_proformas = (this._all_data || []).length > 0;
+				erpnext.proforma.toggle_tab(frm, has_proformas);
+				if (has_proformas && frm._activate_proforma_tab) {
+					frm._activate_proforma_tab = false;
+					frm.get_field("proforma_html")?.tab?.set_active();
+				}
 			},
 			columns: [
 				{
