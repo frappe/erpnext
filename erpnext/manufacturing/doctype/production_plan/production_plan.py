@@ -137,6 +137,9 @@ class ProductionPlan(Document):
 	def on_discard(self):
 		self.db_set("status", "Cancelled")
 
+	def before_validate(self):
+		self.set_material_request_dates()
+
 	def validate(self):
 		self.set_pending_qty_in_row_without_reference()
 		self.calculate_total_planned_qty()
@@ -147,7 +150,6 @@ class ProductionPlan(Document):
 		self.validate_material_request_type()
 		self.validate_raw_material_group_warehouse()
 		self.enable_auto_reserve_stock()
-		self.set_material_request_dates()
 
 	def validate_raw_material_group_warehouse(self):
 		if not self.raw_material_group_warehouse:
