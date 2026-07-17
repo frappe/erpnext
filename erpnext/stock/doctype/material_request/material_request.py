@@ -198,7 +198,7 @@ class MaterialRequest(BuyingController):
 				self.buying_price_list = buying_price_list
 
 	def on_update(self):
-		if self.buying_price_list and self.has_value_changed("buying_price_list"):
+		if not self.is_new() and self.buying_price_list and self.has_value_changed("buying_price_list"):
 			self.update_item_rates()
 
 	def update_item_rates(self):
@@ -214,7 +214,8 @@ class MaterialRequest(BuyingController):
 						"transaction_date": self.transaction_date,
 						"qty": item.qty,
 						"stock_uom": item.stock_uom,
-						"price_not_uom_dependent": price_not_uom_dependent,
+						"conversion_factor": item.conversion_factor,
+						"price_list_uom_dependant": price_not_uom_dependent,
 					}
 				),
 				item.item_code,
