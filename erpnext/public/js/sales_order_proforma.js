@@ -117,8 +117,9 @@ Object.assign(erpnext.proforma, {
 							label: __("Qty"),
 							in_list_view: 1,
 							onchange: function () {
-								// Keep the read-only Amount in sync while editing qty (Quantity basis).
-								if (this.doc) {
+								// In Quantity basis, Amount is derived (qty x rate). In Amount basis
+								// both are user-entered, so leave Amount alone.
+								if (this.doc && dialog.get_value("based_on") === "Quantity") {
 									this.doc.amount = flt(this.doc.qty) * flt(this.doc.rate);
 									this.grid_row?.refresh_field("amount");
 								}
@@ -149,11 +150,11 @@ Object.assign(erpnext.proforma, {
 		this.update_warning(dialog);
 	},
 
-	// Both Qty and Amount columns stay visible; only the one matching the chosen basis is editable.
+	// Qty is always editable; Amount is editable only in Amount basis (else it is derived).
 	toggle_basis(dialog) {
 		const by_amount = dialog.get_value("based_on") === "Amount";
 		const grid = dialog.get_field("items").grid;
-		grid.toggle_enable("qty", !by_amount);
+		grid.toggle_enable("qty", true);
 		grid.toggle_enable("amount", by_amount);
 		this.update_warning(dialog);
 	},
@@ -192,10 +193,13 @@ Object.assign(erpnext.proforma, {
 
 	create(frm, dialog, values) {
 		const by_amount = values.based_on === "Amount";
-		const field = by_amount ? "amount" : "qty";
 		const items = (values.items || [])
-			.filter((row) => flt(row[field]) > 0)
-			.map((row) => ({ so_detail: row.so_detail, [field]: row[field] }));
+			.filter((row) => flt(by_amount ? row.amount : row.qty) > 0)
+			.map((row) =>
+				by_amount
+					? { so_detail: row.so_detail, qty: row.qty, amount: row.amount }
+					: { so_detail: row.so_detail, qty: row.qty }
+			);
 
 		if (!items.length) {
 			frappe.msgprint(__("Please enter a quantity or amount for at least one item."));

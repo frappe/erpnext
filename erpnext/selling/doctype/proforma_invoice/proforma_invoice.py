@@ -180,7 +180,8 @@ def make_proforma_invoice(
 
 def _proforma_line(so_item, based_on: str, row: dict) -> dict | None:
 	if based_on == "Amount":
-		qty = flt(so_item.qty)
+		# Amount basis: both qty and amount are user-entered; the rate is derived.
+		qty = flt(row.get("qty"))
 		amount = flt(row.get("amount"))
 		if amount <= 0 or qty <= 0:
 			return None

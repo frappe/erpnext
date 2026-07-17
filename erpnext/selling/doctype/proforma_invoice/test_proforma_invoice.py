@@ -65,21 +65,21 @@ class TestProformaInvoice(ERPNextTestSuite):
 		self.assertEqual(flt(proforma.grand_total), 440)
 
 	def test_amount_based_proforma(self):
-		"""Amount basis: qty stays ordered, rate is derived so the line totals the entered amount."""
-		sales_order = make_sales_order(qty=10)  # rate 100 -> ordered amount 1000
+		"""Amount basis: qty and amount are both entered; the rate is derived from them."""
+		sales_order = make_sales_order(qty=10)  # rate 100
 		so_detail = sales_order.items[0].name
 
 		name = make_proforma_invoice(
 			sales_order.name,
-			json.dumps([{"so_detail": so_detail, "amount": 250}]),
+			json.dumps([{"so_detail": so_detail, "qty": 5, "amount": 250}]),
 			based_on="Amount",
 		)
 		proforma = frappe.get_doc("Proforma Invoice", name)
 
 		self.assertEqual(proforma.based_on, "Amount")
 		item = proforma.items[0]
-		self.assertEqual(flt(item.qty), 10)
-		self.assertEqual(flt(item.rate), 25)
+		self.assertEqual(flt(item.qty), 5)
+		self.assertEqual(flt(item.rate), 50)  # 250 / 5
 		self.assertEqual(flt(item.amount), 250)
 		self.assertEqual(flt(proforma.grand_total), 250)
 
