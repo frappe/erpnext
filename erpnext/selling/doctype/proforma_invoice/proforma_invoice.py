@@ -4,7 +4,6 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder.functions import Sum
 from frappe.utils import flt, now
 from frappe.utils.file_manager import save_file
 
@@ -44,42 +43,18 @@ class ProformaInvoice(Document):
 	def validate(self) -> None:
 		validate_feature_enabled()
 		self.set_total_qty()
-		self.warn_on_over_proforma_qty()
 
 	def before_submit(self) -> None:
 		self.status = "Issued"
 
 	def on_submit(self) -> None:
-		self.update_proforma_qty_in_sales_order()
 		self.generate_and_attach_pdf()
 
 	def on_cancel(self) -> None:
 		self.status = "Cancelled"
-		self.update_proforma_qty_in_sales_order()
 
 	def set_total_qty(self) -> None:
 		self.total_qty = sum(flt(item.qty) for item in self.items)
-
-	def warn_on_over_proforma_qty(self) -> None:
-		"""Soft-warn (never block) if a line exceeds its pending proforma qty."""
-		pending = {row["so_detail"]: row["pending_qty"] for row in get_pending_proforma_qty(self.sales_order)}
-		for item in self.items:
-			if flt(item.qty) > flt(pending.get(item.so_detail)) + 0.0001:
-				frappe.msgprint(
-					_("Qty {0} for {1} exceeds the pending proforma qty {2}.").format(
-						flt(item.qty), item.item_code, flt(pending.get(item.so_detail))
-					),
-					indicator="orange",
-					alert=True,
-				)
-
-	def update_proforma_qty_in_sales_order(self) -> None:
-		"""Refresh the non-blocking, cosmetic proforma_qty counter on each SO item."""
-		qty_map = get_proformed_qty_map(self.sales_order)
-		for name in frappe.get_all("Sales Order Item", filters={"parent": self.sales_order}, pluck="name"):
-			frappe.db.set_value(
-				"Sales Order Item", name, "proforma_qty", flt(qty_map.get(name)), update_modified=False
-			)
 
 	def generate_and_attach_pdf(self) -> None:
 		if self.proforma_pdf:
@@ -114,38 +89,19 @@ class ProformaInvoice(Document):
 
 
 @frappe.whitelist()
-def get_pending_proforma_qty(sales_order: str) -> list[dict]:
-	"""Per-SO-line pending proforma qty = ordered qty minus already issued proforma qty."""
+def get_sales_order_items(sales_order: str) -> list[dict]:
+	"""Sales Order lines used to pre-fill the create-proforma dialog."""
 	sales_order_doc = frappe.get_doc("Sales Order", sales_order)
-	proformed = get_proformed_qty_map(sales_order)
 	return [
 		{
 			"item_code": item.item_code,
 			"item_name": item.item_name,
 			"uom": item.uom,
 			"so_detail": item.name,
-			"so_qty": flt(item.qty),
-			"pending_qty": flt(item.qty) - flt(proformed.get(item.name)),
+			"qty": flt(item.qty),
 		}
 		for item in sales_order_doc.items
 	]
-
-
-def get_proformed_qty_map(sales_order: str) -> dict[str, float]:
-	"""Sum of issued (docstatus = 1) proforma qty per Sales Order Item row."""
-	proformas = frappe.get_all(
-		"Proforma Invoice", filters={"sales_order": sales_order, "docstatus": 1}, pluck="name"
-	)
-	if not proformas:
-		return {}
-	item = frappe.qb.DocType("Proforma Invoice Item")
-	rows = (
-		frappe.qb.from_(item)
-		.select(item.so_detail, Sum(item.qty).as_("qty"))
-		.where(item.parent.isin(proformas))
-		.groupby(item.so_detail)
-	).run(as_dict=True)
-	return {row.so_detail: flt(row.qty) for row in rows}
 
 
 @frappe.whitelist()

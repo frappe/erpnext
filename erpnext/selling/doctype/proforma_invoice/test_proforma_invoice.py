@@ -6,10 +6,7 @@ import json
 import frappe
 from frappe.utils import flt
 
-from erpnext.selling.doctype.proforma_invoice.proforma_invoice import (
-	get_pending_proforma_qty,
-	make_proforma_invoice,
-)
+from erpnext.selling.doctype.proforma_invoice.proforma_invoice import make_proforma_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -24,7 +21,7 @@ class TestProformaInvoice(ERPNextTestSuite):
 		return frappe.get_doc("Proforma Invoice", name)
 
 	def test_partial_proforma_is_non_blocking(self):
-		"""A proforma tracks its own qty but must not touch delivery/billing or the source SO."""
+		"""A proforma must not touch delivery/billing or the source Sales Order."""
 		sales_order = make_sales_order(qty=10)
 		so_detail = sales_order.items[0].name
 
@@ -41,35 +38,8 @@ class TestProformaInvoice(ERPNextTestSuite):
 		self.assertEqual(flt(item.billed_amt), 0)
 		self.assertEqual(flt(sales_order.per_delivered), 0)
 		self.assertEqual(flt(sales_order.per_billed), 0)
-		# cosmetic counter set, ordered qty untouched (in-memory SO copy never persisted)
-		self.assertEqual(flt(item.proforma_qty), 4)
+		# ordered qty untouched (in-memory SO copy never persisted)
 		self.assertEqual(flt(item.qty), 10)
-
-	def test_pending_qty_aggregates_and_excludes_cancelled(self):
-		sales_order = make_sales_order(qty=10)
-		so_detail = sales_order.items[0].name
-
-		self.assertEqual(get_pending_proforma_qty(sales_order.name)[0]["pending_qty"], 10)
-
-		first = self.create_proforma(sales_order, [(so_detail, 4)])
-		self.assertEqual(get_pending_proforma_qty(sales_order.name)[0]["pending_qty"], 6)
-
-		self.create_proforma(sales_order, [(so_detail, 3)])
-		self.assertEqual(get_pending_proforma_qty(sales_order.name)[0]["pending_qty"], 3)
-
-		# cancelling the first proforma reverses its contribution
-		first.cancel()
-		self.assertEqual(first.status, "Cancelled")
-		self.assertEqual(flt(frappe.db.get_value("Sales Order Item", so_detail, "proforma_qty")), 3)
-		self.assertEqual(get_pending_proforma_qty(sales_order.name)[0]["pending_qty"], 7)
-
-	def test_over_qty_is_allowed_with_warning(self):
-		"""Proforma qty above the pending qty is a soft warning, never a hard block."""
-		sales_order = make_sales_order(qty=10)
-		so_detail = sales_order.items[0].name
-
-		proforma = self.create_proforma(sales_order, [(so_detail, 15)])
-		self.assertEqual(flt(proforma.items[0].qty), 15)
 
 	def test_taxes_scale_to_partial_qty(self):
 		sales_order = make_sales_order(qty=10, do_not_submit=True)

@@ -36,24 +36,24 @@ Object.assign(erpnext.proforma, {
 
 	open_dialog(frm) {
 		frappe.call({
-			method: "erpnext.selling.doctype.proforma_invoice.proforma_invoice.get_pending_proforma_qty",
+			method: "erpnext.selling.doctype.proforma_invoice.proforma_invoice.get_sales_order_items",
 			args: { sales_order: frm.doc.name },
 			callback: (r) => this.show_dialog(frm, r.message || []),
 		});
 	},
 
-	show_dialog(frm, pending) {
+	show_dialog(frm, so_items) {
 		frappe.model.with_doctype("Proforma Invoice", () => {
 			const series = frappe.meta.get_docfield("Proforma Invoice", "naming_series");
 			frappe.db
 				.get_single_value("Selling Settings", "default_proforma_print_format")
 				.then((default_print_format) => {
-					this.build_dialog(frm, pending, series ? series.options : "", default_print_format);
+					this.build_dialog(frm, so_items, series ? series.options : "", default_print_format);
 				});
 		});
 	},
 
-	build_dialog(frm, pending, series_options, default_print_format) {
+	build_dialog(frm, so_items, series_options, default_print_format) {
 		const dialog = new frappe.ui.Dialog({
 			title: __("Create Proforma Invoice"),
 			size: "large",
@@ -86,23 +86,12 @@ Object.assign(erpnext.proforma, {
 					fieldname: "items",
 					fieldtype: "Table",
 					cannot_add_rows: true,
-					data: pending.map((row) => ({
-						...row,
-						qty: flt(row.pending_qty),
-						qty_summary: `${format_number(row.pending_qty)} / ${format_number(row.so_qty)}`,
-					})),
+					data: so_items.map((row) => ({ ...row })),
 					fields: [
 						{
 							fieldname: "item_code",
 							fieldtype: "Data",
 							label: __("Item"),
-							read_only: 1,
-							in_list_view: 1,
-						},
-						{
-							fieldname: "qty_summary",
-							fieldtype: "Data",
-							label: __("Pending"),
 							read_only: 1,
 							in_list_view: 1,
 						},
