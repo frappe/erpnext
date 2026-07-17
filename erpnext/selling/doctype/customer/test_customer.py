@@ -382,6 +382,24 @@ class TestCustomer(ERPNextTestSuite):
 		create_sales_invoice(qty=1, rate=700, posting_date=nowdate())
 		self.assertEqual(get_customer_overdue_amount("_Test Customer", "_Test Company"), baseline + 500)
 
+	def test_get_customer_overdue_amount_is_in_company_currency(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		baseline = get_customer_overdue_amount("_Test Customer USD", "_Test Company")
+
+		# 100 USD at a conversion rate of 50 must be counted as 5000 in company currency
+		create_sales_invoice(
+			customer="_Test Customer USD",
+			debit_to="_Test Receivable USD - _TC",
+			currency="USD",
+			conversion_rate=50,
+			qty=1,
+			rate=100,
+			posting_date=add_days(nowdate(), -30),
+		)
+
+		self.assertEqual(get_customer_overdue_amount("_Test Customer USD", "_Test Company"), baseline + 5000)
+
 	def test_overdue_billing_threshold_on_submit(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 

@@ -16,7 +16,7 @@ from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_
 from frappe.model.utils.rename_doc import update_linked_doctypes
 from frappe.query_builder import CustomFunction, Field, functions
 from frappe.query_builder.functions import Cast, Coalesce, Max
-from frappe.utils import cint, cstr, flt, get_formatted_email, getdate, today
+from frappe.utils import cint, cstr, flt, fmt_money, get_formatted_email, getdate, today
 from frappe.utils.user import get_users_with_role
 
 from erpnext.accounts.party import (
@@ -599,31 +599,44 @@ def check_overdue_billing_threshold(customer: str, company: str) -> None:
 	if bypass_role and bypass_role in frappe.get_roles():
 		return
 
+	company_currency = frappe.get_cached_value("Company", company, "default_currency")
 	frappe.throw(
 		_(
 			"Customer {0} has an overdue billing limit. Overdue amount {1} exceeds the allowed threshold {2}."
-		).format(customer, flt(overdue_amount), flt(threshold)),
+		).format(
+			customer,
+			fmt_money(overdue_amount, currency=company_currency),
+			fmt_money(flt(threshold), currency=company_currency),
+		),
 		title=_("Overdue Billing Limit Crossed"),
 	)
 
 
 def get_customer_overdue_amount(customer: str, company: str) -> float:
-	from erpnext.accounts.party import get_party_account
-	from erpnext.accounts.utils import get_outstanding_invoices
+	from frappe.query_builder.functions import Sum
 
-	receivable_account = get_party_account("Customer", customer, company)
-	if not receivable_account:
-		return 0.0
+	gl_entry = frappe.qb.DocType("GL Entry")
+	sales_invoice = frappe.qb.DocType("Sales Invoice")
 
-	current_date = getdate()
-	overdue_amount = 0.0
-	for invoice in get_outstanding_invoices("Customer", customer, [receivable_account]):
-		if invoice.voucher_type != "Sales Invoice":
-			continue
-		if invoice.due_date and getdate(invoice.due_date) < current_date:
-			overdue_amount += flt(invoice.outstanding_amount)
+	# debit - credit is always booked in company currency, so this is comparable to the threshold
+	outstanding = Sum(gl_entry.debit) - Sum(gl_entry.credit)
 
-	return overdue_amount
+	overdue_invoices = (
+		frappe.qb.from_(gl_entry)
+		.inner_join(sales_invoice)
+		.on(sales_invoice.name == gl_entry.against_voucher)
+		.select(outstanding)
+		.where(gl_entry.party_type == "Customer")
+		.where(gl_entry.party == customer)
+		.where(gl_entry.company == company)
+		.where(gl_entry.is_cancelled == 0)
+		.where(gl_entry.against_voucher_type == "Sales Invoice")
+		.where(sales_invoice.due_date < getdate())
+		.groupby(gl_entry.against_voucher)
+		.having(outstanding > 0)
+	).run()
+
+	return flt(sum(row[0] for row in overdue_invoices))
 
 
 def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=False, cost_center=None):
