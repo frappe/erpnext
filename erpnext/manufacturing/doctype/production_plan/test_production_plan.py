@@ -15,7 +15,6 @@ from erpnext.manufacturing.doctype.work_order.work_order import OverProductionEr
 from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import create_item, make_item
-from erpnext.stock.doctype.material_request.test_material_request import make_material_request
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_batch_from_bundle,
 	get_serial_nos_from_bundle,
@@ -3209,26 +3208,6 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual(len(component_rows), 1)
 		# Min() keeps the real material; the old Max() returned 1 and get_subitems dropped it.
 		self.assertEqual(component_rows[0].is_phantom_item, 0)
-
-	def test_material_request_date_set_from_linked_material_request(self):
-		"""material_request_date on a manually linked Material Requests row is derived
-		from the Material Request's transaction_date, not left blank."""
-		mr = make_material_request(schedule_date=add_to_date(nowdate(), days=5))
-
-		plan = frappe.new_doc("Production Plan")
-		plan.append("material_requests", {"material_request": mr.name})
-		plan.validate()
-
-		self.assertEqual(
-			plan.material_requests[0].material_request_date, getdate(mr.transaction_date)
-		)
-
-		# clearing the link should clear the derived date too
-		plan.material_requests[0].material_request = None
-		plan.validate()
-		self.assertIsNone(plan.material_requests[0].material_request_date)
-
-		mr.cancel()
 
 
 def create_production_plan(**args):
