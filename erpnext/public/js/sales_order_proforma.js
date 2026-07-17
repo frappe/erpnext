@@ -83,6 +83,14 @@ Object.assign(erpnext.proforma, {
 				},
 				{ fieldname: "items_section", fieldtype: "Section Break", label: __("Items") },
 				{
+					fieldname: "based_on",
+					fieldtype: "Select",
+					label: __("Based On"),
+					options: ["Quantity", "Amount"],
+					default: "Quantity",
+					onchange: () => this.toggle_basis(dialog),
+				},
+				{
 					fieldname: "items",
 					fieldtype: "Table",
 					cannot_add_rows: true,
@@ -100,8 +108,22 @@ Object.assign(erpnext.proforma, {
 							fieldtype: "Float",
 							label: __("Qty"),
 							in_list_view: 1,
+							onchange: function () {
+								// Keep the read-only Amount in sync while editing qty (Quantity basis).
+								if (!this.doc) return;
+								this.doc.amount = flt(this.doc.qty) * flt(this.doc.rate);
+								this.grid_row?.refresh_field("amount");
+							},
+						},
+						{
+							fieldname: "amount",
+							fieldtype: "Currency",
+							label: __("Amount"),
+							in_list_view: 1,
+							read_only: 1,
 						},
 						{ fieldname: "item_name", fieldtype: "Data", hidden: 1 },
+						{ fieldname: "rate", fieldtype: "Currency", hidden: 1 },
 						{ fieldname: "so_detail", fieldtype: "Data", hidden: 1 },
 					],
 				},
@@ -113,13 +135,23 @@ Object.assign(erpnext.proforma, {
 		dialog.show();
 	},
 
+	// Both Qty and Amount columns stay visible; only the one matching the chosen basis is editable.
+	toggle_basis(dialog) {
+		const by_amount = dialog.get_value("based_on") === "Amount";
+		const grid = dialog.get_field("items").grid;
+		grid.toggle_enable("qty", !by_amount);
+		grid.toggle_enable("amount", by_amount);
+	},
+
 	create(frm, dialog, values) {
+		const by_amount = values.based_on === "Amount";
+		const field = by_amount ? "amount" : "qty";
 		const items = (values.items || [])
-			.filter((row) => flt(row.qty) > 0)
-			.map((row) => ({ so_detail: row.so_detail, qty: row.qty }));
+			.filter((row) => flt(row[field]) > 0)
+			.map((row) => ({ so_detail: row.so_detail, [field]: row[field] }));
 
 		if (!items.length) {
-			frappe.msgprint(__("Please enter a quantity for at least one item."));
+			frappe.msgprint(__("Please enter a quantity or amount for at least one item."));
 			return;
 		}
 
@@ -128,6 +160,7 @@ Object.assign(erpnext.proforma, {
 			args: {
 				sales_order: frm.doc.name,
 				items: JSON.stringify(items),
+				based_on: values.based_on,
 				naming_series: values.naming_series,
 				print_format: values.print_format,
 				letter_head: values.letter_head,

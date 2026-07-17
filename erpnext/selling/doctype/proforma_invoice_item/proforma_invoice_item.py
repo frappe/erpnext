@@ -13,12 +13,14 @@ class ProformaInvoiceItem(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		amount: DF.Currency
 		item_code: DF.Link
 		item_name: DF.Data | None
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
 		qty: DF.Float
+		rate: DF.Currency
 		so_detail: DF.Data | None
 		uom: DF.Link | None
 	# end: auto-generated types

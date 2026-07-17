@@ -13,6 +13,7 @@
   "proforma_date",
   "company",
   "currency",
+  "based_on",
   "items_section",
   "items",
   "total_qty",
@@ -94,6 +95,14 @@
    "label": "Currency",
    "options": "Currency",
    "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "Quantity",
+   "fieldname": "based_on",
+   "fieldtype": "Select",
+   "label": "Based On",
+   "options": "Quantity\nAmount",
    "read_only": 1
   },
   {

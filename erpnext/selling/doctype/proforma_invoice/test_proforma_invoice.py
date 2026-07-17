@@ -61,6 +61,25 @@ class TestProformaInvoice(ERPNextTestSuite):
 		# partial (4 of 10): net 400 + 10% tax = 440
 		self.assertEqual(flt(proforma.grand_total), 440)
 
+	def test_amount_based_proforma(self):
+		"""Amount basis: qty stays ordered, rate is derived so the line totals the entered amount."""
+		sales_order = make_sales_order(qty=10)  # rate 100 -> ordered amount 1000
+		so_detail = sales_order.items[0].name
+
+		name = make_proforma_invoice(
+			sales_order.name,
+			json.dumps([{"so_detail": so_detail, "amount": 250}]),
+			based_on="Amount",
+		)
+		proforma = frappe.get_doc("Proforma Invoice", name)
+
+		self.assertEqual(proforma.based_on, "Amount")
+		item = proforma.items[0]
+		self.assertEqual(flt(item.qty), 10)
+		self.assertEqual(flt(item.rate), 25)
+		self.assertEqual(flt(item.amount), 250)
+		self.assertEqual(flt(proforma.grand_total), 250)
+
 	def test_feature_toggle_is_enforced(self):
 		sales_order = make_sales_order(qty=10)
 		frappe.db.set_single_value("Selling Settings", "enable_proforma_invoice", 0)

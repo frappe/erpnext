@@ -10,6 +10,8 @@
   "column_break_qty",
   "qty",
   "uom",
+  "rate",
+  "amount",
   "so_detail"
  ],
  "fields": [
@@ -47,6 +49,22 @@
    "fieldtype": "Link",
    "label": "UOM",
    "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Rate",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
    "read_only": 1
   },
   {
