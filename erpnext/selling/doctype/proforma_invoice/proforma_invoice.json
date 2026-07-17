@@ -14,6 +14,7 @@
   "company",
   "currency",
   "based_on",
+  "hide_item_qty",
   "items_section",
   "items",
   "total_qty",
@@ -103,6 +104,15 @@
    "fieldtype": "Select",
    "label": "Based On",
    "options": "Quantity\nAmount",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.based_on==\"Amount\"",
+   "description": "Hide the item quantity and rate on the printed proforma.",
+   "fieldname": "hide_item_qty",
+   "fieldtype": "Check",
+   "label": "Hide Item Quantity in Print",
    "read_only": 1
   },
   {

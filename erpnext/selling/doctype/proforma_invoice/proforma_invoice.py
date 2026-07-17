@@ -30,6 +30,7 @@ class ProformaInvoice(Document):
 		customer_name: DF.Data | None
 		emailed_to: DF.SmallText | None
 		grand_total: DF.Currency
+		hide_item_qty: DF.Check
 		items: DF.Table[ProformaInvoiceItem]
 		letter_head: DF.Link | None
 		naming_series: DF.Literal["PRO-.YYYY.-"]
@@ -84,6 +85,7 @@ class ProformaInvoice(Document):
 		sales_order.run_method("calculate_taxes_and_totals")
 		sales_order.proforma_no = self.name
 		sales_order.proforma_date = self.proforma_date
+		sales_order.hide_item_qty = self.hide_item_qty
 		self.db_set("grand_total", sales_order.grand_total)
 		return frappe.attach_print(
 			"Sales Order",
@@ -138,6 +140,7 @@ def make_proforma_invoice(
 	sales_order: str,
 	items: str,
 	based_on: str = "Quantity",
+	hide_item_qty: bool | int = 0,
 	naming_series: str | None = None,
 	print_format: str | None = None,
 	letter_head: str | None = None,
@@ -145,7 +148,8 @@ def make_proforma_invoice(
 	"""The sole creation path for a Proforma Invoice (the doctype is `in_create`).
 
 	`based_on` decides what the user edited per line: "Quantity" (rate fixed, amount = qty x rate)
-	or "Amount" (qty fixed at ordered, rate derived so the line totals the entered amount).
+	or "Amount" (both qty and amount entered, rate derived). `hide_item_qty` (Amount basis only)
+	hides the qty and rate on the printed proforma for a clean value-based document.
 	"""
 	validate_feature_enabled()
 	selected = frappe.parse_json(items)
@@ -155,6 +159,7 @@ def make_proforma_invoice(
 	proforma = frappe.new_doc("Proforma Invoice")
 	proforma.sales_order = sales_order
 	proforma.based_on = based_on
+	proforma.hide_item_qty = 1 if (based_on == "Amount" and int(hide_item_qty or 0)) else 0
 	if naming_series:
 		proforma.naming_series = naming_series
 	proforma.print_format = print_format or frappe.db.get_single_value(

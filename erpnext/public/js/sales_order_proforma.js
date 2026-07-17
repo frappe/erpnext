@@ -94,6 +94,12 @@ Object.assign(erpnext.proforma, {
 					onchange: () => this.toggle_basis(dialog),
 				},
 				{
+					fieldname: "hide_item_qty",
+					fieldtype: "Check",
+					label: __("Hide Item Quantity in Print"),
+					depends_on: 'eval:doc.based_on=="Amount"',
+				},
+				{
 					fieldname: "items",
 					fieldtype: "Table",
 					cannot_add_rows: true,
@@ -212,6 +218,7 @@ Object.assign(erpnext.proforma, {
 				sales_order: frm.doc.name,
 				items: JSON.stringify(items),
 				based_on: values.based_on,
+				hide_item_qty: values.hide_item_qty ? 1 : 0,
 				naming_series: values.naming_series,
 				print_format: values.print_format,
 				letter_head: values.letter_head,

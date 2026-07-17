@@ -112,6 +112,27 @@ class TestProformaInvoice(ERPNextTestSuite):
 		self.assertEqual(flt(data["proformed_qty"]), 3)
 		self.assertEqual(flt(data["proformed_amount"]), 300)
 
+	def test_hide_item_qty_only_applies_to_amount_basis(self):
+		sales_order = make_sales_order(qty=10)
+		so_detail = sales_order.items[0].name
+
+		amount_based = make_proforma_invoice(
+			sales_order.name,
+			json.dumps([{"so_detail": so_detail, "qty": 5, "amount": 250}]),
+			based_on="Amount",
+			hide_item_qty=1,
+		)
+		self.assertEqual(frappe.db.get_value("Proforma Invoice", amount_based, "hide_item_qty"), 1)
+
+		# ignored outside Amount basis
+		qty_based = make_proforma_invoice(
+			sales_order.name,
+			json.dumps([{"so_detail": so_detail, "qty": 4}]),
+			based_on="Quantity",
+			hide_item_qty=1,
+		)
+		self.assertEqual(frappe.db.get_value("Proforma Invoice", qty_based, "hide_item_qty"), 0)
+
 	def test_feature_toggle_is_enforced(self):
 		sales_order = make_sales_order(qty=10)
 		frappe.db.set_single_value("Selling Settings", "enable_proforma_invoice", 0)
