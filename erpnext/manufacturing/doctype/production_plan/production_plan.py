@@ -182,25 +182,25 @@ class ProductionPlan(Document):
 				row.from_warehouse = ""
 
 	def set_material_request_dates(self):
-		# Keep the read-only `material_request_date` column in sync with the
-		# linked Material Request, whether the row was added by the planning
-		# tool or the user linked an existing Material Request manually.
-		material_requests = {row.material_request for row in self.material_requests if not row.material_request_date}
-		transaction_dates = (
-			frappe._dict(
-				frappe.get_all(
-					"Material Request",
-					filters={"name": ["in", list(material_requests)]},
-					fields=["name", "transaction_date"],
-					as_list=1,
-				)
+		material_requests = {
+			row.material_request
+			for row in self.material_requests
+			if not row.material_request_date or row.has_value_changed("material_request")
+		}
+		if not material_requests:
+			return
+
+		transaction_dates = frappe._dict(
+			frappe.get_list(
+				"Material Request",
+				filters={"name": ["in", list(material_requests)]},
+				fields=["name", "transaction_date"],
+				as_list=1,
 			)
-			if material_requests
-			else {}
 		)
 
 		for row in self.material_requests:
-			if not row.material_request_date:
+			if not row.material_request_date or row.has_value_changed("material_request"):
 				row.material_request_date = transaction_dates.get(row.material_request)
 
 	@frappe.whitelist()
