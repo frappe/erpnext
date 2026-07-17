@@ -22,42 +22,12 @@
    "type": "Card Break"
   },
   {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Accounting",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Chart of Accounts",
    "link_count": 0,
    "link_to": "Account",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Chart of Accounts",
-   "link_count": 0,
-   "link_to": "Account",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Company",
-   "link_count": 0,
-   "link_to": "Company",
    "link_type": "DocType",
    "onboard": 1,
    "type": "Link"
@@ -88,28 +58,6 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Customer",
-   "link_count": 0,
-   "link_to": "Customer",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Supplier",
-   "link_count": 0,
-   "link_to": "Supplier",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Supplier",
    "link_count": 0,
    "link_to": "Supplier",
@@ -126,42 +74,12 @@
    "type": "Card Break"
   },
   {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Stock",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Item",
    "link_count": 0,
    "link_to": "Item",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Item",
-   "link_count": 0,
-   "link_to": "Item",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Warehouse",
-   "link_count": 0,
-   "link_to": "Warehouse",
    "link_type": "DocType",
    "onboard": 1,
    "type": "Link"
@@ -192,42 +110,9 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Brand",
-   "link_count": 0,
-   "link_to": "Brand",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Unit of Measure (UOM)",
    "link_count": 0,
    "link_to": "UOM",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Unit of Measure (UOM)",
-   "link_count": 0,
-   "link_to": "UOM",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Stock Reconciliation",
-   "link_count": 0,
-   "link_to": "Stock Reconciliation",
    "link_type": "DocType",
    "onboard": 1,
    "type": "Link"
@@ -250,25 +135,6 @@
    "link_count": 0,
    "onboard": 0,
    "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "CRM",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Lead",
-   "link_count": 0,
-   "link_to": "Lead",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
   },
   {
    "dependencies": "",
@@ -296,28 +162,6 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Customer Group",
-   "link_count": 0,
-   "link_to": "Customer Group",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Territory",
-   "link_count": 0,
-   "link_to": "Territory",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Territory",
    "link_count": 0,
    "link_to": "Territory",
@@ -334,42 +178,12 @@
    "type": "Card Break"
   },
   {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Data Import and Settings",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Import Data",
    "link_count": 0,
    "link_to": "Data Import",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Import Data",
-   "link_count": 0,
-   "link_to": "Data Import",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Opening Invoice Creation Tool",
-   "link_count": 0,
-   "link_to": "Opening Invoice Creation Tool",
    "link_type": "DocType",
    "onboard": 1,
    "type": "Link"
@@ -400,42 +214,9 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Chart of Accounts Importer",
-   "link_count": 0,
-   "link_to": "Chart of Accounts Importer",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Letter Head",
    "link_count": 0,
    "link_to": "Letter Head",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Letter Head",
-   "link_count": 0,
-   "link_to": "Letter Head",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Email Account",
-   "link_count": 0,
-   "link_to": "Email Account",
    "link_type": "DocType",
    "onboard": 1,
    "type": "Link"
@@ -452,7 +233,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-07-03 14:22:16.927245",
+ "modified": "2026-07-17 07:55:00.592653",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Home",
