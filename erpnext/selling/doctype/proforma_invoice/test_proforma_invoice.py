@@ -80,6 +80,18 @@ class TestProformaInvoice(ERPNextTestSuite):
 		self.assertEqual(flt(item.amount), 250)
 		self.assertEqual(flt(proforma.grand_total), 250)
 
+	def test_cancelled_proforma_keeps_pdf(self):
+		"""Cancelling voids the proforma but keeps its PDF and status for the audit trail."""
+		sales_order = make_sales_order(qty=10)
+		proforma = self.create_proforma(sales_order, [(sales_order.items[0].name, 4)])
+		pdf = proforma.proforma_pdf
+		self.assertTrue(pdf)
+
+		proforma.cancel()
+		proforma.reload()
+		self.assertEqual(proforma.status, "Cancelled")
+		self.assertEqual(proforma.proforma_pdf, pdf)
+
 	def test_feature_toggle_is_enforced(self):
 		sales_order = make_sales_order(qty=10)
 		frappe.db.set_single_value("Selling Settings", "enable_proforma_invoice", 0)

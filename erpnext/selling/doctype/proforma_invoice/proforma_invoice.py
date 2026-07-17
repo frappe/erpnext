@@ -52,7 +52,7 @@ class ProformaInvoice(Document):
 		self.generate_and_attach_pdf()
 
 	def on_cancel(self) -> None:
-		self.status = "Cancelled"
+		self.db_set("status", "Cancelled")
 
 	def set_total_qty(self) -> None:
 		self.total_qty = sum(flt(item.qty) for item in self.items)

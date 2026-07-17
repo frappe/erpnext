@@ -189,7 +189,8 @@ Object.assign(erpnext.proforma, {
 		const list = new frappe.ui.EmbeddedList({
 			wrapper,
 			doctype: "Proforma Invoice",
-			filters: { sales_order: frm.doc.name, docstatus: 1 },
+			// Include cancelled (docstatus 2) so voided proformas stay visible for audit.
+			filters: { sales_order: frm.doc.name, docstatus: ["in", [1, 2]] },
 			fields: ["name", "proforma_date", "grand_total", "status", "proforma_pdf", "sent_on", "currency"],
 			order_by: "creation desc",
 			empty_message: __("No proforma invoices yet."),
@@ -218,7 +219,7 @@ Object.assign(erpnext.proforma, {
 					label: __("Status"),
 					type: "badge",
 					fieldname: "status",
-					color: (row) => (row.status === "Issued" ? "green" : "gray"),
+					color: (row) => (row.status === "Cancelled" ? "red" : "green"),
 				},
 				{
 					type: "actions",
