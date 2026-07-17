@@ -583,16 +583,18 @@ def check_overdue_billing_threshold(customer: str, company: str) -> None:
 	if not frappe.get_single_value("Accounts Settings", "enable_overdue_billing_threshold"):
 		return
 
-	threshold = frappe.db.get_value(
-		"Customer Credit Limit",
-		{"parent": customer, "parenttype": "Customer", "company": company},
-		"overdue_billing_threshold",
+	threshold = flt(
+		frappe.db.get_value(
+			"Customer Credit Limit",
+			{"parent": customer, "parenttype": "Customer", "company": company},
+			"overdue_billing_threshold",
+		)
 	)
-	if not flt(threshold):
+	if not threshold:
 		return
 
 	overdue_amount = get_customer_overdue_amount(customer, company)
-	if overdue_amount <= flt(threshold):
+	if overdue_amount <= threshold:
 		return
 
 	bypass_role = frappe.get_single_value("Accounts Settings", "role_allowed_to_bypass_overdue_billing")
@@ -606,7 +608,7 @@ def check_overdue_billing_threshold(customer: str, company: str) -> None:
 		).format(
 			customer,
 			fmt_money(overdue_amount, currency=company_currency),
-			fmt_money(flt(threshold), currency=company_currency),
+			fmt_money(threshold, currency=company_currency),
 		),
 		title=_("Overdue Billing Limit Crossed"),
 	)

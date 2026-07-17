@@ -423,16 +423,13 @@ class TestCustomer(ERPNextTestSuite):
 		si.submit()
 		self.assertEqual(si.docstatus, 1)
 
-		# feature disabled -> never blocked
+		# threshold still crossed, but the feature is off -> never blocked
 		settings.enable_overdue_billing_threshold = 0
 		settings.role_allowed_to_bypass_overdue_billing = None
 		settings.save()
-		set_overdue_billing_threshold("_Test Customer", "_Test Company", overdue - 100)
 		si = create_sales_invoice(do_not_submit=True)
 		si.submit()
 		self.assertEqual(si.docstatus, 1)
-
-		set_overdue_billing_threshold("_Test Customer", "_Test Company", 0)
 
 	def test_overdue_threshold_row_without_credit_limit(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
