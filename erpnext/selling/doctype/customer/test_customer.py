@@ -13,6 +13,7 @@ from erpnext.selling.doctype.customer.customer import (
 	get_credit_limit,
 	get_customer_outstanding,
 	get_customer_overdue_amount,
+	get_overdue_billing_threshold,
 )
 from erpnext.selling.doctype.customer.mapper import (
 	make_quotation,
@@ -94,7 +95,11 @@ class TestCustomer(ERPNextTestSuite):
 			"company": "_Test Company",
 			"account": "Creditors - _TC",
 		}
-		test_credit_limits = {"company": "_Test Company", "credit_limit": 350000}
+		test_credit_limits = {
+			"company": "_Test Company",
+			"credit_limit": 350000,
+			"overdue_billing_threshold": 5000,
+		}
 		doc.append("accounts", test_account_details)
 		doc.append("credit_limits", test_credit_limits)
 		doc.insert()
@@ -114,6 +119,7 @@ class TestCustomer(ERPNextTestSuite):
 
 		self.assertEqual(c_doc.credit_limits[0].company, "_Test Company")
 		self.assertEqual(c_doc.credit_limits[0].credit_limit, 350000)
+		self.assertEqual(c_doc.credit_limits[0].overdue_billing_threshold, 5000)
 		c_doc.delete()
 		doc.delete()
 
@@ -462,6 +468,20 @@ class TestCustomer(ERPNextTestSuite):
 		si = create_sales_invoice(do_not_submit=True)
 		si.submit()
 		self.assertEqual(si.docstatus, 1)
+
+	def test_overdue_billing_threshold_falls_back_to_customer_group(self):
+		customer_group = frappe.get_cached_value("Customer", "_Test Customer", "customer_group")
+		group = frappe.get_doc("Customer Group", customer_group)
+		group.credit_limits = []
+		group.append("credit_limits", {"company": "_Test Company", "overdue_billing_threshold": 5000})
+		group.save()
+
+		# the customer has no threshold of its own, so the group's applies
+		self.assertEqual(get_overdue_billing_threshold("_Test Customer", "_Test Company"), 5000)
+
+		# a threshold on the customer wins over the group
+		set_overdue_billing_threshold("_Test Customer", "_Test Company", 2000)
+		self.assertEqual(get_overdue_billing_threshold("_Test Customer", "_Test Company"), 2000)
 
 	def test_overdue_threshold_row_without_credit_limit(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice

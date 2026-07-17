@@ -210,17 +210,21 @@ class Customer(TransactionBase):
 		self.credit_limits = []
 		self.payment_terms = self.default_price_list = ""
 
-		tables = [["accounts", "account"], ["credit_limits", "credit_limit"]]
+		tables = [
+			["accounts", ["account"]],
+			["credit_limits", ["credit_limit", "overdue_billing_threshold"]],
+		]
 		fields = ["payment_terms", "default_price_list"]
 
 		for row in tables:
-			table, field = row[0], row[1]
+			table, table_fields = row[0], row[1]
 			if not doc.get(table):
 				continue
 
 			for entry in doc.get(table):
 				child = self.append(table)
-				child.update({"company": entry.company, field: entry.get(field)})
+				child.update({"company": entry.company})
+				child.update({field: entry.get(field) for field in table_fields})
 
 		for field in fields:
 			if not doc.get(field):
@@ -583,13 +587,7 @@ def check_overdue_billing_threshold(customer: str, company: str) -> None:
 	if not frappe.get_single_value("Accounts Settings", "enable_overdue_billing_threshold"):
 		return
 
-	threshold = flt(
-		frappe.db.get_value(
-			"Customer Credit Limit",
-			{"parent": customer, "parenttype": "Customer", "company": company},
-			"overdue_billing_threshold",
-		)
-	)
+	threshold = get_overdue_billing_threshold(customer, company)
 	if not threshold:
 		return
 
@@ -612,6 +610,25 @@ def check_overdue_billing_threshold(customer: str, company: str) -> None:
 		),
 		title=_("Overdue Billing Limit Crossed"),
 	)
+
+
+def get_overdue_billing_threshold(customer: str, company: str) -> float:
+	"""Threshold set on the customer, falling back to its customer group."""
+	threshold = frappe.db.get_value(
+		"Customer Credit Limit",
+		{"parent": customer, "parenttype": "Customer", "company": company},
+		"overdue_billing_threshold",
+	)
+
+	if not threshold:
+		customer_group = frappe.get_cached_value("Customer", customer, "customer_group")
+		threshold = frappe.db.get_value(
+			"Customer Credit Limit",
+			{"parent": customer_group, "parenttype": "Customer Group", "company": company},
+			"overdue_billing_threshold",
+		)
+
+	return flt(threshold)
 
 
 def get_customer_overdue_amount(customer: str, company: str) -> float:
