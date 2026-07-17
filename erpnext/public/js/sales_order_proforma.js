@@ -243,9 +243,9 @@ Object.assign(erpnext.proforma, {
 	},
 
 	build_list(frm) {
-		const wrapper = frm.get_field("proforma_html").$wrapper.empty();
+		const container = frm.get_field("proforma_html").$wrapper.empty();
 		const list = new frappe.ui.EmbeddedList({
-			wrapper,
+			wrapper: $("<div></div>").appendTo(container),
 			doctype: "Proforma Invoice",
 			// Include cancelled (docstatus 2) so voided proformas stay visible for audit.
 			filters: { sales_order: frm.doc.name, docstatus: ["in", [1, 2]] },
@@ -297,6 +297,18 @@ Object.assign(erpnext.proforma, {
 			],
 		});
 		list.refresh();
+
+		frappe.ui
+			.button({
+				label: __("New Proforma"),
+				icon: "plus",
+				variant: "subtle",
+				size: "sm",
+				onclick: () => this.open_dialog(frm),
+			})
+			.appendTo(
+				$('<div class="flex justify-end" style="margin: 10px 0 20px;"></div>').appendTo(container)
+			);
 	},
 
 	send_email(frm, proforma_name, refresh) {
