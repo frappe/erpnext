@@ -75,9 +75,10 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		this.load_page();
 	}
 
-	render_skeleton() {
-		this.wrapper.html(`
-			<style>
+	inject_styles() {
+		if ($("#serial-batch-inline-editor-styles").length) return;
+
+		$(`<style id="serial-batch-inline-editor-styles">
 				.serial-batch-inline-editor input::placeholder {
 					text-align: left;
 				}
@@ -174,7 +175,16 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 				.serial-batch-inline-editor .sbie-table tbody tr.sbie-empty td {
 					background-color: var(--subtle-accent);
 				}
-			</style>
+			</style>`).appendTo("head");
+	}
+
+	esc(value) {
+		return frappe.utils.escape_html(cstr(value));
+	}
+
+	render_skeleton() {
+		this.inject_styles();
+		this.wrapper.html(`
 			<div class="serial-batch-inline-editor">
 				<div class="sbie-table"></div>
 				<div class="sbie-footer" style="display: flex; gap: 8px; align-items: center; margin-top: 10px; flex-wrap: wrap;">
@@ -679,6 +689,13 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		dialog.show();
 	}
 
+	get_active_server_row(field, value) {
+		let p = this.pending;
+		if (p.delete_all) return null;
+
+		return this.last_entries.find((d) => d[field] === value && !p.deleted.some((x) => x.name === d.name));
+	}
+
 	get_known_identifiers() {
 		let p = this.pending;
 		let known = new Set(p.new_entries.map((d) => d.serial_no || d.batch_no));
@@ -710,8 +727,13 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 			p.new_entries.push({ serial_no: value, batch_no: "", qty: 1 });
 		} else {
 			let existing = p.new_entries.find((d) => d.batch_no === value);
+			let server_row = this.get_active_server_row("batch_no", value);
 			if (existing) {
 				existing.qty = flt(existing.qty) + 1;
+			} else if (server_row) {
+				let update = p.updates[server_row.name];
+				let current = update && update.qty != null ? flt(update.qty) : Math.abs(flt(server_row.qty));
+				this.update_entry(server_row.name, { qty: current + 1 });
 			} else {
 				p.new_entries.push({ serial_no: "", batch_no: value, qty: 1 });
 			}
@@ -910,23 +932,24 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 			.map((d, i) => {
 				let update = p.updates[d.name] || {};
 				let qty = update.qty != null ? flt(update.qty) : Math.abs(flt(d.qty));
-				let batch_no = update.batch_no || d.batch_no || "";
-				let serial_no = update.serial_no || d.serial_no || "";
+				let batch_no = this.esc(update.batch_no || d.batch_no || "");
+				let serial_no = this.esc(update.serial_no || d.serial_no || "");
+				let name = this.esc(d.name);
 
-				return `<tr data-name="${d.name}">
+				return `<tr data-name="${name}">
 				<td style="text-align: center;">
-					<input type="checkbox" class="sbie-check" data-name="${d.name}" data-qty="${qty}"></td>
+					<input type="checkbox" class="sbie-check" data-name="${name}" data-qty="${qty}"></td>
 				<td style="text-align: center;">${this.start + i + 1}</td>
 				${
 					show_serial
-						? `<td class="sbie-serial-cell" data-name="${d.name}" title="${__(
+						? `<td class="sbie-serial-cell" data-name="${name}" title="${__(
 								"Click to change Serial No"
 						  )}" style="cursor: pointer;">${serial_no}</td>`
 						: ""
 				}
 				${
 					show_batch
-						? `<td class="sbie-batch-cell" data-name="${d.name}" title="${__(
+						? `<td class="sbie-batch-cell" data-name="${name}" title="${__(
 								"Click to change Batch No"
 						  )}" style="cursor: pointer;">${batch_no}</td>`
 						: ""
@@ -949,8 +972,8 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 				<td style="text-align: center;">
 					<input type="checkbox" class="sbie-check" data-pending-index="${index}"></td>
 				<td style="text-align: center;">${base_count + index + 1}</td>
-				${show_serial ? `<td>${d.serial_no || ""}</td>` : ""}
-				${show_batch ? `<td>${d.batch_no || ""}</td>` : ""}
+				${show_serial ? `<td>${this.esc(d.serial_no || "")}</td>` : ""}
+				${show_batch ? `<td>${this.esc(d.batch_no || "")}</td>` : ""}
 				<td class="${!d.serial_no && show_batch ? "sbie-input-cell" : ""}" style="text-align: right;">${
 					!d.serial_no && show_batch
 						? this.get_pending_qty_input(d, index)
@@ -991,7 +1014,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 
 	get_qty_input(d, qty) {
 		return `<input type="text" class="sbie-qty-input" data-fieldtype="Float"
-			data-name="${d.name}" value="${this.format_float(qty)}" style="text-align: right;">`;
+			data-name="${this.esc(d.name)}" value="${this.format_float(qty)}" style="text-align: right;">`;
 	}
 
 	get_pending_qty_input(d, index) {

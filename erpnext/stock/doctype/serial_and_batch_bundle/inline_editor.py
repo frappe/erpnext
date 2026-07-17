@@ -13,10 +13,27 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	make_serial_nos,
 )
 
+SUPPORTED_VOUCHER_TYPES = frozenset(
+	[
+		"Purchase Receipt",
+		"Purchase Invoice",
+		"Sales Invoice",
+		"POS Invoice",
+		"Delivery Note",
+		"Stock Entry",
+		"Stock Reconciliation",
+		"Subcontracting Receipt",
+		"Pick List",
+		"Asset Capitalization",
+		"Asset Repair",
+	]
+)
+
 
 @frappe.whitelist()
 def get_bundle_entries(bundle: str, start: int = 0, page_length: int = 50, search: str | None = None):
 	frappe.has_permission("Serial and Batch Bundle", "read", doc=bundle, throw=True)
+	page_length = min(cint(page_length) or 50, 500)
 
 	table = frappe.qb.DocType("Serial and Batch Entry")
 	query = (
@@ -24,7 +41,7 @@ def get_bundle_entries(bundle: str, start: int = 0, page_length: int = 50, searc
 		.select(table.name, table.serial_no, table.batch_no, table.qty)
 		.where(table.parent == bundle)
 		.orderby(table.idx)
-		.limit(cint(page_length))
+		.limit(page_length)
 		.offset(cint(start))
 	)
 
@@ -99,6 +116,8 @@ def upsert_bundle_entries(
 	entries = parse_json(entries) or []
 	deleted = parse_json(deleted) or []
 
+	validate_parent_document(child_row, doc)
+
 	bundle_field = (
 		"rejected_serial_and_batch_bundle" if child_row.get("is_rejected") else "serial_and_batch_bundle"
 	)
@@ -112,7 +131,7 @@ def upsert_bundle_entries(
 		if not entries:
 			frappe.throw(_("Please add at least one Serial No or Batch to save"))
 
-		frappe.has_permission(child_row.get("parenttype"), "write", throw=True)
+		frappe.has_permission(doc.get("doctype"), "write", throw=True)
 		if get_type_of_transaction(doc, child_row) == "Inward":
 			make_serial_nos(child_row.item_code, entries)
 			make_batch_nos(child_row.item_code, entries)
@@ -120,6 +139,16 @@ def upsert_bundle_entries(
 		bundle = create_serial_batch_no_ledgers(entries, child_row, doc)
 
 	return get_bundle_summary(bundle.name)
+
+
+def validate_parent_document(child_row, doc):
+	if doc.get("doctype") not in SUPPORTED_VOUCHER_TYPES:
+		frappe.throw(
+			_("{0} is not supported for the inline Serial / Batch editor").format(doc.get("doctype"))
+		)
+
+	if child_row.get("parenttype") != doc.get("doctype"):
+		frappe.throw(_("The selected row does not belong to the {0}").format(doc.get("doctype")))
 
 
 def remove_empty_bundle(bundle, child_row, bundle_field):
@@ -130,7 +159,7 @@ def remove_empty_bundle(bundle, child_row, bundle_field):
 
 
 def apply_incremental_changes(bundle_name, child_row, entries, deleted, replace=0):
-	frappe.has_permission("Serial and Batch Bundle", "write", throw=True)
+	frappe.has_permission("Serial and Batch Bundle", "write", doc=bundle_name, throw=True)
 	bundle = frappe.get_doc("Serial and Batch Bundle", bundle_name)
 
 	if bundle.docstatus == 1:
