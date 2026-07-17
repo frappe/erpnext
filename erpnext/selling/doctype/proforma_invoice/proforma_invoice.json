@@ -5,6 +5,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "details_section",
   "naming_series",
   "sales_order",
   "customer",
@@ -17,19 +18,28 @@
   "hide_item_qty",
   "items_section",
   "items",
+  "totals_section",
+  "column_break_totals",
   "total_qty",
   "grand_total",
   "print_section",
   "print_format",
   "letter_head",
+  "column_break_print",
   "proforma_pdf",
   "status_section",
   "status",
   "sent_on",
+  "column_break_status",
   "emailed_to",
   "amended_from"
  ],
  "fields": [
+  {
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
@@ -128,6 +138,14 @@
    "reqd": 1
   },
   {
+   "fieldname": "totals_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_totals",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "total_qty",
    "fieldtype": "Float",
    "label": "Total Quantity",
@@ -161,6 +179,10 @@
    "read_only": 1
   },
   {
+   "fieldname": "column_break_print",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "proforma_pdf",
    "fieldtype": "Attach",
    "label": "Proforma PDF",
@@ -168,7 +190,8 @@
   },
   {
    "fieldname": "status_section",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Status"
   },
   {
    "default": "Draft",
@@ -187,6 +210,10 @@
    "label": "Sent On",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_status",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "emailed_to",
