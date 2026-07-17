@@ -78,6 +78,8 @@
   "over_billing_allowance",
   "credit_controller",
   "role_allowed_to_over_bill",
+  "enable_overdue_billing_threshold",
+  "role_allowed_to_bypass_overdue_billing",
   "column_break_11",
   "assets_tab",
   "asset_settings_section",
@@ -272,6 +274,21 @@
    "fieldname": "role_allowed_to_over_bill",
    "fieldtype": "Link",
    "label": "Role Allowed to over bill ",
+   "options": "Role"
+  },
+  {
+   "default": "0",
+   "description": "Block submitting a new Sales Invoice when the customer's overdue amount exceeds the Overdue Billing Threshold set on the customer.",
+   "fieldname": "enable_overdue_billing_threshold",
+   "fieldtype": "Check",
+   "label": "Enable Overdue Billing Threshold"
+  },
+  {
+   "depends_on": "eval:doc.enable_overdue_billing_threshold",
+   "description": "Users with this role can still submit invoices for customers over their overdue billing threshold.",
+   "fieldname": "role_allowed_to_bypass_overdue_billing",
+   "fieldtype": "Link",
+   "label": "Role allowed to bypass overdue billing limit",
    "options": "Role"
   },
   {

@@ -8,6 +8,7 @@
   "company",
   "column_break_2",
   "credit_limit",
+  "overdue_billing_threshold",
   "bypass_credit_limit_check"
  ],
  "fields": [
@@ -17,6 +18,15 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Credit Limit"
+  },
+  {
+   "columns": 3,
+   "description": "New Sales Invoices are blocked when the customer's overdue amount exceeds this. Requires 'Enable Overdue Billing Threshold' in Accounts Settings.",
+   "fieldname": "overdue_billing_threshold",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Overdue Billing Threshold"
   },
   {
    "fieldname": "column_break_2",

@@ -16,7 +16,7 @@ from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_
 from frappe.model.utils.rename_doc import update_linked_doctypes
 from frappe.query_builder import CustomFunction, Field, functions
 from frappe.query_builder.functions import Cast, Coalesce, Max
-from frappe.utils import cint, cstr, flt, get_formatted_email, today
+from frappe.utils import cint, cstr, flt, get_formatted_email, getdate, today
 from frappe.utils.user import get_users_with_role
 
 from erpnext.accounts.party import (
@@ -409,6 +409,9 @@ class Customer(TransactionBase):
 			else:
 				company_record.append(limit.company)
 
+			if not flt(limit.credit_limit):
+				continue
+
 			outstanding_amt = get_customer_outstanding(
 				self.name, limit.company, ignore_outstanding_sales_order=limit.bypass_credit_limit_check
 			)
@@ -574,6 +577,53 @@ def send_emails(
 		customer, customer_outstanding, credit_limit
 	)
 	frappe.sendmail(recipients=credit_controller_users_list, subject=subject, message=message)
+
+
+def check_overdue_billing_threshold(customer: str, company: str) -> None:
+	if not frappe.get_single_value("Accounts Settings", "enable_overdue_billing_threshold"):
+		return
+
+	threshold = frappe.db.get_value(
+		"Customer Credit Limit",
+		{"parent": customer, "parenttype": "Customer", "company": company},
+		"overdue_billing_threshold",
+	)
+	if not flt(threshold):
+		return
+
+	overdue_amount = get_customer_overdue_amount(customer, company)
+	if overdue_amount <= flt(threshold):
+		return
+
+	bypass_role = frappe.get_single_value("Accounts Settings", "role_allowed_to_bypass_overdue_billing")
+	if bypass_role and bypass_role in frappe.get_roles():
+		return
+
+	frappe.throw(
+		_(
+			"Customer {0} has an overdue billing limit. Overdue amount {1} exceeds the allowed threshold {2}."
+		).format(customer, flt(overdue_amount), flt(threshold)),
+		title=_("Overdue Billing Limit Crossed"),
+	)
+
+
+def get_customer_overdue_amount(customer: str, company: str) -> float:
+	from erpnext.accounts.party import get_party_account
+	from erpnext.accounts.utils import get_outstanding_invoices
+
+	receivable_account = get_party_account("Customer", customer, company)
+	if not receivable_account:
+		return 0.0
+
+	current_date = getdate()
+	overdue_amount = 0.0
+	for invoice in get_outstanding_invoices("Customer", customer, [receivable_account]):
+		if invoice.voucher_type != "Sales Invoice":
+			continue
+		if invoice.due_date and getdate(invoice.due_date) < current_date:
+			overdue_amount += flt(invoice.outstanding_amount)
+
+	return overdue_amount
 
 
 def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=False, cost_center=None):

@@ -5,13 +5,14 @@
 import json
 
 import frappe
-from frappe.utils import flt, nowdate
+from frappe.utils import add_days, flt, nowdate
 
 from erpnext.accounts.party import get_due_date
 from erpnext.exceptions import PartyDisabled, PartyFrozen
 from erpnext.selling.doctype.customer.customer import (
 	get_credit_limit,
 	get_customer_outstanding,
+	get_customer_overdue_amount,
 )
 from erpnext.selling.doctype.customer.mapper import (
 	make_quotation,
@@ -368,6 +369,67 @@ class TestCustomer(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, customer.save)
 
+	def test_get_customer_overdue_amount(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		baseline = get_customer_overdue_amount("_Test Customer", "_Test Company")
+
+		# a past-due, unpaid invoice adds its outstanding to the overdue amount
+		create_sales_invoice(qty=1, rate=500, posting_date=add_days(nowdate(), -30))
+		self.assertEqual(get_customer_overdue_amount("_Test Customer", "_Test Company"), baseline + 500)
+
+		# an invoice due today (not yet past due) does not
+		create_sales_invoice(qty=1, rate=700, posting_date=nowdate())
+		self.assertEqual(get_customer_overdue_amount("_Test Customer", "_Test Company"), baseline + 500)
+
+	def test_overdue_billing_threshold_on_submit(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		create_sales_invoice(qty=1, rate=1000, posting_date=add_days(nowdate(), -30))
+		overdue = get_customer_overdue_amount("_Test Customer", "_Test Company")
+
+		settings = frappe.get_single("Accounts Settings")
+		settings.enable_overdue_billing_threshold = 1
+		settings.role_allowed_to_bypass_overdue_billing = None
+		settings.save()
+		set_overdue_billing_threshold("_Test Customer", "_Test Company", overdue - 100)
+
+		# overdue is over the threshold and the user has no bypass role -> blocked
+		si = create_sales_invoice(do_not_submit=True)
+		self.assertRaises(frappe.ValidationError, si.submit)
+
+		# a user holding the bypass role can still submit
+		settings.role_allowed_to_bypass_overdue_billing = "Accounts Manager"
+		settings.save()
+		si = create_sales_invoice(do_not_submit=True)
+		si.submit()
+		self.assertEqual(si.docstatus, 1)
+
+		# feature disabled -> never blocked
+		settings.enable_overdue_billing_threshold = 0
+		settings.role_allowed_to_bypass_overdue_billing = None
+		settings.save()
+		set_overdue_billing_threshold("_Test Customer", "_Test Company", overdue - 100)
+		si = create_sales_invoice(do_not_submit=True)
+		si.submit()
+		self.assertEqual(si.docstatus, 1)
+
+		set_overdue_billing_threshold("_Test Customer", "_Test Company", 0)
+
+	def test_overdue_threshold_row_without_credit_limit(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		# outstanding must be > 0 so a 0 credit_limit would previously trip the check
+		create_sales_invoice(qty=1, rate=500)
+
+		customer = frappe.get_doc("Customer", "_Test Customer")
+		customer.credit_limits = []
+		customer.append("credit_limits", {"company": "_Test Company", "overdue_billing_threshold": 1000})
+		customer.save()
+
+		self.assertEqual(customer.credit_limits[0].overdue_billing_threshold, 1000)
+		self.assertEqual(flt(customer.credit_limits[0].credit_limit), 0.0)
+
 	def test_customer_payment_terms(self):
 		frappe.db.set_value(
 			"Customer", "_Test Customer With Template", "payment_terms", "_Test Payment Term Template 3"
@@ -474,6 +536,18 @@ def set_credit_limit(customer, company, credit_limit):
 	if not existing_row:
 		customer.append("credit_limits", {"company": company, "credit_limit": credit_limit})
 		customer.credit_limits[-1].db_insert()
+
+
+def set_overdue_billing_threshold(customer, company, threshold):
+	customer = frappe.get_doc("Customer", customer)
+	for d in customer.credit_limits:
+		if d.company == company:
+			d.overdue_billing_threshold = threshold
+			d.db_update()
+			return
+
+	customer.append("credit_limits", {"company": company, "overdue_billing_threshold": threshold})
+	customer.credit_limits[-1].db_insert()
 
 
 def create_internal_customer(customer_name=None, represents_company=None, allowed_to_interact_with=None):
