@@ -183,7 +183,7 @@ class ProductionPlan(Document):
 		# Keep the read-only `material_request_date` column in sync with the
 		# linked Material Request, whether the row was added by the planning
 		# tool or the user linked an existing Material Request manually.
-		material_requests = {row.material_request for row in self.material_requests if row.material_request}
+		material_requests = {row.material_request for row in self.material_requests if not row.material_request_date}
 		transaction_dates = (
 			frappe._dict(
 				frappe.get_all(
