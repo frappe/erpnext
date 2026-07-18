@@ -298,12 +298,14 @@ def validate_custody_claims(doc, method=None):
 		if flt(claim - allowed, 6) > 0:
 			frappe.throw(
 				_(
-					"{0} unit(s) of {1} wait in custody on open Goods Inward Notes. With this "
-					"document, {2} unit(s) would arrive against {3}, which orders only {4} "
-					"(allowance included) — receive the custody goods through their note instead."
+					"{0} unit(s) of {1} wait in custody on open Goods Inward Notes, and this "
+					"document receives another {2} — {3} unit(s) in total against {4}, which "
+					"orders only {5} (allowance included). Receive the custody goods through "
+					"their note instead."
 				).format(
 					in_custody[order_row.name],
 					get_link_to_form("Item", order_row.item_code),
+					taken.get(order_row.name, 0),
 					claim,
 					get_link_to_form(order_doctype, order_row.parent),
 					allowed,
