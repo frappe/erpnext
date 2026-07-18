@@ -42,6 +42,12 @@ frappe.ui.form.on("Item", {
 		}
 	},
 
+	restrict_to_companies(frm) {
+		if (!frm.doc.restrict_to_companies) {
+			frm.set_value("allowed_companies", []);
+		}
+	},
+
 	setup: function (frm) {
 		frm.set_query("item_group", () => ({ filters: { is_group: 0 } }));
 		frm.set_query("allowed_companies", () => ({

@@ -26,9 +26,6 @@ class CompanyRestriction(Document):
 def get_allowed_companies(user, doctype):
 	from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
 
-	if not frappe.get_single_value("Global Defaults", "enable_company_wise_masters"):
-		return None
-
 	user_permissions = get_user_permissions(user or frappe.session.user)
 	if "Company" not in user_permissions:
 		return None
@@ -45,31 +42,39 @@ def get_permission_query_conditions(user, doctype=None):
 
 	parent = frappe.qb.DocType(doctype)
 	restriction = frappe.qb.DocType("Company Restriction")
-	restriction_rows = (
+	allowed_rows = (
 		frappe.qb.from_(restriction)
 		.select(restriction.name)
 		.where(
 			(restriction.parenttype == doctype)
 			& (restriction.parentfield == "allowed_companies")
 			& (restriction.parent == parent.name)
+			& (restriction.company.isin(allowed_companies))
 		)
 	)
-	allowed_rows = restriction_rows.where(restriction.company.isin(allowed_companies))
-	return Bracket(ExistsCriterion(allowed_rows) | ExistsCriterion(restriction_rows).negate())
+	return Bracket((parent.restrict_to_companies == 0) | ExistsCriterion(allowed_rows))
 
 
 def has_permission(doc, ptype=None, user=None):
+	if not doc.get("restrict_to_companies"):
+		return True
+
 	allowed_companies = get_allowed_companies(user, doc.doctype)
 	if not allowed_companies:
 		return True
 
-	companies = [row.company for row in doc.get("allowed_companies") or []]
-	if not companies:
-		return True
-	return any(company in allowed_companies for company in companies)
+	return any(row.company in allowed_companies for row in doc.get("allowed_companies") or [])
 
 
 def validate_allowed_companies(doc):
+	if not doc.get("restrict_to_companies"):
+		doc.set("allowed_companies", [])
+	elif not doc.get("allowed_companies") and not doc.flags.ignore_mandatory:
+		frappe.throw(
+			_("Allowed Companies is required when Restrict to Companies is checked"),
+			frappe.MandatoryError,
+		)
+
 	if doc.flags.ignore_permissions:
 		return
 
