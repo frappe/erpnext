@@ -5,8 +5,10 @@ frappe.provide("erpnext.accounts.dimensions");
 
 erpnext.landed_cost_taxes_and_charges.setup_triggers("Stock Entry");
 
-function set_quarantine_warehouse_queries(frm) {
+function set_warehouse_queries(frm) {
 	frm.set_query("from_warehouse", () => source_warehouse_query(frm));
+	frm.set_query("to_warehouse", () => target_warehouse_query(frm));
+	frm.set_query("t_warehouse", "items", () => target_warehouse_query(frm));
 
 	frm.set_query("s_warehouse", "items", function () {
 		// a Quality Control Release drains quarantine; everything else avoids it
@@ -21,24 +23,44 @@ function set_quarantine_warehouse_queries(frm) {
 		}
 		return source_warehouse_query(frm);
 	});
+}
 
-	frm.set_query("t_warehouse", "items", function () {
-		// a Quality Control Release may also send rejected stock to a
-		// Rejected warehouse; everything else avoids the special types
-		if (frm.doc.purpose === "Quality Control Release") {
-			return {
-				filters: {
-					warehouse_type: ["not in", ["Quality", "Transit"]],
-					is_group: 0,
-					company: frm.doc.company,
-				},
-			};
-		}
-		return erpnext.queries.warehouse(frm.doc);
-	});
+function target_warehouse_query(frm) {
+	// a Quality Control Release may also send rejected stock to a Rejected
+	// warehouse; a transit entry targets its transit stop; everything else
+	// avoids the special types
+	if (frm.doc.purpose === "Quality Control Release") {
+		return {
+			filters: {
+				warehouse_type: ["not in", ["Quality", "Transit"]],
+				is_group: 0,
+				company: frm.doc.company,
+			},
+		};
+	}
+	if (frm.doc.add_to_transit && frm.doc.purpose === "Material Transfer") {
+		return {
+			filters: {
+				warehouse_type: ["in", ["Transit", ""]],
+				is_group: 0,
+				company: frm.doc.company,
+			},
+		};
+	}
+	return erpnext.queries.warehouse(frm.doc);
 }
 
 function source_warehouse_query(frm) {
+	// receiving from transit: the end-transit entry's source is its transit stop
+	if (frm.doc.outgoing_stock_entry) {
+		return {
+			filters: {
+				warehouse_type: ["in", ["Transit", ""]],
+				is_group: 0,
+				company: frm.doc.company,
+			},
+		};
+	}
 	const query = erpnext.queries.source_warehouse(frm.doc);
 	if (frm.__sample_retention_warehouse) {
 		query.filters.push(["Warehouse", "name", "!=", frm.__sample_retention_warehouse]);
@@ -110,7 +132,7 @@ frappe.ui.form.on("Stock Entry", {
 			frm.__sample_retention_warehouse = r.sample_retention_warehouse;
 		});
 
-		set_quarantine_warehouse_queries(frm);
+		set_warehouse_queries(frm);
 
 		frm.set_query("batch_no", "items", function (doc, cdt, cdn) {
 			let item = locals[cdt][cdn];
@@ -917,23 +939,10 @@ frappe.ui.form.on("Stock Entry", {
 	},
 
 	add_to_transit: function (frm) {
-		if (frm.doc.purpose == "Material Transfer") {
-			var filters = {
-				is_group: 0,
-				company: frm.doc.company,
-			};
-
-			if (frm.doc.add_to_transit) {
-				filters["warehouse_type"] = ["in", ["Transit", ""]];
-				frm.set_value("to_warehouse", "");
-				frm.trigger("set_transit_warehouse");
-			}
-
-			frm.fields_dict.to_warehouse.get_query = function () {
-				return {
-					filters: filters,
-				};
-			};
+		// the target query itself branches on add_to_transit (set_warehouse_queries)
+		if (frm.doc.purpose == "Material Transfer" && frm.doc.add_to_transit) {
+			frm.set_value("to_warehouse", "");
+			frm.trigger("set_transit_warehouse");
 		}
 	},
 
@@ -1225,8 +1234,8 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 	setup_warehouse_query() {
 		super.setup_warehouse_query();
 		// the blanket warehouse query covers every Warehouse link on the form,
-		// clobbering the quarantine-aware pickers registered in setup
-		set_quarantine_warehouse_queries(this.frm);
+		// clobbering the state-aware pickers registered in setup
+		set_warehouse_queries(this.frm);
 	}
 
 	setup() {
